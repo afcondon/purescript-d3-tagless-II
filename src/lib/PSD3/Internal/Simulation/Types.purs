@@ -33,7 +33,7 @@ newtype D3SimulationState_ d = SimState_ (D3SimulationStateRecord d)
 type D3SimulationStateRecord d = {
     handle_       :: D3Simulation_
   -- keeping the map of labels to forces enables functionality like "enableByLabel"
-  , forceLibrary  :: M.Map Label (Force d)
+  , forceLibrary  :: M.Map Label (Force Unit)
   -- , forceStatuses :: M.Map Label ForceStatus
   -- TODO perhaps by keeping tick functions here we can run simulation, tick by tick from PureScript
   , ticks         :: M.Map Label (Step D3Selection_ d)
@@ -61,13 +61,13 @@ _d3Simulation = prop (Proxy :: Proxy "simulation")
 _nullable :: forall a. Prism' (Nullable a) a
 _nullable = prism' notNull N.toMaybe
 
-_handle :: forall r. Lens' { simulation :: D3SimulationState_ | r } D3Simulation_
+_handle :: forall d r. Lens' { simulation :: D3SimulationState_ d | r } D3Simulation_
 _handle = _d3Simulation <<< _Newtype <<< prop (Proxy :: Proxy "handle_")
 
-_forceLibrary :: forall r. Lens' { simulation :: D3SimulationState_ | r } (M.Map Label Force)
+_forceLibrary :: forall d r. Lens' { simulation :: D3SimulationState_ d | r } (M.Map Label (Force Unit))
 _forceLibrary = _d3Simulation <<< _Newtype <<< prop (Proxy :: Proxy "forceLibrary")
 
-_force :: forall r. String -> Lens' { simulation :: D3SimulationState_ | r } (Maybe Force)
+_force :: forall d r. String -> Lens' { simulation :: D3SimulationState_ d | r } (Maybe (Force Unit))
 _force label = _forceLibrary <<< at label
 
 -- | given a list of forces to enable, ensure that those forces are enabled and all others disabled, no forces removed
@@ -76,37 +76,37 @@ onlyTheseForcesActive :: forall f. Foldable f => Functor f => f Label -> Map Lab
 onlyTheseForcesActive labels = \statusMap -> union updatedMap ((const ForceDisabled) <$> statusMap)
   where updatedMap           = fromFoldable $ (\l -> Tuple l ForceActive) <$> labels
 
-_ticks :: Lens' D3SimulationState_ (M.Map Label (Step D3Selection_ Datum_))
+_ticks :: forall d. Lens' (D3SimulationState_ d) (M.Map Label (Step D3Selection_ d))
 _ticks = _Newtype <<< prop (Proxy :: Proxy "ticks")
 
-_tick :: String -> Lens' D3SimulationState_ (Maybe (Step D3Selection_ Datum_))
+_tick :: forall d. String -> Lens' (D3SimulationState_ d) (Maybe (Step D3Selection_ d))
 _tick label = _Newtype <<< prop (Proxy :: Proxy "ticks") <<< at label
 
-_data :: Lens' D3SimulationState_ { nodes :: Array Datum_ , links :: Array Datum_ }
+_data :: forall d. Lens' (D3SimulationState_ d) { nodes :: Array Datum_ , links :: Array Datum_ }
 _data = _Newtype <<< prop (Proxy :: Proxy "data")
 
-_nodedata :: Lens' D3SimulationState_ (Array Datum_ )
+_nodedata :: forall d. Lens' (D3SimulationState_ d) (Array Datum_ )
 _nodedata = _data <<< prop (Proxy :: Proxy "nodes")
 
-_linkdata :: Lens' D3SimulationState_ (Array Datum_ )
+_linkdata :: forall d. Lens' (D3SimulationState_ d) (Array Datum_ )
 _linkdata = _data <<< prop (Proxy :: Proxy "links")
 
-_key :: Lens' D3SimulationState_ (Datum_ -> Index_)
+_key :: forall d. Lens' (D3SimulationState_ d) (Datum_ -> Index_)
 _key = _Newtype <<< prop (Proxy :: Proxy "key")
 
-_alpha :: Lens' D3SimulationState_ Number
+_alpha :: forall d. Lens' (D3SimulationState_ d) Number
 _alpha = _Newtype <<< prop (Proxy :: Proxy "alpha")
 
-_alphaTarget :: Lens' D3SimulationState_ Number
+_alphaTarget :: forall d. Lens' (D3SimulationState_ d) Number
 _alphaTarget   = _Newtype <<< prop (Proxy :: Proxy "alphaTarget")
 
-_alphaMin :: Lens' D3SimulationState_ Number
+_alphaMin :: forall d. Lens' (D3SimulationState_ d) Number
 _alphaMin = _Newtype <<< prop (Proxy :: Proxy "alphaMin")
 
-_alphaDecay :: Lens' D3SimulationState_ Number
+_alphaDecay :: forall d. Lens' (D3SimulationState_ d) Number
 _alphaDecay = _Newtype <<< prop (Proxy :: Proxy "alphaDecay")
 
-_velocityDecay :: Lens' D3SimulationState_ Number
+_velocityDecay :: forall d. Lens' (D3SimulationState_ d) Number
 _velocityDecay = _Newtype <<< prop (Proxy :: Proxy "velocityDecay")
 
 data SimVariable = Alpha Number | AlphaTarget Number | AlphaMin Number | AlphaDecay Number | VelocityDecay Number
@@ -146,7 +146,7 @@ _attributes = _Newtype <<< prop (Proxy :: Proxy "attributes")
 _force_ :: forall d. Lens' (Force d) D3ForceHandle_
 _force_ = _Newtype <<< prop (Proxy :: Proxy "force_")
 
-getStatusMap :: forall d. Map Label (Force d) -> Map Label ForceStatus
+getStatusMap :: Map Label (Force Unit) -> Map Label ForceStatus
 getStatusMap forceMap = fromFoldable $ (\f -> Tuple (view _name f) (view _status f)) <$> forceMap
 
 _filter :: forall d p. Profunctor p => Strong p => p (Maybe ForceFilter) (Maybe ForceFilter) -> p (Force d) (Force d)
@@ -233,7 +233,7 @@ instance Show LinkForceType where
 -- for example, two Halogen components won't _accidentally_ share one
 -- should be dropped later when we can be sure that isn't a problem
 -- needs POC with two sims in one page, sim continuing despite page change etc etc
-initialSimulationState :: forall d. Map Label (Force d) -> D3SimulationState_ d
+initialSimulationState :: forall d. Map Label (Force Unit) -> D3SimulationState_ d
 initialSimulationState forces = SimState_
    {  -- common state for all D3 Simulation
       handle_  : initSimulation_ defaultConfigSimulation keyIsID_

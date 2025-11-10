@@ -58,7 +58,7 @@ draw treeJson selector = do
 
   -- Draw bubbles using simpleJoin for proper data binding
   bubbles <- simpleJoin chartGroup Circle nodes keyIsID_
-  setAttributes bubbles
+  setAttributes (unsafeCoerce bubbles :: D3Selection_ Datum_)
     [ cx (\d -> node'.x (unsafeCoerce d))
     , cy (\d -> node'.y (unsafeCoerce d))
     , radius (\d -> node'.r (unsafeCoerce d))
@@ -71,7 +71,7 @@ draw treeJson selector = do
 
   -- Draw labels using simpleJoin for proper data binding
   labels <- simpleJoin chartGroup Text nodes keyIsID_
-  setAttributes labels
+  setAttributes (unsafeCoerce labels :: D3Selection_ Datum_)
     [ x (\d -> node'.x (unsafeCoerce d))
     , y (\d -> node'.y (unsafeCoerce d))
     , text (\d -> node'.name (unsafeCoerce d))

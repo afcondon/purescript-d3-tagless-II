@@ -148,7 +148,7 @@ type SceneConfig d attrs =
 
 -- | Create a default scene config with minimal settings
 -- | Usage: `defaultScene forceLibrary customAttrs`
-defaultScene :: forall d attrs. Map Label Force -> attrs -> SceneConfig d attrs
+defaultScene :: forall d attrs. Map Label (Force Unit) -> attrs -> SceneConfig d attrs
 defaultScene forceLibrary attrs =
   { chooseNodes: const true                                  -- Show all nodes
   , linksShown: const false                                  -- Hide all links

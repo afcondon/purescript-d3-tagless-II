@@ -77,7 +77,7 @@ initialize :: forall row m.
   Bind m =>
   MonadEffect m =>
   SimulationM2 D3Selection_ m =>
-  m { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ }
+  m { nodes :: Maybe (D3Selection_ row), links :: Maybe (D3Selection_ row) }
 initialize = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   (root :: D3Selection_) <- attach "div.svg-container"

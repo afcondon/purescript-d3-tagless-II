@@ -28,7 +28,7 @@ type State =
   , declarationsData :: Maybe DeclarationsData
   , functionCallsData :: Maybe FunctionCallsData
   , moduleGraphData :: Maybe ModuleGraphData
-  , simulation :: D3SimulationState_
+  , simulation :: D3SimulationState_ Unit
   , searchQuery :: String
   , selectedKindFilter :: Maybe String  -- Filter by declaration kind
   , selectedModuleFilter :: Maybe String  -- Filter by module

@@ -56,7 +56,7 @@ draw treeJson selector = do
 
   -- Draw partitions using simpleJoin for proper data binding
   partitions <- simpleJoin chartGroup Rect nodes keyIsID_
-  setAttributes partitions
+  setAttributes (unsafeCoerce partitions :: D3Selection_ Datum_)
     [ x (\d -> node'.x0 (unsafeCoerce d))
     , y (\d -> node'.y0 (unsafeCoerce d))
     , width (\d -> node'.rectWidth (unsafeCoerce d))
@@ -70,7 +70,7 @@ draw treeJson selector = do
 
   -- Draw labels using simpleJoin for proper data binding
   partitionLabels <- simpleJoin chartGroup Text nodes keyIsID_
-  setAttributes partitionLabels
+  setAttributes (unsafeCoerce partitionLabels :: D3Selection_ Datum_)
     [ x (\d -> node'.x0 (unsafeCoerce d) + 4.0)
     , y (\d -> node'.y0 (unsafeCoerce d) + node'.rectHeight (unsafeCoerce d) / 2.0 + 4.0)
     , text (\d -> node'.name (unsafeCoerce d))

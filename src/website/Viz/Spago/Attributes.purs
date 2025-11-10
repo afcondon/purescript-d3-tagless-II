@@ -2,7 +2,7 @@ module D3.Viz.Spago.Draw.Attributes where
 
 import PSD3.Internal.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, opacity, radius, rotate, strokeColor, strokeWidth, text, textAnchor, transform, transform', viewBox, width, x, y)
 import PSD3.Data.Tree (TreeLayout(..))
-import PSD3.Internal.Types (D3Simulation_, MouseEvent(..))
+import PSD3.Internal.Types (D3Simulation_, Datum_, MouseEvent(..))
 import D3.Viz.Spago.Model (datum_)
 import PSD3.Internal.Selection.Types (SelectionAttribute)
 import PSD3.Data.Node (NodeID)
@@ -12,15 +12,15 @@ import Data.Set (Set)
 import Prelude (negate, (/), (<>))
 
 -- | Attributes for entering node groups (applied when new nodes are added to DOM)
-enterAttrs :: forall d. Array (SelectionAttribute d)
-enterAttrs = 
+enterAttrs :: Array (SelectionAttribute Datum_)
+enterAttrs =
   [ classed datum_.nodeClass
   , transform' datum_.translateNode
   ]
 
 -- | Attributes for updating existing node groups (reapplied on data updates)
-updateAttrs :: forall d. Array (SelectionAttribute d)
-updateAttrs = 
+updateAttrs :: Array (SelectionAttribute Datum_)
+updateAttrs =
   [ classed datum_.nodeClass
   , transform' datum_.translateNode
   ]
@@ -29,14 +29,14 @@ updateAttrs =
 -- | so they can be applied to the appropriate child elements
 -- | Tags automatically propagate to CSS classes on node groups
 type SpagoSceneAttributes d = {
-    circles :: Array (SelectionAttribute d)
-  , labels  :: Array (SelectionAttribute d)
+    circles :: Array (SelectionAttribute Datum_)
+  , labels  :: Array (SelectionAttribute Datum_)
   , tagMap  :: Maybe (Map NodeID (Set String))  -- Optional tag map for automatic CSS class propagation
 }
 
 -- | Attributes for the "cluster" scene - emphasizes package groupings with
 -- | fill/stroke based on usage and semi-transparent packages
-clusterSceneAttributes :: forall d. SpagoSceneAttributes d
+clusterSceneAttributes :: SpagoSceneAttributes Datum_
 clusterSceneAttributes = {
     circles: [ radius datum_.radius
             , fill datum_.fillByUsage
@@ -56,7 +56,7 @@ clusterSceneAttributes = {
 
 -- | Attributes for the "graph" scene - colors nodes by group/package with
 -- | opacity differentiating packages from modules
-graphSceneAttributes :: forall d. SpagoSceneAttributes d
+graphSceneAttributes :: SpagoSceneAttributes Datum_
 graphSceneAttributes = {
     circles: [ radius datum_.radius
             , fill datum_.colorByGroup
@@ -75,7 +75,7 @@ graphSceneAttributes = {
 
 -- | Attributes for the "tree" scene - uses depth-based color gradient for fill
 -- | and group-based colors for stroke to show hierarchy
-treeSceneAttributes :: forall d. SpagoSceneAttributes d
+treeSceneAttributes :: SpagoSceneAttributes Datum_
 treeSceneAttributes = {
     circles: [ radius datum_.radius
             , fill datum_.colorByDepth
@@ -92,7 +92,7 @@ treeSceneAttributes = {
   , tagMap: Nothing
 }
 
-svgAttrs :: forall d. Number -> Number -> Array (SelectionAttribute d)
+svgAttrs :: Number -> Number -> Array (SelectionAttribute Datum_)
 svgAttrs w h = [ viewBox (-w / 2.1) (-h / 2.05) w h 
                     -- , preserveAspectRatio $ AspectRatio XMid YMid Meet 
                     , classed "overlay"

@@ -58,7 +58,7 @@ import PSD3.Simulation.SceneTransition (executeSceneTransition_)
 runSimulation :: forall d attrs sel m.
   MonadAff m =>
   SimulationM sel m =>
-  { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ } ->
+  { nodes :: Maybe (sel (D3_SimulationNode d)), links :: Maybe (sel (D3_SimulationNode d)) } ->
   SceneConfig d attrs ->
   Array (D3_SimulationNode d) ->
   Array D3Link_Unswizzled ->
@@ -137,12 +137,12 @@ runSimulationFromState :: forall d attrs sel m row.
   MonadAff m =>
   SimulationM sel m =>
   MonadState { | row } m =>
-  ({ | row } -> { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ }) ->  -- Get selections
+  ({ | row } -> { nodes :: Maybe (sel (D3_SimulationNode d)), links :: Maybe (sel (D3_SimulationNode d)) }) ->  -- Get selections
   ({ | row } -> SceneConfig d attrs) ->                                           -- Get scene
   ({ | row } -> Array (D3_SimulationNode d)) ->                                   -- Get model nodes
   ({ | row } -> Array D3Link_Unswizzled) ->                                       -- Get model links
   (attrs -> { | row } -> attrs) ->                                                -- Enhance attributes
-  ({ nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ } ->                -- UpdateSimulation function (DECLARATIVE API)
+  ({ nodes :: Maybe (sel (D3_SimulationNode d)), links :: Maybe (sel (D3_SimulationNode d)) } ->  -- UpdateSimulation function (DECLARATIVE API)
    { allNodes :: Array (D3_SimulationNode d)                                         -- FULL dataset
    , allLinks :: Array D3Link_Unswizzled                                            -- FULL dataset
    , nodeFilter :: D3_SimulationNode d -> Boolean                                   -- Which nodes to show

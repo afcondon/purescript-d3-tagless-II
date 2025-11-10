@@ -126,14 +126,14 @@ import Type.Proxy (Proxy(..))
 -- | - `model`: Your data model type (e.g., SpagoModel with nodes, links, metadata)
 type SimulationComponentState scene action dataRow attrs model =
   { -- | Core D3 simulation state (forces, alpha, nodes, etc.)
-    simulation :: D3SimulationState_
+    simulation :: D3SimulationState_ dataRow
 
     -- | Data model for the visualization (often loaded from JSON)
   , model :: Maybe model
 
     -- | Staging area: filtered nodes/links before entering simulation
     -- | This is where scene filters are applied
-  , staging :: Staging D3Selection_ dataRow
+  , staging :: Staging (D3Selection_ (D3_SimulationNode dataRow)) dataRow
 
     -- | Current scene configuration (filters, forces, attributes, initializers)
   , scene :: Scene.SceneConfig dataRow attrs

@@ -195,7 +195,7 @@ draw :: forall m.
 draw selector = do
   let config = defaultConfig
 
-  (root :: D3Selection_ Unit) <- attach selector
+  root <- attach selector
   svg <- appendTo root Svg
     [ viewBox 0.0 0.0 config.width config.height
     , width config.width

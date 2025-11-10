@@ -42,7 +42,7 @@ import Data.Foldable (foldl)
 -- | - nodeTickAttrs: Attributes to apply on each simulation tick for nodes
 -- | - linkTickAttrs: Attributes to apply on each simulation tick for links
 -- | - Applied to merged selections automatically
-type RenderCallbacks attrs sel m = {
+type RenderCallbacks attrs sel m d = {
   -- Node rendering callbacks
   onNodeEnter :: sel -> attrs -> m sel,   -- Populate enter selection, return it for merging
   onNodeUpdate :: sel -> attrs -> m Unit, -- Update existing nodes in-place
@@ -156,13 +156,13 @@ genericUpdateSimulation :: forall d attrs sel m.
   Monad m =>
   SelectionM sel m =>
   SimulationM2 sel m =>
-  { nodes :: Maybe sel, links :: Maybe sel } ->
+  { nodes :: Maybe (sel d), links :: Maybe (sel d) } ->
   Element ->                                         -- Node element type
   Element ->                                         -- Link element type
   DeclarativeUpdateConfig d ->                       -- Declarative configuration
   (Datum_ -> Index_) ->                              -- Key function
   attrs ->                                           -- Visualization attributes
-  RenderCallbacks attrs sel m ->                     -- Render callbacks
+  RenderCallbacks attrs sel m d ->                   -- Render callbacks
   m Unit
 genericUpdateSimulation { nodes: Just nodesGroup, links: Just linksGroup }
                         nodeElement linkElement config keyFn attrs callbacks = do

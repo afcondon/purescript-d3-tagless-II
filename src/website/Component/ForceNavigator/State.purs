@@ -21,9 +21,9 @@ import PSD3.ForceNavigator.Actions (Action)
 import Type.Proxy (Proxy(..))
 
 type State = {
-    simulation :: D3SimulationState_
+    simulation :: D3SimulationState_ NavigationSimNode
   , expandedNodes :: Set String  -- IDs of expanded section nodes
-  , openSelections :: Maybe { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ }
+  , openSelections :: Maybe { nodes :: Maybe (D3Selection_ NavigationSimNode), links :: Maybe (D3Selection_ NavigationSimNode) }
   , activeForces :: Set Label  -- Labels of forces currently enabled (parallel to expandedNodes for data)
   , eventListener :: Maybe (HS.Listener Action)  -- Component infrastructure, not scene config
 }

@@ -56,7 +56,7 @@ draw treeJson selector = do
 
   -- Draw tiles using simpleJoin for proper data binding
   tiles <- simpleJoin chartGroup Rect nodes keyIsID_
-  setAttributes tiles
+  setAttributes (unsafeCoerce tiles :: D3Selection_ Datum_)
     [ x (\d -> node'.x0 (unsafeCoerce d))
     , y (\d -> node'.y0 (unsafeCoerce d))
     , width (\d -> node'.rectWidth (unsafeCoerce d))
@@ -70,7 +70,7 @@ draw treeJson selector = do
 
   -- Draw labels using simpleJoin for proper data binding
   tileLabels <- simpleJoin chartGroup Text nodes keyIsID_
-  setAttributes tileLabels
+  setAttributes (unsafeCoerce tileLabels :: D3Selection_ Datum_)
     [ x (\d -> node'.x0 (unsafeCoerce d) + 2.0)
     , y (\d -> node'.y0 (unsafeCoerce d) + 12.0)
     , text (\d -> node'.name (unsafeCoerce d))
