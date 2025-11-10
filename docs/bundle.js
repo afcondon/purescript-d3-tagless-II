@@ -39528,7 +39528,7 @@
             }
             ;
             if (state3.exampleId === "tree-purescript") {
-              return bind37(liftAff36(get3(string)("./data/flare.json")))(function(result) {
+              return bind37(liftAff36(get3(string)("./data/flare-2.json")))(function(result) {
                 if (result instanceof Left) {
                   return log1("Tree (PureScript): Failed to load data");
                 }
@@ -39545,7 +39545,7 @@
             }
             ;
             if (state3.exampleId === "treemap") {
-              return bind37(liftAff36(get3(string)("./data/flare.json")))(function(result) {
+              return bind37(liftAff36(get3(string)("./data/flare-2.json")))(function(result) {
                 if (result instanceof Left) {
                   return log1("Treemap: Failed to load data");
                 }
@@ -39562,7 +39562,7 @@
             }
             ;
             if (state3.exampleId === "pack-purescript") {
-              return bind37(liftAff36(get3(string)("./data/flare.json")))(function(result) {
+              return bind37(liftAff36(get3(string)("./data/flare-2.json")))(function(result) {
                 if (result instanceof Left) {
                   return log1("Pack (PureScript): Failed to load data");
                 }
@@ -39579,7 +39579,7 @@
             }
             ;
             if (state3.exampleId === "cluster-purescript") {
-              return bind37(liftAff36(get3(string)("./data/flare.json")))(function(result) {
+              return bind37(liftAff36(get3(string)("./data/flare-2.json")))(function(result) {
                 if (result instanceof Left) {
                   return log1("Cluster (PureScript): Failed to load data");
                 }
@@ -39596,7 +39596,7 @@
             }
             ;
             if (state3.exampleId === "icicle") {
-              return bind37(liftAff36(get3(string)("./data/flare.json")))(function(result) {
+              return bind37(liftAff36(get3(string)("./data/flare-2.json")))(function(result) {
                 if (result instanceof Left) {
                   return log1("Partition (Icicle): Failed to load data");
                 }
@@ -39613,7 +39613,7 @@
             }
             ;
             if (state3.exampleId === "sunburst-purescript") {
-              return bind37(liftAff36(get3(string)("./data/flare.json")))(function(result) {
+              return bind37(liftAff36(get3(string)("./data/flare-2.json")))(function(result) {
                 if (result instanceof Left) {
                   return log1("Sunburst (PureScript): Failed to load data");
                 }

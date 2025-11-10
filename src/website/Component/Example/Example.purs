@@ -184,7 +184,7 @@ handleAction = case _ of
             pure unit
 
       "tree-purescript" -> do
-        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare.json"
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare-2.json"
         case result of
           Left err -> log "Tree (PureScript): Failed to load data"
           Right response -> do
@@ -193,7 +193,7 @@ handleAction = case _ of
             pure unit
 
       "treemap" -> do
-        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare.json"
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare-2.json"
         case result of
           Left err -> log "Treemap: Failed to load data"
           Right response -> do
@@ -202,7 +202,7 @@ handleAction = case _ of
             pure unit
 
       "pack-purescript" -> do
-        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare.json"
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare-2.json"
         case result of
           Left err -> log "Pack (PureScript): Failed to load data"
           Right response -> do
@@ -211,7 +211,7 @@ handleAction = case _ of
             pure unit
 
       "cluster-purescript" -> do
-        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare.json"
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare-2.json"
         case result of
           Left err -> log "Cluster (PureScript): Failed to load data"
           Right response -> do
@@ -220,7 +220,7 @@ handleAction = case _ of
             pure unit
 
       "icicle" -> do
-        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare.json"
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare-2.json"
         case result of
           Left err -> log "Partition (Icicle): Failed to load data"
           Right response -> do
@@ -229,7 +229,7 @@ handleAction = case _ of
             pure unit
 
       "sunburst-purescript" -> do
-        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare.json"
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare-2.json"
         case result of
           Left err -> log "Sunburst (PureScript): Failed to load data"
           Right response -> do
