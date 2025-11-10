@@ -396,12 +396,12 @@ topologicalForceLibrary = initialize [ forces.manyBodyWeak, forces.collision, fo
 
 -- | Draw force-directed topological sort with nodes fixed to layers (fy positioning)
 -- | This version uses D3 force simulation but constrains vertical position by layer
-drawTopologicalForceDirected :: forall row m.
+drawTopologicalForceDirected :: forall row d m.
   Bind m =>
   MonadEffect m =>
-  MonadState { simulation :: D3SimulationState_ | row } m =>
+  MonadState { simulation :: D3SimulationState_ LayeredSimNode | row } m =>
   SimulationM2 D3Selection_ m =>
-  Array Task -> Selector D3Selection_ -> m Unit
+  Array Task -> Selector (D3Selection_ d) -> m Unit
 drawTopologicalForceDirected tasks selector = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   let totalWidth = w

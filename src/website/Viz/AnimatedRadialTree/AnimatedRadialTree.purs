@@ -159,14 +159,14 @@ drawAnimatedRadialTree treeType json selector = do
 
 -- | Update the tree to a new layout type, using smooth transitions
 -- | Reuses the same hierarchy root object for proper D3 data join
-updateToLayout :: forall m.
+updateToLayout :: forall m d1 d2.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
   TreeType ->
   Datum_ ->       -- The hierarchy root to re-layout (NOT reconstructed from JSON)
-  D3Selection_ ->
-  D3Selection_ ->
+  D3Selection_ d1 ->
+  D3Selection_ d2 ->
   m Unit
 updateToLayout newTreeType root linksGroup nodesGroup = do
   liftEffect $ log $ "=== UPDATE TO LAYOUT START - new type: " <> show newTreeType <> " ==="
