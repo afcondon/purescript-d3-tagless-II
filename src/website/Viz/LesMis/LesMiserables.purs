@@ -9,7 +9,7 @@ import Control.Monad.State (class MonadState)
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, x1, x2, y1, y2)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import D3.Viz.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
-import D3.Viz.LesMiserables.Model (LesMisRawModel)
+import D3.Viz.LesMiserables.Model (LesMisRawModel, LesMisSimNode)
 import PSD3.Internal.FFI (keyIsID_, simdrag_)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
@@ -76,12 +76,12 @@ draw model selector = do
 -- Snippet_Start
 -- Name: LesMisSimplified
 -- | Simplified version using SimulationM with record-based init
-drawSimplified :: forall row m.
+drawSimplified :: forall row d m.
   Bind m =>
   MonadEffect m =>
-  MonadState { simulation :: D3SimulationState_ | row } m =>
+  MonadState { simulation :: D3SimulationState_ LesMisSimNode | row } m =>
   SimulationM2 D3Selection_ m =>
-  Array Force -> Set.Set String -> LesMisRawModel -> Selector D3Selection_ -> m Unit
+  Array (Force LesMisSimNode) -> Set.Set String -> LesMisRawModel -> Selector (D3Selection_ d) -> m Unit
 drawSimplified forceLibrary activeForces model selector = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   rootSel <- attach selector

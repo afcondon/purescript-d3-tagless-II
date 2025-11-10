@@ -385,7 +385,7 @@ drawTopologicalSort tasks selector = do
 
 -- | Forces configuration for topological sort
 -- | Uses weak charge and collision forces with link forces between dependencies
-topologicalForceLibrary :: Map String Force
+topologicalForceLibrary :: Map String (Force LayeredSimNode)
 topologicalForceLibrary = initialize [ forces.manyBodyWeak, forces.collision, forces.links ]
   where
     forces = {

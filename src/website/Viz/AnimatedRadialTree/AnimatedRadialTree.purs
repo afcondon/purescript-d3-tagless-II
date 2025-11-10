@@ -251,12 +251,12 @@ updateToLayout newTreeType root linksGroup nodesGroup = do
 -- | Rotate the entire tree by a specified angle
 -- | Useful for reading labels without craning your neck!
 -- | Pass the current rotation and the angle to add to it
-rotateTree :: forall m.
+rotateTree :: forall m d.
   MonadEffect m =>
   SelectionM D3Selection_ m =>
   Number ->          -- Current rotation angle in degrees
   Number ->          -- Degrees to rotate by (e.g., 90 for quarter turn)
-  D3Selection_ ->    -- The rotation group
+  D3Selection_ d ->  -- The rotation group
   m Unit
 rotateTree currentAngle deltaAngle rotationGroup = do
   let transition = transitionWithDuration $ Milliseconds 500.0
