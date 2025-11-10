@@ -13,41 +13,41 @@ import Data.Maybe (Maybe(..))
 import Data.Number (infinity)
 
 -- | table of all the forces that are used in the Spago component
-forceLibrary :: Map Label Force
+forceLibrary :: forall d. Map Label (Force d)
 forceLibrary = initialize [
-        createForce "center"       (RegularForce ForceCenter)   allNodes [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
-      , createForce "x"            (RegularForce ForceX)        allNodes [ F.strength 0.05, F.x 0.0 ]
-      , createForce "y"            (RegularForce ForceY)        allNodes [ F.strength 0.07, F.y 0.0 ]
+        createForce "center"       (RegularForce ForceCenter)   allNodes [ F.strengthVal 0.5, F.xVal 0.0, F.yVal 0.0 ]
+      , createForce "x"            (RegularForce ForceX)        allNodes [ F.strengthVal 0.05, F.xVal 0.0 ]
+      , createForce "y"            (RegularForce ForceY)        allNodes [ F.strengthVal 0.07, F.yVal 0.0 ]
 
-      , createForce "collide1"     (RegularForce ForceCollide)  allNodes [ F.strength 1.0, F.radius datum_.collideRadius ]
-      , createForce "collide2"     (RegularForce ForceCollide)  allNodes [ F.strength 0.7, F.radius datum_.collideRadiusBig ]
-      , createForce "charge1"      (RegularForce ForceManyBody) allNodes [ F.strength (-50.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
-      , createForce "charge2"      (RegularForce ForceManyBody) allNodes [ F.strength (-100.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax 400.0 ]
-      , createForce "chargetree"   (RegularForce ForceManyBody) treeExceptLeaves [ F.strength (-100.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax 400.0 ]
+      , createForce "collide1"     (RegularForce ForceCollide)  allNodes [ F.strengthVal 1.0, F.radiusVal datum_.collideRadius ]
+      , createForce "collide2"     (RegularForce ForceCollide)  allNodes [ F.strengthVal 0.7, F.radiusVal datum_.collideRadiusBig ]
+      , createForce "charge1"      (RegularForce ForceManyBody) allNodes [ F.strengthVal (-50.0), F.thetaVal 0.9, F.distanceMinVal 1.0, F.distanceMaxVal infinity ]
+      , createForce "charge2"      (RegularForce ForceManyBody) allNodes [ F.strengthVal (-100.0), F.thetaVal 0.9, F.distanceMinVal 1.0, F.distanceMaxVal 400.0 ]
+      , createForce "chargetree"   (RegularForce ForceManyBody) treeExceptLeaves [ F.strengthVal (-100.0), F.thetaVal 0.9, F.distanceMinVal 1.0, F.distanceMaxVal 400.0 ]
 
-      , createForce "clusterx_M"     (RegularForce ForceX)        modulesOnly [ F.strength 0.2, F.x datum_.gridPointX ]
-      , createForce "clustery_M"     (RegularForce ForceY)        modulesOnly [ F.strength 0.2, F.y datum_.gridPointY ]
+      , createForce "clusterx_M"     (RegularForce ForceX)        modulesOnly [ F.strengthVal 0.2, F.xVal datum_.gridPointX ]
+      , createForce "clustery_M"     (RegularForce ForceY)        modulesOnly [ F.strengthVal 0.2, F.yVal datum_.gridPointY ]
 
-      , createForce "clusterx_P"     (RegularForce ForceX)        packagesOnly [ F.strength 0.8, F.x datum_.gridPointX ]
-      , createForce "clustery_P"     (RegularForce ForceY)        packagesOnly [ F.strength 0.8, F.y datum_.gridPointY ]
+      , createForce "clusterx_P"     (RegularForce ForceX)        packagesOnly [ F.strengthVal 0.8, F.xVal datum_.gridPointX ]
+      , createForce "clustery_P"     (RegularForce ForceY)        packagesOnly [ F.strengthVal 0.8, F.yVal datum_.gridPointY ]
 
       , createForce "htreeNodesX"  (RegularForce ForceX)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
-          [ F.strength 0.4, F.x datum_.treePointX ] 
+          [ F.strengthVal 0.4, F.xVal datum_.treePointX ]
       , createForce "htreeNodesY"  (RegularForce ForceY)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
-          [ F.strength 0.4, F.y datum_.treePointY ] 
+          [ F.strengthVal 0.4, F.yVal datum_.treePointY ]
       , createForce "vtreeNodesX"  (RegularForce ForceX)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
-          [ F.strength 0.4, F.x datum_.treePointY ] 
+          [ F.strengthVal 0.4, F.xVal datum_.treePointY ]
       , createForce "vtreeNodesY"  (RegularForce ForceY)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
-          [ F.strength 0.4, F.y datum_.treePointX ] 
+          [ F.strengthVal 0.4, F.yVal datum_.treePointX ]
 
       , createForce "packageOrbit" (RegularForce ForceRadial)   packagesOnly
-                                   [ F.strength 0.7, F.x 0.0, F.y 0.0, F.radius 1200.0 ]
-      , createForce "unusedOrbit" (RegularForce ForceRadial)   unusedModulesOnly 
-                                   [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 900.0 ]
+                                   [ F.strengthVal 0.7, F.xVal 0.0, F.yVal 0.0, F.radiusVal 1200.0 ]
+      , createForce "unusedOrbit" (RegularForce ForceRadial)   unusedModulesOnly
+                                   [ F.strengthVal 0.8, F.xVal 0.0, F.yVal 0.0, F.radiusVal 900.0 ]
       , createForce "moduleOrbit" (RegularForce ForceRadial)   usedModulesOnly
-                                   [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 600.0 ]
-                                   
-      , createLinkForce Nothing [ F.strength 0.5, F.distance 0.0, F.numKey (toNumber <<< datum_.id) ]
+                                   [ F.strengthVal 0.8, F.xVal 0.0, F.yVal 0.0, F.radiusVal 600.0 ]
+
+      , createLinkForce Nothing [ F.strengthVal 0.5, F.distanceVal 0.0, F.numKey (toNumber <<< datum_.id) ]
       ]
   where
     packagesOnly      = Just $ ForceFilter "all packages" datum_.isPackage

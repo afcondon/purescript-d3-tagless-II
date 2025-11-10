@@ -12,36 +12,36 @@ import PSD3.Internal.Simulation.Types (Force, ForceFilter(..), ForceStatus(..), 
 
 -- | Force library for expandable bubbles visualization
 -- | Contains two sets of forces: compact (for overview) and spotlight (for detailed view)
-forceLibrary :: Map.Map Label Force
+forceLibrary :: forall d. Map.Map Label (Force d)
 forceLibrary = initialize
   -- Overview/Compact forces - tight packing for seeing all modules
   [ createForce "manyBody-compact" (RegularForce ForceManyBody) allNodes
-      [ F.strength (-30.0)  -- Weak repulsion for compact layout
-      , F.distanceMax 200.0
+      [ F.strengthValVal (-30.0)  -- Weak repulsion for compact layout
+      , F.distanceMaxValVal 200.0
       ]
   , createForce "collision-compact" (RegularForce ForceCollide) allNodes
-      [ F.radius 15.0  -- Small fixed radius for compact view
-      , F.strength 0.7
+      [ F.radiusValVal 15.0  -- Small fixed radius for compact view
+      , F.strengthValVal 0.7
       ]
 
   -- Spotlight forces - spread out for viewing expanded modules with declarations
   , createForce "manyBody-spotlight" (RegularForce ForceManyBody) allNodes
-      [ F.strength (-100.0)  -- Stronger repulsion for spread out layout
-      , F.distanceMax 400.0
+      [ F.strengthVal (-100.0)  -- Stronger repulsion for spread out layout
+      , F.distanceMaxVal 400.0
       ]
   , createForce "collision-spotlight" (RegularForce ForceCollide) allNodes
-      [ F.radius 50.0  -- Larger radius for expanded nodes
-      , F.strength 0.8
+      [ F.radiusVal 50.0  -- Larger radius for expanded nodes
+      , F.strengthVal 0.8
       ]
 
   -- Common forces - always active regardless of mode
   , createForce "center" (RegularForce ForceCenter) allNodes
-      [ F.x 400.0  -- Will be updated with actual dimensions
-      , F.y 300.0
+      [ F.xVal 400.0  -- Will be updated with actual dimensions
+      , F.yVal 300.0
       ]
   , createLinkForce allNodes
       [ F.distance 30.0
-      , F.strength 0.1  -- Weak link force - just hints at structure
+      , F.strengthVal 0.1  -- Weak link force - just hints at structure
       ]
   ]
 

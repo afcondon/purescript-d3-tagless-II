@@ -15,13 +15,13 @@ type State =
   }
 
 -- | Forces configuration for LesMis topological visualization
-topologicalForceLibrary :: Map.Map String Force
+topologicalForceLibrary :: forall d. Map.Map String (Force d)
 topologicalForceLibrary = initialize [ forces.manyBodyWeak, forces.collision, forces.links ]
   where
     forces = {
-        manyBodyWeak: createForce "many body weak" (RegularForce ForceManyBody) allNodes [ F.strength (-15.0) ]
-      , collision:    createForce "collision"       (RegularForce ForceCollide)  allNodes [ F.radius 7.0 ]
-      , links:        createLinkForce Nothing [ F.distance 80.0 ]
+        manyBodyWeak: createForce "many body weak" (RegularForce ForceManyBody) allNodes [ F.strengthVal (-15.0) ]
+      , collision:    createForce "collision"       (RegularForce ForceCollide)  allNodes [ F.radiusVal 7.0 ]
+      , links:        createLinkForce Nothing [ F.distanceVal 80.0 ]
     }
 
 -- | Initial state

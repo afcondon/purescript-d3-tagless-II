@@ -37,32 +37,32 @@ collisionRadius d = do
 -- |
 -- | **All forces start enabled (On) by default** - see State.purs where
 -- | `forceStatuses` is initialized from this library via `getStatusMap`
-forceLibrary :: Map Label Force
+forceLibrary :: forall d. Map Label (Force d)
 forceLibrary = initialize [
     -- Strong charge to spread nodes out
     createForce "charge" (RegularForce ForceManyBody) allNodes [
-        F.strength (-80.0)
-      , F.theta 0.9
-      , F.distanceMin 1.0
-      , F.distanceMax infinity
+        F.strengthVal (-80.0)
+      , F.thetaVal 0.9
+      , F.distanceMinVal 1.0
+      , F.distanceMaxVal infinity
       ]
 
     -- Center force to keep graph centered
   , createForce "center" (RegularForce ForceCenter) allNodes [
-        F.strength 0.5
-      , F.x 0.0
-      , F.y 0.0
+        F.strengthVal 0.5
+      , F.xVal 0.0
+      , F.yVal 0.0
       ]
 
     -- Collision force to prevent overlap
   , createForce "collision" (RegularForce ForceCollide) allNodes [
-        F.strength 1.0
-      , F.radius collisionRadius
+        F.strengthVal 1.0
+      , F.radiusFn collisionRadius
       ]
 
     -- Link force to connect parent-child nodes
   , createLinkForce Nothing [
-        F.strength 0.5
-      , F.distance 150.0
+        F.strengthVal 0.5
+      , F.distanceVal 150.0
       ]
   ]
