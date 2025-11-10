@@ -68,7 +68,7 @@ verticalLink :: forall d. SelectionAttribute d
 verticalLink = AttrT $ AttributeSetter "d" $ toAttr (unsafeCoerce linkVertical_ :: d -> String)
 
 horizontalClusterLink :: forall d. Number -> SelectionAttribute d
-horizontalClusterLink yOffset = AttrT $ AttributeSetter "d" $ toAttr (linkClusterHorizontal_ yOffset)
+horizontalClusterLink yOffset = AttrT $ AttributeSetter "d" $ toAttr (unsafeCoerce (linkClusterHorizontal_ yOffset) :: d -> String)
 
 verticalClusterLink :: forall d. Number -> SelectionAttribute d
 verticalClusterLink xOffset = AttrT $ AttributeSetter "d" $ toAttr (unsafeCoerce (linkClusterVertical_ xOffset) :: d -> String)
