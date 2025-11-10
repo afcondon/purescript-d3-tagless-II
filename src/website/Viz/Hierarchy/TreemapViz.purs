@@ -53,7 +53,7 @@ drawWithTiling :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
-  HierData -> String -> TileFunction HierData -> Selector D3Selection_ -> m Unit
+  HierData -> String -> TileFunction HierData -> Selector (D3Selection_ Unit) -> m Unit
 drawWithTiling flareData title tileFunc selector = do
   let chartWidth = 800.0
   let chartHeight = 600.0
@@ -79,7 +79,7 @@ drawWithTiling flareData title tileFunc selector = do
   _ <- liftEffect $ log $ "Total leaves: " <> show (length leaves)
   _ <- liftEffect $ log $ "Max depth: " <> show (maxDepth leaves)
 
-  root <- attach selector :: m D3Selection_
+  root <- attach selector :: m (D3Selection_ Unit)
   svg <- appendTo root Svg
     [ viewBox 0.0 0.0 chartWidth chartHeight
     , classed "treemap"
@@ -140,7 +140,7 @@ draw :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
-  HierData -> Selector D3Selection_ -> m Unit
+  HierData -> Selector (D3Selection_ Unit) -> m Unit
 draw flareData = drawWithTiling flareData "Treemap: Squarify" (squarify phi)
 
 drawBinary :: forall m.

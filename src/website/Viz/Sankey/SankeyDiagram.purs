@@ -35,12 +35,12 @@ draw :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
-  String -> Selector D3Selection_ -> m Unit
+  String -> Selector (D3Selection_ Unit) -> m Unit
 draw csvData selector = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   _ <- liftEffect $ log $ "Window dimensions: w=" <> show w <> ", h=" <> show h
 
-  root <- attach selector :: m D3Selection_
+  root <- attach selector :: m (D3Selection_ Unit)
   svg <- appendTo root Svg [ viewBox 0.0 0.0 w h, width w, height h, classed "sankey" ]
 
   -- Create groups for links and nodes
@@ -78,20 +78,20 @@ draw csvData selector = do
   linksSelection <- simpleJoin linksGroup Path layoutResult.links keyForLink
   setAttributes linksSelection
     [ classed "sankey-link"
-    , fill (\(datum :: Datum_) (_ :: Index_) -> (unboxSankeyLink datum).color)
+    , fill (\(link :: SankeyLink) (_ :: Index_) -> link.color)
     , fillOpacity 0.5
-    , d (\(datum :: Datum_) (_ :: Index_) -> generateLinkPath layoutResult.nodes (unboxSankeyLink datum))
+    , d (\(link :: SankeyLink) (_ :: Index_) -> generateLinkPath layoutResult.nodes link)
     ]
 
   -- Join and render nodes
   nodesSelection <- simpleJoin nodesGroup Rect layoutResult.nodes keyForNode
   setAttributes nodesSelection
     [ classed "sankey-node"
-    , x (\(datum :: Datum_) (_ :: Index_) -> (unboxSankeyNode datum).x0)
-    , y (\(datum :: Datum_) (_ :: Index_) -> (unboxSankeyNode datum).y0)
-    , width (\(datum :: Datum_) (_ :: Index_) -> let node = unboxSankeyNode datum in node.x1 - node.x0)
-    , height (\(datum :: Datum_) (_ :: Index_) -> let node = unboxSankeyNode datum in node.y1 - node.y0)
-    , fill (\(datum :: Datum_) (_ :: Index_) -> (unboxSankeyNode datum).color)
+    , x (\(node :: SankeyNode) (_ :: Index_) -> node.x0)
+    , y (\(node :: SankeyNode) (_ :: Index_) -> node.y0)
+    , width (\(node :: SankeyNode) (_ :: Index_) -> node.x1 - node.x0)
+    , height (\(node :: SankeyNode) (_ :: Index_) -> node.y1 - node.y0)
+    , fill (\(node :: SankeyNode) (_ :: Index_) -> node.color)
     , strokeColor "#000"
     , strokeWidth 1.0
     , strokeOpacity 0.3
@@ -101,10 +101,10 @@ draw csvData selector = do
   labelsSelection <- simpleJoin labelsGroup Text layoutResult.nodes keyForNode
   setAttributes labelsSelection
     [ classed "sankey-label"
-    , x (\(datum :: Datum_) (_ :: Index_) -> let node = unboxSankeyNode datum in if node.x0 < w / 2.0 then node.x1 + 6.0 else node.x0 - 6.0)
-    , y (\(datum :: Datum_) (_ :: Index_) -> let node = unboxSankeyNode datum in (node.y0 + node.y1) / 2.0)
-    , textAnchor (\(datum :: Datum_) (_ :: Index_) -> let node = unboxSankeyNode datum in if node.x0 < w / 2.0 then "start" else "end")
-    , text (\(datum :: Datum_) (_ :: Index_) -> (unboxSankeyNode datum).name)
+    , x (\(node :: SankeyNode) (_ :: Index_) -> if node.x0 < w / 2.0 then node.x1 + 6.0 else node.x0 - 6.0)
+    , y (\(node :: SankeyNode) (_ :: Index_) -> (node.y0 + node.y1) / 2.0)
+    , textAnchor (\(node :: SankeyNode) (_ :: Index_) -> if node.x0 < w / 2.0 then "start" else "end")
+    , text (\(node :: SankeyNode) (_ :: Index_) -> node.name)
     , fill "#000"
     ]
 

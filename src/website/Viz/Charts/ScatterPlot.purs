@@ -20,7 +20,7 @@ draw :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
-  Array DataPoint -> Selector D3Selection_ -> m Unit
+  Array DataPoint -> Selector (D3Selection_ Unit) -> m Unit
 draw dataPoints selector = do
   let dims = defaultDimensions
   let iWidth = innerWidth dims
@@ -34,7 +34,7 @@ draw dataPoints selector = do
   let minY = fromMaybe 0.0 $ minimum yValues
   let maxY = fromMaybe 100.0 $ maximum yValues
 
-  (root :: D3Selection_) <- attach selector
+  (root :: D3Selection_ Unit) <- attach selector
   svg <- appendTo root Svg [
       viewBox 0.0 0.0 dims.width dims.height
     , classed "scatter-plot"
@@ -89,7 +89,7 @@ drawQuartet :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
-  QuartetData -> Selector D3Selection_ -> m Unit
+  QuartetData -> Selector (D3Selection_ Unit) -> m Unit
 drawQuartet quartet selector = do
   -- Overall dimensions for the quartet display
   let totalWidth = 900.0
@@ -107,7 +107,7 @@ drawQuartet quartet selector = do
   let xDomain = [0.0, 20.0]
   let yDomain = [0.0, 14.0]
 
-  (root :: D3Selection_) <- attach selector
+  (root :: D3Selection_ Unit) <- attach selector
   svg <- appendTo root Svg [
       viewBox 0.0 0.0 totalWidth totalHeight
     , classed "scatter-quartet"

@@ -8,7 +8,7 @@ import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, openSele
 import D3.Viz.GUP.Unsafe (coerceDatumToChar, coerceIndexToNumber, coerceDatumToKey)
 import Data.String.CodeUnits (singleton)
 import Effect.Aff (Milliseconds(..))
-import Prelude (bind, discard, pure, ($), (*), (+), (<<<))
+import Prelude (Unit, bind, discard, pure, ($), (*), (+), (<<<))
 
 -- | ====================================================================================
 -- | Simple-as-can-be example of the more complex Join which allows for new data to be
@@ -24,7 +24,7 @@ type Model = Array Char
 
 -- | creates the SVG and a <g> within it to hold the letters
 -- | returns a function which can be called repeatedly to generate each sequence of new and exiting letters
-exGeneralUpdatePattern :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m D3Selection_)
+exGeneralUpdatePattern :: forall m. SelectionM D3Selection_ m => Selector (D3Selection_ Unit) -> m ((Array Char) -> m (D3Selection_ Char))
 exGeneralUpdatePattern selector = do 
   root           <- attach selector
   svg            <- appendTo root Svg [ viewBox 0.0 100.0 800.0 350.0, classed "d3svg gup" ]

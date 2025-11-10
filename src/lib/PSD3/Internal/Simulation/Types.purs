@@ -28,15 +28,15 @@ import Type.Proxy (Proxy(..))
 -- representation of all that is stateful in the D3 simulation engine
 -- (not generalized because we have no other examples of simulation engines ATM
 -- perhaps it can become a more abstract interface in the future)
-newtype D3SimulationState_ = SimState_ D3SimulationStateRecord
+newtype D3SimulationState_ d = SimState_ (D3SimulationStateRecord d)
 -- TODO uses D3Selection instead of type variable, can avoid coercing if generalized correctly
-type D3SimulationStateRecord = { 
+type D3SimulationStateRecord d = {
     handle_       :: D3Simulation_
   -- keeping the map of labels to forces enables functionality like "enableByLabel"
-  , forceLibrary  :: M.Map Label Force
+  , forceLibrary  :: M.Map Label (Force d)
   -- , forceStatuses :: M.Map Label ForceStatus
   -- TODO perhaps by keeping tick functions here we can run simulation, tick by tick from PureScript
-  , ticks         :: M.Map Label (Step D3Selection_ Datum_)
+  , ticks         :: M.Map Label (Step D3Selection_ d)
 
   -- this field is used to cache the swizzled links so that links force can be toggled as D3 simply forgets this information if force is deleted
   , "data"        :: { nodes :: Array Datum_ , links :: Array Datum_ } -- REVIEW are we updating this on setNodes and setLinks
@@ -49,7 +49,7 @@ type D3SimulationStateRecord = {
   , velocityDecay :: Number
 }
 
-derive instance Newtype D3SimulationState_ _
+derive instance Newtype (D3SimulationState_ d) _
 
 -- | anything that wants to use a simulation will need a row that matches this in its State
 _d3Simulation :: forall a r. Lens' { simulation :: a | r} a
@@ -135,30 +135,30 @@ newtype Force d = Force {
 }
 derive instance Newtype (Force d) _
 
-_name :: Lens' Force Label
+_name :: forall d. Lens' (Force d) Label
 _name = _Newtype <<< prop (Proxy :: Proxy "name")
-_status :: Lens' Force ForceStatus
+_status :: forall d. Lens' (Force d) ForceStatus
 _status = _Newtype <<< prop (Proxy :: Proxy "status")
-_type :: Lens' Force ForceType
+_type :: forall d. Lens' (Force d) ForceType
 _type = _Newtype <<< prop (Proxy :: Proxy "type")
-_attributes :: Lens' Force (Array ChainableF)
+_attributes :: forall d. Lens' (Force d) (Array (ChainableF d))
 _attributes = _Newtype <<< prop (Proxy :: Proxy "attributes")
-_force_ :: Lens' Force D3ForceHandle_
+_force_ :: forall d. Lens' (Force d) D3ForceHandle_
 _force_ = _Newtype <<< prop (Proxy :: Proxy "force_")
 
-getStatusMap :: Map Label Force -> Map Label ForceStatus
+getStatusMap :: forall d. Map Label (Force d) -> Map Label ForceStatus
 getStatusMap forceMap = fromFoldable $ (\f -> Tuple (view _name f) (view _status f)) <$> forceMap
 
-_filter :: forall p. Profunctor p => Strong p => p (Maybe ForceFilter) (Maybe ForceFilter) -> p Force Force
+_filter :: forall d p. Profunctor p => Strong p => p (Maybe ForceFilter) (Maybe ForceFilter) -> p (Force d) (Force d)
 _filter = _Newtype <<< prop (Proxy :: Proxy "filter")
 
-_filterLabel :: forall p row.
-     Newtype Force { filter :: Maybe ForceFilter | row }
-  => Newtype Force { filter :: Maybe ForceFilter | row }
+_filterLabel :: forall d p row.
+     Newtype (Force d) { filter :: Maybe ForceFilter | row }
+  => Newtype (Force d) { filter :: Maybe ForceFilter | row }
   => Profunctor p
   => Strong p
   => Choice p
-  => p Label Label -> p Force Force
+  => p Label Label -> p (Force d) (Force d)
 _filterLabel = _Newtype <<< prop (Proxy :: Proxy "filter") <<< _Just <<< _forceFilterLabel
 
 
@@ -166,7 +166,7 @@ instance Show ForceType where
   show (RegularForce t) = show t
   show LinkForce        = "Link force"
 
-instance Show Force where
+instance Show (Force d) where
   show (Force f) = intercalate " " [show f.type, show f.name, show f.status, show f.filter]
   
 -- not sure if there needs to be a separate type for force attributes, maybe not, but we'll start assuming so
@@ -233,7 +233,7 @@ instance Show LinkForceType where
 -- for example, two Halogen components won't _accidentally_ share one
 -- should be dropped later when we can be sure that isn't a problem
 -- needs POC with two sims in one page, sim continuing despite page change etc etc
-initialSimulationState :: Map Label Force -> D3SimulationState_
+initialSimulationState :: forall d. Map Label (Force d) -> D3SimulationState_ d
 initialSimulationState forces = SimState_
    {  -- common state for all D3 Simulation
       handle_  : initSimulation_ defaultConfigSimulation keyIsID_

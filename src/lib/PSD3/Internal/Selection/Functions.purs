@@ -50,7 +50,7 @@ selectionNestedJoin selection e extractChildren keyFn = do
     -- Convert Foldable to Array and coerce datum to Datum_ for D3
     extractFn = extractChildren >>> fromFoldable >>> unsafeCoerce
     dataSelection = d3DataWithFunction_ extractFn keyFn selectS
-    enterSelection = d3EnterAndAppend_ element dataSelection
+    enterSelection = unsafeCoerce (d3EnterAndAppend_ element dataSelection) :: D3Selection_ datum
   pure enterSelection
 
 selectionUpdateJoin   :: forall d datum m.

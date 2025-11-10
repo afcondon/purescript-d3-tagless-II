@@ -119,7 +119,7 @@ draw :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
-  HierData -> Selector D3Selection_ -> m Unit
+  HierData -> Selector (D3Selection_ Unit) -> m Unit
 draw flareData selector = do
   let chartWidth = 1600.0
   let chartHeight = 1200.0
@@ -186,7 +186,7 @@ draw flareData selector = do
   _ <- liftEffect $ log $ "\nRendering " <> show (length nodes) <> " nodes (full hierarchy)"
   _ <- liftEffect $ log $ "Total node count: " <> show (countNodes layout)
 
-  root' <- attach selector :: m D3Selection_
+  root' <- attach selector :: m (D3Selection_ Unit)
   svg <- appendTo root' Svg
     [ viewBox 0.0 0.0 chartWidth chartHeight
     , classed "cluster"

@@ -59,7 +59,7 @@ draw :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
-  DependencyMatrix -> EntityLabels -> Selector D3Selection_ -> m Unit
+  DependencyMatrix -> EntityLabels -> Selector (D3Selection_ Unit) -> m Unit
 draw matrix _ selector = do
   let dims = { width: 800.0, height: 800.0 }
   let outerR = 300.0
@@ -67,7 +67,7 @@ draw matrix _ selector = do
   let centerX = dims.width / 2.0
   let centerY = dims.height / 2.0
 
-  (root :: D3Selection_) <- attach selector
+  (root :: D3Selection_ Unit) <- attach selector
   svg <- appendTo root Svg [
       viewBox 0.0 0.0 dims.width dims.height
     , classed "chord-diagram"

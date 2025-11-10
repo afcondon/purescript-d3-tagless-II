@@ -4,7 +4,7 @@ import Prelude
 
 import PSD3.Internal.Attributes.Sugar (classed, fill, fillOpacity, fontSize, height, strokeColor, strokeWidth, text, textAnchor, viewBox, width, x, y)
 import PSD3.Data.Tree (TreeJson_)
-import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Selector)
+import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
 import PSD3.Internal.FFI (cloneTreeJson_, descendants_, hierarchyFromJSON_, runTreemapLayout_, treeSortForTreeMap_, treemapLayout_, treemapSetPadding_, treemapSetSize_)
 import PSD3.Data.Node (D3_TreeNode)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
@@ -18,11 +18,11 @@ draw :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
-  TreeJson_ -> Selector D3Selection_ -> m Unit
+  TreeJson_ -> Selector (D3Selection_ Unit) -> m Unit
 draw treeJson selector = do
   let dims = { width: 900.0, height: 600.0 }
 
-  (root :: D3Selection_) <- attach selector
+  (root :: D3Selection_ Unit) <- attach selector
   svg <- appendTo root Svg [
       viewBox 0.0 0.0 dims.width dims.height
     , classed "treemap"
@@ -57,11 +57,11 @@ draw treeJson selector = do
   -- Draw tiles using simpleJoin for proper data binding
   tiles <- simpleJoin chartGroup Rect nodes keyIsID_
   setAttributes tiles
-    [ x (\(d :: Datum_) -> node'.x0 (unsafeCoerce d))
-    , y (\(d :: Datum_) -> node'.y0 (unsafeCoerce d))
-    , width (\(d :: Datum_) -> node'.rectWidth (unsafeCoerce d))
-    , height (\(d :: Datum_) -> node'.rectHeight (unsafeCoerce d))
-    , fill (\(d :: Datum_) -> depthColor (node'.depthInt (unsafeCoerce d)))
+    [ x (\d -> node'.x0 (unsafeCoerce d))
+    , y (\d -> node'.y0 (unsafeCoerce d))
+    , width (\d -> node'.rectWidth (unsafeCoerce d))
+    , height (\d -> node'.rectHeight (unsafeCoerce d))
+    , fill (\d -> depthColor (node'.depthInt (unsafeCoerce d)))
     , fillOpacity 0.85
     , strokeColor "#ffffff"
     , strokeWidth 2.0
@@ -71,13 +71,13 @@ draw treeJson selector = do
   -- Draw labels using simpleJoin for proper data binding
   tileLabels <- simpleJoin chartGroup Text nodes keyIsID_
   setAttributes tileLabels
-    [ x (\(d :: Datum_) -> node'.x0 (unsafeCoerce d) + 2.0)
-    , y (\(d :: Datum_) -> node'.y0 (unsafeCoerce d) + 12.0)
-    , text (\(d :: Datum_) -> node'.name (unsafeCoerce d))
+    [ x (\d -> node'.x0 (unsafeCoerce d) + 2.0)
+    , y (\d -> node'.y0 (unsafeCoerce d) + 12.0)
+    , text (\d -> node'.name (unsafeCoerce d))
     , textAnchor "start"
     , fontSize 10.0
     , fill "#ffffff"
-    , fillOpacity (\(d :: Datum_) -> if canShowLabel { minWidth: 30.0, minHeight: 20.0 } (unsafeCoerce d) then 1.0 else 0.0)
+    , fillOpacity (\d -> if canShowLabel { minWidth: 30.0, minHeight: 20.0 } (unsafeCoerce d) then 1.0 else 0.0)
     , classed "tile-label"
     ]
 

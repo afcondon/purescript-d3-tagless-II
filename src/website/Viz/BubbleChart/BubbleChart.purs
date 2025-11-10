@@ -4,7 +4,7 @@ import Prelude
 
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fillOpacity, fontSize, height, radius, strokeColor, strokeWidth, text, textAnchor, viewBox, width, x, y)
 import PSD3.Data.Tree (TreeJson_)
-import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Selector)
+import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
 import PSD3.Internal.FFI (cloneTreeJson_, descendants_, hierarchyFromJSON_, packLayout_, packSetPadding_, packSetSize_, runPackLayout_, treeSortForCirclePack_)
 import PSD3.Data.Node (D3_TreeNode)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
@@ -20,11 +20,11 @@ draw :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
-  TreeJson_ -> Selector D3Selection_ -> m Unit
+  TreeJson_ -> Selector (D3Selection_ Unit) -> m Unit
 draw treeJson selector = do
   let dims = { width: 900.0, height: 900.0 }
 
-  (root :: D3Selection_) <- attach selector
+  (root :: D3Selection_ Unit) <- attach selector
   svg <- appendTo root Svg [
       viewBox 0.0 0.0 dims.width dims.height
     , classed "bubble-chart"
@@ -59,10 +59,10 @@ draw treeJson selector = do
   -- Draw bubbles using simpleJoin for proper data binding
   bubbles <- simpleJoin chartGroup Circle nodes keyIsID_
   setAttributes bubbles
-    [ cx (\(d :: Datum_) -> node'.x (unsafeCoerce d))
-    , cy (\(d :: Datum_) -> node'.y (unsafeCoerce d))
-    , radius (\(d :: Datum_) -> node'.r (unsafeCoerce d))
-    , fill (\(d :: Datum_) -> depthColor (node'.depthInt (unsafeCoerce d)))
+    [ cx (\d -> node'.x (unsafeCoerce d))
+    , cy (\d -> node'.y (unsafeCoerce d))
+    , radius (\d -> node'.r (unsafeCoerce d))
+    , fill (\d -> depthColor (node'.depthInt (unsafeCoerce d)))
     , fillOpacity 0.8
     , strokeColor "#ffffff"
     , strokeWidth 2.0
@@ -72,13 +72,13 @@ draw treeJson selector = do
   -- Draw labels using simpleJoin for proper data binding
   labels <- simpleJoin chartGroup Text nodes keyIsID_
   setAttributes labels
-    [ x (\(d :: Datum_) -> node'.x (unsafeCoerce d))
-    , y (\(d :: Datum_) -> node'.y (unsafeCoerce d))
-    , text (\(d :: Datum_) -> node'.name (unsafeCoerce d))
+    [ x (\d -> node'.x (unsafeCoerce d))
+    , y (\d -> node'.y (unsafeCoerce d))
+    , text (\d -> node'.name (unsafeCoerce d))
     , textAnchor "middle"
-    , fontSize (\(d :: Datum_) -> min 12.0 (node'.r (unsafeCoerce d) / 3.0))
+    , fontSize (\d -> min 12.0 (node'.r (unsafeCoerce d) / 3.0))
     , fill "#ffffff"
-    , fillOpacity (\(d :: Datum_) -> if canShowCircleLabel { minRadius: 20.0 } (unsafeCoerce d) then 1.0 else 0.0)
+    , fillOpacity (\d -> if canShowCircleLabel { minRadius: 20.0 } (unsafeCoerce d) then 1.0 else 0.0)
     , classed "bubble-label"
     ]
 

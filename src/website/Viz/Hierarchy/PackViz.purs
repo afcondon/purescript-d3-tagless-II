@@ -151,7 +151,7 @@ draw :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
-  HierData -> Selector D3Selection_ -> m Unit
+  HierData -> Selector (D3Selection_ Unit) -> m Unit
 draw flareData selector = do
   let chartWidth = 800.0
   let chartHeight = 600.0
@@ -188,7 +188,7 @@ draw flareData selector = do
         then log "✅ NO OVERLAPS at root level"
         else log $ "❌ FOUND " <> show rootOverlaps <> " OVERLAPS at root level"
 
-  root' <- attach selector :: m D3Selection_
+  root' <- attach selector :: m (D3Selection_ Unit)
   svg <- appendTo root' Svg
     [ viewBox 0.0 0.0 chartWidth chartHeight
     , classed "pack"

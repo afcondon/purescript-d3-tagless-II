@@ -102,8 +102,8 @@ orderingToInt GT = 1
 -- | Initialize the visualization structure (SVG, axes, etc.)
 initializeVisualization :: forall m.
   SelectionM D3Selection_ m =>
-  Selector D3Selection_ ->
-  m { svg :: D3Selection_, chartGroup :: D3Selection_ }
+  Selector (D3Selection_ Unit) ->
+  m { svg :: D3Selection_ Unit, chartGroup :: D3Selection_ Unit }
 initializeVisualization selector = do
   let config = defaultConfig
 
@@ -126,7 +126,7 @@ initializeVisualization selector = do
 -- | Update visualization with new data for a given year
 updateVisualization :: forall m.
   SelectionM D3Selection_ m =>
-  D3Selection_ ->
+  D3Selection_ Unit ->
   Array NationPoint ->
   m Unit
 updateVisualization chartGroup nations = do
@@ -190,12 +190,12 @@ updateVisualization chartGroup nations = do
 -- | Following the GUP pattern
 draw :: forall m.
   SelectionM D3Selection_ m =>
-  Selector D3Selection_ ->
-  m (Array NationPoint -> m D3Selection_)
+  Selector (D3Selection_ Unit) ->
+  m (Array NationPoint -> m (D3Selection_ NationPoint))
 draw selector = do
   let config = defaultConfig
 
-  (root :: D3Selection_) <- attach selector
+  (root :: D3Selection_ Unit) <- attach selector
   svg <- appendTo root Svg
     [ viewBox 0.0 0.0 config.width config.height
     , width config.width

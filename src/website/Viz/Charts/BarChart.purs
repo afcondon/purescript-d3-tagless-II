@@ -22,7 +22,7 @@ draw :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
-  Array DataPoint -> Selector D3Selection_ -> m Unit
+  Array DataPoint -> Selector (D3Selection_ Unit) -> m Unit
 draw dataPoints selector = do
   let dims = defaultDimensions
   let iWidth = innerWidth dims
@@ -36,7 +36,7 @@ draw dataPoints selector = do
   let minY = 0.0  -- Start bars from zero
   let maxY = fromMaybe 100.0 $ maximum yValues
 
-  (root :: D3Selection_) <- attach selector
+  (root :: D3Selection_ Unit) <- attach selector
   svg <- appendTo root Svg [
       viewBox 0.0 0.0 dims.width dims.height
     , classed "bar-chart"

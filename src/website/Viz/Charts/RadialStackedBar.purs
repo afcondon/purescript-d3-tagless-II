@@ -73,7 +73,7 @@ draw :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
-  Array GroupedBarData -> Selector D3Selection_ -> m Unit
+  Array GroupedBarData -> Selector (D3Selection_ Unit) -> m Unit
 draw data' selector = do
   let dims = { width: 928.0, height: 928.0, innerRadius: 180.0, outerRadius: 400.0 }
   let centerX = dims.width / 2.0
@@ -103,7 +103,7 @@ draw data' selector = do
           i <- findIndex (\a -> a == age') ages
           index ageColors i
 
-  (root :: D3Selection_) <- attach selector
+  (root :: D3Selection_ Unit) <- attach selector
   svg <- appendTo root Svg [
       classed "radial-stacked-bar"
     , width dims.width

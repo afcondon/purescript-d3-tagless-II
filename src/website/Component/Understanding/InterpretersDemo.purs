@@ -44,7 +44,7 @@ sampleData =
 -- | The sample visualization DSL code for D3 rendering
 scatterPlotD3 :: forall m. Bind m => MonadEffect m => SelectionM D3Selection_ m => m Unit
 scatterPlotD3 = do
-  (root :: D3Selection_) <- attach "div.scatterplot-viz"
+  (root :: D3Selection_ Unit) <- attach "div.scatterplot-viz"
   svg <- appendTo root Svg
     [ classed "simple-scatterplot"
     , width 400.0
