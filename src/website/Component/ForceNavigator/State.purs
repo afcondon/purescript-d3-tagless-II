@@ -104,7 +104,7 @@ visibleLinks nodes allLinks =
     result
 
 -- Lenses
-_simulation :: Lens' State D3SimulationState_
+_simulation :: Lens' State (D3SimulationState_ NavigationSimNode)
 _simulation = prop (Proxy :: Proxy "simulation")
 
 _expandedNodes :: Lens' State (Set String)

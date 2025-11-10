@@ -51,7 +51,7 @@ type MiseEnScene = SceneConfig
 -- | Visualization-Specific Initialization
 -- ============================================================================
 
-initialScene :: M.Map Label Force -> SceneConfig
+initialScene :: M.Map Label (Force SpagoSimNode) -> SceneConfig
 initialScene forceLibrary = {
     chooseNodes: isPackage -- chooses all nodes
   , linksShown:  const false
