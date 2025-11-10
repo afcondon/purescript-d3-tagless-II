@@ -65,7 +65,12 @@ printPartitionStructure currentDepth maxDepth indent (PartNode node) = do
 toHierarchyData :: HierData -> HierarchyData HierData
 toHierarchyData node = HierarchyData
   { data_: node
-  , value: Just (getValue node)
+  , value:
+      -- Only set explicit value for leaf nodes
+      -- Internal nodes will get their value from sum of children
+      case FlareData.getChildren node of
+        Nothing -> Just (getValue node)  -- Leaf node
+        Just _ -> Nothing                 -- Internal node - let it sum children
   , children: map (map toHierarchyData) (FlareData.getChildren node)
   }
 

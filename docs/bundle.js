@@ -34052,7 +34052,18 @@
   var toHierarchyData2 = function(node) {
     return {
       data_: node,
-      value: new Just(getValue(node)),
+      value: (function() {
+        var v = getChildren(node);
+        if (v instanceof Nothing) {
+          return new Just(getValue(node));
+        }
+        ;
+        if (v instanceof Just) {
+          return Nothing.value;
+        }
+        ;
+        throw new Error("Failed pattern match at D3.Viz.PartitionViz (line 71, column 7 - line 73, column 26): " + [v.constructor.name]);
+      })(),
       children: map64(map120(toHierarchyData2))(getChildren(node))
     };
   };
@@ -34060,11 +34071,11 @@
     return function(maxDepth2) {
       return function(indent) {
         return function(v) {
-          var $58 = currentDepth <= maxDepth2;
-          if ($58) {
+          var $61 = currentDepth <= maxDepth2;
+          if ($61) {
             var nodeType = (function() {
-              var $59 = length3(v.value0.children) === 0;
-              if ($59) {
+              var $62 = length3(v.value0.children) === 0;
+              if ($62) {
                 return "leaf";
               }
               ;
@@ -34073,8 +34084,8 @@
             var nodeName2 = getName2(v.value0.data_);
             return function __do5() {
               log2(indent + (nodeName2 + (" [" + (nodeType + ("]: x0=" + (show116(v.value0.x0) + (", y0=" + (show116(v.value0.y0) + (", x1=" + (show116(v.value0.x1) + (", y1=" + (show116(v.value0.y1) + (", depth=" + show43(v.value0.depth))))))))))))))();
-              var $60 = currentDepth < maxDepth2;
-              if ($60) {
+              var $63 = currentDepth < maxDepth2;
+              if ($63) {
                 return traverse_11(printPartitionStructure(currentDepth + 1 | 0)(maxDepth2)(indent + "  "))(v.value0.children)();
               }
               ;
@@ -34088,8 +34099,8 @@
     };
   };
   var getAllNodes3 = function(v) {
-    var $63 = length3(v.value0.children) === 0;
-    if ($63) {
+    var $66 = length3(v.value0.children) === 0;
+    if ($66) {
       return [v];
     }
     ;
@@ -34153,12 +34164,12 @@
                                     var rectWidth = v.value0.x1 - v.value0.x0;
                                     var rectHeight = v.value0.y1 - v.value0.y0;
                                     return discard215((function() {
-                                      var $70 = rectWidth > 0.5 && rectHeight > 0.5;
-                                      if ($70) {
+                                      var $73 = rectWidth > 0.5 && rectHeight > 0.5;
+                                      if ($73) {
                                         return bind120(appendTo5(rectsGroup)(Rect.value)([x35(v.value0.x0), y36(v.value0.y0), width20(rectWidth), height20(rectHeight), fill26(getColor2(v.value0.depth)), strokeColor24("#fff"), strokeWidth20(1), fillOpacity6(0.7), classed26("node"), classed26("depth-" + show43(v.value0.depth))]))(function() {
                                           return discard215((function() {
-                                            var $71 = rectWidth > 50 && rectHeight > 15;
-                                            if ($71) {
+                                            var $74 = rectWidth > 50 && rectHeight > 15;
+                                            if ($74) {
                                               return bind120(appendTo5(rectsGroup)(Text2.value)([x35(v.value0.x0 + 4), y36(v.value0.y0 + rectHeight / 2 + 4), fill26("#333"), fontSize9(10), text22(nodeName2), classed26("label")]))(function() {
                                                 return pure120(unit);
                                               });
@@ -36319,7 +36330,18 @@
   var toHierarchyData3 = function(node) {
     return {
       data_: node,
-      value: new Just(getValue(node)),
+      value: (function() {
+        var v = getChildren(node);
+        if (v instanceof Nothing) {
+          return new Just(getValue(node));
+        }
+        ;
+        if (v instanceof Just) {
+          return Nothing.value;
+        }
+        ;
+        throw new Error("Failed pattern match at D3.Viz.SunburstViz (line 70, column 7 - line 72, column 26): " + [v.constructor.name]);
+      })(),
       children: map68(map121(toHierarchyData3))(getChildren(node))
     };
   };
@@ -36327,11 +36349,11 @@
     return function(maxDepth2) {
       return function(indent) {
         return function(v) {
-          var $63 = currentDepth <= maxDepth2;
-          if ($63) {
+          var $66 = currentDepth <= maxDepth2;
+          if ($66) {
             var nodeType = (function() {
-              var $64 = length3(v.value0.children) === 0;
-              if ($64) {
+              var $67 = length3(v.value0.children) === 0;
+              if ($67) {
                 return "leaf";
               }
               ;
@@ -36340,8 +36362,8 @@
             var nodeName2 = getName2(v.value0.data_);
             return function __do5() {
               log2(indent + (nodeName2 + (" [" + (nodeType + ("]: x0=" + (show119(v.value0.x0) + (", y0=" + (show119(v.value0.y0) + (", x1=" + (show119(v.value0.x1) + (", y1=" + (show119(v.value0.y1) + (", depth=" + show48(v.value0.depth))))))))))))))();
-              var $65 = currentDepth < maxDepth2;
-              if ($65) {
+              var $68 = currentDepth < maxDepth2;
+              if ($68) {
                 return traverse_14(printSunburstStructure(currentDepth + 1 | 0)(maxDepth2)(indent + "  "))(v.value0.children)();
               }
               ;
@@ -36367,8 +36389,8 @@
               var y0$prime = y0 * sin(startAngle);
               var endAngle = x116 / chartWidth * 2 * pi;
               var largeArcFlag = (function() {
-                var $67 = endAngle - startAngle > pi;
-                if ($67) {
+                var $70 = endAngle - startAngle > pi;
+                if ($70) {
                   return 1;
                 }
                 ;
@@ -36411,8 +36433,8 @@
     };
   };
   var getAllNodes4 = function(v) {
-    var $69 = length3(v.value0.children) === 0;
-    if ($69) {
+    var $72 = length3(v.value0.children) === 0;
+    if ($72) {
       return [v];
     }
     ;
@@ -36476,28 +36498,28 @@
                                   var renderNode = function(v) {
                                     var nodeName2 = getName2(v.value0.data_);
                                     return discard215((function() {
-                                      var $76 = v.value0.depth > 0;
-                                      if ($76) {
+                                      var $79 = v.value0.depth > 0;
+                                      if ($79) {
                                         var angleSpan = v.value0.x1 - v.value0.x0;
                                         var radiusSpan = v.value0.y1 - v.value0.y0;
-                                        var $77 = angleSpan > 1e-3 && radiusSpan > 0.5;
-                                        if ($77) {
+                                        var $80 = angleSpan > 1e-3 && radiusSpan > 0.5;
+                                        if ($80) {
                                           return bind120(appendTo5(sunburstGroup)(Path2.value)([d9(makeArcPath(2 * pi)(500)(v.value0.x0)(v.value0.y0)(v.value0.x1)(v.value0.y1)), fill30(getColor3(v.value0.depth)), strokeColor28("#fff"), strokeWidth24(1), fillOpacity9(0.7), classed30("arc"), classed30("depth-" + show48(v.value0.depth))]))(function() {
                                             return discard215((function() {
-                                              var $78 = angleSpan > 0.1 && radiusSpan > 30;
-                                              if ($78) {
+                                              var $81 = angleSpan > 0.1 && radiusSpan > 30;
+                                              if ($81) {
                                                 var labelPos = getLabelPosition(2 * pi)(500)(v.value0.x0)(v.value0.y0)(v.value0.x1)(v.value0.y1);
                                                 var textRotation = (function() {
-                                                  var $79 = labelPos.angle > 90 && labelPos.angle < 270;
-                                                  if ($79) {
+                                                  var $82 = labelPos.angle > 90 && labelPos.angle < 270;
+                                                  if ($82) {
                                                     return labelPos.angle + 180;
                                                   }
                                                   ;
                                                   return labelPos.angle;
                                                 })();
                                                 var anchor = (function() {
-                                                  var $80 = labelPos.angle > 90 && labelPos.angle < 270;
-                                                  if ($80) {
+                                                  var $83 = labelPos.angle > 90 && labelPos.angle < 270;
+                                                  if ($83) {
                                                     return "end";
                                                   }
                                                   ;
