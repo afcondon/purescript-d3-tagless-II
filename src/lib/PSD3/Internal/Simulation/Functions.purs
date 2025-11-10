@@ -217,17 +217,17 @@ simulationSwizzleLinks links nodes keyFn = do
 -- | the situation with General Update Pattern for simulations is MUCH more complicated than for non-simulation data
 -- | this function takes care of all that complexity and adds both links and nodes and takes care of ensuring that
 -- | existing nodes preserve their positions and that all links are to nodes that are still in the simulation
-simulationMergeNewData :: forall d id m row.
+simulationMergeNewData :: forall simStateType dataRow id m row.
   Eq id =>
   Bind m =>
-  MonadState { simulation :: D3SimulationState_ d | row } m =>
-  D3Selection_ -> -- nodes selection
+  MonadState { simulation :: D3SimulationState_ simStateType | row } m =>
+  D3Selection_ (D3_SimulationNode dataRow) -> -- nodes selection
   (Datum_ -> Index_) -> -- nodes keyFn
-  D3Selection_ -> -- links selection
+  D3Selection_ Datum_ -> -- links selection
   (Datum_ -> Index_) -> -- links KeyFn
   Array D3Link_Unswizzled -> -- links raw data
-  Array (D3_SimulationNode d) -> -- nodes raw data
-  m { links :: Array D3Link_Swizzled, nodes :: Array (D3_SimulationNode d)}
+  Array (D3_SimulationNode dataRow) -> -- nodes raw data
+  m { links :: Array D3Link_Swizzled, nodes :: Array (D3_SimulationNode dataRow)}
 simulationMergeNewData nodeSelection nodeKeyFn linkSelection linkKeyFn links nodes = do
   let updatedNodeData = d3PreserveSimulationPositions_ nodeSelection nodes nodeKeyFn
       nodeIDs :: Array id
@@ -293,7 +293,7 @@ simulationSetLinksFromSelection linkSelection filterFn = do
   pure unit
 
 
-simulationCreateTickFunction :: forall selection row m. 
+simulationCreateTickFunction :: forall d selection row m.
   (MonadState { simulation :: D3SimulationState_ d | row } m) =>
   Label -> Step selection -> m Unit
 simulationCreateTickFunction label tick@(StepTransformFFI selection fn) = pure unit

@@ -25,13 +25,13 @@ data StyleChange d = TopLevelCSS String | GraphStyle (SpagoSceneAttributes d)
 data FilterData = LinkShowFilter (D3Link_Unswizzled -> Boolean)
                 | LinkForceFilter (Datum_ -> Boolean) -- because this is post- putting in the DOM, it's a filter on the opaque type
                 | NodeFilter (SpagoSimNode -> Boolean)
-data Action
+data Action d
   = Initialize
   | Finalize
   | Scene Scene
   | ToggleForce Label
   | Filter FilterData
-  | ChangeStyling StyleChange
+  | ChangeStyling (StyleChange d)
   | ChangeSimConfig SimVariable
   | StopSim
   | StartSim

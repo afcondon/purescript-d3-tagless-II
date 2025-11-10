@@ -62,8 +62,14 @@ iterationsVal n = ForceT $ AttributeSetter "iterations" $ NumberAttr $ Static n
 xVal :: forall d. Number -> ChainableF d
 xVal n = ForceT $ AttributeSetter "x" $ NumberAttr $ Static n
 
+xFn :: forall d. (Datum_ -> Index_ -> Number) -> ChainableF d
+xFn fn = ForceT $ AttributeSetter "x" $ NumberAttr $ FnI (unsafeCoerce fn)
+
 yVal :: forall d. Number -> ChainableF d
 yVal n = ForceT $ AttributeSetter "y" $ NumberAttr $ Static n
+
+yFn :: forall d. (Datum_ -> Index_ -> Number) -> ChainableF d
+yFn fn = ForceT $ AttributeSetter "y" $ NumberAttr $ FnI (unsafeCoerce fn)
 
 fxVal :: forall d. Number -> ChainableF d
 fxVal n = ForceT $ AttributeSetter "fx" $ NumberAttr $ Static n

@@ -25,20 +25,20 @@ forceLibrary = initialize [
       , createForce "charge2"      (RegularForce ForceManyBody) allNodes [ F.strengthVal (-100.0), F.thetaVal 0.9, F.distanceMinVal 1.0, F.distanceMaxVal 400.0 ]
       , createForce "chargetree"   (RegularForce ForceManyBody) treeExceptLeaves [ F.strengthVal (-100.0), F.thetaVal 0.9, F.distanceMinVal 1.0, F.distanceMaxVal 400.0 ]
 
-      , createForce "clusterx_M"     (RegularForce ForceX)        modulesOnly [ F.strengthVal 0.2, F.xVal datum_.gridPointX ]
-      , createForce "clustery_M"     (RegularForce ForceY)        modulesOnly [ F.strengthVal 0.2, F.yVal datum_.gridPointY ]
+      , createForce "clusterx_M"     (RegularForce ForceX)        modulesOnly [ F.strengthVal 0.2, F.xFn (\d _ -> datum_.gridPointX d) ]
+      , createForce "clustery_M"     (RegularForce ForceY)        modulesOnly [ F.strengthVal 0.2, F.yFn (\d _ -> datum_.gridPointY d) ]
 
-      , createForce "clusterx_P"     (RegularForce ForceX)        packagesOnly [ F.strengthVal 0.8, F.xVal datum_.gridPointX ]
-      , createForce "clustery_P"     (RegularForce ForceY)        packagesOnly [ F.strengthVal 0.8, F.yVal datum_.gridPointY ]
+      , createForce "clusterx_P"     (RegularForce ForceX)        packagesOnly [ F.strengthVal 0.8, F.xFn (\d _ -> datum_.gridPointX d) ]
+      , createForce "clustery_P"     (RegularForce ForceY)        packagesOnly [ F.strengthVal 0.8, F.yFn (\d _ -> datum_.gridPointY d) ]
 
       , createForce "htreeNodesX"  (RegularForce ForceX)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
-          [ F.strengthVal 0.4, F.xVal datum_.treePointX ]
+          [ F.strengthVal 0.4, F.xFn (\d _ -> datum_.treePointX d) ]
       , createForce "htreeNodesY"  (RegularForce ForceY)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
-          [ F.strengthVal 0.4, F.yVal datum_.treePointY ]
+          [ F.strengthVal 0.4, F.yFn (\d _ -> datum_.treePointY d) ]
       , createForce "vtreeNodesX"  (RegularForce ForceX)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
-          [ F.strengthVal 0.4, F.xVal datum_.treePointY ]
+          [ F.strengthVal 0.4, F.xFn (\d _ -> datum_.treePointY d) ]
       , createForce "vtreeNodesY"  (RegularForce ForceY)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
-          [ F.strengthVal 0.4, F.yVal datum_.treePointX ]
+          [ F.strengthVal 0.4, F.yFn (\d _ -> datum_.treePointX d) ]
 
       , createForce "packageOrbit" (RegularForce ForceRadial)   packagesOnly
                                    [ F.strengthVal 0.7, F.xVal 0.0, F.yVal 0.0, F.radiusVal 1200.0 ]

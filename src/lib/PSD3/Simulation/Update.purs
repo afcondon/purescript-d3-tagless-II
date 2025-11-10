@@ -8,7 +8,7 @@ import PSD3.Internal.Selection.Types (SelectionAttribute)
 import PSD3.Internal.Simulation.Types (Step(..))
 import PSD3.Capabilities.Selection (class SelectionM, mergeSelections, openSelection, updateJoin)
 import PSD3.Capabilities.Simulation (class SimulationM2, SimulationUpdate, addTickFunction, update)
-import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode, NodeID)
+import PSD3.Data.Node (D3Link_Swizzled, D3Link_Unswizzled, D3_SimulationNode, NodeID)
 import PSD3.Internal.FFI (SimulationVariables, getIDsFromNodes_, getLinkIDs_, keyIsID_)
 import Data.Maybe (Maybe(..))
 import Data.Set as Set
@@ -48,14 +48,14 @@ type RenderCallbacks attrs sel m d = {
   onNodeUpdate :: sel d -> attrs -> m Unit,     -- Update existing nodes in-place
   onNodeExit :: sel d -> m Unit,                -- Clean up exiting nodes
 
-  -- Link rendering callbacks (links are Datum_ after swizzling)
-  onLinkEnter :: sel Datum_ -> attrs -> m (sel Datum_),   -- Populate enter selection, return it for merging
-  onLinkUpdate :: sel Datum_ -> attrs -> m Unit,           -- Update existing links in-place
-  onLinkExit :: sel Datum_ -> m Unit,                      -- Clean up exiting links
+  -- Link rendering callbacks (links are D3Link_Swizzled after processing)
+  onLinkEnter :: sel D3Link_Swizzled -> attrs -> m (sel D3Link_Swizzled),   -- Populate enter selection, return it for merging
+  onLinkUpdate :: sel D3Link_Swizzled -> attrs -> m Unit,                    -- Update existing links in-place
+  onLinkExit :: sel D3Link_Swizzled -> m Unit,                               -- Clean up exiting links
 
   -- Tick function attributes (applied to merged selections)
   nodeTickAttrs :: attrs -> Array (SelectionAttribute d),
-  linkTickAttrs :: Array (SelectionAttribute Datum_)       -- Links are Datum_ after swizzling
+  linkTickAttrs :: Array (SelectionAttribute D3Link_Swizzled)  -- Links are D3Link_Swizzled after swizzling
 }
 
 -- | Fully declarative update configuration
@@ -156,7 +156,7 @@ genericUpdateSimulation :: forall dataRow attrs sel m.
   Monad m =>
   SelectionM sel m =>
   SimulationM2 sel m =>
-  { nodes :: Maybe (sel (D3_SimulationNode dataRow)), links :: Maybe (sel Datum_) } ->
+  { nodes :: Maybe (sel (D3_SimulationNode dataRow)), links :: Maybe (sel D3Link_Swizzled) } ->
   Element ->                                         -- Node element type
   Element ->                                         -- Link element type
   DeclarativeUpdateConfig dataRow ->                 -- Declarative configuration (uses Row Type)

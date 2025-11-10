@@ -8,7 +8,7 @@ import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
 
 -- | Render the FP FTW page
-render :: forall w. State -> HH.HTML w Action
+render :: forall d w. State d -> HH.HTML w Action
 render _ =
   HH.div
     [ HP.classes [ HH.ClassName "example-page" ] ]

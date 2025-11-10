@@ -52,10 +52,10 @@ defaultLesMisAttributes = {
 -- | - Simple attribute structure
 -- |
 -- | This demonstrates how easy it is to create a new visualization using the library.
-lesMisRenderCallbacks :: forall m.
+lesMisRenderCallbacks :: forall d m.
   Monad m =>
   SelectionM D3Selection_ m =>
-  RenderCallbacks LesMisAttributes D3Selection_ m
+  RenderCallbacks LesMisAttributes D3Selection_ m d
 lesMisRenderCallbacks = {
   -- Node rendering: Just circles, no complex structure
   onNodeEnter: \enterSel attrs -> do

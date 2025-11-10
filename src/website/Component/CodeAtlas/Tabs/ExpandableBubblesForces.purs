@@ -40,7 +40,7 @@ forceLibrary = initialize
       , F.yVal 300.0
       ]
   , createLinkForce allNodes
-      [ F.distance 30.0
+      [ F.distanceVal 30.0
       , F.strengthVal 0.1  -- Weak link force - just hints at structure
       ]
   ]
