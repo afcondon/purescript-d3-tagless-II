@@ -307,12 +307,12 @@ initialize graphData declsData = do
         in baseRadius + padding
 
       forces =
-        [ createForce "manyBody-compact" (RegularForce ForceManyBody) allNodes [ F.strength (-50.0), F.theta 0.9, F.distanceMin 1.0 ]  -- Weak repulsion for compact
-        , createForce "manyBody-spotlight" (RegularForce ForceManyBody) allNodes [ F.strength (-150.0), F.theta 0.9, F.distanceMin 1.0 ]  -- Moderate repulsion for spotlight
-        , createForce "collision-compact" (RegularForce ForceCollide) allNodes [ F.radius compactCollisionRadius, F.strength 0.9, F.iterations 3.0 ]  -- Initial compact view
-        , createForce "collision-spotlight" (RegularForce ForceCollide) allNodes [ F.radius spotlightCollisionRadius, F.strength 0.9, F.iterations 3.0 ]  -- Spotlight mode
-        , createForce "center" (RegularForce ForceCenter) allNodes [ F.x 0.0, F.y 0.0, F.strength 0.2 ]
-        , createLinkForce Nothing [ F.distance 150.0, F.strength 0.3 ]  -- Weaker link force to reduce pulling
+        [ createForce "manyBody-compact" (RegularForce ForceManyBody) allNodes [ F.strengthVal (-50.0), F.thetaVal 0.9, F.distanceMinVal 1.0 ]  -- Weak repulsion for compact
+        , createForce "manyBody-spotlight" (RegularForce ForceManyBody) allNodes [ F.strengthVal (-150.0), F.thetaVal 0.9, F.distanceMinVal 1.0 ]  -- Moderate repulsion for spotlight
+        , createForce "collision-compact" (RegularForce ForceCollide) allNodes [ F.radiusVal compactCollisionRadius, F.strengthVal 0.9, F.iterationsVal 3.0 ]  -- Initial compact view
+        , createForce "collision-spotlight" (RegularForce ForceCollide) allNodes [ F.radiusVal spotlightCollisionRadius, F.strengthVal 0.9, F.iterationsVal 3.0 ]  -- Spotlight mode
+        , createForce "center" (RegularForce ForceCenter) allNodes [ F.xVal 0.0, F.yVal 0.0, F.strengthVal 0.2 ]
+        , createLinkForce Nothing [ F.distanceVal 150.0, F.strengthVal 0.3 ]  -- Weaker link force to reduce pulling
         ]
       activeForces = Set.fromFoldable [ "manyBody-compact", "collision-compact", "center", "links" ]  -- Start with compact forces
 

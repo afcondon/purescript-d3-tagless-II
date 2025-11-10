@@ -389,9 +389,9 @@ topologicalForceLibrary :: Map String Force
 topologicalForceLibrary = initialize [ forces.manyBodyWeak, forces.collision, forces.links ]
   where
     forces = {
-        manyBodyWeak: createForce "many body weak" (RegularForce ForceManyBody) allNodes [ F.strength (-15.0) ]
-      , collision:    createForce "collision"       (RegularForce ForceCollide)  allNodes [ F.radius 7.0 ]
-      , links:        createLinkForce Nothing [ F.distance 80.0 ]
+        manyBodyWeak: createForce "many body weak" (RegularForce ForceManyBody) allNodes [ F.strengthVal (-15.0) ]
+      , collision:    createForce "collision"       (RegularForce ForceCollide)  allNodes [ F.radiusVal 7.0 ]
+      , links:        createLinkForce Nothing [ F.distanceVal 80.0 ]
     }
 
 -- | Draw force-directed topological sort with nodes fixed to layers (fy positioning)
@@ -419,9 +419,9 @@ drawTopologicalForceDirected tasks selector = do
 
   -- Create forces array
   let forcesArray = [
-        createForce "many body weak" (RegularForce ForceManyBody) allNodes [ F.strength (-15.0) ]
-      , createForce "collision" (RegularForce ForceCollide) allNodes [ F.radius 7.0 ]
-      , createLinkForce Nothing [ F.distance 80.0 ]
+        createForce "many body weak" (RegularForce ForceManyBody) allNodes [ F.strengthVal (-15.0) ]
+      , createForce "collision" (RegularForce ForceCollide) allNodes [ F.radiusVal 7.0 ]
+      , createLinkForce Nothing [ F.distanceVal 80.0 ]
       ]
   let activeForces = Set.fromFoldable ["many body weak", "collision", "links"]
 
