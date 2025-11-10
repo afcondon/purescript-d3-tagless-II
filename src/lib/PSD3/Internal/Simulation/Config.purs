@@ -8,78 +8,77 @@ import Prelude (Unit, negate, ($), (<<<))
 import Unsafe.Coerce (unsafeCoerce)
 
 
-defaultForceRadialConfig       :: (Datum_ -> Index_ -> Number) -> Array (ChainableF Unit)
+defaultForceRadialConfig       :: forall d. (Datum_ -> Index_ -> Number) -> Array (ChainableF d)
 defaultForceRadialConfig r =
     [ radiusFn r, strengthVal 0.1, xVal 0.0, yVal 0.0 ]
 
-defaultForceManyConfig         :: Array (ChainableF Unit)
+defaultForceManyConfig         :: forall d. Array (ChainableF d)
 defaultForceManyConfig =
   [ strengthVal (-30.0), thetaVal 0.9, distanceMinVal 1.0, distanceMaxVal infinity ]
 
-defaultForceCenterConfig       :: Array (ChainableF Unit)
+defaultForceCenterConfig       :: forall d. Array (ChainableF d)
 defaultForceCenterConfig =
   [ xVal 0.0, yVal 0.0, strengthVal 1.0 ]
 
-defaultForceCollideConfig      :: (Datum_ -> Index_ -> Number) -> Array (ChainableF Unit)
+defaultForceCollideConfig      :: forall d. (Datum_ -> Index_ -> Number) -> Array (ChainableF d)
 defaultForceCollideConfig r =
   [ radiusFn r, strengthVal 1.0, iterationsVal 1.0 ]
 
-defaultForceXConfig            :: Array (ChainableF Unit)
+defaultForceXConfig            :: forall d. Array (ChainableF d)
 defaultForceXConfig =
   [ strengthVal 0.1, xVal 0.0 ]
 
-defaultForceYConfig            :: Array (ChainableF Unit)
+defaultForceYConfig            :: forall d. Array (ChainableF d)
 defaultForceYConfig =
   [ strengthVal 0.1, yVal 0.0 ]
 
 -- | ==================================================================================================
 -- | ========================= sugar for the various attributes of forces =============================
 -- | ==================================================================================================
--- Note: Force attributes work with Datum_ at runtime but use Unit as phantom type
+-- Note: Force attributes work with Datum_ at runtime
 -- We bypass the ToAttr typeclass and construct Attr directly using unsafeCoerce
 
-radiusFn :: (Datum_ -> Index_ -> Number) -> ChainableF Unit
+radiusFn :: forall d. (Datum_ -> Index_ -> Number) -> ChainableF d
 radiusFn fn = ForceT $ AttributeSetter "radius" $ NumberAttr $ FnI (unsafeCoerce fn)
 
-radiusVal :: Number -> ChainableF Unit
+radiusVal :: forall d. Number -> ChainableF d
 radiusVal n = ForceT $ AttributeSetter "radius" $ NumberAttr $ Static n
 
-strengthVal :: Number -> ChainableF Unit
+strengthVal :: forall d. Number -> ChainableF d
 strengthVal n = ForceT $ AttributeSetter "strength" $ NumberAttr $ Static n
 
-thetaVal :: Number -> ChainableF Unit
+thetaVal :: forall d. Number -> ChainableF d
 thetaVal n = ForceT $ AttributeSetter "theta" $ NumberAttr $ Static n
 
-distanceMinVal :: Number -> ChainableF Unit
+distanceMinVal :: forall d. Number -> ChainableF d
 distanceMinVal n = ForceT $ AttributeSetter "distanceMin" $ NumberAttr $ Static n
 
-distanceMaxVal :: Number -> ChainableF Unit
+distanceMaxVal :: forall d. Number -> ChainableF d
 distanceMaxVal n = ForceT $ AttributeSetter "distanceMax" $ NumberAttr $ Static n
 
-iterationsVal :: Number -> ChainableF Unit
+iterationsVal :: forall d. Number -> ChainableF d
 iterationsVal n = ForceT $ AttributeSetter "iterations" $ NumberAttr $ Static n
 
-xVal :: Number -> ChainableF Unit
+xVal :: forall d. Number -> ChainableF d
 xVal n = ForceT $ AttributeSetter "x" $ NumberAttr $ Static n
 
-yVal :: Number -> ChainableF Unit
+yVal :: forall d. Number -> ChainableF d
 yVal n = ForceT $ AttributeSetter "y" $ NumberAttr $ Static n
 
-fxVal :: Number -> ChainableF Unit
+fxVal :: forall d. Number -> ChainableF d
 fxVal n = ForceT $ AttributeSetter "fx" $ NumberAttr $ Static n
 
-fyVal :: Number -> ChainableF Unit
+fyVal :: forall d. Number -> ChainableF d
 fyVal n = ForceT $ AttributeSetter "fy" $ NumberAttr $ Static n
 
-distanceVal :: Number -> ChainableF Unit
+distanceVal :: forall d. Number -> ChainableF d
 distanceVal n = ForceT $ AttributeSetter "distance" $ NumberAttr $ Static n
 
 -- these next two are for specifying how a link should swizzle its "id" to an object reference
--- Note: These functions work with Datum_ at runtime, but ChainableF uses Unit as phantom type
--- since forces don't participate in typed phantom tracking
-numKey :: (Datum_ -> Number)  -> ChainableF Unit
+-- Note: These functions work with Datum_ at runtime
+numKey :: forall d. (Datum_ -> Number)  -> ChainableF d
 numKey fn = ForceT $ AttributeSetter "keyFn" $ NumberAttr $ Fn (unsafeCoerce fn)
 
-stringKey :: (Datum_ -> String) -> ChainableF Unit
+stringKey :: forall d. (Datum_ -> String) -> ChainableF d
 stringKey fn = ForceT $ AttributeSetter "keyFn" $ StringAttr $ Fn (unsafeCoerce fn)
 

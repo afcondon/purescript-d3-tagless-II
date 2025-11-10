@@ -148,7 +148,8 @@ type SceneConfig d attrs =
 
 -- | Create a default scene config with minimal settings
 -- | Usage: `defaultScene forceLibrary customAttrs`
-defaultScene :: forall d attrs. Map Label (Force Unit) -> attrs -> SceneConfig d attrs
+-- | Note: row is the row type for nodes, Force needs complete type D3_SimulationNode row
+defaultScene :: forall row attrs. Map Label (Force (D3_SimulationNode row)) -> attrs -> SceneConfig row attrs
 defaultScene forceLibrary attrs =
   { chooseNodes: const true                                  -- Show all nodes
   , linksShown: const false                                  -- Hide all links

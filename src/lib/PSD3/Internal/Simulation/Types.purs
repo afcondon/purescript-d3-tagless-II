@@ -33,7 +33,7 @@ newtype D3SimulationState_ d = SimState_ (D3SimulationStateRecord d)
 type D3SimulationStateRecord d = {
     handle_       :: D3Simulation_
   -- keeping the map of labels to forces enables functionality like "enableByLabel"
-  , forceLibrary  :: M.Map Label (Force Unit)
+  , forceLibrary  :: M.Map Label (Force d)
   -- , forceStatuses :: M.Map Label ForceStatus
   -- TODO perhaps by keeping tick functions here we can run simulation, tick by tick from PureScript
   , ticks         :: M.Map Label (Step D3Selection_ d)
@@ -64,10 +64,10 @@ _nullable = prism' notNull N.toMaybe
 _handle :: forall d r. Lens' { simulation :: D3SimulationState_ d | r } D3Simulation_
 _handle = _d3Simulation <<< _Newtype <<< prop (Proxy :: Proxy "handle_")
 
-_forceLibrary :: forall d r. Lens' { simulation :: D3SimulationState_ d | r } (M.Map Label (Force Unit))
+_forceLibrary :: forall d r. Lens' { simulation :: D3SimulationState_ d | r } (M.Map Label (Force d))
 _forceLibrary = _d3Simulation <<< _Newtype <<< prop (Proxy :: Proxy "forceLibrary")
 
-_force :: forall d r. String -> Lens' { simulation :: D3SimulationState_ d | r } (Maybe (Force Unit))
+_force :: forall d r. String -> Lens' { simulation :: D3SimulationState_ d | r } (Maybe (Force d))
 _force label = _forceLibrary <<< at label
 
 -- | given a list of forces to enable, ensure that those forces are enabled and all others disabled, no forces removed
@@ -146,7 +146,7 @@ _attributes = _Newtype <<< prop (Proxy :: Proxy "attributes")
 _force_ :: forall d. Lens' (Force d) D3ForceHandle_
 _force_ = _Newtype <<< prop (Proxy :: Proxy "force_")
 
-getStatusMap :: Map Label (Force Unit) -> Map Label ForceStatus
+getStatusMap :: forall d. Map Label (Force d) -> Map Label ForceStatus
 getStatusMap forceMap = fromFoldable $ (\f -> Tuple (view _name f) (view _status f)) <$> forceMap
 
 _filter :: forall d p. Profunctor p => Strong p => p (Maybe ForceFilter) (Maybe ForceFilter) -> p (Force d) (Force d)
@@ -233,7 +233,7 @@ instance Show LinkForceType where
 -- for example, two Halogen components won't _accidentally_ share one
 -- should be dropped later when we can be sure that isn't a problem
 -- needs POC with two sims in one page, sim continuing despite page change etc etc
-initialSimulationState :: forall d. Map Label (Force Unit) -> D3SimulationState_ d
+initialSimulationState :: forall d. Map Label (Force d) -> D3SimulationState_ d
 initialSimulationState forces = SimState_
    {  -- common state for all D3 Simulation
       handle_  : initSimulation_ defaultConfigSimulation keyIsID_

@@ -16,10 +16,10 @@ import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
 
 
-initialize   :: forall f. (Foldable f) => (Functor f) => f (Force Unit) -> Map Label (Force Unit)
+initialize   :: forall d f. (Foldable f) => (Functor f) => f (Force d) -> Map Label (Force d)
 initialize forces     = fromFoldable $ (\f -> Tuple (view _name f) f) <$> forces
 
-putStatusMap :: Map Label ForceStatus -> Map Label (Force Unit) -> Map Label (Force Unit)
+putStatusMap :: forall d. Map Label ForceStatus -> Map Label (Force d) -> Map Label (Force d)
 putStatusMap forceStatusMap forceMap = update <$> forceMap
   where
     update force =
@@ -33,7 +33,7 @@ showType =
     LinkForce      -> "linkForce"
     RegularForce f -> show f
 
-createForce :: Label -> ForceType -> Maybe ForceFilter -> Array (ChainableF Unit) -> Force Unit
+createForce :: forall d. Label -> ForceType -> Maybe ForceFilter -> Array (ChainableF d) -> Force d
 createForce l t f cs = Force {
     "type": t
   , name: l
@@ -43,7 +43,7 @@ createForce l t f cs = Force {
   , force_: createForce_ t
 }
 
-createLinkForce :: Maybe ForceFilter -> Array (ChainableF Unit) -> Force Unit
+createLinkForce :: forall d. Maybe ForceFilter -> Array (ChainableF d) -> Force d
 createLinkForce f cs = Force {
     "type": LinkForce
   , name: linksForceName_
@@ -53,16 +53,16 @@ createLinkForce f cs = Force {
   , force_: createForce_ LinkForce
 }
 
-disableForce :: Force Unit -> Force Unit
+disableForce :: forall d. Force d -> Force d
 disableForce = set _status ForceDisabled
 
-enableForce :: Force Unit -> Force Unit
+enableForce :: forall d. Force d -> Force d
 enableForce = set _status ForceActive
 
-toggleForce :: Force Unit -> Force Unit
+toggleForce :: forall d. Force d -> Force d
 toggleForce = over _status toggleForceStatus
 
-disableByLabels :: D3Simulation_ -> Array Label -> Force Unit -> Force Unit
+disableByLabels :: forall d. D3Simulation_ -> Array Label -> Force d -> Force d
 disableByLabels simulation labels force =
   if (view _name force) `elem` labels
   then do
@@ -70,7 +70,7 @@ disableByLabels simulation labels force =
     disableForce force
   else force
 
-enableByLabels :: D3Simulation_ -> Array Label -> Force Unit -> Force Unit
+enableByLabels :: forall d. D3Simulation_ -> Array Label -> Force d -> Force d
 enableByLabels simulation labels force =
   if (view _name force) `elem` labels
   then do
@@ -78,7 +78,7 @@ enableByLabels simulation labels force =
     enableForce force
   else force
 
-enableOnlyTheseLabels :: D3Simulation_ -> Array Label -> Force Unit -> Force Unit
+enableOnlyTheseLabels :: forall d. D3Simulation_ -> Array Label -> Force d -> Force d
 enableOnlyTheseLabels simulation labels force =
   if (view _name force) `elem` labels
   then do
@@ -88,16 +88,16 @@ enableOnlyTheseLabels simulation labels force =
     let _ = removeForceFromSimulation force simulation
     disableForce force
 
-updateForceInSimulation :: D3Simulation_ -> Force Unit -> D3Simulation_
+updateForceInSimulation :: forall d. D3Simulation_ -> Force d -> D3Simulation_
 updateForceInSimulation simulation force = do
     let f = unwrap force
-    let _ = (\a -> setForceAttr f.force_ f.filter (unwrap a)) <$> f.attributes -- side-effecting function that sets force's attributes
+    let _ = (\a -> setForceAttr f.force_ f.filter a) <$> f.attributes -- side-effecting function that sets force's attributes
     case f.status of
       ForceActive -> putForceInSimulation force simulation
       ForceDisabled -> removeForceFromSimulation force simulation
     -- CustomForce   -> simulation_ -- REVIEW not implemented or even designed yet
 
-putForceInSimulation :: Force Unit -> D3Simulation_ -> D3Simulation_
+putForceInSimulation :: forall d. Force d -> D3Simulation_ -> D3Simulation_
 putForceInSimulation (Force force) simulation_ = do
   case force.type of
     -- CustomForce   -> simulation_ -- REVIEW not implemented or even designed yet
@@ -106,7 +106,7 @@ putForceInSimulation (Force force) simulation_ = do
     LinkForce      -> putForceInSimulation_ simulation_ force.name force.force_ -- FIXME need to reload the links if this is just a toggle
 
 
-removeForceFromSimulation :: Force Unit -> D3Simulation_ -> D3Simulation_
+removeForceFromSimulation :: forall d. Force d -> D3Simulation_ -> D3Simulation_
 removeForceFromSimulation (Force force) simulation_ = do
   case force.type of
     -- CustomForce   -> simulation_ -- REVIEW not implemented or even designed yet
@@ -172,7 +172,7 @@ createRegularForce_ = case _ of
   ForceRadial               -> forceRadial_    unit
 
 -- TODO at present there is no type checking on what forces have which attrs settable, see comment above
-setForceAttr :: D3ForceHandle_ -> Maybe ForceFilter -> AttributeSetter Datum_ -> D3ForceHandle_
+setForceAttr :: forall d. D3ForceHandle_ -> Maybe ForceFilter -> AttributeSetter d -> D3ForceHandle_
 setForceAttr force_ maybeFilter (AttributeSetter label attr) = do
   -- let attr' = unboxAttr attr
   case label of
