@@ -44,14 +44,14 @@ import Data.Foldable (foldl)
 -- | - Applied to merged selections automatically
 type RenderCallbacks attrs sel m d = {
   -- Node rendering callbacks
-  onNodeEnter :: sel -> attrs -> m sel,   -- Populate enter selection, return it for merging
-  onNodeUpdate :: sel -> attrs -> m Unit, -- Update existing nodes in-place
-  onNodeExit :: sel -> m Unit,            -- Clean up exiting nodes
+  onNodeEnter :: sel d -> attrs -> m (sel d),   -- Populate enter selection, return it for merging
+  onNodeUpdate :: sel d -> attrs -> m Unit,     -- Update existing nodes in-place
+  onNodeExit :: sel d -> m Unit,                -- Clean up exiting nodes
 
   -- Link rendering callbacks
-  onLinkEnter :: sel -> attrs -> m sel,   -- Populate enter selection, return it for merging
-  onLinkUpdate :: sel -> attrs -> m Unit, -- Update existing links in-place
-  onLinkExit :: sel -> m Unit,            -- Clean up exiting links
+  onLinkEnter :: sel d -> attrs -> m (sel d),   -- Populate enter selection, return it for merging
+  onLinkUpdate :: sel d -> attrs -> m Unit,     -- Update existing links in-place
+  onLinkExit :: sel d -> m Unit,                -- Clean up exiting links
 
   -- Tick function attributes (applied to merged selections)
   nodeTickAttrs :: attrs -> Array (SelectionAttribute d),
@@ -152,17 +152,17 @@ type DeclarativeUpdateConfig d =
 -- | Note: The user NEVER manually filters links. The library does it automatically
 -- | by extracting node IDs and filtering links to only connect visible nodes.
 -- | This makes the "filtered nodes + all links" bug impossible.
-genericUpdateSimulation :: forall d attrs sel m.
+genericUpdateSimulation :: forall d dataRow attrs sel m.
   Monad m =>
   SelectionM sel m =>
   SimulationM2 sel m =>
   { nodes :: Maybe (sel d), links :: Maybe (sel d) } ->
   Element ->                                         -- Node element type
   Element ->                                         -- Link element type
-  DeclarativeUpdateConfig d ->                       -- Declarative configuration
+  DeclarativeUpdateConfig dataRow ->                 -- Declarative configuration (uses Row Type)
   (Datum_ -> Index_) ->                              -- Key function
   attrs ->                                           -- Visualization attributes
-  RenderCallbacks attrs sel m d ->                   -- Render callbacks
+  RenderCallbacks attrs sel m d ->                   -- Render callbacks (uses Type)
   m Unit
 genericUpdateSimulation { nodes: Just nodesGroup, links: Just linksGroup }
                         nodeElement linkElement config keyFn attrs callbacks = do
