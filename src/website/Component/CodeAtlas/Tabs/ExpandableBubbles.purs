@@ -352,7 +352,7 @@ initialize graphData declsData = do
 updateGraph :: forall row m.
   Bind m =>
   MonadEffect m =>
-  MonadState { simulation :: D3SimulationState_ | row } m =>
+  MonadState { simulation :: D3SimulationState_ ExpandableModuleNode | row } m =>
   SelectionM D3Selection_ m =>
   SimulationM2 D3Selection_ m =>
   { nodesGroup :: D3Selection_

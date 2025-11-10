@@ -42,7 +42,7 @@ isProjectModule (D3SimNode node) = case node.nodetype of
 
 -- | Full-screen render for Spago page
 render :: forall m.
-  State -> HH.HTML (ComponentSlot () m Action) Action
+  State -> HH.HTML (ComponentSlot () m (Action SpagoSimNode)) (Action SpagoSimNode)
 render state =
   HH.div
       [ HP.classes [ HH.ClassName "fullscreen-container", HH.ClassName "spago-fullscreen", HH.ClassName "page-with-watermark" ] ]

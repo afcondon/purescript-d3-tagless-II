@@ -17,7 +17,7 @@ import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, SimVariable(..
 import PSD3.Internal.Zoom (ScaleExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, on, setAttributes, simpleJoin)
 import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, start, update)
-import PSD3.Data.Node (D3Link_Swizzled, D3SimNode(..), D3_SimulationNode)
+import PSD3.Data.Node (D3Link_Swizzled, D3_SimulationNode(..))
 import PSD3.Shared.ZoomableViewbox (zoomableSVG)
 import Data.Int (toNumber)
 import Data.Map as Map
