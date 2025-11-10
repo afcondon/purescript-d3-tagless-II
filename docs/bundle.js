@@ -37392,6 +37392,7 @@
       ;
       if (config.nodeSize instanceof Nothing) {
         var extents = findExtents(tree1)(tree1)(tree1)(tree1);
+        var tx = -(extents.left.x + extents.right.x) / 2;
         var s = (function() {
           var $92 = extents.left.x === extents.right.x;
           if ($92) {
@@ -37400,7 +37401,7 @@
           ;
           return config.separation(extents.left)(extents.right) / 2;
         })();
-        var tx = s - extents.left.x;
+        var treeWidth = extents.right.x - extents.left.x + 2 * s;
         var ky = config.size.height / (function() {
           var $93 = extents.bottom.depth === 0;
           if ($93) {
@@ -37409,11 +37410,11 @@
           ;
           return toNumber(extents.bottom.depth);
         })();
-        var kx = config.size.width / (extents.right.x + s + tx);
+        var kx = config.size.width / treeWidth;
         return scaleNode(tx)(kx)(ky)(tree1);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 522, column 3 - line 541, column 33): " + [config.nodeSize.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 522, column 3 - line 547, column 33): " + [config.nodeSize.constructor.name]);
     };
   };
   var extractTreeNode = function(nodes) {

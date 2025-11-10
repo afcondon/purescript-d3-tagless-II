@@ -534,8 +534,14 @@ scaleToFit config tree =
         s = if leftNode.x == rightNode.x
               then 1.0
               else config.separation extents.left extents.right / 2.0
-        tx = s - leftNode.x
-        kx = config.size.width / (rightNode.x + s + tx)
+
+        -- Center the tree: translate so the midpoint of left and right is at center
+        -- This keeps the root centered above its children
+        tx = -(leftNode.x + rightNode.x) / 2.0
+
+        -- Width spans from left to right, accounting for separation margins
+        treeWidth = (rightNode.x - leftNode.x) + 2.0 * s
+        kx = config.size.width / treeWidth
         ky = config.size.height / (if bottomNode.depth == 0 then 1.0 else toNumber bottomNode.depth)
 
       in scaleNode tx kx ky tree
