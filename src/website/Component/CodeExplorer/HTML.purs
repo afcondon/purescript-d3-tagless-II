@@ -88,7 +88,7 @@ renderSimState state =
         [ HH.text $ "Nodes: " <> show (length $ getStagingNodes state)]
     ]
 
-renderSimControls :: forall p. State -> HH.HTML p Action
+renderSimControls :: forall p. State -> HH.HTML p (Action SpagoSimNode)
 renderSimControls state = do
   let
     params = getSimulationVariables state

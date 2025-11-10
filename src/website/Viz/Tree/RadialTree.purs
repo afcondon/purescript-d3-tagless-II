@@ -45,14 +45,14 @@ rotateRadialLabels d =
 -- | TreeType parameter controls Tidy vs Dendrogram layout
 -- Snippet_Start
 -- Name: RadialTree
-drawRadialTree :: forall m.
+drawRadialTree :: forall m d.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
   TreeType ->          -- TidyTree or Dendrogram
   TreeJson_ ->         -- The tree data
-  Selector D3Selection_ -> -- Where to draw (e.g., "div.viz")
-  m D3Selection_
+  Selector (D3Selection_ d) -> -- Where to draw (e.g., "div.viz")
+  m (D3Selection_ d)
 drawRadialTree treeType json selector = do
   -- Get window dimensions
   Tuple w h <- liftEffect getWindowWidthHeight

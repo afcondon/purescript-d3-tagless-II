@@ -43,7 +43,7 @@ foreign import treeLinkKey_ :: Datum_ -> Index_
 foreign import selectionSize_ :: forall a. a -> Int
 
 -- Debug helper to inspect container contents
-foreign import debugInspectContainer_ :: D3Selection_ -> String -> Int
+foreign import debugInspectContainer_ :: forall d. D3Selection_ d -> String -> Int
 
 -- Debug helper to log node coordinates
 foreign import debugLogCoordinates_ :: forall a. a -> String -> Int

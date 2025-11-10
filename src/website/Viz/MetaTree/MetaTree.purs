@@ -46,8 +46,8 @@ drawTree treeModel = liftEffect $ do
 -- Name: MetaTreeDraw
 -- | "script" to produce the documentation-ready rendering of another script's structure
 -- | (could also be the basis for graphical editor of scripts / trees)
-draw :: forall m selection. Bind m => SelectionM selection m => 
-  Tuple Number Number -> MetaTreeNode -> m selection
+draw :: forall m selection d. Bind m => SelectionM selection m =>
+  Tuple Number Number -> MetaTreeNode -> m (selection d)
 draw (Tuple w h) tree = do
   let 
     -- configure dimensions
