@@ -48,14 +48,14 @@ type RenderCallbacks attrs sel m d = {
   onNodeUpdate :: sel d -> attrs -> m Unit,     -- Update existing nodes in-place
   onNodeExit :: sel d -> m Unit,                -- Clean up exiting nodes
 
-  -- Link rendering callbacks
-  onLinkEnter :: sel d -> attrs -> m (sel d),   -- Populate enter selection, return it for merging
-  onLinkUpdate :: sel d -> attrs -> m Unit,     -- Update existing links in-place
-  onLinkExit :: sel d -> m Unit,                -- Clean up exiting links
+  -- Link rendering callbacks (links are Datum_ after swizzling)
+  onLinkEnter :: sel Datum_ -> attrs -> m (sel Datum_),   -- Populate enter selection, return it for merging
+  onLinkUpdate :: sel Datum_ -> attrs -> m Unit,           -- Update existing links in-place
+  onLinkExit :: sel Datum_ -> m Unit,                      -- Clean up exiting links
 
   -- Tick function attributes (applied to merged selections)
   nodeTickAttrs :: attrs -> Array (SelectionAttribute d),
-  linkTickAttrs :: Array (SelectionAttribute d)
+  linkTickAttrs :: Array (SelectionAttribute Datum_)       -- Links are Datum_ after swizzling
 }
 
 -- | Fully declarative update configuration
@@ -156,7 +156,7 @@ genericUpdateSimulation :: forall dataRow attrs sel m.
   Monad m =>
   SelectionM sel m =>
   SimulationM2 sel m =>
-  { nodes :: Maybe (sel (D3_SimulationNode dataRow)), links :: Maybe (sel (D3_SimulationNode dataRow)) } ->
+  { nodes :: Maybe (sel (D3_SimulationNode dataRow)), links :: Maybe (sel Datum_) } ->
   Element ->                                         -- Node element type
   Element ->                                         -- Link element type
   DeclarativeUpdateConfig dataRow ->                 -- Declarative configuration (uses Row Type)
