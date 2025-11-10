@@ -9,9 +9,9 @@ import PSD3.Internal.Simulation.Forces (createForce, createLinkForce, initialize
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, ForceType(..), RegularForceType(..), allNodes, initialSimulationState)
 
 -- | Component state for FP FTW examples
-type State =
+type State d =
   { currentExample :: String  -- Which example is currently selected
-  , simulation :: D3SimulationState_  -- D3 force simulation state
+  , simulation :: D3SimulationState_ d  -- D3 force simulation state
   }
 
 -- | Forces configuration for LesMis topological visualization
@@ -25,7 +25,7 @@ topologicalForceLibrary = initialize [ forces.manyBodyWeak, forces.collision, fo
     }
 
 -- | Initial state
-initialState :: forall i. i -> State
+initialState :: forall d i. i -> State d
 initialState _ =
   { currentExample: "intro"
   , simulation: initialSimulationState topologicalForceLibrary
