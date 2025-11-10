@@ -4,12 +4,12 @@ import Prelude
 
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import PSD3.Internal.Types (D3Selection_, D3Simulation_)
-import PSD3.Internal.FFI (defaultLinkTick_, defaultNodeTick_, disableTick_, getLinksFromSimulation_, getNodes_, onTick_)
-import PSD3.Internal.Selection.Types (applySelectionAttributeD3)
+import PSD3.Internal.FFI (d3AttachZoom_, d3AttachZoomDefaultExtent_, defaultLinkTick_, defaultNodeTick_, disableDrag_, disableTick_, getLinksFromSimulation_, getNodes_, onTick_, simulationDrag_, simdrag_)
+import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
 import PSD3.Internal.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionMergeSelections, selectionModifySelection, selectionNestedJoin, selectionOn, selectionOpenSelection, selectionSelectUnder, selectionUpdateJoin)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, Step(..), SimVariable(..), _handle, _name)
 import PSD3.Internal.Attributes.Instances (Label)
-import PSD3.Internal.Simulation.Functions (simulationActualizeForces, simulationMergeNewData, simulationOn, simulationSetLinks, simulationSetLinksFromSelection, simulationSetNodes, simulationSetNodesFromSelection, simulationSetVariable, simulationStart, simulationStop)
+import PSD3.Internal.Simulation.Functions (simulationActualizeForces, simulationMergeNewData, simulationSetLinks, simulationSetLinksFromSelection, simulationSetNodes, simulationSetNodesFromSelection, simulationSetVariable, simulationStart, simulationStop)
 import PSD3.Internal.Sankey.Types (SankeyLayoutState_)
 import PSD3.Internal.Sankey.Functions (sankeySetData, sankeySetDataWithConfig)
 import PSD3.Capabilities.Selection (class SelectionM)
@@ -25,6 +25,7 @@ import Data.Traversable (sequence)
 import Type.Proxy (Proxy(..))
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..), fst, snd)
+import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff, liftAff)
@@ -96,11 +97,11 @@ runWithD3_Simulation state_T = do
     state' <- liftAff $ exec_D3M_Simulation state state_T
     modify_ (\_ -> state')
 
-evalEffectSimulation :: forall m a row.
+evalEffectSimulation :: forall m a d row.
   Bind m =>
-  MonadState { simulation :: D3SimulationState_ | row } m =>
+  MonadState { simulation :: D3SimulationState_ d | row } m =>
   MonadAff m =>
-  D3SimM row D3Selection_ a -> m a
+  D3SimM row d D3Selection_ a -> m a
 evalEffectSimulation state_T = do
     state <- get
     (Tuple a state') <- liftAff $ run_D3M_Simulation state state_T
@@ -119,14 +120,38 @@ derive newtype instance monadStateD3SimM  :: MonadState  { simulation :: D3Simul
 instance showD3SimM :: Show (D3SimM row d D3Selection_ a) where
   show x = "D3SimM"
 
-instance SelectionM D3Selection_ (D3SimM row d D3Selection_) where
+instance SelectionM D3Selection_ (D3SimM stateRow d D3Selection_) where
   appendTo s_        = selectionAppendElement s_
   selectUnder s_     = selectionSelectUnder s_
   attach selector    = selectionAttach selector
   filterSelection s_ = selectionFilterSelection s_
   mergeSelections s_ = selectionMergeSelections s_
   setAttributes s_   = selectionModifySelection s_
-  on s_              = simulationOn s_ -- NB simulation "on" is handled differently from selectionOn
+  on s_ b            = case b of -- Inline simulationOn to avoid polymorphic constraint issues
+    Drag drag -> do
+      handle <- use _handle
+      let _ = case drag of
+                DefaultDrag      -> simulationDrag_ "default" (unsafeCoerce s_) handle simdrag_
+                NoDrag           -> disableDrag_ (unsafeCoerce s_)
+                (CustomDrag name fn)  -> simulationDrag_ name (unsafeCoerce s_) handle fn
+      pure unit
+    Zoom config -> do
+      let (ScaleExtent smallest largest) = config.scale
+          _ = case config.extent of
+                DefaultZoomExtent ->
+                  d3AttachZoomDefaultExtent_ (unsafeCoerce s_) {
+                    scaleExtent: [ smallest, largest ]
+                  , name  : config.name
+                  , target: unsafeCoerce config.target
+                  }
+                (ZoomExtent ze)   ->
+                  d3AttachZoom_ (unsafeCoerce s_) {
+                    extent     : [ [ ze.left, ze.top ], [ ze.right, ze.bottom ] ]
+                  , scaleExtent: [ smallest, largest ]
+                  , name  : config.name
+                  , target: unsafeCoerce config.target
+                  }
+      pure unit
   openSelection s_   = selectionOpenSelection s_
   simpleJoin s_      = selectionJoin s_
   nestedJoin s_      = selectionNestedJoin s_

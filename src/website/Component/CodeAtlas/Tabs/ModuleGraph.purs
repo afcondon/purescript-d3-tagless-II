@@ -231,7 +231,7 @@ modulesToGridLayout nodes =
 transitionToGridLayout :: forall row m.
   Bind m =>
   MonadEffect m =>
-  MonadState { simulation :: D3SimulationState_ | row } m =>
+  MonadState { simulation :: D3SimulationState_ ModuleNode | row } m =>
   SimulationM2 D3Selection_ m =>
   Boolean -> m Unit
 transitionToGridLayout toGrid = do
@@ -299,7 +299,7 @@ modulesToLinks modules =
 drawModuleGraph :: forall row m.
   Bind m =>
   MonadEffect m =>
-  MonadState { simulation :: D3SimulationState_ | row } m =>
+  MonadState { simulation :: D3SimulationState_ ModuleNode | row } m =>
   SelectionM D3Selection_ m =>
   SimulationM2 D3Selection_ m =>
   ModuleGraphData -> String -> m Unit

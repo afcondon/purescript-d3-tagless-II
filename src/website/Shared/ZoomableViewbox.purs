@@ -25,12 +25,12 @@ type ZoomableSVGConfig = {
 -- | Add an SVG with standard zoom and pan behavior
 -- | Uses DefaultZoomExtent so D3 automatically uses the viewBox for zoom coordinates
 -- | It returns the inner <g> that it adds. Your contents should go in this group
-zoomableSVG :: forall selection m.
+zoomableSVG :: forall selection d m.
   MonadEffect m =>
   SelectionM selection m =>
-  selection -> -- the attach point
+  selection d -> -- the attach point
   ZoomableSVGConfig ->
-  m { svg :: selection, zoomGroup :: selection }
+  m { svg :: selection d, zoomGroup :: selection d }
 zoomableSVG root config = do
   svg       <- appendTo root Svg [ viewBox config.minX config.minY config.width config.height, classed config.svgClass ]
   zoomGroup <- appendTo svg  Group [ classed config.innerClass ]

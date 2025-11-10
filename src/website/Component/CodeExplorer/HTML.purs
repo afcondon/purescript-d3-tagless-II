@@ -75,7 +75,7 @@ render state =
            else HH.text ""
       ]
 
-renderSimState :: forall p. State -> HH.HTML p Action
+renderSimState :: forall p. State -> HH.HTML p (Action SpagoSimNode)
 renderSimState state =
   HH.div
     [ HP.classes [ HH.ClassName "spago-sim-state" ]]
