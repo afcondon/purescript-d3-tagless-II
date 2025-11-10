@@ -29,3 +29,18 @@ foreign import data SankeyLink_ :: Type
 -- Initial state for Sankey layout
 -- This will be created by the FFI layer
 foreign import initialSankeyLayoutState_ :: SankeyLayoutState_
+
+-- Property accessors for SankeyNode_
+foreign import nodeX0_ :: SankeyNode_ -> Number
+foreign import nodeY0_ :: SankeyNode_ -> Number
+foreign import nodeX1_ :: SankeyNode_ -> Number
+foreign import nodeY1_ :: SankeyNode_ -> Number
+foreign import nodeValue_ :: SankeyNode_ -> Number
+foreign import nodeDepth_ :: SankeyNode_ -> Int
+foreign import nodeName_ :: SankeyNode_ -> String
+
+-- Property accessors for SankeyLink_
+foreign import linkValue_ :: SankeyLink_ -> Number
+foreign import linkWidth_ :: SankeyLink_ -> Number
+foreign import linkSourceIndex_ :: SankeyLink_ -> Int
+foreign import linkTargetIndex_ :: SankeyLink_ -> Int

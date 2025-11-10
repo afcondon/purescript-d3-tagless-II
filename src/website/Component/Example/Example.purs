@@ -37,7 +37,6 @@ import PSD3.Capabilities.Selection as PSD3Selection
 import PSD3.Capabilities.Simulation as PSD3Simulation
 import Halogen.HTML.Events as HE
 import D3.Viz.LesMiserables.File (readGraphFromFileContents)
-import D3.Viz.Sankey.Model (energyData)
 import D3.Viz.SankeyDiagram as Sankey
 import D3.Viz.ThreeLittleCircles as ThreeLittleCircles
 import D3.Viz.ThreeLittleCirclesTransition as CirclesTransition
@@ -266,9 +265,12 @@ handleAction = case _ of
         pure unit
 
       "sankey-diagram" -> do
-        runWithD3_Sankey do
-          Sankey.draw energyData "#example-viz"
-        pure unit
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/energy.csv"
+        case result of
+          Left err -> log "Sankey: Failed to load data"
+          Right response -> do
+            _ <- H.liftEffect $ eval_D3M $ Sankey.draw response.body "#example-viz"
+            pure unit
 
       "map-quartet" -> do
         quartet <- H.liftEffect MapQuartet.generateMapQuartet
