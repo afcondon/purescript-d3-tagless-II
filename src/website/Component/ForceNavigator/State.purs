@@ -28,7 +28,7 @@ type State = {
   , eventListener :: Maybe (HS.Listener Action)  -- Component infrastructure, not scene config
 }
 
-initialState :: forall d. M.Map Label (Force d) -> State
+initialState :: M.Map Label (Force NavigationSimNode) -> State
 initialState forceLibrary = {
     simulation: initialSimulationState forceLibrary
   , expandedNodes: Set.empty  -- Start with no sections expanded (just center + sections visible)

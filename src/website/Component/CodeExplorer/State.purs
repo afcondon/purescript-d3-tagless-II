@@ -191,7 +191,7 @@ setActiveForces = SimState.setActiveForces
 setCssClass :: String -> State -> State
 setCssClass = SimState.setCssClass
 
-setSceneAttributes :: SpagoSceneAttributes -> State -> State
+setSceneAttributes :: SpagoSceneAttributes SpagoSimNode -> State -> State
 setSceneAttributes = SimState.setSceneAttributes
 
 setNodeInitializers :: Array (Array SpagoSimNode -> Array SpagoSimNode) -> State -> State

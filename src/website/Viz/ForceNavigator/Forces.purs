@@ -57,7 +57,7 @@ forceLibrary = initialize [
     -- Collision force to prevent overlap
   , createForce "collision" (RegularForce ForceCollide) allNodes [
         F.strengthVal 1.0
-      , F.radiusFn collisionRadius
+      , F.radiusFn (\d _ -> collisionRadius d)
       ]
 
     -- Link force to connect parent-child nodes
