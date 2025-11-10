@@ -249,7 +249,7 @@ renderTableForces state  =
           [ HH.text $ showForceFilter force.filter ]
       ]
 
-slider :: { var :: Number -> SimVariable, id :: String, min :: Number, max :: Number, step :: Number, value :: Number } -> Array (HP.IProp _ Action)
+slider :: { var :: Number -> SimVariable, id :: String, min :: Number, max :: Number, step :: Number, value :: Number } -> Array (HP.IProp _ (Action SpagoSimNode))
 slider config = do
   let
     toScale :: String -> Number

@@ -105,7 +105,7 @@ simulationActualizeForces activeForces = do
 listActiveForces :: Map Label ForceStatus -> Array Label
 listActiveForces forceMap = fst <$> (filter (\(Tuple n s) -> s == ForceActive) $ toUnfoldable forceMap)
 
-listActiveForcesInLibrary :: Map Label Force -> Array Label
+listActiveForcesInLibrary :: forall d. Map Label (Force d) -> Array Label
 listActiveForcesInLibrary forceMap = fst <$> (filter (\(Tuple n f) -> (view _status f) == ForceActive) $ toUnfoldable forceMap)
 
 simulationUpdateForceStatuses :: forall d m row.
