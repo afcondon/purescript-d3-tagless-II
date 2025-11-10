@@ -172,7 +172,7 @@ simulationPreservePositions ::
   forall simStateType dataRow m row.
   Bind m =>
   MonadState { simulation :: D3SimulationState_ simStateType | row } m =>
-  D3Selection_ dataRow ->
+  D3Selection_ (D3_SimulationNode dataRow) ->
   RawData dataRow ->
   (Datum_ -> Index_) ->
   m (Array (D3_SimulationNode dataRow))
