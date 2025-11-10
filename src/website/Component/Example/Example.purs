@@ -21,6 +21,12 @@ import D3.Viz.ScatterPlot as ScatterPlot
 import D3.Viz.FpFtw.MapQuartet as MapQuartet
 import D3.Viz.FpFtw.TopologicalSort as TopologicalSort
 import D3.Viz.Hierarchies as Hierarchies
+import D3.Viz.TreeViz as TreeViz
+import D3.Viz.TreemapViz as TreemapViz
+import D3.Viz.PackViz as PackViz
+import D3.Viz.ClusterViz as ClusterViz
+import D3.Viz.PartitionViz as PartitionViz
+import D3.Viz.SunburstViz as SunburstViz
 import D3.Viz.LesMiserables as LesMis
 import D3.Viz.LesMiserablesGUP as LesMisGUP
 import D3.Viz.LesMiserablesGUP.Model (LesMisRawModel)
@@ -53,7 +59,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Data.Tree (TreeType(..))
 import PSD3.Internal.FFI (linksForceName_)
-import PSD3.Internal.Hierarchical (getTreeViaAJAX)
+import PSD3.Internal.Hierarchical (getTreeViaAJAX, readJSON_)
 import PSD3.Internal.Sankey.Types (SankeyLayoutState_, initialSankeyLayoutState_)
 import PSD3.Internal.Simulation.Config as F
 import PSD3.Internal.Simulation.Forces (createForce, createLinkForce, initialize)
@@ -178,20 +184,58 @@ handleAction = case _ of
             _ <- H.liftEffect $ eval_D3M $ AnimatedRadialTree.drawAnimatedRadialTree TidyTree treeData "#example-viz"
             pure unit
 
+      "tree-purescript" -> do
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare.json"
+        case result of
+          Left err -> log "Tree (PureScript): Failed to load data"
+          Right response -> do
+            let blessed = readJSON_ response.body
+            _ <- H.liftEffect $ eval_D3M $ TreeViz.draw blessed "#example-viz"
+            pure unit
+
       "treemap" -> do
-        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare.json"
         case result of
           Left err -> log "Treemap: Failed to load data"
-          Right treeData -> do
-            _ <- H.liftAff $ Hierarchies.drawTreemap treeData "#example-viz"
+          Right response -> do
+            let blessed = readJSON_ response.body
+            _ <- H.liftEffect $ eval_D3M $ TreemapViz.draw blessed "#example-viz"
+            pure unit
+
+      "pack-purescript" -> do
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare.json"
+        case result of
+          Left err -> log "Pack (PureScript): Failed to load data"
+          Right response -> do
+            let blessed = readJSON_ response.body
+            _ <- H.liftEffect $ eval_D3M $ PackViz.draw blessed "#example-viz"
+            pure unit
+
+      "cluster-purescript" -> do
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare.json"
+        case result of
+          Left err -> log "Cluster (PureScript): Failed to load data"
+          Right response -> do
+            let blessed = readJSON_ response.body
+            _ <- H.liftEffect $ eval_D3M $ ClusterViz.draw blessed "#example-viz"
             pure unit
 
       "icicle" -> do
-        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare.json"
         case result of
-          Left err -> log "Icicle: Failed to load data"
-          Right treeData -> do
-            _ <- H.liftAff $ Hierarchies.drawIcicle treeData "#example-viz"
+          Left err -> log "Partition (Icicle): Failed to load data"
+          Right response -> do
+            let blessed = readJSON_ response.body
+            _ <- H.liftEffect $ eval_D3M $ PartitionViz.draw blessed "#example-viz"
+            pure unit
+
+      "sunburst-purescript" -> do
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare.json"
+        case result of
+          Left err -> log "Sunburst (PureScript): Failed to load data"
+          Right response -> do
+            let blessed = readJSON_ response.body
+            _ <- H.liftEffect $ eval_D3M $ SunburstViz.draw blessed "#example-viz"
             pure unit
 
       "lesmis-force" -> do
@@ -438,8 +482,12 @@ allExampleIds =
   , "horizontal-tree"
   , "radial-tree"
   , "animated-radial-tree"
+  , "tree-purescript"
   , "treemap"
+  , "pack-purescript"
+  , "cluster-purescript"
   , "icicle"
+  , "sunburst-purescript"
   , "lesmis-force"
   , "lesmisgup"
   , "topological-sort"
@@ -496,10 +544,18 @@ getExampleMeta id = case id of
     { id, name: "Radial Tree", description: "Circular hierarchical tree layout", category: "Hierarchies" }
   "animated-radial-tree" -> Just
     { id, name: "Animated Radial Tree", description: "Transitions between tree layouts with smooth animations", category: "Transitions" }
+  "tree-purescript" -> Just
+    { id, name: "Tree (Pure PureScript)", description: "Node-link tree layout using pure PureScript implementation (Reingold-Tilford algorithm)", category: "Hierarchies" }
   "treemap" -> Just
-    { id, name: "Treemap", description: "Space-filling hierarchical visualization using nested rectangles", category: "Hierarchies" }
+    { id, name: "Treemap (Pure PureScript)", description: "Space-filling hierarchical visualization using squarified tiling algorithm in pure PureScript", category: "Hierarchies" }
+  "pack-purescript" -> Just
+    { id, name: "Pack (Pure PureScript)", description: "Circle packing layout with iterative relaxation algorithm in pure PureScript", category: "Hierarchies" }
+  "cluster-purescript" -> Just
+    { id, name: "Cluster (Pure PureScript)", description: "Dendrogram with equal leaf depth using pure PureScript implementation", category: "Hierarchies" }
   "icicle" -> Just
-    { id, name: "Icicle Chart", description: "Hierarchical icicle/partition layout visualization", category: "Hierarchies" }
+    { id, name: "Partition/Icicle (Pure PureScript)", description: "Rectangular partition layout (icicle chart) with equal layer height in pure PureScript", category: "Hierarchies" }
+  "sunburst-purescript" -> Just
+    { id, name: "Sunburst (Pure PureScript)", description: "Radial partition layout with nested rings in pure PureScript", category: "Hierarchies" }
   "lesmis-force" -> Just
     { id, name: "Les Misérables Network", description: "Character co-occurrence force-directed graph with physics simulation", category: "Force-Directed" }
   "lesmisgup" -> Just
