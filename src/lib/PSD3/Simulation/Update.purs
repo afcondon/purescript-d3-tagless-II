@@ -152,17 +152,17 @@ type DeclarativeUpdateConfig d =
 -- | Note: The user NEVER manually filters links. The library does it automatically
 -- | by extracting node IDs and filtering links to only connect visible nodes.
 -- | This makes the "filtered nodes + all links" bug impossible.
-genericUpdateSimulation :: forall d dataRow attrs sel m.
+genericUpdateSimulation :: forall dataRow attrs sel m.
   Monad m =>
   SelectionM sel m =>
   SimulationM2 sel m =>
-  { nodes :: Maybe (sel d), links :: Maybe (sel d) } ->
+  { nodes :: Maybe (sel (D3_SimulationNode dataRow)), links :: Maybe (sel (D3_SimulationNode dataRow)) } ->
   Element ->                                         -- Node element type
   Element ->                                         -- Link element type
   DeclarativeUpdateConfig dataRow ->                 -- Declarative configuration (uses Row Type)
   (Datum_ -> Index_) ->                              -- Key function
   attrs ->                                           -- Visualization attributes
-  RenderCallbacks attrs sel m d ->                   -- Render callbacks (uses Type)
+  RenderCallbacks attrs sel m (D3_SimulationNode dataRow) ->  -- Render callbacks (uses complete Type)
   m Unit
 genericUpdateSimulation { nodes: Just nodesGroup, links: Just linksGroup }
                         nodeElement linkElement config keyFn attrs callbacks = do

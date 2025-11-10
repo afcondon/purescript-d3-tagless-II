@@ -181,13 +181,13 @@ simulationPreservePositions selection rawdata key = do
   pure updatedData
 
 simulationPreserveLinkReferences ::
-  forall d id m row.
+  forall simStateType dataRow id m row.
   Eq id =>
   Bind m =>
-  MonadState { simulation :: D3SimulationState_ d | row } m =>
-  D3Selection_ ->
+  MonadState { simulation :: D3SimulationState_ simStateType | row } m =>
+  D3Selection_ (D3_SimulationNode dataRow) ->
   Array D3Link_Unswizzled ->
-  Array (D3_SimulationNode d) ->
+  Array (D3_SimulationNode dataRow) ->
   (Datum_ -> Index_) ->
   m (Array D3Link_Unswizzled)
 simulationPreserveLinkReferences selection links nodes keyFn = do
