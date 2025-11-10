@@ -169,13 +169,13 @@ simulationShowForces = do
   pure $ intercalate "\n" $ showTuple <$> forceTuples
 
 simulationPreservePositions ::
-  forall d m row.
+  forall simStateType dataRow m row.
   Bind m =>
-  MonadState { simulation :: D3SimulationState_ d | row } m =>
-  D3Selection_ ->
-  RawData d ->
+  MonadState { simulation :: D3SimulationState_ simStateType | row } m =>
+  D3Selection_ dataRow ->
+  RawData dataRow ->
   (Datum_ -> Index_) ->
-  m (Array (D3_SimulationNode d))
+  m (Array (D3_SimulationNode dataRow))
 simulationPreservePositions selection rawdata key = do
   let updatedData = d3PreserveSimulationPositions_ selection rawdata.nodes key
   pure updatedData
