@@ -447,7 +447,7 @@ updateGraph { nodesGroup, linksGroup, nodes, links, inSpotlightMode } = do
   -- Set up tick functions for animation
   let translateNode :: Datum_ -> String
       translateNode d = "translate(" <> show (datum_.x d) <> "," <> show (datum_.y d) <> ")"
-  addTickFunction "nodes" $ Step mergedNodes [ transform' translateNode ]
+  addTickFunction "nodes" $ Step mergedNodes [ transform' (unsafeCoerce translateNode) ]
   addTickFunction "links" $ Step mergedLinks
     [ x1 (_.x <<< link_.source)
     , y1 (_.y <<< link_.source)
