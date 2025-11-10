@@ -355,8 +355,8 @@ updateGraph :: forall row m.
   MonadState { simulation :: D3SimulationState_ BubbleNode | row } m =>
   SelectionM D3Selection_ m =>
   SimulationM2 D3Selection_ m =>
-  { nodesGroup :: D3Selection_
-  , linksGroup :: D3Selection_
+  { nodesGroup :: D3Selection_ BubbleNode
+  , linksGroup :: D3Selection_ D3Link_Swizzled
   , nodes :: Array BubbleNode
   , links :: Array D3Link_Unswizzled
   , inSpotlightMode :: Boolean
