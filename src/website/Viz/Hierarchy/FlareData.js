@@ -4,7 +4,7 @@ export const getName = (node) => node.name || "";
 
 export const getValue = (node) => node.value || 0;
 
-export const getChildren = (node) => {
+export const getChildren_ = (node) => {
   if (node.children && Array.isArray(node.children) && node.children.length > 0) {
     return node.children;
   }

@@ -29906,11 +29906,16 @@
   // output/D3.Viz.FlareData/foreign.js
   var getName2 = (node) => node.name || "";
   var getValue = (node) => node.value || 0;
-  var getChildren = (node) => {
+  var getChildren_ = (node) => {
     if (node.children && Array.isArray(node.children) && node.children.length > 0) {
       return node.children;
     }
     return null;
+  };
+
+  // output/D3.Viz.FlareData/index.js
+  var getChildren = function($1) {
+    return toMaybe(getChildren_($1));
   };
 
   // output/PSD3.Layout.Hierarchy.Cluster/index.js
