@@ -7,7 +7,8 @@ import PSD3.Internal.Types (D3Selection_, D3Simulation_)
 import PSD3.Internal.FFI (defaultLinkTick_, defaultNodeTick_, disableTick_, getLinksFromSimulation_, getNodes_, onTick_)
 import PSD3.Internal.Selection.Types (applySelectionAttributeD3)
 import PSD3.Internal.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionMergeSelections, selectionModifySelection, selectionNestedJoin, selectionOn, selectionOpenSelection, selectionSelectUnder, selectionUpdateJoin)
-import PSD3.Internal.Simulation.Types (D3SimulationState_, Step(..), SimVariable(..), _handle, _name)
+import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, Step(..), SimVariable(..), _handle, _name)
+import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Simulation.Functions (simulationActualizeForces, simulationMergeNewData, simulationOn, simulationSetLinks, simulationSetLinksFromSelection, simulationSetNodes, simulationSetNodesFromSelection, simulationSetVariable, simulationStart, simulationStop)
 import PSD3.Internal.Sankey.Types (SankeyLayoutState_)
 import PSD3.Internal.Sankey.Functions (sankeySetData, sankeySetDataWithConfig)
@@ -132,10 +133,11 @@ instance SelectionM D3Selection_ (D3SimM row d D3Selection_) where
   updateJoin s_      = selectionUpdateJoin s_
 
 -- | Simplified SimulationM instance - record-based initialization
-instance SimulationM D3Selection_ (D3SimM row d D3Selection_) where
+instance SimulationM D3Selection_ (D3SimM stateRow d D3Selection_) where
   init config = do
     -- 1. Initialize force library in simulation state
-    let forcesMap = Map.fromFoldable $ config.forces <#> \f -> Tuple (view _name f) f
+    let forcesMap :: Map.Map Label (Force d)
+        forcesMap = Map.fromFoldable $ config.forces <#> \f -> Tuple (view _name f) (unsafeCoerce f)
     modify_ \state -> state { simulation = state.simulation # (_Newtype <<< prop (Proxy :: Proxy "forceLibrary")) .~ forcesMap }
 
     -- 2. Set up nodes first (must come before forces)
@@ -168,7 +170,7 @@ instance SimulationM D3Selection_ (D3SimM row d D3Selection_) where
                   unit
                 _ = onTick_ handle label makeTick
             pure unit
-    _ <- (sequence :: Array (D3SimM row d D3Selection_ Unit) -> D3SimM row d D3Selection_ (Array Unit)) $ Map.toUnfoldable config.ticks <#> \(Tuple label step) -> addTick label step
+    _ <- (sequence :: Array (D3SimM stateRow d D3Selection_ Unit) -> D3SimM stateRow d D3Selection_ (Array Unit)) $ Map.toUnfoldable config.ticks <#> \(Tuple label step) -> addTick label step
 
     -- 7. Return enhanced data for joining to DOM
     pure { nodes: nodesInSim, links: linksInSim }
