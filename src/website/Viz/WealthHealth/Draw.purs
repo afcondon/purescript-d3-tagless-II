@@ -188,10 +188,10 @@ updateVisualization chartGroup nations = do
 
 -- | Main draw function - creates structure once and returns update function
 -- | Following the GUP pattern
-draw :: forall m.
+draw :: forall m d.
   SelectionM D3Selection_ m =>
-  Selector (D3Selection_ Unit) ->
-  m (Array NationPoint -> m (D3Selection_ NationPoint))
+  Selector (D3Selection_ d) ->
+  m (Array Datum_ -> m (D3Selection_ Datum_))
 draw selector = do
   let config = defaultConfig
 

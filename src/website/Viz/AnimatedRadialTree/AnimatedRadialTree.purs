@@ -52,16 +52,16 @@ foreign import debugLogCoordinates_ :: forall a. a -> String -> Int
 radialRotate :: Number -> String
 radialRotate x = show $ (x * 180.0 / pi - 90.0)
 
-radialRotateCommon :: Datum_ -> String
-radialRotateCommon d = "rotate(" <> radialRotate (treeDatum_.x d) <> ")"
+radialRotateCommon :: forall d. d -> String
+radialRotateCommon d = "rotate(" <> radialRotate (treeDatum_.x (unsafeCoerce d)) <> ")"
 
-radialTranslate :: Datum_ -> String
-radialTranslate d = "translate(" <> show (treeDatum_.y d) <> ",0)"
+radialTranslate :: forall d. d -> String
+radialTranslate d = "translate(" <> show (treeDatum_.y (unsafeCoerce d)) <> ",0)"
 
-rotateRadialLabels :: Datum_ -> String
+rotateRadialLabels :: forall d. d -> String
 rotateRadialLabels d =
   "rotate(" <>
-    (if treeDatum_.x d >= pi
+    (if treeDatum_.x (unsafeCoerce d) >= pi
     then "180"
     else "0")
     <> ")"

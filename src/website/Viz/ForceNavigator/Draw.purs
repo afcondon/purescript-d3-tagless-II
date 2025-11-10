@@ -73,14 +73,14 @@ datum_ = {
 -- | Initialize the SVG structure for the navigation force layout
 -- | Creates empty groups - NO DATA. Call update() immediately after to add initial data.
 -- | This follows the Spago pattern: initialize creates structure, update adds/modifies data
-initialize :: forall d row m.
+initialize :: forall d m.
   Bind m =>
   MonadEffect m =>
   SimulationM2 D3Selection_ m =>
-  m { nodes :: Maybe (D3Selection_ row), links :: Maybe (D3Selection_ row) }
+  m { nodes :: Maybe (D3Selection_ d), links :: Maybe (D3Selection_ d) }
 initialize = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
-  (root :: D3Selection_ d) <- attach "div.svg-container"
+  root <- attach "div.svg-container"
 
   svg <- appendTo root Svg [ viewBox (-w / 2.0) (-h / 2.0) w h, classed "navigation" ]
   linksGroup <- appendTo svg Group [ classed "link", strokeColor "#999" ]

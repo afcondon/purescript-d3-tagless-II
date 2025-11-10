@@ -41,7 +41,7 @@ import PSD3.CodeExplorer.CodeExplorationPage as CodeExplorationPage
 import PSD3.RoutingDSL (routing, routeToPath)
 import PSD3.CodeExplorer.CodeExplorerWrapper as CodeExplorer
 import PSD3.WealthHealth.WealthHealthWrapper as WealthHealth
-import PSD3.CodeAtlas.CodeAtlasWrapper as CodeAtlas
+-- import PSD3.CodeAtlas.CodeAtlasWrapper as CodeAtlas  -- Archived
 import PSD3.FpFtw as FpFtw
 import PSD3.ExamplesGallery as ExamplesGallery
 import PSD3.Component.Example as Example
@@ -120,7 +120,7 @@ _mermaidDiagrams = Proxy :: Proxy "mermaidDiagrams"
 _codeExplorer = Proxy :: Proxy "codeExplorer"
 _codeExploration = Proxy :: Proxy "codeExploration"
 _wealthHealth = Proxy :: Proxy "wealthHealth"
-_codeAtlas = Proxy :: Proxy "codeAtlas"
+-- _codeAtlas = Proxy :: Proxy "codeAtlas"  -- Archived
 _fpFtw = Proxy :: Proxy "fpFtw"
 _examplesGallery = Proxy :: Proxy "examplesGallery"
 _example = Proxy :: Proxy "example"
@@ -232,7 +232,7 @@ renderPage route = case spy "Route is" route of
     HH.slot_ _wealthHealth unit WealthHealth.component unit
 
   CodeAtlas ->
-    HH.slot_ _codeAtlas unit CodeAtlas.component unit
+    HH.div_ [ HH.text "CodeAtlas archived - under reconstruction" ]
 
   FpFtw ->
     HH.slot_ _fpFtw unit FpFtw.component unit

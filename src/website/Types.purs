@@ -108,7 +108,7 @@ data Route
   | CodeExplorer
   | Explore String  -- Code exploration page for a specific snippet
   | WealthHealth    -- Wealth & Health of Nations visualization
-  | CodeAtlas       -- Code Atlas: codebase analysis and visualization
+  | CodeAtlas       -- Code Atlas: codebase analysis and visualization (archived)
   | FpFtw           -- FP FTW: Functional Programming examples
   | ExamplesGallery -- Gallery: index of all visualization examples
   | Example String  -- Individual example page (e.g., "bar-chart", "lesmis-force")

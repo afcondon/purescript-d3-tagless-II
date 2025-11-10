@@ -333,7 +333,7 @@ drawModuleGraph graphData selector = do
   liftEffect $ Console.log $ "Sample layers: " <> show (Array.take 10 layerValues)
 
   (Tuple w h) <- liftEffect getWindowWidthHeight
-  (root :: D3Selection_) <- attach selector
+  root <- attach selector
   svg <- appendTo root Svg [ viewBox (-w / 2.0) (-h / 2.0) w h, classed "module-graph" ]
   -- Create a group to be the zoom target
   zoomGroup <- appendTo svg Group [ classed "zoom-group" ]
