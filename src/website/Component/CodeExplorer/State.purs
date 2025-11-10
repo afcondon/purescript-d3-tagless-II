@@ -112,7 +112,7 @@ _cssClass :: Lens' State String
 _cssClass = _scene <<< prop (Proxy :: Proxy "cssClass")
 _sceneAttributes :: Lens' State (SpagoSceneAttributes SpagoSimNode)
 _sceneAttributes = _scene <<< prop (Proxy :: Proxy "attributes")
-_eventListener :: Lens' State (Maybe (HS.Listener Action))
+_eventListener :: Lens' State (Maybe (HS.Listener (Action SpagoSimNode)))
 _eventListener = prop (Proxy :: Proxy "eventListener")
 _nodeInitializerFunctions :: forall p.
   Strong p =>
