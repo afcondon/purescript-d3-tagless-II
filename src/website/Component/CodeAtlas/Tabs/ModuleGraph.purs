@@ -345,10 +345,10 @@ drawModuleGraph graphData selector = do
   let collisionRadius :: Datum_ -> Index_ -> Number
       collisionRadius datum idx = nodeRadius (_.loc (unsafeCoerce datum))
       forces =
-        [ createForce "manyBody" (RegularForce ForceManyBody) allNodes [ F.strength (-150.0), F.theta 0.9, F.distanceMin 1.0 ]
-        , createForce "collision" (RegularForce ForceCollide) allNodes [ F.radius collisionRadius ]
-        , createForce "center" (RegularForce ForceCenter) allNodes [ F.x 0.0, F.y 0.0, F.strength 0.3 ]
-        , createLinkForce Nothing [ F.distance 100.0 ]
+        [ createForce "manyBody" (RegularForce ForceManyBody) allNodes [ F.strengthVal (-150.0), F.thetaVal 0.9, F.distanceMinVal 1.0 ]
+        , createForce "collision" (RegularForce ForceCollide) allNodes [ F.radiusFn collisionRadius ]
+        , createForce "center" (RegularForce ForceCenter) allNodes [ F.xVal 0.0, F.yVal 0.0, F.strengthVal 0.3 ]
+        , createLinkForce Nothing [ F.distanceVal 100.0 ]
         ]
       activeForces = Set.fromFoldable [ "manyBody", "collision", "center", "links" ]
 

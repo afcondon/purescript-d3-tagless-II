@@ -219,7 +219,7 @@ renderSimControls state = do
         ]
     ]
 
-renderTableForces :: forall m. State -> H.ComponentHTML Action () m
+renderTableForces :: forall m. State -> H.ComponentHTML (Action SpagoSimNode) () m
 renderTableForces state  =
   HH.div_
   [ HH.h3_ [ HH.text "Forces"]
