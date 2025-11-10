@@ -1,6 +1,9 @@
-module PSD3.Internal.Attributes.Sugar where
+module PSD3.Internal.Attributes.Sugar
+  ( module PSD3.Internal.Attributes.Instances
+  , module PSD3.Internal.Attributes.Sugar
+  ) where
 
-import PSD3.Internal.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), AttributeSetter(..), Listener, EffectfulListener, toAttr)
+import PSD3.Internal.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), AttributeSetter(..), DatumFn(..), Listener, EffectfulListener, toAttr, unwrapDatumFn)
 import PSD3.Internal.Types (Datum_, EasingFunction(..), MouseEvent, Transition, PointXY)
 import PSD3.Internal.FFI (autoBox_)
 import PSD3.Internal.Selection.Types (SelectionAttribute(..), OrderingAttribute(..))

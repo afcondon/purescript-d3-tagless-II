@@ -7,6 +7,7 @@ import Data.Number (pi)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import PSD3 (class SelectionM, D3Selection_, Datum_, Selector, Element(..), appendTo, attach, setAttributes, simpleJoin)
+import PSD3.Attributes (DatumFn(..), unwrapDatumFn)
 import PSD3.Data.Tree (TreeJson_, TreeLayoutFn_, TreeType(..))
 import PSD3.Internal.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, x)
 import PSD3.Internal.FFI (descendants_, hierarchyFromJSON_, keyIsID_, links_, runLayoutFn_, treeMinMax_, treeSetSeparation_, treeSetSize_)
@@ -109,7 +110,7 @@ drawRadialTree treeType json selector = do
   -- Draw nodes (groups containing circles and text labels)
   nodeGroups <- simpleJoin nodesGroup Group (descendants_ laidOutRoot) keyIsID_
   setAttributes nodeGroups
-    [ transform [ radialRotateCommon, radialTranslate, rotateRadialLabels ] ]
+    [ transform [ unwrapDatumFn (DatumFn radialRotateCommon), unwrapDatumFn (DatumFn radialTranslate), unwrapDatumFn (DatumFn rotateRadialLabels) ] ]
 
   -- Add circles to nodes
   _ <- appendTo nodeGroups Circle
@@ -122,15 +123,15 @@ drawRadialTree treeType json selector = do
   -- Add text labels to nodes (positioned differently for left vs right side)
   _ <- appendTo nodeGroups Text
     [ dy 0.31
-    , x (\d ->
+    , x (DatumFn \d ->
         if (treeDatum_.hasChildren d) == (treeDatum_.x d < pi)
         then 8.0
         else (-8.0))
-    , textAnchor (\d ->
+    , textAnchor (DatumFn \d ->
         if (treeDatum_.hasChildren d) == (treeDatum_.x d < pi)
         then "start"
         else "end")
-    , text treeDatum_.name
+    , text (DatumFn treeDatum_.name)
     , fill textColor
     , fontSize 11.0
     ]

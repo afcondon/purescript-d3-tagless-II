@@ -7,6 +7,7 @@ import Data.Number (abs)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import PSD3 (class SelectionM, D3Selection_, Datum_, Selector, Element(..), appendTo, attach, setAttributes, simpleJoin)
+import PSD3.Attributes (DatumFn(..), unwrapDatumFn)
 import PSD3.Data.Tree (TreeJson_, TreeLayoutFn_, TreeType(..))
 import PSD3.Internal.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, x)
 import PSD3.Internal.FFI (descendants_, hierarchyFromJSON_, hNodeHeight_, keyIsID_, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
@@ -103,7 +104,7 @@ drawHorizontalTree treeType json selector = do
   -- Draw nodes (groups containing circles and text labels)
   nodeGroups <- simpleJoin nodesGroup Group (descendants_ laidOutRoot) keyIsID_
   setAttributes nodeGroups
-    [ transform [ positionXYreflected ] ]
+    [ transform [ unwrapDatumFn (DatumFn positionXYreflected) ] ]
 
   -- Add circles to nodes
   _ <- appendTo nodeGroups Circle
@@ -116,9 +117,9 @@ drawHorizontalTree treeType json selector = do
   -- Add text labels to nodes
   _ <- appendTo nodeGroups Text
     [ dy 0.31
-    , x (\d -> if treeDatum_.hasChildren d then 8.0 else (-8.0))
-    , textAnchor (\d -> if treeDatum_.hasChildren d then "start" else "end")
-    , text treeDatum_.name
+    , x (DatumFn \d -> if treeDatum_.hasChildren d then 8.0 else (-8.0))
+    , textAnchor (DatumFn \d -> if treeDatum_.hasChildren d then "start" else "end")
+    , text (DatumFn treeDatum_.name)
     , fill textColor
     , fontSize 11.0
     ]

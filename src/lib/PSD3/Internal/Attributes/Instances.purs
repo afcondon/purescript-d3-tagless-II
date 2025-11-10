@@ -3,11 +3,24 @@ module PSD3.Internal.Attributes.Instances where
 import Prelude
 
 import PSD3.Internal.Types (D3This_, Datum_, Index_)
+import PSD3.Data.Node (D3_TreeNode)
 import Data.Function.Uncurried (Fn2, Fn3, mkFn2)
 import Effect (Effect)
 import Effect.Uncurried (EffectFn3)
 import Unsafe.Coerce (unsafeCoerce)
 import Web.Event.Internal.Types (Event)
+
+-- | Newtype wrapper for Datum_ accessor functions
+-- | Use this when you have a function of type (Datum_ -> a) that needs to work
+-- | with any phantom-typed selection
+-- | Example: x (DatumFn \d -> if treeDatum_.hasChildren d then 8.0 else (-8.0))
+newtype DatumFn a = DatumFn (Datum_ -> a)
+
+-- | Unwrap a DatumFn to get the underlying Datum_ accessor function
+-- | Useful when you need to pass accessor functions to functions that expect raw (Datum_ -> a)
+-- | Example: transform [ unwrapDatumFn (DatumFn positionXY) ]
+unwrapDatumFn :: forall a. DatumFn a -> (Datum_ -> a)
+unwrapDatumFn (DatumFn fn) = fn
 
 -- | Some useful type aliases
 type IndexedLambda a = Fn2 Datum_ Index_ a
@@ -91,3 +104,15 @@ instance toAttrArrayFn :: ToAttr (Array Number) (d -> Array Number) d where
   toAttr = ArrayAttr <<< Fn
 instance toAttrArrayFnI :: ToAttr (Array Number) (d -> Index_ -> Array Number) d where
   toAttr = ArrayAttr <<< FnI
+
+-- | ToAttr instances for DatumFn wrapper
+-- | These allow Datum_ accessor functions to work with any phantom-typed selection
+-- | The unsafeCoerce is safe because phantom types exist only at compile time
+instance toAttrStringDatumFn :: ToAttr String (DatumFn String) d where
+  toAttr (DatumFn fn) = StringAttr $ Fn (unsafeCoerce fn)
+
+instance toAttrNumberDatumFn :: ToAttr Number (DatumFn Number) d where
+  toAttr (DatumFn fn) = NumberAttr $ Fn (unsafeCoerce fn)
+
+instance toAttrArrayDatumFn :: ToAttr (Array Number) (DatumFn (Array Number)) d where
+  toAttr (DatumFn fn) = ArrayAttr $ Fn (unsafeCoerce fn)
