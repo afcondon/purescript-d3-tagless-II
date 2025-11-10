@@ -131,7 +131,7 @@ import Prelude (class Eq, class Monad, Unit)
 type SimulationConfig selection row =
   { nodes :: Array (D3_SimulationNode row)                  -- Node data
   , links :: Array D3Link_Unswizzled                        -- Link data (UNSWIZZLED: source/target are IDs)
-  , forces :: Array (Force Unit)                            -- Force library (all available forces)
+  , forces :: Array (Force (D3_SimulationNode row))         -- Force library (all available forces)
   , activeForces :: Set Label                               -- Which forces to enable initially
   , config :: SimulationVariables                           -- Simulation parameters (alpha, decay, etc.)
   , keyFn :: Datum_ -> Index_                               -- Key function for data binding
