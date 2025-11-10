@@ -16,6 +16,11 @@ import Prelude
 import Data.String.Common (replaceAll)
 import Data.String.Pattern (Pattern(..), Replacement(..))
 
+-- | Phantom-type-aware selection type for Mermaid interpreter
+-- | The type parameter d tracks the datum type (for compatibility with phantom types)
+-- | but is not used at runtime (Mermaid just tracks node IDs)
+newtype MermaidSelection d = MermaidSelection NodeID
+
 -- | State for generating Mermaid diagram
 -- | Contains the node counter and accumulated Mermaid syntax
 type MermaidState =
@@ -30,7 +35,7 @@ newtype MermaidASTM a = MermaidASTM (StateT MermaidState Effect a)
 escapeLabel :: String -> String
 escapeLabel = replaceAll (Pattern "\"") (Replacement "'")
 
-runMermaidAST :: MermaidASTM NodeID -> Effect String
+runMermaidAST :: forall d. MermaidASTM (MermaidSelection d) -> Effect String
 runMermaidAST (MermaidASTM state) = do
   Tuple _ finalState <- runStateT state initialState
   let themeConfig = "%%{init: {'theme':'base', 'themeVariables': {'fontFamily':'monospace'}, 'look':'handDrawn', 'flowchart':{'curve':'basis'}}}%%\n"
@@ -79,66 +84,66 @@ generateStyleDefinitions _ =
   "    classDef controlOp fill:#66c2a5,stroke:#3288bd,stroke-width:2px\n" <>
   "    classDef transitionOp fill:#fdae61,stroke:#f46d43,stroke-width:2px\n"
 
-instance mermaidTagless :: SelectionM NodeID MermaidASTM where
+instance mermaidTagless :: SelectionM MermaidSelection MermaidASTM where
   attach selector = do
     nodeId <- addNode ("select(\"" <> selector <> "\")") "selectOp"
-    pure nodeId
+    pure (MermaidSelection nodeId)
 
-  selectUnder parentId selector = do
+  selectUnder (MermaidSelection parentId) selector = do
     nodeId <- addNode ("selectAll(\"" <> selector <> "\")") "selectOp"
     addEdge parentId nodeId
-    pure nodeId
+    pure (MermaidSelection nodeId)
 
-  appendTo parentId element attributes = do
+  appendTo (MermaidSelection parentId) element attributes = do
     nodeId <- addNode ("append(\"" <> show element <> "\")") "appendOp"
     addEdge parentId nodeId
     -- Add coalesced attributes node
     addAttributesNode nodeId attributes
-    pure nodeId
+    pure (MermaidSelection nodeId)
 
-  filterSelection selectionId selector = do
+  filterSelection (MermaidSelection selectionId) selector = do
     nodeId <- addNode ("filter(\"" <> selector <> "\")") "selectOp"
     addEdge selectionId nodeId
-    pure nodeId
+    pure (MermaidSelection nodeId)
 
-  mergeSelections aId bId = do
+  mergeSelections (MermaidSelection aId) (MermaidSelection bId) = do
     nodeId <- addNode "merge" "selectOp"
     addEdge aId nodeId
     addEdge bId nodeId
-    pure nodeId
+    pure (MermaidSelection nodeId)
 
-  setAttributes selectionId attributes = do
+  setAttributes (MermaidSelection selectionId) attributes = do
     addAttributesNode selectionId attributes
     pure unit
 
-  on selectionId (Drag _drag) = do
+  on (MermaidSelection selectionId) (Drag _drag) = do
     nodeId <- addNode "drag()" "controlOp"
     addEdge selectionId nodeId
     pure unit
 
-  on selectionId (Zoom _zoom) = do
+  on (MermaidSelection selectionId) (Zoom _zoom) = do
     nodeId <- addNode "zoom()" "controlOp"
     addEdge selectionId nodeId
     pure unit
 
-  openSelection selectionId selector = do
+  openSelection (MermaidSelection selectionId) selector = do
     nodeId <- addNode ("selectAll(\"" <> selector <> "\")") "selectOp"
     addEdge selectionId nodeId
-    pure nodeId
+    pure (MermaidSelection nodeId)
 
-  simpleJoin selectionId element ds _k = do
+  simpleJoin (MermaidSelection selectionId) element ds _k = do
     -- Collapsed simpleJoin node
     joinNodeId <- addNode ("simpleJoin(\"" <> show element <> "\", [" <> show (length ds) <> " items])") "joinOp"
     addEdge selectionId joinNodeId
-    pure joinNodeId
+    pure (MermaidSelection joinNodeId)
 
-  nestedJoin selectionId element _extractChildren _k = do
+  nestedJoin (MermaidSelection selectionId) element _extractChildren _k = do
     -- Collapsed nestedJoin node
     joinNodeId <- addNode ("nestedJoin(\"" <> show element <> "\", fn)") "joinOp"
     addEdge selectionId joinNodeId
-    pure joinNodeId
+    pure (MermaidSelection joinNodeId)
 
-  updateJoin selectionId element ds _k = do
+  updateJoin (MermaidSelection selectionId) element ds _k = do
     -- Collapsed updateJoin node
     joinNodeId <- addNode ("updateJoin(\"" <> show element <> "\", [" <> show (length ds) <> " items])") "joinOp"
     addEdge selectionId joinNodeId
@@ -155,7 +160,7 @@ instance mermaidTagless :: SelectionM NodeID MermaidASTM where
     exitRemoveId <- addNode "remove()" "controlOp"
     addEdge exitNodeId exitRemoveId
 
-    pure { enter: enterAppendId, exit: exitRemoveId, update: joinNodeId }
+    pure { enter: MermaidSelection enterAppendId, exit: MermaidSelection exitRemoveId, update: MermaidSelection joinNodeId }
 
 -- | Format a single attribute for display
 formatAttribute :: forall d. SelectionAttribute d -> String

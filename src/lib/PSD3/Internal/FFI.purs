@@ -60,7 +60,7 @@ foreign import keyIsSourceTarget_ :: ComputeKeyFunction_ -- used for links in si
 -- REVIEW the returned D3Selection_ here is the full enter, update, exit type of selection
 -- which we haven't really modelled in PureScript (opaque type) but maybe it will turn out that we
 -- needed to all along
-foreign import d3DataWithKeyFunction_ :: forall d. Array d -> ComputeKeyFunction_ -> D3Selection_ d -> D3Selection_ d
+foreign import d3DataWithKeyFunction_ :: forall d1 d2. Array d2 -> ComputeKeyFunction_ -> D3Selection_ d1 -> D3Selection_ d2
 foreign import d3DataWithFunction_ :: forall d. (Datum_ -> Array Datum_) -> ComputeKeyFunction_ -> D3Selection_ d -> D3Selection_ d
 
 -- we'll coerce everything to this type if we can validate attr lambdas against provided data

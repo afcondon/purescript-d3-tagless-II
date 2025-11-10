@@ -74,7 +74,8 @@ instance Show AspectRatioSpec where
 autoBox :: ∀ d. SelectionAttribute d
 autoBox = AttrT <<< AttributeSetter "viewBox" $ toAttr vb
   where
-    vb = \d -> intercalate " " $ show <$> (autoBox_ d)
+    vb :: d -> String
+    vb = \d -> intercalate " " $ show <$> (autoBox_ (unsafeCoerce d))
 
 fontFamily :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 fontFamily = AttrT <<< AttributeSetter "font-family" <<< toAttr
@@ -208,12 +209,12 @@ strokeLineJoin = AttrT <<< AttributeSetter "stroke-linejoin" <<< toAttr <<< show
 
 -- helpers for transitions, a sequence of functions but expressed as text in the DOM
 -- TODO don't export transform'
-transform' :: ∀ d. (Datum_ -> String) -> SelectionAttribute d
+transform' :: ∀ d. (d -> String) -> SelectionAttribute d
 transform' = AttrT <<< AttributeSetter "transform" <<< StringAttr <<< Fn
 
 -- make a single (Datum_ -> String) function out of the array (ie sequence) of functions provided
 transform :: ∀ d. Array (Datum_ -> String) -> SelectionAttribute d
-transform = transform' <<< assembleTransforms
+transform = transform' <<< unsafeCoerce <<< assembleTransforms
 
 -- we take a stack of (Datum_ -> String) functions and produce just one
 -- we can't know here in the library code if this is safe but if the transforms themselves are written in terms of 

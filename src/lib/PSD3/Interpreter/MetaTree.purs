@@ -15,6 +15,12 @@ import Data.Tuple (Tuple(..), snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
 import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, class Show, Unit, bind, discard, pure, show, unit, ($), (+), (<$>), (<>), (==))
+import Unsafe.Coerce (unsafeCoerce)
+
+-- | Phantom-type-aware selection type for MetaTree interpreter
+-- | The type parameter d tracks the datum type (for compatibility with phantom types)
+-- | but is not used at runtime (MetaTree just tracks node IDs)
+newtype MetaTreeSelection d = MetaTreeSelection NodeID
 
 -- REVIEW this whole module should be re-written cleanly to match the final Final Tagless language for Selection and Simulation, it's really just a placeholder
 -- but also serves to validate the ability of the interpreter to run in multiple monads
@@ -81,13 +87,29 @@ showAsSymbol =
     (SplitJoinCloseWithKeyFunctionNode e _) ->  { name: "SplitJoinCloseK" , symbol: "<+>" , param1: tag $ show e, param2: "" }
     (OnNode (Zoom _))          ->  { name: "Zoom"          , symbol: "z"   , param1: "",           param2: "" }
     (OnNode (Drag _))          ->  { name: "Drag"          , symbol: "drag", param1: "",           param2: "" }
-    (AttrNode c)               ->  { name: "Attr"          , symbol: "attr", param1: show c,       param2: "" }
+    (AttrNode c)               ->  { name: "Attr"          , symbol: "attr", param1: formatAttr c, param2: "" }
     (OrderNode c)              ->  { name: "Order"         , symbol: "order", param1: show c,       param2: "" }
     (OnEventNode _)            ->  { name: "OnEvent"       , symbol: "on"  , param1: "",           param2: "" }
     (TransitionNode _ _)       ->  { name: "Transition"    , symbol: "T"   , param1: "",           param2: "" }
 
 tag :: String -> String
 tag s = "<" <> s <> ">"
+
+-- | Format SelectionAttribute for display (without Show instance)
+formatAttr :: forall d. SelectionAttribute d -> String
+formatAttr = case _ of
+  AttrT _ -> "attr"
+  TextT _ -> "text"
+  PropertyT _ -> "property"
+  HTMLT _ -> "html"
+  RemoveT -> "remove"
+  OrderingT Order -> "order"
+  OrderingT (Sort _) -> "sort"
+  OrderingT Raise -> "raise"
+  OrderingT Lower -> "lower"
+  TransitionT _ _ -> "transition"
+  OnT _ _ -> "on"
+  OnT' _ _ -> "on'"
 
 type MetaTreeMap d = Map NodeID (D3GrammarNode d)
 data ScriptTree d = ScriptTree Int (MetaTreeMap d) (Array (Tuple NodeID NodeID))
@@ -121,7 +143,7 @@ initialMetaTree :: ScriptTree Datum_
 initialMetaTree = ScriptTree 0 empty []
 
 -- runMetaTree :: D3MetaTreeM MetaTree -> Effect (Tuple MetaTree MetaTree)
-runMetaTree :: D3MetaTreeM NodeID -> Effect (Tuple NodeID (ScriptTree Datum_))
+runMetaTree :: forall d. D3MetaTreeM (MetaTreeSelection d) -> Effect (Tuple (MetaTreeSelection d) (ScriptTree Datum_))
 runMetaTree (D3MetaTreeM state) = runStateT state initialMetaTree
 
 derive newtype instance functorD3MetaTreeM     :: Functor               D3MetaTreeM
@@ -145,7 +167,7 @@ insertInScriptTree parentID newNode = do
   modify_ (\s -> ScriptTree (id + 1) (insert id newNode nodeMap) ((Tuple parentID (id+1)) : links))
   pure unit
 
-insertAttributeInScriptTree :: forall d. NodeID -> SelectionAttribute d -> D3MetaTreeM Unit
+insertAttributeInScriptTree :: NodeID -> SelectionAttribute Datum_ -> D3MetaTreeM Unit
 insertAttributeInScriptTree parentID = 
   case _ of 
       -- simple attributes are just nodes
@@ -174,57 +196,59 @@ insertAttributeInScriptTree parentID =
   
 
 
-instance d3Tagless :: SelectionM NodeID D3MetaTreeM where
-  appendTo nodeID element attributes = do
+instance d3Tagless :: SelectionM MetaTreeSelection D3MetaTreeM where
+  appendTo (MetaTreeSelection nodeID) element attributes = do
     insertInScriptTree nodeID (AppendNode element)
     (ScriptTree id _ _) <- get -- TODO write a lens to get at the ID and all this code will be much shorter
-    -- _ <- traverse (insertAttributeInScriptTree id) attributes
-    pure id -- this is the id of the AppendNode itself
+    -- _ <- traverse (insertAttributeInScriptTree id) (unsafeCoerce attributes :: Array (SelectionAttribute Datum_))
+    pure (MetaTreeSelection id) -- this is the id of the AppendNode itself
 
-  selectUnder nodeID selector = do
+  selectUnder (MetaTreeSelection nodeID) selector = do
     insertInScriptTree nodeID (SelectUnderNode selector)
     (ScriptTree id _ _) <- get
-    pure id
+    pure (MetaTreeSelection id)
 
   attach selector = do
     insertInScriptTree 0 (AttachNode selector) -- TODO this could actually be a multiple insert
-    pure 1
+    pure (MetaTreeSelection 1)
 
-  filterSelection nodeID selector = do
+  filterSelection (MetaTreeSelection nodeID) selector = do
     insertInScriptTree nodeID (FilterNode selector)
     (ScriptTree id _ _) <- get
-    pure id
+    pure (MetaTreeSelection id)
 
-  mergeSelections a b = do
+  mergeSelections (MetaTreeSelection a) (MetaTreeSelection b) = do
     -- insertInScriptTree nodeID (MergeNode a b)
     (ScriptTree id _ _) <- get
-    pure id
+    pure (MetaTreeSelection id)
 
-  setAttributes nodeID attributes = do
-    insertInScriptTree nodeID (ModifyNode attributes)
+  setAttributes (MetaTreeSelection nodeID) attributes = do
+    -- MetaTree interpreter always uses Datum_ for internal representation
+    insertInScriptTree nodeID (ModifyNode (unsafeCoerce attributes :: Array (SelectionAttribute Datum_)))
     pure unit
 
-  on nodeID behavior = do
-    insertInScriptTree nodeID (OnNode behavior) 
+  on (MetaTreeSelection nodeID) behavior = do
+    -- MetaTree interpreter always uses NodeID for Behavior representation
+    insertInScriptTree nodeID (OnNode (unsafeCoerce behavior :: Behavior NodeID))
     pure unit
 
-  openSelection selection selector = do
+  openSelection (MetaTreeSelection selection) selector = do
     -- insertInScriptTree nodeID (OpenNode selector)
     (ScriptTree id _ _) <- get
-    pure id
+    pure (MetaTreeSelection id)
 
-  simpleJoin nodeID e ds k          = do
+  simpleJoin (MetaTreeSelection nodeID) e ds k          = do
     (ScriptTree id _ _) <- get
     insertInScriptTree nodeID (JoinSimpleWithKeyFunctionNode e k)
-    pure id
-  nestedJoin nodeID e extractChildren k = do
+    pure (MetaTreeSelection id)
+  nestedJoin (MetaTreeSelection nodeID) e extractChildren k = do
     (ScriptTree id _ _) <- get
     insertInScriptTree nodeID (JoinSimpleWithKeyFunctionNode e k)  -- Same as simpleJoin for now
-    pure id
-  updateJoin nodeID e ds k          = do
+    pure (MetaTreeSelection id)
+  updateJoin (MetaTreeSelection nodeID) e ds k          = do
     (ScriptTree id _ _) <- get
     insertInScriptTree nodeID (UpdateJoinNode e)
-    pure { enter: id, exit: id, update: id }
+    pure { enter: MetaTreeSelection id, exit: MetaTreeSelection id, update: MetaTreeSelection id }
 
 -- applySelectionAttributeString :: String -> SelectionAttribute -> String
 -- applySelectionAttributeString selection  = 

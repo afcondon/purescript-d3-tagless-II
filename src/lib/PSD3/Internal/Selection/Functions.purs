@@ -62,10 +62,11 @@ selectionUpdateJoin   :: forall d datum m.
 selectionUpdateJoin openSelection e theData keyFn = do
   let
     -- REVIEW use these FFI function to decompose the update Selection into it's component parts
-    updateSelection  = d3DataWithKeyFunction_ theData keyFn openSelection
+    -- d3DataWithKeyFunction_ rebinds data, changing phantom type from d to datum
+    updateSelection = d3DataWithKeyFunction_ theData keyFn openSelection
     enterSelection   = d3GetEnterSelection_ updateSelection
-    exitSelection    = d3GetExitSelection_ updateSelection
-    
+    exitSelection    = unsafeCoerce (d3GetExitSelection_ updateSelection) :: D3Selection_ d
+
   pure { enter: enterSelection, exit: exitSelection, update: updateSelection }
 
 selectionOpenSelection :: forall d m. (SelectionM D3Selection_ m) => D3Selection_ d -> Selector (D3Selection_ d) -> m (D3Selection_ d)

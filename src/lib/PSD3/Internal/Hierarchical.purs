@@ -18,6 +18,7 @@ import Data.Nullable (toMaybe)
 import Effect.Aff (Aff)
 import Effect.Class (class MonadEffect)
 import Prelude (class Bind, bind, pure, ($), (/))
+import Unsafe.Coerce (unsafeCoerce)
 
 find :: forall d. D3_TreeNode d -> (Datum_ -> Boolean) -> Maybe (D3_TreeNode d)
 find tree filter = toMaybe $ find_ tree filter
@@ -64,13 +65,13 @@ horizontalLink' :: forall d. SelectionAttribute d
 horizontalLink' = AttrT $ AttributeSetter "d" $ toAttr linkHorizontal2_
 
 verticalLink :: forall d. SelectionAttribute d
-verticalLink = AttrT $ AttributeSetter "d" $ toAttr linkVertical_
+verticalLink = AttrT $ AttributeSetter "d" $ toAttr (unsafeCoerce linkVertical_ :: d -> String)
 
 horizontalClusterLink :: forall d. Number -> SelectionAttribute d
 horizontalClusterLink yOffset = AttrT $ AttributeSetter "d" $ toAttr (linkClusterHorizontal_ yOffset)
 
 verticalClusterLink :: forall d. Number -> SelectionAttribute d
-verticalClusterLink xOffset = AttrT $ AttributeSetter "d" $ toAttr (linkClusterVertical_ xOffset)
+verticalClusterLink xOffset = AttrT $ AttributeSetter "d" $ toAttr (unsafeCoerce (linkClusterVertical_ xOffset) :: d -> String)
 
 radialLink :: forall d. (Datum_ -> Number) -> (Datum_ -> Number) -> SelectionAttribute d
 radialLink angleFn radius_Fn = do

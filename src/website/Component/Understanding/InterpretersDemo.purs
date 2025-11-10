@@ -7,8 +7,8 @@ import PSD3.Data.Tree (TreeJson_)
 import PSD3.Internal.Types (D3Selection_, Element(..))
 import PSD3.Data.Node (NodeID)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
-import PSD3.Interpreter.MetaTree (D3MetaTreeM, runMetaTree, scriptTreeToJSON)
-import PSD3.Interpreter.String (D3PrinterM, runPrinter)
+import PSD3.Interpreter.MetaTree (D3MetaTreeM, MetaTreeSelection, runMetaTree, scriptTreeToJSON)
+import PSD3.Interpreter.String (D3PrinterM, StringSelection, runPrinter)
 import Data.Foldable (traverse_)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
@@ -67,9 +67,9 @@ scatterPlotD3 = do
   pure unit
 
 -- | The sample visualization for String interpreter (generates D3 code)
-scatterPlotString :: D3PrinterM String
+scatterPlotString :: forall d. D3PrinterM (StringSelection d)
 scatterPlotString = do
-  (root :: String) <- attach "div.scatterplot-viz"
+  (root :: StringSelection d) <- attach "div.scatterplot-viz"
   svg <- appendTo root Svg
     [ classed "simple-scatterplot"
     , width 400.0
@@ -92,9 +92,9 @@ scatterPlotString = do
   pure dotsGroup
 
 -- | The sample visualization for MetaTree interpreter (builds AST)
-scatterPlotMeta :: D3MetaTreeM NodeID
+scatterPlotMeta :: forall d. D3MetaTreeM (MetaTreeSelection d)
 scatterPlotMeta = do
-  (root :: NodeID) <- attach "div.scatterplot-viz"
+  (root :: MetaTreeSelection d) <- attach "div.scatterplot-viz"
   svg <- appendTo root Svg
     [ classed "simple-scatterplot"
     , width 400.0
@@ -114,7 +114,7 @@ scatterPlotMeta = do
     pure unit
   ) sampleData
 
-  pure 0 -- Return the root node ID
+  pure root -- Return the root selection
 
 -- | Run the visualization through the String interpreter to generate D3 code
 generateD3Code :: Effect String

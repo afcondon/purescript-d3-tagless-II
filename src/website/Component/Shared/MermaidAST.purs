@@ -41,15 +41,14 @@ import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
-import PSD3.Interpreter.MermaidAST (MermaidASTM, runMermaidAST)
-import PSD3.Data.Node (NodeID)
+import PSD3.Interpreter.MermaidAST (MermaidASTM, MermaidSelection, runMermaidAST)
 import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import Type.Proxy (Proxy(..))
 
 -- | Input to the MermaidAST component
 -- | Takes any SelectionM computation and generates its AST diagram
-type Input =
-  { computation :: MermaidASTM NodeID
+type Input d =
+  { computation :: MermaidASTM (MermaidSelection d)
   , className :: Maybe String
   }
 
@@ -61,22 +60,22 @@ _mermaidAST :: Proxy "mermaidAST"
 _mermaidAST = Proxy
 
 -- | Helper to create Input from just a computation
-mkInput :: MermaidASTM NodeID -> Input
+mkInput :: forall d. MermaidASTM (MermaidSelection d) -> Input d
 mkInput computation = { computation, className: Nothing }
 
 -- | Helper to create Input with a custom class
-mkInputWithClass :: MermaidASTM NodeID -> String -> Input
+mkInputWithClass :: forall d. MermaidASTM (MermaidSelection d) -> String -> Input d
 mkInputWithClass computation className = { computation, className: Just className }
 
-type State =
+type State d =
   { mermaidCode :: String
   , className :: Maybe String
-  , computation :: MermaidASTM NodeID
+  , computation :: MermaidASTM (MermaidSelection d)
   }
 
 data Action = Initialize
 
-component :: forall q o m. MonadAff m => H.Component q Input o m
+component :: forall q o m d. MonadAff m => H.Component q (Input d) o m
 component =
   H.mkComponent
     { initialState
@@ -87,18 +86,18 @@ component =
         }
     }
 
-initialState :: Input -> State
+initialState :: forall d. Input d -> State d
 initialState input =
   { mermaidCode: "graph TD\n    Loading[\"Loading...\"]"
   , className: input.className
   , computation: input.computation
   }
 
-render :: forall m. State -> H.ComponentHTML Action () m
+render :: forall m d. State d -> H.ComponentHTML Action () m
 render state =
   mermaidDiagram state.mermaidCode state.className
 
-handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
+handleAction :: forall o m d. MonadAff m => Action -> H.HalogenM (State d) Action () o m Unit
 handleAction = case _ of
   Initialize -> do
     state <- H.get

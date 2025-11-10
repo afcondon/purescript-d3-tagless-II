@@ -125,15 +125,15 @@ data ForceType =
     RegularForce RegularForceType
   | LinkForce
 
-newtype Force = Force {
+newtype Force d = Force {
     "type"     :: ForceType
   , name       :: Label
   , status     :: ForceStatus
   , filter     :: Maybe ForceFilter
-  , attributes :: Array ChainableF
+  , attributes :: Array (ChainableF d)
   , force_     :: D3ForceHandle_
 }
-derive instance Newtype Force _
+derive instance Newtype (Force d) _
 
 _name :: Lens' Force Label
 _name = _Newtype <<< prop (Proxy :: Proxy "name")
@@ -170,8 +170,8 @@ instance Show Force where
   show (Force f) = intercalate " " [show f.type, show f.name, show f.status, show f.filter]
   
 -- not sure if there needs to be a separate type for force attributes, maybe not, but we'll start assuming so
-newtype ChainableF = ForceT AttributeSetter
-derive instance Newtype ChainableF _
+newtype ChainableF d = ForceT (AttributeSetter d)
+derive instance Newtype (ChainableF d) _
 
 data ForceStatus = ForceActive | ForceDisabled
 derive instance eqForceStatus :: Eq ForceStatus
