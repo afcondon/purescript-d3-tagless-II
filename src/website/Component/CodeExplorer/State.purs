@@ -35,14 +35,14 @@ import Type.Proxy (Proxy(..))
 
 -- | CodeExplorer state - specializes the generic SimulationComponentState
 -- | with Spago-specific types
-type State = SimState.SimulationComponentState Scene Action SpagoDataRow SpagoSceneAttributes SpagoModel
+type State = SimState.SimulationComponentState Scene (Action SpagoSimNode) SpagoSimNode SpagoDataRow (SpagoSceneAttributes SpagoSimNode) SpagoModel
 
 -- | Transition matrix type alias for convenience
 type TransitionMatrix = SimState.TransitionMatrix Scene
 
 -- | CodeExplorer's scene configuration - specialized version of library's SceneConfig
 -- | Parameterized with Spago-specific node data (SpagoDataRow) and attributes (SpagoSceneAttributes)
-type SceneConfig = Scene.SceneConfig SpagoDataRow SpagoSceneAttributes
+type SceneConfig = Scene.SceneConfig SpagoDataRow (SpagoSceneAttributes SpagoSimNode)
 
 -- | DEPRECATED: Old name for SceneConfig, kept for backwards compatibility during refactor
 type MiseEnScene = SceneConfig
