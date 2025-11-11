@@ -3,6 +3,7 @@ module D3.Viz.MetaTree where
 import PSD3.Internal.Attributes.Sugar
 import Prelude
 
+import PSD3.Attributes (DatumFn(..), DatumFnI(..), unwrapDatumFn)
 import PSD3.Data.Tree (TreeModel, TreeType(..))
 import PSD3.Internal.Types (D3Selection_, Datum_, Element(..))
 import D3.Viz.MetaTree.Model (MetaTreeNode)
@@ -80,11 +81,11 @@ draw (Tuple w h) tree = do
   setAttributes theLinks_ 
     [ strokeWidth 1.5, strokeColor "black", strokeOpacity 0.4, fill "none", verticalLink]
 
-  nodeJoin_  <- simpleJoin nodes Group (descendants_ tree) keyIsID_ 
-  setAttributes nodeJoin_ [ transform [ datum_.positionXY ] ]
-  
+  nodeJoin_  <- simpleJoin nodes Group (descendants_ tree) keyIsID_
+  setAttributes nodeJoin_ [ transform [ unwrapDatumFn (DatumFn datum_.positionXY) ] ]
 
-  theNodes <- appendTo nodeJoin_ 
+
+  theNodes <- appendTo nodeJoin_
                 Circle  [ fill         "blue"
                         , radius       20.0
                         , strokeColor "white"
@@ -95,15 +96,15 @@ draw (Tuple w h) tree = do
                 Text  [ x          0.0
                       , y          3.0
                       , textAnchor "middle"
-                      , text       datum_.symbol
+                      , text       (DatumFn datum_.symbol)
                       , fill       "white"
                       ]
-                            
+
   labelsGray <- appendTo nodeJoin_
                 Text  [ x          22.0
                       , y          3.0
                       , textAnchor "start"
-                      , text       datum_.param1
+                      , text       (DatumFn datum_.param1)
                       , fill       "gray"
                       ]
                             

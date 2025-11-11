@@ -2,6 +2,7 @@ module D3.Viz.LesMiserablesGUP.Render where
 
 import Prelude
 
+import PSD3.Attributes (DatumFn(..), DatumFnI(..))
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, radius, remove, strokeColor, strokeOpacity, strokeWidth, x1, x2, y1, y2)
 import PSD3.Internal.Types (D3Selection_, Element(..))
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), SelectionAttribute)
@@ -62,7 +63,7 @@ lesMisRenderCallbacks = {
     -- Create circles directly
     nodeEnter <- appendTo enterSel Circle
       [ radius attrs.nodeRadius
-      , fill datum_.colorByGroup
+      , fill (DatumFn datum_.colorByGroup)
       , strokeColor attrs.nodeStrokeColor
       , strokeOpacity attrs.nodeStrokeWidth
       , classed "enter"
@@ -75,7 +76,7 @@ lesMisRenderCallbacks = {
 
   , onNodeUpdate: \updateSel attrs ->
       setAttributes updateSel
-        [ fill datum_.colorByGroup
+        [ fill (DatumFn datum_.colorByGroup)
         , classed "update"
         ]
 
@@ -85,8 +86,8 @@ lesMisRenderCallbacks = {
   -- Link rendering: Simple lines
   , onLinkEnter: \enterSel _attrs -> do
       linkEnter <- appendTo enterSel Line
-        [ strokeWidth (sqrt <<< link_.value)
-        , strokeColor link_.color
+        [ strokeWidth (DatumFn (sqrt <<< link_.value))
+        , strokeColor (DatumFn link_.color)
         , classed "enter"
         ]
       pure linkEnter
@@ -99,12 +100,12 @@ lesMisRenderCallbacks = {
 
   -- Tick function attributes: Position circles and lines
   , nodeTickAttrs: \_attrs ->
-      [ cx datum_.x, cy datum_.y ]
+      [ cx (DatumFn datum_.x), cy (DatumFn datum_.y) ]
 
   , linkTickAttrs:
-      [ x1 (_.x <<< link_.source)
-      , y1 (_.y <<< link_.source)
-      , x2 (_.x <<< link_.target)
-      , y2 (_.y <<< link_.target)
+      [ x1 (DatumFn (_.x <<< link_.source))
+      , y1 (DatumFn (_.y <<< link_.source))
+      , x2 (DatumFn (_.x <<< link_.target))
+      , y2 (DatumFn (_.y <<< link_.target))
       ]
 }

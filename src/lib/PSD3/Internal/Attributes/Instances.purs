@@ -22,6 +22,12 @@ newtype DatumFn a = DatumFn (Datum_ -> a)
 unwrapDatumFn :: forall a. DatumFn a -> (Datum_ -> a)
 unwrapDatumFn (DatumFn fn) = fn
 
+-- | Newtype wrapper for indexed Datum_ accessor functions
+-- | Use this when you have a function of type (Datum_ -> Index_ -> a) that needs to work
+-- | with any phantom-typed selection
+-- | Example: cx (DatumFnI \_ i -> index_ToNumber i * 20.0)
+newtype DatumFnI a = DatumFnI (Datum_ -> Index_ -> a)
+
 -- | Some useful type aliases
 type IndexedLambda a = Fn2 Datum_ Index_ a
 type Listener           = (Event -> Datum_ -> D3This_ -> Unit) 
@@ -116,3 +122,14 @@ instance toAttrNumberDatumFn :: ToAttr Number (DatumFn Number) d where
 
 instance toAttrArrayDatumFn :: ToAttr (Array Number) (DatumFn (Array Number)) d where
   toAttr (DatumFn fn) = ArrayAttr $ Fn (unsafeCoerce fn)
+
+-- | ToAttr instances for DatumFnI wrapper (indexed functions)
+-- | These allow indexed Datum_ accessor functions to work with any phantom-typed selection
+instance toAttrStringDatumFnI :: ToAttr String (DatumFnI String) d where
+  toAttr (DatumFnI fn) = StringAttr $ FnI (unsafeCoerce fn)
+
+instance toAttrNumberDatumFnI :: ToAttr Number (DatumFnI Number) d where
+  toAttr (DatumFnI fn) = NumberAttr $ FnI (unsafeCoerce fn)
+
+instance toAttrArrayDatumFnI :: ToAttr (Array Number) (DatumFnI (Array Number)) d where
+  toAttr (DatumFnI fn) = ArrayAttr $ FnI (unsafeCoerce fn)

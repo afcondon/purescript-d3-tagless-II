@@ -2,6 +2,7 @@ module D3.Viz.Icicle where
 
 import Prelude
 
+import PSD3.Attributes (DatumFn(..), DatumFnI(..))
 import PSD3.Internal.Attributes.Sugar (classed, fill, fillOpacity, fontSize, height, strokeColor, strokeWidth, text, textAnchor, viewBox, width, x, y)
 import PSD3.Data.Tree (TreeJson_)
 import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
@@ -57,11 +58,11 @@ draw treeJson selector = do
   -- Draw partitions using simpleJoin for proper data binding
   partitions <- simpleJoin chartGroup Rect nodes keyIsID_
   setAttributes (unsafeCoerce partitions :: D3Selection_ Datum_)
-    [ x (\d -> node'.x0 (unsafeCoerce d))
-    , y (\d -> node'.y0 (unsafeCoerce d))
-    , width (\d -> node'.rectWidth (unsafeCoerce d))
-    , height (\d -> node'.rectHeight (unsafeCoerce d))
-    , fill (\d -> depthColor (node'.depthInt (unsafeCoerce d)))
+    [ x (DatumFn \d -> node'.x0 (unsafeCoerce d))
+    , y (DatumFn \d -> node'.y0 (unsafeCoerce d))
+    , width (DatumFn \d -> node'.rectWidth (unsafeCoerce d))
+    , height (DatumFn \d -> node'.rectHeight (unsafeCoerce d))
+    , fill (DatumFn \d -> depthColor (node'.depthInt (unsafeCoerce d)))
     , fillOpacity 0.85
     , strokeColor "#ffffff"
     , strokeWidth 2.0
@@ -71,13 +72,13 @@ draw treeJson selector = do
   -- Draw labels using simpleJoin for proper data binding
   partitionLabels <- simpleJoin chartGroup Text nodes keyIsID_
   setAttributes (unsafeCoerce partitionLabels :: D3Selection_ Datum_)
-    [ x (\d -> node'.x0 (unsafeCoerce d) + 4.0)
-    , y (\d -> node'.y0 (unsafeCoerce d) + node'.rectHeight (unsafeCoerce d) / 2.0 + 4.0)
-    , text (\d -> node'.name (unsafeCoerce d))
+    [ x (DatumFn \d -> node'.x0 (unsafeCoerce d) + 4.0)
+    , y (DatumFn \d -> node'.y0 (unsafeCoerce d) + node'.rectHeight (unsafeCoerce d) / 2.0 + 4.0)
+    , text (DatumFn \d -> node'.name (unsafeCoerce d))
     , textAnchor "start"
     , fontSize 10.0
     , fill "#ffffff"
-    , fillOpacity (\d -> if canShowLabel { minWidth: 60.0, minHeight: 15.0 } (unsafeCoerce d) then 1.0 else 0.0)
+    , fillOpacity (DatumFn \d -> if canShowLabel { minWidth: 60.0, minHeight: 15.0 } (unsafeCoerce d) then 1.0 else 0.0)
     , classed "partition-label"
     ]
 

@@ -24,6 +24,7 @@ import Affjax.Web as AX
 import Data.Either (Either(..))
 import Data.Number (sqrt)
 import Data.Set as Set
+import PSD3.Attributes (DatumFn(..), DatumFnI(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, simpleJoin, setAttributes)
 import PSD3.Capabilities.Simulation (class SimulationM2, addTickFunction, init, start)
 import PSD3.Data.Node (D3_SimulationNode(..), D3Link_Swizzled, D3Link_Unswizzled)
@@ -470,7 +471,7 @@ drawTopologicalForceDirected tasks selector = do
                                Nothing -> "#4CAF50") :: Datum_ -> String
   setAttributes nodesSelection [
       radius 5.0  -- Same size as LesMis
-    , fill colorByGroup  -- Color by group (matches LesMis style)
+    , fill (DatumFn colorByGroup)  -- Color by group (matches LesMis style)
     , strokeColor "#fff"  -- White stroke like LesMis
     , strokeWidth 1.5
     , classed "task-node"
@@ -489,24 +490,24 @@ drawTopologicalForceDirected tasks selector = do
   -- Links: extract source/target positions from swizzled link objects
   let unboxLinkObj = unsafeCoerce :: Datum_ -> { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
   addTickFunction "links" $ Step linksSelection [
-      x1 (\d -> (unboxLinkObj d).source.x)
-    , y1 (\d -> (unboxLinkObj d).source.y)
-    , x2 (\d -> (unboxLinkObj d).target.x)
-    , y2 (\d -> (unboxLinkObj d).target.y)
+      x1 (DatumFn \d -> (unboxLinkObj d).source.x)
+    , y1 (DatumFn \d -> (unboxLinkObj d).source.y)
+    , x2 (DatumFn \d -> (unboxLinkObj d).target.x)
+    , y2 (DatumFn \d -> (unboxLinkObj d).target.y)
     ]
 
   -- Nodes: extract x, y, name from simulation nodes
   let unboxNodeObj = unsafeCoerce :: Datum_ -> { x :: Number, y :: Number, name :: String }
   addTickFunction "nodes" $ Step nodesSelection [
-      cx (\d -> (unboxNodeObj d).x)
-    , cy (\d -> (unboxNodeObj d).y)
+      cx (DatumFn \d -> (unboxNodeObj d).x)
+    , cy (DatumFn \d -> (unboxNodeObj d).y)
     ]
 
   -- Labels follow nodes with slight offset
   addTickFunction "labels" $ Step labelsSelection [
-      x (\d -> (unboxNodeObj d).x)
-    , y (\d -> (unboxNodeObj d).y + 20.0)
-    , text (\d -> (unboxNodeObj d).name)
+      x (DatumFn \d -> (unboxNodeObj d).x)
+    , y (DatumFn \d -> (unboxNodeObj d).y + 20.0)
+    , text (DatumFn \d -> (unboxNodeObj d).name)
     ]
 
   -- Draw layer labels (centered coordinates)

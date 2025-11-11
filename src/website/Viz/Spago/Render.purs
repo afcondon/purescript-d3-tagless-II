@@ -4,6 +4,7 @@ import Prelude
 
 import Data.Array ((:))
 
+import PSD3.Attributes (DatumFn(..), DatumFnI(..), unwrapDatumFn)
 import PSD3.Internal.Attributes.Sugar (classed, remove, strokeColor, transform', x1, x2, y1, y2)
 import PSD3.Internal.Types (D3Selection_, Element(..))
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, enterAttrs, updateAttrs)
@@ -25,7 +26,7 @@ import PSD3.Internal.Types (Datum_)
 -- | Tags from the tag map are joined with spaces and added as CSS classes
 makeTagClassesAttr :: forall d. Maybe (Map.Map NodeID (Set.Set String)) -> SelectionAttribute d
 makeTagClassesAttr Nothing = classed ""
-makeTagClassesAttr (Just tagMap) = classed tagClassesFn
+makeTagClassesAttr (Just tagMap) = classed (DatumFn tagClassesFn)
   where
     tagClassesFn :: Datum_ -> String
     tagClassesFn d =
@@ -85,7 +86,7 @@ spagoRenderCallbacks = {
 
   -- Link rendering: Simple line elements
   , onLinkEnter: \enterSel attrs -> do
-      linkEnter <- appendTo enterSel Line [ classed link_.linkClass, strokeColor link_.color, classed "enter" ]
+      linkEnter <- appendTo enterSel Line [ classed (DatumFn link_.linkClass), strokeColor (DatumFn link_.color), classed "enter" ]
       pure linkEnter
 
   , onLinkUpdate: \updateSel attrs ->
@@ -96,12 +97,12 @@ spagoRenderCallbacks = {
 
   -- Tick function attributes
   , nodeTickAttrs: \attrs ->
-      [ transform' datum_.translateNode ]
+      [ transform' (unwrapDatumFn (DatumFn datum_.translateNode)) ]
 
   , linkTickAttrs:
-      [ x1 (_.x <<< link_.source)
-      , y1 (_.y <<< link_.source)
-      , x2 (_.x <<< link_.target)
-      , y2 (_.y <<< link_.target)
+      [ x1 (DatumFn (_.x <<< link_.source))
+      , y1 (DatumFn (_.y <<< link_.source))
+      , x2 (DatumFn (_.x <<< link_.target))
+      , y2 (DatumFn (_.y <<< link_.target))
       ]
 }

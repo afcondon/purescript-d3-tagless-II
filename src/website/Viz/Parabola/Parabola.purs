@@ -4,6 +4,7 @@ import PSD3.Internal.Attributes.Sugar
 
 import D3.Viz.Parabola.Unsafe (coerceDatumToInt)
 import Data.Int (toNumber)
+import PSD3.Attributes (DatumFn(..), DatumFnI(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
 import PSD3.Internal.FFI (keyIsID_)
 import PSD3.Internal.Scales.Scales (d3SchemePairedN_)
@@ -37,11 +38,11 @@ drawWithData circleData selector = do
 
   circles     <- simpleJoin circleGroup Circle circleData keyIsID_
   -- TYPE INFERENCE TEST: Can we use typed lambdas now?
-  setAttributes circles [ strokeColor (\d -> d3SchemePairedN_ ((toNumber $ d) / 100.0))
+  setAttributes circles [ strokeColor (DatumFn \d -> d3SchemePairedN_ ((toNumber $ coerceDatumToInt d) / 100.0))
                         , strokeWidth 3.0
                         , fill "none"
-                        , cx (\_ i -> (index_ToNumber i) * 20.0)
-                        , cy (\d -> 100.0 - (toNumber $ d) / 5.0)
+                        , cx (DatumFnI \_ i -> (index_ToNumber i) * 20.0)
+                        , cy (DatumFn \d -> 100.0 - (toNumber $ coerceDatumToInt d) / 5.0)
                         , radius 10.0 ]
   pure circles
 -- Snippet_End

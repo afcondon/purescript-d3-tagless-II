@@ -6,6 +6,7 @@ import D3.Viz.WealthHealth.Unsafe (coerceDatumToKey, datum_)
 import Data.Int (floor)
 import Data.Number (log, sqrt)
 import Data.Traversable (traverse)
+import PSD3.Attributes (DatumFn(..), DatumFnI(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, openSelection, setAttributes, updateJoin)
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fillOpacity, fontSize, height, radius, sortSelection, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
 import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
@@ -163,10 +164,10 @@ updateVisualization chartGroup nations = do
 
   -- Update: move existing circles to new positions
   setAttributes updateSelections.update
-    [ cx \d i -> (calculateAttrs d i).x
-    , cy \d i -> (calculateAttrs d i).y
-    , radius \d i -> (calculateAttrs d i).r
-    , fill \d i -> (calculateAttrs d i).color
+    [ cx (DatumFnI \d i -> (calculateAttrs d i).x)
+    , cy (DatumFnI \d i -> (calculateAttrs d i).y)
+    , radius (DatumFnI \d i -> (calculateAttrs d i).r)
+    , fill (DatumFnI \d i -> (calculateAttrs d i).color)
     , classed "update"
     ]
     -- TODO: Add update transition
@@ -174,10 +175,10 @@ updateVisualization chartGroup nations = do
   -- Enter: create new circles
   newCircles <- appendTo updateSelections.enter Circle []
   setAttributes newCircles
-    [ cx \d i -> (calculateAttrs d i).x
-    , cy \d i -> (calculateAttrs d i).y
-    , radius \d i -> (calculateAttrs d i).r
-    , fill \d i -> (calculateAttrs d i).color
+    [ cx (DatumFnI \d i -> (calculateAttrs d i).x)
+    , cy (DatumFnI \d i -> (calculateAttrs d i).y)
+    , radius (DatumFnI \d i -> (calculateAttrs d i).r)
+    , fill (DatumFnI \d i -> (calculateAttrs d i).color)
     , fillOpacity 0.7
     , strokeColor "#333"
     , strokeWidth 0.5
@@ -375,10 +376,10 @@ draw selector = do
           let popA = datum_.population a
               popB = datum_.population b
           in orderingToInt $ compare popB popA  -- Descending order
-      , cx \d i -> (calculateAttrs d i).x
-      , cy \d i -> (calculateAttrs d i).y
-      , radius \d i -> (calculateAttrs d i).r
-      , fill \d i -> (calculateAttrs d i).color
+      , cx (DatumFnI \d i -> (calculateAttrs d i).x)
+      , cy (DatumFnI \d i -> (calculateAttrs d i).y)
+      , radius (DatumFnI \d i -> (calculateAttrs d i).r)
+      , fill (DatumFnI \d i -> (calculateAttrs d i).color)
       , classed "nation-circle update"
       ]
 
@@ -389,10 +390,10 @@ draw selector = do
           let popA = datum_.population a
               popB = datum_.population b
           in orderingToInt $ compare popB popA  -- Descending order
-      , cx \d i -> (calculateAttrs d i).x
-      , cy \d i -> (calculateAttrs d i).y
-      , radius \d i -> (calculateAttrs d i).r
-      , fill \d i -> (calculateAttrs d i).color
+      , cx (DatumFnI \d i -> (calculateAttrs d i).x)
+      , cy (DatumFnI \d i -> (calculateAttrs d i).y)
+      , radius (DatumFnI \d i -> (calculateAttrs d i).r)
+      , fill (DatumFnI \d i -> (calculateAttrs d i).color)
       , fillOpacity 0.7
       , strokeColor "#333"
       , strokeWidth 0.5
@@ -403,7 +404,7 @@ draw selector = do
     let tooltipText d = datum_.name d <> "\n" <> datum_.region d
     newTitles <- appendTo newCircles Title []
     setAttributes newTitles
-      [ text tooltipText ]
+      [ text (DatumFn tooltipText) ]
 
     -- Use General Update Pattern for labels (parallel join)
     labelEnterSelection <- openSelection chartGroup "text"
@@ -415,21 +416,21 @@ draw selector = do
 
     -- Update: move existing labels to new positions
     setAttributes labelUpdateSelections.update
-      [ x \d i -> (calculateAttrs d i).x
-      , y \d i -> (calculateAttrs d i).y - (calculateAttrs d i).r - 5.0
+      [ x (DatumFnI \d i -> (calculateAttrs d i).x)
+      , y (DatumFnI \d i -> (calculateAttrs d i).y - (calculateAttrs d i).r - 5.0)
       , classed "nation-label update"
       ]
 
     -- Enter: create new labels
     newLabels <- appendTo labelUpdateSelections.enter Text []
     setAttributes newLabels
-      [ x \d i -> (calculateAttrs d i).x
-      , y \d i -> (calculateAttrs d i).y - (calculateAttrs d i).r - 5.0
+      [ x (DatumFnI \d i -> (calculateAttrs d i).x)
+      , y (DatumFnI \d i -> (calculateAttrs d i).y - (calculateAttrs d i).r - 5.0)
       , textAnchor "middle"
       , fontSize 11.0
       , fill "#333"
       , fillOpacity 0.0  -- Initially hidden
-      , text datum_.name
+      , text (DatumFn datum_.name)
       , classed "nation-label enter"
       ]
 

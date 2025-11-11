@@ -2,6 +2,7 @@ module D3.Viz.BubbleChart where
 
 import Prelude
 
+import PSD3.Attributes (DatumFn(..), DatumFnI(..))
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fillOpacity, fontSize, height, radius, strokeColor, strokeWidth, text, textAnchor, viewBox, width, x, y)
 import PSD3.Data.Tree (TreeJson_)
 import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
@@ -59,10 +60,10 @@ draw treeJson selector = do
   -- Draw bubbles using simpleJoin for proper data binding
   bubbles <- simpleJoin chartGroup Circle nodes keyIsID_
   setAttributes (unsafeCoerce bubbles :: D3Selection_ Datum_)
-    [ cx (\d -> node'.x (unsafeCoerce d))
-    , cy (\d -> node'.y (unsafeCoerce d))
-    , radius (\d -> node'.r (unsafeCoerce d))
-    , fill (\d -> depthColor (node'.depthInt (unsafeCoerce d)))
+    [ cx (DatumFn \d -> node'.x (unsafeCoerce d))
+    , cy (DatumFn \d -> node'.y (unsafeCoerce d))
+    , radius (DatumFn \d -> node'.r (unsafeCoerce d))
+    , fill (DatumFn \d -> depthColor (node'.depthInt (unsafeCoerce d)))
     , fillOpacity 0.8
     , strokeColor "#ffffff"
     , strokeWidth 2.0
@@ -72,13 +73,13 @@ draw treeJson selector = do
   -- Draw labels using simpleJoin for proper data binding
   labels <- simpleJoin chartGroup Text nodes keyIsID_
   setAttributes (unsafeCoerce labels :: D3Selection_ Datum_)
-    [ x (\d -> node'.x (unsafeCoerce d))
-    , y (\d -> node'.y (unsafeCoerce d))
-    , text (\d -> node'.name (unsafeCoerce d))
+    [ x (DatumFn \d -> node'.x (unsafeCoerce d))
+    , y (DatumFn \d -> node'.y (unsafeCoerce d))
+    , text (DatumFn \d -> node'.name (unsafeCoerce d))
     , textAnchor "middle"
-    , fontSize (\d -> min 12.0 (node'.r (unsafeCoerce d) / 3.0))
+    , fontSize (DatumFn \d -> min 12.0 (node'.r (unsafeCoerce d) / 3.0))
     , fill "#ffffff"
-    , fillOpacity (\d -> if canShowCircleLabel { minRadius: 20.0 } (unsafeCoerce d) then 1.0 else 0.0)
+    , fillOpacity (DatumFn \d -> if canShowCircleLabel { minRadius: 20.0 } (unsafeCoerce d) then 1.0 else 0.0)
     , classed "bubble-label"
     ]
 
