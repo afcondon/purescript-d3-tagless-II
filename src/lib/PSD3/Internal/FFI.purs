@@ -128,19 +128,19 @@ foreign import readSimulationVariables_ :: D3Simulation_ -> SimulationVariables
 foreign import d3PreserveSimulationPositions_ ::
   forall d row.
   D3Selection_ d ->
-  Array (D3_SimulationNode row) ->
+  Array (SimulationNode row) ->
   (Datum_ -> Index_) ->
-  Array (D3_SimulationNode row)
+  Array (SimulationNode row)
 foreign import d3PreserveLinkReferences_ ::
   forall d.
   D3Selection_ d ->
   Array D3Link_Unswizzled ->
   Array D3Link_Unswizzled
 
-foreign import getIDsFromNodes_ :: forall d id. Array (D3_SimulationNode d) -> (Datum_ -> Index_) -> Array id
+foreign import getIDsFromNodes_ :: forall d id. Array (SimulationNode d) -> (Datum_ -> Index_) -> Array id
 
-foreign import getNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)
-foreign import setNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> Array (D3_SimulationNode d)
+foreign import getNodes_ :: forall d.   D3Simulation_ -> Array (SimulationNode d)
+foreign import setNodes_ :: forall d.   D3Simulation_ -> Array (SimulationNode d) -> Array (SimulationNode d)
 -- setLinks will do the swizzling AND prune any links that have source or target that is not in [nodes]
 foreign import setLinks_ ::
   D3Simulation_ ->
@@ -149,7 +149,7 @@ foreign import setLinks_ ::
 foreign import swizzleLinks_ ::
   forall d.
   Array D3Link_Unswizzled ->
-  Array (D3_SimulationNode d) ->
+  Array (SimulationNode d) ->
   (Datum_ -> Index_) ->
   Array D3Link_Swizzled
 
@@ -163,26 +163,26 @@ foreign import getLinksFromSimulation_ :: D3Simulation_ -> Array D3Link_Swizzled
 foreign import startSimulation_        :: D3Simulation_ -> Unit
 foreign import stopSimulation_         :: D3Simulation_ -> Unit
 
-foreign import setInSimNodeFlag_     :: forall d. D3_SimulationNode d -> Unit
-foreign import unsetInSimNodeFlag_   :: forall d. D3_SimulationNode d -> Unit
+foreign import setInSimNodeFlag_     :: forall d. SimulationNode d -> Unit
+foreign import unsetInSimNodeFlag_   :: forall d. SimulationNode d -> Unit
 
 -- following functions modify the node and return it - meant to be used on staged data which will then be re-entered to sim
-foreign import pinNode_              :: forall d. Number -> Number -> D3_SimulationNode d -> D3_SimulationNode d
-foreign import pinNamedNode_         :: forall d. String -> Number -> Number -> D3_SimulationNode d -> D3_SimulationNode d
-foreign import pinTreeNode_          :: forall d. D3_SimulationNode d -> D3_SimulationNode d -- modifies fx/fy
-foreign import unpinNode_            :: forall d. D3_SimulationNode d -> D3_SimulationNode d -- set fx/fy to null
+foreign import pinNode_              :: forall d. Number -> Number -> SimulationNode d -> SimulationNode d
+foreign import pinNamedNode_         :: forall d. String -> Number -> Number -> SimulationNode d -> SimulationNode d
+foreign import pinTreeNode_          :: forall d. SimulationNode d -> SimulationNode d -- modifies fx/fy
+foreign import unpinNode_            :: forall d. SimulationNode d -> SimulationNode d -- set fx/fy to null
 
 -- NB mutating function
--- pinNode :: forall d. D3_SimulationNode d -> PointXY -> D3_SimulationNode d
+-- pinNode :: forall d. SimulationNode d -> PointXY -> SimulationNode d
 -- pinNode node p = do
 --   let _ = pinNode_ p.x p.y node
 --   node -- NB mutated value, fx / fy have been set
 -- NB mutating function
-setInSimNodeFlag :: forall d. D3_SimulationNode d -> D3_SimulationNode d
+setInSimNodeFlag :: forall d. SimulationNode d -> SimulationNode d
 setInSimNodeFlag node = do
   let _ = setInSimNodeFlag_ node
   node -- NB mutated value, inSim now true
-unsetInSimNodeFlag :: forall d. D3_SimulationNode d -> D3_SimulationNode d
+unsetInSimNodeFlag :: forall d. SimulationNode d -> SimulationNode d
 unsetInSimNodeFlag node = do
   let _ = unsetInSimNodeFlag_ node
   node -- NB mutated value, inSim now false

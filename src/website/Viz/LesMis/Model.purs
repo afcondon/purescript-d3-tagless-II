@@ -1,28 +1,42 @@
 module D3.Viz.LesMiserables.Model where
 
-import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode, D3_VxyFxy, D3_XY)
-import Type.Row (type (+))
+import Prelude
+import PSD3.Data.Node (D3Link_Unswizzled, SimulationNode(..))
+import Data.Nullable (null)
 
 -- | ==========================================================================================
--- |                  Model data types specialized with inital data
+-- |                  Model data types using new SimulationNode a pattern
 -- | ==========================================================================================
 
--- the "extra / model-specific" data above and beyond what any D3 Tree Node is going to have:
-type LesMisNodeData row = ( id :: String, group :: Int | row ) 
--- this extra data inside a D3SimNode as used in PureScript:
-type LesMisSimNode     = D3_SimulationNode ( LesMisNodeData  + D3_XY + D3_VxyFxy + ()) 
+-- | User data for Les Misérables nodes
+type LesMisNodeData =
+  { id :: String
+  , group :: Int
+  }
 
--- first the "extra / model-specific" data in the links
-type LesMisLinkData     = ( value :: Number )
-type LesMisGraphLinkObj = { source :: LesMisSimRecord, target :: LesMisSimRecord | LesMisLinkData }
+-- | Simulation node with LesMisNodeData embedded
+type LesMisSimNode = SimulationNode LesMisNodeData
 
+-- | Link data (value represents connection strength)
+type LesMisLinkData = { value :: Number }
 
--- we make the model like so, but D3 then swizzles it to the "cooked" model below
--- the source and target in the links are given as "String" to match id in the node data (UNSWIZZLED)
-type LesMisRawModel    = { links :: Array D3Link_Unswizzled, nodes :: Array LesMisSimNode  }
+-- | Raw model (unswizzled links - source/target are string IDs)
+type LesMisRawModel =
+  { links :: Array D3Link_Unswizzled
+  , nodes :: Array LesMisSimNode
+  }
 
--- same as above but as a bare record, this is the "datum" that D3 sees and which it returns to you for attr setting:
-type LesMisSimRecord   = Record (D3_XY + D3_VxyFxy + LesMisNodeData  + ())
+-- | Create a LesMisSimNode with default simulation values
+mkLesMisNode :: String -> Int -> LesMisSimNode
+mkLesMisNode id group = SimNode
+  { data_: { id, group }
+  , x: 0.0
+  , y: 0.0
+  , vx: 0.0
+  , vy: 0.0
+  , fx: null
+  , fy: null
+  }
 
 
 

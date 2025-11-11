@@ -8,7 +8,7 @@ import PSD3.Internal.Selection.Types (SelectionAttribute)
 import PSD3.Internal.Simulation.Types (Step(..))
 import PSD3.Capabilities.Selection (class SelectionM, mergeSelections, openSelection, updateJoin)
 import PSD3.Capabilities.Simulation (class SimulationM2, SimulationUpdate, addTickFunction, update)
-import PSD3.Data.Node (D3Link_Swizzled, D3Link_Unswizzled, D3_SimulationNode, NodeID)
+import PSD3.Data.Node (D3Link_Swizzled, D3Link_Unswizzled, SimulationNode, NodeID)
 import PSD3.Internal.FFI (SimulationVariables, getIDsFromNodes_, getLinkIDs_, keyIsID_)
 import Data.Maybe (Maybe(..))
 import Data.Set as Set
@@ -85,11 +85,11 @@ type RenderCallbacks attrs sel m d = {
 -- | This makes the "nodes filtered but links not" bug IMPOSSIBLE.
 -- | The linkFilter is an optional ADDITIONAL filter for visual purposes.
 type DeclarativeUpdateConfig d =
-  { allNodes :: Array (D3_SimulationNode d)                                -- FULL dataset (required)
+  { allNodes :: Array (SimulationNode d)                                -- FULL dataset (required)
   , allLinks :: Array D3Link_Unswizzled                                    -- FULL dataset (required)
-  , nodeFilter :: D3_SimulationNode d -> Boolean                           -- Which nodes to show (required)
+  , nodeFilter :: SimulationNode d -> Boolean                           -- Which nodes to show (required)
   , linkFilter :: Maybe (D3Link_Unswizzled -> Boolean)                     -- Optional visual filtering (applied AFTER automatic structural filtering)
-  , nodeInitializers :: Array (Array (D3_SimulationNode d) -> Array (D3_SimulationNode d))  -- Functions to transform filtered nodes (e.g., tree layout, grid, pinning)
+  , nodeInitializers :: Array (Array (SimulationNode d) -> Array (SimulationNode d))  -- Functions to transform filtered nodes (e.g., tree layout, grid, pinning)
   , activeForces :: Maybe (Set Label)                                      -- Which forces to enable
   , config :: Maybe SimulationVariables                                    -- Simulation config
   }
@@ -156,13 +156,13 @@ genericUpdateSimulation :: forall dataRow attrs sel m.
   Monad m =>
   SelectionM sel m =>
   SimulationM2 sel m =>
-  { nodes :: Maybe (sel (D3_SimulationNode dataRow)), links :: Maybe (sel D3Link_Swizzled) } ->
+  { nodes :: Maybe (sel (SimulationNode dataRow)), links :: Maybe (sel D3Link_Swizzled) } ->
   Element ->                                         -- Node element type
   Element ->                                         -- Link element type
   DeclarativeUpdateConfig dataRow ->                 -- Declarative configuration (uses Row Type)
   (Datum_ -> Index_) ->                              -- Key function
   attrs ->                                           -- Visualization attributes
-  RenderCallbacks attrs sel m (D3_SimulationNode dataRow) ->  -- Render callbacks (uses complete Type)
+  RenderCallbacks attrs sel m (SimulationNode dataRow) ->  -- Render callbacks (uses complete Type)
   m Unit
 genericUpdateSimulation { nodes: Just nodesGroup, links: Just linksGroup }
                         nodeElement linkElement config keyFn attrs callbacks = do

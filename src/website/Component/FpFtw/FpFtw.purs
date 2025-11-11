@@ -13,7 +13,7 @@ import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect)
 import Effect.Class.Console (log)
 import Halogen as H
-import PSD3.Data.Node (D3_SimulationNode)
+import PSD3.Data.Node (SimulationNode)
 import PSD3.FpFtw.Actions (Action(..))
 import PSD3.FpFtw.HTML (render)
 import PSD3.FpFtw.State (State, initialState)
@@ -35,18 +35,12 @@ component = H.mkComponent
 -- handleAction :: forall o m. MonadAff m => Action -> H.HalogenM (State D3_SimulationNode ) Action () o m Unit
 handleAction :: forall m. MonadAff m => MonadState
                                                 { simulation :: D3SimulationState_
-                                                                  (D3_SimulationNode
-                                                                     ( fx :: Nullable Number
-                                                                     , fy :: Nullable Number
-                                                                     , group :: Maybe Int
+                                                                  (SimulationNode
+                                                                     { group :: Maybe Int
                                                                      , id :: String
                                                                      , layer :: Int
                                                                      , name :: String
-                                                                     , vx :: Number
-                                                                     , vy :: Number
-                                                                     , x :: Number
-                                                                     , y :: Number
-                                                                     )
+                                                                     }
                                                                   )
                                                 , currentExample :: String
                                                 }

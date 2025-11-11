@@ -9,7 +9,7 @@ import Control.Monad.State (class MonadState)
 import PSD3.Attributes (DatumFn(..))
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, x1, x2, y1, y2)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
-import D3.Viz.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
+import D3.Viz.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode, getNodeGroup, getNodeX, getNodeY, getLinkValue, getLinkSourceX, getLinkSourceY, getLinkTargetX, getLinkTargetY, getLinkTargetGroup)
 import D3.Viz.LesMiserables.Model (LesMisRawModel, LesMisSimNode)
 import PSD3.Internal.FFI (keyIsID_, simdrag_)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
@@ -18,7 +18,7 @@ import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, SimVariable(..
 import PSD3.Internal.Zoom (ScaleExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, on, setAttributes, simpleJoin)
 import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, start, update)
-import PSD3.Data.Node (D3Link_Swizzled, D3_SimulationNode(..))
+import PSD3.Data.Node (D3Link_Swizzled, SimulationNode(..))
 import PSD3.Shared.ZoomableViewbox (zoomableSVG)
 import Data.Int (toNumber)
 import Data.Map as Map
@@ -27,6 +27,7 @@ import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
+import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 
 -- PHANTOM TYPE SUCCESS: No more datum_/link_ boilerplate needed!
@@ -77,12 +78,13 @@ draw model selector = do
 -- Snippet_Start
 -- Name: LesMisSimplified
 -- | Simplified version using SimulationM with record-based init
-drawSimplified :: forall row d m.
+-- | Forces are polymorphic (created with allNodes filter) so they work for any node type.
+drawSimplified :: forall row d m nodeType.
   Bind m =>
   MonadEffect m =>
-  MonadState { simulation :: D3SimulationState_ LesMisSimNode | row } m =>
+  MonadState { simulation :: D3SimulationState_ nodeType | row } m =>
   SimulationM2 D3Selection_ m =>
-  Array (Force LesMisSimNode) -> Set.Set String -> LesMisRawModel -> Selector (D3Selection_ d) -> m Unit
+  Array (Force nodeType) -> Set.Set String -> LesMisRawModel -> Selector (D3Selection_ d) -> m Unit
 drawSimplified forceLibrary activeForces model selector = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   rootSel <- attach selector
@@ -105,10 +107,12 @@ drawSimplified forceLibrary activeForces model selector = do
   nodesGroup <- appendTo zoomGroup Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ]
 
   -- Initialize simulation to get enhanced data back
+  -- Forces are polymorphic (created with allNodes filter), so we coerce to the specific type
+  let ffiForces = unsafeCoerce forceLibrary
   { nodes: nodesInSim, links: linksInSim } <- init
     { nodes: model.nodes
     , links: model.links
-    , forces: forceLibrary
+    , forces: ffiForces
     , activeForces: activeForces
     , config: { alpha: 1.0, alphaTarget: 0.0, alphaMin: 0.001, alphaDecay: 0.0228, velocityDecay: 0.4 }
     , keyFn: keyIsID_
@@ -117,26 +121,26 @@ drawSimplified forceLibrary activeForces model selector = do
 
   -- NOW join the simulation-enhanced data to DOM
   nodesSelection <- simpleJoin nodesGroup Circle nodesInSim keyIsID_
-  -- Use unboxD3SimNode to convert Datum_ -> LesMisSimRecord, wrapped in DatumFn
-  setAttributes nodesSelection [ radius 5.0, fill (DatumFn (d3SchemeCategory10N_ <<< toNumber <<< _.group <<< unboxD3SimNode)) ]
+  -- Use accessor helpers to get data from SimulationNode pattern
+  setAttributes nodesSelection [ radius 5.0, fill (DatumFn (d3SchemeCategory10N_ <<< toNumber <<< getNodeGroup <<< unboxD3SimNode)) ]
 
   linksSelection <- simpleJoin linksGroup Line linksInSim keyIsID_
-  -- Use unboxD3SimLink to convert Datum_ -> swizzled link record, wrapped in DatumFn
+  -- Use accessor helpers to get data from swizzled links
   setAttributes linksSelection [
-      strokeWidth (DatumFn (sqrt <<< _.value <<< unboxD3SimLink)),
-      strokeColor (DatumFn (d3SchemeCategory10N_ <<< toNumber <<< _.target.group <<< unboxD3SimLink))
+      strokeWidth (DatumFn (sqrt <<< getLinkValue <<< unboxD3SimLink)),
+      strokeColor (DatumFn (d3SchemeCategory10N_ <<< toNumber <<< getLinkTargetGroup <<< unboxD3SimLink))
     ]
 
-  -- Add tick functions using unboxD3SimNode, wrapped in DatumFn
+  -- Add tick functions using accessor helpers
   addTickFunction "nodes" $ Step nodesSelection [
-      cx (DatumFn (_.x <<< unboxD3SimNode)),
-      cy (DatumFn (_.y <<< unboxD3SimNode))
+      cx (DatumFn (getNodeX <<< unboxD3SimNode)),
+      cy (DatumFn (getNodeY <<< unboxD3SimNode))
     ]
   addTickFunction "links" $ Step linksSelection
-      [ x1 (DatumFn (_.source.x <<< unboxD3SimLink))
-      , y1 (DatumFn (_.source.y <<< unboxD3SimLink))
-      , x2 (DatumFn (_.target.x <<< unboxD3SimLink))
-      , y2 (DatumFn (_.target.y <<< unboxD3SimLink))
+      [ x1 (DatumFn (getLinkSourceX <<< unboxD3SimLink))
+      , y1 (DatumFn (getLinkSourceY <<< unboxD3SimLink))
+      , x2 (DatumFn (getLinkTargetX <<< unboxD3SimLink))
+      , y2 (DatumFn (getLinkTargetY <<< unboxD3SimLink))
       ]
 
   -- Add drag interaction for nodes

@@ -13,7 +13,7 @@ import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import PSD3.Capabilities.Simulation (class SimulationM, start, stop)
-import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode)
+import PSD3.Data.Node (D3Link_Unswizzled, SimulationNode)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Types (D3Selection_, Datum_)
 import PSD3.Simulation.Scene (SceneConfig)
@@ -58,11 +58,11 @@ import PSD3.Simulation.SceneTransition (executeSceneTransition_)
 runSimulation :: forall d attrs sel m.
   MonadAff m =>
   SimulationM sel m =>
-  { nodes :: Maybe (sel (D3_SimulationNode d)), links :: Maybe (sel (D3_SimulationNode d)) } ->
+  { nodes :: Maybe (sel (SimulationNode d)), links :: Maybe (sel (SimulationNode d)) } ->
   SceneConfig d attrs ->
-  Array (D3_SimulationNode d) ->
+  Array (SimulationNode d) ->
   Array D3Link_Unswizzled ->
-  ({ allNodes :: Array (D3_SimulationNode d)
+  ({ allNodes :: Array (SimulationNode d)
    , allLinks :: Array D3Link_Unswizzled
    , scene :: SceneConfig d attrs
    } -> m Unit) ->
@@ -137,17 +137,17 @@ runSimulationFromState :: forall d attrs sel m row.
   MonadAff m =>
   SimulationM sel m =>
   MonadState { | row } m =>
-  ({ | row } -> { nodes :: Maybe (sel (D3_SimulationNode d)), links :: Maybe (sel (D3_SimulationNode d)) }) ->  -- Get selections
+  ({ | row } -> { nodes :: Maybe (sel (SimulationNode d)), links :: Maybe (sel (SimulationNode d)) }) ->  -- Get selections
   ({ | row } -> SceneConfig d attrs) ->                                           -- Get scene
-  ({ | row } -> Array (D3_SimulationNode d)) ->                                   -- Get model nodes
+  ({ | row } -> Array (SimulationNode d)) ->                                   -- Get model nodes
   ({ | row } -> Array D3Link_Unswizzled) ->                                       -- Get model links
   (attrs -> { | row } -> attrs) ->                                                -- Enhance attributes
-  ({ nodes :: Maybe (sel (D3_SimulationNode d)), links :: Maybe (sel (D3_SimulationNode d)) } ->  -- UpdateSimulation function (DECLARATIVE API)
-   { allNodes :: Array (D3_SimulationNode d)                                         -- FULL dataset
+  ({ nodes :: Maybe (sel (SimulationNode d)), links :: Maybe (sel (SimulationNode d)) } ->  -- UpdateSimulation function (DECLARATIVE API)
+   { allNodes :: Array (SimulationNode d)                                         -- FULL dataset
    , allLinks :: Array D3Link_Unswizzled                                            -- FULL dataset
-   , nodeFilter :: D3_SimulationNode d -> Boolean                                   -- Which nodes to show
+   , nodeFilter :: SimulationNode d -> Boolean                                   -- Which nodes to show
    , linkFilter :: Maybe (D3Link_Unswizzled -> Boolean)                             -- Optional visual filtering
-   , nodeInitializers :: Array (Array (D3_SimulationNode d) -> Array (D3_SimulationNode d))  -- Tree layout, grid, etc.
+   , nodeInitializers :: Array (Array (SimulationNode d) -> Array (SimulationNode d))  -- Tree layout, grid, etc.
    , activeForces :: Set Label
    , linksWithForce :: Datum_ -> Boolean
    } ->

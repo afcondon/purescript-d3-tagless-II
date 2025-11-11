@@ -6,11 +6,13 @@ import Type.Row (type (+))
 -- ============================================================================================================================
 -- | Types for working with D3 simulations and graphs.
 -- |
--- | Simulation/graph data uses EXTENDED ROW pattern where node properties (x, y, vx, vy, etc.)
--- | are added directly to the data record.
+-- | UPDATED: Simulation nodes now use PARAMETERIZED TYPE pattern (matching hierarchy layouts)
+-- | instead of extended row pattern. This enables:
+-- | - Typeclass instances (HasDatum)
+-- | - Typed lambdas without DatumFn wrappers
+-- | - Consistent API with TreeNode, PackNode, etc.
 -- |
--- | Hierarchy layouts are now pure PureScript (PSD3.Layout.Hierarchy.*) and use their own node types
--- | (TreeNode, PackNode, etc.) which don't require special wrapping.
+-- | Hierarchy layouts use pure PureScript (PSD3.Layout.Hierarchy.*) with their own node types.
 -- ============================================================================================================================
 
 -- ============================================================================================================================
@@ -35,18 +37,45 @@ foreign import data D3Link_Unswizzled :: Type
 foreign import data D3Link_Swizzled :: Type
 
 -- ============================================================================================================================
--- | Standard Graph node rows
+-- | Simulation Node (Parameterized Type - matches TreeNode pattern)
 -- ============================================================================================================================
--- often we want to create a unique `id` from some other field(s) of data object
-type D3_ID      row = ( id    :: NodeID | row )
--- nodes of many types have or are given an x,y position 
-type D3_XY      row = ( x :: Number, y :: Number | row )
--- the fields that are acted upon by forces in the simulation
-type D3_VxyFxy  row = ( vx :: Number, vy :: Number, fx :: Nullable Number, fy :: Nullable Number | row )
--- focus points for custom forces (such as clustering)
-type D3_FocusXY row = ( cluster :: Int, focusX :: Number, focusY :: Number | row )                  
 
--- the crucial type for building simulation-ready records with mixture of the rows above
+-- | Simulation node with user data embedded in `data_` field
+-- | This matches the pattern used by TreeNode, PackNode, etc.
+-- |
+-- | Fields managed by D3 simulation:
+-- | - x, y: Position
+-- | - vx, vy: Velocity
+-- | - fx, fy: Fixed position (Nullable - Nothing means not fixed)
+-- |
+-- | User data goes in `data_` field of type `a`
+-- |
+-- | NOTE: This is the user-facing type. At the FFI boundary, D3 works with flat objects
+-- | where user fields are mixed with simulation fields. Use toFFISimNode/fromFFISimNode
+-- | to convert between representations.
+data SimulationNode a = SimNode
+  { data_ :: a
+  , x :: Number
+  , y :: Number
+  , vx :: Number
+  , vy :: Number
+  , fx :: Nullable Number
+  , fy :: Nullable Number
+  }
+
+-- | FFI representation of a simulation node (flat object with all fields at top level)
+-- | This is what D3 actually works with - user fields mixed with simulation fields
+type FFISimNode row = Record (D3_XY + D3_VxyFxy + row)
+
+-- ============================================================================================================================
+-- | DEPRECATED: Old row-based types (kept temporarily for compatibility)
+-- ============================================================================================================================
+-- These will be removed once all examples are migrated to SimulationNode a
+
+type D3_ID      row = ( id    :: NodeID | row )
+type D3_XY      row = ( x :: Number, y :: Number | row )
+type D3_VxyFxy  row = ( vx :: Number, vy :: Number, fx :: Nullable Number, fy :: Nullable Number | row )
+type D3_FocusXY row = ( cluster :: Int, focusX :: Number, focusY :: Number | row )
 newtype D3_SimulationNode row = D3SimNode { | row }
 
 -- ============================================================================================================================

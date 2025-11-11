@@ -217,13 +217,12 @@ handleAction = case _ of
             pure unit
 
       "lesmis-force" -> do
-        -- ARCHIVED: Simulation examples temporarily disabled during phantom type integration
-        -- response <- H.liftAff $ AJAX.get ResponseFormat.string "./data/miserables.json"
-        -- let graph = readGraphFromFileContents response
-        -- let forcesArray = [ forces.manyBodyNeg, forces.collision, forces.center, forces.links ]
-        --     activeForces = Set.fromFoldable ["many body negative", "collision", "center", linksForceName_]
-        -- runWithD3_Simulation do
-        --   LesMis.drawSimplified forcesArray activeForces graph "#example-viz"
+        response <- H.liftAff $ AJAX.get ResponseFormat.string "./data/miserables.json"
+        let graph = readGraphFromFileContents response
+        let forcesArray = [ forces.manyBodyNeg, forces.collision, forces.center, forces.links ]
+            activeForces = Set.fromFoldable ["many body negative", "collision", "center", linksForceName_]
+        runWithD3_Simulation do
+          LesMis.drawSimplified forcesArray activeForces graph "#example-viz"
         pure unit
 
       "lesmisgup" -> do
