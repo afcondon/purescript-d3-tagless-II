@@ -36,11 +36,11 @@ component = H.mkComponent
 handleAction :: forall m. MonadAff m => MonadState
                                                 { simulation :: D3SimulationState_
                                                                   (SimulationNode
-                                                                     { group :: Maybe Int
+                                                                     ( group :: Maybe Int
                                                                      , id :: String
                                                                      , layer :: Int
                                                                      , name :: String
-                                                                     }
+                                                                     )
                                                                   )
                                                 , currentExample :: String
                                                 }

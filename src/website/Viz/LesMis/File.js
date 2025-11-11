@@ -6,7 +6,8 @@ const decodeFile = function (filecontents) {
   const json = JSON.parse(filecontents)
   const links = json.links.map(d => Object.create(d))
 
-  // D3 flattens structures, so create flat nodes with simulation fields initialized
+  // Create nodes with flat structure - D3 extends objects with simulation fields
+  // No nesting needed - SimulationNode is row-polymorphic
   const nodes = json.nodes.map(d => ({
     id: d.id,
     group: d.group,

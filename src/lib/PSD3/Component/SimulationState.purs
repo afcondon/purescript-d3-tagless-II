@@ -404,12 +404,12 @@ setStagingLinkFilter fn state =
 -- | Tags accumulate - calling multiple times adds more tags
 tagNodes :: forall scene action id nodeData row attrs model.
   Ord id =>
-  (SimulationNode { id :: id | row } -> id) ->  -- ID extractor function
+  (SimulationNode (id :: id | row) -> id) ->  -- ID extractor function
   String ->
-  (SimulationNode { id :: id | row } -> Boolean) ->
-  Array (SimulationNode { id :: id | row }) ->
-  SimulationComponentState scene action id { id :: id | row } attrs model ->
-  SimulationComponentState scene action id { id :: id | row } attrs model
+  (SimulationNode (id :: id | row) -> Boolean) ->
+  Array (SimulationNode (id :: id | row)) ->
+  SimulationComponentState scene action id (id :: id | row) attrs model ->
+  SimulationComponentState scene action id (id :: id | row) attrs model
 tagNodes getId label predicate nodes state =
   let newTags = foldl (\acc node ->
         if predicate node
@@ -426,11 +426,11 @@ tagNodes getId label predicate nodes state =
 -- | If a node has no tags remaining, it's removed from the map
 untagNodes :: forall scene action id nodeData row attrs model.
   Ord id =>
-  (SimulationNode { id :: id | row } -> id) ->  -- ID extractor function
+  (SimulationNode (id :: id | row) -> id) ->  -- ID extractor function
   String ->
-  Array (SimulationNode { id :: id | row }) ->
-  SimulationComponentState scene action id { id :: id | row } attrs model ->
-  SimulationComponentState scene action id { id :: id | row } attrs model
+  Array (SimulationNode (id :: id | row)) ->
+  SimulationComponentState scene action id (id :: id | row) attrs model ->
+  SimulationComponentState scene action id (id :: id | row) attrs model
 untagNodes getId label nodes state =
   let nodeIds = Set.fromFoldable $ getId <$> nodes
       newTags = M.mapMaybeWithKey (\id tags ->

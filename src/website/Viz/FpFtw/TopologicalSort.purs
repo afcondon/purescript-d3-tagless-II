@@ -27,7 +27,7 @@ import Data.Set as Set
 import PSD3.Attributes (DatumFn(..), DatumFnI(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, simpleJoin, setAttributes)
 import PSD3.Capabilities.Simulation (class SimulationM2, addTickFunction, init, start)
-import PSD3.Data.Node (SimulationNode(..), D3Link_Swizzled, D3Link_Unswizzled)
+import PSD3.Data.Node (SimulationNode, D3Link_Swizzled, D3Link_Unswizzled)
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fontSize, height, radius, strokeColor, strokeWidth, text, textAnchor, transform, viewBox, width, x, x1, x2, y, y1, y2)
 import PSD3.Internal.FFI (keyIsID_)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
@@ -56,16 +56,16 @@ type LayeredTask = {
   , group :: Maybe Int
 }
 
--- | User data for layered task nodes
-type LayeredTaskData =
-  { id :: String
+-- | User data row for layered task nodes
+type LayeredTaskRow =
+  ( id :: String
   , name :: String
   , layer :: Int
   , group :: Maybe Int
-  }
+  )
 
 -- | Simulation node for layered tasks (with fy fixed to layer)
-type LayeredSimNode = SimulationNode LayeredTaskData
+type LayeredSimNode = SimulationNode LayeredTaskRow
 
 -- | Link between tasks (for force simulation)
 type TaskLink = {
@@ -226,20 +226,17 @@ tasksToSimNodes totalWidth totalHeight layeredTasks =
                else 0.0
         yPos = (Int.toNumber task.layer * layerHeight) - (totalHeight / 2.0) + 50.0
       in
-        SimNode
-          { data_:
-              { id: task.id
-              , name: task.name
-              , layer: task.layer
-              , group: task.group  -- Preserve group for color coding!
-              }
-          , x: xPos      -- Initial x position (centered)
-          , y: yPos      -- Initial y position (centered)
-          , vx: 0.0      -- Initial velocity
-          , vy: 0.0
-          , fx: null     -- Allow horizontal movement
-          , fy: notNull yPos  -- Fix vertical position to layer!
-          }
+        { id: task.id
+        , name: task.name
+        , layer: task.layer
+        , group: task.group  -- Preserve group for color coding!
+        , x: xPos      -- Initial x position (centered)
+        , y: yPos      -- Initial y position (centered)
+        , vx: 0.0      -- Initial velocity
+        , vy: 0.0
+        , fx: null     -- Allow horizontal movement
+        , fy: notNull yPos  -- Fix vertical position to layer!
+        }
   in
     -- Process tasks layer by layer, tracking index within each layer
     Array.concat $ (\layer ->

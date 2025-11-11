@@ -9,7 +9,6 @@ import Control.Monad.State (class MonadState)
 import PSD3.Attributes (DatumFn(..))
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, x1, x2, y1, y2)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
-import D3.Viz.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode, getNodeGroup, getNodeX, getNodeY, getLinkValue, getLinkSourceX, getLinkSourceY, getLinkTargetX, getLinkTargetY, getLinkTargetGroup)
 import D3.Viz.LesMiserables.Model (LesMisRawModel, LesMisSimNode)
 import PSD3.Internal.FFI (keyIsID_, simdrag_)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
@@ -18,7 +17,7 @@ import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, SimVariable(..
 import PSD3.Internal.Zoom (ScaleExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, on, setAttributes, simpleJoin)
 import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, start, update)
-import PSD3.Data.Node (D3Link_Swizzled, SimulationNode(..))
+import PSD3.Data.Node (D3Link_Swizzled, SimulationNode)
 import PSD3.Shared.ZoomableViewbox (zoomableSVG)
 import Data.Int (toNumber)
 import Data.Map as Map
@@ -121,26 +120,26 @@ drawSimplified forceLibrary activeForces model selector = do
 
   -- NOW join the simulation-enhanced data to DOM
   nodesSelection <- simpleJoin nodesGroup Circle nodesInSim keyIsID_
-  -- Use accessor helpers to get data from SimulationNode pattern
-  setAttributes nodesSelection [ radius 5.0, fill (DatumFn (d3SchemeCategory10N_ <<< toNumber <<< getNodeGroup <<< unboxD3SimNode)) ]
+  -- Direct record accessors with minimal unsafeCoerce at FFI boundary
+  setAttributes nodesSelection [ radius 5.0, fill (DatumFn \d -> d3SchemeCategory10N_ (toNumber (unsafeCoerce d).group) :: String) ]
 
   linksSelection <- simpleJoin linksGroup Line linksInSim keyIsID_
-  -- Use accessor helpers to get data from swizzled links
+  -- Direct accessors for swizzled links
   setAttributes linksSelection [
-      strokeWidth (DatumFn (sqrt <<< getLinkValue <<< unboxD3SimLink)),
-      strokeColor (DatumFn (d3SchemeCategory10N_ <<< toNumber <<< getLinkTargetGroup <<< unboxD3SimLink))
+      strokeWidth (DatumFn \d -> sqrt (unsafeCoerce d).value :: Number),
+      strokeColor (DatumFn \d -> d3SchemeCategory10N_ (toNumber (unsafeCoerce d).target.group) :: String)
     ]
 
-  -- Add tick functions using accessor helpers
+  -- Tick functions with direct accessors
   addTickFunction "nodes" $ Step nodesSelection [
-      cx (DatumFn (getNodeX <<< unboxD3SimNode)),
-      cy (DatumFn (getNodeY <<< unboxD3SimNode))
+      cx (DatumFn \d -> (unsafeCoerce d).x :: Number),
+      cy (DatumFn \d -> (unsafeCoerce d).y :: Number)
     ]
   addTickFunction "links" $ Step linksSelection
-      [ x1 (DatumFn (getLinkSourceX <<< unboxD3SimLink))
-      , y1 (DatumFn (getLinkSourceY <<< unboxD3SimLink))
-      , x2 (DatumFn (getLinkTargetX <<< unboxD3SimLink))
-      , y2 (DatumFn (getLinkTargetY <<< unboxD3SimLink))
+      [ x1 (DatumFn \d -> (unsafeCoerce d).source.x :: Number)
+      , y1 (DatumFn \d -> (unsafeCoerce d).source.y :: Number)
+      , x2 (DatumFn \d -> (unsafeCoerce d).target.x :: Number)
+      , y2 (DatumFn \d -> (unsafeCoerce d).target.y :: Number)
       ]
 
   -- Add drag interaction for nodes

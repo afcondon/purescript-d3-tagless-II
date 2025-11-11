@@ -762,7 +762,7 @@ export function forceY_() { return d3.forceY() }
 export function getLinksFromForce_(linkForce) { return linkForce.links() }
 export function getNodes_(simulation) { return simulation.nodes() }
 export function keyIsID_(d) {
-  // console.log(`FFI: looking up the id of node: ${d.id}`);
+  // SimulationNode is row-polymorphic - user data fields are at top level
   return d.id;
 }
 export function keyIsSourceTarget_(d) {

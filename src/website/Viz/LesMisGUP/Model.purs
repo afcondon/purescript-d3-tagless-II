@@ -1,6 +1,5 @@
-module D3.Viz.LesMiserables.Model where
+module D3.Viz.LesMiserablesGUP.Model where
 
-import Prelude
 import PSD3.Data.Node (D3Link_Unswizzled, SimulationNode)
 import Data.Nullable (null)
 
@@ -37,6 +36,3 @@ mkLesMisNode id group =
   , fx: null
   , fy: null
   }
-
-
-

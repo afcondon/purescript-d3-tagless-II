@@ -37,35 +37,30 @@ foreign import data D3Link_Unswizzled :: Type
 foreign import data D3Link_Swizzled :: Type
 
 -- ============================================================================================================================
--- | Simulation Node (Parameterized Type - matches TreeNode pattern)
+-- | Simulation Node (Row Polymorphic - matches D3's extend behavior)
 -- ============================================================================================================================
 
--- | Simulation node with user data embedded in `data_` field
--- | This matches the pattern used by TreeNode, PackNode, etc.
+-- | Simulation node that extends user data with D3 simulation fields
+-- | This matches D3's behavior: it EXTENDS your objects with position/velocity fields
+-- | (unlike hierarchies which EMBED your data inside wrapper objects)
 -- |
 -- | Fields managed by D3 simulation:
 -- | - x, y: Position
 -- | - vx, vy: Velocity
 -- | - fx, fy: Fixed position (Nullable - Nothing means not fixed)
 -- |
--- | User data goes in `data_` field of type `a`
+-- | User data fields go directly in the row parameter `r`
 -- |
--- | NOTE: This is the user-facing type. At the FFI boundary, D3 works with flat objects
--- | where user fields are mixed with simulation fields. Use toFFISimNode/fromFFISimNode
--- | to convert between representations.
-data SimulationNode a = SimNode
-  { data_ :: a
-  , x :: Number
-  , y :: Number
-  , vx :: Number
-  , vy :: Number
-  , fx :: Nullable Number
-  , fy :: Nullable Number
-  }
-
--- | FFI representation of a simulation node (flat object with all fields at top level)
--- | This is what D3 actually works with - user fields mixed with simulation fields
-type FFISimNode row = Record (D3_XY + D3_VxyFxy + row)
+-- | Example:
+-- | ```purescript
+-- | type MyNode = SimulationNode (id :: String, group :: Int)
+-- | -- Expands to: { x :: Number, y :: Number, vx :: Number, vy :: Number,
+-- | --               fx :: Nullable Number, fy :: Nullable Number,
+-- | --               id :: String, group :: Int }
+-- | ```
+-- |
+-- | This honest representation eliminates the need for unsafeCoerce and data_ nesting.
+type SimulationNode r = Record (D3_XY + D3_VxyFxy + r)
 
 -- ============================================================================================================================
 -- | DEPRECATED: Old row-based types (kept temporarily for compatibility)
