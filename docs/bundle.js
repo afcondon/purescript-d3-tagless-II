@@ -29036,33 +29036,6 @@
       });
     }
     ;
-    if (id5 === "vertical-tree") {
-      return new Just({
-        id: id5,
-        name: "Vertical Tree",
-        description: "Top-down hierarchical tree layout",
-        category: "Hierarchies"
-      });
-    }
-    ;
-    if (id5 === "horizontal-tree") {
-      return new Just({
-        id: id5,
-        name: "Horizontal Tree",
-        description: "Left-to-right hierarchical tree layout",
-        category: "Hierarchies"
-      });
-    }
-    ;
-    if (id5 === "radial-tree") {
-      return new Just({
-        id: id5,
-        name: "Radial Tree",
-        description: "Circular hierarchical tree layout",
-        category: "Hierarchies"
-      });
-    }
-    ;
     if (id5 === "animated-radial-tree") {
       return new Just({
         id: id5,
@@ -29285,18 +29258,6 @@
               });
             }
             ;
-            if (state3.exampleId === "vertical-tree") {
-              return pure29(unit);
-            }
-            ;
-            if (state3.exampleId === "horizontal-tree") {
-              return pure29(unit);
-            }
-            ;
-            if (state3.exampleId === "radial-tree") {
-              return pure29(unit);
-            }
-            ;
             if (state3.exampleId === "animated-radial-tree") {
               return bind24(liftAff37(getTreeViaAJAX("./data/flare-2.json")))(function(result) {
                 if (result instanceof Left) {
@@ -29309,7 +29270,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Component.Example (line 161, column 9 - line 165, column 22): " + [result.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Component.Example (line 151, column 9 - line 155, column 22): " + [result.constructor.name]);
               });
             }
             ;
@@ -29326,7 +29287,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Component.Example (line 169, column 9 - line 174, column 22): " + [result.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Component.Example (line 159, column 9 - line 164, column 22): " + [result.constructor.name]);
               });
             }
             ;
@@ -29343,7 +29304,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Component.Example (line 178, column 9 - line 183, column 22): " + [result.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Component.Example (line 168, column 9 - line 173, column 22): " + [result.constructor.name]);
               });
             }
             ;
@@ -29360,7 +29321,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Component.Example (line 187, column 9 - line 192, column 22): " + [result.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Component.Example (line 177, column 9 - line 182, column 22): " + [result.constructor.name]);
               });
             }
             ;
@@ -29377,7 +29338,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Component.Example (line 196, column 9 - line 201, column 22): " + [result.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Component.Example (line 186, column 9 - line 191, column 22): " + [result.constructor.name]);
               });
             }
             ;
@@ -29394,7 +29355,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Component.Example (line 205, column 9 - line 210, column 22): " + [result.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Component.Example (line 195, column 9 - line 200, column 22): " + [result.constructor.name]);
               });
             }
             ;
@@ -29411,7 +29372,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Component.Example (line 214, column 9 - line 219, column 22): " + [result.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Component.Example (line 204, column 9 - line 209, column 22): " + [result.constructor.name]);
               });
             }
             ;
@@ -29439,7 +29400,7 @@
                     return pure29(unit);
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.Component.Example (line 235, column 9 - line 237, column 31): " + [v1.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.Component.Example (line 225, column 9 - line 227, column 31): " + [v1.constructor.name]);
                 })())(function() {
                   var forcesArray = [forces.manyBodyNeg, forces.collision, forces.center, forces.links];
                   var activeForces = fromFoldable110(["many body negative", "collision", "center", linksForceName_]);
@@ -29481,7 +29442,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Component.Example (line 256, column 9 - line 260, column 22): " + [result.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Component.Example (line 246, column 9 - line 250, column 22): " + [result.constructor.name]);
               });
             }
             ;
@@ -29731,10 +29692,10 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Component.Example (line 123, column 16 - line 431, column 58): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Component.Example (line 118, column 16 - line 421, column 58): " + [v.constructor.name]);
     };
   };
-  var allExampleIds = ["three-little-circles", "bar-chart", "line-chart", "scatter-plot", "grouped-bar-chart", "multi-line-chart", "radial-stacked-bar", "parabola", "vertical-tree", "horizontal-tree", "radial-tree", "animated-radial-tree", "tree-purescript", "treemap", "pack-purescript", "cluster-purescript", "icicle", "sunburst-purescript", "lesmis-force", "lesmisgup", "topological-sort", "chord-diagram", "sankey-diagram", "map-quartet", "nested-data", "working-with-sets", "wealth-health", "general-update-pattern", "three-circles-transition"];
+  var allExampleIds = ["three-little-circles", "bar-chart", "line-chart", "scatter-plot", "grouped-bar-chart", "multi-line-chart", "radial-stacked-bar", "parabola", "animated-radial-tree", "tree-purescript", "treemap", "pack-purescript", "cluster-purescript", "icicle", "sunburst-purescript", "lesmis-force", "lesmisgup", "topological-sort", "chord-diagram", "sankey-diagram", "map-quartet", "nested-data", "working-with-sets", "wealth-health", "general-update-pattern", "three-circles-transition"];
   var getNextExampleId = function(currentId) {
     var v = findIndex(function(id5) {
       return id5 === currentId;
@@ -29747,7 +29708,7 @@
       return index2(allExampleIds)(v.value0 + 1 | 0);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Component.Example (line 478, column 3 - line 480, column 54): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Component.Example (line 465, column 3 - line 467, column 54): " + [v.constructor.name]);
   };
   var getPrevExampleId = function(currentId) {
     var v = findIndex(function(id5) {
@@ -29766,7 +29727,7 @@
       return Nothing.value;
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Component.Example (line 485, column 3 - line 487, column 83): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Component.Example (line 472, column 3 - line 474, column 83): " + [v.constructor.name]);
   };
   var renderHeader = function(currentId) {
     return function(maybeMeta) {
@@ -29779,7 +29740,7 @@
           return text5("");
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Component.Example (line 683, column 11 - line 691, column 34): " + [maybeMeta.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Component.Example (line 664, column 11 - line 672, column 34): " + [maybeMeta.constructor.name]);
       })()]), div2([classes(["example-header-right"])])([(function() {
         var v = getPrevExampleId(currentId);
         if (v instanceof Nothing) {
@@ -29790,7 +29751,7 @@
           return a([href4("#" + routeToPath(new Example(v.value0))), classes(["example-nav-button"])])([text5("\u2190 Previous")]);
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Component.Example (line 695, column 11 - line 705, column 41): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Component.Example (line 676, column 11 - line 686, column 41): " + [v.constructor.name]);
       })(), (function() {
         var v = getNextExampleId(currentId);
         if (v instanceof Nothing) {
@@ -29801,7 +29762,7 @@
           return a([href4("#" + routeToPath(new Example(v.value0))), classes(["example-nav-button"])])([text5("Next \u2192")]);
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Component.Example (line 706, column 11 - line 716, column 37): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Component.Example (line 687, column 11 - line 697, column 37): " + [v.constructor.name]);
       })()])]);
     };
   };
@@ -29815,7 +29776,7 @@
       return div2([classes(["example-page"])])([renderHeader(state3.exampleId)(new Just(v.value0)), main([classes(["example-content"])])([div2([classes(["example-viz-panel"])])([renderLesMisControls(state3), div2([id2("example-viz"), classes(["example-viz"])])([])]), div2([classes(["example-code-panel"])])([h2([classes(["code-panel-title"])])([text5("Source Code")]), pre([classes(["code-block"])])([code([classes(["language-haskell"])])([text5(getExampleCode(state3.exampleId))])])])])]);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Component.Example (line 554, column 3 - line 594, column 10): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Component.Example (line 535, column 3 - line 575, column 10): " + [v.constructor.name]);
   };
   var component4 = function(dictMonadAff) {
     return mkComponent({
@@ -30664,7 +30625,7 @@
   };
   var filter5 = filterImpl2;
   var renderCategories = function(examples) {
-    var categories = ["Simple Charts", "Hierarchies", "Force-Directed", "Data Flow", "Rich Data Structures", "Transitions"];
+    var categories = ["Simple Charts", "Hierarchies", "Force-Directed", "Data Flow", "Rich Data Structures", "Animations", "Transitions"];
     return mapFlipped6(categories)(function(category) {
       var examplesInCategory = filter5(function(ex) {
         return ex.category === category;
@@ -30716,40 +30677,61 @@
       route: new Example("multi-line-chart"),
       thumbnail: "assets/example-thumbnails/multiline-chart.png"
     }, {
-      id: "vertical-tree",
-      name: "Vertical Tree",
-      description: "Top-down tidy tree layout",
-      category: "Hierarchies",
-      route: new Example("vertical-tree"),
-      thumbnail: "assets/example-thumbnails/vertical-tidy-tree.png"
+      id: "radial-stacked-bar",
+      name: "Radial Stacked Bar",
+      description: "Population by age and state in radial form",
+      category: "Simple Charts",
+      route: new Example("radial-stacked-bar"),
+      thumbnail: "assets/example-thumbnails/radial-stacked-bar.png"
     }, {
-      id: "horizontal-tree",
-      name: "Horizontal Tree",
-      description: "Left-to-right tidy tree layout",
-      category: "Hierarchies",
-      route: new Example("horizontal-tree"),
-      thumbnail: "assets/example-thumbnails/horizontal-tidy-tree.png"
+      id: "parabola",
+      name: "Parabola",
+      description: "Colored circles in parabolic formation",
+      category: "Simple Charts",
+      route: new Example("parabola"),
+      thumbnail: "assets/example-thumbnails/parabola.png"
     }, {
-      id: "radial-tree",
-      name: "Radial Tree",
-      description: "Circular tidy tree layout",
+      id: "tree-purescript",
+      name: "Tree",
+      description: "Node-link tree layout (Reingold-Tilford)",
       category: "Hierarchies",
-      route: new Example("radial-tree"),
-      thumbnail: "assets/example-thumbnails/radial-tidy-tree.png"
+      route: new Example("tree-purescript"),
+      thumbnail: "assets/example-thumbnails/tree-purescript.png"
     }, {
       id: "treemap",
       name: "Treemap",
-      description: "Space-filling hierarchical visualization",
+      description: "Space-filling squarified tiling",
       category: "Hierarchies",
       route: new Example("treemap"),
       thumbnail: "assets/example-thumbnails/treemap.png"
     }, {
+      id: "pack-purescript",
+      name: "Pack",
+      description: "Circle packing with iterative relaxation",
+      category: "Hierarchies",
+      route: new Example("pack-purescript"),
+      thumbnail: "assets/example-thumbnails/pack-purescript.png"
+    }, {
+      id: "cluster-purescript",
+      name: "Cluster",
+      description: "Dendrogram with equal leaf depth",
+      category: "Hierarchies",
+      route: new Example("cluster-purescript"),
+      thumbnail: "assets/example-thumbnails/cluster-purescript.png"
+    }, {
       id: "icicle",
-      name: "Icicle Chart",
-      description: "Hierarchical partition layout",
+      name: "Partition/Icicle",
+      description: "Rectangular partition with equal layer height",
       category: "Hierarchies",
       route: new Example("icicle"),
       thumbnail: "assets/example-thumbnails/icicle-chart.png"
+    }, {
+      id: "sunburst-purescript",
+      name: "Sunburst",
+      description: "Radial partition with nested rings",
+      category: "Hierarchies",
+      route: new Example("sunburst-purescript"),
+      thumbnail: "assets/example-thumbnails/sunburst-purescript.png"
     }, {
       id: "lesmis-force",
       name: "Les Mis\xE9rables Network",
@@ -30758,12 +30740,19 @@
       route: new Example("lesmis-force"),
       thumbnail: "assets/example-thumbnails/les-miserables.png"
     }, {
+      id: "lesmisgup",
+      name: "Les Mis\xE9rables GUP",
+      description: "Interactive network with dynamic filtering",
+      category: "Force-Directed",
+      route: new Example("lesmisgup"),
+      thumbnail: "assets/example-thumbnails/les-miserables-gup.png"
+    }, {
       id: "topological-sort",
       name: "Topological Sort",
       description: "Force layout with layer constraints",
       category: "Force-Directed",
       route: new Example("topological-sort"),
-      thumbnail: "assets/example-thumbnails/working-with-graphs.png"
+      thumbnail: "assets/example-thumbnails/topological-sort.png"
     }, {
       id: "chord-diagram",
       name: "Chord Diagram",
@@ -30785,6 +30774,27 @@
       category: "Rich Data Structures",
       route: new Example("map-quartet"),
       thumbnail: "assets/example-thumbnails/working-with-maps.png"
+    }, {
+      id: "nested-data",
+      name: "Nested Data",
+      description: "Nested selections with 2D arrays",
+      category: "Rich Data Structures",
+      route: new Example("nested-data"),
+      thumbnail: "assets/example-thumbnails/nested-data.png"
+    }, {
+      id: "working-with-sets",
+      name: "Working with Sets",
+      description: "Nested selections with Set data structures",
+      category: "Rich Data Structures",
+      route: new Example("working-with-sets"),
+      thumbnail: "assets/example-thumbnails/working-with-sets.png"
+    }, {
+      id: "wealth-health",
+      name: "Wealth & Health of Nations",
+      description: "Animated scatterplot across time",
+      category: "Animations",
+      route: new Example("wealth-health"),
+      thumbnail: "assets/example-thumbnails/wealth-health.png"
     }, {
       id: "three-circles-transition",
       name: "Color Mixing",

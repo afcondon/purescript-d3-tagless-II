@@ -20,7 +20,6 @@ import D3.Viz.RadialStackedBar as RadialStackedBar
 import D3.Viz.ScatterPlot as ScatterPlot
 import D3.Viz.FpFtw.MapQuartet as MapQuartet
 import D3.Viz.FpFtw.TopologicalSort as TopologicalSort
-import D3.Viz.Hierarchies as Hierarchies
 import D3.Viz.TreeViz as TreeViz
 import D3.Viz.TreemapViz as TreemapViz
 import D3.Viz.PackViz as PackViz
@@ -42,10 +41,6 @@ import D3.Viz.SankeyDiagram as Sankey
 import D3.Viz.ThreeLittleCircles as ThreeLittleCircles
 import D3.Viz.ThreeLittleCirclesTransition as CirclesTransition
 import D3.Viz.ThreeLittleDimensions as ThreeLittleDimensions
--- REMOVED: Old D3 FFI tree visualizations, replaced by TreeViz
--- import D3.Viz.Tree.HorizontalTree as HorizontalTree
--- import D3.Viz.Tree.RadialTree as RadialTree
--- import D3.Viz.Tree.VerticalTree as VerticalTree
 import D3.Viz.WealthHealth.Draw as WealthHealth
 import Data.Array as Data.Array
 import Data.Either (Either(..))
@@ -150,11 +145,6 @@ handleAction = case _ of
         pure unit
 
       -- REMOVED: "bubble-chart" was duplicate of "pack-purescript" with incorrect name/description
-
-      -- REMOVED: Old D3 FFI tree visualizations - use TreeViz instead
-      "vertical-tree" -> pure unit
-      "horizontal-tree" -> pure unit
-      "radial-tree" -> pure unit
 
       "animated-radial-tree" -> do
         result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
@@ -449,9 +439,6 @@ allExampleIds =
   , "multi-line-chart"
   , "radial-stacked-bar"
   , "parabola"
-  , "vertical-tree"
-  , "horizontal-tree"
-  , "radial-tree"
   , "animated-radial-tree"
   , "tree-purescript"
   , "treemap"
@@ -505,12 +492,6 @@ getExampleMeta id = case id of
     { id, name: "Radial Stacked Bar Chart", description: "Population by age and state in radial form", category: "Simple Charts" }
   "parabola" -> Just
     { id, name: "Parabola", description: "Colored circles in parabolic formation", category: "Simple Charts" }
-  "vertical-tree" -> Just
-    { id, name: "Vertical Tree", description: "Top-down hierarchical tree layout", category: "Hierarchies" }
-  "horizontal-tree" -> Just
-    { id, name: "Horizontal Tree", description: "Left-to-right hierarchical tree layout", category: "Hierarchies" }
-  "radial-tree" -> Just
-    { id, name: "Radial Tree", description: "Circular hierarchical tree layout", category: "Hierarchies" }
   "animated-radial-tree" -> Just
     { id, name: "Animated Radial Tree", description: "Transitions between tree layouts with smooth animations", category: "Transitions" }
   "tree-purescript" -> Just
