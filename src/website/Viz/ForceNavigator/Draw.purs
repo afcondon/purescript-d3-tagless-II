@@ -10,8 +10,8 @@ import D3.Viz.ForceNavigator.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import PSD3.Internal.FFI (keyIsID_, simdrag_)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
 import PSD3.Internal.Simulation.Types (Step(..))
-import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, mergeSelections, on, openSelection, selectUnder, setAttributes, simpleJoin, updateJoin)
+import PSD3.Shared.ZoomableViewbox (zoomableSVG)
 import PSD3.Capabilities.Simulation (class SimulationM2, SimulationUpdate, addTickFunction, update)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
@@ -82,17 +82,22 @@ initialize = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   root <- attach "div.svg-container"
 
-  svg <- appendTo root Svg [ viewBox (-w / 2.0) (-h / 2.0) w h, classed "navigation" ]
-  linksGroup <- appendTo svg Group [ classed "link", strokeColor "#999" ]
-  nodesGroup <- appendTo svg Group [ classed "node" ]
-
-  -- Add zoom behavior to SVG
-  _ <- svg `on` Zoom {
-      extent: ZoomExtent { top: 0.0, left: 0.0, bottom: h, right: w }
-    , scale: ScaleExtent 0.5 4.0
-    , name: "navigation"
-    , target: svg
+  -- Use zoomableSVG helper for consistent zoom/pan behavior
+  { svg, zoomGroup } <- zoomableSVG root
+    { minX: -w / 2.0
+    , minY: -h / 2.0
+    , width: w
+    , height: h
+    , svgClass: "navigation"
+    , innerClass: "zoom-group"
+    , innerWidth: w
+    , innerHeight: h
+    , scaleMin: 0.5  -- 50% minimum zoom
+    , scaleMax: 4.0  -- 400% maximum zoom
     }
+
+  linksGroup <- appendTo zoomGroup Group [ classed "link", strokeColor "#999" ]
+  nodesGroup <- appendTo zoomGroup Group [ classed "node" ]
 
   -- Return empty groups - no data yet
   pure { nodes: Just nodesGroup, links: Just linksGroup }
