@@ -42,15 +42,15 @@ import PSD3.Website.Types (Route(..))
 
 -- | State
 type State = {
-  simulation :: D3SimulationState_
+  simulation :: D3SimulationState_ Unit
 , gupFiber :: Maybe (Fiber Unit)
-, circlesSelection :: Maybe D3Selection_
+, circlesSelection :: Maybe (D3Selection_ Int)
 , radialTreeData :: Maybe TreeJson_
 , radialTreeType :: TreeType
 , radialRotation :: Number
-, radialRotationGroup :: Maybe D3Selection_
-, radialLinksGroup :: Maybe D3Selection_
-, radialNodesGroup :: Maybe D3Selection_
+, radialRotationGroup :: Maybe (D3Selection_ Unit)
+, radialLinksGroup :: Maybe (D3Selection_ Unit)
+, radialNodesGroup :: Maybe (D3Selection_ Unit)
 , radialHierarchyRoot :: Maybe Datum_  -- The hierarchy root (reused for transitions)
 }
 
@@ -64,14 +64,14 @@ data Action =
 
 
 -- | Forces configuration
-forceLibrary :: Map String Force
+forceLibrary :: Map String (Force Unit)
 forceLibrary = initialize [ forces.manyBodyNeg, forces.collision, forces.center, forces.links ]
 
-forces :: { center :: Force, collision :: Force, links :: Force, manyBodyNeg :: Force }
+forces :: { center :: Force Unit, collision :: Force Unit, links :: Force Unit, manyBodyNeg :: Force Unit }
 forces = {
-    manyBodyNeg: createForce "many body negative" (RegularForce ForceManyBody) allNodes [ F.strength (-40.0) ]
-  , collision:   createForce "collision"          (RegularForce ForceCollide)  allNodes [ F.radius 4.0 ]
-  , center:      createForce "center"             (RegularForce ForceCenter)   allNodes [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
+    manyBodyNeg: createForce "many body negative" (RegularForce ForceManyBody) allNodes [ F.strengthVal (-40.0) ]
+  , collision:   createForce "collision"          (RegularForce ForceCollide)  allNodes [ F.radiusVal 4.0 ]
+  , center:      createForce "center"             (RegularForce ForceCenter)   allNodes [ F.xVal 0.0, F.yVal 0.0, F.strengthVal 1.0 ]
   , links:       createLinkForce Nothing []
 }
 
@@ -246,17 +246,17 @@ handleAction = case _ of
     fiber <- H.liftAff $ forkAff $ forever $ runUpdate updateFn
     H.modify_ (\state -> state { gupFiber = Just fiber })
 
-    -- Load data
-    response <- H.liftAff $ AJAX.get ResponseFormat.string "./data/miserables.json"
-    let graph = readGraphFromFileContents response
-
-    -- Create force array and active forces set
-    let forcesArray = [ forces.manyBodyNeg, forces.collision, forces.center, forces.links ]
-        activeForces = Set.fromFoldable ["many body negative", "collision", "center", linksForceName_]
-
-    -- Draw visualization
-    runWithD3_Simulation do
-      LesMis.drawSimplified forcesArray activeForces graph "div.lesmis-container"
+    -- ARCHIVED: Force simulation disabled during phantom type integration
+    -- response <- H.liftAff $ AJAX.get ResponseFormat.string "./data/miserables.json"
+    -- let graph = readGraphFromFileContents response
+    --
+    -- -- Create force array and active forces set
+    -- let forcesArray = [ forces.manyBodyNeg, forces.collision, forces.center, forces.links ]
+    --     activeForces = Set.fromFoldable ["many body negative", "collision", "center", linksForceName_]
+    --
+    -- -- Draw visualization
+    -- runWithD3_Simulation do
+    --   LesMis.drawSimplified forcesArray activeForces graph "div.lesmis-container"
 
     -- Load tree data for animated radial tree
     treeResponse <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"

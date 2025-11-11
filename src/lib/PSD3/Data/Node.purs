@@ -4,9 +4,13 @@ import Data.Nullable (Nullable)
 import Type.Row (type (+))
 
 -- ============================================================================================================================
--- | Types for working with D3 Trees and Graphs, to try to smooth the moving between them. 
--- | D3 Simulation/graph data is EXTENDED ROW whereas Tree/Hierarchy data has the original object EMBEDDED as { data: <object> }
--- | Work-in-progress
+-- | Types for working with D3 simulations and graphs.
+-- |
+-- | Simulation/graph data uses EXTENDED ROW pattern where node properties (x, y, vx, vy, etc.)
+-- | are added directly to the data record.
+-- |
+-- | Hierarchy layouts are now pure PureScript (PSD3.Layout.Hierarchy.*) and use their own node types
+-- | (TreeNode, PackNode, etc.) which don't require special wrapping.
 -- ============================================================================================================================
 
 -- ============================================================================================================================
@@ -46,47 +50,11 @@ type D3_FocusXY row = ( cluster :: Int, focusX :: Number, focusY :: Number | row
 newtype D3_SimulationNode row = D3SimNode { | row }
 
 -- ============================================================================================================================
--- | Standard Tree row 
+-- | REMOVED: Old D3 hierarchy types (D3_TreeNode, D3TreeRow, D3CirclePackRow, D3TreeMapRow, EmbeddedData)
+-- | These types were for D3's old hierarchy FFI where data was embedded inside hierarchy nodes.
+-- | We now use pure PureScript hierarchy layouts in PSD3.Layout.Hierarchy.*
+-- | which don't need special types for embedded data.
 -- ============================================================================================================================
--- depth, height and possible value are common to all tree layouts (tidy tree, dendrogram, treemap, circlepack etc)
-type D3_TreeRow row = ( depth :: Int, height :: Int, value:: Nullable Number   | row )
--- Radius, Rect are fields that are used in circlepack and treemap layouts respectively
-type D3_Radius  row = ( r :: Number                                            | row )
-type D3_Rect    row = ( x0 :: Number, y0 :: Number, x1 :: Number, y1 :: Number | row )
--- field to track whether node has TREE children, ie Parent or Leaf
--- NB the node may still have GRAPH "children" / depends which have been pruned to get a tree
--- (in the spago example, the Model nodes contain explicit lists of graph deps in and out and tree children
--- which is probably the way you'll want to go)
--- type D3_Leaf    row = ( isTreeLeaf :: Boolean                                  | row )
-
--- REVIEW WARNING WARNING WARNING WARNING
-newtype D3_TreeNode row = D3TreeNode { | D3_ID + D3_TreeRow + row } -- parent and children also in some records but only accessible via FFI calls
-type D3TreeRow row      = D3_TreeNode ( D3_XY + row ) 
-
--- | not tested in any way yet
-type D3CirclePackRow row = D3_TreeNode ( D3_XY + D3_Radius + row )
--- | not tested in any way yet
-type D3TreeMapRow row    = D3_TreeNode ( D3_Rect + row )
-
--- when you give data to d3.hierarchy the original object contents are present under the `data` field of the new hierarchical objects 
-type EmbeddedData :: forall k. k -> Row k -> Row k
-type EmbeddedData d row= ( "data" :: d | row )
-
-
--- | ***************************************************************************************************
--- | *********************************  D3 hierarchy node
--- | D3 methods on D3_Hierarchy_Node_
--- ancestors()
--- descendants()
--- leaves()
--- find()
--- path()
--- links()
--- sum()
--- count()
--- sort()
---    iterators and maps - each, eachAfter, eachBefore, copy
--- | ***************************************************************************************************
 
 -- | ***************************************************************************************************
 -- | *********************************  D3 simulation node

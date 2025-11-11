@@ -3,9 +3,10 @@ module PSD3.Understanding.Hierarchies where -- understanding
 import Prelude
 
 import D3.Viz.Hierarchies (drawCirclePacking, drawIcicle, drawTreemap)
-import D3.Viz.Tree.HorizontalTree (drawHorizontalTree)
-import D3.Viz.Tree.RadialTree (drawRadialTree)
-import D3.Viz.Tree.VerticalTree (drawVerticalTree)
+-- REMOVED: Old D3 FFI tree visualizations - using new pure PS versions via Hierarchies module
+-- import D3.Viz.Tree.HorizontalTree (drawHorizontalTree)
+-- import D3.Viz.Tree.RadialTree (drawRadialTree)
+-- import D3.Viz.Tree.VerticalTree (drawVerticalTree)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
@@ -268,14 +269,14 @@ drawLayoutViz :: HierarchyLayout -> TreeJson_ -> Aff Unit
 drawLayoutViz layout json =
   let selector = "div.hierarchies-viz"
   in case layout of
-    -- Node-Link Diagrams - direct calls to simple modules (these return D3M)
-    HorizontalTidy       -> liftEffect $ runD3M (drawHorizontalTree TidyTree json selector) $> unit
-    HorizontalDendrogram -> liftEffect $ runD3M (drawHorizontalTree Dendrogram json selector) $> unit
-    VerticalTidy         -> liftEffect $ runD3M (drawVerticalTree TidyTree json selector) $> unit
-    VerticalDendrogram   -> liftEffect $ runD3M (drawVerticalTree Dendrogram json selector) $> unit
-    RadialTidy           -> liftEffect $ runD3M (drawRadialTree TidyTree json selector) $> unit
-    RadialDendrogram     -> liftEffect $ runD3M (drawRadialTree Dendrogram json selector) $> unit
-    -- Adjacency and Enclosure Diagrams (these already return Aff Unit)
+    -- REMOVED: Old D3 FFI tree visualizations - TODO: implement with new pure PS Tree layout
+    HorizontalTidy       -> pure unit
+    HorizontalDendrogram -> pure unit
+    VerticalTidy         -> pure unit
+    VerticalDendrogram   -> pure unit
+    RadialTidy           -> pure unit
+    RadialDendrogram     -> pure unit
+    -- Adjacency and Enclosure Diagrams (using new pure PS layouts)
     Icicle               -> drawIcicle json selector
     CirclePacking        -> drawCirclePacking json selector
     Treemap              -> drawTreemap json selector

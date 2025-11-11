@@ -1,82 +1,38 @@
-module PSD3.Internal.Hierarchical where
+-- | =======================================================================================
+-- | Hierarchical module - minimal utilities for working with tree data
+-- | =======================================================================================
+-- |
+-- | REMOVED: Old D3_TreeNode-based functions that are no longer needed:
+-- |   - find: D3_TreeNode search (only used in archived code)
+-- |   - makeModel: TreeModel construction (only used in archived code)
+-- |   - defaultSeparation, radialSeparation: D3_TreeNode separation functions (only used in archived code)
+-- |   - horizontalLink, verticalLink, radialLink: Link attribute setters (only used in archived code)
+-- |   - horizontalClusterLink, verticalClusterLink: Cluster link setters (only used in archived code)
+-- |
+-- | The new pure PureScript hierarchy layouts (PSD3.Layout.Hierarchy.*) don't need these utilities.
+-- | This module now only provides tree data loading functionality.
+-- | =======================================================================================
 
-import PSD3.Data.Node
+module PSD3.Internal.Hierarchical where
 
 import Affjax.Web (Error, URL)
 import Affjax.Web as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import PSD3.Internal.Attributes.Instances (AttributeSetter(..), toAttr)
-import PSD3.Data.Tree (TreeJson_, TreeLayout, TreeModel, TreeType)
-import PSD3.Internal.Types (Datum_)
-import PSD3.Internal.FFI (find_, getLayout, hNodeDepth_, linkClusterHorizontal_, linkClusterVertical_, linkHorizontal2_, linkHorizontal_, linkRadial_, linkVertical_, sharesParent_)
-import PSD3.Internal.Selection.Types (SelectionAttribute(..))
+import PSD3.Data.Tree (TreeJson_)
 import Data.Bifunctor (rmap)
 import Data.Either (Either)
-import Data.Function.Uncurried (Fn2, mkFn2)
-import Data.Maybe (Maybe)
-import Data.Nullable (toMaybe)
 import Effect.Aff (Aff)
-import Effect.Class (class MonadEffect)
-import Prelude (class Bind, bind, pure, ($), (/))
-import Unsafe.Coerce (unsafeCoerce)
+import Prelude (bind, pure, ($))
 
-find :: forall d. D3_TreeNode d -> (Datum_ -> Boolean) -> Maybe (D3_TreeNode d)
-find tree filter = toMaybe $ find_ tree filter
-
+-- | Load tree data from a URL via AJAX
 getTreeViaAJAX :: URL -> Aff (Either Error TreeJson_)
 getTreeViaAJAX url = do
   result <- AJAX.get ResponseFormat.string url
-  pure $ rmap (\{body} -> readJSON_ body) result  
+  pure $ rmap (\{body} -> readJSON_ body) result
 
-makeModel :: Bind Aff => 
-  MonadEffect Aff => 
-  TreeType -> 
-  TreeLayout ->
-  TreeJson_ -> 
-  Aff TreeModel
-makeModel treeType treeLayout json = do
-  let 
-    -- svgConfig  = { width: fst widthHeight, height: snd widthHeight }
-    treeLayoutFn = getLayout treeType -- REVIEW why not run this here and fill in root_ ?
-    svgConfig    = { width: 650.0, height: 650.0 }
-  pure $ { json, treeType, treeLayout, treeLayoutFn, svgConfig }
-
-foreign import readJSON_                :: String -> TreeJson_ -- TODO no error handling at all here RN
-
--- not clear if we really want to write all these in PureScript, there is no Eq instance for parents etc
--- but it will at least serve as documentation
--- OTOH if it can be nicely written here, so much the better as custom separation and all _is_ necessary
-defaultSeparation :: forall d. Fn2 (D3_TreeNode d) (D3_TreeNode d) Number
-defaultSeparation = mkFn2 (\a b -> if (sharesParent_ a b) 
-                                   then 1.0
-                                   else 2.0)
-
-radialSeparation :: forall r. Fn2 (D3_TreeNode r) (D3_TreeNode r) Number 
-radialSeparation  = mkFn2 (\a b -> if (sharesParent_ a b) 
-                                   then 1.0 
-                                   else 2.0 / (hNodeDepth_ a))
-
-horizontalLink :: forall d. SelectionAttribute d
-horizontalLink = AttrT $ AttributeSetter "d" $ toAttr (unsafeCoerce linkHorizontal_ :: d -> String)
-
--- version for when the x and y point are already swapped
--- should be default someday
-horizontalLink' :: forall d. SelectionAttribute d
-horizontalLink' = AttrT $ AttributeSetter "d" $ toAttr (unsafeCoerce linkHorizontal2_ :: d -> String)
-
-verticalLink :: forall d. SelectionAttribute d
-verticalLink = AttrT $ AttributeSetter "d" $ toAttr (unsafeCoerce linkVertical_ :: d -> String)
-
-horizontalClusterLink :: forall d. Number -> SelectionAttribute d
-horizontalClusterLink yOffset = AttrT $ AttributeSetter "d" $ toAttr (unsafeCoerce (linkClusterHorizontal_ yOffset) :: d -> String)
-
-verticalClusterLink :: forall d. Number -> SelectionAttribute d
-verticalClusterLink xOffset = AttrT $ AttributeSetter "d" $ toAttr (unsafeCoerce (linkClusterVertical_ xOffset) :: d -> String)
-
-radialLink :: forall d. (Datum_ -> Number) -> (Datum_ -> Number) -> SelectionAttribute d
-radialLink angleFn radius_Fn = do
-  let radialFn = linkRadial_ angleFn radius_Fn
-  AttrT $ AttributeSetter "d" $ toAttr (unsafeCoerce radialFn :: d -> String)
+-- | Parse JSON string to TreeJson_
+-- | TODO: Add proper error handling
+foreign import readJSON_ :: String -> TreeJson_
 
 
 

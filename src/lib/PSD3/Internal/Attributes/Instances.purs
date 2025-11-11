@@ -3,7 +3,6 @@ module PSD3.Internal.Attributes.Instances where
 import Prelude
 
 import PSD3.Internal.Types (D3This_, Datum_, Index_)
-import PSD3.Data.Node (D3_TreeNode)
 import Data.Function.Uncurried (Fn2, Fn3, mkFn2)
 import Effect (Effect)
 import Effect.Uncurried (EffectFn3)

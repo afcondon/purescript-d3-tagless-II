@@ -16,8 +16,8 @@ updateSimulation _ _ = pure unit
 nodesToGridLayout :: forall a. a -> Number -> Number -> Array Unit
 nodesToGridLayout _ _ _ = []
 
-transitionNodesToGridPositions_ :: forall m. Applicative m => Array Unit -> m Unit
-transitionNodesToGridPositions_ _ = pure unit
+transitionNodesToGridPositions_ :: forall a b c d e m. Applicative m => a -> b -> c -> d -> e -> m Unit
+transitionNodesToGridPositions_ _ _ _ _ _ = pure unit
 
 unpinAllNodes :: forall a. a -> Array Unit
 unpinAllNodes _ = []

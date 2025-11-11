@@ -242,75 +242,28 @@ foreign import setAsNullForceInSimulation_  :: D3Simulation_ -> String -> D3Simu
 -- this is an opaque type behind which hides the data type of the Purescript tree that was converted
 foreign import data RecursiveD3TreeNode_ :: Type
 -- this is the Purescript Tree after processing in JS to remove empty child fields from leaves etc
--- need to ensure that this structure is encapsulated in libraries (ie by moving this code)
-foreign import data D3TreeLike_         :: Type -- covers both trees and clusters
-foreign import data D3SortComparator_   :: Type -- a number such that n < 0 => a > b, n > 0 => b > a, n == 0 undef'd
-foreign import data D3Hierarchical_     :: Type
+-- =======================================================================================
+-- | REMOVED: Old D3 hierarchy FFI functions
+-- | We now use pure PureScript hierarchy layouts (PSD3.Layout.Hierarchy.*)
+-- | These old FFI functions are no longer needed:
+-- |   - hierarchyFromJSON_, descendants_, links_, runLayoutFn_, etc.
+-- |   - treeSortForCirclePack_, treeSortForTreeMap_, treeSortForTree_
+-- |   - hasChildren_, getHierarchyValue_, getHierarchyChildren_, getHierarchyParent_
+-- |   - getTreeLayoutFn_, getClusterLayoutFn_, treeSetSize_, treeSetSeparation_, etc.
+-- |   - hNodeDepth_, hNodeHeight_, hNodeX_, hNodeY_, hNodeR_
+-- =======================================================================================
 
-foreign import hierarchyFromJSON_       :: forall d. TreeJson_ -> D3_TreeNode d
+-- Kept: cloneTreeJson_ is still used for creating copies of tree data
 foreign import cloneTreeJson_           :: TreeJson_ -> TreeJson_
--- TODO now that these different hierarchy rows are composed at type level, polymorphic functions should be written
-foreign import treeSortForCirclePack_   :: forall d. D3CirclePackRow d -> D3CirclePackRow d
-foreign import treeSortForTreeMap_      :: forall d. D3TreeMapRow d -> D3TreeMapRow d
-foreign import treeSortForTree_         :: forall d. D3_TreeNode d -> D3_TreeNode d
-foreign import treeSortForTree_Spago_    :: forall d. D3_TreeNode d -> D3_TreeNode d
 
--- next some functions to make attributes, types are a bit sloppy here, parent and child fields do not appear in PureScript
-foreign import hasChildren_             :: forall r. D3_TreeNode r -> Boolean
-foreign import getHierarchyValue_       :: forall r. D3_TreeNode r -> Nullable Number
-foreign import getHierarchyChildren_    :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
-foreign import getHierarchyParent_      :: forall r. D3_TreeNode r -> D3_TreeNode r
-
--- the full API for hierarchical nodes:
--- TODO these should all be operating on cooked tree type, however that is to be done
-foreign import descendants_     :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
-foreign import find_            :: forall r. D3_TreeNode r -> (Datum_ -> Boolean) -> Nullable (D3_TreeNode r)
-foreign import links_           :: forall r. D3_TreeNode r -> Array D3Link_Unswizzled
-foreign import ancestors_       :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
-foreign import leaves_          :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
-foreign import path_            :: forall r. D3_TreeNode r -> D3_TreeNode r -> Array (D3_TreeNode r)
-
-getLayout :: TreeType -> TreeLayoutFn_
-getLayout layout = do
-  case layout of
-    TidyTree   -> getTreeLayoutFn_ unit
-    Dendrogram -> getClusterLayoutFn_ unit
-
-foreign import getTreeLayoutFn_       :: Unit -> TreeLayoutFn_
-foreign import getClusterLayoutFn_    :: Unit -> TreeLayoutFn_
-
-foreign import runLayoutFn_           :: forall r. TreeLayoutFn_ -> D3_TreeNode r -> D3_TreeNode r
-foreign import treeSetSize_           :: TreeLayoutFn_ -> Array Number -> TreeLayoutFn_
-foreign import treeSetNodeSize_       :: TreeLayoutFn_ -> Array Number -> TreeLayoutFn_
-foreign import treeSetSeparation_     :: forall d. TreeLayoutFn_ -> (Fn2 (D3_TreeNode d) (D3_TreeNode d) Number) -> TreeLayoutFn_
-foreign import treeMinMax_            :: forall d. D3_TreeNode d -> { xMin :: Number, xMax :: Number, yMin :: Number, yMax :: Number }
--- foreign import sum_                :: D3HierarchicalNode_ -> (Datum_ -> Number) -> D3HierarchicalNode_ -- alters the tree!!!!
--- from docs:  <<if you only want leaf nodes to have internal value, then return zero for any node with children. 
--- For example, as an alternative to node.count:
---        root.sum(function(d) { return d.value ? 1 : 0; });
--- foreign import count_              :: D3HierarchicalNode_ -> D3HierarchicalNode_ -- NB alters the tree!!!
--- foreign import sort_               :: D3HierarchicalNode_ -> (D3HierarchicalNode_ -> D3HierarchicalNode_ -> D3SortComparator_)
--- foreign import each_ -- breadth first traversal
--- foreign import eachAfter_ 
--- foreign import eachBefore_
--- foreign import deepCopy_ -- copies (sub)tree but shares data with clone !!!
-foreign import sharesParent_          :: forall r. (D3_TreeNode r) -> (D3_TreeNode r) -> Boolean
-
-foreign import linkHorizontal_        :: (Datum_ -> String) 
-foreign import linkHorizontal2_       :: (Datum_ -> String) 
-foreign import linkVertical_          :: (Datum_ -> String) 
-foreign import linkClusterHorizontal_ :: Number -> (Datum_ -> String) 
-foreign import linkClusterVertical_   :: Number -> (Datum_ -> String) 
+-- Kept: Link generators are still used for rendering connections
+foreign import linkHorizontal_        :: (Datum_ -> String)
+foreign import linkHorizontal2_       :: (Datum_ -> String)
+foreign import linkVertical_          :: (Datum_ -> String)
+foreign import linkClusterHorizontal_ :: Number -> (Datum_ -> String)
+foreign import linkClusterVertical_   :: Number -> (Datum_ -> String)
 foreign import linkRadial_            :: (Datum_ -> Number) -> (Datum_ -> Number) -> (Datum_ -> String)
 foreign import autoBox_               :: Datum_ -> Array Number
-
--- accessors for fields of D3HierarchicalNode, only valid if layout has been done, hence the _XY version of node
--- REVIEW maybe accessors aren't needed if you can ensure type safety
-foreign import hNodeDepth_  :: forall r. D3_TreeNode r -> Number
-foreign import hNodeHeight_ :: forall r. D3_TreeNode r -> Number
-foreign import hNodeX_      :: forall r. D3_TreeNode r -> Number
-foreign import hNodeY_      :: forall r. D3_TreeNode r -> Number
-foreign import hNodeR_      :: forall r. D3_TreeNode r -> Number
 
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for D3js Chord module          *********************************************
@@ -332,41 +285,15 @@ foreign import setArcInnerRadius_   :: ArcGenerator_ -> Number -> ArcGenerator_
 foreign import setArcOuterRadius_   :: ArcGenerator_ -> Number -> ArcGenerator_
 
 -- | *********************************************************************************************************************
--- | ***************************   FFI signatures for D3js Pack (bubble) module  *********************************************
+-- | REMOVED: Old D3 hierarchy layout FFI functions (Pack, Treemap, Partition)
+-- | We now use pure PureScript implementations in PSD3.Layout.Hierarchy.*
+-- | These old FFI functions are no longer needed:
+-- |   - packLayout_, packSetSize_, packSetPadding_, runPackLayout_
+-- |   - treemapLayout_, treemapSetSize_, treemapSetPadding_, runTreemapLayout_
+-- |   - partitionLayout_, partitionSetSize_, partitionSetPadding_, runPartitionLayout_
+-- |   - treeSortForCirclePack_, treeSortForTreeMap_, treeSortForPartition_
+-- |   - hNodeX0_, hNodeY0_, hNodeX1_, hNodeY1_, hNodeR_
 -- | *********************************************************************************************************************
-foreign import data PackLayout_ :: Type
-
-foreign import packLayout_      :: Unit -> PackLayout_
-foreign import packSetSize_     :: PackLayout_ -> Number -> Number -> PackLayout_
-foreign import packSetPadding_  :: PackLayout_ -> Number -> PackLayout_
-foreign import runPackLayout_   :: forall r. PackLayout_ -> D3_TreeNode r -> D3_TreeNode r
-
--- | *********************************************************************************************************************
--- | ***************************   FFI signatures for D3js Treemap module  *********************************************
--- | *********************************************************************************************************************
-foreign import data TreemapLayout_ :: Type
-
-foreign import treemapLayout_      :: Unit -> TreemapLayout_
-foreign import treemapSetSize_     :: TreemapLayout_ -> Number -> Number -> TreemapLayout_
-foreign import treemapSetPadding_  :: TreemapLayout_ -> Number -> TreemapLayout_
-foreign import runTreemapLayout_   :: forall r. TreemapLayout_ -> D3_TreeNode r -> D3_TreeNode r
-
--- Accessor functions for treemap node bounds
-foreign import hNodeX0_ :: forall r. D3_TreeNode r -> Number
-foreign import hNodeY0_ :: forall r. D3_TreeNode r -> Number
-foreign import hNodeX1_ :: forall r. D3_TreeNode r -> Number
-foreign import hNodeY1_ :: forall r. D3_TreeNode r -> Number
-
--- | *********************************************************************************************************************
--- | ***************************   FFI signatures for D3js Partition (icicle/sunburst) module  **************************
--- | *********************************************************************************************************************
-foreign import data PartitionLayout_ :: Type
-
-foreign import partitionLayout_      :: Unit -> PartitionLayout_
-foreign import partitionSetSize_     :: PartitionLayout_ -> Number -> Number -> PartitionLayout_
-foreign import partitionSetPadding_  :: PartitionLayout_ -> Number -> PartitionLayout_
-foreign import runPartitionLayout_   :: forall r. PartitionLayout_ -> D3_TreeNode r -> D3_TreeNode r
-foreign import treeSortForPartition_ :: forall d. D3_TreeNode d -> D3_TreeNode d
 
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for Details Panel manipulation  *************************************

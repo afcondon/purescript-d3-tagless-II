@@ -1,6 +1,6 @@
 module D3.Viz.LesMiserables.Model where
 
-import PSD3.Data.Node (D3TreeRow, D3Link_Unswizzled, D3_SimulationNode, D3_VxyFxy, D3_XY, EmbeddedData)
+import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode, D3_VxyFxy, D3_XY)
 import Type.Row (type (+))
 
 -- | ==========================================================================================
@@ -22,14 +22,7 @@ type LesMisGraphLinkObj = { source :: LesMisSimRecord, target :: LesMisSimRecord
 type LesMisRawModel    = { links :: Array D3Link_Unswizzled, nodes :: Array LesMisSimNode  }
 
 -- same as above but as a bare record, this is the "datum" that D3 sees and which it returns to you for attr setting:
-type LesMisSimRecord   = Record (D3_XY + D3_VxyFxy + LesMisNodeData  + ()) 
-
-
-
--- now a definition for that same row if it is embedded instead in a D3 Hierarchical structure, in which case
--- our extra data is available in the "datum" as an embedded object at the field "data"
-type LesMisTreeNode    = D3TreeRow (EmbeddedData { | LesMisNodeData () } + ())
--- type LesMisTreeRecord  = Record    (D3_ID + D3_TreeRow + D3_XY   + D3_Leaf + EmbeddedData { | LesMisNodeData () } + ())
+type LesMisSimRecord   = Record (D3_XY + D3_VxyFxy + LesMisNodeData  + ())
 
 
 

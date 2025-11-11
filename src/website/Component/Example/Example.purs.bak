@@ -8,7 +8,7 @@ import Affjax.ResponseFormat as ResponseFormat
 import Affjax.Web as AJAX
 import D3.Viz.AnimatedRadialTree as AnimatedRadialTree
 import D3.Viz.BarChart as BarChart
--- import D3.Viz.BubbleChart as BubbleChart -- REMOVED: Old D3 FFI version, replaced by PackViz
+import D3.Viz.BubbleChart as BubbleChart
 import D3.Viz.Charts.Model as ChartModel
 import D3.Viz.ChordDiagram as ChordDiagram
 import D3.Viz.GroupedBarChart as GroupedBarChart
@@ -40,10 +40,9 @@ import D3.Viz.SankeyDiagram as Sankey
 import D3.Viz.ThreeLittleCircles as ThreeLittleCircles
 import D3.Viz.ThreeLittleCirclesTransition as CirclesTransition
 import D3.Viz.ThreeLittleDimensions as ThreeLittleDimensions
--- REMOVED: Old D3 FFI tree visualizations, replaced by TreeViz
--- import D3.Viz.Tree.HorizontalTree as HorizontalTree
--- import D3.Viz.Tree.RadialTree as RadialTree
--- import D3.Viz.Tree.VerticalTree as VerticalTree
+import D3.Viz.Tree.HorizontalTree as HorizontalTree
+import D3.Viz.Tree.RadialTree as RadialTree
+import D3.Viz.Tree.VerticalTree as VerticalTree
 import D3.Viz.WealthHealth.Draw as WealthHealth
 import Data.Array as Data.Array
 import Data.Either (Either(..))
@@ -147,12 +146,37 @@ handleAction = case _ of
         _ <- H.liftEffect $ eval_D3M $ MultiLineChart.draw ChartModel.multiLineData "#example-viz"
         pure unit
 
-      -- REMOVED: "bubble-chart" was duplicate of "pack-purescript" with incorrect name/description
+      "bubble-chart" -> do
+        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        case result of
+          Left err -> log "BubbleChart: Failed to load data"
+          Right treeData -> do
+            _ <- H.liftEffect $ eval_D3M $ BubbleChart.draw treeData "#example-viz"
+            pure unit
 
-      -- REMOVED: Old D3 FFI tree visualizations - use TreeViz instead
-      "vertical-tree" -> pure unit
-      "horizontal-tree" -> pure unit
-      "radial-tree" -> pure unit
+      "vertical-tree" -> do
+        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        case result of
+          Left err -> log "VerticalTree: Failed to load data"
+          Right treeData -> do
+            _ <- H.liftEffect $ eval_D3M $ VerticalTree.drawVerticalTree TidyTree treeData "#example-viz"
+            pure unit
+
+      "horizontal-tree" -> do
+        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        case result of
+          Left err -> log "HorizontalTree: Failed to load data"
+          Right treeData -> do
+            _ <- H.liftEffect $ eval_D3M $ HorizontalTree.drawHorizontalTree TidyTree treeData "#example-viz"
+            pure unit
+
+      "radial-tree" -> do
+        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        case result of
+          Left err -> log "RadialTree: Failed to load data"
+          Right treeData -> do
+            _ <- H.liftEffect $ eval_D3M $ RadialTree.drawRadialTree TidyTree treeData "#example-viz"
+            pure unit
 
       "animated-radial-tree" -> do
         result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
@@ -295,6 +319,152 @@ handleAction = case _ of
 
       _ -> log $ "Example: Unknown example ID: " <> state.exampleId
 
+  ToggleGroup groupId -> do
+    state <- H.get
+    -- Toggle the group in/out of visible set
+    let newVisibleGroups = if Set.member groupId state.lesMisVisibleGroups
+                           then Set.delete groupId state.lesMisVisibleGroups
+                           else Set.insert groupId state.lesMisVisibleGroups
+    H.modify_ _ { lesMisVisibleGroups = newVisibleGroups }
+
+    -- Call updateSimulation with DECLARATIVE API + re-heat
+    case state.lesMisData of
+      Just model -> do
+        runWithD3_Simulation do
+          -- Get selections from DOM (they were created by drawSimplified)
+          root <- PSD3Selection.attach "#example-viz"
+          nodesGroup <- PSD3Selection.selectUnder root ".zoom-group > .node"
+          linksGroup <- PSD3Selection.selectUnder root ".zoom-group > .link"
+
+          -- Stop simulation to re-heat it
+          PSD3Simulation.stop
+
+          -- DECLARATIVE API: Pass full datasets + predicate
+          -- Library handles filtering AND automatic link filtering
+          LesMisGUP.updateSimulation
+            { nodes: Just nodesGroup, links: Just linksGroup }
+            { allNodes: model.nodes                        -- FULL dataset!
+            , allLinks: model.links                        -- FULL dataset!
+            , nodeFilter: \(D3SimNode node) ->             -- Predicate (single source of truth)
+                Set.member node.group newVisibleGroups
+            , activeForces: state.lesMisActiveForces
+            }
+
+          -- Restart simulation (re-heats with full alpha)
+          PSD3Simulation.start
+      _ -> log "ToggleGroup: No model data available"
+
+  ToggleForce forceLabel -> do
+    state <- H.get
+    -- Toggle the force in/out of active set
+    let newActiveForces = if Set.member forceLabel state.lesMisActiveForces
+                          then Set.delete forceLabel state.lesMisActiveForces
+                          else Set.insert forceLabel state.lesMisActiveForces
+    H.modify_ _ { lesMisActiveForces = newActiveForces }
+
+    -- Call updateSimulation with DECLARATIVE API + re-heat
+    case state.lesMisData of
+      Just model -> do
+        runWithD3_Simulation do
+          -- Get selections from DOM (they were created by drawSimplified)
+          root <- PSD3Selection.attach "#example-viz"
+          nodesGroup <- PSD3Selection.selectUnder root ".zoom-group > .node"
+          linksGroup <- PSD3Selection.selectUnder root ".zoom-group > .link"
+
+          -- Stop simulation to re-heat it
+          PSD3Simulation.stop
+
+          -- DECLARATIVE API: Pass full datasets + predicate
+          -- Library handles filtering AND automatic link filtering
+          LesMisGUP.updateSimulation
+            { nodes: Just nodesGroup, links: Just linksGroup }
+            { allNodes: model.nodes                        -- FULL dataset!
+            , allLinks: model.links                        -- FULL dataset!
+            , nodeFilter: \(D3SimNode node) ->             -- Predicate (single source of truth)
+                Set.member node.group state.lesMisVisibleGroups
+            , activeForces: newActiveForces
+            }
+
+          -- Restart simulation (re-heats with full alpha)
+          PSD3Simulation.start
+      _ -> log "ToggleForce: No model data available"
+
+  MoveToGrid -> do
+    state <- H.get
+    case state.lesMisData of
+      Just model -> do
+        (Tuple w h) <- liftEffect getWindowWidthHeight
+
+        runWithD3_Simulation do
+          -- Get selections from DOM
+          root <- PSD3Selection.attach "#example-viz"
+          nodesGroup <- PSD3Selection.selectUnder root ".zoom-group > .node"
+          linksGroup <- PSD3Selection.selectUnder root ".zoom-group > .link"
+
+          -- Stop simulation during transition (so tick doesn't fight the animation)
+          PSD3Simulation.stop
+
+          -- Calculate grid positions (60px spacing, centered on window)
+          let gridNodes = LesMisGUP.nodesToGridLayout model.nodes 60.0 w
+
+          -- Start D3 transition (animates nodes smoothly to grid over 1500ms)
+          -- Key: simulation is STOPPED so tick function doesn't interfere
+          liftEffect $ LesMisGUP.transitionNodesToGridPositions_
+            ".lesmis"                    -- SVG class
+            ".zoom-group > .node circle" -- Node selector
+            ".zoom-group > .link line"   -- Link selector
+            gridNodes
+            (log "Grid transition complete - nodes now at grid positions")
+
+          -- Update simulation data with pinned nodes (but DON'T start simulation yet!)
+          -- This sets fx/fy in the internal simulation data so nodes are "ready to be pinned"
+          -- But since simulation is stopped, tick function won't override the transition
+          LesMisGUP.updateSimulation
+            { nodes: Just nodesGroup, links: Just linksGroup }
+            { allNodes: gridNodes                      -- Nodes with fx/fy set
+            , allLinks: model.links
+            , nodeFilter: \(D3SimNode node) ->         -- Still apply group filter
+                Set.member node.group state.lesMisVisibleGroups
+            , activeForces: state.lesMisActiveForces
+            }
+
+          -- DON'T restart simulation yet - let the D3 transition complete first!
+          -- After transition finishes (1500ms), nodes will be visually at grid positions
+          -- Mark nodes as pinned in state
+          H.modify_ _ { lesMisNodesPinned = true }
+      _ -> log "MoveToGrid: No model data available"
+
+  ReleaseFromGrid -> do
+    state <- H.get
+    case state.lesMisData of
+      Just model -> do
+        runWithD3_Simulation do
+          -- Get selections from DOM
+          root <- PSD3Selection.attach "#example-viz"
+          nodesGroup <- PSD3Selection.selectUnder root ".zoom-group > .node"
+          linksGroup <- PSD3Selection.selectUnder root ".zoom-group > .link"
+
+          -- Unpin all nodes (set fx/fy to null)
+          let unpinnedNodes = LesMisGUP.unpinAllNodes model.nodes
+
+          -- Update simulation with unpinned nodes
+          LesMisGUP.updateSimulation
+            { nodes: Just nodesGroup, links: Just linksGroup }
+            { allNodes: unpinnedNodes                  -- Nodes with fx/fy = null
+            , allLinks: model.links
+            , nodeFilter: \(D3SimNode node) ->
+                Set.member node.group state.lesMisVisibleGroups
+            , activeForces: state.lesMisActiveForces
+            }
+
+          -- Restart simulation with full alpha (re-heat)
+          PSD3Simulation.stop
+          PSD3Simulation.start
+
+          -- Mark nodes as unpinned in state
+          H.modify_ _ { lesMisNodesPinned = false }
+      _ -> log "ReleaseFromGrid: No model data available"
+
 -- | Example metadata
 type ExampleMeta =
   { id :: String
@@ -314,6 +484,7 @@ allExampleIds =
   , "multi-line-chart"
   , "radial-stacked-bar"
   , "parabola"
+  , "bubble-chart"
   , "vertical-tree"
   , "horizontal-tree"
   , "radial-tree"
@@ -370,6 +541,8 @@ getExampleMeta id = case id of
     { id, name: "Radial Stacked Bar Chart", description: "Population by age and state in radial form", category: "Simple Charts" }
   "parabola" -> Just
     { id, name: "Parabola", description: "Colored circles in parabolic formation", category: "Simple Charts" }
+  "bubble-chart" -> Just
+    { id, name: "Bubble Chart", description: "Scatter plot with sized bubbles representing a third dimension of data", category: "Simple Charts" }
   "vertical-tree" -> Just
     { id, name: "Vertical Tree", description: "Top-down hierarchical tree layout", category: "Hierarchies" }
   "horizontal-tree" -> Just
@@ -461,9 +634,6 @@ render state =
 -- | Render interactive controls for LesMisGUP example
 renderLesMisControls :: forall m. State -> H.ComponentHTML Action () m
 renderLesMisControls state =
-  -- ARCHIVED: LesMisGUP controls disabled during phantom type integration
-  HH.text ""
-  {-
   if state.exampleId == "lesmisgup"
   then
     HH.div
@@ -516,9 +686,7 @@ renderLesMisControls state =
       ]
   else
     HH.text ""  -- No controls for other examples
-  -}
 
-{- ARCHIVED: renderForceButton disabled during phantom type integration
 renderForceButton :: forall m. String -> Set.Set String -> H.ComponentHTML Action () m
 renderForceButton forceLabel activeForces =
   let isActive = Set.member forceLabel activeForces
@@ -527,7 +695,6 @@ renderForceButton forceLabel activeForces =
     , HE.onClick \_ -> ToggleForce forceLabel
     ]
     [ HH.text forceLabel ]
--}
 
 -- | Render the header with logo, navigation, and prev/next buttons
 renderHeader :: forall w i. String -> Maybe ExampleMeta -> HH.HTML w i

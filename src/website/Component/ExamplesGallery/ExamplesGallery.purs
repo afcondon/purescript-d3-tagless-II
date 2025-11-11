@@ -72,15 +72,8 @@ allExamples =
     , route: Example "multi-line-chart"
     , thumbnail: "assets/example-thumbnails/multiline-chart.png"
     }
-  , { id: "bubble-chart"
-    , name: "Bubble Chart"
-    , description: "Hierarchical circle packing layout"
-    , category: "Hierarchies"
-    , route: Example "bubble-chart"
-    , thumbnail: "assets/example-thumbnails/circle-packing.png"
-    }
 
-  -- Hierarchies
+  -- Hierarchies (REMOVED: "bubble-chart" was duplicate of "pack-purescript")
   , { id: "vertical-tree"
     , name: "Vertical Tree"
     , description: "Top-down tidy tree layout"
