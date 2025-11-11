@@ -454,7 +454,6 @@ allExampleIds =
   , "map-quartet"
   , "nested-data"
   , "working-with-sets"
-  , "wealth-health"
   , "general-update-pattern"
   , "three-circles-transition"
   ]
@@ -520,8 +519,6 @@ getExampleMeta id = case id of
     { id, name: "Nested Data", description: "Nested selections with 2D arrays", category: "Rich Data Structures" }
   "working-with-sets" -> Just
     { id, name: "Working with Sets", description: "Nested selections with Set data structures", category: "Rich Data Structures" }
-  "wealth-health" -> Just
-    { id, name: "Wealth & Health of Nations", description: "Animated scatterplot across time", category: "Animations" }
   "chord-diagram" -> Just
     { id, name: "Chord Diagram", description: "Circular flow diagram showing relationships between programming concepts", category: "Data Flow" }
   "general-update-pattern" -> Just

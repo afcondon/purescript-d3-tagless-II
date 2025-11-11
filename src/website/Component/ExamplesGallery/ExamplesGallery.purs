@@ -196,9 +196,9 @@ allExamples =
   -- Animations
   , { id: "wealth-health"
     , name: "Wealth & Health of Nations"
-    , description: "Animated scatterplot across time"
+    , description: "Interactive animated scatterplot (full page experience)"
     , category: "Animations"
-    , route: Example "wealth-health"
+    , route: WealthHealth
     , thumbnail: "assets/example-thumbnails/wealth-health.png"
     }
 
