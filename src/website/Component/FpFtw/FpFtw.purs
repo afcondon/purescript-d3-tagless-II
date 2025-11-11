@@ -2,17 +2,22 @@ module PSD3.FpFtw where
 
 import Prelude
 
+import Control.Monad.State (class MonadState)
 import D3.Viz.FpFtw.MapQuartet as MapQuartet
 import D3.Viz.FpFtw.TopologicalSort as TopologicalSort
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
+import Data.Nullable (Nullable)
 import Effect.Aff.Class (class MonadAff)
+import Effect.Class (class MonadEffect)
 import Effect.Class.Console (log)
 import Halogen as H
+import PSD3.Data.Node (D3_SimulationNode)
 import PSD3.FpFtw.Actions (Action(..))
 import PSD3.FpFtw.HTML (render)
 import PSD3.FpFtw.State (State, initialState)
+import PSD3.Internal.Simulation.Types (D3SimulationState_)
 import PSD3.Interpreter.D3 (eval_D3M, runWithD3_Simulation)
 
 -- | FP FTW component - Functional Programming examples
@@ -27,7 +32,26 @@ component = H.mkComponent
   }
 
 -- | Handle actions
-handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
+-- handleAction :: forall o m. MonadAff m => Action -> H.HalogenM (State D3_SimulationNode ) Action () o m Unit
+handleAction :: forall m. MonadAff m => MonadState
+                                                { simulation :: D3SimulationState_
+                                                                  (D3_SimulationNode
+                                                                     ( fx :: Nullable Number
+                                                                     , fy :: Nullable Number
+                                                                     , group :: Maybe Int
+                                                                     , id :: String
+                                                                     , layer :: Int
+                                                                     , name :: String
+                                                                     , vx :: Number
+                                                                     , vy :: Number
+                                                                     , x :: Number
+                                                                     , y :: Number
+                                                                     )
+                                                                  )
+                                                , currentExample :: String
+                                                }
+                                                m
+                                               => Action -> m Unit
 handleAction = case _ of
   Initialize -> do
     log "FP FTW: Initializing..."
