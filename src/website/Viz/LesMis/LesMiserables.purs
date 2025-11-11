@@ -6,6 +6,7 @@ module D3.Viz.LesMiserables where
 -- | See Acknowledgements page for full credits
 
 import Control.Monad.State (class MonadState)
+import PSD3.Attributes (DatumFn(..))
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, x1, x2, y1, y2)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import D3.Viz.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
@@ -116,28 +117,26 @@ drawSimplified forceLibrary activeForces model selector = do
 
   -- NOW join the simulation-enhanced data to DOM
   nodesSelection <- simpleJoin nodesGroup Circle nodesInSim keyIsID_
-  -- Typed lambda! After simpleJoin, nodesSelection :: D3Selection_ LesMisSimNode
-  -- So d is inferred as D3_SimulationNode (LesMisNodeData + ...) which has .group field
-  setAttributes nodesSelection [ radius 5.0, fill (\(D3SimNode d) -> d3SchemeCategory10N_ (toNumber d.group)) ]
+  -- Use unboxD3SimNode to convert Datum_ -> LesMisSimRecord, wrapped in DatumFn
+  setAttributes nodesSelection [ radius 5.0, fill (DatumFn (d3SchemeCategory10N_ <<< toNumber <<< _.group <<< unboxD3SimNode)) ]
 
   linksSelection <- simpleJoin linksGroup Line linksInSim keyIsID_
-  -- Typed lambda! linksSelection :: D3Selection_ (D3Link_Swizzled ...)
-  -- So d is the swizzled link with .source, .target, .value fields
+  -- Use unboxD3SimLink to convert Datum_ -> swizzled link record, wrapped in DatumFn
   setAttributes linksSelection [
-      strokeWidth (\d -> sqrt d.value),
-      strokeColor (\d -> d3SchemeCategory10N_ (toNumber d.target.group))
+      strokeWidth (DatumFn (sqrt <<< _.value <<< unboxD3SimLink)),
+      strokeColor (DatumFn (d3SchemeCategory10N_ <<< toNumber <<< _.target.group <<< unboxD3SimLink))
     ]
 
-  -- Add tick functions with typed lambdas
+  -- Add tick functions using unboxD3SimNode, wrapped in DatumFn
   addTickFunction "nodes" $ Step nodesSelection [
-      cx (\(D3SimNode d) -> d.x),
-      cy (\(D3SimNode d) -> d.y)
+      cx (DatumFn (_.x <<< unboxD3SimNode)),
+      cy (DatumFn (_.y <<< unboxD3SimNode))
     ]
   addTickFunction "links" $ Step linksSelection
-      [ x1 (\d -> d.source.x)
-      , y1 (\d -> d.source.y)
-      , x2 (\d -> d.target.x)
-      , y2 (\d -> d.target.y)
+      [ x1 (DatumFn (_.source.x <<< unboxD3SimLink))
+      , y1 (DatumFn (_.source.y <<< unboxD3SimLink))
+      , x2 (DatumFn (_.target.x <<< unboxD3SimLink))
+      , y2 (DatumFn (_.target.y <<< unboxD3SimLink))
       ]
 
   -- Add drag interaction for nodes

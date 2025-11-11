@@ -40,7 +40,7 @@ drawTree :: TreeModel -> Aff Unit
 drawTree treeModel = liftEffect $ do
   widthHeight <- getWindowWidthHeight
   let tree = hierarchyFromJSON_ treeModel.json
-  (_ :: Tuple D3Selection_ Unit) <- runD3M (draw widthHeight tree)
+  (_ :: Tuple (D3Selection_ Unit) Unit) <- runD3M (draw widthHeight tree)
   pure unit
 
 -- Snippet_Start

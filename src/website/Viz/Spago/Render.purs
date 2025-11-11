@@ -42,10 +42,10 @@ makeTagClassesAttr (Just tagMap) = classed (DatumFn tagClassesFn)
 -- | - Inner Text (label)
 -- |
 -- | This shows how to use the generic updateSimulation with multi-level DOM structures.
-spagoRenderCallbacks :: forall m.
+spagoRenderCallbacks :: forall m d.
   Monad m =>
   SelectionM D3Selection_ m =>
-  RenderCallbacks SpagoSceneAttributes D3Selection_ m
+  RenderCallbacks (SpagoSceneAttributes d) D3Selection_ m d
 spagoRenderCallbacks = {
   -- Node rendering: Group → Circle + Text structure
   onNodeEnter: \enterSel attrs -> do

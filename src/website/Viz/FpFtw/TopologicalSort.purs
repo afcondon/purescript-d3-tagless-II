@@ -279,7 +279,7 @@ drawTopologicalSort tasks selector = do
   let maxLayer = fromMaybe 0 $ maximum layerValues
   let layerHeight = if maxLayer > 0 then (totalHeight - 100.0) / Int.toNumber maxLayer else 100.0
 
-  (root :: D3Selection_) <- attach selector
+  (root :: D3Selection_ Unit) <- attach selector
   svg <- appendTo root Svg [
       viewBox 0.0 0.0 totalWidth totalHeight
     , classed "topological-sort"

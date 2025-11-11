@@ -26,7 +26,7 @@ type State =
   , selectedNations :: Set String        -- Nations selected for highlighting/tracking
   , animationSpeed :: Number             -- Years per second during playback
   , animationSubscriptionId :: Maybe H.SubscriptionId  -- Timer subscription for animation
-  , vizUpdateFn :: Maybe (Array Draw.NationPoint -> D3M Unit D3Selection_ D3Selection_)  -- Visualization update function
+  , vizUpdateFn :: Maybe (Array Draw.NationPoint -> D3M Unit (D3Selection_ Unit) (D3Selection_ Unit))  -- Visualization update function
   , labelMode :: LabelMode               -- How to display country labels
   }
 

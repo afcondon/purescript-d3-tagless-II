@@ -137,18 +137,18 @@ drawSimplified forceLibrary activeForces model selector = do
 -- | - Provide single node filter predicate
 -- | - Library automatically filters links to match
 -- | - Impossible to mess up (no way to provide inconsistent data)
-updateSimulation :: forall row m d.
+updateSimulation :: forall row m r.
   Bind m =>
   MonadEffect m =>
-  MonadState { simulation :: D3SimulationState_ | row } m =>
+  MonadState { simulation :: D3SimulationState_ (D3_SimulationNode r) | row } m =>
   SelectionM D3Selection_ m =>
   SimulationM2 D3Selection_ m =>
-  { nodes :: Maybe D3Selection_
-  , links :: Maybe D3Selection_
+  { nodes :: Maybe (D3Selection_ (D3_SimulationNode r))
+  , links :: Maybe (D3Selection_ (D3_SimulationNode r))
   } ->
-  { allNodes :: Array (D3_SimulationNode d)          -- FULL dataset
+  { allNodes :: Array (D3_SimulationNode r)          -- FULL dataset
   , allLinks :: Array D3Link_Unswizzled              -- FULL dataset
-  , nodeFilter :: D3_SimulationNode d -> Boolean     -- Which nodes to show
+  , nodeFilter :: D3_SimulationNode r -> Boolean     -- Which nodes to show
   , activeForces :: Set.Set Label
   } ->
   m Unit
