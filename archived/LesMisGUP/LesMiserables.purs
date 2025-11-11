@@ -22,7 +22,7 @@ import PSD3.Internal.Zoom (ScaleExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, on, setAttributes, simpleJoin)
 import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, start)
 import PSD3.Simulation.Update (genericUpdateSimulation)
-import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode(..))
+import PSD3.Data.Node (D3Link_Swizzled, D3Link_Unswizzled, D3_SimulationNode(..))
 import PSD3.Shared.ZoomableViewbox (zoomableSVG)
 import Data.Array (length)
 import Data.Array as Array
@@ -144,7 +144,7 @@ updateSimulation :: forall row m r.
   SelectionM D3Selection_ m =>
   SimulationM2 D3Selection_ m =>
   { nodes :: Maybe (D3Selection_ (D3_SimulationNode r))
-  , links :: Maybe (D3Selection_ (D3_SimulationNode r))
+  , links :: Maybe (D3Selection_ D3Link_Swizzled)
   } ->
   { allNodes :: Array (D3_SimulationNode r)          -- FULL dataset
   , allLinks :: Array D3Link_Unswizzled              -- FULL dataset

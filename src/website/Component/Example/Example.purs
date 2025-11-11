@@ -28,8 +28,7 @@ import D3.Viz.ClusterViz as ClusterViz
 import D3.Viz.PartitionViz as PartitionViz
 import D3.Viz.SunburstViz as SunburstViz
 import D3.Viz.LesMiserables as LesMis
-import D3.Viz.LesMiserablesGUP as LesMisGUP
-import D3.Viz.LesMiserablesGUP.Model (LesMisRawModel)
+import D3.Viz.LesMiserablesGUP as LesMisGUP  -- Stub module (real implementation archived)
 import PSD3.Internal.Types as PSD3Types
 import PSD3.Internal.FFI as PSD3FFI
 import PSD3.Data.Node (D3_SimulationNode(..))
@@ -67,6 +66,9 @@ import PSD3.Interpreter.D3 (eval_D3M, runWithD3_Sankey, runWithD3_Simulation)
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Website.Types (Route(..))
 import Utility (getWindowWidthHeight)
+
+-- | Placeholder type for archived LesMisGUP example
+type LesMisRawModel = Unit
 
 -- | Component state varies by example type
 type State =
