@@ -7,9 +7,8 @@ import Data.Maybe (Maybe(..))
 import Data.Unit (Unit)
 import Data.Set (Set)
 import Data.Set as Set
+import PSD3 (Datum_, D3Selection_, D3M)
 import Halogen as H
-import PSD3.Interpreter.D3 (D3M)
-import PSD3.Internal.Types (D3Selection_)
 import PSD3.WealthHealth.Types (WealthHealthModel)
 
 -- | Label display mode
@@ -26,7 +25,7 @@ type State =
   , selectedNations :: Set String        -- Nations selected for highlighting/tracking
   , animationSpeed :: Number             -- Years per second during playback
   , animationSubscriptionId :: Maybe H.SubscriptionId  -- Timer subscription for animation
-  , vizUpdateFn :: Maybe (Array Draw.NationPoint -> D3M Unit (D3Selection_ Unit) (D3Selection_ Unit))  -- Visualization update function
+  , vizUpdateFn :: Maybe (Array Datum_ -> D3M Unit D3Selection_ (D3Selection_ Datum_))  -- Visualization update function
   , labelMode :: LabelMode               -- How to display country labels
   }
 
