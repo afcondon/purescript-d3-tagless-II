@@ -462,12 +462,12 @@ drawTopologicalForceDirected tasks selector = do
 
   -- Draw task nodes with group-based coloring (matches LesMis style)
   nodesSelection <- simpleJoin container Circle nodesInSim keyIsID_
-  let colorByGroup = (\d -> case (unsafeCoerce d :: { group :: Maybe Int }).group of
-                               Just g -> d3SchemeCategory10N_ (toNumber g)
-                               Nothing -> "#4CAF50") :: Datum_ -> String
-  setAttributes nodesSelection [
+  -- Clean typed lambdas for nodes (concrete type)!
+  setAttributes (nodesSelection :: D3Selection_ LayeredSimNode) [
       radius 5.0  -- Same size as LesMis
-    , fill (DatumFn colorByGroup)  -- Color by group (matches LesMis style)
+    , fill \(d :: LayeredSimNode) -> case d.group of
+                                       Just g -> d3SchemeCategory10N_ (toNumber g)
+                                       Nothing -> "#4CAF50"
     , strokeColor "#fff"  -- White stroke like LesMis
     , strokeWidth 1.5
     , classed "task-node"
@@ -483,27 +483,25 @@ drawTopologicalForceDirected tasks selector = do
     ]
 
   -- Add tick functions to update positions
-  -- Links: extract source/target positions from swizzled link objects
-  let unboxLinkObj = unsafeCoerce :: Datum_ -> { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
+  -- Links are opaque (D3Link_Swizzled), need DatumFn + unsafeCoerce
   addTickFunction "links" $ Step linksSelection [
-      x1 (DatumFn \d -> (unboxLinkObj d).source.x)
-    , y1 (DatumFn \d -> (unboxLinkObj d).source.y)
-    , x2 (DatumFn \d -> (unboxLinkObj d).target.x)
-    , y2 (DatumFn \d -> (unboxLinkObj d).target.y)
+      x1 (DatumFn \d -> (unsafeCoerce d).source.x :: Number)
+    , y1 (DatumFn \d -> (unsafeCoerce d).source.y :: Number)
+    , x2 (DatumFn \d -> (unsafeCoerce d).target.x :: Number)
+    , y2 (DatumFn \d -> (unsafeCoerce d).target.y :: Number)
     ]
 
-  -- Nodes: extract x, y, name from simulation nodes
-  let unboxNodeObj = unsafeCoerce :: Datum_ -> { x :: Number, y :: Number, name :: String }
-  addTickFunction "nodes" $ Step nodesSelection [
-      cx (DatumFn \d -> (unboxNodeObj d).x)
-    , cy (DatumFn \d -> (unboxNodeObj d).y)
+  -- Clean lambdas for node tick attributes
+  addTickFunction "nodes" $ Step (nodesSelection :: D3Selection_ LayeredSimNode) [
+      cx \(d :: LayeredSimNode) -> d.x
+    , cy \(d :: LayeredSimNode) -> d.y
     ]
 
-  -- Labels follow nodes with slight offset
-  addTickFunction "labels" $ Step labelsSelection [
-      x (DatumFn \d -> (unboxNodeObj d).x)
-    , y (DatumFn \d -> (unboxNodeObj d).y + 20.0)
-    , text (DatumFn \d -> (unboxNodeObj d).name)
+  -- Clean lambdas for label tick attributes
+  addTickFunction "labels" $ Step (labelsSelection :: D3Selection_ LayeredSimNode) [
+      x \(d :: LayeredSimNode) -> d.x
+    , y \(d :: LayeredSimNode) -> d.y + 20.0
+    , text \(d :: LayeredSimNode) -> d.name
     ]
 
   -- Draw layer labels (centered coordinates)

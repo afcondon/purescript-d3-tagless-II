@@ -120,27 +120,32 @@ drawSimplified forceLibrary activeForces model selector = do
 
   -- NOW join the simulation-enhanced data to DOM
   nodesSelection <- simpleJoin nodesGroup Circle nodesInSim keyIsID_
-  -- Direct record accessors with minimal unsafeCoerce at FFI boundary
-  setAttributes nodesSelection [ radius 5.0, fill (DatumFn \d -> d3SchemeCategory10N_ (toNumber (unsafeCoerce d).group) :: String) ]
+  -- Clean typed lambdas - annotate parameter on FIRST lambda, rest infer!
+  setAttributes (nodesSelection :: D3Selection_ LesMisSimNode)
+    [ radius 5.0
+    , fill \(d :: LesMisSimNode) -> d3SchemeCategory10N_ (toNumber d.group)
+    ]
 
   linksSelection <- simpleJoin linksGroup Line linksInSim keyIsID_
-  -- Direct accessors for swizzled links
-  setAttributes linksSelection [
-      strokeWidth (DatumFn \d -> sqrt (unsafeCoerce d).value :: Number),
-      strokeColor (DatumFn \d -> d3SchemeCategory10N_ (toNumber (unsafeCoerce d).target.group) :: String)
+  -- Links are opaque (D3Link_Swizzled) so need DatumFn + unsafeCoerce
+  setAttributes linksSelection
+    [ strokeWidth (DatumFn \d -> sqrt (unsafeCoerce d).value :: Number)
+    , strokeColor (DatumFn \d -> d3SchemeCategory10N_ (toNumber (unsafeCoerce d).target.group) :: String)
     ]
 
-  -- Tick functions with direct accessors
-  addTickFunction "nodes" $ Step nodesSelection [
-      cx (DatumFn \d -> (unsafeCoerce d).x :: Number),
-      cy (DatumFn \d -> (unsafeCoerce d).y :: Number)
+  -- Clean lambdas for nodes - each lambda needs annotation OR return type
+  addTickFunction "nodes" $ Step (nodesSelection :: D3Selection_ LesMisSimNode)
+    [ cx \(d :: LesMisSimNode) -> d.x
+    , cy \(d :: LesMisSimNode) -> d.y
     ]
+
+  -- Links are opaque, need DatumFn
   addTickFunction "links" $ Step linksSelection
-      [ x1 (DatumFn \d -> (unsafeCoerce d).source.x :: Number)
-      , y1 (DatumFn \d -> (unsafeCoerce d).source.y :: Number)
-      , x2 (DatumFn \d -> (unsafeCoerce d).target.x :: Number)
-      , y2 (DatumFn \d -> (unsafeCoerce d).target.y :: Number)
-      ]
+    [ x1 (DatumFn \d -> (unsafeCoerce d).source.x :: Number)
+    , y1 (DatumFn \d -> (unsafeCoerce d).source.y :: Number)
+    , x2 (DatumFn \d -> (unsafeCoerce d).target.x :: Number)
+    , y2 (DatumFn \d -> (unsafeCoerce d).target.y :: Number)
+    ]
 
   -- Add drag interaction for nodes
   -- Note: zoom is already configured by zoomableSVG helper

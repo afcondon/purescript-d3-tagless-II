@@ -13,7 +13,7 @@ import Data.Nullable (Nullable, notNull, null)
 import PSD3.Attributes (DatumFn(..))
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, x1, x2, y1, y2)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
-import D3.Viz.LesMiserablesGUP.Model (LesMisRawModel)
+import D3.Viz.LesMiserablesGUP.Model (LesMisRawModel, LesMisSimNode)
 import D3.Viz.LesMiserablesGUP.Render (defaultLesMisAttributes, lesMisRenderCallbacks)
 import PSD3.Internal.FFI (keyIsID_, simdrag_)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
@@ -117,18 +117,32 @@ drawSimplified forceLibrary activeForces model selector = do
 
   -- NOW join the simulation-enhanced data to DOM
   nodesSelection <- simpleJoin nodesGroup Circle nodesInSim keyIsID_
-  setAttributes nodesSelection [ radius 5.0, fill (DatumFn \d -> d3SchemeCategory10N_ (toNumber (unsafeCoerce d).group) :: String) ]
-  linksSelection <- simpleJoin linksGroup Line linksInSim keyIsID_
-  setAttributes linksSelection [ strokeWidth (DatumFn \d -> sqrt (unsafeCoerce d).value :: Number), strokeColor (DatumFn \d -> d3SchemeCategory10N_ (toNumber (unsafeCoerce d).target.group) :: String) ]
+  -- Clean typed lambdas for nodes (concrete type)!
+  setAttributes (nodesSelection :: D3Selection_ LesMisSimNode)
+    [ radius 5.0
+    , fill \(d :: LesMisSimNode) -> d3SchemeCategory10N_ (toNumber d.group)
+    ]
 
-  -- Add tick functions with direct accessors
-  addTickFunction "nodes" $ Step nodesSelection [ cx (DatumFn \d -> (unsafeCoerce d).x :: Number), cy (DatumFn \d -> (unsafeCoerce d).y :: Number) ]
+  linksSelection <- simpleJoin linksGroup Line linksInSim keyIsID_
+  -- Links are opaque, need DatumFn + unsafeCoerce
+  setAttributes linksSelection
+    [ strokeWidth (DatumFn \d -> sqrt (unsafeCoerce d).value :: Number)
+    , strokeColor (DatumFn \d -> d3SchemeCategory10N_ (toNumber (unsafeCoerce d).target.group) :: String)
+    ]
+
+  -- Clean lambdas for node tick attributes
+  addTickFunction "nodes" $ Step (nodesSelection :: D3Selection_ LesMisSimNode)
+    [ cx \(d :: LesMisSimNode) -> d.x
+    , cy \(d :: LesMisSimNode) -> d.y
+    ]
+
+  -- Links opaque, need DatumFn
   addTickFunction "links" $ Step linksSelection
-      [ x1 (DatumFn \d -> (unsafeCoerce d).source.x :: Number)
-      , y1 (DatumFn \d -> (unsafeCoerce d).source.y :: Number)
-      , x2 (DatumFn \d -> (unsafeCoerce d).target.x :: Number)
-      , y2 (DatumFn \d -> (unsafeCoerce d).target.y :: Number)
-      ]
+    [ x1 (DatumFn \d -> (unsafeCoerce d).source.x :: Number)
+    , y1 (DatumFn \d -> (unsafeCoerce d).source.y :: Number)
+    , x2 (DatumFn \d -> (unsafeCoerce d).target.x :: Number)
+    , y2 (DatumFn \d -> (unsafeCoerce d).target.y :: Number)
+    ]
 
   -- Add drag interaction for nodes
   -- Note: zoom is already configured by zoomableSVG helper

@@ -12412,6 +12412,11 @@
       return NumberAttr.create(FnI.create($52));
     }
   };
+  var toAttrNumberFn = {
+    toAttr: function($53) {
+      return NumberAttr.create(Fn.create($53));
+    }
+  };
   var toAttrNumberDatumFnI = {
     toAttr: function(v) {
       return new NumberAttr(new FnI(v));
@@ -19615,7 +19620,7 @@
   var strokeWidth6 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var classed7 = /* @__PURE__ */ classed(toAttrString);
   var radius4 = /* @__PURE__ */ radius(toAttrNumber);
-  var fill6 = /* @__PURE__ */ fill(toAttrStringDatumFn);
+  var fill6 = /* @__PURE__ */ fill(toAttrStringFn);
   var textAnchor3 = /* @__PURE__ */ textAnchor(toAttrString);
   var fontSize4 = /* @__PURE__ */ fontSize(toAttrNumber);
   var fill1 = /* @__PURE__ */ fill(toAttrString);
@@ -19623,11 +19628,11 @@
   var y12 = /* @__PURE__ */ y1(toAttrNumberDatumFn);
   var x22 = /* @__PURE__ */ x2(toAttrNumberDatumFn);
   var y22 = /* @__PURE__ */ y2(toAttrNumberDatumFn);
-  var cx4 = /* @__PURE__ */ cx(toAttrNumberDatumFn);
-  var cy4 = /* @__PURE__ */ cy(toAttrNumberDatumFn);
-  var x7 = /* @__PURE__ */ x(toAttrNumberDatumFn);
-  var y7 = /* @__PURE__ */ y(toAttrNumberDatumFn);
-  var text9 = /* @__PURE__ */ text6(toAttrStringDatumFn);
+  var cx4 = /* @__PURE__ */ cx(toAttrNumberFn);
+  var cy4 = /* @__PURE__ */ cy(toAttrNumberFn);
+  var x7 = /* @__PURE__ */ x(toAttrNumberFn);
+  var y7 = /* @__PURE__ */ y(toAttrNumberFn);
+  var text9 = /* @__PURE__ */ text6(toAttrStringFn);
   var x32 = /* @__PURE__ */ x(toAttrNumber);
   var y32 = /* @__PURE__ */ y(toAttrNumber);
   var text1 = /* @__PURE__ */ text6(toAttrString);
@@ -19648,8 +19653,8 @@
         });
         var maxLayer = fromMaybe(0)(maximum4(layerValues));
         var layerHeight = (function() {
-          var $108 = maxLayer > 0;
-          if ($108) {
+          var $113 = maxLayer > 0;
+          if ($113) {
             return (totalHeight - 100) / toNumber(maxLayer);
           }
           ;
@@ -19664,8 +19669,8 @@
             var layerWidth = totalWidth - 100;
             var layerCount = length3(tasksInLayer);
             var xPos = (function() {
-              var $109 = layerCount > 1;
-              if ($109) {
+              var $114 = layerCount > 1;
+              if ($114) {
                 return toNumber(indexInLayer) * layerWidth / toNumber(layerCount - 1 | 0) - layerWidth / 2;
               }
               ;
@@ -19769,8 +19774,8 @@
         ;
         if (v instanceof Just) {
           var layer = (function() {
-            var $114 = $$null2(v.value0.depends);
-            if ($114) {
+            var $119 = $$null2(v.value0.depends);
+            if ($119) {
               return 0;
             }
             ;
@@ -19876,8 +19881,8 @@
                 });
                 var maxLayer = fromMaybe(0)(maximum4(layerValues));
                 var layerHeight = (function() {
-                  var $119 = maxLayer > 0;
-                  if ($119) {
+                  var $124 = maxLayer > 0;
+                  if ($124) {
                     return (v.value1 - 100) / toNumber(maxLayer);
                   }
                   ;
@@ -19919,18 +19924,17 @@
                         return bind75(simpleJoin4(container)(Line.value)(v2.links)(keyIsID_))(function(linksSelection) {
                           return discard116(setAttributes5(linksSelection)([strokeColor6("#bbb"), strokeWidth6(2), classed7("dependency-link")]))(function() {
                             return bind75(simpleJoin4(container)(Circle.value)(v2.nodes)(keyIsID_))(function(nodesSelection) {
-                              var colorByGroup = function(d14) {
-                                if (d14.group instanceof Just) {
-                                  return d3SchemeCategory10N_(toNumber(d14.group.value0));
+                              return discard116(setAttributes5(nodesSelection)([radius4(5), fill6(function(v3) {
+                                if (v3.group instanceof Just) {
+                                  return d3SchemeCategory10N_(toNumber(v3.group.value0));
                                 }
                                 ;
-                                if (d14.group instanceof Nothing) {
+                                if (v3.group instanceof Nothing) {
                                   return "#4CAF50";
                                 }
                                 ;
-                                throw new Error("Failed pattern match at D3.Viz.FpFtw.TopologicalSort (line 465, column 29 - line 467, column 52): " + [d14.group.constructor.name]);
-                              };
-                              return discard116(setAttributes5(nodesSelection)([radius4(5), fill6(colorByGroup), strokeColor6("#fff"), strokeWidth6(1.5), classed7("task-node")]))(function() {
+                                throw new Error("Failed pattern match at D3.Viz.FpFtw.TopologicalSort (line 468, column 38 - line 470, column 60): " + [v3.group.constructor.name]);
+                              }), strokeColor6("#fff"), strokeWidth6(1.5), classed7("task-node")]))(function() {
                                 return bind75(simpleJoin4(container)(Text2.value)(v2.nodes)(keyIsID_))(function(labelsSelection) {
                                   return discard116(setAttributes5(labelsSelection)([textAnchor3("middle"), fontSize4(10), fill1("#333"), classed7("task-label")]))(function() {
                                     return discard116(addTickFunction2("links")(new Step3(linksSelection, [x12(function(d14) {
@@ -19942,17 +19946,17 @@
                                     }), y22(function(d14) {
                                       return d14.target.y;
                                     })])))(function() {
-                                      return discard116(addTickFunction2("nodes")(new Step3(nodesSelection, [cx4(function(d14) {
-                                        return d14.x;
-                                      }), cy4(function(d14) {
-                                        return d14.y;
+                                      return discard116(addTickFunction2("nodes")(new Step3(nodesSelection, [cx4(function(v3) {
+                                        return v3.x;
+                                      }), cy4(function(v3) {
+                                        return v3.y;
                                       })])))(function() {
-                                        return discard116(addTickFunction2("labels")(new Step3(labelsSelection, [x7(function(d14) {
-                                          return d14.x;
-                                        }), y7(function(d14) {
-                                          return d14.y + 20;
-                                        }), text9(function(d14) {
-                                          return d14.name;
+                                        return discard116(addTickFunction2("labels")(new Step3(labelsSelection, [x7(function(v3) {
+                                          return v3.x;
+                                        }), y7(function(v3) {
+                                          return v3.y + 20;
+                                        }), text9(function(v3) {
+                                          return v3.name;
                                         })])))(function() {
                                           return bind75(traverse_16(function(layer) {
                                             return appendTo6(container)(Text2.value)([x32(-(v.value0 / 2) + 10), y32(toNumber(layer) * layerHeight - v.value1 / 2 + 50 + 5), text1("Layer " + show11(layer)), textAnchor3("start"), fontSize4(12), fill1("#999"), classed7("layer-label")]);
@@ -19998,8 +20002,8 @@
             });
             var maxLayer = fromMaybe(0)(maximum4(layerValues));
             var layerHeight = (function() {
-              var $130 = maxLayer > 0;
-              if ($130) {
+              var $141 = maxLayer > 0;
+              if ($141) {
                 return (600 - 100) / toNumber(maxLayer);
               }
               ;
@@ -20038,16 +20042,16 @@
                         var sourceCount = length3(tasksInSourceLayer);
                         var targetCount = length3(tasksInTargetLayer);
                         var sourceX = (function() {
-                          var $133 = sourceCount > 1;
-                          if ($133) {
+                          var $144 = sourceCount > 1;
+                          if ($144) {
                             return toNumber(sourceIndex) * layerWidth / toNumber(sourceCount - 1 | 0);
                           }
                           ;
                           return layerWidth / 2;
                         })();
                         var targetX = (function() {
-                          var $134 = targetCount > 1;
-                          if ($134) {
+                          var $145 = targetCount > 1;
+                          if ($145) {
                             return toNumber(targetIndex) * layerWidth / toNumber(targetCount - 1 | 0);
                           }
                           ;
@@ -20073,8 +20077,8 @@
                         var layerCount = length3(tasksInLayer);
                         var layerWidth = 900 - 100;
                         var xPos = (function() {
-                          var $136 = layerCount > 1;
-                          if ($136) {
+                          var $147 = layerCount > 1;
+                          if ($147) {
                             return toNumber(indexInLayer) * layerWidth / toNumber(layerCount - 1 | 0);
                           }
                           ;
@@ -20419,11 +20423,11 @@
   var fromFoldable10 = /* @__PURE__ */ fromFoldable(ordString)(foldableArray);
   var discard8 = /* @__PURE__ */ discard(discardUnit);
   var radius5 = /* @__PURE__ */ radius(toAttrNumber);
-  var fill9 = /* @__PURE__ */ fill(toAttrStringDatumFn);
+  var fill9 = /* @__PURE__ */ fill(toAttrStringFn);
   var strokeWidth7 = /* @__PURE__ */ strokeWidth(toAttrNumberDatumFn);
   var strokeColor1 = /* @__PURE__ */ strokeColor(toAttrStringDatumFn);
-  var cx5 = /* @__PURE__ */ cx(toAttrNumberDatumFn);
-  var cy5 = /* @__PURE__ */ cy(toAttrNumberDatumFn);
+  var cx5 = /* @__PURE__ */ cx(toAttrNumberFn);
+  var cy5 = /* @__PURE__ */ cy(toAttrNumberFn);
   var x13 = /* @__PURE__ */ x1(toAttrNumberDatumFn);
   var y13 = /* @__PURE__ */ y1(toAttrNumberDatumFn);
   var x23 = /* @__PURE__ */ x2(toAttrNumberDatumFn);
@@ -20484,8 +20488,8 @@
                               ticks: fromFoldable10([])
                             }))(function(v2) {
                               return bind75(simpleJoin4(nodesGroup)(Circle.value)(v2.nodes)(keyIsID_))(function(nodesSelection) {
-                                return discard116(setAttributes5(nodesSelection)([radius5(5), fill9(function(d14) {
-                                  return d3SchemeCategory10N_(toNumber(d14.group));
+                                return discard116(setAttributes5(nodesSelection)([radius5(5), fill9(function(v3) {
+                                  return d3SchemeCategory10N_(toNumber(v3.group));
                                 })]))(function() {
                                   return bind75(simpleJoin4(linksGroup)(Line.value)(v2.links)(keyIsID_))(function(linksSelection) {
                                     return discard116(setAttributes5(linksSelection)([strokeWidth7(function(d14) {
@@ -20493,10 +20497,10 @@
                                     }), strokeColor1(function(d14) {
                                       return d3SchemeCategory10N_(toNumber(d14.target.group));
                                     })]))(function() {
-                                      return discard116(addTickFunction2("nodes")(new Step3(nodesSelection, [cx5(function(d14) {
-                                        return d14.x;
-                                      }), cy5(function(d14) {
-                                        return d14.y;
+                                      return discard116(addTickFunction2("nodes")(new Step3(nodesSelection, [cx5(function(v3) {
+                                        return v3.x;
+                                      }), cy5(function(v3) {
+                                        return v3.y;
                                       })])))(function() {
                                         return discard116(addTickFunction2("links")(new Step3(linksSelection, [x13(function(d14) {
                                           return d14.source.x;
@@ -20843,11 +20847,11 @@
   var fromFoldable11 = /* @__PURE__ */ fromFoldable(ordString)(foldableArray);
   var discard10 = /* @__PURE__ */ discard(discardUnit);
   var radius7 = /* @__PURE__ */ radius(toAttrNumber);
-  var fill11 = /* @__PURE__ */ fill(toAttrStringDatumFn);
+  var fill11 = /* @__PURE__ */ fill(toAttrStringFn);
   var strokeWidth9 = /* @__PURE__ */ strokeWidth(toAttrNumberDatumFn);
   var strokeColor13 = /* @__PURE__ */ strokeColor(toAttrStringDatumFn);
-  var cx7 = /* @__PURE__ */ cx(toAttrNumberDatumFn);
-  var cy7 = /* @__PURE__ */ cy(toAttrNumberDatumFn);
+  var cx7 = /* @__PURE__ */ cx(toAttrNumberFn);
+  var cy7 = /* @__PURE__ */ cy(toAttrNumberFn);
   var x15 = /* @__PURE__ */ x1(toAttrNumberDatumFn);
   var y15 = /* @__PURE__ */ y1(toAttrNumberDatumFn);
   var x25 = /* @__PURE__ */ x2(toAttrNumberDatumFn);
@@ -20995,8 +20999,8 @@
                                 throw new Error("Failed pattern match at D3.Viz.LesMiserablesGUP (line 114, column 3 - line 116, column 25): " + [v3.constructor.name]);
                               })())(function() {
                                 return bind75(simpleJoin4(nodesGroup)(Circle.value)(v2.nodes)(keyIsID_))(function(nodesSelection) {
-                                  return discard116(setAttributes5(nodesSelection)([radius7(5), fill11(function(d14) {
-                                    return d3SchemeCategory10N_(toNumber(d14.group));
+                                  return discard116(setAttributes5(nodesSelection)([radius7(5), fill11(function(v3) {
+                                    return d3SchemeCategory10N_(toNumber(v3.group));
                                   })]))(function() {
                                     return bind75(simpleJoin4(linksGroup)(Line.value)(v2.links)(keyIsID_))(function(linksSelection) {
                                       return discard116(setAttributes5(linksSelection)([strokeWidth9(function(d14) {
@@ -21004,10 +21008,10 @@
                                       }), strokeColor13(function(d14) {
                                         return d3SchemeCategory10N_(toNumber(d14.target.group));
                                       })]))(function() {
-                                        return discard116(addTickFunction2("nodes")(new Step3(nodesSelection, [cx7(function(d14) {
-                                          return d14.x;
-                                        }), cy7(function(d14) {
-                                          return d14.y;
+                                        return discard116(addTickFunction2("nodes")(new Step3(nodesSelection, [cx7(function(v3) {
+                                          return v3.x;
+                                        }), cy7(function(v3) {
+                                          return v3.y;
                                         })])))(function() {
                                           return discard116(addTickFunction2("links")(new Step3(linksSelection, [x15(function(d14) {
                                             return d14.source.x;
@@ -22653,17 +22657,14 @@
     };
   };
 
-  // output/D3.Viz.Parabola.Unsafe/index.js
-  var coerceDatumToInt = unsafeCoerce2;
-
   // output/D3.Viz.Parabola/index.js
   var classed16 = /* @__PURE__ */ classed(toAttrString);
   var discard12 = /* @__PURE__ */ discard(discardUnit);
-  var strokeColor16 = /* @__PURE__ */ strokeColor(toAttrStringDatumFn);
+  var strokeColor16 = /* @__PURE__ */ strokeColor(toAttrStringFn);
   var strokeWidth13 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var fill15 = /* @__PURE__ */ fill(toAttrString);
-  var cx9 = /* @__PURE__ */ cx(toAttrNumberDatumFnI);
-  var cy9 = /* @__PURE__ */ cy(toAttrNumberDatumFn);
+  var cx9 = /* @__PURE__ */ cx(toAttrNumberFnI);
+  var cy9 = /* @__PURE__ */ cy(toAttrNumberFn);
   var radius9 = /* @__PURE__ */ radius(toAttrNumber);
   var drawWithData = function(dictSelectionM) {
     var Monad0 = dictSelectionM.Monad0();
@@ -22681,14 +22682,14 @@
           return bind75(appendTo6(root3)(Svg.value)([viewBox(-10)(-100)(320)(160), classed16("d3svg gup")]))(function(svg) {
             return bind75(appendTo6(svg)(Group.value)([]))(function(circleGroup) {
               return bind75(simpleJoin4(circleGroup)(Circle.value)(circleData)(keyIsID_))(function(circles) {
-                return discard116(setAttributes5(circles)([strokeColor16(function(d14) {
-                  return d3SchemePairedN_(toNumber(coerceDatumToInt(d14)) / 100);
+                return discard116(setAttributes5(circles)([strokeColor16(function(v) {
+                  return d3SchemePairedN_(toNumber(v) / 100);
                 }), strokeWidth13(3), fill15("none"), cx9(function(v) {
-                  return function(i2) {
-                    return index_ToNumber(i2) * 20;
+                  return function(v1) {
+                    return index_ToNumber(v1) * 20;
                   };
-                }), cy9(function(d14) {
-                  return 100 - toNumber(coerceDatumToInt(d14)) / 5;
+                }), cy9(function(v) {
+                  return 100 - toNumber(v) / 5;
                 }), radius9(10)]))(function() {
                   return pure50(circles);
                 });
