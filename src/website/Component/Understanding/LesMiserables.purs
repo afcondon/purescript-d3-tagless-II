@@ -39,6 +39,7 @@ import Halogen.HTML.Properties as HP
 import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Shared.ZoomSticker as ZoomSticker
 import PSD3.Website.Types (Route(..))
+import Unsafe.Coerce (unsafeCoerce)
 
 -- | State
 type State = {
@@ -246,17 +247,19 @@ handleAction = case _ of
     fiber <- H.liftAff $ forkAff $ forever $ runUpdate updateFn
     H.modify_ (\state -> state { gupFiber = Just fiber })
 
-    -- ARCHIVED: Force simulation disabled during phantom type integration
-    -- response <- H.liftAff $ AJAX.get ResponseFormat.string "./data/miserables.json"
-    -- let graph = readGraphFromFileContents response
-    --
-    -- -- Create force array and active forces set
-    -- let forcesArray = [ forces.manyBodyNeg, forces.collision, forces.center, forces.links ]
-    --     activeForces = Set.fromFoldable ["many body negative", "collision", "center", linksForceName_]
-    --
-    -- -- Draw visualization
-    -- runWithD3_Simulation do
-    --   LesMis.drawSimplified forcesArray activeForces graph "div.lesmis-container"
+    -- Load and draw Les Misérables force-directed graph
+    response <- H.liftAff $ AJAX.get ResponseFormat.string "./data/miserables.json"
+    let graph = readGraphFromFileContents response
+
+    -- Create force array and active forces set
+    -- Forces are polymorphic (created with allNodes filter), so we coerce to the specific type
+    let forcesArray = [ forces.manyBodyNeg, forces.collision, forces.center, forces.links ]
+        ffiForces = unsafeCoerce forcesArray
+        activeForces = Set.fromFoldable ["many body negative", "collision", "center", linksForceName_]
+
+    -- Draw visualization
+    runWithD3_Simulation do
+      LesMis.drawSimplified ffiForces activeForces graph "div.lesmis-container"
 
     -- Load tree data for animated radial tree
     treeResponse <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"

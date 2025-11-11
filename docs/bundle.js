@@ -28173,7 +28173,7 @@
     };
   };
   var selectionNestedJoin = function(dictFoldable) {
-    var fromFoldable21 = fromFoldable2(dictFoldable);
+    var fromFoldable25 = fromFoldable2(dictFoldable);
     return function(dictSelectionM) {
       var pure50 = pure(dictSelectionM.Monad0().Applicative0());
       return function(selection2) {
@@ -28181,7 +28181,7 @@
           return function(extractChildren) {
             return function(keyFn) {
               var extractFn = function($68) {
-                return fromFoldable21(extractChildren($68));
+                return fromFoldable25(extractChildren($68));
               };
               var element3 = spy2("NestedJoin: ")(show32(e));
               var selectS = d3SelectionSelectAll_(element3)(selection2);
@@ -30949,10 +30949,10 @@
     var bind75 = bind(Bind1);
     var liftEffect49 = liftEffect(MonadEffect0);
     var liftAff37 = liftAff(dictMonadAff);
-    var runWithD3_Simulation3 = runWithD3_Simulation(Bind1);
+    var runWithD3_Simulation4 = runWithD3_Simulation(Bind1);
     var pure50 = pure(Monad0.Applicative0());
     return function(dictMonadState) {
-      var runWithD3_Simulation1 = runWithD3_Simulation3(dictMonadState)(dictMonadAff);
+      var runWithD3_Simulation1 = runWithD3_Simulation4(dictMonadState)(dictMonadAff);
       var modify_48 = modify_(dictMonadState);
       return function(v) {
         if (v instanceof Initialize5) {
@@ -38431,6 +38431,9 @@ graph TB
   var discard212 = /* @__PURE__ */ discard70(bindHalogenM);
   var modify_43 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var forever2 = /* @__PURE__ */ forever(monadRecAff);
+  var fromFoldable20 = /* @__PURE__ */ fromFoldable7(foldableArray)(ordString);
+  var runWithD3_Simulation3 = /* @__PURE__ */ runWithD3_Simulation(bindHalogenM)(monadStateHalogenM);
+  var drawSimplified4 = /* @__PURE__ */ drawSimplified(bindD3SimM)(monadEffD3SimM)(monadStateD3SimM)(simulationM2D3Selection_D);
   var pure116 = /* @__PURE__ */ pure(applicativeHalogenM);
   var drawAnimatedRadialTree3 = /* @__PURE__ */ drawAnimatedRadialTree(applicativeD3M);
   var gets2 = /* @__PURE__ */ gets(monadStateHalogenM);
@@ -38479,8 +38482,8 @@ graph TB
       var coinToss = function(c) {
         return function __do5() {
           var n = random();
-          var $63 = n > 0.6;
-          if ($63) {
+          var $72 = n > 0.6;
+          if ($72) {
             return new Just(c);
           }
           ;
@@ -38521,67 +38524,84 @@ graph TB
       return RotateRadialTree.value;
     })])([text5("Rotate 90\xB0")])])])])]);
   };
+  var forces2 = /* @__PURE__ */ (function() {
+    return {
+      manyBodyNeg: createForce("many body negative")(new RegularForce(ForceManyBody.value))(allNodes)([strengthVal(-40)]),
+      collision: createForce("collision")(new RegularForce(ForceCollide.value))(allNodes)([radiusVal(4)]),
+      center: createForce("center")(new RegularForce(ForceCenter.value))(allNodes)([xVal(0), yVal(0), strengthVal(1)]),
+      links: createLinkForce(Nothing.value)([])
+    };
+  })();
   var handleAction45 = function(dictMonadAff) {
     var monadEffectHalogenM7 = monadEffectHalogenM(dictMonadAff.MonadEffect0());
     var liftEffect112 = liftEffect(monadEffectHalogenM7);
     var runGeneralUpdatePattern1 = runGeneralUpdatePattern(monadEffectHalogenM7);
-    var liftAff37 = liftAff(monadAffHalogenM(dictMonadAff));
+    var monadAffHalogenM2 = monadAffHalogenM(dictMonadAff);
+    var liftAff37 = liftAff(monadAffHalogenM2);
+    var runWithD3_Simulation1 = runWithD3_Simulation3(monadAffHalogenM2);
     return function(v) {
       if (v instanceof Initialize46) {
         return bind211(liftEffect112(eval_D3M(drawThreeCirclesTransition3("div.three-circles-viz"))))(function(v1) {
           return discard212(modify_43(function(state3) {
-            var $66 = {};
-            for (var $67 in state3) {
-              if ({}.hasOwnProperty.call(state3, $67)) {
-                $66[$67] = state3[$67];
+            var $75 = {};
+            for (var $76 in state3) {
+              if ({}.hasOwnProperty.call(state3, $76)) {
+                $75[$76] = state3[$76];
               }
               ;
             }
             ;
-            $66.circlesSelection = new Just(v1.circles);
-            return $66;
+            $75.circlesSelection = new Just(v1.circles);
+            return $75;
           }))(function() {
             return bind211(runGeneralUpdatePattern1)(function(updateFn) {
               return bind211(liftAff37(forkAff(forever2(runUpdate(updateFn)))))(function(fiber) {
                 return discard212(modify_43(function(state3) {
-                  var $69 = {};
-                  for (var $70 in state3) {
-                    if ({}.hasOwnProperty.call(state3, $70)) {
-                      $69[$70] = state3[$70];
+                  var $78 = {};
+                  for (var $79 in state3) {
+                    if ({}.hasOwnProperty.call(state3, $79)) {
+                      $78[$79] = state3[$79];
                     }
                     ;
                   }
                   ;
-                  $69.gupFiber = new Just(fiber);
-                  return $69;
+                  $78.gupFiber = new Just(fiber);
+                  return $78;
                 }))(function() {
-                  return bind211(liftAff37(getTreeViaAJAX("./data/flare-2.json")))(function(treeResponse) {
-                    if (treeResponse instanceof Left) {
-                      return pure116(unit);
-                    }
-                    ;
-                    if (treeResponse instanceof Right) {
-                      return bind211(liftEffect112(eval_D3M(drawAnimatedRadialTree3(TidyTree.value)(treeResponse.value0)("div.radial-tree-viz"))))(function(v2) {
-                        return modify_43(function(state3) {
-                          var $75 = {};
-                          for (var $76 in state3) {
-                            if ({}.hasOwnProperty.call(state3, $76)) {
-                              $75[$76] = state3[$76];
-                            }
-                            ;
-                          }
-                          ;
-                          $75.radialTreeData = new Just(treeResponse.value0);
-                          $75.radialRotationGroup = new Just(v2.rotationGroup);
-                          $75.radialLinksGroup = new Just(v2.linksGroup);
-                          $75.radialNodesGroup = new Just(v2.nodesGroup);
-                          $75.radialHierarchyRoot = new Just(v2.root);
-                          return $75;
-                        });
+                  return bind211(liftAff37(get3(string)("./data/miserables.json")))(function(response) {
+                    var graph = readGraphFromFileContents(response);
+                    var forcesArray = [forces2.manyBodyNeg, forces2.collision, forces2.center, forces2.links];
+                    var activeForces = fromFoldable20(["many body negative", "collision", "center", linksForceName_]);
+                    return discard212(runWithD3_Simulation1(drawSimplified4(forcesArray)(activeForces)(graph)("div.lesmis-container")))(function() {
+                      return bind211(liftAff37(getTreeViaAJAX("./data/flare-2.json")))(function(treeResponse) {
+                        if (treeResponse instanceof Left) {
+                          return pure116(unit);
+                        }
+                        ;
+                        if (treeResponse instanceof Right) {
+                          return bind211(liftEffect112(eval_D3M(drawAnimatedRadialTree3(TidyTree.value)(treeResponse.value0)("div.radial-tree-viz"))))(function(v2) {
+                            return modify_43(function(state3) {
+                              var $84 = {};
+                              for (var $85 in state3) {
+                                if ({}.hasOwnProperty.call(state3, $85)) {
+                                  $84[$85] = state3[$85];
+                                }
+                                ;
+                              }
+                              ;
+                              $84.radialTreeData = new Just(treeResponse.value0);
+                              $84.radialRotationGroup = new Just(v2.rotationGroup);
+                              $84.radialLinksGroup = new Just(v2.linksGroup);
+                              $84.radialNodesGroup = new Just(v2.nodesGroup);
+                              $84.radialHierarchyRoot = new Just(v2.root);
+                              return $84;
+                            });
+                          });
+                        }
+                        ;
+                        throw new Error("Failed pattern match at PSD3.Understanding.Movement (line 266, column 5 - line 280, column 11): " + [treeResponse.constructor.name]);
                       });
-                    }
-                    ;
-                    throw new Error("Failed pattern match at PSD3.Understanding.Movement (line 263, column 5 - line 277, column 11): " + [treeResponse.constructor.name]);
+                    });
                   });
                 });
               });
@@ -38602,7 +38622,7 @@ graph TB
             return liftAff37(killFiber(error("Cancelling GUP animation"))(maybeFiber.value0));
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Understanding.Movement (line 282, column 5 - line 284, column 83): " + [maybeFiber.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Understanding.Movement (line 285, column 5 - line 287, column 83): " + [maybeFiber.constructor.name]);
         });
       }
       ;
@@ -38618,7 +38638,7 @@ graph TB
             return liftEffect112(eval_D3M(transitionToColorMixing2(maybeCircles.value0)));
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Understanding.Movement (line 289, column 5 - line 291, column 98): " + [maybeCircles.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Understanding.Movement (line 292, column 5 - line 294, column 98): " + [maybeCircles.constructor.name]);
         });
       }
       ;
@@ -38633,19 +38653,19 @@ graph TB
               return TidyTree.value;
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Understanding.Movement (line 296, column 19 - line 298, column 33): " + [state3.radialTreeType.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Understanding.Movement (line 299, column 19 - line 301, column 33): " + [state3.radialTreeType.constructor.name]);
           })();
           return discard212(modify_43(function(v1) {
-            var $89 = {};
-            for (var $90 in v1) {
-              if ({}.hasOwnProperty.call(v1, $90)) {
-                $89[$90] = v1[$90];
+            var $98 = {};
+            for (var $99 in v1) {
+              if ({}.hasOwnProperty.call(v1, $99)) {
+                $98[$99] = v1[$99];
               }
               ;
             }
             ;
-            $89.radialTreeType = newType;
-            return $89;
+            $98.radialTreeType = newType;
+            return $98;
           }))(function() {
             if (state3.radialHierarchyRoot instanceof Just && (state3.radialLinksGroup instanceof Just && state3.radialNodesGroup instanceof Just)) {
               return liftEffect112(eval_D3M(updateToLayout2(newType)(state3.radialHierarchyRoot.value0)(state3.radialLinksGroup.value0)(state3.radialNodesGroup.value0)));
@@ -38660,16 +38680,16 @@ graph TB
         return bind211(get12)(function(state3) {
           var newRotation = state3.radialRotation + 90;
           return discard212(modify_43(function(v1) {
-            var $98 = {};
-            for (var $99 in v1) {
-              if ({}.hasOwnProperty.call(v1, $99)) {
-                $98[$99] = v1[$99];
+            var $107 = {};
+            for (var $108 in v1) {
+              if ({}.hasOwnProperty.call(v1, $108)) {
+                $107[$108] = v1[$108];
               }
               ;
             }
             ;
-            $98.radialRotation = newRotation;
-            return $98;
+            $107.radialRotation = newRotation;
+            return $107;
           }))(function() {
             if (state3.radialRotationGroup instanceof Nothing) {
               return pure116(unit);
@@ -38679,22 +38699,14 @@ graph TB
               return liftEffect112(eval_D3M(rotateTree2(state3.radialRotation)(90)(state3.radialRotationGroup.value0)));
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Understanding.Movement (line 318, column 5 - line 321, column 104): " + [state3.radialRotationGroup.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Understanding.Movement (line 321, column 5 - line 324, column 104): " + [state3.radialRotationGroup.constructor.name]);
           });
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Understanding.Movement (line 238, column 16 - line 321, column 104): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Understanding.Movement (line 239, column 16 - line 324, column 104): " + [v.constructor.name]);
     };
   };
-  var forces2 = /* @__PURE__ */ (function() {
-    return {
-      manyBodyNeg: createForce("many body negative")(new RegularForce(ForceManyBody.value))(allNodes)([strengthVal(-40)]),
-      collision: createForce("collision")(new RegularForce(ForceCollide.value))(allNodes)([radiusVal(4)]),
-      center: createForce("center")(new RegularForce(ForceCenter.value))(allNodes)([xVal(0), yVal(0), strengthVal(1)]),
-      links: createLinkForce(Nothing.value)([])
-    };
-  })();
   var forceLibrary = /* @__PURE__ */ (function() {
     return initialize(foldableArray)(functorArray)([forces2.manyBodyNeg, forces2.collision, forces2.center, forces2.links]);
   })();
@@ -42100,7 +42112,7 @@ graph TB
   var guard3 = /* @__PURE__ */ guard(alternativeMaybe);
   var apply4 = /* @__PURE__ */ apply(applyMaybe);
   var map122 = /* @__PURE__ */ map(functorMaybe);
-  var fromFoldable20 = /* @__PURE__ */ fromFoldable(ordString)(foldableArray);
+  var fromFoldable21 = /* @__PURE__ */ fromFoldable(ordString)(foldableArray);
   var traverse5 = /* @__PURE__ */ traverse(traversableArray)(applicativeMaybe);
   var fromFoldable111 = /* @__PURE__ */ fromFoldable3(foldableArray);
   var append23 = /* @__PURE__ */ append(semigroupList);
@@ -42113,7 +42125,7 @@ graph TB
         return apply4(map122(Tuple.create)(head(keyVal)))(index2(keyVal)(1));
       });
     };
-    var $27 = map122(fromFoldable20);
+    var $27 = map122(fromFoldable21);
     var $28 = traverse5(part2tuple);
     var $29 = split("&");
     return function($30) {
