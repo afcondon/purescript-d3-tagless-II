@@ -2,7 +2,7 @@ module PSD3.Component.Example where
 
 import Prelude
 
-import Control.Monad (void)
+import Control.Monad.Rec.Class (forever)
 
 import Affjax.ResponseFormat as ResponseFormat
 import Affjax.Web as AJAX
@@ -26,6 +26,7 @@ import D3.Viz.PackViz as PackViz
 import D3.Viz.ClusterViz as ClusterViz
 import D3.Viz.PartitionViz as PartitionViz
 import D3.Viz.SunburstViz as SunburstViz
+import D3.Viz.AnimatedTreeCluster as AnimatedTreeCluster
 import D3.Viz.LesMiserables as LesMis
 import D3.Viz.LesMiserablesGUP as LesMisGUP
 import D3.Viz.LesMiserablesGUP.Model (LesMisRawModel)
@@ -47,6 +48,8 @@ import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.Set as Set
 import Data.Tuple (Tuple(..))
+import Effect.Aff (Fiber, Milliseconds(..), delay, forkAff, killFiber)
+import Effect.Exception (error)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
@@ -79,10 +82,14 @@ type State =
   , lesMisVisibleGroups :: Set.Set Int
   , lesMisActiveForces :: Set.Set String
   , lesMisInGridMode :: Boolean  -- Track if nodes are pinned to grid
+  -- AnimatedTreeCluster-specific state
+  , animatedTreeClusterFiber :: Maybe (Fiber Unit)
+  , animatedTreeClusterLayout :: Maybe AnimatedTreeCluster.LayoutType
   }
 
 data Action
   = Initialize
+  | Finalize
   | ToggleGroup Int           -- Toggle visibility of a character group
   | ToggleForce String        -- Toggle a force on/off
   | MoveToGrid                -- Transition nodes to grid layout
@@ -106,11 +113,15 @@ component = H.mkComponent
       , lesMisVisibleGroups: Set.fromFoldable [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
       , lesMisActiveForces: Set.fromFoldable ["many body negative", "collision", "center", linksForceName_]
       , lesMisInGridMode: false
+      -- AnimatedTreeCluster initial state
+      , animatedTreeClusterFiber: Nothing
+      , animatedTreeClusterLayout: Nothing
       }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
       , initialize = Just Initialize
+      , finalize = Just Finalize
       }
   }
 
@@ -206,6 +217,26 @@ handleAction = case _ of
           Right response -> do
             let blessed = readJSON_ response.body
             _ <- H.liftEffect $ eval_D3M $ SunburstViz.draw blessed "#example-viz"
+            pure unit
+
+      "animated-tree-cluster" -> do
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare-2.json"
+        case result of
+          Left err -> log "AnimatedTreeCluster: Failed to load data"
+          Right response -> do
+            let blessed = readJSON_ response.body
+            -- Initial draw
+            initialLayout <- H.liftEffect $ eval_D3M $ AnimatedTreeCluster.draw blessed "#example-viz"
+            H.modify_ _ { animatedTreeClusterLayout = Just initialLayout }
+
+            -- Start animation loop that toggles between layouts
+            let runToggle currentLayout = do
+                  delay (Milliseconds 3000.0)
+                  newLayout <- liftEffect $ eval_D3M $ AnimatedTreeCluster.updateLayout blessed currentLayout "#example-viz"
+                  runToggle newLayout  -- Recursively call with new layout
+
+            fiber <- H.liftAff $ forkAff $ runToggle initialLayout
+            H.modify_ _ { animatedTreeClusterFiber = Just fiber }
             pure unit
 
       "lesmis-force" -> do
@@ -420,6 +451,13 @@ handleAction = case _ of
         H.modify_ _ { lesMisInGridMode = false }
       _ -> log "ReleaseFromGrid: No model data available"
 
+  Finalize -> do
+    -- Kill the AnimatedTreeCluster animation fiber if it exists
+    maybeFiber <- H.gets _.animatedTreeClusterFiber
+    case maybeFiber of
+      Nothing -> pure unit
+      Just fiber -> H.liftAff $ killFiber (error "Cancelling AnimatedTreeCluster animation") fiber
+
 -- | Example metadata
 type ExampleMeta =
   { id :: String
@@ -446,6 +484,7 @@ allExampleIds =
   , "cluster-purescript"
   , "icicle"
   , "sunburst-purescript"
+  , "animated-tree-cluster"
   , "lesmis-force"
   , "lesmisgup"
   , "topological-sort"
@@ -505,6 +544,8 @@ getExampleMeta id = case id of
     { id, name: "Partition/Icicle (Pure PureScript)", description: "Rectangular partition layout (icicle chart) with equal layer height in pure PureScript", category: "Hierarchies" }
   "sunburst-purescript" -> Just
     { id, name: "Sunburst (Pure PureScript)", description: "Radial partition layout with nested rings in pure PureScript", category: "Hierarchies" }
+  "animated-tree-cluster" -> Just
+    { id, name: "Animated Tree ↔ Cluster", description: "Automatic transitions between tree and dendrogram layouts using pure PureScript algorithms", category: "Transitions" }
   "lesmis-force" -> Just
     { id, name: "Les Misérables Network", description: "Character co-occurrence force-directed graph with physics simulation", category: "Force-Directed" }
   "lesmisgup" -> Just

@@ -217,6 +217,13 @@ allExamples =
     , route: Example "general-update-pattern"
     , thumbnail: "assets/example-thumbnails/general-update-pattern.png"
     }
+  , { id: "animated-tree-cluster"
+    , name: "Animated Tree ↔ Cluster"
+    , description: "Pure PureScript tree and dendrogram with automatic transitions"
+    , category: "Transitions"
+    , route: Example "animated-tree-cluster"
+    , thumbnail: "assets/example-thumbnails/tree-purescript.png"
+    }
   , { id: "animated-radial-tree"
     , name: "Animated Radial Tree"
     , description: "Transitions between tree layouts"
