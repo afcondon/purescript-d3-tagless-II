@@ -8,6 +8,7 @@ import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
 import PSD3.Layout.Hierarchy.Core (hierarchy)
 import PSD3.Layout.Hierarchy.Core as Hierarchy
 import PSD3.Layout.Hierarchy.Cluster (cluster, defaultClusterConfig, ClusterNode(..))
+import PSD3.Layout.Hierarchy.Projection (clusterVerticalX, clusterVerticalY, verticalLinkPath)
 import PSD3.Layout.Hierarchy.Types (HierarchyNode(..), ValuedNode(..))
 import Data.Int (toNumber)
 import Data.Array (length, (..), (!!))
@@ -103,16 +104,8 @@ printClusterStructure currentDepth maxDepth indent (ClusterNode node) = do
   else
     pure unit
 
--- Generate curved path between parent and child (Bezier curve)
--- Based on D3's linkClusterVertical which draws from child to parent
--- with control points at parent.y + levelSpacing/2
-makeLinkPath :: Number -> Number -> Number -> Number -> Number -> String
-makeLinkPath levelSpacing parentX parentY childX childY =
-  let controlY = parentY + levelSpacing / 2.0
-  in "M" <> show childX <> "," <> show childY
-     <> " C" <> show childX <> "," <> show controlY
-     <> " " <> show parentX <> "," <> show controlY
-     <> " " <> show parentX <> "," <> show parentY
+-- REMOVED: Local makeLinkPath function
+-- Now using verticalLinkPath from PSD3.Layout.Hierarchy.Projection
 
 -- Main drawing function for cluster layout (dendrogram)
 draw :: forall m.
@@ -210,11 +203,11 @@ draw flareData selector = do
 
   -- Render links first
   let renderLinks :: ClusterNode HierData -> m Unit
-      renderLinks (ClusterNode node) = do
-        -- Render links to all children
-        traverse_ (\(ClusterNode child) -> do
+      renderLinks parent@(ClusterNode node) = do
+        -- Render links to all children using projection accessors
+        traverse_ (\child -> do
           _ <- appendTo linksGroup Path
-            [ d $ makeLinkPath levelSpacing node.x node.y child.x child.y
+            [ d $ verticalLinkPath (clusterVerticalX parent) (clusterVerticalY parent) (clusterVerticalX child) (clusterVerticalY child)
             , fill "none"
             , strokeColor "#555"
             , fillOpacity 0.4
@@ -229,15 +222,15 @@ draw flareData selector = do
 
   -- Render nodes (circles and labels)
   let renderNode :: ClusterNode HierData -> m Unit
-      renderNode (ClusterNode node) = do
+      renderNode clusterNode@(ClusterNode node) = do
         let nodeName = getName node.data_
         let isLeaf = length node.children == 0
         let nodeRadius = if isLeaf then 3.0 else 4.0
 
-        -- Draw circle
+        -- Draw circle using projection accessors
         _ <- appendTo nodesGroup Circle
-          [ cx node.x
-          , cy node.y
+          [ cx $ clusterVerticalX clusterNode
+          , cy $ clusterVerticalY clusterNode
           , radius nodeRadius
           , fill "#999"
           , strokeColor "#555"
@@ -251,8 +244,8 @@ draw flareData selector = do
         if not isLeaf
           then do
             _ <- appendTo nodesGroup Text
-              [ x (node.x + 8.0)
-              , y node.y
+              [ x $ clusterVerticalX clusterNode + 8.0
+              , y $ clusterVerticalY clusterNode
               , fill "#333"
               , fontSize 10.0
               , text nodeName

@@ -39,6 +39,7 @@ routes =
   <|> dataFlowViz
   <|> movement
   <|> hierarchies
+  <|> isometricCurveExperiment
   <|> interpreters
   <|> mermaidDiagrams
   <|> codeExplorer
@@ -144,6 +145,10 @@ movement = Movement <$ lit "movement" <* end
 hierarchies :: Match Route
 hierarchies = Hierarchies <$ lit "hierarchies" <* end
 
+-- | Match: /isometric-curve-experiment
+isometricCurveExperiment :: Match Route
+isometricCurveExperiment = IsometricCurveExperiment <$ lit "isometric-curve-experiment" <* end
+
 -- | Match: /interpreters
 interpreters :: Match Route
 interpreters = Interpreters <$ lit "interpreters" <* end
@@ -215,6 +220,7 @@ routeToPath SimpleCharts2 = "/simple-charts-2"
 routeToPath DataFlowViz = "/data-flow"
 routeToPath Movement = "/movement"
 routeToPath Hierarchies = "/hierarchies"
+routeToPath IsometricCurveExperiment = "/isometric-curve-experiment"
 routeToPath Interpreters = "/interpreters"
 routeToPath MermaidDiagrams = "/mermaid-diagrams"
 routeToPath CodeExplorer = "/code-explorer"

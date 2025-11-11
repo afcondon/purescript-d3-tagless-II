@@ -7,6 +7,7 @@ import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
 import PSD3.Layout.Hierarchy.Core (hierarchy)
 import PSD3.Layout.Hierarchy.Tree (tree, defaultTreeConfig, TreeNode(..))
+import PSD3.Layout.Hierarchy.Projection (verticalX, verticalY, verticalLinkPath)
 import D3.Viz.FlareData (HierData, getName, getValue)
 import D3.Viz.FlareData (getChildren) as FlareData
 import Data.Array (length, (..), (!!))
@@ -62,14 +63,8 @@ printTreeStructure currentDepth maxDepth indent (TreeNode node) = do
   else
     pure unit
 
--- Generate curved path between parent and child (Bezier curve)
-makeLinkPath :: Number -> Number -> Number -> Number -> String
-makeLinkPath x1 y1 x2 y2 =
-  let midY = (y1 + y2) / 2.0
-  in "M" <> show x1 <> "," <> show y1
-     <> " C" <> show x1 <> "," <> show midY
-     <> " " <> show x2 <> "," <> show midY
-     <> " " <> show x2 <> "," <> show y2
+-- REMOVED: Local makeLinkPath function
+-- Now using verticalLinkPath from PSD3.Layout.Hierarchy.Projection
 
 -- Main drawing function for tree layout
 draw :: forall m.
@@ -125,11 +120,11 @@ draw flareData selector = do
 
   -- Render links first
   let renderLinks :: TreeNode HierData -> m Unit
-      renderLinks (TreeNode node) = do
+      renderLinks parent@(TreeNode node) = do
         -- Render links to all children
-        traverse_ (\(TreeNode child) -> do
+        traverse_ (\child -> do
           _ <- appendTo linksGroup Path
-            [ d $ makeLinkPath node.x node.y child.x child.y
+            [ d $ verticalLinkPath (verticalX parent) (verticalY parent) (verticalX child) (verticalY child)
             , fill "none"
             , strokeColor "#555"
             , fillOpacity 0.4
@@ -144,15 +139,15 @@ draw flareData selector = do
 
   -- Render nodes (circles and labels)
   let renderNode :: TreeNode HierData -> m Unit
-      renderNode (TreeNode node) = do
+      renderNode treeNode@(TreeNode node) = do
         let nodeName = getName node.data_
         let isLeaf = length node.children == 0
         let nodeRadius = if isLeaf then 3.0 else 4.0
 
-        -- Draw circle
+        -- Draw circle using projection accessors
         _ <- appendTo nodesGroup Circle
-          [ cx node.x
-          , cy node.y
+          [ cx $ verticalX treeNode
+          , cy $ verticalY treeNode
           , radius nodeRadius
           , fill "#999"
           , strokeColor "#555"
@@ -166,8 +161,8 @@ draw flareData selector = do
         if not isLeaf
           then do
             _ <- appendTo nodesGroup Text
-              [ x (node.x + 8.0)
-              , y node.y
+              [ x $ verticalX treeNode + 8.0
+              , y $ verticalY treeNode
               , fill "#333"
               , fontSize 10.0
               , text nodeName

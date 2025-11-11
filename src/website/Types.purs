@@ -103,6 +103,7 @@ data Route
   | DataFlowViz
   | Movement
   | Hierarchies
+  | IsometricCurveExperiment  -- Temporary: Isometric curve experimentation
   | Interpreters
   | MermaidDiagrams  -- Mermaid AST visualization examples
   | CodeExplorer
@@ -140,6 +141,7 @@ instance showRoute :: Show Route where
   show DataFlowViz = "Data Flow Visualizations"
   show Movement = "Movement & Transition"
   show Hierarchies = "Hierarchies"
+  show IsometricCurveExperiment = "Isometric Curve Experiment"
   show Interpreters = "Interpreters"
   show MermaidDiagrams = "Mermaid AST Diagrams"
   show CodeExplorer = "Code Explorer"

@@ -34,6 +34,7 @@ import PSD3.Understanding.SimpleCharts1 as SimpleCharts1
 import PSD3.Understanding.SimpleCharts2 as SimpleCharts2
 import PSD3.Understanding.DataFlowViz as DataFlowViz
 import PSD3.Understanding.Hierarchies as Hierarchies
+import PSD3.Understanding.IsometricCurveExperiment as IsometricCurveExperiment
 import PSD3.Understanding.Interpreters as Interpreters
 import PSD3.Component.MermaidDiagrams as MermaidDiagrams
 import PSD3.Understanding.Movement as Movement
@@ -83,6 +84,7 @@ type Slots =
   , dataFlowViz :: forall q. H.Slot q Void Unit
   , movement :: forall q. H.Slot q Void Unit
   , hierarchies :: forall q. H.Slot q Void Unit
+  , isometricCurveExperiment :: forall q. H.Slot q Void Unit
   , interpreters :: forall q. H.Slot q Void Unit
   , mermaidDiagrams :: forall q. H.Slot q Void Unit
   , codeExplorer :: forall q. H.Slot q Void Unit
@@ -115,6 +117,7 @@ _simpleCharts2 = Proxy :: Proxy "simpleCharts2"
 _dataFlowViz = Proxy :: Proxy "dataFlowViz"
 _movement = Proxy :: Proxy "movement"
 _hierarchies = Proxy :: Proxy "hierarchies"
+_isometricCurveExperiment = Proxy :: Proxy "isometricCurveExperiment"
 _interpreters = Proxy :: Proxy "interpreters"
 _mermaidDiagrams = Proxy :: Proxy "mermaidDiagrams"
 _codeExplorer = Proxy :: Proxy "codeExplorer"
@@ -215,6 +218,9 @@ renderPage route = case spy "Route is" route of
 
   Hierarchies ->
     HH.slot_ _hierarchies unit Hierarchies.component unit
+
+  IsometricCurveExperiment ->
+    HH.slot_ _isometricCurveExperiment unit IsometricCurveExperiment.component unit
 
   Interpreters ->
     HH.slot_ _interpreters unit Interpreters.component unit

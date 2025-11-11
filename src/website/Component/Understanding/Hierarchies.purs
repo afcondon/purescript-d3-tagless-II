@@ -3,20 +3,17 @@ module PSD3.Understanding.Hierarchies where -- understanding
 import Prelude
 
 import D3.Viz.Hierarchies (drawCirclePacking, drawIcicle, drawTreemap)
--- REMOVED: Old D3 FFI tree visualizations - using new pure PS versions via Hierarchies module
--- import D3.Viz.Tree.HorizontalTree (drawHorizontalTree)
--- import D3.Viz.Tree.RadialTree (drawRadialTree)
--- import D3.Viz.Tree.VerticalTree (drawVerticalTree)
+import D3.Viz.TreeVizOriented (draw, TreeOrientation(..)) as TreeViz
+import D3.Viz.ClusterVizOriented (draw, ClusterOrientation(..)) as ClusterViz
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
-import Halogen (liftEffect)
+import Effect.Class (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import PSD3 (runD3M)
-import PSD3.Data.Tree (TreeJson_, TreeType(..))
+import PSD3.Data.Tree (TreeJson_)
 import PSD3.Internal.Hierarchical (getTreeViaAJAX)
 import PSD3.Internal.Utility (removeExistingSVG)
 import PSD3.Interpreter.D3 (eval_D3M)
@@ -38,6 +35,7 @@ data HierarchyLayout
   | VerticalDendrogram
   | RadialTidy
   | RadialDendrogram
+  | IsometricTidy
   -- Adjacency Diagrams
   | Icicle
   -- Enclosure Diagrams
@@ -53,21 +51,23 @@ instance showHierarchyLayout :: Show HierarchyLayout where
   show VerticalDendrogram = "Vertical Dendrogram"
   show RadialTidy = "Radial Tidy Tree"
   show RadialDendrogram = "Radial Dendrogram"
+  show IsometricTidy = "Isometric Tidy Tree (2.5D)"
   show Icicle = "Icicle"
   show CirclePacking = "Circle Packing"
   show Treemap = "Treemap"
 
 layoutDescription :: HierarchyLayout -> String
 layoutDescription = case _ of
-  HorizontalTidy -> "Node-link diagram: Compact tidy tree with left-to-right orientation. Root on the left, efficiently uses space."
-  HorizontalDendrogram -> "Node-link diagram: Horizontal dendrogram with all leaves aligned at the same level on the right."
-  VerticalTidy -> "Node-link diagram: Compact tidy tree with top-down orientation. Common in organizational charts."
-  VerticalDendrogram -> "Node-link diagram: Vertical dendrogram with all leaves aligned at the same level at the bottom."
-  RadialTidy -> "Node-link diagram: Compact tidy tree in polar coordinates, emanating from center. Space-efficient for large hierarchies."
-  RadialDendrogram -> "Node-link diagram: Radial dendrogram with all leaves at equal distance from center."
-  Icicle -> "Adjacency diagram: Rectangular subdivisions showing hierarchy through relative placement. Area encodes quantitative values."
-  CirclePacking -> "Enclosure diagram: Tightly nested circles showing hierarchy through containment. Area encodes values, readily shows topology."
-  Treemap -> "Enclosure diagram: Space-efficient rectangular subdivisions. Area is proportional to value, shows hierarchy through nesting."
+  HorizontalTidy -> "Node-link diagram: Compact tidy tree with left-to-right orientation. Root on the left, efficiently uses space. Pure PureScript Reingold-Tilford algorithm with horizontal projection."
+  HorizontalDendrogram -> "Node-link diagram: Horizontal dendrogram with all leaves aligned at the same level on the right. Pure PureScript cluster algorithm with horizontal projection."
+  VerticalTidy -> "Node-link diagram: Compact tidy tree with top-down orientation using pure PureScript Reingold-Tilford algorithm. Common in organizational charts."
+  VerticalDendrogram -> "Node-link diagram: Vertical dendrogram with all leaves aligned at the same level at the bottom. Pure PureScript cluster algorithm."
+  RadialTidy -> "Node-link diagram: Compact tidy tree in polar coordinates, emanating from center. Space-efficient for large hierarchies. Pure PureScript Reingold-Tilford with radial projection."
+  RadialDendrogram -> "Node-link diagram: Radial dendrogram with all leaves at equal distance from center. Pure PureScript cluster algorithm with radial projection."
+  IsometricTidy -> "Node-link diagram: Unique 2.5D isometric projection creates technical drawing aesthetic. Pure PureScript Reingold-Tilford with 30° cabinet projection for depth perception."
+  Icicle -> "Adjacency diagram: Rectangular subdivisions showing hierarchy through relative placement. Area encodes quantitative values. Pure PureScript implementation."
+  CirclePacking -> "Enclosure diagram: Tightly nested circles showing hierarchy through containment. Area encodes values, readily shows topology. Pure PureScript implementation."
+  Treemap -> "Enclosure diagram: Space-efficient rectangular subdivisions. Area is proportional to value, shows hierarchy through nesting. Pure PureScript implementation."
 
 -- | Hierarchies page actions
 data Action
@@ -77,7 +77,7 @@ data Action
 -- | Hierarchies page component
 component :: forall q i o. H.Component q i o Aff
 component = H.mkComponent
-  { initialState: \_ -> { currentLayout: HorizontalTidy, treeData: Nothing }
+  { initialState: \_ -> { currentLayout: VerticalTidy, treeData: Nothing }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -125,6 +125,7 @@ render state =
                         , renderLayoutOption VerticalDendrogram "V-Dendro" state.currentLayout
                         , renderLayoutOption RadialTidy "R-Tidy" state.currentLayout
                         , renderLayoutOption RadialDendrogram "R-Dendro" state.currentLayout
+                        , renderLayoutOption IsometricTidy "Isometric" state.currentLayout
                         ]
                     ]
                 , HH.div
@@ -244,7 +245,7 @@ handleAction = case _ of
     case treeJSON of
       (Left _) -> pure unit
       (Right json) -> do
-        _ <- H.liftAff $ drawLayoutViz HorizontalTidy json
+        _ <- H.liftAff $ drawLayoutViz VerticalTidy json
         H.modify_ (\st -> st { treeData = Just json } )
         pure unit
 
@@ -264,18 +265,33 @@ handleAction = case _ of
         pure unit
 
 -- | Helper to call the appropriate draw function based on layout
--- | Much simpler now - direct calls to dedicated modules!
+-- | Uses parameterized TreeViz and ClusterViz for all orientations!
 drawLayoutViz :: HierarchyLayout -> TreeJson_ -> Aff Unit
 drawLayoutViz layout json =
   let selector = "div.hierarchies-viz"
   in case layout of
-    -- REMOVED: Old D3 FFI tree visualizations - TODO: implement with new pure PS Tree layout
-    HorizontalTidy       -> pure unit
-    HorizontalDendrogram -> pure unit
-    VerticalTidy         -> pure unit
-    VerticalDendrogram   -> pure unit
-    RadialTidy           -> pure unit
-    RadialDendrogram     -> pure unit
+    -- Node-Link Diagrams (using new pure PS Tree and Cluster layouts with projection system)
+    HorizontalTidy       -> liftEffect $ do
+      (_ :: Unit) <- eval_D3M $ TreeViz.draw TreeViz.Horizontal json selector
+      pure unit
+    HorizontalDendrogram -> liftEffect $ do
+      (_ :: Unit) <- eval_D3M $ ClusterViz.draw ClusterViz.Horizontal json selector
+      pure unit
+    VerticalTidy         -> liftEffect $ do
+      (_ :: Unit) <- eval_D3M $ TreeViz.draw TreeViz.Vertical json selector
+      pure unit
+    VerticalDendrogram   -> liftEffect $ do
+      (_ :: Unit) <- eval_D3M $ ClusterViz.draw ClusterViz.Vertical json selector
+      pure unit
+    RadialTidy           -> liftEffect $ do
+      (_ :: Unit) <- eval_D3M $ TreeViz.draw TreeViz.Radial json selector
+      pure unit
+    RadialDendrogram     -> liftEffect $ do
+      (_ :: Unit) <- eval_D3M $ ClusterViz.draw ClusterViz.Radial json selector
+      pure unit
+    IsometricTidy        -> liftEffect $ do
+      (_ :: Unit) <- eval_D3M $ TreeViz.draw TreeViz.Isometric json selector
+      pure unit
     -- Adjacency and Enclosure Diagrams (using new pure PS layouts)
     Icicle               -> drawIcicle json selector
     CirclePacking        -> drawCirclePacking json selector
