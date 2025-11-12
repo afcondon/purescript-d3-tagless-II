@@ -7,7 +7,7 @@ import Prelude
 import Data.Tree (Tree(..))
 import Data.List (List(..), fromFoldable)
 import Data.Array as Array
-import Data.Maybe (fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Foldable (traverse_)
 import PSD3.Internal.Attributes.Sugar (classed, fill, strokeColor, strokeWidth, viewBox, cx, cy, radius, d, x, y, text, textAnchor, fontSize)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector, Datum_, Index_)
@@ -20,14 +20,17 @@ import Unsafe.Coerce (unsafeCoerce)
 
 -- | Convert HierData to Data.Tree with initial x, y, depth fields
 -- | Initial values are dummy (will be overwritten by layout)
+-- | IMPORTANT: Must preserve distinction between Nothing (true leaf) and Just [] (internal node with no children yet)
 hierDataToTree :: HierData -> Tree { name :: String, value :: Number, x :: Number, y :: Number, depth :: Int }
 hierDataToTree hierData =
   let
     name = getName hierData
     value = getValue hierData
     childrenMaybe = getChildren hierData
-    childrenArray = fromMaybe [] childrenMaybe
-    childrenList = fromFoldable $ map hierDataToTree childrenArray
+    -- Don't use fromMaybe - preserve the distinction between Nothing and Just []
+    childrenList = case childrenMaybe of
+      Nothing -> Nil  -- True leaf node
+      Just childrenArray -> fromFoldable $ map hierDataToTree childrenArray  -- Internal node (even if empty)
   in
     Node { name, value, x: 0.0, y: 0.0, depth: 0 } childrenList
 
@@ -64,21 +67,20 @@ draw flareData selector = do
 
   let chartWidth = 1600.0
   let chartHeight = 1200.0
+  let padding = 40.0
 
   -- Convert to Data.Tree
   let dataTree = hierDataToTree flareData
 
-  -- Apply Tree4 layout
-  let config = defaultTreeConfig { size = { width: chartWidth, height: chartHeight } }
+  -- Apply Tree4 layout with padding
+  let config = defaultTreeConfig { size = { width: chartWidth - (2.0 * padding), height: chartHeight - (2.0 * padding) } }
   let positioned = tree config dataTree
-
-  liftEffect $ log $ "Tree4 layout complete"
 
   -- Flatten to array for rendering
   let nodes = Array.fromFoldable positioned
   let links = makeLinks positioned
 
-  liftEffect $ log $ "Rendering " <> show (Array.length nodes) <> " nodes, " <> show (Array.length links) <> " links"
+  liftEffect $ log $ "TreeViz4: Rendering " <> show (Array.length nodes) <> " nodes, " <> show (Array.length links) <> " links"
 
   -- Create SVG
   root' <- attach selector :: m (D3Selection_ Unit)
@@ -101,10 +103,10 @@ draw flareData selector = do
   linksGroup <- appendTo svg Group [ classed "links" ]
   nodesGroup <- appendTo svg Group [ classed "nodes" ]
 
-  -- Draw links
+  -- Draw links (with padding offset)
   _ <- traverse_ (\link ->
     appendTo linksGroup Path
-      [ d $ linkPath link.source.x link.source.y link.target.x link.target.y
+      [ d $ linkPath (link.source.x + padding) (link.source.y + padding) (link.target.x + padding) (link.target.y + padding)
       , fill "none"
       , strokeColor "#555"
       , strokeWidth 1.5
@@ -112,11 +114,11 @@ draw flareData selector = do
       ]
   ) links
 
-  -- Draw nodes
+  -- Draw nodes (with padding offset)
   _ <- traverse_ (\node ->
     appendTo nodesGroup Circle
-      [ cx node.x
-      , cy node.y
+      [ cx (node.x + padding)
+      , cy (node.y + padding)
       , radius (if Array.length (Array.fromFoldable $ case dataTree of Node _ children -> children) == 0 then 3.0 else 4.0)
       , fill "#999"
       , strokeColor "#555"

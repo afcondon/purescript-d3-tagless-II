@@ -180,12 +180,11 @@ handleAction = case _ of
             pure unit
 
       "tree4" -> do
-        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare-2.json"
+        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
         case result of
           Left err -> log "Tree4 (Reingold-Tilford): Failed to load data"
-          Right response -> do
-            let blessed = readJSON_ response.body
-            _ <- H.liftEffect $ eval_D3M $ TreeViz4.draw blessed "#example-viz"
+          Right treeData -> do
+            _ <- H.liftEffect $ eval_D3M $ TreeViz4.draw treeData "#example-viz"
             pure unit
 
       "treemap" -> do

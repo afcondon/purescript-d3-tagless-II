@@ -95,7 +95,8 @@ render minSep inputTree =
     -- Internal function that also returns contours (captures minSep from outer scope)
     renderWithContours :: Tree { x :: Number, y :: Number, depth :: Int | r } -> Tuple (Tree (Tuple { offset :: Number } { x :: Number, y :: Number, depth :: Int | r })) Contours
     renderWithContours (Node val children) =
-      case length children of
+      let childCount = length children
+      in case childCount of
         -- Leaf node: offset = 0, contours = singleton
         0 -> Tuple (Node (Tuple { offset: 0.0 } val) Nil) singletonContours
 
@@ -111,18 +112,25 @@ render minSep inputTree =
             separations = computeSeparations minSep childContours
 
             -- Position children: first at 0, rest offset by cumulative separations
-            childOffsets = scanl (+) 0.0 separations
-
-            -- Update each child tree with its offset
-            childrenWithOffsets = zipWith updateOffset childTrees childOffsets
+            -- These are absolute positions within the sibling group
+            -- NOTE: PureScript's scanl doesn't include the initial value (unlike Haskell)
+            -- So we must explicitly prepend 0.0
+            childAbsoluteOffsets = Cons 0.0 (scanl (+) 0.0 separations)
 
             -- Parent is centered at midpoint of leftmost and rightmost child
-            leftmostOffset = fromMaybe 0.0 $ Array.head $ Array.fromFoldable childOffsets
-            rightmostOffset = fromMaybe 0.0 $ Array.last $ Array.fromFoldable childOffsets
+            leftmostOffset = fromMaybe 0.0 $ Array.head $ Array.fromFoldable childAbsoluteOffsets
+            rightmostOffset = fromMaybe 0.0 $ Array.last $ Array.fromFoldable childAbsoluteOffsets
             parentOffset = (leftmostOffset + rightmostOffset) / 2.0
 
+            -- Convert child offsets to be relative to parent's centered position
+            -- Each child's offset = absoluteOffset - parentOffset
+            childRelativeOffsets = map (\absOffset -> absOffset - parentOffset) childAbsoluteOffsets
+
+            -- Update each child tree with its relative offset
+            childrenWithOffsets = zipWith updateOffset childTrees childRelativeOffsets
+
             -- Combine child contours into parent contours
-            parentContours = spliceContours childOffsets childContours
+            parentContours = spliceContours childRelativeOffsets childContours
 
             resultTree = Node (Tuple { offset: parentOffset } val) childrenWithOffsets
           in
