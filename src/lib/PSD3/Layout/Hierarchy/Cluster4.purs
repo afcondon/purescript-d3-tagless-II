@@ -30,16 +30,18 @@ defaultClusterConfig =
   }
 
 
--- | Cluster layout in 3 steps:
+-- | Cluster layout in 4 steps:
 -- | 1. addHeight: Bottom-up pass computing height (distance from deepest leaf)
--- | 2. render: Bottom-up pass assigning sequential x to leaves, mean x to parents
--- | 3. addY: Add y coordinates based on height (leaves at 0)
--- | 4. scale: Scale abstract coordinates to pixel coordinates
+-- | 2. sortByHeight: Sort children by height to minimize crossovers (D3 pattern)
+-- | 3. render: Bottom-up pass assigning sequential x to leaves, mean x to parents
+-- | 4. addY: Add y coordinates based on height (leaves at 0)
+-- | 5. scale: Scale abstract coordinates to pixel coordinates
 -- |
 -- | Key difference from Tree4:
 -- | - All leaves get sequential x positions (not contour-based)
 -- | - y is based on height (distance from leaves) not depth
 -- | - All leaves appear at y = 0 (dendrogram)
+-- | - Children sorted by height (descending) to minimize crossovers
 -- |
 -- | Input must have x, y, height fields (initial values don't matter, they'll be overwritten)
 cluster :: forall r.
@@ -51,16 +53,38 @@ cluster config inputTree =
     -- Step 1: Compute height field (distance from deepest leaf)
     withHeight = addHeight inputTree
 
-    -- Step 2: Assign sequential x positions to leaves
-    rendered = render config.minSeparation withHeight
+    -- Step 2: Sort children by height (descending) to minimize crossovers
+    sorted = sortByHeight withHeight
 
-    -- Step 3: Add y coordinates based on height
+    -- Step 3: Assign sequential x positions to leaves
+    rendered = render config.minSeparation sorted
+
+    -- Step 4: Add y coordinates based on height
     withCoords = addYCoordinates rendered.tree
 
-    -- Step 4: Scale to final pixel coordinates
+    -- Step 5: Scale to final pixel coordinates
     scaled = scaleToPixels config withCoords
   in
     scaled
+
+-- | Sort children by height (descending) to minimize crossovers
+-- | This is the D3 recommended pattern for dendrograms
+-- | Ensures deeper subtrees are positioned before shallower ones
+sortByHeight :: forall r. Tree { x :: Number, y :: Number, height :: Int | r } -> Tree { x :: Number, y :: Number, height :: Int | r }
+sortByHeight (Node val children) =
+  let
+    -- Recursively sort grandchildren first
+    sortedGrandchildren = map sortByHeight children
+
+    -- Convert to Array, sort, then back to List
+    childArray = Array.fromFoldable sortedGrandchildren
+    sortedArray = Array.sortBy compareByHeight childArray
+    sortedChildrenList = fromFoldable sortedArray
+  in
+    Node val sortedChildrenList
+  where
+    compareByHeight :: forall s. Tree { height :: Int | s } -> Tree { height :: Int | s } -> Ordering
+    compareByHeight (Node a _) (Node b _) = compare b.height a.height  -- Descending
 
 -- | Compute height field (distance from deepest leaf)
 -- | Bottom-up traversal: leaves get 0, parents get 1 + max(children's height)

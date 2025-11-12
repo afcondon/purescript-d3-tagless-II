@@ -981,15 +981,15 @@
     };
   };
   var ordTuple = function(dictOrd) {
-    var compare11 = compare(dictOrd);
+    var compare15 = compare(dictOrd);
     var eqTuple1 = eqTuple(dictOrd.Eq0());
     return function(dictOrd1) {
-      var compare15 = compare(dictOrd1);
+      var compare16 = compare(dictOrd1);
       var eqTuple2 = eqTuple1(dictOrd1.Eq0());
       return {
         compare: function(x45) {
           return function(y45) {
-            var v = compare11(x45.value0)(y45.value0);
+            var v = compare15(x45.value0)(y45.value0);
             if (v instanceof LT) {
               return LT.value;
             }
@@ -998,7 +998,7 @@
               return GT.value;
             }
             ;
-            return compare15(x45.value1)(y45.value1);
+            return compare16(x45.value1)(y45.value1);
           };
         },
         Eq0: function() {
@@ -3086,9 +3086,9 @@
     };
   };
   var maximum = function(dictOrd) {
-    var compare11 = compare(dictOrd);
+    var compare15 = compare(dictOrd);
     return function(dictFoldable) {
-      return maximumBy(dictFoldable)(compare11);
+      return maximumBy(dictFoldable)(compare15);
     };
   };
   var minimumBy = function(dictFoldable) {
@@ -3118,9 +3118,9 @@
     };
   };
   var minimum = function(dictOrd) {
-    var compare11 = compare(dictOrd);
+    var compare15 = compare(dictOrd);
     return function(dictFoldable) {
-      return minimumBy(dictFoldable)(compare11);
+      return minimumBy(dictFoldable)(compare15);
     };
   };
   var sum = function(dictFoldable) {
@@ -5087,11 +5087,11 @@
   });
   var unsafeUnionWith = /* @__PURE__ */ $lazy_unsafeUnionWith(803);
   var unionWith = function(dictOrd) {
-    var compare11 = compare(dictOrd);
+    var compare15 = compare(dictOrd);
     return function(app) {
       return function(m1) {
         return function(m2) {
-          return unsafeUnionWith(compare11, app, m1, m2);
+          return unsafeUnionWith(compare15, app, m1, m2);
         };
       };
     };
@@ -5100,10 +5100,10 @@
     return unionWith(dictOrd)($$const);
   };
   var pop = function(dictOrd) {
-    var compare11 = compare(dictOrd);
+    var compare15 = compare(dictOrd);
     return function(k) {
       return function(m) {
-        var v = unsafeSplit(compare11, k, m);
+        var v = unsafeSplit(compare15, k, m);
         return map10(function(a2) {
           return new Tuple(a2, unsafeJoinNodes(v.value1, v.value2));
         })(v.value0);
@@ -5111,7 +5111,7 @@
     };
   };
   var member = function(dictOrd) {
-    var compare11 = compare(dictOrd);
+    var compare15 = compare(dictOrd);
     return function(k) {
       var go2 = function($copy_v) {
         var $tco_done = false;
@@ -5123,7 +5123,7 @@
           }
           ;
           if (v instanceof Node) {
-            var v1 = compare11(k)(v.value2);
+            var v1 = compare15(k)(v.value2);
             if (v1 instanceof LT) {
               $copy_v = v.value4;
               return;
@@ -5155,7 +5155,7 @@
     };
   };
   var lookup = function(dictOrd) {
-    var compare11 = compare(dictOrd);
+    var compare15 = compare(dictOrd);
     return function(k) {
       var go2 = function($copy_v) {
         var $tco_done = false;
@@ -5167,7 +5167,7 @@
           }
           ;
           if (v instanceof Node) {
-            var v1 = compare11(k)(v.value2);
+            var v1 = compare15(k)(v.value2);
             if (v1 instanceof LT) {
               $copy_v = v.value4;
               return;
@@ -5257,11 +5257,11 @@
     return false;
   };
   var intersectionWith = function(dictOrd) {
-    var compare11 = compare(dictOrd);
+    var compare15 = compare(dictOrd);
     return function(app) {
       return function(m1) {
         return function(m2) {
-          return unsafeIntersectionWith(compare11, app, m1, m2);
+          return unsafeIntersectionWith(compare15, app, m1, m2);
         };
       };
     };
@@ -5270,7 +5270,7 @@
     return intersectionWith(dictOrd)($$const);
   };
   var insertWith = function(dictOrd) {
-    var compare11 = compare(dictOrd);
+    var compare15 = compare(dictOrd);
     return function(app) {
       return function(k) {
         return function(v) {
@@ -5280,7 +5280,7 @@
             }
             ;
             if (v1 instanceof Node) {
-              var v2 = compare11(k)(v1.value2);
+              var v2 = compare15(k)(v1.value2);
               if (v2 instanceof LT) {
                 return unsafeBalancedNode(v1.value2, v1.value3, go2(v1.value4), v1.value5);
               }
@@ -5304,7 +5304,7 @@
     };
   };
   var insert = function(dictOrd) {
-    var compare11 = compare(dictOrd);
+    var compare15 = compare(dictOrd);
     return function(k) {
       return function(v) {
         var go2 = function(v1) {
@@ -5313,7 +5313,7 @@
           }
           ;
           if (v1 instanceof Node) {
-            var v2 = compare11(k)(v1.value2);
+            var v2 = compare15(k)(v1.value2);
             if (v2 instanceof LT) {
               return unsafeBalancedNode(v1.value2, v1.value3, go2(v1.value4), v1.value5);
             }
@@ -5535,15 +5535,15 @@
     };
   };
   var difference = function(dictOrd) {
-    var compare11 = compare(dictOrd);
+    var compare15 = compare(dictOrd);
     return function(m1) {
       return function(m2) {
-        return unsafeDifference(compare11, m1, m2);
+        return unsafeDifference(compare15, m1, m2);
       };
     };
   };
   var $$delete = function(dictOrd) {
-    var compare11 = compare(dictOrd);
+    var compare15 = compare(dictOrd);
     return function(k) {
       var go2 = function(v) {
         if (v instanceof Leaf) {
@@ -5551,7 +5551,7 @@
         }
         ;
         if (v instanceof Node) {
-          var v1 = compare11(k)(v.value2);
+          var v1 = compare15(k)(v.value2);
           if (v1 instanceof LT) {
             return unsafeBalancedNode(v.value2, v.value3, go2(v.value4), v.value5);
           }
@@ -5573,11 +5573,11 @@
     };
   };
   var alter = function(dictOrd) {
-    var compare11 = compare(dictOrd);
+    var compare15 = compare(dictOrd);
     return function(f) {
       return function(k) {
         return function(m) {
-          var v = unsafeSplit(compare11, k, m);
+          var v = unsafeSplit(compare15, k, m);
           var v2 = f(v.value0);
           if (v2 instanceof Nothing) {
             return unsafeJoinNodes(v.value1, v.value2);
@@ -6170,7 +6170,7 @@
     return xs.filter(f);
   };
   var sortByImpl = /* @__PURE__ */ (function() {
-    function mergeFromTo(compare11, fromOrdering, xs1, xs2, from3, to2) {
+    function mergeFromTo(compare15, fromOrdering, xs1, xs2, from3, to2) {
       var mid;
       var i2;
       var j;
@@ -6179,15 +6179,15 @@
       var y45;
       var c;
       mid = from3 + (to2 - from3 >> 1);
-      if (mid - from3 > 1) mergeFromTo(compare11, fromOrdering, xs2, xs1, from3, mid);
-      if (to2 - mid > 1) mergeFromTo(compare11, fromOrdering, xs2, xs1, mid, to2);
+      if (mid - from3 > 1) mergeFromTo(compare15, fromOrdering, xs2, xs1, from3, mid);
+      if (to2 - mid > 1) mergeFromTo(compare15, fromOrdering, xs2, xs1, mid, to2);
       i2 = from3;
       j = mid;
       k = from3;
       while (i2 < mid && j < to2) {
         x45 = xs2[i2];
         y45 = xs2[j];
-        c = fromOrdering(compare11(x45)(y45));
+        c = fromOrdering(compare15(x45)(y45));
         if (c > 0) {
           xs1[k++] = y45;
           ++j;
@@ -6203,11 +6203,11 @@
         xs1[k++] = xs2[j++];
       }
     }
-    return function(compare11, fromOrdering, xs) {
+    return function(compare15, fromOrdering, xs) {
       var out;
       if (xs.length < 2) return xs;
       out = xs.slice(0);
-      mergeFromTo(compare11, fromOrdering, out, xs.slice(0), 0, xs.length);
+      mergeFromTo(compare15, fromOrdering, out, xs.slice(0), 0, xs.length);
       return out;
     };
   })();
@@ -12714,7 +12714,7 @@
     };
   }
   function d3SortSelection_(selection2) {
-    return (compare11) => selection2.sort(compare11);
+    return (compare15) => selection2.sort(compare15);
   }
   function simulationDrag_(label5) {
     return (selection2) => (simulation) => (dragFn) => selection2.call(dragFn(label5, simulation));
@@ -13648,8 +13648,8 @@
       return AttrT.create($144($145($146)));
     };
   };
-  var sortSelection = function(compare11) {
-    return new OrderingT(new Sort(compare11));
+  var sortSelection = function(compare15) {
+    return new OrderingT(new Sort(compare15));
   };
   var remove = /* @__PURE__ */ (function() {
     return RemoveT.value;
@@ -16102,10 +16102,10 @@
   }
 
   // node_modules/d3-selection/src/selection/sort.js
-  function sort_default(compare11) {
-    if (!compare11) compare11 = ascending2;
+  function sort_default(compare15) {
+    if (!compare15) compare15 = ascending2;
     function compareNode(a2, b2) {
-      return a2 && b2 ? compare11(a2.__data__, b2.__data__) : !a2 - !b2;
+      return a2 && b2 ? compare15(a2.__data__, b2.__data__) : !a2 - !b2;
     }
     for (var groups = this._groups, m = groups.length, sortgroups = new Array(m), j = 0; j < m; ++j) {
       for (var group4 = groups[j], n = group4.length, sortgroup = sortgroups[j] = new Array(n), node, i2 = 0; i2 < n; ++i2) {
@@ -19828,26 +19828,39 @@
   };
 
   // output/PSD3.Layout.Hierarchy.Cluster4/index.js
-  var fromFoldable5 = /* @__PURE__ */ fromFoldable2(foldableTree);
-  var map37 = /* @__PURE__ */ map(functorArray);
+  var compare4 = /* @__PURE__ */ compare(ordInt);
+  var map37 = /* @__PURE__ */ map(functorList);
+  var fromFoldable5 = /* @__PURE__ */ fromFoldable2(foldableList);
+  var fromFoldable1 = /* @__PURE__ */ fromFoldable3(foldableArray);
+  var fromFoldable22 = /* @__PURE__ */ fromFoldable2(foldableTree);
+  var map113 = /* @__PURE__ */ map(functorArray);
   var maximum4 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var minimum3 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
   var maximum1 = /* @__PURE__ */ maximum(ordInt)(foldableArray);
-  var map113 = /* @__PURE__ */ map(functorList);
   var foldl13 = /* @__PURE__ */ foldl(foldableArray);
-  var fromFoldable1 = /* @__PURE__ */ fromFoldable2(foldableList);
-  var fromFoldable22 = /* @__PURE__ */ fromFoldable3(foldableArray);
+  var sortByHeight = function(v) {
+    var compareByHeight = function(v1) {
+      return function(v2) {
+        return compare4(v2.value0.height)(v1.value0.height);
+      };
+    };
+    var sortedGrandchildren = map37(sortByHeight)(v.value1);
+    var childArray = fromFoldable5(sortedGrandchildren);
+    var sortedArray = sortBy(compareByHeight)(childArray);
+    var sortedChildrenList = fromFoldable1(sortedArray);
+    return new Node2(v.value0, sortedChildrenList);
+  };
   var scaleToPixels = function(config) {
     return function(inputTree) {
-      var allNodes2 = fromFoldable5(inputTree);
-      var allX = map37(function(n) {
+      var allNodes2 = fromFoldable22(inputTree);
+      var allX = map113(function(n) {
         return n.x;
       })(allNodes2);
       var maxX = fromMaybe(1)(maximum4(allX));
       var minX = fromMaybe(0)(minimum3(allX));
       var xRange = (function() {
-        var $31 = maxX - minX === 0;
-        if ($31) {
+        var $44 = maxX - minX === 0;
+        if ($44) {
           return 1;
         }
         ;
@@ -19856,7 +19869,7 @@
       var scaleX2 = function(x45) {
         return (x45 - minX) / xRange * config.size.width;
       };
-      var allHeights = map37(function(n) {
+      var allHeights = map113(function(n) {
         return n.height;
       })(allNodes2);
       var maxHeight = fromMaybe(1)(maximum1(allHeights));
@@ -19865,18 +19878,18 @@
       };
       var go2 = function(v) {
         return new Node2((function() {
-          var $33 = {};
-          for (var $34 in v.value0) {
-            if ({}.hasOwnProperty.call(v.value0, $34)) {
-              $33[$34] = v["value0"][$34];
+          var $46 = {};
+          for (var $47 in v.value0) {
+            if ({}.hasOwnProperty.call(v.value0, $47)) {
+              $46[$47] = v["value0"][$47];
             }
             ;
           }
           ;
-          $33.x = scaleX2(v.value0.x);
-          $33.y = scaleY2(v.value0.height);
-          return $33;
-        })(), map113(go2)(v.value1));
+          $46.x = scaleX2(v.value0.x);
+          $46.y = scaleY2(v.value0.height);
+          return $46;
+        })(), map37(go2)(v.value1));
       };
       return go2(inputTree);
     };
@@ -19892,19 +19905,19 @@
       };
       var renderInternal = function(currentLeafX) {
         return function(v) {
-          var v1 = fromFoldable1(v.value1);
+          var v1 = fromFoldable5(v.value1);
           if (v1.length === 0) {
             var leafNode = new Node2((function() {
-              var $41 = {};
-              for (var $42 in v.value0) {
-                if ({}.hasOwnProperty.call(v.value0, $42)) {
-                  $41[$42] = v["value0"][$42];
+              var $54 = {};
+              for (var $55 in v.value0) {
+                if ({}.hasOwnProperty.call(v.value0, $55)) {
+                  $54[$55] = v["value0"][$55];
                 }
                 ;
               }
               ;
-              $41.x = currentLeafX;
-              return $41;
+              $54.x = currentLeafX;
+              return $54;
             })(), Nil.value);
             return {
               tree: leafNode,
@@ -19924,23 +19937,23 @@
             trees: [],
             lastLeafX: currentLeafX
           })(v1);
-          var childrenList = fromFoldable22(processChildren.trees);
+          var childrenList = fromFoldable1(processChildren.trees);
           var meanX = foldl110(function(sum7) {
             return function(v2) {
               return sum7 + v2.value0.x;
             };
           })(0)(processChildren.trees) / toNumber(length3(processChildren.trees));
           var internalNode = new Node2((function() {
-            var $47 = {};
-            for (var $48 in v.value0) {
-              if ({}.hasOwnProperty.call(v.value0, $48)) {
-                $47[$48] = v["value0"][$48];
+            var $60 = {};
+            for (var $61 in v.value0) {
+              if ({}.hasOwnProperty.call(v.value0, $61)) {
+                $60[$61] = v["value0"][$61];
               }
               ;
             }
             ;
-            $47.x = meanX;
-            return $47;
+            $60.x = meanX;
+            return $60;
           })(), childrenList);
           return {
             tree: internalNode,
@@ -19960,51 +19973,52 @@
   };
   var addYCoordinates = function(v) {
     var nodeY = toNumber(v.value0.height);
-    var childrenWithY = map113(addYCoordinates)(v.value1);
+    var childrenWithY = map37(addYCoordinates)(v.value1);
     return new Node2((function() {
-      var $53 = {};
-      for (var $54 in v.value0) {
-        if ({}.hasOwnProperty.call(v.value0, $54)) {
-          $53[$54] = v["value0"][$54];
+      var $66 = {};
+      for (var $67 in v.value0) {
+        if ({}.hasOwnProperty.call(v.value0, $67)) {
+          $66[$67] = v["value0"][$67];
         }
         ;
       }
       ;
-      $53.y = nodeY;
-      return $53;
+      $66.y = nodeY;
+      return $66;
     })(), childrenWithY);
   };
   var addHeight = function(v) {
-    var childrenWithHeight = map113(addHeight)(v.value1);
+    var childrenWithHeight = map37(addHeight)(v.value1);
     var nodeHeight = (function() {
-      var v1 = fromFoldable1(childrenWithHeight);
+      var v1 = fromFoldable5(childrenWithHeight);
       if (v1.length === 0) {
         return 0;
       }
       ;
-      var childHeights = map37(function(v2) {
+      var childHeights = map113(function(v2) {
         return v2.value0.height;
       })(v1);
       var maxChildHeight = fromMaybe(0)(maximum1(childHeights));
       return 1 + maxChildHeight | 0;
     })();
     return new Node2((function() {
-      var $63 = {};
-      for (var $64 in v.value0) {
-        if ({}.hasOwnProperty.call(v.value0, $64)) {
-          $63[$64] = v["value0"][$64];
+      var $76 = {};
+      for (var $77 in v.value0) {
+        if ({}.hasOwnProperty.call(v.value0, $77)) {
+          $76[$77] = v["value0"][$77];
         }
         ;
       }
       ;
-      $63.height = nodeHeight;
-      return $63;
+      $76.height = nodeHeight;
+      return $76;
     })(), childrenWithHeight);
   };
   var cluster2 = function(config) {
     return function(inputTree) {
       var withHeight = addHeight(inputTree);
-      var rendered = render3(config.minSeparation)(withHeight);
+      var sorted = sortByHeight(withHeight);
+      var rendered = render3(config.minSeparation)(sorted);
       var withCoords = addYCoordinates(rendered.tree);
       var scaled = scaleToPixels(config)(withCoords);
       return scaled;
@@ -23598,7 +23612,7 @@
   var y19 = /* @__PURE__ */ y(toAttrNumber);
   var text16 = /* @__PURE__ */ text6(toAttrString);
   var textAnchor5 = /* @__PURE__ */ textAnchor(toAttrString);
-  var compare4 = /* @__PURE__ */ compare(ordString);
+  var compare5 = /* @__PURE__ */ compare(ordString);
   var parseCSVRow2 = function(row) {
     return bind16(hush(runExcept(readProp3("division")(row))))(function(divisionF) {
       return bind16(hush(runExcept(readString3(divisionF))))(function(division) {
@@ -23750,7 +23764,7 @@
                         return bind121(appendTo6(chartGroup)(Group.value)([transform([function(v1) {
                           return "translate(0," + (show24(chartHeight) + ")");
                         }]), classed18("x-axis")]))(function(xAxis) {
-                          var allDates = sortBy(compare4)(getDates(data$prime));
+                          var allDates = sortBy(compare5)(getDates(data$prime));
                           var dateCount = toNumber(length3(allDates));
                           var xScale = function(i2) {
                             return toNumber(i2) * (chartWidth / (dateCount - 1));
@@ -25736,7 +25750,7 @@
   var foldl18 = /* @__PURE__ */ foldl(foldableArray);
   var nub5 = /* @__PURE__ */ nub(ordString);
   var map53 = /* @__PURE__ */ map(functorArray);
-  var compare5 = /* @__PURE__ */ compare(ordString);
+  var compare6 = /* @__PURE__ */ compare(ordString);
   var maximum10 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var bind21 = /* @__PURE__ */ bind(bindMaybe);
   var classed23 = /* @__PURE__ */ classed(toAttrString);
@@ -25801,7 +25815,7 @@
     return function(data$prime) {
       return sortBy(function(a2) {
         return function(b2) {
-          return compare5(a2.age)(b2.age);
+          return compare6(a2.age)(b2.age);
         };
       })(filter(function(d1) {
         return d1.state === state$prime;
@@ -26237,7 +26251,7 @@
 
   // output/PSD3.Layout.Sankey.Types/index.js
   var show31 = /* @__PURE__ */ show(showInt);
-  var compare6 = /* @__PURE__ */ compare(ordInt);
+  var compare7 = /* @__PURE__ */ compare(ordInt);
   var bind23 = /* @__PURE__ */ bind(bindMaybe);
   var pure24 = /* @__PURE__ */ pure(applicativeMaybe);
   var SourceColor = /* @__PURE__ */ (function() {
@@ -26339,7 +26353,7 @@
   var ordNodeID = {
     compare: function(x45) {
       return function(y45) {
-        return compare6(x45)(y45);
+        return compare7(x45)(y45);
       };
     },
     Eq0: function() {
@@ -26400,7 +26414,7 @@
   var insert11 = /* @__PURE__ */ insert6(ordNodeID);
   var insert13 = /* @__PURE__ */ insert(ordNodeID);
   var eq4 = /* @__PURE__ */ eq(eqNodeID);
-  var compare7 = /* @__PURE__ */ compare(ordNumber);
+  var compare8 = /* @__PURE__ */ compare(ordNumber);
   var max13 = /* @__PURE__ */ max(ordInt);
   var map56 = /* @__PURE__ */ map(functorArray);
   var max14 = /* @__PURE__ */ max(ordNumber);
@@ -26674,10 +26688,10 @@
                           })(layerNodes);
                           var sorted = sortBy(function(a2) {
                             return function(b2) {
-                              var posCompare = compare7(a2.targetY)(b2.targetY);
+                              var posCompare = compare8(a2.targetY)(b2.targetY);
                               var $120 = eq22(posCompare)(EQ.value);
                               if ($120) {
-                                return compare7(b2.node.value)(a2.node.value);
+                                return compare8(b2.node.value)(a2.node.value);
                               }
                               ;
                               return posCompare;
@@ -27207,7 +27221,7 @@
                   return eq4(n.index)(a2.targetIndex);
                 })(nodes);
                 if (v1 instanceof Just && v instanceof Just) {
-                  return compare7(v1.value0.y0)(v.value0.y0);
+                  return compare8(v1.value0.y0)(v.value0.y0);
                 }
                 ;
                 return EQ.value;
@@ -27265,7 +27279,7 @@
                   return eq4(n.index)(a2.sourceIndex);
                 })(nodes);
                 if (v1 instanceof Just && v instanceof Just) {
-                  return compare7(v1.value0.y0)(v.value0.y0);
+                  return compare8(v1.value0.y0)(v.value0.y0);
                 }
                 ;
                 return EQ.value;
@@ -27746,7 +27760,7 @@
   var show210 = /* @__PURE__ */ show(showInt);
   var for_4 = /* @__PURE__ */ for_(applicativeEffect)(foldableArray);
   var discard21 = /* @__PURE__ */ discard(discardUnit);
-  var compare8 = /* @__PURE__ */ compare(ordInt);
+  var compare9 = /* @__PURE__ */ compare(ordInt);
   var fill24 = /* @__PURE__ */ fill(toAttrStringFnI);
   var fillOpacity8 = /* @__PURE__ */ fillOpacity(toAttrNumber);
   var d14 = /* @__PURE__ */ d(toAttrStringFnI);
@@ -27803,7 +27817,7 @@
                                 return bind82(liftEffect50((function() {
                                   var sorted = sortBy(function(n1) {
                                     return function(n2) {
-                                      return compare8(n1.layer)(n2.layer);
+                                      return compare9(n1.layer)(n2.layer);
                                     };
                                   })(layoutResult.nodes);
                                   var layers = groupBy(function(n1) {
@@ -38231,7 +38245,7 @@ graph TB
 
   // output/D3.Viz.ClusterVizOriented/index.js
   var map68 = /* @__PURE__ */ map(functorArray);
-  var compare9 = /* @__PURE__ */ compare(ordInt);
+  var compare10 = /* @__PURE__ */ compare(ordInt);
   var compare14 = /* @__PURE__ */ compare(ordNumber);
   var append25 = /* @__PURE__ */ append(semigroupArray);
   var bind66 = /* @__PURE__ */ bind(bindArray);
@@ -38295,7 +38309,7 @@ graph TB
   var sortValuedByHeightAndValue3 = function(v) {
     var comparator = function(v1) {
       return function(v2) {
-        var v3 = compare9(v2.value0.height)(v1.value0.height);
+        var v3 = compare10(v2.value0.height)(v1.value0.height);
         if (v3 instanceof EQ) {
           return compare14(v2.value0.value)(v1.value0.value);
         }
@@ -41856,7 +41870,7 @@ graph TB
   var fontSize25 = /* @__PURE__ */ fontSize(toAttrNumber);
   var fill39 = /* @__PURE__ */ fill(toAttrString);
   var text32 = /* @__PURE__ */ text6(toAttrString);
-  var compare10 = /* @__PURE__ */ compare(ordNumber);
+  var compare11 = /* @__PURE__ */ compare(ordNumber);
   var cx26 = /* @__PURE__ */ cx(toAttrNumberDatumFnI);
   var cy27 = /* @__PURE__ */ cy(toAttrNumberDatumFnI);
   var radius28 = /* @__PURE__ */ radius(toAttrNumberDatumFnI);
@@ -42012,7 +42026,7 @@ graph TB
                                         return function(b2) {
                                           var popB = datum_.population(b2);
                                           var popA = datum_.population(a2);
-                                          return orderingToInt(compare10(popB)(popA));
+                                          return orderingToInt(compare11(popB)(popA));
                                         };
                                       }), cx26(function(d21) {
                                         return function(i2) {
@@ -42036,7 +42050,7 @@ graph TB
                                             return function(b2) {
                                               var popB = datum_.population(b2);
                                               var popA = datum_.population(a2);
-                                              return orderingToInt(compare10(popB)(popA));
+                                              return orderingToInt(compare11(popB)(popA));
                                             };
                                           }), cx26(function(d21) {
                                             return function(i2) {
