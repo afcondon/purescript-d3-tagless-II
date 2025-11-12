@@ -31,17 +31,18 @@ hierDataToTree hierData =
     Node { name, value, x: 0.0, y: 0.0, height: 0 } childrenList
 
 -- | Radial projection: convert (x, y) to polar coordinates
--- | x is mapped to angle, y (height) is mapped to radius
+-- | x is mapped to angle, y is mapped to radius
+-- | After Cluster4 scaleToPixels: leaves have y=height (max), root has y=0 (min)
 radialPoint :: forall r. { x :: Number, y :: Number | r } -> Number -> Number -> { x :: Number, y :: Number }
 radialPoint node width height =
   let
     -- Map x to angle (0 to 2π)
     angle = (node.x / width) * 2.0 * pi - (pi / 2.0)  -- Start at top (-π/2)
-    -- Map y (height) to radius - INVERTED for cluster (y=0 is leaves, should be at edge)
+    -- Map y to radius
+    -- Cluster4 scaleToPixels outputs: leaves at y=height, root at y=0
+    -- For radial: leaves should be at max radius (edge), root at center
     minDim = if width < height then width else height
-    -- For cluster: y=0 (leaves) should be at max radius, y=maxHeight (root) should be at center
-    -- Since y is already normalized (0 to height), we invert it
-    radius = ((height - node.y) / height) * (minDim / 2.0) * 0.85  -- Leaves at edge, root at center
+    radius = (node.y / height) * (minDim / 2.0) * 0.85  -- Direct mapping: y=height→maxRadius, y=0→0
   in
     { x: radius * cos angle
     , y: radius * sin angle

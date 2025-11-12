@@ -25494,7 +25494,7 @@
           ;
           return height24;
         })();
-        var radius1 = (height24 - node.y) / height24 * (minDim / 2) * 0.85;
+        var radius1 = node.y / height24 * (minDim / 2) * 0.85;
         var angle = node.x / width24 * 2 * pi - pi / 2;
         return {
           x: radius1 * cos(angle),
