@@ -21,6 +21,7 @@ import D3.Viz.ScatterPlot as ScatterPlot
 import D3.Viz.FpFtw.MapQuartet as MapQuartet
 import D3.Viz.FpFtw.TopologicalSort as TopologicalSort
 import D3.Viz.TreeViz as TreeViz
+import D3.Viz.TreeViz4 as TreeViz4
 import D3.Viz.TreemapViz as TreemapViz
 import D3.Viz.PackViz as PackViz
 import D3.Viz.ClusterViz as ClusterViz
@@ -176,6 +177,15 @@ handleAction = case _ of
           Right response -> do
             let blessed = readJSON_ response.body
             _ <- H.liftEffect $ eval_D3M $ TreeViz.draw blessed "#example-viz"
+            pure unit
+
+      "tree4" -> do
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare-2.json"
+        case result of
+          Left err -> log "Tree4 (Reingold-Tilford): Failed to load data"
+          Right response -> do
+            let blessed = readJSON_ response.body
+            _ <- H.liftEffect $ eval_D3M $ TreeViz4.draw blessed "#example-viz"
             pure unit
 
       "treemap" -> do
@@ -487,6 +497,7 @@ allExampleIds =
   , "parabola"
   , "animated-radial-tree"
   , "tree-purescript"
+  , "tree4"
   , "treemap"
   , "pack-purescript"
   , "cluster-purescript"
@@ -542,6 +553,8 @@ getExampleMeta id = case id of
     { id, name: "Animated Radial Tree", description: "Transitions between tree layouts with smooth animations", category: "Transitions" }
   "tree-purescript" -> Just
     { id, name: "Tree (Pure PureScript)", description: "Node-link tree layout using pure PureScript implementation (Reingold-Tilford algorithm)", category: "Hierarchies" }
+  "tree4" -> Just
+    { id, name: "Tree4 (Data.Tree + Contours)", description: "Reingold-Tilford tree layout using Data.Tree with contour-based algorithm adapted from Haskell", category: "Hierarchies" }
   "treemap" -> Just
     { id, name: "Treemap (Pure PureScript)", description: "Space-filling hierarchical visualization using squarified tiling algorithm in pure PureScript", category: "Hierarchies" }
   "pack-purescript" -> Just
