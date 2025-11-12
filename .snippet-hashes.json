@@ -1,6 +1,6 @@
 {
   "selectionMClass": "8be4e9af",
-  "simulationM2Class": "901ded7f",
+  "simulationM2Class": "c2934d63",
   "TLCSimple": "c0a13158",
   "GUP": "59d08dfd",
   "ThreeDimensions": "9847a3d9",
@@ -9,7 +9,7 @@
   "BarChartDraw": "c9d6d713",
   "LineChartDraw": "8d389051",
   "ScatterPlotQuartet": "d8be773a",
-  "parabolaDatum": "2bedbb5c",
+  "parabolaDatum": "89f3047d",
   "parabolaUnsafe": "e50fbd78",
-  "parabolaDraw": "fb8e6f76"
+  "parabolaDraw": "f12aa9a1"
 }

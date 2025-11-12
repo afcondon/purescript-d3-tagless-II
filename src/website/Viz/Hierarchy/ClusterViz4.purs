@@ -28,13 +28,15 @@ hierDataToTree hierData =
   in
     Node { name, value, x: 0.0, y: 0.0, height: 0 } childrenList
 
--- Simple link path generator (vertical dendrogram)
+-- Dendrogram link path generator (vertical with stepped Bezier)
+-- Creates orthogonal "elbow" connectors to avoid overlaps
 linkPath :: Number -> Number -> Number -> Number -> String
-linkPath x1' y1' x2' y2' =
-  "M" <> show x1' <> "," <> show y1' <>
-  "C" <> show x1' <> "," <> show ((y1' + y2') / 2.0) <>
-  " " <> show x2' <> "," <> show ((y1' + y2') / 2.0) <>
-  " " <> show x2' <> "," <> show y2'
+linkPath x1 y1 x2 y2 =
+  let midY = (y1 + y2) / 2.0
+  in "M" <> show x1 <> "," <> show y1 <>
+     " C" <> show x1 <> "," <> show midY <>
+     " " <> show x2 <> "," <> show midY <>
+     " " <> show x2 <> "," <> show y2
 
 -- Create links from parent to children
 makeLinksAsList :: forall r. Tree { x :: Number, y :: Number | r } -> List { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }

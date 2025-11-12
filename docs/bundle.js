@@ -20161,11 +20161,12 @@
       return $51(makeLinksAsList($52));
     };
   })();
-  var linkPath = function(x1$prime) {
-    return function(y1$prime) {
-      return function(x2$prime) {
-        return function(y2$prime) {
-          return "M" + (show14(x1$prime) + ("," + (show14(y1$prime) + ("C" + (show14(x1$prime) + ("," + (show14((y1$prime + y2$prime) / 2) + (" " + (show14(x2$prime) + ("," + (show14((y1$prime + y2$prime) / 2) + (" " + (show14(x2$prime) + ("," + show14(y2$prime)))))))))))))));
+  var linkPath = function(x111) {
+    return function(y111) {
+      return function(x211) {
+        return function(y211) {
+          var midY = (y111 + y211) / 2;
+          return "M" + (show14(x111) + ("," + (show14(y111) + (" C" + (show14(x111) + ("," + (show14(midY) + (" " + (show14(x211) + ("," + (show14(midY) + (" " + (show14(x211) + ("," + show14(y211)))))))))))))));
         };
       };
     };
@@ -22344,7 +22345,8 @@
     return function(y111) {
       return function(x211) {
         return function(y211) {
-          return "M" + (show19(x111) + ("," + (show19(y111) + ("C" + (show19((x111 + x211) / 2) + ("," + (show19(y111) + (" " + (show19((x111 + x211) / 2) + ("," + (show19(y211) + (" " + (show19(x211) + ("," + show19(y211)))))))))))))));
+          var midX = (x111 + x211) / 2;
+          return "M" + (show19(x111) + ("," + (show19(y111) + (" C" + (show19(midX) + ("," + (show19(y111) + (" " + (show19(midX) + ("," + (show19(y211) + (" " + (show19(x211) + ("," + show19(y211)))))))))))))));
         };
       };
     };
