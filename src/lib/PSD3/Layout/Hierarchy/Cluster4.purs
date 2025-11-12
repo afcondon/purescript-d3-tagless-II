@@ -9,10 +9,10 @@ module PSD3.Layout.Hierarchy.Cluster4 where
 import Prelude
 
 import Data.Tree (Tree(..))
-import Data.List (List(..), fromFoldable, length, zipWith, scanl)
-import Data.Foldable (foldl, maximum, minimum)
-import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Tuple (Tuple(..))
+import Data.List (List(..), fromFoldable)
+import Data.Foldable (maximum, minimum)
+import Data.Foldable as Data.Foldable
+import Data.Maybe (fromMaybe)
 import Data.Array as Array
 import Data.Int (toNumber)
 
@@ -29,32 +29,17 @@ defaultClusterConfig =
   , minSeparation: 1.0
   }
 
--- | A contour is a list of offsets at each depth level
--- | Represents the left or right edge of a subtree
-type Contour = List Number
 
--- | Contours for a subtree: left edge and right edge at each depth
-data Contours = Contours
-  { left :: Contour   -- Leftmost x offset at each depth
-  , right :: Contour  -- Rightmost x offset at each depth
-  }
-
--- | Empty contours for a leaf
-emptyContours :: Contours
-emptyContours = Contours { left: Nil, right: Nil }
-
--- | Single node contours (just the root at position 0)
-singletonContours :: Contours
-singletonContours = Contours { left: Cons 0.0 Nil, right: Cons 0.0 Nil }
-
--- | Cluster layout in 4 steps:
+-- | Cluster layout in 3 steps:
 -- | 1. addHeight: Bottom-up pass computing height (distance from deepest leaf)
--- | 2. render: Bottom-up pass computing relative x positions using contours
--- | 3. petrify: Top-down pass converting distances to absolute (x,y) coordinates
+-- | 2. render: Bottom-up pass assigning sequential x to leaves, mean x to parents
+-- | 3. addY: Add y coordinates based on height (leaves at 0)
 -- | 4. scale: Scale abstract coordinates to pixel coordinates
 -- |
--- | Key difference from Tree4: y is based on height (distance from leaves) not depth
--- | This makes all leaves appear at y = 0 (dendrogram)
+-- | Key difference from Tree4:
+-- | - All leaves get sequential x positions (not contour-based)
+-- | - y is based on height (distance from leaves) not depth
+-- | - All leaves appear at y = 0 (dendrogram)
 -- |
 -- | Input must have x, y, height fields (initial values don't matter, they'll be overwritten)
 cluster :: forall r.
@@ -66,12 +51,11 @@ cluster config inputTree =
     -- Step 1: Compute height field (distance from deepest leaf)
     withHeight = addHeight inputTree
 
-    -- Step 2: Compute relative x positions (bottom-up, same as Tree4)
+    -- Step 2: Assign sequential x positions to leaves
     rendered = render config.minSeparation withHeight
 
-    -- Step 3: Convert offsets to absolute coordinates (top-down)
-    -- For cluster: y = height (0 for leaves, increases toward root)
-    withCoords = petrify 0.0 rendered
+    -- Step 3: Add y coordinates based on height
+    withCoords = addYCoordinates rendered.tree
 
     -- Step 4: Scale to final pixel coordinates
     scaled = scaleToPixels config withCoords
@@ -99,142 +83,65 @@ addHeight (Node val children) =
   in
     Node (val { height = nodeHeight }) childrenWithHeight
 
--- | Bottom-up pass: compute relative x positions using contour scanning
--- | This is identical to Tree4's render function
--- | Annotates tree with Tuple containing offset and original data
+-- | Bottom-up pass: assign sequential x positions to ALL leaves
+-- | Then set parent x = mean of children x
+-- | This is simpler than Tree4 - no contour scanning needed for dendrograms
+-- | Returns tree with absolute x positions (not offsets like Tree4)
 render :: forall r.
   Number ->
   Tree { x :: Number, y :: Number, height :: Int | r } ->
-  Tree (Tuple { offset :: Number } { x :: Number, y :: Number, height :: Int | r })
+  { tree :: Tree { x :: Number, y :: Number, height :: Int | r }, lastLeafX :: Number }
 render minSep inputTree =
-  case renderWithContours inputTree of
-    Tuple t _ -> t
+  renderInternal 0.0 inputTree
   where
-    -- Internal function that also returns contours (captures minSep from outer scope)
-    renderWithContours :: Tree { x :: Number, y :: Number, height :: Int | r } -> Tuple (Tree (Tuple { offset :: Number } { x :: Number, y :: Number, height :: Int | r })) Contours
-    renderWithContours (Node val children) =
-      let childCount = length children
-      in case childCount of
-        -- Leaf node: offset = 0, contours = singleton
-        0 -> Tuple (Node (Tuple { offset: 0.0 } val) Nil) singletonContours
+    -- Thread through lastLeafX to assign sequential positions
+    renderInternal :: Number -> Tree { x :: Number, y :: Number, height :: Int | r } -> { tree :: Tree { x :: Number, y :: Number, height :: Int | r }, lastLeafX :: Number }
+    renderInternal currentLeafX (Node val children) =
+      case Array.fromFoldable children of
+        -- Leaf node: assign sequential x position
+        [] ->
+          let leafX = currentLeafX
+              leafNode = Node (val { x = leafX }) Nil
+          in { tree: leafNode, lastLeafX: leafX + minSep }
 
-        -- Internal node: process children, position them, compute contours
-        _ ->
+        -- Internal node: process children, then set x = mean of children x
+        childArray ->
           let
-            -- Recursively process all children to get their trees and contours
-            childResults = map renderWithContours children
-            childTrees = map (\(Tuple t _) -> t) childResults
-            childContours = map (\(Tuple _ c) -> c) childResults
+            -- Process all children, threading through lastLeafX
+            processChildren = foldl
+              (\acc child ->
+                let result = renderInternal acc.lastLeafX child
+                in { trees: Array.snoc acc.trees result.tree
+                   , lastLeafX: result.lastLeafX
+                   }
+              )
+              { trees: [], lastLeafX: currentLeafX }
+              childArray
 
-            -- Scan adjacent pairs to find needed separations
-            separations = computeSeparations minSep childContours
+            childTrees = processChildren.trees
 
-            -- Position children: first at 0, rest offset by cumulative separations
-            -- PureScript's scanl doesn't include the initial value
-            childAbsoluteOffsets = Cons 0.0 (scanl (+) 0.0 separations)
+            -- Compute mean of children's x values
+            childrenList = fromFoldable childTrees
+            meanX = foldl (\sum (Node v _) -> sum + v.x) 0.0 childTrees / toNumber (Array.length childTrees)
 
-            -- Parent is centered at midpoint of leftmost and rightmost child
-            leftmostOffset = fromMaybe 0.0 $ Array.head $ Array.fromFoldable childAbsoluteOffsets
-            rightmostOffset = fromMaybe 0.0 $ Array.last $ Array.fromFoldable childAbsoluteOffsets
-            parentOffset = (leftmostOffset + rightmostOffset) / 2.0
-
-            -- Convert child offsets to be relative to parent's centered position
-            childRelativeOffsets = map (\absOffset -> absOffset - parentOffset) childAbsoluteOffsets
-
-            -- Update each child tree with its relative offset
-            childrenWithOffsets = zipWith updateOffset childTrees childRelativeOffsets
-
-            -- Combine child contours into parent contours
-            parentContours = spliceContours childRelativeOffsets childContours
-
-            resultTree = Node (Tuple { offset: parentOffset } val) childrenWithOffsets
+            internalNode = Node (val { x = meanX }) childrenList
           in
-            Tuple resultTree parentContours
+            { tree: internalNode, lastLeafX: processChildren.lastLeafX }
 
-    -- Update a child tree's offset in its Tuple annotation
-    updateOffset :: Tree (Tuple { offset :: Number } { x :: Number, y :: Number, height :: Int | r }) -> Number -> Tree (Tuple { offset :: Number } { x :: Number, y :: Number, height :: Int | r })
-    updateOffset (Node (Tuple offsetRec original) children) newOffset =
-      Node (Tuple (offsetRec { offset = newOffset }) original) children
+    foldl :: forall a b. (a -> b -> a) -> a -> Array b -> a
+    foldl f init arr = Data.Foldable.foldl f init arr
 
--- | Compute separations needed between adjacent child subtrees
--- | For n children, returns (n-1) separation values
-computeSeparations :: Number -> List Contours -> List Number
-computeSeparations minSep contours =
-  case contours of
-    Nil -> Nil
-    Cons _ Nil -> Nil
-    _ -> zipWith (scanContours minSep) contours (tailSafe contours)
-  where
-    tailSafe :: forall a. List a -> List a
-    tailSafe Nil = Nil
-    tailSafe (Cons _ xs) = xs
-
--- | Scan two contours to find minimum separation needed
--- | Walks down both contours level by level, ensuring minSep at each level
-scanContours :: Number -> Contours -> Contours -> Number
-scanContours minSep (Contours left) (Contours right) =
-  go minSep left.right right.left
-  where
-    -- Current separation starts at minSep
-    -- Walk down right contour of left subtree and left contour of right subtree
-    go :: Number -> Contour -> Contour -> Number
-    go currentSep Nil _ = currentSep
-    go currentSep _ Nil = currentSep
-    go currentSep (Cons lr rest1) (Cons rl rest2) =
-      let
-        -- Distance between the two nodes at this level
-        actualSep = currentSep + rl - lr
-
-        -- If too close, increase separation
-        neededSep = if actualSep < minSep
-                    then currentSep + (minSep - actualSep)
-                    else currentSep
-      in
-        go neededSep rest1 rest2
-
--- | Combine child contours into parent contours
--- | Given n children at positions offsets[0..n-1], build the parent's contours
-spliceContours :: List Number -> List Contours -> Contours
-spliceContours offsets contours =
-  case Array.fromFoldable $ zipWith Tuple offsets contours of
-    [] -> singletonContours  -- No children (shouldn't happen, but safe)
-    [Tuple offset (Contours c)] ->
-      -- Single child: shift its contours by offset
-      Contours
-        { left: Cons 0.0 (map (\x -> x + offset) c.left)
-        , right: Cons 0.0 (map (\x -> x + offset) c.right)
-        }
-    pairs ->
-      -- Multiple children: leftmost left contour + rightmost right contour
-      let
-        Tuple firstOffset (Contours firstContours) = fromMaybe (Tuple 0.0 emptyContours) $ Array.head pairs
-        Tuple lastOffset (Contours lastContours) = fromMaybe (Tuple 0.0 emptyContours) $ Array.last pairs
-
-        leftContour = Cons 0.0 (map (\x -> x + firstOffset) firstContours.left)
-        rightContour = Cons 0.0 (map (\x -> x + lastOffset) lastContours.right)
-      in
-        Contours { left: leftContour, right: rightContour }
-
--- | Top-down pass: convert offsets to absolute (x, y) coordinates
--- | Strips Tuple annotation and updates x, y fields in the original record
--- | Each node's x = parent.x + node.offset
--- | Each node's y = height (KEY DIFFERENCE from Tree4: uses height not depth)
-petrify :: forall r.
-  Number ->  -- Parent's x coordinate
-  Tree (Tuple { offset :: Number } { x :: Number, y :: Number, height :: Int | r }) ->
-  Tree { x :: Number, y :: Number, height :: Int | r }
-petrify parentX (Node (Tuple offsetRec original) children) =
+-- | Add y coordinates based on height
+-- | For cluster: y = height (leaves have height=0, so y=0, all at same level)
+addYCoordinates :: forall r. Tree { x :: Number, y :: Number, height :: Int | r } -> Tree { x :: Number, y :: Number, height :: Int | r }
+addYCoordinates (Node val children) =
   let
-    -- Node's x is parent's x plus its offset
-    nodeX = parentX + offsetRec.offset
-    -- For cluster: y is height (distance from leaves)
-    -- Leaves have height = 0, so y = 0 (all at same level)
-    nodeY = toNumber original.height
-
-    -- Recursively process children with this node's x as parent
-    childrenWithCoords = map (petrify nodeX) children
+    -- y is simply the height (distance from deepest leaf)
+    nodeY = toNumber val.height
+    -- Recursively process children
+    childrenWithY = map addYCoordinates children
   in
-    Node (original { x = nodeX, y = nodeY }) childrenWithCoords
+    Node (val { y = nodeY }) childrenWithY
 
 -- | Scale abstract coordinates to pixel coordinates
 scaleToPixels :: forall r.
