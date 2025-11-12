@@ -152,7 +152,7 @@ type DeclarativeUpdateConfig d =
 -- | Note: The user NEVER manually filters links. The library does it automatically
 -- | by extracting node IDs and filtering links to only connect visible nodes.
 -- | This makes the "filtered nodes + all links" bug impossible.
-genericUpdateSimulation :: forall dataRow attrs sel m.
+genericUpdateSimulation :: forall dataRow attrs sel m nodeKey linkKey.
   Monad m =>
   SelectionM sel m =>
   SimulationM2 sel m =>
@@ -160,12 +160,13 @@ genericUpdateSimulation :: forall dataRow attrs sel m.
   Element ->                                         -- Node element type
   Element ->                                         -- Link element type
   DeclarativeUpdateConfig dataRow ->                 -- Declarative configuration (uses Row Type)
-  (Datum_ -> Index_) ->                              -- Key function
+  (SimulationNode dataRow -> nodeKey) ->             -- Node key function (returns any key type!)
+  (D3Link_Swizzled -> linkKey) ->                    -- Link key function (returns any key type!)
   attrs ->                                           -- Visualization attributes
   RenderCallbacks attrs sel m (SimulationNode dataRow) ->  -- Render callbacks (uses complete Type)
   m Unit
 genericUpdateSimulation { nodes: Just nodesGroup, links: Just linksGroup }
-                        nodeElement linkElement config keyFn attrs callbacks = do
+                        nodeElement linkElement config nodeKeyFn linkKeyFn attrs callbacks = do
   -- STEP 1: Apply node filter to full dataset
   let filteredNodes = filter config.nodeFilter config.allNodes
 
@@ -174,13 +175,13 @@ genericUpdateSimulation { nodes: Just nodesGroup, links: Just linksGroup }
   let initializedNodes = foldl (\nodes fn -> fn nodes) filteredNodes config.nodeInitializers
 
   -- STEP 3: Extract node IDs for automatic link filtering
-  let nodeIDs = getIDsFromNodes_ initializedNodes keyFn
+  let nodeIDs = getIDsFromNodes_ initializedNodes nodeKeyFn
 
   -- STEP 4: AUTOMATICALLY filter links to only connect visible nodes
   -- This is the key insight: user provides full data + node predicate,
   -- library ensures links are consistent. User can't forget this step!
   let validLink link = do
-        let linkIDs = getLinkIDs_ keyFn link :: { sourceID :: String, targetID :: String }
+        let linkIDs = getLinkIDs_ nodeKeyFn link :: { sourceID :: String, targetID :: String }
         (linkIDs.sourceID `elem` nodeIDs) && (linkIDs.targetID `elem` nodeIDs)
       structurallyFilteredLinks = filter validLink config.allLinks
 
@@ -194,7 +195,7 @@ genericUpdateSimulation { nodes: Just nodesGroup, links: Just linksGroup }
   -- STEP 6: Build internal SimulationUpdate for the update API
   -- Note: We pass pre-filtered and initialized data with no filter predicates
   -- (filtering and initialization already done by library)
-  let internalUpdateConfig :: SimulationUpdate dataRow
+  let internalUpdateConfig :: SimulationUpdate dataRow nodeKey
       internalUpdateConfig =
         { nodes: Just initializedNodes    -- Filtered and initialized by library
         , links: Just finalLinks          -- Structurally + visually filtered by library (AUTOMATIC!)
@@ -202,7 +203,7 @@ genericUpdateSimulation { nodes: Just nodesGroup, links: Just linksGroup }
         , linkFilter: Nothing             -- No predicate needed (already filtered)
         , activeForces: config.activeForces
         , config: config.config
-        , keyFn: keyFn
+        , keyFn: nodeKeyFn
         }
 
   -- STEP 7: Call SimulationM2 update API with consistent data
@@ -214,7 +215,7 @@ genericUpdateSimulation { nodes: Just nodesGroup, links: Just linksGroup }
   link <- openSelection linksGroup (show linkElement)
 
   -- STEP 9: Apply General Update Pattern to nodes
-  node' <- updateJoin node nodeElement enhanced.nodes keyFn
+  node' <- updateJoin node nodeElement enhanced.nodes nodeKeyFn
 
   -- Enter: Create new nodes
   nodeEnter <- callbacks.onNodeEnter node'.enter attrs
@@ -229,7 +230,7 @@ genericUpdateSimulation { nodes: Just nodesGroup, links: Just linksGroup }
   mergedNodes <- mergeSelections nodeEnter node'.update
 
   -- STEP 10: Apply General Update Pattern to links
-  link' <- updateJoin link linkElement enhanced.links keyFn
+  link' <- updateJoin link linkElement enhanced.links linkKeyFn
 
   -- Enter: Create new links
   linkEnter <- callbacks.onLinkEnter link'.enter attrs
@@ -251,4 +252,4 @@ genericUpdateSimulation { nodes: Just nodesGroup, links: Just linksGroup }
   pure unit
 
 -- Fallback when selections are missing (do nothing)
-genericUpdateSimulation _ _ _ _ _ _ _ = pure unit
+genericUpdateSimulation _ _ _ _ _ _ _ _ = pure unit

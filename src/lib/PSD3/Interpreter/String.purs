@@ -138,7 +138,7 @@ foreign import showExit_            :: String -> String
 foreign import showAddTransition_   :: String -> Transition -> String
 foreign import showRemoveSelection_ :: String -> String
 foreign import showAppend_          :: Element -> String -> String
-foreign import showKeyFunction_     :: forall d. Array d -> ComputeKeyFunction_ -> String -> String
+foreign import showKeyFunction_     :: forall d key. Array d -> ComputeKeyFunction_ d key -> String -> String
 foreign import showData_            :: forall d. Array d -> String -> String
 foreign import showSetAttr_         :: String -> D3Attr_ -> String -> String
 foreign import showSetText_         :: D3Attr_ -> String -> String

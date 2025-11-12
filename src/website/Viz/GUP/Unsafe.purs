@@ -1,18 +1,14 @@
 module D3.Viz.GUP.Unsafe where
 
-import PSD3.Internal.Types (Datum_, Index_)
+import PSD3.Internal.Types (Index_)
 import Unsafe.Coerce (unsafeCoerce)
+import Data.String.CodeUnits (singleton)
 
--- | Coerce Datum_ to Char
--- This is safe because D3's data join ensures Datum_ contains
--- the data we originally passed to updateJoin
-coerceDatumToChar :: Datum_ -> Char
-coerceDatumToChar = unsafeCoerce
-
--- | Coerce Index_ to Number (always provided by D3)
+-- | Coerce Index_ to Number (for positioning)
 coerceIndexToNumber :: Index_ -> Number
 coerceIndexToNumber = unsafeCoerce
 
--- | For this very simple example, the data (Char) can be used directly as the key
-coerceDatumToKey :: Datum_ -> Index_
-coerceDatumToKey = unsafeCoerce
+-- | For this simple example, convert Char to String for the key
+-- Just returns String - no Index_ coercion needed!
+charToKey :: Char -> String
+charToKey = singleton

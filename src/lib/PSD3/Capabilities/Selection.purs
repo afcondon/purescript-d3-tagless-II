@@ -192,7 +192,7 @@ class (Monad m) <= SelectionM selection m where
   -- | The key function identifies each datum uniquely for D3's internal tracking.
   -- |
   -- | Maps to D3's data join - see https://d3js.org/d3-selection#joining-data
-  simpleJoin      :: forall d datum. selection d -> Element -> (Array datum) -> (Datum_ -> Index_) -> m (selection datum)
+  simpleJoin      :: forall d datum key. selection d -> Element -> (Array datum) -> (datum -> key) -> m (selection datum)
 
   -- | Bind data to elements using nested selections where child data is extracted from parent datum.
   -- |
@@ -254,5 +254,5 @@ class (Monad m) <= SelectionM selection m where
   -- | ```
   -- |
   -- | See https://d3js.org/d3-selection#joining-data for the General Update Pattern.
-  updateJoin      :: forall d datum. selection d -> Element -> (Array datum) -> (Datum_ -> Index_)
+  updateJoin      :: forall d datum key. selection d -> Element -> (Array datum) -> (datum -> key)
     -> m { enter :: selection datum, exit :: selection d, update :: selection datum }

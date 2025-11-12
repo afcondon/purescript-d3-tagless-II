@@ -33,6 +33,7 @@ import D3.Viz.HorizontalClusterViz as HorizontalClusterViz
 import D3.Viz.PartitionViz as PartitionViz
 import D3.Viz.SunburstViz as SunburstViz
 import D3.Viz.AnimatedTreeCluster as AnimatedTreeCluster
+import D3.Viz.AnimatedTree4Cluster4 as AnimatedTree4Cluster4
 import D3.Viz.LesMiserables as LesMis
 import D3.Viz.LesMiserablesGUP as LesMisGUP
 import D3.Viz.LesMiserablesGUP.Model (LesMisRawModel)
@@ -301,6 +302,24 @@ handleAction = case _ of
             H.modify_ _ { animatedTreeClusterFiber = Just fiber }
             pure unit
 
+      "animated-tree4-cluster4" -> do
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare-2.json"
+        case result of
+          Left err -> log "AnimatedTree4Cluster4: Failed to load data"
+          Right response -> do
+            let blessed = readJSON_ response.body
+            -- Create SVG structure and get data for animation
+            { dataTree, linksGroup, nodesGroup, chartWidth, chartHeight } <- H.liftEffect $ eval_D3M $ AnimatedTree4Cluster4.draw blessed "#example-viz"
+
+            -- Start animation loop that alternates between layouts
+            let runLoop currentLayout = do
+                  _ <- liftEffect $ eval_D3M $ AnimatedTree4Cluster4.animationStep dataTree linksGroup nodesGroup chartWidth chartHeight currentLayout
+                  delay (Milliseconds 3000.0)
+                  runLoop (AnimatedTree4Cluster4.toggleLayout currentLayout)
+
+            _ <- H.liftAff $ forkAff $ runLoop AnimatedTree4Cluster4.TreeLayout
+            pure unit
+
       "lesmis-force" -> do
         response <- H.liftAff $ AJAX.get ResponseFormat.string "./data/miserables.json"
         let graph = readGraphFromFileContents response
@@ -553,6 +572,7 @@ allExampleIds =
   , "icicle"
   , "sunburst-purescript"
   , "animated-tree-cluster"
+  , "animated-tree4-cluster4"
   , "lesmis-force"
   , "lesmisgup"
   , "topological-sort"
@@ -626,6 +646,8 @@ getExampleMeta id = case id of
     { id, name: "Sunburst (Pure PureScript)", description: "Radial partition layout with nested rings in pure PureScript", category: "Hierarchies" }
   "animated-tree-cluster" -> Just
     { id, name: "Animated Tree ↔ Cluster", description: "Automatic transitions between tree and dendrogram layouts using pure PureScript algorithms", category: "Transitions" }
+  "animated-tree4-cluster4" -> Just
+    { id, name: "Animated Tree4 ↔ Cluster4", description: "Looping animation between Reingold-Tilford tidy tree and dendrogram using Data.Tree", category: "Transitions" }
   "lesmis-force" -> Just
     { id, name: "Les Misérables Network", description: "Character co-occurrence force-directed graph with physics simulation", category: "Force-Directed" }
   "lesmisgup" -> Just

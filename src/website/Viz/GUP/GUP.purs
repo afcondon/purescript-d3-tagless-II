@@ -2,13 +2,13 @@ module D3.Viz.GUP where
 
 import PSD3.Internal.Attributes.Sugar
 
-import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
+import PSD3.Internal.Types (D3Selection_, Element(..), Index_, Selector)
 import PSD3.Internal.Selection.Types (SelectionAttribute)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, openSelection, setAttributes, updateJoin)
-import D3.Viz.GUP.Unsafe (coerceDatumToChar, coerceIndexToNumber, coerceDatumToKey)
+import D3.Viz.GUP.Unsafe (charToKey, coerceIndexToNumber)
 import Data.String.CodeUnits (singleton)
 import Effect.Aff (Milliseconds(..))
-import Prelude (Unit, bind, discard, pure, ($), (*), (+), (<<<))
+import Prelude (Unit, bind, discard, pure, ($), (*), (+))
 
 -- | ====================================================================================
 -- | Simple-as-can-be example of the more complex Join which allows for new data to be
@@ -32,7 +32,7 @@ exGeneralUpdatePattern selector = do
   
   pure $ \letters -> do
     enterSelection   <- openSelection letterGroup "text"
-    updateSelections <- updateJoin enterSelection Text letters coerceDatumToKey
+    updateSelections <- updateJoin enterSelection Text letters charToKey
     setAttributes updateSelections.exit exit
     setAttributes updateSelections.update update
 

@@ -85,20 +85,21 @@ getAllClusterNodes node@(ClusterNode n) =
   else [node] <> (n.children >>= getAllClusterNodes)
 
 -- Key function: use node name from data as unique identifier
--- TreeNode and ClusterNode have the same structure, so this works for both
-nodeKey :: Datum_ -> Index_
+-- Works for both TreeNode and ClusterNode (they have the same structure)
+-- NOTE: Legacy function - accepts any type for compatibility with Datum_ pattern
+nodeKey :: forall a. a -> String
 nodeKey d =
   let TreeNode node = unsafeCoerce d
-  in unsafeCoerce $ getName node.data_
+  in getName node.data_
 
 -- Get link key (source -> target path)
--- Links contain TreeNode or ClusterNode, need to unwrap
-linkKey :: Datum_ -> Index_
+-- NOTE: Legacy function - accepts any type for compatibility with Datum_ pattern
+linkKey :: forall a. a -> String
 linkKey d =
   let link = unsafeCoerce d :: { source :: TreeNode HierData, target :: TreeNode HierData }
       TreeNode source = link.source
       TreeNode target = link.target
-  in unsafeCoerce $ getName source.data_ <> " -> " <> getName target.data_
+  in getName source.data_ <> " -> " <> getName target.data_
 
 -- Create links array from nodes
 makeLinks :: forall a node. (node -> Array node) -> (node -> a) -> node -> Array { source :: a, target :: a }
@@ -130,15 +131,11 @@ draw flareData selector = do
   let config = defaultTreeConfig { size = { width: chartWidth, height: chartHeight } }
   let treeLayout = tree config hierarchyRoot
 
-  -- Get nodes for visualization
-  let nodes = getAllTreeNodes treeLayout
-  let nodesData = unsafeCoerce nodes :: Array Datum_
+  -- Get nodes and links for visualization
+  let nodesData = getAllTreeNodes treeLayout
+  let linksData = makeLinks (\(TreeNode n) -> n.children) identity treeLayout
 
-  -- Create links
-  let links = makeLinks (\(TreeNode n) -> n.children) identity treeLayout
-  let linksData = unsafeCoerce links :: Array Datum_
-
-  liftEffect $ log $ "Initial: " <> show (length nodes) <> " nodes, " <> show (length links) <> " links"
+  liftEffect $ log $ "Initial: " <> show (length nodesData) <> " nodes, " <> show (length linksData) <> " links"
 
   -- Create SVG structure
   root' <- attach selector :: m (D3Selection_ Unit)
@@ -164,16 +161,11 @@ draw flareData selector = do
   -- Draw initial links (no transitions)
   linkSelection <- simpleJoin linksGroup Path linksData linkKey
 
-  let linkPathFn :: Datum_ -> String
-      linkPathFn datum =
-        -- Links contain TreeNode, need to unwrap the newtype
-        let link = unsafeCoerce datum :: { source :: TreeNode HierData, target :: TreeNode HierData }
-            TreeNode source = link.source
-            TreeNode target = link.target
-        in verticalLinkPath source.x source.y target.x target.y
-
   setAttributes linkSelection
-    [ d linkPathFn
+    [ d (\(link :: { source :: TreeNode HierData, target :: TreeNode HierData }) ->
+          let TreeNode source = link.source
+              TreeNode target = link.target
+          in verticalLinkPath source.x source.y target.x target.y)
     , fill "none"
     , strokeColor "#555"
     , strokeWidth 1.5
@@ -195,20 +187,20 @@ draw flareData selector = do
     ]
 
   -- Add circles to each node group
-  let radiusFn :: Datum_ -> Number
-      radiusFn d =
-        let TreeNode node = unsafeCoerce d
-        in if length node.children == 0 then 3.0 else 4.0
-
   _ <- appendTo nodeGroupsSelection Circle
-    [ radius radiusFn
+    [ radius (\(TreeNode node :: TreeNode HierData) ->
+          if length node.children == 0 then 3.0 else 4.0)
     , fill "#999"
     , strokeColor "#555"
     , strokeWidth 1.5
     ]
 
   -- Return the data-bound selections, not the parent containers!
-  pure { hierarchyRoot, links: linkSelection, nodes: nodeGroupsSelection }
+  -- Coerce to Datum_ because these selections will be reused with different data types
+  pure { hierarchyRoot
+       , links: unsafeCoerce linkSelection :: D3Selection_ Datum_
+       , nodes: unsafeCoerce nodeGroupsSelection :: D3Selection_ Datum_
+       }
 
 -- Update - transitions to the other layout
 updateLayout :: forall m d1 d2.
@@ -233,8 +225,9 @@ updateLayout currentLayout hierarchyRoot linksGroup nodesGroup = do
       let config = defaultTreeConfig { size = { width: chartWidth, height: chartHeight } }
       let treeLayout = tree config hierarchyRoot
       let nodes = getAllTreeNodes treeLayout
-      let nodesData = unsafeCoerce nodes :: Array Datum_
       let links = makeLinks (\(TreeNode n) -> n.children) identity treeLayout
+      -- Coerce to Datum_ for polymorphic updateVisualization function
+      let nodesData = unsafeCoerce nodes :: Array Datum_
       let linksData = unsafeCoerce links :: Array Datum_
 
       updateVisualization nodesData linksData linksGroup nodesGroup
@@ -248,8 +241,9 @@ updateLayout currentLayout hierarchyRoot linksGroup nodesGroup = do
       let config = defaultClusterConfig { size = { width: chartWidth, height: chartHeight } }
       let clusterLayout = cluster config sorted
       let nodes = getAllClusterNodes clusterLayout
-      let nodesData = unsafeCoerce nodes :: Array Datum_
       let links = makeLinks (\(ClusterNode n) -> n.children) identity clusterLayout
+      -- Coerce to Datum_ for polymorphic updateVisualization function
+      let nodesData = unsafeCoerce nodes :: Array Datum_
       let linksData = unsafeCoerce links :: Array Datum_
 
       updateVisualization nodesData linksData linksGroup nodesGroup
@@ -258,6 +252,7 @@ updateLayout currentLayout hierarchyRoot linksGroup nodesGroup = do
 
 -- Helper to update visualization with transitions
 -- Takes the existing data-bound selections and updates them with new data
+-- NOTE: Uses Datum_ because this function must work with both TreeNode and ClusterNode layouts
 updateVisualization :: forall m d1 d2.
   Bind m =>
   MonadEffect m =>
@@ -268,8 +263,6 @@ updateVisualization :: forall m d1 d2.
   D3Selection_ d2 ->  -- Existing node selection with old data
   m Unit
 updateVisualization nodesData linksData linksSelection nodesSelection = do
-  let transition = transitionWithDuration $ Milliseconds 750.0
-
   -- Update links with transitions
   -- No openSelection needed - linksSelection already has the path elements
   linksJoin <- updateJoin linksSelection Path linksData linkKey
@@ -290,7 +283,7 @@ updateVisualization nodesData linksData linksSelection nodesSelection = do
             TreeNode target = link.target
         in verticalLinkPath source.x source.y target.x target.y
 
-  setAttributes linksAll $ transition `to` [ d linkPathFn ]
+  setAttributes linksAll $ (transitionWithDuration $ Milliseconds 750.0) `to` [ d linkPathFn ]
 
   -- Update nodes with transitions
   -- No openSelection needed - nodesSelection already has the group elements
@@ -304,6 +297,6 @@ updateVisualization nodesData linksData linksSelection nodesSelection = do
         in "translate(" <> show node.x <> "," <> show node.y <> ")"
 
   -- Transition the transform attribute of the groups
-  setAttributes nodeGroupsAll $ transition `to` [ transform [\d -> translateFn d] ]
+  setAttributes nodeGroupsAll $ (transitionWithDuration $ Milliseconds 750.0) `to` [ transform [\d -> translateFn d] ]
 
   pure unit

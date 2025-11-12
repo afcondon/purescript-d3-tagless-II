@@ -26,5 +26,6 @@ datum_ =
   }
 
 -- | Key function for data joins (use nation name as unique identifier)
-coerceDatumToKey :: Datum_ -> Index_
-coerceDatumToKey d = unsafeCoerce (datum_.name d)
+-- Just returns String - no coercion needed!
+nationToKey :: forall r. { name :: String | r } -> String
+nationToKey nation = nation.name

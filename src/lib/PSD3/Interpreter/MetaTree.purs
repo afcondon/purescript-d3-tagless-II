@@ -4,7 +4,7 @@ import PSD3.Data.Node
 
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import PSD3.Data.Tree (TreeJson_)
-import PSD3.Internal.Types (Datum_, Element, MouseEvent, Transition, Selector)
+import PSD3.Internal.Types (Datum_, Element, MouseEvent, Transition, Selector, Index_)
 import PSD3.Internal.FFI (ComputeKeyFunction_)
 import PSD3.Internal.Selection.Types (Behavior(..), SelectionAttribute(..), OrderingAttribute(..))
 import PSD3.Capabilities.Selection (class SelectionM)
@@ -37,8 +37,8 @@ data D3GrammarNode d =
   | JoinSimpleNode     Element (Array (SelectionAttribute d))
   | UpdateJoinNode     Element
   | OpenJoinNode (Selector NodeID)
-  | JoinSimpleWithKeyFunctionNode Element ComputeKeyFunction_
-  | SplitJoinCloseWithKeyFunctionNode Element ComputeKeyFunction_
+  | JoinSimpleWithKeyFunctionNode Element (ComputeKeyFunction_ Datum_ Index_)
+  | SplitJoinCloseWithKeyFunctionNode Element (ComputeKeyFunction_ Datum_ Index_)
   -- the next nodes are for nodes that are attributes and transitions and zooms which are all handled differently
   | OnNode (Behavior NodeID) -- TODO make chainable
   | AttrNode (SelectionAttribute d) -- actually only Attr and Text
@@ -239,11 +239,11 @@ instance d3Tagless :: SelectionM MetaTreeSelection D3MetaTreeM where
 
   simpleJoin (MetaTreeSelection nodeID) e ds k          = do
     (ScriptTree id _ _) <- get
-    insertInScriptTree nodeID (JoinSimpleWithKeyFunctionNode e k)
+    insertInScriptTree nodeID (JoinSimpleWithKeyFunctionNode e (unsafeCoerce k))
     pure (MetaTreeSelection id)
   nestedJoin (MetaTreeSelection nodeID) e extractChildren k = do
     (ScriptTree id _ _) <- get
-    insertInScriptTree nodeID (JoinSimpleWithKeyFunctionNode e k)  -- Same as simpleJoin for now
+    insertInScriptTree nodeID (JoinSimpleWithKeyFunctionNode e (unsafeCoerce k))  -- Same as simpleJoin for now
     pure (MetaTreeSelection id)
   updateJoin (MetaTreeSelection nodeID) e ds k          = do
     (ScriptTree id _ _) <- get

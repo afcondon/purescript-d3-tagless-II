@@ -32,7 +32,7 @@ selectionModifySelection selection_ attributes = do
   let _ = foldl applySelectionAttributeD3 selection_ attributes
   pure unit
 
-selectionJoin   :: forall d datum m. (SelectionM D3Selection_ m) => D3Selection_ d -> Element -> (Array datum) -> (Datum_ -> Index_) -> m (D3Selection_ datum)
+selectionJoin   :: forall d datum key m. (SelectionM D3Selection_ m) => D3Selection_ d -> Element -> (Array datum) -> (datum -> key) -> m (D3Selection_ datum)
 selectionJoin selection e theData keyFn = do
   let
     element         = spy "Join: " $ show e
@@ -53,16 +53,17 @@ selectionNestedJoin selection e extractChildren keyFn = do
     enterSelection = unsafeCoerce (d3EnterAndAppend_ element dataSelection) :: D3Selection_ datum
   pure enterSelection
 
-selectionUpdateJoin   :: forall d datum m.
+selectionUpdateJoin   :: forall d datum key m.
   (SelectionM D3Selection_ m) =>
   D3Selection_ d ->
   Element -> (Array datum) ->
-  (Datum_ -> Index_) ->
+  (datum -> key) ->
   m { enter :: D3Selection_ datum, exit :: D3Selection_ d, update :: D3Selection_ datum }
 selectionUpdateJoin openSelection e theData keyFn = do
   let
     -- REVIEW use these FFI function to decompose the update Selection into it's component parts
     -- d3DataWithKeyFunction_ rebinds data, changing phantom type from d to datum
+    -- Key function can return any type (String, Int, etc), FFI handles coercion
     updateSelection = d3DataWithKeyFunction_ theData keyFn openSelection
     enterSelection   = d3GetEnterSelection_ updateSelection
     exitSelection    = unsafeCoerce (d3GetExitSelection_ updateSelection) :: D3Selection_ d

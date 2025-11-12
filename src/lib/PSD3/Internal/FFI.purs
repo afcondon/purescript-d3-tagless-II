@@ -54,14 +54,15 @@ foreign import d3SortSelection_      :: forall d. D3Selection_ d -> (d -> d -> I
 foreign import getIndexFromDatum_    :: Datum_ -> Int
 
 foreign import d3Data_               :: forall d. Array d -> D3Selection_ d -> D3Selection_ d
-type ComputeKeyFunction_ = Datum_ -> Index_
-foreign import keyIsID_           :: ComputeKeyFunction_
-foreign import keyIsSourceTarget_ :: ComputeKeyFunction_ -- used for links in simulation
+type ComputeKeyFunction_ d key = d -> key
+foreign import keyIsID_           :: forall d. ComputeKeyFunction_ d Index_
+foreign import keyIsSourceTarget_ :: forall d. ComputeKeyFunction_ d Index_ -- used for links in simulation
 -- REVIEW the returned D3Selection_ here is the full enter, update, exit type of selection
 -- which we haven't really modelled in PureScript (opaque type) but maybe it will turn out that we
 -- needed to all along
-foreign import d3DataWithKeyFunction_ :: forall d1 d2. Array d2 -> ComputeKeyFunction_ -> D3Selection_ d1 -> D3Selection_ d2
-foreign import d3DataWithFunction_ :: forall d. (Datum_ -> Array Datum_) -> ComputeKeyFunction_ -> D3Selection_ d -> D3Selection_ d
+-- Key function can return any type (String, Int, etc), gets coerced to Index_ for D3
+foreign import d3DataWithKeyFunction_ :: forall d1 d2 key. Array d2 -> ComputeKeyFunction_ d2 key -> D3Selection_ d1 -> D3Selection_ d2
+foreign import d3DataWithFunction_ :: forall d. (Datum_ -> Array Datum_) -> ComputeKeyFunction_ Datum_ Index_ -> D3Selection_ d -> D3Selection_ d
 
 -- we'll coerce everything to this type if we can validate attr lambdas against provided data
 -- ... and we'll also just coerce all our setters to one thing for the FFI since JS don't care
@@ -94,7 +95,7 @@ foreign import unsafeSetField_ :: forall a. String -> a -> Datum_ -> Effect Unit
 foreign import expandNodeById_ :: forall declsData callsData. D3Simulation_ -> (Boolean -> Int -> Number) -> declsData -> callsData -> String -> Boolean -> Effect Unit
 foreign import addModuleArrowMarker_ :: forall d. D3Selection_ d -> Effect Unit
 foreign import drawInterModuleDeclarationLinks_ :: forall declsData callsData d. D3Selection_ d -> (Boolean -> Int -> Number) -> declsData -> callsData -> Effect Unit
-foreign import filterToConnectedNodes_ :: D3Simulation_ -> (Datum_ -> Index_) -> Array String -> Unit
+foreign import filterToConnectedNodes_ :: forall d key. D3Simulation_ -> (SimulationNode d -> key) -> Array String -> Unit
 
 foreign import selectionOn_         :: forall selection callback. selection -> String -> callback -> selection  
 
@@ -121,15 +122,15 @@ type SimulationVariables = {
     , velocityDecay :: Number
 }
 
-foreign import initSimulation_         ::                  SimulationVariables -> (Datum_ -> Index_) -> D3Simulation_
+foreign import initSimulation_         :: forall d key.    SimulationVariables -> (SimulationNode d -> key) -> D3Simulation_
 foreign import configSimulation_       :: D3Simulation_ -> SimulationVariables -> D3Simulation_
 foreign import readSimulationVariables_ :: D3Simulation_ -> SimulationVariables
 
 foreign import d3PreserveSimulationPositions_ ::
-  forall d row.
+  forall d row key.
   D3Selection_ d ->
   Array (SimulationNode row) ->
-  (Datum_ -> Index_) ->
+  (SimulationNode row -> key) ->
   Array (SimulationNode row)
 foreign import d3PreserveLinkReferences_ ::
   forall d.
@@ -137,7 +138,7 @@ foreign import d3PreserveLinkReferences_ ::
   Array D3Link_Unswizzled ->
   Array D3Link_Unswizzled
 
-foreign import getIDsFromNodes_ :: forall d id. Array (SimulationNode d) -> (Datum_ -> Index_) -> Array id
+foreign import getIDsFromNodes_ :: forall d id key. Array (SimulationNode d) -> (SimulationNode d -> key) -> Array id
 
 foreign import getNodes_ :: forall d.   D3Simulation_ -> Array (SimulationNode d)
 foreign import setNodes_ :: forall d.   D3Simulation_ -> Array (SimulationNode d) -> Array (SimulationNode d)
@@ -147,14 +148,14 @@ foreign import setLinks_ ::
   Array D3Link_Swizzled ->
   Unit
 foreign import swizzleLinks_ ::
-  forall d.
+  forall d key.
   Array D3Link_Unswizzled ->
   Array (SimulationNode d) ->
-  (Datum_ -> Index_) ->
+  (SimulationNode d -> key) ->
   Array D3Link_Swizzled
 
-foreign import getLinkID_              :: (Datum_ -> Index_) -> Datum_ -> Index_
-foreign import getLinkIDs_             :: forall id. (Datum_ -> Index_) -> D3Link_Unswizzled -> { sourceID :: id, targetID :: id }
+foreign import getLinkID_              :: forall link key. (link -> key) -> link -> Index_
+foreign import getLinkIDs_             :: forall nodeData id key. (nodeData -> key) -> D3Link_Unswizzled -> { sourceID :: id, targetID :: id }
 foreign import unsetLinks_             :: D3Simulation_ -> D3Simulation_
 
 foreign import getLinksFromForce_      :: D3ForceHandle_ -> Array D3Link_Unswizzled
@@ -307,4 +308,4 @@ foreign import hideModuleLabels_ :: forall d. D3Selection_ d -> Effect Unit
 foreign import switchToSpotlightForces_ :: D3Simulation_ -> Effect Unit
 foreign import switchToCompactForces_ :: D3Simulation_ -> Effect Unit
 foreign import resetNodeFilter_ :: D3Simulation_ -> Effect Unit
-foreign import restoreAllNodes_ :: forall d1 d2. D3Simulation_ -> D3Selection_ d1 -> D3Selection_ d2 -> Array Datum_ -> Array Datum_ -> (Boolean -> Int -> Number) -> (Datum_ -> Index_) -> Effect Unit
+foreign import restoreAllNodes_ :: forall d1 d2 nodeData linkData key. D3Simulation_ -> D3Selection_ d1 -> D3Selection_ d2 -> Array nodeData -> Array linkData -> (Boolean -> Int -> Number) -> (nodeData -> key) -> Effect Unit

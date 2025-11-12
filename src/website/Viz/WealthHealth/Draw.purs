@@ -2,7 +2,7 @@ module D3.Viz.WealthHealth.Draw where
 
 import Prelude
 
-import D3.Viz.WealthHealth.Unsafe (coerceDatumToKey, datum_)
+import D3.Viz.WealthHealth.Unsafe (nationToKey, datum_)
 import Data.Int (floor)
 import Data.Number (log, sqrt)
 import Data.Traversable (traverse)
@@ -155,7 +155,7 @@ updateVisualization chartGroup nations = do
 
   -- Use General Update Pattern for data binding
   enterSelection <- openSelection chartGroup "circle"
-  updateSelections <- updateJoin enterSelection Circle nations coerceDatumToKey
+  updateSelections <- updateJoin enterSelection Circle nations nationToKey
 
   -- Exit: remove circles for nations that disappeared
   setAttributes updateSelections.exit
@@ -192,7 +192,7 @@ updateVisualization chartGroup nations = do
 draw :: forall m d.
   SelectionM D3Selection_ m =>
   Selector (D3Selection_ d) ->
-  m (Array Datum_ -> m (D3Selection_ Datum_))
+  m (Array NationPoint -> m (D3Selection_ NationPoint))
 draw selector = do
   let config = defaultConfig
 
@@ -363,7 +363,7 @@ draw selector = do
 
     -- Use General Update Pattern for circles (we know this works)
     circleEnterSelection <- openSelection chartGroup "circle"
-    circleUpdateSelections <- updateJoin circleEnterSelection Circle nations coerceDatumToKey
+    circleUpdateSelections <- updateJoin circleEnterSelection Circle nations nationToKey
 
     -- Exit: remove circles for nations that disappeared
     setAttributes circleUpdateSelections.exit
@@ -373,8 +373,8 @@ draw selector = do
     -- Sort by population (descending) so largest circles are drawn last
     setAttributes circleUpdateSelections.update
       [ sortSelection \a b ->
-          let popA = datum_.population a
-              popB = datum_.population b
+          let popA = a.population
+              popB = b.population
           in orderingToInt $ compare popB popA  -- Descending order
       , cx (DatumFnI \d i -> (calculateAttrs d i).x)
       , cy (DatumFnI \d i -> (calculateAttrs d i).y)
@@ -387,8 +387,8 @@ draw selector = do
     newCircles <- appendTo circleUpdateSelections.enter Circle []
     setAttributes newCircles
       [ sortSelection \a b ->
-          let popA = datum_.population a
-              popB = datum_.population b
+          let popA = a.population
+              popB = b.population
           in orderingToInt $ compare popB popA  -- Descending order
       , cx (DatumFnI \d i -> (calculateAttrs d i).x)
       , cy (DatumFnI \d i -> (calculateAttrs d i).y)
@@ -408,7 +408,7 @@ draw selector = do
 
     -- Use General Update Pattern for labels (parallel join)
     labelEnterSelection <- openSelection chartGroup "text"
-    labelUpdateSelections <- updateJoin labelEnterSelection Text nations coerceDatumToKey
+    labelUpdateSelections <- updateJoin labelEnterSelection Text nations nationToKey
 
     -- Exit: remove labels for nations that disappeared
     setAttributes labelUpdateSelections.exit

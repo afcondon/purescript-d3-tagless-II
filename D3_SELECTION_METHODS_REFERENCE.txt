@@ -1,0 +1,270 @@
+================================================================================
+D3.SELECTION METHOD REFERENCE - PURESCRIPT LIBRARY USAGE
+================================================================================
+
+COMPLETE LIST OF D3.SELECTION METHODS USED IN CODEBASE
+======================================================
+
+1. SELECTION CREATION (DOM Queries)
+   d3.select(selector)        -> d3SelectFirstInDOM_
+   d3.selectAll(selector)     -> d3SelectAllInDOM_
+   selection.select(sel)      -> d3SelectionSelect_
+   selection.selectAll(sel)   -> d3SelectionSelectAll_
+
+   FFI Wrappers:
+   - d3SelectAllInDOM_ :: Selector (D3Selection d) -> D3Selection d
+   - d3SelectFirstInDOM_ :: Selector (D3Selection d) -> D3Selection d
+   - d3SelectionSelectAll_ :: Selector (D3Selection d) -> D3Selection d -> D3Selection d
+   - d3SelectionSelect_ :: Selector (D3Selection d) -> D3Selection d -> D3Selection d
+
+   Replacement Plan:
+   - Native: document.querySelector, document.querySelectorAll
+   - Type: DOMNode instead of D3Selection
+   - Effort: 1 day (TRIVIAL)
+
+2. DATA BINDING (Core D3 Feature)
+   selection.data(data)           -> d3Data_
+   selection.data(data, keyFn)    -> d3DataWithKeyFunction_
+   selection.data(extractFn, keyFn) -> d3DataWithFunction_
+   selection.enter()              -> d3GetEnterSelection_
+   selection.exit()               -> d3GetExitSelection_
+   selection.data()               -> d3GetSelectionData_
+
+   FFI Wrappers:
+   - d3Data_ :: Array d -> D3Selection d -> D3Selection d
+   - d3DataWithKeyFunction_ :: Array d -> (d -> key) -> D3Selection d' -> D3Selection d
+   - d3DataWithFunction_ :: (Datum_ -> Array Datum_) -> (Datum_ -> Index_) -> D3Selection d -> D3Selection d
+   - d3GetEnterSelection_ :: D3Selection d -> D3Selection d
+   - d3GetExitSelection_ :: D3Selection d -> D3Selection d'
+   - d3GetSelectionData_ :: D3Selection d -> Array Datum_
+
+   Usage Pattern in Code:
+   ```purescript
+   linkElements <- simpleJoin linksGroup Path links keyIsID_
+     where
+       simpleJoin selection e theData keyFn = do
+         let selectS = d3SelectionSelectAll_ (show e) selection
+         let dataSelection = d3DataWithKeyFunction_ theData keyFn selectS
+         let enterSelection = d3EnterAndAppend_ (show e) dataSelection
+         pure enterSelection
+   ```
+
+   Replacement Plan:
+   - Pure PureScript algorithm: computeDataJoin
+   - Input: Array a, key function, current DOM elements
+   - Output: { enter, update, exit }
+   - Effort: 2-3 weeks (MEDIUM)
+   - Complexity: Core task - requires comprehensive testing
+
+3. ELEMENT CREATION & MANIPULATION
+   selection.append(element)      -> d3Append_
+   selection.enter().append(elem) -> d3EnterAndAppend_
+
+   FFI Wrappers:
+   - d3Append_ :: String -> D3Selection d -> D3Selection d
+   - d3EnterAndAppend_ :: String -> D3Selection d -> D3Selection d
+
+   Usage:
+   ```javascript
+   // d3Append_("circle")(selection) => selection.append("circle")
+   // d3EnterAndAppend_("circle")(dataSelection) => dataSelection.enter().append("circle")
+   ```
+
+   Replacement Plan:
+   - Native: document.createElement, appendChild
+   - Type: (String, DOMNode) -> DOMNode
+   - Effort: 1 day (TRIVIAL)
+
+4. ATTRIBUTE SETTING
+   selection.attr(name, value)     -> d3SetAttr_
+   selection.text(value)           -> d3SetText_
+   selection.html(value)           -> d3SetHTML_
+   selection.property(name, value) -> d3SetProperty_
+
+   FFI Wrappers:
+   - d3SetAttr_ :: String -> D3Attr_ -> D3Selection d -> D3Selection d
+   - d3SetText_ :: D3Attr_ -> D3Selection d -> D3Selection d
+   - d3SetHTML_ :: D3Attr_ -> D3Selection d -> D3Selection d
+   - d3SetProperty_ :: D3Attr_ -> D3Selection d -> D3Selection d
+
+   Replacement Plan:
+   - Native: element.setAttribute, element.textContent, element.innerHTML
+   - Type: (String, String, DOMNode) -> Unit
+   - Effort: 1 day (TRIVIAL)
+
+5. SELECTION FILTERING & ORDERING
+   selection.filter(selector)     -> d3FilterSelection_
+   selection.sort(compareFn)      -> d3SortSelection_
+   selection.order()              -> d3OrderSelection_
+   selection.raise()              -> d3RaiseSelection_
+   selection.lower()              -> d3LowerSelection_
+
+   FFI Wrappers:
+   - d3FilterSelection_ :: D3Selection d -> Selector (D3Selection d) -> D3Selection d
+   - d3SortSelection_ :: D3Selection d -> (d -> d -> Int) -> D3Selection d
+   - d3OrderSelection_ :: D3Selection d -> D3Selection d
+   - d3RaiseSelection_ :: D3Selection d -> D3Selection d
+   - d3LowerSelection_ :: D3Selection d -> D3Selection d
+
+   Replacement Plan:
+   - Native: element.parentNode.insertBefore, querySelectorAll().filter
+   - Type: (Array DOMNode, predicate) -> Array DOMNode
+   - Effort: 2 days (EASY)
+
+6. SELECTION MERGING
+   selection1.merge(selection2)   -> d3MergeSelectionWith_
+
+   FFI Wrapper:
+   - d3MergeSelectionWith_ :: D3Selection d -> D3Selection d -> D3Selection d
+
+   Usage:
+   ```javascript
+   const enter = dataSelection.enter()
+   const update = dataSelection
+   const merged = enter.merge(update)  // For chaining after enter + update
+   ```
+
+   Replacement Plan:
+   - Pure: concat or combine two arrays
+   - Effort: 1 day (TRIVIAL)
+
+7. ELEMENT REMOVAL
+   selection.remove()             -> d3RemoveSelection_
+
+   FFI Wrapper:
+   - d3RemoveSelection_ :: D3Selection d -> D3Selection d
+
+   Replacement Plan:
+   - Native: element.parentNode.removeChild(element)
+   - Effort: 1 day (TRIVIAL)
+
+8. SELECTION INSPECTION
+   selection.empty()              -> d3SelectionIsEmpty_
+
+   FFI Wrapper:
+   - d3SelectionIsEmpty_ :: D3Selection d -> Boolean
+
+   Replacement Plan:
+   - Native: array.length === 0 or querySelectorAll().length === 0
+   - Effort: 1 day (TRIVIAL)
+
+9. EVENT HANDLING
+   selection.on(event, callback)  -> selectionOn_
+
+   FFI Wrapper:
+   - selectionOn_ :: selection -> String -> callback -> selection
+
+   Replacement Plan:
+   - Native: element.addEventListener(event, callback)
+   - Effort: 1 day (TRIVIAL)
+
+10. TRANSITIONS
+    selection.transition()         -> d3AddTransition_
+
+    FFI Wrapper:
+    - d3AddTransition_ :: D3Selection d -> Transition -> D3Selection d
+
+    Replacement Plan:
+    - Native: Web Animations API or requestAnimationFrame
+    - Effort: 2-3 days (EASY-MEDIUM)
+
+================================================================================
+
+EFFORT SUMMARY BY CATEGORY
+===========================
+
+Category           | Methods | FFI Fns | Native API           | Effort
+================================================================================
+DOM Selection      | 4       | 4       | querySelector        | 1 day
+Data Binding       | 6       | 6       | Pure PS algorithm    | 3 weeks
+Element Creation   | 2       | 2       | createElement        | 1 day
+Attributes         | 4       | 4       | setAttribute         | 1 day
+Filtering/Ordering | 5       | 5       | Array methods        | 2 days
+Merging            | 1       | 1       | Array concat         | 1 day
+Removal            | 1       | 1       | removeChild          | 1 day
+Inspection         | 1       | 1       | length check         | 1 day
+Events             | 1       | 1       | addEventListener     | 1 day
+Transitions        | 1       | 1       | Web Animations API   | 3 days
+================================================================================
+
+TOTAL: 26 methods, 29 FFI functions -> 4-5 weeks of effort
+
+CRITICAL PATH
+=============
+1. Data Binding Algorithm (3 weeks) - blocks everything else
+2. DOM Selection (1 day) - needed for testing
+3. Element Creation (1 day) - needed for tests
+4. Attribute Setting (1 day) - needed for tests
+5. Everything else (1 week) - parallelizable
+
+CURRENT USAGE IN CODEBASE
+==========================
+
+selectionJoin (uses):
+  - d3SelectionSelectAll_
+  - d3DataWithKeyFunction_
+  - d3EnterAndAppend_
+
+selectionNestedJoin (uses):
+  - d3SelectionSelectAll_
+  - d3DataWithFunction_
+  - d3EnterAndAppend_
+
+selectionUpdateJoin (uses):
+  - d3DataWithKeyFunction_
+  - d3GetEnterSelection_
+  - d3GetExitSelection_
+
+selectionAppendElement (uses):
+  - d3Append_
+
+selectionFilterSelection (uses):
+  - d3FilterSelection_
+
+applySelectionAttributeD3 (uses):
+  - d3SetAttr_
+  - d3SetText_
+  - d3SetProperty_
+  - d3SetHTML_
+  - d3AddTransition_
+  - d3OrderSelection_
+  - d3SortSelection_
+  - d3RaiseSelection_
+  - d3LowerSelection_
+  - d3RemoveSelection_
+
+selectionOn (uses):
+  - d3AttachZoomDefaultExtent_
+  - d3AttachZoom_
+
+KEY FUNCTIONS USED
+==================
+
+keyIsID_ :: d -> Int
+  - Matches elements by .id property
+  - Used in most joins
+  - Equivalent to: (d) => d.id
+
+keyIsSourceTarget_ :: d -> Int
+  - Matches links by [source, target]
+  - Used in force simulation
+  - Equivalent to: (d) => [d.source, d.target]
+
+CHANGES TO PURESCRIPT NEEDED
+=============================
+
+None! If we implement the new SelectionM instance for native DOM:
+
+Old:
+  instance SelectionM D3Selection_ (D3M state D3Selection_) where
+    attach = selectionAttach
+
+New:
+  instance SelectionM DOMNode (D3M state DOMNode) where
+    attach = nativeSelectionAttach
+
+Caller code stays the same:
+  root' <- attach selector
+  svg <- appendTo root' Svg [...]
+
+================================================================================

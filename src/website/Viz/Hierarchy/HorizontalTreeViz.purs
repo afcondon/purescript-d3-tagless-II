@@ -7,10 +7,10 @@ import Data.Tree (Tree(..))
 import Data.List (List(..), fromFoldable)
 import Data.Array as Array
 import Data.Maybe (Maybe(..))
-import Data.Foldable (traverse_)
 import PSD3.Internal.Attributes.Sugar (classed, fill, strokeColor, strokeWidth, viewBox, cx, cy, radius, d, x, y, text, fontSize)
-import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
-import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
+import PSD3.Internal.Types (D3Selection_, Element(..), Selector, Index_)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, simpleJoin, setAttributes)
+import PSD3.Internal.FFI (keyIsID_)
 import PSD3.Layout.Hierarchy.Tree4 (tree, defaultTreeConfig)
 import D3.Viz.FlareData (HierData, getName, getValue, getChildren)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -108,29 +108,28 @@ draw flareData selector = do
   linksGroup <- appendTo svg Group [ classed "links" ]
   nodesGroup <- appendTo svg Group [ classed "nodes" ]
 
-  -- Draw links (with padding offset)
-  _ <- traverse_ (\link ->
-    appendTo linksGroup Path
-      [ d $ horizontalLinkPath (link.source.x + padding) (link.source.y + padding) (link.target.x + padding) (link.target.y + padding)
-      , fill "none"
-      , strokeColor "#555"
-      , strokeWidth 1.5
-      , classed "link"
-      ]
-  ) links
+  -- Draw links using data join (with padding offset)
+  linkElements <- simpleJoin linksGroup Path links keyIsID_
+  setAttributes linkElements
+    [ d (\(link :: { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }) (_ :: Index_) ->
+          horizontalLinkPath (link.source.x + padding) (link.source.y + padding) (link.target.x + padding) (link.target.y + padding))
+    , fill "none"
+    , strokeColor "#555"
+    , strokeWidth 1.5
+    , classed "link"
+    ]
 
-  -- Draw nodes (with padding offset)
-  _ <- traverse_ (\node ->
-    appendTo nodesGroup Circle
-      [ cx (node.x + padding)
-      , cy (node.y + padding)
-      , radius 4.0
-      , fill "#999"
-      , strokeColor "#555"
-      , strokeWidth 1.5
-      , classed "node"
-      ]
-  ) nodes
+  -- Draw nodes using data join (with padding offset)
+  nodeElements <- simpleJoin nodesGroup Circle nodes keyIsID_
+  setAttributes nodeElements
+    [ cx (\(node :: { name :: String, value :: Number, x :: Number, y :: Number, depth :: Int }) (_ :: Index_) -> node.x + padding)
+    , cy (\(node :: { name :: String, value :: Number, x :: Number, y :: Number, depth :: Int }) (_ :: Index_) -> node.y + padding)
+    , radius 4.0
+    , fill "#999"
+    , strokeColor "#555"
+    , strokeWidth 1.5
+    , classed "node"
+    ]
 
   liftEffect $ log "HorizontalTreeViz: Rendering complete!"
 

@@ -2,12 +2,13 @@ module PSD3.WealthHealth.State where
 
 import Prelude
 
+import D3.Viz.WealthHealth.Draw (NationPoint)
 import D3.Viz.WealthHealth.Draw as Draw
 import Data.Maybe (Maybe(..))
 import Data.Unit (Unit)
 import Data.Set (Set)
 import Data.Set as Set
-import PSD3 (Datum_, D3Selection_, D3M)
+import PSD3 (D3Selection_, D3M)
 import Halogen as H
 import PSD3.WealthHealth.Types (WealthHealthModel)
 
@@ -25,7 +26,7 @@ type State =
   , selectedNations :: Set String        -- Nations selected for highlighting/tracking
   , animationSpeed :: Number             -- Years per second during playback
   , animationSubscriptionId :: Maybe H.SubscriptionId  -- Timer subscription for animation
-  , vizUpdateFn :: Maybe (Array Datum_ -> D3M Unit D3Selection_ (D3Selection_ Datum_))  -- Visualization update function
+  , vizUpdateFn :: Maybe (Array NationPoint -> D3M Unit D3Selection_ (D3Selection_ NationPoint))  -- Visualization update function
   , labelMode :: LabelMode               -- How to display country labels
   }
 

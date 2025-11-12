@@ -191,7 +191,8 @@ updateSimulation selections dataConfig =
     , activeForces: Just dataConfig.activeForces
     , config: Nothing
     }
-    keyIsID_
+    keyIsID_                -- Node key function
+    keyIsID_                -- Link key function (links have index field too)
     defaultLesMisAttributes
     lesMisRenderCallbacks
 -- Snippet_End

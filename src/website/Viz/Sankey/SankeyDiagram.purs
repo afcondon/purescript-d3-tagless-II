@@ -21,14 +21,15 @@ import Effect.Console (log)
 import Utility (getWindowWidthHeight)
 import Unsafe.Coerce (unsafeCoerce)
 
--- Key functions for data joins (work with opaque Datum_ type)
-keyForNode :: Datum_ -> Index_
-keyForNode d = unsafeCoerce ((unsafeCoerce d :: SankeyNode).name)
+-- Key functions for data joins
+-- NOTE: Polymorphic to work with typed data (returns String, not Index_)
+keyForNode :: forall a. a -> String
+keyForNode d = (unsafeCoerce d :: SankeyNode).name
 
-keyForLink :: Datum_ -> Index_
+keyForLink :: forall a. a -> String
 keyForLink d =
   let link = unsafeCoerce d :: SankeyLink
-  in unsafeCoerce (show link.index)
+  in show link.index
 
 -- Main drawing function for Sankey diagram using pure PureScript layout
 draw :: forall m.
