@@ -12,7 +12,7 @@ import Data.Tree (Tree(..))
 import Data.List (List(..), fromFoldable)
 import Data.Foldable (maximum, minimum)
 import Data.Foldable as Data.Foldable
-import Data.Maybe (fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Array as Array
 import Data.Int (toNumber)
 
@@ -76,13 +76,21 @@ cluster config inputTree =
 centerRoot :: forall r. Tree { x :: Number, y :: Number, height :: Int | r } -> Tree { x :: Number, y :: Number, height :: Int | r }
 centerRoot tree =
   let
-    -- Get all nodes and filter for leaves only (height = 0)
+    -- Find leftmost and rightmost leaves (leaves are positioned sequentially)
     allNodes = Array.fromFoldable tree
     leaves = Array.filter (\n -> n.height == 0) allNodes
-    leafX = map (\n -> n.x) leaves
 
-    minX = fromMaybe 0.0 $ minimum leafX
-    maxX = fromMaybe 0.0 $ maximum leafX
+    -- First and last leaves define the extent
+    firstLeaf = Array.head leaves
+    lastLeaf = Array.last leaves
+
+    minX = case firstLeaf of
+      Just leaf -> leaf.x
+      Nothing -> 0.0
+
+    maxX = case lastLeaf of
+      Just leaf -> leaf.x
+      Nothing -> 0.0
 
     -- Find root's current x
     Node root _ = tree

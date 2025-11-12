@@ -19976,25 +19976,44 @@
     var leaves = filter(function(n) {
       return n.height === 0;
     })(allNodes2);
-    var leafX = map113(function(n) {
-      return n.x;
-    })(leaves);
-    var maxX = fromMaybe(0)(maximum4(leafX));
-    var minX = fromMaybe(0)(minimum3(leafX));
+    var firstLeaf = head(leaves);
+    var minX = (function() {
+      if (firstLeaf instanceof Just) {
+        return firstLeaf.value0.x;
+      }
+      ;
+      if (firstLeaf instanceof Nothing) {
+        return 0;
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Cluster4 (line 87, column 12 - line 89, column 21): " + [firstLeaf.constructor.name]);
+    })();
+    var lastLeaf = last(leaves);
+    var maxX = (function() {
+      if (lastLeaf instanceof Just) {
+        return lastLeaf.value0.x;
+      }
+      ;
+      if (lastLeaf instanceof Nothing) {
+        return 0;
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Cluster4 (line 91, column 12 - line 93, column 21): " + [lastLeaf.constructor.name]);
+    })();
     var targetX = (minX + maxX) / 2;
     var offset = targetX - tree4.value0.x;
     var shiftTree = function(v) {
       return new Node2((function() {
-        var $70 = {};
-        for (var $71 in v.value0) {
-          if ({}.hasOwnProperty.call(v.value0, $71)) {
-            $70[$71] = v["value0"][$71];
+        var $74 = {};
+        for (var $75 in v.value0) {
+          if ({}.hasOwnProperty.call(v.value0, $75)) {
+            $74[$75] = v["value0"][$75];
           }
           ;
         }
         ;
-        $70.x = v.value0.x + offset;
-        return $70;
+        $74.x = v.value0.x + offset;
+        return $74;
       })(), map37(shiftTree)(v.value1));
     };
     return shiftTree(tree4);
@@ -20003,16 +20022,16 @@
     var nodeY = toNumber(v.value0.height);
     var childrenWithY = map37(addYCoordinates)(v.value1);
     return new Node2((function() {
-      var $78 = {};
-      for (var $79 in v.value0) {
-        if ({}.hasOwnProperty.call(v.value0, $79)) {
-          $78[$79] = v["value0"][$79];
+      var $82 = {};
+      for (var $83 in v.value0) {
+        if ({}.hasOwnProperty.call(v.value0, $83)) {
+          $82[$83] = v["value0"][$83];
         }
         ;
       }
       ;
-      $78.y = nodeY;
-      return $78;
+      $82.y = nodeY;
+      return $82;
     })(), childrenWithY);
   };
   var addHeight = function(v) {
@@ -20030,16 +20049,16 @@
       return 1 + maxChildHeight | 0;
     })();
     return new Node2((function() {
-      var $88 = {};
-      for (var $89 in v.value0) {
-        if ({}.hasOwnProperty.call(v.value0, $89)) {
-          $88[$89] = v["value0"][$89];
+      var $92 = {};
+      for (var $93 in v.value0) {
+        if ({}.hasOwnProperty.call(v.value0, $93)) {
+          $92[$93] = v["value0"][$93];
         }
         ;
       }
       ;
-      $88.height = nodeHeight;
-      return $88;
+      $92.height = nodeHeight;
+      return $92;
     })(), childrenWithHeight);
   };
   var cluster2 = function(config) {
