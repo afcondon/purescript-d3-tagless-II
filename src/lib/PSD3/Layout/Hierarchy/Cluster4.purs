@@ -150,8 +150,8 @@ addHeight (Node val children) =
     Node (val { height = nodeHeight }) childrenWithHeight
 
 -- | Bottom-up pass: assign sequential x positions to ALL leaves
--- | Then set parent x = mean of children x
--- | This is simpler than Tree4 - no contour scanning needed for dendrograms
+-- | Then set parent x = midpoint between leftmost and rightmost descendants
+-- | This centers each parent on its subtree's full extent, reducing crossovers
 -- | Returns tree with absolute x positions (not offsets like Tree4)
 render :: forall r.
   Number ->
@@ -160,6 +160,19 @@ render :: forall r.
 render minSep inputTree =
   renderInternal 0.0 inputTree
   where
+    -- Find extent (min and max x) of all leaves in a subtree
+    findExtent :: Tree { x :: Number, y :: Number, height :: Int | r } -> { minX :: Number, maxX :: Number }
+    findExtent (Node val children) =
+      case Array.fromFoldable children of
+        [] -> { minX: val.x, maxX: val.x }  -- Leaf node
+        childArray ->
+          let
+            childExtents = map findExtent childArray
+            minX = fromMaybe val.x $ minimum $ map (\e -> e.minX) childExtents
+            maxX = fromMaybe val.x $ maximum $ map (\e -> e.maxX) childExtents
+          in
+            { minX, maxX }
+
     -- Thread through lastLeafX to assign sequential positions
     renderInternal :: Number -> Tree { x :: Number, y :: Number, height :: Int | r } -> { tree :: Tree { x :: Number, y :: Number, height :: Int | r }, lastLeafX :: Number }
     renderInternal currentLeafX (Node val children) =
@@ -170,7 +183,7 @@ render minSep inputTree =
               leafNode = Node (val { x = leafX }) Nil
           in { tree: leafNode, lastLeafX: leafX + minSep }
 
-        -- Internal node: process children, then set x = mean of children x
+        -- Internal node: process children, then center on subtree extent
         childArray ->
           let
             -- Process all children, threading through lastLeafX
@@ -185,12 +198,16 @@ render minSep inputTree =
               childArray
 
             childTrees = processChildren.trees
-
-            -- Compute mean of children's x values
             childrenList = fromFoldable childTrees
-            meanX = foldl (\sum (Node v _) -> sum + v.x) 0.0 childTrees / toNumber (Array.length childTrees)
 
-            internalNode = Node (val { x = meanX }) childrenList
+            -- Center parent on full subtree extent (leftmost to rightmost leaf)
+            -- Fold over all children to find the min and max x positions
+            allChildExtents = map findExtent childTrees
+            minX = fromMaybe 0.0 $ minimum $ map (\e -> e.minX) allChildExtents
+            maxX = fromMaybe 0.0 $ maximum $ map (\e -> e.maxX) allChildExtents
+            centerX = (minX + maxX) / 2.0
+
+            internalNode = Node (val { x = centerX }) childrenList
           in
             { tree: internalNode, lastLeafX: processChildren.lastLeafX }
 

@@ -7,13 +7,13 @@ import Data.Tree (Tree(..))
 import Data.List (List(..), fromFoldable)
 import Data.Array as Array
 import Data.Maybe (Maybe(..))
-import Data.Foldable (traverse_)
 import Data.Number (pi, cos, sin, atan2, sqrt)
 import PSD3.Internal.Attributes.Sugar (classed, fill, strokeColor, strokeWidth, viewBox, cx, cy, radius, d, x, y, text, fontSize)
-import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
-import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
+import PSD3.Internal.Types (D3Selection_, Element(..), Selector, Index_)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, simpleJoin, setAttributes)
 import PSD3.Layout.Hierarchy.Cluster4 (cluster, defaultClusterConfig)
 import D3.Viz.FlareData (HierData, getName, getValue, getChildren)
+import PSD3.Internal.FFI (keyIsID_)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Console (log)
 
@@ -111,9 +111,13 @@ draw flareData selector = do
   let config = defaultClusterConfig { size = { width: chartWidth, height: chartHeight } }
   let positioned = cluster config dataTree
 
+  -- Flatten BEFORE projection to get original x order
+  let nodesBeforeProjection = Array.fromFoldable positioned
+  -- Sort by x position (angular order)
+  let sortedNodes = Array.sortBy (\a b -> compare a.x b.x) nodesBeforeProjection
+
   -- Apply radial projection to all nodes
-  let projectNode :: forall r. Tree { x :: Number, y :: Number | r } -> Tree { x :: Number, y :: Number | r }
-      projectNode (Node val children) =
+  let projectNode (Node val children) =
         let
           projected = radialPoint val chartWidth chartHeight
           projectedChildren = map projectNode children
@@ -122,8 +126,12 @@ draw flareData selector = do
 
   let radialCluster = projectNode positioned
 
-  -- Flatten for rendering
-  let nodes = Array.fromFoldable radialCluster
+  -- Project the sorted nodes
+  let projectSingleNode node =
+        let projected = radialPoint node chartWidth chartHeight
+        in node { x = projected.x, y = projected.y }
+  let nodes = map projectSingleNode sortedNodes
+
   let links = makeLinks radialCluster
 
   liftEffect $ log $ "RadialClusterViz: Rendering " <> show (Array.length nodes) <> " nodes, " <> show (Array.length links) <> " links"
@@ -149,29 +157,28 @@ draw flareData selector = do
   linksGroup <- appendTo svg Group [ classed "links" ]
   nodesGroup <- appendTo svg Group [ classed "nodes" ]
 
-  -- Draw links
-  _ <- traverse_ (\link ->
-    appendTo linksGroup Path
-      [ d $ radialLinkPath link.source.x link.source.y link.target.x link.target.y centerX centerY
-      , fill "none"
-      , strokeColor "#555"
-      , strokeWidth 1.5
-      , classed "link"
-      ]
-  ) links
+  -- Draw links using data join
+  linkElements <- simpleJoin linksGroup Path links keyIsID_
+  setAttributes linkElements
+    [ d (\(link :: { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }) (_ :: Index_) ->
+          radialLinkPath link.source.x link.source.y link.target.x link.target.y centerX centerY)
+    , fill "none"
+    , strokeColor "#555"
+    , strokeWidth 1.5
+    , classed "link"
+    ]
 
-  -- Draw nodes
-  _ <- traverse_ (\node ->
-    appendTo nodesGroup Circle
-      [ cx (node.x + centerX)
-      , cy (node.y + centerY)
-      , radius 3.0
-      , fill "#999"
-      , strokeColor "#555"
-      , strokeWidth 1.5
-      , classed "node"
-      ]
-  ) nodes
+  -- Draw nodes using data join
+  nodeElements <- simpleJoin nodesGroup Circle nodes keyIsID_
+  setAttributes nodeElements
+    [ cx (\(node :: { height :: Int, name :: String, value :: Number, x :: Number, y :: Number }) (_ :: Index_) -> node.x + centerX)
+    , cy (\(node :: { height :: Int, name :: String, value :: Number, x :: Number, y :: Number }) (_ :: Index_) -> node.y + centerY)
+    , radius 3.0
+    , fill "#999"
+    , strokeColor "#555"
+    , strokeWidth 1.5
+    , classed "node"
+    ]
 
   liftEffect $ log "RadialClusterViz: Rendering complete!"
 

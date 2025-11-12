@@ -981,15 +981,15 @@
     };
   };
   var ordTuple = function(dictOrd) {
-    var compare15 = compare(dictOrd);
+    var compare18 = compare(dictOrd);
     var eqTuple1 = eqTuple(dictOrd.Eq0());
     return function(dictOrd1) {
-      var compare16 = compare(dictOrd1);
+      var compare19 = compare(dictOrd1);
       var eqTuple2 = eqTuple1(dictOrd1.Eq0());
       return {
         compare: function(x45) {
           return function(y45) {
-            var v = compare15(x45.value0)(y45.value0);
+            var v = compare18(x45.value0)(y45.value0);
             if (v instanceof LT) {
               return LT.value;
             }
@@ -998,7 +998,7 @@
               return GT.value;
             }
             ;
-            return compare16(x45.value1)(y45.value1);
+            return compare19(x45.value1)(y45.value1);
           };
         },
         Eq0: function() {
@@ -3086,9 +3086,9 @@
     };
   };
   var maximum = function(dictOrd) {
-    var compare15 = compare(dictOrd);
+    var compare18 = compare(dictOrd);
     return function(dictFoldable) {
-      return maximumBy(dictFoldable)(compare15);
+      return maximumBy(dictFoldable)(compare18);
     };
   };
   var minimumBy = function(dictFoldable) {
@@ -3118,9 +3118,9 @@
     };
   };
   var minimum = function(dictOrd) {
-    var compare15 = compare(dictOrd);
+    var compare18 = compare(dictOrd);
     return function(dictFoldable) {
-      return minimumBy(dictFoldable)(compare15);
+      return minimumBy(dictFoldable)(compare18);
     };
   };
   var sum = function(dictFoldable) {
@@ -5087,11 +5087,11 @@
   });
   var unsafeUnionWith = /* @__PURE__ */ $lazy_unsafeUnionWith(803);
   var unionWith = function(dictOrd) {
-    var compare15 = compare(dictOrd);
+    var compare18 = compare(dictOrd);
     return function(app) {
       return function(m1) {
         return function(m2) {
-          return unsafeUnionWith(compare15, app, m1, m2);
+          return unsafeUnionWith(compare18, app, m1, m2);
         };
       };
     };
@@ -5100,10 +5100,10 @@
     return unionWith(dictOrd)($$const);
   };
   var pop = function(dictOrd) {
-    var compare15 = compare(dictOrd);
+    var compare18 = compare(dictOrd);
     return function(k) {
       return function(m) {
-        var v = unsafeSplit(compare15, k, m);
+        var v = unsafeSplit(compare18, k, m);
         return map10(function(a2) {
           return new Tuple(a2, unsafeJoinNodes(v.value1, v.value2));
         })(v.value0);
@@ -5111,7 +5111,7 @@
     };
   };
   var member = function(dictOrd) {
-    var compare15 = compare(dictOrd);
+    var compare18 = compare(dictOrd);
     return function(k) {
       var go2 = function($copy_v) {
         var $tco_done = false;
@@ -5123,7 +5123,7 @@
           }
           ;
           if (v instanceof Node) {
-            var v1 = compare15(k)(v.value2);
+            var v1 = compare18(k)(v.value2);
             if (v1 instanceof LT) {
               $copy_v = v.value4;
               return;
@@ -5155,7 +5155,7 @@
     };
   };
   var lookup = function(dictOrd) {
-    var compare15 = compare(dictOrd);
+    var compare18 = compare(dictOrd);
     return function(k) {
       var go2 = function($copy_v) {
         var $tco_done = false;
@@ -5167,7 +5167,7 @@
           }
           ;
           if (v instanceof Node) {
-            var v1 = compare15(k)(v.value2);
+            var v1 = compare18(k)(v.value2);
             if (v1 instanceof LT) {
               $copy_v = v.value4;
               return;
@@ -5257,11 +5257,11 @@
     return false;
   };
   var intersectionWith = function(dictOrd) {
-    var compare15 = compare(dictOrd);
+    var compare18 = compare(dictOrd);
     return function(app) {
       return function(m1) {
         return function(m2) {
-          return unsafeIntersectionWith(compare15, app, m1, m2);
+          return unsafeIntersectionWith(compare18, app, m1, m2);
         };
       };
     };
@@ -5270,7 +5270,7 @@
     return intersectionWith(dictOrd)($$const);
   };
   var insertWith = function(dictOrd) {
-    var compare15 = compare(dictOrd);
+    var compare18 = compare(dictOrd);
     return function(app) {
       return function(k) {
         return function(v) {
@@ -5280,7 +5280,7 @@
             }
             ;
             if (v1 instanceof Node) {
-              var v2 = compare15(k)(v1.value2);
+              var v2 = compare18(k)(v1.value2);
               if (v2 instanceof LT) {
                 return unsafeBalancedNode(v1.value2, v1.value3, go2(v1.value4), v1.value5);
               }
@@ -5304,7 +5304,7 @@
     };
   };
   var insert = function(dictOrd) {
-    var compare15 = compare(dictOrd);
+    var compare18 = compare(dictOrd);
     return function(k) {
       return function(v) {
         var go2 = function(v1) {
@@ -5313,7 +5313,7 @@
           }
           ;
           if (v1 instanceof Node) {
-            var v2 = compare15(k)(v1.value2);
+            var v2 = compare18(k)(v1.value2);
             if (v2 instanceof LT) {
               return unsafeBalancedNode(v1.value2, v1.value3, go2(v1.value4), v1.value5);
             }
@@ -5535,15 +5535,15 @@
     };
   };
   var difference = function(dictOrd) {
-    var compare15 = compare(dictOrd);
+    var compare18 = compare(dictOrd);
     return function(m1) {
       return function(m2) {
-        return unsafeDifference(compare15, m1, m2);
+        return unsafeDifference(compare18, m1, m2);
       };
     };
   };
   var $$delete = function(dictOrd) {
-    var compare15 = compare(dictOrd);
+    var compare18 = compare(dictOrd);
     return function(k) {
       var go2 = function(v) {
         if (v instanceof Leaf) {
@@ -5551,7 +5551,7 @@
         }
         ;
         if (v instanceof Node) {
-          var v1 = compare15(k)(v.value2);
+          var v1 = compare18(k)(v.value2);
           if (v1 instanceof LT) {
             return unsafeBalancedNode(v.value2, v.value3, go2(v.value4), v.value5);
           }
@@ -5573,11 +5573,11 @@
     };
   };
   var alter = function(dictOrd) {
-    var compare15 = compare(dictOrd);
+    var compare18 = compare(dictOrd);
     return function(f) {
       return function(k) {
         return function(m) {
-          var v = unsafeSplit(compare15, k, m);
+          var v = unsafeSplit(compare18, k, m);
           var v2 = f(v.value0);
           if (v2 instanceof Nothing) {
             return unsafeJoinNodes(v.value1, v.value2);
@@ -6170,7 +6170,7 @@
     return xs.filter(f);
   };
   var sortByImpl = /* @__PURE__ */ (function() {
-    function mergeFromTo(compare15, fromOrdering, xs1, xs2, from3, to2) {
+    function mergeFromTo(compare18, fromOrdering, xs1, xs2, from3, to2) {
       var mid;
       var i2;
       var j;
@@ -6179,15 +6179,15 @@
       var y45;
       var c;
       mid = from3 + (to2 - from3 >> 1);
-      if (mid - from3 > 1) mergeFromTo(compare15, fromOrdering, xs2, xs1, from3, mid);
-      if (to2 - mid > 1) mergeFromTo(compare15, fromOrdering, xs2, xs1, mid, to2);
+      if (mid - from3 > 1) mergeFromTo(compare18, fromOrdering, xs2, xs1, from3, mid);
+      if (to2 - mid > 1) mergeFromTo(compare18, fromOrdering, xs2, xs1, mid, to2);
       i2 = from3;
       j = mid;
       k = from3;
       while (i2 < mid && j < to2) {
         x45 = xs2[i2];
         y45 = xs2[j];
-        c = fromOrdering(compare15(x45)(y45));
+        c = fromOrdering(compare18(x45)(y45));
         if (c > 0) {
           xs1[k++] = y45;
           ++j;
@@ -6203,11 +6203,11 @@
         xs1[k++] = xs2[j++];
       }
     }
-    return function(compare15, fromOrdering, xs) {
+    return function(compare18, fromOrdering, xs) {
       var out;
       if (xs.length < 2) return xs;
       out = xs.slice(0);
-      mergeFromTo(compare15, fromOrdering, out, xs.slice(0), 0, xs.length);
+      mergeFromTo(compare18, fromOrdering, out, xs.slice(0), 0, xs.length);
       return out;
     };
   })();
@@ -12714,7 +12714,7 @@
     };
   }
   function d3SortSelection_(selection2) {
-    return (compare15) => selection2.sort(compare15);
+    return (compare18) => selection2.sort(compare18);
   }
   function simulationDrag_(label5) {
     return (selection2) => (simulation) => (dragFn) => selection2.call(dragFn(label5, simulation));
@@ -13648,8 +13648,8 @@
       return AttrT.create($144($145($146)));
     };
   };
-  var sortSelection = function(compare15) {
-    return new OrderingT(new Sort(compare15));
+  var sortSelection = function(compare18) {
+    return new OrderingT(new Sort(compare18));
   };
   var remove = /* @__PURE__ */ (function() {
     return RemoveT.value;
@@ -15519,19 +15519,19 @@
 
   // node_modules/d3-array/src/bisector.js
   function bisector(f) {
-    let compare15, compare22, delta;
+    let compare18, compare22, delta;
     if (f.length !== 2) {
-      compare15 = ascending;
+      compare18 = ascending;
       compare22 = (d21, x45) => ascending(f(d21), x45);
       delta = (d21, x45) => f(d21) - x45;
     } else {
-      compare15 = f === ascending || f === descending ? f : zero2;
+      compare18 = f === ascending || f === descending ? f : zero2;
       compare22 = f;
       delta = f;
     }
     function left4(a2, x45, lo = 0, hi = a2.length) {
       if (lo < hi) {
-        if (compare15(x45, x45) !== 0) return hi;
+        if (compare18(x45, x45) !== 0) return hi;
         do {
           const mid = lo + hi >>> 1;
           if (compare22(a2[mid], x45) < 0) lo = mid + 1;
@@ -15542,7 +15542,7 @@
     }
     function right4(a2, x45, lo = 0, hi = a2.length) {
       if (lo < hi) {
-        if (compare15(x45, x45) !== 0) return hi;
+        if (compare18(x45, x45) !== 0) return hi;
         do {
           const mid = lo + hi >>> 1;
           if (compare22(a2[mid], x45) <= 0) lo = mid + 1;
@@ -16102,10 +16102,10 @@
   }
 
   // node_modules/d3-selection/src/selection/sort.js
-  function sort_default(compare15) {
-    if (!compare15) compare15 = ascending2;
+  function sort_default(compare18) {
+    if (!compare18) compare18 = ascending2;
     function compareNode(a2, b2) {
-      return a2 && b2 ? compare15(a2.__data__, b2.__data__) : !a2 - !b2;
+      return a2 && b2 ? compare18(a2.__data__, b2.__data__) : !a2 - !b2;
     }
     for (var groups = this._groups, m = groups.length, sortgroups = new Array(m), j = 0; j < m; ++j) {
       for (var group4 = groups[j], n = group4.length, sortgroup = sortgroups[j] = new Array(n), node, i2 = 0; i2 < n; ++i2) {
@@ -19859,8 +19859,8 @@
       var maxX = fromMaybe(1)(maximum4(allX));
       var minX = fromMaybe(0)(minimum3(allX));
       var xRange = (function() {
-        var $47 = maxX - minX === 0;
-        if ($47) {
+        var $48 = maxX - minX === 0;
+        if ($48) {
           return 1;
         }
         ;
@@ -19878,17 +19878,17 @@
       };
       var go2 = function(v) {
         return new Node2((function() {
-          var $49 = {};
-          for (var $50 in v.value0) {
-            if ({}.hasOwnProperty.call(v.value0, $50)) {
-              $49[$50] = v["value0"][$50];
+          var $50 = {};
+          for (var $51 in v.value0) {
+            if ({}.hasOwnProperty.call(v.value0, $51)) {
+              $50[$51] = v["value0"][$51];
             }
             ;
           }
           ;
-          $49.x = scaleX2(v.value0.x);
-          $49.y = scaleY2(v.value0.height);
-          return $49;
+          $50.x = scaleX2(v.value0.x);
+          $50.y = scaleY2(v.value0.height);
+          return $50;
         })(), map37(go2)(v.value1));
       };
       return go2(inputTree);
@@ -19903,21 +19903,42 @@
           };
         };
       };
+      var findExtent = function(v) {
+        var v1 = fromFoldable5(v.value1);
+        if (v1.length === 0) {
+          return {
+            minX: v.value0.x,
+            maxX: v.value0.x
+          };
+        }
+        ;
+        var childExtents = map113(findExtent)(v1);
+        var maxX = fromMaybe(v.value0.x)(maximum4(map113(function(e) {
+          return e.maxX;
+        })(childExtents)));
+        var minX = fromMaybe(v.value0.x)(minimum3(map113(function(e) {
+          return e.minX;
+        })(childExtents)));
+        return {
+          minX,
+          maxX
+        };
+      };
       var renderInternal = function(currentLeafX) {
         return function(v) {
           var v1 = fromFoldable5(v.value1);
           if (v1.length === 0) {
             var leafNode = new Node2((function() {
-              var $57 = {};
-              for (var $58 in v.value0) {
-                if ({}.hasOwnProperty.call(v.value0, $58)) {
-                  $57[$58] = v["value0"][$58];
+              var $62 = {};
+              for (var $63 in v.value0) {
+                if ({}.hasOwnProperty.call(v.value0, $63)) {
+                  $62[$63] = v["value0"][$63];
                 }
                 ;
               }
               ;
-              $57.x = currentLeafX;
-              return $57;
+              $62.x = currentLeafX;
+              return $62;
             })(), Nil.value);
             return {
               tree: leafNode,
@@ -19938,22 +19959,25 @@
             lastLeafX: currentLeafX
           })(v1);
           var childrenList = fromFoldable1(processChildren.trees);
-          var meanX = foldl110(function(sum7) {
-            return function(v2) {
-              return sum7 + v2.value0.x;
-            };
-          })(0)(processChildren.trees) / toNumber(length3(processChildren.trees));
+          var allChildExtents = map113(findExtent)(processChildren.trees);
+          var maxX = fromMaybe(0)(maximum4(map113(function(e) {
+            return e.maxX;
+          })(allChildExtents)));
+          var minX = fromMaybe(0)(minimum3(map113(function(e) {
+            return e.minX;
+          })(allChildExtents)));
+          var centerX = (minX + maxX) / 2;
           var internalNode = new Node2((function() {
-            var $63 = {};
-            for (var $64 in v.value0) {
-              if ({}.hasOwnProperty.call(v.value0, $64)) {
-                $63[$64] = v["value0"][$64];
+            var $65 = {};
+            for (var $66 in v.value0) {
+              if ({}.hasOwnProperty.call(v.value0, $66)) {
+                $65[$66] = v["value0"][$66];
               }
               ;
             }
             ;
-            $63.x = meanX;
-            return $63;
+            $65.x = centerX;
+            return $65;
           })(), childrenList);
           return {
             tree: internalNode,
@@ -20004,16 +20028,16 @@
     var offset = targetX - tree4.value0.x;
     var shiftTree = function(v) {
       return new Node2((function() {
-        var $74 = {};
-        for (var $75 in v.value0) {
-          if ({}.hasOwnProperty.call(v.value0, $75)) {
-            $74[$75] = v["value0"][$75];
+        var $76 = {};
+        for (var $77 in v.value0) {
+          if ({}.hasOwnProperty.call(v.value0, $77)) {
+            $76[$77] = v["value0"][$77];
           }
           ;
         }
         ;
-        $74.x = v.value0.x + offset;
-        return $74;
+        $76.x = v.value0.x + offset;
+        return $76;
       })(), map37(shiftTree)(v.value1));
     };
     return shiftTree(tree4);
@@ -20022,16 +20046,16 @@
     var nodeY = toNumber(v.value0.height);
     var childrenWithY = map37(addYCoordinates)(v.value1);
     return new Node2((function() {
-      var $82 = {};
-      for (var $83 in v.value0) {
-        if ({}.hasOwnProperty.call(v.value0, $83)) {
-          $82[$83] = v["value0"][$83];
+      var $84 = {};
+      for (var $85 in v.value0) {
+        if ({}.hasOwnProperty.call(v.value0, $85)) {
+          $84[$85] = v["value0"][$85];
         }
         ;
       }
       ;
-      $82.y = nodeY;
-      return $82;
+      $84.y = nodeY;
+      return $84;
     })(), childrenWithY);
   };
   var addHeight = function(v) {
@@ -20049,16 +20073,16 @@
       return 1 + maxChildHeight | 0;
     })();
     return new Node2((function() {
-      var $92 = {};
-      for (var $93 in v.value0) {
-        if ({}.hasOwnProperty.call(v.value0, $93)) {
-          $92[$93] = v["value0"][$93];
+      var $94 = {};
+      for (var $95 in v.value0) {
+        if ({}.hasOwnProperty.call(v.value0, $95)) {
+          $94[$95] = v["value0"][$95];
         }
         ;
       }
       ;
-      $92.height = nodeHeight;
-      return $92;
+      $94.height = nodeHeight;
+      return $94;
     })(), childrenWithHeight);
   };
   var cluster2 = function(config) {
@@ -20081,6 +20105,7 @@
   var map38 = /* @__PURE__ */ map(functorArray);
   var discard7 = /* @__PURE__ */ discard(discardUnit);
   var fromFoldable12 = /* @__PURE__ */ fromFoldable2(foldableTree);
+  var compare5 = /* @__PURE__ */ compare(ordNumber);
   var show15 = /* @__PURE__ */ show(showInt);
   var classed6 = /* @__PURE__ */ classed(toAttrString);
   var x7 = /* @__PURE__ */ x(toAttrNumber);
@@ -20111,9 +20136,9 @@
     return append7(childLinks)(grandchildLinks);
   };
   var makeLinks2 = /* @__PURE__ */ (function() {
-    var $51 = fromFoldable2(foldableList);
-    return function($52) {
-      return $51(makeLinksAsList($52));
+    var $52 = fromFoldable2(foldableList);
+    return function($53) {
+      return $52(makeLinksAsList($53));
     };
   })();
   var linkPath = function(x111) {
@@ -20172,7 +20197,12 @@
                 }
               };
               var positioned = cluster2(config)(dataTree);
-              var nodes = fromFoldable12(positioned);
+              var unsortedNodes = fromFoldable12(positioned);
+              var nodes = sortBy(function(a2) {
+                return function(b2) {
+                  return compare5(a2.x)(b2.x);
+                };
+              })(unsortedNodes);
               var links = makeLinks2(positioned);
               return discard116(liftEffect50(log2("ClusterViz4: Rendering " + (show15(length3(nodes)) + (" nodes, " + (show15(length3(links)) + " links"))))))(function() {
                 return bind121(attach6(selector))(function(root$prime) {
@@ -22261,6 +22291,7 @@
   var discard10 = /* @__PURE__ */ discard(discardUnit);
   var map116 = /* @__PURE__ */ map(functorList);
   var fromFoldable16 = /* @__PURE__ */ fromFoldable2(foldableTree);
+  var compare6 = /* @__PURE__ */ compare(ordNumber);
   var show110 = /* @__PURE__ */ show(showInt);
   var classed12 = /* @__PURE__ */ classed(toAttrString);
   var x14 = /* @__PURE__ */ x(toAttrNumber);
@@ -22268,11 +22299,11 @@
   var fill11 = /* @__PURE__ */ fill(toAttrString);
   var fontSize8 = /* @__PURE__ */ fontSize(toAttrNumber);
   var text14 = /* @__PURE__ */ text6(toAttrString);
-  var d7 = /* @__PURE__ */ d(toAttrString);
+  var d7 = /* @__PURE__ */ d(toAttrStringFnI);
   var strokeColor10 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeWidth9 = /* @__PURE__ */ strokeWidth(toAttrNumber);
-  var cx6 = /* @__PURE__ */ cx(toAttrNumber);
-  var cy6 = /* @__PURE__ */ cy(toAttrNumber);
+  var cx6 = /* @__PURE__ */ cx(toAttrNumberFnI);
+  var cy6 = /* @__PURE__ */ cy(toAttrNumberFnI);
   var radius7 = /* @__PURE__ */ radius(toAttrNumber);
   var makeLinksAsList2 = function(v) {
     var grandchildLinks = bind11(v.value1)(makeLinksAsList2);
@@ -22291,9 +22322,9 @@
     return append9(childLinks)(grandchildLinks);
   };
   var makeLinks3 = /* @__PURE__ */ (function() {
-    var $60 = fromFoldable2(foldableList);
-    return function($61) {
-      return $60(makeLinksAsList2($61));
+    var $70 = fromFoldable2(foldableList);
+    return function($71) {
+      return $70(makeLinksAsList2($71));
     };
   })();
   var horizontalLinkPath2 = function(x111) {
@@ -22334,12 +22365,12 @@
     var bind121 = bind(dictBind);
     return function(dictMonadEffect) {
       var liftEffect50 = liftEffect(dictMonadEffect);
-      var Applicative0 = dictMonadEffect.Monad0().Applicative0();
-      var traverse_15 = traverse_(Applicative0)(foldableArray);
-      var pure49 = pure(Applicative0);
+      var pure49 = pure(dictMonadEffect.Monad0().Applicative0());
       return function(dictSelectionM) {
         var attach6 = attach(dictSelectionM);
         var appendTo6 = appendTo(dictSelectionM);
+        var simpleJoin4 = simpleJoin(dictSelectionM);
+        var setAttributes5 = setAttributes(dictSelectionM);
         return function(flareData) {
           return function(selector) {
             return discard116(liftEffect50(log2("HorizontalClusterViz: Using Cluster4 with horizontal projection")))(function() {
@@ -22355,21 +22386,26 @@
               var projectNode = function(v) {
                 var projectedChildren = map116(projectNode)(v.value1);
                 return new Node2((function() {
-                  var $55 = {};
-                  for (var $56 in v.value0) {
-                    if ({}.hasOwnProperty.call(v.value0, $56)) {
-                      $55[$56] = v["value0"][$56];
+                  var $62 = {};
+                  for (var $63 in v.value0) {
+                    if ({}.hasOwnProperty.call(v.value0, $63)) {
+                      $62[$63] = v["value0"][$63];
                     }
                     ;
                   }
                   ;
-                  $55.x = v.value0.y;
-                  $55.y = v.value0.x;
-                  return $55;
+                  $62.x = v.value0.y;
+                  $62.y = v.value0.x;
+                  return $62;
                 })(), projectedChildren);
               };
               var horizontalCluster = projectNode(positioned);
-              var nodes = fromFoldable16(horizontalCluster);
+              var unsortedNodes = fromFoldable16(horizontalCluster);
+              var nodes = sortBy(function(a2) {
+                return function(b2) {
+                  return compare6(a2.y)(b2.y);
+                };
+              })(unsortedNodes);
               var links = makeLinks3(horizontalCluster);
               return discard116(liftEffect50(log2("HorizontalClusterViz: Rendering " + (show110(length3(nodes)) + (" nodes, " + (show110(length3(links)) + " links"))))))(function() {
                 return bind121(attach6(selector))(function(root$prime) {
@@ -22377,14 +22413,26 @@
                     return bind121(appendTo6(svg)(Text2.value)([x14(10), y14(20), fill11("#333"), fontSize8(16), text14("Horizontal Cluster Layout (Dendrogram)"), classed12("title")]))(function() {
                       return bind121(appendTo6(svg)(Group.value)([classed12("links")]))(function(linksGroup) {
                         return bind121(appendTo6(svg)(Group.value)([classed12("nodes")]))(function(nodesGroup) {
-                          return bind121(traverse_15(function(link4) {
-                            return appendTo6(linksGroup)(Path2.value)([d7(horizontalLinkPath2(link4.source.x + 40)(link4.source.y + 40)(link4.target.x + 40)(link4.target.y + 40)), fill11("none"), strokeColor10("#555"), strokeWidth9(1.5), classed12("link")]);
-                          })(links))(function() {
-                            return bind121(traverse_15(function(node) {
-                              return appendTo6(nodesGroup)(Circle.value)([cx6(node.x + 40), cy6(node.y + 40), radius7(4), fill11("#999"), strokeColor10("#555"), strokeWidth9(1.5), classed12("node")]);
-                            })(nodes))(function() {
-                              return discard116(liftEffect50(log2("HorizontalClusterViz: Rendering complete!")))(function() {
-                                return pure49(unit);
+                          return bind121(simpleJoin4(linksGroup)(Path2.value)(links)(keyIsID_))(function(linkElements) {
+                            return discard116(setAttributes5(linkElements)([d7(function(v) {
+                              return function(v1) {
+                                return horizontalLinkPath2(v.source.x + 40)(v.source.y + 40)(v.target.x + 40)(v.target.y + 40);
+                              };
+                            }), fill11("none"), strokeColor10("#555"), strokeWidth9(1.5), classed12("link")]))(function() {
+                              return bind121(simpleJoin4(nodesGroup)(Circle.value)(nodes)(keyIsID_))(function(nodeElements) {
+                                return discard116(setAttributes5(nodeElements)([cx6(function(v) {
+                                  return function(v1) {
+                                    return v.x + 40;
+                                  };
+                                }), cy6(function(v) {
+                                  return function(v1) {
+                                    return v.y + 40;
+                                  };
+                                }), radius7(4), fill11("#999"), strokeColor10("#555"), strokeWidth9(1.5), classed12("node")]))(function() {
+                                  return discard116(liftEffect50(log2("HorizontalClusterViz: Rendering complete!")))(function() {
+                                    return pure49(unit);
+                                  });
+                                });
                               });
                             });
                           });
@@ -23660,7 +23708,7 @@
   var y19 = /* @__PURE__ */ y(toAttrNumber);
   var text16 = /* @__PURE__ */ text6(toAttrString);
   var textAnchor5 = /* @__PURE__ */ textAnchor(toAttrString);
-  var compare5 = /* @__PURE__ */ compare(ordString);
+  var compare7 = /* @__PURE__ */ compare(ordString);
   var parseCSVRow2 = function(row) {
     return bind16(hush(runExcept(readProp3("division")(row))))(function(divisionF) {
       return bind16(hush(runExcept(readString3(divisionF))))(function(division) {
@@ -23812,7 +23860,7 @@
                         return bind121(appendTo6(chartGroup)(Group.value)([transform([function(v1) {
                           return "translate(0," + (show24(chartHeight) + ")");
                         }]), classed18("x-axis")]))(function(xAxis) {
-                          var allDates = sortBy(compare5)(getDates(data$prime));
+                          var allDates = sortBy(compare7)(getDates(data$prime));
                           var dateCount = toNumber(length3(allDates));
                           var xScale = function(i2) {
                             return toNumber(i2) * (chartWidth / (dateCount - 1));
@@ -25616,8 +25664,9 @@
   var fromFoldable25 = /* @__PURE__ */ fromFoldable3(foldableArray);
   var map52 = /* @__PURE__ */ map(functorArray);
   var discard18 = /* @__PURE__ */ discard(discardUnit);
-  var map123 = /* @__PURE__ */ map(functorList);
   var fromFoldable111 = /* @__PURE__ */ fromFoldable2(foldableTree);
+  var compare8 = /* @__PURE__ */ compare(ordNumber);
+  var map123 = /* @__PURE__ */ map(functorList);
   var show115 = /* @__PURE__ */ show(showInt);
   var classed22 = /* @__PURE__ */ classed(toAttrString);
   var x27 = /* @__PURE__ */ x(toAttrNumber);
@@ -25625,18 +25674,18 @@
   var fill21 = /* @__PURE__ */ fill(toAttrString);
   var fontSize12 = /* @__PURE__ */ fontSize(toAttrNumber);
   var text19 = /* @__PURE__ */ text6(toAttrString);
-  var d11 = /* @__PURE__ */ d(toAttrString);
+  var d11 = /* @__PURE__ */ d(toAttrStringFnI);
   var strokeColor22 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeWidth19 = /* @__PURE__ */ strokeWidth(toAttrNumber);
-  var cx13 = /* @__PURE__ */ cx(toAttrNumber);
-  var cy13 = /* @__PURE__ */ cy(toAttrNumber);
+  var cx13 = /* @__PURE__ */ cx(toAttrNumberFnI);
+  var cy13 = /* @__PURE__ */ cy(toAttrNumberFnI);
   var radius14 = /* @__PURE__ */ radius(toAttrNumber);
   var radialPoint = function(node) {
     return function(width24) {
       return function(height24) {
         var minDim = (function() {
-          var $47 = width24 < height24;
-          if ($47) {
+          var $55 = width24 < height24;
+          if ($55) {
             return width24;
           }
           ;
@@ -25690,9 +25739,9 @@
     return append19(childLinks)(grandchildLinks);
   };
   var makeLinks5 = /* @__PURE__ */ (function() {
-    var $62 = fromFoldable2(foldableList);
-    return function($63) {
-      return $62(makeLinksAsList4($63));
+    var $70 = fromFoldable2(foldableList);
+    return function($71) {
+      return $70(makeLinksAsList4($71));
     };
   })();
   var hierDataToTree4 = function(hierData) {
@@ -25723,12 +25772,12 @@
     var bind121 = bind(dictBind);
     return function(dictMonadEffect) {
       var liftEffect50 = liftEffect(dictMonadEffect);
-      var Applicative0 = dictMonadEffect.Monad0().Applicative0();
-      var traverse_15 = traverse_(Applicative0)(foldableArray);
-      var pure49 = pure(Applicative0);
+      var pure49 = pure(dictMonadEffect.Monad0().Applicative0());
       return function(dictSelectionM) {
         var attach6 = attach(dictSelectionM);
         var appendTo6 = appendTo(dictSelectionM);
+        var simpleJoin4 = simpleJoin(dictSelectionM);
+        var setAttributes5 = setAttributes(dictSelectionM);
         return function(flareData) {
           return function(selector) {
             var centerX = 1600 / 2;
@@ -25743,25 +25792,35 @@
                 }
               };
               var positioned = cluster2(config)(dataTree);
+              var nodesBeforeProjection = fromFoldable111(positioned);
+              var sortedNodes = sortBy(function(a2) {
+                return function(b2) {
+                  return compare8(a2.x)(b2.x);
+                };
+              })(nodesBeforeProjection);
               var projectNode = function(v) {
                 var projectedChildren = map123(projectNode)(v.value1);
                 var projected = radialPoint(v.value0)(1600)(1600);
-                return new Node2((function() {
-                  var $57 = {};
-                  for (var $58 in v.value0) {
-                    if ({}.hasOwnProperty.call(v.value0, $58)) {
-                      $57[$58] = v["value0"][$58];
-                    }
-                    ;
-                  }
-                  ;
-                  $57.x = projected.x;
-                  $57.y = projected.y;
-                  return $57;
-                })(), projectedChildren);
+                return new Node2({
+                  height: v.value0.height,
+                  name: v.value0.name,
+                  value: v.value0.value,
+                  x: projected.x,
+                  y: projected.y
+                }, projectedChildren);
               };
               var radialCluster = projectNode(positioned);
-              var nodes = fromFoldable111(radialCluster);
+              var projectSingleNode = function(node) {
+                var projected = radialPoint(node)(1600)(1600);
+                return {
+                  height: node.height,
+                  name: node.name,
+                  value: node.value,
+                  x: projected.x,
+                  y: projected.y
+                };
+              };
+              var nodes = map52(projectSingleNode)(sortedNodes);
               var links = makeLinks5(radialCluster);
               return discard116(liftEffect50(log2("RadialClusterViz: Rendering " + (show115(length3(nodes)) + (" nodes, " + (show115(length3(links)) + " links"))))))(function() {
                 return bind121(attach6(selector))(function(root$prime) {
@@ -25769,14 +25828,26 @@
                     return bind121(appendTo6(svg)(Text2.value)([x27(10), y27(20), fill21("#333"), fontSize12(16), text19("Radial Cluster Layout (Dendrogram)"), classed22("title")]))(function() {
                       return bind121(appendTo6(svg)(Group.value)([classed22("links")]))(function(linksGroup) {
                         return bind121(appendTo6(svg)(Group.value)([classed22("nodes")]))(function(nodesGroup) {
-                          return bind121(traverse_15(function(link4) {
-                            return appendTo6(linksGroup)(Path2.value)([d11(radialLinkPath2(link4.source.x)(link4.source.y)(link4.target.x)(link4.target.y)(centerX)(centerY)), fill21("none"), strokeColor22("#555"), strokeWidth19(1.5), classed22("link")]);
-                          })(links))(function() {
-                            return bind121(traverse_15(function(node) {
-                              return appendTo6(nodesGroup)(Circle.value)([cx13(node.x + centerX), cy13(node.y + centerY), radius14(3), fill21("#999"), strokeColor22("#555"), strokeWidth19(1.5), classed22("node")]);
-                            })(nodes))(function() {
-                              return discard116(liftEffect50(log2("RadialClusterViz: Rendering complete!")))(function() {
-                                return pure49(unit);
+                          return bind121(simpleJoin4(linksGroup)(Path2.value)(links)(keyIsID_))(function(linkElements) {
+                            return discard116(setAttributes5(linkElements)([d11(function(v) {
+                              return function(v1) {
+                                return radialLinkPath2(v.source.x)(v.source.y)(v.target.x)(v.target.y)(centerX)(centerY);
+                              };
+                            }), fill21("none"), strokeColor22("#555"), strokeWidth19(1.5), classed22("link")]))(function() {
+                              return bind121(simpleJoin4(nodesGroup)(Circle.value)(nodes)(keyIsID_))(function(nodeElements) {
+                                return discard116(setAttributes5(nodeElements)([cx13(function(v) {
+                                  return function(v1) {
+                                    return v.x + centerX;
+                                  };
+                                }), cy13(function(v) {
+                                  return function(v1) {
+                                    return v.y + centerY;
+                                  };
+                                }), radius14(3), fill21("#999"), strokeColor22("#555"), strokeWidth19(1.5), classed22("node")]))(function() {
+                                  return discard116(liftEffect50(log2("RadialClusterViz: Rendering complete!")))(function() {
+                                    return pure49(unit);
+                                  });
+                                });
                               });
                             });
                           });
@@ -25798,7 +25869,7 @@
   var foldl18 = /* @__PURE__ */ foldl(foldableArray);
   var nub5 = /* @__PURE__ */ nub(ordString);
   var map53 = /* @__PURE__ */ map(functorArray);
-  var compare6 = /* @__PURE__ */ compare(ordString);
+  var compare9 = /* @__PURE__ */ compare(ordString);
   var maximum10 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var bind21 = /* @__PURE__ */ bind(bindMaybe);
   var classed23 = /* @__PURE__ */ classed(toAttrString);
@@ -25863,7 +25934,7 @@
     return function(data$prime) {
       return sortBy(function(a2) {
         return function(b2) {
-          return compare6(a2.age)(b2.age);
+          return compare9(a2.age)(b2.age);
         };
       })(filter(function(d1) {
         return d1.state === state$prime;
@@ -26299,7 +26370,7 @@
 
   // output/PSD3.Layout.Sankey.Types/index.js
   var show31 = /* @__PURE__ */ show(showInt);
-  var compare7 = /* @__PURE__ */ compare(ordInt);
+  var compare10 = /* @__PURE__ */ compare(ordInt);
   var bind23 = /* @__PURE__ */ bind(bindMaybe);
   var pure24 = /* @__PURE__ */ pure(applicativeMaybe);
   var SourceColor = /* @__PURE__ */ (function() {
@@ -26401,7 +26472,7 @@
   var ordNodeID = {
     compare: function(x45) {
       return function(y45) {
-        return compare7(x45)(y45);
+        return compare10(x45)(y45);
       };
     },
     Eq0: function() {
@@ -26462,7 +26533,7 @@
   var insert11 = /* @__PURE__ */ insert6(ordNodeID);
   var insert13 = /* @__PURE__ */ insert(ordNodeID);
   var eq4 = /* @__PURE__ */ eq(eqNodeID);
-  var compare8 = /* @__PURE__ */ compare(ordNumber);
+  var compare11 = /* @__PURE__ */ compare(ordNumber);
   var max13 = /* @__PURE__ */ max(ordInt);
   var map56 = /* @__PURE__ */ map(functorArray);
   var max14 = /* @__PURE__ */ max(ordNumber);
@@ -26736,10 +26807,10 @@
                           })(layerNodes);
                           var sorted = sortBy(function(a2) {
                             return function(b2) {
-                              var posCompare = compare8(a2.targetY)(b2.targetY);
+                              var posCompare = compare11(a2.targetY)(b2.targetY);
                               var $120 = eq22(posCompare)(EQ.value);
                               if ($120) {
-                                return compare8(b2.node.value)(a2.node.value);
+                                return compare11(b2.node.value)(a2.node.value);
                               }
                               ;
                               return posCompare;
@@ -27269,7 +27340,7 @@
                   return eq4(n.index)(a2.targetIndex);
                 })(nodes);
                 if (v1 instanceof Just && v instanceof Just) {
-                  return compare8(v1.value0.y0)(v.value0.y0);
+                  return compare11(v1.value0.y0)(v.value0.y0);
                 }
                 ;
                 return EQ.value;
@@ -27327,7 +27398,7 @@
                   return eq4(n.index)(a2.sourceIndex);
                 })(nodes);
                 if (v1 instanceof Just && v instanceof Just) {
-                  return compare8(v1.value0.y0)(v.value0.y0);
+                  return compare11(v1.value0.y0)(v.value0.y0);
                 }
                 ;
                 return EQ.value;
@@ -27808,7 +27879,7 @@
   var show210 = /* @__PURE__ */ show(showInt);
   var for_4 = /* @__PURE__ */ for_(applicativeEffect)(foldableArray);
   var discard21 = /* @__PURE__ */ discard(discardUnit);
-  var compare9 = /* @__PURE__ */ compare(ordInt);
+  var compare14 = /* @__PURE__ */ compare(ordInt);
   var fill24 = /* @__PURE__ */ fill(toAttrStringFnI);
   var fillOpacity8 = /* @__PURE__ */ fillOpacity(toAttrNumber);
   var d14 = /* @__PURE__ */ d(toAttrStringFnI);
@@ -27865,7 +27936,7 @@
                                 return bind82(liftEffect50((function() {
                                   var sorted = sortBy(function(n1) {
                                     return function(n2) {
-                                      return compare9(n1.layer)(n2.layer);
+                                      return compare14(n1.layer)(n2.layer);
                                     };
                                   })(layoutResult.nodes);
                                   var layers = groupBy(function(n1) {
@@ -38293,8 +38364,8 @@ graph TB
 
   // output/D3.Viz.ClusterVizOriented/index.js
   var map68 = /* @__PURE__ */ map(functorArray);
-  var compare10 = /* @__PURE__ */ compare(ordInt);
-  var compare14 = /* @__PURE__ */ compare(ordNumber);
+  var compare15 = /* @__PURE__ */ compare(ordInt);
+  var compare16 = /* @__PURE__ */ compare(ordNumber);
   var append25 = /* @__PURE__ */ append(semigroupArray);
   var bind66 = /* @__PURE__ */ bind(bindArray);
   var minimum7 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
@@ -38357,9 +38428,9 @@ graph TB
   var sortValuedByHeightAndValue3 = function(v) {
     var comparator = function(v1) {
       return function(v2) {
-        var v3 = compare10(v2.value0.height)(v1.value0.height);
+        var v3 = compare15(v2.value0.height)(v1.value0.height);
         if (v3 instanceof EQ) {
-          return compare14(v2.value0.value)(v1.value0.value);
+          return compare16(v2.value0.value)(v1.value0.value);
         }
         ;
         return v3;
@@ -41918,7 +41989,7 @@ graph TB
   var fontSize25 = /* @__PURE__ */ fontSize(toAttrNumber);
   var fill39 = /* @__PURE__ */ fill(toAttrString);
   var text32 = /* @__PURE__ */ text6(toAttrString);
-  var compare11 = /* @__PURE__ */ compare(ordNumber);
+  var compare17 = /* @__PURE__ */ compare(ordNumber);
   var cx26 = /* @__PURE__ */ cx(toAttrNumberDatumFnI);
   var cy27 = /* @__PURE__ */ cy(toAttrNumberDatumFnI);
   var radius28 = /* @__PURE__ */ radius(toAttrNumberDatumFnI);
@@ -42074,7 +42145,7 @@ graph TB
                                         return function(b2) {
                                           var popB = datum_.population(b2);
                                           var popA = datum_.population(a2);
-                                          return orderingToInt(compare11(popB)(popA));
+                                          return orderingToInt(compare17(popB)(popA));
                                         };
                                       }), cx26(function(d21) {
                                         return function(i2) {
@@ -42098,7 +42169,7 @@ graph TB
                                             return function(b2) {
                                               var popB = datum_.population(b2);
                                               var popA = datum_.population(a2);
-                                              return orderingToInt(compare11(popB)(popA));
+                                              return orderingToInt(compare17(popB)(popA));
                                             };
                                           }), cx26(function(d21) {
                                             return function(i2) {

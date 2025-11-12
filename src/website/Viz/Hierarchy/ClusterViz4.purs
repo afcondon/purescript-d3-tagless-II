@@ -72,7 +72,9 @@ draw flareData selector = do
   let positioned = cluster config dataTree
 
   -- Flatten to arrays for rendering
-  let nodes = Array.fromFoldable positioned
+  let unsortedNodes = Array.fromFoldable positioned
+  -- Sort by x position for correct DOM order (left to right)
+  let nodes = Array.sortBy (\a b -> compare a.x b.x) unsortedNodes
   let links = makeLinks positioned
 
   liftEffect $ log $ "ClusterViz4: Rendering " <> show (Array.length nodes) <> " nodes, " <> show (Array.length links) <> " links"
