@@ -30,7 +30,7 @@ import D3.Viz.AnimatedTreeCluster as AnimatedTreeCluster
 import D3.Viz.LesMiserables as LesMis
 import D3.Viz.LesMiserablesGUP as LesMisGUP
 import D3.Viz.LesMiserablesGUP.Model (LesMisRawModel)
-import PSD3.Internal.Types (D3Selection_)
+import PSD3.Internal.Types (D3Selection_, Datum_)
 import PSD3.Internal.Types as PSD3Types
 import PSD3.Internal.FFI as PSD3FFI
 import PSD3.Data.Node (D3_SimulationNode(..), SimulationNode)
@@ -85,6 +85,8 @@ type State =
   -- AnimatedTreeCluster-specific state
   , animatedTreeClusterFiber :: Maybe (Fiber Unit)
   , animatedTreeClusterLayout :: Maybe AnimatedTreeCluster.LayoutType
+  , animatedTreeClusterLinks :: Maybe (D3Selection_ Datum_)
+  , animatedTreeClusterNodes :: Maybe (D3Selection_ Datum_)
   }
 
 data Action
@@ -116,6 +118,8 @@ component = H.mkComponent
       -- AnimatedTreeCluster initial state
       , animatedTreeClusterFiber: Nothing
       , animatedTreeClusterLayout: Nothing
+      , animatedTreeClusterLinks: Nothing
+      , animatedTreeClusterNodes: Nothing
       }
   , render
   , eval: H.mkEval H.defaultEval
@@ -225,17 +229,21 @@ handleAction = case _ of
           Left err -> log "AnimatedTreeCluster: Failed to load data"
           Right response -> do
             let blessed = readJSON_ response.body
-            -- Initial draw
-            initialLayout <- H.liftEffect $ eval_D3M $ AnimatedTreeCluster.draw blessed "#example-viz"
-            H.modify_ _ { animatedTreeClusterLayout = Just initialLayout }
+            -- Initial draw - returns hierarchy and data-bound selections
+            { hierarchyRoot, links, nodes } <- H.liftEffect $ eval_D3M $ AnimatedTreeCluster.draw blessed "#example-viz"
+            H.modify_ _ {
+              animatedTreeClusterLayout = Just AnimatedTreeCluster.TreeLayout,
+              animatedTreeClusterLinks = Just links,
+              animatedTreeClusterNodes = Just nodes
+            }
 
             -- Start animation loop that toggles between layouts
             let runToggle currentLayout = do
                   delay (Milliseconds 3000.0)
-                  newLayout <- liftEffect $ eval_D3M $ AnimatedTreeCluster.updateLayout blessed currentLayout "#example-viz"
+                  newLayout <- liftEffect $ eval_D3M $ AnimatedTreeCluster.updateLayout currentLayout hierarchyRoot links nodes
                   runToggle newLayout  -- Recursively call with new layout
 
-            fiber <- H.liftAff $ forkAff $ runToggle initialLayout
+            fiber <- H.liftAff $ forkAff $ runToggle AnimatedTreeCluster.TreeLayout
             H.modify_ _ { animatedTreeClusterFiber = Just fiber }
             pure unit
 
