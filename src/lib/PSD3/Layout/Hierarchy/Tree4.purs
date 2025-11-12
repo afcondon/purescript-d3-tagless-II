@@ -179,6 +179,7 @@ scanContours minSep (Contours left) (Contours right) =
 
 -- | Combine child contours into parent contours
 -- | Given n children at positions offsets[0..n-1], build the parent's contours
+-- | At each depth level, take the minimum of all left contours and maximum of all right contours
 spliceContours :: List Number -> List Contours -> Contours
 spliceContours offsets contours =
   case Array.fromFoldable $ zipWith Tuple offsets contours of
@@ -190,15 +191,82 @@ spliceContours offsets contours =
         , right: Cons 0.0 (map (\x -> x + offset) c.right)
         }
     pairs ->
-      -- Multiple children: leftmost left contour + rightmost right contour
+      -- Multiple children: merge all contours level by level
+      -- At each level, take the leftmost of all left contours and rightmost of all right contours
       let
-        Tuple firstOffset (Contours firstContours) = fromMaybe (Tuple 0.0 emptyContours) $ Array.head pairs
-        Tuple lastOffset (Contours lastContours) = fromMaybe (Tuple 0.0 emptyContours) $ Array.last pairs
+        -- Shift all contours by their offsets
+        shiftedContours = map (\(Tuple offset (Contours c)) ->
+          Contours { left: map (\x -> x + offset) c.left
+                   , right: map (\x -> x + offset) c.right
+                   }) pairs
 
-        leftContour = Cons 0.0 (map (\x -> x + firstOffset) firstContours.left)
-        rightContour = Cons 0.0 (map (\x -> x + lastOffset) lastContours.right)
+        -- Merge contours level by level
+        mergedLeft = mergeContoursLeft (map (\(Contours c) -> c.left) shiftedContours)
+        mergedRight = mergeContoursRight (map (\(Contours c) -> c.right) shiftedContours)
       in
-        Contours { left: leftContour, right: rightContour }
+        Contours { left: Cons 0.0 mergedLeft, right: Cons 0.0 mergedRight }
+
+-- | Merge left contours: at each level, take the minimum
+mergeContoursLeft :: Array Contour -> Contour
+mergeContoursLeft contours =
+  case contours of
+    [] -> Nil
+    _ -> mergeLevel contours
+  where
+    mergeLevel :: Array Contour -> Contour
+    mergeLevel cs =
+      let
+        -- Get all values at current level (filter out Nil)
+        currentLevels = Array.mapMaybe
+          (\c -> case c of
+            Cons x _ -> Just x
+            Nil -> Nothing)
+          cs
+      in
+        case Array.head currentLevels of
+          Nothing -> Nil  -- All contours ended
+          Just _ ->
+            let
+              minVal = fromMaybe 0.0 $ minimum currentLevels
+              -- Get rest of each contour
+              restContours = Array.mapMaybe
+                (\c -> case c of
+                  Cons _ rest -> Just rest
+                  Nil -> Nothing)
+                cs
+            in
+              Cons minVal (mergeLevel restContours)
+
+-- | Merge right contours: at each level, take the maximum
+mergeContoursRight :: Array Contour -> Contour
+mergeContoursRight contours =
+  case contours of
+    [] -> Nil
+    _ -> mergeLevel contours
+  where
+    mergeLevel :: Array Contour -> Contour
+    mergeLevel cs =
+      let
+        -- Get all values at current level (filter out Nil)
+        currentLevels = Array.mapMaybe
+          (\c -> case c of
+            Cons x _ -> Just x
+            Nil -> Nothing)
+          cs
+      in
+        case Array.head currentLevels of
+          Nothing -> Nil  -- All contours ended
+          Just _ ->
+            let
+              maxVal = fromMaybe 0.0 $ maximum currentLevels
+              -- Get rest of each contour
+              restContours = Array.mapMaybe
+                (\c -> case c of
+                  Cons _ rest -> Just rest
+                  Nil -> Nothing)
+                cs
+            in
+              Cons maxVal (mergeLevel restContours)
 
 -- | Top-down pass: convert offsets to absolute (x, y) coordinates
 -- | Strips Tuple annotation and updates x, y fields in the original record

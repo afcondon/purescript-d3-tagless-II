@@ -22389,8 +22389,8 @@
                 if (v3 instanceof Cons && v4 instanceof Cons) {
                   var actualSep = v2 + v4.value0 - v3.value0;
                   var neededSep = (function() {
-                    var $45 = actualSep < minSep;
-                    if ($45) {
+                    var $48 = actualSep < minSep;
+                    if ($48) {
                       return v2 + (minSep - actualSep);
                     }
                     ;
@@ -22426,8 +22426,8 @@
       var maxX = fromMaybe(1)(maximum7(allX));
       var minX = fromMaybe(0)(minimum4(allX));
       var xRange = (function() {
-        var $52 = maxX - minX === 0;
-        if ($52) {
+        var $55 = maxX - minX === 0;
+        if ($55) {
           return 1;
         }
         ;
@@ -22445,17 +22445,17 @@
       };
       var go2 = function(v) {
         return new Node2((function() {
-          var $54 = {};
-          for (var $55 in v.value0) {
-            if ({}.hasOwnProperty.call(v.value0, $55)) {
-              $54[$55] = v["value0"][$55];
+          var $57 = {};
+          for (var $58 in v.value0) {
+            if ({}.hasOwnProperty.call(v.value0, $58)) {
+              $57[$58] = v["value0"][$58];
             }
             ;
           }
           ;
-          $54.x = scaleX2(v.value0.x);
-          $54.y = scaleY2(v.value0.depth);
-          return $54;
+          $57.x = scaleX2(v.value0.x);
+          $57.y = scaleY2(v.value0.depth);
+          return $57;
         })(), map117(go2)(v.value1));
       };
       return go2(inputTree);
@@ -22467,26 +22467,104 @@
       var nodeX = parentX + v.value0.value0.offset;
       var childrenWithCoords = map117(petrify(nodeX))(v.value1);
       return new Node2((function() {
-        var $61 = {};
-        for (var $62 in v.value0.value1) {
-          if ({}.hasOwnProperty.call(v.value0.value1, $62)) {
-            $61[$62] = v["value0"]["value1"][$62];
+        var $64 = {};
+        for (var $65 in v.value0.value1) {
+          if ({}.hasOwnProperty.call(v.value0.value1, $65)) {
+            $64[$65] = v["value0"]["value1"][$65];
           }
           ;
         }
         ;
-        $61.x = nodeX;
-        $61.y = nodeY;
-        return $61;
+        $64.x = nodeX;
+        $64.y = nodeY;
+        return $64;
       })(), childrenWithCoords);
     };
   };
-  var emptyContours = /* @__PURE__ */ (function() {
-    return new Contours({
-      left: Nil.value,
-      right: Nil.value
-    });
-  })();
+  var mergeContoursRight = function(contours) {
+    var mergeLevel = function(cs) {
+      var currentLevels = mapMaybe(function(c) {
+        if (c instanceof Cons) {
+          return new Just(c.value0);
+        }
+        ;
+        if (c instanceof Nil) {
+          return Nothing.value;
+        }
+        ;
+        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 252, column 18 - line 254, column 27): " + [c.constructor.name]);
+      })(cs);
+      var v = head(currentLevels);
+      if (v instanceof Nothing) {
+        return Nil.value;
+      }
+      ;
+      if (v instanceof Just) {
+        var restContours = mapMaybe(function(c) {
+          if (c instanceof Cons) {
+            return new Just(c.value1);
+          }
+          ;
+          if (c instanceof Nil) {
+            return Nothing.value;
+          }
+          ;
+          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 264, column 24 - line 266, column 33): " + [c.constructor.name]);
+        })(cs);
+        var maxVal = fromMaybe(0)(maximum7(currentLevels));
+        return new Cons(maxVal, mergeLevel(restContours));
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 257, column 9 - line 269, column 52): " + [v.constructor.name]);
+    };
+    if (contours.length === 0) {
+      return Nil.value;
+    }
+    ;
+    return mergeLevel(contours);
+  };
+  var mergeContoursLeft = function(contours) {
+    var mergeLevel = function(cs) {
+      var currentLevels = mapMaybe(function(c) {
+        if (c instanceof Cons) {
+          return new Just(c.value0);
+        }
+        ;
+        if (c instanceof Nil) {
+          return Nothing.value;
+        }
+        ;
+        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 221, column 18 - line 223, column 27): " + [c.constructor.name]);
+      })(cs);
+      var v = head(currentLevels);
+      if (v instanceof Nothing) {
+        return Nil.value;
+      }
+      ;
+      if (v instanceof Just) {
+        var restContours = mapMaybe(function(c) {
+          if (c instanceof Cons) {
+            return new Just(c.value1);
+          }
+          ;
+          if (c instanceof Nil) {
+            return Nothing.value;
+          }
+          ;
+          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 233, column 24 - line 235, column 33): " + [c.constructor.name]);
+        })(cs);
+        var minVal = fromMaybe(0)(minimum4(currentLevels));
+        return new Cons(minVal, mergeLevel(restContours));
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 226, column 9 - line 238, column 52): " + [v.constructor.name]);
+    };
+    if (contours.length === 0) {
+      return Nil.value;
+    }
+    ;
+    return mergeLevel(contours);
+  };
   var spliceContours = function(offsets) {
     return function(contours) {
       var v = fromFoldable18(zipWith2(Tuple.create)(offsets)(contours));
@@ -22505,17 +22583,25 @@
         });
       }
       ;
-      var v1 = fromMaybe(new Tuple(0, emptyContours))(head(v));
-      var v2 = fromMaybe(new Tuple(0, emptyContours))(last(v));
-      var rightContour = new Cons(0, map117(function(x45) {
-        return x45 + v2.value0;
-      })(v2.value1.value0.right));
-      var leftContour = new Cons(0, map117(function(x45) {
-        return x45 + v1.value0;
-      })(v1.value1.value0.left));
+      var shiftedContours = map43(function(v1) {
+        return new Contours({
+          left: map117(function(x45) {
+            return x45 + v1.value0;
+          })(v1.value1.value0.left),
+          right: map117(function(x45) {
+            return x45 + v1.value0;
+          })(v1.value1.value0.right)
+        });
+      })(v);
+      var mergedRight = mergeContoursRight(map43(function(v1) {
+        return v1.value0.right;
+      })(shiftedContours));
+      var mergedLeft = mergeContoursLeft(map43(function(v1) {
+        return v1.value0.left;
+      })(shiftedContours));
       return new Contours({
-        left: leftContour,
-        right: rightContour
+        left: new Cons(0, mergedLeft),
+        right: new Cons(0, mergedRight)
       });
     };
   };
@@ -22596,16 +22682,16 @@
   var addDepth = function(currentDepth) {
     return function(v) {
       return new Node2((function() {
-        var $108 = {};
-        for (var $109 in v.value0) {
-          if ({}.hasOwnProperty.call(v.value0, $109)) {
-            $108[$109] = v["value0"][$109];
+        var $129 = {};
+        for (var $130 in v.value0) {
+          if ({}.hasOwnProperty.call(v.value0, $130)) {
+            $129[$130] = v["value0"][$130];
           }
           ;
         }
         ;
-        $108.depth = currentDepth;
-        return $108;
+        $129.depth = currentDepth;
+        return $129;
       })(), map117(addDepth(currentDepth + 1 | 0))(v.value1));
     };
   };
