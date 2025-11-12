@@ -22,6 +22,8 @@ import D3.Viz.FpFtw.MapQuartet as MapQuartet
 import D3.Viz.FpFtw.TopologicalSort as TopologicalSort
 import D3.Viz.TreeViz as TreeViz
 import D3.Viz.TreeViz4 as TreeViz4
+import D3.Viz.RadialTreeViz as RadialTreeViz
+import D3.Viz.HorizontalTreeViz as HorizontalTreeViz
 import D3.Viz.TreemapViz as TreemapViz
 import D3.Viz.PackViz as PackViz
 import D3.Viz.ClusterViz as ClusterViz
@@ -185,6 +187,22 @@ handleAction = case _ of
           Left err -> log "Tree4 (Reingold-Tilford): Failed to load data"
           Right treeData -> do
             _ <- H.liftEffect $ eval_D3M $ TreeViz4.draw treeData "#example-viz"
+            pure unit
+
+      "radial-tree" -> do
+        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        case result of
+          Left err -> log "Radial Tree: Failed to load data"
+          Right treeData -> do
+            _ <- H.liftEffect $ eval_D3M $ RadialTreeViz.draw treeData "#example-viz"
+            pure unit
+
+      "horizontal-tree" -> do
+        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        case result of
+          Left err -> log "Horizontal Tree: Failed to load data"
+          Right treeData -> do
+            _ <- H.liftEffect $ eval_D3M $ HorizontalTreeViz.draw treeData "#example-viz"
             pure unit
 
       "treemap" -> do
@@ -497,6 +515,8 @@ allExampleIds =
   , "animated-radial-tree"
   , "tree-purescript"
   , "tree4"
+  , "radial-tree"
+  , "horizontal-tree"
   , "treemap"
   , "pack-purescript"
   , "cluster-purescript"
@@ -554,6 +574,10 @@ getExampleMeta id = case id of
     { id, name: "Tree (Pure PureScript)", description: "Node-link tree layout using pure PureScript implementation (Reingold-Tilford algorithm)", category: "Hierarchies" }
   "tree4" -> Just
     { id, name: "Tree4 (Data.Tree + Contours)", description: "Reingold-Tilford tree layout using Data.Tree with contour-based algorithm adapted from Haskell", category: "Hierarchies" }
+  "radial-tree" -> Just
+    { id, name: "Radial Tree", description: "Tree layout with polar projection - same Tree4 algorithm with radial coordinates", category: "Hierarchies" }
+  "horizontal-tree" -> Just
+    { id, name: "Horizontal Tree", description: "Tree layout with horizontal orientation - Tree4 with swapped axes", category: "Hierarchies" }
   "treemap" -> Just
     { id, name: "Treemap (Pure PureScript)", description: "Space-filling hierarchical visualization using squarified tiling algorithm in pure PureScript", category: "Hierarchies" }
   "pack-purescript" -> Just
