@@ -5,66 +5,50 @@ import Prelude
 import PSD3.Internal.Attributes.Sugar (classed, fill, fillOpacity, fontSize, strokeColor, strokeWidth, text, viewBox, cx, cy, radius, x, y, textAnchor, d)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
-import PSD3.Layout.Hierarchy.Core (hierarchy)
-import PSD3.Layout.Hierarchy.Tree (tree, defaultTreeConfig, TreeNode(..))
-import PSD3.Layout.Hierarchy.Projection (verticalX, verticalY, verticalLinkPath)
-import D3.Viz.FlareData (HierData, getName, getValue)
-import D3.Viz.FlareData (getChildren) as FlareData
-import Data.Array (length, (..), (!!))
+import PSD3.Layout.Hierarchy.Tree4 (tree, defaultTreeConfig)
+import D3.Viz.FlareData (HierData, getName, getValue, getChildren)
+import Data.Tree (Tree(..))
+import Data.List (List(..), fromFoldable)
+import Data.Array as Array
 import Data.Traversable (traverse_)
 import Data.Maybe (Maybe(..))
-import Data.Foldable (foldl, sum)
-import Effect (Effect)
+import Data.Foldable (sum)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Console (log)
-import Data.String as String
 
--- Use the FFI getChildren accessor
-getChildren :: HierData -> Maybe (Array HierData)
-getChildren = FlareData.getChildren
+-- Convert HierData to Data.Tree with initial x, y, depth fields
+hierDataToTree :: HierData -> Tree { name :: String, value :: Number, x :: Number, y :: Number, depth :: Int }
+hierDataToTree hierData =
+  let
+    name = getName hierData
+    value = getValue hierData
+    childrenMaybe = getChildren hierData
+    childrenList = case childrenMaybe of
+      Nothing -> Nil
+      Just childrenArray -> fromFoldable $ map hierDataToTree childrenArray
+  in
+    Node { name, value, x: 0.0, y: 0.0, depth: 0 } childrenList
 
--- Simple color palette for depth-based coloring
-colors :: Array String
-colors =
-  [ "#e7ba52", "#c7c7c7", "#aec7e8", "#1f77b4", "#9467bd"
-  , "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"
-  ]
+-- Simple link path generator (vertical tree)
+linkPath :: Number -> Number -> Number -> Number -> String
+linkPath x1' y1' x2' y2' =
+  "M" <> show x1' <> "," <> show y1' <>
+  "C" <> show x1' <> "," <> show ((y1' + y2') / 2.0) <>
+  " " <> show x2' <> "," <> show ((y1' + y2') / 2.0) <>
+  " " <> show x2' <> "," <> show y2'
 
--- Get color by depth
-getColor :: Int -> String
-getColor depth =
-  let idx = depth `mod` (length colors)
-  in case colors !! idx of
-       Just c -> c
-       Nothing -> "#cccccc"
+-- Create links from parent to children
+makeLinksAsList :: forall r. Tree { x :: Number, y :: Number | r } -> List { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
+makeLinksAsList (Node val children) =
+  let
+    childLinks = children >>= \(Node childVal _) ->
+      Cons { source: { x: val.x, y: val.y }, target: { x: childVal.x, y: childVal.y } } Nil
+    grandchildLinks = children >>= makeLinksAsList
+  in
+    childLinks <> grandchildLinks
 
--- Get all nodes (recursive traversal)
-getAllNodes :: forall a. TreeNode a -> Array (TreeNode a)
-getAllNodes node@(TreeNode n) =
-  if length n.children == 0
-  then [node]
-  else [node] <> (n.children >>= getAllNodes)
-
--- Count total nodes
-countNodes :: forall a. TreeNode a -> Int
-countNodes (TreeNode node) = 1 + sum (map countNodes node.children)
-
--- Print tree structure
-printTreeStructure :: Int -> Int -> String -> TreeNode HierData -> Effect Unit
-printTreeStructure currentDepth maxDepth indent (TreeNode node) = do
-  if currentDepth <= maxDepth then do
-    let nodeType = if length node.children == 0 then "leaf" else "internal(" <> show (length node.children) <> " children)"
-    let nodeName = getName node.data_
-    log $ indent <> nodeName <> " [" <> nodeType <> "]: x=" <> show node.x <> ", y=" <> show node.y <> ", depth=" <> show node.depth
-    if currentDepth < maxDepth then
-      traverse_ (printTreeStructure (currentDepth + 1) maxDepth (indent <> "  ")) node.children
-    else
-      pure unit
-  else
-    pure unit
-
--- REMOVED: Local makeLinkPath function
--- Now using verticalLinkPath from PSD3.Layout.Hierarchy.Projection
+makeLinks :: forall r. Tree { x :: Number, y :: Number | r } -> Array { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
+makeLinks = Array.fromFoldable <<< makeLinksAsList
 
 -- Main drawing function for tree layout
 draw :: forall m.
@@ -75,26 +59,22 @@ draw :: forall m.
 draw flareData selector = do
   let chartWidth = 1600.0
   let chartHeight = 1200.0
+  let padding = 40.0
 
-  -- Create hierarchy from blessed Flare data
-  let root = hierarchy flareData getChildren
+  liftEffect $ log "TreeViz: Using Tree4 (Reingold-Tilford) layout"
 
-  -- Apply tree layout with custom size
-  let config = defaultTreeConfig
-        { size = { width: chartWidth, height: chartHeight }
-        }
-  let layout = tree config root
+  -- Convert to Data.Tree
+  let dataTree = hierDataToTree flareData
 
-  -- Get all nodes for visualization
-  let nodes = getAllNodes layout
+  -- Apply Tree4 layout
+  let config = defaultTreeConfig { size = { width: chartWidth - (2.0 * padding), height: chartHeight - (2.0 * padding) } }
+  let positioned = tree config dataTree
 
-  -- Debug: log the tree structure
-  _ <- liftEffect $ log "\n╔═══════════════════════════════════════════════════════════════╗"
-  _ <- liftEffect $ log "║   TREE VISUALIZATION: FULL FLARE HIERARCHY                    ║"
-  _ <- liftEffect $ log "╚═══════════════════════════════════════════════════════════════╝\n"
-  _ <- liftEffect $ printTreeStructure 0 3 "" layout
-  _ <- liftEffect $ log $ "\nRendering " <> show (length nodes) <> " nodes (full hierarchy)"
-  _ <- liftEffect $ log $ "Total node count: " <> show (countNodes layout)
+  -- Flatten to arrays for rendering
+  let nodes = Array.fromFoldable positioned
+  let links = makeLinks positioned
+
+  liftEffect $ log $ "TreeViz: Rendering " <> show (Array.length nodes) <> " nodes, " <> show (Array.length links) <> " links"
 
   root' <- attach selector :: m (D3Selection_ Unit)
   svg <- appendTo root' Svg
@@ -112,72 +92,34 @@ draw flareData selector = do
     , classed "title"
     ]
 
-  -- Create group for links (so they appear behind nodes)
+  -- Create groups
   linksGroup <- appendTo svg Group [ classed "links" ]
-
-  -- Create group for nodes (so they appear in front)
   nodesGroup <- appendTo svg Group [ classed "nodes" ]
 
-  -- Render links first
-  let renderLinks :: TreeNode HierData -> m Unit
-      renderLinks parent@(TreeNode node) = do
-        -- Render links to all children
-        traverse_ (\child -> do
-          _ <- appendTo linksGroup Path
-            [ d $ verticalLinkPath (verticalX parent) (verticalY parent) (verticalX child) (verticalY child)
-            , fill "none"
-            , strokeColor "#555"
-            , fillOpacity 0.4
-            , strokeWidth 1.5
-            , classed "link"
-            ]
-          pure unit
-        ) node.children
+  -- Draw links (with padding offset)
+  _ <- traverse_ (\link ->
+    appendTo linksGroup Path
+      [ d $ linkPath (link.source.x + padding) (link.source.y + padding) (link.target.x + padding) (link.target.y + padding)
+      , fill "none"
+      , strokeColor "#555"
+      , strokeWidth 1.5
+      , classed "link"
+      ]
+  ) links
 
-        -- Recursively render children's links
-        traverse_ renderLinks node.children
+  -- Draw nodes (with padding offset)
+  _ <- traverse_ (\node ->
+    appendTo nodesGroup Circle
+      [ cx (node.x + padding)
+      , cy (node.y + padding)
+      , radius 4.0
+      , fill "#999"
+      , strokeColor "#555"
+      , strokeWidth 1.5
+      , classed "node"
+      ]
+  ) nodes
 
-  -- Render nodes (circles and labels)
-  let renderNode :: TreeNode HierData -> m Unit
-      renderNode treeNode@(TreeNode node) = do
-        let nodeName = getName node.data_
-        let isLeaf = length node.children == 0
-        let nodeRadius = if isLeaf then 3.0 else 4.0
-
-        -- Draw circle using projection accessors
-        _ <- appendTo nodesGroup Circle
-          [ cx $ verticalX treeNode
-          , cy $ verticalY treeNode
-          , radius nodeRadius
-          , fill "#999"
-          , strokeColor "#555"
-          , strokeWidth 1.5
-          , classed "node"
-          , classed $ "depth-" <> show node.depth
-          , classed $ if isLeaf then "leaf" else "internal"
-          ]
-
-        -- Add label for internal nodes (non-leaf)
-        if not isLeaf
-          then do
-            _ <- appendTo nodesGroup Text
-              [ x $ verticalX treeNode + 8.0
-              , y $ verticalY treeNode
-              , fill "#333"
-              , fontSize 10.0
-              , text nodeName
-              , classed "label"
-              ]
-            pure unit
-          else pure unit
-
-        -- Recursively render children
-        traverse_ renderNode node.children
-
-  -- Render all links
-  _ <- renderLinks layout
-
-  -- Render all nodes
-  _ <- renderNode layout
+  liftEffect $ log "TreeViz: Rendering complete!"
 
   pure unit
