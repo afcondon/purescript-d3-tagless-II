@@ -19859,8 +19859,8 @@
       var maxX = fromMaybe(1)(maximum4(allX));
       var minX = fromMaybe(0)(minimum3(allX));
       var xRange = (function() {
-        var $46 = maxX - minX === 0;
-        if ($46) {
+        var $47 = maxX - minX === 0;
+        if ($47) {
           return 1;
         }
         ;
@@ -19878,17 +19878,17 @@
       };
       var go2 = function(v) {
         return new Node2((function() {
-          var $48 = {};
-          for (var $49 in v.value0) {
-            if ({}.hasOwnProperty.call(v.value0, $49)) {
-              $48[$49] = v["value0"][$49];
+          var $49 = {};
+          for (var $50 in v.value0) {
+            if ({}.hasOwnProperty.call(v.value0, $50)) {
+              $49[$50] = v["value0"][$50];
             }
             ;
           }
           ;
-          $48.x = scaleX2(v.value0.x);
-          $48.y = scaleY2(v.value0.height);
-          return $48;
+          $49.x = scaleX2(v.value0.x);
+          $49.y = scaleY2(v.value0.height);
+          return $49;
         })(), map37(go2)(v.value1));
       };
       return go2(inputTree);
@@ -19908,16 +19908,16 @@
           var v1 = fromFoldable5(v.value1);
           if (v1.length === 0) {
             var leafNode = new Node2((function() {
-              var $56 = {};
-              for (var $57 in v.value0) {
-                if ({}.hasOwnProperty.call(v.value0, $57)) {
-                  $56[$57] = v["value0"][$57];
+              var $57 = {};
+              for (var $58 in v.value0) {
+                if ({}.hasOwnProperty.call(v.value0, $58)) {
+                  $57[$58] = v["value0"][$58];
                 }
                 ;
               }
               ;
-              $56.x = currentLeafX;
-              return $56;
+              $57.x = currentLeafX;
+              return $57;
             })(), Nil.value);
             return {
               tree: leafNode,
@@ -19944,16 +19944,16 @@
             };
           })(0)(processChildren.trees) / toNumber(length3(processChildren.trees));
           var internalNode = new Node2((function() {
-            var $62 = {};
-            for (var $63 in v.value0) {
-              if ({}.hasOwnProperty.call(v.value0, $63)) {
-                $62[$63] = v["value0"][$63];
+            var $63 = {};
+            for (var $64 in v.value0) {
+              if ({}.hasOwnProperty.call(v.value0, $64)) {
+                $63[$64] = v["value0"][$64];
               }
               ;
             }
             ;
-            $62.x = meanX;
-            return $62;
+            $63.x = meanX;
+            return $63;
           })(), childrenList);
           return {
             tree: internalNode,
@@ -19973,25 +19973,28 @@
   };
   var centerRoot = function(tree4) {
     var allNodes2 = fromFoldable22(tree4);
-    var allX = map113(function(n) {
-      return n.x;
+    var leaves = filter(function(n) {
+      return n.height === 0;
     })(allNodes2);
-    var maxX = fromMaybe(0)(maximum4(allX));
-    var minX = fromMaybe(0)(minimum3(allX));
+    var leafX = map113(function(n) {
+      return n.x;
+    })(leaves);
+    var maxX = fromMaybe(0)(maximum4(leafX));
+    var minX = fromMaybe(0)(minimum3(leafX));
     var targetX = (minX + maxX) / 2;
     var offset = targetX - tree4.value0.x;
     var shiftTree = function(v) {
       return new Node2((function() {
-        var $69 = {};
-        for (var $70 in v.value0) {
-          if ({}.hasOwnProperty.call(v.value0, $70)) {
-            $69[$70] = v["value0"][$70];
+        var $70 = {};
+        for (var $71 in v.value0) {
+          if ({}.hasOwnProperty.call(v.value0, $71)) {
+            $70[$71] = v["value0"][$71];
           }
           ;
         }
         ;
-        $69.x = v.value0.x + offset;
-        return $69;
+        $70.x = v.value0.x + offset;
+        return $70;
       })(), map37(shiftTree)(v.value1));
     };
     return shiftTree(tree4);
@@ -20000,16 +20003,16 @@
     var nodeY = toNumber(v.value0.height);
     var childrenWithY = map37(addYCoordinates)(v.value1);
     return new Node2((function() {
-      var $77 = {};
-      for (var $78 in v.value0) {
-        if ({}.hasOwnProperty.call(v.value0, $78)) {
-          $77[$78] = v["value0"][$78];
+      var $78 = {};
+      for (var $79 in v.value0) {
+        if ({}.hasOwnProperty.call(v.value0, $79)) {
+          $78[$79] = v["value0"][$79];
         }
         ;
       }
       ;
-      $77.y = nodeY;
-      return $77;
+      $78.y = nodeY;
+      return $78;
     })(), childrenWithY);
   };
   var addHeight = function(v) {
@@ -20027,16 +20030,16 @@
       return 1 + maxChildHeight | 0;
     })();
     return new Node2((function() {
-      var $87 = {};
-      for (var $88 in v.value0) {
-        if ({}.hasOwnProperty.call(v.value0, $88)) {
-          $87[$88] = v["value0"][$88];
+      var $88 = {};
+      for (var $89 in v.value0) {
+        if ({}.hasOwnProperty.call(v.value0, $89)) {
+          $88[$89] = v["value0"][$89];
         }
         ;
       }
       ;
-      $87.height = nodeHeight;
-      return $87;
+      $88.height = nodeHeight;
+      return $88;
     })(), childrenWithHeight);
   };
   var cluster2 = function(config) {

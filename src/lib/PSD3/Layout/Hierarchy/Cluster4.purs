@@ -72,20 +72,23 @@ cluster config inputTree =
 
 -- | Center the root node on the full tree
 -- | After rendering, the root is centered on its immediate children
--- | This adjusts all x positions so the root aligns with the midpoint of all leaves
+-- | This adjusts all x positions so the root aligns with the midpoint of all LEAVES
 centerRoot :: forall r. Tree { x :: Number, y :: Number, height :: Int | r } -> Tree { x :: Number, y :: Number, height :: Int | r }
 centerRoot tree =
   let
+    -- Get all nodes and filter for leaves only (height = 0)
     allNodes = Array.fromFoldable tree
-    allX = map (\n -> n.x) allNodes
-    minX = fromMaybe 0.0 $ minimum allX
-    maxX = fromMaybe 0.0 $ maximum allX
+    leaves = Array.filter (\n -> n.height == 0) allNodes
+    leafX = map (\n -> n.x) leaves
+
+    minX = fromMaybe 0.0 $ minimum leafX
+    maxX = fromMaybe 0.0 $ maximum leafX
 
     -- Find root's current x
     Node root _ = tree
     rootX = root.x
 
-    -- Calculate where root should be (center of leaf spread)
+    -- Calculate where root should be (center of LEAF spread)
     targetX = (minX + maxX) / 2.0
 
     -- Calculate offset to shift entire tree
