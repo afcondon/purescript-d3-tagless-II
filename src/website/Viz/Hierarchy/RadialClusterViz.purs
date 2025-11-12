@@ -1,5 +1,5 @@
--- | Radial tree visualization using Tree4 with polar projection
-module D3.Viz.RadialTreeViz where
+-- | Radial cluster visualization using Cluster4 with polar projection
+module D3.Viz.RadialClusterViz where
 
 import Prelude
 
@@ -12,13 +12,13 @@ import Data.Number (pi, cos, sin, atan2, sqrt)
 import PSD3.Internal.Attributes.Sugar (classed, fill, strokeColor, strokeWidth, viewBox, cx, cy, radius, d, x, y, text, fontSize)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
-import PSD3.Layout.Hierarchy.Tree4 (tree, defaultTreeConfig)
+import PSD3.Layout.Hierarchy.Cluster4 (cluster, defaultClusterConfig)
 import D3.Viz.FlareData (HierData, getName, getValue, getChildren)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Console (log)
 
 -- | Convert HierData to Data.Tree
-hierDataToTree :: HierData -> Tree { name :: String, value :: Number, x :: Number, y :: Number, depth :: Int }
+hierDataToTree :: HierData -> Tree { name :: String, value :: Number, x :: Number, y :: Number, height :: Int }
 hierDataToTree hierData =
   let
     name = getName hierData
@@ -28,18 +28,20 @@ hierDataToTree hierData =
       Nothing -> Nil
       Just childrenArray -> fromFoldable $ map hierDataToTree childrenArray
   in
-    Node { name, value, x: 0.0, y: 0.0, depth: 0 } childrenList
+    Node { name, value, x: 0.0, y: 0.0, height: 0 } childrenList
 
 -- | Radial projection: convert (x, y) to polar coordinates
--- | x is mapped to angle, y (depth) is mapped to radius
+-- | x is mapped to angle, y (height) is mapped to radius
 radialPoint :: forall r. { x :: Number, y :: Number | r } -> Number -> Number -> { x :: Number, y :: Number }
 radialPoint node width height =
   let
     -- Map x to angle (0 to 2π)
     angle = (node.x / width) * 2.0 * pi - (pi / 2.0)  -- Start at top (-π/2)
-    -- Map y (depth) to radius
+    -- Map y (height) to radius - INVERTED for cluster (y=0 is leaves, should be at edge)
     minDim = if width < height then width else height
-    radius = (node.y / height) * (minDim / 2.0) * 0.85  -- Scale to 85% of radius
+    -- For cluster: y=0 (leaves) should be at max radius, y=maxHeight (root) should be at center
+    -- Since y is already normalized (0 to height), we invert it
+    radius = ((height - node.y) / height) * (minDim / 2.0) * 0.85  -- Leaves at edge, root at center
   in
     { x: radius * cos angle
     , y: radius * sin angle
@@ -87,7 +89,7 @@ makeLinksAsList (Node val children) =
 makeLinks :: forall r. Tree { x :: Number, y :: Number | r } -> Array { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
 makeLinks = Array.fromFoldable <<< makeLinksAsList
 
--- | Draw radial tree
+-- | Draw radial cluster
 draw :: forall m.
   Bind m =>
   MonadEffect m =>
@@ -99,14 +101,14 @@ draw flareData selector = do
   let centerX = chartWidth / 2.0
   let centerY = chartHeight / 2.0
 
-  liftEffect $ log "RadialTreeViz: Using Tree4 with radial projection"
+  liftEffect $ log "RadialClusterViz: Using Cluster4 with radial projection"
 
   -- Convert to Data.Tree
   let dataTree = hierDataToTree flareData
 
-  -- Apply Tree4 layout
-  let config = defaultTreeConfig { size = { width: chartWidth, height: chartHeight } }
-  let positioned = tree config dataTree
+  -- Apply Cluster4 layout
+  let config = defaultClusterConfig { size = { width: chartWidth, height: chartHeight } }
+  let positioned = cluster config dataTree
 
   -- Apply radial projection to all nodes
   let projectNode :: forall r. Tree { x :: Number, y :: Number | r } -> Tree { x :: Number, y :: Number | r }
@@ -117,19 +119,19 @@ draw flareData selector = do
         in
           Node (val { x = projected.x, y = projected.y }) projectedChildren
 
-  let radialTree = projectNode positioned
+  let radialCluster = projectNode positioned
 
   -- Flatten for rendering
-  let nodes = Array.fromFoldable radialTree
-  let links = makeLinks radialTree
+  let nodes = Array.fromFoldable radialCluster
+  let links = makeLinks radialCluster
 
-  liftEffect $ log $ "RadialTreeViz: Rendering " <> show (Array.length nodes) <> " nodes, " <> show (Array.length links) <> " links"
+  liftEffect $ log $ "RadialClusterViz: Rendering " <> show (Array.length nodes) <> " nodes, " <> show (Array.length links) <> " links"
 
   -- Create SVG
   root' <- attach selector :: m (D3Selection_ Unit)
   svg <- appendTo root' Svg
     [ viewBox 0.0 0.0 chartWidth chartHeight
-    , classed "radial-tree-viz"
+    , classed "radial-cluster-viz"
     ]
 
   -- Add title
@@ -138,7 +140,7 @@ draw flareData selector = do
     , y 20.0
     , fill "#333"
     , fontSize 16.0
-    , text "Radial Tree Layout (Reingold-Tilford)"
+    , text "Radial Cluster Layout (Dendrogram)"
     , classed "title"
     ]
 
@@ -170,6 +172,6 @@ draw flareData selector = do
       ]
   ) nodes
 
-  liftEffect $ log "RadialTreeViz: Rendering complete!"
+  liftEffect $ log "RadialClusterViz: Rendering complete!"
 
   pure unit

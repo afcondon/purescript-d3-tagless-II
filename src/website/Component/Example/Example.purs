@@ -27,6 +27,9 @@ import D3.Viz.HorizontalTreeViz as HorizontalTreeViz
 import D3.Viz.TreemapViz as TreemapViz
 import D3.Viz.PackViz as PackViz
 import D3.Viz.ClusterViz as ClusterViz
+import D3.Viz.ClusterViz4 as ClusterViz4
+import D3.Viz.RadialClusterViz as RadialClusterViz
+import D3.Viz.HorizontalClusterViz as HorizontalClusterViz
 import D3.Viz.PartitionViz as PartitionViz
 import D3.Viz.SunburstViz as SunburstViz
 import D3.Viz.AnimatedTreeCluster as AnimatedTreeCluster
@@ -230,6 +233,30 @@ handleAction = case _ of
           Right response -> do
             let blessed = readJSON_ response.body
             _ <- H.liftEffect $ eval_D3M $ ClusterViz.draw blessed "#example-viz"
+            pure unit
+
+      "cluster4" -> do
+        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        case result of
+          Left err -> log "Cluster4: Failed to load data"
+          Right treeData -> do
+            _ <- H.liftEffect $ eval_D3M $ ClusterViz4.draw treeData "#example-viz"
+            pure unit
+
+      "radial-cluster" -> do
+        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        case result of
+          Left err -> log "Radial Cluster: Failed to load data"
+          Right treeData -> do
+            _ <- H.liftEffect $ eval_D3M $ RadialClusterViz.draw treeData "#example-viz"
+            pure unit
+
+      "horizontal-cluster" -> do
+        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        case result of
+          Left err -> log "Horizontal Cluster: Failed to load data"
+          Right treeData -> do
+            _ <- H.liftEffect $ eval_D3M $ HorizontalClusterViz.draw treeData "#example-viz"
             pure unit
 
       "icicle" -> do
@@ -520,6 +547,9 @@ allExampleIds =
   , "treemap"
   , "pack-purescript"
   , "cluster-purescript"
+  , "cluster4"
+  , "radial-cluster"
+  , "horizontal-cluster"
   , "icicle"
   , "sunburst-purescript"
   , "animated-tree-cluster"
@@ -584,6 +614,12 @@ getExampleMeta id = case id of
     { id, name: "Pack (Pure PureScript)", description: "Circle packing layout with iterative relaxation algorithm in pure PureScript", category: "Hierarchies" }
   "cluster-purescript" -> Just
     { id, name: "Cluster (Pure PureScript)", description: "Dendrogram with equal leaf depth using pure PureScript implementation", category: "Hierarchies" }
+  "cluster4" -> Just
+    { id, name: "Cluster4 (Dendrogram)", description: "Vertical dendrogram using Cluster4 layout with Data.Tree - all leaves at equal depth", category: "Hierarchies" }
+  "radial-cluster" -> Just
+    { id, name: "Radial Cluster", description: "Radial dendrogram using Cluster4 with polar projection", category: "Hierarchies" }
+  "horizontal-cluster" -> Just
+    { id, name: "Horizontal Cluster", description: "Horizontal dendrogram using Cluster4 with swapped axes", category: "Hierarchies" }
   "icicle" -> Just
     { id, name: "Partition/Icicle (Pure PureScript)", description: "Rectangular partition layout (icicle chart) with equal layer height in pure PureScript", category: "Hierarchies" }
   "sunburst-purescript" -> Just
