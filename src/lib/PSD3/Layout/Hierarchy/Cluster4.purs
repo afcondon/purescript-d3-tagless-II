@@ -59,13 +59,44 @@ cluster config inputTree =
     -- Step 3: Assign sequential x positions to leaves
     rendered = render config.minSeparation sorted
 
-    -- Step 4: Add y coordinates based on height
-    withCoords = addYCoordinates rendered.tree
+    -- Step 4: Center root on the entire tree (all leaves)
+    centered = centerRoot rendered.tree
 
-    -- Step 5: Scale to final pixel coordinates
+    -- Step 5: Add y coordinates based on height
+    withCoords = addYCoordinates centered
+
+    -- Step 6: Scale to final pixel coordinates
     scaled = scaleToPixels config withCoords
   in
     scaled
+
+-- | Center the root node on the full tree
+-- | After rendering, the root is centered on its immediate children
+-- | This adjusts all x positions so the root aligns with the midpoint of all leaves
+centerRoot :: forall r. Tree { x :: Number, y :: Number, height :: Int | r } -> Tree { x :: Number, y :: Number, height :: Int | r }
+centerRoot tree =
+  let
+    allNodes = Array.fromFoldable tree
+    allX = map (\n -> n.x) allNodes
+    minX = fromMaybe 0.0 $ minimum allX
+    maxX = fromMaybe 0.0 $ maximum allX
+
+    -- Find root's current x
+    Node root _ = tree
+    rootX = root.x
+
+    -- Calculate where root should be (center of leaf spread)
+    targetX = (minX + maxX) / 2.0
+
+    -- Calculate offset to shift entire tree
+    offset = targetX - rootX
+
+    -- Shift all nodes by offset
+    shiftTree :: Tree { x :: Number, y :: Number, height :: Int | r } -> Tree { x :: Number, y :: Number, height :: Int | r }
+    shiftTree (Node val children) =
+      Node (val { x = val.x + offset }) (map shiftTree children)
+  in
+    shiftTree tree
 
 -- | Sort children by height (descending) to minimize crossovers
 -- | This is the D3 recommended pattern for dendrograms
