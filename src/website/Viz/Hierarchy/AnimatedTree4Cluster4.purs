@@ -12,14 +12,12 @@ import Data.List (List(..), fromFoldable)
 import Data.Maybe (Maybe(..))
 import Data.Time.Duration (Milliseconds(..))
 import Data.Tree (Tree(..))
-import Debug (spy)
 import Effect.Class (class MonadEffect, liftEffect)
-import Effect.Console (log)
-import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, openSelection, updateJoin, mergeSelections, setAttributes)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, openSelection, updateJoin, setAttributes)
 import PSD3.Internal.Attributes.Sugar (classed, fill, strokeColor, strokeWidth, viewBox, d, transitionWithDuration, to, cx, cy, radius, remove)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import PSD3.Layout.Hierarchy.Cluster4 (cluster, defaultClusterConfig)
-import PSD3.Layout.Hierarchy.Tree4 (tree, defaultTreeConfig)
+import PSD3.Layout.Hierarchy.Tree4 (treeWithSorting, defaultTreeConfig)
 
 -- | Layout type
 data LayoutType = TreeLayout | ClusterLayout
@@ -55,11 +53,12 @@ flattenTree :: forall r. Tree { name :: String | r } -> Array { name :: String |
 flattenTree = Array.fromFoldable
 
 -- | Create links from tree structure
-makeLinks :: forall r. Tree { x :: Number, y :: Number | r } -> Array { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
+-- | Now includes node names for stable key generation across layout changes
+makeLinks :: forall r. Tree { name :: String, x :: Number, y :: Number | r } -> Array { source :: { name :: String, x :: Number, y :: Number }, target :: { name :: String, x :: Number, y :: Number } }
 makeLinks (Node val children) =
   let
     childLinks = Array.fromFoldable children >>= \(Node childVal _) ->
-      [{ source: { x: val.x, y: val.y }, target: { x: childVal.x, y: childVal.y } }]
+      [{ source: { name: val.name, x: val.x, y: val.y }, target: { name: childVal.name, x: childVal.x, y: childVal.y } }]
     grandchildLinks = Array.fromFoldable children >>= makeLinks
   in
     childLinks <> grandchildLinks
@@ -79,9 +78,9 @@ nodeKey :: forall r. { name :: String | r } -> String
 nodeKey node = node.name
 
 -- | Link key function
--- Just returns String - no coercion needed!
-linkKey :: { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } } -> String
-linkKey link = show link.source.x <> "," <> show link.source.y <> "->" <> show link.target.x <> "," <> show link.target.y
+-- Uses node names for stable keys across layout changes (not positions!)
+linkKey :: { source :: { name :: String, x :: Number, y :: Number }, target :: { name :: String, x :: Number, y :: Number } } -> String
+linkKey link = link.source.name <> "->" <> link.target.name
 
 -- | Initial draw - creates SVG structure and returns data for animation
 draw :: forall m.
@@ -94,8 +93,6 @@ draw :: forall m.
                                                   , chartHeight :: Number
                                                   }
 draw flareData selector = do
-  liftEffect $ log "AnimatedTree4Cluster4: Creating SVG structure"
-
   let chartWidth = 1200.0
   let chartHeight = 900.0
 
@@ -131,7 +128,7 @@ animationStep dataTree linksGroup nodesGroup chartWidth chartHeight currentLayou
   let positioned = case currentLayout of
         TreeLayout ->
           let config = defaultTreeConfig { size = { width: chartWidth, height: chartHeight } }
-          in tree config dataTree
+          in treeWithSorting config dataTree
         ClusterLayout ->
           let config = defaultClusterConfig { size = { width: chartWidth, height: chartHeight } }
           in cluster config dataTree
@@ -140,19 +137,19 @@ animationStep dataTree linksGroup nodesGroup chartWidth chartHeight currentLayou
   let nodes = flattenTree positioned
   let links = makeLinks positioned
 
-  liftEffect $ log $ "Animating to " <> show currentLayout <> ": " <> show (Array.length nodes) <> " nodes, " <> show (Array.length links) <> " links"
 
   -- Update links with transition
   -- First select existing path elements, then call updateJoin
-  linksSelection <- spy "linkSelection: " $ openSelection linksGroup "path"
-  linkJoin <- spy "linkJoin: " $ updateJoin linksSelection Path links linkKey
+  linksSelection <- openSelection linksGroup "path"
+  linkJoin <- updateJoin linksSelection Path links linkKey
 
   -- Remove old links
   setAttributes linkJoin.exit [ remove ]
 
-  -- Merge enter and update selections to apply transitions to both
-  linkElements <- mergeSelections linkJoin.enter linkJoin.update
-  let linkPathFn :: { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } } -> String
+  -- Create actual DOM elements from enter placeholders
+  newEnterLinks <- appendTo linkJoin.enter Path []
+
+  let linkPathFn :: { source :: { name :: String, x :: Number, y :: Number }, target :: { name :: String, x :: Number, y :: Number } } -> String
       linkPathFn link =
         let sx = link.source.x
             sy = link.source.y
@@ -160,27 +157,45 @@ animationStep dataTree linksGroup nodesGroup chartWidth chartHeight currentLayou
             ty = link.target.y
         in verticalLinkPath sx sy tx ty
 
-  setAttributes linkElements $ (transitionWithDuration $ Milliseconds 1500.0) `to`
-    [ d linkPathFn
-    , fill "none"
+  -- Set static attributes on enter links
+  _ <- setAttributes newEnterLinks
+    [ fill "none"
     , strokeColor "#555"
     , strokeWidth 1.5
     , classed "link"
     ]
 
+  -- For ENTER links: Set initial path immediately (no transition)
+  _ <- setAttributes newEnterLinks
+    [ d linkPathFn
+    ]
+
+  -- Set static attributes on update links
+  _ <- setAttributes linkJoin.update
+    [ fill "none"
+    , strokeColor "#555"
+    , strokeWidth 1.5
+    , classed "link"
+    ]
+
+  -- For UPDATE links: Transition path to new positions
+  setAttributes linkJoin.update $ (transitionWithDuration $ Milliseconds 1500.0) `to`
+    [ d linkPathFn
+    ]
+
   -- Update nodes with transition
   -- First select existing circle elements, then call updateJoin
-  nodesSelection <- spy "openSelection circle" $ openSelection nodesGroup "circle"
-  nodeJoin <- spy "updateJoin" $ updateJoin nodesSelection Circle nodes nodeKey
+  nodesSelection <- openSelection nodesGroup "circle"
+  nodeJoin <- updateJoin nodesSelection Circle nodes nodeKey
 
   -- Remove old nodes
-  _ <- spy "setAttributes node exit: " $ setAttributes nodeJoin.exit [ remove ]
+  _ <- setAttributes nodeJoin.exit [ remove ]
 
-  -- Merge enter and update selections to apply transitions to both
-  nodeElements <- spy "mergeSelection: " $ mergeSelections nodeJoin.enter nodeJoin.update
+  -- Create actual DOM elements from enter placeholders
+  newEnterNodes <- appendTo nodeJoin.enter Circle []
 
-  -- First set static attributes
-  _ <- spy "setAttributes static nodeElements" $ setAttributes nodeElements
+  -- Set static attributes on all nodes (both enter and update)
+  _ <- setAttributes newEnterNodes
     [ radius 4.0
     , fill "#999"
     , strokeColor "#555"
@@ -188,8 +203,23 @@ animationStep dataTree linksGroup nodesGroup chartWidth chartHeight currentLayou
     , classed "node"
     ]
 
-  -- Then apply transition for position
-  _ <- spy "setAttributes transition nodeElements" $ setAttributes nodeElements $ (transitionWithDuration $ Milliseconds 1500.0) `to`
+  -- For ENTER nodes: Set initial position immediately (no transition)
+  _ <- setAttributes newEnterNodes
+    [ cx (\(node :: TreeModel) -> node.x)
+    , cy (\(node :: TreeModel) -> node.y)
+    ]
+
+  -- Set static attributes on update nodes too
+  _ <- setAttributes nodeJoin.update
+    [ radius 4.0
+    , fill "#999"
+    , strokeColor "#555"
+    , strokeWidth 1.5
+    , classed "node"
+    ]
+
+  -- For UPDATE nodes: Transition to new position
+  _ <- setAttributes nodeJoin.update $ (transitionWithDuration $ Milliseconds 1500.0) `to`
     [ cx (\(node :: TreeModel) -> node.x)
     , cy (\(node :: TreeModel) -> node.y)
     ]

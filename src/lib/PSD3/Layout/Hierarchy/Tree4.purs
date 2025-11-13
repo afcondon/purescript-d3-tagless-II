@@ -74,6 +74,36 @@ tree config inputTree =
   in
     scaled
 
+-- | Tree layout with height-based sorting for consistent ordering with Cluster4
+-- | Use this variant when your tree has height computed and you want sorted children
+treeWithSorting :: forall r.
+  TreeConfig ->
+  Tree { x :: Number, y :: Number, depth :: Int, height :: Int | r } ->
+  Tree { x :: Number, y :: Number, depth :: Int, height :: Int | r }
+treeWithSorting config inputTree =
+  let
+    -- Step 1: Add depth field
+    withDepth = addDepth 0 inputTree
+
+    -- Step 2: Compute height field (distance from deepest leaf)
+    withHeight = addHeightField withDepth
+
+    -- Step 3: Sort children by height (descending) for consistent ordering with Cluster4
+    sorted = sortByHeight withHeight
+
+    -- Step 4: Compute relative positions (bottom-up)
+    -- Annotates tree with Tuple { offset :: Number } original
+    rendered = render config.minSeparation sorted
+
+    -- Step 5: Convert offsets to absolute coordinates (top-down)
+    -- Strips Tuple annotation, adds x and y fields
+    withCoords = petrify 0.0 rendered
+
+    -- Step 6: Scale to final pixel coordinates
+    scaled = scaleToPixels config withCoords
+  in
+    scaled
+
 -- | Update depth field (top-down traversal)
 -- | Input must already have depth field, which gets overwritten
 addDepth :: forall r. Int -> Tree { x :: Number, y :: Number, depth :: Int | r } -> Tree { x :: Number, y :: Number, depth :: Int | r }
@@ -316,3 +346,40 @@ scaleToPixels config inputTree =
         (map go children)
   in
     go inputTree
+
+-- | Compute height field (distance from deepest leaf)
+-- | Bottom-up traversal: leaves get 0, parents get 1 + max(children's height)
+addHeightField :: forall r. Tree { x :: Number, y :: Number, depth :: Int, height :: Int | r } -> Tree { x :: Number, y :: Number, depth :: Int, height :: Int | r }
+addHeightField (Node val children) =
+  let
+    -- Recursively compute children's heights
+    childrenWithHeight = map addHeightField children
+
+    -- Leaf: height = 0
+    -- Internal: height = 1 + max(children's height)
+    nodeHeight = case Array.fromFoldable childrenWithHeight of
+      [] -> 0
+      childArray ->
+        let childHeights = map (\(Node v _) -> v.height) childArray
+            maxChildHeight = fromMaybe 0 (maximum childHeights)
+        in maxChildHeight + 1
+  in
+    Node (val { height = nodeHeight }) childrenWithHeight
+
+-- | Sort children by height (descending) to minimize crossovers
+-- | This matches Cluster4's behavior for consistent child ordering during animations
+sortByHeight :: forall r. Tree { x :: Number, y :: Number, depth :: Int, height :: Int | r } -> Tree { x :: Number, y :: Number, depth :: Int, height :: Int | r }
+sortByHeight (Node val children) =
+  let
+    -- Recursively sort grandchildren first
+    sortedGrandchildren = map sortByHeight children
+
+    -- Convert to Array, sort, then back to List
+    childArray = Array.fromFoldable sortedGrandchildren
+    sortedArray = Array.sortBy compareByHeight childArray
+    sortedChildrenList = fromFoldable sortedArray
+  in
+    Node val sortedChildrenList
+  where
+    compareByHeight :: forall s. Tree { height :: Int | s } -> Tree { height :: Int | s } -> Ordering
+    compareByHeight (Node a _) (Node b _) = compare b.height a.height  -- Descending
