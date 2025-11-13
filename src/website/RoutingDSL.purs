@@ -42,6 +42,7 @@ routes =
   <|> isometricCurveExperiment
   <|> interpreters
   <|> mermaidDiagrams
+  <|> forceNavigator
   <|> codeExplorer
   <|> explore
   <|> wealthHealth
@@ -157,6 +158,10 @@ interpreters = Interpreters <$ lit "interpreters" <* end
 mermaidDiagrams :: Match Route
 mermaidDiagrams = MermaidDiagrams <$ lit "mermaid-diagrams" <* end
 
+-- | Match: /force-navigator
+forceNavigator :: Match Route
+forceNavigator = ForceNavigator <$ lit "force-navigator" <* end
+
 -- | Match: /code-explorer
 codeExplorer :: Match Route
 codeExplorer = CodeExplorer <$ lit "code-explorer" <* end
@@ -223,6 +228,7 @@ routeToPath Hierarchies = "/hierarchies"
 routeToPath IsometricCurveExperiment = "/isometric-curve-experiment"
 routeToPath Interpreters = "/interpreters"
 routeToPath MermaidDiagrams = "/mermaid-diagrams"
+routeToPath ForceNavigator = "/force-navigator"
 routeToPath CodeExplorer = "/code-explorer"
 routeToPath (Explore snippetId) = "/explore/" <> snippetId
 routeToPath WealthHealth = "/wealth-health"

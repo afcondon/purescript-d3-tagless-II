@@ -42,17 +42,17 @@ visibleNodes :: Set String -> Array NavigationSimNode -> Array NavigationSimNode
 visibleNodes expanded allNodes =
   let
     -- Start with center node
-    centerNode = allNodes # Array.filter (\(D3SimNode n) -> n.id == "purescript-d3")
+    centerNode = allNodes # Array.filter (\n -> n.id == "purescript-d3")
 
     -- Get all section nodes (children of center)
-    sectionNodes = allNodes # Array.filter (\(D3SimNode n) -> n.nodeType == Section)
+    sectionNodes = allNodes # Array.filter (\n -> n.nodeType == Section)
 
     -- For each expanded section, get its children
     expandedChildren = do
-      (D3SimNode node) <- allNodes
+      node <- allNodes
       if Set.member node.id expanded
         then case node.children of
-          Just childIds -> allNodes # Array.filter (\(D3SimNode n) -> Array.elem n.id childIds)
+          Just childIds -> allNodes # Array.filter (\n -> Array.elem n.id childIds)
           Nothing -> []
         else []
   in
@@ -70,7 +70,7 @@ cloneLink link =
 visibleLinks :: Array NavigationSimNode -> Array D3Link_Unswizzled -> Array D3Link_Unswizzled
 visibleLinks nodes allLinks =
   let
-    visibleIds = Set.fromFoldable $ map (\(D3SimNode n) -> n.id) nodes
+    visibleIds = Set.fromFoldable $ map (\n -> n.id) nodes
     unpackLink :: D3Link_Unswizzled -> { source :: String, target :: String }
     unpackLink = unsafeCoerce
 

@@ -3,21 +3,20 @@ module D3.Viz.ForceNavigator.Forces where
 import Prelude
 
 import PSD3.Internal.Attributes.Instances (Label)
-import PSD3.Internal.Types (Datum_)
-import D3.Viz.ForceNavigator.Model (NodeType(..))
-import D3.Viz.ForceNavigator.Unsafe (unboxD3SimNode)
+import D3.Viz.ForceNavigator.Model (NavigationSimNode, NodeType(..))
 import PSD3.Internal.Simulation.Config as F
 import PSD3.Internal.Simulation.Forces (createForce, createLinkForce, initialize)
 import PSD3.Internal.Simulation.Types (Force, ForceType(..), RegularForceType(..), allNodes)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))
 import Data.Number (infinity)
+import Unsafe.Coerce (unsafeCoerce)
 
 -- | Helper to get collision radius based on node type
 -- | Can be customized per nodeType for different spacing
-collisionRadius :: Datum_ -> Number
+collisionRadius :: forall d. d -> Number
 collisionRadius d = do
-  let node = unboxD3SimNode d
+  let node = unsafeCoerce d :: NavigationSimNode
   case node.nodeType of
     _ -> 80.0  -- Use consistent collision radius for spacing
 

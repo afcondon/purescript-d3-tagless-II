@@ -106,6 +106,7 @@ data Route
   | IsometricCurveExperiment  -- Temporary: Isometric curve experimentation
   | Interpreters
   | MermaidDiagrams  -- Mermaid AST visualization examples
+  | ForceNavigator  -- Force-directed navigation graph
   | CodeExplorer
   | Explore String  -- Code exploration page for a specific snippet
   | WealthHealth    -- Wealth & Health of Nations visualization
@@ -144,6 +145,7 @@ instance showRoute :: Show Route where
   show IsometricCurveExperiment = "Isometric Curve Experiment"
   show Interpreters = "Interpreters"
   show MermaidDiagrams = "Mermaid AST Diagrams"
+  show ForceNavigator = "Force Navigator"
   show CodeExplorer = "Code Explorer"
   show (Explore snippetId) = "Explore: " <> snippetId
   show WealthHealth = "Wealth & Health of Nations"

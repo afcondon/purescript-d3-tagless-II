@@ -1,7 +1,7 @@
 module D3.Viz.ForceNavigator.Data where
 
 import D3.Viz.ForceNavigator.Model (Category(..), NavigationRawModel, NodeType(..))
-import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode(..))
+import PSD3.Data.Node (D3Link_Unswizzled)
 import Unsafe.Coerce (unsafeCoerce)
 import Data.Maybe (Maybe(..))
 import Data.Nullable (notNull, null)
@@ -15,7 +15,7 @@ navigationData :: NavigationRawModel
 navigationData = {
   nodes: [
     -- Central root node
-    D3SimNode {
+    {
       id: "purescript-d3"
     , label: "PureScript D3"
     , nodeType: Center
@@ -33,7 +33,7 @@ navigationData = {
     }
 
     -- Main sections
-  , D3SimNode {
+  , {
       id: "gallery"
     , label: "Gallery"
     , nodeType: Section
@@ -55,7 +55,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "about"
     , label: "About"
     , nodeType: Section
@@ -72,7 +72,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "spago"
     , label: "Spago Explorer"
     , nodeType: Section
@@ -89,7 +89,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "interpreters"
     , label: "Interpreters"
     , nodeType: Section
@@ -106,7 +106,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "github"
     , label: "GitHub"
     , nodeType: Section
@@ -124,7 +124,7 @@ navigationData = {
     }
 
     -- Gallery children - Basic Charts
-  , D3SimNode {
+  , {
       id: "line-chart"
     , label: "Line Chart"
     , nodeType: Example
@@ -141,7 +141,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "bar-chart"
     , label: "Bar Chart"
     , nodeType: Example
@@ -158,7 +158,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "scatter-plot"
     , label: "Scatter Plot"
     , nodeType: Example
@@ -175,7 +175,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "scatter-quartet"
     , label: "Anscombe's Quartet"
     , nodeType: Example
@@ -193,7 +193,7 @@ navigationData = {
     }
 
     -- Gallery children - Advanced Layouts
-  , D3SimNode {
+  , {
       id: "chord-diagram"
     , label: "Chord Diagram"
     , nodeType: Example
@@ -210,7 +210,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "bubble-chart"
     , label: "Bubble Chart"
     , nodeType: Example
@@ -227,7 +227,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "sankey"
     , label: "Sankey Diagram"
     , nodeType: Example
@@ -244,7 +244,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "tree"
     , label: "Tree Layout"
     , nodeType: Example
@@ -261,7 +261,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "tree-horizontal"
     , label: "Horizontal Tree"
     , nodeType: Example
@@ -278,7 +278,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "tree-vertical"
     , label: "Vertical Tree"
     , nodeType: Example
@@ -295,7 +295,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "tree-radial"
     , label: "Radial Tree"
     , nodeType: Example
@@ -313,7 +313,7 @@ navigationData = {
     }
 
     -- Gallery children - Interactive
-  , D3SimNode {
+  , {
       id: "three-little-circles"
     , label: "Three Little Circles"
     , nodeType: Example
@@ -330,7 +330,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "gup"
     , label: "General Update Pattern"
     , nodeType: Example
@@ -347,7 +347,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "les-mis"
     , label: "Les Misérables Network"
     , nodeType: Example
@@ -365,7 +365,7 @@ navigationData = {
     }
 
     -- Interpreters children
-  , D3SimNode {
+  , {
       id: "meta-tree"
     , label: "MetaTree Visualizer"
     , nodeType: Example
@@ -382,7 +382,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "print-tree"
     , label: "String Generator"
     , nodeType: Example
@@ -400,7 +400,7 @@ navigationData = {
     }
 
     -- About children (features)
-  , D3SimNode {
+  , {
       id: "type-safe"
     , label: "Type-Safe"
     , nodeType: Feature
@@ -417,7 +417,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "composable"
     , label: "Composable"
     , nodeType: Feature
@@ -434,7 +434,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "interpreters-feature"
     , label: "Multiple Interpreters"
     , nodeType: Feature
@@ -451,7 +451,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "d3-powered"
     , label: "D3-Powered"
     , nodeType: Feature
@@ -468,7 +468,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "interactive-feature"
     , label: "Interactive"
     , nodeType: Feature
@@ -485,7 +485,7 @@ navigationData = {
     , fy: null
     }
 
-  , D3SimNode {
+  , {
       id: "documented"
     , label: "Well-Documented"
     , nodeType: Feature
