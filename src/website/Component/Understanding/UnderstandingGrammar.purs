@@ -11,7 +11,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3 as D3
 import PSD3.Data.Node (NodeID)
-import PSD3.Interpreter.MermaidAST (MermaidASTM)
+import PSD3.Interpreter.MermaidAST (MermaidASTM, MermaidSelection)
 import PSD3.Shared.DocsHeader as DocsHeader
 import PSD3.Shared.MermaidAST as MermaidAST
 import PSD3.Types (Element(..))
@@ -31,7 +31,7 @@ type Slots =
 _docsHeader = Proxy :: Proxy "docsHeader"
 
 -- | General Update Pattern (GUP) example showing enter/update/exit
-gupVisualization :: MermaidASTM NodeID
+gupVisualization :: MermaidASTM (MermaidSelection NodeID)
 gupVisualization = do
   root <- D3.attach "div"
   svg <- D3.appendTo root Svg [viewBox 0.0 100.0 800.0 350.0, classed "d3svg gup"]
@@ -63,7 +63,7 @@ gupVisualization = do
   pure newlyEntered
 
 -- Parabola (Three Little Circles with data-driven positioning)
-viz_ParabolaAST :: MermaidASTM NodeID
+viz_ParabolaAST :: MermaidASTM (MermaidSelection NodeID)
 viz_ParabolaAST = do
   root <- D3.attach "div"
   svg <- D3.appendTo root Svg []
@@ -80,7 +80,7 @@ viz_ParabolaAST = do
   pure circles
 
 -- Bubble Chart (circle pack hierarchy)
-viz_BubbleChartAST :: MermaidASTM NodeID
+viz_BubbleChartAST :: MermaidASTM (MermaidSelection NodeID)
 viz_BubbleChartAST = do
   root <- D3.attach "div"
   svg <- D3.appendTo root Svg []

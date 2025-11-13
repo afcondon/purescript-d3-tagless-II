@@ -5,7 +5,7 @@ import Prelude
 import Effect (Effect)
 import PSD3.Internal.Types (D3Selection_)
 import PSD3.Simulation.Scene (TransitionSpec, encodeEnterBehavior, encodeExitBehavior, encodeUpdateBehavior)
-import PSD3.Data.Node (D3_SimulationNode)
+import PSD3.Data.Node (SimulationNode)
 
 -- ============================================================================
 -- Scene Transition Execution
@@ -58,7 +58,7 @@ executeSceneTransition_
      TransitionSpec
   -> String                        -- Node selector
   -> String                        -- Link selector
-  -> Array (D3_SimulationNode d)   -- Nodes with target positions
+  -> Array (SimulationNode d)      -- Nodes with target positions
   -> Effect Unit                   -- Completion callback
   -> Effect Unit
 executeSceneTransition_ spec =
@@ -70,6 +70,6 @@ foreign import executeSceneTransition_Impl
      TransitionSpec_
   -> String                        -- Node selector
   -> String                        -- Link selector
-  -> Array (D3_SimulationNode d)   -- Nodes with target positions
+  -> Array (SimulationNode d)      -- Nodes with target positions
   -> Effect Unit                   -- Completion callback
   -> Effect Unit

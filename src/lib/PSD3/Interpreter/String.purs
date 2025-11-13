@@ -16,10 +16,15 @@ import Effect (Effect)
 import Effect.Class (class MonadEffect)
 import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, discard, pure, show, unit, ($), (+), (<>))
 
+-- | Phantom-type-aware selection type for String interpreter
+-- | The type parameter d tracks the datum type (for compatibility with phantom types)
+-- | but is not used at runtime (String interpreter just tracks JavaScript code strings)
+newtype StringSelection d = StringSelection String
+
 -- TODO s/Effect/Identity
 newtype D3PrinterM a = D3PrinterM (StateT String Effect a)
 
-runPrinter :: D3PrinterM String -> String -> Effect (Tuple String String)
+runPrinter :: forall d. D3PrinterM (StringSelection d) -> String -> Effect (Tuple (StringSelection d) String)
 runPrinter (D3PrinterM state) initialString = runStateT state initialString
 
 derive newtype instance functorD3PrinterM     :: Functor           D3PrinterM
@@ -30,72 +35,72 @@ derive newtype instance monadD3PrinterM       :: Monad             D3PrinterM
 derive newtype instance monadStateD3PrinterM  :: MonadState String D3PrinterM 
 derive newtype instance monadEffD3PrinterM    :: MonadEffect       D3PrinterM
 
-instance d3Tagless :: SelectionM String D3PrinterM where
+instance d3Tagless :: SelectionM StringSelection D3PrinterM where
   attach selector = do
     let code = showSelectAllInDOM_ selector
     modify_ (\s -> s <> code)
-    pure code
+    pure (StringSelection code)
 
-  selectUnder selection selector = do
+  selectUnder (StringSelection selection) selector = do
     let code = showSelectAll_ selector selection
     modify_ (\s -> s <> "\n  ." <> code)
-    pure code
+    pure (StringSelection code)
 
-  appendTo selection element attributes = do
+  appendTo (StringSelection selection) element attributes = do
     let appendCode = showAppend_ element selection
         attributeString = foldl applySelectionAttributeString appendCode attributes
     modify_ (\s -> s <> "\n\nconst /* TODO: varName */ = " <> appendCode <> attributeString <> ";")
-    pure appendCode
+    pure (StringSelection appendCode)
 
-  filterSelection selection selector = do
+  filterSelection (StringSelection selection) selector = do
     let code = selection <> ".filter(" <> show selector <> ")"
     modify_ (\s -> s <> "\n  ." <> code)
-    pure code
+    pure (StringSelection code)
 
-  mergeSelections a b = do
+  mergeSelections (StringSelection a) (StringSelection b) = do
     let code = a <> ".merge(" <> b <> ")"
     modify_ (\s -> s <> "\n  ." <> code)
-    pure code
+    pure (StringSelection code)
 
-  setAttributes selection attributes = do
+  setAttributes (StringSelection selection) attributes = do
     let attributeString = foldl (\acc attr -> acc <> "\n  ." <> applySelectionAttributeString selection attr) "" attributes
     modify_ (\s -> s <> attributeString)
     pure unit
 
-  on selection (Drag drag) = do
+  on (StringSelection selection) (Drag drag) = do
     modify_ (\s -> s <> "\n  .call(d3.drag())")
     pure unit
-  on selection (Zoom zoom) = do
+  on (StringSelection selection) (Zoom zoom) = do
     modify_ (\s -> s <> "\n  .call(d3.zoom())")
     pure unit
 
-  openSelection selection selector = do
+  openSelection (StringSelection selection) selector = do
     let code = showSelectAll_ selector selection
     modify_ (\s -> s <> "\n\nconst /* TODO: varName */ = " <> code <> ";")
-    pure code
+    pure (StringSelection code)
 
-  simpleJoin selection e ds k = do
+  simpleJoin (StringSelection selection) e ds k = do
     let dataCode = showData_ ds selection
         joinCode = dataCode <> "\n  .join(" <> show e <> ")"
     modify_ (\s -> s <> "\n\nconst /* TODO: varName */ = " <> joinCode <> ";")
-    pure joinCode
+    pure (StringSelection joinCode)
 
-  nestedJoin selection e extractChildren k = do
+  nestedJoin (StringSelection selection) e extractChildren k = do
     let dataCode = selection <> "\n  .data(d => extractChildren(d))"  -- Shows nested data function
         joinCode = dataCode <> "\n  .join(" <> show e <> ")"
     modify_ (\s -> s <> "\n\nconst /* TODO: varName */ = " <> joinCode <> ";")
-    pure joinCode
+    pure (StringSelection joinCode)
 
-  updateJoin selection e ds k = do
+  updateJoin (StringSelection selection) e ds k = do
     let dataCode = showData_ ds selection
         enterCode = dataCode <> "\n  .enter().append(" <> show e <> ")"
         exitCode = dataCode <> "\n  .exit().remove()"
     modify_ (\s -> s <> "\n\n// Update pattern\nconst update = " <> dataCode <> ";\nconst enter = " <> enterCode <> ";\nconst exit = " <> exitCode <> ";")
-    pure { enter: enterCode, exit: exitCode, update: dataCode }
+    pure { enter: StringSelection enterCode, exit: StringSelection exitCode, update: StringSelection dataCode }
       
 
 
-applySelectionAttributeString :: String -> SelectionAttribute -> String
+applySelectionAttributeString :: forall d. String -> SelectionAttribute d -> String
 applySelectionAttributeString selection  =
   case _ of
     (AttrT (AttributeSetter label attr))     -> trimSelectionPrefix $ showSetAttr_ label (unboxAttr attr) selection
@@ -133,7 +138,7 @@ foreign import showExit_            :: String -> String
 foreign import showAddTransition_   :: String -> Transition -> String
 foreign import showRemoveSelection_ :: String -> String
 foreign import showAppend_          :: Element -> String -> String
-foreign import showKeyFunction_     :: forall d. Array d -> ComputeKeyFunction_ -> String -> String
+foreign import showKeyFunction_     :: forall d key. Array d -> ComputeKeyFunction_ d key -> String -> String
 foreign import showData_            :: forall d. Array d -> String -> String
 foreign import showSetAttr_         :: String -> D3Attr_ -> String -> String
 foreign import showSetText_         :: D3Attr_ -> String -> String

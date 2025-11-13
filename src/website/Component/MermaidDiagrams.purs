@@ -12,7 +12,7 @@ import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3 as D3
 import PSD3.Attributes (fill, fillOpacity, radius, cx, cy, width, height, strokeWidth, strokeColor, strokeOpacity, x, y, to, transitionWithDuration, classed, fontSize, viewBox, andThen, remove)
 import PSD3.Types (Element(..))
-import PSD3.Interpreter.MermaidAST (MermaidASTM, runMermaidAST)
+import PSD3.Interpreter.MermaidAST (MermaidASTM, MermaidSelection, runMermaidAST)
 import PSD3.Data.Node (NodeID)
 import Unsafe.Coerce (unsafeCoerce)
 import Data.Time.Duration (Milliseconds(..))
@@ -287,7 +287,7 @@ handleAction = case _ of
     triggerMermaidRendering
 
 -- Test 1: Simple selection and append
-test1_SimpleAppend :: MermaidASTM NodeID
+test1_SimpleAppend :: MermaidASTM (MermaidSelection NodeID)
 test1_SimpleAppend = do
   svg <- D3.attach "svg"
   circle <- D3.appendTo svg Circle
@@ -299,7 +299,7 @@ test1_SimpleAppend = do
   pure circle
 
 -- Test 2: Multiple appends in sequence
-test2_MultipleAppends :: MermaidASTM NodeID
+test2_MultipleAppends :: MermaidASTM (MermaidSelection NodeID)
 test2_MultipleAppends = do
   svg <- D3.attach "svg"
   g <- D3.appendTo svg Group []
@@ -309,7 +309,7 @@ test2_MultipleAppends = do
   pure circle3
 
 -- Test 3: SelectUnder and data join
-test3_SelectUnderJoin :: MermaidASTM NodeID
+test3_SelectUnderJoin :: MermaidASTM (MermaidSelection NodeID)
 test3_SelectUnderJoin = do
   svg <- D3.attach "svg"
   circles <- D3.selectUnder svg "circle"
@@ -321,7 +321,7 @@ test3_SelectUnderJoin = do
   pure joined
 
 -- Test 4: Update pattern (enter/exit)
-test4_UpdatePattern :: MermaidASTM NodeID
+test4_UpdatePattern :: MermaidASTM (MermaidSelection NodeID)
 test4_UpdatePattern = do
   svg <- D3.attach "svg"
   circles <- D3.selectUnder svg "circle"
@@ -333,7 +333,7 @@ test4_UpdatePattern = do
   pure enter
 
 -- Test 5: Filter selection
-test5_FilterSelection :: MermaidASTM NodeID
+test5_FilterSelection :: MermaidASTM (MermaidSelection NodeID)
 test5_FilterSelection = do
   svg <- D3.attach "svg"
   allCircles <- D3.selectUnder svg "circle"
@@ -342,7 +342,7 @@ test5_FilterSelection = do
   pure filtered
 
 -- Test 6: Merge selections
-test6_MergeSelections :: MermaidASTM NodeID
+test6_MergeSelections :: MermaidASTM (MermaidSelection NodeID)
 test6_MergeSelections = do
   svg <- D3.attach "svg"
   circles1 <- D3.selectUnder svg ".group1"
@@ -352,7 +352,7 @@ test6_MergeSelections = do
   pure merged
 
 -- Test 7: Nested groups
-test7_NestedGroups :: MermaidASTM NodeID
+test7_NestedGroups :: MermaidASTM (MermaidSelection NodeID)
 test7_NestedGroups = do
   svg <- D3.attach "svg"
   g1 <- D3.appendTo svg Group []
@@ -367,7 +367,7 @@ test7_NestedGroups = do
   pure rect
 
 -- Test 8: Mixed element types
-test8_MixedElements :: MermaidASTM NodeID
+test8_MixedElements :: MermaidASTM (MermaidSelection NodeID)
 test8_MixedElements = do
   svg <- D3.attach "svg"
   rect <- D3.appendTo svg Rect [width 200.0, height 100.0, fill "lightblue"]
@@ -377,7 +377,7 @@ test8_MixedElements = do
   pure text
 
 -- Test 9: Open selection (nested join)
-test9_OpenSelection :: MermaidASTM NodeID
+test9_OpenSelection :: MermaidASTM (MermaidSelection NodeID)
 test9_OpenSelection = do
   svg <- D3.attach "svg"
   groups <- D3.simpleJoin svg Group [1, 2, 3] unsafeCoerce
@@ -385,7 +385,7 @@ test9_OpenSelection = do
   pure opened
 
 -- Test 10: Attributes only (no joins)
-test10_AttributesOnly :: MermaidASTM NodeID
+test10_AttributesOnly :: MermaidASTM (MermaidSelection NodeID)
 test10_AttributesOnly = do
   svg <- D3.attach "svg"
   circle <- D3.appendTo svg Circle []
@@ -400,7 +400,7 @@ test10_AttributesOnly = do
   pure circle
 
 -- Test 11: Transitions
-test11_Transitions :: MermaidASTM NodeID
+test11_Transitions :: MermaidASTM (MermaidSelection NodeID)
 test11_Transitions = do
   svg <- D3.attach "svg"
   circle <- D3.appendTo svg Circle [cx 50.0, cy 50.0, radius 20.0, fill "red"]
@@ -419,7 +419,7 @@ test11_Transitions = do
 -- ============================================================================
 
 -- Parabola (Three Little Circles with data-driven positioning)
-viz_ParabolaAST :: MermaidASTM NodeID
+viz_ParabolaAST :: MermaidASTM (MermaidSelection NodeID)
 viz_ParabolaAST = do
   root <- D3.attach "div"
   svg <- D3.appendTo root Svg []
@@ -436,7 +436,7 @@ viz_ParabolaAST = do
   pure circles
 
 -- Multi-Line Chart (time-series with multiple paths)
-viz_MultiLineChartAST :: MermaidASTM NodeID
+viz_MultiLineChartAST :: MermaidASTM (MermaidSelection NodeID)
 viz_MultiLineChartAST = do
   root <- D3.attach "div"
   svg <- D3.appendTo root Svg []
@@ -460,7 +460,7 @@ viz_MultiLineChartAST = do
   pure path3
 
 -- Radial Stacked Bar Chart
-viz_StackedBarAST :: MermaidASTM NodeID
+viz_StackedBarAST :: MermaidASTM (MermaidSelection NodeID)
 viz_StackedBarAST = do
   root <- D3.attach "div"
   svg <- D3.appendTo root Svg []
@@ -481,7 +481,7 @@ viz_StackedBarAST = do
   pure labels
 
 -- Chord Diagram (circular dependency viz)
-viz_ChordDiagramAST :: MermaidASTM NodeID
+viz_ChordDiagramAST :: MermaidASTM (MermaidSelection NodeID)
 viz_ChordDiagramAST = do
   root <- D3.attach "div"
   svg <- D3.appendTo root Svg []
@@ -509,7 +509,7 @@ viz_ChordDiagramAST = do
   pure arcPaths
 
 -- Sankey Diagram (flow diagram)
-viz_SankeyAST :: MermaidASTM NodeID
+viz_SankeyAST :: MermaidASTM (MermaidSelection NodeID)
 viz_SankeyAST = do
   root <- D3.attach "div"
   svg <- D3.appendTo root Svg []
@@ -546,7 +546,7 @@ viz_SankeyAST = do
   pure labels
 
 -- Tree (Vertical hierarchical layout)
-viz_TreeAST :: MermaidASTM NodeID
+viz_TreeAST :: MermaidASTM (MermaidSelection NodeID)
 viz_TreeAST = do
   root <- D3.attach "div"
   svg <- D3.appendTo root Svg []
@@ -584,7 +584,7 @@ viz_TreeAST = do
   pure labels
 
 -- Bubble Chart (circle pack hierarchy)
-viz_BubbleChartAST :: MermaidASTM NodeID
+viz_BubbleChartAST :: MermaidASTM (MermaidSelection NodeID)
 viz_BubbleChartAST = do
   root <- D3.attach "div"
   svg <- D3.appendTo root Svg []
@@ -613,7 +613,7 @@ viz_BubbleChartAST = do
   pure labels
 
 -- Icicle Chart (partition layout)
-viz_IcicleAST :: MermaidASTM NodeID
+viz_IcicleAST :: MermaidASTM (MermaidSelection NodeID)
 viz_IcicleAST = do
   root <- D3.attach "div"
   svg <- D3.appendTo root Svg []
@@ -643,7 +643,7 @@ viz_IcicleAST = do
   pure labels
 
 -- Treemap (space-filling hierarchy)
-viz_TreemapAST :: MermaidASTM NodeID
+viz_TreemapAST :: MermaidASTM (MermaidSelection NodeID)
 viz_TreemapAST = do
   root <- D3.attach "div"
   svg <- D3.appendTo root Svg []
@@ -673,7 +673,7 @@ viz_TreemapAST = do
   pure tileLabels
 
 -- General Update Pattern (GUP)
-viz_GUPAST :: MermaidASTM NodeID
+viz_GUPAST :: MermaidASTM (MermaidSelection NodeID)
 viz_GUPAST = do
   root <- D3.attach "div"
   svg <- D3.appendTo root Svg [viewBox 0.0 100.0 800.0 350.0, classed "d3svg gup"]

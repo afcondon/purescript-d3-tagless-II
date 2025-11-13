@@ -14,4 +14,4 @@ foreign import axisBottom_ :: LinearScale_ -> Axis_
 foreign import axisLeft_ :: LinearScale_ -> Axis_
 
 -- Call an axis on a selection (renders the axis)
-foreign import callAxis_ :: D3Selection_ -> Axis_ -> Effect Unit
+foreign import callAxis_ :: forall d. D3Selection_ d -> Axis_ -> Effect Unit

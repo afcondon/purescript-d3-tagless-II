@@ -1,7 +1,7 @@
 module D3.Viz.Sankey.Unsafe where
 
 import PSD3.Internal.Types (Datum_)
-import D3.Viz.Sankey.Model (SankeyLink, SankeyNode)
+import PSD3.Layout.Sankey.Types (SankeyLink, SankeyNode)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- Unsafe unboxing of Sankey data from D3's opaque Datum_ type

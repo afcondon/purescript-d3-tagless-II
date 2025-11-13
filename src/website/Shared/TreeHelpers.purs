@@ -30,3 +30,10 @@ treeDatum_ =
   , x: \d -> unsafeFieldImpl "x" d
   , y: \d -> unsafeFieldImpl "y" d
   }
+
+-- | Helper to coerce a Datum_ accessor function to work with any phantom-typed datum
+-- | This is safe because phantom types exist only at compile time - at runtime,
+-- | all D3 selections work with Datum_ (foreign any type)
+-- | Usage: x (datum treeDatum_.x)
+datum :: forall d a. (Datum_ -> a) -> (d -> a)
+datum = unsafeCoerceImpl

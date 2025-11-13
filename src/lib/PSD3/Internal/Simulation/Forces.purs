@@ -14,26 +14,27 @@ import Data.Map (Map, fromFoldable)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
+import Unsafe.Coerce (unsafeCoerce)
 
 
-initialize   :: forall f. (Foldable f) => (Functor f) => f Force -> Map Label Force
+initialize   :: forall d f. (Foldable f) => (Functor f) => f (Force d) -> Map Label (Force d)
 initialize forces     = fromFoldable $ (\f -> Tuple (view _name f) f) <$> forces
 
-putStatusMap :: Map Label ForceStatus -> Map Label Force -> Map Label Force
+putStatusMap :: forall d. Map Label ForceStatus -> Map Label (Force d) -> Map Label (Force d)
 putStatusMap forceStatusMap forceMap = update <$> forceMap
   where
     update force =
       case (view (at (view _name force)) forceStatusMap) of -- get desired status from status map
         Nothing       -> set _status ForceDisabled force -- default is to disable
-        (Just status) -> set _status status force 
-    
+        (Just status) -> set _status status force
+
 showType :: ForceType -> String
-showType = 
+showType =
   case _ of
     LinkForce      -> "linkForce"
     RegularForce f -> show f
 
-createForce :: Label -> ForceType -> Maybe ForceFilter -> Array ChainableF -> Force
+createForce :: forall d. Label -> ForceType -> Maybe (ForceFilter d) -> Array (ChainableF d) -> Force d
 createForce l t f cs = Force {
     "type": t
   , name: l
@@ -43,7 +44,7 @@ createForce l t f cs = Force {
   , force_: createForce_ t
 }
 
-createLinkForce :: Maybe ForceFilter -> Array ChainableF -> Force
+createLinkForce :: forall d. Maybe (ForceFilter d) -> Array (ChainableF d) -> Force d
 createLinkForce f cs = Force {
     "type": LinkForce
   , name: linksForceName_
@@ -53,16 +54,16 @@ createLinkForce f cs = Force {
   , force_: createForce_ LinkForce
 }
 
-disableForce :: Force -> Force
+disableForce :: forall d. Force d -> Force d
 disableForce = set _status ForceDisabled
 
-enableForce :: Force -> Force
+enableForce :: forall d. Force d -> Force d
 enableForce = set _status ForceActive
 
-toggleForce :: Force -> Force
+toggleForce :: forall d. Force d -> Force d
 toggleForce = over _status toggleForceStatus
 
-disableByLabels :: D3Simulation_ -> Array Label -> Force -> Force
+disableByLabels :: forall d. D3Simulation_ -> Array Label -> Force d -> Force d
 disableByLabels simulation labels force =
   if (view _name force) `elem` labels
   then do
@@ -70,15 +71,15 @@ disableByLabels simulation labels force =
     disableForce force
   else force
 
-enableByLabels :: D3Simulation_ -> Array Label -> Force -> Force
-enableByLabels simulation labels force = 
+enableByLabels :: forall d. D3Simulation_ -> Array Label -> Force d -> Force d
+enableByLabels simulation labels force =
   if (view _name force) `elem` labels
   then do
     let _ = putForceInSimulation force simulation
     enableForce force
   else force
 
-enableOnlyTheseLabels :: D3Simulation_ -> Array Label -> Force -> Force
+enableOnlyTheseLabels :: forall d. D3Simulation_ -> Array Label -> Force d -> Force d
 enableOnlyTheseLabels simulation labels force =
   if (view _name force) `elem` labels
   then do
@@ -88,7 +89,7 @@ enableOnlyTheseLabels simulation labels force =
     let _ = removeForceFromSimulation force simulation
     disableForce force
 
-updateForceInSimulation :: D3Simulation_ -> Force -> D3Simulation_
+updateForceInSimulation :: forall d. D3Simulation_ -> Force d -> D3Simulation_
 updateForceInSimulation simulation force = do
     let f = unwrap force
     let _ = (\a -> setForceAttr f.force_ f.filter (unwrap a)) <$> f.attributes -- side-effecting function that sets force's attributes
@@ -97,7 +98,7 @@ updateForceInSimulation simulation force = do
       ForceDisabled -> removeForceFromSimulation force simulation
     -- CustomForce   -> simulation_ -- REVIEW not implemented or even designed yet
 
-putForceInSimulation :: Force -> D3Simulation_ -> D3Simulation_
+putForceInSimulation :: forall d. Force d -> D3Simulation_ -> D3Simulation_
 putForceInSimulation (Force force) simulation_ = do
   case force.type of
     -- CustomForce   -> simulation_ -- REVIEW not implemented or even designed yet
@@ -106,7 +107,7 @@ putForceInSimulation (Force force) simulation_ = do
     LinkForce      -> putForceInSimulation_ simulation_ force.name force.force_ -- FIXME need to reload the links if this is just a toggle
 
 
-removeForceFromSimulation :: Force -> D3Simulation_ -> D3Simulation_
+removeForceFromSimulation :: forall d. Force d -> D3Simulation_ -> D3Simulation_
 removeForceFromSimulation (Force force) simulation_ = do
   case force.type of
     -- CustomForce   -> simulation_ -- REVIEW not implemented or even designed yet
@@ -172,7 +173,7 @@ createRegularForce_ = case _ of
   ForceRadial               -> forceRadial_    unit
 
 -- TODO at present there is no type checking on what forces have which attrs settable, see comment above
-setForceAttr :: D3ForceHandle_ -> Maybe ForceFilter -> AttributeSetter -> D3ForceHandle_
+setForceAttr :: forall d. D3ForceHandle_ -> Maybe (ForceFilter d) -> AttributeSetter d -> D3ForceHandle_
 setForceAttr force_ maybeFilter (AttributeSetter label attr) = do
   -- let attr' = unboxAttr attr
   case label of
@@ -195,9 +196,9 @@ setForceAttr force_ maybeFilter (AttributeSetter label attr) = do
     _ -> force_ -- no other force attributes accepted
 
 
-attrFilter :: (Datum_ -> Boolean) -> Number -> Attr -> Attr
+attrFilter :: forall d. (Datum_ -> Boolean) -> Number -> Attr d -> Attr d
 attrFilter filter' default' = do
-  let 
+  let
     addFilterToStatic :: (Datum_ -> Boolean) -> Number -> Number -> (Datum_ -> Number)
     addFilterToStatic filter value default = \d -> if filter d then value else default
 
@@ -205,7 +206,7 @@ attrFilter filter' default' = do
     addFilterToFn filter fn default = \d -> if filter d then fn d else default
 
     -- addFilterToFnI :: (Datum_ -> Index_ -> Boolean) -> IndexedLambda Number -> Number -> IndexedLambda Number
-    -- addFilterToFnI filter fni default = mkFn2 f 
+    -- addFilterToFnI filter fni default = mkFn2 f
     --   where
     --     f d i = if filter d i then runFn2 fni d i else default
   case _ of
@@ -213,8 +214,9 @@ attrFilter filter' default' = do
     (StringAttr (Fn a))     -> StringAttr (Fn a)
     (StringAttr (FnI a))    -> StringAttr (FnI a)
 
-    (NumberAttr (Static a)) -> NumberAttr (Fn (addFilterToStatic filter' a default')) -- turns static setter into dynamic because of filtering
-    (NumberAttr (Fn a))     -> NumberAttr (Fn (addFilterToFn filter' a default'))
+    -- FFI boundary: Functions work with Datum_ at runtime, but need phantom type d for type system
+    (NumberAttr (Static a)) -> NumberAttr (Fn (unsafeCoerce (addFilterToStatic filter' a default'))) -- turns static setter into dynamic because of filtering
+    (NumberAttr (Fn a))     -> NumberAttr (Fn (unsafeCoerce (addFilterToFn filter' (unsafeCoerce a) default')))
     (NumberAttr (FnI a))    -> NumberAttr (FnI a) -- NB doesn't handle filtering of indexed functions at the moment
 
     (ArrayAttr (Static a))  -> ArrayAttr (Static a)

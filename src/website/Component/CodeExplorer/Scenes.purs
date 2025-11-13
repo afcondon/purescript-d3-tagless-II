@@ -16,7 +16,7 @@ import Prelude
 
 import D3.Viz.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
 import D3.Viz.Spago.Files (isM2M_Tree_Link, isP2P_Link, isM2P_Link)
-import D3.Viz.Spago.Model (allNodes, fixNamedNodeTo, isPackage, isUsedModule, moduleNodesToContainerXY, packageNodesToGridXY, packagesNodesToPhyllotaxis, sourcePackageIs, treeNodesToSwarmStart, treeNodesToTreeXY_H, treeNodesToTreeXY_R, treeNodesToTreeXY_V, unpinAllNodes)
+import D3.Viz.Spago.Model (allNodes, fixNamedNodeTo, isPackage, isUsedModule, moduleNodesToContainerXY, packageNodesToGridXY, packagesNodesToPhyllotaxis, treeNodesToSwarmStart, treeNodesToTreeXY_H, treeNodesToTreeXY_R, treeNodesToTreeXY_V, unpinAllNodes)
 import PSD3.CodeExplorer.State (SceneConfig)
 import PSD3.Internal.FFI (linksForceName_)
 import PSD3.Simulation.Scene (smoothTransition)
@@ -45,7 +45,7 @@ packageGraphScene :: SceneConfig
 packageGraphScene = {
   chooseNodes: isPackage
 , linksShown: isP2P_Link
-, linksActive: (sourcePackageIs "my-project")
+, linksActive: const true  -- TODO: restore sourcePackageIs filter
 , cssClass: "graph"
 , attributes: graphSceneAttributes
 , activeForces: Set.fromFoldable ["center", "collide2", "charge2", "packageOrbit", linksForceName_ ]

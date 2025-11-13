@@ -39,8 +39,10 @@ routes =
   <|> dataFlowViz
   <|> movement
   <|> hierarchies
+  <|> isometricCurveExperiment
   <|> interpreters
   <|> mermaidDiagrams
+  <|> forceNavigator
   <|> codeExplorer
   <|> explore
   <|> wealthHealth
@@ -144,6 +146,10 @@ movement = Movement <$ lit "movement" <* end
 hierarchies :: Match Route
 hierarchies = Hierarchies <$ lit "hierarchies" <* end
 
+-- | Match: /isometric-curve-experiment
+isometricCurveExperiment :: Match Route
+isometricCurveExperiment = IsometricCurveExperiment <$ lit "isometric-curve-experiment" <* end
+
 -- | Match: /interpreters
 interpreters :: Match Route
 interpreters = Interpreters <$ lit "interpreters" <* end
@@ -151,6 +157,10 @@ interpreters = Interpreters <$ lit "interpreters" <* end
 -- | Match: /mermaid-diagrams
 mermaidDiagrams :: Match Route
 mermaidDiagrams = MermaidDiagrams <$ lit "mermaid-diagrams" <* end
+
+-- | Match: /force-navigator
+forceNavigator :: Match Route
+forceNavigator = ForceNavigator <$ lit "force-navigator" <* end
 
 -- | Match: /code-explorer
 codeExplorer :: Match Route
@@ -215,8 +225,10 @@ routeToPath SimpleCharts2 = "/simple-charts-2"
 routeToPath DataFlowViz = "/data-flow"
 routeToPath Movement = "/movement"
 routeToPath Hierarchies = "/hierarchies"
+routeToPath IsometricCurveExperiment = "/isometric-curve-experiment"
 routeToPath Interpreters = "/interpreters"
 routeToPath MermaidDiagrams = "/mermaid-diagrams"
+routeToPath ForceNavigator = "/force-navigator"
 routeToPath CodeExplorer = "/code-explorer"
 routeToPath (Explore snippetId) = "/explore/" <> snippetId
 routeToPath WealthHealth = "/wealth-health"

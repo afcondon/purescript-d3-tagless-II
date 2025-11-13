@@ -3,11 +3,12 @@ module D3.Viz.Spago.Render where
 import Prelude
 
 import Data.Array ((:))
-
+import PSD3.Attributes (DatumFn(..), DatumFnI(..), unwrapDatumFn)
 import PSD3.Internal.Attributes.Sugar (classed, remove, strokeColor, transform', x1, x2, y1, y2)
 import PSD3.Internal.Types (D3Selection_, Element(..))
-import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, enterAttrs, updateAttrs)
-import D3.Viz.Spago.Model (datum_, link_)
+import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, enterAttrs, updateAttrs, translateNode)
+import D3.Viz.Spago.Model (SpagoSimNode)
+import D3.Viz.Spago.Files (LinkType(..))
 import PSD3.Internal.FFI (keyIsID_, simdrag_)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), SelectionAttribute)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, on, selectUnder, setAttributes)
@@ -19,19 +20,29 @@ import Data.String as String
 import Data.Array as Array
 import PSD3.Data.Node (NodeID)
 import Data.Maybe (fromMaybe)
-import PSD3.Internal.Types (Datum_)
+import Unsafe.Coerce (unsafeCoerce)
+
+-- Helper type for swizzled links (what we get after D3 swizzles them)
+type SpagoSwizzledLink = { source :: SpagoSimNode, target :: SpagoSimNode, linktype :: LinkType }
+
+-- Helper functions for links (phantom type friendly)
+linkClass :: SpagoSwizzledLink -> String
+linkClass l = show l.linktype
+
+linkColor :: SpagoSwizzledLink -> String
+linkColor l = case l.linktype of
+  P2P -> "red"
+  M2P -> "blue"
+  M2M_Graph -> "green"
+  M2M_Tree -> "orange"
 
 -- | Create a CSS class attribute from tags
 -- | Tags from the tag map are joined with spaces and added as CSS classes
-makeTagClassesAttr :: Maybe (Map.Map NodeID (Set.Set String)) -> SelectionAttribute
+makeTagClassesAttr :: Maybe (Map.Map NodeID (Set.Set String)) -> SelectionAttribute SpagoSimNode
 makeTagClassesAttr Nothing = classed ""
-makeTagClassesAttr (Just tagMap) = classed tagClassesFn
-  where
-    tagClassesFn :: Datum_ -> String
-    tagClassesFn d =
-      let nodeId = datum_.id d
-          tags = fromMaybe Set.empty $ Map.lookup nodeId tagMap
-      in String.joinWith " " $ Array.fromFoldable tags
+makeTagClassesAttr (Just tagMap) = classed \(d :: SpagoSimNode) ->
+  let tags = fromMaybe Set.empty $ Map.lookup d.id tagMap
+  in String.joinWith " " $ Array.fromFoldable tags
 
 -- | Render callbacks for Spago visualization
 -- |
@@ -44,7 +55,7 @@ makeTagClassesAttr (Just tagMap) = classed tagClassesFn
 spagoRenderCallbacks :: forall m.
   Monad m =>
   SelectionM D3Selection_ m =>
-  RenderCallbacks SpagoSceneAttributes D3Selection_ m
+  RenderCallbacks SpagoSceneAttributes D3Selection_ m SpagoSimNode
 spagoRenderCallbacks = {
   -- Node rendering: Group → Circle + Text structure
   onNodeEnter: \enterSel attrs -> do
@@ -85,7 +96,11 @@ spagoRenderCallbacks = {
 
   -- Link rendering: Simple line elements
   , onLinkEnter: \enterSel attrs -> do
-      linkEnter <- appendTo enterSel Line [ classed link_.linkClass, strokeColor link_.color, classed "enter" ]
+      linkEnter <- appendTo enterSel Line [
+          classed (DatumFn \d -> linkClass (unsafeCoerce d :: SpagoSwizzledLink))
+        , strokeColor (DatumFn \d -> linkColor (unsafeCoerce d :: SpagoSwizzledLink))
+        , classed "enter"
+        ]
       pure linkEnter
 
   , onLinkUpdate: \updateSel attrs ->
@@ -96,12 +111,12 @@ spagoRenderCallbacks = {
 
   -- Tick function attributes
   , nodeTickAttrs: \attrs ->
-      [ transform' datum_.translateNode ]
+      [ transform' \(d :: SpagoSimNode) -> translateNode d ]
 
   , linkTickAttrs:
-      [ x1 (_.x <<< link_.source)
-      , y1 (_.y <<< link_.source)
-      , x2 (_.x <<< link_.target)
-      , y2 (_.y <<< link_.target)
+      [ x1 (DatumFn \d -> (unsafeCoerce d :: SpagoSwizzledLink).source.x)
+      , y1 (DatumFn \d -> (unsafeCoerce d :: SpagoSwizzledLink).source.y)
+      , x2 (DatumFn \d -> (unsafeCoerce d :: SpagoSwizzledLink).target.x)
+      , y2 (DatumFn \d -> (unsafeCoerce d :: SpagoSwizzledLink).target.y)
       ]
 }

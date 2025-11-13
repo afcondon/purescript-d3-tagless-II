@@ -1,6 +1,9 @@
-module PSD3.Internal.Attributes.Sugar where
+module PSD3.Internal.Attributes.Sugar
+  ( module PSD3.Internal.Attributes.Instances
+  , module PSD3.Internal.Attributes.Sugar
+  ) where
 
-import PSD3.Internal.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), AttributeSetter(..), Listener, EffectfulListener, toAttr)
+import PSD3.Internal.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), AttributeSetter(..), DatumFn(..), DatumFnI(..), Listener, EffectfulListener, toAttr, unwrapDatumFn)
 import PSD3.Internal.Types (Datum_, EasingFunction(..), MouseEvent, Transition, PointXY)
 import PSD3.Internal.FFI (autoBox_)
 import PSD3.Internal.Selection.Types (SelectionAttribute(..), OrderingAttribute(..))
@@ -11,43 +14,43 @@ import Effect.Uncurried (mkEffectFn3)
 import Prelude (class Semigroup, class Show, append, flap, show, ($), (<$>), (<<<), (<>))
 import Unsafe.Coerce (unsafeCoerce)
 
-backgroundColor :: ∀ a. ToAttr String a => a -> SelectionAttribute
+backgroundColor :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 backgroundColor = AttrT <<< AttributeSetter "background-color" <<< toAttr
 
-strokeColor :: ∀ a. ToAttr String a => a -> SelectionAttribute
+strokeColor :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 strokeColor = AttrT <<< AttributeSetter "stroke" <<< toAttr
 
-strokeOpacity :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+strokeOpacity :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 strokeOpacity = AttrT <<< AttributeSetter "stroke-opacity" <<< toAttr
 
-opacity :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+opacity :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 opacity = AttrT <<< AttributeSetter "opacity" <<< toAttr
 
-strokeWidth :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+strokeWidth :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 strokeWidth = AttrT <<< AttributeSetter "stroke-width" <<< toAttr
 
-fill :: ∀ a. ToAttr String a => a -> SelectionAttribute
+fill :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 fill = AttrT <<< AttributeSetter "fill" <<< toAttr
 
-fillOpacity :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+fillOpacity :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 fillOpacity = AttrT <<< AttributeSetter "fill-opacity" <<< toAttr
 
 -- TODO this definitely needs to be Number-with-unit here
-viewBox :: Number -> Number -> Number -> Number -> SelectionAttribute
+viewBox :: ∀ d. Number -> Number -> Number -> Number -> SelectionAttribute d
 viewBox xo yo w h = AttrT <<< AttributeSetter "viewBox" $ toAttr vb
   where
     vb = intercalate " " $ show <$> [ xo, yo, w, h ]
 
 -- REVIEW this isn't plumbed in anywhere but it's a pattern (generating array of attrs) that could apply in multiple places potentially
 -- attr for setting both x and y at the same time from a point
-pointXY :: PointXY -> Array SelectionAttribute
-pointXY point = 
+pointXY :: ∀ d. PointXY -> Array (SelectionAttribute d)
+pointXY point =
   [ AttrT <<< AttributeSetter "x" $ toAttr point.x
   , AttrT <<< AttributeSetter "y" $ toAttr point.y ]
 
 -- preserveAspectRatio as an attribute only applies to viewBox
 -- | Aspect ratio stuff could be shared with Halogen when it is present TODO
-preserveAspectRatio :: AspectRatioSpec -> SelectionAttribute
+preserveAspectRatio :: ∀ d. AspectRatioSpec -> SelectionAttribute d
 preserveAspectRatio = AttrT <<< AttributeSetter "preserveAspectRatio" <<< toAttr <<< show
 
 data AlignAspectRatio_X = XMin | XMid | XMax
@@ -71,99 +74,100 @@ instance Show AspectRatioSpec where
   show (AspectRatio x y None) =  "none"
   show (AspectRatio x y p)    =  show x <> show y <> " " <> show p
 
-autoBox :: SelectionAttribute
+autoBox :: ∀ d. SelectionAttribute d
 autoBox = AttrT <<< AttributeSetter "viewBox" $ toAttr vb
   where
-    vb = \d -> intercalate " " $ show <$> (autoBox_ d)
+    vb :: d -> String
+    vb = \d -> intercalate " " $ show <$> (autoBox_ (unsafeCoerce d))
 
-fontFamily :: ∀ a. ToAttr String a => a -> SelectionAttribute
+fontFamily :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 fontFamily = AttrT <<< AttributeSetter "font-family" <<< toAttr
 
-textAnchor :: ∀ a. ToAttr String a => a -> SelectionAttribute
+textAnchor :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 textAnchor = AttrT <<< AttributeSetter "text-anchor" <<< toAttr
 
-rotate :: ∀ a. ToAttr String a => a -> SelectionAttribute
+rotate :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 rotate = AttrT <<< AttributeSetter "rotate" <<< toAttr
 
-radius :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+radius :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 radius = AttrT <<< AttributeSetter "r" <<< toAttr
 
-fontSize :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+fontSize :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 fontSize = AttrT <<< AttributeSetter "font-size" <<< toAttr
 
-width :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+width :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 width = AttrT <<< AttributeSetter "width" <<< toAttr
 
-height :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+height :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 height = AttrT <<< AttributeSetter "height" <<< toAttr
 
-width100 :: SelectionAttribute
+width100 :: ∀ d. SelectionAttribute d
 width100 = AttrT <<< AttributeSetter "width" $ toAttr "100%"
 
-height100 :: SelectionAttribute
+height100 :: ∀ d. SelectionAttribute d
 height100 = AttrT <<< AttributeSetter "height" $ toAttr "100%"
 
-x :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+x :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 x = AttrT <<< AttributeSetter "x" <<< toAttr
 
-y :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+y :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 y = AttrT <<< AttributeSetter "y" <<< toAttr
 
 -- yu :: ∀ a. ToAttr NWU a => a -> SelectionAttribute
 -- yu = AttrT <<< AttributeSetter "y" <<< toAttr
 
-x1 :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+x1 :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 x1 = AttrT <<< AttributeSetter "x1" <<< toAttr
 
-y1 :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+y1 :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 y1 = AttrT <<< AttributeSetter "y1" <<< toAttr
 
-x2 :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+x2 :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 x2 = AttrT <<< AttributeSetter "x2" <<< toAttr
 
-y2 :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+y2 :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 y2 = AttrT <<< AttributeSetter "y2" <<< toAttr
 
-dx :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+dx :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 dx = AttrT <<< AttributeSetter "dx" <<< toAttr
 
-dy :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+dy :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 dy = AttrT <<< AttributeSetter "dy" <<< toAttr
 
-cx :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+cx :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 cx = AttrT <<< AttributeSetter "cx" <<< toAttr
 
-cy :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+cy :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 cy = AttrT <<< AttributeSetter "cy" <<< toAttr
 
-text :: ∀ a. ToAttr String a => a -> SelectionAttribute
+text :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 text = TextT <<< AttributeSetter "text" <<< toAttr
 
-d :: ∀ a. ToAttr String a => a -> SelectionAttribute
+d :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 d = AttrT <<< AttributeSetter "d" <<< toAttr
 
 -- TODO classed here has destructive semantics which D3 doesn't, because in D3 you give a Boolean to indicate whether you're adding or removing the class
-classed :: ∀ a. ToAttr String a => a -> SelectionAttribute
+classed :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 classed = AttrT <<< AttributeSetter "class" <<< toAttr
 
-cursor :: ∀ a. ToAttr String a => a -> SelectionAttribute
+cursor :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 cursor = AttrT <<< AttributeSetter "cursor" <<< toAttr
 
-onMouseEvent :: MouseEvent -> Listener -> SelectionAttribute
+onMouseEvent :: ∀ d. MouseEvent -> Listener -> SelectionAttribute d
 onMouseEvent event listener = OnT event (mkFn3 listener)
 
-onMouseEventEffectful :: MouseEvent -> EffectfulListener -> SelectionAttribute
+onMouseEventEffectful :: ∀ d. MouseEvent -> EffectfulListener -> SelectionAttribute d
 onMouseEventEffectful event listener = OnT' event (mkEffectFn3 listener)
 
 -- helpers for Forces
 
-originX :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+originX :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 originX = AttrT <<< AttributeSetter "originX" <<< toAttr
 
-originY :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+originY :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 originY = AttrT <<< AttributeSetter "originY" <<< toAttr
 
-strength :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+strength :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 strength = AttrT <<< AttributeSetter "strength" <<< toAttr
 
 
@@ -174,24 +178,24 @@ defaultTransition :: Transition
 defaultTransition = { name: "", delay: Milliseconds 0.0, duration: Milliseconds 0.0, easing: DefaultCubic }
 
 -- always make this empty because the other chainable things compose at the use-point
-transition :: Transition -> SelectionAttribute
+transition :: ∀ d. Transition -> SelectionAttribute d
 transition t = TransitionT [] t
 
-namedTransition :: String -> SelectionAttribute
+namedTransition :: ∀ d. String -> SelectionAttribute d
 namedTransition name = TransitionT [] $ defaultTransition { name = name } 
 
-transitionWithDuration :: Milliseconds -> SelectionAttribute -- this can be mempty for monoid
+transitionWithDuration :: ∀ d. Milliseconds -> SelectionAttribute d -- this can be mempty for monoid
 transitionWithDuration duration = TransitionT [] defaultTransition { duration = duration }
 
 andThen :: forall a. Semigroup a => a -> a -> a
 andThen = append
 
-to :: SelectionAttribute -> Array SelectionAttribute -> Array SelectionAttribute
+to :: ∀ d. SelectionAttribute d -> Array (SelectionAttribute d) -> Array (SelectionAttribute d)
 to (TransitionT [] t) chain = [ TransitionT chain t ]
 to (TransitionT existingChain t) newChain = [ TransitionT (existingChain <> newChain) t ]
 to otherSelectionAttribute chain = otherSelectionAttribute:chain
 
-remove :: SelectionAttribute
+remove :: ∀ d. SelectionAttribute d
 remove = RemoveT
 
 
@@ -203,17 +207,17 @@ instance showLineJoin :: Show LineJoin where
   show MiterClip = "miter-clip"
   show Round     = "round"
 
-strokeLineJoin :: LineJoin -> SelectionAttribute
+strokeLineJoin :: ∀ d. LineJoin -> SelectionAttribute d
 strokeLineJoin = AttrT <<< AttributeSetter "stroke-linejoin" <<< toAttr <<< show
 
 -- helpers for transitions, a sequence of functions but expressed as text in the DOM
 -- TODO don't export transform'
-transform' :: (Datum_ -> String) -> SelectionAttribute
+transform' :: ∀ d. (d -> String) -> SelectionAttribute d
 transform' = AttrT <<< AttributeSetter "transform" <<< StringAttr <<< Fn
 
 -- make a single (Datum_ -> String) function out of the array (ie sequence) of functions provided
-transform :: Array (Datum_ -> String) -> SelectionAttribute
-transform = transform' <<< assembleTransforms
+transform :: ∀ d. Array (Datum_ -> String) -> SelectionAttribute d
+transform = transform' <<< unsafeCoerce <<< assembleTransforms
 
 -- we take a stack of (Datum_ -> String) functions and produce just one
 -- we can't know here in the library code if this is safe but if the transforms themselves are written in terms of 
@@ -223,11 +227,11 @@ assembleTransforms fs = unsafeCoerce (\d -> intercalate " " $ flap fs d)
 
 
 -- helpers for Ordering type attributes
-lower :: SelectionAttribute
+lower :: ∀ d. SelectionAttribute d
 lower = OrderingT Lower
-raise :: SelectionAttribute
+raise :: ∀ d. SelectionAttribute d
 raise = OrderingT Raise
-order :: SelectionAttribute
+order :: ∀ d. SelectionAttribute d
 order = OrderingT Order
-sortSelection :: (Datum_ -> Datum_ -> Int) -> SelectionAttribute
+sortSelection :: ∀ d. (d -> d -> Int) -> SelectionAttribute d
 sortSelection compare = OrderingT (Sort compare)

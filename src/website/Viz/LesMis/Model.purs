@@ -1,35 +1,42 @@
 module D3.Viz.LesMiserables.Model where
 
-import PSD3.Data.Node (D3TreeRow, D3Link_Unswizzled, D3_SimulationNode, D3_VxyFxy, D3_XY, EmbeddedData)
-import Type.Row (type (+))
+import Prelude
+import PSD3.Data.Node (D3Link_Unswizzled, SimulationNode)
+import Data.Nullable (null)
 
 -- | ==========================================================================================
--- |                  Model data types specialized with inital data
+-- |                  Model data types using row-polymorphic SimulationNode
 -- | ==========================================================================================
 
--- the "extra / model-specific" data above and beyond what any D3 Tree Node is going to have:
-type LesMisNodeData row = ( id :: String, group :: Int | row ) 
--- this extra data inside a D3SimNode as used in PureScript:
-type LesMisSimNode     = D3_SimulationNode ( LesMisNodeData  + D3_XY + D3_VxyFxy + ()) 
+-- | Row type for Les Misérables node user data
+type LesMisNodeRow = (id :: String, group :: Int)
 
--- first the "extra / model-specific" data in the links
-type LesMisLinkData     = ( value :: Number )
-type LesMisGraphLinkObj = { source :: LesMisSimRecord, target :: LesMisSimRecord | LesMisLinkData }
+-- | Simulation node with user data fields directly in the record
+-- | This matches D3's behavior: it EXTENDS your data with simulation fields
+type LesMisSimNode = SimulationNode LesMisNodeRow
 
+-- | Link data (value represents connection strength)
+type LesMisLinkData = { value :: Number }
 
--- we make the model like so, but D3 then swizzles it to the "cooked" model below
--- the source and target in the links are given as "String" to match id in the node data (UNSWIZZLED)
-type LesMisRawModel    = { links :: Array D3Link_Unswizzled, nodes :: Array LesMisSimNode  }
+-- | Raw model (unswizzled links - source/target are string IDs)
+type LesMisRawModel =
+  { links :: Array D3Link_Unswizzled
+  , nodes :: Array LesMisSimNode
+  }
 
--- same as above but as a bare record, this is the "datum" that D3 sees and which it returns to you for attr setting:
-type LesMisSimRecord   = Record (D3_XY + D3_VxyFxy + LesMisNodeData  + ()) 
-
-
-
--- now a definition for that same row if it is embedded instead in a D3 Hierarchical structure, in which case
--- our extra data is available in the "datum" as an embedded object at the field "data"
-type LesMisTreeNode    = D3TreeRow (EmbeddedData { | LesMisNodeData () } + ())
--- type LesMisTreeRecord  = Record    (D3_ID + D3_TreeRow + D3_XY   + D3_Leaf + EmbeddedData { | LesMisNodeData () } + ())
+-- | Create a LesMisSimNode with default simulation values
+-- | Just a plain record - no constructor wrapping needed
+mkLesMisNode :: String -> Int -> LesMisSimNode
+mkLesMisNode id group =
+  { id
+  , group
+  , x: 0.0
+  , y: 0.0
+  , vx: 0.0
+  , vy: 0.0
+  , fx: null
+  , fy: null
+  }
 
 
 

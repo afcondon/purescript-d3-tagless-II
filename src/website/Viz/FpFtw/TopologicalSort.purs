@@ -24,9 +24,10 @@ import Affjax.Web as AX
 import Data.Either (Either(..))
 import Data.Number (sqrt)
 import Data.Set as Set
+import PSD3.Attributes (DatumFn(..), DatumFnI(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, simpleJoin, setAttributes)
 import PSD3.Capabilities.Simulation (class SimulationM2, addTickFunction, init, start)
-import PSD3.Data.Node (D3_SimulationNode(..), D3Link_Swizzled, D3Link_Unswizzled)
+import PSD3.Data.Node (SimulationNode, D3Link_Swizzled, D3Link_Unswizzled)
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fontSize, height, radius, strokeColor, strokeWidth, text, textAnchor, transform, viewBox, width, x, x1, x2, y, y1, y2)
 import PSD3.Internal.FFI (keyIsID_)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
@@ -55,19 +56,16 @@ type LayeredTask = {
   , group :: Maybe Int
 }
 
--- | Simulation node for layered tasks (with fy fixed to layer)
-type LayeredSimNode = D3_SimulationNode (
-    id :: String
+-- | User data row for layered task nodes
+type LayeredTaskRow =
+  ( id :: String
   , name :: String
   , layer :: Int
   , group :: Maybe Int
-  , x :: Number
-  , y :: Number
-  , vx :: Number
-  , vy :: Number
-  , fx :: Nullable Number
-  , fy :: Nullable Number
-)
+  )
+
+-- | Simulation node for layered tasks (with fy fixed to layer)
+type LayeredSimNode = SimulationNode LayeredTaskRow
 
 -- | Link between tasks (for force simulation)
 type TaskLink = {
@@ -228,18 +226,17 @@ tasksToSimNodes totalWidth totalHeight layeredTasks =
                else 0.0
         yPos = (Int.toNumber task.layer * layerHeight) - (totalHeight / 2.0) + 50.0
       in
-        D3SimNode
-          { id: task.id
-          , name: task.name
-          , layer: task.layer
-          , group: task.group  -- Preserve group for color coding!
-          , x: xPos      -- Initial x position (centered)
-          , y: yPos      -- Initial y position (centered)
-          , vx: 0.0      -- Initial velocity
-          , vy: 0.0
-          , fx: null     -- Allow horizontal movement
-          , fy: notNull yPos  -- Fix vertical position to layer!
-          }
+        { id: task.id
+        , name: task.name
+        , layer: task.layer
+        , group: task.group  -- Preserve group for color coding!
+        , x: xPos      -- Initial x position (centered)
+        , y: yPos      -- Initial y position (centered)
+        , vx: 0.0      -- Initial velocity
+        , vy: 0.0
+        , fx: null     -- Allow horizontal movement
+        , fy: notNull yPos  -- Fix vertical position to layer!
+        }
   in
     -- Process tasks layer by layer, tracking index within each layer
     Array.concat $ (\layer ->
@@ -278,7 +275,7 @@ drawTopologicalSort tasks selector = do
   let maxLayer = fromMaybe 0 $ maximum layerValues
   let layerHeight = if maxLayer > 0 then (totalHeight - 100.0) / Int.toNumber maxLayer else 100.0
 
-  (root :: D3Selection_) <- attach selector
+  (root :: D3Selection_ Unit) <- attach selector
   svg <- appendTo root Svg [
       viewBox 0.0 0.0 totalWidth totalHeight
     , classed "topological-sort"
@@ -385,23 +382,23 @@ drawTopologicalSort tasks selector = do
 
 -- | Forces configuration for topological sort
 -- | Uses weak charge and collision forces with link forces between dependencies
-topologicalForceLibrary :: Map String Force
+topologicalForceLibrary :: Map String (Force LayeredSimNode)
 topologicalForceLibrary = initialize [ forces.manyBodyWeak, forces.collision, forces.links ]
   where
     forces = {
-        manyBodyWeak: createForce "many body weak" (RegularForce ForceManyBody) allNodes [ F.strength (-15.0) ]
-      , collision:    createForce "collision"       (RegularForce ForceCollide)  allNodes [ F.radius 7.0 ]
-      , links:        createLinkForce Nothing [ F.distance 80.0 ]
+        manyBodyWeak: createForce "many body weak" (RegularForce ForceManyBody) allNodes [ F.strengthVal (-15.0) ]
+      , collision:    createForce "collision"       (RegularForce ForceCollide)  allNodes [ F.radiusVal 7.0 ]
+      , links:        createLinkForce Nothing [ F.distanceVal 80.0 ]
     }
 
 -- | Draw force-directed topological sort with nodes fixed to layers (fy positioning)
 -- | This version uses D3 force simulation but constrains vertical position by layer
-drawTopologicalForceDirected :: forall row m.
+drawTopologicalForceDirected :: forall row d m.
   Bind m =>
   MonadEffect m =>
-  MonadState { simulation :: D3SimulationState_ | row } m =>
+  MonadState { simulation :: D3SimulationState_ LayeredSimNode | row } m =>
   SimulationM2 D3Selection_ m =>
-  Array Task -> Selector D3Selection_ -> m Unit
+  Array Task -> Selector (D3Selection_ d) -> m Unit
 drawTopologicalForceDirected tasks selector = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   let totalWidth = w
@@ -419,9 +416,9 @@ drawTopologicalForceDirected tasks selector = do
 
   -- Create forces array
   let forcesArray = [
-        createForce "many body weak" (RegularForce ForceManyBody) allNodes [ F.strength (-15.0) ]
-      , createForce "collision" (RegularForce ForceCollide) allNodes [ F.radius 7.0 ]
-      , createLinkForce Nothing [ F.distance 80.0 ]
+        createForce "many body weak" (RegularForce ForceManyBody) allNodes [ F.strengthVal (-15.0) ]
+      , createForce "collision" (RegularForce ForceCollide) allNodes [ F.radiusVal 7.0 ]
+      , createLinkForce Nothing [ F.distanceVal 80.0 ]
       ]
   let activeForces = Set.fromFoldable ["many body weak", "collision", "links"]
 
@@ -465,12 +462,12 @@ drawTopologicalForceDirected tasks selector = do
 
   -- Draw task nodes with group-based coloring (matches LesMis style)
   nodesSelection <- simpleJoin container Circle nodesInSim keyIsID_
-  let colorByGroup = (\d -> case (unsafeCoerce d :: { group :: Maybe Int }).group of
-                               Just g -> d3SchemeCategory10N_ (toNumber g)
-                               Nothing -> "#4CAF50") :: Datum_ -> String
-  setAttributes nodesSelection [
+  -- Clean typed lambdas for nodes (concrete type)!
+  setAttributes (nodesSelection :: D3Selection_ LayeredSimNode) [
       radius 5.0  -- Same size as LesMis
-    , fill colorByGroup  -- Color by group (matches LesMis style)
+    , fill \(d :: LayeredSimNode) -> case d.group of
+                                       Just g -> d3SchemeCategory10N_ (toNumber g)
+                                       Nothing -> "#4CAF50"
     , strokeColor "#fff"  -- White stroke like LesMis
     , strokeWidth 1.5
     , classed "task-node"
@@ -486,27 +483,25 @@ drawTopologicalForceDirected tasks selector = do
     ]
 
   -- Add tick functions to update positions
-  -- Links: extract source/target positions from swizzled link objects
-  let unboxLinkObj = unsafeCoerce :: Datum_ -> { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
+  -- Links are opaque (D3Link_Swizzled), need DatumFn + unsafeCoerce
   addTickFunction "links" $ Step linksSelection [
-      x1 (\d -> (unboxLinkObj d).source.x)
-    , y1 (\d -> (unboxLinkObj d).source.y)
-    , x2 (\d -> (unboxLinkObj d).target.x)
-    , y2 (\d -> (unboxLinkObj d).target.y)
+      x1 (DatumFn \d -> (unsafeCoerce d).source.x :: Number)
+    , y1 (DatumFn \d -> (unsafeCoerce d).source.y :: Number)
+    , x2 (DatumFn \d -> (unsafeCoerce d).target.x :: Number)
+    , y2 (DatumFn \d -> (unsafeCoerce d).target.y :: Number)
     ]
 
-  -- Nodes: extract x, y, name from simulation nodes
-  let unboxNodeObj = unsafeCoerce :: Datum_ -> { x :: Number, y :: Number, name :: String }
-  addTickFunction "nodes" $ Step nodesSelection [
-      cx (\d -> (unboxNodeObj d).x)
-    , cy (\d -> (unboxNodeObj d).y)
+  -- Clean lambdas for node tick attributes
+  addTickFunction "nodes" $ Step (nodesSelection :: D3Selection_ LayeredSimNode) [
+      cx \(d :: LayeredSimNode) -> d.x
+    , cy \(d :: LayeredSimNode) -> d.y
     ]
 
-  -- Labels follow nodes with slight offset
-  addTickFunction "labels" $ Step labelsSelection [
-      x (\d -> (unboxNodeObj d).x)
-    , y (\d -> (unboxNodeObj d).y + 20.0)
-    , text (\d -> (unboxNodeObj d).name)
+  -- Clean lambdas for label tick attributes
+  addTickFunction "labels" $ Step (labelsSelection :: D3Selection_ LayeredSimNode) [
+      x \(d :: LayeredSimNode) -> d.x
+    , y \(d :: LayeredSimNode) -> d.y + 20.0
+    , text \(d :: LayeredSimNode) -> d.name
     ]
 
   -- Draw layer labels (centered coordinates)

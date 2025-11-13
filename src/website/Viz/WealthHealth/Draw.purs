@@ -2,10 +2,11 @@ module D3.Viz.WealthHealth.Draw where
 
 import Prelude
 
-import D3.Viz.WealthHealth.Unsafe (coerceDatumToKey, datum_)
+import D3.Viz.WealthHealth.Unsafe (nationToKey, datum_)
 import Data.Int (floor)
 import Data.Number (log, sqrt)
 import Data.Traversable (traverse)
+import PSD3.Attributes (DatumFn(..), DatumFnI(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, openSelection, setAttributes, updateJoin)
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fillOpacity, fontSize, height, radius, sortSelection, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
 import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
@@ -102,8 +103,8 @@ orderingToInt GT = 1
 -- | Initialize the visualization structure (SVG, axes, etc.)
 initializeVisualization :: forall m.
   SelectionM D3Selection_ m =>
-  Selector D3Selection_ ->
-  m { svg :: D3Selection_, chartGroup :: D3Selection_ }
+  Selector (D3Selection_ Unit) ->
+  m { svg :: D3Selection_ Unit, chartGroup :: D3Selection_ Unit }
 initializeVisualization selector = do
   let config = defaultConfig
 
@@ -126,7 +127,7 @@ initializeVisualization selector = do
 -- | Update visualization with new data for a given year
 updateVisualization :: forall m.
   SelectionM D3Selection_ m =>
-  D3Selection_ ->
+  D3Selection_ Unit ->
   Array NationPoint ->
   m Unit
 updateVisualization chartGroup nations = do
@@ -154,7 +155,7 @@ updateVisualization chartGroup nations = do
 
   -- Use General Update Pattern for data binding
   enterSelection <- openSelection chartGroup "circle"
-  updateSelections <- updateJoin enterSelection Circle nations coerceDatumToKey
+  updateSelections <- updateJoin enterSelection Circle nations nationToKey
 
   -- Exit: remove circles for nations that disappeared
   setAttributes updateSelections.exit
@@ -163,10 +164,10 @@ updateVisualization chartGroup nations = do
 
   -- Update: move existing circles to new positions
   setAttributes updateSelections.update
-    [ cx \d i -> (calculateAttrs d i).x
-    , cy \d i -> (calculateAttrs d i).y
-    , radius \d i -> (calculateAttrs d i).r
-    , fill \d i -> (calculateAttrs d i).color
+    [ cx (DatumFnI \d i -> (calculateAttrs d i).x)
+    , cy (DatumFnI \d i -> (calculateAttrs d i).y)
+    , radius (DatumFnI \d i -> (calculateAttrs d i).r)
+    , fill (DatumFnI \d i -> (calculateAttrs d i).color)
     , classed "update"
     ]
     -- TODO: Add update transition
@@ -174,10 +175,10 @@ updateVisualization chartGroup nations = do
   -- Enter: create new circles
   newCircles <- appendTo updateSelections.enter Circle []
   setAttributes newCircles
-    [ cx \d i -> (calculateAttrs d i).x
-    , cy \d i -> (calculateAttrs d i).y
-    , radius \d i -> (calculateAttrs d i).r
-    , fill \d i -> (calculateAttrs d i).color
+    [ cx (DatumFnI \d i -> (calculateAttrs d i).x)
+    , cy (DatumFnI \d i -> (calculateAttrs d i).y)
+    , radius (DatumFnI \d i -> (calculateAttrs d i).r)
+    , fill (DatumFnI \d i -> (calculateAttrs d i).color)
     , fillOpacity 0.7
     , strokeColor "#333"
     , strokeWidth 0.5
@@ -188,14 +189,14 @@ updateVisualization chartGroup nations = do
 
 -- | Main draw function - creates structure once and returns update function
 -- | Following the GUP pattern
-draw :: forall m.
+draw :: forall m d.
   SelectionM D3Selection_ m =>
-  Selector D3Selection_ ->
-  m (Array NationPoint -> m D3Selection_)
+  Selector (D3Selection_ d) ->
+  m (Array NationPoint -> m (D3Selection_ NationPoint))
 draw selector = do
   let config = defaultConfig
 
-  (root :: D3Selection_) <- attach selector
+  root <- attach selector
   svg <- appendTo root Svg
     [ viewBox 0.0 0.0 config.width config.height
     , width config.width
@@ -362,7 +363,7 @@ draw selector = do
 
     -- Use General Update Pattern for circles (we know this works)
     circleEnterSelection <- openSelection chartGroup "circle"
-    circleUpdateSelections <- updateJoin circleEnterSelection Circle nations coerceDatumToKey
+    circleUpdateSelections <- updateJoin circleEnterSelection Circle nations nationToKey
 
     -- Exit: remove circles for nations that disappeared
     setAttributes circleUpdateSelections.exit
@@ -372,13 +373,13 @@ draw selector = do
     -- Sort by population (descending) so largest circles are drawn last
     setAttributes circleUpdateSelections.update
       [ sortSelection \a b ->
-          let popA = datum_.population a
-              popB = datum_.population b
+          let popA = a.population
+              popB = b.population
           in orderingToInt $ compare popB popA  -- Descending order
-      , cx \d i -> (calculateAttrs d i).x
-      , cy \d i -> (calculateAttrs d i).y
-      , radius \d i -> (calculateAttrs d i).r
-      , fill \d i -> (calculateAttrs d i).color
+      , cx (DatumFnI \d i -> (calculateAttrs d i).x)
+      , cy (DatumFnI \d i -> (calculateAttrs d i).y)
+      , radius (DatumFnI \d i -> (calculateAttrs d i).r)
+      , fill (DatumFnI \d i -> (calculateAttrs d i).color)
       , classed "nation-circle update"
       ]
 
@@ -386,13 +387,13 @@ draw selector = do
     newCircles <- appendTo circleUpdateSelections.enter Circle []
     setAttributes newCircles
       [ sortSelection \a b ->
-          let popA = datum_.population a
-              popB = datum_.population b
+          let popA = a.population
+              popB = b.population
           in orderingToInt $ compare popB popA  -- Descending order
-      , cx \d i -> (calculateAttrs d i).x
-      , cy \d i -> (calculateAttrs d i).y
-      , radius \d i -> (calculateAttrs d i).r
-      , fill \d i -> (calculateAttrs d i).color
+      , cx (DatumFnI \d i -> (calculateAttrs d i).x)
+      , cy (DatumFnI \d i -> (calculateAttrs d i).y)
+      , radius (DatumFnI \d i -> (calculateAttrs d i).r)
+      , fill (DatumFnI \d i -> (calculateAttrs d i).color)
       , fillOpacity 0.7
       , strokeColor "#333"
       , strokeWidth 0.5
@@ -403,11 +404,11 @@ draw selector = do
     let tooltipText d = datum_.name d <> "\n" <> datum_.region d
     newTitles <- appendTo newCircles Title []
     setAttributes newTitles
-      [ text tooltipText ]
+      [ text (DatumFn tooltipText) ]
 
     -- Use General Update Pattern for labels (parallel join)
     labelEnterSelection <- openSelection chartGroup "text"
-    labelUpdateSelections <- updateJoin labelEnterSelection Text nations coerceDatumToKey
+    labelUpdateSelections <- updateJoin labelEnterSelection Text nations nationToKey
 
     -- Exit: remove labels for nations that disappeared
     setAttributes labelUpdateSelections.exit
@@ -415,21 +416,21 @@ draw selector = do
 
     -- Update: move existing labels to new positions
     setAttributes labelUpdateSelections.update
-      [ x \d i -> (calculateAttrs d i).x
-      , y \d i -> (calculateAttrs d i).y - (calculateAttrs d i).r - 5.0
+      [ x (DatumFnI \d i -> (calculateAttrs d i).x)
+      , y (DatumFnI \d i -> (calculateAttrs d i).y - (calculateAttrs d i).r - 5.0)
       , classed "nation-label update"
       ]
 
     -- Enter: create new labels
     newLabels <- appendTo labelUpdateSelections.enter Text []
     setAttributes newLabels
-      [ x \d i -> (calculateAttrs d i).x
-      , y \d i -> (calculateAttrs d i).y - (calculateAttrs d i).r - 5.0
+      [ x (DatumFnI \d i -> (calculateAttrs d i).x)
+      , y (DatumFnI \d i -> (calculateAttrs d i).y - (calculateAttrs d i).r - 5.0)
       , textAnchor "middle"
       , fontSize 11.0
       , fill "#333"
       , fillOpacity 0.0  -- Initially hidden
-      , text datum_.name
+      , text (DatumFn datum_.name)
       , classed "nation-label enter"
       ]
 

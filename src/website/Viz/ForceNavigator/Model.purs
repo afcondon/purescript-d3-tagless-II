@@ -1,7 +1,7 @@
 module D3.Viz.ForceNavigator.Model where
 
 import Prelude
-import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode, D3_VxyFxy, D3_XY)
+import PSD3.Data.Node (D3Link_Unswizzled, SimulationNode, D3_VxyFxy, D3_XY)
 import Data.Maybe (Maybe)
 import Type.Row (type (+))
 
@@ -31,7 +31,7 @@ instance showCategory :: Show Category where
   show Application = "application"
 
 -- | The extra/model-specific data for navigation nodes
-type NavigationNodeData row = (
+type NavigationNodeRow = (
   id :: String
 , label :: String
 , nodeType :: NodeType
@@ -40,14 +40,13 @@ type NavigationNodeData row = (
 , url :: Maybe String
 , external :: Maybe Boolean
 , description :: Maybe String
-| row
 )
 
--- | Navigation node as used in PureScript simulation
-type NavigationSimNode = D3_SimulationNode (NavigationNodeData + D3_XY + D3_VxyFxy + ())
+-- | Navigation node as used in simulation (phantom type friendly!)
+type NavigationSimNode = SimulationNode NavigationNodeRow
 
--- | Navigation node as a bare record (what D3 returns in callbacks)
-type NavigationSimRecord = Record (D3_XY + D3_VxyFxy + NavigationNodeData + ())
+-- | Legacy alias - now equivalent to NavigationSimNode
+type NavigationSimRecord = NavigationSimNode
 
 -- | Link data (no extra data needed beyond source/target)
 type NavigationLinkData = ()

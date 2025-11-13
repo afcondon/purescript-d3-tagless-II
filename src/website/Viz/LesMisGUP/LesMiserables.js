@@ -1,5 +1,27 @@
 // FFI for LesMiserables grid transition
 
+export function unsafeStringify(obj) {
+  return JSON.stringify(obj, null, 2);
+}
+
+// Mutate object to set fx/fy without losing other properties
+export function setFxFy(obj) {
+  return function(fx) {
+    return function(fy) {
+      obj.fx = fx;
+      obj.fy = fy;
+      return obj;
+    };
+  };
+}
+
+// Mutate object to clear fx/fy without losing other properties
+export function clearFxFy(obj) {
+  obj.fx = null;
+  obj.fy = null;
+  return obj;
+}
+
 // Transition nodes to grid positions with smooth D3 animation
 // Generic version that works with any visualization by taking class selectors
 export const transitionNodesToGridPositions_ = (svgClass) => (nodeClass) => (linkClass) => (gridNodes) => (onComplete) => () => {

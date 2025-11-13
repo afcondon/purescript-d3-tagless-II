@@ -4,11 +4,12 @@ import Prelude
 
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import PSD3.Internal.Types (D3Selection_, D3Simulation_)
-import PSD3.Internal.FFI (defaultLinkTick_, defaultNodeTick_, disableTick_, getLinksFromSimulation_, getNodes_, onTick_)
-import PSD3.Internal.Selection.Types (applySelectionAttributeD3)
+import PSD3.Internal.FFI (d3AttachZoom_, d3AttachZoomDefaultExtent_, defaultLinkTick_, defaultNodeTick_, disableDrag_, disableTick_, getLinksFromSimulation_, getNodes_, onTick_, simulationDrag_, simdrag_)
+import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
 import PSD3.Internal.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionMergeSelections, selectionModifySelection, selectionNestedJoin, selectionOn, selectionOpenSelection, selectionSelectUnder, selectionUpdateJoin)
-import PSD3.Internal.Simulation.Types (D3SimulationState_, Step(..), SimVariable(..), _handle, _name)
-import PSD3.Internal.Simulation.Functions (simulationActualizeForces, simulationMergeNewData, simulationOn, simulationSetLinks, simulationSetLinksFromSelection, simulationSetNodes, simulationSetNodesFromSelection, simulationSetVariable, simulationStart, simulationStop)
+import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, Step(..), SimVariable(..), _handle, _name)
+import PSD3.Internal.Attributes.Instances (Label)
+import PSD3.Internal.Simulation.Functions (simulationActualizeForces, simulationMergeNewData, simulationSetLinks, simulationSetLinksFromSelection, simulationSetNodes, simulationSetNodesFromSelection, simulationSetVariable, simulationStart, simulationStop)
 import PSD3.Internal.Sankey.Types (SankeyLayoutState_)
 import PSD3.Internal.Sankey.Functions (sankeySetData, sankeySetDataWithConfig)
 import PSD3.Capabilities.Selection (class SelectionM)
@@ -24,6 +25,7 @@ import Data.Traversable (sequence)
 import Type.Proxy (Proxy(..))
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..), fst, snd)
+import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff, liftAff)
@@ -73,69 +75,94 @@ exec_D3M (D3M state_T) = liftA1 snd $ runStateT state_T unit
 -- Simulation Monad (with simulation state)
 -- ====================================================
 
-newtype D3SimM :: forall k. Row Type -> k -> Type -> Type
-newtype D3SimM row selection a = D3SimM (StateT { simulation :: D3SimulationState_ | row } Aff a)
+newtype D3SimM :: forall k. Row Type -> Type -> k -> Type -> Type
+newtype D3SimM row d selection a = D3SimM (StateT { simulation :: D3SimulationState_ d | row } Aff a)
 
-run_D3M_Simulation :: forall a row. { simulation :: D3SimulationState_ | row } -> D3SimM row D3Selection_ a -> Aff (Tuple a ({ simulation :: D3SimulationState_ | row }))
+run_D3M_Simulation :: forall a d row. { simulation :: D3SimulationState_ d | row } -> D3SimM row d D3Selection_ a -> Aff (Tuple a ({ simulation :: D3SimulationState_ d | row }))
 run_D3M_Simulation simulation (D3SimM state_T) = runStateT state_T simulation
 
-exec_D3M_Simulation :: forall a row. { simulation :: D3SimulationState_ | row } -> D3SimM row D3Selection_ a -> Aff { simulation :: D3SimulationState_ | row }
+exec_D3M_Simulation :: forall a d row. { simulation :: D3SimulationState_ d | row } -> D3SimM row d D3Selection_ a -> Aff { simulation :: D3SimulationState_ d | row }
 exec_D3M_Simulation simulation (D3SimM state_T) = liftA1 snd $ runStateT state_T simulation
 
-eval_D3M_Simulation :: forall a row. { simulation :: D3SimulationState_ | row } -> D3SimM row D3Selection_ a -> Aff a
+eval_D3M_Simulation :: forall a d row. { simulation :: D3SimulationState_ d | row } -> D3SimM row d D3Selection_ a -> Aff a
 eval_D3M_Simulation simulation (D3SimM state_T) = liftA1 fst $ runStateT state_T simulation
 
-runWithD3_Simulation :: forall m a row.
+runWithD3_Simulation :: forall m a d row.
   Bind m =>
-  MonadState { simulation :: D3SimulationState_ | row } m =>
+  MonadState { simulation :: D3SimulationState_ d | row } m =>
   MonadAff m =>
-  D3SimM row D3Selection_ a -> m Unit
+  D3SimM row d D3Selection_ a -> m Unit
 runWithD3_Simulation state_T = do
     state <- get
     state' <- liftAff $ exec_D3M_Simulation state state_T
     modify_ (\_ -> state')
 
-evalEffectSimulation :: forall m a row.
+evalEffectSimulation :: forall m a d row.
   Bind m =>
-  MonadState { simulation :: D3SimulationState_ | row } m =>
+  MonadState { simulation :: D3SimulationState_ d | row } m =>
   MonadAff m =>
-  D3SimM row D3Selection_ a -> m a
+  D3SimM row d D3Selection_ a -> m a
 evalEffectSimulation state_T = do
     state <- get
     (Tuple a state') <- liftAff $ run_D3M_Simulation state state_T
     modify_ (\_ -> state')
     pure a
 
-derive newtype instance functorD3SimM     :: Functor           (D3SimM row selection)
-derive newtype instance applyD3SimM       :: Apply             (D3SimM row selection)
-derive newtype instance applicativeD3SimM :: Applicative       (D3SimM row selection)
-derive newtype instance bindD3SimM        :: Bind              (D3SimM row selection)
-derive newtype instance monadD3SimM       :: Monad             (D3SimM row selection)
-derive newtype instance monadEffD3SimM    :: MonadEffect       (D3SimM row selection)
-derive newtype instance monadAffD3SimM    :: MonadAff          (D3SimM row selection)
-derive newtype instance monadStateD3SimM  :: MonadState  { simulation :: D3SimulationState_ | row } (D3SimM row selection)
+derive newtype instance functorD3SimM     :: Functor           (D3SimM row d selection)
+derive newtype instance applyD3SimM       :: Apply             (D3SimM row d selection)
+derive newtype instance applicativeD3SimM :: Applicative       (D3SimM row d selection)
+derive newtype instance bindD3SimM        :: Bind              (D3SimM row d selection)
+derive newtype instance monadD3SimM       :: Monad             (D3SimM row d selection)
+derive newtype instance monadEffD3SimM    :: MonadEffect       (D3SimM row d selection)
+derive newtype instance monadAffD3SimM    :: MonadAff          (D3SimM row d selection)
+derive newtype instance monadStateD3SimM  :: MonadState  { simulation :: D3SimulationState_ d | row } (D3SimM row d selection)
 
-instance showD3SimM :: Show (D3SimM row D3Selection_ a) where
+instance showD3SimM :: Show (D3SimM row d D3Selection_ a) where
   show x = "D3SimM"
 
-instance SelectionM D3Selection_ (D3SimM row D3Selection_) where
+instance SelectionM D3Selection_ (D3SimM stateRow d D3Selection_) where
   appendTo s_        = selectionAppendElement s_
   selectUnder s_     = selectionSelectUnder s_
   attach selector    = selectionAttach selector
   filterSelection s_ = selectionFilterSelection s_
   mergeSelections s_ = selectionMergeSelections s_
   setAttributes s_   = selectionModifySelection s_
-  on s_              = simulationOn s_ -- NB simulation "on" is handled differently from selectionOn
+  on s_ b            = case b of -- Inline simulationOn to avoid polymorphic constraint issues
+    Drag drag -> do
+      handle <- use _handle
+      let _ = case drag of
+                DefaultDrag      -> simulationDrag_ "default" (unsafeCoerce s_) handle simdrag_
+                NoDrag           -> disableDrag_ (unsafeCoerce s_)
+                (CustomDrag name fn)  -> simulationDrag_ name (unsafeCoerce s_) handle fn
+      pure unit
+    Zoom config -> do
+      let (ScaleExtent smallest largest) = config.scale
+          _ = case config.extent of
+                DefaultZoomExtent ->
+                  d3AttachZoomDefaultExtent_ (unsafeCoerce s_) {
+                    scaleExtent: [ smallest, largest ]
+                  , name  : config.name
+                  , target: unsafeCoerce config.target
+                  }
+                (ZoomExtent ze)   ->
+                  d3AttachZoom_ (unsafeCoerce s_) {
+                    extent     : [ [ ze.left, ze.top ], [ ze.right, ze.bottom ] ]
+                  , scaleExtent: [ smallest, largest ]
+                  , name  : config.name
+                  , target: unsafeCoerce config.target
+                  }
+      pure unit
   openSelection s_   = selectionOpenSelection s_
   simpleJoin s_      = selectionJoin s_
   nestedJoin s_      = selectionNestedJoin s_
   updateJoin s_      = selectionUpdateJoin s_
 
 -- | Simplified SimulationM instance - record-based initialization
-instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
+instance SimulationM D3Selection_ (D3SimM stateRow d D3Selection_) where
   init config = do
     -- 1. Initialize force library in simulation state
-    let forcesMap = Map.fromFoldable $ config.forces <#> \f -> Tuple (view _name f) f
+    let forcesMap :: Map.Map Label (Force d)
+        forcesMap = Map.fromFoldable $ config.forces <#> \f -> Tuple (view _name f) (unsafeCoerce f)
     modify_ \state -> state { simulation = state.simulation # (_Newtype <<< prop (Proxy :: Proxy "forceLibrary")) .~ forcesMap }
 
     -- 2. Set up nodes first (must come before forces)
@@ -168,7 +195,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
                   unit
                 _ = onTick_ handle label makeTick
             pure unit
-    _ <- (sequence :: Array (D3SimM row D3Selection_ Unit) -> D3SimM row D3Selection_ (Array Unit)) $ Map.toUnfoldable config.ticks <#> \(Tuple label step) -> addTick label step
+    _ <- (sequence :: Array (D3SimM stateRow d D3Selection_ Unit) -> D3SimM stateRow d D3Selection_ (Array Unit)) $ Map.toUnfoldable config.ticks <#> \(Tuple label step) -> addTick label step
 
     -- 7. Return enhanced data for joining to DOM
     pure { nodes: nodesInSim, links: linksInSim }
@@ -182,7 +209,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
 -- | where the simulation sometimes doesn't run properly. Unable to reproduce
 -- | consistently. May be related to timing of DOM updates vs simulation updates,
 -- | or possibly an issue with how filters affect the data flow.
-instance SimulationM2 D3Selection_ (D3SimM row D3Selection_) where
+instance SimulationM2 D3Selection_ (D3SimM row d D3Selection_) where
   update config = do
     -- Get current simulation state
     handle <- use _handle

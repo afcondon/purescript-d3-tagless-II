@@ -8,6 +8,7 @@ import Data.Array (find)
 import Data.Either (Either(..))
 import Data.Int (floor)
 import Data.Maybe (Maybe(..))
+import Unsafe.Coerce (unsafeCoerce)
 import Data.Set as Set
 import Effect.Aff (Milliseconds(..))
 import Effect.Aff as Aff
@@ -19,7 +20,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
 import PSD3.Interpreter.D3 (D3M, eval_D3M)
-import PSD3.Internal.Types (D3Selection_)
+import PSD3.Internal.Types (D3Selection_, Datum_)
 import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.WealthHealth.Actions (Action(..))
 import PSD3.WealthHealth.Data (getAllNationsAtYear, getNationAtYear, loadNationsData)
@@ -205,7 +206,7 @@ handleAction = case _ of
     H.liftAff $ Aff.delay (Milliseconds 100.0)
 
     -- Initialize visualization once and store update function
-    (updateFn :: Array Draw.NationPoint -> D3M Unit D3Selection_ D3Selection_) <- liftEffect $ eval_D3M $ Draw.draw "#wealth-health-viz"
+    updateFn <- liftEffect $ eval_D3M $ Draw.draw "#wealth-health-viz"
     H.modify_ _ { vizUpdateFn = Just updateFn }
 
     -- Draw initial visualization
@@ -285,6 +286,6 @@ handleAction = case _ of
       Just model, Just updateFn -> do
         let nations = getAllNationsAtYear state.currentYear model
         let drawData = map nationPointToDrawData nations
-        _ <- liftEffect $ eval_D3M $ updateFn drawData
+        _ <- liftEffect $ eval_D3M $ updateFn (unsafeCoerce drawData)
         pure unit
       _, _ -> pure unit

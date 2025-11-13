@@ -6,7 +6,7 @@ import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Types (D3Selection_, Datum_)
 import PSD3.Internal.Selection.Types (SelectionAttribute)
 import PSD3.Internal.Simulation.Types (Force)
-import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode)
+import PSD3.Data.Node (D3Link_Unswizzled, SimulationNode)
 import Data.Map (Map)
 import Data.Map as Data.Map
 import Data.Maybe (Maybe(..))
@@ -126,9 +126,9 @@ instantTransition =
 -- |
 -- | This pattern enables declarative scene switching - just provide a new
 -- | SceneConfig and call runSimulation to transition between visualizations.
-type SceneConfig d attrs =
+type SceneConfig a attrs =
   { -- Data filtering
-    chooseNodes :: D3_SimulationNode d -> Boolean           -- Which nodes to display
+    chooseNodes :: SimulationNode a -> Boolean           -- Which nodes to display
   , linksShown :: D3Link_Unswizzled -> Boolean              -- Which links to render
   , linksActive :: Datum_ -> Boolean                         -- Which links exert force
 
@@ -140,7 +140,7 @@ type SceneConfig d attrs =
   , attributes :: attrs                                      -- Scene-specific attributes
 
   -- Node initialization (positioning, pinning, etc.)
-  , nodeInitializerFunctions :: Array (Array (D3_SimulationNode d) -> Array (D3_SimulationNode d))
+  , nodeInitializerFunctions :: Array (Array (SimulationNode a) -> Array (SimulationNode a))
 
   -- Transition behavior (Nothing = instant, Just = animated)
   , transitionConfig :: Maybe TransitionSpec                 -- How scene transitions in/out
@@ -148,7 +148,8 @@ type SceneConfig d attrs =
 
 -- | Create a default scene config with minimal settings
 -- | Usage: `defaultScene forceLibrary customAttrs`
-defaultScene :: forall d attrs. Map Label Force -> attrs -> SceneConfig d attrs
+-- | Note: a is the node data type, Force wraps SimulationNode a
+defaultScene :: forall a attrs. Map Label (Force (SimulationNode a)) -> attrs -> SceneConfig a attrs
 defaultScene forceLibrary attrs =
   { chooseNodes: const true                                  -- Show all nodes
   , linksShown: const false                                  -- Hide all links
@@ -161,10 +162,10 @@ defaultScene forceLibrary attrs =
   }
 
 -- | Modify node filter in a scene
-withNodeFilter :: forall d attrs.
-  (D3_SimulationNode d -> Boolean) ->
-  SceneConfig d attrs ->
-  SceneConfig d attrs
+withNodeFilter :: forall a attrs.
+  (SimulationNode a -> Boolean) ->
+  SceneConfig a attrs ->
+  SceneConfig a attrs
 withNodeFilter pred scene = scene { chooseNodes = pred }
 
 -- | Modify link filter in a scene
@@ -182,10 +183,10 @@ withForces :: forall d attrs.
 withForces forces scene = scene { activeForces = forces }
 
 -- | Add a node initializer function
-withInitializer :: forall d attrs.
-  (Array (D3_SimulationNode d) -> Array (D3_SimulationNode d)) ->
-  SceneConfig d attrs ->
-  SceneConfig d attrs
+withInitializer :: forall a attrs.
+  (Array (SimulationNode a) -> Array (SimulationNode a)) ->
+  SceneConfig a attrs ->
+  SceneConfig a attrs
 withInitializer fn scene =
   scene { nodeInitializerFunctions = scene.nodeInitializerFunctions <> [fn] }
 

@@ -4,9 +4,8 @@ import Prelude
 
 import PSD3.Data.Tree (TreeLayout(..))
 import D3.Viz.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
-import D3.Viz.Spago.Files (isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link, NodeType(..))
-import D3.Viz.Spago.Model (SpagoSimNode, isM2M_Graph_Link_, isM2M_Tree_Link_, isM2P_Link_, isP2P_Link_, isPackage, isUsedModule)
-import PSD3.Data.Node (D3_SimulationNode(..))
+import D3.Viz.Spago.Files (NodeType(..), isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
+import D3.Viz.Spago.Model (SpagoSimNode, isPackage, isUsedModule)
 import Data.String.CodeUnits (take)
 import PSD3.Internal.Simulation.Forces (showType)
 import PSD3.Internal.Simulation.Types (D3SimulationState_(..), Force(..), ForceStatus(..), SimVariable(..), _forceLibrary, showForceFilter)
@@ -36,13 +35,13 @@ import PSD3.Website.Types (Route(..))
 
 -- | Filter for project modules only (from src/ directory), but keep all packages
 isProjectModule :: SpagoSimNode -> Boolean
-isProjectModule (D3SimNode node) = case node.nodetype of
+isProjectModule node = case node.nodetype of
   IsModule path -> take 4 path == "src/"
   IsPackage _ -> true  -- Keep all packages visible
 
 -- | Full-screen render for Spago page
 render :: forall m.
-  State -> HH.HTML (ComponentSlot () m Action) Action
+  State -> HH.HTML (ComponentSlot () m (Action SpagoSimNode)) (Action SpagoSimNode)
 render state =
   HH.div
       [ HP.classes [ HH.ClassName "fullscreen-container", HH.ClassName "spago-fullscreen", HH.ClassName "page-with-watermark" ] ]
@@ -75,7 +74,7 @@ render state =
            else HH.text ""
       ]
 
-renderSimState :: forall p. State -> HH.HTML p Action
+renderSimState :: forall p. State -> HH.HTML p (Action SpagoSimNode)
 renderSimState state =
   HH.div
     [ HP.classes [ HH.ClassName "spago-sim-state" ]]
@@ -88,7 +87,7 @@ renderSimState state =
         [ HH.text $ "Nodes: " <> show (length $ getStagingNodes state)]
     ]
 
-renderSimControls :: forall p. State -> HH.HTML p Action
+renderSimControls :: forall p. State -> HH.HTML p (Action SpagoSimNode)
 renderSimControls state = do
   let
     params = getSimulationVariables state
@@ -219,7 +218,7 @@ renderSimControls state = do
         ]
     ]
 
-renderTableForces :: forall m. State -> H.ComponentHTML Action () m
+renderTableForces :: forall m. State -> H.ComponentHTML (Action SpagoSimNode) () m
 renderTableForces state  =
   HH.div_
   [ HH.h3_ [ HH.text "Forces"]
@@ -249,7 +248,7 @@ renderTableForces state  =
           [ HH.text $ showForceFilter force.filter ]
       ]
 
-slider :: { var :: Number -> SimVariable, id :: String, min :: Number, max :: Number, step :: Number, value :: Number } -> Array (HP.IProp _ Action)
+slider :: { var :: Number -> SimVariable, id :: String, min :: Number, max :: Number, step :: Number, value :: Number } -> Array (HP.IProp _ (Action SpagoSimNode))
 slider config = do
   let
     toScale :: String -> Number

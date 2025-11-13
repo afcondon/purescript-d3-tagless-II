@@ -16,85 +16,86 @@ import Prelude (Unit, unit)
 -- | ***************************   FFI signatures for D3js zoom module       *********************************************
 -- | *********************************************************************************************************************
 foreign import data ZoomBehavior_ :: Type  -- the zoom behavior, provided to Event Handler
-foreign import d3AttachZoom_              :: D3Selection_ -> ZoomConfig_        -> D3Selection_
-foreign import d3AttachZoomDefaultExtent_ :: D3Selection_ -> ZoomConfigDefault_ -> D3Selection_
-foreign import showAttachZoomDefaultExtent_ :: forall selection. selection -> ZoomConfigDefault_ -> selection
-foreign import showAttachZoom_              :: forall selection. selection -> ZoomConfig_ -> selection
+foreign import d3AttachZoom_              :: forall d. D3Selection_ d -> ZoomConfig_ d        -> D3Selection_ d
+foreign import d3AttachZoomDefaultExtent_ :: forall d. D3Selection_ d -> ZoomConfigDefault_ d -> D3Selection_ d
+foreign import showAttachZoomDefaultExtent_ :: forall selection d. selection -> ZoomConfigDefault_ d -> selection
+foreign import showAttachZoom_              :: forall selection d. selection -> ZoomConfig_ d -> selection
 
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for Selection & Transition  ********************************************
 -- | *********************************************************************************************************************
 
-foreign import d3SelectAllInDOM_     :: Selector D3Selection_ -> D3Selection_
-foreign import d3SelectFirstInDOM_   :: Selector D3Selection_    -> D3Selection_
-foreign import d3SelectionSelectAll_ :: Selector D3Selection_    -> D3Selection_ -> D3Selection_
-foreign import d3SelectionSelect_    :: Selector D3Selection_    -> D3Selection_ -> D3Selection_
-foreign import d3SelectionIsEmpty_   :: D3Selection_ -> Boolean
-foreign import d3GetSelectionData_   :: D3Selection_ -> Array Datum_
-foreign import d3EnterAndAppend_     :: String      -> D3Selection_ -> D3Selection_
-foreign import d3Append_             :: String      -> D3Selection_ -> D3Selection_
-foreign import d3MergeSelectionWith_ :: D3Selection_ -> D3Selection_ -> D3Selection_
+foreign import d3SelectAllInDOM_     :: forall d. Selector (D3Selection_ d) -> D3Selection_ d
+foreign import d3SelectFirstInDOM_   :: forall d. Selector (D3Selection_ d) -> D3Selection_ d
+foreign import d3SelectionSelectAll_ :: forall d. Selector (D3Selection_ d) -> D3Selection_ d -> D3Selection_ d
+foreign import d3SelectionSelect_    :: forall d. Selector (D3Selection_ d) -> D3Selection_ d -> D3Selection_ d
+foreign import d3SelectionIsEmpty_   :: forall d. D3Selection_ d -> Boolean
+foreign import d3GetSelectionData_   :: forall d. D3Selection_ d -> Array Datum_
+foreign import d3EnterAndAppend_     :: forall d. String -> D3Selection_ d -> D3Selection_ d
+foreign import d3Append_             :: forall d. String -> D3Selection_ d -> D3Selection_ d
+foreign import d3MergeSelectionWith_ :: forall d. D3Selection_ d -> D3Selection_ d -> D3Selection_ d
 
 -- these next two are for getting Enter and Exit selections during an update
-foreign import d3GetEnterSelection_ :: D3Selection_ -> D3Selection_
-foreign import d3GetExitSelection_  :: D3Selection_ -> D3Selection_
+foreign import d3GetEnterSelection_ :: forall d. D3Selection_ d -> D3Selection_ d
+foreign import d3GetExitSelection_  :: forall d. D3Selection_ d -> D3Selection_ d
 
 -- Removes the selected elements from the document. Returns this selection (the
 -- removed elements) which are now detached from the DOM. There is not currently a
 -- dedicated API to add removed elements back to the document; however, you can
 -- pass a function to selection.append or selection.insert to re-add elements.
-foreign import d3RemoveSelection_    :: D3Selection_ -> D3Selection_
+foreign import d3RemoveSelection_    :: forall d. D3Selection_ d -> D3Selection_ d
 
-foreign import d3FilterSelection_    :: D3Selection_ -> Selector D3Selection_   -> D3Selection_
-foreign import d3OrderSelection_     :: D3Selection_ -> D3Selection_
-foreign import d3RaiseSelection_     :: D3Selection_ -> D3Selection_
-foreign import d3LowerSelection_     :: D3Selection_ -> D3Selection_
-foreign import d3SortSelection_      :: forall d. D3Selection_ -> (d -> d -> Int) -> D3Selection_
+foreign import d3FilterSelection_    :: forall d. D3Selection_ d -> Selector (D3Selection_ d) -> D3Selection_ d
+foreign import d3OrderSelection_     :: forall d. D3Selection_ d -> D3Selection_ d
+foreign import d3RaiseSelection_     :: forall d. D3Selection_ d -> D3Selection_ d
+foreign import d3LowerSelection_     :: forall d. D3Selection_ d -> D3Selection_ d
+foreign import d3SortSelection_      :: forall d. D3Selection_ d -> (d -> d -> Int) -> D3Selection_ d
 
 foreign import getIndexFromDatum_    :: Datum_ -> Int
 
-foreign import d3Data_               :: forall d. Array d -> D3Selection_ -> D3Selection_
-type ComputeKeyFunction_ = Datum_ -> Index_
-foreign import keyIsID_           :: ComputeKeyFunction_
-foreign import keyIsSourceTarget_ :: ComputeKeyFunction_ -- used for links in simulation
+foreign import d3Data_               :: forall d. Array d -> D3Selection_ d -> D3Selection_ d
+type ComputeKeyFunction_ d key = d -> key
+foreign import keyIsID_           :: forall d. ComputeKeyFunction_ d Index_
+foreign import keyIsSourceTarget_ :: forall d. ComputeKeyFunction_ d Index_ -- used for links in simulation
 -- REVIEW the returned D3Selection_ here is the full enter, update, exit type of selection
--- which we haven't really modelled in PureScript (opaque type) but maybe it will turn out that we 
+-- which we haven't really modelled in PureScript (opaque type) but maybe it will turn out that we
 -- needed to all along
-foreign import d3DataWithKeyFunction_ :: forall d. Array d -> ComputeKeyFunction_ -> D3Selection_ -> D3Selection_
-foreign import d3DataWithFunction_ :: (Datum_ -> Array Datum_) -> ComputeKeyFunction_ -> D3Selection_ -> D3Selection_
+-- Key function can return any type (String, Int, etc), gets coerced to Index_ for D3
+foreign import d3DataWithKeyFunction_ :: forall d1 d2 key. Array d2 -> ComputeKeyFunction_ d2 key -> D3Selection_ d1 -> D3Selection_ d2
+foreign import d3DataWithFunction_ :: forall d. (Datum_ -> Array Datum_) -> ComputeKeyFunction_ Datum_ Index_ -> D3Selection_ d -> D3Selection_ d
 
 -- we'll coerce everything to this type if we can validate attr lambdas against provided data
 -- ... and we'll also just coerce all our setters to one thing for the FFI since JS don't care
 foreign import data D3Attr_ :: Type 
--- NB D3 returns the selection after setting an Attr but we will only capture Selections that are 
+-- NB D3 returns the selection after setting an Attr but we will only capture Selections that are
 -- meaningfully different _as_ selections, we're not chaining them in the same way
 -- foreign import d3GetAttr_ :: String -> D3Selection -> ???? -- solve the ???? as needed later
-foreign import d3AddTransition_ :: D3Selection_ -> Transition -> D3Selection_ -- this is the PS transition record
+foreign import d3AddTransition_ :: forall d. D3Selection_ d -> Transition -> D3Selection_ d -- this is the PS transition record
 
-foreign import d3SetAttr_       :: String -> D3Attr_ -> D3Selection_ -> D3Selection_
-foreign import d3SetText_       :: D3Attr_ -> D3Selection_ -> D3Selection_
-foreign import d3SetProperty_   :: D3Attr_ -> D3Selection_ -> D3Selection_
-foreign import d3SetHTML_       :: D3Attr_ -> D3Selection_ -> D3Selection_
+foreign import d3SetAttr_       :: forall d. String -> D3Attr_ -> D3Selection_ d -> D3Selection_ d
+foreign import d3SetText_       :: forall d. D3Attr_ -> D3Selection_ d -> D3Selection_ d
+foreign import d3SetProperty_   :: forall d. D3Attr_ -> D3Selection_ d -> D3Selection_ d
+foreign import d3SetHTML_       :: forall d. D3Attr_ -> D3Selection_ d -> D3Selection_ d
 
 foreign import emptyD3Data_ :: D3Data_ -- probably just null, could this be monoid too??? ie Last (Maybe D3Data_)
 
 foreign import data D3DragFunction_ :: Type
-foreign import simulationDrag_ :: String -> D3Selection_ -> D3Simulation_ -> D3DragFunction_ -> D3Selection_
+foreign import simulationDrag_ :: forall d. String -> D3Selection_ d -> D3Simulation_ -> D3DragFunction_ -> D3Selection_ d
 foreign import simdrag_  :: D3DragFunction_
 foreign import simdragHorizontal_ :: D3DragFunction_
-foreign import disableDrag_ :: D3Selection_ -> D3Selection_
+foreign import disableDrag_ :: forall d. D3Selection_ d -> D3Selection_ d
 
-foreign import highlightConnectedNodes_ :: D3Selection_ -> Array String -> Unit
-foreign import clearHighlights_ :: D3Selection_ -> Unit
+foreign import highlightConnectedNodes_ :: forall d. D3Selection_ d -> Array String -> Unit
+foreign import clearHighlights_ :: forall d. D3Selection_ d -> Unit
 foreign import unpinAllNodes_ :: D3Simulation_ -> Unit
 foreign import updateBubbleRadii_ :: D3Simulation_ -> (Boolean -> Int -> Number) -> Unit
 foreign import updateNodeExpansion_ :: forall declsData callsData. D3Simulation_ -> (Boolean -> Int -> Number) -> declsData -> callsData -> Datum_ -> Unit
 foreign import unsafeSetField_ :: forall a. String -> a -> Datum_ -> Effect Unit
 
 foreign import expandNodeById_ :: forall declsData callsData. D3Simulation_ -> (Boolean -> Int -> Number) -> declsData -> callsData -> String -> Boolean -> Effect Unit
-foreign import addModuleArrowMarker_ :: D3Selection_ -> Effect Unit
-foreign import drawInterModuleDeclarationLinks_ :: forall declsData callsData. D3Selection_ -> (Boolean -> Int -> Number) -> declsData -> callsData -> Effect Unit
-foreign import filterToConnectedNodes_ :: D3Simulation_ -> (Datum_ -> Index_) -> Array String -> Unit
+foreign import addModuleArrowMarker_ :: forall d. D3Selection_ d -> Effect Unit
+foreign import drawInterModuleDeclarationLinks_ :: forall declsData callsData d. D3Selection_ d -> (Boolean -> Int -> Number) -> declsData -> callsData -> Effect Unit
+foreign import filterToConnectedNodes_ :: forall d key. D3Simulation_ -> (SimulationNode d -> key) -> Array String -> Unit
 
 foreign import selectionOn_         :: forall selection callback. selection -> String -> callback -> selection  
 
@@ -121,39 +122,40 @@ type SimulationVariables = {
     , velocityDecay :: Number
 }
 
-foreign import initSimulation_         ::                  SimulationVariables -> (Datum_ -> Index_) -> D3Simulation_
+foreign import initSimulation_         :: forall d key.    SimulationVariables -> (SimulationNode d -> key) -> D3Simulation_
 foreign import configSimulation_       :: D3Simulation_ -> SimulationVariables -> D3Simulation_
 foreign import readSimulationVariables_ :: D3Simulation_ -> SimulationVariables
 
-foreign import d3PreserveSimulationPositions_ :: 
-  forall d. 
-  D3Selection_ ->
-  Array (D3_SimulationNode d) ->
-  (Datum_ -> Index_) -> 
-  Array (D3_SimulationNode d)
+foreign import d3PreserveSimulationPositions_ ::
+  forall d row key.
+  D3Selection_ d ->
+  Array (SimulationNode row) ->
+  (SimulationNode row -> key) ->
+  Array (SimulationNode row)
 foreign import d3PreserveLinkReferences_ ::
-  D3Selection_ ->
+  forall d.
+  D3Selection_ d ->
   Array D3Link_Unswizzled ->
   Array D3Link_Unswizzled
 
-foreign import getIDsFromNodes_ :: forall d id. Array (D3_SimulationNode d) -> (Datum_ -> Index_) -> Array id
+foreign import getIDsFromNodes_ :: forall d id key. Array (SimulationNode d) -> (SimulationNode d -> key) -> Array id
 
-foreign import getNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)
-foreign import setNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> Array (D3_SimulationNode d)
+foreign import getNodes_ :: forall d.   D3Simulation_ -> Array (SimulationNode d)
+foreign import setNodes_ :: forall d.   D3Simulation_ -> Array (SimulationNode d) -> Array (SimulationNode d)
 -- setLinks will do the swizzling AND prune any links that have source or target that is not in [nodes]
 foreign import setLinks_ ::
   D3Simulation_ ->
   Array D3Link_Swizzled ->
   Unit
 foreign import swizzleLinks_ ::
-  forall d.
+  forall d key.
   Array D3Link_Unswizzled ->
-  Array (D3_SimulationNode d) ->
-  (Datum_ -> Index_) ->
+  Array (SimulationNode d) ->
+  (SimulationNode d -> key) ->
   Array D3Link_Swizzled
 
-foreign import getLinkID_              :: (Datum_ -> Index_) -> Datum_ -> Index_
-foreign import getLinkIDs_             :: forall id. (Datum_ -> Index_) -> D3Link_Unswizzled -> { sourceID :: id, targetID :: id }
+foreign import getLinkID_              :: forall link key. (link -> key) -> link -> Index_
+foreign import getLinkIDs_             :: forall nodeData id key. (nodeData -> key) -> D3Link_Unswizzled -> { sourceID :: id, targetID :: id }
 foreign import unsetLinks_             :: D3Simulation_ -> D3Simulation_
 
 foreign import getLinksFromForce_      :: D3ForceHandle_ -> Array D3Link_Unswizzled
@@ -162,26 +164,26 @@ foreign import getLinksFromSimulation_ :: D3Simulation_ -> Array D3Link_Swizzled
 foreign import startSimulation_        :: D3Simulation_ -> Unit
 foreign import stopSimulation_         :: D3Simulation_ -> Unit
 
-foreign import setInSimNodeFlag_     :: forall d. D3_SimulationNode d -> Unit
-foreign import unsetInSimNodeFlag_   :: forall d. D3_SimulationNode d -> Unit
+foreign import setInSimNodeFlag_     :: forall d. SimulationNode d -> Unit
+foreign import unsetInSimNodeFlag_   :: forall d. SimulationNode d -> Unit
 
 -- following functions modify the node and return it - meant to be used on staged data which will then be re-entered to sim
-foreign import pinNode_              :: forall d. Number -> Number -> D3_SimulationNode d -> D3_SimulationNode d
-foreign import pinNamedNode_         :: forall d. String -> Number -> Number -> D3_SimulationNode d -> D3_SimulationNode d
-foreign import pinTreeNode_          :: forall d. D3_SimulationNode d -> D3_SimulationNode d -- modifies fx/fy
-foreign import unpinNode_            :: forall d. D3_SimulationNode d -> D3_SimulationNode d -- set fx/fy to null
+foreign import pinNode_              :: forall d. Number -> Number -> SimulationNode d -> SimulationNode d
+foreign import pinNamedNode_         :: forall d. String -> Number -> Number -> SimulationNode d -> SimulationNode d
+foreign import pinTreeNode_          :: forall d. SimulationNode d -> SimulationNode d -- modifies fx/fy
+foreign import unpinNode_            :: forall d. SimulationNode d -> SimulationNode d -- set fx/fy to null
 
 -- NB mutating function
--- pinNode :: forall d. D3_SimulationNode d -> PointXY -> D3_SimulationNode d
+-- pinNode :: forall d. SimulationNode d -> PointXY -> SimulationNode d
 -- pinNode node p = do
 --   let _ = pinNode_ p.x p.y node
 --   node -- NB mutated value, fx / fy have been set
 -- NB mutating function
-setInSimNodeFlag :: forall d. D3_SimulationNode d -> D3_SimulationNode d
+setInSimNodeFlag :: forall d. SimulationNode d -> SimulationNode d
 setInSimNodeFlag node = do
   let _ = setInSimNodeFlag_ node
   node -- NB mutated value, inSim now true
-unsetInSimNodeFlag :: forall d. D3_SimulationNode d -> D3_SimulationNode d
+unsetInSimNodeFlag :: forall d. SimulationNode d -> SimulationNode d
 unsetInSimNodeFlag node = do
   let _ = unsetInSimNodeFlag_ node
   node -- NB mutated value, inSim now false
@@ -191,8 +193,8 @@ unsetInSimNodeFlag node = do
 -- foreign import addAttrFnToTick_           :: D3Selection_ -> D3Attr_ -> Unit
 foreign import onTick_                :: D3Simulation_ -> String -> (Unit -> Unit) -> Unit
 foreign import disableTick_           :: D3Simulation_ -> String -> Unit
-foreign import defaultNodeTick_       :: String -> D3Simulation_ -> D3Selection_ -> Unit
-foreign import defaultLinkTick_       :: String -> D3Simulation_ -> D3Selection_ -> Unit
+foreign import defaultNodeTick_       :: forall d. String -> D3Simulation_ -> D3Selection_ d -> Unit
+foreign import defaultLinkTick_       :: forall d. String -> D3Simulation_ -> D3Selection_ d -> Unit
 foreign import setAlpha_              :: D3Simulation_ -> Number -> Unit
 foreign import setAlphaMin_           :: D3Simulation_ -> Number -> Unit
 foreign import setAlphaDecay_         :: D3Simulation_ -> Number -> Unit
@@ -241,75 +243,28 @@ foreign import setAsNullForceInSimulation_  :: D3Simulation_ -> String -> D3Simu
 -- this is an opaque type behind which hides the data type of the Purescript tree that was converted
 foreign import data RecursiveD3TreeNode_ :: Type
 -- this is the Purescript Tree after processing in JS to remove empty child fields from leaves etc
--- need to ensure that this structure is encapsulated in libraries (ie by moving this code)
-foreign import data D3TreeLike_         :: Type -- covers both trees and clusters
-foreign import data D3SortComparator_   :: Type -- a number such that n < 0 => a > b, n > 0 => b > a, n == 0 undef'd
-foreign import data D3Hierarchical_     :: Type
+-- =======================================================================================
+-- | REMOVED: Old D3 hierarchy FFI functions
+-- | We now use pure PureScript hierarchy layouts (PSD3.Layout.Hierarchy.*)
+-- | These old FFI functions are no longer needed:
+-- |   - hierarchyFromJSON_, descendants_, links_, runLayoutFn_, etc.
+-- |   - treeSortForCirclePack_, treeSortForTreeMap_, treeSortForTree_
+-- |   - hasChildren_, getHierarchyValue_, getHierarchyChildren_, getHierarchyParent_
+-- |   - getTreeLayoutFn_, getClusterLayoutFn_, treeSetSize_, treeSetSeparation_, etc.
+-- |   - hNodeDepth_, hNodeHeight_, hNodeX_, hNodeY_, hNodeR_
+-- =======================================================================================
 
-foreign import hierarchyFromJSON_       :: forall d. TreeJson_ -> D3_TreeNode d
+-- Kept: cloneTreeJson_ is still used for creating copies of tree data
 foreign import cloneTreeJson_           :: TreeJson_ -> TreeJson_
--- TODO now that these different hierarchy rows are composed at type level, polymorphic functions should be written
-foreign import treeSortForCirclePack_   :: forall d. D3CirclePackRow d -> D3CirclePackRow d
-foreign import treeSortForTreeMap_      :: forall d. D3TreeMapRow d -> D3TreeMapRow d
-foreign import treeSortForTree_         :: forall d. D3_TreeNode d -> D3_TreeNode d
-foreign import treeSortForTree_Spago_    :: forall d. D3_TreeNode d -> D3_TreeNode d
 
--- next some functions to make attributes, types are a bit sloppy here, parent and child fields do not appear in PureScript
-foreign import hasChildren_             :: forall r. D3_TreeNode r -> Boolean
-foreign import getHierarchyValue_       :: forall r. D3_TreeNode r -> Nullable Number
-foreign import getHierarchyChildren_    :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
-foreign import getHierarchyParent_      :: forall r. D3_TreeNode r -> D3_TreeNode r
-
--- the full API for hierarchical nodes:
--- TODO these should all be operating on cooked tree type, however that is to be done
-foreign import descendants_     :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
-foreign import find_            :: forall r. D3_TreeNode r -> (Datum_ -> Boolean) -> Nullable (D3_TreeNode r)
-foreign import links_           :: forall r. D3_TreeNode r -> Array D3Link_Unswizzled
-foreign import ancestors_       :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
-foreign import leaves_          :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
-foreign import path_            :: forall r. D3_TreeNode r -> D3_TreeNode r -> Array (D3_TreeNode r)
-
-getLayout :: TreeType -> TreeLayoutFn_
-getLayout layout = do
-  case layout of
-    TidyTree   -> getTreeLayoutFn_ unit
-    Dendrogram -> getClusterLayoutFn_ unit
-
-foreign import getTreeLayoutFn_       :: Unit -> TreeLayoutFn_
-foreign import getClusterLayoutFn_    :: Unit -> TreeLayoutFn_
-
-foreign import runLayoutFn_           :: forall r. TreeLayoutFn_ -> D3_TreeNode r -> D3_TreeNode r
-foreign import treeSetSize_           :: TreeLayoutFn_ -> Array Number -> TreeLayoutFn_
-foreign import treeSetNodeSize_       :: TreeLayoutFn_ -> Array Number -> TreeLayoutFn_
-foreign import treeSetSeparation_     :: forall d. TreeLayoutFn_ -> (Fn2 (D3_TreeNode d) (D3_TreeNode d) Number) -> TreeLayoutFn_
-foreign import treeMinMax_            :: forall d. D3_TreeNode d -> { xMin :: Number, xMax :: Number, yMin :: Number, yMax :: Number }
--- foreign import sum_                :: D3HierarchicalNode_ -> (Datum_ -> Number) -> D3HierarchicalNode_ -- alters the tree!!!!
--- from docs:  <<if you only want leaf nodes to have internal value, then return zero for any node with children. 
--- For example, as an alternative to node.count:
---        root.sum(function(d) { return d.value ? 1 : 0; });
--- foreign import count_              :: D3HierarchicalNode_ -> D3HierarchicalNode_ -- NB alters the tree!!!
--- foreign import sort_               :: D3HierarchicalNode_ -> (D3HierarchicalNode_ -> D3HierarchicalNode_ -> D3SortComparator_)
--- foreign import each_ -- breadth first traversal
--- foreign import eachAfter_ 
--- foreign import eachBefore_
--- foreign import deepCopy_ -- copies (sub)tree but shares data with clone !!!
-foreign import sharesParent_          :: forall r. (D3_TreeNode r) -> (D3_TreeNode r) -> Boolean
-
-foreign import linkHorizontal_        :: (Datum_ -> String) 
-foreign import linkHorizontal2_       :: (Datum_ -> String) 
-foreign import linkVertical_          :: (Datum_ -> String) 
-foreign import linkClusterHorizontal_ :: Number -> (Datum_ -> String) 
-foreign import linkClusterVertical_   :: Number -> (Datum_ -> String) 
+-- Kept: Link generators are still used for rendering connections
+foreign import linkHorizontal_        :: (Datum_ -> String)
+foreign import linkHorizontal2_       :: (Datum_ -> String)
+foreign import linkVertical_          :: (Datum_ -> String)
+foreign import linkClusterHorizontal_ :: Number -> (Datum_ -> String)
+foreign import linkClusterVertical_   :: Number -> (Datum_ -> String)
 foreign import linkRadial_            :: (Datum_ -> Number) -> (Datum_ -> Number) -> (Datum_ -> String)
 foreign import autoBox_               :: Datum_ -> Array Number
-
--- accessors for fields of D3HierarchicalNode, only valid if layout has been done, hence the _XY version of node
--- REVIEW maybe accessors aren't needed if you can ensure type safety
-foreign import hNodeDepth_  :: forall r. D3_TreeNode r -> Number
-foreign import hNodeHeight_ :: forall r. D3_TreeNode r -> Number
-foreign import hNodeX_      :: forall r. D3_TreeNode r -> Number
-foreign import hNodeY_      :: forall r. D3_TreeNode r -> Number
-foreign import hNodeR_      :: forall r. D3_TreeNode r -> Number
 
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for D3js Chord module          *********************************************
@@ -331,52 +286,26 @@ foreign import setArcInnerRadius_   :: ArcGenerator_ -> Number -> ArcGenerator_
 foreign import setArcOuterRadius_   :: ArcGenerator_ -> Number -> ArcGenerator_
 
 -- | *********************************************************************************************************************
--- | ***************************   FFI signatures for D3js Pack (bubble) module  *********************************************
+-- | REMOVED: Old D3 hierarchy layout FFI functions (Pack, Treemap, Partition)
+-- | We now use pure PureScript implementations in PSD3.Layout.Hierarchy.*
+-- | These old FFI functions are no longer needed:
+-- |   - packLayout_, packSetSize_, packSetPadding_, runPackLayout_
+-- |   - treemapLayout_, treemapSetSize_, treemapSetPadding_, runTreemapLayout_
+-- |   - partitionLayout_, partitionSetSize_, partitionSetPadding_, runPartitionLayout_
+-- |   - treeSortForCirclePack_, treeSortForTreeMap_, treeSortForPartition_
+-- |   - hNodeX0_, hNodeY0_, hNodeX1_, hNodeY1_, hNodeR_
 -- | *********************************************************************************************************************
-foreign import data PackLayout_ :: Type
-
-foreign import packLayout_      :: Unit -> PackLayout_
-foreign import packSetSize_     :: PackLayout_ -> Number -> Number -> PackLayout_
-foreign import packSetPadding_  :: PackLayout_ -> Number -> PackLayout_
-foreign import runPackLayout_   :: forall r. PackLayout_ -> D3_TreeNode r -> D3_TreeNode r
-
--- | *********************************************************************************************************************
--- | ***************************   FFI signatures for D3js Treemap module  *********************************************
--- | *********************************************************************************************************************
-foreign import data TreemapLayout_ :: Type
-
-foreign import treemapLayout_      :: Unit -> TreemapLayout_
-foreign import treemapSetSize_     :: TreemapLayout_ -> Number -> Number -> TreemapLayout_
-foreign import treemapSetPadding_  :: TreemapLayout_ -> Number -> TreemapLayout_
-foreign import runTreemapLayout_   :: forall r. TreemapLayout_ -> D3_TreeNode r -> D3_TreeNode r
-
--- Accessor functions for treemap node bounds
-foreign import hNodeX0_ :: forall r. D3_TreeNode r -> Number
-foreign import hNodeY0_ :: forall r. D3_TreeNode r -> Number
-foreign import hNodeX1_ :: forall r. D3_TreeNode r -> Number
-foreign import hNodeY1_ :: forall r. D3_TreeNode r -> Number
-
--- | *********************************************************************************************************************
--- | ***************************   FFI signatures for D3js Partition (icicle/sunburst) module  **************************
--- | *********************************************************************************************************************
-foreign import data PartitionLayout_ :: Type
-
-foreign import partitionLayout_      :: Unit -> PartitionLayout_
-foreign import partitionSetSize_     :: PartitionLayout_ -> Number -> Number -> PartitionLayout_
-foreign import partitionSetPadding_  :: PartitionLayout_ -> Number -> PartitionLayout_
-foreign import runPartitionLayout_   :: forall r. PartitionLayout_ -> D3_TreeNode r -> D3_TreeNode r
-foreign import treeSortForPartition_ :: forall d. D3_TreeNode d -> D3_TreeNode d
 
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for Details Panel manipulation  *************************************
 -- | *********************************************************************************************************************
-foreign import showDetailsPanel_ :: D3Selection_ -> Effect Unit
-foreign import hideDetailsPanel_ :: D3Selection_ -> Effect Unit
-foreign import setDetailsModuleName_ :: D3Selection_ -> String -> Effect Unit
-foreign import populateDetailsList_ :: D3Selection_ -> Array String -> Effect Unit
-foreign import showModuleLabels_ :: D3Selection_ -> Effect Unit
-foreign import hideModuleLabels_ :: D3Selection_ -> Effect Unit
+foreign import showDetailsPanel_ :: forall d. D3Selection_ d -> Effect Unit
+foreign import hideDetailsPanel_ :: forall d. D3Selection_ d -> Effect Unit
+foreign import setDetailsModuleName_ :: forall d. D3Selection_ d -> String -> Effect Unit
+foreign import populateDetailsList_ :: forall d. D3Selection_ d -> Array String -> Effect Unit
+foreign import showModuleLabels_ :: forall d. D3Selection_ d -> Effect Unit
+foreign import hideModuleLabels_ :: forall d. D3Selection_ d -> Effect Unit
 foreign import switchToSpotlightForces_ :: D3Simulation_ -> Effect Unit
 foreign import switchToCompactForces_ :: D3Simulation_ -> Effect Unit
 foreign import resetNodeFilter_ :: D3Simulation_ -> Effect Unit
-foreign import restoreAllNodes_ :: D3Simulation_ -> D3Selection_ -> D3Selection_ -> Array Datum_ -> Array Datum_ -> (Boolean -> Int -> Number) -> (Datum_ -> Index_) -> Effect Unit
+foreign import restoreAllNodes_ :: forall d1 d2 nodeData linkData key. D3Simulation_ -> D3Selection_ d1 -> D3Selection_ d2 -> Array nodeData -> Array linkData -> (Boolean -> Int -> Number) -> (nodeData -> key) -> Effect Unit

@@ -3,8 +3,8 @@ module PSD3.CodeExplorer.State where
 import Prelude
 
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, clusterSceneAttributes)
-import D3.Viz.Spago.Files (SpagoDataRow, SpagoLinkData)
-import PSD3.Data.Node (D3Link_Unswizzled)
+import D3.Viz.Spago.Files (D3_Radius, SpagoDataRow, SpagoLinkData, SpagoNodeRow)
+import PSD3.Data.Node (D3Link_Unswizzled, D3_FocusXY)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage)
 import Data.Array (filter, foldl)
 import Data.Lens (Lens', _Just, view)
@@ -35,14 +35,14 @@ import Type.Proxy (Proxy(..))
 
 -- | CodeExplorer state - specializes the generic SimulationComponentState
 -- | with Spago-specific types
-type State = SimState.SimulationComponentState Scene Action SpagoDataRow SpagoSceneAttributes SpagoModel
+type State = SimState.SimulationComponentState Scene (Action SpagoSimNode) NodeID (SpagoNodeRow (D3_FocusXY (D3_Radius ()))) SpagoSceneAttributes SpagoModel
 
 -- | Transition matrix type alias for convenience
 type TransitionMatrix = SimState.TransitionMatrix Scene
 
 -- | CodeExplorer's scene configuration - specialized version of library's SceneConfig
--- | Parameterized with Spago-specific node data (SpagoDataRow) and attributes (SpagoSceneAttributes)
-type SceneConfig = Scene.SceneConfig SpagoDataRow SpagoSceneAttributes
+-- | Parameterized with Spago-specific node data row and attributes
+type SceneConfig = Scene.SceneConfig (SpagoNodeRow (D3_FocusXY (D3_Radius ()))) SpagoSceneAttributes
 
 -- | DEPRECATED: Old name for SceneConfig, kept for backwards compatibility during refactor
 type MiseEnScene = SceneConfig
@@ -51,7 +51,7 @@ type MiseEnScene = SceneConfig
 -- | Visualization-Specific Initialization
 -- ============================================================================
 
-initialScene :: M.Map Label Force -> SceneConfig
+initialScene :: M.Map Label (Force SpagoSimNode) -> SceneConfig
 initialScene forceLibrary = {
     chooseNodes: isPackage -- chooses all nodes
   , linksShown:  const false
@@ -112,7 +112,7 @@ _cssClass :: Lens' State String
 _cssClass = _scene <<< prop (Proxy :: Proxy "cssClass")
 _sceneAttributes :: Lens' State SpagoSceneAttributes
 _sceneAttributes = _scene <<< prop (Proxy :: Proxy "attributes")
-_eventListener :: Lens' State (Maybe (HS.Listener Action))
+_eventListener :: Lens' State (Maybe (HS.Listener (Action SpagoSimNode)))
 _eventListener = prop (Proxy :: Proxy "eventListener")
 _nodeInitializerFunctions :: forall p.
   Strong p =>
@@ -163,7 +163,7 @@ getSimulationVariables state = do
 -- | Scene Management (re-exported from SimState with Spago-specific types)
 -- ============================================================================
 
-updateScene :: (MiseEnScene -> MiseEnScene) -> State -> State
+updateScene :: (SceneConfig -> SceneConfig) -> State -> State
 updateScene = SimState.updateScene
 
 applySceneConfig :: SceneConfig -> State -> State
@@ -243,10 +243,10 @@ setStagingLinkFilter = SimState.setStagingLinkFilter
 -- | See PSD3.Component.SimulationState for full documentation of the tagging system.
 
 tagNodes :: String -> (SpagoSimNode -> Boolean) -> Array SpagoSimNode -> State -> State
-tagNodes = SimState.tagNodes
+tagNodes label predicate nodes state = SimState.tagNodes _.id label predicate nodes state
 
 untagNodes :: String -> Array SpagoSimNode -> State -> State
-untagNodes = SimState.untagNodes
+untagNodes label nodes state = SimState.untagNodes _.id label nodes state
 
 clearTag :: String -> State -> State
 clearTag = SimState.clearTag

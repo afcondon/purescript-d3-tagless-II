@@ -79,7 +79,7 @@ drawMapQuartet :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
-  MapQuartetData -> Selector D3Selection_ -> m Unit
+  MapQuartetData -> Selector (D3Selection_ Unit) -> m Unit
 drawMapQuartet quartet selector = do
   -- Overall dimensions for the quartet display
   let totalWidth = 900.0
@@ -98,7 +98,7 @@ drawMapQuartet quartet selector = do
   let xDomain = [0.0, 200.0]
   let yDomain = [0.0, 120.0]
 
-  (root :: D3Selection_) <- attach selector
+  (root :: D3Selection_ Unit) <- attach selector
   svg <- appendTo root Svg [
       viewBox 0.0 0.0 totalWidth totalHeight
     , classed "map-quartet"

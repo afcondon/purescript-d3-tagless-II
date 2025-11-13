@@ -3,21 +3,20 @@ module D3.Viz.ForceNavigator.Forces where
 import Prelude
 
 import PSD3.Internal.Attributes.Instances (Label)
-import PSD3.Internal.Types (Datum_)
-import D3.Viz.ForceNavigator.Model (NodeType(..))
-import D3.Viz.ForceNavigator.Unsafe (unboxD3SimNode)
+import D3.Viz.ForceNavigator.Model (NavigationSimNode, NodeType(..))
 import PSD3.Internal.Simulation.Config as F
 import PSD3.Internal.Simulation.Forces (createForce, createLinkForce, initialize)
 import PSD3.Internal.Simulation.Types (Force, ForceType(..), RegularForceType(..), allNodes)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))
 import Data.Number (infinity)
+import Unsafe.Coerce (unsafeCoerce)
 
 -- | Helper to get collision radius based on node type
 -- | Can be customized per nodeType for different spacing
-collisionRadius :: Datum_ -> Number
+collisionRadius :: forall d. d -> Number
 collisionRadius d = do
-  let node = unboxD3SimNode d
+  let node = unsafeCoerce d :: NavigationSimNode
   case node.nodeType of
     _ -> 80.0  -- Use consistent collision radius for spacing
 
@@ -37,32 +36,32 @@ collisionRadius d = do
 -- |
 -- | **All forces start enabled (On) by default** - see State.purs where
 -- | `forceStatuses` is initialized from this library via `getStatusMap`
-forceLibrary :: Map Label Force
+forceLibrary :: forall d. Map Label (Force d)
 forceLibrary = initialize [
     -- Strong charge to spread nodes out
     createForce "charge" (RegularForce ForceManyBody) allNodes [
-        F.strength (-80.0)
-      , F.theta 0.9
-      , F.distanceMin 1.0
-      , F.distanceMax infinity
+        F.strengthVal (-80.0)
+      , F.thetaVal 0.9
+      , F.distanceMinVal 1.0
+      , F.distanceMaxVal infinity
       ]
 
     -- Center force to keep graph centered
   , createForce "center" (RegularForce ForceCenter) allNodes [
-        F.strength 0.5
-      , F.x 0.0
-      , F.y 0.0
+        F.strengthVal 0.5
+      , F.xVal 0.0
+      , F.yVal 0.0
       ]
 
     -- Collision force to prevent overlap
   , createForce "collision" (RegularForce ForceCollide) allNodes [
-        F.strength 1.0
-      , F.radius collisionRadius
+        F.strengthVal 1.0
+      , F.radiusFn (\d _ -> collisionRadius d)
       ]
 
     -- Link force to connect parent-child nodes
   , createLinkForce Nothing [
-        F.strength 0.5
-      , F.distance 150.0
+        F.strengthVal 0.5
+      , F.distanceVal 150.0
       ]
   ]

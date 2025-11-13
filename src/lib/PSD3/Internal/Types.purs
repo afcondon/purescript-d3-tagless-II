@@ -14,8 +14,8 @@ index_ToNumber i = toNumber $ index_ToInt i
 intToIndex_ :: Int -> Index_
 intToIndex_ = unsafeCoerce
 
-foreign import data D3Data_       :: Type 
-foreign import data D3Selection_  :: Type
+foreign import data D3Data_       :: Type
+foreign import data D3Selection_  :: Type -> Type  -- Phantom type parameter tracks datum type
 foreign import data D3Simulation_ :: Type -- has to be declared here to avoid cycle with Simulation.purs
 foreign import data D3Transition_ :: Type -- not clear yet if we need to distinguish from Selection
 foreign import data D3This_       :: Type -- not yet used but may be needed, ex. in callbacks
@@ -79,14 +79,14 @@ data EasingFunction =
 
 -- Zoom types
 -- TODO some Attr polymorphism needed here too
-type ZoomConfig_ = {
+type ZoomConfig_ d = {
     extent      :: Array (Array Number)
   , scaleExtent :: Array Number
   , name        :: String
-  , target      :: D3Selection_
+  , target      :: D3Selection_ d
 }
-type ZoomConfigDefault_ = {
+type ZoomConfigDefault_ d = {
     scaleExtent :: Array Number
   , name        :: String
-  , target      :: D3Selection_
+  , target      :: D3Selection_ d
 }

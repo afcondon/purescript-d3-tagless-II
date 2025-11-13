@@ -94,7 +94,7 @@ class (Monad m) <= SelectionM selection m where
   -- | ```
   -- |
   -- | Maps to D3's `selection.append()` - see https://d3js.org/d3-selection#selection_append
-  appendTo        :: selection -> Element -> Array (SelectionAttribute) -> m selection
+  appendTo        :: forall d. selection d -> Element -> Array (SelectionAttribute d) -> m (selection d)
 
   -- | Select descendant elements matching a selector within a selection.
   -- |
@@ -107,7 +107,7 @@ class (Monad m) <= SelectionM selection m where
   -- | ```
   -- |
   -- | Maps to D3's `selection.selectAll()` - see https://d3js.org/d3-selection#selection_selectAll
-  selectUnder     :: selection -> Selector selection -> m selection
+  selectUnder     :: forall d. selection d -> Selector (selection d) -> m (selection d)
 
   -- | Attach to an existing DOM element using a CSS selector.
   -- |
@@ -119,7 +119,7 @@ class (Monad m) <= SelectionM selection m where
   -- | ```
   -- |
   -- | Maps to D3's `d3.select()` - see https://d3js.org/d3-selection#select
-  attach          :: Selector selection -> m selection
+  attach          :: forall d. Selector (selection d) -> m (selection d)
 
   -- | Filter a selection to only elements matching a selector.
   -- |
@@ -131,7 +131,7 @@ class (Monad m) <= SelectionM selection m where
   -- | ```
   -- |
   -- | Maps to D3's `selection.filter()` - see https://d3js.org/d3-selection#selection_filter
-  filterSelection :: selection -> Selector selection -> m selection
+  filterSelection :: forall d. selection d -> Selector (selection d) -> m (selection d)
 
   -- | Merge two selections into one.
   -- |
@@ -145,7 +145,7 @@ class (Monad m) <= SelectionM selection m where
   -- | ```
   -- |
   -- | Maps to D3's `selection.merge()` - see https://d3js.org/d3-selection#selection_merge
-  mergeSelections :: selection -> selection -> m selection
+  mergeSelections :: forall d. selection d -> selection d -> m (selection d)
 
   -- | Apply attributes to a selection.
   -- |
@@ -156,7 +156,7 @@ class (Monad m) <= SelectionM selection m where
   -- | ```
   -- |
   -- | See `PSD3.Attributes` for the full list of available attributes.
-  setAttributes   :: selection -> Array (SelectionAttribute) -> m Unit
+  setAttributes   :: forall d. selection d -> Array (SelectionAttribute d) -> m Unit
 
   -- | Attach behavior (drag, zoom) to a selection.
   -- |
@@ -168,7 +168,7 @@ class (Monad m) <= SelectionM selection m where
   -- | ```
   -- |
   -- | See `PSD3.Internal.Selection.Types` for available behaviors.
-  on              :: selection -> Behavior selection -> m Unit
+  on              :: forall d. selection d -> Behavior (selection d) -> m Unit
 
   -- | Open a selection for data binding.
   -- |
@@ -176,7 +176,7 @@ class (Monad m) <= SelectionM selection m where
   -- | Most users won't need to call this directly.
   -- |
   -- | **Note**: This operation may be refactored in future versions.
-  openSelection   :: selection -> Selector selection -> m selection
+  openSelection   :: forall d. selection d -> Selector (selection d) -> m (selection d)
 
   -- | Bind data to elements using a simple join (enter-only pattern).
   -- |
@@ -192,7 +192,7 @@ class (Monad m) <= SelectionM selection m where
   -- | The key function identifies each datum uniquely for D3's internal tracking.
   -- |
   -- | Maps to D3's data join - see https://d3js.org/d3-selection#joining-data
-  simpleJoin      :: ∀ datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_) -> m selection
+  simpleJoin      :: forall d datum key. selection d -> Element -> (Array datum) -> (datum -> key) -> m (selection datum)
 
   -- | Bind data to elements using nested selections where child data is extracted from parent datum.
   -- |
@@ -227,8 +227,8 @@ class (Monad m) <= SelectionM selection m where
   -- | See Mike Bostock's [Nested Selections](https://bost.ocks.org/mike/nest/) for more on this pattern.
   -- |
   -- | Maps to D3's `.data(function(d) { return d; })` pattern.
-  nestedJoin      :: ∀ f datum. Foldable f =>
-                     selection -> Element -> (Datum_ -> f datum) -> (Datum_ -> Index_) -> m selection
+  nestedJoin      :: forall d f datum. Foldable f =>
+                     selection d -> Element -> (Datum_ -> f datum) -> (Datum_ -> Index_) -> m (selection datum)
 
   -- | Bind data to elements using the General Update Pattern (enter/update/exit).
   -- |
@@ -254,5 +254,5 @@ class (Monad m) <= SelectionM selection m where
   -- | ```
   -- |
   -- | See https://d3js.org/d3-selection#joining-data for the General Update Pattern.
-  updateJoin      :: ∀ datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_)
-    -> m { enter :: selection, exit :: selection, update :: selection }
+  updateJoin      :: forall d datum key. selection d -> Element -> (Array datum) -> (datum -> key)
+    -> m { enter :: selection datum, exit :: selection d, update :: selection datum }

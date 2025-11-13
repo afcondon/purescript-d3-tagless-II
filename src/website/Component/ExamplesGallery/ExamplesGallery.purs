@@ -72,49 +72,63 @@ allExamples =
     , route: Example "multi-line-chart"
     , thumbnail: "assets/example-thumbnails/multiline-chart.png"
     }
-  , { id: "bubble-chart"
-    , name: "Bubble Chart"
-    , description: "Hierarchical circle packing layout"
-    , category: "Hierarchies"
-    , route: Example "bubble-chart"
-    , thumbnail: "assets/example-thumbnails/circle-packing.png"
+  , { id: "radial-stacked-bar"
+    , name: "Radial Stacked Bar"
+    , description: "Population by age and state in radial form"
+    , category: "Simple Charts"
+    , route: Example "radial-stacked-bar"
+    , thumbnail: "assets/example-thumbnails/radial-stacked-bar.png"
+    }
+  , { id: "parabola"
+    , name: "Parabola"
+    , description: "Colored circles in parabolic formation"
+    , category: "Simple Charts"
+    , route: Example "parabola"
+    , thumbnail: "assets/example-thumbnails/parabola.png"
     }
 
-  -- Hierarchies
-  , { id: "vertical-tree"
-    , name: "Vertical Tree"
-    , description: "Top-down tidy tree layout"
+  -- Hierarchies (Pure PureScript implementations)
+  , { id: "tree-purescript"
+    , name: "Tree"
+    , description: "Node-link tree layout (Reingold-Tilford)"
     , category: "Hierarchies"
-    , route: Example "vertical-tree"
-    , thumbnail: "assets/example-thumbnails/vertical-tidy-tree.png"
-    }
-  , { id: "horizontal-tree"
-    , name: "Horizontal Tree"
-    , description: "Left-to-right tidy tree layout"
-    , category: "Hierarchies"
-    , route: Example "horizontal-tree"
-    , thumbnail: "assets/example-thumbnails/horizontal-tidy-tree.png"
-    }
-  , { id: "radial-tree"
-    , name: "Radial Tree"
-    , description: "Circular tidy tree layout"
-    , category: "Hierarchies"
-    , route: Example "radial-tree"
-    , thumbnail: "assets/example-thumbnails/radial-tidy-tree.png"
+    , route: Example "tree-purescript"
+    , thumbnail: "assets/example-thumbnails/tree-purescript.png"
     }
   , { id: "treemap"
     , name: "Treemap"
-    , description: "Space-filling hierarchical visualization"
+    , description: "Space-filling squarified tiling"
     , category: "Hierarchies"
     , route: Example "treemap"
     , thumbnail: "assets/example-thumbnails/treemap.png"
     }
+  , { id: "pack-purescript"
+    , name: "Pack"
+    , description: "Circle packing with iterative relaxation"
+    , category: "Hierarchies"
+    , route: Example "pack-purescript"
+    , thumbnail: "assets/example-thumbnails/pack-purescript.png"
+    }
+  , { id: "cluster-purescript"
+    , name: "Cluster"
+    , description: "Dendrogram with equal leaf depth"
+    , category: "Hierarchies"
+    , route: Example "cluster-purescript"
+    , thumbnail: "assets/example-thumbnails/cluster-purescript.png"
+    }
   , { id: "icicle"
-    , name: "Icicle Chart"
-    , description: "Hierarchical partition layout"
+    , name: "Partition/Icicle"
+    , description: "Rectangular partition with equal layer height"
     , category: "Hierarchies"
     , route: Example "icicle"
     , thumbnail: "assets/example-thumbnails/icicle-chart.png"
+    }
+  , { id: "sunburst-purescript"
+    , name: "Sunburst"
+    , description: "Radial partition with nested rings"
+    , category: "Hierarchies"
+    , route: Example "sunburst-purescript"
+    , thumbnail: "assets/example-thumbnails/sunburst-purescript.png"
     }
 
   -- Force-Directed
@@ -125,12 +139,19 @@ allExamples =
     , route: Example "lesmis-force"
     , thumbnail: "assets/example-thumbnails/les-miserables.png"
     }
+  , { id: "lesmisgup"
+    , name: "Les Misérables GUP"
+    , description: "Interactive network with dynamic filtering"
+    , category: "Force-Directed"
+    , route: Example "lesmisgup"
+    , thumbnail: "assets/example-thumbnails/les-miserables-gup.png"
+    }
   , { id: "topological-sort"
     , name: "Topological Sort"
     , description: "Force layout with layer constraints"
     , category: "Force-Directed"
     , route: Example "topological-sort"
-    , thumbnail: "assets/example-thumbnails/working-with-graphs.png"
+    , thumbnail: "assets/example-thumbnails/topological-sort.png"
     }
 
   -- Data Flow
@@ -157,6 +178,29 @@ allExamples =
     , route: Example "map-quartet"
     , thumbnail: "assets/example-thumbnails/working-with-maps.png"
     }
+  , { id: "nested-data"
+    , name: "Nested Data"
+    , description: "Nested selections with 2D arrays"
+    , category: "Rich Data Structures"
+    , route: Example "nested-data"
+    , thumbnail: "assets/example-thumbnails/nested-data.png"
+    }
+  , { id: "working-with-sets"
+    , name: "Working with Sets"
+    , description: "Nested selections with Set data structures"
+    , category: "Rich Data Structures"
+    , route: Example "working-with-sets"
+    , thumbnail: "assets/example-thumbnails/working-with-sets.png"
+    }
+
+  -- Animations
+  , { id: "wealth-health"
+    , name: "Wealth & Health of Nations"
+    , description: "Interactive animated scatterplot (full page experience)"
+    , category: "Animations"
+    , route: WealthHealth
+    , thumbnail: "assets/example-thumbnails/wealth-health.png"
+    }
 
   -- Transitions
   , { id: "three-circles-transition"
@@ -172,6 +216,13 @@ allExamples =
     , category: "Transitions"
     , route: Example "general-update-pattern"
     , thumbnail: "assets/example-thumbnails/general-update-pattern.png"
+    }
+  , { id: "animated-tree-cluster"
+    , name: "Animated Tree ↔ Cluster"
+    , description: "Pure PureScript tree and dendrogram with automatic transitions"
+    , category: "Transitions"
+    , route: Example "animated-tree-cluster"
+    , thumbnail: "assets/example-thumbnails/tree-purescript.png"
     }
   , { id: "animated-radial-tree"
     , name: "Animated Radial Tree"
@@ -221,7 +272,7 @@ render _ =
 renderCategories :: forall w i. Array ExampleMeta -> Array (HH.HTML w i)
 renderCategories examples =
   let
-    categories = [ "Simple Charts", "Hierarchies", "Force-Directed", "Data Flow", "Rich Data Structures", "Transitions" ]
+    categories = [ "Simple Charts", "Hierarchies", "Force-Directed", "Data Flow", "Rich Data Structures", "Animations", "Transitions" ]
   in
     categories <#> \category ->
       let examplesInCategory = examples # filter (\ex -> ex.category == category)

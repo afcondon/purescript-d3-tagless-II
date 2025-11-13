@@ -35,7 +35,7 @@ import Control.Monad.State (class MonadState)
 import D3.Viz.Spago.Draw (getVizEventFromClick)
 import D3.Viz.Spago.Draw as Graph
 import D3.Viz.Spago.Files (NodeType(..))
-import D3.Viz.Spago.Model (SpagoModel, isPackage, isPackageOrVisibleModule)
+import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage, isPackageOrVisibleModule)
 import Data.Array ((:), filter)
 import Data.Either (Either(..))
 import Data.Foldable (foldl, foldr)
@@ -61,7 +61,6 @@ import PSD3.CodeExplorer.Forces (forceLibrary)
 import PSD3.CodeExplorer.HTML (render)
 import PSD3.CodeExplorer.Scenes (horizontalTreeScene, layerSwarmScene, packageGraphScene, packageGridScene, radialTreeScene, verticalTreeScene)
 import PSD3.CodeExplorer.State (State, TransitionMatrix, applySceneConfig, applySceneWithTransition, clearAllTags, getModelLinks, getModelNodes, initialScene, setChooseNodes, setCssClass, setLinksActive, setLinksShown, setSceneAttributes, tagNodes, toggleForce)
-import PSD3.Data.Node (D3_SimulationNode(..))
 import PSD3.Data.Tree (TreeLayout(..))
 import PSD3.Internal.Attributes.Sugar (onMouseEventEffectful, x)
 import PSD3.Internal.Selection.Types (SelectionAttribute)
@@ -70,6 +69,7 @@ import PSD3.Internal.Types (MouseEvent(..))
 import PSD3.Interpreter.D3 (evalEffectSimulation, runWithD3_Simulation)
 import PSD3.Simulation.RunSimulation as LibRunSim
 import PSD3.Simulation.Scene (smoothTransition, smoothTransitionPinned)
+import Unsafe.Coerce (unsafeCoerce)
 
 -- | Default transition matrix: declarative specification of scene choreography
 -- |
@@ -151,14 +151,14 @@ component = H.mkComponent
     , showWelcome: true
     }
 
-simulationEvent :: HS.Listener Action -> SelectionAttribute
+simulationEvent :: HS.Listener (Action SpagoSimNode) -> SelectionAttribute SpagoSimNode
 simulationEvent l = onMouseEventEffectful MouseClick (\e d t -> liftEffect $ HS.notify l (EventFromVizualization (getVizEventFromClick e d t)))
 
 -- | Main action handler - processes all user interactions and internal events
 handleAction :: forall t316 t317 t318.
   MonadAff t318 =>
-  Action ->
-  HalogenM State Action t316 t317 t318 Unit
+  Action SpagoSimNode ->
+  HalogenM State (Action SpagoSimNode) t316 t317 t318 Unit
 handleAction = case _ of
 
   Initialize -> do
@@ -298,7 +298,7 @@ handleAction = case _ of
     state <- H.get
     let allNodes = getModelNodes state
         -- Tag all packages whose name contains "halogen"
-        isHalogenPackage (D3SimNode n) = case n.nodetype of
+        isHalogenPackage n = case n.nodetype of
           IsPackage _ -> String.contains (String.Pattern "halogen") (String.toLower n.name)
           _ -> false
     H.modify_ $ tagNodes "halogen" isHalogenPackage allNodes

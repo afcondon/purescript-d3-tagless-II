@@ -3,11 +3,10 @@ module D3.Viz.Spago.Model where
 import Prelude
 
 import PSD3.Internal.Attributes.Instances (Label)
-import PSD3.Internal.Types (D3Simulation_, Datum_, PointXY)
-import D3.Viz.Spago.Files (LinkType(..), NodeType(..), SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
-import D3.Viz.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode)
+import PSD3.Internal.Types (D3Simulation_, PointXY)
+import D3.Viz.Spago.Files (D3_Radius, D3TreeRow, EmbeddedData, LinkType(..), NodeType(..), SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
 import PSD3.Internal.FFI (getIndexFromDatum_, setInSimNodeFlag)
-import PSD3.Data.Node (D3Link_Unswizzled, D3TreeRow, D3_FocusXY, D3_Radius, D3_SimulationNode(..), D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
+import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, D3_FocusXY, SimulationNode, D3_VxyFxy, D3_XY, NodeID)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_, d3SchemeSequential10N_)
 import Data.Array (foldl, length, mapWithIndex, partition, (:))
 import Data.Array (null) as A
@@ -32,8 +31,8 @@ import Web.Event.Internal.Types (Event)
 
 
 -- Model data types specialized with inital data
-type SpagoTreeNode = D3TreeRow         (EmbeddedData SpagoNodeData                                  + ())
-type SpagoSimNode  = D3_SimulationNode ( SpagoNodeRow  + D3_XY + D3_VxyFxy + D3_FocusXY + D3_Radius + ()) -- note we've woven in focusXY so that we can cluster the nodes
+type SpagoTreeNode = Record (D3TreeRow (EmbeddedData SpagoNodeData + ()))
+type SpagoSimNode  = SimulationNode ( SpagoNodeRow  + D3_FocusXY + D3_Radius + ()) -- SimulationNode already includes D3_XY + D3_VxyFxy
 -- | this is the only data that we're bringing over from the SpagoTreeNode to SpagoSimNode (at the momment)
 type TreeFields = { x :: Number, y :: Number, isTreeLeaf :: Boolean, depth :: Int, childIDs :: Array NodeID }
 
@@ -53,22 +52,26 @@ type SpagoModel = {
 }
 
 
-link_ = {
-    source    : _.source <<< unboxD3SimLink 
-  , target    : _.target <<< unboxD3SimLink
-  , linkType  : _.linktype <<< unboxD3SimLink
+-- PHANTOM TYPES: No more link_/datum_ accessor modules!
+-- Use inline type annotations with DatumFn when needed.
+-- Helper type aliases for swizzled links (what D3 returns after swizzling)
+type SpagoSwizzledLink = { source :: SpagoSimNode, target :: SpagoSimNode, linktype :: LinkType }
 
-  , linkClass :                          show     <<< _.linktype           <<< unboxD3SimLink
-  , linkClass2: (append "updated ")  <<< show     <<< _.linktype           <<< unboxD3SimLink
-  , color     : d3SchemeCategory10N_ <<< toNumber <<< _.target.containerID <<< unboxD3SimLink
-}
+-- Helper functions for link predicates (using phantom types)
+isP2P_Link :: SpagoSwizzledLink -> Boolean
+isP2P_Link l = l.linktype == P2P
 
-isP2P_Link_ l = link_.linkType l == P2P
-isM2P_Link_ l = link_.linkType l == M2P
-isM2M_Graph_Link_ l = link_.linkType l == M2M_Graph
-isM2M_Tree_Link_ l = link_.linkType l == M2M_Tree
+isM2P_Link :: SpagoSwizzledLink -> Boolean
+isM2P_Link l = l.linktype == M2P
 
--- | all the coercions in one place
+isM2M_Graph_Link :: SpagoSwizzledLink -> Boolean
+isM2M_Graph_Link l = l.linktype == M2M_Graph
+
+isM2M_Tree_Link :: SpagoSwizzledLink -> Boolean
+isM2M_Tree_Link l = l.linktype == M2M_Tree
+
+-- OLD BOILERPLATE REMOVED - use phantom types instead:
+{-
 datum_ = {
 -- direct accessors to fields of the datum (BOILERPLATE)
     radius        : _.r             <<< unboxD3SimNode
@@ -167,40 +170,36 @@ datum_ = {
       \d -> (datum_.links d).treeChildren              
   , isTreeParent: -- simplifying assumption here that we don't need or care to check if its actually a tree node or not, just that it has tree children
       \d -> not $ A.null $ datum_.treeChildren d
-              
-}
 
--- type LinkFilter = forall r. D3_SimulationNode r -> Boolean
+}
+-}
+
+-- Node predicate functions (phantom type friendly)
 allNodes :: SpagoSimNode -> Boolean
 allNodes = const true
-isPackage :: SpagoSimNode -> Boolean
-isPackage (D3SimNode d) =
-  case d.nodetype of
-    (IsModule _) -> false
-    (IsPackage _) -> true
-isPackageOrVisibleModule :: NodeID -> SpagoSimNode -> Boolean
-isPackageOrVisibleModule id (D3SimNode d) =
-  case d.nodetype of
-    (IsModule _) -> d.containerID == id -- include modules whose
-    (IsPackage _) -> true
-isModule :: SpagoSimNode -> Boolean
-isModule (D3SimNode d) =
-  case d.nodetype of
-    (IsModule _) -> true
-    (IsPackage _) -> false
-isUsedModule :: SpagoSimNode -> Boolean
-isUsedModule (D3SimNode d) =
-  case d.nodetype of
-    (IsPackage _) -> false
-    (IsModule _) -> if d.connected
-                    then true
-                    else false
 
-sourcePackageIs :: String -> Datum_ -> Boolean
-sourcePackageIs name link = (link_.source link).name == name
+isPackage :: SpagoSimNode -> Boolean
+isPackage d = case d.nodetype of
+  (IsModule _) -> false
+  (IsPackage _) -> true
+
+isPackageOrVisibleModule :: NodeID -> SpagoSimNode -> Boolean
+isPackageOrVisibleModule id d = case d.nodetype of
+  (IsModule _) -> d.containerID == id
+  (IsPackage _) -> true
+
+isModule :: SpagoSimNode -> Boolean
+isModule d = case d.nodetype of
+  (IsModule _) -> true
+  (IsPackage _) -> false
+
+isUsedModule :: SpagoSimNode -> Boolean
+isUsedModule d = case d.nodetype of
+  (IsPackage _) -> false
+  (IsModule _) -> d.connected
               
 upgradeSpagoNodeData :: M.Map NodeID (Array NodeID) -> SpagoNodeData -> SpagoSimNode
-upgradeSpagoNodeData sourcesMap node = D3SimNode {
+upgradeSpagoNodeData sourcesMap node = {
     links        : node.links { sources = fromMaybe [] $ M.lookup node.id sourcesMap }
   , id           : node.id
   , cluster      : node.containerID  -- packages cluster by their own ID, modules by their container
@@ -247,9 +246,8 @@ numberToGridPoint columns i = do
 unpinAllNodes :: Array SpagoSimNode -> Array SpagoSimNode
 unpinAllNodes nodes = unpin <$> nodes
   where
-    -- unpin (D3SimNode d) = D3SimNode $ unpinNode_ d
     unpin :: SpagoSimNode -> SpagoSimNode
-    unpin (D3SimNode d) = D3SimNode d { fx = (null :: Nullable Number), fy = (null :: Nullable Number) }
+    unpin d = d { fx = (null :: Nullable Number), fy = (null :: Nullable Number) }
 
 -- | put (only) package nodes on a fixed grid
 packageNodesToGridXY :: Array SpagoSimNode -> Array SpagoSimNode
@@ -266,12 +264,12 @@ packageNodesToGridXY nodes = partitioned.no <> packagesWithGrid
     offset  = -((toNumber columns) / 2.0)
 
     packagesWithGrid = foldlWithIndex (\i b a -> (setGridXY a i) : b) [] partitioned.yes
-      where 
-        setGridXY (D3SimNode p) i = do
+      where
+        setGridXY p i = do
           let gridXY = scalePoint 200.0 200.0 $ offsetXY { x: offset, y: offset } $ numberToGridPoint columns i
           -- Set x/y for transition, gridXY for cluster forces
           -- Don't pin (fx/fy) - let forces position nodes during simulation
-          D3SimNode p { gridXY = notNull gridXY, x = gridXY.x, y = gridXY.y }
+          p { gridXY = notNull gridXY, x = gridXY.x, y = gridXY.y }
 
 moduleNodesToContainerXY :: Array SpagoSimNode -> Array SpagoSimNode
 moduleNodesToContainerXY nodes = modulesWithGrid <> partitioned.yes
@@ -279,19 +277,19 @@ moduleNodesToContainerXY nodes = modulesWithGrid <> partitioned.yes
     -- we're going to set gridXY of packages and then make modules have gridXY of their containing package
     partitioned = partition isPackage nodes
 
-    packagesIndexMap = 
+    packagesIndexMap =
       fromFoldable $
-      foldl (\b (D3SimNode a) -> (Tuple a.id a.gridXY) : b) [] partitioned.yes
+      foldl (\b a -> (Tuple a.id a.gridXY) : b) [] partitioned.yes
 
     modulesWithGrid = map setModuleGridXY partitioned.no
 
-    setModuleGridXY (D3SimNode m) =
+    setModuleGridXY m =
       case lookup m.containerID packagesIndexMap of
-        Nothing -> D3SimNode m -- shouldn't be possible, but a noop is fine if not found
+        Nothing -> m -- shouldn't be possible, but a noop is fine if not found
         Just gridXY -> do
           case toMaybe gridXY of
-            Nothing ->  D3SimNode m { x = 0.0, y = 0.0, gridXY = gridXY }
-            Just xy ->  D3SimNode m { x = xy.x, y = xy.y, gridXY = gridXY }
+            Nothing -> m { x = 0.0, y = 0.0, gridXY = gridXY }
+            Just xy -> m { x = xy.x, y = xy.y, gridXY = gridXY }
 
 packagesNodesToPhyllotaxis :: Array SpagoSimNode -> Array SpagoSimNode
 packagesNodesToPhyllotaxis = nodesToPhyllotaxis isPackage
@@ -312,7 +310,7 @@ initialAngle = pi * (3.0 - sqrt 5.0)
 -- | Position a node in a sunflower/phyllotaxis pattern based on its index.
 -- | This creates aesthetically pleasing, evenly-distributed circular layouts.
 setForPhyllotaxis :: Int -> SpagoSimNode -> SpagoSimNode
-setForPhyllotaxis index (D3SimNode d) = D3SimNode $ d { x = (radius * cos angle), y = (radius * sin angle) }
+setForPhyllotaxis index d = d { x = (radius * cos angle), y = (radius * sin angle) }
   where
     i = toNumber index
     radius = initialRadius * sqrt (0.5 + i)
@@ -323,7 +321,7 @@ treeNodesToTreeXY_H nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes
   where
     partitioned = partition isUsedModule nodes
     setXYtoTreeXY :: SpagoSimNode -> SpagoSimNode
-    setXYtoTreeXY (D3SimNode d) = D3SimNode $ d { treeXY = notNull treeXY, x = treeXY.x, y = treeXY.y }
+    setXYtoTreeXY d = d { treeXY = notNull treeXY, x = treeXY.x, y = treeXY.y }
       where treeXY = fromMaybe { x: d.x, y: d.y } $ toMaybe d.treeXY
 
 -- same as horizontal tree but uses x and y as polar coordinates, computes fx/fy from them
@@ -332,7 +330,7 @@ treeNodesToTreeXY_R nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes
   where
     partitioned = partition isUsedModule nodes
     setXYtoTreeXY :: SpagoSimNode -> SpagoSimNode
-    setXYtoTreeXY (D3SimNode d) = D3SimNode $ d { treeXY = notNull treeXY, x = radialXY.x, y = radialXY.y }
+    setXYtoTreeXY d = d { treeXY = notNull treeXY, x = radialXY.x, y = radialXY.y }
       where treeXY = fromMaybe { x: d.x, y: d.y } $ toMaybe d.treeXY
             radialXY = radialTranslate treeXY
             -- for radial positioning we treat x as angle and y as radius
@@ -350,7 +348,7 @@ treeNodesToTreeXY_V nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes
   where
     partitioned = partition isUsedModule nodes
     setXYtoTreeXY :: SpagoSimNode -> SpagoSimNode
-    setXYtoTreeXY (D3SimNode d) = D3SimNode $ d { treeXY = notNull treeXY, x = treeXY.y, y = treeXY.x }
+    setXYtoTreeXY d = d { treeXY = notNull treeXY, x = treeXY.y, y = treeXY.x }
       where treeXY = fromMaybe { x: d.y, y: d.x } $ toMaybe d.treeXY
 
 -- | Set nodes to their tree X position with Y at 0 (for swarm diagrams)
@@ -361,22 +359,22 @@ treeNodesToSwarmStart nodes = partitioned.no <> (setSwarmStart <$> partitioned.y
   where
     partitioned = partition isUsedModule nodes
     setSwarmStart :: SpagoSimNode -> SpagoSimNode
-    setSwarmStart (D3SimNode d) = D3SimNode $ d { x = treeXY.x, y = 0.0, fx = null, fy = null }
+    setSwarmStart d = d { x = treeXY.x, y = 0.0, fx = null, fy = null }
       where treeXY = fromMaybe { x: d.x, y: d.y } $ toMaybe d.treeXY
 
 fixNamedNodeTo :: Label -> PointXY -> Array SpagoSimNode -> Array SpagoSimNode
 fixNamedNodeTo label point nodes = fixNamedNode' <$> nodes
   where
-    fixNamedNode' (D3SimNode d) = if d.name == label
-                                  then D3SimNode d { fx = notNull point.x, fy = notNull point.y }
-                                  else D3SimNode d
+    fixNamedNode' d = if d.name == label
+                      then d { fx = notNull point.x, fy = notNull point.y }
+                      else d
 
 fixNamedNode :: Label -> Array SpagoSimNode -> Array SpagoSimNode
 fixNamedNode label nodes = fixNamedNode' <$> nodes
   where
-    fixNamedNode' (D3SimNode d) = if d.name == label
-                                  then D3SimNode d { fx = notNull d.x, fy = notNull d.y }
-                                  else D3SimNode d
+    fixNamedNode' d = if d.name == label
+                      then d { fx = notNull d.x, fy = notNull d.y }
+                      else d
 
 scalePoint :: Number -> Number -> PointXY -> PointXY
 scalePoint xFactor yFactor xy = { x: xy.x * xFactor, y: xy.y * yFactor }
@@ -391,20 +389,20 @@ offsetY :: Number -> PointXY -> PointXY
 offsetY yOffset xy = xy { y = xy.y + yOffset }
 
 pinNode :: PointXY -> SpagoSimNode -> SpagoSimNode
-pinNode xy (D3SimNode node) = D3SimNode (node { fx = notNull xy.x, fy = notNull xy.y } )
+pinNode xy node = node { fx = notNull xy.x, fy = notNull xy.y }
 
 setXY :: SpagoSimNode -> { x :: Number, y :: Number } -> SpagoSimNode
-setXY (D3SimNode node) { x, y } = D3SimNode (node { x = x, y = y })
+setXY node { x, y } = node { x = x, y = y }
 
 setTreeXYIncludingLeaves :: SpagoSimNode -> TreeFields -> SpagoSimNode
-setTreeXYIncludingLeaves (D3SimNode node) { x, y, depth, childIDs } =
-  D3SimNode (node { treeXY = notNull {x, y}, treeDepth = notNull depth, connected = true, links { treeChildren = childIDs } })
+setTreeXYIncludingLeaves node { x, y, depth, childIDs } =
+  node { treeXY = notNull {x, y}, treeDepth = notNull depth, connected = true, links { treeChildren = childIDs } }
 
 setTreeXYExceptLeaves :: SpagoSimNode -> TreeFields -> SpagoSimNode
-setTreeXYExceptLeaves (D3SimNode node) { depth, isTreeLeaf: true }  = 
-  D3SimNode node { treeXY = (N.null :: Nullable PointXY), treeDepth = notNull depth, connected = true }
-setTreeXYExceptLeaves (D3SimNode node) { x, y, depth, isTreeLeaf: false, childIDs } =
-  D3SimNode (node { treeXY = notNull { x,y }, treeDepth = notNull depth, connected = true, links { treeChildren = childIDs } })
+setTreeXYExceptLeaves node { depth, isTreeLeaf: true } =
+  node { treeXY = (N.null :: Nullable PointXY), treeDepth = notNull depth, connected = true }
+setTreeXYExceptLeaves node { x, y, depth, isTreeLeaf: false, childIDs } =
+  node { treeXY = notNull { x,y }, treeDepth = notNull depth, connected = true, links { treeChildren = childIDs } }
 
 convertFilesToGraphModel :: forall r. 
   { body :: String | r } -> 
@@ -494,12 +492,12 @@ foreign import cancelSpotlight_ :: D3Simulation_ -> Unit
 -- | Works with Group elements positioned via transform attribute
 -- | Used for scene transitions to grid and tree layouts
 foreign import transitionNodesToPinnedPositions_
-  :: forall d.
-     String                        -- SVG selector
-  -> String                        -- Node selector (Groups)
-  -> String                        -- Link selector (Lines)
-  -> Array (D3_SimulationNode d)   -- Nodes with target fx/fy set
-  -> Effect Unit                   -- Completion callback
+  :: forall row.
+     String                           -- SVG selector
+  -> String                           -- Node selector (Groups)
+  -> String                           -- Link selector (Lines)
+  -> Array (SimulationNode row)      -- Nodes with target fx/fy set
+  -> Effect Unit                      -- Completion callback
   -> Effect Unit
 
 -- this is going to be another side-effecting function since it will change the fx/fy of selected nodes

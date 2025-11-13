@@ -6,18 +6,17 @@ module D3.Viz.LesMiserables where
 -- | See Acknowledgements page for full credits
 
 import Control.Monad.State (class MonadState)
+import PSD3.Attributes (DatumFn(..))
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, x1, x2, y1, y2)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
-import D3.Viz.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
-import D3.Viz.LesMiserables.Model (LesMisRawModel)
+import D3.Viz.LesMiserables.Model (LesMisRawModel, LesMisSimNode)
 import PSD3.Internal.FFI (keyIsID_, simdrag_)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, SimVariable(..), Step(..))
-import PSD3.Internal.Zoom (ScaleExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, on, setAttributes, simpleJoin)
 import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, start, update)
-import PSD3.Data.Node (D3Link_Swizzled, D3_SimulationNode)
+import PSD3.Data.Node (D3Link_Swizzled, SimulationNode)
 import PSD3.Shared.ZoomableViewbox (zoomableSVG)
 import Data.Int (toNumber)
 import Data.Map as Map
@@ -26,13 +25,16 @@ import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
+import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 
--- type-safe(ish) accessors for the data that is given to D3
--- we lose the type information in callbacks from the FFI, such as for attributes
--- but since we know what we gave we can coerce it back to the initial type.
+-- PHANTOM TYPE SUCCESS: No more datum_/link_ boilerplate needed!
+-- With phantom types, the compiler infers datum types from selections.
+-- After simpleJoin, lambdas get the correct types automatically.
 -- Snippet_Start
 -- Name: LesMisAccessors
+-- OLD APPROACH (with boilerplate):
+{-
 link_ = {
     source: _.source <<< unboxD3SimLink
   , target: _.target <<< unboxD3SimLink
@@ -41,14 +43,15 @@ link_ = {
 }
 
 datum_ = {
--- direct accessors to fields of the datum (BOILERPLATE)
-    id    : _.id <<< unboxD3SimNode -- NB the id in this case is a String
+    id    : _.id <<< unboxD3SimNode
   , x     : _.x <<< unboxD3SimNode
   , y     : _.y <<< unboxD3SimNode
   , group : _.group <<< unboxD3SimNode
-
   , colorByGroup: d3SchemeCategory10N_ <<< toNumber <<< _.group <<< unboxD3SimNode
 }
+-}
+-- NEW APPROACH: Use typed lambdas directly! No accessor records needed.
+-- The compiler infers the datum type from the selection.
 -- Snippet_End
 
 -- Snippet_Start
@@ -73,12 +76,13 @@ draw model selector = do
 -- Snippet_Start
 -- Name: LesMisSimplified
 -- | Simplified version using SimulationM with record-based init
-drawSimplified :: forall row m.
+-- | Forces are polymorphic (created with allNodes filter) so they work for any node type.
+drawSimplified :: forall row d m nodeType.
   Bind m =>
   MonadEffect m =>
-  MonadState { simulation :: D3SimulationState_ | row } m =>
+  MonadState { simulation :: D3SimulationState_ nodeType | row } m =>
   SimulationM2 D3Selection_ m =>
-  Array Force -> Set.Set String -> LesMisRawModel -> Selector D3Selection_ -> m Unit
+  Array (Force nodeType) -> Set.Set String -> LesMisRawModel -> Selector (D3Selection_ d) -> m Unit
 drawSimplified forceLibrary activeForces model selector = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   rootSel <- attach selector
@@ -101,10 +105,12 @@ drawSimplified forceLibrary activeForces model selector = do
   nodesGroup <- appendTo zoomGroup Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ]
 
   -- Initialize simulation to get enhanced data back
+  -- Forces are polymorphic (created with allNodes filter), so we coerce to the specific type
+  let ffiForces = unsafeCoerce forceLibrary
   { nodes: nodesInSim, links: linksInSim } <- init
     { nodes: model.nodes
     , links: model.links
-    , forces: forceLibrary
+    , forces: ffiForces
     , activeForces: activeForces
     , config: { alpha: 1.0, alphaTarget: 0.0, alphaMin: 0.001, alphaDecay: 0.0228, velocityDecay: 0.4 }
     , keyFn: keyIsID_
@@ -113,18 +119,32 @@ drawSimplified forceLibrary activeForces model selector = do
 
   -- NOW join the simulation-enhanced data to DOM
   nodesSelection <- simpleJoin nodesGroup Circle nodesInSim keyIsID_
-  setAttributes nodesSelection [ radius 5.0, fill datum_.colorByGroup ]
-  linksSelection <- simpleJoin linksGroup Line linksInSim keyIsID_
-  setAttributes linksSelection [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
+  -- Clean typed lambdas - annotate parameter on FIRST lambda, rest infer!
+  setAttributes (nodesSelection :: D3Selection_ LesMisSimNode)
+    [ radius 5.0
+    , fill \(d :: LesMisSimNode) -> d3SchemeCategory10N_ (toNumber d.group)
+    ]
 
-  -- Add tick functions with the selections (using SimulationM2 for now)
-  addTickFunction "nodes" $ Step nodesSelection [ cx datum_.x, cy datum_.y ]
+  linksSelection <- simpleJoin linksGroup Line linksInSim keyIsID_
+  -- Links are opaque (D3Link_Swizzled) so need DatumFn + unsafeCoerce
+  setAttributes linksSelection
+    [ strokeWidth (DatumFn \d -> sqrt (unsafeCoerce d).value :: Number)
+    , strokeColor (DatumFn \d -> d3SchemeCategory10N_ (toNumber (unsafeCoerce d).target.group) :: String)
+    ]
+
+  -- Clean lambdas for nodes - each lambda needs annotation OR return type
+  addTickFunction "nodes" $ Step (nodesSelection :: D3Selection_ LesMisSimNode)
+    [ cx \(d :: LesMisSimNode) -> d.x
+    , cy \(d :: LesMisSimNode) -> d.y
+    ]
+
+  -- Links are opaque, need DatumFn
   addTickFunction "links" $ Step linksSelection
-      [ x1 (_.x <<< link_.source)
-      , y1 (_.y <<< link_.source)
-      , x2 (_.x <<< link_.target)
-      , y2 (_.y <<< link_.target)
-      ]
+    [ x1 (DatumFn \d -> (unsafeCoerce d).source.x :: Number)
+    , y1 (DatumFn \d -> (unsafeCoerce d).source.y :: Number)
+    , x2 (DatumFn \d -> (unsafeCoerce d).target.x :: Number)
+    , y2 (DatumFn \d -> (unsafeCoerce d).target.y :: Number)
+    ]
 
   -- Add drag interaction for nodes
   -- Note: zoom is already configured by zoomableSVG helper

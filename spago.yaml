@@ -2,57 +2,59 @@ package:
   name: psd3
   description: a library for building data driven documents
   dependencies:
-  - aff
-  - affjax
-  - affjax-web
-  - arrays
-  - bifunctors
-  - console
-  - const
-  - datetime
-  - debug
-  - dom-indexed
-  - effect
-  - either
-  - exceptions
-  - foldable-traversable
-  - foreign-object
-  - functions
-  - graphs
-  - halogen
-  - halogen-subscriptions
-  - halogen-svg-elems
-  - halogen-vdom
-  - html-parser-halogen
-  - integers
-  - lists
-  - maybe
-  - newtype
-  - nullable
-  - numbers
-  - ordered-collections
-  - prelude
-  - profunctor
-  - profunctor-lenses
-  - psci-support
-  - random
-  - read
-  - routing
-  - strings
-  - tailrec
-  - transformers
-  - tuples
-  - typelevel-prelude
-  - unsafe-coerce
-  - web-events
-  - web-html
+    - aff
+    - affjax
+    - affjax-web
+    - argonaut-codecs
+    - argonaut-core
+    - arrays
+    - bifunctors
+    - console
+    - const
+    - datetime
+    - debug
+    - dom-indexed
+    - effect
+    - either
+    - exceptions
+    - foldable-traversable
+    - foreign-object
+    - functions
+    - graphs
+    - halogen
+    - halogen-subscriptions
+    - halogen-svg-elems
+    - halogen-vdom
+    - html-parser-halogen
+    - integers
+    - lists
+    - maybe
+    - newtype
+    - nullable
+    - numbers
+    - ordered-collections
+    - prelude
+    - profunctor
+    - profunctor-lenses
+    - psci-support
+    - random
+    - read
+    - routing
+    - strings
+    - tailrec
+    - transformers
+    - tuples
+    - typelevel-prelude
+    - unsafe-coerce
+    - web-events
+    - web-html
 workspace:
   packageSet:
     registry: 67.0.1
-  extraPackages: 
+  extraPackages:
     html-parser-halogen:
       dependencies:
-      - halogen
-      - string-parsers
+        - halogen
+        - string-parsers
       git: https://github.com/afcondon/purescript-html-parser-halogen.git
       ref: esmodules

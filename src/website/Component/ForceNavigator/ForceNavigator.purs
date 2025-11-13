@@ -18,7 +18,8 @@ import PSD3.Internal.Types (MouseEvent(..))
 import PSD3.Internal.Simulation.Types (SimVariable(..))
 import D3.Viz.ForceNavigator.Data (navigationData)
 import D3.Viz.ForceNavigator.Draw as Draw
-import D3.Viz.ForceNavigator.Model (NodeType(..))
+import D3.Viz.ForceNavigator.Model (NavigationSimNode, NodeType(..))
+import Unsafe.Coerce (unsafeCoerce)
 import PSD3.Capabilities.Simulation (SimulationUpdate, start, stop, update)
 import PSD3.Interpreter.D3 (evalEffectSimulation, runWithD3_Simulation)
 import Data.Lens (use, (.=), (%=))
@@ -53,8 +54,9 @@ render _ =
 simulationEvent :: HS.Listener Action -> _
 simulationEvent l = onMouseEventEffectful MouseClick
   (\e d t -> liftEffect $ do
-    let nodeType = Draw.datum_.nodeType d
-    let nodeId = Draw.datum_.id d
+    let node = unsafeCoerce d :: NavigationSimNode
+    let nodeType = node.nodeType
+    let nodeId = node.id
     let _ = spy "🖱️ D3 Click Event" { nodeType, nodeId }
     HS.notify l (EventFromVizualization (NodeClick nodeType nodeId))
   )

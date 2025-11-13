@@ -2,13 +2,13 @@ module PSD3.Component.Example where
 
 import Prelude
 
-import Control.Monad (void)
+import Control.Monad.Rec.Class (forever)
 
 import Affjax.ResponseFormat as ResponseFormat
 import Affjax.Web as AJAX
 import D3.Viz.AnimatedRadialTree as AnimatedRadialTree
 import D3.Viz.BarChart as BarChart
-import D3.Viz.BubbleChart as BubbleChart
+-- import D3.Viz.BubbleChart as BubbleChart -- REMOVED: Old D3 FFI version, replaced by PackViz
 import D3.Viz.Charts.Model as ChartModel
 import D3.Viz.ChordDiagram as ChordDiagram
 import D3.Viz.GroupedBarChart as GroupedBarChart
@@ -20,32 +20,45 @@ import D3.Viz.RadialStackedBar as RadialStackedBar
 import D3.Viz.ScatterPlot as ScatterPlot
 import D3.Viz.FpFtw.MapQuartet as MapQuartet
 import D3.Viz.FpFtw.TopologicalSort as TopologicalSort
-import D3.Viz.Hierarchies as Hierarchies
+import D3.Viz.TreeViz as TreeViz
+import D3.Viz.TreeViz4 as TreeViz4
+import D3.Viz.RadialTreeViz as RadialTreeViz
+import D3.Viz.HorizontalTreeViz as HorizontalTreeViz
+import D3.Viz.TreemapViz as TreemapViz
+import D3.Viz.PackViz as PackViz
+import D3.Viz.ClusterViz as ClusterViz
+import D3.Viz.ClusterViz4 as ClusterViz4
+import D3.Viz.RadialClusterViz as RadialClusterViz
+import D3.Viz.HorizontalClusterViz as HorizontalClusterViz
+import D3.Viz.PartitionViz as PartitionViz
+import D3.Viz.SunburstViz as SunburstViz
+import D3.Viz.AnimatedTreeCluster as AnimatedTreeCluster
+import D3.Viz.AnimatedTree4Cluster4 as AnimatedTree4Cluster4
 import D3.Viz.LesMiserables as LesMis
 import D3.Viz.LesMiserablesGUP as LesMisGUP
 import D3.Viz.LesMiserablesGUP.Model (LesMisRawModel)
+import PSD3.Internal.Types (D3Selection_, Datum_)
 import PSD3.Internal.Types as PSD3Types
 import PSD3.Internal.FFI as PSD3FFI
-import PSD3.Data.Node (D3_SimulationNode(..))
+import PSD3.Data.Node (D3_SimulationNode(..), SimulationNode)
 import PSD3.Capabilities.Selection as PSD3Selection
 import PSD3.Capabilities.Simulation as PSD3Simulation
 import Halogen.HTML.Events as HE
 import D3.Viz.LesMiserables.File (readGraphFromFileContents)
-import D3.Viz.Sankey.Model (energyData)
 import D3.Viz.SankeyDiagram as Sankey
 import D3.Viz.ThreeLittleCircles as ThreeLittleCircles
 import D3.Viz.ThreeLittleCirclesTransition as CirclesTransition
 import D3.Viz.ThreeLittleDimensions as ThreeLittleDimensions
-import D3.Viz.Tree.HorizontalTree as HorizontalTree
-import D3.Viz.Tree.RadialTree as RadialTree
-import D3.Viz.Tree.VerticalTree as VerticalTree
 import D3.Viz.WealthHealth.Draw as WealthHealth
 import Data.Array as Data.Array
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.Set as Set
 import Data.Tuple (Tuple(..))
+import Effect.Aff (Fiber, Milliseconds(..), delay, forkAff, killFiber)
+import Effect.Exception (error)
 import Effect.Aff.Class (class MonadAff)
+import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Halogen as H
@@ -53,7 +66,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Data.Tree (TreeType(..))
 import PSD3.Internal.FFI (linksForceName_)
-import PSD3.Internal.Hierarchical (getTreeViaAJAX)
+import PSD3.Internal.Hierarchical (getTreeViaAJAX, readJSON_)
 import PSD3.Internal.Sankey.Types (SankeyLayoutState_, initialSankeyLayoutState_)
 import PSD3.Internal.Simulation.Config as F
 import PSD3.Internal.Simulation.Forces (createForce, createLinkForce, initialize)
@@ -62,30 +75,39 @@ import PSD3.Interpreter.D3 (eval_D3M, runWithD3_Sankey, runWithD3_Simulation)
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Website.Types (Route(..))
 import Utility (getWindowWidthHeight)
+import Unsafe.Coerce (unsafeCoerce)
+
+foreign import stringify :: forall a. a -> String
 
 -- | Component state varies by example type
 type State =
   { exampleId :: String
-  , simulation :: D3SimulationState_
+  , simulation :: D3SimulationState_ Unit
   , sankeyLayout :: SankeyLayoutState_
   -- LesMisGUP-specific state for interactive controls
   , lesMisData :: Maybe LesMisRawModel
   , lesMisVisibleGroups :: Set.Set Int
   , lesMisActiveForces :: Set.Set String
-  , lesMisNodesPinned :: Boolean  -- Track if nodes are pinned to grid
+  , lesMisInGridMode :: Boolean  -- Track if nodes are pinned to grid
+  -- AnimatedTreeCluster-specific state
+  , animatedTreeClusterFiber :: Maybe (Fiber Unit)
+  , animatedTreeClusterLayout :: Maybe AnimatedTreeCluster.LayoutType
+  , animatedTreeClusterLinks :: Maybe (D3Selection_ Datum_)
+  , animatedTreeClusterNodes :: Maybe (D3Selection_ Datum_)
   }
 
 data Action
   = Initialize
+  | Finalize
   | ToggleGroup Int           -- Toggle visibility of a character group
   | ToggleForce String        -- Toggle a force on/off
   | MoveToGrid                -- Transition nodes to grid layout
   | ReleaseFromGrid           -- Unpin nodes, return to force layout
 
 forces = {
-    manyBodyNeg: createForce "many body negative" (RegularForce ForceManyBody) allNodes [ F.strength (-40.0) ]
-  , collision:   createForce "collision"          (RegularForce ForceCollide)  allNodes [ F.radius 4.0 ]
-  , center:      createForce "center"             (RegularForce ForceCenter)   allNodes [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
+    manyBodyNeg: createForce "many body negative" (RegularForce ForceManyBody) allNodes [ F.strengthVal (-40.0) ]
+  , collision:   createForce "collision"          (RegularForce ForceCollide)  allNodes [ F.radiusVal 4.0 ]
+  , center:      createForce "center"             (RegularForce ForceCenter)   allNodes [ F.xVal 0.0, F.yVal 0.0, F.strengthVal 1.0 ]
   , links:       createLinkForce Nothing []
 }
 
@@ -99,12 +121,18 @@ component = H.mkComponent
       , lesMisData: Nothing
       , lesMisVisibleGroups: Set.fromFoldable [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
       , lesMisActiveForces: Set.fromFoldable ["many body negative", "collision", "center", linksForceName_]
-      , lesMisNodesPinned: false
+      , lesMisInGridMode: false
+      -- AnimatedTreeCluster initial state
+      , animatedTreeClusterFiber: Nothing
+      , animatedTreeClusterLayout: Nothing
+      , animatedTreeClusterLinks: Nothing
+      , animatedTreeClusterNodes: Nothing
       }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
       , initialize = Just Initialize
+      , finalize = Just Finalize
       }
   }
 
@@ -138,37 +166,7 @@ handleAction = case _ of
         _ <- H.liftEffect $ eval_D3M $ MultiLineChart.draw ChartModel.multiLineData "#example-viz"
         pure unit
 
-      "bubble-chart" -> do
-        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
-        case result of
-          Left err -> log "BubbleChart: Failed to load data"
-          Right treeData -> do
-            _ <- H.liftEffect $ eval_D3M $ BubbleChart.draw treeData "#example-viz"
-            pure unit
-
-      "vertical-tree" -> do
-        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
-        case result of
-          Left err -> log "VerticalTree: Failed to load data"
-          Right treeData -> do
-            _ <- H.liftEffect $ eval_D3M $ VerticalTree.drawVerticalTree TidyTree treeData "#example-viz"
-            pure unit
-
-      "horizontal-tree" -> do
-        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
-        case result of
-          Left err -> log "HorizontalTree: Failed to load data"
-          Right treeData -> do
-            _ <- H.liftEffect $ eval_D3M $ HorizontalTree.drawHorizontalTree TidyTree treeData "#example-viz"
-            pure unit
-
-      "radial-tree" -> do
-        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
-        case result of
-          Left err -> log "RadialTree: Failed to load data"
-          Right treeData -> do
-            _ <- H.liftEffect $ eval_D3M $ RadialTree.drawRadialTree TidyTree treeData "#example-viz"
-            pure unit
+      -- REMOVED: "bubble-chart" was duplicate of "pack-purescript" with incorrect name/description
 
       "animated-radial-tree" -> do
         result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
@@ -178,20 +176,148 @@ handleAction = case _ of
             _ <- H.liftEffect $ eval_D3M $ AnimatedRadialTree.drawAnimatedRadialTree TidyTree treeData "#example-viz"
             pure unit
 
-      "treemap" -> do
+      "tree-purescript" -> do
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare-2.json"
+        case result of
+          Left err -> log "Tree (PureScript): Failed to load data"
+          Right response -> do
+            let blessed = readJSON_ response.body
+            _ <- H.liftEffect $ eval_D3M $ TreeViz.draw blessed "#example-viz"
+            pure unit
+
+      "tree4" -> do
         result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
         case result of
-          Left err -> log "Treemap: Failed to load data"
+          Left err -> log "Tree4 (Reingold-Tilford): Failed to load data"
           Right treeData -> do
-            _ <- H.liftAff $ Hierarchies.drawTreemap treeData "#example-viz"
+            _ <- H.liftEffect $ eval_D3M $ TreeViz4.draw treeData "#example-viz"
+            pure unit
+
+      "radial-tree" -> do
+        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        case result of
+          Left err -> log "Radial Tree: Failed to load data"
+          Right treeData -> do
+            _ <- H.liftEffect $ eval_D3M $ RadialTreeViz.draw treeData "#example-viz"
+            pure unit
+
+      "horizontal-tree" -> do
+        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        case result of
+          Left err -> log "Horizontal Tree: Failed to load data"
+          Right treeData -> do
+            _ <- H.liftEffect $ eval_D3M $ HorizontalTreeViz.draw treeData "#example-viz"
+            pure unit
+
+      "treemap" -> do
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare-2.json"
+        case result of
+          Left err -> log "Treemap: Failed to load data"
+          Right response -> do
+            let blessed = readJSON_ response.body
+            _ <- H.liftEffect $ eval_D3M $ TreemapViz.draw blessed "#example-viz"
+            pure unit
+
+      "pack-purescript" -> do
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare-2.json"
+        case result of
+          Left err -> log "Pack (PureScript): Failed to load data"
+          Right response -> do
+            let blessed = readJSON_ response.body
+            _ <- H.liftEffect $ eval_D3M $ PackViz.draw blessed "#example-viz"
+            pure unit
+
+      "cluster-purescript" -> do
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare-2.json"
+        case result of
+          Left err -> log "Cluster (PureScript): Failed to load data"
+          Right response -> do
+            let blessed = readJSON_ response.body
+            _ <- H.liftEffect $ eval_D3M $ ClusterViz.draw blessed "#example-viz"
+            pure unit
+
+      "cluster4" -> do
+        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        case result of
+          Left err -> log "Cluster4: Failed to load data"
+          Right treeData -> do
+            _ <- H.liftEffect $ eval_D3M $ ClusterViz4.draw treeData "#example-viz"
+            pure unit
+
+      "radial-cluster" -> do
+        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        case result of
+          Left err -> log "Radial Cluster: Failed to load data"
+          Right treeData -> do
+            _ <- H.liftEffect $ eval_D3M $ RadialClusterViz.draw treeData "#example-viz"
+            pure unit
+
+      "horizontal-cluster" -> do
+        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        case result of
+          Left err -> log "Horizontal Cluster: Failed to load data"
+          Right treeData -> do
+            _ <- H.liftEffect $ eval_D3M $ HorizontalClusterViz.draw treeData "#example-viz"
             pure unit
 
       "icicle" -> do
-        result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare-2.json"
         case result of
-          Left err -> log "Icicle: Failed to load data"
-          Right treeData -> do
-            _ <- H.liftAff $ Hierarchies.drawIcicle treeData "#example-viz"
+          Left err -> log "Partition (Icicle): Failed to load data"
+          Right response -> do
+            let blessed = readJSON_ response.body
+            _ <- H.liftEffect $ eval_D3M $ PartitionViz.draw blessed "#example-viz"
+            pure unit
+
+      "sunburst-purescript" -> do
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare-2.json"
+        case result of
+          Left err -> log "Sunburst (PureScript): Failed to load data"
+          Right response -> do
+            let blessed = readJSON_ response.body
+            _ <- H.liftEffect $ eval_D3M $ SunburstViz.draw blessed "#example-viz"
+            pure unit
+
+      "animated-tree-cluster" -> do
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare-2.json"
+        case result of
+          Left err -> log "AnimatedTreeCluster: Failed to load data"
+          Right response -> do
+            let blessed = readJSON_ response.body
+            -- Initial draw - returns hierarchy and data-bound selections
+            { hierarchyRoot, links, nodes } <- H.liftEffect $ eval_D3M $ AnimatedTreeCluster.draw blessed "#example-viz"
+            H.modify_ _ {
+              animatedTreeClusterLayout = Just AnimatedTreeCluster.TreeLayout,
+              animatedTreeClusterLinks = Just links,
+              animatedTreeClusterNodes = Just nodes
+            }
+
+            -- Start animation loop that toggles between layouts
+            let runToggle currentLayout = do
+                  delay (Milliseconds 3000.0)
+                  newLayout <- liftEffect $ eval_D3M $ AnimatedTreeCluster.updateLayout currentLayout hierarchyRoot links nodes
+                  runToggle newLayout  -- Recursively call with new layout
+
+            fiber <- H.liftAff $ forkAff $ runToggle AnimatedTreeCluster.TreeLayout
+            H.modify_ _ { animatedTreeClusterFiber = Just fiber }
+            pure unit
+
+      "animated-tree4-cluster4" -> do
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare-2.json"
+        case result of
+          Left err -> log "AnimatedTree4Cluster4: Failed to load data"
+          Right response -> do
+            let blessed = readJSON_ response.body
+            -- Create SVG structure and get data for animation
+            { dataTree, linksGroup, nodesGroup, chartWidth, chartHeight } <- H.liftEffect $ eval_D3M $ AnimatedTree4Cluster4.draw blessed "#example-viz"
+
+            -- Start animation loop that alternates between layouts
+            let runLoop currentLayout = do
+                  _ <- liftEffect $ eval_D3M $ AnimatedTree4Cluster4.animationStep dataTree linksGroup nodesGroup chartWidth chartHeight currentLayout
+                  delay (Milliseconds 3000.0)
+                  runLoop (AnimatedTree4Cluster4.toggleLayout currentLayout)
+
+            _ <- H.liftAff $ forkAff $ runLoop AnimatedTree4Cluster4.TreeLayout
             pure unit
 
       "lesmis-force" -> do
@@ -206,10 +332,16 @@ handleAction = case _ of
       "lesmisgup" -> do
         response <- H.liftAff $ AJAX.get ResponseFormat.string "./data/miserables.json"
         let graph = readGraphFromFileContents response
+
+        -- LOG POINT 1: Before giving to Simulation
+        case Data.Array.head graph.nodes of
+          Just firstNode -> liftEffect $ log $ "BEFORE SIMULATION (Myriel): " <> stringify firstNode
+          Nothing -> pure unit
+
         let forcesArray = [ forces.manyBodyNeg, forces.collision, forces.center, forces.links ]
             activeForces = Set.fromFoldable ["many body negative", "collision", "center", linksForceName_]
 
-        -- Draw initial visualization
+        -- Draw initial visualization (LOG POINT 2 is inside drawSimplified)
         runWithD3_Simulation do
           void $ LesMisGUP.drawSimplified forcesArray activeForces graph "#example-viz"
 
@@ -222,9 +354,12 @@ handleAction = case _ of
         pure unit
 
       "sankey-diagram" -> do
-        runWithD3_Sankey do
-          Sankey.draw energyData "#example-viz"
-        pure unit
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/energy.csv"
+        case result of
+          Left err -> log "Sankey: Failed to load data"
+          Right response -> do
+            _ <- H.liftEffect $ eval_D3M $ Sankey.draw response.body "#example-viz"
+            pure unit
 
       "map-quartet" -> do
         quartet <- H.liftEffect MapQuartet.generateMapQuartet
@@ -270,149 +405,139 @@ handleAction = case _ of
 
   ToggleGroup groupId -> do
     state <- H.get
-    -- Toggle the group in/out of visible set
-    let newVisibleGroups = if Set.member groupId state.lesMisVisibleGroups
-                           then Set.delete groupId state.lesMisVisibleGroups
-                           else Set.insert groupId state.lesMisVisibleGroups
+    -- Toggle group visibility
+    let newVisibleGroups =
+          if Set.member groupId state.lesMisVisibleGroups
+            then Set.delete groupId state.lesMisVisibleGroups
+            else Set.insert groupId state.lesMisVisibleGroups
+
     H.modify_ _ { lesMisVisibleGroups = newVisibleGroups }
 
-    -- Call updateSimulation with DECLARATIVE API + re-heat
+    -- Call updateSimulation with new filter predicate
     case state.lesMisData of
       Just model -> do
         runWithD3_Simulation do
           -- Get selections from DOM (they were created by drawSimplified)
-          root <- PSD3Selection.attach "#example-viz"
-          nodesGroup <- PSD3Selection.selectUnder root ".zoom-group > .node"
-          linksGroup <- PSD3Selection.selectUnder root ".zoom-group > .link"
+          root :: D3Selection_ Unit <- PSD3Selection.attach "#example-viz"
+          nodesGroup :: D3Selection_ Unit <- PSD3Selection.selectUnder root ".node"
+          linksGroup :: D3Selection_ Unit <- PSD3Selection.selectUnder root ".link"
 
-          -- Stop simulation to re-heat it
-          PSD3Simulation.stop
-
-          -- DECLARATIVE API: Pass full datasets + predicate
-          -- Library handles filtering AND automatic link filtering
+          -- Now works! updateSimulation is polymorphic in state phantom type
           LesMisGUP.updateSimulation
-            { nodes: Just nodesGroup, links: Just linksGroup }
-            { allNodes: model.nodes                        -- FULL dataset!
-            , allLinks: model.links                        -- FULL dataset!
-            , nodeFilter: \(D3SimNode node) ->             -- Predicate (single source of truth)
+            { nodes: Just (unsafeCoerce nodesGroup), links: Just (unsafeCoerce linksGroup) }
+            { allNodes: model.nodes           -- FULL dataset
+            , allLinks: model.links           -- FULL dataset
+            , nodeFilter: \node ->
+                -- Direct record access - SimulationNode is row-polymorphic!
                 Set.member node.group newVisibleGroups
             , activeForces: state.lesMisActiveForces
             }
 
-          -- Restart simulation (re-heats with full alpha)
+          -- Reheat simulation when nodes are added back (they'd otherwise sit at origin)
           PSD3Simulation.start
       _ -> log "ToggleGroup: No model data available"
 
   ToggleForce forceLabel -> do
     state <- H.get
-    -- Toggle the force in/out of active set
-    let newActiveForces = if Set.member forceLabel state.lesMisActiveForces
-                          then Set.delete forceLabel state.lesMisActiveForces
-                          else Set.insert forceLabel state.lesMisActiveForces
+    -- Toggle force active/inactive
+    let newActiveForces =
+          if Set.member forceLabel state.lesMisActiveForces
+            then Set.delete forceLabel state.lesMisActiveForces
+            else Set.insert forceLabel state.lesMisActiveForces
+
     H.modify_ _ { lesMisActiveForces = newActiveForces }
 
-    -- Call updateSimulation with DECLARATIVE API + re-heat
+    -- Call updateSimulation with new force configuration
     case state.lesMisData of
       Just model -> do
         runWithD3_Simulation do
-          -- Get selections from DOM (they were created by drawSimplified)
-          root <- PSD3Selection.attach "#example-viz"
-          nodesGroup <- PSD3Selection.selectUnder root ".zoom-group > .node"
-          linksGroup <- PSD3Selection.selectUnder root ".zoom-group > .link"
+          root :: D3Selection_ Unit <- PSD3Selection.attach "#example-viz"
+          nodesGroup :: D3Selection_ Unit <- PSD3Selection.selectUnder root ".node"
+          linksGroup :: D3Selection_ Unit <- PSD3Selection.selectUnder root ".link"
 
-          -- Stop simulation to re-heat it
-          PSD3Simulation.stop
-
-          -- DECLARATIVE API: Pass full datasets + predicate
-          -- Library handles filtering AND automatic link filtering
           LesMisGUP.updateSimulation
-            { nodes: Just nodesGroup, links: Just linksGroup }
-            { allNodes: model.nodes                        -- FULL dataset!
-            , allLinks: model.links                        -- FULL dataset!
-            , nodeFilter: \(D3SimNode node) ->             -- Predicate (single source of truth)
+            { nodes: Just (unsafeCoerce nodesGroup), links: Just (unsafeCoerce linksGroup) }
+            { allNodes: model.nodes
+            , allLinks: model.links
+            , nodeFilter: \node ->
                 Set.member node.group state.lesMisVisibleGroups
             , activeForces: newActiveForces
             }
-
-          -- Restart simulation (re-heats with full alpha)
-          PSD3Simulation.start
       _ -> log "ToggleForce: No model data available"
 
   MoveToGrid -> do
     state <- H.get
     case state.lesMisData of
       Just model -> do
-        (Tuple w h) <- liftEffect getWindowWidthHeight
+        -- Step 1: Calculate grid positions (with fx/fy set)
+        let gridNodes = LesMisGUP.nodesToGridLayout model.nodes 50.0 800.0
 
+        -- Step 2: Stop simulation so it doesn't fight the transition
+        runWithD3_Simulation PSD3Simulation.stop
+
+        -- Step 3: Start smooth D3 transition to grid positions (animates DOM asynchronously)
+        liftEffect $ LesMisGUP.transitionNodesToGridPositions_
+          ".lesmis"        -- SVG class
+          ".node circle"   -- Node selector
+          ".link line"     -- Link selector
+          gridNodes
+          (pure unit)      -- No callback needed - transition runs async
+
+        -- Step 4: Update simulation data with pinned nodes (transition still animating)
         runWithD3_Simulation do
-          -- Get selections from DOM
-          root <- PSD3Selection.attach "#example-viz"
-          nodesGroup <- PSD3Selection.selectUnder root ".zoom-group > .node"
-          linksGroup <- PSD3Selection.selectUnder root ".zoom-group > .link"
+          root :: D3Selection_ Unit <- PSD3Selection.attach "#example-viz"
+          nodesGroup :: D3Selection_ Unit <- PSD3Selection.selectUnder root ".node"
+          linksGroup :: D3Selection_ Unit <- PSD3Selection.selectUnder root ".link"
 
-          -- Stop simulation during transition (so tick doesn't fight the animation)
-          PSD3Simulation.stop
-
-          -- Calculate grid positions (60px spacing, centered on window)
-          let gridNodes = LesMisGUP.nodesToGridLayout model.nodes 60.0 w
-
-          -- Start D3 transition (animates nodes smoothly to grid over 1500ms)
-          -- Key: simulation is STOPPED so tick function doesn't interfere
-          liftEffect $ LesMisGUP.transitionNodesToGridPositions_
-            ".lesmis"                    -- SVG class
-            ".zoom-group > .node circle" -- Node selector
-            ".zoom-group > .link line"   -- Link selector
-            gridNodes
-            (log "Grid transition complete - nodes now at grid positions")
-
-          -- Update simulation data with pinned nodes (but DON'T start simulation yet!)
-          -- This sets fx/fy in the internal simulation data so nodes are "ready to be pinned"
-          -- But since simulation is stopped, tick function won't override the transition
+          -- Update with grid-pinned nodes
           LesMisGUP.updateSimulation
-            { nodes: Just nodesGroup, links: Just linksGroup }
-            { allNodes: gridNodes                      -- Nodes with fx/fy set
+            { nodes: Just (unsafeCoerce nodesGroup), links: Just (unsafeCoerce linksGroup) }
+            { allNodes: gridNodes                -- Nodes with fx/fy set
             , allLinks: model.links
-            , nodeFilter: \(D3SimNode node) ->         -- Still apply group filter
+            , nodeFilter: \node ->
                 Set.member node.group state.lesMisVisibleGroups
             , activeForces: state.lesMisActiveForces
             }
 
-          -- DON'T restart simulation yet - let the D3 transition complete first!
-          -- After transition finishes (1500ms), nodes will be visually at grid positions
-          -- Mark nodes as pinned in state
-          H.modify_ _ { lesMisNodesPinned = true }
+        -- Update state to track grid mode
+        H.modify_ _ { lesMisInGridMode = true }
       _ -> log "MoveToGrid: No model data available"
 
   ReleaseFromGrid -> do
     state <- H.get
     case state.lesMisData of
       Just model -> do
+        -- Unpin all nodes (clear fx/fy)
+        let unpinnedNodes = LesMisGUP.unpinAllNodes model.nodes
+
         runWithD3_Simulation do
-          -- Get selections from DOM
-          root <- PSD3Selection.attach "#example-viz"
-          nodesGroup <- PSD3Selection.selectUnder root ".zoom-group > .node"
-          linksGroup <- PSD3Selection.selectUnder root ".zoom-group > .link"
+          root :: D3Selection_ Unit <- PSD3Selection.attach "#example-viz"
+          nodesGroup :: D3Selection_ Unit <- PSD3Selection.selectUnder root ".node"
+          linksGroup :: D3Selection_ Unit <- PSD3Selection.selectUnder root ".link"
 
-          -- Unpin all nodes (set fx/fy to null)
-          let unpinnedNodes = LesMisGUP.unpinAllNodes model.nodes
-
-          -- Update simulation with unpinned nodes
+          -- Update with unpinned nodes
           LesMisGUP.updateSimulation
-            { nodes: Just nodesGroup, links: Just linksGroup }
-            { allNodes: unpinnedNodes                  -- Nodes with fx/fy = null
+            { nodes: Just (unsafeCoerce nodesGroup), links: Just (unsafeCoerce linksGroup) }
+            { allNodes: unpinnedNodes            -- Nodes with fx/fy cleared
             , allLinks: model.links
-            , nodeFilter: \(D3SimNode node) ->
+            , nodeFilter: \node ->
                 Set.member node.group state.lesMisVisibleGroups
             , activeForces: state.lesMisActiveForces
             }
 
-          -- Restart simulation with full alpha (re-heat)
-          PSD3Simulation.stop
+          -- Restart simulation so unpinned nodes flow back into natural positions
           PSD3Simulation.start
 
-          -- Mark nodes as unpinned in state
-          H.modify_ _ { lesMisNodesPinned = false }
+        -- Update state to track not in grid mode
+        H.modify_ _ { lesMisInGridMode = false }
       _ -> log "ReleaseFromGrid: No model data available"
+
+  Finalize -> do
+    -- Kill the AnimatedTreeCluster animation fiber if it exists
+    maybeFiber <- H.gets _.animatedTreeClusterFiber
+    case maybeFiber of
+      Nothing -> pure unit
+      Just fiber -> H.liftAff $ killFiber (error "Cancelling AnimatedTreeCluster animation") fiber
 
 -- | Example metadata
 type ExampleMeta =
@@ -433,13 +558,21 @@ allExampleIds =
   , "multi-line-chart"
   , "radial-stacked-bar"
   , "parabola"
-  , "bubble-chart"
-  , "vertical-tree"
-  , "horizontal-tree"
-  , "radial-tree"
   , "animated-radial-tree"
+  , "tree-purescript"
+  , "tree4"
+  , "radial-tree"
+  , "horizontal-tree"
   , "treemap"
+  , "pack-purescript"
+  , "cluster-purescript"
+  , "cluster4"
+  , "radial-cluster"
+  , "horizontal-cluster"
   , "icicle"
+  , "sunburst-purescript"
+  , "animated-tree-cluster"
+  , "animated-tree4-cluster4"
   , "lesmis-force"
   , "lesmisgup"
   , "topological-sort"
@@ -448,7 +581,6 @@ allExampleIds =
   , "map-quartet"
   , "nested-data"
   , "working-with-sets"
-  , "wealth-health"
   , "general-update-pattern"
   , "three-circles-transition"
   ]
@@ -486,20 +618,36 @@ getExampleMeta id = case id of
     { id, name: "Radial Stacked Bar Chart", description: "Population by age and state in radial form", category: "Simple Charts" }
   "parabola" -> Just
     { id, name: "Parabola", description: "Colored circles in parabolic formation", category: "Simple Charts" }
-  "bubble-chart" -> Just
-    { id, name: "Bubble Chart", description: "Scatter plot with sized bubbles representing a third dimension of data", category: "Simple Charts" }
-  "vertical-tree" -> Just
-    { id, name: "Vertical Tree", description: "Top-down hierarchical tree layout", category: "Hierarchies" }
-  "horizontal-tree" -> Just
-    { id, name: "Horizontal Tree", description: "Left-to-right hierarchical tree layout", category: "Hierarchies" }
-  "radial-tree" -> Just
-    { id, name: "Radial Tree", description: "Circular hierarchical tree layout", category: "Hierarchies" }
   "animated-radial-tree" -> Just
     { id, name: "Animated Radial Tree", description: "Transitions between tree layouts with smooth animations", category: "Transitions" }
+  "tree-purescript" -> Just
+    { id, name: "Tree (Pure PureScript)", description: "Node-link tree layout using pure PureScript implementation (Reingold-Tilford algorithm)", category: "Hierarchies" }
+  "tree4" -> Just
+    { id, name: "Tree4 (Data.Tree + Contours)", description: "Reingold-Tilford tree layout using Data.Tree with contour-based algorithm adapted from Haskell", category: "Hierarchies" }
+  "radial-tree" -> Just
+    { id, name: "Radial Tree", description: "Tree layout with polar projection - same Tree4 algorithm with radial coordinates", category: "Hierarchies" }
+  "horizontal-tree" -> Just
+    { id, name: "Horizontal Tree", description: "Tree layout with horizontal orientation - Tree4 with swapped axes", category: "Hierarchies" }
   "treemap" -> Just
-    { id, name: "Treemap", description: "Space-filling hierarchical visualization using nested rectangles", category: "Hierarchies" }
+    { id, name: "Treemap (Pure PureScript)", description: "Space-filling hierarchical visualization using squarified tiling algorithm in pure PureScript", category: "Hierarchies" }
+  "pack-purescript" -> Just
+    { id, name: "Pack (Pure PureScript)", description: "Circle packing layout with iterative relaxation algorithm in pure PureScript", category: "Hierarchies" }
+  "cluster-purescript" -> Just
+    { id, name: "Cluster (Pure PureScript)", description: "Dendrogram with equal leaf depth using pure PureScript implementation", category: "Hierarchies" }
+  "cluster4" -> Just
+    { id, name: "Cluster4 (Dendrogram)", description: "Vertical dendrogram using Cluster4 layout with Data.Tree - all leaves at equal depth", category: "Hierarchies" }
+  "radial-cluster" -> Just
+    { id, name: "Radial Cluster", description: "Radial dendrogram using Cluster4 with polar projection", category: "Hierarchies" }
+  "horizontal-cluster" -> Just
+    { id, name: "Horizontal Cluster", description: "Horizontal dendrogram using Cluster4 with swapped axes", category: "Hierarchies" }
   "icicle" -> Just
-    { id, name: "Icicle Chart", description: "Hierarchical icicle/partition layout visualization", category: "Hierarchies" }
+    { id, name: "Partition/Icicle (Pure PureScript)", description: "Rectangular partition layout (icicle chart) with equal layer height in pure PureScript", category: "Hierarchies" }
+  "sunburst-purescript" -> Just
+    { id, name: "Sunburst (Pure PureScript)", description: "Radial partition layout with nested rings in pure PureScript", category: "Hierarchies" }
+  "animated-tree-cluster" -> Just
+    { id, name: "Animated Tree ↔ Cluster", description: "Automatic transitions between tree and dendrogram layouts using pure PureScript algorithms", category: "Transitions" }
+  "animated-tree4-cluster4" -> Just
+    { id, name: "Animated Tree4 ↔ Cluster4", description: "Looping animation between Reingold-Tilford tidy tree and dendrogram using Data.Tree", category: "Transitions" }
   "lesmis-force" -> Just
     { id, name: "Les Misérables Network", description: "Character co-occurrence force-directed graph with physics simulation", category: "Force-Directed" }
   "lesmisgup" -> Just
@@ -514,8 +662,6 @@ getExampleMeta id = case id of
     { id, name: "Nested Data", description: "Nested selections with 2D arrays", category: "Rich Data Structures" }
   "working-with-sets" -> Just
     { id, name: "Working with Sets", description: "Nested selections with Set data structures", category: "Rich Data Structures" }
-  "wealth-health" -> Just
-    { id, name: "Wealth & Health of Nations", description: "Animated scatterplot across time", category: "Animations" }
   "chord-diagram" -> Just
     { id, name: "Chord Diagram", description: "Circular flow diagram showing relationships between programming concepts", category: "Data Flow" }
   "general-update-pattern" -> Just
@@ -605,7 +751,7 @@ renderLesMisControls state =
           [ HH.h3_ [ HH.text "Layout" ]
           , HH.div
               [ HP.classes [ HH.ClassName "button-group" ] ]
-              [ if state.lesMisNodesPinned
+              [ if state.lesMisInGridMode
                 then
                   HH.button
                     [ HP.classes [ HH.ClassName "layout-button" ]

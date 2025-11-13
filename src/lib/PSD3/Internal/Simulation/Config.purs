@@ -4,82 +4,87 @@ import PSD3.Internal.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(.
 import PSD3.Internal.Types (Datum_, Index_)
 import PSD3.Internal.Simulation.Types (ChainableF(..))
 import Data.Number (infinity)
-import Prelude (negate, (<<<))
+import Prelude (Unit, negate, ($), (<<<))
+import Unsafe.Coerce (unsafeCoerce)
 
-    
-defaultForceRadialConfig       :: (Datum_ -> Index_ -> Number) -> Array ChainableF
-defaultForceRadialConfig r =  
-    [ radius r, strength 0.1, x 0.0, y 0.0 ]
 
-defaultForceManyConfig         :: Array ChainableF
-defaultForceManyConfig = 
-  [ strength (-30.0), theta 0.9, distanceMin 1.0, distanceMax infinity ]
+defaultForceRadialConfig       :: forall d. (Datum_ -> Index_ -> Number) -> Array (ChainableF d)
+defaultForceRadialConfig r =
+    [ radiusFn r, strengthVal 0.1, xVal 0.0, yVal 0.0 ]
 
-defaultForceCenterConfig       :: Array ChainableF
-defaultForceCenterConfig = 
-  [ x 0.0, y 0.0, strength 1.0 ]
+defaultForceManyConfig         :: forall d. Array (ChainableF d)
+defaultForceManyConfig =
+  [ strengthVal (-30.0), thetaVal 0.9, distanceMinVal 1.0, distanceMaxVal infinity ]
 
-defaultForceCollideConfig      :: (Datum_ -> Index_ -> Number) -> Array ChainableF
-defaultForceCollideConfig r = 
-  [ radius r, strength 1.0, iterations 1.0 ]
+defaultForceCenterConfig       :: forall d. Array (ChainableF d)
+defaultForceCenterConfig =
+  [ xVal 0.0, yVal 0.0, strengthVal 1.0 ]
 
-defaultForceXConfig            :: Array ChainableF
-defaultForceXConfig = 
-  [ strength 0.1, x 0.0 ]
+defaultForceCollideConfig      :: forall d. (Datum_ -> Index_ -> Number) -> Array (ChainableF d)
+defaultForceCollideConfig r =
+  [ radiusFn r, strengthVal 1.0, iterationsVal 1.0 ]
 
-defaultForceYConfig            :: Array ChainableF
-defaultForceYConfig = 
-  [ strength 0.1, y 0.0 ]
-  
+defaultForceXConfig            :: forall d. Array (ChainableF d)
+defaultForceXConfig =
+  [ strengthVal 0.1, xVal 0.0 ]
+
+defaultForceYConfig            :: forall d. Array (ChainableF d)
+defaultForceYConfig =
+  [ strengthVal 0.1, yVal 0.0 ]
+
 -- | ==================================================================================================
 -- | ========================= sugar for the various attributes of forces =============================
 -- | ==================================================================================================
-radius :: ∀ a. ToAttr Number a => a -> ChainableF
-radius = ForceT <<< AttributeSetter "radius" <<< toAttr
+-- Note: Force attributes work with Datum_ at runtime
+-- We bypass the ToAttr typeclass and construct Attr directly using unsafeCoerce
 
-strength :: ∀ a. ToAttr Number a => a -> ChainableF
-strength = ForceT <<< AttributeSetter "strength" <<< toAttr
+radiusFn :: forall d. (Datum_ -> Index_ -> Number) -> ChainableF d
+radiusFn fn = ForceT $ AttributeSetter "radius" $ NumberAttr $ FnI (unsafeCoerce fn)
 
--- cx :: ∀ a. ToAttr Number a => a -> ChainableF
--- cx = ForceT <<< AttributeSetter "cx" <<< toAttr
+radiusVal :: forall d. Number -> ChainableF d
+radiusVal n = ForceT $ AttributeSetter "radius" $ NumberAttr $ Static n
 
--- cy :: ∀ a. ToAttr Number a => a -> ChainableF
--- cy = ForceT <<< AttributeSetter "cy" <<< toAttr
+strengthVal :: forall d. Number -> ChainableF d
+strengthVal n = ForceT $ AttributeSetter "strength" $ NumberAttr $ Static n
 
-theta :: ∀ a. ToAttr Number a => a -> ChainableF
-theta = ForceT <<< AttributeSetter "theta" <<< toAttr
+thetaVal :: forall d. Number -> ChainableF d
+thetaVal n = ForceT $ AttributeSetter "theta" $ NumberAttr $ Static n
 
-distanceMin :: ∀ a. ToAttr Number a => a -> ChainableF
-distanceMin = ForceT <<< AttributeSetter "distanceMin" <<< toAttr
+distanceMinVal :: forall d. Number -> ChainableF d
+distanceMinVal n = ForceT $ AttributeSetter "distanceMin" $ NumberAttr $ Static n
 
-distanceMax :: ∀ a. ToAttr Number a => a -> ChainableF
-distanceMax = ForceT <<< AttributeSetter "distanceMax" <<< toAttr
+distanceMaxVal :: forall d. Number -> ChainableF d
+distanceMaxVal n = ForceT $ AttributeSetter "distanceMax" $ NumberAttr $ Static n
 
-iterations :: ∀ a. ToAttr Number a => a -> ChainableF
-iterations = ForceT <<< AttributeSetter "iterations" <<< toAttr
+iterationsVal :: forall d. Number -> ChainableF d
+iterationsVal n = ForceT $ AttributeSetter "iterations" $ NumberAttr $ Static n
 
-x :: ∀ a. ToAttr Number a => a -> ChainableF
-x = ForceT <<< AttributeSetter "x" <<< toAttr
+xVal :: forall d. Number -> ChainableF d
+xVal n = ForceT $ AttributeSetter "x" $ NumberAttr $ Static n
 
-y :: ∀ a. ToAttr Number a => a -> ChainableF
-y = ForceT <<< AttributeSetter "y" <<< toAttr
+xFn :: forall d. (Datum_ -> Index_ -> Number) -> ChainableF d
+xFn fn = ForceT $ AttributeSetter "x" $ NumberAttr $ FnI (unsafeCoerce fn)
 
-fx :: ∀ a. ToAttr Number a => a -> ChainableF
-fx = ForceT <<< AttributeSetter "fx" <<< toAttr
+yVal :: forall d. Number -> ChainableF d
+yVal n = ForceT $ AttributeSetter "y" $ NumberAttr $ Static n
 
-fy :: ∀ a. ToAttr Number a => a -> ChainableF
-fy = ForceT <<< AttributeSetter "fy" <<< toAttr
+yFn :: forall d. (Datum_ -> Index_ -> Number) -> ChainableF d
+yFn fn = ForceT $ AttributeSetter "y" $ NumberAttr $ FnI (unsafeCoerce fn)
 
-distance :: ∀ a. ToAttr Number a => a -> ChainableF
-distance = ForceT <<< AttributeSetter "distance" <<< toAttr
+fxVal :: forall d. Number -> ChainableF d
+fxVal n = ForceT $ AttributeSetter "fx" $ NumberAttr $ Static n
 
-index :: ∀ a. ToAttr Number a => a -> ChainableF -- TODO in fact this would be an Int correctly
-index = ForceT <<< AttributeSetter "distance" <<< toAttr
+fyVal :: forall d. Number -> ChainableF d
+fyVal n = ForceT $ AttributeSetter "fy" $ NumberAttr $ Static n
+
+distanceVal :: forall d. Number -> ChainableF d
+distanceVal n = ForceT $ AttributeSetter "distance" $ NumberAttr $ Static n
 
 -- these next two are for specifying how a link should swizzle its "id" to an object reference
-numKey :: (Datum_ -> Number)  -> ChainableF
-numKey = ForceT <<< AttributeSetter "keyFn" <<< NumberAttr <<< Fn
+-- Note: These functions work with Datum_ at runtime
+numKey :: forall d. (Datum_ -> Number)  -> ChainableF d
+numKey fn = ForceT $ AttributeSetter "keyFn" $ NumberAttr $ Fn (unsafeCoerce fn)
 
-stringKey :: (Datum_ -> String) -> ChainableF
-stringKey = ForceT <<< AttributeSetter "keyFn" <<< StringAttr <<< Fn
+stringKey :: forall d. (Datum_ -> String) -> ChainableF d
+stringKey fn = ForceT $ AttributeSetter "keyFn" $ StringAttr $ Fn (unsafeCoerce fn)
 

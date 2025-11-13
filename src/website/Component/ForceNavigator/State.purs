@@ -21,14 +21,14 @@ import PSD3.ForceNavigator.Actions (Action)
 import Type.Proxy (Proxy(..))
 
 type State = {
-    simulation :: D3SimulationState_
+    simulation :: D3SimulationState_ NavigationSimNode
   , expandedNodes :: Set String  -- IDs of expanded section nodes
-  , openSelections :: Maybe { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ }
+  , openSelections :: Maybe { nodes :: Maybe (D3Selection_ NavigationSimNode), links :: Maybe (D3Selection_ NavigationSimNode) }
   , activeForces :: Set Label  -- Labels of forces currently enabled (parallel to expandedNodes for data)
   , eventListener :: Maybe (HS.Listener Action)  -- Component infrastructure, not scene config
 }
 
-initialState :: M.Map Label Force -> State
+initialState :: M.Map Label (Force NavigationSimNode) -> State
 initialState forceLibrary = {
     simulation: initialSimulationState forceLibrary
   , expandedNodes: Set.empty  -- Start with no sections expanded (just center + sections visible)
@@ -42,17 +42,17 @@ visibleNodes :: Set String -> Array NavigationSimNode -> Array NavigationSimNode
 visibleNodes expanded allNodes =
   let
     -- Start with center node
-    centerNode = allNodes # Array.filter (\(D3SimNode n) -> n.id == "purescript-d3")
+    centerNode = allNodes # Array.filter (\n -> n.id == "purescript-d3")
 
     -- Get all section nodes (children of center)
-    sectionNodes = allNodes # Array.filter (\(D3SimNode n) -> n.nodeType == Section)
+    sectionNodes = allNodes # Array.filter (\n -> n.nodeType == Section)
 
     -- For each expanded section, get its children
     expandedChildren = do
-      (D3SimNode node) <- allNodes
+      node <- allNodes
       if Set.member node.id expanded
         then case node.children of
-          Just childIds -> allNodes # Array.filter (\(D3SimNode n) -> Array.elem n.id childIds)
+          Just childIds -> allNodes # Array.filter (\n -> Array.elem n.id childIds)
           Nothing -> []
         else []
   in
@@ -70,7 +70,7 @@ cloneLink link =
 visibleLinks :: Array NavigationSimNode -> Array D3Link_Unswizzled -> Array D3Link_Unswizzled
 visibleLinks nodes allLinks =
   let
-    visibleIds = Set.fromFoldable $ map (\(D3SimNode n) -> n.id) nodes
+    visibleIds = Set.fromFoldable $ map (\n -> n.id) nodes
     unpackLink :: D3Link_Unswizzled -> { source :: String, target :: String }
     unpackLink = unsafeCoerce
 
@@ -104,13 +104,13 @@ visibleLinks nodes allLinks =
     result
 
 -- Lenses
-_simulation :: Lens' State D3SimulationState_
+_simulation :: Lens' State (D3SimulationState_ NavigationSimNode)
 _simulation = prop (Proxy :: Proxy "simulation")
 
 _expandedNodes :: Lens' State (Set String)
 _expandedNodes = prop (Proxy :: Proxy "expandedNodes")
 
-_openSelections :: Lens' State (Maybe { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ })
+_openSelections :: Lens' State (Maybe { nodes :: Maybe (D3Selection_ NavigationSimNode), links :: Maybe (D3Selection_ NavigationSimNode) })
 _openSelections = prop (Proxy :: Proxy "openSelections")
 
 _activeForces :: Lens' State (Set Label)

@@ -12,27 +12,27 @@ import Prelude (Unit, discard, pure, show, unit, ($), (>>>))
 import Unsafe.Coerce (unsafeCoerce)
 
 
-selectionAttach :: forall m. (SelectionM D3Selection_ m) => Selector D3Selection_ -> m D3Selection_
+selectionAttach :: forall d m. (SelectionM D3Selection_ m) => Selector (D3Selection_ d) -> m (D3Selection_ d)
 selectionAttach selector = pure $ d3SelectAllInDOM_ selector 
 
-selectionSelectUnder :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Selector D3Selection_ -> m D3Selection_
+selectionSelectUnder :: forall d m. (SelectionM D3Selection_ m) => D3Selection_ d -> Selector (D3Selection_ d) -> m (D3Selection_ d)
 selectionSelectUnder selection selector = pure $ d3SelectionSelectAll_ selector selection
 
-selectionAppendElement :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Element -> Array SelectionAttribute -> m D3Selection_
+selectionAppendElement :: forall d m. (SelectionM D3Selection_ m) => D3Selection_ d -> Element -> Array (SelectionAttribute d) -> m (D3Selection_ d)
 selectionAppendElement selection_ element attributes = do
   let appended_ = d3Append_ (show element) selection_
   selectionModifySelection appended_ attributes
   pure appended_
 
-selectionFilterSelection :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Selector D3Selection_ -> m D3Selection_
+selectionFilterSelection :: forall d m. (SelectionM D3Selection_ m) => D3Selection_ d -> Selector (D3Selection_ d) -> m (D3Selection_ d)
 selectionFilterSelection selection_ selector = pure $ d3FilterSelection_ selection_ selector
 
-selectionModifySelection :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Array (SelectionAttribute) -> m Unit
+selectionModifySelection :: forall d m. (SelectionM D3Selection_ m) => D3Selection_ d -> Array (SelectionAttribute d) -> m Unit
 selectionModifySelection selection_ attributes = do
   let _ = foldl applySelectionAttributeD3 selection_ attributes
   pure unit
 
-selectionJoin   :: forall datum m. (SelectionM D3Selection_ m) => D3Selection_ -> Element -> (Array datum) -> (Datum_ -> Index_) -> m D3Selection_
+selectionJoin   :: forall d datum key m. (SelectionM D3Selection_ m) => D3Selection_ d -> Element -> (Array datum) -> (datum -> key) -> m (D3Selection_ datum)
 selectionJoin selection e theData keyFn = do
   let
     element         = spy "Join: " $ show e
@@ -41,8 +41,8 @@ selectionJoin selection e theData keyFn = do
     enterSelection  = d3EnterAndAppend_ element dataSelection
   pure enterSelection
 
-selectionNestedJoin :: forall f datum m. Foldable f => (SelectionM D3Selection_ m) =>
-  D3Selection_ -> Element -> (Datum_ -> f datum) -> (Datum_ -> Index_) -> m D3Selection_
+selectionNestedJoin :: forall d f datum m. Foldable f => (SelectionM D3Selection_ m) =>
+  D3Selection_ d -> Element -> (Datum_ -> f datum) -> (Datum_ -> Index_) -> m (D3Selection_ datum)
 selectionNestedJoin selection e extractChildren keyFn = do
   let
     element = spy "NestedJoin: " $ show e
@@ -50,33 +50,34 @@ selectionNestedJoin selection e extractChildren keyFn = do
     -- Convert Foldable to Array and coerce datum to Datum_ for D3
     extractFn = extractChildren >>> fromFoldable >>> unsafeCoerce
     dataSelection = d3DataWithFunction_ extractFn keyFn selectS
-    enterSelection = d3EnterAndAppend_ element dataSelection
+    enterSelection = unsafeCoerce (d3EnterAndAppend_ element dataSelection) :: D3Selection_ datum
   pure enterSelection
 
-selectionUpdateJoin   :: forall datum m.
+selectionUpdateJoin   :: forall d datum key m.
   (SelectionM D3Selection_ m) =>
-  D3Selection_ ->
+  D3Selection_ d ->
   Element -> (Array datum) ->
-  (Datum_ -> Index_) ->
-  m { enter :: D3Selection_, exit :: D3Selection_, update :: D3Selection_ }
+  (datum -> key) ->
+  m { enter :: D3Selection_ datum, exit :: D3Selection_ d, update :: D3Selection_ datum }
 selectionUpdateJoin openSelection e theData keyFn = do
   let
     -- REVIEW use these FFI function to decompose the update Selection into it's component parts
-    updateSelection  = d3DataWithKeyFunction_ theData keyFn openSelection
+    -- d3DataWithKeyFunction_ rebinds data, changing phantom type from d to datum
+    -- Key function can return any type (String, Int, etc), FFI handles coercion
+    updateSelection = d3DataWithKeyFunction_ theData keyFn openSelection
     enterSelection   = d3GetEnterSelection_ updateSelection
-    exitSelection    = d3GetExitSelection_ updateSelection
-    
+    exitSelection    = unsafeCoerce (d3GetExitSelection_ updateSelection) :: D3Selection_ d
+
   pure { enter: enterSelection, exit: exitSelection, update: updateSelection }
 
-selectionOpenSelection :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Selector D3Selection_ -> m D3Selection_
-selectionOpenSelection selection selector = do
-  let _ = spy "open selection: " $ selector
+selectionOpenSelection :: forall d m. (SelectionM D3Selection_ m) => D3Selection_ d -> Selector (D3Selection_ d) -> m (D3Selection_ d)
+selectionOpenSelection selection selector =
   pure $ d3SelectionSelectAll_ selector selection
 
-selectionMergeSelections :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> D3Selection_ -> m D3Selection_
+selectionMergeSelections :: forall d m. (SelectionM D3Selection_ m) => D3Selection_ d -> D3Selection_ d -> m (D3Selection_ d)
 selectionMergeSelections selectionA selectionB = pure $ d3MergeSelectionWith_ selectionA selectionB
 
-selectionOn :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Behavior D3Selection_ -> m Unit
+selectionOn :: forall d m. (SelectionM D3Selection_ m) => D3Selection_ d -> Behavior (D3Selection_ d) -> m Unit
 selectionOn selection (Drag drag) = do
 -- TODO need to provide the simpler, non-simulation version here
   -- let _ = case drag of 

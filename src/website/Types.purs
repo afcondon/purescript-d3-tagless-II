@@ -103,12 +103,14 @@ data Route
   | DataFlowViz
   | Movement
   | Hierarchies
+  | IsometricCurveExperiment  -- Temporary: Isometric curve experimentation
   | Interpreters
   | MermaidDiagrams  -- Mermaid AST visualization examples
+  | ForceNavigator  -- Force-directed navigation graph
   | CodeExplorer
   | Explore String  -- Code exploration page for a specific snippet
   | WealthHealth    -- Wealth & Health of Nations visualization
-  | CodeAtlas       -- Code Atlas: codebase analysis and visualization
+  | CodeAtlas       -- Code Atlas: codebase analysis and visualization (archived)
   | FpFtw           -- FP FTW: Functional Programming examples
   | ExamplesGallery -- Gallery: index of all visualization examples
   | Example String  -- Individual example page (e.g., "bar-chart", "lesmis-force")
@@ -140,8 +142,10 @@ instance showRoute :: Show Route where
   show DataFlowViz = "Data Flow Visualizations"
   show Movement = "Movement & Transition"
   show Hierarchies = "Hierarchies"
+  show IsometricCurveExperiment = "Isometric Curve Experiment"
   show Interpreters = "Interpreters"
   show MermaidDiagrams = "Mermaid AST Diagrams"
+  show ForceNavigator = "Force Navigator"
   show CodeExplorer = "Code Explorer"
   show (Explore snippetId) = "Explore: " <> snippetId
   show WealthHealth = "Wealth & Health of Nations"

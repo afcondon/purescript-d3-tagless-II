@@ -2,13 +2,13 @@ module D3.Viz.GUP where
 
 import PSD3.Internal.Attributes.Sugar
 
-import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
+import PSD3.Internal.Types (D3Selection_, Element(..), Index_, Selector)
 import PSD3.Internal.Selection.Types (SelectionAttribute)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, openSelection, setAttributes, updateJoin)
-import D3.Viz.GUP.Unsafe (coerceDatumToChar, coerceIndexToNumber, coerceDatumToKey)
+import D3.Viz.GUP.Unsafe (charToKey, coerceIndexToNumber)
 import Data.String.CodeUnits (singleton)
 import Effect.Aff (Milliseconds(..))
-import Prelude (bind, discard, pure, ($), (*), (+), (<<<))
+import Prelude (Unit, bind, discard, pure, ($), (*), (+))
 
 -- | ====================================================================================
 -- | Simple-as-can-be example of the more complex Join which allows for new data to be
@@ -18,19 +18,13 @@ import Prelude (bind, discard, pure, ($), (*), (+), (<<<))
 -- Name: GUP
 type Model = Array Char
 
--- | Accessor record for working with bound data
-datum_ ::
-  { char :: Datum_ -> Char
-  , indexNum :: Index_ -> Number
-  }
-datum_ =
-  { char: coerceDatumToChar
-  , indexNum: coerceIndexToNumber
-  }
+-- PHANTOM TYPE SUCCESS: No more datum_ boilerplate!
+-- After updateJoin, the selections are typed as D3Selection_ Char
+-- So lambdas can use d :: Char directly!
 
 -- | creates the SVG and a <g> within it to hold the letters
 -- | returns a function which can be called repeatedly to generate each sequence of new and exiting letters
-exGeneralUpdatePattern :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m D3Selection_)
+exGeneralUpdatePattern :: forall m. SelectionM D3Selection_ m => Selector (D3Selection_ Unit) -> m ((Array Char) -> m (D3Selection_ Char))
 exGeneralUpdatePattern selector = do 
   root           <- attach selector
   svg            <- appendTo root Svg [ viewBox 0.0 100.0 800.0 350.0, classed "d3svg gup" ]
@@ -38,7 +32,7 @@ exGeneralUpdatePattern selector = do
   
   pure $ \letters -> do
     enterSelection   <- openSelection letterGroup "text"
-    updateSelections <- updateJoin enterSelection Text letters coerceDatumToKey
+    updateSelections <- updateJoin enterSelection Text letters charToKey
     setAttributes updateSelections.exit exit
     setAttributes updateSelections.update update
 
@@ -48,17 +42,18 @@ exGeneralUpdatePattern selector = do
     pure newlyEntered
 
   where
-    transition :: SelectionAttribute
+    transition :: forall d. SelectionAttribute d
     transition = transitionWithDuration $ Milliseconds 2000.0
 
-    xFromIndex :: Datum_ -> Index_ -> Number
-    xFromIndex _ i = 50.0 + (datum_.indexNum i * 48.0) -- letters enter at this position, and then must transition to new position on each update
+    -- Typed lambda! After updateJoin, d :: Char and i :: Index_
+    xFromIndex :: Char -> Index_ -> Number
+    xFromIndex _ i = 50.0 + (coerceIndexToNumber i * 48.0)
 
     enter = [ classed  "enter"
             , fill     "green"
             , x        xFromIndex
             , y        0.0
-            , text     (singleton <<< datum_.char)
+            , text     (singleton)  -- d :: Char, so just use singleton directly!
             , fontSize 60.0 ]
           `andThen` (transition `to` [ y 200.0 ])
 

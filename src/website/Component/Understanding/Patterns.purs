@@ -11,7 +11,7 @@ import Halogen.HTML.Properties as HP
 import PSD3 as D3
 import PSD3.Attributes (classed, fill, fontSize, viewBox, x, y, andThen, to, remove, transitionWithDuration)
 import PSD3.Data.Node (NodeID)
-import PSD3.Interpreter.MermaidAST (MermaidASTM)
+import PSD3.Interpreter.MermaidAST (MermaidASTM, MermaidSelection)
 import PSD3.Shared.DocsHeader as DocsHeader
 import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3.Shared.MermaidAST as MermaidAST
@@ -65,7 +65,7 @@ sequenceDiagram
 """
 
 -- | General Update Pattern (GUP) example showing enter/update/exit
-gupVisualization :: MermaidASTM NodeID
+gupVisualization :: MermaidASTM (MermaidSelection NodeID)
 gupVisualization = do
   root <- D3.attach "div"
   svg <- D3.appendTo root Svg [viewBox 0.0 100.0 800.0 350.0, classed "d3svg gup"]

@@ -4,7 +4,7 @@ import Prelude
 
 import Affjax (URL)
 import PSD3.Internal.Types (PointXY)
-import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, D3_FocusXY, D3_ID, D3_Radius, D3_TreeNode, D3_TreeRow, D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
+import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, D3_FocusXY, D3_ID, D3_VxyFxy, D3_XY, NodeID)
 import PSD3.Data.Graph (buildGraphModel, getLinksTo)
 import Unsafe.Coerce (unsafeCoerce)
 import Data.Array (catMaybes, foldl, groupBy, length, range, sortBy, zip, (!!), (:))
@@ -16,6 +16,14 @@ import Data.String (Pattern(..), split)
 import Data.Tuple (Tuple(..))
 import Type.Row (type (+))
 import Utility (chunk, compareSnd, equalSnd)
+
+-- ======================================================================================================================
+-- | Legacy tree row types (removed from PSD3.Data.Node during native tree refactor)
+-- | Defined locally here for Spago's tree building needs
+-- ======================================================================================================================
+type EmbeddedData a row = ( data :: a | row )
+type D3TreeRow row = ( x :: Number, y :: Number, depth :: Int, height :: Int, parent :: Maybe String, childIDs :: Array NodeID | row )
+newtype D3_TreeNode a = D3TreeNode (Record (D3TreeRow (EmbeddedData a ())))
 
 -- ======================================================================================================================
 -- | Types for all the data from the files
@@ -75,7 +83,7 @@ type Dependencies    = Array NodeID
 
 type SpagoLinkData = ( linktype :: LinkType, inSim :: Boolean ) 
 
-type SpagoTreeObj = D3_TreeNode (D3_XY  + (EmbeddedData { | SpagoNodeRow () }) + () )
+type SpagoTreeObj = D3_TreeNode SpagoNodeData
 
 type SpagoNodeRow row = ( 
     id       :: NodeID
@@ -100,6 +108,8 @@ type SpagoNodeRow row = (
   , gridXY        :: Nullable PointXY
   | row )
 type SpagoNodeData    = { | SpagoNodeRow () }
+-- Note: r (radius) field is added by upgradeSpagoNodeData in Model.purs
+type D3_Radius row = ( r :: Number | row )
 type SpagoDataRow   = (D3_XY + D3_VxyFxy + SpagoNodeRow  + D3_FocusXY + D3_Radius + ())
 type SpagoDataRecord = Record SpagoDataRow
 

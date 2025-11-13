@@ -8,6 +8,8 @@
             "aff",
             "affjax",
             "affjax-web",
+            "argonaut-codecs",
+            "argonaut-core",
             "arrays",
             "bifunctors",
             "console",
@@ -54,6 +56,7 @@
             "aff",
             "affjax",
             "affjax-web",
+            "argonaut-codecs",
             "argonaut-core",
             "arraybuffer-types",
             "arrays",
@@ -765,6 +768,24 @@
         "either",
         "maybe",
         "prelude"
+      ]
+    },
+    "argonaut-codecs": {
+      "type": "registry",
+      "version": "9.1.0",
+      "integrity": "sha256-N6efXByUeg848ompEqJfVvZuZPfdRYDGlTDFn0G0Oh8=",
+      "dependencies": [
+        "argonaut-core",
+        "arrays",
+        "effect",
+        "foreign-object",
+        "identity",
+        "integers",
+        "maybe",
+        "nonempty",
+        "ordered-collections",
+        "prelude",
+        "record"
       ]
     },
     "argonaut-core": {

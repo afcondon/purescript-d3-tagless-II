@@ -1,0 +1,161 @@
+================================================================================
+D3.SELECTION REPLACEMENT ANALYSIS - QUICK SUMMARY
+================================================================================
+
+CURRENT STATE
+=============
+- 149 foreign imports from D3.js (FFI boundary)
+- 1,587 lines of JavaScript FFI code
+- ~40% dedicated to D3.Selection operations
+- Successfully replaced D3 Hierarchy layouts with pure PureScript (precedent)
+
+D3.SELECTION API BREAKDOWN
+===========================
+
+Feature           | Lines | Usage Level | Modern Replacement    | Difficulty
+================================================================================
+DOM Selection     | 50    | Heavy       | querySelector API     | EASY
+Data Binding      | 300   | CRITICAL    | Pure PureScript algo  | MEDIUM
+Element Manip.    | 200   | Heavy       | native DOM APIs       | EASY
+Transitions       | 100   | Light       | Web Animations API    | MEDIUM
+Event Handling    | 50    | Light       | addEventListener      | EASY
+Drag/Zoom         | 150   | Moderate    | Pointer Events API    | HARD
+================================================================================ 
+
+WHAT NEEDS PURE PURESCRIPT
+===========================
+✓ Data join algorithm (enter/update/exit pattern)
+  - Core innovation of D3
+  - Complex but well-understood
+  - Can be fully tested, debugged, and optimized
+  - Estimated: 100-150 lines of PS
+
+✓ Selection abstraction (capability class)
+  - Already exists in codebase
+  - Just need new implementation
+  - Estimated: 50-75 lines of PS
+
+✓ Attribute application logic
+  - Map from SelectionAttribute to DOM
+  - Similar to existing applySelectionAttributeD3
+  - Estimated: 50-75 lines of PS
+
+WHAT STILL NEEDS FFI
+====================
+✓ Basic DOM operations (~35 functions)
+  - querySelector, querySelectorAll
+  - setAttribute, getAttribute
+  - appendChild, removeChild
+  - classList manipulation
+  - Complexity: TRIVIAL (direct JS calls)
+
+✓ Browser APIs (~20 functions)
+  - addEventListener, removeEventListener
+  - requestAnimationFrame
+  - getBoundingClientRect
+  - Complexity: TRIVIAL (direct JS calls)
+
+✓ Keep D3 For (Optional)
+  - Force simulation (sophisticated, already FFI)
+  - Drag behavior (complex pointer handling)
+  - Advanced zoom (gesture handling)
+
+MIGRATION PHASES
+================
+
+Phase 1: Native DOM FFI (Weeks 1-2)
+  - Create minimal DOM wrapper
+  - Replace d3SelectAllInDOM_, d3SelectFirstInDOM_
+  - Zero changes to caller code
+  Risk: LOW
+
+Phase 2: Pure Data Join Algorithm (Weeks 3-5)
+  - Implement computeDataJoin in pure PS
+  - Create comprehensive test suite
+  - Compare output with D3
+  Risk: MEDIUM (algorithm is complex but well-understood)
+
+Phase 3: Element Manipulation (Weeks 6-7)
+  - Implement setAttribute, addClass, setTextContent, etc.
+  - Replace d3SetAttr_, d3SetText_, etc.
+  - Update visualization examples
+  Risk: LOW
+
+Phase 4: Events & Behaviors (Weeks 8-10)
+  - Implement addEventListener, drag, zoom
+  - Can skip if keeping D3 for these
+  Risk: MEDIUM (browser event handling is tricky)
+
+Phase 5: Cleanup & Release (Weeks 11-12)
+  - Remove D3 from dependencies
+  - Archive old FFI functions
+  - Update documentation
+  Risk: LOW
+
+EFFORT ESTIMATE
+===============
+Total Effort:        12-16 weeks (1 person)
+Phases 1-3 Only:      6-8 weeks (can keep D3 for drag/zoom)
+Phases 1-5 Full:     12-16 weeks (completely replace D3 for selections)
+
+Risk Level:          MEDIUM
+  - Well-understood problem (D3 is stable, mature)
+  - Proven feasible (hierarchy layouts already replaced)
+  - Main risk: complex data binding algorithm
+  - Mitigatable: comprehensive testing
+
+KEY RISKS & MITIGATIONS
+=======================
+
+Risk: Data join algorithm complexity
+  Mitigation: Use Maps for O(n) performance, not O(n²)
+  Mitigation: Write property-based tests
+  Mitigation: Compare D3 output for validation
+
+Risk: Performance regression
+  Mitigation: Profile both implementations
+  Mitigation: Benchmark incrementally
+  Mitigation: Use same algorithmic approach as D3
+
+Risk: Element lifecycle management
+  Mitigation: Simple transitions only (no complex easing)
+  Mitigation: Use Web Animations API or requestAnimationFrame
+  Mitigation: Track pending operations
+
+Risk: Drag/zoom complexity
+  Mitigation: Can keep existing D3 implementation
+  Mitigation: Gradually replace in Phase 6
+
+FEASIBILITY ASSESSMENT
+======================
+
+Pure PureScript Data Binding Algorithm:  VERY FEASIBLE
+  - Core algorithm is pure FP
+  - Can be fully tested in isolation
+  - No DOM dependency needed
+  - Type system catches errors
+
+Native DOM Wrapper:  TRIVIAL
+  - Direct 1:1 mapping to native APIs
+  - No complex logic needed
+  - All modern browsers support APIs
+
+Event Handling:  FEASIBLE
+  - addEventListener is standard API
+  - Drag/zoom need care but doable
+  - Can start simple and enhance
+
+BOTTOM LINE
+===========
+
+Replacing D3.Selection is:
+  ✓ Feasible: Browser APIs are mature enough
+  ✓ Beneficial: Removes external dependency, improves type safety
+  ✓ Manageable: Can be phased incrementally
+  ✓ De-risked: Project already replaced D3 layouts successfully
+
+Recommended: Start with Phase 1-2 as proof of concept
+Expected outcome: Can eliminate D3 for selection operations while keeping it
+for sophisticated features like force simulation (if desired)
+
+================================================================================

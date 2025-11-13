@@ -79,7 +79,7 @@ draw :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
-  Array GroupedBarData -> Selector D3Selection_ -> m Unit
+  Array GroupedBarData -> Selector (D3Selection_ Unit) -> m Unit
 draw data' selector = do
   let dims = { width: 928.0, height: 600.0, marginTop: 10.0, marginRight: 10.0, marginBottom: 20.0, marginLeft: 40.0 }
   let chartWidth = dims.width - dims.marginLeft - dims.marginRight
@@ -121,7 +121,7 @@ draw data' selector = do
           i <- findIndex (\a -> a == age') ages
           index ageColors i
 
-  (root :: D3Selection_) <- attach selector
+  (root :: D3Selection_ Unit) <- attach selector
   svg <- appendTo root Svg [
       classed "grouped-bar-chart"
     , width dims.width
