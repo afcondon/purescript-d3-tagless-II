@@ -22,7 +22,7 @@ import Effect.Class (class MonadEffect, liftEffect)
 import Partial.Unsafe (unsafePartial)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Force(..), _name, SimVariable(..), _handle)
 import PSD3.Internal.Simulation.Functions as SimFn
-import PSD3.Internal.FFI (onTick_)
+import PSD3.Internal.FFI (onTick_, getNodes_, getLinksFromSimulation_)
 import Data.Lens (use, (.~), view)
 import Data.Lens.Record (prop)
 import Data.Lens.Iso.Newtype (_Newtype)
@@ -33,7 +33,7 @@ import Type.Proxy (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
 import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..))
 import PSD3v2.Capabilities.Selection (class SelectionM)
-import PSD3v2.Capabilities.Simulation (class SimulationM, Step(..))
+import PSD3v2.Capabilities.Simulation (class SimulationM, class SimulationM2, Step(..))
 import PSD3v2.Capabilities.Transition (class TransitionM)
 import PSD3v2.Selection.Operations as Ops
 import PSD3v2.Selection.Types (Selection(..), SelectionImpl(..), SBound, JoinResult(..))
@@ -442,3 +442,43 @@ instance SimulationM (D3v2Selection_ SBound Element) (D3v2SimM row d) where
   start = SimFn.simulationStart
 
   stop = SimFn.simulationStop
+
+-- | SimulationM2 instance for D3v2SimM (dynamic simulations with update)
+-- |
+-- | Extends SimulationM with update and reheat capabilities
+instance SimulationM2 (D3v2Selection_ SBound Element) (D3v2SimM row d) where
+  update config = do
+    -- 1. Update nodes if provided
+    nodesInSim <- case config.nodes of
+      Just newNodes -> SimFn.simulationSetNodes newNodes
+      Nothing -> do
+        handle <- use _handle
+        let opaqueNodes = getNodes_ handle
+        pure $ unsafeCoerce opaqueNodes
+
+    -- 2. Update active forces if provided
+    _ <- case config.activeForces of
+      Just forces -> SimFn.simulationActualizeForces forces
+      Nothing -> pure unit
+
+    -- 3. Update configuration variables if provided
+    _ <- case config.config of
+      Just vars -> do
+        SimFn.simulationSetVariable $ AlphaTarget vars.alphaTarget
+        SimFn.simulationSetVariable $ AlphaMin vars.alphaMin
+        SimFn.simulationSetVariable $ AlphaDecay vars.alphaDecay
+        SimFn.simulationSetVariable $ VelocityDecay vars.velocityDecay
+      Nothing -> pure unit
+
+    -- 4. Update links if provided (must come after nodes!)
+    linksInSim <- case config.links of
+      Just newLinks -> SimFn.simulationSetLinks newLinks nodesInSim config.keyFn
+      Nothing -> do
+        handle <- use _handle
+        let swizzledLinks = getLinksFromSimulation_ handle
+        pure swizzledLinks
+
+    -- 5. Return updated data for re-joining to DOM
+    pure { nodes: nodesInSim, links: linksInSim }
+
+  reheat alpha = SimFn.simulationSetVariable $ Alpha alpha

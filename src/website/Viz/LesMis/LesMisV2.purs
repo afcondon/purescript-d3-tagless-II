@@ -14,7 +14,7 @@ import Prelude
 import Control.Monad.State (class MonadState)
 import D3.Viz.LesMiserables.Model (LesMisRawModel, LesMisSimNode)
 import Data.Map as Map
-import Data.Number (sqrt)
+import Data.Number (sqrt, cos, sin, pi)
 import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
@@ -43,6 +43,28 @@ instance Eq IndexedLink where
 
 instance Ord IndexedLink where
   compare (IndexedLink a) (IndexedLink b) = compare a.index b.index
+
+-- | Phylotaxis layout constants (sunflower spiral pattern)
+-- | This creates a pleasing initial arrangement that helps the simulation converge faster
+initialRadius :: Number
+initialRadius = 10.0
+
+initialAngle :: Number
+initialAngle = pi * (3.0 - sqrt 5.0)  -- Golden angle
+
+-- | Apply phylotaxis positions to nodes
+-- | Uses the sunflower spiral pattern to distribute nodes evenly
+setPhyllotaxisPositions :: forall r. Array (Record (x :: Number, y :: Number | r)) -> Array (Record (x :: Number, y :: Number | r))
+setPhyllotaxisPositions nodes = Array.mapWithIndex setPosition nodes
+  where
+    setPosition :: Int -> Record (x :: Number, y :: Number | r) -> Record (x :: Number, y :: Number | r)
+    setPosition index node =
+      let
+        i = toNumber index
+        radius = initialRadius * sqrt (0.5 + i)
+        angle = i * initialAngle
+      in
+        node { x = radius * cos angle, y = radius * sin angle }
 
 -- | Draw LesMis force-directed graph using PSD3v2
 -- |
@@ -95,9 +117,12 @@ drawLesMisV2 forcesArray activeForces model containerSelector = do
     ]
     zoomGroup
 
+  -- Apply phylotaxis initial positions to reduce initial agitation
+  let nodesWithPositions = setPhyllotaxisPositions model.nodes
+
   -- Initialize simulation
   { nodes: nodesInSim, links: linksInSim } <- init
-    { nodes: model.nodes
+    { nodes: nodesWithPositions
     , links: model.links
     , forces: forcesArray
     , activeForces: activeForces

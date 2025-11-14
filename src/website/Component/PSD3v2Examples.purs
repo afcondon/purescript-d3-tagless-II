@@ -23,6 +23,7 @@ import D3.Viz.TreeVizV2 as TreeVizV2
 import D3.Viz.AnimatedTreeV2 as AnimatedTreeV2
 import D3.Viz.AnimatedTreeV2 (LayoutType(..))
 import D3.Viz.LesMisV2 as LesMisV2
+import D3.Viz.LesMisGUPV2 as LesMisGUPV2
 import D3.Viz.LesMiserables.Model (LesMisSimNode)
 import D3.Viz.LesMiserables.File (readGraphFromFileContents)
 import PSD3v2.Interpreter.D3v2 as D3v2
@@ -42,12 +43,16 @@ type State =
   { gupInitialized :: Boolean
   , treeLayout :: LayoutType
   , lesMisSimulation :: D3SimulationState_ LesMisSimNode
+  , lesMisGUPSimulation :: D3SimulationState_ LesMisSimNode
   }
 
 data Action
   = Initialize
   | UpdateGUPRandom
   | ToggleTreeLayout
+  | MoveLesMisToGrid
+  | MoveLesMisToPhylotaxis
+  | UnpinLesMisNodes
 
 -- | Forces configuration for LesMis
 forces :: { center :: Force LesMisSimNode, collision :: Force LesMisSimNode, links :: Force LesMisSimNode, manyBodyNeg :: Force LesMisSimNode }
@@ -68,6 +73,7 @@ component =
         { gupInitialized: false
         , treeLayout: TreeLayout
         , lesMisSimulation: initialSimulationState forceLibrary
+        , lesMisGUPSimulation: initialSimulationState forceLibrary
         }
     , render
     , eval: H.mkEval $ H.defaultEval
@@ -111,6 +117,7 @@ render _ =
             , title: "Les Misérables Force-Directed Graph"
             , description: "Character network using PSD3v2 with force simulation. Integration of SelectionM + SimulationM capabilities."
             }
+        , renderLesMisGUPExample
         ]
     ]
 
@@ -160,6 +167,41 @@ renderGUPExample =
     , HH.div
         [ HP.classes [ HH.ClassName "example-viz-container" ]
         , HP.id "gup-v2"
+        ]
+        []
+    ]
+
+renderLesMisGUPExample :: forall m. HH.HTML m Action
+renderLesMisGUPExample =
+  HH.div
+    [ HP.classes [ HH.ClassName "example-card" ] ]
+    [ HH.h3
+        [ HP.classes [ HH.ClassName "example-title" ] ]
+        [ HH.text "Les Mis with Dynamic Layouts" ]
+    , HH.p
+        [ HP.classes [ HH.ClassName "example-description" ] ]
+        [ HH.text "Force-directed graph with SimulationM2 update pattern. Transition between force-directed, grid, and phylotaxis (sunflower spiral) layouts." ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "gup-controls" ] ]
+        [ HH.button
+            [ HP.classes [ HH.ClassName "gup-button" ]
+            , HE.onClick \_ -> MoveLesMisToGrid
+            ]
+            [ HH.text "Move to Grid" ]
+        , HH.button
+            [ HP.classes [ HH.ClassName "gup-button" ]
+            , HE.onClick \_ -> MoveLesMisToPhylotaxis
+            ]
+            [ HH.text "Move to Phylotaxis" ]
+        , HH.button
+            [ HP.classes [ HH.ClassName "gup-button" ]
+            , HE.onClick \_ -> UnpinLesMisNodes
+            ]
+            [ HH.text "Unpin (Force Layout)" ]
+        ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "example-viz-container" ]
+        , HP.id "lesmis-gup-v2"
         ]
         []
     ]
@@ -239,6 +281,14 @@ handleAction = case _ of
         H.modify_ \s -> s { lesMisSimulation = newState.simulation }
         log "Les Misérables V2 initialized"
 
+        -- Initialize Les Mis GUP V2 (with dynamic layout transitions)
+        state2 <- H.get
+        newState2 <- H.liftEffect $ D3v2.execD3v2SimM { simulation: state2.lesMisGUPSimulation } do
+          _ <- LesMisGUPV2.drawLesMisGUPV2 forcesArray activeForces graph "#lesmis-gup-v2"
+          pure unit
+        H.modify_ \s -> s { lesMisGUPSimulation = newState2.simulation }
+        log "Les Misérables GUP V2 initialized"
+
     H.modify_ _ { gupInitialized = true }
 
     pure unit
@@ -258,3 +308,24 @@ handleAction = case _ of
     log $ "Toggling tree layout to: " <> show newLayout
     H.modify_ _ { treeLayout = newLayout }
     H.liftEffect $ D3v2.runD3v2M $ AnimatedTreeV2.updateTreeLayout newLayout
+
+  MoveLesMisToGrid -> do
+    log "Moving Les Mis nodes to grid layout"
+    state <- H.get
+    newState <- H.liftEffect $ D3v2.execD3v2SimM { simulation: state.lesMisGUPSimulation } do
+      LesMisGUPV2.moveToGrid 30.0  -- 30px grid spacing
+    H.modify_ \s -> s { lesMisGUPSimulation = newState.simulation }
+
+  MoveLesMisToPhylotaxis -> do
+    log "Moving Les Mis nodes to phylotaxis layout"
+    state <- H.get
+    newState <- H.liftEffect $ D3v2.execD3v2SimM { simulation: state.lesMisGUPSimulation } do
+      LesMisGUPV2.moveToPhylotaxis
+    H.modify_ \s -> s { lesMisGUPSimulation = newState.simulation }
+
+  UnpinLesMisNodes -> do
+    log "Unpinning Les Mis nodes (returning to force layout)"
+    state <- H.get
+    newState <- H.liftEffect $ D3v2.execD3v2SimM { simulation: state.lesMisGUPSimulation } do
+      LesMisGUPV2.unpinNodes
+    H.modify_ \s -> s { lesMisGUPSimulation = newState.simulation }
