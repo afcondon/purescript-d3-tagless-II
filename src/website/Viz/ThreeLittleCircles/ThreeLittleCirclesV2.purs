@@ -31,11 +31,11 @@ import PSD3v2.Selection.Types (ElementType(..))
 -- | - No simpleJoin + setAttributes - just renderData
 -- | - No keyIsID_ - Ord instance controls identity
 -- | - Type-safe attributes (cx, cy, radius are smart constructors)
-drawThreeCircles :: forall m sel. SelectionM sel m => m Unit
-drawThreeCircles = do
-  -- Select the SVG element
+drawThreeCircles :: forall m sel. SelectionM sel m => String -> m Unit
+drawThreeCircles selector = do
+  -- Select the container element (typically "#example-viz")
   -- The datum type (Int) is inferred from the data we bind below
-  svg <- select "svg"
+  svg <- select selector
 
   -- Render circles with real data [32, 57, 293]
   -- The renderData function handles enter/update/exit automatically
@@ -65,6 +65,6 @@ drawThreeCircles = do
       , radius (\datum -> toNumber datum / 10.0)          -- Data-driven radius
       ]
 
--- | Run the example with the D3v2 interpreter
+-- | Run the example with the D3v2 interpreter (for standalone testing)
 main :: Effect Unit
-main = runD3v2M drawThreeCircles
+main = runD3v2M (drawThreeCircles "svg")

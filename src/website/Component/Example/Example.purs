@@ -48,6 +48,7 @@ import Halogen.HTML.Events as HE
 import D3.Viz.LesMiserables.File (readGraphFromFileContents)
 import D3.Viz.SankeyDiagram as Sankey
 import D3.Viz.ThreeLittleCircles as ThreeLittleCircles
+import D3.Viz.ThreeLittleCirclesV2 as ThreeLittleCirclesV2
 import D3.Viz.ThreeLittleCirclesTransition as CirclesTransition
 import D3.Viz.ThreeLittleDimensions as ThreeLittleDimensions
 import D3.Viz.WealthHealth.Draw as WealthHealth
@@ -73,6 +74,7 @@ import PSD3.Internal.Simulation.Config as F
 import PSD3.Internal.Simulation.Forces (createForce, createLinkForce, initialize)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, ForceType(..), RegularForceType(..), allNodes, initialSimulationState)
 import PSD3.Interpreter.D3 (eval_D3M, runWithD3_Sankey, runWithD3_Simulation)
+import PSD3v2.Interpreter.D3v2 as PSD3v2.Interpreter.D3v2
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Website.Types (Route(..))
 import Utility (getWindowWidthHeight)
@@ -145,6 +147,10 @@ handleAction = case _ of
     case state.exampleId of
       "three-little-circles" -> do
         _ <- H.liftEffect $ eval_D3M $ ThreeLittleCircles.drawThreeCircles "#example-viz"
+        pure unit
+
+      "three-little-circles-v2" -> do
+        _ <- H.liftEffect $ PSD3v2.Interpreter.D3v2.runD3v2M $ ThreeLittleCirclesV2.drawThreeCircles "#example-viz"
         pure unit
 
       "bar-chart" -> do
