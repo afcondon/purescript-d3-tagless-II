@@ -15,7 +15,7 @@ import Prelude
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
-import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..), fill, radius)
+import PSD3v2.Attribute.Types (Attribute, fill, radius, cx, cy)
 import PSD3v2.Capabilities.Selection (class SelectionM, select, renderData)
 import PSD3v2.Interpreter.D3v2 (runD3v2M)
 import PSD3v2.Selection.Types (ElementType(..))
@@ -47,20 +47,22 @@ drawThreeCircles = do
   pure unit
   where
     -- Attributes for entering circles (green)
-    -- Note: Using datum value to scale radius
-    enterAttrs d =
-      [ fill "green"
-      , IndexedAttr (AttributeName "cx") (\_ i -> NumberValue (toNumber i * 100.0 + 50.0))  -- Position based on index
-      , StaticAttr (AttributeName "cy") (NumberValue 50.0)
-      , radius (toNumber d / 10.0)  -- Scale radius based on data value
+    -- Note: Using datum value to scale radius, index for position
+    enterAttrs :: Int -> Array (Attribute Int)
+    enterAttrs _ =
+      [ fill "green"                                      -- Static color
+      , cx (\(_ :: Int) i -> toNumber i * 100.0 + 50.0)   -- Indexed position
+      , cy 50.0                                           -- Static position
+      , radius (\datum -> toNumber datum / 10.0)          -- Data-driven radius
       ]
 
     -- Attributes for updating circles (could change color, size, etc.)
-    updateAttrs d =
-      [ fill "orange"  -- Change existing circles to orange
-      , IndexedAttr (AttributeName "cx") (\_ i -> NumberValue (toNumber i * 100.0 + 50.0))
-      , StaticAttr (AttributeName "cy") (NumberValue 50.0)
-      , radius (toNumber d / 10.0)
+    updateAttrs :: Int -> Array (Attribute Int)
+    updateAttrs _ =
+      [ fill "orange"                                     -- Change to orange
+      , cx (\(_ :: Int) i -> toNumber i * 100.0 + 50.0)   -- Indexed position
+      , cy 50.0                                           -- Static position
+      , radius (\datum -> toNumber datum / 10.0)          -- Data-driven radius
       ]
 
 -- | Run the example with the D3v2 interpreter

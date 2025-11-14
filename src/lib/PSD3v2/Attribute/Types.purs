@@ -2,9 +2,8 @@ module PSD3v2.Attribute.Types
   ( Attribute(..)
   , AttributeName(..)
   , AttributeValue(..)
-  , toAttributeName
-  , class ToAttributeValue
-  , toAttributeValue
+  , class ToAttr
+  , toAttr
   -- Smart constructors for common attributes
   , fill
   , stroke
@@ -22,7 +21,6 @@ module PSD3v2.Attribute.Types
   , transform
   , class_
   , id_
-  , text
   , fontSize
   , fontFamily
   , textAnchor
@@ -31,10 +29,6 @@ module PSD3v2.Attribute.Types
   ) where
 
 import Prelude
-
-import Data.Generic.Rep (class Generic)
-import Data.Int (toNumber)
-import Data.Show.Generic (genericShow)
 
 -- | Type-safe attribute with datum phantom type
 -- |
@@ -66,9 +60,6 @@ derive instance Eq AttributeName
 derive instance Ord AttributeName
 derive newtype instance Show AttributeName
 
-toAttributeName :: String -> AttributeName
-toAttributeName = AttributeName
-
 -- | Attribute values
 -- |
 -- | We support the most common value types.
@@ -79,102 +70,168 @@ data AttributeValue
   | BooleanValue Boolean
 
 derive instance Eq AttributeValue
-derive instance Generic AttributeValue _
+derive instance Ord AttributeValue
+
 instance Show AttributeValue where
-  show = genericShow
-
--- | Convert common types to AttributeValue
-class ToAttributeValue a where
-  toAttributeValue :: a -> AttributeValue
-
-instance ToAttributeValue String where
-  toAttributeValue = StringValue
-
-instance ToAttributeValue Number where
-  toAttributeValue = NumberValue
-
-instance ToAttributeValue Int where
-  toAttributeValue = NumberValue <<< toNumber
-
-instance ToAttributeValue Boolean where
-  toAttributeValue = BooleanValue
+  show (StringValue s) = "StringValue " <> show s
+  show (NumberValue n) = "NumberValue " <> show n
+  show (BooleanValue b) = "BooleanValue " <> show b
 
 -- ============================================================================
--- Smart Constructors for Common Attributes
+-- ToAttr Type Class - Enables Polymorphic Attribute Setters
 -- ============================================================================
--- These provide a convenient, type-safe API for users.
--- Examples:
---   fill "red"                    -- Static color
---   cx (\d -> d.x)                -- Data-driven position
---   cy (\d i -> d.y + toNumber i) -- Indexed position
 
--- Colors and opacity
-fill :: forall datum. String -> Attribute datum
-fill color = StaticAttr (AttributeName "fill") (StringValue color)
+-- | Type class for converting various input types to Attribute
+-- |
+-- | This enables elegant polymorphic attribute setters inspired by Ian Ross' design:
+-- | - `fill "red"` - static value
+-- | - `fill (\d -> d.color)` - datum-driven
+-- | - `fill (\d i -> if i == 0 then "red" else "blue")` - indexed
+-- |
+-- | The functional dependency `from -> to` allows the compiler to infer
+-- | which instance to use based on the input type.
+class ToAttr :: Type -> Type -> Type -> Constraint
+class ToAttr to from datum | from -> to where
+  toAttr :: from -> AttributeName -> Attribute datum
 
-stroke :: forall datum. String -> Attribute datum
-stroke color = StaticAttr (AttributeName "stroke") (StringValue color)
+-- ============================================================================
+-- ToAttr Instances for String
+-- ============================================================================
 
-strokeWidth :: forall datum. Number -> Attribute datum
-strokeWidth w = StaticAttr (AttributeName "stroke-width") (NumberValue w)
+instance ToAttr String String datum where
+  toAttr value name = StaticAttr name (StringValue value)
 
-strokeOpacity :: forall datum. Number -> Attribute datum
-strokeOpacity o = StaticAttr (AttributeName "stroke-opacity") (NumberValue o)
+instance ToAttr String (datum -> String) datum where
+  toAttr fn name = DataAttr name (StringValue <<< fn)
 
-opacity :: forall datum. Number -> Attribute datum
-opacity o = StaticAttr (AttributeName "opacity") (NumberValue o)
+instance ToAttr String (datum -> Int -> String) datum where
+  toAttr fn name = IndexedAttr name (\d i -> StringValue (fn d i))
 
--- Positions and dimensions
-cx :: forall datum. (datum -> Number) -> Attribute datum
-cx f = DataAttr (AttributeName "cx") (NumberValue <<< f)
+-- ============================================================================
+-- ToAttr Instances for Number
+-- ============================================================================
 
-cy :: forall datum. (datum -> Number) -> Attribute datum
-cy f = DataAttr (AttributeName "cy") (NumberValue <<< f)
+instance ToAttr Number Number datum where
+  toAttr value name = StaticAttr name (NumberValue value)
 
-radius :: forall datum. Number -> Attribute datum
-radius r = StaticAttr (AttributeName "r") (NumberValue r)
+instance ToAttr Number (datum -> Number) datum where
+  toAttr fn name = DataAttr name (NumberValue <<< fn)
 
-x :: forall datum. (datum -> Number) -> Attribute datum
-x f = DataAttr (AttributeName "x") (NumberValue <<< f)
+instance ToAttr Number (datum -> Int -> Number) datum where
+  toAttr fn name = IndexedAttr name (\d i -> NumberValue (fn d i))
 
-y :: forall datum. (datum -> Number) -> Attribute datum
-y f = DataAttr (AttributeName "y") (NumberValue <<< f)
+-- ============================================================================
+-- ToAttr Instances for Boolean
+-- ============================================================================
 
-width :: forall datum. Number -> Attribute datum
-width w = StaticAttr (AttributeName "width") (NumberValue w)
+instance ToAttr Boolean Boolean datum where
+  toAttr value name = StaticAttr name (BooleanValue value)
 
-height :: forall datum. Number -> Attribute datum
-height h = StaticAttr (AttributeName "height") (NumberValue h)
+instance ToAttr Boolean (datum -> Boolean) datum where
+  toAttr fn name = DataAttr name (BooleanValue <<< fn)
 
--- Paths and transforms
-d :: forall datum. (datum -> String) -> Attribute datum
-d f = DataAttr (AttributeName "d") (StringValue <<< f)
+instance ToAttr Boolean (datum -> Int -> Boolean) datum where
+  toAttr fn name = IndexedAttr name (\d i -> BooleanValue (fn d i))
 
-transform :: forall datum. (datum -> String) -> Attribute datum
-transform f = DataAttr (AttributeName "transform") (StringValue <<< f)
+-- ============================================================================
+-- Smart Constructors - Now Polymorphic!
+-- ============================================================================
 
--- Standard HTML attributes
-class_ :: forall datum. String -> Attribute datum
-class_ c = StaticAttr (AttributeName "class") (StringValue c)
+-- | Fill color attribute
+-- |
+-- | Supports:
+-- | - Static: `fill "red"`
+-- | - Datum-driven: `fill (\d -> d.color)`
+-- | - Indexed: `fill (\d i -> if i == 0 then "red" else "blue")`
+fill :: forall datum a. ToAttr String a datum => a -> Attribute datum
+fill value = toAttr value (AttributeName "fill")
 
-id_ :: forall datum. (datum -> String) -> Attribute datum
-id_ f = DataAttr (AttributeName "id") (StringValue <<< f)
+-- | Stroke color attribute
+stroke :: forall datum a. ToAttr String a datum => a -> Attribute datum
+stroke value = toAttr value (AttributeName "stroke")
 
--- Text attributes
-text :: forall datum. (datum -> String) -> Attribute datum
-text f = DataAttr (AttributeName "text") (StringValue <<< f)
+-- | Stroke width attribute
+strokeWidth :: forall datum a. ToAttr Number a datum => a -> Attribute datum
+strokeWidth value = toAttr value (AttributeName "stroke-width")
 
-fontSize :: forall datum. Number -> Attribute datum
-fontSize size = StaticAttr (AttributeName "font-size") (NumberValue size)
+-- | Stroke opacity attribute
+strokeOpacity :: forall datum a. ToAttr Number a datum => a -> Attribute datum
+strokeOpacity value = toAttr value (AttributeName "stroke-opacity")
 
-fontFamily :: forall datum. String -> Attribute datum
-fontFamily family = StaticAttr (AttributeName "font-family") (StringValue family)
+-- | Opacity attribute
+opacity :: forall datum a. ToAttr Number a datum => a -> Attribute datum
+opacity value = toAttr value (AttributeName "opacity")
 
-textAnchor :: forall datum. String -> Attribute datum
-textAnchor anchor = StaticAttr (AttributeName "text-anchor") (StringValue anchor)
+-- | X center coordinate
+-- |
+-- | Supports:
+-- | - Static: `cx 50.0`
+-- | - Datum-driven: `cx (\d -> d.x)`
+-- | - Indexed: `cx (\d i -> toNumber i * 100.0)`
+cx :: forall datum a. ToAttr Number a datum => a -> Attribute datum
+cx value = toAttr value (AttributeName "cx")
 
-dy :: forall datum. Number -> Attribute datum
-dy offset = StaticAttr (AttributeName "dy") (NumberValue offset)
+-- | Y center coordinate
+cy :: forall datum a. ToAttr Number a datum => a -> Attribute datum
+cy value = toAttr value (AttributeName "cy")
 
-dx :: forall datum. Number -> Attribute datum
-dx offset = StaticAttr (AttributeName "dx") (NumberValue offset)
+-- | Radius attribute
+-- |
+-- | Supports:
+-- | - Static: `radius 10.0`
+-- | - Datum-driven: `radius (\d -> d.size)`
+-- | - Indexed: `radius (\d i -> toNumber i * 5.0)`
+radius :: forall datum a. ToAttr Number a datum => a -> Attribute datum
+radius value = toAttr value (AttributeName "r")
+
+-- | X position
+x :: forall datum a. ToAttr Number a datum => a -> Attribute datum
+x value = toAttr value (AttributeName "x")
+
+-- | Y position
+y :: forall datum a. ToAttr Number a datum => a -> Attribute datum
+y value = toAttr value (AttributeName "y")
+
+-- | Width attribute
+width :: forall datum a. ToAttr Number a datum => a -> Attribute datum
+width value = toAttr value (AttributeName "width")
+
+-- | Height attribute
+height :: forall datum a. ToAttr Number a datum => a -> Attribute datum
+height value = toAttr value (AttributeName "height")
+
+-- | SVG path data
+d :: forall datum a. ToAttr String a datum => a -> Attribute datum
+d value = toAttr value (AttributeName "d")
+
+-- | Transform attribute
+transform :: forall datum a. ToAttr String a datum => a -> Attribute datum
+transform value = toAttr value (AttributeName "transform")
+
+-- | CSS class attribute
+class_ :: forall datum a. ToAttr String a datum => a -> Attribute datum
+class_ value = toAttr value (AttributeName "class")
+
+-- | ID attribute
+id_ :: forall datum a. ToAttr String a datum => a -> Attribute datum
+id_ value = toAttr value (AttributeName "id")
+
+-- | Font size
+fontSize :: forall datum a. ToAttr Number a datum => a -> Attribute datum
+fontSize value = toAttr value (AttributeName "font-size")
+
+-- | Font family
+fontFamily :: forall datum a. ToAttr String a datum => a -> Attribute datum
+fontFamily value = toAttr value (AttributeName "font-family")
+
+-- | Text anchor (start, middle, end)
+textAnchor :: forall datum a. ToAttr String a datum => a -> Attribute datum
+textAnchor value = toAttr value (AttributeName "text-anchor")
+
+-- | Y offset for text
+dy :: forall datum a. ToAttr Number a datum => a -> Attribute datum
+dy value = toAttr value (AttributeName "dy")
+
+-- | X offset for text
+dx :: forall datum a. ToAttr Number a datum => a -> Attribute datum
+dx value = toAttr value (AttributeName "dx")
