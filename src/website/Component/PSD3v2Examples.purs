@@ -3,7 +3,8 @@ module PSD3.Component.PSD3v2Examples where
 import Prelude
 
 import Data.Maybe (Maybe(..))
-import Effect.Class (class MonadEffect)
+import Effect.Aff.Class (class MonadAff)
+import Effect.Aff (Milliseconds(..), delay)
 import Effect.Class.Console (log)
 import Halogen as H
 import Halogen.HTML as HH
@@ -15,7 +16,7 @@ type State = Unit
 
 data Action = Initialize
 
-component :: forall query input output m. MonadEffect m => H.Component query input output m
+component :: forall query input output m. MonadAff m => H.Component query input output m
 component =
   H.mkComponent
     { initialState: \_ -> unit
@@ -64,10 +65,12 @@ renderExample { id, title, description } =
         []
     ]
 
-handleAction :: forall output m. MonadEffect m => Action -> H.HalogenM State Action () output m Unit
+handleAction :: forall output m. MonadAff m => Action -> H.HalogenM State Action () output m Unit
 handleAction = case _ of
   Initialize -> do
     log "PSD3v2Examples: Initializing"
+    -- Small delay to ensure DOM is ready
+    H.liftAff $ delay (Milliseconds 100.0)
     -- Render Three Little Circles V2
     H.liftEffect $ D3v2.runD3v2M $ ThreeLittleCirclesV2.drawThreeCircles "#three-little-circles-v2"
     pure unit

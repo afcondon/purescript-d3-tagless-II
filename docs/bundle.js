@@ -39085,19 +39085,22 @@
       description: "The classic D3 example reimplemented with PSD3v2"
     })])]);
   };
-  var handleAction6 = function(dictMonadEffect) {
-    var monadEffectHalogenM8 = monadEffectHalogenM(dictMonadEffect);
+  var handleAction6 = function(dictMonadAff) {
+    var monadEffectHalogenM8 = monadEffectHalogenM(dictMonadAff.MonadEffect0());
     var log7 = log3(monadEffectHalogenM8);
+    var liftAff37 = liftAff(monadAffHalogenM(dictMonadAff));
     var liftEffect53 = liftEffect(monadEffectHalogenM8);
     return function(v) {
       return discard44(log7("PSD3v2Examples: Initializing"))(function() {
-        return discard44(liftEffect53(runD3v2M(drawThreeCircles4("#three-little-circles-v2"))))(function() {
-          return pure35(unit);
+        return discard44(liftAff37(delay(100)))(function() {
+          return discard44(liftEffect53(runD3v2M(drawThreeCircles4("#three-little-circles-v2"))))(function() {
+            return pure35(unit);
+          });
         });
       });
     };
   };
-  var component8 = function(dictMonadEffect) {
+  var component8 = function(dictMonadAff) {
     return mkComponent({
       initialState: function(v) {
         return unit;
@@ -39107,7 +39110,7 @@
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
         finalize: defaultEval.finalize,
-        handleAction: handleAction6(dictMonadEffect),
+        handleAction: handleAction6(dictMonadAff),
         initialize: new Just(Initialize7.value)
       })
     });
@@ -51625,7 +51628,7 @@ graph TB
       return "psd3v2Examples";
     }
   })(ordUnit);
-  var component72 = /* @__PURE__ */ component8(monadEffectAff);
+  var component72 = /* @__PURE__ */ component8(monadAffAff);
   var slot_322 = /* @__PURE__ */ slot_20({
     reflectSymbol: function() {
       return "acknowledgements";
