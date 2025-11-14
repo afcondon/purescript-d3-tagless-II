@@ -10,6 +10,7 @@ module PSD3v2.Capabilities.Selection
   , setAttrsExit
   , remove
   , merge
+  , on
   ) where
 
 import Prelude
@@ -17,6 +18,7 @@ import Prelude
 import Data.Foldable (class Foldable)
 import Data.Maybe (Maybe)
 import PSD3v2.Attribute.Types (Attribute)
+import PSD3v2.Behavior.Types (Behavior)
 import PSD3v2.Selection.Types (ElementType, JoinResult, SBound, SEmpty, SExiting, SPending)
 import Web.DOM.Element (Element)
 
@@ -182,3 +184,20 @@ class Monad m <= SelectionM sel m | m -> sel where
     -> Array (Attribute datumOut)
     -> sel SEmpty parent datum
     -> m (sel SEmpty Element datumOut)
+
+  -- | Attach a behavior (zoom, drag, etc.) to a selection
+  -- |
+  -- | Returns the selection unchanged to allow chaining.
+  -- |
+  -- | Example:
+  -- | ```purescript
+  -- | svg <- appendChild SVG [...] container
+  -- | zoomGroup <- appendChild Group [...] svg
+  -- | _ <- on (Drag defaultDrag) zoomGroup
+  -- | _ <- on (Zoom $ defaultZoom (ScaleExtent 0.5 4.0) ".zoom-group") svg
+  -- | ```
+  on
+    :: forall state elem datum
+     . Behavior
+    -> sel state elem datum
+    -> m (sel state elem datum)

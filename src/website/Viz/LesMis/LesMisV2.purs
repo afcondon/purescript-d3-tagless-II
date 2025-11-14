@@ -24,7 +24,8 @@ import PSD3.Internal.Simulation.Types (D3SimulationState_, Force)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
 import PSD3.Internal.FFI (keyIsID_)
 import PSD3v2.Attribute.Types (cx, cy, fill, radius, stroke, strokeWidth, x1, x2, y1, y2, id_, class_, width, height, viewBox)
-import PSD3v2.Capabilities.Selection (select, appendChild, joinData, append)
+import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom, ScaleExtent(..))
+import PSD3v2.Capabilities.Selection (select, appendChild, joinData, append, on)
 import PSD3v2.Capabilities.Simulation (init, addTickFunction, start, Step(..))
 import PSD3v2.Interpreter.D3v2 (D3v2SimM, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), SBound)
@@ -68,18 +69,31 @@ drawLesMisV2 forcesArray activeForces model containerSelector = do
     ]
     container
 
-  -- Create groups for links and nodes
+  -- Create inner zoom group (this is what gets transformed)
+  zoomGroup <- appendChild Group
+    [ id_ "zoom-group"
+    , class_ "zoom-group"
+    ]
+    svg
+
+  -- Attach drag behavior to zoom group (allows panning by dragging)
+  _ <- on (Drag defaultDrag) zoomGroup
+
+  -- Attach zoom behavior to SVG (zoom on scroll/pinch, target is zoom group)
+  _ <- on (Zoom $ defaultZoom (ScaleExtent 0.5 4.0) "#zoom-group") svg
+
+  -- Create groups for links and nodes inside zoom group
   linksGroup <- appendChild Group
     [ id_ "links"
     , class_ "links"
     ]
-    svg
+    zoomGroup
 
   nodesGroup <- appendChild Group
     [ id_ "nodes"
     , class_ "nodes"
     ]
-    svg
+    zoomGroup
 
   -- Initialize simulation
   { nodes: nodesInSim, links: linksInSim } <- init

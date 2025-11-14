@@ -9,6 +9,7 @@ module PSD3v2.Selection.Operations
   , merge
   , joinData
   , renderData
+  , on
   ) where
 
 import Prelude
@@ -26,6 +27,8 @@ import Effect.Class (class MonadEffect, liftEffect)
 import Partial.Unsafe (unsafePartial)
 import Unsafe.Coerce (unsafeCoerce)
 import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..))
+import PSD3v2.Behavior.Types (Behavior(..), DragConfig(..), ZoomConfig(..), ScaleExtent(..))
+import PSD3v2.Behavior.FFI as BehaviorFFI
 import PSD3v2.Selection.Join as Join
 import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), SBound, SEmpty, SExiting, SPending, Selection(..), SelectionImpl(..))
 import Web.DOM.Document (Document)
@@ -514,6 +517,43 @@ querySelectorAllElements selector parents = do
     pure $ Array.mapMaybe fromNode nodes
   -- Flatten the array of arrays
   pure $ Array.concat nodeArrays
+
+-- | Attach a behavior (zoom, drag, etc.) to a selection
+-- |
+-- | Works with any selection type - extracts elements and applies D3 behavior.
+-- | Returns the selection unchanged to allow chaining.
+-- |
+-- | Example:
+-- | ```purescript
+-- | svg <- appendChild SVG [...] container
+-- | zoomGroup <- appendChild Group [...] svg
+-- | _ <- on (Drag defaultDrag) zoomGroup
+-- | _ <- on (Zoom $ defaultZoom (ScaleExtent 0.5 4.0) ".zoom-group") svg
+-- | ```
+on :: forall state elem datum. Behavior -> Selection state elem datum -> Effect (Selection state elem datum)
+on behavior selection@(Selection impl) = do
+  -- Extract elements from the selection
+  let elements = getElements impl
+
+  -- Apply the behavior to each element
+  traverse_ (applyBehavior behavior) elements
+
+  -- Return selection unchanged
+  pure selection
+  where
+    -- Extract elements from any selection type
+    getElements :: SelectionImpl elem datum -> Array Element
+    getElements (EmptySelection { parentElements }) = parentElements
+    getElements (BoundSelection { elements: els }) = els
+    getElements (PendingSelection { parentElements }) = parentElements
+    getElements (ExitingSelection { elements: els }) = els
+
+    -- Apply behavior to a single element
+    applyBehavior :: Behavior -> Element -> Effect Unit
+    applyBehavior (Zoom (ZoomConfig { scaleExtent: ScaleExtent scaleMin scaleMax, targetSelector })) element =
+      void $ BehaviorFFI.attachZoom_ element scaleMin scaleMax targetSelector
+    applyBehavior (Drag (DragConfig _)) element =
+      void $ BehaviorFFI.attachDrag_ element unit
 
 -- | Apply attributes to an element
 applyAttributes :: forall datum. Element -> datum -> Int -> Array (Attribute datum) -> Effect Unit

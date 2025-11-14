@@ -139,6 +139,10 @@ instance SelectionM D3v2Selection_ D3v2M where
     result <- Ops.appendChild elemType attrs emptySelection
     pure $ D3v2Selection_ result
 
+  on behavior (D3v2Selection_ selection) = D3v2M do
+    result <- Ops.on behavior selection
+    pure $ D3v2Selection_ result
+
 -- | TransitionM instance for D3v2 interpreter
 -- |
 -- | Implements animated transitions using D3's transition engine.
@@ -267,6 +271,10 @@ instance SelectionM D3v2Selection_ (D3v2SimM row d) where
   merge (D3v2Selection_ sel1) (D3v2Selection_ sel2) = liftEffect $ do
     merged <- Ops.merge sel1 sel2
     pure $ D3v2Selection_ merged
+
+  on behavior (D3v2Selection_ selection) = liftEffect $ do
+    result <- Ops.on behavior selection
+    pure $ D3v2Selection_ result
 
 -- | TransitionM instance for D3v2SimM
 -- |

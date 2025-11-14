@@ -13876,17 +13876,17 @@
     return ZoomExtent2;
   })();
   var ScaleExtent = /* @__PURE__ */ (function() {
-    function ScaleExtent2(value0, value1) {
+    function ScaleExtent3(value0, value1) {
       this.value0 = value0;
       this.value1 = value1;
     }
     ;
-    ScaleExtent2.create = function(value0) {
+    ScaleExtent3.create = function(value0) {
       return function(value1) {
-        return new ScaleExtent2(value0, value1);
+        return new ScaleExtent3(value0, value1);
       };
     };
-    return ScaleExtent2;
+    return ScaleExtent3;
   })();
 
   // output/PSD3.Internal.Selection.Types/index.js
@@ -14046,24 +14046,24 @@
     return CustomDrag2;
   })();
   var Drag = /* @__PURE__ */ (function() {
-    function Drag2(value0) {
+    function Drag3(value0) {
       this.value0 = value0;
     }
     ;
-    Drag2.create = function(value0) {
-      return new Drag2(value0);
+    Drag3.create = function(value0) {
+      return new Drag3(value0);
     };
-    return Drag2;
+    return Drag3;
   })();
   var Zoom = /* @__PURE__ */ (function() {
-    function Zoom2(value0) {
+    function Zoom3(value0) {
       this.value0 = value0;
     }
     ;
-    Zoom2.create = function(value0) {
-      return new Zoom2(value0);
+    Zoom3.create = function(value0) {
+      return new Zoom3(value0);
     };
-    return Zoom2;
+    return Zoom3;
   })();
   var showOrderingAttribute = {
     show: function(v) {
@@ -14657,7 +14657,7 @@
     var discard115 = discard5(Bind1);
     return function(dictSelectionM) {
       var appendTo6 = appendTo(dictSelectionM);
-      var on3 = on2(dictSelectionM);
+      var on6 = on2(dictSelectionM);
       var setAttributes5 = setAttributes(dictSelectionM);
       var selectUnder4 = selectUnder(dictSelectionM);
       return {
@@ -14668,7 +14668,7 @@
             return bind96(appendTo6(enterSel)(Group.value)(enterAttrsWithTags))(function(nodeEnter) {
               return bind96(appendTo6(nodeEnter)(Circle.value)(attrs.circles))(function() {
                 return bind96(appendTo6(nodeEnter)(Text2.value)(attrs.labels))(function() {
-                  return bind96(on3(nodeEnter)(new Drag(new CustomDrag("spago", simdrag_))))(function() {
+                  return bind96(on6(nodeEnter)(new Drag(new CustomDrag("spago", simdrag_))))(function() {
                     return pure57(nodeEnter);
                   });
                 });
@@ -15347,20 +15347,20 @@
     };
   };
   var modifying = function(dictMonadState) {
-    var $$void13 = $$void(dictMonadState.Monad0().Bind1().Apply0().Functor0());
+    var $$void14 = $$void(dictMonadState.Monad0().Bind1().Apply0().Functor0());
     var modify5 = modify(dictMonadState);
     return function(p2) {
       return function(f) {
-        return $$void13(modify5(over2(p2)(f)));
+        return $$void14(modify5(over2(p2)(f)));
       };
     };
   };
   var assign2 = function(dictMonadState) {
-    var $$void13 = $$void(dictMonadState.Monad0().Bind1().Apply0().Functor0());
+    var $$void14 = $$void(dictMonadState.Monad0().Bind1().Apply0().Functor0());
     var modify5 = modify(dictMonadState);
     return function(p2) {
       return function(b10) {
-        return $$void13(modify5(set(p2)(b10)));
+        return $$void14(modify5(set(p2)(b10)));
       };
     };
   };
@@ -15947,13 +15947,13 @@
         return function(dictSelectionM) {
           var attach6 = attach(dictSelectionM);
           var appendTo6 = appendTo(dictSelectionM);
-          var on3 = on2(dictSelectionM);
+          var on6 = on2(dictSelectionM);
           return bind96(liftEffect55(getWindowWidthHeight))(function(v) {
             return bind96(attach6("div.svg-container"))(function(v1) {
               return bind96(appendTo6(v1)(Svg.value)(svgAttrs(v.value0)(v.value1)))(function(svg2) {
                 return bind96(appendTo6(svg2)(Group.value)([]))(function(inner) {
-                  return bind96(on3(inner)(new Drag(DefaultDrag.value)))(function() {
-                    return bind96(on3(svg2)(new Zoom({
+                  return bind96(on6(inner)(new Drag(DefaultDrag.value)))(function() {
+                    return bind96(on6(svg2)(new Zoom({
                       extent: new ZoomExtent({
                         top: 0,
                         left: 0,
@@ -20489,24 +20489,24 @@
   }
   function onRemove(typename) {
     return function() {
-      var on3 = this.__on;
-      if (!on3) return;
-      for (var j = 0, i2 = -1, m = on3.length, o; j < m; ++j) {
-        if (o = on3[j], (!typename.type || o.type === typename.type) && o.name === typename.name) {
+      var on6 = this.__on;
+      if (!on6) return;
+      for (var j = 0, i2 = -1, m = on6.length, o; j < m; ++j) {
+        if (o = on6[j], (!typename.type || o.type === typename.type) && o.name === typename.name) {
           this.removeEventListener(o.type, o.listener, o.options);
         } else {
-          on3[++i2] = o;
+          on6[++i2] = o;
         }
       }
-      if (++i2) on3.length = i2;
+      if (++i2) on6.length = i2;
       else delete this.__on;
     };
   }
   function onAdd(typename, value18, options2) {
     return function() {
-      var on3 = this.__on, o, listener = contextListener(value18);
-      if (on3) for (var j = 0, m = on3.length; j < m; ++j) {
-        if ((o = on3[j]).type === typename.type && o.name === typename.name) {
+      var on6 = this.__on, o, listener = contextListener(value18);
+      if (on6) for (var j = 0, m = on6.length; j < m; ++j) {
+        if ((o = on6[j]).type === typename.type && o.name === typename.name) {
           this.removeEventListener(o.type, o.listener, o.options);
           this.addEventListener(o.type, o.listener = listener, o.options = options2);
           o.value = value18;
@@ -20515,16 +20515,16 @@
       }
       this.addEventListener(typename.type, listener, options2);
       o = { type: typename.type, name: typename.name, value: value18, listener, options: options2 };
-      if (!on3) this.__on = [o];
-      else on3.push(o);
+      if (!on6) this.__on = [o];
+      else on6.push(o);
     };
   }
   function on_default(typename, value18, options2) {
     var typenames = parseTypenames2(typename + ""), i2, n = typenames.length, t;
     if (arguments.length < 2) {
-      var on3 = this.node().__on;
-      if (on3) for (var j = 0, m = on3.length, o; j < m; ++j) {
-        for (i2 = 0, o = on3[j]; i2 < n; ++i2) {
+      var on6 = this.node().__on;
+      if (on6) for (var j = 0, m = on6.length, o; j < m; ++j) {
+        for (i2 = 0, o = on6[j]; i2 < n; ++i2) {
           if ((t = typenames[i2]).type === o.type && t.name === o.name) {
             return o.value;
           }
@@ -20532,8 +20532,8 @@
       }
       return;
     }
-    on3 = value18 ? onAdd : onRemove;
-    for (i2 = 0; i2 < n; ++i2) this.each(on3(typenames[i2], value18, options2));
+    on6 = value18 ? onAdd : onRemove;
+    for (i2 = 0; i2 < n; ++i2) this.each(on6(typenames[i2], value18, options2));
     return this;
   }
 
@@ -20627,6 +20627,250 @@
   // node_modules/d3-selection/src/select.js
   function select_default2(selector) {
     return typeof selector === "string" ? new Selection([[document.querySelector(selector)]], [document.documentElement]) : new Selection([[selector]], root2);
+  }
+
+  // node_modules/d3-selection/src/sourceEvent.js
+  function sourceEvent_default(event) {
+    let sourceEvent;
+    while (sourceEvent = event.sourceEvent) event = sourceEvent;
+    return event;
+  }
+
+  // node_modules/d3-selection/src/pointer.js
+  function pointer_default(event, node) {
+    event = sourceEvent_default(event);
+    if (node === void 0) node = event.currentTarget;
+    if (node) {
+      var svg2 = node.ownerSVGElement || node;
+      if (svg2.createSVGPoint) {
+        var point = svg2.createSVGPoint();
+        point.x = event.clientX, point.y = event.clientY;
+        point = point.matrixTransform(node.getScreenCTM().inverse());
+        return [point.x, point.y];
+      }
+      if (node.getBoundingClientRect) {
+        var rect = node.getBoundingClientRect();
+        return [event.clientX - rect.left - node.clientLeft, event.clientY - rect.top - node.clientTop];
+      }
+    }
+    return [event.pageX, event.pageY];
+  }
+
+  // node_modules/d3-drag/src/noevent.js
+  var nonpassive = { passive: false };
+  var nonpassivecapture = { capture: true, passive: false };
+  function nopropagation(event) {
+    event.stopImmediatePropagation();
+  }
+  function noevent_default(event) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+
+  // node_modules/d3-drag/src/nodrag.js
+  function nodrag_default(view2) {
+    var root3 = view2.document.documentElement, selection2 = select_default2(view2).on("dragstart.drag", noevent_default, nonpassivecapture);
+    if ("onselectstart" in root3) {
+      selection2.on("selectstart.drag", noevent_default, nonpassivecapture);
+    } else {
+      root3.__noselect = root3.style.MozUserSelect;
+      root3.style.MozUserSelect = "none";
+    }
+  }
+  function yesdrag(view2, noclick) {
+    var root3 = view2.document.documentElement, selection2 = select_default2(view2).on("dragstart.drag", null);
+    if (noclick) {
+      selection2.on("click.drag", noevent_default, nonpassivecapture);
+      setTimeout(function() {
+        selection2.on("click.drag", null);
+      }, 0);
+    }
+    if ("onselectstart" in root3) {
+      selection2.on("selectstart.drag", null);
+    } else {
+      root3.style.MozUserSelect = root3.__noselect;
+      delete root3.__noselect;
+    }
+  }
+
+  // node_modules/d3-drag/src/constant.js
+  var constant_default2 = (x49) => () => x49;
+
+  // node_modules/d3-drag/src/event.js
+  function DragEvent(type2, {
+    sourceEvent,
+    subject,
+    target: target7,
+    identifier,
+    active,
+    x: x49,
+    y: y49,
+    dx,
+    dy: dy4,
+    dispatch: dispatch2
+  }) {
+    Object.defineProperties(this, {
+      type: { value: type2, enumerable: true, configurable: true },
+      sourceEvent: { value: sourceEvent, enumerable: true, configurable: true },
+      subject: { value: subject, enumerable: true, configurable: true },
+      target: { value: target7, enumerable: true, configurable: true },
+      identifier: { value: identifier, enumerable: true, configurable: true },
+      active: { value: active, enumerable: true, configurable: true },
+      x: { value: x49, enumerable: true, configurable: true },
+      y: { value: y49, enumerable: true, configurable: true },
+      dx: { value: dx, enumerable: true, configurable: true },
+      dy: { value: dy4, enumerable: true, configurable: true },
+      _: { value: dispatch2 }
+    });
+  }
+  DragEvent.prototype.on = function() {
+    var value18 = this._.on.apply(this._, arguments);
+    return value18 === this._ ? this : value18;
+  };
+
+  // node_modules/d3-drag/src/drag.js
+  function defaultFilter(event) {
+    return !event.ctrlKey && !event.button;
+  }
+  function defaultContainer() {
+    return this.parentNode;
+  }
+  function defaultSubject(event, d26) {
+    return d26 == null ? { x: event.x, y: event.y } : d26;
+  }
+  function defaultTouchable() {
+    return navigator.maxTouchPoints || "ontouchstart" in this;
+  }
+  function drag_default() {
+    var filter7 = defaultFilter, container = defaultContainer, subject = defaultSubject, touchable = defaultTouchable, gestures = {}, listeners = dispatch_default("start", "drag", "end"), active = 0, mousedownx, mousedowny, mousemoving, touchending, clickDistance2 = 0;
+    function drag2(selection2) {
+      selection2.on("mousedown.drag", mousedowned).filter(touchable).on("touchstart.drag", touchstarted).on("touchmove.drag", touchmoved, nonpassive).on("touchend.drag touchcancel.drag", touchended).style("touch-action", "none").style("-webkit-tap-highlight-color", "rgba(0,0,0,0)");
+    }
+    function mousedowned(event, d26) {
+      if (touchending || !filter7.call(this, event, d26)) return;
+      var gesture = beforestart(this, container.call(this, event, d26), event, d26, "mouse");
+      if (!gesture) return;
+      select_default2(event.view).on("mousemove.drag", mousemoved, nonpassivecapture).on("mouseup.drag", mouseupped, nonpassivecapture);
+      nodrag_default(event.view);
+      nopropagation(event);
+      mousemoving = false;
+      mousedownx = event.clientX;
+      mousedowny = event.clientY;
+      gesture("start", event);
+    }
+    function mousemoved(event) {
+      noevent_default(event);
+      if (!mousemoving) {
+        var dx = event.clientX - mousedownx, dy4 = event.clientY - mousedowny;
+        mousemoving = dx * dx + dy4 * dy4 > clickDistance2;
+      }
+      gestures.mouse("drag", event);
+    }
+    function mouseupped(event) {
+      select_default2(event.view).on("mousemove.drag mouseup.drag", null);
+      yesdrag(event.view, mousemoving);
+      noevent_default(event);
+      gestures.mouse("end", event);
+    }
+    function touchstarted(event, d26) {
+      if (!filter7.call(this, event, d26)) return;
+      var touches = event.changedTouches, c = container.call(this, event, d26), n = touches.length, i2, gesture;
+      for (i2 = 0; i2 < n; ++i2) {
+        if (gesture = beforestart(this, c, event, d26, touches[i2].identifier, touches[i2])) {
+          nopropagation(event);
+          gesture("start", event, touches[i2]);
+        }
+      }
+    }
+    function touchmoved(event) {
+      var touches = event.changedTouches, n = touches.length, i2, gesture;
+      for (i2 = 0; i2 < n; ++i2) {
+        if (gesture = gestures[touches[i2].identifier]) {
+          noevent_default(event);
+          gesture("drag", event, touches[i2]);
+        }
+      }
+    }
+    function touchended(event) {
+      var touches = event.changedTouches, n = touches.length, i2, gesture;
+      if (touchending) clearTimeout(touchending);
+      touchending = setTimeout(function() {
+        touchending = null;
+      }, 500);
+      for (i2 = 0; i2 < n; ++i2) {
+        if (gesture = gestures[touches[i2].identifier]) {
+          nopropagation(event);
+          gesture("end", event, touches[i2]);
+        }
+      }
+    }
+    function beforestart(that, container2, event, d26, identifier, touch) {
+      var dispatch2 = listeners.copy(), p2 = pointer_default(touch || event, container2), dx, dy4, s;
+      if ((s = subject.call(that, new DragEvent("beforestart", {
+        sourceEvent: event,
+        target: drag2,
+        identifier,
+        active,
+        x: p2[0],
+        y: p2[1],
+        dx: 0,
+        dy: 0,
+        dispatch: dispatch2
+      }), d26)) == null) return;
+      dx = s.x - p2[0] || 0;
+      dy4 = s.y - p2[1] || 0;
+      return function gesture(type2, event2, touch2) {
+        var p0 = p2, n;
+        switch (type2) {
+          case "start":
+            gestures[identifier] = gesture, n = active++;
+            break;
+          case "end":
+            delete gestures[identifier], --active;
+          // falls through
+          case "drag":
+            p2 = pointer_default(touch2 || event2, container2), n = active;
+            break;
+        }
+        dispatch2.call(
+          type2,
+          that,
+          new DragEvent(type2, {
+            sourceEvent: event2,
+            subject: s,
+            target: drag2,
+            identifier,
+            active: n,
+            x: p2[0] + dx,
+            y: p2[1] + dy4,
+            dx: p2[0] - p0[0],
+            dy: p2[1] - p0[1],
+            dispatch: dispatch2
+          }),
+          d26
+        );
+      };
+    }
+    drag2.filter = function(_) {
+      return arguments.length ? (filter7 = typeof _ === "function" ? _ : constant_default2(!!_), drag2) : filter7;
+    };
+    drag2.container = function(_) {
+      return arguments.length ? (container = typeof _ === "function" ? _ : constant_default2(_), drag2) : container;
+    };
+    drag2.subject = function(_) {
+      return arguments.length ? (subject = typeof _ === "function" ? _ : constant_default2(_), drag2) : subject;
+    };
+    drag2.touchable = function(_) {
+      return arguments.length ? (touchable = typeof _ === "function" ? _ : constant_default2(!!_), drag2) : touchable;
+    };
+    drag2.on = function() {
+      var value18 = listeners.on.apply(listeners, arguments);
+      return value18 === listeners ? drag2 : value18;
+    };
+    drag2.clickDistance = function(_) {
+      return arguments.length ? (clickDistance2 = (_ = +_) * _, drag2) : Math.sqrt(clickDistance2);
+    };
+    return drag2;
   }
 
   // node_modules/d3-color/src/define.js
@@ -21000,7 +21244,7 @@
   }
 
   // node_modules/d3-interpolate/src/constant.js
-  var constant_default2 = (x49) => () => x49;
+  var constant_default3 = (x49) => () => x49;
 
   // node_modules/d3-interpolate/src/color.js
   function linear(a2, d26) {
@@ -21015,12 +21259,12 @@
   }
   function gamma(y49) {
     return (y49 = +y49) === 1 ? nogamma : function(a2, b10) {
-      return b10 - a2 ? exponential(a2, b10, y49) : constant_default2(isNaN(a2) ? b10 : a2);
+      return b10 - a2 ? exponential(a2, b10, y49) : constant_default3(isNaN(a2) ? b10 : a2);
     };
   }
   function nogamma(a2, b10) {
     var d26 = b10 - a2;
-    return d26 ? linear(a2, d26) : constant_default2(isNaN(a2) ? b10 : a2);
+    return d26 ? linear(a2, d26) : constant_default3(isNaN(a2) ? b10 : a2);
   }
 
   // node_modules/d3-interpolate/src/rgb.js
@@ -21165,7 +21409,7 @@
   // node_modules/d3-interpolate/src/value.js
   function value_default(a2, b10) {
     var t = typeof b10, c;
-    return b10 == null || t === "boolean" ? constant_default2(b10) : (t === "number" ? number_default : t === "string" ? (c = color(b10)) ? (b10 = c, rgb_default) : string_default : b10 instanceof color ? rgb_default : b10 instanceof Date ? date_default : isNumberArray(b10) ? numberArray_default : Array.isArray(b10) ? genericArray : typeof b10.valueOf !== "function" && typeof b10.toString !== "function" || isNaN(b10) ? object_default : number_default)(a2, b10);
+    return b10 == null || t === "boolean" ? constant_default3(b10) : (t === "number" ? number_default : t === "string" ? (c = color(b10)) ? (b10 = c, rgb_default) : string_default : b10 instanceof color ? rgb_default : b10 instanceof Date ? date_default : isNumberArray(b10) ? numberArray_default : Array.isArray(b10) ? genericArray : typeof b10.valueOf !== "function" && typeof b10.toString !== "function" || isNaN(b10) ? object_default : number_default)(a2, b10);
   }
 
   // node_modules/d3-interpolate/src/round.js
@@ -21270,6 +21514,51 @@
   }
   var interpolateTransformCss = interpolateTransform(parseCss, "px, ", "px)", "deg)");
   var interpolateTransformSvg = interpolateTransform(parseSvg, ", ", ")", ")");
+
+  // node_modules/d3-interpolate/src/zoom.js
+  var epsilon2 = 1e-12;
+  function cosh(x49) {
+    return ((x49 = Math.exp(x49)) + 1 / x49) / 2;
+  }
+  function sinh(x49) {
+    return ((x49 = Math.exp(x49)) - 1 / x49) / 2;
+  }
+  function tanh(x49) {
+    return ((x49 = Math.exp(2 * x49)) - 1) / (x49 + 1);
+  }
+  var zoom_default = (function zoomRho(rho, rho2, rho4) {
+    function zoom(p0, p1) {
+      var ux0 = p0[0], uy0 = p0[1], w0 = p0[2], ux1 = p1[0], uy1 = p1[1], w1 = p1[2], dx = ux1 - ux0, dy4 = uy1 - uy0, d26 = dx * dx + dy4 * dy4, i2, S;
+      if (d26 < epsilon2) {
+        S = Math.log(w1 / w0) / rho;
+        i2 = function(t) {
+          return [
+            ux0 + t * dx,
+            uy0 + t * dy4,
+            w0 * Math.exp(rho * t * S)
+          ];
+        };
+      } else {
+        var d1 = Math.sqrt(d26), b02 = (w1 * w1 - w0 * w0 + rho4 * d26) / (2 * w0 * rho2 * d1), b12 = (w1 * w1 - w0 * w0 - rho4 * d26) / (2 * w1 * rho2 * d1), r0 = Math.log(Math.sqrt(b02 * b02 + 1) - b02), r1 = Math.log(Math.sqrt(b12 * b12 + 1) - b12);
+        S = (r1 - r0) / rho;
+        i2 = function(t) {
+          var s = t * S, coshr0 = cosh(r0), u2 = w0 / (rho2 * d1) * (coshr0 * tanh(rho * s + r0) - sinh(r0));
+          return [
+            ux0 + u2 * dx,
+            uy0 + u2 * dy4,
+            w0 * coshr0 / cosh(rho * s + r0)
+          ];
+        };
+      }
+      i2.duration = S * 1e3 * rho / Math.SQRT2;
+      return i2;
+    }
+    zoom.rho = function(_) {
+      var _1 = Math.max(1e-3, +_), _2 = _1 * _1, _4 = _2 * _2;
+      return zoomRho(_1, _2, _4);
+    };
+    return zoom;
+  })(Math.SQRT2, 2, 4);
 
   // node_modules/d3-timer/src/timer.js
   var frame = 0;
@@ -21775,8 +22064,8 @@
   function onFunction(id5, name16, listener) {
     var on0, on1, sit = start3(name16) ? init4 : set4;
     return function() {
-      var schedule = sit(this, id5), on3 = schedule.on;
-      if (on3 !== on0) (on1 = (on0 = on3).copy()).on(name16, listener);
+      var schedule = sit(this, id5), on6 = schedule.on;
+      if (on6 !== on0) (on1 = (on0 = on6).copy()).on(name16, listener);
       schedule.on = on1;
     };
   }
@@ -21870,8 +22159,8 @@
   function styleMaybeRemove(id5, name16) {
     var on0, on1, listener0, key = "style." + name16, event = "end." + key, remove6;
     return function() {
-      var schedule = set4(this, id5), on3 = schedule.on, listener = schedule.value[key] == null ? remove6 || (remove6 = styleRemove2(name16)) : void 0;
-      if (on3 !== on0 || listener0 !== listener) (on1 = (on0 = on3).copy()).on(event, listener0 = listener);
+      var schedule = set4(this, id5), on6 = schedule.on, listener = schedule.value[key] == null ? remove6 || (remove6 = styleRemove2(name16)) : void 0;
+      if (on6 !== on0 || listener0 !== listener) (on1 = (on0 = on6).copy()).on(event, listener0 = listener);
       schedule.on = on1;
     };
   }
@@ -21971,9 +22260,9 @@
         if (--size6 === 0) resolve();
       } };
       that.each(function() {
-        var schedule = set4(this, id5), on3 = schedule.on;
-        if (on3 !== on0) {
-          on1 = (on0 = on3).copy();
+        var schedule = set4(this, id5), on6 = schedule.on;
+        if (on6 !== on0) {
+          on1 = (on0 = on6).copy();
           on1._.cancel.push(cancel);
           on1._.interrupt.push(cancel);
           on1._.end.push(end2);
@@ -22272,8 +22561,8 @@
   // node_modules/d3-path/src/path.js
   var pi3 = Math.PI;
   var tau2 = 2 * pi3;
-  var epsilon2 = 1e-6;
-  var tauEpsilon = tau2 - epsilon2;
+  var epsilon3 = 1e-6;
+  var tauEpsilon = tau2 - epsilon3;
   function Path3() {
     this._x0 = this._y0 = // start of current subpath
     this._x1 = this._y1 = null;
@@ -22308,12 +22597,12 @@
       if (r < 0) throw new Error("negative radius: " + r);
       if (this._x1 === null) {
         this._ += "M" + (this._x1 = x117) + "," + (this._y1 = y115);
-      } else if (!(l01_2 > epsilon2)) ;
-      else if (!(Math.abs(y01 * x214 - y214 * x01) > epsilon2) || !r) {
+      } else if (!(l01_2 > epsilon3)) ;
+      else if (!(Math.abs(y01 * x214 - y214 * x01) > epsilon3) || !r) {
         this._ += "L" + (this._x1 = x117) + "," + (this._y1 = y115);
       } else {
         var x202 = x213 - x0, y202 = y213 - y0, l21_2 = x214 * x214 + y214 * y214, l20_2 = x202 * x202 + y202 * y202, l21 = Math.sqrt(l21_2), l01 = Math.sqrt(l01_2), l = r * Math.tan((pi3 - Math.acos((l21_2 + l01_2 - l20_2) / (2 * l21 * l01))) / 2), t01 = l / l01, t21 = l / l21;
-        if (Math.abs(t01 - 1) > epsilon2) {
+        if (Math.abs(t01 - 1) > epsilon3) {
           this._ += "L" + (x117 + t01 * x01) + "," + (y115 + t01 * y01);
         }
         this._ += "A" + r + "," + r + ",0,0," + +(y01 * x202 > x01 * y202) + "," + (this._x1 = x117 + t21 * x214) + "," + (this._y1 = y115 + t21 * y214);
@@ -22325,14 +22614,14 @@
       if (r < 0) throw new Error("negative radius: " + r);
       if (this._x1 === null) {
         this._ += "M" + x0 + "," + y0;
-      } else if (Math.abs(this._x1 - x0) > epsilon2 || Math.abs(this._y1 - y0) > epsilon2) {
+      } else if (Math.abs(this._x1 - x0) > epsilon3 || Math.abs(this._y1 - y0) > epsilon3) {
         this._ += "L" + x0 + "," + y0;
       }
       if (!r) return;
       if (da < 0) da = da % tau2 + tau2;
       if (da > tauEpsilon) {
         this._ += "A" + r + "," + r + ",0,1," + cw + "," + (x49 - dx) + "," + (y49 - dy4) + "A" + r + "," + r + ",0,1," + cw + "," + (this._x1 = x0) + "," + (this._y1 = y0);
-      } else if (da > epsilon2) {
+      } else if (da > epsilon3) {
         this._ += "A" + r + "," + r + ",0," + +(da >= pi3) + "," + cw + "," + (this._x1 = x49 + r * Math.cos(a1)) + "," + (this._y1 = y49 + r * Math.sin(a1));
       }
     },
@@ -22781,7 +23070,7 @@
   }
 
   // node_modules/d3-shape/src/constant.js
-  function constant_default4(x49) {
+  function constant_default5(x49) {
     return function constant2() {
       return x49;
     };
@@ -22841,9 +23130,9 @@
 
   // node_modules/d3-shape/src/line.js
   function line_default(x49, y49) {
-    var defined = constant_default4(true), context = null, curve = linear_default, output2 = null;
-    x49 = typeof x49 === "function" ? x49 : x49 === void 0 ? x4 : constant_default4(x49);
-    y49 = typeof y49 === "function" ? y49 : y49 === void 0 ? y4 : constant_default4(y49);
+    var defined = constant_default5(true), context = null, curve = linear_default, output2 = null;
+    x49 = typeof x49 === "function" ? x49 : x49 === void 0 ? x4 : constant_default5(x49);
+    y49 = typeof y49 === "function" ? y49 : y49 === void 0 ? y4 : constant_default5(y49);
     function line(data) {
       var i2, n = (data = array_default(data)).length, d26, defined0 = false, buffer;
       if (context == null) output2 = curve(buffer = path_default());
@@ -22857,13 +23146,13 @@
       if (buffer) return output2 = null, buffer + "" || null;
     }
     line.x = function(_) {
-      return arguments.length ? (x49 = typeof _ === "function" ? _ : constant_default4(+_), line) : x49;
+      return arguments.length ? (x49 = typeof _ === "function" ? _ : constant_default5(+_), line) : x49;
     };
     line.y = function(_) {
-      return arguments.length ? (y49 = typeof _ === "function" ? _ : constant_default4(+_), line) : y49;
+      return arguments.length ? (y49 = typeof _ === "function" ? _ : constant_default5(+_), line) : y49;
     };
     line.defined = function(_) {
-      return arguments.length ? (defined = typeof _ === "function" ? _ : constant_default4(!!_), line) : defined;
+      return arguments.length ? (defined = typeof _ === "function" ? _ : constant_default5(!!_), line) : defined;
     };
     line.curve = function(_) {
       return arguments.length ? (curve = _, context != null && (output2 = curve(context)), line) : curve;
@@ -22872,6 +23161,25 @@
       return arguments.length ? (_ == null ? context = output2 = null : output2 = curve(context = _), line) : context;
     };
     return line;
+  }
+
+  // node_modules/d3-zoom/src/constant.js
+  var constant_default6 = (x49) => () => x49;
+
+  // node_modules/d3-zoom/src/event.js
+  function ZoomEvent(type2, {
+    sourceEvent,
+    target: target7,
+    transform: transform3,
+    dispatch: dispatch2
+  }) {
+    Object.defineProperties(this, {
+      type: { value: type2, enumerable: true, configurable: true },
+      sourceEvent: { value: sourceEvent, enumerable: true, configurable: true },
+      target: { value: target7, enumerable: true, configurable: true },
+      transform: { value: transform3, enumerable: true, configurable: true },
+      _: { value: dispatch2 }
+    });
   }
 
   // node_modules/d3-zoom/src/transform.js
@@ -22921,6 +23229,330 @@
   function transform2(node) {
     while (!node.__zoom) if (!(node = node.parentNode)) return identity17;
     return node.__zoom;
+  }
+
+  // node_modules/d3-zoom/src/noevent.js
+  function nopropagation3(event) {
+    event.stopImmediatePropagation();
+  }
+  function noevent_default3(event) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+
+  // node_modules/d3-zoom/src/zoom.js
+  function defaultFilter2(event) {
+    return (!event.ctrlKey || event.type === "wheel") && !event.button;
+  }
+  function defaultExtent() {
+    var e = this;
+    if (e instanceof SVGElement) {
+      e = e.ownerSVGElement || e;
+      if (e.hasAttribute("viewBox")) {
+        e = e.viewBox.baseVal;
+        return [[e.x, e.y], [e.x + e.width, e.y + e.height]];
+      }
+      return [[0, 0], [e.width.baseVal.value, e.height.baseVal.value]];
+    }
+    return [[0, 0], [e.clientWidth, e.clientHeight]];
+  }
+  function defaultTransform() {
+    return this.__zoom || identity17;
+  }
+  function defaultWheelDelta(event) {
+    return -event.deltaY * (event.deltaMode === 1 ? 0.05 : event.deltaMode ? 1 : 2e-3) * (event.ctrlKey ? 10 : 1);
+  }
+  function defaultTouchable2() {
+    return navigator.maxTouchPoints || "ontouchstart" in this;
+  }
+  function defaultConstrain(transform3, extent, translateExtent) {
+    var dx0 = transform3.invertX(extent[0][0]) - translateExtent[0][0], dx1 = transform3.invertX(extent[1][0]) - translateExtent[1][0], dy0 = transform3.invertY(extent[0][1]) - translateExtent[0][1], dy1 = transform3.invertY(extent[1][1]) - translateExtent[1][1];
+    return transform3.translate(
+      dx1 > dx0 ? (dx0 + dx1) / 2 : Math.min(0, dx0) || Math.max(0, dx1),
+      dy1 > dy0 ? (dy0 + dy1) / 2 : Math.min(0, dy0) || Math.max(0, dy1)
+    );
+  }
+  function zoom_default2() {
+    var filter7 = defaultFilter2, extent = defaultExtent, constrain = defaultConstrain, wheelDelta = defaultWheelDelta, touchable = defaultTouchable2, scaleExtent = [0, Infinity], translateExtent = [[-Infinity, -Infinity], [Infinity, Infinity]], duration2 = 250, interpolate = zoom_default, listeners = dispatch_default("start", "zoom", "end"), touchstarting, touchfirst, touchending, touchDelay = 500, wheelDelay = 150, clickDistance2 = 0, tapDistance = 10;
+    function zoom(selection2) {
+      selection2.property("__zoom", defaultTransform).on("wheel.zoom", wheeled, { passive: false }).on("mousedown.zoom", mousedowned).on("dblclick.zoom", dblclicked).filter(touchable).on("touchstart.zoom", touchstarted).on("touchmove.zoom", touchmoved).on("touchend.zoom touchcancel.zoom", touchended).style("-webkit-tap-highlight-color", "rgba(0,0,0,0)");
+    }
+    zoom.transform = function(collection, transform3, point, event) {
+      var selection2 = collection.selection ? collection.selection() : collection;
+      selection2.property("__zoom", defaultTransform);
+      if (collection !== selection2) {
+        schedule(collection, transform3, point, event);
+      } else {
+        selection2.interrupt().each(function() {
+          gesture(this, arguments).event(event).start().zoom(null, typeof transform3 === "function" ? transform3.apply(this, arguments) : transform3).end();
+        });
+      }
+    };
+    zoom.scaleBy = function(selection2, k, p2, event) {
+      zoom.scaleTo(selection2, function() {
+        var k0 = this.__zoom.k, k1 = typeof k === "function" ? k.apply(this, arguments) : k;
+        return k0 * k1;
+      }, p2, event);
+    };
+    zoom.scaleTo = function(selection2, k, p2, event) {
+      zoom.transform(selection2, function() {
+        var e = extent.apply(this, arguments), t0 = this.__zoom, p0 = p2 == null ? centroid(e) : typeof p2 === "function" ? p2.apply(this, arguments) : p2, p1 = t0.invert(p0), k1 = typeof k === "function" ? k.apply(this, arguments) : k;
+        return constrain(translate(scale(t0, k1), p0, p1), e, translateExtent);
+      }, p2, event);
+    };
+    zoom.translateBy = function(selection2, x49, y49, event) {
+      zoom.transform(selection2, function() {
+        return constrain(this.__zoom.translate(
+          typeof x49 === "function" ? x49.apply(this, arguments) : x49,
+          typeof y49 === "function" ? y49.apply(this, arguments) : y49
+        ), extent.apply(this, arguments), translateExtent);
+      }, null, event);
+    };
+    zoom.translateTo = function(selection2, x49, y49, p2, event) {
+      zoom.transform(selection2, function() {
+        var e = extent.apply(this, arguments), t = this.__zoom, p0 = p2 == null ? centroid(e) : typeof p2 === "function" ? p2.apply(this, arguments) : p2;
+        return constrain(identity17.translate(p0[0], p0[1]).scale(t.k).translate(
+          typeof x49 === "function" ? -x49.apply(this, arguments) : -x49,
+          typeof y49 === "function" ? -y49.apply(this, arguments) : -y49
+        ), e, translateExtent);
+      }, p2, event);
+    };
+    function scale(transform3, k) {
+      k = Math.max(scaleExtent[0], Math.min(scaleExtent[1], k));
+      return k === transform3.k ? transform3 : new Transform(k, transform3.x, transform3.y);
+    }
+    function translate(transform3, p0, p1) {
+      var x49 = p0[0] - p1[0] * transform3.k, y49 = p0[1] - p1[1] * transform3.k;
+      return x49 === transform3.x && y49 === transform3.y ? transform3 : new Transform(transform3.k, x49, y49);
+    }
+    function centroid(extent2) {
+      return [(+extent2[0][0] + +extent2[1][0]) / 2, (+extent2[0][1] + +extent2[1][1]) / 2];
+    }
+    function schedule(transition2, transform3, point, event) {
+      transition2.on("start.zoom", function() {
+        gesture(this, arguments).event(event).start();
+      }).on("interrupt.zoom end.zoom", function() {
+        gesture(this, arguments).event(event).end();
+      }).tween("zoom", function() {
+        var that = this, args = arguments, g = gesture(that, args).event(event), e = extent.apply(that, args), p2 = point == null ? centroid(e) : typeof point === "function" ? point.apply(that, args) : point, w = Math.max(e[1][0] - e[0][0], e[1][1] - e[0][1]), a2 = that.__zoom, b10 = typeof transform3 === "function" ? transform3.apply(that, args) : transform3, i2 = interpolate(a2.invert(p2).concat(w / a2.k), b10.invert(p2).concat(w / b10.k));
+        return function(t) {
+          if (t === 1) t = b10;
+          else {
+            var l = i2(t), k = w / l[2];
+            t = new Transform(k, p2[0] - l[0] * k, p2[1] - l[1] * k);
+          }
+          g.zoom(null, t);
+        };
+      });
+    }
+    function gesture(that, args, clean) {
+      return !clean && that.__zooming || new Gesture(that, args);
+    }
+    function Gesture(that, args) {
+      this.that = that;
+      this.args = args;
+      this.active = 0;
+      this.sourceEvent = null;
+      this.extent = extent.apply(that, args);
+      this.taps = 0;
+    }
+    Gesture.prototype = {
+      event: function(event) {
+        if (event) this.sourceEvent = event;
+        return this;
+      },
+      start: function() {
+        if (++this.active === 1) {
+          this.that.__zooming = this;
+          this.emit("start");
+        }
+        return this;
+      },
+      zoom: function(key, transform3) {
+        if (this.mouse && key !== "mouse") this.mouse[1] = transform3.invert(this.mouse[0]);
+        if (this.touch0 && key !== "touch") this.touch0[1] = transform3.invert(this.touch0[0]);
+        if (this.touch1 && key !== "touch") this.touch1[1] = transform3.invert(this.touch1[0]);
+        this.that.__zoom = transform3;
+        this.emit("zoom");
+        return this;
+      },
+      end: function() {
+        if (--this.active === 0) {
+          delete this.that.__zooming;
+          this.emit("end");
+        }
+        return this;
+      },
+      emit: function(type2) {
+        var d26 = select_default2(this.that).datum();
+        listeners.call(
+          type2,
+          this.that,
+          new ZoomEvent(type2, {
+            sourceEvent: this.sourceEvent,
+            target: zoom,
+            type: type2,
+            transform: this.that.__zoom,
+            dispatch: listeners
+          }),
+          d26
+        );
+      }
+    };
+    function wheeled(event, ...args) {
+      if (!filter7.apply(this, arguments)) return;
+      var g = gesture(this, args).event(event), t = this.__zoom, k = Math.max(scaleExtent[0], Math.min(scaleExtent[1], t.k * Math.pow(2, wheelDelta.apply(this, arguments)))), p2 = pointer_default(event);
+      if (g.wheel) {
+        if (g.mouse[0][0] !== p2[0] || g.mouse[0][1] !== p2[1]) {
+          g.mouse[1] = t.invert(g.mouse[0] = p2);
+        }
+        clearTimeout(g.wheel);
+      } else if (t.k === k) return;
+      else {
+        g.mouse = [p2, t.invert(p2)];
+        interrupt_default(this);
+        g.start();
+      }
+      noevent_default3(event);
+      g.wheel = setTimeout(wheelidled, wheelDelay);
+      g.zoom("mouse", constrain(translate(scale(t, k), g.mouse[0], g.mouse[1]), g.extent, translateExtent));
+      function wheelidled() {
+        g.wheel = null;
+        g.end();
+      }
+    }
+    function mousedowned(event, ...args) {
+      if (touchending || !filter7.apply(this, arguments)) return;
+      var currentTarget2 = event.currentTarget, g = gesture(this, args, true).event(event), v = select_default2(event.view).on("mousemove.zoom", mousemoved, true).on("mouseup.zoom", mouseupped, true), p2 = pointer_default(event, currentTarget2), x0 = event.clientX, y0 = event.clientY;
+      nodrag_default(event.view);
+      nopropagation3(event);
+      g.mouse = [p2, this.__zoom.invert(p2)];
+      interrupt_default(this);
+      g.start();
+      function mousemoved(event2) {
+        noevent_default3(event2);
+        if (!g.moved) {
+          var dx = event2.clientX - x0, dy4 = event2.clientY - y0;
+          g.moved = dx * dx + dy4 * dy4 > clickDistance2;
+        }
+        g.event(event2).zoom("mouse", constrain(translate(g.that.__zoom, g.mouse[0] = pointer_default(event2, currentTarget2), g.mouse[1]), g.extent, translateExtent));
+      }
+      function mouseupped(event2) {
+        v.on("mousemove.zoom mouseup.zoom", null);
+        yesdrag(event2.view, g.moved);
+        noevent_default3(event2);
+        g.event(event2).end();
+      }
+    }
+    function dblclicked(event, ...args) {
+      if (!filter7.apply(this, arguments)) return;
+      var t0 = this.__zoom, p0 = pointer_default(event.changedTouches ? event.changedTouches[0] : event, this), p1 = t0.invert(p0), k1 = t0.k * (event.shiftKey ? 0.5 : 2), t1 = constrain(translate(scale(t0, k1), p0, p1), extent.apply(this, args), translateExtent);
+      noevent_default3(event);
+      if (duration2 > 0) select_default2(this).transition().duration(duration2).call(schedule, t1, p0, event);
+      else select_default2(this).call(zoom.transform, t1, p0, event);
+    }
+    function touchstarted(event, ...args) {
+      if (!filter7.apply(this, arguments)) return;
+      var touches = event.touches, n = touches.length, g = gesture(this, args, event.changedTouches.length === n).event(event), started, i2, t, p2;
+      nopropagation3(event);
+      for (i2 = 0; i2 < n; ++i2) {
+        t = touches[i2], p2 = pointer_default(t, this);
+        p2 = [p2, this.__zoom.invert(p2), t.identifier];
+        if (!g.touch0) g.touch0 = p2, started = true, g.taps = 1 + !!touchstarting;
+        else if (!g.touch1 && g.touch0[2] !== p2[2]) g.touch1 = p2, g.taps = 0;
+      }
+      if (touchstarting) touchstarting = clearTimeout(touchstarting);
+      if (started) {
+        if (g.taps < 2) touchfirst = p2[0], touchstarting = setTimeout(function() {
+          touchstarting = null;
+        }, touchDelay);
+        interrupt_default(this);
+        g.start();
+      }
+    }
+    function touchmoved(event, ...args) {
+      if (!this.__zooming) return;
+      var g = gesture(this, args).event(event), touches = event.changedTouches, n = touches.length, i2, t, p2, l;
+      noevent_default3(event);
+      for (i2 = 0; i2 < n; ++i2) {
+        t = touches[i2], p2 = pointer_default(t, this);
+        if (g.touch0 && g.touch0[2] === t.identifier) g.touch0[0] = p2;
+        else if (g.touch1 && g.touch1[2] === t.identifier) g.touch1[0] = p2;
+      }
+      t = g.that.__zoom;
+      if (g.touch1) {
+        var p0 = g.touch0[0], l0 = g.touch0[1], p1 = g.touch1[0], l1 = g.touch1[1], dp = (dp = p1[0] - p0[0]) * dp + (dp = p1[1] - p0[1]) * dp, dl2 = (dl2 = l1[0] - l0[0]) * dl2 + (dl2 = l1[1] - l0[1]) * dl2;
+        t = scale(t, Math.sqrt(dp / dl2));
+        p2 = [(p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2];
+        l = [(l0[0] + l1[0]) / 2, (l0[1] + l1[1]) / 2];
+      } else if (g.touch0) p2 = g.touch0[0], l = g.touch0[1];
+      else return;
+      g.zoom("touch", constrain(translate(t, p2, l), g.extent, translateExtent));
+    }
+    function touchended(event, ...args) {
+      if (!this.__zooming) return;
+      var g = gesture(this, args).event(event), touches = event.changedTouches, n = touches.length, i2, t;
+      nopropagation3(event);
+      if (touchending) clearTimeout(touchending);
+      touchending = setTimeout(function() {
+        touchending = null;
+      }, touchDelay);
+      for (i2 = 0; i2 < n; ++i2) {
+        t = touches[i2];
+        if (g.touch0 && g.touch0[2] === t.identifier) delete g.touch0;
+        else if (g.touch1 && g.touch1[2] === t.identifier) delete g.touch1;
+      }
+      if (g.touch1 && !g.touch0) g.touch0 = g.touch1, delete g.touch1;
+      if (g.touch0) g.touch0[1] = this.__zoom.invert(g.touch0[0]);
+      else {
+        g.end();
+        if (g.taps === 2) {
+          t = pointer_default(t, this);
+          if (Math.hypot(touchfirst[0] - t[0], touchfirst[1] - t[1]) < tapDistance) {
+            var p2 = select_default2(this).on("dblclick.zoom");
+            if (p2) p2.apply(this, arguments);
+          }
+        }
+      }
+    }
+    zoom.wheelDelta = function(_) {
+      return arguments.length ? (wheelDelta = typeof _ === "function" ? _ : constant_default6(+_), zoom) : wheelDelta;
+    };
+    zoom.filter = function(_) {
+      return arguments.length ? (filter7 = typeof _ === "function" ? _ : constant_default6(!!_), zoom) : filter7;
+    };
+    zoom.touchable = function(_) {
+      return arguments.length ? (touchable = typeof _ === "function" ? _ : constant_default6(!!_), zoom) : touchable;
+    };
+    zoom.extent = function(_) {
+      return arguments.length ? (extent = typeof _ === "function" ? _ : constant_default6([[+_[0][0], +_[0][1]], [+_[1][0], +_[1][1]]]), zoom) : extent;
+    };
+    zoom.scaleExtent = function(_) {
+      return arguments.length ? (scaleExtent[0] = +_[0], scaleExtent[1] = +_[1], zoom) : [scaleExtent[0], scaleExtent[1]];
+    };
+    zoom.translateExtent = function(_) {
+      return arguments.length ? (translateExtent[0][0] = +_[0][0], translateExtent[1][0] = +_[1][0], translateExtent[0][1] = +_[0][1], translateExtent[1][1] = +_[1][1], zoom) : [[translateExtent[0][0], translateExtent[0][1]], [translateExtent[1][0], translateExtent[1][1]]];
+    };
+    zoom.constrain = function(_) {
+      return arguments.length ? (constrain = _, zoom) : constrain;
+    };
+    zoom.duration = function(_) {
+      return arguments.length ? (duration2 = +_, zoom) : duration2;
+    };
+    zoom.interpolate = function(_) {
+      return arguments.length ? (interpolate = _, zoom) : interpolate;
+    };
+    zoom.on = function() {
+      var value18 = listeners.on.apply(listeners, arguments);
+      return value18 === listeners ? zoom : value18;
+    };
+    zoom.clickDistance = function(_) {
+      return arguments.length ? (clickDistance2 = (_ = +_) * _, zoom) : Math.sqrt(clickDistance2);
+    };
+    zoom.tapDistance = function(_) {
+      return arguments.length ? (tapDistance = +_, zoom) : tapDistance;
+    };
+    return zoom;
   }
 
   // node_modules/d3-sankey/node_modules/d3-array/src/max.js
@@ -23318,8 +23950,8 @@
   // node_modules/d3-sankey/node_modules/d3-path/src/path.js
   var pi4 = Math.PI;
   var tau3 = 2 * pi4;
-  var epsilon3 = 1e-6;
-  var tauEpsilon2 = tau3 - epsilon3;
+  var epsilon4 = 1e-6;
+  var tauEpsilon2 = tau3 - epsilon4;
   function Path4() {
     this._x0 = this._y0 = // start of current subpath
     this._x1 = this._y1 = null;
@@ -23354,12 +23986,12 @@
       if (r < 0) throw new Error("negative radius: " + r);
       if (this._x1 === null) {
         this._ += "M" + (this._x1 = x117) + "," + (this._y1 = y115);
-      } else if (!(l01_2 > epsilon3)) ;
-      else if (!(Math.abs(y01 * x214 - y214 * x01) > epsilon3) || !r) {
+      } else if (!(l01_2 > epsilon4)) ;
+      else if (!(Math.abs(y01 * x214 - y214 * x01) > epsilon4) || !r) {
         this._ += "L" + (this._x1 = x117) + "," + (this._y1 = y115);
       } else {
         var x202 = x213 - x0, y202 = y213 - y0, l21_2 = x214 * x214 + y214 * y214, l20_2 = x202 * x202 + y202 * y202, l21 = Math.sqrt(l21_2), l01 = Math.sqrt(l01_2), l = r * Math.tan((pi4 - Math.acos((l21_2 + l01_2 - l20_2) / (2 * l21 * l01))) / 2), t01 = l / l01, t21 = l / l21;
-        if (Math.abs(t01 - 1) > epsilon3) {
+        if (Math.abs(t01 - 1) > epsilon4) {
           this._ += "L" + (x117 + t01 * x01) + "," + (y115 + t01 * y01);
         }
         this._ += "A" + r + "," + r + ",0,0," + +(y01 * x202 > x01 * y202) + "," + (this._x1 = x117 + t21 * x214) + "," + (this._y1 = y115 + t21 * y214);
@@ -23371,14 +24003,14 @@
       if (r < 0) throw new Error("negative radius: " + r);
       if (this._x1 === null) {
         this._ += "M" + x0 + "," + y0;
-      } else if (Math.abs(this._x1 - x0) > epsilon3 || Math.abs(this._y1 - y0) > epsilon3) {
+      } else if (Math.abs(this._x1 - x0) > epsilon4 || Math.abs(this._y1 - y0) > epsilon4) {
         this._ += "L" + x0 + "," + y0;
       }
       if (!r) return;
       if (da < 0) da = da % tau3 + tau3;
       if (da > tauEpsilon2) {
         this._ += "A" + r + "," + r + ",0,1," + cw + "," + (x49 - dx) + "," + (y49 - dy4) + "A" + r + "," + r + ",0,1," + cw + "," + (this._x1 = x0) + "," + (this._y1 = y0);
-      } else if (da > epsilon3) {
+      } else if (da > epsilon4) {
         this._ += "A" + r + "," + r + ",0," + +(da >= pi4) + "," + cw + "," + (this._x1 = x49 + r * Math.cos(a1)) + "," + (this._y1 = y49 + r * Math.sin(a1));
       }
     },
@@ -23392,7 +24024,7 @@
   var path_default2 = path2;
 
   // node_modules/d3-sankey/node_modules/d3-shape/src/constant.js
-  function constant_default6(x49) {
+  function constant_default7(x49) {
     return function constant2() {
       return x49;
     };
@@ -23431,10 +24063,10 @@
       return arguments.length ? (target7 = _, link4) : target7;
     };
     link4.x = function(_) {
-      return arguments.length ? (x49 = typeof _ === "function" ? _ : constant_default6(+_), link4) : x49;
+      return arguments.length ? (x49 = typeof _ === "function" ? _ : constant_default7(+_), link4) : x49;
     };
     link4.y = function(_) {
-      return arguments.length ? (y49 = typeof _ === "function" ? _ : constant_default6(+_), link4) : y49;
+      return arguments.length ? (y49 = typeof _ === "function" ? _ : constant_default7(+_), link4) : y49;
     };
     link4.context = function(_) {
       return arguments.length ? (context = _ == null ? null : _, link4) : context;
@@ -28538,13 +29170,13 @@
     var pure57 = pure(Monad0.Applicative0());
     return function(dictSelectionM) {
       var appendTo6 = appendTo(dictSelectionM);
-      var on3 = on2(dictSelectionM);
+      var on6 = on2(dictSelectionM);
       return function(root3) {
         return function(config) {
           return bind96(appendTo6(root3)(Svg.value)([viewBox(config.minX)(config.minY)(config.width)(config.height), classed13(config.svgClass)]))(function(svg2) {
             return bind96(appendTo6(svg2)(Group.value)([classed13(config.innerClass)]))(function(zoomGroup) {
-              return bind96(on3(zoomGroup)(new Drag(DefaultDrag.value)))(function() {
-                return bind96(on3(svg2)(new Zoom({
+              return bind96(on6(zoomGroup)(new Drag(DefaultDrag.value)))(function() {
+                return bind96(on6(svg2)(new Zoom({
                   extent: DefaultZoomExtent.value,
                   scale: new ScaleExtent(config.scaleMin, config.scaleMax),
                   name: "zoom",
@@ -29915,7 +30547,7 @@
           var simpleJoin4 = simpleJoin(SelectionM1);
           var setAttributes5 = setAttributes(SelectionM1);
           var addTickFunction4 = addTickFunction(dictSimulationM2);
-          var on3 = on2(SelectionM1);
+          var on6 = on2(SelectionM1);
           var start9 = start2(SimulationM1);
           return function(forceLibrary6) {
             return function(activeForces) {
@@ -29976,7 +30608,7 @@
                                         }), y24(function(d26) {
                                           return d26.target.y;
                                         })])))(function() {
-                                          return bind96(on3(nodesSelection)(new Drag(new CustomDrag("lesmis", simdrag_))))(function() {
+                                          return bind96(on6(nodesSelection)(new Drag(new CustomDrag("lesmis", simdrag_))))(function() {
                                             return discard115(start9)(function() {
                                               return pure57(unit);
                                             });
@@ -30134,7 +30766,7 @@
     var pure57 = pure(dictMonad.Applicative0());
     return function(dictSelectionM) {
       var appendTo6 = appendTo(dictSelectionM);
-      var on3 = on2(dictSelectionM);
+      var on6 = on2(dictSelectionM);
       var setAttributes5 = setAttributes(dictSelectionM);
       return {
         onNodeEnter: function(enterSel) {
@@ -30142,7 +30774,7 @@
             return bind96(appendTo6(enterSel)(Circle.value)([radius13(attrs.nodeRadius), fill17(function(d26) {
               return d3SchemeCategory10N_(toNumber(d26.group));
             }), strokeColor17(attrs.nodeStrokeColor), strokeOpacity3(attrs.nodeStrokeWidth), classed21("enter")]))(function(nodeEnter) {
-              return bind96(on3(nodeEnter)(new Drag(new CustomDrag("lesmis", simdrag_))))(function() {
+              return bind96(on6(nodeEnter)(new Drag(new CustomDrag("lesmis", simdrag_))))(function() {
                 return pure57(nodeEnter);
               });
             });
@@ -30312,7 +30944,7 @@
           var simpleJoin4 = simpleJoin(SelectionM1);
           var setAttributes5 = setAttributes(SelectionM1);
           var addTickFunction4 = addTickFunction(dictSimulationM2);
-          var on3 = on2(SelectionM1);
+          var on6 = on2(SelectionM1);
           var start9 = start2(SimulationM1);
           return function(forceLibrary6) {
             return function(activeForces) {
@@ -30385,7 +31017,7 @@
                                           }), y26(function(d26) {
                                             return d26.target.y;
                                           })])))(function() {
-                                            return bind96(on3(nodesSelection)(new Drag(new CustomDrag("lesmis", simdrag_))))(function() {
+                                            return bind96(on6(nodesSelection)(new Drag(new CustomDrag("lesmis", simdrag_))))(function() {
                                               return discard115(start9)(function() {
                                                 return pure57({
                                                   nodes: new Just(nodesGroup),
@@ -31160,12 +31792,12 @@
     };
   };
   var tryPlaceCircle = /* @__PURE__ */ tryPlaceCircleWithLimit(100);
-  var epsilon4 = 1e-9;
+  var epsilon5 = 1e-9;
   var enclosesWeak = function(a2) {
     return function(b10) {
       var dy4 = b10.y - a2.y;
       var dx = b10.x - a2.x;
-      var dr = a2.r - b10.r + max12(a2.r)(max12(b10.r)(1)) * epsilon4;
+      var dr = a2.r - b10.r + max12(a2.r)(max12(b10.r)(1)) * epsilon5;
       return dr > 0 && dr * dr > dx * dx + dy4 * dy4;
     };
   };
@@ -35626,6 +36258,9 @@
   var remove3 = function(dict) {
     return dict.remove;
   };
+  var on3 = function(dict) {
+    return dict.on;
+  };
   var joinData = function(dict) {
     return dict.joinData;
   };
@@ -35665,6 +36300,81 @@
       };
     };
   }
+
+  // output/PSD3v2.Behavior.FFI/foreign.js
+  function attachZoom_(element3) {
+    return (scaleMin) => (scaleMax) => (targetSelector) => () => {
+      const selection2 = select_default2(element3);
+      const target7 = selection2.select(targetSelector);
+      function zoomed(event) {
+        target7.attr("transform", event.transform);
+      }
+      const zoom = zoom_default2().scaleExtent([scaleMin, scaleMax]).on("zoom", zoomed);
+      selection2.call(zoom);
+      return element3;
+    };
+  }
+  function attachDrag_(element3) {
+    return () => () => {
+      const selection2 = select_default2(element3);
+      let transform3 = { x: 0, y: 0 };
+      function dragstarted(event) {
+        select_default2(this).raise();
+      }
+      function dragged(event) {
+        transform3.x += event.dx;
+        transform3.y += event.dy;
+        select_default2(this).attr("transform", `translate(${transform3.x},${transform3.y})`);
+      }
+      const drag2 = drag_default().on("start", dragstarted).on("drag", dragged);
+      selection2.call(drag2);
+      return element3;
+    };
+  }
+
+  // output/PSD3v2.Behavior.Types/index.js
+  var ScaleExtent2 = /* @__PURE__ */ (function() {
+    function ScaleExtent3(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    ScaleExtent3.create = function(value0) {
+      return function(value1) {
+        return new ScaleExtent3(value0, value1);
+      };
+    };
+    return ScaleExtent3;
+  })();
+  var Zoom2 = /* @__PURE__ */ (function() {
+    function Zoom3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Zoom3.create = function(value0) {
+      return new Zoom3(value0);
+    };
+    return Zoom3;
+  })();
+  var Drag2 = /* @__PURE__ */ (function() {
+    function Drag3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Drag3.create = function(value0) {
+      return new Drag3(value0);
+    };
+    return Drag3;
+  })();
+  var defaultZoom = function(scaleExtent) {
+    return function(targetSelector) {
+      return {
+        scaleExtent,
+        targetSelector
+      };
+    };
+  };
+  var defaultDrag = {};
 
   // output/PSD3v2.Selection.Join/index.js
   var unsafeIndex2 = /* @__PURE__ */ unsafeIndex();
@@ -35892,13 +36602,14 @@
   var pure32 = /* @__PURE__ */ pure(applicativeEffect);
   var traverse_11 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableArray);
   var traverse4 = /* @__PURE__ */ traverse(traversableArray)(applicativeEffect);
+  var $$void10 = /* @__PURE__ */ $$void(functorEffect);
+  var discard36 = /* @__PURE__ */ discard(discardUnit);
   var append118 = /* @__PURE__ */ append(semigroupArray);
   var mapFlipped8 = /* @__PURE__ */ mapFlipped(functorMaybe);
   var compare17 = /* @__PURE__ */ compare(ordInt);
   var mapFlipped1 = /* @__PURE__ */ mapFlipped(functorArray);
   var show45 = /* @__PURE__ */ show(showNumber);
   var show124 = /* @__PURE__ */ show(showBoolean);
-  var discard36 = /* @__PURE__ */ discard(discardUnit);
   var traverseWithIndex_2 = /* @__PURE__ */ traverseWithIndex_(applicativeEffect)(foldableWithIndexArray);
   var unsafeIndex3 = /* @__PURE__ */ unsafeIndex();
   var traverseWithIndex2 = /* @__PURE__ */ traverseWithIndex(traversableWithIndexArray)(applicativeEffect);
@@ -35924,7 +36635,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 64, column 3 - line 72, column 8): " + [maybeElement.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 67, column 3 - line 75, column 8): " + [maybeElement.constructor.name]);
       });
     };
   };
@@ -35937,7 +36648,7 @@
             return v.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 244, column 36 - line 245, column 32): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 247, column 36 - line 248, column 32): " + [v.constructor.name]);
         })();
         return traverse_11(function(element3) {
           var node = toNode2(element3);
@@ -35951,7 +36662,7 @@
               return unit;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 249, column 5 - line 251, column 27): " + [maybeParent.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 252, column 5 - line 254, column 27): " + [maybeParent.constructor.name]);
           };
         })(v1.elements);
       })());
@@ -35972,6 +36683,47 @@
       };
     };
   };
+  var on4 = function(behavior) {
+    return function(v) {
+      var getElements = function(v1) {
+        if (v1 instanceof EmptySelection) {
+          return v1.value0.parentElements;
+        }
+        ;
+        if (v1 instanceof BoundSelection) {
+          return v1.value0.elements;
+        }
+        ;
+        if (v1 instanceof PendingSelection) {
+          return v1.value0.parentElements;
+        }
+        ;
+        if (v1 instanceof ExitingSelection) {
+          return v1.value0.elements;
+        }
+        ;
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 545, column 5 - line 545, column 61): " + [v1.constructor.name]);
+      };
+      var applyBehavior = function(v1) {
+        return function(v2) {
+          if (v1 instanceof Zoom2) {
+            return $$void10(attachZoom_(v2)(v1.value0.scaleExtent.value0)(v1.value0.scaleExtent.value1)(v1.value0.targetSelector));
+          }
+          ;
+          if (v1 instanceof Drag2) {
+            return $$void10(attachDrag_(v2)(unit));
+          }
+          ;
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 552, column 5 - line 552, column 56): " + [v1.constructor.name, v2.constructor.name]);
+        };
+      };
+      var elements = getElements(v);
+      return function __do5() {
+        traverse_11(applyBehavior(behavior))(elements)();
+        return v;
+      };
+    };
+  };
   var merge = function(dictMonadEffect) {
     var pure122 = pure(dictMonadEffect.Monad0().Applicative0());
     return function(v) {
@@ -35981,14 +36733,14 @@
             return v.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 313, column 70 - line 314, column 30): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 316, column 70 - line 317, column 30): " + [v.constructor.name]);
         })();
         var v3 = (function() {
           if (v1 instanceof BoundSelection) {
             return v1.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 315, column 55 - line 316, column 30): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 318, column 55 - line 319, column 30): " + [v1.constructor.name]);
         })();
         return pure122(new BoundSelection({
           elements: append118(v2.elements)(v3.elements),
@@ -36014,7 +36766,7 @@
                     return v.value0;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 346, column 57 - line 347, column 30): " + [v.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 349, column 57 - line 350, column 30): " + [v.constructor.name]);
                 })();
                 return function __do5() {
                   var existingElements = querySelectorAllElements(selector)(v1.parentElements)();
@@ -36109,7 +36861,7 @@
       return pure32(v.value0.document);
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 481, column 1 - line 481, column 82): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 484, column 1 - line 484, column 82): " + [v.constructor.name]);
   };
   var selectAll = function(dictMonadEffect) {
     var liftEffect55 = liftEffect(dictMonadEffect);
@@ -36134,7 +36886,7 @@
               return querySelectorAllElements(selector)(v.value0.elements)();
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 93, column 15 - line 101, column 50): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 96, column 15 - line 104, column 50): " + [v.constructor.name]);
           })();
           return new EmptySelection({
             parentElements: elements,
@@ -36182,7 +36934,7 @@
         return createElement2("span")(doc);
       }
       ;
-      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 491, column 3 - line 502, column 46): " + [elemType.constructor.name]);
+      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 494, column 3 - line 505, column 46): " + [elemType.constructor.name]);
     };
   };
   var attributeValueToString = function(v) {
@@ -36198,7 +36950,7 @@
       return show124(v.value0);
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 539, column 1 - line 539, column 51): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 579, column 1 - line 579, column 51): " + [v.constructor.name]);
   };
   var applyAttributes = function(element3) {
     return function(datum2) {
@@ -36206,8 +36958,8 @@
         return function(attrs) {
           return traverse_11(function(attr3) {
             if (attr3 instanceof StaticAttr) {
-              var $157 = attr3.value0 === "textContent";
-              if ($157) {
+              var $181 = attr3.value0 === "textContent";
+              if ($181) {
                 return setTextContent_(attributeValueToString(attr3.value1))(element3);
               }
               ;
@@ -36216,8 +36968,8 @@
             ;
             if (attr3 instanceof DataAttr) {
               var val = attributeValueToString(attr3.value1(datum2));
-              var $160 = attr3.value0 === "textContent";
-              if ($160) {
+              var $184 = attr3.value0 === "textContent";
+              if ($184) {
                 return setTextContent_(val)(element3);
               }
               ;
@@ -36226,15 +36978,15 @@
             ;
             if (attr3 instanceof IndexedAttr) {
               var val = attributeValueToString(attr3.value1(datum2)(index5));
-              var $163 = attr3.value0 === "textContent";
-              if ($163) {
+              var $187 = attr3.value0 === "textContent";
+              if ($187) {
                 return setTextContent_(val)(element3);
               }
               ;
               return setAttribute2(attr3.value0)(val)(element3);
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 521, column 30 - line 537, column 54): " + [attr3.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 561, column 30 - line 577, column 54): " + [attr3.constructor.name]);
           })(attrs);
         };
       };
@@ -36273,7 +37025,7 @@
               return v.value0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 183, column 78 - line 184, column 30): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 186, column 78 - line 187, column 30): " + [v.constructor.name]);
           })();
           var paired = zipWith(Tuple.create)(v1.data)(v1.elements);
           return function __do5() {
@@ -36288,7 +37040,7 @@
                     return arrayIndex;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 188, column 24 - line 190, column 32): " + [v1.indices.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 191, column 24 - line 193, column 32): " + [v1.indices.constructor.name]);
                 })();
                 return applyAttributes(v2.value1)(v2.value0)(logicalIndex)(attrs);
               };
@@ -36314,7 +37066,7 @@
               return v.value0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 216, column 69 - line 217, column 32): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 219, column 69 - line 220, column 32): " + [v.constructor.name]);
           })();
           var paired = zipWith(Tuple.create)(v1.data)(v1.elements);
           return function __do5() {
@@ -36344,7 +37096,7 @@
                 return v.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 276, column 57 - line 277, column 30): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 279, column 57 - line 280, column 30): " + [v.constructor.name]);
             })();
             return function __do5() {
               var elements = traverse4(function(parent2) {
@@ -36378,7 +37130,7 @@
                 return v.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 130, column 79 - line 131, column 32): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 133, column 79 - line 134, column 32): " + [v.constructor.name]);
             })();
             var parent2 = (function() {
               var v2 = head(v1.parentElements);
@@ -36390,7 +37142,7 @@
                 return unsafeIndex3(v1.parentElements)(0);
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 135, column 16 - line 137, column 70): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 138, column 16 - line 140, column 70): " + [v2.constructor.name]);
             })();
             return function __do5() {
               var elements = traverseWithIndex2(function(arrayIndex) {
@@ -36404,7 +37156,7 @@
                       return arrayIndex;
                     }
                     ;
-                    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 141, column 24 - line 143, column 32): " + [v1.indices.constructor.name]);
+                    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 144, column 24 - line 146, column 32): " + [v1.indices.constructor.name]);
                   })();
                   return function __do6() {
                     var element3 = createElementWithNS(elemType)(v1.document)();
@@ -36461,7 +37213,7 @@
                             return applyPerDatumAttrs1(enterAttrs2.value0)(bound);
                           }
                           ;
-                          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 436, column 5 - line 438, column 55): " + [enterAttrs2.constructor.name]);
+                          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 439, column 5 - line 441, column 55): " + [enterAttrs2.constructor.name]);
                         }))(function(enterBound) {
                           return bind123((function() {
                             if (updateAttrs2 instanceof Nothing) {
@@ -36472,7 +37224,7 @@
                               return applyPerDatumAttrs1(updateAttrs2.value0)(v.value0.update);
                             }
                             ;
-                            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 441, column 18 - line 443, column 54): " + [updateAttrs2.constructor.name]);
+                            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 444, column 18 - line 446, column 54): " + [updateAttrs2.constructor.name]);
                           })())(function(updateBound) {
                             return discard217((function() {
                               if (exitAttrs instanceof Nothing) {
@@ -36485,7 +37237,7 @@
                                 });
                               }
                               ;
-                              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 446, column 3 - line 450, column 18): " + [exitAttrs.constructor.name]);
+                              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 449, column 3 - line 453, column 18): " + [exitAttrs.constructor.name]);
                             })())(function() {
                               return merge1(enterBound)(updateBound);
                             });
@@ -37135,6 +37887,14 @@
         });
       };
     },
+    on: function(behavior) {
+      return function(v) {
+        return liftEffect9(function __do5() {
+          var result = on4(behavior)(v)();
+          return result;
+        });
+      };
+    },
     Monad0: function() {
       return monadD3v2SimM;
     }
@@ -37246,6 +38006,14 @@
         };
       };
     },
+    on: function(behavior) {
+      return function(v) {
+        return function __do5() {
+          var result = on4(behavior)(v)();
+          return result;
+        };
+      };
+    },
     Monad0: function() {
       return monadD3v2M;
     }
@@ -37280,7 +38048,7 @@
       return show125(v.value0);
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 215, column 1 - line 215, column 51): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 219, column 1 - line 219, column 51): " + [v.constructor.name]);
   };
   var transitionMD3v2Selection_ = {
     withTransition: function(config) {
@@ -37291,7 +38059,7 @@
               return v.value0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 150, column 65 - line 151, column 44): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 154, column 65 - line 155, column 44): " + [v.constructor.name]);
           })();
           var paired = zipWith(function(d26) {
             return function(e) {
@@ -37312,7 +38080,7 @@
                   return arrayIndex;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 160, column 26 - line 162, column 34): " + [v1.indices.constructor.name]);
+                throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 164, column 26 - line 166, column 34): " + [v1.indices.constructor.name]);
               })();
               return function __do5() {
                 var transition2 = createTransition_(config.duration)(maybeMillisecondsToNullable(config.delay))(maybeEasingToNullable(config.easing))(v2.element)();
@@ -37329,7 +38097,7 @@
                     return transitionSetAttribute_(attr3.value0)(attributeValueToString2(attr3.value1(v2.datum)(logicalIndex)))(transition2);
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 172, column 34 - line 180, column 112): " + [attr3.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 176, column 34 - line 184, column 112): " + [attr3.constructor.name]);
                 })(attrs)();
               };
             };
@@ -37345,7 +38113,7 @@
               return v.value0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 184, column 56 - line 185, column 46): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 188, column 56 - line 189, column 46): " + [v.constructor.name]);
           })();
           var paired = zipWith(function(d26) {
             return function(e) {
@@ -37372,7 +38140,7 @@
                     return transitionSetAttribute_(attr3.value0)(attributeValueToString2(attr3.value1(v2.datum)(index5)))(transition2);
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 201, column 34 - line 209, column 105): " + [attr3.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 205, column 34 - line 213, column 105): " + [attr3.constructor.name]);
                 })(attrs)();
                 return transitionRemove_(transition2)();
               };
@@ -37401,7 +38169,7 @@
             return setAttributeSync_(attr3.value0)(attributeValueToString2(attr3.value1(datum2)(index5)))(element3);
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 334, column 47 - line 342, column 76): " + [attr3.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 342, column 47 - line 350, column 76): " + [attr3.constructor.name]);
         };
       };
     };
@@ -37412,21 +38180,21 @@
         return new Tuple(view(_name4)(f), f);
       }));
       return discard211(modify_6(function(state3) {
-        var $297 = {};
-        for (var $298 in state3) {
-          if ({}.hasOwnProperty.call(state3, $298)) {
-            $297[$298] = state3[$298];
+        var $303 = {};
+        for (var $304 in state3) {
+          if ({}.hasOwnProperty.call(state3, $304)) {
+            $303[$304] = state3[$304];
           }
           ;
         }
         ;
-        $297.simulation = set((function() {
-          var $332 = prop7($$Proxy.value)(strongFn);
-          return function($333) {
-            return _Newtype4($332($333));
+        $303.simulation = set((function() {
+          var $338 = prop7($$Proxy.value)(strongFn);
+          return function($339) {
+            return _Newtype4($338($339));
           };
         })())(forcesMap)(state3.simulation);
-        return $297;
+        return $303;
       }))(function() {
         return bind110(simulationSetNodes3(config.nodes))(function(nodesInSim) {
           return discard211(simulationActualizeForces3(config.activeForces))(function() {
@@ -37442,7 +38210,7 @@
                               return v.value1.value0.value0;
                             }
                             ;
-                            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 384, column 71 - line 385, column 50): " + [v.value1.value0.constructor.name]);
+                            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 392, column 71 - line 393, column 50): " + [v.value1.value0.constructor.name]);
                           })();
                           var makeTick = function(v2) {
                             var paired = zipWith(function(d26) {
@@ -37464,7 +38232,7 @@
                                     return arrayIndex;
                                   }
                                   ;
-                                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 391, column 46 - line 393, column 54): " + [v1.indices.constructor.name]);
+                                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 399, column 46 - line 401, column 54): " + [v1.indices.constructor.name]);
                                 })();
                                 var v5 = mapFlipped9(v.value1.value1)(function(attr3) {
                                   return applyAttributeSync(v4.element)(v4.datum)(logicalIndex)(attr3);
@@ -37499,7 +38267,7 @@
               return v.value0.value0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 409, column 65 - line 410, column 44): " + [v.value0.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 417, column 65 - line 418, column 44): " + [v.value0.constructor.name]);
           })();
           var makeTick = function(v2) {
             var paired = zipWith(function(d26) {
@@ -37521,7 +38289,7 @@
                     return arrayIndex;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 416, column 40 - line 418, column 48): " + [v1.indices.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 424, column 40 - line 426, column 48): " + [v1.indices.constructor.name]);
                 })();
                 var v5 = mapFlipped9(v.value1)(function(attr3) {
                   return applyAttributeSync(v4.element)(v4.datum)(logicalIndex)(attr3);
@@ -38687,7 +39455,7 @@
   var runWithD3_Simulation3 = /* @__PURE__ */ runWithD3_Simulation(bindHalogenM)(monadStateHalogenM);
   var drawSimplified3 = /* @__PURE__ */ drawSimplified(bindD3SimM)(monadEffD3SimM)(monadStateD3SimM)(simulationM2D3Selection_D);
   var log4 = /* @__PURE__ */ log3(monadEffectEffect);
-  var $$void10 = /* @__PURE__ */ $$void(functorD3SimM);
+  var $$void11 = /* @__PURE__ */ $$void(functorD3SimM);
   var drawSimplified1 = /* @__PURE__ */ drawSimplified2(bindD3SimM)(monadEffD3SimM)(monadStateD3SimM)(simulationM2D3Selection_D);
   var drawTopologicalSort2 = /* @__PURE__ */ drawTopologicalSort(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var draw182 = /* @__PURE__ */ draw17(bindD3M)(monadEffD3M)(d3TaglessD3M);
@@ -39517,7 +40285,7 @@
                 })())(function() {
                   var forcesArray = [forces.manyBodyNeg, forces.collision, forces.center, forces.links];
                   var activeForces = fromFoldable121(["many body negative", "collision", "center", linksForceName_]);
-                  return discard110(runWithD3_Simulation1($$void10(drawSimplified1(forcesArray)(activeForces)(graph)("#example-viz"))))(function() {
+                  return discard110(runWithD3_Simulation1($$void11(drawSimplified1(forcesArray)(activeForces)(graph)("#example-viz"))))(function() {
                     return discard110(modify_7(function(v1) {
                       var $258 = {};
                       for (var $259 in v1) {
@@ -41199,6 +41967,7 @@
   var show56 = /* @__PURE__ */ show(showNumber);
   var id_5 = /* @__PURE__ */ id_(toAttrStringString);
   var class_5 = /* @__PURE__ */ class_2(toAttrStringString);
+  var on5 = /* @__PURE__ */ on3(selectionMD3v2Selection_D);
   var init6 = /* @__PURE__ */ init5(simulationMD3v2Selection_);
   var joinData4 = /* @__PURE__ */ joinData(selectionMD3v2Selection_D)(foldableArray);
   var append120 = /* @__PURE__ */ append24(selectionMD3v2Selection_D);
@@ -41277,69 +42046,75 @@
           return bind42(liftEffect11(getWindowWidthHeight))(function(v) {
             return bind42(select8(containerSelector))(function(container) {
               return bind42(appendChild5(SVG.value)([width27(v.value0), height27(v.value1), viewBox6(show56(-v.value0 / 2) + (" " + (show56(-v.value1 / 2) + (" " + (show56(v.value0) + (" " + show56(v.value1))))))), id_5("lesmis-v2-svg"), class_5("lesmis-v2")])(container))(function(svg2) {
-                return bind42(appendChild5(Group2.value)([id_5("links"), class_5("links")])(svg2))(function(linksGroup) {
-                  return bind42(appendChild5(Group2.value)([id_5("nodes"), class_5("nodes")])(svg2))(function(nodesGroup) {
-                    return bind42(init6({
-                      nodes: model.nodes,
-                      links: model.links,
-                      forces: forcesArray,
-                      activeForces,
-                      config: {
-                        alpha: 1,
-                        alphaTarget: 0,
-                        alphaMin: 1e-3,
-                        alphaDecay: 0.0228,
-                        velocityDecay: 0.4
-                      },
-                      keyFn: keyIsID_,
-                      ticks: empty2
-                    }))(function(v1) {
-                      var indexedLinks = mapWithIndex3(function(i2) {
-                        return function(link4) {
-                          return {
-                            index: i2,
-                            link: link4
-                          };
-                        };
-                      })(v1.links);
-                      return bind42(joinData22(indexedLinks)("line")(linksGroup))(function(v2) {
-                        return bind42(append120(Line2.value)([x115(function(v3) {
-                          return v3.link.source.x;
-                        }), y113(function(v3) {
-                          return v3.link.source.y;
-                        }), x211(function(v3) {
-                          return v3.link.target.x;
-                        }), y211(function(v3) {
-                          return v3.link.target.y;
-                        }), strokeWidth34(function(v3) {
-                          return sqrt(v3.link.value);
-                        }), stroke3(function(v3) {
-                          return d3SchemeCategory10N_(toNumber(v3.link.target.group));
-                        })])(v2.value0.enter))(function(linkLines) {
-                          return bind42(joinData1(v1.nodes)("circle")(nodesGroup))(function(v3) {
-                            return bind42(append120(Circle2.value)([cx25(function(v4) {
-                              return v4.x;
-                            }), cy26(function(v4) {
-                              return v4.y;
-                            }), radius29(5), fill40(function(v4) {
-                              return d3SchemeCategory10N_(toNumber(v4.group));
-                            }), stroke1("#fff"), strokeWidth1(2)])(v3.value0.enter))(function(nodeCircles) {
-                              return discard47(addTickFunction3("nodes")(new Step4(nodeCircles, [cx25(function(v4) {
-                                return v4.x;
-                              }), cy26(function(v4) {
-                                return v4.y;
-                              })])))(function() {
-                                return discard47(addTickFunction3("links")(new Step4(linkLines, [x115(function(v4) {
-                                  return v4.link.source.x;
-                                }), y113(function(v4) {
-                                  return v4.link.source.y;
-                                }), x211(function(v4) {
-                                  return v4.link.target.x;
-                                }), y211(function(v4) {
-                                  return v4.link.target.y;
-                                })])))(function() {
-                                  return discard47(start7)(function() {
-                                    return pure35(unit);
+                return bind42(appendChild5(Group2.value)([id_5("zoom-group"), class_5("zoom-group")])(svg2))(function(zoomGroup) {
+                  return bind42(on5(new Drag2(defaultDrag))(zoomGroup))(function() {
+                    return bind42(on5(new Zoom2(defaultZoom(new ScaleExtent2(0.5, 4))("#zoom-group")))(svg2))(function() {
+                      return bind42(appendChild5(Group2.value)([id_5("links"), class_5("links")])(zoomGroup))(function(linksGroup) {
+                        return bind42(appendChild5(Group2.value)([id_5("nodes"), class_5("nodes")])(zoomGroup))(function(nodesGroup) {
+                          return bind42(init6({
+                            nodes: model.nodes,
+                            links: model.links,
+                            forces: forcesArray,
+                            activeForces,
+                            config: {
+                              alpha: 1,
+                              alphaTarget: 0,
+                              alphaMin: 1e-3,
+                              alphaDecay: 0.0228,
+                              velocityDecay: 0.4
+                            },
+                            keyFn: keyIsID_,
+                            ticks: empty2
+                          }))(function(v1) {
+                            var indexedLinks = mapWithIndex3(function(i2) {
+                              return function(link4) {
+                                return {
+                                  index: i2,
+                                  link: link4
+                                };
+                              };
+                            })(v1.links);
+                            return bind42(joinData22(indexedLinks)("line")(linksGroup))(function(v2) {
+                              return bind42(append120(Line2.value)([x115(function(v3) {
+                                return v3.link.source.x;
+                              }), y113(function(v3) {
+                                return v3.link.source.y;
+                              }), x211(function(v3) {
+                                return v3.link.target.x;
+                              }), y211(function(v3) {
+                                return v3.link.target.y;
+                              }), strokeWidth34(function(v3) {
+                                return sqrt(v3.link.value);
+                              }), stroke3(function(v3) {
+                                return d3SchemeCategory10N_(toNumber(v3.link.target.group));
+                              })])(v2.value0.enter))(function(linkLines) {
+                                return bind42(joinData1(v1.nodes)("circle")(nodesGroup))(function(v3) {
+                                  return bind42(append120(Circle2.value)([cx25(function(v4) {
+                                    return v4.x;
+                                  }), cy26(function(v4) {
+                                    return v4.y;
+                                  }), radius29(5), fill40(function(v4) {
+                                    return d3SchemeCategory10N_(toNumber(v4.group));
+                                  }), stroke1("#fff"), strokeWidth1(2)])(v3.value0.enter))(function(nodeCircles) {
+                                    return discard47(addTickFunction3("nodes")(new Step4(nodeCircles, [cx25(function(v4) {
+                                      return v4.x;
+                                    }), cy26(function(v4) {
+                                      return v4.y;
+                                    })])))(function() {
+                                      return discard47(addTickFunction3("links")(new Step4(linkLines, [x115(function(v4) {
+                                        return v4.link.source.x;
+                                      }), y113(function(v4) {
+                                        return v4.link.source.y;
+                                      }), x211(function(v4) {
+                                        return v4.link.target.x;
+                                      }), y211(function(v4) {
+                                        return v4.link.target.y;
+                                      })])))(function() {
+                                        return discard47(start7)(function() {
+                                          return pure35(unit);
+                                        });
+                                      });
+                                    });
                                   });
                                 });
                               });
@@ -42922,7 +43697,7 @@
   var evalEffectSimulation3 = /* @__PURE__ */ evalEffectSimulation(bindHalogenM)(monadStateHalogenM);
   var start8 = /* @__PURE__ */ start2(simulationMD3Selection_D3);
   var discard51 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var $$void11 = /* @__PURE__ */ $$void(functorHalogenM);
+  var $$void12 = /* @__PURE__ */ $$void(functorHalogenM);
   var assign3 = /* @__PURE__ */ assign2(monadStateHalogenM);
   var _eventListener2 = /* @__PURE__ */ _eventListener(strongFn);
   var initialize6 = /* @__PURE__ */ initialize5(bindD3SimM)(monadEffD3SimM)(simulationM2D3Selection_D);
@@ -42966,7 +43741,7 @@
     return function(v) {
       if (v instanceof Initialize8) {
         return bind46(liftEffect112(create3))(function(v12) {
-          return discard51($$void11(subscribe2(v12.emitter)))(function() {
+          return discard51($$void12(subscribe2(v12.emitter)))(function() {
             return discard51(assign3(_eventListener2)(new Just(v12.listener)))(function() {
               return bind46(evalEffectSimulation1(initialize6))(function(selections) {
                 return discard51(assign3(_openSelections2)(new Just(selections)))(function() {
@@ -52441,7 +53216,7 @@ graph TB
   var draw34 = /* @__PURE__ */ draw33(d3TaglessD3M);
   var get16 = /* @__PURE__ */ get(monadStateHalogenM);
   var when6 = /* @__PURE__ */ when(applicativeHalogenM);
-  var $$void12 = /* @__PURE__ */ $$void(functorHalogenM);
+  var $$void13 = /* @__PURE__ */ $$void(functorHalogenM);
   var forever3 = /* @__PURE__ */ forever(monadRecAff);
   var discard216 = /* @__PURE__ */ discard97(bindAff);
   var liftEffect52 = /* @__PURE__ */ liftEffect(monadEffectAff);
@@ -52584,7 +53359,7 @@ graph TB
                       $76.animationSubscriptionId = new Just(subscriptionId);
                       return $76;
                     }))(function() {
-                      return $$void12(liftAff37(forkAff(forever3(discard216(delay(intervalMs))(function() {
+                      return $$void13(liftAff37(forkAff(forever3(discard216(delay(intervalMs))(function() {
                         return liftEffect52(notify(v1.listener)(Tick.value));
                       })))));
                     });
