@@ -26,6 +26,7 @@ package:
     - halogen-svg-elems
     - halogen-vdom
     - html-parser-halogen
+    - indexed-monad
     - integers
     - lists
     - maybe

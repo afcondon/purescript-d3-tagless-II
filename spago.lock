@@ -29,6 +29,7 @@
             "halogen-svg-elems",
             "halogen-vdom",
             "html-parser-halogen",
+            "indexed-monad",
             "integers",
             "lists",
             "maybe",
@@ -94,6 +95,7 @@
             "html-parser-halogen",
             "http-methods",
             "identity",
+            "indexed-monad",
             "integers",
             "invariant",
             "js-date",
@@ -1280,6 +1282,15 @@
         "invariant",
         "newtype",
         "prelude"
+      ]
+    },
+    "indexed-monad": {
+      "type": "registry",
+      "version": "3.0.0",
+      "integrity": "sha256-N8yYLH7iRVnsprSAusJ369pUprXJo9gN9xM5XXSB+bM=",
+      "dependencies": [
+        "control",
+        "newtype"
       ]
     },
     "integers": {
