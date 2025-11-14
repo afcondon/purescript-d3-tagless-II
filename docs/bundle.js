@@ -40564,8 +40564,8 @@
           var treeConfig = {
             minSeparation: defaultTreeConfig.minSeparation,
             size: {
-              width: 800,
-              height: 600
+              width: 1200,
+              height: 900
             }
           };
           var positioned = wrapTree(treeWithSorting(treeConfig)(unwrapTree(sampleTree)));
@@ -40573,7 +40573,7 @@
           var links = makeLinks10(positioned);
           return discard115(liftEffect53(log2("AnimatedTreeV2: Initial render with " + (show129(length3(nodes)) + " nodes"))))(function() {
             return bind122(select8(containerSelector))(function(container) {
-              return bind122(appendChild5(SVG.value)([id_3("animated-tree-v2-svg"), width25(800), height25(600), viewBox4("0 0 1200 900"), class_3("animated-tree-v2")])(container))(function(svg2) {
+              return bind122(appendChild5(SVG.value)([id_3("animated-tree-v2-svg"), width25(1200), height25(900), viewBox4("0 0 1200 900"), class_3("animated-tree-v2")])(container))(function(svg2) {
                 return bind122(appendChild5(Group2.value)([id_3("animated-tree-v2-links"), class_3("links")])(svg2))(function(linksGroup) {
                   return bind122(appendChild5(Group2.value)([id_3("animated-tree-v2-nodes"), class_3("nodes")])(svg2))(function(nodesGroup) {
                     return bind122(joinData1(links)("path")(linksGroup))(function(v) {

@@ -150,8 +150,8 @@ initializeAnimatedTree :: forall m sel. SelectionM sel m => MonadEffect m => Str
 initializeAnimatedTree containerSelector = do
   liftEffect $ log "AnimatedTreeV2: Initializing with tree layout"
 
-  let chartWidth = 800.0
-  let chartHeight = 600.0
+  let chartWidth = 1200.0
+  let chartHeight = 900.0
 
   -- Apply Tree layout to sample data
   let treeConfig = defaultTreeConfig { size = { width: chartWidth, height: chartHeight } }
