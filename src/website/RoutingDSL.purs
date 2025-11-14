@@ -49,6 +49,7 @@ routes =
   <|> codeAtlas
   <|> fpFtw
   <|> examplesGallery
+  <|> psd3v2Examples
   <|> example        -- Must come after examplesGallery (more specific)
   <|> acknowledgements
   <|> rootRedirect
@@ -186,6 +187,10 @@ fpFtw = FpFtw <$ lit "fp-ftw" <* end
 examplesGallery :: Match Route
 examplesGallery = ExamplesGallery <$ lit "examples" <* end
 
+-- | Match: /psd3v2
+psd3v2Examples :: Match Route
+psd3v2Examples = PSD3v2Examples <$ lit "psd3v2" <* end
+
 -- | Match: /example/:exampleId
 example :: Match Route
 example = Example <$> (lit "example" *> str) <* end
@@ -235,6 +240,7 @@ routeToPath WealthHealth = "/wealth-health"
 routeToPath CodeAtlas = "/code-atlas"
 routeToPath FpFtw = "/fp-ftw"
 routeToPath ExamplesGallery = "/examples"
+routeToPath PSD3v2Examples = "/psd3v2"
 routeToPath (Example exampleId) = "/example/" <> exampleId
 routeToPath Acknowledgements = "/acknowledgements"
 routeToPath NotFound = "/not-found"
