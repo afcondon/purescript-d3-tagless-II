@@ -1,11 +1,14 @@
 module PSD3v2.Behavior.FFI
   ( attachZoom_
-  , attachDrag_
+  , attachSimpleDrag_
+  , attachSimulationDrag_
   ) where
 
 import Prelude
 
+import Data.Nullable (Nullable)
 import Effect (Effect)
+import PSD3.Internal.Types (D3Simulation_)
 import Web.DOM.Element (Element)
 
 -- | Attach zoom behavior to a DOM element
@@ -24,14 +27,26 @@ foreign import attachZoom_
   -> String
   -> Effect Element
 
--- | Attach drag behavior to a DOM element
+-- | Attach simple drag behavior to a DOM element
 -- |
--- | Parameters:
--- | - element: The DOM element to attach drag to
--- | - unit: Unit placeholder for curried application
--- |
+-- | Enables dragging with transform translation.
 -- | Returns the element for chaining.
-foreign import attachDrag_
+foreign import attachSimpleDrag_
   :: Element
   -> Unit
+  -> Effect Element
+
+-- | Attach simulation-aware drag behavior to a DOM element
+-- |
+-- | Enables dragging with force simulation reheat.
+-- | When dragging:
+-- | - Dragstart: Sets fx/fy fixed positions, reheats simulation
+-- | - Drag: Updates fx/fy to follow mouse
+-- | - Dragend: Clears fx/fy, cools simulation
+-- |
+-- | Returns the element for chaining.
+foreign import attachSimulationDrag_
+  :: Element
+  -> Nullable D3Simulation_
+  -> String  -- Label for drag event namespace
   -> Effect Element

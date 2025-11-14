@@ -29,3 +29,9 @@ export function setTextContent_(text) {
     };
   };
 }
+
+// Extract D3 simulation handle from simulation state
+// Returns null if not initialized
+export function getSimulationHandle_(simState) {
+  return simState.simulation || null;
+}

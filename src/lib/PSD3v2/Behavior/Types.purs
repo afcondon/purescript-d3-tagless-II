@@ -4,6 +4,7 @@ module PSD3v2.Behavior.Types
   , DragConfig(..)
   , ScaleExtent(..)
   , defaultDrag
+  , simulationDrag
   , defaultZoom
   ) where
 
@@ -50,20 +51,23 @@ instance Show ZoomConfig where
 
 -- | Drag behavior configuration
 -- |
--- | Currently just a marker type for default drag behavior.
--- | Future: Could add filter functions, container constraints, etc.
-newtype DragConfig = DragConfig {}
+-- | - `SimpleDrag`: Basic dragging with transform
+-- | - `SimulationDrag`: Drag with force simulation reheat (for force-directed graphs)
+data DragConfig
+  = SimpleDrag
+  | SimulationDrag String  -- Simulation ID for accessing D3SimulationState_
 
 derive instance Eq DragConfig
 derive instance Ord DragConfig
 
 instance Show DragConfig where
-  show (DragConfig _) = "DragConfig {}"
+  show SimpleDrag = "SimpleDrag"
+  show (SimulationDrag id) = "SimulationDrag " <> show id
 
 -- | Behaviors that can be attached to selections
 -- |
 -- | - `Zoom`: Pan and zoom with mouse/touch
--- | - `Drag`: Drag elements with mouse/touch
+-- | - `Drag`: Drag elements with mouse/touch (simple or simulation-aware)
 data Behavior
   = Zoom ZoomConfig
   | Drag DragConfig
@@ -77,9 +81,23 @@ instance Show Behavior where
 
 -- | Default drag configuration
 -- |
--- | Enables drag on the element with default D3 settings.
+-- | Enables simple drag on the element with default D3 settings.
 defaultDrag :: DragConfig
-defaultDrag = DragConfig {}
+defaultDrag = SimpleDrag
+
+-- | Simulation-aware drag configuration
+-- |
+-- | Enables drag with force simulation reheat.
+-- | When dragging starts, simulation alpha is increased to reheat.
+-- | When dragging ends, simulation cools back down.
+-- |
+-- | Example:
+-- | ```purescript
+-- | nodeCircles <- append Circle [...] nodeEnter
+-- | _ <- on (Drag $ simulationDrag "lesmis") nodeCircles
+-- | ```
+simulationDrag :: String -> DragConfig
+simulationDrag = SimulationDrag
 
 -- | Default zoom configuration
 -- |

@@ -10,6 +10,7 @@ module PSD3v2.Selection.Operations
   , joinData
   , renderData
   , on
+  , onWithSimulation
   ) where
 
 import Prelude
@@ -18,7 +19,7 @@ import Data.Array as Array
 import Data.Foldable (class Foldable, traverse_)
 import Data.FoldableWithIndex (traverseWithIndex_)
 import Data.Maybe (Maybe(..))
-import Data.Nullable (Nullable, toMaybe)
+import Data.Nullable (Nullable, toMaybe, toNullable)
 import Data.Traversable (traverse)
 import Data.TraversableWithIndex (traverseWithIndex)
 import Data.Tuple (Tuple(..))
@@ -26,6 +27,8 @@ import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Partial.Unsafe (unsafePartial)
 import Unsafe.Coerce (unsafeCoerce)
+import PSD3.Internal.Simulation.Types (D3SimulationState_)
+import PSD3.Internal.Types (D3Simulation_)
 import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..))
 import PSD3v2.Behavior.Types (Behavior(..), DragConfig(..), ZoomConfig(..), ScaleExtent(..))
 import PSD3v2.Behavior.FFI as BehaviorFFI
@@ -552,8 +555,58 @@ on behavior selection@(Selection impl) = do
     applyBehavior :: Behavior -> Element -> Effect Unit
     applyBehavior (Zoom (ZoomConfig { scaleExtent: ScaleExtent scaleMin scaleMax, targetSelector })) element =
       void $ BehaviorFFI.attachZoom_ element scaleMin scaleMax targetSelector
-    applyBehavior (Drag (DragConfig _)) element =
-      void $ BehaviorFFI.attachDrag_ element unit
+    applyBehavior (Drag SimpleDrag) element =
+      void $ BehaviorFFI.attachSimpleDrag_ element unit
+    applyBehavior (Drag (SimulationDrag _)) _ =
+      -- Simulation drag requires simulation handle, which is only available in D3v2SimM
+      -- This case should not be reached when calling from D3v2M
+      pure unit
+
+-- | Attach a behavior with simulation access (for SimulationDrag)
+-- |
+-- | Works like `on` but also takes a simulation state for drag reheat.
+-- | Use this from D3v2SimM when you need simulation-aware dragging.
+-- |
+-- | Example:
+-- | ```purescript
+-- | nodeCircles <- append Circle [...] nodeEnter
+-- | onWithSimulation (Drag $ simulationDrag "lesmis") simState nodeCircles
+-- | ```
+onWithSimulation :: forall state elem datum d. Behavior -> D3SimulationState_ d -> Selection state elem datum -> Effect (Selection state elem datum)
+onWithSimulation behavior simState selection@(Selection impl) = do
+  -- Extract elements from the selection
+  let elements = getElements impl
+
+  -- Apply the behavior to each element
+  traverse_ (applyBehaviorWithSim behavior simState) elements
+
+  -- Return selection unchanged
+  pure selection
+  where
+    -- Extract elements from any selection type
+    getElements :: SelectionImpl elem datum -> Array Element
+    getElements (EmptySelection { parentElements }) = parentElements
+    getElements (BoundSelection { elements: els }) = els
+    getElements (PendingSelection { parentElements }) = parentElements
+    getElements (ExitingSelection { elements: els }) = els
+
+    -- Apply behavior to a single element with simulation access
+    applyBehaviorWithSim :: Behavior -> D3SimulationState_ d -> Element -> Effect Unit
+    applyBehaviorWithSim (Zoom (ZoomConfig { scaleExtent: ScaleExtent scaleMin scaleMax, targetSelector })) _ element =
+      void $ BehaviorFFI.attachZoom_ element scaleMin scaleMax targetSelector
+    applyBehaviorWithSim (Drag SimpleDrag) _ element =
+      void $ BehaviorFFI.attachSimpleDrag_ element unit
+    applyBehaviorWithSim (Drag (SimulationDrag label)) simSt element =
+      -- Extract D3Simulation_ handle from simulation state
+      let simHandle = getSimulationHandle simSt
+      in void $ BehaviorFFI.attachSimulationDrag_ element (toNullable simHandle) label
+
+-- | Extract D3 simulation handle from simulation state
+-- | Returns Nothing if simulation is not initialized
+foreign import getSimulationHandle_ :: forall d. D3SimulationState_ d -> Nullable D3Simulation_
+
+getSimulationHandle :: forall d. D3SimulationState_ d -> Maybe D3Simulation_
+getSimulationHandle = toMaybe <<< getSimulationHandle_
 
 -- | Apply attributes to an element
 applyAttributes :: forall datum. Element -> datum -> Int -> Array (Attribute datum) -> Effect Unit

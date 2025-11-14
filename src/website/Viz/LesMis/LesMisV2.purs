@@ -24,7 +24,7 @@ import PSD3.Internal.Simulation.Types (D3SimulationState_, Force)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
 import PSD3.Internal.FFI (keyIsID_)
 import PSD3v2.Attribute.Types (cx, cy, fill, radius, stroke, strokeWidth, x1, x2, y1, y2, id_, class_, width, height, viewBox)
-import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom, ScaleExtent(..))
+import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom, simulationDrag, ScaleExtent(..))
 import PSD3v2.Capabilities.Selection (select, appendChild, joinData, append, on)
 import PSD3v2.Capabilities.Simulation (init, addTickFunction, start, Step(..))
 import PSD3v2.Interpreter.D3v2 (D3v2SimM, D3v2Selection_)
@@ -138,6 +138,9 @@ drawLesMisV2 forcesArray activeForces model containerSelector = do
     , strokeWidth 2.0
     ]
     nodeEnter
+
+  -- Attach simulation drag to node circles (enables dragging with reheat)
+  _ <- on (Drag $ simulationDrag "lesmis") nodeCircles
 
   -- Add tick functions to update positions
   addTickFunction "nodes" $ Step nodeCircles

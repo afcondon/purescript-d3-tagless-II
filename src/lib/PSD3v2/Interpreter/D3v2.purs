@@ -10,7 +10,7 @@ module PSD3v2.Interpreter.D3v2
 
 import Prelude
 
-import Control.Monad.State (class MonadState, StateT, runStateT, evalStateT, execStateT, modify_)
+import Control.Monad.State (class MonadState, StateT, runStateT, evalStateT, execStateT, modify_, get)
 import Data.Array as Array
 import Data.FoldableWithIndex (traverseWithIndex_)
 import Data.Maybe (Maybe(..))
@@ -272,8 +272,11 @@ instance SelectionM D3v2Selection_ (D3v2SimM row d) where
     merged <- Ops.merge sel1 sel2
     pure $ D3v2Selection_ merged
 
-  on behavior (D3v2Selection_ selection) = liftEffect $ do
-    result <- Ops.on behavior selection
+  on behavior (D3v2Selection_ selection) = do
+    -- Get simulation state from StateT context
+    state <- get
+    -- Call onWithSimulation with the simulation state
+    result <- liftEffect $ Ops.onWithSimulation behavior state.simulation selection
     pure $ D3v2Selection_ result
 
 -- | TransitionM instance for D3v2SimM
