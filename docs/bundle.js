@@ -39076,7 +39076,7 @@
     return Initialize63;
   })();
   var renderExample = function(v) {
-    return div2([classes(["example-card"])])([h3([classes(["example-title"])])([text5(v.title)]), p([classes(["example-description"])])([text5(v.description)]), div2([id2(v.id), classes(["example-viz"])])([])]);
+    return div2([classes(["example-card"])])([h3([classes(["example-title"])])([text5(v.title)]), p([classes(["example-description"])])([text5(v.description)]), div2([classes(["example-viz-container"])])([element2("svg")([id2(v.id), attr2("width")("400"), attr2("height")("150"), classes(["example-viz"])])([])])]);
   };
   var render13 = function(v) {
     return div2([classes(["psd3v2-examples-page"])])([div2([classes(["page-header"])])([h1_([text5("PSD3v2 Examples")]), p([classes(["page-description"])])([text5("Type-safe D3 visualizations using phantom types and tagless final architecture")])]), div2([classes(["examples-grid"])])([renderExample({

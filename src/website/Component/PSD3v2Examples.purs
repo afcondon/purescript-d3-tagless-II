@@ -59,10 +59,17 @@ renderExample { id, title, description } =
         [ HP.classes [ HH.ClassName "example-description" ] ]
         [ HH.text description ]
     , HH.div
-        [ HP.id id
-        , HP.classes [ HH.ClassName "example-viz" ]
+        [ HP.classes [ HH.ClassName "example-viz-container" ]
         ]
-        []
+        [ -- Embed SVG directly for PSD3v2 to use
+          HH.element (HH.ElemName "svg")
+            [ HP.id id
+            , HP.attr (HH.AttrName "width") "400"
+            , HP.attr (HH.AttrName "height") "150"
+            , HP.classes [ HH.ClassName "example-viz" ]
+            ]
+            []
+        ]
     ]
 
 handleAction :: forall output m. MonadAff m => Action -> H.HalogenM State Action () output m Unit
