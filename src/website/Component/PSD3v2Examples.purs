@@ -20,19 +20,28 @@ import D3.Viz.ThreeLittleCirclesV2 as ThreeLittleCirclesV2
 import D3.Viz.ThreeLittleCirclesTransitionV2 as ThreeLittleCirclesTransitionV2
 import D3.Viz.GUPV2 as GUPV2
 import D3.Viz.TreeVizV2 as TreeVizV2
+import D3.Viz.AnimatedTreeV2 as AnimatedTreeV2
+import D3.Viz.AnimatedTreeV2 (LayoutType(..))
 import PSD3v2.Interpreter.D3v2 as D3v2
 import Halogen.HTML.Events as HE
 
-type State = { gupInitialized :: Boolean }
+type State =
+  { gupInitialized :: Boolean
+  , treeLayout :: LayoutType
+  }
 
 data Action
   = Initialize
   | UpdateGUPRandom
+  | ToggleTreeLayout
 
 component :: forall query input output m. MonadAff m => H.Component query input output m
 component =
   H.mkComponent
-    { initialState: \_ -> { gupInitialized: false }
+    { initialState: \_ ->
+        { gupInitialized: false
+        , treeLayout: TreeLayout
+        }
     , render
     , eval: H.mkEval $ H.defaultEval
         { handleAction = handleAction
@@ -69,7 +78,33 @@ render _ =
             , title: "Tree Layout"
             , description: "Reingold-Tilford tree layout algorithm (non-animating)"
             }
+        , renderAnimatedTreeExample
         ]
+    ]
+
+renderAnimatedTreeExample :: forall m. HH.HTML m Action
+renderAnimatedTreeExample =
+  HH.div
+    [ HP.classes [ HH.ClassName "example-card" ] ]
+    [ HH.h3
+        [ HP.classes [ HH.ClassName "example-title" ] ]
+        [ HH.text "Animated Tree / Cluster" ]
+    , HH.p
+        [ HP.classes [ HH.ClassName "example-description" ] ]
+        [ HH.text "Toggle between Tree (Reingold-Tilford) and Cluster (Dendrogram) layouts. Click button to switch with animated transition." ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "gup-controls" ] ]
+        [ HH.button
+            [ HP.classes [ HH.ClassName "gup-button" ]
+            , HE.onClick \_ -> ToggleTreeLayout
+            ]
+            [ HH.text "Toggle Layout" ]
+        ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "example-viz-container" ]
+        , HP.id "animated-tree-v2"
+        ]
+        []
     ]
 
 renderGUPExample :: forall m. HH.HTML m Action
@@ -154,6 +189,9 @@ handleAction = case _ of
     -- Render Tree V2 (non-animating)
     H.liftEffect $ D3v2.runD3v2M $ TreeVizV2.drawTree "#tree-v2"
 
+    -- Render Animated Tree V2 (initialize with tree layout)
+    H.liftEffect $ D3v2.runD3v2M $ AnimatedTreeV2.initializeAnimatedTree "#animated-tree-v2"
+
     H.modify_ _ { gupInitialized = true }
 
     pure unit
@@ -164,3 +202,12 @@ handleAction = case _ of
       randomText <- generateRandomLetters
       log $ "GUP: New text = " <> randomText
       H.liftEffect $ D3v2.runD3v2M $ GUPV2.updateText "#letter-group" randomText
+
+  ToggleTreeLayout -> do
+    state <- H.get
+    let newLayout = case state.treeLayout of
+          TreeLayout -> ClusterLayout
+          ClusterLayout -> TreeLayout
+    log $ "Toggling tree layout to: " <> show newLayout
+    H.modify_ _ { treeLayout = newLayout }
+    H.liftEffect $ D3v2.runD3v2M $ AnimatedTreeV2.updateTreeLayout newLayout
