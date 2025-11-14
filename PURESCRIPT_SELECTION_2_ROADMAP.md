@@ -1,20 +1,43 @@
 # PureScript Selection 2.0 - Implementation Roadmap
 
 **Branch:** `purescript-selection-2`
-**Status:** Design complete, ready for implementation
+**Status:** Phase 1 complete, ready for Phase 2
 **Target:** Proof of concept with Three Little Circles
 
-## Phase 1: Core Types (Start Here)
+## Architecture Overview
 
-### 1.1 Selection Types with Phantom States
+PSD3v2 is the **implementation layer** for interpreters, not a replacement for tagless final:
+
+```
+User Viz Code (uses type class constraints)
+    ↓
+SelectionM, HierarchicalM, etc. (capabilities)
+    ↓
+Interpreter Instances (D3v2, String, Meta, Music)
+    ↓
+PSD3v2.Selection.Operations (renderData, joinData, etc.)
+    ↓
+DOM / String / Meta structure
+```
+
+**Key insight:** We're building the primitives that the D3v2 interpreter will delegate to. Other interpreters (String, Meta) will be reworked to align with these patterns.
+
+## Phase 1: Core Types ✅ COMPLETE
+
+### 1.1 Selection Types with Phantom States ✅
 **File:** `src/lib/PSD3v2/Selection/Types.purs`
 
+**Status:** Implemented and building cleanly
+
 ```purescript
--- Selection state phantom types
-data SelectionState = Empty | Bound | Pending | Exiting
+-- Selection state phantom types (uninhabited types)
+data SEmpty    -- No data bound
+data SBound    -- Data bound to elements
+data SPending  -- Data waiting for elements (enter)
+data SExiting  -- Elements to be removed (exit)
 
 -- Main selection type
-newtype Selection (state :: SelectionState) (parent :: Type) (datum :: Type)
+newtype Selection (state :: Type) (parent :: Type) (datum :: Type)
   = Selection (SelectionImpl parent datum)
 
 -- Internal implementation (not exported)
@@ -46,8 +69,10 @@ data JoinResult parent datum = JoinResult
   }
 ```
 
-### 1.2 Pure Join Algorithm
+### 1.2 Pure Join Algorithm ✅
 **File:** `src/lib/PSD3v2/Selection/Join.purs`
+
+**Status:** Implemented with O(n+m) complexity using Map
 
 ```purescript
 -- Core join algorithm (pure!)
@@ -71,8 +96,10 @@ computeJoin
 - Property: Keys match correctly
 - Property: Order preservation
 
-### 1.3 Attribute Types
+### 1.3 Attribute Types ✅
 **File:** `src/lib/PSD3v2/Attribute/Types.purs`
+
+**Status:** Implemented with 20+ smart constructors
 
 ```purescript
 -- Attribute with datum phantom type
@@ -280,16 +307,130 @@ Each type should have Pursuit-ready documentation explaining:
 - **Current Selection:** `src/lib/PSD3/Capabilities/Selection.purs`
 - **Current D3 Interpreter:** `src/lib/PSD3/Interpreter/D3.purs`
 
-## Next Steps After Phase 1-3
+## Phase 4: Tagless Final Integration
+
+### 4.1 Revise Capability Type Classes
+**File:** `src/lib/PSD3v2/Capabilities/Selection.purs`
+
+Redesign `SelectionM` to align with PSD3v2 patterns:
+
+```purescript
+class SelectionM sel m | m -> sel where
+  -- High-level user-friendly API
+  renderData
+    :: forall f parent datum
+     . Foldable f
+    => Ord datum
+    => ElementType
+    -> f datum
+    -> String
+    -> sel SEmpty parent datum
+    -> Maybe (datum -> Array (Attribute datum))  -- Enter
+    -> Maybe (datum -> Array (Attribute datum))  -- Update
+    -> Maybe (datum -> Array (Attribute datum))  -- Exit
+    -> m (sel SBound Element datum)
+
+  -- Low-level power user API
+  joinData
+    :: forall f parent datum
+     . Foldable f
+    => Ord datum
+    -> f datum
+    -> String
+    -> sel SEmpty parent datum
+    -> m (JoinResult parent datum)
+
+  append
+    :: forall parent datum
+     . ElementType
+    -> Array (Attribute datum)
+    -> sel SPending parent datum
+    -> m (sel SBound Element datum)
+
+  setAttrs
+    :: forall datum
+     . Array (Attribute datum)
+    -> sel SBound Element datum
+    -> m (sel SBound Element datum)
+
+  remove
+    :: forall datum
+     . sel SExiting Element datum
+    -> m Unit
+
+  merge
+    :: forall datum
+     . sel SBound Element datum
+    -> sel SBound Element datum
+    -> m (sel SBound Element datum)
+```
+
+### 4.2 Implement D3v2 Interpreter
+**File:** `src/lib/PSD3v2/Interpreter/D3v2.purs`
+
+Create interpreter that delegates to PSD3v2.Selection.Operations:
+
+```purescript
+newtype D3v2Selection_ (state :: Type) (parent :: Type) (datum :: Type)
+  = D3v2Selection_ (Selection state parent datum)
+
+instance SelectionM D3v2Selection_ Effect where
+  renderData elemType foldableData selector emptySelection enterAttrs updateAttrs exitAttrs = do
+    -- Unwrap, delegate to PSD3v2 primitive, re-wrap
+    let Selection impl = unwrap emptySelection
+    result <- PSD3v2Ops.renderData elemType foldableData selector (Selection impl) enterAttrs updateAttrs exitAttrs
+    pure $ D3v2Selection_ result
+
+  -- ... similar for other operations
+```
+
+### 4.3 Port String Interpreter
+**File:** `src/lib/PSD3v2/Interpreter/String.purs`
+
+Rework to align with new patterns:
+- `renderData` generates HTML strings directly from data
+- Phantom types ensure type safety even in string generation
+- No DOM operations needed
+
+### 4.4 Port Meta Interpreter
+**File:** `src/lib/PSD3v2/Interpreter/Meta.purs`
+
+Rework to track operations:
+- Record what operations were called
+- Track phantom type transitions
+- Enable visualization of the data flow
+
+## Phase 5: Migration and Examples
+
+### 5.1 Port Three Little Circles
+**File:** `src/website/Viz/ThreeLittleCirclesV2.purs`
+
+Use D3v2 interpreter via type class constraints.
+
+### 5.2 Port GUP Example
+**File:** `src/website/Viz/GUPv2.purs`
+
+Test the full enter-update-exit cycle with real interactions.
+
+### 5.3 Create Migration Guide
+**File:** `MIGRATION_TO_V2.md`
+
+Document:
+- What changed and why
+- How to update existing code
+- Side-by-side examples (old vs new)
+- Benefits of the new approach
+
+## Next Steps After Phase 1-5
 
 1. Get feedback on API ergonomics
-2. Port more examples (bar chart, GUP)
-3. Add transitions
-4. Add event handling
-5. Consider FRP integration
+2. Port more examples (bar chart, hierarchies)
+3. Add transitions (Phase 6)
+4. Add event handling (Phase 7)
+5. FRP integration for composition
 6. Performance optimization
-7. Documentation and examples
-8. Migration guide from PSD3 v1
+7. Comprehensive documentation
+8. Decide on deprecation timeline for PSD3 v1
 
 ---
 

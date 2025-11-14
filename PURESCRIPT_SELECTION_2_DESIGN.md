@@ -648,6 +648,164 @@ chartViz dataBehavior = dataBehavior <#> \data ->
 
 Users can start imperative and graduate to FRP when they need composition.
 
+## Integration with Tagless Final Architecture
+
+### The Big Picture: PSD3v2 as Interpreter Foundation
+
+**Critical Architectural Decision:** PSD3v2 is NOT a replacement for the tagless final interpreter pattern - it's the **implementation layer** that interpreters delegate to.
+
+```
+User Code (Tagless Final DSL)
+    ↓
+Type Class Constraints (SelectionM, HierarchicalM, etc.)
+    ↓
+Interpreter Instances (D3v2, String, Meta, Music, etc.)
+    ↓
+PSD3v2 Primitives (renderData, joinData, setAttrs, etc.)
+    ↓
+DOM / String / Meta structure
+```
+
+### Why Keep Tagless Final?
+
+1. **Multiple Interpreters** - Users can extend with custom interpreters:
+   - Music/sound interpreter for unsighted data "visualization"
+   - WYSIWYG meta tree for visualization development
+   - HTML string generation for SSR
+   - Test interpreters that verify behavior without DOM
+
+2. **Backwards Compatibility Path** - Could even write a D3v2 interpreter backed by rewritten D3.js if needed
+
+3. **Separation of Concerns**:
+   - User code: High-level visualization intent (via type classes)
+   - Interpreter: Translation strategy (how to render)
+   - PSD3v2: Safe, typed primitives (what can be rendered)
+
+### Revised Capability Type Classes
+
+The existing type classes will be **reworked** to align with PSD3v2 patterns:
+
+```purescript
+-- OLD (current PSD3)
+class SelectionM sel m | m -> sel where
+  simpleJoin :: forall parent datum
+    . parent
+    -> Element
+    -> Array datum
+    -> KeyFunction
+    -> m sel
+
+-- NEW (PSD3v2-aligned)
+class SelectionM sel m | m -> sel where
+  -- High-level: user-friendly, manages sequencing
+  renderData :: forall f parent datum
+    . Foldable f
+    => Ord datum
+    => ElementType
+    -> f datum
+    -> String
+    -> sel SEmpty parent datum
+    -> Maybe (datum -> Array (Attribute datum))  -- Enter
+    -> Maybe (datum -> Array (Attribute datum))  -- Update
+    -> Maybe (datum -> Array (Attribute datum))  -- Exit
+    -> m (sel SBound Element datum)
+
+  -- Low-level: power users, explicit control
+  joinData :: forall f parent datum
+    . Foldable f
+    => Ord datum
+    -> f datum
+    -> String
+    -> sel SEmpty parent datum
+    -> m (JoinResult parent datum)
+
+  -- Operations on typed selections
+  append :: forall parent datum
+    . ElementType
+    -> Array (Attribute datum)
+    -> sel SPending parent datum
+    -> m (sel SBound Element datum)
+
+  setAttrs :: forall datum
+    . Array (Attribute datum)
+    -> sel SBound Element datum
+    -> m (sel SBound Element datum)
+
+  remove :: forall datum
+    . sel SExiting Element datum
+    -> m Unit
+```
+
+### Example: D3v2 Interpreter Implementation
+
+```purescript
+-- The new D3v2 interpreter delegates to PSD3v2 primitives
+instance SelectionM D3Selection_ Effect where
+  renderData elemType foldableData selector emptySelection enterAttrs updateAttrs exitAttrs = do
+    -- Delegate to PSD3v2.Selection.Operations.renderData
+    PSD3v2.renderData elemType foldableData selector emptySelection enterAttrs updateAttrs exitAttrs
+
+  joinData foldableData selector emptySelection = do
+    -- Delegate to PSD3v2.Selection.Operations.joinData
+    PSD3v2.joinData foldableData selector emptySelection
+
+  append elemType attrs pendingSelection = do
+    -- Delegate to PSD3v2.Selection.Operations.append
+    PSD3v2.append elemType attrs pendingSelection
+
+  -- ... etc
+```
+
+### Example: String Interpreter (Reworked)
+
+```purescript
+-- String interpreter generates HTML without DOM
+instance SelectionM StringSelection_ Identity where
+  renderData elemType foldableData selector _ enterAttrs _ _ = do
+    -- Generate HTML string from data and attributes
+    let elements = Array.fromFoldable foldableData
+    let html = elements # map \datum ->
+          let attrs = fromMaybe (const []) enterAttrs datum
+          in renderElementToString elemType attrs datum
+    pure $ StringSelection_ (Array.fold html)
+
+  -- joinData not needed for string generation
+  joinData _ _ _ =
+    pure $ JoinResult { enter: ..., update: ..., exit: ... }
+```
+
+### Example: Meta Interpreter (Tracking Operations)
+
+```purescript
+-- Meta interpreter records what operations were called
+instance SelectionM MetaSelection_ (Writer (Array MetaOp)) where
+  renderData elemType foldableData selector emptySelection enterAttrs updateAttrs exitAttrs = do
+    tell [RenderDataOp { elemType, count: length foldableData, selector }]
+    -- Could delegate to actual D3v2 or return mock selection
+    pure $ MetaSelection_ ...
+```
+
+### Benefits of This Architecture
+
+✅ **Type safety** - PSD3v2 phantom types prevent illegal states
+✅ **Extensibility** - Users can write custom interpreters
+✅ **Testability** - String/Meta interpreters enable testing without DOM
+✅ **Flexibility** - Could swap out D3.js backend without changing user code
+✅ **Migration path** - Can introduce D3v2 interpreter alongside existing D3 interpreter
+✅ **Clean separation** - Core primitives (PSD3v2) vs. interpretation strategy (type class instances)
+
+### Migration Strategy
+
+1. **Phase 1-3:** Build PSD3v2 primitives (current work)
+2. **Phase 4:** Design revised capability type classes
+3. **Phase 5:** Implement D3v2 interpreter using PSD3v2
+4. **Phase 6:** Port String interpreter to new patterns
+5. **Phase 7:** Port Meta interpreter to new patterns
+6. **Phase 8:** Migrate example visualizations to use D3v2 interpreter
+7. **Phase 9:** Deprecate old D3 interpreter (or keep for compatibility)
+
+---
+
 ## Comparison with D3.js
 
 ### What We Improve
