@@ -8,6 +8,7 @@ module PSD3v2.Capabilities.Selection
   , setAttrs
   , remove
   , merge
+  , coerceSelection
   ) where
 
 import Prelude
@@ -150,3 +151,20 @@ class Monad m <= SelectionM sel m | m -> sel where
      . sel SBound Element datum
     -> sel SBound Element datum
     -> m (sel SBound Element datum)
+
+  -- | Coerce the datum type of a selection
+  -- |
+  -- | This is safe because empty selections have no data bound yet.
+  -- | Use this to fix phantom type mismatches when selecting DOM elements
+  -- | before binding data.
+  -- |
+  -- | Example:
+  -- | ```purescript
+  -- | svg <- select "svg"  -- Returns: sel SEmpty Element Unit
+  -- | svg' <- coerceSelection svg  -- Coerce to: sel SEmpty Element Int
+  -- | circles <- renderData Circle [1, 2, 3] "circle" svg'
+  -- | ```
+  coerceSelection
+    :: forall state parent a b
+     . sel state parent a
+    -> m (sel state parent b)

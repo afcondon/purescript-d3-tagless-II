@@ -71,3 +71,7 @@ instance SelectionM D3v2Selection_ D3v2M where
   merge (D3v2Selection_ sel1) (D3v2Selection_ sel2) = D3v2M do
     result <- Ops.merge sel1 sel2
     pure $ D3v2Selection_ result
+
+  coerceSelection (D3v2Selection_ sel) = D3v2M do
+    result <- Ops.coerceSelection sel
+    pure $ D3v2Selection_ result

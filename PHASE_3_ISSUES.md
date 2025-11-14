@@ -1,6 +1,6 @@
 # Phase 3: Three Little Circles - Issues Discovered
 
-## Issue 1: Phantom Type Datum Mismatch
+## Issue 1: Phantom Type Datum Mismatch ✅ FIXED
 
 **Problem:** `select` returns `sel SEmpty Element Unit`, but `renderData` expects the datum type to match the data being bound.
 
@@ -12,34 +12,63 @@ renderData Circle [32, 57, 293] "circle" svg  -- Expects: sel SEmpty Element Int
 
 **Root Cause:** The Empty selection's phantom `datum` parameter should probably be polymorphic or contravariant, since it has no data bound yet.
 
-**Workaround:** Use `[unit, unit, unit]` instead of `[32, 57, 293]`.
-
-**Proper Fix Options:**
-1. Make `select` return `sel SEmpty Element datum` with polymorphic `datum`
-2. Add a type coercion function: `coerceDatum :: sel SEmpty parent a -> sel SEmpty parent b`
-3. Change Empty selection to not track datum type at all
-
-## Issue 2: renderData Doesn't Apply Attributes Per-Datum
-
-**Problem:** In `Operations.purs`, the `renderData` function has TODOs for applying attributes:
+**Solution Implemented:** Added `coerceSelection` function that safely coerces phantom datum type:
 
 ```purescript
--- Operations.purs:296-301
-enterBound <- case enterAttrs of
-  Nothing -> append elemType [] enter
-  Just _mkAttrs -> do
-    -- TODO: Need to apply per-datum attributes
-    -- For now, we'll use empty attributes
-    append elemType [] enter
+coerceSelection
+  :: forall state parent a b
+   . sel state parent a
+  -> m (sel state parent b)
 ```
 
-**Current Behavior:** Attributes are ignored, empty array is passed to `append`.
+Implementation uses `unsafeCoerce` which is safe because phantom types are erased at runtime and the underlying SelectionImpl doesn't change.
 
-**What We Need:** Apply the `datum -> Array (Attribute datum)` function for each datum in the selection.
+**Usage:**
+```purescript
+svg <- select "svg"  -- Returns: sel SEmpty Element Unit
+svg' <- coerceSelection svg  -- Coerce to: sel SEmpty Element Int
+circles <- renderData Circle [32, 57, 293] "circle" svg'
+```
 
-**Challenge:** The `append` function takes a single `Array (Attribute datum)` for all elements, but we have a function that generates different attributes for each datum.
+**Files Modified:**
+- `/src/lib/PSD3v2/Selection/Operations.purs` - Added coerceSelection implementation
+- `/src/lib/PSD3v2/Capabilities/Selection.purs` - Added to type class
+- `/src/lib/PSD3v2/Interpreter/D3v2.purs` - Implemented in interpreter
 
-**Solution:** Need to rethink the API - maybe `append` should take `Maybe (datum -> Array (Attribute datum))` or we need a different approach where we iterate over the data.
+## Issue 2: renderData Doesn't Apply Attributes Per-Datum ✅ FIXED
+
+**Problem:** In `Operations.purs`, the `renderData` function had TODOs for applying attributes - attributes were ignored, empty array was passed to `append`.
+
+**Solution Implemented:** Created `applyPerDatumAttrs` helper function that:
+1. Takes a `datum -> Array (Attribute datum)` function
+2. Zips elements with data
+3. Applies generated attributes to each element using `traverseWithIndex_`
+
+```purescript
+applyPerDatumAttrs
+  :: forall datum m state
+   . MonadEffect m
+  => (datum -> Array (Attribute datum))
+  -> Selection state Element datum
+  -> m (Selection state Element datum)
+applyPerDatumAttrs mkAttrs (Selection impl) = liftEffect do
+  case impl of
+    BoundSelection { elements, data: datumArray } -> do
+      let paired = Array.zipWith Tuple datumArray elements
+      paired # traverseWithIndex_ \index (Tuple datum element) -> do
+        let attrs = mkAttrs datum
+        applyAttributes element datum index attrs
+      pure $ Selection impl
+    _ -> pure $ Selection impl
+```
+
+**Updated renderData flow:**
+1. Append elements with no attributes
+2. Apply per-datum attributes if provided
+3. Return bound selection
+
+**Files Modified:**
+- `/src/lib/PSD3v2/Selection/Operations.purs` - Added applyPerDatumAttrs, updated renderData
 
 ## Issue 3: Attribute Smart Constructors Are Inconsistent
 

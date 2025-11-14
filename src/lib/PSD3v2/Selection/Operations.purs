@@ -7,6 +7,7 @@ module PSD3v2.Selection.Operations
   , merge
   , joinData
   , renderData
+  , coerceSelection
   ) where
 
 import Prelude
@@ -21,6 +22,7 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Partial.Unsafe (unsafePartial)
+import Unsafe.Coerce (unsafeCoerce)
 import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..))
 import PSD3v2.Selection.Join as Join
 import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), SBound, SEmpty, SExiting, SPending, Selection(..), SelectionImpl(..))
@@ -307,34 +309,74 @@ renderData elemType foldableData selector emptySelection enterAttrs updateAttrs 
   -- Perform the join
   JoinResult { enter, update, exit } <- joinData foldableData selector emptySelection
 
-  -- Handle enter
-  enterBound <- case enterAttrs of
-    Nothing -> append elemType [] enter
-    Just _mkAttrs -> do
-      -- TODO: Need to apply per-datum attributes
-      -- For now, we'll use empty attributes
-      append elemType [] enter
+  -- Handle enter: append elements then apply per-datum attributes if provided
+  enterBound <- do
+    -- First append all elements with no attributes
+    bound <- append elemType [] enter
+    -- Then apply per-datum attributes if provided
+    case enterAttrs of
+      Nothing -> pure bound
+      Just mkAttrs -> applyPerDatumAttrs mkAttrs bound
 
-  -- Handle update
+  -- Handle update: apply per-datum attributes if provided
   updateBound <- case updateAttrs of
     Nothing -> pure update
-    Just _mkAttrs -> do
-      -- TODO: Apply update attributes per-datum
-      pure update
+    Just mkAttrs -> applyPerDatumAttrs mkAttrs update
 
-  -- Handle exit
+  -- Handle exit: apply attributes then remove
   case exitAttrs of
     Nothing -> remove exit
-    Just _mkAttrs -> do
-      -- TODO: Apply exit attributes before removing
+    Just mkAttrs -> do
+      _ <- applyPerDatumAttrs mkAttrs exit
       remove exit
 
   -- Merge enter and update
   merge enterBound updateBound
 
+-- | Coerce the datum type of an empty selection
+-- |
+-- | This is safe because SEmpty selections have no data bound yet.
+-- | Use this to fix phantom type mismatches when selecting DOM elements
+-- | before binding data.
+-- |
+-- | Example:
+-- | ```purescript
+-- | svg <- select "svg"  -- Returns: Selection SEmpty Element Unit
+-- | let svg' = coerceSelection svg  -- Coerce to: Selection SEmpty Element Int
+-- | circles <- renderData Circle [1, 2, 3] "circle" svg'
+-- | ```
+coerceSelection
+  :: forall m state parent a b
+   . MonadEffect m
+  => Selection state parent a
+  -> m (Selection state parent b)
+coerceSelection sel = pure $ unsafeCoerce sel
+
 -- ============================================================================
 -- Helper Functions
 -- ============================================================================
+
+-- | Apply per-datum attributes to a bound selection
+-- |
+-- | Takes a function that generates attributes for each datum,
+-- | and applies those attributes to the corresponding elements.
+applyPerDatumAttrs
+  :: forall datum m state
+   . MonadEffect m
+  => (datum -> Array (Attribute datum))
+  -> Selection state Element datum
+  -> m (Selection state Element datum)
+applyPerDatumAttrs mkAttrs (Selection impl) = liftEffect do
+  case impl of
+    BoundSelection { elements, data: datumArray } -> do
+      -- Apply attributes to each (element, datum) pair
+      let paired = Array.zipWith Tuple datumArray elements
+      paired # traverseWithIndex_ \index (Tuple datum element) -> do
+        let attrs = mkAttrs datum
+        applyAttributes element datum index attrs
+      -- Return the selection unchanged
+      pure $ Selection impl
+    _ -> pure $ Selection impl  -- Non-bound selections: no-op
 
 getDocument :: forall parent datum. SelectionImpl parent datum -> Effect Document
 getDocument (EmptySelection { document: doc }) = pure doc
