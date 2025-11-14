@@ -1,6 +1,7 @@
 module PSD3.Data.Tree
   ( TreeJson_
   , TreeLayoutFn_
+  , D3_TreeNode
   , TreeType(..)
   , TreeModel
   , TreeLayout(..)
@@ -23,6 +24,10 @@ import PSD3.Data.Node (NodeID)
 
 foreign import data TreeJson_ :: Type
 foreign import emptyTreeJson_ :: TreeJson_
+
+-- | D3 tree node (result of d3.hierarchy() and layout functions)
+-- | Parameterized by datum type
+foreign import data D3_TreeNode :: Type -> Type
 
 data TreeType   = TidyTree | Dendrogram
 derive instance eqTreeType :: Eq TreeType

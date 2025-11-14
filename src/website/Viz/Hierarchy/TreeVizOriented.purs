@@ -183,11 +183,12 @@ draw orientation flareData selector = do
 
   -- Render links first
   let renderLinks :: TreeNode HierData -> m Unit
-      renderLinks parent@(TreeNode node) = do
+      renderLinks parent@(TreeNode pNode) = do
         -- Render links to all children
-        traverse_ (\child -> do
+        traverse_ (\child@(TreeNode cNode) -> do
           let pathData = case orientation of
                 Isometric -> isometricTreeLinkPath parent child
+                Radial -> linkPath pNode.x pNode.y cNode.x cNode.y  -- For radial, use raw x/y (angle/radius)
                 _ -> linkPath (getX parent) (getY parent) (getX child) (getY child)
           _ <- appendTo linksGroup Path
             [ d pathData
@@ -198,10 +199,10 @@ draw orientation flareData selector = do
             , classed "link"
             ]
           pure unit
-        ) node.children
+        ) pNode.children
 
         -- Recursively render children's links
-        traverse_ renderLinks node.children
+        traverse_ renderLinks pNode.children
 
   -- Render nodes (circles and labels)
   let renderNode :: TreeNode HierData -> m Unit

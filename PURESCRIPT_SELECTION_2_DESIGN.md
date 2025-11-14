@@ -346,41 +346,50 @@ animateCircles data = do
     ]
 ```
 
-## Practical API Design
+## Practical API Design - User-Centric Naming
 
-### Typical Usage Pattern
+### Philosophy: Describe Intent, Not Mechanism
+
+Instead of exposing "enter/update/exit" which are implementation details, we provide operations that describe what the user wants to accomplish:
 
 ```purescript
--- Create visualization
+-- High-level: "Show this data as these elements"
+renderData
+  :: forall f parent datum m
+   . MonadEffect m
+  => Foldable f
+  => Ord datum
+  => ElementType                    -- What element to create
+  -> f datum                        -- Data to visualize
+  -> String                         -- CSS selector
+  -> Selection Empty parent datum_  -- Parent selection
+  -> Maybe (datum -> Array (Attribute datum))        -- How to create new elements (enter)
+  -> Maybe (datum -> Array (Attribute datum))        -- How to update existing (update)
+  -> Maybe (datum -> Array (Attribute datum))        -- How to remove old (exit, e.g., fade out)
+  -> m (Selection Bound Element datum)
+
+-- Example: Simple bar chart
 createBarChart :: forall m. MonadEffect m => Array Number -> m Unit
 createBarChart dataset = do
-  -- 1. Attach to container
   svg <- select "#chart"
 
-  -- 2. Open selection (returns Empty selection)
-  bars <- selectAll "rect" svg
-
-  -- 3. Bind data (returns JoinResult)
-  result <- bindData identity dataset bars
-
-  -- 4. Handle enter: create new elements
-  newBars <- append Rect [] result.enter
-  entered <- setAttrs
-    [ x (\d i -> Number.fromInt i * 25.0)
-    , y (\d -> 200.0 - d)
-    , width 20.0
-    , height (\d -> d)
-    , fill "steelblue"
-    ] newBars
-
-  -- 5. Handle update: update existing
-  updated <- setAttrs
-    [ y (\d -> 200.0 - d)
-    , height (\d -> d)
-    ] result.update
-
-  -- 6. Handle exit: remove old
-  remove result.exit
+  _ <- renderData
+    Rect
+    dataset
+    "rect"
+    svg
+    (Just $ const  -- Enter: create with initial attributes
+      [ x (\d i -> fromInt i * 25.0)
+      , y (\d -> 200.0 - d)
+      , width 20.0
+      , height (\d -> d)
+      , fill "steelblue"
+      ])
+    (Just $ const  -- Update: change these attributes
+      [ y (\d -> 200.0 - d)
+      , height (\d -> d)
+      ])
+    Nothing        -- Exit: just remove (no transition)
 
   pure unit
 
@@ -388,94 +397,89 @@ createBarChart dataset = do
 updateBarChart :: forall m. MonadEffect m => Array Number -> m Unit
 updateBarChart dataset = do
   svg <- select "#chart"
-  bars <- selectAll "rect" svg
 
-  -- Rebind creates new JoinResult
-  result <- rebindData identity dataset bars
+  _ <- renderData
+    Rect
+    dataset
+    "rect"
+    svg
+    (Just $ const  -- Enter: create with attributes
+      [ x (\d i -> fromInt i * 25.0)
+      , y (\d -> 200.0 - d)
+      , width 20.0
+      , height (\d -> d)
+      , fill "steelblue"
+      ])
+    (Just $ \d ->  -- Update: transition to new values
+      [ transitionTo "y" (\d -> 200.0 - d)
+          { duration: Milliseconds 750, delay: zero, easing: EaseInOut, name: Nothing }
+      , transitionTo "height" identity
+          { duration: Milliseconds 750, delay: zero, easing: EaseInOut, name: Nothing }
+      , fill "orange"
+      ])
+    (Just $ const  -- Exit: fade out before removing
+      [ transitionTo "opacity" (const 0.0)
+          { duration: Milliseconds 375, delay: zero, easing: EaseOut, name: Nothing }
+      , transitionTo "y" (const 200.0)
+          { duration: Milliseconds 375, delay: zero, easing: EaseOut, name: Nothing }
+      ])
 
-  -- Enter (same as before)
-  newBars <- append Rect [] result.enter
-  _ <- setAttrs [x (\d i -> ...), ...] newBars
+  pure unit
+```
 
-  -- Update with transition
-  _ <- transitionGroup
-    { duration: Milliseconds 750
-    , delay: Milliseconds 0
-    , easing: EaseInOut
-    , name: Nothing
-    }
-    [ y (\d -> 200.0 - d)
-    , height (\d -> d)
-    , fill "orange"
-    ]
-    result.update
+**Key Improvements:**
+1. ✅ User specifies what they want, not how to sequence operations
+2. ✅ All three phases (enter/update/exit) handled internally
+3. ✅ `Nothing` for phases you don't care about (just use defaults)
+4. ✅ No risk of forgetting to handle a phase
+5. ✅ Type system still prevents misuse
 
-  -- Exit with transition then remove
-  _ <- transitionGroup
-    { duration: Milliseconds 375
-    , delay: Milliseconds 0
-    , easing: EaseOut
-    , name: Nothing
-    }
-    [ opacity 0.0
-    , y 200.0
-    , height 0.0
-    ]
-    result.exit
+### Alternative: Explicit Join for Power Users
 
+For cases where you need fine-grained control (e.g., complex GUP logic), expose the join:
+
+```purescript
+-- Low-level: Explicit enter-update-exit (for advanced use)
+data JoinResult parent datum = JoinResult
+  { enter  :: Selection Pending parent datum
+  , update :: Selection Bound Element datum
+  , exit   :: Selection Exiting Element datum
+  }
+
+joinData
+  :: forall f parent datum m
+   . MonadEffect m
+  => Foldable f
+  => Ord datum                       -- Key function implicit: use datum identity
+  -> f datum
+  -> String                          -- CSS selector
+  -> Selection Empty parent datum_
+  -> m (JoinResult parent datum)
+
+-- Power user version: full control
+createComplexGUP :: Array Node -> m Unit
+createComplexGUP nodes = do
+  svg <- select "#graph"
+  result <- joinData nodes "circle" svg
+
+  -- Fine-grained control over each phase
+  entered <- append Circle [] result.enter
+  _ <- setAttrs [customEnterLogic] entered
+  _ <- customEnterBehavior entered
+
+  updated <- setAttrs [customUpdateLogic] result.update
+  _ <- customUpdateBehavior updated
+
+  _ <- customExitBehavior result.exit
   remove result.exit
 
   pure unit
 ```
 
-### General Update Pattern (Idiomatic)
-
-```purescript
--- Encapsulate the enter-update-exit pattern
-generalUpdate
-  :: forall parent datum key m
-   . MonadEffect m
-  => Ord key
-  => (datum -> key)                                   -- Key function
-  -> ElementType                                      -- Element to create
-  -> Array (Attribute datum)                          -- Enter attributes
-  -> Array (Attribute datum)                          -- Update attributes
-  -> (Selection Pending parent datum -> m (Selection Bound Element datum))  -- Enter behavior
-  -> (Selection Bound Element datum -> m (Selection Bound Element datum))   -- Update behavior
-  -> (Selection Exiting Element datum -> m Unit)                            -- Exit behavior
-  -> Array datum                                                             -- Data
-  -> Selection Empty parent datum                                            -- Parent selection
-  -> m (Selection Bound Element datum)                                       -- Result
-generalUpdate keyFn elemType enterAttrs updateAttrs enterFn updateFn exitFn newData selection = do
-  result <- bindData keyFn newData selection
-
-  -- Handle enter
-  entered <- enterFn result.enter
-
-  -- Handle update
-  updated <- updateFn result.update
-
-  -- Handle exit
-  exitFn result.exit
-
-  -- Merge enter and update selections
-  merge entered updated
-
--- Usage becomes extremely concise
-updateChart :: Array Number -> m (Selection Bound Element Number)
-updateChart data = do
-  rects <- selectAll "rect" svg
-  generalUpdate
-    identity
-    Rect
-    [fill "steelblue", opacity 1.0]
-    [fill "orange"]
-    (append Rect [] >=> setAttrs [x (\d i -> ...), height (\d -> d), ...])
-    (transitionGroup transitionCfg [height (\d -> d * 2.0)])
-    (transitionGroup exitCfg [opacity 0.0] >=> remove)
-    data
-    rects
-```
+**Design Principle:**
+- `renderData` for 90% of use cases (declarative, foolproof)
+- `joinData` for 10% that need custom sequencing (powerful, explicit)
+- Both use the same type-safe underlying operations
 
 ## Advanced: Nested Selections
 
@@ -525,6 +529,124 @@ createGroupedChart dataset = do
 
     pure unit
 ```
+
+## FRP Composition - Interactive Data-Driven Elements
+
+### Philosophy: Reactive Values, Not Imperative Updates
+
+Instead of imperatively updating the DOM, we can model visualizations as **functions from data streams to visual representations**.
+
+```purescript
+-- Behavior: A value that changes over time
+type Behavior a = Time -> a
+
+-- Event: A discrete occurrence at a point in time
+type Event a = Stream (Time, a)
+
+-- A visualization is a behavior over selections
+type Visualization datum = Behavior (Selection Bound Element datum)
+```
+
+### Example: Reactive Bar Chart
+
+```purescript
+-- Data stream from WebSocket/polling/user interaction
+dataStream :: Event (Array Number)
+
+-- Create a behavior that represents the current bar chart
+barChartViz :: Event (Array Number) -> Behavior (Selection Bound Element Number)
+barChartViz dataEvents = do
+  currentData <- stepper [] dataEvents  -- Hold latest data
+
+  pure $ renderData
+    Rect
+    currentData
+    "rect"
+    svg
+    (Just enterAttrs)
+    (Just updateAttrs)
+    (Just exitAttrs)
+
+-- Render the behavior to the DOM
+main = do
+  svg <- select "#chart"
+  viz <- barChartViz dataStream
+
+  -- Subscribe: whenever behavior changes, re-render
+  subscribe viz \selection -> do
+    log "Chart updated!"
+```
+
+### Composing Multiple Interactive Elements
+
+```purescript
+-- Multiple synchronized visualizations
+type Dashboard =
+  { barChart :: Visualization Number
+  , lineChart :: Visualization { x :: Number, y :: Number }
+  , scatterPlot :: Visualization Point
+  }
+
+-- They all react to the same underlying data
+createDashboard :: Behavior Dataset -> Dashboard
+createDashboard datasetBehavior =
+  let
+    -- Derive different views from the same data
+    bars = datasetBehavior <#> _.totals <#> renderBarChart
+    lines = datasetBehavior <#> _.timeSeries <#> renderLineChart
+    points = datasetBehavior <#> _.distribution <#> renderScatterPlot
+  in
+    { barChart: bars
+    , lineChart: lines
+    , scatterPlot: points
+    }
+
+-- User interaction creates new events
+onClick :: Selection Bound Element datum -> Event datum
+onClick selection = -- ... create event stream from click handlers
+
+-- Compose interactions
+interactiveDashboard = do
+  dataset <- loadData
+  dash <- createDashboard (pure dataset)
+
+  -- When user clicks bar, highlight corresponding line and scatter points
+  barClicks <- onClick dash.barChart
+
+  let highlightedData = stepper Nothing (Just <$> barClicks)
+
+  -- Update visualizations based on selection
+  let updatedLines = renderLineChart <$> (applyHighlight <$> highlightedData <*> dataset)
+
+  pure { barChart: dash.barChart, lineChart: updatedLines, scatterPlot: dash.scatterPlot }
+```
+
+### Benefits of FRP Approach
+
+1. ✅ **Composability:** Combine multiple reactive visualizations naturally
+2. ✅ **Declarative:** Describe relationships, not imperative steps
+3. ✅ **Time-traveling:** Behaviors are pure functions of time (testable!)
+4. ✅ **Synchronization:** Multiple views automatically stay in sync
+5. ✅ **Derived state:** Compute dependent visualizations automatically
+
+### Integration with Current Design
+
+FRP is **optional** - the core API works without it:
+
+```purescript
+-- Without FRP (imperative)
+updateChart :: Array Number -> m Unit
+updateChart newData = do
+  selection <- renderData Rect newData "rect" svg ...
+  pure unit
+
+-- With FRP (declarative)
+chartViz :: Behavior (Array Number) -> Behavior (Selection Bound Element Number)
+chartViz dataBehavior = dataBehavior <#> \data ->
+  renderData Rect data "rect" svg ...
+```
+
+Users can start imperative and graduate to FRP when they need composition.
 
 ## Comparison with D3.js
 
@@ -608,35 +730,101 @@ createGroupedChart dataset = do
 
 **Recommendation:** Start with imperative for familiarity, but design for eventual FRP upgrade.
 
-### 2. Attribute Value Types
+### 2. Data Requirements: Ord vs Key Functions
 
-**Option A: Closed ADT**
+**Option A: Require Ord on data type**
 ```purescript
-data AttributeValue
-  = StringValue String
-  | NumberValue Number
-  | BooleanValue Boolean
+renderData
+  :: Ord datum
+  => f datum
+  -> ...
 ```
-- Pro: Exhaustive, pattern matchable
-- Con: Not extensible
+- Pro: Simpler API, no key function parameter
+- Pro: Natural for simple cases (Int, String, etc.)
+- Pro: Works with Sets and Maps automatically
+- Con: Requires newtype wrappers for complex types
+- Con: User can't control what "identity" means
 
-**Option B: Type Class**
+**Option B: Explicit key function**
 ```purescript
-class ToAttributeValue a where
-  toAttributeValue :: a -> String
-
-instance ToAttributeValue String where ...
-instance ToAttributeValue Number where ...
-instance ToAttributeValue Color where ...
+renderData
+  :: Ord key
+  => (datum -> key)
+  -> f datum
+  -> ...
 ```
-- Pro: Extensible by users
-- Con: Less type-safe at attribute definition
+- Pro: Maximum flexibility
+- Pro: Can extract keys from complex structures
+- Pro: Matches D3 model
+- Con: Extra parameter noise
 
-**Recommendation:** Type class for flexibility, but provide well-typed smart constructors.
+**Recommendation:** **Require Ord on datum** for simplicity. Users needing custom keys can use newtypes:
+```purescript
+newtype NodeByID = NodeByID Node
+derive newtype instance Ord NodeByID  -- Orders by node.id field
+```
 
-### 3. Selection Merging
+This is more "PureScript idiomatic" than passing key functions everywhere.
 
-When we have enter and update selections, how do we merge them into a single bound selection?
+### 3. Foldable Data, Not Just Arrays
+
+All functions accept `Foldable f => f datum` instead of `Array datum`:
+```purescript
+renderData :: Foldable f => f datum -> ...
+
+-- Users can pass:
+renderData [1, 2, 3]              -- Array
+renderData (List.fromFoldable ...) -- List
+renderData (Set.fromFoldable ...)  -- Set (already Ord!)
+renderData (Map.values myMap)      -- Map values
+```
+
+Internally we convert to Array when needed, but the API is more flexible.
+
+### 4. Event Handling - Leverage purescript-web-dom
+
+```purescript
+-- Use standard web event types from purescript-web-dom
+import Web.Event.Event (Event, EventType)
+import Web.UIEvent.MouseEvent (MouseEvent)
+import Web.UIEvent.KeyboardEvent (KeyboardEvent)
+
+-- Events are separate from attributes
+on
+  :: forall datum m
+   . MonadEffect m
+  => EventType                      -- e.g., EventType "click"
+  -> (datum -> Event -> Effect Unit)  -- Handler gets datum and event
+  -> Selection Bound Element datum
+  -> m (Selection Bound Element datum)
+
+-- Smart constructors for common events
+onClick :: (datum -> MouseEvent -> Effect Unit) -> EventHandler datum
+onDoubleClick :: (datum -> MouseEvent -> Effect Unit) -> EventHandler datum
+onMouseEnter :: (datum -> MouseEvent -> Effect Unit) -> EventHandler datum
+onMouseLeave :: (datum -> MouseEvent -> Effect Unit) -> EventHandler datum
+onKeyDown :: (datum -> KeyboardEvent -> Effect Unit) -> EventHandler datum
+
+-- Drag events (may need purescript-web-drag or custom)
+onDragStart :: (datum -> DragEvent -> Effect Unit) -> EventHandler datum
+onDrag :: (datum -> DragEvent -> Effect Unit) -> EventHandler datum
+onDragEnd :: (datum -> DragEvent -> Effect Unit) -> EventHandler datum
+
+-- For zoom/pan, we might create higher-level helpers
+onZoom :: (datum -> ZoomState -> Effect Unit) -> EventHandler datum
+  where ZoomState = { scale :: Number, translate :: { x :: Number, y :: Number } }
+```
+
+**Key Insight:** Reuse web platform types from `purescript-web-*` packages:
+- `purescript-web-dom` - Core DOM APIs
+- `purescript-web-events` - Event types
+- `purescript-web-uievents` - Mouse, keyboard, etc.
+
+This unifies with the broader PureScript ecosystem and avoids reinventing these types.
+
+### 5. Selection Merging - Follow D3's Approach
+
+D3 merges selections by concatenating element arrays while preserving document order:
 
 ```purescript
 merge
@@ -645,11 +833,27 @@ merge
   => Selection Bound Element datum
   -> Selection Bound Element datum
   -> m (Selection Bound Element datum)
+
+-- Internal implementation follows D3:
+-- 1. Concatenate element arrays: entered ++ updated
+-- 2. Sort by document order (if needed for consistency)
+-- 3. Concatenate data arrays in same order
+-- 4. Return new merged selection
 ```
 
-**Challenge:** Need to maintain element order and data binding consistency.
+**D3's behavior:**
+```javascript
+const merged = enter.merge(update);
+// merged contains all elements in document order
+```
 
-**Solution:** Track insertion order via timestamp or explicit ordering field.
+**Our approach:** Same semantics. If D3's ordering works for millions of visualizations, we adopt it unless there's a principled reason not to.
+
+**Open Question:** Should we auto-merge in `renderData` or require explicit merge?
+- Auto-merge: Simpler for users
+- Explicit merge: More control for complex cases
+
+**Recommendation:** Auto-merge in `renderData`, expose explicit `merge` for `joinData` users.
 
 ### 4. Event Handling
 

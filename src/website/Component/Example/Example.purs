@@ -30,6 +30,7 @@ import D3.Viz.ClusterViz as ClusterViz
 import D3.Viz.ClusterViz4 as ClusterViz4
 import D3.Viz.RadialClusterViz as RadialClusterViz
 import D3.Viz.HorizontalClusterViz as HorizontalClusterViz
+import D3.Viz.HorizontalTreeD3 as HorizontalTreeD3
 import D3.Viz.PartitionViz as PartitionViz
 import D3.Viz.SunburstViz as SunburstViz
 import D3.Viz.AnimatedTreeCluster as AnimatedTreeCluster
@@ -258,6 +259,15 @@ handleAction = case _ of
           Left err -> log "Horizontal Cluster: Failed to load data"
           Right treeData -> do
             _ <- H.liftEffect $ eval_D3M $ HorizontalClusterViz.draw treeData "#example-viz"
+            pure unit
+
+      "horizontal-cluster-d3" -> do
+        result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/flare-2.json"
+        case result of
+          Left err -> log "Horizontal Cluster (D3): Failed to load data"
+          Right response -> do
+            let blessed = readJSON_ response.body
+            _ <- H.liftEffect $ eval_D3M $ HorizontalTreeD3.drawHorizontalTree Dendrogram blessed "#example-viz"
             pure unit
 
       "icicle" -> do
@@ -640,6 +650,8 @@ getExampleMeta id = case id of
     { id, name: "Radial Cluster", description: "Radial dendrogram using Cluster4 with polar projection", category: "Hierarchies" }
   "horizontal-cluster" -> Just
     { id, name: "Horizontal Cluster", description: "Horizontal dendrogram using Cluster4 with swapped axes", category: "Hierarchies" }
+  "horizontal-cluster-d3" -> Just
+    { id, name: "Horizontal Cluster (D3 Native)", description: "Horizontal dendrogram using D3's native cluster algorithm via FFI", category: "Hierarchies" }
   "icicle" -> Just
     { id, name: "Partition/Icicle (Pure PureScript)", description: "Rectangular partition layout (icicle chart) with equal layer height in pure PureScript", category: "Hierarchies" }
   "sunburst-purescript" -> Just

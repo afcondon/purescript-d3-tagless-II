@@ -226,11 +226,12 @@ draw orientation flareData selector = do
 
   -- Render links first
   let renderLinks :: ClusterNode HierData -> m Unit
-      renderLinks parent@(ClusterNode node) = do
+      renderLinks parent@(ClusterNode pNode) = do
         -- Render links to all children using projection accessors
-        traverse_ (\child -> do
+        traverse_ (\child@(ClusterNode cNode) -> do
           let pathData = case orientation of
                 Isometric -> isometricClusterLinkPath parent child
+                Radial -> linkPath pNode.x pNode.y cNode.x cNode.y  -- For radial, use raw x/y (angle/radius)
                 _ -> linkPath (getX parent) (getY parent) (getX child) (getY child)
           _ <- appendTo linksGroup Path
             [ d pathData
@@ -241,10 +242,10 @@ draw orientation flareData selector = do
             , classed "link"
             ]
           pure unit
-        ) node.children
+        ) pNode.children
 
         -- Recursively render children's links
-        traverse_ renderLinks node.children
+        traverse_ renderLinks pNode.children
 
   -- Render nodes (circles and labels)
   let renderNode :: ClusterNode HierData -> m Unit
