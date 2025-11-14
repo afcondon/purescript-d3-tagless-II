@@ -5,6 +5,7 @@ module PSD3v2.Capabilities.Selection
   , renderData
   , joinData
   , append
+  , appendChild
   , setAttrs
   , remove
   , merge
@@ -153,3 +154,20 @@ class Monad m <= SelectionM sel m | m -> sel where
      . sel SBound Element datum
     -> sel SBound Element datum
     -> m (sel SBound Element datum)
+
+  -- | Append a single child element to a parent selection
+  -- |
+  -- | Creates one new element and appends it to each parent.
+  -- | Returns an empty selection of the newly created element(s).
+  -- |
+  -- | Example:
+  -- | ```purescript
+  -- | container <- select "#viz"
+  -- | svg <- appendChild SVG [width 400.0, height 150.0] container
+  -- | ```
+  appendChild
+    :: forall parent datum datumOut
+     . ElementType
+    -> Array (Attribute datumOut)
+    -> sel SEmpty parent datum
+    -> m (sel SEmpty Element datumOut)

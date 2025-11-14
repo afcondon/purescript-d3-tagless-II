@@ -10,6 +10,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import D3.Viz.ThreeLittleCirclesV2 as ThreeLittleCirclesV2
+import D3.Viz.ThreeLittleCirclesTransitionV2 as ThreeLittleCirclesTransitionV2
 import PSD3v2.Interpreter.D3v2 as D3v2
 
 type State = Unit
@@ -45,6 +46,11 @@ render _ =
             , title: "Three Little Circles"
             , description: "The classic D3 example reimplemented with PSD3v2"
             }
+        , renderExample
+            { id: "three-circles-transition-v2"
+            , title: "Three Circles with Transitions"
+            , description: "Animated transitions showing color mixing with elastic easing"
+            }
         ]
     ]
 
@@ -60,16 +66,9 @@ renderExample { id, title, description } =
         [ HH.text description ]
     , HH.div
         [ HP.classes [ HH.ClassName "example-viz-container" ]
+        , HP.id id
         ]
-        [ -- Embed SVG directly for PSD3v2 to use
-          HH.element (HH.ElemName "svg")
-            [ HP.id id
-            , HP.attr (HH.AttrName "width") "400"
-            , HP.attr (HH.AttrName "height") "150"
-            , HP.classes [ HH.ClassName "example-viz" ]
-            ]
-            []
-        ]
+        []
     ]
 
 handleAction :: forall output m. MonadAff m => Action -> H.HalogenM State Action () output m Unit
@@ -78,6 +77,11 @@ handleAction = case _ of
     log "PSD3v2Examples: Initializing"
     -- Small delay to ensure DOM is ready
     H.liftAff $ delay (Milliseconds 100.0)
-    -- Render Three Little Circles V2
+
+    -- Render Three Little Circles V2 (static)
     H.liftEffect $ D3v2.runD3v2M $ ThreeLittleCirclesV2.drawThreeCircles "#three-little-circles-v2"
+
+    -- Render Three Circles with Transitions (animated)
+    H.liftEffect $ D3v2.runD3v2M $ ThreeLittleCirclesTransitionV2.drawThreeCirclesTransition "#three-circles-transition-v2"
+
     pure unit

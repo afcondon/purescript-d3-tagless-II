@@ -15,14 +15,15 @@ import Prelude
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
-import PSD3v2.Attribute.Types (Attribute, fill, radius, cx, cy)
-import PSD3v2.Capabilities.Selection (class SelectionM, select, renderData)
+import PSD3v2.Attribute.Types (Attribute, fill, radius, cx, cy, width, height, id_, viewBox)
+import PSD3v2.Capabilities.Selection (class SelectionM, select, appendChild, renderData)
 import PSD3v2.Interpreter.D3v2 (runD3v2M)
 import PSD3v2.Selection.Types (ElementType(..))
 
 -- | Draw three circles using the new PSD3v2 API
 -- |
 -- | This demonstrates:
+-- | - Creating SVG elements via the DSL (appendChild)
 -- | - Type-safe selection operations
 -- | - Clean DSL with SelectionM constraint
 -- | - Phantom types prevent misuse (can't append to bound selections, etc.)
@@ -33,9 +34,17 @@ import PSD3v2.Selection.Types (ElementType(..))
 -- | - Type-safe attributes (cx, cy, radius are smart constructors)
 drawThreeCircles :: forall m sel. SelectionM sel m => String -> m Unit
 drawThreeCircles selector = do
-  -- Select the container element (typically "#example-viz")
-  -- The datum type (Int) is inferred from the data we bind below
-  svg <- select selector
+  -- Select the container element (typically "#three-little-circles-v2")
+  container <- select selector
+
+  -- Create SVG element using the DSL instead of hardcoding in Halogen
+  svg <- appendChild SVG
+    [ id_ "three-little-circles-v2-svg"
+    , width 400.0
+    , height 150.0
+    , viewBox "0 0 400 150"
+    ]
+    container
 
   -- Render circles with real data [32, 57, 293]
   -- The renderData function handles enter/update/exit automatically

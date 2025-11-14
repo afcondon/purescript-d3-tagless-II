@@ -6,6 +6,7 @@ module PSD3v2.Attribute.Types
   , toAttr
   -- Smart constructors for common attributes
   , fill
+  , fillOpacity
   , stroke
   , strokeWidth
   , strokeOpacity
@@ -21,6 +22,7 @@ module PSD3v2.Attribute.Types
   , transform
   , class_
   , id_
+  , viewBox
   , fontSize
   , fontFamily
   , textAnchor
@@ -146,6 +148,13 @@ instance ToAttr Boolean (datum -> Int -> Boolean) datum where
 fill :: forall datum a. ToAttr String a datum => a -> Attribute datum
 fill value = toAttr value (AttributeName "fill")
 
+-- | Fill opacity attribute (0.0 to 1.0)
+-- |
+-- | Controls the transparency of the fill color.
+-- | 0.0 is fully transparent, 1.0 is fully opaque.
+fillOpacity :: forall datum a. ToAttr Number a datum => a -> Attribute datum
+fillOpacity value = toAttr value (AttributeName "fill-opacity")
+
 -- | Stroke color attribute
 stroke :: forall datum a. ToAttr String a datum => a -> Attribute datum
 stroke value = toAttr value (AttributeName "stroke")
@@ -215,6 +224,10 @@ class_ value = toAttr value (AttributeName "class")
 -- | ID attribute
 id_ :: forall datum a. ToAttr String a datum => a -> Attribute datum
 id_ value = toAttr value (AttributeName "id")
+
+-- | SVG viewBox attribute (e.g., "0 0 400 150")
+viewBox :: forall datum a. ToAttr String a datum => a -> Attribute datum
+viewBox value = toAttr value (AttributeName "viewBox")
 
 -- | Font size
 fontSize :: forall datum a. ToAttr Number a datum => a -> Attribute datum

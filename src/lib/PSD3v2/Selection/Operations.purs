@@ -2,6 +2,7 @@ module PSD3v2.Selection.Operations
   ( select
   , selectAll
   , append
+  , appendChild
   , setAttrs
   , remove
   , merge
@@ -15,19 +16,27 @@ import Data.Array as Array
 import Data.Foldable (class Foldable, traverse_)
 import Data.FoldableWithIndex (traverseWithIndex_)
 import Data.Maybe (Maybe(..))
+import Data.Nullable (Nullable, toMaybe)
 import Data.Traversable (traverse)
 import Data.TraversableWithIndex (traverseWithIndex)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Partial.Unsafe (unsafePartial)
+import Unsafe.Coerce (unsafeCoerce)
 import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..))
 import PSD3v2.Selection.Join as Join
 import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), SBound, SEmpty, SExiting, SPending, Selection(..), SelectionImpl(..))
 import Web.DOM.Document (Document)
-import Web.DOM.Element (Element)
+import Web.DOM.Document as Document
+import Web.DOM.Element (Element, fromNode, toNode, toParentNode)
+import Web.DOM.Element as Element
+import Web.DOM.Node as Node
+import Web.DOM.NodeList as NodeList
+import Web.DOM.ParentNode (QuerySelector(..), querySelector, querySelectorAll)
 import Web.HTML (window)
 import Web.HTML.HTMLDocument (toDocument)
+import Web.HTML.HTMLDocument as HTMLDocument
 import Web.HTML.Window (document)
 
 -- | Select a single element matching the CSS selector
@@ -47,8 +56,10 @@ select
   => String  -- CSS selector
   -> m (Selection SEmpty Element datum)
 select selector = liftEffect do
-  doc <- window >>= document <#> toDocument
-  maybeElement <- querySelector_ selector doc
+  htmlDoc <- window >>= document
+  let doc = toDocument htmlDoc
+  let parentNode = HTMLDocument.toParentNode htmlDoc
+  maybeElement <- querySelector (QuerySelector selector) parentNode
   case maybeElement of
     Nothing -> pure $ Selection $ EmptySelection
       { parentElements: []
@@ -80,13 +91,13 @@ selectAll selector (Selection impl) = liftEffect do
   doc <- getDocument impl
   elements <- case impl of
     EmptySelection { parentElements } ->
-      querySelectorAll_ selector parentElements
+      querySelectorAllElements selector parentElements
     BoundSelection { elements: parentElems } ->
-      querySelectorAll_ selector parentElems
+      querySelectorAllElements selector parentElems
     PendingSelection { parentElements } ->
-      querySelectorAll_ selector parentElements
+      querySelectorAllElements selector parentElements
     ExitingSelection { elements: exitElems } ->
-      querySelectorAll_ selector exitElems
+      querySelectorAllElements selector exitElems
 
   pure $ Selection $ EmptySelection
     { parentElements: elements
@@ -118,13 +129,20 @@ append elemType attrs (Selection impl) = liftEffect do
   let { parentElements, pendingData, document: doc } = unsafePartial case impl of
         PendingSelection r -> r
   -- Create elements for each datum
-  let paired = Array.zipWith Tuple pendingData parentElements
-  elements <- paired # traverseWithIndex \index (Tuple datum parent) -> do
-    element <- createElement_ (elementTypeToString elemType) doc
+  -- In D3, if there's one parent, all elements go to that parent
+  -- If there are multiple parents, they're distributed (but that's rare)
+  let parent = case Array.head parentElements of
+        Just p -> p
+        Nothing -> unsafePartial $ Array.unsafeIndex parentElements 0  -- Should never happen
+
+  elements <- pendingData # traverseWithIndex \index datum -> do
+    element <- createElementWithNS elemType doc
     -- Set attributes on the new element
     applyAttributes element datum index attrs
     -- Append to parent
-    appendChild_ element parent
+    let elementNode = toNode element
+    let parentNode = toNode parent
+    Node.appendChild elementNode parentNode
     pure element
 
   pure $ Selection $ BoundSelection
@@ -183,8 +201,56 @@ remove
 remove (Selection impl) = liftEffect do
   let { elements } = unsafePartial case impl of
         ExitingSelection r -> r
-  elements # traverse_ \element ->
-    removeElement_ element
+  elements # traverse_ \element -> do
+    let node = toNode element
+    maybeParent <- Node.parentNode node
+    case maybeParent of
+      Just parent -> Node.removeChild node parent
+      Nothing -> pure unit  -- Element not in DOM, nothing to remove
+
+-- | Append a single child element to a parent selection
+-- |
+-- | Creates one new element and appends it to each parent in the selection.
+-- | Returns an empty selection of the newly created element(s).
+-- |
+-- | This is different from `append` which creates elements for each datum
+-- | in a pending (enter) selection. `appendChild` is for structural elements
+-- | like creating an SVG container.
+-- |
+-- | Example:
+-- | ```purescript
+-- | container <- select "#viz"
+-- | svg <- appendChild SVG [width 400.0, height 150.0] container
+-- | circles <- renderData Circle [1, 2, 3] "circle" svg ...
+-- | ```
+appendChild
+  :: forall parent datum datumOut m
+   . MonadEffect m
+  => ElementType
+  -> Array (Attribute datumOut)
+  -> Selection SEmpty parent datum
+  -> m (Selection SEmpty Element datumOut)
+appendChild elemType attrs (Selection impl) = liftEffect do
+  let { parentElements, document: doc } = unsafePartial case impl of
+        EmptySelection r -> r
+
+  -- Create one element for each parent
+  elements <- parentElements # traverse \parent -> do
+    element <- createElementWithNS elemType doc
+    -- Apply attributes with a dummy datum (attributes should be static for appendChild)
+    -- We use unit as the datum since structural elements typically don't need data
+    let dummyDatum = unsafeCoerce unit :: datumOut
+    applyAttributes element dummyDatum 0 attrs
+    -- Append to parent
+    let elementNode = toNode element
+    let parentNode = toNode parent
+    Node.appendChild elementNode parentNode
+    pure element
+
+  pure $ Selection $ EmptySelection
+    { parentElements: elements
+    , document: doc
+    }
 
 -- | Merge two bound selections
 -- |
@@ -237,11 +303,12 @@ joinData foldableData selector (Selection impl) = liftEffect do
   let { parentElements, document: doc } = unsafePartial case impl of
         EmptySelection r -> r
   -- Query for existing elements within parents
-  existingElements <- querySelectorAll_ selector parentElements
+  existingElements <- querySelectorAllElements selector parentElements
 
   -- Get old bindings (elements with their bound data)
   oldBindings <- existingElements # traverse \element -> do
-    maybeDatum <- getElementData_ element
+    nullableDatum <- getElementData_ element
+    let maybeDatum = toMaybe nullableDatum
     pure $ { element, datum: maybeDatum }
 
   -- Filter to only elements that have data bound
@@ -365,18 +432,49 @@ getDocument (BoundSelection { document: doc }) = pure doc
 getDocument (PendingSelection { document: doc }) = pure doc
 getDocument (ExitingSelection { document: doc }) = pure doc
 
+-- | Create an element with the appropriate namespace
+-- | SVG elements must be created in the SVG namespace to preserve case-sensitive attributes
+createElementWithNS :: ElementType -> Document -> Effect Element
+createElementWithNS elemType doc =
+  case elemType of
+    -- SVG elements need the SVG namespace
+    Circle -> Document.createElementNS (Just "http://www.w3.org/2000/svg") "circle" doc
+    Rect -> Document.createElementNS (Just "http://www.w3.org/2000/svg") "rect" doc
+    Path -> Document.createElementNS (Just "http://www.w3.org/2000/svg") "path" doc
+    Line -> Document.createElementNS (Just "http://www.w3.org/2000/svg") "line" doc
+    Text -> Document.createElementNS (Just "http://www.w3.org/2000/svg") "text" doc
+    Group -> Document.createElementNS (Just "http://www.w3.org/2000/svg") "g" doc
+    SVG -> Document.createElementNS (Just "http://www.w3.org/2000/svg") "svg" doc
+    -- HTML elements use default namespace
+    Div -> Document.createElement "div" doc
+    Span -> Document.createElement "span" doc
+
+-- | Query all matching elements within parent elements
+-- | Uses web-dom library functions instead of custom FFI
+querySelectorAllElements :: String -> Array Element -> Effect (Array Element)
+querySelectorAllElements selector parents = do
+  -- Convert each parent to ParentNode and query
+  nodeArrays <- parents # traverse \parent -> do
+    let parentNode = toParentNode parent
+    nodeList <- querySelectorAll (QuerySelector selector) parentNode
+    nodes <- NodeList.toArray nodeList
+    -- Filter and convert Nodes to Elements
+    pure $ Array.mapMaybe fromNode nodes
+  -- Flatten the array of arrays
+  pure $ Array.concat nodeArrays
+
 -- | Apply attributes to an element
 applyAttributes :: forall datum. Element -> datum -> Int -> Array (Attribute datum) -> Effect Unit
 applyAttributes element datum index attrs =
   attrs # traverse_ \attr -> case attr of
     StaticAttr (AttributeName name) value ->
-      setAttribute_ name (attributeValueToString value) element
+      Element.setAttribute name (attributeValueToString value) element
 
     DataAttr (AttributeName name) f ->
-      setAttribute_ name (attributeValueToString (f datum)) element
+      Element.setAttribute name (attributeValueToString (f datum)) element
 
     IndexedAttr (AttributeName name) f ->
-      setAttribute_ name (attributeValueToString (f datum index)) element
+      Element.setAttribute name (attributeValueToString (f datum index)) element
 
 attributeValueToString :: AttributeValue -> String
 attributeValueToString (StringValue s) = s
@@ -395,14 +493,13 @@ elementTypeToString Div = "div"
 elementTypeToString Span = "span"
 
 -- ============================================================================
--- FFI Declarations
+-- FFI Declarations (D3-specific data binding)
 -- ============================================================================
 
-foreign import querySelector_ :: String -> Document -> Effect (Maybe Element)
-foreign import querySelectorAll_ :: String -> Array Element -> Effect (Array Element)
-foreign import createElement_ :: String -> Document -> Effect Element
-foreign import setAttribute_ :: String -> String -> Element -> Effect Unit
-foreign import appendChild_ :: Element -> Element -> Effect Unit
-foreign import removeElement_ :: Element -> Effect Unit
-foreign import getElementData_ :: forall datum. Element -> Effect (Maybe datum)
+-- | Get data bound to an element (D3-style __data__ property)
+-- | Returns Nullable which we convert to Maybe using Data.Nullable.toMaybe
+-- | This is the only custom FFI we need - everything else uses web-dom library
+foreign import getElementData_ :: forall datum. Element -> Effect (Nullable datum)
+
+-- | Set data on an element (D3-style __data__ property)
 foreign import setElementData_ :: forall datum. datum -> Element -> Effect Unit

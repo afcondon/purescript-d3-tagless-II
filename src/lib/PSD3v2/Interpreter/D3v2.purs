@@ -6,11 +6,19 @@ module PSD3v2.Interpreter.D3v2
 
 import Prelude
 
+import Data.Array as Array
+import Data.Time.Duration (Milliseconds(..))
+import Data.Traversable (traverse_)
 import Effect (Effect)
-import Effect.Class (class MonadEffect)
+import Effect.Class (class MonadEffect, liftEffect)
+import Partial.Unsafe (unsafePartial)
+import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..))
 import PSD3v2.Capabilities.Selection (class SelectionM)
+import PSD3v2.Capabilities.Transition (class TransitionM)
 import PSD3v2.Selection.Operations as Ops
-import PSD3v2.Selection.Types (Selection)
+import PSD3v2.Selection.Types (Selection(..), SelectionImpl(..), SBound)
+import PSD3v2.Transition.FFI as TransitionFFI
+import Web.DOM.Element (Element)
 
 -- | Selection type for D3v2 interpreter
 -- |
@@ -71,3 +79,51 @@ instance SelectionM D3v2Selection_ D3v2M where
   merge (D3v2Selection_ sel1) (D3v2Selection_ sel2) = D3v2M do
     result <- Ops.merge sel1 sel2
     pure $ D3v2Selection_ result
+
+  appendChild elemType attrs (D3v2Selection_ emptySelection) = D3v2M do
+    result <- Ops.appendChild elemType attrs emptySelection
+    pure $ D3v2Selection_ result
+
+-- | TransitionM instance for D3v2 interpreter
+-- |
+-- | Implements animated transitions using D3's transition engine.
+-- | Applies transitions to each element in the bound selection.
+instance TransitionM D3v2Selection_ D3v2M where
+
+  withTransition config (D3v2Selection_ selection) attrs = D3v2M do
+    -- Extract elements and data from the bound selection
+    let { elements, data: datumArray } = unsafePartial case selection of
+          Selection (BoundSelection r) -> r
+
+    -- Get transition configuration
+    let Milliseconds duration = config.duration
+
+    -- Apply transition to each element with its corresponding datum
+    let paired = Array.zipWith (\d e -> {datum: d, element: e}) datumArray elements
+    paired # traverse_ \{ datum, element } -> do
+      -- Create a D3 transition for this element
+      transition <- TransitionFFI.createTransition_
+        duration
+        (TransitionFFI.maybeMillisecondsToNullable config.delay)
+        (TransitionFFI.maybeEasingToNullable config.easing)
+        element
+
+      -- Apply each attribute to the transition
+      attrs # traverse_ \attr -> case attr of
+        StaticAttr (AttributeName name) value ->
+          TransitionFFI.transitionSetAttribute_ name (attributeValueToString value) transition
+
+        DataAttr (AttributeName name) f ->
+          TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum)) transition
+
+        IndexedAttr (AttributeName name) _f ->
+          -- For indexed attributes during transitions, we'd need to track indices
+          -- For now, we'll skip these or apply without index
+          -- TODO: Enhance to support indexed attributes if needed
+          pure unit
+
+-- Helper function to convert AttributeValue to String
+attributeValueToString :: AttributeValue -> String
+attributeValueToString (StringValue s) = s
+attributeValueToString (NumberValue n) = show n
+attributeValueToString (BooleanValue b) = show b
