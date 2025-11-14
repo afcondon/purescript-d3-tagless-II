@@ -730,41 +730,71 @@ Users can start imperative and graduate to FRP when they need composition.
 
 **Recommendation:** Start with imperative for familiarity, but design for eventual FRP upgrade.
 
-### 2. Data Requirements: Ord vs Key Functions
+### 2. Data Requirements: Ord (and Eq) for Identity
 
-**Option A: Require Ord on data type**
+**Decision: Require Ord (which requires Eq)**
 ```purescript
 renderData
   :: Ord datum
   => f datum
   -> ...
 ```
-- Pro: Simpler API, no key function parameter
-- Pro: Natural for simple cases (Int, String, etc.)
-- Pro: Works with Sets and Maps automatically
-- Con: Requires newtype wrappers for complex types
-- Con: User can't control what "identity" means
 
-**Option B: Explicit key function**
+**Key Insight:** Users control "identity" through Eq/Ord instances!
+
 ```purescript
-renderData
-  :: Ord key
-  => (datum -> key)
-  -> f datum
-  -> ...
+-- Example: Nodes identified by ID field
+data Node = Node { id :: Int, x :: Number, y :: Number, label :: String }
+
+-- User defines what "same node" means via Eq
+instance Eq Node where
+  eq (Node a) (Node b) = a.id == b.id  -- Identity is by ID
+
+-- Ord required for Map-based join algorithm
+instance Ord Node where
+  compare (Node a) (Node b) = compare a.id b.id
+
+-- Now renderData can match nodes by ID across updates!
+renderData circles nodes "circle" svg ...
 ```
-- Pro: Maximum flexibility
-- Pro: Can extract keys from complex structures
-- Pro: Matches D3 model
-- Con: Extra parameter noise
 
-**Recommendation:** **Require Ord on datum** for simplicity. Users needing custom keys can use newtypes:
+**Benefits:**
+- ✅ Simpler API - no key function parameter
+- ✅ Natural for simple types (Int, String already have Eq/Ord)
+- ✅ Users control identity semantics through Eq instance
+- ✅ Works with Sets and Maps automatically
+- ✅ More PureScript-idiomatic than passing functions
+
+**For complex types, newtype with derived instances:**
 ```purescript
+-- If you can't modify the original type
 newtype NodeByID = NodeByID Node
-derive newtype instance Ord NodeByID  -- Orders by node.id field
+
+instance Eq NodeByID where
+  eq (NodeByID a) (NodeByID b) = a.id == b.id
+
+derive newtype instance Ord NodeByID
 ```
 
-This is more "PureScript idiomatic" than passing key functions everywhere.
+**Alternative: Generic deriving for common patterns:**
+```purescript
+-- Let compiler generate by-field comparison
+derive instance Generic Node _
+derive instance Eq Node      -- Structural equality
+derive instance Ord Node     -- Structural ordering
+
+-- Or manually specify for ID-based identity
+instance Eq Node where
+  eq = comparing _.id        -- Identity by ID field
+
+instance Ord Node where
+  compare = comparing _.id
+```
+
+**Why Ord, not just Eq?**
+- Join algorithm uses `Map` for O(n+m) performance
+- Map requires Ord for balanced tree structure
+- Alternative would be HashMap (requires Hashable), but Ord is simpler
 
 ### 3. Foldable Data, Not Just Arrays
 
