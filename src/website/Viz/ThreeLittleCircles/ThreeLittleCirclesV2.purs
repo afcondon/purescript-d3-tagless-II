@@ -16,7 +16,7 @@ import Data.Int (toNumber)
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..), fill, radius)
-import PSD3v2.Capabilities.Selection (class SelectionM, select, renderData, coerceSelection)
+import PSD3v2.Capabilities.Selection (class SelectionM, select, renderData)
 import PSD3v2.Interpreter.D3v2 (runD3v2M)
 import PSD3v2.Selection.Types (ElementType(..))
 
@@ -33,13 +33,13 @@ import PSD3v2.Selection.Types (ElementType(..))
 -- | - Type-safe attributes (cx, cy, radius are smart constructors)
 drawThreeCircles :: forall m sel. SelectionM sel m => m Unit
 drawThreeCircles = do
-  -- Select the SVG element and coerce datum type to Int
+  -- Select the SVG element
+  -- The datum type (Int) is inferred from the data we bind below
   svg <- select "svg"
-  svg' <- coerceSelection svg  -- Coerce from Unit to Int
 
   -- Render circles with real data [32, 57, 293]
   -- The renderData function handles enter/update/exit automatically
-  _ <- renderData Circle [32, 57, 293] "circle" svg'
+  _ <- renderData Circle [32, 57, 293] "circle" svg
     (Just enterAttrs)  -- Enter: new circles
     (Just updateAttrs) -- Update: existing circles (if any)
     Nothing            -- Exit: just remove (no special styling)

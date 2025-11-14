@@ -7,7 +7,6 @@ module PSD3v2.Selection.Operations
   , merge
   , joinData
   , renderData
-  , coerceSelection
   ) where
 
 import Prelude
@@ -22,7 +21,6 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Partial.Unsafe (unsafePartial)
-import Unsafe.Coerce (unsafeCoerce)
 import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..))
 import PSD3v2.Selection.Join as Join
 import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), SBound, SEmpty, SExiting, SPending, Selection(..), SelectionImpl(..))
@@ -35,6 +33,7 @@ import Web.HTML.Window (document)
 -- | Select a single element matching the CSS selector
 -- |
 -- | Returns an empty selection (no data bound).
+-- | The datum type is polymorphic and will be inferred from usage.
 -- | This is typically the starting point for data binding.
 -- |
 -- | Example:
@@ -43,10 +42,10 @@ import Web.HTML.Window (document)
 -- | circles <- renderData Circle [1, 2, 3] "circle" svg ...
 -- | ```
 select
-  :: forall m
+  :: forall m datum
    . MonadEffect m
   => String  -- CSS selector
-  -> m (Selection SEmpty Element Unit)
+  -> m (Selection SEmpty Element datum)
 select selector = liftEffect do
   doc <- window >>= document <#> toDocument
   maybeElement <- querySelector_ selector doc
@@ -63,6 +62,7 @@ select selector = liftEffect do
 -- | Select all elements matching the CSS selector within a parent selection
 -- |
 -- | Returns an empty selection (no data bound yet).
+-- | The datum type is polymorphic and will be inferred from usage.
 -- | Use this for nested selections.
 -- |
 -- | Example:
@@ -71,11 +71,11 @@ select selector = liftEffect do
 -- | groups <- selectAll "g" svg
 -- | ```
 selectAll
-  :: forall state parent datum m
+  :: forall state parent parentDatum datum m
    . MonadEffect m
   => String  -- CSS selector
-  -> Selection state parent datum
-  -> m (Selection SEmpty Element Unit)
+  -> Selection state parent parentDatum
+  -> m (Selection SEmpty Element datum)
 selectAll selector (Selection impl) = liftEffect do
   doc <- getDocument impl
   elements <- case impl of
@@ -332,25 +332,6 @@ renderData elemType foldableData selector emptySelection enterAttrs updateAttrs 
 
   -- Merge enter and update
   merge enterBound updateBound
-
--- | Coerce the datum type of an empty selection
--- |
--- | This is safe because SEmpty selections have no data bound yet.
--- | Use this to fix phantom type mismatches when selecting DOM elements
--- | before binding data.
--- |
--- | Example:
--- | ```purescript
--- | svg <- select "svg"  -- Returns: Selection SEmpty Element Unit
--- | let svg' = coerceSelection svg  -- Coerce to: Selection SEmpty Element Int
--- | circles <- renderData Circle [1, 2, 3] "circle" svg'
--- | ```
-coerceSelection
-  :: forall m state parent a b
-   . MonadEffect m
-  => Selection state parent a
-  -> m (Selection state parent b)
-coerceSelection sel = pure $ unsafeCoerce sel
 
 -- ============================================================================
 -- Helper Functions

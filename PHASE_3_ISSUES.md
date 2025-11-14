@@ -10,30 +10,32 @@ svg <- select "svg"  -- Returns: sel SEmpty Element Unit
 renderData Circle [32, 57, 293] "circle" svg  -- Expects: sel SEmpty Element Int
 ```
 
-**Root Cause:** The Empty selection's phantom `datum` parameter should probably be polymorphic or contravariant, since it has no data bound yet.
+**Root Cause:** The Empty selection's phantom `datum` parameter was hardcoded to `Unit`, but empty selections have no data bound yet, so the datum type should be polymorphic.
 
-**Solution Implemented:** Added `coerceSelection` function that safely coerces phantom datum type:
+**Solution Implemented:** Made the datum type parameter polymorphic in `select` and `selectAll`:
 
 ```purescript
-coerceSelection
-  :: forall state parent a b
-   . sel state parent a
-  -> m (sel state parent b)
+-- Before:
+select :: String -> m (sel SEmpty Element Unit)
+
+-- After:
+select :: forall datum. String -> m (sel SEmpty Element datum)
 ```
 
-Implementation uses `unsafeCoerce` which is safe because phantom types are erased at runtime and the underlying SelectionImpl doesn't change.
+The datum type is now inferred from usage - when you bind data with `renderData`, the type flows backward to constrain the selection's datum type.
 
 **Usage:**
 ```purescript
-svg <- select "svg"  -- Returns: sel SEmpty Element Unit
-svg' <- coerceSelection svg  -- Coerce to: sel SEmpty Element Int
-circles <- renderData Circle [32, 57, 293] "circle" svg'
+svg <- select "svg"  -- Type inferred as: sel SEmpty Element Int
+circles <- renderData Circle [32, 57, 293] "circle" svg  -- Constrains datum to Int
 ```
 
+This is the correct fix because `EmptySelection` in `SelectionImpl` doesn't actually store any datum values - it only has `parentElements` and `document`, making the datum type truly phantom for empty selections.
+
 **Files Modified:**
-- `/src/lib/PSD3v2/Selection/Operations.purs` - Added coerceSelection implementation
-- `/src/lib/PSD3v2/Capabilities/Selection.purs` - Added to type class
-- `/src/lib/PSD3v2/Interpreter/D3v2.purs` - Implemented in interpreter
+- `/src/lib/PSD3v2/Selection/Operations.purs` - Made select/selectAll polymorphic
+- `/src/lib/PSD3v2/Capabilities/Selection.purs` - Updated type class signatures
+- `/src/website/Viz/ThreeLittleCircles/ThreeLittleCirclesV2.purs` - No coercion needed!
 
 ## Issue 2: renderData Doesn't Apply Attributes Per-Datum ✅ FIXED
 

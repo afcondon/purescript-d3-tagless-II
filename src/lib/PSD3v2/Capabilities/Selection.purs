@@ -8,7 +8,6 @@ module PSD3v2.Capabilities.Selection
   , setAttrs
   , remove
   , merge
-  , coerceSelection
   ) where
 
 import Prelude
@@ -49,19 +48,22 @@ class Monad m <= SelectionM sel m | m -> sel where
   -- | Select a single element by CSS selector
   -- |
   -- | Returns an empty selection (no data bound).
+  -- | The datum type is polymorphic and will be inferred from usage.
   -- | This is typically the starting point for data binding.
   select
-    :: String  -- CSS selector
-    -> m (sel SEmpty Element Unit)
+    :: forall datum
+     . String  -- CSS selector
+    -> m (sel SEmpty Element datum)
 
   -- | Select all elements matching selector within a parent selection
   -- |
   -- | Returns an empty selection of the matched elements.
+  -- | The datum type is polymorphic and will be inferred from usage.
   selectAll
-    :: forall state parent datum
+    :: forall state parent parentDatum datum
      . String  -- CSS selector
-    -> sel state parent datum
-    -> m (sel SEmpty Element Unit)
+    -> sel state parent parentDatum
+    -> m (sel SEmpty Element datum)
 
   -- | High-level data rendering (recommended for most use cases)
   -- |
@@ -151,20 +153,3 @@ class Monad m <= SelectionM sel m | m -> sel where
      . sel SBound Element datum
     -> sel SBound Element datum
     -> m (sel SBound Element datum)
-
-  -- | Coerce the datum type of a selection
-  -- |
-  -- | This is safe because empty selections have no data bound yet.
-  -- | Use this to fix phantom type mismatches when selecting DOM elements
-  -- | before binding data.
-  -- |
-  -- | Example:
-  -- | ```purescript
-  -- | svg <- select "svg"  -- Returns: sel SEmpty Element Unit
-  -- | svg' <- coerceSelection svg  -- Coerce to: sel SEmpty Element Int
-  -- | circles <- renderData Circle [1, 2, 3] "circle" svg'
-  -- | ```
-  coerceSelection
-    :: forall state parent a b
-     . sel state parent a
-    -> m (sel state parent b)
