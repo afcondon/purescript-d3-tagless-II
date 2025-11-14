@@ -22,12 +22,26 @@ import D3.Viz.GUPV2 as GUPV2
 import D3.Viz.TreeVizV2 as TreeVizV2
 import D3.Viz.AnimatedTreeV2 as AnimatedTreeV2
 import D3.Viz.AnimatedTreeV2 (LayoutType(..))
+import D3.Viz.LesMisV2 as LesMisV2
+import D3.Viz.LesMiserables.Model (LesMisSimNode)
+import D3.Viz.LesMiserables.File (readGraphFromFileContents)
 import PSD3v2.Interpreter.D3v2 as D3v2
+import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, ForceType(..), RegularForceType(..), allNodes, initialSimulationState)
+import PSD3.Internal.Simulation.Config as F
+import PSD3.Internal.Simulation.Forces (createForce, createLinkForce, initialize)
+import PSD3.Internal.FFI (linksForceName_)
+import Affjax.Web as AJAX
+import Affjax.ResponseFormat as ResponseFormat
+import Data.Either (Either(..))
+import Data.Set as Set
+import Data.Map (Map)
+import Unsafe.Coerce (unsafeCoerce)
 import Halogen.HTML.Events as HE
 
 type State =
   { gupInitialized :: Boolean
   , treeLayout :: LayoutType
+  , lesMisSimulation :: D3SimulationState_ LesMisSimNode
   }
 
 data Action
@@ -35,12 +49,25 @@ data Action
   | UpdateGUPRandom
   | ToggleTreeLayout
 
+-- | Forces configuration for LesMis
+forces :: { center :: Force LesMisSimNode, collision :: Force LesMisSimNode, links :: Force LesMisSimNode, manyBodyNeg :: Force LesMisSimNode }
+forces = {
+    manyBodyNeg: createForce "many body negative" (RegularForce ForceManyBody) allNodes [ F.strengthVal (-100.0) ]
+  , collision:   createForce "collision"          (RegularForce ForceCollide)  allNodes [ F.radiusVal 6.0 ]
+  , center:      createForce "center"             (RegularForce ForceCenter)   allNodes [ F.xVal 0.0, F.yVal 0.0, F.strengthVal 0.1 ]
+  , links:       createLinkForce Nothing []
+}
+
+forceLibrary :: Map String (Force LesMisSimNode)
+forceLibrary = initialize [ forces.manyBodyNeg, forces.collision, forces.center, forces.links ]
+
 component :: forall query input output m. MonadAff m => H.Component query input output m
 component =
   H.mkComponent
     { initialState: \_ ->
         { gupInitialized: false
         , treeLayout: TreeLayout
+        , lesMisSimulation: initialSimulationState forceLibrary
         }
     , render
     , eval: H.mkEval $ H.defaultEval
@@ -79,6 +106,11 @@ render _ =
             , description: "Reingold-Tilford tree layout algorithm (non-animating)"
             }
         , renderAnimatedTreeExample
+        , renderExample
+            { id: "lesmis-v2"
+            , title: "Les Misérables Force-Directed Graph"
+            , description: "Character network using PSD3v2 with force simulation. Integration of SelectionM + SimulationM capabilities."
+            }
         ]
     ]
 
@@ -191,6 +223,21 @@ handleAction = case _ of
 
     -- Render Animated Tree V2 (initialize with tree layout)
     H.liftEffect $ D3v2.runD3v2M $ AnimatedTreeV2.initializeAnimatedTree "#animated-tree-v2"
+
+    -- Load and render Les Misérables force-directed graph
+    lesMisResponse <- H.liftAff $ AJAX.get ResponseFormat.string "./data/miserables.json"
+    case lesMisResponse of
+      Left _ -> log "Failed to load Les Misérables data"
+      Right response -> do
+        let graph = readGraphFromFileContents (Right response)
+        let forcesArray = [ forces.manyBodyNeg, forces.collision, forces.center, forces.links ]
+            activeForces = Set.fromFoldable ["many body negative", "collision", "center", linksForceName_]
+
+        state <- H.get
+        newState <- H.liftEffect $ D3v2.execD3v2SimM { simulation: state.lesMisSimulation } do
+          LesMisV2.drawLesMisV2 forcesArray activeForces graph "#lesmis-v2"
+        H.modify_ \s -> s { lesMisSimulation = newState.simulation }
+        log "Les Misérables V2 initialized"
 
     H.modify_ _ { gupInitialized = true }
 

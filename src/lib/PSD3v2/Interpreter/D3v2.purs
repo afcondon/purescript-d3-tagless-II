@@ -10,7 +10,7 @@ module PSD3v2.Interpreter.D3v2
 
 import Prelude
 
-import Control.Monad.State (class MonadState, StateT, runStateT, evalStateT, execStateT)
+import Control.Monad.State (class MonadState, StateT, runStateT, evalStateT, execStateT, modify_)
 import Data.Array as Array
 import Data.FoldableWithIndex (traverseWithIndex_)
 import Data.Maybe (Maybe(..))
@@ -20,14 +20,26 @@ import Data.Tuple (Tuple, snd, fst)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Partial.Unsafe (unsafePartial)
-import PSD3.Internal.Simulation.Types (D3SimulationState_)
+import PSD3.Internal.Simulation.Types (D3SimulationState_, Force(..), _name, SimVariable(..), _handle)
+import PSD3.Internal.Simulation.Functions as SimFn
+import PSD3.Internal.FFI (onTick_)
+import Data.Lens (use, (.~), view)
+import Data.Lens.Record (prop)
+import Data.Lens.Iso.Newtype (_Newtype)
+import Data.Map as Map
+import Data.Tuple (Tuple(..))
+import Data.Lens.At (at)
+import Type.Proxy (Proxy(..))
+import Unsafe.Coerce (unsafeCoerce)
 import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..))
 import PSD3v2.Capabilities.Selection (class SelectionM)
+import PSD3v2.Capabilities.Simulation (class SimulationM, Step(..))
 import PSD3v2.Capabilities.Transition (class TransitionM)
 import PSD3v2.Selection.Operations as Ops
 import PSD3v2.Selection.Types (Selection(..), SelectionImpl(..), SBound, JoinResult(..))
 import PSD3v2.Transition.FFI as TransitionFFI
 import Web.DOM.Element (Element)
+import Web.DOM.Element as Element
 
 -- | Selection type for D3v2 interpreter
 -- |
@@ -310,3 +322,112 @@ instance TransitionM D3v2Selection_ (D3v2SimM row d) where
           TransitionFFI.transitionRemove_ transition
 
       _ -> pure unit
+
+-- =============================================================================
+-- SimulationM Instance (Force Simulations)
+-- =============================================================================
+
+-- | Helper function to apply PSD3v2 attributes to elements (synchronous, for tick callbacks)
+-- | Used by tick functions to update DOM on each simulation frame
+-- | Returns Unit directly (not Effect Unit) because D3 tick callbacks must be synchronous
+applyAttributeSync :: forall datum. Element -> datum -> Int -> Attribute datum -> Unit
+applyAttributeSync element datum index attr = case attr of
+  StaticAttr (AttributeName name) value ->
+    setAttributeSync_ name (attributeValueToString value) element
+
+  DataAttr (AttributeName name) f ->
+    setAttributeSync_ name (attributeValueToString (f datum)) element
+
+  IndexedAttr (AttributeName name) f ->
+    setAttributeSync_ name (attributeValueToString (f datum index)) element
+
+-- | FFI for setting attributes synchronously (no Effect wrapper)
+-- | Used in D3 tick callbacks which must be synchronous
+foreign import setAttributeSync_ :: String -> String -> Element -> Unit
+
+-- | SimulationM instance for D3v2SimM
+-- |
+-- | Delegates to existing PSD3.Internal.Simulation.Functions
+-- | but uses PSD3v2's Attribute system for tick callbacks
+-- |
+-- | Note: D3v2Selection_ is partially applied to (SBound) (Element) to match
+-- | the expected kind Type -> Type for SimulationM's sel parameter
+instance SimulationM (D3v2Selection_ SBound Element) (D3v2SimM row d) where
+  init config = do
+    -- 1. Initialize force library in simulation state
+    let forcesMap = Map.fromFoldable $ config.forces <#> \f ->
+          Tuple (view _name f) (unsafeCoerce f)
+    modify_ \state -> state { simulation = state.simulation #
+      (_Newtype <<< prop (Proxy :: Proxy "forceLibrary")) .~ forcesMap }
+
+    -- 2. Set up nodes first (must come before forces)
+    nodesInSim <- SimFn.simulationSetNodes config.nodes
+
+    -- 3. Activate specified forces (must come BEFORE setting links!)
+    SimFn.simulationActualizeForces config.activeForces
+
+    -- 4. Set links (returns simulation-enhanced data)
+    linksInSim <- SimFn.simulationSetLinks config.links config.nodes config.keyFn
+
+    -- 5. Set configuration variables (except Alpha)
+    SimFn.simulationSetVariable $ AlphaTarget config.config.alphaTarget
+    SimFn.simulationSetVariable $ AlphaMin config.config.alphaMin
+    SimFn.simulationSetVariable $ AlphaDecay config.config.alphaDecay
+    SimFn.simulationSetVariable $ VelocityDecay config.config.velocityDecay
+
+    -- 6. Add initial tick functions from config
+    handle <- use _handle
+    _ <- (Map.toUnfoldable config.ticks :: Array (Tuple _ _)) # traverse_ \(Tuple label step) ->
+      case step of
+        Step (D3v2Selection_ selection) attrs -> do
+          -- Extract elements and data from bound selection
+          let { elements, data: datumArray, indices } = unsafePartial case selection of
+                Selection (BoundSelection r) -> r
+
+          -- Create tick callback that applies PSD3v2 attributes
+          let makeTick _ =
+                let paired = Array.zipWith (\d e -> { datum: d, element: e }) datumArray elements
+                    _ = Array.mapWithIndex (\arrayIndex { datum, element } ->
+                          let logicalIndex = case indices of
+                                Just indexArray -> unsafePartial $ Array.unsafeIndex indexArray arrayIndex
+                                Nothing -> arrayIndex
+                              _ = attrs <#> \attr -> applyAttributeSync element datum logicalIndex attr
+                          in unit
+                        ) paired
+                in unit
+
+          -- Register tick callback with D3
+          pure $ onTick_ handle label makeTick
+
+    -- 7. Return enhanced data for joining to DOM
+    pure { nodes: nodesInSim, links: linksInSim }
+
+  addTickFunction label (Step (D3v2Selection_ selection) attrs) = do
+    handle <- use _handle
+
+    -- Extract elements and data from bound selection
+    let { elements, data: datumArray, indices } = unsafePartial case selection of
+          Selection (BoundSelection r) -> r
+
+    -- Create tick callback that applies PSD3v2 attributes
+    let makeTick _ =
+          let paired = Array.zipWith (\d e -> { datum: d, element: e }) datumArray elements
+              _ = Array.mapWithIndex (\arrayIndex { datum, element } ->
+                    let logicalIndex = case indices of
+                          Just indexArray -> unsafePartial $ Array.unsafeIndex indexArray arrayIndex
+                          Nothing -> arrayIndex
+                        _ = attrs <#> \attr -> applyAttributeSync element datum logicalIndex attr
+                    in unit
+                  ) paired
+          in unit
+
+    -- Register tick callback with D3
+    pure $ onTick_ handle label makeTick
+
+  removeTickFunction label = do
+    handle <- use _handle
+    pure $ onTick_ handle label (const unit)
+
+  start = SimFn.simulationStart
+
+  stop = SimFn.simulationStop

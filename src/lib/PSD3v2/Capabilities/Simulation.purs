@@ -63,11 +63,11 @@ data Step sel datum = Step (sel datum) (Array (Attribute datum))
 
 -- | Configuration for initializing a force simulation.
 -- |
--- | This mirrors PSD3.Capabilities.Simulation.SimulationInit but is
+-- | This mirrors PSD3.Capabilities.Simulation.SimulationConfig but is
 -- | type-safe with PSD3v2's patterns.
 -- |
 -- | ```purescript
--- | { nodes: nodesInSim, links: linksInSim } <- initSimulation
+-- | { nodes: nodesInSim, links: linksInSim } <- init
 -- |   { nodes: myNodeData
 -- |   , links: myLinkData
 -- |   , forces: [centerForce w h, chargeForce (const (-100.0))]
@@ -77,7 +77,7 @@ data Step sel datum = Step (sel datum) (Array (Attribute datum))
 -- |   , ticks: Map.empty
 -- |   }
 -- | ```
-type SimulationInit a key sel =
+type SimulationConfig a key sel =
   { nodes :: Array (SimulationNode a)
   , links :: Array D3Link_Unswizzled
   , forces :: Array (Force (SimulationNode a))
@@ -86,6 +86,9 @@ type SimulationInit a key sel =
   , keyFn :: SimulationNode a -> key
   , ticks :: Map Label (Step sel (SimulationNode a))  -- Initial tick functions (usually empty)
   }
+
+-- Alias for backward compatibility with initial naming
+type SimulationInit a key sel = SimulationConfig a key sel
 
 -- | Configuration for updating a running simulation.
 -- |
@@ -120,17 +123,16 @@ type SimulationUpdate a key =
   , keyFn :: SimulationNode a -> key
   }
 
--- | SimulationM2 capability for force-directed graph simulations.
+-- | SimulationM capability for force-directed graph simulations.
 -- |
--- | This type class provides methods for creating and updating force simulations.
--- | It requires SelectionM for DOM manipulation.
+-- | This is the BASE class for static simulations. Use SimulationM2 for dynamic updates.
 -- |
--- | ## Usage Pattern
+-- | ## Usage Pattern (Static Simulation)
 -- |
 -- | ```purescript
 -- | drawForceGraph :: forall m sel.
 -- |   SelectionM sel m =>
--- |   SimulationM2 sel m =>
+-- |   SimulationM sel m =>
 -- |   MonadEffect m =>
 -- |   MonadState { simulation :: D3SimulationState_ NodeType | r } m =>
 -- |   m Unit
@@ -139,43 +141,32 @@ type SimulationUpdate a key =
 -- |   svg <- select "#chart" >>= appendChild SVG [...]
 -- |   nodesGroup <- appendChild Group [...] svg
 -- |
--- |   -- 2. Initialize physics with SimulationM2
--- |   { nodes, links } <- initSimulation {...}
+-- |   -- 2. Initialize physics with SimulationM
+-- |   { nodes, links } <- init {...}
 -- |
 -- |   -- 3. Join data with SelectionM
 -- |   JoinResult { enter } <- joinData nodes "circle" nodesGroup
 -- |   circles <- append Circle [...] enter
 -- |
--- |   -- 4. Register tick callbacks with SimulationM2
+-- |   -- 4. Register tick callbacks with SimulationM
 -- |   addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
 -- |
 -- |   -- 5. Start animation
--- |   startSimulation
+-- |   start
 -- | ```
 -- |
 -- | ## State Requirement
 -- |
 -- | Implementations require `MonadState { simulation :: D3SimulationState_ a | r }`.
 -- | The simulation state is inherently mutable - we don't hide this.
-class (Monad m) <= SimulationM2 sel m | m -> sel where
+class (Monad m) <= SimulationM sel m | m -> sel where
   -- | Initialize a force simulation and return simulation-enhanced data.
   -- |
   -- | The simulation adds physics properties (vx, vy) to nodes and swizzles links
   -- | (converts IDs to object references).
   -- |
   -- | Returns nodes and links ready for data joining with SelectionM.
-  initSimulation :: forall a key. SimulationInit a key sel -> m { nodes :: Array (SimulationNode a), links :: Array D3Link_Swizzled }
-
-  -- | Update a running simulation declaratively.
-  -- |
-  -- | Handles:
-  -- | - Data updates (preserving node positions)
-  -- | - Force toggling
-  -- | - Link swizzling
-  -- | - Reheating simulation
-  -- |
-  -- | Returns updated nodes and swizzled links for re-joining to DOM.
-  updateSimulation :: forall a key. SimulationUpdate a key -> m { nodes :: Array (SimulationNode a), links :: Array D3Link_Swizzled }
+  init :: forall a key. SimulationConfig a key sel -> m { nodes :: Array (SimulationNode a), links :: Array D3Link_Swizzled }
 
   -- | Register a function to run on every simulation tick.
   -- |
@@ -188,12 +179,55 @@ class (Monad m) <= SimulationM2 sel m | m -> sel where
   removeTickFunction :: Label -> m Unit
 
   -- | Start the simulation animation.
-  startSimulation :: m Unit
+  start :: m Unit
 
   -- | Stop the simulation animation.
-  stopSimulation :: m Unit
+  stop :: m Unit
 
-  -- | Reheat the simulation (set alpha to given value and restart).
+-- | SimulationM2 extends SimulationM with dynamic update capabilities.
+-- |
+-- | This type class provides methods for DYNAMIC simulations where data changes.
+-- | For static simulations, SimulationM is sufficient.
+-- |
+-- | ## Usage Pattern (Dynamic Simulation)
+-- |
+-- | Same as SimulationM but adds:
+-- | ```purescript
+-- | -- Update data dynamically
+-- | { nodes, links } <- update
+-- |   { nodes: Just newNodeArray
+-- |   , links: Just newLinkArray
+-- |   , nodeFilter: Nothing
+-- |   , linkFilter: Nothing
+-- |   , activeForces: Nothing
+-- |   , config: Nothing
+-- |   , keyFn: _.id
+-- |   }
+-- |
+-- | -- Re-join updated data to DOM
+-- | JoinResult { enter, update, exit } <- joinData nodes "circle" nodesGroup
+-- | ...
+-- |
+-- | -- Reheat and restart
+-- | reheat 0.7
+-- | start
+-- | ```
+class (Monad m, SimulationM sel m) <= SimulationM2 sel m | m -> sel where
+  -- | Update a running simulation declaratively.
+  -- |
+  -- | Handles:
+  -- | - Data updates (preserving node positions)
+  -- | - Force toggling
+  -- | - Link swizzling
+  -- | - Reheating simulation
+  -- |
+  -- | All fields in SimulationUpdate are optional. Only provide what you want to change.
+  -- |
+  -- | Returns updated nodes and swizzled links for re-joining to DOM.
+  update :: forall a key. SimulationUpdate a key -> m { nodes :: Array (SimulationNode a), links :: Array D3Link_Swizzled }
+
+  -- | Reheat the simulation (set alpha to given value).
   -- |
   -- | Use this after updating data to re-animate the layout.
-  reheatSimulation :: Number -> m Unit
+  -- | You still need to call `start` (from SimulationM) to begin animation.
+  reheat :: Number -> m Unit

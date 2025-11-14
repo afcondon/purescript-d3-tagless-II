@@ -16,6 +16,10 @@ module PSD3v2.Attribute.Types
   , radius
   , x
   , y
+  , x1
+  , y1
+  , x2
+  , y2
   , width
   , height
   , d
@@ -201,6 +205,22 @@ x value = toAttr value (AttributeName "x")
 -- | Y position
 y :: forall datum a. ToAttr Number a datum => a -> Attribute datum
 y value = toAttr value (AttributeName "y")
+
+-- | Line start X coordinate
+x1 :: forall datum a. ToAttr Number a datum => a -> Attribute datum
+x1 value = toAttr value (AttributeName "x1")
+
+-- | Line start Y coordinate
+y1 :: forall datum a. ToAttr Number a datum => a -> Attribute datum
+y1 value = toAttr value (AttributeName "y1")
+
+-- | Line end X coordinate
+x2 :: forall datum a. ToAttr Number a datum => a -> Attribute datum
+x2 value = toAttr value (AttributeName "x2")
+
+-- | Line end Y coordinate
+y2 :: forall datum a. ToAttr Number a datum => a -> Attribute datum
+y2 value = toAttr value (AttributeName "y2")
 
 -- | Width attribute
 width :: forall datum a. ToAttr Number a datum => a -> Attribute datum
