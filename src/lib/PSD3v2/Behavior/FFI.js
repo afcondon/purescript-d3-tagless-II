@@ -76,8 +76,12 @@ export function attachSimulationDrag_(element) {
     const selection = d3.select(element);
 
     function dragstarted(event) {
-      if (simulation && !event.active) {
-        simulation.alphaTarget(0.3).restart();
+      if (simulation) {
+        // Always restart if simulation has stopped (alpha = 0)
+        // Only reheat if this is the first concurrent drag (!event.active)
+        if (!event.active || simulation.alpha() < 0.001) {
+          simulation.alphaTarget(0.3).restart();
+        }
       }
       event.subject.fx = event.subject.x;
       event.subject.fy = event.subject.y;

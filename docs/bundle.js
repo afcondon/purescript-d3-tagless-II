@@ -36338,8 +36338,10 @@
     return (simulation) => (label5) => () => {
       const selection2 = select_default2(element3);
       function dragstarted(event) {
-        if (simulation && !event.active) {
-          simulation.alphaTarget(0.3).restart();
+        if (simulation) {
+          if (!event.active || simulation.alpha() < 1e-3) {
+            simulation.alphaTarget(0.3).restart();
+          }
         }
         event.subject.fx = event.subject.x;
         event.subject.fy = event.subject.y;
