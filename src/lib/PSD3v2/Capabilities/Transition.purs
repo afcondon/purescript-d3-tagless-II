@@ -1,12 +1,13 @@
 module PSD3v2.Capabilities.Transition
   ( class TransitionM
   , withTransition
+  , withTransitionExit
   ) where
 
 import Prelude
 
 import PSD3v2.Attribute.Types (Attribute)
-import PSD3v2.Selection.Types (SBound)
+import PSD3v2.Selection.Types (SBound, SExiting)
 import PSD3v2.Transition.Types (TransitionConfig)
 import Web.DOM.Element (Element)
 
@@ -74,5 +75,16 @@ class Monad m <= TransitionM sel m | m -> sel where
     :: forall datum
      . TransitionConfig
     -> sel SBound Element datum
+    -> Array (Attribute datum)
+    -> m Unit
+
+  -- | Apply a transition to an exiting selection
+  -- |
+  -- | Similar to withTransition but works with selections in the exit phase.
+  -- | Useful for animating elements before they are removed (e.g., fade out, slide out).
+  withTransitionExit
+    :: forall datum
+     . TransitionConfig
+    -> sel SExiting Element datum
     -> Array (Attribute datum)
     -> m Unit

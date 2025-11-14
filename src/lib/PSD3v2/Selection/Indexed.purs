@@ -142,14 +142,19 @@ append
   -> Selection SPending parent datum
   -> IxSelectionM SPending SBound (Selection SBound Element datum)
 append elemType attrs (Selection impl) = IxSelectionM do
-  let { parentElements, pendingData, document: doc } = unsafePartial case impl of
+  let { parentElements, pendingData, indices, document: doc } = unsafePartial case impl of
         PendingSelection r -> r
   -- Create elements for each datum
   let paired = Array.zipWith Tuple pendingData parentElements
-  elements <- paired # traverseWithIndex \index (Tuple datum parent) -> do
+  elements <- paired # traverseWithIndex \arrayIndex (Tuple datum parent) -> do
+    -- Use logical index from indices array if present (for enter selections from joins)
+    let logicalIndex = case indices of
+          Just indexArray -> unsafePartial $ Array.unsafeIndex indexArray arrayIndex
+          Nothing -> arrayIndex
+
     element <- createElement_ (elementTypeToString elemType) doc
-    -- Set attributes on the new element
-    applyAttributes element datum index attrs
+    -- Set attributes on the new element using logical index
+    applyAttributes element datum logicalIndex attrs
     -- Bind data to element
     setElementData_ datum element
     -- Append to parent
@@ -159,6 +164,7 @@ append elemType attrs (Selection impl) = IxSelectionM do
   pure $ Selection $ BoundSelection
     { elements
     , data: pendingData
+    , indices  -- Preserve indices from pending selection (for enter selections from joins)
     , document: doc
     }
 
@@ -171,16 +177,20 @@ setAttrs
   -> Selection SBound Element datum
   -> IxSelectionM SBound SBound (Selection SBound Element datum)
 setAttrs attrs (Selection impl) = IxSelectionM do
-  let { elements, data: datumArray, document: doc } = unsafePartial case impl of
+  let { elements, data: datumArray, indices, document: doc } = unsafePartial case impl of
         BoundSelection r -> r
-  -- Apply attributes to each element
+  -- Apply attributes to each element, using logical indices if present
   let paired = Array.zipWith Tuple datumArray elements
-  paired # traverseWithIndex_ \index (Tuple datum element) ->
-    applyAttributes element datum index attrs
+  paired # traverseWithIndex_ \arrayIndex (Tuple datum element) -> do
+    let logicalIndex = case indices of
+          Just indexArray -> unsafePartial $ Array.unsafeIndex indexArray arrayIndex
+          Nothing -> arrayIndex
+    applyAttributes element datum logicalIndex attrs
 
   pure $ Selection $ BoundSelection
     { elements
     , data: datumArray
+    , indices  -- Preserve indices from input selection
     , document: doc
     }
 
@@ -213,6 +223,7 @@ merge (Selection impl1) (Selection impl2) = IxSelectionM do
   pure $ Selection $ BoundSelection
     { elements: els1 <> els2
     , data: data1 <> data2
+    , indices: Nothing  -- Merged selections lose index information
     , document: doc
     }
 
@@ -227,7 +238,7 @@ joinData
   => f datum
   -> String  -- Element selector for existing elements
   -> Selection SEmpty parent datum
-  -> IxSelectionM SEmpty SEmpty (JoinResult parent datum)
+  -> IxSelectionM SEmpty SEmpty (JoinResult Selection parent datum)
 joinData foldableData selector (Selection impl) = IxSelectionM do
   let { parentElements, document: doc } = unsafePartial case impl of
         EmptySelection r -> r
@@ -250,20 +261,29 @@ joinData foldableData selector (Selection impl) = IxSelectionM do
   let joinSets = Join.computeJoin newDataArray validOldBindings
 
   -- Build typed selections for each set
+  -- Sort enter bindings by newIndex to match the order in the new data
+  let sortedEnter = Array.sortBy (\a b -> compare a.newIndex b.newIndex) joinSets.enter
+
   let enterSelection = Selection $ PendingSelection
         { parentElements
-        , pendingData: joinSets.enter
+        , pendingData: sortedEnter <#> _.datum
+        , indices: Just (sortedEnter <#> _.newIndex)  -- Preserve logical positions for element creation
         , document: doc
         }
 
+  -- Sort update bindings by newIndex to match the order in the new data
+  let sortedUpdate = Array.sortBy (\a b -> compare a.newIndex b.newIndex) joinSets.update
+
   let updateSelection = Selection $ BoundSelection
-        { elements: joinSets.update <#> _.element
-        , data: joinSets.update <#> _.newDatum
+        { elements: sortedUpdate <#> _.element
+        , data: sortedUpdate <#> _.newDatum
+        , indices: Just (sortedUpdate <#> _.newIndex)  -- Preserve logical positions for transitions
         , document: doc
         }
 
   let exitSelection = Selection $ ExitingSelection
         { elements: joinSets.exit <#> _.element
+        , data: joinSets.exit <#> _.datum
         , document: doc
         }
 

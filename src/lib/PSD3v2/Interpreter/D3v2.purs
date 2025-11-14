@@ -7,6 +7,8 @@ module PSD3v2.Interpreter.D3v2
 import Prelude
 
 import Data.Array as Array
+import Data.FoldableWithIndex (traverseWithIndex_)
+import Data.Maybe (Maybe(..))
 import Data.Time.Duration (Milliseconds(..))
 import Data.Traversable (traverse_)
 import Effect (Effect)
@@ -16,7 +18,7 @@ import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(
 import PSD3v2.Capabilities.Selection (class SelectionM)
 import PSD3v2.Capabilities.Transition (class TransitionM)
 import PSD3v2.Selection.Operations as Ops
-import PSD3v2.Selection.Types (Selection(..), SelectionImpl(..), SBound)
+import PSD3v2.Selection.Types (Selection(..), SelectionImpl(..), SBound, JoinResult(..))
 import PSD3v2.Transition.FFI as TransitionFFI
 import Web.DOM.Element (Element)
 
@@ -63,7 +65,12 @@ instance SelectionM D3v2Selection_ D3v2M where
     pure $ D3v2Selection_ result
 
   joinData foldableData selector (D3v2Selection_ emptySelection) = D3v2M do
-    Ops.joinData foldableData selector emptySelection
+    JoinResult { enter, update, exit } <- Ops.joinData foldableData selector emptySelection
+    pure $ JoinResult
+      { enter: D3v2Selection_ enter
+      , update: D3v2Selection_ update
+      , exit: D3v2Selection_ exit
+      }
 
   append elemType attrs (D3v2Selection_ pendingSelection) = D3v2M do
     result <- Ops.append elemType attrs pendingSelection
@@ -71,6 +78,10 @@ instance SelectionM D3v2Selection_ D3v2M where
 
   setAttrs attrs (D3v2Selection_ boundSelection) = D3v2M do
     result <- Ops.setAttrs attrs boundSelection
+    pure $ D3v2Selection_ result
+
+  setAttrsExit attrs (D3v2Selection_ exitingSelection) = D3v2M do
+    result <- Ops.setAttrsExit attrs exitingSelection
     pure $ D3v2Selection_ result
 
   remove (D3v2Selection_ exitingSelection) = D3v2M do
@@ -91,16 +102,21 @@ instance SelectionM D3v2Selection_ D3v2M where
 instance TransitionM D3v2Selection_ D3v2M where
 
   withTransition config (D3v2Selection_ selection) attrs = D3v2M do
-    -- Extract elements and data from the bound selection
-    let { elements, data: datumArray } = unsafePartial case selection of
+    -- Extract elements, data, and indices from the bound selection
+    let { elements, data: datumArray, indices } = unsafePartial case selection of
           Selection (BoundSelection r) -> r
 
     -- Get transition configuration
     let Milliseconds duration = config.duration
 
-    -- Apply transition to each element with its corresponding datum
+    -- Apply transition to each element with its corresponding datum and index
     let paired = Array.zipWith (\d e -> {datum: d, element: e}) datumArray elements
-    paired # traverse_ \{ datum, element } -> do
+    paired # traverseWithIndex_ \arrayIndex { datum, element } -> do
+      -- Use logical index from indices array if present, otherwise use array index
+      let logicalIndex = case indices of
+            Just indexArray -> unsafePartial $ Array.unsafeIndex indexArray arrayIndex
+            Nothing -> arrayIndex
+
       -- Create a D3 transition for this element
       transition <- TransitionFFI.createTransition_
         duration
@@ -116,11 +132,40 @@ instance TransitionM D3v2Selection_ D3v2M where
         DataAttr (AttributeName name) f ->
           TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum)) transition
 
-        IndexedAttr (AttributeName name) _f ->
-          -- For indexed attributes during transitions, we'd need to track indices
-          -- For now, we'll skip these or apply without index
-          -- TODO: Enhance to support indexed attributes if needed
-          pure unit
+        IndexedAttr (AttributeName name) f ->
+          TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum logicalIndex)) transition
+
+  withTransitionExit config (D3v2Selection_ selection) attrs = D3v2M do
+    -- Extract elements and data from the exiting selection
+    let { elements, data: datumArray } = unsafePartial case selection of
+          Selection (ExitingSelection r) -> r
+
+    -- Get transition configuration
+    let Milliseconds duration = config.duration
+
+    -- Apply transition to each element with its corresponding datum and index
+    let paired = Array.zipWith (\d e -> {datum: d, element: e}) datumArray elements
+    paired # traverseWithIndex_ \index { datum, element } -> do
+      -- Create a D3 transition for this element
+      transition <- TransitionFFI.createTransition_
+        duration
+        (TransitionFFI.maybeMillisecondsToNullable config.delay)
+        (TransitionFFI.maybeEasingToNullable config.easing)
+        element
+
+      -- Apply each attribute to the transition
+      attrs # traverse_ \attr -> case attr of
+        StaticAttr (AttributeName name) value ->
+          TransitionFFI.transitionSetAttribute_ name (attributeValueToString value) transition
+
+        DataAttr (AttributeName name) f ->
+          TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum)) transition
+
+        IndexedAttr (AttributeName name) f ->
+          TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum index)) transition
+
+      -- Remove element after transition completes (D3 pattern: transition.remove())
+      TransitionFFI.transitionRemove_ transition
 
 -- Helper function to convert AttributeValue to String
 attributeValueToString :: AttributeValue -> String

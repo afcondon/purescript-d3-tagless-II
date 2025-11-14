@@ -51,6 +51,15 @@ export function transitionSetAttribute_(name) {
   };
 }
 
+// Remove elements after transition completes
+// This is the D3 pattern: transition.remove()
+export function transitionRemove_(transition) {
+  return function() {
+    console.log('transitionRemove_: Scheduling removal after transition');
+    transition.remove();
+  };
+}
+
 // Map easing names to D3 easing functions
 function getD3EasingFunction(name) {
   // D3 easing functions from d3-ease

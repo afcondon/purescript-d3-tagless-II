@@ -131,12 +131,91 @@ See `NATIVE_DOM_INTERPRETER_EXPLORATION.md` for complete details including:
 
 ## Next Steps (If Pursuing Further)
 
-1. Test GUP Native with key function architecture
-2. Implement ADT-based NativeSelection
-3. Add missing features (transitions, events)
-4. Consider applying insights to main PSD3 Selection type
-5. Explore phantom type states for compile-time correctness
+1. ✅ Test GUP Native with key function architecture
+2. ✅ Implement ADT-based NativeSelection
+3. ✅ Add missing features (transitions, events)
+4. ✅ Consider applying insights to main PSD3 Selection type
+5. ✅ Explore phantom type states for compile-time correctness
 
 ---
 
-**Note:** This branch preserves valuable architectural insights even if the implementation doesn't merge. The learnings about Selection type design apply to the entire PSD3 library.
+## Update: PSD3v2 Implementation (2025-11-14)
+
+**Status:** ✅ **Recommendations Successfully Implemented in PSD3v2**
+
+The architectural insights from this exploration were validated and implemented in the PSD3v2 library:
+
+### 1. Phantom Type States ✅
+Implemented exactly as recommended:
+```purescript
+-- PSD3v2 Selection with phantom type states
+newtype Selection (state :: Type) (parent :: Type) (datum :: Type)
+  = Selection (SelectionImpl parent datum)
+
+data SEmpty    -- No data bound
+data SBound    -- Data bound to elements
+data SPending  -- Enter selection
+data SExiting  -- Exit selection
+```
+
+### 2. Type-Safe Join Results ✅
+```purescript
+data JoinResult sel parent datum = JoinResult
+  { enter  :: sel SPending parent datum
+  , update :: sel SBound Element datum
+  , exit   :: sel SExiting Element datum
+  }
+```
+
+### 3. Index Preservation for Positioning ✅
+**Critical Discovery:** When implementing GUP, we found that selections must preserve **logical indices** in sorted data, not just array positions:
+
+```purescript
+| BoundSelection
+    { elements :: Array Element
+    , data :: Array datum
+    , indices :: Maybe (Array Int)  -- Just for join results
+    , document :: Document
+    }
+| PendingSelection
+    { parentElements :: Array Element
+    , pendingData :: Array datum
+    , indices :: Maybe (Array Int)  -- Just for join results
+    , document :: Document
+    }
+```
+
+**Why This Matters:** When data is sorted for display (e.g., alphabetically sorted letters in GUP), the position in the enter/update arrays (0,1,2,3...) differs from the position in the final sorted data. IndexedAttr functions like `x (\_ i -> 50.0 + toNumber i * 48.0)` must use the logical position, not the array position, to avoid overlapping elements.
+
+**Solution:** The join algorithm tracks `newIndex` for both enter and update data:
+```purescript
+type EnterBinding datum =
+  { datum :: datum
+  , newIndex :: Int  -- Position in the new data array
+  }
+
+type UpdateBinding datum =
+  { element :: Element
+  , oldDatum :: datum
+  , newDatum :: datum
+  , newIndex :: Int  -- Position in the new data array
+  }
+```
+
+### 4. Working Examples ✅
+- Three Little Circles (static)
+- Three Circles with Transitions (animated)
+- GUP (General Update Pattern with enter/update/exit)
+
+### 5. Pure PureScript Join Algorithm ✅
+Implemented in `src/lib/PSD3v2/Selection/Join.purs`:
+- O(n × m) worst case (good enough in practice)
+- Handles duplicate datums correctly via order-preserving array matching
+- Identity via `Eq` constraint (no separate key functions needed for simple cases)
+
+### Documentation
+See `PURESCRIPT_SELECTION_2_DESIGN.md` for complete design and implementation notes.
+
+---
+
+**Note:** This exploration's architectural insights were proven correct and are now the foundation of PSD3v2. The phantom type approach successfully eliminates entire classes of runtime errors while maintaining ergonomic APIs.

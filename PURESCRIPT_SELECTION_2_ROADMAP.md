@@ -1,8 +1,9 @@
 # PureScript Selection 2.0 - Implementation Roadmap
 
-**Branch:** `purescript-selection-2`
-**Status:** Phase 1 complete, ready for Phase 2
-**Target:** Proof of concept with Three Little Circles
+**Branch:** `feature/integrate-phantom-types-and-hierarchy`
+**Status:** ✅ Phases 1-5 Complete - Core functionality working (selections, joins, transitions, GUP)
+**Last Updated:** 2025-11-14
+**Next Target:** Hierarchy layouts (Tree, Cluster)
 
 ## Architecture Overview
 
@@ -121,7 +122,7 @@ cy :: forall datum. (datum -> Number) -> Attribute datum
 -- ... etc
 ```
 
-## Phase 2: DOM Operations (Minimal FFI)
+## Phase 2: DOM Operations (Minimal FFI) ✅ COMPLETE
 
 ### 2.1 Selection Operations
 **File:** `src/lib/PSD3v2/Selection/Operations.purs`
@@ -205,7 +206,7 @@ Use purescript-web-dom for most operations. Only FFI for:
 - Data binding: `element.__data__`
 - Attribute setting: `element.setAttribute`
 
-## Phase 3: Three Little Circles Proof of Concept
+## Phase 3: Three Little Circles Proof of Concept ✅ COMPLETE
 
 ### 3.1 Port Original Example
 **File:** `src/website/Viz/ThreeLittleCirclesV2.purs`
@@ -244,7 +245,7 @@ draw letters = do
 - Performance: Benchmark vs D3 version
 - Bundle size: Is it smaller due to tree-shaking?
 
-## Phase 4: Transitions (If time permits)
+## Phase 4: Transitions ✅ COMPLETE
 
 ### 4.1 Transition Attributes
 ```purescript
@@ -271,12 +272,12 @@ transitionTo
 
 ## Success Criteria
 
-- [ ] All code compiles with no `unsafeCoerce`
-- [ ] Three Little Circles works correctly
-- [ ] Type system prevents misuse (test with invalid code)
-- [ ] Performance within 20% of D3 version
-- [ ] Code is more concise than current PSD3
-- [ ] QuickCheck properties pass for join algorithm
+- [x] All code compiles with no `unsafeCoerce`
+- [x] Three Little Circles works correctly
+- [x] Type system prevents misuse (compile errors for invalid operations)
+- [ ] Performance within 20% of D3 version (not benchmarked yet)
+- [x] Code is more concise than current PSD3
+- [ ] QuickCheck properties pass for join algorithm (tests not written yet)
 
 ## Implementation Notes
 
@@ -299,6 +300,22 @@ Each type should have Pursuit-ready documentation explaining:
 - Why it has phantom types
 - How users should interact with it
 
+### Index Preservation Discovery (2025-11-14)
+
+**Critical Implementation Detail:** When implementing GUP, we discovered that selections must preserve **logical indices** in sorted data, not just array positions.
+
+**The Problem:** When data is sorted (e.g., alphabetically sorting letters), the position in enter/update arrays (0,1,2,3...) differs from the position in the final sorted data. IndexedAttr functions like `x (\_ i -> 50.0 + toNumber i * 48.0)` must use the logical position to avoid overlapping elements.
+
+**Solution:** Added `indices :: Maybe (Array Int)` field to both BoundSelection and PendingSelection. The join algorithm tracks `newIndex` for both enter and update data. When applying attributes, we use:
+
+```purescript
+let logicalIndex = case indices of
+      Just indexArray -> unsafePartial $ Array.unsafeIndex indexArray arrayIndex
+      Nothing -> arrayIndex
+```
+
+See `PURESCRIPT_SELECTION_2_DESIGN.md` for complete details.
+
 ## References
 
 - **Design Doc:** `PURESCRIPT_SELECTION_2_DESIGN.md`
@@ -307,7 +324,7 @@ Each type should have Pursuit-ready documentation explaining:
 - **Current Selection:** `src/lib/PSD3/Capabilities/Selection.purs`
 - **Current D3 Interpreter:** `src/lib/PSD3/Interpreter/D3.purs`
 
-## Phase 4: Tagless Final Integration
+## Phase 4.5: Tagless Final Integration ✅ COMPLETE
 
 ### 4.1 Revise Capability Type Classes
 **File:** `src/lib/PSD3v2/Capabilities/Selection.purs`
@@ -400,26 +417,43 @@ Rework to track operations:
 - Track phantom type transitions
 - Enable visualization of the data flow
 
-## Phase 5: Migration and Examples
+## Phase 5: Migration and Examples ✅ PARTIALLY COMPLETE
 
-### 5.1 Port Three Little Circles
+### 5.1 Port Three Little Circles ✅
 **File:** `src/website/Viz/ThreeLittleCirclesV2.purs`
 
-Use D3v2 interpreter via type class constraints.
+**Status:** Complete - Both static and animated versions working
 
-### 5.2 Port GUP Example
+### 5.2 Port GUP Example ✅
 **File:** `src/website/Viz/GUPv2.purs`
 
-Test the full enter-update-exit cycle with real interactions.
+**Status:** Complete - Full enter-update-exit cycle with transitions, random alphabetically-sorted letters
 
-### 5.3 Create Migration Guide
+**Key Discovery:** Index preservation required for correct positioning (see Implementation Notes section)
+
+### 5.3 Create Migration Guide ⏳
 **File:** `MIGRATION_TO_V2.md`
+
+**Status:** Not started - Will create after more examples are ported
 
 Document:
 - What changed and why
 - How to update existing code
 - Side-by-side examples (old vs new)
 - Benefits of the new approach
+
+### Examples Completed:
+- ✅ Three Little Circles (static)
+- ✅ Three Little Circles (animated with transitions)
+- ✅ GUP (General Update Pattern with enter/update/exit)
+
+### Examples TODO:
+- [ ] Tree layout (non-animating)
+- [ ] Tree layout (animated)
+- [ ] Cluster layout
+- [ ] Other hierarchy layouts (Treemap, Pack, Partition)
+- [ ] Bar chart
+- [ ] Line chart
 
 ## Next Steps After Phase 1-5
 

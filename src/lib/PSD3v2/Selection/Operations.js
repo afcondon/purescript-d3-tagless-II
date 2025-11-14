@@ -20,3 +20,12 @@ export function setElementData_(datum) {
     };
   };
 }
+
+// Set textContent property on an element
+export function setTextContent_(text) {
+  return function(element) {
+    return function() {
+      element.textContent = text;
+    };
+  };
+}

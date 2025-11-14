@@ -1087,6 +1087,86 @@ This design will be successful if:
 5. Implement minimal DOM interpreter
 6. Port Three Little Circles as first example
 
+## Implementation Notes
+
+### Index Preservation for Correct Positioning (2025-11-14)
+
+**Problem Discovered:** When implementing the GUP example with alphabetically sorted letters, we discovered that **both enter and update selections must preserve their logical indices** in the sorted data array, not just their array positions after sorting.
+
+**Why This Matters:**
+
+When transitioning from `['a','g','i','k','m','n','p','r','t','y']` to `['c','d','f','h','q','r','t','u','v','w','x','y','z']`:
+- Update letter 'r' should be at position 5 (x=290.0), not position 1
+- Enter letter 'r' should also be at position 5 (x=290.0), not position 1
+
+Without index preservation, letters would overlap because `traverseWithIndex` only knows their position in the enter/update arrays (0,1,2,3...), not their position in the final sorted alphabet.
+
+**Solution Implemented:**
+
+1. **Added `indices :: Maybe (Array Int)` field** to both `BoundSelection` and `PendingSelection`:
+   ```purescript
+   | BoundSelection
+       { elements :: Array Element
+       , data :: Array datum
+       , indices :: Maybe (Array Int)  -- Just for join results, Nothing otherwise
+       , document :: Document
+       }
+   | PendingSelection
+       { parentElements :: Array Element
+       , pendingData :: Array datum
+       , indices :: Maybe (Array Int)  -- Just for join results, Nothing otherwise
+       , document :: Document
+       }
+   ```
+
+2. **Enhanced join result types** to track indices:
+   ```purescript
+   type EnterBinding datum =
+     { datum :: datum
+     , newIndex :: Int  -- Position in the new data array
+     }
+
+   type UpdateBinding datum =
+     { element :: Element
+     , oldDatum :: datum
+     , newDatum :: datum
+     , newIndex :: Int  -- Position in the new data array
+     }
+   ```
+
+3. **Updated join algorithm** to populate indices:
+   ```purescript
+   -- In joinData operation:
+   let sortedEnter = Array.sortBy (\a b -> compare a.newIndex b.newIndex) joinSets.enter
+   let enterSelection = Selection $ PendingSelection
+         { parentElements
+         , pendingData: sortedEnter <#> _.datum
+         , indices: Just (sortedEnter <#> _.newIndex)  -- ← Preserves logical positions
+         , document: doc
+         }
+   ```
+
+4. **Modified attribute application** to use logical indices:
+   ```purescript
+   -- In append and setAttrs:
+   traverseWithIndex_ \arrayIndex datum -> do
+     let logicalIndex = case indices of
+           Just indexArray -> unsafePartial $ Array.unsafeIndex indexArray arrayIndex
+           Nothing -> arrayIndex
+     -- Use logicalIndex for IndexedAttr functions
+   ```
+
+**Key Insight:** When data is sorted/reordered for a join, the position in the enter/update arrays (0,1,2,3...) differs from the position in the final data array. IndexedAttr functions like `x (\_ i -> 50.0 + toNumber i * 48.0)` must use the logical position, not the array position.
+
+**Files Modified:**
+- `src/lib/PSD3v2/Selection/Types.purs`: Added `indices` field to BoundSelection and PendingSelection
+- `src/lib/PSD3v2/Selection/Join.purs`: Added `EnterBinding` type, track `newIndex` for enter data
+- `src/lib/PSD3v2/Selection/Operations.purs`: Populate and use `indices` in append, setAttrs, and joinData
+- `src/lib/PSD3v2/Selection/Indexed.purs`: Same changes for indexed monad version
+- `src/lib/PSD3v2/Interpreter/D3v2.purs`: Use `indices` field in transitions
+
+**Testing:** Verified with GUP example using random alphabetically-sorted letters. Without this fix, letters would overlap; with it, they smoothly transition to their correct alphabetical positions.
+
 ## References
 
 - **D3 Data Join:** https://bost.ocks.org/mike/join/
@@ -1099,5 +1179,6 @@ This design will be successful if:
 ---
 
 **Author:** Claude (with human guidance)
-**Status:** Design Exploration
-**Next Review:** After Phase 1 prototype
+**Status:** ✅ **Implemented** - Core features working (selections, joins, transitions, GUP)
+**Last Updated:** 2025-11-14
+**Next Review:** After additional examples (hierarchy layouts, force simulations)

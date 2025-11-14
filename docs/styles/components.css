@@ -2072,3 +2072,11 @@
   font-size: var(--font-size-tiny);
   color: var(--color-text-muted);
 }
+/* ============================================
+   PSD3v2 GUP Example Styles
+   ============================================ */
+
+/* Use monospace font for GUP letters to ensure consistent spacing */
+.gup-v2 text {
+  font-family: 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
+}

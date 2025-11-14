@@ -1,6 +1,7 @@
 module PSD3v2.Selection.Join
   ( computeJoin
   , ElementBinding(..)
+  , EnterBinding(..)
   , UpdateBinding(..)
   , JoinSets(..)
   ) where
@@ -8,9 +9,9 @@ module PSD3v2.Selection.Join
 import Prelude
 
 import Data.Array as Array
-import Data.Map as Map
-import Data.Maybe (Maybe(..))
-import Data.Tuple (Tuple(..))
+import Data.FoldableWithIndex (foldlWithIndex)
+import Data.Maybe (Maybe(..), fromMaybe)
+import Partial.Unsafe (unsafePartial)
 import Web.DOM.Element (Element)
 
 -- | Represents an element with its bound datum
@@ -19,28 +20,38 @@ type ElementBinding datum =
   , datum :: datum
   }
 
+-- | Represents a datum entering with its index in the new data array
+type EnterBinding datum =
+  { datum :: datum
+  , newIndex :: Int  -- Index in the new data array (for positioning)
+  }
+
 -- | Represents an element being updated from old to new datum
 type UpdateBinding datum =
   { element :: Element
   , oldDatum :: datum
   , newDatum :: datum
+  , newIndex :: Int  -- Index in the new data array (for positioning)
   }
 
 -- | The three disjoint sets resulting from a join
 type JoinSets datum =
-  { enter :: Array datum
+  { enter :: Array (EnterBinding datum)
   , update :: Array (UpdateBinding datum)
   , exit :: Array (ElementBinding datum)
   }
 
--- | Pure join algorithm matching D3 semantics
+-- | Pure join algorithm matching D3 semantics with support for duplicate datums
 -- |
 -- | This implements the data join pattern:
 -- | 1. New data not in old elements -> enter
 -- | 2. Data matching existing elements -> update
 -- | 3. Old elements not in new data -> exit
 -- |
--- | The Ord constraint is used for efficient matching via Map.
+-- | Handles duplicates correctly by matching in order. For example,
+-- | if old data is "HELLO" and new data is "WORLD", the two 'L's in "HELLO"
+-- | will match correctly with elements in order.
+-- |
 -- | Users control identity semantics via their Eq instance:
 -- |
 -- | ```purescript
@@ -48,28 +59,34 @@ type JoinSets datum =
 -- |   eq (Node a) (Node b) = a.id == b.id  -- Identity by ID
 -- | ```
 -- |
--- | Time complexity: O(n + m) where n = new data length, m = old elements length
--- | Space complexity: O(m) for the Map
+-- | Time complexity: O(n * m) worst case, where n = new data length, m = old elements length
+-- | Space complexity: O(m) for tracking remaining elements
 -- |
--- | Properties (see test suite):
+-- | Properties:
 -- | - Disjoint: No element appears in multiple sets
 -- | - Complete: All new data appears in enter ∪ update
 -- | - Complete: All old elements appear in update ∪ exit
 -- | - Order: enter and update preserve input order
+-- | - Duplicates: Handles duplicate datums by matching in order
 computeJoin
   :: forall datum
-   . Ord datum
+   . Eq datum
   => Array datum                           -- New data to bind
   -> Array (ElementBinding datum)          -- Currently bound elements
   -> JoinSets datum
 computeJoin newData oldBindings =
   let
-    -- Track which old elements we matched (for exit calculation)
-    -- We use a mutable approach via foldl to build matched set
-    matchResult = Array.foldl processNewDatum { matched: Map.empty, enter: [], update: [] } newData
+    -- Process each new datum with its index, tracking which old elements we've used
+    matchResult = foldlWithIndex processNewDatum
+      { remainingOld: oldBindings
+      , enter: []
+      , update: []
+      , matchedIndices: []
+      }
+      newData
 
-    -- Compute exit: old elements not in matched set
-    exitBindings = Array.filter (\{ datum } -> not $ Map.member datum matchResult.matched) oldBindings
+    -- Exit: old elements that weren't matched (not in matchedIndices)
+    exitBindings = matchResult.remainingOld
 
   in
     { enter: Array.reverse matchResult.enter   -- Reverse to restore input order
@@ -77,23 +94,28 @@ computeJoin newData oldBindings =
     , exit: exitBindings
     }
   where
-    -- Build a map from datum to element for O(1) lookup
-    oldMap :: Map.Map datum Element
-    oldMap = Map.fromFoldable $ oldBindings <#> \{ datum, element } ->
-      Tuple datum element
-
-    processNewDatum state datum =
-      case Map.lookup datum oldMap of
-        -- Datum not in old elements -> enter
+    processNewDatum newIndex state datum =
+      -- Find first remaining old element with matching datum
+      case Array.findIndex (\{ datum: d } -> d == datum) state.remainingOld of
+        -- No match found -> enter (track newIndex for positioning)
         Nothing ->
-          state { enter = Array.cons datum state.enter }
+          let enterBinding = { datum, newIndex }
+          in state { enter = Array.cons enterBinding state.enter }
 
-        -- Datum matches old element -> update
-        Just element ->
+        -- Match found -> update, and remove from remaining
+        Just oldIndex ->
           let
-            updateBinding = { element, oldDatum: datum, newDatum: datum }
+            matched = unsafePartial $ Array.unsafeIndex state.remainingOld oldIndex
+            newRemaining = fromMaybe state.remainingOld $ Array.deleteAt oldIndex state.remainingOld
+            updateBinding =
+              { element: matched.element
+              , oldDatum: datum
+              , newDatum: datum
+              , newIndex: newIndex  -- Track the index in the new data array
+              }
           in
             state
               { update = Array.cons updateBinding state.update
-              , matched = Map.insert datum element state.matched
+              , remainingOld = newRemaining
+              , matchedIndices = Array.cons oldIndex state.matchedIndices
               }

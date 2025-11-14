@@ -7,6 +7,7 @@ module PSD3v2.Capabilities.Selection
   , append
   , appendChild
   , setAttrs
+  , setAttrsExit
   , remove
   , merge
   ) where
@@ -114,7 +115,7 @@ class Monad m <= SelectionM sel m | m -> sel where
     => f datum
     -> String  -- Selector for existing elements
     -> sel SEmpty parent datum
-    -> m (JoinResult parent datum)
+    -> m (JoinResult sel parent datum)
 
   -- | Append new elements to a pending (enter) selection
   -- |
@@ -136,6 +137,16 @@ class Monad m <= SelectionM sel m | m -> sel where
      . Array (Attribute datum)
     -> sel SBound Element datum
     -> m (sel SBound Element datum)
+
+  -- | Set attributes on an exiting selection
+  -- |
+  -- | Similar to setAttrs but works on selections in the exit phase.
+  -- | Useful for styling elements before they animate out and are removed.
+  setAttrsExit
+    :: forall datum
+     . Array (Attribute datum)
+    -> sel SExiting Element datum
+    -> m (sel SExiting Element datum)
 
   -- | Remove elements from an exit selection
   -- |

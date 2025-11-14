@@ -2,6 +2,7 @@ module PSD3v2.Transition.FFI
   ( D3Transition
   , createTransition_
   , transitionSetAttribute_
+  , transitionRemove_
   , maybeMillisecondsToNullable
   , maybeEasingToNullable
   ) where
@@ -38,6 +39,14 @@ foreign import transitionSetAttribute_
   :: String         -- attribute name
   -> String         -- attribute value
   -> D3Transition   -- transition to modify
+  -> Effect Unit
+
+-- | Remove elements after transition completes
+-- |
+-- | Calls D3's transition.remove() which schedules the elements
+-- | to be removed from the DOM after the transition finishes.
+foreign import transitionRemove_
+  :: D3Transition   -- transition
   -> Effect Unit
 
 -- Helper to convert Maybe Milliseconds to Nullable Number

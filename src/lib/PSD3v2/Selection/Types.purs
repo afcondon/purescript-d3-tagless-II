@@ -3,6 +3,7 @@ module PSD3v2.Selection.Types where
 import Prelude
 
 import Data.Generic.Rep (class Generic)
+import Data.Maybe (Maybe)
 import Data.Show.Generic (genericShow)
 import Web.DOM.Element (Element)
 import Web.DOM.Document (Document)
@@ -53,15 +54,18 @@ data SelectionImpl parent datum
   | BoundSelection
       { elements :: Array Element
       , data :: Array datum
+      , indices :: Maybe (Array Int)  -- Nothing for regular selections, Just for update selections
       , document :: Document
       }
   | PendingSelection
       { parentElements :: Array Element
       , pendingData :: Array datum
+      , indices :: Maybe (Array Int)  -- Nothing for regular, Just for enter with indices
       , document :: Document
       }
   | ExitingSelection
       { elements :: Array Element
+      , data :: Array datum
       , document :: Document
       }
 
@@ -76,10 +80,12 @@ data SelectionImpl parent datum
 -- | - enter is SPending (needs append)
 -- | - update is SBound (can be modified)
 -- | - exit is SExiting (should be removed)
-data JoinResult parent datum = JoinResult
-  { enter  :: Selection SPending parent datum
-  , update :: Selection SBound Element datum
-  , exit   :: Selection SExiting Element datum
+-- | Polymorphic join result that works with any selection type wrapper
+-- | This allows interpreters to use their own selection types (e.g., D3v2Selection_)
+data JoinResult sel parent datum = JoinResult
+  { enter  :: sel SPending parent datum
+  , update :: sel SBound Element datum
+  , exit   :: sel SExiting Element datum
   }
 
 -- | SVG and HTML element types

@@ -28,6 +28,7 @@ module PSD3v2.Attribute.Types
   , textAnchor
   , dy
   , dx
+  , textContent
   ) where
 
 import Prelude
@@ -248,3 +249,11 @@ dy value = toAttr value (AttributeName "dy")
 -- | X offset for text
 dx :: forall datum a. ToAttr Number a datum => a -> Attribute datum
 dx value = toAttr value (AttributeName "dx")
+
+-- | Text content
+-- |
+-- | Sets the text content of an element (typically used with Text elements).
+-- | Uses the special attribute name "textContent" which will be handled
+-- | by the interpreter to set element.textContent rather than an attribute.
+textContent :: forall datum a. ToAttr String a datum => a -> Attribute datum
+textContent value = toAttr value (AttributeName "textContent")
