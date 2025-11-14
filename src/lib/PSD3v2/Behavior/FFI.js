@@ -105,7 +105,9 @@ export function attachSimulationDrag_(element) {
       .on('drag.' + label, dragged)
       .on('end.' + label, dragended);
 
-    selection.call(drag);
+    selection
+      .call(drag)
+      .style('cursor', 'pointer');  // Set cursor to pointer for draggable elements
 
     return element;
   };

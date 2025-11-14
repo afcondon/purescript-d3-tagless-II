@@ -36358,7 +36358,7 @@
         event.subject.fy = null;
       }
       const drag2 = drag_default().on("start." + label5, dragstarted).on("drag." + label5, dragged).on("end." + label5, dragended);
-      selection2.call(drag2);
+      selection2.call(drag2).style("cursor", "pointer");
       return element3;
     };
   }
