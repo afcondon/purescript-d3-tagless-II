@@ -88,12 +88,38 @@ data JoinResult sel parent datum = JoinResult
   , exit   :: sel SExiting Element datum
   }
 
--- | SVG and HTML element types
+-- | Output context for rendering
+-- | Determines which namespace to use when creating elements
+data RenderContext
+  = SVGContext    -- SVG namespace (for graphics)
+  | HTMLContext   -- HTML namespace (for DOM elements)
+  -- Future extensions:
+  -- | CanvasContext  -- Canvas 2D/WebGL rendering
+  -- | AudioContext   -- Web Audio API
+  -- | ARContext      -- Augmented reality / spatial
+  -- | StringContext  -- String-based interpreters (testing, pretty-printing, etc.)
+  --                  -- In this mode, elements become indentation groups:
+  --                  --   Group "chart" [...]
+  --                  --     Circle [cx 10, cy 20]
+  --                  --     Text "Hello"
+  --                  -- Useful for:
+  --                  -- - Unit testing (check structure without DOM)
+  --                  -- - Debugging (inspect tree as text)
+  --                  -- - Documentation generation
+  --                  -- - Alternative formats (Markdown, LaTeX, etc.)
+
+derive instance Eq RenderContext
+derive instance Ord RenderContext
+derive instance Generic RenderContext _
+instance Show RenderContext where
+  show = genericShow
+
+-- | Element types organized by rendering context
 -- |
--- | Used when appending new elements to specify what to create.
--- | We might expand this to support all SVG/HTML elements eventually,
--- | but starting with the most common ones for proof of concept.
+-- | This ADT makes the distinction between SVG and HTML elements explicit,
+-- | allowing the type system to guide proper namespace handling.
 data ElementType
+  -- SVG elements (require SVG namespace)
   = Circle
   | Rect
   | Path
@@ -101,11 +127,36 @@ data ElementType
   | Text
   | Group
   | SVG
+  -- HTML elements (use default namespace)
   | Div
   | Span
+  | Table
+  | Tr
+  | Td
+  | Th
+  | Tbody
+  | Thead
 
 derive instance Eq ElementType
 derive instance Ord ElementType
 derive instance Generic ElementType _
 instance Show ElementType where
   show = genericShow
+
+-- | Determine which rendering context an element belongs to
+elementContext :: ElementType -> RenderContext
+elementContext Circle = SVGContext
+elementContext Rect = SVGContext
+elementContext Path = SVGContext
+elementContext Line = SVGContext
+elementContext Text = SVGContext
+elementContext Group = SVGContext
+elementContext SVG = SVGContext
+elementContext Div = HTMLContext
+elementContext Span = HTMLContext
+elementContext Table = HTMLContext
+elementContext Tr = HTMLContext
+elementContext Td = HTMLContext
+elementContext Th = HTMLContext
+elementContext Tbody = HTMLContext
+elementContext Thead = HTMLContext

@@ -33,12 +33,12 @@ testSimpleTree = runD3v2M do
   -- Define the tree structure using the declarative API
   let tree :: Tree Unit
       tree =
-        T.named "svg" SVG [width 800.0, height 600.0, viewBox "0 0 800 600", id_ "simple-tree-svg"]
+        T.named SVG "svg" [width 800.0, height 600.0, viewBox "0 0 800 600", id_ "simple-tree-svg"]
           `T.withChild`
-            (T.named "container" Group [class_ "container"]
+            (T.named Group "container" [class_ "container"]
               `T.withChildren`
-                [ T.named "circle" Circle [cx 100.0, cy 100.0, radius 20.0, fill "steelblue"]
-                , T.named "text" Text [x 100.0, y 130.0, textContent "Hello Tree API!", textAnchor "middle"]
+                [ T.named Circle "circle" [cx 100.0, cy 100.0, radius 20.0, fill "steelblue"]
+                , T.named Text "text" [x 100.0, y 130.0, textContent "Hello Tree API!", textAnchor "middle"]
                 ])
 
   -- Render the tree

@@ -30,30 +30,30 @@ testNestedElements = runD3v2M do
   -- This is the pattern: Group → (Circle + Text)
   let tree :: Tree Unit
       tree =
-        T.named "svg" SVG
+        T.named SVG "svg"
           [ width 600.0
           , height 400.0
           , viewBox "0 0 600 400"
           , id_ "nested-example-svg"
           ]
           `T.withChild`
-            (T.named "mainGroup" Group [class_ "main-group"]
+            (T.named Group "mainGroup" [class_ "main-group"]
               `T.withChildren`
                 -- Multiple node groups, each with Circle + Text
                 [ -- Node 1
-                  T.named "node1" Group
+                  T.named Group "node1"
                     [ class_ "node"
                     , transform "translate(100, 100)"
                     ]
                     `T.withChildren`
-                      [ T.named "node1Circle" Circle
+                      [ T.named Circle "node1Circle"
                           [ cx 0.0, cy 0.0
                           , radius 25.0
                           , fill "steelblue"
                           , stroke "white"
                           , strokeWidth 2.0
                           ]
-                      , T.named "node1Label" Text
+                      , T.named Text "node1Label"
                           [ x 0.0, y 40.0
                           , textContent "Node A"
                           , textAnchor "middle"
@@ -62,19 +62,19 @@ testNestedElements = runD3v2M do
                       ]
 
                 , -- Node 2
-                  T.named "node2" Group
+                  T.named Group "node2"
                     [ class_ "node"
                     , transform "translate(300, 150)"
                     ]
                     `T.withChildren`
-                      [ T.named "node2Circle" Circle
+                      [ T.named Circle "node2Circle"
                           [ cx 0.0, cy 0.0
                           , radius 20.0
                           , fill "orange"
                           , stroke "white"
                           , strokeWidth 2.0
                           ]
-                      , T.named "node2Label" Text
+                      , T.named Text "node2Label"
                           [ x 0.0, y 35.0
                           , textContent "Node B"
                           , textAnchor "middle"
@@ -83,19 +83,19 @@ testNestedElements = runD3v2M do
                       ]
 
                 , -- Node 3
-                  T.named "node3" Group
+                  T.named Group "node3"
                     [ class_ "node"
                     , transform "translate(500, 100)"
                     ]
                     `T.withChildren`
-                      [ T.named "node3Circle" Circle
+                      [ T.named Circle "node3Circle"
                           [ cx 0.0, cy 0.0
                           , radius 30.0
                           , fill "green"
                           , stroke "white"
                           , strokeWidth 2.0
                           ]
-                      , T.named "node3Label" Text
+                      , T.named Text "node3Label"
                           [ x 0.0, y 45.0
                           , textContent "Node C"
                           , textAnchor "middle"

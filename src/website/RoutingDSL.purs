@@ -50,6 +50,7 @@ routes =
   <|> fpFtw
   <|> examplesGallery
   <|> psd3v2Examples
+  <|> treeAPI
   <|> example        -- Must come after examplesGallery (more specific)
   <|> acknowledgements
   <|> rootRedirect
@@ -191,6 +192,10 @@ examplesGallery = ExamplesGallery <$ lit "examples" <* end
 psd3v2Examples :: Match Route
 psd3v2Examples = PSD3v2Examples <$ lit "psd3v2" <* end
 
+-- | Match: /tree-api
+treeAPI :: Match Route
+treeAPI = TreeAPI <$ lit "tree-api" <* end
+
 -- | Match: /example/:exampleId
 example :: Match Route
 example = Example <$> (lit "example" *> str) <* end
@@ -241,6 +246,7 @@ routeToPath CodeAtlas = "/code-atlas"
 routeToPath FpFtw = "/fp-ftw"
 routeToPath ExamplesGallery = "/examples"
 routeToPath PSD3v2Examples = "/psd3v2"
+routeToPath TreeAPI = "/tree-api"
 routeToPath (Example exampleId) = "/example/" <> exampleId
 routeToPath Acknowledgements = "/acknowledgements"
 routeToPath NotFound = "/not-found"

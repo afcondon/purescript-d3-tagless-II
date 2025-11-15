@@ -325,6 +325,12 @@ elementTypeToString Group = "g"
 elementTypeToString SVG = "svg"
 elementTypeToString Div = "div"
 elementTypeToString Span = "span"
+elementTypeToString Table = "table"
+elementTypeToString Tr = "tr"
+elementTypeToString Td = "td"
+elementTypeToString Th = "th"
+elementTypeToString Tbody = "tbody"
+elementTypeToString Thead = "thead"
 
 -- ============================================================================
 -- FFI Declarations

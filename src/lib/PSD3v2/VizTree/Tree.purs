@@ -5,6 +5,7 @@ import Prelude
 import PSD3v2.Attribute.Types (Attribute)
 import PSD3v2.Selection.Types (ElementType)
 import Data.Maybe (Maybe(..))
+import Unsafe.Coerce (unsafeCoerce)
 
 -- | A simple tree structure for declaratively building DOM
 -- |
@@ -37,14 +38,29 @@ data Tree datum
       , joinData :: Array datum     -- Data to join
       , template :: datum -> Tree datum  -- Template builder - given datum, builds subtree
       }
+  -- | NestedJoin allows datum type to change during decomposition
+  -- | Used for nested data structures like 2D arrays, arrays of records with arrays, etc.
+  -- |
+  -- | Uses unsafeCoerce internally to handle type changing.
+  -- | This enables patterns like: Array (Array a) → table rows → table cells
+  -- |
+  -- | SAFETY: The decompose and template functions are provided together by nestedJoin,
+  -- | ensuring type safety at the call site. Internally we erase the inner type.
+  | NestedJoin
+      { name :: String                     -- Name for this join
+      , key :: String                      -- Element type to create (e.g., "tr")
+      , joinData :: Array datum            -- Outer data (e.g., rows)
+      , decompose :: datum -> Array datum   -- Decomposer (type-erased)
+      , template :: datum -> Tree datum     -- Template (type-erased)
+      }
 
 -- | Smart constructors
 
 -- | Create a named element
 -- |
--- | Usage: named "svg" SVG [width 800, height 600]
-named :: forall datum. String -> ElementType -> Array (Attribute datum) -> Tree datum
-named name elemType attrs =
+-- | Usage: named SVG "svg" [width 800, height 600]
+named :: forall datum. ElementType -> String -> Array (Attribute datum) -> Tree datum
+named elemType name attrs =
   Node { name: Just name, elemType, attrs, children: [] }
 
 -- | Create an anonymous element (won't be in the returned selections)
@@ -61,6 +77,7 @@ withChild :: forall datum. Tree datum -> Tree datum -> Tree datum
 withChild parent child = case parent of
   Node node -> Node node { children = node.children <> [child] }
   Join j -> Join j  -- Joins can't have additional children (template already defined)
+  NestedJoin nj -> NestedJoin nj  -- Nested joins can't have additional children
 
 -- | Add multiple children to a tree node
 -- |
@@ -69,6 +86,7 @@ withChildren :: forall datum. Tree datum -> Array (Tree datum) -> Tree datum
 withChildren parent newChildren = case parent of
   Node node -> Node node { children = node.children <> newChildren }
   Join j -> Join j
+  NestedJoin nj -> NestedJoin nj
 
 -- | Create a named data join
 -- |
@@ -93,6 +111,44 @@ joinData :: forall datum. String -> String -> Array datum -> (datum -> Tree datu
 joinData name key data' templateBuilder =
   Join { name, key, joinData: data', template: templateBuilder }
 
+-- | Create a nested data join with decomposition
+-- |
+-- | This allows the datum type to change at each level of nesting.
+-- | The decomposer extracts inner collections from outer data items.
+-- |
+-- | Usage:
+-- | ```purescript
+-- | -- 2D array → table
+-- | nestedJoin "rows" "tr" matrixData identity $ \rowData ->
+-- |   nestedJoin "cells" "td" [rowData] identity $ \cellValue ->
+-- |     elem Td [textContent (show cellValue)]
+-- | ```
+-- |
+-- | Or more commonly:
+-- | ```purescript
+-- | -- Array of records with nested arrays
+-- | nestedJoin "groups" "g" groups (_.items) $ \item ->
+-- |   elem Circle [cx item.x, cy item.y]
+-- | ```
+nestedJoin
+  :: forall outerDatum innerDatum
+   . String                                  -- Name for this join
+  -> String                                  -- Element type (e.g., "tr", "g")
+  -> Array outerDatum                        -- Outer data
+  -> (outerDatum -> Array innerDatum)        -- Decomposer: extract inner collection
+  -> (innerDatum -> Tree innerDatum)         -- Template for inner elements
+  -> Tree outerDatum
+nestedJoin name key data' decomposeFn templateFn =
+  NestedJoin
+    { name
+    , key
+    , joinData: data'
+    -- Use unsafeCoerce to erase the inner type
+    -- SAFETY: decomposeFn and templateFn are provided together, so they agree on innerDatum
+    , decompose: unsafeCoerce decomposeFn
+    , template: unsafeCoerce templateFn
+    }
+
 -- | Operators for Emmet-style syntax
 
 infixl 6 withChild as >:
@@ -115,21 +171,21 @@ siblings = identity
 -- |
 -- | Simple tree:
 -- | ```purescript
--- | tree = named "svg" SVG [width 800] >: named "circle" Circle [radius 5]
+-- | tree = named SVG "svg" [width 800] >: named Circle "circle" [radius 5]
 -- | ```
 -- |
 -- | Tree with siblings:
 -- | ```purescript
 -- | tree =
--- |   named "svg" SVG [width 800] `withChildren`
--- |     [ named "circle" Circle [radius 5]
--- |     , named "text" Text [content "Hello"]
+-- |   named SVG "svg" [width 800] `withChildren`
+-- |     [ named Circle "circle" [radius 5]
+-- |     , named Text "text" [content "Hello"]
 -- |     ]
 -- | ```
 -- |
 -- | Using operators:
 -- | ```purescript
 -- | tree =
--- |   named "svg" SVG [width 800] `withChildren`
--- |     (named "circle" Circle [radius 5] +: named "text" Text [content "Hello"])
+-- |   named SVG "svg" [width 800] `withChildren`
+-- |     (named Circle "circle" [radius 5] +: named Text "text" [content "Hello"])
 -- | ```

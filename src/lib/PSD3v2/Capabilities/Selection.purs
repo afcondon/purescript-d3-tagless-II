@@ -114,12 +114,12 @@ class Monad m <= SelectionM sel m | m -> sel where
   -- | merged <- merge enterEls updateEls
   -- | ```
   joinData
-    :: forall f parent datum
+    :: forall f parent parentDatum datum
      . Foldable f
     => Ord datum
     => f datum
     -> String  -- Selector for existing elements
-    -> sel SEmpty parent datum
+    -> sel SEmpty parent parentDatum
     -> m (JoinResult sel parent datum)
 
   -- | Append new elements to a pending (enter) selection
@@ -229,8 +229,8 @@ class Monad m <= SelectionM sel m | m -> sel where
   -- |   Nothing -> ...
   -- | ```
   renderTree
-    :: forall parent datum
+    :: forall parent parentDatum datum
      . Ord datum
-    => sel SEmpty parent datum
+    => sel SEmpty parent parentDatum
     -> Tree datum
     -> m (Map String (sel SBound Element datum))

@@ -25,7 +25,7 @@ import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable, toMaybe, toNullable)
 import Data.Traversable (traverse)
 import Data.TraversableWithIndex (traverseWithIndex)
-import Data.Tuple (Tuple(..), snd)
+import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Partial.Unsafe (unsafePartial, unsafeCrashWith)
@@ -36,7 +36,7 @@ import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(
 import PSD3v2.Behavior.Types (Behavior(..), DragConfig(..), ZoomConfig(..), ScaleExtent(..))
 import PSD3v2.Behavior.FFI as BehaviorFFI
 import PSD3v2.Selection.Join as Join
-import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), SBound, SEmpty, SExiting, SPending, Selection(..), SelectionImpl(..))
+import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), RenderContext(..), SBound, SEmpty, SExiting, SPending, Selection(..), SelectionImpl(..), elementContext)
 import PSD3v2.VizTree.Tree (Tree(..))
 import Web.DOM.Document (Document)
 import Web.DOM.Document as Document
@@ -344,13 +344,13 @@ merge (Selection impl1) (Selection impl2) = do
 -- | remove exit
 -- | ```
 joinData
-  :: forall f parent datum m
+  :: forall f parent parentDatum datum m
    . MonadEffect m
   => Foldable f
   => Ord datum
   => f datum
   -> String  -- Element selector for existing elements
-  -> Selection SEmpty parent datum
+  -> Selection SEmpty parent parentDatum
   -> m (JoinResult Selection parent datum)
 joinData foldableData selector (Selection impl) = liftEffect do
   let { parentElements, document: doc } = unsafePartial case impl of
@@ -495,21 +495,16 @@ getDocument (PendingSelection { document: doc }) = pure doc
 getDocument (ExitingSelection { document: doc }) = pure doc
 
 -- | Create an element with the appropriate namespace
--- | SVG elements must be created in the SVG namespace to preserve case-sensitive attributes
+-- | Uses the element's rendering context to determine namespace
 createElementWithNS :: ElementType -> Document -> Effect Element
 createElementWithNS elemType doc =
-  case elemType of
-    -- SVG elements need the SVG namespace
-    Circle -> Document.createElementNS (Just "http://www.w3.org/2000/svg") "circle" doc
-    Rect -> Document.createElementNS (Just "http://www.w3.org/2000/svg") "rect" doc
-    Path -> Document.createElementNS (Just "http://www.w3.org/2000/svg") "path" doc
-    Line -> Document.createElementNS (Just "http://www.w3.org/2000/svg") "line" doc
-    Text -> Document.createElementNS (Just "http://www.w3.org/2000/svg") "text" doc
-    Group -> Document.createElementNS (Just "http://www.w3.org/2000/svg") "g" doc
-    SVG -> Document.createElementNS (Just "http://www.w3.org/2000/svg") "svg" doc
-    -- HTML elements use default namespace
-    Div -> Document.createElement "div" doc
-    Span -> Document.createElement "span" doc
+  case elementContext elemType of
+    SVGContext ->
+      -- SVG elements need the SVG namespace
+      Document.createElementNS (Just "http://www.w3.org/2000/svg") (elementTypeToString elemType) doc
+    HTMLContext ->
+      -- HTML elements use default namespace
+      Document.createElement (elementTypeToString elemType) doc
 
 -- | Query all matching elements within parent elements
 -- | Uses web-dom library functions instead of custom FFI
@@ -648,6 +643,31 @@ elementTypeToString Group = "g"
 elementTypeToString SVG = "svg"
 elementTypeToString Div = "div"
 elementTypeToString Span = "span"
+elementTypeToString Table = "table"
+elementTypeToString Tr = "tr"
+elementTypeToString Td = "td"
+elementTypeToString Th = "th"
+elementTypeToString Tbody = "tbody"
+elementTypeToString Thead = "thead"
+
+-- | Convert string to ElementType (inverse of elementTypeToString)
+stringToElementType :: String -> ElementType
+stringToElementType "circle" = Circle
+stringToElementType "rect" = Rect
+stringToElementType "path" = Path
+stringToElementType "line" = Line
+stringToElementType "text" = Text
+stringToElementType "g" = Group
+stringToElementType "svg" = SVG
+stringToElementType "div" = Div
+stringToElementType "span" = Span
+stringToElementType "table" = Table
+stringToElementType "tr" = Tr
+stringToElementType "td" = Td
+stringToElementType "th" = Th
+stringToElementType "tbody" = Tbody
+stringToElementType "thead" = Thead
+stringToElementType _ = Group  -- Default to Group for unknown types
 
 -- | FFI function to set textContent property
 foreign import setTextContent_ :: String -> Element -> Effect Unit
@@ -659,9 +679,9 @@ foreign import setTextContent_ :: String -> Element -> Effect Unit
 -- | Helper: Render a single node and its children
 -- | Returns the created element and accumulated selections map
 renderNodeHelper
-  :: forall p d
+  :: forall p pd d
    . Ord d  -- Needed for joinData
-  => Selection SEmpty p d
+  => Selection SEmpty p pd
   -> Tree d
   -> Effect (Tuple Element (Map String (Selection SBound Element d)))
 renderNodeHelper parentSel (Node node) = do
@@ -695,26 +715,166 @@ renderNodeHelper parentSel (Join joinSpec) = do
   -- For now, just handle enter phase
   JoinResult { enter: enterSel } <- joinData joinSpec.joinData joinSpec.key parentSel
 
-  -- 2. Append the top-level elements (one per datum)
-  -- We need to figure out what element type to create
-  -- For now, let's default to Group
-  boundSel <- append Group [] enterSel
+  -- 2. For each datum in the enter selection, render the template tree
+  -- The template specifies what elements to create (e.g., Circle, Rect, etc.)
+  elementsAndMaps <- renderTemplatesForPendingSelection joinSpec.template enterSel
 
-  -- 3. For each bound element, render its children from the template
-  childSelections <- appendChildrenFromTemplate joinSpec.template boundSel
+  let elements = map fst elementsAndMaps
+  let childMaps = map snd elementsAndMaps
+  let combinedChildMap = Array.foldl Map.union Map.empty childMaps
 
-  -- 4. Add the join's collection to the selections map
-  let selectionsMap = Map.insert joinSpec.name (unsafeCoerce boundSel) childSelections
+  -- 3. Get the data array and document from enter selection
+  let Selection enterImpl = enterSel
+  let { pendingData, document: doc } = unsafePartial case enterImpl of
+        PendingSelection rec -> rec
+
+  -- 4. Create a bound selection from the rendered elements
+  let boundSel = Selection $ BoundSelection
+        { elements
+        , data: pendingData
+        , indices: Just (Array.range 0 (Array.length elements - 1))
+        , document: doc
+        }
+
+  -- 5. Add the join's collection to the selections map
+  let selectionsMap = Map.insert joinSpec.name (unsafeCoerce boundSel) combinedChildMap
 
   -- 5. Get first element for return value
-  let Selection boundImpl = boundSel
-  let firstElement = case boundImpl of
-        BoundSelection rec -> case Array.head rec.elements of
-          Just el -> el
-          Nothing -> unsafePartial $ unsafeCrashWith "renderTree Join: no elements created"
-        _ -> unsafePartial $ unsafeCrashWith "renderTree Join: expected BoundSelection"
+  let firstElement = case Array.head elements of
+        Just el -> el
+        Nothing -> unsafePartial $ unsafeCrashWith "renderTree Join: no elements created"
 
   pure $ Tuple firstElement selectionsMap
+
+-- Render a nested data join (with type decomposition)
+-- This handles cases like Array (Array a) → rows → cells
+renderNodeHelper parentSel (NestedJoin joinSpec) = do
+  -- 1. Perform data join on outer data
+  JoinResult { enter: enterSel } <- joinData joinSpec.joinData joinSpec.key parentSel
+
+  -- 2. For each outer datum, create the wrapper element and render inner items
+  elementsAndMaps <- renderNestedTemplatesForPendingSelection
+    joinSpec.decompose
+    joinSpec.template
+    (stringToElementType joinSpec.key)
+    enterSel
+
+  let elements = map fst elementsAndMaps
+  let childMaps = map snd elementsAndMaps
+  let combinedChildMap = Array.foldl Map.union Map.empty childMaps
+
+  -- 3. Get the data array and document from enter selection
+  let Selection enterImpl = enterSel
+  let { pendingData, document: doc } = unsafePartial case enterImpl of
+        PendingSelection rec -> rec
+
+  -- 4. Create a bound selection from the rendered elements
+  let boundSel = Selection $ BoundSelection
+        { elements
+        , data: pendingData
+        , indices: Just (Array.range 0 (Array.length elements - 1))
+        , document: doc
+        }
+
+  -- 5. Add the join's collection to the selections map
+  let selectionsMap = Map.insert joinSpec.name (unsafeCoerce boundSel) combinedChildMap
+
+  -- 6. Get first element for return value
+  let firstElement = case Array.head elements of
+        Just el -> el
+        Nothing -> unsafePartial $ unsafeCrashWith "renderTree NestedJoin: no elements created"
+
+  pure $ Tuple firstElement selectionsMap
+
+-- | Helper: Render nested templates for pending selection
+-- |
+-- | For each outer datum:
+-- | 1. Create the wrapper element (e.g., TR)
+-- | 2. Decompose to get inner data
+-- | 3. Render template for each inner datum
+renderNestedTemplatesForPendingSelection
+  :: forall outerDatum innerDatum parent
+   . Ord innerDatum
+  => (outerDatum -> Array outerDatum)  -- Decomposer (type-erased to outerDatum)
+  -> (outerDatum -> Tree outerDatum)   -- Template (type-erased to outerDatum)
+  -> ElementType                        -- Wrapper element type
+  -> Selection SPending parent outerDatum  -- Pending selection (pendingData has type Array outerDatum)
+  -> Effect (Array (Tuple Element (Map String (Selection SBound Element innerDatum))))
+renderNestedTemplatesForPendingSelection decomposer templateFn wrapperType pendingSel = do
+  let Selection impl = pendingSel
+  let { parentElements, pendingData, document: doc } = unsafePartial case impl of
+        PendingSelection rec -> rec
+
+  traverseWithIndex (\idx outerDatum -> do
+    let parentIdx = idx `mod` Array.length parentElements
+    case Array.index parentElements parentIdx of
+      Nothing -> unsafeCrashWith "renderNestedTemplatesForPendingSelection: no parent elements"
+      Just parent -> do
+        -- Create the wrapper element (e.g., <tr>)
+        wrapperElement <- createElementWithNS wrapperType doc
+        let wrapperNode = toNode wrapperElement
+        let parentNode = toNode parent
+        Node.appendChild wrapperNode parentNode
+
+        -- Decompose to get inner data
+        let innerDataArray = decomposer outerDatum
+
+        -- Render template for each inner datum
+        innerMaps <- traverse (\innerDatum -> do
+          let tree = unsafeCoerce templateFn innerDatum :: Tree innerDatum
+
+          let singleParentSel = Selection $ EmptySelection
+                { parentElements: [wrapperElement]
+                , document: doc
+                }
+
+          Tuple _ childSelections <- renderNodeHelper singleParentSel tree
+          pure childSelections
+          ) innerDataArray
+
+        let combinedInnerMap = Array.foldl Map.union Map.empty innerMaps
+        pure $ Tuple wrapperElement combinedInnerMap
+    ) pendingData
+
+-- | Helper: Render templates for each datum in a pending selection
+-- |
+-- | For each datum in the pending selection:
+-- | 1. Call template function to build the tree
+-- | 2. Render that tree to create the element
+-- | 3. Return the element and its child selections
+renderTemplatesForPendingSelection
+  :: forall datum parent
+   . Ord datum  -- Needed for recursive renderNodeHelper calls
+  => (datum -> Tree datum)  -- Template function
+  -> Selection SPending parent datum  -- Pending selection from join (pendingData has type Array datum)
+  -> Effect (Array (Tuple Element (Map String (Selection SBound Element datum))))
+renderTemplatesForPendingSelection templateFn pendingSel = do
+  -- Extract pending data from the selection
+  let Selection impl = pendingSel
+  let { parentElements, pendingData, document: doc } = unsafePartial case impl of
+        PendingSelection rec -> rec
+
+  -- For each (parent, datum) pair, render the template
+  traverseWithIndex (\idx datum -> do
+    -- Get the parent element for this datum
+    -- Distribute data across parents cyclically if there are more data than parents
+    let parentIdx = idx `mod` Array.length parentElements
+    case Array.index parentElements parentIdx of
+      Nothing -> unsafeCrashWith "renderTemplatesForPendingSelection: no parent elements"
+      Just parent -> do
+        -- Build the template tree for this datum
+        let tree = templateFn datum
+
+        -- Create an empty selection for this single parent
+        let singleParentSel = Selection $ EmptySelection
+              { parentElements: [parent]
+              , document: doc
+              }
+
+        -- Render the tree
+        Tuple element childSelections <- renderNodeHelper singleParentSel tree
+        pure $ Tuple element childSelections
+    ) pendingData
 
 -- | Helper: Render children from a template function for each datum in a bound selection
 -- |
@@ -758,14 +918,67 @@ appendChildrenFromTemplate templateFn boundSel = do
   -- Combine all the child selection maps
   pure $ Array.foldl Map.union Map.empty childMaps
 
+-- | Helper: Render children from a nested template with decomposition
+-- |
+-- | For each element in the bound selection:
+-- | 1. Extract the outer datum bound to that element
+-- | 2. Apply decomposer to get inner data array
+-- | 3. For each inner datum, call template to build child tree
+-- | 4. Render those trees as children of the element
+-- | 5. Collect all named selections from all children
+appendChildrenFromNestedTemplate
+  :: forall outerDatum innerDatum
+   . Ord innerDatum  -- Needed for recursive renderNodeHelper calls
+  => (outerDatum -> Array innerDatum)  -- Decomposer function
+  -> (innerDatum -> Tree innerDatum)    -- Template function
+  -> Selection SBound Element outerDatum  -- Parent selection with outer data
+  -> Effect (Map String (Selection SBound Element innerDatum))
+appendChildrenFromNestedTemplate decomposer templateFn boundSel = do
+  -- Extract elements and data from the bound selection
+  let Selection impl = boundSel
+  let { elements, data: outerDataArray, document: doc } = unsafePartial case impl of
+        BoundSelection rec -> rec
+
+  -- For each (element, outerDatum) pair, decompose and render inner children
+  childMaps <- traverseWithIndex (\idx outerDatum -> do
+    -- Get the element for this outer datum
+    case Array.index elements idx of
+      Nothing -> pure Map.empty
+      Just element -> do
+        -- Decompose outer datum to get inner data
+        let innerDataArray = decomposer outerDatum
+
+        -- For each inner datum, render the template
+        innerMaps <- traverse (\innerDatum -> do
+          -- Build the template tree for this inner datum
+          let childTree = templateFn innerDatum
+
+          -- Create an empty selection for this single element
+          let singleParentSel = Selection $ EmptySelection
+                { parentElements: [element]
+                , document: doc
+                }
+
+          -- Render the child tree
+          Tuple _ childSelections <- renderNodeHelper singleParentSel childTree
+          pure childSelections
+          ) innerDataArray
+
+        -- Combine selections from all inner items
+        pure $ Array.foldl Map.union Map.empty innerMaps
+    ) outerDataArray
+
+  -- Combine all the child selection maps
+  pure $ Array.foldl Map.union Map.empty childMaps
+
 -- | Render a declarative tree structure
 -- |
 -- | Walks the tree, creates DOM elements, and returns a map of named selections.
 -- | This is the core implementation of the declarative API.
 renderTree
-  :: forall parent datum
+  :: forall parent parentDatum datum
    . Ord datum  -- Needed for data joins
-  => Selection SEmpty parent datum
+  => Selection SEmpty parent parentDatum
   -> Tree datum
   -> Effect (Map String (Selection SBound Element datum))
 renderTree parent tree = do

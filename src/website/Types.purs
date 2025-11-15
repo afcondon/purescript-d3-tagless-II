@@ -115,6 +115,7 @@ data Route
   | ExamplesGallery -- Gallery: index of all visualization examples
   | Example String  -- Individual example page (e.g., "bar-chart", "lesmis-force")
   | PSD3v2Examples  -- PSD3v2 examples showcase page
+  | TreeAPI         -- Tree API examples (declarative tree API)
   | Acknowledgements -- Credits and acknowledgements
   | NotFound
 
@@ -154,6 +155,7 @@ instance showRoute :: Show Route where
   show FpFtw = "FP FTW"
   show ExamplesGallery = "Examples Gallery"
   show PSD3v2Examples = "PSD3v2 Examples"
+  show TreeAPI = "Tree API Examples"
   show (Example exampleId) = "Example: " <> exampleId
   show Acknowledgements = "Acknowledgements"
   show NotFound = "Not Found"

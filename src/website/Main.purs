@@ -29,6 +29,7 @@ import PSD3.Understanding.UnderstandingSelectionM as UnderstandingSelectionM
 import PSD3.Understanding.UnderstandingCapabilities as UnderstandingCapabilities
 import PSD3.Understanding.UnderstandingTypeSystem as UnderstandingTypeSystem
 import PSD3.Component.PSD3v2Examples as PSD3v2Examples
+import Component.TreeAPI as TreeAPI
 import PSD3.Understanding.UnderstandingDatumPattern as UnderstandingDatumPattern
 import PSD3.Understanding.UnderstandingGrammar as UnderstandingGrammar
 import PSD3.Understanding.SimpleCharts1 as SimpleCharts1
@@ -97,6 +98,7 @@ type Slots =
   , fpFtw :: forall q. H.Slot q Void Unit
   , examplesGallery :: forall q. H.Slot q Void Unit
   , psd3v2Examples :: forall q. H.Slot q Void Unit
+  , treeAPI :: forall q. H.Slot q Void Unit
   , example :: forall q. H.Slot q Void String
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
@@ -132,6 +134,7 @@ _wealthHealth = Proxy :: Proxy "wealthHealth"
 _fpFtw = Proxy :: Proxy "fpFtw"
 _examplesGallery = Proxy :: Proxy "examplesGallery"
 _psd3v2Examples = Proxy :: Proxy "psd3v2Examples"
+_treeAPI = Proxy :: Proxy "treeAPI"
 _example = Proxy :: Proxy "example"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
@@ -257,6 +260,9 @@ renderPage route = case spy "Route is" route of
 
   PSD3v2Examples ->
     HH.slot_ _psd3v2Examples unit PSD3v2Examples.component unit
+
+  TreeAPI ->
+    HH.slot_ _treeAPI unit TreeAPI.component unit
 
   Example exampleId ->
     renderExamplePage exampleId
