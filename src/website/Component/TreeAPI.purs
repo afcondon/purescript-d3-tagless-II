@@ -13,6 +13,7 @@ import Halogen.HTML.Properties as HP
 import Type.Proxy (Proxy(..))
 
 import D3.Viz.TreeAPI.ThreeLittleCircles as ThreeLittleCircles
+import D3.Viz.TreeAPI.ThreeLittleCirclesTransition as ThreeLittleCirclesTransition
 import D3.Viz.TreeAPI.SimpleTreeExample as SimpleTreeExample
 import D3.Viz.TreeAPI.NestedElementsExample as NestedElementsExample
 import D3.Viz.TreeAPI.BarChartExample as BarChartExample
@@ -29,6 +30,7 @@ type State =
 
 data Example
   = ThreeCircles
+  | ThreeCirclesTransition
   | SimpleTree
   | NestedElements
   | BarChart
@@ -85,6 +87,7 @@ render state =
         [ HH.h2_ [ HH.text "Basic Examples:" ]
         , HH.div [ HP.class_ (HH.ClassName "buttons") ]
             [ exampleButton state ThreeCircles "Three Little Circles" "Data join basics"
+            , exampleButton state ThreeCirclesTransition "Circles Transition" "Animated transitions"
             , exampleButton state SimpleTree "Simple Tree" "Basic nesting"
             , exampleButton state NestedElements "Nested Elements" "Multi-level (Group → Circle + Text)"
             , exampleButton state ThreeDimensions "Three Little Dimensions" "Nested data joins (2D array → table)"
@@ -130,6 +133,7 @@ exampleButton state ex label description =
 
 exampleTitle :: Example -> String
 exampleTitle ThreeCircles = "Three Little Circles (Data Join)"
+exampleTitle ThreeCirclesTransition = "Three Little Circles (Transition)"
 exampleTitle SimpleTree = "Simple Tree (Basic Structure)"
 exampleTitle NestedElements = "Nested Elements (Multi-Level)"
 exampleTitle BarChart = "Bar Chart"
@@ -151,6 +155,33 @@ tree = named SVG "svg" [...] `withChild`
       ])
 
 selections <- renderTree container tree
+"""
+
+exampleCode ThreeCirclesTransition = """
+-- Initial render: green circles in horizontal line
+initialTree = named SVG "svg" [...] `withChild`
+  (joinData "circles" "circle" [0, 1, 2] $ \\d ->
+    elem Circle [fill "green", cx (d * 100 + 100), ...])
+
+selections <- renderTree container initialTree
+
+-- Extract circles selection
+circlesSel <- liftEffect $ reselectD3v2 "circles" selections
+
+-- Transition to RGB colors with overlapping positions
+let transitionConfig = transitionWith
+      { duration: Milliseconds 1500.0
+      , delay: Just (Milliseconds 100.0)
+      , easing: Just ElasticOut
+      }
+
+withTransition transitionConfig circlesSel
+  [ fill colorFn
+  , cx cxFn
+  , cy cyFn
+  , radius 30.0
+  , fillOpacity 0.5
+  ]
 """
 
 exampleCode SimpleTree = """
@@ -300,6 +331,7 @@ handleAction = case _ of
     -- Render the selected example
     case example of
       ThreeCircles -> liftEffect ThreeLittleCircles.threeLittleCircles
+      ThreeCirclesTransition -> liftEffect ThreeLittleCirclesTransition.threeLittleCirclesTransition
       SimpleTree -> liftEffect SimpleTreeExample.testSimpleTree
       NestedElements -> liftEffect NestedElementsExample.testNestedElements
       BarChart -> liftEffect BarChartExample.barChart
