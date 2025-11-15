@@ -15,7 +15,7 @@ import Effect.Console as Console
 import PSD3v2.Attribute.Types (width, height, viewBox, class_, x, y, fill, transform)
 import PSD3v2.Axis.Axis (axisBottom, axisLeft, renderAxis, Scale)
 import PSD3v2.Capabilities.Selection (select, renderTree)
-import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
+import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, reselectD3v2)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
 import PSD3v2.VizTree.Tree as T
 import Web.DOM.Element (Element)
@@ -152,8 +152,8 @@ groupedBarChart = runD3v2M do
   axesSelections <- renderTree container axesTree
 
   -- Second tree: Grouped bars
-  -- Select the chart group to add bars
-  chartGroupSel <- select ".chart-content" :: _ (D3v2Selection_ SEmpty Element Unit)
+  -- Extract the chartGroup selection for the second render
+  chartGroupSel <- liftEffect $ reselectD3v2 "chartGroup" axesSelections
 
   -- Use nestedJoin to create state groups → bars
   let barsTree :: T.Tree StateGroup

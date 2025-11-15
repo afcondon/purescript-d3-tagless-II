@@ -6,6 +6,7 @@ module PSD3v2.Interpreter.D3v2
   , runD3v2SimM
   , execD3v2SimM
   , evalD3v2SimM
+  , reselectD3v2
   ) where
 
 import Prelude
@@ -36,7 +37,7 @@ import PSD3v2.Capabilities.Selection (class SelectionM)
 import PSD3v2.Capabilities.Simulation (class SimulationM, class SimulationM2, Step(..))
 import PSD3v2.Capabilities.Transition (class TransitionM)
 import PSD3v2.Selection.Operations as Ops
-import PSD3v2.Selection.Types (Selection(..), SelectionImpl(..), SBound, JoinResult(..))
+import PSD3v2.Selection.Types (Selection(..), SelectionImpl(..), SBound, SEmpty, JoinResult(..))
 import PSD3v2.Transition.FFI as TransitionFFI
 import Web.DOM.Element (Element)
 import Web.DOM.Element as Element
@@ -490,3 +491,19 @@ instance SimulationM2 (D3v2Selection_ SBound Element) (D3v2SimM row d) where
     pure { nodes: nodesInSim, links: linksInSim }
 
   reheat alpha = SimFn.simulationSetVariable $ Alpha alpha
+
+-- | Helper function for reselecting from D3v2 renderTree results
+-- |
+-- | This wraps the `reselect` function from Operations to work with D3v2Selection_ newtype.
+reselectD3v2
+  :: forall datum datumOut
+   . String
+  -> Map.Map String (D3v2Selection_ SBound Element datum)
+  -> Effect (D3v2Selection_ SEmpty Element datumOut)
+reselectD3v2 name selectionsMap = do
+  -- Unwrap D3v2Selection_ to Selection
+  let unwrappedMap = map (\(D3v2Selection_ sel) -> sel) selectionsMap
+  -- Call reselect
+  result <- Ops.reselect name unwrappedMap
+  -- Wrap result back in D3v2Selection_
+  pure $ D3v2Selection_ result

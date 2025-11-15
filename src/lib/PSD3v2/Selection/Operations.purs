@@ -12,6 +12,7 @@ module PSD3v2.Selection.Operations
   , on
   , onWithSimulation
   , renderTree
+  , reselect
   ) where
 
 import Prelude
@@ -986,6 +987,45 @@ renderTree parent tree = do
   -- Returns (element created, map of named selections in subtree)
   Tuple _ selectionsMap <- renderNodeHelper parent tree
   pure selectionsMap
+
+-- | Extract a named selection from a renderTree result and convert to SEmpty
+-- |
+-- | This is useful for the two-tree pattern where you need to render different
+-- | datum types in sequence:
+-- |
+-- | ```purescript
+-- | axesSelections <- renderTree container axesTree
+-- | chartGroup <- reselect "chartGroup" axesSelections
+-- | barsSelections <- renderTree chartGroup barsTree
+-- | ```
+-- |
+-- | If the named selection is not found, returns an empty selection.
+reselect
+  :: forall datum datumOut
+   . String  -- Name of the selection to extract
+  -> Map String (Selection SBound Element datum)
+  -> Effect (Selection SEmpty Element datumOut)
+reselect name selectionsMap = do
+  doc <- window >>= document <#> toDocument
+  case Map.lookup name selectionsMap of
+    Just (Selection impl) -> do
+      -- Extract the elements from the selection
+      -- Note: selections in the map might be EmptySelection (from appendChild)
+      -- or BoundSelection (from data joins), so we handle both
+      let elements = unsafePartial case impl of
+            BoundSelection r -> r.elements
+            EmptySelection r -> r.parentElements
+      -- Return as empty selection (parent for next render)
+      pure $ Selection $ EmptySelection
+        { parentElements: elements
+        , document: doc
+        }
+    Nothing -> do
+      -- Return empty selection with no parents
+      pure $ Selection $ EmptySelection
+        { parentElements: []
+        , document: doc
+        }
 
 -- ============================================================================
 -- FFI Declarations (D3-specific data binding)
