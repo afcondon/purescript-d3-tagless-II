@@ -143,6 +143,10 @@ instance SelectionM D3v2Selection_ D3v2M where
     result <- Ops.on behavior selection
     pure $ D3v2Selection_ result
 
+  renderTree (D3v2Selection_ parent) tree = D3v2M do
+    selectionsMap <- Ops.renderTree parent tree
+    pure $ map D3v2Selection_ selectionsMap
+
 -- | TransitionM instance for D3v2 interpreter
 -- |
 -- | Implements animated transitions using D3's transition engine.
@@ -278,6 +282,10 @@ instance SelectionM D3v2Selection_ (D3v2SimM row d) where
     -- Call onWithSimulation with the simulation state
     result <- liftEffect $ Ops.onWithSimulation behavior state.simulation selection
     pure $ D3v2Selection_ result
+
+  renderTree (D3v2Selection_ parent) tree = liftEffect $ do
+    selectionsMap <- Ops.renderTree parent tree
+    pure $ map D3v2Selection_ selectionsMap
 
 -- | TransitionM instance for D3v2SimM
 -- |

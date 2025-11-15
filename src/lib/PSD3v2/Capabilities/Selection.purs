@@ -11,15 +11,18 @@ module PSD3v2.Capabilities.Selection
   , remove
   , merge
   , on
+  , renderTree
   ) where
 
 import Prelude
 
 import Data.Foldable (class Foldable)
+import Data.Map (Map)
 import Data.Maybe (Maybe)
 import PSD3v2.Attribute.Types (Attribute)
 import PSD3v2.Behavior.Types (Behavior)
 import PSD3v2.Selection.Types (ElementType, JoinResult, SBound, SEmpty, SExiting, SPending)
+import PSD3v2.VizTree.Tree (Tree)
 import Web.DOM.Element (Element)
 
 -- | Type class for selection operations
@@ -201,3 +204,32 @@ class Monad m <= SelectionM sel m | m -> sel where
      . Behavior
     -> sel state elem datum
     -> m (sel state elem datum)
+
+  -- | Declarative tree rendering (high-level API)
+  -- |
+  -- | Renders an entire tree structure at once, returning a map of named selections.
+  -- | This is the declarative alternative to imperative appendChild chains.
+  -- |
+  -- | Example:
+  -- | ```purescript
+  -- | import PSD3v2.VizTree.Tree as T
+  -- |
+  -- | tree =
+  -- |   T.named "svg" SVG [width 800] `T.withChildren`
+  -- |     [ T.named "zoom" Group [class_ "zoom"] `T.withChild`
+  -- |         T.named "nodes" Group [class_ "nodes"]
+  -- |     ]
+  -- |
+  -- | container <- select "#viz"
+  -- | selections <- renderTree container tree
+  -- |
+  -- | -- Access named selections
+  -- | case Map.lookup "svg" selections of
+  -- |   Just svg -> ...
+  -- |   Nothing -> ...
+  -- | ```
+  renderTree
+    :: forall parent datum
+     . sel SEmpty parent datum
+    -> Tree datum
+    -> m (Map String (sel SBound Element datum))

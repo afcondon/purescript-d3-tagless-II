@@ -11,6 +11,7 @@ module PSD3v2.Selection.Operations
   , renderData
   , on
   , onWithSimulation
+  , renderTree
   ) where
 
 import Prelude
@@ -18,14 +19,16 @@ import Prelude
 import Data.Array as Array
 import Data.Foldable (class Foldable, traverse_)
 import Data.FoldableWithIndex (traverseWithIndex_)
+import Data.Map (Map)
+import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable, toMaybe, toNullable)
 import Data.Traversable (traverse)
 import Data.TraversableWithIndex (traverseWithIndex)
-import Data.Tuple (Tuple(..))
+import Data.Tuple (Tuple(..), snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
-import Partial.Unsafe (unsafePartial)
+import Partial.Unsafe (unsafePartial, unsafeCrashWith)
 import Unsafe.Coerce (unsafeCoerce)
 import PSD3.Internal.Simulation.Types (D3SimulationState_)
 import PSD3.Internal.Types (D3Simulation_)
@@ -34,6 +37,7 @@ import PSD3v2.Behavior.Types (Behavior(..), DragConfig(..), ZoomConfig(..), Scal
 import PSD3v2.Behavior.FFI as BehaviorFFI
 import PSD3v2.Selection.Join as Join
 import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), SBound, SEmpty, SExiting, SPending, Selection(..), SelectionImpl(..))
+import PSD3v2.VizTree.Tree (Tree(..))
 import Web.DOM.Document (Document)
 import Web.DOM.Document as Document
 import Web.DOM.Element (Element, fromNode, toNode, toParentNode)
@@ -647,6 +651,70 @@ elementTypeToString Span = "span"
 
 -- | FFI function to set textContent property
 foreign import setTextContent_ :: String -> Element -> Effect Unit
+
+-- ============================================================================
+-- Declarative Tree Rendering
+-- ============================================================================
+
+-- | Render a declarative tree structure
+-- |
+-- | Walks the tree, creates DOM elements, and returns a map of named selections.
+-- | This is the core implementation of the declarative API.
+renderTree
+  :: forall parent datum
+   . Selection SEmpty parent datum
+  -> Tree datum
+  -> Effect (Map String (Selection SBound Element datum))
+renderTree parent tree = do
+  -- Use a State-like pattern to accumulate named selections
+  -- Returns (element created, map of named selections in subtree)
+  Tuple _ selectionsMap <- renderNode parent tree
+  pure selectionsMap
+  where
+    -- Render a single node and its children
+    -- Returns the created element and accumulated selections map
+    renderNode
+      :: forall p d
+       . Selection SEmpty p d
+      -> Tree d
+      -> Effect (Tuple Element (Map String (Selection SBound Element d)))
+    renderNode parentSel (Node node) = do
+      -- Create this element
+      childSel <- appendChild node.elemType node.attrs parentSel
+
+      -- Get the first element from the created selection
+      let Selection impl = childSel
+      let element = case impl of
+            EmptySelection rec -> case Array.head rec.parentElements of
+              Just el -> el
+              Nothing -> unsafePartial $ unsafeCrashWith "renderTree: appendChild returned empty selection"
+            _ -> unsafePartial $ unsafeCrashWith "renderTree: appendChild should return EmptySelection"
+
+      -- Recursively render children
+      childMaps <- traverse (renderNode childSel) node.children
+      let combinedChildMap = Array.foldl Map.union Map.empty (map snd childMaps)
+
+      -- Add this node to the map if it has a name
+      let selectionsMap = case node.name of
+            Just name -> Map.insert name (unsafeCoerce childSel :: Selection SBound Element d) combinedChildMap
+            Nothing -> combinedChildMap
+
+      pure $ Tuple element selectionsMap
+
+    -- Render a data join
+    -- TODO: Full implementation with enter/update/exit
+    -- For prototype, we'll skip data joins and just return empty map
+    renderNode parentSel (Join _joinSpec) = do
+      -- Get first element from parent
+      let Selection parentImpl = parentSel
+      let parentElement = case parentImpl of
+            EmptySelection rec -> case Array.head rec.parentElements of
+              Just el -> el
+              Nothing -> unsafePartial $ unsafeCrashWith "renderTree Join: parent has no elements"
+            _ -> unsafePartial $ unsafeCrashWith "renderTree Join: expected EmptySelection parent"
+
+      -- Return empty map for now
+      pure $ Tuple parentElement Map.empty
 
 -- ============================================================================
 -- FFI Declarations (D3-specific data binding)
