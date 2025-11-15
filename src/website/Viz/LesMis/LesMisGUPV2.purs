@@ -28,10 +28,12 @@ import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
 import PSD3.Internal.FFI (keyIsID_)
 import PSD3v2.Attribute.Types (cx, cy, fill, radius, stroke, strokeWidth, x1, x2, y1, y2, id_, class_, width, height, viewBox)
 import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom, simulationDrag, ScaleExtent(..))
-import PSD3v2.Capabilities.Selection (select, appendChild, joinData, append, on, setAttrs, renderTree)
+import PSD3v2.Capabilities.Selection (select, on, renderTree)
 import PSD3v2.Capabilities.Simulation (init, addTickFunction, start, stop, Step(..), update, reheat)
-import PSD3v2.Interpreter.D3v2 (D3v2SimM, reselectD3v2)
-import PSD3v2.Selection.Types (ElementType(..), JoinResult(..))
+import PSD3v2.Interpreter.D3v2 (D3v2SimM, D3v2Selection_, reselectD3v2)
+import PSD3v2.Selection.Types (ElementType(..), SBound)
+import Partial.Unsafe (unsafePartial, unsafeCrashWith)
+import Web.DOM.Element (Element)
 import PSD3v2.VizTree.Tree as T
 import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
@@ -199,29 +201,48 @@ drawLesMisGUPV2 forcesArray activeForces model containerSelector = do
   -- Wrap links with indices for data join
   let indexedLinks = Array.mapWithIndex (\i link -> IndexedLink { index: i, link }) linksInSim
 
-  -- Join links to DOM
-  JoinResult { enter: linkEnter } <- joinData indexedLinks "line" linksGroup
-  linkLines <- append Line
-    [ x1 (\(IndexedLink il) -> (unsafeCoerce il.link).source.x :: Number)
-    , y1 (\(IndexedLink il) -> (unsafeCoerce il.link).source.y :: Number)
-    , x2 (\(IndexedLink il) -> (unsafeCoerce il.link).target.x :: Number)
-    , y2 (\(IndexedLink il) -> (unsafeCoerce il.link).target.y :: Number)
-    , strokeWidth (\(IndexedLink il) -> Number.sqrt (unsafeCoerce il.link).value :: Number)
-    , stroke (\(IndexedLink il) -> d3SchemeCategory10N_ (toNumber (unsafeCoerce il.link).target.group) :: String)
-    ]
-    linkEnter
+  -- Render links tree into linksGroup using Tree API
+  let linksTree :: T.Tree IndexedLink
+      linksTree =
+        T.joinData "linkElements" "line" indexedLinks $ \(IndexedLink il) ->
+          let link = unsafeCoerce il.link
+          in T.elem Line
+            [ x1 ((\(_ :: IndexedLink) -> link.source.x) :: IndexedLink -> Number)
+            , y1 ((\(_ :: IndexedLink) -> link.source.y) :: IndexedLink -> Number)
+            , x2 ((\(_ :: IndexedLink) -> link.target.x) :: IndexedLink -> Number)
+            , y2 ((\(_ :: IndexedLink) -> link.target.y) :: IndexedLink -> Number)
+            , strokeWidth ((\(_ :: IndexedLink) -> Number.sqrt link.value) :: IndexedLink -> Number)
+            , stroke ((\(_ :: IndexedLink) -> d3SchemeCategory10N_ (toNumber link.target.group)) :: IndexedLink -> String)
+            ]
 
-  -- Join nodes to DOM
-  JoinResult { enter: nodeEnter } <- joinData nodesInSim "circle" nodesGroup
-  nodeCircles <- append Circle
-    [ cx (\(d :: LesMisSimNode) -> d.x)
-    , cy (\(d :: LesMisSimNode) -> d.y)
-    , radius 5.0
-    , fill (\(d :: LesMisSimNode) -> d3SchemeCategory10N_ (toNumber d.group))
-    , stroke "#fff"
-    , strokeWidth 2.0
-    ]
-    nodeEnter
+  linksSelections <- renderTree linksGroup linksTree
+
+  -- Render nodes tree into nodesGroup using Tree API
+  let nodesTree :: T.Tree LesMisSimNode
+      nodesTree =
+        T.joinData "nodeElements" "circle" nodesInSim $ \(d :: LesMisSimNode) ->
+          T.elem Circle
+            [ cx d.x
+            , cy d.y
+            , radius 5.0
+            , fill (d3SchemeCategory10N_ (toNumber d.group))
+            , stroke "#fff"
+            , strokeWidth 2.0
+            ]
+
+  nodesSelections <- renderTree nodesGroup nodesTree
+
+  -- Extract bound selections for behaviors and tick functions
+  -- Use case pattern matching (NOT fromMaybe) when default might throw
+  let nodeCircles :: D3v2Selection_ SBound Element LesMisSimNode
+      nodeCircles = case Map.lookup "nodeElements" nodesSelections of
+        Just sel -> sel
+        Nothing -> unsafePartial $ unsafeCrashWith "nodeElements not found"
+
+  let linkLines :: D3v2Selection_ SBound Element IndexedLink
+      linkLines = case Map.lookup "linkElements" linksSelections of
+        Just sel -> sel
+        Nothing -> unsafePartial $ unsafeCrashWith "linkElements not found"
 
   -- Attach simulation drag to node circles
   _ <- on (Drag $ simulationDrag "lesmis-gup") nodeCircles
