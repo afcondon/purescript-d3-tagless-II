@@ -352,3 +352,97 @@ unpinNodes = do
   -- Reheat and restart
   reheat 0.5
   start
+
+-- | Filter nodes by minimum group number and re-render
+-- |
+-- | This demonstrates the full GUP cycle with Tree API:
+-- | - update simulation with node filter
+-- | - Re-render using Tree API (handles enter/update/exit)
+-- | - Restart simulation with filtered data
+filterByGroup :: forall row.
+  Int ->
+  D3v2SimM row LesMisSimNode Unit
+filterByGroup minGroup = do
+  -- Stop simulation
+  stop
+
+  -- Update simulation with node filter
+  { nodes: filteredNodes, links: filteredLinks } <- update
+    { nodes: Nothing
+    , links: Nothing
+    , nodeFilter: Just (\n -> n.group >= minGroup)
+    , linkFilter: Nothing
+    , activeForces: Nothing
+    , config: Nothing
+    , keyFn: keyIsID_
+    }
+
+  -- Select the parent groups (using select from the module)
+  container <- select "#lesmis-gup-v2"
+  linksGroup <- select "#links"
+  nodesGroup <- select "#nodes"
+
+  -- Wrap links with indices
+  let indexedLinks = Array.mapWithIndex (\i link -> IndexedLink { index: i, link }) filteredLinks
+
+  -- Re-render links tree with filtered data
+  let linksTree :: T.Tree IndexedLink
+      linksTree =
+        T.joinData "linkElements" "line" indexedLinks $ \(IndexedLink il) ->
+          let link = unsafeCoerce il.link
+          in T.elem Line
+            [ x1 ((\(_ :: IndexedLink) -> link.source.x) :: IndexedLink -> Number)
+            , y1 ((\(_ :: IndexedLink) -> link.source.y) :: IndexedLink -> Number)
+            , x2 ((\(_ :: IndexedLink) -> link.target.x) :: IndexedLink -> Number)
+            , y2 ((\(_ :: IndexedLink) -> link.target.y) :: IndexedLink -> Number)
+            , strokeWidth ((\(_ :: IndexedLink) -> Number.sqrt link.value) :: IndexedLink -> Number)
+            , stroke ((\(_ :: IndexedLink) -> d3SchemeCategory10N_ (toNumber link.target.group)) :: IndexedLink -> String)
+            ]
+
+  linksSelections <- renderTree linksGroup linksTree
+
+  -- Re-render nodes tree with filtered data
+  let nodesTree :: T.Tree LesMisSimNode
+      nodesTree =
+        T.joinData "nodeElements" "circle" filteredNodes $ \(d :: LesMisSimNode) ->
+          T.elem Circle
+            [ cx d.x
+            , cy d.y
+            , radius 5.0
+            , fill (d3SchemeCategory10N_ (toNumber d.group))
+            , stroke "#fff"
+            , strokeWidth 2.0
+            ]
+
+  nodesSelections <- renderTree nodesGroup nodesTree
+
+  -- Extract updated selections
+  let nodeCircles :: D3v2Selection_ SBound Element LesMisSimNode
+      nodeCircles = case Map.lookup "nodeElements" nodesSelections of
+        Just sel -> sel
+        Nothing -> unsafePartial $ unsafeCrashWith "nodeElements not found"
+
+  let linkLines :: D3v2Selection_ SBound Element IndexedLink
+      linkLines = case Map.lookup "linkElements" linksSelections of
+        Just sel -> sel
+        Nothing -> unsafePartial $ unsafeCrashWith "linkElements not found"
+
+  -- Re-attach behaviors
+  _ <- on (Drag $ simulationDrag "lesmis-gup") nodeCircles
+
+  -- Update tick functions
+  addTickFunction "nodes" $ Step nodeCircles
+    [ cx (\(d :: LesMisSimNode) -> d.x)
+    , cy (\(d :: LesMisSimNode) -> d.y)
+    ]
+
+  addTickFunction "links" $ Step linkLines
+    [ x1 (\(IndexedLink il) -> (unsafeCoerce il.link).source.x :: Number)
+    , y1 (\(IndexedLink il) -> (unsafeCoerce il.link).source.y :: Number)
+    , x2 (\(IndexedLink il) -> (unsafeCoerce il.link).target.x :: Number)
+    , y2 (\(IndexedLink il) -> (unsafeCoerce il.link).target.y :: Number)
+    ]
+
+  -- Reheat and restart
+  reheat 0.8
+  start

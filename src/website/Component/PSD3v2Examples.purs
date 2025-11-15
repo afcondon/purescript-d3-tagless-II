@@ -53,6 +53,7 @@ data Action
   | MoveLesMisToGrid
   | MoveLesMisToPhylotaxis
   | UnpinLesMisNodes
+  | FilterLesMisNodes Int
 
 -- | Forces configuration for LesMis
 forces :: { center :: Force LesMisSimNode, collision :: Force LesMisSimNode, links :: Force LesMisSimNode, manyBodyNeg :: Force LesMisSimNode }
@@ -183,21 +184,38 @@ renderLesMisGUPExample =
         [ HH.text "Force-directed graph with SimulationM2 update pattern. Transition between force-directed, grid, and phylotaxis (sunflower spiral) layouts." ]
     , HH.div
         [ HP.classes [ HH.ClassName "gup-controls" ] ]
-        [ HH.button
+        [ HH.h4_ [ HH.text "Layout:" ]
+        , HH.button
             [ HP.classes [ HH.ClassName "gup-button" ]
             , HE.onClick \_ -> MoveLesMisToGrid
             ]
-            [ HH.text "Move to Grid" ]
+            [ HH.text "Grid" ]
         , HH.button
             [ HP.classes [ HH.ClassName "gup-button" ]
             , HE.onClick \_ -> MoveLesMisToPhylotaxis
             ]
-            [ HH.text "Move to Phylotaxis" ]
+            [ HH.text "Phylotaxis" ]
         , HH.button
             [ HP.classes [ HH.ClassName "gup-button" ]
             , HE.onClick \_ -> UnpinLesMisNodes
             ]
-            [ HH.text "Unpin (Force Layout)" ]
+            [ HH.text "Force" ]
+        , HH.h4_ [ HH.text "Filter (GUP):" ]
+        , HH.button
+            [ HP.classes [ HH.ClassName "gup-button" ]
+            , HE.onClick \_ -> FilterLesMisNodes 0
+            ]
+            [ HH.text "All" ]
+        , HH.button
+            [ HP.classes [ HH.ClassName "gup-button" ]
+            , HE.onClick \_ -> FilterLesMisNodes 5
+            ]
+            [ HH.text "Group≥5" ]
+        , HH.button
+            [ HP.classes [ HH.ClassName "gup-button" ]
+            , HE.onClick \_ -> FilterLesMisNodes 8
+            ]
+            [ HH.text "Group≥8" ]
         ]
     , HH.div
         [ HP.classes [ HH.ClassName "example-viz-container" ]
@@ -328,4 +346,11 @@ handleAction = case _ of
     state <- H.get
     newState <- H.liftEffect $ D3v2.execD3v2SimM { simulation: state.lesMisGUPSimulation } do
       LesMisGUPV2.unpinNodes
+    H.modify_ \s -> s { lesMisGUPSimulation = newState.simulation }
+
+  FilterLesMisNodes minGroup -> do
+    log $ "Filtering Les Mis nodes to group >= " <> show minGroup
+    state <- H.get
+    newState <- H.liftEffect $ D3v2.execD3v2SimM { simulation: state.lesMisGUPSimulation } do
+      LesMisGUPV2.filterByGroup minGroup
     H.modify_ \s -> s { lesMisGUPSimulation = newState.simulation }
