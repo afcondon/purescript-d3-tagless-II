@@ -14664,11 +14664,11 @@
       };
     },
     renderTree: function(dictOrd) {
-      var renderTree17 = renderTree2(dictOrd);
+      var renderTree18 = renderTree2(dictOrd);
       return function(v) {
         return function(tree4) {
           return function __do5() {
-            var selectionsMap = renderTree17(v)(tree4)();
+            var selectionsMap = renderTree18(v)(tree4)();
             return map18(D3v2Selection_)(selectionsMap);
           };
         };
@@ -14803,11 +14803,11 @@
       };
     },
     renderTree: function(dictOrd) {
-      var renderTree17 = renderTree2(dictOrd);
+      var renderTree18 = renderTree2(dictOrd);
       return function(v) {
         return function(tree4) {
           return liftEffect2(function __do5() {
-            var selectionsMap = renderTree17(v)(tree4)();
+            var selectionsMap = renderTree18(v)(tree4)();
             return map18(D3v2Selection_)(selectionsMap);
           });
         };
@@ -41530,7 +41530,7 @@
     var Monad0 = dictSelectionM.Monad0();
     var bind108 = bind(Monad0.Bind1());
     var select12 = select(dictSelectionM);
-    var appendChild7 = appendChild(dictSelectionM);
+    var appendChild6 = appendChild(dictSelectionM);
     var renderData4 = renderData(dictSelectionM)(foldableArray)(ordInt);
     var pure60 = pure(Monad0.Applicative0());
     return function(selector) {
@@ -41553,7 +41553,7 @@
         })];
       };
       return bind108(select12(selector))(function(container) {
-        return bind108(appendChild7(SVG.value)([id_7("three-little-circles-v2-svg"), width32(400), height32(150), viewBox13("0 0 400 150")])(container))(function(svg2) {
+        return bind108(appendChild6(SVG.value)([id_7("three-little-circles-v2-svg"), width32(400), height32(150), viewBox13("0 0 400 150")])(container))(function(svg2) {
           return bind108(renderData4(Circle.value)([32, 57, 293])("circle")(svg2)(new Just(enterAttrs2))(new Just(updateAttrs2))(Nothing.value))(function() {
             return pure60(unit);
           });
@@ -44891,7 +44891,7 @@
   var flattenTree2 = /* @__PURE__ */ fromFoldable(foldableTree);
   var initializeAnimatedTree = function(dictSelectionM) {
     var select12 = select(dictSelectionM);
-    var appendChild7 = appendChild(dictSelectionM);
+    var appendChild6 = appendChild(dictSelectionM);
     var joinData7 = joinData2(dictSelectionM)(foldableArray);
     var joinData14 = joinData7(ordLink);
     var append210 = append4(dictSelectionM);
@@ -44917,9 +44917,9 @@
           var links = makeLinks11(positioned);
           return discard115(liftEffect67(log2("AnimatedTreeV2: Initial render with " + (show132(length(nodes)) + " nodes"))))(function() {
             return bind125(select12(containerSelector))(function(container) {
-              return bind125(appendChild7(SVG.value)([id_8("animated-tree-v2-svg"), width35(1200), height35(900), viewBox14("0 0 1200 900"), class_14("animated-tree-v2")])(container))(function(svg2) {
-                return bind125(appendChild7(Group.value)([id_8("animated-tree-v2-links"), class_14("links")])(svg2))(function(linksGroup) {
-                  return bind125(appendChild7(Group.value)([id_8("animated-tree-v2-nodes"), class_14("nodes")])(svg2))(function(nodesGroup) {
+              return bind125(appendChild6(SVG.value)([id_8("animated-tree-v2-svg"), width35(1200), height35(900), viewBox14("0 0 1200 900"), class_14("animated-tree-v2")])(container))(function(svg2) {
+                return bind125(appendChild6(Group.value)([id_8("animated-tree-v2-links"), class_14("links")])(svg2))(function(linksGroup) {
+                  return bind125(appendChild6(Group.value)([id_8("animated-tree-v2-nodes"), class_14("nodes")])(svg2))(function(nodesGroup) {
                     return bind125(joinData14(links)("path")(linksGroup))(function(v) {
                       return bind125(append210(Path.value)([d24(linkPath5), fill49("none"), stroke8("#555"), strokeWidth38(1.5), class_14("link")])(v.value0.enter))(function() {
                         return bind125(joinData24(nodes)("circle")(nodesGroup))(function(v1) {
@@ -45047,12 +45047,12 @@
     var Monad0 = dictSelectionM.Monad0();
     var bind108 = bind(Monad0.Bind1());
     var select12 = select(dictSelectionM);
-    var appendChild7 = appendChild(dictSelectionM);
+    var appendChild6 = appendChild(dictSelectionM);
     var pure60 = pure(Monad0.Applicative0());
     return function(containerSelector) {
       return bind108(select12(containerSelector))(function(container) {
-        return bind108(appendChild7(SVG.value)([id_9("gup-v2-svg"), width36(800), height36(400), viewBox15("0 0 800 400"), class_15("gup-v2")])(container))(function(svg2) {
-          return bind108(appendChild7(Group.value)([id_9("letter-group")])(svg2))(function() {
+        return bind108(appendChild6(SVG.value)([id_9("gup-v2-svg"), width36(800), height36(400), viewBox15("0 0 800 400"), class_15("gup-v2")])(container))(function(svg2) {
+          return bind108(appendChild6(Group.value)([id_9("letter-group")])(svg2))(function() {
             return pure60("#letter-group");
           });
         });
@@ -45246,13 +45246,13 @@
   var stop5 = /* @__PURE__ */ stop(simulationMD3v2Selection_);
   var pure37 = /* @__PURE__ */ pure(applicativeEffect);
   var select10 = /* @__PURE__ */ select(selectionMD3v2Selection_D1);
-  var appendChild5 = /* @__PURE__ */ appendChild(selectionMD3v2Selection_D1);
   var width37 = /* @__PURE__ */ width(toAttrNumberNumber);
   var height37 = /* @__PURE__ */ height(toAttrNumberNumber);
   var viewBox16 = /* @__PURE__ */ viewBox(toAttrStringString);
   var show68 = /* @__PURE__ */ show(showNumber);
   var id_10 = /* @__PURE__ */ id_(toAttrStringString);
   var class_16 = /* @__PURE__ */ class_(toAttrStringString);
+  var renderTree17 = /* @__PURE__ */ renderTree(selectionMD3v2Selection_D1)(ordUnit);
   var on6 = /* @__PURE__ */ on2(selectionMD3v2Selection_D1);
   var init7 = /* @__PURE__ */ init4(simulationMD3v2Selection_);
   var joinData5 = /* @__PURE__ */ joinData2(selectionMD3v2Selection_D1)(foldableArray);
@@ -45384,17 +45384,17 @@
         var angle = i2 * initialAngle3;
         var newX = rad * cos(angle);
         var newY = rad * sin(angle);
-        var $138 = {};
-        for (var $139 in node) {
-          if ({}.hasOwnProperty.call(node, $139)) {
-            $138[$139] = node[$139];
+        var $139 = {};
+        for (var $140 in node) {
+          if ({}.hasOwnProperty.call(node, $140)) {
+            $139[$140] = node[$140];
           }
           ;
         }
         ;
-        $138.x = newX;
-        $138.y = newY;
-        return $138;
+        $139.x = newX;
+        $139.y = newY;
+        return $139;
       };
     };
     return mapWithIndex2(setPosition)(nodes);
@@ -45405,77 +45405,80 @@
         return function(containerSelector) {
           return bind53(liftEffect22(getWindowWidthHeight))(function(v) {
             return bind53(select10(containerSelector))(function(container) {
-              return bind53(appendChild5(SVG.value)([width37(v.value0), height37(v.value1), viewBox16(show68(-v.value0 / 2) + (" " + (show68(-v.value1 / 2) + (" " + (show68(v.value0) + (" " + show68(v.value1))))))), id_10("lesmis-gup-v2-svg"), class_16("lesmis-gup-v2")])(container))(function(svg2) {
-                return bind53(appendChild5(Group.value)([id_10("zoom-group"), class_16("zoom-group")])(svg2))(function(zoomGroup) {
-                  return bind53(on6(new Drag2(defaultDrag))(zoomGroup))(function() {
-                    return bind53(on6(new Zoom2(defaultZoom(new ScaleExtent2(0.5, 4))("#zoom-group")))(svg2))(function() {
-                      return bind53(appendChild5(Group.value)([id_10("links"), class_16("links")])(zoomGroup))(function(linksGroup) {
-                        return bind53(appendChild5(Group.value)([id_10("nodes"), class_16("nodes")])(zoomGroup))(function(nodesGroup) {
-                          var nodesWithPositions = setPhyllotaxisInitialPositions(model.nodes);
-                          return bind53(init7({
-                            nodes: nodesWithPositions,
-                            links: model.links,
-                            forces: forcesArray,
-                            activeForces,
-                            config: {
-                              alpha: 1,
-                              alphaTarget: 0,
-                              alphaMin: 1e-3,
-                              alphaDecay: 0.0228,
-                              velocityDecay: 0.4
-                            },
-                            keyFn: keyIsID_,
-                            ticks: empty2
-                          }))(function(v1) {
-                            var indexedLinks = mapWithIndex2(function(i2) {
-                              return function(link4) {
-                                return {
-                                  index: i2,
-                                  link: link4
+              var forceGraphTree = withChild(named(SVG.value)("svg")([width37(v.value0), height37(v.value1), viewBox16(show68(-v.value0 / 2) + (" " + (show68(-v.value1 / 2) + (" " + (show68(v.value0) + (" " + show68(v.value1))))))), id_10("lesmis-gup-v2-svg"), class_16("lesmis-gup-v2")]))(withChildren(named(Group.value)("zoomGroup")([id_10("zoom-group"), class_16("zoom-group")]))([named(Group.value)("linksGroup")([id_10("links"), class_16("links")]), named(Group.value)("nodesGroup")([id_10("nodes"), class_16("nodes")])]));
+              return bind53(renderTree17(container)(forceGraphTree))(function(selections) {
+                return bind53(liftEffect22(reselectD3v2("svg")(selections)))(function(svg2) {
+                  return bind53(liftEffect22(reselectD3v2("zoomGroup")(selections)))(function(zoomGroup) {
+                    return bind53(liftEffect22(reselectD3v2("linksGroup")(selections)))(function(linksGroup) {
+                      return bind53(liftEffect22(reselectD3v2("nodesGroup")(selections)))(function(nodesGroup) {
+                        return bind53(on6(new Drag2(defaultDrag))(zoomGroup))(function() {
+                          return bind53(on6(new Zoom2(defaultZoom(new ScaleExtent2(0.5, 4))("#zoom-group")))(svg2))(function() {
+                            var nodesWithPositions = setPhyllotaxisInitialPositions(model.nodes);
+                            return bind53(init7({
+                              nodes: nodesWithPositions,
+                              links: model.links,
+                              forces: forcesArray,
+                              activeForces,
+                              config: {
+                                alpha: 1,
+                                alphaTarget: 0,
+                                alphaMin: 1e-3,
+                                alphaDecay: 0.0228,
+                                velocityDecay: 0.4
+                              },
+                              keyFn: keyIsID_,
+                              ticks: empty2
+                            }))(function(v1) {
+                              var indexedLinks = mapWithIndex2(function(i2) {
+                                return function(link4) {
+                                  return {
+                                    index: i2,
+                                    link: link4
+                                  };
                                 };
-                              };
-                            })(v1.links);
-                            return bind53(joinData22(indexedLinks)("line")(linksGroup))(function(v2) {
-                              return bind53(append122(Line.value)([x115(function(v3) {
-                                return v3.link.source.x;
-                              }), y115(function(v3) {
-                                return v3.link.source.y;
-                              }), x214(function(v3) {
-                                return v3.link.target.x;
-                              }), y214(function(v3) {
-                                return v3.link.target.y;
-                              }), strokeWidth39(function(v3) {
-                                return sqrt(v3.link.value);
-                              }), stroke9(function(v3) {
-                                return d3SchemeCategory10N_(toNumber(v3.link.target.group));
-                              })])(v2.value0.enter))(function(linkLines) {
-                                return bind53(joinData12(v1.nodes)("circle")(nodesGroup))(function(v3) {
-                                  return bind53(append122(Circle.value)([cx34(function(v4) {
-                                    return v4.x;
-                                  }), cy34(function(v4) {
-                                    return v4.y;
-                                  }), radius36(5), fill51(function(v4) {
-                                    return d3SchemeCategory10N_(toNumber(v4.group));
-                                  }), stroke12("#fff"), strokeWidth110(2)])(v3.value0.enter))(function(nodeCircles) {
-                                    return bind53(on6(new Drag2(simulationDrag("lesmis-gup")))(nodeCircles))(function() {
-                                      return discard54(addTickFunction4("nodes")(new Step2(nodeCircles, [cx34(function(v4) {
-                                        return v4.x;
-                                      }), cy34(function(v4) {
-                                        return v4.y;
-                                      })])))(function() {
-                                        return discard54(addTickFunction4("links")(new Step2(linkLines, [x115(function(v4) {
-                                          return v4.link.source.x;
-                                        }), y115(function(v4) {
-                                          return v4.link.source.y;
-                                        }), x214(function(v4) {
-                                          return v4.link.target.x;
-                                        }), y214(function(v4) {
-                                          return v4.link.target.y;
+                              })(v1.links);
+                              return bind53(joinData22(indexedLinks)("line")(linksGroup))(function(v2) {
+                                return bind53(append122(Line.value)([x115(function(v3) {
+                                  return v3.link.source.x;
+                                }), y115(function(v3) {
+                                  return v3.link.source.y;
+                                }), x214(function(v3) {
+                                  return v3.link.target.x;
+                                }), y214(function(v3) {
+                                  return v3.link.target.y;
+                                }), strokeWidth39(function(v3) {
+                                  return sqrt(v3.link.value);
+                                }), stroke9(function(v3) {
+                                  return d3SchemeCategory10N_(toNumber(v3.link.target.group));
+                                })])(v2.value0.enter))(function(linkLines) {
+                                  return bind53(joinData12(v1.nodes)("circle")(nodesGroup))(function(v3) {
+                                    return bind53(append122(Circle.value)([cx34(function(v4) {
+                                      return v4.x;
+                                    }), cy34(function(v4) {
+                                      return v4.y;
+                                    }), radius36(5), fill51(function(v4) {
+                                      return d3SchemeCategory10N_(toNumber(v4.group));
+                                    }), stroke12("#fff"), strokeWidth110(2)])(v3.value0.enter))(function(nodeCircles) {
+                                      return bind53(on6(new Drag2(simulationDrag("lesmis-gup")))(nodeCircles))(function() {
+                                        return discard54(addTickFunction4("nodes")(new Step2(nodeCircles, [cx34(function(v4) {
+                                          return v4.x;
+                                        }), cy34(function(v4) {
+                                          return v4.y;
                                         })])))(function() {
-                                          return discard54(start8)(function() {
-                                            return pure114({
-                                              nodesGroup: Group.value,
-                                              linksGroup: Group.value
+                                          return discard54(addTickFunction4("links")(new Step2(linkLines, [x115(function(v4) {
+                                            return v4.link.source.x;
+                                          }), y115(function(v4) {
+                                            return v4.link.source.y;
+                                          }), x214(function(v4) {
+                                            return v4.link.target.x;
+                                          }), y214(function(v4) {
+                                            return v4.link.target.y;
+                                          })])))(function() {
+                                            return discard54(start8)(function() {
+                                              return pure114({
+                                                nodesGroup: Group.value,
+                                                linksGroup: Group.value
+                                              });
                                             });
                                           });
                                         });
@@ -45504,7 +45507,7 @@
   var bind54 = /* @__PURE__ */ bind(bindD3v2SimM);
   var liftEffect23 = /* @__PURE__ */ liftEffect(monadEffectD3v2SimM);
   var select11 = /* @__PURE__ */ select(selectionMD3v2Selection_D1);
-  var appendChild6 = /* @__PURE__ */ appendChild(selectionMD3v2Selection_D1);
+  var appendChild5 = /* @__PURE__ */ appendChild(selectionMD3v2Selection_D1);
   var width38 = /* @__PURE__ */ width(toAttrNumberNumber);
   var height38 = /* @__PURE__ */ height(toAttrNumberNumber);
   var viewBox17 = /* @__PURE__ */ viewBox(toAttrStringString);
@@ -45614,12 +45617,12 @@
         return function(containerSelector) {
           return bind54(liftEffect23(getWindowWidthHeight))(function(v) {
             return bind54(select11(containerSelector))(function(container) {
-              return bind54(appendChild6(SVG.value)([width38(v.value0), height38(v.value1), viewBox17(show69(-v.value0 / 2) + (" " + (show69(-v.value1 / 2) + (" " + (show69(v.value0) + (" " + show69(v.value1))))))), id_11("lesmis-v2-svg"), class_17("lesmis-v2")])(container))(function(svg2) {
-                return bind54(appendChild6(Group.value)([id_11("zoom-group"), class_17("zoom-group")])(svg2))(function(zoomGroup) {
+              return bind54(appendChild5(SVG.value)([width38(v.value0), height38(v.value1), viewBox17(show69(-v.value0 / 2) + (" " + (show69(-v.value1 / 2) + (" " + (show69(v.value0) + (" " + show69(v.value1))))))), id_11("lesmis-v2-svg"), class_17("lesmis-v2")])(container))(function(svg2) {
+                return bind54(appendChild5(Group.value)([id_11("zoom-group"), class_17("zoom-group")])(svg2))(function(zoomGroup) {
                   return bind54(on7(new Drag2(defaultDrag))(zoomGroup))(function() {
                     return bind54(on7(new Zoom2(defaultZoom(new ScaleExtent2(0.5, 4))("#zoom-group")))(svg2))(function() {
-                      return bind54(appendChild6(Group.value)([id_11("links"), class_17("links")])(zoomGroup))(function(linksGroup) {
-                        return bind54(appendChild6(Group.value)([id_11("nodes"), class_17("nodes")])(zoomGroup))(function(nodesGroup) {
+                      return bind54(appendChild5(Group.value)([id_11("links"), class_17("links")])(zoomGroup))(function(linksGroup) {
+                        return bind54(appendChild5(Group.value)([id_11("nodes"), class_17("nodes")])(zoomGroup))(function(nodesGroup) {
                           var nodesWithPositions = setPhyllotaxisPositions2(model.nodes);
                           return bind54(init8({
                             nodes: nodesWithPositions,
@@ -45723,7 +45726,7 @@
     var Bind1 = Monad0.Bind1();
     var bind108 = bind(Bind1);
     var select12 = select(dictSelectionM);
-    var appendChild7 = appendChild(dictSelectionM);
+    var appendChild6 = appendChild(dictSelectionM);
     var renderData4 = renderData(dictSelectionM)(foldableArray)(ordInt);
     var discard115 = discard56(Bind1);
     var pure60 = pure(Monad0.Applicative0());
@@ -45769,7 +45772,7 @@
           return "#0000ff";
         };
         return bind108(select12(selector))(function(container) {
-          return bind108(appendChild7(SVG.value)([id_12("three-circles-transition-v2-svg"), width39(400), height39(200), viewBox18("0 0 400 200")])(container))(function(svg2) {
+          return bind108(appendChild6(SVG.value)([id_12("three-circles-transition-v2-svg"), width39(400), height39(200), viewBox18("0 0 400 200")])(container))(function(svg2) {
             return bind108(renderData4(Circle.value)([0, 1, 2])("circle")(svg2)(new Just(enterAttrs2))(Nothing.value)(Nothing.value))(function(circles) {
               var transitionConfig = transitionWith({
                 duration: 1500,
@@ -45919,7 +45922,7 @@
   var flattenTree3 = /* @__PURE__ */ fromFoldable(foldableTree);
   var drawTree = function(dictSelectionM) {
     var select12 = select(dictSelectionM);
-    var appendChild7 = appendChild(dictSelectionM);
+    var appendChild6 = appendChild(dictSelectionM);
     var joinData7 = joinData2(dictSelectionM)(foldableArray);
     var joinData14 = joinData7(ordRecord22);
     var append210 = append4(dictSelectionM);
@@ -45945,15 +45948,15 @@
           var links = makeLinks12(positioned);
           return discard115(liftEffect67(log2("TreeVizV2: Rendering " + (show134(length(nodes)) + (" nodes, " + (show134(length(links)) + " links"))))))(function() {
             return bind125(select12(containerSelector))(function(container) {
-              return bind125(appendChild7(SVG.value)([id_13("tree-v2-svg"), width40(800), height40(600), viewBox19("0 0 800 600"), class_18("tree-v2")])(container))(function(svg2) {
-                return bind125(appendChild7(Group.value)([id_13("tree-group")])(svg2))(function(treeGroup) {
-                  return bind125(appendChild7(Group.value)([id_13("links-group"), class_18("links")])(treeGroup))(function(linksGroup) {
+              return bind125(appendChild6(SVG.value)([id_13("tree-v2-svg"), width40(800), height40(600), viewBox19("0 0 800 600"), class_18("tree-v2")])(container))(function(svg2) {
+                return bind125(appendChild6(Group.value)([id_13("tree-group")])(svg2))(function(treeGroup) {
+                  return bind125(appendChild6(Group.value)([id_13("links-group"), class_18("links")])(treeGroup))(function(linksGroup) {
                     return bind125(joinData14(links)("path")(linksGroup))(function(v) {
                       return bind125(append210(Path.value)([d25(linkPath6), fill54("none"), stroke11("#999"), strokeWidth41(1.5), class_18("link")])(v.value0.enter))(function() {
-                        return bind125(appendChild7(Group.value)([id_13("circles-group"), class_18("circles")])(treeGroup))(function(circlesGroup) {
+                        return bind125(appendChild6(Group.value)([id_13("circles-group"), class_18("circles")])(treeGroup))(function(circlesGroup) {
                           return bind125(joinData24(nodes)("circle")(circlesGroup))(function(v1) {
                             return bind125(append210(Circle.value)([cx37(nodeX2), cy37(nodeY2), radius39(5), fill54("#4CAF50"), class_18("node-circle")])(v1.value0.enter))(function() {
-                              return bind125(appendChild7(Group.value)([id_13("labels-group"), class_18("labels")])(treeGroup))(function(labelsGroup) {
+                              return bind125(appendChild6(Group.value)([id_13("labels-group"), class_18("labels")])(treeGroup))(function(labelsGroup) {
                                 return bind125(joinData24(nodes)("text")(labelsGroup))(function(v2) {
                                   return bind125(append210(Text.value)([x49(nodeX2), y47(labelY), textAnchor18("middle"), fontSize26(10), fill54("#333"), textContent9(nodeName3), class_18("node-label")])(v2.value0.enter))(function() {
                                     return pure60(unit);

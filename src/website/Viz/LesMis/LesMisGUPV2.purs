@@ -28,10 +28,11 @@ import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
 import PSD3.Internal.FFI (keyIsID_)
 import PSD3v2.Attribute.Types (cx, cy, fill, radius, stroke, strokeWidth, x1, x2, y1, y2, id_, class_, width, height, viewBox)
 import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom, simulationDrag, ScaleExtent(..))
-import PSD3v2.Capabilities.Selection (select, appendChild, joinData, append, on, setAttrs)
+import PSD3v2.Capabilities.Selection (select, appendChild, joinData, append, on, setAttrs, renderTree)
 import PSD3v2.Capabilities.Simulation (init, addTickFunction, start, stop, Step(..), update, reheat)
-import PSD3v2.Interpreter.D3v2 (D3v2SimM)
+import PSD3v2.Interpreter.D3v2 (D3v2SimM, reselectD3v2)
 import PSD3v2.Selection.Types (ElementType(..), JoinResult(..))
+import PSD3v2.VizTree.Tree as T
 import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 import Effect (Effect)
@@ -131,42 +132,49 @@ drawLesMisGUPV2 forcesArray activeForces model containerSelector = do
   -- Get window dimensions
   (Tuple w h) <- liftEffect getWindowWidthHeight
 
-  -- Create SVG container
+  -- Select container
   container <- select containerSelector
-  svg <- appendChild SVG
-    [ width w
-    , height h
-    , viewBox (show ((-w) / 2.0) <> " " <> show ((-h) / 2.0) <> " " <> show w <> " " <> show h)
-    , id_ "lesmis-gup-v2-svg"
-    , class_ "lesmis-gup-v2"
-    ]
-    container
 
-  -- Create inner zoom group
-  zoomGroup <- appendChild Group
-    [ id_ "zoom-group"
-    , class_ "zoom-group"
-    ]
-    svg
+  -- Declarative tree structure for force graph (using Tree API)
+  let forceGraphTree :: T.Tree Unit
+      forceGraphTree =
+        T.named SVG "svg"
+          [ width w
+          , height h
+          , viewBox (show ((-w) / 2.0) <> " " <> show ((-h) / 2.0) <> " " <> show w <> " " <> show h)
+          , id_ "lesmis-gup-v2-svg"
+          , class_ "lesmis-gup-v2"
+          ]
+          `T.withChild`
+            (T.named Group "zoomGroup"
+              [ id_ "zoom-group"
+              , class_ "zoom-group"
+              ]
+              `T.withChildren`
+                [ T.named Group "linksGroup"
+                    [ id_ "links"
+                    , class_ "links"
+                    ]
+                , T.named Group "nodesGroup"
+                    [ id_ "nodes"
+                    , class_ "nodes"
+                    ]
+                ])
+
+  -- Render the structure tree
+  selections <- renderTree container forceGraphTree
+
+  -- Extract selections for behaviors
+  svg <- liftEffect $ reselectD3v2 "svg" selections
+  zoomGroup <- liftEffect $ reselectD3v2 "zoomGroup" selections
+  linksGroup <- liftEffect $ reselectD3v2 "linksGroup" selections
+  nodesGroup <- liftEffect $ reselectD3v2 "nodesGroup" selections
 
   -- Attach drag behavior to zoom group (allows panning)
   _ <- on (Drag defaultDrag) zoomGroup
 
   -- Attach zoom behavior to SVG
   _ <- on (Zoom $ defaultZoom (ScaleExtent 0.5 4.0) "#zoom-group") svg
-
-  -- Create groups for links and nodes
-  linksGroup <- appendChild Group
-    [ id_ "links"
-    , class_ "links"
-    ]
-    zoomGroup
-
-  nodesGroup <- appendChild Group
-    [ id_ "nodes"
-    , class_ "nodes"
-    ]
-    zoomGroup
 
   -- Apply phylotaxis initial positions (without pinning, so simulation can run)
   let nodesWithPositions = setPhyllotaxisInitialPositions model.nodes
