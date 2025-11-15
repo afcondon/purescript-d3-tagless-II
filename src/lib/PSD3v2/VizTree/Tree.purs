@@ -28,11 +28,14 @@ data Tree datum
   = Node (TreeNode datum)
   -- | DataJoin creates N copies of a template tree, one per data item
   -- | This is how we handle enter/update/exit with the declarative API
+  -- |
+  -- | The join itself is a named node in the tree - it represents the COLLECTION
+  -- | of elements created from the data.
   | Join
-      { name :: Maybe String       -- Name for the parent container
+      { name :: String              -- Name for this join (becomes a selection you can access)
       , key :: String               -- Join key (e.g., "circle", "g")
-      , joinData :: Array datum     -- Data to join (note: this changes datum type!)
-      , template :: Tree datum      -- Template tree to repeat for each datum
+      , joinData :: Array datum     -- Data to join
+      , template :: datum -> Tree datum  -- Template builder - given datum, builds subtree
       }
 
 -- | Smart constructors
@@ -67,19 +70,28 @@ withChildren parent newChildren = case parent of
   Node node -> Node node { children = node.children <> newChildren }
   Join j -> Join j
 
--- | Create a data join
+-- | Create a named data join
 -- |
--- | Usage: join "nodes" "g" nodeData (named "nodeGroup" Group [class_ "node"])
+-- | The join itself becomes a named selection representing the COLLECTION
+-- | of elements created from the data.
 -- |
--- | This will create one copy of the template for each item in nodeData
-join :: forall datum. String -> String -> Array datum -> Tree datum -> Tree datum
-join name key data' template =
-  Join { name: Just name, key, joinData: data', template }
-
--- | Anonymous data join (parent container won't be in selections)
-join' :: forall datum. String -> Array datum -> Tree datum -> Tree datum
-join' key data' template =
-  Join { name: Nothing, key, joinData: data', template }
+-- | Usage:
+-- | ```purescript
+-- | joinData "nodes" "g" nodeData $ \node ->
+-- |   elem Group [transform (translate node)] `withChildren`
+-- |     [ elem Circle [radius node.r]
+-- |     , elem Text [textContent node.name]
+-- |     ]
+-- | ```
+-- |
+-- | Later you can access the collection:
+-- | ```purescript
+-- | case Map.lookup "nodes" selections of
+-- |   Just nodeGroups -> addTickFunction "nodes" $ Step nodeGroups [...]
+-- | ```
+joinData :: forall datum. String -> String -> Array datum -> (datum -> Tree datum) -> Tree datum
+joinData name key data' templateBuilder =
+  Join { name, key, joinData: data', template: templateBuilder }
 
 -- | Operators for Emmet-style syntax
 

@@ -702,19 +702,55 @@ renderTree parent tree = do
       pure $ Tuple element selectionsMap
 
     -- Render a data join
-    -- TODO: Full implementation with enter/update/exit
-    -- For prototype, we'll skip data joins and just return empty map
-    renderNode parentSel (Join _joinSpec) = do
-      -- Get first element from parent
-      let Selection parentImpl = parentSel
-      let parentElement = case parentImpl of
-            EmptySelection rec -> case Array.head rec.parentElements of
-              Just el -> el
-              Nothing -> unsafePartial $ unsafeCrashWith "renderTree Join: parent has no elements"
-            _ -> unsafePartial $ unsafeCrashWith "renderTree Join: expected EmptySelection parent"
+    -- This is where the magic happens: we create N copies of the template,
+    -- one for each datum, using the actual joinData operation
+    renderNode parentSel (Join joinSpec) = do
+      -- Perform data join (enter/update/exit)
+      -- For now, just handle enter phase
+      JoinResult { enter: enterSel } <- joinData joinSpec.joinData joinSpec.key parentSel
 
-      -- Return empty map for now
-      pure $ Tuple parentElement Map.empty
+      -- For each datum in the enter selection, we need to:
+      -- 1. Build the template tree by calling: template datum
+      -- 2. Render that tree
+      -- 3. Collect the selections
+
+      -- Problem: We need to access individual datums from the pending selection
+      -- The enter selection has type: Selection SPending parent childDatum
+      -- We need to iterate over the data and render each template
+
+      -- For now, let's use a simpler approach:
+      -- Render a single instance of the template using the first datum
+      -- This proves the concept, we can make it work for all datums later
+
+      case Array.head joinSpec.joinData of
+        Just firstDatum -> do
+          -- Build template for this datum
+          let templateTree = joinSpec.template firstDatum
+
+          -- Render the template (but this won't work yet because we need to
+          -- render it for EACH datum in the enter selection, not just once)
+          -- TODO: Need to figure out how to render template N times
+
+          -- For now, return empty map as placeholder
+          let Selection parentImpl = parentSel
+          let parentElement = case parentImpl of
+                EmptySelection rec -> case Array.head rec.parentElements of
+                  Just el -> el
+                  Nothing -> unsafePartial $ unsafeCrashWith "renderTree Join: parent has no elements"
+                _ -> unsafePartial $ unsafeCrashWith "renderTree Join: expected EmptySelection parent"
+
+          pure $ Tuple parentElement Map.empty
+
+        Nothing -> do
+          -- No data, return empty
+          let Selection parentImpl = parentSel
+          let parentElement = case parentImpl of
+                EmptySelection rec -> case Array.head rec.parentElements of
+                  Just el -> el
+                  Nothing -> unsafePartial $ unsafeCrashWith "renderTree Join: parent has no elements"
+                _ -> unsafePartial $ unsafeCrashWith "renderTree Join: expected EmptySelection parent"
+
+          pure $ Tuple parentElement Map.empty
 
 -- ============================================================================
 -- FFI Declarations (D3-specific data binding)
