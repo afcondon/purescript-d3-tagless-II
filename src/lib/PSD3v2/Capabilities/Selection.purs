@@ -230,6 +230,7 @@ class Monad m <= SelectionM sel m | m -> sel where
   -- | ```
   renderTree
     :: forall parent datum
-     . sel SEmpty parent datum
+     . Ord datum
+    => sel SEmpty parent datum
     -> Tree datum
     -> m (Map String (sel SBound Element datum))

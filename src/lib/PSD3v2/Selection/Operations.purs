@@ -656,101 +656,123 @@ foreign import setTextContent_ :: String -> Element -> Effect Unit
 -- Declarative Tree Rendering
 -- ============================================================================
 
+-- | Helper: Render a single node and its children
+-- | Returns the created element and accumulated selections map
+renderNodeHelper
+  :: forall p d
+   . Ord d  -- Needed for joinData
+  => Selection SEmpty p d
+  -> Tree d
+  -> Effect (Tuple Element (Map String (Selection SBound Element d)))
+renderNodeHelper parentSel (Node node) = do
+  -- Create this element
+  childSel <- appendChild node.elemType node.attrs parentSel
+
+  -- Get the first element from the created selection
+  let Selection impl = childSel
+  let element = case impl of
+        EmptySelection rec -> case Array.head rec.parentElements of
+          Just el -> el
+          Nothing -> unsafePartial $ unsafeCrashWith "renderTree: appendChild returned empty selection"
+        _ -> unsafePartial $ unsafeCrashWith "renderTree: appendChild should return EmptySelection"
+
+  -- Recursively render children
+  childMaps <- traverse (renderNodeHelper childSel) node.children
+  let combinedChildMap = Array.foldl Map.union Map.empty (map snd childMaps)
+
+  -- Add this node to the map if it has a name
+  let selectionsMap = case node.name of
+        Just name -> Map.insert name (unsafeCoerce childSel :: Selection SBound Element d) combinedChildMap
+        Nothing -> combinedChildMap
+
+  pure $ Tuple element selectionsMap
+
+-- Render a data join
+-- This is where the magic happens: we create N copies of the template,
+-- one for each datum, using the actual joinData operation
+renderNodeHelper parentSel (Join joinSpec) = do
+  -- 1. Perform data join (enter/update/exit)
+  -- For now, just handle enter phase
+  JoinResult { enter: enterSel } <- joinData joinSpec.joinData joinSpec.key parentSel
+
+  -- 2. Append the top-level elements (one per datum)
+  -- We need to figure out what element type to create
+  -- For now, let's default to Group
+  boundSel <- append Group [] enterSel
+
+  -- 3. For each bound element, render its children from the template
+  childSelections <- appendChildrenFromTemplate joinSpec.template boundSel
+
+  -- 4. Add the join's collection to the selections map
+  let selectionsMap = Map.insert joinSpec.name (unsafeCoerce boundSel) childSelections
+
+  -- 5. Get first element for return value
+  let Selection boundImpl = boundSel
+  let firstElement = case boundImpl of
+        BoundSelection rec -> case Array.head rec.elements of
+          Just el -> el
+          Nothing -> unsafePartial $ unsafeCrashWith "renderTree Join: no elements created"
+        _ -> unsafePartial $ unsafeCrashWith "renderTree Join: expected BoundSelection"
+
+  pure $ Tuple firstElement selectionsMap
+
+-- | Helper: Render children from a template function for each datum in a bound selection
+-- |
+-- | For each element in the bound selection:
+-- | 1. Extract the datum bound to that element
+-- | 2. Call template function to build child trees
+-- | 3. Render those trees as children of the element
+-- | 4. Collect all named selections from all children
+appendChildrenFromTemplate
+  :: forall datum
+   . Ord datum  -- Needed for recursive renderNodeHelper calls
+  => (datum -> Tree datum)  -- Template function
+  -> Selection SBound Element datum  -- Parent selection with bound data
+  -> Effect (Map String (Selection SBound Element datum))
+appendChildrenFromTemplate templateFn boundSel = do
+  -- Extract elements and data from the bound selection
+  let Selection impl = boundSel
+  let { elements, data: dataArray, document: doc } = unsafePartial case impl of
+        BoundSelection rec -> rec
+
+  -- For each (element, datum) pair, render children
+  childMaps <- traverseWithIndex (\idx datum -> do
+    -- Get the element for this datum
+    case Array.index elements idx of
+      Nothing -> pure Map.empty
+      Just element -> do
+        -- Build the template tree for this datum
+        let childTree = templateFn datum
+
+        -- Create an empty selection for this single element
+        let singleParentSel = Selection $ EmptySelection
+              { parentElements: [element]
+              , document: doc
+              }
+
+        -- Render the child tree
+        Tuple _ childSelections <- renderNodeHelper singleParentSel childTree
+        pure childSelections
+    ) dataArray
+
+  -- Combine all the child selection maps
+  pure $ Array.foldl Map.union Map.empty childMaps
+
 -- | Render a declarative tree structure
 -- |
 -- | Walks the tree, creates DOM elements, and returns a map of named selections.
 -- | This is the core implementation of the declarative API.
 renderTree
   :: forall parent datum
-   . Selection SEmpty parent datum
+   . Ord datum  -- Needed for data joins
+  => Selection SEmpty parent datum
   -> Tree datum
   -> Effect (Map String (Selection SBound Element datum))
 renderTree parent tree = do
   -- Use a State-like pattern to accumulate named selections
   -- Returns (element created, map of named selections in subtree)
-  Tuple _ selectionsMap <- renderNode parent tree
+  Tuple _ selectionsMap <- renderNodeHelper parent tree
   pure selectionsMap
-  where
-    -- Render a single node and its children
-    -- Returns the created element and accumulated selections map
-    renderNode
-      :: forall p d
-       . Selection SEmpty p d
-      -> Tree d
-      -> Effect (Tuple Element (Map String (Selection SBound Element d)))
-    renderNode parentSel (Node node) = do
-      -- Create this element
-      childSel <- appendChild node.elemType node.attrs parentSel
-
-      -- Get the first element from the created selection
-      let Selection impl = childSel
-      let element = case impl of
-            EmptySelection rec -> case Array.head rec.parentElements of
-              Just el -> el
-              Nothing -> unsafePartial $ unsafeCrashWith "renderTree: appendChild returned empty selection"
-            _ -> unsafePartial $ unsafeCrashWith "renderTree: appendChild should return EmptySelection"
-
-      -- Recursively render children
-      childMaps <- traverse (renderNode childSel) node.children
-      let combinedChildMap = Array.foldl Map.union Map.empty (map snd childMaps)
-
-      -- Add this node to the map if it has a name
-      let selectionsMap = case node.name of
-            Just name -> Map.insert name (unsafeCoerce childSel :: Selection SBound Element d) combinedChildMap
-            Nothing -> combinedChildMap
-
-      pure $ Tuple element selectionsMap
-
-    -- Render a data join
-    -- This is where the magic happens: we create N copies of the template,
-    -- one for each datum, using the actual joinData operation
-    renderNode parentSel (Join joinSpec) = do
-      -- Perform data join (enter/update/exit)
-      -- For now, just handle enter phase
-      JoinResult { enter: enterSel } <- joinData joinSpec.joinData joinSpec.key parentSel
-
-      -- For each datum in the enter selection, we need to:
-      -- 1. Build the template tree by calling: template datum
-      -- 2. Render that tree
-      -- 3. Collect the selections
-
-      -- Problem: We need to access individual datums from the pending selection
-      -- The enter selection has type: Selection SPending parent childDatum
-      -- We need to iterate over the data and render each template
-
-      -- For now, let's use a simpler approach:
-      -- Render a single instance of the template using the first datum
-      -- This proves the concept, we can make it work for all datums later
-
-      case Array.head joinSpec.joinData of
-        Just firstDatum -> do
-          -- Build template for this datum
-          let templateTree = joinSpec.template firstDatum
-
-          -- Render the template (but this won't work yet because we need to
-          -- render it for EACH datum in the enter selection, not just once)
-          -- TODO: Need to figure out how to render template N times
-
-          -- For now, return empty map as placeholder
-          let Selection parentImpl = parentSel
-          let parentElement = case parentImpl of
-                EmptySelection rec -> case Array.head rec.parentElements of
-                  Just el -> el
-                  Nothing -> unsafePartial $ unsafeCrashWith "renderTree Join: parent has no elements"
-                _ -> unsafePartial $ unsafeCrashWith "renderTree Join: expected EmptySelection parent"
-
-          pure $ Tuple parentElement Map.empty
-
-        Nothing -> do
-          -- No data, return empty
-          let Selection parentImpl = parentSel
-          let parentElement = case parentImpl of
-                EmptySelection rec -> case Array.head rec.parentElements of
-                  Just el -> el
-                  Nothing -> unsafePartial $ unsafeCrashWith "renderTree Join: parent has no elements"
-                _ -> unsafePartial $ unsafeCrashWith "renderTree Join: expected EmptySelection parent"
-
-          pure $ Tuple parentElement Map.empty
 
 -- ============================================================================
 -- FFI Declarations (D3-specific data binding)
