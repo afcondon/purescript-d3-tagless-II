@@ -23,9 +23,7 @@ routes =
   <|> howtoIndex
   <|> referenceModule  -- Must come before reference (more specific)
   <|> reference
-  <|> psd3v2Examples
   <|> treeAPI
-  <|> lesMisGUPTree
   <|> acknowledgements
   <|> rootRedirect
   <|> notFound
@@ -58,17 +56,9 @@ referenceModule = ReferenceModule <$> (lit "reference" *> str) <* end
 reference :: Match Route
 reference = Reference <$ lit "reference" <* end
 
--- | Match: /psd3v2
-psd3v2Examples :: Match Route
-psd3v2Examples = PSD3v2Examples <$ lit "psd3v2" <* end
-
 -- | Match: /tree-api
 treeAPI :: Match Route
 treeAPI = TreeAPI <$ lit "tree-api" <* end
-
--- | Match: /lesmis-gup-tree
-lesMisGUPTree :: Match Route
-lesMisGUPTree = LesMisGUPTree <$ lit "lesmis-gup-tree" <* end
 
 -- | Match: /acknowledgements
 acknowledgements :: Match Route
@@ -88,8 +78,6 @@ routeToPath Wizard = "/wizard"
 routeToPath HowtoIndex = "/howto"
 routeToPath Reference = "/reference"
 routeToPath (ReferenceModule moduleName) = "/reference/" <> moduleName
-routeToPath PSD3v2Examples = "/psd3v2"
 routeToPath TreeAPI = "/tree-api"
-routeToPath LesMisGUPTree = "/lesmis-gup-tree"
 routeToPath Acknowledgements = "/acknowledgements"
 routeToPath NotFound = "/not-found"

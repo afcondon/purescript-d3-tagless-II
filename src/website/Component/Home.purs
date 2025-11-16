@@ -86,18 +86,18 @@ render _ =
             , HH.div
                 [ HP.classes [ HH.ClassName "home-hero-image" ] ]
                 [ HH.img
-                    [ HP.src "assets/example-thumbnails/lesmis-gup-tree.png"
-                    , HP.alt "Les Misérables character network visualization"
+                    [ HP.src "assets/example-thumbnails/tree-api.png"
+                    , HP.alt "Tree API visualization examples"
                     , HP.classes [ HH.ClassName "home-hero-img" ]
                     ]
                 , HH.p
                     [ HP.classes [ HH.ClassName "home-hero-caption" ] ]
-                    [ HH.text "Learn how to make powerful interactive data-driven apps like this "
+                    [ HH.text "Learn how to build visualizations with the declarative "
                     , HH.a
-                        [ HP.href $ "#" <> routeToPath LesMisGUPTree
+                        [ HP.href $ "#" <> routeToPath TreeAPI
                         , HP.classes [ HH.ClassName "home-hero-link" ]
                         ]
-                        [ HH.text "Les Misérables network" ]
+                        [ HH.text "Tree API" ]
                     ]
                 ]
             ]
@@ -145,15 +145,9 @@ render _ =
             [ HH.text "You can read through the following to progressively build up an understanding of the capabilities and concepts:" ]
         , HH.div
             [ HP.classes [ HH.ClassName "home-tutorials-grid" ] ]
-            [ renderTutorialLink "1. PSD3v2 Examples"
-                "Explore the new PSD3v2 architecture with phantom types and Tree API"
-                (routeToPath PSD3v2Examples)
-            , renderTutorialLink "2. Tree API"
+            [ renderTutorialLink "Tree API Examples"
                 "Learn the declarative Tree API for building visualizations"
                 (routeToPath TreeAPI)
-            , renderTutorialLink "3. Les Mis GUP Tree"
-                "Force simulation with Tree API, GUP, and dynamic layouts"
-                (routeToPath LesMisGUPTree)
             ]
         ]
 

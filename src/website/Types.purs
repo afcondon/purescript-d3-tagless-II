@@ -86,10 +86,8 @@ data Route
   | HowtoIndex      -- How-to: index of all step-by-step guides (TODO: update for v2)
   | Reference       -- Reference: API documentation index
   | ReferenceModule String  -- Reference: individual module page
-  -- PSD3v2 Examples (Tree API based)
-  | PSD3v2Examples  -- PSD3v2 examples showcase page
+  -- Tree API Examples
   | TreeAPI         -- Tree API examples (declarative tree API)
-  | LesMisGUPTree   -- Les Misérables with Tree API + GUP + Dynamic Layouts (FLAGSHIP EXAMPLE)
   -- Meta
   | Acknowledgements -- Credits and acknowledgements
   | NotFound
@@ -103,8 +101,6 @@ instance showRoute :: Show Route where
   show HowtoIndex = "How-to Guides"
   show Reference = "API Reference"
   show (ReferenceModule moduleName) = "Module: " <> moduleName
-  show PSD3v2Examples = "PSD3v2 Examples"
   show TreeAPI = "Tree API Examples"
-  show LesMisGUPTree = "Les Mis GUP (Tree API)"
   show Acknowledgements = "Acknowledgements"
   show NotFound = "Not Found"

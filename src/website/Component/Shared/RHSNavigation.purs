@@ -35,10 +35,8 @@ render currentRoute =
         , HH.hr [ HP.classes [ HH.ClassName "explanation-page__nav-divider" ] ]
         , HH.p
             [ HP.classes [ HH.ClassName "explanation-page__nav-section-title" ] ]
-            [ HH.text "PSD3v2 Examples" ]
-        , navLink PSD3v2Examples "PSD3v2 Showcase" currentRoute
+            [ HH.text "Tree API Examples" ]
         , navLink TreeAPI "Tree API" currentRoute
-        , navLink LesMisGUPTree "Les Mis GUP (Tree)" currentRoute
         , HH.hr [ HP.classes [ HH.ClassName "explanation-page__nav-divider" ] ]
         , HH.a
             [ HP.href "https://github.com/afcondon/purescript-d3-tagless"

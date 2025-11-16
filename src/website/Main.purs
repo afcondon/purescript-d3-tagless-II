@@ -23,10 +23,8 @@ import PSD3.HowTo.HowtoIndex as HowtoIndex
 import PSD3.Reference.Reference as Reference
 import PSD3.Acknowledgements as Acknowledgements
 
--- PSD3v2 Examples (Tree API based)
-import PSD3.Component.PSD3v2Examples as PSD3v2Examples
+-- Tree API Examples
 import Component.TreeAPI as TreeAPI
-import Component.LesMisGUPTree as LesMisGUPTree
 
 -- Routing
 import PSD3.RoutingDSL (routing, routeToPath)
@@ -52,9 +50,7 @@ type Slots =
   , wizard :: forall q. H.Slot q Void Unit
   , howtoIndex :: forall q. H.Slot q Void Unit
   , reference :: forall q. H.Slot q Void Unit
-  , psd3v2Examples :: forall q. H.Slot q Void Unit
   , treeAPI :: forall q. H.Slot q Void Unit
-  , lesMisGUPTree :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
 
@@ -63,9 +59,7 @@ _gettingStarted = Proxy :: Proxy "gettingStarted"
 _wizard = Proxy :: Proxy "wizard"
 _howtoIndex = Proxy :: Proxy "howtoIndex"
 _reference = Proxy :: Proxy "reference"
-_psd3v2Examples = Proxy :: Proxy "psd3v2Examples"
 _treeAPI = Proxy :: Proxy "treeAPI"
-_lesMisGUPTree = Proxy :: Proxy "lesMisGUPTree"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
 -- | Main application component
@@ -110,15 +104,9 @@ renderPage route = case spy "Route is" route of
   ReferenceModule moduleName ->
     HH.slot_ _reference unit Reference.component (ReferenceModule moduleName)
 
-  -- PSD3v2 Examples (Working)
-  PSD3v2Examples ->
-    HH.slot_ _psd3v2Examples unit PSD3v2Examples.component unit
-
+  -- Tree API Examples
   TreeAPI ->
     HH.slot_ _treeAPI unit TreeAPI.component unit
-
-  LesMisGUPTree ->
-    HH.slot_ _lesMisGUPTree unit LesMisGUPTree.component unit
 
   Acknowledgements ->
     HH.slot_ _acknowledgements unit Acknowledgements.component unit

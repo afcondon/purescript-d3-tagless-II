@@ -17,9 +17,7 @@ import PSD3.Website.Types (Route(..))
 -- | All tutorial pages in order
 allTutorialRoutes :: Array Route
 allTutorialRoutes =
-  [ PSD3v2Examples
-  , TreeAPI
-  , LesMisGUPTree
+  [ TreeAPI
   ]
 
 -- | Get the next tutorial in the sequence

@@ -39,11 +39,9 @@ render currentRoute =
             [ HH.text "← Home" ]
         , HH.hr [ HP.classes [ HH.ClassName "explanation-page__nav-divider" ] ]
 
-        -- PSD3v2 Examples
-        , sectionTitle "PSD3v2 Examples"
-        , navLink PSD3v2Examples "PSD3v2 Showcase" currentRoute
+        -- Tree API Examples
+        , sectionTitle "Tree API Examples"
         , navLink TreeAPI "Tree API" currentRoute
-        , navLink LesMisGUPTree "Les Mis GUP (Tree)" currentRoute
 
         , HH.hr [ HP.classes [ HH.ClassName "explanation-page__nav-divider" ] ]
         , HH.a
