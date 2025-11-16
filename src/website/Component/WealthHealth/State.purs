@@ -8,7 +8,8 @@ import Data.Maybe (Maybe(..))
 import Data.Unit (Unit)
 import Data.Set (Set)
 import Data.Set as Set
-import PSD3 (D3Selection_, D3M)
+import PSD3.Internal.Types (D3Selection_)
+import PSD3.Interpreter.D3 (D3M)
 import Halogen as H
 import PSD3.WealthHealth.Types (WealthHealthModel)
 

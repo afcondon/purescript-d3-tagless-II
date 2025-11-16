@@ -3,10 +3,10 @@ module PSD3.Shared.ZoomableViewbox where -- belongs in library TODO
 import Prelude
 
 import Effect.Class (class MonadEffect)
-import PSD3 (DragBehavior(..), Element(..))
+import PSD3.Internal.Types (Element(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, on)
 import PSD3.Internal.Attributes.Sugar (classed, viewBox)
-import PSD3.Internal.Selection.Types (Behavior(..))
+import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 
 type ZoomableSVGConfig = {
