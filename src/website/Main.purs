@@ -26,6 +26,9 @@ import PSD3.Acknowledgements as Acknowledgements
 -- Tree API Examples
 import Component.TreeAPI as TreeAPI
 import Component.AnimatedTreeCluster as AnimatedTreeCluster
+import Component.LesMisGUPTree as LesMisGUPTree
+import Component.ModuleGraph as ModuleGraph
+import Component.MermaidTreeDemo as MermaidTreeDemo
 
 -- Routing
 import PSD3.RoutingDSL (routing, routeToPath)
@@ -53,6 +56,9 @@ type Slots =
   , reference :: forall q. H.Slot q Void Unit
   , treeAPI :: forall q. H.Slot q Void Unit
   , animatedTreeCluster :: forall q. H.Slot q Void Unit
+  , lesMisGUPTree :: forall q. H.Slot q Void Unit
+  , moduleGraph :: forall q. H.Slot q Void Unit
+  , mermaidTreeDemo :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
 
@@ -63,6 +69,9 @@ _howtoIndex = Proxy :: Proxy "howtoIndex"
 _reference = Proxy :: Proxy "reference"
 _treeAPI = Proxy :: Proxy "treeAPI"
 _animatedTreeCluster = Proxy :: Proxy "animatedTreeCluster"
+_lesMisGUPTree = Proxy :: Proxy "lesMisGUPTree"
+_moduleGraph = Proxy :: Proxy "moduleGraph"
+_mermaidTreeDemo = Proxy :: Proxy "mermaidTreeDemo"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
 -- | Main application component
@@ -113,6 +122,15 @@ renderPage route = case spy "Route is" route of
 
   AnimatedTreeCluster ->
     HH.slot_ _animatedTreeCluster unit AnimatedTreeCluster.component unit
+
+  LesMisGUPTree ->
+    HH.slot_ _lesMisGUPTree unit LesMisGUPTree.component unit
+
+  ModuleGraph ->
+    HH.slot_ _moduleGraph unit ModuleGraph.component unit
+
+  MermaidTreeDemo ->
+    HH.slot_ _mermaidTreeDemo unit MermaidTreeDemo.component unit
 
   Acknowledgements ->
     HH.slot_ _acknowledgements unit Acknowledgements.component unit

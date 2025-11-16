@@ -1,0 +1,227 @@
+-- | PSD3: PureScript D3 - Type-safe, composable data visualization
+-- |
+-- | **Version 2 (PSD3v2)** - Complete rewrite with phantom types and Tree API
+-- |
+-- | PSD3v2 is a PureScript library for creating D3.js visualizations using phantom types
+-- | for compile-time safety and a declarative Tree API for clean, maintainable code.
+-- |
+-- | ## ⚠️ Breaking Changes from v1
+-- |
+-- | This is a **major version** with breaking changes. The old v1 architecture has been
+-- | archived to `src/lib/PSD3_v1_Archive/`. See that directory's README for migration guide.
+-- |
+-- | **Key Changes**:
+-- | - ❌ Old SelectionM monad → ✅ Phantom-typed selections
+-- | - ❌ Manual append/select chains → ✅ Declarative Tree API
+-- | - ❌ Old SimulationM → ✅ SimulationM2 with init/update/start/stop
+-- | - ❌ Manual GUP → ✅ Automatic enter/update/exit with `joinData`
+-- |
+-- | ## Quick Start (v2)
+-- |
+-- | ```purescript
+-- | import PSD3v2.Interpreter.D3v2 as D3v2
+-- | import PSD3v2.Capabilities.Selection (select, renderTree)
+-- | import PSD3v2.VizTree.Tree as T
+-- | import PSD3v2.Attribute.Types (width, height, cx, cy, radius, fill)
+-- |
+-- | main :: Effect Unit
+-- | main = void $ D3v2.runD3v2M unit do
+-- |   container <- select "body"
+-- |   let tree =
+-- |         T.elem SVG [width 800.0, height 600.0]
+-- |           `T.withChild`
+-- |             T.elem Circle [cx 100.0, cy 100.0, radius 50.0, fill "steelblue"]
+-- |   renderTree container tree
+-- | ```
+-- |
+-- | ## Tree API Example
+-- |
+-- | Declarative DOM structure with data binding:
+-- |
+-- | ```purescript
+-- | import PSD3v2.VizTree.Tree as T
+-- |
+-- | barChart :: Array Number -> T.Tree Number
+-- | barChart data =
+-- |   T.elem SVG [width 500.0, height 300.0]
+-- |     `T.withChild`
+-- |       T.joinData "bars" "rect" data \d ->
+-- |         T.elem Rect
+-- |           [ x (\_ i -> toNumber i * 25.0)
+-- |           , y (\val _ -> 300.0 - val)
+-- |           , width 20.0
+-- |           , height (\val _ -> val)
+-- |           , fill "steelblue"
+-- |           ]
+-- | ```
+-- |
+-- | ## Force Simulation Example (SimulationM2)
+-- |
+-- | ```purescript
+-- | import PSD3v2.Capabilities.Simulation (init, start, addTickFunction, Step(..))
+-- | import PSD3v2.Interpreter.D3v2 (D3v2SimM)
+-- |
+-- | forceGraph :: forall row. D3v2SimM row MyNode Unit
+-- | forceGraph = do
+-- |   container <- select "#chart"
+-- |
+-- |   -- Initialize simulation
+-- |   { nodes, links } <- init
+-- |     { nodes: myNodes
+-- |     , links: myLinks
+-- |     , forces: [manyBody, center, linkForce]
+-- |     , activeForces: Set.fromFoldable ["manyBody", "center", "links"]
+-- |     , config: defaultConfig
+-- |     , keyFn: nodeKeyFn
+-- |     , ticks: Map.empty
+-- |     }
+-- |
+-- |   -- Render with Tree API
+-- |   let tree =
+-- |         T.elem SVG [width 800.0, height 600.0]
+-- |           `T.withChildren`
+-- |             [ T.joinData "links" "line" links \link -> ...
+-- |             , T.joinData "nodes" "circle" nodes \node -> ...
+-- |             ]
+-- |   selections <- renderTree container tree
+-- |
+-- |   -- Extract bound selections for tick updates
+-- |   nodeCircles <- liftEffect $ reselectD3v2 "nodes" selections
+-- |   linkLines <- liftEffect $ reselectD3v2 "links" selections
+-- |
+-- |   -- Update positions on tick
+-- |   addTickFunction "nodes" $ Step nodeCircles [cx nodeX, cy nodeY]
+-- |   addTickFunction "links" $ Step linkLines [x1 linkSourceX, y1 linkSourceY, ...]
+-- |
+-- |   start
+-- | ```
+-- |
+-- | ## Module Organization
+-- |
+-- | **Core Modules** (PSD3v2):
+-- | - `PSD3v2.Interpreter.D3v2` - Main interpreter with phantom types
+-- | - `PSD3v2.Capabilities.Selection` - Selection operations + Tree API
+-- | - `PSD3v2.Capabilities.Simulation` - SimulationM2 for force simulations
+-- | - `PSD3v2.Capabilities.Transition` - Smooth transitions
+-- | - `PSD3v2.VizTree.Tree` - Declarative Tree API
+-- | - `PSD3v2.Attribute.Types` - All attributes (width, height, cx, cy, etc.)
+-- | - `PSD3v2.Behavior.Types` - Behaviors (drag, zoom)
+-- |
+-- | **Selection System**:
+-- | - `PSD3v2.Selection.Types` - Phantom type states (SUnbound, SBound, SJoined)
+-- | - `PSD3v2.Selection.Operations` - Core operations
+-- | - `PSD3v2.Selection.Join` - Data join implementation (GUP)
+-- |
+-- | **Shared Modules** (used by both v1 and v2):
+-- | - `PSD3.Data.Node` - SimulationNode, D3Link types
+-- | - `PSD3.Data.Tree` - Tree data structures
+-- | - `PSD3.Layout.Hierarchy.*` - Pure PureScript layouts (Tree, Cluster, Pack, etc.)
+-- | - `PSD3.Layout.Sankey` - Pure PureScript Sankey layout
+-- | - `PSD3.Internal.Simulation.*` - Simulation core (forces, config)
+-- | - `PSD3.Internal.FFI` - D3.js FFI bindings
+-- |
+-- | ## Working Examples
+-- |
+-- | See these for complete, working demonstrations:
+-- |
+-- | 1. **LesMisGUPTree** (`src/website/Component/LesMisGUPTree.purs`)
+-- |    - Full-featured force simulation
+-- |    - Tree API + SimulationM2
+-- |    - General Update Pattern (dynamic filtering)
+-- |    - Layout transitions (grid, phylotaxis, force-directed)
+-- |    - Position caching for smooth transitions
+-- |
+-- | 2. **PSD3v2Examples** (`src/website/Component/PSD3v2Examples.purs`)
+-- |    - Three Little Circles
+-- |    - GUP demonstrations
+-- |    - Tree visualizations
+-- |
+-- | 3. **TreeAPI Examples** (`src/website/Component/TreeAPI.purs`)
+-- |    - Tree API patterns
+-- |    - Declarative structure examples
+-- |
+-- | ## Import Patterns
+-- |
+-- | **Basic visualization**:
+-- | ```purescript
+-- | import PSD3v2.Interpreter.D3v2 as D3v2
+-- | import PSD3v2.Capabilities.Selection (select, renderTree)
+-- | import PSD3v2.VizTree.Tree as T
+-- | import PSD3v2.Attribute.Types (width, height, cx, cy, radius, fill, stroke)
+-- | ```
+-- |
+-- | **Force simulation**:
+-- | ```purescript
+-- | import PSD3v2.Interpreter.D3v2 (D3v2SimM, runD3v2SimM)
+-- | import PSD3v2.Capabilities.Simulation (init, update, start, stop, addTickFunction, Step(..))
+-- | import PSD3v2.Capabilities.Selection (select, renderTree)
+-- | import PSD3.Internal.Simulation.Types (Force, D3SimulationState_)
+-- | import PSD3.Internal.Simulation.Config as F
+-- | import PSD3.Internal.Simulation.Forces (createForce)
+-- | ```
+-- |
+-- | **With behaviors**:
+-- | ```purescript
+-- | import PSD3v2.Capabilities.Selection (on)
+-- | import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom, simulationDrag)
+-- | ```
+-- |
+-- | ## Migration from v1
+-- |
+-- | See `src/lib/PSD3_v1_Archive/README.md` for detailed migration guide.
+-- |
+-- | **Quick comparison**:
+-- |
+-- | v1 (OLD):
+-- | ```purescript
+-- | import PSD3.Interpreter.D3 (runD3, D3M)
+-- | import PSD3.Capabilities.Selection (select, append)
+-- |
+-- | example :: D3M Unit
+-- | example = do
+-- |   sel <- select "body"
+-- |   svg <- append SVG sel
+-- |   -- manual DOM manipulation...
+-- | ```
+-- |
+-- | v2 (NEW):
+-- | ```purescript
+-- | import PSD3v2.Interpreter.D3v2 as D3v2
+-- | import PSD3v2.Capabilities.Selection (select, renderTree)
+-- | import PSD3v2.VizTree.Tree as T
+-- |
+-- | example :: D3v2M SUnbound Unit
+-- | example = do
+-- |   container <- select "body"
+-- |   let tree = T.elem SVG [] `T.withChild` ...
+-- |   renderTree container tree
+-- | ```
+-- |
+-- | ## Exports
+-- |
+-- | This module currently re-exports the **NEW PSD3v2** modules.
+-- |
+-- | For the old v1 modules, see `src/lib/PSD3_v1_Archive/`.
+-- |
+module PSD3 (module X) where
+
+import Prelude as X
+
+-- PSD3v2 Core Exports
+import PSD3v2.Interpreter.D3v2 (D3v2M, D3v2SimM, D3v2Selection_, runD3v2M, runD3v2SimM, execD3v2SimM, reselectD3v2) as X
+
+import PSD3v2.Capabilities.Selection (class SelectionM, select, append, renderTree, renderData, setAttrs, on) as X
+import PSD3v2.Capabilities.Simulation (class SimulationM2, SimulationUpdate, init, update, start, stop, reheat, addTickFunction, removeTickFunction, Step(..)) as X
+import PSD3v2.Capabilities.Transition (class TransitionM, withTransition, withTransitionExit) as X
+
+-- Tree API
+import PSD3v2.VizTree.Tree (Tree, elem, joinData, withChild, withChildren, named) as X
+
+-- Types
+import PSD3v2.Selection.Types (SEmpty, SBound, SPending, SExiting, Selection(..)) as X
+import PSD3v2.Attribute.Types (Attribute, cx, cy, x, y, x1, y1, x2, y2, width, height, radius, fill, stroke, strokeWidth, opacity, transform, viewBox, id_, class_) as X
+import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, simulationDrag, ScaleExtent(..)) as X
+
+-- Shared data types
+import PSD3.Data.Node (SimulationNode, D3Link_Unswizzled, D3Link_Swizzled) as X
+import PSD3.Internal.Types (D3Simulation_, Datum_, Index_, Selector) as X

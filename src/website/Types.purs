@@ -89,6 +89,9 @@ data Route
   -- Tree API Examples
   | TreeAPI         -- Tree API examples (declarative tree API)
   | AnimatedTreeCluster  -- Animated Tree ↔ Cluster transitions (flagship example from yesterday)
+  | LesMisGUPTree   -- Les Mis with Tree API + GUP + Dynamic Layouts (proof-of-concept)
+  | ModuleGraph     -- Module dependency graph (dogfooding!)
+  | MermaidTreeDemo -- Mermaid interpreter for Tree API (visualizes tree structure)
   -- Meta
   | Acknowledgements -- Credits and acknowledgements
   | NotFound
@@ -104,5 +107,8 @@ instance showRoute :: Show Route where
   show (ReferenceModule moduleName) = "Module: " <> moduleName
   show TreeAPI = "Tree API Examples"
   show AnimatedTreeCluster = "Animated Tree ↔ Cluster"
+  show LesMisGUPTree = "Les Misérables GUP"
+  show ModuleGraph = "Module Graph"
+  show MermaidTreeDemo = "Mermaid Tree Visualizer"
   show Acknowledgements = "Acknowledgements"
   show NotFound = "Not Found"

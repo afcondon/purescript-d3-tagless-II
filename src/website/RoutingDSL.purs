@@ -25,6 +25,9 @@ routes =
   <|> reference
   <|> treeAPI
   <|> animatedTreeCluster
+  <|> lesMisGUPTree
+  <|> moduleGraph
+  <|> mermaidTreeDemo
   <|> acknowledgements
   <|> rootRedirect
   <|> notFound
@@ -65,6 +68,18 @@ treeAPI = TreeAPI <$ lit "tree-api" <* end
 animatedTreeCluster :: Match Route
 animatedTreeCluster = AnimatedTreeCluster <$ lit "animated-tree-cluster" <* end
 
+-- | Match: /lesmis-gup-tree
+lesMisGUPTree :: Match Route
+lesMisGUPTree = LesMisGUPTree <$ lit "lesmis-gup-tree" <* end
+
+-- | Match: /module-graph
+moduleGraph :: Match Route
+moduleGraph = ModuleGraph <$ lit "module-graph" <* end
+
+-- | Match: /mermaid-tree-demo
+mermaidTreeDemo :: Match Route
+mermaidTreeDemo = MermaidTreeDemo <$ lit "mermaid-tree-demo" <* end
+
 -- | Match: /acknowledgements
 acknowledgements :: Match Route
 acknowledgements = Acknowledgements <$ lit "acknowledgements" <* end
@@ -85,5 +100,8 @@ routeToPath Reference = "/reference"
 routeToPath (ReferenceModule moduleName) = "/reference/" <> moduleName
 routeToPath TreeAPI = "/tree-api"
 routeToPath AnimatedTreeCluster = "/animated-tree-cluster"
+routeToPath LesMisGUPTree = "/lesmis-gup-tree"
+routeToPath ModuleGraph = "/module-graph"
+routeToPath MermaidTreeDemo = "/mermaid-tree-demo"
 routeToPath Acknowledgements = "/acknowledgements"
 routeToPath NotFound = "/not-found"

@@ -43,6 +43,8 @@ render currentRoute =
         , sectionTitle "Tree API Examples"
         , navLink TreeAPI "Tree API" currentRoute
         , navLink AnimatedTreeCluster "Animated Tree ↔ Cluster" currentRoute
+        , navLink LesMisGUPTree "Les Misérables GUP" currentRoute
+        , navLink ModuleGraph "Module Graph" currentRoute
 
         , HH.hr [ HP.classes [ HH.ClassName "explanation-page__nav-divider" ] ]
         , HH.a

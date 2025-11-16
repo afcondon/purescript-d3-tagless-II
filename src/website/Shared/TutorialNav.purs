@@ -19,6 +19,8 @@ allTutorialRoutes :: Array Route
 allTutorialRoutes =
   [ TreeAPI
   , AnimatedTreeCluster
+  , LesMisGUPTree
+  , ModuleGraph
   ]
 
 -- | Get the next tutorial in the sequence

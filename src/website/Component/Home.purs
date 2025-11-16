@@ -151,6 +151,15 @@ render _ =
             , renderTutorialLink "Animated Tree ↔ Cluster"
                 "Smooth transitions between layouts with proper data joins (flagship example)"
                 (routeToPath AnimatedTreeCluster)
+            , renderTutorialLink "Les Misérables GUP"
+                "Force-directed graph with Tree API + dynamic layouts (grid, phylotaxis) + node filtering (GUP)"
+                (routeToPath LesMisGUPTree)
+            , renderTutorialLink "Module Graph"
+                "Visualize this codebase's own module dependencies - dogfooding the Tree API!"
+                (routeToPath ModuleGraph)
+            , renderTutorialLink "Mermaid Tree Visualizer"
+                "NEW: Visualize Tree API structure as Mermaid diagrams - see how trees are composed!"
+                (routeToPath MermaidTreeDemo)
             ]
         ]
 
