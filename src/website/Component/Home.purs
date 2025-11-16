@@ -142,29 +142,56 @@ render _ =
             [ HH.text "Take the Tour" ]
         , HH.p
             [ HP.classes [ HH.ClassName "home-section-description" ] ]
-            [ HH.text "You can read through the following to progressively build up an understanding of the capabilities and concepts:" ]
+            [ HH.text "A progressive tour of the library's capabilities, from basic visualizations to advanced techniques:" ]
         , HH.div
             [ HP.classes [ HH.ClassName "home-tutorials-grid" ] ]
-            [ renderTutorialLink "Tree API Examples"
-                "Learn the declarative Tree API for building visualizations"
-                (routeToPath TreeAPI)
-            , renderTutorialLink "Animated Tree ↔ Cluster"
-                "Smooth transitions between layouts with proper data joins (flagship example)"
-                (routeToPath AnimatedTreeCluster)
-            , renderTutorialLink "Les Misérables GUP"
-                "Force-directed graph with Tree API + dynamic layouts (grid, phylotaxis) + node filtering (GUP)"
-                (routeToPath LesMisGUPTree)
-            , renderTutorialLink "Module Graph"
-                "Visualize this codebase's own module dependencies - dogfooding the Tree API!"
-                (routeToPath ModuleGraph)
-            , renderTutorialLink "Mermaid Tree Visualizer"
-                "NEW: Visualize Tree API structure as Mermaid diagrams - see how trees are composed!"
-                (routeToPath MermaidTreeDemo)
+            [ renderTutorialLink "1. Foundations"
+                "Three circles, nested data, bar charts - the building blocks of visualization"
+                (routeToPath TourFoundations)
+            , renderTutorialLink "2. Professional Charts"
+                "Grouped bars, multi-line, radial stacked - production-ready visualizations"
+                (routeToPath TourProfessional)
+            , renderTutorialLink "3. Flow Diagrams"
+                "Chord and Sankey diagrams for relationships and flows"
+                (routeToPath TourFlow)
+            , renderTutorialLink "4. Hierarchies"
+                "Trees, dendrograms, treemaps, circle packing - all hierarchy layouts"
+                (routeToPath TourHierarchies)
+            , renderTutorialLink "5. Motion & Transitions"
+                "Animations, General Update Pattern, force-directed graphs"
+                (routeToPath TourMotion)
+            , renderTutorialLink "6. Alternative Interpreters"
+                "Mermaid diagrams, code generation - the power of Finally Tagless"
+                (routeToPath TourInterpreters)
+            , renderTutorialLink "7. FP For The Win"
+                "Maps, Sets, contravariant functors - functional programming superpowers"
+                (routeToPath TourFPFTW)
+            , renderTutorialLink "8. Showcase"
+                "Flagship demonstrations combining multiple techniques"
+                (routeToPath TourShowcase)
             ]
         ]
 
-    -- Examples section will be rebuilt with v2
-    -- TODO: Rebuild examples gallery with v2 examples
+    -- Examples section
+    , HH.section
+        [ HP.id "examples"
+        , HP.classes [ HH.ClassName "home-examples" ]
+        ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "home-section-title" ] ]
+            [ HH.text "Examples Gallery" ]
+        , HH.p
+            [ HP.classes [ HH.ClassName "home-section-description" ] ]
+            [ HH.text "Browse all TreeAPI examples organized by category, from basic data joins to advanced simulations." ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "home-gallery-cta" ] ]
+            [ HH.a
+                [ HP.href $ "#" <> routeToPath Gallery
+                , HP.classes [ HH.ClassName "home-gallery-link" ]
+                ]
+                [ HH.text "View Examples Gallery →" ]
+            ]
+        ]
 
     -- Footer
     , Footer.render

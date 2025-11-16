@@ -23,7 +23,19 @@ import PSD3.HowTo.HowtoIndex as HowtoIndex
 import PSD3.Reference.Reference as Reference
 import PSD3.Acknowledgements as Acknowledgements
 
+-- Tour pages
+import Component.Tour.TourFoundations as TourFoundations
+import Component.Tour.TourProfessional as TourProfessional
+import Component.Tour.TourFlow as TourFlow
+import Component.Tour.TourHierarchies as TourHierarchies
+import Component.Tour.TourMotion as TourMotion
+import Component.Tour.TourInterpreters as TourInterpreters
+import Component.Tour.TourFPFTW as TourFPFTW
+import Component.Tour.TourShowcase as TourShowcase
+
 -- Tree API Examples
+import Component.ExamplesGallery as ExamplesGallery
+import Component.Example as Example
 import Component.TreeAPI as TreeAPI
 import Component.AnimatedTreeCluster as AnimatedTreeCluster
 import Component.LesMisGUPTree as LesMisGUPTree
@@ -54,6 +66,16 @@ type Slots =
   , wizard :: forall q. H.Slot q Void Unit
   , howtoIndex :: forall q. H.Slot q Void Unit
   , reference :: forall q. H.Slot q Void Unit
+  , tourFoundations :: forall q. H.Slot q Void Unit
+  , tourProfessional :: forall q. H.Slot q Void Unit
+  , tourFlow :: forall q. H.Slot q Void Unit
+  , tourHierarchies :: forall q. H.Slot q Void Unit
+  , tourMotion :: forall q. H.Slot q Void Unit
+  , tourInterpreters :: forall q. H.Slot q Void Unit
+  , tourFPFTW :: forall q. H.Slot q Void Unit
+  , tourShowcase :: forall q. H.Slot q Void Unit
+  , gallery :: forall q. H.Slot q Void Unit
+  , example :: forall q. H.Slot q Void Unit
   , treeAPI :: forall q. H.Slot q Void Unit
   , animatedTreeCluster :: forall q. H.Slot q Void Unit
   , lesMisGUPTree :: forall q. H.Slot q Void Unit
@@ -67,6 +89,16 @@ _gettingStarted = Proxy :: Proxy "gettingStarted"
 _wizard = Proxy :: Proxy "wizard"
 _howtoIndex = Proxy :: Proxy "howtoIndex"
 _reference = Proxy :: Proxy "reference"
+_tourFoundations = Proxy :: Proxy "tourFoundations"
+_tourProfessional = Proxy :: Proxy "tourProfessional"
+_tourFlow = Proxy :: Proxy "tourFlow"
+_tourHierarchies = Proxy :: Proxy "tourHierarchies"
+_tourMotion = Proxy :: Proxy "tourMotion"
+_tourInterpreters = Proxy :: Proxy "tourInterpreters"
+_tourFPFTW = Proxy :: Proxy "tourFPFTW"
+_tourShowcase = Proxy :: Proxy "tourShowcase"
+_gallery = Proxy :: Proxy "gallery"
+_example = Proxy :: Proxy "example"
 _treeAPI = Proxy :: Proxy "treeAPI"
 _animatedTreeCluster = Proxy :: Proxy "animatedTreeCluster"
 _lesMisGUPTree = Proxy :: Proxy "lesMisGUPTree"
@@ -116,7 +148,38 @@ renderPage route = case spy "Route is" route of
   ReferenceModule moduleName ->
     HH.slot_ _reference unit Reference.component (ReferenceModule moduleName)
 
+  -- Tour Pages
+  TourFoundations ->
+    HH.slot_ _tourFoundations unit TourFoundations.component unit
+
+  TourProfessional ->
+    HH.slot_ _tourProfessional unit TourProfessional.component unit
+
+  TourFlow ->
+    HH.slot_ _tourFlow unit TourFlow.component unit
+
+  TourHierarchies ->
+    HH.slot_ _tourHierarchies unit TourHierarchies.component unit
+
+  TourMotion ->
+    HH.slot_ _tourMotion unit TourMotion.component unit
+
+  TourInterpreters ->
+    HH.slot_ _tourInterpreters unit TourInterpreters.component unit
+
+  TourFPFTW ->
+    HH.slot_ _tourFPFTW unit TourFPFTW.component unit
+
+  TourShowcase ->
+    HH.slot_ _tourShowcase unit TourShowcase.component unit
+
   -- Tree API Examples
+  Gallery ->
+    HH.slot_ _gallery unit ExamplesGallery.component unit
+
+  Example exampleId ->
+    HH.slot_ _example unit Example.component exampleId
+
   TreeAPI ->
     HH.slot_ _treeAPI unit TreeAPI.component unit
 

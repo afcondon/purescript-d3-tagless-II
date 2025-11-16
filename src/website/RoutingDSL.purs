@@ -23,6 +23,16 @@ routes =
   <|> howtoIndex
   <|> referenceModule  -- Must come before reference (more specific)
   <|> reference
+  <|> tourFoundations
+  <|> tourProfessional
+  <|> tourFlow
+  <|> tourHierarchies
+  <|> tourMotion
+  <|> tourInterpreters
+  <|> tourFPFTW
+  <|> tourShowcase
+  <|> gallery
+  <|> examplePage     -- Must come before other routes to match /example/:id
   <|> treeAPI
   <|> animatedTreeCluster
   <|> lesMisGUPTree
@@ -59,6 +69,46 @@ referenceModule = ReferenceModule <$> (lit "reference" *> str) <* end
 -- | Match: /reference
 reference :: Match Route
 reference = Reference <$ lit "reference" <* end
+
+-- | Match: /tour/foundations
+tourFoundations :: Match Route
+tourFoundations = TourFoundations <$ lit "tour" <* lit "foundations" <* end
+
+-- | Match: /tour/professional
+tourProfessional :: Match Route
+tourProfessional = TourProfessional <$ lit "tour" <* lit "professional" <* end
+
+-- | Match: /tour/flow
+tourFlow :: Match Route
+tourFlow = TourFlow <$ lit "tour" <* lit "flow" <* end
+
+-- | Match: /tour/hierarchies
+tourHierarchies :: Match Route
+tourHierarchies = TourHierarchies <$ lit "tour" <* lit "hierarchies" <* end
+
+-- | Match: /tour/motion
+tourMotion :: Match Route
+tourMotion = TourMotion <$ lit "tour" <* lit "motion" <* end
+
+-- | Match: /tour/interpreters
+tourInterpreters :: Match Route
+tourInterpreters = TourInterpreters <$ lit "tour" <* lit "interpreters" <* end
+
+-- | Match: /tour/fpftw
+tourFPFTW :: Match Route
+tourFPFTW = TourFPFTW <$ lit "tour" <* lit "fpftw" <* end
+
+-- | Match: /tour/showcase
+tourShowcase :: Match Route
+tourShowcase = TourShowcase <$ lit "tour" <* lit "showcase" <* end
+
+-- | Match: /gallery
+gallery :: Match Route
+gallery = Gallery <$ lit "gallery" <* end
+
+-- | Match: /example/:exampleId
+examplePage :: Match Route
+examplePage = Example <$> (lit "example" *> str) <* end
 
 -- | Match: /tree-api
 treeAPI :: Match Route
@@ -98,6 +148,16 @@ routeToPath Wizard = "/wizard"
 routeToPath HowtoIndex = "/howto"
 routeToPath Reference = "/reference"
 routeToPath (ReferenceModule moduleName) = "/reference/" <> moduleName
+routeToPath TourFoundations = "/tour/foundations"
+routeToPath TourProfessional = "/tour/professional"
+routeToPath TourFlow = "/tour/flow"
+routeToPath TourHierarchies = "/tour/hierarchies"
+routeToPath TourMotion = "/tour/motion"
+routeToPath TourInterpreters = "/tour/interpreters"
+routeToPath TourFPFTW = "/tour/fpftw"
+routeToPath TourShowcase = "/tour/showcase"
+routeToPath Gallery = "/gallery"
+routeToPath (Example exampleId) = "/example/" <> exampleId
 routeToPath TreeAPI = "/tree-api"
 routeToPath AnimatedTreeCluster = "/animated-tree-cluster"
 routeToPath LesMisGUPTree = "/lesmis-gup-tree"

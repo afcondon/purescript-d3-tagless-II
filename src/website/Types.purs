@@ -86,7 +86,18 @@ data Route
   | HowtoIndex      -- How-to: index of all step-by-step guides (TODO: update for v2)
   | Reference       -- Reference: API documentation index
   | ReferenceModule String  -- Reference: individual module page
+  -- Tour Pages (progressive overview of capabilities)
+  | TourFoundations      -- Tour 1: Three circles, matrix, parabola, bar chart
+  | TourProfessional     -- Tour 2: Multiline, grouped bar, radial stacked
+  | TourFlow             -- Tour 3: Chord and Sankey diagrams
+  | TourHierarchies      -- Tour 4: All tree layouts, treemap, pack, icicle
+  | TourMotion           -- Tour 5: Transitions and animations
+  | TourInterpreters     -- Tour 6: Alternative interpreters (Mermaid, English, generators)
+  | TourFPFTW            -- Tour 7: Functional Programming For The Win (Maps, Sets, contravariant attributes)
+  | TourShowcase         -- Tour 8: Flagship demo visualizations
   -- Tree API Examples
+  | Gallery         -- Gallery of all TreeAPI examples with cards
+  | Example String  -- Individual example page by ID
   | TreeAPI         -- Tree API examples (declarative tree API)
   | AnimatedTreeCluster  -- Animated Tree ↔ Cluster transitions (flagship example from yesterday)
   | LesMisGUPTree   -- Les Mis with Tree API + GUP + Dynamic Layouts (proof-of-concept)
@@ -105,6 +116,16 @@ instance showRoute :: Show Route where
   show HowtoIndex = "How-to Guides"
   show Reference = "API Reference"
   show (ReferenceModule moduleName) = "Module: " <> moduleName
+  show TourFoundations = "Tour: Foundations"
+  show TourProfessional = "Tour: Professional Charts"
+  show TourFlow = "Tour: Flow Diagrams"
+  show TourHierarchies = "Tour: Hierarchies"
+  show TourMotion = "Tour: Motion & Transitions"
+  show TourInterpreters = "Tour: Alternative Interpreters"
+  show TourFPFTW = "Tour: FP For The Win"
+  show TourShowcase = "Tour: Showcase"
+  show Gallery = "Examples Gallery"
+  show (Example exampleId) = "Example: " <> exampleId
   show TreeAPI = "Tree API Examples"
   show AnimatedTreeCluster = "Animated Tree ↔ Cluster"
   show LesMisGUPTree = "Les Misérables GUP"

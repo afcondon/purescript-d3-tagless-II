@@ -17,10 +17,14 @@ import PSD3.Website.Types (Route(..))
 -- | All tutorial pages in order
 allTutorialRoutes :: Array Route
 allTutorialRoutes =
-  [ TreeAPI
-  , AnimatedTreeCluster
-  , LesMisGUPTree
-  , ModuleGraph
+  [ TourFoundations
+  , TourProfessional
+  , TourFlow
+  , TourHierarchies
+  , TourMotion
+  , TourInterpreters
+  , TourFPFTW
+  , TourShowcase
   ]
 
 -- | Get the next tutorial in the sequence
