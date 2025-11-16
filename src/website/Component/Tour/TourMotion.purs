@@ -10,6 +10,9 @@ import Halogen.HTML.Properties as HP
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
+import Effect.Class (liftEffect)
+import D3.Viz.TreeAPI.ThreeLittleCirclesTransition as ThreeLittleCirclesTransition
+import D3.Viz.TreeAPI.GeneralUpdatePattern as GeneralUpdatePattern
 
 -- | Tour page state
 type State = Unit
@@ -31,7 +34,9 @@ component = H.mkComponent
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
-    -- No examples to render on this page (link to separate pages)
+    -- Render motion/transition examples
+    liftEffect $ ThreeLittleCirclesTransition.threeLittleCirclesTransition
+    liftEffect $ GeneralUpdatePattern.generalUpdatePattern
     pure unit
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -60,8 +65,11 @@ render _ =
                 [ HH.text "1. Basic Transitions: Color Mixing" ]
             , HH.p_
                 [ HH.text "Transitions allow smooth animated changes to visual properties. This simple example shows three circles transitioning from green to RGB primary colors (red, green, blue) with 50% opacity. The circles reposition to overlap, demonstrating additive color mixing where overlapping colors create secondary colors: cyan (green + blue), magenta (red + blue), and yellow (red + green)." ]
-            , HH.p_
-                [ HH.em_ [ HH.text "[Color mixing transition example not yet implemented in TreeAPI - coming soon]" ] ]
+            , HH.div
+                [ HP.id "viz"
+                , HP.classes [ HH.ClassName "viz-container" ]
+                ]
+                []
             ]
 
         -- Section 2: General Update Pattern
@@ -76,8 +84,13 @@ render _ =
                 [ HH.text "This deceptively simple example shows off an aspect of screen-based data visualization that has no analogue in paper visualizations: the ability to specify how updates to the data should be represented." ]
             , HH.p_
                 [ HH.text "In this example, some letters of the alphabet are presented and then constantly updated. When a letter enters at first, it falls in from the top and it is green. If it's still present in the next set of letters it stays on the screen, but it turns gray and moves to an alphabetically correct new position. And if it's not present in the new data, it turns red and falls out before disappearing." ]
+            , HH.div
+                [ HP.id "gup-container"
+                , HP.classes [ HH.ClassName "viz-container" ]
+                ]
+                []
             , HH.p_
-                [ HH.em_ [ HH.text "[General Update Pattern example not yet implemented in TreeAPI - coming soon]" ] ]
+                [ HH.text "The example automatically cycles through random letter selections every 2 seconds, demonstrating all three parts of the pattern: green letters entering from above, gray letters sliding to new positions, and brown letters exiting below." ]
             ]
 
         -- Section 3: Les Misérables Force Layout
