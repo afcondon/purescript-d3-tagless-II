@@ -25,6 +25,7 @@ import PSD3.Acknowledgements as Acknowledgements
 
 -- Tree API Examples
 import Component.TreeAPI as TreeAPI
+import Component.AnimatedTreeCluster as AnimatedTreeCluster
 
 -- Routing
 import PSD3.RoutingDSL (routing, routeToPath)
@@ -51,6 +52,7 @@ type Slots =
   , howtoIndex :: forall q. H.Slot q Void Unit
   , reference :: forall q. H.Slot q Void Unit
   , treeAPI :: forall q. H.Slot q Void Unit
+  , animatedTreeCluster :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
 
@@ -60,6 +62,7 @@ _wizard = Proxy :: Proxy "wizard"
 _howtoIndex = Proxy :: Proxy "howtoIndex"
 _reference = Proxy :: Proxy "reference"
 _treeAPI = Proxy :: Proxy "treeAPI"
+_animatedTreeCluster = Proxy :: Proxy "animatedTreeCluster"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
 -- | Main application component
@@ -107,6 +110,9 @@ renderPage route = case spy "Route is" route of
   -- Tree API Examples
   TreeAPI ->
     HH.slot_ _treeAPI unit TreeAPI.component unit
+
+  AnimatedTreeCluster ->
+    HH.slot_ _animatedTreeCluster unit AnimatedTreeCluster.component unit
 
   Acknowledgements ->
     HH.slot_ _acknowledgements unit Acknowledgements.component unit

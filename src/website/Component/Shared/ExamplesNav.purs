@@ -42,6 +42,7 @@ render currentRoute =
         -- Tree API Examples
         , sectionTitle "Tree API Examples"
         , navLink TreeAPI "Tree API" currentRoute
+        , navLink AnimatedTreeCluster "Animated Tree ↔ Cluster" currentRoute
 
         , HH.hr [ HP.classes [ HH.ClassName "explanation-page__nav-divider" ] ]
         , HH.a

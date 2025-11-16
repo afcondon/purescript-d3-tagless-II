@@ -24,6 +24,7 @@ routes =
   <|> referenceModule  -- Must come before reference (more specific)
   <|> reference
   <|> treeAPI
+  <|> animatedTreeCluster
   <|> acknowledgements
   <|> rootRedirect
   <|> notFound
@@ -60,6 +61,10 @@ reference = Reference <$ lit "reference" <* end
 treeAPI :: Match Route
 treeAPI = TreeAPI <$ lit "tree-api" <* end
 
+-- | Match: /animated-tree-cluster
+animatedTreeCluster :: Match Route
+animatedTreeCluster = AnimatedTreeCluster <$ lit "animated-tree-cluster" <* end
+
 -- | Match: /acknowledgements
 acknowledgements :: Match Route
 acknowledgements = Acknowledgements <$ lit "acknowledgements" <* end
@@ -79,5 +84,6 @@ routeToPath HowtoIndex = "/howto"
 routeToPath Reference = "/reference"
 routeToPath (ReferenceModule moduleName) = "/reference/" <> moduleName
 routeToPath TreeAPI = "/tree-api"
+routeToPath AnimatedTreeCluster = "/animated-tree-cluster"
 routeToPath Acknowledgements = "/acknowledgements"
 routeToPath NotFound = "/not-found"

@@ -18,6 +18,7 @@ import PSD3.Website.Types (Route(..))
 allTutorialRoutes :: Array Route
 allTutorialRoutes =
   [ TreeAPI
+  , AnimatedTreeCluster
   ]
 
 -- | Get the next tutorial in the sequence

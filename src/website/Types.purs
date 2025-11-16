@@ -88,6 +88,7 @@ data Route
   | ReferenceModule String  -- Reference: individual module page
   -- Tree API Examples
   | TreeAPI         -- Tree API examples (declarative tree API)
+  | AnimatedTreeCluster  -- Animated Tree ↔ Cluster transitions (flagship example from yesterday)
   -- Meta
   | Acknowledgements -- Credits and acknowledgements
   | NotFound
@@ -102,5 +103,6 @@ instance showRoute :: Show Route where
   show Reference = "API Reference"
   show (ReferenceModule moduleName) = "Module: " <> moduleName
   show TreeAPI = "Tree API Examples"
+  show AnimatedTreeCluster = "Animated Tree ↔ Cluster"
   show Acknowledgements = "Acknowledgements"
   show NotFound = "Not Found"

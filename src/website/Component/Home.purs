@@ -148,6 +148,9 @@ render _ =
             [ renderTutorialLink "Tree API Examples"
                 "Learn the declarative Tree API for building visualizations"
                 (routeToPath TreeAPI)
+            , renderTutorialLink "Animated Tree ↔ Cluster"
+                "Smooth transitions between layouts with proper data joins (flagship example)"
+                (routeToPath AnimatedTreeCluster)
             ]
         ]
 
