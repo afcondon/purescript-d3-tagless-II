@@ -8,14 +8,15 @@ import Effect.Class (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import PSD3.RoutingDSL (routeToPath)
 import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
 
 -- Import TreeAPI examples
-import D3.Viz.TreeAPI.ThreeLittleCircles as ThreeLittleCircles
-import D3.Viz.TreeAPI.ThreeLittleDimensionsExample as ThreeLittleDimensions
-import D3.Viz.TreeAPI.BarChartExample as BarChart
+import D3.Viz.TreeAPI.ThreeLittleCirclesGreen as ThreeLittleCirclesGreen
+import D3.Viz.TreeAPI.ThreeLittleCirclesColored as ThreeLittleCirclesColored
+import D3.Viz.TreeAPI.ParabolaNoAxes as ParabolaNoAxes
+import D3.Viz.TreeAPI.ParabolaWithAxes as ParabolaWithAxes
+import D3.Viz.TreeAPI.AnscombesQuartet as AnscombesQuartet
 
 -- | Tour page state
 type State = Unit
@@ -37,10 +38,12 @@ component = H.mkComponent
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
-    -- Render examples
-    liftEffect $ ThreeLittleCircles.threeLittleCircles
-    liftEffect $ ThreeLittleDimensions.threeLittleDimensions
-    liftEffect $ BarChart.barChart
+    -- Render examples with unique selectors
+    liftEffect $ ThreeLittleCirclesGreen.threeLittleCirclesGreen "#three-circles-green-viz"
+    liftEffect $ ThreeLittleCirclesColored.threeLittleCirclesColored "#three-circles-colored-viz"
+    liftEffect $ ParabolaNoAxes.parabolaNoAxes "#parabola-no-axes-viz"
+    liftEffect $ ParabolaWithAxes.parabolaWithAxes "#parabola-with-axes-viz"
+    liftEffect $ AnscombesQuartet.anscombesQuartet "#anscombes-quartet-viz"
     pure unit
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -54,107 +57,112 @@ render _ =
             [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
             [ HH.h1
                 [ HP.classes [ HH.ClassName "tutorial-title" ] ]
-                [ HH.text "1. Building Visualizations with PureScript" ]
+                [ HH.text "1. Foundations: Data to Visualization" ]
             , HH.p_
-                [ HH.text "We'll show just the very simplest examples of putting elements in the DOM, in this case into an SVG, using the PS<$>D3 library. Then in the following pages, we'll look at progressively more complicated data visualizations and techniques that go well beyond simple static representations." ]
+                [ HH.text "The fundamental principle of data visualization is simple: start with data, create visual elements from that data. This page shows the progression from the most trivial example (three pieces of data → three circles) to a classic demonstration of why visualization matters (Anscombe's Quartet)." ]
             , HH.p_
-                [ HH.text "Each example has a link beneath it to see the full source code for the example, and if you're already familiar with D3.js the shape of the code should look very familiar." ]
+                [ HH.text "Each step adds one concept, building your understanding incrementally. If you're familiar with D3.js, the TreeAPI will feel natural but with type safety and composability." ]
             ]
 
-        -- Section 1: Three Little Circles
+        -- Section 1: Three Little Circles (Green)
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ]
-            , HP.id "section-1"
+            , HP.id "three-circles-green"
             ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
                 [ HH.text "1. Three Little Circles" ]
             , HH.p_
-                [ HH.text "Simplest possible example, we have three items of data and we put a green circle into an SVG for each one. We use the index of the datum to offset it so that they form a little line." ]
+                [ HH.text "The most minimal example: three pieces of data ['a', 'b', 'c'] → three green circles. The data doesn't need to be numbers - it can be anything. We just create one circle for each datum and use the index to position them horizontally." ]
             , HH.div
                 [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
                 [ HH.div
-                    [ HP.id "viz"
-                    , HP.classes [ HH.ClassName "three-circles-viz" ] ]
+                    [ HP.id "three-circles-green-viz"
+                    , HP.classes [ HH.ClassName "three-circles-green-viz" ] ]
                     []
-                ]
-            , HH.p_
-                [ HH.text "View this example "
-                , HH.a
-                    [ HP.href $ "#" <> routeToPath (Example "three-little-circles")
-                    ]
-                    [ HH.text "with full source code" ]
-                , HH.text "."
                 ]
             ]
 
-        -- Section 1b: Three Little Dimensions (Nested Data Binding)
+        -- Section 2: Three Little Circles (Colored)
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ]
-            , HP.id "section-1b"
+            , HP.id "three-circles-colored"
             ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "1b. Nested Data Binding: Three Little Dimensions" ]
+                [ HH.text "2. Three Colored Circles" ]
             , HH.p_
-                [ HH.text "This example demonstrates nested data binding, where child elements derive their data from the parent element's bound datum. We take a 2D array [[1,2,3],[4,5,6],[7,8,9]] and create a nested structure using a proper HTML table: rows bound to outer arrays, cells bound to inner arrays." ]
+                [ HH.text "Same structure, different data: ['red', 'green', 'blue'] → three circles, each colored by its datum. This shows how attributes can be functions of the data - the fill color comes directly from the datum itself." ]
             , HH.div
                 [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
                 [ HH.div
-                    [ HP.id "viz"
-                    , HP.classes [ HH.ClassName "three-dimensions-viz" ] ]
+                    [ HP.id "three-circles-colored-viz"
+                    , HP.classes [ HH.ClassName "three-circles-colored-viz" ] ]
                     []
                 ]
-            , HH.p_
-                [ HH.text "For more advanced examples of working with different data structures like Sets and Maps, see the "
-                , HH.a
-                    [ HP.href $ "#" <> routeToPath TourFPFTW ]
-                    [ HH.text "FP For The Win" ]
-                , HH.text " tour page."
-                ]
             ]
 
-        -- Section 2: Parabola of Circles
+        -- Section 3: Ten Circles in a Parabola (No Axes)
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ]
-            , HP.id "section-2"
+            , HP.id "parabola-no-axes"
             ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "2. Data-Driven Positioning" ]
+                [ HH.text "3. Data-Driven Positioning: Parabola" ]
             , HH.p_
-                [ HH.text "This extends the super-simple model of the three little circles for a slightly more real-world example. Now we're giving more circles and varying the y position with a function to a parabola." ]
-            , HH.p_
-                [ HH.em_ [ HH.text "[Parabola example not yet implemented in TreeAPI - coming soon]" ] ]
-            ]
-
-        -- Section 3: Bar Chart
-        , HH.section
-            [ HP.classes [ HH.ClassName "tutorial-section" ]
-            , HP.id "section-3"
-            ]
-            [ HH.h2
-                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "3. Bar Charts with Scales" ]
-            , HH.p_
-                [ HH.text "Bar charts are ideal for comparing discrete categories or showing changes across time periods. They're so familiar that there isn't much to say, just some rectangles strung along an axis. And, in fact the creation of the axes is a notable part of this example." ]
-            , HH.p_
-                [ HH.text "This example shows monthly sales data using a vertical bar chart. Each bar represents a month, and the height indicates the sales value. The implementation uses D3 scales to map data values to pixel coordinates." ]
+                [ HH.text "Ten circles forming a parabola. Now the y-position comes from the datum itself - we compute y = x² for each point. Still just green circles, but positioned by a mathematical relationship in the data." ]
             , HH.div
                 [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
                 [ HH.div
-                    [ HP.id "viz"
-                    , HP.classes [ HH.ClassName "barchart-viz" ] ]
+                    [ HP.id "parabola-no-axes-viz"
+                    , HP.classes [ HH.ClassName "parabola-no-axes-viz" ] ]
+                    []
+                ]
+            ]
+
+        -- Section 4: Parabola with Axes
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ]
+            , HP.id "parabola-with-axes"
+            ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "4. Adding Context: Axes and Scales" ]
+            , HH.p_
+                [ HH.text "Same parabola, but now with axes to show the actual values. This introduces scales (mapping data space to pixel space) and axes (visual representation of those scales). These are fundamental tools for any real visualization." ]
+            , HH.div
+                [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
+                [ HH.div
+                    [ HP.id "parabola-with-axes-viz"
+                    , HP.classes [ HH.ClassName "parabola-with-axes-viz" ] ]
+                    []
+                ]
+            ]
+
+        -- Section 5: Anscombe's Quartet
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ]
+            , HP.id "anscombes-quartet"
+            ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "5. Why Visualization Matters: Anscombe's Quartet" ]
+            , HH.p_
+                [ HH.text "Four datasets with identical statistical properties (mean, variance, correlation) but completely different distributions. This is the classic demonstration of why you need to visualize data - summary statistics alone can be misleading." ]
+            , HH.p_
+                [ HH.text "Each dataset shows a scatterplot with its statistical summary below. Notice how the numbers are nearly identical, but the patterns are completely different: linear relationship, curved relationship, linear with outlier, and vertical line with outlier." ]
+            , HH.div
+                [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
+                [ HH.div
+                    [ HP.id "anscombes-quartet-viz"
+                    , HP.classes [ HH.ClassName "anscombes-quartet-viz" ] ]
                     []
                 ]
             , HH.p_
-                [ HH.text "View this example "
-                , HH.a
-                    [ HP.href $ "#" <> routeToPath (Example "bar-chart")
-                    ]
-                    [ HH.text "with full source code" ]
-                , HH.text "."
-                ]
+                [ HH.em_ [ HH.text "[Coming soon]" ] ]
+            , HH.p_
+                [ HH.text "This example demonstrates why data visualization exists: numbers alone don't tell the story. You need to see the data to understand it." ]
             ]
         ]
     ]

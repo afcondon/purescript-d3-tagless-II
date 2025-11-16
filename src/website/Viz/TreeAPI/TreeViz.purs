@@ -1,15 +1,18 @@
-module D3.Viz.TreeAPI.SimpleHierarchyExample where
+module D3.Viz.TreeAPI.TreeViz where
 
 import Prelude
 
 import Data.Array as Array
+import Data.Either (Either(..))
 import Data.List (List(..), fromFoldable)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Tree (Tree(..))
 import Effect (Effect)
+import Effect.Aff (Aff, launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
+import PSD3.Shared.Data (loadFlareData)
 import PSD3.Layout.Hierarchy.Tree4 (tree, defaultTreeConfig)
 import PSD3v2.Attribute.Types (width, height, viewBox, class_, cx, cy, radius, fill, stroke, strokeWidth, d, x, y, textContent, textAnchor, fontSize)
 import PSD3v2.Capabilities.Selection (select, renderTree)
@@ -18,33 +21,11 @@ import PSD3v2.Selection.Types (ElementType(..), SEmpty)
 import PSD3v2.VizTree.Tree as T
 import Web.DOM.Element (Element)
 
--- | Simple hierarchy node type (with depth field required by Tree4)
-type HierNode = { name :: String, x :: Number, y :: Number, depth :: Int }
+-- | Hierarchy node type (matches loadFlareData output)
+type HierNode = { name :: String, value :: Number, x :: Number, y :: Number, depth :: Int, height :: Int }
 
 -- | Link data type
 type LinkDatum = { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
-
--- | Sample small hierarchy
-sampleTree :: Tree HierNode
-sampleTree =
-  Node { name: "Root", x: 0.0, y: 0.0, depth: 0 }
-    ( fromFoldable
-        [ Node { name: "Child A", x: 0.0, y: 0.0, depth: 0 }
-            ( fromFoldable
-                [ Node { name: "A1", x: 0.0, y: 0.0, depth: 0 } Nil
-                , Node { name: "A2", x: 0.0, y: 0.0, depth: 0 } Nil
-                ]
-            )
-        , Node { name: "Child B", x: 0.0, y: 0.0, depth: 0 }
-            ( fromFoldable
-                [ Node { name: "B1", x: 0.0, y: 0.0, depth: 0 } Nil
-                , Node { name: "B2", x: 0.0, y: 0.0, depth: 0 } Nil
-                , Node { name: "B3", x: 0.0, y: 0.0, depth: 0 } Nil
-                ]
-            )
-        , Node { name: "Child C", x: 0.0, y: 0.0, depth: 0 } Nil
-        ]
-    )
 
 -- | Create links from parent to children
 makeLinks :: forall r. Tree { x :: Number, y :: Number | r }
@@ -69,20 +50,20 @@ linkPath x1' y1' x2' y2' =
   " " <> show x2' <> "," <> show ((y1' + y2') / 2.0) <>
   " " <> show x2' <> "," <> show y2'
 
--- | Simple tree hierarchy using declarative tree API
-simpleHierarchy :: Effect Unit
-simpleHierarchy = runD3v2M do
-  container <- select "#viz" :: _ (D3v2Selection_ SEmpty Element Unit)
+-- | Draw tree hierarchy with loaded data
+drawTree :: String -> Tree HierNode -> Effect Unit
+drawTree selector flareTree = runD3v2M do
+  container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
 
-  let chartWidth = 600.0
-  let chartHeight = 400.0
+  let chartWidth = 800.0
+  let chartHeight = 600.0
   let padding = 40.0
 
   -- Apply Tree4 layout
   let config = defaultTreeConfig
         { size = { width: chartWidth - (2.0 * padding)
                  , height: chartHeight - (2.0 * padding) } }
-  let positioned = tree config sampleTree
+  let positioned = tree config flareTree
 
   -- Flatten to arrays
   let nodes = Array.fromFoldable positioned
@@ -160,28 +141,16 @@ simpleHierarchy = runD3v2M do
   nodesSelections <- renderTree chartGroupSel nodesTree
 
   liftEffect do
-    Console.log "=== Simple Hierarchy (Tree API) ==="
+    Console.log "=== Tree Layout (Tree API) ==="
+    Console.log ""
+    Console.log $ "Rendered " <> show (Array.length nodes) <> " nodes, " <> show (Array.length links) <> " links"
+    Console.log "Flare visualization toolkit hierarchy"
     Console.log ""
 
-    case Map.lookup "svg" linksSelections of
-      Just _ -> Console.log "✓ SVG created"
-      Nothing -> Console.log "✗ Missing SVG"
-
-    case Map.lookup "linksGroup" linksSelections of
-      Just _ -> Console.log "✓ Links group created"
-      Nothing -> Console.log "✗ Missing links group"
-
-    case Map.lookup "links" linksSelections of
-      Just _ -> Console.log $ "✓ Links created (" <> show (Array.length links) <> ")"
-      Nothing -> Console.log "✗ Missing links"
-
-    case Map.lookup "nodesGroup" nodesSelections of
-      Just _ -> Console.log "✓ Nodes group created"
-      Nothing -> Console.log "✗ Missing nodes group"
-
-    case Map.lookup "nodeGroups" nodesSelections of
-      Just _ -> Console.log $ "✓ Node groups created (" <> show (Array.length nodes) <> ")"
-      Nothing -> Console.log "✗ Missing node groups"
-
-    Console.log ""
-    Console.log "Expected: Tree layout with 8 nodes and 7 links (curved paths)"
+-- | Main entry point - loads Flare data then renders
+treeViz :: String -> Effect Unit
+treeViz selector = launchAff_ do
+  result <- loadFlareData
+  case result of
+    Left err -> liftEffect $ Console.log $ "Failed to load Flare data: " <> err
+    Right flareTree -> liftEffect $ drawTree selector flareTree

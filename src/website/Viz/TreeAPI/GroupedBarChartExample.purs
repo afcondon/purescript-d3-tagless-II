@@ -2,16 +2,20 @@ module D3.Viz.TreeAPI.GroupedBarChartExample where
 
 import Prelude
 
-import Data.Array (nub, filter, findIndex)
+import Data.Array (nub, filter, findIndex, mapMaybe)
 import Data.Array as Array
+import Data.Either (Either(..))
 import Data.Foldable (maximum)
 import Data.Int as Int
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
-import D3.Viz.TreeAPI.Data (GroupedBarData, groupedBarData)
+import Data.Number as Number
+import Data.String (Pattern(..), split, trim)
 import Effect (Effect)
+import Effect.Aff (Aff, launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
+import PSD3.Shared.Data (DataFile(..), loadDataFile, parseCSVRow)
 import PSD3v2.Attribute.Types (width, height, viewBox, class_, x, y, fill, transform)
 import PSD3v2.Axis.Axis (axisBottom, axisLeft, renderAxis, Scale)
 import PSD3v2.Capabilities.Selection (select, renderTree)
@@ -19,6 +23,54 @@ import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, reselectD3v2)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
 import PSD3v2.VizTree.Tree as T
 import Web.DOM.Element (Element)
+
+-- | Grouped Bar Chart Data (State population by age group)
+type GroupedBarData =
+  { state :: String
+  , age :: String
+  , population :: Number
+  }
+
+-- | Parse CSV row into population data
+-- | CSV format: State,Under 5 Years,5 to 13 Years,14 to 17 Years,18 to 24 Years,25 to 44 Years,45 to 64 Years,65 Years and Over
+-- | Map to 9 age categories: <10, 10-19, 20-29, 30-39, 40-49, 50-59, 60-69, 70-79, ≥80
+parsePopulationRow :: String -> Array GroupedBarData
+parsePopulationRow line =
+  case parseCSVRow line of
+    [state, under5Str, age5to13Str, age14to17Str, age18to24Str, age25to44Str, age45to64Str, age65plusStr] -> do
+      let under5 = fromMaybe 0.0 $ Number.fromString (trim under5Str)
+          age5to13 = fromMaybe 0.0 $ Number.fromString (trim age5to13Str)
+          age14to17 = fromMaybe 0.0 $ Number.fromString (trim age14to17Str)
+          age18to24 = fromMaybe 0.0 $ Number.fromString (trim age18to24Str)
+          age25to44 = fromMaybe 0.0 $ Number.fromString (trim age25to44Str)
+          age45to64 = fromMaybe 0.0 $ Number.fromString (trim age45to64Str)
+          age65plus = fromMaybe 0.0 $ Number.fromString (trim age65plusStr)
+      [ { state: trim state, age: "<10", population: under5 + age5to13 * 0.5 }
+      , { state: trim state, age: "10-19", population: age5to13 * 0.5 + age14to17 }
+      , { state: trim state, age: "20-29", population: age18to24 + age25to44 * 0.25 }
+      , { state: trim state, age: "30-39", population: age25to44 * 0.5 }
+      , { state: trim state, age: "40-49", population: age25to44 * 0.25 }
+      , { state: trim state, age: "50-59", population: age45to64 * 0.6 }
+      , { state: trim state, age: "60-69", population: age45to64 * 0.4 }
+      , { state: trim state, age: "70-79", population: age65plus * 0.6 }
+      , { state: trim state, age: "≥80", population: age65plus * 0.4 }
+      ]
+    _ -> []
+
+-- | Load population data from CSV
+loadPopulationData :: Aff (Array GroupedBarData)
+loadPopulationData = do
+  result <- loadDataFile USPopulationStateAgeCSV
+  case result of
+    Left err -> do
+      liftEffect $ Console.log $ "Failed to load population data: " <> err
+      pure []
+    Right body -> do
+      let lines = split (Pattern "\n") body
+      let dataLines = Array.drop 1 lines  -- Skip header
+      let parsed = Array.concatMap parsePopulationRow dataLines
+      liftEffect $ Console.log $ "Loaded " <> show (Array.length parsed) <> " population data points"
+      pure parsed
 
 -- | Chart dimensions
 type Dimensions =
@@ -78,17 +130,18 @@ colorForAge _ = "#999"
 -- | - Nested joins: states → bars within each state
 -- | - Multiple data series with color encoding
 -- | - Axes with proper scales
-groupedBarChart :: Effect Unit
-groupedBarChart = runD3v2M do
-  container <- select "#viz" :: _ (D3v2Selection_ SEmpty Element Unit)
+-- | Draw grouped bar chart with loaded data
+drawGroupedBarChart :: String -> Array GroupedBarData -> Effect Unit
+drawGroupedBarChart selector populationData = runD3v2M do
+  container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
 
   let dims = defaultDims
   let iWidth = innerWidth dims
   let iHeight = innerHeight dims
 
   -- Group data by state
-  let stateGroups = groupByState groupedBarData
-  let ages = getAges groupedBarData
+  let stateGroups = groupByState populationData
+  let ages = getAges populationData
   let numStates = Array.length stateGroups
   let numAges = Array.length ages
 
@@ -97,7 +150,7 @@ groupedBarChart = runD3v2M do
   let barWidth = groupWidth / Int.toNumber numAges * 0.9
 
   -- Calculate scales
-  let populationValues = map _.population groupedBarData
+  let populationValues = map _.population populationData
   let maxPop = fromMaybe 6000000.0 $ maximum populationValues
 
   -- X scale maps state index to position
@@ -189,24 +242,15 @@ groupedBarChart = runD3v2M do
   liftEffect do
     Console.log "=== Grouped Bar Chart (Tree API) ==="
     Console.log ""
-    Console.log $ "Rendered " <> show (Array.length groupedBarData) <> " bars in "
+    Console.log $ "Rendered " <> show (Array.length populationData) <> " bars in "
                   <> show numStates <> " groups"
 
     case Map.lookup "svg" axesSelections of
       Just _ -> Console.log "✓ SVG created"
       Nothing -> Console.log "✗ Missing SVG"
 
-    case Map.lookup "xAxis" axesSelections of
-      Just _ -> Console.log "✓ X axis created"
-      Nothing -> Console.log "✗ Missing X axis"
-
-    case Map.lookup "yAxis" axesSelections of
-      Just _ -> Console.log "✓ Y axis created"
-      Nothing -> Console.log "✗ Missing Y axis"
-
-    case Map.lookup "stateGroups" barsSelections of
-      Just _ -> Console.log $ "✓ State groups created (" <> show numStates <> ")"
-      Nothing -> Console.log "✗ Missing state groups"
-
-    Console.log ""
-    Console.log $ "Expected: " <> show numStates <> " groups of " <> show numAges <> " bars each"
+-- | Main entry point - loads data then renders
+groupedBarChart :: String -> Effect Unit
+groupedBarChart selector = launchAff_ do
+  populationData <- loadPopulationData
+  liftEffect $ drawGroupedBarChart selector populationData

@@ -19,7 +19,7 @@ import D3.Viz.TreeAPI.NestedElementsExample as NestedElementsExample
 import D3.Viz.TreeAPI.BarChartExample as BarChartExample
 import D3.Viz.TreeAPI.ScatterPlotExample as ScatterPlotExample
 import D3.Viz.TreeAPI.LineChartExample as LineChartExample
-import D3.Viz.TreeAPI.SimpleHierarchyExample as SimpleHierarchyExample
+import D3.Viz.TreeAPI.TreeViz as TreeViz
 import D3.Viz.TreeAPI.ThreeLittleDimensionsExample as ThreeLittleDimensionsExample
 import D3.Viz.TreeAPI.GroupedBarChartExample as GroupedBarChartExample
 import D3.Viz.TreeAPI.LesMisTreeExample as LesMisTreeExample
@@ -376,8 +376,8 @@ handleAction = case _ of
       BarChart -> liftEffect BarChartExample.barChart
       ScatterPlot -> liftEffect ScatterPlotExample.scatterPlot
       LineChart -> liftEffect LineChartExample.lineChart
-      GroupedBarChart -> liftEffect GroupedBarChartExample.groupedBarChart
-      SimpleHierarchy -> liftEffect SimpleHierarchyExample.simpleHierarchy
+      GroupedBarChart -> liftEffect $ GroupedBarChartExample.groupedBarChart "#viz"
+      SimpleHierarchy -> liftEffect $ TreeViz.treeViz "#viz"
       ThreeDimensions -> liftEffect ThreeLittleDimensionsExample.threeLittleDimensions
       LesMisForce -> liftEffect LesMisTreeExample.testLesMisTree
 

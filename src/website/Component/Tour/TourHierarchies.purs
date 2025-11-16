@@ -4,12 +4,21 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
+import Effect.Class (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
+import D3.Viz.TreeAPI.TreeViz as TreeViz
+import D3.Viz.TreeAPI.HorizontalTreeViz as HorizontalTreeViz
+import D3.Viz.TreeAPI.RadialTreeViz as RadialTreeViz
+import D3.Viz.TreeAPI.ClusterViz as ClusterViz
+import D3.Viz.TreeAPI.PackViz as PackViz
+import D3.Viz.TreeAPI.TreemapViz as TreemapViz
+import D3.Viz.TreeAPI.PartitionViz as PartitionViz
+import D3.Viz.TreeAPI.SunburstViz as SunburstViz
 
 -- | Tour page state
 type State = Unit
@@ -31,7 +40,15 @@ component = H.mkComponent
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
-    -- No examples to render in this page (link to separate pages instead)
+    -- Render all hierarchy examples
+    liftEffect $ TreeViz.treeViz "#tree-viz"
+    liftEffect $ HorizontalTreeViz.horizontalTreeViz "#horizontal-tree-viz"
+    liftEffect $ RadialTreeViz.radialTreeViz "#radial-tree-viz"
+    liftEffect $ ClusterViz.clusterViz "#cluster-viz"
+    liftEffect $ PartitionViz.partitionViz "#partition-viz"
+    liftEffect $ SunburstViz.sunburstViz "#sunburst-viz"
+    liftEffect $ TreemapViz.treemapViz "#treemap-viz"
+    liftEffect $ PackViz.packViz "#pack-viz"
     pure unit
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -63,40 +80,48 @@ render _ =
             , HH.p_
                 [ HH.text "Node-link diagrams show hierarchies as connected nodes, with parent-child relationships represented by links. These layouts can be oriented horizontally, vertically, or radially." ]
             , HH.h3_
-                [ HH.text "Tidy Trees" ]
+                [ HH.text "Vertical Tidy Tree" ]
             , HH.p_
-                [ HH.text "Compact tidy tree layout using the Reingold-Tilford algorithm. This algorithm minimizes the width of the tree while maintaining clear parent-child relationships and avoiding node overlaps." ]
-            , HH.ul_
-                [ HH.li_
-                    [ HH.strong_ [ HH.text "Horizontal Tidy Tree: " ]
-                    , HH.text "Root on the left, grows to the right. Efficient use of horizontal space."
-                    ]
-                , HH.li_
-                    [ HH.strong_ [ HH.text "Vertical Tidy Tree: " ]
-                    , HH.text "Root at the top, grows downward. Common in organizational charts."
-                    ]
-                , HH.li_
-                    [ HH.strong_ [ HH.text "Radial Tidy Tree: " ]
-                    , HH.text "Emanates from center in a circular layout. Space-efficient for large hierarchies."
-                    ]
-                , HH.li_
-                    [ HH.strong_ [ HH.text "Isometric Tidy Tree: " ]
-                    , HH.text "Unique 2.5D isometric projection creates technical drawing aesthetic with 30° cabinet projection for depth perception."
-                    ]
+                [ HH.text "Root at the top, grows downward. Compact tidy tree layout using the Reingold-Tilford algorithm. Common in organizational charts." ]
+            , HH.div
+                [ HP.id "tree-viz"
+                , HP.classes [ HH.ClassName "viz-container" ]
                 ]
+                []
+            , HH.h3_
+                [ HH.text "Horizontal Tidy Tree" ]
+            , HH.p_
+                [ HH.text "Root on the left, grows to the right. Efficient use of horizontal space." ]
+            , HH.div
+                [ HP.id "horizontal-tree-viz"
+                , HP.classes [ HH.ClassName "viz-container" ]
+                ]
+                []
+            , HH.h3_
+                [ HH.text "Radial Tidy Tree" ]
+            , HH.p_
+                [ HH.text "Emanates from center in a circular layout. Space-efficient for large hierarchies." ]
+            , HH.div
+                [ HP.id "radial-tree-viz"
+                , HP.classes [ HH.ClassName "viz-container" ]
+                ]
+                []
             , HH.h3_
                 [ HH.text "Dendrograms (Cluster Diagrams)" ]
             , HH.p_
-                [ HH.text "Dendrogram layouts place all leaf nodes at the same level, creating a uniform appearance useful for comparing leaf nodes. Available in the same orientations as tidy trees." ]
+                [ HH.text "Dendrogram layouts place all leaf nodes at the same level, creating a uniform appearance useful for comparing leaf nodes." ]
+            , HH.div
+                [ HP.id "cluster-viz"
+                , HP.classes [ HH.ClassName "viz-container" ]
+                ]
+                []
             , HH.p_
-                [ HH.text "We have an interactive demo showing "
+                [ HH.text "We also have an interactive demo showing "
                 , HH.a
                     [ HP.href $ "#" <> routeToPath AnimatedTreeCluster ]
                     [ HH.text "animated transitions between Tree and Cluster layouts" ]
                 , HH.text " that demonstrates how the same data looks different with these two algorithms."
                 ]
-            , HH.p_
-                [ HH.em_ [ HH.text "[Additional orientation examples not yet implemented in TreeAPI - coming soon]" ] ]
             ]
 
         -- Section 2: Adjacency Diagrams
@@ -110,17 +135,23 @@ render _ =
             , HH.p_
                 [ HH.text "Adjacency diagrams show hierarchy through relative placement of rectangles or arcs. They're space-efficient and can encode quantitative values through area." ]
             , HH.h3_
-                [ HH.text "Icicle Diagram" ]
+                [ HH.text "Icicle Diagram (Partition)" ]
             , HH.p_
                 [ HH.text "Rectangular subdivisions showing hierarchy through relative placement. Each level of the hierarchy is a horizontal band, with children subdividing their parent's width. Area encodes quantitative values." ]
-            , HH.p_
-                [ HH.em_ [ HH.text "[Icicle diagram not yet implemented in TreeAPI - coming soon]" ] ]
+            , HH.div
+                [ HP.id "partition-viz"
+                , HP.classes [ HH.ClassName "viz-container" ]
+                ]
+                []
             , HH.h3_
                 [ HH.text "Sunburst Diagram" ]
             , HH.p_
                 [ HH.text "The radial equivalent of icicle diagrams. The root is at the center, and each ring represents a level of the hierarchy. Angular width represents quantitative value or number of children." ]
-            , HH.p_
-                [ HH.em_ [ HH.text "[Sunburst diagram not yet implemented in TreeAPI - coming soon]" ] ]
+            , HH.div
+                [ HP.id "sunburst-viz"
+                , HP.classes [ HH.ClassName "viz-container" ]
+                ]
+                []
             ]
 
         -- Section 3: Enclosure Diagrams
@@ -137,14 +168,20 @@ render _ =
                 [ HH.text "Treemap" ]
             , HH.p_
                 [ HH.text "Space-efficient rectangular subdivisions where area is proportional to value. Treemaps show hierarchy through nesting and excel at displaying large amounts of hierarchical data in a compact space. The recursive subdivision algorithm creates rectangles whose area represents quantitative values." ]
-            , HH.p_
-                [ HH.em_ [ HH.text "[Treemap not yet implemented in TreeAPI - coming soon]" ] ]
+            , HH.div
+                [ HP.id "treemap-viz"
+                , HP.classes [ HH.ClassName "viz-container" ]
+                ]
+                []
             , HH.h3_
                 [ HH.text "Circle Packing" ]
             , HH.p_
                 [ HH.text "Tightly nested circles showing hierarchy through containment. Area encodes values, and the circular layout readily shows topology. The packing algorithm positions circles to minimize wasted space while maintaining clear hierarchical relationships." ]
-            , HH.p_
-                [ HH.em_ [ HH.text "[Circle packing not yet implemented in TreeAPI - coming soon]" ] ]
+            , HH.div
+                [ HP.id "pack-viz"
+                , HP.classes [ HH.ClassName "viz-container" ]
+                ]
+                []
             ]
 
         -- Section 4: Edge Bundling

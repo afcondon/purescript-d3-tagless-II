@@ -14,6 +14,8 @@ import PSD3.Website.Types (Route(..))
 
 -- Import TreeAPI examples
 import D3.Viz.TreeAPI.GroupedBarChartExample as GroupedBarChart
+import D3.Viz.TreeAPI.MultiLineChartExample as MultiLineChart
+import D3.Viz.TreeAPI.RadialStackedBarExample as RadialStackedBar
 
 -- | Tour page state
 type State = Unit
@@ -35,8 +37,10 @@ component = H.mkComponent
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
-    -- Render examples
-    liftEffect $ GroupedBarChart.groupedBarChart
+    -- Render examples with unique selectors
+    liftEffect $ GroupedBarChart.groupedBarChart "#grouped-bar-viz"
+    liftEffect $ MultiLineChart.multiLineChart "#multi-line-viz"
+    liftEffect $ RadialStackedBar.radialStackedBar "#radial-stacked-viz"
     pure unit
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -70,7 +74,7 @@ render _ =
             , HH.div
                 [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
                 [ HH.div
-                    [ HP.id "viz"
+                    [ HP.id "grouped-bar-viz"
                     , HP.classes [ HH.ClassName "grouped-bar-viz" ] ]
                     []
                 ]
@@ -95,11 +99,20 @@ render _ =
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
                 [ HH.text "2. Multi-Line Chart" ]
             , HH.p_
-                [ HH.text "Unemployment rates over time for four major US metro areas: San Francisco, New York, Detroit, and Miami. This chart shows how unemployment fluctuated from 2000 to 2013, clearly illustrating the impact of the 2008 financial crisis and subsequent recovery." ]
+                [ HH.text "Unemployment rates over time for 42 US metro areas from 2000 to 2013. This chart shows how unemployment fluctuated across the country, clearly illustrating the impact of the 2008 financial crisis and subsequent recovery. With so many overlapping lines, the data would be impossible to read without interaction." ]
+            , HH.div
+                [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
+                [ HH.div
+                    [ HP.id "multi-line-viz"
+                    , HP.classes [ HH.ClassName "multi-line-viz" ] ]
+                    []
+                ]
             , HH.p_
-                [ HH.em_ [ HH.text "[Multi-line chart not yet implemented in TreeAPI - coming soon]" ] ]
+                [ HH.text "All lines are drawn in light gray using SVG path elements. The chart uses linear scales for time (x-axis) and unemployment percentage (y-axis), with axis labels for context." ]
             , HH.p_
-                [ HH.text "Each city is represented by a colored line, with a legend on the right for identification. The chart uses SVG path elements for smooth lines, linear scales for time (x-axis) and unemployment percentage (y-axis), and includes axis labels for context. Significantly, it uses hover where available to help the reader pick out the details of an individual line, the first thing we've seen that has no print analog." ]
+                [ HH.strong_ [ HH.text "Try hovering over the lines! " ]
+                , HH.text "This is the key feature: when you hover over any line, it darkens while the others remain light gray, making it easy to trace that individual metro area through the tangle of overlapping data. This demonstrates a fundamental advantage of web-based visualization over print: interactivity makes complex, dense datasets readable. In a static image, these 42 overlapping lines would be nearly impossible to interpret."
+                ]
             ]
 
         -- Section 3: Radial Stacked Bar Chart
@@ -112,10 +125,15 @@ render _ =
                 [ HH.text "3. Radial Stacked Bar Chart" ]
             , HH.p_
                 [ HH.text "The same US state population data as the grouped bar chart, but visualized in polar coordinates. Each state gets a wedge around the circle, with age groups stacked radially from the center outward. This \"sunburst-like\" layout efficiently uses space and creates an aesthetically pleasing circular composition." ]
+            , HH.div
+                [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
+                [ HH.div
+                    [ HP.id "radial-stacked-viz"
+                    , HP.classes [ HH.ClassName "radial-stacked-viz" ] ]
+                    []
+                ]
             , HH.p_
-                [ HH.em_ [ HH.text "[Radial stacked bar chart not yet implemented in TreeAPI - coming soon]" ] ]
-            , HH.p_
-                [ HH.text "Radial charts are good for repeating data, such as time or season, but that's not the case with this example which uses the same data as the first chart above to contrast the approaches. The chart uses polar coordinates with an angular scale (θ) dividing the circle by states and a radial scale (r) for population. Arc paths are generated for each segment, with the same color scheme as the grouped bar chart for consistency. State labels are positioned around the perimeter." ]
+                [ HH.text "Radial charts work best for cyclical or seasonal data, but we're using the same state population data here to demonstrate how the same dataset can be visualized in multiple ways. The chart uses polar coordinates with an angular scale (θ) dividing the circle by states and a radial scale (r) for population. Arc paths are generated for each segment, with the same Spectral color scheme as the grouped bar chart. State labels are positioned around the perimeter." ]
             ]
         ]
     ]
