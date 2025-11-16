@@ -11,7 +11,7 @@ import Halogen.HTML.Properties as HP
 import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3 as D3
 import PSD3.Attributes (fill, fillOpacity, radius, cx, cy, width, height, strokeWidth, strokeColor, strokeOpacity, x, y, to, transitionWithDuration, classed, fontSize, viewBox, andThen, remove)
-import PSD3.Types (Element(..))
+import PSD3.Internal.Types (Element(..))
 import PSD3.Interpreter.MermaidAST (MermaidASTM, MermaidSelection, runMermaidAST)
 import PSD3.Data.Node (NodeID)
 import Unsafe.Coerce (unsafeCoerce)

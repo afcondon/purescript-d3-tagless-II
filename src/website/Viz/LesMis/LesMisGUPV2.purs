@@ -13,13 +13,14 @@ import Prelude
 
 import Control.Monad.State (get)
 import D3.Viz.LesMiserables.Model (LesMisRawModel, LesMisSimNode)
+import PSD3.Data.Node (D3Link_Unswizzled)
 import Data.Array as Array
 import Data.Int (toNumber, floor)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
+import Data.Set as Set
 import Data.Nullable (Nullable, toNullable)
 import Data.Number (sqrt, cos, sin, pi, ceil, floor, (%)) as Number
-import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Effect.Class (liftEffect)
 import PSD3.Data.Node (D3Link_Swizzled)
@@ -28,16 +29,18 @@ import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
 import PSD3.Internal.FFI (keyIsID_)
 import PSD3v2.Attribute.Types (cx, cy, fill, radius, stroke, strokeWidth, x1, x2, y1, y2, id_, class_, width, height, viewBox)
 import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom, simulationDrag, ScaleExtent(..))
-import PSD3v2.Capabilities.Selection (select, on, renderTree)
+import PSD3v2.Capabilities.Selection (select, on, renderTree, renderData)
 import PSD3v2.Capabilities.Simulation (init, addTickFunction, start, stop, Step(..), update, reheat)
 import PSD3v2.Interpreter.D3v2 (D3v2SimM, D3v2Selection_, reselectD3v2)
-import PSD3v2.Selection.Types (ElementType(..), SBound)
+import PSD3v2.Interpreter.D3v2 as D3v2
+import PSD3v2.Selection.Types (ElementType(..), SBound, Selection(..), SelectionImpl(..))
 import Partial.Unsafe (unsafePartial, unsafeCrashWith)
 import Web.DOM.Element (Element)
 import PSD3v2.VizTree.Tree as T
 import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 import Effect (Effect)
+import Effect.Class.Console (log)
 
 -- | FFI functions for mutating node positions
 foreign import setNodesGridPositions_ :: forall a. Array a -> Number -> Effect (Array a)
@@ -45,16 +48,44 @@ foreign import setNodesPhyllotaxisPositions_ :: forall a. Array a -> Effect (Arr
 foreign import clearNodesFxFy_ :: forall a. Array a -> Effect (Array a)
 
 -- | FFI function to transition nodes/links to fx/fy positions with D3 transitions
-foreign import transitionToFxFyPositions_ :: forall a. String -> String -> String -> Array a -> Effect Unit -> Effect Unit
+foreign import transitionToFxFyPositions_ :: forall a b. String -> String -> String -> Array a -> Array b -> Effect Unit -> Effect Unit
 
--- | Indexed link for data join (links don't have Ord instance, so we use index)
+-- | FFI function to transition nodes/links back to cached sx/sy positions, then clear fx/fy
+foreign import transitionToCachedPositions_ :: forall a b. String -> String -> String -> Array a -> Array b -> Effect Unit -> Effect Unit
+
+-- | Indexed link for data join
+-- | We keep the index for array operations, but use source/target IDs for equality
 newtype IndexedLink = IndexedLink { index :: Int, link :: D3Link_Swizzled }
 
 instance Eq IndexedLink where
-  eq (IndexedLink a) (IndexedLink b) = a.index == b.index
+  eq (IndexedLink a) (IndexedLink b) =
+    let linkA = unsafeCoerce a.link :: { source :: { id :: String }, target :: { id :: String } }
+        linkB = unsafeCoerce b.link :: { source :: { id :: String }, target :: { id :: String } }
+    in linkA.source.id == linkB.source.id && linkA.target.id == linkB.target.id
 
 instance Ord IndexedLink where
-  compare (IndexedLink a) (IndexedLink b) = compare a.index b.index
+  compare (IndexedLink a) (IndexedLink b) =
+    let linkA = unsafeCoerce a.link :: { source :: { id :: String }, target :: { id :: String } }
+        linkB = unsafeCoerce b.link :: { source :: { id :: String }, target :: { id :: String } }
+        sourceComp = compare linkA.source.id linkB.source.id
+    in if sourceComp == EQ
+       then compare linkA.target.id linkB.target.id
+       else sourceComp
+
+-- | Keyed node for data join (uses ID for equality, not position)
+newtype KeyedNode = KeyedNode LesMisSimNode
+
+instance Eq KeyedNode where
+  eq (KeyedNode a) (KeyedNode b) =
+    let nodeA = unsafeCoerce a :: { id :: String }
+        nodeB = unsafeCoerce b :: { id :: String }
+    in nodeA.id == nodeB.id
+
+instance Ord KeyedNode where
+  compare (KeyedNode a) (KeyedNode b) =
+    let nodeA = unsafeCoerce a :: { id :: String }
+        nodeB = unsafeCoerce b :: { id :: String }
+    in compare nodeA.id nodeB.id
 
 -- | Phylotaxis layout constants (sunflower spiral pattern)
 initialRadius :: Number
@@ -217,10 +248,13 @@ drawLesMisGUPV2 forcesArray activeForces model containerSelector = do
 
   linksSelections <- renderTree linksGroup linksTree
 
+  -- Wrap nodes for data join (keyed by ID for proper GUP)
+  let keyedNodes = nodesInSim <#> KeyedNode
+
   -- Render nodes tree into nodesGroup using Tree API
-  let nodesTree :: T.Tree LesMisSimNode
+  let nodesTree :: T.Tree KeyedNode
       nodesTree =
-        T.joinData "nodeElements" "circle" nodesInSim $ \(d :: LesMisSimNode) ->
+        T.joinData "nodeElements" "circle" keyedNodes $ \(KeyedNode d :: KeyedNode) ->
           T.elem Circle
             [ cx d.x
             , cy d.y
@@ -234,7 +268,7 @@ drawLesMisGUPV2 forcesArray activeForces model containerSelector = do
 
   -- Extract bound selections for behaviors and tick functions
   -- Use case pattern matching (NOT fromMaybe) when default might throw
-  let nodeCircles :: D3v2Selection_ SBound Element LesMisSimNode
+  let nodeCircles :: D3v2Selection_ SBound Element KeyedNode
       nodeCircles = case Map.lookup "nodeElements" nodesSelections of
         Just sel -> sel
         Nothing -> unsafePartial $ unsafeCrashWith "nodeElements not found"
@@ -249,8 +283,8 @@ drawLesMisGUPV2 forcesArray activeForces model containerSelector = do
 
   -- Add tick functions
   addTickFunction "nodes" $ Step nodeCircles
-    [ cx (\(d :: LesMisSimNode) -> d.x)
-    , cy (\(d :: LesMisSimNode) -> d.y)
+    [ cx (\(KeyedNode d :: KeyedNode) -> d.x)
+    , cy (\(KeyedNode d :: KeyedNode) -> d.y)
     ]
 
   addTickFunction "links" $ Step linkLines
@@ -277,8 +311,8 @@ moveToGrid gridSpacing = do
   -- Stop the simulation (we'll use transitions instead)
   stop
 
-  -- Get current nodes from simulation
-  { nodes: currentNodes } <- update
+  -- Get current nodes and links from simulation
+  { nodes: currentNodes, links: currentLinks } <- update
     { nodes: Nothing
     , links: Nothing
     , nodeFilter: Nothing
@@ -297,6 +331,7 @@ moveToGrid gridSpacing = do
     ".nodes circle"        -- Node selector
     ".links line"          -- Link selector
     currentNodes
+    currentLinks           -- Pass links array for transition
     (pure unit)            -- Completion callback (do nothing)
 
 -- | Move nodes to phylotaxis layout
@@ -309,8 +344,8 @@ moveToPhylotaxis = do
   -- Stop the simulation (we'll use transitions instead)
   stop
 
-  -- Get current nodes from simulation
-  { nodes: currentNodes } <- update
+  -- Get current nodes and links from simulation
+  { nodes: currentNodes, links: currentLinks } <- update
     { nodes: Nothing
     , links: Nothing
     , nodeFilter: Nothing
@@ -329,14 +364,15 @@ moveToPhylotaxis = do
     ".nodes circle"        -- Node selector
     ".links line"          -- Link selector
     currentNodes
+    currentLinks           -- Pass links array for transition
     (pure unit)            -- Completion callback (do nothing)
 
 -- | Unpin nodes and let forces take over
 unpinNodes :: forall row.
   D3v2SimM row LesMisSimNode Unit
 unpinNodes = do
-  -- Get current nodes
-  { nodes: currentNodes } <- update
+  -- Get current nodes and links
+  { nodes: currentNodes, links: currentLinks } <- update
     { nodes: Nothing
     , links: Nothing
     , nodeFilter: Nothing
@@ -346,29 +382,36 @@ unpinNodes = do
     , keyFn: keyIsID_
     }
 
-  -- Mutate nodes in-place to clear fx/fy
-  _ <- liftEffect $ clearNodesFxFy_ currentNodes
+  -- Get simulation handle to use in completion callback
+  simHandle <- get
 
-  -- Reheat and restart
-  reheat 0.5
-  start
+  -- Transition nodes/links back to cached sx/sy positions, then clear fx/fy
+  -- This creates a smooth animated return to the force-directed layout
+  -- After transition completes, reheat and restart the simulation
+  liftEffect $ transitionToCachedPositions_
+    "#lesmis-gup-v2-svg"
+    ".nodes circle"
+    ".links line"
+    currentNodes
+    currentLinks
+    do
+      -- Callback: restart simulation after transition completes
+      void $ D3v2.runD3v2SimM simHandle do
+        reheat 0.5
+        start
 
--- | Filter nodes by minimum group number and re-render
--- |
--- | This demonstrates the full GUP cycle with Tree API:
--- | - update simulation with node filter
--- | - Re-render using Tree API (handles enter/update/exit)
--- | - Restart simulation with filtered data
+-- | DEPRECATED: Use filterByGroupWithOriginal instead
+-- | This version doesn't work correctly for expanding filters because it filters from already-filtered data
 filterByGroup :: forall row.
   Int ->
   D3v2SimM row LesMisSimNode Unit
 filterByGroup minGroup = do
-  -- Stop simulation
+  log "WARNING: filterByGroup is deprecated - use filterByGroupWithOriginal for correct behavior"
+  -- This will NOT work correctly when going from filtered to less-filtered
+  -- because it gets current nodes from simulation (which are already filtered)
   stop
-
-  -- Update simulation with node filter
   { nodes: filteredNodes, links: filteredLinks } <- update
-    { nodes: Nothing
+    { nodes: Nothing  -- Gets already-filtered nodes!
     , links: Nothing
     , nodeFilter: Just (\n -> n.group >= minGroup)
     , linkFilter: Nothing
@@ -376,16 +419,78 @@ filterByGroup minGroup = do
     , config: Nothing
     , keyFn: keyIsID_
     }
+  -- ... rest would go here but this function shouldn't be used
+  reheat 0.8
+  start
 
-  -- Select the parent groups (using select from the module)
-  container <- select "#lesmis-gup-v2"
+-- | Filter nodes by minimum group number and re-render (with original graph data)
+-- |
+-- | This demonstrates the full GUP cycle with Tree API:
+-- | - Apply filter to ORIGINAL unfiltered data
+-- | - Update simulation with filtered data
+-- | - Re-render using Tree API (handles enter/update/exit)
+-- | - Restart simulation with filtered data
+filterByGroupWithOriginal :: forall row.
+  Int ->
+  { nodes :: Array LesMisSimNode, links :: Array D3Link_Unswizzled } ->
+  D3v2SimM row LesMisSimNode Unit
+filterByGroupWithOriginal minGroup originalGraph = do
+  log $ "=== filterByGroupWithOriginal: minGroup = " <> show minGroup <> " ==="
+
+  -- Stop simulation
+  stop
+
+  -- Filter the ORIGINAL unfiltered data
+  let filteredNodes = Array.filter (\n -> n.group >= minGroup) originalGraph.nodes
+
+  -- Create a set of filtered node IDs for fast lookup
+  let filteredNodeIds = Set.fromFoldable $ filteredNodes <#> (\n -> (unsafeCoerce n :: { id :: String }).id)
+
+  -- Filter links to only include those where both source and target are in filtered nodes
+  -- Links have been swizzled by D3, so source/target are objects with .id properties
+  let filteredLinks = Array.filter (\link ->
+        let l = unsafeCoerce link :: { source :: { id :: String }, target :: { id :: String } }
+        in Set.member l.source.id filteredNodeIds && Set.member l.target.id filteredNodeIds
+      ) originalGraph.links
+
+  log $ "Filtered from " <> show (Array.length originalGraph.nodes) <> " to " <> show (Array.length filteredNodes) <> " nodes"
+  log $ "Filtered from " <> show (Array.length originalGraph.links) <> " to " <> show (Array.length filteredLinks) <> " links"
+
+  -- Update simulation with filtered data (passing the filtered nodes explicitly)
+  { nodes: nodesInSim, links: linksInSim } <- update
+    { nodes: Just filteredNodes  -- Pass filtered nodes explicitly
+    , links: Just filteredLinks  -- Pass original links
+    , nodeFilter: Nothing  -- No filter needed - we already filtered
+    , linkFilter: Nothing
+    , activeForces: Nothing
+    , config: Nothing
+    , keyFn: keyIsID_
+    }
+
+  log $ "After update: " <> show (Array.length nodesInSim) <> " nodes, " <> show (Array.length linksInSim) <> " links"
+
+  -- Log first few node IDs to verify filtering
+  let nodeIds = Array.take 5 nodesInSim <#> (\n -> (unsafeCoerce n :: { id :: String }).id)
+  log $ "First 5 filtered node IDs: " <> show nodeIds
+
+  -- Select the groups where data joins live
   linksGroup <- select "#links"
   nodesGroup <- select "#nodes"
 
-  -- Wrap links with indices
-  let indexedLinks = Array.mapWithIndex (\i link -> IndexedLink { index: i, link }) filteredLinks
+  -- Wrap links with indices for data join
+  let indexedLinks = Array.mapWithIndex (\i link -> IndexedLink { index: i, link }) linksInSim
 
-  -- Re-render links tree with filtered data
+  -- Wrap nodes for data join (keyed by ID for proper GUP)
+  let keyedNodes = nodesInSim <#> KeyedNode
+
+  log $ "KeyedNodes created: " <> show (Array.length keyedNodes)
+
+  -- Log KeyedNode equality check
+  case Array.index keyedNodes 0, Array.index keyedNodes 1 of
+    Just kn1, Just kn2 -> log $ "KeyedNode equality test: node0 == node1 = " <> show (kn1 == kn2)
+    _, _ -> log "Not enough keyedNodes to test equality"
+
+  -- Build trees for just the data join parts (not the whole structure)
   let linksTree :: T.Tree IndexedLink
       linksTree =
         T.joinData "linkElements" "line" indexedLinks $ \(IndexedLink il) ->
@@ -399,12 +504,9 @@ filterByGroup minGroup = do
             , stroke ((\(_ :: IndexedLink) -> d3SchemeCategory10N_ (toNumber link.target.group)) :: IndexedLink -> String)
             ]
 
-  linksSelections <- renderTree linksGroup linksTree
-
-  -- Re-render nodes tree with filtered data
-  let nodesTree :: T.Tree LesMisSimNode
+  let nodesTree :: T.Tree KeyedNode
       nodesTree =
-        T.joinData "nodeElements" "circle" filteredNodes $ \(d :: LesMisSimNode) ->
+        T.joinData "nodeElements" "circle" keyedNodes $ \(KeyedNode d :: KeyedNode) ->
           T.elem Circle
             [ cx d.x
             , cy d.y
@@ -414,26 +516,42 @@ filterByGroup minGroup = do
             , strokeWidth 2.0
             ]
 
+  -- Re-render JUST the join trees into their parent groups
+  -- The Tree API should detect existing elements and perform enter/update/exit
+  linksSelections <- renderTree linksGroup linksTree
   nodesSelections <- renderTree nodesGroup nodesTree
 
-  -- Extract updated selections
-  let nodeCircles :: D3v2Selection_ SBound Element LesMisSimNode
+  log "After renderTree calls"
+
+  -- Extract updated selections for tick functions
+  let nodeCircles :: D3v2Selection_ SBound Element KeyedNode
       nodeCircles = case Map.lookup "nodeElements" nodesSelections of
         Just sel -> sel
-        Nothing -> unsafePartial $ unsafeCrashWith "nodeElements not found"
+        Nothing -> unsafePartial $ unsafeCrashWith "nodeElements not found after filter"
 
   let linkLines :: D3v2Selection_ SBound Element IndexedLink
       linkLines = case Map.lookup "linkElements" linksSelections of
         Just sel -> sel
-        Nothing -> unsafePartial $ unsafeCrashWith "linkElements not found"
+        Nothing -> unsafePartial $ unsafeCrashWith "linkElements not found after filter"
 
-  -- Re-attach behaviors
+  -- Log selection sizes (unwrap D3v2Selection_ newtype to get Selection)
+  liftEffect $ do
+    let Selection nodeImpl = (unsafeCoerce nodeCircles :: Selection SBound Element KeyedNode)
+    let Selection linkImpl = (unsafeCoerce linkLines :: Selection SBound Element IndexedLink)
+    case nodeImpl of
+      BoundSelection rec -> log $ "nodeCircles selection has " <> show (Array.length rec.elements) <> " elements"
+      _ -> log "nodeCircles is not a BoundSelection"
+    case linkImpl of
+      BoundSelection rec -> log $ "linkLines selection has " <> show (Array.length rec.elements) <> " elements"
+      _ -> log "linkLines is not a BoundSelection"
+
+  -- Re-attach behaviors to the updated selection
   _ <- on (Drag $ simulationDrag "lesmis-gup") nodeCircles
 
-  -- Update tick functions
+  -- Update tick functions with new selections
   addTickFunction "nodes" $ Step nodeCircles
-    [ cx (\(d :: LesMisSimNode) -> d.x)
-    , cy (\(d :: LesMisSimNode) -> d.y)
+    [ cx (\(KeyedNode d :: KeyedNode) -> d.x)
+    , cy (\(KeyedNode d :: KeyedNode) -> d.y)
     ]
 
   addTickFunction "links" $ Step linkLines

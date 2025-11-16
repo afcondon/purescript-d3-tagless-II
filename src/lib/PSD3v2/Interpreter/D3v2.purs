@@ -20,6 +20,7 @@ import Data.Traversable (traverse_)
 import Data.Tuple (Tuple, snd, fst)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Class.Console (log)
 import Partial.Unsafe (unsafePartial)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Force(..), _name, SimVariable(..), _handle)
 import PSD3.Internal.Simulation.Functions as SimFn
@@ -457,20 +458,30 @@ instance SimulationM (D3v2Selection_ SBound Element) (D3v2SimM row d) where
 -- | Extends SimulationM with update and reheat capabilities
 instance SimulationM2 (D3v2Selection_ SBound Element) (D3v2SimM row d) where
   update config = do
-    -- 1. Update nodes if provided
-    nodesInSim <- case config.nodes of
+    -- 1. Update nodes if provided (or get current nodes)
+    nodesBeforeFilter <- case config.nodes of
       Just newNodes -> SimFn.simulationSetNodes newNodes
       Nothing -> do
         handle <- use _handle
         let opaqueNodes = getNodes_ handle
         pure $ unsafeCoerce opaqueNodes
 
-    -- 2. Update active forces if provided
+    -- 2. Apply node filter if provided
+    let nodesInSim = case config.nodeFilter of
+          Just filterFn -> Array.filter filterFn nodesBeforeFilter
+          Nothing -> nodesBeforeFilter
+
+    -- 3. If filtering occurred, update simulation with filtered nodes
+    _ <- case config.nodeFilter of
+      Just _ -> SimFn.simulationSetNodes nodesInSim
+      Nothing -> pure nodesInSim
+
+    -- 4. Update active forces if provided
     _ <- case config.activeForces of
       Just forces -> SimFn.simulationActualizeForces forces
       Nothing -> pure unit
 
-    -- 3. Update configuration variables if provided
+    -- 5. Update configuration variables if provided
     _ <- case config.config of
       Just vars -> do
         SimFn.simulationSetVariable $ AlphaTarget vars.alphaTarget
@@ -479,15 +490,32 @@ instance SimulationM2 (D3v2Selection_ SBound Element) (D3v2SimM row d) where
         SimFn.simulationSetVariable $ VelocityDecay vars.velocityDecay
       Nothing -> pure unit
 
-    -- 4. Update links if provided (must come after nodes!)
-    linksInSim <- case config.links of
-      Just newLinks -> SimFn.simulationSetLinks newLinks nodesInSim config.keyFn
-      Nothing -> do
+    -- 6. Handle links with filtering
+    linksInSim <- case config.links, config.linkFilter of
+      -- New links provided WITH filter: filter first, then swizzle
+      Just newLinks, Just filterFn -> do
+        let filteredLinks = Array.filter filterFn newLinks
+        SimFn.simulationSetLinks filteredLinks nodesInSim config.keyFn
+
+      -- New links provided WITHOUT filter: just swizzle
+      Just newLinks, Nothing ->
+        SimFn.simulationSetLinks newLinks nodesInSim config.keyFn
+
+      -- No new links, but filter provided: can't filter already-swizzled links
+      -- This case is invalid - log warning and return current links
+      Nothing, Just _ -> do
+        handle <- use _handle
+        let swizzledLinks = getLinksFromSimulation_ handle
+        liftEffect $ log "Warning: linkFilter ignored - can't filter already-swizzled links. Provide 'links' to apply filter."
+        pure swizzledLinks
+
+      -- No new links, no filter: return current links
+      Nothing, Nothing -> do
         handle <- use _handle
         let swizzledLinks = getLinksFromSimulation_ handle
         pure swizzledLinks
 
-    -- 5. Return updated data for re-joining to DOM
+    -- 7. Return updated data for re-joining to DOM
     pure { nodes: nodesInSim, links: linksInSim }
 
   reheat alpha = SimFn.simulationSetVariable $ Alpha alpha

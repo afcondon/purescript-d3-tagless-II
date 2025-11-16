@@ -29,6 +29,7 @@ import Data.TraversableWithIndex (traverseWithIndex)
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Class.Console (log)
 import Partial.Unsafe (unsafePartial, unsafeCrashWith)
 import Unsafe.Coerce (unsafeCoerce)
 import PSD3.Internal.Simulation.Types (D3SimulationState_)
@@ -364,6 +365,10 @@ joinData foldableData selector (Selection impl) = liftEffect do
     nullableDatum <- getElementData_ element
     let maybeDatum = toMaybe nullableDatum
     pure $ { element, datum: maybeDatum }
+
+  -- Log what data we found on existing elements
+  liftEffect $ log $ "joinData: found " <> show (Array.length existingElements) <> " existing elements with selector '" <> selector <> "'"
+  liftEffect $ log $ "joinData: " <> show (Array.length (Array.mapMaybe _.datum oldBindings)) <> " of those have data bound"
 
   -- Filter to only elements that have data bound
   let validOldBindings = oldBindings # Array.mapMaybe \{ element, datum } ->
@@ -713,35 +718,77 @@ renderNodeHelper parentSel (Node node) = do
 -- one for each datum, using the actual joinData operation
 renderNodeHelper parentSel (Join joinSpec) = do
   -- 1. Perform data join (enter/update/exit)
-  -- For now, just handle enter phase
-  JoinResult { enter: enterSel } <- joinData joinSpec.joinData joinSpec.key parentSel
+  JoinResult { enter: enterSel, update: updateSel, exit: exitSel } <- joinData joinSpec.joinData joinSpec.key parentSel
 
-  -- 2. For each datum in the enter selection, render the template tree
-  -- The template specifies what elements to create (e.g., Circle, Rect, etc.)
-  elementsAndMaps <- renderTemplatesForPendingSelection joinSpec.template enterSel
-
-  let elements = map fst elementsAndMaps
-  let childMaps = map snd elementsAndMaps
-  let combinedChildMap = Array.foldl Map.union Map.empty childMaps
-
-  -- 3. Get the data array and document from enter selection
+  -- Log join results
   let Selection enterImpl = enterSel
-  let { pendingData, document: doc } = unsafePartial case enterImpl of
-        PendingSelection rec -> rec
+  let Selection updateImpl = updateSel
+  let Selection exitImpl = exitSel
+  liftEffect $ do
+    let enterCount = case enterImpl of
+          PendingSelection rec -> Array.length rec.pendingData
+          _ -> 0
+    let updateCount = case updateImpl of
+          BoundSelection rec -> Array.length rec.data
+          _ -> 0
+    let exitCount = case exitImpl of
+          BoundSelection rec -> Array.length rec.data
+          ExitingSelection rec -> Array.length rec.data
+          _ -> 0
+    log $ "Tree API Join '" <> joinSpec.name <> "': enter=" <> show enterCount <> ", update=" <> show updateCount <> ", exit=" <> show exitCount
 
-  -- 4. Create a bound selection from the rendered elements
+  -- 2. Handle EXIT: remove exiting elements
+  _ <- remove exitSel
+
+  -- 3. Handle ENTER: create new elements from template
+  enterElementsAndMaps <- renderTemplatesForPendingSelection joinSpec.template enterSel
+
+  let enterElements = map fst enterElementsAndMaps
+  let enterChildMaps = map snd enterElementsAndMaps
+
+  -- 4. Handle UPDATE: re-render existing elements with new template
+  -- For update elements, we need to update their attributes based on the template
+  updateElementsAndMaps <- renderTemplatesForBoundSelection joinSpec.template updateSel
+
+  let updateElements = map fst updateElementsAndMaps
+  let updateChildMaps = map snd updateElementsAndMaps
+
+  -- 5. Combine enter and update elements
+  let allElements = enterElements <> updateElements
+  let allChildMaps = enterChildMaps <> updateChildMaps
+  let combinedChildMap = Array.foldl Map.union Map.empty allChildMaps
+
+  -- 6. Get data array and document (from enter or update)
+  let Selection enterImpl = enterSel
+  let Selection updateImpl = updateSel
+
+  -- Extract document from whichever selection is non-empty
+  let doc = unsafePartial case enterImpl of
+        PendingSelection rec -> rec.document
+        _ -> case updateImpl of
+          BoundSelection rec -> rec.document
+
+  -- Extract data arrays
+  let allData = unsafePartial case enterImpl of
+        PendingSelection rec -> rec.pendingData
+        _ -> []
+  let updateData = unsafePartial case updateImpl of
+        BoundSelection rec -> rec.data
+        _ -> []
+
+  -- 7. Create a bound selection from all elements (enter + update)
   let boundSel = Selection $ BoundSelection
-        { elements
-        , data: pendingData
-        , indices: Just (Array.range 0 (Array.length elements - 1))
+        { elements: allElements
+        , data: allData <> updateData
+        , indices: Just (Array.range 0 (Array.length allElements - 1))
         , document: doc
         }
 
-  -- 5. Add the join's collection to the selections map
+  -- 8. Add the join's collection to the selections map
   let selectionsMap = Map.insert joinSpec.name (unsafeCoerce boundSel) combinedChildMap
 
-  -- 5. Get first element for return value
-  let firstElement = case Array.head elements of
+  -- 9. Get first element for return value
+  let firstElement = case Array.head allElements of
         Just el -> el
         Nothing -> unsafePartial $ unsafeCrashWith "renderTree Join: no elements created"
 
@@ -874,8 +921,71 @@ renderTemplatesForPendingSelection templateFn pendingSel = do
 
         -- Render the tree
         Tuple element childSelections <- renderNodeHelper singleParentSel tree
+
+        -- CRITICAL: Bind the datum to the root element created by the template
+        -- This allows future joins to match this element with updated data
+        setElementData_ (unsafeCoerce datum) element
+
         pure $ Tuple element childSelections
     ) pendingData
+
+-- | Helper: Update existing elements from a template function for each datum in a bound selection
+-- |
+-- | For UPDATE phase of data join:
+-- | 1. Extract elements and data from bound selection
+-- | 2. For each element, apply template to update attributes
+-- | 3. Return elements with updated attributes
+renderTemplatesForBoundSelection
+  :: forall datum parent
+   . Ord datum
+  => (datum -> Tree datum)  -- Template function
+  -> Selection SBound parent datum  -- Bound selection from join (update set)
+  -> Effect (Array (Tuple Element (Map String (Selection SBound Element datum))))
+renderTemplatesForBoundSelection templateFn boundSel = do
+  -- Extract elements and data from the bound selection
+  let Selection impl = boundSel
+  let { elements, data: dataArray, document: doc } = unsafePartial case impl of
+        BoundSelection rec -> rec
+
+  -- For each (element, datum) pair, update the element based on template
+  traverseWithIndex (\idx datum -> do
+    case Array.index elements idx of
+      Nothing -> unsafeCrashWith "renderTemplatesForBoundSelection: index out of bounds"
+      Just element -> do
+        -- Build the template tree for this datum
+        let tree = templateFn datum
+
+        -- Apply template attributes to existing element
+        -- For now, we re-render the tree structure (this updates attributes)
+        -- TODO: optimize to only update attributes without recreating structure
+
+        -- Create a selection containing just this element
+        let elementSel = Selection $ BoundSelection
+              { elements: [element]
+              , data: [datum]
+              , indices: Just [idx]
+              , document: doc
+              }
+
+        -- For UPDATE, we need to update the element's attributes based on the template
+        -- The template is a Tree, so we extract attribute updates from it
+        _ <- updateElementFromTree element datum idx tree doc
+
+        -- Return the element (unchanged) and empty child map for now
+        pure $ Tuple element Map.empty
+    ) dataArray
+
+-- | Helper: Update a single element's attributes from a tree template
+updateElementFromTree :: forall datum. Element -> datum -> Int -> Tree datum -> Document -> Effect Unit
+updateElementFromTree element datum index tree doc = do
+  -- CRITICAL: Bind the datum to the element so future joins can match it
+  setElementData_ (unsafeCoerce datum) element
+
+  case tree of
+    Node nodeSpec -> do
+      -- Apply each attribute from the template to the element
+      applyAttributes element datum index nodeSpec.attrs
+    _ -> pure unit  -- For joins/groups, we don't update attributes directly
 
 -- | Helper: Render children from a template function for each datum in a bound selection
 -- |
@@ -1033,7 +1143,6 @@ reselect name selectionsMap = do
 
 -- | Get data bound to an element (D3-style __data__ property)
 -- | Returns Nullable which we convert to Maybe using Data.Nullable.toMaybe
--- | This is the only custom FFI we need - everything else uses web-dom library
 foreign import getElementData_ :: forall datum. Element -> Effect (Nullable datum)
 
 -- | Set data on an element (D3-style __data__ property)

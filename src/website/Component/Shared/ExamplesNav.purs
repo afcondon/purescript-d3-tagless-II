@@ -39,36 +39,18 @@ render currentRoute =
             [ HH.text "← Home" ]
         , HH.hr [ HP.classes [ HH.ClassName "explanation-page__nav-divider" ] ]
 
-        -- Simplest Examples
-        , sectionTitle "Simple Charts"
-        , navLink SimpleCharts1 "Simplest Examples" currentRoute
-        , navLink SimpleCharts2 "Simple Charts" currentRoute
+        -- PSD3v2 Examples
+        , sectionTitle "PSD3v2 Examples"
+        , navLink PSD3v2Examples "PSD3v2 Showcase" currentRoute
+        , navLink TreeAPI "Tree API" currentRoute
+        , navLink LesMisGUPTree "Les Mis GUP (Tree)" currentRoute
 
-        -- Data Flow Visualizations
-        , sectionTitle "Data Flow"
-        , navLink DataFlowViz "Chord & Sankey" currentRoute
-
-        -- Movement, transitions and simulations
-        , sectionTitle "Movement"
-        , navLink Movement "Movement & Transition" currentRoute
-
-        -- Hierarchies
-        , sectionTitle "Hierarchies"
-        , navLink Hierarchies "Hierarchies" currentRoute
-
-        -- Rich Data Structures
-        , sectionTitle "Rich Data Structures"
-        , navLink FpFtw "FP FTW" currentRoute
-
-        -- Applications
-        , sectionTitle "Applications"
-        , navLink CodeExplorer "Package Explorer" currentRoute
+        -- Other Examples
+        , sectionTitle "Other Examples"
+        , navLink ForceNavigator "Force Navigator" currentRoute
         , navLink WealthHealth "Wealth & Health" currentRoute
-        , navLink CodeAtlas "Module Explorer" currentRoute
-
-        -- Interpreters
-        , sectionTitle "Alternative Interpreters"
-        , navLink Interpreters "Interpreters" currentRoute
+        , navLink FpFtw "FP FTW" currentRoute
+        , navLink CodeExplorer "Code Explorer" currentRoute
 
         , HH.hr [ HP.classes [ HH.ClassName "explanation-page__nav-divider" ] ]
         , HH.a

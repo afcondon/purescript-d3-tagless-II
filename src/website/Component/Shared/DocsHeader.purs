@@ -89,7 +89,7 @@ renderQuadrant targetSection currentSection =
 -- | Get default route for a section
 sectionDefaultRoute :: Section -> Route
 sectionDefaultRoute = case _ of
-  UnderstandingSection -> UnderstandingConcepts
+  UnderstandingSection -> Home  -- No understanding pages anymore
   TutorialSection -> GettingStarted
   HowToSection -> HowtoIndex
   APISection -> Reference

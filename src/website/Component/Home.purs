@@ -126,9 +126,9 @@ render _ =
                 "Pursuit-style documentation of the library with type signatures"
                 "api/index.html"
             , renderDocBox
-                "Understanding"
-                "Concepts, patterns, and design philosophy"
-                (routeToPath UnderstandingConcepts)
+                "Acknowledgements"
+                "Credits and acknowledgements"
+                (routeToPath Acknowledgements)
             ]
         ]
 
@@ -145,27 +145,21 @@ render _ =
             [ HH.text "You can read through the following to progressively build up an understanding of the capabilities and concepts:" ]
         , HH.div
             [ HP.classes [ HH.ClassName "home-tutorials-grid" ] ]
-            [ renderTutorialLink "1. Simplest Charts"
-                "Start with the basics: three circles, positioning, and data binding"
-                (routeToPath SimpleCharts1)
-            , renderTutorialLink "2. Lines and Bars"
-                "Create line and bar charts with scales, axes, and labels"
-                (routeToPath SimpleCharts2)
-            , renderTutorialLink "3. Hierarchies"
-                "Trees, treemaps, and circle packing for hierarchical data"
-                (routeToPath Hierarchies)
-            , renderTutorialLink "4. Data Flow Visualizations"
-                "Chord diagrams and Sankey charts for showing relationships and flows"
-                (routeToPath DataFlowViz)
-            , renderTutorialLink "5. Movement & Transition"
-                "Animations, transitions, and the general update pattern"
-                (routeToPath Movement)
-            , renderTutorialLink "6. FP FTW"
+            [ renderTutorialLink "1. PSD3v2 Examples"
+                "Explore the new PSD3v2 architecture with phantom types and Tree API"
+                (routeToPath PSD3v2Examples)
+            , renderTutorialLink "2. Tree API"
+                "Learn the declarative Tree API for building visualizations"
+                (routeToPath TreeAPI)
+            , renderTutorialLink "3. Les Mis GUP Tree"
+                "Force simulation with Tree API, GUP, and dynamic layouts"
+                (routeToPath LesMisGUPTree)
+            , renderTutorialLink "4. Force Navigator"
+                "Interactive force-directed graph navigation"
+                (routeToPath ForceNavigator)
+            , renderTutorialLink "5. FP FTW"
                 "Functional programming patterns with Maps, Sets, and type-safe graphs"
                 (routeToPath FpFtw)
-            , renderTutorialLink "7. Interpreters"
-                "How the tagless final pattern enables framework-independent code"
-                (routeToPath Interpreters)
             ]
         ]
 
@@ -186,29 +180,13 @@ render _ =
                 "Animated scatterplot showing global development over time"
                 (routeToPath WealthHealth)
             , renderTutorialLink "Code Explorer"
-                "Interactive force-directed graph exploring PureScript dependencies"
+                "Interactive force-directed graph exploring PureScript dependencies (coming soon)"
                 (routeToPath CodeExplorer)
-            , renderTutorialLink "Code Atlas"
-                "Visualize codebase structure with multiple interactive views"
-                (routeToPath CodeAtlas)
             ]
         ]
 
-    -- Examples section (integrated gallery)
-    , HH.section
-        [ HP.id "examples"
-        , HP.classes [ HH.ClassName "home-examples" ]
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "home-section-title" ] ]
-            [ HH.text "Examples Side-by-side with their code" ]
-        , HH.p
-            [ HP.classes [ HH.ClassName "home-section-description" ] ]
-            [ HH.text "Browse all the visualizations used in the tour side-by-side with their full source code" ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "home-examples-content" ] ]
-            (renderCategories allExamples)
-        ]
+    -- Examples section will be rebuilt with v2
+    -- TODO: Rebuild examples gallery with v2 examples
 
     -- Footer
     , Footer.render
@@ -293,261 +271,3 @@ renderTutorialLink title description path =
 handleAction :: forall o. Action -> H.HalogenM State Action () o Aff Unit
 handleAction = case _ of
   Initialize -> pure unit
-
--- | Example metadata for the gallery
-type ExampleMeta =
-  { id :: String
-  , name :: String
-  , description :: String
-  , category :: String
-  , route :: Route
-  , thumbnail :: String
-  }
-
--- | All available examples organized by category
-allExamples :: Array ExampleMeta
-allExamples =
-  [ -- Simple Charts
-    { id: "three-little-circles"
-    , name: "Three Little Circles"
-    , description: "The simplest possible D3 example"
-    , category: "Simple Charts"
-    , route: Example "three-little-circles"
-    , thumbnail: "assets/example-thumbnails/three-little-circles.png"
-    }
-  , { id: "bar-chart"
-    , name: "Bar Chart"
-    , description: "Basic bar chart with axis and labels"
-    , category: "Simple Charts"
-    , route: Example "bar-chart"
-    , thumbnail: "assets/example-thumbnails/simple-bar-chart.png"
-    }
-  , { id: "line-chart"
-    , name: "Line Chart"
-    , description: "Line chart with time series data"
-    , category: "Simple Charts"
-    , route: Example "line-chart"
-    , thumbnail: "assets/example-thumbnails/simple-line-chart.png"
-    }
-  , { id: "scatter-plot"
-    , name: "Scatter Plot"
-    , description: "Anscombe's Quartet visualization"
-    , category: "Simple Charts"
-    , route: Example "scatter-plot"
-    , thumbnail: "assets/example-thumbnails/anscombes-quartet.png"
-    }
-  , { id: "grouped-bar-chart"
-    , name: "Grouped Bar Chart"
-    , description: "Bar chart with grouped categories"
-    , category: "Simple Charts"
-    , route: Example "grouped-bar-chart"
-    , thumbnail: "assets/example-thumbnails/grouped-bar-chart.png"
-    }
-  , { id: "multi-line-chart"
-    , name: "Multi-Line Chart"
-    , description: "Multiple line series on one chart"
-    , category: "Simple Charts"
-    , route: Example "multi-line-chart"
-    , thumbnail: "assets/example-thumbnails/multiline-chart.png"
-    }
-  , { id: "radial-stacked-bar"
-    , name: "Radial Stacked Bar Chart"
-    , description: "Population by age and state in radial form"
-    , category: "Simple Charts"
-    , route: Example "radial-stacked-bar"
-    , thumbnail: "assets/example-thumbnails/stacked-radial-bar-chart.png"
-    }
-  , { id: "parabola"
-    , name: "Parabola"
-    , description: "Colored circles in parabolic formation"
-    , category: "Simple Charts"
-    , route: Example "parabola"
-    , thumbnail: "assets/example-thumbnails/parabola.png"
-    }
-  , { id: "bubble-chart"
-    , name: "Bubble Chart"
-    , description: "Hierarchical circle packing layout"
-    , category: "Hierarchies"
-    , route: Example "bubble-chart"
-    , thumbnail: "assets/example-thumbnails/circle-packing.png"
-    }
-
-  -- Hierarchies
-  , { id: "vertical-tree"
-    , name: "Vertical Tree"
-    , description: "Top-down tidy tree layout"
-    , category: "Hierarchies"
-    , route: Example "vertical-tree"
-    , thumbnail: "assets/example-thumbnails/vertical-tidy-tree.png"
-    }
-  , { id: "horizontal-tree"
-    , name: "Horizontal Tree"
-    , description: "Left-to-right tidy tree layout"
-    , category: "Hierarchies"
-    , route: Example "horizontal-tree"
-    , thumbnail: "assets/example-thumbnails/horizontal-tidy-tree.png"
-    }
-  , { id: "radial-tree"
-    , name: "Radial Tree"
-    , description: "Circular tidy tree layout"
-    , category: "Hierarchies"
-    , route: Example "radial-tree"
-    , thumbnail: "assets/example-thumbnails/radial-tidy-tree.png"
-    }
-  , { id: "treemap"
-    , name: "Treemap"
-    , description: "Space-filling hierarchical visualization"
-    , category: "Hierarchies"
-    , route: Example "treemap"
-    , thumbnail: "assets/example-thumbnails/treemap.png"
-    }
-  , { id: "icicle"
-    , name: "Icicle Chart"
-    , description: "Hierarchical partition layout"
-    , category: "Hierarchies"
-    , route: Example "icicle"
-    , thumbnail: "assets/example-thumbnails/icicle-chart.png"
-    }
-
-  -- Force-Directed
-  , { id: "lesmis-force"
-    , name: "Les Misérables Network"
-    , description: "Character co-occurrence graph"
-    , category: "Force-Directed"
-    , route: Example "lesmis-force"
-    , thumbnail: "assets/example-thumbnails/les-miserables.png"
-    }
-  , { id: "topological-sort"
-    , name: "Topological Sort"
-    , description: "Force layout with layer constraints"
-    , category: "Force-Directed"
-    , route: Example "topological-sort"
-    , thumbnail: "assets/example-thumbnails/working-with-graphs.png"
-    }
-
-  -- Data Flow
-  , { id: "chord-diagram"
-    , name: "Chord Diagram"
-    , description: "Circular relationship diagram"
-    , category: "Data Flow"
-    , route: Example "chord-diagram"
-    , thumbnail: "assets/example-thumbnails/chord-diagram.png"
-    }
-  , { id: "sankey-diagram"
-    , name: "Sankey Diagram"
-    , description: "Flow diagram with proportional widths"
-    , category: "Data Flow"
-    , route: Example "sankey-diagram"
-    , thumbnail: "assets/example-thumbnails/sankey-diagram.png"
-    }
-
-  -- Rich Data Structures
-  , { id: "map-quartet"
-    , name: "Map Quartet"
-    , description: "Sparse data with PureScript Maps"
-    , category: "Rich Data Structures"
-    , route: Example "map-quartet"
-    , thumbnail: "assets/example-thumbnails/working-with-maps.png"
-    }
-  , { id: "nested-data"
-    , name: "Nested Data"
-    , description: "Nested selections with 2D arrays"
-    , category: "Rich Data Structures"
-    , route: Example "nested-data"
-    , thumbnail: "assets/example-thumbnails/nested-data.png"
-    }
-  , { id: "working-with-sets"
-    , name: "Working with Sets"
-    , description: "Nested selections with Set data structures"
-    , category: "Rich Data Structures"
-    , route: Example "working-with-sets"
-    , thumbnail: "assets/example-thumbnails/working-with-sets.png"
-    }
-
-  -- Animations
-  , { id: "wealth-health"
-    , name: "Wealth & Health of Nations"
-    , description: "Animated scatterplot across time"
-    , category: "Animations"
-    , route: Example "wealth-health"
-    , thumbnail: "assets/example-thumbnails/wealth-and-health-of-nations.png"
-    }
-
-  -- Transitions
-  , { id: "three-circles-transition"
-    , name: "Color Mixing"
-    , description: "RGB color transitions"
-    , category: "Transitions"
-    , route: Example "three-circles-transition"
-    , thumbnail: "assets/example-thumbnails/three-little-circles.png"
-    }
-  , { id: "general-update-pattern"
-    , name: "General Update Pattern"
-    , description: "Enter, update, exit pattern"
-    , category: "Transitions"
-    , route: Example "general-update-pattern"
-    , thumbnail: "assets/example-thumbnails/general-update-pattern.png"
-    }
-  , { id: "animated-radial-tree"
-    , name: "Animated Radial Tree"
-    , description: "Transitions between tree layouts"
-    , category: "Transitions"
-    , route: Example "animated-radial-tree"
-    , thumbnail: "assets/example-thumbnails/animating-tree.png"
-    }
-  ]
-
--- | Group examples by category and render
-renderCategories :: forall w i. Array ExampleMeta -> Array (HH.HTML w i)
-renderCategories examples =
-  let
-    categories = [ "Simple Charts", "Hierarchies", "Force-Directed", "Data Flow", "Rich Data Structures", "Animations", "Transitions" ]
-  in
-    categories <#> \category ->
-      let examplesInCategory = examples # filter (\ex -> ex.category == category)
-      in renderCategory category examplesInCategory
-
--- | Render a category section
-renderCategory :: forall w i. String -> Array ExampleMeta -> HH.HTML w i
-renderCategory categoryName examples =
-  HH.div
-    [ HP.classes [ HH.ClassName "home-gallery-category" ] ]
-    [ HH.h3
-        [ HP.classes [ HH.ClassName "home-gallery-category-title" ] ]
-        [ HH.text categoryName ]
-    , HH.div
-        [ HP.classes [ HH.ClassName "home-gallery-grid" ] ]
-        (examples <#> renderExampleCard)
-    ]
-
--- | Render an individual example card
-renderExampleCard :: forall w i. ExampleMeta -> HH.HTML w i
-renderExampleCard ex =
-  HH.a
-    [ HP.href $ "#" <> routeToPath ex.route
-    , HP.classes [ HH.ClassName "home-example-card" ]
-    ]
-    [ HH.div
-        [ HP.classes [ HH.ClassName "home-example-thumbnail" ] ]
-        [ HH.img
-            [ HP.src ex.thumbnail
-            , HP.alt ex.name
-            , HP.classes [ HH.ClassName "home-example-thumbnail-img" ]
-            ]
-        ]
-    , HH.div
-        [ HP.classes [ HH.ClassName "home-example-card-content" ] ]
-        [ HH.h3
-            [ HP.classes [ HH.ClassName "home-example-card-title" ] ]
-            [ HH.text ex.name ]
-        , HH.p
-            [ HP.classes [ HH.ClassName "home-example-card-description" ] ]
-            [ HH.text ex.description ]
-        ]
-    ]
-
--- | Filter examples
-filter :: forall a. (a -> Boolean) -> Array a -> Array a
-filter = filterImpl
-
-foreign import filterImpl :: forall a. (a -> Boolean) -> Array a -> Array a

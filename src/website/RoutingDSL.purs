@@ -23,35 +23,14 @@ routes =
   <|> howtoIndex
   <|> referenceModule  -- Must come before reference (more specific)
   <|> reference
-  <|> understandingFinallyTagless
-  <|> understandingSelectionM
-  <|> understandingCapabilities
-  <|> understandingTypeSystem
-  <|> understandingDatumPattern
-  <|> understandingGrammar
-  <|> understandingPhilosophy
-  <|> understandingIndex
-  <|> understandingConcepts   -- Legacy redirect to index
-  <|> understandingPatterns   -- Legacy redirect to index
-  <|> about                   -- Legacy redirect to philosophy
-  <|> simpleCharts1
-  <|> simpleCharts2
-  <|> dataFlowViz
-  <|> movement
-  <|> hierarchies
-  <|> isometricCurveExperiment
-  <|> interpreters
-  <|> mermaidDiagrams
+  <|> psd3v2Examples
+  <|> treeAPI
+  <|> lesMisGUPTree
   <|> forceNavigator
   <|> codeExplorer
   <|> explore
   <|> wealthHealth
-  <|> codeAtlas
   <|> fpFtw
-  <|> examplesGallery
-  <|> psd3v2Examples
-  <|> treeAPI
-  <|> example        -- Must come after examplesGallery (more specific)
   <|> acknowledgements
   <|> rootRedirect
   <|> notFound
@@ -84,81 +63,17 @@ referenceModule = ReferenceModule <$> (lit "reference" *> str) <* end
 reference :: Match Route
 reference = Reference <$ lit "reference" <* end
 
--- | Match: /understanding (index)
-understandingIndex :: Match Route
-understandingIndex = UnderstandingIndex <$ lit "understanding" <* end
+-- | Match: /psd3v2
+psd3v2Examples :: Match Route
+psd3v2Examples = PSD3v2Examples <$ lit "psd3v2" <* end
 
--- | Match: /understanding/finally-tagless
-understandingFinallyTagless :: Match Route
-understandingFinallyTagless = UnderstandingFinallyTagless <$ lit "understanding" <* lit "finally-tagless" <* end
+-- | Match: /tree-api
+treeAPI :: Match Route
+treeAPI = TreeAPI <$ lit "tree-api" <* end
 
--- | Match: /understanding/selectionm
-understandingSelectionM :: Match Route
-understandingSelectionM = UnderstandingSelectionM <$ lit "understanding" <* lit "selectionm" <* end
-
--- | Match: /understanding/capabilities
-understandingCapabilities :: Match Route
-understandingCapabilities = UnderstandingCapabilities <$ lit "understanding" <* lit "capabilities" <* end
-
--- | Match: /understanding/type-system
-understandingTypeSystem :: Match Route
-understandingTypeSystem = UnderstandingTypeSystem <$ lit "understanding" <* lit "type-system" <* end
-
--- | Match: /understanding/datum-pattern
-understandingDatumPattern :: Match Route
-understandingDatumPattern = UnderstandingDatumPattern <$ lit "understanding" <* lit "datum-pattern" <* end
-
--- | Match: /understanding/grammar
-understandingGrammar :: Match Route
-understandingGrammar = UnderstandingGrammar <$ lit "understanding" <* lit "grammar" <* end
-
--- | Match: /understanding/philosophy
-understandingPhilosophy :: Match Route
-understandingPhilosophy = UnderstandingPhilosophy <$ lit "understanding" <* lit "philosophy" <* end
-
--- | Match: /understanding/concepts (legacy redirect to index)
-understandingConcepts :: Match Route
-understandingConcepts = UnderstandingIndex <$ lit "understanding" <* lit "concepts" <* end
-
--- | Match: /understanding/patterns (legacy redirect to index)
-understandingPatterns :: Match Route
-understandingPatterns = UnderstandingIndex <$ lit "understanding" <* lit "patterns" <* end
-
--- | Match: /about (legacy redirect to philosophy)
-about :: Match Route
-about = UnderstandingPhilosophy <$ lit "about" <* end
-
--- | Match: /simple-charts-1
-simpleCharts1 :: Match Route
-simpleCharts1 = SimpleCharts1 <$ lit "simple-charts-1" <* end
-
--- | Match: /simple-charts-2
-simpleCharts2 :: Match Route
-simpleCharts2 = SimpleCharts2 <$ lit "simple-charts-2" <* end
-
--- | Match: /data-flow
-dataFlowViz :: Match Route
-dataFlowViz = DataFlowViz <$ lit "data-flow" <* end
-
--- | Match: /movement
-movement :: Match Route
-movement = Movement <$ lit "movement" <* end
-
--- | Match: /hierarchies
-hierarchies :: Match Route
-hierarchies = Hierarchies <$ lit "hierarchies" <* end
-
--- | Match: /isometric-curve-experiment
-isometricCurveExperiment :: Match Route
-isometricCurveExperiment = IsometricCurveExperiment <$ lit "isometric-curve-experiment" <* end
-
--- | Match: /interpreters
-interpreters :: Match Route
-interpreters = Interpreters <$ lit "interpreters" <* end
-
--- | Match: /mermaid-diagrams
-mermaidDiagrams :: Match Route
-mermaidDiagrams = MermaidDiagrams <$ lit "mermaid-diagrams" <* end
+-- | Match: /lesmis-gup-tree
+lesMisGUPTree :: Match Route
+lesMisGUPTree = LesMisGUPTree <$ lit "lesmis-gup-tree" <* end
 
 -- | Match: /force-navigator
 forceNavigator :: Match Route
@@ -176,29 +91,9 @@ explore = Explore <$> (lit "explore" *> str) <* end
 wealthHealth :: Match Route
 wealthHealth = WealthHealth <$ lit "wealth-health" <* end
 
--- | Match: /code-atlas
-codeAtlas :: Match Route
-codeAtlas = CodeAtlas <$ lit "code-atlas" <* end
-
 -- | Match: /fp-ftw
 fpFtw :: Match Route
 fpFtw = FpFtw <$ lit "fp-ftw" <* end
-
--- | Match: /examples
-examplesGallery :: Match Route
-examplesGallery = ExamplesGallery <$ lit "examples" <* end
-
--- | Match: /psd3v2
-psd3v2Examples :: Match Route
-psd3v2Examples = PSD3v2Examples <$ lit "psd3v2" <* end
-
--- | Match: /tree-api
-treeAPI :: Match Route
-treeAPI = TreeAPI <$ lit "tree-api" <* end
-
--- | Match: /example/:exampleId
-example :: Match Route
-example = Example <$> (lit "example" *> str) <* end
 
 -- | Match: /acknowledgements
 acknowledgements :: Match Route
@@ -210,7 +105,7 @@ notFound = pure NotFound
 
 -- | Convert a Route back to a URL path (for links and navigation)
 -- |
--- | These paths are used with hash-based routing (e.g., /#/about, /#/tutorial)
+-- | These paths are used with hash-based routing (e.g., /#/home, /#/psd3v2)
 routeToPath :: Route -> String
 routeToPath Home = "/home"
 routeToPath GettingStarted = "/getting-started"
@@ -218,35 +113,13 @@ routeToPath Wizard = "/wizard"
 routeToPath HowtoIndex = "/howto"
 routeToPath Reference = "/reference"
 routeToPath (ReferenceModule moduleName) = "/reference/" <> moduleName
-routeToPath About = "/understanding/philosophy"  -- Redirect to philosophy
-routeToPath UnderstandingIndex = "/understanding"
-routeToPath UnderstandingFinallyTagless = "/understanding/finally-tagless"
-routeToPath UnderstandingSelectionM = "/understanding/selectionm"
-routeToPath UnderstandingCapabilities = "/understanding/capabilities"
-routeToPath UnderstandingTypeSystem = "/understanding/type-system"
-routeToPath UnderstandingDatumPattern = "/understanding/datum-pattern"
-routeToPath UnderstandingGrammar = "/understanding/grammar"
-routeToPath UnderstandingPhilosophy = "/understanding/philosophy"
--- Legacy redirects
-routeToPath UnderstandingConcepts = "/understanding"
-routeToPath UnderstandingPatterns = "/understanding"
-routeToPath SimpleCharts1 = "/simple-charts-1"
-routeToPath SimpleCharts2 = "/simple-charts-2"
-routeToPath DataFlowViz = "/data-flow"
-routeToPath Movement = "/movement"
-routeToPath Hierarchies = "/hierarchies"
-routeToPath IsometricCurveExperiment = "/isometric-curve-experiment"
-routeToPath Interpreters = "/interpreters"
-routeToPath MermaidDiagrams = "/mermaid-diagrams"
+routeToPath PSD3v2Examples = "/psd3v2"
+routeToPath TreeAPI = "/tree-api"
+routeToPath LesMisGUPTree = "/lesmis-gup-tree"
 routeToPath ForceNavigator = "/force-navigator"
 routeToPath CodeExplorer = "/code-explorer"
 routeToPath (Explore snippetId) = "/explore/" <> snippetId
 routeToPath WealthHealth = "/wealth-health"
-routeToPath CodeAtlas = "/code-atlas"
 routeToPath FpFtw = "/fp-ftw"
-routeToPath ExamplesGallery = "/examples"
-routeToPath PSD3v2Examples = "/psd3v2"
-routeToPath TreeAPI = "/tree-api"
-routeToPath (Example exampleId) = "/example/" <> exampleId
 routeToPath Acknowledgements = "/acknowledgements"
 routeToPath NotFound = "/not-found"

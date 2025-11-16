@@ -16,7 +16,9 @@ const decodeFile = function (filecontents) {
     vx: 0.0,
     vy: 0.0,
     fx: null,
-    fy: null
+    fy: null,
+    sx: null,  // Cached simulation x for smooth transitions
+    sy: null   // Cached simulation y for smooth transitions
   }))
 
   return { links: links, nodes: nodes }

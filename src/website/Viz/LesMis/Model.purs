@@ -2,14 +2,15 @@ module D3.Viz.LesMiserables.Model where
 
 import Prelude
 import PSD3.Data.Node (D3Link_Unswizzled, SimulationNode)
-import Data.Nullable (null)
+import Data.Nullable (Nullable, null)
 
 -- | ==========================================================================================
 -- |                  Model data types using row-polymorphic SimulationNode
 -- | ==========================================================================================
 
 -- | Row type for Les Misérables node user data
-type LesMisNodeRow = (id :: String, group :: Int)
+-- | Includes sx, sy for caching simulation positions during layout transitions
+type LesMisNodeRow = (id :: String, group :: Int, sx :: Nullable Number, sy :: Nullable Number)
 
 -- | Simulation node with user data fields directly in the record
 -- | This matches D3's behavior: it EXTENDS your data with simulation fields
@@ -36,6 +37,8 @@ mkLesMisNode id group =
   , vy: 0.0
   , fx: null
   , fy: null
+  , sx: null  -- Cached simulation x (for smooth transitions)
+  , sy: null  -- Cached simulation y (for smooth transitions)
   }
 
 

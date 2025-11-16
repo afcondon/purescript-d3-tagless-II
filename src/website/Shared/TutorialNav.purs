@@ -17,16 +17,13 @@ import PSD3.Website.Types (Route(..))
 -- | All tutorial pages in order
 allTutorialRoutes :: Array Route
 allTutorialRoutes =
-  [ SimpleCharts1
-  , SimpleCharts2
-  , Hierarchies
-  , DataFlowViz
-  , Movement
-  , FpFtw
-  , Interpreters
+  [ PSD3v2Examples
+  , TreeAPI
+  , LesMisGUPTree
+  , ForceNavigator
   , WealthHealth
+  , FpFtw
   , CodeExplorer
-  , CodeAtlas
   ]
 
 -- | Get the next tutorial in the sequence

@@ -80,42 +80,23 @@ type ExampleMetadata = {
 
 -- | Route in the application
 data Route
-  = Home            -- Landing page with four documentation categories
-  | GettingStarted  -- Tutorial: installation, setup, first project
-  | Wizard          -- Interactive wizard for scaffolding visualizations
-  | HowtoIndex      -- How-to: index of all step-by-step guides
-  | Reference       -- Reference: API documentation index
-  | ReferenceModule String  -- Reference: individual module page (e.g., "PSD3.Types")
-  | About           -- Legacy route, redirects to UnderstandingPhilosophy
-  | UnderstandingIndex       -- Understanding: index page with card grid
-  | UnderstandingFinallyTagless   -- Understanding: Finally Tagless pattern
-  | UnderstandingSelectionM       -- Understanding: SelectionM Monad
-  | UnderstandingCapabilities     -- Understanding: Capabilities & Interpreters
-  | UnderstandingTypeSystem       -- Understanding: Type-Safe Attribute System
-  | UnderstandingDatumPattern     -- Understanding: datum_/Datum_ Pattern
-  | UnderstandingGrammar          -- Understanding: Grammar of D3 in SelectionM
-  | UnderstandingPhilosophy       -- Understanding: design philosophy
-  -- Legacy routes (redirect to new structure)
-  | UnderstandingConcepts    -- Redirects to UnderstandingIndex
-  | UnderstandingPatterns    -- Redirects to UnderstandingIndex
-  | SimpleCharts1
-  | SimpleCharts2
-  | DataFlowViz
-  | Movement
-  | Hierarchies
-  | IsometricCurveExperiment  -- Temporary: Isometric curve experimentation
-  | Interpreters
-  | MermaidDiagrams  -- Mermaid AST visualization examples
-  | ForceNavigator  -- Force-directed navigation graph
-  | CodeExplorer
-  | Explore String  -- Code exploration page for a specific snippet
-  | WealthHealth    -- Wealth & Health of Nations visualization
-  | CodeAtlas       -- Code Atlas: codebase analysis and visualization (archived)
-  | FpFtw           -- FP FTW: Functional Programming examples
-  | ExamplesGallery -- Gallery: index of all visualization examples
-  | Example String  -- Individual example page (e.g., "bar-chart", "lesmis-force")
+  = Home            -- Landing page
+  | GettingStarted  -- Tutorial: installation, setup, first project (TODO: update for v2)
+  | Wizard          -- Interactive wizard for scaffolding visualizations (TODO: update for v2)
+  | HowtoIndex      -- How-to: index of all step-by-step guides (TODO: update for v2)
+  | Reference       -- Reference: API documentation index (TODO: update for v2)
+  | ReferenceModule String  -- Reference: individual module page
+  -- Working PSD3v2 Examples
   | PSD3v2Examples  -- PSD3v2 examples showcase page
   | TreeAPI         -- Tree API examples (declarative tree API)
+  | LesMisGUPTree   -- Les Misérables with Tree API + GUP + Dynamic Layouts (FLAGSHIP EXAMPLE)
+  -- Other Examples (TODO: check if these work with v2)
+  | ForceNavigator  -- Force-directed navigation graph
+  | CodeExplorer    -- Code Explorer (TO BE BUILT TODAY)
+  | Explore String  -- Code exploration page for a specific snippet
+  | WealthHealth    -- Wealth & Health of Nations visualization
+  | FpFtw           -- FP FTW: Functional Programming examples
+  -- Meta
   | Acknowledgements -- Credits and acknowledgements
   | NotFound
 
@@ -128,34 +109,13 @@ instance showRoute :: Show Route where
   show HowtoIndex = "How-to Guides"
   show Reference = "API Reference"
   show (ReferenceModule moduleName) = "Module: " <> moduleName
-  show About = "About"
-  show UnderstandingIndex = "Understanding"
-  show UnderstandingFinallyTagless = "Understanding: Finally Tagless"
-  show UnderstandingSelectionM = "Understanding: SelectionM"
-  show UnderstandingCapabilities = "Understanding: Capabilities"
-  show UnderstandingTypeSystem = "Understanding: Type System"
-  show UnderstandingDatumPattern = "Understanding: Datum Pattern"
-  show UnderstandingGrammar = "Understanding: Grammar"
-  show UnderstandingConcepts = "Understanding: Concepts"
-  show UnderstandingPatterns = "Understanding: Patterns"
-  show UnderstandingPhilosophy = "Understanding: Philosophy"
-  show SimpleCharts1 = "Simplest Charts"
-  show SimpleCharts2 = "Lines and Bars"
-  show DataFlowViz = "Data Flow Visualizations"
-  show Movement = "Movement & Transition"
-  show Hierarchies = "Hierarchies"
-  show IsometricCurveExperiment = "Isometric Curve Experiment"
-  show Interpreters = "Interpreters"
-  show MermaidDiagrams = "Mermaid AST Diagrams"
+  show PSD3v2Examples = "PSD3v2 Examples"
+  show TreeAPI = "Tree API Examples"
+  show LesMisGUPTree = "Les Mis GUP (Tree API)"
   show ForceNavigator = "Force Navigator"
   show CodeExplorer = "Code Explorer"
   show (Explore snippetId) = "Explore: " <> snippetId
   show WealthHealth = "Wealth & Health of Nations"
-  show CodeAtlas = "Code Atlas"
   show FpFtw = "FP FTW"
-  show ExamplesGallery = "Examples Gallery"
-  show PSD3v2Examples = "PSD3v2 Examples"
-  show TreeAPI = "Tree API Examples"
-  show (Example exampleId) = "Example: " <> exampleId
   show Acknowledgements = "Acknowledgements"
   show NotFound = "Not Found"

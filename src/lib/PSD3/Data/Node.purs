@@ -70,6 +70,7 @@ type SimulationNode r = Record (D3_XY + D3_VxyFxy + r)
 type D3_ID      row = ( id    :: NodeID | row )
 type D3_XY      row = ( x :: Number, y :: Number | row )
 type D3_VxyFxy  row = ( vx :: Number, vy :: Number, fx :: Nullable Number, fy :: Nullable Number | row )
+type D3_CachedXY row = ( sx :: Nullable Number, sy :: Nullable Number | row )  -- Cached simulation positions for smooth transitions
 type D3_FocusXY row = ( cluster :: Int, focusX :: Number, focusY :: Number | row )
 newtype D3_SimulationNode row = D3SimNode { | row }
 
