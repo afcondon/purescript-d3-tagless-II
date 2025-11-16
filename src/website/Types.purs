@@ -84,18 +84,12 @@ data Route
   | GettingStarted  -- Tutorial: installation, setup, first project (TODO: update for v2)
   | Wizard          -- Interactive wizard for scaffolding visualizations (TODO: update for v2)
   | HowtoIndex      -- How-to: index of all step-by-step guides (TODO: update for v2)
-  | Reference       -- Reference: API documentation index (TODO: update for v2)
+  | Reference       -- Reference: API documentation index
   | ReferenceModule String  -- Reference: individual module page
-  -- Working PSD3v2 Examples
+  -- PSD3v2 Examples (Tree API based)
   | PSD3v2Examples  -- PSD3v2 examples showcase page
   | TreeAPI         -- Tree API examples (declarative tree API)
   | LesMisGUPTree   -- Les Misérables with Tree API + GUP + Dynamic Layouts (FLAGSHIP EXAMPLE)
-  -- Other Examples (TODO: check if these work with v2)
-  | ForceNavigator  -- Force-directed navigation graph
-  | CodeExplorer    -- Code Explorer (TO BE BUILT TODAY)
-  | Explore String  -- Code exploration page for a specific snippet
-  | WealthHealth    -- Wealth & Health of Nations visualization
-  | FpFtw           -- FP FTW: Functional Programming examples
   -- Meta
   | Acknowledgements -- Credits and acknowledgements
   | NotFound
@@ -112,10 +106,5 @@ instance showRoute :: Show Route where
   show PSD3v2Examples = "PSD3v2 Examples"
   show TreeAPI = "Tree API Examples"
   show LesMisGUPTree = "Les Mis GUP (Tree API)"
-  show ForceNavigator = "Force Navigator"
-  show CodeExplorer = "Code Explorer"
-  show (Explore snippetId) = "Explore: " <> snippetId
-  show WealthHealth = "Wealth & Health of Nations"
-  show FpFtw = "FP FTW"
   show Acknowledgements = "Acknowledgements"
   show NotFound = "Not Found"

@@ -86,18 +86,18 @@ render _ =
             , HH.div
                 [ HP.classes [ HH.ClassName "home-hero-image" ] ]
                 [ HH.img
-                    [ HP.src "assets/example-thumbnails/code-explorer.png"
-                    , HP.alt "Code Explorer visualization"
+                    [ HP.src "assets/example-thumbnails/lesmis-gup-tree.png"
+                    , HP.alt "Les Misérables character network visualization"
                     , HP.classes [ HH.ClassName "home-hero-img" ]
                     ]
                 , HH.p
                     [ HP.classes [ HH.ClassName "home-hero-caption" ] ]
                     [ HH.text "Learn how to make powerful interactive data-driven apps like this "
                     , HH.a
-                        [ HP.href $ "#" <> routeToPath CodeExplorer
+                        [ HP.href $ "#" <> routeToPath LesMisGUPTree
                         , HP.classes [ HH.ClassName "home-hero-link" ]
                         ]
-                        [ HH.text "code explorer" ]
+                        [ HH.text "Les Misérables network" ]
                     ]
                 ]
             ]
@@ -154,34 +154,6 @@ render _ =
             , renderTutorialLink "3. Les Mis GUP Tree"
                 "Force simulation with Tree API, GUP, and dynamic layouts"
                 (routeToPath LesMisGUPTree)
-            , renderTutorialLink "4. Force Navigator"
-                "Interactive force-directed graph navigation"
-                (routeToPath ForceNavigator)
-            , renderTutorialLink "5. FP FTW"
-                "Functional programming patterns with Maps, Sets, and type-safe graphs"
-                (routeToPath FpFtw)
-            ]
-        ]
-
-    -- Larger examples section
-    , HH.section
-        [ HP.id "apps"
-        , HP.classes [ HH.ClassName "home-tutorials" ]
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "home-section-title" ] ]
-            [ HH.text "Interactive, data-driven apps" ]
-        , HH.p
-            [ HP.classes [ HH.ClassName "home-section-description" ] ]
-            [ HH.text "These examples are more involved than a simple visualisation" ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "home-tutorials-grid" ] ]
-            [ renderTutorialLink "Wealth & Health of Nations"
-                "Animated scatterplot showing global development over time"
-                (routeToPath WealthHealth)
-            , renderTutorialLink "Code Explorer"
-                "Interactive force-directed graph exploring PureScript dependencies (coming soon)"
-                (routeToPath CodeExplorer)
             ]
         ]
 

@@ -45,13 +45,6 @@ render currentRoute =
         , navLink TreeAPI "Tree API" currentRoute
         , navLink LesMisGUPTree "Les Mis GUP (Tree)" currentRoute
 
-        -- Other Examples
-        , sectionTitle "Other Examples"
-        , navLink ForceNavigator "Force Navigator" currentRoute
-        , navLink WealthHealth "Wealth & Health" currentRoute
-        , navLink FpFtw "FP FTW" currentRoute
-        , navLink CodeExplorer "Code Explorer" currentRoute
-
         , HH.hr [ HP.classes [ HH.ClassName "explanation-page__nav-divider" ] ]
         , HH.a
             [ HP.href "https://github.com/afcondon/purescript-d3-tagless"

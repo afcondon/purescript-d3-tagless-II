@@ -35,13 +35,10 @@ render currentRoute =
         , HH.hr [ HP.classes [ HH.ClassName "explanation-page__nav-divider" ] ]
         , HH.p
             [ HP.classes [ HH.ClassName "explanation-page__nav-section-title" ] ]
-            [ HH.text "Basic Visualizations" ]
-        , navLink (Explore "TLCSimple") "Three Little Circles" currentRoute
-        , navLink (Explore "GUP") "General Update Pattern" currentRoute
-        , navLink (Explore "TLCParabola") "Data-Driven Positioning" currentRoute
-        , navLink (Explore "BarChartDraw") "Build a Bar Chart" currentRoute
-        , navLink (Explore "LineChartDraw") "Build a Line Chart" currentRoute
-        , navLink (Explore "ScatterPlotQuartet") "Anscombe's Quartet" currentRoute
+            [ HH.text "PSD3v2 Examples" ]
+        , navLink PSD3v2Examples "PSD3v2 Showcase" currentRoute
+        , navLink TreeAPI "Tree API" currentRoute
+        , navLink LesMisGUPTree "Les Mis GUP (Tree)" currentRoute
         , HH.hr [ HP.classes [ HH.ClassName "explanation-page__nav-divider" ] ]
         , HH.a
             [ HP.href "https://github.com/afcondon/purescript-d3-tagless"

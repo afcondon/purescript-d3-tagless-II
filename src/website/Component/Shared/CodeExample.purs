@@ -31,16 +31,6 @@ renderCodeExample config =
     , HH.div
         [ HP.classes [ HH.ClassName "code-example__code" ] ]
         (syntaxHighlightedCode config.code)
-
-    -- Explore button
-    , HH.div
-        [ HP.classes [ HH.ClassName "code-example__actions" ] ]
-        [ HH.a
-            [ HP.href $ "#" <> routeToPath (Explore config.snippetId)
-            , HP.classes [ HH.ClassName "code-example__explore-btn" ]
-            ]
-            [ HH.text "Explore this code →" ]
-        ]
     ]
 
 -- | Simple version without title

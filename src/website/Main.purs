@@ -23,17 +23,10 @@ import PSD3.HowTo.HowtoIndex as HowtoIndex
 import PSD3.Reference.Reference as Reference
 import PSD3.Acknowledgements as Acknowledgements
 
--- Working PSD3v2 Examples
+-- PSD3v2 Examples (Tree API based)
 import PSD3.Component.PSD3v2Examples as PSD3v2Examples
 import Component.TreeAPI as TreeAPI
 import Component.LesMisGUPTree as LesMisGUPTree
-
--- Other examples (TODO: check these work with v2)
-import PSD3.ForceNavigator as ForceNavigator
-import PSD3.CodeExplorer.CodeExplorationPage as CodeExplorationPage
-import PSD3.CodeExplorer.CodeExplorerWrapper as CodeExplorer
-import PSD3.WealthHealth.WealthHealthWrapper as WealthHealth
-import PSD3.FpFtw as FpFtw
 
 -- Routing
 import PSD3.RoutingDSL (routing, routeToPath)
@@ -62,11 +55,6 @@ type Slots =
   , psd3v2Examples :: forall q. H.Slot q Void Unit
   , treeAPI :: forall q. H.Slot q Void Unit
   , lesMisGUPTree :: forall q. H.Slot q Void Unit
-  , forceNavigator :: forall q. H.Slot q Void Unit
-  , codeExplorer :: forall q. H.Slot q Void Unit
-  , codeExploration :: forall q. H.Slot q Void String
-  , wealthHealth :: forall q. H.Slot q Void Unit
-  , fpFtw :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
 
@@ -78,11 +66,6 @@ _reference = Proxy :: Proxy "reference"
 _psd3v2Examples = Proxy :: Proxy "psd3v2Examples"
 _treeAPI = Proxy :: Proxy "treeAPI"
 _lesMisGUPTree = Proxy :: Proxy "lesMisGUPTree"
-_forceNavigator = Proxy :: Proxy "forceNavigator"
-_codeExplorer = Proxy :: Proxy "codeExplorer"
-_codeExploration = Proxy :: Proxy "codeExploration"
-_wealthHealth = Proxy :: Proxy "wealthHealth"
-_fpFtw = Proxy :: Proxy "fpFtw"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
 -- | Main application component
@@ -136,22 +119,6 @@ renderPage route = case spy "Route is" route of
 
   LesMisGUPTree ->
     HH.slot_ _lesMisGUPTree unit LesMisGUPTree.component unit
-
-  -- Other Examples (TODO: verify these work with v2)
-  ForceNavigator ->
-    HH.slot_ _forceNavigator unit ForceNavigator.component unit
-
-  CodeExplorer ->
-    HH.slot_ _codeExplorer unit CodeExplorer.component unit
-
-  Explore snippetId ->
-    HH.slot_ _codeExploration snippetId CodeExplorationPage.component snippetId
-
-  WealthHealth ->
-    HH.slot_ _wealthHealth unit WealthHealth.component unit
-
-  FpFtw ->
-    HH.slot_ _fpFtw unit FpFtw.component unit
 
   Acknowledgements ->
     HH.slot_ _acknowledgements unit Acknowledgements.component unit

@@ -20,10 +20,6 @@ allTutorialRoutes =
   [ PSD3v2Examples
   , TreeAPI
   , LesMisGUPTree
-  , ForceNavigator
-  , WealthHealth
-  , FpFtw
-  , CodeExplorer
   ]
 
 -- | Get the next tutorial in the sequence

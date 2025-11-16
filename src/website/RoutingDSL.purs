@@ -26,11 +26,6 @@ routes =
   <|> psd3v2Examples
   <|> treeAPI
   <|> lesMisGUPTree
-  <|> forceNavigator
-  <|> codeExplorer
-  <|> explore
-  <|> wealthHealth
-  <|> fpFtw
   <|> acknowledgements
   <|> rootRedirect
   <|> notFound
@@ -75,26 +70,6 @@ treeAPI = TreeAPI <$ lit "tree-api" <* end
 lesMisGUPTree :: Match Route
 lesMisGUPTree = LesMisGUPTree <$ lit "lesmis-gup-tree" <* end
 
--- | Match: /force-navigator
-forceNavigator :: Match Route
-forceNavigator = ForceNavigator <$ lit "force-navigator" <* end
-
--- | Match: /code-explorer
-codeExplorer :: Match Route
-codeExplorer = CodeExplorer <$ lit "code-explorer" <* end
-
--- | Match: /explore/:snippetId
-explore :: Match Route
-explore = Explore <$> (lit "explore" *> str) <* end
-
--- | Match: /wealth-health
-wealthHealth :: Match Route
-wealthHealth = WealthHealth <$ lit "wealth-health" <* end
-
--- | Match: /fp-ftw
-fpFtw :: Match Route
-fpFtw = FpFtw <$ lit "fp-ftw" <* end
-
 -- | Match: /acknowledgements
 acknowledgements :: Match Route
 acknowledgements = Acknowledgements <$ lit "acknowledgements" <* end
@@ -116,10 +91,5 @@ routeToPath (ReferenceModule moduleName) = "/reference/" <> moduleName
 routeToPath PSD3v2Examples = "/psd3v2"
 routeToPath TreeAPI = "/tree-api"
 routeToPath LesMisGUPTree = "/lesmis-gup-tree"
-routeToPath ForceNavigator = "/force-navigator"
-routeToPath CodeExplorer = "/code-explorer"
-routeToPath (Explore snippetId) = "/explore/" <> snippetId
-routeToPath WealthHealth = "/wealth-health"
-routeToPath FpFtw = "/fp-ftw"
 routeToPath Acknowledgements = "/acknowledgements"
 routeToPath NotFound = "/not-found"

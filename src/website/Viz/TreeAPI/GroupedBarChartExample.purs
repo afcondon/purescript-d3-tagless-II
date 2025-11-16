@@ -8,7 +8,7 @@ import Data.Foldable (maximum)
 import Data.Int as Int
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
-import D3.Viz.Charts.Model (GroupedBarData, groupedBarData)
+import D3.Viz.TreeAPI.Data (GroupedBarData, groupedBarData)
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
