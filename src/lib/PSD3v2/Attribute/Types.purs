@@ -36,6 +36,7 @@ module PSD3v2.Attribute.Types
   ) where
 
 import Prelude
+import Data.Functor.Contravariant (class Contravariant, cmap)
 
 -- | Type-safe attribute with datum phantom type
 -- |
@@ -56,6 +57,30 @@ instance Show (Attribute datum) where
   show (StaticAttr name val) = "(StaticAttr " <> show name <> " " <> show val <> ")"
   show (DataAttr name _) = "(DataAttr " <> show name <> " <function>)"
   show (IndexedAttr name _) = "(IndexedAttr " <> show name <> " <function>)"
+
+-- | Contravariant instance for Attribute
+-- |
+-- | Attributes *consume* data (they're data sinks), making them naturally contravariant.
+-- | This enables attribute reuse via `cmap`:
+-- |
+-- | ```purescript
+-- | -- Define attribute for specific type
+-- | radiusAttr :: Attribute Number
+-- | radiusAttr = DataAttr (AttributeName "r") NumberValue
+-- |
+-- | -- Adapt to work with richer type
+-- | type Circle = { radius :: Number, x :: Number, y :: Number }
+-- | circleRadiusAttr :: Attribute Circle
+-- | circleRadiusAttr = cmap _.radius radiusAttr
+-- | ```
+-- |
+-- | The key insight: `cmap` composes the projection function with the attribute's
+-- | data accessor, allowing attributes written for simple types to work with
+-- | complex types via field selection.
+instance Contravariant Attribute where
+  cmap f (StaticAttr name val) = StaticAttr name val  -- Static doesn't depend on datum
+  cmap f (DataAttr name g) = DataAttr name (g <<< f)   -- Compose: first project, then extract value
+  cmap f (IndexedAttr name g) = IndexedAttr name (\b i -> g (f b) i)  -- Project datum before indexing
 
 -- | Attribute names (SVG/HTML properties)
 -- |

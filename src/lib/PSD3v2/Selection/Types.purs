@@ -38,6 +38,44 @@ data SExiting  -- Elements without matching data (exit selection)
 newtype Selection (state :: Type) (parent :: Type) (datum :: Type)
   = Selection (SelectionImpl parent datum)
 
+-- | Functor instance for Selection
+-- |
+-- | Allows transforming the bound data without touching the DOM.
+-- | This is pure - no effects, just data transformation.
+-- |
+-- | Examples:
+-- | ```purescript
+-- | -- Transform numeric data
+-- | doubled :: Selection SBound Element Int
+-- | doubled = map (_ * 2) numbers
+-- |
+-- | -- Extract fields from records
+-- | ages :: Selection SBound Element Int
+-- | ages = map _.age people
+-- | ```
+instance Functor (Selection state parent) where
+  map f (Selection impl) = Selection (mapSelectionImpl f impl)
+    where
+      mapSelectionImpl :: forall a b. (a -> b) -> SelectionImpl parent a -> SelectionImpl parent b
+      mapSelectionImpl _ (EmptySelection r) = EmptySelection r
+      mapSelectionImpl f (BoundSelection r) = BoundSelection
+        { elements: r.elements
+        , data: map f r.data
+        , indices: r.indices
+        , document: r.document
+        }
+      mapSelectionImpl f (PendingSelection r) = PendingSelection
+        { parentElements: r.parentElements
+        , pendingData: map f r.pendingData
+        , indices: r.indices
+        , document: r.document
+        }
+      mapSelectionImpl f (ExitingSelection r) = ExitingSelection
+        { elements: r.elements
+        , data: map f r.data
+        , document: r.document
+        }
+
 -- | Internal implementation of selections (not exported to users)
 -- |
 -- | This ADT ensures that each state has exactly the data it needs:
