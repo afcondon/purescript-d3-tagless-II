@@ -13,6 +13,7 @@ import PSD3.RoutingDSL (routeToPath)
 import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
 import D3.Viz.FPFTW.AnscombeQuartet as Anscombe
+import D3.Viz.FPFTW.SetOperations as SetOps
 
 -- | Tour page state
 type State = Unit
@@ -39,6 +40,9 @@ handleAction = case _ of
 
     -- Render Anscombe's Quartet
     liftEffect $ Anscombe.drawAnscombeQuartet "#anscombe-quartet"
+
+    -- Render Set Operations
+    liftEffect $ SetOps.drawSetOperations "#set-operations"
 
     pure unit
 
@@ -131,15 +135,40 @@ render _ =
             ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "2. Beyond Arrays: Working with Sets" ]
+                [ HH.text "2. Set Operations: Map + Foldable + Phylotaxis" ]
             , HH.p_
-                [ HH.text "The real power of PS<$>D3's nestedJoin is its Foldable constraint. This means you can use ANY Foldable type for nested data, not just Arrays. This example uses Sets (unordered, unique collections) to represent product categories or tags." ]
+                [ HH.text "Sets are unordered, unique collections. This example demonstrates " ]
+            , HH.strong_ [ HH.text "three FP wins at once" ]
+            , HH.text ":"
+            
+            , HH.ul_
+                [ HH.li_
+                    [ HH.strong_ [ HH.text "Map pattern: " ]
+                    , HH.text "One visualizer component, mapped over four different sets (A, B, A ∪ B, A ∩ B)"
+                    ]
+                , HH.li_
+                    [ HH.strong_ [ HH.text "Foldable abstraction: " ]
+                    , HH.text "We iterate over a Set, not an Array! The visualization works with any Foldable type."
+                    ]
+                , HH.li_
+                    [ HH.strong_ [ HH.text "Code reuse: " ]
+                    , HH.text "Uses the same phylotaxis (sunflower spiral) layout from our network simulations."
+                    ]
+                ]
             , HH.p_
-                [ HH.text "Notice how some products have many tags, some have few, and some have none - the library handles all cases gracefully. This flexibility goes far beyond standard D3.js, where nested selections only work with arrays." ]
+                [ HH.text "Each set is visualized as colored circles arranged in a phylotaxis pattern (the mathematical arrangement of seeds in a sunflower). Watch how union combines elements and intersection shows only shared elements:"
+                ]
+            , HH.div
+                [ HP.id "set-operations"
+                , HP.classes [ HH.ClassName "viz-container" ]
+                , HP.style "margin: 20px 0; text-align: center;"
+                ]
+                []
             , HH.p_
-                [ HH.em_ [ HH.text "[Sets example not yet implemented in TreeAPI - coming soon]" ] ]
-            , HH.p_
-                [ HH.text "With PureScript's type classes, the same visualization code works with Sets, Lists, Maps, or any custom Foldable you define. The type system ensures you can't accidentally mix incompatible data structures." ]
+                [ HH.text "The FP win: This visualization demonstrates that PureScript's type classes let you write generic, reusable code. The same phylotaxis layout function works in network graphs "
+                , HH.em_ [ HH.text "and" ]
+                , HH.text " set visualizations. In JavaScript, you'd rewrite it each time."
+                ]
             ]
 
         -- Section 3: Map Quartet - Scatterplots from Maps
@@ -263,7 +292,8 @@ render _ =
                     ]
                 ]
             , HH.p_
-                [ HH.text "This is why we say \"Functional Programming For The Win\" - not because it's academically interesting, but because it produces better visualization code that's easier to write, test, and maintain." ]
+                [ HH.text "This is why we say \"Functional Programming For The Win\" - not because it's academically interesting, but because it produces better visualization code that's easier to write, test, and maintain." 
+                ]
             ]
         ]
     
