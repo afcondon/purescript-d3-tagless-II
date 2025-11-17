@@ -44,6 +44,7 @@ import Component.LesMisGUPTree as LesMisGUPTree
 import Component.LesMisGUP as LesMisGUP
 import Component.ModuleGraph as ModuleGraph
 import Component.MermaidTreeDemo as MermaidTreeDemo
+import Component.SceneJoinDemo as SceneJoinDemo
 
 -- Routing
 import PSD3.RoutingDSL (routing, routeToPath)
@@ -87,6 +88,7 @@ type Slots =
   , lesMisGUP :: forall q. H.Slot q Void Unit
   , moduleGraph :: forall q. H.Slot q Void Unit
   , mermaidTreeDemo :: forall q. H.Slot q Void Unit
+  , sceneJoinDemo :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
 
@@ -113,6 +115,7 @@ _lesMisGUPTree = Proxy :: Proxy "lesMisGUPTree"
 _lesMisGUP = Proxy :: Proxy "lesMisGUP"
 _moduleGraph = Proxy :: Proxy "moduleGraph"
 _mermaidTreeDemo = Proxy :: Proxy "mermaidTreeDemo"
+_sceneJoinDemo = Proxy :: Proxy "sceneJoinDemo"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
 -- | Main application component
@@ -212,6 +215,9 @@ renderPage route = case spy "Route is" route of
 
   MermaidTreeDemo ->
     HH.slot_ _mermaidTreeDemo unit MermaidTreeDemo.component unit
+
+  SceneJoinDemo ->
+    HH.slot_ _sceneJoinDemo unit SceneJoinDemo.component unit
 
   Acknowledgements ->
     HH.slot_ _acknowledgements unit Acknowledgements.component unit

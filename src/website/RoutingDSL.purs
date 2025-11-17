@@ -41,6 +41,7 @@ routes =
   <|> lesMisGUP
   <|> moduleGraph
   <|> mermaidTreeDemo
+  <|> sceneJoinDemo
   <|> acknowledgements
   <|> rootRedirect
   <|> notFound
@@ -145,6 +146,10 @@ moduleGraph = ModuleGraph <$ lit "module-graph" <* end
 mermaidTreeDemo :: Match Route
 mermaidTreeDemo = MermaidTreeDemo <$ lit "mermaid-tree-demo" <* end
 
+-- | Match: /scene-join-demo
+sceneJoinDemo :: Match Route
+sceneJoinDemo = SceneJoinDemo <$ lit "scene-join-demo" <* end
+
 -- | Match: /acknowledgements
 acknowledgements :: Match Route
 acknowledgements = Acknowledgements <$ lit "acknowledgements" <* end
@@ -181,5 +186,6 @@ routeToPath LesMisGUPTree = "/lesmis-gup-tree"
 routeToPath LesMisGUP = "/lesmis-gup"
 routeToPath ModuleGraph = "/module-graph"
 routeToPath MermaidTreeDemo = "/mermaid-tree-demo"
+routeToPath SceneJoinDemo = "/scene-join-demo"
 routeToPath Acknowledgements = "/acknowledgements"
 routeToPath NotFound = "/not-found"

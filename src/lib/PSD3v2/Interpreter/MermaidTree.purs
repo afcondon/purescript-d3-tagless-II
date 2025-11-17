@@ -5,7 +5,7 @@ import Prelude
 import Control.Monad.State (StateT, get, modify_, runStateT)
 import Data.Array (foldl, length, uncons)
 import Data.Traversable (traverse)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), isJust)
 import Data.String.Common (replaceAll)
 import Data.String.Pattern (Pattern(..), Replacement(..))
 import Data.Tuple (Tuple(..))
@@ -162,6 +162,72 @@ renderTree tree parentId = case tree of
           Just { head: firstInner } -> do
             let templateTree = nestedSpec.template firstInner
             _ <- renderTree templateTree (Just templateId)
+            pure unit
+
+    pure joinId
+
+  SceneJoin sceneSpec -> do
+    -- Create scene join node with GUP info
+    let behaviorInfo =
+          (if isJust sceneSpec.enterBehavior then "E" else "") <>
+          (if isJust sceneSpec.updateBehavior then "U" else "") <>
+          (if isJust sceneSpec.exitBehavior then "X" else "")
+        joinLabel = "SCENE JOIN \"" <> sceneSpec.name <> "\" (" <> sceneSpec.key <> ") ["
+                    <> show (length sceneSpec.joinData) <> " items] {" <> behaviorInfo <> "}"
+    joinId <- addNode joinLabel "sceneJoinNode"
+
+    -- Connect to parent if present
+    case parentId of
+      Just pid -> addEdge pid joinId
+      Nothing -> pure unit
+
+    -- Create template node
+    templateLabel <- addNode "template(datum) →" "templateNode"
+    addEdge joinId templateLabel
+
+    -- Render one instance of the template (if data exists)
+    case uncons sceneSpec.joinData of
+      Nothing -> pure unit
+      Just { head: firstDatum } -> do
+        let templateTree = sceneSpec.template firstDatum
+        _ <- renderTree templateTree (Just templateLabel)
+        pure unit
+
+    pure joinId
+
+  SceneNestedJoin sceneNestedSpec -> do
+    -- Create scene nested join node with GUP info
+    let behaviorInfo =
+          (if isJust sceneNestedSpec.enterBehavior then "E" else "") <>
+          (if isJust sceneNestedSpec.updateBehavior then "U" else "") <>
+          (if isJust sceneNestedSpec.exitBehavior then "X" else "")
+        joinLabel = "SCENE NESTED JOIN \"" <> sceneNestedSpec.name <> "\" (" <> sceneNestedSpec.key <> ") ["
+                    <> show (length sceneNestedSpec.joinData) <> " items] {" <> behaviorInfo <> "}"
+    joinId <- addNode joinLabel "sceneNestedJoinNode"
+
+    -- Connect to parent if present
+    case parentId of
+      Just pid -> addEdge pid joinId
+      Nothing -> pure unit
+
+    -- Create decompose node
+    decomposeId <- addNode "decompose(datum) →" "decomposeNode"
+    addEdge joinId decomposeId
+
+    -- Create template node
+    templateLabel <- addNode "template(innerDatum) →" "templateNode"
+    addEdge decomposeId templateLabel
+
+    -- Render one instance of the template (if data exists)
+    case uncons sceneNestedSpec.joinData of
+      Nothing -> pure unit
+      Just { head: firstDatum } -> do
+        let innerData = sceneNestedSpec.decompose firstDatum
+        case uncons innerData of
+          Nothing -> pure unit
+          Just { head: firstInner } -> do
+            let templateTree = sceneNestedSpec.template firstInner
+            _ <- renderTree templateTree (Just templateLabel)
             pure unit
 
     pure joinId

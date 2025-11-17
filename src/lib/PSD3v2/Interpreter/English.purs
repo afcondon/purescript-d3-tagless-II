@@ -8,7 +8,7 @@ import Prelude
 import Control.Monad.Writer (Writer, runWriter, tell)
 import Data.Array (length, null)
 import Data.Foldable (for_)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), isJust)
 import Data.Tuple (Tuple(..), snd)
 import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..))
 import PSD3v2.Selection.Types (ElementType(..))
@@ -44,6 +44,30 @@ describeTree tree level = case tree of
     tell $ "create a " <> key <> " (nested join named \"" <> name <> "\")"
     tell " using data-driven attributes\n"
     tell $ indent (level + 1) <> "(Nested template function defined)\n"
+
+  SceneJoin {name, key, joinData, enterBehavior, updateBehavior, exitBehavior} -> do
+    tell $ indent level <> "For each of " <> show (length joinData) <> " data items, "
+    tell $ "create/update/remove " <> key <> " (scene join named \"" <> name <> "\")"
+    tell " with General Update Pattern:\n"
+    when (isJust enterBehavior) $
+      tell $ indent (level + 1) <> "- Enter: elements appear with initial attributes and transition\n"
+    when (isJust updateBehavior) $
+      tell $ indent (level + 1) <> "- Update: elements transition to new state\n"
+    when (isJust exitBehavior) $
+      tell $ indent (level + 1) <> "- Exit: elements transition out then removed\n"
+    tell $ indent (level + 1) <> "(Template function defined for creating elements from data)\n"
+
+  SceneNestedJoin {name, key, joinData, enterBehavior, updateBehavior, exitBehavior} -> do
+    tell $ indent level <> "For each of " <> show (length joinData) <> " nested data items, "
+    tell $ "decompose and create/update/remove " <> key <> " (scene nested join named \"" <> name <> "\")"
+    tell " with General Update Pattern:\n"
+    when (isJust enterBehavior) $
+      tell $ indent (level + 1) <> "- Enter: elements appear with initial attributes and transition\n"
+    when (isJust updateBehavior) $
+      tell $ indent (level + 1) <> "- Update: elements transition to new state\n"
+    when (isJust exitBehavior) $
+      tell $ indent (level + 1) <> "- Exit: elements transition out then removed\n"
+    tell $ indent (level + 1) <> "(Decompose and template functions defined)\n"
 
 -- | Describe an attribute in English
 describeAttribute :: forall datum. Attribute datum -> String

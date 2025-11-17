@@ -20,7 +20,7 @@ module PSD3v2.Selection.Operations
 import Prelude
 
 import Data.Array as Array
-import Data.Foldable (class Foldable, traverse_)
+import Data.Foldable (class Foldable, foldl, traverse_)
 import Data.FoldableWithIndex (traverseWithIndex_)
 import Data.Map (Map)
 import Data.Map as Map
@@ -925,6 +925,218 @@ renderNodeHelper parentSel (NestedJoin joinSpec) = do
   let firstElement = case Array.head elements of
         Just el -> el
         Nothing -> unsafePartial $ unsafeCrashWith "renderTree NestedJoin: no elements created"
+
+  pure $ Tuple firstElement selectionsMap
+
+-- Render a scene join with General Update Pattern behavior
+-- This implements enter/update/exit with behavior specs
+renderNodeHelper parentSel (SceneJoin joinSpec) = do
+  -- 1. Perform data join (enter/update/exit)
+  JoinResult { enter: enterSel, update: updateSel, exit: exitSel } <- joinData joinSpec.joinData joinSpec.key parentSel
+
+  -- Log join results
+  let Selection enterImpl = enterSel
+  let Selection updateImpl = updateSel
+  let Selection exitImpl = exitSel
+  liftEffect $ do
+    let enterCount = case enterImpl of
+          PendingSelection rec -> Array.length rec.pendingData
+          _ -> 0
+    let updateCount = case updateImpl of
+          BoundSelection rec -> Array.length rec.data
+          _ -> 0
+    let exitCount = case exitImpl of
+          BoundSelection rec -> Array.length rec.data
+          ExitingSelection rec -> Array.length rec.data
+          _ -> 0
+    log $ "Tree API SceneJoin '" <> joinSpec.name <> "': enter=" <> show enterCount <> ", update=" <> show updateCount <> ", exit=" <> show exitCount
+
+  -- 2. Handle EXIT with behavior
+  case joinSpec.exitBehavior of
+    Just exitBehavior -> do
+      -- Apply exit attributes
+      _ <- setAttrsExit exitBehavior.attrs exitSel
+      -- TODO: Apply exit transition (requires TransitionM in monad stack)
+      -- For now, just remove immediately
+      _ <- remove exitSel
+      pure unit
+    Nothing -> do
+      -- No exit behavior specified, just remove
+      _ <- remove exitSel
+      pure unit
+
+  -- 3. Handle ENTER with behavior
+  enterElementsAndMaps <- case joinSpec.enterBehavior of
+    Just enterBehavior -> do
+      -- First apply initial attributes to pending selection
+      -- (This sets the starting state before any transition)
+      let modifiedTemplate datum = case joinSpec.template datum of
+            Node nodeSpec -> Node nodeSpec { attrs = enterBehavior.initialAttrs <> nodeSpec.attrs }
+            other -> other  -- For non-Node trees, can't modify attrs easily
+
+      -- Render with modified template
+      rendered <- renderTemplatesForPendingSelection modifiedTemplate enterSel
+
+      -- TODO: Apply enter transition (requires TransitionM)
+      -- The transition would animate from initialAttrs to final template attrs
+
+      pure rendered
+    Nothing ->
+      -- No enter behavior, use base template
+      renderTemplatesForPendingSelection joinSpec.template enterSel
+
+  let enterElements = map fst enterElementsAndMaps
+  let enterChildMaps = map snd enterElementsAndMaps
+
+  -- 4. Handle UPDATE with behavior
+  updateElementsAndMaps <- case joinSpec.updateBehavior of
+    Just updateBehavior -> do
+      -- Apply update attributes immediately
+      _ <- setAttrs updateBehavior.attrs updateSel
+
+      -- TODO: Apply update transition (requires TransitionM)
+
+      -- Then render with template to update structure
+      renderTemplatesForBoundSelection joinSpec.template updateSel
+    Nothing ->
+      -- No update behavior, just re-render with template
+      renderTemplatesForBoundSelection joinSpec.template updateSel
+
+  let updateElements = map fst updateElementsAndMaps
+  let updateChildMaps = map snd updateElementsAndMaps
+
+  -- 5. Combine enter and update elements (same as Join)
+  let allElements = enterElements <> updateElements
+  let allChildMaps = enterChildMaps <> updateChildMaps
+  let combinedChildMap = Array.foldl Map.union Map.empty allChildMaps
+
+  -- 6. Get data array and document
+  let Selection enterImpl = enterSel
+  let Selection updateImpl = updateSel
+
+  let doc = unsafePartial case enterImpl of
+        PendingSelection rec -> rec.document
+        _ -> case updateImpl of
+          BoundSelection rec -> rec.document
+
+  let allData = unsafePartial case enterImpl of
+        PendingSelection rec -> rec.pendingData
+        _ -> []
+  let updateData = unsafePartial case updateImpl of
+        BoundSelection rec -> rec.data
+        _ -> []
+
+  -- 7. Create a bound selection from all elements (enter + update)
+  let boundSel = Selection $ BoundSelection
+        { elements: allElements
+        , data: allData <> updateData
+        , indices: Just (Array.range 0 (Array.length allElements - 1))
+        , document: doc
+        }
+
+  -- 8. Add the join's collection to the selections map
+  let selectionsMap = Map.insert joinSpec.name (unsafeCoerce boundSel) combinedChildMap
+
+  -- 9. Get first element for return value
+  let firstElement = case Array.head allElements of
+        Just el -> el
+        Nothing -> unsafePartial $ unsafeCrashWith "renderTree SceneJoin: no elements created"
+
+  pure $ Tuple firstElement selectionsMap
+
+-- SceneNestedJoin: Combines NestedJoin's type decomposition with SceneJoin's GUP behaviors
+renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
+  -- 1. Decompose outer data into inner data
+  --    joinSpec.joinData :: Array outerDatum
+  --    joinSpec.decompose :: outerDatum -> Array innerDatum
+  --    We need to flatten: Array outerDatum -> Array (Array innerDatum) -> Array innerDatum
+  let innerData :: Array _ -- Type is erased, but logically Array innerDatum
+      innerData = join $ map (unsafeCoerce joinSpec.decompose) joinSpec.joinData
+
+  -- 2. Perform data join on the INNER data (enter/update/exit)
+  JoinResult { enter: enterSel, update: updateSel, exit: exitSel } <-
+    joinData innerData joinSpec.key parentSel
+
+  -- Log join results (extract counts from selection implementations)
+  liftEffect $ do
+    let Selection enterImpl = unsafeCoerce enterSel
+    let enterCount = case enterImpl of
+          PendingSelection rec -> Array.length rec.pendingData
+          _ -> 0
+    let Selection updateImpl = unsafeCoerce updateSel
+    let updateCount = case updateImpl of
+          BoundSelection rec -> Array.length rec.data
+          _ -> 0
+    let Selection exitImpl = unsafeCoerce exitSel
+    let exitCount = case exitImpl of
+          BoundSelection rec -> Array.length rec.data
+          ExitingSelection rec -> Array.length rec.data
+          _ -> 0
+    log $ "Tree API SceneNestedJoin '" <> joinSpec.name <> "': enter=" <> show enterCount <> ", update=" <> show updateCount <> ", exit=" <> show exitCount
+
+  -- 3. Handle EXIT with behavior
+  case joinSpec.exitBehavior of
+    Just exitBehavior -> do
+      _ <- setAttrsExit (unsafeCoerce exitBehavior.attrs) exitSel
+      -- TODO: Apply exit transition (requires TransitionM in monad stack)
+      _ <- remove exitSel
+      pure unit
+    Nothing -> do
+      _ <- remove exitSel
+      pure unit
+
+  -- 4. Handle ENTER with behavior
+  enterElementsAndMaps <- case joinSpec.enterBehavior of
+    Just enterBehavior -> do
+      -- Apply initial attributes by modifying the template
+      let modifiedTemplate datum = case (unsafeCoerce joinSpec.template) datum of
+            Node nodeSpec -> Node nodeSpec { attrs = (unsafeCoerce enterBehavior.initialAttrs) <> nodeSpec.attrs }
+            other -> other
+      rendered <- renderTemplatesForPendingSelection modifiedTemplate enterSel
+      -- TODO: Apply enter transition
+      pure rendered
+    Nothing -> renderTemplatesForPendingSelection (unsafeCoerce joinSpec.template) enterSel
+
+  -- 5. Handle UPDATE with behavior
+  updateElementsAndMaps <- case joinSpec.updateBehavior of
+    Just updateBehavior -> do
+      _ <- setAttrs (unsafeCoerce updateBehavior.attrs) updateSel
+      -- TODO: Apply update transition
+      renderTemplatesForBoundSelection (unsafeCoerce joinSpec.template) updateSel
+    Nothing -> renderTemplatesForBoundSelection (unsafeCoerce joinSpec.template) updateSel
+
+  -- 6-9. Combine results (same as SceneJoin)
+  let enterElements = map fst enterElementsAndMaps
+      updateElements = map fst updateElementsAndMaps
+      allElements = enterElements <> updateElements
+
+  let enterChildMaps = map snd enterElementsAndMaps
+      updateChildMaps = map snd updateElementsAndMaps
+      allChildMaps = enterChildMaps <> updateChildMaps
+      combinedChildMap = Array.foldl Map.union Map.empty allChildMaps
+
+  -- Get document from selections
+  let Selection enterImpl = unsafeCoerce enterSel
+  let Selection updateImpl = unsafeCoerce updateSel
+
+  let doc = unsafePartial case enterImpl of
+        PendingSelection rec -> rec.document
+        _ -> case updateImpl of
+          BoundSelection rec -> rec.document
+
+  -- Create bound selection from all elements
+  let boundSel = Selection $ BoundSelection
+        { elements: allElements
+        , data: innerData
+        , indices: Just (Array.range 0 (Array.length allElements - 1))
+        , document: doc
+        }
+
+  let selectionsMap = Map.insert joinSpec.name (unsafeCoerce boundSel) combinedChildMap
+
+  let firstElement = case Array.head allElements of
+        Just el -> el
+        Nothing -> unsafePartial $ unsafeCrashWith "renderTree SceneNestedJoin: no elements created"
 
   pure $ Tuple firstElement selectionsMap
 

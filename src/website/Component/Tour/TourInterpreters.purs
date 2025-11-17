@@ -178,6 +178,68 @@ astToTreeVisualization ast =
                 ]
             ]
 
+      SceneJoinAST {name, dataCount, hasEnter, hasUpdate, hasExit} ->
+        T.named Group ("scene-join-" <> show level)
+          []
+          `T.withChildren`
+            [ T.elem Circle
+                [ cx xPos
+                , cy (toNumber level * 80.0)
+                , radius 30.0
+                , fill "#4AE2A4"
+                , stroke "#2E8A5C"
+                , strokeWidth 2.0
+                ]
+            , T.elem Text
+                [ x xPos
+                , y (toNumber level * 80.0 + 5.0)
+                , textContent ("SceneJoin: " <> name)
+                , textAnchor "middle"
+                , fill "white"
+                ]
+            , T.elem Text
+                [ x xPos
+                , y (toNumber level * 80.0 + 45.0)
+                , textContent ("data: " <> show dataCount <> " {" <>
+                              (if hasEnter then "E" else "") <>
+                              (if hasUpdate then "U" else "") <>
+                              (if hasExit then "X" else "") <> "}")
+                , textAnchor "middle"
+                , fill "#666"
+                ]
+            ]
+
+      SceneNestedJoinAST {name, dataCount, hasEnter, hasUpdate, hasExit} ->
+        T.named Group ("scene-nested-join-" <> show level)
+          []
+          `T.withChildren`
+            [ T.elem Circle
+                [ cx xPos
+                , cy (toNumber level * 80.0)
+                , radius 30.0
+                , fill "#E2A44A"
+                , stroke "#8A5C2E"
+                , strokeWidth 2.0
+                ]
+            , T.elem Text
+                [ x xPos
+                , y (toNumber level * 80.0 + 5.0)
+                , textContent ("SceneNestedJoin: " <> name)
+                , textAnchor "middle"
+                , fill "white"
+                ]
+            , T.elem Text
+                [ x xPos
+                , y (toNumber level * 80.0 + 45.0)
+                , textContent ("data: " <> show dataCount <> " {" <>
+                              (if hasEnter then "E" else "") <>
+                              (if hasUpdate then "U" else "") <>
+                              (if hasExit then "X" else "") <> "}")
+                , textAnchor "middle"
+                , fill "#666"
+                ]
+            ]
+
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do

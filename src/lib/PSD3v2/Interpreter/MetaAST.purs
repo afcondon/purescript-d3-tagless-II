@@ -33,6 +33,24 @@ data TreeAST
       , dataCount :: Int
       , hasTemplate :: Boolean
       }
+  | SceneJoinAST
+      { name :: String
+      , key :: String
+      , dataCount :: Int
+      , hasEnter :: Boolean
+      , hasUpdate :: Boolean
+      , hasExit :: Boolean
+      , hasTemplate :: Boolean
+      }
+  | SceneNestedJoinAST
+      { name :: String
+      , key :: String
+      , dataCount :: Int
+      , hasEnter :: Boolean
+      , hasUpdate :: Boolean
+      , hasExit :: Boolean
+      , hasTemplate :: Boolean
+      }
 
 derive instance Generic TreeAST _
 
@@ -60,6 +78,40 @@ toAST tree = case tree of
       { name
       , key
       , dataCount: length joinData
+      , hasTemplate: true
+      }
+
+  SceneJoin {name, key, joinData, enterBehavior, updateBehavior, exitBehavior} ->
+    SceneJoinAST
+      { name
+      , key
+      , dataCount: length joinData
+      , hasEnter: case enterBehavior of
+          Just _ -> true
+          Nothing -> false
+      , hasUpdate: case updateBehavior of
+          Just _ -> true
+          Nothing -> false
+      , hasExit: case exitBehavior of
+          Just _ -> true
+          Nothing -> false
+      , hasTemplate: true
+      }
+
+  SceneNestedJoin {name, key, joinData, enterBehavior, updateBehavior, exitBehavior} ->
+    SceneNestedJoinAST
+      { name
+      , key
+      , dataCount: length joinData
+      , hasEnter: case enterBehavior of
+          Just _ -> true
+          Nothing -> false
+      , hasUpdate: case updateBehavior of
+          Just _ -> true
+          Nothing -> false
+      , hasExit: case exitBehavior of
+          Just _ -> true
+          Nothing -> false
       , hasTemplate: true
       }
 
@@ -97,6 +149,28 @@ prettyPrintAST ast = prettyPrint ast 0
         <> indent (level + 1) <> "{ name: \"" <> name <> "\"\n"
         <> indent (level + 1) <> ", key: \"" <> key <> "\"\n"
         <> indent (level + 1) <> ", dataCount: " <> show dataCount <> "\n"
+        <> indent (level + 1) <> ", hasTemplate: " <> show hasTemplate <> "\n"
+        <> indent level <> "}"
+
+      SceneJoinAST {name, key, dataCount, hasEnter, hasUpdate, hasExit, hasTemplate} ->
+        indent level <> "SceneJoinAST\n"
+        <> indent (level + 1) <> "{ name: \"" <> name <> "\"\n"
+        <> indent (level + 1) <> ", key: \"" <> key <> "\"\n"
+        <> indent (level + 1) <> ", dataCount: " <> show dataCount <> "\n"
+        <> indent (level + 1) <> ", hasEnter: " <> show hasEnter <> "\n"
+        <> indent (level + 1) <> ", hasUpdate: " <> show hasUpdate <> "\n"
+        <> indent (level + 1) <> ", hasExit: " <> show hasExit <> "\n"
+        <> indent (level + 1) <> ", hasTemplate: " <> show hasTemplate <> "\n"
+        <> indent level <> "}"
+
+      SceneNestedJoinAST {name, key, dataCount, hasEnter, hasUpdate, hasExit, hasTemplate} ->
+        indent level <> "SceneNestedJoinAST\n"
+        <> indent (level + 1) <> "{ name: \"" <> name <> "\"\n"
+        <> indent (level + 1) <> ", key: \"" <> key <> "\"\n"
+        <> indent (level + 1) <> ", dataCount: " <> show dataCount <> "\n"
+        <> indent (level + 1) <> ", hasEnter: " <> show hasEnter <> "\n"
+        <> indent (level + 1) <> ", hasUpdate: " <> show hasUpdate <> "\n"
+        <> indent (level + 1) <> ", hasExit: " <> show hasExit <> "\n"
         <> indent (level + 1) <> ", hasTemplate: " <> show hasTemplate <> "\n"
         <> indent level <> "}"
 
