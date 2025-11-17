@@ -4,12 +4,15 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
+import Effect.Class (liftEffect)
+import Effect.Aff (Milliseconds(..), delay)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
+import D3.Viz.FPFTW.AnscombeQuartet as Anscombe
 
 -- | Tour page state
 type State = Unit
@@ -31,7 +34,12 @@ component = H.mkComponent
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
-    -- No examples to render on this page yet
+    -- Small delay to ensure DOM is ready
+    H.liftAff $ delay (Milliseconds 100.0)
+
+    -- Render Anscombe's Quartet
+    liftEffect $ Anscombe.drawAnscombeQuartet "#anscombe-quartet"
+
     pure unit
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -52,14 +60,78 @@ render _ =
                 [ HH.text "These examples demonstrate the \"FP For The Win\" philosophy: using advanced functional programming techniques to create more composable, reusable, and maintainable visualization code." ]
             ]
 
-        -- Section 1: Three Little Sets (moved from Foundations)
+        -- Section 1: Anscombe's Quartet - The Power of Map
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ]
+            , HP.id "anscombe"
+            ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "1. Anscombe's Quartet: The Power of Map" ]
+            , HH.p_
+                [ HH.text "Anscombe's Quartet is a famous dataset demonstrating why visualization matters. All four datasets have "
+                , HH.strong_ [ HH.text "identical statistical properties" ]
+                , HH.text " (mean, variance, correlation ≈ 0.816), but "
+                , HH.strong_ [ HH.text "completely different distributions" ]
+                , HH.text ". Statistics can lie; plots don't!"
+                ]
+            , HH.p_
+                [ HH.text "This example showcases functional programming's " ]
+            , HH.em_ [ HH.text "map" ]
+            , HH.text " pattern: we define "
+            , HH.strong_ [ HH.text "one scatterplot component" ]
+            , HH.text " and "
+            , HH.strong_ [ HH.text "map it over four datasets" ]
+            , HH.text ". Same code, different data, four visualizations. This is composability in action:"
+            ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ]
+                , HP.style "background: #f5f5f5; padding: 15px; border-radius: 5px; color: #333; overflow-x: auto;"
+                ]
+                [ HH.code_
+                    [ HH.text "-- One component definition\nscatterplot :: String -> Array Point -> Tree\nscatterplot name points = ...\n\n-- Map over all four datasets!\nmap (\\{ name, points } -> scatterplot name points) anscombeData" ]
+                ]
+            , HH.div
+                [ HP.id "anscombe-quartet"
+                , HP.classes [ HH.ClassName "viz-container" ]
+                , HP.style "margin: 20px 0; text-align: center;"
+                ]
+                []
+            , HH.p_
+                [ HH.text "Notice how:" ]
+            , HH.ul_
+                [ HH.li_
+                    [ HH.strong_ [ HH.text "Dataset I" ]
+                    , HH.text ": Linear relationship with some scatter"
+                    ]
+                , HH.li_
+                    [ HH.strong_ [ HH.text "Dataset II" ]
+                    , HH.text ": Perfect quadratic curve"
+                    ]
+                , HH.li_
+                    [ HH.strong_ [ HH.text "Dataset III" ]
+                    , HH.text ": Linear with one outlier skewing statistics"
+                    ]
+                , HH.li_
+                    [ HH.strong_ [ HH.text "Dataset IV" ]
+                    , HH.text ": No relationship except one influential point"
+                    ]
+                ]
+            , HH.p_
+                [ HH.text "The FP win: We wrote the visualization component once and reused it four times. In imperative code, you'd repeat yourself or write complex loops. With "
+                , HH.code_ [ HH.text "map" ]
+                , HH.text ", composition is natural and type-safe."
+                ]
+            ]
+
+        -- Section 2: Three Little Sets (moved from Foundations)
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ]
             , HP.id "sets"
             ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "1. Beyond Arrays: Working with Sets" ]
+                [ HH.text "2. Beyond Arrays: Working with Sets" ]
             , HH.p_
                 [ HH.text "The real power of PS<$>D3's nestedJoin is its Foldable constraint. This means you can use ANY Foldable type for nested data, not just Arrays. This example uses Sets (unordered, unique collections) to represent product categories or tags." ]
             , HH.p_
@@ -70,14 +142,14 @@ render _ =
                 [ HH.text "With PureScript's type classes, the same visualization code works with Sets, Lists, Maps, or any custom Foldable you define. The type system ensures you can't accidentally mix incompatible data structures." ]
             ]
 
-        -- Section 2: Map Quartet - Scatterplots from Maps
+        -- Section 3: Map Quartet - Scatterplots from Maps
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ]
             , HP.id "map-quartet"
             ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "2. Map Quartet: Scatterplots from Sparse Data" ]
+                [ HH.text "3. Map Quartet: Scatterplots from Sparse Data" ]
             , HH.p_
                 [ HH.text "Maps are ideal for sparse data where you only have values for certain keys. This example shows four scatterplots, each visualizing a Map<Number, Number> with only ~15 data points out of a possible 200 x-values." ]
             , HH.p_
@@ -94,14 +166,14 @@ render _ =
                 [ HH.text "In JavaScript, you'd typically use an array with sparse indices or objects with string keys. Maps provide a more principled approach with better type safety and performance characteristics." ]
             ]
 
-        -- Section 3: Contravariant Attributes
+        -- Section 4: Contravariant Attributes
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ]
             , HP.id "contravariant"
             ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "3. Contravariant Functors: Type-Safe Attribute Mapping" ]
+                [ HH.text "4. Contravariant Functors: Type-Safe Attribute Mapping" ]
             , HH.p_
                 [ HH.text "One of PureScript's most powerful features for visualization is contravariant functors. These allow you to transform the input type of an attribute function while maintaining type safety." ]
             , HH.p_
@@ -123,14 +195,14 @@ render _ =
                 ]
             ]
 
-        -- Section 4: TreeAPI Language Power
+        -- Section 5: TreeAPI Language Power
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ]
             , HP.id "tree-api-power"
             ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "4. TreeAPI: A Composable DSL" ]
+                [ HH.text "5. TreeAPI: A Composable DSL" ]
             , HH.p_
                 [ HH.text "The TreeAPI demonstrates functional programming principles in action. It's a deeply embedded DSL (Domain-Specific Language) that leverages PureScript's type system to provide:" ]
             , HH.ul_
@@ -194,4 +266,5 @@ render _ =
                 [ HH.text "This is why we say \"Functional Programming For The Win\" - not because it's academically interesting, but because it produces better visualization code that's easier to write, test, and maintain." ]
             ]
         ]
-    ]
+    
+
