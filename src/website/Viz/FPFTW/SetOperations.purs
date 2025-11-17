@@ -5,8 +5,10 @@ module D3.Viz.FPFTW.SetOperations where
 
 import Prelude
 
+import Data.Array (find)
 import Data.Array as Array
 import Data.Int (toNumber)
+import Data.Maybe (Maybe(..))
 import Data.Number as Number
 import Data.Set (Set)
 import Data.Set as Set
@@ -37,26 +39,50 @@ phylotaxisPosition index =
     , y: rad * Number.sin angle
     }
 
--- | Our example sets
-setA :: Set Int
-setA = Set.fromFoldable [1, 2, 3, 4, 5, 6, 7, 8]
+-- | Color names with their hex values for visualization
+type ColorName = String
+type ColorHex = String
 
-setB :: Set Int
-setB = Set.fromFoldable [4, 5, 6, 7, 8, 9, 10, 11, 12]
+colorMap :: Array { name :: ColorName, hex :: ColorHex }
+colorMap =
+  [ { name: "yellow", hex: "#FFD700" }
+  , { name: "blue", hex: "#4169E1" }
+  , { name: "red", hex: "#DC143C" }
+  , { name: "orange", hex: "#FF8C00" }
+  , { name: "purple", hex: "#9370DB" }
+  , { name: "green", hex: "#32CD32" }
+  , { name: "brown", hex: "#8B4513" }
+  , { name: "black", hex: "#2C2C2C" }
+  , { name: "pink", hex: "#FF69B4" }
+  ]
+
+-- | Our example sets - using color names to make semantics clear!
+setA :: Set String
+setA = Set.fromFoldable ["yellow", "blue", "red", "orange", "purple"]
+
+setB :: Set String
+setB = Set.fromFoldable ["blue", "green", "brown", "black", "purple"]
 
 -- | Four sets to visualize
-setsToVisualize :: Array { name :: String, set :: Set Int, color :: String }
+setsToVisualize :: Array { name :: String, set :: Set String, borderColor :: String }
 setsToVisualize =
-  [ { name: "Set A", set: setA, color: "#E74C3C" }
-  , { name: "Set B", set: setB, color: "#3498DB" }
-  , { name: "A ∪ B (Union)", set: Set.union setA setB, color: "#9B59B6" }
-  , { name: "A ∩ B (Intersection)", set: Set.intersection setA setB, color: "#27AE60" }
+  [ { name: "Set A", set: setA, borderColor: "#E74C3C" }
+  , { name: "Set B", set: setB, borderColor: "#3498DB" }
+  , { name: "A ∪ B (Union)", set: Set.union setA setB, borderColor: "#9B59B6" }
+  , { name: "A ∩ B (Intersection)", set: Set.intersection setA setB, borderColor: "#27AE60" }
   ]
+
+-- | Get the hex color for a color name
+getColorHex :: String -> String
+getColorHex colorName =
+  case find (\c -> c.name == colorName) colorMap of
+    Just c -> c.hex
+    Nothing -> "#999999"  -- Default gray for unknown colors
 
 -- | Visualize a single set as circles in phylotaxis layout
 -- | This is the component we'll MAP over four different sets!
-visualizeSet :: String -> Set Int -> String -> T.Tree Unit
-visualizeSet setName elements color =
+visualizeSet :: String -> Set String -> String -> T.Tree Unit
+visualizeSet setName elements borderColor =
   T.named Group ("set-" <> setName)
     [ class_ "set-visualization" ]
     `T.withChildren`
@@ -66,8 +92,8 @@ visualizeSet setName elements color =
            , cy 0.0
            , radius 120.0
            , fill "none"
-           , stroke "#ddd"
-           , strokeWidth 2.0
+           , stroke borderColor
+           , strokeWidth 3.0
            , class_ "set-boundary"
            ]
        -- Title
@@ -83,36 +109,29 @@ visualizeSet setName elements color =
        , T.elem Text
            [ x 0.0
            , y 145.0
-           , textContent ("(" <> show (Set.size elements) <> " elements)")
+           , textContent ("(" <> show (Set.size elements) <> " colors)")
            , textAnchor "middle"
            , fill "#666"
            , class_ "set-count"
            ]
        ] <>
-       -- Elements as small circles in phylotaxis layout
+       -- Elements as colored circles in phylotaxis layout
        -- This demonstrates Foldable - we're folding over a Set, not an Array!
+       -- Each circle is colored with its actual color!
        (Set.toUnfoldable elements
-         # Array.mapWithIndex (\index value ->
+         # Array.mapWithIndex (\index colorName ->
              let pos = phylotaxisPosition index
+                 colorHex = getColorHex colorName
              in T.elem Circle
                   [ cx pos.x
                   , cy pos.y
-                  , radius 6.0
-                  , fill color
-                  , fillOpacity 0.8
+                  , radius 12.0  -- Larger to show colors better
+                  , fill colorHex  -- Use the actual color!
+                  , fillOpacity 0.9
                   , stroke "#fff"
-                  , strokeWidth 1.5
+                  , strokeWidth 2.0
                   , class_ "set-element"
                   ]
-                  `T.withChild`
-                    T.elem Text
-                      [ x pos.x
-                      , y (pos.y + 1.5)
-                      , textContent (show value)
-                      , textAnchor "middle"
-                      , fill "#fff"
-                      , class_ "element-label"
-                      ]
            )
        ))
 
@@ -133,14 +152,14 @@ drawSetOperations containerSelector = runD3v2M do
           `T.withChildren`
             -- Map the visualizeSet component over all four sets!
             -- This is the FP win: one definition, four instances
-            (Array.mapWithIndex (\index { name, set, color } ->
+            (Array.mapWithIndex (\index { name, set, borderColor } ->
               let col = index `mod` 2
                   row = index / 2
                   xOffset = toNumber col * 500.0 + 250.0
                   yOffset = toNumber row * 350.0 + 200.0
               in T.named Group ("group-" <> name)
                    [ transform ("translate(" <> show xOffset <> "," <> show yOffset <> ")") ]
-                   `T.withChild` visualizeSet name set color
+                   `T.withChild` visualizeSet name set borderColor
             ) setsToVisualize)
 
   _ <- renderTree container setsTree

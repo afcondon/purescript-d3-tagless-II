@@ -26591,7 +26591,7 @@
   };
 
   // output/D3.Viz.FPFTW.SetOperations/index.js
-  var fromFoldable24 = /* @__PURE__ */ fromFoldable7(foldableArray)(ordInt);
+  var fromFoldable24 = /* @__PURE__ */ fromFoldable7(foldableArray)(ordString);
   var class_17 = /* @__PURE__ */ class_2(toAttrStringString);
   var append18 = /* @__PURE__ */ append(semigroupArray);
   var cx17 = /* @__PURE__ */ cx3(toAttrNumberNumber);
@@ -26618,24 +26618,24 @@
   var show114 = /* @__PURE__ */ show(showNumber);
   var renderTree28 = /* @__PURE__ */ renderTree(selectionMD3v2Selection_D)(ordUnit);
   var pure28 = /* @__PURE__ */ pure(applicativeD3v2M);
-  var setB = /* @__PURE__ */ fromFoldable24([4, 5, 6, 7, 8, 9, 10, 11, 12]);
-  var setA = /* @__PURE__ */ fromFoldable24([1, 2, 3, 4, 5, 6, 7, 8]);
+  var setB = /* @__PURE__ */ fromFoldable24(["blue", "green", "brown", "black", "purple"]);
+  var setA = /* @__PURE__ */ fromFoldable24(["yellow", "blue", "red", "orange", "purple"]);
   var setsToVisualize = [{
     name: "Set A",
     set: setA,
-    color: "#E74C3C"
+    borderColor: "#E74C3C"
   }, {
     name: "Set B",
     set: setB,
-    color: "#3498DB"
+    borderColor: "#3498DB"
   }, {
     name: "A \u222A B (Union)",
-    set: /* @__PURE__ */ union3(ordInt)(setA)(setB),
-    color: "#9B59B6"
+    set: /* @__PURE__ */ union3(ordString)(setA)(setB),
+    borderColor: "#9B59B6"
   }, {
     name: "A \u2229 B (Intersection)",
-    set: /* @__PURE__ */ intersection2(ordInt)(setA)(setB),
-    color: "#27AE60"
+    set: /* @__PURE__ */ intersection2(ordString)(setA)(setB),
+    borderColor: "#27AE60"
   }];
   var initialRadius3 = 8;
   var goldenAngle = /* @__PURE__ */ (function() {
@@ -26650,13 +26650,56 @@
       y: rad * sin(angle)
     };
   };
+  var colorMap = [{
+    name: "yellow",
+    hex: "#FFD700"
+  }, {
+    name: "blue",
+    hex: "#4169E1"
+  }, {
+    name: "red",
+    hex: "#DC143C"
+  }, {
+    name: "orange",
+    hex: "#FF8C00"
+  }, {
+    name: "purple",
+    hex: "#9370DB"
+  }, {
+    name: "green",
+    hex: "#32CD32"
+  }, {
+    name: "brown",
+    hex: "#8B4513"
+  }, {
+    name: "black",
+    hex: "#2C2C2C"
+  }, {
+    name: "pink",
+    hex: "#FF69B4"
+  }];
+  var getColorHex = function(colorName) {
+    var v = find2(function(c) {
+      return c.name === colorName;
+    })(colorMap);
+    if (v instanceof Just) {
+      return v.value0.hex;
+    }
+    ;
+    if (v instanceof Nothing) {
+      return "#999999";
+    }
+    ;
+    throw new Error("Failed pattern match at D3.Viz.FPFTW.SetOperations (line 78, column 3 - line 80, column 25): " + [v.constructor.name]);
+  };
   var visualizeSet = function(setName14) {
     return function(elements) {
-      return function(color2) {
-        return withChildren(named2(Group2.value)("set-" + setName14)([class_17("set-visualization")]))(append18([elem4(Circle2.value)([cx17(0), cy17(0), radius14(120), fill18("none"), stroke11("#ddd"), strokeWidth13(2), class_17("set-boundary")]), elem4(Text3.value)([x11(0), y11(-135), textContent10(setName14), textAnchor8("middle"), fill18("#333"), class_17("set-title")]), elem4(Text3.value)([x11(0), y11(145), textContent10("(" + (show36(size4(elements)) + " elements)")), textAnchor8("middle"), fill18("#666"), class_17("set-count")])])(mapWithIndex2(function(index5) {
-          return function(value15) {
+      return function(borderColor) {
+        return withChildren(named2(Group2.value)("set-" + setName14)([class_17("set-visualization")]))(append18([elem4(Circle2.value)([cx17(0), cy17(0), radius14(120), fill18("none"), stroke11(borderColor), strokeWidth13(3), class_17("set-boundary")]), elem4(Text3.value)([x11(0), y11(-135), textContent10(setName14), textAnchor8("middle"), fill18("#333"), class_17("set-title")]), elem4(Text3.value)([x11(0), y11(145), textContent10("(" + (show36(size4(elements)) + " colors)")), textAnchor8("middle"), fill18("#666"), class_17("set-count")])])(mapWithIndex2(function(index5) {
+          return function(colorName) {
             var pos = phylotaxisPosition(index5);
-            return withChild(elem4(Circle2.value)([cx17(pos.x), cy17(pos.y), radius14(6), fill18(color2), fillOpacity4(0.8), stroke11("#fff"), strokeWidth13(1.5), class_17("set-element")]))(elem4(Text3.value)([x11(pos.x), y11(pos.y + 1.5), textContent10(show36(value15)), textAnchor8("middle"), fill18("#fff"), class_17("element-label")]));
+            var colorHex = getColorHex(colorName);
+            return elem4(Circle2.value)([cx17(pos.x), cy17(pos.y), radius14(12), fill18(colorHex), fillOpacity4(0.9), stroke11("#fff"), strokeWidth13(2), class_17("set-element")]);
           };
         })(toUnfoldable6(elements))));
       };
@@ -26670,7 +26713,7 @@
           var yOffset = toNumber(row) * 350 + 200;
           var col2 = mod4(index5)(2);
           var xOffset = toNumber(col2) * 500 + 250;
-          return withChild(named2(Group2.value)("group-" + v.name)([transform10("translate(" + (show114(xOffset) + ("," + (show114(yOffset) + ")"))))]))(visualizeSet(v.name)(v.set)(v.color));
+          return withChild(named2(Group2.value)("group-" + v.name)([transform10("translate(" + (show114(xOffset) + ("," + (show114(yOffset) + ")"))))]))(visualizeSet(v.name)(v.set)(v.borderColor));
         };
       })(setsToVisualize));
       return bind33(renderTree28(container)(setsTree))(function() {
