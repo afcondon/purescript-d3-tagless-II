@@ -274,16 +274,17 @@ foreign import data ChordGenerator_ :: Type
 foreign import data RibbonGenerator_ :: Type
 foreign import data ArcGenerator_ :: Type
 
-foreign import chordLayout_         :: Array (Array Number) -> ChordLayout_
-foreign import chordGroups_         :: ChordLayout_ -> Array Datum_
-foreign import chordArray_          :: ChordLayout_ -> Array Datum_
-foreign import ribbonGenerator_     :: Unit -> RibbonGenerator_
-foreign import arcGenerator_        :: Unit -> ArcGenerator_
-foreign import ribbonPath_          :: RibbonGenerator_ -> Datum_ -> String
-foreign import arcPath_             :: ArcGenerator_ -> Datum_ -> String
-foreign import setRibbonRadius_     :: RibbonGenerator_ -> Number -> RibbonGenerator_
-foreign import setArcInnerRadius_   :: ArcGenerator_ -> Number -> ArcGenerator_
-foreign import setArcOuterRadius_   :: ArcGenerator_ -> Number -> ArcGenerator_
+foreign import chordLayout_            :: Array (Array Number) -> ChordLayout_
+foreign import chordLayoutWithPadAngle_ :: Array (Array Number) -> Number -> ChordLayout_
+foreign import chordGroups_            :: ChordLayout_ -> Array Datum_
+foreign import chordArray_             :: ChordLayout_ -> Array Datum_
+foreign import ribbonGenerator_        :: Unit -> RibbonGenerator_
+foreign import arcGenerator_           :: Unit -> ArcGenerator_
+foreign import ribbonPath_             :: RibbonGenerator_ -> Datum_ -> String
+foreign import arcPath_                :: ArcGenerator_ -> Datum_ -> String
+foreign import setRibbonRadius_        :: RibbonGenerator_ -> Number -> RibbonGenerator_
+foreign import setArcInnerRadius_      :: ArcGenerator_ -> Number -> ArcGenerator_
+foreign import setArcOuterRadius_      :: ArcGenerator_ -> Number -> ArcGenerator_
 
 -- | *********************************************************************************************************************
 -- | REMOVED: Old D3 hierarchy layout FFI functions (Pack, Treemap, Partition)

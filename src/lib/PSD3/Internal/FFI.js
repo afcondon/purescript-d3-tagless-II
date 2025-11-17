@@ -1246,6 +1246,9 @@ export function autoBox_() {
 export function chordLayout_(matrix) {
   return d3.chord()(matrix);
 }
+export function chordLayoutWithPadAngle_(matrix) {
+  return padAngle => d3.chord().padAngle(padAngle)(matrix);
+}
 export function chordGroups_(chordLayout) { return chordLayout.groups }
 export function chordArray_(chordLayout) {
   return Array.from(chordLayout);
