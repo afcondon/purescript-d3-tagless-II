@@ -12,10 +12,10 @@ export const renderMermaidDiagrams_ = () => {
     console.log('FFI: requestAnimationFrame callback executing');
 
     try {
-      // Check if mermaid is loaded
-      if (typeof window.mermaid === 'undefined') {
-        console.log('Mermaid not loaded yet, will retry...');
-        setTimeout(() => renderMermaidDiagrams_(), 500);
+      // Check if mermaid is loaded AND initialized (render function exists)
+      if (typeof window.mermaid === 'undefined' || typeof window.mermaid.render !== 'function') {
+        console.log('Mermaid not loaded/initialized yet, will retry...');
+        setTimeout(() => renderMermaidDiagrams_()(), 500);
         return;
       }
 

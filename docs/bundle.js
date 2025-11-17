@@ -32342,9 +32342,9 @@
     requestAnimationFrame(() => {
       console.log("FFI: requestAnimationFrame callback executing");
       try {
-        if (typeof window.mermaid === "undefined") {
-          console.log("Mermaid not loaded yet, will retry...");
-          setTimeout(() => renderMermaidDiagrams_(), 500);
+        if (typeof window.mermaid === "undefined" || typeof window.mermaid.render !== "function") {
+          console.log("Mermaid not loaded/initialized yet, will retry...");
+          setTimeout(() => renderMermaidDiagrams_()(), 500);
           return;
         }
         console.log("Mermaid is loaded, looking for diagram elements...");
