@@ -171,67 +171,14 @@ render _ =
                 ]
             ]
 
-        -- Section 3: Map Quartet - Scatterplots from Maps
-        , HH.section
-            [ HP.classes [ HH.ClassName "tutorial-section" ]
-            , HP.id "map-quartet"
-            ]
-            [ HH.h2
-                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "3. Map Quartet: Scatterplots from Sparse Data" ]
-            , HH.p_
-                [ HH.text "Maps are ideal for sparse data where you only have values for certain keys. This example shows four scatterplots, each visualizing a Map<Number, Number> with only ~15 data points out of a possible 200 x-values." ]
-            , HH.p_
-                [ HH.em_ [ HH.text "[Map Quartet example not yet implemented in TreeAPI - coming soon]" ] ]
-            , HH.p_
-                [ HH.text "The visualization demonstrates:" ]
-            , HH.ul_
-                [ HH.li_ [ HH.text "How Maps naturally represent sparse data without storing null/undefined values" ]
-                , HH.li_ [ HH.text "Type-safe iteration over Map entries using Foldable" ]
-                , HH.li_ [ HH.text "Efficient memory usage for datasets with many missing values" ]
-                , HH.li_ [ HH.text "Clear distinction between \"no data\" and \"data with value zero\"" ]
-                ]
-            , HH.p_
-                [ HH.text "In JavaScript, you'd typically use an array with sparse indices or objects with string keys. Maps provide a more principled approach with better type safety and performance characteristics." ]
-            ]
-
-        -- Section 4: Contravariant Attributes
-        , HH.section
-            [ HP.classes [ HH.ClassName "tutorial-section" ]
-            , HP.id "contravariant"
-            ]
-            [ HH.h2
-                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "4. Contravariant Functors: Type-Safe Attribute Mapping" ]
-            , HH.p_
-                [ HH.text "One of PureScript's most powerful features for visualization is contravariant functors. These allow you to transform the input type of an attribute function while maintaining type safety." ]
-            , HH.p_
-                [ HH.em_ [ HH.text "[Contravariant attributes example not yet implemented in TreeAPI - coming soon]" ] ]
-            , HH.p_
-                [ HH.text "Example: suppose you have a circle radius attribute that expects a Number, but your data is a record { value :: Number }. With contravariant functors, you can elegantly compose the attribute:" ]
-            , HH.pre
-                [ HP.classes [ HH.ClassName "code-block" ] ]
-                [ HH.code_
-                    [ HH.text "-- Define base attribute\nradiusAttr :: Attr Number\nradiusAttr = radius\n\n-- Transform to work with records\nradiusFromRecord :: Attr { value :: Number }\nradiusFromRecord = cmap _.value radiusAttr\n\n-- The type system ensures the transformation is correct!" ]
-                ]
-            , HH.p_
-                [ HH.text "This technique enables:" ]
-            , HH.ul_
-                [ HH.li_ [ HH.text "Reusable attribute definitions that work with different data types" ]
-                , HH.li_ [ HH.text "Type-safe composition of data transformations and visual encodings" ]
-                , HH.li_ [ HH.text "Compile-time guarantees that your data matches your attributes" ]
-                , HH.li_ [ HH.text "Clear separation between data transformation and visual encoding" ]
-                ]
-            ]
-
-        -- Section 5: TreeAPI Language Power
+        -- Section 3: TreeAPI Language Power
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ]
             , HP.id "tree-api-power"
             ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "5. TreeAPI: A Composable DSL" ]
+                [ HH.text "3. TreeAPI: A Composable DSL" ]
             , HH.p_
                 [ HH.text "The TreeAPI demonstrates functional programming principles in action. It's a deeply embedded DSL (Domain-Specific Language) that leverages PureScript's type system to provide:" ]
             , HH.ul_
