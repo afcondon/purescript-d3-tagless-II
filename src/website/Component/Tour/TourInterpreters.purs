@@ -218,6 +218,33 @@ handleAction = case _ of
 
     pure unit
 
+-- | Mermaid diagram showing the interpreter flow
+interpreterFlowDiagram :: String
+interpreterFlowDiagram = """
+graph TB
+    Code["PureScript Visualization Code<br/>(TreeAPI DSL)"]
+
+    Code --> D3["D3/DOM Interpreter"]
+    Code --> English["English Description Interpreter"]
+    Code --> Mermaid["Mermaid Diagram Interpreter"]
+    Code --> Meta["Meta/AST Interpreter"]
+
+    D3 --> Output1["HTML & SVG<br/>Interactive Visualizations"]
+    English --> Output2["Natural Language Description<br/>How the viz is built"]
+    Mermaid --> Output3["Mermaid Syntax<br/>→ AST Flowchart Diagram"]
+    Meta --> Output4["PureScript Data Structure<br/>→ Visual Tree Diagram<br/>(Future: WYSIWYG Editor!)"]
+
+    style Code fill:#e1f5ff,stroke:#4a90e2,stroke-width:3px
+    style D3 fill:#d4edda,stroke:#28a745,stroke-width:2px
+    style English fill:#fff3cd,stroke:#ffc107,stroke-width:2px
+    style Mermaid fill:#f8d7da,stroke:#dc3545,stroke-width:2px
+    style Meta fill:#e7d4f5,stroke:#9b4ae2,stroke-width:2px
+    style Output1 fill:#d4edda,stroke:#28a745,stroke-width:2px
+    style Output2 fill:#fff3cd,stroke:#ffc107,stroke-width:2px
+    style Output3 fill:#f8d7da,stroke:#dc3545,stroke-width:2px
+    style Output4 fill:#e7d4f5,stroke:#9b4ae2,stroke-width:2px
+"""
+
 render :: forall m. State -> H.ComponentHTML Action () m
 render state =
   HH.div
@@ -231,7 +258,19 @@ render state =
                 [ HP.classes [ HH.ClassName "tutorial-title" ] ]
                 [ HH.text "6. Alternative Interpreters" ]
             , HH.p_
-                [ HH.text "TreeAPI is a grammar, not just an API. The same visualization code can be interpreted in multiple ways. Below, we show the \"Three Little Circles\" example interpreted in three different ways:" ]
+                [ HH.text "TreeAPI is a grammar, not just an API. The same visualization code can be interpreted in multiple ways, each serving a different purpose:" ]
+
+            -- Overview diagram
+            , HH.div
+                [ HP.style "margin: 30px 0; background: #f9f9f9; padding: 20px; border-radius: 8px;" ]
+                [ HH.h3
+                    [ HP.style "margin-top: 0; text-align: center; color: #555;" ]
+                    [ HH.text "The Interpreter Pattern: One Code, Multiple Outputs" ]
+                , mermaidDiagram interpreterFlowDiagram (Just "interpreter-overview")
+                ]
+
+            , HH.p_
+                [ HH.text "Below, we demonstrate each interpreter using the \"Three Little Circles\" example. First, here's the actual visualization:" ]
             , HH.div
                 [ HP.id "d3-output"
                 , HP.classes [ HH.ClassName "viz-container" ]
