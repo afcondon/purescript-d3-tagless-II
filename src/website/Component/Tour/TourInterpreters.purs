@@ -10,16 +10,21 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.RoutingDSL (routeToPath)
+import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
 import PSD3v2.Interpreter.English (runEnglish)
-import PSD3v2.Interpreter.MetaAST (toAST, prettyPrintAST)
+import PSD3v2.Interpreter.MetaAST (toAST, prettyPrintAST, TreeAST(..))
 import PSD3v2.Interpreter.MermaidTree (runMermaidTree)
-import PSD3v2.Selection.Types (SEmpty)
+import PSD3v2.Selection.Types (SEmpty, ElementType(..))
+import PSD3v2.Attribute.Types (width, height, viewBox, transform, fill, stroke, strokeWidth, textContent, textAnchor, x, y, cx, cy, radius, x1, y1, x2, y2)
+import PSD3v2.VizTree.Tree as T
 import D3.Viz.TreeAPI.InterpreterDemo as Demo
 import Web.DOM.Element (Element)
+import Data.Array (length, mapWithIndex)
+import Data.Int (toNumber)
 
 -- | Tour page state
 type State =
@@ -46,6 +51,133 @@ component = H.mkComponent
       }
   }
 
+-- | Convert TreeAST to a visual tree diagram
+-- | This is the inception part - visualizing the AST structure itself!
+astToTreeVisualization :: TreeAST -> T.Tree Unit
+astToTreeVisualization ast =
+  T.named SVG "svg"
+    [ width 600.0
+    , height 400.0
+    , viewBox "0 0 600 400"
+    ]
+    `T.withChild`
+      (T.named Group "ast-tree"
+        [ transform "translate(300, 30)" ]
+        `T.withChild` renderASTNode ast 0.0 0)
+  where
+    renderASTNode :: TreeAST -> Number -> Int -> T.Tree Unit
+    renderASTNode node xPos level = case node of
+      NodeAST {name, elemType, attrCount, children} ->
+        let label = case name of
+              Just n -> elemType <> ": " <> n
+              Nothing -> elemType
+            childSpacing = 120.0
+            childCount = length children
+            startX = xPos - (childSpacing * (toNumber childCount - 1.0) / 2.0)
+        in T.named Group ("node-" <> show level)
+            []
+            `T.withChildren`
+              ([ -- Node circle
+                 T.elem Circle
+                   [ cx xPos
+                   , cy (toNumber level * 80.0)
+                   , radius 30.0
+                   , fill "#4A90E2"
+                   , stroke "#2E5C8A"
+                   , strokeWidth 2.0
+                   ]
+               -- Node label
+               , T.elem Text
+                   [ x xPos
+                   , y (toNumber level * 80.0 + 5.0)
+                   , textContent label
+                   , textAnchor "middle"
+                   , fill "white"
+                   ]
+               -- Attribute count badge
+               , T.elem Text
+                   [ x xPos
+                   , y (toNumber level * 80.0 + 45.0)
+                   , textContent ("attrs: " <> show attrCount)
+                   , textAnchor "middle"
+                   , fill "#666"
+                   ]
+               ] <>
+               -- Lines to children
+               (mapWithIndex (\i _ ->
+                 let childX = startX + (toNumber i * childSpacing)
+                     childY = (toNumber (level + 1)) * 80.0
+                 in T.elem Line
+                      [ x1 xPos
+                      , y1 (toNumber level * 80.0 + 30.0)
+                      , x2 childX
+                      , y2 (childY - 30.0)
+                      , stroke "#999"
+                      , strokeWidth 1.5
+                      ]
+               ) children) <>
+               -- Child nodes
+               (mapWithIndex (\i child ->
+                 let childX = startX + (toNumber i * childSpacing)
+                 in renderASTNode child childX (level + 1)
+               ) children))
+
+      JoinAST {name, dataCount} ->
+        T.named Group ("join-" <> show level)
+          []
+          `T.withChildren`
+            [ T.elem Circle
+                [ cx xPos
+                , cy (toNumber level * 80.0)
+                , radius 30.0
+                , fill "#E27A4A"
+                , stroke "#8A472E"
+                , strokeWidth 2.0
+                ]
+            , T.elem Text
+                [ x xPos
+                , y (toNumber level * 80.0 + 5.0)
+                , textContent ("Join: " <> name)
+                , textAnchor "middle"
+                , fill "white"
+                ]
+            , T.elem Text
+                [ x xPos
+                , y (toNumber level * 80.0 + 45.0)
+                , textContent ("data: " <> show dataCount)
+                , textAnchor "middle"
+                , fill "#666"
+                ]
+            ]
+
+      NestedJoinAST {name, dataCount} ->
+        T.named Group ("nested-join-" <> show level)
+          []
+          `T.withChildren`
+            [ T.elem Circle
+                [ cx xPos
+                , cy (toNumber level * 80.0)
+                , radius 30.0
+                , fill "#9B4AE2"
+                , stroke "#5C2E8A"
+                , strokeWidth 2.0
+                ]
+            , T.elem Text
+                [ x xPos
+                , y (toNumber level * 80.0 + 5.0)
+                , textContent ("NestedJoin: " <> name)
+                , textAnchor "middle"
+                , fill "white"
+                ]
+            , T.elem Text
+                [ x xPos
+                , y (toNumber level * 80.0 + 45.0)
+                , textContent ("data: " <> show dataCount)
+                , textAnchor "middle"
+                , fill "#666"
+                ]
+            ]
+
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
@@ -71,8 +203,18 @@ handleAction = case _ of
     let ast = toAST tree
     let astPretty = prettyPrintAST ast
 
+    -- 5. Visualize the AST itself as a tree diagram (INCEPTION!)
+    let astTree = astToTreeVisualization ast
+    liftEffect $ runD3v2M do
+      astContainer <- select "#ast-viz-output" :: _ (D3v2Selection_ SEmpty Element Unit)
+      _ <- renderTree astContainer astTree
+      pure unit
+
     -- Update state
     H.modify_ _ { englishDesc = english, mermaidCode = mermaid, astCode = astPretty }
+
+    -- Trigger Mermaid rendering (inception!)
+    triggerMermaidRendering
 
     pure unit
 
@@ -116,7 +258,7 @@ render state =
                 [ HH.text "This interpreter translates the TreeAPI code into plain English, describing HOW the visualization is built (not what it looks like). Perfect for documentation and understanding code structure." ]
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-output" ]
-                , HP.style "background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto;"
+                , HP.style "background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; color: #333;"
                 ]
                 [ HH.text state.englishDesc ]
             ]
@@ -130,18 +272,36 @@ render state =
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
                 [ HH.text "2. Mermaid Diagram Interpreter" ]
             , HH.p_
-                [ HH.text "This interpreter generates Mermaid diagram syntax, representing the visualization structure as a flowchart. Perfect for documentation and architectural overviews." ]
-            , HH.pre
-                [ HP.classes [ HH.ClassName "code-output" ]
-                , HP.style "background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto;"
+                [ HH.text "This interpreter generates Mermaid diagram syntax, representing the visualization structure as a flowchart. Perfect for documentation and architectural overviews. "
+                , HH.strong_ [ HH.text "Below we feed this generated code back into Mermaid to prove it works!" ]
                 ]
-                [ HH.text state.mermaidCode ]
+            , HH.div
+                [ HP.style "display: flex; gap: 20px; margin: 20px 0;" ]
+                [ HH.div
+                    [ HP.style "flex: 1;" ]
+                    [ HH.h3
+                        [ HP.style "margin-top: 0; font-size: 14px; color: #666;" ]
+                        [ HH.text "Generated Mermaid Code:" ]
+                    , HH.pre
+                        [ HP.classes [ HH.ClassName "code-output" ]
+                        , HP.style "background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; color: #333; margin: 0;"
+                        ]
+                        [ HH.text state.mermaidCode ]
+                    ]
+                , HH.div
+                    [ HP.style "flex: 1;" ]
+                    [ HH.h3
+                        [ HP.style "margin-top: 0; font-size: 14px; color: #666;" ]
+                        [ HH.text "Rendered Diagram (Inception!):" ]
+                    , mermaidDiagram state.mermaidCode Nothing
+                    ]
+                ]
             , HH.p_
                 [ HH.text "Visit the "
                 , HH.a
                     [ HP.href $ "#" <> routeToPath MermaidTreeDemo ]
                     [ HH.text "Mermaid Tree Visualizer" ]
-                , HH.text " to see interactive Mermaid diagrams."
+                , HH.text " to see more interactive Mermaid diagrams."
                 ]
             ]
 
@@ -154,12 +314,35 @@ render state =
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
                 [ HH.text "3. Meta/AST Interpreter - Code as Data" ]
             , HH.p_
-                [ HH.text "This interpreter produces a PureScript data structure representation of the tree itself. It demonstrates that the visualization code IS data that can be inspected and manipulated." ]
-            , HH.pre
-                [ HP.classes [ HH.ClassName "code-output" ]
-                , HP.style "background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px;"
+                [ HH.text "This interpreter produces a PureScript data structure representation of the tree itself. It demonstrates that the visualization code IS data that can be inspected and manipulated. "
+                , HH.strong_ [ HH.text "Below we visualize the AST structure itself using TreeAPI - pure inception!" ]
                 ]
-                [ HH.text state.astCode ]
+            , HH.div
+                [ HP.style "display: flex; gap: 20px; margin: 20px 0;" ]
+                [ HH.div
+                    [ HP.style "flex: 1;" ]
+                    [ HH.h3
+                        [ HP.style "margin-top: 0; font-size: 14px; color: #666;" ]
+                        [ HH.text "Generated AST Code:" ]
+                    , HH.pre
+                        [ HP.classes [ HH.ClassName "code-output" ]
+                        , HP.style "background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 12px; color: #333; margin: 0; max-height: 400px;"
+                        ]
+                        [ HH.text state.astCode ]
+                    ]
+                , HH.div
+                    [ HP.style "flex: 1;" ]
+                    [ HH.h3
+                        [ HP.style "margin-top: 0; font-size: 14px; color: #666;" ]
+                        [ HH.text "Visualized AST Tree (Inception!):" ]
+                    , HH.div
+                        [ HP.id "ast-viz-output"
+                        , HP.classes [ HH.ClassName "viz-container" ]
+                        , HP.style "border: 1px solid #ddd; border-radius: 5px; background: white;"
+                        ]
+                        []
+                    ]
+                ]
             , HH.p_
                 [ HH.text "This is particularly powerful because it:" ]
             , HH.ul_
