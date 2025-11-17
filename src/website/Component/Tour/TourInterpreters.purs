@@ -4,6 +4,8 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
+import Effect.Class (liftEffect)
+import Effect.Aff (Milliseconds(..), delay)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
@@ -12,7 +14,9 @@ import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
 
 -- | Tour page state
-type State = Unit
+type State =
+  { mermaidCode :: Maybe String
+  }
 
 -- | Tour page actions
 data Action = Initialize
@@ -20,7 +24,7 @@ data Action = Initialize
 -- | Tour page component
 component :: forall q i o m. MonadAff m => H.Component q i o m
 component = H.mkComponent
-  { initialState: \_ -> unit
+  { initialState: \_ -> { mermaidCode: Nothing }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -31,7 +35,11 @@ component = H.mkComponent
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
-    -- No examples to render on this page
+    -- Small delay to ensure DOM is ready
+    H.liftAff $ delay (Milliseconds 100.0)
+
+    -- TODO: Add side-by-side D3 and Mermaid interpreter demo
+
     pure unit
 
 render :: forall m. State -> H.ComponentHTML Action () m
