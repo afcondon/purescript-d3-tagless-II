@@ -115,3 +115,7 @@ The project aims to be both an impressive demonstration of functional visualizat
 - **datum_ pattern**: Record of accessor functions for safely extracting data from D3's opaque `Datum_` type
 - **FFI consolidation**: All D3.js FFI should live in src/lib/D3/FFI.purs/.js
 - **Debug statements**: Use purescript-debug library's `spy` function (generates warnings to prevent shipping debug code)
+
+## Common PureScript Gotchas
+
+- **Math functions**: There is NO `Math` module in PureScript! Use `Data.Number` for floating-point math functions (sqrt, sin, cos, etc.) or `Data.Int` for integer operations. The module `Data.Math` is deprecated and should not be used.
