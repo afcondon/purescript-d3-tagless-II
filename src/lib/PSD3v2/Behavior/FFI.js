@@ -112,3 +112,52 @@ export function attachSimulationDrag_(element) {
     return element;
   };
 }
+
+/**
+ * Attach click handler without datum access
+ * @param {Element} element - The DOM element to attach click handler to
+ * @param {Function} handler - The PureScript Effect Unit handler
+ * @returns {Element} The element (for chaining)
+ */
+export function attachClick_(element) {
+  return handler => () => {
+    // Create D3 selection from element
+    const selection = d3.select(element);
+
+    // Attach click event listener
+    selection.on('click', function(event) {
+      // Call PureScript handler (it's already an Effect, so invoke it)
+      handler();
+    });
+
+    // Set cursor to pointer for clickable elements
+    selection.style('cursor', 'pointer');
+
+    return element;
+  };
+}
+
+/**
+ * Attach click handler with datum access
+ * @param {Element} element - The DOM element to attach click handler to
+ * @param {Function} handler - The PureScript (datum -> Effect Unit) handler
+ * @returns {Element} The element (for chaining)
+ */
+export function attachClickWithDatum_(element) {
+  return handler => () => {
+    // Create D3 selection from element
+    const selection = d3.select(element);
+
+    // Attach click event listener
+    selection.on('click', function(event, d) {
+      // D3 v6+ passes datum as second argument
+      // Call PureScript handler with datum (it returns an Effect, so invoke it)
+      handler(d)();
+    });
+
+    // Set cursor to pointer for clickable elements
+    selection.style('cursor', 'pointer');
+
+    return element;
+  };
+}

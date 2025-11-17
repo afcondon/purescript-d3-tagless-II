@@ -6,6 +6,7 @@ module D3.Viz.TreeAPI.ThreeLittleCirclesTransition where
 -- | - Initial render with Tree API
 -- | - Re-rendering with updated data
 -- | - Transitions between states
+-- | - Click handlers with onClick behavior
 -- |
 -- | Based on Mike Bostock's "Three Little Circles" (https://bost.ocks.org/mike/circles/)
 
@@ -17,87 +18,146 @@ import Data.Maybe (Maybe(..))
 import Data.Time.Duration (Milliseconds(..))
 import Effect (Effect)
 import Effect.Class (liftEffect)
+import Effect.Console (log)
+import Effect.Ref as Ref
 import PSD3v2.Attribute.Types (width, height, viewBox, id_, fill, cx, cy, radius, fillOpacity)
-import PSD3v2.Capabilities.Selection (select, renderTree)
+import PSD3v2.Behavior.Types (onClick)
+import PSD3v2.Capabilities.Selection (select, renderTree, on)
 import PSD3v2.Capabilities.Transition (withTransition)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
-import Partial.Unsafe (unsafePartial, unsafeCrashWith)
-import PSD3v2.Selection.Types (ElementType(..), SEmpty)
-import PSD3v2.Transition.Types (transitionWith, Easing(ElasticOut))
+import PSD3v2.Selection.Types (ElementType(..), SEmpty, SBound)
+import PSD3v2.Transition.Types (transitionWith)
 import PSD3v2.VizTree.Tree as T
+import Partial.Unsafe (unsafePartial, unsafeCrashWith)
 import Web.DOM.Element (Element)
 
 -- | Circle data type
 type CircleData = Int
 
--- | Draw three circles and then animate them
-threeLittleCirclesTransition :: Effect Unit
-threeLittleCirclesTransition = runD3v2M do
-  container <- select "#viz" :: _ (D3v2Selection_ SEmpty Element Unit)
+-- | State of the circles visualization
+data CircleState = StateGreen | StateRGB
 
-  -- Initial tree: three green circles in a horizontal line
-  let initialTree :: T.Tree CircleData
-      initialTree =
-        T.named SVG "svg"
-          [ width 400.0
-          , height 200.0
-          , viewBox "0 0 400 200"
-          , id_ "three-circles-transition-tree"
-          ]
-          `T.withChild`
-            (T.joinData "circles" "circle" [0, 1, 2] $ \d ->
-              T.elem Circle
-                [ fill "green"
-                , cx (toNumber d * 100.0 + 100.0)  -- Evenly spaced: 100, 200, 300
-                , cy 100.0                          -- Middle of SVG
-                , radius 15.0
-                , fillOpacity 1.0
-                ]
-            )
+derive instance Eq CircleState
 
-  -- Render initial state
-  selections <- renderTree container initialTree
+instance Show CircleState where
+  show StateGreen = "StateGreen"
+  show StateRGB = "StateRGB"
 
-  -- Extract the circles selection for transition
-  -- The circles selection is already SBound from the joinData
-  let circlesSel = case Map.lookup "circles" selections of
-        Just sel -> sel
-        Nothing -> unsafePartial $ unsafeCrashWith "circles selection not found"
+-- | Toggle between states
+toggleState :: CircleState -> CircleState
+toggleState StateGreen = StateRGB
+toggleState StateRGB = StateGreen
 
-  -- Transition to RGB primary colors with overlapping positions
+-- | Transition circles to a given state
+transitionToState :: D3v2Selection_ SBound Element CircleData -> CircleState -> Effect Unit
+transitionToState circlesSel state = runD3v2M do
   let transitionConfig = transitionWith
-        { duration: Milliseconds 1500.0
-        , delay: Just (Milliseconds 100.0)
-        , easing: Just ElasticOut
+        { duration: Milliseconds 1000.0
+        , delay: Nothing
+        , easing: Nothing
         }
 
-  withTransition transitionConfig circlesSel
-    [ fill colorFn
-    , cx cxFn
-    , cy cyFn
-    , radius 30.0          -- Larger for better overlap
-    , fillOpacity 0.5      -- Semi-transparent for color mixing
-    ]
+  case state of
+    StateGreen ->
+      withTransition transitionConfig circlesSel
+        [ fill ((\_ -> "green") :: CircleData -> String)
+        , cx ((\d -> toNumber d * 100.0 + 100.0) :: CircleData -> Number)  -- Evenly spaced: 100, 200, 300
+        , cy ((\_ -> 100.0) :: CircleData -> Number)                        -- Middle
+        , radius 15.0
+        , fillOpacity 1.0
+        ]
+    StateRGB ->
+      withTransition transitionConfig circlesSel
+        [ fill colorFnRGB
+        , cx cxFnRGB
+        , cy cyFnRGB
+        , radius 30.0          -- Larger for better overlap
+        , fillOpacity 0.5      -- Semi-transparent for color mixing
+        ]
 
   pure unit
   where
-    -- Target colors: Red, Green, Blue
-    colorFn :: CircleData -> String
-    colorFn d = case d of
+    -- RGB colors: Red, Green, Blue
+    colorFnRGB :: CircleData -> String
+    colorFnRGB d = case d of
       0 -> "#ff0000"  -- Red
       1 -> "#00ff00"  -- Green
       _ -> "#0000ff"  -- Blue
 
-    -- Target X positions: form triangle with overlap
-    cxFn :: CircleData -> Number
-    cxFn d = case d of
+    -- RGB X positions: form triangle with overlap
+    cxFnRGB :: CircleData -> Number
+    cxFnRGB d = case d of
       0 -> 150.0  -- Red on left
       1 -> 250.0  -- Green on right
       _ -> 200.0  -- Blue in center
 
-    -- Target Y positions: red/green at bottom, blue at top
-    cyFn :: CircleData -> Number
-    cyFn d = case d of
+    -- RGB Y positions: red/green at bottom, blue at top
+    cyFnRGB :: CircleData -> Number
+    cyFnRGB d = case d of
       0 -> 130.0  -- Red at bottom
       1 -> 130.0  -- Green at bottom
       _ -> 70.0   -- Blue at top
+
+-- | Draw three circles with toggle control circle
+threeLittleCirclesTransition :: Effect Unit
+threeLittleCirclesTransition = do
+  -- Create state ref
+  stateRef <- Ref.new StateGreen
+
+  runD3v2M do
+    container <- select "#viz" :: _ (D3v2Selection_ SEmpty Element Unit)
+
+    -- Initial tree: three green circles + a control circle for toggling
+    let initialTree :: T.Tree CircleData
+        initialTree =
+          T.named SVG "svg"
+            [ width 400.0
+            , height 250.0
+            , viewBox "0 0 400 250"
+            , id_ "three-circles-transition-tree"
+            ]
+            `T.withChild`
+              (T.joinData "circles" "circle" [0, 1, 2] $ \d ->
+                T.elem Circle
+                  [ fill "green"
+                  , cx (toNumber d * 100.0 + 100.0)  -- Evenly spaced: 100, 200, 300
+                  , cy 100.0                          -- Middle of SVG
+                  , radius 15.0
+                  , fillOpacity 1.0
+                  ]
+              )
+            `T.withChild`
+              -- Toggle button as a clickable circle
+              T.named Circle "toggle-btn"
+                [ cx 200.0
+                , cy 220.0
+                , radius 20.0
+                , fill "#4CAF50"
+                , fillOpacity 0.8
+                ]
+
+    -- Render initial state
+    selections <- renderTree container initialTree
+
+    -- Extract the circles selection for transitions
+    let circlesSel = case Map.lookup "circles" selections of
+          Just sel -> sel
+          Nothing -> unsafePartial $ unsafeCrashWith "circles selection not found"
+
+    -- Extract the toggle button selection
+    let toggleBtnSel = case Map.lookup "toggle-btn" selections of
+          Just sel -> sel
+          Nothing -> unsafePartial $ unsafeCrashWith "toggle button not found"
+
+    -- Attach click handler using the new onClick behavior
+    liftEffect do
+      _ <- runD3v2M $ on (onClick do
+        currentState <- Ref.read stateRef
+        let newState = toggleState currentState
+        Ref.write newState stateRef
+        log $ "Toggling to: " <> show newState
+        transitionToState circlesSel newState
+      ) toggleBtnSel
+      pure unit
+
+  pure unit

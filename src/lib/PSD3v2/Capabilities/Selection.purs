@@ -201,7 +201,7 @@ class Monad m <= SelectionM sel m | m -> sel where
   -- | ```
   on
     :: forall state elem datum
-     . Behavior
+     . Behavior datum
     -> sel state elem datum
     -> m (sel state elem datum)
 

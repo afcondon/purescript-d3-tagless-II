@@ -2,6 +2,8 @@ module PSD3v2.Behavior.FFI
   ( attachZoom_
   , attachSimpleDrag_
   , attachSimulationDrag_
+  , attachClick_
+  , attachClickWithDatum_
   ) where
 
 import Prelude
@@ -49,4 +51,29 @@ foreign import attachSimulationDrag_
   :: Element
   -> Nullable D3Simulation_
   -> String  -- Label for drag event namespace
+  -> Effect Element
+
+-- | Attach click handler without datum access
+-- |
+-- | Attaches a simple click handler that doesn't access the bound datum.
+-- | Also sets cursor to pointer for clickable elements.
+-- |
+-- | Returns the element for chaining.
+foreign import attachClick_
+  :: Element
+  -> Effect Unit
+  -> Effect Element
+
+-- | Attach click handler with datum access
+-- |
+-- | Attaches a click handler that receives the datum bound to the element.
+-- | The datum is recovered from D3's __data__ property.
+-- | Type safety is preserved through the Selection's phantom type.
+-- | Also sets cursor to pointer for clickable elements.
+-- |
+-- | Returns the element for chaining.
+foreign import attachClickWithDatum_
+  :: forall datum
+   . Element
+  -> (datum -> Effect Unit)
   -> Effect Element

@@ -6,9 +6,13 @@ module PSD3v2.Behavior.Types
   , defaultDrag
   , simulationDrag
   , defaultZoom
+  , onClick
+  , onClickWithDatum
   ) where
 
 import Prelude
+
+import Effect (Effect)
 
 -- | Scale extent for zoom (min and max zoom levels)
 -- |
@@ -66,18 +70,25 @@ instance Show DragConfig where
 
 -- | Behaviors that can be attached to selections
 -- |
+-- | Parameterized by datum type to enable typed event handlers.
+-- |
 -- | - `Zoom`: Pan and zoom with mouse/touch
 -- | - `Drag`: Drag elements with mouse/touch (simple or simulation-aware)
-data Behavior
+-- | - `Click`: Click handler without datum access
+-- | - `ClickWithDatum`: Click handler with typed datum access
+data Behavior datum
   = Zoom ZoomConfig
   | Drag DragConfig
+  | Click (Effect Unit)
+  | ClickWithDatum (datum -> Effect Unit)
 
-derive instance Eq Behavior
-derive instance Ord Behavior
-
-instance Show Behavior where
+-- Note: Can't derive Eq/Ord for function types
+-- We only show structure, not function contents
+instance Show (Behavior datum) where
   show (Zoom cfg) = "Zoom " <> show cfg
   show (Drag cfg) = "Drag " <> show cfg
+  show (Click _) = "Click <handler>"
+  show (ClickWithDatum _) = "ClickWithDatum <handler>"
 
 -- | Default drag configuration
 -- |
@@ -111,3 +122,30 @@ simulationDrag = SimulationDrag
 -- | ```
 defaultZoom :: ScaleExtent -> String -> ZoomConfig
 defaultZoom scaleExtent targetSelector = ZoomConfig { scaleExtent, targetSelector }
+
+-- | Click handler without datum access
+-- |
+-- | Use when you don't need the data bound to the clicked element.
+-- |
+-- | Example:
+-- | ```purescript
+-- | button <- append Circle [radius 20.0] container
+-- | _ <- on (onClick (log "Button clicked!")) button
+-- | ```
+onClick :: forall datum. Effect Unit -> Behavior datum
+onClick = Click
+
+-- | Click handler with typed datum access
+-- |
+-- | The datum is recovered from the DOM element using D3's `__data__` property.
+-- | Type safety is preserved through the Selection's phantom type parameter.
+-- |
+-- | Example:
+-- | ```purescript
+-- | type CircleData = { id :: Int, color :: String }
+-- |
+-- | circles <- append Circle [...] (joinData data)
+-- | _ <- on (onClickWithDatum \d -> log ("Clicked circle: " <> show d.id)) circles
+-- | ```
+onClickWithDatum :: forall datum. (datum -> Effect Unit) -> Behavior datum
+onClickWithDatum = ClickWithDatum

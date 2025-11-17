@@ -538,7 +538,7 @@ querySelectorAllElements selector parents = do
 -- | _ <- on (Drag defaultDrag) zoomGroup
 -- | _ <- on (Zoom $ defaultZoom (ScaleExtent 0.5 4.0) ".zoom-group") svg
 -- | ```
-on :: forall state elem datum. Behavior -> Selection state elem datum -> Effect (Selection state elem datum)
+on :: forall state elem datum. Behavior datum -> Selection state elem datum -> Effect (Selection state elem datum)
 on behavior selection@(Selection impl) = do
   -- Extract elements from the selection
   let elements = getElements impl
@@ -557,7 +557,7 @@ on behavior selection@(Selection impl) = do
     getElements (ExitingSelection { elements: els }) = els
 
     -- Apply behavior to a single element
-    applyBehavior :: Behavior -> Element -> Effect Unit
+    applyBehavior :: Behavior datum -> Element -> Effect Unit
     applyBehavior (Zoom (ZoomConfig { scaleExtent: ScaleExtent scaleMin scaleMax, targetSelector })) element =
       void $ BehaviorFFI.attachZoom_ element scaleMin scaleMax targetSelector
     applyBehavior (Drag SimpleDrag) element =
@@ -566,6 +566,10 @@ on behavior selection@(Selection impl) = do
       -- Simulation drag requires simulation handle, which is only available in D3v2SimM
       -- This case should not be reached when calling from D3v2M
       pure unit
+    applyBehavior (Click handler) element =
+      void $ BehaviorFFI.attachClick_ element handler
+    applyBehavior (ClickWithDatum handler) element =
+      void $ BehaviorFFI.attachClickWithDatum_ element handler
 
 -- | Attach a behavior with simulation access (for SimulationDrag)
 -- |
@@ -577,7 +581,7 @@ on behavior selection@(Selection impl) = do
 -- | nodeCircles <- append Circle [...] nodeEnter
 -- | onWithSimulation (Drag $ simulationDrag "lesmis") simState nodeCircles
 -- | ```
-onWithSimulation :: forall state elem datum d. Behavior -> D3SimulationState_ d -> Selection state elem datum -> Effect (Selection state elem datum)
+onWithSimulation :: forall state elem datum d. Behavior datum -> D3SimulationState_ d -> Selection state elem datum -> Effect (Selection state elem datum)
 onWithSimulation behavior simState selection@(Selection impl) = do
   -- Extract elements from the selection
   let elements = getElements impl
@@ -596,7 +600,7 @@ onWithSimulation behavior simState selection@(Selection impl) = do
     getElements (ExitingSelection { elements: els }) = els
 
     -- Apply behavior to a single element with simulation access
-    applyBehaviorWithSim :: Behavior -> D3SimulationState_ d -> Element -> Effect Unit
+    applyBehaviorWithSim :: Behavior datum -> D3SimulationState_ d -> Element -> Effect Unit
     applyBehaviorWithSim (Zoom (ZoomConfig { scaleExtent: ScaleExtent scaleMin scaleMax, targetSelector })) _ element =
       void $ BehaviorFFI.attachZoom_ element scaleMin scaleMax targetSelector
     applyBehaviorWithSim (Drag SimpleDrag) _ element =
@@ -605,6 +609,10 @@ onWithSimulation behavior simState selection@(Selection impl) = do
       -- Extract D3Simulation_ handle from simulation state
       let simHandle = getSimulationHandle simSt
       in void $ BehaviorFFI.attachSimulationDrag_ element (toNullable simHandle) label
+    applyBehaviorWithSim (Click handler) _ element =
+      void $ BehaviorFFI.attachClick_ element handler
+    applyBehaviorWithSim (ClickWithDatum handler) _ element =
+      void $ BehaviorFFI.attachClickWithDatum_ element handler
 
 -- | Extract D3 simulation handle from simulation state
 -- | Returns Nothing if simulation is not initialized

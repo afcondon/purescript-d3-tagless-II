@@ -11,8 +11,16 @@ import PSD3.RoutingDSL (routeToPath)
 import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
 import Effect.Class (liftEffect)
+import Effect.Aff (Milliseconds(..), delay)
+import Affjax.Web as AJAX
+import Affjax.ResponseFormat as ResponseFormat
+import Data.Either (Either(..))
+import Unsafe.Coerce (unsafeCoerce)
 import D3.Viz.TreeAPI.ThreeLittleCirclesTransition as ThreeLittleCirclesTransition
 import D3.Viz.TreeAPI.GeneralUpdatePattern as GeneralUpdatePattern
+import D3.Viz.AnimatedTreeClusterLoop as AnimatedTreeLoop
+import D3.Viz.TreeAPI.LesMisSimple as LesMisSimple
+import D3.Viz.LesMiserables.File (readGraphFromFileContents)
 
 -- | Tour page state
 type State = Unit
@@ -34,9 +42,28 @@ component = H.mkComponent
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
-    -- Render motion/transition examples
+    -- Small delay to ensure DOM is ready
+    H.liftAff $ delay (Milliseconds 100.0)
+
+    -- Render Section 1: Three Circles Transition
     liftEffect $ ThreeLittleCirclesTransition.threeLittleCirclesTransition
+
+    -- Render Section 2: General Update Pattern
     liftEffect $ GeneralUpdatePattern.generalUpdatePattern
+
+    -- Render Section 3: Animated Tree (load flare data and start loop)
+    flareResult <- H.liftAff $ AJAX.get ResponseFormat.json "./data/flare-2.json"
+    case flareResult of
+      Left err -> pure unit  -- Silently fail for now
+      Right response -> do
+        let flareData = unsafeCoerce response.body
+        liftEffect $ AnimatedTreeLoop.startAnimatedTreeClusterLoop flareData "#animated-tree-container"
+
+    -- Render Section 4: Les Mis simulation (load data and start simulation)
+    lesMisResult <- H.liftAff $ AJAX.get ResponseFormat.string "./data/miserables.json"
+    let lesMisModel = readGraphFromFileContents lesMisResult
+    liftEffect $ LesMisSimple.startLesMisSimple lesMisModel "#lesmis-container"
+
     pure unit
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -93,49 +120,50 @@ render _ =
                 [ HH.text "The example automatically cycles through random letter selections every 2 seconds, demonstrating all three parts of the pattern: green letters entering from above, gray letters sliding to new positions, and brown letters exiting below." ]
             ]
 
-        -- Section 3: Les Misérables Force Layout
+        -- Section 3: Animated Tree Transitions
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ]
             , HP.id "section-3"
             ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "3. Force-Directed Graph: Les Misérables" ]
+                [ HH.text "3. Animated Tree Transitions" ]
             , HH.p_
-                [ HH.text "Force-directed graphs use physics simulation to position nodes and links. Nodes repel each other like charged particles, while links act as springs pulling connected nodes together. The simulation finds an equilibrium that naturally reveals the structure of the network." ]
+                [ HH.text "This demonstration shows smooth automatic transitions between Tidy Tree and Dendrogram (Cluster) layouts. The visualization automatically alternates between layouts every 3 seconds. The same 252 nodes from the Flare visualization toolkit smoothly animate to their new positions—no enter/exit, just updates." ]
             , HH.p_
-                [ HH.text "This example uses the simplified SimulationM API - a single "
-                , HH.code_ [ HH.text "init" ]
-                , HH.text " call with a configuration record, followed by "
-                , HH.code_ [ HH.text "start" ]
-                , HH.text ". The graph shows character co-occurrence in Victor Hugo's Les Misérables, where node size represents importance and link thickness shows the strength of connections."
+                [ HH.text "The transitions are implemented using D3's data join with identity-based keys, ensuring each node maintains its identity across layout changes. Children are sorted by height to eliminate crossovers during animation, creating smooth and comprehensible transitions." ]
+            , HH.div
+                [ HP.id "animated-tree-container"
+                , HP.classes [ HH.ClassName "viz-container" ]
                 ]
+                []
             , HH.p_
-                [ HH.em_ [ HH.text "[Les Misérables force layout example not yet implemented in TreeAPI - coming soon]" ] ]
-            , HH.p_
-                [ HH.text "Drag nodes to see the force simulation respond. The simulation applies multiple forces: center (pulls toward middle), charge (nodes repel), collision (prevents overlap), and link (pulls connected nodes together)." ]
+                [ HH.text "For a version with manual controls, visit the "
+                , HH.a
+                    [ HP.href $ "#" <> routeToPath AnimatedTreeCluster ]
+                    [ HH.text "full Animated Tree ↔ Cluster demo" ]
+                , HH.text "."
+                ]
             ]
 
-        -- Section 4: Animated Tree Transitions
+        -- Section 4: Les Misérables Force Layout
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ]
             , HP.id "section-4"
             ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "4. Animated Tree Transitions" ]
+                [ HH.text "4. Force-Directed Graph: Les Misérables" ]
             , HH.p_
-                [ HH.text "This demonstration shows smooth transitions between Tidy Tree and Dendrogram (Cluster) layouts. The same nodes smoothly animate to their new positions—no enter/exit, just updates. This example showcases the TreeAPI's ability to handle complex layout transitions with data-driven animations." ]
+                [ HH.text "Force-directed graphs use physics simulation to position nodes and links. Nodes repel each other like charged particles, while links act as springs pulling connected nodes together. The simulation finds an equilibrium that naturally reveals the structure of the network." ]
             , HH.p_
-                [ HH.text "Visit the "
-                , HH.a
-                    [ HP.href $ "#" <> routeToPath AnimatedTreeCluster ]
-                    [ HH.text "Animated Tree ↔ Cluster demo" ]
-                , HH.text " to see this in action. The demo shows 252 nodes from the Flare visualization toolkit transitioning smoothly between different hierarchical layouts."
+                [ HH.text "The graph shows character co-occurrence in Victor Hugo's Les Misérables. Try dragging nodes to see the force simulation respond - the simulation applies multiple forces: center (pulls toward middle), charge (nodes repel), collision (prevents overlap), and link (pulls connected nodes together). You can also zoom and pan using the mouse wheel and drag gestures."
                 ]
-            , HH.p_
-                [ HH.text "The transitions are implemented using D3's data join with identity-based keys, ensuring each node maintains its identity across layout changes. Children are sorted by height to eliminate crossovers during animation, creating smooth and comprehensible transitions."
+            , HH.div
+                [ HP.id "lesmis-container"
+                , HP.classes [ HH.ClassName "viz-container" ]
                 ]
+                []
             ]
         ]
     ]
