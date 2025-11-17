@@ -8,11 +8,13 @@ module PSD3v2.Selection.Operations
   , remove
   , merge
   , joinData
+  , joinDataWithKey
   , renderData
   , on
   , onWithSimulation
   , renderTree
   , reselect
+  , elementTypeToString
   ) where
 
 import Prelude
@@ -379,6 +381,90 @@ joinData foldableData selector (Selection impl) = liftEffect do
 
   -- Run pure join algorithm
   let joinSets = Join.computeJoin newDataArray validOldBindings
+
+  -- Build typed selections for each set
+  -- Sort enter bindings by newIndex to match the order in the new data
+  let sortedEnter = Array.sortBy (\a b -> compare a.newIndex b.newIndex) joinSets.enter
+
+  let enterSelection = Selection $ PendingSelection
+        { parentElements
+        , pendingData: sortedEnter <#> _.datum
+        , indices: Just (sortedEnter <#> _.newIndex)  -- Preserve logical positions for element creation
+        , document: doc
+        }
+
+  -- Sort update bindings by newIndex to match the order in the new data
+  let sortedUpdate = Array.sortBy (\a b -> compare a.newIndex b.newIndex) joinSets.update
+
+  let updateSelection = Selection $ BoundSelection
+        { elements: sortedUpdate <#> _.element
+        , data: sortedUpdate <#> _.newDatum
+        , indices: Just (sortedUpdate <#> _.newIndex)  -- Preserve logical positions for transitions
+        , document: doc
+        }
+
+  let exitSelection = Selection $ ExitingSelection
+        { elements: joinSets.exit <#> _.element
+        , data: joinSets.exit <#> _.datum
+        , document: doc
+        }
+
+  pure $ JoinResult
+    { enter: enterSelection
+    , update: updateSelection
+    , exit: exitSelection
+    }
+
+-- | Low-level data join with custom key function
+-- |
+-- | Like joinData, but uses a key function to extract comparable keys
+-- | instead of requiring Ord on the data itself.
+-- |
+-- | This is essential for data types that don't have lawful Ord instances
+-- | (e.g., opaque foreign types like D3Link_Swizzled).
+-- |
+-- | Example:
+-- | ```purescript
+-- | JoinResult { enter, update, exit } <- joinDataWithKey links (\l -> l.id) "line" svg
+-- | enterEls <- append Line [...] enter
+-- | updateEls <- setAttrs [...] update
+-- | remove exit
+-- | ```
+joinDataWithKey
+  :: forall f parent parentDatum datum key m
+   . MonadEffect m
+  => Foldable f
+  => Eq key
+  => f datum
+  -> (datum -> key)  -- Key extraction function
+  -> String  -- Element selector for existing elements
+  -> Selection SEmpty parent parentDatum
+  -> m (JoinResult Selection parent datum)
+joinDataWithKey foldableData keyFn selector (Selection impl) = liftEffect do
+  let { parentElements, document: doc } = unsafePartial case impl of
+        EmptySelection r -> r
+  -- Query for existing elements within parents
+  existingElements <- querySelectorAllElements selector parentElements
+
+  -- Get old bindings (elements with their bound data)
+  oldBindings <- existingElements # traverse \element -> do
+    nullableDatum <- getElementData_ element
+    let maybeDatum = toMaybe nullableDatum
+    pure $ { element, datum: maybeDatum }
+
+  -- Log what data we found on existing elements
+  liftEffect $ log $ "joinDataWithKey: found " <> show (Array.length existingElements) <> " existing elements with selector '" <> selector <> "'"
+  liftEffect $ log $ "joinDataWithKey: " <> show (Array.length (Array.mapMaybe _.datum oldBindings)) <> " of those have data bound"
+
+  -- Filter to only elements that have data bound
+  let validOldBindings = oldBindings # Array.mapMaybe \{ element, datum } ->
+        datum <#> \d -> { element, datum: d }
+
+  -- Convert foldable to array
+  let newDataArray = Array.fromFoldable foldableData
+
+  -- Run pure join algorithm with key function
+  let joinSets = Join.computeJoinWithKey newDataArray validOldBindings keyFn
 
   -- Build typed selections for each set
   -- Sort enter bindings by newIndex to match the order in the new data

@@ -41,6 +41,7 @@ import Component.Example as Example
 import Component.TreeAPI as TreeAPI
 import Component.AnimatedTreeCluster as AnimatedTreeCluster
 import Component.LesMisGUPTree as LesMisGUPTree
+import Component.LesMisGUP as LesMisGUP
 import Component.ModuleGraph as ModuleGraph
 import Component.MermaidTreeDemo as MermaidTreeDemo
 
@@ -83,6 +84,7 @@ type Slots =
   , treeAPI :: forall q. H.Slot q Void Unit
   , animatedTreeCluster :: forall q. H.Slot q Void Unit
   , lesMisGUPTree :: forall q. H.Slot q Void Unit
+  , lesMisGUP :: forall q. H.Slot q Void Unit
   , moduleGraph :: forall q. H.Slot q Void Unit
   , mermaidTreeDemo :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
@@ -108,6 +110,7 @@ _example = Proxy :: Proxy "example"
 _treeAPI = Proxy :: Proxy "treeAPI"
 _animatedTreeCluster = Proxy :: Proxy "animatedTreeCluster"
 _lesMisGUPTree = Proxy :: Proxy "lesMisGUPTree"
+_lesMisGUP = Proxy :: Proxy "lesMisGUP"
 _moduleGraph = Proxy :: Proxy "moduleGraph"
 _mermaidTreeDemo = Proxy :: Proxy "mermaidTreeDemo"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
@@ -200,6 +203,9 @@ renderPage route = case spy "Route is" route of
 
   LesMisGUPTree ->
     HH.slot_ _lesMisGUPTree unit LesMisGUPTree.component unit
+
+  LesMisGUP ->
+    HH.slot_ _lesMisGUP unit LesMisGUP.component unit
 
   ModuleGraph ->
     HH.slot_ _moduleGraph unit ModuleGraph.component unit

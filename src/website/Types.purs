@@ -103,6 +103,7 @@ data Route
   | TreeAPI         -- Tree API examples (declarative tree API)
   | AnimatedTreeCluster  -- Animated Tree ↔ Cluster transitions (flagship example from yesterday)
   | LesMisGUPTree   -- Les Mis with Tree API + GUP + Dynamic Layouts (proof-of-concept)
+  | LesMisGUP       -- Les Mis with declarative scene-based PSD3v2 + GUP (clean example)
   | ModuleGraph     -- Module dependency graph (dogfooding!)
   | MermaidTreeDemo -- Mermaid interpreter for Tree API (visualizes tree structure)
   -- Meta
@@ -132,7 +133,8 @@ instance showRoute :: Show Route where
   show (Example exampleId) = "Example: " <> exampleId
   show TreeAPI = "Tree API Examples"
   show AnimatedTreeCluster = "Animated Tree ↔ Cluster"
-  show LesMisGUPTree = "Les Misérables GUP"
+  show LesMisGUPTree = "Les Misérables GUP (Tree API)"
+  show LesMisGUP = "Les Misérables GUP (PSD3v2)"
   show ModuleGraph = "Module Graph"
   show MermaidTreeDemo = "Mermaid Tree Visualizer"
   show Acknowledgements = "Acknowledgements"

@@ -38,6 +38,7 @@ routes =
   <|> treeAPI
   <|> animatedTreeCluster
   <|> lesMisGUPTree
+  <|> lesMisGUP
   <|> moduleGraph
   <|> mermaidTreeDemo
   <|> acknowledgements
@@ -132,6 +133,10 @@ animatedTreeCluster = AnimatedTreeCluster <$ lit "animated-tree-cluster" <* end
 lesMisGUPTree :: Match Route
 lesMisGUPTree = LesMisGUPTree <$ lit "lesmis-gup-tree" <* end
 
+-- | Match: /lesmis-gup
+lesMisGUP :: Match Route
+lesMisGUP = LesMisGUP <$ lit "lesmis-gup" <* end
+
 -- | Match: /module-graph
 moduleGraph :: Match Route
 moduleGraph = ModuleGraph <$ lit "module-graph" <* end
@@ -173,6 +178,7 @@ routeToPath (Example exampleId) = "/example/" <> exampleId
 routeToPath TreeAPI = "/tree-api"
 routeToPath AnimatedTreeCluster = "/animated-tree-cluster"
 routeToPath LesMisGUPTree = "/lesmis-gup-tree"
+routeToPath LesMisGUP = "/lesmis-gup"
 routeToPath ModuleGraph = "/module-graph"
 routeToPath MermaidTreeDemo = "/mermaid-tree-demo"
 routeToPath Acknowledgements = "/acknowledgements"

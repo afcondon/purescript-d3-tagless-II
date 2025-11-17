@@ -4,6 +4,7 @@ module PSD3v2.Capabilities.Selection
   , selectAll
   , renderData
   , joinData
+  , joinDataWithKey
   , append
   , appendChild
   , setAttrs
@@ -118,6 +119,28 @@ class Monad m <= SelectionM sel m | m -> sel where
      . Foldable f
     => Ord datum
     => f datum
+    -> String  -- Selector for existing elements
+    -> sel SEmpty parent parentDatum
+    -> m (JoinResult sel parent datum)
+
+  -- | Data join with custom key function
+  -- |
+  -- | Like joinData, but uses a key function to extract comparable keys
+  -- | instead of requiring Ord on the data itself.
+  -- |
+  -- | This is essential for data types that don't have lawful Ord instances
+  -- | (e.g., opaque foreign types like D3Link_Swizzled).
+  -- |
+  -- | Example:
+  -- | ```purescript
+  -- | JoinResult { enter, update, exit } <- joinDataWithKey links (\l -> l.id) "line" svg
+  -- | ```
+  joinDataWithKey
+    :: forall f parent parentDatum datum key
+     . Foldable f
+    => Ord key
+    => f datum
+    -> (datum -> key)  -- Key extraction function
     -> String  -- Selector for existing elements
     -> sel SEmpty parent parentDatum
     -> m (JoinResult sel parent datum)

@@ -118,6 +118,14 @@ instance SelectionM D3v2Selection_ D3v2M where
       , exit: D3v2Selection_ exit
       }
 
+  joinDataWithKey foldableData keyFn selector (D3v2Selection_ emptySelection) = D3v2M do
+    JoinResult { enter, update, exit } <- Ops.joinDataWithKey foldableData keyFn selector emptySelection
+    pure $ JoinResult
+      { enter: D3v2Selection_ enter
+      , update: D3v2Selection_ update
+      , exit: D3v2Selection_ exit
+      }
+
   append elemType attrs (D3v2Selection_ pendingSelection) = D3v2M do
     result <- Ops.append elemType attrs pendingSelection
     pure $ D3v2Selection_ result
@@ -249,6 +257,14 @@ instance SelectionM D3v2Selection_ (D3v2SimM row d) where
       { enter: D3v2Selection_ result.enter
       , update: D3v2Selection_ result.update
       , exit: D3v2Selection_ result.exit
+      }
+
+  joinDataWithKey foldableData keyFn selector (D3v2Selection_ emptySelection) = liftEffect $ do
+    JoinResult { enter, update, exit } <- Ops.joinDataWithKey foldableData keyFn selector emptySelection
+    pure $ JoinResult
+      { enter: D3v2Selection_ enter
+      , update: D3v2Selection_ update
+      , exit: D3v2Selection_ exit
       }
 
   append elemType attrs (D3v2Selection_ pending) = liftEffect $ do

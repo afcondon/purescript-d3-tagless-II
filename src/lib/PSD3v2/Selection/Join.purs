@@ -1,5 +1,6 @@
 module PSD3v2.Selection.Join
   ( computeJoin
+  , computeJoinWithKey
   , ElementBinding(..)
   , EnterBinding(..)
   , UpdateBinding(..)
@@ -119,3 +120,70 @@ computeJoin newData oldBindings =
               , remainingOld = newRemaining
               , matchedIndices = Array.cons oldIndex state.matchedIndices
               }
+
+-- | Pure join algorithm with custom key function
+-- |
+-- | Like computeJoin, but uses a key function to extract comparable keys
+-- | instead of requiring Eq on the data itself.
+-- |
+-- | This is essential for data types that don't have lawful Eq instances
+-- | (e.g., opaque foreign types like D3Link_Swizzled).
+-- |
+-- | Example:
+-- | ```purescript
+-- | computeJoinWithKey newLinks oldLinks (\l -> unsafeCoerce l # _.id)
+-- | ```
+computeJoinWithKey
+  :: forall datum key
+   . Eq key
+  => Array datum                           -- New data to bind
+  -> Array (ElementBinding datum)          -- Currently bound elements
+  -> (datum -> key)                        -- Key extraction function
+  -> JoinSets datum
+computeJoinWithKey newData oldBindings keyFn =
+  let
+    -- Process each new datum with its index, tracking which old elements we've used
+    matchResult = foldlWithIndex processNewDatum
+      { remainingOld: oldBindings
+      , enter: []
+      , update: []
+      , matchedIndices: []
+      }
+      newData
+
+    -- Exit: old elements that weren't matched
+    exitBindings = matchResult.remainingOld
+
+  in
+    { enter: Array.reverse matchResult.enter   -- Reverse to restore input order
+    , update: Array.reverse matchResult.update -- Reverse to restore input order
+    , exit: exitBindings
+    }
+  where
+    processNewDatum newIndex state datum =
+      let newKey = keyFn datum
+      in
+        -- Find first remaining old element with matching key
+        case Array.findIndex (\{ datum: d } -> keyFn d == newKey) state.remainingOld of
+          -- No match found -> enter (track newIndex for positioning)
+          Nothing ->
+            let enterBinding = { datum, newIndex }
+            in state { enter = Array.cons enterBinding state.enter }
+
+          -- Match found -> update, and remove from remaining
+          Just oldIndex ->
+            let
+              matched = unsafePartial $ Array.unsafeIndex state.remainingOld oldIndex
+              newRemaining = fromMaybe state.remainingOld $ Array.deleteAt oldIndex state.remainingOld
+              updateBinding =
+                { element: matched.element
+                , oldDatum: datum
+                , newDatum: datum
+                , newIndex: newIndex  -- Track the index in the new data array
+                }
+            in
+              state
+                { update = Array.cons updateBinding state.update
+                , remainingOld = newRemaining
+                , matchedIndices = Array.cons oldIndex state.matchedIndices
+                }

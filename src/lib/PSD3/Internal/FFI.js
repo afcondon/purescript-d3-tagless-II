@@ -918,7 +918,12 @@ export function setNodes_(simulation) {
 export function setLinks_(simulation) {
   return links => {
     console.log(`FFI: setting links in simulation, there are ${links.length} links`);
-    simulation.force(linksForceName_).links(links)
+    const linkForce = simulation.force(linksForceName_);
+    if (linkForce) {
+      linkForce.links(links);
+    } else {
+      console.log(`FFI: links force not found (may be disabled), skipping setLinks`);
+    }
   }
 }
 // returns array of links with ids replaced by object references, invalid links are discarded
