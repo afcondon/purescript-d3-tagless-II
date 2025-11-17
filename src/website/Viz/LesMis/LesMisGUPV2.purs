@@ -423,74 +423,35 @@ filterByGroup minGroup = do
   reheat 0.8
   start
 
--- | Filter nodes by minimum group number and re-render (with original graph data)
+-- | Re-render force graph with new data (EXTRACTED HELPER FUNCTION)
 -- |
--- | This demonstrates the full GUP cycle with Tree API:
--- | - Apply filter to ORIGINAL unfiltered data
--- | - Update simulation with filtered data
--- | - Re-render using Tree API (handles enter/update/exit)
--- | - Restart simulation with filtered data
-filterByGroupWithOriginal :: forall row.
-  Int ->
-  { nodes :: Array LesMisSimNode, links :: Array D3Link_Unswizzled } ->
+-- | This encapsulates the 9 imperative steps required to update a force visualization:
+-- | 1. Re-select groups
+-- | 2. Build new trees
+-- | 3. Render trees
+-- | 4. Extract selections
+-- | 5. Re-attach behaviors
+-- | 6. Re-register tick functions
+-- | 7. Reheat and restart
+-- |
+-- | This makes the update pattern reusable and highlights the complexity that
+-- | should ideally be hidden behind a more declarative API.
+updateForceGraph :: forall row.
+  Array LesMisSimNode ->
+  Array D3Link_Swizzled ->
   D3v2SimM row LesMisSimNode Unit
-filterByGroupWithOriginal minGroup originalGraph = do
-  log $ "=== filterByGroupWithOriginal: minGroup = " <> show minGroup <> " ==="
+updateForceGraph nodesInSim linksInSim = do
+  log $ "updateForceGraph: " <> show (Array.length nodesInSim) <> " nodes, " <> show (Array.length linksInSim) <> " links"
 
-  -- Stop simulation
-  stop
-
-  -- Filter the ORIGINAL unfiltered data
-  let filteredNodes = Array.filter (\n -> n.group >= minGroup) originalGraph.nodes
-
-  -- Create a set of filtered node IDs for fast lookup
-  let filteredNodeIds = Set.fromFoldable $ filteredNodes <#> (\n -> (unsafeCoerce n :: { id :: String }).id)
-
-  -- Filter links to only include those where both source and target are in filtered nodes
-  -- Links have been swizzled by D3, so source/target are objects with .id properties
-  let filteredLinks = Array.filter (\link ->
-        let l = unsafeCoerce link :: { source :: { id :: String }, target :: { id :: String } }
-        in Set.member l.source.id filteredNodeIds && Set.member l.target.id filteredNodeIds
-      ) originalGraph.links
-
-  log $ "Filtered from " <> show (Array.length originalGraph.nodes) <> " to " <> show (Array.length filteredNodes) <> " nodes"
-  log $ "Filtered from " <> show (Array.length originalGraph.links) <> " to " <> show (Array.length filteredLinks) <> " links"
-
-  -- Update simulation with filtered data (passing the filtered nodes explicitly)
-  { nodes: nodesInSim, links: linksInSim } <- update
-    { nodes: Just filteredNodes  -- Pass filtered nodes explicitly
-    , links: Just filteredLinks  -- Pass original links
-    , nodeFilter: Nothing  -- No filter needed - we already filtered
-    , linkFilter: Nothing
-    , activeForces: Nothing
-    , config: Nothing
-    , keyFn: keyIsID_
-    }
-
-  log $ "After update: " <> show (Array.length nodesInSim) <> " nodes, " <> show (Array.length linksInSim) <> " links"
-
-  -- Log first few node IDs to verify filtering
-  let nodeIds = Array.take 5 nodesInSim <#> (\n -> (unsafeCoerce n :: { id :: String }).id)
-  log $ "First 5 filtered node IDs: " <> show nodeIds
-
-  -- Select the groups where data joins live
+  -- Step 1: Re-select the groups where data joins live
   linksGroup <- select "#links"
   nodesGroup <- select "#nodes"
 
-  -- Wrap links with indices for data join
+  -- Step 2: Wrap data for joins
   let indexedLinks = Array.mapWithIndex (\i link -> IndexedLink { index: i, link }) linksInSim
-
-  -- Wrap nodes for data join (keyed by ID for proper GUP)
   let keyedNodes = nodesInSim <#> KeyedNode
 
-  log $ "KeyedNodes created: " <> show (Array.length keyedNodes)
-
-  -- Log KeyedNode equality check
-  case Array.index keyedNodes 0, Array.index keyedNodes 1 of
-    Just kn1, Just kn2 -> log $ "KeyedNode equality test: node0 == node1 = " <> show (kn1 == kn2)
-    _, _ -> log "Not enough keyedNodes to test equality"
-
-  -- Build trees for just the data join parts (not the whole structure)
+  -- Step 3: Build trees for data joins
   let linksTree :: T.Tree IndexedLink
       linksTree =
         T.joinData "linkElements" "line" indexedLinks $ \(IndexedLink il) ->
@@ -516,39 +477,25 @@ filterByGroupWithOriginal minGroup originalGraph = do
             , strokeWidth 2.0
             ]
 
-  -- Re-render JUST the join trees into their parent groups
-  -- The Tree API should detect existing elements and perform enter/update/exit
+  -- Step 4: Re-render trees (Tree API handles enter/update/exit)
   linksSelections <- renderTree linksGroup linksTree
   nodesSelections <- renderTree nodesGroup nodesTree
 
-  log "After renderTree calls"
-
-  -- Extract updated selections for tick functions
+  -- Step 5: Extract updated selections
   let nodeCircles :: D3v2Selection_ SBound Element KeyedNode
       nodeCircles = case Map.lookup "nodeElements" nodesSelections of
         Just sel -> sel
-        Nothing -> unsafePartial $ unsafeCrashWith "nodeElements not found after filter"
+        Nothing -> unsafePartial $ unsafeCrashWith "nodeElements not found"
 
   let linkLines :: D3v2Selection_ SBound Element IndexedLink
       linkLines = case Map.lookup "linkElements" linksSelections of
         Just sel -> sel
-        Nothing -> unsafePartial $ unsafeCrashWith "linkElements not found after filter"
+        Nothing -> unsafePartial $ unsafeCrashWith "linkElements not found"
 
-  -- Log selection sizes (unwrap D3v2Selection_ newtype to get Selection)
-  liftEffect $ do
-    let Selection nodeImpl = (unsafeCoerce nodeCircles :: Selection SBound Element KeyedNode)
-    let Selection linkImpl = (unsafeCoerce linkLines :: Selection SBound Element IndexedLink)
-    case nodeImpl of
-      BoundSelection rec -> log $ "nodeCircles selection has " <> show (Array.length rec.elements) <> " elements"
-      _ -> log "nodeCircles is not a BoundSelection"
-    case linkImpl of
-      BoundSelection rec -> log $ "linkLines selection has " <> show (Array.length rec.elements) <> " elements"
-      _ -> log "linkLines is not a BoundSelection"
-
-  -- Re-attach behaviors to the updated selection
+  -- Step 6: Re-attach behaviors to updated selection
   _ <- on (Drag $ simulationDrag "lesmis-gup") nodeCircles
 
-  -- Update tick functions with new selections
+  -- Step 7: Re-register tick functions with new selections
   addTickFunction "nodes" $ Step nodeCircles
     [ cx (\(KeyedNode d :: KeyedNode) -> d.x)
     , cy (\(KeyedNode d :: KeyedNode) -> d.y)
@@ -561,6 +508,47 @@ filterByGroupWithOriginal minGroup originalGraph = do
     , y2 (\(IndexedLink il) -> (unsafeCoerce il.link).target.y :: Number)
     ]
 
-  -- Reheat and restart
+  -- Step 8: Reheat and restart simulation
   reheat 0.8
   start
+
+-- | Filter nodes by minimum group number and re-render (with original graph data)
+-- |
+-- | Now simplified to just: filter data, update simulation, call updateForceGraph
+filterByGroupWithOriginal :: forall row.
+  Int ->
+  { nodes :: Array LesMisSimNode, links :: Array D3Link_Unswizzled } ->
+  D3v2SimM row LesMisSimNode Unit
+filterByGroupWithOriginal minGroup originalGraph = do
+  log $ "=== filterByGroupWithOriginal: minGroup = " <> show minGroup <> " ==="
+
+  -- Stop simulation
+  stop
+
+  -- Filter the ORIGINAL unfiltered data
+  let filteredNodes = Array.filter (\n -> n.group >= minGroup) originalGraph.nodes
+
+  -- Create a set of filtered node IDs for fast lookup
+  let filteredNodeIds = Set.fromFoldable $ filteredNodes <#> (\n -> (unsafeCoerce n :: { id :: String }).id)
+
+  -- Filter links to only include those where both source and target are in filtered nodes
+  let filteredLinks = Array.filter (\link ->
+        let l = unsafeCoerce link :: { source :: { id :: String }, target :: { id :: String } }
+        in Set.member l.source.id filteredNodeIds && Set.member l.target.id filteredNodeIds
+      ) originalGraph.links
+
+  log $ "Filtered from " <> show (Array.length originalGraph.nodes) <> " to " <> show (Array.length filteredNodes) <> " nodes"
+
+  -- Update simulation with filtered data
+  { nodes: nodesInSim, links: linksInSim } <- update
+    { nodes: Just filteredNodes
+    , links: Just filteredLinks
+    , nodeFilter: Nothing
+    , linkFilter: Nothing
+    , activeForces: Nothing
+    , config: Nothing
+    , keyFn: keyIsID_
+    }
+
+  -- Use the extracted helper to handle all the re-rendering
+  updateForceGraph nodesInSim linksInSim
