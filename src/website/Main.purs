@@ -32,6 +32,7 @@ import Component.Tour.TourMotion as TourMotion
 import Component.Tour.TourInterpreters as TourInterpreters
 import Component.Tour.TourFPFTW as TourFPFTW
 import Component.Tour.TourGraphAlgorithms as TourGraphAlgorithms
+import Component.Tour.TourLesMisGUP as TourLesMisGUP
 import Component.Tour.TourShowcase as TourShowcase
 
 -- Tree API Examples
@@ -75,6 +76,7 @@ type Slots =
   , tourInterpreters :: forall q. H.Slot q Void Unit
   , tourFPFTW :: forall q. H.Slot q Void Unit
   , tourGraphAlgorithms :: forall q. H.Slot q Void Unit
+  , tourLesMisGUP :: forall q. H.Slot q Void Unit
   , tourShowcase :: forall q. H.Slot q Void Unit
   , gallery :: forall q. H.Slot q Void Unit
   , example :: forall q. H.Slot q Void Unit
@@ -99,6 +101,7 @@ _tourMotion = Proxy :: Proxy "tourMotion"
 _tourInterpreters = Proxy :: Proxy "tourInterpreters"
 _tourFPFTW = Proxy :: Proxy "tourFPFTW"
 _tourGraphAlgorithms = Proxy :: Proxy "tourGraphAlgorithms"
+_tourLesMisGUP = Proxy :: Proxy "tourLesMisGUP"
 _tourShowcase = Proxy :: Proxy "tourShowcase"
 _gallery = Proxy :: Proxy "gallery"
 _example = Proxy :: Proxy "example"
@@ -175,6 +178,9 @@ renderPage route = case spy "Route is" route of
 
   TourGraphAlgorithms ->
     HH.slot_ _tourGraphAlgorithms unit TourGraphAlgorithms.component unit
+
+  TourLesMisGUP ->
+    HH.slot_ _tourLesMisGUP unit TourLesMisGUP.component unit
 
   TourShowcase ->
     HH.slot_ _tourShowcase unit TourShowcase.component unit

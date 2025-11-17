@@ -95,7 +95,8 @@ data Route
   | TourInterpreters     -- Tour 6: Alternative interpreters (Mermaid, English, generators)
   | TourFPFTW            -- Tour 7: Functional Programming For The Win (Maps, Sets, contravariant attributes)
   | TourGraphAlgorithms  -- Tour 8: Graph Algorithms (topological sort, transitive reduction)
-  | TourShowcase         -- Tour 9: Flagship demo visualizations
+  | TourLesMisGUP        -- Tour 9: General Update Pattern with dynamic graphs
+  | TourShowcase         -- Tour 10: Flagship demo visualizations
   -- Tree API Examples
   | Gallery         -- Gallery of all TreeAPI examples with cards
   | Example String  -- Individual example page by ID
@@ -125,6 +126,7 @@ instance showRoute :: Show Route where
   show TourInterpreters = "Tour: Alternative Interpreters"
   show TourFPFTW = "Tour: FP For The Win"
   show TourGraphAlgorithms = "Tour: Graph Algorithms"
+  show TourLesMisGUP = "Tour: General Update Pattern"
   show TourShowcase = "Tour: Showcase"
   show Gallery = "Examples Gallery"
   show (Example exampleId) = "Example: " <> exampleId

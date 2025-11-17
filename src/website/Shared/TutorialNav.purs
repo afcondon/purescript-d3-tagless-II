@@ -25,6 +25,7 @@ allTutorialRoutes =
   , TourInterpreters
   , TourFPFTW
   , TourGraphAlgorithms
+  , TourLesMisGUP
   , TourShowcase
   ]
 

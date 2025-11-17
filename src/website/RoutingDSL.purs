@@ -31,6 +31,7 @@ routes =
   <|> tourInterpreters
   <|> tourFPFTW
   <|> tourGraphAlgorithms
+  <|> tourLesMisGUP
   <|> tourShowcase
   <|> gallery
   <|> examplePage     -- Must come before other routes to match /example/:id
@@ -103,6 +104,10 @@ tourFPFTW = TourFPFTW <$ lit "tour" <* lit "fpftw" <* end
 tourGraphAlgorithms :: Match Route
 tourGraphAlgorithms = TourGraphAlgorithms <$ lit "tour" <* lit "graph-algorithms" <* end
 
+-- | Match: /tour/lesmis-gup
+tourLesMisGUP :: Match Route
+tourLesMisGUP = TourLesMisGUP <$ lit "tour" <* lit "lesmis-gup" <* end
+
 -- | Match: /tour/showcase
 tourShowcase :: Match Route
 tourShowcase = TourShowcase <$ lit "tour" <* lit "showcase" <* end
@@ -161,6 +166,7 @@ routeToPath TourMotion = "/tour/motion"
 routeToPath TourInterpreters = "/tour/interpreters"
 routeToPath TourFPFTW = "/tour/fpftw"
 routeToPath TourGraphAlgorithms = "/tour/graph-algorithms"
+routeToPath TourLesMisGUP = "/tour/lesmis-gup"
 routeToPath TourShowcase = "/tour/showcase"
 routeToPath Gallery = "/gallery"
 routeToPath (Example exampleId) = "/example/" <> exampleId
