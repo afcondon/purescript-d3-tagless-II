@@ -77,8 +77,14 @@ data LinkType        = M2M_Tree | M2M_Graph | P2P | M2P
 derive instance Eq LinkType
 
 data PackageInfo     = PackageInfo { version :: String, repo :: String }
+
+derive instance eqPackageInfo :: Eq PackageInfo
+derive instance ordPackageInfo :: Ord PackageInfo
 type ModulePath      = String
 data NodeType        = IsModule ModulePath | IsPackage PackageInfo
+
+derive instance eqNodeType :: Eq NodeType
+derive instance ordNodeType :: Ord NodeType
 type Dependencies    = Array NodeID
 
 type SpagoLinkData = ( linktype :: LinkType, inSim :: Boolean ) 

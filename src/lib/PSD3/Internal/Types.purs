@@ -2,11 +2,20 @@ module PSD3.Internal.Types where
 
 import Data.Int (toNumber)
 import Data.Time.Duration (Milliseconds)
-import Prelude (class Show, ($))
+import Prelude (class Eq, class Ord, class Show, compare, eq, ($))
 import Unsafe.Coerce (unsafeCoerce)
 
 foreign import data Datum_ :: Type
 foreign import data Index_ :: Type
+
+-- Index_ is a foreign type representing array indices (Int under the hood)
+-- We provide Eq and Ord instances to support data joins with key functions
+instance eqIndex_ :: Eq Index_ where
+  eq a b = eq (index_ToInt a) (index_ToInt b)
+
+instance ordIndex_ :: Ord Index_ where
+  compare a b = compare (index_ToInt a) (index_ToInt b)
+
 index_ToInt :: Index_ -> Int
 index_ToInt = unsafeCoerce
 index_ToNumber :: Index_ -> Number

@@ -53,20 +53,20 @@ import Halogen (HalogenM, liftEffect)
 import Halogen as H
 import Halogen.Subscription as HS
 import PSD3.Capabilities.Selection as PSD3Selection
-import PSD3.Capabilities.Simulation (start, stop)
-import PSD3.Capabilities.Simulation as PSD3Simulation
+import PSD3v2.Capabilities.Simulation (start, stop)
 import PSD3.CodeExplorer.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..), VizEvent(..))
 import PSD3.CodeExplorer.Data (readModelData)
 import PSD3.CodeExplorer.Forces (forceLibrary)
 import PSD3.CodeExplorer.HTML (render)
 import PSD3.CodeExplorer.Scenes (horizontalTreeScene, layerSwarmScene, packageGraphScene, packageGridScene, radialTreeScene, verticalTreeScene)
-import PSD3.CodeExplorer.State (State, TransitionMatrix, applySceneConfig, applySceneWithTransition, clearAllTags, getModelLinks, getModelNodes, initialScene, setChooseNodes, setCssClass, setLinksActive, setLinksShown, setSceneAttributes, tagNodes, toggleForce)
+import PSD3.CodeExplorer.State (State, TransitionMatrix, applySceneConfig, applySceneWithTransition, clearAllTags, getModelLinks, getModelNodes, getSelections, initialScene, setChooseNodes, setCssClass, setLinksActive, setLinksShown, setSceneAttributes, tagNodes, toggleForce)
 import PSD3.Data.Tree (TreeLayout(..))
 import PSD3.Internal.Attributes.Sugar (onMouseEventEffectful, x)
 import PSD3.Internal.Selection.Types (SelectionAttribute)
 import PSD3.Internal.Simulation.Types (initialSimulationState)
 import PSD3.Internal.Types (MouseEvent(..))
-import PSD3.Interpreter.D3 (evalEffectSimulation, runWithD3_Simulation)
+import PSD3.Interpreter.D3 (evalEffectSimulation)
+import PSD3v2.Interpreter.D3v2 (evalD3v2SimM)
 import PSD3v2.Simulation.RunSimulation as LibRunSim
 import PSD3v2.Simulation.Scene (smoothTransition, smoothTransitionPinned)
 import Unsafe.Coerce (unsafeCoerce)
@@ -167,12 +167,13 @@ handleAction = case _ of
     H.modify_ _ { model = maybeModel }
 
     -- 2. Initialize D3 structure (one-time SVG setup)
-    openSelections <- evalEffectSimulation Graph.initialize
+    state <- H.get
+    openSelections <- H.liftAff $ evalD3v2SimM state Graph.initialize
     H.modify_ \s -> s {
       staging = s.staging {
         selections = {
-          nodes: openSelections.nodes
-        , links: openSelections.links
+          nodes: Just (unsafeCoerce openSelections.nodes)
+        , links: Just (unsafeCoerce openSelections.links)
         }
       }
     }
@@ -206,7 +207,9 @@ handleAction = case _ of
     H.modify_ $ setChooseNodes isPackage
     runSimulation
 
-  SpotlightNode _ -> runWithD3_Simulation stop
+  SpotlightNode _ -> do
+    state <- H.get
+    H.liftAff $ evalD3v2SimM state stop
 
   -- | Scene Switching Pattern - Declarative Scene Configuration with Transition Matrix
   -- |
@@ -289,10 +292,13 @@ handleAction = case _ of
     pure unit -- runWithD3_Simulation $ setConfigVariable c
 
   StartSim -> do
-    runWithD3_Simulation start
+    state <- H.get
+    H.liftAff $ evalD3v2SimM state start
     -- TODO: Use update to set alpha first
 
-  StopSim -> runWithD3_Simulation stop
+  StopSim -> do
+    state <- H.get
+    H.liftAff $ evalD3v2SimM state stop
 
   TagHalogen -> do
     state <- H.get
@@ -381,25 +387,24 @@ runSimulation :: forall m.
   MonadAff m =>
   MonadState State m =>
   m Unit
-runSimulation = runWithD3_Simulation do
-  LibRunSim.runSimulationFromState
-    -- Extract selections from state
-    (_.staging.selections)
-    -- Extract scene configuration from state
-    (_.scene)
-    -- Extract model nodes from state
-    getModelNodes
-    -- Extract model links from state
-    getModelLinks
-    -- Enhance attributes with callbacks and tags
-    (\attrs state -> do
-      let callback = case state.eventListener of
-            Just listener -> simulationEvent listener
-            Nothing -> x 0.0  -- dummy during initialization
-      attrs {
-        circles = callback : attrs.circles
-      , tagMap = Just state.tags  -- Pass tags for automatic CSS class propagation
-      }
-    )
-    -- Visualization-specific updateSimulation
-    Graph.updateSimulation
+runSimulation = do
+  state <- H.get
+  H.liftAff $ evalD3v2SimM state do
+    LibRunSim.runSimulationFromState
+      -- Extract selections from state (unwraps Maybe for v2 API)
+      getSelections
+      -- Extract scene configuration from state
+      (_.scene)
+      -- Extract model nodes from state
+      getModelNodes
+      -- Extract model links from state
+      getModelLinks
+      -- Enhance attributes with tags
+      -- TODO v2: Event handlers need to be added via `on` behavior in render callbacks
+      -- not as attributes. Need to refactor event handling for v2.
+      (\attrs st -> attrs {
+          tagMap = Just st.tags  -- Pass tags for automatic CSS class propagation
+        }
+      )
+      -- Visualization-specific updateSimulation
+      Graph.updateSimulation

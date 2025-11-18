@@ -2,19 +2,23 @@ module D3.Viz.Spago.Draw where
 
 import Prelude
 
-import PSD3.Internal.Attributes.Sugar (classed)
-import PSD3.Internal.Types (D3Selection_, D3This_, Datum_, Element(..))
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, svgAttrs)
 import D3.Viz.Spago.Model (SpagoSimNode)
 import D3.Viz.Spago.Render (spagoRenderCallbacks)
-import PSD3.Internal.FFI (keyIsID_)
-import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
-import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
-import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, on)
-import PSD3.Capabilities.Simulation (class SimulationM2, SimulationUpdate)
-import PSD3v2.Simulation.Update (genericUpdateSimulation)
-import PSD3.Internal.Attributes.Instances (Label)
+import PSD3.CodeExplorer.Actions (VizEvent(..))
 import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, NodeID)
+import PSD3.Internal.Attributes.Instances (Label)
+import PSD3.Internal.FFI (keyIsID_)
+import PSD3.Internal.Types (D3This_, Datum_)
+import Unsafe.Coerce (unsafeCoerce)
+import PSD3v2.Attribute.Types (class_)
+import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom, ScaleExtent(..))
+import PSD3v2.Capabilities.Selection (class SelectionM, appendChild, select, on)
+import PSD3v2.Capabilities.Simulation (class SimulationM2)
+import PSD3v2.Interpreter.D3v2 (D3v2Selection_)
+import PSD3v2.Selection.Types (ElementType(..), SBound, SEmpty)
+import PSD3v2.Simulation.Update (genericUpdateSimulation)
+import Web.DOM.Element (Element)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))
 import Data.Set (Set)
@@ -35,27 +39,24 @@ getVizEventFromClick e d t =
 initialize :: forall m.
   Bind m =>
   MonadEffect m =>
-  SimulationM2 D3Selection_ m =>
-  SelectionM D3Selection_ m =>
-  m { nodes :: Maybe (D3Selection_ SpagoSimNode), links :: Maybe (D3Selection_ SpagoSimNode) }
+  SimulationM2 (D3v2Selection_ SBound Element) m =>
+  SelectionM D3v2Selection_ m =>
+  m { nodes :: D3v2Selection_ SEmpty Element SpagoSimNode, links :: D3v2Selection_ SEmpty Element SpagoSimNode }
 initialize = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
-  root :: D3Selection_ Unit <- attach "div.svg-container"
+  root <- select "div.svg-container"
 
-  svg   <- appendTo root Svg (svgAttrs w h)
-  inner <- appendTo svg  Group []
-  _     <- inner `on` Drag DefaultDrag
-  _     <- svg   `on` Zoom { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
-                           , scale  : ScaleExtent 0.1 4.0
-                           , name   : "spago"
-                           , target : inner
-                           }
+  svg   <- appendChild SVG (svgAttrs w h) root
+  inner <- appendChild Group [] svg
+  _     <- on (Drag defaultDrag) inner
+  _     <- on (Zoom (defaultZoom (ScaleExtent 0.1 4.0) "g")) svg
+
   -- Create groups for nodes and links (links first so they render under nodes)
-  linksGroup <- appendTo inner Group [ classed "links" ]
-  nodesGroup <- appendTo inner Group [ classed "nodes" ]
+  linksGroup <- appendChild Group [ class_ "links" ] inner
+  nodesGroup <- appendChild Group [ class_ "nodes" ] inner
 
-  -- SAFE: Cast untyped selections to expected types - data will be bound by genericUpdateSimulation
-  pure { nodes: Just (unsafeCoerce nodesGroup), links: Just (unsafeCoerce linksGroup) }
+  -- Return empty selections - data will be bound by genericUpdateSimulation
+  pure { nodes: nodesGroup, links: linksGroup }
 
 -- | Update simulation using the fully generic library updateSimulation
 -- |
@@ -85,10 +86,10 @@ initialize = do
 updateSimulation :: forall m.
   Bind m =>
   MonadEffect m =>
-  SelectionM D3Selection_ m =>
-  SimulationM2 D3Selection_ m =>
-  { nodes :: Maybe (D3Selection_ SpagoSimNode)
-  , links :: Maybe (D3Selection_ SpagoSimNode)  -- Unified type for library compatibility, cast internally
+  SelectionM D3v2Selection_ m =>
+  SimulationM2 (D3v2Selection_ SBound Element) m =>
+  { nodes :: D3v2Selection_ SEmpty Element SpagoSimNode
+  , links :: D3v2Selection_ SEmpty Element SpagoSimNode
   } ->
   { allNodes :: Array SpagoSimNode                                         -- FULL dataset
   , allLinks :: Array D3Link_Unswizzled                                   -- FULL dataset
@@ -103,7 +104,7 @@ updateSimulation :: forall m.
 updateSimulation selections dataConfig attrs =
   genericUpdateSimulation
     { nodes: selections.nodes
-    , links: unsafeCoerce selections.links  -- Cast back to D3Selection_ D3Link_Swizzled for genericUpdateSimulation
+    , links: unsafeCoerce selections.links  -- Cast SpagoSimNode datum to D3Link_Swizzled datum for links
     }
     Group  -- Node element type
     Line   -- Link element type

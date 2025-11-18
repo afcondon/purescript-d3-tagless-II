@@ -110,6 +110,7 @@ data Route
   | ModuleGraph     -- Module dependency graph (dogfooding!)
   | MermaidTreeDemo -- Mermaid interpreter for Tree API (visualizes tree structure)
   | SceneJoinDemo   -- SceneNestedJoin demonstration (GUP with type decomposition)
+  | CodeExplorer    -- Interactive code exploration (PureScript module dependencies)
   -- Meta
   | Acknowledgements -- Credits and acknowledgements
   | NotFound
@@ -145,5 +146,6 @@ instance showRoute :: Show Route where
   show ModuleGraph = "Module Graph"
   show MermaidTreeDemo = "Mermaid Tree Visualizer"
   show SceneJoinDemo = "SceneNestedJoin Demo"
+  show CodeExplorer = "Code Explorer"
   show Acknowledgements = "Acknowledgements"
   show NotFound = "Not Found"

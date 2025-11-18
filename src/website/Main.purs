@@ -48,6 +48,7 @@ import Component.LesMisGUPClean as LesMisGUPClean
 import Component.ModuleGraph as ModuleGraph
 import Component.MermaidTreeDemo as MermaidTreeDemo
 import Component.SceneJoinDemo as SceneJoinDemo
+import PSD3.CodeExplorer.CodeExplorationPage as CodeExplorer
 
 -- Routing
 import PSD3.RoutingDSL (routing, routeToPath)
@@ -95,6 +96,7 @@ type Slots =
   , moduleGraph :: forall q. H.Slot q Void Unit
   , mermaidTreeDemo :: forall q. H.Slot q Void Unit
   , sceneJoinDemo :: forall q. H.Slot q Void Unit
+  , codeExplorer :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
 
@@ -125,6 +127,7 @@ _lesMisGUPClean = Proxy :: Proxy "lesMisGUPClean"
 _moduleGraph = Proxy :: Proxy "moduleGraph"
 _mermaidTreeDemo = Proxy :: Proxy "mermaidTreeDemo"
 _sceneJoinDemo = Proxy :: Proxy "sceneJoinDemo"
+_codeExplorer = Proxy :: Proxy "codeExplorer"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
 -- | Main application component
@@ -236,6 +239,9 @@ renderPage route = case spy "Route is" route of
 
   SceneJoinDemo ->
     HH.slot_ _sceneJoinDemo unit SceneJoinDemo.component unit
+
+  CodeExplorer ->
+    HH.slot_ _codeExplorer unit CodeExplorer.component "#code-explorer-container"
 
   Acknowledgements ->
     HH.slot_ _acknowledgements unit Acknowledgements.component unit

@@ -2,12 +2,11 @@ module D3.Viz.Spago.Draw.Attributes where
 
 import Prelude
 
-import PSD3.Internal.Attributes.Sugar (classed, cursor, fill, height, opacity, radius, strokeColor, strokeWidth, text, textAnchor, transform', viewBox, width, x, y)
-import PSD3.Internal.Selection.Types (SelectionAttribute)
 import D3.Viz.Spago.Model (SpagoSimNode)
 import D3.Viz.Spago.Files (NodeType(..))
-import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_, d3SchemeSequential10N_)
 import PSD3.Data.Node (NodeID)
+import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_, d3SchemeSequential10N_)
+import PSD3v2.Attribute.Types (Attribute, class_, fill, height, opacity, radius, stroke, strokeWidth, textContent, textAnchor, transform, viewBox, width, x, y)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set (Set)
@@ -53,25 +52,25 @@ opacityByType d = case d.nodetype of
   (IsModule _) -> 0.7
 
 -- | Attributes for entering node groups (applied when new nodes are added to DOM)
-enterAttrs :: Array (SelectionAttribute SpagoSimNode)
+enterAttrs :: Array (Attribute SpagoSimNode)
 enterAttrs =
-  [ classed \(d :: SpagoSimNode) -> nodeClass d
-  , transform' \(d :: SpagoSimNode) -> translateNode d
+  [ class_ \(d :: SpagoSimNode) -> nodeClass d
+  , transform \(d :: SpagoSimNode) -> translateNode d
   ]
 
 -- | Attributes for updating existing node groups (reapplied on data updates)
-updateAttrs :: Array (SelectionAttribute SpagoSimNode)
+updateAttrs :: Array (Attribute SpagoSimNode)
 updateAttrs =
-  [ classed \(d :: SpagoSimNode) -> nodeClass d
-  , transform' \(d :: SpagoSimNode) -> translateNode d
+  [ class_ \(d :: SpagoSimNode) -> nodeClass d
+  , transform \(d :: SpagoSimNode) -> translateNode d
   ]
 
 -- | Visual attributes for a scene - split into circle and label attributes
 -- | so they can be applied to the appropriate child elements
 -- | Tags automatically propagate to CSS classes on node groups
 type SpagoSceneAttributes = {
-    circles :: Array (SelectionAttribute SpagoSimNode)
-  , labels  :: Array (SelectionAttribute SpagoSimNode)
+    circles :: Array (Attribute SpagoSimNode)
+  , labels  :: Array (Attribute SpagoSimNode)
   , tagMap  :: Maybe (Map NodeID (Set String))  -- Optional tag map for automatic CSS class propagation
 }
 
@@ -81,15 +80,15 @@ clusterSceneAttributes :: SpagoSceneAttributes
 clusterSceneAttributes = {
     circles: [ radius \(d :: SpagoSimNode) -> nodeRadius d
             , fill \(d :: SpagoSimNode) -> fillByUsage d
-            , strokeColor \(d :: SpagoSimNode) -> strokeByUsage d
+            , stroke \(d :: SpagoSimNode) -> strokeByUsage d
             , strokeWidth 3.0
             , opacity \(d :: SpagoSimNode) -> opacityByType d
           ]
-  , labels: [ classed "label"
+  , labels: [ class_ "label"
             , x 0.2
             , y \(d :: SpagoSimNode) -> positionLabel d
             , textAnchor "middle"
-            , text \(d :: SpagoSimNode) -> nodeName d
+            , textContent \(d :: SpagoSimNode) -> nodeName d
           ]
   , tagMap: Nothing
 }
@@ -102,11 +101,11 @@ graphSceneAttributes = {
             , fill \(d :: SpagoSimNode) -> colorByGroup d
             , opacity \(d :: SpagoSimNode) -> opacityByType d
            ]
-  , labels: [ classed "label"
+  , labels: [ class_ "label"
             , x 0.2
             , y \(d :: SpagoSimNode) -> positionLabel d
             , textAnchor "middle"
-            , text \(d :: SpagoSimNode) -> nodeName d
+            , textContent \(d :: SpagoSimNode) -> nodeName d
           ]
   , tagMap: Nothing
 }
@@ -117,20 +116,19 @@ treeSceneAttributes :: SpagoSceneAttributes
 treeSceneAttributes = {
     circles: [ radius \(d :: SpagoSimNode) -> nodeRadius d
             , fill \(d :: SpagoSimNode) -> colorByDepth d
-            , strokeColor \(d :: SpagoSimNode) -> colorByGroup d
+            , stroke \(d :: SpagoSimNode) -> colorByGroup d
             , strokeWidth 3.0
             ]
-  , labels: [ classed "label"
+  , labels: [ class_ "label"
             , x 4.0
             , y 2.0
-            , text \(d :: SpagoSimNode) -> nodeName d
+            , textContent\(d :: SpagoSimNode) -> nodeName d
             ]
   , tagMap: Nothing
 }
 
-svgAttrs :: forall d. Number -> Number -> Array (SelectionAttribute d)
-svgAttrs w h = [ viewBox (-w / 2.1) (-h / 2.05) w h
-                    , classed "overlay"
+svgAttrs :: forall d. Number -> Number -> Array (Attribute d)
+svgAttrs w h = [ viewBox (show (-w / 2.1) <> " " <> show (-h / 2.05) <> " " <> show w <> " " <> show h)
+                    , class_ "overlay"
                     , width w, height h
-                    , cursor "grab"
 ]

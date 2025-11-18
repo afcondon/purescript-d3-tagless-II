@@ -19,6 +19,8 @@ import Data.Time.Duration (Milliseconds(..))
 import Data.Traversable (traverse_)
 import Data.Tuple (Tuple, snd, fst)
 import Effect (Effect)
+import Effect.Aff (Aff)
+import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Class.Console (log)
 import Partial.Unsafe (unsafePartial)
@@ -68,9 +70,10 @@ runD3v2M (D3v2M eff) = eff
 
 -- | The D3v2 simulation monad (with simulation state)
 -- |
--- | Like D3v2M but adds StateT for managing simulation state.
--- | Required for force-directed graphs.
-newtype D3v2SimM row d a = D3v2SimM (StateT { simulation :: D3SimulationState_ d | row } Effect a)
+-- | Wraps Aff (not Effect) to support async operations like scene transitions.
+-- | StateT provides simulation state management.
+-- | Required for force-directed graphs with transitions.
+newtype D3v2SimM row d a = D3v2SimM (StateT { simulation :: D3SimulationState_ d | row } Aff a)
 
 derive newtype instance Functor (D3v2SimM row d)
 derive newtype instance Apply (D3v2SimM row d)
@@ -78,18 +81,19 @@ derive newtype instance Applicative (D3v2SimM row d)
 derive newtype instance Bind (D3v2SimM row d)
 derive newtype instance Monad (D3v2SimM row d)
 derive newtype instance MonadEffect (D3v2SimM row d)
+derive newtype instance MonadAff (D3v2SimM row d)
 derive newtype instance MonadState { simulation :: D3SimulationState_ d | row } (D3v2SimM row d)
 
 -- | Run the D3v2 simulation interpreter and return result + final state
-runD3v2SimM :: forall a d row. { simulation :: D3SimulationState_ d | row } -> D3v2SimM row d a -> Effect (Tuple a { simulation :: D3SimulationState_ d | row })
+runD3v2SimM :: forall a d row. { simulation :: D3SimulationState_ d | row } -> D3v2SimM row d a -> Aff (Tuple a { simulation :: D3SimulationState_ d | row })
 runD3v2SimM state (D3v2SimM st) = runStateT st state
 
 -- | Run the D3v2 simulation interpreter and return only the final state
-execD3v2SimM :: forall a d row. { simulation :: D3SimulationState_ d | row } -> D3v2SimM row d a -> Effect { simulation :: D3SimulationState_ d | row }
+execD3v2SimM :: forall a d row. { simulation :: D3SimulationState_ d | row } -> D3v2SimM row d a -> Aff { simulation :: D3SimulationState_ d | row }
 execD3v2SimM state (D3v2SimM st) = map snd $ runStateT st state
 
 -- | Run the D3v2 simulation interpreter and return only the result
-evalD3v2SimM :: forall a d row. { simulation :: D3SimulationState_ d | row } -> D3v2SimM row d a -> Effect a
+evalD3v2SimM :: forall a d row. { simulation :: D3SimulationState_ d | row } -> D3v2SimM row d a -> Aff a
 evalD3v2SimM state (D3v2SimM st) = map fst $ runStateT st state
 
 -- | SelectionM instance for D3v2 interpreter

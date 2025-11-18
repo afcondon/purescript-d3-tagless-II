@@ -6,6 +6,9 @@ import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, clusterSceneAttribute
 import D3.Viz.Spago.Files (D3_Radius, SpagoDataRow, SpagoLinkData, SpagoNodeRow)
 import PSD3.Data.Node (D3Link_Unswizzled, D3_FocusXY)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage)
+import PSD3v2.Interpreter.D3v2 (D3v2Selection_)
+import PSD3v2.Selection.Types (SEmpty)
+import Web.DOM.Element (Element)
 import Data.Array (filter, foldl)
 import Data.Lens (Lens', _Just, view)
 import Data.Lens.At (at)
@@ -17,6 +20,8 @@ import Data.Profunctor.Strong (class Strong)
 import Data.Set (Set)
 import Data.Set as Set
 import Data.Tuple (Tuple(..))
+import Partial.Unsafe (unsafeCrashWith)
+import Unsafe.Coerce (unsafeCoerce)
 import Halogen.Subscription as HS
 import PSD3.CodeExplorer.Actions (Action, Scene)
 import PSD3.Component.SimulationState as SimState
@@ -222,6 +227,16 @@ getStagingLinks = SimState.getStagingLinks
 
 getStagingLinkFilter :: State -> (Datum_ -> Boolean)
 getStagingLinkFilter = SimState.getStagingLinkFilter
+
+-- | Get selections from staging, unwrapping Maybe for v2 API
+-- | This assumes selections have been initialized (which happens in Initialize action)
+-- | SAFETY: After Initialize action runs, selections are guaranteed to be Just
+-- | If called before initialization, crashes with clear error message
+-- | Note: runSimulationFromState expects both selections to have SimulationNode datum type
+getSelections :: State -> { nodes :: D3v2Selection_ SEmpty Element SpagoSimNode, links :: D3v2Selection_ SEmpty Element SpagoSimNode }
+getSelections state = case state.staging.selections.nodes, state.staging.selections.links of
+  Just nodes, Just links -> { nodes: unsafeCoerce nodes, links: unsafeCoerce links }
+  _, _ -> unsafeCrashWith "getSelections called before Initialize action! Selections must be initialized first."
 
 -- ============================================================================
 -- | Staging Setters (typed for Spago)
