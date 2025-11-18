@@ -22,6 +22,7 @@ import Data.Set as Set
 import Data.Nullable (Nullable, toNullable)
 import Data.Number (sqrt, cos, sin, pi, ceil, floor, (%)) as Number
 import Data.Tuple (Tuple(..))
+import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import PSD3.Data.Node (D3Link_Swizzled)
 import PSD3.Internal.Simulation.Types (Force)
@@ -396,7 +397,7 @@ unpinNodes = do
     currentLinks
     do
       -- Callback: restart simulation after transition completes
-      void $ D3v2.runD3v2SimM simHandle do
+      launchAff_ $ void $ D3v2.runD3v2SimM simHandle do
         reheat 0.5
         start
 

@@ -150,7 +150,7 @@ handleAction = case _ of
         H.modify_ \s -> s { originalGraph = Just graph }
 
         state <- H.get
-        newState <- H.liftEffect $ D3v2.execD3v2SimM { simulation: state.lesMisGUPSimulation } do
+        newState <- H.liftAff $ D3v2.execD3v2SimM { simulation: state.lesMisGUPSimulation } do
           _ <- LesMisGUPSimple.drawLesMisGUPSimple forcesArray activeForces graph "#lesmis-gup-simple-viz"
           pure unit
         H.modify_ \s -> s { lesMisGUPSimulation = newState.simulation }
@@ -170,6 +170,6 @@ handleAction = case _ of
 
         log $ "Filtered to " <> show (Array.length filteredNodes) <> " nodes"
 
-        newState <- H.liftEffect $ D3v2.execD3v2SimM { simulation: state.lesMisGUPSimulation } do
+        newState <- H.liftAff $ D3v2.execD3v2SimM { simulation: state.lesMisGUPSimulation } do
           LesMisGUPSimple.updateNodes filteredNodes
         H.modify_ \s -> s { lesMisGUPSimulation = newState.simulation }

@@ -13,6 +13,7 @@ import Data.Maybe (Maybe(..))
 import Data.Number (sqrt, cos, sin, pi)
 import Data.Set as Set
 import Effect (Effect)
+import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import Partial.Unsafe (unsafePartial, unsafeCrashWith)
@@ -205,7 +206,7 @@ drawLesMisSimple model containerSelector w h = do
 
 -- | Entry point with fixed dimensions for Tour page
 startLesMisSimple :: LesMisRawModel -> String -> Effect Unit
-startLesMisSimple model containerSelector = do
+startLesMisSimple model containerSelector = launchAff_ do
   -- Fixed dimensions for embedded view
   let w = 900.0
   let h = 600.0

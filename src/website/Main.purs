@@ -48,7 +48,7 @@ import Component.LesMisGUPClean as LesMisGUPClean
 import Component.ModuleGraph as ModuleGraph
 import Component.MermaidTreeDemo as MermaidTreeDemo
 import Component.SceneJoinDemo as SceneJoinDemo
-import PSD3.CodeExplorer.CodeExplorationPage as CodeExplorer
+import PSD3.CodeExplorer as CodeExplorer
 
 -- Routing
 import PSD3.RoutingDSL (routing, routeToPath)
@@ -241,7 +241,7 @@ renderPage route = case spy "Route is" route of
     HH.slot_ _sceneJoinDemo unit SceneJoinDemo.component unit
 
   CodeExplorer ->
-    HH.slot_ _codeExplorer unit CodeExplorer.component "#code-explorer-container"
+    HH.slot_ _codeExplorer unit CodeExplorer.component unit
 
   Acknowledgements ->
     HH.slot_ _acknowledgements unit Acknowledgements.component unit

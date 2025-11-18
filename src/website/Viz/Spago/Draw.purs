@@ -106,8 +106,8 @@ updateSimulation selections dataConfig attrs =
     { nodes: selections.nodes
     , links: unsafeCoerce selections.links  -- Cast SpagoSimNode datum to D3Link_Swizzled datum for links
     }
-    Group  -- Node element type
-    Line   -- Link element type
+    Circle  -- Node element type (simplified - no group wrapper for now)
+    Line    -- Link element type
     { allNodes: dataConfig.allNodes           -- Full dataset
     , allLinks: dataConfig.allLinks           -- Full dataset
     , nodeFilter: dataConfig.nodeFilter       -- Single predicate (library filters links automatically!)

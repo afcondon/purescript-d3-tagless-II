@@ -18,7 +18,7 @@ import PSD3v2.Attribute.Types (class_, stroke, transform, x1, x2, y1, y2, Attrib
 import PSD3v2.Behavior.Types (Behavior(..), simulationDrag)
 import PSD3v2.Capabilities.Selection (class SelectionM, append, appendChild, on, openSelection, remove, setAttrs)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_)
-import PSD3v2.Selection.Types (ElementType(..), SBound, SPending, SExiting)
+import PSD3v2.Selection.Types (ElementType(..), SBound, SEmpty, SPending, SExiting)
 import PSD3v2.Simulation.Update (RenderCallbacks)
 import Web.DOM.Element (Element)
 
@@ -61,32 +61,23 @@ spagoRenderCallbacks = {
   -- v2 approach: Create group, then use openSelection to add children
   onNodeEnter: \enterSel attrs -> do
     let tagClassesAttr = makeTagClassesAttr attrs.tagMap
-        enterAttrsWithTags = tagClassesAttr : enterAttrs
+        circleAttrs = tagClassesAttr : transform translateNode : attrs.circles
 
-    -- Create group with position and classes
-    nodeEnter <- append Group enterAttrsWithTags enterSel
+    -- For now, create circles directly (without group wrapper)
+    -- TODO: Need proper v2 API for adding children to bound selections
+    circleEnter <- append Circle circleAttrs enterSel
 
-    -- Get empty selection for adding circle children
-    circleParent <- openSelection nodeEnter "g"
-    _ <- appendChild Circle attrs.circles circleParent
+    -- Add drag behavior
+    _ <- on (Drag (simulationDrag "spago")) circleEnter
 
-    -- Get empty selection for adding text children
-    textParent <- openSelection nodeEnter "g"
-    _ <- appendChild Text attrs.labels textParent
-
-    -- Add drag behavior to the group
-    _ <- on (Drag (simulationDrag "spago")) nodeEnter
-
-    pure nodeEnter
+    pure circleEnter
 
   , onNodeUpdate: \updateSel attrs -> do
       let tagClassesAttr = makeTagClassesAttr attrs.tagMap
-          updateAttrsWithTags = tagClassesAttr : updateAttrs
+          circleAttrs = tagClassesAttr : transform translateNode : attrs.circles
 
-      -- Update group attributes (position, classes)
-      -- Note: Circle and text children attributes are set once during enter
-      -- and don't need per-update changes in this visualization
-      _ <- setAttrs updateAttrsWithTags updateSel
+      -- Update circle attributes
+      _ <- setAttrs circleAttrs updateSel
 
       pure unit
 
@@ -109,8 +100,8 @@ spagoRenderCallbacks = {
   , onLinkExit: \exitSel ->
       remove exitSel
 
-  -- Tick function attributes
-  , nodeTickAttrs: \attrs ->
+  -- Tick function attributes - update circle position on each tick
+  , nodeTickAttrs: \_attrs ->
       [ transform \(d :: SpagoSimNode) -> translateNode d ]
 
   , linkTickAttrs:

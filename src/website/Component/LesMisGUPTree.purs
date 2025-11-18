@@ -158,7 +158,7 @@ handleAction = case _ of
         H.modify_ \s -> s { originalGraph = Just graph }
 
         state <- H.get
-        newState <- H.liftEffect $ D3v2.execD3v2SimM { simulation: state.lesMisGUPSimulation } do
+        newState <- H.liftAff $ D3v2.execD3v2SimM { simulation: state.lesMisGUPSimulation } do
           _ <- LesMisGUPV2.drawLesMisGUPV2 forcesArray activeForces graph "#lesmis-gup-tree-viz"
           pure unit
         H.modify_ \s -> s { lesMisGUPSimulation = newState.simulation }
@@ -169,21 +169,21 @@ handleAction = case _ of
   MoveToGrid -> do
     log "Moving to grid layout"
     state <- H.get
-    newState <- H.liftEffect $ D3v2.execD3v2SimM { simulation: state.lesMisGUPSimulation } do
+    newState <- H.liftAff $ D3v2.execD3v2SimM { simulation: state.lesMisGUPSimulation } do
       LesMisGUPV2.moveToGrid 30.0
     H.modify_ \s -> s { lesMisGUPSimulation = newState.simulation }
 
   MoveToPhylotaxis -> do
     log "Moving to phylotaxis layout"
     state <- H.get
-    newState <- H.liftEffect $ D3v2.execD3v2SimM { simulation: state.lesMisGUPSimulation } do
+    newState <- H.liftAff $ D3v2.execD3v2SimM { simulation: state.lesMisGUPSimulation } do
       LesMisGUPV2.moveToPhylotaxis
     H.modify_ \s -> s { lesMisGUPSimulation = newState.simulation }
 
   UnpinNodes -> do
     log "Unpinning nodes (returning to force layout)"
     state <- H.get
-    newState <- H.liftEffect $ D3v2.execD3v2SimM { simulation: state.lesMisGUPSimulation } do
+    newState <- H.liftAff $ D3v2.execD3v2SimM { simulation: state.lesMisGUPSimulation } do
       LesMisGUPV2.unpinNodes
     H.modify_ \s -> s { lesMisGUPSimulation = newState.simulation }
 
@@ -193,6 +193,6 @@ handleAction = case _ of
     case state.originalGraph of
       Nothing -> log "Error: Original graph data not loaded"
       Just graph -> do
-        newState <- H.liftEffect $ D3v2.execD3v2SimM { simulation: state.lesMisGUPSimulation } do
+        newState <- H.liftAff $ D3v2.execD3v2SimM { simulation: state.lesMisGUPSimulation } do
           LesMisGUPV2.filterByGroupWithOriginal minGroup graph
         H.modify_ \s -> s { lesMisGUPSimulation = newState.simulation }

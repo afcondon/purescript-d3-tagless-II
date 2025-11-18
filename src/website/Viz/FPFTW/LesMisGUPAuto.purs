@@ -19,6 +19,7 @@ import Data.Time.Duration (Milliseconds(..))
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (Aff, delay, launchAff_)
+import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import Effect.Random (randomInt)
@@ -320,7 +321,7 @@ autoCycleGraph simStateRef allNodes allLinks linksGroupSel nodesGroupSel allNode
       currentState <- liftEffect $ Ref.read simStateRef
 
       -- Run update and get new state
-      newState <- liftEffect $ execD3v2SimM currentState do
+      newState <- liftAff $ execD3v2SimM currentState do
         updateGraph nodesWithPositions activeLinks linksGroupSel nodesGroupSel
 
       -- Store updated state back in Ref

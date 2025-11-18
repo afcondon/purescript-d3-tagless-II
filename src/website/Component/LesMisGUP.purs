@@ -200,7 +200,7 @@ handleAction = case _ of
         state <- H.get
 
         -- Draw initial visualization using declarative pattern
-        Tuple result newState <- H.liftEffect $ D3v2.runD3v2SimM state do
+        Tuple result newState <- H.liftAff $ D3v2.runD3v2SimM state do
           let forcesArray = [ forces.manyBodyNeg, forces.collision, forces.center, forces.links ]
           LesMisGUP.drawLesMisGUP forcesArray activeForces model "#lesmis-gup-viz"
 
@@ -218,7 +218,7 @@ handleAction = case _ of
       Just model, Just sels -> do
         -- Run the scene switch in the D3v2SimM monad
         let selections = { nodes: sels.nodesGroup, links: sels.linksGroup }
-        Tuple _ newState <- H.liftEffect $ D3v2.runD3v2SimM state do
+        Tuple _ newState <- H.liftAff $ D3v2.runD3v2SimM state do
           case sceneType of
             FullGraph ->
               LesMisGUP.switchToFullGraph selections model activeForces

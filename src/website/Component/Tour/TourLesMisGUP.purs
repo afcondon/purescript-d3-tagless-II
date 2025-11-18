@@ -64,7 +64,7 @@ handleAction = case _ of
             initialState = { simulation: initialSimulationState forceLibrary }
 
         -- Start auto-cycling GUP demo
-        liftEffect $ void $ D3v2.runD3v2SimM initialState $ LesMisGUPAuto.drawLesMisGUPAuto graph.nodes graph.links "#lesmis-gup-auto-viz" width height
+        H.liftAff $ void $ D3v2.runD3v2SimM initialState $ LesMisGUPAuto.drawLesMisGUPAuto graph.nodes graph.links "#lesmis-gup-auto-viz" width height
 
     pure unit
 

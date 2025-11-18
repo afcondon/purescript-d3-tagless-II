@@ -146,7 +146,7 @@ handleAction = case _ of
             activeForces = Set.fromFoldable ["many body negative", "collision", "center", linksForceName_]
 
         state <- H.get
-        newState <- H.liftEffect $ D3v2.execD3v2SimM { simulation: state.simulation } do
+        newState <- H.liftAff $ D3v2.execD3v2SimM { simulation: state.simulation } do
           ModuleGraphViz.drawModuleGraph forcesArray activeForces graph "#module-graph-viz"
         H.modify_ \s -> s { simulation = newState.simulation }
         log "ModuleGraph: Initialized successfully"

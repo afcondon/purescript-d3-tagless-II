@@ -22,6 +22,7 @@ import Affjax.Web as AJAX
 import D3.Viz.LesMiserables.File (readGraphFromFileContents)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
+import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import Partial.Unsafe (unsafePartial, unsafeCrashWith)
@@ -97,7 +98,7 @@ testLesMisTree = launchAff_ do
   let initialState = { simulation: initialSimulationState forceLibrary }
 
   -- Run with simulation state management
-  liftEffect $ void $ runD3v2SimM initialState do
+  void $ liftAff $ runD3v2SimM initialState do
     drawLesMisTree forcesArray activeForces model "#viz"
 
 -- | Draw LesMis using Tree API
