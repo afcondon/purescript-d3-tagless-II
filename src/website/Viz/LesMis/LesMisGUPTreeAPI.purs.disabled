@@ -1,0 +1,251 @@
+module D3.Viz.LesMis.LesMisGUPTreeAPI where
+
+-- | LesMis GUP example using TreeAPI's SceneJoin
+-- |
+-- | This demonstrates the fully declarative approach to General Update Pattern
+-- | using TreeAPI's SceneJoin variant instead of manual genericUpdateSimulation.
+
+import Prelude
+
+import D3.Viz.LesMiserables.Model (LesMisNodeRow, LesMisRawModel, LesMisSimNode)
+import D3.Viz.LesMis.LesMisScenes (fullGraphScene, filteredGraphScene, gridScene, phylotaxisScene)
+import Data.Array as Array
+import Data.Int (toNumber)
+import Data.Map as Map
+import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Set as Set
+import Data.Tuple (Tuple(..))
+import Effect.Class (liftEffect)
+import PSD3.Data.Node (D3Link_Swizzled, D3Link_Unswizzled)
+import PSD3.Internal.Attributes.Instances (Label)
+import PSD3.Internal.FFI (keyIsID_)
+import PSD3.Internal.Simulation.Types (Force)
+import PSD3v2.Attribute.Types (class_, height, id_, viewBox, width, cx, cy, radius, fill, stroke, strokeWidth, x1, y1, x2, y2)
+import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultDrag, defaultZoom)
+import PSD3v2.Capabilities.Selection (on, renderTree, select)
+import PSD3v2.Capabilities.Simulation (init, start, stop, reheat)
+import PSD3v2.Interpreter.D3v2 (D3v2SimM, D3v2Selection_, reselectD3v2)
+import PSD3v2.Selection.Types (ElementType(..), SBound, SEmpty)
+import PSD3v2.Simulation.Scene (SceneConfig)
+import PSD3v2.Transition.Types (TransitionConfig, Easing(CubicIn, CubicInOut), transition)
+import Data.Time.Duration (Milliseconds(..))
+import PSD3v2.VizTree.Tree as T
+import Unsafe.Coerce (unsafeCoerce)
+import Utility (getWindowWidthHeight)
+import Web.DOM.Element (Element)
+
+-- | Initial setup using TreeAPI's declarative SceneJoin
+-- |
+-- | This creates the structure and initial scene using SceneJoin for
+-- | fully declarative enter/update/exit behavior
+drawLesMisGUPTreeAPI :: forall row.
+  Array (Force LesMisSimNode) ->
+  Set.Set Label ->
+  LesMisRawModel ->
+  String ->
+  D3v2SimM row LesMisSimNode
+    { selections :: Map.Map String (D3v2Selection_ SEmpty Element Unit)
+    , model :: LesMisRawModel
+    }
+drawLesMisGUPTreeAPI forcesArray activeForces model containerSelector = do
+  -- Get window dimensions
+  (Tuple w h) <- liftEffect getWindowWidthHeight
+
+  -- Select container
+  container <- select containerSelector
+
+  -- Get the initial scene configuration
+  let scene = fullGraphScene activeForces
+
+  -- Declarative tree structure using SceneJoin for nodes and links
+  let forceGraphTree :: T.Tree Unit
+      forceGraphTree =
+        T.named SVG "svg"
+          [ width w
+          , height h
+          , viewBox (show ((-w) / 2.0) <> " " <> show ((-h) / 2.0) <> " " <> show w <> " " <> show h)
+          , id_ "lesmis-gup-tree-svg"
+          , class_ "lesmis-gup-tree"
+          ]
+          `T.withChild`
+            (T.named Group "zoomGroup"
+              [ id_ "zoom-group"
+              , class_ "zoom-group"
+              ]
+              `T.withChildren`
+                [ -- Links as SceneJoin
+                  T.sceneJoin "linksJoin" "line"
+                    (filterLinks model.nodes model.links scene.linksShown)
+                    (\link -> T.elem Line
+                      [ x1 (getLinkSourceX link)
+                      , y1 (getLinkSourceY link)
+                      , x2 (getLinkTargetX link)
+                      , y2 (getLinkTargetY link)
+                      , stroke "#999"
+                      , strokeWidth 1.0
+                      ])
+                    { enterBehavior: Just
+                        { initialAttrs:
+                            [ stroke "#999"
+                            , strokeWidth 0.0  -- Start invisible
+                            ]
+                        , transition: Just
+                            { duration: Milliseconds 500.0
+                            , delay: Nothing
+                            , easing: Just CubicInOut
+                            }
+                        }
+                    , updateBehavior: Just
+                        { attrs: []
+                        , transition: Just
+                            { duration: Milliseconds 500.0
+                            , delay: Nothing
+                            , easing: Just CubicInOut
+                            }
+                        }
+                    , exitBehavior: Just
+                        { attrs: []
+                        , transition: Just
+                            { duration: Milliseconds 300.0
+                            , delay: Nothing
+                            , easing: Just CubicIn
+                            }
+                        }
+                    }
+                , -- Nodes as SceneJoin
+                  T.sceneJoin "nodesJoin" "circle"
+                    (filterNodes model.nodes scene.chooseNodes)
+                    (\node -> T.elem Circle
+                      [ cx (getNodeX node)
+                      , cy (getNodeY node)
+                      , radius (getNodeRadius node)
+                      , fill (getNodeFill node)
+                      , stroke "#fff"
+                      , strokeWidth 1.5
+                      ])
+                    { enterBehavior: Just
+                        { initialAttrs:
+                            [ cx 0.0
+                            , cy 0.0
+                            , radius 0.0
+                            ]
+                        , transition: Just
+                            { duration: Milliseconds 500.0
+                            , delay: Nothing
+                            , easing: Just CubicInOut
+                            }
+                        }
+                    , updateBehavior: Just
+                        { attrs: []
+                        , transition: Just
+                            { duration: Milliseconds 500.0
+                            , delay: Nothing
+                            , easing: Just CubicInOut
+                            }
+                        }
+                    , exitBehavior: Just
+                        { attrs: []
+                        , transition: Just
+                            { duration: Milliseconds 300.0
+                            , delay: Nothing
+                            , easing: Just CubicIn
+                            }
+                        }
+                    }
+                ])
+
+  -- Render the structure tree
+  selections <- renderTree container forceGraphTree
+
+  -- Extract selections for behaviors
+  svg <- liftEffect $ reselectD3v2 "svg" selections
+  zoomGroup <- liftEffect $ reselectD3v2 "zoomGroup" selections
+
+  -- Attach drag behavior to zoom group (allows panning)
+  _ <- on (Drag defaultDrag) zoomGroup
+
+  -- Attach zoom behavior to SVG
+  _ <- on (Zoom $ defaultZoom (ScaleExtent 0.5 4.0) "#zoom-group") svg
+
+  -- Initialize simulation
+  _ <- init
+    { nodes: model.nodes
+    , links: model.links
+    , forces: forcesArray
+    , activeForces: activeForces
+    , config:
+        { alpha: 1.0
+        , alphaTarget: 0.0
+        , alphaMin: 0.001
+        , alphaDecay: 0.0228
+        , velocityDecay: 0.4
+        }
+    , keyFn: keyIsID_
+    , ticks: Map.empty
+    }
+
+  -- Start simulation
+  start
+
+  -- Return selections and model for future scene switches
+  pure { selections, model }
+
+-- | Helper: Filter nodes based on scene configuration
+filterNodes :: Array LesMisSimNode -> (LesMisSimNode -> Boolean) -> Array LesMisSimNode
+filterNodes nodes predicate = Array.filter predicate nodes
+
+-- | Helper: Filter links based on shown links predicate
+filterLinks :: Array LesMisSimNode -> Array D3Link_Unswizzled -> (D3Link_Unswizzled -> Boolean) -> Array D3Link_Unswizzled
+filterLinks nodes links predicate =
+  let visibleNodeIDs = Set.fromFoldable $ map (\n -> (unsafeCoerce n :: { id :: String }).id) nodes
+      structuralFilter link =
+        let linkIDs = unsafeCoerce link :: { source :: String, target :: String }
+        in Set.member linkIDs.source visibleNodeIDs && Set.member linkIDs.target visibleNodeIDs
+      filtered = Array.filter structuralFilter links
+  in Array.filter predicate filtered
+
+-- | Helper: Get node x coordinate (from simulation or layout)
+getNodeX :: LesMisSimNode -> Number
+getNodeX node = (unsafeCoerce node :: { x :: Maybe Number }).x # fromMaybe 0.0
+
+-- | Helper: Get node y coordinate
+getNodeY :: LesMisSimNode -> Number
+getNodeY node = (unsafeCoerce node :: { y :: Maybe Number }).y # fromMaybe 0.0
+
+-- | Helper: Get node radius
+getNodeRadius :: LesMisSimNode -> Number
+getNodeRadius node =
+  let groupVal = (unsafeCoerce node :: { group :: Int }).group
+  in 3.0 + (toNumber groupVal * 0.5)
+
+-- | Helper: Get node fill color
+getNodeFill :: LesMisSimNode -> String
+getNodeFill node =
+  let groupVal = (unsafeCoerce node :: { group :: Int }).group
+  in case groupVal `mod` 10 of
+    0 -> "#1f77b4"
+    1 -> "#ff7f0e"
+    2 -> "#2ca02c"
+    3 -> "#d62728"
+    4 -> "#9467bd"
+    5 -> "#8c564b"
+    6 -> "#e377c2"
+    7 -> "#7f7f7f"
+    8 -> "#bcbd22"
+    _ -> "#17becf"
+
+-- | Helper: Get link source x
+getLinkSourceX :: D3Link_Swizzled -> Number
+getLinkSourceX link = (unsafeCoerce link :: { source :: { x :: Maybe Number } }).source.x # fromMaybe 0.0
+
+-- | Helper: Get link source y
+getLinkSourceY :: D3Link_Swizzled -> Number
+getLinkSourceY link = (unsafeCoerce link :: { source :: { y :: Maybe Number } }).source.y # fromMaybe 0.0
+
+-- | Helper: Get link target x
+getLinkTargetX :: D3Link_Swizzled -> Number
+getLinkTargetX link = (unsafeCoerce link :: { target :: { x :: Maybe Number } }).target.x # fromMaybe 0.0
+
+-- | Helper: Get link target y
+getLinkTargetY :: D3Link_Swizzled -> Number
+getLinkTargetY link = (unsafeCoerce link :: { target :: { y :: Maybe Number } }).target.y # fromMaybe 0.0

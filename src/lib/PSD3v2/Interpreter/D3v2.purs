@@ -106,6 +106,10 @@ instance SelectionM D3v2Selection_ D3v2M where
     result <- Ops.selectAll selector sel
     pure $ D3v2Selection_ result
 
+  openSelection (D3v2Selection_ sel) selector = D3v2M do
+    result <- Ops.selectAll selector sel
+    pure $ D3v2Selection_ result
+
   renderData elemType foldableData selector (D3v2Selection_ emptySelection) enterAttrs updateAttrs exitAttrs = D3v2M do
     result <- Ops.renderData elemType foldableData selector emptySelection enterAttrs updateAttrs exitAttrs
     pure $ D3v2Selection_ result
@@ -119,6 +123,14 @@ instance SelectionM D3v2Selection_ D3v2M where
       }
 
   joinDataWithKey foldableData keyFn selector (D3v2Selection_ emptySelection) = D3v2M do
+    JoinResult { enter, update, exit } <- Ops.joinDataWithKey foldableData keyFn selector emptySelection
+    pure $ JoinResult
+      { enter: D3v2Selection_ enter
+      , update: D3v2Selection_ update
+      , exit: D3v2Selection_ exit
+      }
+
+  updateJoin (D3v2Selection_ emptySelection) _elemType foldableData keyFn selector = D3v2M do
     JoinResult { enter, update, exit } <- Ops.joinDataWithKey foldableData keyFn selector emptySelection
     pure $ JoinResult
       { enter: D3v2Selection_ enter
@@ -285,6 +297,18 @@ instance SelectionM D3v2Selection_ (D3v2SimM row d) where
   selectAll tag (D3v2Selection_ parent) = liftEffect $ do
     selection <- Ops.selectAll tag parent
     pure $ D3v2Selection_ selection
+
+  openSelection (D3v2Selection_ parent) tag = liftEffect $ do
+    selection <- Ops.selectAll tag parent
+    pure $ D3v2Selection_ selection
+
+  updateJoin (D3v2Selection_ emptySelection) _elemType foldableData keyFn selector = liftEffect $ do
+    JoinResult { enter, update, exit } <- Ops.joinDataWithKey foldableData keyFn selector emptySelection
+    pure $ JoinResult
+      { enter: D3v2Selection_ enter
+      , update: D3v2Selection_ update
+      , exit: D3v2Selection_ exit
+      }
 
   renderData elemType foldable tag (D3v2Selection_ parent) enterFn updateFn exitFn = liftEffect $ do
     bound <- Ops.renderData elemType foldable tag parent enterFn updateFn exitFn

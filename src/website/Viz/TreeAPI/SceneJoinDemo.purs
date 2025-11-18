@@ -9,6 +9,7 @@ import Prelude
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Time.Duration (Milliseconds(..))
 import Effect (Effect)
+import Effect.Class (liftEffect)
 import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..), class_, cx, cy, fill, height, id_, radius, stroke, strokeWidth, viewBox, width)
 import PSD3v2.Capabilities.Selection (renderTree, select)
 import PSD3v2.Interpreter.D3v2 (D3v2M)
@@ -22,10 +23,12 @@ type DataPoint = { x :: Number, y :: Number, color :: String }
 -- | Scene data (holds all points for the scene)
 type SceneData = { points :: Array DataPoint }
 
--- | Create SVG container once (called only in Initialize)
+-- | Create SVG container (clears existing content first)
 createSvgContainer :: String -> D3v2M Unit
 createSvgContainer containerSelector = do
   container <- select containerSelector
+  -- Clear any existing content to avoid duplicate SVGs
+  liftEffect $ clearInnerHTML containerSelector
   let svgTree :: T.Tree Unit
       svgTree = T.named SVG "svg"
         [ width 800.0
@@ -38,10 +41,13 @@ createSvgContainer containerSelector = do
   _ <- renderTree container svgTree
   pure unit
 
+-- | Clear innerHTML of an element (FFI helper)
+foreign import clearInnerHTML :: String -> Effect Unit
+
 -- | Initial render with 5 points
 drawInitial :: String -> D3v2M Unit
 drawInitial containerSelector = do
-  -- Create SVG container if this is first render
+  -- Create SVG container (idempotent - only creates if doesn't exist)
   createSvgContainer containerSelector
   -- Now update the circles
   updateCircles

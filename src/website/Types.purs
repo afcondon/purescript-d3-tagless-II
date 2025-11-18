@@ -102,8 +102,11 @@ data Route
   | Example String  -- Individual example page by ID
   | TreeAPI         -- Tree API examples (declarative tree API)
   | AnimatedTreeCluster  -- Animated Tree ↔ Cluster transitions (flagship example from yesterday)
+  | GeneralUpdatePattern  -- Classic GUP with animated letters (v1 restored)
   | LesMisGUPTree   -- Les Mis with Tree API + GUP + Dynamic Layouts (proof-of-concept)
   | LesMisGUP       -- Les Mis with declarative scene-based PSD3v2 + GUP (clean example)
+  | LesMisGUPSimple -- Les Mis minimal GUP with SceneNestedJoin (12-line update function!)
+  | LesMisGUPClean  -- Les Mis GUP with existing primitives (no wrappers!)
   | ModuleGraph     -- Module dependency graph (dogfooding!)
   | MermaidTreeDemo -- Mermaid interpreter for Tree API (visualizes tree structure)
   | SceneJoinDemo   -- SceneNestedJoin demonstration (GUP with type decomposition)
@@ -134,8 +137,11 @@ instance showRoute :: Show Route where
   show (Example exampleId) = "Example: " <> exampleId
   show TreeAPI = "Tree API Examples"
   show AnimatedTreeCluster = "Animated Tree ↔ Cluster"
+  show GeneralUpdatePattern = "General Update Pattern (Letters)"
   show LesMisGUPTree = "Les Misérables GUP (Tree API)"
   show LesMisGUP = "Les Misérables GUP (PSD3v2)"
+  show LesMisGUPSimple = "Les Misérables GUP (Simple)"
+  show LesMisGUPClean = "Les Misérables GUP (Clean)"
   show ModuleGraph = "Module Graph"
   show MermaidTreeDemo = "Mermaid Tree Visualizer"
   show SceneJoinDemo = "SceneNestedJoin Demo"

@@ -37,8 +37,11 @@ routes =
   <|> examplePage     -- Must come before other routes to match /example/:id
   <|> treeAPI
   <|> animatedTreeCluster
+  <|> generalUpdatePattern
   <|> lesMisGUPTree
   <|> lesMisGUP
+  <|> lesMisGUPSimple
+  <|> lesMisGUPClean
   <|> moduleGraph
   <|> mermaidTreeDemo
   <|> sceneJoinDemo
@@ -130,6 +133,10 @@ treeAPI = TreeAPI <$ lit "tree-api" <* end
 animatedTreeCluster :: Match Route
 animatedTreeCluster = AnimatedTreeCluster <$ lit "animated-tree-cluster" <* end
 
+-- | Match: /general-update-pattern
+generalUpdatePattern :: Match Route
+generalUpdatePattern = GeneralUpdatePattern <$ lit "general-update-pattern" <* end
+
 -- | Match: /lesmis-gup-tree
 lesMisGUPTree :: Match Route
 lesMisGUPTree = LesMisGUPTree <$ lit "lesmis-gup-tree" <* end
@@ -137,6 +144,14 @@ lesMisGUPTree = LesMisGUPTree <$ lit "lesmis-gup-tree" <* end
 -- | Match: /lesmis-gup
 lesMisGUP :: Match Route
 lesMisGUP = LesMisGUP <$ lit "lesmis-gup" <* end
+
+-- | Match: /lesmis-gup-simple
+lesMisGUPSimple :: Match Route
+lesMisGUPSimple = LesMisGUPSimple <$ lit "lesmis-gup-simple" <* end
+
+-- | Match: /lesmis-gup-clean
+lesMisGUPClean :: Match Route
+lesMisGUPClean = LesMisGUPClean <$ lit "lesmis-gup-clean" <* end
 
 -- | Match: /module-graph
 moduleGraph :: Match Route
@@ -182,8 +197,11 @@ routeToPath Gallery = "/gallery"
 routeToPath (Example exampleId) = "/example/" <> exampleId
 routeToPath TreeAPI = "/tree-api"
 routeToPath AnimatedTreeCluster = "/animated-tree-cluster"
+routeToPath GeneralUpdatePattern = "/general-update-pattern"
 routeToPath LesMisGUPTree = "/lesmis-gup-tree"
 routeToPath LesMisGUP = "/lesmis-gup"
+routeToPath LesMisGUPSimple = "/lesmis-gup-simple"
+routeToPath LesMisGUPClean = "/lesmis-gup-clean"
 routeToPath ModuleGraph = "/module-graph"
 routeToPath MermaidTreeDemo = "/mermaid-tree-demo"
 routeToPath SceneJoinDemo = "/scene-join-demo"

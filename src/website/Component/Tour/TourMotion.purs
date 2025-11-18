@@ -17,25 +17,36 @@ import Affjax.ResponseFormat as ResponseFormat
 import Data.Either (Either(..))
 import Unsafe.Coerce (unsafeCoerce)
 import D3.Viz.TreeAPI.ThreeLittleCirclesTransition as ThreeLittleCirclesTransition
-import D3.Viz.TreeAPI.GeneralUpdatePattern as GeneralUpdatePattern
+import D3.Viz.GUP as GUP
+import PSD3.Interpreter.D3 (eval_D3M, runD3M)
 import D3.Viz.AnimatedTreeClusterLoop as AnimatedTreeLoop
 import D3.Viz.TreeAPI.LesMisSimple as LesMisSimple
 import D3.Viz.LesMiserables.File (readGraphFromFileContents)
+import Data.Array (catMaybes)
+import Data.String.CodeUnits (toCharArray)
+import Data.Traversable (sequence)
+import Effect.Random (random)
+import Control.Monad.Rec.Class (forever)
+import Effect.Aff (forkAff)
+import Effect (Effect)
 
 -- | Tour page state
-type State = Unit
+type State =
+  { gupFiber :: Maybe (H.ForkId)
+  }
 
 -- | Tour page actions
-data Action = Initialize
+data Action = Initialize | Finalize
 
 -- | Tour page component
 component :: forall q i o m. MonadAff m => H.Component q i o m
 component = H.mkComponent
-  { initialState: \_ -> unit
+  { initialState: \_ -> { gupFiber: Nothing }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
       , initialize = Just Initialize
+      , finalize = Just Finalize
       }
   }
 
@@ -48,8 +59,13 @@ handleAction = case _ of
     -- Render Section 1: Three Circles Transition
     liftEffect $ ThreeLittleCirclesTransition.threeLittleCirclesTransition
 
-    -- Render Section 2: General Update Pattern
-    liftEffect $ GeneralUpdatePattern.generalUpdatePattern
+    -- Render Section 2: General Update Pattern (v1 restored)
+    update <- liftEffect $ eval_D3M $ GUP.exGeneralUpdatePattern "#gup-container"
+    forkId <- H.fork $ forever do
+      letters <- liftEffect getLetters
+      liftEffect $ runD3M (update letters) *> pure unit
+      H.liftAff $ delay (Milliseconds 2300.0)
+    H.modify_ _ { gupFiber = Just forkId }
 
     -- Render Section 3: Animated Tree (load flare data and start loop)
     flareResult <- H.liftAff $ AJAX.get ResponseFormat.json "./data/flare-2.json"
@@ -65,6 +81,26 @@ handleAction = case _ of
     liftEffect $ LesMisSimple.startLesMisSimple lesMisModel "#lesmis-container"
 
     pure unit
+
+  Finalize -> do
+    state <- H.get
+    case state.gupFiber of
+      Nothing -> pure unit
+      Just forkId -> H.kill forkId
+    H.modify_ _ { gupFiber = Nothing }
+
+-- | Choose a string of random letters (no duplicates), ordered alphabetically
+getLetters :: Effect (Array Char)
+getLetters = do
+  let
+    letters = toCharArray "abcdefghijklmnopqrstuvwxyz"
+    coinToss :: Char -> Effect (Maybe Char)
+    coinToss c = do
+      n <- random
+      pure $ if n > 0.6 then Just c else Nothing
+
+  choices <- sequence $ coinToss <$> letters
+  pure $ catMaybes choices
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render _ =

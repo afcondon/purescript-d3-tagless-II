@@ -40,8 +40,11 @@ import Component.ExamplesGallery as ExamplesGallery
 import Component.Example as Example
 import Component.TreeAPI as TreeAPI
 import Component.AnimatedTreeCluster as AnimatedTreeCluster
+import Component.GeneralUpdatePattern as GeneralUpdatePattern
 import Component.LesMisGUPTree as LesMisGUPTree
 import Component.LesMisGUP as LesMisGUP
+import Component.LesMisGUPSimple as LesMisGUPSimple
+import Component.LesMisGUPClean as LesMisGUPClean
 import Component.ModuleGraph as ModuleGraph
 import Component.MermaidTreeDemo as MermaidTreeDemo
 import Component.SceneJoinDemo as SceneJoinDemo
@@ -84,8 +87,11 @@ type Slots =
   , example :: forall q. H.Slot q Void Unit
   , treeAPI :: forall q. H.Slot q Void Unit
   , animatedTreeCluster :: forall q. H.Slot q Void Unit
+  , generalUpdatePattern :: forall q. H.Slot q Void Unit
   , lesMisGUPTree :: forall q. H.Slot q Void Unit
   , lesMisGUP :: forall q. H.Slot q Void Unit
+  , lesMisGUPSimple :: forall q. H.Slot q Void Unit
+  , lesMisGUPClean :: forall q. H.Slot q Void Unit
   , moduleGraph :: forall q. H.Slot q Void Unit
   , mermaidTreeDemo :: forall q. H.Slot q Void Unit
   , sceneJoinDemo :: forall q. H.Slot q Void Unit
@@ -111,8 +117,11 @@ _gallery = Proxy :: Proxy "gallery"
 _example = Proxy :: Proxy "example"
 _treeAPI = Proxy :: Proxy "treeAPI"
 _animatedTreeCluster = Proxy :: Proxy "animatedTreeCluster"
+_generalUpdatePattern = Proxy :: Proxy "generalUpdatePattern"
 _lesMisGUPTree = Proxy :: Proxy "lesMisGUPTree"
 _lesMisGUP = Proxy :: Proxy "lesMisGUP"
+_lesMisGUPSimple = Proxy :: Proxy "lesMisGUPSimple"
+_lesMisGUPClean = Proxy :: Proxy "lesMisGUPClean"
 _moduleGraph = Proxy :: Proxy "moduleGraph"
 _mermaidTreeDemo = Proxy :: Proxy "mermaidTreeDemo"
 _sceneJoinDemo = Proxy :: Proxy "sceneJoinDemo"
@@ -204,11 +213,20 @@ renderPage route = case spy "Route is" route of
   AnimatedTreeCluster ->
     HH.slot_ _animatedTreeCluster unit AnimatedTreeCluster.component unit
 
+  GeneralUpdatePattern ->
+    HH.slot_ _generalUpdatePattern unit GeneralUpdatePattern.component unit
+
   LesMisGUPTree ->
     HH.slot_ _lesMisGUPTree unit LesMisGUPTree.component unit
 
   LesMisGUP ->
     HH.slot_ _lesMisGUP unit LesMisGUP.component unit
+
+  LesMisGUPSimple ->
+    HH.slot_ _lesMisGUPSimple unit LesMisGUPSimple.component unit
+
+  LesMisGUPClean ->
+    HH.slot_ _lesMisGUPClean unit LesMisGUPClean.component unit
 
   ModuleGraph ->
     HH.slot_ _moduleGraph unit ModuleGraph.component unit

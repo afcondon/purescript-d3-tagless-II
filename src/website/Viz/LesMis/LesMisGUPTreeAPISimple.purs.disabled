@@ -1,0 +1,158 @@
+module D3.Viz.LesMis.LesMisGUPTreeAPISimple where
+
+-- | Simple LesMis GUP example using TreeAPI's SceneJoin
+-- |
+-- | This demonstrates SceneJoin for nodes only (no links, no force simulation)
+-- | to show the enter/update/exit pattern clearly.
+
+import Prelude
+
+import D3.Viz.LesMiserables.Model (LesMisRawModel, LesMisSimNode)
+import Data.Array as Array
+import Data.Int (toNumber)
+import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Time.Duration (Milliseconds(..))
+import Data.Tuple (Tuple(..))
+import Effect.Class (liftEffect)
+import PSD3v2.Attribute.Types (class_, cx, cy, fill, height, id_, radius, stroke, strokeWidth, viewBox, width)
+import PSD3v2.Capabilities.Selection (renderTree, select)
+import PSD3v2.Interpreter.D3v2 (D3v2M)
+import PSD3v2.Selection.Types (ElementType(..))
+import PSD3v2.Transition.Types (Easing(CubicIn, CubicInOut))
+import PSD3v2.VizTree.Tree as T
+import Unsafe.Coerce (unsafeCoerce)
+import Utility (getWindowWidthHeight)
+
+-- | Draw initial visualization with all nodes
+drawLesMisSimpleGUP :: LesMisRawModel -> String -> D3v2M Unit
+drawLesMisSimpleGUP model containerSelector = do
+  -- Get window dimensions
+  (Tuple w h) <- liftEffect getWindowWidthHeight
+
+  -- Select container
+  container <- select containerSelector
+
+  -- Create tree with all nodes
+  let tree = createTree w h model.nodes
+
+  -- Render
+  _ <- renderTree container tree
+  pure unit
+
+-- | Update visualization with filtered nodes
+updateLesMisSimpleGUP :: LesMisRawModel -> Int -> String -> D3v2M Unit
+updateLesMisSimpleGUP model minGroup containerSelector = do
+  -- Get window dimensions
+  (Tuple w h) <- liftEffect getWindowWidthHeight
+
+  -- Select container
+  container <- select containerSelector
+
+  -- Filter nodes by group
+  let filteredNodes = Array.filter (\n -> (unsafeCoerce n :: { group :: Int }).group >= minGroup) model.nodes
+      tree = createTree w h filteredNodes
+
+  -- Re-render (this will trigger enter/update/exit)
+  _ <- renderTree container tree
+  pure unit
+
+-- | Wrapper type to hold all nodes data
+type NodesData = { nodes :: Array LesMisSimNode }
+
+-- | Create the tree structure with given nodes
+createTree :: Number -> Number -> Array LesMisSimNode -> T.Tree NodesData
+createTree w h nodes =
+  T.named SVG "svg"
+    [ width w
+    , height h
+    , viewBox (show ((-w) / 2.0) <> " " <> show ((-h) / 2.0) <> " " <> show w <> " " <> show h)
+    , id_ "lesmis-simple-svg"
+    , class_ "lesmis-simple"
+    ]
+    `T.withChild`
+      (T.named Group "mainGroup"
+        [ id_ "main-group"
+        , class_ "main-group"
+        ]
+        `T.withChild`
+          -- Nodes as NestedJoin (to change datum type) + SceneJoin
+          (T.nestedJoin "nodesWrapper" "g"
+            [{ nodes }]  -- Wrap in array
+            (_.nodes)    -- Extract nodes
+            (\node -> T.elem Circle
+              [ cx (getNodeX node w h)
+              , cy (getNodeY node w h)
+              , radius (getNodeRadius node)
+              , fill (getNodeFill node)
+              , stroke "#fff"
+              , strokeWidth 1.5
+              ])
+            { enterBehavior: Just
+                { initialAttrs:
+                    [ cx 0.0
+                    , cy 0.0
+                    , radius 0.0
+                    ]
+                , transition: Just
+                    { duration: Milliseconds 500.0
+                    , delay: Nothing
+                    , easing: Just CubicInOut
+                    }
+                }
+            , updateBehavior: Just
+                { attrs: []
+                , transition: Just
+                    { duration: Milliseconds 500.0
+                    , delay: Nothing
+                    , easing: Just CubicInOut
+                    }
+                }
+            , exitBehavior: Just
+                { attrs: []
+                , transition: Just
+                    { duration: Milliseconds 300.0
+                    , delay: Nothing
+                    , easing: Just CubicIn
+                    }
+                }
+            }))
+
+-- | Helper: Get node x coordinate (layout in a grid for simplicity)
+getNodeX :: LesMisSimNode -> Number -> Number -> Number
+getNodeX node w h =
+  let index = (unsafeCoerce node :: { index :: Maybe Int }).index # fromMaybe 0
+      cols = 10
+      col = index `mod` cols
+      spacing = w / toNumber cols
+  in (toNumber col * spacing) - (w / 2.0) + (spacing / 2.0)
+
+-- | Helper: Get node y coordinate
+getNodeY :: LesMisSimNode -> Number -> Number -> Number
+getNodeY node w h =
+  let index = (unsafeCoerce node :: { index :: Maybe Int }).index # fromMaybe 0
+      cols = 10
+      row = index / cols
+      spacing = h / 10.0
+  in (toNumber row * spacing) - (h / 2.0) + (spacing / 2.0)
+
+-- | Helper: Get node radius
+getNodeRadius :: LesMisSimNode -> Number
+getNodeRadius node =
+  let groupVal = (unsafeCoerce node :: { group :: Int }).group
+  in 3.0 + (toNumber groupVal * 0.5)
+
+-- | Helper: Get node fill color
+getNodeFill :: LesMisSimNode -> String
+getNodeFill node =
+  let groupVal = (unsafeCoerce node :: { group :: Int }).group
+  in case groupVal `mod` 10 of
+    0 -> "#1f77b4"
+    1 -> "#ff7f0e"
+    2 -> "#2ca02c"
+    3 -> "#d62728"
+    4 -> "#9467bd"
+    5 -> "#8c564b"
+    6 -> "#e377c2"
+    7 -> "#7f7f7f"
+    8 -> "#bcbd22"
+    _ -> "#17becf"

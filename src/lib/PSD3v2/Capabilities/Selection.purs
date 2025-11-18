@@ -2,9 +2,11 @@ module PSD3v2.Capabilities.Selection
   ( class SelectionM
   , select
   , selectAll
+  , openSelection
   , renderData
   , joinData
   , joinDataWithKey
+  , updateJoin
   , append
   , appendChild
   , setAttrs
@@ -71,6 +73,21 @@ class Monad m <= SelectionM sel m | m -> sel where
     :: forall state parent parentDatum datum
      . String  -- CSS selector
     -> sel state parent parentDatum
+    -> m (sel SEmpty Element datum)
+
+  -- | Open selection (v1 compatibility API)
+  -- |
+  -- | Alias for selectAll with arguments flipped to match v1 convention.
+  -- | In v1, openSelection took parent first, then selector.
+  -- |
+  -- | Example (v1 style):
+  -- | ```purescript
+  -- | openSel <- openSelection letterGroup "text"
+  -- | ```
+  openSelection
+    :: forall state parent parentDatum datum
+     . sel state parent parentDatum
+    -> String  -- CSS selector
     -> m (sel SEmpty Element datum)
 
   -- | High-level data rendering (recommended for most use cases)
@@ -143,6 +160,31 @@ class Monad m <= SelectionM sel m | m -> sel where
     -> (datum -> key)  -- Key extraction function
     -> String  -- Selector for existing elements
     -> sel SEmpty parent parentDatum
+    -> m (JoinResult sel parent datum)
+
+  -- | Update join (v1 compatibility API)
+  -- |
+  -- | This is a compatibility wrapper that provides similar semantics to v1's updateJoin.
+  -- | Unlike v1 which could infer the selector from the open selection, v2 requires
+  -- | passing the selector string explicitly.
+  -- |
+  -- | Parameters match v1 order: openSelection -> Element -> data -> keyFn -> selector
+  -- | The Element parameter is kept for compatibility but not used internally.
+  -- |
+  -- | Example (v2 style with selector):
+  -- | ```purescript
+  -- | openSel <- openSelection letterGroup "text"
+  -- | { enter, update, exit } <- updateJoin openSel Text letters charToKey "text"
+  -- | ```
+  updateJoin
+    :: forall f parent parentDatum datum key elemType
+     . Foldable f
+    => Ord key
+    => sel SEmpty parent parentDatum
+    -> elemType  -- Element type (not used in v2, kept for v1 compatibility)
+    -> f datum
+    -> (datum -> key)  -- Key extraction function
+    -> String  -- Selector string (required in v2, inferred in v1)
     -> m (JoinResult sel parent datum)
 
   -- | Append new elements to a pending (enter) selection
