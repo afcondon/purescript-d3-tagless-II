@@ -7,6 +7,7 @@ import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import Halogen.HTML.Events as HE
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
@@ -17,6 +18,10 @@ import Affjax.ResponseFormat as ResponseFormat
 import Data.Either (Either(..))
 import Unsafe.Coerce (unsafeCoerce)
 import D3.Viz.TreeAPI.ThreeLittleCirclesTransition as ThreeLittleCirclesTransition
+import Effect.Ref as Ref
+import PSD3v2.Interpreter.D3v2 (D3v2Selection_)
+import PSD3v2.Selection.Types (SBoundOwns)
+import Web.DOM.Element (Element)
 import D3.Viz.GUP as GUP
 import PSD3.Interpreter.D3 (eval_D3M, runD3M)
 import D3.Viz.AnimatedTreeClusterLoop as AnimatedTreeLoop
@@ -33,15 +38,17 @@ import Effect (Effect)
 -- | Tour page state
 type State =
   { gupFiber :: Maybe (H.ForkId)
+  , colorMixingTrigger :: Maybe { stateRef :: Ref.Ref ThreeLittleCirclesTransition.CircleState
+                                 , circlesSel :: D3v2Selection_ SBoundOwns Element ThreeLittleCirclesTransition.CircleData }
   }
 
 -- | Tour page actions
-data Action = Initialize | Finalize
+data Action = Initialize | Finalize | TriggerColorMixing
 
 -- | Tour page component
 component :: forall q i o m. MonadAff m => H.Component q i o m
 component = H.mkComponent
-  { initialState: \_ -> { gupFiber: Nothing }
+  { initialState: \_ -> { gupFiber: Nothing, colorMixingTrigger: Nothing }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -57,7 +64,8 @@ handleAction = case _ of
     H.liftAff $ delay (Milliseconds 100.0)
 
     -- Render Section 1: Three Circles Transition
-    liftEffect $ ThreeLittleCirclesTransition.threeLittleCirclesTransition
+    trigger <- liftEffect $ ThreeLittleCirclesTransition.threeLittleCirclesTransition "#viz"
+    H.modify_ _ { colorMixingTrigger = Just trigger }
 
     -- Render Section 2: General Update Pattern (v1 restored)
     update <- liftEffect $ eval_D3M $ GUP.exGeneralUpdatePattern "#gup-container"
@@ -88,6 +96,12 @@ handleAction = case _ of
       Nothing -> pure unit
       Just forkId -> H.kill forkId
     H.modify_ _ { gupFiber = Nothing }
+
+  TriggerColorMixing -> do
+    state <- H.get
+    case state.colorMixingTrigger of
+      Nothing -> pure unit
+      Just trigger -> liftEffect $ ThreeLittleCirclesTransition.createTransitionTrigger trigger
 
 -- | Choose a string of random letters (no duplicates), ordered alphabetically
 getLetters :: Effect (Array Char)
@@ -133,6 +147,11 @@ render _ =
                 , HP.classes [ HH.ClassName "viz-container" ]
                 ]
                 []
+            , HH.button
+                [ HP.classes [ HH.ClassName "transition-button" ]
+                , HE.onClick \_ -> TriggerColorMixing
+                ]
+                [ HH.text "Transition to RGB" ]
             ]
 
         -- Section 2: General Update Pattern

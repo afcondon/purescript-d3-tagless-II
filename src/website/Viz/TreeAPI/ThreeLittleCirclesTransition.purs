@@ -35,17 +35,17 @@ import Web.DOM.Element (Element)
 type CircleData = Int
 
 -- | State of the circles visualization
-data CircleState = StateHidden | StateRGB
+data CircleState = StateGreen | StateRGB
 
 derive instance Eq CircleState
 
 instance Show CircleState where
-  show StateHidden = "StateHidden"
+  show StateGreen = "StateGreen"
   show StateRGB = "StateRGB"
 
--- | Toggle between states (now just shows RGB from hidden)
+-- | Toggle between states
 toggleState :: CircleState -> CircleState
-toggleState StateHidden = StateRGB
+toggleState StateGreen = StateRGB
 toggleState StateRGB = StateRGB  -- Stay in RGB state once shown
 
 -- | Transition circles to a given state
@@ -58,11 +58,14 @@ transitionToState circlesSel state = runD3v2M do
         }
 
   case state of
-    StateHidden ->
-      -- Start hidden (zero radius, zero opacity)
+    StateGreen ->
+      -- Three green circles in a row
       withTransition transitionConfig circlesSel
-        [ radius 0.0
-        , fillOpacity 0.0
+        [ fill colorFnGreen
+        , cx cxFnGreen
+        , cy cyFnGreen
+        , radius 40.0
+        , fillOpacity 1.0  -- Fully opaque
         ]
     StateRGB ->
       withTransition transitionConfig circlesSel
@@ -75,6 +78,16 @@ transitionToState circlesSel state = runD3v2M do
 
   pure unit
   where
+    -- Green state: all circles green
+    colorFnGreen :: CircleData -> String
+    colorFnGreen _ = "#00ff00"
+
+    cxFnGreen :: CircleData -> Number
+    cxFnGreen d = 100.0 + toNumber d * 100.0  -- Spaced 100px apart
+
+    cyFnGreen :: CircleData -> Number
+    cyFnGreen _ = 125.0  -- All at same height
+
     -- RGB colors: Red, Green, Blue
     colorFnRGB :: CircleData -> String
     colorFnRGB d = case d of
@@ -96,16 +109,16 @@ transitionToState circlesSel state = runD3v2M do
       1 -> 130.0  -- Green at bottom
       _ -> 70.0   -- Blue at top
 
--- | Draw three circles with start button
-threeLittleCirclesTransition :: Effect Unit
-threeLittleCirclesTransition = do
-  -- Create state ref - start hidden
-  stateRef <- Ref.new StateHidden
+-- | Draw three circles with visible initial state
+threeLittleCirclesTransition :: String -> Effect { stateRef :: Ref.Ref CircleState, circlesSel :: D3v2Selection_ SBoundOwns Element CircleData }
+threeLittleCirclesTransition selector = do
+  -- Create state ref - start with green circles
+  stateRef <- Ref.new StateGreen
 
   runD3v2M do
-    container <- select "#viz" :: _ (D3v2Selection_ SEmpty Element Unit)
+    container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
 
-    -- Initial tree: three hidden circles + a "Start" button
+    -- Initial tree: three green circles in a row
     let initialTree :: T.Tree CircleData
         initialTree =
           T.named SVG "svg"
@@ -117,22 +130,13 @@ threeLittleCirclesTransition = do
             `T.withChild`
               (T.joinData "circles" "circle" [0, 1, 2] $ \d ->
                 T.elem Circle
-                  [ fill "#0000ff"  -- Will be overridden by transition
-                  , cx 200.0        -- Start at center
-                  , cy 100.0        -- Start at center
-                  , radius 0.0      -- Start hidden
-                  , fillOpacity 0.0
+                  [ fill "#00ff00"  -- Start green
+                  , cx (100.0 + toNumber d * 100.0)  -- Three in a row
+                  , cy 125.0
+                  , radius 40.0
+                  , fillOpacity 1.0
                   ]
               )
-            `T.withChild`
-              -- Start button as a clickable circle
-              T.named Circle "toggle-btn"
-                [ cx 200.0
-                , cy 220.0
-                , radius 25.0      -- Slightly larger button
-                , fill "#2196F3"   -- Blue button color
-                , fillOpacity 0.9
-                ]
 
     -- Render initial state
     selections <- renderTree container initialTree
@@ -142,20 +146,15 @@ threeLittleCirclesTransition = do
           Just sel -> sel
           Nothing -> unsafePartial $ unsafeCrashWith "circles selection not found"
 
-    -- Extract the toggle button selection
-    let toggleBtnSel = case Map.lookup "toggle-btn" selections of
-          Just sel -> sel
-          Nothing -> unsafePartial $ unsafeCrashWith "toggle button not found"
+    -- Return the state ref and selection so external button can trigger transition
+    pure { stateRef, circlesSel }
 
-    -- Attach click handler using the new onClick behavior
-    liftEffect do
-      _ <- runD3v2M $ on (onClick do
-        currentState <- Ref.read stateRef
-        let newState = toggleState currentState
-        Ref.write newState stateRef
-        log $ "Toggling to: " <> show newState
-        transitionToState circlesSel newState
-      ) toggleBtnSel
-      pure unit
-
-  pure unit
+-- | Helper to create transition function for a button
+-- | Call this after threeLittleCirclesTransition to get a function to attach to a button
+createTransitionTrigger :: { stateRef :: Ref.Ref CircleState, circlesSel :: D3v2Selection_ SBoundOwns Element CircleData } -> Effect Unit
+createTransitionTrigger { stateRef, circlesSel } = do
+  currentState <- Ref.read stateRef
+  let newState = toggleState currentState
+  Ref.write newState stateRef
+  log $ "Transitioning to: " <> show newState
+  transitionToState circlesSel newState

@@ -370,7 +370,7 @@ handleAction = case _ of
     -- Render the selected example
     case example of
       ThreeCircles -> liftEffect ThreeLittleCircles.threeLittleCircles
-      ThreeCirclesTransition -> liftEffect ThreeLittleCirclesTransition.threeLittleCirclesTransition
+      ThreeCirclesTransition -> liftEffect $ void $ ThreeLittleCirclesTransition.threeLittleCirclesTransition "#viz"
       SimpleTree -> liftEffect SimpleTreeExample.testSimpleTree
       NestedElements -> liftEffect NestedElementsExample.testNestedElements
       BarChart -> liftEffect BarChartExample.barChart

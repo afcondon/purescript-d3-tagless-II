@@ -51,7 +51,7 @@ handleAction = case _ of
       "three-little-circles" ->
         liftEffect ThreeLittleCircles.threeLittleCircles
       "three-circles-transition" ->
-        liftEffect ThreeLittleCirclesTransition.threeLittleCirclesTransition
+        liftEffect $ void $ ThreeLittleCirclesTransition.threeLittleCirclesTransition "#viz"
       "simple-tree" ->
         liftEffect SimpleTreeExample.testSimpleTree
       "nested-elements" ->
