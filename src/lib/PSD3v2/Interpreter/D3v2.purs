@@ -7,6 +7,7 @@ module PSD3v2.Interpreter.D3v2
   , execD3v2SimM
   , evalD3v2SimM
   , reselectD3v2
+  , queryAllD3v2
   ) where
 
 import Prelude
@@ -40,6 +41,7 @@ import PSD3v2.Capabilities.Selection (class SelectionM)
 import PSD3v2.Capabilities.Simulation (class SimulationM, class SimulationM2, Step(..))
 import PSD3v2.Capabilities.Transition (class TransitionM)
 import PSD3v2.Selection.Operations as Ops
+import PSD3v2.Selection.Query as Query
 import PSD3v2.Selection.Types (Selection(..), SelectionImpl(..), SBoundOwns, SBoundInherits, SEmpty, JoinResult(..))
 import PSD3v2.Transition.FFI as TransitionFFI
 import Web.DOM.Element (Element)
@@ -593,5 +595,22 @@ reselectD3v2 name selectionsMap = do
   let unwrappedMap = map (\(D3v2Selection_ sel) -> sel) selectionsMap
   -- Call reselect
   result <- Ops.reselect name unwrappedMap
+  -- Wrap result back in D3v2Selection_
+  pure $ D3v2Selection_ result
+
+-- | Query using CSS selector across all named selections
+-- |
+-- | Like `queryAll` but works with D3v2Selection_ wrapper.
+-- | Properly unwraps the newtype before querying.
+queryAllD3v2
+  :: forall datum datumOut
+   . String  -- ^ CSS selector
+  -> Map.Map String (D3v2Selection_ SBoundOwns Element datum)
+  -> Effect (D3v2Selection_ SEmpty Element datumOut)
+queryAllD3v2 selector selectionsMap = do
+  -- Unwrap D3v2Selection_ to Selection - CRITICAL!
+  let unwrappedMap = map (\(D3v2Selection_ sel) -> sel) selectionsMap
+  -- Call queryAll from Query module
+  result <- Query.queryAll selector unwrappedMap
   -- Wrap result back in D3v2Selection_
   pure $ D3v2Selection_ result

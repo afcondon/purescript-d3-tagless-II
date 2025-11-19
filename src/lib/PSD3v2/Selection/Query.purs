@@ -1,15 +1,61 @@
--- | Selection Query Language
+-- | EXPERIMENTAL: Selection Query Language
+-- |
+-- | **Status: Experimental - API may change**
 -- |
 -- | Provides CSS-style querying across named selections for dynamic selection manipulation.
 -- | This module is orthogonal to the core selection API and can be used selectively.
 -- |
--- | ## Type Safety and Data Coercion
+-- | ## Known Issues and Limitations
 -- |
--- | Query functions return `Selection SEmpty Element datumOut` where `datumOut` is polymorphic.
--- | The caller must specify the expected datum type, which is controlled coercion:
--- | - Type safety is enforced by later operations (data joins, attribute setters)
--- | - Accessing data on the wrong type will cause runtime errors
--- | - The phantom type system prevents calling data operations on unbound selections
+-- | ### 1. D3v2Selection_ Unwrapping
+-- |
+-- | When using with the D3v2 interpreter, you **cannot** simply `unsafeCoerce` from
+-- | `Map String (D3v2Selection_ ...)` to `Map String (Selection ...)`.
+-- | The newtype constructor must be properly unwrapped:
+-- |
+-- | ```purescript
+-- | -- ❌ WRONG: unsafeCoerce doesn't properly unwrap newtype constructors
+-- | let unwrapped = unsafeCoerce selections
+-- | groupCircles <- queryAll ".group-1" unwrapped  -- Returns empty!
+-- |
+-- | -- ✅ RIGHT: Pattern match to unwrap each selection
+-- | let unwrapped = map (\(D3v2Selection_ sel) -> sel) selections
+-- | groupCircles <- queryAll ".group-1" unwrapped  -- Works correctly
+-- |
+-- | -- ✅ BEST: Use the wrapper function
+-- | groupCircles <- queryAllD3v2 ".group-1" selections  -- Handles unwrapping
+-- | ```
+-- |
+-- | See `queryAllD3v2` in `PSD3v2.Interpreter.D3v2` for the correct wrapper.
+-- |
+-- | ### 2. Phantom Type Transitions
+-- |
+-- | Query functions return `SEmpty` selections (no bound data), but you may know
+-- | that elements have data from prior joins. Currently requires `unsafeCoerce`
+-- | to transition from `SEmpty` to `SBoundOwns` for attribute operations.
+-- |
+-- | ### 3. Controlled Coercion
+-- |
+-- | The `datumOut` type parameter is polymorphic, allowing the caller to specify
+-- | the expected datum type. This is safe only if you know what data is bound
+-- | to the queried elements. Type safety is enforced by later operations.
+-- |
+-- | ## Alternative Approaches
+-- |
+-- | For simpler use cases, consider:
+-- | - **Direct DOM API**: Use `document.querySelectorAll` from JavaScript/FFI
+-- | - **CSS selector passthrough**: Store selectors as strings, apply later in
+-- |   a visualization builder/live-editor context
+-- | - **Document-level queries**: Simpler API that searches the whole document
+-- |   instead of within named selections
+-- |
+-- | ## Intended Use Cases
+-- |
+-- | - Interactive visualization builders with live-editing
+-- | - Prototyping with CSS selectors before principled implementation
+-- | - Dynamic selection and modification based on data properties
+-- | - Testing and debugging selections in development
+-- | - Meta-tree editing with selector annotations and lambda attributes
 -- |
 -- | ## Example Usage
 -- |
@@ -17,8 +63,8 @@
 -- | -- Query within a named selection
 -- | activeCircles <- queryIn "nodesGroup" "circle.active" selections
 -- |
--- | -- Query across all selections
--- | allCircles <- queryAll "circle" selections
+-- | -- Query across all selections (with D3v2 interpreter)
+-- | allCircles <- queryAllD3v2 "circle" selections
 -- |
 -- | -- Filter by data predicate (requires bound selection)
 -- | largeNodes <- filterByData (_.value > 100) nodeCircles
