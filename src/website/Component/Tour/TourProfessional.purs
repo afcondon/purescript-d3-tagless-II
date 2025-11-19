@@ -54,9 +54,9 @@ render _ =
             [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
             [ HH.h1
                 [ HP.classes [ HH.ClassName "tutorial-title" ] ]
-                [ HH.text "2. Simple Charts" ]
+                [ HH.text "2. Typical Charts" ]
             , HH.p_
-                [ HH.text "Real-world examples of common chart types showing state-level US population data and economic indicators. Compared to the previous page these charts are more complex, but we classify them as \"simple\" because they don't include hierarchies, animations, transitions, or physical simulations." ]
+                [ HH.text "Real-world examples of common chart types showing state-level US population data and economic indicators. These are the kinds of charts you'd typically create for data analysis and reporting - more complex than the foundations, but without hierarchies, animations, transitions, or physical simulations." ]
             , HH.p_
                 [ HH.text "Each example demonstrates best practices for scales, axes, legends, and color coding to create clear and informative visualizations." ]
             ]

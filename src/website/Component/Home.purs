@@ -148,10 +148,10 @@ render _ =
             [ renderTutorialLink "1. Foundations"
                 "Three circles, nested data, bar charts - the building blocks of visualization"
                 (routeToPath TourFoundations)
-            , renderTutorialLink "2. Professional Charts"
+            , renderTutorialLink "2. Typical Charts"
                 "Grouped bars, multi-line, radial stacked - production-ready visualizations"
                 (routeToPath TourProfessional)
-            , renderTutorialLink "3. Flow Diagrams"
+            , renderTutorialLink "3. Data Flow"
                 "Chord and Sankey diagrams for relationships and flows"
                 (routeToPath TourFlow)
             , renderTutorialLink "4. Hierarchies"

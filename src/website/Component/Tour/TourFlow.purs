@@ -63,7 +63,7 @@ render _ =
             [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
             [ HH.h1
                 [ HP.classes [ HH.ClassName "tutorial-title" ] ]
-                [ HH.text "4. Data Flow Visualizations" ]
+                [ HH.text "3. Data Flow" ]
             , HH.p_
                 [ HH.text "Chord and Sankey diagrams are specialized visualizations for showing relationships and flows between entities. Both use visual metaphors - ribbons and flows - to make complex interconnections immediately comprehensible." ]
             , HH.p_

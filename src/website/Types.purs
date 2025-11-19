@@ -128,8 +128,8 @@ instance showRoute :: Show Route where
   show Reference = "API Reference"
   show (ReferenceModule moduleName) = "Module: " <> moduleName
   show TourFoundations = "Tour: Foundations"
-  show TourProfessional = "Tour: Professional Charts"
-  show TourFlow = "Tour: Flow Diagrams"
+  show TourProfessional = "Tour: Typical Charts"
+  show TourFlow = "Tour: Data Flow"
   show TourHierarchies = "Tour: Hierarchies"
   show TourMotion = "Tour: Motion & Transitions"
   show TourInterpreters = "Tour: Alternative Interpreters"
