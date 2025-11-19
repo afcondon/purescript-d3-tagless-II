@@ -217,14 +217,23 @@ parseCSVRowSemicolon line =
           }
 
 -- | Parse bridges CSV data into matrix format
--- | CSV format: origin;destination;value
+-- | CSV format: origin;destination;value (with optional header row)
 parseBridgesCSV :: String -> Either String BridgeData
 parseBridgesCSV csvContent = do
   let lines = split (Pattern "\n") csvContent
   let nonEmptyLines = Array.filter (\line -> trim line /= "") lines
 
+  -- Skip header row if it exists (check if first row contains "From" or "To" or "Value")
+  let dataLines = case Array.head nonEmptyLines of
+        Just firstLine ->
+          let lowerFirst = trim firstLine
+          in if lowerFirst == "From;To;Value" || lowerFirst == "from;to;value" || lowerFirst == "Origin;Destination;Value"
+             then Array.drop 1 nonEmptyLines
+             else nonEmptyLines
+        Nothing -> nonEmptyLines
+
   -- Parse each row
-  let parsedRows = Array.mapMaybe parseRow nonEmptyLines
+  let parsedRows = Array.mapMaybe parseRow dataLines
 
   -- Extract unique region labels (origins and destinations)
   let allRegions = Array.nub $ do
