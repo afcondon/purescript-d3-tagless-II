@@ -908,3 +908,65 @@ pre.line-numbers > code {
   stroke-width: 2;
   z-index: 1;
 }
+
+/* Anscombe's Quartet - smaller, lighter axis text */
+.anscombe-plot .axis text {
+  font-size: 9px;
+  fill: #999;
+}
+
+.anscombe-plot .axis .domain,
+.anscombe-plot .axis .tick line {
+  stroke: #ccc;
+}
+
+/* Anscombe data tables - 2x2 grid matching charts */
+.anscombe-data-tables {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin: 2rem 0;
+  max-width: 600px;
+}
+
+.dataset-table-container {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 1rem;
+  background: #fafafa;
+}
+
+.dataset-table-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  text-align: center;
+  color: #333;
+}
+
+.dataset-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.dataset-table th,
+.dataset-table td {
+  padding: 0.4rem 0.6rem;
+  text-align: right;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.dataset-table th {
+  background: #f0f0f0;
+  font-weight: 600;
+  color: #666;
+}
+
+.dataset-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.dataset-table tbody tr:hover {
+  background: #f5f5f5;
+}

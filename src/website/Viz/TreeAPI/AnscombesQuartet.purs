@@ -209,44 +209,6 @@ anscombesQuartet selector = runD3v2M do
                         , fill "steelblue"
                         ]
                   ]
-
-            , -- Statistics table
-              T.named Group "stats"
-                [ transform ("translate(5," <> show (plotSize - 70.0) <> ")")
-                , class_ "stats-table"
-                ]
-                `T.withChildren`
-                  [ T.elem Text
-                      [ x 0.0
-                      , y 0.0
-                      , class_ "stat-label"
-                      , textContent ("Mean X: " <> formatNum dataset.stats.meanX)
-                      ]
-                  , T.elem Text
-                      [ x 0.0
-                      , y 12.0
-                      , class_ "stat-label"
-                      , textContent ("Mean Y: " <> formatNum dataset.stats.meanY)
-                      ]
-                  , T.elem Text
-                      [ x 0.0
-                      , y 24.0
-                      , class_ "stat-label"
-                      , textContent ("Var X: " <> formatNum dataset.stats.varianceX)
-                      ]
-                  , T.elem Text
-                      [ x 0.0
-                      , y 36.0
-                      , class_ "stat-label"
-                      , textContent ("Var Y: " <> formatNum dataset.stats.varianceY)
-                      ]
-                  , T.elem Text
-                      [ x 0.0
-                      , y 48.0
-                      , class_ "stat-label"
-                      , textContent ("Corr: " <> formatNum dataset.stats.correlation)
-                      ]
-                  ]
             ]
 
   -- Build all four plots

@@ -18,6 +18,68 @@ import D3.Viz.TreeAPI.ParabolaNoAxes as ParabolaNoAxes
 import D3.Viz.TreeAPI.ParabolaWithAxes as ParabolaWithAxes
 import D3.Viz.TreeAPI.AnscombesQuartet as AnscombesQuartet
 
+-- | Anscombe's Quartet datasets for full data tables
+type Point = { x :: Number, y :: Number }
+
+datasetA :: Array Point
+datasetA =
+  [ { x: 10.0, y: 8.04 }, { x: 8.0, y: 6.95 }, { x: 13.0, y: 7.58 }
+  , { x: 9.0, y: 8.81 }, { x: 11.0, y: 8.33 }, { x: 14.0, y: 9.96 }
+  , { x: 6.0, y: 7.24 }, { x: 4.0, y: 4.26 }, { x: 12.0, y: 10.84 }
+  , { x: 7.0, y: 4.82 }, { x: 5.0, y: 5.68 }
+  ]
+
+datasetB :: Array Point
+datasetB =
+  [ { x: 10.0, y: 9.14 }, { x: 8.0, y: 8.14 }, { x: 13.0, y: 8.74 }
+  , { x: 9.0, y: 8.77 }, { x: 11.0, y: 9.26 }, { x: 14.0, y: 8.10 }
+  , { x: 6.0, y: 6.13 }, { x: 4.0, y: 3.10 }, { x: 12.0, y: 9.13 }
+  , { x: 7.0, y: 7.26 }, { x: 5.0, y: 4.74 }
+  ]
+
+datasetC :: Array Point
+datasetC =
+  [ { x: 10.0, y: 7.46 }, { x: 8.0, y: 6.77 }, { x: 13.0, y: 12.74 }
+  , { x: 9.0, y: 7.11 }, { x: 11.0, y: 7.81 }, { x: 14.0, y: 8.84 }
+  , { x: 6.0, y: 6.08 }, { x: 4.0, y: 5.39 }, { x: 12.0, y: 8.15 }
+  , { x: 7.0, y: 6.42 }, { x: 5.0, y: 5.73 }
+  ]
+
+datasetD :: Array Point
+datasetD =
+  [ { x: 8.0, y: 6.58 }, { x: 8.0, y: 5.76 }, { x: 8.0, y: 7.71 }
+  , { x: 8.0, y: 8.84 }, { x: 8.0, y: 8.47 }, { x: 8.0, y: 7.04 }
+  , { x: 8.0, y: 5.25 }, { x: 19.0, y: 12.50 }, { x: 8.0, y: 5.56 }
+  , { x: 8.0, y: 7.91 }, { x: 8.0, y: 6.89 }
+  ]
+
+-- | Render a dataset table with all points
+renderDatasetTable :: forall w i. String -> Array Point -> HH.HTML w i
+renderDatasetTable name points =
+  HH.div
+    [ HP.classes [ HH.ClassName "dataset-table-container" ] ]
+    [ HH.h4
+        [ HP.classes [ HH.ClassName "dataset-table-title" ] ]
+        [ HH.text $ "Dataset " <> name ]
+    , HH.table
+        [ HP.classes [ HH.ClassName "dataset-table" ] ]
+        [ HH.thead_
+            [ HH.tr_
+                [ HH.th_ [ HH.text "x" ]
+                , HH.th_ [ HH.text "y" ]
+                ]
+            ]
+        , HH.tbody_ $ map renderRow points
+        ]
+    ]
+  where
+    renderRow :: Point -> HH.HTML w i
+    renderRow p =
+      HH.tr_
+        [ HH.td_ [ HH.text $ show p.x ]
+        , HH.td_ [ HH.text $ show p.y ]
+        ]
+
 -- | Tour page state
 type State = Unit
 
@@ -226,6 +288,18 @@ render _ =
                 ]
             , HH.p_
                 [ HH.text "Yet when visualized, the patterns are completely different: linear relationship (A), curved relationship (B), linear with outlier (C), and vertical line with outlier (D)." ]
+            , HH.p_
+                [ HH.text "Here are the complete datasets - notice how different the patterns are when you see all the points:" ]
+
+            -- Full data tables in 2x2 grid
+            , HH.div
+                [ HP.classes [ HH.ClassName "anscombe-data-tables" ] ]
+                [ renderDatasetTable "A" datasetA
+                , renderDatasetTable "B" datasetB
+                , renderDatasetTable "C" datasetC
+                , renderDatasetTable "D" datasetD
+                ]
+
             , HH.div
                 [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
                 [ HH.div
