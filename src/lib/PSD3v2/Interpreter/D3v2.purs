@@ -118,6 +118,10 @@ instance SelectionM D3v2Selection_ D3v2M where
     result <- Ops.renderData elemType foldableData selector emptySelection enterAttrs updateAttrs exitAttrs
     pure $ D3v2Selection_ result
 
+  appendData elemType foldableData attrs (D3v2Selection_ emptySelection) = D3v2M do
+    result <- Ops.appendData elemType foldableData attrs emptySelection
+    pure $ D3v2Selection_ result
+
   joinData foldableData selector (D3v2Selection_ emptySelection) = D3v2M do
     JoinResult { enter, update, exit } <- Ops.joinData foldableData selector emptySelection
     pure $ JoinResult
@@ -324,6 +328,10 @@ instance SelectionM D3v2Selection_ (D3v2SimM row d) where
 
   renderData elemType foldable tag (D3v2Selection_ parent) enterFn updateFn exitFn = liftEffect $ do
     bound <- Ops.renderData elemType foldable tag parent enterFn updateFn exitFn
+    pure $ D3v2Selection_ bound
+
+  appendData elemType foldableData attrs (D3v2Selection_ emptySelection) = liftEffect $ do
+    bound <- Ops.appendData elemType foldableData attrs emptySelection
     pure $ D3v2Selection_ bound
 
   merge (D3v2Selection_ sel1) (D3v2Selection_ sel2) = liftEffect $ do

@@ -11,6 +11,7 @@ module PSD3v2.Selection.Operations
   , joinData
   , joinDataWithKey
   , renderData
+  , appendData
   , on
   , onWithSimulation
   , renderTree
@@ -618,6 +619,50 @@ renderData elemType foldableData selector emptySelection enterAttrs updateAttrs 
 
   -- Merge enter and update
   merge enterBound updateBound
+
+-- | Simple data append for initial renders
+-- |
+-- | A simplified variant of renderData for when you just want to create
+-- | elements from data without worrying about enter/update/exit cycles.
+-- |
+-- | This is perfect for initial renders where you know there are no
+-- | existing elements to update or remove.
+-- |
+-- | Example:
+-- | ```purescript
+-- | svg <- select "svg"
+-- | circles <- appendData Circle [1, 2, 3]
+-- |   [radius 10.0, fill "steelblue", cx (\d _ -> d * 100.0)]
+-- |   svg
+-- | ```
+appendData
+  :: forall f parent parentDatum datum m
+   . MonadEffect m
+  => Foldable f
+  => ElementType
+  -> f datum
+  -> Array (Attribute datum)
+  -> Selection SEmpty parent parentDatum
+  -> m (Selection SBoundOwns Element datum)
+appendData elemType foldableData attrs emptySelection = liftEffect do
+  -- Extract parent elements and document from the empty selection
+  let Selection impl = emptySelection
+  let { parentElements, document: doc } = unsafePartial case impl of
+        EmptySelection r -> r
+
+  -- Convert data to array
+  let dataArray = Array.fromFoldable foldableData
+
+  -- Create a pending selection with the data
+  let pendingSelection = Selection $ PendingSelection
+        { parentElements: parentElements
+        , pendingData: dataArray
+        , indices: Just (Array.range 0 (Array.length dataArray - 1))
+        , document: doc
+        }
+
+  -- Append elements with attributes
+  append elemType attrs pendingSelection
 
 -- ============================================================================
 -- Helper Functions

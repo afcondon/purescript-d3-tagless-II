@@ -4,6 +4,7 @@ module PSD3v2.Capabilities.Selection
   , selectAll
   , openSelection
   , renderData
+  , appendData
   , joinData
   , joinDataWithKey
   , updateJoin
@@ -117,6 +118,29 @@ class Monad m <= SelectionM sel m | m -> sel where
     -> Maybe (datum -> Array (Attribute datum))  -- Enter attributes
     -> Maybe (datum -> Array (Attribute datum))  -- Update attributes
     -> Maybe (datum -> Array (Attribute datum))  -- Exit attributes (applied before removal)
+    -> m (sel SBoundOwns Element datum)
+
+  -- | Simple data append for initial renders
+  -- |
+  -- | A simplified variant for when you just want to create elements
+  -- | without worrying about updates or exits.
+  -- |
+  -- | Perfect for initial renders where there are no existing elements.
+  -- |
+  -- | Example:
+  -- | ```purescript
+  -- | svg <- select "svg"
+  -- | circles <- appendData Circle [1, 2, 3]
+  -- |   [radius 10.0, fill "steelblue"]
+  -- |   svg
+  -- | ```
+  appendData
+    :: forall f parent parentDatum datum
+     . Foldable f
+    => ElementType
+    -> f datum
+    -> Array (Attribute datum)
+    -> sel SEmpty parent parentDatum
     -> m (sel SBoundOwns Element datum)
 
   -- | Low-level data join for power users
