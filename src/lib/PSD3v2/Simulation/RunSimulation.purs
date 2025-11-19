@@ -16,7 +16,7 @@ import PSD3v2.Capabilities.Simulation (class SimulationM2, start, stop)
 import PSD3.Data.Node (D3Link_Unswizzled, SimulationNode)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Types (Datum_)
-import PSD3v2.Simulation.Scene (SceneConfig)
+import PSD3v2.Simulation.Scene (SimSceneConfig)
 import PSD3v2.Simulation.SceneTransition (executeSceneTransition_)
 import PSD3v2.Selection.Types (SBoundOwns, SEmpty)
 import Web.DOM.Element (Element)
@@ -61,12 +61,12 @@ runSimulation :: forall d attrs sel m.
   MonadAff m =>
   SimulationM2 (sel SBoundOwns Element) m =>
   { nodes :: sel SEmpty Element (SimulationNode d), links :: sel SEmpty Element (SimulationNode d) } ->
-  SceneConfig d attrs ->
+  SimSceneConfig d attrs ->
   Array (SimulationNode d) ->
   Array D3Link_Unswizzled ->
   ({ allNodes :: Array (SimulationNode d)
    , allLinks :: Array D3Link_Unswizzled
-   , scene :: SceneConfig d attrs
+   , scene :: SimSceneConfig d attrs
    } -> m Unit) ->
   m Unit
 runSimulation _selections scene allNodes allLinks updateSimFn = do
@@ -140,7 +140,7 @@ runSimulationFromState :: forall d attrs sel m row.
   SimulationM2 (sel SBoundOwns Element) m =>
   MonadState { | row } m =>
   ({ | row } -> { nodes :: sel SEmpty Element (SimulationNode d), links :: sel SEmpty Element (SimulationNode d) }) ->  -- Get selections
-  ({ | row } -> SceneConfig d attrs) ->                                           -- Get scene
+  ({ | row } -> SimSceneConfig d attrs) ->                                           -- Get scene
   ({ | row } -> Array (SimulationNode d)) ->                                   -- Get model nodes
   ({ | row } -> Array D3Link_Unswizzled) ->                                       -- Get model links
   (attrs -> { | row } -> attrs) ->                                                -- Enhance attributes

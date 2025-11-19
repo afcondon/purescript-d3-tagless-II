@@ -28,7 +28,7 @@ import PSD3v2.Capabilities.Selection (on, renderTree, select)
 import PSD3v2.Capabilities.Simulation (init, start, stop, reheat)
 import PSD3v2.Interpreter.D3v2 (D3v2SimM, D3v2Selection_, reselectD3v2)
 import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, SBoundInherits, SEmpty)
-import PSD3v2.Simulation.Scene (SceneConfig)
+import PSD3v2.Simulation.Scene (SimSceneConfig)
 import PSD3v2.Simulation.Update (genericUpdateSimulation)
 import PSD3v2.VizTree.Tree as T
 import Unsafe.Coerce (unsafeCoerce)
@@ -44,7 +44,7 @@ updateLesMisSimulation :: forall row.
   } ->
   { allNodes :: Array LesMisSimNode
   , allLinks :: Array D3Link_Unswizzled
-  , scene :: SceneConfig LesMisNodeRow LesMisAttributes
+  , scene :: SimSceneConfig LesMisNodeRow LesMisAttributes
   } ->
   D3v2SimM row LesMisSimNode Unit
 updateLesMisSimulation selections { allNodes, allLinks, scene } = do

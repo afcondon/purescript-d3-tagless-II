@@ -137,7 +137,7 @@ type SimulationComponentState scene action id nodeData attrs model =
   , staging :: Staging (D3Selection_ (SimulationNode nodeData)) nodeData
 
     -- | Current scene configuration (filters, forces, attributes, initializers)
-  , scene :: Scene.SceneConfig nodeData attrs
+  , scene :: Scene.SimSceneConfig nodeData attrs
 
     -- | Current scene identifier (for transition matrix lookups)
   , currentScene :: scene
@@ -183,7 +183,7 @@ type TransitionMatrix scene = M.Map (Tuple scene scene) Scene.TransitionSpec
 -- | Update the scene configuration with a function
 -- | Use this when you want to modify specific scene fields
 updateScene :: forall scene action id nodeData attrs model.
-  (Scene.SceneConfig nodeData attrs -> Scene.SceneConfig nodeData attrs) ->
+  (Scene.SimSceneConfig nodeData attrs -> Scene.SimSceneConfig nodeData attrs) ->
   SimulationComponentState scene action id nodeData attrs model ->
   SimulationComponentState scene action id nodeData attrs model
 updateScene f state = state { scene = f state.scene }
@@ -193,7 +193,7 @@ updateScene f state = state { scene = f state.scene }
 -- | This replaces the entire scene configuration in one step.
 -- | Filtering and initialization happen later inside runSimulation.
 applySceneConfig :: forall scene action id nodeData attrs model.
-  Scene.SceneConfig nodeData attrs ->
+  Scene.SimSceneConfig nodeData attrs ->
   SimulationComponentState scene action id nodeData attrs model ->
   SimulationComponentState scene action id nodeData attrs model
 applySceneConfig config state = state { scene = config }
@@ -220,7 +220,7 @@ applySceneConfig config state = state { scene = config }
 applySceneWithTransition :: forall scene action id nodeData attrs model.
   Ord scene =>
   scene ->
-  Scene.SceneConfig nodeData attrs ->
+  Scene.SimSceneConfig nodeData attrs ->
   SimulationComponentState scene action id nodeData attrs model ->
   SimulationComponentState scene action id nodeData attrs model
 applySceneWithTransition targetScene baseConfig state =

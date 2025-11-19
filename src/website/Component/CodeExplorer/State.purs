@@ -47,7 +47,7 @@ type TransitionMatrix = SimState.TransitionMatrix Scene
 
 -- | CodeExplorer's scene configuration - specialized version of library's SceneConfig
 -- | Parameterized with Spago-specific node data row and attributes
-type SceneConfig = Scene.SceneConfig (SpagoNodeRow (D3_FocusXY (D3_Radius ()))) SpagoSceneAttributes
+type SceneConfig = Scene.SimSceneConfig (SpagoNodeRow (D3_FocusXY (D3_Radius ()))) SpagoSceneAttributes
 
 -- | DEPRECATED: Old name for SceneConfig, kept for backwards compatibility during refactor
 type MiseEnScene = SceneConfig
