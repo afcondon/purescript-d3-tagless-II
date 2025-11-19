@@ -6,6 +6,7 @@ import Affjax.Web as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Data.Array as Array
 import Data.Either (Either(..))
+import Data.Foldable (traverse_)
 import Data.Int as Int
 import Data.List (List(..), fromFoldable)
 import Data.Map as Map
@@ -285,4 +286,22 @@ loadBridgesData = do
   result <- loadDataFile BridgesCSV
   case result of
     Left err -> pure $ Left err
-    Right csvContent -> pure $ parseBridgesCSV csvContent
+    Right csvContent -> do
+      let parsed = parseBridgesCSV csvContent
+      case parsed of
+        Right bridgeData -> do
+          -- Log the parsed data for debugging
+          log "=== Bridges CSV Parsed Data ==="
+          log $ "Labels (" <> show (Array.length bridgeData.labels) <> " regions):"
+          log $ show bridgeData.labels
+          log "\nMatrix (rows = from, cols = to):"
+          let indexedRows = Array.mapWithIndex (\i row -> { i, row }) bridgeData.matrix
+          traverse_ (\{i, row} -> do
+            let label = case Array.index bridgeData.labels i of
+                         Just l -> l
+                         Nothing -> "?"
+            log $ label <> ": " <> show row
+          ) indexedRows
+          log "=== End Bridges Data ==="
+          pure $ Right bridgeData
+        Left err -> pure $ Left err
