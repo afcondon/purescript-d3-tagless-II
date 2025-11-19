@@ -31651,6 +31651,7 @@
   var y30 = /* @__PURE__ */ y3(toAttrNumberNumber);
   var textAnchor9 = /* @__PURE__ */ textAnchor(toAttrStringString);
   var textContent11 = /* @__PURE__ */ textContent(toAttrStringString);
+  var fontSize8 = /* @__PURE__ */ fontSize2(toAttrNumberNumber);
   var pure40 = /* @__PURE__ */ pure(applicativeD3v2M);
   var bind116 = /* @__PURE__ */ bind(bindAff);
   var liftEffect110 = /* @__PURE__ */ liftEffect(monadEffectAff);
@@ -31693,6 +31694,15 @@
   var regionColorMap = /* @__PURE__ */ (function() {
     return fromFoldable6(ordString)(foldableArray)([new Tuple("WBR", "#d62728"), new Tuple("Pointe Coupee", "#ff9896"), new Tuple("Point Coupe", "#ff9896"), new Tuple("Iberville", "#e7969c"), new Tuple("EBR-M", "#5ab4ac"), new Tuple("EBR - M", "#5ab4ac"), new Tuple("EBR-S", "#c7eae5"), new Tuple("EBR - S", "#c7eae5"), new Tuple("Ascension", "#80cdc1"), new Tuple("Livingston", "#d8daeb"), new Tuple("I-10 Lafayette", "#b2abd2"), new Tuple("US-190 Opelousas", "#ff7f0e"), new Tuple("US 190 Opelousas", "#ff7f0e"), new Tuple("I-10 NOLA", "#ffbb78"), new Tuple("I-12", "#98df8a")]);
   })();
+  var getTargetValue = function(d1) {
+    return d1.target.value;
+  };
+  var getTargetIndex = function(d1) {
+    return d1.target.index;
+  };
+  var getSourceValue = function(d1) {
+    return d1.source.value;
+  };
   var getSourceIndex = function(d1) {
     return d1.source.index;
   };
@@ -31721,6 +31731,16 @@
   };
   var getGroupIndex = function(d1) {
     return d1.index;
+  };
+  var getDominantFlowIndex = function(d1) {
+    var targetVal = getTargetValue(d1);
+    var sourceVal = getSourceValue(d1);
+    var $71 = sourceVal >= targetVal;
+    if ($71) {
+      return getSourceIndex(d1);
+    }
+    ;
+    return getTargetIndex(d1);
   };
   var drawChord = function(matrix) {
     return function(labels9) {
@@ -31759,8 +31779,8 @@
                       return bind45(liftEffect25(reselectD3v2("arcsGroup")(selections)))(function(arcsGroupSel) {
                         return bind45(liftEffect25(reselectD3v2("labelsGroup")(selections)))(function(labelsGroupSel) {
                           var ribbonsTree = joinData("ribbonElements")("path")(indexedChords)(function(v) {
-                            var sourceIdx = getSourceIndex(v.datum);
-                            var color2 = getRegionColor(labels9)(sourceIdx);
+                            var dominantIdx = getDominantFlowIndex(v.datum);
+                            var color2 = getRegionColor(labels9)(dominantIdx);
                             return elem4(Path3.value)([class_23("ribbon"), d8(ribbonPath_(ribbonGen)(v.datum)), fill26(color2), fillOpacity5(0.67), stroke20("#000000"), strokeWidth21(0.5)]);
                           });
                           return bind45(renderTree212(ribbonsGroupSel)(ribbonsTree))(function() {
@@ -31771,21 +31791,21 @@
                             });
                             return bind45(renderTree38(arcsGroupSel)(arcsTree))(function() {
                               var labelsTree = joinData("labelElements")("text")(indexedGroups)(function(v) {
-                                var labelR = 280 + 35;
+                                var labelR = 280 + 8;
                                 var idx = getGroupIndex(v.datum);
                                 var label5 = fromMaybe("")(index(labels9)(idx));
                                 var angle = (v.datum.startAngle + v.datum.endAngle) / 2;
                                 var labelX = labelR * cos(angle - pi / 2);
                                 var labelY = labelR * sin(angle - pi / 2);
                                 var anchor = (function() {
-                                  var $72 = angle > pi;
-                                  if ($72) {
+                                  var $75 = angle > pi;
+                                  if ($75) {
                                     return "end";
                                   }
                                   ;
                                   return "start";
                                 })();
-                                return elem4(Text3.value)([class_23("chord-label"), x30(labelX), y30(labelY), textAnchor9(anchor), fill26("#000"), textContent11(label5)]);
+                                return elem4(Text3.value)([class_23("chord-label"), x30(labelX), y30(labelY), textAnchor9(anchor), fill26("#000"), textContent11(label5), fontSize8(10)]);
                               });
                               return bind45(renderTree38(labelsGroupSel)(labelsTree))(function() {
                                 return discard38(liftEffect25(log2("Chord diagram rendered with TreeAPI")))(function() {
@@ -31816,7 +31836,7 @@
         return liftEffect110(drawChord(result.value0.matrix)(result.value0.labels)(containerSelector)(700)(700));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.TreeAPI.ChordDiagram (line 266, column 3 - line 268, column 105): " + [result.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.TreeAPI.ChordDiagram (line 283, column 3 - line 285, column 105): " + [result.constructor.name]);
     }));
   };
 
@@ -35162,7 +35182,7 @@
   var x36 = /* @__PURE__ */ x3(toAttrNumberNumber);
   var y36 = /* @__PURE__ */ y3(toAttrNumberNumber);
   var textContent16 = /* @__PURE__ */ textContent(toAttrStringString);
-  var fontSize8 = /* @__PURE__ */ fontSize2(toAttrNumberNumber);
+  var fontSize9 = /* @__PURE__ */ fontSize2(toAttrNumberNumber);
   var textAnchor14 = /* @__PURE__ */ textAnchor(toAttrStringString);
   var renderTree214 = /* @__PURE__ */ renderTree47(/* @__PURE__ */ ordRecord6(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(ordRecordCons12)()({
     reflectSymbol: function() {
@@ -35232,7 +35252,7 @@
           return bind119(renderTree116(container)(linksTree))(function(linksSelections) {
             return bind119(liftEffect32(reselectD3v2("chartGroup")(linksSelections)))(function(chartGroupSel) {
               var nodesTree = withChild(named2(Group2.value)("nodesGroup")([class_32("nodes")]))(joinData("nodeGroups")("g")(nodes)(function(node) {
-                return withChildren(named2(Group2.value)("node-" + node.name)([class_32("node")]))([elem4(Circle2.value)([cx30(node.x + 40), cy30(node.y + 40), radius27(4), fill35("#69b3a2"), stroke24("#fff"), strokeWidth25(1.5)]), elem4(Text3.value)([x36(node.x + 40 + 8), y36(node.y + 40 + 4), textContent16(node.name), fontSize8(10), textAnchor14("start")])]);
+                return withChildren(named2(Group2.value)("node-" + node.name)([class_32("node")]))([elem4(Circle2.value)([cx30(node.x + 40), cy30(node.y + 40), radius27(4), fill35("#69b3a2"), stroke24("#fff"), strokeWidth25(1.5)]), elem4(Text3.value)([x36(node.x + 40 + 8), y36(node.y + 40 + 4), textContent16(node.name), fontSize9(10), textAnchor14("start")])]);
               }));
               return bind119(renderTree214(chartGroupSel)(nodesTree))(function() {
                 return liftEffect32(function __do3() {
@@ -35311,7 +35331,7 @@
   var x37 = /* @__PURE__ */ x3(toAttrNumberNumber);
   var y37 = /* @__PURE__ */ y3(toAttrNumberNumber);
   var textContent17 = /* @__PURE__ */ textContent(toAttrStringString);
-  var fontSize9 = /* @__PURE__ */ fontSize2(toAttrNumberNumber);
+  var fontSize10 = /* @__PURE__ */ fontSize2(toAttrNumberNumber);
   var textAnchor15 = /* @__PURE__ */ textAnchor(toAttrStringString);
   var renderTree215 = /* @__PURE__ */ renderTree48(/* @__PURE__ */ ordRecord7(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(ordRecordCons13)()({
     reflectSymbol: function() {
@@ -35397,7 +35417,7 @@
           return bind120(renderTree117(container)(linksTree))(function(linksSelections) {
             return bind120(liftEffect33(reselectD3v2("chartGroup")(linksSelections)))(function(chartGroupSel) {
               var nodesTree = withChild(named2(Group2.value)("nodesGroup")([class_33("nodes")]))(joinData("nodeGroups")("g")(nodes)(function(node) {
-                return withChildren(named2(Group2.value)("node-" + node.name)([class_33("node")]))([elem4(Circle2.value)([cx31(node.x + 40), cy31(node.y + 40), radius28(4), fill36("#69b3a2"), stroke25("#fff"), strokeWidth26(1.5)]), elem4(Text3.value)([x37(node.x + 40 + 8), y37(node.y + 40 + 4), textContent17(node.name), fontSize9(10), textAnchor15("start")])]);
+                return withChildren(named2(Group2.value)("node-" + node.name)([class_33("node")]))([elem4(Circle2.value)([cx31(node.x + 40), cy31(node.y + 40), radius28(4), fill36("#69b3a2"), stroke25("#fff"), strokeWidth26(1.5)]), elem4(Text3.value)([x37(node.x + 40 + 8), y37(node.y + 40 + 4), textContent17(node.name), fontSize10(10), textAnchor15("start")])]);
               }));
               return bind120(renderTree215(chartGroupSel)(nodesTree))(function() {
                 return liftEffect33(function __do3() {
@@ -36560,7 +36580,7 @@
   var textContent18 = /* @__PURE__ */ textContent(toAttrStringString);
   var textAnchor16 = /* @__PURE__ */ textAnchor(toAttrStringString);
   var y38 = /* @__PURE__ */ y3(toAttrNumberNumber);
-  var fontSize10 = /* @__PURE__ */ fontSize2(toAttrNumberNumber);
+  var fontSize11 = /* @__PURE__ */ fontSize2(toAttrNumberNumber);
   var renderTree49 = /* @__PURE__ */ renderTree(selectionMD3v2Selection_D)(/* @__PURE__ */ ordPackNode(ordString));
   var bind213 = /* @__PURE__ */ bind(bindAff);
   var liftEffect113 = /* @__PURE__ */ liftEffect(monadEffectAff);
@@ -36612,7 +36632,7 @@
         var nodes = getAllNodes(packed);
         return discard113(liftEffect34(log2("Rendering circle pack: " + (show60(length(nodes)) + " circles"))))(function() {
           var tree3 = withChild(named2(SVG.value)("svg")([width39(700), height39(700), viewBox33("0 0 " + (show127(700) + (" " + show127(700)))), class_34("pack-viz")]))(withChild(named2(Group2.value)("chartGroup")([class_34("pack-content")]))(joinData("circles")("g")(nodes)(function(v) {
-            return withChildren(named2(Group2.value)("circle-" + v.value0.data_)([class_34("node"), transform14("translate(" + (show127(v.value0.x) + ("," + (show127(v.value0.y) + ")"))))]))([elem4(Circle2.value)([radius29(v.value0.r), fill37(getColor(v.value0.depth)), fillOpacity7(0.7), stroke26("#fff"), strokeWidth27(1)]), elem4(Text3.value)([textContent18(v.value0.data_), textAnchor16("middle"), y38(4), fontSize10((function() {
+            return withChildren(named2(Group2.value)("circle-" + v.value0.data_)([class_34("node"), transform14("translate(" + (show127(v.value0.x) + ("," + (show127(v.value0.y) + ")"))))]))([elem4(Circle2.value)([radius29(v.value0.r), fill37(getColor(v.value0.depth)), fillOpacity7(0.7), stroke26("#fff"), strokeWidth27(1)]), elem4(Text3.value)([textContent18(v.value0.data_), textAnchor16("middle"), y38(4), fontSize11((function() {
               var $46 = v.value0.r > 20;
               if ($46) {
                 return 10;
@@ -37005,7 +37025,7 @@
   var strokeWidth28 = /* @__PURE__ */ strokeWidth3(toAttrNumberNumber);
   var textContent19 = /* @__PURE__ */ textContent(toAttrStringString);
   var textAnchor17 = /* @__PURE__ */ textAnchor(toAttrStringString);
-  var fontSize11 = /* @__PURE__ */ fontSize2(toAttrNumberNumber);
+  var fontSize12 = /* @__PURE__ */ fontSize2(toAttrNumberNumber);
   var renderTree50 = /* @__PURE__ */ renderTree(selectionMD3v2Selection_D)(/* @__PURE__ */ ordPartitionNode(ordString));
   var bind214 = /* @__PURE__ */ bind(bindAff);
   var liftEffect114 = /* @__PURE__ */ liftEffect(monadEffectAff);
@@ -37054,7 +37074,7 @@
         var nodes = getAllNodes2(partitioned);
         return discard47(liftEffect35(log2("Rendering partition: " + (show61(length(nodes)) + " rectangles"))))(function() {
           var tree3 = withChild(named2(SVG.value)("svg")([width40(750), height40(500), viewBox34("0 0 " + (show128(750) + (" " + show128(500)))), class_35("partition-viz")]))(joinData("rects")("g")(nodes)(function(v) {
-            return withChildren(named2(Group2.value)("rect-" + v.value0.data_)([class_35("node")]))([elem4(Rect2.value)([x38(v.value0.x0), y39(v.value0.y0), width40(v.value0.x1 - v.value0.x0), height40(v.value0.y1 - v.value0.y0), fill38(getColor2(v.value0.depth)), fillOpacity8(0.7), stroke27("#fff"), strokeWidth28(1)]), elem4(Text3.value)([x38((v.value0.x0 + v.value0.x1) / 2), y39((v.value0.y0 + v.value0.y1) / 2), textContent19(v.value0.data_), textAnchor17("middle"), fontSize11(9), fillOpacity8((function() {
+            return withChildren(named2(Group2.value)("rect-" + v.value0.data_)([class_35("node")]))([elem4(Rect2.value)([x38(v.value0.x0), y39(v.value0.y0), width40(v.value0.x1 - v.value0.x0), height40(v.value0.y1 - v.value0.y0), fill38(getColor2(v.value0.depth)), fillOpacity8(0.7), stroke27("#fff"), strokeWidth28(1)]), elem4(Text3.value)([x38((v.value0.x0 + v.value0.x1) / 2), y39((v.value0.y0 + v.value0.y1) / 2), textContent19(v.value0.data_), textAnchor17("middle"), fontSize12(9), fillOpacity8((function() {
               var $47 = v.value0.x1 - v.value0.x0 > 30 && v.value0.y1 - v.value0.y0 > 15;
               if ($47) {
                 return 1;
@@ -37134,7 +37154,7 @@
   var x39 = /* @__PURE__ */ x3(toAttrNumberNumber);
   var y40 = /* @__PURE__ */ y3(toAttrNumberNumber);
   var textContent20 = /* @__PURE__ */ textContent(toAttrStringString);
-  var fontSize12 = /* @__PURE__ */ fontSize2(toAttrNumberNumber);
+  var fontSize13 = /* @__PURE__ */ fontSize2(toAttrNumberNumber);
   var textAnchor18 = /* @__PURE__ */ textAnchor(toAttrStringString);
   var renderTree216 = /* @__PURE__ */ renderTree51(/* @__PURE__ */ ordRecord8(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(ordRecordCons14)()({
     reflectSymbol: function() {
@@ -37256,7 +37276,7 @@
           return bind123(renderTree118(container)(linksTree))(function(linksSelections) {
             return bind123(liftEffect36(reselectD3v2("chartGroup")(linksSelections)))(function(chartGroupSel) {
               var nodesTree = withChild(named2(Group2.value)("nodesGroup")([class_36("nodes")]))(joinData("nodeGroups")("g")(nodes)(function(node) {
-                return withChildren(named2(Group2.value)("node-" + node.name)([class_36("node")]))([elem4(Circle2.value)([cx32(node.x), cy32(node.y), radius30(3), fill39("#69b3a2"), stroke28("#fff"), strokeWidth29(1.5)]), elem4(Text3.value)([x39(node.x), y40(node.y), textContent20(node.name), fontSize12(9), textAnchor18("start"), transform15("translate(6, 3)")])]);
+                return withChildren(named2(Group2.value)("node-" + node.name)([class_36("node")]))([elem4(Circle2.value)([cx32(node.x), cy32(node.y), radius30(3), fill39("#69b3a2"), stroke28("#fff"), strokeWidth29(1.5)]), elem4(Text3.value)([x39(node.x), y40(node.y), textContent20(node.name), fontSize13(9), textAnchor18("start"), transform15("translate(6, 3)")])]);
               }));
               return bind123(renderTree216(chartGroupSel)(nodesTree))(function() {
                 return liftEffect36(function __do3() {
@@ -38230,7 +38250,7 @@
   var strokeWidth31 = /* @__PURE__ */ strokeWidth3(toAttrNumberNumber);
   var textContent21 = /* @__PURE__ */ textContent(toAttrStringString);
   var textAnchor19 = /* @__PURE__ */ textAnchor(toAttrStringString);
-  var fontSize13 = /* @__PURE__ */ fontSize2(toAttrNumberNumber);
+  var fontSize14 = /* @__PURE__ */ fontSize2(toAttrNumberNumber);
   var renderTree53 = /* @__PURE__ */ renderTree(selectionMD3v2Selection_D)(/* @__PURE__ */ ordTreemapNode(ordString));
   var bind217 = /* @__PURE__ */ bind(bindAff);
   var liftEffect117 = /* @__PURE__ */ liftEffect(monadEffectAff);
@@ -38291,7 +38311,7 @@
         var leaves = getLeaves(layout);
         return discard50(liftEffect38(log2("Rendering treemap: " + (show64(length(leaves)) + " rectangles"))))(function() {
           var tree3 = withChild(named2(SVG.value)("svg")([width43(750), height43(500), viewBox37("0 0 " + (show131(750) + (" " + show131(500)))), class_38("treemap-viz")]))(joinData("rects")("g")(leaves)(function(v) {
-            return withChildren(named2(Group2.value)("rect-" + v.value0.data_)([class_38("node")]))([elem4(Rect2.value)([x40(v.value0.x0), y41(v.value0.y0), width43(v.value0.x1 - v.value0.x0), height43(v.value0.y1 - v.value0.y0), fill41(getColor4(v.value0.depth)), fillOpacity10(0.6), stroke30("#fff"), strokeWidth31(1)]), elem4(Text3.value)([x40((v.value0.x0 + v.value0.x1) / 2), y41((v.value0.y0 + v.value0.y1) / 2), textContent21(v.value0.data_), textAnchor19("middle"), fontSize13(9), fillOpacity10((function() {
+            return withChildren(named2(Group2.value)("rect-" + v.value0.data_)([class_38("node")]))([elem4(Rect2.value)([x40(v.value0.x0), y41(v.value0.y0), width43(v.value0.x1 - v.value0.x0), height43(v.value0.y1 - v.value0.y0), fill41(getColor4(v.value0.depth)), fillOpacity10(0.6), stroke30("#fff"), strokeWidth31(1)]), elem4(Text3.value)([x40((v.value0.x0 + v.value0.x1) / 2), y41((v.value0.y0 + v.value0.y1) / 2), textContent21(v.value0.data_), textAnchor19("middle"), fontSize14(9), fillOpacity10((function() {
               var $49 = v.value0.x1 - v.value0.x0 > 30 && v.value0.y1 - v.value0.y0 > 15;
               if ($49) {
                 return 1;
@@ -40321,7 +40341,7 @@
   var x43 = /* @__PURE__ */ x3(toAttrNumberNumber);
   var y44 = /* @__PURE__ */ y3(toAttrNumberNumber);
   var textAnchor21 = /* @__PURE__ */ textAnchor(toAttrStringString);
-  var fontSize14 = /* @__PURE__ */ fontSize2(toAttrNumberNumber);
+  var fontSize15 = /* @__PURE__ */ fontSize2(toAttrNumberNumber);
   var textContent23 = /* @__PURE__ */ textContent(toAttrStringString);
   var d14 = /* @__PURE__ */ d4(toAttrStringString);
   var fill46 = /* @__PURE__ */ fill3(toAttrStringString);
@@ -40477,7 +40497,7 @@
           ;
           throw new Error("Failed pattern match at D3.Viz.TreeAPI.MultiLineChartExample (line 127, column 9 - line 132, column 73): " + [v.constructor.name]);
         };
-        var tree3 = withChild(named2(SVG.value)("svg")([width48(928), height48(600), viewBox42("0 0 " + (show135(928) + (" " + show135(600)))), class_42("multi-line-chart")]))(withChildren(named2(Group2.value)("plot-area")([transform17("translate(" + (show135(margin.left) + ("," + (show135(margin.top) + ")"))))]))([withChild(named2(Group2.value)("x-axis")([transform17("translate(0," + (show135(plotHeight) + ")")), class_42("x-axis")]))(renderAxis(axisBottom(xScale))), withChild(named2(Group2.value)("y-axis")([class_42("y-axis")]))(renderAxis(axisLeft(yScale))), elem4(Text3.value)([transform17("rotate(-90)"), x43(-(plotHeight / 2)), y44(-40), textAnchor21("middle"), fontSize14(12), textContent23("Unemployment Rate (%)")]), joinData("lines")("path")(series)(function(s) {
+        var tree3 = withChild(named2(SVG.value)("svg")([width48(928), height48(600), viewBox42("0 0 " + (show135(928) + (" " + show135(600)))), class_42("multi-line-chart")]))(withChildren(named2(Group2.value)("plot-area")([transform17("translate(" + (show135(margin.left) + ("," + (show135(margin.top) + ")"))))]))([withChild(named2(Group2.value)("x-axis")([transform17("translate(0," + (show135(plotHeight) + ")")), class_42("x-axis")]))(renderAxis(axisBottom(xScale))), withChild(named2(Group2.value)("y-axis")([class_42("y-axis")]))(renderAxis(axisLeft(yScale))), elem4(Text3.value)([transform17("rotate(-90)"), x43(-(plotHeight / 2)), y44(-40), textAnchor21("middle"), fontSize15(12), textContent23("Unemployment Rate (%)")]), joinData("lines")("path")(series)(function(s) {
           return elem4(Path3.value)([d14(linePath(s.points)), fill46("none"), stroke34("#ddd"), strokeWidth35(1.5), class_42("line")]);
         })]));
         return bind219(renderTree57(container)(tree3))(function() {
@@ -40526,7 +40546,7 @@
   var height49 = /* @__PURE__ */ height2(toAttrNumberNumber);
   var x44 = /* @__PURE__ */ x3(toAttrNumberNumber);
   var textAnchor22 = /* @__PURE__ */ textAnchor(toAttrStringString);
-  var fontSize15 = /* @__PURE__ */ fontSize2(toAttrNumberNumber);
+  var fontSize16 = /* @__PURE__ */ fontSize2(toAttrNumberNumber);
   var d15 = /* @__PURE__ */ d4(toAttrStringString);
   var viewBox43 = /* @__PURE__ */ viewBox2(toAttrStringString);
   var append117 = /* @__PURE__ */ append(semigroupArray);
@@ -40779,7 +40799,7 @@
           var labelX = 320 * cos(labelAngle);
           var labelY = 320 * sin(labelAngle);
           var rotation = labelAngle * 180 / pi + 90;
-          return elem4(Text3.value)([x44(labelX), y45(labelY), textAnchor22("middle"), fontSize15(10), transform18("rotate(" + (show136(rotation) + (" " + (show136(labelX) + (" " + (show136(labelY) + ")")))))), textContent24(stateData.state), class_43("state-label")]);
+          return elem4(Text3.value)([x44(labelX), y45(labelY), textAnchor22("middle"), fontSize16(10), transform18("rotate(" + (show136(rotation) + (" " + (show136(labelX) + (" " + (show136(labelY) + ")")))))), textContent24(stateData.state), class_43("state-label")]);
         };
         var makeStateArcs = function(stateData) {
           return mapWithIndex2(function(ageIdx) {
@@ -40790,7 +40810,7 @@
             };
           })(stateData.ageSegments);
         };
-        var tree3 = withChild(named2(SVG.value)("svg")([width49(700), height49(700), viewBox43("0 0 " + (show136(700) + (" " + show136(700)))), class_43("radial-stacked-bar")]))(withChildren(named2(Group2.value)("plot-area")([transform18("translate(" + (show136(centerX) + ("," + (show136(centerY) + ")"))))]))([withChildren(named2(Group2.value)("y-axis")([textAnchor22("middle")]))(append117([elem4(Text3.value)([y45(-(300 + 10)), fontSize15(12), textContent24("Population"), class_43("axis-label")])])(concatMap(makeGridLine)(gridValues))), withChildren(named2(Group2.value)("legend")([]))(mapWithIndex2(makeLegendItem)(ageGroups)), withChildren(named2(Group2.value)("data-arcs")([]))(concatMap(makeStateArcs)(states)), withChildren(named2(Group2.value)("state-labels")([]))(map64(makeStateLabel)(states))]));
+        var tree3 = withChild(named2(SVG.value)("svg")([width49(700), height49(700), viewBox43("0 0 " + (show136(700) + (" " + show136(700)))), class_43("radial-stacked-bar")]))(withChildren(named2(Group2.value)("plot-area")([transform18("translate(" + (show136(centerX) + ("," + (show136(centerY) + ")"))))]))([withChildren(named2(Group2.value)("y-axis")([textAnchor22("middle")]))(append117([elem4(Text3.value)([y45(-(300 + 10)), fontSize16(12), textContent24("Population"), class_43("axis-label")])])(concatMap(makeGridLine)(gridValues))), withChildren(named2(Group2.value)("legend")([]))(mapWithIndex2(makeLegendItem)(ageGroups)), withChildren(named2(Group2.value)("data-arcs")([]))(concatMap(makeStateArcs)(states)), withChildren(named2(Group2.value)("state-labels")([]))(map64(makeStateLabel)(states))]));
         return bind129(renderTree58(container)(tree3))(function() {
           return liftEffect120(function __do3() {
             log2("=== Radial Stacked Bar Chart ===")();

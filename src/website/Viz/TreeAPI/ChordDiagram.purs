@@ -21,7 +21,7 @@ import PSD3.Shared.Data (loadBridgesData)
 import Partial.Unsafe (unsafeCrashWith, unsafePartial)
 import PSD3.Internal.FFI (arcGenerator_, arcPath_, chordArray_, chordGroups_, chordLayoutWithPadAngle_, ribbonGenerator_, ribbonPath_, setArcInnerRadius_, setArcOuterRadius_, setRibbonRadius_)
 import PSD3.Internal.Types (Datum_)
-import PSD3v2.Attribute.Types (class_, d, fill, fillOpacity, height, id_, stroke, strokeWidth, textAnchor, textContent, transform, viewBox, width, x, y)
+import PSD3v2.Attribute.Types (class_, d, fill, fillOpacity, fontSize, height, id_, stroke, strokeWidth, textAnchor, textContent, transform, viewBox, width, x, y)
 import PSD3v2.Capabilities.Selection (renderTree, select)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_, reselectD3v2, runD3v2M)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
@@ -104,8 +104,24 @@ getSourceIndex d = (unsafeCoerce d).source.index
 getTargetIndex :: Datum_ -> Int
 getTargetIndex d = (unsafeCoerce d).target.index
 
+getSourceValue :: Datum_ -> Number
+getSourceValue d = (unsafeCoerce d).source.value
+
+getTargetValue :: Datum_ -> Number
+getTargetValue d = (unsafeCoerce d).target.value
+
 getGroupIndex :: Datum_ -> Int
 getGroupIndex d = (unsafeCoerce d).index
+
+-- | Get the index of the dominant flow direction (larger value)
+-- | This colors ribbons by where the larger flow originates
+getDominantFlowIndex :: Datum_ -> Int
+getDominantFlowIndex d =
+  let sourceVal = getSourceValue d
+      targetVal = getTargetValue d
+  in if sourceVal >= targetVal
+     then getSourceIndex d
+     else getTargetIndex d
 
 -- | Indexed arc for data join
 newtype IndexedArc = IndexedArc { index :: Int, datum :: Datum_ }
@@ -192,12 +208,12 @@ drawChord matrix labels containerSelector w h = runD3v2M do
   arcsGroupSel <- liftEffect $ reselectD3v2 "arcsGroup" selections
   labelsGroupSel <- liftEffect $ reselectD3v2 "labelsGroup" selections
 
-  -- Render ribbons (colored by source)
+  -- Render ribbons (colored by dominant flow direction)
   let ribbonsTree :: T.Tree IndexedRibbon
       ribbonsTree =
         T.joinData "ribbonElements" "path" indexedChords $ \(IndexedRibbon ir) ->
-          let sourceIdx = getSourceIndex ir.datum
-              color = getRegionColor labels sourceIdx
+          let dominantIdx = getDominantFlowIndex ir.datum
+              color = getRegionColor labels dominantIdx
           in T.elem Path
             [ class_ "ribbon"
             , d (ribbonPath_ ribbonGen ir.datum)
@@ -234,7 +250,7 @@ drawChord matrix labels containerSelector w h = runD3v2M do
               -- Calculate angle for label positioning
               groupData = unsafeCoerce ia.datum :: { startAngle :: Number, endAngle :: Number }
               angle = (groupData.startAngle + groupData.endAngle) / 2.0
-              labelR = outerR + 35.0  -- Increased from 20.0 to 35.0 for better spacing
+              labelR = outerR + 8.0  -- Close to the arc
               labelX = labelR * cos (angle - pi / 2.0)
               labelY = labelR * sin (angle - pi / 2.0)
               -- Anchor based on which side of the circle
@@ -246,6 +262,7 @@ drawChord matrix labels containerSelector w h = runD3v2M do
             , textAnchor anchor
             , fill "#000"
             , textContent label
+            , fontSize 10.0  -- Smaller font size
             ]
 
   _ <- renderTree labelsGroupSel labelsTree
