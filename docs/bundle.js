@@ -24104,7 +24104,7 @@
             return elem4(Path3.value)([d7(linkPath(link4.source.x + 40)(link4.source.y + 40)(link4.target.x + 40)(link4.target.y + 40)), fill14("none"), stroke7("#999"), strokeWidth8(1.5), class_13("link")]);
           }))));
           return bind110(renderTree16(container)(linksTree))(function(linksSelections) {
-            return bind110(select10(".tree-content"))(function(chartGroupSel) {
+            return bind110(liftEffect16(reselectD3v2("chartGroup")(linksSelections)))(function(chartGroupSel) {
               var nodesTree = withChild(named2(Group2.value)("nodesGroup")([class_13("nodes")]))(joinData("nodeGroups")("g")(nodes)(function(node) {
                 return withChildren(named2(Group2.value)("node-" + node.name)([class_13("node")]))([elem4(Circle2.value)([cx10(node.x + 40), cy10(node.y + 40), radius10(6), fill14("#69b3a2"), stroke7("#fff"), strokeWidth8(2)]), elem4(Text3.value)([x9(node.x + 40 + 10), y9(node.y + 40 + 4), textContent7(node.name), fontSize5(12), textAnchor5("start")])]);
               }));
