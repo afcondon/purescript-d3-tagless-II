@@ -34899,8 +34899,8 @@
           var linksTree = withChild(named2(SVG.value)("svg")([width37(750), height37(500), viewBox31("0 0 " + (show55(750) + (" " + show55(500)))), class_32("cluster-viz")]))(withChild(named2(Group2.value)("chartGroup")([class_32("tree-content")]))(withChild(named2(Group2.value)("linksGroup")([class_32("links")]))(joinData("links")("path")(links)(function(link4) {
             return elem4(Path3.value)([d10(linkPath2(link4.source.x + 40)(link4.source.y + 40)(link4.target.x + 40)(link4.target.y + 40)), fill35("none"), stroke24("#999"), strokeWidth25(1.5), class_32("link")]);
           }))));
-          return bind117(renderTree116(container)(linksTree))(function() {
-            return bind117(select29(".tree-content"))(function(chartGroupSel) {
+          return bind117(renderTree116(container)(linksTree))(function(linksSelections) {
+            return bind117(liftEffect33(reselectD3v2("chartGroup")(linksSelections)))(function(chartGroupSel) {
               var nodesTree = withChild(named2(Group2.value)("nodesGroup")([class_32("nodes")]))(joinData("nodeGroups")("g")(nodes)(function(node) {
                 return withChildren(named2(Group2.value)("node-" + node.name)([class_32("node")]))([elem4(Circle2.value)([cx30(node.x + 40), cy30(node.y + 40), radius27(4), fill35("#69b3a2"), stroke24("#fff"), strokeWidth25(1.5)]), elem4(Text3.value)([x36(node.x + 40 + 8), y36(node.y + 40 + 4), textContent16(node.name), fontSize8(10), textAnchor14("start")])]);
               }));
@@ -35064,8 +35064,8 @@
           var linksTree = withChild(named2(SVG.value)("svg")([width38(750), height38(500), viewBox32("0 0 " + (show56(750) + (" " + show56(500)))), class_33("horizontal-tree-viz")]))(withChild(named2(Group2.value)("chartGroup")([class_33("tree-content")]))(withChild(named2(Group2.value)("linksGroup")([class_33("links")]))(joinData("links")("path")(links)(function(link4) {
             return elem4(Path3.value)([d11(linkPath3(link4.source.x + 40)(link4.source.y + 40)(link4.target.x + 40)(link4.target.y + 40)), fill36("none"), stroke25("#999"), strokeWidth26(1.5), class_33("link")]);
           }))));
-          return bind118(renderTree117(container)(linksTree))(function() {
-            return bind118(select30(".tree-content"))(function(chartGroupSel) {
+          return bind118(renderTree117(container)(linksTree))(function(linksSelections) {
+            return bind118(liftEffect34(reselectD3v2("chartGroup")(linksSelections)))(function(chartGroupSel) {
               var nodesTree = withChild(named2(Group2.value)("nodesGroup")([class_33("nodes")]))(joinData("nodeGroups")("g")(nodes)(function(node) {
                 return withChildren(named2(Group2.value)("node-" + node.name)([class_33("node")]))([elem4(Circle2.value)([cx31(node.x + 40), cy31(node.y + 40), radius28(4), fill36("#69b3a2"), stroke25("#fff"), strokeWidth26(1.5)]), elem4(Text3.value)([x37(node.x + 40 + 8), y37(node.y + 40 + 4), textContent17(node.name), fontSize9(10), textAnchor15("start")])]);
               }));
@@ -36923,8 +36923,8 @@
           var linksTree = withChild(named2(SVG.value)("svg")([width41(700), height41(700), viewBox35("0 0 " + (show60(700) + (" " + show60(700)))), class_36("radial-tree-viz")]))(withChild(named2(Group2.value)("chartGroup")([class_36("tree-content"), transform15("translate(" + (show60(centerX) + ("," + (show60(centerY) + ")"))))]))(withChild(named2(Group2.value)("linksGroup")([class_36("links")]))(joinData("links")("path")(links)(function(link4) {
             return elem4(Path3.value)([d12(radialLinkPath(link4.source.x)(link4.source.y)(link4.target.x)(link4.target.y)), fill39("none"), stroke28("#999"), strokeWidth29(1.5), class_36("link")]);
           }))));
-          return bind121(renderTree118(container)(linksTree))(function() {
-            return bind121(select33(".tree-content"))(function(chartGroupSel) {
+          return bind121(renderTree118(container)(linksTree))(function(linksSelections) {
+            return bind121(liftEffect37(reselectD3v2("chartGroup")(linksSelections)))(function(chartGroupSel) {
               var nodesTree = withChild(named2(Group2.value)("nodesGroup")([class_36("nodes")]))(joinData("nodeGroups")("g")(nodes)(function(node) {
                 return withChildren(named2(Group2.value)("node-" + node.name)([class_36("node")]))([elem4(Circle2.value)([cx32(node.x), cy32(node.y), radius30(3), fill39("#69b3a2"), stroke28("#fff"), strokeWidth29(1.5)]), elem4(Text3.value)([x39(node.x), y40(node.y), textContent20(node.name), fontSize12(9), textAnchor18("start"), transform15("translate(6, 3)")])]);
               }));

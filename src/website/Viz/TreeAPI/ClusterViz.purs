@@ -14,7 +14,7 @@ import PSD3.Shared.Data (loadFlareData)
 import PSD3.Layout.Hierarchy.Cluster4 (cluster, defaultClusterConfig)
 import PSD3v2.Attribute.Types (width, height, viewBox, class_, cx, cy, radius, fill, stroke, strokeWidth, d, x, y, textContent, textAnchor, fontSize)
 import PSD3v2.Capabilities.Selection (select, renderTree)
-import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
+import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, reselectD3v2)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
 import PSD3v2.VizTree.Tree as T
 import Web.DOM.Element (Element)
@@ -105,11 +105,11 @@ drawCluster selector flareTree = runD3v2M do
             )
 
   -- Render links first (underlaying)
-  _ <- renderTree container linksTree
+  linksSelections <- renderTree container linksTree
 
   -- Second tree: Nodes on top (datum type: HierNode)
-  -- Select the chartGroup to add nodes to
-  chartGroupSel <- select ".tree-content" :: _ (D3v2Selection_ SEmpty Element Unit)
+  -- Reselect the chartGroup from rendered selections (not global CSS selector!)
+  chartGroupSel <- liftEffect $ reselectD3v2 "chartGroup" linksSelections
 
   let nodesTree :: T.Tree HierNode
       nodesTree =
