@@ -18,7 +18,7 @@ import PSD3v2.Attribute.Types (class_, stroke, transform, x1, x2, y1, y2, Attrib
 import PSD3v2.Behavior.Types (Behavior(..), simulationDrag)
 import PSD3v2.Capabilities.Selection (class SelectionM, append, appendChild, on, openSelection, remove, setAttrs)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_)
-import PSD3v2.Selection.Types (ElementType(..), SBound, SEmpty, SPending, SExiting)
+import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, SBoundInherits, SEmpty, SPending, SExiting)
 import PSD3v2.Simulation.Update (RenderCallbacks)
 import Web.DOM.Element (Element)
 

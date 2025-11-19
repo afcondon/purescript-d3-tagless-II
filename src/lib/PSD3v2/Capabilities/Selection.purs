@@ -24,7 +24,7 @@ import Data.Map (Map)
 import Data.Maybe (Maybe)
 import PSD3v2.Attribute.Types (Attribute)
 import PSD3v2.Behavior.Types (Behavior)
-import PSD3v2.Selection.Types (ElementType, JoinResult, SBound, SEmpty, SExiting, SPending)
+import PSD3v2.Selection.Types (ElementType, JoinResult, SBoundOwns, SBoundInherits, SEmpty, SExiting, SPending)
 import PSD3v2.VizTree.Tree (Tree)
 import Web.DOM.Element (Element)
 
@@ -116,7 +116,7 @@ class Monad m <= SelectionM sel m | m -> sel where
     -> Maybe (datum -> Array (Attribute datum))  -- Enter attributes
     -> Maybe (datum -> Array (Attribute datum))  -- Update attributes
     -> Maybe (datum -> Array (Attribute datum))  -- Exit attributes (applied before removal)
-    -> m (sel SBound Element datum)
+    -> m (sel SBoundOwns Element datum)
 
   -- | Low-level data join for power users
   -- |
@@ -196,7 +196,7 @@ class Monad m <= SelectionM sel m | m -> sel where
      . ElementType
     -> Array (Attribute datum)
     -> sel SPending parent datum
-    -> m (sel SBound Element datum)
+    -> m (sel SBoundOwns Element datum)
 
   -- | Set attributes on a bound selection
   -- |
@@ -205,8 +205,8 @@ class Monad m <= SelectionM sel m | m -> sel where
   setAttrs
     :: forall datum
      . Array (Attribute datum)
-    -> sel SBound Element datum
-    -> m (sel SBound Element datum)
+    -> sel SBoundOwns Element datum
+    -> m (sel SBoundOwns Element datum)
 
   -- | Set attributes on an exiting selection
   -- |
@@ -232,9 +232,9 @@ class Monad m <= SelectionM sel m | m -> sel where
   -- | Useful for combining enter and update selections.
   merge
     :: forall datum
-     . sel SBound Element datum
-    -> sel SBound Element datum
-    -> m (sel SBound Element datum)
+     . sel SBoundOwns Element datum
+    -> sel SBoundOwns Element datum
+    -> m (sel SBoundOwns Element datum)
 
   -- | Append a single child element to a parent selection
   -- |
@@ -298,4 +298,4 @@ class Monad m <= SelectionM sel m | m -> sel where
      . Ord datum
     => sel SEmpty parent parentDatum
     -> Tree datum
-    -> m (Map String (sel SBound Element datum))
+    -> m (Map String (sel SBoundOwns Element datum))

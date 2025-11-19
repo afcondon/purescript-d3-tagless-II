@@ -25,7 +25,7 @@ import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom, simula
 import PSD3v2.Capabilities.Selection (on, renderTree, select)
 import PSD3v2.Capabilities.Simulation (Step(..), addTickFunction, init, start)
 import PSD3v2.Interpreter.D3v2 (D3v2SimM, D3v2Selection_, reselectD3v2)
-import PSD3v2.Selection.Types (ElementType(..), SBound)
+import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, SBoundInherits)
 import Partial.Unsafe (unsafePartial, unsafeCrashWith)
 import Web.DOM.Element (Element)
 import PSD3v2.VizTree.Tree as T
@@ -169,17 +169,17 @@ drawModuleGraph forcesArray activeForces graph containerSelector = do
   labelsSelections <- renderTree labelsGroup labelsTree
 
   -- Extract bound selections for behaviors and tick functions
-  let nodeCircles :: D3v2Selection_ SBound Element ModuleSimNode
+  let nodeCircles :: D3v2Selection_ SBoundOwns Element ModuleSimNode
       nodeCircles = case Map.lookup "nodeElements" nodesSelections of
         Just sel -> sel
         Nothing -> unsafePartial $ unsafeCrashWith "nodeElements not found"
 
-      linkLines :: D3v2Selection_ SBound Element IndexedLink
+      linkLines :: D3v2Selection_ SBoundOwns Element IndexedLink
       linkLines = case Map.lookup "linkElements" linksSelections of
         Just sel -> sel
         Nothing -> unsafePartial $ unsafeCrashWith "linkElements not found"
 
-      labelTexts :: D3v2Selection_ SBound Element ModuleSimNode
+      labelTexts :: D3v2Selection_ SBoundOwns Element ModuleSimNode
       labelTexts = case Map.lookup "labelElements" labelsSelections of
         Just sel -> sel
         Nothing -> unsafePartial $ unsafeCrashWith "labelElements not found"

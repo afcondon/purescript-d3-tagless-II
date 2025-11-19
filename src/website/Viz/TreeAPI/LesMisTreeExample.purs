@@ -37,7 +37,7 @@ import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom, simulation
 import PSD3v2.Capabilities.Selection (select, renderTree, on)
 import PSD3v2.Capabilities.Simulation (init, addTickFunction, start, Step(..))
 import PSD3v2.Interpreter.D3v2 (runD3v2SimM, D3v2Selection_, D3v2SimM, reselectD3v2)
-import PSD3v2.Selection.Types (ElementType(..), SEmpty, SBound)
+import PSD3v2.Selection.Types (ElementType(..), SEmpty, SBoundOwns, SBoundInherits)
 import PSD3v2.VizTree.Tree as T
 import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
@@ -180,7 +180,7 @@ drawLesMisTree forcesArray activeForces model containerSelector = do
   liftEffect $ Console.log $ "Structure rendered, selections: " <> show (Map.keys selections)
 
   -- Extract the linksGroup and nodesGroup for rendering data
-  -- Use reselectD3v2 to convert from SBound Unit to SEmpty datumOut
+  -- Use reselectD3v2 to convert from SBoundOwns Unit to SEmpty datumOut
   linksGroupSel <- liftEffect $ reselectD3v2 "linksGroup" selections
   nodesGroupSel <- liftEffect $ reselectD3v2 "nodesGroup" selections
   liftEffect $ Console.log "Extracted linksGroup and nodesGroup selections"
@@ -234,12 +234,12 @@ drawLesMisTree forcesArray activeForces model containerSelector = do
   -- Pattern matching with `case` is lazy in unevaluated branches, so the Nothing branch
   -- only executes if we actually match Nothing. This is the correct pattern when the
   -- default might throw an exception or have side effects.
-  let nodesSel :: D3v2Selection_ SBound Element LesMisSimNode
+  let nodesSel :: D3v2Selection_ SBoundOwns Element LesMisSimNode
       nodesSel = case Map.lookup "nodeElements" nodesSelections of
         Just sel -> sel
         Nothing -> unsafePartial $ unsafeCrashWith "nodeElements not found"
 
-  let linksSel :: D3v2Selection_ SBound Element IndexedLink
+  let linksSel :: D3v2Selection_ SBoundOwns Element IndexedLink
       linksSel = case Map.lookup "linkElements" linksSelections of
         Just sel -> sel
         Nothing -> unsafePartial $ unsafeCrashWith "linkElements not found"

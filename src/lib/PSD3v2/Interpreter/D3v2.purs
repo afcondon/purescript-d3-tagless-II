@@ -40,7 +40,7 @@ import PSD3v2.Capabilities.Selection (class SelectionM)
 import PSD3v2.Capabilities.Simulation (class SimulationM, class SimulationM2, Step(..))
 import PSD3v2.Capabilities.Transition (class TransitionM)
 import PSD3v2.Selection.Operations as Ops
-import PSD3v2.Selection.Types (Selection(..), SelectionImpl(..), SBound, SEmpty, JoinResult(..))
+import PSD3v2.Selection.Types (Selection(..), SelectionImpl(..), SBoundOwns, SBoundInherits, SEmpty, JoinResult(..))
 import PSD3v2.Transition.FFI as TransitionFFI
 import Web.DOM.Element (Element)
 import Web.DOM.Element as Element
@@ -417,7 +417,7 @@ foreign import setAttributeSync_ :: String -> String -> Element -> Unit
 -- |
 -- | Note: D3v2Selection_ is partially applied to (SBound) (Element) to match
 -- | the expected kind Type -> Type for SimulationM's sel parameter
-instance SimulationM (D3v2Selection_ SBound Element) (D3v2SimM row d) where
+instance SimulationM (D3v2Selection_ SBoundOwns Element) (D3v2SimM row d) where
   init config = do
     -- 1. Initialize force library in simulation state
     let forcesMap = Map.fromFoldable $ config.forces <#> \f ->
@@ -500,7 +500,7 @@ instance SimulationM (D3v2Selection_ SBound Element) (D3v2SimM row d) where
 -- | SimulationM2 instance for D3v2SimM (dynamic simulations with update)
 -- |
 -- | Extends SimulationM with update and reheat capabilities
-instance SimulationM2 (D3v2Selection_ SBound Element) (D3v2SimM row d) where
+instance SimulationM2 (D3v2Selection_ SBoundOwns Element) (D3v2SimM row d) where
   update config = do
     -- 1. Update nodes if provided (or get current nodes)
     nodesBeforeFilter <- case config.nodes of
@@ -570,7 +570,7 @@ instance SimulationM2 (D3v2Selection_ SBound Element) (D3v2SimM row d) where
 reselectD3v2
   :: forall datum datumOut
    . String
-  -> Map.Map String (D3v2Selection_ SBound Element datum)
+  -> Map.Map String (D3v2Selection_ SBoundOwns Element datum)
   -> Effect (D3v2Selection_ SEmpty Element datumOut)
 reselectD3v2 name selectionsMap = do
   -- Unwrap D3v2Selection_ to Selection

@@ -18073,7 +18073,7 @@
       return HTMLContext.value;
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Selection.Types (line 185, column 1 - line 185, column 47): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Selection.Types (line 188, column 1 - line 188, column 47): " + [v.constructor.name]);
   };
 
   // output/PSD3v2.VizTree.Tree/index.js
@@ -20399,7 +20399,7 @@
           };
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 781, column 1 - line 786, column 70): " + [v.constructor.name, v1.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 781, column 1 - line 786, column 74): " + [v.constructor.name, v1.constructor.name]);
       };
     };
   };

@@ -7,7 +7,7 @@ module PSD3v2.Capabilities.Transition
 import Prelude
 
 import PSD3v2.Attribute.Types (Attribute)
-import PSD3v2.Selection.Types (SBound, SExiting)
+import PSD3v2.Selection.Types (SBoundOwns, SBoundInherits, SExiting)
 import PSD3v2.Transition.Types (TransitionConfig)
 import Web.DOM.Element (Element)
 
@@ -49,7 +49,7 @@ class Monad m <= TransitionM sel m | m -> sel where
   -- | defined by the provided attributes, over the specified duration.
   -- |
   -- | Type Safety:
-  -- | - Only works with SBound selections (selections with data)
+  -- | - Only works with SBoundOwns selections (selections with data)
   -- | - Attributes must match the selection's datum type
   -- | - Transition config specifies timing (duration, delay, easing)
   -- |
@@ -74,7 +74,7 @@ class Monad m <= TransitionM sel m | m -> sel where
   withTransition
     :: forall datum
      . TransitionConfig
-    -> sel SBound Element datum
+    -> sel SBoundOwns Element datum
     -> Array (Attribute datum)
     -> m Unit
 

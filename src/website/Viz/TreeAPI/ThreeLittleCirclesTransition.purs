@@ -25,7 +25,7 @@ import PSD3v2.Behavior.Types (onClick)
 import PSD3v2.Capabilities.Selection (select, renderTree, on)
 import PSD3v2.Capabilities.Transition (withTransition)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
-import PSD3v2.Selection.Types (ElementType(..), SEmpty, SBound)
+import PSD3v2.Selection.Types (ElementType(..), SEmpty, SBoundOwns, SBoundInherits)
 import PSD3v2.Transition.Types (transitionWith)
 import PSD3v2.VizTree.Tree as T
 import Partial.Unsafe (unsafePartial, unsafeCrashWith)
@@ -49,7 +49,7 @@ toggleState StateGreen = StateRGB
 toggleState StateRGB = StateGreen
 
 -- | Transition circles to a given state
-transitionToState :: D3v2Selection_ SBound Element CircleData -> CircleState -> Effect Unit
+transitionToState :: D3v2Selection_ SBoundOwns Element CircleData -> CircleState -> Effect Unit
 transitionToState circlesSel state = runD3v2M do
   let transitionConfig = transitionWith
         { duration: Milliseconds 1000.0

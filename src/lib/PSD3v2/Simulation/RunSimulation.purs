@@ -18,7 +18,7 @@ import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Types (Datum_)
 import PSD3v2.Simulation.Scene (SceneConfig)
 import PSD3v2.Simulation.SceneTransition (executeSceneTransition_)
-import PSD3v2.Selection.Types (SBound, SEmpty)
+import PSD3v2.Selection.Types (SBoundOwns, SEmpty)
 import Web.DOM.Element (Element)
 
 -- | Low-level runSimulation pattern for force-directed visualizations
@@ -59,7 +59,7 @@ import Web.DOM.Element (Element)
 -- | - This prevents "nodes stuck at origin" issues during scene switches
 runSimulation :: forall d attrs sel m.
   MonadAff m =>
-  SimulationM2 (sel SBound Element) m =>
+  SimulationM2 (sel SBoundOwns Element) m =>
   { nodes :: sel SEmpty Element (SimulationNode d), links :: sel SEmpty Element (SimulationNode d) } ->
   SceneConfig d attrs ->
   Array (SimulationNode d) ->
@@ -137,7 +137,7 @@ runSimulation _selections scene allNodes allLinks updateSimFn = do
 -- | ```
 runSimulationFromState :: forall d attrs sel m row.
   MonadAff m =>
-  SimulationM2 (sel SBound Element) m =>
+  SimulationM2 (sel SBoundOwns Element) m =>
   MonadState { | row } m =>
   ({ | row } -> { nodes :: sel SEmpty Element (SimulationNode d), links :: sel SEmpty Element (SimulationNode d) }) ->  -- Get selections
   ({ | row } -> SceneConfig d attrs) ->                                           -- Get scene

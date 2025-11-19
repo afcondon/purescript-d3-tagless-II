@@ -16,7 +16,7 @@ import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom, ScaleExten
 import PSD3v2.Capabilities.Selection (class SelectionM, appendChild, select, on)
 import PSD3v2.Capabilities.Simulation (class SimulationM2)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_)
-import PSD3v2.Selection.Types (ElementType(..), SBound, SEmpty)
+import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, SBoundInherits, SEmpty)
 import PSD3v2.Simulation.Update (genericUpdateSimulation)
 import Web.DOM.Element (Element)
 import Data.Map (Map)
@@ -39,7 +39,7 @@ getVizEventFromClick e d t =
 initialize :: forall m.
   Bind m =>
   MonadEffect m =>
-  SimulationM2 (D3v2Selection_ SBound Element) m =>
+  SimulationM2 (D3v2Selection_ SBoundOwns Element) m =>
   SelectionM D3v2Selection_ m =>
   m { nodes :: D3v2Selection_ SEmpty Element SpagoSimNode, links :: D3v2Selection_ SEmpty Element SpagoSimNode }
 initialize = do
@@ -87,7 +87,7 @@ updateSimulation :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3v2Selection_ m =>
-  SimulationM2 (D3v2Selection_ SBound Element) m =>
+  SimulationM2 (D3v2Selection_ SBoundOwns Element) m =>
   { nodes :: D3v2Selection_ SEmpty Element SpagoSimNode
   , links :: D3v2Selection_ SEmpty Element SpagoSimNode
   } ->

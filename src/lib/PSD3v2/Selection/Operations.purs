@@ -40,7 +40,7 @@ import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(
 import PSD3v2.Behavior.Types (Behavior(..), DragConfig(..), ZoomConfig(..), ScaleExtent(..))
 import PSD3v2.Behavior.FFI as BehaviorFFI
 import PSD3v2.Selection.Join as Join
-import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), RenderContext(..), SBound, SEmpty, SExiting, SPending, Selection(..), SelectionImpl(..), elementContext)
+import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), RenderContext(..), SBoundOwns, SBoundInherits, SEmpty, SExiting, SPending, Selection(..), SelectionImpl(..), elementContext)
 import PSD3v2.VizTree.Tree (Tree(..))
 import Web.DOM.Document (Document)
 import Web.DOM.Document as Document
@@ -139,7 +139,7 @@ append
   => ElementType
   -> Array (Attribute datum)
   -> Selection SPending parent datum
-  -> m (Selection SBound Element datum)
+  -> m (Selection SBoundOwns Element datum)
 append elemType attrs (Selection impl) = liftEffect do
   let { parentElements, pendingData, indices, document: doc } = unsafePartial case impl of
         PendingSelection r -> r
@@ -191,8 +191,8 @@ setAttrs
   :: forall datum m
    . MonadEffect m
   => Array (Attribute datum)
-  -> Selection SBound Element datum
-  -> m (Selection SBound Element datum)
+  -> Selection SBoundOwns Element datum
+  -> m (Selection SBoundOwns Element datum)
 setAttrs attrs (Selection impl) = liftEffect do
   let { elements, data: datumArray, indices, document: doc } = unsafePartial case impl of
         BoundSelection r -> r
@@ -320,9 +320,9 @@ appendChild elemType attrs (Selection impl) = liftEffect do
 merge
   :: forall datum m
    . MonadEffect m
-  => Selection SBound Element datum
-  -> Selection SBound Element datum
-  -> m (Selection SBound Element datum)
+  => Selection SBoundOwns Element datum
+  -> Selection SBoundOwns Element datum
+  -> m (Selection SBoundOwns Element datum)
 merge (Selection impl1) (Selection impl2) = do
   let { elements: els1, data: data1, document: doc } = unsafePartial case impl1 of
         BoundSelection r -> r
@@ -525,7 +525,7 @@ renderData
   -> Maybe (datum -> Array (Attribute datum))  -- Enter attributes
   -> Maybe (datum -> Array (Attribute datum))  -- Update attributes
   -> Maybe (datum -> Array (Attribute datum))  -- Exit attributes (applied before removal)
-  -> m (Selection SBound Element datum)
+  -> m (Selection SBoundOwns Element datum)
 renderData elemType foldableData selector emptySelection enterAttrs updateAttrs exitAttrs = do
   -- Perform the join
   JoinResult { enter, update, exit } <- joinData foldableData selector emptySelection
@@ -783,7 +783,7 @@ renderNodeHelper
    . Ord d  -- Needed for joinData
   => Selection SEmpty p pd
   -> Tree d
-  -> Effect (Tuple Element (Map String (Selection SBound Element d)))
+  -> Effect (Tuple Element (Map String (Selection SBoundOwns Element d)))
 renderNodeHelper parentSel (Node node) = do
   -- Create this element
   childSel <- appendChild node.elemType node.attrs parentSel
@@ -802,7 +802,7 @@ renderNodeHelper parentSel (Node node) = do
 
   -- Add this node to the map if it has a name
   let selectionsMap = case node.name of
-        Just name -> Map.insert name (unsafeCoerce childSel :: Selection SBound Element d) combinedChildMap
+        Just name -> Map.insert name (unsafeCoerce childSel :: Selection SBoundOwns Element d) combinedChildMap
         Nothing -> combinedChildMap
 
   pure $ Tuple element selectionsMap
@@ -1153,7 +1153,7 @@ renderNestedTemplatesForPendingSelection
   -> (outerDatum -> Tree outerDatum)   -- Template (type-erased to outerDatum)
   -> ElementType                        -- Wrapper element type
   -> Selection SPending parent outerDatum  -- Pending selection (pendingData has type Array outerDatum)
-  -> Effect (Array (Tuple Element (Map String (Selection SBound Element innerDatum))))
+  -> Effect (Array (Tuple Element (Map String (Selection SBoundOwns Element innerDatum))))
 renderNestedTemplatesForPendingSelection decomposer templateFn wrapperType pendingSel = do
   let Selection impl = pendingSel
   let { parentElements, pendingData, document: doc } = unsafePartial case impl of
@@ -1201,7 +1201,7 @@ renderTemplatesForPendingSelection
    . Ord datum  -- Needed for recursive renderNodeHelper calls
   => (datum -> Tree datum)  -- Template function
   -> Selection SPending parent datum  -- Pending selection from join (pendingData has type Array datum)
-  -> Effect (Array (Tuple Element (Map String (Selection SBound Element datum))))
+  -> Effect (Array (Tuple Element (Map String (Selection SBoundOwns Element datum))))
 renderTemplatesForPendingSelection templateFn pendingSel = do
   -- Extract pending data from the selection
   let Selection impl = pendingSel
@@ -1245,8 +1245,8 @@ renderTemplatesForBoundSelection
   :: forall datum parent
    . Ord datum
   => (datum -> Tree datum)  -- Template function
-  -> Selection SBound parent datum  -- Bound selection from join (update set)
-  -> Effect (Array (Tuple Element (Map String (Selection SBound Element datum))))
+  -> Selection SBoundOwns parent datum  -- Bound selection from join (update set)
+  -> Effect (Array (Tuple Element (Map String (Selection SBoundOwns Element datum))))
 renderTemplatesForBoundSelection templateFn boundSel = do
   -- Extract elements and data from the bound selection
   let Selection impl = boundSel
@@ -1304,8 +1304,8 @@ appendChildrenFromTemplate
   :: forall datum
    . Ord datum  -- Needed for recursive renderNodeHelper calls
   => (datum -> Tree datum)  -- Template function
-  -> Selection SBound Element datum  -- Parent selection with bound data
-  -> Effect (Map String (Selection SBound Element datum))
+  -> Selection SBoundOwns Element datum  -- Parent selection with bound data
+  -> Effect (Map String (Selection SBoundOwns Element datum))
 appendChildrenFromTemplate templateFn boundSel = do
   -- Extract elements and data from the bound selection
   let Selection impl = boundSel
@@ -1348,8 +1348,8 @@ appendChildrenFromNestedTemplate
    . Ord innerDatum  -- Needed for recursive renderNodeHelper calls
   => (outerDatum -> Array innerDatum)  -- Decomposer function
   -> (innerDatum -> Tree innerDatum)    -- Template function
-  -> Selection SBound Element outerDatum  -- Parent selection with outer data
-  -> Effect (Map String (Selection SBound Element innerDatum))
+  -> Selection SBoundOwns Element outerDatum  -- Parent selection with outer data
+  -> Effect (Map String (Selection SBoundOwns Element innerDatum))
 appendChildrenFromNestedTemplate decomposer templateFn boundSel = do
   -- Extract elements and data from the bound selection
   let Selection impl = boundSel
@@ -1397,7 +1397,7 @@ renderTree
    . Ord datum  -- Needed for data joins
   => Selection SEmpty parent parentDatum
   -> Tree datum
-  -> Effect (Map String (Selection SBound Element datum))
+  -> Effect (Map String (Selection SBoundOwns Element datum))
 renderTree parent tree = do
   -- Use a State-like pattern to accumulate named selections
   -- Returns (element created, map of named selections in subtree)
@@ -1419,7 +1419,7 @@ renderTree parent tree = do
 reselect
   :: forall datum datumOut
    . String  -- Name of the selection to extract
-  -> Map String (Selection SBound Element datum)
+  -> Map String (Selection SBoundOwns Element datum)
   -> Effect (Selection SEmpty Element datumOut)
 reselect name selectionsMap = do
   doc <- window >>= document <#> toDocument

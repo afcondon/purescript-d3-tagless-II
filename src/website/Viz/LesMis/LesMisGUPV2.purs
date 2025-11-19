@@ -34,7 +34,7 @@ import PSD3v2.Capabilities.Selection (select, on, renderTree, renderData)
 import PSD3v2.Capabilities.Simulation (init, addTickFunction, start, stop, Step(..), update, reheat)
 import PSD3v2.Interpreter.D3v2 (D3v2SimM, D3v2Selection_, reselectD3v2)
 import PSD3v2.Interpreter.D3v2 as D3v2
-import PSD3v2.Selection.Types (ElementType(..), SBound, Selection(..), SelectionImpl(..))
+import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, SBoundInherits, Selection(..), SelectionImpl(..))
 import Partial.Unsafe (unsafePartial, unsafeCrashWith)
 import Web.DOM.Element (Element)
 import PSD3v2.VizTree.Tree as T
@@ -269,12 +269,12 @@ drawLesMisGUPV2 forcesArray activeForces model containerSelector = do
 
   -- Extract bound selections for behaviors and tick functions
   -- Use case pattern matching (NOT fromMaybe) when default might throw
-  let nodeCircles :: D3v2Selection_ SBound Element KeyedNode
+  let nodeCircles :: D3v2Selection_ SBoundOwns Element KeyedNode
       nodeCircles = case Map.lookup "nodeElements" nodesSelections of
         Just sel -> sel
         Nothing -> unsafePartial $ unsafeCrashWith "nodeElements not found"
 
-  let linkLines :: D3v2Selection_ SBound Element IndexedLink
+  let linkLines :: D3v2Selection_ SBoundOwns Element IndexedLink
       linkLines = case Map.lookup "linkElements" linksSelections of
         Just sel -> sel
         Nothing -> unsafePartial $ unsafeCrashWith "linkElements not found"
@@ -483,12 +483,12 @@ updateForceGraph nodesInSim linksInSim = do
   nodesSelections <- renderTree nodesGroup nodesTree
 
   -- Step 5: Extract updated selections
-  let nodeCircles :: D3v2Selection_ SBound Element KeyedNode
+  let nodeCircles :: D3v2Selection_ SBoundOwns Element KeyedNode
       nodeCircles = case Map.lookup "nodeElements" nodesSelections of
         Just sel -> sel
         Nothing -> unsafePartial $ unsafeCrashWith "nodeElements not found"
 
-  let linkLines :: D3v2Selection_ SBound Element IndexedLink
+  let linkLines :: D3v2Selection_ SBoundOwns Element IndexedLink
       linkLines = case Map.lookup "linkElements" linksSelections of
         Just sel -> sel
         Nothing -> unsafePartial $ unsafeCrashWith "linkElements not found"

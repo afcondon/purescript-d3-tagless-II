@@ -28,7 +28,7 @@ import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom, simulation
 import PSD3v2.Capabilities.Selection (select, on, renderTree)
 import PSD3v2.Capabilities.Simulation (init, addTickFunction, start, Step(..), update)
 import PSD3v2.Interpreter.D3v2 (D3v2SimM, reselectD3v2)
-import PSD3v2.Selection.Types (ElementType(..), SBound)
+import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, SBoundInherits)
 import PSD3v2.Selection.Types as ST
 import PSD3v2.Transition.Types (Easing(..))
 import PSD3v2.VizTree.Tree as T
@@ -206,7 +206,7 @@ drawLesMisGUPSimple forcesArray activeForces model containerSelector = do
   -- SceneNestedJoin returns Selection SceneData, but DOM elements are bound to KeyedNode
   -- This is a library limitation - the type signature doesn't capture the inner datum type
   -- We use unsafeCoerce because we know the runtime datum type is KeyedNode
-  let nodeCirclesKeyed = unsafeCoerce nodeCircles :: _ SBound _ KeyedNode
+  let nodeCirclesKeyed = unsafeCoerce nodeCircles :: _ SBoundOwns _ KeyedNode
 
   -- Attach simulation drag and tick functions
   _ <- on (Drag $ simulationDrag "lesmis-gup-simple") nodeCirclesKeyed

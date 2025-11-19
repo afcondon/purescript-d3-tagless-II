@@ -36,7 +36,7 @@ import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultDrag, defaul
 import PSD3v2.Capabilities.Selection (append, joinData, merge, on, remove, renderTree, select, selectAll, setAttrs, setAttrsExit)
 import PSD3v2.Capabilities.Simulation (Step(..), addTickFunction, init, reheat, start, update)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_, D3v2SimM, reselectD3v2, runD3v2SimM, execD3v2SimM)
-import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), SBound, SEmpty)
+import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), SBoundOwns, SBoundInherits, SEmpty)
 import PSD3v2.VizTree.Tree as T
 import Partial.Unsafe (unsafePartial, unsafeCrashWith)
 import Unsafe.Coerce (unsafeCoerce)
@@ -234,12 +234,12 @@ drawLesMisGUPAuto nodes links containerSelector w h = do
   nodesSelections <- renderTree nodesGroupSel nodesTree
 
   -- Extract bound selections
-  let nodesSel :: D3v2Selection_ SBound Element KeyedNode
+  let nodesSel :: D3v2Selection_ SBoundOwns Element KeyedNode
       nodesSel = case Map.lookup "nodeElements" nodesSelections of
         Just sel -> sel
         Nothing -> unsafePartial $ unsafeCrashWith "nodeElements not found"
 
-      linksSel :: D3v2Selection_ SBound Element IndexedLink
+      linksSel :: D3v2Selection_ SBoundOwns Element IndexedLink
       linksSel = case Map.lookup "linkElements" linksSelections of
         Just sel -> sel
         Nothing -> unsafePartial $ unsafeCrashWith "linkElements not found"

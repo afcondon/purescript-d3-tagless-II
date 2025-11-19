@@ -218,7 +218,7 @@ import PSD3v2.Capabilities.Transition (class TransitionM, withTransition, withTr
 import PSD3v2.VizTree.Tree (Tree, elem, joinData, withChild, withChildren, named) as X
 
 -- Types
-import PSD3v2.Selection.Types (SEmpty, SBound, SPending, SExiting, Selection(..)) as X
+import PSD3v2.Selection.Types (SEmpty, SBoundOwns, SBoundInherits, SPending, SExiting, Selection(..)) as X
 import PSD3v2.Attribute.Types (Attribute, cx, cy, x, y, x1, y1, x2, y2, width, height, radius, fill, stroke, strokeWidth, opacity, transform, viewBox, id_, class_) as X
 import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, simulationDrag, ScaleExtent(..)) as X
 

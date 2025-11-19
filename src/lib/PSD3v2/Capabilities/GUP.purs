@@ -124,5 +124,5 @@ type JoinSpec datum =
 --   => sel SEmpty parent parentDatum
 --   -> Array datum
 --   -> JoinSpec datum
---   -> m (sel SBound Element datum)
+--   -> m (sel SBoundOwns Element datum)
 -- joinWithGUP = undefined  -- TODO: Implement using existing SelectionM operations

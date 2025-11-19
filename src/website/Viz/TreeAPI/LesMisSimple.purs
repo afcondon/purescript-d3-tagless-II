@@ -28,7 +28,7 @@ import PSD3v2.Behavior.Types (Behavior(..), defaultZoom, simulationDrag, ScaleEx
 import PSD3v2.Capabilities.Selection (select, renderTree, on)
 import PSD3v2.Capabilities.Simulation (init, addTickFunction, start, Step(..))
 import PSD3v2.Interpreter.D3v2 (runD3v2SimM, D3v2Selection_, D3v2SimM, reselectD3v2)
-import PSD3v2.Selection.Types (ElementType(..), SEmpty, SBound)
+import PSD3v2.Selection.Types (ElementType(..), SEmpty, SBoundOwns, SBoundInherits)
 import PSD3v2.VizTree.Tree as T
 import Unsafe.Coerce (unsafeCoerce)
 import Web.DOM.Element (Element)
@@ -170,12 +170,12 @@ drawLesMisSimple model containerSelector w h = do
   -- Extract selections for behaviors
   svgSel <- liftEffect $ reselectD3v2 "svg" selections
 
-  let nodesSel :: D3v2Selection_ SBound Element LesMisSimNode
+  let nodesSel :: D3v2Selection_ SBoundOwns Element LesMisSimNode
       nodesSel = case Map.lookup "nodeElements" nodesSelections of
         Just sel -> sel
         Nothing -> unsafePartial $ unsafeCrashWith "nodeElements not found"
 
-  let linksSel :: D3v2Selection_ SBound Element IndexedLink
+  let linksSel :: D3v2Selection_ SBoundOwns Element IndexedLink
       linksSel = case Map.lookup "linkElements" linksSelections of
         Just sel -> sel
         Nothing -> unsafePartial $ unsafeCrashWith "linkElements not found"

@@ -7,7 +7,7 @@ import PSD3v2.Attribute.Types (Attribute)
 import PSD3v2.Capabilities.Selection (class SelectionM, joinData, joinDataWithKey, merge)
 import PSD3v2.Capabilities.Simulation (class SimulationM2, SimulationUpdate, Step(..), addTickFunction, update)
 import PSD3v2.Selection.Operations (elementTypeToString)
-import PSD3v2.Selection.Types (ElementType, JoinResult(..), SBound, SEmpty, SPending, SExiting, Selection(..), SelectionImpl(..))
+import PSD3v2.Selection.Types (ElementType, JoinResult(..), SBoundOwns, SBoundInherits, SEmpty, SPending, SExiting, Selection(..), SelectionImpl(..))
 import Web.DOM.Element (Element)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Class.Console (log)
@@ -49,16 +49,16 @@ import Data.Foldable (foldl)
 -- | - Applied to merged selections automatically
 type RenderCallbacks attrs sel m d = {
   -- Node rendering callbacks
-  -- Enter: Takes SPending, returns SBound after appending elements
-  onNodeEnter :: sel SPending Element d -> attrs -> m (sel SBound Element d),
+  -- Enter: Takes SPending, returns SBoundOwns after appending elements
+  onNodeEnter :: sel SPending Element d -> attrs -> m (sel SBoundOwns Element d),
   -- Update: Takes SBound, modifies in place, returns Unit
-  onNodeUpdate :: sel SBound Element d -> attrs -> m Unit,
+  onNodeUpdate :: sel SBoundOwns Element d -> attrs -> m Unit,
   -- Exit: Takes SExiting, removes elements, returns Unit
   onNodeExit :: sel SExiting Element d -> m Unit,
 
   -- Link rendering callbacks (links are D3Link_Swizzled after processing)
-  onLinkEnter :: sel SPending Element D3Link_Swizzled -> attrs -> m (sel SBound Element D3Link_Swizzled),
-  onLinkUpdate :: sel SBound Element D3Link_Swizzled -> attrs -> m Unit,
+  onLinkEnter :: sel SPending Element D3Link_Swizzled -> attrs -> m (sel SBoundOwns Element D3Link_Swizzled),
+  onLinkUpdate :: sel SBoundOwns Element D3Link_Swizzled -> attrs -> m Unit,
   onLinkExit :: sel SExiting Element D3Link_Swizzled -> m Unit,
 
   -- Tick function attributes (applied to merged selections)
@@ -158,7 +158,7 @@ type DeclarativeUpdateConfig d =
 genericUpdateSimulation :: forall dataRow attrs sel m nodeKey linkKey.
   MonadEffect m =>
   SelectionM sel m =>
-  SimulationM2 (sel SBound Element) m =>
+  SimulationM2 (sel SBoundOwns Element) m =>
   Ord (SimulationNode dataRow) =>                        -- PSD3v2 requires Ord for data joins
   Ord nodeKey =>
   Ord linkKey =>                                         -- Links use key-based join (no Ord D3Link_Swizzled needed!)
@@ -264,8 +264,8 @@ getEnterData sel = case (unsafeCoerce sel :: Selection SPending parent datum) of
   Selection (PendingSelection r) -> r.pendingData
   _ -> []
 
-getUpdateData :: forall sel parent datum. sel SBound parent datum -> Array datum
-getUpdateData sel = case (unsafeCoerce sel :: Selection SBound parent datum) of
+getUpdateData :: forall sel parent datum. sel SBoundOwns parent datum -> Array datum
+getUpdateData sel = case (unsafeCoerce sel :: Selection SBoundOwns parent datum) of
   Selection (BoundSelection r) -> r.data
   _ -> []
 

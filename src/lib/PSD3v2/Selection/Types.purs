@@ -12,16 +12,18 @@ import Web.DOM.Document (Document)
 -- |
 -- | These are uninhabited types used only at the type level
 -- | to track what operations are legal on a selection.
-data SEmpty    -- Selection has parent elements but no data bound
-data SBound    -- Elements with data bound (the normal working state)
-data SPending  -- Data without elements (enter selection)
-data SExiting  -- Elements without matching data (exit selection)
+data SEmpty         -- Selection has parent elements but no data bound
+data SBoundOwns     -- Elements with data bound (owns the __data__ binding)
+data SBoundInherits -- Elements with data bound (inherited from parent)
+data SPending       -- Data without elements (enter selection)
+data SExiting       -- Elements without matching data (exit selection)
 
 -- | A type-safe D3-style selection
 -- |
 -- | The phantom type parameter `state` tracks what operations are legal:
 -- | - `SEmpty` selections can receive data via join
--- | - `SBound` selections can be updated with attributes
+-- | - `SBoundOwns` selections own their data binding, can be updated
+-- | - `SBoundInherits` selections inherit parent's data, can be updated
 -- | - `SPending` selections need elements appended
 -- | - `SExiting` selections should be removed
 -- |
@@ -31,7 +33,8 @@ data SExiting  -- Elements without matching data (exit selection)
 -- | Examples:
 -- | ```purescript
 -- | svg :: Selection SEmpty Element Unit
--- | circles :: Selection SBound Element Number
+-- | circles :: Selection SBoundOwnsOwns Element Number
+-- | labels :: Selection SBoundOwnsInherits Element Number  -- inherits from circles
 -- | entering :: Selection SPending SVGElement Number
 -- | leaving :: Selection SExiting SVGElement Number
 -- | ```
@@ -46,11 +49,11 @@ newtype Selection (state :: Type) (parent :: Type) (datum :: Type)
 -- | Examples:
 -- | ```purescript
 -- | -- Transform numeric data
--- | doubled :: Selection SBound Element Int
+-- | doubled :: Selection SBoundOwnsOwns Element Int
 -- | doubled = map (_ * 2) numbers
 -- |
 -- | -- Extract fields from records
--- | ages :: Selection SBound Element Int
+-- | ages :: Selection SBoundOwnsOwns Element Int
 -- | ages = map _.age people
 -- | ```
 instance Functor (Selection state parent) where
@@ -116,13 +119,13 @@ data SelectionImpl parent datum
 -- |
 -- | Note the type signatures enforce correct usage:
 -- | - enter is SPending (needs append)
--- | - update is SBound (can be modified)
+-- | - update is SBoundOwns (owns data, can be modified)
 -- | - exit is SExiting (should be removed)
 -- | Polymorphic join result that works with any selection type wrapper
 -- | This allows interpreters to use their own selection types (e.g., D3v2Selection_)
 data JoinResult sel parent datum = JoinResult
   { enter  :: sel SPending parent datum
-  , update :: sel SBound Element datum
+  , update :: sel SBoundOwns Element datum
   , exit   :: sel SExiting Element datum
   }
 

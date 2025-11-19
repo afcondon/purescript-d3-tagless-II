@@ -28,7 +28,7 @@ import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom, simulation
 import PSD3v2.Capabilities.Selection (select, appendChild, joinData, append, on)
 import PSD3v2.Capabilities.Simulation (init, addTickFunction, start, Step(..))
 import PSD3v2.Interpreter.D3v2 (D3v2SimM, D3v2Selection_)
-import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), SBound)
+import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), SBoundOwns, SBoundInherits)
 import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 import Data.Int (toNumber)

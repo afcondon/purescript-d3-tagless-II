@@ -24,7 +24,7 @@ import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom, simulation
 import PSD3v2.Capabilities.Selection (select, on, renderTree, joinDataWithKey, append, setAttrs, remove, merge)
 import PSD3v2.Capabilities.Simulation (init, addTickFunction, start, Step(..), update)
 import PSD3v2.Interpreter.D3v2 (D3v2SimM, reselectD3v2)
-import PSD3v2.Selection.Types (ElementType(..), SBound, JoinResult(..))
+import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, SBoundInherits, JoinResult(..))
 import PSD3v2.VizTree.Tree as T
 import Partial.Unsafe (unsafePartial, unsafeCrashWith)
 import Unsafe.Coerce (unsafeCoerce)
