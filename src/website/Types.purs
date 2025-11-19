@@ -84,6 +84,7 @@ data Route
   | GettingStarted  -- Tutorial: installation, setup, first project (TODO: update for v2)
   | Wizard          -- Interactive wizard for scaffolding visualizations (TODO: update for v2)
   | HowtoIndex      -- How-to: index of all step-by-step guides (TODO: update for v2)
+  | Understanding   -- Conceptual overview: interpreters, composability, grammar, attributes (TODO: content needed)
   | Reference       -- Reference: API documentation index
   | ReferenceModule String  -- Reference: individual module page
   -- Tour Pages (progressive overview of capabilities)
@@ -123,6 +124,7 @@ instance showRoute :: Show Route where
   show GettingStarted = "Getting Started"
   show Wizard = "Wizard"
   show HowtoIndex = "How-to Guides"
+  show Understanding = "Understanding"
   show Reference = "API Reference"
   show (ReferenceModule moduleName) = "Module: " <> moduleName
   show TourFoundations = "Tour: Foundations"

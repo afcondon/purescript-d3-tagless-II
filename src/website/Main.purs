@@ -20,6 +20,7 @@ import PSD3.Home as Home
 import PSD3.Tutorial.GettingStarted as GettingStarted
 import PSD3.Wizard.Wizard as Wizard
 import PSD3.HowTo.HowtoIndex as HowtoIndex
+import PSD3.Understanding as Understanding
 import PSD3.Reference.Reference as Reference
 import PSD3.Acknowledgements as Acknowledgements
 
@@ -74,6 +75,7 @@ type Slots =
   , gettingStarted :: forall q. H.Slot q Void Unit
   , wizard :: forall q. H.Slot q Void Unit
   , howtoIndex :: forall q. H.Slot q Void Unit
+  , understanding :: forall q. H.Slot q Void Unit
   , reference :: forall q. H.Slot q Void Unit
   , tourFoundations :: forall q. H.Slot q Void Unit
   , tourProfessional :: forall q. H.Slot q Void Unit
@@ -106,6 +108,7 @@ _home = Proxy :: Proxy "home"
 _gettingStarted = Proxy :: Proxy "gettingStarted"
 _wizard = Proxy :: Proxy "wizard"
 _howtoIndex = Proxy :: Proxy "howtoIndex"
+_understanding = Proxy :: Proxy "understanding"
 _reference = Proxy :: Proxy "reference"
 _tourFoundations = Proxy :: Proxy "tourFoundations"
 _tourProfessional = Proxy :: Proxy "tourProfessional"
@@ -168,6 +171,9 @@ renderPage route = case spy "Route is" route of
 
   HowtoIndex ->
     HH.slot_ _howtoIndex unit HowtoIndex.component unit
+
+  Understanding ->
+    HH.slot_ _understanding unit Understanding.component unit
 
   Reference ->
     HH.slot_ _reference unit Reference.component Reference

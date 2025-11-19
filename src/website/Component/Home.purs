@@ -126,9 +126,9 @@ render _ =
                 "Pursuit-style documentation of the library with type signatures"
                 "api/index.html"
             , renderDocBox
-                "Acknowledgements"
-                "Credits and acknowledgements"
-                (routeToPath Acknowledgements)
+                "Understanding"
+                "Conceptual overview of the project"
+                (routeToPath Understanding)
             ]
         ]
 

@@ -14,8 +14,6 @@ import Prelude (Unit, bind, discard, pure, ($), (*), (+))
 -- | Simple-as-can-be example of the more complex Join which allows for new data to be
 -- | entered, existing data to be updated and disappearing data to be removed
 -- | ====================================================================================
--- Snippet_Start
--- Name: GUP
 type Model = Array Char
 
 -- PHANTOM TYPE SUCCESS: No more datum_ boilerplate!
@@ -62,4 +60,3 @@ exGeneralUpdatePattern selector = do
 
     exit =  [ classed "exit", fill "brown"]
             `andThen` (transition `to` [ y 400.0, remove ])
--- Snippet_End

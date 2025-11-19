@@ -21,6 +21,7 @@ routes =
   <|> gettingStarted  -- Must come early - specific routes before general
   <|> wizard
   <|> howtoIndex
+  <|> understanding
   <|> referenceModule  -- Must come before reference (more specific)
   <|> reference
   <|> tourFoundations
@@ -70,6 +71,10 @@ wizard = Wizard <$ lit "wizard" <* end
 -- | Match: /howto
 howtoIndex :: Match Route
 howtoIndex = HowtoIndex <$ lit "howto" <* end
+
+-- | Match: /understanding
+understanding :: Match Route
+understanding = Understanding <$ lit "understanding" <* end
 
 -- | Match: /reference/:moduleName
 referenceModule :: Match Route
@@ -191,6 +196,7 @@ routeToPath Home = "/home"
 routeToPath GettingStarted = "/getting-started"
 routeToPath Wizard = "/wizard"
 routeToPath HowtoIndex = "/howto"
+routeToPath Understanding = "/understanding"
 routeToPath Reference = "/reference"
 routeToPath (ReferenceModule moduleName) = "/reference/" <> moduleName
 routeToPath TourFoundations = "/tour/foundations"

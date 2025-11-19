@@ -20,7 +20,7 @@
 .home-header-content {
   max-width: 1400px;
   margin: 0 auto;
-  margin-bottom: -1.875rem; /* -30px - allows logo to extend below nav line */
+  margin-bottom: 0; /* Removed negative margin to prevent nav overlap */
   padding: 0 3rem;
   display: flex;
   align-items: center;
@@ -34,10 +34,10 @@
 }
 
 .home-logo {
-  height: 96px;
+  height: 80px; /* Reduced from 96px */
   width: auto;
-  margin-bottom: -3rem; /* -48px - half of logo height to allow bottom extension */
-  margin-top: -3rem; /* -48px - half of logo height to allow top extension */
+  margin-bottom: -1rem; /* Reduced from -3rem to prevent overlap */
+  margin-top: -1rem; /* Reduced from -3rem */
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
   position: relative;
   z-index: 10;
