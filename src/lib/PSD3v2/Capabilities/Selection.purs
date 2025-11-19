@@ -9,6 +9,7 @@ module PSD3v2.Capabilities.Selection
   , updateJoin
   , append
   , appendChild
+  , appendChildInheriting
   , setAttrs
   , setAttrsExit
   , remove
@@ -252,6 +253,29 @@ class Monad m <= SelectionM sel m | m -> sel where
     -> Array (Attribute datumOut)
     -> sel SEmpty parent datum
     -> m (sel SEmpty Element datumOut)
+
+  -- | Append a child element that inherits the parent's data
+  -- |
+  -- | Creates one child element for each parent, copying the parent's __data__.
+  -- | Returns a selection with SBoundInherits state to document data inheritance.
+  -- |
+  -- | This enables nested data-bound structures like:
+  -- | ```purescript
+  -- | -- Create groups with data
+  -- | groups <- append Group [] enterSelection  -- SBoundOwns
+  -- |
+  -- | -- Add circles that inherit group's data
+  -- | circles <- appendChildInheriting Circle [radius 5.0] groups  -- SBoundInherits
+  -- |
+  -- | -- Add text that also inherits group's data
+  -- | labels <- appendChildInheriting Text [textContent _.name] groups  -- SBoundInherits
+  -- | ```
+  appendChildInheriting
+    :: forall parent datum
+     . ElementType
+    -> Array (Attribute datum)
+    -> sel SBoundOwns parent datum
+    -> m (sel SBoundInherits Element datum)
 
   -- | Attach a behavior (zoom, drag, etc.) to a selection
   -- |

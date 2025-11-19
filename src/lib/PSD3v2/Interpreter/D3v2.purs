@@ -165,6 +165,10 @@ instance SelectionM D3v2Selection_ D3v2M where
     result <- Ops.appendChild elemType attrs emptySelection
     pure $ D3v2Selection_ result
 
+  appendChildInheriting elemType attrs (D3v2Selection_ boundSelection) = D3v2M do
+    result <- Ops.appendChildInheriting elemType attrs boundSelection
+    pure $ D3v2Selection_ result
+
   on behavior (D3v2Selection_ selection) = D3v2M do
     result <- Ops.on behavior selection
     pure $ D3v2Selection_ result
@@ -265,6 +269,10 @@ instance SelectionM D3v2Selection_ (D3v2SimM row d) where
 
   appendChild elemType attrs (D3v2Selection_ parent) = liftEffect $ do
     child <- Ops.appendChild elemType attrs parent
+    pure $ D3v2Selection_ child
+
+  appendChildInheriting elemType attrs (D3v2Selection_ boundSelection) = liftEffect $ do
+    child <- Ops.appendChildInheriting elemType attrs boundSelection
     pure $ D3v2Selection_ child
 
   joinData foldable tag (D3v2Selection_ parent) = liftEffect $ do

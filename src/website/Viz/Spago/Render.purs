@@ -16,7 +16,7 @@ import PSD3.Internal.FFI (keyIsID_, simdrag_)
 import Unsafe.Coerce (unsafeCoerce)
 import PSD3v2.Attribute.Types (class_, stroke, transform, x1, x2, y1, y2, Attribute)
 import PSD3v2.Behavior.Types (Behavior(..), simulationDrag)
-import PSD3v2.Capabilities.Selection (class SelectionM, append, appendChild, on, openSelection, remove, setAttrs)
+import PSD3v2.Capabilities.Selection (class SelectionM, append, appendChild, appendChildInheriting, on, openSelection, remove, setAttrs)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, SBoundInherits, SEmpty, SPending, SExiting)
 import PSD3v2.Simulation.Update (RenderCallbacks)
@@ -58,26 +58,35 @@ spagoRenderCallbacks :: forall m.
   RenderCallbacks SpagoSceneAttributes D3v2Selection_ m SpagoSimNode
 spagoRenderCallbacks = {
   -- Node rendering: Group with Circle + Text children
-  -- v2 approach: Create group, then use openSelection to add children
+  -- v2 approach: Create group, then use appendChildInheriting to add children
   onNodeEnter: \enterSel attrs -> do
     let tagClassesAttr = makeTagClassesAttr attrs.tagMap
-        circleAttrs = tagClassesAttr : transform translateNode : attrs.circles
+        groupAttrs = tagClassesAttr : transform translateNode : []
+        circleAttrs = attrs.circles
+        labelAttrs = attrs.labels
 
-    -- For now, create circles directly (without group wrapper)
-    -- TODO: Need proper v2 API for adding children to bound selections
-    circleEnter <- append Circle circleAttrs enterSel
+    -- Create outer group positioned via transform
+    groupEnter <- append Group groupAttrs enterSel
 
-    -- Add drag behavior
-    _ <- on (Drag (simulationDrag "spago")) circleEnter
+    -- Add circle child that inherits the parent's data
+    circleEnter <- appendChildInheriting Circle circleAttrs groupEnter
 
-    pure circleEnter
+    -- Add text label child that also inherits the parent's data
+    labelEnter <- appendChildInheriting Text labelAttrs groupEnter
+
+    -- Add drag behavior to group
+    _ <- on (Drag (simulationDrag "spago")) groupEnter
+
+    pure groupEnter
 
   , onNodeUpdate: \updateSel attrs -> do
       let tagClassesAttr = makeTagClassesAttr attrs.tagMap
-          circleAttrs = tagClassesAttr : transform translateNode : attrs.circles
+          groupAttrs = tagClassesAttr : transform translateNode : []
 
-      -- Update circle attributes
-      _ <- setAttrs circleAttrs updateSel
+      -- Update group attributes (tag classes and position)
+      _ <- setAttrs groupAttrs updateSel
+
+      -- TODO: Optionally update circle/text children via openSelection if needed
 
       pure unit
 
@@ -100,7 +109,7 @@ spagoRenderCallbacks = {
   , onLinkExit: \exitSel ->
       remove exitSel
 
-  -- Tick function attributes - update circle position on each tick
+  -- Tick function attributes - update group position on each tick
   , nodeTickAttrs: \_attrs ->
       [ transform \(d :: SpagoSimNode) -> translateNode d ]
 

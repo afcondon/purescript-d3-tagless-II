@@ -3,6 +3,7 @@ module PSD3v2.Selection.Operations
   , selectAll
   , append
   , appendChild
+  , appendChildInheriting
   , setAttrs
   , setAttrsExit
   , remove
@@ -305,6 +306,70 @@ appendChild elemType attrs (Selection impl) = liftEffect do
 
   pure $ Selection $ EmptySelection
     { parentElements: elements
+    , document: doc
+    }
+
+-- | Append child elements to a data-bound selection, inheriting parent's data
+-- |
+-- | This is the key function for creating nested SVG structures where children
+-- | need access to their parent's bound data. The children don't own the data
+-- | binding - they inherit it from their parent.
+-- |
+-- | Semantics: Each parent element gets one child. The child inherits the parent's
+-- | data by copying the __data__ reference (a performance optimization vs. traversing
+-- | the DOM tree on every attribute access).
+-- |
+-- | Type signature documents the data flow:
+-- | - Parent must be SBoundOwns (owns the data to inherit from)
+-- | - Child is SBoundInherits (borrows parent's data)
+-- | - Both parent and child have same datum type
+-- |
+-- | Example:
+-- | ```purescript
+-- | -- Create groups with data
+-- | groups <- append Group [] enterSelection  -- SBoundOwns
+-- |
+-- | -- Add circles that inherit group's data
+-- | circles <- appendChildInheriting Circle [radius 5.0] groups  -- SBoundInherits
+-- |
+-- | -- Add text that also inherits group's data
+-- | labels <- appendChildInheriting Text [textContent _.name] groups  -- SBoundInherits
+-- | ```
+appendChildInheriting
+  :: forall parent datum m
+   . MonadEffect m
+  => ElementType
+  -> Array (Attribute datum)
+  -> Selection SBoundOwns parent datum
+  -> m (Selection SBoundInherits Element datum)
+appendChildInheriting elemType attrs (Selection impl) = liftEffect do
+  let { elements: parentElements, data: dataArray, document: doc } = unsafePartial case impl of
+        BoundSelection r -> r
+
+  -- Create one child for each parent, inheriting the parent's data
+  childElements <- Array.zipWith Tuple parentElements dataArray # traverseWithIndex \idx (Tuple parent datum) -> do
+    -- Create child element
+    child <- createElementWithNS elemType doc
+
+    -- Copy parent's __data__ to child (the "caching" optimization)
+    -- This allows child to access data without DOM traversal
+    setElementData_ datum child
+
+    -- Apply attributes using the inherited data
+    applyAttributes child datum idx attrs
+
+    -- Append child to parent
+    let childNode = toNode child
+    let parentNode = toNode parent
+    Node.appendChild childNode parentNode
+
+    pure child
+
+  -- Return as SBoundInherits selection
+  pure $ Selection $ BoundSelection
+    { elements: childElements
+    , data: dataArray  -- Same data as parent
+    , indices: Nothing
     , document: doc
     }
 

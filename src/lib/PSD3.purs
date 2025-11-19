@@ -210,7 +210,7 @@ import Prelude as X
 -- PSD3v2 Core Exports
 import PSD3v2.Interpreter.D3v2 (D3v2M, D3v2SimM, D3v2Selection_, runD3v2M, runD3v2SimM, execD3v2SimM, reselectD3v2) as X
 
-import PSD3v2.Capabilities.Selection (class SelectionM, select, append, renderTree, renderData, setAttrs, on) as X
+import PSD3v2.Capabilities.Selection (class SelectionM, select, append, appendChildInheriting, renderTree, renderData, setAttrs, on) as X
 import PSD3v2.Capabilities.Simulation (class SimulationM2, SimulationUpdate, init, update, start, stop, reheat, addTickFunction, removeTickFunction, Step(..)) as X
 import PSD3v2.Capabilities.Transition (class TransitionM, withTransition, withTransitionExit) as X
 
