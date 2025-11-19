@@ -9,6 +9,7 @@ import Effect.Aff (Milliseconds(..), delay)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import Halogen.HTML.Events as HE
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3.Shared.TutorialNav as TutorialNav
@@ -26,15 +27,21 @@ import Web.DOM.Element (Element)
 import Data.Array (length, mapWithIndex)
 import Data.Int (toNumber)
 
+-- | Available examples
+data ExampleSelection = ExThreeLittleCircles | ExBarChart | ExNestedStructure
+
+derive instance Eq ExampleSelection
+
 -- | Tour page state
 type State =
   { englishDesc :: String
   , mermaidCode :: String
   , astCode :: String
+  , selectedExample :: ExampleSelection
   }
 
 -- | Tour page actions
-data Action = Initialize
+data Action = Initialize | SelectExample ExampleSelection
 
 -- | Tour page component
 component :: forall q i o m. MonadAff m => H.Component q i o m
@@ -43,6 +50,7 @@ component = H.mkComponent
       { englishDesc: ""
       , mermaidCode: ""
       , astCode: ""
+      , selectedExample: ExThreeLittleCircles
       }
   , render
   , eval: H.mkEval H.defaultEval
@@ -62,7 +70,7 @@ astToTreeVisualization ast =
     ]
     `T.withChild`
       (T.named Group "ast-tree"
-        [ transform "translate(300, 30)" ]
+        [ transform "translate(300, 50)" ]  -- Increased from 30 to 50 for better vertical centering
         `T.withChild` renderASTNode ast 0.0 0)
   where
     renderASTNode :: TreeAST -> Number -> Int -> T.Tree Unit
@@ -240,45 +248,64 @@ astToTreeVisualization ast =
                 ]
             ]
 
+-- | Get the tree for the selected example
+getExampleTree :: ExampleSelection -> T.Tree Unit
+getExampleTree ExThreeLittleCircles = Demo.threeLittleCircles
+getExampleTree ExBarChart = Demo.simpleBarChartNoJoin
+getExampleTree ExNestedStructure = Demo.nestedStructure
+
+-- | Render the selected example through all interpreters
+renderExample :: forall o m. MonadAff m => ExampleSelection -> H.HalogenM State Action () o m Unit
+renderExample selection = do
+  -- Get the tree for this example
+  let tree = getExampleTree selection
+
+  -- 1. D3 interpreter - render the actual visualization
+  liftEffect $ runD3v2M do
+    container <- select "#d3-output" :: _ (D3v2Selection_ SEmpty Element Unit)
+    _ <- renderTree container tree
+    pure unit
+
+  -- 2. English interpreter
+  let english = runEnglish tree
+
+  -- 3. Mermaid interpreter
+  mermaid <- liftEffect $ runMermaidTree tree
+
+  -- 4. Meta/AST interpreter
+  let ast = toAST tree
+  let astPretty = prettyPrintAST ast
+
+  -- 5. Visualize the AST itself as a tree diagram (INCEPTION!)
+  let astTree = astToTreeVisualization ast
+  liftEffect $ runD3v2M do
+    astContainer <- select "#ast-viz-output" :: _ (D3v2Selection_ SEmpty Element Unit)
+    _ <- renderTree astContainer astTree
+    pure unit
+
+  -- Update state
+  H.modify_ _ { englishDesc = english, mermaidCode = mermaid, astCode = astPretty }
+
+  -- Trigger Mermaid rendering (inception!)
+  triggerMermaidRendering
+
+  pure unit
+
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
     -- Small delay to ensure DOM is ready
     H.liftAff $ delay (Milliseconds 100.0)
 
-    -- Run the example through all three interpreters
-    let tree = Demo.threeLittleCircles
+    -- Render the initial example (Three Little Circles)
+    renderExample ExThreeLittleCircles
 
-    -- 1. D3 interpreter - render the actual visualization
-    liftEffect $ runD3v2M do
-      container <- select "#d3-output" :: _ (D3v2Selection_ SEmpty Element Unit)
-      _ <- renderTree container tree
-      pure unit
+  SelectExample selection -> do
+    -- Update selected example
+    H.modify_ _ { selectedExample = selection }
 
-    -- 2. English interpreter
-    let english = runEnglish tree
-
-    -- 3. Mermaid interpreter
-    mermaid <- liftEffect $ runMermaidTree tree
-
-    -- 4. Meta/AST interpreter
-    let ast = toAST tree
-    let astPretty = prettyPrintAST ast
-
-    -- 5. Visualize the AST itself as a tree diagram (INCEPTION!)
-    let astTree = astToTreeVisualization ast
-    liftEffect $ runD3v2M do
-      astContainer <- select "#ast-viz-output" :: _ (D3v2Selection_ SEmpty Element Unit)
-      _ <- renderTree astContainer astTree
-      pure unit
-
-    -- Update state
-    H.modify_ _ { englishDesc = english, mermaidCode = mermaid, astCode = astPretty }
-
-    -- Trigger Mermaid rendering (inception!)
-    triggerMermaidRendering
-
-    pure unit
+    -- Render the new example
+    renderExample selection
 
 -- | Mermaid diagram showing the interpreter flow
 interpreterFlowDiagram :: String
@@ -332,7 +359,36 @@ render state =
                 ]
 
             , HH.p_
-                [ HH.text "Below, we demonstrate each interpreter using the \"Three Little Circles\" example. First, here's the actual visualization:" ]
+                [ HH.text "Below, we demonstrate each interpreter using different examples. Choose an example to see how each interpreter handles increasing complexity:" ]
+
+            -- Example selector
+            , HH.div
+                [ HP.classes [ HH.ClassName "example-selector" ]
+                , HP.style "margin: 20px 0; text-align: center;"
+                ]
+                [ HH.button
+                    [ HP.classes [ HH.ClassName "example-button"
+                                 , HH.ClassName if state.selectedExample == ExThreeLittleCircles then "active" else ""
+                                 ]
+                    , HE.onClick \_ -> SelectExample ExThreeLittleCircles
+                    ]
+                    [ HH.text "Three Little Circles" ]
+                , HH.button
+                    [ HP.classes [ HH.ClassName "example-button"
+                                 , HH.ClassName if state.selectedExample == ExBarChart then "active" else ""
+                                 ]
+                    , HE.onClick \_ -> SelectExample ExBarChart
+                    ]
+                    [ HH.text "Bar Chart (Data Join)" ]
+                , HH.button
+                    [ HP.classes [ HH.ClassName "example-button"
+                                 , HH.ClassName if state.selectedExample == ExNestedStructure then "active" else ""
+                                 ]
+                    , HE.onClick \_ -> SelectExample ExNestedStructure
+                    ]
+                    [ HH.text "Nested Structure" ]
+                ]
+
             , HH.div
                 [ HP.id "d3-output"
                 , HP.classes [ HH.ClassName "viz-container" ]

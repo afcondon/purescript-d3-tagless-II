@@ -61,6 +61,57 @@ simpleBarChart =
              , fill "steelblue"
              ])
 
+-- | Simple bar chart without data join (for interpreter demos)
+simpleBarChartNoJoin :: T.Tree Unit
+simpleBarChartNoJoin =
+  T.named SVG "svg"
+    [ width 400.0
+    , height 200.0
+    , viewBox "0 0 400 200"
+    , class_ "bar-chart"
+    ]
+    `T.withChild`
+      (T.named Group "bars"
+        [ class_ "bars-group"
+        ]
+        `T.withChildren`
+          [ T.elem Rect
+              [ x 20.0
+              , y 130.0
+              , width 50.0
+              , height 50.0
+              , fill "steelblue"
+              ]
+          , T.elem Rect
+              [ x 90.0
+              , y 55.0
+              , width 50.0
+              , height 125.0
+              , fill "steelblue"
+              ]
+          , T.elem Rect
+              [ x 160.0
+              , y 105.0
+              , width 50.0
+              , height 75.0
+              , fill "steelblue"
+              ]
+          , T.elem Rect
+              [ x 230.0
+              , y 30.0
+              , width 50.0
+              , height 150.0
+              , fill "steelblue"
+              ]
+          , T.elem Rect
+              [ x 300.0
+              , y 80.0
+              , width 50.0
+              , height 100.0
+              , fill "steelblue"
+              ]
+          ])
+
 -- | Nested structure example
 nestedStructure :: T.Tree Unit
 nestedStructure =

@@ -771,6 +771,44 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
+/* Example Selector - Interpreter Tour */
+.example-selector {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.example-button {
+  padding: 0.625rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  background: white;
+  color: #666;
+  border: 2px solid #ddd;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.example-button:hover {
+  background: #f5f5f5;
+  border-color: #bbb;
+  color: #333;
+}
+
+.example-button.active {
+  background: var(--color-red-accent);
+  color: white;
+  border-color: var(--color-red-accent);
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
+}
+
+.example-button.active:hover {
+  background: #d64d2d;
+  border-color: #d64d2d;
+}
+
 /* Nested Data Table - Three Little Dimensions */
 .three-dimensions-viz {
   display: flex;
