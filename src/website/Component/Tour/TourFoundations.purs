@@ -81,6 +81,11 @@ render _ =
                     , HP.classes [ HH.ClassName "three-circles-green-viz" ] ]
                     []
                 ]
+            , HH.p
+                [ HP.classes [ HH.ClassName "code-highlight" ] ]
+                [ HH.text "Key: "
+                , HH.code_ [ HH.text "joinData \"circles\" \"circle\" [\"a\", \"b\", \"c\"] $ \\d -> ..." ]
+                ]
             ]
 
         -- Section 2: Three Little Circles (Colored)
@@ -99,6 +104,12 @@ render _ =
                     [ HP.id "three-circles-colored-viz"
                     , HP.classes [ HH.ClassName "three-circles-colored-viz" ] ]
                     []
+                ]
+            , HH.p
+                [ HP.classes [ HH.ClassName "code-highlight" ] ]
+                [ HH.text "Key: "
+                , HH.code_ [ HH.text "fill d.color" ]
+                , HH.text " — attribute comes from datum"
                 ]
             ]
 
@@ -119,6 +130,13 @@ render _ =
                     , HP.classes [ HH.ClassName "parabola-no-axes-viz" ] ]
                     []
                 ]
+            , HH.p
+                [ HP.classes [ HH.ClassName "code-highlight" ] ]
+                [ HH.text "Key: "
+                , HH.code_ [ HH.text "let y = x * x" ]
+                , HH.text " then "
+                , HH.code_ [ HH.text "cy (scaleY y)" ]
+                ]
             ]
 
         -- Section 4: Parabola with Axes
@@ -138,6 +156,13 @@ render _ =
                     , HP.classes [ HH.ClassName "parabola-with-axes-viz" ] ]
                     []
                 ]
+            , HH.p
+                [ HP.classes [ HH.ClassName "code-highlight" ] ]
+                [ HH.text "Key: "
+                , HH.code_ [ HH.text "axisBottom xScale" ]
+                , HH.text " and "
+                , HH.code_ [ HH.text "axisLeft yScale" ]
+                ]
             ]
 
         -- Section 5: Anscombe's Quartet
@@ -151,7 +176,56 @@ render _ =
             , HH.p_
                 [ HH.text "Four datasets with identical statistical properties (mean, variance, correlation) but completely different distributions. This is the classic demonstration of why you need to visualize data - summary statistics alone can be misleading." ]
             , HH.p_
-                [ HH.text "Each dataset shows a scatterplot with its statistical summary below. Notice how the numbers are nearly identical, but the patterns are completely different: linear relationship, curved relationship, linear with outlier, and vertical line with outlier." ]
+                [ HH.text "The table shows how all four datasets have nearly identical statistics:" ]
+            , HH.table
+                [ HP.classes [ HH.ClassName "stats-table" ] ]
+                [ HH.thead_
+                    [ HH.tr_
+                        [ HH.th_ [ HH.text "Dataset" ]
+                        , HH.th_ [ HH.text "Mean X" ]
+                        , HH.th_ [ HH.text "Mean Y" ]
+                        , HH.th_ [ HH.text "Var X" ]
+                        , HH.th_ [ HH.text "Var Y" ]
+                        , HH.th_ [ HH.text "Correlation" ]
+                        ]
+                    ]
+                , HH.tbody_
+                    [ HH.tr_
+                        [ HH.td_ [ HH.strong_ [ HH.text "A" ] ]
+                        , HH.td_ [ HH.text "9.0" ]
+                        , HH.td_ [ HH.text "7.5" ]
+                        , HH.td_ [ HH.text "11.0" ]
+                        , HH.td_ [ HH.text "4.1" ]
+                        , HH.td_ [ HH.text "0.82" ]
+                        ]
+                    , HH.tr_
+                        [ HH.td_ [ HH.strong_ [ HH.text "B" ] ]
+                        , HH.td_ [ HH.text "9.0" ]
+                        , HH.td_ [ HH.text "7.5" ]
+                        , HH.td_ [ HH.text "11.0" ]
+                        , HH.td_ [ HH.text "4.1" ]
+                        , HH.td_ [ HH.text "0.82" ]
+                        ]
+                    , HH.tr_
+                        [ HH.td_ [ HH.strong_ [ HH.text "C" ] ]
+                        , HH.td_ [ HH.text "9.0" ]
+                        , HH.td_ [ HH.text "7.5" ]
+                        , HH.td_ [ HH.text "11.0" ]
+                        , HH.td_ [ HH.text "4.1" ]
+                        , HH.td_ [ HH.text "0.82" ]
+                        ]
+                    , HH.tr_
+                        [ HH.td_ [ HH.strong_ [ HH.text "D" ] ]
+                        , HH.td_ [ HH.text "9.0" ]
+                        , HH.td_ [ HH.text "7.5" ]
+                        , HH.td_ [ HH.text "11.0" ]
+                        , HH.td_ [ HH.text "4.1" ]
+                        , HH.td_ [ HH.text "0.82" ]
+                        ]
+                    ]
+                ]
+            , HH.p_
+                [ HH.text "Yet when visualized, the patterns are completely different: linear relationship (A), curved relationship (B), linear with outlier (C), and vertical line with outlier (D)." ]
             , HH.div
                 [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
                 [ HH.div
@@ -159,8 +233,6 @@ render _ =
                     , HP.classes [ HH.ClassName "anscombes-quartet-viz" ] ]
                     []
                 ]
-            , HH.p_
-                [ HH.em_ [ HH.text "[Coming soon]" ] ]
             , HH.p_
                 [ HH.text "This example demonstrates why data visualization exists: numbers alone don't tell the story. You need to see the data to understand it." ]
             ]

@@ -125,10 +125,10 @@ calculateStats points =
 -- All four datasets with statistics
 allDatasets :: Array Dataset
 allDatasets =
-  [ { name: "Dataset I", data: dataset1, stats: calculateStats dataset1 }
-  , { name: "Dataset II", data: dataset2, stats: calculateStats dataset2 }
-  , { name: "Dataset III", data: dataset3, stats: calculateStats dataset3 }
-  , { name: "Dataset IV", data: dataset4, stats: calculateStats dataset4 }
+  [ { name: "A", data: dataset1, stats: calculateStats dataset1 }
+  , { name: "B", data: dataset2, stats: calculateStats dataset2 }
+  , { name: "C", data: dataset3, stats: calculateStats dataset3 }
+  , { name: "D", data: dataset4, stats: calculateStats dataset4 }
   ]
 
 anscombesQuartet :: String -> Effect Unit
