@@ -82,7 +82,8 @@ drawSunburst :: String -> HierData -> Effect Unit
 drawSunburst selector flareData = runD3v2M do
   container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
 
-  let chartSize = 900.0
+  -- Reduced from 900 to fit within tutorial-section max-width (832px)
+  let chartSize = 700.0
   let radius = chartSize / 2.0
 
   -- Convert to HierarchyData

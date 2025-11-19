@@ -47,8 +47,9 @@ drawPartition :: String -> HierData -> Effect Unit
 drawPartition selector flareData = runD3v2M do
   container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
 
-  let chartWidth = 900.0
-  let chartHeight = 600.0
+  -- Reduced from 900x600 to fit within tutorial-section max-width (832px)
+  let chartWidth = 750.0
+  let chartHeight = 500.0
 
   -- Convert to HierarchyData
   let hierData = toHierarchyData flareData

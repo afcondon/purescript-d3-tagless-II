@@ -34741,15 +34741,15 @@
         var config = {
           minSeparation: defaultClusterConfig.minSeparation,
           size: {
-            width: 1200 - 2 * 40,
-            height: 800 - 2 * 40
+            width: 750 - 2 * 40,
+            height: 500 - 2 * 40
           }
         };
         var positioned = cluster(config)(flareTree);
         var nodes = fromFoldable113(positioned);
         var links = makeLinks4(positioned);
         return discard111(liftEffect33(log2("Rendering cluster (dendrogram): " + (show123(length(nodes)) + (" nodes, " + (show123(length(links)) + " links"))))))(function() {
-          var linksTree = withChild(named2(SVG.value)("svg")([width37(1200), height37(800), viewBox31("0 0 " + (show54(1200) + (" " + show54(800)))), class_32("cluster-viz")]))(withChild(named2(Group2.value)("chartGroup")([class_32("tree-content")]))(withChild(named2(Group2.value)("linksGroup")([class_32("links")]))(joinData("links")("path")(links)(function(link4) {
+          var linksTree = withChild(named2(SVG.value)("svg")([width37(750), height37(500), viewBox31("0 0 " + (show54(750) + (" " + show54(500)))), class_32("cluster-viz")]))(withChild(named2(Group2.value)("chartGroup")([class_32("tree-content")]))(withChild(named2(Group2.value)("linksGroup")([class_32("links")]))(joinData("links")("path")(links)(function(link4) {
             return elem4(Path3.value)([d10(linkPath2(link4.source.x + 40)(link4.source.y + 40)(link4.target.x + 40)(link4.target.y + 40)), fill35("none"), stroke24("#999"), strokeWidth25(1.5), class_32("link")]);
           }))));
           return bind117(renderTree116(container)(linksTree))(function() {
@@ -34781,7 +34781,7 @@
         return liftEffect110(drawCluster(selector)(result.value0));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.TreeAPI.ClusterViz (line 153, column 3 - line 155, column 67): " + [result.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.TreeAPI.ClusterViz (line 154, column 3 - line 156, column 67): " + [result.constructor.name]);
     }));
   };
 
@@ -34905,8 +34905,8 @@
         var config = {
           minSeparation: defaultTreeConfig.minSeparation,
           size: {
-            width: 800 - 2 * 40,
-            height: 1200 - 2 * 40
+            width: 500 - 2 * 40,
+            height: 750 - 2 * 40
           }
         };
         var positioned = tree2(config)(flareTree);
@@ -34914,7 +34914,7 @@
         var nodes = fromFoldable114(horizontalTree);
         var links = makeLinks5(horizontalTree);
         return discard112(liftEffect34(log2("Rendering horizontal tree: " + (show124(length(nodes)) + (" nodes, " + (show124(length(links)) + " links"))))))(function() {
-          var linksTree = withChild(named2(SVG.value)("svg")([width38(1200), height38(800), viewBox32("0 0 " + (show55(1200) + (" " + show55(800)))), class_33("horizontal-tree-viz")]))(withChild(named2(Group2.value)("chartGroup")([class_33("tree-content")]))(withChild(named2(Group2.value)("linksGroup")([class_33("links")]))(joinData("links")("path")(links)(function(link4) {
+          var linksTree = withChild(named2(SVG.value)("svg")([width38(750), height38(500), viewBox32("0 0 " + (show55(750) + (" " + show55(500)))), class_33("horizontal-tree-viz")]))(withChild(named2(Group2.value)("chartGroup")([class_33("tree-content")]))(withChild(named2(Group2.value)("linksGroup")([class_33("links")]))(joinData("links")("path")(links)(function(link4) {
             return elem4(Path3.value)([d11(linkPath3(link4.source.x + 40)(link4.source.y + 40)(link4.target.x + 40)(link4.target.y + 40)), fill36("none"), stroke25("#999"), strokeWidth26(1.5), class_33("link")]);
           }))));
           return bind118(renderTree117(container)(linksTree))(function() {
@@ -34946,7 +34946,7 @@
         return liftEffect111(drawHorizontalTree(selector)(result.value0));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.TreeAPI.HorizontalTreeViz (line 163, column 3 - line 165, column 74): " + [result.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.TreeAPI.HorizontalTreeViz (line 164, column 3 - line 166, column 74): " + [result.constructor.name]);
     }));
   };
 
@@ -36119,22 +36119,22 @@
   var drawPack = function(selector) {
     return function(flareData) {
       return runD3v2M(bind119(select31(selector))(function(container) {
-        var centerX = 1e3 / 2;
-        var centerY = 1e3 / 2;
+        var centerX = 700 / 2;
+        var centerY = 700 / 2;
         var hierData = toHierarchyData(flareData);
         var packRoot = hierarchy(hierData);
         var config = {
           radius: defaultPackConfig.radius,
           size: {
-            width: 1e3,
-            height: 1e3
+            width: 700,
+            height: 700
           },
           padding: 2
         };
         var packed = pack(config)(packRoot);
         var nodes = getAllNodes(packed);
         return discard113(liftEffect35(log2("Rendering circle pack: " + (show57(length(nodes)) + " circles"))))(function() {
-          var tree3 = withChild(named2(SVG.value)("svg")([width39(1e3), height39(1e3), viewBox33("0 0 " + (show126(1e3) + (" " + show126(1e3)))), class_34("pack-viz")]))(withChild(named2(Group2.value)("chartGroup")([class_34("pack-content")]))(joinData("circles")("g")(nodes)(function(v) {
+          var tree3 = withChild(named2(SVG.value)("svg")([width39(700), height39(700), viewBox33("0 0 " + (show126(700) + (" " + show126(700)))), class_34("pack-viz")]))(withChild(named2(Group2.value)("chartGroup")([class_34("pack-content")]))(joinData("circles")("g")(nodes)(function(v) {
             return withChildren(named2(Group2.value)("circle-" + v.value0.data_)([class_34("node"), transform14("translate(" + (show126(v.value0.x) + ("," + (show126(v.value0.y) + ")"))))]))([elem4(Circle2.value)([radius29(v.value0.r), fill37(getColor(v.value0.depth)), fillOpacity7(0.7), stroke26("#fff"), strokeWidth27(1)]), elem4(Text3.value)([textContent18(v.value0.data_), textAnchor16("middle"), y38(4), fontSize10((function() {
               var $46 = v.value0.r > 20;
               if ($46) {
@@ -36174,7 +36174,7 @@
         return liftEffect112(drawPack(selector)(hierData));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.TreeAPI.PackViz (line 128, column 3 - line 132, column 46): " + [result.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.TreeAPI.PackViz (line 129, column 3 - line 133, column 46): " + [result.constructor.name]);
     }));
   };
 
@@ -36568,15 +36568,15 @@
         var config = {
           round: defaultPartitionConfig.round,
           size: {
-            width: 900,
-            height: 600
+            width: 750,
+            height: 500
           },
           padding: 1
         };
         var partitioned = partition3(config)(partRoot);
         var nodes = getAllNodes2(partitioned);
         return discard47(liftEffect36(log2("Rendering partition: " + (show58(length(nodes)) + " rectangles"))))(function() {
-          var tree3 = withChild(named2(SVG.value)("svg")([width40(900), height40(600), viewBox34("0 0 " + (show127(900) + (" " + show127(600)))), class_35("partition-viz")]))(joinData("rects")("g")(nodes)(function(v) {
+          var tree3 = withChild(named2(SVG.value)("svg")([width40(750), height40(500), viewBox34("0 0 " + (show127(750) + (" " + show127(500)))), class_35("partition-viz")]))(joinData("rects")("g")(nodes)(function(v) {
             return withChildren(named2(Group2.value)("rect-" + v.value0.data_)([class_35("node")]))([elem4(Rect2.value)([x38(v.value0.x0), y39(v.value0.y0), width40(v.value0.x1 - v.value0.x0), height40(v.value0.y1 - v.value0.y0), fill38(getColor2(v.value0.depth)), fillOpacity8(0.7), stroke27("#fff"), strokeWidth28(1)]), elem4(Text3.value)([x38((v.value0.x0 + v.value0.x1) / 2), y39((v.value0.y0 + v.value0.y1) / 2), textContent19(v.value0.data_), textAnchor17("middle"), fontSize11(9), fillOpacity8((function() {
               var $47 = v.value0.x1 - v.value0.x0 > 30 && v.value0.y1 - v.value0.y0 > 15;
               if ($47) {
@@ -36603,7 +36603,7 @@
         return liftEffect113(drawPartition(selector)(parseFlareJson(result.value0)));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.TreeAPI.PartitionViz (line 114, column 3 - line 116, column 88): " + [result.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.TreeAPI.PartitionViz (line 115, column 3 - line 117, column 88): " + [result.constructor.name]);
     }));
   };
 
@@ -36759,21 +36759,21 @@
   var drawRadialTree = function(selector) {
     return function(flareTree) {
       return runD3v2M(bind121(select33(selector))(function(container) {
-        var centerX = 1e3 / 2;
-        var centerY = 1e3 / 2;
+        var centerX = 700 / 2;
+        var centerY = 700 / 2;
         var config = {
           minSeparation: defaultTreeConfig.minSeparation,
           size: {
-            width: 1e3,
-            height: 1e3
+            width: 700,
+            height: 700
           }
         };
         var positioned = tree2(config)(flareTree);
-        var radialTree = projectRadial(1e3)(1e3)(positioned);
+        var radialTree = projectRadial(700)(700)(positioned);
         var nodes = fromFoldable115(radialTree);
         var links = makeLinks6(radialTree);
         return discard114(liftEffect37(log2("Rendering radial tree: " + (show128(length(nodes)) + (" nodes, " + (show128(length(links)) + " links"))))))(function() {
-          var linksTree = withChild(named2(SVG.value)("svg")([width41(1e3), height41(1e3), viewBox35("0 0 " + (show59(1e3) + (" " + show59(1e3)))), class_36("radial-tree-viz")]))(withChild(named2(Group2.value)("chartGroup")([class_36("tree-content"), transform15("translate(" + (show59(centerX) + ("," + (show59(centerY) + ")"))))]))(withChild(named2(Group2.value)("linksGroup")([class_36("links")]))(joinData("links")("path")(links)(function(link4) {
+          var linksTree = withChild(named2(SVG.value)("svg")([width41(700), height41(700), viewBox35("0 0 " + (show59(700) + (" " + show59(700)))), class_36("radial-tree-viz")]))(withChild(named2(Group2.value)("chartGroup")([class_36("tree-content"), transform15("translate(" + (show59(centerX) + ("," + (show59(centerY) + ")"))))]))(withChild(named2(Group2.value)("linksGroup")([class_36("links")]))(joinData("links")("path")(links)(function(link4) {
             return elem4(Path3.value)([d12(radialLinkPath(link4.source.x)(link4.source.y)(link4.target.x)(link4.target.y)), fill39("none"), stroke28("#999"), strokeWidth29(1.5), class_36("link")]);
           }))));
           return bind121(renderTree118(container)(linksTree))(function() {
@@ -36805,7 +36805,7 @@
         return liftEffect114(drawRadialTree(selector)(result.value0));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.TreeAPI.RadialTreeViz (line 200, column 3 - line 202, column 70): " + [result.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.TreeAPI.RadialTreeViz (line 201, column 3 - line 203, column 70): " + [result.constructor.name]);
     }));
   };
 
@@ -36895,7 +36895,7 @@
   var drawSunburst = function(selector) {
     return function(flareData) {
       return runD3v2M(bind122(select34(selector))(function(container) {
-        var radius37 = 900 / 2;
+        var radius37 = 700 / 2;
         var hierData = toHierarchyData3(flareData);
         var partRoot = hierarchy2(hierData);
         var config = {
@@ -36912,7 +36912,7 @@
           return v.value0.depth > 0;
         })(allNodes3);
         return discard49(liftEffect38(log2("Rendering sunburst: " + (show129(length(nodes)) + " arcs"))))(function() {
-          var tree3 = withChild(named2(SVG.value)("svg")([width42(900), height42(900), viewBox36(show60(-radius37) + (" " + (show60(-radius37) + (" " + (show60(900) + (" " + show60(900))))))), class_37("sunburst-viz")]))(joinData("arcs")("g")(nodes)(function(v) {
+          var tree3 = withChild(named2(SVG.value)("svg")([width42(700), height42(700), viewBox36(show60(-radius37) + (" " + (show60(-radius37) + (" " + (show60(700) + (" " + show60(700))))))), class_37("sunburst-viz")]))(joinData("arcs")("g")(nodes)(function(v) {
             return withChild(named2(Group2.value)("arc-" + v.value0.data_)([class_37("node")]))(elem4(Path3.value)([d13(arcPath(v.value0.x0)(v.value0.y0)(v.value0.x1)(v.value0.y1)(radius37)), fill40(getColor3(v.value0.depth)), fillOpacity9(0.7), stroke29("#fff"), strokeWidth30(1)]));
           }));
           return bind122(renderTree52(container)(tree3))(function() {
@@ -36932,7 +36932,7 @@
         return liftEffect115(drawSunburst(selector)(parseFlareJson(result.value0)));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.TreeAPI.SunburstViz (line 139, column 3 - line 141, column 87): " + [result.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.TreeAPI.SunburstViz (line 140, column 3 - line 142, column 87): " + [result.constructor.name]);
     }));
   };
 
@@ -37805,15 +37805,15 @@
           paddingTop: defaultTreemapConfig.paddingTop,
           round: defaultTreemapConfig.round,
           size: {
-            width: 900,
-            height: 600
+            width: 750,
+            height: 500
           },
           tile: squarify(phi)
         };
         var layout = treemap(config)(stringValued);
         var leaves = getLeaves(layout);
         return discard50(liftEffect39(log2("Rendering treemap: " + (show61(length(leaves)) + " rectangles"))))(function() {
-          var tree3 = withChild(named2(SVG.value)("svg")([width43(900), height43(600), viewBox37("0 0 " + (show130(900) + (" " + show130(600)))), class_38("treemap-viz")]))(joinData("rects")("g")(leaves)(function(v) {
+          var tree3 = withChild(named2(SVG.value)("svg")([width43(750), height43(500), viewBox37("0 0 " + (show130(750) + (" " + show130(500)))), class_38("treemap-viz")]))(joinData("rects")("g")(leaves)(function(v) {
             return withChildren(named2(Group2.value)("rect-" + v.value0.data_)([class_38("node")]))([elem4(Rect2.value)([x40(v.value0.x0), y41(v.value0.y0), width43(v.value0.x1 - v.value0.x0), height43(v.value0.y1 - v.value0.y0), fill41(getColor4(v.value0.depth)), fillOpacity10(0.6), stroke30("#fff"), strokeWidth31(1)]), elem4(Text3.value)([x40((v.value0.x0 + v.value0.x1) / 2), y41((v.value0.y0 + v.value0.y1) / 2), textContent21(v.value0.data_), textAnchor19("middle"), fontSize13(9), fillOpacity10((function() {
               var $49 = v.value0.x1 - v.value0.x0 > 30 && v.value0.y1 - v.value0.y0 > 15;
               if ($49) {
@@ -37840,7 +37840,7 @@
         return liftEffect116(drawTreemap(selector)(parseFlareJson(result.value0)));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.TreeAPI.TreemapViz (line 119, column 3 - line 121, column 86): " + [result.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.TreeAPI.TreemapViz (line 120, column 3 - line 122, column 86): " + [result.constructor.name]);
     }));
   };
 

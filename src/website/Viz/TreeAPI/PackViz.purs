@@ -53,7 +53,8 @@ drawPack :: String -> HierData -> Effect Unit
 drawPack selector flareData = runD3v2M do
   container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
 
-  let chartSize = 1000.0
+  -- Reduced from 1000 to fit within tutorial-section max-width (832px)
+  let chartSize = 700.0
   let centerX = chartSize / 2.0
   let centerY = chartSize / 2.0
 

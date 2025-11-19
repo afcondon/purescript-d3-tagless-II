@@ -55,8 +55,9 @@ drawCluster :: String -> Tree HierNode -> Effect Unit
 drawCluster selector flareTree = runD3v2M do
   container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
 
-  let chartWidth = 1200.0
-  let chartHeight = 800.0
+  -- Reduced from 1200x800 to fit within tutorial-section max-width (832px)
+  let chartWidth = 750.0
+  let chartHeight = 500.0
   let padding = 40.0
 
   -- Apply Cluster4 layout (height field already computed by data loader)
