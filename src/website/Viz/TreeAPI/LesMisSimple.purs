@@ -75,21 +75,22 @@ drawLesMisSimple model containerSelector w h = do
   -- Select container
   container <- select containerSelector :: _ (D3v2Selection_ SEmpty Element Unit)
 
-  -- Apply phylotaxis initial positions
+  -- Apply phylotaxis initial positions (sunflower spiral pattern)
   let nodesWithPositions = setPhyllotaxisPositions model.nodes
 
-  -- Create forces
-  let manyBodyForce = createForce "many body negative" (RegularForce ForceManyBody) allNodes [ F.strengthVal (-100.0) ]
-  let centerForce = createForce "center" (RegularForce ForceCenter) allNodes [ F.xVal 0.0, F.yVal 0.0, F.strengthVal 0.1 ]
-  let linksForce = createLinkForce allNodes []
-  let collisionForce = createForce "collision" (RegularForce ForceCollide) allNodes [ F.radiusVal 6.0 ]
+  -- KEY: Create physics forces that govern node behavior
+  -- These forces combine to create the organic layout
+  let manyBodyForce = createForce "many body negative" (RegularForce ForceManyBody) allNodes [ F.strengthVal (-100.0) ]  -- Nodes repel each other
+  let centerForce = createForce "center" (RegularForce ForceCenter) allNodes [ F.xVal 0.0, F.yVal 0.0, F.strengthVal 0.1 ]  -- Pull towards center
+  let linksForce = createLinkForce allNodes []  -- Links pull connected nodes together
+  let collisionForce = createForce "collision" (RegularForce ForceCollide) allNodes [ F.radiusVal 6.0 ]  -- Prevent node overlap
 
-  -- Build force library
+  -- Build force library and activate all forces
   let forceLibrary = initialize [ manyBodyForce, centerForce, linksForce, collisionForce ]
   let forcesArray = [ manyBodyForce, centerForce, linksForce, collisionForce ]
   let activeForces = Set.fromFoldable ["many body negative", "center", linksForceName_, "collision"]
 
-  -- Initialize simulation
+  -- KEY: Initialize D3 force simulation with nodes, links, and forces
   { nodes: nodesInSim, links: linksInSim } <- init
     { nodes: nodesWithPositions
     , links: model.links
@@ -136,31 +137,33 @@ drawLesMisSimple model containerSelector w h = do
   linksGroupSel <- liftEffect $ reselectD3v2 "linksGroup" selections
   nodesGroupSel <- liftEffect $ reselectD3v2 "nodesGroup" selections
 
-  -- Render links
+  -- KEY: Data join for links - one line per connection
+  -- Attributes are functions that access simulation-computed positions
   let linksTree :: T.Tree IndexedLink
       linksTree =
         T.joinData "linkElements" "line" indexedLinks $ \(IndexedLink il) ->
           let link = unsafeCoerce il.link
           in T.elem Line
-            [ x1 ((\(_ :: IndexedLink) -> link.source.x) :: IndexedLink -> Number)
+            [ x1 ((\(_ :: IndexedLink) -> link.source.x) :: IndexedLink -> Number)  -- Source node position
             , y1 ((\(_ :: IndexedLink) -> link.source.y) :: IndexedLink -> Number)
-            , x2 ((\(_ :: IndexedLink) -> link.target.x) :: IndexedLink -> Number)
+            , x2 ((\(_ :: IndexedLink) -> link.target.x) :: IndexedLink -> Number)  -- Target node position
             , y2 ((\(_ :: IndexedLink) -> link.target.y) :: IndexedLink -> Number)
-            , strokeWidth ((\(_ :: IndexedLink) -> sqrt link.value) :: IndexedLink -> Number)
-            , stroke ((\(_ :: IndexedLink) -> d3SchemeCategory10N_ (toNumber link.target.group)) :: IndexedLink -> String)
+            , strokeWidth ((\(_ :: IndexedLink) -> sqrt link.value) :: IndexedLink -> Number)  -- Width based on relationship strength
+            , stroke ((\(_ :: IndexedLink) -> d3SchemeCategory10N_ (toNumber link.target.group)) :: IndexedLink -> String)  -- Color by group
             ]
 
   linksSelections <- renderTree linksGroupSel linksTree
 
-  -- Render nodes
+  -- KEY: Data join for nodes - one circle per character
+  -- Positions come from simulation state (updated each tick)
   let nodesTree :: T.Tree LesMisSimNode
       nodesTree =
         T.joinData "nodeElements" "circle" nodesInSim $ \(d :: LesMisSimNode) ->
           T.elem Circle
-            [ cx d.x
-            , cy d.y
+            [ cx d.x  -- X position (updated by simulation)
+            , cy d.y  -- Y position (updated by simulation)
             , radius 5.0
-            , fill (d3SchemeCategory10N_ (toNumber d.group))
+            , fill (d3SchemeCategory10N_ (toNumber d.group))  -- Color by character group
             , stroke "#fff"
             , strokeWidth 2.0
             ]

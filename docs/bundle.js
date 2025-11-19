@@ -22206,7 +22206,7 @@
                 return log2("\u2717 Missing SVG")();
               }
               ;
-              throw new Error("Failed pattern match at D3.Viz.TreeAPI.BarChartExample (line 161, column 5 - line 163, column 45): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at D3.Viz.TreeAPI.BarChartExample (line 164, column 5 - line 166, column 45): " + [v.constructor.name]);
             })();
             (function() {
               var v = lookup6("chartGroup")(axesSelections);
@@ -22218,7 +22218,7 @@
                 return log2("\u2717 Missing chart group")();
               }
               ;
-              throw new Error("Failed pattern match at D3.Viz.TreeAPI.BarChartExample (line 165, column 5 - line 167, column 53): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at D3.Viz.TreeAPI.BarChartExample (line 168, column 5 - line 170, column 53): " + [v.constructor.name]);
             })();
             (function() {
               var v = lookup6("xAxis")(axesSelections);
@@ -22230,7 +22230,7 @@
                 return log2("\u2717 Missing X axis")();
               }
               ;
-              throw new Error("Failed pattern match at D3.Viz.TreeAPI.BarChartExample (line 169, column 5 - line 171, column 48): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at D3.Viz.TreeAPI.BarChartExample (line 172, column 5 - line 174, column 48): " + [v.constructor.name]);
             })();
             (function() {
               var v = lookup6("yAxis")(axesSelections);
@@ -22242,7 +22242,7 @@
                 return log2("\u2717 Missing Y axis")();
               }
               ;
-              throw new Error("Failed pattern match at D3.Viz.TreeAPI.BarChartExample (line 173, column 5 - line 175, column 48): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at D3.Viz.TreeAPI.BarChartExample (line 176, column 5 - line 178, column 48): " + [v.constructor.name]);
             })();
             (function() {
               var v = lookup6("bars")(barsSelections);
@@ -22254,7 +22254,7 @@
                 return log2("\u2717 Missing bars collection")();
               }
               ;
-              throw new Error("Failed pattern match at D3.Viz.TreeAPI.BarChartExample (line 177, column 5 - line 179, column 57): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at D3.Viz.TreeAPI.BarChartExample (line 180, column 5 - line 182, column 57): " + [v.constructor.name]);
             })();
             log2("")();
             return log2("Expected: 7 blue bars of varying heights with X and Y axes")();
@@ -39443,7 +39443,7 @@
                                 return unsafeCrashWith("nodeElements not found");
                               }
                               ;
-                              throw new Error("Failed pattern match at D3.Viz.TreeAPI.LesMisSimple (line 174, column 18 - line 176, column 76): " + [v1.constructor.name]);
+                              throw new Error("Failed pattern match at D3.Viz.TreeAPI.LesMisSimple (line 177, column 18 - line 179, column 76): " + [v1.constructor.name]);
                             })();
                             var linksSel = (function() {
                               var v1 = lookup29("linkElements")(linksSelections);
@@ -39455,7 +39455,7 @@
                                 return unsafeCrashWith("linkElements not found");
                               }
                               ;
-                              throw new Error("Failed pattern match at D3.Viz.TreeAPI.LesMisSimple (line 179, column 18 - line 181, column 76): " + [v1.constructor.name]);
+                              throw new Error("Failed pattern match at D3.Viz.TreeAPI.LesMisSimple (line 182, column 18 - line 184, column 76): " + [v1.constructor.name]);
                             })();
                             return bind68(on13(new Zoom2(defaultZoom(new ScaleExtent2(0.1, 10))(".zoom-group")))(svgSel))(function() {
                               return bind68(on13(new Drag2(simulationDrag("lesmis-simple")))(nodesSel))(function() {

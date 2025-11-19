@@ -75,21 +75,22 @@ barChart = runD3v2M do
   let minY = 0.0  -- Start bars from zero
   let maxY = fromMaybe 100.0 $ maximum yValues
 
-  -- Calculate bar width
+  -- Calculate bar width (80% of available space per bar)
   let numBars = length sampleData
   let barWidth = if numBars > 0 then (iWidth / (Int.toNumber numBars)) * 0.8 else 0.0
 
-  -- Create scales for axes
+  -- KEY: Create scales to map data values → pixel positions
+  -- Scales are the bridge between data space and visual space
   let xScale :: Scale
       xScale =
-        { domain: { min: 1.0, max: Int.toNumber numBars }
-        , range: { min: 0.0, max: iWidth }
+        { domain: { min: 1.0, max: Int.toNumber numBars }  -- Data range
+        , range: { min: 0.0, max: iWidth }                  -- Pixel range
         }
 
   let yScale :: Scale
       yScale =
-        { domain: { min: minY, max: maxY }
-        , range: { min: iHeight, max: 0.0 }
+        { domain: { min: minY, max: maxY }    -- Data range (0 to max value)
+        , range: { min: iHeight, max: 0.0 }   -- Pixel range (inverted for SVG coords)
         }
 
   -- Create axes
@@ -129,21 +130,23 @@ barChart = runD3v2M do
   -- Render axes first (underlaying)
   axesSelections <- renderTree container axesTree
 
-  -- Then, render bars on top (datum type: DataPoint)
-  -- Extract the chartGroup selection for the second render
+  -- KEY: Reselect the chartGroup for layered rendering
+  -- This allows us to render bars on top of axes
   chartGroupSel <- liftEffect $ reselectD3v2 "chartGroup" axesSelections
 
+  -- KEY: Data join creates one rect per data point
   let barsTree :: Tree DataPoint
       barsTree =
         T.joinData "bars" "rect" sampleData $ \point ->
+          -- Calculate bar position and dimensions from data
           let xPos = (point.x - 1.0) * (iWidth / (Int.toNumber numBars)) + ((iWidth / (Int.toNumber numBars)) - barWidth) / 2.0
-              yPos = iHeight - ((point.y - minY) / (maxY - minY) * iHeight)
-              barHeight = iHeight - yPos
+              yPos = iHeight - ((point.y - minY) / (maxY - minY) * iHeight)  -- Manual scale calculation
+              barHeight = iHeight - yPos  -- Bar grows from baseline
           in T.elem Rect
-            [ x xPos
-            , y yPos
-            , width barWidth
-            , height barHeight
+            [ x xPos          -- Horizontal position
+            , y yPos          -- Top of bar (SVG coords from top-left)
+            , width barWidth  -- Bar width
+            , height barHeight  -- Bar height (grows downward in SVG)
             , fill "#4a90e2"
             , stroke "#357abd"
             , strokeWidth 1.0
