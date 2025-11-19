@@ -45,6 +45,7 @@ import Component.LesMisGUPTree as LesMisGUPTree
 import Component.LesMisGUP as LesMisGUP
 import Component.LesMisGUPSimple as LesMisGUPSimple
 import Component.LesMisGUPClean as LesMisGUPClean
+import Component.LesMisQueryDemo as LesMisQueryDemo
 import Component.ModuleGraph as ModuleGraph
 import Component.MermaidTreeDemo as MermaidTreeDemo
 import Component.SceneJoinDemo as SceneJoinDemo
@@ -93,6 +94,7 @@ type Slots =
   , lesMisGUP :: forall q. H.Slot q Void Unit
   , lesMisGUPSimple :: forall q. H.Slot q Void Unit
   , lesMisGUPClean :: forall q. H.Slot q Void Unit
+  , lesMisQueryDemo :: forall q. H.Slot q Void Unit
   , moduleGraph :: forall q. H.Slot q Void Unit
   , mermaidTreeDemo :: forall q. H.Slot q Void Unit
   , sceneJoinDemo :: forall q. H.Slot q Void Unit
@@ -124,6 +126,7 @@ _lesMisGUPTree = Proxy :: Proxy "lesMisGUPTree"
 _lesMisGUP = Proxy :: Proxy "lesMisGUP"
 _lesMisGUPSimple = Proxy :: Proxy "lesMisGUPSimple"
 _lesMisGUPClean = Proxy :: Proxy "lesMisGUPClean"
+_lesMisQueryDemo = Proxy :: Proxy "lesMisQueryDemo"
 _moduleGraph = Proxy :: Proxy "moduleGraph"
 _mermaidTreeDemo = Proxy :: Proxy "mermaidTreeDemo"
 _sceneJoinDemo = Proxy :: Proxy "sceneJoinDemo"
@@ -230,6 +233,9 @@ renderPage route = case spy "Route is" route of
 
   LesMisGUPClean ->
     HH.slot_ _lesMisGUPClean unit LesMisGUPClean.component unit
+
+  LesMisQueryDemo ->
+    HH.slot_ _lesMisQueryDemo unit LesMisQueryDemo.component unit
 
   ModuleGraph ->
     HH.slot_ _moduleGraph unit ModuleGraph.component unit

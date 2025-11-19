@@ -42,6 +42,7 @@ routes =
   <|> lesMisGUP
   <|> lesMisGUPSimple
   <|> lesMisGUPClean
+  <|> lesMisQueryDemo
   <|> moduleGraph
   <|> mermaidTreeDemo
   <|> sceneJoinDemo
@@ -154,6 +155,10 @@ lesMisGUPSimple = LesMisGUPSimple <$ lit "lesmis-gup-simple" <* end
 lesMisGUPClean :: Match Route
 lesMisGUPClean = LesMisGUPClean <$ lit "lesmis-gup-clean" <* end
 
+-- | Match: /lesmis-query-demo
+lesMisQueryDemo :: Match Route
+lesMisQueryDemo = LesMisQueryDemo <$ lit "lesmis-query-demo" <* end
+
 -- | Match: /module-graph
 moduleGraph :: Match Route
 moduleGraph = ModuleGraph <$ lit "module-graph" <* end
@@ -207,6 +212,7 @@ routeToPath LesMisGUPTree = "/lesmis-gup-tree"
 routeToPath LesMisGUP = "/lesmis-gup"
 routeToPath LesMisGUPSimple = "/lesmis-gup-simple"
 routeToPath LesMisGUPClean = "/lesmis-gup-clean"
+routeToPath LesMisQueryDemo = "/lesmis-query-demo"
 routeToPath ModuleGraph = "/module-graph"
 routeToPath MermaidTreeDemo = "/mermaid-tree-demo"
 routeToPath SceneJoinDemo = "/scene-join-demo"

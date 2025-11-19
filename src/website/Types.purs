@@ -107,6 +107,7 @@ data Route
   | LesMisGUP       -- Les Mis with declarative scene-based PSD3v2 + GUP (clean example)
   | LesMisGUPSimple -- Les Mis minimal GUP with SceneNestedJoin (12-line update function!)
   | LesMisGUPClean  -- Les Mis GUP with existing primitives (no wrappers!)
+  | LesMisQueryDemo -- Query language demo with interactive group filtering
   | ModuleGraph     -- Module dependency graph (dogfooding!)
   | MermaidTreeDemo -- Mermaid interpreter for Tree API (visualizes tree structure)
   | SceneJoinDemo   -- SceneNestedJoin demonstration (GUP with type decomposition)
@@ -143,6 +144,7 @@ instance showRoute :: Show Route where
   show LesMisGUP = "Les Misérables GUP (PSD3v2)"
   show LesMisGUPSimple = "Les Misérables GUP (Simple)"
   show LesMisGUPClean = "Les Misérables GUP (Clean)"
+  show LesMisQueryDemo = "Query Language Demo"
   show ModuleGraph = "Module Graph"
   show MermaidTreeDemo = "Mermaid Tree Visualizer"
   show SceneJoinDemo = "SceneNestedJoin Demo"
