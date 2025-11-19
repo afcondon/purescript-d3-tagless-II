@@ -86,18 +86,18 @@ render _ =
             , HH.div
                 [ HP.classes [ HH.ClassName "home-hero-image" ] ]
                 [ HH.img
-                    [ HP.src "assets/example-thumbnails/tree-api.png"
-                    , HP.alt "Tree API visualization examples"
+                    [ HP.src "assets/example-thumbnails/code-explorer.png"
+                    , HP.alt "Interactive code explorer"
                     , HP.classes [ HH.ClassName "home-hero-img" ]
                     ]
                 , HH.p
                     [ HP.classes [ HH.ClassName "home-hero-caption" ] ]
-                    [ HH.text "Learn how to build visualizations with the declarative "
+                    [ HH.text "Explore the "
                     , HH.a
-                        [ HP.href $ "#" <> routeToPath TreeAPI
+                        [ HP.href $ "#" <> routeToPath CodeExplorer
                         , HP.classes [ HH.ClassName "home-hero-link" ]
                         ]
-                        [ HH.text "Tree API" ]
+                        [ HH.text "interactive code explorer" ]
                     ]
                 ]
             ]
