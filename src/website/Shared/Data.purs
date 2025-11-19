@@ -6,11 +6,16 @@ import Affjax.Web as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Data.Array as Array
 import Data.Either (Either(..))
+import Data.Int as Int
 import Data.List (List(..), fromFoldable)
+import Data.Map as Map
 import Data.Maybe (Maybe(..))
+import Data.Number as Number
 import Data.Nullable (Nullable, toMaybe)
+import Data.String (Pattern(..), split, trim)
 import Data.String.CodeUnits as CodeUnits
 import Data.Tree (Tree(..))
+import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Effect.Class.Console (log)
 
@@ -22,6 +27,7 @@ data DataFile
   | NationsJSON                  -- Wealth & Health of Nations
   | MetroUnemploymentCSV         -- BLS metro unemployment data
   | USPopulationStateAgeCSV      -- US population by state and age (for grouped bar chart)
+  | BridgesCSV                   -- Baton Rouge bridge traffic data (for chord diagram)
 
 derive instance Eq DataFile
 
@@ -33,6 +39,7 @@ dataFilePath MiserablesJSON = "./data/miserables.json"
 dataFilePath NationsJSON = "./data/nations.json"
 dataFilePath MetroUnemploymentCSV = "./data/bls-metro-unemployment.csv"
 dataFilePath USPopulationStateAgeCSV = "./data/us-population-state-age.csv"
+dataFilePath BridgesCSV = "./data/bridges.csv"
 
 -- | Human-readable description
 dataFileDescription :: DataFile -> String
@@ -42,6 +49,7 @@ dataFileDescription MiserablesJSON = "Les Misérables character co-occurrence ne
 dataFileDescription NationsJSON = "Wealth & Health of Nations time series data"
 dataFileDescription MetroUnemploymentCSV = "BLS metro area unemployment rates"
 dataFileDescription USPopulationStateAgeCSV = "US population by state and age group"
+dataFileDescription BridgesCSV = "Baton Rouge bridge traffic flow data (origin;destination;value)"
 
 -- | Load a data file as a string
 -- | Returns Either error string or file contents
@@ -148,3 +156,124 @@ loadFlareData = do
       let hierData = parseFlareJson jsonString
       let tree = hierDataToTree hierData
       pure $ Right tree
+
+-- | Bridge traffic data row (origin;destination;value)
+type BridgeFlowRow = { origin :: String, destination :: String, value :: Number }
+
+-- | Bridge traffic data with matrix and labels
+type BridgeData =
+  { matrix :: Array (Array Number)
+  , labels :: Array String
+  }
+
+-- | Parse semicolon-delimited CSV row
+parseCSVRowSemicolon :: String -> Array String
+parseCSVRowSemicolon line =
+  let chars = CodeUnits.toCharArray line
+  in parseFields chars []
+  where
+    parseFields :: Array Char -> Array String -> Array String
+    parseFields chars acc
+      | Array.null chars = acc
+      | otherwise =
+          case Array.head chars of
+            Just '"' ->
+              -- Quoted field - find closing quote
+              case findClosingQuote (Array.drop 1 chars) 0 of
+                { field, rest } ->
+                  let nextFields = if Array.null rest
+                                   then []
+                                   else Array.drop 1 rest -- skip semicolon
+                  in parseFields nextFields (Array.snoc acc field)
+            _ ->
+              -- Unquoted field - read until semicolon or end
+              let { field, rest } = readUntilSemicolon chars
+              in parseFields rest (Array.snoc acc field)
+
+    findClosingQuote :: Array Char -> Int -> { field :: String, rest :: Array Char }
+    findClosingQuote chars idx =
+      case Array.index chars idx of
+        Just '"' ->
+          { field: CodeUnits.fromCharArray (Array.slice 0 idx chars)
+          , rest: Array.drop (idx + 1) chars
+          }
+        Just _ -> findClosingQuote chars (idx + 1)
+        Nothing ->
+          -- No closing quote found, take everything
+          { field: CodeUnits.fromCharArray chars
+          , rest: []
+          }
+
+    readUntilSemicolon :: Array Char -> { field :: String, rest :: Array Char }
+    readUntilSemicolon chars =
+      case Array.findIndex (\c -> c == ';') chars of
+        Just idx ->
+          { field: CodeUnits.fromCharArray (Array.slice 0 idx chars)
+          , rest: Array.drop (idx + 1) chars
+          }
+        Nothing ->
+          { field: CodeUnits.fromCharArray chars
+          , rest: []
+          }
+
+-- | Parse bridges CSV data into matrix format
+-- | CSV format: origin;destination;value
+parseBridgesCSV :: String -> Either String BridgeData
+parseBridgesCSV csvContent = do
+  let lines = split (Pattern "\n") csvContent
+  let nonEmptyLines = Array.filter (\line -> trim line /= "") lines
+
+  -- Parse each row
+  let parsedRows = Array.mapMaybe parseRow nonEmptyLines
+
+  -- Extract unique region labels (origins and destinations)
+  let allRegions = Array.nub $ do
+        row <- parsedRows
+        [row.origin, row.destination]
+
+  let labels = Array.sort allRegions
+  let n = Array.length labels
+
+  -- Create index lookup map
+  let labelIndexMap = Map.fromFoldable $
+        Array.mapWithIndex (\i label -> Tuple label i) labels
+
+  -- Initialize matrix with zeros
+  let emptyMatrix = Array.replicate n (Array.replicate n 0.0)
+
+  -- Fill matrix with values
+  let matrix = Array.foldl (fillMatrixCell labelIndexMap) emptyMatrix parsedRows
+
+  pure { matrix, labels }
+  where
+    parseRow :: String -> Maybe BridgeFlowRow
+    parseRow line = do
+      let fields = parseCSVRowSemicolon (trim line)
+      origin <- Array.index fields 0
+      destination <- Array.index fields 1
+      valueStr <- Array.index fields 2
+      value <- Number.fromString (trim valueStr)
+      pure { origin: trim origin, destination: trim destination, value }
+
+    fillMatrixCell :: Map.Map String Int -> Array (Array Number) -> BridgeFlowRow -> Array (Array Number)
+    fillMatrixCell labelMap matrix row =
+      case Tuple <$> Map.lookup row.origin labelMap <*> Map.lookup row.destination labelMap of
+        Just (Tuple originIdx destIdx) ->
+          case Array.index matrix originIdx of
+            Just rowArray ->
+              let updatedRow = Array.updateAt destIdx row.value rowArray
+              in case updatedRow of
+                   Just newRow -> case Array.updateAt originIdx newRow matrix of
+                                    Just newMatrix -> newMatrix
+                                    Nothing -> matrix
+                   Nothing -> matrix
+            Nothing -> matrix
+        Nothing -> matrix
+
+-- | Load and parse bridges CSV data
+loadBridgesData :: Aff (Either String BridgeData)
+loadBridgesData = do
+  result <- loadDataFile BridgesCSV
+  case result of
+    Left err -> pure $ Left err
+    Right csvContent -> pure $ parseBridgesCSV csvContent

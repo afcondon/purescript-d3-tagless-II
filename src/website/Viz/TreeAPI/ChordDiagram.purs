@@ -7,13 +7,16 @@ module D3.Viz.TreeAPI.ChordDiagram where
 import Prelude
 
 import Data.Array (length, mapWithIndex, (!!), (..))
+import Data.Either (Either(..))
 import Data.Foldable (traverse_)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Number (pi, cos, sin)
 import Effect (Effect)
+import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
+import PSD3.Shared.Data (loadBridgesData)
 import Partial.Unsafe (unsafeCrashWith, unsafePartial)
 import PSD3.Internal.FFI (arcGenerator_, arcPath_, chordArray_, chordGroups_, chordLayoutWithPadAngle_, ribbonGenerator_, ribbonPath_, setArcInnerRadius_, setArcOuterRadius_, setRibbonRadius_)
 import PSD3.Internal.Types (Datum_)
@@ -238,9 +241,14 @@ drawChord matrix labels containerSelector w h = runD3v2M do
   pure unit
 
 -- | Entry point with fixed dimensions for Tour page
+-- | Loads data from bridges.csv
 startChord :: String -> Effect Unit
-startChord containerSelector = do
+startChord containerSelector = launchAff_ do
   let w = 700.0
   let h = 700.0
 
-  drawChord batonRougeTraffic batonRougeRegions containerSelector w h
+  -- Load bridges data from CSV
+  result <- loadBridgesData
+  case result of
+    Left err -> liftEffect $ Console.log $ "Failed to load bridges data: " <> err
+    Right bridgeData -> liftEffect $ drawChord bridgeData.matrix bridgeData.labels containerSelector w h
