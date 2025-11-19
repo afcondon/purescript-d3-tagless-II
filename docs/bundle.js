@@ -2317,7 +2317,7 @@
     };
   };
   var altExceptT = function(dictSemigroup) {
-    var append35 = append(dictSemigroup);
+    var append36 = append(dictSemigroup);
     return function(dictMonad) {
       var Bind1 = dictMonad.Bind1();
       var bind134 = bind(Bind1);
@@ -2338,7 +2338,7 @@
                   }
                   ;
                   if (rn instanceof Left) {
-                    return pure71(new Left(append35(rm.value0)(rn.value0)));
+                    return pure71(new Left(append36(rm.value0)(rn.value0)));
                   }
                   ;
                   throw new Error("Failed pattern match at Control.Monad.Except.Trans (line 87, column 9 - line 89, column 49): " + [rn.constructor.name]);
@@ -2861,7 +2861,7 @@
   var intercalate = function(dictFoldable) {
     var foldl22 = foldl(dictFoldable);
     return function(dictMonoid) {
-      var append35 = append(dictMonoid.Semigroup0());
+      var append36 = append(dictMonoid.Semigroup0());
       var mempty3 = mempty(dictMonoid);
       return function(sep) {
         return function(xs) {
@@ -2876,7 +2876,7 @@
               ;
               return {
                 init: false,
-                acc: append35(v.acc)(append35(sep)(v1))
+                acc: append36(v.acc)(append36(sep)(v1))
               };
             };
           };
@@ -3057,12 +3057,12 @@
   var foldMapDefaultR = function(dictFoldable) {
     var foldr22 = foldr(dictFoldable);
     return function(dictMonoid) {
-      var append35 = append(dictMonoid.Semigroup0());
+      var append36 = append(dictMonoid.Semigroup0());
       var mempty3 = mempty(dictMonoid);
       return function(f) {
         return foldr22(function(x44) {
           return function(acc) {
-            return append35(f(x44))(acc);
+            return append36(f(x44))(acc);
           };
         })(mempty3);
       };
@@ -3664,13 +3664,13 @@
   var foldMapWithIndexDefaultR = function(dictFoldableWithIndex) {
     var foldrWithIndex1 = foldrWithIndex(dictFoldableWithIndex);
     return function(dictMonoid) {
-      var append35 = append(dictMonoid.Semigroup0());
+      var append36 = append(dictMonoid.Semigroup0());
       var mempty3 = mempty(dictMonoid);
       return function(f) {
         return foldrWithIndex1(function(i2) {
           return function(x44) {
             return function(acc) {
-              return append35(f(i2)(x44))(acc);
+              return append36(f(i2)(x44))(acc);
             };
           };
         })(mempty3);
@@ -5521,7 +5521,7 @@
     };
   };
   var applyWriterT = function(dictSemigroup) {
-    var append35 = append(dictSemigroup);
+    var append36 = append(dictSemigroup);
     return function(dictApply) {
       var apply7 = apply(dictApply);
       var Functor0 = dictApply.Functor0();
@@ -5532,7 +5532,7 @@
           return function(v1) {
             var k = function(v3) {
               return function(v4) {
-                return new Tuple(v3.value0(v4.value0), append35(v3.value1)(v4.value1));
+                return new Tuple(v3.value0(v4.value0), append36(v3.value1)(v4.value1));
               };
             };
             return apply7(map89(k)(v))(v1);
@@ -5545,7 +5545,7 @@
     };
   };
   var bindWriterT = function(dictSemigroup) {
-    var append35 = append(dictSemigroup);
+    var append36 = append(dictSemigroup);
     var applyWriterT1 = applyWriterT(dictSemigroup);
     return function(dictBind) {
       var bind134 = bind(dictBind);
@@ -5558,7 +5558,7 @@
             return bind134(v)(function(v1) {
               var v2 = k(v1.value0);
               return map89(function(v3) {
-                return new Tuple(v3.value0, append35(v1.value1)(v3.value1));
+                return new Tuple(v3.value0, append36(v1.value1)(v3.value1));
               })(v2);
             });
           };
@@ -19147,7 +19147,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 79, column 3 - line 87, column 8): " + [maybeElement.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 80, column 3 - line 88, column 8): " + [maybeElement.constructor.name]);
       });
     };
   };
@@ -19166,7 +19166,7 @@
               return v.value0.value0.parentElements;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1496, column 36 - line 1498, column 49): " + [v.value0.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1541, column 36 - line 1543, column 49): " + [v.value0.constructor.name]);
           })();
           return new EmptySelection({
             parentElements: elements,
@@ -19181,7 +19181,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1491, column 3 - line 1509, column 10): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1536, column 3 - line 1554, column 10): " + [v.constructor.name]);
       };
     };
   };
@@ -19194,7 +19194,7 @@
             return v.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 259, column 36 - line 260, column 32): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 260, column 36 - line 261, column 32): " + [v.constructor.name]);
         })();
         return traverse_4(function(element3) {
           var node = toNode(element3);
@@ -19208,7 +19208,7 @@
               return unit;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 264, column 5 - line 266, column 27): " + [maybeParent.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 265, column 5 - line 267, column 27): " + [maybeParent.constructor.name]);
           };
         })(v1.elements);
       })());
@@ -19249,7 +19249,7 @@
           return v1.value0.elements;
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 704, column 5 - line 704, column 61): " + [v1.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 749, column 5 - line 749, column 61): " + [v1.constructor.name]);
       };
       var applyBehavior = function(v1) {
         return function(v2) {
@@ -19273,7 +19273,7 @@
             return $$void7(attachClickWithDatum_(v2)(v1.value0));
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 711, column 5 - line 711, column 62): " + [v1.constructor.name, v2.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 756, column 5 - line 756, column 62): " + [v1.constructor.name, v2.constructor.name]);
         };
       };
       var elements = getElements(v);
@@ -19292,14 +19292,14 @@
             return v.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 392, column 70 - line 393, column 30): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 393, column 70 - line 394, column 30): " + [v.constructor.name]);
         })();
         var v3 = (function() {
           if (v1 instanceof BoundSelection) {
             return v1.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 394, column 55 - line 395, column 30): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 395, column 55 - line 396, column 30): " + [v1.constructor.name]);
         })();
         return pure123(new BoundSelection({
           elements: append15(v2.elements)(v3.elements),
@@ -19326,7 +19326,7 @@
                       return v.value0;
                     }
                     ;
-                    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 509, column 57 - line 510, column 30): " + [v.constructor.name]);
+                    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 510, column 57 - line 511, column 30): " + [v.constructor.name]);
                   })();
                   return function __do4() {
                     var existingElements = querySelectorAllElements(selector)(v1.parentElements)();
@@ -19424,7 +19424,7 @@
                     return v.value0;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 425, column 57 - line 426, column 30): " + [v.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 426, column 57 - line 427, column 30): " + [v.constructor.name]);
                 })();
                 return function __do4() {
                   var existingElements = querySelectorAllElements(selector)(v1.parentElements)();
@@ -19507,8 +19507,8 @@
     };
   };
   var joinData1 = /* @__PURE__ */ joinData3(monadEffectEffect)(foldableArray);
-  var getSimulationHandle = function($594) {
-    return toMaybe(getSimulationHandle_($594));
+  var getSimulationHandle = function($606) {
+    return toMaybe(getSimulationHandle_($606));
   };
   var onWithSimulation = function(behavior) {
     return function(simState) {
@@ -19530,7 +19530,7 @@
             return v1.value0.elements;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 747, column 5 - line 747, column 61): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 792, column 5 - line 792, column 61): " + [v1.constructor.name]);
         };
         var applyBehaviorWithSim = function(v1) {
           return function(v2) {
@@ -19556,7 +19556,7 @@
                 return $$void7(attachClickWithDatum_(v3)(v1.value0));
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 754, column 5 - line 754, column 93): " + [v1.constructor.name, v2.constructor.name, v3.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 799, column 5 - line 799, column 93): " + [v1.constructor.name, v2.constructor.name, v3.constructor.name]);
             };
           };
         };
@@ -19585,7 +19585,7 @@
       return pure8(v.value0.document);
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 648, column 1 - line 648, column 82): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 693, column 1 - line 693, column 82): " + [v.constructor.name]);
   };
   var selectAll = function(dictMonadEffect) {
     var liftEffect121 = liftEffect(dictMonadEffect);
@@ -19610,7 +19610,7 @@
               return querySelectorAllElements(selector)(v.value0.elements)();
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 108, column 15 - line 116, column 50): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 109, column 15 - line 117, column 50): " + [v.constructor.name]);
           })();
           return new EmptySelection({
             parentElements: elements,
@@ -19681,7 +19681,7 @@
       return "thead";
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 801, column 1 - line 801, column 45): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 846, column 1 - line 846, column 45): " + [v.constructor.name]);
   };
   var createElementWithNS = function(elemType) {
     return function(doc) {
@@ -19694,7 +19694,7 @@
         return createElement2(elementTypeToString(elemType))(doc);
       }
       ;
-      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 658, column 3 - line 664, column 64): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 703, column 3 - line 709, column 64): " + [v.constructor.name]);
     };
   };
   var attributeValueToString = function(v) {
@@ -19710,7 +19710,7 @@
       return show22(v.value0);
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 796, column 1 - line 796, column 51): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 841, column 1 - line 841, column 51): " + [v.constructor.name]);
   };
   var applyAttributes = function(element3) {
     return function(datum2) {
@@ -19718,8 +19718,8 @@
         return function(attrs) {
           return traverse_4(function(attr3) {
             if (attr3 instanceof StaticAttr) {
-              var $326 = attr3.value0 === "textContent";
-              if ($326) {
+              var $332 = attr3.value0 === "textContent";
+              if ($332) {
                 return setTextContent_(attributeValueToString(attr3.value1))(element3);
               }
               ;
@@ -19728,8 +19728,8 @@
             ;
             if (attr3 instanceof DataAttr) {
               var val = attributeValueToString(attr3.value1(datum2));
-              var $329 = attr3.value0 === "textContent";
-              if ($329) {
+              var $335 = attr3.value0 === "textContent";
+              if ($335) {
                 return setTextContent_(val)(element3);
               }
               ;
@@ -19738,15 +19738,15 @@
             ;
             if (attr3 instanceof IndexedAttr) {
               var val = attributeValueToString(attr3.value1(datum2)(index5));
-              var $332 = attr3.value0 === "textContent";
-              if ($332) {
+              var $338 = attr3.value0 === "textContent";
+              if ($338) {
                 return setTextContent_(val)(element3);
               }
               ;
               return setAttribute2(attr3.value0)(val)(element3);
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 778, column 30 - line 794, column 54): " + [attr3.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 823, column 30 - line 839, column 54): " + [attr3.constructor.name]);
           })(attrs);
         };
       };
@@ -19785,7 +19785,7 @@
               return v.value0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 198, column 78 - line 199, column 30): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 199, column 78 - line 200, column 30): " + [v.constructor.name]);
           })();
           var paired = zipWith(Tuple.create)(v1.data)(v1.elements);
           return function __do4() {
@@ -19800,7 +19800,7 @@
                     return arrayIndex;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 203, column 24 - line 205, column 32): " + [v1.indices.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 204, column 24 - line 206, column 32): " + [v1.indices.constructor.name]);
                 })();
                 return applyAttributes(v2.value1)(v2.value0)(logicalIndex)(attrs);
               };
@@ -19827,7 +19827,7 @@
               return v.value0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 231, column 69 - line 232, column 32): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 232, column 69 - line 233, column 32): " + [v.constructor.name]);
           })();
           var paired = zipWith(Tuple.create)(v1.data)(v1.elements);
           return function __do4() {
@@ -19873,7 +19873,7 @@
             return boundSel.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1318, column 68 - line 1319, column 34): " + [boundSel.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1363, column 68 - line 1364, column 34): " + [boundSel.constructor.name]);
         })();
         return traverseWithIndex2(function(idx) {
           return function(datum2) {
@@ -19896,7 +19896,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1323, column 5 - line 1346, column 39): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1368, column 5 - line 1391, column 39): " + [v1.constructor.name]);
           };
         })(v.data);
       };
@@ -19913,7 +19913,7 @@
                 return v.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 346, column 84 - line 347, column 30): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 347, column 84 - line 348, column 30): " + [v.constructor.name]);
             })();
             return function __do4() {
               var childElements = traverseWithIndex2(function(idx) {
@@ -19952,7 +19952,7 @@
                 return v.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 291, column 57 - line 292, column 30): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 292, column 57 - line 293, column 30): " + [v.constructor.name]);
             })();
             return function __do4() {
               var elements = traverse3(function(parent2) {
@@ -19984,7 +19984,7 @@
             return pendingSel.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1273, column 70 - line 1274, column 36): " + [pendingSel.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1318, column 70 - line 1319, column 36): " + [pendingSel.constructor.name]);
         })();
         return traverseWithIndex2(function(idx) {
           return function(datum2) {
@@ -20007,7 +20007,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1281, column 5 - line 1300, column 45): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1326, column 5 - line 1345, column 45): " + [v1.constructor.name]);
           };
         })(v.pendingData);
       };
@@ -20032,7 +20032,7 @@
                   return unsafeCrashWith("renderTree: appendChild returned empty selection");
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 859, column 31 - line 861, column 104): " + [v2.constructor.name]);
+                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 904, column 31 - line 906, column 104): " + [v2.constructor.name]);
               }
               ;
               return unsafeCrashWith("renderTree: appendChild should return EmptySelection");
@@ -20048,7 +20048,7 @@
                 return combinedChildMap;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 869, column 23 - line 871, column 36): " + [v1.value0.name.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 914, column 23 - line 916, column 36): " + [v1.value0.name.constructor.name]);
             })();
             return new Tuple(element3, selectionsMap);
           };
@@ -20104,7 +20104,7 @@
                 return v2.value0.update.value0.document;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 927, column 14 - line 928, column 45): " + [v2.value0.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 972, column 14 - line 973, column 45): " + [v2.value0.update.constructor.name]);
             })();
             var allData = (function() {
               if (v2.value0.enter instanceof PendingSelection) {
@@ -20137,7 +20137,7 @@
                 return unsafeCrashWith("renderTree Join: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 950, column 22 - line 952, column 90): " + [v3.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 995, column 22 - line 997, column 90): " + [v3.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
@@ -20155,7 +20155,7 @@
                 return v2.value0.enter.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 975, column 54 - line 976, column 36): " + [v2.value0.enter.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1020, column 54 - line 1021, column 36): " + [v2.value0.enter.constructor.name]);
             })();
             var boundSel = new BoundSelection({
               elements,
@@ -20174,7 +20174,7 @@
                 return unsafeCrashWith("renderTree NestedJoin: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 990, column 22 - line 992, column 96): " + [v4.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1035, column 22 - line 1037, column 96): " + [v4.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
@@ -20223,7 +20223,7 @@
                 return unit;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1020, column 3 - line 1031, column 16): " + [v1.value0.exitBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1065, column 3 - line 1076, column 16): " + [v1.value0.exitBehavior.constructor.name]);
             })();
             var enterElementsAndMaps = (function() {
               if (v1.value0.enterBehavior instanceof Just) {
@@ -20248,7 +20248,7 @@
                 return renderTemplatesForPendingSelection(dictOrd)(v1.value0.template)(v2.value0.enter)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1034, column 27 - line 1051, column 68): " + [v1.value0.enterBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1079, column 27 - line 1096, column 68): " + [v1.value0.enterBehavior.constructor.name]);
             })();
             var enterElements = map31(fst)(enterElementsAndMaps);
             var enterChildMaps = map31(snd)(enterElementsAndMaps);
@@ -20262,7 +20262,7 @@
                 return renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1057, column 28 - line 1068, column 67): " + [v1.value0.updateBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1102, column 28 - line 1113, column 67): " + [v1.value0.updateBehavior.constructor.name]);
             })();
             var updateElements = map31(fst)(updateElementsAndMaps);
             var updateChildMaps = map31(snd)(updateElementsAndMaps);
@@ -20278,7 +20278,7 @@
                 return v2.value0.update.value0.document;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1084, column 14 - line 1085, column 45): " + [v2.value0.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1129, column 14 - line 1130, column 45): " + [v2.value0.update.constructor.name]);
             })();
             var allData = (function() {
               if (v2.value0.enter instanceof PendingSelection) {
@@ -20311,7 +20311,7 @@
                 return unsafeCrashWith("renderTree SceneJoin: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1106, column 22 - line 1108, column 95): " + [v3.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1151, column 22 - line 1153, column 95): " + [v3.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
@@ -20361,7 +20361,7 @@
                 return unit;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1143, column 3 - line 1151, column 16): " + [v1.value0.exitBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1188, column 3 - line 1196, column 16): " + [v1.value0.exitBehavior.constructor.name]);
             })();
             var enterElementsAndMaps = (function() {
               if (v1.value0.enterBehavior instanceof Just) {
@@ -20386,7 +20386,7 @@
                 return renderTemplatesForPendingSelection(dictOrd)(v1.value0.template)(v2.value0.enter)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1154, column 27 - line 1163, column 92): " + [v1.value0.enterBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1199, column 27 - line 1208, column 92): " + [v1.value0.enterBehavior.constructor.name]);
             })();
             var updateElementsAndMaps = (function() {
               if (v1.value0.updateBehavior instanceof Just) {
@@ -20398,7 +20398,7 @@
                 return renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1166, column 28 - line 1171, column 91): " + [v1.value0.updateBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1211, column 28 - line 1216, column 91): " + [v1.value0.updateBehavior.constructor.name]);
             })();
             var updateElements = map31(fst)(updateElementsAndMaps);
             var enterElements = map31(fst)(enterElementsAndMaps);
@@ -20416,7 +20416,7 @@
                 return v2.value0.update.value0.document;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1189, column 14 - line 1190, column 45): " + [v2.value0.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1234, column 14 - line 1235, column 45): " + [v2.value0.update.constructor.name]);
             })();
             var boundSel = new BoundSelection({
               elements: allElements,
@@ -20435,13 +20435,13 @@
                 return unsafeCrashWith("renderTree SceneNestedJoin: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1202, column 22 - line 1204, column 101): " + [v5.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1247, column 22 - line 1249, column 101): " + [v5.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 846, column 1 - line 851, column 74): " + [v.constructor.name, v1.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 891, column 1 - line 896, column 74): " + [v.constructor.name, v1.constructor.name]);
       };
     };
   };
@@ -20455,7 +20455,7 @@
                 return pendingSel.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1224, column 70 - line 1225, column 36): " + [pendingSel.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1269, column 70 - line 1270, column 36): " + [pendingSel.constructor.name]);
             })();
             return traverseWithIndex2(function(idx) {
               return function(outerDatum) {
@@ -20488,7 +20488,7 @@
                   };
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1229, column 5 - line 1255, column 53): " + [v1.constructor.name]);
+                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1274, column 5 - line 1300, column 53): " + [v1.constructor.name]);
               };
             })(v.pendingData);
           };
@@ -20518,7 +20518,7 @@
                 return v.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 145, column 79 - line 146, column 32): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 146, column 79 - line 147, column 32): " + [v.constructor.name]);
             })();
             var parent2 = (function() {
               var v2 = head(v1.parentElements);
@@ -20530,7 +20530,7 @@
                 return unsafeIndex3(v1.parentElements)(0);
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 150, column 16 - line 152, column 70): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 151, column 16 - line 153, column 70): " + [v2.constructor.name]);
             })();
             return function __do4() {
               var elements = traverseWithIndex2(function(arrayIndex) {
@@ -20544,7 +20544,7 @@
                       return arrayIndex;
                     }
                     ;
-                    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 156, column 24 - line 158, column 32): " + [v1.indices.constructor.name]);
+                    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 157, column 24 - line 159, column 32): " + [v1.indices.constructor.name]);
                   })();
                   return function __do5() {
                     var element3 = createElementWithNS(elemType)(v1.document)();
@@ -20569,12 +20569,44 @@
       };
     };
   };
+  var append32 = /* @__PURE__ */ append8(monadEffectEffect);
+  var appendData = function(dictMonadEffect) {
+    var liftEffect121 = liftEffect(dictMonadEffect);
+    return function(dictFoldable) {
+      var fromFoldable47 = fromFoldable(dictFoldable);
+      return function(elemType) {
+        return function(foldableData) {
+          return function(attrs) {
+            return function(emptySelection) {
+              return liftEffect121((function() {
+                var v = (function() {
+                  if (emptySelection instanceof EmptySelection) {
+                    return emptySelection.value0;
+                  }
+                  ;
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 650, column 57 - line 651, column 30): " + [emptySelection.constructor.name]);
+                })();
+                var dataArray = fromFoldable47(foldableData);
+                var pendingSelection = new PendingSelection({
+                  parentElements: v.parentElements,
+                  pendingData: dataArray,
+                  indices: new Just(range2(0)(length(dataArray) - 1 | 0)),
+                  document: v.document
+                });
+                return append32(elemType)(attrs)(pendingSelection);
+              })());
+            };
+          };
+        };
+      };
+    };
+  };
   var renderData = function(dictMonadEffect) {
     var Monad0 = dictMonadEffect.Monad0();
     var Bind1 = Monad0.Bind1();
     var bind134 = bind(Bind1);
     var joinData22 = joinData3(dictMonadEffect);
-    var append35 = append8(dictMonadEffect);
+    var append42 = append8(dictMonadEffect);
     var pure123 = pure(Monad0.Applicative0());
     var applyPerDatumAttrs1 = applyPerDatumAttrs(dictMonadEffect);
     var discard213 = discard6(Bind1);
@@ -20592,7 +20624,7 @@
                   return function(updateAttrs) {
                     return function(exitAttrs) {
                       return bind134(joinData42(foldableData)(selector)(emptySelection))(function(v) {
-                        return bind134(bind134(append35(elemType)([])(v.value0.enter))(function(bound) {
+                        return bind134(bind134(append42(elemType)([])(v.value0.enter))(function(bound) {
                           if (enterAttrs instanceof Nothing) {
                             return pure123(bound);
                           }
@@ -20601,7 +20633,7 @@
                             return applyPerDatumAttrs1(enterAttrs.value0)(bound);
                           }
                           ;
-                          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 603, column 5 - line 605, column 55): " + [enterAttrs.constructor.name]);
+                          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 604, column 5 - line 606, column 55): " + [enterAttrs.constructor.name]);
                         }))(function(enterBound) {
                           return bind134((function() {
                             if (updateAttrs instanceof Nothing) {
@@ -20612,7 +20644,7 @@
                               return applyPerDatumAttrs1(updateAttrs.value0)(v.value0.update);
                             }
                             ;
-                            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 608, column 18 - line 610, column 54): " + [updateAttrs.constructor.name]);
+                            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 609, column 18 - line 611, column 54): " + [updateAttrs.constructor.name]);
                           })())(function(updateBound) {
                             return discard213((function() {
                               if (exitAttrs instanceof Nothing) {
@@ -20625,7 +20657,7 @@
                                 });
                               }
                               ;
-                              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 613, column 3 - line 617, column 18): " + [exitAttrs.constructor.name]);
+                              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 614, column 3 - line 618, column 18): " + [exitAttrs.constructor.name]);
                             })())(function() {
                               return merge1(enterBound)(updateBound);
                             });
@@ -21135,6 +21167,7 @@
   var select6 = /* @__PURE__ */ select5(monadEffectEffect);
   var selectAll2 = /* @__PURE__ */ selectAll(monadEffectEffect);
   var renderData2 = /* @__PURE__ */ renderData(monadEffectEffect);
+  var appendData2 = /* @__PURE__ */ appendData(monadEffectEffect);
   var joinData4 = /* @__PURE__ */ joinData3(monadEffectEffect);
   var joinDataWithKey3 = /* @__PURE__ */ joinDataWithKey2(monadEffectEffect);
   var append9 = /* @__PURE__ */ append8(monadEffectEffect);
@@ -21219,6 +21252,21 @@
                     };
                   };
                 };
+              };
+            };
+          };
+        };
+      };
+    },
+    appendData: function(dictFoldable) {
+      var appendData1 = appendData2(dictFoldable);
+      return function(elemType) {
+        return function(foldableData) {
+          return function(attrs) {
+            return function(v) {
+              return function __do4() {
+                var result = appendData1(elemType)(foldableData)(attrs)(v)();
+                return result;
               };
             };
           };
@@ -21543,6 +21591,21 @@
         };
       };
     },
+    appendData: function(dictFoldable) {
+      var appendData1 = appendData2(dictFoldable);
+      return function(elemType) {
+        return function(foldableData) {
+          return function(attrs) {
+            return function(v) {
+              return liftEffect4(function __do4() {
+                var bound = appendData1(elemType)(foldableData)(attrs)(v)();
+                return bound;
+              });
+            };
+          };
+        };
+      };
+    },
     merge: function(v) {
       return function(v1) {
         return liftEffect4(function __do4() {
@@ -21618,7 +21681,7 @@
       return show15(v.value0);
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 253, column 1 - line 253, column 51): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 257, column 1 - line 257, column 51): " + [v.constructor.name]);
   };
   var transitionMD3v2Selection_ = {
     withTransition: function(config) {
@@ -21629,7 +21692,7 @@
               return v.value0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 188, column 65 - line 189, column 44): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 192, column 65 - line 193, column 44): " + [v.constructor.name]);
           })();
           var paired = zipWith(function(d16) {
             return function(e) {
@@ -21650,7 +21713,7 @@
                   return arrayIndex;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 198, column 26 - line 200, column 34): " + [v1.indices.constructor.name]);
+                throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 202, column 26 - line 204, column 34): " + [v1.indices.constructor.name]);
               })();
               return function __do4() {
                 var transition2 = createTransition_(config.duration)(maybeMillisecondsToNullable(config.delay))(maybeEasingToNullable(config.easing))(v2.element)();
@@ -21667,7 +21730,7 @@
                     return transitionSetAttribute_(attr3.value0)(attributeValueToString2(attr3.value1(v2.datum)(logicalIndex)))(transition2);
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 210, column 34 - line 218, column 112): " + [attr3.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 214, column 34 - line 222, column 112): " + [attr3.constructor.name]);
                 })(attrs)();
               };
             };
@@ -21683,7 +21746,7 @@
               return v.value0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 222, column 56 - line 223, column 46): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 226, column 56 - line 227, column 46): " + [v.constructor.name]);
           })();
           var paired = zipWith(function(d16) {
             return function(e) {
@@ -21710,7 +21773,7 @@
                     return transitionSetAttribute_(attr3.value0)(attributeValueToString2(attr3.value1(v2.datum)(index5)))(transition2);
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 239, column 34 - line 247, column 105): " + [attr3.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 243, column 34 - line 251, column 105): " + [attr3.constructor.name]);
                 })(attrs)();
                 return transitionRemove_(transition2)();
               };
@@ -21739,7 +21802,7 @@
             return setAttributeSync_(attr3.value0)(attributeValueToString2(attr3.value1(datum2)(index5)))(element3);
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 407, column 47 - line 415, column 76): " + [attr3.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 415, column 47 - line 423, column 76): " + [attr3.constructor.name]);
         };
       };
     };
@@ -21750,21 +21813,21 @@
         return new Tuple(view(_name3)(f), f);
       }));
       return discard22(modify_4(function(state3) {
-        var $403 = {};
-        for (var $404 in state3) {
-          if ({}.hasOwnProperty.call(state3, $404)) {
-            $403[$404] = state3[$404];
+        var $418 = {};
+        for (var $419 in state3) {
+          if ({}.hasOwnProperty.call(state3, $419)) {
+            $418[$419] = state3[$419];
           }
           ;
         }
         ;
-        $403.simulation = set2((function() {
-          var $454 = prop6($$Proxy.value)(strongFn);
-          return function($455) {
-            return _Newtype3($454($455));
+        $418.simulation = set2((function() {
+          var $469 = prop6($$Proxy.value)(strongFn);
+          return function($470) {
+            return _Newtype3($469($470));
           };
         })())(forcesMap)(state3.simulation);
-        return $403;
+        return $418;
       }))(function() {
         return bind12(simulationSetNodes2(config.nodes))(function(nodesInSim) {
           return discard22(simulationActualizeForces2(config.activeForces))(function() {
@@ -21780,7 +21843,7 @@
                               return v.value1.value0.value0;
                             }
                             ;
-                            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 457, column 71 - line 458, column 50): " + [v.value1.value0.constructor.name]);
+                            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 465, column 71 - line 466, column 50): " + [v.value1.value0.constructor.name]);
                           })();
                           var makeTick = function(v2) {
                             var paired = zipWith(function(d16) {
@@ -21802,7 +21865,7 @@
                                     return arrayIndex;
                                   }
                                   ;
-                                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 464, column 46 - line 466, column 54): " + [v1.indices.constructor.name]);
+                                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 472, column 46 - line 474, column 54): " + [v1.indices.constructor.name]);
                                 })();
                                 var v5 = mapFlipped4(v.value1.value1)(function(attr3) {
                                   return applyAttributeSync(v4.element)(v4.datum)(logicalIndex)(attr3);
@@ -21837,7 +21900,7 @@
               return v.value0.value0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 482, column 65 - line 483, column 44): " + [v.value0.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 490, column 65 - line 491, column 44): " + [v.value0.constructor.name]);
           })();
           var makeTick = function(v2) {
             var paired = zipWith(function(d16) {
@@ -21859,7 +21922,7 @@
                     return arrayIndex;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 489, column 40 - line 491, column 48): " + [v1.indices.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 497, column 40 - line 499, column 48): " + [v1.indices.constructor.name]);
                 })();
                 var v5 = mapFlipped4(v.value1)(function(attr3) {
                   return applyAttributeSync(v4.element)(v4.datum)(logicalIndex)(attr3);
@@ -21898,7 +21961,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 514, column 26 - line 519, column 40): " + [config.nodes.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 522, column 26 - line 527, column 40): " + [config.nodes.constructor.name]);
       })())(function(nodesBeforeFilter) {
         var nodesInSim = (function() {
           if (config.nodeFilter instanceof Just) {
@@ -21909,7 +21972,7 @@
             return nodesBeforeFilter;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 522, column 22 - line 524, column 39): " + [config.nodeFilter.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 530, column 22 - line 532, column 39): " + [config.nodeFilter.constructor.name]);
         })();
         return bind12((function() {
           if (config.nodeFilter instanceof Just) {
@@ -21920,7 +21983,7 @@
             return pure12(nodesInSim);
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 527, column 10 - line 529, column 33): " + [config.nodeFilter.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 535, column 10 - line 537, column 33): " + [config.nodeFilter.constructor.name]);
         })())(function() {
           return bind12((function() {
             if (config.activeForces instanceof Just) {
@@ -21931,7 +21994,7 @@
               return pure12(unit);
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 532, column 10 - line 534, column 27): " + [config.activeForces.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 540, column 10 - line 542, column 27): " + [config.activeForces.constructor.name]);
           })())(function() {
             return bind12((function() {
               if (config.config instanceof Just) {
@@ -21948,7 +22011,7 @@
                 return pure12(unit);
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 537, column 10 - line 543, column 27): " + [config.config.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 545, column 10 - line 551, column 27): " + [config.config.constructor.name]);
             })())(function() {
               return bind12((function() {
                 if (config.links instanceof Just && config.linkFilter instanceof Just) {
@@ -21976,7 +22039,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 546, column 19 - line 568, column 27): " + [config.links.constructor.name, config.linkFilter.constructor.name]);
+                throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 554, column 19 - line 576, column 27): " + [config.links.constructor.name, config.linkFilter.constructor.name]);
               })())(function(linksInSim) {
                 return pure12({
                   nodes: nodesInSim,
@@ -26104,7 +26167,7 @@
     var bind134 = bind(dictMonad.Bind1());
     var pure71 = pure(dictMonad.Applicative0());
     return function(dictSelectionM) {
-      var append35 = append7(dictSelectionM);
+      var append36 = append7(dictSelectionM);
       var on13 = on2(dictSelectionM);
       var setAttrs6 = setAttrs(dictSelectionM);
       var setAttrsExit5 = setAttrsExit(dictSelectionM);
@@ -26112,7 +26175,7 @@
       return {
         onNodeEnter: function(enterSel) {
           return function(_attrs) {
-            return bind134(append35(Circle2.value)([cx11(function(v) {
+            return bind134(append36(Circle2.value)([cx11(function(v) {
               return v.x;
             }), cy11(function(v) {
               return v.y;
@@ -26141,7 +26204,7 @@
         },
         onLinkEnter: function(enterSel) {
           return function(_attrs) {
-            return append35(Line2.value)([strokeWidth12(function(v) {
+            return append36(Line2.value)([strokeWidth12(function(v) {
               return sqrt(v.value);
             }), stroke12(function(v) {
               return d3SchemeCategory10N_(toNumber(v.target.group));
@@ -41884,7 +41947,7 @@
     var bind134 = bind(dictMonad.Bind1());
     var pure71 = pure(dictMonad.Applicative0());
     return function(dictSelectionM) {
-      var append35 = append7(dictSelectionM);
+      var append36 = append7(dictSelectionM);
       var appendChildInheriting4 = appendChildInheriting(dictSelectionM);
       var on13 = on2(dictSelectionM);
       var setAttrs6 = setAttrs(dictSelectionM);
@@ -41894,7 +41957,7 @@
           return function(attrs) {
             var tagClassesAttr = makeTagClassesAttr(attrs.tagMap);
             var groupAttrs = cons(tagClassesAttr)(cons(transform19(translateNode))([]));
-            return bind134(append35(Group2.value)(groupAttrs)(enterSel))(function(groupEnter) {
+            return bind134(append36(Group2.value)(groupAttrs)(enterSel))(function(groupEnter) {
               return bind134(appendChildInheriting4(Circle2.value)(attrs.circles)(groupEnter))(function(circleEnter) {
                 return bind134(appendChildInheriting4(Text3.value)(attrs.labels)(groupEnter))(function(labelEnter) {
                   return bind134(on13(new Drag2(simulationDrag("spago")))(groupEnter))(function() {
@@ -41919,7 +41982,7 @@
         },
         onLinkEnter: function(enterSel) {
           return function(attrs) {
-            return bind134(append35(Line2.value)([class_1(function(v) {
+            return bind134(append36(Line2.value)([class_1(function(v) {
               return linkClass(v);
             }), stroke35(function(v) {
               return linkColor(v);
@@ -44958,7 +45021,7 @@
   })();
 
   // output/PSD3.Shared.DocsCardGrid/index.js
-  var append32 = /* @__PURE__ */ append(semigroupArray);
+  var append33 = /* @__PURE__ */ append(semigroupArray);
   var map79 = /* @__PURE__ */ map(functorArray);
   var HowTo = /* @__PURE__ */ (function() {
     function HowTo2() {
@@ -45028,14 +45091,14 @@
       throw new Error("Failed pattern match at PSD3.Shared.DocsCardGrid (line 34, column 17 - line 38, column 51): " + [v.cardType.constructor.name]);
     })();
     var baseClasses = ["docs-card"];
-    var allClasses = append32(baseClasses)([typeClass]);
+    var allClasses = append33(baseClasses)([typeClass]);
     var element3 = (function() {
       if (v.route instanceof Just) {
         return a([href("#" + routeToPath(v.route.value0)), classes(allClasses)]);
       }
       ;
       if (v.route instanceof Nothing) {
-        return div2([classes(append32(allClasses)(["docs-card--coming-soon"]))]);
+        return div2([classes(append33(allClasses)(["docs-card--coming-soon"]))]);
       }
       ;
       throw new Error("Failed pattern match at PSD3.Shared.DocsCardGrid (line 47, column 15 - line 55, column 85): " + [v.route.constructor.name]);
@@ -49540,7 +49603,7 @@
   };
 
   // output/PSD3.Wizard.FileDownload/index.js
-  var append33 = /* @__PURE__ */ append(semigroupArray);
+  var append34 = /* @__PURE__ */ append(semigroupArray);
   var eq18 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
   var append121 = /* @__PURE__ */ append(semigroupString);
   var map83 = /* @__PURE__ */ map(functorArray);
@@ -49556,7 +49619,7 @@
           return [];
         }
         ;
-        return append33([x44])(replicateArray(n - 1 | 0)(x44));
+        return append34([x44])(replicateArray(n - 1 | 0)(x44));
       };
     };
     var intercalateArray = function(sep) {
@@ -50521,7 +50584,7 @@
   var fromFoldable46 = /* @__PURE__ */ fromFoldable6(ordString)(foldableArray);
   var traverse5 = /* @__PURE__ */ traverse(traversableArray)(applicativeMaybe);
   var fromFoldable119 = /* @__PURE__ */ fromFoldable2(foldableArray);
-  var append34 = /* @__PURE__ */ append(semigroupList);
+  var append35 = /* @__PURE__ */ append(semigroupList);
   var map211 = /* @__PURE__ */ map(functorList);
   var fromFoldable212 = /* @__PURE__ */ fromFoldable2(foldableMaybe);
   var parseQueryPart = function(decoder) {
@@ -50553,7 +50616,7 @@
       };
       var v = map121(flip(splitAt3)(hash2))(indexOf2("?")(hash2));
       if (v instanceof Just) {
-        return append34(pathParts(v.value0.before))(map211(Query2.create)(fromFoldable212(parseQueryPart(decoder)(drop5(1)(v.value0.after)))));
+        return append35(pathParts(v.value0.before))(map211(Query2.create)(fromFoldable212(parseQueryPart(decoder)(drop5(1)(v.value0.after)))));
       }
       ;
       if (v instanceof Nothing) {
