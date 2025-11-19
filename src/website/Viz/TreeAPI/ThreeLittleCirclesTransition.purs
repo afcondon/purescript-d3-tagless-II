@@ -35,18 +35,18 @@ import Web.DOM.Element (Element)
 type CircleData = Int
 
 -- | State of the circles visualization
-data CircleState = StateGreen | StateRGB
+data CircleState = StateHidden | StateRGB
 
 derive instance Eq CircleState
 
 instance Show CircleState where
-  show StateGreen = "StateGreen"
+  show StateHidden = "StateHidden"
   show StateRGB = "StateRGB"
 
--- | Toggle between states
+-- | Toggle between states (now just shows RGB from hidden)
 toggleState :: CircleState -> CircleState
-toggleState StateGreen = StateRGB
-toggleState StateRGB = StateGreen
+toggleState StateHidden = StateRGB
+toggleState StateRGB = StateRGB  -- Stay in RGB state once shown
 
 -- | Transition circles to a given state
 transitionToState :: D3v2Selection_ SBoundOwns Element CircleData -> CircleState -> Effect Unit
@@ -58,20 +58,18 @@ transitionToState circlesSel state = runD3v2M do
         }
 
   case state of
-    StateGreen ->
+    StateHidden ->
+      -- Start hidden (zero radius, zero opacity)
       withTransition transitionConfig circlesSel
-        [ fill ((\_ -> "green") :: CircleData -> String)
-        , cx ((\d -> toNumber d * 100.0 + 100.0) :: CircleData -> Number)  -- Evenly spaced: 100, 200, 300
-        , cy ((\_ -> 100.0) :: CircleData -> Number)                        -- Middle
-        , radius 15.0
-        , fillOpacity 1.0
+        [ radius 0.0
+        , fillOpacity 0.0
         ]
     StateRGB ->
       withTransition transitionConfig circlesSel
         [ fill colorFnRGB
         , cx cxFnRGB
         , cy cyFnRGB
-        , radius 30.0          -- Larger for better overlap
+        , radius 60.0          -- Increased from 30 to 60 for proper overlap and color mixing
         , fillOpacity 0.5      -- Semi-transparent for color mixing
         ]
 
@@ -98,16 +96,16 @@ transitionToState circlesSel state = runD3v2M do
       1 -> 130.0  -- Green at bottom
       _ -> 70.0   -- Blue at top
 
--- | Draw three circles with toggle control circle
+-- | Draw three circles with start button
 threeLittleCirclesTransition :: Effect Unit
 threeLittleCirclesTransition = do
-  -- Create state ref
-  stateRef <- Ref.new StateGreen
+  -- Create state ref - start hidden
+  stateRef <- Ref.new StateHidden
 
   runD3v2M do
     container <- select "#viz" :: _ (D3v2Selection_ SEmpty Element Unit)
 
-    -- Initial tree: three green circles + a control circle for toggling
+    -- Initial tree: three hidden circles + a "Start" button
     let initialTree :: T.Tree CircleData
         initialTree =
           T.named SVG "svg"
@@ -119,21 +117,21 @@ threeLittleCirclesTransition = do
             `T.withChild`
               (T.joinData "circles" "circle" [0, 1, 2] $ \d ->
                 T.elem Circle
-                  [ fill "green"
-                  , cx (toNumber d * 100.0 + 100.0)  -- Evenly spaced: 100, 200, 300
-                  , cy 100.0                          -- Middle of SVG
-                  , radius 15.0
-                  , fillOpacity 1.0
+                  [ fill "#0000ff"  -- Will be overridden by transition
+                  , cx 200.0        -- Start at center
+                  , cy 100.0        -- Start at center
+                  , radius 0.0      -- Start hidden
+                  , fillOpacity 0.0
                   ]
               )
             `T.withChild`
-              -- Toggle button as a clickable circle
+              -- Start button as a clickable circle
               T.named Circle "toggle-btn"
                 [ cx 200.0
                 , cy 220.0
-                , radius 20.0
-                , fill "#4CAF50"
-                , fillOpacity 0.8
+                , radius 25.0      -- Slightly larger button
+                , fill "#2196F3"   -- Blue button color
+                , fillOpacity 0.9
                 ]
 
     -- Render initial state

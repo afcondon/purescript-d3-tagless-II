@@ -23757,11 +23757,11 @@
   var discard11 = /* @__PURE__ */ discard(discardUnit);
   var discard13 = /* @__PURE__ */ discard11(bindD3v2M);
   var withTransition2 = /* @__PURE__ */ withTransition(transitionMD3v2Selection_);
+  var radius9 = /* @__PURE__ */ radius3(toAttrNumberNumber);
+  var fillOpacity2 = /* @__PURE__ */ fillOpacity(toAttrNumberNumber);
   var fill13 = /* @__PURE__ */ fill3(toAttrStringFunctionStrin);
   var cx9 = /* @__PURE__ */ cx3(toAttrNumberFunctionNumbe);
   var cy9 = /* @__PURE__ */ cy3(toAttrNumberFunctionNumbe);
-  var radius9 = /* @__PURE__ */ radius3(toAttrNumberNumber);
-  var fillOpacity2 = /* @__PURE__ */ fillOpacity(toAttrNumberNumber);
   var pure13 = /* @__PURE__ */ pure(applicativeD3v2M);
   var bind19 = /* @__PURE__ */ bind(bindD3v2M);
   var select9 = /* @__PURE__ */ select3(selectionMD3v2Selection_D);
@@ -23776,12 +23776,12 @@
   var lookup14 = /* @__PURE__ */ lookup2(ordString);
   var liftEffect14 = /* @__PURE__ */ liftEffect(monadEffectD3v2M);
   var on5 = /* @__PURE__ */ on2(selectionMD3v2Selection_D);
-  var StateGreen = /* @__PURE__ */ (function() {
-    function StateGreen2() {
+  var StateHidden = /* @__PURE__ */ (function() {
+    function StateHidden2() {
     }
     ;
-    StateGreen2.value = new StateGreen2();
-    return StateGreen2;
+    StateHidden2.value = new StateHidden2();
+    return StateHidden2;
   })();
   var StateRGB = /* @__PURE__ */ (function() {
     function StateRGB2() {
@@ -23792,8 +23792,8 @@
   })();
   var showCircleState = {
     show: function(v) {
-      if (v instanceof StateGreen) {
-        return "StateGreen";
+      if (v instanceof StateHidden) {
+        return "StateHidden";
       }
       ;
       if (v instanceof StateRGB) {
@@ -23846,21 +23846,15 @@
           easing: Nothing.value
         });
         return discard13((function() {
-          if (state3 instanceof StateGreen) {
-            return withTransition2(transitionConfig)(circlesSel)([fill13(function(v) {
-              return "green";
-            }), cx9(function(d16) {
-              return toNumber(d16) * 100 + 100;
-            }), cy9(function(v) {
-              return 100;
-            }), radius9(15), fillOpacity2(1)]);
+          if (state3 instanceof StateHidden) {
+            return withTransition2(transitionConfig)(circlesSel)([radius9(0), fillOpacity2(0)]);
           }
           ;
           if (state3 instanceof StateRGB) {
-            return withTransition2(transitionConfig)(circlesSel)([fill13(colorFnRGB), cx9(cxFnRGB), cy9(cyFnRGB), radius9(30), fillOpacity2(0.5)]);
+            return withTransition2(transitionConfig)(circlesSel)([fill13(colorFnRGB), cx9(cxFnRGB), cy9(cyFnRGB), radius9(60), fillOpacity2(0.5)]);
           }
           ;
-          throw new Error("Failed pattern match at D3.Viz.TreeAPI.ThreeLittleCirclesTransition (line 60, column 3 - line 76, column 10): " + [state3.constructor.name]);
+          throw new Error("Failed pattern match at D3.Viz.TreeAPI.ThreeLittleCirclesTransition (line 60, column 3 - line 74, column 10): " + [state3.constructor.name]);
         })())(function() {
           return pure13(unit);
         });
@@ -23868,22 +23862,22 @@
     };
   };
   var toggleState = function(v) {
-    if (v instanceof StateGreen) {
+    if (v instanceof StateHidden) {
       return StateRGB.value;
     }
     ;
     if (v instanceof StateRGB) {
-      return StateGreen.value;
+      return StateRGB.value;
     }
     ;
     throw new Error("Failed pattern match at D3.Viz.TreeAPI.ThreeLittleCirclesTransition (line 47, column 1 - line 47, column 42): " + [v.constructor.name]);
   };
   var threeLittleCirclesTransition = function __do3() {
-    var stateRef = $$new(StateGreen.value)();
+    var stateRef = $$new(StateHidden.value)();
     runD3v2M(bind19(select9("#viz"))(function(container) {
       var initialTree = withChild(withChild(named2(SVG.value)("svg")([width17(400), height17(250), viewBox11("0 0 400 250"), id_6("three-circles-transition-tree")]))(joinData("circles")("circle")([0, 1, 2])(function(d16) {
-        return elem4(Circle2.value)([fill1("green"), cx12(toNumber(d16) * 100 + 100), cy12(100), radius9(15), fillOpacity2(1)]);
-      })))(named2(Circle2.value)("toggle-btn")([cx12(200), cy12(220), radius9(20), fill1("#4CAF50"), fillOpacity2(0.8)]));
+        return elem4(Circle2.value)([fill1("#0000ff"), cx12(200), cy12(100), radius9(0), fillOpacity2(0)]);
+      })))(named2(Circle2.value)("toggle-btn")([cx12(200), cy12(220), radius9(25), fill1("#2196F3"), fillOpacity2(0.9)]));
       return bind19(renderTree11(container)(initialTree))(function(selections) {
         var circlesSel = (function() {
           var v = lookup14("circles")(selections);
@@ -23895,7 +23889,7 @@
             return unsafeCrashWith("circles selection not found");
           }
           ;
-          throw new Error("Failed pattern match at D3.Viz.TreeAPI.ThreeLittleCirclesTransition (line 143, column 22 - line 145, column 83): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at D3.Viz.TreeAPI.ThreeLittleCirclesTransition (line 141, column 22 - line 143, column 83): " + [v.constructor.name]);
         })();
         var toggleBtnSel = (function() {
           var v = lookup14("toggle-btn")(selections);
@@ -23907,7 +23901,7 @@
             return unsafeCrashWith("toggle button not found");
           }
           ;
-          throw new Error("Failed pattern match at D3.Viz.TreeAPI.ThreeLittleCirclesTransition (line 148, column 24 - line 150, column 79): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at D3.Viz.TreeAPI.ThreeLittleCirclesTransition (line 146, column 24 - line 148, column 79): " + [v.constructor.name]);
         })();
         return liftEffect14(function __do4() {
           runD3v2M(on5(onClick2(function __do5() {
