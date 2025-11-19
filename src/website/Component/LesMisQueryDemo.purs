@@ -9,7 +9,6 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Data.Set as Set
-import Data.Array as Array
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
 import Halogen as H
@@ -88,9 +87,9 @@ handleAction :: forall output m. MonadAff m => Action -> H.HalogenM State Action
 handleAction = case _ of
   Initialize -> do
     -- Load data
-    result <- H.liftAff $ AJAX.get ResponseFormat.string "/data/lesmiserables.json"
+    result <- H.liftAff $ AJAX.get ResponseFormat.string "./data/miserables.json"
     case result of
-      Left err -> liftEffect $ do
+      Left _ -> liftEffect $ do
         -- Log error but don't crash - helps with development
         pure unit
 

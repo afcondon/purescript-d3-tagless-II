@@ -23,7 +23,6 @@ import Data.Map as Map
 import Data.Number (sqrt, cos, sin, pi)
 import Data.Set as Set
 import Data.Tuple (Tuple(..))
-import Effect (Effect)
 import Effect.Class (liftEffect)
 import PSD3.Data.Node (D3Link_Swizzled)
 import PSD3.Internal.FFI (keyIsID_)
@@ -31,11 +30,9 @@ import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
 import PSD3.Internal.Simulation.Types (Force)
 import PSD3v2.Attribute.Types (cx, cy, fill, radius, stroke, strokeWidth, x1, x2, y1, y2, id_, class_, width, height, viewBox)
 import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom, simulationDrag, ScaleExtent(..))
-import PSD3v2.Capabilities.Selection (select, appendChild, joinData, append, on, renderTree)
-import PSD3v2.Selection.Operations as Ops
+import PSD3v2.Capabilities.Selection (select, joinData, append, on, renderTree)
 import PSD3v2.Capabilities.Simulation (init, addTickFunction, start, Step(..))
 import PSD3v2.Interpreter.D3v2 (D3v2SimM, reselectD3v2)
-import PSD3v2.Selection.Query (queryAll)
 import PSD3v2.Selection.Types (ElementType(..), JoinResult(..))
 import PSD3v2.VizTree.Tree as T
 import Unsafe.Coerce (unsafeCoerce)
@@ -185,21 +182,10 @@ drawLesMisQueryDemo forcesArray activeForces model containerSelector = do
   liftEffect $ createGroupButtons
     sortedGroups
     (\group -> d3SchemeCategory10N_ (toNumber group))
-    (\group isLarge -> do
-      -- Unwrap D3v2Selection_ to Selection for query language (using unsafeCoerce)
-      let unwrappedSelections = unsafeCoerce selections
-
-      -- Query circles for this specific group using CSS class selector!
-      -- This demonstrates the power of queryAll with CSS selectors
-      groupCircles <- queryAll (".group-" <> show group) unwrappedSelections
-
-      -- Note: queryAll returns SEmpty but we know these have data bound
-      -- Safe to coerce since they were created via joinData
-      let boundCircles = unsafeCoerce groupCircles
-
-      -- Update radius based on whether group is large
-      let newRadius = if isLarge then 10.0 else 5.0
-      void $ Ops.setAttrs [radius newRadius] boundCircles
+    (\_ _ -> do
+      -- Note: Actual DOM manipulation happens in FFI (QueryDemoFFI.js)
+      -- This callback is currently unused but kept for potential future use
+      pure unit
     )
 
   -- Start simulation
