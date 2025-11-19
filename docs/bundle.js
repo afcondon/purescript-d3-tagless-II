@@ -33167,7 +33167,7 @@
   };
   var startSankey = function(csvData) {
     return function(containerSelector) {
-      return drawSankey(csvData)(containerSelector)(900)(600);
+      return drawSankey(csvData)(containerSelector)(750)(500);
     };
   };
 

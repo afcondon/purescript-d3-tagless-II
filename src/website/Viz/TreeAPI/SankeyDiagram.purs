@@ -147,7 +147,8 @@ drawSankey csvData containerSelector w h = runD3v2M do
 startSankey :: String -> String -> Effect Unit
 startSankey csvData containerSelector = do
   -- Fixed dimensions for embedded view
-  let w = 900.0
-  let h = 600.0
+  -- Reduced from 900 to 750 to fit within tutorial-section max-width (52rem = 832px)
+  let w = 750.0
+  let h = 500.0
 
   drawSankey csvData containerSelector w h
