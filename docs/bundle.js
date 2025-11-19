@@ -31627,6 +31627,7 @@
 
   // output/D3.Viz.TreeAPI.ChordDiagram/index.js
   var compare12 = /* @__PURE__ */ compare(ordInt);
+  var lookup20 = /* @__PURE__ */ lookup2(ordString);
   var discard38 = /* @__PURE__ */ discard(discardUnit)(bindD3v2M);
   var liftEffect25 = /* @__PURE__ */ liftEffect(monadEffectD3v2M);
   var bind45 = /* @__PURE__ */ bind(bindD3v2M);
@@ -31689,9 +31690,34 @@
     }
   };
   var renderTree38 = /* @__PURE__ */ renderTree37(ordIndexedArc);
-  var regionColors = ["#d62728", "#ff9896", "#e7969c", "#5ab4ac", "#c7eae5", "#80cdc1", "#d8daeb", "#b2abd2", "#ff7f0e", "#ffbb78", "#98df8a"];
+  var regionColorMap = /* @__PURE__ */ (function() {
+    return fromFoldable6(ordString)(foldableArray)([new Tuple("WBR", "#d62728"), new Tuple("Pointe Coupee", "#ff9896"), new Tuple("Point Coupe", "#ff9896"), new Tuple("Iberville", "#e7969c"), new Tuple("EBR-M", "#5ab4ac"), new Tuple("EBR - M", "#5ab4ac"), new Tuple("EBR-S", "#c7eae5"), new Tuple("EBR - S", "#c7eae5"), new Tuple("Ascension", "#80cdc1"), new Tuple("Livingston", "#d8daeb"), new Tuple("I-10 Lafayette", "#b2abd2"), new Tuple("US-190 Opelousas", "#ff7f0e"), new Tuple("US 190 Opelousas", "#ff7f0e"), new Tuple("I-10 NOLA", "#ffbb78"), new Tuple("I-12", "#98df8a")]);
+  })();
   var getSourceIndex = function(d1) {
     return d1.source.index;
+  };
+  var getRegionColor = function(labels9) {
+    return function(idx) {
+      var v = index(labels9)(idx);
+      if (v instanceof Just) {
+        var v1 = lookup20(v.value0)(regionColorMap);
+        if (v1 instanceof Just) {
+          return v1.value0;
+        }
+        ;
+        if (v1 instanceof Nothing) {
+          return "#999999";
+        }
+        ;
+        throw new Error("Failed pattern match at D3.Viz.TreeAPI.ChordDiagram (line 78, column 17 - line 80, column 25): " + [v1.constructor.name]);
+      }
+      ;
+      if (v instanceof Nothing) {
+        return "#999999";
+      }
+      ;
+      throw new Error("Failed pattern match at D3.Viz.TreeAPI.ChordDiagram (line 77, column 29 - line 81, column 23): " + [v.constructor.name]);
+    };
   };
   var getGroupIndex = function(d1) {
     return d1.index;
@@ -31734,26 +31760,26 @@
                         return bind45(liftEffect25(reselectD3v2("labelsGroup")(selections)))(function(labelsGroupSel) {
                           var ribbonsTree = joinData("ribbonElements")("path")(indexedChords)(function(v) {
                             var sourceIdx = getSourceIndex(v.datum);
-                            var color2 = fromMaybe("#999999")(index(regionColors)(sourceIdx));
+                            var color2 = getRegionColor(labels9)(sourceIdx);
                             return elem4(Path3.value)([class_23("ribbon"), d8(ribbonPath_(ribbonGen)(v.datum)), fill26(color2), fillOpacity5(0.67), stroke20("#000000"), strokeWidth21(0.5)]);
                           });
                           return bind45(renderTree212(ribbonsGroupSel)(ribbonsTree))(function() {
                             var arcsTree = joinData("arcElements")("path")(indexedGroups)(function(v) {
                               var idx = getGroupIndex(v.datum);
-                              var color2 = fromMaybe("#999999")(index(regionColors)(idx));
+                              var color2 = getRegionColor(labels9)(idx);
                               return elem4(Path3.value)([class_23("arc"), d8(arcPath_(arcGen)(v.datum)), fill26(color2), stroke20("#ffffff"), strokeWidth21(2)]);
                             });
                             return bind45(renderTree38(arcsGroupSel)(arcsTree))(function() {
                               var labelsTree = joinData("labelElements")("text")(indexedGroups)(function(v) {
-                                var labelR = 280 + 20;
+                                var labelR = 280 + 35;
                                 var idx = getGroupIndex(v.datum);
                                 var label5 = fromMaybe("")(index(labels9)(idx));
                                 var angle = (v.datum.startAngle + v.datum.endAngle) / 2;
                                 var labelX = labelR * cos(angle - pi / 2);
                                 var labelY = labelR * sin(angle - pi / 2);
                                 var anchor = (function() {
-                                  var $63 = angle > pi;
-                                  if ($63) {
+                                  var $72 = angle > pi;
+                                  if ($72) {
                                     return "end";
                                   }
                                   ;
@@ -31790,7 +31816,7 @@
         return liftEffect110(drawChord(result.value0.matrix)(result.value0.labels)(containerSelector)(700)(700));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.TreeAPI.ChordDiagram (line 252, column 3 - line 254, column 105): " + [result.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.TreeAPI.ChordDiagram (line 266, column 3 - line 268, column 105): " + [result.constructor.name]);
     }));
   };
 
@@ -31941,12 +31967,12 @@
       return eqNodeID;
     }
   };
-  var lookup20 = /* @__PURE__ */ lookup2(ordNodeID);
+  var lookup21 = /* @__PURE__ */ lookup2(ordNodeID);
   var initialiseSankeyNode = function(m) {
     return function(id5) {
-      return bind46(lookup20(id5)(m.nodeIDToName))(function(name16) {
-        var sourceLinks = fromMaybe(empty8)(lookup20(id5)(m.deps));
-        var targetLinks = fromMaybe(empty8)(lookup20(id5)(m.sped));
+      return bind46(lookup21(id5)(m.nodeIDToName))(function(name16) {
+        var sourceLinks = fromMaybe(empty8)(lookup21(id5)(m.deps));
+        var targetLinks = fromMaybe(empty8)(lookup21(id5)(m.sped));
         return pure41({
           name: name16,
           x0: 0,
@@ -31991,7 +32017,7 @@
   };
 
   // output/PSD3.Layout.Sankey.Compute/index.js
-  var lookup21 = /* @__PURE__ */ lookup2(ordNodeID);
+  var lookup22 = /* @__PURE__ */ lookup2(ordNodeID);
   var insert8 = /* @__PURE__ */ insert4(ordNodeID);
   var insert12 = /* @__PURE__ */ insert(ordNodeID);
   var eq5 = /* @__PURE__ */ eq(eqNodeID);
@@ -32023,7 +32049,7 @@
     return function(tid) {
       return function(deps) {
         var targetSet = (function() {
-          var v = lookup21(sid)(deps);
+          var v = lookup22(sid)(deps);
           if (v instanceof Nothing) {
             return singleton10(tid);
           }
@@ -33878,7 +33904,7 @@
     }
   })(ordNumber)));
   var liftEffect28 = /* @__PURE__ */ liftEffect(monadEffectD3v2M);
-  var lookup22 = /* @__PURE__ */ lookup2(ordString);
+  var lookup23 = /* @__PURE__ */ lookup2(ordString);
   var parabolaData = /* @__PURE__ */ (function() {
     var makePoint = function(i2) {
       var x46 = toNumber(i2);
@@ -33911,7 +33937,7 @@
           log2("Result: 10 circles forming a parabola")();
           log2("")();
           (function() {
-            var v = lookup22("circles")(selections);
+            var v = lookup23("circles")(selections);
             if (v instanceof Just) {
               return log2("\u2713 Circles positioned by data (y = x\xB2)")();
             }
@@ -33956,7 +33982,7 @@
     }
   })(ordNumber)));
   var liftEffect29 = /* @__PURE__ */ liftEffect(monadEffectD3v2M);
-  var lookup23 = /* @__PURE__ */ lookup2(ordString);
+  var lookup24 = /* @__PURE__ */ lookup2(ordString);
   var parabolaData2 = /* @__PURE__ */ (function() {
     var makePoint = function(i2) {
       var x46 = toNumber(i2);
@@ -34021,7 +34047,7 @@
           log2("Result: Parabola with labeled axes")();
           log2("")();
           (function() {
-            var v = lookup23("circles")(selections);
+            var v = lookup24("circles")(selections);
             if (v instanceof Just) {
               return log2("\u2713 Circles positioned using scales")();
             }
@@ -34067,7 +34093,7 @@
     }
   })(ordString)));
   var liftEffect30 = /* @__PURE__ */ liftEffect(monadEffectD3v2M);
-  var lookup24 = /* @__PURE__ */ lookup2(ordString);
+  var lookup25 = /* @__PURE__ */ lookup2(ordString);
   var colorData = [{
     color: "red",
     index: 0
@@ -34091,7 +34117,7 @@
           log2("Result: 3 circles, each with its data-driven color")();
           log2("")();
           (function() {
-            var v = lookup24("circles")(selections);
+            var v = lookup25("circles")(selections);
             if (v instanceof Just) {
               return log2("\u2713 Circles created with data-driven colors")();
             }
@@ -34134,7 +34160,7 @@
     }
   })(ordNumber)));
   var liftEffect31 = /* @__PURE__ */ liftEffect(monadEffectD3v2M);
-  var lookup25 = /* @__PURE__ */ lookup2(ordString);
+  var lookup26 = /* @__PURE__ */ lookup2(ordString);
   var simpleData = [{
     label: "a",
     index: 0
@@ -34158,7 +34184,7 @@
           log2("Result: 3 green circles")();
           log2("")();
           (function() {
-            var v = lookup25("circles")(selections);
+            var v = lookup26("circles")(selections);
             if (v instanceof Just) {
               return log2("\u2713 Circles created via data join")();
             }
@@ -34500,7 +34526,7 @@
   var toUnfoldable22 = /* @__PURE__ */ toUnfoldable2(unfoldableArray);
   var reachableFrom = function(dictOrd) {
     var unions1 = unions3(dictOrd);
-    var lookup38 = lookup2(dictOrd);
+    var lookup39 = lookup2(dictOrd);
     var difference5 = difference3(dictOrd);
     var union6 = union3(dictOrd);
     return function(start14) {
@@ -34518,7 +34544,7 @@
               ;
               if (otherwise) {
                 var neighbors = unions1(catMaybes(mapFlipped8(toUnfoldable8(frontier))(function(n) {
-                  return lookup38(n)(graph.edges);
+                  return lookup39(n)(graph.edges);
                 })));
                 var newNodes = difference5(neighbors)(visited);
                 $tco_var_visited = union6(visited)(frontier);
@@ -34542,7 +34568,7 @@
   };
   var transitiveReduction = function(dictOrd) {
     var $$delete8 = $$delete4(dictOrd);
-    var lookup38 = lookup2(dictOrd);
+    var lookup39 = lookup2(dictOrd);
     var member9 = member2(dictOrd);
     var reachableFrom1 = reachableFrom(dictOrd);
     var filter7 = filter4(dictOrd);
@@ -34550,7 +34576,7 @@
     return function(graph) {
       var isTransitive = function(source2) {
         return function(target7) {
-          var intermediates = $$delete8(target7)(fromMaybe(empty8)(lookup38(source2)(graph.edges)));
+          var intermediates = $$delete8(target7)(fromMaybe(empty8)(lookup39(source2)(graph.edges)));
           var reachableThroughIntermediate = any2(function(intermediate) {
             return member9(target7)(reachableFrom1(intermediate)(graph));
           })(toUnfoldable8(intermediates));
@@ -34572,10 +34598,10 @@
     };
   };
   var getAllEdges = function(dictOrd) {
-    var lookup38 = lookup2(dictOrd);
+    var lookup39 = lookup2(dictOrd);
     return function(graph) {
       return concat(mapFlipped8(graph.nodes)(function(source2) {
-        var v = lookup38(source2)(graph.edges);
+        var v = lookup39(source2)(graph.edges);
         if (v instanceof Nothing) {
           return [];
         }
@@ -34625,7 +34651,7 @@
   var computeLayers = function(dictOrd) {
     var fromFoldable213 = fromFoldable6(dictOrd)(foldableArray);
     var getTopologicalOrder1 = getTopologicalOrder(dictOrd);
-    var lookup38 = lookup2(dictOrd);
+    var lookup39 = lookup2(dictOrd);
     var insert15 = insert(dictOrd);
     return function(tasks) {
       var taskMap = fromFoldable213(mapFlipped8(tasks)(function(t) {
@@ -34634,7 +34660,7 @@
       var sortedIds = reverse2(getTopologicalOrder1(tasks));
       var processTask = function(accLayers) {
         return function(taskId) {
-          var v = lookup38(taskId)(taskMap);
+          var v = lookup39(taskId)(taskMap);
           if (v instanceof Nothing) {
             return accLayers;
           }
@@ -34647,7 +34673,7 @@
               }
               ;
               var depLayers = mapFlipped8(v.value0.depends)(function(depId) {
-                return fromMaybe(0)(lookup38(depId)(accLayers));
+                return fromMaybe(0)(lookup39(depId)(accLayers));
               });
               var v1 = maximum8(depLayers);
               if (v1 instanceof Just) {
@@ -34671,13 +34697,13 @@
   };
   var addLayers = function(dictOrd) {
     var computeLayers1 = computeLayers(dictOrd);
-    var lookup38 = lookup2(dictOrd);
+    var lookup39 = lookup2(dictOrd);
     return function(tasks) {
       var layers = computeLayers1(tasks);
       return mapFlipped8(tasks)(function(t) {
         return {
           id: t.id,
-          layer: fromMaybe(0)(lookup38(t.id)(layers)),
+          layer: fromMaybe(0)(lookup39(t.id)(layers)),
           depends: t.depends
         };
       });
@@ -34705,7 +34731,7 @@
   var mapFlipped9 = /* @__PURE__ */ mapFlipped(functorArray);
   var fromFoldable32 = /* @__PURE__ */ fromFoldable6(ordString)(foldableArray);
   var addLayers2 = /* @__PURE__ */ addLayers(ordString);
-  var lookup26 = /* @__PURE__ */ lookup2(ordString);
+  var lookup27 = /* @__PURE__ */ lookup2(ordString);
   var bind117 = /* @__PURE__ */ bind(bindD3v2M);
   var select27 = /* @__PURE__ */ select3(selectionMD3v2Selection_D);
   var maximum9 = /* @__PURE__ */ maximum(ordInt)(foldableArray);
@@ -34832,7 +34858,7 @@
     return mapFlipped9(layered)(function(l) {
       return {
         id: l.id,
-        name: fromMaybe(l.id)(lookup26(l.id)(nameMap)),
+        name: fromMaybe(l.id)(lookup27(l.id)(nameMap)),
         layer: l.layer,
         depends: l.depends
       };
@@ -34894,7 +34920,7 @@
   var radius26 = /* @__PURE__ */ radius3(toAttrNumberNumber);
   var stroke23 = /* @__PURE__ */ stroke(toAttrStringString);
   var strokeWidth24 = /* @__PURE__ */ strokeWidth3(toAttrNumberNumber);
-  var lookup27 = /* @__PURE__ */ lookup2(ordString);
+  var lookup28 = /* @__PURE__ */ lookup2(ordString);
   var getAllEdges2 = /* @__PURE__ */ getAllEdges(ordString);
   var bind56 = /* @__PURE__ */ bind(bindMaybe);
   var elem6 = /* @__PURE__ */ elem2(/* @__PURE__ */ eqTuple(eqString)(eqString));
@@ -34989,7 +35015,7 @@
                   return withChildren(named2(Group2.value)("node-" + pos.id)([]))([elem4(Circle2.value)([cx29(pos.x), cy29(pos.y), radius26(20), fill34("#4A90E2"), stroke23("#2E5C8A"), strokeWidth24(2), class_31("graph-node")]), elem4(Text3.value)([x35(pos.x), y35(pos.y + 5), textContent15(pos.id), textAnchor13("middle"), fill34("#fff"), class_31("node-label")])]);
                 });
                 var getPos = function(nodeId) {
-                  return lookup27(nodeId)(posMap);
+                  return lookup28(nodeId)(posMap);
                 };
                 var allEdges = getAllEdges2(graph);
                 var edgeElements = catMaybes(mapFlipped10(allEdges)(function(v) {
@@ -35417,7 +35443,7 @@
   var mod7 = /* @__PURE__ */ mod(euclideanRingInt);
   var compare16 = /* @__PURE__ */ compare(ordInt);
   var compare17 = /* @__PURE__ */ compare(ordNumber);
-  var lookup28 = /* @__PURE__ */ lookup2(ordInt);
+  var lookup29 = /* @__PURE__ */ lookup2(ordInt);
   var show210 = /* @__PURE__ */ show(/* @__PURE__ */ showArray(showInt));
   var map114 = /* @__PURE__ */ map(functorMaybe);
   var apply4 = /* @__PURE__ */ apply(applyMaybe);
@@ -35790,7 +35816,7 @@
     return function(newCircle) {
       return function(circles) {
         return findMap(function(id5) {
-          var v = lookup28(id5)(circles);
+          var v = lookup29(id5)(circles);
           if (v instanceof Just) {
             var $190 = intersects(v.value0)(newCircle);
             if ($190) {
@@ -35845,8 +35871,8 @@
               }
               ;
               if (otherwise) {
-                var v = lookup28(bId)(state3.circles);
-                var v1 = lookup28(aId)(state3.circles);
+                var v = lookup29(bId)(state3.circles);
+                var v1 = lookup29(aId)(state3.circles);
                 if (v1 instanceof Just && v instanceof Just) {
                   var positioned = place(v.value0)(v1.value0)(newCircle);
                   var v2 = unsafePerformEffect(log2("  Try r=" + (show126(newCircle.r) + (" at (" + (show59(aId) + ("," + (show59(bId) + (")" + (" -> pos=(" + (show126(positioned.x) + ("," + (show126(positioned.y) + (")" + (" [retries left: " + (show59(maxRetries) + "]")))))))))))))));
@@ -36245,9 +36271,9 @@
   };
   var scoreNode = function(nodeId) {
     return function(state3) {
-      return bind59(lookup28(nodeId)(state3.circles))(function(node) {
+      return bind59(lookup29(nodeId)(state3.circles))(function(node) {
         return bind59(getNextId(nodeId)(state3.frontChain))(function(nextId) {
-          return bind59(lookup28(nextId)(state3.circles))(function(next2) {
+          return bind59(lookup29(nextId)(state3.circles))(function(next2) {
             return pure48({
               nodeId,
               score: calculateScore(node)(next2)
@@ -36401,7 +36427,7 @@
       var initialState2 = initState(v2.value0)(v1.value0)(v.value0);
       var finalState = foldl12(flip(addCircle))(initialState2)(remaining);
       var positioned = mapMaybe(function(i2) {
-        return lookup28(i2)(finalState.circles);
+        return lookup29(i2)(finalState.circles);
       })(range2(0)(n - 1 | 0));
       var enclosing = packEnclose(positioned);
       var translated = map53(function(c) {
@@ -39306,7 +39332,7 @@
   var init12 = /* @__PURE__ */ init4(simulationMD3v2Selection_);
   var cx111 = /* @__PURE__ */ cx3(toAttrNumberNumber);
   var cy111 = /* @__PURE__ */ cy3(toAttrNumberNumber);
-  var lookup29 = /* @__PURE__ */ lookup2(ordString);
+  var lookup30 = /* @__PURE__ */ lookup2(ordString);
   var on11 = /* @__PURE__ */ on2(selectionMD3v2Selection_D1);
   var start11 = /* @__PURE__ */ start3(simulationMD3v2Selection_);
   var get19 = /* @__PURE__ */ get(monadStateRecordD3v2SimM);
@@ -39635,7 +39661,7 @@
                                 return bind66(renderTree311(linksGroupSel)(linksTree))(function(linksSelections) {
                                   return bind66(renderTree217(nodesGroupSel)(nodesTree))(function(nodesSelections) {
                                     var nodesSel = (function() {
-                                      var v1 = lookup29("nodeElements")(nodesSelections);
+                                      var v1 = lookup30("nodeElements")(nodesSelections);
                                       if (v1 instanceof Just) {
                                         return v1.value0;
                                       }
@@ -39647,7 +39673,7 @@
                                       throw new Error("Failed pattern match at D3.Viz.FPFTW.LesMisGUPAuto (line 238, column 18 - line 240, column 76): " + [v1.constructor.name]);
                                     })();
                                     var linksSel = (function() {
-                                      var v1 = lookup29("linkElements")(linksSelections);
+                                      var v1 = lookup30("linkElements")(linksSelections);
                                       if (v1 instanceof Just) {
                                         return v1.value0;
                                       }
@@ -39898,7 +39924,7 @@
       return "fx";
     }
   })(ordNullable6)));
-  var lookup30 = /* @__PURE__ */ lookup2(ordString);
+  var lookup31 = /* @__PURE__ */ lookup2(ordString);
   var on12 = /* @__PURE__ */ on2(selectionMD3v2Selection_D1);
   var addTickFunction9 = /* @__PURE__ */ addTickFunction(simulationMD3v2Selection_);
   var cx112 = /* @__PURE__ */ cx3(toAttrNumberFunctionNumbe);
@@ -40011,7 +40037,7 @@
                         return bind69(renderTree218(nodesGroupSel)(nodesTree))(function(nodesSelections) {
                           return bind69(liftEffect41(reselectD3v2("svg")(selections)))(function(svgSel) {
                             var nodesSel = (function() {
-                              var v1 = lookup30("nodeElements")(nodesSelections);
+                              var v1 = lookup31("nodeElements")(nodesSelections);
                               if (v1 instanceof Just) {
                                 return v1.value0;
                               }
@@ -40023,7 +40049,7 @@
                               throw new Error("Failed pattern match at D3.Viz.TreeAPI.LesMisSimple (line 177, column 18 - line 179, column 76): " + [v1.constructor.name]);
                             })();
                             var linksSel = (function() {
-                              var v1 = lookup30("linkElements")(linksSelections);
+                              var v1 = lookup31("linkElements")(linksSelections);
                               if (v1 instanceof Just) {
                                 return v1.value0;
                               }
@@ -41391,7 +41417,7 @@
   // output/Halogen.Aff.Driver.Eval/index.js
   var traverse_7 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
   var bindFlipped6 = /* @__PURE__ */ bindFlipped(bindMaybe);
-  var lookup31 = /* @__PURE__ */ lookup2(ordSubscriptionId);
+  var lookup32 = /* @__PURE__ */ lookup2(ordSubscriptionId);
   var bind130 = /* @__PURE__ */ bind(bindAff);
   var liftEffect45 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var discard65 = /* @__PURE__ */ discard(discardUnit);
@@ -41421,7 +41447,7 @@
       return function __do3() {
         var v = read(ref2)();
         var subs = read(v.subscriptions)();
-        return traverse_7(unsubscribe)(bindFlipped6(lookup31(sid))(subs))();
+        return traverse_7(unsubscribe)(bindFlipped6(lookup32(sid))(subs))();
       };
     };
   };
@@ -42217,17 +42243,17 @@
     };
   }
   function buildPathLookup(locArray) {
-    const lookup38 = {};
+    const lookup39 = {};
     for (const entry of locArray) {
-      lookup38[entry.path] = entry.loc;
+      lookup39[entry.path] = entry.loc;
       const parts = entry.path.split("/");
       if (parts[0] === ".spago" && parts.length >= 4) {
         const pkg = parts[1];
         const relPath = parts.slice(3).join("/");
-        lookup38[`${pkg}::${relPath}`] = entry.loc;
+        lookup39[`${pkg}::${relPath}`] = entry.loc;
       }
     }
-    return lookup38;
+    return lookup39;
   }
   function lookupLOC(modulePath, pathToLOC, locArray) {
     if (pathToLOC[modulePath]) {
@@ -42280,7 +42306,7 @@
 
   // output/PSD3.Data.Graph/index.js
   var map70 = /* @__PURE__ */ map(functorArray);
-  var lookup32 = /* @__PURE__ */ lookup2(ordInt);
+  var lookup33 = /* @__PURE__ */ lookup2(ordInt);
   var fromFoldable40 = /* @__PURE__ */ fromFoldable2(foldableArray);
   var fromFoldable116 = /* @__PURE__ */ fromFoldable6(ordInt)(foldableArray);
   var append27 = /* @__PURE__ */ append(semigroupArray);
@@ -42288,7 +42314,7 @@
   var alter3 = /* @__PURE__ */ alter(ordInt);
   var getLinksTo = function(nodeId) {
     return function(model) {
-      var v = lookup32(nodeId)(model.maps.linksByTarget);
+      var v = lookup33(nodeId)(model.maps.linksByTarget);
       if (v instanceof Nothing) {
         return [];
       }
@@ -42302,7 +42328,7 @@
   };
   var getLinksFrom = function(nodeId) {
     return function(model) {
-      var v = lookup32(nodeId)(model.maps.linksBySource);
+      var v = lookup33(nodeId)(model.maps.linksBySource);
       if (v instanceof Nothing) {
         return [];
       }
@@ -42378,7 +42404,7 @@
   var append28 = /* @__PURE__ */ append(semigroupArray);
   var map71 = /* @__PURE__ */ map(functorArray);
   var fromFoldableWith2 = /* @__PURE__ */ fromFoldableWith(ordString)(foldableArray);
-  var lookup33 = /* @__PURE__ */ lookup2(ordString);
+  var lookup34 = /* @__PURE__ */ lookup2(ordString);
   var fromFoldable41 = /* @__PURE__ */ fromFoldable6(ordString)(foldableArray);
   var mapFlipped12 = /* @__PURE__ */ mapFlipped(functorArray);
   var bind74 = /* @__PURE__ */ bind(bindMaybe);
@@ -42545,7 +42571,7 @@
       };
     })(zip(names)(ids));
     var getId = function(s) {
-      return fromMaybe(0)(lookup33(s)(name2ID));
+      return fromMaybe(0)(lookup34(s)(name2ID));
     };
     var makeNodeFromModuleJSONPL = function(m) {
       var id5 = getId(m.key);
@@ -42594,7 +42620,7 @@
       var repo = fromMaybe({
         version: "not found",
         repo: "not found"
-      })(lookup33(p2.key)(depsMap));
+      })(lookup34(p2.key)(depsMap));
       var id5 = getId(p2.key);
       return {
         id: id5,
@@ -42657,7 +42683,7 @@
     })(modulesPL));
     var maybeModules = function(ms) {
       return catMaybes(map71(function(k) {
-        return lookup33(k)(mapNamesToModules);
+        return lookup34(k)(mapNamesToModules);
       })(ms));
     };
     var rollUpLOC = function(ms) {
@@ -42682,14 +42708,14 @@
         key: v1.key,
         depends: v1.depends,
         contains: v1.contains,
-        loc: fromMaybe(0)(lookup33(v1.key)(packageLOCMap))
+        loc: fromMaybe(0)(lookup34(v1.key)(packageLOCMap))
       };
     };
     var addContains = function(v1) {
       return {
         key: v1.key,
         depends: v1.depends,
-        contains: fromMaybe([])(lookup33(v1.key)(packageContainsMap))
+        contains: fromMaybe([])(lookup34(v1.key)(packageContainsMap))
       };
     };
     var packagesCL = map71(function($121) {
@@ -42926,7 +42952,7 @@
   // output/D3.Viz.Spago.Render/index.js
   var class_45 = /* @__PURE__ */ class_2(toAttrStringString);
   var class_110 = /* @__PURE__ */ class_2(toAttrStringFunctionStrin);
-  var lookup34 = /* @__PURE__ */ lookup2(ordInt);
+  var lookup35 = /* @__PURE__ */ lookup2(ordInt);
   var fromFoldable42 = /* @__PURE__ */ fromFoldable(foldableSet);
   var show73 = /* @__PURE__ */ show(showLinkType);
   var transform19 = /* @__PURE__ */ transform2(toAttrStringFunctionStrin);
@@ -42942,7 +42968,7 @@
     ;
     if (v instanceof Just) {
       return class_110(function(v1) {
-        var tags = fromMaybe(empty8)(lookup34(v1.id)(v.value0));
+        var tags = fromMaybe(empty8)(lookup35(v1.id)(v.value0));
         return joinWith(" ")(fromFoldable42(tags));
       });
     }
@@ -43695,7 +43721,7 @@
   };
 
   // output/D3.Viz.Spago.Model/index.js
-  var lookup35 = /* @__PURE__ */ lookup2(ordInt);
+  var lookup36 = /* @__PURE__ */ lookup2(ordInt);
   var map72 = /* @__PURE__ */ map(functorArray);
   var append29 = /* @__PURE__ */ append(semigroupArray);
   var fromFoldable43 = /* @__PURE__ */ fromFoldable6(ordInt)(foldableArray);
@@ -43711,7 +43737,7 @@
           inPackage: node.links.inPackage,
           outPackage: node.links.outPackage,
           contains: node.links.contains,
-          sources: fromMaybe([])(lookup35(node.id)(sourcesMap))
+          sources: fromMaybe([])(lookup36(node.id)(sourcesMap))
         },
         id: node.id,
         cluster: node.containerID,
@@ -44017,7 +44043,7 @@
       };
     })([])(partitioned.yes));
     var setModuleGridXY = function(m) {
-      var v = lookup35(m.containerID)(packagesIndexMap);
+      var v = lookup36(m.containerID)(packagesIndexMap);
       if (v instanceof Nothing) {
         return m;
       }
@@ -44382,7 +44408,7 @@
   };
 
   // output/D3.Viz.Spago.Tree/index.js
-  var lookup36 = /* @__PURE__ */ lookup2(ordInt);
+  var lookup37 = /* @__PURE__ */ lookup2(ordInt);
   var map74 = /* @__PURE__ */ map(functorArray);
   var map120 = /* @__PURE__ */ map(functorList);
   var fromFoldable45 = /* @__PURE__ */ fromFoldable(foldableList);
@@ -44396,7 +44422,7 @@
   var updateNodeTreeXY = function(nodes) {
     return function(treeDerivedDataMap) {
       var updateNode = function(node) {
-        var v = lookup36(node.id)(treeDerivedDataMap);
+        var v = lookup37(node.id)(treeDerivedDataMap);
         if (v instanceof Nothing) {
           return node;
         }
@@ -44524,7 +44550,7 @@
       var links = append31(treelinks)(append31(prunedTreeLinks)(onlyPackageLinks));
       var idTree = buildIDTree(rootID)(treelinks);
       var dataTree = mapTree(function(nodeId) {
-        var v = lookup36(nodeId)(nodeMap);
+        var v = lookup37(nodeId)(nodeMap);
         if (v instanceof Just) {
           return {
             id: nodeId,
@@ -44574,7 +44600,7 @@
 
   // output/PSD3.CodeExplorer.Data/index.js
   var bind77 = /* @__PURE__ */ bind(bindMaybe);
-  var lookup37 = /* @__PURE__ */ lookup2(ordString);
+  var lookup38 = /* @__PURE__ */ lookup2(ordString);
   var pure63 = /* @__PURE__ */ pure(applicativeMaybe);
   var bind133 = /* @__PURE__ */ bind(bindAff);
   var apply5 = /* @__PURE__ */ apply(applyEither);
@@ -44583,7 +44609,7 @@
   var addTreeToModel = function(rootName) {
     return function(maybeModel) {
       return bind77(maybeModel)(function(model) {
-        return bind77(lookup37(rootName)(model.maps.name2ID))(function(rootID) {
+        return bind77(lookup38(rootName)(model.maps.name2ID))(function(rootID) {
           return pure63(treeReduction(rootID)(model));
         });
       });
@@ -45081,11 +45107,11 @@
     };
   };
   var applySceneWithTransition = function(dictOrd) {
-    var lookup38 = lookup2(ordTuple(dictOrd)(dictOrd));
+    var lookup39 = lookup2(ordTuple(dictOrd)(dictOrd));
     return function(targetScene) {
       return function(baseConfig) {
         return function(state3) {
-          var transitionSpec = lookup38(new Tuple(state3.currentScene, targetScene))(state3.transitionMatrix);
+          var transitionSpec = lookup39(new Tuple(state3.currentScene, targetScene))(state3.transitionMatrix);
           var config = {
             activeForces: baseConfig.activeForces,
             attributes: baseConfig.attributes,

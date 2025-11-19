@@ -6,11 +6,12 @@ module D3.Viz.TreeAPI.ChordDiagram where
 
 import Prelude
 
-import Data.Array (length, mapWithIndex, (!!), (..))
+import Data.Array (length, mapWithIndex, index, (!!), (..))
 import Data.Either (Either(..))
 import Data.Foldable (traverse_)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Tuple (Tuple(..))
 import Data.Number (pi, cos, sin)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
@@ -51,20 +52,33 @@ batonRougeRegions =
   ]
 
 -- | Color palette for regions (color-by-origin like the example)
-regionColors :: Array String
-regionColors =
-  [ "#d62728"  -- WBR - Red (dominant in image)
-  , "#ff9896"  -- Pointe Coupee - Light red
-  , "#e7969c"  -- Iberville - Pink red
-  , "#5ab4ac"  -- EBR - M - Teal
-  , "#c7eae5"  -- EBR - S - Light teal
-  , "#80cdc1"  -- Ascension - Medium teal
-  , "#d8daeb"  -- Livingston - Light purple
-  , "#b2abd2"  -- I-10 Lafayette - Purple
-  , "#ff7f0e"  -- US 190 - Orange
-  , "#ffbb78"  -- I-10 NOLA - Light orange
-  , "#98df8a"  -- I-12 - Light green
+-- | This is keyed by region name, not index, to handle alphabetical sorting
+regionColorMap :: Map.Map String String
+regionColorMap = Map.fromFoldable
+  [ Tuple "WBR" "#d62728"              -- Red (dominant in image)
+  , Tuple "Pointe Coupee" "#ff9896"    -- Light red
+  , Tuple "Point Coupe" "#ff9896"      -- Light red (alternate spelling)
+  , Tuple "Iberville" "#e7969c"        -- Pink red
+  , Tuple "EBR-M" "#5ab4ac"            -- Teal
+  , Tuple "EBR - M" "#5ab4ac"          -- Teal (with spaces)
+  , Tuple "EBR-S" "#c7eae5"            -- Light teal
+  , Tuple "EBR - S" "#c7eae5"          -- Light teal (with spaces)
+  , Tuple "Ascension" "#80cdc1"        -- Medium teal
+  , Tuple "Livingston" "#d8daeb"       -- Light purple
+  , Tuple "I-10 Lafayette" "#b2abd2"   -- Purple
+  , Tuple "US-190 Opelousas" "#ff7f0e" -- Orange
+  , Tuple "US 190 Opelousas" "#ff7f0e" -- Orange (alternate)
+  , Tuple "I-10 NOLA" "#ffbb78"        -- Light orange
+  , Tuple "I-12" "#98df8a"             -- Light green
   ]
+
+-- | Get color for a region by name
+getRegionColor :: RegionLabels -> Int -> String
+getRegionColor labels idx = case index labels idx of
+  Just label -> case Map.lookup label regionColorMap of
+    Just color -> color
+    Nothing -> "#999999"  -- Default gray for unknown regions
+  Nothing -> "#999999"
 
 -- | Sample traffic matrix (placeholder - to be filled with estimated values)
 -- | TODO: Fill with estimated values from the image
@@ -183,7 +197,7 @@ drawChord matrix labels containerSelector w h = runD3v2M do
       ribbonsTree =
         T.joinData "ribbonElements" "path" indexedChords $ \(IndexedRibbon ir) ->
           let sourceIdx = getSourceIndex ir.datum
-              color = fromMaybe "#999999" (regionColors !! sourceIdx)
+              color = getRegionColor labels sourceIdx
           in T.elem Path
             [ class_ "ribbon"
             , d (ribbonPath_ ribbonGen ir.datum)
@@ -200,7 +214,7 @@ drawChord matrix labels containerSelector w h = runD3v2M do
       arcsTree =
         T.joinData "arcElements" "path" indexedGroups $ \(IndexedArc ia) ->
           let idx = getGroupIndex ia.datum
-              color = fromMaybe "#999999" (regionColors !! idx)
+              color = getRegionColor labels idx
           in T.elem Path
             [ class_ "arc"
             , d (arcPath_ arcGen ia.datum)
@@ -220,7 +234,7 @@ drawChord matrix labels containerSelector w h = runD3v2M do
               -- Calculate angle for label positioning
               groupData = unsafeCoerce ia.datum :: { startAngle :: Number, endAngle :: Number }
               angle = (groupData.startAngle + groupData.endAngle) / 2.0
-              labelR = outerR + 20.0
+              labelR = outerR + 35.0  -- Increased from 20.0 to 35.0 for better spacing
               labelX = labelR * cos (angle - pi / 2.0)
               labelY = labelR * sin (angle - pi / 2.0)
               -- Anchor based on which side of the circle
