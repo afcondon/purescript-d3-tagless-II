@@ -347,11 +347,13 @@
 }
 
 /* Example Card Content */
-.home-example-card-content {
+.home-example-card-content,
+.home-example-content {
   padding: 1.25rem 1.5rem;
 }
 
-.home-example-card-title {
+.home-example-card-title,
+.home-example-title {
   font-size: 1.1rem;
   font-weight: 600;
   color: #333;
@@ -359,11 +361,44 @@
   line-height: 1.3;
 }
 
-.home-example-card-description {
+.home-example-card-description,
+.home-example-description {
   font-size: 0.9rem;
   color: #666;
   margin: 0;
   line-height: 1.5;
+}
+
+/* Examples Grid */
+.home-examples-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto 2.5rem auto;
+}
+
+/* Gallery CTA */
+.home-gallery-cta {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.home-gallery-link {
+  display: inline-block;
+  font-size: 1.1rem;
+  color: #333;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #333;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.home-gallery-link:hover {
+  background-color: #333;
+  color: #fff;
 }
 
 /* Responsive adjustments */
@@ -469,7 +504,8 @@
     font-size: 0.9rem;
   }
 
-  .home-gallery-grid {
+  .home-gallery-grid,
+  .home-examples-grid {
     grid-template-columns: 1fr;
     gap: 1.25rem;
   }

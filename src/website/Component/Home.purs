@@ -184,12 +184,55 @@ render _ =
             [ HP.classes [ HH.ClassName "home-section-description" ] ]
             [ HH.text "Browse all TreeAPI examples organized by category, from basic data joins to advanced simulations." ]
         , HH.div
+            [ HP.classes [ HH.ClassName "home-examples-grid" ] ]
+            [ renderExampleCard
+                "Three Little Circles"
+                "Data join basics - bind data to DOM elements"
+                "assets/example-thumbnails/three-little-circles.png"
+                (Example "three-little-circles")
+            , renderExampleCard
+                "Bar Chart"
+                "Data-driven bars with scaling"
+                "assets/example-thumbnails/simple-bar-chart.png"
+                (Example "bar-chart")
+            , renderExampleCard
+                "Grouped Bar Chart"
+                "Nested joins with multiple series"
+                "assets/example-thumbnails/grouped-bar-chart.png"
+                (Example "grouped-bar-chart")
+            , renderExampleCard
+                "Tree Layout"
+                "Hierarchical node-link diagram"
+                "assets/example-thumbnails/tree-purescript.png"
+                (Example "simple-hierarchy")
+            , renderExampleCard
+                "Les Misérables Network"
+                "Force-directed graph with simulation"
+                "assets/example-thumbnails/les-miserables.png"
+                (Example "lesmis-force")
+            , renderExampleCard
+                "Animated Tree ↔ Cluster"
+                "Smooth transitions between layouts"
+                "assets/example-thumbnails/tree-purescript.png"
+                AnimatedTreeCluster
+            , renderExampleCard
+                "Les Misérables GUP"
+                "Dynamic layouts with General Update Pattern"
+                "assets/example-thumbnails/les-miserables-gup.png"
+                LesMisGUPTree
+            , renderExampleCard
+                "Module Graph"
+                "Visualize this codebase's own dependencies"
+                "assets/example-thumbnails/module-graph.png"
+                ModuleGraph
+            ]
+        , HH.div
             [ HP.classes [ HH.ClassName "home-gallery-cta" ] ]
             [ HH.a
                 [ HP.href $ "#" <> routeToPath Gallery
                 , HP.classes [ HH.ClassName "home-gallery-link" ]
                 ]
-                [ HH.text "View Examples Gallery →" ]
+                [ HH.text "View Full Gallery →" ]
             ]
         ]
 
@@ -271,6 +314,32 @@ renderTutorialLink title description path =
     , HH.p
         [ HP.classes [ HH.ClassName "home-tutorial-card-description" ] ]
         [ HH.text description ]
+    ]
+
+-- | Render an example card with thumbnail
+renderExampleCard :: forall w i. String -> String -> String -> Route -> HH.HTML w i
+renderExampleCard title description thumbnail route =
+  HH.a
+    [ HP.href $ "#" <> routeToPath route
+    , HP.classes [ HH.ClassName "home-example-card" ]
+    ]
+    [ HH.div
+        [ HP.classes [ HH.ClassName "home-example-thumbnail" ] ]
+        [ HH.img
+            [ HP.src thumbnail
+            , HP.alt title
+            , HP.classes [ HH.ClassName "home-example-thumbnail-img" ]
+            ]
+        ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "home-example-content" ] ]
+        [ HH.h3
+            [ HP.classes [ HH.ClassName "home-example-title" ] ]
+            [ HH.text title ]
+        , HH.p
+            [ HP.classes [ HH.ClassName "home-example-description" ] ]
+            [ HH.text description ]
+        ]
     ]
 
 handleAction :: forall o. Action -> H.HalogenM State Action () o Aff Unit
