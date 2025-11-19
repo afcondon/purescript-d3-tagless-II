@@ -37,13 +37,13 @@ threeLittleCirclesColored selector = runD3v2M do
 
   -- Define the tree with a DATA JOIN
   -- Now the fill color comes from the datum itself!
-  -- Compact size for foundational example
+  -- Very compact size for foundational example
   let tree :: Tree ColorDatum
       tree =
         T.named SVG "svg"
-          [ width 300.0
-          , height 150.0
-          , viewBox "0 0 300 150"
+          [ width 400.0
+          , height 100.0
+          , viewBox "0 0 400 100"
           , id_ "three-circles-colored-svg"
           , class_ "tree-api-example"
           ]
@@ -52,10 +52,10 @@ threeLittleCirclesColored selector = runD3v2M do
             -- The key difference: fill uses d.color from the datum
             (joinData "circles" "circle" colorData $ \d ->
               T.elem Circle
-                [ cx (75.0 + d.index * 75.0)     -- Space circles 75px apart
-                , cy 75.0                         -- All at same vertical position
-                , radius 30.0                     -- All same size
-                , fill d.color                    -- Color FROM THE DATUM!
+                [ cx (100.0 + d.index * 100.0)    -- Space circles 100px apart
+                , cy 50.0                          -- All at same vertical position
+                , radius 25.0                      -- All same size
+                , fill d.color                     -- Color FROM THE DATUM!
                 ])
 
   -- Render the tree

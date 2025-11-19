@@ -33592,15 +33592,15 @@
   })();
   var parabolaNoAxes = function(selector) {
     return runD3v2M(bind50(select23(selector))(function(container) {
-      var plotHeight = 225 - 2 * 30;
-      var plotWidth = 300 - 2 * 30;
+      var plotHeight = 200 - 2 * 30;
+      var plotWidth = 400 - 2 * 30;
       var scaleX2 = function(x45) {
         return 30 + x45 / 9 * plotWidth;
       };
       var scaleY2 = function(y46) {
-        return 225 - 30 - y46 / 81 * plotHeight;
+        return 200 - 30 - y46 / 81 * plotHeight;
       };
-      var tree3 = withChild(named2(SVG.value)("svg")([width31(300), height31(225), viewBox25("0 0 " + (show50(300) + (" " + show50(225)))), id_17("parabola-no-axes-svg"), class_26("tree-api-example")]))(joinData("circles")("circle")(parabolaData)(function(d16) {
+      var tree3 = withChild(named2(SVG.value)("svg")([width31(400), height31(200), viewBox25("0 0 " + (show50(400) + (" " + show50(200)))), id_17("parabola-no-axes-svg"), class_26("tree-api-example")]))(joinData("circles")("circle")(parabolaData)(function(d16) {
         return elem4(Circle2.value)([cx24(scaleX2(d16.x)), cy24(scaleY2(d16.y)), radius21(5), fill29("green")]);
       }));
       return bind50(renderTree41(container)(tree3))(function(selections) {
@@ -33676,7 +33676,7 @@
         bottom: 50,
         left: 60
       };
-      var plotHeight = 225 - margin.top - margin.bottom;
+      var plotHeight = 200 - margin.top - margin.bottom;
       var yScale = {
         domain: {
           min: 0,
@@ -33693,7 +33693,7 @@
         var normalized = (value16 - yScale.domain.min) / domainSpan;
         return yScale.range.min + normalized * rangeSpan;
       };
-      var plotWidth = 300 - margin.left - margin.right;
+      var plotWidth = 400 - margin.left - margin.right;
       var xScale = {
         domain: {
           min: 0,
@@ -33710,7 +33710,7 @@
         var normalized = (value16 - xScale.domain.min) / domainSpan;
         return xScale.range.min + normalized * rangeSpan;
       };
-      var tree3 = withChild(named2(SVG.value)("svg")([width32(300), height32(225), viewBox26("0 0 " + (show51(300) + (" " + show51(225)))), id_18("parabola-with-axes-svg"), class_27("tree-api-example")]))(withChildren(named2(Group2.value)("plot-area")([transform13("translate(" + (show51(margin.left) + ("," + (show51(margin.top) + ")")))), class_27("plot-area")]))([withChild(named2(Group2.value)("x-axis")([transform13("translate(0," + (show51(plotHeight) + ")")), class_27("x-axis")]))(renderAxis(axisBottom(xScale))), withChild(named2(Group2.value)("y-axis")([class_27("y-axis")]))(renderAxis(axisLeft(yScale))), joinData("circles")("circle")(parabolaData2)(function(d16) {
+      var tree3 = withChild(named2(SVG.value)("svg")([width32(400), height32(200), viewBox26("0 0 " + (show51(400) + (" " + show51(200)))), id_18("parabola-with-axes-svg"), class_27("tree-api-example")]))(withChildren(named2(Group2.value)("plot-area")([transform13("translate(" + (show51(margin.left) + ("," + (show51(margin.top) + ")")))), class_27("plot-area")]))([withChild(named2(Group2.value)("x-axis")([transform13("translate(0," + (show51(plotHeight) + ")")), class_27("x-axis")]))(renderAxis(axisBottom(xScale))), withChild(named2(Group2.value)("y-axis")([class_27("y-axis")]))(renderAxis(axisLeft(yScale))), joinData("circles")("circle")(parabolaData2)(function(d16) {
         return elem4(Circle2.value)([cx25(scaleX2(d16.x)), cy25(scaleY2(d16.y)), radius22(5), fill30("green")]);
       })]));
       return bind51(renderTree42(container)(tree3))(function(selections) {
@@ -33780,8 +33780,8 @@
   }];
   var threeLittleCirclesColored = function(selector) {
     return runD3v2M(bind52(select25(selector))(function(container) {
-      var tree3 = withChild(named2(SVG.value)("svg")([width33(300), height33(150), viewBox27("0 0 300 150"), id_19("three-circles-colored-svg"), class_28("tree-api-example")]))(joinData("circles")("circle")(colorData)(function(d16) {
-        return elem4(Circle2.value)([cx26(75 + d16.index * 75), cy26(75), radius23(30), fill31(d16.color)]);
+      var tree3 = withChild(named2(SVG.value)("svg")([width33(400), height33(100), viewBox27("0 0 400 100"), id_19("three-circles-colored-svg"), class_28("tree-api-example")]))(joinData("circles")("circle")(colorData)(function(d16) {
+        return elem4(Circle2.value)([cx26(100 + d16.index * 100), cy26(50), radius23(25), fill31(d16.color)]);
       }));
       return bind52(renderTree43(container)(tree3))(function(selections) {
         return liftEffect31(function __do4() {
@@ -33847,8 +33847,8 @@
   }];
   var threeLittleCirclesGreen = function(selector) {
     return runD3v2M(bind53(select26(selector))(function(container) {
-      var tree3 = withChild(named2(SVG.value)("svg")([width34(300), height34(150), viewBox28("0 0 300 150"), id_20("three-circles-green-svg"), class_29("tree-api-example")]))(joinData("circles")("circle")(simpleData)(function(d16) {
-        return elem4(Circle2.value)([cx27(75 + d16.index * 75), cy27(75), radius24(30), fill32("green")]);
+      var tree3 = withChild(named2(SVG.value)("svg")([width34(400), height34(100), viewBox28("0 0 400 100"), id_20("three-circles-green-svg"), class_29("tree-api-example")]))(joinData("circles")("circle")(simpleData)(function(d16) {
+        return elem4(Circle2.value)([cx27(100 + d16.index * 100), cy27(50), radius24(25), fill32("green")]);
       }));
       return bind53(renderTree44(container)(tree3))(function(selections) {
         return liftEffect32(function __do4() {
