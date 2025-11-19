@@ -44,8 +44,9 @@ parabolaWithAxes selector = runD3v2M do
 
   -- Define dimensions and margins
   let margin = { top: 20.0, right: 20.0, bottom: 50.0, left: 60.0 }
-      svgWidth = 400.0
-      svgHeight = 300.0
+      -- Compact size for foundational example
+      svgWidth = 300.0
+      svgHeight = 225.0
       plotWidth = svgWidth - margin.left - margin.right
       plotHeight = svgHeight - margin.top - margin.bottom
 

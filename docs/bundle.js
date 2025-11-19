@@ -33445,7 +33445,7 @@
         bottom: 40,
         left: 50
       };
-      var plotHeight = 180 - margin.top - margin.bottom;
+      var plotHeight = 140 - margin.top - margin.bottom;
       var yScale = {
         domain: {
           min: 0,
@@ -33462,7 +33462,7 @@
         var normalized = (value16 - yScale.domain.min) / domainSpan;
         return yScale.range.min + normalized * rangeSpan;
       };
-      var plotWidth = 180 - margin.left - margin.right;
+      var plotWidth = 140 - margin.left - margin.right;
       var xScale = {
         domain: {
           min: 0,
@@ -33485,7 +33485,7 @@
           return 0;
         }
         ;
-        return 180 + 20;
+        return 140 + 20;
       };
       var getPlotY = function(idx) {
         var $49 = idx < 2;
@@ -33493,17 +33493,17 @@
           return 0;
         }
         ;
-        return 180 + 20;
+        return 140 + 20;
       };
       var buildPlot = function(idx) {
         return function(dataset) {
-          return withChildren(named2(Group2.value)("plot-" + show122(idx))([transform12("translate(" + (show49(getPlotX(idx)) + ("," + (show49(getPlotY(idx)) + ")")))), class_25("anscombe-plot")]))([elem4(Text3.value)([x33(180 / 2), y33(10), textAnchor11("middle"), class_25("plot-title"), textContent13(dataset.name)]), withChildren(named2(Group2.value)("plot-area")([transform12("translate(" + (show49(margin.left) + ("," + (show49(margin.top) + ")"))))]))([withChild(named2(Group2.value)("x-axis")([transform12("translate(0," + (show49(plotHeight) + ")"))]))(renderAxis(axisBottom(xScale))), withChild(named2(Group2.value)("y-axis")([]))(renderAxis(axisLeft(yScale))), joinData("points-" + show122(idx))("circle")(dataset.data)(function(d16) {
+          return withChildren(named2(Group2.value)("plot-" + show122(idx))([transform12("translate(" + (show49(getPlotX(idx)) + ("," + (show49(getPlotY(idx)) + ")")))), class_25("anscombe-plot")]))([elem4(Text3.value)([x33(140 / 2), y33(10), textAnchor11("middle"), class_25("plot-title"), textContent13(dataset.name)]), withChildren(named2(Group2.value)("plot-area")([transform12("translate(" + (show49(margin.left) + ("," + (show49(margin.top) + ")"))))]))([withChild(named2(Group2.value)("x-axis")([transform12("translate(0," + (show49(plotHeight) + ")"))]))(renderAxis(axisBottom(xScale))), withChild(named2(Group2.value)("y-axis")([]))(renderAxis(axisLeft(yScale))), joinData("points-" + show122(idx))("circle")(dataset.data)(function(d16) {
             return elem4(Circle2.value)([cx23(scaleX2(d16.x)), cy23(scaleY2(d16.y)), radius20(3), fill28("steelblue")]);
-          })]), withChildren(named2(Group2.value)("stats")([transform12("translate(5," + (show49(180 - 70) + ")")), class_25("stats-table")]))([elem4(Text3.value)([x33(0), y33(0), class_25("stat-label"), textContent13("Mean X: " + formatNum(dataset.stats.meanX))]), elem4(Text3.value)([x33(0), y33(12), class_25("stat-label"), textContent13("Mean Y: " + formatNum(dataset.stats.meanY))]), elem4(Text3.value)([x33(0), y33(24), class_25("stat-label"), textContent13("Var X: " + formatNum(dataset.stats.varianceX))]), elem4(Text3.value)([x33(0), y33(36), class_25("stat-label"), textContent13("Var Y: " + formatNum(dataset.stats.varianceY))]), elem4(Text3.value)([x33(0), y33(48), class_25("stat-label"), textContent13("Corr: " + formatNum(dataset.stats.correlation))])])]);
+          })]), withChildren(named2(Group2.value)("stats")([transform12("translate(5," + (show49(140 - 70) + ")")), class_25("stats-table")]))([elem4(Text3.value)([x33(0), y33(0), class_25("stat-label"), textContent13("Mean X: " + formatNum(dataset.stats.meanX))]), elem4(Text3.value)([x33(0), y33(12), class_25("stat-label"), textContent13("Mean Y: " + formatNum(dataset.stats.meanY))]), elem4(Text3.value)([x33(0), y33(24), class_25("stat-label"), textContent13("Var X: " + formatNum(dataset.stats.varianceX))]), elem4(Text3.value)([x33(0), y33(36), class_25("stat-label"), textContent13("Var Y: " + formatNum(dataset.stats.varianceY))]), elem4(Text3.value)([x33(0), y33(48), class_25("stat-label"), textContent13("Corr: " + formatNum(dataset.stats.correlation))])])]);
         };
       };
-      var svgWidth = 180 * 2 + 20;
-      var svgHeight = 180 * 2 + 20;
+      var svgWidth = 140 * 2 + 20;
+      var svgHeight = 140 * 2 + 20;
       var emptyDataset = {
         name: "Empty",
         data: [],
@@ -33581,15 +33581,15 @@
   })();
   var parabolaNoAxes = function(selector) {
     return runD3v2M(bind50(select23(selector))(function(container) {
-      var plotHeight = 300 - 2 * 40;
-      var plotWidth = 400 - 2 * 40;
+      var plotHeight = 225 - 2 * 30;
+      var plotWidth = 300 - 2 * 30;
       var scaleX2 = function(x45) {
-        return 40 + x45 / 9 * plotWidth;
+        return 30 + x45 / 9 * plotWidth;
       };
       var scaleY2 = function(y46) {
-        return 300 - 40 - y46 / 81 * plotHeight;
+        return 225 - 30 - y46 / 81 * plotHeight;
       };
-      var tree3 = withChild(named2(SVG.value)("svg")([width31(400), height31(300), viewBox25("0 0 " + (show50(400) + (" " + show50(300)))), id_17("parabola-no-axes-svg"), class_26("tree-api-example")]))(joinData("circles")("circle")(parabolaData)(function(d16) {
+      var tree3 = withChild(named2(SVG.value)("svg")([width31(300), height31(225), viewBox25("0 0 " + (show50(300) + (" " + show50(225)))), id_17("parabola-no-axes-svg"), class_26("tree-api-example")]))(joinData("circles")("circle")(parabolaData)(function(d16) {
         return elem4(Circle2.value)([cx24(scaleX2(d16.x)), cy24(scaleY2(d16.y)), radius21(5), fill29("green")]);
       }));
       return bind50(renderTree41(container)(tree3))(function(selections) {
@@ -33665,7 +33665,7 @@
         bottom: 50,
         left: 60
       };
-      var plotHeight = 300 - margin.top - margin.bottom;
+      var plotHeight = 225 - margin.top - margin.bottom;
       var yScale = {
         domain: {
           min: 0,
@@ -33682,7 +33682,7 @@
         var normalized = (value16 - yScale.domain.min) / domainSpan;
         return yScale.range.min + normalized * rangeSpan;
       };
-      var plotWidth = 400 - margin.left - margin.right;
+      var plotWidth = 300 - margin.left - margin.right;
       var xScale = {
         domain: {
           min: 0,
@@ -33699,7 +33699,7 @@
         var normalized = (value16 - xScale.domain.min) / domainSpan;
         return xScale.range.min + normalized * rangeSpan;
       };
-      var tree3 = withChild(named2(SVG.value)("svg")([width32(400), height32(300), viewBox26("0 0 " + (show51(400) + (" " + show51(300)))), id_18("parabola-with-axes-svg"), class_27("tree-api-example")]))(withChildren(named2(Group2.value)("plot-area")([transform13("translate(" + (show51(margin.left) + ("," + (show51(margin.top) + ")")))), class_27("plot-area")]))([withChild(named2(Group2.value)("x-axis")([transform13("translate(0," + (show51(plotHeight) + ")")), class_27("x-axis")]))(renderAxis(axisBottom(xScale))), withChild(named2(Group2.value)("y-axis")([class_27("y-axis")]))(renderAxis(axisLeft(yScale))), joinData("circles")("circle")(parabolaData2)(function(d16) {
+      var tree3 = withChild(named2(SVG.value)("svg")([width32(300), height32(225), viewBox26("0 0 " + (show51(300) + (" " + show51(225)))), id_18("parabola-with-axes-svg"), class_27("tree-api-example")]))(withChildren(named2(Group2.value)("plot-area")([transform13("translate(" + (show51(margin.left) + ("," + (show51(margin.top) + ")")))), class_27("plot-area")]))([withChild(named2(Group2.value)("x-axis")([transform13("translate(0," + (show51(plotHeight) + ")")), class_27("x-axis")]))(renderAxis(axisBottom(xScale))), withChild(named2(Group2.value)("y-axis")([class_27("y-axis")]))(renderAxis(axisLeft(yScale))), joinData("circles")("circle")(parabolaData2)(function(d16) {
         return elem4(Circle2.value)([cx25(scaleX2(d16.x)), cy25(scaleY2(d16.y)), radius22(5), fill30("green")]);
       })]));
       return bind51(renderTree42(container)(tree3))(function(selections) {
@@ -33719,7 +33719,7 @@
               return log2("\u2717 Missing circles")();
             }
             ;
-            throw new Error("Failed pattern match at D3.Viz.TreeAPI.ParabolaWithAxes (line 118, column 5 - line 120, column 49): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at D3.Viz.TreeAPI.ParabolaWithAxes (line 119, column 5 - line 121, column 49): " + [v.constructor.name]);
           })();
           log2("")();
           log2("Key concepts introduced:")();
@@ -33769,8 +33769,8 @@
   }];
   var threeLittleCirclesColored = function(selector) {
     return runD3v2M(bind52(select25(selector))(function(container) {
-      var tree3 = withChild(named2(SVG.value)("svg")([width33(400), height33(200), viewBox27("0 0 400 200"), id_19("three-circles-colored-svg"), class_28("tree-api-example")]))(joinData("circles")("circle")(colorData)(function(d16) {
-        return elem4(Circle2.value)([cx26(100 + d16.index * 100), cy26(100), radius23(40), fill31(d16.color)]);
+      var tree3 = withChild(named2(SVG.value)("svg")([width33(300), height33(150), viewBox27("0 0 300 150"), id_19("three-circles-colored-svg"), class_28("tree-api-example")]))(joinData("circles")("circle")(colorData)(function(d16) {
+        return elem4(Circle2.value)([cx26(75 + d16.index * 75), cy26(75), radius23(30), fill31(d16.color)]);
       }));
       return bind52(renderTree43(container)(tree3))(function(selections) {
         return liftEffect31(function __do4() {
@@ -33789,7 +33789,7 @@
               return log2("\u2717 Missing circles")();
             }
             ;
-            throw new Error("Failed pattern match at D3.Viz.TreeAPI.ThreeLittleCirclesColored (line 70, column 5 - line 72, column 49): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at D3.Viz.TreeAPI.ThreeLittleCirclesColored (line 71, column 5 - line 73, column 49): " + [v.constructor.name]);
           })();
           log2("")();
           log2("The key concept: Attributes can be FUNCTIONS of the data.")();
@@ -33836,8 +33836,8 @@
   }];
   var threeLittleCirclesGreen = function(selector) {
     return runD3v2M(bind53(select26(selector))(function(container) {
-      var tree3 = withChild(named2(SVG.value)("svg")([width34(400), height34(200), viewBox28("0 0 400 200"), id_20("three-circles-green-svg"), class_29("tree-api-example")]))(joinData("circles")("circle")(simpleData)(function(d16) {
-        return elem4(Circle2.value)([cx27(100 + d16.index * 100), cy27(100), radius24(40), fill32("green")]);
+      var tree3 = withChild(named2(SVG.value)("svg")([width34(300), height34(150), viewBox28("0 0 300 150"), id_20("three-circles-green-svg"), class_29("tree-api-example")]))(joinData("circles")("circle")(simpleData)(function(d16) {
+        return elem4(Circle2.value)([cx27(75 + d16.index * 75), cy27(75), radius24(30), fill32("green")]);
       }));
       return bind53(renderTree44(container)(tree3))(function(selections) {
         return liftEffect32(function __do4() {
@@ -33856,7 +33856,7 @@
               return log2("\u2717 Missing circles")();
             }
             ;
-            throw new Error("Failed pattern match at D3.Viz.TreeAPI.ThreeLittleCirclesGreen (line 69, column 5 - line 71, column 49): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at D3.Viz.TreeAPI.ThreeLittleCirclesGreen (line 70, column 5 - line 72, column 49): " + [v.constructor.name]);
           })();
           log2("")();
           log2("The key concept: one circle per datum, positioned by index.")();

@@ -136,7 +136,8 @@ anscombesQuartet selector = runD3v2M do
   container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
 
   -- Layout parameters
-  let plotSize = 180.0
+  -- Compact size for foundational example
+  let plotSize = 140.0
       margin = { top: 20.0, right: 20.0, bottom: 40.0, left: 50.0 }
       plotWidth = plotSize - margin.left - margin.right
       plotHeight = plotSize - margin.top - margin.bottom

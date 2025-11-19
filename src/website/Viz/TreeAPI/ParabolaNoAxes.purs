@@ -42,10 +42,10 @@ parabolaNoAxes selector = runD3v2M do
 
   -- We need to scale our data to fit the SVG
   -- Data x range: [0, 9], y range: [0, 81]
-  -- SVG: 400×300, with padding
-  let padding = 40.0
-      svgWidth = 400.0
-      svgHeight = 300.0
+  -- Compact size for foundational example
+  let padding = 30.0
+      svgWidth = 300.0
+      svgHeight = 225.0
       plotWidth = svgWidth - (2.0 * padding)
       plotHeight = svgHeight - (2.0 * padding)
 
