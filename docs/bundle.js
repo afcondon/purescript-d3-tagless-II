@@ -45532,7 +45532,7 @@
         focusX: d16.focusX,
         focusY: d16.focusY,
         r: d16.r,
-        x: treeXY.x,
+        x: treeXY.y,
         y: 0,
         fx: nullImpl,
         fy: nullImpl
@@ -45544,8 +45544,8 @@
   var treeNodesToTreeXY_H = function(nodes) {
     var setXYtoTreeXY = function(d16) {
       var treeXY = fromMaybe({
-        x: d16.x,
-        y: d16.y
+        x: d16.y,
+        y: d16.x
       })(toMaybe(d16.treeXY));
       return {
         vx: d16.vx,
@@ -45570,8 +45570,8 @@
         focusY: d16.focusY,
         r: d16.r,
         treeXY: notNull(treeXY),
-        x: treeXY.x,
-        y: treeXY.y
+        x: treeXY.y,
+        y: treeXY.x
       };
     };
     var partitioned = partition(isUsedModule)(nodes);
@@ -45625,8 +45625,8 @@
   var treeNodesToTreeXY_V = function(nodes) {
     var setXYtoTreeXY = function(d16) {
       var treeXY = fromMaybe({
-        x: d16.y,
-        y: d16.x
+        x: d16.x,
+        y: d16.y
       })(toMaybe(d16.treeXY));
       return {
         vx: d16.vx,
@@ -45651,8 +45651,8 @@
         focusY: d16.focusY,
         r: d16.r,
         treeXY: notNull(treeXY),
-        x: treeXY.y,
-        y: treeXY.x
+        x: treeXY.x,
+        y: treeXY.y
       };
     };
     var partitioned = partition(isUsedModule)(nodes);

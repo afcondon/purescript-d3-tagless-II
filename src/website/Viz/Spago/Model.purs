@@ -321,8 +321,9 @@ treeNodesToTreeXY_H nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes
   where
     partitioned = partition isUsedModule nodes
     setXYtoTreeXY :: SpagoSimNode -> SpagoSimNode
-    setXYtoTreeXY d = d { treeXY = notNull treeXY, x = treeXY.x, y = treeXY.y }
-      where treeXY = fromMaybe { x: d.x, y: d.y } $ toMaybe d.treeXY
+    -- Horizontal tree: swap D3's (breadth=x, depth=y) to screen (depth=x, breadth=y)
+    setXYtoTreeXY d = d { treeXY = notNull treeXY, x = treeXY.y, y = treeXY.x }
+      where treeXY = fromMaybe { x: d.y, y: d.x } $ toMaybe d.treeXY
 
 -- same as horizontal tree but uses x and y as polar coordinates, computes fx/fy from them
 treeNodesToTreeXY_R :: Array SpagoSimNode -> Array SpagoSimNode
@@ -342,24 +343,26 @@ treeNodesToTreeXY_R nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes
                   y = radius * sin angle
               in { x, y }
 
--- same as horizontal tree but reverses {x,y} and {fx,fy}
+-- Vertical tree uses D3's natural coordinates (breadth=x, depth=y)
 treeNodesToTreeXY_V :: Array SpagoSimNode -> Array SpagoSimNode
 treeNodesToTreeXY_V nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes)
   where
     partitioned = partition isUsedModule nodes
     setXYtoTreeXY :: SpagoSimNode -> SpagoSimNode
-    setXYtoTreeXY d = d { treeXY = notNull treeXY, x = treeXY.y, y = treeXY.x }
-      where treeXY = fromMaybe { x: d.y, y: d.x } $ toMaybe d.treeXY
+    -- Vertical tree: use D3's coordinates directly (breadth=x, depth=y)
+    setXYtoTreeXY d = d { treeXY = notNull treeXY, x = treeXY.x, y = treeXY.y }
+      where treeXY = fromMaybe { x: d.x, y: d.y } $ toMaybe d.treeXY
 
--- | Set nodes to their tree X position with Y at 0 (for swarm diagrams)
+-- | Set nodes to their tree depth position with Y at 0 (for swarm diagrams)
 -- | This creates a starting line for the swarm effect where nodes begin
--- | horizontally positioned and then spread vertically due to forces
+-- | horizontally positioned by tree depth and then spread vertically due to forces
 treeNodesToSwarmStart :: Array SpagoSimNode -> Array SpagoSimNode
 treeNodesToSwarmStart nodes = partitioned.no <> (setSwarmStart <$> partitioned.yes)
   where
     partitioned = partition isUsedModule nodes
     setSwarmStart :: SpagoSimNode -> SpagoSimNode
-    setSwarmStart d = d { x = treeXY.x, y = 0.0, fx = null, fy = null }
+    -- Use treeXY.y (depth) for x position, since D3 tree has depth on y-axis
+    setSwarmStart d = d { x = treeXY.y, y = 0.0, fx = null, fy = null }
       where treeXY = fromMaybe { x: d.x, y: d.y } $ toMaybe d.treeXY
 
 fixNamedNodeTo :: Label -> PointXY -> Array SpagoSimNode -> Array SpagoSimNode
