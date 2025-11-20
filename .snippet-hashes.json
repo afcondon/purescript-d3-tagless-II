@@ -11,5 +11,16 @@
   "ScatterPlotQuartet": "d8be773a",
   "parabolaDatum": "89f3047d",
   "parabolaUnsafe": "e50fbd78",
-  "parabolaDraw": "f12aa9a1"
+  "parabolaDraw": "f12aa9a1",
+  "threeLittleCircles": "17e7e018",
+  "threeLittleCirclesTransition": "f5f7d8f3",
+  "simpleTree": "63ffdc8e",
+  "nestedElements": "8c714de9",
+  "barChart": "3aaac4b9",
+  "scatterPlot": "5ac2f19b",
+  "lineChart": "7ee799d5",
+  "groupedBarChart": "74777634",
+  "treeViz": "513dbe6f",
+  "threeLittleDimensions": "f2582544",
+  "lesMisTree": "ac1160ae"
 }

@@ -2,6 +2,7 @@ module Component.Example where
 
 import Prelude
 
+import CodeSnippets (getSnippet)
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
@@ -10,6 +11,18 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Website.Types (Route(..))
+
+-- SNIPPET: threeLittleCircles src/website/Viz/TreeAPI/ThreeLittleCircles.purs 25-62
+-- SNIPPET: threeLittleCirclesTransition src/website/Viz/TreeAPI/ThreeLittleCirclesTransition.purs 112-150
+-- SNIPPET: simpleTree src/website/Viz/TreeAPI/SimpleTreeExample.purs 28-45
+-- SNIPPET: nestedElements src/website/Viz/TreeAPI/NestedElementsExample.purs 25-105
+-- SNIPPET: barChart src/website/Viz/TreeAPI/BarChartExample.purs 65-157
+-- SNIPPET: scatterPlot src/website/Viz/TreeAPI/ScatterPlotExample.purs 64-113
+-- SNIPPET: lineChart src/website/Viz/TreeAPI/LineChartExample.purs 78-121
+-- SNIPPET: groupedBarChart src/website/Viz/TreeAPI/GroupedBarChartExample.purs 134-240
+-- SNIPPET: treeViz src/website/Viz/TreeAPI/TreeViz.purs 54-141
+-- SNIPPET: threeLittleDimensions src/website/Viz/TreeAPI/ThreeLittleDimensionsExample.purs 27-54
+-- SNIPPET: lesMisTree src/website/Viz/TreeAPI/LesMisTreeExample.purs 104-268
 
 -- Import TreeAPI examples
 import D3.Viz.TreeAPI.ThreeLittleCircles as ThreeLittleCircles
@@ -279,110 +292,18 @@ getModuleName = case _ of
   "lesmis-force" -> "LesMisTreeExample"
   _ -> "Unknown"
 
--- | Get example code summary (placeholder showing key concepts)
+-- | Get example code summary from extracted snippets
 getExampleCodeSummary :: String -> String
 getExampleCodeSummary = case _ of
-  "three-little-circles" -> """
--- Three Little Circles: Basic data join
-circleData = [
-  { x: 100.0, y: 100.0, r: 20.0, color: "red" },
-  { x: 200.0, y: 100.0, r: 20.0, color: "green" },
-  { x: 300.0, y: 100.0, r: 20.0, color: "blue" }
-]
-
-tree = named SVG "svg" [...] `withChild`
-  (joinData "circles" "circle" circleData $ \\d ->
-    elem Circle
-      [ cx d.x, cy d.y, radius d.r, fill d.color ])
-
-selections <- renderTree container tree
-"""
-
-  "bar-chart" -> """
--- Bar Chart: Data-driven rectangles with scaling
-dataPoints = [
-  { name: "Jan", value: 30.0 },
-  { name: "Feb", value: 50.0 },
-  ...
-]
-
-let yScale val = iHeight - (val * iHeight / maxValue)
-    barWidth = iWidth / toNumber (length dataPoints)
-
-tree = named SVG "svg" [...] `withChild`
-  (joinData "bars" "rect" dataPoints $ \\point ->
-    elem Rect
-      [ x (\\i -> toNumber i * barWidth)
-      , y (yScale point.value)
-      , width barWidth
-      , height (\\_ i -> iHeight - yScale (unsafeIndex dataPoints i).value)
-      , fill "#4a90e2"
-      ])
-"""
-
-  "nested-elements" -> """
--- Nested Elements: Multi-level structure
-tree = named SVG "svg" [...] `withChild`
-  (named Group "mainGroup" [...] `withChildren`
-    [ named Group "node1" [...] `withChildren`
-        [ named Circle "circle1" [cx 100.0, cy 100.0, radius 30.0]
-        , named Text "label1" [x 100.0, y 150.0, textContent "Node 1"]
-        ]
-    , named Group "node2" [...] `withChildren`
-        [ named Circle "circle2" [cx 250.0, cy 100.0, radius 30.0]
-        , named Text "label2" [x 250.0, y 150.0, textContent "Node 2"]
-        ]
-    ])
-"""
-
-  "grouped-bar-chart" -> """
--- Grouped Bar Chart: Nested joins for multiple series
-let stateGroups = groupByState data
-    ages = getAges data
-
-barsTree = nestedJoin "stateGroups" "g" stateGroups (_.bars) $ \\bar ->
-  let xPos = stateIdx * groupWidth + ageIdx * barWidth
-      yPos = yScale bar.population
-  in elem Rect
-      [ x xPos, y yPos
-      , width barWidth
-      , height (iHeight - yPos)
-      , fill (colorForAge bar.age)
-      ]
-"""
-
-  "simple-hierarchy" -> """
--- Tree Layout: Pure PureScript hierarchy with links and nodes
-let positioned = tree config hierarchyData
-    nodes = Array.fromFoldable positioned
-    links = makeLinks positioned
-
-tree = named SVG "svg" [...] `withChildren`
-  [ named Group "linksGroup" [...] `withChild`
-      (joinData "links" "path" links $ \\link ->
-        elem Path [d (linkPath link), ...])
-  , named Group "nodesGroup" [...] `withChild`
-      (joinData "nodes" "g" nodes $ \\node ->
-        named Group ("node-" <> node.name) [...]
-          `withChildren`
-            [ elem Circle [cx node.x, cy node.y, ...]
-            , elem Text [textContent node.name, ...]
-            ])
-  ]
-"""
-
-  "three-little-dimensions" -> """
--- Three Little Dimensions: Nested data (2D array → table)
-let matrixData = [[1,2,3],[4,5,6],[7,8,9]]
-
-tree = named Table "table" [...] `withChild`
-  (nestedJoin "rows" "tr" matrixData identity $ \\cellValue ->
-    elem Td [textContent (show cellValue)])
-
--- nestedJoin decomposes:
--- - Outer type: Array Int (a row)
--- - Inner type: Int (a cell value)
--- - Creates: table rows → table cells
-"""
-
+  "three-little-circles" -> getSnippet "threeLittleCircles"
+  "three-circles-transition" -> getSnippet "threeLittleCirclesTransition"
+  "simple-tree" -> getSnippet "simpleTree"
+  "nested-elements" -> getSnippet "nestedElements"
+  "bar-chart" -> getSnippet "barChart"
+  "scatter-plot" -> getSnippet "scatterPlot"
+  "line-chart" -> getSnippet "lineChart"
+  "grouped-bar-chart" -> getSnippet "groupedBarChart"
+  "simple-hierarchy" -> getSnippet "treeViz"
+  "three-little-dimensions" -> getSnippet "threeLittleDimensions"
+  "lesmis-force" -> getSnippet "lesMisTree"
   _ -> "-- See GitHub for full source code"

@@ -15,23 +15,184 @@ type SnippetInfo =
 
 -- ** Snippet Content Constants **
 
+snippet_barChart_content :: String
+snippet_barChart_content = "barChart :: Effect Unit\nbarChart = runD3v2M do\n  container <- select \"#viz\" :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  let dims = defaultDims\n  let iWidth = innerWidth dims\n  let iHeight = innerHeight dims\n\n  -- Calculate data extents\n  let yValues = map _.y sampleData\n  let minY = 0.0  -- Start bars from zero\n  let maxY = fromMaybe 100.0 $ maximum yValues\n\n  -- Calculate bar width (80% of available space per bar)\n  let numBars = length sampleData\n  let barWidth = if numBars > 0 then (iWidth / (Int.toNumber numBars)) * 0.8 else 0.0\n\n  -- KEY: Create scales to map data values → pixel positions\n  -- Scales are the bridge between data space and visual space\n  let xScale :: Scale\n      xScale =\n        { domain: { min: 1.0, max: Int.toNumber numBars }  -- Data range\n        , range: { min: 0.0, max: iWidth }                  -- Pixel range\n        }\n\n  let yScale :: Scale\n      yScale =\n        { domain: { min: minY, max: maxY }    -- Data range (0 to max value)\n        , range: { min: iHeight, max: 0.0 }   -- Pixel range (inverted for SVG coords)\n        }\n\n  -- Create axes\n  let xAxis = axisBottom xScale\n  let yAxis = axisLeft yScale\n\n  -- First, render the SVG container with axes (datum type: Unit)\n  let axesTree :: Tree Unit\n      axesTree =\n        T.named SVG \"svg\"\n          [ width dims.width\n          , height dims.height\n          , viewBox (\"0 0 \" <> show dims.width <> \" \" <> show dims.height)\n          , class_ \"bar-chart-tree\"\n          ]\n          `T.withChild`\n            (T.named Group \"chartGroup\"\n              [ class_ \"chart-content\"\n              , transform (\"translate(\" <> show dims.marginLeft <> \",\" <> show dims.marginTop <> \")\")\n              ]\n              `T.withChildren`\n                [ -- X axis\n                  T.named Group \"xAxis\"\n                    [ transform (\"translate(0,\" <> show iHeight <> \")\")\n                    , class_ \"x-axis\"\n                    ]\n                    `T.withChild`\n                      renderAxis xAxis\n                , -- Y axis\n                  T.named Group \"yAxis\"\n                    [ class_ \"y-axis\"\n                    ]\n                    `T.withChild`\n                      renderAxis yAxis\n                ])\n\n  -- Render axes first (underlaying)\n  axesSelections <- renderTree container axesTree\n\n  -- KEY: Reselect the chartGroup for layered rendering\n  -- This allows us to render bars on top of axes\n  chartGroupSel <- liftEffect $ reselectD3v2 \"chartGroup\" axesSelections\n\n  -- KEY: Data join creates one rect per data point\n  let barsTree :: Tree DataPoint\n      barsTree =\n        T.joinData \"bars\" \"rect\" sampleData $ \\point ->\n          -- Calculate bar position and dimensions from data\n          let xPos = (point.x - 1.0) * (iWidth / (Int.toNumber numBars)) + ((iWidth / (Int.toNumber numBars)) - barWidth) / 2.0\n              yPos = iHeight - ((point.y - minY) / (maxY - minY) * iHeight)  -- Manual scale calculation\n              barHeight = iHeight - yPos  -- Bar grows from baseline\n          in T.elem Rect\n            [ x xPos          -- Horizontal position\n            , y yPos          -- Top of bar (SVG coords from top-left)\n            , width barWidth  -- Bar width\n            , height barHeight  -- Bar height (grows downward in SVG)\n            , fill \"#4a90e2\"\n            , stroke \"#357abd\"\n            , strokeWidth 1.0\n            , class_ \"bar\"\n            ]\n\n  -- Render bars into the chart group (overlaying)\n  barsSelections <- renderTree chartGroupSel barsTree"
 
+snippet_groupedBarChart_content :: String
+snippet_groupedBarChart_content = "drawGroupedBarChart :: String -> Array GroupedBarData -> Effect Unit\ndrawGroupedBarChart selector populationData = runD3v2M do\n  container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  let dims = defaultDims\n  let iWidth = innerWidth dims\n  let iHeight = innerHeight dims\n\n  -- Group data by state\n  let stateGroups = groupByState populationData\n  let ages = getAges populationData\n  let numStates = Array.length stateGroups\n  let numAges = Array.length ages\n\n  -- Calculate bar dimensions\n  let groupWidth = iWidth / Int.toNumber numStates\n  let barWidth = groupWidth / Int.toNumber numAges * 0.9\n\n  -- Calculate scales\n  let populationValues = map _.population populationData\n  let maxPop = fromMaybe 6000000.0 $ maximum populationValues\n\n  -- X scale maps state index to position\n  let xScale :: Scale\n      xScale =\n        { domain: { min: 0.0, max: Int.toNumber numStates }\n        , range: { min: 0.0, max: iWidth }\n        }\n\n  -- Y scale maps population to height\n  let yScale :: Scale\n      yScale =\n        { domain: { min: 0.0, max: maxPop }\n        , range: { min: iHeight, max: 0.0 }\n        }\n\n  -- Create axes\n  let xAxis = axisBottom xScale\n  let yAxis = axisLeft yScale\n\n  -- First tree: SVG container with axes\n  let axesTree :: T.Tree Unit\n      axesTree =\n        T.named SVG \"svg\"\n          [ width dims.width\n          , height dims.height\n          , viewBox (\"0 0 \" <> show dims.width <> \" \" <> show dims.height)\n          , class_ \"grouped-bar-chart\"\n          ]\n          `T.withChild`\n            (T.named Group \"chartGroup\"\n              [ class_ \"chart-content\"\n              , transform (\"translate(\" <> show dims.marginLeft <> \",\" <> show dims.marginTop <> \")\")\n              ]\n              `T.withChildren`\n                [ -- X axis\n                  T.named Group \"xAxis\"\n                    [ transform (\"translate(0,\" <> show iHeight <> \")\")\n                    , class_ \"x-axis\"\n                    ]\n                    `T.withChild`\n                      renderAxis xAxis\n                , -- Y axis\n                  T.named Group \"yAxis\"\n                    [ class_ \"y-axis\"\n                    ]\n                    `T.withChild`\n                      renderAxis yAxis\n                ])\n\n  -- Render axes\n  axesSelections <- renderTree container axesTree\n\n  -- Second tree: Grouped bars\n  -- Extract the chartGroup selection for the second render\n  chartGroupSel <- liftEffect $ reselectD3v2 \"chartGroup\" axesSelections\n\n  -- Use nestedJoin to create state groups → bars\n  let barsTree :: T.Tree StateGroup\n      barsTree =\n        T.nestedJoin \"stateGroups\" \"g\" stateGroups (_.bars) $ \\bar ->\n          -- bar :: GroupedBarData\n          -- Calculate position for this bar\n          let\n            -- Find which state this bar belongs to\n            stateIdx = fromMaybe 0 $ findIndex (\\g -> g.state == bar.state) stateGroups\n            -- Find which age group this is\n            ageIdx = fromMaybe 0 $ findIndex (\\a -> a == bar.age) ages\n\n            -- X position: state position + age offset\n            xPos = Int.toNumber stateIdx * groupWidth + Int.toNumber ageIdx * barWidth\n\n            -- Y position and height from population\n            yPos = iHeight - ((bar.population / maxPop) * iHeight)\n            barHeight = (bar.population / maxPop) * iHeight\n          in\n            T.elem Rect\n              [ x xPos\n              , y yPos\n              , width barWidth\n              , height barHeight\n              , fill (colorForAge bar.age)\n              , class_ \"bar\"\n              ]\n\n  -- Render bars\n  barsSelections <- renderTree chartGroupSel barsTree"
+
+snippet_lesMisTree_content :: String
+snippet_lesMisTree_content = "drawLesMisTree :: forall row.\n  Array (Force LesMisSimNode) ->\n  Set.Set String ->\n  LesMisRawModel ->\n  String ->\n  D3v2SimM row LesMisSimNode Unit\ndrawLesMisTree forcesArray activeForces model containerSelector = do\n  liftEffect $ Console.log $ \"=== Drawing LesMis with Tree API ===\"\n  liftEffect $ Console.log $ \"Model has \" <> show (Array.length model.nodes) <> \" nodes, \" <> show (Array.length model.links) <> \" links\"\n\n  -- Get window dimensions\n  (Tuple w h) <- liftEffect getWindowWidthHeight\n  liftEffect $ Console.log $ \"Window dimensions: \" <> show w <> \" x \" <> show h\n\n  -- Select container\n  container <- select containerSelector :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  -- Apply phylotaxis initial positions\n  let nodesWithPositions = setPhyllotaxisPositions model.nodes\n\n  -- Initialize simulation first (so we have node/link data with positions)\n  liftEffect $ Console.log \"Initializing simulation...\"\n  { nodes: nodesInSim, links: linksInSim } <- init\n    { nodes: nodesWithPositions\n    , links: model.links\n    , forces: forcesArray\n    , activeForces: activeForces\n    , config:\n        { alpha: 1.0\n        , alphaTarget: 0.0\n        , alphaMin: 0.001\n        , alphaDecay: 0.0228\n        , velocityDecay: 0.4\n        }\n    , keyFn: keyIsID_\n    , ticks: Map.empty\n    }\n\n  liftEffect $ Console.log $ \"Simulation initialized with \" <> show (Array.length nodesInSim) <> \" nodes, \" <> show (Array.length linksInSim) <> \" links\"\n\n  -- Wrap links with indices for data join\n  let indexedLinks = Array.mapWithIndex (\\i link -> IndexedLink { index: i, link }) linksInSim\n  liftEffect $ Console.log $ \"Created \" <> show (Array.length indexedLinks) <> \" indexed links\"\n\n  -- Declarative tree structure for force graph\n  let forceGraphTree :: T.Tree Unit\n      forceGraphTree =\n        T.named SVG \"svg\"\n          [ width w\n          , height h\n          , viewBox (show ((-w) / 2.0) <> \" \" <> show ((-h) / 2.0) <> \" \" <> show w <> \" \" <> show h)\n          , id_ \"lesmis-tree-svg\"\n          , class_ \"lesmis-tree\"\n          ]\n          `T.withChild`\n            (T.named Group \"zoomGroup\"\n              [ id_ \"zoom-group\"\n              , class_ \"zoom-group\"\n              ]\n              `T.withChildren`\n                [ -- Links group (structural, no data)\n                  T.named Group \"linksGroup\"\n                    [ id_ \"links\"\n                    , class_ \"links\"\n                    ]\n                , -- Nodes group (structural, no data)\n                  T.named Group \"nodesGroup\"\n                    [ id_ \"nodes\"\n                    , class_ \"nodes\"\n                    ]\n                ])\n\n  -- Render the structure tree\n  liftEffect $ Console.log \"Rendering structure tree...\"\n  selections <- renderTree container forceGraphTree\n  liftEffect $ Console.log $ \"Structure rendered, selections: \" <> show (Map.keys selections)\n\n  -- Extract the linksGroup and nodesGroup for rendering data\n  -- Use reselectD3v2 to convert from SBoundOwns Unit to SEmpty datumOut\n  linksGroupSel <- liftEffect $ reselectD3v2 \"linksGroup\" selections\n  nodesGroupSel <- liftEffect $ reselectD3v2 \"nodesGroup\" selections\n  liftEffect $ Console.log \"Extracted linksGroup and nodesGroup selections\"\n\n  -- Render links tree into linksGroup\n  let linksTree :: T.Tree IndexedLink\n      linksTree =\n        T.joinData \"linkElements\" \"line\" indexedLinks $ \\(IndexedLink il) ->\n          let link = unsafeCoerce il.link\n          in T.elem Line\n            [ x1 ((\\(_ :: IndexedLink) -> link.source.x) :: IndexedLink -> Number)\n            , y1 ((\\(_ :: IndexedLink) -> link.source.y) :: IndexedLink -> Number)\n            , x2 ((\\(_ :: IndexedLink) -> link.target.x) :: IndexedLink -> Number)\n            , y2 ((\\(_ :: IndexedLink) -> link.target.y) :: IndexedLink -> Number)\n            , strokeWidth ((\\(_ :: IndexedLink) -> sqrt link.value) :: IndexedLink -> Number)\n            , stroke ((\\(_ :: IndexedLink) -> d3SchemeCategory10N_ (toNumber link.target.group)) :: IndexedLink -> String)\n            ]\n\n  liftEffect $ Console.log $ \"Rendering \" <> show (Array.length indexedLinks) <> \" links into linksGroup...\"\n  linksSelections <- renderTree linksGroupSel linksTree\n  liftEffect $ Console.log $ \"Links rendered, selections: \" <> show (Map.keys linksSelections)\n\n  -- Render nodes tree into nodesGroup\n  let nodesTree :: T.Tree LesMisSimNode\n      nodesTree =\n        T.joinData \"nodeElements\" \"circle\" nodesInSim $ \\(d :: LesMisSimNode) ->\n          T.elem Circle\n            [ cx d.x\n            , cy d.y\n            , radius 5.0\n            , fill (d3SchemeCategory10N_ (toNumber d.group))\n            , stroke \"#fff\"\n            , strokeWidth 2.0\n            ]\n\n  liftEffect $ Console.log $ \"Rendering \" <> show (Array.length nodesInSim) <> \" nodes into nodesGroup...\"\n  nodesSelections <- renderTree nodesGroupSel nodesTree\n  liftEffect $ Console.log $ \"Nodes rendered, selections: \" <> show (Map.keys nodesSelections)\n\n  -- Extract final selections for behaviors\n  zoomGroupSel <- liftEffect $ reselectD3v2 \"zoomGroup\" selections\n  svgSel <- liftEffect $ reselectD3v2 \"svg\" selections\n\n  -- Extract bound selections for drag and tick\n  -- IMPORTANT: Must use `case` pattern matching, NOT `fromMaybe`, when default might throw!\n  --\n  -- ROOT CAUSE: PureScript is strict, so `fromMaybe (unsafeCrashWith \"error\") maybe_value`\n  -- evaluates unsafeCrashWith BEFORE calling fromMaybe (JavaScript evaluates all arguments\n  -- before calling functions). The crash happens even if maybe_value is Just!\n  --\n  -- Pattern matching with `case` is lazy in unevaluated branches, so the Nothing branch\n  -- only executes if we actually match Nothing. This is the correct pattern when the\n  -- default might throw an exception or have side effects.\n  let nodesSel :: D3v2Selection_ SBoundOwns Element LesMisSimNode\n      nodesSel = case Map.lookup \"nodeElements\" nodesSelections of\n        Just sel -> sel\n        Nothing -> unsafePartial $ unsafeCrashWith \"nodeElements not found\"\n\n  let linksSel :: D3v2Selection_ SBoundOwns Element IndexedLink\n      linksSel = case Map.lookup \"linkElements\" linksSelections of\n        Just sel -> sel\n        Nothing -> unsafePartial $ unsafeCrashWith \"linkElements not found\"\n\n  -- Attach behaviors\n  _ <- on (Drag defaultDrag) zoomGroupSel\n  _ <- on (Zoom $ defaultZoom (ScaleExtent 0.5 4.0) \"#zoom-group\") svgSel\n  _ <- on (Drag $ simulationDrag \"lesmis-tree\") nodesSel\n\n  -- Add tick functions to update positions\n  addTickFunction \"nodes\" $ Step nodesSel\n    [ cx (\\(d :: LesMisSimNode) -> d.x)\n    , cy (\\(d :: LesMisSimNode) -> d.y)\n    ]\n\n  addTickFunction \"links\" $ Step linksSel\n    [ x1 (\\(IndexedLink il) -> (unsafeCoerce il.link).source.x :: Number)\n    , y1 (\\(IndexedLink il) -> (unsafeCoerce il.link).source.y :: Number)\n    , x2 (\\(IndexedLink il) -> (unsafeCoerce il.link).target.x :: Number)\n    , y2 (\\(IndexedLink il) -> (unsafeCoerce il.link).target.y :: Number)\n    ]\n\n  -- Start the simulation\n  start\n\n  pure unit"
+
+snippet_lineChart_content :: String
+snippet_lineChart_content = "lineChart :: Effect Unit\nlineChart = runD3v2M do\n  container <- select \"#viz\" :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  let dims = defaultDims\n\n  -- Calculate data extents\n  let xValues = map _.x lineData\n  let yValues = map _.y lineData\n  let minX = fromMaybe 0.0 $ minimum xValues\n  let maxX = fromMaybe 10.0 $ maximum xValues\n  let minY = fromMaybe 0.0 $ minimum yValues\n  let maxY = fromMaybe 100.0 $ maximum yValues\n\n  -- Generate path data\n  let pathData = pointsToPath dims lineData minX maxX minY maxY\n\n  -- Define the tree structure\n  let tree :: Tree Unit\n      tree =\n        T.named SVG \"svg\"\n          [ width dims.width\n          , height dims.height\n          , viewBox (\"0 0 \" <> show dims.width <> \" \" <> show dims.height)\n          , class_ \"line-chart-tree\"\n          ]\n          `T.withChild`\n            (T.named Group \"chartGroup\"\n              [ class_ \"chart-content\"\n              , transform (\"translate(\" <> show dims.marginLeft <> \",\" <> show dims.marginTop <> \")\")\n              ]\n              `T.withChild`\n                -- Single path element for the line\n                (T.named Path \"line\"\n                  [ d pathData\n                  , fill \"none\"\n                  , stroke \"#2ecc71\"\n                  , strokeWidth 2.0\n                  , class_ \"line\"\n                  ]\n                ))\n\n  -- Render the tree\n  selections <- renderTree container tree"
+
+snippet_nestedElements_content :: String
+snippet_nestedElements_content = "testNestedElements :: Effect Unit\ntestNestedElements = runD3v2M do\n  container <- select \"#viz\" :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  -- Define a tree with MULTI-LEVEL NESTING\n  -- This is the pattern: Group → (Circle + Text)\n  let tree :: Tree Unit\n      tree =\n        T.named SVG \"svg\"\n          [ width 600.0\n          , height 400.0\n          , viewBox \"0 0 600 400\"\n          , id_ \"nested-example-svg\"\n          ]\n          `T.withChild`\n            (T.named Group \"mainGroup\" [class_ \"main-group\"]\n              `T.withChildren`\n                -- Multiple node groups, each with Circle + Text\n                [ -- Node 1\n                  T.named Group \"node1\"\n                    [ class_ \"node\"\n                    , transform \"translate(100, 100)\"\n                    ]\n                    `T.withChildren`\n                      [ T.named Circle \"node1Circle\"\n                          [ cx 0.0, cy 0.0\n                          , radius 25.0\n                          , fill \"steelblue\"\n                          , stroke \"white\"\n                          , strokeWidth 2.0\n                          ]\n                      , T.named Text \"node1Label\"\n                          [ x 0.0, y 40.0\n                          , textContent \"Node A\"\n                          , textAnchor \"middle\"\n                          , fontSize 14.0\n                          ]\n                      ]\n\n                , -- Node 2\n                  T.named Group \"node2\"\n                    [ class_ \"node\"\n                    , transform \"translate(300, 150)\"\n                    ]\n                    `T.withChildren`\n                      [ T.named Circle \"node2Circle\"\n                          [ cx 0.0, cy 0.0\n                          , radius 20.0\n                          , fill \"orange\"\n                          , stroke \"white\"\n                          , strokeWidth 2.0\n                          ]\n                      , T.named Text \"node2Label\"\n                          [ x 0.0, y 35.0\n                          , textContent \"Node B\"\n                          , textAnchor \"middle\"\n                          , fontSize 14.0\n                          ]\n                      ]\n\n                , -- Node 3\n                  T.named Group \"node3\"\n                    [ class_ \"node\"\n                    , transform \"translate(500, 100)\"\n                    ]\n                    `T.withChildren`\n                      [ T.named Circle \"node3Circle\"\n                          [ cx 0.0, cy 0.0\n                          , radius 30.0\n                          , fill \"green\"\n                          , stroke \"white\"\n                          , strokeWidth 2.0\n                          ]\n                      , T.named Text \"node3Label\"\n                          [ x 0.0, y 45.0\n                          , textContent \"Node C\"\n                          , textAnchor \"middle\"\n                          , fontSize 14.0\n                          ]\n                      ]\n                ])"
+
+snippet_scatterPlot_content :: String
+snippet_scatterPlot_content = "scatterPlot :: Effect Unit\nscatterPlot = runD3v2M do\n  container <- select \"#viz\" :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  let dims = defaultDims\n  let iWidth = innerWidth dims\n  let iHeight = innerHeight dims\n\n  -- Calculate data extents\n  let xValues = map _.x scatterData\n  let yValues = map _.y scatterData\n  let minX = fromMaybe 0.0 $ minimum xValues\n  let maxX = fromMaybe 100.0 $ maximum xValues\n  let minY = fromMaybe 0.0 $ minimum yValues\n  let maxY = fromMaybe 100.0 $ maximum yValues\n\n  -- Simple linear scale functions\n  let xScale val = ((val - minX) / (maxX - minX)) * iWidth\n  let yScale val = iHeight - ((val - minY) / (maxY - minY)) * iHeight\n\n  -- Define the tree structure\n  let tree :: Tree Point\n      tree =\n        T.named SVG \"svg\"\n          [ width dims.width\n          , height dims.height\n          , viewBox (\"0 0 \" <> show dims.width <> \" \" <> show dims.height)\n          , class_ \"scatter-plot-tree\"\n          ]\n          `T.withChild`\n            (T.named Group \"chartGroup\"\n              [ class_ \"chart-content\"\n              , transform (\"translate(\" <> show dims.marginLeft <> \",\" <> show dims.marginTop <> \")\")\n              ]\n              `T.withChild`\n                -- Data join for points\n                (joinData \"points\" \"circle\" scatterData $ \\point ->\n                  T.elem Circle\n                    [ cx (xScale point.x)\n                    , cy (yScale point.y)\n                    , radius 6.0\n                    , fill \"#e74c3c\"\n                    , opacity 0.7\n                    , class_ \"point\"\n                    ]\n                ))\n\n  -- Render the tree\n  selections <- renderTree container tree"
+
+snippet_simpleTree_content :: String
+snippet_simpleTree_content = "testSimpleTree :: Effect Unit\ntestSimpleTree = runD3v2M do\n  -- Select the container\n  container <- select \"#viz\" :: _  (D3v2Selection_ SEmpty Element Unit)\n\n  -- Define the tree structure using the declarative API\n  let tree :: Tree Unit\n      tree =\n        T.named SVG \"svg\" [width 800.0, height 600.0, viewBox \"0 0 800 600\", id_ \"simple-tree-svg\"]\n          `T.withChild`\n            (T.named Group \"container\" [class_ \"container\"]\n              `T.withChildren`\n                [ T.named Circle \"circle\" [cx 100.0, cy 100.0, radius 20.0, fill \"steelblue\"]\n                , T.named Text \"text\" [x 100.0, y 130.0, textContent \"Hello Tree API!\", textAnchor \"middle\"]\n                ])\n\n  -- Render the tree\n  selections <- renderTree container tree"
+
+snippet_threeLittleCircles_content :: String
+snippet_threeLittleCircles_content = "type CircleData =\n  { x :: Number\n  , y :: Number\n  , r :: Number\n  , color :: String\n  }\n\ncircleData :: Array CircleData\ncircleData =\n  [ { x: 100.0, y: 100.0, r: 40.0, color: \"red\" }\n  , { x: 200.0, y: 100.0, r: 30.0, color: \"green\" }\n  , { x: 300.0, y: 100.0, r: 50.0, color: \"blue\" }\n  ]\n\nthreeLittleCircles :: Effect Unit\nthreeLittleCircles = runD3v2M do\n  container <- select \"#viz\" :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  -- Define the tree with a DATA JOIN\n  -- Note: The datum type is CircleData because we're using joinData with CircleData\n  let tree :: Tree CircleData\n      tree =\n        T.named SVG \"svg\"\n          [ width 400.0\n          , height 200.0\n          , viewBox \"0 0 400 200\"\n          , id_ \"three-circles-svg\"\n          , class_ \"tree-api-example\"\n          ]\n          `T.withChild`\n            -- Here's the magic: joinData creates N copies of the template\n            (joinData \"circles\" \"circle\" circleData $ \\d ->\n              T.elem Circle\n                [ cx d.x\n                , cy d.y\n                , radius d.r\n                , fill d.color\n                ])"
+
+snippet_threeLittleCirclesTransition_content :: String
+snippet_threeLittleCirclesTransition_content = "threeLittleCirclesTransition :: String -> Effect { stateRef :: Ref.Ref CircleState, circlesSel :: D3v2Selection_ SBoundOwns Element CircleData }\nthreeLittleCirclesTransition selector = do\n  -- Create state ref - start with green circles\n  stateRef <- Ref.new StateGreen\n\n  runD3v2M do\n    container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)\n\n    -- Initial tree: three green circles in a row\n    let initialTree :: T.Tree CircleData\n        initialTree =\n          T.named SVG \"svg\"\n            [ width 400.0\n            , height 250.0\n            , viewBox \"0 0 400 250\"\n            , id_ \"three-circles-transition-tree\"\n            ]\n            `T.withChild`\n              (T.joinData \"circles\" \"circle\" [0, 1, 2] $ \\d ->\n                T.elem Circle\n                  [ fill \"#00ff00\"  -- Start green\n                  , cx (100.0 + toNumber d * 100.0)  -- Three in a row\n                  , cy 125.0\n                  , radius 40.0\n                  , fillOpacity 1.0\n                  ]\n              )\n\n    -- Render initial state\n    selections <- renderTree container initialTree\n\n    -- Extract the circles selection for transitions\n    let circlesSel = case Map.lookup \"circles\" selections of\n          Just sel -> sel\n          Nothing -> unsafePartial $ unsafeCrashWith \"circles selection not found\"\n\n    -- Return the state ref and selection so external button can trigger transition\n    pure { stateRef, circlesSel }"
+
+snippet_threeLittleDimensions_content :: String
+snippet_threeLittleDimensions_content = "threeLittleDimensions :: Effect Unit\nthreeLittleDimensions = runD3v2M do\n  container <- select \"#viz\" :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  -- The challenge: how to represent nested decomposition in a tree?\n  -- Outer datum type: Array Int (a row)\n  -- Inner datum type: Int (a cell value)\n\n  -- Approach: Use nestedJoin to handle datum type decomposition\n  -- Outer type: Array Int (a row)\n  -- Inner type: Int (a cell value)\n  let tree :: T.Tree (Array Int)\n      tree =\n        T.named Table \"table\"\n          [ class_ \"nested-data-table\" ]\n          `T.withChild`\n            -- nestedJoin handles the type change from Array Int → Int\n            -- identity is the decomposer: it just returns the row data as-is\n            (T.nestedJoin \"rows\" \"tr\" matrixData identity $ \\cellValue ->\n              -- cellValue :: Int (decomposed from Array Int)\n              T.elem Td\n                [ class_ \"table-cell\"\n                , textContent (show cellValue)\n                ]\n            )\n\n  -- Render the tree\n  selections <- renderTree container tree"
+
+snippet_treeViz_content :: String
+snippet_treeViz_content = "drawTree :: String -> Tree HierNode -> Effect Unit\ndrawTree selector flareTree = runD3v2M do\n  container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  let chartWidth = 800.0\n  let chartHeight = 600.0\n  let padding = 40.0\n\n  -- Apply Tree4 layout\n  let config = defaultTreeConfig\n        { size = { width: chartWidth - (2.0 * padding)\n                 , height: chartHeight - (2.0 * padding) } }\n  let positioned = tree config flareTree\n\n  -- Flatten to arrays\n  let nodes = Array.fromFoldable positioned\n  let links = makeLinks positioned\n\n  liftEffect $ Console.log $ \"Rendering \" <> show (Array.length nodes) <> \" nodes, \" <> show (Array.length links) <> \" links\"\n\n  -- First tree: SVG container with links (datum type: link data)\n  let linksTree :: T.Tree LinkDatum\n      linksTree =\n        T.named SVG \"svg\"\n          [ width chartWidth\n          , height chartHeight\n          , viewBox (\"0 0 \" <> show chartWidth <> \" \" <> show chartHeight)\n          , class_ \"simple-hierarchy-tree\"\n          ]\n          `T.withChild`\n            (T.named Group \"chartGroup\"\n              [ class_ \"tree-content\" ]\n              `T.withChild`\n                (T.named Group \"linksGroup\"\n                  [ class_ \"links\" ]\n                  `T.withChild`\n                    (T.joinData \"links\" \"path\" links $ \\link ->\n                      T.elem Path\n                        [ d (linkPath\n                            (link.source.x + padding)\n                            (link.source.y + padding)\n                            (link.target.x + padding)\n                            (link.target.y + padding))\n                        , fill \"none\"\n                        , stroke \"#999\"\n                        , strokeWidth 1.5\n                        , class_ \"link\"\n                        ]\n                    )\n                )\n            )\n\n  -- Render links first (underlaying)\n  linksSelections <- renderTree container linksTree\n\n  -- Second tree: Nodes on top (datum type: HierNode)\n  -- Reselect the chartGroup from rendered selections (not global CSS selector!)\n  chartGroupSel <- liftEffect $ reselectD3v2 \"chartGroup\" linksSelections\n\n  let nodesTree :: T.Tree HierNode\n      nodesTree =\n        T.named Group \"nodesGroup\"\n          [ class_ \"nodes\" ]\n          `T.withChild`\n            (T.joinData \"nodeGroups\" \"g\" nodes $ \\node ->\n              T.named Group (\"node-\" <> node.name)\n                [ class_ \"node\" ]\n                `T.withChildren`\n                  [ T.elem Circle\n                      [ cx (node.x + padding)\n                      , cy (node.y + padding)\n                      , radius 6.0\n                      , fill \"#69b3a2\"\n                      , stroke \"#fff\"\n                      , strokeWidth 2.0\n                      ]\n                  , T.elem Text\n                      [ x (node.x + padding + 10.0)\n                      , y (node.y + padding + 4.0)\n                      , textContent node.name\n                      , fontSize 12.0\n                      , textAnchor \"start\"\n                      ]\n                  ]\n            )\n\n  -- Render nodes on top (overlaying)\n  nodesSelections <- renderTree chartGroupSel nodesTree"
 
 -- | All available snippets
 snippets :: Array SnippetInfo
 snippets =
-  []
+  [ { name: "barChart"
+    , content: snippet_barChart_content
+    , source: "src/website/Viz/TreeAPI/BarChartExample.purs"
+    , lines: "65-157"
+    }
+  , { name: "groupedBarChart"
+    , content: snippet_groupedBarChart_content
+    , source: "src/website/Viz/TreeAPI/GroupedBarChartExample.purs"
+    , lines: "134-240"
+    }
+  , { name: "lesMisTree"
+    , content: snippet_lesMisTree_content
+    , source: "src/website/Viz/TreeAPI/LesMisTreeExample.purs"
+    , lines: "104-268"
+    }
+  , { name: "lineChart"
+    , content: snippet_lineChart_content
+    , source: "src/website/Viz/TreeAPI/LineChartExample.purs"
+    , lines: "78-121"
+    }
+  , { name: "nestedElements"
+    , content: snippet_nestedElements_content
+    , source: "src/website/Viz/TreeAPI/NestedElementsExample.purs"
+    , lines: "25-105"
+    }
+  , { name: "scatterPlot"
+    , content: snippet_scatterPlot_content
+    , source: "src/website/Viz/TreeAPI/ScatterPlotExample.purs"
+    , lines: "64-113"
+    }
+  , { name: "simpleTree"
+    , content: snippet_simpleTree_content
+    , source: "src/website/Viz/TreeAPI/SimpleTreeExample.purs"
+    , lines: "28-45"
+    }
+  , { name: "threeLittleCircles"
+    , content: snippet_threeLittleCircles_content
+    , source: "src/website/Viz/TreeAPI/ThreeLittleCircles.purs"
+    , lines: "25-62"
+    }
+  , { name: "threeLittleCirclesTransition"
+    , content: snippet_threeLittleCirclesTransition_content
+    , source: "src/website/Viz/TreeAPI/ThreeLittleCirclesTransition.purs"
+    , lines: "112-150"
+    }
+  , { name: "threeLittleDimensions"
+    , content: snippet_threeLittleDimensions_content
+    , source: "src/website/Viz/TreeAPI/ThreeLittleDimensionsExample.purs"
+    , lines: "27-54"
+    }
+  , { name: "treeViz"
+    , content: snippet_treeViz_content
+    , source: "src/website/Viz/TreeAPI/TreeViz.purs"
+    , lines: "54-141"
+    }
+  ]
 
 -- | Look up a snippet by name
 getSnippet :: String -> String
 getSnippet name = case name of
-
+  "barChart" -> snippet_barChart_content
+  "groupedBarChart" -> snippet_groupedBarChart_content
+  "lesMisTree" -> snippet_lesMisTree_content
+  "lineChart" -> snippet_lineChart_content
+  "nestedElements" -> snippet_nestedElements_content
+  "scatterPlot" -> snippet_scatterPlot_content
+  "simpleTree" -> snippet_simpleTree_content
+  "threeLittleCircles" -> snippet_threeLittleCircles_content
+  "threeLittleCirclesTransition" -> snippet_threeLittleCirclesTransition_content
+  "threeLittleDimensions" -> snippet_threeLittleDimensions_content
+  "treeViz" -> snippet_treeViz_content
   _ -> "Snippet not found: " <> name
 
 -- | Get snippet info by name
 getSnippetInfo :: String -> SnippetInfo
 getSnippetInfo name = case name of
-
+  "barChart" ->
+    { name: "barChart"
+    , content: snippet_barChart_content
+    , source: "src/website/Viz/TreeAPI/BarChartExample.purs"
+    , lines: "65-157"
+    }
+  "groupedBarChart" ->
+    { name: "groupedBarChart"
+    , content: snippet_groupedBarChart_content
+    , source: "src/website/Viz/TreeAPI/GroupedBarChartExample.purs"
+    , lines: "134-240"
+    }
+  "lesMisTree" ->
+    { name: "lesMisTree"
+    , content: snippet_lesMisTree_content
+    , source: "src/website/Viz/TreeAPI/LesMisTreeExample.purs"
+    , lines: "104-268"
+    }
+  "lineChart" ->
+    { name: "lineChart"
+    , content: snippet_lineChart_content
+    , source: "src/website/Viz/TreeAPI/LineChartExample.purs"
+    , lines: "78-121"
+    }
+  "nestedElements" ->
+    { name: "nestedElements"
+    , content: snippet_nestedElements_content
+    , source: "src/website/Viz/TreeAPI/NestedElementsExample.purs"
+    , lines: "25-105"
+    }
+  "scatterPlot" ->
+    { name: "scatterPlot"
+    , content: snippet_scatterPlot_content
+    , source: "src/website/Viz/TreeAPI/ScatterPlotExample.purs"
+    , lines: "64-113"
+    }
+  "simpleTree" ->
+    { name: "simpleTree"
+    , content: snippet_simpleTree_content
+    , source: "src/website/Viz/TreeAPI/SimpleTreeExample.purs"
+    , lines: "28-45"
+    }
+  "threeLittleCircles" ->
+    { name: "threeLittleCircles"
+    , content: snippet_threeLittleCircles_content
+    , source: "src/website/Viz/TreeAPI/ThreeLittleCircles.purs"
+    , lines: "25-62"
+    }
+  "threeLittleCirclesTransition" ->
+    { name: "threeLittleCirclesTransition"
+    , content: snippet_threeLittleCirclesTransition_content
+    , source: "src/website/Viz/TreeAPI/ThreeLittleCirclesTransition.purs"
+    , lines: "112-150"
+    }
+  "threeLittleDimensions" ->
+    { name: "threeLittleDimensions"
+    , content: snippet_threeLittleDimensions_content
+    , source: "src/website/Viz/TreeAPI/ThreeLittleDimensionsExample.purs"
+    , lines: "27-54"
+    }
+  "treeViz" ->
+    { name: "treeViz"
+    , content: snippet_treeViz_content
+    , source: "src/website/Viz/TreeAPI/TreeViz.purs"
+    , lines: "54-141"
+    }
   _ ->
     { name: "not-found"
     , content: "Snippet not found: " <> name
