@@ -353,11 +353,11 @@
 
   // output/Data.Ord/foreign.js
   var unsafeCompareImpl = function(lt) {
-    return function(eq21) {
+    return function(eq20) {
       return function(gt) {
         return function(x46) {
           return function(y47) {
-            return x46 < y47 ? lt : x46 === y47 ? eq21 : gt;
+            return x46 < y47 ? lt : x46 === y47 ? eq20 : gt;
           };
         };
       };
@@ -983,7 +983,7 @@
     };
   };
   var eqMaybe = function(dictEq) {
-    var eq21 = eq(dictEq);
+    var eq20 = eq(dictEq);
     return {
       eq: function(x46) {
         return function(y47) {
@@ -992,7 +992,7 @@
           }
           ;
           if (x46 instanceof Just && y47 instanceof Just) {
-            return eq21(x46.value0)(y47.value0);
+            return eq20(x46.value0)(y47.value0);
           }
           ;
           return false;
@@ -2134,13 +2134,13 @@
     return v.value0;
   };
   var eqTuple = function(dictEq) {
-    var eq21 = eq(dictEq);
+    var eq20 = eq(dictEq);
     return function(dictEq1) {
       var eq110 = eq(dictEq1);
       return {
         eq: function(x46) {
           return function(y47) {
-            return eq21(x46.value0)(y47.value0) && eq110(x46.value1)(y47.value1);
+            return eq20(x46.value0)(y47.value0) && eq110(x46.value1)(y47.value1);
           };
         }
       };
@@ -16786,21 +16786,6 @@
     ;
     throw new Error("Failed pattern match at PSD3.Internal.Simulation.Types (line 204, column 1 - line 204, column 61): " + [v.constructor.name]);
   };
-  var eqForceStatus = {
-    eq: function(x46) {
-      return function(y47) {
-        if (x46 instanceof ForceActive && y47 instanceof ForceActive) {
-          return true;
-        }
-        ;
-        if (x46 instanceof ForceDisabled && y47 instanceof ForceDisabled) {
-          return true;
-        }
-        ;
-        return false;
-      };
-    }
-  };
   var defaultConfigSimulation = {
     alpha: 1,
     alphaTarget: 0,
@@ -18866,7 +18851,7 @@
   var unsafeIndex2 = /* @__PURE__ */ unsafeIndex();
   var foldlWithIndex2 = /* @__PURE__ */ foldlWithIndex(foldableWithIndexArray);
   var computeJoinWithKey = function(dictEq) {
-    var eq21 = eq(dictEq);
+    var eq20 = eq(dictEq);
     return function(newData) {
       return function(oldBindings) {
         return function(keyFn) {
@@ -18875,7 +18860,7 @@
               return function(datum2) {
                 var newKey = keyFn(datum2);
                 var v = findIndex(function(v1) {
-                  return eq21(keyFn(v1.datum))(newKey);
+                  return eq20(keyFn(v1.datum))(newKey);
                 })(state3.remainingOld);
                 if (v instanceof Nothing) {
                   var enterBinding = {
@@ -18927,14 +18912,14 @@
     };
   };
   var computeJoin = function(dictEq) {
-    var eq21 = eq(dictEq);
+    var eq20 = eq(dictEq);
     return function(newData) {
       return function(oldBindings) {
         var processNewDatum = function(newIndex) {
           return function(state3) {
             return function(datum2) {
               var v = findIndex(function(v1) {
-                return eq21(v1.datum)(datum2);
+                return eq20(v1.datum)(datum2);
               })(state3.remainingOld);
               if (v instanceof Nothing) {
                 var enterBinding = {
@@ -23603,10 +23588,10 @@
     return new Tuple(toNumber(w), toNumber(h));
   };
   var equalSnd = function(dictEq) {
-    var eq21 = eq(dictEq);
+    var eq20 = eq(dictEq);
     return function(a2) {
       return function(b10) {
-        return eq21(snd(a2))(snd(b10));
+        return eq20(snd(a2))(snd(b10));
       };
     };
   };
@@ -35526,7 +35511,7 @@
     return x46;
   };
   var topologicalSort = function(dictOrd) {
-    var member9 = member(dictOrd);
+    var member10 = member(dictOrd);
     var $$delete8 = $$delete3(dictOrd);
     var lookup112 = lookup2(dictOrd);
     return function(v) {
@@ -35553,7 +35538,7 @@
             }
             ;
             if (v1 instanceof Just && v1.value0.value0 instanceof Visit) {
-              if (member9(v1.value0.value0.value0)(state3.unvisited)) {
+              if (member10(v1.value0.value0.value0)(state3.unvisited)) {
                 var start14 = {
                   result: state3.result,
                   unvisited: $$delete8(v1.value0.value0.value0)(state3.unvisited)
@@ -35669,7 +35654,7 @@
   var transitiveReduction = function(dictOrd) {
     var $$delete8 = $$delete4(dictOrd);
     var lookup41 = lookup2(dictOrd);
-    var member9 = member2(dictOrd);
+    var member10 = member2(dictOrd);
     var reachableFrom1 = reachableFrom(dictOrd);
     var filter7 = filter4(dictOrd);
     var fromFoldable213 = fromFoldable6(dictOrd)(foldableArray);
@@ -35678,7 +35663,7 @@
         return function(target7) {
           var intermediates = $$delete8(target7)(fromMaybe(empty8)(lookup41(source2)(graph.edges)));
           var reachableThroughIntermediate = any2(function(intermediate) {
-            return member9(target7)(reachableFrom1(intermediate)(graph));
+            return member10(target7)(reachableFrom1(intermediate)(graph));
           })(toUnfoldable8(intermediates));
           return reachableThroughIntermediate;
         };
@@ -46907,7 +46892,7 @@
   var type_19 = /* @__PURE__ */ type_3(isPropInputType);
   var value14 = /* @__PURE__ */ value3(isPropString);
   var show74 = /* @__PURE__ */ show(showNumber);
-  var eq10 = /* @__PURE__ */ eq(eqForceStatus);
+  var member9 = /* @__PURE__ */ member2(ordString);
   var map80 = /* @__PURE__ */ map(functorArray);
   var toUnfoldable9 = /* @__PURE__ */ toUnfoldable3(unfoldableArray);
   var _forceLibrary3 = /* @__PURE__ */ _forceLibrary(strongForget);
@@ -46922,9 +46907,9 @@
   };
   var renderTableForces = function(state3) {
     var renderForceItem = function(v) {
+      var isActive = member9(v.name)(state3.scene.activeForces);
       return div2([classes(["force-item", (function() {
-        var $15 = eq10(v.status)(ForceActive.value);
-        if ($15) {
+        if (isActive) {
           return "force-active";
         }
         ;
@@ -46946,7 +46931,7 @@
       return true;
     }
     ;
-    throw new Error("Failed pattern match at PSD3.CodeExplorer.HTML (line 38, column 24 - line 40, column 22): " + [node.nodetype.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.CodeExplorer.HTML (line 39, column 24 - line 41, column 22): " + [node.nodetype.constructor.name]);
   };
   var renderSimControls = function(state3) {
     var params = getSimulationVariables(state3);
@@ -47764,7 +47749,7 @@
   })();
 
   // output/PSD3.Shared.DocsHeader/index.js
-  var eq11 = /* @__PURE__ */ eq(eqSection);
+  var eq10 = /* @__PURE__ */ eq(eqSection);
   var sectionTitle = function(v) {
     if (v instanceof UnderstandingSection) {
       return "Understanding";
@@ -47806,14 +47791,14 @@
   var renderQuadrant = function(targetSection) {
     return function(currentSection) {
       return a([href((function() {
-        var $8 = eq11(targetSection)(APISection.value);
+        var $8 = eq10(targetSection)(APISection.value);
         if ($8) {
           return "api/index.html";
         }
         ;
         return "#" + routeToPath(sectionDefaultRoute(targetSection));
       })()), classes(["docs-header-quadrant-box", (function() {
-        if (currentSection instanceof Just && eq11(currentSection.value0)(targetSection)) {
+        if (currentSection instanceof Just && eq10(currentSection.value0)(targetSection)) {
           return "docs-header-quadrant-box--active";
         }
         ;
@@ -51544,8 +51529,8 @@
   })();
 
   // output/PSD3.Shared.SectionNav/index.js
-  var eq17 = /* @__PURE__ */ eq(eqSection);
-  var eq18 = /* @__PURE__ */ eq(eqRoute);
+  var eq11 = /* @__PURE__ */ eq(eqSection);
+  var eq17 = /* @__PURE__ */ eq(eqRoute);
   var map82 = /* @__PURE__ */ map(functorArray);
   var sectionTitle2 = function(v) {
     if (v instanceof UnderstandingSection) {
@@ -51588,7 +51573,7 @@
   var renderQuadrant2 = function(targetSection) {
     return function(currentSection) {
       return a([href("#" + routeToPath(sectionDefaultRoute2(targetSection))), classes(["section-nav__quadrant-box", (function() {
-        var $11 = eq17(targetSection)(currentSection);
+        var $11 = eq11(targetSection)(currentSection);
         if ($11) {
           return "section-nav__quadrant-box--active";
         }
@@ -51599,7 +51584,7 @@
   };
   var renderPageLink = function(currentRoute) {
     return function(v) {
-      var $14 = eq18(v.route)(currentRoute);
+      var $14 = eq17(v.route)(currentRoute);
       if ($14) {
         return span2([classes(["section-nav__page-link", "section-nav__page-link--active"])])([text2(v.label)]);
       }
@@ -51610,7 +51595,7 @@
   var renderModuleLink = function(currentRoute) {
     return function(moduleInfo) {
       var moduleRoute = new ReferenceModule(moduleInfo.name);
-      var isActive = eq18(currentRoute)(moduleRoute);
+      var isActive = eq17(currentRoute)(moduleRoute);
       return li([classes(["section-nav__module-item"])])([(function() {
         if (isActive) {
           return span2([classes(["section-nav__module-link", "section-nav__module-link--active"]), title(moduleInfo.description)])([text2(moduleInfo.name)]);
@@ -52277,7 +52262,7 @@
 
   // output/PSD3.Wizard.FileDownload/index.js
   var append34 = /* @__PURE__ */ append(semigroupArray);
-  var eq19 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
+  var eq18 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
   var append121 = /* @__PURE__ */ append(semigroupString);
   var map85 = /* @__PURE__ */ map(functorArray);
   var bind135 = /* @__PURE__ */ bind(bindAff);
@@ -52298,7 +52283,7 @@
     var intercalateArray = function(sep) {
       return function(arr) {
         return maybe("")(function(v) {
-          var $16 = eq19(v.tail)([]);
+          var $16 = eq18(v.tail)([]);
           if ($16) {
             return v.head;
           }
@@ -52521,7 +52506,7 @@
 
   // output/PSD3.Wizard.Wizard/index.js
   var map88 = /* @__PURE__ */ map(functorArray);
-  var eq20 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
+  var eq19 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
   var show76 = /* @__PURE__ */ show(showDifficulty);
   var eq25 = /* @__PURE__ */ eq(eqDifficulty);
   var eq33 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqDifficulty));
@@ -52679,7 +52664,7 @@
     var intercalate9 = function(sep) {
       return function(arr) {
         return maybe("")(function(v) {
-          var $75 = eq20(v.tail)([]);
+          var $75 = eq19(v.tail)([]);
           if ($75) {
             return v.head;
           }

@@ -20,6 +20,7 @@ import Data.Lens (view)
 import Data.Map (toUnfoldable)
 import Data.Maybe (fromMaybe)
 import Data.Tuple (snd)
+import Data.Set as Set
 import Halogen (ComponentSlot)
 import Halogen as H
 import Halogen.HTML as HH
@@ -230,10 +231,11 @@ renderTableForces state  =
   forceData = snd <$> (toUnfoldable $ view _forceLibrary state)
 
   renderForceItem (Force force) =
-    HH.div
+    let isActive = Set.member force.name state.scene.activeForces
+    in HH.div
       [ HP.classes
           [ HH.ClassName "force-item"
-          , HH.ClassName if force.status == ForceActive then "force-active" else "force-inactive"
+          , HH.ClassName if isActive then "force-active" else "force-inactive"
           ]
       , HE.onClick $ const (ToggleForce force.name)
       ]
