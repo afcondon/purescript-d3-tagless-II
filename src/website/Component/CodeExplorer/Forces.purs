@@ -66,14 +66,16 @@ forceLibrary = initialize [
       , createForce "clusterx_P"     (RegularForce ForceX)        packagesOnly [ F.strengthVal 0.8, F.xFn (\d _ -> gridPointX (unsafeCoerce d)) ]
       , createForce "clustery_P"     (RegularForce ForceY)        packagesOnly [ F.strengthVal 0.8, F.yFn (\d _ -> gridPointY (unsafeCoerce d)) ]
 
+      -- Horizontal tree: X=depth (treePointY), Y=breadth (treePointX)
       , createForce "htreeNodesX"  (RegularForce ForceX)  (Just $ ForceFilter "tree only" (_.connected <<< unsafeCoerce))
-          [ F.strengthVal 0.4, F.xFn (\d _ -> treePointX (unsafeCoerce d)) ]
-      , createForce "htreeNodesY"  (RegularForce ForceY)  (Just $ ForceFilter "tree only" (_.connected <<< unsafeCoerce))
-          [ F.strengthVal 0.4, F.yFn (\d _ -> treePointY (unsafeCoerce d)) ]
-      , createForce "vtreeNodesX"  (RegularForce ForceX)  (Just $ ForceFilter "tree only" (_.connected <<< unsafeCoerce))
           [ F.strengthVal 0.4, F.xFn (\d _ -> treePointY (unsafeCoerce d)) ]
-      , createForce "vtreeNodesY"  (RegularForce ForceY)  (Just $ ForceFilter "tree only" (_.connected <<< unsafeCoerce))
+      , createForce "htreeNodesY"  (RegularForce ForceY)  (Just $ ForceFilter "tree only" (_.connected <<< unsafeCoerce))
           [ F.strengthVal 0.4, F.yFn (\d _ -> treePointX (unsafeCoerce d)) ]
+      -- Vertical tree: X=breadth (treePointX), Y=depth (treePointY)
+      , createForce "vtreeNodesX"  (RegularForce ForceX)  (Just $ ForceFilter "tree only" (_.connected <<< unsafeCoerce))
+          [ F.strengthVal 0.4, F.xFn (\d _ -> treePointX (unsafeCoerce d)) ]
+      , createForce "vtreeNodesY"  (RegularForce ForceY)  (Just $ ForceFilter "tree only" (_.connected <<< unsafeCoerce))
+          [ F.strengthVal 0.4, F.yFn (\d _ -> treePointY (unsafeCoerce d)) ]
 
       , createForce "packageOrbit" (RegularForce ForceRadial)   packagesOnly
                                    [ F.strengthVal 0.7, F.xVal 0.0, F.yVal 0.0, F.radiusVal 1200.0 ]

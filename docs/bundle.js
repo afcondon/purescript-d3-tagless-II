@@ -46370,25 +46370,25 @@
       return $37.connected;
     })))([strengthVal(0.4), xFn(function(d16) {
       return function(v) {
-        return treePointX(d16);
+        return treePointY(d16);
       };
     })]), createForce("htreeNodesY")(new RegularForce(ForceY.value))(new Just(new ForceFilter("tree only", function($38) {
       return $38.connected;
     })))([strengthVal(0.4), yFn(function(d16) {
       return function(v) {
-        return treePointY(d16);
+        return treePointX(d16);
       };
     })]), createForce("vtreeNodesX")(new RegularForce(ForceX.value))(new Just(new ForceFilter("tree only", function($39) {
       return $39.connected;
     })))([strengthVal(0.4), xFn(function(d16) {
       return function(v) {
-        return treePointY(d16);
+        return treePointX(d16);
       };
     })]), createForce("vtreeNodesY")(new RegularForce(ForceY.value))(new Just(new ForceFilter("tree only", function($40) {
       return $40.connected;
     })))([strengthVal(0.4), yFn(function(d16) {
       return function(v) {
-        return treePointX(d16);
+        return treePointY(d16);
       };
     })]), createForce("packageOrbit")(new RegularForce(ForceRadial.value))(packagesOnly)([strengthVal(0.7), xVal(0), yVal(0), radiusVal(1200)]), createForce("unusedOrbit")(new RegularForce(ForceRadial.value))(unusedModulesOnly)([strengthVal(0.8), xVal(0), yVal(0), radiusVal(900)]), createForce("moduleOrbit")(new RegularForce(ForceRadial.value))(usedModulesOnly)([strengthVal(0.8), xVal(0), yVal(0), radiusVal(600)]), createLinkForce(Nothing.value)([strengthVal(0.5), distanceVal(0), numKey(function($41) {
       return toNumber((function(v) {
