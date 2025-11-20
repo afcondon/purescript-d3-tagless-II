@@ -892,6 +892,18 @@
   gap: 1.5rem;
 }
 
+/* Card Grid */
+.howto-card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.howto-card-grid .howto-card {
+  flex: 1 1 300px;
+  max-width: 400px;
+}
+
 /* Cards */
 .howto-card {
   background-color: #fafaf8;
