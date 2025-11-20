@@ -261,29 +261,29 @@
   };
   var applyFirst = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map92 = map(dictApply.Functor0());
+    var map91 = map(dictApply.Functor0());
     return function(a2) {
       return function(b10) {
-        return apply1(map92($$const)(a2))(b10);
+        return apply1(map91($$const)(a2))(b10);
       };
     };
   };
   var applySecond = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map92 = map(dictApply.Functor0());
+    var map91 = map(dictApply.Functor0());
     return function(a2) {
       return function(b10) {
-        return apply1(map92($$const(identity2))(a2))(b10);
+        return apply1(map91($$const(identity2))(a2))(b10);
       };
     };
   };
   var lift2 = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map92 = map(dictApply.Functor0());
+    var map91 = map(dictApply.Functor0());
     return function(f) {
       return function(a2) {
         return function(b10) {
-          return apply1(map92(f)(a2))(b10);
+          return apply1(map91(f)(a2))(b10);
         };
       };
     };
@@ -1729,10 +1729,10 @@
   var $$try = function(dictMonadError) {
     var catchError1 = catchError(dictMonadError);
     var Monad0 = dictMonadError.MonadThrow0().Monad0();
-    var map92 = map(Monad0.Bind1().Apply0().Functor0());
+    var map91 = map(Monad0.Bind1().Apply0().Functor0());
     var pure86 = pure(Monad0.Applicative0());
     return function(a2) {
-      return catchError1(map92(Right.create)(a2))(function($52) {
+      return catchError1(map91(Right.create)(a2))(function($52) {
         return pure86(Left.create($52));
       });
     };
@@ -3186,7 +3186,7 @@
       };
     }
     return function(apply8) {
-      return function(map92) {
+      return function(map91) {
         return function(pure86) {
           return function(f) {
             return function(array4) {
@@ -3195,14 +3195,14 @@
                   case 0:
                     return pure86([]);
                   case 1:
-                    return map92(array1)(f(array4[bot]));
+                    return map91(array1)(f(array4[bot]));
                   case 2:
-                    return apply8(map92(array2)(f(array4[bot])))(f(array4[bot + 1]));
+                    return apply8(map91(array2)(f(array4[bot])))(f(array4[bot + 1]));
                   case 3:
-                    return apply8(apply8(map92(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
+                    return apply8(apply8(map91(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
                   default:
                     var pivot = bot + Math.floor((top3 - bot) / 4) * 2;
-                    return apply8(map92(concat2)(go2(bot, pivot)))(go2(pivot, top3));
+                    return apply8(map91(concat2)(go2(bot, pivot)))(go2(pivot, top3));
                 }
               }
               return go2(0, array4.length);
@@ -5526,10 +5526,10 @@
     };
   };
   var functorWriterT = function(dictFunctor) {
-    var map92 = map(dictFunctor);
+    var map91 = map(dictFunctor);
     return {
       map: function(f) {
-        return mapWriterT(map92(function(v) {
+        return mapWriterT(map91(function(v) {
           return new Tuple(f(v.value0), v.value1);
         }));
       }
@@ -5540,7 +5540,7 @@
     return function(dictApply) {
       var apply8 = apply(dictApply);
       var Functor0 = dictApply.Functor0();
-      var map92 = map(Functor0);
+      var map91 = map(Functor0);
       var functorWriterT1 = functorWriterT(Functor0);
       return {
         apply: function(v) {
@@ -5550,7 +5550,7 @@
                 return new Tuple(v3.value0(v4.value0), append36(v3.value1)(v4.value1));
               };
             };
-            return apply8(map92(k)(v))(v1);
+            return apply8(map91(k)(v))(v1);
           };
         },
         Functor0: function() {
@@ -5565,14 +5565,14 @@
     return function(dictBind) {
       var bind140 = bind(dictBind);
       var Apply0 = dictBind.Apply0();
-      var map92 = map(Apply0.Functor0());
+      var map91 = map(Apply0.Functor0());
       var applyWriterT2 = applyWriterT1(Apply0);
       return {
         bind: function(v) {
           return function(k) {
             return bind140(v)(function(v1) {
               var v2 = k(v1.value0);
-              return map92(function(v3) {
+              return map91(function(v3) {
                 return new Tuple(v3.value0, append36(v1.value1)(v3.value1));
               })(v2);
             });
@@ -8675,12 +8675,12 @@
   };
   var lift3 = /* @__PURE__ */ lift(monadTransStateT);
   var functorStateT = function(dictFunctor) {
-    var map92 = map(dictFunctor);
+    var map91 = map(dictFunctor);
     return {
       map: function(f) {
         return function(v) {
           return function(s) {
-            return map92(function(v1) {
+            return map91(function(v1) {
               return new Tuple(f(v1.value0), v1.value1);
             })(v(s));
           };
@@ -27524,7 +27524,7 @@
     return header([classes(["example-header"])])([div2([classes(["example-header-left"])])([a([href("#" + routeToPath(Home.value)), classes(["example-logo-link"])])([img([src2("assets/psd3-logo-color.svg"), alt4("PSD3 Logo"), classes(["example-logo"])])]), a([href("#/howto"), classes(["example-gallery-link"])])([text2("How-to")]), div2([classes(["example-title-container"])])([h1([classes(["example-title"])])([text2(title4)])])])]);
   };
   var render8 = function(v) {
-    return div2([classes(["tutorial-page"])])([renderHeader2("Creating Axes and Scales"), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Creating Axes and Scales")]), p_([text2("How to set up scales and generate axes for charts.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Topics Covered")]), ul_([li_([text2("Setting up linear, ordinal, and time scales")]), li_([text2("Generating axes with d3-axis")]), li_([text2("Formatting tick labels")]), li_([text2("Responsive axes that resize")]), li_([text2("Custom tick values")])])])])]);
+    return div2([classes(["tutorial-page"])])([renderHeader2("Creating Axes and Scales"), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Creating Axes and Scales")]), p_([text2("PSD3 provides color scales and supports D3's scale/axis FFI for custom scales.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Color Scales")]), p_([text2("Built-in color interpolation (0-1 input):")]), pre([classes(["code-block"])])([code_([text2("import PSD3.Internal.Scales.Scales\n\n-- Sequential scales\nfill (\\\\d -> d3InterpolateViridis_ (d.value / maxValue))\nfill (\\\\d -> d3InterpolatePlasma_ (d.value / maxValue))\n\n-- Diverging scales (good for -1 to 1 ranges)\nfill (\\\\d -> d3InterpolateRdYlGn_ (normalize d.change))\n\n-- Categorical by index\nfill (\\\\d -> d3SchemeCategory10N_ (toNumber d.index))")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Custom D3 Scales via FFI")]), p_([text2("For linear/band/time scales, use FFI:")]), h3_([text2("JavaScript FFI")]), pre([classes(["code-block"])])([code_([text2("export const scaleLinear_ = domain => range => () =>\n  d3.scaleLinear().domain(domain).range(range);\n\nexport const scaleBand_ = domain => range => padding => () =>\n  d3.scaleBand().domain(domain).range(range).padding(padding);\n\nexport const applyScale_ = scale => value => scale(value);")])]), h3_([text2("PureScript")]), pre([classes(["code-block"])])([code_([text2("foreign import scaleLinear_ :: Array Number -> Array Number -> Effect Scale\nforeign import scaleBand_ :: Array String -> Array Number -> Number -> Effect Scale\nforeign import applyScale_ :: Scale -> Number -> Number\n\n-- Usage\nxScale <- liftEffect $ scaleLinear_ [0.0, maxX] [0.0, width]\nlet xPos d = applyScale_ xScale d.value")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Creating Axes")]), p_([text2("Axes via FFI:")]), pre([classes(["code-block"])])([code_([text2('-- JavaScript\nexport const axisBottom_ = scale => () => d3.axisBottom(scale);\nexport const axisLeft_ = scale => () => d3.axisLeft(scale);\nexport const callAxis_ = selection => axis => () => selection.call(axis);\n\n-- PureScript: Append group then call axis\naxisGroup <- append Group [transform ("translate(0," <> show height <> ")")] svg\nliftEffect $ callAxis_ axisGroup xAxis')])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Key Points")]), ul_([li_([strong_([text2("Color interpolators")]), text2(" - Take 0-1, return color string")]), li_([strong_([text2("Normalize data")]), text2(" - Scale values to 0-1 for interpolators")]), li_([strong_([text2("FFI for numeric scales")]), text2(" - scaleLinear, scaleBand, scaleTime")]), li_([strong_([text2("Axis via .call()")]), text2(" - D3 pattern for rendering axes")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Real Example")]), p_([text2("See scales in action:")]), ul_([li_([code_([text2("src/lib/PSD3/Internal/Scales/Scales.purs")]), text2(" - Color interpolators")]), li_([code_([text2("src/website/Viz/Spago/Draw/Attributes.purs")]), text2(" - Color-by-metric scales")])])])])]);
   };
   var handleAction4 = function(dictMonadAff) {
     return function(v) {
@@ -27560,7 +27560,7 @@
     return header([classes(["example-header"])])([div2([classes(["example-header-left"])])([a([href("#" + routeToPath(Home.value)), classes(["example-logo-link"])])([img([src2("assets/psd3-logo-color.svg"), alt4("PSD3 Logo"), classes(["example-logo"])])]), a([href("#/howto"), classes(["example-gallery-link"])])([text2("How-to")]), div2([classes(["example-title-container"])])([h1([classes(["example-title"])])([text2(title4)])])])]);
   };
   var render9 = function(v) {
-    return div2([classes(["tutorial-page"])])([renderHeader3("Debugging Visualizations"), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Debugging Visualizations")]), p_([text2("How to debug and troubleshoot visualization issues.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Topics Covered")]), ul_([li_([text2("Using the Mermaid interpreter to inspect tree structure")]), li_([text2("Console logging in attribute functions")]), li_([text2("Inspecting enter/update/exit selections")]), li_([text2("Common errors and their causes")]), li_([text2("Browser DevTools for SVG inspection")])])])])]);
+    return div2([classes(["tutorial-page"])])([renderHeader3("Debugging Visualizations"), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Debugging Visualizations")]), p_([text2("Techniques for finding and fixing visualization issues.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Console Logging")]), p_([text2("Log data in attribute functions:")]), pre([classes(["code-block"])])([code_([text2('import Effect.Console (log)\nimport Effect.Unsafe (unsafePerformEffect)\n\n-- Debug attribute values\nfill (\\\\d -> unsafePerformEffect do\n  log $ "Node: " <> show d.id <> ", value: " <> show d.value\n  pure $ colorScale d.value\n)')])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Browser DevTools")]), ul_([li_([strong_([text2("Elements panel")]), text2(" - Inspect SVG structure and attributes")]), li_([strong_([text2("$0.__data__")]), text2(" - View bound data on selected element")]), li_([strong_([text2("Network tab")]), text2(" - Verify data loading")]), li_([strong_([text2("Performance tab")]), text2(" - Profile slow renders")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Mermaid Diagrams")]), p_([text2("Visualize tree structure with Mermaid interpreter:")]), pre([classes(["code-block"])])([code_([text2("-- Generate Mermaid code from TreeAPI tree\nlet mermaidCode = runMermaidInterpreter myTree\n\n-- Copy to https://mermaid.live to visualize structure")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Common Issues")]), ul_([li_([strong_([text2("Nothing renders")]), text2(" - Check container exists, SVG has size")]), li_([strong_([text2("Elements at origin")]), text2(" - Verify coordinate attributes (cx, cy, x, y)")]), li_([strong_([text2("Wrong colors")]), text2(" - Check scale domain/range, normalize values to 0-1")]), li_([strong_([text2("No data binding")]), text2(" - Use joinData, check key function")]), li_([strong_([text2("Type errors")]), text2(" - Ensure datum type matches selection")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Key Points")]), ul_([li_([strong_([text2("unsafePerformEffect")]), text2(" - Escape hatch for logging")]), li_([strong_([text2("$0.__data__")]), text2(" - Console access to bound data")]), li_([strong_([text2("Mermaid interpreter")]), text2(" - Visualize tree structure")]), li_([strong_([text2("Check dimensions")]), text2(" - SVG needs viewBox or width/height")])])])])]);
   };
   var handleAction5 = function(dictMonadAff) {
     return function(v) {
@@ -27596,7 +27596,7 @@
     return header([classes(["example-header"])])([div2([classes(["example-header-left"])])([a([href("#" + routeToPath(Home.value)), classes(["example-logo-link"])])([img([src2("assets/psd3-logo-color.svg"), alt4("PSD3 Logo"), classes(["example-logo"])])]), a([href("#/howto"), classes(["example-gallery-link"])])([text2("How-to")]), div2([classes(["example-title-container"])])([h1([classes(["example-title"])])([text2(title4)])])])]);
   };
   var render10 = function(v) {
-    return div2([classes(["tutorial-page"])])([renderHeader4("Responding to User Events"), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Responding to User Events")]), p_([text2("How to make visualizations interactive with click, hover, and other events.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Topics Covered")]), ul_([li_([text2("Click handlers on elements")]), li_([text2("Hover effects and highlights")]), li_([text2("Mouse position for tooltips")]), li_([text2("Keyboard events")]), li_([text2("Event delegation with selections")])])])])]);
+    return div2([classes(["tutorial-page"])])([renderHeader4("Responding to User Events"), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Responding to User Events")]), p_([text2("PSD3 provides type-safe event handlers. Use the 'on' function to attach behaviors to selections.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Click Handlers")]), p_([text2("Access the bound datum when an element is clicked:")]), pre([classes(["code-block"])])([code_([text2('import PSD3v2.Behavior.Types (onClickWithDatum)\n\ncircles <- append Circle [fill "blue", radius 20.0] container\n_ <- on (onClickWithDatum \\\\d -> log ("Clicked: " <> d.name)) circles')])]), p_([text2("Without datum access:")]), pre([classes(["code-block"])])([code_([text2('import PSD3v2.Behavior.Types (onClick)\n\n_ <- on (onClick (log "Button clicked!")) button')])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Hover Effects")]), p_([text2("Simple enter/leave handlers:")]), pre([classes(["code-block"])])([code_([text2("import PSD3v2.Behavior.Types (onMouseEnter, onMouseLeave)\n\n_ <- on (onMouseEnter \\\\d -> highlightNode d) circles\n_ <- on (onMouseLeave \\\\_ -> clearHighlight) circles")])]), p_([text2("Built-in style changes with onHover:")]), pre([classes(["code-block"])])([code_([text2('import PSD3v2.Behavior.Types (onHover)\n\n_ <- on (onHover\n  { enter: [{ attr: "stroke", value: "#333" }, { attr: "stroke-width", value: "3" }]\n  , leave: [{ attr: "stroke", value: "#ddd" }, { attr: "stroke-width", value: "1.5" }]\n  }) lines')])]), p_([text2("With mouse coordinates (for tooltips):")]), pre([classes(["code-block"])])([code_([text2("import PSD3v2.Behavior.Types (onMouseEnterWithInfo)\n\n_ <- on (onMouseEnterWithInfo \\\\info -> do\n  -- info.datum: bound data\n  -- info.pageX/pageY: document coordinates\n  -- info.offsetX/offsetY: element coordinates\n  showTooltip info.datum info.pageX info.pageY\n) circles")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Drag & Zoom")]), p_([text2("Simple drag behavior:")]), pre([classes(["code-block"])])([code_([text2("import PSD3v2.Behavior.Types (Drag(..), defaultDrag)\n\n_ <- on (Drag defaultDrag) draggableElement")])]), p_([text2("Force simulation drag (reheats on drag):")]), pre([classes(["code-block"])])([code_([text2('import PSD3v2.Behavior.Types (Drag(..), simulationDrag)\n\n_ <- on (Drag (simulationDrag "my-simulation-id")) nodes')])]), p_([text2("Pan and zoom:")]), pre([classes(["code-block"])])([code_([text2('import PSD3v2.Behavior.Types (Zoom(..), defaultZoom, ScaleExtent(..))\n\n-- Attach to outer SVG, transforms inner group\n_ <- on (Zoom (defaultZoom (ScaleExtent 0.5 4.0) ".zoom-group")) svg')])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Key Points")]), ul_([li_([strong_([text2("Type-safe")]), text2(" - Datum type flows through handlers")]), li_([strong_([text2("MouseEventInfo")]), text2(" - Contains datum + all coordinates")]), li_([strong_([text2("Combine behaviors")]), text2(" - Attach multiple with separate 'on' calls")]), li_([strong_([text2("simulationDrag")]), text2(" - Auto-reheats force simulation")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Real Example")]), p_([text2("See the Code Explorer implementation:")]), ul_([li_([code_([text2("src/website/Viz/Spago/Render.purs:81-96")]), text2(" - Drag, click, hover behaviors")]), li_([code_([text2("src/lib/PSD3v2/Behavior/Types.purs")]), text2(" - All behavior types with docs")])])])])]);
   };
   var handleAction6 = function(dictMonadAff) {
     return function(v) {
@@ -27632,7 +27632,7 @@
     return header([classes(["example-header"])])([div2([classes(["example-header-left"])])([a([href("#" + routeToPath(Home.value)), classes(["example-logo-link"])])([img([src2("assets/psd3-logo-color.svg"), alt4("PSD3 Logo"), classes(["example-logo"])])]), a([href("#/howto"), classes(["example-gallery-link"])])([text2("How-to")]), div2([classes(["example-title-container"])])([h1([classes(["example-title"])])([text2(title4)])])])]);
   };
   var render11 = function(v) {
-    return div2([classes(["tutorial-page"])])([renderHeader5("Building Force-Directed Graphs"), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Building Force-Directed Graphs")]), p_([text2("How to create interactive force-directed network visualizations.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Topics Covered")]), ul_([li_([text2("Setting up the D3 force simulation")]), li_([text2("Configuring forces (charge, link, center, collision)")]), li_([text2("Connecting simulation tick to DOM updates")]), li_([text2("Node dragging with force interaction")]), li_([text2("Restarting simulation on data changes")]), li_([text2("Alpha decay and cooling")])])])])]);
+    return div2([classes(["tutorial-page"])])([renderHeader5("Building Force-Directed Graphs"), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Building Force-Directed Graphs")]), p_([text2("PSD3 provides SimulationM and SimulationM2 capabilities for force-directed layouts.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Initialize Simulation")]), p_([text2("Create a force simulation with nodes and links:")]), pre([classes(["code-block"])])([code_([text2('import PSD3v2.Capabilities.Simulation (class SimulationM, init, addTickFunction, start, Step(..))\n\n{ nodes, links } <- init\n  { nodes: myNodeData\n  , links: myLinkData\n  , forces: [centerForce w h, chargeForce (const (-100.0)), linkForce]\n  , activeForces: Set.fromFoldable ["center", "charge", "link"]\n  , config: defaultSimConfig\n  , keyFn: _.id\n  , ticks: Map.empty\n  }')])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Tick Functions")]), p_([text2("Register callbacks to update DOM on each simulation tick:")]), pre([classes(["code-block"])])([code_([text2('-- Update node positions\naddTickFunction "nodes" $ Step nodeCircles\n  [ cx (_.x)\n  , cy (_.y)\n  ]\n\n-- Update link positions\naddTickFunction "links" $ Step linkLines\n  [ x1 (\\\\l -> l.source.x)\n  , y1 (\\\\l -> l.source.y)\n  , x2 (\\\\l -> l.target.x)\n  , y2 (\\\\l -> l.target.y)\n  ]\n\nstart -- Begin animation')])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Available Forces")]), ul_([li_([strong_([text2("centerForce")]), text2(" - Keep nodes centered")]), li_([strong_([text2("chargeForce")]), text2(" - Repulsion/attraction between nodes")]), li_([strong_([text2("linkForce")]), text2(" - Springs between connected nodes")]), li_([strong_([text2("collideForce")]), text2(" - Prevent node overlap")]), li_([strong_([text2("forceX/Y")]), text2(" - Push toward position")]), li_([strong_([text2("radialForce")]), text2(" - Push toward circle")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Dynamic Updates")]), p_([text2("Use SimulationM2 for dynamic data changes:")]), pre([classes(["code-block"])])([code_([text2("import PSD3v2.Capabilities.Simulation (class SimulationM2, update, reheat)\n\n{ nodes, links } <- update\n  { nodes: Just newNodeArray\n  , links: Just newLinkArray\n  , nodeFilter: Nothing\n  , linkFilter: Nothing\n  , activeForces: Nothing\n  , config: Nothing\n  , keyFn: _.id\n  }\n\nreheat 0.7  -- Re-energize simulation\nstart       -- Begin animation")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Node Dragging")]), p_([text2("Enable simulation-aware drag:")]), pre([classes(["code-block"])])([code_([text2('import PSD3v2.Behavior.Types (Drag(..), simulationDrag)\n\n-- Drag reheats simulation automatically\n_ <- on (Drag (simulationDrag "my-simulation-id")) nodeCircles')])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Key Points")]), ul_([li_([strong_([text2("SimulationM")]), text2(" - Static simulations")]), li_([strong_([text2("SimulationM2")]), text2(" - Adds update/reheat for dynamic data")]), li_([strong_([text2("Step")]), text2(" - Maps selection to tick attributes")]), li_([strong_([text2("activeForces")]), text2(" - Control which forces are enabled")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Real Example")]), p_([text2("See force simulation in action:")]), ul_([li_([code_([text2("src/website/Component/CodeExplorer")]), text2(" - Full force graph with scenes")]), li_([code_([text2("src/lib/PSD3v2/Capabilities/Simulation.purs")]), text2(" - SimulationM type class")])])])])]);
   };
   var handleAction7 = function(dictMonadAff) {
     return function(v) {
@@ -27668,7 +27668,7 @@
     return header([classes(["example-header"])])([div2([classes(["example-header-left"])])([a([href("#" + routeToPath(Home.value)), classes(["example-logo-link"])])([img([src2("assets/psd3-logo-color.svg"), alt4("PSD3 Logo"), classes(["example-logo"])])]), a([href("#/howto"), classes(["example-gallery-link"])])([text2("How-to")]), div2([classes(["example-title-container"])])([h1([classes(["example-title"])])([text2(title4)])])])]);
   };
   var render12 = function(v) {
-    return div2([classes(["tutorial-page"])])([renderHeader6("Working with Hierarchical Data"), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Working with Hierarchical Data")]), p_([text2("How to visualize tree structures, treemaps, and other hierarchical layouts.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Topics Covered")]), ul_([li_([text2("Converting flat data to tree structure")]), li_([text2("Using d3-hierarchy layouts (tree, cluster, treemap)")]), li_([text2("Link generators for tree connections")]), li_([text2("Radial layouts")]), li_([text2("Collapsible trees with enter/exit")])])])])]);
+    return div2([classes(["tutorial-page"])])([renderHeader6("Working with Hierarchical Data"), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Working with Hierarchical Data")]), p_([text2("PSD3 supports D3's hierarchy layouts for trees, clusters, and treemaps.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Creating Hierarchy")]), p_([text2("Convert JSON to d3.hierarchy via FFI:")]), pre([classes(["code-block"])])([code_([text2("-- JavaScript FFI\nexport const hierarchy_ = data => () => d3.hierarchy(data);\nexport const descendants_ = root => root.descendants();\nexport const links_ = root => root.links();\n\n-- PureScript\nforeign import hierarchy_ :: Json -> Effect HierarchyNode\nforeign import descendants_ :: HierarchyNode -> Array HierarchyNode\nforeign import links_ :: HierarchyNode -> Array HierarchyLink\n\nroot <- liftEffect $ hierarchy_ jsonData\nlet nodes = descendants_ root\nlet links = links_ root")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Layout Functions")]), p_([text2("Apply layouts to compute positions:")]), pre([classes(["code-block"])])([code_([text2("-- Tree layout (neat spacing)\nexport const tree_ = width => height => () =>\n  d3.tree().size([height, width]);\n\n-- Cluster layout (leaves aligned)\nexport const cluster_ = width => height => () =>\n  d3.cluster().size([height, width]);\n\n-- Treemap layout (space-filling)\nexport const treemap_ = width => height => () =>\n  d3.treemap().size([width, height]).padding(1);\n\n-- Apply layout to hierarchy\nexport const applyLayout_ = layout => root => () => layout(root);")])]), p_([text2("After layout, nodes have x/y coordinates:")]), pre([classes(["code-block"])])([code_([text2("treeLayout <- liftEffect $ tree_ width height\nliftEffect $ applyLayout_ treeLayout root\n\n-- Now render nodes at computed positions\ncircles <- append Circle\n  [ cx (_.y)  -- Note: tree layout swaps x/y\n  , cy (_.x)\n  , radius 5.0\n  ] nodeEnter")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Drawing Links")]), p_([text2("Generate curved paths for tree connections:")]), pre([classes(["code-block"])])([code_([text2('-- Horizontal curved links (for tree layout)\nexport const linkHorizontal_ = d3.linkHorizontal()\n  .x(d => d.y)\n  .y(d => d.x);\n\n-- PureScript\npaths <- append Path\n  [ d (\\\\link -> linkHorizontal_ link)\n  , stroke "#999"\n  , fill "none"\n  ] linkEnter')])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Key Points")]), ul_([li_([strong_([text2("hierarchy()")]), text2(" - Converts JSON to hierarchy nodes")]), li_([strong_([text2("descendants()/links()")]), text2(" - Get flat arrays for data binding")]), li_([strong_([text2("tree/cluster layouts")]), text2(" - Swap x/y in coordinates")]), li_([strong_([text2("linkHorizontal/Vertical")]), text2(" - Curved path generators")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Real Example")]), p_([text2("See hierarchical layouts:")]), ul_([li_([code_([text2("src/website/Viz/TreeAPI/LesMisTreeExample.purs")]), text2(" - Tree visualization")]), li_([code_([text2("src/website/Component/AnimatedTreeCluster.purs")]), text2(" - Animated transitions")])])])])]);
   };
   var handleAction8 = function(dictMonadAff) {
     return function(v) {
@@ -27704,7 +27704,7 @@
     return header([classes(["example-header"])])([div2([classes(["example-header-left"])])([a([href("#" + routeToPath(Home.value)), classes(["example-logo-link"])])([img([src2("assets/psd3-logo-color.svg"), alt4("PSD3 Logo"), classes(["example-logo"])])]), a([href("#/howto"), classes(["example-gallery-link"])])([text2("How-to")]), div2([classes(["example-title-container"])])([h1([classes(["example-title"])])([text2(title4)])])])]);
   };
   var render13 = function(v) {
-    return div2([classes(["tutorial-page"])])([renderHeader7("Loading External Data"), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Loading External Data")]), p_([text2("How to fetch and parse external data sources for visualization.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Topics Covered")]), ul_([li_([text2("Fetching JSON data with Aff")]), li_([text2("Parsing CSV data")]), li_([text2("Handling loading states")]), li_([text2("Error handling and fallbacks")]), li_([text2("Caching and refreshing data")])])])])]);
+    return div2([classes(["tutorial-page"])])([renderHeader7("Loading External Data"), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Loading External Data")]), p_([text2("PSD3 uses Affjax for async data loading with configurable strategies.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Simple JSON Loading")]), p_([text2("Load JSON with automatic error fallback:")]), pre([classes(["code-block"])])([code_([text2('import PSD3.Shared.DataLoader (simpleLoadJSON)\n\njson <- H.liftAff $ simpleLoadJSON "data/les-miserables.json"\n-- Returns fallback on error, never throws')])]), p_([text2("With explicit error handling:")]), pre([classes(["code-block"])])([code_([text2('import PSD3.Shared.DataLoader (loadJSON, defaultConfig, LoadError(..))\n\nresult <- H.liftAff $ loadJSON defaultConfig "data/graph.json"\ncase result of\n  Left (NetworkError msg) -> log ("Network error: " <> msg)\n  Left (ParseError msg) -> log ("Parse error: " <> msg)\n  Right json -> processData json')])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Load Strategies")]), p_([text2("Configure where to load data from:")]), pre([classes(["code-block"])])([code_([text2('import PSD3.Shared.DataLoader (loadJSON, LoadStrategy(..), LoadConfig)\n\n-- Local only (bundled files)\nlet localConfig = { strategy: LocalOnly, baseUrl: Nothing }\n\n-- Remote only (requires server)\nlet remoteConfig = { strategy: RemoteOnly, baseUrl: Just "http://localhost:8080" }\n\n-- Try local first, fallback to remote\nlet hybridConfig = { strategy: LocalFirst, baseUrl: Just "http://localhost:8080" }\n\njson <- H.liftAff $ loadJSON hybridConfig "data/graph.json\\"')])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("CSV Loading")]), p_([text2("Load CSV data as Foreign array:")]), pre([classes(["code-block"])])([code_([text2('import PSD3.Shared.DataLoader (simpleLoadCSV, loadCSV)\nimport Foreign (Foreign)\n\n-- Simple loading with empty array fallback\nrows <- H.liftAff $ simpleLoadCSV "data/population.csv"\n\n-- With error handling\nresult <- H.liftAff $ loadCSV defaultConfig "data/timeseries.csv"\ncase result of\n  Left err -> log (show err)\n  Right rows -> processRows rows')])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Halogen Pattern")]), p_([text2("Common pattern for loading in component initialization:")]), pre([classes(["code-block"])])([code_([text2('data State = { loading :: Boolean, graphData :: Maybe GraphData }\n\nhandleAction = case _ of\n  Initialize -> do\n    H.modify_ _ { loading = true }\n    json <- H.liftAff $ simpleLoadJSON "data/graph.json"\n    let graphData = decodeGraphData json\n    H.modify_ _ { loading = false, graphData = Just graphData }\n\nrender state\n  | state.loading = HH.div_ [ HH.text "Loading..." ]\n  | otherwise = renderVisualization state.graphData')])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Key Points")]), ul_([li_([strong_([text2("Aff-based")]), text2(" - Use H.liftAff to run in Halogen")]), li_([strong_([text2("Strategies")]), text2(" - LocalOnly, RemoteOnly, LocalFirst, RemoteFirst")]), li_([strong_([text2("Error types")]), text2(" - NetworkError, ParseError, FileNotFound, ConfigError")]), li_([strong_([text2("simple* helpers")]), text2(" - Return fallbacks instead of Either")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Real Example")]), p_([text2("See data loading in action:")]), ul_([li_([code_([text2("src/website/Shared/DataLoader.purs")]), text2(" - Full DataLoader module")]), li_([code_([text2("src/website/Component/CodeExplorer/Data.purs")]), text2(" - Loading Spago graph data")])])])])]);
   };
   var handleAction9 = function(dictMonadAff) {
     return function(v) {
@@ -27740,7 +27740,10 @@
     return header([classes(["example-header"])])([div2([classes(["example-header-left"])])([a([href("#" + routeToPath(Home.value)), classes(["example-logo-link"])])([img([src2("assets/psd3-logo-color.svg"), alt4("PSD3 Logo"), classes(["example-logo"])])]), a([href("#/howto"), classes(["example-gallery-link"])])([text2("How-to")]), div2([classes(["example-title-container"])])([h1([classes(["example-title"])])([text2(title4)])])])]);
   };
   var render14 = function(v) {
-    return div2([classes(["tutorial-page"])])([renderHeader8("Performance Optimization"), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Performance Optimization")]), p_([text2("How to optimize visualizations for large datasets and smooth interactions.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Topics Covered")]), ul_([li_([text2("Strategies for large datasets (sampling, aggregation)")]), li_([text2("Canvas rendering for many elements")]), li_([text2("Throttling/debouncing updates")]), li_([text2("Minimizing DOM mutations")]), li_([text2("When to use vanilla D3 escape hatches")])])])])]);
+    return div2([classes(["tutorial-page"])])([renderHeader8("Performance Optimization"), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Performance Optimization")]), p_([text2("Tips for fast, smooth visualizations with large datasets.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Reduce DOM Elements")]), ul_([li_([strong_([text2("Sample data")]), text2(" - Random sample for preview, full for export")]), li_([strong_([text2("Aggregate")]), text2(" - Bin/group data points")]), li_([strong_([text2("Filter visually")]), text2(" - Hide offscreen elements")]), li_([strong_([text2("Canvas")]), text2(" - Consider d3-canvas for 10k+ elements")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Minimize Updates")]), p_([text2("Batch DOM mutations:")]), pre([classes(["code-block"])])([code_([text2("-- Good: Set multiple attributes at once\nsetAttrs [cx newX, cy newY, fill newColor] circles\n\n-- Avoid: Multiple separate setAttrs calls\n-- Each call triggers layout recalculation")])]), p_([text2("Debounce rapid updates:")]), pre([classes(["code-block"])])([code_([text2("-- Only update after user stops resizing\nwindow.addEventListener('resize', debounce(updateChart, 150))")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Force Simulation Tips")]), ul_([li_([strong_([text2("Minimal tick attrs")]), text2(" - Only update position, not style")]), li_([strong_([text2("Alpha decay")]), text2(" - Higher decay = faster cooldown")]), li_([strong_([text2("Stop when idle")]), text2(" - Call stop() when alpha reaches min")])]), pre([classes(["code-block"])])([code_([text2(`-- Minimal tick: just positions
+addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
+
+-- Don't recalculate colors on every frame!`)])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("CSS vs D3 Transitions")]), p_([text2("CSS transitions are often faster for simple changes:")]), pre([classes(["code-block"])])([code_([text2(".node circle {\n  transition: fill 0.2s ease, opacity 0.2s ease;\n}\n\n/* PSD3 just toggles class, CSS handles animation */\n.node.highlighted circle { fill: #fbbf24; }")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Key Points")]), ul_([li_([strong_([text2("< 1000 elements")]), text2(" - SVG fine, no optimization needed")]), li_([strong_([text2("1000-5000 elements")]), text2(" - Optimize tick functions, batch updates")]), li_([strong_([text2("> 5000 elements")]), text2(" - Consider Canvas, sampling, or aggregation")]), li_([strong_([text2("Profile first")]), text2(" - Use DevTools Performance tab")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Real Example")]), p_([text2("The Code Explorer handles 1400+ nodes smoothly:")]), ul_([li_([code_([text2("src/website/Component/CodeExplorer")]), text2(" - Force graph with many nodes")]), li_([code_([text2("src/website/Viz/Spago/Render.purs")]), text2(" - Efficient render callbacks")])])])])]);
   };
   var handleAction10 = function(dictMonadAff) {
     return function(v) {
@@ -27812,7 +27815,7 @@
     return header([classes(["example-header"])])([div2([classes(["example-header-left"])])([a([href("#" + routeToPath(Home.value)), classes(["example-logo-link"])])([img([src2("assets/psd3-logo-color.svg"), alt4("PSD3 Logo"), classes(["example-logo"])])]), a([href("#/howto"), classes(["example-gallery-link"])])([text2("How-to")]), div2([classes(["example-title-container"])])([h1([classes(["example-title"])])([text2(title4)])])])]);
   };
   var render16 = function(v) {
-    return div2([classes(["tutorial-page"])])([renderHeader10("Creating Animated Transitions"), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Creating Animated Transitions")]), p_([text2("How to create smooth, animated transitions between visualization states.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Topics Covered")]), ul_([li_([text2("Setting up TransitionConfig (duration, easing, delay)")]), li_([text2("Enter transitions for new elements")]), li_([text2("Update transitions for changing data")]), li_([text2("Exit transitions for removed elements")]), li_([text2("Staggering animations with index-based delays")]), li_([text2("Chaining transitions for multi-step animations")])])])])]);
+    return div2([classes(["tutorial-page"])])([renderHeader10("Creating Animated Transitions"), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Creating Animated Transitions")]), p_([text2("PSD3 provides a TransitionM capability for smooth, animated attribute changes.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Basic Transition")]), p_([text2("Animate attributes over a duration:")]), pre([classes(["code-block"])])([code_([text2('import Data.Time.Duration (Milliseconds(..))\nimport PSD3v2.Transition.Types (transition)\nimport PSD3v2.Capabilities.Transition (withTransition)\n\n-- Animate circles to new state over 1 second\nwithTransition (transition (Milliseconds 1000.0)) circles\n  [ fill "orange"\n  , radius 25.0\n  , cx 100.0\n  ]')])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Easing & Delay")]), p_([text2("Add easing functions and delays:")]), pre([classes(["code-block"])])([code_([text2("import PSD3v2.Transition.Types (transitionWith, Easing(..))\n\nlet config = transitionWith\n      { duration: Milliseconds 1500.0\n      , delay: Just (Milliseconds 500.0)\n      , easing: Just ElasticOut\n      }\n\nwithTransition config circles [radius 30.0]")])]), p_([text2("Available easings include: Linear, Cubic, Quad, Sin, Exp, Circle, Elastic, Back, Bounce (each with In/Out/InOut variants).")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Staggered Animations")]), p_([text2("Animate elements sequentially with per-element delays:")]), pre([classes(["code-block"])])([code_([text2('import PSD3v2.Capabilities.Transition (withTransitionStaggered, staggerByIndex)\n\n-- Each element delays 50ms more than the previous\nwithTransitionStaggered config (staggerByIndex 50.0) bars\n  [ height \\\\d -> d.value * 10.0\n  , fill "steelblue"\n  ]')])]), p_([text2("Custom delay based on data:")]), pre([classes(["code-block"])])([code_([text2("-- Delay based on datum value\nwithTransitionStaggered config (\\\\d _ -> Milliseconds (d.priority * 100.0)) items\n  [ opacity 1.0 ]")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Exit Transitions")]), p_([text2("Animate elements before removal:")]), pre([classes(["code-block"])])([code_([text2("import PSD3v2.Capabilities.Transition (withTransitionExit)\n\n-- Fade out and shrink before removing\nwithTransitionExit (transition (Milliseconds 500.0)) exitSelection\n  [ opacity 0.0\n  , radius 0.0\n  ]")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Key Points")]), ul_([li_([strong_([text2("Type-safe")]), text2(" - Only bound selections can be transitioned")]), li_([strong_([text2("Milliseconds")]), text2(" - All durations use Data.Time.Duration")]), li_([strong_([text2("staggerByIndex")]), text2(" - Helper for simple sequential delays")]), li_([strong_([text2("D3 easings")]), text2(" - Full set of D3's easing functions")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Real Example")]), p_([text2("See these files for transition usage:")]), ul_([li_([code_([text2("src/lib/PSD3v2/Transition/Types.purs")]), text2(" - All easing options")]), li_([code_([text2("src/lib/PSD3v2/Capabilities/Transition.purs")]), text2(" - TransitionM type class")])])])])]);
   };
   var handleAction12 = function(dictMonadAff) {
     return function(v) {
@@ -27848,7 +27851,7 @@
     return header([classes(["example-header"])])([div2([classes(["example-header-left"])])([a([href("#" + routeToPath(Home.value)), classes(["example-logo-link"])])([img([src2("assets/psd3-logo-color.svg"), alt4("PSD3 Logo"), classes(["example-logo"])])]), a([href("#/howto"), classes(["example-gallery-link"])])([text2("How-to")]), div2([classes(["example-title-container"])])([h1([classes(["example-title"])])([text2(title4)])])])]);
   };
   var render17 = function(v) {
-    return div2([classes(["tutorial-page"])])([renderHeader11("Using the TreeAPI"), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Using the TreeAPI")]), p_([text2("How to use the declarative TreeAPI for building visualization structures.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Topics Covered")]), ul_([li_([text2("When to use TreeAPI vs SelectionM directly")]), li_([text2("Building declarative tree structures")]), li_([text2("Join nodes for data-driven elements")]), li_([text2("NestedJoin for hierarchical DOM")]), li_([text2("Choosing the right interpreter")])])])])]);
+    return div2([classes(["tutorial-page"])])([renderHeader11("Using the TreeAPI"), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Using the TreeAPI")]), p_([text2("TreeAPI provides a declarative way to build visualization structures with multiple interpreters.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("When to Use TreeAPI")]), ul_([li_([text2("Need multiple outputs (D3, String, Mermaid diagram)")]), li_([text2("Want to visualize the tree structure for debugging")]), li_([text2("Building reusable visualization components")]), li_([text2("Working with General Update Pattern")])]), p_([text2("For simple one-off visualizations, SelectionM is simpler.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Static Elements")]), p_([text2("Build static DOM structure:")]), pre([classes(["code-block"])])([code_([text2('import PSD3v2.Tree.Types (Tree(..), Element(..), Child(..))\n\nmyTree :: Tree Unit\nmyTree =\n  Tree\n    (Element SVG [viewBox "0 0 800 600"])\n    [ Child $ Tree (Element Group [class_ "chart-area"])\n        [ Child $ Tree (Element Rect [width 100.0, height 50.0]) [] ]\n    ]')])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Data-Driven Elements")]), p_([text2("Use Join for data binding:")]), pre([classes(["code-block"])])([code_([text2('import PSD3v2.Tree.Types (Join(..))\n\nmyTree :: Array BarData -> Tree Unit\nmyTree barData =\n  Tree (Element SVG [viewBox "0 0 800 600"])\n    [ Join barData "bar" Group\n        [ width 20.0\n        , height (\\\\d -> d.value * 10.0)\n        , x (\\\\d i -> toNumber i * 25.0)\n        , fill "steelblue"\n        ]\n    ]')])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Interpreters")]), p_([text2("Same tree, multiple outputs:")]), pre([classes(["code-block"])])([code_([text2("-- Render to D3/DOM\nrunD3Interpreter container myTree\n\n-- Generate Mermaid diagram\nlet mermaidCode = runMermaidInterpreter myTree\n\n-- Generate HTML string\nlet htmlString = runStringInterpreter myTree")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Key Points")]), ul_([li_([strong_([text2("Tree")]), text2(" - Root element with children")]), li_([strong_([text2("Child/Join")]), text2(" - Static vs data-bound children")]), li_([strong_([text2("Interpreters")]), text2(" - Same DSL, multiple backends")]), li_([strong_([text2("Mermaid")]), text2(" - Debug tree structure visually")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Real Example")]), p_([text2("See TreeAPI in action:")]), ul_([li_([code_([text2("src/website/Viz/TreeAPI/LesMisTreeExample.purs")]), text2(" - TreeAPI visualization")]), li_([code_([text2("src/lib/PSD3v2/Tree/Types.purs")]), text2(" - Tree type definitions")])])])])]);
   };
   var handleAction13 = function(dictMonadAff) {
     return function(v) {
@@ -48656,7 +48659,6 @@
   });
 
   // output/PSD3.HowTo.HowtoIndex/index.js
-  var map82 = /* @__PURE__ */ map(functorArray);
   var pure79 = /* @__PURE__ */ pure(applicativeHalogenM);
   var slot_2 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
@@ -48670,23 +48672,10 @@
     Initialize77.value = new Initialize77();
     return Initialize77;
   })();
-  var renderHowtoCardWithBadge = function(title4) {
-    return function(badge) {
+  var renderHowtoCard = function(route) {
+    return function(title4) {
       return function(description) {
-        return function(bullets) {
-          return div2([classes(["howto-card"])])([h3([classes(["howto-card__title"])])([text2(title4), span2([classes(["howto-card__badge"])])([text2(badge)])]), p([classes(["howto-card__description"])])([text2(description)]), ul([classes(["howto-card__bullets"])])(map82(function(bullet) {
-            return li_([text2(bullet)]);
-          })(bullets))]);
-        };
-      };
-    };
-  };
-  var renderHowtoCard = function(title4) {
-    return function(description) {
-      return function(bullets) {
-        return div2([classes(["howto-card"])])([h3([classes(["howto-card__title"])])([text2(title4)]), p([classes(["howto-card__description"])])([text2(description)]), ul([classes(["howto-card__bullets"])])(map82(function(bullet) {
-          return li_([text2(bullet)]);
-        })(bullets))]);
+        return a([classes(["howto-card"]), href("#" + routeToPath(route))])([h3([classes(["howto-card__title"])])([text2(title4)]), p([classes(["howto-card__description"])])([text2(description)])]);
       };
     };
   };
@@ -48699,7 +48688,7 @@
   var render49 = function(v) {
     return div2([classes(["docs-page", "howto-wiki"])])([slot_2(_docsHeader)(unit)(component42)({
       currentSection: new Just(HowToSection.value)
-    }), section([classes(["docs-hero"])])([div2([classes(["docs-hero-content"])])([h1([classes(["docs-hero-title"])])([text2("How-to Guides")]), p([classes(["docs-hero-description"])])([text2("Practical guides for accomplishing specific tasks with PureScript D3. Each topic includes bullet points of what will be covered.")])])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text2("Core Techniques")]), renderHowtoCard("Creating Animated Transitions")("How to create smooth, animated transitions between visualization states.")(["Setting up TransitionConfig (duration, easing, delay)", "Enter transitions for new elements", "Update transitions for changing data", "Exit transitions for removed elements", "Staggering animations with index-based delays", "Chaining transitions for multi-step animations"]), renderHowtoCard("Responding to User Events")("How to make visualizations interactive with click, hover, and other events.")(["Click handlers on elements", "Hover effects and highlights", "Mouse position for tooltips", "Keyboard events", "Event delegation with selections"]), renderHowtoCard("Adding Tooltips")("How to add informative tooltips that appear on hover.")(["Basic tooltip div approach", "Positioning relative to mouse/element", "Showing/hiding on hover", "Formatting data in tooltips", "Styling and theming"])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text2("Data & Scales")]), renderHowtoCard("Loading External Data")("How to fetch and parse external data sources for visualization.")(["Fetching JSON data with Aff", "Parsing CSV data", "Handling loading states", "Error handling and fallbacks", "Caching and refreshing data"]), renderHowtoCard("Creating Axes and Scales")("How to set up scales and generate axes for charts.")(["Setting up linear, ordinal, and time scales", "Generating axes with d3-axis", "Formatting tick labels", "Responsive axes that resize", "Custom tick values"])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text2("Layouts")]), renderHowtoCard("Building Force-Directed Graphs")("How to create interactive force-directed network visualizations.")(["Setting up the D3 force simulation", "Configuring forces (charge, link, center, collision)", "Connecting simulation tick to DOM updates", "Node dragging with force interaction", "Restarting simulation on data changes", "Alpha decay and cooling"]), renderHowtoCard("Working with Hierarchical Data")("How to visualize tree structures, treemaps, and other hierarchical layouts.")(["Converting flat data to tree structure", "Using d3-hierarchy layouts (tree, cluster, treemap)", "Link generators for tree connections", "Radial layouts", "Collapsible trees with enter/exit"]), renderHowtoCard("Using the TreeAPI")("How to use the declarative TreeAPI for building visualization structures.")(["When to use TreeAPI vs SelectionM directly", "Building declarative tree structures", "Join nodes for data-driven elements", "NestedJoin for hierarchical DOM", "Choosing the right interpreter"])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text2("Development")]), renderHowtoCard("Debugging Visualizations")("How to debug and troubleshoot visualization issues.")(["Using the Mermaid interpreter to inspect tree structure", "Console logging in attribute functions", "Inspecting enter/update/exit selections", "Common errors and their causes", "Browser DevTools for SVG inspection"]), renderHowtoCardWithBadge("Performance Optimization")("In Progress")("How to optimize visualizations for large datasets and smooth interactions.")(["Strategies for large datasets (sampling, aggregation)", "Canvas rendering for many elements", "Throttling/debouncing updates", "Minimizing DOM mutations", "When to use vanilla D3 escape hatches"])])]);
+    }), section([classes(["docs-hero"])])([div2([classes(["docs-hero-content"])])([h1([classes(["docs-hero-title"])])([text2("How-to Guides")]), p([classes(["docs-hero-description"])])([text2("Practical guides for accomplishing specific tasks with PureScript D3. Each topic includes bullet points of what will be covered.")])])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text2("Core Techniques")]), div2([classes(["howto-card-grid"])])([renderHowtoCard(HowtoTransitions.value)("Creating Animated Transitions")("Smooth, animated transitions between visualization states."), renderHowtoCard(HowtoEvents.value)("Responding to User Events")("Click, hover, drag, and zoom interactions."), renderHowtoCard(HowtoTooltips.value)("Adding Tooltips")("Informative tooltips that appear on hover.")])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text2("Data & Scales")]), div2([classes(["howto-card-grid"])])([renderHowtoCard(HowtoLoadingData.value)("Loading External Data")("Fetch and parse JSON/CSV with Affjax."), renderHowtoCard(HowtoAxesScales.value)("Creating Axes and Scales")("Color interpolation and D3 scale/axis FFI.")])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text2("Layouts")]), div2([classes(["howto-card-grid"])])([renderHowtoCard(HowtoForceGraphs.value)("Building Force-Directed Graphs")("SimulationM for interactive network visualizations."), renderHowtoCard(HowtoHierarchical.value)("Working with Hierarchical Data")("Tree, cluster, and treemap layouts."), renderHowtoCard(HowtoTreeAPI.value)("Using the TreeAPI")("Declarative trees with multiple interpreters.")])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text2("Development")]), div2([classes(["howto-card-grid"])])([renderHowtoCard(HowtoDebugging.value)("Debugging Visualizations")("Console logging, DevTools, Mermaid diagrams."), renderHowtoCard(HowtoPerformance.value)("Performance Optimization")("DOM optimization, tick efficiency, CSS transitions.")])])]);
   };
   var component43 = /* @__PURE__ */ (function() {
     return mkComponent({
@@ -52364,7 +52353,7 @@
   // output/PSD3.Shared.SectionNav/index.js
   var eq11 = /* @__PURE__ */ eq(eqSection);
   var eq17 = /* @__PURE__ */ eq(eqRoute);
-  var map83 = /* @__PURE__ */ map(functorArray);
+  var map82 = /* @__PURE__ */ map(functorArray);
   var sectionTitle2 = function(v) {
     if (v instanceof UnderstandingSection) {
       return "Understanding";
@@ -52440,17 +52429,17 @@
   };
   var renderModuleCategory = function(currentRoute) {
     return function(category) {
-      return div2([classes(["section-nav__module-category"])])([h4([classes(["section-nav__category-title"])])([text2(category.title)]), ul([classes(["section-nav__module-list"])])(map83(renderModuleLink(currentRoute))(category.modules))]);
+      return div2([classes(["section-nav__module-category"])])([h4([classes(["section-nav__category-title"])])([text2(category.title)]), ul([classes(["section-nav__module-list"])])(map82(renderModuleLink(currentRoute))(category.modules))]);
     };
   };
   var render80 = function(v) {
     return div2([classes(["section-nav"])])([div2([classes(["section-nav__quadrant"])])([renderQuadrant2(TutorialSection.value)(v.currentSection), renderQuadrant2(HowToSection.value)(v.currentSection), renderQuadrant2(APISection.value)(v.currentSection), renderQuadrant2(UnderstandingSection.value)(v.currentSection)]), h3([classes(["section-nav__title"])])([text2(sectionTitle2(v.currentSection))]), (function() {
       if (v.moduleCategories instanceof Just) {
-        return nav([classes(["section-nav__modules"])])(map83(renderModuleCategory(v.currentRoute))(v.moduleCategories.value0));
+        return nav([classes(["section-nav__modules"])])(map82(renderModuleCategory(v.currentRoute))(v.moduleCategories.value0));
       }
       ;
       if (v.moduleCategories instanceof Nothing) {
-        return nav([classes(["section-nav__pages"])])(map83(renderPageLink(v.currentRoute))(v.sectionPages));
+        return nav([classes(["section-nav__pages"])])(map82(renderPageLink(v.currentRoute))(v.sectionPages));
       }
       ;
       throw new Error("Failed pattern match at PSD3.Shared.SectionNav (line 54, column 7 - line 64, column 61): " + [v.moduleCategories.constructor.name]);
@@ -52486,7 +52475,7 @@
   var show75 = /* @__PURE__ */ show(showInt);
   var append120 = /* @__PURE__ */ append(semigroupArray);
   var type_20 = /* @__PURE__ */ type_3(isPropButtonType);
-  var map84 = /* @__PURE__ */ map(functorArray);
+  var map83 = /* @__PURE__ */ map(functorArray);
   var AnchorLink = /* @__PURE__ */ (function() {
     function AnchorLink2(value0) {
       this.value0 = value0;
@@ -52534,11 +52523,11 @@
     throw new Error("Failed pattern match at PSD3.Understanding.TOC (line 78, column 5 - line 93, column 33): " + [item.target.constructor.name]);
   };
   var renderTOC = function(config) {
-    return div2([classes(["toc-panel"])])([img([src2(fromMaybe("bookmark.jpeg")(config.image)), alt4(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text2(config.title)]), button([classes(["floating-panel__toggle"]), type_20(ButtonButton.value)])([text2("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])(map84(renderTOCItem)(config.items))])])]);
+    return div2([classes(["toc-panel"])])([img([src2(fromMaybe("bookmark.jpeg")(config.image)), alt4(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text2(config.title)]), button([classes(["floating-panel__toggle"]), type_20(ButtonButton.value)])([text2("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])(map83(renderTOCItem)(config.items))])])]);
   };
 
   // output/PSD3.Reference.Reference/index.js
-  var map85 = /* @__PURE__ */ map(functorArray);
+  var map84 = /* @__PURE__ */ map(functorArray);
   var pure81 = /* @__PURE__ */ pure(applicativeHalogenM);
   var modify_48 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var slot2 = /* @__PURE__ */ slot()({
@@ -52571,7 +52560,7 @@
   var toSectionNavCategory = function(category) {
     return {
       title: category.title,
-      modules: map85(function(m) {
+      modules: map84(function(m) {
         return {
           name: m.name,
           description: m.description
@@ -52739,7 +52728,7 @@
       currentSection: APISection.value,
       currentRoute: state3.currentRoute,
       sectionPages: [],
-      moduleCategories: new Just(map85(toSectionNavCategory)(moduleCategories))
+      moduleCategories: new Just(map84(toSectionNavCategory)(moduleCategories))
     }), main([classes(["reference-main"])])([(function() {
       if (state3.currentRoute instanceof Reference) {
         return renderModuleComponent("PSD3.Capabilities.Selection");
@@ -53097,7 +53086,7 @@
   var append34 = /* @__PURE__ */ append(semigroupArray);
   var eq18 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
   var append121 = /* @__PURE__ */ append(semigroupString);
-  var map86 = /* @__PURE__ */ map(functorArray);
+  var map85 = /* @__PURE__ */ map(functorArray);
   var bind135 = /* @__PURE__ */ bind(bindAff);
   var liftEffect78 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var discard101 = /* @__PURE__ */ discard(discardUnit)(bindAff);
@@ -53134,7 +53123,7 @@
     var formatFile = function(file) {
       return "File: " + (file.filename + ("\n" + (repeatString("-")(80) + ("\n" + file.content))));
     };
-    var fileTexts = map86(formatFile)(files2);
+    var fileTexts = map85(formatFile)(files2);
     return intercalateArray(separator)(fileTexts);
   };
   var downloadAsZip = function(projectName) {
@@ -53154,11 +53143,11 @@
   };
 
   // output/PSD3.Wizard.Templates/index.js
-  var map87 = /* @__PURE__ */ map(functorArray);
+  var map86 = /* @__PURE__ */ map(functorArray);
   var map121 = /* @__PURE__ */ map(functorMaybe);
   var intercalate7 = /* @__PURE__ */ intercalate2(monoidString);
   var generateRecordType = function(fields) {
-    var fieldLines = map87(function(f) {
+    var fieldLines = map86(function(f) {
       return f.name + (" :: " + f.fieldType);
     })(fields);
     return joinWith("\n  , ")(fieldLines);
@@ -53202,7 +53191,7 @@
 `)));
   };
   var generateDatumType = function(fields) {
-    var typeLines = map87(function(f) {
+    var typeLines = map86(function(f) {
       return f.name + (" :: Datum_ -> " + f.fieldType);
     })(fields);
     return joinWith("\n  , ")(typeLines);
@@ -53213,10 +53202,10 @@
         var firstField = fromMaybe("x")(map121(function(f) {
           return f.name;
         })(head(fields)));
-        var fieldList = intercalate7("\n")(map87(function(f) {
+        var fieldList = intercalate7("\n")(map86(function(f) {
           return "- " + (f.name + (": " + f.fieldType));
         })(fields));
-        var exampleFields = intercalate7(", ")(map87(function(f) {
+        var exampleFields = intercalate7(", ")(map86(function(f) {
           return f.name + ": 0.0";
         })(fields));
         var datumType = generateDatumType(fields);
@@ -53226,7 +53215,7 @@
   };
   var generateAccessors = function(fields) {
     return function(coerceFnName) {
-      var accessorLines = map87(function(f) {
+      var accessorLines = map86(function(f) {
         return f.name + (": _." + (f.name + (" <<< " + coerceFnName)));
       })(fields);
       return joinWith("\n  , ")(accessorLines);
@@ -53249,7 +53238,7 @@
 
   // output/PSD3.Wizard.Generator/index.js
   var intercalate8 = /* @__PURE__ */ intercalate2(monoidString);
-  var map88 = /* @__PURE__ */ map(functorArray);
+  var map87 = /* @__PURE__ */ map(functorArray);
   var append122 = /* @__PURE__ */ append(semigroupArray);
   var sineWaveData = "[ { x: 0.0, y: 100.0 }\n  , { x: 5.0, y: 125.0 }\n  , { x: 10.0, y: 145.0 }\n  , { x: 15.0, y: 159.0 }\n  , { x: 20.0, y: 165.0 }\n  , { x: 25.0, y: 159.0 }\n  , { x: 30.0, y: 145.0 }\n  , { x: 35.0, y: 125.0 }\n  , { x: 40.0, y: 100.0 }\n  , { x: 45.0, y: 75.0 }\n  , { x: 50.0, y: 55.0 }\n  , { x: 55.0, y: 41.0 }\n  , { x: 60.0, y: 35.0 }\n  , { x: 65.0, y: 41.0 }\n  , { x: 70.0, y: 55.0 }\n  , { x: 75.0, y: 75.0 }\n  , { x: 80.0, y: 100.0 }\n  ]";
   var scatterData2 = "[ { x: 10.0, y: 20.0 }\n  , { x: 25.0, y: 45.0 }\n  , { x: 40.0, y: 30.0 }\n  , { x: 55.0, y: 60.0 }\n  , { x: 70.0, y: 40.0 }\n  , { x: 85.0, y: 70.0 }\n  , { x: 100.0, y: 55.0 }\n  , { x: 115.0, y: 80.0 }\n  , { x: 130.0, y: 65.0 }\n  , { x: 145.0, y: 90.0 }\n  ]";
@@ -53271,7 +53260,7 @@
       ;
       return field.name + ": 0.0";
     };
-    var sampleRow = "{ " + (intercalate8(", ")(map88(generateFieldValue)(fields)) + " }");
+    var sampleRow = "{ " + (intercalate8(", ")(map87(generateFieldValue)(fields)) + " }");
     var rows4 = intercalate8("\n  , ")([sampleRow, sampleRow, sampleRow]);
     return "[ " + (rows4 + "\n  ]");
   };
@@ -53338,7 +53327,7 @@
   };
 
   // output/PSD3.Wizard.Wizard/index.js
-  var map89 = /* @__PURE__ */ map(functorArray);
+  var map88 = /* @__PURE__ */ map(functorArray);
   var eq19 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
   var show76 = /* @__PURE__ */ show(showDifficulty);
   var eq25 = /* @__PURE__ */ eq(eqDifficulty);
@@ -53467,7 +53456,7 @@
     var renderFile = function(file) {
       return details([classes(["wizard__file"])])([summary_([text2(file.filename)]), pre([classes(["wizard__code"])])([code_([text2(file.content)])])]);
     };
-    return div2([classes(["wizard__step-content"])])([h2_([text2("Review Generated Files")]), p_([text2("Preview the files that will be generated for your project.")]), div2([classes(["wizard__file-list"])])(map89(renderFile)(state3.generatedFiles))]);
+    return div2([classes(["wizard__step-content"])])([h2_([text2("Review Generated Files")]), p_([text2("Preview the files that will be generated for your project.")]), div2([classes(["wizard__file-list"])])(map88(renderFile)(state3.generatedFiles))]);
   };
   var renderHeader18 = function(state3) {
     return header([classes(["wizard__header"])])([h1_([text2("PSD3 Visualization Wizard")]), p([classes(["wizard__subtitle"])])([text2("Create a new PSD3 visualization project in 4 easy steps")])]);
@@ -53489,7 +53478,7 @@
         ;
         return c;
       };
-      var $151 = map89(toLower2);
+      var $151 = map88(toLower2);
       return function($152) {
         return fromCharArray($151(toCharArray($152)));
       };
@@ -53527,7 +53516,7 @@
       })();
       return div2([classes([cardClass]), onClick(function(v) {
         return new SelectDataset(dataset);
-      })])([div2([classes(["dataset-card__header"])])([h3_([text2(dataset.name)]), span2([classes(["difficulty-badge difficulty-badge--" + toLowerCase(show76(dataset.difficulty))])])([text2(show76(dataset.difficulty))])]), p([classes(["dataset-card__description"])])([text2(dataset.description)]), div2([classes(["dataset-card__info"])])([strong_([text2("Fields: ")]), text2(intercalate9(", ")(map89(function(f) {
+      })])([div2([classes(["dataset-card__header"])])([h3_([text2(dataset.name)]), span2([classes(["difficulty-badge difficulty-badge--" + toLowerCase(show76(dataset.difficulty))])])([text2(show76(dataset.difficulty))])]), p([classes(["dataset-card__description"])])([text2(dataset.description)]), div2([classes(["dataset-card__info"])])([strong_([text2("Fields: ")]), text2(intercalate9(", ")(map88(function(f) {
         return f.name + (": " + f.fieldType);
       })(dataset.fields)))]), div2([classes(["dataset-card__viz"])])([strong_([text2("Suggested: ")]), text2(dataset.suggestedViz)]), div2([classes(["dataset-card__note"])])([text2(dataset.educationalNote)])]);
     };
@@ -53571,7 +53560,7 @@
       return "";
     })()]), onClick(function(v) {
       return new SetDifficultyFilter(new Just(Intermediate.value));
-    })])([text2("Intermediate")])]), div2([classes(["wizard__dataset-grid"])])(map89(renderDatasetCard)(filteredDatasets))]);
+    })])([text2("Intermediate")])]), div2([classes(["wizard__dataset-grid"])])(map88(renderDatasetCard)(filteredDatasets))]);
   };
   var isValidModuleName = function(name16) {
     var all4 = function(pred) {
@@ -54067,7 +54056,7 @@
   })();
 
   // output/Routing.Parser/index.js
-  var map90 = /* @__PURE__ */ map(functorArray);
+  var map89 = /* @__PURE__ */ map(functorArray);
   var discard103 = /* @__PURE__ */ discard(discardUnit)(bindMaybe);
   var guard2 = /* @__PURE__ */ guard(alternativeMaybe);
   var apply6 = /* @__PURE__ */ apply(applyMaybe);
@@ -54080,7 +54069,7 @@
   var fromFoldable212 = /* @__PURE__ */ fromFoldable2(foldableMaybe);
   var parseQueryPart = function(decoder) {
     var part2tuple = function(input3) {
-      var keyVal = map90(decoder)(split("=")(input3));
+      var keyVal = map89(decoder)(split("=")(input3));
       return discard103(guard2(length(keyVal) <= 2))(function() {
         return apply6(map122(Tuple.create)(head(keyVal)))(index(keyVal)(1));
       });
@@ -54095,7 +54084,7 @@
   var parse8 = function(decoder) {
     return function(hash2) {
       var pathParts = function(str2) {
-        var parts = fromFoldable119(map90(function($31) {
+        var parts = fromFoldable119(map89(function($31) {
           return Path4.create(decoder($31));
         })(split("/")(str2)));
         var v2 = unsnoc(parts);
@@ -54138,7 +54127,7 @@
 
   // output/Routing.Hash/index.js
   var bind138 = /* @__PURE__ */ bind(bindEffect);
-  var map91 = /* @__PURE__ */ map(functorEffect);
+  var map90 = /* @__PURE__ */ map(functorEffect);
   var bindFlipped9 = /* @__PURE__ */ bindFlipped(bindEffect);
   var join4 = /* @__PURE__ */ join(bindEffect);
   var apply7 = /* @__PURE__ */ apply(applyEffect);
@@ -54148,7 +54137,7 @@
     return bind138(bind138(windowImpl)(location))(setHash(h));
   };
   var getHash = /* @__PURE__ */ bind138(/* @__PURE__ */ bind138(windowImpl)(location))(/* @__PURE__ */ (function() {
-    var $16 = map91((function() {
+    var $16 = map90((function() {
       var $18 = fromMaybe("");
       var $19 = stripPrefix("#");
       return function($20) {
@@ -54163,9 +54152,9 @@
     return function(init14) {
       return function __do4() {
         var ref2 = bindFlipped9($$new)(bindFlipped9(init14)(getHash))();
-        var win = map91(toEventTarget)(windowImpl)();
+        var win = map90(toEventTarget)(windowImpl)();
         var listener = eventListener(function(v) {
-          return bindFlipped9(flip(write)(ref2))(join4(apply7(map91(cb)(read(ref2)))(getHash)));
+          return bindFlipped9(flip(write)(ref2))(join4(apply7(map90(cb)(read(ref2)))(getHash)));
         })();
         addEventListener2(hashchange)(listener)(false)(win)();
         return removeEventListener2(hashchange)(listener)(false)(win);

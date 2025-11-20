@@ -1,61 +1,6 @@
 // Tooltip module for Code Explorer
 // Shows node information including git metrics on hover
-
-let tooltipElement = null;
-
-// Ensure tooltip element exists
-function ensureTooltip() {
-  if (!tooltipElement) {
-    tooltipElement = document.createElement('div');
-    tooltipElement.className = 'node-tooltip';
-    tooltipElement.style.display = 'none';
-    document.body.appendChild(tooltipElement);
-  }
-  return tooltipElement;
-}
-
-// Show tooltip with content at position
-export function showTooltip_(content) {
-  return function(x) {
-    return function(y) {
-      return function() {
-        const tooltip = ensureTooltip();
-        tooltip.innerHTML = content;
-        tooltip.style.display = 'block';
-
-        // Position tooltip near cursor but offset to avoid overlap
-        const offsetX = 15;
-        const offsetY = 10;
-
-        // Get viewport dimensions to keep tooltip on screen
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-
-        // Calculate position
-        let posX = x + offsetX;
-        let posY = y + offsetY;
-
-        // Adjust if tooltip would go off screen
-        const tooltipRect = tooltip.getBoundingClientRect();
-        if (posX + tooltipRect.width > viewportWidth) {
-          posX = x - tooltipRect.width - offsetX;
-        }
-        if (posY + tooltipRect.height > viewportHeight) {
-          posY = y - tooltipRect.height - offsetY;
-        }
-
-        tooltip.style.left = posX + 'px';
-        tooltip.style.top = posY + 'px';
-      };
-    };
-  };
-}
-
-// Hide tooltip
-export function hideTooltip_() {
-  const tooltip = ensureTooltip();
-  tooltip.style.display = 'none';
-}
+// Uses PSD3v2.Tooltip library for show/hide, this module provides formatting
 
 // Format git metrics for display
 export function formatMetricsContent_(node) {

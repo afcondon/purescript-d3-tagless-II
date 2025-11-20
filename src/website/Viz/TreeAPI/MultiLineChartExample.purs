@@ -22,21 +22,12 @@ import PSD3v2.Axis.Axis (axisBottom, axisLeft, renderAxis, Scale)
 import PSD3v2.Capabilities.Selection (select, renderTree, on)
 import PSD3v2.Behavior.Types (onMouseLeaveWithInfo, onMouseMoveWithInfo, MouseEventInfo)
 import Data.Map as Map
-import Web.DOM.Element as Element
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
 import PSD3v2.VizTree.Tree (Tree, joinData)
 import PSD3v2.VizTree.Tree as T
+import PSD3v2.Tooltip (showTooltip, hideTooltip)
 import Web.DOM.Element (Element)
-import Web.HTML (window)
-import Web.HTML.Window (document)
-import Web.HTML.HTMLDocument (body)
-import Web.DOM.Node (appendChild)
-import Web.DOM.Document (createElement)
-import Web.HTML.HTMLDocument (toDocument)
-import Web.DOM.Element (toNode, setAttribute, setId)
-import Web.HTML.HTMLElement (toNode) as HTMLElement
-import Effect.Ref (Ref)
 import Effect.Ref as Ref
 import Data.Maybe (Maybe(..)) as Maybe
 
@@ -94,78 +85,6 @@ groupByDivision dataPoints =
            }
   in map toSeries grouped
 
--- | Create or get the tooltip element
--- Returns the tooltip Element for manipulation
-createTooltip :: Effect Element
-createTooltip = do
-  win <- window
-  htmlDoc <- document win
-  let doc = toDocument htmlDoc
-
-  -- Create tooltip div
-  tooltip <- createElement "div" doc
-  setId "multiline-tooltip" tooltip
-
-  -- Style the tooltip
-  setAttribute "style"
-    ( "position: absolute; "
-    <> "background: rgba(0, 0, 0, 0.8); "
-    <> "color: white; "
-    <> "padding: 8px 12px; "
-    <> "border-radius: 4px; "
-    <> "font-size: 12px; "
-    <> "pointer-events: none; "
-    <> "opacity: 0; "
-    <> "z-index: 1000; "
-    <> "transition: opacity 0.15s;"
-    ) tooltip
-
-  -- Append to body
-  maybeBody <- body htmlDoc
-  case maybeBody of
-    Just b -> void $ appendChild (toNode tooltip) (HTMLElement.toNode b)
-    Nothing -> pure unit
-
-  pure tooltip
-
--- | Show tooltip with content at position
-showTooltip :: Element -> String -> Number -> Number -> Effect Unit
-showTooltip tooltip content pageX pageY = do
-  setAttribute "style"
-    ( "position: absolute; "
-    <> "background: rgba(0, 0, 0, 0.8); "
-    <> "color: white; "
-    <> "padding: 8px 12px; "
-    <> "border-radius: 4px; "
-    <> "font-size: 12px; "
-    <> "pointer-events: none; "
-    <> "opacity: 1; "
-    <> "z-index: 1000; "
-    <> "transition: opacity 0.15s; "
-    <> "left: " <> show (pageX + 15.0) <> "px; "
-    <> "top: " <> show (pageY - 10.0) <> "px;"
-    ) tooltip
-  setInnerHTML_ content tooltip
-
--- | Hide tooltip
-hideTooltip :: Element -> Effect Unit
-hideTooltip tooltip = do
-  setAttribute "style"
-    ( "position: absolute; "
-    <> "background: rgba(0, 0, 0, 0.8); "
-    <> "color: white; "
-    <> "padding: 8px 12px; "
-    <> "border-radius: 4px; "
-    <> "font-size: 12px; "
-    <> "pointer-events: none; "
-    <> "opacity: 0; "
-    <> "z-index: 1000; "
-    <> "transition: opacity 0.15s;"
-    ) tooltip
-
--- FFI for setting innerHTML
-foreign import setInnerHTML_ :: String -> Element -> Effect Unit
-
 -- FFI for setTimeout/clearTimeout
 foreign import setTimeout_ :: Effect Unit -> Int -> Effect Int
 foreign import clearTimeout_ :: Int -> Effect Unit
@@ -175,8 +94,7 @@ drawMultiLineChart :: String -> Array DataPoint -> Effect Unit
 drawMultiLineChart selector unemploymentData = runD3v2M do
   container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
 
-  -- Create tooltip element and timeout ref for debounced hiding
-  tooltip <- liftEffect createTooltip
+  -- Timeout ref for debounced tooltip hiding
   hideTimeoutRef <- liftEffect $ Ref.new (Maybe.Nothing :: Maybe.Maybe Int)
 
   -- Chart dimensions
@@ -313,7 +231,7 @@ drawMultiLineChart selector unemploymentData = runD3v2M do
           Maybe.Just point -> do
             let content = "<strong>" <> info.datum.division <> "</strong><br/>"
                        <> point.date <> ": " <> show point.rate <> "%"
-            showTooltip tooltip content info.pageX info.pageY
+            showTooltip content info.pageX info.pageY
           Maybe.Nothing -> pure unit
         ) linesSel
 
@@ -321,7 +239,7 @@ drawMultiLineChart selector unemploymentData = runD3v2M do
       -- This provides a buffer so tiny mouse movements don't immediately cancel the tooltip
       _ <- on (onMouseLeaveWithInfo \(_ :: MouseEventInfo Series) -> do
         -- Set a timeout to hide after 150ms
-        timeoutId <- setTimeout_ (hideTooltip tooltip) 150
+        timeoutId <- setTimeout_ hideTooltip 150
         Ref.write (Maybe.Just timeoutId) hideTimeoutRef
         ) linesSel
 
