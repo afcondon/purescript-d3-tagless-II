@@ -32,7 +32,6 @@ module PSD3.CodeExplorer where
 import Prelude
 
 import Control.Monad.State (class MonadState)
-import D3.Viz.Spago.Draw (getVizEventFromClick)
 import D3.Viz.Spago.Draw as Graph
 import D3.Viz.Spago.Files (NodeType(..))
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage, isPackageOrVisibleModule)
@@ -61,10 +60,7 @@ import PSD3.CodeExplorer.HTML (render)
 import PSD3.CodeExplorer.Scenes (horizontalTreeScene, layerSwarmScene, packageGraphScene, packageGridScene, radialTreeScene, verticalTreeScene)
 import PSD3.CodeExplorer.State (State, TransitionMatrix, applySceneConfig, applySceneWithTransition, clearAllTags, getModelLinks, getModelNodes, getSelections, initialScene, setChooseNodes, setCssClass, setLinksActive, setLinksShown, setSceneAttributes, tagNodes, toggleForce)
 import PSD3.Data.Tree (TreeLayout(..))
-import PSD3.Internal.Attributes.Sugar (onMouseEventEffectful, x)
-import PSD3.Internal.Selection.Types (SelectionAttribute)
 import PSD3.Internal.Simulation.Types (initialSimulationState)
-import PSD3.Internal.Types (MouseEvent(..))
 import PSD3.Interpreter.D3 (evalEffectSimulation)
 import PSD3v2.Interpreter.D3v2 (evalD3v2SimM)
 import PSD3v2.Simulation.RunSimulation as LibRunSim
@@ -150,9 +146,6 @@ component = H.mkComponent
     , tags: Map.empty
     , showWelcome: true
     }
-
-simulationEvent :: HS.Listener (Action SpagoSimNode) -> SelectionAttribute SpagoSimNode
-simulationEvent l = onMouseEventEffectful MouseClick (\e d t -> liftEffect $ HS.notify l (EventFromVizualization (getVizEventFromClick e d t)))
 
 -- | Main action handler - processes all user interactions and internal events
 handleAction :: forall t316 t317 t318.
@@ -399,11 +392,13 @@ runSimulation = do
       getModelNodes
       -- Extract model links from state
       getModelLinks
-      -- Enhance attributes with tags
-      -- TODO v2: Event handlers need to be added via `on` behavior in render callbacks
-      -- not as attributes. Need to refactor event handling for v2.
+      -- Enhance attributes with tags and click handler
       (\attrs st -> attrs {
           tagMap = Just st.tags  -- Pass tags for automatic CSS class propagation
+        , nodeClick = case st.eventListener of
+            Just listener -> Just \node ->
+              HS.notify listener (EventFromVizualization (NodeClick node.nodetype node.id))
+            Nothing -> Nothing
         }
       )
       -- Visualization-specific updateSimulation

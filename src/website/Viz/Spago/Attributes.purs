@@ -10,6 +10,7 @@ import PSD3v2.Attribute.Types (Attribute, class_, fill, height, opacity, radius,
 import Data.Map (Map)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set (Set)
+import Effect (Effect)
 import Data.Nullable (toMaybe)
 import Data.Int (toNumber)
 import Data.Number (sqrt) as Number
@@ -72,6 +73,7 @@ type SpagoSceneAttributes = {
     circles :: Array (Attribute SpagoSimNode)
   , labels  :: Array (Attribute SpagoSimNode)
   , tagMap  :: Maybe (Map NodeID (Set String))  -- Optional tag map for automatic CSS class propagation
+  , nodeClick :: Maybe (SpagoSimNode -> Effect Unit)  -- Optional click handler for nodes
 }
 
 -- | Attributes for the "cluster" scene - emphasizes package groupings with
@@ -91,6 +93,7 @@ clusterSceneAttributes = {
             , textContent \(d :: SpagoSimNode) -> nodeName d
           ]
   , tagMap: Nothing
+  , nodeClick: Nothing
 }
 
 -- | Attributes for the "graph" scene - colors nodes by group/package with
@@ -108,6 +111,7 @@ graphSceneAttributes = {
             , textContent \(d :: SpagoSimNode) -> nodeName d
           ]
   , tagMap: Nothing
+  , nodeClick: Nothing
 }
 
 -- | Attributes for the "tree" scene - uses depth-based color gradient for fill
@@ -125,6 +129,7 @@ treeSceneAttributes = {
             , textContent\(d :: SpagoSimNode) -> nodeName d
             ]
   , tagMap: Nothing
+  , nodeClick: Nothing
 }
 
 svgAttrs :: forall d. Number -> Number -> Array (Attribute d)

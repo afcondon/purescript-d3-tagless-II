@@ -18847,6 +18847,9 @@
   var onMouseLeaveWithInfo = /* @__PURE__ */ (function() {
     return MouseLeaveWithInfo.create;
   })();
+  var onClickWithDatum = /* @__PURE__ */ (function() {
+    return ClickWithDatum.create;
+  })();
   var defaultZoom = function(scaleExtent) {
     return function(targetSelector) {
       return {
@@ -44476,7 +44479,7 @@
       return 0;
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 31, column 19 - line 33, column 23): " + [d16.nodetype.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 32, column 19 - line 34, column 23): " + [d16.nodetype.constructor.name]);
   };
   var opacityByType = function(d16) {
     if (d16.nodetype instanceof IsPackage) {
@@ -44487,7 +44490,7 @@
       return 0.7;
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 50, column 19 - line 52, column 22): " + [d16.nodetype.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 51, column 19 - line 53, column 22): " + [d16.nodetype.constructor.name]);
   };
   var nodeRadius = function(d16) {
     return d16.r;
@@ -44519,7 +44522,8 @@
       }), textAnchor23("middle"), textContent25(function(v) {
         return nodeName2(v);
       })],
-      tagMap: Nothing.value
+      tagMap: Nothing.value,
+      nodeClick: Nothing.value
     };
   })();
   var strokeByUsage = function(d16) {
@@ -44539,7 +44543,7 @@
       return d3SchemeSequential10N_(toNumber(v.value0));
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 45, column 18 - line 47, column 56): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 46, column 18 - line 48, column 56): " + [v.constructor.name]);
   };
   var treeSceneAttributes = /* @__PURE__ */ (function() {
     return {
@@ -44553,7 +44557,8 @@
       labels: [class_45("label"), x45(4), y3(toAttrNumberNumber)(2), textContent25(function(v) {
         return nodeName2(v);
       })],
-      tagMap: Nothing.value
+      tagMap: Nothing.value,
+      nodeClick: Nothing.value
     };
   })();
   var clusterSceneAttributes = /* @__PURE__ */ (function() {
@@ -44572,7 +44577,8 @@
       }), textAnchor23("middle"), textContent25(function(v) {
         return nodeName2(v);
       })],
-      tagMap: Nothing.value
+      tagMap: Nothing.value,
+      nodeClick: Nothing.value
     };
   })();
 
@@ -44583,6 +44589,7 @@
   var fromFoldable42 = /* @__PURE__ */ fromFoldable(foldableSet);
   var show73 = /* @__PURE__ */ show(showLinkType);
   var transform19 = /* @__PURE__ */ transform2(toAttrStringFunctionStrin);
+  var discard67 = /* @__PURE__ */ discard(discardUnit);
   var stroke37 = /* @__PURE__ */ stroke(toAttrStringFunctionStrin);
   var x116 = /* @__PURE__ */ x1(toAttrNumberFunctionNumbe);
   var y116 = /* @__PURE__ */ y1(toAttrNumberFunctionNumbe);
@@ -44600,7 +44607,7 @@
       });
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 41, column 1 - line 41, column 88): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 42, column 1 - line 42, column 88): " + [v.constructor.name]);
   };
   var linkColor = function(l) {
     if (l.linktype instanceof P2P) {
@@ -44619,13 +44626,16 @@
       return "orange";
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 33, column 15 - line 37, column 23): " + [l.linktype.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 34, column 15 - line 38, column 23): " + [l.linktype.constructor.name]);
   };
   var linkClass = function(l) {
     return show73(l.linktype);
   };
   var spagoRenderCallbacks = function(dictMonad) {
-    var bind140 = bind(dictMonad.Bind1());
+    var Bind1 = dictMonad.Bind1();
+    var bind140 = bind(Bind1);
+    var discard118 = discard67(Bind1);
+    var $$void19 = $$void(Bind1.Apply0().Functor0());
     var pure85 = pure(dictMonad.Applicative0());
     return function(dictSelectionM) {
       var append36 = append7(dictSelectionM);
@@ -44642,7 +44652,19 @@
               return bind140(appendChildInheriting4(Circle2.value)(attrs.circles)(groupEnter))(function(circleEnter) {
                 return bind140(appendChildInheriting4(Text3.value)(attrs.labels)(groupEnter))(function(labelEnter) {
                   return bind140(on14(new Drag2(simulationDrag("spago")))(groupEnter))(function() {
-                    return pure85(groupEnter);
+                    return discard118((function() {
+                      if (attrs.nodeClick instanceof Just) {
+                        return $$void19(on14(onClickWithDatum(attrs.nodeClick.value0))(groupEnter));
+                      }
+                      ;
+                      if (attrs.nodeClick instanceof Nothing) {
+                        return pure85(unit);
+                      }
+                      ;
+                      throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 82, column 5 - line 84, column 27): " + [attrs.nodeClick.constructor.name]);
+                    })())(function() {
+                      return pure85(groupEnter);
+                    });
                   });
                 });
               });
@@ -44783,6 +44805,19 @@
   // output/PSD3.CodeExplorer.Actions/index.js
   var eq9 = /* @__PURE__ */ eq(eqTreeLayout);
   var compare26 = /* @__PURE__ */ compare(ordTreeLayout);
+  var NodeClick = /* @__PURE__ */ (function() {
+    function NodeClick2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    NodeClick2.create = function(value0) {
+      return function(value1) {
+        return new NodeClick2(value0, value1);
+      };
+    };
+    return NodeClick2;
+  })();
   var TopLevelCSS = /* @__PURE__ */ (function() {
     function TopLevelCSS2(value0) {
       this.value0 = value0;
@@ -47137,10 +47172,10 @@
   };
 
   // output/PSD3v2.Simulation.RunSimulation/index.js
-  var discard67 = /* @__PURE__ */ discard(discardUnit);
+  var discard68 = /* @__PURE__ */ discard(discardUnit);
   var foldl17 = /* @__PURE__ */ foldl(foldableArray);
   var runSimulation = function(dictMonadAff) {
-    var discard214 = discard67(dictMonadAff.MonadEffect0().Monad0().Bind1());
+    var discard214 = discard68(dictMonadAff.MonadEffect0().Monad0().Bind1());
     var liftAff34 = liftAff(dictMonadAff);
     return function(dictSimulationM2) {
       var SimulationM1 = dictSimulationM2.SimulationM1();
@@ -47232,7 +47267,7 @@
   var runSimulationFromState2 = /* @__PURE__ */ runSimulationFromState(monadAffD3v2SimM)(simulationM2D3v2Selection)(monadStateRecordD3v2SimM);
   var updateSimulation2 = /* @__PURE__ */ updateSimulation(bindD3v2SimM)(monadEffectD3v2SimM)(selectionMD3v2Selection_D1)(simulationM2D3v2Selection);
   var bind78 = /* @__PURE__ */ bind(bindHalogenM);
-  var discard68 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard69 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_17 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var get21 = /* @__PURE__ */ get(monadStateHalogenM);
   var initialize6 = /* @__PURE__ */ initialize5(bindD3v2SimM)(monadEffectD3v2SimM)(simulationM2D3v2Selection)(selectionMD3v2Selection_D1);
@@ -47252,7 +47287,20 @@
             return {
               circles: attrs.circles,
               labels: attrs.labels,
-              tagMap: new Just(st.tags)
+              tagMap: new Just(st.tags),
+              nodeClick: (function() {
+                if (st.eventListener instanceof Just) {
+                  return new Just(function(node) {
+                    return notify(st.eventListener.value0)(new EventFromVizualization(new NodeClick(node.nodetype, node.id)));
+                  });
+                }
+                ;
+                if (st.eventListener instanceof Nothing) {
+                  return Nothing.value;
+                }
+                ;
+                throw new Error("Failed pattern match at PSD3.CodeExplorer (line 398, column 23 - line 401, column 31): " + [st.eventListener.constructor.name]);
+              })()
             };
           };
         })(updateSimulation2)));
@@ -47262,78 +47310,78 @@
   var handleAction39 = function(dictMonadAff) {
     var monadAffHalogenM2 = monadAffHalogenM(dictMonadAff);
     var liftAff34 = liftAff(monadAffHalogenM2);
-    var liftEffect122 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftEffect80 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     var runSimulation1 = runSimulation2(monadAffHalogenM2)(monadStateHalogenM);
     return function(v) {
       if (v instanceof Initialize40) {
         return bind78(liftAff34(readModelData))(function(v1) {
-          return discard68(modify_17(function(v2) {
-            var $64 = {};
-            for (var $65 in v2) {
-              if ({}.hasOwnProperty.call(v2, $65)) {
-                $64[$65] = v2[$65];
+          return discard69(modify_17(function(v2) {
+            var $65 = {};
+            for (var $66 in v2) {
+              if ({}.hasOwnProperty.call(v2, $66)) {
+                $65[$66] = v2[$66];
               }
               ;
             }
             ;
-            $64.model = v1;
-            return $64;
+            $65.model = v1;
+            return $65;
           }))(function() {
             return bind78(get21)(function(state3) {
               return bind78(liftAff34(evalD3v2SimM(state3)(initialize6)))(function(openSelections) {
-                return discard68(modify_17(function(s) {
-                  var $70 = {};
-                  for (var $71 in s) {
-                    if ({}.hasOwnProperty.call(s, $71)) {
-                      $70[$71] = s[$71];
+                return discard69(modify_17(function(s) {
+                  var $71 = {};
+                  for (var $72 in s) {
+                    if ({}.hasOwnProperty.call(s, $72)) {
+                      $71[$72] = s[$72];
                     }
                     ;
                   }
                   ;
-                  $70.staging = (function() {
-                    var $67 = {};
-                    for (var $68 in s.staging) {
-                      if ({}.hasOwnProperty.call(s.staging, $68)) {
-                        $67[$68] = s["staging"][$68];
+                  $71.staging = (function() {
+                    var $68 = {};
+                    for (var $69 in s.staging) {
+                      if ({}.hasOwnProperty.call(s.staging, $69)) {
+                        $68[$69] = s["staging"][$69];
                       }
                       ;
                     }
                     ;
-                    $67.selections = {
+                    $68.selections = {
                       nodes: new Just(openSelections.nodes),
                       links: new Just(openSelections.links)
                     };
-                    return $67;
+                    return $68;
                   })();
-                  return $70;
+                  return $71;
                 }))(function() {
-                  return bind78(liftEffect122(create))(function(v2) {
-                    return discard68($$void18(subscribe2(v2.emitter)))(function() {
-                      return discard68(modify_17(function(v3) {
-                        var $74 = {};
-                        for (var $75 in v3) {
-                          if ({}.hasOwnProperty.call(v3, $75)) {
-                            $74[$75] = v3[$75];
+                  return bind78(liftEffect80(create))(function(v2) {
+                    return discard69($$void18(subscribe2(v2.emitter)))(function() {
+                      return discard69(modify_17(function(v3) {
+                        var $75 = {};
+                        for (var $76 in v3) {
+                          if ({}.hasOwnProperty.call(v3, $76)) {
+                            $75[$76] = v3[$76];
                           }
                           ;
                         }
                         ;
-                        $74.eventListener = new Just(v2.listener);
-                        return $74;
+                        $75.eventListener = new Just(v2.listener);
+                        return $75;
                       }))(function() {
-                        return bind78(liftEffect122(create))(function(v3) {
-                          return discard68($$void18(subscribe2(v3.emitter)))(function() {
-                            return discard68(modify_17(function(v4) {
-                              var $78 = {};
-                              for (var $79 in v4) {
-                                if ({}.hasOwnProperty.call(v4, $79)) {
-                                  $78[$79] = v4[$79];
+                        return bind78(liftEffect80(create))(function(v3) {
+                          return discard69($$void18(subscribe2(v3.emitter)))(function() {
+                            return discard69(modify_17(function(v4) {
+                              var $79 = {};
+                              for (var $80 in v4) {
+                                if ({}.hasOwnProperty.call(v4, $80)) {
+                                  $79[$80] = v4[$80];
                                 }
                                 ;
                               }
                               ;
-                              $78.transitionListener = new Just(v3.listener);
-                              return $78;
+                              $79.transitionListener = new Just(v3.listener);
+                              return $79;
                             }))(function() {
                               return pure76(unit);
                             });
@@ -47362,17 +47410,17 @@
           return handleAction39(dictMonadAff)(new SpotlightNode(v.value0.value1));
         }
         ;
-        throw new Error("Failed pattern match at PSD3.CodeExplorer (line 198, column 5 - line 200, column 68): " + [v.value0.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.CodeExplorer (line 191, column 5 - line 193, column 68): " + [v.value0.constructor.name]);
       }
       ;
       if (v instanceof ToggleChildrenOfNode) {
-        return discard68(modify_17(setChooseNodes2(isPackageOrVisibleModule(v.value0))))(function() {
+        return discard69(modify_17(setChooseNodes2(isPackageOrVisibleModule(v.value0))))(function() {
           return runSimulation1;
         });
       }
       ;
       if (v instanceof UnToggleChildrenOfNode) {
-        return discard68(modify_17(setChooseNodes2(isPackage)))(function() {
+        return discard69(modify_17(setChooseNodes2(isPackage)))(function() {
           return runSimulation1;
         });
       }
@@ -47388,139 +47436,139 @@
       }
       ;
       if (v instanceof Scene && v.value0 instanceof PackageGrid) {
-        return discard68(modify_17(applySceneWithTransition2(PackageGrid.value)(packageGridScene)))(function() {
-          return discard68(runSimulation1)(function() {
+        return discard69(modify_17(applySceneWithTransition2(PackageGrid.value)(packageGridScene)))(function() {
+          return discard69(runSimulation1)(function() {
             return modify_17(function(v1) {
-              var $97 = {};
-              for (var $98 in v1) {
-                if ({}.hasOwnProperty.call(v1, $98)) {
-                  $97[$98] = v1[$98];
+              var $98 = {};
+              for (var $99 in v1) {
+                if ({}.hasOwnProperty.call(v1, $99)) {
+                  $98[$99] = v1[$99];
                 }
                 ;
               }
               ;
-              $97.currentScene = PackageGrid.value;
-              return $97;
+              $98.currentScene = PackageGrid.value;
+              return $98;
             });
           });
         });
       }
       ;
       if (v instanceof Scene && v.value0 instanceof PackageGraph) {
-        return discard68(modify_17(applySceneWithTransition2(PackageGraph.value)(packageGraphScene)))(function() {
-          return discard68(runSimulation1)(function() {
+        return discard69(modify_17(applySceneWithTransition2(PackageGraph.value)(packageGraphScene)))(function() {
+          return discard69(runSimulation1)(function() {
             return modify_17(function(v1) {
-              var $101 = {};
-              for (var $102 in v1) {
-                if ({}.hasOwnProperty.call(v1, $102)) {
-                  $101[$102] = v1[$102];
+              var $102 = {};
+              for (var $103 in v1) {
+                if ({}.hasOwnProperty.call(v1, $103)) {
+                  $102[$103] = v1[$103];
                 }
                 ;
               }
               ;
-              $101.currentScene = PackageGraph.value;
-              return $101;
+              $102.currentScene = PackageGraph.value;
+              return $102;
             });
           });
         });
       }
       ;
       if (v instanceof Scene && v.value0 instanceof LayerSwarm) {
-        return discard68(modify_17(applySceneWithTransition2(LayerSwarm.value)(layerSwarmScene)))(function() {
-          return discard68(runSimulation1)(function() {
+        return discard69(modify_17(applySceneWithTransition2(LayerSwarm.value)(layerSwarmScene)))(function() {
+          return discard69(runSimulation1)(function() {
             return modify_17(function(v1) {
-              var $105 = {};
-              for (var $106 in v1) {
-                if ({}.hasOwnProperty.call(v1, $106)) {
-                  $105[$106] = v1[$106];
+              var $106 = {};
+              for (var $107 in v1) {
+                if ({}.hasOwnProperty.call(v1, $107)) {
+                  $106[$107] = v1[$107];
                 }
                 ;
               }
               ;
-              $105.currentScene = LayerSwarm.value;
-              return $105;
+              $106.currentScene = LayerSwarm.value;
+              return $106;
             });
           });
         });
       }
       ;
       if (v instanceof Scene && (v.value0 instanceof ModuleTree && v.value0.value0 instanceof Radial)) {
-        return discard68(modify_17(applySceneWithTransition2(new ModuleTree(Radial.value))(radialTreeScene)))(function() {
-          return discard68(runSimulation1)(function() {
+        return discard69(modify_17(applySceneWithTransition2(new ModuleTree(Radial.value))(radialTreeScene)))(function() {
+          return discard69(runSimulation1)(function() {
             return modify_17(function(v1) {
-              var $109 = {};
-              for (var $110 in v1) {
-                if ({}.hasOwnProperty.call(v1, $110)) {
-                  $109[$110] = v1[$110];
+              var $110 = {};
+              for (var $111 in v1) {
+                if ({}.hasOwnProperty.call(v1, $111)) {
+                  $110[$111] = v1[$111];
                 }
                 ;
               }
               ;
-              $109.currentScene = new ModuleTree(Radial.value);
-              return $109;
+              $110.currentScene = new ModuleTree(Radial.value);
+              return $110;
             });
           });
         });
       }
       ;
       if (v instanceof Scene && (v.value0 instanceof ModuleTree && v.value0.value0 instanceof Horizontal)) {
-        return discard68(modify_17(applySceneWithTransition2(new ModuleTree(Horizontal.value))(horizontalTreeScene)))(function() {
-          return discard68(runSimulation1)(function() {
+        return discard69(modify_17(applySceneWithTransition2(new ModuleTree(Horizontal.value))(horizontalTreeScene)))(function() {
+          return discard69(runSimulation1)(function() {
             return modify_17(function(v1) {
-              var $114 = {};
-              for (var $115 in v1) {
-                if ({}.hasOwnProperty.call(v1, $115)) {
-                  $114[$115] = v1[$115];
+              var $115 = {};
+              for (var $116 in v1) {
+                if ({}.hasOwnProperty.call(v1, $116)) {
+                  $115[$116] = v1[$116];
                 }
                 ;
               }
               ;
-              $114.currentScene = new ModuleTree(Horizontal.value);
-              return $114;
+              $115.currentScene = new ModuleTree(Horizontal.value);
+              return $115;
             });
           });
         });
       }
       ;
       if (v instanceof Scene && (v.value0 instanceof ModuleTree && v.value0.value0 instanceof Vertical)) {
-        return discard68(modify_17(applySceneWithTransition2(new ModuleTree(Vertical.value))(verticalTreeScene)))(function() {
-          return discard68(runSimulation1)(function() {
+        return discard69(modify_17(applySceneWithTransition2(new ModuleTree(Vertical.value))(verticalTreeScene)))(function() {
+          return discard69(runSimulation1)(function() {
             return modify_17(function(v1) {
-              var $119 = {};
-              for (var $120 in v1) {
-                if ({}.hasOwnProperty.call(v1, $120)) {
-                  $119[$120] = v1[$120];
+              var $120 = {};
+              for (var $121 in v1) {
+                if ({}.hasOwnProperty.call(v1, $121)) {
+                  $120[$121] = v1[$121];
                 }
                 ;
               }
               ;
-              $119.currentScene = new ModuleTree(Vertical.value);
-              return $119;
+              $120.currentScene = new ModuleTree(Vertical.value);
+              return $120;
             });
           });
         });
       }
       ;
       if (v instanceof ToggleForce) {
-        return discard68(modify_17(toggleForce3(v.value0)))(function() {
+        return discard69(modify_17(toggleForce3(v.value0)))(function() {
           return runSimulation1;
         });
       }
       ;
       if (v instanceof Filter && v.value0 instanceof LinkShowFilter) {
-        return discard68(modify_17(setLinksShown2(v.value0.value0)))(function() {
+        return discard69(modify_17(setLinksShown2(v.value0.value0)))(function() {
           return runSimulation1;
         });
       }
       ;
       if (v instanceof Filter && v.value0 instanceof LinkForceFilter) {
-        return discard68(modify_17(setLinksActive2(v.value0.value0)))(function() {
+        return discard69(modify_17(setLinksActive2(v.value0.value0)))(function() {
           return runSimulation1;
         });
       }
       ;
       if (v instanceof Filter && v.value0 instanceof NodeFilter) {
-        return discard68(modify_17(setChooseNodes2(v.value0.value0)))(function() {
+        return discard69(modify_17(setChooseNodes2(v.value0.value0)))(function() {
           return runSimulation1;
         });
       }
@@ -47530,7 +47578,7 @@
       }
       ;
       if (v instanceof ChangeStyling && v.value0 instanceof GraphStyle) {
-        return discard68(modify_17(setSceneAttributes2(v.value0.value0)))(function() {
+        return discard69(modify_17(setSceneAttributes2(v.value0.value0)))(function() {
           return runSimulation1;
         });
       }
@@ -47561,34 +47609,34 @@
             return false;
           };
           var allNodes3 = getModelNodes(state3);
-          return discard68(modify_17(tagNodes2("halogen")(isHalogenPackage)(allNodes3)))(function() {
+          return discard69(modify_17(tagNodes2("halogen")(isHalogenPackage)(allNodes3)))(function() {
             return runSimulation1;
           });
         });
       }
       ;
       if (v instanceof ClearTags) {
-        return discard68(modify_17(clearAllTags2))(function() {
+        return discard69(modify_17(clearAllTags2))(function() {
           return runSimulation1;
         });
       }
       ;
       if (v instanceof DismissWelcome) {
         return modify_17(function(v1) {
-          var $138 = {};
-          for (var $139 in v1) {
-            if ({}.hasOwnProperty.call(v1, $139)) {
-              $138[$139] = v1[$139];
+          var $139 = {};
+          for (var $140 in v1) {
+            if ({}.hasOwnProperty.call(v1, $140)) {
+              $139[$140] = v1[$140];
             }
             ;
           }
           ;
-          $138.showWelcome = false;
-          return $138;
+          $139.showWelcome = false;
+          return $139;
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.CodeExplorer (line 162, column 16 - line 318, column 40): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.CodeExplorer (line 155, column 16 - line 311, column 40): " + [v.constructor.name]);
     };
   };
   var defaultTransitionMatrix = /* @__PURE__ */ (function() {
@@ -48019,7 +48067,7 @@
   var bind80 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff4 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_18 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard69 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard70 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect48 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize43 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -48088,7 +48136,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard69(modify_18(function(v1) {
+        return discard70(modify_18(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -48135,7 +48183,7 @@
   var bind81 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff5 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_19 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard70 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard71 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect49 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize44 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -48204,7 +48252,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard70(modify_19(function(v1) {
+        return discard71(modify_19(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -48251,7 +48299,7 @@
   var bind82 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff6 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_20 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard71 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard72 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect50 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize45 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -48320,7 +48368,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard71(modify_20(function(v1) {
+        return discard72(modify_20(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -48367,7 +48415,7 @@
   var bind83 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff7 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_21 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard72 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard73 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect51 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize46 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -48436,7 +48484,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard72(modify_21(function(v1) {
+        return discard73(modify_21(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -48483,7 +48531,7 @@
   var bind84 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff8 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_22 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard73 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard74 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect52 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize47 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -48552,7 +48600,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard73(modify_22(function(v1) {
+        return discard74(modify_22(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -48599,7 +48647,7 @@
   var bind85 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff9 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_23 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard74 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard75 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect53 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize48 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -48668,7 +48716,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard74(modify_23(function(v1) {
+        return discard75(modify_23(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -48715,7 +48763,7 @@
   var bind86 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff10 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_24 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard75 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard76 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect54 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize49 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -48784,7 +48832,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard75(modify_24(function(v1) {
+        return discard76(modify_24(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -48831,7 +48879,7 @@
   var bind87 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff11 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_25 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard76 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard77 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect55 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize50 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -48900,7 +48948,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard76(modify_25(function(v1) {
+        return discard77(modify_25(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -48947,7 +48995,7 @@
   var bind88 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff12 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_26 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard77 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard78 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect56 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize51 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -49016,7 +49064,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard77(modify_26(function(v1) {
+        return discard78(modify_26(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -49063,7 +49111,7 @@
   var bind89 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff13 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_27 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard78 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard79 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect57 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize52 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -49132,7 +49180,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard78(modify_27(function(v1) {
+        return discard79(modify_27(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -49179,7 +49227,7 @@
   var bind90 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff14 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_28 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard79 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard80 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect58 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize53 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -49248,7 +49296,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard79(modify_28(function(v1) {
+        return discard80(modify_28(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -49295,7 +49343,7 @@
   var bind91 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff15 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_29 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard80 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard81 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect59 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize54 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -49364,7 +49412,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard80(modify_29(function(v1) {
+        return discard81(modify_29(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -49411,7 +49459,7 @@
   var bind92 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff16 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_30 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard81 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard82 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect60 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize55 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -49480,7 +49528,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard81(modify_30(function(v1) {
+        return discard82(modify_30(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -49527,7 +49575,7 @@
   var bind93 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff17 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_31 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard82 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard83 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect61 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize56 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -49596,7 +49644,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard82(modify_31(function(v1) {
+        return discard83(modify_31(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -49643,7 +49691,7 @@
   var bind94 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff18 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_32 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard83 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard84 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect62 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize57 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -49712,7 +49760,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard83(modify_32(function(v1) {
+        return discard84(modify_32(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -49759,7 +49807,7 @@
   var bind95 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff19 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_33 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard84 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard85 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect63 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize58 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -49828,7 +49876,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard84(modify_33(function(v1) {
+        return discard85(modify_33(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -49875,7 +49923,7 @@
   var bind96 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff20 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_34 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard85 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard86 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect64 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize59 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -49944,7 +49992,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard85(modify_34(function(v1) {
+        return discard86(modify_34(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -49991,7 +50039,7 @@
   var bind97 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff21 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_35 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard86 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard87 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect65 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize60 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -50060,7 +50108,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard86(modify_35(function(v1) {
+        return discard87(modify_35(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -50107,7 +50155,7 @@
   var bind98 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff22 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_36 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard87 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard88 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect66 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize61 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -50176,7 +50224,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard87(modify_36(function(v1) {
+        return discard88(modify_36(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -50223,7 +50271,7 @@
   var bind99 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff23 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_37 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard88 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard89 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect67 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize62 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -50292,7 +50340,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard88(modify_37(function(v1) {
+        return discard89(modify_37(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -50339,7 +50387,7 @@
   var bind100 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff24 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_38 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard89 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard90 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect68 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize63 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -50408,7 +50456,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard89(modify_38(function(v1) {
+        return discard90(modify_38(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -50455,7 +50503,7 @@
   var bind101 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff25 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_39 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard90 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard91 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect69 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize64 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -50524,7 +50572,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard90(modify_39(function(v1) {
+        return discard91(modify_39(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -50571,7 +50619,7 @@
   var bind102 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff26 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_40 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard91 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard92 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect70 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize65 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -50640,7 +50688,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard91(modify_40(function(v1) {
+        return discard92(modify_40(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -50687,7 +50735,7 @@
   var bind103 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff27 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_41 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard92 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard93 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect71 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize66 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -50756,7 +50804,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard92(modify_41(function(v1) {
+        return discard93(modify_41(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -50803,7 +50851,7 @@
   var bind104 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff28 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_42 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard93 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard94 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect72 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize67 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -50872,7 +50920,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard93(modify_42(function(v1) {
+        return discard94(modify_42(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -50919,7 +50967,7 @@
   var bind105 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff29 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_43 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard94 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard95 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect73 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize68 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -50988,7 +51036,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard94(modify_43(function(v1) {
+        return discard95(modify_43(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -51035,7 +51083,7 @@
   var bind106 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff30 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_44 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard95 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard96 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect74 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize69 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -51104,7 +51152,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard95(modify_44(function(v1) {
+        return discard96(modify_44(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -51151,7 +51199,7 @@
   var bind107 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff31 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_45 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard96 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard97 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect75 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize70 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -51220,7 +51268,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard96(modify_45(function(v1) {
+        return discard97(modify_45(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -51267,7 +51315,7 @@
   var bind108 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff32 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_46 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard97 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard98 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect76 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize71 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -51336,7 +51384,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard97(modify_46(function(v1) {
+        return discard98(modify_46(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -51383,7 +51431,7 @@
   var bind109 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff33 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_47 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard98 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard99 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect77 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize72 = /* @__PURE__ */ (function() {
     function Initialize77() {
@@ -51452,7 +51500,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard98(modify_47(function(v1) {
+        return discard99(modify_47(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -52234,7 +52282,7 @@
   var map85 = /* @__PURE__ */ map(functorArray);
   var bind135 = /* @__PURE__ */ bind(bindAff);
   var liftEffect78 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var discard99 = /* @__PURE__ */ discard(discardUnit)(bindAff);
+  var discard100 = /* @__PURE__ */ discard(discardUnit)(bindAff);
   var for_6 = /* @__PURE__ */ for_(applicativeEffect)(foldableArray);
   var formatFilesForClipboard = function(files2) {
     var replicateArray = function(n) {
@@ -52274,7 +52322,7 @@
   var downloadAsZip = function(projectName) {
     return function(files2) {
       return bind135(liftEffect78(createZip))(function(zip2) {
-        return discard99(liftEffect78(for_6(files2)(function(file) {
+        return discard100(liftEffect78(for_6(files2)(function(file) {
           return addFile(zip2)(file.filename)(file.content);
         })))(function() {
           return fromEffectFnAff(downloadZipImpl(zip2)(projectName + ".zip"));
@@ -52484,7 +52532,7 @@
   var modify_49 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var bind137 = /* @__PURE__ */ bind(bindHalogenM);
   var get22 = /* @__PURE__ */ get(monadStateHalogenM);
-  var discard100 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard101 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var pure124 = /* @__PURE__ */ pure(applicativeHalogenM);
   var when8 = /* @__PURE__ */ when(applicativeHalogenM);
   var ChooseDataset = /* @__PURE__ */ (function() {
@@ -53001,7 +53049,7 @@
           }
           ;
           if (state3.currentStep instanceof NameModule) {
-            return discard100(handleAction75(dictMonadAff)(GenerateFiles.value))(function() {
+            return discard101(handleAction75(dictMonadAff)(GenerateFiles.value))(function() {
               return modify_49(function(v1) {
                 var $119 = {};
                 for (var $120 in v1) {
@@ -53202,7 +53250,7 @@
 
   // output/Routing.Parser/index.js
   var map89 = /* @__PURE__ */ map(functorArray);
-  var discard101 = /* @__PURE__ */ discard(discardUnit)(bindMaybe);
+  var discard102 = /* @__PURE__ */ discard(discardUnit)(bindMaybe);
   var guard2 = /* @__PURE__ */ guard(alternativeMaybe);
   var apply6 = /* @__PURE__ */ apply(applyMaybe);
   var map122 = /* @__PURE__ */ map(functorMaybe);
@@ -53215,7 +53263,7 @@
   var parseQueryPart = function(decoder) {
     var part2tuple = function(input3) {
       var keyVal = map89(decoder)(split("=")(input3));
-      return discard101(guard2(length(keyVal) <= 2))(function() {
+      return discard102(guard2(length(keyVal) <= 2))(function() {
         return apply6(map122(Tuple.create)(head(keyVal)))(index(keyVal)(1));
       });
     };
@@ -53333,7 +53381,7 @@
   // output/PSD3.Main/index.js
   var bind139 = /* @__PURE__ */ bind(bindHalogenM);
   var liftEffect79 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var discard102 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard103 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var when9 = /* @__PURE__ */ when(applicativeHalogenM);
   var pure84 = /* @__PURE__ */ pure(applicativeHalogenM);
   var modify_50 = /* @__PURE__ */ modify_2(monadStateHalogenM);
@@ -53641,7 +53689,7 @@
         var loc = location(w)();
         return hash(loc)();
       }))(function(currentHash) {
-        return discard102(when9(currentHash === "" || (currentHash === "#" || currentHash === "#/"))(liftEffect79(setHash2(routeToPath(Home.value)))))(function() {
+        return discard103(when9(currentHash === "" || (currentHash === "#" || currentHash === "#/"))(liftEffect79(setHash2(routeToPath(Home.value)))))(function() {
           return bind139(subscribe2(makeEmitter(function(push2) {
             return matches2(routing)(function(v1) {
               return function(newRoute) {
