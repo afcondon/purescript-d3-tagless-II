@@ -3,19 +3,17 @@ module D3.Viz.TreeAPI.WealthHealthDraw where
 import Prelude
 
 import Data.Int (floor)
-import Data.Maybe (Maybe(..))
 import Data.Number (log, sqrt)
 import Effect (Effect)
-import PSD3v2.Attribute.Types (viewBox, width, height, class_, cx, cy, fill, fillOpacity, stroke, strokeOpacity, strokeWidth, x, x1, x2, y, y1, y2, textAnchor, fontSize, textContent, radius)
-import PSD3v2.Capabilities.Selection (select, renderTree, on)
+import PSD3v2.Attribute.Types (Attribute, viewBox, width, height, class_, cx, cy, fill, fillOpacity, stroke, strokeOpacity, strokeWidth, x, x1, x2, y, y1, y2, textAnchor, fontSize, textContent, radius)
+import PSD3v2.Capabilities.Selection (select, renderTree, on, joinDataWithKey, append, setAttrs, remove, merge)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
-import PSD3v2.Selection.Types (ElementType(..), SEmpty)
-import PSD3v2.VizTree.Tree (Tree, joinData)
+import PSD3v2.Selection.Types (ElementType(..), SEmpty, JoinResult(..))
+import PSD3v2.VizTree.Tree (Tree)
 import PSD3v2.VizTree.Tree as T
 import PSD3v2.Behavior.Types (onMouseEnterWithInfo, onMouseLeaveWithInfo, MouseEventInfo)
 import PSD3v2.Tooltip (showTooltip, hideTooltip)
 import Web.DOM.Element (Element)
-import Data.Map as Map
 
 -- | Type alias for a nation data point ready for visualization
 type NationPoint =
@@ -162,16 +160,16 @@ yAxisTick config tickValue =
           ]
       ]
 
--- | Main draw function - renders visualization with data
-drawWealthHealth :: String -> Array NationPoint -> Effect Unit
-drawWealthHealth selector nations = runD3v2M do
+-- | Initialize the visualization - creates SVG structure and returns update function
+initWealthHealth :: String -> Effect (Array NationPoint -> Effect Unit)
+initWealthHealth selector = runD3v2M do
   container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
 
   let config = defaultConfig
 
-  -- Build the visualization tree
-  let tree :: Tree NationPoint
-      tree =
+  -- Build the static visualization tree (without data-bound circles)
+  let staticTree :: Tree NationPoint
+      staticTree =
         T.named SVG "svg"
           [ width config.width
           , height config.height
@@ -242,27 +240,47 @@ drawWealthHealth selector nations = runD3v2M do
                 , textContent "Life Expectancy (years)"
                 ]
 
-            -- Nation circles with data join
-            , joinData "nations" "circle" nations $ \nation ->
-                T.elem Circle
-                  [ cx (scaleX config nation.income)
-                  , cy (scaleY config nation.lifeExpectancy)
-                  , radius (scaleRadius nation.population)
-                  , fill nation.regionColor
-                  , fillOpacity 0.7
-                  , stroke "#333"
-                  , strokeWidth 0.5
-                  , class_ "nation-circle"
-                  ]
+            -- Empty group for nations (will be populated by update function)
+            , T.named Group "nations-container" [ class_ "nations" ] `T.withChildren` []
             ]
 
-  -- Render the tree and get selections
-  selections <- renderTree container tree
+  -- Render the static structure
+  _ <- renderTree container staticTree
 
-  -- Add tooltips to nation circles
-  case Map.lookup "nations" selections of
-    Just nationsSel -> do
-      -- Show tooltip on hover
+  -- Return the update function
+  pure $ \nations -> runD3v2M do
+      -- Select the nations container
+      nationsContainer <- select "#wealth-health-viz .nations" :: _ (D3v2Selection_ SEmpty Element Unit)
+
+      -- Data join using Selection API with nation name as key
+      JoinResult { enter, update: updateSel, exit } <- joinDataWithKey nations (_.name) "circle" nationsContainer
+
+      -- Attributes for circles (using datum-only functions with explicit types)
+      let circleAttrs :: Array (Attribute NationPoint)
+          circleAttrs =
+            [ cx ((\n -> scaleX config n.income) :: NationPoint -> Number)
+            , cy ((\n -> scaleY config n.lifeExpectancy) :: NationPoint -> Number)
+            , radius ((\n -> scaleRadius n.population) :: NationPoint -> Number)
+            , fill ((_.regionColor) :: NationPoint -> String)
+            , fillOpacity 0.7
+            , stroke "#333"
+            , strokeWidth 0.5
+            , class_ "nation-circle"
+            ]
+
+      -- Handle enter: create new circles
+      enterCircles <- append Circle circleAttrs enter
+
+      -- Handle update: update existing circles
+      _ <- setAttrs circleAttrs updateSel
+
+      -- Handle exit: remove old circles
+      remove exit
+
+      -- Merge enter and update for tooltips
+      merged <- merge enterCircles updateSel
+
+      -- Add tooltips to all circles
       _ <- on (onMouseEnterWithInfo \(info :: MouseEventInfo NationPoint) -> do
         let nation = info.datum
         let content = "<strong>" <> nation.name <> "</strong><br/>"
@@ -271,15 +289,12 @@ drawWealthHealth selector nations = runD3v2M do
                    <> "Life Expectancy: " <> show (floor nation.lifeExpectancy) <> " years<br/>"
                    <> "Population: " <> formatPopulation nation.population
         showTooltip content info.pageX info.pageY
-        ) nationsSel
+        ) merged
 
       -- Hide tooltip on leave
-      _ <- on (onMouseLeaveWithInfo \(_ :: MouseEventInfo NationPoint) -> hideTooltip) nationsSel
+      _ <- on (onMouseLeaveWithInfo \(_ :: MouseEventInfo NationPoint) -> hideTooltip) merged
 
       pure unit
-    Nothing -> pure unit
-
-  pure unit
 
 -- | Format population for display
 formatPopulation :: Number -> String

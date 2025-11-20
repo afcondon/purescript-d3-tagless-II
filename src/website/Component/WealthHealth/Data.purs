@@ -33,15 +33,15 @@ type NationDataRaw =
   }
 
 -- | Parse a region string to a Region ADT
+-- | Matches the actual values in nations.json
 parseRegionString :: String -> Maybe Region
 parseRegionString = case _ of
-  "EastAsiaAndPacific" -> Just EastAsiaAndPacific
-  "Europe" -> Just Europe
-  "LatinAmericaAndCaribbean" -> Just LatinAmericaAndCaribbean
-  "MiddleEastAndNorthAfrica" -> Just MiddleEastAndNorthAfrica
-  "SouthAsia" -> Just SouthAsia
-  "SubSaharanAfrica" -> Just SubSaharanAfrica
-  "NorthAmerica" -> Just NorthAmerica
+  "East Asia & Pacific" -> Just EastAsiaAndPacific
+  "Europe & Central Asia" -> Just Europe
+  "America" -> Just LatinAmericaAndCaribbean  -- Includes both North and Latin America
+  "Middle East & North Africa" -> Just MiddleEastAndNorthAfrica
+  "South Asia" -> Just SouthAsia
+  "Sub-Saharan Africa" -> Just SubSaharanAfrica
   _ -> Nothing
 
 -- | Convert raw nation data to proper NationData with parsed Region

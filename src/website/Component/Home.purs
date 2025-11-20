@@ -160,6 +160,9 @@ render _ =
             , renderTutorialLink "5. Motion & Transitions"
                 "Animations, General Update Pattern, force-directed graphs"
                 (routeToPath TourMotion)
+            , renderTutorialLink "5b. Wealth & Health"
+                "Animated bubble chart - Hans Rosling's famous visualization"
+                (routeToPath TourWealthHealth)
             , renderTutorialLink "6. Alternative Interpreters"
                 "Mermaid diagrams, code generation - the power of Finally Tagless"
                 (routeToPath TourInterpreters)

@@ -168,6 +168,10 @@ handleAction = case _ of
     -- Give Halogen time to render the DOM with the viz container
     H.liftAff $ Aff.delay (Milliseconds 100.0)
 
+    -- Initialize the visualization and store the update function
+    updateFn <- liftEffect $ Draw.initWealthHealth "#wealth-health-viz"
+    H.modify_ _ { vizUpdateFn = Just updateFn }
+
     -- Draw initial visualization
     handleAction Render
 
@@ -241,9 +245,9 @@ handleAction = case _ of
 
   Render -> do
     state <- H.get
-    case state.model of
-      Just model -> do
+    case state.model, state.vizUpdateFn of
+      Just model, Just updateFn -> do
         let nations = getAllNationsAtYear state.currentYear model
         let drawData = map nationPointToDrawData nations
-        liftEffect $ Draw.drawWealthHealth "#wealth-health-viz" drawData
-      Nothing -> pure unit
+        liftEffect $ updateFn drawData
+      _, _ -> pure unit

@@ -5,8 +5,10 @@ import Prelude
 import Data.Maybe (Maybe(..))
 import Data.Set (Set)
 import Data.Set as Set
+import Effect (Effect)
 import Halogen as H
 import Component.WealthHealth.Types (WealthHealthModel)
+import D3.Viz.TreeAPI.WealthHealthDraw as Draw
 
 -- | Label display mode
 data LabelMode = AlwaysShow | OnHoverOnly
@@ -23,6 +25,7 @@ type State =
   , animationSpeed :: Number             -- Years per second during playback
   , animationSubscriptionId :: Maybe H.SubscriptionId  -- Timer subscription for animation
   , labelMode :: LabelMode               -- How to display country labels
+  , vizUpdateFn :: Maybe (Array Draw.NationPoint -> Effect Unit)  -- Visualization update function
   }
 
 -- | Initial state before data is loaded
@@ -36,4 +39,5 @@ initialState _ =
   , animationSpeed: 5.0  -- 5 years per second (reasonable default)
   , animationSubscriptionId: Nothing
   , labelMode: OnHoverOnly  -- Start with labels only on hover
+  , vizUpdateFn: Nothing  -- Set after initialization
   }
