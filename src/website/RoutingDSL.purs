@@ -31,6 +31,7 @@ routes =
   <|> howtoTooltips
   <|> howtoDebugging
   <|> howtoPerformance
+  <|> howtoTreeExplorer
   <|> understandingGrammar  -- Must come before understanding (more specific)
   <|> understandingAttributes
   <|> understandingSelections
@@ -127,6 +128,10 @@ howtoDebugging = HowtoDebugging <$ lit "howto" <* lit "debugging" <* end
 -- | Match: /howto/performance
 howtoPerformance :: Match Route
 howtoPerformance = HowtoPerformance <$ lit "howto" <* lit "performance" <* end
+
+-- | Match: /howto/tree-explorer
+howtoTreeExplorer :: Match Route
+howtoTreeExplorer = HowtoTreeExplorer <$ lit "howto" <* lit "tree-explorer" <* end
 
 -- | Match: /understanding
 understanding :: Match Route
@@ -286,6 +291,7 @@ routeToPath HowtoAxesScales = "/howto/axes-scales"
 routeToPath HowtoTooltips = "/howto/tooltips"
 routeToPath HowtoDebugging = "/howto/debugging"
 routeToPath HowtoPerformance = "/howto/performance"
+routeToPath HowtoTreeExplorer = "/howto/tree-explorer"
 routeToPath Understanding = "/understanding"
 routeToPath UnderstandingGrammar = "/understanding/grammar"
 routeToPath UnderstandingAttributes = "/understanding/attributes"

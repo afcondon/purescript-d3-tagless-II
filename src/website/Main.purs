@@ -30,6 +30,7 @@ import Component.HowTo.HowtoAxesScales as HowtoAxesScales
 import Component.HowTo.HowtoTooltips as HowtoTooltips
 import Component.HowTo.HowtoDebugging as HowtoDebugging
 import Component.HowTo.HowtoPerformance as HowtoPerformance
+import Component.HowTo.HowtoTreeExplorer as HowtoTreeExplorer
 import PSD3.Understanding as Understanding
 import Component.Understanding.UnderstandingGrammar as UnderstandingGrammar
 import Component.Understanding.UnderstandingAttributes as UnderstandingAttributes
@@ -101,6 +102,7 @@ type Slots =
   , howtoTooltips :: forall q. H.Slot q Void Unit
   , howtoDebugging :: forall q. H.Slot q Void Unit
   , howtoPerformance :: forall q. H.Slot q Void Unit
+  , howtoTreeExplorer :: forall q. H.Slot q Void Unit
   , understanding :: forall q. H.Slot q Void Unit
   , understandingGrammar :: forall q. H.Slot q Void Unit
   , understandingAttributes :: forall q. H.Slot q Void Unit
@@ -150,6 +152,7 @@ _howtoAxesScales = Proxy :: Proxy "howtoAxesScales"
 _howtoTooltips = Proxy :: Proxy "howtoTooltips"
 _howtoDebugging = Proxy :: Proxy "howtoDebugging"
 _howtoPerformance = Proxy :: Proxy "howtoPerformance"
+_howtoTreeExplorer = Proxy :: Proxy "howtoTreeExplorer"
 _understanding = Proxy :: Proxy "understanding"
 _understandingGrammar = Proxy :: Proxy "understandingGrammar"
 _understandingAttributes = Proxy :: Proxy "understandingAttributes"
@@ -250,6 +253,9 @@ renderPage route = case spy "Route is" route of
 
   HowtoPerformance ->
     HH.slot_ _howtoPerformance unit HowtoPerformance.component unit
+
+  HowtoTreeExplorer ->
+    HH.slot_ _howtoTreeExplorer unit HowtoTreeExplorer.component unit
 
   Understanding ->
     HH.slot_ _understanding unit Understanding.component unit

@@ -15,17 +15,52 @@ import Data.Array as Array
 import Data.Int (toNumber)
 
 -- | Configuration for tree layout
-type TreeConfig =
+-- |
+-- | The `separation` function controls horizontal spacing between adjacent nodes.
+-- | It receives the node data for two adjacent nodes and returns the desired separation.
+-- | Default behavior uses `minSeparation` for all nodes.
+-- |
+-- | The `layerScale` function controls vertical spacing between depth levels.
+-- | It receives the depth (0 = root) and returns a scale factor for that level.
+-- | Default is identity (linear scaling).
+-- |
+-- | Example for "flatter at top" effect:
+-- | ```purescript
+-- | config { layerScale = \depth -> toNumber depth ** 1.5 }
+-- | ```
+type TreeConfig a =
   { size :: { width :: Number, height :: Number }
   , minSeparation :: Number  -- Minimum horizontal separation between siblings
+  , separation :: Maybe (a -> a -> Number)  -- Custom separation function based on node data
+  , layerScale :: Maybe (Int -> Number)  -- Custom vertical spacing by depth
   }
 
 -- | Default configuration
-defaultTreeConfig :: TreeConfig
+defaultTreeConfig :: forall a. TreeConfig a
 defaultTreeConfig =
   { size: { width: 800.0, height: 600.0 }
   , minSeparation: 1.0
+  , separation: Nothing
+  , layerScale: Nothing
   }
+
+-- | Configuration with custom layer scaling
+-- |
+-- | Common patterns:
+-- | - `\d -> toNumber d ** 1.5` - compressed at top, expanded at bottom
+-- | - `\d -> log (toNumber d + 1.0)` - very flat at top
+-- | - `\d -> sqrt (toNumber d)` - moderate compression at top
+withLayerScale :: forall a. (Int -> Number) -> TreeConfig a -> TreeConfig a
+withLayerScale scale config = config { layerScale = Just scale }
+
+-- | Configuration with custom separation function
+-- |
+-- | Example for radius-based separation:
+-- | ```purescript
+-- | withSeparation (\a b -> (a.radius + b.radius) / 2.0 + 1.0) config
+-- | ```
+withSeparation :: forall a. (a -> a -> Number) -> TreeConfig a -> TreeConfig a
+withSeparation sep config = config { separation = Just sep }
 
 -- | A contour is a list of offsets at each depth level
 -- | Represents the left or right edge of a subtree
@@ -53,7 +88,7 @@ singletonContours = Contours { left: Cons 0.0 Nil, right: Cons 0.0 Nil }
 -- | Uses Tuple annotation to temporarily hold offset values during layout computation
 -- | Input must have x, y, depth fields (initial values don't matter, they'll be overwritten)
 tree :: forall r.
-  TreeConfig ->
+  TreeConfig { x :: Number, y :: Number, depth :: Int | r } ->
   Tree { x :: Number, y :: Number, depth :: Int | r } ->
   Tree { x :: Number, y :: Number, depth :: Int | r }
 tree config inputTree =
@@ -77,7 +112,7 @@ tree config inputTree =
 -- | Tree layout with height-based sorting for consistent ordering with Cluster4
 -- | Use this variant when your tree has height computed and you want sorted children
 treeWithSorting :: forall r.
-  TreeConfig ->
+  TreeConfig { x :: Number, y :: Number, depth :: Int, height :: Int | r } ->
   Tree { x :: Number, y :: Number, depth :: Int, height :: Int | r } ->
   Tree { x :: Number, y :: Number, depth :: Int, height :: Int | r }
 treeWithSorting config inputTree =
@@ -319,7 +354,7 @@ petrify parentX (Node (Tuple offsetRec original) children) =
 
 -- | Scale abstract coordinates to pixel coordinates
 scaleToPixels :: forall r.
-  TreeConfig ->
+  TreeConfig { depth :: Int, x :: Number, y :: Number | r } ->
   Tree { depth :: Int, x :: Number, y :: Number | r } ->
   Tree { depth :: Int, x :: Number, y :: Number | r }
 scaleToPixels config inputTree =
@@ -335,9 +370,18 @@ scaleToPixels config inputTree =
     allDepths = map (\n -> n.depth) allNodes
     maxDepth = fromMaybe 1 $ maximum allDepths
 
+    -- Apply layer scale function if provided
+    layerScaleFn = fromMaybe toNumber config.layerScale
+
+    -- Compute scaled depths for normalization
+    scaledDepths = map (\n -> layerScaleFn n.depth) allNodes
+    maxScaledDepth = fromMaybe 1.0 $ maximum scaledDepths
+
     -- Scale functions
     scaleX x = ((x - minX) / xRange) * config.size.width
-    scaleY depth = (toNumber depth / toNumber maxDepth) * config.size.height
+    scaleY depth =
+      let scaledDepth = layerScaleFn depth
+      in (scaledDepth / maxScaledDepth) * config.size.height
 
     -- Apply scaling via map
     go (Node val children) =

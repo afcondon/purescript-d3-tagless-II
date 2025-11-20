@@ -95,6 +95,7 @@ data Route
   | HowtoTooltips         -- Adding tooltips
   | HowtoDebugging        -- Debugging visualizations
   | HowtoPerformance      -- Performance optimization
+  | HowtoTreeExplorer     -- Interactive tree layout explorer
   | Understanding   -- Conceptual overview: index page
   -- Understanding sub-pages
   | UnderstandingGrammar       -- Grammar of D3 in PSD3v2
@@ -152,6 +153,7 @@ instance showRoute :: Show Route where
   show HowtoTooltips = "How-to: Tooltips"
   show HowtoDebugging = "How-to: Debugging"
   show HowtoPerformance = "How-to: Performance"
+  show HowtoTreeExplorer = "How-to: Tree Explorer"
   show Understanding = "Understanding"
   show UnderstandingGrammar = "Understanding: Grammar"
   show UnderstandingAttributes = "Understanding: Attributes"

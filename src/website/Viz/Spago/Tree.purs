@@ -111,7 +111,7 @@ treeReduction rootID model = do
       ) idTree
 
       -- Run tree layout
-      config = { size: { width: 4000.0, height: 800.0 }, minSeparation: 8.0 }
+      config = { size: { width: 4000.0, height: 800.0 }, minSeparation: 8.0, separation: Nothing, layerScale: Nothing }
       laidOutTree = Tree4.tree config dataTree
 
       -- Flatten tree to map of positions
