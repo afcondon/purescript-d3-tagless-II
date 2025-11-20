@@ -173,12 +173,24 @@
 .code-block {
   flex: 1;
   margin: 0;
-  padding: 2rem;
+  padding: 1rem;
   overflow-y: auto;
   background-color: #fafaf8;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 0.9rem;
-  line-height: 1.6;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+/* Prism code styling within code blocks */
+.code-block pre {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.code-block pre code {
+  font-size: inherit;
+  line-height: inherit;
 }
 
 .code-block code {
@@ -247,7 +259,7 @@
   }
 
   .code-block {
-    padding: 1rem;
-    font-size: 0.85rem;
+    padding: 0.75rem;
+    font-size: 0.7rem;
   }
 }

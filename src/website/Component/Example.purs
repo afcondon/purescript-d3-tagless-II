@@ -9,7 +9,9 @@ import Effect.Class (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import PSD3.PrismJS as Prism
 import PSD3.RoutingDSL (routeToPath)
+import PSD3.Shared.Utilities (syntaxHighlightedCode)
 import PSD3.Website.Types (Route(..))
 
 -- SNIPPET: threeLittleCircles src/website/Viz/TreeAPI/ThreeLittleCircles.purs 25-62
@@ -84,6 +86,8 @@ handleAction = case _ of
       "lesmis-force" ->
         liftEffect LesMisTreeExample.testLesMisTree
       _ -> pure unit
+    -- Highlight code blocks with Prism
+    liftEffect Prism.highlightAll
 
 -- | Example metadata
 type ExampleMeta =
@@ -212,11 +216,9 @@ render state =
                         ]
                         [ HH.text "GitHub repository" ]
                     ]
-                , HH.pre
+                , HH.div
                     [ HP.classes [ HH.ClassName "code-block" ] ]
-                    [ HH.code_
-                        [ HH.text $ getExampleCodeSummary meta.id ]
-                    ]
+                    (syntaxHighlightedCode $ getExampleCodeSummary meta.id)
                 ]
             ]
         ]
