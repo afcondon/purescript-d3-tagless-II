@@ -48,6 +48,7 @@ data ColorByOption
   | ColorByAuthors    -- Color by number of authors
   | ColorByChurn      -- Color by total lines changed
   | ColorBySize       -- Color by file size
+  | ColorByReplay     -- Color by git replay state (animated)
 
 derive instance Eq ColorByOption
 
@@ -60,3 +61,4 @@ instance Show ColorByOption where
   show ColorByAuthors = "Authors"
   show ColorByChurn = "Churn"
   show ColorBySize = "Size"
+  show ColorByReplay = "Replay"

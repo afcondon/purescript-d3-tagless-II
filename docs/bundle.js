@@ -44836,6 +44836,131 @@
     ColorBySize2.value = new ColorBySize2();
     return ColorBySize2;
   })();
+  var ColorByReplay = /* @__PURE__ */ (function() {
+    function ColorByReplay2() {
+    }
+    ;
+    ColorByReplay2.value = new ColorByReplay2();
+    return ColorByReplay2;
+  })();
+
+  // output/D3.Viz.Spago.GitReplay/foreign.js
+  var timelineData = null;
+  var replayState = {
+    isPlaying: false,
+    currentIndex: 0,
+    speed: 100,
+    // ms per commit
+    intervalId: null,
+    fadeSteps: 5,
+    // How many commits before red fades to green
+    moduleStates: /* @__PURE__ */ new Map(),
+    // moduleName -> { exists: bool, heat: 0-1 }
+    onUpdate: null
+    // Callback when state changes
+  };
+  function loadTimeline_() {
+    fetch("./data/commit-timeline.json").then((response) => response.json()).then((data) => {
+      timelineData = data;
+      replayState.moduleStates.clear();
+      console.log("Loaded commit timeline:", data.commitCount, "commits,", data.moduleCount, "modules");
+    }).catch((err) => {
+      console.warn("Failed to load commit timeline:", err);
+    });
+  }
+  function setUpdateCallback_(callback) {
+    return function() {
+      replayState.onUpdate = callback;
+    };
+  }
+  function stepForward() {
+    if (!timelineData || replayState.currentIndex >= timelineData.timeline.length) {
+      stopReplay();
+      return false;
+    }
+    const commit = timelineData.timeline[replayState.currentIndex];
+    for (const [name16, state3] of replayState.moduleStates) {
+      if (state3.exists && state3.heat > 0) {
+        state3.heat = Math.max(0, state3.heat - 1 / replayState.fadeSteps);
+      }
+    }
+    for (const moduleName of commit.created) {
+      replayState.moduleStates.set(moduleName, { exists: true, heat: 1 });
+    }
+    for (const moduleName of commit.modified) {
+      const state3 = replayState.moduleStates.get(moduleName);
+      if (state3) {
+        state3.heat = 0.9;
+      } else {
+        replayState.moduleStates.set(moduleName, { exists: true, heat: 0.9 });
+      }
+    }
+    for (const moduleName of commit.deleted) {
+      const state3 = replayState.moduleStates.get(moduleName);
+      if (state3) {
+        state3.exists = false;
+        state3.heat = 0;
+      }
+    }
+    replayState.currentIndex++;
+    if (replayState.onUpdate) {
+      replayState.onUpdate();
+    }
+    return true;
+  }
+  function startReplay_() {
+    if (replayState.isPlaying) return;
+    replayState.isPlaying = true;
+    replayState.intervalId = setInterval(() => {
+      if (!stepForward()) {
+        stopReplay();
+      }
+    }, replayState.speed);
+  }
+  function stopReplay_() {
+    stopReplay();
+  }
+  function stopReplay() {
+    replayState.isPlaying = false;
+    if (replayState.intervalId) {
+      clearInterval(replayState.intervalId);
+      replayState.intervalId = null;
+    }
+  }
+  function resetReplay_() {
+    stopReplay();
+    replayState.currentIndex = 0;
+    replayState.moduleStates.clear();
+    if (replayState.onUpdate) {
+      replayState.onUpdate();
+    }
+  }
+  function getReplayColor_(moduleName) {
+    const state3 = replayState.moduleStates.get(moduleName);
+    if (!state3 || !state3.exists) {
+      return "rgba(128, 128, 128, 0.1)";
+    }
+    const heat = state3.heat;
+    if (heat >= 1) {
+      return "rgb(255, 235, 59)";
+    } else if (heat > 0) {
+      if (heat > 0.5) {
+        const t = (heat - 0.5) * 2;
+        const r = 255;
+        const g = Math.round(82 + (167 - 82) * (1 - t));
+        const b10 = Math.round(82 + (38 - 82) * (1 - t));
+        return `rgb(${r}, ${g}, ${b10})`;
+      } else {
+        const t = heat * 2;
+        const r = Math.round(76 + (255 - 76) * t);
+        const g = Math.round(175 + (167 - 175) * t);
+        const b10 = Math.round(80 + (38 - 80) * t);
+        return `rgb(${r}, ${g}, ${b10})`;
+      }
+    } else {
+      return "rgb(76, 175, 80)";
+    }
+  }
 
   // output/D3.Viz.Spago.Draw.Attributes/index.js
   var show72 = /* @__PURE__ */ show(showNumber);
@@ -44869,7 +44994,7 @@
       return 0;
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 33, column 19 - line 35, column 23): " + [d16.nodetype.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 34, column 19 - line 36, column 23): " + [d16.nodetype.constructor.name]);
   };
   var opacityByType = function(d16) {
     if (d16.nodetype instanceof IsPackage) {
@@ -44880,7 +45005,7 @@
       return 0.7;
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 74, column 19 - line 76, column 22): " + [d16.nodetype.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 76, column 19 - line 78, column 22): " + [d16.nodetype.constructor.name]);
   };
   var nodeRadius = function(d16) {
     return d16.r;
@@ -44933,7 +45058,7 @@
       return d3SchemeSequential10N_(toNumber(v.value0));
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 47, column 18 - line 49, column 56): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 48, column 18 - line 50, column 56): " + [v.constructor.name]);
   };
   var colorByMetric = function(option2) {
     return function(d16) {
@@ -44978,7 +45103,11 @@
         return interpolateViridis(getModuleMetric_(d16.name)("size"));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 53, column 26 - line 61, column 69): " + [option2.constructor.name]);
+      if (option2 instanceof ColorByReplay) {
+        return getReplayColor_(d16.name);
+      }
+      ;
+      throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 54, column 26 - line 63, column 42): " + [option2.constructor.name]);
     };
   };
   var sceneAttributesWithColorBy = function(colorOption) {
@@ -45620,6 +45749,34 @@
     ;
     DismissWelcome2.value = new DismissWelcome2();
     return DismissWelcome2;
+  })();
+  var StartReplay = /* @__PURE__ */ (function() {
+    function StartReplay2() {
+    }
+    ;
+    StartReplay2.value = new StartReplay2();
+    return StartReplay2;
+  })();
+  var StopReplay = /* @__PURE__ */ (function() {
+    function StopReplay2() {
+    }
+    ;
+    StopReplay2.value = new StopReplay2();
+    return StopReplay2;
+  })();
+  var ResetReplay = /* @__PURE__ */ (function() {
+    function ResetReplay2() {
+    }
+    ;
+    ResetReplay2.value = new ResetReplay2();
+    return ResetReplay2;
+  })();
+  var ReplayTick = /* @__PURE__ */ (function() {
+    function ReplayTick2() {
+    }
+    ;
+    ReplayTick2.value = new ReplayTick2();
+    return ReplayTick2;
   })();
   var eqScene = {
     eq: function(x46) {
@@ -47523,7 +47680,7 @@
       return true;
     }
     ;
-    throw new Error("Failed pattern match at PSD3.CodeExplorer.HTML (line 40, column 24 - line 42, column 22): " + [node.nodetype.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.CodeExplorer.HTML (line 41, column 24 - line 43, column 22): " + [node.nodetype.constructor.name]);
   };
   var renderSimControls = function(state3) {
     var params = getSimulationVariables(state3);
@@ -47541,7 +47698,7 @@
       max: 100,
       step: 10,
       value: params.alphaTarget * 100
-    })), caption_2([text2("AlphaTarget: " + show74(params.alphaTarget))])]), div2([classes(["control-group"])])([buttonGroup_([buttonPrimaryLeft([onClick($$const(StopSim.value))])([text2("Stop")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0.3))))])([text2("Heat")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0))))])([text2("Cool")]), buttonPrimaryRight([onClick($$const(StartSim.value))])([text2("Start")])])]), subHeading_([text2("Filters")]), div2([classes(["control-group"])])([contentHeading_([text2("Node visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new NodeFilter(isPackage))))])([text2("Packages")]), buttonCenter([onClick($$const(new Filter(new NodeFilter($$const(true)))))])([text2("All")]), buttonRight([onClick($$const(new Filter(new NodeFilter(isUsedModule))))])([text2("Modules")])])]), div2([classes(["control-group"])])([button3([onClick($$const(new Filter(new NodeFilter(isProjectModule))))])([text2("Only project files")])]), div2([classes(["control-group"])])([contentHeading_([text2("Link Visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new LinkShowFilter(isM2M_Tree_Link))))])([text2("Tree")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2M_Graph_Link))))])([text2("Graph")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2P_Link))))])([text2("M2P")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isP2P_Link))))])([text2("P2P")]), buttonRight([onClick($$const(new Filter(new LinkShowFilter($$const(false)))))])([text2("None")])])]), subHeading_([text2("Styling")]), div2([classes(["control-group"])])([buttonGroup_([buttonLeft([onClick($$const(new ChangeStyling(new GraphStyle(clusterSceneAttributes))))])([text2("Cluster")]), buttonCenter([onClick($$const(new ChangeStyling(new GraphStyle(graphSceneAttributes))))])([text2("Graph")]), buttonRight([onClick($$const(new ChangeStyling(new GraphStyle(treeSceneAttributes))))])([text2("Tree")])])]), subHeading_([text2("Color By")]), div2([classes(["control-group"])])([buttonGroup_([buttonLeft([onClick($$const(new ChangeColorBy(ColorByGroup.value)))])([text2("Package")]), buttonCenter([onClick($$const(new ChangeColorBy(ColorByDepth.value)))])([text2("Depth")]), buttonRight([onClick($$const(new ChangeColorBy(ColorBySize.value)))])([text2("Size")])])]), div2([classes(["control-group"])])([contentHeading_([text2("Git Metrics")]), buttonGroup_([buttonLeft([onClick($$const(new ChangeColorBy(ColorByCommits.value)))])([text2("Commits")]), buttonCenter([onClick($$const(new ChangeColorBy(ColorByRecency.value)))])([text2("Recency")]), buttonRight([onClick($$const(new ChangeColorBy(ColorByAge.value)))])([text2("Age")])])]), div2([classes(["control-group"])])([buttonGroup_([buttonLeft([onClick($$const(new ChangeColorBy(ColorByAuthors.value)))])([text2("Authors")]), buttonRight([onClick($$const(new ChangeColorBy(ColorByChurn.value)))])([text2("Churn")])])])]);
+    })), caption_2([text2("AlphaTarget: " + show74(params.alphaTarget))])]), div2([classes(["control-group"])])([buttonGroup_([buttonPrimaryLeft([onClick($$const(StopSim.value))])([text2("Stop")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0.3))))])([text2("Heat")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0))))])([text2("Cool")]), buttonPrimaryRight([onClick($$const(StartSim.value))])([text2("Start")])])]), subHeading_([text2("Filters")]), div2([classes(["control-group"])])([contentHeading_([text2("Node visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new NodeFilter(isPackage))))])([text2("Packages")]), buttonCenter([onClick($$const(new Filter(new NodeFilter($$const(true)))))])([text2("All")]), buttonRight([onClick($$const(new Filter(new NodeFilter(isUsedModule))))])([text2("Modules")])])]), div2([classes(["control-group"])])([button3([onClick($$const(new Filter(new NodeFilter(isProjectModule))))])([text2("Only project files")])]), div2([classes(["control-group"])])([contentHeading_([text2("Link Visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new LinkShowFilter(isM2M_Tree_Link))))])([text2("Tree")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2M_Graph_Link))))])([text2("Graph")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2P_Link))))])([text2("M2P")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isP2P_Link))))])([text2("P2P")]), buttonRight([onClick($$const(new Filter(new LinkShowFilter($$const(false)))))])([text2("None")])])]), subHeading_([text2("Styling")]), div2([classes(["control-group"])])([buttonGroup_([buttonLeft([onClick($$const(new ChangeStyling(new GraphStyle(clusterSceneAttributes))))])([text2("Cluster")]), buttonCenter([onClick($$const(new ChangeStyling(new GraphStyle(graphSceneAttributes))))])([text2("Graph")]), buttonRight([onClick($$const(new ChangeStyling(new GraphStyle(treeSceneAttributes))))])([text2("Tree")])])]), subHeading_([text2("Color By")]), div2([classes(["control-group"])])([buttonGroup_([buttonLeft([onClick($$const(new ChangeColorBy(ColorByGroup.value)))])([text2("Package")]), buttonCenter([onClick($$const(new ChangeColorBy(ColorByDepth.value)))])([text2("Depth")]), buttonRight([onClick($$const(new ChangeColorBy(ColorBySize.value)))])([text2("Size")])])]), div2([classes(["control-group"])])([contentHeading_([text2("Git Metrics")]), buttonGroup_([buttonLeft([onClick($$const(new ChangeColorBy(ColorByCommits.value)))])([text2("Commits")]), buttonCenter([onClick($$const(new ChangeColorBy(ColorByRecency.value)))])([text2("Recency")]), buttonRight([onClick($$const(new ChangeColorBy(ColorByAge.value)))])([text2("Age")])])]), div2([classes(["control-group"])])([buttonGroup_([buttonLeft([onClick($$const(new ChangeColorBy(ColorByAuthors.value)))])([text2("Authors")]), buttonRight([onClick($$const(new ChangeColorBy(ColorByChurn.value)))])([text2("Churn")])])]), subHeading_([text2("Git Replay")]), div2([classes(["control-group"])])([buttonGroup_([buttonLeft([onClick($$const(StartReplay.value))])([text2("Play")]), buttonCenter([onClick($$const(StopReplay.value))])([text2("Stop")]), buttonRight([onClick($$const(ResetReplay.value))])([text2("Reset")])])])]);
   };
   var render46 = function(state3) {
     return div2([classes(["fullscreen-container", "spago-fullscreen", "page-with-watermark"])])([renderHeader12(CodeExplorer.value), div2([classes(["floating-panel", "floating-panel--top-left", "floating-panel--small", "spago-controls-panel", "editorial"])])([h2([classes(["floating-panel__title", "spago-controls__title"])])([text2("Controls")]), renderSimControls(state3), renderSimState(state3)]), div2([classes(["floating-panel", "floating-panel--top-right", "floating-panel--large", "spago-forces-panel", "editorial"])])([renderTableForces(state3)]), div2([classes(["svg-container", "fullscreen-viz", "spago-viz-container", state3.scene.cssClass])])([render45]), (function() {
@@ -47876,7 +48033,7 @@
                   return Nothing.value;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.CodeExplorer (line 409, column 23 - line 412, column 31): " + [st.eventListener.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.CodeExplorer (line 434, column 23 - line 437, column 31): " + [st.eventListener.constructor.name]);
               })()
             };
           };
@@ -47893,75 +48050,77 @@
       if (v instanceof Initialize40) {
         return bind78(liftAff34(readModelData))(function(v1) {
           return discard70(modify_17(function(v2) {
-            var $66 = {};
-            for (var $67 in v2) {
-              if ({}.hasOwnProperty.call(v2, $67)) {
-                $66[$67] = v2[$67];
+            var $67 = {};
+            for (var $68 in v2) {
+              if ({}.hasOwnProperty.call(v2, $68)) {
+                $67[$68] = v2[$68];
               }
               ;
             }
             ;
-            $66.model = v1;
-            return $66;
+            $67.model = v1;
+            return $67;
           }))(function() {
             return discard70(liftEffect80(loadGitMetrics_))(function() {
-              return bind78(get21)(function(state3) {
-                return bind78(liftAff34(evalD3v2SimM(state3)(initialize6)))(function(openSelections) {
-                  return discard70(modify_17(function(s) {
-                    var $72 = {};
-                    for (var $73 in s) {
-                      if ({}.hasOwnProperty.call(s, $73)) {
-                        $72[$73] = s[$73];
-                      }
-                      ;
-                    }
-                    ;
-                    $72.staging = (function() {
-                      var $69 = {};
-                      for (var $70 in s.staging) {
-                        if ({}.hasOwnProperty.call(s.staging, $70)) {
-                          $69[$70] = s["staging"][$70];
+              return discard70(liftEffect80(loadTimeline_))(function() {
+                return bind78(get21)(function(state3) {
+                  return bind78(liftAff34(evalD3v2SimM(state3)(initialize6)))(function(openSelections) {
+                    return discard70(modify_17(function(s) {
+                      var $73 = {};
+                      for (var $74 in s) {
+                        if ({}.hasOwnProperty.call(s, $74)) {
+                          $73[$74] = s[$74];
                         }
                         ;
                       }
                       ;
-                      $69.selections = {
-                        nodes: new Just(openSelections.nodes),
-                        links: new Just(openSelections.links)
-                      };
-                      return $69;
-                    })();
-                    return $72;
-                  }))(function() {
-                    return bind78(liftEffect80(create))(function(v2) {
-                      return discard70($$void18(subscribe2(v2.emitter)))(function() {
-                        return discard70(modify_17(function(v3) {
-                          var $76 = {};
-                          for (var $77 in v3) {
-                            if ({}.hasOwnProperty.call(v3, $77)) {
-                              $76[$77] = v3[$77];
-                            }
-                            ;
+                      $73.staging = (function() {
+                        var $70 = {};
+                        for (var $71 in s.staging) {
+                          if ({}.hasOwnProperty.call(s.staging, $71)) {
+                            $70[$71] = s["staging"][$71];
                           }
                           ;
-                          $76.eventListener = new Just(v2.listener);
-                          return $76;
-                        }))(function() {
-                          return bind78(liftEffect80(create))(function(v3) {
-                            return discard70($$void18(subscribe2(v3.emitter)))(function() {
-                              return discard70(modify_17(function(v4) {
-                                var $80 = {};
-                                for (var $81 in v4) {
-                                  if ({}.hasOwnProperty.call(v4, $81)) {
-                                    $80[$81] = v4[$81];
+                        }
+                        ;
+                        $70.selections = {
+                          nodes: new Just(openSelections.nodes),
+                          links: new Just(openSelections.links)
+                        };
+                        return $70;
+                      })();
+                      return $73;
+                    }))(function() {
+                      return bind78(liftEffect80(create))(function(v2) {
+                        return discard70($$void18(subscribe2(v2.emitter)))(function() {
+                          return discard70(modify_17(function(v3) {
+                            var $77 = {};
+                            for (var $78 in v3) {
+                              if ({}.hasOwnProperty.call(v3, $78)) {
+                                $77[$78] = v3[$78];
+                              }
+                              ;
+                            }
+                            ;
+                            $77.eventListener = new Just(v2.listener);
+                            return $77;
+                          }))(function() {
+                            return bind78(liftEffect80(create))(function(v3) {
+                              return discard70($$void18(subscribe2(v3.emitter)))(function() {
+                                return discard70(modify_17(function(v4) {
+                                  var $81 = {};
+                                  for (var $82 in v4) {
+                                    if ({}.hasOwnProperty.call(v4, $82)) {
+                                      $81[$82] = v4[$82];
+                                    }
+                                    ;
                                   }
                                   ;
-                                }
-                                ;
-                                $80.transitionListener = new Just(v3.listener);
-                                return $80;
-                              }))(function() {
-                                return pure77(unit);
+                                  $81.transitionListener = new Just(v3.listener);
+                                  return $81;
+                                }))(function() {
+                                  return pure77(unit);
+                                });
                               });
                             });
                           });
@@ -47989,7 +48148,7 @@
           return handleAction39(dictMonadAff)(new SpotlightNode(v.value0.value1));
         }
         ;
-        throw new Error("Failed pattern match at PSD3.CodeExplorer (line 196, column 5 - line 198, column 68): " + [v.value0.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.CodeExplorer (line 200, column 5 - line 202, column 68): " + [v.value0.constructor.name]);
       }
       ;
       if (v instanceof ToggleChildrenOfNode) {
@@ -48018,16 +48177,16 @@
         return discard70(modify_17(applySceneWithTransition2(PackageGrid.value)(packageGridScene)))(function() {
           return discard70(runSimulation1)(function() {
             return modify_17(function(v1) {
-              var $99 = {};
-              for (var $100 in v1) {
-                if ({}.hasOwnProperty.call(v1, $100)) {
-                  $99[$100] = v1[$100];
+              var $100 = {};
+              for (var $101 in v1) {
+                if ({}.hasOwnProperty.call(v1, $101)) {
+                  $100[$101] = v1[$101];
                 }
                 ;
               }
               ;
-              $99.currentScene = PackageGrid.value;
-              return $99;
+              $100.currentScene = PackageGrid.value;
+              return $100;
             });
           });
         });
@@ -48037,16 +48196,16 @@
         return discard70(modify_17(applySceneWithTransition2(PackageGraph.value)(packageGraphScene)))(function() {
           return discard70(runSimulation1)(function() {
             return modify_17(function(v1) {
-              var $103 = {};
-              for (var $104 in v1) {
-                if ({}.hasOwnProperty.call(v1, $104)) {
-                  $103[$104] = v1[$104];
+              var $104 = {};
+              for (var $105 in v1) {
+                if ({}.hasOwnProperty.call(v1, $105)) {
+                  $104[$105] = v1[$105];
                 }
                 ;
               }
               ;
-              $103.currentScene = PackageGraph.value;
-              return $103;
+              $104.currentScene = PackageGraph.value;
+              return $104;
             });
           });
         });
@@ -48056,16 +48215,16 @@
         return discard70(modify_17(applySceneWithTransition2(LayerSwarm.value)(layerSwarmScene)))(function() {
           return discard70(runSimulation1)(function() {
             return modify_17(function(v1) {
-              var $107 = {};
-              for (var $108 in v1) {
-                if ({}.hasOwnProperty.call(v1, $108)) {
-                  $107[$108] = v1[$108];
+              var $108 = {};
+              for (var $109 in v1) {
+                if ({}.hasOwnProperty.call(v1, $109)) {
+                  $108[$109] = v1[$109];
                 }
                 ;
               }
               ;
-              $107.currentScene = LayerSwarm.value;
-              return $107;
+              $108.currentScene = LayerSwarm.value;
+              return $108;
             });
           });
         });
@@ -48075,16 +48234,16 @@
         return discard70(modify_17(applySceneWithTransition2(new ModuleTree(Radial.value))(radialTreeScene)))(function() {
           return discard70(runSimulation1)(function() {
             return modify_17(function(v1) {
-              var $111 = {};
-              for (var $112 in v1) {
-                if ({}.hasOwnProperty.call(v1, $112)) {
-                  $111[$112] = v1[$112];
+              var $112 = {};
+              for (var $113 in v1) {
+                if ({}.hasOwnProperty.call(v1, $113)) {
+                  $112[$113] = v1[$113];
                 }
                 ;
               }
               ;
-              $111.currentScene = new ModuleTree(Radial.value);
-              return $111;
+              $112.currentScene = new ModuleTree(Radial.value);
+              return $112;
             });
           });
         });
@@ -48094,16 +48253,16 @@
         return discard70(modify_17(applySceneWithTransition2(new ModuleTree(Horizontal.value))(horizontalTreeScene)))(function() {
           return discard70(runSimulation1)(function() {
             return modify_17(function(v1) {
-              var $116 = {};
-              for (var $117 in v1) {
-                if ({}.hasOwnProperty.call(v1, $117)) {
-                  $116[$117] = v1[$117];
+              var $117 = {};
+              for (var $118 in v1) {
+                if ({}.hasOwnProperty.call(v1, $118)) {
+                  $117[$118] = v1[$118];
                 }
                 ;
               }
               ;
-              $116.currentScene = new ModuleTree(Horizontal.value);
-              return $116;
+              $117.currentScene = new ModuleTree(Horizontal.value);
+              return $117;
             });
           });
         });
@@ -48113,16 +48272,16 @@
         return discard70(modify_17(applySceneWithTransition2(new ModuleTree(Vertical.value))(verticalTreeScene)))(function() {
           return discard70(runSimulation1)(function() {
             return modify_17(function(v1) {
-              var $121 = {};
-              for (var $122 in v1) {
-                if ({}.hasOwnProperty.call(v1, $122)) {
-                  $121[$122] = v1[$122];
+              var $122 = {};
+              for (var $123 in v1) {
+                if ({}.hasOwnProperty.call(v1, $123)) {
+                  $122[$123] = v1[$123];
                 }
                 ;
               }
               ;
-              $121.currentScene = new ModuleTree(Vertical.value);
-              return $121;
+              $122.currentScene = new ModuleTree(Vertical.value);
+              return $122;
             });
           });
         });
@@ -48215,16 +48374,16 @@
       ;
       if (v instanceof DismissWelcome) {
         return modify_17(function(v1) {
-          var $140 = {};
-          for (var $141 in v1) {
-            if ({}.hasOwnProperty.call(v1, $141)) {
-              $140[$141] = v1[$141];
+          var $141 = {};
+          for (var $142 in v1) {
+            if ({}.hasOwnProperty.call(v1, $142)) {
+              $141[$142] = v1[$142];
             }
             ;
           }
           ;
-          $140.showWelcome = false;
-          return $140;
+          $141.showWelcome = false;
+          return $141;
         });
       }
       ;
@@ -48234,7 +48393,35 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.CodeExplorer (line 157, column 16 - line 322, column 18): " + [v.constructor.name]);
+      if (v instanceof StartReplay) {
+        return discard70(modify_17(setSceneAttributes2(sceneAttributesWithColorBy(ColorByReplay.value))))(function() {
+          return bind78(liftEffect80(create))(function(v1) {
+            return discard70($$void18(subscribe2(v1.emitter)))(function() {
+              return discard70(liftEffect80(setUpdateCallback_(notify(v1.listener)(ReplayTick.value))))(function() {
+                return discard70(liftEffect80(startReplay_))(function() {
+                  return runSimulation1;
+                });
+              });
+            });
+          });
+        });
+      }
+      ;
+      if (v instanceof StopReplay) {
+        return liftEffect80(stopReplay_);
+      }
+      ;
+      if (v instanceof ResetReplay) {
+        return discard70(liftEffect80(resetReplay_))(function() {
+          return runSimulation1;
+        });
+      }
+      ;
+      if (v instanceof ReplayTick) {
+        return runSimulation1;
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3.CodeExplorer (line 158, column 16 - line 347, column 18): " + [v.constructor.name]);
     };
   };
   var defaultTransitionMatrix = /* @__PURE__ */ (function() {

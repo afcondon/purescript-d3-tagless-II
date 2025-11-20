@@ -35,7 +35,8 @@ import Control.Monad.State (class MonadState)
 import D3.Viz.Spago.Draw as Graph
 import D3.Viz.Spago.Draw.Attributes (sceneAttributesWithColorBy)
 import D3.Viz.Spago.Files (NodeType(..))
-import D3.Viz.Spago.GitMetrics (loadGitMetrics_)
+import D3.Viz.Spago.GitMetrics (loadGitMetrics_, ColorByOption(..))
+import D3.Viz.Spago.GitReplay (loadTimeline_, startReplay_, stopReplay_, resetReplay_, setUpdateCallback_)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage, isPackageOrVisibleModule)
 import Data.Array ((:), filter)
 import Data.Either (Either(..))
@@ -163,6 +164,9 @@ handleAction = case _ of
 
     -- 1b. Load git metrics for color-by-metric feature (fire and forget)
     liftEffect loadGitMetrics_
+
+    -- 1c. Load commit timeline for git replay feature
+    liftEffect loadTimeline_
 
     -- 2. Initialize D3 structure (one-time SVG setup)
     state <- H.get
@@ -319,6 +323,27 @@ handleAction = case _ of
 
   ChangeColorBy colorOption -> do
     H.modify_ $ setSceneAttributes (sceneAttributesWithColorBy colorOption)
+    runSimulation
+
+  StartReplay -> do
+    -- Set color mode to replay and start animation
+    H.modify_ $ setSceneAttributes (sceneAttributesWithColorBy ColorByReplay)
+    -- Set up callback to trigger ReplayTick
+    { emitter: replayEmitter, listener: replayListener } <- liftEffect $ HS.create
+    void $ H.subscribe replayEmitter
+    liftEffect $ setUpdateCallback_ (HS.notify replayListener ReplayTick)
+    liftEffect startReplay_
+    runSimulation
+
+  StopReplay -> do
+    liftEffect stopReplay_
+
+  ResetReplay -> do
+    liftEffect resetReplay_
+    runSimulation
+
+  ReplayTick -> do
+    -- Re-render with current replay state
     runSimulation
 
 -- | The core simulation orchestrator - bridges Halogen state to D3 rendering

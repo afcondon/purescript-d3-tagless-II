@@ -29,6 +29,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties (StepValue(..))
 import Halogen.HTML.Properties as HP
 import PSD3.CodeExplorer.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..))
+import D3.Viz.Spago.GitMetrics (ColorByOption(..))
 import PSD3.CodeExplorer.State (State, getStagingLinks, getStagingNodes, getSimulationVariables)
 import PSD3.Shared.ZoomSticker as ZoomSticker
 import PSD3.CodeExplorer.WelcomeOverlay as WelcomeOverlay
@@ -255,6 +256,21 @@ renderSimControls state = do
           , Button.buttonRight
               [ HE.onClick $ const (ChangeColorBy ColorByChurn) ]
               [ HH.text "Churn" ]
+          ]
+        ]
+
+    , Format.subHeading_ [ HH.text "Git Replay" ]
+    , HH.div [ HP.classes [ HH.ClassName "control-group"]]
+        [ Button.buttonGroup_
+          [ Button.buttonLeft
+              [ HE.onClick $ const StartReplay ]
+              [ HH.text "Play" ]
+          , Button.buttonCenter
+              [ HE.onClick $ const StopReplay ]
+              [ HH.text "Stop" ]
+          , Button.buttonRight
+              [ HE.onClick $ const ResetReplay ]
+              [ HH.text "Reset" ]
           ]
         ]
     ]

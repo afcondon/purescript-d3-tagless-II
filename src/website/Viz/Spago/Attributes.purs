@@ -5,6 +5,7 @@ import Prelude
 import D3.Viz.Spago.Model (SpagoSimNode)
 import D3.Viz.Spago.Files (NodeType(..))
 import D3.Viz.Spago.GitMetrics (ColorByOption(..), getModuleMetric_)
+import D3.Viz.Spago.GitReplay (getReplayColor_)
 import PSD3.Data.Node (NodeID)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_, d3SchemeSequential10N_, d3InterpolateViridis_, d3InterpolateRdYlGn_, d3InterpolatePlasma_)
 import PSD3v2.Attribute.Types (Attribute, class_, fill, height, opacity, radius, stroke, strokeWidth, textContent, textAnchor, transform, viewBox, width, x, y)
@@ -59,6 +60,7 @@ colorByMetric option d = case option of
   ColorByAuthors -> interpolateViridis $ getModuleMetric_ d.name "authors"
   ColorByChurn -> interpolatePlasma $ getModuleMetric_ d.name "churn"
   ColorBySize -> interpolateViridis $ getModuleMetric_ d.name "size"
+  ColorByReplay -> getReplayColor_ d.name
   where
     -- Interpolate functions that convert 0-1 value to color string
     interpolateViridis :: Number -> String

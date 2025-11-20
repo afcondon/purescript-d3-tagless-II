@@ -44,6 +44,11 @@ data Action d
   | TagHalogen  -- Tag all Halogen-related packages
   | ClearTags   -- Clear all tags
   | DismissWelcome  -- Dismiss welcome overlay
+  -- Git replay actions
+  | StartReplay
+  | StopReplay
+  | ResetReplay
+  | ReplayTick  -- Internal action for replay updates
 
 data VizEvent = NodeClick NodeType NodeID 
 -- to be added:
