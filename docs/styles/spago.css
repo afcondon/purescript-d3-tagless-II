@@ -161,3 +161,33 @@ g.package.halogen circle {
     height: auto;
   }
 }
+
+/* Highlight connected nodes on hover */
+.highlighted-source circle {
+  stroke: #fff !important;
+  stroke-width: 4px !important;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+}
+
+.highlighted-connection circle {
+  stroke: #fbbf24 !important;
+  stroke-width: 3px !important;
+  filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.6));
+}
+
+.dimmed {
+  opacity: 0.15 !important;
+}
+
+.dimmed circle {
+  filter: none !important;
+}
+
+/* Smooth transitions for highlight effects */
+g circle {
+  transition: opacity 0.15s ease, stroke 0.15s ease, stroke-width 0.15s ease, filter 0.15s ease;
+}
+
+g {
+  transition: opacity 0.15s ease;
+}

@@ -45165,6 +45165,40 @@
     };
   })();
 
+  // output/D3.Viz.Spago.Highlight/foreign.js
+  function highlightConnected_(node) {
+    return function() {
+      if (!node || !node.links) return;
+      const connectedIds = /* @__PURE__ */ new Set();
+      if (node.links.targets) {
+        node.links.targets.forEach((id5) => connectedIds.add(id5));
+      }
+      if (node.links.sources) {
+        node.links.sources.forEach((id5) => connectedIds.add(id5));
+      }
+      if (node.links.treeChildren) {
+        node.links.treeChildren.forEach((id5) => connectedIds.add(id5));
+      }
+      const nodeGroups = d3.selectAll("svg.overlay g").filter(function(d16) {
+        return d16 && d16.id !== void 0;
+      });
+      nodeGroups.classed("highlighted-connection", function(d16) {
+        return d16 && connectedIds.has(d16.id);
+      });
+      nodeGroups.classed("highlighted-source", function(d16) {
+        return d16 && d16.id === node.id;
+      });
+      nodeGroups.classed("dimmed", function(d16) {
+        return d16 && d16.id !== node.id && !connectedIds.has(d16.id);
+      });
+    };
+  }
+  function clearHighlights_2() {
+    d3.selectAll(".highlighted-connection").classed("highlighted-connection", false);
+    d3.selectAll(".highlighted-source").classed("highlighted-source", false);
+    d3.selectAll(".dimmed").classed("dimmed", false);
+  }
+
   // output/D3.Viz.Spago.Tooltip/foreign.js
   var tooltipElement = null;
   function ensureTooltip() {
@@ -45294,7 +45328,7 @@
       });
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 43, column 1 - line 43, column 88): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 44, column 1 - line 44, column 88): " + [v.constructor.name]);
   };
   var linkColor = function(l) {
     if (l.linktype instanceof P2P) {
@@ -45313,7 +45347,7 @@
       return "orange";
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 35, column 15 - line 39, column 23): " + [l.linktype.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 36, column 15 - line 40, column 23): " + [l.linktype.constructor.name]);
   };
   var linkClass = function(l) {
     return show73(l.linktype);
@@ -45321,7 +45355,7 @@
   var spagoRenderCallbacks = function(dictMonad) {
     var Bind1 = dictMonad.Bind1();
     var bind140 = bind(Bind1);
-    var discard118 = discard68(Bind1);
+    var discard214 = discard68(Bind1);
     var $$void19 = $$void(Bind1.Apply0().Functor0());
     var pure86 = pure(dictMonad.Applicative0());
     return function(dictSelectionM) {
@@ -45339,7 +45373,7 @@
               return bind140(appendChildInheriting4(Circle2.value)(attrs.circles)(groupEnter))(function(circleEnter) {
                 return bind140(appendChildInheriting4(Text3.value)(attrs.labels)(groupEnter))(function(labelEnter) {
                   return bind140(on14(new Drag2(simulationDrag("spago")))(groupEnter))(function() {
-                    return discard118((function() {
+                    return discard214((function() {
                       if (attrs.nodeClick instanceof Just) {
                         return $$void19(on14(onClickWithDatum(attrs.nodeClick.value0))(groupEnter));
                       }
@@ -45348,13 +45382,19 @@
                         return pure86(unit);
                       }
                       ;
-                      throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 83, column 5 - line 85, column 27): " + [attrs.nodeClick.constructor.name]);
+                      throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 84, column 5 - line 86, column 27): " + [attrs.nodeClick.constructor.name]);
                     })())(function() {
                       return bind140(on14(onMouseEnterWithInfo(function(info2) {
-                        return showNodeTooltip(info2.datum)(info2.pageX)(info2.pageY);
+                        return function __do4() {
+                          showNodeTooltip(info2.datum)(info2.pageX)(info2.pageY)();
+                          return highlightConnected_(info2.datum)();
+                        };
                       }))(groupEnter))(function() {
                         return bind140(on14(onMouseLeave(function(v) {
-                          return hideNodeTooltip;
+                          return function __do4() {
+                            hideNodeTooltip();
+                            return clearHighlights_2();
+                          };
                         }))(groupEnter))(function() {
                           return pure86(groupEnter);
                         });

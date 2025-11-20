@@ -6,6 +6,7 @@ import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, enterAttrs, updateAtt
 import D3.Viz.Spago.Files (LinkType(..))
 import D3.Viz.Spago.Model (SpagoSimNode)
 import D3.Viz.Spago.Tooltip (showNodeTooltip, hideNodeTooltip)
+import D3.Viz.Spago.Highlight (highlightConnected_, clearHighlights_)
 import Data.Array ((:))
 import Data.Array as Array
 import Data.Map as Map
@@ -84,9 +85,15 @@ spagoRenderCallbacks = {
       Just handler -> void $ on (onClickWithDatum handler) groupEnter
       Nothing -> pure unit
 
-    -- Add tooltip hover behavior
-    _ <- on (onMouseEnterWithInfo \info -> showNodeTooltip info.datum info.pageX info.pageY) groupEnter
-    _ <- on (onMouseLeave \_ -> hideNodeTooltip) groupEnter
+    -- Add tooltip and highlight hover behavior
+    _ <- on (onMouseEnterWithInfo \info -> do
+      showNodeTooltip info.datum info.pageX info.pageY
+      highlightConnected_ info.datum
+    ) groupEnter
+    _ <- on (onMouseLeave \_ -> do
+      hideNodeTooltip
+      clearHighlights_
+    ) groupEnter
 
     pure groupEnter
 
