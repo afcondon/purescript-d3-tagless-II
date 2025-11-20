@@ -22,6 +22,7 @@ allTutorialRoutes =
   , TourFlow
   , TourHierarchies
   , TourMotion
+  , TourWealthHealth
   , TourInterpreters
   , TourFPFTW
   , TourGraphAlgorithms

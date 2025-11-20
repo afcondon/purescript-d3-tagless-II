@@ -110,6 +110,7 @@ data Route
   | TourFlow             -- Tour 3: Chord and Sankey diagrams
   | TourHierarchies      -- Tour 4: All tree layouts, treemap, pack, icicle
   | TourMotion           -- Tour 5: Transitions and animations
+  | TourWealthHealth     -- Tour 5b: Wealth & Health of Nations (animated bubble chart)
   | TourInterpreters     -- Tour 6: Alternative interpreters (Mermaid, English, generators)
   | TourFPFTW            -- Tour 7: Functional Programming For The Win (Maps, Sets, contravariant attributes)
   | TourGraphAlgorithms  -- Tour 8: Graph Algorithms (topological sort, transitive reduction)
@@ -164,6 +165,7 @@ instance showRoute :: Show Route where
   show TourFlow = "Tour: Data Flow"
   show TourHierarchies = "Tour: Hierarchies"
   show TourMotion = "Tour: Motion & Transitions"
+  show TourWealthHealth = "Tour: Wealth & Health"
   show TourInterpreters = "Tour: Alternative Interpreters"
   show TourFPFTW = "Tour: FP For The Win"
   show TourGraphAlgorithms = "Tour: Graph Algorithms"

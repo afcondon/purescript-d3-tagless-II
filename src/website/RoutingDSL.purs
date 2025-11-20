@@ -44,6 +44,7 @@ routes =
   <|> tourFlow
   <|> tourHierarchies
   <|> tourMotion
+  <|> tourWealthHealth
   <|> tourInterpreters
   <|> tourFPFTW
   <|> tourGraphAlgorithms
@@ -179,6 +180,10 @@ tourHierarchies = TourHierarchies <$ lit "tour" <* lit "hierarchies" <* end
 tourMotion :: Match Route
 tourMotion = TourMotion <$ lit "tour" <* lit "motion" <* end
 
+-- | Match: /tour/wealth-health
+tourWealthHealth :: Match Route
+tourWealthHealth = TourWealthHealth <$ lit "tour" <* lit "wealth-health" <* end
+
 -- | Match: /tour/interpreters
 tourInterpreters :: Match Route
 tourInterpreters = TourInterpreters <$ lit "tour" <* lit "interpreters" <* end
@@ -294,6 +299,7 @@ routeToPath TourProfessional = "/tour/professional"
 routeToPath TourFlow = "/tour/flow"
 routeToPath TourHierarchies = "/tour/hierarchies"
 routeToPath TourMotion = "/tour/motion"
+routeToPath TourWealthHealth = "/tour/wealth-health"
 routeToPath TourInterpreters = "/tour/interpreters"
 routeToPath TourFPFTW = "/tour/fpftw"
 routeToPath TourGraphAlgorithms = "/tour/graph-algorithms"
