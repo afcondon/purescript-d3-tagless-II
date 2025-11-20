@@ -4,6 +4,13 @@ module PSD3v2.Behavior.FFI
   , attachSimulationDrag_
   , attachClick_
   , attachClickWithDatum_
+  , attachMouseEnter_
+  , attachMouseLeave_
+  , attachHighlight_
+  , attachMouseMoveWithInfo_
+  , attachMouseEnterWithInfo_
+  , attachMouseLeaveWithInfo_
+  , MouseEventInfoJS
   ) where
 
 import Prelude
@@ -76,4 +83,80 @@ foreign import attachClickWithDatum_
   :: forall datum
    . Element
   -> (datum -> Effect Unit)
+  -> Effect Element
+
+-- | Attach mouseenter handler with datum access
+-- |
+-- | Attaches a handler that fires when mouse enters the element.
+-- | Does not bubble (unlike mouseover).
+-- | The datum is recovered from D3's __data__ property.
+-- |
+-- | Returns the element for chaining.
+foreign import attachMouseEnter_
+  :: forall datum
+   . Element
+  -> (datum -> Effect Unit)
+  -> Effect Element
+
+-- | Attach mouseleave handler with datum access
+-- |
+-- | Attaches a handler that fires when mouse leaves the element.
+-- | Does not bubble (unlike mouseout).
+-- | The datum is recovered from D3's __data__ property.
+-- |
+-- | Returns the element for chaining.
+foreign import attachMouseLeave_
+  :: forall datum
+   . Element
+  -> (datum -> Effect Unit)
+  -> Effect Element
+
+-- | Attach hover highlight behavior
+-- |
+-- | Applies styles on mouseenter and resets on mouseleave.
+-- | Also raises the element to front on hover.
+-- |
+-- | Parameters:
+-- | - element: DOM element to attach to
+-- | - enterStyles: Array of {attr, value} to apply on enter
+-- | - leaveStyles: Array of {attr, value} to apply on leave
+-- |
+-- | Returns the element for chaining.
+foreign import attachHighlight_
+  :: Element
+  -> Array { attr :: String, value :: String }
+  -> Array { attr :: String, value :: String }
+  -> Effect Element
+
+-- | Mouse event info type (matches PureScript MouseEventInfo)
+type MouseEventInfoJS =
+  { clientX :: Number
+  , clientY :: Number
+  , pageX :: Number
+  , pageY :: Number
+  , offsetX :: Number
+  , offsetY :: Number
+  }
+
+-- | Attach mousemove handler with event info
+-- |
+-- | Passes datum and mouse coordinates to the handler.
+foreign import attachMouseMoveWithInfo_
+  :: forall datum
+   . Element
+  -> (datum -> MouseEventInfoJS -> Effect Unit)
+  -> Effect Element
+
+-- | Attach mouseenter handler with event info
+foreign import attachMouseEnterWithInfo_
+  :: forall datum
+   . Element
+  -> (datum -> MouseEventInfoJS -> Effect Unit)
+  -> Effect Element
+
+-- | Attach mouseleave handler with event info
+foreign import attachMouseLeaveWithInfo_
+  :: forall datum
+   . Element
+  -> (datum -> MouseEventInfoJS -> Effect Unit)
   -> Effect Element

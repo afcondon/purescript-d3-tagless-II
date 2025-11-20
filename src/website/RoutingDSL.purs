@@ -21,6 +21,21 @@ routes =
   <|> gettingStarted  -- Must come early - specific routes before general
   <|> wizard
   <|> howtoIndex
+  <|> howtoTransitions      -- Must come before howtoIndex check (more specific)
+  <|> howtoForceGraphs
+  <|> howtoHierarchical
+  <|> howtoEvents
+  <|> howtoTreeAPI
+  <|> howtoLoadingData
+  <|> howtoAxesScales
+  <|> howtoTooltips
+  <|> howtoDebugging
+  <|> howtoPerformance
+  <|> understandingGrammar  -- Must come before understanding (more specific)
+  <|> understandingAttributes
+  <|> understandingSelections
+  <|> understandingTreeAPI
+  <|> understandingScenes
   <|> understanding
   <|> referenceModule  -- Must come before reference (more specific)
   <|> reference
@@ -72,9 +87,69 @@ wizard = Wizard <$ lit "wizard" <* end
 howtoIndex :: Match Route
 howtoIndex = HowtoIndex <$ lit "howto" <* end
 
+-- | Match: /howto/transitions
+howtoTransitions :: Match Route
+howtoTransitions = HowtoTransitions <$ lit "howto" <* lit "transitions" <* end
+
+-- | Match: /howto/force-graphs
+howtoForceGraphs :: Match Route
+howtoForceGraphs = HowtoForceGraphs <$ lit "howto" <* lit "force-graphs" <* end
+
+-- | Match: /howto/hierarchical
+howtoHierarchical :: Match Route
+howtoHierarchical = HowtoHierarchical <$ lit "howto" <* lit "hierarchical" <* end
+
+-- | Match: /howto/events
+howtoEvents :: Match Route
+howtoEvents = HowtoEvents <$ lit "howto" <* lit "events" <* end
+
+-- | Match: /howto/tree-api
+howtoTreeAPI :: Match Route
+howtoTreeAPI = HowtoTreeAPI <$ lit "howto" <* lit "tree-api" <* end
+
+-- | Match: /howto/loading-data
+howtoLoadingData :: Match Route
+howtoLoadingData = HowtoLoadingData <$ lit "howto" <* lit "loading-data" <* end
+
+-- | Match: /howto/axes-scales
+howtoAxesScales :: Match Route
+howtoAxesScales = HowtoAxesScales <$ lit "howto" <* lit "axes-scales" <* end
+
+-- | Match: /howto/tooltips
+howtoTooltips :: Match Route
+howtoTooltips = HowtoTooltips <$ lit "howto" <* lit "tooltips" <* end
+
+-- | Match: /howto/debugging
+howtoDebugging :: Match Route
+howtoDebugging = HowtoDebugging <$ lit "howto" <* lit "debugging" <* end
+
+-- | Match: /howto/performance
+howtoPerformance :: Match Route
+howtoPerformance = HowtoPerformance <$ lit "howto" <* lit "performance" <* end
+
 -- | Match: /understanding
 understanding :: Match Route
 understanding = Understanding <$ lit "understanding" <* end
+
+-- | Match: /understanding/grammar
+understandingGrammar :: Match Route
+understandingGrammar = UnderstandingGrammar <$ lit "understanding" <* lit "grammar" <* end
+
+-- | Match: /understanding/attributes
+understandingAttributes :: Match Route
+understandingAttributes = UnderstandingAttributes <$ lit "understanding" <* lit "attributes" <* end
+
+-- | Match: /understanding/selections
+understandingSelections :: Match Route
+understandingSelections = UnderstandingSelections <$ lit "understanding" <* lit "selections" <* end
+
+-- | Match: /understanding/tree-api
+understandingTreeAPI :: Match Route
+understandingTreeAPI = UnderstandingTreeAPI <$ lit "understanding" <* lit "tree-api" <* end
+
+-- | Match: /understanding/scenes
+understandingScenes :: Match Route
+understandingScenes = UnderstandingScenes <$ lit "understanding" <* lit "scenes" <* end
 
 -- | Match: /reference/:moduleName
 referenceModule :: Match Route
@@ -196,7 +271,22 @@ routeToPath Home = "/home"
 routeToPath GettingStarted = "/getting-started"
 routeToPath Wizard = "/wizard"
 routeToPath HowtoIndex = "/howto"
+routeToPath HowtoTransitions = "/howto/transitions"
+routeToPath HowtoForceGraphs = "/howto/force-graphs"
+routeToPath HowtoHierarchical = "/howto/hierarchical"
+routeToPath HowtoEvents = "/howto/events"
+routeToPath HowtoTreeAPI = "/howto/tree-api"
+routeToPath HowtoLoadingData = "/howto/loading-data"
+routeToPath HowtoAxesScales = "/howto/axes-scales"
+routeToPath HowtoTooltips = "/howto/tooltips"
+routeToPath HowtoDebugging = "/howto/debugging"
+routeToPath HowtoPerformance = "/howto/performance"
 routeToPath Understanding = "/understanding"
+routeToPath UnderstandingGrammar = "/understanding/grammar"
+routeToPath UnderstandingAttributes = "/understanding/attributes"
+routeToPath UnderstandingSelections = "/understanding/selections"
+routeToPath UnderstandingTreeAPI = "/understanding/tree-api"
+routeToPath UnderstandingScenes = "/understanding/scenes"
 routeToPath Reference = "/reference"
 routeToPath (ReferenceModule moduleName) = "/reference/" <> moduleName
 routeToPath TourFoundations = "/tour/foundations"

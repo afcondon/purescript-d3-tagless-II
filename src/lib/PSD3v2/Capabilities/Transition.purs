@@ -2,10 +2,15 @@ module PSD3v2.Capabilities.Transition
   ( class TransitionM
   , withTransition
   , withTransitionExit
+  , withTransitionStaggered
+  , withTransitionExitStaggered
+  , staggerByIndex
   ) where
 
 import Prelude
 
+import Data.Int (toNumber)
+import Data.Time.Duration (Milliseconds(..))
 import PSD3v2.Attribute.Types (Attribute)
 import PSD3v2.Selection.Types (SBoundOwns, SBoundInherits, SExiting)
 import PSD3v2.Transition.Types (TransitionConfig)
@@ -88,3 +93,56 @@ class Monad m <= TransitionM sel m | m -> sel where
     -> sel SExiting Element datum
     -> Array (Attribute datum)
     -> m Unit
+
+  -- | Apply a transition with per-element staggered delays
+  -- |
+  -- | Like withTransition but allows the delay to be computed dynamically
+  -- | based on each element's datum and index. This is essential for creating
+  -- | staggered animations where elements animate in sequence.
+  -- |
+  -- | The delay function receives (datum, index) and returns the delay in milliseconds.
+  -- | The config.delay field is ignored in favor of the function.
+  -- |
+  -- | Example:
+  -- | ```purescript
+  -- | -- Each element delays 100ms more than the previous
+  -- | withTransitionStaggered config (\_ i -> Milliseconds (toNumber i * 100.0)) circles
+  -- |   [ cy 50.0
+  -- |   , fill "red"
+  -- |   ]
+  -- |
+  -- | -- Delay based on data value
+  -- | withTransitionStaggered config (\d _ -> Milliseconds d.priority) items
+  -- |   [ opacity 1.0 ]
+  -- | ```
+  withTransitionStaggered
+    :: forall datum
+     . TransitionConfig
+    -> (datum -> Int -> Milliseconds)  -- Per-element delay function
+    -> sel SBoundOwns Element datum
+    -> Array (Attribute datum)
+    -> m Unit
+
+  -- | Apply a staggered transition to an exiting selection
+  -- |
+  -- | Like withTransitionExit but with per-element delays for choreographed exit animations.
+  withTransitionExitStaggered
+    :: forall datum
+     . TransitionConfig
+    -> (datum -> Int -> Milliseconds)
+    -> sel SExiting Element datum
+    -> Array (Attribute datum)
+    -> m Unit
+
+-- | Helper to create a simple index-based stagger delay
+-- |
+-- | Creates a delay function that multiplies the index by a fixed amount.
+-- | Useful for simple sequential animations.
+-- |
+-- | Example:
+-- | ```purescript
+-- | -- Each element delays 50ms more than the previous
+-- | withTransitionStaggered config (staggerByIndex 50.0) circles [cy 100.0]
+-- | ```
+staggerByIndex :: forall datum. Number -> datum -> Int -> Milliseconds
+staggerByIndex msPerElement = \_ i -> Milliseconds (toNumber i * msPerElement)

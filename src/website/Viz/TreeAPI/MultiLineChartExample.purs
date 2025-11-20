@@ -7,7 +7,7 @@ import Data.Array as Data.Array
 import Data.Array.NonEmpty as NEA
 import Data.Either (Either(..))
 import Data.Foldable (maximum, foldl)
-import Data.Function (on)
+import Data.Function (on) as F
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Number as Number
@@ -19,12 +19,26 @@ import Effect.Console as Console
 import PSD3.Shared.Data (DataFile(..), loadDataFile, parseCSVRow)
 import PSD3v2.Attribute.Types (width, height, viewBox, class_, x, y, fill, transform, stroke, strokeWidth, d, textContent, textAnchor, fontSize)
 import PSD3v2.Axis.Axis (axisBottom, axisLeft, renderAxis, Scale)
-import PSD3v2.Capabilities.Selection (select, renderTree)
+import PSD3v2.Capabilities.Selection (select, renderTree, on)
+import PSD3v2.Behavior.Types (onMouseLeaveWithInfo, onMouseMoveWithInfo, MouseEventInfo)
+import Data.Map as Map
+import Web.DOM.Element as Element
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
 import PSD3v2.VizTree.Tree (Tree, joinData)
 import PSD3v2.VizTree.Tree as T
 import Web.DOM.Element (Element)
+import Web.HTML (window)
+import Web.HTML.Window (document)
+import Web.HTML.HTMLDocument (body)
+import Web.DOM.Node (appendChild)
+import Web.DOM.Document (createElement)
+import Web.HTML.HTMLDocument (toDocument)
+import Web.DOM.Element (toNode, setAttribute, setId)
+import Web.HTML.HTMLElement (toNode) as HTMLElement
+import Effect.Ref (Ref)
+import Effect.Ref as Ref
+import Data.Maybe (Maybe(..)) as Maybe
 
 -- | Multi-line chart showing unemployment rates over time for US metro areas
 -- |
@@ -71,19 +85,99 @@ loadUnemploymentData = do
 -- Group data by division
 groupByDivision :: Array DataPoint -> Array Series
 groupByDivision dataPoints =
-  let grouped = groupBy (\a b -> a.division == b.division) $ sortBy (compare `on` _.division) dataPoints
+  let grouped = groupBy (\a b -> a.division == b.division) $ sortBy (compare `F.on` _.division) dataPoints
       toSeries group =
         let first = NEA.head group
             points = NEA.toArray group
         in { division: first.division
-           , points: sortBy (compare `on` _.date) points
+           , points: sortBy (compare `F.on` _.date) points
            }
   in map toSeries grouped
+
+-- | Create or get the tooltip element
+-- Returns the tooltip Element for manipulation
+createTooltip :: Effect Element
+createTooltip = do
+  win <- window
+  htmlDoc <- document win
+  let doc = toDocument htmlDoc
+
+  -- Create tooltip div
+  tooltip <- createElement "div" doc
+  setId "multiline-tooltip" tooltip
+
+  -- Style the tooltip
+  setAttribute "style"
+    ( "position: absolute; "
+    <> "background: rgba(0, 0, 0, 0.8); "
+    <> "color: white; "
+    <> "padding: 8px 12px; "
+    <> "border-radius: 4px; "
+    <> "font-size: 12px; "
+    <> "pointer-events: none; "
+    <> "opacity: 0; "
+    <> "z-index: 1000; "
+    <> "transition: opacity 0.15s;"
+    ) tooltip
+
+  -- Append to body
+  maybeBody <- body htmlDoc
+  case maybeBody of
+    Just b -> void $ appendChild (toNode tooltip) (HTMLElement.toNode b)
+    Nothing -> pure unit
+
+  pure tooltip
+
+-- | Show tooltip with content at position
+showTooltip :: Element -> String -> Number -> Number -> Effect Unit
+showTooltip tooltip content pageX pageY = do
+  setAttribute "style"
+    ( "position: absolute; "
+    <> "background: rgba(0, 0, 0, 0.8); "
+    <> "color: white; "
+    <> "padding: 8px 12px; "
+    <> "border-radius: 4px; "
+    <> "font-size: 12px; "
+    <> "pointer-events: none; "
+    <> "opacity: 1; "
+    <> "z-index: 1000; "
+    <> "transition: opacity 0.15s; "
+    <> "left: " <> show (pageX + 15.0) <> "px; "
+    <> "top: " <> show (pageY - 10.0) <> "px;"
+    ) tooltip
+  setInnerHTML_ content tooltip
+
+-- | Hide tooltip
+hideTooltip :: Element -> Effect Unit
+hideTooltip tooltip = do
+  setAttribute "style"
+    ( "position: absolute; "
+    <> "background: rgba(0, 0, 0, 0.8); "
+    <> "color: white; "
+    <> "padding: 8px 12px; "
+    <> "border-radius: 4px; "
+    <> "font-size: 12px; "
+    <> "pointer-events: none; "
+    <> "opacity: 0; "
+    <> "z-index: 1000; "
+    <> "transition: opacity 0.15s;"
+    ) tooltip
+
+-- FFI for setting innerHTML
+foreign import setInnerHTML_ :: String -> Element -> Effect Unit
+
+-- FFI for setTimeout/clearTimeout
+foreign import setTimeout_ :: Effect Unit -> Int -> Effect Int
+foreign import clearTimeout_ :: Int -> Effect Unit
 
 -- Draw the multi-line chart with loaded data
 drawMultiLineChart :: String -> Array DataPoint -> Effect Unit
 drawMultiLineChart selector unemploymentData = runD3v2M do
   container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
+
+  -- Create tooltip element and timeout ref for debounced hiding
+  tooltip <- liftEffect createTooltip
+  hideTimeoutRef <- liftEffect $ Ref.new (Maybe.Nothing :: Maybe.Maybe Int)
 
   -- Chart dimensions
   let margin = { top: 20.0, right: 20.0, bottom: 50.0, left: 60.0 }
@@ -181,8 +275,58 @@ drawMultiLineChart selector unemploymentData = runD3v2M do
                       ]
                 ])
 
-  -- Render
-  _ <- renderTree container tree
+  -- Render and get selections
+  selections <- renderTree container tree
+
+  -- Helper to find nearest point by offsetX
+  let findNearestPoint :: Series -> Number -> Maybe DataPoint
+      findNearestPoint s mouseX = do
+        -- Adjust for margin to get plot-relative x
+        let plotX = mouseX - margin.left
+        -- Sort points by date (x position)
+        let sortedPoints = sortBy (compare `F.on` _.date) s.points
+        -- Find nearest by comparing scaled x positions
+        let withDistances = sortedPoints # map \p ->
+              { point: p, dist: Number.abs (scaleX p.date - plotX) }
+        case Data.Array.head (sortBy (compare `F.on` _.dist) withDistances) of
+          Just { point } -> Just point
+          Nothing -> Nothing
+
+  -- Attach hover with tooltip to lines
+  -- Visual highlighting is handled by CSS (.multi-line-chart .line:hover)
+  -- Tooltip is handled by PureScript via onMouseMoveWithInfo/onMouseLeaveWithInfo
+  -- We use a debounced hide to avoid flickering from tiny mouse movements
+  case Map.lookup "lines" selections of
+    Just linesSel -> do
+      -- Use onMouseMoveWithInfo to continuously update tooltip as mouse moves along line
+      _ <- on (onMouseMoveWithInfo \(info :: MouseEventInfo Series) -> do
+        -- Cancel any pending hide timeout
+        maybeTimeout <- Ref.read hideTimeoutRef
+        case maybeTimeout of
+          Maybe.Just timeoutId -> do
+            clearTimeout_ timeoutId
+            Ref.write Maybe.Nothing hideTimeoutRef
+          Maybe.Nothing -> pure unit
+
+        -- Find nearest point based on mouse x position
+        case findNearestPoint info.datum info.offsetX of
+          Maybe.Just point -> do
+            let content = "<strong>" <> info.datum.division <> "</strong><br/>"
+                       <> point.date <> ": " <> show point.rate <> "%"
+            showTooltip tooltip content info.pageX info.pageY
+          Maybe.Nothing -> pure unit
+        ) linesSel
+
+      -- Use onMouseLeaveWithInfo to hide tooltip with a small delay
+      -- This provides a buffer so tiny mouse movements don't immediately cancel the tooltip
+      _ <- on (onMouseLeaveWithInfo \(_ :: MouseEventInfo Series) -> do
+        -- Set a timeout to hide after 150ms
+        timeoutId <- setTimeout_ (hideTooltip tooltip) 150
+        Ref.write (Maybe.Just timeoutId) hideTimeoutRef
+        ) linesSel
+
+      pure unit
+    Nothing -> pure unit
 
   liftEffect do
     Console.log "=== Multi-Line Chart ==="

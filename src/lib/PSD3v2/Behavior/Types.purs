@@ -8,6 +8,14 @@ module PSD3v2.Behavior.Types
   , defaultZoom
   , onClick
   , onClickWithDatum
+  , onMouseEnter
+  , onMouseLeave
+  , HighlightStyle
+  , onHover
+  , MouseEventInfo
+  , onMouseMoveWithInfo
+  , onMouseEnterWithInfo
+  , onMouseLeaveWithInfo
   ) where
 
 import Prelude
@@ -20,6 +28,39 @@ import Effect (Effect)
 -- | - `ScaleExtent 0.5 4.0` allows zooming from 50% to 400%
 -- | - `ScaleExtent 1.0 1.0` disables zoom (fixed at 100%)
 data ScaleExtent = ScaleExtent Number Number
+
+-- | Style changes for hover highlight effect
+-- |
+-- | Specifies attribute name-value pairs to apply on enter and leave.
+-- | Uses String values for simplicity (works with any attribute type).
+-- |
+-- | Example:
+-- | ```purescript
+-- | highlightStyle = { enter: [Tuple "stroke" "#333", Tuple "stroke-width" "3"]
+-- |                  , leave: [Tuple "stroke" "#ddd", Tuple "stroke-width" "1.5"]
+-- |                  }
+-- | ```
+type HighlightStyle =
+  { enter :: Array { attr :: String, value :: String }
+  , leave :: Array { attr :: String, value :: String }
+  }
+
+-- | Mouse event information with position data
+-- |
+-- | Provides both page-relative and element-relative coordinates.
+-- |
+-- | - `clientX`/`clientY`: Position relative to viewport
+-- | - `pageX`/`pageY`: Position relative to document (for tooltip positioning)
+-- | - `offsetX`/`offsetY`: Position relative to target element
+type MouseEventInfo datum =
+  { datum :: datum
+  , clientX :: Number
+  , clientY :: Number
+  , pageX :: Number
+  , pageY :: Number
+  , offsetX :: Number
+  , offsetY :: Number
+  }
 
 derive instance Eq ScaleExtent
 derive instance Ord ScaleExtent
@@ -76,11 +117,19 @@ instance Show DragConfig where
 -- | - `Drag`: Drag elements with mouse/touch (simple or simulation-aware)
 -- | - `Click`: Click handler without datum access
 -- | - `ClickWithDatum`: Click handler with typed datum access
+-- | - `MouseEnter`: Mouse enter handler with typed datum access
+-- | - `MouseLeave`: Mouse leave handler with typed datum access
 data Behavior datum
   = Zoom ZoomConfig
   | Drag DragConfig
   | Click (Effect Unit)
   | ClickWithDatum (datum -> Effect Unit)
+  | MouseEnter (datum -> Effect Unit)
+  | MouseLeave (datum -> Effect Unit)
+  | Highlight HighlightStyle  -- Hover highlighting with style changes
+  | MouseMoveWithInfo (MouseEventInfo datum -> Effect Unit)
+  | MouseEnterWithInfo (MouseEventInfo datum -> Effect Unit)
+  | MouseLeaveWithInfo (MouseEventInfo datum -> Effect Unit)
 
 -- Note: Can't derive Eq/Ord for function types
 -- We only show structure, not function contents
@@ -89,6 +138,12 @@ instance Show (Behavior datum) where
   show (Drag cfg) = "Drag " <> show cfg
   show (Click _) = "Click <handler>"
   show (ClickWithDatum _) = "ClickWithDatum <handler>"
+  show (MouseEnter _) = "MouseEnter <handler>"
+  show (MouseLeave _) = "MouseLeave <handler>"
+  show (Highlight _) = "Highlight <styles>"
+  show (MouseMoveWithInfo _) = "MouseMoveWithInfo <handler>"
+  show (MouseEnterWithInfo _) = "MouseEnterWithInfo <handler>"
+  show (MouseLeaveWithInfo _) = "MouseLeaveWithInfo <handler>"
 
 -- | Default drag configuration
 -- |
@@ -149,3 +204,72 @@ onClick = Click
 -- | ```
 onClickWithDatum :: forall datum. (datum -> Effect Unit) -> Behavior datum
 onClickWithDatum = ClickWithDatum
+
+-- | Mouse enter handler with typed datum access
+-- |
+-- | Fires when mouse enters the element. Does not bubble.
+-- | Useful for hover effects like highlighting.
+-- |
+-- | Example:
+-- | ```purescript
+-- | lines <- joinData "lines" "path" series (\s -> ...)
+-- | _ <- on (onMouseEnter \s -> log ("Hovered: " <> s.division)) lines
+-- | ```
+onMouseEnter :: forall datum. (datum -> Effect Unit) -> Behavior datum
+onMouseEnter = MouseEnter
+
+-- | Mouse leave handler with typed datum access
+-- |
+-- | Fires when mouse leaves the element. Does not bubble.
+-- | Pair with onMouseEnter for hover effects.
+-- |
+-- | Example:
+-- | ```purescript
+-- | _ <- on (onMouseLeave \_ -> resetHighlight) lines
+-- | ```
+onMouseLeave :: forall datum. (datum -> Effect Unit) -> Behavior datum
+onMouseLeave = MouseLeave
+
+-- | Hover highlight behavior
+-- |
+-- | Applies style changes on mouse enter and resets on mouse leave.
+-- | Also raises the element to front on hover.
+-- |
+-- | Example:
+-- | ```purescript
+-- | _ <- on (onHover
+-- |   { enter: [{ attr: "stroke", value: "#333" }, { attr: "stroke-width", value: "3" }]
+-- |   , leave: [{ attr: "stroke", value: "#ddd" }, { attr: "stroke-width", value: "1.5" }]
+-- |   }) lines
+-- | ```
+onHover :: forall datum. HighlightStyle -> Behavior datum
+onHover = Highlight
+
+-- | Mouse move handler with full event info
+-- |
+-- | Fires continuously as mouse moves over the element.
+-- | Provides datum and mouse coordinates for tooltips, crosshairs, etc.
+-- |
+-- | Example:
+-- | ```purescript
+-- | _ <- on (onMouseMoveWithInfo \info -> do
+-- |   -- info.datum is the bound data
+-- |   -- info.pageX/pageY for tooltip positioning
+-- |   -- info.offsetX/offsetY for data lookup
+-- |   updateTooltip info.datum info.pageX info.pageY
+-- | ) lines
+-- | ```
+onMouseMoveWithInfo :: forall datum. (MouseEventInfo datum -> Effect Unit) -> Behavior datum
+onMouseMoveWithInfo = MouseMoveWithInfo
+
+-- | Mouse enter handler with full event info
+-- |
+-- | Like onMouseEnter but also provides mouse coordinates.
+onMouseEnterWithInfo :: forall datum. (MouseEventInfo datum -> Effect Unit) -> Behavior datum
+onMouseEnterWithInfo = MouseEnterWithInfo
+
+-- | Mouse leave handler with full event info
+-- |
+-- | Like onMouseLeave but also provides mouse coordinates.
+onMouseLeaveWithInfo :: forall datum. (MouseEventInfo datum -> Effect Unit) -> Behavior datum
+onMouseLeaveWithInfo = MouseLeaveWithInfo

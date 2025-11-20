@@ -7,6 +7,8 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import PSD3.Website.Types (Route(..))
+import PSD3.RoutingDSL (routeToPath)
 
 -- | Understanding page state
 type State = Unit
@@ -28,55 +30,131 @@ component = H.mkComponent
 render :: State -> H.ComponentHTML Action () Aff
 render _ =
   HH.div
-    [ HP.classes [ HH.ClassName "understanding-page" ] ]
-    [ HH.header
-        [ HP.classes [ HH.ClassName "docs-header" ] ]
-        [ HH.h1
-            [ HP.classes [ HH.ClassName "docs-header__title" ] ]
-            [ HH.text "Understanding PSD3" ]
-        , HH.p
-            [ HP.classes [ HH.ClassName "docs-header__subtitle" ] ]
-            [ HH.text "Conceptual overview of the project" ]
+    [ HP.classes [ HH.ClassName "tutorial-page" ] ]
+    [ -- Header with navigation
+      HH.header
+        [ HP.classes [ HH.ClassName "example-header" ] ]
+        [ HH.div
+            [ HP.classes [ HH.ClassName "example-header-left" ] ]
+            [ HH.a
+                [ HP.href $ "#" <> routeToPath Home
+                , HP.classes [ HH.ClassName "example-logo-link" ]
+                ]
+                [ HH.img
+                    [ HP.src "assets/psd3-logo-color.svg"
+                    , HP.alt "PSD3 Logo"
+                    , HP.classes [ HH.ClassName "example-logo" ]
+                    ]
+                ]
+            , HH.div
+                [ HP.classes [ HH.ClassName "example-title-container" ] ]
+                [ HH.h1
+                    [ HP.classes [ HH.ClassName "example-title" ] ]
+                    [ HH.text "Understanding PSD3" ]
+                ]
+            ]
         ]
 
-    , HH.main
-        [ HP.classes [ HH.ClassName "understanding-content" ] ]
-        [ HH.div
-            [ HP.classes [ HH.ClassName "understanding-grid" ] ]
-            [ renderConceptCard
-                "Interpreters"
-                "How the Finally Tagless pattern enables multiple interpretations of visualization specifications"
-                "TODO: Content needed - explain finally tagless, D3v2 interpreter, Mermaid interpreter, etc."
-            , renderConceptCard
-                "Composability"
-                "Building complex visualizations from simple, reusable components"
-                "TODO: Content needed - explain composition, higher-order functions, etc."
-            , renderConceptCard
-                "Grammar"
-                "The declarative grammar of graphics and how it maps to PSD3's API"
-                "TODO: Content needed - explain selection model, data binding, attributes, etc."
-            , renderConceptCard
-                "Attributes"
-                "The contravariant functor pattern for type-safe, composable styling"
-                "TODO: Content needed - explain contravariant, datum functions, static values, etc."
+    , HH.main_
+        [ -- Introduction
+          HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
+            [ HH.h1
+                [ HP.classes [ HH.ClassName "tutorial-title" ] ]
+                [ HH.text "Understanding PSD3v2" ]
+            , HH.p_
+                [ HH.text "Deep dives into the core concepts and patterns that make PSD3 a type-safe, composable framework for D3 visualizations. Click any card to learn more." ]
+            ]
+
+        -- Core Concepts Section
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Core Concepts" ]
+            , HH.p_
+                [ HH.text "Essential concepts that form the foundation of PSD3's architecture." ]
+
+            -- Four-square navigation grid
+            , HH.div
+                [ HP.classes [ HH.ClassName "understanding-nav-grid" ] ]
+                [ renderNavCard
+                    "The Grammar of D3"
+                    "Four essential primitives: select, append, join, attr. Everything else builds from these."
+                    UnderstandingGrammar
+                , renderNavCard
+                    "Type-Safe Attributes"
+                    "Static values, datum functions, contravariant pattern. Compile-time type safety."
+                    UnderstandingAttributes
+                , renderNavCard
+                    "Selection Phantom Types"
+                    "Five states: SEmpty, SPending, SBoundOwns, SBoundInherits, SExiting. Indexed Monad pattern."
+                    UnderstandingSelections
+                , renderNavCard
+                    "TreeAPI"
+                    "Declarative tree structures. Layer cake: TreeAPI and Simulation API on SelectionM."
+                    UnderstandingTreeAPI
+                ]
+            ]
+
+        -- Advanced Topics Section
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Advanced Topics" ]
+            , HH.p_
+                [ HH.text "Complex patterns for interactive, updating visualizations." ]
+
+            , HH.div
+                [ HP.classes [ HH.ClassName "understanding-nav-grid", HH.ClassName "single-column" ] ]
+                [ renderNavCard
+                    "Scene Structures & Transitions"
+                    "Declarative state management for complex interactive visualizations. Transition matrices for multi-state apps."
+                    UnderstandingScenes
+                ]
+            ]
+
+        -- Quick Links Section
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Related Resources" ]
+            , HH.ul_
+                [ HH.li_
+                    [ HH.a
+                        [ HP.href "#/tour/foundations" ]
+                        [ HH.text "Tour: See these concepts in action" ]
+                    ]
+                , HH.li_
+                    [ HH.a
+                        [ HP.href "#/tour/interpreters" ]
+                        [ HH.text "Tour: Alternative Interpreters" ]
+                    ]
+                , HH.li_
+                    [ HH.a
+                        [ HP.href "#/reference" ]
+                        [ HH.text "API Reference" ]
+                    ]
+                ]
             ]
         ]
     ]
 
--- | Render a concept card
-renderConceptCard :: forall w i. String -> String -> String -> HH.HTML w i
-renderConceptCard title description placeholder =
-  HH.div
-    [ HP.classes [ HH.ClassName "understanding-card" ] ]
-    [ HH.h2
-        [ HP.classes [ HH.ClassName "understanding-card__title" ] ]
+-- | Render a navigation card
+renderNavCard :: forall w i. String -> String -> Route -> HH.HTML w i
+renderNavCard title description route =
+  HH.a
+    [ HP.href $ "#" <> routeToPath route
+    , HP.classes [ HH.ClassName "understanding-nav-card" ]
+    ]
+    [ HH.h3
+        [ HP.classes [ HH.ClassName "understanding-nav-card__title" ] ]
         [ HH.text title ]
     , HH.p
-        [ HP.classes [ HH.ClassName "understanding-card__description" ] ]
+        [ HP.classes [ HH.ClassName "understanding-nav-card__description" ] ]
         [ HH.text description ]
-    , HH.div
-        [ HP.classes [ HH.ClassName "understanding-card__placeholder" ] ]
-        [ HH.text placeholder ]
     ]
 
 handleAction :: forall o. Action -> H.HalogenM State Action () o Aff Unit

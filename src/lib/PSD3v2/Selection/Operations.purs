@@ -766,6 +766,18 @@ on behavior selection@(Selection impl) = do
       void $ BehaviorFFI.attachClick_ element handler
     applyBehavior (ClickWithDatum handler) element =
       void $ BehaviorFFI.attachClickWithDatum_ element handler
+    applyBehavior (MouseEnter handler) element =
+      void $ BehaviorFFI.attachMouseEnter_ element handler
+    applyBehavior (MouseLeave handler) element =
+      void $ BehaviorFFI.attachMouseLeave_ element handler
+    applyBehavior (Highlight { enter, leave }) element =
+      void $ BehaviorFFI.attachHighlight_ element enter leave
+    applyBehavior (MouseMoveWithInfo handler) element =
+      void $ BehaviorFFI.attachMouseMoveWithInfo_ element (\d info -> handler { datum: d, clientX: info.clientX, clientY: info.clientY, pageX: info.pageX, pageY: info.pageY, offsetX: info.offsetX, offsetY: info.offsetY })
+    applyBehavior (MouseEnterWithInfo handler) element =
+      void $ BehaviorFFI.attachMouseEnterWithInfo_ element (\d info -> handler { datum: d, clientX: info.clientX, clientY: info.clientY, pageX: info.pageX, pageY: info.pageY, offsetX: info.offsetX, offsetY: info.offsetY })
+    applyBehavior (MouseLeaveWithInfo handler) element =
+      void $ BehaviorFFI.attachMouseLeaveWithInfo_ element (\d info -> handler { datum: d, clientX: info.clientX, clientY: info.clientY, pageX: info.pageX, pageY: info.pageY, offsetX: info.offsetX, offsetY: info.offsetY })
 
 -- | Attach a behavior with simulation access (for SimulationDrag)
 -- |
@@ -809,6 +821,18 @@ onWithSimulation behavior simState selection@(Selection impl) = do
       void $ BehaviorFFI.attachClick_ element handler
     applyBehaviorWithSim (ClickWithDatum handler) _ element =
       void $ BehaviorFFI.attachClickWithDatum_ element handler
+    applyBehaviorWithSim (MouseEnter handler) _ element =
+      void $ BehaviorFFI.attachMouseEnter_ element handler
+    applyBehaviorWithSim (MouseLeave handler) _ element =
+      void $ BehaviorFFI.attachMouseLeave_ element handler
+    applyBehaviorWithSim (Highlight { enter, leave }) _ element =
+      void $ BehaviorFFI.attachHighlight_ element enter leave
+    applyBehaviorWithSim (MouseMoveWithInfo handler) _ element =
+      void $ BehaviorFFI.attachMouseMoveWithInfo_ element (\d info -> handler { datum: d, clientX: info.clientX, clientY: info.clientY, pageX: info.pageX, pageY: info.pageY, offsetX: info.offsetX, offsetY: info.offsetY })
+    applyBehaviorWithSim (MouseEnterWithInfo handler) _ element =
+      void $ BehaviorFFI.attachMouseEnterWithInfo_ element (\d info -> handler { datum: d, clientX: info.clientX, clientY: info.clientY, pageX: info.pageX, pageY: info.pageY, offsetX: info.offsetX, offsetY: info.offsetY })
+    applyBehaviorWithSim (MouseLeaveWithInfo handler) _ element =
+      void $ BehaviorFFI.attachMouseLeaveWithInfo_ element (\d info -> handler { datum: d, clientX: info.clientX, clientY: info.clientY, pageX: info.pageX, pageY: info.pageY, offsetX: info.offsetX, offsetY: info.offsetY })
 
 -- | Extract D3 simulation handle from simulation state
 -- | Returns Nothing if simulation is not initialized

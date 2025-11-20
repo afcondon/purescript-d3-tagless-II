@@ -161,3 +161,256 @@ export function attachClickWithDatum_(element) {
     return element;
   };
 }
+
+/**
+ * Attach mouseenter handler with datum access
+ * @param {Element} element - The DOM element to attach handler to
+ * @param {Function} handler - The PureScript (datum -> Effect Unit) handler
+ * @returns {Element} The element (for chaining)
+ */
+export function attachMouseEnter_(element) {
+  return handler => () => {
+    // Create D3 selection from element
+    const selection = d3.select(element);
+
+    // Attach mouseenter event listener
+    selection.on('mouseenter', function(event, d) {
+      // D3 v6+ passes datum as second argument
+      // Call PureScript handler with datum (it returns an Effect, so invoke it)
+      handler(d)();
+    });
+
+    return element;
+  };
+}
+
+/**
+ * Attach mouseleave handler with datum access
+ * @param {Element} element - The DOM element to attach handler to
+ * @param {Function} handler - The PureScript (datum -> Effect Unit) handler
+ * @returns {Element} The element (for chaining)
+ */
+export function attachMouseLeave_(element) {
+  return handler => () => {
+    // Create D3 selection from element
+    const selection = d3.select(element);
+
+    // Attach mouseleave event listener
+    selection.on('mouseleave', function(event, d) {
+      // D3 v6+ passes datum as second argument
+      // Call PureScript handler with datum (it returns an Effect, so invoke it)
+      handler(d)();
+    });
+
+    return element;
+  };
+}
+
+/**
+ * Attach hover highlight behavior
+ * @param {Element} element - The DOM element to attach to
+ * @param {Array} enterStyles - Array of {attr, value} to apply on enter
+ * @param {Array} leaveStyles - Array of {attr, value} to apply on leave
+ * @returns {Element} The element (for chaining)
+ */
+export function attachHighlight_(element) {
+  return enterStyles => leaveStyles => () => {
+    // Create D3 selection from element
+    const selection = d3.select(element);
+
+    // Attach mouseenter handler
+    selection.on('mouseenter', function(event) {
+      const sel = d3.select(this);
+      // Raise element to front
+      sel.raise();
+      // Apply enter styles
+      enterStyles.forEach(style => {
+        sel.attr(style.attr, style.value);
+      });
+    });
+
+    // Attach mouseleave handler
+    selection.on('mouseleave', function(event) {
+      const sel = d3.select(this);
+      // Apply leave styles
+      leaveStyles.forEach(style => {
+        sel.attr(style.attr, style.value);
+      });
+    });
+
+    return element;
+  };
+}
+
+/**
+ * Attach mousemove handler with event info
+ * @param {Element} element - The DOM element to attach handler to
+ * @param {Function} handler - The PureScript (datum -> MouseEventInfoJS -> Effect Unit) handler
+ * @returns {Element} The element (for chaining)
+ */
+export function attachMouseMoveWithInfo_(element) {
+  return handler => () => {
+    const selection = d3.select(element);
+
+    selection.on('mousemove', function(event, d) {
+      const info = {
+        clientX: event.clientX,
+        clientY: event.clientY,
+        pageX: event.pageX,
+        pageY: event.pageY,
+        offsetX: event.offsetX,
+        offsetY: event.offsetY
+      };
+      handler(d)(info)();
+    });
+
+    return element;
+  };
+}
+
+/**
+ * Attach mouseenter handler with event info
+ * @param {Element} element - The DOM element to attach handler to
+ * @param {Function} handler - The PureScript (datum -> MouseEventInfoJS -> Effect Unit) handler
+ * @returns {Element} The element (for chaining)
+ */
+export function attachMouseEnterWithInfo_(element) {
+  return handler => () => {
+    const selection = d3.select(element);
+
+    selection.on('mouseenter', function(event, d) {
+      const info = {
+        clientX: event.clientX,
+        clientY: event.clientY,
+        pageX: event.pageX,
+        pageY: event.pageY,
+        offsetX: event.offsetX,
+        offsetY: event.offsetY
+      };
+      handler(d)(info)();
+    });
+
+    return element;
+  };
+}
+
+/**
+ * Attach mouseleave handler with event info
+ * @param {Element} element - The DOM element to attach handler to
+ * @param {Function} handler - The PureScript (datum -> MouseEventInfoJS -> Effect Unit) handler
+ * @returns {Element} The element (for chaining)
+ */
+export function attachMouseLeaveWithInfo_(element) {
+  return handler => () => {
+    const selection = d3.select(element);
+
+    selection.on('mouseleave', function(event, d) {
+      const info = {
+        clientX: event.clientX,
+        clientY: event.clientY,
+        pageX: event.pageX,
+        pageY: event.pageY,
+        offsetX: event.offsetX,
+        offsetY: event.offsetY
+      };
+      handler(d)(info)();
+    });
+
+    return element;
+  };
+}
+
+/**
+ * Attach line chart tooltip behavior
+ * Shows series name and interpolated value at mouse position
+ */
+export function attachLineTooltip_(svgElement) {
+  return pathElement => seriesName => points => margin => () => {
+    const svg = d3.select(svgElement);
+    const path = d3.select(pathElement);
+
+    // Get or create tooltip div
+    let tooltip = d3.select('body').select('.line-tooltip');
+    if (tooltip.empty()) {
+      tooltip = d3.select('body')
+        .append('div')
+        .attr('class', 'line-tooltip')
+        .style('position', 'absolute')
+        .style('background', 'rgba(0, 0, 0, 0.8)')
+        .style('color', 'white')
+        .style('padding', '8px 12px')
+        .style('border-radius', '4px')
+        .style('font-size', '12px')
+        .style('pointer-events', 'none')
+        .style('opacity', 0)
+        .style('z-index', 1000);
+    }
+
+    // Sort points by x for binary search
+    const sortedPoints = [...points].sort((a, b) => a.x - b.x);
+
+    // Find nearest point by x coordinate
+    function findNearestPoint(mouseX) {
+      // Adjust for margin
+      const x = mouseX - margin.left;
+
+      // Binary search for nearest point
+      let left = 0;
+      let right = sortedPoints.length - 1;
+
+      while (right - left > 1) {
+        const mid = Math.floor((left + right) / 2);
+        if (sortedPoints[mid].x < x) {
+          left = mid;
+        } else {
+          right = mid;
+        }
+      }
+
+      // Return closer of the two
+      if (right >= sortedPoints.length) return sortedPoints[left];
+      if (left < 0) return sortedPoints[right];
+
+      const dLeft = Math.abs(sortedPoints[left].x - x);
+      const dRight = Math.abs(sortedPoints[right].x - x);
+      return dLeft < dRight ? sortedPoints[left] : sortedPoints[right];
+    }
+
+    // Attach events
+    path
+      .on('mouseenter.tooltip', function(event) {
+        // Highlight the line
+        d3.select(this)
+          .raise()
+          .attr('stroke', '#333')
+          .attr('stroke-width', 2.5);
+
+        tooltip
+          .style('opacity', 1);
+      })
+      .on('mousemove.tooltip', function(event) {
+        // Get mouse position relative to SVG
+        const [mouseX, mouseY] = d3.pointer(event, svgElement);
+
+        // Find nearest data point
+        const point = findNearestPoint(mouseX);
+
+        // Update tooltip content
+        tooltip
+          .html(`<strong>${seriesName}</strong><br/>${point.label}: ${point.y.toFixed(1)}%`)
+          .style('left', (event.pageX + 15) + 'px')
+          .style('top', (event.pageY - 10) + 'px');
+      })
+      .on('mouseleave.tooltip', function(event) {
+        // Reset line style
+        d3.select(this)
+          .attr('stroke', '#ddd')
+          .attr('stroke-width', 1.5);
+
+        tooltip
+          .style('opacity', 0);
+      });
+
+    return pathElement;
+  };
+}

@@ -27,6 +27,7 @@ import PSD3.Interpreter.D3 (eval_D3M, runD3M)
 import D3.Viz.AnimatedTreeClusterLoop as AnimatedTreeLoop
 import D3.Viz.TreeAPI.LesMisSimple as LesMisSimple
 import D3.Viz.LesMiserables.File (readGraphFromFileContents)
+import D3.Viz.TreeAPI.StaggeredCircles as StaggeredCircles
 import Data.Array (catMaybes)
 import Data.String.CodeUnits (toCharArray)
 import Data.Traversable (sequence)
@@ -40,15 +41,16 @@ type State =
   { gupFiber :: Maybe (H.ForkId)
   , colorMixingTrigger :: Maybe { stateRef :: Ref.Ref ThreeLittleCirclesTransition.CircleState
                                  , circlesSel :: D3v2Selection_ SBoundOwns Element ThreeLittleCirclesTransition.CircleData }
+  , staggeredTrigger :: Maybe { trigger :: Effect Unit, reset :: Effect Unit }
   }
 
 -- | Tour page actions
-data Action = Initialize | Finalize | TriggerColorMixing
+data Action = Initialize | Finalize | TriggerColorMixing | TriggerStaggered | ResetStaggered
 
 -- | Tour page component
 component :: forall q i o m. MonadAff m => H.Component q i o m
 component = H.mkComponent
-  { initialState: \_ -> { gupFiber: Nothing, colorMixingTrigger: Nothing }
+  { initialState: \_ -> { gupFiber: Nothing, colorMixingTrigger: Nothing, staggeredTrigger: Nothing }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -67,7 +69,11 @@ handleAction = case _ of
     trigger <- liftEffect $ ThreeLittleCirclesTransition.threeLittleCirclesTransition "#viz"
     H.modify_ _ { colorMixingTrigger = Just trigger }
 
-    -- Render Section 2: General Update Pattern (v1 restored)
+    -- Render Section 2: Staggered Animation
+    staggered <- liftEffect $ StaggeredCircles.staggeredCircles "#staggered-container"
+    H.modify_ _ { staggeredTrigger = Just staggered }
+
+    -- Render Section 3: General Update Pattern (v1 restored)
     update <- liftEffect $ eval_D3M $ GUP.exGeneralUpdatePattern "#gup-container"
     forkId <- H.fork $ forever do
       letters <- liftEffect getLetters
@@ -102,6 +108,18 @@ handleAction = case _ of
     case state.colorMixingTrigger of
       Nothing -> pure unit
       Just trigger -> liftEffect $ ThreeLittleCirclesTransition.createTransitionTrigger trigger
+
+  TriggerStaggered -> do
+    state <- H.get
+    case state.staggeredTrigger of
+      Nothing -> pure unit
+      Just { trigger } -> liftEffect trigger
+
+  ResetStaggered -> do
+    state <- H.get
+    case state.staggeredTrigger of
+      Nothing -> pure unit
+      Just { reset } -> liftEffect reset
 
 -- | Choose a string of random letters (no duplicates), ordered alphabetically
 getLetters :: Effect (Array Char)
@@ -154,14 +172,47 @@ render _ =
                 [ HH.text "Transition to RGB" ]
             ]
 
-        -- Section 2: General Update Pattern
+        -- Section 2: Staggered Animation
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ]
             , HP.id "section-2"
             ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "2. The General Update Pattern" ]
+                [ HH.text "2. Staggered Animations" ]
+            , HH.p_
+                [ HH.text "Transitions can include per-element delays for choreographing complex multi-step animations. This example shows 10 circles with staggered delays—each circle animates 100ms after the previous one, creating a wave effect." ]
+            , HH.p_
+                [ HH.text "The `withTransitionStaggered` function takes a delay function `(datum -> index -> Milliseconds)` that computes a unique delay for each element. The helper `staggerByIndex 100.0` creates delays of 0ms, 100ms, 200ms, etc."
+                ]
+            , HH.div
+                [ HP.id "staggered-container"
+                , HP.classes [ HH.ClassName "viz-container" ]
+                ]
+                []
+            , HH.div
+                [ HP.classes [ HH.ClassName "button-row" ] ]
+                [ HH.button
+                    [ HP.classes [ HH.ClassName "transition-button" ]
+                    , HE.onClick \_ -> TriggerStaggered
+                    ]
+                    [ HH.text "Animate" ]
+                , HH.button
+                    [ HP.classes [ HH.ClassName "transition-button", HH.ClassName "secondary" ]
+                    , HE.onClick \_ -> ResetStaggered
+                    ]
+                    [ HH.text "Reset" ]
+                ]
+            ]
+
+        -- Section 3: General Update Pattern
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ]
+            , HP.id "section-3"
+            ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "3. The General Update Pattern" ]
             , HH.p_
                 [ HH.text "This deceptively simple example shows off an aspect of screen-based data visualization that has no analogue in paper visualizations: the ability to specify how updates to the data should be represented." ]
             , HH.p_
@@ -175,14 +226,14 @@ render _ =
                 [ HH.text "The example automatically cycles through random letter selections every 2 seconds, demonstrating all three parts of the pattern: green letters entering from above, gray letters sliding to new positions, and brown letters exiting below." ]
             ]
 
-        -- Section 3: Animated Tree Transitions
+        -- Section 4: Animated Tree Transitions
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ]
-            , HP.id "section-3"
+            , HP.id "section-4"
             ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "3. Animated Tree Transitions" ]
+                [ HH.text "4. Animated Tree Transitions" ]
             , HH.p_
                 [ HH.text "This demonstration shows smooth automatic transitions between Tidy Tree and Dendrogram (Cluster) layouts. The visualization automatically alternates between layouts every 3 seconds. The same 252 nodes from the Flare visualization toolkit smoothly animate to their new positions—no enter/exit, just updates." ]
             , HH.p_
@@ -201,14 +252,14 @@ render _ =
                 ]
             ]
 
-        -- Section 4: Les Misérables Force Layout
+        -- Section 5: Les Misérables Force Layout
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ]
-            , HP.id "section-4"
+            , HP.id "section-5"
             ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "4. Force-Directed Graph: Les Misérables" ]
+                [ HH.text "5. Force-Directed Graph: Les Misérables" ]
             , HH.p_
                 [ HH.text "Force-directed graphs use physics simulation to position nodes and links. Nodes repel each other like charged particles, while links act as springs pulling connected nodes together. The simulation finds an equilibrium that naturally reveals the structure of the network." ]
             , HH.p_

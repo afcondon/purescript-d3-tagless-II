@@ -1036,3 +1036,182 @@ pre.line-numbers > code {
 .dataset-table tbody tr:hover {
   background: #f5f5f5;
 }
+
+/* Section Navigation Cards - for in-page section links */
+.section-nav-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.section-nav-card {
+  display: block;
+  padding: 1rem;
+  background: #f5f0e6;
+  border: 2px solid #e0d5c5;
+  border-radius: 4px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.section-nav-card:hover {
+  background: #ebe3d5;
+  border-color: #c9a227;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.section-nav-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  color: #8b7355;
+}
+
+.section-nav-card p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* Understanding Page Navigation Grid - Four Squares */
+.understanding-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.understanding-nav-grid.single-column {
+  grid-template-columns: 1fr;
+  max-width: 50%;
+}
+
+@media (max-width: 768px) {
+  .understanding-nav-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .understanding-nav-grid.single-column {
+    max-width: 100%;
+  }
+}
+
+.understanding-nav-card {
+  display: block;
+  padding: 1.5rem;
+  background: #f5f0e6;
+  border: 2px solid #e0d5c5;
+  border-radius: 6px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.understanding-nav-card:hover {
+  background: #ebe3d5;
+  border-color: #c9a227;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.understanding-nav-card__title {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.125rem;
+  color: #8b7355;
+  font-weight: 600;
+}
+
+.understanding-nav-card__description {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* How-to Wiki Card Styles */
+.howto-wiki .docs-section {
+  margin-bottom: 2rem;
+}
+
+.howto-card {
+  background: #f8f5ef;
+  border: 1px solid #e0d5c5;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.howto-card__title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  color: #8b7355;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.howto-card__badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  background: #fef3cd;
+  color: #856404;
+  border-radius: 4px;
+  border: 1px solid #ffc107;
+}
+
+.howto-card__description {
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  color: #555;
+  font-style: italic;
+}
+
+.howto-card__bullets {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.howto-card__bullets li {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #444;
+  line-height: 1.4;
+}
+
+.howto-card__bullets li:last-child {
+  margin-bottom: 0;
+}
+
+/* Print styles for how-to wiki */
+@media print {
+  .howto-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border: 1px solid #ccc;
+    margin-bottom: 1rem;
+  }
+
+  .howto-card__bullets li {
+    line-height: 2; /* More space for handwritten notes */
+  }
+}
+
+/* Button row for multiple buttons */
+.button-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.transition-button.secondary {
+  background-color: #6c757d;
+}
+
+.transition-button.secondary:hover {
+  background-color: #5a6268;
+}

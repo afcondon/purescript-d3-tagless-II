@@ -84,7 +84,24 @@ data Route
   | GettingStarted  -- Tutorial: installation, setup, first project (TODO: update for v2)
   | Wizard          -- Interactive wizard for scaffolding visualizations (TODO: update for v2)
   | HowtoIndex      -- How-to: index of all step-by-step guides (TODO: update for v2)
-  | Understanding   -- Conceptual overview: interpreters, composability, grammar, attributes (TODO: content needed)
+  -- How-to sub-pages
+  | HowtoTransitions      -- Creating animated transitions
+  | HowtoForceGraphs      -- Building force-directed graphs
+  | HowtoHierarchical     -- Working with hierarchical data
+  | HowtoEvents           -- Responding to user events
+  | HowtoTreeAPI          -- Using the TreeAPI
+  | HowtoLoadingData      -- Loading external data
+  | HowtoAxesScales       -- Creating axes and scales
+  | HowtoTooltips         -- Adding tooltips
+  | HowtoDebugging        -- Debugging visualizations
+  | HowtoPerformance      -- Performance optimization
+  | Understanding   -- Conceptual overview: index page
+  -- Understanding sub-pages
+  | UnderstandingGrammar       -- Grammar of D3 in PSD3v2
+  | UnderstandingAttributes    -- Type-safe attribute system with phantom types
+  | UnderstandingSelections    -- Selection phantom types (Indexed Monad pattern)
+  | UnderstandingTreeAPI       -- TreeAPI declarative layer
+  | UnderstandingScenes        -- Scene structures for interactive visualizations
   | Reference       -- Reference: API documentation index
   | ReferenceModule String  -- Reference: individual module page
   -- Tour Pages (progressive overview of capabilities)
@@ -124,7 +141,22 @@ instance showRoute :: Show Route where
   show GettingStarted = "Getting Started"
   show Wizard = "Wizard"
   show HowtoIndex = "How-to Guides"
+  show HowtoTransitions = "How-to: Transitions"
+  show HowtoForceGraphs = "How-to: Force Graphs"
+  show HowtoHierarchical = "How-to: Hierarchical Data"
+  show HowtoEvents = "How-to: Events"
+  show HowtoTreeAPI = "How-to: TreeAPI"
+  show HowtoLoadingData = "How-to: Loading Data"
+  show HowtoAxesScales = "How-to: Axes & Scales"
+  show HowtoTooltips = "How-to: Tooltips"
+  show HowtoDebugging = "How-to: Debugging"
+  show HowtoPerformance = "How-to: Performance"
   show Understanding = "Understanding"
+  show UnderstandingGrammar = "Understanding: Grammar"
+  show UnderstandingAttributes = "Understanding: Attributes"
+  show UnderstandingSelections = "Understanding: Selections"
+  show UnderstandingTreeAPI = "Understanding: TreeAPI"
+  show UnderstandingScenes = "Understanding: Scenes"
   show Reference = "API Reference"
   show (ReferenceModule moduleName) = "Module: " <> moduleName
   show TourFoundations = "Tour: Foundations"

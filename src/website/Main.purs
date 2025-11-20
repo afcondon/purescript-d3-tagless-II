@@ -20,7 +20,22 @@ import PSD3.Home as Home
 import PSD3.Tutorial.GettingStarted as GettingStarted
 import PSD3.Wizard.Wizard as Wizard
 import PSD3.HowTo.HowtoIndex as HowtoIndex
+import Component.HowTo.HowtoTransitions as HowtoTransitions
+import Component.HowTo.HowtoForceGraphs as HowtoForceGraphs
+import Component.HowTo.HowtoHierarchical as HowtoHierarchical
+import Component.HowTo.HowtoEvents as HowtoEvents
+import Component.HowTo.HowtoTreeAPI as HowtoTreeAPI
+import Component.HowTo.HowtoLoadingData as HowtoLoadingData
+import Component.HowTo.HowtoAxesScales as HowtoAxesScales
+import Component.HowTo.HowtoTooltips as HowtoTooltips
+import Component.HowTo.HowtoDebugging as HowtoDebugging
+import Component.HowTo.HowtoPerformance as HowtoPerformance
 import PSD3.Understanding as Understanding
+import Component.Understanding.UnderstandingGrammar as UnderstandingGrammar
+import Component.Understanding.UnderstandingAttributes as UnderstandingAttributes
+import Component.Understanding.UnderstandingSelections as UnderstandingSelections
+import Component.Understanding.UnderstandingTreeAPI as UnderstandingTreeAPI
+import Component.Understanding.UnderstandingScenes as UnderstandingScenes
 import PSD3.Reference.Reference as Reference
 import PSD3.Acknowledgements as Acknowledgements
 
@@ -75,7 +90,22 @@ type Slots =
   , gettingStarted :: forall q. H.Slot q Void Unit
   , wizard :: forall q. H.Slot q Void Unit
   , howtoIndex :: forall q. H.Slot q Void Unit
+  , howtoTransitions :: forall q. H.Slot q Void Unit
+  , howtoForceGraphs :: forall q. H.Slot q Void Unit
+  , howtoHierarchical :: forall q. H.Slot q Void Unit
+  , howtoEvents :: forall q. H.Slot q Void Unit
+  , howtoTreeAPI :: forall q. H.Slot q Void Unit
+  , howtoLoadingData :: forall q. H.Slot q Void Unit
+  , howtoAxesScales :: forall q. H.Slot q Void Unit
+  , howtoTooltips :: forall q. H.Slot q Void Unit
+  , howtoDebugging :: forall q. H.Slot q Void Unit
+  , howtoPerformance :: forall q. H.Slot q Void Unit
   , understanding :: forall q. H.Slot q Void Unit
+  , understandingGrammar :: forall q. H.Slot q Void Unit
+  , understandingAttributes :: forall q. H.Slot q Void Unit
+  , understandingSelections :: forall q. H.Slot q Void Unit
+  , understandingTreeAPI :: forall q. H.Slot q Void Unit
+  , understandingScenes :: forall q. H.Slot q Void Unit
   , reference :: forall q. H.Slot q Void Unit
   , tourFoundations :: forall q. H.Slot q Void Unit
   , tourProfessional :: forall q. H.Slot q Void Unit
@@ -108,7 +138,22 @@ _home = Proxy :: Proxy "home"
 _gettingStarted = Proxy :: Proxy "gettingStarted"
 _wizard = Proxy :: Proxy "wizard"
 _howtoIndex = Proxy :: Proxy "howtoIndex"
+_howtoTransitions = Proxy :: Proxy "howtoTransitions"
+_howtoForceGraphs = Proxy :: Proxy "howtoForceGraphs"
+_howtoHierarchical = Proxy :: Proxy "howtoHierarchical"
+_howtoEvents = Proxy :: Proxy "howtoEvents"
+_howtoTreeAPI = Proxy :: Proxy "howtoTreeAPI"
+_howtoLoadingData = Proxy :: Proxy "howtoLoadingData"
+_howtoAxesScales = Proxy :: Proxy "howtoAxesScales"
+_howtoTooltips = Proxy :: Proxy "howtoTooltips"
+_howtoDebugging = Proxy :: Proxy "howtoDebugging"
+_howtoPerformance = Proxy :: Proxy "howtoPerformance"
 _understanding = Proxy :: Proxy "understanding"
+_understandingGrammar = Proxy :: Proxy "understandingGrammar"
+_understandingAttributes = Proxy :: Proxy "understandingAttributes"
+_understandingSelections = Proxy :: Proxy "understandingSelections"
+_understandingTreeAPI = Proxy :: Proxy "understandingTreeAPI"
+_understandingScenes = Proxy :: Proxy "understandingScenes"
 _reference = Proxy :: Proxy "reference"
 _tourFoundations = Proxy :: Proxy "tourFoundations"
 _tourProfessional = Proxy :: Proxy "tourProfessional"
@@ -172,8 +217,55 @@ renderPage route = case spy "Route is" route of
   HowtoIndex ->
     HH.slot_ _howtoIndex unit HowtoIndex.component unit
 
+  -- How-to sub-pages
+  HowtoTransitions ->
+    HH.slot_ _howtoTransitions unit HowtoTransitions.component unit
+
+  HowtoForceGraphs ->
+    HH.slot_ _howtoForceGraphs unit HowtoForceGraphs.component unit
+
+  HowtoHierarchical ->
+    HH.slot_ _howtoHierarchical unit HowtoHierarchical.component unit
+
+  HowtoEvents ->
+    HH.slot_ _howtoEvents unit HowtoEvents.component unit
+
+  HowtoTreeAPI ->
+    HH.slot_ _howtoTreeAPI unit HowtoTreeAPI.component unit
+
+  HowtoLoadingData ->
+    HH.slot_ _howtoLoadingData unit HowtoLoadingData.component unit
+
+  HowtoAxesScales ->
+    HH.slot_ _howtoAxesScales unit HowtoAxesScales.component unit
+
+  HowtoTooltips ->
+    HH.slot_ _howtoTooltips unit HowtoTooltips.component unit
+
+  HowtoDebugging ->
+    HH.slot_ _howtoDebugging unit HowtoDebugging.component unit
+
+  HowtoPerformance ->
+    HH.slot_ _howtoPerformance unit HowtoPerformance.component unit
+
   Understanding ->
     HH.slot_ _understanding unit Understanding.component unit
+
+  -- Understanding sub-pages
+  UnderstandingGrammar ->
+    HH.slot_ _understandingGrammar unit UnderstandingGrammar.component unit
+
+  UnderstandingAttributes ->
+    HH.slot_ _understandingAttributes unit UnderstandingAttributes.component unit
+
+  UnderstandingSelections ->
+    HH.slot_ _understandingSelections unit UnderstandingSelections.component unit
+
+  UnderstandingTreeAPI ->
+    HH.slot_ _understandingTreeAPI unit UnderstandingTreeAPI.component unit
+
+  UnderstandingScenes ->
+    HH.slot_ _understandingScenes unit UnderstandingScenes.component unit
 
   Reference ->
     HH.slot_ _reference unit Reference.component Reference

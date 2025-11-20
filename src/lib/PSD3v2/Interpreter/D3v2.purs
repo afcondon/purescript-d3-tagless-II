@@ -16,6 +16,7 @@ import Control.Monad.State (class MonadState, StateT, runStateT, evalStateT, exe
 import Data.Array as Array
 import Data.FoldableWithIndex (traverseWithIndex_)
 import Data.Maybe (Maybe(..))
+import Data.Nullable (toNullable)
 import Data.Time.Duration (Milliseconds(..))
 import Data.Traversable (traverse_)
 import Data.Tuple (Tuple, snd, fst)
@@ -255,6 +256,78 @@ instance TransitionM D3v2Selection_ D3v2M where
       -- Remove element after transition completes (D3 pattern: transition.remove())
       TransitionFFI.transitionRemove_ transition
 
+  withTransitionStaggered config delayFn (D3v2Selection_ selection) attrs = D3v2M do
+    -- Extract elements, data, and indices from the bound selection
+    let { elements, data: datumArray, indices } = unsafePartial case selection of
+          Selection (BoundSelection r) -> r
+
+    -- Get transition configuration
+    let Milliseconds duration = config.duration
+
+    -- Apply transition to each element with its corresponding datum and index
+    let paired = Array.zipWith (\d e -> {datum: d, element: e}) datumArray elements
+    paired # traverseWithIndex_ \arrayIndex { datum, element } -> do
+      -- Use logical index from indices array if present, otherwise use array index
+      let logicalIndex = case indices of
+            Just indexArray -> unsafePartial $ Array.unsafeIndex indexArray arrayIndex
+            Nothing -> arrayIndex
+
+      -- Compute the delay for this element using the delay function
+      let Milliseconds elementDelay = delayFn datum logicalIndex
+
+      -- Create a D3 transition for this element with computed delay
+      transition <- TransitionFFI.createTransition_
+        duration
+        (toNullable (Just elementDelay))
+        (TransitionFFI.maybeEasingToNullable config.easing)
+        element
+
+      -- Apply each attribute to the transition
+      attrs # traverse_ \attr -> case attr of
+        StaticAttr (AttributeName name) value ->
+          TransitionFFI.transitionSetAttribute_ name (attributeValueToString value) transition
+
+        DataAttr (AttributeName name) f ->
+          TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum)) transition
+
+        IndexedAttr (AttributeName name) f ->
+          TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum logicalIndex)) transition
+
+  withTransitionExitStaggered config delayFn (D3v2Selection_ selection) attrs = D3v2M do
+    -- Extract elements and data from the exiting selection
+    let { elements, data: datumArray } = unsafePartial case selection of
+          Selection (ExitingSelection r) -> r
+
+    -- Get transition configuration
+    let Milliseconds duration = config.duration
+
+    -- Apply transition to each element with its corresponding datum and index
+    let paired = Array.zipWith (\d e -> {datum: d, element: e}) datumArray elements
+    paired # traverseWithIndex_ \index { datum, element } -> do
+      -- Compute the delay for this element using the delay function
+      let Milliseconds elementDelay = delayFn datum index
+
+      -- Create a D3 transition for this element with computed delay
+      transition <- TransitionFFI.createTransition_
+        duration
+        (toNullable (Just elementDelay))
+        (TransitionFFI.maybeEasingToNullable config.easing)
+        element
+
+      -- Apply each attribute to the transition
+      attrs # traverse_ \attr -> case attr of
+        StaticAttr (AttributeName name) value ->
+          TransitionFFI.transitionSetAttribute_ name (attributeValueToString value) transition
+
+        DataAttr (AttributeName name) f ->
+          TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum)) transition
+
+        IndexedAttr (AttributeName name) f ->
+          TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum index)) transition
+
+      -- Remove element after transition completes (D3 pattern: transition.remove())
+      TransitionFFI.transitionRemove_ transition
+
 -- Helper function to convert AttributeValue to String
 attributeValueToString :: AttributeValue -> String
 attributeValueToString (StringValue s) = s
@@ -401,6 +474,68 @@ instance TransitionM D3v2Selection_ (D3v2SimM row d) where
               TransitionFFI.transitionSetAttribute_ name (attributeValueToString value) transition
 
             _ -> pure unit  -- Exit selections don't have data, so only static attrs work
+
+          TransitionFFI.transitionRemove_ transition
+
+      _ -> pure unit
+
+  withTransitionStaggered transConfig delayFn (D3v2Selection_ selection) attrs = liftEffect $
+    case selection of
+      Selection (BoundSelection { elements, data: datumArray, indices }) -> do
+        let Milliseconds duration = transConfig.duration
+        let paired = Array.zipWith (\element datum -> { element, datum }) elements datumArray
+
+        paired # traverseWithIndex_ \arrayIndex { datum, element } -> do
+          let logicalIndex = case indices of
+                Just indexArray -> unsafePartial $ Array.unsafeIndex indexArray arrayIndex
+                Nothing -> arrayIndex
+
+          -- Compute the delay for this element using the delay function
+          let Milliseconds elementDelay = delayFn datum logicalIndex
+
+          transition <- TransitionFFI.createTransition_
+            duration
+            (toNullable (Just elementDelay))
+            (TransitionFFI.maybeEasingToNullable transConfig.easing)
+            element
+
+          attrs # traverse_ \attr -> case attr of
+            StaticAttr (AttributeName name) value ->
+              TransitionFFI.transitionSetAttribute_ name (attributeValueToString value) transition
+
+            DataAttr (AttributeName name) fn ->
+              TransitionFFI.transitionSetAttribute_ name (attributeValueToString $ fn datum) transition
+
+            IndexedAttr (AttributeName name) fn ->
+              TransitionFFI.transitionSetAttribute_ name (attributeValueToString $ fn datum logicalIndex) transition
+
+      _ -> pure unit
+
+  withTransitionExitStaggered transConfig delayFn (D3v2Selection_ selection) attrs = liftEffect $
+    case selection of
+      Selection (ExitingSelection { elements, data: datumArray }) -> do
+        let Milliseconds duration = transConfig.duration
+        let paired = Array.zipWith (\element datum -> { element, datum }) elements datumArray
+
+        paired # traverseWithIndex_ \index { datum, element } -> do
+          -- Compute the delay for this element using the delay function
+          let Milliseconds elementDelay = delayFn datum index
+
+          transition <- TransitionFFI.createTransition_
+            duration
+            (toNullable (Just elementDelay))
+            (TransitionFFI.maybeEasingToNullable transConfig.easing)
+            element
+
+          attrs # traverse_ \attr -> case attr of
+            StaticAttr (AttributeName name) value ->
+              TransitionFFI.transitionSetAttribute_ name (attributeValueToString value) transition
+
+            DataAttr (AttributeName name) fn ->
+              TransitionFFI.transitionSetAttribute_ name (attributeValueToString $ fn datum) transition
+
+            IndexedAttr (AttributeName name) fn ->
+              TransitionFFI.transitionSetAttribute_ name (attributeValueToString $ fn datum index) transition
 
           TransitionFFI.transitionRemove_ transition
 
