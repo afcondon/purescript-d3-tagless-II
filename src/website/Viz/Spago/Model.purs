@@ -334,11 +334,11 @@ treeNodesToTreeXY_R nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes
     setXYtoTreeXY d = d { treeXY = notNull treeXY, x = radialXY.x, y = radialXY.y }
       where treeXY = fromMaybe { x: d.x, y: d.y } $ toMaybe d.treeXY
             radialXY = radialTranslate treeXY
-            -- for radial positioning we treat x as angle and y as radius
+            -- for radial positioning: breadth (x) becomes angle, depth (y) becomes radius
             radialTranslate :: PointXY -> PointXY
             radialTranslate p =
-              let angle  = p.y -- reversed because horizontal tree is the default this should change
-                  radius = p.x
+              let angle  = p.x  -- breadth determines angular position around the circle
+                  radius = p.y  -- depth determines distance from center
                   x = radius * cos angle
                   y = radius * sin angle
               in { x, y }
