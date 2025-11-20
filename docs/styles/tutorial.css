@@ -2,7 +2,8 @@
 
 .tutorial-page {
   min-height: 100vh;
-  background-color: #fffdf7; /* Light cream - warm and welcoming */
+  background-color: #fffdf7;
+  /* Light cream - warm and welcoming */
   padding: 2rem 1rem;
   position: relative;
 }
@@ -137,7 +138,8 @@
 }
 
 .control-panel__icon {
-  width: 50%; /* Half the panel width */
+  width: 50%;
+  /* Half the panel width */
   max-width: 180px;
   height: auto;
   margin: 1rem 0 1rem 1rem;
@@ -279,7 +281,8 @@
   background-color: #F5F1E8;
   padding: 2rem 3rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-  position: relative; /* For positioning margin notes */
+  position: relative;
+  /* For positioning margin notes */
 }
 
 .tutorial-intro {
@@ -394,8 +397,10 @@
 .tutorial-section code {
   font-family: var(--font-mono);
   font-size: 0.8125rem;
-  background-color: #2d2d2d;  /* Dark background for high contrast */
-  color: #f8f8f2;  /* Light text */
+  background-color: #2d2d2d;
+  /* Dark background for high contrast */
+  color: #f8f8f2;
+  /* Light text */
   padding: 0.125rem 0.375rem;
   border-radius: 2px;
 }
@@ -403,8 +408,10 @@
 .tutorial-section pre {
   font-family: var(--font-mono);
   font-size: 0.8125rem;
-  background-color: #2d2d2d;  /* Dark background for high contrast */
-  color: #f8f8f2;  /* Light text */
+  background-color: #2d2d2d;
+  /* Dark background for high contrast */
+  color: #f8f8f2;
+  /* Light text */
   padding: 1rem;
   margin-bottom: 1rem;
   overflow-x: auto;
@@ -478,8 +485,10 @@
 /* Specific sizing for small examples to keep them readable */
 .tutorial-viz-container .three-circles-viz svg,
 .tutorial-viz-container .parabola-viz svg {
-  max-width: 600px; /* Keep small examples from getting too large */
-  min-height: 100px; /* Ensure minimum readable size */
+  max-width: 600px;
+  /* Keep small examples from getting too large */
+  min-height: 100px;
+  /* Ensure minimum readable size */
 }
 
 /* GUP needs more vertical space for animation */
@@ -530,13 +539,15 @@
 
 .tutorial-code-block pre {
   margin: 0;
-  overflow-x: auto; /* Allow horizontal scroll for long lines */
+  overflow-x: auto;
+  /* Allow horizontal scroll for long lines */
 }
 
 .tutorial-code-block code {
   /* Font size defined in prism-editorial.css (0.6875rem / 11px) */
   line-height: 1.7;
-  white-space: pre; /* Preserve formatting, don't wrap */
+  white-space: pre;
+  /* Preserve formatting, don't wrap */
 }
 
 /* Ensure Prism styles apply correctly */
@@ -554,13 +565,15 @@
 /* Margin Notes */
 .tutorial-margin-note {
   position: absolute;
-  right: -280px; /* Position outside the main content column */
+  right: -280px;
+  /* Position outside the main content column */
   width: 240px;
   background-color: var(--color-beige-light);
   border: 2px solid var(--color-gray-medium);
   padding: 1rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  margin-top: -1rem; /* Align with adjacent content */
+  margin-top: -1rem;
+  /* Align with adjacent content */
 }
 
 .tutorial-margin-note__label {
@@ -673,7 +686,8 @@
   .tutorial-code-block code,
   .tutorial-code-block pre[class*="language-"],
   .tutorial-code-block code[class*="language-"] {
-    font-size: 0.625rem; /* 10px on mobile */
+    font-size: 0.625rem;
+    /* 10px on mobile */
   }
 
   /* Adjust min heights for mobile */
@@ -928,7 +942,7 @@ pre.line-numbers {
   counter-reset: linenumber;
 }
 
-pre.line-numbers > code {
+pre.line-numbers>code {
   position: relative;
   white-space: inherit;
 }
@@ -945,12 +959,12 @@ pre.line-numbers > code {
   user-select: none;
 }
 
-.line-numbers-rows > span {
+.line-numbers-rows>span {
   display: block;
   counter-increment: linenumber;
 }
 
-.line-numbers-rows > span:before {
+.line-numbers-rows>span:before {
   content: counter(linenumber);
   color: #999;
   display: block;
@@ -977,8 +991,9 @@ pre.line-numbers > code {
 
 /* Anscombe's Quartet - smaller, lighter axis text */
 .anscombe-plot .axis text {
-  font-size: 9px;
+  font-size: 4px;
   fill: #999;
+  stroke: none;
 }
 
 .anscombe-plot .axis .domain,
@@ -1197,7 +1212,8 @@ pre.line-numbers > code {
   }
 
   .howto-card__bullets li {
-    line-height: 2; /* More space for handwritten notes */
+    line-height: 2;
+    /* More space for handwritten notes */
   }
 }
 
