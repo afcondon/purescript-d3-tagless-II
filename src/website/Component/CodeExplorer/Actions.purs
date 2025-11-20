@@ -4,6 +4,7 @@ import Prelude
 
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes)
 import D3.Viz.Spago.Files (NodeType)
+import D3.Viz.Spago.GitMetrics (ColorByOption)
 import D3.Viz.Spago.Model (SpagoSimNode)
 import PSD3.Data.Node (D3Link_Unswizzled, NodeID)
 import PSD3.Data.Tree (TreeLayout)
@@ -33,6 +34,7 @@ data Action d
   | Filter FilterData
   | ChangeStyling (StyleChange d)
   | ChangeSimConfig SimVariable
+  | ChangeColorBy ColorByOption
   | StopSim
   | StartSim
   | EventFromVizualization VizEvent

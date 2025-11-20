@@ -17,6 +17,13 @@ const d3SchemeSequential10 = d3.scaleSequential()
     .domain([0, 5, 10]); // TODO this should be determined by number of nodes in sim
 export function d3SchemeSequential10N_(number) { return d3SchemeSequential10(number) }
 
+// Direct interpolation functions (take 0-1 value, return color string)
+export function d3InterpolateViridis_(t) { return d3.interpolateViridis(t) }
+export function d3InterpolateRdYlGn_(t) { return d3.interpolateRdYlGn(t) }
+export function d3InterpolatePlasma_(t) { return d3.interpolatePlasma(t) }
+export function d3InterpolateInferno_(t) { return d3.interpolateInferno(t) }
+export function d3InterpolateMagma_(t) { return d3.interpolateMagma(t) }
+export function d3InterpolateTurbo_(t) { return d3.interpolateTurbo(t) }
 
 // diverging example for reference
 // colorScale = d3.scaleSequential()

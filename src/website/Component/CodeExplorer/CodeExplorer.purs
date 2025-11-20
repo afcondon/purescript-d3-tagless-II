@@ -33,7 +33,9 @@ import Prelude
 
 import Control.Monad.State (class MonadState)
 import D3.Viz.Spago.Draw as Graph
+import D3.Viz.Spago.Draw.Attributes (sceneAttributesWithColorBy)
 import D3.Viz.Spago.Files (NodeType(..))
+import D3.Viz.Spago.GitMetrics (loadGitMetrics_)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage, isPackageOrVisibleModule)
 import Data.Array ((:), filter)
 import Data.Either (Either(..))
@@ -158,6 +160,9 @@ handleAction = case _ of
     -- 1. Load model data from JSON files (async)
     (maybeModel :: Maybe SpagoModel) <- H.liftAff readModelData
     H.modify_ _ { model = maybeModel }
+
+    -- 1b. Load git metrics for color-by-metric feature (fire and forget)
+    liftEffect loadGitMetrics_
 
     -- 2. Initialize D3 structure (one-time SVG setup)
     state <- H.get
@@ -311,6 +316,10 @@ handleAction = case _ of
 
   DismissWelcome -> do
     H.modify_ _ { showWelcome = false }
+
+  ChangeColorBy colorOption -> do
+    H.modify_ $ setSceneAttributes (sceneAttributesWithColorBy colorOption)
+    runSimulation
 
 -- | The core simulation orchestrator - bridges Halogen state to D3 rendering
 -- |

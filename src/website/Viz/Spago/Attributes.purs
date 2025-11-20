@@ -4,8 +4,9 @@ import Prelude
 
 import D3.Viz.Spago.Model (SpagoSimNode)
 import D3.Viz.Spago.Files (NodeType(..))
+import D3.Viz.Spago.GitMetrics (ColorByOption(..), getModuleMetric_)
 import PSD3.Data.Node (NodeID)
-import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_, d3SchemeSequential10N_)
+import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_, d3SchemeSequential10N_, d3InterpolateViridis_, d3InterpolateRdYlGn_, d3InterpolatePlasma_)
 import PSD3v2.Attribute.Types (Attribute, class_, fill, height, opacity, radius, stroke, strokeWidth, textContent, textAnchor, transform, viewBox, width, x, y)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -46,6 +47,28 @@ colorByDepth :: SpagoSimNode -> String
 colorByDepth d = case toMaybe d.treeDepth of
   Nothing -> "none"
   Just depth -> d3SchemeSequential10N_ (toNumber depth)
+
+-- | Color by git metric - uses the metric value to interpolate a color
+colorByMetric :: ColorByOption -> SpagoSimNode -> String
+colorByMetric option d = case option of
+  ColorByGroup -> colorByGroup d
+  ColorByDepth -> colorByDepth d
+  ColorByCommits -> interpolateViridis $ getModuleMetric_ d.name "commits"
+  ColorByRecency -> interpolateRdYlGn $ getModuleMetric_ d.name "recency"
+  ColorByAge -> interpolatePlasma $ getModuleMetric_ d.name "age"
+  ColorByAuthors -> interpolateViridis $ getModuleMetric_ d.name "authors"
+  ColorByChurn -> interpolatePlasma $ getModuleMetric_ d.name "churn"
+  ColorBySize -> interpolateViridis $ getModuleMetric_ d.name "size"
+  where
+    -- Interpolate functions that convert 0-1 value to color string
+    interpolateViridis :: Number -> String
+    interpolateViridis t = d3InterpolateViridis_ t
+
+    interpolateRdYlGn :: Number -> String
+    interpolateRdYlGn t = d3InterpolateRdYlGn_ t
+
+    interpolatePlasma :: Number -> String
+    interpolatePlasma t = d3InterpolatePlasma_ t
 
 opacityByType :: SpagoSimNode -> Number
 opacityByType d = case d.nodetype of
@@ -102,6 +125,24 @@ graphSceneAttributes :: SpagoSceneAttributes
 graphSceneAttributes = {
     circles: [ radius \(d :: SpagoSimNode) -> nodeRadius d
             , fill \(d :: SpagoSimNode) -> colorByGroup d
+            , opacity \(d :: SpagoSimNode) -> opacityByType d
+           ]
+  , labels: [ class_ "label"
+            , x 0.2
+            , y \(d :: SpagoSimNode) -> positionLabel d
+            , textAnchor "middle"
+            , textContent \(d :: SpagoSimNode) -> nodeName d
+          ]
+  , tagMap: Nothing
+  , nodeClick: Nothing
+}
+
+-- | Create scene attributes with a specific color option
+-- | Used by ChangeColorBy action to dynamically change node colors
+sceneAttributesWithColorBy :: ColorByOption -> SpagoSceneAttributes
+sceneAttributesWithColorBy colorOption = {
+    circles: [ radius \(d :: SpagoSimNode) -> nodeRadius d
+            , fill \(d :: SpagoSimNode) -> colorByMetric colorOption d
             , opacity \(d :: SpagoSimNode) -> opacityByType d
            ]
   , labels: [ class_ "label"

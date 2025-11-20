@@ -1,5 +1,5 @@
 {
-  "generated": "2025-11-20T12:39:31.605Z",
+  "generated": "2025-11-20T13:02:45.731Z",
   "fileCount": 258,
   "maxValues": {
     "commits": 174,
@@ -11,7 +11,7 @@
     "recentActivity": 50
   },
   "modules": {
-    "RoutingDSL": {
+    "PSD3.RoutingDSL": {
       "path": "src/website/RoutingDSL.purs",
       "commitCount": 42,
       "daysSinceModified": 0,
@@ -55,7 +55,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.CodeExplorer.Actions": {
+    "PSD3.CodeExplorer.Actions": {
       "path": "src/website/Component/CodeExplorer/Actions.purs",
       "commitCount": 33,
       "daysSinceModified": 1,
@@ -63,7 +63,7 @@
       "authorCount": 1,
       "linesChanged": 140,
       "recentCommits": 14,
-      "lineCount": 50,
+      "lineCount": 52,
       "authors": [
         "Andrew Condon"
       ],
@@ -73,11 +73,11 @@
         "recency": 0.9993319973279893,
         "authors": 0.5,
         "churn": 0.035362465269007326,
-        "size": 0.03033980582524272,
+        "size": 0.03155339805825243,
         "recentActivity": 0.28
       }
     },
-    "Component.CodeExplorer.CodeExplorerWrapper": {
+    "PSD3.CodeExplorer.CodeExplorerWrapper": {
       "path": "src/website/Component/CodeExplorer/CodeExplorerWrapper.purs",
       "commitCount": 13,
       "daysSinceModified": 1,
@@ -99,7 +99,7 @@
         "recentActivity": 0.14
       }
     },
-    "Component.CodeExplorer.CodeExplorer": {
+    "PSD3.CodeExplorer": {
       "path": "src/website/Component/CodeExplorer/CodeExplorer.purs",
       "commitCount": 104,
       "daysSinceModified": 0,
@@ -107,7 +107,7 @@
       "authorCount": 2,
       "linesChanged": 3815,
       "recentCommits": 31,
-      "lineCount": 408,
+      "lineCount": 417,
       "authors": [
         "Andrew Condon",
         "Mike Solomon"
@@ -118,11 +118,11 @@
         "recency": 1,
         "authors": 1,
         "churn": 0.9636271785804497,
-        "size": 0.24757281553398058,
+        "size": 0.2530339805825243,
         "recentActivity": 0.62
       }
     },
-    "Component.CodeExplorer.HTML": {
+    "PSD3.CodeExplorer.HTML": {
       "path": "src/website/Component/CodeExplorer/HTML.purs",
       "commitCount": 27,
       "daysSinceModified": 0,
@@ -130,7 +130,7 @@
       "authorCount": 1,
       "linesChanged": 408,
       "recentCommits": 22,
-      "lineCount": 269,
+      "lineCount": 309,
       "authors": [
         "Andrew Condon"
       ],
@@ -140,11 +140,11 @@
         "recency": 1,
         "authors": 0.5,
         "churn": 0.10305632735539277,
-        "size": 0.16322815533980584,
+        "size": 0.1875,
         "recentActivity": 0.44
       }
     },
-    "Component.CodeExplorer.Data": {
+    "PSD3.CodeExplorer.Data": {
       "path": "src/website/Component/CodeExplorer/Data.purs",
       "commitCount": 7,
       "daysSinceModified": 1,
@@ -166,7 +166,7 @@
         "recentActivity": 0.14
       }
     },
-    "Component.CodeExplorer.Forces": {
+    "PSD3.CodeExplorer.Forces": {
       "path": "src/website/Component/CodeExplorer/Forces.purs",
       "commitCount": 40,
       "daysSinceModified": 0,
@@ -188,7 +188,7 @@
         "recentActivity": 0.22
       }
     },
-    "Component.CodeExplorer.CodeExplorationPage": {
+    "PSD3.CodeExplorer.CodeExplorationPage": {
       "path": "src/website/Component/CodeExplorer/CodeExplorationPage.purs",
       "commitCount": 15,
       "daysSinceModified": 1,
@@ -210,7 +210,7 @@
         "recentActivity": 0.3
       }
     },
-    "Component.CodeExplorer.State": {
+    "PSD3.CodeExplorer.State": {
       "path": "src/website/Component/CodeExplorer/State.purs",
       "commitCount": 57,
       "daysSinceModified": 1,
@@ -232,7 +232,7 @@
         "recentActivity": 0.56
       }
     },
-    "Component.CodeExplorer.WelcomeOverlay": {
+    "PSD3.CodeExplorer.WelcomeOverlay": {
       "path": "src/website/Component/CodeExplorer/WelcomeOverlay.purs",
       "commitCount": 5,
       "daysSinceModified": 1,
@@ -254,7 +254,7 @@
         "recentActivity": 0.1
       }
     },
-    "Component.CodeExplorer.Scenes": {
+    "PSD3.CodeExplorer.Scenes": {
       "path": "src/website/Component/CodeExplorer/Scenes.purs",
       "commitCount": 8,
       "daysSinceModified": 1,
@@ -276,7 +276,7 @@
         "recentActivity": 0.16
       }
     },
-    "Component.Tutorial.GettingStarted": {
+    "PSD3.Tutorial.GettingStarted": {
       "path": "src/website/Component/Tutorial/GettingStarted.purs",
       "commitCount": 15,
       "daysSinceModified": 16,
@@ -320,7 +320,7 @@
         "recentActivity": 0.08
       }
     },
-    "Component.Home": {
+    "PSD3.Home": {
       "path": "src/website/Component/Home.purs",
       "commitCount": 37,
       "daysSinceModified": 0,
@@ -342,7 +342,7 @@
         "recentActivity": 0.6
       }
     },
-    "Component.Wizard.Datasets": {
+    "PSD3.Wizard.Datasets": {
       "path": "src/website/Component/Wizard/Datasets.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -364,7 +364,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Wizard.Wizard": {
+    "PSD3.Wizard.Wizard": {
       "path": "src/website/Component/Wizard/Wizard.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -386,7 +386,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Wizard.Templates": {
+    "PSD3.Wizard.Templates": {
       "path": "src/website/Component/Wizard/Templates.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -408,7 +408,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Wizard.FileDownload": {
+    "PSD3.Wizard.FileDownload": {
       "path": "src/website/Component/Wizard/FileDownload.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -430,7 +430,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Wizard.Generator": {
+    "PSD3.Wizard.Generator": {
       "path": "src/website/Component/Wizard/Generator.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -452,7 +452,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Understanding.TOC": {
+    "PSD3.Understanding.TOC": {
       "path": "src/website/Component/Understanding/TOC.purs",
       "commitCount": 5,
       "daysSinceModified": 21,
@@ -584,7 +584,7 @@
         "recentActivity": 0.1
       }
     },
-    "Component.Shared.RHSNavigation": {
+    "PSD3.Shared.RHSNavigation": {
       "path": "src/website/Component/Shared/RHSNavigation.purs",
       "commitCount": 7,
       "daysSinceModified": 4,
@@ -606,7 +606,7 @@
         "recentActivity": 0.14
       }
     },
-    "Component.Shared.CodeExample": {
+    "PSD3.Shared.CodeExample": {
       "path": "src/website/Component/Shared/CodeExample.purs",
       "commitCount": 4,
       "daysSinceModified": 4,
@@ -628,7 +628,7 @@
         "recentActivity": 0.08
       }
     },
-    "Component.Shared.Utilities": {
+    "PSD3.Shared.Utilities": {
       "path": "src/website/Component/Shared/Utilities.purs",
       "commitCount": 10,
       "daysSinceModified": 21,
@@ -650,7 +650,7 @@
         "recentActivity": 0.06
       }
     },
-    "Component.Shared.DocsHeader": {
+    "PSD3.Shared.DocsHeader": {
       "path": "src/website/Component/Shared/DocsHeader.purs",
       "commitCount": 2,
       "daysSinceModified": 4,
@@ -672,7 +672,7 @@
         "recentActivity": 0.04
       }
     },
-    "Component.Shared.ExamplesNav": {
+    "PSD3.Shared.ExamplesNav": {
       "path": "src/website/Component/Shared/ExamplesNav.purs",
       "commitCount": 11,
       "daysSinceModified": 4,
@@ -716,7 +716,7 @@
         "recentActivity": 0.04
       }
     },
-    "Component.Shared.DocsCardGrid": {
+    "PSD3.Shared.DocsCardGrid": {
       "path": "src/website/Component/Shared/DocsCardGrid.purs",
       "commitCount": 1,
       "daysSinceModified": 16,
@@ -738,7 +738,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Shared.DocParser": {
+    "PSD3.Shared.DocParser": {
       "path": "src/website/Component/Shared/DocParser.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -782,7 +782,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Shared.SectionNav": {
+    "PSD3.Shared.SectionNav": {
       "path": "src/website/Component/Shared/SectionNav.purs",
       "commitCount": 6,
       "daysSinceModified": 4,
@@ -892,11 +892,11 @@
         "recentActivity": 0.1
       }
     },
-    "Component.Understanding": {
+    "PSD3.Understanding": {
       "path": "src/website/Component/Understanding.purs",
       "commitCount": 2,
       "daysSinceModified": 0,
-      "ageInDays": 0,
+      "ageInDays": 1,
       "authorCount": 1,
       "linesChanged": 242,
       "recentCommits": 2,
@@ -906,7 +906,7 @@
       ],
       "normalized": {
         "commits": 0.011494252873563218,
-        "age": 0,
+        "age": 0.0005878894767783657,
         "recency": 1,
         "authors": 0.5,
         "churn": 0.06112654710785552,
@@ -1178,7 +1178,7 @@
         "recentActivity": 0.14
       }
     },
-    "Component.PrismJS": {
+    "PSD3.PrismJS": {
       "path": "src/website/Component/PrismJS.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -1244,7 +1244,7 @@
         "recentActivity": 0.1
       }
     },
-    "Component.Acknowledgements": {
+    "PSD3.Acknowledgements": {
       "path": "src/website/Component/Acknowledgements.purs",
       "commitCount": 3,
       "daysSinceModified": 21,
@@ -1420,7 +1420,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.HowTo.HowtoIndex": {
+    "PSD3.HowTo.HowtoIndex": {
       "path": "src/website/Component/HowTo/HowtoIndex.purs",
       "commitCount": 15,
       "daysSinceModified": 0,
@@ -1552,7 +1552,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.ReferenceNav": {
+    "PSD3.Reference.ReferenceNav": {
       "path": "src/website/Component/Reference/ReferenceNav.purs",
       "commitCount": 2,
       "daysSinceModified": 4,
@@ -1574,7 +1574,7 @@
         "recentActivity": 0.04
       }
     },
-    "Component.Reference.ModuleRegistry": {
+    "PSD3.Reference.ModuleRegistry": {
       "path": "src/website/Component/Reference/ModuleRegistry.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -1596,7 +1596,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.ReferenceOld": {
+    "PSD3.Reference.ReferenceOld": {
       "path": "src/website/Component/Reference/ReferenceOld.purs",
       "commitCount": 9,
       "daysSinceModified": 16,
@@ -1618,7 +1618,7 @@
         "recentActivity": 0.18
       }
     },
-    "Component.Reference.ModuleViewer": {
+    "PSD3.Reference.ModuleViewer": {
       "path": "src/website/Component/Reference/ModuleViewer.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -1640,7 +1640,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Reference": {
+    "PSD3.Reference.Reference": {
       "path": "src/website/Component/Reference/Reference.purs",
       "commitCount": 7,
       "daysSinceModified": 25,
@@ -1662,7 +1662,7 @@
         "recentActivity": 0.14
       }
     },
-    "Component.Reference.SourceLoader": {
+    "PSD3.Reference.SourceLoader": {
       "path": "src/website/Component/Reference/SourceLoader.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -1684,7 +1684,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Interpreter.String": {
+    "PSD3.Reference.Modules.Interpreter.String": {
       "path": "src/website/Component/Reference/Modules/Interpreter/String.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -1706,7 +1706,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Interpreter.D3": {
+    "PSD3.Reference.Modules.Interpreter.D3": {
       "path": "src/website/Component/Reference/Modules/Interpreter/D3.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -1728,7 +1728,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Interpreter.MetaTree": {
+    "PSD3.Reference.Modules.Interpreter.MetaTree": {
       "path": "src/website/Component/Reference/Modules/Interpreter/MetaTree.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -1750,7 +1750,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Attributes": {
+    "PSD3.Reference.Modules.Attributes": {
       "path": "src/website/Component/Reference/Modules/Attributes.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -1772,7 +1772,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Capabilities.Simulation": {
+    "PSD3.Reference.Modules.Capabilities.Simulation": {
       "path": "src/website/Component/Reference/Modules/Capabilities/Simulation.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -1794,7 +1794,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Capabilities.Selection": {
+    "PSD3.Reference.Modules.Capabilities.Selection": {
       "path": "src/website/Component/Reference/Modules/Capabilities/Selection.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -1816,7 +1816,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Capabilities.Sankey": {
+    "PSD3.Reference.Modules.Capabilities.Sankey": {
       "path": "src/website/Component/Reference/Modules/Capabilities/Sankey.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -1838,7 +1838,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Internal.Sankey.Functions": {
+    "PSD3.Reference.Modules.Internal.Sankey.Functions": {
       "path": "src/website/Component/Reference/Modules/Internal/Sankey/Functions.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -1860,7 +1860,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Internal.Sankey.Types": {
+    "PSD3.Reference.Modules.Internal.Sankey.Types": {
       "path": "src/website/Component/Reference/Modules/Internal/Sankey/Types.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -1882,7 +1882,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Internal.Zoom": {
+    "PSD3.Reference.Modules.Internal.Zoom": {
       "path": "src/website/Component/Reference/Modules/Internal/Zoom.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -1904,7 +1904,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Internal.Simulation.Functions": {
+    "PSD3.Reference.Modules.Internal.Simulation.Functions": {
       "path": "src/website/Component/Reference/Modules/Internal/Simulation/Functions.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -1926,7 +1926,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Internal.Simulation.Forces": {
+    "PSD3.Reference.Modules.Internal.Simulation.Forces": {
       "path": "src/website/Component/Reference/Modules/Internal/Simulation/Forces.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -1948,7 +1948,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Internal.Simulation.Types": {
+    "PSD3.Reference.Modules.Internal.Simulation.Types": {
       "path": "src/website/Component/Reference/Modules/Internal/Simulation/Types.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -1970,7 +1970,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Internal.Simulation.Config": {
+    "PSD3.Reference.Modules.Internal.Simulation.Config": {
       "path": "src/website/Component/Reference/Modules/Internal/Simulation/Config.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -1992,7 +1992,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Internal.Scales.Scales": {
+    "PSD3.Reference.Modules.Internal.Scales.Scales": {
       "path": "src/website/Component/Reference/Modules/Internal/Scales/Scales.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -2014,7 +2014,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Internal.Scales.Linear": {
+    "PSD3.Reference.Modules.Internal.Scales.Linear": {
       "path": "src/website/Component/Reference/Modules/Internal/Scales/Linear.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -2036,7 +2036,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Internal.Attributes.Instances": {
+    "PSD3.Reference.Modules.Internal.Attributes.Instances": {
       "path": "src/website/Component/Reference/Modules/Internal/Attributes/Instances.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -2058,7 +2058,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Internal.Attributes.Sugar": {
+    "PSD3.Reference.Modules.Internal.Attributes.Sugar": {
       "path": "src/website/Component/Reference/Modules/Internal/Attributes/Sugar.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -2080,7 +2080,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Internal.Types": {
+    "PSD3.Reference.Modules.Internal.Types": {
       "path": "src/website/Component/Reference/Modules/Internal/Types.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -2102,7 +2102,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Internal.FFI": {
+    "PSD3.Reference.Modules.Internal.FFI": {
       "path": "src/website/Component/Reference/Modules/Internal/FFI.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -2124,7 +2124,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Internal.Axes": {
+    "PSD3.Reference.Modules.Internal.Axes": {
       "path": "src/website/Component/Reference/Modules/Internal/Axes.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -2146,7 +2146,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Internal.Selection.Functions": {
+    "PSD3.Reference.Modules.Internal.Selection.Functions": {
       "path": "src/website/Component/Reference/Modules/Internal/Selection/Functions.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -2168,7 +2168,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Internal.Selection.Types": {
+    "PSD3.Reference.Modules.Internal.Selection.Types": {
       "path": "src/website/Component/Reference/Modules/Internal/Selection/Types.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -2190,7 +2190,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Internal.Generators.Line": {
+    "PSD3.Reference.Modules.Internal.Generators.Line": {
       "path": "src/website/Component/Reference/Modules/Internal/Generators/Line.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -2212,7 +2212,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Internal.Hierarchical": {
+    "PSD3.Reference.Modules.Internal.Hierarchical": {
       "path": "src/website/Component/Reference/Modules/Internal/Hierarchical.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -2234,7 +2234,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Internal.Utility": {
+    "PSD3.Reference.Modules.Internal.Utility": {
       "path": "src/website/Component/Reference/Modules/Internal/Utility.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -2256,7 +2256,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Types": {
+    "PSD3.Reference.Modules.Types": {
       "path": "src/website/Component/Reference/Modules/Types.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -2278,7 +2278,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Data.Node": {
+    "PSD3.Reference.Modules.Data.Node": {
       "path": "src/website/Component/Reference/Modules/Data/Node.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -2300,7 +2300,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Data.Tree": {
+    "PSD3.Reference.Modules.Data.Tree": {
       "path": "src/website/Component/Reference/Modules/Data/Tree.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -2322,7 +2322,7 @@
         "recentActivity": 0.02
       }
     },
-    "Component.Reference.Modules.Data.Utility": {
+    "PSD3.Reference.Modules.Data.Utility": {
       "path": "src/website/Component/Reference/Modules/Data/Utility.purs",
       "commitCount": 1,
       "daysSinceModified": 25,
@@ -2366,7 +2366,7 @@
         "recentActivity": 0.04
       }
     },
-    "HTML.Format": {
+    "PSD3.Format": {
       "path": "src/website/HTML/Format.purs",
       "commitCount": 7,
       "daysSinceModified": 30,
@@ -2410,7 +2410,7 @@
         "recentActivity": 0
       }
     },
-    "HTML.Builder": {
+    "PSD3.Builder": {
       "path": "src/website/HTML/Builder.purs",
       "commitCount": 7,
       "daysSinceModified": 30,
@@ -2432,7 +2432,7 @@
         "recentActivity": 0
       }
     },
-    "HTML.CodeSnippet": {
+    "CodeSnippet": {
       "path": "src/website/HTML/CodeSnippet.purs",
       "commitCount": 2,
       "daysSinceModified": 21,
@@ -2454,7 +2454,7 @@
         "recentActivity": 0.04
       }
     },
-    "HTML.Table": {
+    "PSD3.Table": {
       "path": "src/website/HTML/Table.purs",
       "commitCount": 7,
       "daysSinceModified": 30,
@@ -2476,7 +2476,7 @@
         "recentActivity": 0
       }
     },
-    "HTML.Radio": {
+    "PSD3.Radio": {
       "path": "src/website/HTML/Radio.purs",
       "commitCount": 7,
       "daysSinceModified": 30,
@@ -2498,7 +2498,7 @@
         "recentActivity": 0
       }
     },
-    "HTML.FormField": {
+    "PSD3.FormField": {
       "path": "src/website/HTML/FormField.purs",
       "commitCount": 8,
       "daysSinceModified": 30,
@@ -2520,7 +2520,7 @@
         "recentActivity": 0
       }
     },
-    "HTML.Checkbox": {
+    "PSD3.Checkbox": {
       "path": "src/website/HTML/Checkbox.purs",
       "commitCount": 7,
       "daysSinceModified": 30,
@@ -2542,7 +2542,7 @@
         "recentActivity": 0
       }
     },
-    "HTML.Card": {
+    "PSD3.Card": {
       "path": "src/website/HTML/Card.purs",
       "commitCount": 7,
       "daysSinceModified": 30,
@@ -2564,7 +2564,7 @@
         "recentActivity": 0
       }
     },
-    "HTML.Button": {
+    "PSD3.Button": {
       "path": "src/website/HTML/Button.purs",
       "commitCount": 8,
       "daysSinceModified": 30,
@@ -2608,7 +2608,7 @@
         "recentActivity": 0
       }
     },
-    "HTML.Backdrop": {
+    "PSD3.Backdrop": {
       "path": "src/website/HTML/Backdrop.purs",
       "commitCount": 7,
       "daysSinceModified": 30,
@@ -2630,7 +2630,7 @@
         "recentActivity": 0
       }
     },
-    "HTML.Expandable": {
+    "PSD3.Expandable": {
       "path": "src/website/HTML/Expandable.purs",
       "commitCount": 9,
       "daysSinceModified": 30,
@@ -2652,7 +2652,7 @@
         "recentActivity": 0
       }
     },
-    "HTML.Snippets": {
+    "Snippets": {
       "path": "src/website/HTML/Snippets.purs",
       "commitCount": 10,
       "daysSinceModified": 26,
@@ -2674,7 +2674,7 @@
         "recentActivity": 0.04
       }
     },
-    "HTML.CodeSnippets": {
+    "CodeSnippets": {
       "path": "src/website/HTML/CodeSnippets.purs",
       "commitCount": 17,
       "daysSinceModified": 0,
@@ -2696,7 +2696,7 @@
         "recentActivity": 0.34
       }
     },
-    "Shared.ZoomableViewbox": {
+    "PSD3.Shared.ZoomableViewbox": {
       "path": "src/website/Shared/ZoomableViewbox.purs",
       "commitCount": 6,
       "daysSinceModified": 4,
@@ -2740,7 +2740,7 @@
         "recentActivity": 0.18
       }
     },
-    "Shared.Data": {
+    "PSD3.Shared.Data": {
       "path": "src/website/Shared/Data.purs",
       "commitCount": 5,
       "daysSinceModified": 0,
@@ -2762,7 +2762,7 @@
         "recentActivity": 0.1
       }
     },
-    "Shared.DataLoader": {
+    "PSD3.Shared.DataLoader": {
       "path": "src/website/Shared/DataLoader.purs",
       "commitCount": 1,
       "daysSinceModified": 20,
@@ -2784,7 +2784,7 @@
         "recentActivity": 0.02
       }
     },
-    "Shared.ChartDimensions": {
+    "PSD3.Shared.ChartDimensions": {
       "path": "src/website/Shared/ChartDimensions.purs",
       "commitCount": 1,
       "daysSinceModified": 20,
@@ -2806,7 +2806,7 @@
         "recentActivity": 0.02
       }
     },
-    "Shared.ZoomSticker": {
+    "PSD3.Shared.ZoomSticker": {
       "path": "src/website/Shared/ZoomSticker.purs",
       "commitCount": 1,
       "daysSinceModified": 22,
@@ -2828,7 +2828,7 @@
         "recentActivity": 0.02
       }
     },
-    "Shared.FlareData": {
+    "PSD3.Shared.FlareData": {
       "path": "src/website/Shared/FlareData.purs",
       "commitCount": 4,
       "daysSinceModified": 4,
@@ -2850,7 +2850,7 @@
         "recentActivity": 0.08
       }
     },
-    "Shared.TreeHelpers": {
+    "PSD3.Shared.TreeHelpers": {
       "path": "src/website/Shared/TreeHelpers.purs",
       "commitCount": 2,
       "daysSinceModified": 9,
@@ -2872,7 +2872,7 @@
         "recentActivity": 0.04
       }
     },
-    "Shared.Footer": {
+    "PSD3.Shared.Footer": {
       "path": "src/website/Shared/Footer.purs",
       "commitCount": 1,
       "daysSinceModified": 22,
@@ -2894,7 +2894,7 @@
         "recentActivity": 0.02
       }
     },
-    "Viz.ModuleGraph.ModuleGraphViz": {
+    "D3.Viz.ModuleGraph.Viz": {
       "path": "src/website/Viz/ModuleGraph/ModuleGraphViz.purs",
       "commitCount": 2,
       "daysSinceModified": 1,
@@ -2916,7 +2916,7 @@
         "recentActivity": 0.04
       }
     },
-    "Viz.ModuleGraph.LoadModuleGraph": {
+    "D3.Viz.ModuleGraph.LoadModuleGraph": {
       "path": "src/website/Viz/ModuleGraph/LoadModuleGraph.purs",
       "commitCount": 1,
       "daysSinceModified": 4,
@@ -2938,7 +2938,7 @@
         "recentActivity": 0.02
       }
     },
-    "Viz.ModuleGraph.ModuleGraphModel": {
+    "D3.Viz.ModuleGraph.Model": {
       "path": "src/website/Viz/ModuleGraph/ModuleGraphModel.purs",
       "commitCount": 1,
       "daysSinceModified": 4,
@@ -2960,7 +2960,7 @@
         "recentActivity": 0.02
       }
     },
-    "Viz.FPFTW.SetOperations": {
+    "D3.Viz.FPFTW.SetOperations": {
       "path": "src/website/Viz/FPFTW/SetOperations.purs",
       "commitCount": 2,
       "daysSinceModified": 3,
@@ -2982,7 +2982,7 @@
         "recentActivity": 0.04
       }
     },
-    "Viz.FPFTW.TopologicalSort": {
+    "D3.Viz.FPFTW.TopologicalSort": {
       "path": "src/website/Viz/FPFTW/TopologicalSort.purs",
       "commitCount": 1,
       "daysSinceModified": 3,
@@ -3004,7 +3004,7 @@
         "recentActivity": 0.02
       }
     },
-    "Viz.FPFTW.AnscombeQuartet": {
+    "D3.Viz.FPFTW.AnscombeQuartet": {
       "path": "src/website/Viz/FPFTW/AnscombeQuartet.purs",
       "commitCount": 1,
       "daysSinceModified": 3,
@@ -3026,7 +3026,7 @@
         "recentActivity": 0.02
       }
     },
-    "Viz.FPFTW.LesMisGUPAuto": {
+    "D3.Viz.FPFTW.LesMisGUPAuto": {
       "path": "src/website/Viz/FPFTW/LesMisGUPAuto.purs",
       "commitCount": 3,
       "daysSinceModified": 1,
@@ -3048,7 +3048,7 @@
         "recentActivity": 0.06
       }
     },
-    "Viz.FPFTW.TransitiveReduction": {
+    "D3.Viz.FPFTW.TransitiveReduction": {
       "path": "src/website/Viz/FPFTW/TransitiveReduction.purs",
       "commitCount": 1,
       "daysSinceModified": 3,
@@ -3070,7 +3070,7 @@
         "recentActivity": 0.02
       }
     },
-    "Viz.Spago.Tree": {
+    "D3.Viz.Spago.Tree": {
       "path": "src/website/Viz/Spago/Tree.purs",
       "commitCount": 52,
       "daysSinceModified": 1,
@@ -3092,7 +3092,7 @@
         "recentActivity": 0.2
       }
     },
-    "Viz.Spago.Attributes": {
+    "D3.Viz.Spago.Draw.Attributes": {
       "path": "src/website/Viz/Spago/Attributes.purs",
       "commitCount": 39,
       "daysSinceModified": 0,
@@ -3100,7 +3100,7 @@
       "authorCount": 1,
       "linesChanged": 863,
       "recentCommits": 11,
-      "lineCount": 140,
+      "lineCount": 181,
       "authors": [
         "Andrew Condon"
       ],
@@ -3110,11 +3110,11 @@
         "recency": 1,
         "authors": 0.5,
         "churn": 0.21798433947966658,
-        "size": 0.08495145631067962,
+        "size": 0.10983009708737865,
         "recentActivity": 0.22
       }
     },
-    "Viz.Spago.Files": {
+    "D3.Viz.Spago.Files": {
       "path": "src/website/Viz/Spago/Files.purs",
       "commitCount": 48,
       "daysSinceModified": 1,
@@ -3136,7 +3136,7 @@
         "recentActivity": 0.22
       }
     },
-    "Viz.Spago.Draw": {
+    "D3.Viz.Spago.Draw": {
       "path": "src/website/Viz/Spago/Draw.purs",
       "commitCount": 174,
       "daysSinceModified": 0,
@@ -3158,7 +3158,7 @@
         "recentActivity": 0.44
       }
     },
-    "Viz.Spago.Render": {
+    "D3.Viz.Spago.Render": {
       "path": "src/website/Viz/Spago/Render.purs",
       "commitCount": 13,
       "daysSinceModified": 0,
@@ -3166,7 +3166,7 @@
       "authorCount": 1,
       "linesChanged": 378,
       "recentCommits": 13,
-      "lineCount": 129,
+      "lineCount": 134,
       "authors": [
         "Andrew Condon"
       ],
@@ -3176,11 +3176,11 @@
         "recency": 1,
         "authors": 0.5,
         "churn": 0.09547865622631978,
-        "size": 0.07827669902912622,
+        "size": 0.08131067961165049,
         "recentActivity": 0.26
       }
     },
-    "Viz.Spago.Model": {
+    "D3.Viz.Spago.Model": {
       "path": "src/website/Viz/Spago/Model.purs",
       "commitCount": 124,
       "daysSinceModified": 0,
@@ -3202,7 +3202,7 @@
         "recentActivity": 0.24
       }
     },
-    "Viz.Hierarchy.AnimatedTree4Cluster4": {
+    "D3.Viz.AnimatedTree4Cluster4": {
       "path": "src/website/Viz/Hierarchy/AnimatedTree4Cluster4.purs",
       "commitCount": 4,
       "daysSinceModified": 4,
@@ -3224,7 +3224,7 @@
         "recentActivity": 0.08
       }
     },
-    "Viz.Hierarchy.AnimatedTreeClusterLoop": {
+    "D3.Viz.AnimatedTreeClusterLoop": {
       "path": "src/website/Viz/Hierarchy/AnimatedTreeClusterLoop.purs",
       "commitCount": 1,
       "daysSinceModified": 3,
@@ -3246,7 +3246,7 @@
         "recentActivity": 0.02
       }
     },
-    "Viz.GUP.Unsafe": {
+    "D3.Viz.GUP.Unsafe": {
       "path": "src/website/Viz/GUP/Unsafe.purs",
       "commitCount": 4,
       "daysSinceModified": 1,
@@ -3268,7 +3268,7 @@
         "recentActivity": 0.08
       }
     },
-    "Viz.TreeAPI.ScatterPlotExample": {
+    "D3.Viz.TreeAPI.ScatterPlotExample": {
       "path": "src/website/Viz/TreeAPI/ScatterPlotExample.purs",
       "commitCount": 1,
       "daysSinceModified": 5,
@@ -3290,7 +3290,7 @@
         "recentActivity": 0.02
       }
     },
-    "Viz.TreeAPI.ThreeLittleCirclesTransition": {
+    "D3.Viz.TreeAPI.ThreeLittleCirclesTransition": {
       "path": "src/website/Viz/TreeAPI/ThreeLittleCirclesTransition.purs",
       "commitCount": 5,
       "daysSinceModified": 0,
@@ -3312,7 +3312,7 @@
         "recentActivity": 0.1
       }
     },
-    "Viz.TreeAPI.StaggeredCircles": {
+    "D3.Viz.TreeAPI.StaggeredCircles": {
       "path": "src/website/Viz/TreeAPI/StaggeredCircles.purs",
       "commitCount": 1,
       "daysSinceModified": 0,
@@ -3334,7 +3334,7 @@
         "recentActivity": 0.02
       }
     },
-    "Viz.TreeAPI.GroupedBarChartExample": {
+    "D3.Viz.TreeAPI.GroupedBarChartExample": {
       "path": "src/website/Viz/TreeAPI/GroupedBarChartExample.purs",
       "commitCount": 4,
       "daysSinceModified": 3,
@@ -3356,7 +3356,7 @@
         "recentActivity": 0.08
       }
     },
-    "Viz.TreeAPI.BarChartExample": {
+    "D3.Viz.TreeAPI.BarChartExample": {
       "path": "src/website/Viz/TreeAPI/BarChartExample.purs",
       "commitCount": 3,
       "daysSinceModified": 0,
@@ -3378,7 +3378,7 @@
         "recentActivity": 0.06
       }
     },
-    "Viz.TreeAPI.TreeViz": {
+    "D3.Viz.TreeAPI.TreeViz": {
       "path": "src/website/Viz/TreeAPI/TreeViz.purs",
       "commitCount": 3,
       "daysSinceModified": 0,
@@ -3400,7 +3400,7 @@
         "recentActivity": 0.06
       }
     },
-    "Viz.TreeAPI.ThreeLittleCircles": {
+    "D3.Viz.TreeAPI.ThreeLittleCircles": {
       "path": "src/website/Viz/TreeAPI/ThreeLittleCircles.purs",
       "commitCount": 1,
       "daysSinceModified": 5,
@@ -3422,7 +3422,7 @@
         "recentActivity": 0.02
       }
     },
-    "Viz.TreeAPI.MultiLineChartExample": {
+    "D3.Viz.TreeAPI.MultiLineChartExample": {
       "path": "src/website/Viz/TreeAPI/MultiLineChartExample.purs",
       "commitCount": 2,
       "daysSinceModified": 0,
@@ -3444,7 +3444,7 @@
         "recentActivity": 0.04
       }
     },
-    "Viz.TreeAPI.SankeyDiagram": {
+    "D3.Viz.TreeAPI.SankeyDiagram": {
       "path": "src/website/Viz/TreeAPI/SankeyDiagram.purs",
       "commitCount": 2,
       "daysSinceModified": 0,
@@ -3466,7 +3466,7 @@
         "recentActivity": 0.04
       }
     },
-    "Viz.TreeAPI.ThreeLittleCirclesColored": {
+    "D3.Viz.TreeAPI.ThreeLittleCirclesColored": {
       "path": "src/website/Viz/TreeAPI/ThreeLittleCirclesColored.purs",
       "commitCount": 3,
       "daysSinceModified": 0,
@@ -3488,7 +3488,7 @@
         "recentActivity": 0.06
       }
     },
-    "Viz.TreeAPI.HorizontalTreeViz": {
+    "D3.Viz.TreeAPI.HorizontalTreeViz": {
       "path": "src/website/Viz/TreeAPI/HorizontalTreeViz.purs",
       "commitCount": 4,
       "daysSinceModified": 0,
@@ -3510,7 +3510,7 @@
         "recentActivity": 0.08
       }
     },
-    "Viz.TreeAPI.ThreeLittleDimensionsExample": {
+    "D3.Viz.TreeAPI.ThreeLittleDimensionsExample": {
       "path": "src/website/Viz/TreeAPI/ThreeLittleDimensionsExample.purs",
       "commitCount": 1,
       "daysSinceModified": 5,
@@ -3532,7 +3532,7 @@
         "recentActivity": 0.02
       }
     },
-    "Viz.TreeAPI.InterpreterDemo": {
+    "D3.Viz.TreeAPI.InterpreterDemo": {
       "path": "src/website/Viz/TreeAPI/InterpreterDemo.purs",
       "commitCount": 2,
       "daysSinceModified": 0,
@@ -3554,7 +3554,7 @@
         "recentActivity": 0.04
       }
     },
-    "Viz.TreeAPI.LesMisTreeExample": {
+    "D3.Viz.TreeAPI.LesMisTreeExample": {
       "path": "src/website/Viz/TreeAPI/LesMisTreeExample.purs",
       "commitCount": 3,
       "daysSinceModified": 1,
@@ -3576,7 +3576,7 @@
         "recentActivity": 0.06
       }
     },
-    "Viz.TreeAPI.SimpleTreeExample": {
+    "D3.Viz.TreeAPI.SimpleTreeExample": {
       "path": "src/website/Viz/TreeAPI/SimpleTreeExample.purs",
       "commitCount": 3,
       "daysSinceModified": 5,
@@ -3598,7 +3598,7 @@
         "recentActivity": 0.06
       }
     },
-    "Viz.TreeAPI.ParabolaWithAxes": {
+    "D3.Viz.TreeAPI.ParabolaWithAxes": {
       "path": "src/website/Viz/TreeAPI/ParabolaWithAxes.purs",
       "commitCount": 3,
       "daysSinceModified": 0,
@@ -3620,7 +3620,7 @@
         "recentActivity": 0.06
       }
     },
-    "Viz.TreeAPI.AnscombesQuartet": {
+    "D3.Viz.TreeAPI.AnscombesQuartet": {
       "path": "src/website/Viz/TreeAPI/AnscombesQuartet.purs",
       "commitCount": 4,
       "daysSinceModified": 0,
@@ -3642,7 +3642,7 @@
         "recentActivity": 0.08
       }
     },
-    "Viz.TreeAPI.Data": {
+    "D3.Viz.TreeAPI.Data": {
       "path": "src/website/Viz/TreeAPI/Data.purs",
       "commitCount": 1,
       "daysSinceModified": 4,
@@ -3664,7 +3664,7 @@
         "recentActivity": 0.02
       }
     },
-    "Viz.TreeAPI.ThreeLittleCirclesGreen": {
+    "D3.Viz.TreeAPI.ThreeLittleCirclesGreen": {
       "path": "src/website/Viz/TreeAPI/ThreeLittleCirclesGreen.purs",
       "commitCount": 3,
       "daysSinceModified": 0,
@@ -3686,7 +3686,7 @@
         "recentActivity": 0.06
       }
     },
-    "Viz.TreeAPI.PackViz": {
+    "D3.Viz.TreeAPI.PackViz": {
       "path": "src/website/Viz/TreeAPI/PackViz.purs",
       "commitCount": 2,
       "daysSinceModified": 0,
@@ -3708,7 +3708,7 @@
         "recentActivity": 0.04
       }
     },
-    "Viz.TreeAPI.RadialTreeViz": {
+    "D3.Viz.TreeAPI.RadialTreeViz": {
       "path": "src/website/Viz/TreeAPI/RadialTreeViz.purs",
       "commitCount": 3,
       "daysSinceModified": 0,
@@ -3730,7 +3730,7 @@
         "recentActivity": 0.06
       }
     },
-    "Viz.TreeAPI.ChordDiagram": {
+    "D3.Viz.TreeAPI.ChordDiagram": {
       "path": "src/website/Viz/TreeAPI/ChordDiagram.purs",
       "commitCount": 4,
       "daysSinceModified": 0,
@@ -3752,7 +3752,7 @@
         "recentActivity": 0.08
       }
     },
-    "Viz.TreeAPI.NestedElementsExample": {
+    "D3.Viz.TreeAPI.NestedElementsExample": {
       "path": "src/website/Viz/TreeAPI/NestedElementsExample.purs",
       "commitCount": 3,
       "daysSinceModified": 5,
@@ -3774,7 +3774,7 @@
         "recentActivity": 0.06
       }
     },
-    "Viz.TreeAPI.SunburstViz": {
+    "D3.Viz.TreeAPI.SunburstViz": {
       "path": "src/website/Viz/TreeAPI/SunburstViz.purs",
       "commitCount": 2,
       "daysSinceModified": 0,
@@ -3796,7 +3796,7 @@
         "recentActivity": 0.04
       }
     },
-    "Viz.TreeAPI.PartitionViz": {
+    "D3.Viz.TreeAPI.PartitionViz": {
       "path": "src/website/Viz/TreeAPI/PartitionViz.purs",
       "commitCount": 2,
       "daysSinceModified": 0,
@@ -3818,7 +3818,7 @@
         "recentActivity": 0.04
       }
     },
-    "Viz.TreeAPI.LineChartExample": {
+    "D3.Viz.TreeAPI.LineChartExample": {
       "path": "src/website/Viz/TreeAPI/LineChartExample.purs",
       "commitCount": 1,
       "daysSinceModified": 5,
@@ -3840,7 +3840,7 @@
         "recentActivity": 0.02
       }
     },
-    "Viz.TreeAPI.SceneJoinDemo": {
+    "D3.Viz.TreeAPI.SceneJoinDemo": {
       "path": "src/website/Viz/TreeAPI/SceneJoinDemo.purs",
       "commitCount": 2,
       "daysSinceModified": 1,
@@ -3862,7 +3862,7 @@
         "recentActivity": 0.04
       }
     },
-    "Viz.TreeAPI.ClusterViz": {
+    "D3.Viz.TreeAPI.ClusterViz": {
       "path": "src/website/Viz/TreeAPI/ClusterViz.purs",
       "commitCount": 4,
       "daysSinceModified": 0,
@@ -3884,7 +3884,7 @@
         "recentActivity": 0.08
       }
     },
-    "Viz.TreeAPI.ParabolaNoAxes": {
+    "D3.Viz.TreeAPI.ParabolaNoAxes": {
       "path": "src/website/Viz/TreeAPI/ParabolaNoAxes.purs",
       "commitCount": 3,
       "daysSinceModified": 0,
@@ -3906,7 +3906,7 @@
         "recentActivity": 0.06
       }
     },
-    "Viz.TreeAPI.RadialStackedBarExample": {
+    "D3.Viz.TreeAPI.RadialStackedBarExample": {
       "path": "src/website/Viz/TreeAPI/RadialStackedBarExample.purs",
       "commitCount": 1,
       "daysSinceModified": 3,
@@ -3928,7 +3928,7 @@
         "recentActivity": 0.02
       }
     },
-    "Viz.TreeAPI.LesMisSimple": {
+    "D3.Viz.TreeAPI.LesMisSimple": {
       "path": "src/website/Viz/TreeAPI/LesMisSimple.purs",
       "commitCount": 5,
       "daysSinceModified": 0,
@@ -3950,7 +3950,7 @@
         "recentActivity": 0.1
       }
     },
-    "Viz.TreeAPI.TreemapViz": {
+    "D3.Viz.TreeAPI.TreemapViz": {
       "path": "src/website/Viz/TreeAPI/TreemapViz.purs",
       "commitCount": 2,
       "daysSinceModified": 0,
@@ -3972,10 +3972,10 @@
         "recentActivity": 0.04
       }
     },
-    "Viz.GUP": {
+    "D3.Viz.GUP": {
       "path": "src/website/Viz/GUP.purs",
       "commitCount": 108,
-      "daysSinceModified": 0,
+      "daysSinceModified": 1,
       "ageInDays": 1698,
       "authorCount": 1,
       "linesChanged": 1754,
@@ -3987,14 +3987,14 @@
       "normalized": {
         "commits": 0.6206896551724138,
         "age": 0.9982363315696648,
-        "recency": 1,
+        "recency": 0.9993319973279893,
         "authors": 0.5,
         "churn": 0.44304117201313464,
         "size": 0.03822815533980582,
         "recentActivity": 0.22
       }
     },
-    "Viz.LesMis.QueryDemoFFI": {
+    "D3.Viz.LesMis.QueryDemoFFI": {
       "path": "src/website/Viz/LesMis/QueryDemoFFI.purs",
       "commitCount": 1,
       "daysSinceModified": 1,
@@ -4016,7 +4016,7 @@
         "recentActivity": 0.02
       }
     },
-    "Viz.LesMis.LesMisV2": {
+    "D3.Viz.LesMisV2": {
       "path": "src/website/Viz/LesMis/LesMisV2.purs",
       "commitCount": 5,
       "daysSinceModified": 1,
@@ -4038,7 +4038,7 @@
         "recentActivity": 0.1
       }
     },
-    "Viz.LesMis.LesMisGUPV2": {
+    "D3.Viz.LesMisGUPV2": {
       "path": "src/website/Viz/LesMis/LesMisGUPV2.purs",
       "commitCount": 8,
       "daysSinceModified": 1,
@@ -4060,7 +4060,7 @@
         "recentActivity": 0.16
       }
     },
-    "Viz.LesMis.LesMisGUP": {
+    "D3.Viz.LesMis.LesMisGUP": {
       "path": "src/website/Viz/LesMis/LesMisGUP.purs",
       "commitCount": 3,
       "daysSinceModified": 1,
@@ -4082,7 +4082,7 @@
         "recentActivity": 0.06
       }
     },
-    "Viz.LesMis.LesMisRenderCallbacks": {
+    "D3.Viz.LesMis.LesMisRenderCallbacks": {
       "path": "src/website/Viz/LesMis/LesMisRenderCallbacks.purs",
       "commitCount": 2,
       "daysSinceModified": 1,
@@ -4104,7 +4104,7 @@
         "recentActivity": 0.04
       }
     },
-    "Viz.LesMis.LesMisGUPClean": {
+    "D3.Viz.LesMis.LesMisGUPClean": {
       "path": "src/website/Viz/LesMis/LesMisGUPClean.purs",
       "commitCount": 2,
       "daysSinceModified": 1,
@@ -4126,7 +4126,7 @@
         "recentActivity": 0.04
       }
     },
-    "Viz.LesMis.LesMisGUPSimple": {
+    "D3.Viz.LesMis.LesMisGUPSimple": {
       "path": "src/website/Viz/LesMis/LesMisGUPSimple.purs",
       "commitCount": 2,
       "daysSinceModified": 1,
@@ -4148,7 +4148,7 @@
         "recentActivity": 0.04
       }
     },
-    "Viz.LesMis.File": {
+    "D3.Viz.LesMiserables.File": {
       "path": "src/website/Viz/LesMis/File.purs",
       "commitCount": 21,
       "daysSinceModified": 30,
@@ -4170,7 +4170,7 @@
         "recentActivity": 0
       }
     },
-    "Viz.LesMis.LesMisScenes": {
+    "D3.Viz.LesMis.LesMisScenes": {
       "path": "src/website/Viz/LesMis/LesMisScenes.purs",
       "commitCount": 2,
       "daysSinceModified": 1,
@@ -4192,7 +4192,7 @@
         "recentActivity": 0.04
       }
     },
-    "Viz.LesMis.Model": {
+    "D3.Viz.LesMiserables.Model": {
       "path": "src/website/Viz/LesMis/Model.purs",
       "commitCount": 17,
       "daysSinceModified": 4,
@@ -4214,7 +4214,7 @@
         "recentActivity": 0.12
       }
     },
-    "Viz.LesMis.LesMisQueryDemo": {
+    "D3.Viz.LesMis.QueryDemo": {
       "path": "src/website/Viz/LesMis/LesMisQueryDemo.purs",
       "commitCount": 7,
       "daysSinceModified": 1,
@@ -4236,7 +4236,7 @@
         "recentActivity": 0.14
       }
     },
-    "Types": {
+    "PSD3.Website.Types": {
       "path": "src/website/Types.purs",
       "commitCount": 48,
       "daysSinceModified": 0,
@@ -4258,7 +4258,7 @@
         "recentActivity": 0.84
       }
     },
-    "Main": {
+    "PSD3.Main": {
       "path": "src/website/Main.purs",
       "commitCount": 60,
       "daysSinceModified": 0,
@@ -4794,7 +4794,7 @@
       "authorCount": 1,
       "linesChanged": 34,
       "recentCommits": 2,
-      "lineCount": 16,
+      "lineCount": 24,
       "authors": [
         "Andrew Condon"
       ],
@@ -4804,7 +4804,7 @@
         "recency": 0.9826319305277221,
         "authors": 0.5,
         "churn": 0.008588027279616064,
-        "size": 0.009708737864077669,
+        "size": 0.014563106796116505,
         "recentActivity": 0.04
       }
     },
@@ -5050,7 +5050,7 @@
         "recentActivity": 0.06
       }
     },
-    "PSD3.Data.Utility": {
+    "Utility": {
       "path": "src/lib/PSD3/Data/Utility.purs",
       "commitCount": 5,
       "daysSinceModified": 26,

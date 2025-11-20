@@ -18896,6 +18896,12 @@
   var onMouseLeaveWithInfo = /* @__PURE__ */ (function() {
     return MouseLeaveWithInfo.create;
   })();
+  var onMouseLeave = /* @__PURE__ */ (function() {
+    return MouseLeave2.create;
+  })();
+  var onMouseEnterWithInfo = /* @__PURE__ */ (function() {
+    return MouseEnterWithInfo.create;
+  })();
   var onClickWithDatum = /* @__PURE__ */ (function() {
     return ClickWithDatum.create;
   })();
@@ -23570,6 +23576,15 @@
   var d3SchemeSequential10 = d3.scaleSequential().interpolator(d3.interpolateYlOrRd).domain([0, 5, 10]);
   function d3SchemeSequential10N_(number) {
     return d3SchemeSequential10(number);
+  }
+  function d3InterpolateViridis_(t) {
+    return d3.interpolateViridis(t);
+  }
+  function d3InterpolateRdYlGn_(t) {
+    return d3.interpolateRdYlGn(t);
+  }
+  function d3InterpolatePlasma_(t) {
+    return d3.interpolatePlasma(t);
   }
 
   // output/PSD3.Internal.Simulation.Config/index.js
@@ -44725,6 +44740,103 @@
     }
   };
 
+  // output/D3.Viz.Spago.GitMetrics/foreign.js
+  var metricsData = null;
+  function loadGitMetrics_() {
+    fetch("./data/module-metrics.json").then((response) => response.json()).then((data) => {
+      metricsData = data;
+      window.__metricsData = data;
+      console.log("Loaded git metrics for", Object.keys(data.modules).length, "modules");
+    }).catch((err) => {
+      console.warn("Failed to load git metrics:", err);
+    });
+  }
+  function getModuleMetric_(moduleName) {
+    return function(metricType) {
+      if (!metricsData || !metricsData.modules) return 0;
+      let module2 = metricsData.modules[moduleName];
+      if (!module2) {
+        const prefixes = ["D3.Viz.", "PSD3.", "Component."];
+        for (const prefix of prefixes) {
+          if (moduleName.startsWith(prefix)) {
+            module2 = metricsData.modules[moduleName.slice(prefix.length)];
+            if (module2) break;
+          }
+        }
+      }
+      if (!module2) {
+        const parts = moduleName.split(".");
+        const lastName = parts[parts.length - 1];
+        for (const key of Object.keys(metricsData.modules)) {
+          if (key.endsWith("." + lastName) || key === lastName) {
+            module2 = metricsData.modules[key];
+            break;
+          }
+        }
+      }
+      if (!module2 || !module2.normalized) return 0;
+      return module2.normalized[metricType] || 0;
+    };
+  }
+
+  // output/D3.Viz.Spago.GitMetrics/index.js
+  var ColorByGroup = /* @__PURE__ */ (function() {
+    function ColorByGroup2() {
+    }
+    ;
+    ColorByGroup2.value = new ColorByGroup2();
+    return ColorByGroup2;
+  })();
+  var ColorByDepth = /* @__PURE__ */ (function() {
+    function ColorByDepth2() {
+    }
+    ;
+    ColorByDepth2.value = new ColorByDepth2();
+    return ColorByDepth2;
+  })();
+  var ColorByCommits = /* @__PURE__ */ (function() {
+    function ColorByCommits2() {
+    }
+    ;
+    ColorByCommits2.value = new ColorByCommits2();
+    return ColorByCommits2;
+  })();
+  var ColorByRecency = /* @__PURE__ */ (function() {
+    function ColorByRecency2() {
+    }
+    ;
+    ColorByRecency2.value = new ColorByRecency2();
+    return ColorByRecency2;
+  })();
+  var ColorByAge = /* @__PURE__ */ (function() {
+    function ColorByAge2() {
+    }
+    ;
+    ColorByAge2.value = new ColorByAge2();
+    return ColorByAge2;
+  })();
+  var ColorByAuthors = /* @__PURE__ */ (function() {
+    function ColorByAuthors2() {
+    }
+    ;
+    ColorByAuthors2.value = new ColorByAuthors2();
+    return ColorByAuthors2;
+  })();
+  var ColorByChurn = /* @__PURE__ */ (function() {
+    function ColorByChurn2() {
+    }
+    ;
+    ColorByChurn2.value = new ColorByChurn2();
+    return ColorByChurn2;
+  })();
+  var ColorBySize = /* @__PURE__ */ (function() {
+    function ColorBySize2() {
+    }
+    ;
+    ColorBySize2.value = new ColorBySize2();
+    return ColorBySize2;
+  })();
+
   // output/D3.Viz.Spago.Draw.Attributes/index.js
   var show72 = /* @__PURE__ */ show(showNumber);
   var viewBox45 = /* @__PURE__ */ viewBox2(toAttrStringString);
@@ -44757,7 +44869,7 @@
       return 0;
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 32, column 19 - line 34, column 23): " + [d16.nodetype.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 33, column 19 - line 35, column 23): " + [d16.nodetype.constructor.name]);
   };
   var opacityByType = function(d16) {
     if (d16.nodetype instanceof IsPackage) {
@@ -44768,7 +44880,7 @@
       return 0.7;
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 51, column 19 - line 53, column 22): " + [d16.nodetype.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 74, column 19 - line 76, column 22): " + [d16.nodetype.constructor.name]);
   };
   var nodeRadius = function(d16) {
     return d16.r;
@@ -44821,7 +44933,71 @@
       return d3SchemeSequential10N_(toNumber(v.value0));
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 46, column 18 - line 48, column 56): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 47, column 18 - line 49, column 56): " + [v.constructor.name]);
+  };
+  var colorByMetric = function(option2) {
+    return function(d16) {
+      var interpolateViridis = function(t) {
+        return d3InterpolateViridis_(t);
+      };
+      var interpolateRdYlGn = function(t) {
+        return d3InterpolateRdYlGn_(t);
+      };
+      var interpolatePlasma = function(t) {
+        return d3InterpolatePlasma_(t);
+      };
+      if (option2 instanceof ColorByGroup) {
+        return colorByGroup(d16);
+      }
+      ;
+      if (option2 instanceof ColorByDepth) {
+        return colorByDepth(d16);
+      }
+      ;
+      if (option2 instanceof ColorByCommits) {
+        return interpolateViridis(getModuleMetric_(d16.name)("commits"));
+      }
+      ;
+      if (option2 instanceof ColorByRecency) {
+        return interpolateRdYlGn(getModuleMetric_(d16.name)("recency"));
+      }
+      ;
+      if (option2 instanceof ColorByAge) {
+        return interpolatePlasma(getModuleMetric_(d16.name)("age"));
+      }
+      ;
+      if (option2 instanceof ColorByAuthors) {
+        return interpolateViridis(getModuleMetric_(d16.name)("authors"));
+      }
+      ;
+      if (option2 instanceof ColorByChurn) {
+        return interpolatePlasma(getModuleMetric_(d16.name)("churn"));
+      }
+      ;
+      if (option2 instanceof ColorBySize) {
+        return interpolateViridis(getModuleMetric_(d16.name)("size"));
+      }
+      ;
+      throw new Error("Failed pattern match at D3.Viz.Spago.Draw.Attributes (line 53, column 26 - line 61, column 69): " + [option2.constructor.name]);
+    };
+  };
+  var sceneAttributesWithColorBy = function(colorOption) {
+    return {
+      circles: [radius37(function(v) {
+        return nodeRadius(v);
+      }), fill49(function(v) {
+        return colorByMetric(colorOption)(v);
+      }), opacity3(function(v) {
+        return opacityByType(v);
+      })],
+      labels: [class_45("label"), x45(0.2), y46(function(v) {
+        return positionLabel(v);
+      }), textAnchor23("middle"), textContent25(function(v) {
+        return nodeName2(v);
+      })],
+      tagMap: Nothing.value,
+      nodeClick: Nothing.value
+    };
   };
   var treeSceneAttributes = /* @__PURE__ */ (function() {
     return {
@@ -44860,6 +45036,110 @@
     };
   })();
 
+  // output/D3.Viz.Spago.Tooltip/foreign.js
+  var tooltipElement = null;
+  function ensureTooltip() {
+    if (!tooltipElement) {
+      tooltipElement = document.createElement("div");
+      tooltipElement.className = "node-tooltip";
+      tooltipElement.style.display = "none";
+      document.body.appendChild(tooltipElement);
+    }
+    return tooltipElement;
+  }
+  function showTooltip_(content3) {
+    return function(x46) {
+      return function(y47) {
+        return function() {
+          const tooltip = ensureTooltip();
+          tooltip.innerHTML = content3;
+          tooltip.style.display = "block";
+          const offsetX2 = 15;
+          const offsetY2 = 10;
+          const viewportWidth = window.innerWidth;
+          const viewportHeight = window.innerHeight;
+          let posX = x46 + offsetX2;
+          let posY = y47 + offsetY2;
+          const tooltipRect = tooltip.getBoundingClientRect();
+          if (posX + tooltipRect.width > viewportWidth) {
+            posX = x46 - tooltipRect.width - offsetX2;
+          }
+          if (posY + tooltipRect.height > viewportHeight) {
+            posY = y47 - tooltipRect.height - offsetY2;
+          }
+          tooltip.style.left = posX + "px";
+          tooltip.style.top = posY + "px";
+        };
+      };
+    };
+  }
+  function hideTooltip_() {
+    const tooltip = ensureTooltip();
+    tooltip.style.display = "none";
+  }
+  function formatMetricsContent_(node) {
+    return function(metricsData2) {
+      const name16 = node.name || "Unknown";
+      const nodeType = node.nodetype ? node.nodetype.tag === "IsPackage" ? "Package" : "Module" : "Node";
+      const cluster2 = node.containerName || node.cluster || "";
+      let html2 = `<div class="tooltip-header">${name16}</div>`;
+      html2 += `<div class="tooltip-type">${nodeType}${cluster2 ? " in " + cluster2 : ""}</div>`;
+      if (metricsData2 && metricsData2.modules) {
+        let moduleMetrics = metricsData2.modules[name16];
+        if (!moduleMetrics) {
+          const prefixes = ["D3.Viz.", "PSD3.", "Component."];
+          for (const prefix of prefixes) {
+            if (name16.startsWith(prefix)) {
+              moduleMetrics = metricsData2.modules[name16.slice(prefix.length)];
+              if (moduleMetrics) break;
+            }
+          }
+        }
+        if (moduleMetrics) {
+          html2 += '<div class="tooltip-metrics">';
+          html2 += '<div class="tooltip-metrics-title">Git Metrics</div>';
+          if (moduleMetrics.commitCount !== void 0) {
+            html2 += `<div class="tooltip-metric"><span class="metric-label">Commits:</span> <span class="metric-value">${moduleMetrics.commitCount}</span></div>`;
+          }
+          if (moduleMetrics.daysSinceModified !== void 0) {
+            html2 += `<div class="tooltip-metric"><span class="metric-label">Last modified:</span> <span class="metric-value">${moduleMetrics.daysSinceModified} days ago</span></div>`;
+          }
+          if (moduleMetrics.ageInDays !== void 0) {
+            html2 += `<div class="tooltip-metric"><span class="metric-label">Age:</span> <span class="metric-value">${moduleMetrics.ageInDays} days</span></div>`;
+          }
+          if (moduleMetrics.authorCount !== void 0) {
+            html2 += `<div class="tooltip-metric"><span class="metric-label">Authors:</span> <span class="metric-value">${moduleMetrics.authorCount}</span></div>`;
+          }
+          if (moduleMetrics.linesChanged !== void 0) {
+            html2 += `<div class="tooltip-metric"><span class="metric-label">Churn:</span> <span class="metric-value">${moduleMetrics.linesChanged} lines</span></div>`;
+          }
+          if (moduleMetrics.lineCount !== void 0) {
+            html2 += `<div class="tooltip-metric"><span class="metric-label">Size:</span> <span class="metric-value">${moduleMetrics.lineCount} lines</span></div>`;
+          }
+          html2 += "</div>";
+        }
+      }
+      return html2;
+    };
+  }
+  function getMetricsData_() {
+    return window.__metricsData || null;
+  }
+
+  // output/D3.Viz.Spago.Tooltip/index.js
+  var showNodeTooltip = function(node) {
+    return function(x46) {
+      return function(y47) {
+        return function __do4() {
+          var metricsData2 = getMetricsData_();
+          var content3 = formatMetricsContent_(node)(metricsData2);
+          return showTooltip_(content3)(x46)(y47)();
+        };
+      };
+    };
+  };
+  var hideNodeTooltip = hideTooltip_;
+
   // output/D3.Viz.Spago.Render/index.js
   var class_46 = /* @__PURE__ */ class_2(toAttrStringString);
   var class_110 = /* @__PURE__ */ class_2(toAttrStringFunctionStrin);
@@ -44885,7 +45165,7 @@
       });
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 42, column 1 - line 42, column 88): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 43, column 1 - line 43, column 88): " + [v.constructor.name]);
   };
   var linkColor = function(l) {
     if (l.linktype instanceof P2P) {
@@ -44904,7 +45184,7 @@
       return "orange";
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 34, column 15 - line 38, column 23): " + [l.linktype.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 35, column 15 - line 39, column 23): " + [l.linktype.constructor.name]);
   };
   var linkClass = function(l) {
     return show73(l.linktype);
@@ -44939,9 +45219,17 @@
                         return pure86(unit);
                       }
                       ;
-                      throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 82, column 5 - line 84, column 27): " + [attrs.nodeClick.constructor.name]);
+                      throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 83, column 5 - line 85, column 27): " + [attrs.nodeClick.constructor.name]);
                     })())(function() {
-                      return pure86(groupEnter);
+                      return bind140(on14(onMouseEnterWithInfo(function(info2) {
+                        return showNodeTooltip(info2.datum)(info2.pageX)(info2.pageY);
+                      }))(groupEnter))(function() {
+                        return bind140(on14(onMouseLeave(function(v) {
+                          return hideNodeTooltip;
+                        }))(groupEnter))(function() {
+                          return pure86(groupEnter);
+                        });
+                      });
                     });
                   });
                 });
@@ -45247,6 +45535,16 @@
       return new ChangeSimConfig2(value0);
     };
     return ChangeSimConfig2;
+  })();
+  var ChangeColorBy = /* @__PURE__ */ (function() {
+    function ChangeColorBy2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ChangeColorBy2.create = function(value0) {
+      return new ChangeColorBy2(value0);
+    };
+    return ChangeColorBy2;
   })();
   var StopSim = /* @__PURE__ */ (function() {
     function StopSim2() {
@@ -47225,7 +47523,7 @@
       return true;
     }
     ;
-    throw new Error("Failed pattern match at PSD3.CodeExplorer.HTML (line 39, column 24 - line 41, column 22): " + [node.nodetype.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.CodeExplorer.HTML (line 40, column 24 - line 42, column 22): " + [node.nodetype.constructor.name]);
   };
   var renderSimControls = function(state3) {
     var params = getSimulationVariables(state3);
@@ -47243,7 +47541,7 @@
       max: 100,
       step: 10,
       value: params.alphaTarget * 100
-    })), caption_2([text2("AlphaTarget: " + show74(params.alphaTarget))])]), div2([classes(["control-group"])])([buttonGroup_([buttonPrimaryLeft([onClick($$const(StopSim.value))])([text2("Stop")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0.3))))])([text2("Heat")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0))))])([text2("Cool")]), buttonPrimaryRight([onClick($$const(StartSim.value))])([text2("Start")])])]), subHeading_([text2("Filters")]), div2([classes(["control-group"])])([contentHeading_([text2("Node visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new NodeFilter(isPackage))))])([text2("Packages")]), buttonCenter([onClick($$const(new Filter(new NodeFilter($$const(true)))))])([text2("All")]), buttonRight([onClick($$const(new Filter(new NodeFilter(isUsedModule))))])([text2("Modules")])])]), div2([classes(["control-group"])])([button3([onClick($$const(new Filter(new NodeFilter(isProjectModule))))])([text2("Only project files")])]), div2([classes(["control-group"])])([contentHeading_([text2("Link Visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new LinkShowFilter(isM2M_Tree_Link))))])([text2("Tree")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2M_Graph_Link))))])([text2("Graph")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2P_Link))))])([text2("M2P")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isP2P_Link))))])([text2("P2P")]), buttonRight([onClick($$const(new Filter(new LinkShowFilter($$const(false)))))])([text2("None")])])]), subHeading_([text2("Styling")]), div2([classes(["control-group"])])([buttonGroup_([buttonLeft([onClick($$const(new ChangeStyling(new GraphStyle(clusterSceneAttributes))))])([text2("Cluster")]), buttonCenter([onClick($$const(new ChangeStyling(new GraphStyle(graphSceneAttributes))))])([text2("Graph")]), buttonRight([onClick($$const(new ChangeStyling(new GraphStyle(treeSceneAttributes))))])([text2("Tree")])])])]);
+    })), caption_2([text2("AlphaTarget: " + show74(params.alphaTarget))])]), div2([classes(["control-group"])])([buttonGroup_([buttonPrimaryLeft([onClick($$const(StopSim.value))])([text2("Stop")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0.3))))])([text2("Heat")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0))))])([text2("Cool")]), buttonPrimaryRight([onClick($$const(StartSim.value))])([text2("Start")])])]), subHeading_([text2("Filters")]), div2([classes(["control-group"])])([contentHeading_([text2("Node visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new NodeFilter(isPackage))))])([text2("Packages")]), buttonCenter([onClick($$const(new Filter(new NodeFilter($$const(true)))))])([text2("All")]), buttonRight([onClick($$const(new Filter(new NodeFilter(isUsedModule))))])([text2("Modules")])])]), div2([classes(["control-group"])])([button3([onClick($$const(new Filter(new NodeFilter(isProjectModule))))])([text2("Only project files")])]), div2([classes(["control-group"])])([contentHeading_([text2("Link Visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new LinkShowFilter(isM2M_Tree_Link))))])([text2("Tree")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2M_Graph_Link))))])([text2("Graph")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2P_Link))))])([text2("M2P")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isP2P_Link))))])([text2("P2P")]), buttonRight([onClick($$const(new Filter(new LinkShowFilter($$const(false)))))])([text2("None")])])]), subHeading_([text2("Styling")]), div2([classes(["control-group"])])([buttonGroup_([buttonLeft([onClick($$const(new ChangeStyling(new GraphStyle(clusterSceneAttributes))))])([text2("Cluster")]), buttonCenter([onClick($$const(new ChangeStyling(new GraphStyle(graphSceneAttributes))))])([text2("Graph")]), buttonRight([onClick($$const(new ChangeStyling(new GraphStyle(treeSceneAttributes))))])([text2("Tree")])])]), subHeading_([text2("Color By")]), div2([classes(["control-group"])])([buttonGroup_([buttonLeft([onClick($$const(new ChangeColorBy(ColorByGroup.value)))])([text2("Package")]), buttonCenter([onClick($$const(new ChangeColorBy(ColorByDepth.value)))])([text2("Depth")]), buttonRight([onClick($$const(new ChangeColorBy(ColorBySize.value)))])([text2("Size")])])]), div2([classes(["control-group"])])([contentHeading_([text2("Git Metrics")]), buttonGroup_([buttonLeft([onClick($$const(new ChangeColorBy(ColorByCommits.value)))])([text2("Commits")]), buttonCenter([onClick($$const(new ChangeColorBy(ColorByRecency.value)))])([text2("Recency")]), buttonRight([onClick($$const(new ChangeColorBy(ColorByAge.value)))])([text2("Age")])])]), div2([classes(["control-group"])])([buttonGroup_([buttonLeft([onClick($$const(new ChangeColorBy(ColorByAuthors.value)))])([text2("Authors")]), buttonRight([onClick($$const(new ChangeColorBy(ColorByChurn.value)))])([text2("Churn")])])])]);
   };
   var render46 = function(state3) {
     return div2([classes(["fullscreen-container", "spago-fullscreen", "page-with-watermark"])])([renderHeader12(CodeExplorer.value), div2([classes(["floating-panel", "floating-panel--top-left", "floating-panel--small", "spago-controls-panel", "editorial"])])([h2([classes(["floating-panel__title", "spago-controls__title"])])([text2("Controls")]), renderSimControls(state3), renderSimState(state3)]), div2([classes(["floating-panel", "floating-panel--top-right", "floating-panel--large", "spago-forces-panel", "editorial"])])([renderTableForces(state3)]), div2([classes(["svg-container", "fullscreen-viz", "spago-viz-container", state3.scene.cssClass])])([render45]), (function() {
@@ -47578,7 +47876,7 @@
                   return Nothing.value;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.CodeExplorer (line 400, column 23 - line 403, column 31): " + [st.eventListener.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.CodeExplorer (line 409, column 23 - line 412, column 31): " + [st.eventListener.constructor.name]);
               })()
             };
           };
@@ -47606,63 +47904,65 @@
             $66.model = v1;
             return $66;
           }))(function() {
-            return bind78(get21)(function(state3) {
-              return bind78(liftAff34(evalD3v2SimM(state3)(initialize6)))(function(openSelections) {
-                return discard70(modify_17(function(s) {
-                  var $72 = {};
-                  for (var $73 in s) {
-                    if ({}.hasOwnProperty.call(s, $73)) {
-                      $72[$73] = s[$73];
-                    }
-                    ;
-                  }
-                  ;
-                  $72.staging = (function() {
-                    var $69 = {};
-                    for (var $70 in s.staging) {
-                      if ({}.hasOwnProperty.call(s.staging, $70)) {
-                        $69[$70] = s["staging"][$70];
+            return discard70(liftEffect80(loadGitMetrics_))(function() {
+              return bind78(get21)(function(state3) {
+                return bind78(liftAff34(evalD3v2SimM(state3)(initialize6)))(function(openSelections) {
+                  return discard70(modify_17(function(s) {
+                    var $72 = {};
+                    for (var $73 in s) {
+                      if ({}.hasOwnProperty.call(s, $73)) {
+                        $72[$73] = s[$73];
                       }
                       ;
                     }
                     ;
-                    $69.selections = {
-                      nodes: new Just(openSelections.nodes),
-                      links: new Just(openSelections.links)
-                    };
-                    return $69;
-                  })();
-                  return $72;
-                }))(function() {
-                  return bind78(liftEffect80(create))(function(v2) {
-                    return discard70($$void18(subscribe2(v2.emitter)))(function() {
-                      return discard70(modify_17(function(v3) {
-                        var $76 = {};
-                        for (var $77 in v3) {
-                          if ({}.hasOwnProperty.call(v3, $77)) {
-                            $76[$77] = v3[$77];
-                          }
-                          ;
+                    $72.staging = (function() {
+                      var $69 = {};
+                      for (var $70 in s.staging) {
+                        if ({}.hasOwnProperty.call(s.staging, $70)) {
+                          $69[$70] = s["staging"][$70];
                         }
                         ;
-                        $76.eventListener = new Just(v2.listener);
-                        return $76;
-                      }))(function() {
-                        return bind78(liftEffect80(create))(function(v3) {
-                          return discard70($$void18(subscribe2(v3.emitter)))(function() {
-                            return discard70(modify_17(function(v4) {
-                              var $80 = {};
-                              for (var $81 in v4) {
-                                if ({}.hasOwnProperty.call(v4, $81)) {
-                                  $80[$81] = v4[$81];
+                      }
+                      ;
+                      $69.selections = {
+                        nodes: new Just(openSelections.nodes),
+                        links: new Just(openSelections.links)
+                      };
+                      return $69;
+                    })();
+                    return $72;
+                  }))(function() {
+                    return bind78(liftEffect80(create))(function(v2) {
+                      return discard70($$void18(subscribe2(v2.emitter)))(function() {
+                        return discard70(modify_17(function(v3) {
+                          var $76 = {};
+                          for (var $77 in v3) {
+                            if ({}.hasOwnProperty.call(v3, $77)) {
+                              $76[$77] = v3[$77];
+                            }
+                            ;
+                          }
+                          ;
+                          $76.eventListener = new Just(v2.listener);
+                          return $76;
+                        }))(function() {
+                          return bind78(liftEffect80(create))(function(v3) {
+                            return discard70($$void18(subscribe2(v3.emitter)))(function() {
+                              return discard70(modify_17(function(v4) {
+                                var $80 = {};
+                                for (var $81 in v4) {
+                                  if ({}.hasOwnProperty.call(v4, $81)) {
+                                    $80[$81] = v4[$81];
+                                  }
+                                  ;
                                 }
                                 ;
-                              }
-                              ;
-                              $80.transitionListener = new Just(v3.listener);
-                              return $80;
-                            }))(function() {
-                              return pure77(unit);
+                                $80.transitionListener = new Just(v3.listener);
+                                return $80;
+                              }))(function() {
+                                return pure77(unit);
+                              });
                             });
                           });
                         });
@@ -47689,7 +47989,7 @@
           return handleAction39(dictMonadAff)(new SpotlightNode(v.value0.value1));
         }
         ;
-        throw new Error("Failed pattern match at PSD3.CodeExplorer (line 191, column 5 - line 193, column 68): " + [v.value0.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.CodeExplorer (line 196, column 5 - line 198, column 68): " + [v.value0.constructor.name]);
       }
       ;
       if (v instanceof ToggleChildrenOfNode) {
@@ -47928,7 +48228,13 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.CodeExplorer (line 155, column 16 - line 313, column 40): " + [v.constructor.name]);
+      if (v instanceof ChangeColorBy) {
+        return discard70(modify_17(setSceneAttributes2(sceneAttributesWithColorBy(v.value0))))(function() {
+          return runSimulation1;
+        });
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3.CodeExplorer (line 157, column 16 - line 322, column 18): " + [v.constructor.name]);
     };
   };
   var defaultTransitionMatrix = /* @__PURE__ */ (function() {

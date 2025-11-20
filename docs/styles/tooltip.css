@@ -1,0 +1,76 @@
+/* Node tooltip styles for Code Explorer */
+
+.node-tooltip {
+  position: fixed;
+  z-index: 1000;
+  background: rgba(20, 20, 30, 0.95);
+  color: #f0f0f0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  max-width: 300px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+}
+
+.tooltip-header {
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+
+.tooltip-type {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tooltip-metrics {
+  margin-top: 4px;
+}
+
+.tooltip-metrics-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.tooltip-metric {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 3px;
+  font-size: 12px;
+}
+
+.metric-label {
+  color: #999;
+}
+
+.metric-value {
+  color: #fff;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Color-coded metric values based on context */
+.tooltip-metric .metric-value.high {
+  color: #4ade80;
+}
+
+.tooltip-metric .metric-value.medium {
+  color: #fbbf24;
+}
+
+.tooltip-metric .metric-value.low {
+  color: #f87171;
+}

@@ -5,6 +5,7 @@ import Prelude
 import PSD3.Data.Tree (TreeLayout(..))
 import D3.Viz.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
 import D3.Viz.Spago.Files (NodeType(..), isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
+import D3.Viz.Spago.GitMetrics (ColorByOption(..))
 import D3.Viz.Spago.Model (SpagoSimNode, isPackage, isUsedModule)
 import Data.String.CodeUnits (take)
 import PSD3.Internal.Simulation.Forces (showType)
@@ -215,6 +216,45 @@ renderSimControls state = do
           , Button.buttonRight
               [ HE.onClick $ const (ChangeStyling $ GraphStyle treeSceneAttributes) ]
               [ HH.text "Tree" ]
+          ]
+        ]
+
+    , Format.subHeading_ [ HH.text "Color By" ]
+    , HH.div [ HP.classes [ HH.ClassName "control-group"]]
+        [ Button.buttonGroup_
+          [ Button.buttonLeft
+              [ HE.onClick $ const (ChangeColorBy ColorByGroup) ]
+              [ HH.text "Package" ]
+          , Button.buttonCenter
+              [ HE.onClick $ const (ChangeColorBy ColorByDepth) ]
+              [ HH.text "Depth" ]
+          , Button.buttonRight
+              [ HE.onClick $ const (ChangeColorBy ColorBySize) ]
+              [ HH.text "Size" ]
+          ]
+        ]
+    , HH.div [ HP.classes [ HH.ClassName "control-group"]]
+        [ Format.contentHeading_ [ HH.text "Git Metrics" ]
+        , Button.buttonGroup_
+          [ Button.buttonLeft
+              [ HE.onClick $ const (ChangeColorBy ColorByCommits) ]
+              [ HH.text "Commits" ]
+          , Button.buttonCenter
+              [ HE.onClick $ const (ChangeColorBy ColorByRecency) ]
+              [ HH.text "Recency" ]
+          , Button.buttonRight
+              [ HE.onClick $ const (ChangeColorBy ColorByAge) ]
+              [ HH.text "Age" ]
+          ]
+        ]
+    , HH.div [ HP.classes [ HH.ClassName "control-group"]]
+        [ Button.buttonGroup_
+          [ Button.buttonLeft
+              [ HE.onClick $ const (ChangeColorBy ColorByAuthors) ]
+              [ HH.text "Authors" ]
+          , Button.buttonRight
+              [ HE.onClick $ const (ChangeColorBy ColorByChurn) ]
+              [ HH.text "Churn" ]
           ]
         ]
     ]

@@ -108,17 +108,26 @@ function getFileMetrics(filePath) {
 }
 
 /**
- * Convert file path to module name
- * e.g., "src/website/Component/Example.purs" -> "Component.Example"
+ * Extract actual module name from PureScript file content
+ * Reads the "module ModuleName where" declaration
  */
-function pathToModuleName(filePath) {
-  // Remove src/website/ or src/lib/ prefix and .purs suffix
+function getModuleNameFromFile(filePath) {
+  try {
+    const content = fs.readFileSync(filePath, 'utf8');
+    // Match "module ModuleName where" - module name can have dots
+    const match = content.match(/^module\s+([\w.]+)\s+where/m);
+    if (match) {
+      return match[1];
+    }
+  } catch (e) {
+    // File might not exist
+  }
+
+  // Fallback: derive from path
   let modulePath = filePath
     .replace(/^src\/website\//, '')
     .replace(/^src\/lib\//, '')
     .replace(/\.purs$/, '');
-
-  // Convert path separators to dots
   return modulePath.replace(/\//g, '.');
 }
 
@@ -139,7 +148,7 @@ function main() {
     const fileMetrics = getFileMetrics(file);
 
     if (fileMetrics) {
-      const moduleName = pathToModuleName(file);
+      const moduleName = getModuleNameFromFile(file);
       metrics[moduleName] = {
         path: file,
         ...fileMetrics

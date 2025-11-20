@@ -14,3 +14,11 @@ foreign import d3SchemeDiverging10N_  :: ScaleNumeric_ -- not modelling the scal
 foreign import d3SchemeSequential10N_ :: ScaleNumeric_ -- not modelling the scale / domain distinction yet
 foreign import d3SchemeCategory10S_   :: ScaleString_ -- not modelling the scale / domain distinction yet
 foreign import d3SchemePairedN_       :: ScaleNumeric_
+
+-- Direct interpolation functions (take 0-1 value, return color string)
+foreign import d3InterpolateViridis_ :: ScaleNumeric_
+foreign import d3InterpolateRdYlGn_  :: ScaleNumeric_
+foreign import d3InterpolatePlasma_  :: ScaleNumeric_
+foreign import d3InterpolateInferno_ :: ScaleNumeric_
+foreign import d3InterpolateMagma_   :: ScaleNumeric_
+foreign import d3InterpolateTurbo_   :: ScaleNumeric_

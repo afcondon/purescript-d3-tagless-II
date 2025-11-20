@@ -5,6 +5,7 @@ import Prelude
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, enterAttrs, updateAttrs, translateNode)
 import D3.Viz.Spago.Files (LinkType(..))
 import D3.Viz.Spago.Model (SpagoSimNode)
+import D3.Viz.Spago.Tooltip (showNodeTooltip, hideNodeTooltip)
 import Data.Array ((:))
 import Data.Array as Array
 import Data.Map as Map
@@ -16,7 +17,7 @@ import PSD3.Data.Node (D3Link_Swizzled, NodeID)
 import PSD3.Internal.FFI (keyIsID_, simdrag_)
 import Unsafe.Coerce (unsafeCoerce)
 import PSD3v2.Attribute.Types (class_, stroke, transform, x1, x2, y1, y2, Attribute)
-import PSD3v2.Behavior.Types (Behavior(..), simulationDrag, onClickWithDatum)
+import PSD3v2.Behavior.Types (Behavior(..), simulationDrag, onClickWithDatum, onMouseEnterWithInfo, onMouseLeave)
 import PSD3v2.Capabilities.Selection (class SelectionM, append, appendChild, appendChildInheriting, on, openSelection, remove, setAttrs)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, SBoundInherits, SEmpty, SPending, SExiting)
@@ -82,6 +83,10 @@ spagoRenderCallbacks = {
     case attrs.nodeClick of
       Just handler -> void $ on (onClickWithDatum handler) groupEnter
       Nothing -> pure unit
+
+    -- Add tooltip hover behavior
+    _ <- on (onMouseEnterWithInfo \info -> showNodeTooltip info.datum info.pageX info.pageY) groupEnter
+    _ <- on (onMouseLeave \_ -> hideNodeTooltip) groupEnter
 
     pure groupEnter
 
