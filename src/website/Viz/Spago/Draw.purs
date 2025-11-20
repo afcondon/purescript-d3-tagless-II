@@ -106,7 +106,7 @@ updateSimulation selections dataConfig attrs =
     { nodes: selections.nodes
     , links: unsafeCoerce selections.links  -- Cast SpagoSimNode datum to D3Link_Swizzled datum for links
     }
-    Circle  -- Node element type (simplified - no group wrapper for now)
+    Group  -- Node element type (groups containing circle + text children)
     Line    -- Link element type
     { allNodes: dataConfig.allNodes           -- Full dataset
     , allLinks: dataConfig.allLinks           -- Full dataset

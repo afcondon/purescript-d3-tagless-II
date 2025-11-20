@@ -45279,7 +45279,7 @@
                 return genericUpdateSimulation22({
                   nodes: selections.nodes,
                   links: selections.links
-                })(Circle2.value)(Line2.value)({
+                })(Group2.value)(Line2.value)({
                   allNodes: dataConfig.allNodes,
                   allLinks: dataConfig.allLinks,
                   nodeFilter: dataConfig.nodeFilter,
