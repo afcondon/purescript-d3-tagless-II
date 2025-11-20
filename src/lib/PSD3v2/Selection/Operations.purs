@@ -23,6 +23,7 @@ import Prelude
 
 import Data.Array as Array
 import Data.Foldable (class Foldable, foldl, traverse_)
+import Data.Int (toNumber)
 import Data.FoldableWithIndex (traverseWithIndex_)
 import Data.Map (Map)
 import Data.Map as Map
@@ -34,6 +35,8 @@ import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Class.Console (log)
+import Effect.Uncurried (mkEffectFn2)
+import Web.UIEvent.MouseEvent (MouseEvent, clientX, clientY, pageX, pageY)
 import Partial.Unsafe (unsafePartial, unsafeCrashWith)
 import Unsafe.Coerce (unsafeCoerce)
 import PSD3.Internal.Simulation.Types (D3SimulationState_)
@@ -55,6 +58,10 @@ import Web.HTML (window)
 import Web.HTML.HTMLDocument (toDocument)
 import Web.HTML.HTMLDocument as HTMLDocument
 import Web.HTML.Window (document)
+
+-- FFI for offsetX/offsetY (not yet in purescript-web-uievents - PR candidate)
+foreign import offsetX :: MouseEvent -> Number
+foreign import offsetY :: MouseEvent -> Number
 
 -- | Select a single element matching the CSS selector
 -- |
@@ -772,12 +779,38 @@ on behavior selection@(Selection impl) = do
       void $ BehaviorFFI.attachMouseLeave_ element handler
     applyBehavior (Highlight { enter, leave }) element =
       void $ BehaviorFFI.attachHighlight_ element enter leave
+    -- Pure web-events versions - use MouseEvent accessors directly
+    -- Note: MouseEvent coords are Int, but MouseEventInfo uses Number for flexibility
     applyBehavior (MouseMoveWithInfo handler) element =
-      void $ BehaviorFFI.attachMouseMoveWithInfo_ element (\d info -> handler { datum: d, clientX: info.clientX, clientY: info.clientY, pageX: info.pageX, pageY: info.pageY, offsetX: info.offsetX, offsetY: info.offsetY })
+      void $ BehaviorFFI.attachMouseMoveWithEvent_ element $ mkEffectFn2 \d evt ->
+        handler { datum: d
+                , clientX: toNumber $ clientX evt
+                , clientY: toNumber $ clientY evt
+                , pageX: toNumber $ pageX evt
+                , pageY: toNumber $ pageY evt
+                , offsetX: offsetX evt
+                , offsetY: offsetY evt
+                }
     applyBehavior (MouseEnterWithInfo handler) element =
-      void $ BehaviorFFI.attachMouseEnterWithInfo_ element (\d info -> handler { datum: d, clientX: info.clientX, clientY: info.clientY, pageX: info.pageX, pageY: info.pageY, offsetX: info.offsetX, offsetY: info.offsetY })
+      void $ BehaviorFFI.attachMouseEnterWithEvent_ element $ mkEffectFn2 \d evt ->
+        handler { datum: d
+                , clientX: toNumber $ clientX evt
+                , clientY: toNumber $ clientY evt
+                , pageX: toNumber $ pageX evt
+                , pageY: toNumber $ pageY evt
+                , offsetX: offsetX evt
+                , offsetY: offsetY evt
+                }
     applyBehavior (MouseLeaveWithInfo handler) element =
-      void $ BehaviorFFI.attachMouseLeaveWithInfo_ element (\d info -> handler { datum: d, clientX: info.clientX, clientY: info.clientY, pageX: info.pageX, pageY: info.pageY, offsetX: info.offsetX, offsetY: info.offsetY })
+      void $ BehaviorFFI.attachMouseLeaveWithEvent_ element $ mkEffectFn2 \d evt ->
+        handler { datum: d
+                , clientX: toNumber $ clientX evt
+                , clientY: toNumber $ clientY evt
+                , pageX: toNumber $ pageX evt
+                , pageY: toNumber $ pageY evt
+                , offsetX: offsetX evt
+                , offsetY: offsetY evt
+                }
 
 -- | Attach a behavior with simulation access (for SimulationDrag)
 -- |
@@ -827,12 +860,37 @@ onWithSimulation behavior simState selection@(Selection impl) = do
       void $ BehaviorFFI.attachMouseLeave_ element handler
     applyBehaviorWithSim (Highlight { enter, leave }) _ element =
       void $ BehaviorFFI.attachHighlight_ element enter leave
+    -- Pure web-events versions
     applyBehaviorWithSim (MouseMoveWithInfo handler) _ element =
-      void $ BehaviorFFI.attachMouseMoveWithInfo_ element (\d info -> handler { datum: d, clientX: info.clientX, clientY: info.clientY, pageX: info.pageX, pageY: info.pageY, offsetX: info.offsetX, offsetY: info.offsetY })
+      void $ BehaviorFFI.attachMouseMoveWithEvent_ element $ mkEffectFn2 \d evt ->
+        handler { datum: d
+                , clientX: toNumber $ clientX evt
+                , clientY: toNumber $ clientY evt
+                , pageX: toNumber $ pageX evt
+                , pageY: toNumber $ pageY evt
+                , offsetX: offsetX evt
+                , offsetY: offsetY evt
+                }
     applyBehaviorWithSim (MouseEnterWithInfo handler) _ element =
-      void $ BehaviorFFI.attachMouseEnterWithInfo_ element (\d info -> handler { datum: d, clientX: info.clientX, clientY: info.clientY, pageX: info.pageX, pageY: info.pageY, offsetX: info.offsetX, offsetY: info.offsetY })
+      void $ BehaviorFFI.attachMouseEnterWithEvent_ element $ mkEffectFn2 \d evt ->
+        handler { datum: d
+                , clientX: toNumber $ clientX evt
+                , clientY: toNumber $ clientY evt
+                , pageX: toNumber $ pageX evt
+                , pageY: toNumber $ pageY evt
+                , offsetX: offsetX evt
+                , offsetY: offsetY evt
+                }
     applyBehaviorWithSim (MouseLeaveWithInfo handler) _ element =
-      void $ BehaviorFFI.attachMouseLeaveWithInfo_ element (\d info -> handler { datum: d, clientX: info.clientX, clientY: info.clientY, pageX: info.pageX, pageY: info.pageY, offsetX: info.offsetX, offsetY: info.offsetY })
+      void $ BehaviorFFI.attachMouseLeaveWithEvent_ element $ mkEffectFn2 \d evt ->
+        handler { datum: d
+                , clientX: toNumber $ clientX evt
+                , clientY: toNumber $ clientY evt
+                , pageX: toNumber $ pageX evt
+                , pageY: toNumber $ pageY evt
+                , offsetX: offsetX evt
+                , offsetY: offsetY evt
+                }
 
 -- | Extract D3 simulation handle from simulation state
 -- | Returns Nothing if simulation is not initialized

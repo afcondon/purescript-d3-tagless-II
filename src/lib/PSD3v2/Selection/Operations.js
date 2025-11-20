@@ -38,3 +38,17 @@ export function getSimulationHandle_(simState) {
   // In JavaScript, newtypes are transparent, so simState IS the record
   return simState.handle_ || null;
 }
+
+// ============================================================================
+// MouseEvent accessors (candidates for purescript-web-uievents PR)
+// ============================================================================
+
+// Get offsetX from MouseEvent (position relative to target element)
+export function offsetX(event) {
+  return event.offsetX;
+}
+
+// Get offsetY from MouseEvent (position relative to target element)
+export function offsetY(event) {
+  return event.offsetY;
+}

@@ -7,6 +7,11 @@ module PSD3v2.Behavior.FFI
   , attachMouseEnter_
   , attachMouseLeave_
   , attachHighlight_
+  -- Pure web-events versions (preferred)
+  , attachMouseMoveWithEvent_
+  , attachMouseEnterWithEvent_
+  , attachMouseLeaveWithEvent_
+  -- DEPRECATED D3 versions
   , attachMouseMoveWithInfo_
   , attachMouseEnterWithInfo_
   , attachMouseLeaveWithInfo_
@@ -17,8 +22,10 @@ import Prelude
 
 import Data.Nullable (Nullable)
 import Effect (Effect)
+import Effect.Uncurried (EffectFn1, EffectFn2)
 import PSD3.Internal.Types (D3Simulation_)
 import Web.DOM.Element (Element)
+import Web.UIEvent.MouseEvent (MouseEvent)
 
 -- | Attach zoom behavior to a DOM element
 -- |
@@ -129,6 +136,7 @@ foreign import attachHighlight_
   -> Effect Element
 
 -- | Mouse event info type (matches PureScript MouseEventInfo)
+-- | DEPRECATED: Will be removed once Operations.purs is updated to use MouseEvent
 type MouseEventInfoJS =
   { clientX :: Number
   , clientY :: Number
@@ -138,23 +146,43 @@ type MouseEventInfoJS =
   , offsetY :: Number
   }
 
--- | Attach mousemove handler with event info
+-- | Attach mousemove handler with event info (pure web-events version)
 -- |
--- | Passes datum and mouse coordinates to the handler.
+-- | Uses standard addEventListener instead of D3's .on()
+-- | Handler receives raw MouseEvent - use Web.UIEvent.MouseEvent accessors
+foreign import attachMouseMoveWithEvent_
+  :: forall datum
+   . Element
+  -> EffectFn2 datum MouseEvent Unit
+  -> Effect Element
+
+-- | Attach mouseenter handler with event info (pure web-events version)
+foreign import attachMouseEnterWithEvent_
+  :: forall datum
+   . Element
+  -> EffectFn2 datum MouseEvent Unit
+  -> Effect Element
+
+-- | Attach mouseleave handler with event info (pure web-events version)
+foreign import attachMouseLeaveWithEvent_
+  :: forall datum
+   . Element
+  -> EffectFn2 datum MouseEvent Unit
+  -> Effect Element
+
+-- | DEPRECATED: Old D3-based versions - keeping for backwards compatibility during transition
 foreign import attachMouseMoveWithInfo_
   :: forall datum
    . Element
   -> (datum -> MouseEventInfoJS -> Effect Unit)
   -> Effect Element
 
--- | Attach mouseenter handler with event info
 foreign import attachMouseEnterWithInfo_
   :: forall datum
    . Element
   -> (datum -> MouseEventInfoJS -> Effect Unit)
   -> Effect Element
 
--- | Attach mouseleave handler with event info
 foreign import attachMouseLeaveWithInfo_
   :: forall datum
    . Element

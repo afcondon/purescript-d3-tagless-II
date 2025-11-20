@@ -18557,6 +18557,12 @@
   function getSimulationHandle_(simState) {
     return simState.handle_ || null;
   }
+  function offsetX(event) {
+    return event.offsetX;
+  }
+  function offsetY(event) {
+    return event.offsetY;
+  }
 
   // output/PSD3v2.Behavior.FFI/foreign.js
   function attachZoom_(element3) {
@@ -18673,53 +18679,29 @@
       return element3;
     };
   }
-  function attachMouseMoveWithInfo_(element3) {
+  function attachMouseMoveWithEvent_(element3) {
     return (handler3) => () => {
-      const selection2 = select_default2(element3);
-      selection2.on("mousemove", function(event, d16) {
-        const info2 = {
-          clientX: event.clientX,
-          clientY: event.clientY,
-          pageX: event.pageX,
-          pageY: event.pageY,
-          offsetX: event.offsetX,
-          offsetY: event.offsetY
-        };
-        handler3(d16)(info2)();
+      element3.addEventListener("mousemove", function(event) {
+        const datum2 = this.__data__;
+        handler3(datum2, event);
       });
       return element3;
     };
   }
-  function attachMouseEnterWithInfo_(element3) {
+  function attachMouseEnterWithEvent_(element3) {
     return (handler3) => () => {
-      const selection2 = select_default2(element3);
-      selection2.on("mouseenter", function(event, d16) {
-        const info2 = {
-          clientX: event.clientX,
-          clientY: event.clientY,
-          pageX: event.pageX,
-          pageY: event.pageY,
-          offsetX: event.offsetX,
-          offsetY: event.offsetY
-        };
-        handler3(d16)(info2)();
+      element3.addEventListener("mouseenter", function(event) {
+        const datum2 = this.__data__;
+        handler3(datum2, event);
       });
       return element3;
     };
   }
-  function attachMouseLeaveWithInfo_(element3) {
+  function attachMouseLeaveWithEvent_(element3) {
     return (handler3) => () => {
-      const selection2 = select_default2(element3);
-      selection2.on("mouseleave", function(event, d16) {
-        const info2 = {
-          clientX: event.clientX,
-          clientY: event.clientY,
-          pageX: event.pageX,
-          pageY: event.pageY,
-          offsetX: event.offsetX,
-          offsetY: event.offsetY
-        };
-        handler3(d16)(info2)();
+      element3.addEventListener("mouseleave", function(event) {
+        const datum2 = this.__data__;
+        handler3(datum2, event);
       });
       return element3;
     };
@@ -19228,6 +19210,20 @@
   // output/Web.HTML.Window/index.js
   var toEventTarget = unsafeCoerce2;
 
+  // output/Web.UIEvent.MouseEvent/foreign.js
+  function clientX(e) {
+    return e.clientX;
+  }
+  function clientY(e) {
+    return e.clientY;
+  }
+  function pageX(e) {
+    return e.pageX;
+  }
+  function pageY(e) {
+    return e.pageY;
+  }
+
   // output/PSD3v2.Selection.Operations/index.js
   var bind6 = /* @__PURE__ */ bind(bindEffect);
   var pure8 = /* @__PURE__ */ pure(applicativeEffect);
@@ -19339,7 +19335,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 80, column 3 - line 88, column 8): " + [maybeElement.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 87, column 3 - line 95, column 8): " + [maybeElement.constructor.name]);
       });
     };
   };
@@ -19358,7 +19354,7 @@
               return v.value0.value0.parentElements;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1565, column 36 - line 1567, column 49): " + [v.value0.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1623, column 36 - line 1625, column 49): " + [v.value0.constructor.name]);
           })();
           return new EmptySelection({
             parentElements: elements,
@@ -19373,7 +19369,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1560, column 3 - line 1578, column 10): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1618, column 3 - line 1636, column 10): " + [v.constructor.name]);
       };
     };
   };
@@ -19386,7 +19382,7 @@
             return v.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 260, column 36 - line 261, column 32): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 267, column 36 - line 268, column 32): " + [v.constructor.name]);
         })();
         return traverse_4(function(element3) {
           var node = toNode(element3);
@@ -19400,7 +19396,7 @@
               return unit;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 265, column 5 - line 267, column 27): " + [maybeParent.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 272, column 5 - line 274, column 27): " + [maybeParent.constructor.name]);
           };
         })(v1.elements);
       })());
@@ -19441,7 +19437,7 @@
           return v1.value0.elements;
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 749, column 5 - line 749, column 61): " + [v1.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 756, column 5 - line 756, column 61): " + [v1.constructor.name]);
       };
       var applyBehavior = function(v1) {
         return function(v2) {
@@ -19478,54 +19474,48 @@
           }
           ;
           if (v1 instanceof MouseMoveWithInfo) {
-            return $$void7(attachMouseMoveWithInfo_(v2)(function(d16) {
-              return function(info2) {
-                return v1.value0({
-                  datum: d16,
-                  clientX: info2.clientX,
-                  clientY: info2.clientY,
-                  pageX: info2.pageX,
-                  pageY: info2.pageY,
-                  offsetX: info2.offsetX,
-                  offsetY: info2.offsetY
-                });
-              };
+            return $$void7(attachMouseMoveWithEvent_(v2)(function(d16, evt) {
+              return v1.value0({
+                datum: d16,
+                clientX: toNumber(clientX(evt)),
+                clientY: toNumber(clientY(evt)),
+                pageX: toNumber(pageX(evt)),
+                pageY: toNumber(pageY(evt)),
+                offsetX: offsetX(evt),
+                offsetY: offsetY(evt)
+              })();
             }));
           }
           ;
           if (v1 instanceof MouseEnterWithInfo) {
-            return $$void7(attachMouseEnterWithInfo_(v2)(function(d16) {
-              return function(info2) {
-                return v1.value0({
-                  datum: d16,
-                  clientX: info2.clientX,
-                  clientY: info2.clientY,
-                  pageX: info2.pageX,
-                  pageY: info2.pageY,
-                  offsetX: info2.offsetX,
-                  offsetY: info2.offsetY
-                });
-              };
+            return $$void7(attachMouseEnterWithEvent_(v2)(function(d16, evt) {
+              return v1.value0({
+                datum: d16,
+                clientX: toNumber(clientX(evt)),
+                clientY: toNumber(clientY(evt)),
+                pageX: toNumber(pageX(evt)),
+                pageY: toNumber(pageY(evt)),
+                offsetX: offsetX(evt),
+                offsetY: offsetY(evt)
+              })();
             }));
           }
           ;
           if (v1 instanceof MouseLeaveWithInfo) {
-            return $$void7(attachMouseLeaveWithInfo_(v2)(function(d16) {
-              return function(info2) {
-                return v1.value0({
-                  datum: d16,
-                  clientX: info2.clientX,
-                  clientY: info2.clientY,
-                  pageX: info2.pageX,
-                  pageY: info2.pageY,
-                  offsetX: info2.offsetX,
-                  offsetY: info2.offsetY
-                });
-              };
+            return $$void7(attachMouseLeaveWithEvent_(v2)(function(d16, evt) {
+              return v1.value0({
+                datum: d16,
+                clientX: toNumber(clientX(evt)),
+                clientY: toNumber(clientY(evt)),
+                pageX: toNumber(pageX(evt)),
+                pageY: toNumber(pageY(evt)),
+                offsetX: offsetX(evt),
+                offsetY: offsetY(evt)
+              })();
             }));
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 756, column 5 - line 756, column 62): " + [v1.constructor.name, v2.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 763, column 5 - line 763, column 62): " + [v1.constructor.name, v2.constructor.name]);
         };
       };
       var elements = getElements(v);
@@ -19544,14 +19534,14 @@
             return v.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 393, column 70 - line 394, column 30): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 400, column 70 - line 401, column 30): " + [v.constructor.name]);
         })();
         var v3 = (function() {
           if (v1 instanceof BoundSelection) {
             return v1.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 395, column 55 - line 396, column 30): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 402, column 55 - line 403, column 30): " + [v1.constructor.name]);
         })();
         return pure125(new BoundSelection({
           elements: append15(v2.elements)(v3.elements),
@@ -19578,7 +19568,7 @@
                       return v.value0;
                     }
                     ;
-                    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 510, column 57 - line 511, column 30): " + [v.constructor.name]);
+                    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 517, column 57 - line 518, column 30): " + [v.constructor.name]);
                   })();
                   return function __do4() {
                     var existingElements = querySelectorAllElements(selector)(v1.parentElements)();
@@ -19676,7 +19666,7 @@
                     return v.value0;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 426, column 57 - line 427, column 30): " + [v.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 433, column 57 - line 434, column 30): " + [v.constructor.name]);
                 })();
                 return function __do4() {
                   var existingElements = querySelectorAllElements(selector)(v1.parentElements)();
@@ -19782,7 +19772,7 @@
             return v1.value0.elements;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 804, column 5 - line 804, column 61): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 837, column 5 - line 837, column 61): " + [v1.constructor.name]);
         };
         var applyBehaviorWithSim = function(v1) {
           return function(v2) {
@@ -19821,54 +19811,48 @@
               }
               ;
               if (v1 instanceof MouseMoveWithInfo) {
-                return $$void7(attachMouseMoveWithInfo_(v3)(function(d16) {
-                  return function(info2) {
-                    return v1.value0({
-                      datum: d16,
-                      clientX: info2.clientX,
-                      clientY: info2.clientY,
-                      pageX: info2.pageX,
-                      pageY: info2.pageY,
-                      offsetX: info2.offsetX,
-                      offsetY: info2.offsetY
-                    });
-                  };
+                return $$void7(attachMouseMoveWithEvent_(v3)(function(d16, evt) {
+                  return v1.value0({
+                    datum: d16,
+                    clientX: toNumber(clientX(evt)),
+                    clientY: toNumber(clientY(evt)),
+                    pageX: toNumber(pageX(evt)),
+                    pageY: toNumber(pageY(evt)),
+                    offsetX: offsetX(evt),
+                    offsetY: offsetY(evt)
+                  })();
                 }));
               }
               ;
               if (v1 instanceof MouseEnterWithInfo) {
-                return $$void7(attachMouseEnterWithInfo_(v3)(function(d16) {
-                  return function(info2) {
-                    return v1.value0({
-                      datum: d16,
-                      clientX: info2.clientX,
-                      clientY: info2.clientY,
-                      pageX: info2.pageX,
-                      pageY: info2.pageY,
-                      offsetX: info2.offsetX,
-                      offsetY: info2.offsetY
-                    });
-                  };
+                return $$void7(attachMouseEnterWithEvent_(v3)(function(d16, evt) {
+                  return v1.value0({
+                    datum: d16,
+                    clientX: toNumber(clientX(evt)),
+                    clientY: toNumber(clientY(evt)),
+                    pageX: toNumber(pageX(evt)),
+                    pageY: toNumber(pageY(evt)),
+                    offsetX: offsetX(evt),
+                    offsetY: offsetY(evt)
+                  })();
                 }));
               }
               ;
               if (v1 instanceof MouseLeaveWithInfo) {
-                return $$void7(attachMouseLeaveWithInfo_(v3)(function(d16) {
-                  return function(info2) {
-                    return v1.value0({
-                      datum: d16,
-                      clientX: info2.clientX,
-                      clientY: info2.clientY,
-                      pageX: info2.pageX,
-                      pageY: info2.pageY,
-                      offsetX: info2.offsetX,
-                      offsetY: info2.offsetY
-                    });
-                  };
+                return $$void7(attachMouseLeaveWithEvent_(v3)(function(d16, evt) {
+                  return v1.value0({
+                    datum: d16,
+                    clientX: toNumber(clientX(evt)),
+                    clientY: toNumber(clientY(evt)),
+                    pageX: toNumber(pageX(evt)),
+                    pageY: toNumber(pageY(evt)),
+                    offsetX: offsetX(evt),
+                    offsetY: offsetY(evt)
+                  })();
                 }));
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 811, column 5 - line 811, column 93): " + [v1.constructor.name, v2.constructor.name, v3.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 844, column 5 - line 844, column 93): " + [v1.constructor.name, v2.constructor.name, v3.constructor.name]);
             };
           };
         };
@@ -19897,7 +19881,7 @@
       return pure8(v.value0.document);
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 693, column 1 - line 693, column 82): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 700, column 1 - line 700, column 82): " + [v.constructor.name]);
   };
   var selectAll = function(dictMonadEffect) {
     var liftEffect122 = liftEffect(dictMonadEffect);
@@ -19922,7 +19906,7 @@
               return querySelectorAllElements(selector)(v.value0.elements)();
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 109, column 15 - line 117, column 50): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 116, column 15 - line 124, column 50): " + [v.constructor.name]);
           })();
           return new EmptySelection({
             parentElements: elements,
@@ -19993,7 +19977,7 @@
       return "thead";
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 870, column 1 - line 870, column 45): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 928, column 1 - line 928, column 45): " + [v.constructor.name]);
   };
   var createElementWithNS = function(elemType) {
     return function(doc) {
@@ -20006,7 +19990,7 @@
         return createElement2(elementTypeToString(elemType))(doc);
       }
       ;
-      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 703, column 3 - line 709, column 64): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 710, column 3 - line 716, column 64): " + [v.constructor.name]);
     };
   };
   var attributeValueToString = function(v) {
@@ -20022,7 +20006,7 @@
       return show22(v.value0);
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 865, column 1 - line 865, column 51): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 923, column 1 - line 923, column 51): " + [v.constructor.name]);
   };
   var applyAttributes = function(element3) {
     return function(datum2) {
@@ -20058,7 +20042,7 @@
               return setAttribute2(attr3.value0)(val)(element3);
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 847, column 30 - line 863, column 54): " + [attr3.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 905, column 30 - line 921, column 54): " + [attr3.constructor.name]);
           })(attrs);
         };
       };
@@ -20097,7 +20081,7 @@
               return v.value0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 199, column 78 - line 200, column 30): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 206, column 78 - line 207, column 30): " + [v.constructor.name]);
           })();
           var paired = zipWith(Tuple.create)(v1.data)(v1.elements);
           return function __do4() {
@@ -20112,7 +20096,7 @@
                     return arrayIndex;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 204, column 24 - line 206, column 32): " + [v1.indices.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 211, column 24 - line 213, column 32): " + [v1.indices.constructor.name]);
                 })();
                 return applyAttributes(v2.value1)(v2.value0)(logicalIndex)(attrs);
               };
@@ -20139,7 +20123,7 @@
               return v.value0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 232, column 69 - line 233, column 32): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 239, column 69 - line 240, column 32): " + [v.constructor.name]);
           })();
           var paired = zipWith(Tuple.create)(v1.data)(v1.elements);
           return function __do4() {
@@ -20185,7 +20169,7 @@
             return boundSel.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1387, column 68 - line 1388, column 34): " + [boundSel.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1445, column 68 - line 1446, column 34): " + [boundSel.constructor.name]);
         })();
         return traverseWithIndex2(function(idx) {
           return function(datum2) {
@@ -20208,7 +20192,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1392, column 5 - line 1415, column 39): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1450, column 5 - line 1473, column 39): " + [v1.constructor.name]);
           };
         })(v.data);
       };
@@ -20225,7 +20209,7 @@
                 return v.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 347, column 84 - line 348, column 30): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 354, column 84 - line 355, column 30): " + [v.constructor.name]);
             })();
             return function __do4() {
               var childElements = traverseWithIndex2(function(idx) {
@@ -20264,7 +20248,7 @@
                 return v.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 292, column 57 - line 293, column 30): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 299, column 57 - line 300, column 30): " + [v.constructor.name]);
             })();
             return function __do4() {
               var elements = traverse3(function(parent2) {
@@ -20296,7 +20280,7 @@
             return pendingSel.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1342, column 70 - line 1343, column 36): " + [pendingSel.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1400, column 70 - line 1401, column 36): " + [pendingSel.constructor.name]);
         })();
         return traverseWithIndex2(function(idx) {
           return function(datum2) {
@@ -20319,7 +20303,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1350, column 5 - line 1369, column 45): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1408, column 5 - line 1427, column 45): " + [v1.constructor.name]);
           };
         })(v.pendingData);
       };
@@ -20344,7 +20328,7 @@
                   return unsafeCrashWith("renderTree: appendChild returned empty selection");
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 928, column 31 - line 930, column 104): " + [v2.constructor.name]);
+                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 986, column 31 - line 988, column 104): " + [v2.constructor.name]);
               }
               ;
               return unsafeCrashWith("renderTree: appendChild should return EmptySelection");
@@ -20360,7 +20344,7 @@
                 return combinedChildMap;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 938, column 23 - line 940, column 36): " + [v1.value0.name.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 996, column 23 - line 998, column 36): " + [v1.value0.name.constructor.name]);
             })();
             return new Tuple(element3, selectionsMap);
           };
@@ -20416,7 +20400,7 @@
                 return v2.value0.update.value0.document;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 996, column 14 - line 997, column 45): " + [v2.value0.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1054, column 14 - line 1055, column 45): " + [v2.value0.update.constructor.name]);
             })();
             var allData = (function() {
               if (v2.value0.enter instanceof PendingSelection) {
@@ -20449,7 +20433,7 @@
                 return unsafeCrashWith("renderTree Join: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1019, column 22 - line 1021, column 90): " + [v3.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1077, column 22 - line 1079, column 90): " + [v3.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
@@ -20467,7 +20451,7 @@
                 return v2.value0.enter.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1044, column 54 - line 1045, column 36): " + [v2.value0.enter.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1102, column 54 - line 1103, column 36): " + [v2.value0.enter.constructor.name]);
             })();
             var boundSel = new BoundSelection({
               elements,
@@ -20486,7 +20470,7 @@
                 return unsafeCrashWith("renderTree NestedJoin: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1059, column 22 - line 1061, column 96): " + [v4.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1117, column 22 - line 1119, column 96): " + [v4.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
@@ -20535,7 +20519,7 @@
                 return unit;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1089, column 3 - line 1100, column 16): " + [v1.value0.exitBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1147, column 3 - line 1158, column 16): " + [v1.value0.exitBehavior.constructor.name]);
             })();
             var enterElementsAndMaps = (function() {
               if (v1.value0.enterBehavior instanceof Just) {
@@ -20560,7 +20544,7 @@
                 return renderTemplatesForPendingSelection(dictOrd)(v1.value0.template)(v2.value0.enter)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1103, column 27 - line 1120, column 68): " + [v1.value0.enterBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1161, column 27 - line 1178, column 68): " + [v1.value0.enterBehavior.constructor.name]);
             })();
             var enterElements = map31(fst)(enterElementsAndMaps);
             var enterChildMaps = map31(snd)(enterElementsAndMaps);
@@ -20574,7 +20558,7 @@
                 return renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1126, column 28 - line 1137, column 67): " + [v1.value0.updateBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1184, column 28 - line 1195, column 67): " + [v1.value0.updateBehavior.constructor.name]);
             })();
             var updateElements = map31(fst)(updateElementsAndMaps);
             var updateChildMaps = map31(snd)(updateElementsAndMaps);
@@ -20590,7 +20574,7 @@
                 return v2.value0.update.value0.document;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1153, column 14 - line 1154, column 45): " + [v2.value0.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1211, column 14 - line 1212, column 45): " + [v2.value0.update.constructor.name]);
             })();
             var allData = (function() {
               if (v2.value0.enter instanceof PendingSelection) {
@@ -20623,7 +20607,7 @@
                 return unsafeCrashWith("renderTree SceneJoin: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1175, column 22 - line 1177, column 95): " + [v3.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1233, column 22 - line 1235, column 95): " + [v3.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
@@ -20673,7 +20657,7 @@
                 return unit;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1212, column 3 - line 1220, column 16): " + [v1.value0.exitBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1270, column 3 - line 1278, column 16): " + [v1.value0.exitBehavior.constructor.name]);
             })();
             var enterElementsAndMaps = (function() {
               if (v1.value0.enterBehavior instanceof Just) {
@@ -20698,7 +20682,7 @@
                 return renderTemplatesForPendingSelection(dictOrd)(v1.value0.template)(v2.value0.enter)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1223, column 27 - line 1232, column 92): " + [v1.value0.enterBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1281, column 27 - line 1290, column 92): " + [v1.value0.enterBehavior.constructor.name]);
             })();
             var updateElementsAndMaps = (function() {
               if (v1.value0.updateBehavior instanceof Just) {
@@ -20710,7 +20694,7 @@
                 return renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1235, column 28 - line 1240, column 91): " + [v1.value0.updateBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1293, column 28 - line 1298, column 91): " + [v1.value0.updateBehavior.constructor.name]);
             })();
             var updateElements = map31(fst)(updateElementsAndMaps);
             var enterElements = map31(fst)(enterElementsAndMaps);
@@ -20728,7 +20712,7 @@
                 return v2.value0.update.value0.document;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1258, column 14 - line 1259, column 45): " + [v2.value0.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1316, column 14 - line 1317, column 45): " + [v2.value0.update.constructor.name]);
             })();
             var boundSel = new BoundSelection({
               elements: allElements,
@@ -20747,13 +20731,13 @@
                 return unsafeCrashWith("renderTree SceneNestedJoin: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1271, column 22 - line 1273, column 101): " + [v5.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1329, column 22 - line 1331, column 101): " + [v5.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 915, column 1 - line 920, column 74): " + [v.constructor.name, v1.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 973, column 1 - line 978, column 74): " + [v.constructor.name, v1.constructor.name]);
       };
     };
   };
@@ -20767,7 +20751,7 @@
                 return pendingSel.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1293, column 70 - line 1294, column 36): " + [pendingSel.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1351, column 70 - line 1352, column 36): " + [pendingSel.constructor.name]);
             })();
             return traverseWithIndex2(function(idx) {
               return function(outerDatum) {
@@ -20800,7 +20784,7 @@
                   };
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1298, column 5 - line 1324, column 53): " + [v1.constructor.name]);
+                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1356, column 5 - line 1382, column 53): " + [v1.constructor.name]);
               };
             })(v.pendingData);
           };
@@ -20830,7 +20814,7 @@
                 return v.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 146, column 79 - line 147, column 32): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 153, column 79 - line 154, column 32): " + [v.constructor.name]);
             })();
             var parent2 = (function() {
               var v2 = head(v1.parentElements);
@@ -20842,7 +20826,7 @@
                 return unsafeIndex3(v1.parentElements)(0);
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 151, column 16 - line 153, column 70): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 158, column 16 - line 160, column 70): " + [v2.constructor.name]);
             })();
             return function __do4() {
               var elements = traverseWithIndex2(function(arrayIndex) {
@@ -20856,7 +20840,7 @@
                       return arrayIndex;
                     }
                     ;
-                    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 157, column 24 - line 159, column 32): " + [v1.indices.constructor.name]);
+                    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 164, column 24 - line 166, column 32): " + [v1.indices.constructor.name]);
                   })();
                   return function __do5() {
                     var element3 = createElementWithNS(elemType)(v1.document)();
@@ -20896,7 +20880,7 @@
                     return emptySelection.value0;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 650, column 57 - line 651, column 30): " + [emptySelection.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 657, column 57 - line 658, column 30): " + [emptySelection.constructor.name]);
                 })();
                 var dataArray = fromFoldable49(foldableData);
                 var pendingSelection = new PendingSelection({
@@ -20945,7 +20929,7 @@
                             return applyPerDatumAttrs1(enterAttrs.value0)(bound);
                           }
                           ;
-                          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 604, column 5 - line 606, column 55): " + [enterAttrs.constructor.name]);
+                          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 611, column 5 - line 613, column 55): " + [enterAttrs.constructor.name]);
                         }))(function(enterBound) {
                           return bind140((function() {
                             if (updateAttrs instanceof Nothing) {
@@ -20956,7 +20940,7 @@
                               return applyPerDatumAttrs1(updateAttrs.value0)(v.value0.update);
                             }
                             ;
-                            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 609, column 18 - line 611, column 54): " + [updateAttrs.constructor.name]);
+                            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 616, column 18 - line 618, column 54): " + [updateAttrs.constructor.name]);
                           })())(function(updateBound) {
                             return discard214((function() {
                               if (exitAttrs instanceof Nothing) {
@@ -20969,7 +20953,7 @@
                                 });
                               }
                               ;
-                              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 614, column 3 - line 618, column 18): " + [exitAttrs.constructor.name]);
+                              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 621, column 3 - line 625, column 18): " + [exitAttrs.constructor.name]);
                             })())(function() {
                               return merge1(enterBound)(updateBound);
                             });
@@ -41642,10 +41626,10 @@
   var pure310 = /* @__PURE__ */ pure(applicativeD3v2M);
   var showTooltip = function(tooltip) {
     return function(content3) {
-      return function(pageX) {
-        return function(pageY) {
+      return function(pageX2) {
+        return function(pageY2) {
           return function __do4() {
-            setAttribute2("style")("position: absolute; " + ("background: rgba(0, 0, 0, 0.8); " + ("color: white; " + ("padding: 8px 12px; " + ("border-radius: 4px; " + ("font-size: 12px; " + ("pointer-events: none; " + ("opacity: 1; " + ("z-index: 1000; " + ("transition: opacity 0.15s; " + ("left: " + (show70(pageX + 15) + ("px; " + ("top: " + (show70(pageY - 10) + "px;")))))))))))))))(tooltip)();
+            setAttribute2("style")("position: absolute; " + ("background: rgba(0, 0, 0, 0.8); " + ("color: white; " + ("padding: 8px 12px; " + ("border-radius: 4px; " + ("font-size: 12px; " + ("pointer-events: none; " + ("opacity: 1; " + ("z-index: 1000; " + ("transition: opacity 0.15s; " + ("left: " + (show70(pageX2 + 15) + ("px; " + ("top: " + (show70(pageY2 - 10) + "px;")))))))))))))))(tooltip)();
             return setInnerHTML_(content3)(tooltip)();
           };
         };
@@ -46568,7 +46552,7 @@
       return button(appendIProps([classes(append33(buttonMainClasses)(classes2))])(iprops));
     };
   };
-  var button2 = /* @__PURE__ */ buttonBuilder(buttonClasses);
+  var button3 = /* @__PURE__ */ buttonBuilder(buttonClasses);
 
   // output/PSD3.Component.SimulationState/index.js
   var $$delete7 = /* @__PURE__ */ $$delete4(ordString);
@@ -46945,7 +46929,7 @@
       max: 100,
       step: 10,
       value: params.alphaTarget * 100
-    })), caption_2([text2("AlphaTarget: " + show74(params.alphaTarget))])]), div2([classes(["control-group"])])([buttonGroup_([buttonPrimaryLeft([onClick($$const(StopSim.value))])([text2("Stop")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0.3))))])([text2("Heat")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0))))])([text2("Cool")]), buttonPrimaryRight([onClick($$const(StartSim.value))])([text2("Start")])])]), subHeading_([text2("Filters")]), div2([classes(["control-group"])])([contentHeading_([text2("Node visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new NodeFilter(isPackage))))])([text2("Packages")]), buttonCenter([onClick($$const(new Filter(new NodeFilter($$const(true)))))])([text2("All")]), buttonRight([onClick($$const(new Filter(new NodeFilter(isUsedModule))))])([text2("Modules")])])]), div2([classes(["control-group"])])([button2([onClick($$const(new Filter(new NodeFilter(isProjectModule))))])([text2("Only project files")])]), div2([classes(["control-group"])])([contentHeading_([text2("Link Visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new LinkShowFilter(isM2M_Tree_Link))))])([text2("Tree")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2M_Graph_Link))))])([text2("Graph")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2P_Link))))])([text2("M2P")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isP2P_Link))))])([text2("P2P")]), buttonRight([onClick($$const(new Filter(new LinkShowFilter($$const(false)))))])([text2("None")])])]), subHeading_([text2("Styling")]), div2([classes(["control-group"])])([buttonGroup_([buttonLeft([onClick($$const(new ChangeStyling(new GraphStyle(clusterSceneAttributes))))])([text2("Cluster")]), buttonCenter([onClick($$const(new ChangeStyling(new GraphStyle(graphSceneAttributes))))])([text2("Graph")]), buttonRight([onClick($$const(new ChangeStyling(new GraphStyle(treeSceneAttributes))))])([text2("Tree")])])])]);
+    })), caption_2([text2("AlphaTarget: " + show74(params.alphaTarget))])]), div2([classes(["control-group"])])([buttonGroup_([buttonPrimaryLeft([onClick($$const(StopSim.value))])([text2("Stop")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0.3))))])([text2("Heat")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0))))])([text2("Cool")]), buttonPrimaryRight([onClick($$const(StartSim.value))])([text2("Start")])])]), subHeading_([text2("Filters")]), div2([classes(["control-group"])])([contentHeading_([text2("Node visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new NodeFilter(isPackage))))])([text2("Packages")]), buttonCenter([onClick($$const(new Filter(new NodeFilter($$const(true)))))])([text2("All")]), buttonRight([onClick($$const(new Filter(new NodeFilter(isUsedModule))))])([text2("Modules")])])]), div2([classes(["control-group"])])([button3([onClick($$const(new Filter(new NodeFilter(isProjectModule))))])([text2("Only project files")])]), div2([classes(["control-group"])])([contentHeading_([text2("Link Visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new LinkShowFilter(isM2M_Tree_Link))))])([text2("Tree")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2M_Graph_Link))))])([text2("Graph")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2P_Link))))])([text2("M2P")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isP2P_Link))))])([text2("P2P")]), buttonRight([onClick($$const(new Filter(new LinkShowFilter($$const(false)))))])([text2("None")])])]), subHeading_([text2("Styling")]), div2([classes(["control-group"])])([buttonGroup_([buttonLeft([onClick($$const(new ChangeStyling(new GraphStyle(clusterSceneAttributes))))])([text2("Cluster")]), buttonCenter([onClick($$const(new ChangeStyling(new GraphStyle(graphSceneAttributes))))])([text2("Graph")]), buttonRight([onClick($$const(new ChangeStyling(new GraphStyle(treeSceneAttributes))))])([text2("Tree")])])])]);
   };
   var render45 = function(state3) {
     return div2([classes(["fullscreen-container", "spago-fullscreen", "page-with-watermark"])])([renderHeader12(CodeExplorer.value), div2([classes(["floating-panel", "floating-panel--top-left", "floating-panel--small", "spago-controls-panel", "editorial"])])([h2([classes(["floating-panel__title", "spago-controls__title"])])([text2("Controls")]), renderSimControls(state3), renderSimState(state3)]), div2([classes(["floating-panel", "floating-panel--top-right", "floating-panel--large", "spago-forces-panel", "editorial"])])([renderTableForces(state3)]), div2([classes(["svg-container", "fullscreen-viz", "spago-viz-container", state3.scene.cssClass])])([render44]), (function() {

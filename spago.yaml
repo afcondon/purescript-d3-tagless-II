@@ -49,6 +49,7 @@ package:
     - unsafe-coerce
     - web-events
     - web-html
+    - web-uievents
 workspace:
   packageSet:
     registry: 67.0.1

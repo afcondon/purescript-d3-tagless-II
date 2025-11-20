@@ -243,10 +243,24 @@ export function attachHighlight_(element) {
 }
 
 /**
- * Attach mousemove handler with event info
+ * Attach mousemove handler using pure web-events (no D3)
  * @param {Element} element - The DOM element to attach handler to
- * @param {Function} handler - The PureScript (datum -> MouseEventInfoJS -> Effect Unit) handler
+ * @param {Function} handler - The PureScript EffectFn2 datum MouseEvent Unit handler
  * @returns {Element} The element (for chaining)
+ */
+export function attachMouseMoveWithEvent_(element) {
+  return handler => () => {
+    element.addEventListener('mousemove', function(event) {
+      // Get datum from element's __data__ property (D3 convention)
+      const datum = this.__data__;
+      handler(datum, event);
+    });
+    return element;
+  };
+}
+
+/**
+ * DEPRECATED: D3-based version - use attachMouseMoveWithEvent_ instead
  */
 export function attachMouseMoveWithInfo_(element) {
   return handler => () => {
@@ -269,10 +283,20 @@ export function attachMouseMoveWithInfo_(element) {
 }
 
 /**
- * Attach mouseenter handler with event info
- * @param {Element} element - The DOM element to attach handler to
- * @param {Function} handler - The PureScript (datum -> MouseEventInfoJS -> Effect Unit) handler
- * @returns {Element} The element (for chaining)
+ * Attach mouseenter handler using pure web-events (no D3)
+ */
+export function attachMouseEnterWithEvent_(element) {
+  return handler => () => {
+    element.addEventListener('mouseenter', function(event) {
+      const datum = this.__data__;
+      handler(datum, event);
+    });
+    return element;
+  };
+}
+
+/**
+ * DEPRECATED: D3-based version
  */
 export function attachMouseEnterWithInfo_(element) {
   return handler => () => {
@@ -295,10 +319,20 @@ export function attachMouseEnterWithInfo_(element) {
 }
 
 /**
- * Attach mouseleave handler with event info
- * @param {Element} element - The DOM element to attach handler to
- * @param {Function} handler - The PureScript (datum -> MouseEventInfoJS -> Effect Unit) handler
- * @returns {Element} The element (for chaining)
+ * Attach mouseleave handler using pure web-events (no D3)
+ */
+export function attachMouseLeaveWithEvent_(element) {
+  return handler => () => {
+    element.addEventListener('mouseleave', function(event) {
+      const datum = this.__data__;
+      handler(datum, event);
+    });
+    return element;
+  };
+}
+
+/**
+ * DEPRECATED: D3-based version
  */
 export function attachMouseLeaveWithInfo_(element) {
   return handler => () => {
