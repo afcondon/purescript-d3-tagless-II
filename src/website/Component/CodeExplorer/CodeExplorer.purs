@@ -58,7 +58,7 @@ import PSD3.CodeExplorer.Data (readModelData)
 import PSD3.CodeExplorer.Forces (forceLibrary)
 import PSD3.CodeExplorer.HTML (render)
 import PSD3.CodeExplorer.Scenes (horizontalTreeScene, layerSwarmScene, packageGraphScene, packageGridScene, radialTreeScene, verticalTreeScene)
-import PSD3.CodeExplorer.State (State, TransitionMatrix, applySceneConfig, applySceneWithTransition, clearAllTags, getModelLinks, getModelNodes, getSelections, initialScene, setChooseNodes, setCssClass, setLinksActive, setLinksShown, setSceneAttributes, tagNodes, toggleForce)
+import PSD3.CodeExplorer.State (State, TransitionMatrix, applySceneConfig, applySceneWithTransition, clearAllTags, getModelLinks, getModelNodes, getSelections, initialScene, setChooseNodes, setCssClass, setLinksActive, setLinksShown, setSceneAttributes, tagNodes, toggleForce, updateScene)
 import PSD3.Data.Tree (TreeLayout(..))
 import PSD3.Internal.Simulation.Types (initialSimulationState)
 import PSD3.Interpreter.D3 (evalEffectSimulation)
@@ -259,6 +259,8 @@ handleAction = case _ of
 
   ToggleForce label -> do
     H.modify_ $ toggleForce label
+    -- Clear transition for instant feedback on force toggles
+    H.modify_ $ updateScene \s -> s { transitionConfig = Nothing }
     runSimulation
 
   Filter (LinkShowFilter filterFn) -> do

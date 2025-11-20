@@ -46790,6 +46790,7 @@
   var tagNodes1 = /* @__PURE__ */ tagNodes(ordInt);
   var fromFoldable46 = /* @__PURE__ */ fromFoldable8(foldableSet)(ordString);
   var _handle4 = /* @__PURE__ */ _handle(strongForget);
+  var updateScene2 = updateScene;
   var toggleForce3 = toggleForce2;
   var tagNodes2 = function(label5) {
     return function(predicate) {
@@ -47284,7 +47285,7 @@
                   return Nothing.value;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.CodeExplorer (line 398, column 23 - line 401, column 31): " + [st.eventListener.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.CodeExplorer (line 400, column 23 - line 403, column 31): " + [st.eventListener.constructor.name]);
               })()
             };
           };
@@ -47301,72 +47302,72 @@
       if (v instanceof Initialize40) {
         return bind78(liftAff34(readModelData))(function(v1) {
           return discard69(modify_17(function(v2) {
-            var $65 = {};
-            for (var $66 in v2) {
-              if ({}.hasOwnProperty.call(v2, $66)) {
-                $65[$66] = v2[$66];
+            var $66 = {};
+            for (var $67 in v2) {
+              if ({}.hasOwnProperty.call(v2, $67)) {
+                $66[$67] = v2[$67];
               }
               ;
             }
             ;
-            $65.model = v1;
-            return $65;
+            $66.model = v1;
+            return $66;
           }))(function() {
             return bind78(get21)(function(state3) {
               return bind78(liftAff34(evalD3v2SimM(state3)(initialize6)))(function(openSelections) {
                 return discard69(modify_17(function(s) {
-                  var $71 = {};
-                  for (var $72 in s) {
-                    if ({}.hasOwnProperty.call(s, $72)) {
-                      $71[$72] = s[$72];
+                  var $72 = {};
+                  for (var $73 in s) {
+                    if ({}.hasOwnProperty.call(s, $73)) {
+                      $72[$73] = s[$73];
                     }
                     ;
                   }
                   ;
-                  $71.staging = (function() {
-                    var $68 = {};
-                    for (var $69 in s.staging) {
-                      if ({}.hasOwnProperty.call(s.staging, $69)) {
-                        $68[$69] = s["staging"][$69];
+                  $72.staging = (function() {
+                    var $69 = {};
+                    for (var $70 in s.staging) {
+                      if ({}.hasOwnProperty.call(s.staging, $70)) {
+                        $69[$70] = s["staging"][$70];
                       }
                       ;
                     }
                     ;
-                    $68.selections = {
+                    $69.selections = {
                       nodes: new Just(openSelections.nodes),
                       links: new Just(openSelections.links)
                     };
-                    return $68;
+                    return $69;
                   })();
-                  return $71;
+                  return $72;
                 }))(function() {
                   return bind78(liftEffect80(create))(function(v2) {
                     return discard69($$void18(subscribe2(v2.emitter)))(function() {
                       return discard69(modify_17(function(v3) {
-                        var $75 = {};
-                        for (var $76 in v3) {
-                          if ({}.hasOwnProperty.call(v3, $76)) {
-                            $75[$76] = v3[$76];
+                        var $76 = {};
+                        for (var $77 in v3) {
+                          if ({}.hasOwnProperty.call(v3, $77)) {
+                            $76[$77] = v3[$77];
                           }
                           ;
                         }
                         ;
-                        $75.eventListener = new Just(v2.listener);
-                        return $75;
+                        $76.eventListener = new Just(v2.listener);
+                        return $76;
                       }))(function() {
                         return bind78(liftEffect80(create))(function(v3) {
                           return discard69($$void18(subscribe2(v3.emitter)))(function() {
                             return discard69(modify_17(function(v4) {
-                              var $79 = {};
-                              for (var $80 in v4) {
-                                if ({}.hasOwnProperty.call(v4, $80)) {
-                                  $79[$80] = v4[$80];
+                              var $80 = {};
+                              for (var $81 in v4) {
+                                if ({}.hasOwnProperty.call(v4, $81)) {
+                                  $80[$81] = v4[$81];
                                 }
                                 ;
                               }
                               ;
-                              $79.transitionListener = new Just(v3.listener);
-                              return $79;
+                              $80.transitionListener = new Just(v3.listener);
+                              return $80;
                             }))(function() {
                               return pure76(unit);
                             });
@@ -47424,16 +47425,16 @@
         return discard69(modify_17(applySceneWithTransition2(PackageGrid.value)(packageGridScene)))(function() {
           return discard69(runSimulation1)(function() {
             return modify_17(function(v1) {
-              var $98 = {};
-              for (var $99 in v1) {
-                if ({}.hasOwnProperty.call(v1, $99)) {
-                  $98[$99] = v1[$99];
+              var $99 = {};
+              for (var $100 in v1) {
+                if ({}.hasOwnProperty.call(v1, $100)) {
+                  $99[$100] = v1[$100];
                 }
                 ;
               }
               ;
-              $98.currentScene = PackageGrid.value;
-              return $98;
+              $99.currentScene = PackageGrid.value;
+              return $99;
             });
           });
         });
@@ -47443,16 +47444,16 @@
         return discard69(modify_17(applySceneWithTransition2(PackageGraph.value)(packageGraphScene)))(function() {
           return discard69(runSimulation1)(function() {
             return modify_17(function(v1) {
-              var $102 = {};
-              for (var $103 in v1) {
-                if ({}.hasOwnProperty.call(v1, $103)) {
-                  $102[$103] = v1[$103];
+              var $103 = {};
+              for (var $104 in v1) {
+                if ({}.hasOwnProperty.call(v1, $104)) {
+                  $103[$104] = v1[$104];
                 }
                 ;
               }
               ;
-              $102.currentScene = PackageGraph.value;
-              return $102;
+              $103.currentScene = PackageGraph.value;
+              return $103;
             });
           });
         });
@@ -47462,16 +47463,16 @@
         return discard69(modify_17(applySceneWithTransition2(LayerSwarm.value)(layerSwarmScene)))(function() {
           return discard69(runSimulation1)(function() {
             return modify_17(function(v1) {
-              var $106 = {};
-              for (var $107 in v1) {
-                if ({}.hasOwnProperty.call(v1, $107)) {
-                  $106[$107] = v1[$107];
+              var $107 = {};
+              for (var $108 in v1) {
+                if ({}.hasOwnProperty.call(v1, $108)) {
+                  $107[$108] = v1[$108];
                 }
                 ;
               }
               ;
-              $106.currentScene = LayerSwarm.value;
-              return $106;
+              $107.currentScene = LayerSwarm.value;
+              return $107;
             });
           });
         });
@@ -47481,16 +47482,16 @@
         return discard69(modify_17(applySceneWithTransition2(new ModuleTree(Radial.value))(radialTreeScene)))(function() {
           return discard69(runSimulation1)(function() {
             return modify_17(function(v1) {
-              var $110 = {};
-              for (var $111 in v1) {
-                if ({}.hasOwnProperty.call(v1, $111)) {
-                  $110[$111] = v1[$111];
+              var $111 = {};
+              for (var $112 in v1) {
+                if ({}.hasOwnProperty.call(v1, $112)) {
+                  $111[$112] = v1[$112];
                 }
                 ;
               }
               ;
-              $110.currentScene = new ModuleTree(Radial.value);
-              return $110;
+              $111.currentScene = new ModuleTree(Radial.value);
+              return $111;
             });
           });
         });
@@ -47500,16 +47501,16 @@
         return discard69(modify_17(applySceneWithTransition2(new ModuleTree(Horizontal.value))(horizontalTreeScene)))(function() {
           return discard69(runSimulation1)(function() {
             return modify_17(function(v1) {
-              var $115 = {};
-              for (var $116 in v1) {
-                if ({}.hasOwnProperty.call(v1, $116)) {
-                  $115[$116] = v1[$116];
+              var $116 = {};
+              for (var $117 in v1) {
+                if ({}.hasOwnProperty.call(v1, $117)) {
+                  $116[$117] = v1[$117];
                 }
                 ;
               }
               ;
-              $115.currentScene = new ModuleTree(Horizontal.value);
-              return $115;
+              $116.currentScene = new ModuleTree(Horizontal.value);
+              return $116;
             });
           });
         });
@@ -47519,16 +47520,16 @@
         return discard69(modify_17(applySceneWithTransition2(new ModuleTree(Vertical.value))(verticalTreeScene)))(function() {
           return discard69(runSimulation1)(function() {
             return modify_17(function(v1) {
-              var $120 = {};
-              for (var $121 in v1) {
-                if ({}.hasOwnProperty.call(v1, $121)) {
-                  $120[$121] = v1[$121];
+              var $121 = {};
+              for (var $122 in v1) {
+                if ({}.hasOwnProperty.call(v1, $122)) {
+                  $121[$122] = v1[$122];
                 }
                 ;
               }
               ;
-              $120.currentScene = new ModuleTree(Vertical.value);
-              return $120;
+              $121.currentScene = new ModuleTree(Vertical.value);
+              return $121;
             });
           });
         });
@@ -47536,7 +47537,20 @@
       ;
       if (v instanceof ToggleForce) {
         return discard69(modify_17(toggleForce3(v.value0)))(function() {
-          return runSimulation1;
+          return discard69(modify_17(updateScene2(function(s) {
+            return {
+              chooseNodes: s.chooseNodes,
+              linksShown: s.linksShown,
+              linksActive: s.linksActive,
+              activeForces: s.activeForces,
+              cssClass: s.cssClass,
+              attributes: s.attributes,
+              nodeInitializerFunctions: s.nodeInitializerFunctions,
+              transitionConfig: Nothing.value
+            };
+          })))(function() {
+            return runSimulation1;
+          });
         });
       }
       ;
@@ -47608,20 +47622,20 @@
       ;
       if (v instanceof DismissWelcome) {
         return modify_17(function(v1) {
-          var $139 = {};
-          for (var $140 in v1) {
-            if ({}.hasOwnProperty.call(v1, $140)) {
-              $139[$140] = v1[$140];
+          var $140 = {};
+          for (var $141 in v1) {
+            if ({}.hasOwnProperty.call(v1, $141)) {
+              $140[$141] = v1[$141];
             }
             ;
           }
           ;
-          $139.showWelcome = false;
-          return $139;
+          $140.showWelcome = false;
+          return $140;
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.CodeExplorer (line 155, column 16 - line 311, column 40): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.CodeExplorer (line 155, column 16 - line 313, column 40): " + [v.constructor.name]);
     };
   };
   var defaultTransitionMatrix = /* @__PURE__ */ (function() {
