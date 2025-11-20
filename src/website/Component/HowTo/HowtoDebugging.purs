@@ -35,26 +35,113 @@ render _ =
     [ renderHeader "Debugging Visualizations"
 
     , HH.main_
-        [ HH.section
+        [ -- Intro
+          HH.section
             [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
             [ HH.h1
                 [ HP.classes [ HH.ClassName "tutorial-title" ] ]
                 [ HH.text "Debugging Visualizations" ]
             , HH.p_
-                [ HH.text "How to debug and troubleshoot visualization issues." ]
+                [ HH.text "Techniques for finding and fixing visualization issues." ]
             ]
 
+        -- Console Logging
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ] ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "Topics Covered" ]
+                [ HH.text "Console Logging" ]
+
+            , HH.p_ [ HH.text "Log data in attribute functions:" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """import Effect.Console (log)
+import Effect.Unsafe (unsafePerformEffect)
+
+-- Debug attribute values
+fill (\\d -> unsafePerformEffect do
+  log $ "Node: " <> show d.id <> ", value: " <> show d.value
+  pure $ colorScale d.value
+)""" ]
+                ]
+            ]
+
+        -- Browser DevTools
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Browser DevTools" ]
+
             , HH.ul_
-                [ HH.li_ [ HH.text "Using the Mermaid interpreter to inspect tree structure" ]
-                , HH.li_ [ HH.text "Console logging in attribute functions" ]
-                , HH.li_ [ HH.text "Inspecting enter/update/exit selections" ]
-                , HH.li_ [ HH.text "Common errors and their causes" ]
-                , HH.li_ [ HH.text "Browser DevTools for SVG inspection" ]
+                [ HH.li_ [ HH.strong_ [ HH.text "Elements panel" ], HH.text " - Inspect SVG structure and attributes" ]
+                , HH.li_ [ HH.strong_ [ HH.text "$0.__data__" ], HH.text " - View bound data on selected element" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Network tab" ], HH.text " - Verify data loading" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Performance tab" ], HH.text " - Profile slow renders" ]
+                ]
+            ]
+
+        -- Mermaid Diagrams
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Mermaid Diagrams" ]
+
+            , HH.p_ [ HH.text "Visualize tree structure with Mermaid interpreter:" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """-- Generate Mermaid code from TreeAPI tree
+let mermaidCode = runMermaidInterpreter myTree
+
+-- Copy to https://mermaid.live to visualize structure""" ]
+                ]
+            ]
+
+        -- Common Issues
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Common Issues" ]
+
+            , HH.ul_
+                [ HH.li_
+                    [ HH.strong_ [ HH.text "Nothing renders" ]
+                    , HH.text " - Check container exists, SVG has size"
+                    ]
+                , HH.li_
+                    [ HH.strong_ [ HH.text "Elements at origin" ]
+                    , HH.text " - Verify coordinate attributes (cx, cy, x, y)"
+                    ]
+                , HH.li_
+                    [ HH.strong_ [ HH.text "Wrong colors" ]
+                    , HH.text " - Check scale domain/range, normalize values to 0-1"
+                    ]
+                , HH.li_
+                    [ HH.strong_ [ HH.text "No data binding" ]
+                    , HH.text " - Use joinData, check key function"
+                    ]
+                , HH.li_
+                    [ HH.strong_ [ HH.text "Type errors" ]
+                    , HH.text " - Ensure datum type matches selection"
+                    ]
+                ]
+            ]
+
+        -- Key Points
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Key Points" ]
+            , HH.ul_
+                [ HH.li_ [ HH.strong_ [ HH.text "unsafePerformEffect" ], HH.text " - Escape hatch for logging" ]
+                , HH.li_ [ HH.strong_ [ HH.text "$0.__data__" ], HH.text " - Console access to bound data" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Mermaid interpreter" ], HH.text " - Visualize tree structure" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Check dimensions" ], HH.text " - SVG needs viewBox or width/height" ]
                 ]
             ]
         ]

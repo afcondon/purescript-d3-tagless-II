@@ -35,26 +35,154 @@ render _ =
     [ renderHeader "Loading External Data"
 
     , HH.main_
-        [ HH.section
+        [ -- Intro
+          HH.section
             [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
             [ HH.h1
                 [ HP.classes [ HH.ClassName "tutorial-title" ] ]
                 [ HH.text "Loading External Data" ]
             , HH.p_
-                [ HH.text "How to fetch and parse external data sources for visualization." ]
+                [ HH.text "PSD3 uses Affjax for async data loading with configurable strategies." ]
             ]
 
+        -- Simple JSON Loading
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ] ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "Topics Covered" ]
+                [ HH.text "Simple JSON Loading" ]
+
+            , HH.p_ [ HH.text "Load JSON with automatic error fallback:" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """import PSD3.Shared.DataLoader (simpleLoadJSON)
+
+json <- H.liftAff $ simpleLoadJSON "data/les-miserables.json"
+-- Returns fallback on error, never throws""" ]
+                ]
+
+            , HH.p_ [ HH.text "With explicit error handling:" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """import PSD3.Shared.DataLoader (loadJSON, defaultConfig, LoadError(..))
+
+result <- H.liftAff $ loadJSON defaultConfig "data/graph.json"
+case result of
+  Left (NetworkError msg) -> log ("Network error: " <> msg)
+  Left (ParseError msg) -> log ("Parse error: " <> msg)
+  Right json -> processData json""" ]
+                ]
+            ]
+
+        -- Load Strategies
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Load Strategies" ]
+
+            , HH.p_ [ HH.text "Configure where to load data from:" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """import PSD3.Shared.DataLoader (loadJSON, LoadStrategy(..), LoadConfig)
+
+-- Local only (bundled files)
+let localConfig = { strategy: LocalOnly, baseUrl: Nothing }
+
+-- Remote only (requires server)
+let remoteConfig = { strategy: RemoteOnly, baseUrl: Just "http://localhost:8080" }
+
+-- Try local first, fallback to remote
+let hybridConfig = { strategy: LocalFirst, baseUrl: Just "http://localhost:8080" }
+
+json <- H.liftAff $ loadJSON hybridConfig "data/graph.json\"""" ]
+                ]
+            ]
+
+        -- CSV Loading
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "CSV Loading" ]
+
+            , HH.p_ [ HH.text "Load CSV data as Foreign array:" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """import PSD3.Shared.DataLoader (simpleLoadCSV, loadCSV)
+import Foreign (Foreign)
+
+-- Simple loading with empty array fallback
+rows <- H.liftAff $ simpleLoadCSV "data/population.csv"
+
+-- With error handling
+result <- H.liftAff $ loadCSV defaultConfig "data/timeseries.csv"
+case result of
+  Left err -> log (show err)
+  Right rows -> processRows rows""" ]
+                ]
+            ]
+
+        -- Halogen Pattern
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Halogen Pattern" ]
+
+            , HH.p_ [ HH.text "Common pattern for loading in component initialization:" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """data State = { loading :: Boolean, graphData :: Maybe GraphData }
+
+handleAction = case _ of
+  Initialize -> do
+    H.modify_ _ { loading = true }
+    json <- H.liftAff $ simpleLoadJSON "data/graph.json"
+    let graphData = decodeGraphData json
+    H.modify_ _ { loading = false, graphData = Just graphData }
+
+render state
+  | state.loading = HH.div_ [ HH.text "Loading..." ]
+  | otherwise = renderVisualization state.graphData""" ]
+                ]
+            ]
+
+        -- Key Points
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Key Points" ]
             , HH.ul_
-                [ HH.li_ [ HH.text "Fetching JSON data with Aff" ]
-                , HH.li_ [ HH.text "Parsing CSV data" ]
-                , HH.li_ [ HH.text "Handling loading states" ]
-                , HH.li_ [ HH.text "Error handling and fallbacks" ]
-                , HH.li_ [ HH.text "Caching and refreshing data" ]
+                [ HH.li_ [ HH.strong_ [ HH.text "Aff-based" ], HH.text " - Use H.liftAff to run in Halogen" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Strategies" ], HH.text " - LocalOnly, RemoteOnly, LocalFirst, RemoteFirst" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Error types" ], HH.text " - NetworkError, ParseError, FileNotFound, ConfigError" ]
+                , HH.li_ [ HH.strong_ [ HH.text "simple* helpers" ], HH.text " - Return fallbacks instead of Either" ]
+                ]
+            ]
+
+        -- Real Example
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Real Example" ]
+            , HH.p_ [ HH.text "See data loading in action:" ]
+            , HH.ul_
+                [ HH.li_
+                    [ HH.code_ [ HH.text "src/website/Shared/DataLoader.purs" ]
+                    , HH.text " - Full DataLoader module"
+                    ]
+                , HH.li_
+                    [ HH.code_ [ HH.text "src/website/Component/CodeExplorer/Data.purs" ]
+                    , HH.text " - Loading Spago graph data"
+                    ]
                 ]
             ]
         ]

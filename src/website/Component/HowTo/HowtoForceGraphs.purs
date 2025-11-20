@@ -35,27 +35,163 @@ render _ =
     [ renderHeader "Building Force-Directed Graphs"
 
     , HH.main_
-        [ HH.section
+        [ -- Intro
+          HH.section
             [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
             [ HH.h1
                 [ HP.classes [ HH.ClassName "tutorial-title" ] ]
                 [ HH.text "Building Force-Directed Graphs" ]
             , HH.p_
-                [ HH.text "How to create interactive force-directed network visualizations." ]
+                [ HH.text "PSD3 provides SimulationM and SimulationM2 capabilities for force-directed layouts." ]
             ]
 
+        -- Initialize Simulation
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ] ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "Topics Covered" ]
+                [ HH.text "Initialize Simulation" ]
+
+            , HH.p_ [ HH.text "Create a force simulation with nodes and links:" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """import PSD3v2.Capabilities.Simulation (class SimulationM, init, addTickFunction, start, Step(..))
+
+{ nodes, links } <- init
+  { nodes: myNodeData
+  , links: myLinkData
+  , forces: [centerForce w h, chargeForce (const (-100.0)), linkForce]
+  , activeForces: Set.fromFoldable ["center", "charge", "link"]
+  , config: defaultSimConfig
+  , keyFn: _.id
+  , ticks: Map.empty
+  }""" ]
+                ]
+            ]
+
+        -- Tick Functions
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Tick Functions" ]
+
+            , HH.p_ [ HH.text "Register callbacks to update DOM on each simulation tick:" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """-- Update node positions
+addTickFunction "nodes" $ Step nodeCircles
+  [ cx (_.x)
+  , cy (_.y)
+  ]
+
+-- Update link positions
+addTickFunction "links" $ Step linkLines
+  [ x1 (\\l -> l.source.x)
+  , y1 (\\l -> l.source.y)
+  , x2 (\\l -> l.target.x)
+  , y2 (\\l -> l.target.y)
+  ]
+
+start -- Begin animation""" ]
+                ]
+            ]
+
+        -- Forces
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Available Forces" ]
+
             , HH.ul_
-                [ HH.li_ [ HH.text "Setting up the D3 force simulation" ]
-                , HH.li_ [ HH.text "Configuring forces (charge, link, center, collision)" ]
-                , HH.li_ [ HH.text "Connecting simulation tick to DOM updates" ]
-                , HH.li_ [ HH.text "Node dragging with force interaction" ]
-                , HH.li_ [ HH.text "Restarting simulation on data changes" ]
-                , HH.li_ [ HH.text "Alpha decay and cooling" ]
+                [ HH.li_ [ HH.strong_ [ HH.text "centerForce" ], HH.text " - Keep nodes centered" ]
+                , HH.li_ [ HH.strong_ [ HH.text "chargeForce" ], HH.text " - Repulsion/attraction between nodes" ]
+                , HH.li_ [ HH.strong_ [ HH.text "linkForce" ], HH.text " - Springs between connected nodes" ]
+                , HH.li_ [ HH.strong_ [ HH.text "collideForce" ], HH.text " - Prevent node overlap" ]
+                , HH.li_ [ HH.strong_ [ HH.text "forceX/Y" ], HH.text " - Push toward position" ]
+                , HH.li_ [ HH.strong_ [ HH.text "radialForce" ], HH.text " - Push toward circle" ]
+                ]
+            ]
+
+        -- Dynamic Updates
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Dynamic Updates" ]
+
+            , HH.p_ [ HH.text "Use SimulationM2 for dynamic data changes:" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """import PSD3v2.Capabilities.Simulation (class SimulationM2, update, reheat)
+
+{ nodes, links } <- update
+  { nodes: Just newNodeArray
+  , links: Just newLinkArray
+  , nodeFilter: Nothing
+  , linkFilter: Nothing
+  , activeForces: Nothing
+  , config: Nothing
+  , keyFn: _.id
+  }
+
+reheat 0.7  -- Re-energize simulation
+start       -- Begin animation""" ]
+                ]
+            ]
+
+        -- Drag Behavior
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Node Dragging" ]
+
+            , HH.p_ [ HH.text "Enable simulation-aware drag:" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """import PSD3v2.Behavior.Types (Drag(..), simulationDrag)
+
+-- Drag reheats simulation automatically
+_ <- on (Drag (simulationDrag "my-simulation-id")) nodeCircles""" ]
+                ]
+            ]
+
+        -- Key Points
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Key Points" ]
+            , HH.ul_
+                [ HH.li_ [ HH.strong_ [ HH.text "SimulationM" ], HH.text " - Static simulations" ]
+                , HH.li_ [ HH.strong_ [ HH.text "SimulationM2" ], HH.text " - Adds update/reheat for dynamic data" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Step" ], HH.text " - Maps selection to tick attributes" ]
+                , HH.li_ [ HH.strong_ [ HH.text "activeForces" ], HH.text " - Control which forces are enabled" ]
+                ]
+            ]
+
+        -- Real Example
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Real Example" ]
+            , HH.p_ [ HH.text "See force simulation in action:" ]
+            , HH.ul_
+                [ HH.li_
+                    [ HH.code_ [ HH.text "src/website/Component/CodeExplorer" ]
+                    , HH.text " - Full force graph with scenes"
+                    ]
+                , HH.li_
+                    [ HH.code_ [ HH.text "src/lib/PSD3v2/Capabilities/Simulation.purs" ]
+                    , HH.text " - SimulationM type class"
+                    ]
                 ]
             ]
         ]

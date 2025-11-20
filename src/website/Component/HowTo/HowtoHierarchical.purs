@@ -35,26 +35,141 @@ render _ =
     [ renderHeader "Working with Hierarchical Data"
 
     , HH.main_
-        [ HH.section
+        [ -- Intro
+          HH.section
             [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
             [ HH.h1
                 [ HP.classes [ HH.ClassName "tutorial-title" ] ]
                 [ HH.text "Working with Hierarchical Data" ]
             , HH.p_
-                [ HH.text "How to visualize tree structures, treemaps, and other hierarchical layouts." ]
+                [ HH.text "PSD3 supports D3's hierarchy layouts for trees, clusters, and treemaps." ]
             ]
 
+        -- Creating Hierarchy
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ] ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "Topics Covered" ]
+                [ HH.text "Creating Hierarchy" ]
+
+            , HH.p_ [ HH.text "Convert JSON to d3.hierarchy via FFI:" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """-- JavaScript FFI
+export const hierarchy_ = data => () => d3.hierarchy(data);
+export const descendants_ = root => root.descendants();
+export const links_ = root => root.links();
+
+-- PureScript
+foreign import hierarchy_ :: Json -> Effect HierarchyNode
+foreign import descendants_ :: HierarchyNode -> Array HierarchyNode
+foreign import links_ :: HierarchyNode -> Array HierarchyLink
+
+root <- liftEffect $ hierarchy_ jsonData
+let nodes = descendants_ root
+let links = links_ root""" ]
+                ]
+            ]
+
+        -- Layouts
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Layout Functions" ]
+
+            , HH.p_ [ HH.text "Apply layouts to compute positions:" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """-- Tree layout (neat spacing)
+export const tree_ = width => height => () =>
+  d3.tree().size([height, width]);
+
+-- Cluster layout (leaves aligned)
+export const cluster_ = width => height => () =>
+  d3.cluster().size([height, width]);
+
+-- Treemap layout (space-filling)
+export const treemap_ = width => height => () =>
+  d3.treemap().size([width, height]).padding(1);
+
+-- Apply layout to hierarchy
+export const applyLayout_ = layout => root => () => layout(root);""" ]
+                ]
+
+            , HH.p_ [ HH.text "After layout, nodes have x/y coordinates:" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """treeLayout <- liftEffect $ tree_ width height
+liftEffect $ applyLayout_ treeLayout root
+
+-- Now render nodes at computed positions
+circles <- append Circle
+  [ cx (_.y)  -- Note: tree layout swaps x/y
+  , cy (_.x)
+  , radius 5.0
+  ] nodeEnter""" ]
+                ]
+            ]
+
+        -- Link Paths
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Drawing Links" ]
+
+            , HH.p_ [ HH.text "Generate curved paths for tree connections:" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """-- Horizontal curved links (for tree layout)
+export const linkHorizontal_ = d3.linkHorizontal()
+  .x(d => d.y)
+  .y(d => d.x);
+
+-- PureScript
+paths <- append Path
+  [ d (\\link -> linkHorizontal_ link)
+  , stroke "#999"
+  , fill "none"
+  ] linkEnter""" ]
+                ]
+            ]
+
+        -- Key Points
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Key Points" ]
             , HH.ul_
-                [ HH.li_ [ HH.text "Converting flat data to tree structure" ]
-                , HH.li_ [ HH.text "Using d3-hierarchy layouts (tree, cluster, treemap)" ]
-                , HH.li_ [ HH.text "Link generators for tree connections" ]
-                , HH.li_ [ HH.text "Radial layouts" ]
-                , HH.li_ [ HH.text "Collapsible trees with enter/exit" ]
+                [ HH.li_ [ HH.strong_ [ HH.text "hierarchy()" ], HH.text " - Converts JSON to hierarchy nodes" ]
+                , HH.li_ [ HH.strong_ [ HH.text "descendants()/links()" ], HH.text " - Get flat arrays for data binding" ]
+                , HH.li_ [ HH.strong_ [ HH.text "tree/cluster layouts" ], HH.text " - Swap x/y in coordinates" ]
+                , HH.li_ [ HH.strong_ [ HH.text "linkHorizontal/Vertical" ], HH.text " - Curved path generators" ]
+                ]
+            ]
+
+        -- Real Example
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Real Example" ]
+            , HH.p_ [ HH.text "See hierarchical layouts:" ]
+            , HH.ul_
+                [ HH.li_
+                    [ HH.code_ [ HH.text "src/website/Viz/TreeAPI/LesMisTreeExample.purs" ]
+                    , HH.text " - Tree visualization"
+                    ]
+                , HH.li_
+                    [ HH.code_ [ HH.text "src/website/Component/AnimatedTreeCluster.purs" ]
+                    , HH.text " - Animated transitions"
+                    ]
                 ]
             ]
         ]

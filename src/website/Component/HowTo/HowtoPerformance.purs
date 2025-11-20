@@ -35,26 +35,131 @@ render _ =
     [ renderHeader "Performance Optimization"
 
     , HH.main_
-        [ HH.section
+        [ -- Intro
+          HH.section
             [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
             [ HH.h1
                 [ HP.classes [ HH.ClassName "tutorial-title" ] ]
                 [ HH.text "Performance Optimization" ]
             , HH.p_
-                [ HH.text "How to optimize visualizations for large datasets and smooth interactions." ]
+                [ HH.text "Tips for fast, smooth visualizations with large datasets." ]
             ]
 
+        -- Reduce DOM Elements
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ] ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "Topics Covered" ]
+                [ HH.text "Reduce DOM Elements" ]
+
             , HH.ul_
-                [ HH.li_ [ HH.text "Strategies for large datasets (sampling, aggregation)" ]
-                , HH.li_ [ HH.text "Canvas rendering for many elements" ]
-                , HH.li_ [ HH.text "Throttling/debouncing updates" ]
-                , HH.li_ [ HH.text "Minimizing DOM mutations" ]
-                , HH.li_ [ HH.text "When to use vanilla D3 escape hatches" ]
+                [ HH.li_ [ HH.strong_ [ HH.text "Sample data" ], HH.text " - Random sample for preview, full for export" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Aggregate" ], HH.text " - Bin/group data points" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Filter visually" ], HH.text " - Hide offscreen elements" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Canvas" ], HH.text " - Consider d3-canvas for 10k+ elements" ]
+                ]
+            ]
+
+        -- Minimize Updates
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Minimize Updates" ]
+
+            , HH.p_ [ HH.text "Batch DOM mutations:" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """-- Good: Set multiple attributes at once
+setAttrs [cx newX, cy newY, fill newColor] circles
+
+-- Avoid: Multiple separate setAttrs calls
+-- Each call triggers layout recalculation""" ]
+                ]
+
+            , HH.p_ [ HH.text "Debounce rapid updates:" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """-- Only update after user stops resizing
+window.addEventListener('resize', debounce(updateChart, 150))""" ]
+                ]
+            ]
+
+        -- Efficient Tick Functions
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Force Simulation Tips" ]
+
+            , HH.ul_
+                [ HH.li_ [ HH.strong_ [ HH.text "Minimal tick attrs" ], HH.text " - Only update position, not style" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Alpha decay" ], HH.text " - Higher decay = faster cooldown" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Stop when idle" ], HH.text " - Call stop() when alpha reaches min" ]
+                ]
+
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """-- Minimal tick: just positions
+addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
+
+-- Don't recalculate colors on every frame!""" ]
+                ]
+            ]
+
+        -- CSS Transitions
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "CSS vs D3 Transitions" ]
+
+            , HH.p_ [ HH.text "CSS transitions are often faster for simple changes:" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """.node circle {
+  transition: fill 0.2s ease, opacity 0.2s ease;
+}
+
+/* PSD3 just toggles class, CSS handles animation */
+.node.highlighted circle { fill: #fbbf24; }""" ]
+                ]
+            ]
+
+        -- Key Points
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Key Points" ]
+            , HH.ul_
+                [ HH.li_ [ HH.strong_ [ HH.text "< 1000 elements" ], HH.text " - SVG fine, no optimization needed" ]
+                , HH.li_ [ HH.strong_ [ HH.text "1000-5000 elements" ], HH.text " - Optimize tick functions, batch updates" ]
+                , HH.li_ [ HH.strong_ [ HH.text "> 5000 elements" ], HH.text " - Consider Canvas, sampling, or aggregation" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Profile first" ], HH.text " - Use DevTools Performance tab" ]
+                ]
+            ]
+
+        -- Real Example
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Real Example" ]
+            , HH.p_ [ HH.text "The Code Explorer handles 1400+ nodes smoothly:" ]
+            , HH.ul_
+                [ HH.li_
+                    [ HH.code_ [ HH.text "src/website/Component/CodeExplorer" ]
+                    , HH.text " - Force graph with many nodes"
+                    ]
+                , HH.li_
+                    [ HH.code_ [ HH.text "src/website/Viz/Spago/Render.purs" ]
+                    , HH.text " - Efficient render callbacks"
+                    ]
                 ]
             ]
         ]
