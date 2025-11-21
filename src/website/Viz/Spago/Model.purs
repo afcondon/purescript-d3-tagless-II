@@ -316,13 +316,18 @@ setForPhyllotaxis index d = d { x = (radius * cos angle), y = (radius * sin angl
     radius = initialRadius * sqrt (0.5 + i)
     angle  = i * initialAngle
 
+-- | Depth multiplier for tree layouts - stretches depth dimension for better force layout relaxation
+treeDepthMultiplier :: Number
+treeDepthMultiplier = 2.0
+
 treeNodesToTreeXY_H :: Array SpagoSimNode -> Array SpagoSimNode
 treeNodesToTreeXY_H nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes)
   where
     partitioned = partition isUsedModule nodes
     setXYtoTreeXY :: SpagoSimNode -> SpagoSimNode
     -- Horizontal tree: swap D3's (breadth=x, depth=y) to screen (depth=x, breadth=y)
-    setXYtoTreeXY d = d { treeXY = notNull treeXY, x = treeXY.y, y = treeXY.x }
+    -- Depth (now x) is stretched by multiplier
+    setXYtoTreeXY d = d { treeXY = notNull treeXY, x = treeXY.y * treeDepthMultiplier, y = treeXY.x }
       where treeXY = fromMaybe { x: d.y, y: d.x } $ toMaybe d.treeXY
 
 -- same as horizontal tree but uses x and y as polar coordinates, computes fx/fy from them
@@ -335,10 +340,11 @@ treeNodesToTreeXY_R nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes
       where treeXY = fromMaybe { x: d.x, y: d.y } $ toMaybe d.treeXY
             radialXY = radialTranslate treeXY
             -- for radial positioning: breadth (x) becomes angle, depth (y) becomes radius
+            -- Radius is stretched by depth multiplier
             radialTranslate :: PointXY -> PointXY
             radialTranslate p =
               let angle  = p.x  -- breadth determines angular position around the circle
-                  radius = p.y  -- depth determines distance from center
+                  radius = p.y * treeDepthMultiplier  -- depth determines distance from center, stretched
                   x = radius * cos angle
                   y = radius * sin angle
               in { x, y }
@@ -350,7 +356,8 @@ treeNodesToTreeXY_V nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes
     partitioned = partition isUsedModule nodes
     setXYtoTreeXY :: SpagoSimNode -> SpagoSimNode
     -- Vertical tree: use D3's coordinates directly (breadth=x, depth=y)
-    setXYtoTreeXY d = d { treeXY = notNull treeXY, x = treeXY.x, y = treeXY.y }
+    -- Depth (y) is stretched by multiplier
+    setXYtoTreeXY d = d { treeXY = notNull treeXY, x = treeXY.x, y = treeXY.y * treeDepthMultiplier }
       where treeXY = fromMaybe { x: d.x, y: d.y } $ toMaybe d.treeXY
 
 -- | Set nodes to their tree depth position with Y at 0 (for swarm diagrams)

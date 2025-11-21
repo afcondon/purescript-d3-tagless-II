@@ -98,7 +98,7 @@ tree config inputTree =
 
     -- Step 2: Compute relative positions (bottom-up)
     -- Annotates tree with Tuple { offset :: Number } original
-    rendered = render config.minSeparation withDepth
+    rendered = render config.minSeparation config.separation withDepth
 
     -- Step 3: Convert offsets to absolute coordinates (top-down)
     -- Strips Tuple annotation, adds x and y fields
@@ -128,7 +128,7 @@ treeWithSorting config inputTree =
 
     -- Step 4: Compute relative positions (bottom-up)
     -- Annotates tree with Tuple { offset :: Number } original
-    rendered = render config.minSeparation sorted
+    rendered = render config.minSeparation config.separation sorted
 
     -- Step 5: Convert offsets to absolute coordinates (top-down)
     -- Strips Tuple annotation, adds x and y fields
@@ -151,13 +151,14 @@ addDepth currentDepth (Node val children) =
 -- | Annotates tree with Tuple containing offset and original data
 render :: forall r.
   Number ->
+  Maybe ({ x :: Number, y :: Number, depth :: Int | r } -> { x :: Number, y :: Number, depth :: Int | r } -> Number) ->
   Tree { x :: Number, y :: Number, depth :: Int | r } ->
   Tree (Tuple { offset :: Number } { x :: Number, y :: Number, depth :: Int | r })
-render minSep inputTree =
+render minSep separationFn inputTree =
   case renderWithContours inputTree of
     Tuple t _ -> t
   where
-    -- Internal function that also returns contours (captures minSep from outer scope)
+    -- Internal function that also returns contours (captures minSep and separationFn from outer scope)
     renderWithContours :: Tree { x :: Number, y :: Number, depth :: Int | r } -> Tuple (Tree (Tuple { offset :: Number } { x :: Number, y :: Number, depth :: Int | r })) Contours
     renderWithContours (Node val children) =
       let childCount = length children
@@ -173,8 +174,14 @@ render minSep inputTree =
             childTrees = map (\(Tuple t _) -> t) childResults
             childContours = map (\(Tuple _ c) -> c) childResults
 
-            -- Scan adjacent pairs to find needed separations
-            separations = computeSeparations minSep childContours
+            -- Extract root node data from each child tree for separation calculation
+            childRootData = map getRootData childTrees
+
+            -- Compute base separations for adjacent pairs using separation function
+            baseSeparations = computeBaseSeparations minSep separationFn childRootData
+
+            -- Scan adjacent pairs to find needed separations (using base separations)
+            separations = computeSeparationsWithBase baseSeparations childContours
 
             -- Position children: first at 0, rest offset by cumulative separations
             -- These are absolute positions within the sibling group
@@ -205,6 +212,69 @@ render minSep inputTree =
     updateOffset :: Tree (Tuple { offset :: Number } { x :: Number, y :: Number, depth :: Int | r }) -> Number -> Tree (Tuple { offset :: Number } { x :: Number, y :: Number, depth :: Int | r })
     updateOffset (Node (Tuple offsetRec original) children) newOffset =
       Node (Tuple (offsetRec { offset = newOffset }) original) children
+
+-- | Extract root node data from a tree with Tuple annotation
+getRootData :: forall r. Tree (Tuple { offset :: Number } r) -> r
+getRootData (Node (Tuple _ nodeData) _) = nodeData
+
+-- | Compute base separations for adjacent pairs using separation function
+-- | For n nodes, returns (n-1) separation values
+computeBaseSeparations :: forall r.
+  Number ->  -- default minSep
+  Maybe (r -> r -> Number) ->  -- optional separation function
+  List r ->  -- node data for each child
+  List Number  -- base separation for each adjacent pair
+computeBaseSeparations minSep separationFn nodes =
+  case nodes of
+    Nil -> Nil
+    Cons _ Nil -> Nil
+    _ -> zipWith (getSep separationFn minSep) nodes (tailSafe nodes)
+  where
+    -- When separation function exists, ADD minSep to it (minSep acts as base spacing)
+    getSep :: Maybe (r -> r -> Number) -> Number -> r -> r -> Number
+    getSep Nothing defSep _ _ = defSep
+    getSep (Just sepFn) baseMinSep a b = sepFn a b + baseMinSep
+
+    tailSafe :: forall a. List a -> List a
+    tailSafe Nil = Nil
+    tailSafe (Cons _ xs) = xs
+
+-- | Compute separations with per-pair base separations
+-- | Uses base separation for each pair instead of uniform minSep
+computeSeparationsWithBase :: List Number -> List Contours -> List Number
+computeSeparationsWithBase baseSeps contours =
+  case Tuple baseSeps contours of
+    Tuple Nil _ -> Nil
+    Tuple _ Nil -> Nil
+    Tuple _ (Cons _ Nil) -> Nil
+    _ ->
+      -- Zip baseSeps with pairs of contours
+      let contourPairs = zipWith Tuple contours (tailSafe contours)
+      in zipWith applyBase baseSeps contourPairs
+  where
+    applyBase :: Number -> Tuple Contours Contours -> Number
+    applyBase base (Tuple c1 c2) = scanContoursWithBase base c1 c2
+
+    tailSafe :: forall a. List a -> List a
+    tailSafe Nil = Nil
+    tailSafe (Cons _ xs) = xs
+
+-- | Scan two contours with a specific base separation
+scanContoursWithBase :: Number -> Contours -> Contours -> Number
+scanContoursWithBase baseSep (Contours left) (Contours right) =
+  go baseSep left.right right.left
+  where
+    go :: Number -> Contour -> Contour -> Number
+    go currentSep Nil _ = currentSep
+    go currentSep _ Nil = currentSep
+    go currentSep (Cons lr rest1) (Cons rl rest2) =
+      let
+        actualSep = currentSep + rl - lr
+        neededSep = if actualSep < baseSep
+                    then currentSep + (baseSep - actualSep)
+                    else currentSep
+      in
+        go neededSep rest1 rest2
 
 -- | Compute separations needed between adjacent child subtrees
 -- | For n children, returns (n-1) separation values

@@ -107,7 +107,7 @@ updateSimulation selections dataConfig attrs =
     , links: unsafeCoerce selections.links  -- Cast SpagoSimNode datum to D3Link_Swizzled datum for links
     }
     Group  -- Node element type (groups containing circle + text children)
-    Line    -- Link element type
+    Path    -- Link element type (paths for morphable bezier/diagonal links)
     { allNodes: dataConfig.allNodes           -- Full dataset
     , allLinks: dataConfig.allLinks           -- Full dataset
     , nodeFilter: dataConfig.nodeFilter       -- Single predicate (library filters links automatically!)

@@ -4,11 +4,14 @@ import Prelude
 
 import Data.Array as Array
 import Data.Either (Either(..))
+import Data.Foldable (foldl)
 import Data.Int (toNumber)
 import Data.List (List(..), fromFoldable)
+import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Number (pow, sqrt, log)
 import Data.String (length)
+import Data.Tuple (Tuple(..))
 import Data.String.CodePoints (codePointAt)
 import Data.Enum (fromEnum)
 import Data.Tree (Tree(..))
@@ -24,7 +27,7 @@ import Halogen.HTML.Properties as HP
 import PSD3.Layout.Hierarchy.Tree4 as Tree4
 import PSD3.Layout.Hierarchy.Link (LinkStyle(..), linkGenerator)
 import PSD3.Shared.Data (loadFlareData)
-import PSD3v2.Attribute.Types (width, height, viewBox, class_, cx, cy, radius, fill, stroke, strokeWidth, d)
+import PSD3v2.Attribute.Types (width, height, viewBox, class_, cx, cy, radius, fill, stroke, strokeWidth, strokeOpacity, d)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, reselectD3v2)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
@@ -55,7 +58,7 @@ type NodeWithRadius = { name :: String, value :: Number, x :: Number, y :: Numbe
 type LinkDatum = { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
 
 -- | Compute radius for a node based on pseudo-random from name
--- | Uses simple hash of name to get variation
+-- | Returns values in tree units (small) - will be scaled with x coordinates
 computeRadius :: HierNode -> Number
 computeRadius node =
   let
@@ -65,7 +68,7 @@ computeRadius node =
     -- Scale to get variation, use remainder for pseudo-randomness
     base = hash - (floor (hash / 4.0)) * 4.0 + 1.0
   in
-    base * base / 4.0 + 1.0  -- Range roughly 1.25 to 5.25
+    base * 0.5 + 0.5  -- Range roughly 1.0 to 2.5 in tree units
 
 foreign import floor :: Number -> Number
 
@@ -82,8 +85,59 @@ addRadius node =
   }
 
 -- | Separation function based on node radii
+-- | Returns distance between centers, so needs full sum of radii plus gap
 radiusSeparation :: NodeWithRadius -> NodeWithRadius -> Number
-radiusSeparation a b = (a.radius + b.radius) / 2.0 + 0.5
+radiusSeparation a b = a.radius + b.radius + 0.5
+
+-- | Compute the pixel-to-tree-unit scale factor from positioned nodes
+-- | Groups nodes by depth, finds adjacent pairs, computes distance/separation ratio
+computeScaleFactor :: Number -> Array NodeWithRadius -> Number
+computeScaleFactor minSep nodes =
+  let
+    -- Group nodes by depth
+    grouped = foldl (\m n -> Map.insertWith (<>) n.depth [n] m) Map.empty nodes
+
+    -- For each depth level, get scale samples from adjacent pairs
+    samples = Array.concatMap getScaleSamples (Array.fromFoldable $ Map.values grouped)
+
+    -- Average the samples, or use fallback
+    avgScale = if Array.length samples == 0
+               then 5.0  -- fallback
+               else (foldl (+) 0.0 samples) / toNumber (Array.length samples)
+  in
+    avgScale
+  where
+    getScaleSamples :: Array NodeWithRadius -> Array Number
+    getScaleSamples depthNodes =
+      let
+        -- Sort by x coordinate
+        sorted = Array.sortWith _.x depthNodes
+        -- Get adjacent pairs
+        pairs = Array.zip sorted (Array.drop 1 sorted)
+      in
+        Array.mapMaybe computePairScale pairs
+
+    computePairScale :: Tuple NodeWithRadius NodeWithRadius -> Maybe Number
+    computePairScale (Tuple a b) =
+      let
+        pixelDist = b.x - a.x
+        -- Expected tree-unit separation = radiusSeparation + minSep
+        expectedSep = radiusSeparation a b + minSep
+      in
+        -- Only include if reasonable
+        if pixelDist > 1.0 && expectedSep > 0.01
+        then Just (pixelDist / expectedSep)
+        else Nothing
+
+-- | Compute color for a node (HSL with varying hue)
+computeColor :: NodeWithRadius -> String
+computeColor node =
+  let
+    -- Use different part of hash for color variation
+    charCode = maybe 65 fromEnum (codePointAt 1 node.name)
+    hue = toNumber (charCode * 7) - (floor (toNumber (charCode * 7) / 360.0)) * 360.0
+  in
+    "hsl(" <> show hue <> ", 70%, 50%)"
 
 -- | Component state
 type State =
@@ -236,7 +290,10 @@ drawTreeExplorer selector state flareTree = do
     let nodes = Array.fromFoldable positioned
     let links = makeLinks positioned
 
-    liftEffect $ Console.log $ "TreeExplorer: " <> show (Array.length nodes) <> " nodes, minSep=" <> show state.minSeparation
+    -- Compute actual scale factor from positioned nodes
+    let radiusScale = computeScaleFactor state.minSeparation nodes
+
+    liftEffect $ Console.log $ "TreeExplorer: " <> show (Array.length nodes) <> " nodes, minSep=" <> show state.minSeparation <> ", radiusScale=" <> show radiusScale
 
     -- Build SVG tree structure for links
     let linksTree :: T.Tree LinkDatum
@@ -276,7 +333,7 @@ drawTreeExplorer selector state flareTree = do
     -- Reselect chartGroup for nodes
     chartGroupSel <- liftEffect $ reselectD3v2 "chartGroup" linksSelections
 
-    -- Build nodes tree with variable radius
+    -- Build nodes tree with variable radius and color
     let nodesTree :: T.Tree NodeWithRadius
         nodesTree =
           T.named Group "nodesGroup"
@@ -286,8 +343,10 @@ drawTreeExplorer selector state flareTree = do
                 T.elem Circle
                   [ cx (node.x + padding)
                   , cy (node.y + padding)
-                  , radius node.radius
-                  , fill "#69b3a2"
+                  , radius (node.radius * radiusScale)  -- Scale from tree units to pixels
+                  , fill (computeColor node)
+                  , stroke "none"
+                  , strokeOpacity 0.0
                   , class_ "node"
                   ]
               )

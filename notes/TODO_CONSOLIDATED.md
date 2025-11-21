@@ -9,13 +9,15 @@ This document consolidates all active TODOs from the project, organized by prior
 ### Visualization Improvements
 
 **Chord Diagram** (needs work)
-- [ ] Add labels to arcs and chords
-- [ ] Source interesting dataset (trade flows, migration patterns, music genre relationships)
+- [x] Add labels to arcs and chords
+- [x] Source interesting dataset (trade flows, migration patterns, music genre relationships)
 - [ ] Respect container height
 - [ ] Hover interactions: highlight connected arcs
-- [ ] Accessible color scheme
+- [x] Accessible color scheme
+- [ ] Re-write in PureScript
 
 **Bubble Chart** (needs work)
+- [ ] Fix bugs/regressions currently visible
 - [ ] Find own interesting dataset (not Flare)
 - [ ] Click-to-zoom: click inner bubble to drill down, click outer to go back up
 - [ ] Fix labeling: drop tiny labels, hide labels that don't fit
@@ -23,12 +25,15 @@ This document consolidates all active TODOs from the project, organized by prior
 - [ ] Stretch: Live transition to tree, treemap, or graph layout
 
 **Sankey Diagram** (needs work)
+- [ ] Further improvements to layout are possible
+- [ ] Ensure that multiple layout choices work
 - [ ] Add margins for proper spacing
 - [ ] Hover highlighting for flow paths
 - [ ] Find more up-to-date energy flow data
 - [ ] "Primary energy fallacy" color toggle
 - [ ] Readable labels
 - [ ] Smooth transitions
+- [ ] Transition to graph, force layout
 
 **Hierarchical Data Displays** (needs comprehensive page)
 - [ ] Horizontal tree (centering, zoom)
@@ -44,13 +49,13 @@ This document consolidates all active TODOs from the project, organized by prior
 - [ ] Stretch - FINAL BOSS: Animate tree into force layout graph
 
 ### Anscombe's Quartet
-- [ ] Show summary statistics alongside charts
+- [x] Show summary statistics alongside charts
 
 ---
 
 ## Medium Priority
 
-### Code Atlas Enhancements
+### Code Atlas / Code Explorer Enhancements
 
 - [ ] Module cohesion metrics visualization
 - [ ] Package coupling visualization

@@ -152,35 +152,27 @@ export const executeSceneTransition_Impl = (spec) => (nodeSelector) => (linkSele
   // TODO: Apply enter/exit behaviors when we have proper enter/exit tracking from GUP
 
   // Transition links to follow nodes (using ID lookup for efficiency)
+  // Links are now path elements with 'd' attribute instead of line elements
   linkSelection
     .transition(t)
-    .attr('x1', function(d) {
+    .attr('d', function(d) {
       const source = targetById.get(d.source.id);
-      if (source) {
-        return source.fx !== null && source.fx !== undefined ? source.fx : source.x;
-      }
-      return d.source.x;
-    })
-    .attr('y1', function(d) {
-      const source = targetById.get(d.source.id);
-      if (source) {
-        return source.fy !== null && source.fy !== undefined ? source.fy : source.y;
-      }
-      return d.source.y;
-    })
-    .attr('x2', function(d) {
       const target = targetById.get(d.target.id);
-      if (target) {
-        return target.fx !== null && target.fx !== undefined ? target.fx : target.x;
-      }
-      return d.target.x;
-    })
-    .attr('y2', function(d) {
-      const target = targetById.get(d.target.id);
-      if (target) {
-        return target.fy !== null && target.fy !== undefined ? target.fy : target.y;
-      }
-      return d.target.y;
+
+      const x1 = source
+        ? (source.fx !== null && source.fx !== undefined ? source.fx : source.x)
+        : d.source.x;
+      const y1 = source
+        ? (source.fy !== null && source.fy !== undefined ? source.fy : source.y)
+        : d.source.y;
+      const x2 = target
+        ? (target.fx !== null && target.fx !== undefined ? target.fx : target.x)
+        : d.target.x;
+      const y2 = target
+        ? (target.fy !== null && target.fy !== undefined ? target.fy : target.y)
+        : d.target.y;
+
+      return `M${x1},${y1}L${x2},${y2}`;
     });
 
   // Call completion callback after last node finishes

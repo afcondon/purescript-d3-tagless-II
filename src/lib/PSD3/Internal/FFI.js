@@ -735,7 +735,7 @@ export function filterToConnectedNodes_(simulation) {
 
     // Update DOM - remove links that aren't in the filtered set
     d3.select('div.svg-container')
-      .selectAll('g.link line')
+      .selectAll('g.link path')
       .filter(d => {
         const sourceId = typeof d.source === 'object' ? keyFn(d.source) : d.source;
         const targetId = typeof d.target === 'object' ? keyFn(d.target) : d.target;

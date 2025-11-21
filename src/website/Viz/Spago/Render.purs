@@ -17,7 +17,7 @@ import Data.String as String
 import PSD3.Data.Node (D3Link_Swizzled, NodeID)
 import PSD3.Internal.FFI (keyIsID_, simdrag_)
 import Unsafe.Coerce (unsafeCoerce)
-import PSD3v2.Attribute.Types (class_, stroke, transform, x1, x2, y1, y2, Attribute)
+import PSD3v2.Attribute.Types (class_, d, fill, stroke, transform, Attribute)
 import PSD3v2.Behavior.Types (Behavior(..), simulationDrag, onClickWithDatum, onMouseEnterWithInfo, onMouseLeave)
 import PSD3v2.Capabilities.Selection (class SelectionM, append, appendChild, appendChildInheriting, on, openSelection, remove, setAttrs)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_)
@@ -38,6 +38,12 @@ linkColor l = case l.linktype of
   M2P -> "blue"
   M2M_Graph -> "green"
   M2M_Tree -> "orange"
+
+-- | Generate diagonal (straight line) path data
+linkDiagonal :: Number -> Number -> Number -> Number -> String
+linkDiagonal x1' y1' x2' y2' =
+  "M" <> show x1' <> "," <> show y1' <>
+  "L" <> show x2' <> "," <> show y2'
 
 -- | Create a CSS class attribute from tags
 -- | Tags from the tag map are joined with spaces and added as CSS classes
@@ -111,11 +117,12 @@ spagoRenderCallbacks = {
   , onNodeExit: \exitSel ->
       remove exitSel
 
-  -- Link rendering: Simple line elements
+  -- Link rendering: Path elements (can morph between diagonal and bezier)
   , onLinkEnter: \enterSel attrs -> do
-      linkEnter <- append Line [
-          class_ (\(d :: D3Link_Swizzled) -> linkClass (unsafeCoerce d))
-        , stroke (\(d :: D3Link_Swizzled) -> linkColor (unsafeCoerce d))
+      linkEnter <- append Path [
+          class_ (\(link :: D3Link_Swizzled) -> linkClass (unsafeCoerce link))
+        , stroke (\(link :: D3Link_Swizzled) -> linkColor (unsafeCoerce link))
+        , fill "none"
         , class_ "enter"
         ] enterSel
       pure linkEnter
@@ -132,9 +139,8 @@ spagoRenderCallbacks = {
       [ transform \(d :: SpagoSimNode) -> translateNode d ]
 
   , linkTickAttrs:
-      [ x1 (\(d :: D3Link_Swizzled) -> (unsafeCoerce d :: SpagoSwizzledLink).source.x)
-      , y1 (\(d :: D3Link_Swizzled) -> (unsafeCoerce d :: SpagoSwizzledLink).source.y)
-      , x2 (\(d :: D3Link_Swizzled) -> (unsafeCoerce d :: SpagoSwizzledLink).target.x)
-      , y2 (\(d :: D3Link_Swizzled) -> (unsafeCoerce d :: SpagoSwizzledLink).target.y)
+      [ d \(link :: D3Link_Swizzled) ->
+          let l = unsafeCoerce link :: SpagoSwizzledLink
+          in linkDiagonal l.source.x l.source.y l.target.x l.target.y
       ]
 }

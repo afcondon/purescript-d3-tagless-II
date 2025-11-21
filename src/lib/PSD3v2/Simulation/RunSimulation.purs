@@ -100,7 +100,7 @@ runSimulation _selections scene allNodes allLinks updateSimFn = do
         executeSceneTransition_
           spec
           "g.nodes > g"      -- Node selector (standard D3 hierarchy)
-          "g.links > line"   -- Link selector (standard D3 hierarchy)
+          "g.links > path"   -- Link selector (path elements for morphable links)
           targetNodes        -- Nodes with computed positions (fx/fy or x/y)
           (callback (Right unit))  -- Signal completion when transition finishes
         pure nonCanceler
