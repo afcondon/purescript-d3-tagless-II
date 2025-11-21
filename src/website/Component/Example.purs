@@ -228,7 +228,7 @@ render state =
 renderHeader :: forall w i. String -> Maybe ExampleMeta -> HH.HTML w i
 renderHeader currentId maybeMeta =
   SiteNav.render
-    { logoSize: SiteNav.Normal
+    { logoSize: SiteNav.Large
     , quadrant: SiteNav.NoQuadrant
     , prevNext: Just
         { prev: Example <$> getPrevExampleId currentId

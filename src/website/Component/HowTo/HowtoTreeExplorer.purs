@@ -32,6 +32,7 @@ import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, reselectD3v2)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
 import PSD3v2.VizTree.Tree as T
+import PSD3.Shared.SiteNav as SiteNav
 import Web.DOM.Element (Element)
 import Web.DOM.ParentNode (QuerySelector(..), querySelector)
 import Web.HTML (window)
@@ -371,7 +372,14 @@ render :: forall m. State -> H.ComponentHTML Action () m
 render state =
   HH.div
     [ HP.classes [ HH.ClassName "tutorial-page", HH.ClassName "tree-explorer" ] ]
-    [ HH.h1_ [ HH.text "Tree Layout Explorer" ]
+    [ SiteNav.render
+        { logoSize: SiteNav.Large
+        , quadrant: SiteNav.QuadHowTo
+        , prevNext: Nothing
+        , pageTitle: Nothing
+        }
+
+    , HH.h1_ [ HH.text "Tree Layout Explorer" ]
 
     , HH.p_ [ HH.text "Experiment with tree layout configuration options. Adjust the controls below to see how they affect the Reingold-Tilford tree layout algorithm." ]
 

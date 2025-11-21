@@ -34,7 +34,7 @@ render _ =
     [ HP.classes [ HH.ClassName "docs-page", HH.ClassName "howto-wiki" ] ]
     [ -- Site Navigation with HowTo quadrant highlighted
       SiteNav.render
-        { logoSize: SiteNav.Normal
+        { logoSize: SiteNav.Large
         , quadrant: SiteNav.QuadHowTo
         , prevNext: Nothing
         , pageTitle: Nothing

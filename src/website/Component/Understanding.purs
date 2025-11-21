@@ -7,6 +7,7 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import PSD3.Shared.SiteNav as SiteNav
 import PSD3.Website.Types (Route(..))
 import PSD3.RoutingDSL (routeToPath)
 
@@ -31,29 +32,13 @@ render :: State -> H.ComponentHTML Action () Aff
 render _ =
   HH.div
     [ HP.classes [ HH.ClassName "tutorial-page" ] ]
-    [ -- Header with navigation
-      HH.header
-        [ HP.classes [ HH.ClassName "example-header" ] ]
-        [ HH.div
-            [ HP.classes [ HH.ClassName "example-header-left" ] ]
-            [ HH.a
-                [ HP.href $ "#" <> routeToPath Home
-                , HP.classes [ HH.ClassName "example-logo-link" ]
-                ]
-                [ HH.img
-                    [ HP.src "assets/psd3-logo-color.svg"
-                    , HP.alt "PSD3 Logo"
-                    , HP.classes [ HH.ClassName "example-logo" ]
-                    ]
-                ]
-            , HH.div
-                [ HP.classes [ HH.ClassName "example-title-container" ] ]
-                [ HH.h1
-                    [ HP.classes [ HH.ClassName "example-title" ] ]
-                    [ HH.text "Understanding PSD3" ]
-                ]
-            ]
-        ]
+    [ -- Site Navigation with Understanding quadrant highlighted
+      SiteNav.render
+        { logoSize: SiteNav.Large
+        , quadrant: SiteNav.QuadUnderstanding
+        , prevNext: Nothing
+        , pageTitle: Nothing
+        }
 
     , HH.main_
         [ -- Introduction

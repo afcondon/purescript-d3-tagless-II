@@ -152,7 +152,7 @@ render _ =
   HH.div
     [ HP.classes [ HH.ClassName "examples-gallery-page" ] ]
     [ SiteNav.render
-        { logoSize: SiteNav.Normal
+        { logoSize: SiteNav.Large
         , quadrant: SiteNav.NoQuadrant
         , prevNext: Nothing
         , pageTitle: Just "Tree API Examples"

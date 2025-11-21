@@ -7,8 +7,9 @@ import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import PSD3.Website.Types (Route(..))
 import PSD3.RoutingDSL (routeToPath)
+import PSD3.Shared.SiteNav as SiteNav
+import PSD3.Website.Types (Route(..))
 
 type State = Unit
 
@@ -32,7 +33,12 @@ render :: forall m. State -> H.ComponentHTML Action () m
 render _ =
   HH.div
     [ HP.classes [ HH.ClassName "tutorial-page" ] ]
-    [ renderHeader "Working with Hierarchical Data"
+    [ SiteNav.render
+        { logoSize: SiteNav.Large
+        , quadrant: SiteNav.QuadHowTo
+        , prevNext: Nothing
+        , pageTitle: Nothing
+        }
 
     , HH.main_
         [ -- Intro

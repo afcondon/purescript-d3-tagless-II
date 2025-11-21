@@ -76,7 +76,7 @@ render _ =
     [ HP.classes [ HH.ClassName "docs-page" ] ]
     [ -- Site Navigation with GettingStarted quadrant highlighted
       SiteNav.render
-        { logoSize: SiteNav.Normal
+        { logoSize: SiteNav.Large
         , quadrant: SiteNav.QuadGettingStarted
         , prevNext: Nothing
         , pageTitle: Nothing

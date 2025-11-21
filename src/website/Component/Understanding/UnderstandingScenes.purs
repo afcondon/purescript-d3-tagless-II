@@ -8,9 +8,10 @@ import Effect.Class (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
-import PSD3.Website.Types (Route(..))
 import PSD3.RoutingDSL (routeToPath)
+import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
+import PSD3.Shared.SiteNav as SiteNav
+import PSD3.Website.Types (Route(..))
 
 -- | State for the Scenes page
 type State = Unit
@@ -140,7 +141,12 @@ render _ =
   HH.div
     [ HP.classes [ HH.ClassName "tutorial-page" ] ]
     [ -- Header with navigation
-      renderHeader
+      SiteNav.render
+        { logoSize: SiteNav.Large
+        , quadrant: SiteNav.QuadUnderstanding
+        , prevNext: Nothing
+        , pageTitle: Nothing
+        }
 
     , HH.main_
         [ -- Introduction

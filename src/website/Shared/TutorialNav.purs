@@ -47,7 +47,7 @@ getPrevTutorial currentRoute =
 renderHeader :: forall w i. Route -> HH.HTML w i
 renderHeader currentRoute =
   SiteNav.render
-    { logoSize: SiteNav.Normal
+    { logoSize: SiteNav.Large
     , quadrant: SiteNav.NoQuadrant
     , prevNext: Just
         { prev: getPrevTutorial currentRoute
