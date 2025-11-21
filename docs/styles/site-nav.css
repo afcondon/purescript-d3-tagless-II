@@ -1,0 +1,263 @@
+/* Site Navigation - Unified header component for all pages */
+
+.site-nav {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0ddd4;
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.site-nav-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+/* Left section: Logo and title */
+.site-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.site-nav-logo-link {
+  display: flex;
+  align-items: center;
+}
+
+.site-nav-logo {
+  width: auto;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.1));
+}
+
+.site-nav-logo--normal {
+  height: 36px;
+}
+
+.site-nav-logo--large {
+  height: 72px;
+  margin: -0.5rem 0;
+}
+
+.site-nav-title-container {
+  flex: 1;
+}
+
+.site-nav-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Center section: Quadrant navigation */
+.site-nav-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.site-nav-quadrant {
+  display: grid;
+  grid-template-columns: repeat(2, 16px);
+  grid-template-rows: repeat(2, 16px);
+  gap: 4px;
+}
+
+.site-nav-quadrant-box {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #999;
+  background-color: transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.site-nav-quadrant-box:hover {
+  background-color: #f5f1e8;
+  border-color: #c41e3a;
+}
+
+.site-nav-quadrant-box--active {
+  background-color: #c41e3a;
+  border-color: #c41e3a;
+}
+
+.site-nav-quadrant-box--inactive {
+  background-color: transparent;
+}
+
+/* Right section: Nav links and prev/next */
+.site-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.site-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.site-nav-link {
+  font-size: 0.95rem;
+  color: #666;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.site-nav-link:hover {
+  color: #333;
+}
+
+/* Prev/Next navigation */
+.site-nav-prevnext {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.site-nav-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  color: #333;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.site-nav-button:hover {
+  background-color: #f5f1e8;
+  border-color: #c41e3a;
+  color: #c41e3a;
+}
+
+.site-nav-button--disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .site-nav-content {
+    padding: 0 1.5rem;
+    gap: 1rem;
+  }
+
+  .site-nav-links {
+    gap: 1rem;
+  }
+
+  .site-nav-link {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .site-nav {
+    padding: 0.75rem 0;
+  }
+
+  .site-nav-content {
+    padding: 0 1rem;
+    gap: 0.75rem;
+  }
+
+  .site-nav-left {
+    gap: 1rem;
+  }
+
+  .site-nav-logo--normal {
+    height: 28px;
+  }
+
+  .site-nav-logo--large {
+    height: 48px;
+    margin: -0.25rem 0;
+  }
+
+  .site-nav-title {
+    font-size: 0.95rem;
+  }
+
+  .site-nav-quadrant {
+    grid-template-columns: repeat(2, 12px);
+    grid-template-rows: repeat(2, 12px);
+    gap: 3px;
+  }
+
+  .site-nav-quadrant-box {
+    width: 12px;
+    height: 12px;
+    border-width: 1.5px;
+  }
+
+  .site-nav-links {
+    gap: 0.75rem;
+  }
+
+  .site-nav-link {
+    font-size: 0.8rem;
+  }
+
+  .site-nav-button {
+    width: 28px;
+    height: 28px;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .site-nav-content {
+    gap: 0.5rem;
+  }
+
+  .site-nav-left {
+    gap: 0.5rem;
+  }
+
+  .site-nav-logo--normal {
+    height: 24px;
+  }
+
+  .site-nav-logo--large {
+    height: 36px;
+  }
+
+  .site-nav-title-container {
+    display: none;
+  }
+
+  .site-nav-center {
+    display: none;
+  }
+
+  .site-nav-links {
+    gap: 0.5rem;
+  }
+
+  .site-nav-link {
+    font-size: 0.75rem;
+  }
+}

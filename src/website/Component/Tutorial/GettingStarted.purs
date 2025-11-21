@@ -7,10 +7,10 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import PSD3.Shared.DocsHeader as DocsHeader
 import PSD3.Shared.Footer as Footer
 import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3.Shared.SectionNav as SectionNav
+import PSD3.Shared.SiteNav as SiteNav
 import PSD3.Understanding.TOC (renderTOC, tocAnchor)
 import PSD3.Website.Types (Route(..), Section(..))
 import Type.Proxy (Proxy(..))
@@ -23,11 +23,9 @@ data Action = Initialize
 
 -- | Child component slots
 type Slots = ( sectionNav :: forall q. H.Slot q Void Unit
-             , docsHeader :: forall q. H.Slot q Void Unit
    )
 
 _sectionNav = Proxy :: Proxy "sectionNav"
-_docsHeader = Proxy :: Proxy "docsHeader"
 
 -- | Mermaid diagram for the wizard workflow decision tree
 wizardWorkflowDiagram :: String
@@ -76,9 +74,13 @@ render :: State -> H.ComponentHTML Action Slots Aff
 render _ =
   HH.div
     [ HP.classes [ HH.ClassName "docs-page" ] ]
-    [ -- Docs Header
-        HH.slot_ _docsHeader unit DocsHeader.component
-            { currentSection: Just TutorialSection }
+    [ -- Site Navigation with GettingStarted quadrant highlighted
+      SiteNav.render
+        { logoSize: SiteNav.Normal
+        , quadrant: SiteNav.QuadGettingStarted
+        , prevNext: Nothing
+        , pageTitle: Nothing
+        }
 
     -- Hero section
     , HH.section

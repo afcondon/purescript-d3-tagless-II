@@ -11,6 +11,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.PrismJS as Prism
 import PSD3.RoutingDSL (routeToPath)
+import PSD3.Shared.SiteNav as SiteNav
 import PSD3.Shared.Utilities (syntaxHighlightedCode)
 import PSD3.Website.Types (Route(..))
 
@@ -226,52 +227,15 @@ render state =
 -- | Render the header with navigation
 renderHeader :: forall w i. String -> Maybe ExampleMeta -> HH.HTML w i
 renderHeader currentId maybeMeta =
-  HH.header
-    [ HP.classes [ HH.ClassName "example-header" ] ]
-    [ HH.div
-        [ HP.classes [ HH.ClassName "example-header-content" ] ]
-        [ HH.a
-            [ HP.href $ "#" <> routeToPath Home
-            , HP.classes [ HH.ClassName "example-logo-link" ]
-            ]
-            [ HH.img
-                [ HP.src "assets/psd3-logo-color.svg"
-                , HP.alt "PSD3 Logo"
-                , HP.classes [ HH.ClassName "example-logo" ]
-                ]
-            ]
-        , HH.nav
-            [ HP.classes [ HH.ClassName "example-nav" ] ]
-            [ HH.a
-                [ HP.href $ "#" <> routeToPath Gallery
-                , HP.classes [ HH.ClassName "example-nav-link" ]
-                ]
-                [ HH.text "← Gallery" ]
-            , case getPrevExampleId currentId of
-                Nothing ->
-                  HH.span
-                    [ HP.classes [ HH.ClassName "example-nav-link", HH.ClassName "disabled" ] ]
-                    [ HH.text "← Prev" ]
-                Just prevId ->
-                  HH.a
-                    [ HP.href $ "#" <> routeToPath (Example prevId)
-                    , HP.classes [ HH.ClassName "example-nav-link" ]
-                    ]
-                    [ HH.text "← Prev" ]
-            , case getNextExampleId currentId of
-                Nothing ->
-                  HH.span
-                    [ HP.classes [ HH.ClassName "example-nav-link", HH.ClassName "disabled" ] ]
-                    [ HH.text "Next →" ]
-                Just nextId ->
-                  HH.a
-                    [ HP.href $ "#" <> routeToPath (Example nextId)
-                    , HP.classes [ HH.ClassName "example-nav-link" ]
-                    ]
-                    [ HH.text "Next →" ]
-            ]
-        ]
-    ]
+  SiteNav.render
+    { logoSize: SiteNav.Normal
+    , quadrant: SiteNav.NoQuadrant
+    , prevNext: Just
+        { prev: Example <$> getPrevExampleId currentId
+        , next: Example <$> getNextExampleId currentId
+        }
+    , pageTitle: (\m -> m.name) <$> maybeMeta
+    }
 
 -- | Get GitHub link for example source code
 getGithubLink :: String -> String

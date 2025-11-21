@@ -7,23 +7,15 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import PSD3.Shared.DocsHeader as DocsHeader
-import PSD3.Website.Types (Route(..), Section(..))
+import PSD3.Shared.SiteNav as SiteNav
+import PSD3.Website.Types (Route(..))
 import PSD3.RoutingDSL (routeToPath)
-import Type.Proxy (Proxy(..))
 
 -- | Howto Index page state
 type State = Unit
 
 -- | Howto Index page actions
 data Action = Initialize
-
--- | Howto Index page slots
-type Slots =
-  ( docsHeader :: forall q. H.Slot q Void Unit
-  )
-
-_docsHeader = Proxy :: Proxy "docsHeader"
 
 -- | Howto Index page component
 component :: forall q i o. H.Component q i o Aff
@@ -36,13 +28,17 @@ component = H.mkComponent
       }
   }
 
-render :: State -> H.ComponentHTML Action Slots Aff
+render :: State -> H.ComponentHTML Action () Aff
 render _ =
   HH.div
     [ HP.classes [ HH.ClassName "docs-page", HH.ClassName "howto-wiki" ] ]
-    [ -- Docs Header
-      HH.slot_ _docsHeader unit DocsHeader.component
-        { currentSection: Just HowToSection }
+    [ -- Site Navigation with HowTo quadrant highlighted
+      SiteNav.render
+        { logoSize: SiteNav.Normal
+        , quadrant: SiteNav.QuadHowTo
+        , prevNext: Nothing
+        , pageTitle: Nothing
+        }
 
     -- Hero section
     , HH.section
@@ -148,6 +144,6 @@ renderHowtoCard route title description =
         [ HH.text description ]
     ]
 
-handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
+handleAction :: forall o. Action -> H.HalogenM State Action () o Aff Unit
 handleAction = case _ of
   Initialize -> pure unit

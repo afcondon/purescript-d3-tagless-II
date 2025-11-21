@@ -2,10 +2,12 @@ module Component.ExamplesGallery where
 
 import Prelude
 
+import Data.Maybe (Maybe(..))
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.RoutingDSL (routeToPath)
+import PSD3.Shared.SiteNav as SiteNav
 import PSD3.Website.Types (Route(..))
 
 -- | Gallery showing all available TreeAPI visualizations
@@ -149,31 +151,12 @@ render :: forall m. Unit -> H.ComponentHTML Unit () m
 render _ =
   HH.div
     [ HP.classes [ HH.ClassName "examples-gallery-page" ] ]
-    [ HH.header
-        [ HP.classes [ HH.ClassName "gallery-header" ] ]
-        [ HH.div
-            [ HP.classes [ HH.ClassName "gallery-header-content" ] ]
-            [ HH.a
-                [ HP.href $ "#" <> routeToPath Home
-                , HP.classes [ HH.ClassName "gallery-logo-link" ]
-                ]
-                [ HH.img
-                    [ HP.src "assets/psd3-logo-color.svg"
-                    , HP.alt "PSD3 Logo"
-                    , HP.classes [ HH.ClassName "gallery-logo" ]
-                    ]
-                ]
-            , HH.div
-                [ HP.classes [ HH.ClassName "gallery-header-text" ] ]
-                [ HH.h1
-                    [ HP.classes [ HH.ClassName "gallery-title" ] ]
-                    [ HH.text "Tree API Examples" ]
-                , HH.p
-                    [ HP.classes [ HH.ClassName "gallery-subtitle" ] ]
-                    [ HH.text "Interactive visualizations with the declarative Tree API" ]
-                ]
-            ]
-        ]
+    [ SiteNav.render
+        { logoSize: SiteNav.Normal
+        , quadrant: SiteNav.NoQuadrant
+        , prevNext: Nothing
+        , pageTitle: Just "Tree API Examples"
+        }
 
     , HH.main
         [ HP.classes [ HH.ClassName "gallery-content" ] ]

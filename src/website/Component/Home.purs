@@ -10,6 +10,7 @@ import Halogen.HTML.Properties as HP
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Website.Types (Route(..))
 import PSD3.Shared.Footer as Footer
+import PSD3.Shared.SiteNav as SiteNav
 
 -- | Home page state
 type State = Unit
@@ -33,45 +34,12 @@ render _ =
   HH.div
     [ HP.classes [ HH.ClassName "home-page" ] ]
     [ -- Header with logo and navigation
-      HH.header
-        [ HP.classes [ HH.ClassName "home-header" ] ]
-        [ HH.div
-            [ HP.classes [ HH.ClassName "home-header-content" ] ]
-            [ HH.a
-                [ HP.href "#hero"
-                , HP.classes [ HH.ClassName "home-logo-link" ]
-                ]
-                [ HH.img
-                    [ HP.src "assets/psd3-logo-color.svg"
-                    , HP.alt "PSD3 Logo"
-                    , HP.classes [ HH.ClassName "home-logo" ]
-                    ]
-                ]
-            , HH.nav
-                [ HP.classes [ HH.ClassName "home-nav" ] ]
-                [ HH.a
-                    [ HP.href "#docs"
-                    , HP.classes [ HH.ClassName "home-nav-link" ]
-                    ]
-                    [ HH.text "Docs" ]
-                , HH.a
-                    [ HP.href "#tutorials"
-                    , HP.classes [ HH.ClassName "home-nav-link" ]
-                    ]
-                    [ HH.text "Tour" ]
-                , HH.a
-                    [ HP.href "#examples"
-                    , HP.classes [ HH.ClassName "home-nav-link" ]
-                    ]
-                    [ HH.text "Examples' code" ]
-                , HH.a
-                    [ HP.href $ "#" <> routeToPath Wizard
-                    , HP.classes [ HH.ClassName "home-nav-link home-nav-link--cta" ]
-                    ]
-                    [ HH.text "Get Started" ]
-                ]
-            ]
-        ]
+      SiteNav.render
+        { logoSize: SiteNav.Large
+        , quadrant: SiteNav.NoQuadrant
+        , prevNext: Nothing
+        , pageTitle: Nothing
+        }
 
     -- Hero section
     , HH.section
