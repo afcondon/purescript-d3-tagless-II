@@ -91,20 +91,17 @@ render config =
                     ]
             ]
 
-        -- Center section: Quadrant nav (if not NoQuadrant)
-        , case config.quadrant of
-            NoQuadrant -> HH.text ""
-            _ ->
-              HH.div
-                [ HP.classes [ HH.ClassName "site-nav-center" ] ]
-                [ HH.div
-                    [ HP.classes [ HH.ClassName "site-nav-quadrant" ] ]
-                    [ renderQuadrantBox QuadGettingStarted config.quadrant
-                    , renderQuadrantBox QuadHowTo config.quadrant
-                    , renderQuadrantBox QuadReference config.quadrant
-                    , renderQuadrantBox QuadUnderstanding config.quadrant
-                    ]
+        -- Center section: Quadrant nav (always visible as design element)
+        , HH.div
+            [ HP.classes [ HH.ClassName "site-nav-center" ] ]
+            [ HH.div
+                [ HP.classes [ HH.ClassName "site-nav-quadrant" ] ]
+                [ renderQuadrantBox QuadGettingStarted config.quadrant
+                , renderQuadrantBox QuadHowTo config.quadrant
+                , renderQuadrantBox QuadReference config.quadrant
+                , renderQuadrantBox QuadUnderstanding config.quadrant
                 ]
+            ]
 
         -- Right section: Nav links and prev/next
         , HH.div

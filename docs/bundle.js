@@ -26609,7 +26609,7 @@
       return "Understanding";
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Shared.SiteNav (line 197, column 17 - line 202, column 39): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Shared.SiteNav (line 194, column 17 - line 199, column 39): " + [v.constructor.name]);
   };
   var quadrantRoute = function(v) {
     if (v instanceof NoQuadrant) {
@@ -26632,7 +26632,7 @@
       return "#" + routeToPath(Understanding.value);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Shared.SiteNav (line 188, column 17 - line 193, column 56): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Shared.SiteNav (line 185, column 17 - line 190, column 56): " + [v.constructor.name]);
   };
   var eqQuadrant = {
     eq: function(x47) {
@@ -26695,13 +26695,7 @@
       }
       ;
       throw new Error("Failed pattern match at PSD3.Shared.SiteNav (line 83, column 15 - line 91, column 22): " + [config.pageTitle.constructor.name]);
-    })()]), (function() {
-      if (config.quadrant instanceof NoQuadrant) {
-        return text2("");
-      }
-      ;
-      return div2([classes(["site-nav-center"])])([div2([classes(["site-nav-quadrant"])])([renderQuadrantBox(QuadGettingStarted.value)(config.quadrant), renderQuadrantBox(QuadHowTo.value)(config.quadrant), renderQuadrantBox(QuadReference.value)(config.quadrant), renderQuadrantBox(QuadUnderstanding.value)(config.quadrant)])]);
-    })(), div2([classes(["site-nav-right"])])([nav([classes(["site-nav-links"])])([a([href("#" + routeToPath(TourFoundations.value)), classes(["site-nav-link"])])([text2("Tour")]), a([href("#" + routeToPath(Gallery.value)), classes(["site-nav-link"])])([text2("Examples")]), a([href("#" + routeToPath(CodeExplorer.value)), classes(["site-nav-link"])])([text2("Code Explorer")]), a([href("api/index.html"), classes(["site-nav-link"])])([text2("API")])]), (function() {
+    })()]), div2([classes(["site-nav-center"])])([div2([classes(["site-nav-quadrant"])])([renderQuadrantBox(QuadGettingStarted.value)(config.quadrant), renderQuadrantBox(QuadHowTo.value)(config.quadrant), renderQuadrantBox(QuadReference.value)(config.quadrant), renderQuadrantBox(QuadUnderstanding.value)(config.quadrant)])]), div2([classes(["site-nav-right"])])([nav([classes(["site-nav-links"])])([a([href("#" + routeToPath(TourFoundations.value)), classes(["site-nav-link"])])([text2("Tour")]), a([href("#" + routeToPath(Gallery.value)), classes(["site-nav-link"])])([text2("Examples")]), a([href("#" + routeToPath(CodeExplorer.value)), classes(["site-nav-link"])])([text2("Code Explorer")]), a([href("api/index.html"), classes(["site-nav-link"])])([text2("API")])]), (function() {
       if (config.prevNext instanceof Nothing) {
         return text2("");
       }
@@ -26716,7 +26710,7 @@
             return a([href("#" + routeToPath(config.prevNext.value0.prev.value0)), classes(["site-nav-button"]), title(show31(config.prevNext.value0.prev.value0))])([text2("\u2190")]);
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Shared.SiteNav (line 142, column 23 - line 153, column 44): " + [config.prevNext.value0.prev.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Shared.SiteNav (line 139, column 23 - line 150, column 44): " + [config.prevNext.value0.prev.constructor.name]);
         })(), (function() {
           if (config.prevNext.value0.next instanceof Nothing) {
             return span2([classes(["site-nav-button", "site-nav-button--disabled"])])([text2("\u2192")]);
@@ -26726,11 +26720,11 @@
             return a([href("#" + routeToPath(config.prevNext.value0.next.value0)), classes(["site-nav-button"]), title(show31(config.prevNext.value0.next.value0))])([text2("\u2192")]);
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Shared.SiteNav (line 154, column 23 - line 165, column 44): " + [config.prevNext.value0.next.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Shared.SiteNav (line 151, column 23 - line 162, column 44): " + [config.prevNext.value0.next.constructor.name]);
         })()]);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Shared.SiteNav (line 137, column 15 - line 166, column 22): " + [config.prevNext.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Shared.SiteNav (line 134, column 15 - line 163, column 22): " + [config.prevNext.constructor.name]);
     })()])])]);
   };
 
