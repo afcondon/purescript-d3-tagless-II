@@ -176,7 +176,7 @@ renderQuadrantBox target current =
             then "site-nav-quadrant-box--active"
             else "site-nav-quadrant-box--inactive"
         ]
-    , HP.title $ quadrantTitle target
+    , HP.attr (HH.AttrName "data-tooltip") (quadrantTitle target)
     ]
     []
 
@@ -186,14 +186,14 @@ quadrantRoute = case _ of
   NoQuadrant -> "#"
   QuadGettingStarted -> "#" <> routeToPath GettingStarted
   QuadHowTo -> "#" <> routeToPath HowtoIndex
-  QuadReference -> "api/index.html"
+  QuadReference -> "#" <> routeToPath Reference
   QuadUnderstanding -> "#" <> routeToPath Understanding
 
--- | Get display title for a quadrant
+-- | Get display title for a quadrant (shown on hover)
 quadrantTitle :: Quadrant -> String
 quadrantTitle = case _ of
   NoQuadrant -> ""
-  QuadGettingStarted -> "Getting Started"
-  QuadHowTo -> "How-To Guides"
-  QuadReference -> "API Reference"
-  QuadUnderstanding -> "Understanding"
+  QuadGettingStarted -> "Docs: Getting Started"
+  QuadHowTo -> "Docs: How-To"
+  QuadReference -> "Docs: Reference"
+  QuadUnderstanding -> "Docs: Understanding"

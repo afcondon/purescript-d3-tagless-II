@@ -65,6 +65,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: visible;
 }
 
 .site-nav-quadrant {
@@ -72,6 +73,7 @@
   grid-template-columns: repeat(2, 16px);
   grid-template-rows: repeat(2, 16px);
   gap: 4px;
+  overflow: visible;
 }
 
 .site-nav-quadrant-box {
@@ -81,11 +83,37 @@
   background-color: transparent;
   transition: all 0.2s ease;
   cursor: pointer;
+  position: relative;
 }
 
 .site-nav-quadrant-box:hover {
   background-color: #f5f1e8;
   border-color: #c41e3a;
+}
+
+/* Instant CSS tooltips */
+.site-nav-quadrant-box::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.site-nav-quadrant-box:hover::after {
+  opacity: 1;
+  visibility: visible;
 }
 
 .site-nav-quadrant-box--active {

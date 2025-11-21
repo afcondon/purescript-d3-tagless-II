@@ -176,24 +176,6 @@
     return dict.reflectSymbol;
   };
 
-  // output/Data.Void/index.js
-  var absurd = function(a2) {
-    var spin = function($copy_v) {
-      var $tco_result;
-      function $tco_loop(v) {
-        $copy_v = v;
-        return;
-      }
-      ;
-      while (true) {
-        $tco_result = $tco_loop($copy_v);
-      }
-      ;
-      return $tco_result;
-    };
-    return spin(a2);
-  };
-
   // output/Record.Unsafe/foreign.js
   var unsafeGet = function(label5) {
     return function(rec) {
@@ -261,29 +243,29 @@
   };
   var applyFirst = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map97 = map(dictApply.Functor0());
+    var map94 = map(dictApply.Functor0());
     return function(a2) {
       return function(b10) {
-        return apply1(map97($$const)(a2))(b10);
+        return apply1(map94($$const)(a2))(b10);
       };
     };
   };
   var applySecond = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map97 = map(dictApply.Functor0());
+    var map94 = map(dictApply.Functor0());
     return function(a2) {
       return function(b10) {
-        return apply1(map97($$const(identity2))(a2))(b10);
+        return apply1(map94($$const(identity2))(a2))(b10);
       };
     };
   };
   var lift2 = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map97 = map(dictApply.Functor0());
+    var map94 = map(dictApply.Functor0());
     return function(f) {
       return function(a2) {
         return function(b10) {
-          return apply1(map97(f)(a2))(b10);
+          return apply1(map94(f)(a2))(b10);
         };
       };
     };
@@ -353,11 +335,11 @@
 
   // output/Data.Ord/foreign.js
   var unsafeCompareImpl = function(lt) {
-    return function(eq21) {
+    return function(eq19) {
       return function(gt) {
         return function(x47) {
           return function(y48) {
-            return x47 < y48 ? lt : x47 === y48 ? eq21 : gt;
+            return x47 < y48 ? lt : x47 === y48 ? eq19 : gt;
           };
         };
       };
@@ -983,7 +965,7 @@
     };
   };
   var eqMaybe = function(dictEq) {
-    var eq21 = eq(dictEq);
+    var eq19 = eq(dictEq);
     return {
       eq: function(x47) {
         return function(y48) {
@@ -992,7 +974,7 @@
           }
           ;
           if (x47 instanceof Just && y48 instanceof Just) {
-            return eq21(x47.value0)(y48.value0);
+            return eq19(x47.value0)(y48.value0);
           }
           ;
           return false;
@@ -1454,11 +1436,11 @@
     };
   };
   var composeKleisli = function(dictBind) {
-    var bind148 = bind(dictBind);
+    var bind138 = bind(dictBind);
     return function(f) {
       return function(g) {
         return function(a2) {
-          return bind148(f(a2))(g);
+          return bind138(f(a2))(g);
         };
       };
     };
@@ -1469,9 +1451,9 @@
     }
   };
   var join = function(dictBind) {
-    var bind148 = bind(dictBind);
+    var bind138 = bind(dictBind);
     return function(m) {
-      return bind148(m)(identity5);
+      return bind138(m)(identity5);
     };
   };
 
@@ -1576,24 +1558,24 @@
 
   // output/Control.Monad/index.js
   var unlessM = function(dictMonad) {
-    var bind148 = bind(dictMonad.Bind1());
+    var bind89 = bind(dictMonad.Bind1());
     var unless2 = unless(dictMonad.Applicative0());
     return function(mb) {
       return function(m) {
-        return bind148(mb)(function(b10) {
+        return bind89(mb)(function(b10) {
           return unless2(b10)(m);
         });
       };
     };
   };
   var ap = function(dictMonad) {
-    var bind148 = bind(dictMonad.Bind1());
-    var pure90 = pure(dictMonad.Applicative0());
+    var bind89 = bind(dictMonad.Bind1());
+    var pure89 = pure(dictMonad.Applicative0());
     return function(f) {
       return function(a2) {
-        return bind148(f)(function(f$prime) {
-          return bind148(a2)(function(a$prime) {
-            return pure90(f$prime(a$prime));
+        return bind89(f)(function(f$prime) {
+          return bind89(a2)(function(a$prime) {
+            return pure89(f$prime(a$prime));
           });
         });
       };
@@ -1729,11 +1711,11 @@
   var $$try = function(dictMonadError) {
     var catchError1 = catchError(dictMonadError);
     var Monad0 = dictMonadError.MonadThrow0().Monad0();
-    var map97 = map(Monad0.Bind1().Apply0().Functor0());
-    var pure90 = pure(Monad0.Applicative0());
+    var map94 = map(Monad0.Bind1().Apply0().Functor0());
+    var pure89 = pure(Monad0.Applicative0());
     return function(a2) {
-      return catchError1(map97(Right.create)(a2))(function($52) {
-        return pure90(Left.create($52));
+      return catchError1(map94(Right.create)(a2))(function($52) {
+        return pure89(Left.create($52));
       });
     };
   };
@@ -2134,13 +2116,13 @@
     return v.value0;
   };
   var eqTuple = function(dictEq) {
-    var eq21 = eq(dictEq);
+    var eq19 = eq(dictEq);
     return function(dictEq1) {
       var eq110 = eq(dictEq1);
       return {
         eq: function(x47) {
           return function(y48) {
-            return eq21(x47.value0)(y48.value0) && eq110(x47.value1)(y48.value1);
+            return eq19(x47.value0)(y48.value0) && eq110(x47.value1)(y48.value1);
           };
         }
       };
@@ -2270,13 +2252,13 @@
     };
   };
   var bindExceptT = function(dictMonad) {
-    var bind148 = bind(dictMonad.Bind1());
-    var pure90 = pure(dictMonad.Applicative0());
+    var bind89 = bind(dictMonad.Bind1());
+    var pure89 = pure(dictMonad.Applicative0());
     return {
       bind: function(v) {
         return function(k) {
-          return bind148(v)(either(function($193) {
-            return pure90(Left.create($193));
+          return bind89(v)(either(function($193) {
+            return pure89(Left.create($193));
           })(function(a2) {
             var v1 = k(a2);
             return v1;
@@ -2328,25 +2310,25 @@
     var append37 = append(dictSemigroup);
     return function(dictMonad) {
       var Bind1 = dictMonad.Bind1();
-      var bind148 = bind(Bind1);
-      var pure90 = pure(dictMonad.Applicative0());
+      var bind89 = bind(Bind1);
+      var pure89 = pure(dictMonad.Applicative0());
       var functorExceptT1 = functorExceptT(Bind1.Apply0().Functor0());
       return {
         alt: function(v) {
           return function(v1) {
-            return bind148(v)(function(rm) {
+            return bind89(v)(function(rm) {
               if (rm instanceof Right) {
-                return pure90(new Right(rm.value0));
+                return pure89(new Right(rm.value0));
               }
               ;
               if (rm instanceof Left) {
-                return bind148(v1)(function(rn) {
+                return bind89(v1)(function(rn) {
                   if (rn instanceof Right) {
-                    return pure90(new Right(rn.value0));
+                    return pure89(new Right(rn.value0));
                   }
                   ;
                   if (rn instanceof Left) {
-                    return pure90(new Left(append37(rm.value0)(rn.value0)));
+                    return pure89(new Left(append37(rm.value0)(rn.value0)));
                   }
                   ;
                   throw new Error("Failed pattern match at Control.Monad.Except.Trans (line 87, column 9 - line 89, column 49): " + [rn.constructor.name]);
@@ -2813,13 +2795,13 @@
   };
   var traverse_ = function(dictApplicative) {
     var applySecond5 = applySecond(dictApplicative.Apply0());
-    var pure90 = pure(dictApplicative);
+    var pure89 = pure(dictApplicative);
     return function(dictFoldable) {
       var foldr22 = foldr(dictFoldable);
       return function(f) {
         return foldr22(function($454) {
           return applySecond5(f($454));
-        })(pure90(unit));
+        })(pure89(unit));
       };
     };
   };
@@ -3186,23 +3168,23 @@
       };
     }
     return function(apply8) {
-      return function(map97) {
-        return function(pure90) {
+      return function(map94) {
+        return function(pure89) {
           return function(f) {
             return function(array4) {
               function go2(bot, top3) {
                 switch (top3 - bot) {
                   case 0:
-                    return pure90([]);
+                    return pure89([]);
                   case 1:
-                    return map97(array1)(f(array4[bot]));
+                    return map94(array1)(f(array4[bot]));
                   case 2:
-                    return apply8(map97(array2)(f(array4[bot])))(f(array4[bot + 1]));
+                    return apply8(map94(array2)(f(array4[bot])))(f(array4[bot + 1]));
                   case 3:
-                    return apply8(apply8(map97(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
+                    return apply8(apply8(map94(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
                   default:
                     var pivot = bot + Math.floor((top3 - bot) / 4) * 2;
-                    return apply8(map97(concat2)(go2(bot, pivot)))(go2(pivot, top3));
+                    return apply8(map94(concat2)(go2(bot, pivot)))(go2(pivot, top3));
                 }
               }
               return go2(0, array4.length);
@@ -3660,7 +3642,7 @@
   };
   var traverseWithIndex_ = function(dictApplicative) {
     var applySecond5 = applySecond(dictApplicative.Apply0());
-    var pure90 = pure(dictApplicative);
+    var pure89 = pure(dictApplicative);
     return function(dictFoldableWithIndex) {
       var foldrWithIndex1 = foldrWithIndex(dictFoldableWithIndex);
       return function(f) {
@@ -3669,7 +3651,7 @@
           return function($290) {
             return applySecond5($289($290));
           };
-        })(pure90(unit));
+        })(pure89(unit));
       };
     };
   };
@@ -5526,10 +5508,10 @@
     };
   };
   var functorWriterT = function(dictFunctor) {
-    var map97 = map(dictFunctor);
+    var map94 = map(dictFunctor);
     return {
       map: function(f) {
-        return mapWriterT(map97(function(v) {
+        return mapWriterT(map94(function(v) {
           return new Tuple(f(v.value0), v.value1);
         }));
       }
@@ -5540,7 +5522,7 @@
     return function(dictApply) {
       var apply8 = apply(dictApply);
       var Functor0 = dictApply.Functor0();
-      var map97 = map(Functor0);
+      var map94 = map(Functor0);
       var functorWriterT1 = functorWriterT(Functor0);
       return {
         apply: function(v) {
@@ -5550,7 +5532,7 @@
                 return new Tuple(v3.value0(v4.value0), append37(v3.value1)(v4.value1));
               };
             };
-            return apply8(map97(k)(v))(v1);
+            return apply8(map94(k)(v))(v1);
           };
         },
         Functor0: function() {
@@ -5563,16 +5545,16 @@
     var append37 = append(dictSemigroup);
     var applyWriterT1 = applyWriterT(dictSemigroup);
     return function(dictBind) {
-      var bind148 = bind(dictBind);
+      var bind89 = bind(dictBind);
       var Apply0 = dictBind.Apply0();
-      var map97 = map(Apply0.Functor0());
+      var map94 = map(Apply0.Functor0());
       var applyWriterT2 = applyWriterT1(Apply0);
       return {
         bind: function(v) {
           return function(k) {
-            return bind148(v)(function(v1) {
+            return bind89(v)(function(v1) {
               var v2 = k(v1.value0);
-              return map97(function(v3) {
+              return map94(function(v3) {
                 return new Tuple(v3.value0, append37(v1.value1)(v3.value1));
               })(v2);
             });
@@ -5588,11 +5570,11 @@
     var mempty3 = mempty(dictMonoid);
     var applyWriterT1 = applyWriterT(dictMonoid.Semigroup0());
     return function(dictApplicative) {
-      var pure90 = pure(dictApplicative);
+      var pure89 = pure(dictApplicative);
       var applyWriterT2 = applyWriterT1(dictApplicative.Apply0());
       return {
         pure: function(a2) {
-          return pure90(new Tuple(a2, mempty3));
+          return pure89(new Tuple(a2, mempty3));
         },
         Apply0: function() {
           return applyWriterT2;
@@ -6588,11 +6570,11 @@
       };
     },
     foldMap: function(dictMonoid) {
-      var append126 = append(dictMonoid.Semigroup0());
+      var append125 = append(dictMonoid.Semigroup0());
       var foldMap12 = foldMap2(dictMonoid);
       return function(f) {
         return function(v) {
-          return append126(f(v.value0))(foldMap12(foldMap(foldableTree)(dictMonoid)(f))(v.value1));
+          return append125(f(v.value0))(foldMap12(foldMap(foldableTree)(dictMonoid)(f))(v.value1));
         };
       };
     }
@@ -8612,19 +8594,19 @@
   var flattenTree = /* @__PURE__ */ fromFoldable(foldableTree);
   var draw = function(dictMonadEffect) {
     var Monad0 = dictMonadEffect.Monad0();
-    var bind148 = bind(Monad0.Bind1());
-    var pure90 = pure(Monad0.Applicative0());
+    var bind138 = bind(Monad0.Bind1());
+    var pure89 = pure(Monad0.Applicative0());
     return function(dictSelectionM) {
       var attach2 = attach(dictSelectionM);
       var appendTo2 = appendTo(dictSelectionM);
       return function(flareData) {
         return function(selector) {
           var dataTree = hierDataToTree(flareData);
-          return bind148(attach2(selector))(function(root$prime) {
-            return bind148(appendTo2(root$prime)(Svg.value)([viewBox(0)(0)(1200)(900), classed2("animated-tree4-cluster4")]))(function(svg2) {
-              return bind148(appendTo2(svg2)(Group.value)([classed2("links")]))(function(linksGroup) {
-                return bind148(appendTo2(svg2)(Group.value)([classed2("nodes")]))(function(nodesGroup) {
-                  return pure90({
+          return bind138(attach2(selector))(function(root$prime) {
+            return bind138(appendTo2(root$prime)(Svg.value)([viewBox(0)(0)(1200)(900), classed2("animated-tree4-cluster4")]))(function(svg2) {
+              return bind138(appendTo2(svg2)(Group.value)([classed2("links")]))(function(linksGroup) {
+                return bind138(appendTo2(svg2)(Group.value)([classed2("nodes")]))(function(nodesGroup) {
+                  return pure89({
                     dataTree,
                     linksGroup,
                     nodesGroup,
@@ -8642,9 +8624,9 @@
   var animationStep = function(dictMonadEffect) {
     var Monad0 = dictMonadEffect.Monad0();
     var Bind1 = Monad0.Bind1();
-    var bind148 = bind(Bind1);
-    var discard121 = discard2(Bind1);
-    var pure90 = pure(Monad0.Applicative0());
+    var bind138 = bind(Bind1);
+    var discard120 = discard2(Bind1);
+    var pure89 = pure(Monad0.Applicative0());
     return function(dictSelectionM) {
       var openSelection2 = openSelection(dictSelectionM);
       var updateJoin2 = updateJoin(dictSelectionM);
@@ -8685,34 +8667,34 @@
                   })();
                   var nodes = flattenTree(positioned);
                   var links = makeLinks(positioned);
-                  return bind148(openSelection2(linksGroup)("path"))(function(linksSelection) {
-                    return bind148(updateJoin2(linksSelection)(Path.value)(links)(linkKey))(function(linkJoin) {
-                      return discard121(setAttributes2(linkJoin.exit)([remove]))(function() {
-                        return bind148(appendTo2(linkJoin.enter)(Path.value)([]))(function(newEnterLinks) {
+                  return bind138(openSelection2(linksGroup)("path"))(function(linksSelection) {
+                    return bind138(updateJoin2(linksSelection)(Path.value)(links)(linkKey))(function(linkJoin) {
+                      return discard120(setAttributes2(linkJoin.exit)([remove]))(function() {
+                        return bind138(appendTo2(linkJoin.enter)(Path.value)([]))(function(newEnterLinks) {
                           var linkPathFn = function(link4) {
                             return verticalLinkPath(link4.source.x)(link4.source.y)(link4.target.x)(link4.target.y);
                           };
-                          return bind148(setAttributes2(newEnterLinks)([fill2("none"), strokeColor2("#555"), strokeWidth2(1.5), classed2("link")]))(function() {
-                            return bind148(setAttributes2(newEnterLinks)([d2(linkPathFn)]))(function() {
-                              return bind148(setAttributes2(linkJoin.update)([fill2("none"), strokeColor2("#555"), strokeWidth2(1.5), classed2("link")]))(function() {
-                                return discard121(setAttributes2(linkJoin.update)(to(transitionWithDuration(1500))([d2(linkPathFn)])))(function() {
-                                  return bind148(openSelection2(nodesGroup)("circle"))(function(nodesSelection) {
-                                    return bind148(updateJoin2(nodesSelection)(Circle.value)(nodes)(nodeKey))(function(nodeJoin) {
-                                      return bind148(setAttributes2(nodeJoin.exit)([remove]))(function() {
-                                        return bind148(appendTo2(nodeJoin.enter)(Circle.value)([]))(function(newEnterNodes) {
-                                          return bind148(setAttributes2(newEnterNodes)([radius2(4), fill2("#999"), strokeColor2("#555"), strokeWidth2(1.5), classed2("node")]))(function() {
-                                            return bind148(setAttributes2(newEnterNodes)([cx2(function(v) {
+                          return bind138(setAttributes2(newEnterLinks)([fill2("none"), strokeColor2("#555"), strokeWidth2(1.5), classed2("link")]))(function() {
+                            return bind138(setAttributes2(newEnterLinks)([d2(linkPathFn)]))(function() {
+                              return bind138(setAttributes2(linkJoin.update)([fill2("none"), strokeColor2("#555"), strokeWidth2(1.5), classed2("link")]))(function() {
+                                return discard120(setAttributes2(linkJoin.update)(to(transitionWithDuration(1500))([d2(linkPathFn)])))(function() {
+                                  return bind138(openSelection2(nodesGroup)("circle"))(function(nodesSelection) {
+                                    return bind138(updateJoin2(nodesSelection)(Circle.value)(nodes)(nodeKey))(function(nodeJoin) {
+                                      return bind138(setAttributes2(nodeJoin.exit)([remove]))(function() {
+                                        return bind138(appendTo2(nodeJoin.enter)(Circle.value)([]))(function(newEnterNodes) {
+                                          return bind138(setAttributes2(newEnterNodes)([radius2(4), fill2("#999"), strokeColor2("#555"), strokeWidth2(1.5), classed2("node")]))(function() {
+                                            return bind138(setAttributes2(newEnterNodes)([cx2(function(v) {
                                               return v.x;
                                             }), cy2(function(v) {
                                               return v.y;
                                             })]))(function() {
-                                              return bind148(setAttributes2(nodeJoin.update)([radius2(4), fill2("#999"), strokeColor2("#555"), strokeWidth2(1.5), classed2("node")]))(function() {
-                                                return bind148(setAttributes2(nodeJoin.update)(to(transitionWithDuration(1500))([cx2(function(v) {
+                                              return bind138(setAttributes2(nodeJoin.update)([radius2(4), fill2("#999"), strokeColor2("#555"), strokeWidth2(1.5), classed2("node")]))(function() {
+                                                return bind138(setAttributes2(nodeJoin.update)(to(transitionWithDuration(1500))([cx2(function(v) {
                                                   return v.x;
                                                 }), cy2(function(v) {
                                                   return v.y;
                                                 })])))(function() {
-                                                  return pure90(unit);
+                                                  return pure89(unit);
                                                 });
                                               });
                                             });
@@ -8744,12 +8726,12 @@
   };
   var monadTransStateT = {
     lift: function(dictMonad) {
-      var bind148 = bind(dictMonad.Bind1());
-      var pure90 = pure(dictMonad.Applicative0());
+      var bind89 = bind(dictMonad.Bind1());
+      var pure89 = pure(dictMonad.Applicative0());
       return function(m) {
         return function(s) {
-          return bind148(m)(function(x47) {
-            return pure90(new Tuple(x47, s));
+          return bind89(m)(function(x47) {
+            return pure89(new Tuple(x47, s));
           });
         };
       };
@@ -8757,12 +8739,12 @@
   };
   var lift3 = /* @__PURE__ */ lift(monadTransStateT);
   var functorStateT = function(dictFunctor) {
-    var map97 = map(dictFunctor);
+    var map94 = map(dictFunctor);
     return {
       map: function(f) {
         return function(v) {
           return function(s) {
-            return map97(function(v1) {
+            return map94(function(v1) {
               return new Tuple(f(v1.value0), v1.value1);
             })(v(s));
           };
@@ -8781,12 +8763,12 @@
     };
   };
   var bindStateT = function(dictMonad) {
-    var bind148 = bind(dictMonad.Bind1());
+    var bind89 = bind(dictMonad.Bind1());
     return {
       bind: function(v) {
         return function(f) {
           return function(s) {
-            return bind148(v(s))(function(v1) {
+            return bind89(v(s))(function(v1) {
               var v3 = f(v1.value0);
               return v3(v1.value1);
             });
@@ -8808,11 +8790,11 @@
     };
   };
   var applicativeStateT = function(dictMonad) {
-    var pure90 = pure(dictMonad.Applicative0());
+    var pure89 = pure(dictMonad.Applicative0());
     return {
       pure: function(a2) {
         return function(s) {
-          return pure90(new Tuple(a2, s));
+          return pure89(new Tuple(a2, s));
         };
       },
       Apply0: function() {
@@ -8837,12 +8819,12 @@
     };
   };
   var monadStateStateT = function(dictMonad) {
-    var pure90 = pure(dictMonad.Applicative0());
+    var pure89 = pure(dictMonad.Applicative0());
     var monadStateT1 = monadStateT(dictMonad);
     return {
       state: function(f) {
         return function($206) {
-          return pure90(f($206));
+          return pure89(f($206));
         };
       },
       Monad0: function() {
@@ -9650,7 +9632,7 @@
     },
     foldMap: function(dictMonoid) {
       var mempty3 = mempty(dictMonoid);
-      var append126 = append(dictMonoid.Semigroup0());
+      var append125 = append(dictMonoid.Semigroup0());
       return function(f) {
         var go2 = function(v) {
           if (v instanceof Leaf) {
@@ -9658,7 +9640,7 @@
           }
           ;
           if (v instanceof Node2) {
-            return append126(go2(v.value4))(append126(f(v.value3))(go2(v.value5)));
+            return append125(go2(v.value4))(append125(f(v.value3))(go2(v.value5)));
           }
           ;
           throw new Error("Failed pattern match at Data.Map.Internal (line 181, column 10 - line 184, column 28): " + [v.constructor.name]);
@@ -9712,7 +9694,7 @@
     },
     foldMapWithIndex: function(dictMonoid) {
       var mempty3 = mempty(dictMonoid);
-      var append126 = append(dictMonoid.Semigroup0());
+      var append125 = append(dictMonoid.Semigroup0());
       return function(f) {
         var go2 = function(v) {
           if (v instanceof Leaf) {
@@ -9720,7 +9702,7 @@
           }
           ;
           if (v instanceof Node2) {
-            return append126(go2(v.value4))(append126(f(v.value2)(v.value3))(go2(v.value5)));
+            return append125(go2(v.value4))(append125(f(v.value2)(v.value3))(go2(v.value5)));
           }
           ;
           throw new Error("Failed pattern match at Data.Map.Internal (line 201, column 10 - line 204, column 30): " + [v.constructor.name]);
@@ -9985,44 +9967,6 @@
     };
   };
   var empty4 = empty3;
-
-  // output/DOM.HTML.Indexed.ButtonType/index.js
-  var ButtonButton = /* @__PURE__ */ (function() {
-    function ButtonButton2() {
-    }
-    ;
-    ButtonButton2.value = new ButtonButton2();
-    return ButtonButton2;
-  })();
-  var ButtonSubmit = /* @__PURE__ */ (function() {
-    function ButtonSubmit2() {
-    }
-    ;
-    ButtonSubmit2.value = new ButtonSubmit2();
-    return ButtonSubmit2;
-  })();
-  var ButtonReset = /* @__PURE__ */ (function() {
-    function ButtonReset2() {
-    }
-    ;
-    ButtonReset2.value = new ButtonReset2();
-    return ButtonReset2;
-  })();
-  var renderButtonType = function(v) {
-    if (v instanceof ButtonButton) {
-      return "button";
-    }
-    ;
-    if (v instanceof ButtonSubmit) {
-      return "submit";
-    }
-    ;
-    if (v instanceof ButtonReset) {
-      return "reset";
-    }
-    ;
-    throw new Error("Failed pattern match at DOM.HTML.Indexed.ButtonType (line 14, column 20 - line 17, column 25): " + [v.constructor.name]);
-  };
 
   // output/DOM.HTML.Indexed.InputType/index.js
   var InputButton = /* @__PURE__ */ (function() {
@@ -11381,11 +11325,6 @@
       return propFromString(renderInputType($45));
     }
   };
-  var isPropButtonType = {
-    toPropValue: function($50) {
-      return propFromString(renderButtonType($50));
-    }
-  };
   var isPropBoolean = {
     toPropValue: propFromBoolean
   };
@@ -11451,7 +11390,7 @@
     return Lift.create;
   })();
   var goLeft = function(dictApplicative) {
-    var pure90 = pure(dictApplicative);
+    var pure89 = pure(dictApplicative);
     return function(fStack) {
       return function(valStack) {
         return function(nat) {
@@ -11459,7 +11398,7 @@
             return function(count) {
               if (func instanceof Pure) {
                 return new Tuple(new Cons({
-                  func: pure90(func.value0),
+                  func: pure89(func.value0),
                   count
                 }, fStack), valStack);
               }
@@ -11530,7 +11469,7 @@
   };
   var foldFreeAp = function(dictApplicative) {
     var goApply1 = goApply(dictApplicative);
-    var pure90 = pure(dictApplicative);
+    var pure89 = pure(dictApplicative);
     var goLeft1 = goLeft(dictApplicative);
     return function(nat) {
       return function(z) {
@@ -11539,7 +11478,7 @@
           var $tco_result;
           function $tco_loop(v) {
             if (v.value1.value0 instanceof Pure) {
-              var v1 = goApply1(v.value0)(v.value1.value1)(pure90(v.value1.value0.value0));
+              var v1 = goApply1(v.value0)(v.value1.value1)(pure89(v.value1.value0.value0));
               if (v1 instanceof Left) {
                 $tco_done = true;
                 return v1.value0;
@@ -12283,14 +12222,14 @@
 
   // output/Halogen.Query.HalogenQ/index.js
   var Initialize = /* @__PURE__ */ (function() {
-    function Initialize80(value0) {
+    function Initialize50(value0) {
       this.value0 = value0;
     }
     ;
-    Initialize80.create = function(value0) {
-      return new Initialize80(value0);
+    Initialize50.create = function(value0) {
+      return new Initialize50(value0);
     };
-    return Initialize80;
+    return Initialize50;
   })();
   var Finalize = /* @__PURE__ */ (function() {
     function Finalize5(value0) {
@@ -12303,17 +12242,17 @@
     return Finalize5;
   })();
   var Receive = /* @__PURE__ */ (function() {
-    function Receive3(value0, value1) {
+    function Receive2(value0, value1) {
       this.value0 = value0;
       this.value1 = value1;
     }
     ;
-    Receive3.create = function(value0) {
+    Receive2.create = function(value0) {
       return function(value1) {
-        return new Receive3(value0, value1);
+        return new Receive2(value0, value1);
       };
     };
-    return Receive3;
+    return Receive2;
   })();
   var Action2 = /* @__PURE__ */ (function() {
     function Action3(value0, value1) {
@@ -12572,10 +12511,10 @@
   // output/Foreign.Index/index.js
   var unsafeReadProp = function(dictMonad) {
     var fail3 = fail(dictMonad);
-    var pure90 = pure(applicativeExceptT(dictMonad));
+    var pure89 = pure(applicativeExceptT(dictMonad));
     return function(k) {
       return function(value18) {
-        return unsafeReadPropImpl(fail3(new TypeMismatch("object", typeOf(value18))), pure90, k, value18);
+        return unsafeReadPropImpl(fail3(new TypeMismatch("object", typeOf(value18))), pure89, k, value18);
       };
     };
   };
@@ -12598,11 +12537,11 @@
 
   // output/Control.Alternative/index.js
   var guard = function(dictAlternative) {
-    var pure90 = pure(dictAlternative.Applicative0());
+    var pure89 = pure(dictAlternative.Applicative0());
     var empty9 = empty2(dictAlternative.Plus1());
     return function(v) {
       if (v) {
-        return pure90(unit);
+        return pure89(unit);
       }
       ;
       if (!v) {
@@ -13278,11 +13217,11 @@
   }
   function data_default(value18, key) {
     if (!arguments.length) return Array.from(this, datum);
-    var bind148 = key ? bindKey : bindIndex, parents = this._parents, groups = this._groups;
+    var bind89 = key ? bindKey : bindIndex, parents = this._parents, groups = this._groups;
     if (typeof value18 !== "function") value18 = constant_default(value18);
     for (var m = groups.length, update8 = new Array(m), enter = new Array(m), exit = new Array(m), j = 0; j < m; ++j) {
       var parent2 = parents[j], group4 = groups[j], groupLength = group4.length, data = arraylike(value18.call(parent2, parent2 && parent2.__data__, j, parents)), dataLength = data.length, enterGroup = enter[j] = new Array(dataLength), updateGroup = update8[j] = new Array(dataLength), exitGroup = exit[j] = new Array(groupLength);
-      bind148(parent2, group4, enterGroup, updateGroup, exitGroup, data, key);
+      bind89(parent2, group4, enterGroup, updateGroup, exitGroup, data, key);
       for (var i0 = 0, i1 = 0, previous, next2; i0 < dataLength; ++i0) {
         if (previous = enterGroup[i0]) {
           if (i0 >= i1) i1 = i0 + 1;
@@ -16356,7 +16295,7 @@
   var foldl7 = /* @__PURE__ */ foldl(foldableArray);
   var discard3 = /* @__PURE__ */ discard(discardUnit);
   var selectionUpdateJoin = function(dictSelectionM) {
-    var pure90 = pure(dictSelectionM.Monad0().Applicative0());
+    var pure89 = pure(dictSelectionM.Monad0().Applicative0());
     return function(openSelection2) {
       return function(e) {
         return function(theData) {
@@ -16364,7 +16303,7 @@
             var updateSelection = d3DataWithKeyFunction_(theData)(keyFn)(openSelection2);
             var exitSelection = d3GetExitSelection_(updateSelection);
             var enterSelection = d3GetEnterSelection_(updateSelection);
-            return pure90({
+            return pure89({
               enter: enterSelection,
               exit: exitSelection,
               update: updateSelection
@@ -16375,27 +16314,27 @@
     };
   };
   var selectionSelectUnder = function(dictSelectionM) {
-    var pure90 = pure(dictSelectionM.Monad0().Applicative0());
+    var pure89 = pure(dictSelectionM.Monad0().Applicative0());
     return function(selection2) {
       return function(selector) {
-        return pure90(d3SelectionSelectAll_(selector)(selection2));
+        return pure89(d3SelectionSelectAll_(selector)(selection2));
       };
     };
   };
   var selectionOpenSelection = function(dictSelectionM) {
-    var pure90 = pure(dictSelectionM.Monad0().Applicative0());
+    var pure89 = pure(dictSelectionM.Monad0().Applicative0());
     return function(selection2) {
       return function(selector) {
-        return pure90(d3SelectionSelectAll_(selector)(selection2));
+        return pure89(d3SelectionSelectAll_(selector)(selection2));
       };
     };
   };
   var selectionOn = function(dictSelectionM) {
-    var pure90 = pure(dictSelectionM.Monad0().Applicative0());
+    var pure89 = pure(dictSelectionM.Monad0().Applicative0());
     return function(v) {
       return function(v1) {
         if (v1 instanceof Drag) {
-          return pure90(unit);
+          return pure89(unit);
         }
         ;
         if (v1 instanceof Zoom) {
@@ -16419,7 +16358,7 @@
             ;
             throw new Error("Failed pattern match at PSD3.Internal.Selection.Functions (line 98, column 9 - line 112, column 14): " + [v1.value0.extent.constructor.name]);
           })();
-          return pure90(unit);
+          return pure89(unit);
         }
         ;
         throw new Error("Failed pattern match at PSD3.Internal.Selection.Functions (line 80, column 1 - line 80, column 112): " + [v.constructor.name, v1.constructor.name]);
@@ -16429,7 +16368,7 @@
   var selectionNestedJoin = function(dictFoldable) {
     var fromFoldable51 = fromFoldable(dictFoldable);
     return function(dictSelectionM) {
-      var pure90 = pure(dictSelectionM.Monad0().Applicative0());
+      var pure89 = pure(dictSelectionM.Monad0().Applicative0());
       return function(selection2) {
         return function(e) {
           return function(extractChildren) {
@@ -16441,7 +16380,7 @@
               var selectS = d3SelectionSelectAll_(element3)(selection2);
               var dataSelection = d3DataWithFunction_(extractFn)(keyFn)(selectS);
               var enterSelection = d3EnterAndAppend_(element3)(dataSelection);
-              return pure90(enterSelection);
+              return pure89(enterSelection);
             };
           };
         };
@@ -16449,24 +16388,24 @@
     };
   };
   var selectionModifySelection = function(dictSelectionM) {
-    var pure90 = pure(dictSelectionM.Monad0().Applicative0());
+    var pure89 = pure(dictSelectionM.Monad0().Applicative0());
     return function(selection_) {
       return function(attributes) {
         var v = foldl7(applySelectionAttributeD3)(selection_)(attributes);
-        return pure90(unit);
+        return pure89(unit);
       };
     };
   };
   var selectionMergeSelections = function(dictSelectionM) {
-    var pure90 = pure(dictSelectionM.Monad0().Applicative0());
+    var pure89 = pure(dictSelectionM.Monad0().Applicative0());
     return function(selectionA) {
       return function(selectionB) {
-        return pure90(d3MergeSelectionWith_(selectionA)(selectionB));
+        return pure89(d3MergeSelectionWith_(selectionA)(selectionB));
       };
     };
   };
   var selectionJoin = function(dictSelectionM) {
-    var pure90 = pure(dictSelectionM.Monad0().Applicative0());
+    var pure89 = pure(dictSelectionM.Monad0().Applicative0());
     return function(selection2) {
       return function(e) {
         return function(theData) {
@@ -16475,37 +16414,37 @@
             var selectS = d3SelectionSelectAll_(element3)(selection2);
             var dataSelection = d3DataWithKeyFunction_(theData)(keyFn)(selectS);
             var enterSelection = d3EnterAndAppend_(element3)(dataSelection);
-            return pure90(enterSelection);
+            return pure89(enterSelection);
           };
         };
       };
     };
   };
   var selectionFilterSelection = function(dictSelectionM) {
-    var pure90 = pure(dictSelectionM.Monad0().Applicative0());
+    var pure89 = pure(dictSelectionM.Monad0().Applicative0());
     return function(selection_) {
       return function(selector) {
-        return pure90(d3FilterSelection_(selection_)(selector));
+        return pure89(d3FilterSelection_(selection_)(selector));
       };
     };
   };
   var selectionAttach = function(dictSelectionM) {
-    var pure90 = pure(dictSelectionM.Monad0().Applicative0());
+    var pure89 = pure(dictSelectionM.Monad0().Applicative0());
     return function(selector) {
-      return pure90(d3SelectAllInDOM_(selector));
+      return pure89(d3SelectAllInDOM_(selector));
     };
   };
   var selectionAppendElement = function(dictSelectionM) {
     var Monad0 = dictSelectionM.Monad0();
-    var discard121 = discard3(Monad0.Bind1());
+    var discard120 = discard3(Monad0.Bind1());
     var selectionModifySelection1 = selectionModifySelection(dictSelectionM);
-    var pure90 = pure(Monad0.Applicative0());
+    var pure89 = pure(Monad0.Applicative0());
     return function(selection_) {
       return function(element3) {
         return function(attributes) {
           var appended_ = d3Append_(show7(element3))(selection_);
-          return discard121(selectionModifySelection1(appended_)(attributes))(function() {
-            return pure90(appended_);
+          return discard120(selectionModifySelection1(appended_)(attributes))(function() {
+            return pure89(appended_);
           });
         };
       };
@@ -16538,10 +16477,10 @@
     return singleton8(a2)(unit);
   };
   var showSet = function(dictShow) {
-    var show82 = show(showArray(dictShow));
+    var show81 = show(showArray(dictShow));
     return {
       show: function(s) {
-        return "(fromFoldable " + (show82(toUnfoldable1(s)) + ")");
+        return "(fromFoldable " + (show81(toUnfoldable1(s)) + ")");
       }
     };
   };
@@ -17288,32 +17227,32 @@
   var spy3 = /* @__PURE__ */ spy();
   var simulationStop = function(dictMonadState) {
     var Monad0 = dictMonadState.Monad0();
-    var pure90 = pure(Monad0.Applicative0());
+    var pure89 = pure(Monad0.Applicative0());
     return bind(Monad0.Bind1())(use(dictMonadState)(_handle2))(function(handle) {
       var v = stopSimulation_(handle);
-      return pure90(unit);
+      return pure89(unit);
     });
   };
   var simulationStart = function(dictMonadState) {
     var Monad0 = dictMonadState.Monad0();
     var Bind1 = Monad0.Bind1();
-    var discard121 = discard4(Bind1);
+    var discard120 = discard4(Bind1);
     var modifying2 = modifying(dictMonadState);
-    var pure90 = pure(Monad0.Applicative0());
+    var pure89 = pure(Monad0.Applicative0());
     return bind(Bind1)(use(dictMonadState)(_handle2))(function(handle) {
-      return discard121(modifying2(function($247) {
+      return discard120(modifying2(function($247) {
         return _d3Simulation2(_alpha2($247));
       })($$const(1)))(function() {
-        return pure90(startSimulation_(handle));
+        return pure89(startSimulation_(handle));
       });
     });
   };
   var simulationSetVariable = function(dictMonadState) {
-    var bind148 = bind(dictMonadState.Monad0().Bind1());
+    var bind89 = bind(dictMonadState.Monad0().Bind1());
     var use3 = use(dictMonadState);
     var modifying2 = modifying(dictMonadState);
     return function(v) {
-      return bind148(use3(_handle2))(function(handle) {
+      return bind89(use3(_handle2))(function(handle) {
         if (v instanceof Alpha) {
           var v1 = setAlpha_(handle)(v.value0);
           return modifying2(function($248) {
@@ -17354,31 +17293,31 @@
     };
   };
   var simulationSetNodes = function(dictBind) {
-    var bind148 = bind(dictBind);
+    var bind89 = bind(dictBind);
     return function(dictMonadState) {
       var use3 = use(dictMonadState);
-      var pure90 = pure(dictMonadState.Monad0().Applicative0());
+      var pure89 = pure(dictMonadState.Monad0().Applicative0());
       return function(nodes) {
-        return bind148(use3(_handle2))(function(handle) {
+        return bind89(use3(_handle2))(function(handle) {
           var v = setNodes_(handle)(nodes);
           var opaqueNodes = getNodes_(handle);
-          return pure90(opaqueNodes);
+          return pure89(opaqueNodes);
         });
       };
     };
   };
   var simulationSetLinks = function(dictBind) {
-    var bind148 = bind(dictBind);
+    var bind89 = bind(dictBind);
     return function(dictMonadState) {
       var use3 = use(dictMonadState);
-      var pure90 = pure(dictMonadState.Monad0().Applicative0());
+      var pure89 = pure(dictMonadState.Monad0().Applicative0());
       return function(links) {
         return function(nodes) {
           return function(keyFn) {
-            return bind148(use3(_handle2))(function(handle) {
+            return bind89(use3(_handle2))(function(handle) {
               var v = setLinks_(handle)(swizzleLinks_(links)(nodes)(keyFn));
               var swizzledLinks = getLinksFromSimulation_(handle);
-              return pure90(swizzledLinks);
+              return pure89(swizzledLinks);
             });
           };
         };
@@ -17386,24 +17325,24 @@
     };
   };
   var simulationEnableForcesByLabel = function(dictMonadState) {
-    var bind148 = bind(dictMonadState.Monad0().Bind1());
+    var bind89 = bind(dictMonadState.Monad0().Bind1());
     var use3 = use(dictMonadState);
     var modifying2 = modifying(dictMonadState);
     return function(labels9) {
-      return bind148(use3(_handle2))(function(handle) {
-        return bind148(use3(_forceLibrary1))(function(forces7) {
+      return bind89(use3(_handle2))(function(handle) {
+        return bind89(use3(_forceLibrary1))(function(forces7) {
           return modifying2(_forceLibrary2)($$const(map27(enableByLabels(handle)(labels9))(forces7)));
         });
       });
     };
   };
   var simulationDisableForcesByLabel = function(dictMonadState) {
-    var bind148 = bind(dictMonadState.Monad0().Bind1());
+    var bind89 = bind(dictMonadState.Monad0().Bind1());
     var use3 = use(dictMonadState);
     var modifying2 = modifying(dictMonadState);
     return function(labels9) {
-      return bind148(use3(_handle2))(function(handle) {
-        return bind148(use3(_forceLibrary1))(function(forces7) {
+      return bind89(use3(_handle2))(function(handle) {
+        return bind89(use3(_forceLibrary1))(function(forces7) {
           return modifying2(_forceLibrary2)($$const(map27(disableByLabels(handle)(labels9))(forces7)));
         });
       });
@@ -17412,25 +17351,25 @@
   var simulationActualizeForces = function(dictMonadState) {
     var Monad0 = dictMonadState.Monad0();
     var Bind1 = Monad0.Bind1();
-    var bind148 = bind(Bind1);
+    var bind89 = bind(Bind1);
     var use3 = use(dictMonadState);
-    var discard121 = discard4(Bind1);
+    var discard120 = discard4(Bind1);
     var simulationEnableForcesByLabel1 = simulationEnableForcesByLabel(dictMonadState);
     var simulationDisableForcesByLabel1 = simulationDisableForcesByLabel(dictMonadState);
-    var pure90 = pure(Monad0.Applicative0());
+    var pure89 = pure(Monad0.Applicative0());
     return function(activeForces2) {
-      return bind148(use3(_handle2))(function(handle) {
-        return bind148(use3(_forceLibrary1))(function(library) {
+      return bind89(use3(_handle2))(function(handle) {
+        return bind89(use3(_forceLibrary1))(function(library) {
           var allLabels = keys3(library);
           var disableLabels = fromFoldable10(difference4(fromFoldable14(allLabels))(activeForces2));
           var enableLabels = fromFoldable10(intersection3(activeForces2)(fromFoldable14(allLabels)));
           var v = spy3("\u{1F527} actualizeForces - enabling")(enableLabels);
           var v1 = spy3("\u{1F527} actualizeForces - disabling")(disableLabels);
-          return discard121(simulationEnableForcesByLabel1(enableLabels))(function() {
-            return discard121(simulationDisableForcesByLabel1(disableLabels))(function() {
-              return bind148(use3(_forceLibrary1))(function(updatedLibrary) {
+          return discard120(simulationEnableForcesByLabel1(enableLabels))(function() {
+            return discard120(simulationDisableForcesByLabel1(disableLabels))(function() {
+              return bind89(use3(_forceLibrary1))(function(updatedLibrary) {
                 var v2 = map27(updateForceInSimulation(handle))(updatedLibrary);
-                return pure90(unit);
+                return pure89(unit);
               });
             });
           });
@@ -17503,11 +17442,11 @@
   var get7 = /* @__PURE__ */ get(monadStateHalogenM);
   var pure8 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize2 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var ToggleLayout = /* @__PURE__ */ (function() {
     function ToggleLayout2() {
@@ -17524,19 +17463,19 @@
   var handleAction = function(dictMonadAff) {
     var monadEffectHalogenM2 = monadEffectHalogenM(dictMonadAff.MonadEffect0());
     var log9 = log3(monadEffectHalogenM2);
-    var liftAff34 = liftAff(monadAffHalogenM(dictMonadAff));
-    var liftEffect82 = liftEffect(monadEffectHalogenM2);
+    var liftAff4 = liftAff(monadAffHalogenM(dictMonadAff));
+    var liftEffect52 = liftEffect(monadEffectHalogenM2);
     return function(v) {
       if (v instanceof Initialize2) {
         return discard5(log9("AnimatedTreeCluster: Initializing"))(function() {
-          return discard5(liftAff34(delay(100)))(function() {
-            return bind5(liftAff34(get3(json)("./data/flare-2.json")))(function(flareResult) {
+          return discard5(liftAff4(delay(100)))(function() {
+            return bind5(liftAff4(get3(json)("./data/flare-2.json")))(function(flareResult) {
               if (flareResult instanceof Left) {
                 return log9("Failed to load Flare data: " + printError(flareResult.value0));
               }
               ;
               if (flareResult instanceof Right) {
-                return bind5(liftEffect82(runD3M(draw2(flareResult.value0.body)("#animated-tree-cluster"))))(function(v1) {
+                return bind5(liftEffect52(runD3M(draw2(flareResult.value0.body)("#animated-tree-cluster"))))(function(v1) {
                   return discard5(modify_3(function(v2) {
                     var $32 = {};
                     for (var $33 in v2) {
@@ -17549,7 +17488,7 @@
                     $32.vizState = new Just(v1.value0);
                     return $32;
                   }))(function() {
-                    return bind5(liftEffect82(runD3M(animationStep2(v1.value0.dataTree)(v1.value0.linksGroup)(v1.value0.nodesGroup)(v1.value0.chartWidth)(v1.value0.chartHeight)(TreeLayout.value))))(function() {
+                    return bind5(liftEffect52(runD3M(animationStep2(v1.value0.dataTree)(v1.value0.linksGroup)(v1.value0.nodesGroup)(v1.value0.chartWidth)(v1.value0.chartHeight)(TreeLayout.value))))(function() {
                       return log9("AnimatedTreeCluster: Initialized");
                     });
                   });
@@ -17583,7 +17522,7 @@
               }
               ;
               if (state3.vizState instanceof Just) {
-                return bind5(liftEffect82(runD3M(animationStep2(state3.vizState.value0.dataTree)(state3.vizState.value0.linksGroup)(state3.vizState.value0.nodesGroup)(state3.vizState.value0.chartWidth)(state3.vizState.value0.chartHeight)(newLayout))))(function() {
+                return bind5(liftEffect52(runD3M(animationStep2(state3.vizState.value0.dataTree)(state3.vizState.value0.linksGroup)(state3.vizState.value0.nodesGroup)(state3.vizState.value0.chartWidth)(state3.vizState.value0.chartHeight)(newLayout))))(function() {
                   return pure8(unit);
                 });
               }
@@ -19004,7 +18943,7 @@
   var unsafeIndex2 = /* @__PURE__ */ unsafeIndex();
   var foldlWithIndex2 = /* @__PURE__ */ foldlWithIndex(foldableWithIndexArray);
   var computeJoinWithKey = function(dictEq) {
-    var eq21 = eq(dictEq);
+    var eq19 = eq(dictEq);
     return function(newData) {
       return function(oldBindings) {
         return function(keyFn) {
@@ -19013,7 +18952,7 @@
               return function(datum2) {
                 var newKey = keyFn(datum2);
                 var v = findIndex(function(v1) {
-                  return eq21(keyFn(v1.datum))(newKey);
+                  return eq19(keyFn(v1.datum))(newKey);
                 })(state3.remainingOld);
                 if (v instanceof Nothing) {
                   var enterBinding = {
@@ -19065,14 +19004,14 @@
     };
   };
   var computeJoin = function(dictEq) {
-    var eq21 = eq(dictEq);
+    var eq19 = eq(dictEq);
     return function(newData) {
       return function(oldBindings) {
         var processNewDatum = function(newIndex) {
           return function(state3) {
             return function(datum2) {
               var v = findIndex(function(v1) {
-                return eq21(v1.datum)(datum2);
+                return eq19(v1.datum)(datum2);
               })(state3.remainingOld);
               if (v instanceof Nothing) {
                 var enterBinding = {
@@ -21033,7 +20972,7 @@
   var renderData = function(dictMonadEffect) {
     var Monad0 = dictMonadEffect.Monad0();
     var Bind1 = Monad0.Bind1();
-    var bind148 = bind(Bind1);
+    var bind138 = bind(Bind1);
     var joinData23 = joinData3(dictMonadEffect);
     var append42 = append8(dictMonadEffect);
     var pure127 = pure(Monad0.Applicative0());
@@ -21052,8 +20991,8 @@
                 return function(enterAttrs) {
                   return function(updateAttrs) {
                     return function(exitAttrs) {
-                      return bind148(joinData42(foldableData)(selector)(emptySelection))(function(v) {
-                        return bind148(bind148(append42(elemType)([])(v.value0.enter))(function(bound) {
+                      return bind138(joinData42(foldableData)(selector)(emptySelection))(function(v) {
+                        return bind138(bind138(append42(elemType)([])(v.value0.enter))(function(bound) {
                           if (enterAttrs instanceof Nothing) {
                             return pure127(bound);
                           }
@@ -21064,7 +21003,7 @@
                           ;
                           throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 611, column 5 - line 613, column 55): " + [enterAttrs.constructor.name]);
                         }))(function(enterBound) {
-                          return bind148((function() {
+                          return bind138((function() {
                             if (updateAttrs instanceof Nothing) {
                               return pure127(v.value0.update);
                             }
@@ -21081,7 +21020,7 @@
                               }
                               ;
                               if (exitAttrs instanceof Just) {
-                                return bind148(applyPerDatumAttrs1(exitAttrs.value0)(v.value0.exit))(function() {
+                                return bind138(applyPerDatumAttrs1(exitAttrs.value0)(v.value0.exit))(function() {
                                   return remove22(v.value0.exit);
                                 });
                               }
@@ -23742,10 +23681,10 @@
     return new Tuple(toNumber(w), toNumber(h));
   };
   var equalSnd = function(dictEq) {
-    var eq21 = eq(dictEq);
+    var eq19 = eq(dictEq);
     return function(a2) {
       return function(b10) {
-        return eq21(snd(a2))(snd(b10));
+        return eq19(snd(a2))(snd(b10));
       };
     };
   };
@@ -24974,34 +24913,6 @@
   }
 
   // output/PSD3.Website.Types/index.js
-  var UnderstandingSection = /* @__PURE__ */ (function() {
-    function UnderstandingSection2() {
-    }
-    ;
-    UnderstandingSection2.value = new UnderstandingSection2();
-    return UnderstandingSection2;
-  })();
-  var TutorialSection = /* @__PURE__ */ (function() {
-    function TutorialSection2() {
-    }
-    ;
-    TutorialSection2.value = new TutorialSection2();
-    return TutorialSection2;
-  })();
-  var HowToSection = /* @__PURE__ */ (function() {
-    function HowToSection2() {
-    }
-    ;
-    HowToSection2.value = new HowToSection2();
-    return HowToSection2;
-  })();
-  var APISection = /* @__PURE__ */ (function() {
-    function APISection2() {
-    }
-    ;
-    APISection2.value = new APISection2();
-    return APISection2;
-  })();
   var Home = /* @__PURE__ */ (function() {
     function Home2() {
     }
@@ -25561,29 +25472,6 @@
       }
       ;
       throw new Error("Failed pattern match at PSD3.Website.Types (line 141, column 1 - line 191, column 30): " + [v.constructor.name]);
-    }
-  };
-  var eqSection = {
-    eq: function(x47) {
-      return function(y48) {
-        if (x47 instanceof UnderstandingSection && y48 instanceof UnderstandingSection) {
-          return true;
-        }
-        ;
-        if (x47 instanceof TutorialSection && y48 instanceof TutorialSection) {
-          return true;
-        }
-        ;
-        if (x47 instanceof HowToSection && y48 instanceof HowToSection) {
-          return true;
-        }
-        ;
-        if (x47 instanceof APISection && y48 instanceof APISection) {
-          return true;
-        }
-        ;
-        return false;
-      };
     }
   };
   var eqRoute = {
@@ -26594,22 +26482,22 @@
     }
     ;
     if (v instanceof QuadGettingStarted) {
-      return "Getting Started";
+      return "Docs: Getting Started";
     }
     ;
     if (v instanceof QuadHowTo) {
-      return "How-To Guides";
+      return "Docs: How-To";
     }
     ;
     if (v instanceof QuadReference) {
-      return "API Reference";
+      return "Docs: Reference";
     }
     ;
     if (v instanceof QuadUnderstanding) {
-      return "Understanding";
+      return "Docs: Understanding";
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Shared.SiteNav (line 194, column 17 - line 199, column 39): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Shared.SiteNav (line 194, column 17 - line 199, column 45): " + [v.constructor.name]);
   };
   var quadrantRoute = function(v) {
     if (v instanceof NoQuadrant) {
@@ -26625,7 +26513,7 @@
     }
     ;
     if (v instanceof QuadReference) {
-      return "api/index.html";
+      return "#" + routeToPath(Reference.value);
     }
     ;
     if (v instanceof QuadUnderstanding) {
@@ -26671,7 +26559,7 @@
         }
         ;
         return "site-nav-quadrant-box--inactive";
-      })()]), title(quadrantTitle(target7))])([]);
+      })()]), attr2("data-tooltip")(quadrantTitle(target7))])([]);
     };
   };
   var render4 = function(config) {
@@ -26933,64 +26821,64 @@
   var pure19 = /* @__PURE__ */ pure(applicativeHalogenM);
   var map42 = /* @__PURE__ */ map(functorMaybe);
   var Initialize3 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var handleAction2 = function(dictMonadAff) {
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
       return bind26(get9)(function(state3) {
         return discard16((function() {
           if (state3.exampleId === "three-little-circles") {
-            return liftEffect82(threeLittleCircles);
+            return liftEffect52(threeLittleCircles);
           }
           ;
           if (state3.exampleId === "three-circles-transition") {
-            return liftEffect82($$void9(threeLittleCirclesTransition("#viz")));
+            return liftEffect52($$void9(threeLittleCirclesTransition("#viz")));
           }
           ;
           if (state3.exampleId === "simple-tree") {
-            return liftEffect82(testSimpleTree);
+            return liftEffect52(testSimpleTree);
           }
           ;
           if (state3.exampleId === "nested-elements") {
-            return liftEffect82(testNestedElements);
+            return liftEffect52(testNestedElements);
           }
           ;
           if (state3.exampleId === "bar-chart") {
-            return liftEffect82(barChart);
+            return liftEffect52(barChart);
           }
           ;
           if (state3.exampleId === "scatter-plot") {
-            return liftEffect82(scatterPlot);
+            return liftEffect52(scatterPlot);
           }
           ;
           if (state3.exampleId === "line-chart") {
-            return liftEffect82(lineChart);
+            return liftEffect52(lineChart);
           }
           ;
           if (state3.exampleId === "grouped-bar-chart") {
-            return liftEffect82(groupedBarChart("#viz"));
+            return liftEffect52(groupedBarChart("#viz"));
           }
           ;
           if (state3.exampleId === "simple-hierarchy") {
-            return liftEffect82(treeViz("#viz"));
+            return liftEffect52(treeViz("#viz"));
           }
           ;
           if (state3.exampleId === "three-little-dimensions") {
-            return liftEffect82(threeLittleDimensions);
+            return liftEffect52(threeLittleDimensions);
           }
           ;
           if (state3.exampleId === "lesmis-force") {
-            return liftEffect82(testLesMisTree);
+            return liftEffect52(testLesMisTree);
           }
           ;
           return pure19(unit);
         })())(function() {
-          return liftEffect82(highlightAll);
+          return liftEffect52(highlightAll);
         });
       });
     };
@@ -27500,13 +27388,13 @@
   var exGeneralUpdatePattern = function(dictSelectionM) {
     var Monad0 = dictSelectionM.Monad0();
     var Bind1 = Monad0.Bind1();
-    var bind148 = bind(Bind1);
+    var bind89 = bind(Bind1);
     var attach2 = attach(dictSelectionM);
     var appendTo2 = appendTo(dictSelectionM);
-    var pure90 = pure(Monad0.Applicative0());
+    var pure89 = pure(Monad0.Applicative0());
     var openSelection2 = openSelection(dictSelectionM);
     var updateJoin2 = updateJoin(dictSelectionM);
-    var discard121 = discard17(Bind1);
+    var discard120 = discard17(Bind1);
     var setAttributes2 = setAttributes(dictSelectionM);
     return function(selector) {
       var xFromIndex = function(v) {
@@ -27518,17 +27406,17 @@
       var update8 = andThen2([classed3("update"), fill15("gray"), y10(200)])(to(transition2)([x10(xFromIndex)]));
       var exit = andThen2([classed3("exit"), fill15("brown")])(to(transition2)([y10(400), remove]));
       var enter = andThen2([classed3("enter"), fill15("green"), x10(xFromIndex), y10(0), text7(singleton7), fontSize6(60)])(to(transition2)([y10(200)]));
-      return bind148(attach2(selector))(function(root3) {
-        return bind148(appendTo2(root3)(Svg.value)([viewBox(0)(100)(800)(350), classed3("d3svg gup")]))(function(svg2) {
-          return bind148(appendTo2(svg2)(Group.value)([]))(function(letterGroup) {
-            return pure90(function(letters) {
-              return bind148(openSelection2(letterGroup)("text"))(function(enterSelection) {
-                return bind148(updateJoin2(enterSelection)(Text.value)(letters)(charToKey))(function(updateSelections) {
-                  return discard121(setAttributes2(updateSelections.exit)(exit))(function() {
-                    return discard121(setAttributes2(updateSelections.update)(update8))(function() {
-                      return bind148(appendTo2(updateSelections.enter)(Text.value)([]))(function(newlyEntered) {
-                        return discard121(setAttributes2(newlyEntered)(enter))(function() {
-                          return pure90(newlyEntered);
+      return bind89(attach2(selector))(function(root3) {
+        return bind89(appendTo2(root3)(Svg.value)([viewBox(0)(100)(800)(350), classed3("d3svg gup")]))(function(svg2) {
+          return bind89(appendTo2(svg2)(Group.value)([]))(function(letterGroup) {
+            return pure89(function(letters) {
+              return bind89(openSelection2(letterGroup)("text"))(function(enterSelection) {
+                return bind89(updateJoin2(enterSelection)(Text.value)(letters)(charToKey))(function(updateSelections) {
+                  return discard120(setAttributes2(updateSelections.exit)(exit))(function() {
+                    return discard120(setAttributes2(updateSelections.update)(update8))(function() {
+                      return bind89(appendTo2(updateSelections.enter)(Text.value)([]))(function(newlyEntered) {
+                        return discard120(setAttributes2(newlyEntered)(enter))(function() {
+                          return pure89(newlyEntered);
                         });
                       });
                     });
@@ -27585,11 +27473,11 @@
     return Paused2;
   })();
   var Initialize4 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var ToggleStatus = /* @__PURE__ */ (function() {
     function ToggleStatus2() {
@@ -27670,12 +27558,12 @@
     var log9 = log3(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     var monadAffHalogenM2 = monadAffHalogenM(dictMonadAff);
     var runGeneralUpdatePattern2 = runGeneralUpdatePattern1(monadAffHalogenM2);
-    var liftAff34 = liftAff(monadAffHalogenM2);
+    var liftAff4 = liftAff(monadAffHalogenM2);
     return function(v) {
       if (v instanceof Initialize4) {
         return discard24(log9("GeneralUpdatePattern: Initializing"))(function() {
           return bind27(runGeneralUpdatePattern2)(function(updateFn) {
-            return bind27(liftAff34(forkAff(forever2(runUpdate(updateFn)))))(function(fiber) {
+            return bind27(liftAff4(forkAff(forever2(runUpdate(updateFn)))))(function(fiber) {
               return discard24(modify_5(function(s) {
                 var $53 = {};
                 for (var $54 in s) {
@@ -27707,7 +27595,7 @@
                 }
                 ;
                 if (state3.fiber instanceof Just) {
-                  return liftAff34(killFiber(error("Cancel fiber to suspend computation"))(state3.fiber.value0));
+                  return liftAff4(killFiber(error("Cancel fiber to suspend computation"))(state3.fiber.value0));
                 }
                 ;
                 throw new Error("Failed pattern match at Component.GeneralUpdatePattern (line 142, column 9 - line 145, column 86): " + [state3.fiber.constructor.name]);
@@ -27736,7 +27624,7 @@
               }
               ;
               if (state3.update instanceof Just) {
-                return bind27(liftAff34(forkAff(forever2(runUpdate(state3.update.value0)))))(function(fiber) {
+                return bind27(liftAff4(forkAff(forever2(runUpdate(state3.update.value0)))))(function(fiber) {
                   return modify_5(function(s) {
                     var $63 = {};
                     for (var $64 in s) {
@@ -27770,7 +27658,7 @@
               }
               ;
               if (state3.fiber instanceof Just) {
-                return liftAff34(killFiber(error("Cancelling fiber and terminating computation"))(state3.fiber.value0));
+                return liftAff4(killFiber(error("Cancelling fiber and terminating computation"))(state3.fiber.value0));
               }
               ;
               throw new Error("Failed pattern match at Component.GeneralUpdatePattern (line 158, column 5 - line 160, column 103): " + [state3.fiber.constructor.name]);
@@ -27820,11 +27708,11 @@
   // output/Component.HowTo.HowtoAxesScales/index.js
   var pure21 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize5 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render9 = function(v) {
     return div2([classes(["tutorial-page"])])([render4({
@@ -27858,11 +27746,11 @@
   // output/Component.HowTo.HowtoDebugging/index.js
   var pure24 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize6 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render10 = function(v) {
     return div2([classes(["tutorial-page"])])([render4({
@@ -27896,11 +27784,11 @@
   // output/Component.HowTo.HowtoEvents/index.js
   var pure25 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize7 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render11 = function(v) {
     return div2([classes(["tutorial-page"])])([render4({
@@ -27934,11 +27822,11 @@
   // output/Component.HowTo.HowtoForceGraphs/index.js
   var pure26 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize8 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render12 = function(v) {
     return div2([classes(["tutorial-page"])])([render4({
@@ -27972,11 +27860,11 @@
   // output/Component.HowTo.HowtoHierarchical/index.js
   var pure27 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize9 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render13 = function(v) {
     return div2([classes(["tutorial-page"])])([render4({
@@ -28010,11 +27898,11 @@
   // output/Component.HowTo.HowtoLoadingData/index.js
   var pure28 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize10 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render14 = function(v) {
     return div2([classes(["tutorial-page"])])([render4({
@@ -28048,11 +27936,11 @@
   // output/Component.HowTo.HowtoPerformance/index.js
   var pure29 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize11 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render15 = function(v) {
     return div2([classes(["tutorial-page"])])([render4({
@@ -28089,11 +27977,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.HowTo.HowtoTooltips/index.js
   var pure30 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize12 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render16 = function(v) {
     return div2([classes(["tutorial-page"])])([render4({
@@ -28127,11 +28015,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.HowTo.HowtoTransitions/index.js
   var pure31 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize13 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render17 = function(v) {
     return div2([classes(["tutorial-page"])])([render4({
@@ -28165,11 +28053,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.HowTo.HowtoTreeAPI/index.js
   var pure32 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize14 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render18 = function(v) {
     return div2([classes(["tutorial-page"])])([render4({
@@ -28809,11 +28697,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return Custom2;
   })();
   var Initialize15 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var SetMinSeparation = /* @__PURE__ */ (function() {
     function SetMinSeparation2(value0) {
@@ -29141,12 +29029,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
   var handleAction14 = function(dictMonadAff) {
-    var liftAff34 = liftAff(monadAffHalogenM(dictMonadAff));
+    var liftAff4 = liftAff(monadAffHalogenM(dictMonadAff));
     var liftEffect122 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
       if (v instanceof Initialize15) {
-        return discard32(liftAff34(delay(100)))(function() {
-          return bind32(liftAff34(loadFlareData))(function(result) {
+        return discard32(liftAff4(delay(100)))(function() {
+          return bind32(liftAff4(loadFlareData))(function(result) {
             if (result instanceof Left) {
               return modify_6(function(v1) {
                 var $151 = {};
@@ -29301,8 +29189,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var x25 = /* @__PURE__ */ x22(toAttrNumberFunctionNumbe);
   var y25 = /* @__PURE__ */ y22(toAttrNumberFunctionNumbe);
   var lesMisRenderCallbacks = function(dictMonad) {
-    var bind148 = bind(dictMonad.Bind1());
-    var pure90 = pure(dictMonad.Applicative0());
+    var bind89 = bind(dictMonad.Bind1());
+    var pure89 = pure(dictMonad.Applicative0());
     return function(dictSelectionM) {
       var append37 = append7(dictSelectionM);
       var on15 = on2(dictSelectionM);
@@ -29312,30 +29200,30 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return {
         onNodeEnter: function(enterSel) {
           return function(_attrs) {
-            return bind148(append37(Circle2.value)([cx13(function(v) {
+            return bind89(append37(Circle2.value)([cx13(function(v) {
               return v.x;
             }), cy13(function(v) {
               return v.y;
             }), radius12(5), fill17(function(v) {
               return d3SchemeCategory10N_(toNumber(v.group));
             }), stroke9("#fff"), strokeWidth10(2)])(enterSel))(function(nodeEnter) {
-              return bind148(on15(new Drag2(simulationDrag("lesmis")))(nodeEnter))(function() {
-                return pure90(nodeEnter);
+              return bind89(on15(new Drag2(simulationDrag("lesmis")))(nodeEnter))(function() {
+                return pure89(nodeEnter);
               });
             });
           };
         },
         onNodeUpdate: function(updateSel) {
           return function(_attrs) {
-            return bind148(setAttrs7([fill17(function(v) {
+            return bind89(setAttrs7([fill17(function(v) {
               return d3SchemeCategory10N_(toNumber(v.group));
             })])(updateSel))(function() {
-              return pure90(unit);
+              return pure89(unit);
             });
           };
         },
         onNodeExit: function(exitSel) {
-          return bind148(setAttrsExit5([fill18("gray"), stroke9("black")])(exitSel))(function() {
+          return bind89(setAttrsExit5([fill18("gray"), stroke9("black")])(exitSel))(function() {
             return remove10(exitSel);
           });
         },
@@ -29350,10 +29238,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         },
         onLinkUpdate: function(updateSel) {
           return function(_attrs) {
-            return bind148(setAttrs7([stroke12(function(v) {
+            return bind89(setAttrs7([stroke12(function(v) {
               return d3SchemeCategory10N_(toNumber(v.target.group));
             })])(updateSel))(function() {
-              return pure90(unit);
+              return pure89(unit);
             });
           };
         },
@@ -29690,10 +29578,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var genericUpdateSimulation = function(dictMonadEffect) {
     var Monad0 = dictMonadEffect.Monad0();
     var Bind1 = Monad0.Bind1();
-    var bind148 = bind(Bind1);
-    var liftEffect82 = liftEffect(dictMonadEffect);
-    var discard121 = discard21(Bind1);
-    var pure90 = pure(Monad0.Applicative0());
+    var bind89 = bind(Bind1);
+    var liftEffect52 = liftEffect(dictMonadEffect);
+    var discard120 = discard21(Bind1);
+    var pure89 = pure(Monad0.Applicative0());
     return function(dictSelectionM) {
       var joinData7 = joinData2(dictSelectionM)(foldableArray);
       var merge7 = merge(dictSelectionM);
@@ -29746,24 +29634,24 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                 config: config.config,
                                 keyFn: nodeKeyFn
                               };
-                              return bind148(update8(internalUpdateConfig))(function(enhanced) {
+                              return bind89(update8(internalUpdateConfig))(function(enhanced) {
                                 var nodeSelector = elementTypeToString(nodeElement);
-                                return bind148(liftEffect82(log7("\u{1F50D} genericUpdateSimulation: joining nodes with selector '" + (nodeSelector + "'"))))(function() {
-                                  return bind148(liftEffect82(log7("\u{1F50D} genericUpdateSimulation: " + (show35(length(enhanced.nodes)) + " nodes in data"))))(function() {
-                                    return bind148(joinData13(enhanced.nodes)(nodeSelector)(v.nodes))(function(v1) {
-                                      return bind148(liftEffect82(log7("\u{1F50D} genericUpdateSimulation: join result - enter: " + (show35(length(getEnterData(v1.value0.enter))) + (", update: " + (show35(length(getUpdateData(v1.value0.update))) + (", exit: " + show35(length(getExitData(v1.value0.exit))))))))))(function() {
-                                        return bind148(callbacks.onNodeEnter(v1.value0.enter)(attrs))(function(nodeEnter) {
-                                          return discard121(callbacks.onNodeUpdate(v1.value0.update)(attrs))(function() {
-                                            return discard121(callbacks.onNodeExit(v1.value0.exit))(function() {
-                                              return bind148(merge7(nodeEnter)(v1.value0.update))(function(mergedNodes) {
-                                                return bind148(joinDataWithKey1(enhanced.links)(linkKeyFn)(elementTypeToString(linkElement))(v.links))(function(v2) {
-                                                  return bind148(callbacks.onLinkEnter(v2.value0.enter)(attrs))(function(linkEnter) {
-                                                    return discard121(callbacks.onLinkUpdate(v2.value0.update)(attrs))(function() {
-                                                      return discard121(callbacks.onLinkExit(v2.value0.exit))(function() {
-                                                        return bind148(merge7(linkEnter)(v2.value0.update))(function(mergedLinks) {
-                                                          return discard121(addTickFunction10("nodes")(new Step4(mergedNodes, callbacks.nodeTickAttrs(attrs))))(function() {
-                                                            return discard121(addTickFunction10("links")(new Step4(mergedLinks, callbacks.linkTickAttrs)))(function() {
-                                                              return pure90(unit);
+                                return bind89(liftEffect52(log7("\u{1F50D} genericUpdateSimulation: joining nodes with selector '" + (nodeSelector + "'"))))(function() {
+                                  return bind89(liftEffect52(log7("\u{1F50D} genericUpdateSimulation: " + (show35(length(enhanced.nodes)) + " nodes in data"))))(function() {
+                                    return bind89(joinData13(enhanced.nodes)(nodeSelector)(v.nodes))(function(v1) {
+                                      return bind89(liftEffect52(log7("\u{1F50D} genericUpdateSimulation: join result - enter: " + (show35(length(getEnterData(v1.value0.enter))) + (", update: " + (show35(length(getUpdateData(v1.value0.update))) + (", exit: " + show35(length(getExitData(v1.value0.exit))))))))))(function() {
+                                        return bind89(callbacks.onNodeEnter(v1.value0.enter)(attrs))(function(nodeEnter) {
+                                          return discard120(callbacks.onNodeUpdate(v1.value0.update)(attrs))(function() {
+                                            return discard120(callbacks.onNodeExit(v1.value0.exit))(function() {
+                                              return bind89(merge7(nodeEnter)(v1.value0.update))(function(mergedNodes) {
+                                                return bind89(joinDataWithKey1(enhanced.links)(linkKeyFn)(elementTypeToString(linkElement))(v.links))(function(v2) {
+                                                  return bind89(callbacks.onLinkEnter(v2.value0.enter)(attrs))(function(linkEnter) {
+                                                    return discard120(callbacks.onLinkUpdate(v2.value0.update)(attrs))(function() {
+                                                      return discard120(callbacks.onLinkExit(v2.value0.exit))(function() {
+                                                        return bind89(merge7(linkEnter)(v2.value0.update))(function(mergedLinks) {
+                                                          return discard120(addTickFunction10("nodes")(new Step4(mergedNodes, callbacks.nodeTickAttrs(attrs))))(function() {
+                                                            return discard120(addTickFunction10("links")(new Step4(mergedLinks, callbacks.linkTickAttrs)))(function() {
+                                                              return pure89(unit);
                                                             });
                                                           });
                                                         });
@@ -30045,11 +29933,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return Phylotaxis2;
   })();
   var Initialize16 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var SwitchToScene = /* @__PURE__ */ (function() {
     function SwitchToScene2(value0) {
@@ -30173,12 +30061,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var activeForces = /* @__PURE__ */ fromFoldable8(foldableArray)(ordString)(["many body negative", "collision", "center", linksForceName_]);
   var handleAction15 = function(dictMonadAff) {
     var log9 = log3(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
-    var liftAff34 = liftAff(monadAffHalogenM(dictMonadAff));
+    var liftAff4 = liftAff(monadAffHalogenM(dictMonadAff));
     return function(v) {
       if (v instanceof Initialize16) {
         return discard27(log9("LesMisGUP: Initializing declarative visualization"))(function() {
-          return discard27(liftAff34(delay(100)))(function() {
-            return bind31(liftAff34(get3(string)("./data/miserables.json")))(function(lesMisResponse) {
+          return discard27(liftAff4(delay(100)))(function() {
+            return bind31(liftAff4(get3(string)("./data/miserables.json")))(function(lesMisResponse) {
               if (lesMisResponse instanceof Left) {
                 return log9("LesMisGUP: Failed to load data");
               }
@@ -30199,7 +30087,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     return $61;
                   }))(function() {
                     return bind31(get12)(function(state3) {
-                      return bind31(liftAff34(runD3v2SimM(state3)((function() {
+                      return bind31(liftAff4(runD3v2SimM(state3)((function() {
                         var forcesArray = [forces.manyBodyNeg, forces.collision, forces.center, forces.links];
                         return drawLesMisGUP(forcesArray)(activeForces)(model)("#lesmis-gup-viz");
                       })())))(function(v1) {
@@ -30242,7 +30130,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 nodes: state3.selections.value0.nodesGroup,
                 links: state3.selections.value0.linksGroup
               };
-              return bind31(liftAff34(runD3v2SimM(state3)((function() {
+              return bind31(liftAff4(runD3v2SimM(state3)((function() {
                 if (v.value0 instanceof FullGraph) {
                   return switchToFullGraph(selections)(state3.model.value0)(activeForces);
                 }
@@ -30332,7 +30220,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return FullGraph.value;
             })();
             return discard27(handleAction15(dictMonadAff)(new SwitchToScene(nextScene)))(function() {
-              return discard27(liftAff34(delay(4e3)))(function() {
+              return discard27(liftAff4(delay(4e3)))(function() {
                 return handleAction15(dictMonadAff)(AutoCycleNext.value);
               });
             });
@@ -30585,11 +30473,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var pure112 = /* @__PURE__ */ pure(applicativeHalogenM);
   var show39 = /* @__PURE__ */ show(showInt);
   var Initialize17 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var FilterNodes = /* @__PURE__ */ (function() {
     function FilterNodes4(value0) {
@@ -30620,12 +30508,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   })();
   var handleAction16 = function(dictMonadAff) {
     var log9 = log3(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
-    var liftAff34 = liftAff(monadAffHalogenM(dictMonadAff));
+    var liftAff4 = liftAff(monadAffHalogenM(dictMonadAff));
     return function(v) {
       if (v instanceof Initialize17) {
         return discard29(log9("LesMisGUPClean: Initializing"))(function() {
-          return discard29(liftAff34(delay(100)))(function() {
-            return bind34(liftAff34(get3(string)("./data/miserables.json")))(function(lesMisResponse) {
+          return discard29(liftAff4(delay(100)))(function() {
+            return bind34(liftAff4(get3(string)("./data/miserables.json")))(function(lesMisResponse) {
               return discard29((function() {
                 if (lesMisResponse instanceof Left) {
                   return log9("Failed to load Les Mis\xE9rables data");
@@ -30648,7 +30536,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     return $38;
                   }))(function() {
                     return bind34(get13)(function(state3) {
-                      return bind34(liftAff34(execD3v2SimM({
+                      return bind34(liftAff4(execD3v2SimM({
                         simulation: state3.lesMisGUPSimulation
                       })(bind113(drawLesMisGUPClean(forcesArray)(activeForces2)(graph)("#lesmis-gup-clean-viz"))(function() {
                         return pure35(unit);
@@ -30700,7 +30588,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 })(state3.originalGraph.value0.nodes);
               })();
               return discard29(log9("Filtered to " + (show39(length(filteredNodes)) + " nodes")))(function() {
-                return bind34(liftAff34(execD3v2SimM({
+                return bind34(liftAff4(execD3v2SimM({
                   simulation: state3.lesMisGUPSimulation
                 })(updateNodes(filteredNodes))))(function(newState) {
                   return modify_8(function(s) {
@@ -31027,11 +30915,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var pure113 = /* @__PURE__ */ pure(applicativeHalogenM);
   var show41 = /* @__PURE__ */ show(showInt);
   var Initialize18 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var FilterNodes2 = /* @__PURE__ */ (function() {
     function FilterNodes4(value0) {
@@ -31062,12 +30950,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   })();
   var handleAction17 = function(dictMonadAff) {
     var log9 = log3(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
-    var liftAff34 = liftAff(monadAffHalogenM(dictMonadAff));
+    var liftAff4 = liftAff(monadAffHalogenM(dictMonadAff));
     return function(v) {
       if (v instanceof Initialize18) {
         return discard31(log9("LesMisGUPSimple: Initializing"))(function() {
-          return discard31(liftAff34(delay(100)))(function() {
-            return bind36(liftAff34(get3(string)("./data/miserables.json")))(function(lesMisResponse) {
+          return discard31(liftAff4(delay(100)))(function() {
+            return bind36(liftAff4(get3(string)("./data/miserables.json")))(function(lesMisResponse) {
               return discard31((function() {
                 if (lesMisResponse instanceof Left) {
                   return log9("Failed to load Les Mis\xE9rables data");
@@ -31090,7 +30978,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     return $38;
                   }))(function() {
                     return bind36(get14)(function(state3) {
-                      return bind36(liftAff34(execD3v2SimM({
+                      return bind36(liftAff4(execD3v2SimM({
                         simulation: state3.lesMisGUPSimulation
                       })(bind114(drawLesMisGUPSimple(forcesArray)(activeForces2)(graph)("#lesmis-gup-simple-viz"))(function() {
                         return pure37(unit);
@@ -31142,7 +31030,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 })(state3.originalGraph.value0.nodes);
               })();
               return discard31(log9("Filtered to " + (show41(length(filteredNodes)) + " nodes")))(function() {
-                return bind36(liftAff34(execD3v2SimM({
+                return bind36(liftAff4(execD3v2SimM({
                   simulation: state3.lesMisGUPSimulation
                 })(updateNodes2(filteredNodes))))(function(newState) {
                   return modify_9(function(s) {
@@ -31801,11 +31689,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var pure115 = /* @__PURE__ */ pure(applicativeHalogenM);
   var show43 = /* @__PURE__ */ show(showInt);
   var Initialize19 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var MoveToGrid = /* @__PURE__ */ (function() {
     function MoveToGrid2() {
@@ -31863,12 +31751,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   })();
   var handleAction18 = function(dictMonadAff) {
     var log9 = log3(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
-    var liftAff34 = liftAff(monadAffHalogenM(dictMonadAff));
+    var liftAff4 = liftAff(monadAffHalogenM(dictMonadAff));
     return function(v) {
       if (v instanceof Initialize19) {
         return discard34(log9("LesMisGUPTree: Initializing"))(function() {
-          return discard34(liftAff34(delay(100)))(function() {
-            return bind38(liftAff34(get3(string)("./data/miserables.json")))(function(lesMisResponse) {
+          return discard34(liftAff4(delay(100)))(function() {
+            return bind38(liftAff4(get3(string)("./data/miserables.json")))(function(lesMisResponse) {
               return discard34((function() {
                 if (lesMisResponse instanceof Left) {
                   return log9("Failed to load Les Mis\xE9rables data");
@@ -31891,7 +31779,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     return $42;
                   }))(function() {
                     return bind38(get16)(function(state3) {
-                      return bind38(liftAff34(execD3v2SimM({
+                      return bind38(liftAff4(execD3v2SimM({
                         simulation: state3.lesMisGUPSimulation
                       })(bind115(drawLesMisGUPV2(forcesArray)(activeForces2)(graph)("#lesmis-gup-tree-viz"))(function() {
                         return pure39(unit);
@@ -31927,7 +31815,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       if (v instanceof MoveToGrid) {
         return discard34(log9("Moving to grid layout"))(function() {
           return bind38(get16)(function(state3) {
-            return bind38(liftAff34(execD3v2SimM({
+            return bind38(liftAff4(execD3v2SimM({
               simulation: state3.lesMisGUPSimulation
             })(moveToGrid(30))))(function(newState) {
               return modify_10(function(s) {
@@ -31950,7 +31838,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       if (v instanceof MoveToPhylotaxis) {
         return discard34(log9("Moving to phylotaxis layout"))(function() {
           return bind38(get16)(function(state3) {
-            return bind38(liftAff34(execD3v2SimM({
+            return bind38(liftAff4(execD3v2SimM({
               simulation: state3.lesMisGUPSimulation
             })(moveToPhylotaxis)))(function(newState) {
               return modify_10(function(s) {
@@ -31973,7 +31861,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       if (v instanceof UnpinNodes) {
         return discard34(log9("Unpinning nodes (returning to force layout)"))(function() {
           return bind38(get16)(function(state3) {
-            return bind38(liftAff34(execD3v2SimM({
+            return bind38(liftAff4(execD3v2SimM({
               simulation: state3.lesMisGUPSimulation
             })(unpinNodes)))(function(newState) {
               return modify_10(function(s) {
@@ -32001,7 +31889,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             }
             ;
             if (state3.originalGraph instanceof Just) {
-              return bind38(liftAff34(execD3v2SimM({
+              return bind38(liftAff4(execD3v2SimM({
                 simulation: state3.lesMisGUPSimulation
               })(filterByGroupWithOriginal(v.value0)(state3.originalGraph.value0))))(function(newState) {
                 return modify_10(function(s) {
@@ -32348,11 +32236,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var fromFoldable28 = /* @__PURE__ */ fromFoldable8(foldableArray)(ordString);
   var $$void11 = /* @__PURE__ */ $$void(functorHalogenM);
   var Initialize20 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render24 = function(v) {
     return div2([class_("lesmis-query-demo-page")])([div2([class_("page-header")])([h1_([text2("Selection Query Language Demo")]), p([class_("page-description")])([text2("Demonstrates the PSD3v2 selection query language (PSD3v2.Selection.Query). Click buttons to toggle group sizes using queryAll + filterByData.")]), div2([class_("code-example")])([pre_([code_([text2('-- Query all circles\nallCircles <- queryAll "circle" selections\n\n-- Filter to specific group using data predicate\ngroupNodes <- filterByData (\\\\d -> d.group == targetGroup) allCircles\n\n-- Update attributes\nsetAttrs [radius 10.0] groupNodes')])])])]), div2([id3("lesmis-query-demo-viz"), class_("viz-container")])([])]);
@@ -32369,12 +32257,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return initialize(foldableArray)(functorArray)([forces5.manyBodyNeg, forces5.collision, forces5.center, forces5.links]);
   })();
   var handleAction19 = function(dictMonadAff) {
-    var liftAff34 = liftAff(monadAffHalogenM(dictMonadAff));
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftAff4 = liftAff(monadAffHalogenM(dictMonadAff));
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
-      return bind40(liftAff34(get3(string)("./data/miserables.json")))(function(result) {
+      return bind40(liftAff4(get3(string)("./data/miserables.json")))(function(result) {
         if (result instanceof Left) {
-          return liftEffect82(pure41(unit));
+          return liftEffect52(pure41(unit));
         }
         ;
         if (result instanceof Right) {
@@ -32384,7 +32272,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           var initialState4 = {
             simulation: initialSimulationState(forceLibrary5)
           };
-          return $$void11(liftAff34(runD3v2SimM(initialState4)(drawLesMisQueryDemo(forcesArray)(activeForces2)(model)("#lesmis-query-demo-viz"))));
+          return $$void11(liftAff4(runD3v2SimM(initialState4)(drawLesMisQueryDemo(forcesArray)(activeForces2)(model)("#lesmis-query-demo-viz"))));
         }
         ;
         throw new Error("Failed pattern match at Component.LesMisQueryDemo (line 91, column 5 - line 104, column 96): " + [result.constructor.name]);
@@ -32876,11 +32764,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard37 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_12 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var Initialize21 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var GenerateSimpleTree = /* @__PURE__ */ (function() {
     function GenerateSimpleTree2() {
@@ -32924,7 +32812,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
   var handleAction20 = function(dictMonadAff) {
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
       if (v instanceof Initialize21) {
         return pure43(unit);
@@ -32932,7 +32820,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       ;
       if (v instanceof GenerateSimpleTree) {
         var tree3 = withChildren(named2(SVG.value)("svg")([staticAttr("width")("800"), staticAttr("height")("600")]))([withChild(elem4(Group2.value)([staticAttr("class")("container")]))(elem4(Circle2.value)([staticAttr("r")("50"), staticAttr("fill")("blue")])), elem4(Text3.value)([staticAttr("x")("100"), staticAttr("y")("100")])]);
-        return bind42(liftEffect82(runMermaidTree(tree3)))(function(code2) {
+        return bind42(liftEffect52(runMermaidTree(tree3)))(function(code2) {
           return discard37(modify_12(function(v1) {
             var $23 = {};
             for (var $24 in v1) {
@@ -32945,7 +32833,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             $23.mermaidCode = new Just(code2);
             return $23;
           }))(function() {
-            return liftEffect82(runMermaid);
+            return liftEffect52(runMermaid);
           });
         });
       }
@@ -32959,7 +32847,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return new NumberValue(100);
           }), staticAttr("r")("20"), staticAttr("fill")("steelblue")]);
         }));
-        return bind42(liftEffect82(runMermaidTree(tree3)))(function(code2) {
+        return bind42(liftEffect52(runMermaidTree(tree3)))(function(code2) {
           return discard37(modify_12(function(v1) {
             var $26 = {};
             for (var $27 in v1) {
@@ -32972,7 +32860,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             $26.mermaidCode = new Just(code2);
             return $26;
           }))(function() {
-            return liftEffect82(runMermaid);
+            return liftEffect52(runMermaid);
           });
         });
       }
@@ -33379,11 +33267,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var get18 = /* @__PURE__ */ get(monadStateHalogenM);
   var pure46 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize22 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render26 = function(state3) {
     var getGroupColor = function(v) {
@@ -33446,11 +33334,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   })();
   var handleAction21 = function(dictMonadAff) {
     var log9 = log3(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
-    var liftAff34 = liftAff(monadAffHalogenM(dictMonadAff));
+    var liftAff4 = liftAff(monadAffHalogenM(dictMonadAff));
     return function(v) {
       return discard39(log9("ModuleGraph: Initializing"))(function() {
-        return discard39(liftAff34(delay(100)))(function() {
-          return bind44(liftAff34(loadModuleGraph))(function(graphResult) {
+        return discard39(liftAff4(delay(100)))(function() {
+          return bind44(liftAff4(loadModuleGraph))(function(graphResult) {
             return discard39((function() {
               if (graphResult instanceof Left) {
                 return log9("Failed to load module graph: " + graphResult.value0);
@@ -33474,7 +33362,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     var forcesArray = [forces6.manyBodyNeg, forces6.collision, forces6.center, forces6.links];
                     var activeForces2 = fromFoldable30(["many body negative", "collision", "center", linksForceName_]);
                     return bind44(get18)(function(state3) {
-                      return bind44(liftAff34(execD3v2SimM({
+                      return bind44(liftAff4(execD3v2SimM({
                         simulation: state3.simulation
                       })(drawModuleGraph(forcesArray)(activeForces2)(graphResult.value0)("#module-graph-viz"))))(function(newState) {
                         return discard39(modify_13(function(s) {
@@ -33716,11 +33604,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
 
   // output/Component.SceneJoinDemo/index.js
   var Initialize23 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var ShowInitial = /* @__PURE__ */ (function() {
     function ShowInitial2() {
@@ -33753,22 +33641,22 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }), class_("btn btn-success")])([text2("Show 7 Circles (Enter)")])]), div2([id3("scene-join-demo-viz"), class_("visualization")])([]), div2([class_("explanation")])([h3_([text2("What's Happening?")]), ul_([li_([text2("Initial: 5 circles enter from center with transition")]), li_([text2("Show 3: 2 circles exit (shrink away), 3 update positions")]), li_([text2("Show 7: 2 new circles enter from center, 5 update positions")])]), h3_([text2("The Code")]), pre_([code_([text2('T.sceneNestedJoin "circles" "circle"\n  [scene]              -- Outer data: SceneData\n  (_.points)           -- Decompose to Array DataPoint\n  (\\\\point -> ...)      -- Template\n  { enterBehavior: Just { initialAttrs: [...], transition: ... }\n  , updateBehavior: Just { attrs: [], transition: ... }\n  , exitBehavior: Just { attrs: [...], transition: ... }\n  }')])])])]);
   };
   var handleAction22 = function(dictMonadAff) {
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
       if (v instanceof Initialize23) {
-        return liftEffect82(runD3v2M(drawInitial("#scene-join-demo-viz")));
+        return liftEffect52(runD3v2M(drawInitial("#scene-join-demo-viz")));
       }
       ;
       if (v instanceof ShowInitial) {
-        return liftEffect82(runD3v2M(drawInitial("#scene-join-demo-viz")));
+        return liftEffect52(runD3v2M(drawInitial("#scene-join-demo-viz")));
       }
       ;
       if (v instanceof ShowThree) {
-        return liftEffect82(runD3v2M(updateToThree("#scene-join-demo-viz")));
+        return liftEffect52(runD3v2M(updateToThree("#scene-join-demo-viz")));
       }
       ;
       if (v instanceof ShowSeven) {
-        return liftEffect82(runD3v2M(updateToSeven("#scene-join-demo-viz")));
+        return liftEffect52(runD3v2M(updateToSeven("#scene-join-demo-viz")));
       }
       ;
       throw new Error("Failed pattern match at Component.SceneJoinDemo (line 92, column 16 - line 103, column 70): " + [v.constructor.name]);
@@ -34194,22 +34082,22 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard41 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var pure50 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize24 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render28 = function(v) {
     return div2([classes(["tutorial-page"])])([renderHeader2(TourFPFTW.value), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Functional Programming For The Win")]), p_([text2("PureScript's powerful type system and functional programming features unlock visualization capabilities that are difficult or impossible in JavaScript. This page showcases how Maps, Sets, Foldable types, and contravariant functors make data visualization more flexible and type-safe.")]), p_([text2('These examples demonstrate the "FP For The Win" philosophy: using advanced functional programming techniques to create more composable, reusable, and maintainable visualization code.')])]), section([classes(["tutorial-section"]), id3("anscombe")])([h2([classes(["tutorial-section-title"])])([text2("1. Anscombe's Quartet: The Power of Map")]), p_([text2("Anscombe's Quartet is a famous dataset demonstrating why visualization matters. All four datasets have "), strong_([text2("identical statistical properties")]), text2(" (mean, variance, correlation \u2248 0.816), but "), strong_([text2("completely different distributions")]), text2(". Statistics can lie; plots don't!")]), p_([text2("This example showcases functional programming's ")]), em_([text2("map")]), text2(" pattern: we define "), strong_([text2("one scatterplot component")]), text2(" and "), strong_([text2("map it over four datasets")]), text2(". Same code, different data, four visualizations. This is composability in action:")]), pre([classes(["code-block"]), style("background: #f5f5f5; padding: 15px; border-radius: 5px; color: #333; overflow-x: auto;")])([code_([text2("-- One component definition\nscatterplot :: String -> Array Point -> Tree\nscatterplot name points = ...\n\n-- Map over all four datasets!\nmap (\\{ name, points } -> scatterplot name points) anscombeData")])]), div2([id3("anscombe-quartet"), classes(["viz-container"]), style("margin: 20px 0; text-align: center;")])([]), p_([text2("Notice how:")]), ul_([li_([strong_([text2("Dataset I")]), text2(": Linear relationship with some scatter")]), li_([strong_([text2("Dataset II")]), text2(": Perfect quadratic curve")]), li_([strong_([text2("Dataset III")]), text2(": Linear with one outlier skewing statistics")]), li_([strong_([text2("Dataset IV")]), text2(": No relationship except one influential point")])]), p_([text2("The FP win: We wrote the visualization component once and reused it four times. In imperative code, you'd repeat yourself or write complex loops. With "), code_([text2("map")]), text2(", composition is natural and type-safe.")])]), section([classes(["tutorial-section"]), id3("sets")])([h2([classes(["tutorial-section-title"])])([text2("2. Set Operations: Map + Foldable + Phylotaxis")]), p_([text2("Sets are unordered, unique collections. This example demonstrates ")]), strong_([text2("three FP wins at once")]), text2(":"), ul_([li_([strong_([text2("Map pattern: ")]), text2("One visualizer component, mapped over four different sets (A, B, A \u222A B, A \u2229 B)")]), li_([strong_([text2("Foldable abstraction: ")]), text2("We iterate over a Set, not an Array! The visualization works with any Foldable type.")]), li_([strong_([text2("Code reuse: ")]), text2("Uses the same phylotaxis (sunflower spiral) layout from our network simulations.")])]), p_([text2("Each set is visualized as colored circles arranged in a phylotaxis pattern (the mathematical arrangement of seeds in a sunflower). Watch how union combines elements and intersection shows only shared elements:")]), div2([id3("set-operations"), classes(["viz-container"]), style("margin: 20px 0; text-align: center;")])([]), p_([text2("The FP win: This visualization demonstrates that PureScript's type classes let you write generic, reusable code. The same phylotaxis layout function works in network graphs "), em_([text2("and")]), text2(" set visualizations. In JavaScript, you'd rewrite it each time.")])]), section([classes(["tutorial-section"]), id3("tree-api-power")])([h2([classes(["tutorial-section-title"])])([text2("3. TreeAPI: A Composable DSL")]), p_([text2("The TreeAPI demonstrates functional programming principles in action. It's a deeply embedded DSL (Domain-Specific Language) that leverages PureScript's type system to provide:")]), ul_([li_([strong_([text2("Composability: ")]), text2("Build complex visualizations from simple, reusable pieces. Trees compose with attributes, which compose with scales and axes.")]), li_([strong_([text2("Type Safety: ")]), text2("The compiler ensures you can't attach circle attributes to rect elements, or pass the wrong data type to a layout.")]), li_([strong_([text2("Multiple Interpretations: ")]), text2("The same TreeAPI code can be interpreted as SVG, Mermaid diagrams, or even generated JavaScript.")]), li_([strong_([text2("Referential Transparency: ")]), text2("Tree descriptions are pure values that can be tested, transformed, and reasoned about before rendering.")])]), p_([text2("For examples of TreeAPI in action, see the "), a([href("#" + routeToPath(TreeAPI.value))])([text2("Tree API Examples")]), text2(" page, or explore the "), a([href("#" + routeToPath(AnimatedTreeCluster.value))])([text2("Animated Tree \u2194 Cluster")]), text2(" demonstration which shows how the same tree structure can smoothly transition between different layout algorithms.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Why Functional Programming Wins")]), p_([text2("These techniques might seem abstract, but they solve real problems:")]), ul_([li_([strong_([text2("Maintainability: ")]), text2("Type-safe code means fewer runtime errors and easier refactoring.")]), li_([strong_([text2("Reusability: ")]), text2("Contravariant functors and type classes let you write code once and use it with many data types.")]), li_([strong_([text2("Correctness: ")]), text2("The compiler catches bugs that would only appear at runtime in JavaScript.")]), li_([strong_([text2("Expressiveness: ")]), text2("Foldable, Functor, and other abstractions let you express complex data transformations concisely.")])]), p_([text2(`This is why we say "Functional Programming For The Win" - not because it's academically interesting, but because it produces better visualization code that's easier to write, test, and maintain.`)])])]);
   };
   var handleAction23 = function(dictMonadAff) {
-    var liftAff34 = liftAff(monadAffHalogenM(dictMonadAff));
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftAff4 = liftAff(monadAffHalogenM(dictMonadAff));
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
-      return discard41(liftAff34(delay(100)))(function() {
-        return discard41(liftEffect82(drawAnscombeQuartet("#anscombe-quartet")))(function() {
-          return discard41(liftEffect82(drawSetOperations("#set-operations")))(function() {
+      return discard41(liftAff4(delay(100)))(function() {
+        return discard41(liftEffect52(drawAnscombeQuartet("#anscombe-quartet")))(function() {
+          return discard41(liftEffect52(drawSetOperations("#set-operations")))(function() {
             return pure50(unit);
           });
         });
@@ -36138,33 +36026,33 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var bind52 = /* @__PURE__ */ bind(bindHalogenM);
   var pure54 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize25 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render29 = function(v) {
     return div2([classes(["tutorial-page"])])([renderHeader2(TourFlow.value), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("3. Data Flow")]), p_([text2("Chord and Sankey diagrams are specialized visualizations for showing relationships and flows between entities. Both use visual metaphors - ribbons and flows - to make complex interconnections immediately comprehensible.")]), p_([text2("These visualization types excel at revealing patterns in network data, resource flows, and dependencies that would be difficult to understand in tabular form.")])]), section([classes(["tutorial-section"]), id3("chord")])([h2([classes(["tutorial-section-title"])])([text2("1. Chord Diagram: Traffic Flow Analysis")]), p_([text2("Chord diagrams show bidirectional relationships and flows between entities in a circular layout. They're particularly effective for displaying interconnected systems where flow goes in both directions between pairs.")]), p_([text2("This example shows traffic flow between 11 regions in Baton Rouge, Louisiana, supporting analysis for a new bridge location. Each arc represents a region, and the ribbons show the volume of trips between region pairs. Ribbons are colored by their origin region, making it easy to trace outbound traffic from each area.")]), div2([id3("chord-container"), classes(["viz-container"])])([]), p_([text2("Inspired by "), a([href("https://www.streetlightdata.com/planning-bridges-louisiana/"), target2("_blank")])([text2("StreetLight Data's bridge planning analysis")]), text2(". The circular layout reveals dominant traffic patterns - notice how West Baton Rouge (WBR, in red) and East Baton Rouge Main (EBR-M, in teal) serve as major hubs with thick ribbons to multiple regions.")])]), section([classes(["tutorial-section"]), id3("sankey")])([h2([classes(["tutorial-section-title"])])([text2("2. Sankey Diagram: Flow Visualization")]), p_([text2("Sankey diagrams visualize the flow of resources, energy, costs, or other quantities through a system. The width of each connection is proportional to the flow quantity, making it easy to identify dominant flows and inefficiencies.")]), p_([text2("This diagram shows energy flows in the UK energy system, from primary energy sources through transformation and distribution to final consumption. The Sankey layout uses a pure PureScript algorithm (not D3 FFI) that automatically positions nodes and creates smooth flow paths.")]), div2([id3("sankey-container"), classes(["viz-container"])])([]), p_([text2("The width of each flow represents the quantity of energy. Notice how the diagram reveals energy losses in transformation processes and highlights which sources contribute most to final consumption.")])])])]);
   };
   var handleAction24 = function(dictMonadAff) {
-    var liftAff34 = liftAff(monadAffHalogenM(dictMonadAff));
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftAff4 = liftAff(monadAffHalogenM(dictMonadAff));
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
-      return discard45(liftAff34(delay(100)))(function() {
-        return bind52(liftAff34(get3(string)("./data/energy.csv")))(function(sankeyResult) {
+      return discard45(liftAff4(delay(100)))(function() {
+        return bind52(liftAff4(get3(string)("./data/energy.csv")))(function(sankeyResult) {
           return discard45((function() {
             if (sankeyResult instanceof Left) {
               return pure54(unit);
             }
             ;
             if (sankeyResult instanceof Right) {
-              return liftEffect82(startSankey(sankeyResult.value0.body)("#sankey-container"));
+              return liftEffect52(startSankey(sankeyResult.value0.body)("#sankey-container"));
             }
             ;
             throw new Error("Failed pattern match at Component.Tour.TourFlow (line 45, column 5 - line 48, column 81): " + [sankeyResult.constructor.name]);
           })())(function() {
-            return discard45(liftEffect82(startChord("#chord-container")))(function() {
+            return discard45(liftEffect52(startChord("#chord-container")))(function() {
               return pure54(unit);
             });
           });
@@ -36838,11 +36726,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard46 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var pure55 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize26 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var renderDatasetTable = function(name16) {
     return function(points) {
@@ -36853,13 +36741,13 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
   var handleAction25 = function(dictMonadAff) {
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
-      return discard46(liftEffect82(threeLittleCirclesGreen("#three-circles-green-viz")))(function() {
-        return discard46(liftEffect82(threeLittleCirclesColored("#three-circles-colored-viz")))(function() {
-          return discard46(liftEffect82(parabolaNoAxes("#parabola-no-axes-viz")))(function() {
-            return discard46(liftEffect82(parabolaWithAxes("#parabola-with-axes-viz")))(function() {
-              return discard46(liftEffect82(anscombesQuartet("#anscombes-quartet-viz")))(function() {
+      return discard46(liftEffect52(threeLittleCirclesGreen("#three-circles-green-viz")))(function() {
+        return discard46(liftEffect52(threeLittleCirclesColored("#three-circles-colored-viz")))(function() {
+          return discard46(liftEffect52(parabolaNoAxes("#parabola-no-axes-viz")))(function() {
+            return discard46(liftEffect52(parabolaWithAxes("#parabola-with-axes-viz")))(function() {
+              return discard46(liftEffect52(anscombesQuartet("#anscombes-quartet-viz")))(function() {
                 return pure55(unit);
               });
             });
@@ -37703,22 +37591,22 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard47 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var pure58 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize27 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render31 = function(v) {
     return div2([classes(["tutorial-page"])])([renderHeader2(TourGraphAlgorithms.value), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Graph Algorithms: FP Wizardry")]), p_([text2("Graphs are everywhere in software: dependency trees, build systems, task schedulers, network routing, code analysis. This page demonstrates how "), strong_([text2("pure functional graph algorithms")]), text2(" combined with "), strong_([text2("declarative visualization")]), text2(" create powerful, elegant solutions to real-world problems.")]), p_([text2("We'll explore two classic algorithms that solve practical problems: topological sort (ordering tasks with dependencies) and transitive reduction (removing redundant edges). Both showcase the FP advantage: immutable transformations, pure functions, and easy-to-test logic.")])]), section([classes(["tutorial-section"]), id3("topological-sort-section")])([h2([classes(["tutorial-section-title"])])([text2("1. Topological Sort: Ordering Dependencies")]), p_([text2("Topological sort solves a fundamental problem: "), em_([text2('"In what order should I execute tasks that depend on each other?"')]), text2(" It's used in build systems (compile before link), package managers (install dependencies first), and task schedulers.")]), p_([text2("The algorithm takes a "), strong_([text2("directed acyclic graph (DAG)")]), text2(" and produces a "), strong_([text2("linear ordering")]), text2(" where every task comes after its dependencies. Below is a build pipeline with 7 tasks:")]), div2([id3("topological-sort"), classes(["viz-container"]), style("margin: 20px 0; text-align: center;")])([]), p_([text2("Notice how tasks are arranged in "), strong_([text2("layers")]), text2(" (L0, L1, L2, etc.). Each layer can execute in parallel since tasks in the same layer don't depend on each other. This is exactly what CI/CD systems do!")]), h3_([text2("The FP Win: Pure Graph Transformation")]), p_([text2("The topological sort implementation uses PureScript's "), code_([text2("Data.Graph")]), text2(" library with a purely functional algorithm:")]), pre([classes(["code-block"]), style("background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto;")])([code_([text2("-- Build a Graph from tasks\nbuildTaskGraph :: Array Task -> Graph String Task\nbuildTaskGraph tasks = fromMap graphMap\n  where\n    graphMap = foldl addTask Map.empty tasks\n    addTask acc task =\n      Map.insert task.id\n        (Tuple task (List.fromFoldable task.depends))\n        acc\n\n-- Pure topological sort (from Data.Graph)\ngetTopologicalOrder :: Array Task -> List String\ngetTopologicalOrder tasks =\n  topologicalSort (buildTaskGraph tasks)\n\n-- Compute layers: tasks with no deps at layer 0,\n-- tasks depending on layer 0 at layer 1, etc.\ncomputeLayers :: Array Task -> Map String Int\ncomputeLayers tasks = foldl processTask Map.empty sortedIds\n  where\n    sortedIds = List.reverse $ getTopologicalOrder tasks")])]), p_([text2("Key advantages:")]), ul_([li_([strong_([text2("Immutable: ")]), text2("Graph transformations return new graphs, never mutate")]), li_([strong_([text2("Pure: ")]), text2("Same input always produces same output, easy to test")]), li_([strong_([text2("Composable: ")]), text2("Topological sort \u2192 layer computation \u2192 visualization pipeline")]), li_([strong_([text2("Type-safe: ")]), text2("Compiler ensures graph structure is valid")])])]), section([classes(["tutorial-section"]), id3("transitive-reduction-section")])([h2([classes(["tutorial-section-title"])])([text2("2. Transitive Reduction: Removing Redundant Edges")]), p_([text2("Transitive reduction solves another practical problem: "), em_([text2('"Which dependencies are redundant?"')]), text2(" In dependency graphs, some edges are "), strong_([text2("implied by transitivity")]), text2(". For example, if A depends on B, and B depends on C, then we don't need to explicitly state that A depends on C.")]), p_([text2("Removing transitive edges simplifies graphs, making them easier to understand and maintain. This is crucial for build systems, package managers, and code dependency analysis.")]), div2([id3("transitive-reduction"), classes(["viz-container"]), style("margin: 20px 0; text-align: center;")])([]), p_([text2("The visualization shows "), strong_([text2("before and after")]), text2(". Redundant edges are highlighted in "), span2([style("color: #E74C3C;")])([text2("red")]), text2(" on the left, and removed on the right. Notice how the reduced graph preserves all reachability (A can still reach E through C \u2192 E) but with fewer explicit edges.")]), h3_([text2("The Algorithm: Reachability Analysis")]), p_([text2("The transitive reduction algorithm checks each edge: if the target is reachable through an "), em_([text2("alternate path")]), text2(", the edge is redundant:")]), pre([classes(["code-block"]), style("background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto;")])([code_([text2("-- Compute all nodes reachable from a given node\nreachableFrom :: String -> Graph -> Set String\nreachableFrom start graph = go Set.empty (Set.singleton start)\n  where\n    go visited frontier\n      | Set.isEmpty frontier = visited\n      | otherwise =\n          let neighbors = getNeighbors frontier\n              newNodes = Set.difference neighbors visited\n          in go (Set.union visited frontier) newNodes\n\n-- Remove transitive edges\ntransitiveReduction :: Graph -> Graph\ntransitiveReduction graph =\n  { nodes: graph.nodes\n  , edges: Map.mapWithKey reduceNode graph.edges\n  }\n  where\n    reduceNode source targets =\n      Set.filter (not <<< isTransitive source) targets\n\n    isTransitive source target =\n      -- Is target reachable through intermediate nodes?\n      let intermediates = Set.delete target targets\n      in Array.any (\\\\i -> Set.member target (reachableFrom i graph))\n           (Set.toUnfoldable intermediates)")])]), p_([text2("Key FP advantages:")]), ul_([li_([strong_([text2("Graph as value: ")]), text2("Original and reduced graphs coexist, easy to compare")]), li_([strong_([text2("Recursive traversal: ")]), text2("Reachability computed via tail-recursive function")]), li_([strong_([text2("Set operations: ")]), text2("Union, difference, membership checks are declarative and clear")]), li_([strong_([text2("Visualization-friendly: ")]), text2("Easy to highlight removed edges for before/after comparison")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Why FP Wins for Graph Algorithms")]), p_([text2("These examples demonstrate fundamental advantages of functional programming for graph algorithms:")]), ul_([li_([strong_([text2("Immutability enables comparison: ")]), text2("We can keep the original graph and the transformed graph, making before/after visualizations trivial.")]), li_([strong_([text2("Purity enables testing: ")]), text2("No hidden state, no side effects. Feed in a graph, get back a result. Test with edge cases, verify correctness.")]), li_([strong_([text2("Composition enables pipelines: ")]), text2("Topological sort \u2192 layer computation \u2192 layout \u2192 visualization. Each step is a pure function.")]), li_([strong_([text2("Types prevent bugs: ")]), text2("The compiler ensures you don't create cycles in a DAG, or reference non-existent nodes.")])]), p_([text2("Real-world applications:")]), ul_([li_([text2("Build systems: Bazel, Buck, Gradle all use topological sort for parallelization")]), li_([text2("Package managers: npm, cargo, pip use dependency resolution with cycle detection")]), li_([text2("Task schedulers: Apache Airflow, Luigi, Prefect order DAG execution")]), li_([text2("Code analysis: Import graphs, call graphs, module dependencies")])]), p_([text2("This is "), strong_([text2("functional programming wizardry")]), text2(": elegant algorithms solving hard problems, with visualization making the solutions immediately obvious.")])])]), footer([classes(["tutorial-footer"])])([p_([text2("Want more FP demonstrations? Check out "), a([href("#" + routeToPath(TourFPFTW.value))])([text2("FP For The Win")]), text2(" for examples with Maps, Sets, and functional patterns.")])])]);
   };
   var handleAction26 = function(dictMonadAff) {
-    var liftAff34 = liftAff(monadAffHalogenM(dictMonadAff));
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftAff4 = liftAff(monadAffHalogenM(dictMonadAff));
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
-      return discard47(liftAff34(delay(100)))(function() {
-        return discard47(liftEffect82(drawTopologicalSort("#topological-sort")))(function() {
-          return discard47(liftEffect82(drawTransitiveReduction("#transitive-reduction")))(function() {
+      return discard47(liftAff4(delay(100)))(function() {
+        return discard47(liftEffect52(drawTopologicalSort("#topological-sort")))(function() {
+          return discard47(liftEffect52(drawTransitiveReduction("#transitive-reduction")))(function() {
             return pure58(unit);
           });
         });
@@ -40956,26 +40844,26 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard55 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var pure60 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize28 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render32 = function(v) {
     return div2([classes(["tutorial-page"])])([renderHeader2(TourHierarchies.value), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("3. Hierarchical Layouts")]), p_([text2("Hierarchical data structures are everywhere in computing: file systems, organizational charts, taxonomies, JSON documents, and abstract syntax trees. Different visualization layouts reveal different aspects of the same hierarchical data.")]), p_([text2("This page demonstrates different ways to visualize hierarchical datasets. Use the links below to explore each layout type and see how each representation emphasizes different relationships in the data.")])]), section([classes(["tutorial-section"]), id3("node-link")])([h2([classes(["tutorial-section-title"])])([text2("1. Node-Link Diagrams (Trees and Dendrograms)")]), p_([text2("Node-link diagrams show hierarchies as connected nodes, with parent-child relationships represented by links. These layouts can be oriented horizontally, vertically, or radially.")]), h3_([text2("Vertical Tidy Tree")]), p_([text2("Root at the top, grows downward. Compact tidy tree layout using the Reingold-Tilford algorithm. Common in organizational charts.")]), div2([id3("tree-viz"), classes(["viz-container"])])([]), h3_([text2("Horizontal Tidy Tree")]), p_([text2("Root on the left, grows to the right. Efficient use of horizontal space.")]), div2([id3("horizontal-tree-viz"), classes(["viz-container"])])([]), h3_([text2("Radial Tidy Tree")]), p_([text2("Emanates from center in a circular layout. Space-efficient for large hierarchies.")]), div2([id3("radial-tree-viz"), classes(["viz-container"])])([]), h3_([text2("Dendrograms (Cluster Diagrams)")]), p_([text2("Dendrogram layouts place all leaf nodes at the same level, creating a uniform appearance useful for comparing leaf nodes.")]), div2([id3("cluster-viz"), classes(["viz-container"])])([]), p_([text2("We also have an interactive demo showing "), a([href("#" + routeToPath(AnimatedTreeCluster.value))])([text2("animated transitions between Tree and Cluster layouts")]), text2(" that demonstrates how the same data looks different with these two algorithms.")])]), section([classes(["tutorial-section"]), id3("adjacency")])([h2([classes(["tutorial-section-title"])])([text2("2. Adjacency Diagrams (Icicle/Sunburst)")]), p_([text2("Adjacency diagrams show hierarchy through relative placement of rectangles or arcs. They're space-efficient and can encode quantitative values through area.")]), h3_([text2("Icicle Diagram (Partition)")]), p_([text2("Rectangular subdivisions showing hierarchy through relative placement. Each level of the hierarchy is a horizontal band, with children subdividing their parent's width. Area encodes quantitative values.")]), div2([id3("partition-viz"), classes(["viz-container"])])([]), h3_([text2("Sunburst Diagram")]), p_([text2("The radial equivalent of icicle diagrams. The root is at the center, and each ring represents a level of the hierarchy. Angular width represents quantitative value or number of children.")]), div2([id3("sunburst-viz"), classes(["viz-container"])])([])]), section([classes(["tutorial-section"]), id3("enclosure")])([h2([classes(["tutorial-section-title"])])([text2("3. Enclosure Diagrams (Treemap and Circle Packing)")]), p_([text2("Enclosure diagrams show hierarchy through containment, where parent elements completely enclose their children. These layouts efficiently use space and make quantitative comparisons easy.")]), h3_([text2("Treemap")]), p_([text2("Space-efficient rectangular subdivisions where area is proportional to value. Treemaps show hierarchy through nesting and excel at displaying large amounts of hierarchical data in a compact space. The recursive subdivision algorithm creates rectangles whose area represents quantitative values.")]), div2([id3("treemap-viz"), classes(["viz-container"])])([]), h3_([text2("Circle Packing")]), p_([text2("Tightly nested circles showing hierarchy through containment. Area encodes values, and the circular layout readily shows topology. The packing algorithm positions circles to minimize wasted space while maintaining clear hierarchical relationships.")]), div2([id3("pack-viz"), classes(["viz-container"])])([])]), section([classes(["tutorial-section"]), id3("edge-bundling")])([h2([classes(["tutorial-section-title"])])([text2("4. Hierarchical Edge Bundling")]), p_([text2("Edge bundling is a technique for reducing visual clutter in graphs with many edges. Edges are bundled together along the hierarchical structure, creating visually appealing flow patterns that reveal high-level connectivity patterns.")]), p_([text2("This technique is particularly effective for visualizing dependencies, relationships, or flows in large hierarchical datasets like software dependencies, communication networks, or biological pathways.")]), p_([em_([text2("[Edge bundling not yet implemented in TreeAPI - coming soon]")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Interactive Exploration")]), p_([text2("To see a working example of hierarchical layouts with interactive switching between tree and cluster algorithms, visit the "), a([href("#" + routeToPath(AnimatedTreeCluster.value))])([text2("Animated Tree \u2194 Cluster demo")]), text2(" which shows smooth transitions between different layouts of the same hierarchical data.")]), p_([text2("More hierarchical layout examples will be added to the "), a([href("#" + routeToPath(Gallery.value))])([text2("Examples Gallery")]), text2(" as they are implemented in TreeAPI.")])])])]);
   };
   var handleAction27 = function(dictMonadAff) {
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
-      return discard55(liftEffect82(treeViz("#tree-viz")))(function() {
-        return discard55(liftEffect82(horizontalTreeViz("#horizontal-tree-viz")))(function() {
-          return discard55(liftEffect82(radialTreeViz("#radial-tree-viz")))(function() {
-            return discard55(liftEffect82(clusterViz("#cluster-viz")))(function() {
-              return discard55(liftEffect82(partitionViz("#partition-viz")))(function() {
-                return discard55(liftEffect82(sunburstViz("#sunburst-viz")))(function() {
-                  return discard55(liftEffect82(treemapViz("#treemap-viz")))(function() {
-                    return discard55(liftEffect82(packViz("#pack-viz")))(function() {
+      return discard55(liftEffect52(treeViz("#tree-viz")))(function() {
+        return discard55(liftEffect52(horizontalTreeViz("#horizontal-tree-viz")))(function() {
+          return discard55(liftEffect52(radialTreeViz("#radial-tree-viz")))(function() {
+            return discard55(liftEffect52(clusterViz("#cluster-viz")))(function() {
+              return discard55(liftEffect52(partitionViz("#partition-viz")))(function() {
+                return discard55(liftEffect52(sunburstViz("#sunburst-viz")))(function() {
+                  return discard55(liftEffect52(treemapViz("#treemap-viz")))(function() {
+                    return discard55(liftEffect52(packViz("#pack-viz")))(function() {
                       return pure60(unit);
                     });
                   });
@@ -41072,9 +40960,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard56 = /* @__PURE__ */ discard(discardUnit);
   var append26 = /* @__PURE__ */ append(semigroupArray);
   var triggerMermaidRendering = function(dictMonadEffect) {
-    var liftEffect82 = liftEffect(dictMonadEffect);
-    return discard56(dictMonadEffect.Monad0().Bind1())(liftEffect82(logMessage("PureScript: triggerMermaidRendering called")))(function() {
-      return liftEffect82(renderMermaidDiagrams_);
+    var liftEffect52 = liftEffect(dictMonadEffect);
+    return discard56(dictMonadEffect.Monad0().Bind1())(liftEffect52(logMessage("PureScript: triggerMermaidRendering called")))(function() {
+      return liftEffect52(renderMermaidDiagrams_);
     });
   };
   var mermaidDiagram = function(code2) {
@@ -41643,11 +41531,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return ExNestedStructure2;
   })();
   var Initialize29 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var SelectExample = /* @__PURE__ */ (function() {
     function SelectExample3(value0) {
@@ -41817,21 +41705,21 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
   var renderExample = function(dictMonadAff) {
     var monadEffectHalogenM2 = monadEffectHalogenM(dictMonadAff.MonadEffect0());
-    var liftEffect82 = liftEffect(monadEffectHalogenM2);
+    var liftEffect52 = liftEffect(monadEffectHalogenM2);
     var triggerMermaidRendering8 = triggerMermaidRendering(monadEffectHalogenM2);
     return function(selection2) {
       var tree3 = getExampleTree(selection2);
-      return discard58(liftEffect82(runD3v2M(bind68(select37("#d3-output"))(function(container) {
+      return discard58(liftEffect52(runD3v2M(bind68(select37("#d3-output"))(function(container) {
         return bind68(renderTree56(container)(tree3))(function() {
           return pure61(unit);
         });
       }))))(function() {
         var english = runEnglish(tree3);
-        return bind126(liftEffect82(runMermaidTree(tree3)))(function(mermaid) {
+        return bind126(liftEffect52(runMermaidTree(tree3)))(function(mermaid) {
           var ast = toAST(tree3);
           var astPretty = prettyPrintAST(ast);
           var astTree = astToTreeVisualization(ast);
-          return discard58(liftEffect82(runD3v2M(bind68(select37("#ast-viz-output"))(function(astContainer) {
+          return discard58(liftEffect52(runD3v2M(bind68(select37("#ast-viz-output"))(function(astContainer) {
             return bind68(renderTree56(astContainer)(astTree))(function() {
               return pure61(unit);
             });
@@ -41860,11 +41748,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
   var handleAction28 = function(dictMonadAff) {
-    var liftAff34 = liftAff(monadAffHalogenM(dictMonadAff));
+    var liftAff4 = liftAff(monadAffHalogenM(dictMonadAff));
     var renderExample1 = renderExample(dictMonadAff);
     return function(v) {
       if (v instanceof Initialize29) {
-        return discard58(liftAff34(delay(100)))(function() {
+        return discard58(liftAff4(delay(100)))(function() {
           return renderExample1(ExThreeLittleCircles.value);
         });
       }
@@ -42379,21 +42267,21 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var initialize3 = /* @__PURE__ */ initialize(foldableArray)(functorArray);
   var $$void12 = /* @__PURE__ */ $$void(functorAff);
   var Initialize30 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render34 = function(v) {
     return div2([classes(["tutorial-page"])])([renderHeader2(TourLesMisGUP.value), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("General Update Pattern: Dynamic Graphs")]), p_([text2("The "), strong_([text2("General Update Pattern (GUP)")]), text2(" is D3's approach to handling changing data. When your dataset changes, you need to:")]), ul_([li_([strong_([text2("Enter: ")]), text2("Create new elements for new data")]), li_([strong_([text2("Update: ")]), text2("Modify existing elements for persisting data")]), li_([strong_([text2("Exit: ")]), text2("Remove old elements for deleted data")])]), p_([text2("Below, watch as nodes randomly enter and exit the graph every few seconds. The TreeAPI handles all the complexity automatically:")])]), section([classes(["tutorial-section"]), id3("lesmis-gup-demo")])([h2([classes(["tutorial-section-title"])])([text2("Watch the Pattern in Action")]), div2([id3("lesmis-gup-auto-viz"), classes(["viz-container"]), style("margin: 20px 0; text-align: center; min-height: 600px;")])([]), div2([classes(["gup-legend"]), style("text-align: center; margin: 20px 0;")])([div2([style("display: inline-block; margin: 0 20px;")])([span2([style("display: inline-block; width: 12px; height: 12px; background: green; border-radius: 50%; margin-right: 8px;")])([]), text2("Entering")]), div2([style("display: inline-block; margin: 0 20px;")])([span2([style("display: inline-block; width: 12px; height: 12px; background: #666; border-radius: 50%; margin-right: 8px;")])([]), text2("Staying")]), div2([style("display: inline-block; margin: 0 20px;")])([span2([style("display: inline-block; width: 12px; height: 12px; background: brown; border-radius: 50%; margin-right: 8px;")])([]), text2("Exiting")])]), p_([text2("Notice how:")]), ul_([li_([strong_([text2("Entering nodes")]), text2(" appear in "), span2([style("color: green;")])([text2("green")]), text2(" at their initial positions, then transition to their group color")]), li_([strong_([text2("Staying nodes")]), text2(" maintain their group colors and smoothly adjust positions")]), li_([strong_([text2("Exiting nodes")]), text2(" turn "), span2([style("color: brown;")])([text2("brown")]), text2(", lose their links, and fly away before being removed")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("How TreeAPI Handles GUP")]), p_([text2("With traditional D3, you manually handle enter/update/exit with verbose code. With TreeAPI, you just call "), code_([text2("joinData")]), text2(" and get three selections back:")]), pre([classes(["code-block"]), style("background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto;")])([code_([text2('-- Join new data with existing elements\nJoinResult { enter, update, exit } <- joinData newNodes "circle" nodeGroup\n\n-- ENTER: Create new elements (green initially)\nenterNodes <- renderData Circle\n  [ fill "green", radius 5.0, ... ]\n  enter\n\n-- Transition enter nodes to final color\nwithTransition enterTransition enterNodes\n  [ fill \\\\n -> groupColor n.group ]\n\n-- UPDATE: Update existing elements\nsetAttrs [ fill \\\\n -> groupColor n.group ] update\n\n-- EXIT: Transition out and remove\nsetAttrsExit [ fill "brown" ] exit\nwithTransitionExit exitTransition exit []')])]), p_([text2("The TreeAPI:")]), ul_([li_([text2("Automatically tracks which elements correspond to which data (via key function)")]), li_([text2("Separates new data (enter), existing data (update), and removed data (exit)")]), li_([text2("Handles transitions and removals declaratively")]), li_([text2("Updates the simulation state to match the new graph structure")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Why GUP Matters")]), p_([text2("The General Update Pattern is essential for real-world visualizations:")]), ul_([li_([strong_([text2("Streaming data: ")]), text2("Real-time dashboards where data arrives continuously")]), li_([strong_([text2("User interactions: ")]), text2("Filtering, searching, or drilling down changes what's displayed")]), li_([strong_([text2("Animations: ")]), text2("Smooth transitions make changes comprehensible instead of jarring")]), li_([strong_([text2("Code clarity: ")]), text2("Declarative approach is easier to understand and maintain")])]), p_([text2("This pattern works for any visualization - bar charts, network graphs, maps, timelines. Master it once, use it everywhere.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Explore More")]), p_([text2("See the full-featured version with manual controls, grid layout, and phylotaxis at "), a([href("#" + routeToPath(LesMisGUPTree.value))])([text2("Les Mis\xE9rables GUP Tree")]), text2(".")]), p_([text2("Or continue the tour to see more advanced examples in "), a([href("#" + routeToPath(TourShowcase.value))])([text2("Showcase")]), text2(".")])])])]);
   };
   var handleAction29 = function(dictMonadAff) {
-    var liftAff34 = liftAff(monadAffHalogenM(dictMonadAff));
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftAff4 = liftAff(monadAffHalogenM(dictMonadAff));
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
-      return discard60(liftAff34(delay(100)))(function() {
-        return bind70(liftAff34(get3(string)("./data/miserables.json")))(function(lesMisResponse) {
+      return discard60(liftAff4(delay(100)))(function() {
+        return bind70(liftAff4(get3(string)("./data/miserables.json")))(function(lesMisResponse) {
           return discard60((function() {
             if (lesMisResponse instanceof Left) {
               return pure63(unit);
@@ -42401,7 +42289,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             ;
             if (lesMisResponse instanceof Right) {
               var graph = readGraphFromFileContents(new Right(lesMisResponse.value0));
-              return bind70(liftEffect82(getWindowWidthHeight))(function(v1) {
+              return bind70(liftEffect52(getWindowWidthHeight))(function(v1) {
                 var manyBodyForce = createForce("charge")(new RegularForce(ForceManyBody.value))(allNodes)([strengthVal(-30)]);
                 var linksForce2 = createLinkForce(allNodes)([distanceVal(30)]);
                 var collisionForce = createForce("collision")(new RegularForce(ForceCollide.value))(allNodes)([radiusVal(6)]);
@@ -42410,7 +42298,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 var initialState4 = {
                   simulation: initialSimulationState(forceLibrary8)
                 };
-                return liftAff34($$void12(runD3v2SimM(initialState4)(drawLesMisGUPAuto(graph.nodes)(graph.links)("#lesmis-gup-auto-viz")(v1.value0)(v1.value1))));
+                return liftAff4($$void12(runD3v2SimM(initialState4)(drawLesMisGUPAuto(graph.nodes)(graph.links)("#lesmis-gup-auto-viz")(v1.value0)(v1.value1))));
               });
             }
             ;
@@ -42848,11 +42736,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var pure120 = /* @__PURE__ */ pure(applicativeHalogenM);
   var get21 = /* @__PURE__ */ get(monadStateHalogenM);
   var Initialize31 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var Finalize3 = /* @__PURE__ */ (function() {
     function Finalize5() {
@@ -42910,12 +42798,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   })();
   var handleAction30 = function(dictMonadAff) {
-    var liftAff34 = liftAff(monadAffHalogenM(dictMonadAff));
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftAff4 = liftAff(monadAffHalogenM(dictMonadAff));
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
       if (v instanceof Initialize31) {
-        return discard63(liftAff34(delay(100)))(function() {
-          return bind128(liftEffect82(threeLittleCirclesTransition("#viz")))(function(trigger) {
+        return discard63(liftAff4(delay(100)))(function() {
+          return bind128(liftEffect52(threeLittleCirclesTransition("#viz")))(function(trigger) {
             return discard63(modify_16(function(v1) {
               var $37 = {};
               for (var $38 in v1) {
@@ -42928,7 +42816,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               $37.colorMixingTrigger = new Just(trigger);
               return $37;
             }))(function() {
-              return bind128(liftEffect82(staggeredCircles("#staggered-container")))(function(staggered) {
+              return bind128(liftEffect52(staggeredCircles("#staggered-container")))(function(staggered) {
                 return discard63(modify_16(function(v1) {
                   var $40 = {};
                   for (var $41 in v1) {
@@ -42941,10 +42829,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   $40.staggeredTrigger = new Just(staggered);
                   return $40;
                 }))(function() {
-                  return bind128(liftEffect82(eval_D3M(exGeneralUpdatePattern3("#gup-container"))))(function(update8) {
-                    return bind128(fork(forever3(bind128(liftEffect82(getLetters2))(function(letters) {
-                      return discard63(liftEffect82(applySecond4(runD3M(update8(letters)))(pure65(unit))))(function() {
-                        return liftAff34(delay(2300));
+                  return bind128(liftEffect52(eval_D3M(exGeneralUpdatePattern3("#gup-container"))))(function(update8) {
+                    return bind128(fork(forever3(bind128(liftEffect52(getLetters2))(function(letters) {
+                      return discard63(liftEffect52(applySecond4(runD3M(update8(letters)))(pure65(unit))))(function() {
+                        return liftAff4(delay(2300));
                       });
                     }))))(function(forkId) {
                       return discard63(modify_16(function(v1) {
@@ -42959,21 +42847,21 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                         $43.gupFiber = new Just(forkId);
                         return $43;
                       }))(function() {
-                        return bind128(liftAff34(get3(json)("./data/flare-2.json")))(function(flareResult) {
+                        return bind128(liftAff4(get3(json)("./data/flare-2.json")))(function(flareResult) {
                           return discard63((function() {
                             if (flareResult instanceof Left) {
                               return pure120(unit);
                             }
                             ;
                             if (flareResult instanceof Right) {
-                              return liftEffect82(startAnimatedTreeClusterLoop(flareResult.value0.body)("#animated-tree-container"));
+                              return liftEffect52(startAnimatedTreeClusterLoop(flareResult.value0.body)("#animated-tree-container"));
                             }
                             ;
                             throw new Error("Failed pattern match at Component.Tour.TourMotion (line 86, column 5 - line 90, column 104): " + [flareResult.constructor.name]);
                           })())(function() {
-                            return bind128(liftAff34(get3(string)("./data/miserables.json")))(function(lesMisResult) {
+                            return bind128(liftAff4(get3(string)("./data/miserables.json")))(function(lesMisResult) {
                               var lesMisModel = readGraphFromFileContents(lesMisResult);
-                              return discard63(liftEffect82(startLesMisSimple(lesMisModel)("#lesmis-container")))(function() {
+                              return discard63(liftEffect52(startLesMisSimple(lesMisModel)("#lesmis-container")))(function() {
                                 return pure120(unit);
                               });
                             });
@@ -43025,7 +42913,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           }
           ;
           if (state3.colorMixingTrigger instanceof Just) {
-            return liftEffect82(createTransitionTrigger(state3.colorMixingTrigger.value0));
+            return liftEffect52(createTransitionTrigger(state3.colorMixingTrigger.value0));
           }
           ;
           throw new Error("Failed pattern match at Component.Tour.TourMotion (line 108, column 5 - line 110, column 96): " + [state3.colorMixingTrigger.constructor.name]);
@@ -43039,7 +42927,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           }
           ;
           if (state3.staggeredTrigger instanceof Just) {
-            return liftEffect82(state3.staggeredTrigger.value0.trigger);
+            return liftEffect52(state3.staggeredTrigger.value0.trigger);
           }
           ;
           throw new Error("Failed pattern match at Component.Tour.TourMotion (line 114, column 5 - line 116, column 45): " + [state3.staggeredTrigger.constructor.name]);
@@ -43053,7 +42941,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           }
           ;
           if (state3.staggeredTrigger instanceof Just) {
-            return liftEffect82(state3.staggeredTrigger.value0.reset);
+            return liftEffect52(state3.staggeredTrigger.value0.reset);
           }
           ;
           throw new Error("Failed pattern match at Component.Tour.TourMotion (line 120, column 5 - line 122, column 41): " + [state3.staggeredTrigger.constructor.name]);
@@ -43739,21 +43627,21 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard66 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var pure68 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize32 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render36 = function(v) {
     return div2([classes(["tutorial-page"])])([renderHeader2(TourProfessional.value), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("2. Typical Charts")]), p_([text2("Real-world examples of common chart types showing state-level US population data and economic indicators. These are the kinds of charts you'd typically create for data analysis and reporting - more complex than the foundations, but without hierarchies, animations, transitions, or physical simulations.")]), p_([text2("Each example demonstrates best practices for scales, axes, legends, and color coding to create clear and informative visualizations.")])]), section([classes(["tutorial-section"]), id3("grouped-bar")])([h2([classes(["tutorial-section-title"])])([text2("1. Grouped Bar Chart")]), p_([text2("US population by state and age group. This grouped bar chart shows population distribution across 6 states (CA, TX, FL, NY, PA, IL) broken down into 9 age groups. Each state has its own cluster of bars, with colors representing different age groups.")]), div2([classes(["tutorial-viz-container"])])([div2([id3("grouped-bar-viz"), classes(["grouped-bar-viz"])])([])]), p_([text2("The chart uses nested band scales: an outer scale positions each state cluster, and an inner scale positions individual bars within each cluster. The population values are scaled linearly to bar heights, with colors from the Spectral color scheme to distinguish age groups.")]), p_([text2("View this example "), a([href("#" + routeToPath(new Example("grouped-bar-chart")))])([text2("with full source code")]), text2(".")])]), section([classes(["tutorial-section"]), id3("multi-line")])([h2([classes(["tutorial-section-title"])])([text2("2. Multi-Line Chart")]), p_([text2("Unemployment rates over time for 42 US metro areas from 2000 to 2013. This chart shows how unemployment fluctuated across the country, clearly illustrating the impact of the 2008 financial crisis and subsequent recovery. With so many overlapping lines, the data would be impossible to read without interaction.")]), div2([classes(["tutorial-viz-container"])])([div2([id3("multi-line-viz"), classes(["multi-line-viz"])])([])]), p_([text2("All lines are drawn in light gray using SVG path elements. The chart uses linear scales for time (x-axis) and unemployment percentage (y-axis), with axis labels for context.")]), p_([strong_([text2("Try hovering over the lines! ")]), text2("This is the key feature: when you hover over any line, it darkens while the others remain light gray, making it easy to trace that individual metro area through the tangle of overlapping data. This demonstrates a fundamental advantage of web-based visualization over print: interactivity makes complex, dense datasets readable. In a static image, these 42 overlapping lines would be nearly impossible to interpret.")])]), section([classes(["tutorial-section"]), id3("radial-stacked")])([h2([classes(["tutorial-section-title"])])([text2("3. Radial Stacked Bar Chart")]), p_([text2('The same US state population data as the grouped bar chart, but visualized in polar coordinates. Each state gets a wedge around the circle, with age groups stacked radially from the center outward. This "sunburst-like" layout efficiently uses space and creates an aesthetically pleasing circular composition.')]), div2([classes(["tutorial-viz-container"])])([div2([id3("radial-stacked-viz"), classes(["radial-stacked-viz"])])([])]), p_([text2("Radial charts work best for cyclical or seasonal data, but we're using the same state population data here to demonstrate how the same dataset can be visualized in multiple ways. The chart uses polar coordinates with an angular scale (\u03B8) dividing the circle by states and a radial scale (r) for population. Arc paths are generated for each segment, with the same Spectral color scheme as the grouped bar chart. State labels are positioned around the perimeter.")])])])]);
   };
   var handleAction31 = function(dictMonadAff) {
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
-      return discard66(liftEffect82(groupedBarChart("#grouped-bar-viz")))(function() {
-        return discard66(liftEffect82(multiLineChart("#multi-line-viz")))(function() {
-          return discard66(liftEffect82(radialStackedBar("#radial-stacked-viz")))(function() {
+      return discard66(liftEffect52(groupedBarChart("#grouped-bar-viz")))(function() {
+        return discard66(liftEffect52(multiLineChart("#multi-line-viz")))(function() {
+          return discard66(liftEffect52(radialStackedBar("#radial-stacked-viz")))(function() {
             return pure68(unit);
           });
         });
@@ -43779,11 +43667,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.Tour.TourShowcase/index.js
   var pure69 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize33 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render37 = function(v) {
     return div2([classes(["tutorial-page"])])([renderHeader2(TourShowcase.value), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Showcase: Flagship Demonstrations")]), p_([text2("This page highlights the most impressive and complete demonstrations of the PS<$>D3 library. These examples combine multiple techniques from the tour to create sophisticated, production-ready visualizations.")]), p_([text2("Each showcase example demonstrates the full power of combining PureScript's type safety with D3's visualization capabilities, showing what's possible when you bring together advanced programming language features and data visualization.")])]), section([classes(["tutorial-section"]), id3("animated-tree-cluster")])([h2([classes(["tutorial-section-title"])])([text2("Animated Tree \u2194 Cluster Transitions")]), p_([text2("This flagship demonstration shows smooth, bidirectional animations between Tree and Cluster layouts. It visualizes 252 nodes from the Flare visualization toolkit, demonstrating:")]), ul_([li_([text2("Smooth transitions using D3's data join with identity-based keys")]), li_([text2("Height-based child sorting to eliminate crossovers during animation")]), li_([text2("Extent-based centering for balanced layout")]), li_([text2("Complex hierarchical data with 252 nodes transitioning smoothly")])]), p_([a([href("#" + routeToPath(AnimatedTreeCluster.value))])([text2("View the Animated Tree \u2194 Cluster demonstration \u2192")])]), p_([text2("This example showcases the TreeAPI's capability to handle complex layout transitions with proper enter/update/exit patterns, ensuring every node maintains its identity across layout changes for smooth, comprehensible animations.")])]), section([classes(["tutorial-section"]), id3("lesmis-gup-tree")])([h2([classes(["tutorial-section-title"])])([text2("Les Mis\xE9rables with General Update Pattern")]), p_([text2("A proof-of-concept combining the General Update Pattern (GUP) with Tree API and dynamic layouts. This demonstration shows character relationships from Victor Hugo's Les Mis\xE9rables with dynamic updates and transitions.")]), p_([a([href("#" + routeToPath(LesMisGUPTree.value))])([text2("View the Les Mis\xE9rables GUP demonstration \u2192")])]), p_([text2("This example demonstrates how the library can combine multiple advanced techniques: hierarchical layouts, force-directed positioning, and the General Update Pattern for smooth enter/update/exit transitions.")])]), section([classes(["tutorial-section"]), id3("module-graph")])([h2([classes(["tutorial-section-title"])])([text2("Module Dependency Graph (Dogfooding)")]), p_([text2('A self-referential visualization showing the module dependencies of the PS<$>D3 library itself. This is "dogfooding" - using our library to visualize its own structure.')]), p_([a([href("#" + routeToPath(ModuleGraph.value))])([text2("View the Module Dependency Graph \u2192")])]), p_([text2("This example shows:")]), ul_([li_([text2("How the library can visualize its own architecture")]), li_([text2("Hierarchical relationships between modules")]), li_([text2("The power of tree layouts for understanding code structure")]), li_([text2("Self-hosting capabilities of the visualization system")])])]), section([classes(["tutorial-section"]), id3("gallery")])([h2([classes(["tutorial-section-title"])])([text2("Full Examples Gallery")]), p_([text2("For a complete collection of all working examples with source code, visit the "), a([href("#" + routeToPath(Gallery.value))])([text2("Examples Gallery")]), text2(". The gallery provides a comprehensive view of all TreeAPI examples, organized by category and difficulty level.")]), p_([text2("Each example in the gallery includes:")]), ul_([li_([text2("Full source code with syntax highlighting")]), li_([text2("Interactive demonstrations")]), li_([text2("Detailed explanations of techniques used")]), li_([text2("Links to relevant API documentation")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Coming Soon")]), p_([text2("As more sophisticated examples are implemented in TreeAPI, they will be featured here in the showcase. Future additions may include:")]), ul_([li_([text2("Interactive chord diagrams with relationship filtering")]), li_([text2("Animated Sankey diagrams showing flow changes over time")]), li_([text2("Force-directed graphs with custom physics simulations")]), li_([text2("Multi-view coordinated visualizations")]), li_([text2("Real-time data streaming visualizations")]), li_([text2("Complex interactive dashboards combining multiple visualization types")])]), p_([text2("The goal is to demonstrate that PureScript + D3 can handle any visualization challenge, with better type safety, composability, and maintainability than pure JavaScript solutions.")])])])]);
@@ -43924,11 +43812,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
 
   // output/Component.WealthHealth.Actions/index.js
   var Initialize34 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var DataLoaded = /* @__PURE__ */ (function() {
     function DataLoaded2(value0) {
@@ -44580,13 +44468,13 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
   var handleAction33 = function(dictMonadAff) {
-    var liftAff34 = liftAff(monadAffHalogenM(dictMonadAff));
+    var liftAff4 = liftAff(monadAffHalogenM(dictMonadAff));
     var MonadEffect0 = dictMonadAff.MonadEffect0();
     var liftEffect122 = liftEffect(monadEffectHalogenM(MonadEffect0));
     return function(dictMonadEffect) {
       return function(v) {
         if (v instanceof Initialize34) {
-          return bind77(liftAff34(loadNationsData))(function(result) {
+          return bind77(liftAff4(loadNationsData))(function(result) {
             if (result instanceof Left) {
               return discard118(liftEffect122(log2("Error loading data: " + result.value0)))(function() {
                 return pure72(unit);
@@ -44626,7 +44514,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               $58.currentYear = v.value0.yearRange.min;
               return $58;
             }))(function() {
-              return discard118(liftAff34(delay(100)))(function() {
+              return discard118(liftAff4(delay(100)))(function() {
                 return bind77(liftEffect122(initWealthHealth("#wealth-health-viz")))(function(updateFn) {
                   return discard118(modify_17(function(v1) {
                     var $61 = {};
@@ -44702,7 +44590,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                       $74.animationSubscriptionId = new Just(subscriptionId);
                       return $74;
                     }))(function() {
-                      return $$void14(liftAff34(forkAff(forever4(discard213(delay(intervalMs))(function() {
+                      return $$void14(liftAff4(forkAff(forever4(discard213(delay(intervalMs))(function() {
                         return liftEffect45(notify(v1.listener)(Tick.value));
                       })))));
                     });
@@ -44968,30 +44856,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         var componentSlot22 = componentSlot1(dictOrd);
         return function(label5) {
           return function(p2) {
-            return function(component83) {
+            return function(component51) {
               return function(input3) {
-                return widget(new ComponentSlot(componentSlot22(label5)(p2)(component83)(input3)($$const(Nothing.value))));
-              };
-            };
-          };
-        };
-      };
-    };
-  };
-  var slot = function() {
-    return function(dictIsSymbol) {
-      var componentSlot1 = componentSlot2(dictIsSymbol);
-      return function(dictOrd) {
-        var componentSlot22 = componentSlot1(dictOrd);
-        return function(label5) {
-          return function(p2) {
-            return function(component83) {
-              return function(input3) {
-                return function(outputQuery) {
-                  return widget(new ComponentSlot(componentSlot22(label5)(p2)(component83)(input3)(function($11) {
-                    return Just.create(outputQuery($11));
-                  })));
-                };
+                return widget(new ComponentSlot(componentSlot22(label5)(p2)(component51)(input3)($$const(Nothing.value))));
               };
             };
           };
@@ -45009,16 +44876,16 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }
   })(ordUnit);
   var Initialize35 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var handleAction34 = function(dictMonadAff) {
-    var liftAff34 = liftAff(monadAffHalogenM(dictMonadAff));
+    var liftAff4 = liftAff(monadAffHalogenM(dictMonadAff));
     return function(v) {
-      return discard69(liftAff34(delay(100)))(function() {
+      return discard69(liftAff4(delay(100)))(function() {
         return pure73(unit);
       });
     };
@@ -45138,11 +45005,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return LesMisForce2;
   })();
   var Initialize36 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var SelectExample2 = /* @__PURE__ */ (function() {
     function SelectExample3(value0) {
@@ -45155,7 +45022,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return SelectExample3;
   })();
   var handleAction35 = function(dictMonadAff) {
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
       if (v instanceof Initialize36) {
         return handleAction35(dictMonadAff)(new SelectExample2(ThreeCircles.value));
@@ -45174,49 +45041,49 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           $21.currentExample = v.value0;
           return $21;
         }))(function() {
-          return discard70(liftEffect82(clearViz))(function() {
+          return discard70(liftEffect52(clearViz))(function() {
             if (v.value0 instanceof ThreeCircles) {
-              return liftEffect82(threeLittleCircles);
+              return liftEffect52(threeLittleCircles);
             }
             ;
             if (v.value0 instanceof ThreeCirclesTransition) {
-              return liftEffect82($$void15(threeLittleCirclesTransition("#viz")));
+              return liftEffect52($$void15(threeLittleCirclesTransition("#viz")));
             }
             ;
             if (v.value0 instanceof SimpleTree) {
-              return liftEffect82(testSimpleTree);
+              return liftEffect52(testSimpleTree);
             }
             ;
             if (v.value0 instanceof NestedElements) {
-              return liftEffect82(testNestedElements);
+              return liftEffect52(testNestedElements);
             }
             ;
             if (v.value0 instanceof BarChart) {
-              return liftEffect82(barChart);
+              return liftEffect52(barChart);
             }
             ;
             if (v.value0 instanceof ScatterPlot) {
-              return liftEffect82(scatterPlot);
+              return liftEffect52(scatterPlot);
             }
             ;
             if (v.value0 instanceof LineChart) {
-              return liftEffect82(lineChart);
+              return liftEffect52(lineChart);
             }
             ;
             if (v.value0 instanceof GroupedBarChart) {
-              return liftEffect82(groupedBarChart("#viz"));
+              return liftEffect52(groupedBarChart("#viz"));
             }
             ;
             if (v.value0 instanceof SimpleHierarchy) {
-              return liftEffect82(treeViz("#viz"));
+              return liftEffect52(treeViz("#viz"));
             }
             ;
             if (v.value0 instanceof ThreeDimensions) {
-              return liftEffect82(threeLittleDimensions);
+              return liftEffect52(threeLittleDimensions);
             }
             ;
             if (v.value0 instanceof LesMisForce) {
-              return liftEffect82(testLesMisTree);
+              return liftEffect52(testLesMisTree);
             }
             ;
             throw new Error("Failed pattern match at Component.TreeAPI (line 371, column 5 - line 382, column 65): " + [v.value0.constructor.name]);
@@ -45415,11 +45282,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.Understanding.UnderstandingAttributes/index.js
   var triggerMermaidRendering2 = /* @__PURE__ */ triggerMermaidRendering(monadEffectEffect);
   var Initialize37 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var renderNavCard = function(title4) {
     return function(href5) {
@@ -45429,9 +45296,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
   var handleAction36 = function(dictMonadAff) {
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
-      return liftEffect82(triggerMermaidRendering2);
+      return liftEffect52(triggerMermaidRendering2);
     };
   };
   var contravariantDiagram = '\ngraph LR\n    subgraph "Contravariant Pattern"\n        Attr["Attribute datum"]\n        CMap["cmap f attr"]\n        AttrNew["Attribute newDatum"]\n    end\n\n    Attr --> CMap\n    CMap --> AttrNew\n\n    note["f :: newDatum -> datum<br/>Transforms data BEFORE attribute sees it"]\n\n    style Attr fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n    style CMap fill:#d4d8e8,stroke:#555b8b,stroke-width:2px\n    style AttrNew fill:#c4e8d3,stroke:#558b73,stroke-width:2px\n';
@@ -45463,11 +45330,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.Understanding.UnderstandingGrammar/index.js
   var triggerMermaidRendering3 = /* @__PURE__ */ triggerMermaidRendering(monadEffectEffect);
   var Initialize38 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var treeAPIDiagram = '\ngraph TD\n    subgraph "TreeAPI - Declarative Structure"\n        A[renderTree] --> B[Tree datum]\n        B --> C[Node]\n        B --> D[Join]\n        B --> E[SceneJoin]\n        C --> F[name, elemType, attrs, children]\n        D --> G[template: datum -> Tree]\n        E --> H[enter/update/exit behaviors]\n    end\n\n    style A fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style B fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n    style C fill:#d4c4b0,stroke:#8b7355,stroke-width:2px\n    style D fill:#c4e8d3,stroke:#558b73,stroke-width:2px\n    style E fill:#d4d8e8,stroke:#555b8b,stroke-width:2px\n';
   var staticVizDiagram = '\ngraph TD\n    subgraph "Static Visualization"\n        A[select container] --> B[appendChild SVG]\n        B --> C[appendData Circle]\n        C --> D[setAttrs]\n    end\n\n    style A fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style B fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n    style C fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n    style D fill:#d4c4b0,stroke:#8b7355,stroke-width:2px\n';
@@ -45480,9 +45347,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
   var handleAction37 = function(dictMonadAff) {
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
-      return liftEffect82(triggerMermaidRendering3);
+      return liftEffect52(triggerMermaidRendering3);
     };
   };
   var gupFlowDiagram = '\ngraph TD\n    subgraph "General Update Pattern"\n        A[openSelection/selectAll] --> B[joinData]\n        B --> C{JoinResult}\n        C --> D[enter: append]\n        C --> E[update: setAttrs]\n        C --> F[exit: remove]\n        D --> G[merge]\n        E --> G\n    end\n\n    style A fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style B fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n    style C fill:#d4c4b0,stroke:#8b7355,stroke-width:2px\n    style D fill:#c4e8d3,stroke:#558b73,stroke-width:2px\n    style E fill:#d4d8e8,stroke:#555b8b,stroke-width:2px\n    style F fill:#e8d4d4,stroke:#8b5555,stroke-width:2px\n';
@@ -45513,11 +45380,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.Understanding.UnderstandingScenes/index.js
   var triggerMermaidRendering4 = /* @__PURE__ */ triggerMermaidRendering(monadEffectEffect);
   var Initialize39 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var transitionMatrixDiagram = '\ngraph LR\n    subgraph "State Transition Matrix"\n        S1["Scene A"]\n        S2["Scene B"]\n        S3["Scene C"]\n    end\n\n    S1 -->|"transition AB"| S2\n    S2 -->|"transition BC"| S3\n    S3 -->|"transition CA"| S1\n\n    note["Each transition defines:<br/>- Data changes<br/>- Element changes<br/>- Animation timing"]\n\n    style S1 fill:#c4e8d3,stroke:#558b73,stroke-width:2px\n    style S2 fill:#d4d8e8,stroke:#555b8b,stroke-width:2px\n    style S3 fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n';
   var sceneStructureDiagram = '\ngraph TD\n    subgraph "Scene Data Structure"\n        Scene["Scene"]\n        Data["Visualization Data"]\n        Config["Configuration"]\n        Behaviors["Enter/Update/Exit"]\n    end\n\n    Scene --> Data\n    Scene --> Config\n    Scene --> Behaviors\n\n    Behaviors --> Enter["Enter Behavior<br/><i>initialAttrs, transition</i>"]\n    Behaviors --> Update["Update Behavior<br/><i>attrs, transition</i>"]\n    Behaviors --> Exit["Exit Behavior<br/><i>attrs, transition</i>"]\n\n    style Scene fill:#d4d8e8,stroke:#555b8b,stroke-width:2px\n    style Data fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style Config fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style Enter fill:#c4e8d3,stroke:#558b73,stroke-width:2px\n    style Update fill:#d4d8e8,stroke:#555b8b,stroke-width:2px\n    style Exit fill:#f8d7da,stroke:#721c24,stroke-width:2px\n';
@@ -45529,9 +45396,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
   var handleAction38 = function(dictMonadAff) {
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
-      return liftEffect82(triggerMermaidRendering4);
+      return liftEffect52(triggerMermaidRendering4);
     };
   };
   var declarativeVsDiagram = '\ngraph TB\n    subgraph "Imperative (D3)"\n        Imp1["Check current state"]\n        Imp2["Calculate diff"]\n        Imp3["Apply changes"]\n        Imp4["Manage transitions"]\n        Imp5["Handle cleanup"]\n    end\n\n    subgraph "Declarative (PSD3v2)"\n        Dec1["Declare desired state"]\n        Dec2["Framework handles rest"]\n    end\n\n    Imp1 --> Imp2\n    Imp2 --> Imp3\n    Imp3 --> Imp4\n    Imp4 --> Imp5\n\n    Dec1 --> Dec2\n\n    style Imp1 fill:#f8d7da,stroke:#721c24,stroke-width:1px\n    style Dec1 fill:#d4edda,stroke:#155724,stroke-width:1px\n    style Dec2 fill:#d4edda,stroke:#155724,stroke-width:1px\n';
@@ -45563,11 +45430,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.Understanding.UnderstandingSelections/index.js
   var triggerMermaidRendering5 = /* @__PURE__ */ triggerMermaidRendering(monadEffectEffect);
   var Initialize40 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var typeSafetyDiagram = '\ngraph LR\n    subgraph "Compile-Time Errors"\n        Bad1["setAttrs on SEmpty"]\n        Bad2["append on SBoundOwns"]\n        Bad3["remove on SPending"]\n    end\n\n    Bad1 --> Error[Type Error!]\n    Bad2 --> Error\n    Bad3 --> Error\n\n    style Bad1 fill:#f8d7da,stroke:#721c24,stroke-width:2px\n    style Bad2 fill:#f8d7da,stroke:#721c24,stroke-width:2px\n    style Bad3 fill:#f8d7da,stroke:#721c24,stroke-width:2px\n    style Error fill:#dc3545,stroke:#721c24,stroke-width:2px,color:#fff\n';
   var stateMachineDiagram = "\nstateDiagram-v2\n    [*] --> SEmpty: select/selectAll\n    SEmpty --> SBoundOwns: appendData\n    SEmpty --> JoinResult: joinData\n\n    state JoinResult {\n        [*] --> fork\n        fork --> SPending: .enter\n        fork --> SBoundOwns: .update\n        fork --> SExiting: .exit\n    }\n\n    SPending --> SBoundOwns: append\n    SBoundOwns --> SBoundOwns: setAttrs\n    SBoundOwns --> SBoundInherits: appendChildInheriting\n    SBoundOwns --> SBoundOwns: merge\n    SExiting --> [*]: remove\n";
@@ -45588,9 +45455,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Selection Phantom Types")]), p_([text2("PSD3v2 uses phantom types to encode the state machine of D3 selections. This is similar to the Indexed Monad pattern - operations are only allowed when the selection is in the correct state, and this is enforced at compile time.")]), div2([classes(["section-nav-cards"])])([renderNavCard4("Selection States")("#selection-states")("Five phantom type states"), renderNavCard4("State Machine")("#state-machine")("Valid state transitions"), renderNavCard4("Indexed Monad")("#indexed-monad")("Why this pattern works"), renderNavCard4("Type Safety")("#type-safety")("Errors at compile time")])]), section([classes(["tutorial-section"]), id3("selection-states")])([h2([classes(["tutorial-section-title"])])([text2("The Five Selection States")]), p_([text2("A selection in PSD3v2 carries a phantom type parameter indicating its current state:")]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text2("State")]), th_([text2("Meaning")]), th_([text2("Valid Operations")])])]), tbody_([tr_([td_([code_([text2("SEmpty")])]), td_([text2("Has parent elements, no data bound")]), td_([text2("appendChild, appendData, joinData")])]), tr_([td_([code_([text2("SPending")])]), td_([text2("Has data, needs elements (enter)")]), td_([text2("append")])]), tr_([td_([code_([text2("SBoundOwns")])]), td_([text2("Elements with bound data")]), td_([text2("setAttrs, appendChildInheriting, merge")])]), tr_([td_([code_([text2("SBoundInherits")])]), td_([text2("Child elements inheriting parent data")]), td_([text2("setAttrs")])]), tr_([td_([code_([text2("SExiting")])]), td_([text2("Elements to be removed (exit)")]), td_([text2("setAttrsExit, remove")])])])]), p([classes(["code-highlight"])])([text2("Note: "), text2("These types are 'phantom' - they exist only at compile time and carry no runtime data.")])]), section([classes(["tutorial-section"]), id3("state-machine")])([h2([classes(["tutorial-section-title"])])([text2("The Selection State Machine")]), p_([text2("Operations transition selections between states. The type system ensures only valid transitions are allowed:")]), div2([classes(["diagram-container"])])([mermaidDiagram(stateMachineDiagram)(new Just("state-machine-diagram"))]), p_([text2("Key transitions:")]), ul_([li_([code_([text2("select")]), text2(" \u2192 SEmpty (entry point)")]), li_([code_([text2("joinData")]), text2(" \u2192 JoinResult with enter/update/exit")]), li_([code_([text2("append")]), text2(" \u2192 SPending to SBoundOwns (creates elements)")]), li_([code_([text2("remove")]), text2(" \u2192 SExiting to done (deletes elements)")])])]), section([classes(["tutorial-section"]), id3("indexed-monad")])([h2([classes(["tutorial-section-title"])])([text2("The Indexed Monad Pattern")]), p_([text2("This design is inspired by Indexed Monads (also called Parameterized Monads). Unlike regular monads where bind has type:")]), p([classes(["code-highlight"])])([code_([text2("bind :: m a -> (a -> m b) -> m b")])]), p_([text2("Indexed monads carry additional type parameters for pre/post state:")]), p([classes(["code-highlight"])])([code_([text2("ibind :: m i j a -> (a -> m j k b) -> m i k b")])]), div2([classes(["diagram-container"])])([mermaidDiagram(indexedMonadDiagram)(new Just("indexed-monad-diagram"))]), p_([text2("In PSD3v2, each selection operation is typed with its input and output states:")]), ul_([li_([code_([text2("select :: m (sel SEmpty ...)")])]), li_([code_([text2("append :: sel SPending ... -> m (sel SBoundOwns ...)")])])]), p_([text2("Sequencing operations chains their states - the output of one becomes input to the next.")])]), section([classes(["tutorial-section"]), id3("type-safety")])([h2([classes(["tutorial-section-title"])])([text2("Type Safety in Practice")]), p_([text2("Invalid operations are compile-time errors, not runtime bugs:")]), div2([classes(["diagram-container"])])([mermaidDiagram(typeSafetyDiagram)(new Just("type-safety-diagram"))]), p_([text2("Examples of errors caught at compile time:")]), ul_([li_([code_([text2("setAttrs attrs emptySel")]), text2(" - Can't set attrs on SEmpty")]), li_([code_([text2("append Circle boundSel")]), text2(" - Can't append to SBoundOwns")]), li_([code_([text2("remove pendingSel")]), text2(" - Can't remove SPending (has no elements)")])]), p_([text2("Compare to D3.js where these errors would fail silently or cause confusing runtime behavior.")]), p([classes(["code-highlight"])])([text2("Benefit: "), text2("The compiler guides you through the correct sequence of operations.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Summary")]), p_([text2("Selection phantom types provide:")]), ul_([li_([text2("Five states: SEmpty, SPending, SBoundOwns, SBoundInherits, SExiting")]), li_([text2("State machine enforced by types")]), li_([text2("Indexed Monad pattern for state transitions")]), li_([text2("Invalid operation sequences caught at compile time")]), li_([text2("No more silent failures or undefined behavior")])])])])]);
   };
   var handleAction39 = function(dictMonadAff) {
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
-      return liftEffect82(triggerMermaidRendering5);
+      return liftEffect52(triggerMermaidRendering5);
     };
   };
   var component40 = function(dictMonadAff) {
@@ -45612,11 +45479,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.Understanding.UnderstandingTreeAPI/index.js
   var triggerMermaidRendering6 = /* @__PURE__ */ triggerMermaidRendering(monadEffectEffect);
   var Initialize41 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var treeStructureDiagram = '\ngraph TD\n    subgraph "Tree datum"\n        Node["Node<br/><i>Static element</i>"]\n        Join["Join<br/><i>Data-driven N elements</i>"]\n        NestedJoin["NestedJoin<br/><i>Type decomposition</i>"]\n        SceneJoin["SceneJoin<br/><i>GUP behaviors</i>"]\n    end\n\n    Node --> Children["children: Array Tree"]\n    Join --> Template["template: datum -> Tree"]\n    NestedJoin --> Decompose["decompose + template"]\n    SceneJoin --> Behaviors["enter/update/exit"]\n\n    style Node fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style Join fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n    style NestedJoin fill:#d4c4b0,stroke:#8b7355,stroke-width:2px\n    style SceneJoin fill:#c4e8d3,stroke:#558b73,stroke-width:2px\n';
   var renderNavCard5 = function(title4) {
@@ -45628,9 +45495,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
   var layerCakeDiagram = '\ngraph TB\n    subgraph "High-Level APIs"\n        TreeAPI["TreeAPI<br/><i>Declarative tree structures</i>"]\n        SimAPI["Simulation API<br/><i>Force-directed layouts</i>"]\n    end\n\n    subgraph "Core Layer"\n        SelectionM["SelectionM<br/><i>Type-safe selections</i>"]\n    end\n\n    subgraph "Interpreters"\n        D3v2["D3v2 Interpreter<br/><i>DOM manipulation</i>"]\n        Mermaid["Mermaid Interpreter<br/><i>Diagram generation</i>"]\n        String["String Interpreter<br/><i>Debug output</i>"]\n    end\n\n    TreeAPI --> SelectionM\n    SimAPI --> SelectionM\n    SelectionM --> D3v2\n    SelectionM --> Mermaid\n    SelectionM --> String\n\n    style TreeAPI fill:#c4e8d3,stroke:#558b73,stroke-width:2px\n    style SimAPI fill:#c4e8d3,stroke:#558b73,stroke-width:2px\n    style SelectionM fill:#d4d8e8,stroke:#555b8b,stroke-width:2px\n    style D3v2 fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style Mermaid fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style String fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n';
   var handleAction40 = function(dictMonadAff) {
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
-      return liftEffect82(triggerMermaidRendering6);
+      return liftEffect52(triggerMermaidRendering6);
     };
   };
   var comparisonDiagram = '\ngraph LR\n    subgraph "Imperative Style"\n        Imp1["select"]\n        Imp2["appendChild"]\n        Imp3["appendChild"]\n        Imp4["joinData"]\n        Imp5["append"]\n        Imp6["setAttrs"]\n    end\n\n    subgraph "Declarative Style"\n        Dec1["renderTree"]\n        Dec2["Tree structure"]\n    end\n\n    Imp1 --> Imp2\n    Imp2 --> Imp3\n    Imp3 --> Imp4\n    Imp4 --> Imp5\n    Imp5 --> Imp6\n\n    Dec1 --> Dec2\n\n    style Imp1 fill:#f8d7da,stroke:#721c24,stroke-width:1px\n    style Dec1 fill:#d4edda,stroke:#155724,stroke-width:1px\n    style Dec2 fill:#d4edda,stroke:#155724,stroke-width:1px\n';
@@ -45743,7 +45610,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return f(v);
     };
   };
-  var initDriverState = function(component83) {
+  var initDriverState = function(component51) {
     return function(input3) {
       return function(handler3) {
         return function(lchs) {
@@ -45759,8 +45626,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             var subscriptions = $$new(new Just(empty3))();
             var forks = $$new(empty3)();
             var ds = {
-              component: component83,
-              state: component83.initialState(input3),
+              component: component51,
+              state: component51.initialState(input3),
               refs: empty3,
               children: empty4,
               childrenIn,
@@ -45867,16 +45734,16 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       });
     };
   };
-  var evalQ = function(render89) {
+  var evalQ = function(render58) {
     return function(ref2) {
       return function(q2) {
         return bind133(liftEffect47(read(ref2)))(function(v) {
-          return evalM(render89)(ref2)(v["component"]["eval"](new Query(map74(Just.create)(liftCoyoneda(q2)), $$const(Nothing.value))));
+          return evalM(render58)(ref2)(v["component"]["eval"](new Query(map74(Just.create)(liftCoyoneda(q2)), $$const(Nothing.value))));
         });
       };
     };
   };
-  var evalM = function(render89) {
+  var evalM = function(render58) {
     return function(initRef) {
       return function(v) {
         var evalChildQuery = function(ref2) {
@@ -45886,7 +45753,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 var evalChild = function(v3) {
                   return parallel3(bind133(liftEffect47(read(v3)))(function(dsx) {
                     return unDriverStateX(function(ds) {
-                      return evalQ(render89)(ds.selfRef)(v2.value1);
+                      return evalQ(render58)(ds.selfRef)(v2.value1);
                     })(dsx);
                   }));
                 };
@@ -45923,7 +45790,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     lifecycleHandlers: v2.lifecycleHandlers,
                     state: v3.value1
                   })(ref2)))(function() {
-                    return discard119(handleLifecycle(v2.lifecycleHandlers)(render89(v2.lifecycleHandlers)(ref2)))(function() {
+                    return discard119(handleLifecycle(v2.lifecycleHandlers)(render58(v2.lifecycleHandlers)(ref2)))(function() {
                       return pure75(v3.value0);
                     });
                   });
@@ -45936,7 +45803,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             if (v1 instanceof Subscribe) {
               return bind133(fresh(SubscriptionId)(ref2))(function(sid) {
                 return bind133(liftEffect47(subscribe(v1.value0(sid))(function(act) {
-                  return handleAff(evalF(render89)(ref2)(new Action(act)));
+                  return handleAff(evalF(render58)(ref2)(new Action(act)));
                 })))(function(finalize) {
                   return bind133(liftEffect47(read(ref2)))(function(v2) {
                     return discard119(liftEffect47(modify_(map210(insert11(sid)(finalize)))(v2.subscriptions)))(function() {
@@ -45973,7 +45840,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             ;
             if (v1 instanceof Par) {
               return sequential2(retractFreeAp2(hoistFreeAp((function() {
-                var $119 = evalM(render89)(ref2);
+                var $119 = evalM(render58)(ref2);
                 return function($120) {
                   return parallel3($119($120));
                 };
@@ -45987,7 +45854,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     return bind133(fork3($$finally(liftEffect47(function __do3() {
                       modify_($$delete7(fid))(v2.forks)();
                       return write(true)(doneRef)();
-                    }))(evalM(render89)(ref2)(v1.value0))))(function(fiber) {
+                    }))(evalM(render58)(ref2)(v1.value0))))(function(fiber) {
                       return discard119(liftEffect47(unlessM2(read(doneRef))(modify_(insert13(fid)(fiber))(v2.forks))))(function() {
                         return pure75(v1.value1(fid));
                       });
@@ -46030,7 +45897,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       };
     };
   };
-  var evalF = function(render89) {
+  var evalF = function(render58) {
     return function(ref2) {
       return function(v) {
         if (v instanceof RefUpdate) {
@@ -46058,7 +45925,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         ;
         if (v instanceof Action) {
           return bind133(liftEffect47(read(ref2)))(function(v1) {
-            return evalM(render89)(ref2)(v1["component"]["eval"](new Action2(v.value0, unit)));
+            return evalM(render58)(ref2)(v1["component"]["eval"](new Action2(v.value0, unit)));
           });
         }
         ;
@@ -46124,12 +45991,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
   var runUI = function(renderSpec2) {
-    return function(component83) {
+    return function(component51) {
       return function(i2) {
         var squashChildInitializers = function(lchs) {
           return function(preInits) {
             return unDriverStateX(function(st) {
-              var parentInitializer = evalM(render89)(st.selfRef)(st["component"]["eval"](new Initialize(unit)));
+              var parentInitializer = evalM(render58)(st.selfRef)(st["component"]["eval"](new Initialize(unit)));
               return modify_(function(handlers) {
                 return {
                   initializers: new Cons(discard214(parSequence_3(reverse2(handlers.initializers)))(function() {
@@ -46159,7 +46026,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     finalizers: pre2.finalizers
                   })(lchs)();
                   bindFlipped7(unDriverStateX((function() {
-                    var $63 = render89(lchs);
+                    var $63 = render58(lchs);
                     return function($64) {
                       return $63((function(v) {
                         return v.selfRef;
@@ -46177,9 +46044,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return function(handler3) {
             return function(childrenInRef) {
               return function(childrenOutRef) {
-                return unComponentSlot(function(slot3) {
+                return unComponentSlot(function(slot) {
                   return function __do3() {
-                    var childrenIn = map75(slot3.pop)(read(childrenInRef))();
+                    var childrenIn = map75(slot.pop)(read(childrenInRef))();
                     var $$var2 = (function() {
                       if (childrenIn instanceof Just) {
                         write(childrenIn.value0.value1)(childrenInRef)();
@@ -46189,10 +46056,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                             flip(write)(st.handlerRef)((function() {
                               var $65 = maybe(pure124(unit))(handler3);
                               return function($66) {
-                                return $65(slot3.output($66));
+                                return $65(slot.output($66));
                               };
                             })())();
-                            return handleAff(evalM(render89)(st.selfRef)(st["component"]["eval"](new Receive(slot3.input, unit))))();
+                            return handleAff(evalM(render58)(st.selfRef)(st["component"]["eval"](new Receive(slot.input, unit))))();
                           };
                         })(dsx)();
                         return childrenIn.value0.value0;
@@ -46202,18 +46069,18 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                         return runComponent(lchs)((function() {
                           var $67 = maybe(pure124(unit))(handler3);
                           return function($68) {
-                            return $67(slot3.output($68));
+                            return $67(slot.output($68));
                           };
-                        })())(slot3.input)(slot3.component)();
+                        })())(slot.input)(slot.component)();
                       }
                       ;
                       throw new Error("Failed pattern match at Halogen.Aff.Driver (line 213, column 14 - line 222, column 98): " + [childrenIn.constructor.name]);
                     })();
                     var isDuplicate = map75(function($69) {
-                      return isJust(slot3.get($69));
+                      return isJust(slot.get($69));
                     })(read(childrenOutRef))();
                     when7(isDuplicate)(warn("Halogen: Duplicate slot address was detected during rendering, unexpected results may occur"))();
-                    modify_(slot3.set($$var2))(childrenOutRef)();
+                    modify_(slot.set($$var2))(childrenOutRef)();
                     return bind79(read($$var2))(renderStateX2(function(v) {
                       if (v instanceof Nothing) {
                         return $$throw("Halogen internal error: child was not initialized in renderChild");
@@ -46231,7 +46098,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             };
           };
         };
-        var render89 = function(lchs) {
+        var render58 = function(lchs) {
           return function($$var2) {
             return function __do3() {
               var v = read($$var2)();
@@ -46241,7 +46108,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               write(v.children)(v.childrenIn)();
               var handler3 = (function() {
                 var $70 = queueOrRun(v.pendingHandlers);
-                var $71 = evalF(render89)(v.selfRef);
+                var $71 = evalF(render58)(v.selfRef);
                 return function($72) {
                   return $70($$void16($71($72)));
                 };
@@ -46310,7 +46177,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return unDriverStateX(function(st) {
             return function __do3() {
               cleanupSubscriptionsAndForks(st)();
-              var f = evalM(render89)(st.selfRef)(st["component"]["eval"](new Finalize(unit)));
+              var f = evalM(render58)(st.selfRef)(st["component"]["eval"](new Finalize(unit)));
               modify_(function(handlers) {
                 return {
                   initializers: handlers.initializers,
@@ -46334,7 +46201,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   return pure124(Nothing.value);
                 }
                 ;
-                return evalQ(render89)(ref2)(q2);
+                return evalQ(render58)(ref2)(q2);
               });
             };
           };
@@ -46369,7 +46236,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return function($79) {
                   return liftEffect48($78($79));
                 };
-              })())(i2)(component83))();
+              })())(i2)(component51))();
               return unDriverStateX(function(st) {
                 return pure76({
                   query: evalDriver(disposed)(st.selfRef),
@@ -46447,36 +46314,36 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         var buildWidget2 = function(spec) {
           var buildThunk2 = buildThunk(unwrap9)(spec);
           var $lazy_patch = $runtime_lazy10("patch", "Halogen.VDom.Driver", function() {
-            return function(st, slot3) {
+            return function(st, slot) {
               if (st instanceof Just) {
-                if (slot3 instanceof ComponentSlot) {
+                if (slot instanceof ComponentSlot) {
                   halt(st.value0);
-                  return $lazy_renderComponentSlot(100)(slot3.value0);
+                  return $lazy_renderComponentSlot(100)(slot.value0);
                 }
                 ;
-                if (slot3 instanceof ThunkSlot) {
-                  var step$prime = step(st.value0, slot3.value0);
+                if (slot instanceof ThunkSlot) {
+                  var step$prime = step(st.value0, slot.value0);
                   return mkStep(new Step2(extract2(step$prime), new Just(step$prime), $lazy_patch(103), done));
                 }
                 ;
-                throw new Error("Failed pattern match at Halogen.VDom.Driver (line 97, column 22 - line 103, column 79): " + [slot3.constructor.name]);
+                throw new Error("Failed pattern match at Halogen.VDom.Driver (line 97, column 22 - line 103, column 79): " + [slot.constructor.name]);
               }
               ;
-              return $lazy_render(104)(slot3);
+              return $lazy_render(104)(slot);
             };
           });
           var $lazy_render = $runtime_lazy10("render", "Halogen.VDom.Driver", function() {
-            return function(slot3) {
-              if (slot3 instanceof ComponentSlot) {
-                return $lazy_renderComponentSlot(86)(slot3.value0);
+            return function(slot) {
+              if (slot instanceof ComponentSlot) {
+                return $lazy_renderComponentSlot(86)(slot.value0);
               }
               ;
-              if (slot3 instanceof ThunkSlot) {
-                var step4 = buildThunk2(slot3.value0);
+              if (slot instanceof ThunkSlot) {
+                var step4 = buildThunk2(slot.value0);
                 return mkStep(new Step2(extract2(step4), new Just(step4), $lazy_patch(89), done));
               }
               ;
-              throw new Error("Failed pattern match at Halogen.VDom.Driver (line 84, column 7 - line 89, column 75): " + [slot3.constructor.name]);
+              throw new Error("Failed pattern match at Halogen.VDom.Driver (line 84, column 7 - line 89, column 75): " + [slot.constructor.name]);
             };
           });
           var $lazy_renderComponentSlot = $runtime_lazy10("renderComponentSlot", "Halogen.VDom.Driver", function() {
@@ -46488,9 +46355,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             };
           });
           var patch2 = $lazy_patch(91);
-          var render89 = $lazy_render(82);
+          var render58 = $lazy_render(82);
           var renderComponentSlot = $lazy_renderComponentSlot(109);
-          return render89;
+          return render58;
         };
         var buildAttributes = buildProp(handler3);
         return {
@@ -46503,7 +46370,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
   var renderSpec = function(document3) {
     return function(container) {
-      var render89 = function(handler3) {
+      var render58 = function(handler3) {
         return function(child) {
           return function(v) {
             return function(v1) {
@@ -46544,18 +46411,18 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         };
       };
       return {
-        render: render89,
+        render: render58,
         renderChild: identity17,
         removeChild: removeChild3,
         dispose: removeChild3
       };
     };
   };
-  var runUI2 = function(component83) {
+  var runUI2 = function(component51) {
     return function(i2) {
       return function(element3) {
         return bind135(liftEffect49(map76(toDocument)(bindFlipped8(document2)(windowImpl))))(function(document3) {
-          return runUI(renderSpec(document3)(element3))(component83)(i2);
+          return runUI(renderSpec(document3)(element3))(component51)(i2);
         });
       };
     };
@@ -46569,11 +46436,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/PSD3.Acknowledgements/index.js
   var pure78 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize42 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var render47 = function(v) {
     return div2([classes(["acknowledgements-page"])])([div2([classes(["acknowledgements-content"])])([h1([classes(["acknowledgements-title"])])([text2("Acknowledgements")]), section([classes(["acknowledgements-section"])])([h2_([text2("D3.js and Data Visualization")]), p_([text2("This project would not exist without "), a([href("https://d3js.org/")])([text2("D3.js")]), text2(", created by "), a([href("https://bost.ocks.org/mike/")])([text2("Mike Bostock")]), text2(". D3 revolutionized web-based data visualization and established patterns that have become fundamental to the field. Many of the examples in PS<$>D3 are adapted from Mike's extensive collection of examples and tutorials.")]), p_([text2("Thanks so much to Mike for creating D3, for his clear documentation and examples, and for making the library open source. His work on Observable and continued contributions to visualization continue to inspire.")])]), section([classes(["acknowledgements-section"])])([h2_([text2("Observable Examples (ISC License)")]), p_([text2("Several chart examples in PS<$>D3 are based on visualizations from "), a([href("https://observablehq.com/")])([text2("Observable")]), text2(", licensed under the ISC License. These include:")]), ul_([li_([a([href("https://observablehq.com/@d3/grouped-bar-chart/2")])([text2("Grouped Bar Chart")]), text2(" (Copyright 2018\u20132020 Observable, Inc.)")]), li_([a([href("https://observablehq.com/@d3/multi-line-chart/2")])([text2("Multi-Line Chart")]), text2(" (Copyright 2018\u20132023 Observable, Inc.)")]), li_([a([href("https://observablehq.com/@d3/radial-stacked-bar-chart/2")])([text2("Radial Stacked Bar Chart")]), text2(" (Copyright 2019\u20132023 Observable, Inc., created by Mike Bostock)")])]), p_([text2("These examples have been reimplemented in PureScript to demonstrate the PS<$>D3 library's capabilities while faithfully reproducing the original visualizations' dimensions, scales, and styling.")])]), section([classes(["acknowledgements-section"])])([h2_([text2("Data Visualization Pioneers")]), p_([a([href("https://www.edwardtufte.com/")])([text2("Edward Tufte")]), text2("'s work on information design and visual communication established many of the principles we follow today. His books remain essential reading for anyone interested in effective data presentation.")]), p_([a([href("https://www.gapminder.org/about/hans-rosling/")])([text2("Hans Rosling")]), text2("'s passionate advocacy for data literacy and his innovative animated visualizations (particularly the Gapminder World visualization) showed how data can tell compelling stories. The Wealth & Health example in this project is inspired by his work.")])]), section([classes(["acknowledgements-section"])])([h2_([text2("PureScript and Functional Programming")]), p_([a([href("http://functorial.com/")])([text2("Phil Freeman")]), text2(", for his presentation and example of finally tagless encodings in PureScript which provided the spark for this library's architecture.")]), p_([text2("Ian Ross, for his solution to the polymorphic attribute architecture with typeclasses, so neat.")]), p_([text2("The PureScript Core Team members, past, present and future and the wider PureScript community for building this incredibly nice language and ecosystem. I'd particularly like to single out Mike Solomon, Jordan Martinez, Thomas Honeyman, Fabrizio Ferrai who listened to me drone on about this on conference calls.")])]), section([classes(["acknowledgements-section"])])([h2_([text2("About This Project")]), p_([text2("PS<$>D3 is an experimental exploration of what data visualization APIs might look like in a strongly-typed functional programming language. It aims to preserve D3's flexibility while adding type safety and composability.")]), p_([text2("This project is open source and available on GitHub. Contributions, feedback, and suggestions are always welcome.")])])]), render46]);
@@ -47769,12 +47636,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
   var spagoRenderCallbacks = function(dictMonad) {
     var Bind1 = dictMonad.Bind1();
-    var bind148 = bind(Bind1);
+    var bind89 = bind(Bind1);
     var discard215 = discard74(Bind1);
     var $$void19 = $$void(Bind1.Apply0().Functor0());
-    var pure90 = pure(dictMonad.Applicative0());
+    var pure89 = pure(dictMonad.Applicative0());
     return function(dictSelectionM) {
-      var append126 = append7(dictSelectionM);
+      var append125 = append7(dictSelectionM);
       var appendChildInheriting4 = appendChildInheriting(dictSelectionM);
       var on15 = on2(dictSelectionM);
       var setAttrs7 = setAttrs(dictSelectionM);
@@ -47784,34 +47651,34 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return function(attrs) {
             var tagClassesAttr = makeTagClassesAttr(attrs.tagMap);
             var groupAttrs = cons(tagClassesAttr)(cons(transform19(translateNode))([]));
-            return bind148(append126(Group2.value)(groupAttrs)(enterSel))(function(groupEnter) {
-              return bind148(appendChildInheriting4(Circle2.value)(attrs.circles)(groupEnter))(function(circleEnter) {
-                return bind148(appendChildInheriting4(Text3.value)(attrs.labels)(groupEnter))(function(labelEnter) {
-                  return bind148(on15(new Drag2(simulationDrag("spago")))(groupEnter))(function() {
+            return bind89(append125(Group2.value)(groupAttrs)(enterSel))(function(groupEnter) {
+              return bind89(appendChildInheriting4(Circle2.value)(attrs.circles)(groupEnter))(function(circleEnter) {
+                return bind89(appendChildInheriting4(Text3.value)(attrs.labels)(groupEnter))(function(labelEnter) {
+                  return bind89(on15(new Drag2(simulationDrag("spago")))(groupEnter))(function() {
                     return discard215((function() {
                       if (attrs.nodeClick instanceof Just) {
                         return $$void19(on15(onClickWithDatum(attrs.nodeClick.value0))(groupEnter));
                       }
                       ;
                       if (attrs.nodeClick instanceof Nothing) {
-                        return pure90(unit);
+                        return pure89(unit);
                       }
                       ;
                       throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 90, column 5 - line 92, column 27): " + [attrs.nodeClick.constructor.name]);
                     })())(function() {
-                      return bind148(on15(onMouseEnterWithInfo(function(info2) {
+                      return bind89(on15(onMouseEnterWithInfo(function(info2) {
                         return function __do3() {
                           showNodeTooltip(info2.datum)(info2.pageX)(info2.pageY)();
                           return highlightConnected_(info2.datum)();
                         };
                       }))(groupEnter))(function() {
-                        return bind148(on15(onMouseLeave(function(v) {
+                        return bind89(on15(onMouseLeave(function(v) {
                           return function __do3() {
                             hideNodeTooltip();
                             return clearHighlights_2();
                           };
                         }))(groupEnter))(function() {
-                          return pure90(groupEnter);
+                          return pure89(groupEnter);
                         });
                       });
                     });
@@ -47825,8 +47692,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return function(attrs) {
             var tagClassesAttr = makeTagClassesAttr(attrs.tagMap);
             var groupAttrs = cons(tagClassesAttr)(cons(transform19(translateNode))([]));
-            return bind148(setAttrs7(groupAttrs)(updateSel))(function() {
-              return pure90(unit);
+            return bind89(setAttrs7(groupAttrs)(updateSel))(function() {
+              return pure89(unit);
             });
           };
         },
@@ -47835,19 +47702,19 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         },
         onLinkEnter: function(enterSel) {
           return function(attrs) {
-            return bind148(append126(Path3.value)([class_110(function(v) {
+            return bind89(append125(Path3.value)([class_110(function(v) {
               return linkClass(v);
             }), stroke39(function(v) {
               return linkColor(v);
             }), fill52("none"), class_48("enter")])(enterSel))(function(linkEnter) {
-              return pure90(linkEnter);
+              return pure89(linkEnter);
             });
           };
         },
         onLinkUpdate: function(updateSel) {
           return function(attrs) {
-            return bind148(setAttrs7([class_48("update")])(updateSel))(function() {
-              return pure90(unit);
+            return bind89(setAttrs7([class_48("update")])(updateSel))(function() {
+              return pure89(unit);
             });
           };
         },
@@ -48051,11 +47918,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return NodeFilter2;
   })();
   var Initialize43 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var Finalize4 = /* @__PURE__ */ (function() {
     function Finalize5() {
@@ -48480,24 +48347,24 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
   var initialize5 = function(dictBind) {
-    var bind148 = bind(dictBind);
+    var bind89 = bind(dictBind);
     return function(dictMonadEffect) {
-      var liftEffect82 = liftEffect(dictMonadEffect);
-      var pure90 = pure(dictMonadEffect.Monad0().Applicative0());
+      var liftEffect52 = liftEffect(dictMonadEffect);
+      var pure89 = pure(dictMonadEffect.Monad0().Applicative0());
       return function(dictSimulationM2) {
         return function(dictSelectionM) {
           var select45 = select3(dictSelectionM);
           var appendChild5 = appendChild(dictSelectionM);
           var on15 = on2(dictSelectionM);
-          return bind148(liftEffect82(getWindowWidthHeight))(function(v) {
-            return bind148(select45("div.svg-container"))(function(root3) {
-              return bind148(appendChild5(SVG.value)(svgAttrs(v.value0)(v.value1))(root3))(function(svg2) {
-                return bind148(appendChild5(Group2.value)([])(svg2))(function(inner) {
-                  return bind148(on15(new Drag2(defaultDrag))(inner))(function() {
-                    return bind148(on15(new Zoom2(defaultZoom(new ScaleExtent2(0.1, 4))("g")))(svg2))(function() {
-                      return bind148(appendChild5(Group2.value)([class_49("links")])(inner))(function(linksGroup) {
-                        return bind148(appendChild5(Group2.value)([class_49("nodes")])(inner))(function(nodesGroup) {
-                          return pure90({
+          return bind89(liftEffect52(getWindowWidthHeight))(function(v) {
+            return bind89(select45("div.svg-container"))(function(root3) {
+              return bind89(appendChild5(SVG.value)(svgAttrs(v.value0)(v.value1))(root3))(function(svg2) {
+                return bind89(appendChild5(Group2.value)([])(svg2))(function(inner) {
+                  return bind89(on15(new Drag2(defaultDrag))(inner))(function() {
+                    return bind89(on15(new Zoom2(defaultZoom(new ScaleExtent2(0.1, 4))("g")))(svg2))(function() {
+                      return bind89(appendChild5(Group2.value)([class_49("links")])(inner))(function(linksGroup) {
+                        return bind89(appendChild5(Group2.value)([class_49("nodes")])(inner))(function(nodesGroup) {
+                          return pure89({
                             nodes: nodesGroup,
                             links: linksGroup
                           });
@@ -50347,7 +50214,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var foldl18 = /* @__PURE__ */ foldl(foldableArray);
   var runSimulation = function(dictMonadAff) {
     var discard215 = discard75(dictMonadAff.MonadEffect0().Monad0().Bind1());
-    var liftAff34 = liftAff(dictMonadAff);
+    var liftAff4 = liftAff(dictMonadAff);
     return function(dictSimulationM2) {
       var SimulationM1 = dictSimulationM2.SimulationM1();
       var stop5 = stop(SimulationM1);
@@ -50373,7 +50240,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     }
                     ;
                     if (scene.transitionConfig instanceof Just) {
-                      return discard215(liftAff34(makeAff(function(callback) {
+                      return discard215(liftAff4(makeAff(function(callback) {
                         return function __do3() {
                           executeSceneTransition_(scene.transitionConfig.value0)("g.nodes > g")("g.links > path")(targetNodes)(callback(new Right(unit)))();
                           return nonCanceler;
@@ -50394,7 +50261,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
   var runSimulationFromState = function(dictMonadAff) {
-    var bind148 = bind(dictMonadAff.MonadEffect0().Monad0().Bind1());
+    var bind89 = bind(dictMonadAff.MonadEffect0().Monad0().Bind1());
     var runSimulation1 = runSimulation(dictMonadAff);
     return function(dictSimulationM2) {
       var runSimulation22 = runSimulation1(dictSimulationM2);
@@ -50406,7 +50273,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return function(getLinks) {
                 return function(enhanceAttrs) {
                   return function(updateSimFn) {
-                    return bind148(get25)(function(state3) {
+                    return bind89(get25)(function(state3) {
                       var selections = getSelections2(state3);
                       var scene = getScene(state3);
                       var enhancedAttrs = enhanceAttrs(scene.attributes)(state3);
@@ -50447,11 +50314,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var stop4 = /* @__PURE__ */ stop(simulationMD3v2Selection_);
   var start13 = /* @__PURE__ */ start3(simulationMD3v2Selection_);
   var runSimulation2 = function(dictMonadAff) {
-    var bind148 = bind(dictMonadAff.MonadEffect0().Monad0().Bind1());
-    var liftAff34 = liftAff(dictMonadAff);
+    var bind138 = bind(dictMonadAff.MonadEffect0().Monad0().Bind1());
+    var liftAff4 = liftAff(dictMonadAff);
     return function(dictMonadState) {
-      return bind148(get(dictMonadState))(function(state3) {
-        return liftAff34(evalD3v2SimM(state3)(runSimulationFromState2(getSelections)(function(v) {
+      return bind138(get(dictMonadState))(function(state3) {
+        return liftAff4(evalD3v2SimM(state3)(runSimulationFromState2(getSelections)(function(v) {
           return v.scene;
         })(getModelNodes)(getModelLinks)(function(attrs) {
           return function(st) {
@@ -50480,12 +50347,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
   var handleAction42 = function(dictMonadAff) {
     var monadAffHalogenM2 = monadAffHalogenM(dictMonadAff);
-    var liftAff34 = liftAff(monadAffHalogenM2);
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftAff4 = liftAff(monadAffHalogenM2);
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     var runSimulation1 = runSimulation2(monadAffHalogenM2)(monadStateHalogenM);
     return function(v) {
       if (v instanceof Initialize43) {
-        return bind84(liftAff34(readModelData))(function(v1) {
+        return bind84(liftAff4(readModelData))(function(v1) {
           return discard76(modify_19(function(v2) {
             var $67 = {};
             for (var $68 in v2) {
@@ -50498,10 +50365,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             $67.model = v1;
             return $67;
           }))(function() {
-            return discard76(liftEffect82(loadGitMetrics_))(function() {
-              return discard76(liftEffect82(loadTimeline_))(function() {
+            return discard76(liftEffect52(loadGitMetrics_))(function() {
+              return discard76(liftEffect52(loadTimeline_))(function() {
                 return bind84(get23)(function(state3) {
-                  return bind84(liftAff34(evalD3v2SimM(state3)(initialize6)))(function(openSelections) {
+                  return bind84(liftAff4(evalD3v2SimM(state3)(initialize6)))(function(openSelections) {
                     return discard76(modify_19(function(s) {
                       var $73 = {};
                       for (var $74 in s) {
@@ -50528,7 +50395,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                       })();
                       return $73;
                     }))(function() {
-                      return bind84(liftEffect82(create))(function(v2) {
+                      return bind84(liftEffect52(create))(function(v2) {
                         return discard76($$void18(subscribe2(v2.emitter)))(function() {
                           return discard76(modify_19(function(v3) {
                             var $77 = {};
@@ -50542,7 +50409,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                             $77.eventListener = new Just(v2.listener);
                             return $77;
                           }))(function() {
-                            return bind84(liftEffect82(create))(function(v3) {
+                            return bind84(liftEffect52(create))(function(v3) {
                               return discard76($$void18(subscribe2(v3.emitter)))(function() {
                                 return discard76(modify_19(function(v4) {
                                   var $81 = {};
@@ -50602,7 +50469,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       ;
       if (v instanceof SpotlightNode) {
         return bind84(get23)(function(state3) {
-          return liftAff34(evalD3v2SimM(state3)(stop4));
+          return liftAff4(evalD3v2SimM(state3)(stop4));
         });
       }
       ;
@@ -50777,13 +50644,13 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       ;
       if (v instanceof StartSim) {
         return bind84(get23)(function(state3) {
-          return liftAff34(evalD3v2SimM(state3)(start13));
+          return liftAff4(evalD3v2SimM(state3)(start13));
         });
       }
       ;
       if (v instanceof StopSim) {
         return bind84(get23)(function(state3) {
-          return liftAff34(evalD3v2SimM(state3)(stop4));
+          return liftAff4(evalD3v2SimM(state3)(stop4));
         });
       }
       ;
@@ -50832,10 +50699,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       ;
       if (v instanceof StartReplay) {
         return discard76(modify_19(setSceneAttributes2(sceneAttributesWithColorBy(ColorByReplay.value))))(function() {
-          return bind84(liftEffect82(create))(function(v1) {
+          return bind84(liftEffect52(create))(function(v1) {
             return discard76($$void18(subscribe2(v1.emitter)))(function() {
-              return discard76(liftEffect82(setUpdateCallback_(notify(v1.listener)(ReplayTick.value))))(function() {
-                return discard76(liftEffect82(startReplay_))(function() {
+              return discard76(liftEffect52(setUpdateCallback_(notify(v1.listener)(ReplayTick.value))))(function() {
+                return discard76(liftEffect52(startReplay_))(function() {
                   return runSimulation1;
                 });
               });
@@ -50845,11 +50712,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v instanceof StopReplay) {
-        return liftEffect82(stopReplay_);
+        return liftEffect52(stopReplay_);
       }
       ;
       if (v instanceof ResetReplay) {
-        return discard76(liftEffect82(resetReplay_))(function() {
+        return discard76(liftEffect52(resetReplay_))(function() {
           return runSimulation1;
         });
       }
@@ -50903,11 +50770,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/PSD3.Home/index.js
   var pure82 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize44 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var renderTutorialLink = function(title4) {
     return function(description) {
@@ -50993,11 +50860,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/PSD3.HowTo.HowtoIndex/index.js
   var pure83 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize45 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var renderHowtoCard = function(route) {
     return function(title4) {
@@ -51033,274 +50900,35 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     });
   })();
 
-  // output/PSD3.Reference.ModuleRegistry/index.js
-  var moduleCategories = [{
-    title: "Core API",
-    modules: [{
-      name: "PSD3.Types",
-      path: "PSD3/Types.purs",
-      description: "Common type definitions used throughout PSD3"
-    }, {
-      name: "PSD3.Attributes",
-      path: "PSD3/Attributes.purs",
-      description: "SVG and HTML attribute combinators"
-    }]
-  }, {
-    title: "Capabilities",
-    modules: [{
-      name: "PSD3.Capabilities.Selection",
-      path: "PSD3/Capabilities/Selection.purs",
-      description: "Core selection and element manipulation operations"
-    }, {
-      name: "PSD3.Capabilities.Simulation",
-      path: "PSD3/Capabilities/Simulation.purs",
-      description: "Force simulation capabilities"
-    }, {
-      name: "PSD3.Capabilities.Sankey",
-      path: "PSD3/Capabilities/Sankey.purs",
-      description: "Sankey diagram layout capabilities"
-    }]
-  }, {
-    title: "Interpreters",
-    modules: [{
-      name: "PSD3.Interpreter.D3",
-      path: "PSD3/Interpreter/D3.purs",
-      description: "D3.js interpreter - runs visualizations in the browser"
-    }, {
-      name: "PSD3.Interpreter.String",
-      path: "PSD3/Interpreter/String.purs",
-      description: "String interpreter - generates code as text"
-    }, {
-      name: "PSD3.Interpreter.MetaTree",
-      path: "PSD3/Interpreter/MetaTree.purs",
-      description: "MetaTree interpreter - produces AST representation"
-    }]
-  }, {
-    title: "Data Structures",
-    modules: [{
-      name: "PSD3.Data.Tree",
-      path: "PSD3/Data/Tree.purs",
-      description: "Tree data structure for hierarchical layouts"
-    }, {
-      name: "PSD3.Data.Node",
-      path: "PSD3/Data/Node.purs",
-      description: "Node types for tree structures"
-    }, {
-      name: "PSD3.Data.Utility",
-      path: "PSD3/Data/Utility.purs",
-      description: "Utility functions for data manipulation"
-    }]
-  }, {
-    title: "Internal - Selection",
-    modules: [{
-      name: "PSD3.Internal.Selection.Types",
-      path: "PSD3/Internal/Selection/Types.purs",
-      description: "Selection type definitions"
-    }, {
-      name: "PSD3.Internal.Selection.Functions",
-      path: "PSD3/Internal/Selection/Functions.purs",
-      description: "Selection implementation functions"
-    }]
-  }, {
-    title: "Internal - Simulation",
-    modules: [{
-      name: "PSD3.Internal.Simulation.Types",
-      path: "PSD3/Internal/Simulation/Types.purs",
-      description: "Simulation type definitions"
-    }, {
-      name: "PSD3.Internal.Simulation.Functions",
-      path: "PSD3/Internal/Simulation/Functions.purs",
-      description: "Simulation implementation functions"
-    }, {
-      name: "PSD3.Internal.Simulation.Forces",
-      path: "PSD3/Internal/Simulation/Forces.purs",
-      description: "Force definitions for simulations"
-    }, {
-      name: "PSD3.Internal.Simulation.Config",
-      path: "PSD3/Internal/Simulation/Config.purs",
-      description: "Simulation configuration"
-    }]
-  }, {
-    title: "Internal - Other",
-    modules: [{
-      name: "PSD3.Internal.Types",
-      path: "PSD3/Internal/Types.purs",
-      description: "Internal type definitions"
-    }, {
-      name: "PSD3.Internal.FFI",
-      path: "PSD3/Internal/FFI.purs",
-      description: "Foreign function interface to D3.js"
-    }, {
-      name: "PSD3.Internal.Attributes.Instances",
-      path: "PSD3/Internal/Attributes/Instances.purs",
-      description: "Type class instances for attributes"
-    }, {
-      name: "PSD3.Internal.Attributes.Sugar",
-      path: "PSD3/Internal/Attributes/Sugar.purs",
-      description: "Syntactic sugar for attributes"
-    }, {
-      name: "PSD3.Internal.Axes",
-      path: "PSD3/Internal/Axes.purs",
-      description: "Axis generation"
-    }, {
-      name: "PSD3.Internal.Hierarchical",
-      path: "PSD3/Internal/Hierarchical.purs",
-      description: "Hierarchical layout algorithms"
-    }, {
-      name: "PSD3.Internal.Generators.Line",
-      path: "PSD3/Internal/Generators/Line.purs",
-      description: "Line and area generators"
-    }, {
-      name: "PSD3.Internal.Scales.Scales",
-      path: "PSD3/Internal/Scales/Scales.purs",
-      description: "Scale functions"
-    }, {
-      name: "PSD3.Internal.Scales.Linear",
-      path: "PSD3/Internal/Scales/Linear.purs",
-      description: "Linear scale implementation"
-    }, {
-      name: "PSD3.Internal.Sankey.Types",
-      path: "PSD3/Internal/Sankey/Types.purs",
-      description: "Sankey diagram types"
-    }, {
-      name: "PSD3.Internal.Sankey.Functions",
-      path: "PSD3/Internal/Sankey/Functions.purs",
-      description: "Sankey diagram functions"
-    }, {
-      name: "PSD3.Internal.Utility",
-      path: "PSD3/Internal/Utility.purs",
-      description: "Internal utility functions"
-    }, {
-      name: "PSD3.Internal.Zoom",
-      path: "PSD3/Internal/Zoom.purs",
-      description: "Zoom and pan behavior"
-    }]
-  }];
-
-  // output/PSD3.Reference.SourceLoader/index.js
-  var bind85 = /* @__PURE__ */ bind(bindAff);
-  var pure84 = /* @__PURE__ */ pure(applicativeAff);
-  var loadSourceFile = function(relativePath) {
-    var url2 = "sources/" + relativePath;
-    return bind85(get3(string)(url2))(function(result) {
-      return pure84((function() {
-        if (result instanceof Left) {
-          return new Left("Failed to load " + (relativePath + (": " + printError(result.value0))));
-        }
-        ;
-        if (result instanceof Right) {
-          return new Right(result.value0.body);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.SourceLoader (line 16, column 8 - line 20, column 26): " + [result.constructor.name]);
-      })());
-    });
-  };
-
-  // output/PSD3.Reference.Modules.Attributes/index.js
-  var bind86 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff4 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_20 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard77 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect50 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
+  // output/PSD3.Reference.Reference/index.js
+  var pure84 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize46 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
-  var SourceLoaded = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
+  var renderApiCard = function(title4) {
+    return function(description) {
+      return a([classes(["howto-card"]), href("api/index.html"), target2("_blank")])([h3([classes(["howto-card__title"])])([text2(title4)]), p([classes(["howto-card__description"])])([text2(description)])]);
     };
-    return SourceLoaded31;
-  })();
-  var render53 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Attributes")]), p([classes(["module-page__description"])])([text2("SVG and HTML attribute combinators")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Attributes (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Attributes (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
+  };
+  var render53 = function(v) {
+    return div2([classes(["docs-page", "reference-index"])])([render4({
+      logoSize: Large.value,
+      quadrant: QuadReference.value,
+      prevNext: Nothing.value,
+      pageTitle: Nothing.value
+    }), section([classes(["docs-hero"])])([div2([classes(["docs-hero-content"])])([h1([classes(["docs-hero-title"])])([text2("API Reference")]), p([classes(["docs-hero-description"])])([text2("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Comprehensive documentation for all PSD3 modules, types, and functions.")])])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text2("Browse Documentation")]), div2([classes(["howto-card-grid"])])([renderApiCard("Core Selection API")("Lorem ipsum dolor sit amet, consectetur adipiscing elit. SelectionM monad and phantom type system."), renderApiCard("Simulation & Forces")("Sed do eiusmod tempor incididunt ut labore. Force-directed layouts and physics configuration."), renderApiCard("TreeAPI & Declarative")("Ut enim ad minim veniam, quis nostrud exercitation. Declarative tree structures and interpreters."), renderApiCard("Data Utilities")("Duis aute irure dolor in reprehenderit in voluptate. Hierarchical data, scales, and transformations.")])])]);
   };
   var handleAction45 = function(v) {
-    if (v instanceof Initialize46) {
-      return bind86(liftAff4(loadSourceFile("PSD3/Attributes.purs")))(function(result) {
-        return handleAction45(new SourceLoaded(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded) {
-      if (v.value0 instanceof Left) {
-        return modify_20(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard77(modify_20(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect50(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Attributes (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Attributes (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
+    return pure84(unit);
   };
   var component46 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
+        return unit;
       },
       render: render53,
       "eval": mkEval({
@@ -51313,110 +50941,31 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     });
   })();
 
-  // output/PSD3.Reference.Modules.Capabilities.Sankey/index.js
-  var bind87 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff5 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_21 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard78 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect51 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
+  // output/PSD3.Tutorial.GettingStarted/index.js
+  var triggerMermaidRendering7 = /* @__PURE__ */ triggerMermaidRendering(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize47 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
-  var SourceLoaded2 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render54 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Capabilities.Sankey")]), p([classes(["module-page__description"])])([text2("Sankey diagram layout capabilities")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Capabilities.Sankey (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Capabilities.Sankey (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
+  var wizardWorkflowDiagram = "\nflowchart TD\n    Start([Start Wizard]) --> Choice{Choose Method}\n\n    Choice -->|Web| WebWizard[Web-based Wizard]\n    Choice -->|CLI| CLIWizard[CLI Wizard]\n\n    WebWizard --> WebOptions{Select Options}\n    WebOptions --> Dataset[Choose Dataset<br/>\u2022 Anscombe's Quartet<br/>\u2022 Scatter Plot<br/>\u2022 Sine Wave]\n    Dataset --> WebPreview[Preview Files]\n    WebPreview --> WebDownload[Download .zip]\n\n    CLIWizard --> CLIRun[Run: node scripts/init-psd3-viz.js]\n    CLIRun --> CLIOptions{Configure}\n    CLIOptions --> VizName[Enter Visualization Name]\n    VizName --> VizType[Select Type<br/>\u2022 Static<br/>\u2022 Interactive]\n    VizType --> DataChoice[Choose Data<br/>\u2022 Example<br/>\u2022 Custom JSON]\n    DataChoice --> CLIGenerate[Generate Files]\n\n    WebDownload --> Extract[Extract Files]\n    CLIGenerate --> Build[Build & Run]\n    Extract --> Build\n    Build --> Success([Visualization Ready!])\n\n    style Start fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style Success fill:#d4c4b0,stroke:#8b7355,stroke-width:2px\n    style WebWizard fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n    style CLIWizard fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n";
+  var render54 = function(v) {
+    return div2([classes(["docs-page"])])([render4({
+      logoSize: Large.value,
+      quadrant: QuadGettingStarted.value,
+      prevNext: Nothing.value,
+      pageTitle: Nothing.value
+    }), section([classes(["docs-hero"])])([div2([classes(["docs-hero-content"])])([h1([classes(["docs-hero-title"])])([text2("Getting Started")]), p([classes(["docs-hero-description"])])([text2("To get a feel for writing with this DSL we provide a command-line wizard bundled with the repo, a web-based wizard that you can run right here and you can also find instructions here to write your own visualizations from scratch.")])])]), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Getting Started with PS<$>D3")]), p_([text2("Welcome! This guide will help you install PSD3, set up your first project, and create your first data visualization using our scaffold wizard. By the end, you'll have a working visualization that you can view in your browser.")]), div2([classes(["tutorial-callout"])])([h3_([text2("\u{1F680} Try the Interactive Wizard")]), p_([text2("Want to skip the command line? Use our interactive web wizard to generate a complete visualization project right in your browser:")]), p_([a([href("#/wizard"), classes(["tutorial-button tutorial-button--primary"])])([text2("Launch Interactive Wizard \u2192")])])])]), section([classes(["tutorial-section"]), id3("installation")])([h2([classes(["tutorial-section-title"])])([text2("Installation")]), p_([text2("Before we begin, ensure you have the following installed on your system:")]), h3([id3("prerequisites")])([text2("Prerequisites")]), ul_([li_([text2("Node.js (version 18 or higher)")]), li_([text2("npm or yarn package manager")]), li_([text2("PureScript compiler (purs)")]), li_([text2("Spago (PureScript package manager and build tool)")])]), p_([text2("If you don't have PureScript and Spago installed, you can install them globally:")]), pre_([code_([text2("npm install -g purescript spago")])])]), section([classes(["tutorial-section"]), id3("setup")])([h2([classes(["tutorial-section-title"])])([text2("Project Setup")]), p_([text2("Clone the PSD3 repository which includes the visualization wizard:")]), pre_([code_([text2("# Clone the PSD3 repository\ngit clone https://github.com/afcondon/PureScript-Tagless-D3.git\ncd PureScript-Tagless-D3\n\n# Install dependencies\nnpm install\nspago build")])]), p_([text2("The wizard is located in ")]), code_([text2("scripts/init-psd3-viz.js")]), text2(" and will generate all the files you need to get started.")]), section([classes(["tutorial-section"]), id3("wizard")])([h2([classes(["tutorial-section-title"])])([text2("Using the Wizard")]), p_([text2("PSD3 provides two ways to generate a visualization scaffold:")]), div2([classes(["diagram-container"])])([mermaidDiagram(wizardWorkflowDiagram)(new Just("wizard-workflow-diagram"))]), h3_([text2("Option 1: Interactive Web Wizard (Recommended)")]), p_([text2("The easiest way to get started is with our "), a([href("#/wizard")])([text2("interactive web wizard")]), text2(". It provides:")]), ul_([li_([text2("Choose from pre-configured example datasets (Anscombe's Quartet, scatter plots, sine waves, etc.)")]), li_([text2("Educational tips and explanations at each step")]), li_([text2("Preview generated files before downloading")]), li_([text2("Download as a .zip file or copy to clipboard")])]), p_([a([href("#/wizard"), classes(["tutorial-button tutorial-button--primary"])])([text2("Launch Interactive Wizard \u2192")])]), h3_([text2("Option 2: Command-Line Wizard")]), p_([text2("If you prefer working from the command line, use the CLI wizard. Run it from the project root:")]), pre_([code_([text2("node scripts/init-psd3-viz.js")])]), p_([text2("You'll be prompted for:")]), ul_([li_([strong_([text2("Visualization module name")]), text2(" - e.g., "), code_([text2("MyFirstChart")])]), li_([strong_([text2("Data record fields")]), text2(" - e.g., "), code_([text2("x:Number,y:Number,label:String")])]), li_([strong_([text2("Output directory")]), text2(" - default: "), code_([text2("src/viz/YourModuleName")])]), li_([strong_([text2("Generate Main.purs?")]), text2(" - Entry point for standalone viewing (y/n, default: y)")]), li_([strong_([text2("Generate index.html?")]), text2(" - (y/n, default: y)")])]), h3_([text2("Example Session")]), pre_([code_([text2("Visualization module name: ParabolaChart\nData record fields: x:Number,y:Number\nOutput directory: src/viz/ParabolaChart\nGenerate Main.purs? (y/n): y\nGenerate index.html? (y/n): y\n\n\u2713 Created src/viz/ParabolaChart/Unsafe.purs\n\u2713 Created src/viz/ParabolaChart/Model.purs\n\u2713 Created src/viz/ParabolaChart/Draw.purs\n\u2713 Created src/viz/ParabolaChart/Main.purs\n\u2713 Created src/viz/ParabolaChart/index.html\n\u2713 Created src/viz/ParabolaChart/README.md")])]), h3_([text2("Build and View")]), p_([text2("Now build and bundle your visualization:")]), pre_([code_([text2("# Compile the PureScript\nspago build\n\n# Bundle for the browser\nspago bundle --module Main --outfile src/viz/ParabolaChart/bundle.js\n\n# Open in browser\nopen src/viz/ParabolaChart/index.html")])])]), section([classes(["tutorial-section"]), id3("understanding")])([h2([classes(["tutorial-section-title"])])([text2("Understanding the Generated Code")]), p_([text2("The wizard generates several files following PSD3 best practices:")]), ul_([li_([strong_([text2("Unsafe.purs")]), text2(" - Contains type coercion functions that bridge PureScript's type system with D3's untyped JavaScript data")]), li_([strong_([text2("Model.purs")]), text2(" - Defines your data type and provides a placeholder for example data")]), li_([strong_([text2("Draw.purs")]), text2(" - Contains the visualization code with the "), code_([text2("datum_")]), text2(" accessor pattern")]), li_([strong_([text2("index.html")]), text2(" - Pre-configured HTML with D3.js loaded from CDN and the correct "), code_([text2("#chart")]), text2(" div")]), li_([strong_([text2("README.md")]), text2(" - Quick reference specific to your visualization")])]), h3([id3("datum-pattern")])([text2("The Datum_ Pattern")]), p_([text2("D3.js works with untyped JavaScript data, but PureScript is strongly typed. The "), code_([text2("datum_")]), text2(" accessor pattern solves this by isolating type coercion in the "), code_([text2("Unsafe.purs")]), text2(" module while providing typed accessors everywhere else.")]), p_([text2("In your "), code_([text2("Draw.purs")]), text2(", you'll use type-annotated lambdas to work with your data:")]), pre_([code_([text2('-- Use data in attributes\nA.cx (\\\\(d :: Datum_) _ -> datum_.x d)\n\n-- Use both data and index\nA.fill (\\\\(d :: Datum_) (i :: Index_) ->\n  if datum_.index i > 5 then "red" else "blue")\n\n-- Scale by data value\nA.radius (\\\\(d :: Datum_) _ -> datum_.y d * 2.0)')])]), p_([text2("The type annotations "), code_([text2("(d :: Datum_)")]), text2(" and "), code_([text2("(i :: Index_)")]), text2(" are required to help PureScript's type checker find the correct "), code_([text2("ToAttr")]), text2(" instance.")])]), render46]);
   };
   var handleAction46 = function(v) {
-    if (v instanceof Initialize47) {
-      return bind87(liftAff5(loadSourceFile("PSD3/Capabilities/Sankey.purs")))(function(result) {
-        return handleAction46(new SourceLoaded2(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded2) {
-      if (v.value0 instanceof Left) {
-        return modify_21(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard78(modify_21(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect51(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Capabilities.Sankey (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Capabilities.Sankey (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
+    return triggerMermaidRendering7;
   };
   var component47 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
+        return unit;
       },
       render: render54,
       "eval": mkEval({
@@ -51429,110 +50978,37 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     });
   })();
 
-  // output/PSD3.Reference.Modules.Capabilities.Selection/index.js
-  var bind88 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff6 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_22 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard79 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect52 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
+  // output/PSD3.Understanding/index.js
+  var pure85 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize48 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
-  var SourceLoaded3 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
+  var renderCard = function(route) {
+    return function(title4) {
+      return function(description) {
+        return a([classes(["howto-card"]), href("#" + routeToPath(route))])([h3([classes(["howto-card__title"])])([text2(title4)]), p([classes(["howto-card__description"])])([text2(description)])]);
+      };
     };
-    return SourceLoaded31;
-  })();
-  var render55 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Capabilities.Selection")]), p([classes(["module-page__description"])])([text2("Core selection and element manipulation operations")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Capabilities.Selection (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Capabilities.Selection (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
+  };
+  var render55 = function(v) {
+    return div2([classes(["docs-page", "understanding-index"])])([render4({
+      logoSize: Large.value,
+      quadrant: QuadUnderstanding.value,
+      prevNext: Nothing.value,
+      pageTitle: Nothing.value
+    }), section([classes(["docs-hero"])])([div2([classes(["docs-hero-content"])])([h1([classes(["docs-hero-title"])])([text2("Understanding")]), p([classes(["docs-hero-description"])])([text2("Deep dives into the core concepts and patterns that make PSD3 a type-safe, composable framework for D3 visualizations.")])])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text2("Core Concepts")]), div2([classes(["howto-card-grid"])])([renderCard(UnderstandingGrammar.value)("The Grammar of D3")("Four essential primitives: select, append, join, attr. Everything else builds from these."), renderCard(UnderstandingAttributes.value)("Type-Safe Attributes")("Static values, datum functions, contravariant pattern. Compile-time type safety."), renderCard(UnderstandingSelections.value)("Selection Phantom Types")("Five states: SEmpty, SPending, SBoundOwns, SBoundInherits, SExiting. Indexed Monad pattern.")])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text2("Architecture")]), div2([classes(["howto-card-grid"])])([renderCard(UnderstandingTreeAPI.value)("TreeAPI")("Declarative tree structures. Layer cake architecture with TreeAPI and Simulation API on SelectionM."), renderCard(UnderstandingScenes.value)("Scene Structures & Transitions")("Declarative state management for complex interactive visualizations with transition matrices.")])])]);
   };
   var handleAction47 = function(v) {
-    if (v instanceof Initialize48) {
-      return bind88(liftAff6(loadSourceFile("PSD3/Capabilities/Selection.purs")))(function(result) {
-        return handleAction47(new SourceLoaded3(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded3) {
-      if (v.value0 instanceof Left) {
-        return modify_22(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard79(modify_22(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect52(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Capabilities.Selection (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Capabilities.Selection (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
+    return pure85(unit);
   };
   var component48 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
+        return unit;
       },
       render: render55,
       "eval": mkEval({
@@ -51541,3629 +51017,6 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         finalize: defaultEval.finalize,
         handleAction: handleAction47,
         initialize: new Just(Initialize48.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Capabilities.Simulation/index.js
-  var bind89 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff7 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_23 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard80 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect53 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize49 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded4 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render56 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Capabilities.Simulation")]), p([classes(["module-page__description"])])([text2("Force simulation capabilities")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Capabilities.Simulation (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Capabilities.Simulation (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction48 = function(v) {
-    if (v instanceof Initialize49) {
-      return bind89(liftAff7(loadSourceFile("PSD3/Capabilities/Simulation.purs")))(function(result) {
-        return handleAction48(new SourceLoaded4(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded4) {
-      if (v.value0 instanceof Left) {
-        return modify_23(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard80(modify_23(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect53(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Capabilities.Simulation (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Capabilities.Simulation (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component49 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render56,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction48,
-        initialize: new Just(Initialize49.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Data.Node/index.js
-  var bind90 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff8 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_24 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard81 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect54 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize50 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded5 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render57 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Data.Node")]), p([classes(["module-page__description"])])([text2("Node types for tree structures")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Data.Node (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Data.Node (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction49 = function(v) {
-    if (v instanceof Initialize50) {
-      return bind90(liftAff8(loadSourceFile("PSD3/Data/Node.purs")))(function(result) {
-        return handleAction49(new SourceLoaded5(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded5) {
-      if (v.value0 instanceof Left) {
-        return modify_24(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard81(modify_24(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect54(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Data.Node (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Data.Node (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component50 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render57,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction49,
-        initialize: new Just(Initialize50.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Data.Tree/index.js
-  var bind91 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff9 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_25 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard82 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect55 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize51 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded6 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render58 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Data.Tree")]), p([classes(["module-page__description"])])([text2("Tree data structure for hierarchical layouts")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Data.Tree (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Data.Tree (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction50 = function(v) {
-    if (v instanceof Initialize51) {
-      return bind91(liftAff9(loadSourceFile("PSD3/Data/Tree.purs")))(function(result) {
-        return handleAction50(new SourceLoaded6(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded6) {
-      if (v.value0 instanceof Left) {
-        return modify_25(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard82(modify_25(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect55(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Data.Tree (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Data.Tree (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component51 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render58,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction50,
-        initialize: new Just(Initialize51.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Data.Utility/index.js
-  var bind92 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff10 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_26 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard83 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect56 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize52 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded7 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render59 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Data.Utility")]), p([classes(["module-page__description"])])([text2("Utility functions for data manipulation")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Data.Utility (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Data.Utility (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction51 = function(v) {
-    if (v instanceof Initialize52) {
-      return bind92(liftAff10(loadSourceFile("PSD3/Data/Utility.purs")))(function(result) {
-        return handleAction51(new SourceLoaded7(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded7) {
-      if (v.value0 instanceof Left) {
-        return modify_26(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard83(modify_26(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect56(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Data.Utility (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Data.Utility (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component52 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render59,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction51,
-        initialize: new Just(Initialize52.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Internal.Attributes.Instances/index.js
-  var bind93 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff11 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_27 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard84 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect57 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize53 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded8 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render60 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Internal.Attributes.Instances")]), p([classes(["module-page__description"])])([text2("Type class instances for attributes")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Attributes.Instances (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Attributes.Instances (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction52 = function(v) {
-    if (v instanceof Initialize53) {
-      return bind93(liftAff11(loadSourceFile("PSD3/Internal/Attributes/Instances.purs")))(function(result) {
-        return handleAction52(new SourceLoaded8(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded8) {
-      if (v.value0 instanceof Left) {
-        return modify_27(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard84(modify_27(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect57(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Attributes.Instances (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Attributes.Instances (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component53 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render60,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction52,
-        initialize: new Just(Initialize53.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Internal.Attributes.Sugar/index.js
-  var bind94 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff12 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_28 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard85 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect58 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize54 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded9 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render61 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Internal.Attributes.Sugar")]), p([classes(["module-page__description"])])([text2("Syntactic sugar for attributes")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Attributes.Sugar (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Attributes.Sugar (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction53 = function(v) {
-    if (v instanceof Initialize54) {
-      return bind94(liftAff12(loadSourceFile("PSD3/Internal/Attributes/Sugar.purs")))(function(result) {
-        return handleAction53(new SourceLoaded9(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded9) {
-      if (v.value0 instanceof Left) {
-        return modify_28(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard85(modify_28(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect58(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Attributes.Sugar (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Attributes.Sugar (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component54 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render61,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction53,
-        initialize: new Just(Initialize54.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Internal.Axes/index.js
-  var bind95 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff13 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_29 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard86 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect59 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize55 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded10 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render62 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Internal.Axes")]), p([classes(["module-page__description"])])([text2("Axis generation")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Axes (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Axes (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction54 = function(v) {
-    if (v instanceof Initialize55) {
-      return bind95(liftAff13(loadSourceFile("PSD3/Internal/Axes.purs")))(function(result) {
-        return handleAction54(new SourceLoaded10(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded10) {
-      if (v.value0 instanceof Left) {
-        return modify_29(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard86(modify_29(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect59(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Axes (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Axes (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component55 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render62,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction54,
-        initialize: new Just(Initialize55.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Internal.FFI/index.js
-  var bind96 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff14 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_30 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard87 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect60 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize56 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded11 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render63 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Internal.FFI")]), p([classes(["module-page__description"])])([text2("Foreign function interface to D3.js")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.FFI (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.FFI (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction55 = function(v) {
-    if (v instanceof Initialize56) {
-      return bind96(liftAff14(loadSourceFile("PSD3/Internal/FFI.purs")))(function(result) {
-        return handleAction55(new SourceLoaded11(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded11) {
-      if (v.value0 instanceof Left) {
-        return modify_30(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard87(modify_30(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect60(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.FFI (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.FFI (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component56 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render63,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction55,
-        initialize: new Just(Initialize56.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Internal.Generators.Line/index.js
-  var bind97 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff15 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_31 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard88 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect61 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize57 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded12 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render64 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Internal.Generators.Line")]), p([classes(["module-page__description"])])([text2("Line and area generators")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Generators.Line (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Generators.Line (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction56 = function(v) {
-    if (v instanceof Initialize57) {
-      return bind97(liftAff15(loadSourceFile("PSD3/Internal/Generators/Line.purs")))(function(result) {
-        return handleAction56(new SourceLoaded12(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded12) {
-      if (v.value0 instanceof Left) {
-        return modify_31(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard88(modify_31(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect61(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Generators.Line (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Generators.Line (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component57 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render64,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction56,
-        initialize: new Just(Initialize57.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Internal.Hierarchical/index.js
-  var bind98 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff16 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_32 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard89 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect62 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize58 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded13 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render65 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Internal.Hierarchical")]), p([classes(["module-page__description"])])([text2("Hierarchical layout algorithms")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Hierarchical (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Hierarchical (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction57 = function(v) {
-    if (v instanceof Initialize58) {
-      return bind98(liftAff16(loadSourceFile("PSD3/Internal/Hierarchical.purs")))(function(result) {
-        return handleAction57(new SourceLoaded13(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded13) {
-      if (v.value0 instanceof Left) {
-        return modify_32(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard89(modify_32(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect62(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Hierarchical (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Hierarchical (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component58 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render65,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction57,
-        initialize: new Just(Initialize58.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Internal.Sankey.Functions/index.js
-  var bind99 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff17 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_33 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard90 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect63 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize59 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded14 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render66 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Internal.Sankey.Functions")]), p([classes(["module-page__description"])])([text2("Sankey diagram functions")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Sankey.Functions (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Sankey.Functions (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction58 = function(v) {
-    if (v instanceof Initialize59) {
-      return bind99(liftAff17(loadSourceFile("PSD3/Internal/Sankey/Functions.purs")))(function(result) {
-        return handleAction58(new SourceLoaded14(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded14) {
-      if (v.value0 instanceof Left) {
-        return modify_33(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard90(modify_33(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect63(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Sankey.Functions (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Sankey.Functions (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component59 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render66,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction58,
-        initialize: new Just(Initialize59.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Internal.Sankey.Types/index.js
-  var bind100 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff18 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_34 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard91 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect64 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize60 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded15 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render67 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Internal.Sankey.Types")]), p([classes(["module-page__description"])])([text2("Sankey diagram types")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Sankey.Types (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Sankey.Types (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction59 = function(v) {
-    if (v instanceof Initialize60) {
-      return bind100(liftAff18(loadSourceFile("PSD3/Internal/Sankey/Types.purs")))(function(result) {
-        return handleAction59(new SourceLoaded15(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded15) {
-      if (v.value0 instanceof Left) {
-        return modify_34(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard91(modify_34(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect64(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Sankey.Types (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Sankey.Types (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component60 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render67,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction59,
-        initialize: new Just(Initialize60.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Internal.Scales.Linear/index.js
-  var bind101 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff19 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_35 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard92 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect65 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize61 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded16 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render68 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Internal.Scales.Linear")]), p([classes(["module-page__description"])])([text2("Linear scale implementation")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Scales.Linear (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Scales.Linear (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction60 = function(v) {
-    if (v instanceof Initialize61) {
-      return bind101(liftAff19(loadSourceFile("PSD3/Internal/Scales/Linear.purs")))(function(result) {
-        return handleAction60(new SourceLoaded16(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded16) {
-      if (v.value0 instanceof Left) {
-        return modify_35(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard92(modify_35(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect65(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Scales.Linear (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Scales.Linear (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component61 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render68,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction60,
-        initialize: new Just(Initialize61.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Internal.Scales.Scales/index.js
-  var bind102 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff20 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_36 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard93 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect66 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize62 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded17 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render69 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Internal.Scales.Scales")]), p([classes(["module-page__description"])])([text2("Scale functions")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Scales.Scales (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Scales.Scales (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction61 = function(v) {
-    if (v instanceof Initialize62) {
-      return bind102(liftAff20(loadSourceFile("PSD3/Internal/Scales/Scales.purs")))(function(result) {
-        return handleAction61(new SourceLoaded17(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded17) {
-      if (v.value0 instanceof Left) {
-        return modify_36(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard93(modify_36(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect66(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Scales.Scales (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Scales.Scales (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component62 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render69,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction61,
-        initialize: new Just(Initialize62.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Internal.Selection.Functions/index.js
-  var bind103 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff21 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_37 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard94 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect67 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize63 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded18 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render70 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Internal.Selection.Functions")]), p([classes(["module-page__description"])])([text2("Selection implementation functions")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Selection.Functions (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Selection.Functions (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction62 = function(v) {
-    if (v instanceof Initialize63) {
-      return bind103(liftAff21(loadSourceFile("PSD3/Internal/Selection/Functions.purs")))(function(result) {
-        return handleAction62(new SourceLoaded18(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded18) {
-      if (v.value0 instanceof Left) {
-        return modify_37(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard94(modify_37(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect67(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Selection.Functions (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Selection.Functions (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component63 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render70,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction62,
-        initialize: new Just(Initialize63.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Internal.Selection.Types/index.js
-  var bind104 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff22 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_38 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard95 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect68 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize64 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded19 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render71 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Internal.Selection.Types")]), p([classes(["module-page__description"])])([text2("Selection type definitions")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Selection.Types (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Selection.Types (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction63 = function(v) {
-    if (v instanceof Initialize64) {
-      return bind104(liftAff22(loadSourceFile("PSD3/Internal/Selection/Types.purs")))(function(result) {
-        return handleAction63(new SourceLoaded19(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded19) {
-      if (v.value0 instanceof Left) {
-        return modify_38(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard95(modify_38(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect68(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Selection.Types (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Selection.Types (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component64 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render71,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction63,
-        initialize: new Just(Initialize64.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Internal.Simulation.Config/index.js
-  var bind105 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff23 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_39 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard96 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect69 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize65 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded20 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render72 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Internal.Simulation.Config")]), p([classes(["module-page__description"])])([text2("Simulation configuration")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Simulation.Config (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Simulation.Config (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction64 = function(v) {
-    if (v instanceof Initialize65) {
-      return bind105(liftAff23(loadSourceFile("PSD3/Internal/Simulation/Config.purs")))(function(result) {
-        return handleAction64(new SourceLoaded20(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded20) {
-      if (v.value0 instanceof Left) {
-        return modify_39(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard96(modify_39(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect69(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Simulation.Config (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Simulation.Config (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component65 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render72,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction64,
-        initialize: new Just(Initialize65.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Internal.Simulation.Forces/index.js
-  var bind106 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff24 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_40 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard97 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect70 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize66 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded21 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render73 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Internal.Simulation.Forces")]), p([classes(["module-page__description"])])([text2("Force definitions for simulations")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Simulation.Forces (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Simulation.Forces (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction65 = function(v) {
-    if (v instanceof Initialize66) {
-      return bind106(liftAff24(loadSourceFile("PSD3/Internal/Simulation/Forces.purs")))(function(result) {
-        return handleAction65(new SourceLoaded21(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded21) {
-      if (v.value0 instanceof Left) {
-        return modify_40(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard97(modify_40(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect70(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Simulation.Forces (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Simulation.Forces (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component66 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render73,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction65,
-        initialize: new Just(Initialize66.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Internal.Simulation.Functions/index.js
-  var bind107 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff25 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_41 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard98 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect71 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize67 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded22 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render74 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Internal.Simulation.Functions")]), p([classes(["module-page__description"])])([text2("Simulation implementation functions")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Simulation.Functions (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Simulation.Functions (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction66 = function(v) {
-    if (v instanceof Initialize67) {
-      return bind107(liftAff25(loadSourceFile("PSD3/Internal/Simulation/Functions.purs")))(function(result) {
-        return handleAction66(new SourceLoaded22(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded22) {
-      if (v.value0 instanceof Left) {
-        return modify_41(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard98(modify_41(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect71(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Simulation.Functions (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Simulation.Functions (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component67 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render74,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction66,
-        initialize: new Just(Initialize67.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Internal.Simulation.Types/index.js
-  var bind108 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff26 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_42 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard99 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect72 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize68 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded23 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render75 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Internal.Simulation.Types")]), p([classes(["module-page__description"])])([text2("Simulation type definitions")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Simulation.Types (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Simulation.Types (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction67 = function(v) {
-    if (v instanceof Initialize68) {
-      return bind108(liftAff26(loadSourceFile("PSD3/Internal/Simulation/Types.purs")))(function(result) {
-        return handleAction67(new SourceLoaded23(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded23) {
-      if (v.value0 instanceof Left) {
-        return modify_42(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard99(modify_42(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect72(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Simulation.Types (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Simulation.Types (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component68 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render75,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction67,
-        initialize: new Just(Initialize68.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Internal.Types/index.js
-  var bind109 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff27 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_43 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard100 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect73 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize69 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded24 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render76 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Internal.Types")]), p([classes(["module-page__description"])])([text2("Internal type definitions")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Types (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Types (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction68 = function(v) {
-    if (v instanceof Initialize69) {
-      return bind109(liftAff27(loadSourceFile("PSD3/Internal/Types.purs")))(function(result) {
-        return handleAction68(new SourceLoaded24(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded24) {
-      if (v.value0 instanceof Left) {
-        return modify_43(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard100(modify_43(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect73(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Types (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Types (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component69 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render76,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction68,
-        initialize: new Just(Initialize69.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Internal.Utility/index.js
-  var bind137 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff28 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_44 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard101 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect74 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize70 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded25 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render77 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Internal.Utility")]), p([classes(["module-page__description"])])([text2("Internal utility functions")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Utility (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Utility (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction69 = function(v) {
-    if (v instanceof Initialize70) {
-      return bind137(liftAff28(loadSourceFile("PSD3/Internal/Utility.purs")))(function(result) {
-        return handleAction69(new SourceLoaded25(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded25) {
-      if (v.value0 instanceof Left) {
-        return modify_44(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard101(modify_44(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect74(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Utility (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Utility (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component70 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render77,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction69,
-        initialize: new Just(Initialize70.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Internal.Zoom/index.js
-  var bind138 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff29 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_45 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard102 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect75 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize71 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded26 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render78 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Internal.Zoom")]), p([classes(["module-page__description"])])([text2("Zoom and pan behavior")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Zoom (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Zoom (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction70 = function(v) {
-    if (v instanceof Initialize71) {
-      return bind138(liftAff29(loadSourceFile("PSD3/Internal/Zoom.purs")))(function(result) {
-        return handleAction70(new SourceLoaded26(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded26) {
-      if (v.value0 instanceof Left) {
-        return modify_45(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard102(modify_45(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect75(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Zoom (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Internal.Zoom (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component71 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render78,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction70,
-        initialize: new Just(Initialize71.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Interpreter.D3/index.js
-  var bind139 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff30 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_46 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard103 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect76 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize72 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded27 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render79 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Interpreter.D3")]), p([classes(["module-page__description"])])([text2("D3.js interpreter - runs visualizations in the browser")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Interpreter.D3 (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Interpreter.D3 (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction71 = function(v) {
-    if (v instanceof Initialize72) {
-      return bind139(liftAff30(loadSourceFile("PSD3/Interpreter/D3.purs")))(function(result) {
-        return handleAction71(new SourceLoaded27(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded27) {
-      if (v.value0 instanceof Left) {
-        return modify_46(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard103(modify_46(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect76(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Interpreter.D3 (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Interpreter.D3 (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component72 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render79,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction71,
-        initialize: new Just(Initialize72.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Interpreter.MetaTree/index.js
-  var bind140 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff31 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_47 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard104 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect77 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize73 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded28 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render80 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Interpreter.MetaTree")]), p([classes(["module-page__description"])])([text2("MetaTree interpreter - produces AST representation")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Interpreter.MetaTree (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Interpreter.MetaTree (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction72 = function(v) {
-    if (v instanceof Initialize73) {
-      return bind140(liftAff31(loadSourceFile("PSD3/Interpreter/MetaTree.purs")))(function(result) {
-        return handleAction72(new SourceLoaded28(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded28) {
-      if (v.value0 instanceof Left) {
-        return modify_47(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard104(modify_47(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect77(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Interpreter.MetaTree (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Interpreter.MetaTree (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component73 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render80,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction72,
-        initialize: new Just(Initialize73.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Interpreter.String/index.js
-  var bind141 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff32 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_48 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard105 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect78 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize74 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded29 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render81 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Interpreter.String")]), p([classes(["module-page__description"])])([text2("String interpreter - generates code as text")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Interpreter.String (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Interpreter.String (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction73 = function(v) {
-    if (v instanceof Initialize74) {
-      return bind141(liftAff32(loadSourceFile("PSD3/Interpreter/String.purs")))(function(result) {
-        return handleAction73(new SourceLoaded29(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded29) {
-      if (v.value0 instanceof Left) {
-        return modify_48(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard105(modify_48(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect78(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Interpreter.String (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Interpreter.String (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component74 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render81,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction73,
-        initialize: new Just(Initialize74.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Reference.Modules.Types/index.js
-  var bind142 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff33 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var modify_49 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var discard106 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var liftEffect79 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize75 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var SourceLoaded30 = /* @__PURE__ */ (function() {
-    function SourceLoaded31(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SourceLoaded31.create = function(value0) {
-      return new SourceLoaded31(value0);
-    };
-    return SourceLoaded31;
-  })();
-  var render82 = function(state3) {
-    return div2([classes(["module-page"])])([section([classes(["module-page__header"])])([h1([classes(["module-page__title"])])([text2("PSD3.Types")]), p([classes(["module-page__description"])])([text2("Common type definitions used throughout PSD3")])]), section([classes(["module-page__content"])])([]), section([classes(["module-page__source"])])([h2([classes(["module-page__source-title"])])([text2("Source Code")]), (function() {
-      if (state3.sourceCode instanceof Nothing) {
-        if (state3.loading) {
-          return div2([classes(["module-page__loading"])])([text2("Loading source code...")]);
-        }
-        ;
-        if (state3.error instanceof Just) {
-          return div2([classes(["module-page__error"])])([text2(state3.error.value0)]);
-        }
-        ;
-        if (state3.error instanceof Nothing) {
-          return div2([classes(["module-page__error"])])([text2("Failed to load source code")]);
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Reference.Modules.Types (line 77, column 22 - line 85, column 63): " + [state3.error.constructor.name]);
-      }
-      ;
-      if (state3.sourceCode instanceof Just) {
-        return div2([classes(["module-page__code"])])([pre([classes(["line-numbers"])])([code([classes(["language-haskell"])])([text2(state3.sourceCode.value0)])])]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Types (line 71, column 11 - line 95, column 18): " + [state3.sourceCode.constructor.name]);
-    })()])]);
-  };
-  var handleAction74 = function(v) {
-    if (v instanceof Initialize75) {
-      return bind142(liftAff33(loadSourceFile("PSD3/Types.purs")))(function(result) {
-        return handleAction74(new SourceLoaded30(result));
-      });
-    }
-    ;
-    if (v instanceof SourceLoaded30) {
-      if (v.value0 instanceof Left) {
-        return modify_49(function(v1) {
-          var $20 = {};
-          for (var $21 in v1) {
-            if ({}.hasOwnProperty.call(v1, $21)) {
-              $20[$21] = v1[$21];
-            }
-            ;
-          }
-          ;
-          $20.loading = false;
-          $20.error = new Just(v.value0.value0);
-          return $20;
-        });
-      }
-      ;
-      if (v.value0 instanceof Right) {
-        return discard106(modify_49(function(v1) {
-          var $24 = {};
-          for (var $25 in v1) {
-            if ({}.hasOwnProperty.call(v1, $25)) {
-              $24[$25] = v1[$25];
-            }
-            ;
-          }
-          ;
-          $24.sourceCode = new Just(v.value0.value0);
-          $24.loading = false;
-          $24.error = Nothing.value;
-          return $24;
-        }))(function() {
-          return liftEffect79(highlightAll);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Reference.Modules.Types (line 107, column 5 - line 112, column 32): " + [v.value0.constructor.name]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Modules.Types (line 100, column 16 - line 112, column 32): " + [v.constructor.name]);
-  };
-  var component75 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return {
-          sourceCode: Nothing.value,
-          loading: true,
-          error: Nothing.value
-        };
-      },
-      render: render82,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction74,
-        initialize: new Just(Initialize75.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Shared.SectionNav/index.js
-  var eq17 = /* @__PURE__ */ eq(eqSection);
-  var eq18 = /* @__PURE__ */ eq(eqRoute);
-  var map88 = /* @__PURE__ */ map(functorArray);
-  var sectionTitle = function(v) {
-    if (v instanceof UnderstandingSection) {
-      return "Understanding";
-    }
-    ;
-    if (v instanceof TutorialSection) {
-      return "Getting Started";
-    }
-    ;
-    if (v instanceof HowToSection) {
-      return "How-To Guides";
-    }
-    ;
-    if (v instanceof APISection) {
-      return "API Reference";
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Shared.SectionNav (line 115, column 16 - line 119, column 32): " + [v.constructor.name]);
-  };
-  var sectionDefaultRoute = function(v) {
-    if (v instanceof UnderstandingSection) {
-      return Home.value;
-    }
-    ;
-    if (v instanceof TutorialSection) {
-      return GettingStarted.value;
-    }
-    ;
-    if (v instanceof HowToSection) {
-      return HowtoIndex.value;
-    }
-    ;
-    if (v instanceof APISection) {
-      return Reference.value;
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Shared.SectionNav (line 107, column 23 - line 111, column 26): " + [v.constructor.name]);
-  };
-  var renderQuadrant = function(targetSection) {
-    return function(currentSection) {
-      return a([href("#" + routeToPath(sectionDefaultRoute(targetSection))), classes(["section-nav__quadrant-box", (function() {
-        var $11 = eq17(targetSection)(currentSection);
-        if ($11) {
-          return "section-nav__quadrant-box--active";
-        }
-        ;
-        return "section-nav__quadrant-box--inactive";
-      })()]), title(sectionTitle(targetSection))])([]);
-    };
-  };
-  var renderPageLink = function(currentRoute) {
-    return function(v) {
-      var $14 = eq18(v.route)(currentRoute);
-      if ($14) {
-        return span2([classes(["section-nav__page-link", "section-nav__page-link--active"])])([text2(v.label)]);
-      }
-      ;
-      return a([href("#" + routeToPath(v.route)), classes(["section-nav__page-link"])])([text2(v.label), text2(" \u2192")]);
-    };
-  };
-  var renderModuleLink = function(currentRoute) {
-    return function(moduleInfo) {
-      var moduleRoute = new ReferenceModule(moduleInfo.name);
-      var isActive = eq18(currentRoute)(moduleRoute);
-      return li([classes(["section-nav__module-item"])])([(function() {
-        if (isActive) {
-          return span2([classes(["section-nav__module-link", "section-nav__module-link--active"]), title(moduleInfo.description)])([text2(moduleInfo.name)]);
-        }
-        ;
-        return a([href("#" + routeToPath(moduleRoute)), classes(["section-nav__module-link"]), title(moduleInfo.description)])([text2(moduleInfo.name)]);
-      })()]);
-    };
-  };
-  var renderModuleCategory = function(currentRoute) {
-    return function(category) {
-      return div2([classes(["section-nav__module-category"])])([h4([classes(["section-nav__category-title"])])([text2(category.title)]), ul([classes(["section-nav__module-list"])])(map88(renderModuleLink(currentRoute))(category.modules))]);
-    };
-  };
-  var render83 = function(v) {
-    return div2([classes(["section-nav"])])([div2([classes(["section-nav__quadrant"])])([renderQuadrant(TutorialSection.value)(v.currentSection), renderQuadrant(HowToSection.value)(v.currentSection), renderQuadrant(APISection.value)(v.currentSection), renderQuadrant(UnderstandingSection.value)(v.currentSection)]), h3([classes(["section-nav__title"])])([text2(sectionTitle(v.currentSection))]), (function() {
-      if (v.moduleCategories instanceof Just) {
-        return nav([classes(["section-nav__modules"])])(map88(renderModuleCategory(v.currentRoute))(v.moduleCategories.value0));
-      }
-      ;
-      if (v.moduleCategories instanceof Nothing) {
-        return nav([classes(["section-nav__pages"])])(map88(renderPageLink(v.currentRoute))(v.sectionPages));
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Shared.SectionNav (line 54, column 7 - line 64, column 61): " + [v.moduleCategories.constructor.name]);
-    })()]);
-  };
-  var component76 = /* @__PURE__ */ mkComponent({
-    initialState: /* @__PURE__ */ identity(categoryFn),
-    render: render83,
-    "eval": /* @__PURE__ */ mkEval(defaultEval)
-  });
-
-  // output/PSD3.Understanding.TOC/foreign.js
-  (function() {
-    document.addEventListener("click", function(event) {
-      const link4 = event.target.closest("a[data-anchor-link]");
-      if (link4) {
-        event.preventDefault();
-        const anchorId = link4.getAttribute("data-anchor-link");
-        const element3 = document.getElementById(anchorId);
-        if (element3) {
-          element3.scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-          });
-        } else {
-          console.warn(`Anchor element with id "${anchorId}" not found`);
-        }
-      }
-    });
-  })();
-
-  // output/PSD3.Understanding.TOC/index.js
-  var show80 = /* @__PURE__ */ show(showInt);
-  var append123 = /* @__PURE__ */ append(semigroupArray);
-  var type_22 = /* @__PURE__ */ type_3(isPropButtonType);
-  var map89 = /* @__PURE__ */ map(functorArray);
-  var AnchorLink = /* @__PURE__ */ (function() {
-    function AnchorLink2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    AnchorLink2.create = function(value0) {
-      return new AnchorLink2(value0);
-    };
-    return AnchorLink2;
-  })();
-  var RouteLink = /* @__PURE__ */ (function() {
-    function RouteLink2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    RouteLink2.create = function(value0) {
-      return new RouteLink2(value0);
-    };
-    return RouteLink2;
-  })();
-  var renderTOCItem = function(item) {
-    var routeLinkClass = (function() {
-      if (item.target instanceof RouteLink) {
-        return ["toc-nav__item--route-link"];
-      }
-      ;
-      return [];
-    })();
-    var levelClass = (function() {
-      if (item.level === 0) {
-        return [];
-      }
-      ;
-      return ["toc-nav__item--level-" + show80(item.level + 1 | 0)];
-    })();
-    var classes2 = append123(["toc-nav__item"])(append123(levelClass)(routeLinkClass));
-    if (item.target instanceof AnchorLink) {
-      return a([href("#" + item.target.value0), classes(classes2), attr2("data-anchor-link")(item.target.value0)])([text2(item.label)]);
-    }
-    ;
-    if (item.target instanceof RouteLink) {
-      return a([href("#" + routeToPath(item.target.value0)), classes(classes2)])([text2(item.label)]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Understanding.TOC (line 78, column 5 - line 93, column 33): " + [item.target.constructor.name]);
-  };
-  var renderTOC = function(config) {
-    return div2([classes(["toc-panel"])])([img([src2(fromMaybe("bookmark.jpeg")(config.image)), alt4(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text2(config.title)]), button([classes(["floating-panel__toggle"]), type_22(ButtonButton.value)])([text2("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])(map89(renderTOCItem)(config.items))])])]);
-  };
-
-  // output/PSD3.Reference.Reference/index.js
-  var map90 = /* @__PURE__ */ map(functorArray);
-  var pure85 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var modify_50 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var slot2 = /* @__PURE__ */ slot()({
-    reflectSymbol: function() {
-      return "moduleComponent";
-    }
-  })(ordString);
-  var slot_3 = /* @__PURE__ */ slot_()({
-    reflectSymbol: function() {
-      return "sectionNav";
-    }
-  })(ordUnit);
-  var Initialize76 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var Receive2 = /* @__PURE__ */ (function() {
-    function Receive3(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Receive3.create = function(value0) {
-      return new Receive3(value0);
-    };
-    return Receive3;
-  })();
-  var toSectionNavCategory = function(category) {
-    return {
-      title: category.title,
-      modules: map90(function(m) {
-        return {
-          name: m.name,
-          description: m.description
-        };
-      })(category.modules)
-    };
-  };
-  var handleAction75 = function(v) {
-    if (v instanceof Initialize76) {
-      return pure85(unit);
-    }
-    ;
-    if (v instanceof Receive2) {
-      return modify_50(function(v1) {
-        var $17 = {};
-        for (var $18 in v1) {
-          if ({}.hasOwnProperty.call(v1, $18)) {
-            $17[$18] = v1[$18];
-          }
-          ;
-        }
-        ;
-        $17.currentRoute = v.value0;
-        return $17;
-      });
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Reference.Reference (line 213, column 16 - line 217, column 41): " + [v.constructor.name]);
-  };
-  var _sectionNav = /* @__PURE__ */ (function() {
-    return $$Proxy.value;
-  })();
-  var _moduleComponent = /* @__PURE__ */ (function() {
-    return $$Proxy.value;
-  })();
-  var renderModuleComponent = function(moduleName) {
-    if (moduleName === "PSD3.Types") {
-      return slot2(_moduleComponent)(moduleName)(component75)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Attributes") {
-      return slot2(_moduleComponent)(moduleName)(component46)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Capabilities.Selection") {
-      return slot2(_moduleComponent)(moduleName)(component48)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Capabilities.Simulation") {
-      return slot2(_moduleComponent)(moduleName)(component49)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Capabilities.Sankey") {
-      return slot2(_moduleComponent)(moduleName)(component47)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Interpreter.D3") {
-      return slot2(_moduleComponent)(moduleName)(component72)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Interpreter.String") {
-      return slot2(_moduleComponent)(moduleName)(component74)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Interpreter.MetaTree") {
-      return slot2(_moduleComponent)(moduleName)(component73)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Data.Tree") {
-      return slot2(_moduleComponent)(moduleName)(component51)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Data.Node") {
-      return slot2(_moduleComponent)(moduleName)(component50)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Data.Utility") {
-      return slot2(_moduleComponent)(moduleName)(component52)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Internal.Selection.Types") {
-      return slot2(_moduleComponent)(moduleName)(component64)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Internal.Selection.Functions") {
-      return slot2(_moduleComponent)(moduleName)(component63)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Internal.Simulation.Types") {
-      return slot2(_moduleComponent)(moduleName)(component68)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Internal.Simulation.Functions") {
-      return slot2(_moduleComponent)(moduleName)(component67)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Internal.Simulation.Forces") {
-      return slot2(_moduleComponent)(moduleName)(component66)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Internal.Simulation.Config") {
-      return slot2(_moduleComponent)(moduleName)(component65)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Internal.Types") {
-      return slot2(_moduleComponent)(moduleName)(component69)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Internal.FFI") {
-      return slot2(_moduleComponent)(moduleName)(component56)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Internal.Attributes.Instances") {
-      return slot2(_moduleComponent)(moduleName)(component53)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Internal.Attributes.Sugar") {
-      return slot2(_moduleComponent)(moduleName)(component54)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Internal.Axes") {
-      return slot2(_moduleComponent)(moduleName)(component55)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Internal.Hierarchical") {
-      return slot2(_moduleComponent)(moduleName)(component58)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Internal.Generators.Line") {
-      return slot2(_moduleComponent)(moduleName)(component57)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Internal.Scales.Scales") {
-      return slot2(_moduleComponent)(moduleName)(component62)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Internal.Scales.Linear") {
-      return slot2(_moduleComponent)(moduleName)(component61)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Internal.Sankey.Types") {
-      return slot2(_moduleComponent)(moduleName)(component60)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Internal.Sankey.Functions") {
-      return slot2(_moduleComponent)(moduleName)(component59)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Internal.Utility") {
-      return slot2(_moduleComponent)(moduleName)(component70)(unit)(absurd);
-    }
-    ;
-    if (moduleName === "PSD3.Internal.Zoom") {
-      return slot2(_moduleComponent)(moduleName)(component71)(unit)(absurd);
-    }
-    ;
-    return div2([classes(["reference-not-found"])])([h2_([text2("Module Not Found")]), p_([text2('The module "' + (moduleName + '" was not found.'))])]);
-  };
-  var render84 = function(state3) {
-    return div2([classes(["reference-page"])])([renderTOC({
-      title: "Page Contents",
-      items: [],
-      image: new Just("images/reference-bookmark-deepseavent.jpeg")
-    }), slot_3(_sectionNav)(unit)(component76)({
-      currentSection: APISection.value,
-      currentRoute: state3.currentRoute,
-      sectionPages: [],
-      moduleCategories: new Just(map90(toSectionNavCategory)(moduleCategories))
-    }), main([classes(["reference-main"])])([(function() {
-      if (state3.currentRoute instanceof Reference) {
-        return renderModuleComponent("PSD3.Capabilities.Selection");
-      }
-      ;
-      if (state3.currentRoute instanceof ReferenceModule) {
-        return renderModuleComponent(state3.currentRoute.value0);
-      }
-      ;
-      return renderModuleComponent("PSD3.Capabilities.Selection");
-    })()])]);
-  };
-  var component77 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(route) {
-        return {
-          currentRoute: route
-        };
-      },
-      render: render84,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction75,
-        initialize: new Just(Initialize76.value),
-        receive: function($24) {
-          return Just.create(Receive2.create($24));
-        }
-      })
-    });
-  })();
-
-  // output/PSD3.Tutorial.GettingStarted/index.js
-  var triggerMermaidRendering7 = /* @__PURE__ */ triggerMermaidRendering(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var Initialize77 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var wizardWorkflowDiagram = "\nflowchart TD\n    Start([Start Wizard]) --> Choice{Choose Method}\n\n    Choice -->|Web| WebWizard[Web-based Wizard]\n    Choice -->|CLI| CLIWizard[CLI Wizard]\n\n    WebWizard --> WebOptions{Select Options}\n    WebOptions --> Dataset[Choose Dataset<br/>\u2022 Anscombe's Quartet<br/>\u2022 Scatter Plot<br/>\u2022 Sine Wave]\n    Dataset --> WebPreview[Preview Files]\n    WebPreview --> WebDownload[Download .zip]\n\n    CLIWizard --> CLIRun[Run: node scripts/init-psd3-viz.js]\n    CLIRun --> CLIOptions{Configure}\n    CLIOptions --> VizName[Enter Visualization Name]\n    VizName --> VizType[Select Type<br/>\u2022 Static<br/>\u2022 Interactive]\n    VizType --> DataChoice[Choose Data<br/>\u2022 Example<br/>\u2022 Custom JSON]\n    DataChoice --> CLIGenerate[Generate Files]\n\n    WebDownload --> Extract[Extract Files]\n    CLIGenerate --> Build[Build & Run]\n    Extract --> Build\n    Build --> Success([Visualization Ready!])\n\n    style Start fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style Success fill:#d4c4b0,stroke:#8b7355,stroke-width:2px\n    style WebWizard fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n    style CLIWizard fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n";
-  var render85 = function(v) {
-    return div2([classes(["docs-page"])])([render4({
-      logoSize: Large.value,
-      quadrant: QuadGettingStarted.value,
-      prevNext: Nothing.value,
-      pageTitle: Nothing.value
-    }), section([classes(["docs-hero"])])([div2([classes(["docs-hero-content"])])([h1([classes(["docs-hero-title"])])([text2("Getting Started")]), p([classes(["docs-hero-description"])])([text2("To get a feel for writing with this DSL we provide a command-line wizard bundled with the repo, a web-based wizard that you can run right here and you can also find instructions here to write your own visualizations from scratch.")])])]), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Getting Started with PS<$>D3")]), p_([text2("Welcome! This guide will help you install PSD3, set up your first project, and create your first data visualization using our scaffold wizard. By the end, you'll have a working visualization that you can view in your browser.")]), div2([classes(["tutorial-callout"])])([h3_([text2("\u{1F680} Try the Interactive Wizard")]), p_([text2("Want to skip the command line? Use our interactive web wizard to generate a complete visualization project right in your browser:")]), p_([a([href("#/wizard"), classes(["tutorial-button tutorial-button--primary"])])([text2("Launch Interactive Wizard \u2192")])])])]), section([classes(["tutorial-section"]), id3("installation")])([h2([classes(["tutorial-section-title"])])([text2("Installation")]), p_([text2("Before we begin, ensure you have the following installed on your system:")]), h3([id3("prerequisites")])([text2("Prerequisites")]), ul_([li_([text2("Node.js (version 18 or higher)")]), li_([text2("npm or yarn package manager")]), li_([text2("PureScript compiler (purs)")]), li_([text2("Spago (PureScript package manager and build tool)")])]), p_([text2("If you don't have PureScript and Spago installed, you can install them globally:")]), pre_([code_([text2("npm install -g purescript spago")])])]), section([classes(["tutorial-section"]), id3("setup")])([h2([classes(["tutorial-section-title"])])([text2("Project Setup")]), p_([text2("Clone the PSD3 repository which includes the visualization wizard:")]), pre_([code_([text2("# Clone the PSD3 repository\ngit clone https://github.com/afcondon/PureScript-Tagless-D3.git\ncd PureScript-Tagless-D3\n\n# Install dependencies\nnpm install\nspago build")])]), p_([text2("The wizard is located in ")]), code_([text2("scripts/init-psd3-viz.js")]), text2(" and will generate all the files you need to get started.")]), section([classes(["tutorial-section"]), id3("wizard")])([h2([classes(["tutorial-section-title"])])([text2("Using the Wizard")]), p_([text2("PSD3 provides two ways to generate a visualization scaffold:")]), div2([classes(["diagram-container"])])([mermaidDiagram(wizardWorkflowDiagram)(new Just("wizard-workflow-diagram"))]), h3_([text2("Option 1: Interactive Web Wizard (Recommended)")]), p_([text2("The easiest way to get started is with our "), a([href("#/wizard")])([text2("interactive web wizard")]), text2(". It provides:")]), ul_([li_([text2("Choose from pre-configured example datasets (Anscombe's Quartet, scatter plots, sine waves, etc.)")]), li_([text2("Educational tips and explanations at each step")]), li_([text2("Preview generated files before downloading")]), li_([text2("Download as a .zip file or copy to clipboard")])]), p_([a([href("#/wizard"), classes(["tutorial-button tutorial-button--primary"])])([text2("Launch Interactive Wizard \u2192")])]), h3_([text2("Option 2: Command-Line Wizard")]), p_([text2("If you prefer working from the command line, use the CLI wizard. Run it from the project root:")]), pre_([code_([text2("node scripts/init-psd3-viz.js")])]), p_([text2("You'll be prompted for:")]), ul_([li_([strong_([text2("Visualization module name")]), text2(" - e.g., "), code_([text2("MyFirstChart")])]), li_([strong_([text2("Data record fields")]), text2(" - e.g., "), code_([text2("x:Number,y:Number,label:String")])]), li_([strong_([text2("Output directory")]), text2(" - default: "), code_([text2("src/viz/YourModuleName")])]), li_([strong_([text2("Generate Main.purs?")]), text2(" - Entry point for standalone viewing (y/n, default: y)")]), li_([strong_([text2("Generate index.html?")]), text2(" - (y/n, default: y)")])]), h3_([text2("Example Session")]), pre_([code_([text2("Visualization module name: ParabolaChart\nData record fields: x:Number,y:Number\nOutput directory: src/viz/ParabolaChart\nGenerate Main.purs? (y/n): y\nGenerate index.html? (y/n): y\n\n\u2713 Created src/viz/ParabolaChart/Unsafe.purs\n\u2713 Created src/viz/ParabolaChart/Model.purs\n\u2713 Created src/viz/ParabolaChart/Draw.purs\n\u2713 Created src/viz/ParabolaChart/Main.purs\n\u2713 Created src/viz/ParabolaChart/index.html\n\u2713 Created src/viz/ParabolaChart/README.md")])]), h3_([text2("Build and View")]), p_([text2("Now build and bundle your visualization:")]), pre_([code_([text2("# Compile the PureScript\nspago build\n\n# Bundle for the browser\nspago bundle --module Main --outfile src/viz/ParabolaChart/bundle.js\n\n# Open in browser\nopen src/viz/ParabolaChart/index.html")])])]), section([classes(["tutorial-section"]), id3("understanding")])([h2([classes(["tutorial-section-title"])])([text2("Understanding the Generated Code")]), p_([text2("The wizard generates several files following PSD3 best practices:")]), ul_([li_([strong_([text2("Unsafe.purs")]), text2(" - Contains type coercion functions that bridge PureScript's type system with D3's untyped JavaScript data")]), li_([strong_([text2("Model.purs")]), text2(" - Defines your data type and provides a placeholder for example data")]), li_([strong_([text2("Draw.purs")]), text2(" - Contains the visualization code with the "), code_([text2("datum_")]), text2(" accessor pattern")]), li_([strong_([text2("index.html")]), text2(" - Pre-configured HTML with D3.js loaded from CDN and the correct "), code_([text2("#chart")]), text2(" div")]), li_([strong_([text2("README.md")]), text2(" - Quick reference specific to your visualization")])]), h3([id3("datum-pattern")])([text2("The Datum_ Pattern")]), p_([text2("D3.js works with untyped JavaScript data, but PureScript is strongly typed. The "), code_([text2("datum_")]), text2(" accessor pattern solves this by isolating type coercion in the "), code_([text2("Unsafe.purs")]), text2(" module while providing typed accessors everywhere else.")]), p_([text2("In your "), code_([text2("Draw.purs")]), text2(", you'll use type-annotated lambdas to work with your data:")]), pre_([code_([text2('-- Use data in attributes\nA.cx (\\\\(d :: Datum_) _ -> datum_.x d)\n\n-- Use both data and index\nA.fill (\\\\(d :: Datum_) (i :: Index_) ->\n  if datum_.index i > 5 then "red" else "blue")\n\n-- Scale by data value\nA.radius (\\\\(d :: Datum_) _ -> datum_.y d * 2.0)')])]), p_([text2("The type annotations "), code_([text2("(d :: Datum_)")]), text2(" and "), code_([text2("(i :: Index_)")]), text2(" are required to help PureScript's type checker find the correct "), code_([text2("ToAttr")]), text2(" instance.")])]), render46]);
-  };
-  var handleAction76 = function(v) {
-    return triggerMermaidRendering7;
-  };
-  var component78 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return unit;
-      },
-      render: render85,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction76,
-        initialize: new Just(Initialize77.value)
-      })
-    });
-  })();
-
-  // output/PSD3.Understanding/index.js
-  var pure86 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var Initialize78 = /* @__PURE__ */ (function() {
-    function Initialize80() {
-    }
-    ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
-  })();
-  var renderNavCard6 = function(title4) {
-    return function(description) {
-      return function(route) {
-        return a([href("#" + routeToPath(route)), classes(["understanding-nav-card"])])([h3([classes(["understanding-nav-card__title"])])([text2(title4)]), p([classes(["understanding-nav-card__description"])])([text2(description)])]);
-      };
-    };
-  };
-  var render86 = function(v) {
-    return div2([classes(["tutorial-page"])])([render4({
-      logoSize: Large.value,
-      quadrant: QuadUnderstanding.value,
-      prevNext: Nothing.value,
-      pageTitle: Nothing.value
-    }), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text2("Understanding PSD3v2")]), p_([text2("Deep dives into the core concepts and patterns that make PSD3 a type-safe, composable framework for D3 visualizations. Click any card to learn more.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Core Concepts")]), p_([text2("Essential concepts that form the foundation of PSD3's architecture.")]), div2([classes(["understanding-nav-grid"])])([renderNavCard6("The Grammar of D3")("Four essential primitives: select, append, join, attr. Everything else builds from these.")(UnderstandingGrammar.value), renderNavCard6("Type-Safe Attributes")("Static values, datum functions, contravariant pattern. Compile-time type safety.")(UnderstandingAttributes.value), renderNavCard6("Selection Phantom Types")("Five states: SEmpty, SPending, SBoundOwns, SBoundInherits, SExiting. Indexed Monad pattern.")(UnderstandingSelections.value), renderNavCard6("TreeAPI")("Declarative tree structures. Layer cake: TreeAPI and Simulation API on SelectionM.")(UnderstandingTreeAPI.value)])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Advanced Topics")]), p_([text2("Complex patterns for interactive, updating visualizations.")]), div2([classes(["understanding-nav-grid", "single-column"])])([renderNavCard6("Scene Structures & Transitions")("Declarative state management for complex interactive visualizations. Transition matrices for multi-state apps.")(UnderstandingScenes.value)])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text2("Related Resources")]), ul_([li_([a([href("#/tour/foundations")])([text2("Tour: See these concepts in action")])]), li_([a([href("#/tour/interpreters")])([text2("Tour: Alternative Interpreters")])]), li_([a([href("#/reference")])([text2("API Reference")])])])])])]);
-  };
-  var handleAction77 = function(v) {
-    return pure86(unit);
-  };
-  var component79 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return unit;
-      },
-      render: render86,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction77,
-        initialize: new Just(Initialize78.value)
       })
     });
   })();
@@ -55411,12 +51264,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
 
   // output/PSD3.Wizard.FileDownload/index.js
   var append35 = /* @__PURE__ */ append(semigroupArray);
-  var eq19 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
-  var append124 = /* @__PURE__ */ append(semigroupString);
-  var map91 = /* @__PURE__ */ map(functorArray);
-  var bind143 = /* @__PURE__ */ bind(bindAff);
-  var liftEffect80 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var discard107 = /* @__PURE__ */ discard(discardUnit)(bindAff);
+  var eq17 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
+  var append123 = /* @__PURE__ */ append(semigroupString);
+  var map88 = /* @__PURE__ */ map(functorArray);
+  var bind85 = /* @__PURE__ */ bind(bindAff);
+  var liftEffect50 = /* @__PURE__ */ liftEffect(monadEffectAff);
+  var discard77 = /* @__PURE__ */ discard(discardUnit)(bindAff);
   var for_6 = /* @__PURE__ */ for_(applicativeEffect)(foldableArray);
   var formatFilesForClipboard = function(files2) {
     var replicateArray = function(n) {
@@ -55432,7 +51285,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     var intercalateArray = function(sep) {
       return function(arr) {
         return maybe("")(function(v) {
-          var $16 = eq19(v.tail)([]);
+          var $16 = eq17(v.tail)([]);
           if ($16) {
             return v.head;
           }
@@ -55443,20 +51296,20 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
     var repeatString = function(str2) {
       return function(n) {
-        return foldl2(append124)("")(replicateArray(n)(str2));
+        return foldl2(append123)("")(replicateArray(n)(str2));
       };
     };
     var separator = "\n" + (repeatString("=")(80) + "\n");
     var formatFile = function(file) {
       return "File: " + (file.filename + ("\n" + (repeatString("-")(80) + ("\n" + file.content))));
     };
-    var fileTexts = map91(formatFile)(files2);
+    var fileTexts = map88(formatFile)(files2);
     return intercalateArray(separator)(fileTexts);
   };
   var downloadAsZip = function(projectName) {
     return function(files2) {
-      return bind143(liftEffect80(createZip))(function(zip2) {
-        return discard107(liftEffect80(for_6(files2)(function(file) {
+      return bind85(liftEffect50(createZip))(function(zip2) {
+        return discard77(liftEffect50(for_6(files2)(function(file) {
           return addFile(zip2)(file.filename)(file.content);
         })))(function() {
           return fromEffectFnAff(downloadZipImpl(zip2)(projectName + ".zip"));
@@ -55470,11 +51323,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
 
   // output/PSD3.Wizard.Templates/index.js
-  var map92 = /* @__PURE__ */ map(functorArray);
+  var map89 = /* @__PURE__ */ map(functorArray);
   var map122 = /* @__PURE__ */ map(functorMaybe);
   var intercalate7 = /* @__PURE__ */ intercalate2(monoidString);
   var generateRecordType = function(fields) {
-    var fieldLines = map92(function(f) {
+    var fieldLines = map89(function(f) {
       return f.name + (" :: " + f.fieldType);
     })(fields);
     return joinWith("\n  , ")(fieldLines);
@@ -55518,7 +51371,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
 `)));
   };
   var generateDatumType = function(fields) {
-    var typeLines = map92(function(f) {
+    var typeLines = map89(function(f) {
       return f.name + (" :: Datum_ -> " + f.fieldType);
     })(fields);
     return joinWith("\n  , ")(typeLines);
@@ -55529,10 +51382,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         var firstField = fromMaybe("x")(map122(function(f) {
           return f.name;
         })(head(fields)));
-        var fieldList = intercalate7("\n")(map92(function(f) {
+        var fieldList = intercalate7("\n")(map89(function(f) {
           return "- " + (f.name + (": " + f.fieldType));
         })(fields));
-        var exampleFields = intercalate7(", ")(map92(function(f) {
+        var exampleFields = intercalate7(", ")(map89(function(f) {
           return f.name + ": 0.0";
         })(fields));
         var datumType = generateDatumType(fields);
@@ -55542,7 +51395,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
   var generateAccessors = function(fields) {
     return function(coerceFnName) {
-      var accessorLines = map92(function(f) {
+      var accessorLines = map89(function(f) {
         return f.name + (": _." + (f.name + (" <<< " + coerceFnName)));
       })(fields);
       return joinWith("\n  , ")(accessorLines);
@@ -55565,8 +51418,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
 
   // output/PSD3.Wizard.Generator/index.js
   var intercalate8 = /* @__PURE__ */ intercalate2(monoidString);
-  var map93 = /* @__PURE__ */ map(functorArray);
-  var append125 = /* @__PURE__ */ append(semigroupArray);
+  var map90 = /* @__PURE__ */ map(functorArray);
+  var append124 = /* @__PURE__ */ append(semigroupArray);
   var sineWaveData = "[ { x: 0.0, y: 100.0 }\n  , { x: 5.0, y: 125.0 }\n  , { x: 10.0, y: 145.0 }\n  , { x: 15.0, y: 159.0 }\n  , { x: 20.0, y: 165.0 }\n  , { x: 25.0, y: 159.0 }\n  , { x: 30.0, y: 145.0 }\n  , { x: 35.0, y: 125.0 }\n  , { x: 40.0, y: 100.0 }\n  , { x: 45.0, y: 75.0 }\n  , { x: 50.0, y: 55.0 }\n  , { x: 55.0, y: 41.0 }\n  , { x: 60.0, y: 35.0 }\n  , { x: 65.0, y: 41.0 }\n  , { x: 70.0, y: 55.0 }\n  , { x: 75.0, y: 75.0 }\n  , { x: 80.0, y: 100.0 }\n  ]";
   var scatterData2 = "[ { x: 10.0, y: 20.0 }\n  , { x: 25.0, y: 45.0 }\n  , { x: 40.0, y: 30.0 }\n  , { x: 55.0, y: 60.0 }\n  , { x: 70.0, y: 40.0 }\n  , { x: 85.0, y: 70.0 }\n  , { x: 100.0, y: 55.0 }\n  , { x: 115.0, y: 80.0 }\n  , { x: 130.0, y: 65.0 }\n  , { x: 145.0, y: 90.0 }\n  ]";
   var multiLineData = '[ { series: "San Francisco", date: "2000-01", value: 3.5 }\n  , { series: "San Francisco", date: "2002-01", value: 5.2 }\n  , { series: "San Francisco", date: "2004-01", value: 4.8 }\n  , { series: "San Francisco", date: "2006-01", value: 3.9 }\n  , { series: "San Francisco", date: "2008-01", value: 4.2 }\n  , { series: "San Francisco", date: "2010-01", value: 8.4 }\n  , { series: "San Francisco", date: "2012-01", value: 6.8 }\n  , { series: "New York", date: "2000-01", value: 5.3 }\n  , { series: "New York", date: "2002-01", value: 7.2 }\n  , { series: "New York", date: "2004-01", value: 6.1 }\n  , { series: "New York", date: "2006-01", value: 4.9 }\n  , { series: "New York", date: "2008-01", value: 5.3 }\n  , { series: "New York", date: "2010-01", value: 9.2 }\n  , { series: "New York", date: "2012-01", value: 7.8 }\n  , { series: "Austin", date: "2000-01", value: 2.9 }\n  , { series: "Austin", date: "2002-01", value: 4.8 }\n  , { series: "Austin", date: "2004-01", value: 4.2 }\n  , { series: "Austin", date: "2006-01", value: 3.5 }\n  , { series: "Austin", date: "2008-01", value: 3.8 }\n  , { series: "Austin", date: "2010-01", value: 6.5 }\n  , { series: "Austin", date: "2012-01", value: 5.1 }\n  , { series: "Seattle", date: "2000-01", value: 4.1 }\n  , { series: "Seattle", date: "2002-01", value: 6.3 }\n  , { series: "Seattle", date: "2004-01", value: 5.5 }\n  , { series: "Seattle", date: "2006-01", value: 4.2 }\n  , { series: "Seattle", date: "2008-01", value: 4.5 }\n  , { series: "Seattle", date: "2010-01", value: 7.8 }\n  , { series: "Seattle", date: "2012-01", value: 6.2 }\n  ]';
@@ -55587,7 +51440,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       ;
       return field.name + ": 0.0";
     };
-    var sampleRow = "{ " + (intercalate8(", ")(map93(generateFieldValue)(fields)) + " }");
+    var sampleRow = "{ " + (intercalate8(", ")(map90(generateFieldValue)(fields)) + " }");
     var rows4 = intercalate8("\n  , ")([sampleRow, sampleRow, sampleRow]);
     return "[ " + (rows4 + "\n  ]");
   };
@@ -55650,23 +51503,23 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       filename: config.vizName + "/README.md",
       content: generateREADME(config.vizName)(dataTypeName)(config.dataset.fields)
     }];
-    return append125(baseFiles)(mainFile);
+    return append124(baseFiles)(mainFile);
   };
 
   // output/PSD3.Wizard.Wizard/index.js
-  var map94 = /* @__PURE__ */ map(functorArray);
-  var eq20 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
-  var show81 = /* @__PURE__ */ show(showDifficulty);
+  var map91 = /* @__PURE__ */ map(functorArray);
+  var eq18 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
+  var show80 = /* @__PURE__ */ show(showDifficulty);
   var eq26 = /* @__PURE__ */ eq(eqDifficulty);
   var eq33 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqDifficulty));
-  var bind144 = /* @__PURE__ */ bind(bindMaybe);
-  var pure87 = /* @__PURE__ */ pure(applicativeMaybe);
-  var type_23 = /* @__PURE__ */ type_3(isPropInputType);
+  var bind86 = /* @__PURE__ */ bind(bindMaybe);
+  var pure86 = /* @__PURE__ */ pure(applicativeMaybe);
+  var type_22 = /* @__PURE__ */ type_3(isPropInputType);
   var value17 = /* @__PURE__ */ value3(isPropString);
-  var modify_51 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var bind145 = /* @__PURE__ */ bind(bindHalogenM);
+  var modify_20 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var bind137 = /* @__PURE__ */ bind(bindHalogenM);
   var get24 = /* @__PURE__ */ get(monadStateHalogenM);
-  var discard108 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard78 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var pure126 = /* @__PURE__ */ pure(applicativeHalogenM);
   var when9 = /* @__PURE__ */ when(applicativeHalogenM);
   var ChooseDataset = /* @__PURE__ */ (function() {
@@ -55783,7 +51636,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     var renderFile = function(file) {
       return details([classes(["wizard__file"])])([summary_([text2(file.filename)]), pre([classes(["wizard__code"])])([code_([text2(file.content)])])]);
     };
-    return div2([classes(["wizard__step-content"])])([h2_([text2("Review Generated Files")]), p_([text2("Preview the files that will be generated for your project.")]), div2([classes(["wizard__file-list"])])(map94(renderFile)(state3.generatedFiles))]);
+    return div2([classes(["wizard__step-content"])])([h2_([text2("Review Generated Files")]), p_([text2("Preview the files that will be generated for your project.")]), div2([classes(["wizard__file-list"])])(map91(renderFile)(state3.generatedFiles))]);
   };
   var renderHeader3 = function(state3) {
     return header([classes(["wizard__header"])])([h1_([text2("PSD3 Visualization Wizard")]), p([classes(["wizard__subtitle"])])([text2("Create a new PSD3 visualization project in 4 easy steps")])]);
@@ -55805,7 +51658,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         ;
         return c;
       };
-      var $151 = map94(toLower2);
+      var $151 = map91(toLower2);
       return function($152) {
         return fromCharArray($151(toCharArray($152)));
       };
@@ -55813,7 +51666,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     var intercalate9 = function(sep) {
       return function(arr) {
         return maybe("")(function(v) {
-          var $75 = eq20(v.tail)([]);
+          var $75 = eq18(v.tail)([]);
           if ($75) {
             return v.head;
           }
@@ -55843,7 +51696,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       })();
       return div2([classes([cardClass]), onClick(function(v) {
         return new SelectDataset(dataset);
-      })])([div2([classes(["dataset-card__header"])])([h3_([text2(dataset.name)]), span2([classes(["difficulty-badge difficulty-badge--" + toLowerCase(show81(dataset.difficulty))])])([text2(show81(dataset.difficulty))])]), p([classes(["dataset-card__description"])])([text2(dataset.description)]), div2([classes(["dataset-card__info"])])([strong_([text2("Fields: ")]), text2(intercalate9(", ")(map94(function(f) {
+      })])([div2([classes(["dataset-card__header"])])([h3_([text2(dataset.name)]), span2([classes(["difficulty-badge difficulty-badge--" + toLowerCase(show80(dataset.difficulty))])])([text2(show80(dataset.difficulty))])]), p([classes(["dataset-card__description"])])([text2(dataset.description)]), div2([classes(["dataset-card__info"])])([strong_([text2("Fields: ")]), text2(intercalate9(", ")(map91(function(f) {
         return f.name + (": " + f.fieldType);
       })(dataset.fields)))]), div2([classes(["dataset-card__viz"])])([strong_([text2("Suggested: ")]), text2(dataset.suggestedViz)]), div2([classes(["dataset-card__note"])])([text2(dataset.educationalNote)])]);
     };
@@ -55887,7 +51740,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return "";
     })()]), onClick(function(v) {
       return new SetDifficultyFilter(new Just(Intermediate.value));
-    })])([text2("Intermediate")])]), div2([classes(["wizard__dataset-grid"])])(map94(renderDatasetCard)(filteredDatasets))]);
+    })])([text2("Intermediate")])]), div2([classes(["wizard__dataset-grid"])])(map91(renderDatasetCard)(filteredDatasets))]);
   };
   var isValidModuleName = function(name16) {
     var all4 = function(pred) {
@@ -55924,19 +51777,19 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return false;
     }
     ;
-    return fromMaybe(false)(bind144(head(chars))(function(first2) {
-      return pure87(isUpperCase(first2) && all4(isAlphaNum)(chars));
+    return fromMaybe(false)(bind86(head(chars))(function(first2) {
+      return pure86(isUpperCase(first2) && all4(isAlphaNum)(chars));
     }));
   };
   var renderNameModule = function(state3) {
-    return div2([classes(["wizard__step-content"])])([h2_([text2("Name Your Visualization")]), p_([text2("Choose a name for your visualization module. It should be a valid PureScript module name (CamelCase, starting with uppercase).")]), div2([classes(["wizard__form-group"])])([label([$$for("viz-name")])([text2("Visualization Name")]), input([type_23(InputText.value), id3("viz-name"), value17(state3.vizName), placeholder2("e.g., MyScatterPlot"), onValueInput(SetVizName.create), classes(["wizard__input"])]), (function() {
+    return div2([classes(["wizard__step-content"])])([h2_([text2("Name Your Visualization")]), p_([text2("Choose a name for your visualization module. It should be a valid PureScript module name (CamelCase, starting with uppercase).")]), div2([classes(["wizard__form-group"])])([label([$$for("viz-name")])([text2("Visualization Name")]), input([type_22(InputText.value), id3("viz-name"), value17(state3.vizName), placeholder2("e.g., MyScatterPlot"), onValueInput(SetVizName.create), classes(["wizard__input"])]), (function() {
       var $91 = isValidModuleName(state3.vizName) || state3.vizName === "";
       if ($91) {
         return div_([]);
       }
       ;
       return div2([classes(["wizard__error"])])([text2("Module name must start with uppercase and contain only letters and numbers")]);
-    })()]), div2([classes(["wizard__form-group"])])([label_([input([type_23(InputCheckbox.value), checked2(state3.includeMain), onChecked(function(v) {
+    })()]), div2([classes(["wizard__form-group"])])([label_([input([type_22(InputCheckbox.value), checked2(state3.includeMain), onChecked(function(v) {
       return ToggleIncludeMain.value;
     })]), text2(" Include Main.purs (for bundling with spago)")]), p([classes(["wizard__help-text"])])([text2("Main.purs provides an entry point for bundling your visualization. Check this if you plan to use 'spago bundle'.")])]), (function() {
       var $92 = state3.vizName !== "" && isValidModuleName(state3.vizName);
@@ -56089,7 +51942,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
     return div2([classes(["wizard__progress"])])([renderStep(ChooseDataset.value)("1")("Choose Dataset"), renderStep(NameModule.value)("2")("Name Module"), renderStep(ReviewFiles.value)("3")("Review Files"), renderStep(Download.value)("4")("Download")]);
   };
-  var render87 = function(dictMonadAff) {
+  var render56 = function(dictMonadAff) {
     var renderStepContent1 = renderStepContent(dictMonadAff);
     return function(state3) {
       return div2([classes(["wizard"])])([renderHeader3(state3), renderProgressBar(state3), renderStepContent1(state3), renderNavigation(state3)]);
@@ -56116,12 +51969,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       throw new Error("Failed pattern match at PSD3.Wizard.Wizard (line 435, column 26 - line 439, column 101): " + [step4.constructor.name]);
     };
   };
-  var handleAction78 = function(dictMonadAff) {
-    var liftAff34 = liftAff(monadAffHalogenM(dictMonadAff));
-    var liftEffect82 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+  var handleAction48 = function(dictMonadAff) {
+    var liftAff4 = liftAff(monadAffHalogenM(dictMonadAff));
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
       if (v instanceof SelectDataset) {
-        return modify_51(function(v1) {
+        return modify_20(function(v1) {
           var $104 = {};
           for (var $105 in v1) {
             if ({}.hasOwnProperty.call(v1, $105)) {
@@ -56136,7 +51989,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v instanceof SetVizName) {
-        return modify_51(function(v1) {
+        return modify_20(function(v1) {
           var $108 = {};
           for (var $109 in v1) {
             if ({}.hasOwnProperty.call(v1, $109)) {
@@ -56151,7 +52004,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v instanceof ToggleIncludeMain) {
-        return modify_51(function(s) {
+        return modify_20(function(s) {
           var $112 = {};
           for (var $113 in s) {
             if ({}.hasOwnProperty.call(s, $113)) {
@@ -56166,9 +52019,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v instanceof NextStep) {
-        return bind145(get24)(function(state3) {
+        return bind137(get24)(function(state3) {
           if (state3.currentStep instanceof ChooseDataset) {
-            return modify_51(function(v1) {
+            return modify_20(function(v1) {
               var $116 = {};
               for (var $117 in v1) {
                 if ({}.hasOwnProperty.call(v1, $117)) {
@@ -56183,8 +52036,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           }
           ;
           if (state3.currentStep instanceof NameModule) {
-            return discard108(handleAction78(dictMonadAff)(GenerateFiles.value))(function() {
-              return modify_51(function(v1) {
+            return discard78(handleAction48(dictMonadAff)(GenerateFiles.value))(function() {
+              return modify_20(function(v1) {
                 var $119 = {};
                 for (var $120 in v1) {
                   if ({}.hasOwnProperty.call(v1, $120)) {
@@ -56200,7 +52053,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           }
           ;
           if (state3.currentStep instanceof ReviewFiles) {
-            return modify_51(function(v1) {
+            return modify_20(function(v1) {
               var $122 = {};
               for (var $123 in v1) {
                 if ({}.hasOwnProperty.call(v1, $123)) {
@@ -56215,7 +52068,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           }
           ;
           if (state3.currentStep instanceof Download) {
-            return modify_51(function(v1) {
+            return modify_20(function(v1) {
               var $125 = {};
               for (var $126 in v1) {
                 if ({}.hasOwnProperty.call(v1, $126)) {
@@ -56234,9 +52087,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v instanceof PreviousStep) {
-        return bind145(get24)(function(state3) {
+        return bind137(get24)(function(state3) {
           if (state3.currentStep instanceof NameModule) {
-            return modify_51(function(v1) {
+            return modify_20(function(v1) {
               var $129 = {};
               for (var $130 in v1) {
                 if ({}.hasOwnProperty.call(v1, $130)) {
@@ -56251,7 +52104,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           }
           ;
           if (state3.currentStep instanceof ReviewFiles) {
-            return modify_51(function(v1) {
+            return modify_20(function(v1) {
               var $132 = {};
               for (var $133 in v1) {
                 if ({}.hasOwnProperty.call(v1, $133)) {
@@ -56266,7 +52119,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           }
           ;
           if (state3.currentStep instanceof Download) {
-            return modify_51(function(v1) {
+            return modify_20(function(v1) {
               var $135 = {};
               for (var $136 in v1) {
                 if ({}.hasOwnProperty.call(v1, $136)) {
@@ -56289,8 +52142,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v instanceof GoToStep) {
-        return bind145(get24)(function(state3) {
-          return when9(canGoToStep(state3)(v.value0))(modify_51(function(v1) {
+        return bind137(get24)(function(state3) {
+          return when9(canGoToStep(state3)(v.value0))(modify_20(function(v1) {
             var $138 = {};
             for (var $139 in v1) {
               if ({}.hasOwnProperty.call(v1, $139)) {
@@ -56306,7 +52159,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v instanceof GenerateFiles) {
-        return bind145(get24)(function(state3) {
+        return bind137(get24)(function(state3) {
           if (state3.selectedDataset instanceof Just) {
             var config = {
               vizName: state3.vizName,
@@ -56314,7 +52167,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               includeMain: state3.includeMain
             };
             var files2 = generateProject(config);
-            return modify_51(function(v1) {
+            return modify_20(function(v1) {
               var $143 = {};
               for (var $144 in v1) {
                 if ({}.hasOwnProperty.call(v1, $144)) {
@@ -56337,21 +52190,21 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v instanceof DownloadZip) {
-        return bind145(get24)(function(state3) {
-          return liftAff34(downloadAsZip(state3.vizName)(state3.generatedFiles));
+        return bind137(get24)(function(state3) {
+          return liftAff4(downloadAsZip(state3.vizName)(state3.generatedFiles));
         });
       }
       ;
       if (v instanceof CopyToClipboard) {
-        return bind145(get24)(function(state3) {
-          return bind145(liftEffect82(copyFilesToClipboard(state3.generatedFiles)))(function(success) {
+        return bind137(get24)(function(state3) {
+          return bind137(liftEffect52(copyFilesToClipboard(state3.generatedFiles)))(function(success) {
             return pure126(unit);
           });
         });
       }
       ;
       if (v instanceof SetDifficultyFilter) {
-        return modify_51(function(v1) {
+        return modify_20(function(v1) {
           var $147 = {};
           for (var $148 in v1) {
             if ({}.hasOwnProperty.call(v1, $148)) {
@@ -56368,23 +52221,23 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       throw new Error("Failed pattern match at PSD3.Wizard.Wizard (line 371, column 16 - line 431, column 50): " + [v.constructor.name]);
     };
   };
-  var component80 = /* @__PURE__ */ (function() {
+  var component49 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: $$const(initialState3),
-      render: render87(monadAffAff),
+      render: render56(monadAffAff),
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
         initialize: defaultEval.initialize,
         finalize: defaultEval.finalize,
-        handleAction: handleAction78(monadAffAff)
+        handleAction: handleAction48(monadAffAff)
       })
     });
   })();
 
   // output/Routing.Parser/index.js
-  var map95 = /* @__PURE__ */ map(functorArray);
-  var discard109 = /* @__PURE__ */ discard(discardUnit)(bindMaybe);
+  var map92 = /* @__PURE__ */ map(functorArray);
+  var discard79 = /* @__PURE__ */ discard(discardUnit)(bindMaybe);
   var guard2 = /* @__PURE__ */ guard(alternativeMaybe);
   var apply6 = /* @__PURE__ */ apply(applyMaybe);
   var map123 = /* @__PURE__ */ map(functorMaybe);
@@ -56396,8 +52249,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var fromFoldable212 = /* @__PURE__ */ fromFoldable2(foldableMaybe);
   var parseQueryPart = function(decoder) {
     var part2tuple = function(input3) {
-      var keyVal = map95(decoder)(split("=")(input3));
-      return discard109(guard2(length(keyVal) <= 2))(function() {
+      var keyVal = map92(decoder)(split("=")(input3));
+      return discard79(guard2(length(keyVal) <= 2))(function() {
         return apply6(map123(Tuple.create)(head(keyVal)))(index(keyVal)(1));
       });
     };
@@ -56411,7 +52264,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var parse8 = function(decoder) {
     return function(hash2) {
       var pathParts = function(str2) {
-        var parts = fromFoldable120(map95(function($31) {
+        var parts = fromFoldable120(map92(function($31) {
           return Path4.create(decoder($31));
         })(split("/")(str2)));
         var v2 = unsnoc(parts);
@@ -56453,18 +52306,18 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var hashchange = "hashchange";
 
   // output/Routing.Hash/index.js
-  var bind146 = /* @__PURE__ */ bind(bindEffect);
-  var map96 = /* @__PURE__ */ map(functorEffect);
+  var bind87 = /* @__PURE__ */ bind(bindEffect);
+  var map93 = /* @__PURE__ */ map(functorEffect);
   var bindFlipped9 = /* @__PURE__ */ bindFlipped(bindEffect);
   var join4 = /* @__PURE__ */ join(bindEffect);
   var apply7 = /* @__PURE__ */ apply(applyEffect);
-  var pure88 = /* @__PURE__ */ pure(applicativeEffect);
+  var pure87 = /* @__PURE__ */ pure(applicativeEffect);
   var voidRight3 = /* @__PURE__ */ voidRight(functorEffect);
   var setHash2 = function(h) {
-    return bind146(bind146(windowImpl)(location))(setHash(h));
+    return bind87(bind87(windowImpl)(location))(setHash(h));
   };
-  var getHash = /* @__PURE__ */ bind146(/* @__PURE__ */ bind146(windowImpl)(location))(/* @__PURE__ */ (function() {
-    var $16 = map96((function() {
+  var getHash = /* @__PURE__ */ bind87(/* @__PURE__ */ bind87(windowImpl)(location))(/* @__PURE__ */ (function() {
+    var $16 = map93((function() {
       var $18 = fromMaybe("");
       var $19 = stripPrefix("#");
       return function($20) {
@@ -56479,9 +52332,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return function(init14) {
       return function __do3() {
         var ref2 = bindFlipped9($$new)(bindFlipped9(init14)(getHash))();
-        var win = map96(toEventTarget)(windowImpl)();
+        var win = map93(toEventTarget)(windowImpl)();
         var listener = eventListener(function(v) {
-          return bindFlipped9(flip(write)(ref2))(join4(apply7(map96(cb)(read(ref2)))(getHash)));
+          return bindFlipped9(flip(write)(ref2))(join4(apply7(map93(cb)(read(ref2)))(getHash)));
         })();
         addEventListener2(hashchange)(listener)(false)(win)();
         return removeEventListener2(hashchange)(listener)(false)(win);
@@ -56493,7 +52346,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return function(parser) {
       return function(cb) {
         var go2 = function(a2) {
-          var $21 = maybe(pure88(a2))(function(b10) {
+          var $21 = maybe(pure87(a2))(function(b10) {
             return voidRight3(new Just(b10))(cb(a2)(b10));
           });
           var $22 = indexl2(0);
@@ -56513,300 +52366,300 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   })();
 
   // output/PSD3.Main/index.js
-  var bind147 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftEffect81 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var discard120 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var bind88 = /* @__PURE__ */ bind(bindHalogenM);
+  var liftEffect51 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
+  var discard80 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var when10 = /* @__PURE__ */ when(applicativeHalogenM);
-  var pure89 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var modify_52 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var pure88 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var modify_21 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var spy4 = /* @__PURE__ */ spy();
-  var slot_4 = /* @__PURE__ */ slot_();
-  var slot_1 = /* @__PURE__ */ slot_4({
+  var slot_3 = /* @__PURE__ */ slot_();
+  var slot_1 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "home";
     }
   })(ordUnit);
-  var slot_22 = /* @__PURE__ */ slot_4({
+  var slot_22 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "gettingStarted";
     }
   })(ordUnit);
-  var slot_32 = /* @__PURE__ */ slot_4({
+  var slot_32 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "wizard";
     }
   })(ordUnit);
-  var slot_42 = /* @__PURE__ */ slot_4({
+  var slot_4 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "howtoIndex";
     }
   })(ordUnit);
-  var slot_5 = /* @__PURE__ */ slot_4({
+  var slot_5 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "howtoTransitions";
     }
   })(ordUnit);
   var component1 = /* @__PURE__ */ component13(monadAffAff);
-  var slot_6 = /* @__PURE__ */ slot_4({
+  var slot_6 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "howtoForceGraphs";
     }
   })(ordUnit);
   var component210 = /* @__PURE__ */ component8(monadAffAff);
-  var slot_7 = /* @__PURE__ */ slot_4({
+  var slot_7 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "howtoHierarchical";
     }
   })(ordUnit);
   var component310 = /* @__PURE__ */ component9(monadAffAff);
-  var slot_8 = /* @__PURE__ */ slot_4({
+  var slot_8 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "howtoEvents";
     }
   })(ordUnit);
   var component410 = /* @__PURE__ */ component7(monadAffAff);
-  var slot_9 = /* @__PURE__ */ slot_4({
+  var slot_9 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "howtoTreeAPI";
     }
   })(ordUnit);
-  var component510 = /* @__PURE__ */ component14(monadAffAff);
-  var slot_10 = /* @__PURE__ */ slot_4({
+  var component52 = /* @__PURE__ */ component14(monadAffAff);
+  var slot_10 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "howtoLoadingData";
     }
   })(ordUnit);
-  var component610 = /* @__PURE__ */ component10(monadAffAff);
-  var slot_11 = /* @__PURE__ */ slot_4({
+  var component62 = /* @__PURE__ */ component10(monadAffAff);
+  var slot_11 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "howtoAxesScales";
     }
   })(ordUnit);
-  var component710 = /* @__PURE__ */ component5(monadAffAff);
-  var slot_12 = /* @__PURE__ */ slot_4({
+  var component72 = /* @__PURE__ */ component5(monadAffAff);
+  var slot_12 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "howtoTooltips";
     }
   })(ordUnit);
   var component82 = /* @__PURE__ */ component12(monadAffAff);
-  var slot_13 = /* @__PURE__ */ slot_4({
+  var slot_13 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "howtoDebugging";
     }
   })(ordUnit);
   var component92 = /* @__PURE__ */ component6(monadAffAff);
-  var slot_14 = /* @__PURE__ */ slot_4({
+  var slot_14 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "howtoPerformance";
     }
   })(ordUnit);
   var component102 = /* @__PURE__ */ component11(monadAffAff);
-  var slot_15 = /* @__PURE__ */ slot_4({
+  var slot_15 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "howtoTreeExplorer";
     }
   })(ordUnit);
   var component112 = /* @__PURE__ */ component15(monadAffAff);
-  var slot_16 = /* @__PURE__ */ slot_4({
+  var slot_16 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "understanding";
     }
   })(ordUnit);
-  var slot_17 = /* @__PURE__ */ slot_4({
+  var slot_17 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "understandingGrammar";
     }
   })(ordUnit);
   var component122 = /* @__PURE__ */ component38(monadAffAff);
-  var slot_18 = /* @__PURE__ */ slot_4({
+  var slot_18 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "understandingAttributes";
     }
   })(ordUnit);
   var component132 = /* @__PURE__ */ component37(monadAffAff);
-  var slot_19 = /* @__PURE__ */ slot_4({
+  var slot_19 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "understandingSelections";
     }
   })(ordUnit);
   var component142 = /* @__PURE__ */ component40(monadAffAff);
-  var slot_20 = /* @__PURE__ */ slot_4({
+  var slot_20 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "understandingTreeAPI";
     }
   })(ordUnit);
   var component152 = /* @__PURE__ */ component41(monadAffAff);
-  var slot_21 = /* @__PURE__ */ slot_4({
+  var slot_21 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "understandingScenes";
     }
   })(ordUnit);
   var component162 = /* @__PURE__ */ component39(monadAffAff);
-  var slot_222 = /* @__PURE__ */ slot_4({
+  var slot_222 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "reference";
     }
   })(ordUnit);
-  var slot_23 = /* @__PURE__ */ slot_4({
+  var slot_23 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "tourFoundations";
     }
   })(ordUnit);
   var component172 = /* @__PURE__ */ component26(monadAffAff);
-  var slot_24 = /* @__PURE__ */ slot_4({
+  var slot_24 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "tourProfessional";
     }
   })(ordUnit);
   var component182 = /* @__PURE__ */ component32(monadAffAff);
-  var slot_25 = /* @__PURE__ */ slot_4({
+  var slot_25 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "tourFlow";
     }
   })(ordUnit);
   var component192 = /* @__PURE__ */ component25(monadAffAff);
-  var slot_26 = /* @__PURE__ */ slot_4({
+  var slot_26 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "tourHierarchies";
     }
   })(ordUnit);
   var component202 = /* @__PURE__ */ component28(monadAffAff);
-  var slot_27 = /* @__PURE__ */ slot_4({
+  var slot_27 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "tourMotion";
     }
   })(ordUnit);
   var component212 = /* @__PURE__ */ component31(monadAffAff);
-  var slot_28 = /* @__PURE__ */ slot_4({
+  var slot_28 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "tourWealthHealth";
     }
   })(ordUnit);
   var component222 = /* @__PURE__ */ component35(monadAffAff);
-  var slot_29 = /* @__PURE__ */ slot_4({
+  var slot_29 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "tourInterpreters";
     }
   })(ordUnit);
   var component232 = /* @__PURE__ */ component29(monadAffAff);
-  var slot_30 = /* @__PURE__ */ slot_4({
+  var slot_30 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "tourFPFTW";
     }
   })(ordUnit);
   var component242 = /* @__PURE__ */ component24(monadAffAff);
-  var slot_31 = /* @__PURE__ */ slot_4({
+  var slot_31 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "tourGraphAlgorithms";
     }
   })(ordUnit);
   var component252 = /* @__PURE__ */ component27(monadAffAff);
-  var slot_322 = /* @__PURE__ */ slot_4({
+  var slot_322 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "tourLesMisGUP";
     }
   })(ordUnit);
   var component262 = /* @__PURE__ */ component30(monadAffAff);
-  var slot_33 = /* @__PURE__ */ slot_4({
+  var slot_33 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "tourShowcase";
     }
   })(ordUnit);
   var component272 = /* @__PURE__ */ component33(monadAffAff);
-  var slot_34 = /* @__PURE__ */ slot_4({
+  var slot_34 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "gallery";
     }
   })(ordUnit);
-  var slot_35 = /* @__PURE__ */ slot_4({
+  var slot_35 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "example";
     }
   })(ordUnit);
   var component282 = /* @__PURE__ */ component2(monadAffAff);
-  var slot_36 = /* @__PURE__ */ slot_4({
+  var slot_36 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "treeAPI";
     }
   })(ordUnit);
   var component292 = /* @__PURE__ */ component36(monadAffAff);
-  var slot_37 = /* @__PURE__ */ slot_4({
+  var slot_37 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "animatedTreeCluster";
     }
   })(ordUnit);
   var component302 = /* @__PURE__ */ component(monadAffAff);
-  var slot_38 = /* @__PURE__ */ slot_4({
+  var slot_38 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "generalUpdatePattern";
     }
   })(ordUnit);
   var component312 = /* @__PURE__ */ component4(monadAffAff);
-  var slot_39 = /* @__PURE__ */ slot_4({
+  var slot_39 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "lesMisGUPTree";
     }
   })(ordUnit);
   var component322 = /* @__PURE__ */ component19(monadAffAff);
-  var slot_40 = /* @__PURE__ */ slot_4({
+  var slot_40 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "lesMisGUP";
     }
   })(ordUnit);
   var component332 = /* @__PURE__ */ component16(monadAffAff);
-  var slot_41 = /* @__PURE__ */ slot_4({
+  var slot_41 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "lesMisGUPSimple";
     }
   })(ordUnit);
   var component342 = /* @__PURE__ */ component18(monadAffAff);
-  var slot_422 = /* @__PURE__ */ slot_4({
+  var slot_42 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "lesMisGUPClean";
     }
   })(ordUnit);
   var component352 = /* @__PURE__ */ component17(monadAffAff);
-  var slot_43 = /* @__PURE__ */ slot_4({
+  var slot_43 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "lesMisQueryDemo";
     }
   })(ordUnit);
   var component362 = /* @__PURE__ */ component20(monadAffAff);
-  var slot_44 = /* @__PURE__ */ slot_4({
+  var slot_44 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "moduleGraph";
     }
   })(ordUnit);
   var component372 = /* @__PURE__ */ component22(monadAffAff);
-  var slot_45 = /* @__PURE__ */ slot_4({
+  var slot_45 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "mermaidTreeDemo";
     }
   })(ordUnit);
   var component382 = /* @__PURE__ */ component21(monadAffAff);
-  var slot_46 = /* @__PURE__ */ slot_4({
+  var slot_46 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "sceneJoinDemo";
     }
   })(ordUnit);
   var component392 = /* @__PURE__ */ component23(monadAffAff);
-  var slot_47 = /* @__PURE__ */ slot_4({
+  var slot_47 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "codeExplorer";
     }
   })(ordUnit);
   var component402 = /* @__PURE__ */ component43(monadAffAff);
-  var slot_48 = /* @__PURE__ */ slot_4({
+  var slot_48 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
       return "acknowledgements";
     }
   })(ordUnit);
-  var Initialize79 = /* @__PURE__ */ (function() {
-    function Initialize80() {
+  var Initialize49 = /* @__PURE__ */ (function() {
+    function Initialize50() {
     }
     ;
-    Initialize80.value = new Initialize80();
-    return Initialize80;
+    Initialize50.value = new Initialize50();
+    return Initialize50;
   })();
   var Navigate = /* @__PURE__ */ (function() {
     function Navigate2(value0) {
@@ -56828,34 +52681,34 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
     return RouteChanged2;
   })();
-  var handleAction79 = function(v) {
-    if (v instanceof Initialize79) {
-      return bind147(liftEffect81(function __do3() {
+  var handleAction49 = function(v) {
+    if (v instanceof Initialize49) {
+      return bind88(liftEffect51(function __do3() {
         var w = windowImpl();
         var loc = location(w)();
         return hash(loc)();
       }))(function(currentHash) {
-        return discard120(when10(currentHash === "" || (currentHash === "#" || currentHash === "#/"))(liftEffect81(setHash2(routeToPath(Home.value)))))(function() {
-          return bind147(subscribe2(makeEmitter(function(push2) {
+        return discard80(when10(currentHash === "" || (currentHash === "#" || currentHash === "#/"))(liftEffect51(setHash2(routeToPath(Home.value)))))(function() {
+          return bind88(subscribe2(makeEmitter(function(push2) {
             return matches2(routing)(function(v1) {
               return function(newRoute) {
                 return push2(new RouteChanged(new Just(newRoute)));
               };
             });
           })))(function() {
-            return pure89(unit);
+            return pure88(unit);
           });
         });
       });
     }
     ;
     if (v instanceof Navigate) {
-      return liftEffect81(setHash2(routeToPath(v.value0)));
+      return liftEffect51(setHash2(routeToPath(v.value0)));
     }
     ;
     if (v instanceof RouteChanged) {
       if (v.value0 instanceof Just) {
-        return modify_52(function(v1) {
+        return modify_21(function(v1) {
           var $209 = {};
           for (var $210 in v1) {
             if ({}.hasOwnProperty.call(v1, $210)) {
@@ -56870,7 +52723,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v.value0 instanceof Nothing) {
-        return modify_52(function(v1) {
+        return modify_21(function(v1) {
           var $213 = {};
           for (var $214 in v1) {
             if ({}.hasOwnProperty.call(v1, $214)) {
@@ -56884,10 +52737,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Main (line 400, column 5 - line 403, column 57): " + [v.value0.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Main (line 401, column 5 - line 404, column 57): " + [v.value0.constructor.name]);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Main (line 376, column 16 - line 403, column 57): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Main (line 377, column 16 - line 404, column 57): " + [v.constructor.name]);
   };
   var _wizard = /* @__PURE__ */ (function() {
     return $$Proxy.value;
@@ -57040,15 +52893,15 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }
     ;
     if (v instanceof GettingStarted) {
-      return slot_22(_gettingStarted)(unit)(component78)(unit);
+      return slot_22(_gettingStarted)(unit)(component47)(unit);
     }
     ;
     if (v instanceof Wizard) {
-      return slot_32(_wizard)(unit)(component80)(unit);
+      return slot_32(_wizard)(unit)(component49)(unit);
     }
     ;
     if (v instanceof HowtoIndex) {
-      return slot_42(_howtoIndex)(unit)(component45)(unit);
+      return slot_4(_howtoIndex)(unit)(component45)(unit);
     }
     ;
     if (v instanceof HowtoTransitions) {
@@ -57068,15 +52921,15 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }
     ;
     if (v instanceof HowtoTreeAPI) {
-      return slot_9(_howtoTreeAPI)(unit)(component510)(unit);
+      return slot_9(_howtoTreeAPI)(unit)(component52)(unit);
     }
     ;
     if (v instanceof HowtoLoadingData) {
-      return slot_10(_howtoLoadingData)(unit)(component610)(unit);
+      return slot_10(_howtoLoadingData)(unit)(component62)(unit);
     }
     ;
     if (v instanceof HowtoAxesScales) {
-      return slot_11(_howtoAxesScales)(unit)(component710)(unit);
+      return slot_11(_howtoAxesScales)(unit)(component72)(unit);
     }
     ;
     if (v instanceof HowtoTooltips) {
@@ -57096,7 +52949,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }
     ;
     if (v instanceof Understanding) {
-      return slot_16(_understanding)(unit)(component79)(unit);
+      return slot_16(_understanding)(unit)(component48)(unit);
     }
     ;
     if (v instanceof UnderstandingGrammar) {
@@ -57120,11 +52973,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }
     ;
     if (v instanceof Reference) {
-      return slot_222(_reference)(unit)(component77)(Reference.value);
+      return slot_222(_reference)(unit)(component46)(unit);
     }
     ;
     if (v instanceof ReferenceModule) {
-      return slot_222(_reference)(unit)(component77)(new ReferenceModule(v.value0));
+      return slot_222(_reference)(unit)(component46)(unit);
     }
     ;
     if (v instanceof TourFoundations) {
@@ -57204,7 +53057,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }
     ;
     if (v instanceof LesMisGUPClean) {
-      return slot_422(_lesMisGUPClean)(unit)(component352)(unit);
+      return slot_42(_lesMisGUPClean)(unit)(component352)(unit);
     }
     ;
     if (v instanceof LesMisQueryDemo) {
@@ -57235,30 +53088,30 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return div2([classes(["not-found"])])([h1_([text2("404 - Page Not Found")]), p_([text2("The page you're looking for doesn't exist.")]), a([href("#" + routeToPath(Home.value))])([text2("Go to Home")])]);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Main (line 213, column 20 - line 373, column 8): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Main (line 213, column 20 - line 374, column 8): " + [v.constructor.name]);
   };
-  var render88 = function(state3) {
+  var render57 = function(state3) {
     return div2([classes(["app"])])([main([classes(["app__main"])])([renderPage(state3.currentRoute)])]);
   };
-  var component81 = /* @__PURE__ */ (function() {
+  var component50 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return {
           currentRoute: Home.value
         };
       },
-      render: render88,
+      render: render57,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
         finalize: defaultEval.finalize,
-        handleAction: handleAction79,
-        initialize: new Just(Initialize79.value)
+        handleAction: handleAction49,
+        initialize: new Just(Initialize49.value)
       })
     });
   })();
   var main2 = /* @__PURE__ */ runHalogenAff(/* @__PURE__ */ bind(bindAff)(awaitBody)(function(body2) {
-    return runUI2(component81)(unit)(body2);
+    return runUI2(component50)(unit)(body2);
   }));
 
   // <stdin>

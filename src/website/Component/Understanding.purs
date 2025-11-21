@@ -31,7 +31,7 @@ component = H.mkComponent
 render :: State -> H.ComponentHTML Action () Aff
 render _ =
   HH.div
-    [ HP.classes [ HH.ClassName "tutorial-page" ] ]
+    [ HP.classes [ HH.ClassName "docs-page", HH.ClassName "understanding-index" ] ]
     [ -- Site Navigation with Understanding quadrant highlighted
       SiteNav.render
         { logoSize: SiteNav.Large
@@ -40,105 +40,70 @@ render _ =
         , pageTitle: Nothing
         }
 
-    , HH.main_
-        [ -- Introduction
-          HH.section
-            [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
+    -- Hero section
+    , HH.section
+        [ HP.classes [ HH.ClassName "docs-hero" ] ]
+        [ HH.div
+            [ HP.classes [ HH.ClassName "docs-hero-content" ] ]
             [ HH.h1
-                [ HP.classes [ HH.ClassName "tutorial-title" ] ]
-                [ HH.text "Understanding PSD3v2" ]
-            , HH.p_
-                [ HH.text "Deep dives into the core concepts and patterns that make PSD3 a type-safe, composable framework for D3 visualizations. Click any card to learn more." ]
+                [ HP.classes [ HH.ClassName "docs-hero-title" ] ]
+                [ HH.text "Understanding" ]
+            , HH.p
+                [ HP.classes [ HH.ClassName "docs-hero-description" ] ]
+                [ HH.text "Deep dives into the core concepts and patterns that make PSD3 a type-safe, composable framework for D3 visualizations." ]
             ]
+        ]
 
-        -- Core Concepts Section
-        , HH.section
-            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
-            [ HH.h2
-                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "Core Concepts" ]
-            , HH.p_
-                [ HH.text "Essential concepts that form the foundation of PSD3's architecture." ]
+    -- Core Concepts
+    , HH.section
+        [ HP.classes [ HH.ClassName "docs-section" ] ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "docs-section-title" ] ]
+            [ HH.text "Core Concepts" ]
 
-            -- Four-square navigation grid
-            , HH.div
-                [ HP.classes [ HH.ClassName "understanding-nav-grid" ] ]
-                [ renderNavCard
-                    "The Grammar of D3"
-                    "Four essential primitives: select, append, join, attr. Everything else builds from these."
-                    UnderstandingGrammar
-                , renderNavCard
-                    "Type-Safe Attributes"
-                    "Static values, datum functions, contravariant pattern. Compile-time type safety."
-                    UnderstandingAttributes
-                , renderNavCard
-                    "Selection Phantom Types"
-                    "Five states: SEmpty, SPending, SBoundOwns, SBoundInherits, SExiting. Indexed Monad pattern."
-                    UnderstandingSelections
-                , renderNavCard
-                    "TreeAPI"
-                    "Declarative tree structures. Layer cake: TreeAPI and Simulation API on SelectionM."
-                    UnderstandingTreeAPI
-                ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "howto-card-grid" ] ]
+            [ renderCard UnderstandingGrammar "The Grammar of D3"
+                "Four essential primitives: select, append, join, attr. Everything else builds from these."
+
+            , renderCard UnderstandingAttributes "Type-Safe Attributes"
+                "Static values, datum functions, contravariant pattern. Compile-time type safety."
+
+            , renderCard UnderstandingSelections "Selection Phantom Types"
+                "Five states: SEmpty, SPending, SBoundOwns, SBoundInherits, SExiting. Indexed Monad pattern."
             ]
+        ]
 
-        -- Advanced Topics Section
-        , HH.section
-            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
-            [ HH.h2
-                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "Advanced Topics" ]
-            , HH.p_
-                [ HH.text "Complex patterns for interactive, updating visualizations." ]
+    -- Architecture
+    , HH.section
+        [ HP.classes [ HH.ClassName "docs-section" ] ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "docs-section-title" ] ]
+            [ HH.text "Architecture" ]
 
-            , HH.div
-                [ HP.classes [ HH.ClassName "understanding-nav-grid", HH.ClassName "single-column" ] ]
-                [ renderNavCard
-                    "Scene Structures & Transitions"
-                    "Declarative state management for complex interactive visualizations. Transition matrices for multi-state apps."
-                    UnderstandingScenes
-                ]
-            ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "howto-card-grid" ] ]
+            [ renderCard UnderstandingTreeAPI "TreeAPI"
+                "Declarative tree structures. Layer cake architecture with TreeAPI and Simulation API on SelectionM."
 
-        -- Quick Links Section
-        , HH.section
-            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
-            [ HH.h2
-                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "Related Resources" ]
-            , HH.ul_
-                [ HH.li_
-                    [ HH.a
-                        [ HP.href "#/tour/foundations" ]
-                        [ HH.text "Tour: See these concepts in action" ]
-                    ]
-                , HH.li_
-                    [ HH.a
-                        [ HP.href "#/tour/interpreters" ]
-                        [ HH.text "Tour: Alternative Interpreters" ]
-                    ]
-                , HH.li_
-                    [ HH.a
-                        [ HP.href "#/reference" ]
-                        [ HH.text "API Reference" ]
-                    ]
-                ]
+            , renderCard UnderstandingScenes "Scene Structures & Transitions"
+                "Declarative state management for complex interactive visualizations with transition matrices."
             ]
         ]
     ]
 
--- | Render a navigation card
-renderNavCard :: forall w i. String -> String -> Route -> HH.HTML w i
-renderNavCard title description route =
+-- | Render a card with link, title, and description
+renderCard :: forall w i. Route -> String -> String -> HH.HTML w i
+renderCard route title description =
   HH.a
-    [ HP.href $ "#" <> routeToPath route
-    , HP.classes [ HH.ClassName "understanding-nav-card" ]
+    [ HP.classes [ HH.ClassName "howto-card" ]
+    , HP.href $ "#" <> routeToPath route
     ]
     [ HH.h3
-        [ HP.classes [ HH.ClassName "understanding-nav-card__title" ] ]
+        [ HP.classes [ HH.ClassName "howto-card__title" ] ]
         [ HH.text title ]
     , HH.p
-        [ HP.classes [ HH.ClassName "understanding-nav-card__description" ] ]
+        [ HP.classes [ HH.ClassName "howto-card__description" ] ]
         [ HH.text description ]
     ]
 

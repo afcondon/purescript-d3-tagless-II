@@ -277,10 +277,11 @@ renderPage route = case spy "Route is" route of
     HH.slot_ _understandingScenes unit UnderstandingScenes.component unit
 
   Reference ->
-    HH.slot_ _reference unit Reference.component Reference
+    HH.slot_ _reference unit Reference.component unit
 
-  ReferenceModule moduleName ->
-    HH.slot_ _reference unit Reference.component (ReferenceModule moduleName)
+  ReferenceModule _ ->
+    -- ReferenceModule routes redirect to the main Reference page
+    HH.slot_ _reference unit Reference.component unit
 
   -- Tour Pages
   TourFoundations ->
