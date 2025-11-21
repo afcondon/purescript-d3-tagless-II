@@ -89,10 +89,10 @@ render _ =
                 "How-to Guides"
                 "Step-by-step instructions for specific visualizations"
                 (routeToPath HowtoIndex)
-            , renderDocBoxExternal
+            , renderDocBox
                 "API Reference"
                 "Pursuit-style documentation of the library with type signatures"
-                "api/index.html"
+                (routeToPath Reference)
             , renderDocBox
                 "Understanding"
                 "Conceptual overview of the project"

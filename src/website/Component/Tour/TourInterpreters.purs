@@ -433,25 +433,19 @@ render state =
                 , HH.strong_ [ HH.text "Below we feed this generated code back into Mermaid to prove it works!" ]
                 ]
             , HH.div
-                [ HP.style "display: flex; gap: 20px; margin: 20px 0;" ]
-                [ HH.div
-                    [ HP.style "flex: 1;" ]
-                    [ HH.h3
-                        [ HP.style "margin-top: 0; font-size: 14px; color: #666;" ]
-                        [ HH.text "Generated Mermaid Code:" ]
-                    , HH.pre
-                        [ HP.classes [ HH.ClassName "code-output" ]
-                        , HP.style "background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; color: #333; margin: 0;"
-                        ]
-                        [ HH.text state.mermaidCode ]
+                [ HP.style "margin: 20px 0;" ]
+                [ HH.h3
+                    [ HP.style "margin-top: 0; font-size: 14px; color: #666;" ]
+                    [ HH.text "Generated Mermaid Code:" ]
+                , HH.pre
+                    [ HP.classes [ HH.ClassName "code-output" ]
+                    , HP.style "background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; color: #333; margin: 0 0 20px 0; max-height: 200px; overflow-y: auto;"
                     ]
-                , HH.div
-                    [ HP.style "flex: 1;" ]
-                    [ HH.h3
-                        [ HP.style "margin-top: 0; font-size: 14px; color: #666;" ]
-                        [ HH.text "Rendered Diagram (Inception!):" ]
-                    , mermaidDiagram state.mermaidCode Nothing
-                    ]
+                    [ HH.text state.mermaidCode ]
+                , HH.h3
+                    [ HP.style "margin-top: 0; font-size: 14px; color: #666;" ]
+                    [ HH.text "Rendered Diagram (Inception!):" ]
+                , mermaidDiagram state.mermaidCode Nothing
                 ]
             , HH.p_
                 [ HH.text "Visit the "

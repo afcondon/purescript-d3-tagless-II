@@ -13,7 +13,7 @@ import Halogen.HTML as HH
 import PSD3.Shared.SiteNav as SiteNav
 import PSD3.Website.Types (Route(..))
 
--- | All tutorial pages in order
+-- | All tutorial pages in order (WealthHealth and Showcase moved to Showcase section)
 allTutorialRoutes :: Array Route
 allTutorialRoutes =
   [ TourFoundations
@@ -21,12 +21,10 @@ allTutorialRoutes =
   , TourFlow
   , TourHierarchies
   , TourMotion
-  , TourWealthHealth
   , TourInterpreters
   , TourFPFTW
   , TourGraphAlgorithms
   , TourLesMisGUP
-  , TourShowcase
   ]
 
 -- | Get the next tutorial in the sequence

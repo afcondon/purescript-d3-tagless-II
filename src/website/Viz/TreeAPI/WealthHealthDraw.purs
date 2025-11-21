@@ -288,7 +288,7 @@ initWealthHealth selector = runD3v2M do
                    <> "Income: $" <> show (floor nation.income) <> "<br/>"
                    <> "Life Expectancy: " <> show (floor nation.lifeExpectancy) <> " years<br/>"
                    <> "Population: " <> formatPopulation nation.population
-        showTooltip content info.pageX info.pageY
+        showTooltip content info.clientX info.clientY
         ) merged
 
       -- Hide tooltip on leave

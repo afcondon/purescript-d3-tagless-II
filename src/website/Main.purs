@@ -41,6 +41,7 @@ import PSD3.Reference.Reference as Reference
 import PSD3.Acknowledgements as Acknowledgements
 
 -- Tour pages
+import Component.Tour.TourIndex as TourIndex
 import Component.Tour.TourFoundations as TourFoundations
 import Component.Tour.TourProfessional as TourProfessional
 import Component.Tour.TourFlow as TourFlow
@@ -52,6 +53,9 @@ import Component.Tour.TourFPFTW as TourFPFTW
 import Component.Tour.TourGraphAlgorithms as TourGraphAlgorithms
 import Component.Tour.TourLesMisGUP as TourLesMisGUP
 import Component.Tour.TourShowcase as TourShowcase
+
+-- Showcase
+import Component.Showcase.ShowcaseIndex as ShowcaseIndex
 
 -- Tree API Examples
 import Component.ExamplesGallery as ExamplesGallery
@@ -110,6 +114,7 @@ type Slots =
   , understandingTreeAPI :: forall q. H.Slot q Void Unit
   , understandingScenes :: forall q. H.Slot q Void Unit
   , reference :: forall q. H.Slot q Void Unit
+  , tourIndex :: forall q. H.Slot q Void Unit
   , tourFoundations :: forall q. H.Slot q Void Unit
   , tourProfessional :: forall q. H.Slot q Void Unit
   , tourFlow :: forall q. H.Slot q Void Unit
@@ -121,6 +126,7 @@ type Slots =
   , tourGraphAlgorithms :: forall q. H.Slot q Void Unit
   , tourLesMisGUP :: forall q. H.Slot q Void Unit
   , tourShowcase :: forall q. H.Slot q Void Unit
+  , showcase :: forall q. H.Slot q Void Unit
   , gallery :: forall q. H.Slot q Void Unit
   , example :: forall q. H.Slot q Void Unit
   , treeAPI :: forall q. H.Slot q Void Unit
@@ -160,6 +166,7 @@ _understandingSelections = Proxy :: Proxy "understandingSelections"
 _understandingTreeAPI = Proxy :: Proxy "understandingTreeAPI"
 _understandingScenes = Proxy :: Proxy "understandingScenes"
 _reference = Proxy :: Proxy "reference"
+_tourIndex = Proxy :: Proxy "tourIndex"
 _tourFoundations = Proxy :: Proxy "tourFoundations"
 _tourProfessional = Proxy :: Proxy "tourProfessional"
 _tourFlow = Proxy :: Proxy "tourFlow"
@@ -171,6 +178,7 @@ _tourFPFTW = Proxy :: Proxy "tourFPFTW"
 _tourGraphAlgorithms = Proxy :: Proxy "tourGraphAlgorithms"
 _tourLesMisGUP = Proxy :: Proxy "tourLesMisGUP"
 _tourShowcase = Proxy :: Proxy "tourShowcase"
+_showcase = Proxy :: Proxy "showcase"
 _gallery = Proxy :: Proxy "gallery"
 _example = Proxy :: Proxy "example"
 _treeAPI = Proxy :: Proxy "treeAPI"
@@ -284,6 +292,9 @@ renderPage route = case spy "Route is" route of
     HH.slot_ _reference unit Reference.component unit
 
   -- Tour Pages
+  TourIndex ->
+    HH.slot_ _tourIndex unit TourIndex.component unit
+
   TourFoundations ->
     HH.slot_ _tourFoundations unit TourFoundations.component unit
 
@@ -316,6 +327,10 @@ renderPage route = case spy "Route is" route of
 
   TourShowcase ->
     HH.slot_ _tourShowcase unit TourShowcase.component unit
+
+  -- Showcase
+  Showcase ->
+    HH.slot_ _showcase unit ShowcaseIndex.component unit
 
   -- Tree API Examples
   Gallery ->

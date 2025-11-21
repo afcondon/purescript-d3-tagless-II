@@ -106,6 +106,7 @@ data Route
   | Reference       -- Reference: API documentation index
   | ReferenceModule String  -- Reference: individual module page
   -- Tour Pages (progressive overview of capabilities)
+  | TourIndex            -- Tour: index page with hero and cards
   | TourFoundations      -- Tour 1: Three circles, matrix, parabola, bar chart
   | TourProfessional     -- Tour 2: Multiline, grouped bar, radial stacked
   | TourFlow             -- Tour 3: Chord and Sankey diagrams
@@ -117,6 +118,8 @@ data Route
   | TourGraphAlgorithms  -- Tour 8: Graph Algorithms (topological sort, transitive reduction)
   | TourLesMisGUP        -- Tour 9: General Update Pattern with dynamic graphs
   | TourShowcase         -- Tour 10: Flagship demo visualizations
+  -- Showcase (complex app-like visualizations)
+  | Showcase             -- Showcase: index page with hero and cards
   -- Tree API Examples
   | Gallery         -- Gallery of all TreeAPI examples with cards
   | Example String  -- Individual example page by ID
@@ -162,6 +165,7 @@ instance showRoute :: Show Route where
   show UnderstandingScenes = "Understanding: Scenes"
   show Reference = "API Reference"
   show (ReferenceModule moduleName) = "Module: " <> moduleName
+  show TourIndex = "Tour"
   show TourFoundations = "Tour: Foundations"
   show TourProfessional = "Tour: Typical Charts"
   show TourFlow = "Tour: Data Flow"
@@ -173,6 +177,7 @@ instance showRoute :: Show Route where
   show TourGraphAlgorithms = "Tour: Graph Algorithms"
   show TourLesMisGUP = "Tour: General Update Pattern"
   show TourShowcase = "Tour: Showcase"
+  show Showcase = "Showcase"
   show Gallery = "Examples Gallery"
   show (Example exampleId) = "Example: " <> exampleId
   show TreeAPI = "Tree API Examples"

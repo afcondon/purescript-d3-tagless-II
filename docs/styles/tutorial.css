@@ -462,6 +462,14 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Generic viz-container - make SVGs responsive */
+.viz-container svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
 /* Embedded visualization divs */
 .tutorial-viz-container .three-circles-viz,
 .tutorial-viz-container .gup-viz,

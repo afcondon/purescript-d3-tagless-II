@@ -1,5 +1,21 @@
 /* Wealth & Health of Nations Visualization Styles */
 
+/* Showcase page wrapper - minimal padding for full-screen visualizations */
+.showcase-page {
+  min-height: 100vh;
+  background-color: var(--color-beige-base);
+}
+
+.wealth-health-showcase {
+  display: flex;
+  flex-direction: column;
+}
+
+.wealth-health-showcase .wealth-health-page {
+  flex: 1;
+  padding-top: 0;
+}
+
 .wealth-health-wrapper {
   width: 100%;
   min-height: 100vh;

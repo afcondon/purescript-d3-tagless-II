@@ -51,6 +51,8 @@ routes =
   <|> tourGraphAlgorithms
   <|> tourLesMisGUP
   <|> tourShowcase
+  <|> tourIndex
+  <|> showcase
   <|> gallery
   <|> examplePage     -- Must come before other routes to match /example/:id
   <|> treeAPI
@@ -209,6 +211,14 @@ tourLesMisGUP = TourLesMisGUP <$ lit "tour" <* lit "lesmis-gup" <* end
 tourShowcase :: Match Route
 tourShowcase = TourShowcase <$ lit "tour" <* lit "showcase" <* end
 
+-- | Match: /tour (index page - must come after specific tour routes)
+tourIndex :: Match Route
+tourIndex = TourIndex <$ lit "tour" <* end
+
+-- | Match: /showcase
+showcase :: Match Route
+showcase = Showcase <$ lit "showcase" <* end
+
 -- | Match: /gallery
 gallery :: Match Route
 gallery = Gallery <$ lit "gallery" <* end
@@ -300,6 +310,7 @@ routeToPath UnderstandingTreeAPI = "/understanding/tree-api"
 routeToPath UnderstandingScenes = "/understanding/scenes"
 routeToPath Reference = "/reference"
 routeToPath (ReferenceModule moduleName) = "/reference/" <> moduleName
+routeToPath TourIndex = "/tour"
 routeToPath TourFoundations = "/tour/foundations"
 routeToPath TourProfessional = "/tour/professional"
 routeToPath TourFlow = "/tour/flow"
@@ -311,6 +322,7 @@ routeToPath TourFPFTW = "/tour/fpftw"
 routeToPath TourGraphAlgorithms = "/tour/graph-algorithms"
 routeToPath TourLesMisGUP = "/tour/lesmis-gup"
 routeToPath TourShowcase = "/tour/showcase"
+routeToPath Showcase = "/showcase"
 routeToPath Gallery = "/gallery"
 routeToPath (Example exampleId) = "/example/" <> exampleId
 routeToPath TreeAPI = "/tree-api"

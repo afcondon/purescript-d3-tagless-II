@@ -110,7 +110,7 @@ render config =
               HH.nav
                 [ HP.classes [ HH.ClassName "site-nav-links" ] ]
                 [ HH.a
-                    [ HP.href $ "#" <> routeToPath TourFoundations
+                    [ HP.href $ "#" <> routeToPath TourIndex
                     , HP.classes [ HH.ClassName "site-nav-link" ]
                     ]
                     [ HH.text "Tour" ]
@@ -120,15 +120,10 @@ render config =
                     ]
                     [ HH.text "Examples" ]
                 , HH.a
-                    [ HP.href $ "#" <> routeToPath CodeExplorer
+                    [ HP.href $ "#" <> routeToPath Showcase
                     , HP.classes [ HH.ClassName "site-nav-link" ]
                     ]
-                    [ HH.text "Code Explorer" ]
-                , HH.a
-                    [ HP.href "api/index.html"
-                    , HP.classes [ HH.ClassName "site-nav-link" ]
-                    ]
-                    [ HH.text "API" ]
+                    [ HH.text "Showcase" ]
                 ]
             -- Prev/Next buttons (if provided)
             , case config.prevNext of
@@ -140,26 +135,26 @@ render config =
                         Nothing ->
                           HH.span
                             [ HP.classes [ HH.ClassName "site-nav-button", HH.ClassName "site-nav-button--disabled" ] ]
-                            [ HH.text "←" ]
+                            [ HH.text "☜" ]
                         Just prevRoute ->
                           HH.a
                             [ HP.href $ "#" <> routeToPath prevRoute
                             , HP.classes [ HH.ClassName "site-nav-button" ]
                             , HP.title $ show prevRoute
                             ]
-                            [ HH.text "←" ]
+                            [ HH.text "☜" ]
                     , case next of
                         Nothing ->
                           HH.span
                             [ HP.classes [ HH.ClassName "site-nav-button", HH.ClassName "site-nav-button--disabled" ] ]
-                            [ HH.text "→" ]
+                            [ HH.text "☞" ]
                         Just nextRoute ->
                           HH.a
                             [ HP.href $ "#" <> routeToPath nextRoute
                             , HP.classes [ HH.ClassName "site-nav-button" ]
                             , HP.title $ show nextRoute
                             ]
-                            [ HH.text "→" ]
+                            [ HH.text "☞" ]
                     ]
             ]
         ]
