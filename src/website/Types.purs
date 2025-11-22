@@ -135,6 +135,7 @@ data Route
   | MermaidTreeDemo -- Mermaid interpreter for Tree API (visualizes tree structure)
   | SceneJoinDemo   -- SceneNestedJoin demonstration (GUP with type decomposition)
   | CodeExplorer    -- Interactive code exploration (PureScript module dependencies)
+  | CodeExplorerV2  -- Rebuilt Code Explorer using LesMisGUP patterns
   -- Meta
   | Acknowledgements -- Credits and acknowledgements
   | NotFound
@@ -192,5 +193,6 @@ instance showRoute :: Show Route where
   show MermaidTreeDemo = "Mermaid Tree Visualizer"
   show SceneJoinDemo = "SceneNestedJoin Demo"
   show CodeExplorer = "Code Explorer"
+  show CodeExplorerV2 = "Code Explorer V2"
   show Acknowledgements = "Acknowledgements"
   show NotFound = "Not Found"

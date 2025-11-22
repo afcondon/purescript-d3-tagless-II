@@ -4,36 +4,60 @@ import Prelude
 
 import Affjax.ResponseFormat as ResponseFormat
 import Affjax.Web as AJAX
+import Data.Array as Array
 import Data.Either (Either(..))
+import Data.Map as Map
 import Data.Maybe (Maybe(..))
-import Data.Tuple (Tuple(..))
-import D3.Viz.FPFTW.LesMisGUPAuto as LesMisGUPAuto
+import Data.Set as Set
+import D3.Viz.LesMisGUPV2 as LesMisGUPV2
 import D3.Viz.LesMiserables.File (readGraphFromFileContents)
+import D3.Viz.LesMiserables.Model (LesMisSimNode, LesMisLink)
+import PSD3.Internal.FFI (linksForceName_)
 import PSD3.Internal.Simulation.Config as F
 import PSD3.Internal.Simulation.Forces (createForce, createLinkForce, initialize)
-import PSD3.Internal.Simulation.Types (ForceType(..), RegularForceType(..), allNodes, initialSimulationState)
+import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, ForceType(..), RegularForceType(..), allNodes, initialSimulationState)
 import Effect.Aff (Milliseconds(..), delay)
 import Effect.Aff.Class (class MonadAff)
-import Effect.Class (liftEffect)
+import Effect.Class.Console (log)
 import Halogen as H
 import Halogen.HTML as HH
+import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
 import PSD3v2.Interpreter.D3v2 as D3v2
-import Utility (getWindowWidthHeight)
+
+-- | Forces configuration
+forces :: { center :: Force LesMisSimNode, collision :: Force LesMisSimNode, links :: Force LesMisSimNode, manyBodyNeg :: Force LesMisSimNode }
+forces =
+  { manyBodyNeg: createForce "many body negative" (RegularForce ForceManyBody) allNodes [ F.strengthVal (-100.0) ]
+  , collision: createForce "collision" (RegularForce ForceCollide) allNodes [ F.radiusVal 6.0 ]
+  , center: createForce "center" (RegularForce ForceCenter) allNodes [ F.xVal 0.0, F.yVal 0.0, F.strengthVal 0.1 ]
+  , links: createLinkForce allNodes []
+  }
+
+forceLibrary :: Map.Map String (Force LesMisSimNode)
+forceLibrary = initialize [ forces.manyBodyNeg, forces.collision, forces.center, forces.links ]
 
 -- | Tour page state
-type State = Unit
+type State =
+  { simulation :: D3SimulationState_ LesMisSimNode
+  , originalGraph :: Maybe { nodes :: Array LesMisSimNode, links :: Array LesMisLink }
+  }
 
 -- | Tour page actions
-data Action = Initialize
+data Action
+  = Initialize
+  | FilterNodes Int
 
 -- | Tour page component
 component :: forall q i o m. MonadAff m => H.Component q i o m
 component = H.mkComponent
-  { initialState: \_ -> unit
+  { initialState: \_ ->
+      { simulation: initialSimulationState forceLibrary
+      , originalGraph: Nothing
+      }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -44,29 +68,39 @@ component = H.mkComponent
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
-    -- Small delay to ensure DOM is ready
+    log "TourLesMisGUP: Initializing"
     H.liftAff $ delay (Milliseconds 100.0)
 
     -- Load Les Misérables data
     lesMisResponse <- H.liftAff $ AJAX.get ResponseFormat.string "./data/miserables.json"
     case lesMisResponse of
-      Left _ -> pure unit  -- Fail silently
+      Left _ -> log "Failed to load Les Misérables data"
       Right response -> do
         let graph = readGraphFromFileContents (Right response)
-        Tuple width height <- liftEffect getWindowWidthHeight
+        let forcesArray = [ forces.manyBodyNeg, forces.collision, forces.center, forces.links ]
+            activeForces = Set.fromFoldable ["many body negative", "collision", "center", linksForceName_]
 
-        -- Create force library and initial state
-        let manyBodyForce = createForce "charge" (RegularForce ForceManyBody) allNodes [ F.strengthVal (-30.0) ]
-            centerForce = createForce "center" (RegularForce ForceCenter) allNodes [ F.xVal 0.0, F.yVal 0.0, F.strengthVal 0.1 ]
-            linksForce = createLinkForce allNodes [ F.distanceVal 30.0 ]
-            collisionForce = createForce "collision" (RegularForce ForceCollide) allNodes [ F.radiusVal 6.0 ]
-            forceLibrary = initialize [ manyBodyForce, centerForce, linksForce, collisionForce ]
-            initialState = { simulation: initialSimulationState forceLibrary }
+        -- Store original graph for filtering
+        H.modify_ \s -> s { originalGraph = Just graph }
 
-        -- Start auto-cycling GUP demo
-        H.liftAff $ void $ D3v2.runD3v2SimM initialState $ LesMisGUPAuto.drawLesMisGUPAuto graph.nodes graph.links "#lesmis-gup-auto-viz" width height
+        state <- H.get
+        newState <- H.liftAff $ D3v2.execD3v2SimM { simulation: state.simulation } do
+          _ <- LesMisGUPV2.drawLesMisGUPV2 forcesArray activeForces graph "#lesmis-gup-viz"
+          pure unit
+        H.modify_ \s -> s { simulation = newState.simulation }
+        log "TourLesMisGUP: Initialized successfully"
 
     pure unit
+
+  FilterNodes minGroup -> do
+    log $ "Filtering nodes to group >= " <> show minGroup
+    state <- H.get
+    case state.originalGraph of
+      Nothing -> log "Error: Original graph data not loaded"
+      Just graph -> do
+        newState <- H.liftAff $ D3v2.execD3v2SimM { simulation: state.simulation } do
+          LesMisGUPV2.filterByGroupWithOriginal minGroup graph
+        H.modify_ \s -> s { simulation = newState.simulation }
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render _ =
@@ -101,57 +135,53 @@ render _ =
             ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "Watch the Pattern in Action" ]
+                [ HH.text "Try the Pattern Yourself" ]
+            , HH.p_
+                [ HH.text "Click the buttons below to filter nodes by group. Watch how nodes enter (appear), update (stay), and exit (disappear):" ]
             , HH.div
-                [ HP.id "lesmis-gup-auto-viz"
+                [ HP.classes [ HH.ClassName "button-group" ]
+                , HP.style "text-align: center; margin: 20px 0;"
+                ]
+                [ HH.button
+                    [ HP.classes [ HH.ClassName "control-button" ]
+                    , HE.onClick \_ -> FilterNodes 0
+                    ]
+                    [ HH.text "All Nodes (77)" ]
+                , HH.button
+                    [ HP.classes [ HH.ClassName "control-button" ]
+                    , HE.onClick \_ -> FilterNodes 5
+                    ]
+                    [ HH.text "Group ≥ 5" ]
+                , HH.button
+                    [ HP.classes [ HH.ClassName "control-button" ]
+                    , HE.onClick \_ -> FilterNodes 8
+                    ]
+                    [ HH.text "Group ≥ 8" ]
+                ]
+            , HH.div
+                [ HP.id "lesmis-gup-viz"
                 , HP.classes [ HH.ClassName "viz-container" ]
                 , HP.style "margin: 20px 0; text-align: center; min-height: 600px;"
                 ]
                 []
-            , HH.div
-                [ HP.classes [ HH.ClassName "gup-legend" ]
-                , HP.style "text-align: center; margin: 20px 0;"
-                ]
-                [ HH.div
-                    [ HP.style "display: inline-block; margin: 0 20px;" ]
-                    [ HH.span
-                        [ HP.style "display: inline-block; width: 12px; height: 12px; background: green; border-radius: 50%; margin-right: 8px;" ]
-                        []
-                    , HH.text "Entering"
-                    ]
-                , HH.div
-                    [ HP.style "display: inline-block; margin: 0 20px;" ]
-                    [ HH.span
-                        [ HP.style "display: inline-block; width: 12px; height: 12px; background: #666; border-radius: 50%; margin-right: 8px;" ]
-                        []
-                    , HH.text "Staying"
-                    ]
-                , HH.div
-                    [ HP.style "display: inline-block; margin: 0 20px;" ]
-                    [ HH.span
-                        [ HP.style "display: inline-block; width: 12px; height: 12px; background: brown; border-radius: 50%; margin-right: 8px;" ]
-                        []
-                    , HH.text "Exiting"
-                    ]
-                ]
             , HH.p_
                 [ HH.text "Notice how:" ]
             , HH.ul_
                 [ HH.li_
                     [ HH.strong_ [ HH.text "Entering nodes" ]
-                    , HH.text " appear in "
-                    , HH.span [ HP.style "color: green;" ] [ HH.text "green" ]
-                    , HH.text " at their initial positions, then transition to their group color"
+                    , HH.text " appear at phylotaxis (spiral) positions and animate into place"
                     ]
                 , HH.li_
                     [ HH.strong_ [ HH.text "Staying nodes" ]
-                    , HH.text " maintain their group colors and smoothly adjust positions"
+                    , HH.text " maintain their positions and group colors"
                     ]
                 , HH.li_
                     [ HH.strong_ [ HH.text "Exiting nodes" ]
-                    , HH.text " turn "
-                    , HH.span [ HP.style "color: brown;" ] [ HH.text "brown" ]
-                    , HH.text ", lose their links, and fly away before being removed"
+                    , HH.text " and their links are removed from the simulation"
+                    ]
+                , HH.li_
+                    [ HH.strong_ [ HH.text "Links" ]
+                    , HH.text " are automatically filtered to only connect visible nodes"
                     ]
                 ]
             ]

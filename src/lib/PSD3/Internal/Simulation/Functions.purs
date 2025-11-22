@@ -181,14 +181,14 @@ simulationPreservePositions selection rawdata key = do
   pure updatedData
 
 simulationPreserveLinkReferences ::
-  forall simStateType nodeData id linkRow key m row.
+  forall simStateType nodeData id linkRow m row.
   Eq id =>
   Bind m =>
   MonadState { simulation :: D3SimulationState_ simStateType | row } m =>
   D3Selection_ (SimulationNode nodeData) ->
   Array (Link id linkRow) ->
   Array (SimulationNode nodeData) ->
-  (SimulationNode nodeData -> key) ->
+  (SimulationNode nodeData -> id) ->  -- Key function must return same type as link source/target
   m (Array (Link id linkRow))
 simulationPreserveLinkReferences selection links nodes keyFn = do
   let
@@ -217,12 +217,12 @@ simulationSwizzleLinks links nodes keyFn = do
 -- | the situation with General Update Pattern for simulations is MUCH more complicated than for non-simulation data
 -- | this function takes care of all that complexity and adds both links and nodes and takes care of ensuring that
 -- | existing nodes preserve their positions and that all links are to nodes that are still in the simulation
-simulationMergeNewData :: forall simStateType nodeData id linkRow nodeKey linkKey m row.
+simulationMergeNewData :: forall simStateType nodeData id linkRow linkKey m row.
   Eq id =>
   Bind m =>
   MonadState { simulation :: D3SimulationState_ simStateType | row } m =>
   D3Selection_ (SimulationNode nodeData) -> -- nodes selection
-  (SimulationNode nodeData -> nodeKey) -> -- nodes keyFn (typed!)
+  (SimulationNode nodeData -> id) -> -- nodes keyFn (must return same type as link source/target)
   D3Selection_ Datum_ -> -- links selection
   (Link id linkRow -> linkKey) -> -- links KeyFn (typed!)
   Array (Link id linkRow) -> -- links raw data
@@ -268,8 +268,12 @@ simulationSetLinks :: -- now with 100% more swizzling!!
   m (Array (SwizzledLink nodeData linkRow))
 simulationSetLinks links nodes keyFn = do
   handle <- use _handle
-  let _ = setLinks_ handle (swizzleLinks_ links nodes keyFn)
-  let swizzledLinks = getLinksFromSimulation_ handle
+  -- Swizzle links (convert source/target indices to node objects)
+  let swizzledLinks = swizzleLinks_ links nodes keyFn
+  -- Set in simulation (for links force if enabled)
+  let _ = setLinks_ handle swizzledLinks
+  -- Return the swizzled links directly, not from simulation
+  -- (getLinksFromSimulation_ returns [] when links force is disabled)
   pure swizzledLinks
 
 simulationSetNodesFromSelection ::

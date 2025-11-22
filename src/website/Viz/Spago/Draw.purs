@@ -106,8 +106,8 @@ updateSimulation selections dataConfig attrs =
     , activeForces: Just dataConfig.activeForces
     , config: Nothing
     }
-    (\n -> n.id)  -- Node key function
-    keyIsID_  -- Link key function (links also have index property)
+    (\n -> n.id)  -- Node key function (integer id matches link source/target)
+    keyIsID_  -- Link key function (unused - library uses swizzledLinkKey_)
     attrs
     spagoRenderCallbacks
 

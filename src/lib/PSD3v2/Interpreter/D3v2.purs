@@ -569,6 +569,15 @@ applyAttributeSync element datum index attr = case attr of
 -- | Used in D3 tick callbacks which must be synchronous
 foreign import setAttributeSync_ :: String -> String -> Element -> Unit
 
+-- | Debug: check if two objects are the same reference (=== in JS)
+foreign import debugSameRef_ :: forall a b. a -> b -> Boolean
+
+-- | Debug: log object identity check for tick function
+foreign import debugTickIdentity_ :: forall a. String -> Array a -> Unit
+
+-- | Read __data__ from a DOM element (D3's bound data)
+foreign import getElementData_ :: forall a. Element -> a
+
 -- | SimulationM instance for D3v2SimM
 -- |
 -- | Delegates to existing PSD3.Internal.Simulation.Functions
@@ -629,20 +638,23 @@ instance SimulationM (D3v2Selection_ SBoundOwns Element) (D3v2SimM row d) where
   addTickFunction label (Step (D3v2Selection_ selection) attrs) = do
     handle <- use _handle
 
-    -- Extract elements and data from bound selection
-    let { elements, data: datumArray, indices } = unsafePartial case selection of
+    -- Extract elements from bound selection
+    -- We capture elements but READ datum from element.__data__ on each tick
+    -- This ensures we always get the current simulation data (mutated in place)
+    let { elements, indices } = unsafePartial case selection of
           Selection (BoundSelection r) -> r
 
-    -- Create tick callback that applies PSD3v2 attributes
+    -- Create tick callback that reads from __data__ (not captured datum)
     let makeTick _ =
-          let paired = Array.zipWith (\d e -> { datum: d, element: e }) datumArray elements
-              _ = Array.mapWithIndex (\arrayIndex { datum, element } ->
+          let _ = Array.mapWithIndex (\arrayIndex element ->
                     let logicalIndex = case indices of
                           Just indexArray -> unsafePartial $ Array.unsafeIndex indexArray arrayIndex
                           Nothing -> arrayIndex
+                        -- Read current datum from element's __data__ property
+                        datum = getElementData_ element
                         _ = attrs <#> \attr -> applyAttributeSync element datum logicalIndex attr
                     in unit
-                  ) paired
+                  ) elements
           in unit
 
     -- Register tick callback with D3

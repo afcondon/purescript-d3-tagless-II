@@ -57,6 +57,7 @@ foreign import d3Data_               :: forall d. Array d -> D3Selection_ d -> D
 type ComputeKeyFunction_ d key = d -> key
 foreign import keyIsID_           :: forall d. ComputeKeyFunction_ d Index_
 foreign import keyIsSourceTarget_ :: forall d. ComputeKeyFunction_ d Index_ -- used for links in simulation
+foreign import swizzledLinkKey_   :: forall d. ComputeKeyFunction_ d String -- key function for swizzled links (extracts source/target IDs)
 -- REVIEW the returned D3Selection_ here is the full enter, update, exit type of selection
 -- which we haven't really modelled in PureScript (opaque type) but maybe it will turn out that we
 -- needed to all along
@@ -138,7 +139,7 @@ foreign import d3PreserveLinkReferences_ ::
   Array (Link id linkRow) ->
   Array (Link id linkRow)
 
-foreign import getIDsFromNodes_ :: forall d id key. Array (SimulationNode d) -> (SimulationNode d -> key) -> Array id
+foreign import getIDsFromNodes_ :: forall d key. Array (SimulationNode d) -> (SimulationNode d -> key) -> Array key
 
 foreign import getNodes_ :: forall d.   D3Simulation_ -> Array (SimulationNode d)
 foreign import setNodes_ :: forall d.   D3Simulation_ -> Array (SimulationNode d) -> Array (SimulationNode d)

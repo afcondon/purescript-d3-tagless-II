@@ -14,11 +14,11 @@ import Effect.Class.Console (log)
 import Data.Array as Array
 import Unsafe.Coerce (unsafeCoerce)
 import PSD3.Data.Node (Link, SwizzledLink, SimulationNode, NodeID)
-import PSD3.Internal.FFI (SimulationVariables, getIDsFromNodes_, getLinkIDs_, keyIsID_)
+import PSD3.Internal.FFI (SimulationVariables, getIDsFromNodes_, getLinkIDs_, swizzleLinks_, swizzledLinkKey_)
 import Data.Maybe (Maybe(..))
 import Data.Set as Set
 import Data.Set (Set)
-import Data.Array (filter, elem)
+import Data.Array (filter, elem, head)
 import Data.Foldable (foldl)
 
 -- | Declarative callbacks for rendering nodes and links
@@ -158,19 +158,20 @@ type DeclarativeUpdateConfig d id linkRow =
 -- | Note: The user NEVER manually filters links. The library does it automatically
 -- | by extracting node IDs and filtering links to only connect visible nodes.
 -- | This makes the "filtered nodes + all links" bug impossible.
-genericUpdateSimulation :: forall dataRow id linkRow attrs sel m nodeKey linkKey.
+genericUpdateSimulation :: forall dataRow id linkRow attrs sel m linkKey.
   MonadEffect m =>
   SelectionM sel m =>
   SimulationM2 (sel SBoundOwns Element) m =>
   Ord (SimulationNode dataRow) =>                        -- PSD3v2 requires Ord for data joins
-  Ord nodeKey =>
-  Eq id =>                                               -- For elem check in link filtering (id must match nodeKey)
+  Ord id =>                                              -- Node key must be Ord (for Sets) and Eq (for elem)
+  Eq id =>                                               -- For elem check in link filtering
+  Show id =>                                             -- For debug logging (TODO: remove after debugging)
   Ord linkKey =>                                         -- Links use key-based join (no Ord SwizzledLink needed!)
   { nodes :: sel SEmpty Element (SimulationNode dataRow), links :: sel SEmpty Element (SwizzledLink dataRow linkRow) } ->
   ElementType ->                                         -- Node element type
   ElementType ->                                         -- Link element type
-  DeclarativeUpdateConfig dataRow id linkRow ->          -- Declarative configuration
-  (SimulationNode dataRow -> nodeKey) ->                 -- Node key function
+  DeclarativeUpdateConfig dataRow id linkRow ->          -- Declarative configuration (id = node key = link source/target type)
+  (SimulationNode dataRow -> id) ->                      -- Node key function (must return same type as link source/target)
   (SwizzledLink dataRow linkRow -> linkKey) ->           -- Link key function
   attrs ->                                               -- Visualization attributes
   RenderCallbacks attrs sel m dataRow linkRow ->         -- Render callbacks
@@ -187,13 +188,34 @@ genericUpdateSimulation { nodes: nodesGroup, links: linksGroup }
   -- STEP 3: Extract node IDs for automatic link filtering
   let nodeIDs = getIDsFromNodes_ initializedNodes nodeKeyFn
 
+  -- Debug: show what nodeIDs we extracted
+  _ <- liftEffect $ log $ "🔗 DEBUG: initialized nodes count: " <> show (Array.length initializedNodes)
+  _ <- liftEffect $ log $ "🔗 DEBUG: nodeIDs array length: " <> show (Array.length nodeIDs)
+  _ <- liftEffect $ log $ "🔗 DEBUG: first 5 nodeIDs: " <> show (Array.take 5 nodeIDs)
+
   -- STEP 4: AUTOMATICALLY filter links to only connect visible nodes
   -- This is the key insight: user provides full data + node predicate,
   -- library ensures links are consistent. User can't forget this step!
+
+  -- Debug: test first link
+  let firstLink = Array.head config.allLinks
+  case firstLink of
+    Nothing -> pure unit
+    Just link -> do
+      let linkIDs = getLinkIDs_ link
+      _ <- liftEffect $ log $ "🔗 DEBUG: first link source: " <> show linkIDs.sourceID <> ", target: " <> show linkIDs.targetID
+      _ <- liftEffect $ log $ "🔗 DEBUG: source in nodeIDs: " <> show (linkIDs.sourceID `elem` nodeIDs)
+      _ <- liftEffect $ log $ "🔗 DEBUG: target in nodeIDs: " <> show (linkIDs.targetID `elem` nodeIDs)
+      pure unit
+
   let validLink link = do
         let linkIDs = getLinkIDs_ link
         (linkIDs.sourceID `elem` nodeIDs) && (linkIDs.targetID `elem` nodeIDs)
       structurallyFilteredLinks = filter validLink config.allLinks
+
+  -- Debug: log link filtering info
+  _ <- liftEffect $ log $ "🔗 genericUpdateSimulation: " <> show (Array.length config.allLinks) <> " total links"
+  _ <- liftEffect $ log $ "🔗 genericUpdateSimulation: " <> show (Array.length structurallyFilteredLinks) <> " links after structural filter"
 
   -- STEP 5: Apply optional visual/semantic link filter
   -- This runs AFTER automatic structural filtering, so safety is guaranteed
@@ -202,10 +224,12 @@ genericUpdateSimulation { nodes: nodesGroup, links: linksGroup }
         Nothing -> structurallyFilteredLinks
         Just visualFilter -> filter visualFilter structurallyFilteredLinks
 
+  _ <- liftEffect $ log $ "🔗 genericUpdateSimulation: " <> show (Array.length finalLinks) <> " links after visual filter"
+
   -- STEP 6: Build internal SimulationUpdate for the update API
   -- Note: We pass pre-filtered and initialized data with no filter predicates
   -- (filtering and initialization already done by library)
-  let internalUpdateConfig :: SimulationUpdate dataRow id linkRow nodeKey
+  let internalUpdateConfig :: SimulationUpdate dataRow id linkRow id
       internalUpdateConfig =
         { nodes: Just initializedNodes    -- Filtered and initialized by library
         , links: Just finalLinks          -- Structurally + visually filtered by library (AUTOMATIC!)
@@ -217,8 +241,13 @@ genericUpdateSimulation { nodes: nodesGroup, links: linksGroup }
         }
 
   -- STEP 7: Call SimulationM2 update API with consistent data
-  -- Handles data merging, link swizzling, force engagement
+  -- Handles data merging, link swizzling (for force if enabled), force engagement
   enhanced <- update internalUpdateConfig
+
+  -- STEP 7b: Swizzle links directly for DOM join
+  -- We do this ourselves because update may return empty links when links force is disabled.
+  -- This ensures visual links work even without a links force.
+  let swizzledLinks = swizzleLinks_ finalLinks enhanced.nodes nodeKeyFn
 
   -- STEP 8-9: Join data to DOM and apply General Update Pattern to nodes
   -- In PSD3v2, joinData directly returns the JoinResult with enter/update/exit
@@ -241,7 +270,11 @@ genericUpdateSimulation { nodes: nodesGroup, links: linksGroup }
   mergedNodes <- merge nodeEnter nodeJoin.update
 
   -- STEP 10: Apply General Update Pattern to links (using key function to avoid Ord D3Link_Swizzled)
-  JoinResult linkJoin <- joinDataWithKey enhanced.links linkKeyFn (elementTypeToString linkElement) linksGroup
+  -- Use swizzledLinks (our own swizzle) instead of enhanced.links (from simulation)
+  -- Use swizzledLinkKey_ which extracts source/target IDs from node objects
+  _ <- liftEffect $ log $ "🔗 genericUpdateSimulation: " <> show (Array.length swizzledLinks) <> " links to join"
+  JoinResult linkJoin <- joinDataWithKey swizzledLinks swizzledLinkKey_ (elementTypeToString linkElement) linksGroup
+  _ <- liftEffect $ log $ "🔗 genericUpdateSimulation: link join result - enter: " <> show (Array.length $ getEnterData linkJoin.enter) <> ", update: " <> show (Array.length $ getUpdateData linkJoin.update) <> ", exit: " <> show (Array.length $ getExitData linkJoin.exit)
 
   -- Enter: Create new links
   linkEnter <- callbacks.onLinkEnter linkJoin.enter attrs

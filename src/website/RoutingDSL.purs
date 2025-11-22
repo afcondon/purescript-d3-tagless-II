@@ -67,6 +67,7 @@ routes =
   <|> mermaidTreeDemo
   <|> sceneJoinDemo
   <|> codeExplorer
+  <|> codeExplorerV2
   <|> acknowledgements
   <|> rootRedirect
   <|> notFound
@@ -275,6 +276,10 @@ sceneJoinDemo = SceneJoinDemo <$ lit "scene-join-demo" <* end
 codeExplorer :: Match Route
 codeExplorer = CodeExplorer <$ lit "code-explorer" <* end
 
+-- | Match: /code-explorer-v2
+codeExplorerV2 :: Match Route
+codeExplorerV2 = CodeExplorerV2 <$ lit "code-explorer-v2" <* end
+
 -- | Match: /acknowledgements
 acknowledgements :: Match Route
 acknowledgements = Acknowledgements <$ lit "acknowledgements" <* end
@@ -337,5 +342,6 @@ routeToPath ModuleGraph = "/module-graph"
 routeToPath MermaidTreeDemo = "/mermaid-tree-demo"
 routeToPath SceneJoinDemo = "/scene-join-demo"
 routeToPath CodeExplorer = "/code-explorer"
+routeToPath CodeExplorerV2 = "/code-explorer-v2"
 routeToPath Acknowledgements = "/acknowledgements"
 routeToPath NotFound = "/not-found"

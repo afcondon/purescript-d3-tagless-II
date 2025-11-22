@@ -72,6 +72,7 @@ import Component.ModuleGraph as ModuleGraph
 import Component.MermaidTreeDemo as MermaidTreeDemo
 import Component.SceneJoinDemo as SceneJoinDemo
 import PSD3.CodeExplorer as CodeExplorer
+import Component.CodeExplorerV2 as CodeExplorerV2
 
 -- Routing
 import PSD3.RoutingDSL (routing, routeToPath)
@@ -141,6 +142,7 @@ type Slots =
   , mermaidTreeDemo :: forall q. H.Slot q Void Unit
   , sceneJoinDemo :: forall q. H.Slot q Void Unit
   , codeExplorer :: forall q. H.Slot q Void Unit
+  , codeExplorerV2 :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
 
@@ -193,6 +195,7 @@ _moduleGraph = Proxy :: Proxy "moduleGraph"
 _mermaidTreeDemo = Proxy :: Proxy "mermaidTreeDemo"
 _sceneJoinDemo = Proxy :: Proxy "sceneJoinDemo"
 _codeExplorer = Proxy :: Proxy "codeExplorer"
+_codeExplorerV2 = Proxy :: Proxy "codeExplorerV2"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
 -- | Main application component
@@ -374,6 +377,9 @@ renderPage route = case spy "Route is" route of
 
   CodeExplorer ->
     HH.slot_ _codeExplorer unit CodeExplorer.component unit
+
+  CodeExplorerV2 ->
+    HH.slot_ _codeExplorerV2 unit CodeExplorerV2.component unit
 
   Acknowledgements ->
     HH.slot_ _acknowledgements unit Acknowledgements.component unit

@@ -769,6 +769,22 @@ export function keyIsSourceTarget_(d) {
   // console.log(`FFI: looking up the id of node: ${[d.source, d.target]}`);
   return [d.source, d.target];
 }
+
+// Key function for swizzled links - extracts id from the node objects
+// Uses 'id' field to match link source/target IDs
+export function swizzledLinkKey_(d) {
+  // After swizzling, source/target are node objects with 'id' field
+  const sourceId = typeof d.source === 'object' ? d.source.id : d.source;
+  const targetId = typeof d.target === 'object' ? d.target.id : d.target;
+  const key = `${sourceId}->${targetId}`;
+  // Debug: log first few keys
+  if (!window._linkKeyDebugCount) window._linkKeyDebugCount = 0;
+  if (window._linkKeyDebugCount < 5) {
+    console.log(`swizzledLinkKey_: ${key} (source type: ${typeof d.source}, target type: ${typeof d.target})`);
+    window._linkKeyDebugCount++;
+  }
+  return key;
+}
 export function setAlpha_(simulation) {
   return alpha => {
     console.log(`FFI: setting simulation.alpha to ${alpha}`);
@@ -927,12 +943,19 @@ export function setLinks_(simulation) {
   }
 }
 // returns array of links with ids replaced by object references, invalid links are discarded
+// Creates copies of links to avoid mutating the original array
 export function swizzleLinks_(links) {
   return simNodes => keyFn => {
     console.log(`FFI: swizzling links in simulation, there are ${links.length} links`);
     const nodeById = new Map(simNodes.map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
-    // we could use the copy approach from d3PreserveSimulationPositions here so that links animate
-    const swizzledLinks = links.filter((link, index, arr) => {
+
+    // Map to copies first, then filter - this prevents mutation of original links
+    // Note: Must explicitly copy source/target as they may be on prototype (PureScript records)
+    const swizzledLinks = links.map(link => ({
+      source: link.source,
+      target: link.target,
+      ...link
+    })).filter((link, index, arr) => {
       // look up both source and target (which could be id or obj reference)
       // if both source and target are found in nodeMap then we can swizzle and return true
       // else we just return false and this node will go in the bit bucket
@@ -948,10 +971,10 @@ export function swizzleLinks_(links) {
       }
       // now let's see what we got from that and if we have a valid link or not
       if (typeof link.source === 'undefined' || link.target === 'undefined') {
-        return false; // filter this node
+        return false; // filter this link
       } else {
         link.id = keyFn(link.source) + "-" + keyFn(link.target)
-        return true // we've updated the 
+        return true // we've updated the link
       }
     })
     return swizzledLinks
@@ -972,12 +995,10 @@ export function getLinkID_(keyFn) {
     return sourceID + "-" + targetID
   }
 }
-export function getLinkIDs_(keyFn) {
-  return link => { // version for generating the pairs to check against node ids for pruning
-    const sourceID = (typeof link.source == `object`) ? keyFn(link.source) : link.source
-    const targetID = (typeof link.target == `object`) ? keyFn(link.target) : link.target
-    return { sourceID, targetID }
-  }
+// For unswizzled links, source/target are just the ID values directly
+// (swizzled links would have objects, but this function is for filtering unswizzled links)
+export function getLinkIDs_(link) {
+  return { sourceID: link.source, targetID: link.target }
 }
 export function getLinksFromSimulation_(simulation) {
   linksForce = simulation.force(linksForceName_)

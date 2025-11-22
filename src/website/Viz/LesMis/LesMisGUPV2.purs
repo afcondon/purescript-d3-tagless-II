@@ -535,9 +535,9 @@ filterByGroupWithOriginal minGroup originalGraph = do
   let filteredNodeIds = Set.fromFoldable $ filteredNodes <#> (\n -> (unsafeCoerce n :: { id :: String }).id)
 
   -- Filter links to only include those where both source and target are in filtered nodes
+  -- Note: LesMisLink has source/target as strings, not objects
   let filteredLinks = Array.filter (\link ->
-        let l = unsafeCoerce link :: { source :: { id :: String }, target :: { id :: String } }
-        in Set.member l.source.id filteredNodeIds && Set.member l.target.id filteredNodeIds
+        Set.member link.source filteredNodeIds && Set.member link.target filteredNodeIds
       ) originalGraph.links
 
   log $ "Filtered from " <> show (Array.length originalGraph.nodes) <> " to " <> show (Array.length filteredNodes) <> " nodes"
