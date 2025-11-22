@@ -5,17 +5,14 @@ import Prelude
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Types (D3Simulation_, PointXY)
 import D3.Viz.Spago.Files (D3_Radius, D3TreeRow, EmbeddedData, LinkType(..), NodeType(..), SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
-import PSD3.Internal.FFI (getIndexFromDatum_, setInSimNodeFlag)
-import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, D3_FocusXY, SimulationNode, D3_VxyFxy, D3_XY, NodeID)
-import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_, d3SchemeSequential10N_)
+import PSD3.Internal.FFI (setInSimNodeFlag)
+import PSD3.Data.Node (D3Link_Unswizzled, D3_FocusXY, NodeID, SimulationNode)
 import Data.Array (foldl, length, mapWithIndex, partition, (:))
-import Data.Array (null) as A
 import Data.FoldableWithIndex (foldlWithIndex)
-import Data.Graph (Graph, fromMap)
+import Data.Graph (Graph)
 import PSD3.Data.Graph (GraphConfig, GraphModel, buildGraphModel, toDataGraph)
 import Data.Int (toNumber)
 import Data.Int (floor) as Int
-import Data.List as L
 import Data.Map (fromFoldable, lookup)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -70,109 +67,6 @@ isM2M_Graph_Link l = l.linktype == M2M_Graph
 isM2M_Tree_Link :: SpagoSwizzledLink -> Boolean
 isM2M_Tree_Link l = l.linktype == M2M_Tree
 
--- OLD BOILERPLATE REMOVED - use phantom types instead:
-{-
-datum_ = {
--- direct accessors to fields of the datum (BOILERPLATE)
-    radius        : _.r             <<< unboxD3SimNode
-  , id            : _.id            <<< unboxD3SimNode
-  , loc           : _.loc           <<< unboxD3SimNode
-  , containerID   : _.containerID   <<< unboxD3SimNode
-  , containerName : _.containerName <<< unboxD3SimNode
-  , name          : _.name          <<< unboxD3SimNode
-  , x             : _.x             <<< unboxD3SimNode
-  , y             : _.y             <<< unboxD3SimNode
-  , fx            : _.fx            <<< unboxD3SimNode
-  , fy            : _.fy            <<< unboxD3SimNode
-  , treeXY        : _.treeXY        <<< unboxD3SimNode
-  , treeDepth     : _.treeDepth     <<< unboxD3SimNode
-  , gridXY        : _.gridXY        <<< unboxD3SimNode
-  , nodetype      : _.nodetype      <<< unboxD3SimNode
-  , cluster       : _.cluster       <<< unboxD3SimNode
-  , links         : _.links         <<< unboxD3SimNode
-  , connected     : _.connected     <<< unboxD3SimNode
-
-  , nameAndID     : \d -> (unboxD3SimNode d).name <> " " <> show (unboxD3SimNode d).id
-  , indexAndID    : \d -> (unboxD3SimNode d).name <> " " <> show (getIndexFromDatum_ d) <> " " <>  show (unboxD3SimNode d).id
-  , namePos       : \d -> "(" <> show (Number.floor $ datum_.x d) <> "," <> show (Number.floor $ datum_.y d) <> ")" -- for debugging position
-
-  , gridPoint     : \d -> fromMaybe { x: datum_.x d, y: datum_.y d} $ toMaybe (datum_.gridXY d)
-  , gridPointX    : \d -> (_.x $ datum_.gridPoint d)
-  , gridPointY    : \d -> (_.y $ datum_.gridPoint d)
-
-  , treePoint     : \d -> fromMaybe { x: datum_.x d, y: datum_.y d} $ toMaybe (datum_.treeXY d)
-  , treePointX    : \d -> _.x $ datum_.treePoint d
-  , treePointY    : \d -> _.y $ datum_.treePoint d
-
--- the crucial index function which allows us to reference Nodes from Links in JSON
-  , indexFunction : (_.id <<< unboxD3SimNode)
-
--- more complicated calculations (CONVENIENCE)
-  , positionLabel:
-    \d -> case datum_.nodetype d of
-            (IsModule _)  -> negate $ datum_.radius d  -- position below center
-            (IsPackage _) -> 0.0  -- position at center
-
-  , collideRadius:
-      \d -> 
-        if datum_.id d == datum_.containerID d
-        then 10.0
-        else datum_.radius d
-
-  , collideRadiusBig:
-      \d -> (datum_.radius d) + 10.0
-
-  , nodeClass:
-      \d -> show (datum_.nodetype d) <> " " <> (datum_.containerName d) <> " " <> (datum_.name d) <> (if (datum_.connected d) then " connected" else "")
-  , nodeClass':
-      \d -> "updated" <> show (datum_.nodetype d) <> " " <> (datum_.containerName d) <> " " <> (datum_.name d) <> (if (datum_.connected d) then " connected" else "")
-  , colorByGroup:
-      \d -> d3SchemeCategory10N_ (toNumber $ datum_.cluster d)
-  , colorByDepth:
-      \d -> case toMaybe $ datum_.treeDepth d of
-              Nothing -> "none"
-              Just depth -> d3SchemeSequential10N_ (toNumber depth)
-  , fillByUsage:
-      \d -> if (datum_.connected d) then datum_.colorByGroup d else "none"
-  , strokeByUsage:
-      \d -> if (datum_.connected d) then "none" else datum_.colorByGroup d
-  , colorByUsage:
-      \d -> if (datum_.connected d) then "red" else "blue"
-  , opacityByType:
-      \d -> if (datum_.isPackage d) then 0.4 else 0.7
-  , translateNode:
-      \d -> "translate(" <> show (datum_.x d) <> "," <> show (datum_.y d) <> ")"
-      
--- accessors to provide different force settings for different cohorts, quite possible that this should go thru a similar but different route from `datum`
-  , isNamed: \name _ -> \d -> datum_.name d == name
-  , isPackage:
-      \d -> case datum_.nodetype d of
-              (IsModule _) -> false
-              (IsPackage _) -> true
-  , isModule:
-      \d -> case datum_.nodetype d of
-              (IsModule _) -> true
-              (IsPackage _) -> false
-  , isUnusedModule:
-      \d -> case datum_.nodetype d of
-              (IsPackage _) -> false
-              (IsModule _)  -> if datum_.connected d 
-                               then false
-                               else true
-              
-  , isUsedModule:
-      \d -> case datum_.nodetype d of
-              (IsPackage _) -> false
-              (IsModule _)  -> if datum_.connected d 
-                               then true
-                               else false
-  , treeChildren:
-      \d -> (datum_.links d).treeChildren              
-  , isTreeParent: -- simplifying assumption here that we don't need or care to check if its actually a tree node or not, just that it has tree children
-      \d -> not $ A.null $ datum_.treeChildren d
-
-}
--}
 
 -- Node predicate functions (phantom type friendly)
 allNodes :: SpagoSimNode -> Boolean
@@ -294,6 +188,24 @@ moduleNodesToContainerXY nodes = modulesWithGrid <> partitioned.yes
 packagesNodesToPhyllotaxis :: Array SpagoSimNode -> Array SpagoSimNode
 packagesNodesToPhyllotaxis = nodesToPhyllotaxis isPackage
 
+-- | Position packages in phyllotaxis pattern AND pin them (fx, fy)
+-- | Also stores position in gridXY so modules can cluster around them
+-- | Uses larger radius than standard phyllotaxis for grid-like spacing
+pinnedPackagesToPhyllotaxis :: Array SpagoSimNode -> Array SpagoSimNode
+pinnedPackagesToPhyllotaxis nodes = partitioned.no <> (setPinnedPhyllotaxis `mapWithIndex` partitioned.yes)
+  where
+    partitioned = partition isPackage nodes
+    -- Scale factor to spread packages out like grid layout (standard is 10.0)
+    phyllotaxisScale = 100.0
+    setPinnedPhyllotaxis :: Int -> SpagoSimNode -> SpagoSimNode
+    setPinnedPhyllotaxis index d =
+      let i = toNumber index
+          radius = phyllotaxisScale * sqrt (0.5 + i)
+          angle  = i * initialAngle
+          x = radius * cos angle
+          y = radius * sin angle
+      in d { x = x, y = y, fx = notNull x, fy = notNull y, gridXY = notNull { x, y } }
+
 modulesNodesToPhyllotaxis :: Array SpagoSimNode -> Array SpagoSimNode
 modulesNodesToPhyllotaxis = nodesToPhyllotaxis isModule
 
@@ -304,7 +216,9 @@ nodesToPhyllotaxis predicate nodes = partitioned.no <> (setForPhyllotaxis `mapWi
   where
     partitioned = partition predicate nodes
 
+initialRadius :: Number
 initialRadius = 10.0
+initialAngle :: Number
 initialAngle = pi * (3.0 - sqrt 5.0)
 
 -- | Position a node in a sunflower/phyllotaxis pattern based on its index.
@@ -371,6 +285,44 @@ treeNodesToSwarmStart nodes = partitioned.no <> (setSwarmStart <$> partitioned.y
     -- Use treeXY.y (depth) for x position, since D3 tree has depth on y-axis
     setSwarmStart d = d { x = treeXY.y, y = 0.0, fx = null, fy = null }
       where treeXY = fromMaybe { x: d.x, y: d.y } $ toMaybe d.treeXY
+
+-- | Position nodes for progressive tree revelation
+-- | Modules at depth <= step get radial tree position
+-- | Modules at depth > step stay at their package's grid position
+-- | Packages stay at their grid positions
+nodesToRevelationXY :: Int -> Array SpagoSimNode -> Array SpagoSimNode
+nodesToRevelationXY step nodes = map positionNode nodes
+  where
+    positionNode :: SpagoSimNode -> SpagoSimNode
+    positionNode node
+      | isPackage node = node  -- Packages already positioned by packageNodesToGridXY
+      | otherwise = positionModule node
+
+    positionModule :: SpagoSimNode -> SpagoSimNode
+    positionModule node =
+      let nodeDepth = fromMaybe 0 $ toMaybe node.treeDepth
+      in if node.name == "PSD3.Main"
+         then node { x = 0.0, y = 0.0, fx = notNull 0.0, fy = notNull 0.0 }  -- Main pinned at center
+         else if nodeDepth == step && nodeDepth > 0
+              then setToRadialTreeXY node  -- NEWLY revealed: move to tree position
+              else node  -- Everyone else: leave exactly as-is
+
+    -- Set module to radial tree position and PIN it there
+    setToRadialTreeXY :: SpagoSimNode -> SpagoSimNode
+    setToRadialTreeXY node =
+      let treeXY = fromMaybe { x: node.x, y: node.y } $ toMaybe node.treeXY
+          angle = treeXY.x
+          radius = treeXY.y * treeDepthMultiplier
+          x = radius * cos angle
+          y = radius * sin angle
+      in node { x = x, y = y, fx = notNull x, fy = notNull y }  -- Pin to prevent forces pulling back
+
+    -- Set module to its container (package) grid position and PIN it there
+    setToContainerXY :: SpagoSimNode -> SpagoSimNode
+    setToContainerXY node =
+      case toMaybe node.gridXY of
+        Just gridXY -> node { x = gridXY.x, y = gridXY.y, fx = notNull gridXY.x, fy = notNull gridXY.y }  -- Pin at container
+        Nothing -> node  -- Fallback: keep current position
 
 fixNamedNodeTo :: Label -> PointXY -> Array SpagoSimNode -> Array SpagoSimNode
 fixNamedNodeTo label point nodes = fixNamedNode' <$> nodes
@@ -477,19 +429,6 @@ buildSpagoGraph nodes =
 -- | Legacy function for compatibility - returns only Data.Graph
 makeGraph :: Array SpagoNodeData -> Graph NodeID SpagoNodeData
 makeGraph nodes = (buildSpagoGraph nodes).graph
-
-
--- explodePackages :: Event -> D3Simulation_ -> Datum_ -> Unit
--- explodePackages event simulation d = explodePackages_ event simulation nodeID nodeType
---   where
---     nodeID   = datum_.id d
---     nodeType = show $ datum_.nodetype d
-
--- toggleSpotlight :: Event -> D3Simulation_ -> Datum_ -> Unit
--- toggleSpotlight event simulation d = toggleSpotlight_ event simulation nodeID nodeType
---   where
---     nodeID   = datum_.id d
---     nodeType = show $ datum_.nodetype d
 
 -- foreign functions to implement Spotlight, essentially because it's easier to prototype some 
 -- behaviors in D3js while deciding whether/how to express them in PureScript

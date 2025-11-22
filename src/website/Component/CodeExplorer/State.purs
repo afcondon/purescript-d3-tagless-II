@@ -3,30 +3,25 @@ module PSD3.CodeExplorer.State where
 import Prelude
 
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, clusterSceneAttributes)
-import D3.Viz.Spago.Files (D3_Radius, SpagoDataRow, SpagoLinkData, SpagoNodeRow)
-import PSD3.Data.Node (D3Link_Unswizzled, D3_FocusXY)
+import D3.Viz.Spago.Files (D3_Radius, SpagoNodeRow)
+import PSD3.Data.Node (D3Link_Unswizzled, D3_FocusXY, NodeID)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_)
 import PSD3v2.Selection.Types (SEmpty)
 import Web.DOM.Element (Element)
-import Data.Array (filter, foldl)
 import Data.Lens (Lens', _Just, view)
-import Data.Lens.At (at)
 import Data.Lens.Record (prop)
-import Data.Map (Map, alter, empty, keys, lookup, mapMaybeWithKey) as M
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Map (Map, keys) as M
+import Data.Maybe (Maybe(..))
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
 import Data.Set (Set)
 import Data.Set as Set
-import Data.Tuple (Tuple(..))
 import Partial.Unsafe (unsafeCrashWith)
 import Unsafe.Coerce (unsafeCoerce)
 import Halogen.Subscription as HS
 import PSD3.CodeExplorer.Actions (Action, Scene)
 import PSD3.Component.SimulationState as SimState
-import PSD3.Data.Node (D3_SimulationNode(..))
-import PSD3.Data.Node (NodeID)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.FFI (SimulationVariables, readSimulationVariables_)
 import PSD3.Internal.Simulation.Types (Force, _handle)
@@ -48,9 +43,6 @@ type TransitionMatrix = SimState.TransitionMatrix Scene
 -- | CodeExplorer's scene configuration - specialized version of library's SceneConfig
 -- | Parameterized with Spago-specific node data row and attributes
 type SceneConfig = Scene.SimSceneConfig (SpagoNodeRow (D3_FocusXY (D3_Radius ()))) SpagoSceneAttributes
-
--- | DEPRECATED: Old name for SceneConfig, kept for backwards compatibility during refactor
-type MiseEnScene = SceneConfig
 
 -- ============================================================================
 -- | Visualization-Specific Initialization

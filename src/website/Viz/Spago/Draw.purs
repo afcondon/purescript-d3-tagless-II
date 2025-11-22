@@ -5,34 +5,24 @@ import Prelude
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, svgAttrs)
 import D3.Viz.Spago.Model (SpagoSimNode)
 import D3.Viz.Spago.Render (spagoRenderCallbacks)
-import PSD3.CodeExplorer.Actions (VizEvent(..))
-import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, NodeID)
+import PSD3.Data.Node (D3Link_Unswizzled)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.FFI (keyIsID_)
-import PSD3.Internal.Types (D3This_, Datum_)
+import PSD3.Internal.Types (Datum_)
 import Unsafe.Coerce (unsafeCoerce)
 import PSD3v2.Attribute.Types (class_)
 import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom, ScaleExtent(..))
 import PSD3v2.Capabilities.Selection (class SelectionM, appendChild, select, on)
 import PSD3v2.Capabilities.Simulation (class SimulationM2)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_)
-import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, SBoundInherits, SEmpty)
+import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, SEmpty)
 import PSD3v2.Simulation.Update (genericUpdateSimulation)
 import Web.DOM.Element (Element)
-import Data.Map (Map)
 import Data.Maybe (Maybe(..))
 import Data.Set (Set)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
-import PSD3.CodeExplorer.Actions (VizEvent(..))
 import Utility (getWindowWidthHeight)
-import Web.Event.Internal.Types (Event)
-import Unsafe.Coerce (unsafeCoerce)
-
-getVizEventFromClick :: Event -> Datum_ -> D3This_ -> VizEvent
-getVizEventFromClick e d t =
-  let node = unsafeCoerce d :: SpagoSimNode
-  in NodeClick node.nodetype node.id
 
 -- | Initialize the SVG structure for Spago visualization
 -- | Creates the zoom/pan container and group elements for nodes and links
