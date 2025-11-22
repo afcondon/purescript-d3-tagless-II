@@ -18,6 +18,7 @@ module PSD3v2.Capabilities.Selection
   , merge
   , on
   , renderTree
+  , renderTreeWithSimulation
   ) where
 
 import Prelude
@@ -362,3 +363,36 @@ class Monad m <= SelectionM sel m | m -> sel where
     => sel SEmpty parent parentDatum
     -> Tree datum
     -> m (Map String (sel SBoundOwns Element datum))
+
+-- | Render a tree and then run a callback with the named selections
+-- |
+-- | This is a convenience function for integrating TreeAPI with simulations.
+-- | The callback receives the map of named selections, allowing setup of
+-- | simulation-related elements like data joins, tick functions, and behaviors.
+-- |
+-- | This enables a declarative tree structure while still supporting the
+-- | imperative setup required for D3 force simulations.
+-- |
+-- | Example:
+-- | ```purescript
+-- | renderTreeWithSimulation container myTree \selections -> do
+-- |   case Map.lookup "nodes" selections of
+-- |     Just nodesGroup -> do
+-- |       -- Set up simulation with the nodes group
+-- |       _ <- init { nodes: data, links: links, ... }
+-- |       JoinResult { enter, update, exit } <- joinData nodes "g" nodesGroup
+-- |       -- ... handle enter/update/exit
+-- |     Nothing -> pure unit
+-- | ```
+renderTreeWithSimulation
+  :: forall parent parentDatum datum m sel
+   . SelectionM sel m
+  => Ord datum
+  => sel SEmpty parent parentDatum
+  -> Tree datum
+  -> (Map String (sel SBoundOwns Element datum) -> m Unit)
+  -> m (Map String (sel SBoundOwns Element datum))
+renderTreeWithSimulation container tree callback = do
+  selections <- renderTree container tree
+  callback selections
+  pure selections

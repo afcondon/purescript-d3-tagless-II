@@ -129,6 +129,7 @@ data Route
   | LesMisGUPTree   -- Les Mis with Tree API + GUP + Dynamic Layouts (proof-of-concept)
   | LesMisGUP       -- Les Mis with declarative scene-based PSD3v2 + GUP (clean example)
   | LesMisGUPSimple -- Les Mis minimal GUP with SceneNestedJoin (12-line update function!)
+  | LesMisGUPTreeAPI -- Les Mis testing renderTreeWithSimulation pattern
   | LesMisGUPClean  -- Les Mis GUP with existing primitives (no wrappers!)
   | LesMisQueryDemo -- Query language demo with interactive group filtering
   | ModuleGraph     -- Module dependency graph (dogfooding!)
@@ -187,6 +188,7 @@ instance showRoute :: Show Route where
   show LesMisGUPTree = "Les Misérables GUP (Tree API)"
   show LesMisGUP = "Les Misérables GUP (PSD3v2)"
   show LesMisGUPSimple = "Les Misérables GUP (Simple)"
+  show LesMisGUPTreeAPI = "Les Misérables GUP (TreeAPI)"
   show LesMisGUPClean = "Les Misérables GUP (Clean)"
   show LesMisQueryDemo = "Query Language Demo"
   show ModuleGraph = "Module Graph"

@@ -61,6 +61,7 @@ routes =
   <|> lesMisGUPTree
   <|> lesMisGUP
   <|> lesMisGUPSimple
+  <|> lesMisGUPTreeAPI
   <|> lesMisGUPClean
   <|> lesMisQueryDemo
   <|> moduleGraph
@@ -252,6 +253,10 @@ lesMisGUP = LesMisGUP <$ lit "lesmis-gup" <* end
 lesMisGUPSimple :: Match Route
 lesMisGUPSimple = LesMisGUPSimple <$ lit "lesmis-gup-simple" <* end
 
+-- | Match: /lesmis-gup-treeapi
+lesMisGUPTreeAPI :: Match Route
+lesMisGUPTreeAPI = LesMisGUPTreeAPI <$ lit "lesmis-gup-treeapi" <* end
+
 -- | Match: /lesmis-gup-clean
 lesMisGUPClean :: Match Route
 lesMisGUPClean = LesMisGUPClean <$ lit "lesmis-gup-clean" <* end
@@ -336,6 +341,7 @@ routeToPath GeneralUpdatePattern = "/general-update-pattern"
 routeToPath LesMisGUPTree = "/lesmis-gup-tree"
 routeToPath LesMisGUP = "/lesmis-gup"
 routeToPath LesMisGUPSimple = "/lesmis-gup-simple"
+routeToPath LesMisGUPTreeAPI = "/lesmis-gup-treeapi"
 routeToPath LesMisGUPClean = "/lesmis-gup-clean"
 routeToPath LesMisQueryDemo = "/lesmis-query-demo"
 routeToPath ModuleGraph = "/module-graph"

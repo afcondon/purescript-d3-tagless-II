@@ -66,6 +66,7 @@ import Component.GeneralUpdatePattern as GeneralUpdatePattern
 import Component.LesMisGUPTree as LesMisGUPTree
 import Component.LesMisGUP as LesMisGUP
 import Component.LesMisGUPSimple as LesMisGUPSimple
+import Component.LesMisGUPTreeAPI as LesMisGUPTreeAPI
 import Component.LesMisGUPClean as LesMisGUPClean
 import Component.LesMisQueryDemo as LesMisQueryDemo
 import Component.ModuleGraph as ModuleGraph
@@ -136,6 +137,7 @@ type Slots =
   , lesMisGUPTree :: forall q. H.Slot q Void Unit
   , lesMisGUP :: forall q. H.Slot q Void Unit
   , lesMisGUPSimple :: forall q. H.Slot q Void Unit
+  , lesMisGUPTreeAPI :: forall q. H.Slot q Void Unit
   , lesMisGUPClean :: forall q. H.Slot q Void Unit
   , lesMisQueryDemo :: forall q. H.Slot q Void Unit
   , moduleGraph :: forall q. H.Slot q Void Unit
@@ -189,6 +191,7 @@ _generalUpdatePattern = Proxy :: Proxy "generalUpdatePattern"
 _lesMisGUPTree = Proxy :: Proxy "lesMisGUPTree"
 _lesMisGUP = Proxy :: Proxy "lesMisGUP"
 _lesMisGUPSimple = Proxy :: Proxy "lesMisGUPSimple"
+_lesMisGUPTreeAPI = Proxy :: Proxy "lesMisGUPTreeAPI"
 _lesMisGUPClean = Proxy :: Proxy "lesMisGUPClean"
 _lesMisQueryDemo = Proxy :: Proxy "lesMisQueryDemo"
 _moduleGraph = Proxy :: Proxy "moduleGraph"
@@ -359,6 +362,9 @@ renderPage route = case spy "Route is" route of
 
   LesMisGUPSimple ->
     HH.slot_ _lesMisGUPSimple unit LesMisGUPSimple.component unit
+
+  LesMisGUPTreeAPI ->
+    HH.slot_ _lesMisGUPTreeAPI unit LesMisGUPTreeAPI.component unit
 
   LesMisGUPClean ->
     HH.slot_ _lesMisGUPClean unit LesMisGUPClean.component unit
