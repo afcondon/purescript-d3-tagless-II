@@ -2,11 +2,11 @@ module D3.Viz.Spago.Tree where
 
 import Prelude
 
-import D3.Viz.Spago.Files (LinkType(..))
+import D3.Viz.Spago.Files (LinkType(..), SpagoLink, isP2P_Link)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, TreeFields, spagoGraphConfig)
 import PSD3.Data.Graph (buildGraphModel, getLinksFrom)
 import PSD3.Data.Graph.Algorithms (getReachableNodes)
-import PSD3.Data.Node (D3Link_Unswizzled, NodeID)
+import PSD3.Data.Node (NodeID)
 import PSD3.Layout.Hierarchy.Tree4 as Tree4
 import Data.Array (elem, filter, partition, (..))
 import Data.Array as Array
@@ -19,31 +19,26 @@ import Data.Maybe (Maybe(..))
 import Data.Nullable (notNull)
 import Data.Tree (Tree(..))
 import Data.Tuple (Tuple(..))
-import Unsafe.Coerce (unsafeCoerce)
 
 -- | Helper to create links from tuples
-tupleToLink :: forall t. t -> Tuple NodeID NodeID -> D3Link_Unswizzled
+tupleToLink :: LinkType -> Tuple NodeID NodeID -> SpagoLink
 tupleToLink linktype (Tuple source target) =
-  unsafeCoerce { source, target, linktype, inSim: true }
+  { source, target, linktype, inSim: true }
 
 -- | Change the linktype of an existing link
-changeLinkType :: forall t. t -> D3Link_Unswizzled -> D3Link_Unswizzled
-changeLinkType newLinktype link =
-  let oldLink = unsafeCoerce link :: { source :: Int, target :: Int, linktype :: t, inSim :: Boolean }
-  in unsafeCoerce $ oldLink { linktype = newLinktype }
+changeLinkType :: LinkType -> SpagoLink -> SpagoLink
+changeLinkType newLinktype link = link { linktype = newLinktype }
 
 -- | Build tree structure from rootID and dependency links
 -- | Returns: Tree of NodeIDs representing the dependency hierarchy
-buildIDTree :: NodeID -> Array D3Link_Unswizzled -> Tree NodeID
+buildIDTree :: NodeID -> Array SpagoLink -> Tree NodeID
 buildIDTree rootID links = go rootID
   where
     -- Extract children for a given node from links
     getChildren :: NodeID -> Array NodeID
     getChildren nodeId =
-      let unpackLink :: D3Link_Unswizzled -> { source :: NodeID, target :: NodeID }
-          unpackLink = unsafeCoerce
-          matchingLinks = filter (\link -> let l = unpackLink link in l.source == nodeId) links
-      in (\link -> let l = unpackLink link in l.target) <$> matchingLinks
+      let matchingLinks = filter (\link -> link.source == nodeId) links
+      in _.target <$> matchingLinks
 
     -- Recursively build tree
     go :: NodeID -> Tree NodeID
@@ -66,14 +61,6 @@ flattenTreeToMap tree = go tree M.empty
           treeFields = { x: node.x, y: node.y, isTreeLeaf: isLeaf, depth: node.depth, childIDs }
           accWithNode = M.insert node.id treeFields acc
       in foldl (\m child -> go child m) accWithNode children
-
--- | Check if link is a package-to-package link
-isP2P_Link :: D3Link_Unswizzled -> Boolean
-isP2P_Link link =
-  let { linktype } = unsafeCoerce link :: { linktype :: LinkType }
-  in case linktype of
-       P2P -> true
-       _ -> false
 
 -- | Main tree reduction function
 -- | Builds dependency tree, runs layout, updates node positions

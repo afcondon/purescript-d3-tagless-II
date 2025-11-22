@@ -4,7 +4,7 @@ import Prelude
 
 import Affjax (URL)
 import PSD3.Internal.Types (PointXY)
-import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, D3_FocusXY, D3_ID, D3_VxyFxy, D3_XY, NodeID)
+import PSD3.Data.Node (D3_FocusXY, D3_ID, D3_VxyFxy, D3_XY, NodeID)
 import PSD3.Data.Graph (buildGraphModel, getLinksTo)
 import Unsafe.Coerce (unsafeCoerce)
 import Data.Array (catMaybes, foldl, groupBy, length, range, sortBy, zip, (!!), (:))
@@ -58,13 +58,13 @@ type Spago_Raw_JSON_ = {
 foreign import readSpago_Raw_JSON_ :: String -> String -> String -> String -> Spago_Raw_JSON_
 
 type Spago_Cooked_JSON    = {
-    links              :: Array D3Link_Unswizzled
+    links              :: Array SpagoLink
   , nodes              :: Array SpagoNodeData
   , moduleNodes        :: Array SpagoNodeData
   , packageNodes       :: Array SpagoNodeData
-  , moduleLinks        :: Array D3Link_Unswizzled
-  , packageLinks       :: Array D3Link_Unswizzled
-  , modulePackageLinks :: Array D3Link_Unswizzled
+  , moduleLinks        :: Array SpagoLink
+  , packageLinks       :: Array SpagoLink
+  , modulePackageLinks :: Array SpagoLink
   , sourceLinksMap     :: M.Map NodeID (Array NodeID)
   , name2ID            :: M.Map String NodeID
   , id2Name            :: M.Map NodeID String
@@ -87,7 +87,16 @@ derive instance eqNodeType :: Eq NodeType
 derive instance ordNodeType :: Ord NodeType
 type Dependencies    = Array NodeID
 
-type SpagoLinkData = ( linktype :: LinkType, inSim :: Boolean ) 
+type SpagoLinkData = ( linktype :: LinkType, inSim :: Boolean )
+
+-- | Typed link representation (source of truth)
+-- | This replaces the opaque D3Link_Unswizzled for user code
+type SpagoLink =
+  { source :: NodeID
+  , target :: NodeID
+  , linktype :: LinkType
+  , inSim :: Boolean
+  } 
 
 type SpagoTreeObj = D3_TreeNode SpagoNodeData
 
@@ -248,11 +257,8 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
     moduleNodes        = makeNodeFromModuleJSONPL  <$> modulesPL
     packageNodes       = makeNodeFromPackageJSONCL <$> packagesCL
 
-    packLink :: forall r. { source :: NodeID, target :: NodeID | r } -> D3Link_Unswizzled
-    packLink = unsafeCoerce
-
-    makeLink :: LinkType -> Tuple NodeID NodeID -> D3Link_Unswizzled
-    makeLink linktype (Tuple source target) = packLink { source, target, linktype, inSim: true }
+    makeLink :: LinkType -> Tuple NodeID NodeID -> SpagoLink
+    makeLink linktype (Tuple source target) = { source, target, linktype, inSim: true }
 
     foldDepends :: forall r. Array (Tuple NodeID NodeID) -> { key :: String, depends :: Array String | r } -> Array (Tuple NodeID NodeID)
     foldDepends b a = (makeTuple <$> a.depends) <> b
@@ -263,8 +269,8 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
     moduleLinks  = (makeLink M2M_Graph) <$> (foldl foldDepends [] modules)
     packageLinks = (makeLink P2P)       <$> (foldl foldDepends [] packages)
 
-    makeModuleToPackageLink :: SpagoNodeData -> D3Link_Unswizzled
-    makeModuleToPackageLink m = packLink { source: m.id, target: m.containerID, linktype: M2P, inSim: true }
+    makeModuleToPackageLink :: SpagoNodeData -> SpagoLink
+    makeModuleToPackageLink m = { source: m.id, target: m.containerID, linktype: M2P, inSim: true }
 
     modulePackageLinks = makeModuleToPackageLink <$> moduleNodes
     
@@ -273,8 +279,8 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
 
     -- Build temporary GraphModel for O(1) link lookups during sourceLinksMap construction
     linkGraphConfig = { getNodeId: _.id
-                      , getLinkSource: \link -> (unsafeCoerce link).source
-                      , getLinkTarget: \link -> (unsafeCoerce link).target
+                      , getLinkSource: _.source
+                      , getLinkTarget: _.target
                       }
     linkGraph = buildGraphModel linkGraphConfig nodes links
 
@@ -285,7 +291,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
     getSourceLinks { id } = Tuple id sources
       where
         incomingLinks = getLinksTo id linkGraph  -- O(1) lookup!
-        sources = ((unsafeCoerce >>> _.source) <$> incomingLinks)
+        sources = (_.source <$> incomingLinks)
 
     sourceLinksMap = M.fromFoldable $ getSourceLinks <$> nodes
 
@@ -304,17 +310,18 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
   , id2LOC    : M.empty
   }
 
-unpackLink' :: D3Link_Unswizzled -> { linktype :: LinkType }
-unpackLink' = unsafeCoerce
+-- Link predicates on typed SpagoLink
+isP2P_Link :: SpagoLink -> Boolean
+isP2P_Link link = link.linktype == P2P
 
-isP2P_Link :: D3Link_Unswizzled -> Boolean
-isP2P_Link link = (unpackLink' link).linktype == P2P
-isM2M_Graph_Link :: D3Link_Unswizzled -> Boolean
-isM2M_Graph_Link link = (unpackLink' link).linktype == M2M_Graph
-isM2P_Link :: D3Link_Unswizzled -> Boolean
-isM2P_Link link = (unpackLink' link).linktype == M2P
-isM2M_Tree_Link :: D3Link_Unswizzled -> Boolean
-isM2M_Tree_Link link = (unpackLink' link).linktype == M2M_Tree
+isM2M_Graph_Link :: SpagoLink -> Boolean
+isM2M_Graph_Link link = link.linktype == M2M_Graph
+
+isM2P_Link :: SpagoLink -> Boolean
+isM2P_Link link = link.linktype == M2P
+
+isM2M_Tree_Link :: SpagoLink -> Boolean
+isM2M_Tree_Link link = link.linktype == M2M_Tree
 
 
 -- | boilerplate

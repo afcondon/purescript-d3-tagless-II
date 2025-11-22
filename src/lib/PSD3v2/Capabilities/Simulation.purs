@@ -31,7 +31,7 @@ import Prelude
 import Data.Map (Map)
 import Data.Maybe (Maybe)
 import Data.Set (Set)
-import PSD3.Data.Node (SimulationNode, D3Link_Unswizzled, D3Link_Swizzled)
+import PSD3.Data.Node (Link, SimulationNode, SwizzledLink)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.FFI (SimulationVariables)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Force)
@@ -66,6 +66,9 @@ data Step sel datum = Step (sel datum) (Array (Attribute datum))
 -- | This mirrors PSD3.Capabilities.Simulation.SimulationConfig but is
 -- | type-safe with PSD3v2's patterns.
 -- |
+-- | Now uses concrete Link type instead of polymorphic link parameter.
+-- | The swizzled output type is derivable: SwizzledLink a linkRow.
+-- |
 -- | ```purescript
 -- | { nodes: nodesInSim, links: linksInSim } <- init
 -- |   { nodes: myNodeData
@@ -77,9 +80,9 @@ data Step sel datum = Step (sel datum) (Array (Attribute datum))
 -- |   , ticks: Map.empty
 -- |   }
 -- | ```
-type SimulationConfig a key sel =
+type SimulationConfig a id linkRow key sel =
   { nodes :: Array (SimulationNode a)
-  , links :: Array D3Link_Unswizzled
+  , links :: Array (Link id linkRow)
   , forces :: Array (Force (SimulationNode a))
   , activeForces :: Set Label
   , config :: SimulationVariables
@@ -88,11 +91,14 @@ type SimulationConfig a key sel =
   }
 
 -- Alias for backward compatibility with initial naming
-type SimulationInit a key sel = SimulationConfig a key sel
+type SimulationInit a id linkRow key sel = SimulationConfig a id linkRow key sel
 
 -- | Configuration for updating a running simulation.
 -- |
 -- | All fields are optional - only provide what you want to change.
+-- |
+-- | Now uses concrete Link type instead of polymorphic link parameter.
+-- | The swizzled output type is derivable: SwizzledLink a linkRow.
 -- |
 -- | ```purescript
 -- | -- Toggle forces
@@ -113,11 +119,11 @@ type SimulationInit a key sel = SimulationConfig a key sel
 -- |   , keyFn: _.id
 -- |   }
 -- | ```
-type SimulationUpdate a key =
+type SimulationUpdate a id linkRow key =
   { nodes :: Maybe (Array (SimulationNode a))
-  , links :: Maybe (Array D3Link_Unswizzled)
+  , links :: Maybe (Array (Link id linkRow))
   , nodeFilter :: Maybe (SimulationNode a -> Boolean)
-  , linkFilter :: Maybe (D3Link_Unswizzled -> Boolean)
+  , linkFilter :: Maybe (Link id linkRow -> Boolean)
   , activeForces :: Maybe (Set Label)
   , config :: Maybe SimulationVariables
   , keyFn :: SimulationNode a -> key
@@ -166,7 +172,15 @@ class (Monad m) <= SimulationM sel m | m -> sel where
   -- | (converts IDs to object references).
   -- |
   -- | Returns nodes and links ready for data joining with SelectionM.
-  init :: forall a key. SimulationConfig a key sel -> m { nodes :: Array (SimulationNode a), links :: Array D3Link_Swizzled }
+  -- |
+  -- | Type parameters:
+  -- | - `a`: node data row
+  -- | - `id`: link ID type (e.g., Int, String)
+  -- | - `linkRow`: additional link fields (e.g., (value :: Number))
+  -- | - `key`: node key type for data binding
+  -- |
+  -- | The output link type is derived: SwizzledLink a linkRow
+  init :: forall a id linkRow key. SimulationConfig a id linkRow key sel -> m { nodes :: Array (SimulationNode a), links :: Array (SwizzledLink a linkRow) }
 
   -- | Register a function to run on every simulation tick.
   -- |
@@ -224,7 +238,15 @@ class (Monad m, SimulationM sel m) <= SimulationM2 sel m | m -> sel where
   -- | All fields in SimulationUpdate are optional. Only provide what you want to change.
   -- |
   -- | Returns updated nodes and swizzled links for re-joining to DOM.
-  update :: forall a key. SimulationUpdate a key -> m { nodes :: Array (SimulationNode a), links :: Array D3Link_Swizzled }
+  -- |
+  -- | Type parameters:
+  -- | - `a`: node data row
+  -- | - `id`: link ID type (e.g., Int, String)
+  -- | - `linkRow`: additional link fields
+  -- | - `key`: node key type for data binding
+  -- |
+  -- | The output link type is derived: SwizzledLink a linkRow
+  update :: forall a id linkRow key. SimulationUpdate a id linkRow key -> m { nodes :: Array (SimulationNode a), links :: Array (SwizzledLink a linkRow) }
 
   -- | Reheat the simulation (set alpha to given value).
   -- |

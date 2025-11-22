@@ -14,9 +14,8 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import D3.Viz.LesMis.LesMisGUPSimple as LesMisGUPSimple
-import D3.Viz.LesMiserables.Model (LesMisSimNode)
+import D3.Viz.LesMiserables.Model (LesMisSimNode, LesMisLink)
 import D3.Viz.LesMiserables.File (readGraphFromFileContents)
-import PSD3.Data.Node (D3Link_Unswizzled)
 import PSD3v2.Interpreter.D3v2 as D3v2
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, ForceType(..), RegularForceType(..), allNodes, initialSimulationState)
 import PSD3.Internal.Simulation.Config as F
@@ -29,7 +28,7 @@ import Data.Map as Map
 
 type State =
   { lesMisGUPSimulation :: D3SimulationState_ LesMisSimNode
-  , originalGraph :: Maybe { nodes :: Array LesMisSimNode, links :: Array D3Link_Unswizzled }
+  , originalGraph :: Maybe { nodes :: Array LesMisSimNode, links :: Array LesMisLink }
   }
 
 data Action

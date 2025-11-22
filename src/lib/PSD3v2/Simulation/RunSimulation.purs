@@ -13,7 +13,7 @@ import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import PSD3v2.Capabilities.Simulation (class SimulationM2, start, stop)
-import PSD3.Data.Node (D3Link_Unswizzled, SimulationNode)
+import PSD3.Data.Node (Link, SimulationNode)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Types (Datum_)
 import PSD3v2.Simulation.Scene (SimSceneConfig)
@@ -57,16 +57,16 @@ import Web.DOM.Element (Element)
 -- | - Wait for transition completion (uses Aff to make callback-based FFI awaitable)
 -- | - Start simulation only after transitions complete
 -- | - This prevents "nodes stuck at origin" issues during scene switches
-runSimulation :: forall d attrs sel m.
+runSimulation :: forall d id linkRow attrs sel m.
   MonadAff m =>
   SimulationM2 (sel SBoundOwns Element) m =>
   { nodes :: sel SEmpty Element (SimulationNode d), links :: sel SEmpty Element (SimulationNode d) } ->
-  SimSceneConfig d attrs ->
+  SimSceneConfig d id linkRow attrs ->
   Array (SimulationNode d) ->
-  Array D3Link_Unswizzled ->
+  Array (Link id linkRow) ->
   ({ allNodes :: Array (SimulationNode d)
-   , allLinks :: Array D3Link_Unswizzled
-   , scene :: SimSceneConfig d attrs
+   , allLinks :: Array (Link id linkRow)
+   , scene :: SimSceneConfig d id linkRow attrs
    } -> m Unit) ->
   m Unit
 runSimulation _selections scene allNodes allLinks updateSimFn = do
@@ -135,23 +135,23 @@ runSimulation _selections scene allNodes allLinks updateSimFn = do
 -- |   (\attrs state -> attrs { tagMap = Just state.tags })  -- enhance attrs
 -- |   Graph.updateSimulation                   -- viz-specific update
 -- | ```
-runSimulationFromState :: forall d attrs sel m row.
+runSimulationFromState :: forall d id linkRow attrs sel m row.
   MonadAff m =>
   SimulationM2 (sel SBoundOwns Element) m =>
   MonadState { | row } m =>
   ({ | row } -> { nodes :: sel SEmpty Element (SimulationNode d), links :: sel SEmpty Element (SimulationNode d) }) ->  -- Get selections
-  ({ | row } -> SimSceneConfig d attrs) ->                                           -- Get scene
+  ({ | row } -> SimSceneConfig d id linkRow attrs) ->                                   -- Get scene
   ({ | row } -> Array (SimulationNode d)) ->                                   -- Get model nodes
-  ({ | row } -> Array D3Link_Unswizzled) ->                                       -- Get model links
+  ({ | row } -> Array (Link id linkRow)) ->                                          -- Get model links
   (attrs -> { | row } -> attrs) ->                                                -- Enhance attributes
   ({ nodes :: sel SEmpty Element (SimulationNode d), links :: sel SEmpty Element (SimulationNode d) } ->  -- UpdateSimulation function (DECLARATIVE API)
    { allNodes :: Array (SimulationNode d)                                         -- FULL dataset
-   , allLinks :: Array D3Link_Unswizzled                                            -- FULL dataset
+   , allLinks :: Array (Link id linkRow)                                               -- FULL dataset
    , nodeFilter :: SimulationNode d -> Boolean                                   -- Which nodes to show
-   , linkFilter :: Maybe (D3Link_Unswizzled -> Boolean)                             -- Optional visual filtering
+   , linkFilter :: Maybe (Link id linkRow -> Boolean)                                  -- Optional visual filtering
    , nodeInitializers :: Array (Array (SimulationNode d) -> Array (SimulationNode d))  -- Tree layout, grid, etc.
    , activeForces :: Set Label
-   , linksWithForce :: Datum_ -> Boolean
+   , linksWithForce :: Link id linkRow -> Boolean
    } ->
    attrs ->
    m Unit) ->

@@ -24,8 +24,8 @@ import Effect.Class (liftEffect)
 import Effect.Console as Console
 import Effect.Random (randomInt)
 import Effect.Ref as Ref
-import D3.Viz.LesMiserables.Model (LesMisRawModel, LesMisSimNode)
-import PSD3.Data.Node (D3Link_Swizzled, D3Link_Unswizzled)
+import D3.Viz.LesMiserables.Model (LesMisRawModel, LesMisSimNode, LesMisNodeRow, LesMisLinkRow, LesMisLink)
+import PSD3.Data.Node (SwizzledLink)
 import PSD3.Internal.FFI (keyIsID_, linksForceName_)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
 import PSD3.Internal.Simulation.Config as F
@@ -84,8 +84,11 @@ shuffleArray arr = do
       _, _ -> pure unit
   Ref.read ref
 
+-- | Swizzled link type alias for LesMis
+type LesMisSwizzledLink = SwizzledLink LesMisNodeRow LesMisLinkRow
+
 -- | Indexed link wrapper for data join
-newtype IndexedLink = IndexedLink { index :: Int, link :: D3Link_Swizzled }
+newtype IndexedLink = IndexedLink { index :: Int, link :: LesMisSwizzledLink }
 
 instance Eq IndexedLink where
   eq (IndexedLink a) (IndexedLink b) =
@@ -121,7 +124,7 @@ instance Ord KeyedNode where
 -- | Returns the simulation state for use in auto-cycling
 drawLesMisGUPAuto :: forall row.
   Array LesMisSimNode ->
-  Array D3Link_Unswizzled ->
+  Array LesMisLink ->
   String ->
   Number ->
   Number ->
@@ -287,7 +290,7 @@ autoCycleGraph ::
   forall row.
   Ref.Ref { simulation :: D3SimulationState_ LesMisSimNode | row } ->
   Array LesMisSimNode ->
-  Array D3Link_Unswizzled ->
+  Array LesMisLink ->
   D3v2Selection_ SEmpty Element Unit ->
   D3v2Selection_ SEmpty Element Unit ->
   Array String ->
@@ -337,7 +340,7 @@ autoCycleGraph simStateRef allNodes allLinks linksGroupSel nodesGroupSel allNode
 -- | 3. Reheat simulation to animate to new positions
 updateGraph :: forall row.
   Array LesMisSimNode ->
-  Array D3Link_Unswizzled ->
+  Array LesMisLink ->
   D3v2Selection_ SEmpty Element Unit ->
   D3v2Selection_ SEmpty Element Unit ->
   D3v2SimM row LesMisSimNode Unit

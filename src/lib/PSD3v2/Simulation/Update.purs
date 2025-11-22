@@ -13,7 +13,7 @@ import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Class.Console (log)
 import Data.Array as Array
 import Unsafe.Coerce (unsafeCoerce)
-import PSD3.Data.Node (D3Link_Swizzled, D3Link_Unswizzled, SimulationNode, NodeID)
+import PSD3.Data.Node (Link, SwizzledLink, SimulationNode, NodeID)
 import PSD3.Internal.FFI (SimulationVariables, getIDsFromNodes_, getLinkIDs_, keyIsID_)
 import Data.Maybe (Maybe(..))
 import Data.Set as Set
@@ -47,23 +47,26 @@ import Data.Foldable (foldl)
 -- | - nodeTickAttrs: Attributes to apply on each simulation tick for nodes
 -- | - linkTickAttrs: Attributes to apply on each simulation tick for links
 -- | - Applied to merged selections automatically
-type RenderCallbacks attrs sel m d = {
+-- |
+-- | Now uses concrete SwizzledLink type instead of polymorphic swizzled parameter.
+-- | The swizzled type is derivable: SwizzledLink dataRow linkRow.
+type RenderCallbacks attrs sel m dataRow linkRow = {
   -- Node rendering callbacks
   -- Enter: Takes SPending, returns SBoundOwns after appending elements
-  onNodeEnter :: sel SPending Element d -> attrs -> m (sel SBoundOwns Element d),
+  onNodeEnter :: sel SPending Element (SimulationNode dataRow) -> attrs -> m (sel SBoundOwns Element (SimulationNode dataRow)),
   -- Update: Takes SBound, modifies in place, returns Unit
-  onNodeUpdate :: sel SBoundOwns Element d -> attrs -> m Unit,
+  onNodeUpdate :: sel SBoundOwns Element (SimulationNode dataRow) -> attrs -> m Unit,
   -- Exit: Takes SExiting, removes elements, returns Unit
-  onNodeExit :: sel SExiting Element d -> m Unit,
+  onNodeExit :: sel SExiting Element (SimulationNode dataRow) -> m Unit,
 
-  -- Link rendering callbacks (links are D3Link_Swizzled after processing)
-  onLinkEnter :: sel SPending Element D3Link_Swizzled -> attrs -> m (sel SBoundOwns Element D3Link_Swizzled),
-  onLinkUpdate :: sel SBoundOwns Element D3Link_Swizzled -> attrs -> m Unit,
-  onLinkExit :: sel SExiting Element D3Link_Swizzled -> m Unit,
+  -- Link rendering callbacks (swizzled links after processing)
+  onLinkEnter :: sel SPending Element (SwizzledLink dataRow linkRow) -> attrs -> m (sel SBoundOwns Element (SwizzledLink dataRow linkRow)),
+  onLinkUpdate :: sel SBoundOwns Element (SwizzledLink dataRow linkRow) -> attrs -> m Unit,
+  onLinkExit :: sel SExiting Element (SwizzledLink dataRow linkRow) -> m Unit,
 
   -- Tick function attributes (applied to merged selections)
-  nodeTickAttrs :: attrs -> Array (Attribute d),
-  linkTickAttrs :: Array (Attribute D3Link_Swizzled)  -- Links are D3Link_Swizzled after swizzling
+  nodeTickAttrs :: attrs -> Array (Attribute (SimulationNode dataRow)),
+  linkTickAttrs :: Array (Attribute (SwizzledLink dataRow linkRow))  -- Links are swizzled type after swizzling
 }
 
 -- | Fully declarative update configuration
@@ -92,11 +95,11 @@ type RenderCallbacks attrs sel m d = {
 -- |
 -- | This makes the "nodes filtered but links not" bug IMPOSSIBLE.
 -- | The linkFilter is an optional ADDITIONAL filter for visual purposes.
-type DeclarativeUpdateConfig d =
+type DeclarativeUpdateConfig d id linkRow =
   { allNodes :: Array (SimulationNode d)                                -- FULL dataset (required)
-  , allLinks :: Array D3Link_Unswizzled                                    -- FULL dataset (required)
+  , allLinks :: Array (Link id linkRow)                                 -- FULL dataset (required)
   , nodeFilter :: SimulationNode d -> Boolean                           -- Which nodes to show (required)
-  , linkFilter :: Maybe (D3Link_Unswizzled -> Boolean)                     -- Optional visual filtering (applied AFTER automatic structural filtering)
+  , linkFilter :: Maybe (Link id linkRow -> Boolean)                    -- Optional visual filtering (applied AFTER automatic structural filtering)
   , nodeInitializers :: Array (Array (SimulationNode d) -> Array (SimulationNode d))  -- Functions to transform filtered nodes (e.g., tree layout, grid, pinning)
   , activeForces :: Maybe (Set Label)                                      -- Which forces to enable
   , config :: Maybe SimulationVariables                                    -- Simulation config
@@ -155,21 +158,22 @@ type DeclarativeUpdateConfig d =
 -- | Note: The user NEVER manually filters links. The library does it automatically
 -- | by extracting node IDs and filtering links to only connect visible nodes.
 -- | This makes the "filtered nodes + all links" bug impossible.
-genericUpdateSimulation :: forall dataRow attrs sel m nodeKey linkKey.
+genericUpdateSimulation :: forall dataRow id linkRow attrs sel m nodeKey linkKey.
   MonadEffect m =>
   SelectionM sel m =>
   SimulationM2 (sel SBoundOwns Element) m =>
   Ord (SimulationNode dataRow) =>                        -- PSD3v2 requires Ord for data joins
   Ord nodeKey =>
-  Ord linkKey =>                                         -- Links use key-based join (no Ord D3Link_Swizzled needed!)
-  { nodes :: sel SEmpty Element (SimulationNode dataRow), links :: sel SEmpty Element D3Link_Swizzled } ->
+  Eq id =>                                               -- For elem check in link filtering (id must match nodeKey)
+  Ord linkKey =>                                         -- Links use key-based join (no Ord SwizzledLink needed!)
+  { nodes :: sel SEmpty Element (SimulationNode dataRow), links :: sel SEmpty Element (SwizzledLink dataRow linkRow) } ->
   ElementType ->                                         -- Node element type
   ElementType ->                                         -- Link element type
-  DeclarativeUpdateConfig dataRow ->                     -- Declarative configuration
+  DeclarativeUpdateConfig dataRow id linkRow ->          -- Declarative configuration
   (SimulationNode dataRow -> nodeKey) ->                 -- Node key function
-  (D3Link_Swizzled -> linkKey) ->                        -- Link key function
+  (SwizzledLink dataRow linkRow -> linkKey) ->           -- Link key function
   attrs ->                                               -- Visualization attributes
-  RenderCallbacks attrs sel m (SimulationNode dataRow) -> -- Render callbacks
+  RenderCallbacks attrs sel m dataRow linkRow ->         -- Render callbacks
   m Unit
 genericUpdateSimulation { nodes: nodesGroup, links: linksGroup }
                         nodeElement linkElement config nodeKeyFn linkKeyFn attrs callbacks = do
@@ -187,7 +191,7 @@ genericUpdateSimulation { nodes: nodesGroup, links: linksGroup }
   -- This is the key insight: user provides full data + node predicate,
   -- library ensures links are consistent. User can't forget this step!
   let validLink link = do
-        let linkIDs = getLinkIDs_ nodeKeyFn link :: { sourceID :: String, targetID :: String }
+        let linkIDs = getLinkIDs_ link
         (linkIDs.sourceID `elem` nodeIDs) && (linkIDs.targetID `elem` nodeIDs)
       structurallyFilteredLinks = filter validLink config.allLinks
 
@@ -201,7 +205,7 @@ genericUpdateSimulation { nodes: nodesGroup, links: linksGroup }
   -- STEP 6: Build internal SimulationUpdate for the update API
   -- Note: We pass pre-filtered and initialized data with no filter predicates
   -- (filtering and initialization already done by library)
-  let internalUpdateConfig :: SimulationUpdate dataRow nodeKey
+  let internalUpdateConfig :: SimulationUpdate dataRow id linkRow nodeKey
       internalUpdateConfig =
         { nodes: Just initializedNodes    -- Filtered and initialized by library
         , links: Just finalLinks          -- Structurally + visually filtered by library (AUTOMATIC!)

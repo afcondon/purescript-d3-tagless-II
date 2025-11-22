@@ -105,7 +105,7 @@ import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Halogen.Subscription as HS
 import PSD3.Capabilities.Simulation (Staging)
-import PSD3.Data.Node (D3Link_Unswizzled, SimulationNode(..), NodeID)
+import PSD3.Data.Node (Link, SimulationNode(..), NodeID)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Simulation.Types (D3SimulationState_)
 import PSD3.Internal.Types (D3Selection_, Datum_)
@@ -123,9 +123,10 @@ import Type.Proxy (Proxy(..))
 -- | - `action`: Your Halogen action type
 -- | - `id`: Node ID type (must have Eq and Ord, e.g., String or Int)
 -- | - `nodeData`: Your simulation node user data type (e.g., { id :: String, group :: Int })
+-- | - `linkRow`: Your link user data type (e.g., { linktype :: LinkType, inSim :: Boolean })
 -- | - `attrs`: Your scene-specific attributes type (e.g., SpagoSceneAttributes)
 -- | - `model`: Your data model type (e.g., SpagoModel with nodes, links, metadata)
-type SimulationComponentState scene action id nodeData attrs model =
+type SimulationComponentState scene action id nodeData linkRow attrs model =
   { -- | Core D3 simulation state (forces, alpha, nodes, etc.)
     simulation :: D3SimulationState_ (SimulationNode nodeData)
 
@@ -134,10 +135,10 @@ type SimulationComponentState scene action id nodeData attrs model =
 
     -- | Staging area: filtered nodes/links before entering simulation
     -- | This is where scene filters are applied
-  , staging :: Staging (D3Selection_ (SimulationNode nodeData)) nodeData
+  , staging :: Staging (D3Selection_ (SimulationNode nodeData)) nodeData id linkRow
 
     -- | Current scene configuration (filters, forces, attributes, initializers)
-  , scene :: Scene.SimSceneConfig nodeData attrs
+  , scene :: Scene.SimSceneConfig nodeData id linkRow attrs
 
     -- | Current scene identifier (for transition matrix lookups)
   , currentScene :: scene
@@ -158,6 +159,13 @@ type SimulationComponentState scene action id nodeData attrs model =
 
     -- | Show welcome overlay on first load
   , showWelcome :: Boolean
+
+    -- | Tree revelation step (for progressive tree reveal animations)
+    -- | 0 = initial state, increases to maxTreeDepth+1 for final relaxation
+  , revelationStep :: Int
+
+    -- | Maximum tree depth in current data (calculated from tree)
+  , maxTreeDepth :: Int
   }
 
 -- | Transition matrix: maps scene transitions to animation specifications
@@ -182,20 +190,20 @@ type TransitionMatrix scene = M.Map (Tuple scene scene) Scene.TransitionSpec
 
 -- | Update the scene configuration with a function
 -- | Use this when you want to modify specific scene fields
-updateScene :: forall scene action id nodeData attrs model.
-  (Scene.SimSceneConfig nodeData attrs -> Scene.SimSceneConfig nodeData attrs) ->
-  SimulationComponentState scene action id nodeData attrs model ->
-  SimulationComponentState scene action id nodeData attrs model
+updateScene :: forall scene action id nodeData linkRow attrs model.
+  (Scene.SimSceneConfig nodeData id linkRow attrs -> Scene.SimSceneConfig nodeData id linkRow attrs) ->
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
+  SimulationComponentState scene action id nodeData linkRow attrs model
 updateScene f state = state { scene = f state.scene }
 
 -- | Apply a complete scene configuration
 -- |
 -- | This replaces the entire scene configuration in one step.
 -- | Filtering and initialization happen later inside runSimulation.
-applySceneConfig :: forall scene action id nodeData attrs model.
-  Scene.SimSceneConfig nodeData attrs ->
-  SimulationComponentState scene action id nodeData attrs model ->
-  SimulationComponentState scene action id nodeData attrs model
+applySceneConfig :: forall scene action id nodeData linkRow attrs model.
+  Scene.SimSceneConfig nodeData id linkRow attrs ->
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
+  SimulationComponentState scene action id nodeData linkRow attrs model
 applySceneConfig config state = state { scene = config }
 
 -- | Apply a scene configuration with transition matrix lookup
@@ -217,12 +225,12 @@ applySceneConfig config state = state { scene = config }
 -- |   runSimulation
 -- |   H.modify_ _ { currentScene = ModuleTree }
 -- | ```
-applySceneWithTransition :: forall scene action id nodeData attrs model.
+applySceneWithTransition :: forall scene action id nodeData linkRow attrs model.
   Ord scene =>
   scene ->
-  Scene.SimSceneConfig nodeData attrs ->
-  SimulationComponentState scene action id nodeData attrs model ->
-  SimulationComponentState scene action id nodeData attrs model
+  Scene.SimSceneConfig nodeData id linkRow attrs ->
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
+  SimulationComponentState scene action id nodeData linkRow attrs model
 applySceneWithTransition targetScene baseConfig state =
   let transitionSpec = M.lookup (Tuple state.currentScene targetScene) state.transitionMatrix
       config = baseConfig { transitionConfig = transitionSpec }
@@ -233,66 +241,66 @@ applySceneWithTransition targetScene baseConfig state =
 -- ============================================================================
 
 -- | Set which nodes to display
-setChooseNodes :: forall scene action id nodeData attrs model.
+setChooseNodes :: forall scene action id nodeData linkRow attrs model.
   (SimulationNode nodeData -> Boolean) ->
-  SimulationComponentState scene action id nodeData attrs model ->
-  SimulationComponentState scene action id nodeData attrs model
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
+  SimulationComponentState scene action id nodeData linkRow attrs model
 setChooseNodes fn = updateScene (\s -> s { chooseNodes = fn })
 
 -- | Set which links to render
-setLinksShown :: forall scene action id nodeData attrs model.
-  (D3Link_Unswizzled -> Boolean) ->
-  SimulationComponentState scene action id nodeData attrs model ->
-  SimulationComponentState scene action id nodeData attrs model
+setLinksShown :: forall scene action id nodeData linkRow attrs model.
+  (Link id linkRow -> Boolean) ->
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
+  SimulationComponentState scene action id nodeData linkRow attrs model
 setLinksShown fn = updateScene (\s -> s { linksShown = fn })
 
 -- | Set which links exert force
-setLinksActive :: forall scene action id nodeData attrs model.
-  (Datum_ -> Boolean) ->
-  SimulationComponentState scene action id nodeData attrs model ->
-  SimulationComponentState scene action id nodeData attrs model
+setLinksActive :: forall scene action id nodeData linkRow attrs model.
+  (Link id linkRow -> Boolean) ->
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
+  SimulationComponentState scene action id nodeData linkRow attrs model
 setLinksActive fn = updateScene (\s -> s { linksActive = fn })
 
 -- | Set which forces are active
-setActiveForces :: forall scene action id nodeData attrs model.
+setActiveForces :: forall scene action id nodeData linkRow attrs model.
   Set Label ->
-  SimulationComponentState scene action id nodeData attrs model ->
-  SimulationComponentState scene action id nodeData attrs model
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
+  SimulationComponentState scene action id nodeData linkRow attrs model
 setActiveForces forces = updateScene (\s -> s { activeForces = forces })
 
 -- | Set CSS class for current scene
-setCssClass :: forall scene action id nodeData attrs model.
+setCssClass :: forall scene action id nodeData linkRow attrs model.
   String ->
-  SimulationComponentState scene action id nodeData attrs model ->
-  SimulationComponentState scene action id nodeData attrs model
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
+  SimulationComponentState scene action id nodeData linkRow attrs model
 setCssClass css = updateScene (\s -> s { cssClass = css })
 
 -- | Set scene attributes (visual styling)
-setSceneAttributes :: forall scene action id nodeData attrs model.
+setSceneAttributes :: forall scene action id nodeData linkRow attrs model.
   attrs ->
-  SimulationComponentState scene action id nodeData attrs model ->
-  SimulationComponentState scene action id nodeData attrs model
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
+  SimulationComponentState scene action id nodeData linkRow attrs model
 setSceneAttributes attrs = updateScene (\s -> s { attributes = attrs })
 
 -- | Set node initializer functions (positioning, pinning, etc.)
-setNodeInitializers :: forall scene action id nodeData attrs model.
+setNodeInitializers :: forall scene action id nodeData linkRow attrs model.
   Array (Array (SimulationNode nodeData) -> Array (SimulationNode nodeData)) ->
-  SimulationComponentState scene action id nodeData attrs model ->
-  SimulationComponentState scene action id nodeData attrs model
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
+  SimulationComponentState scene action id nodeData linkRow attrs model
 setNodeInitializers fns = updateScene (\s -> s { nodeInitializerFunctions = fns })
 
 -- | Set transition configuration for scene
-setTransitionConfig :: forall scene action id nodeData attrs model.
+setTransitionConfig :: forall scene action id nodeData linkRow attrs model.
   Maybe Scene.TransitionSpec ->
-  SimulationComponentState scene action id nodeData attrs model ->
-  SimulationComponentState scene action id nodeData attrs model
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
+  SimulationComponentState scene action id nodeData linkRow attrs model
 setTransitionConfig config = updateScene (\s -> s { transitionConfig = config })
 
 -- | Toggle a force on/off
-toggleForce :: forall scene action id nodeData attrs model.
+toggleForce :: forall scene action id nodeData linkRow attrs model.
   Label ->
-  SimulationComponentState scene action id nodeData attrs model ->
-  SimulationComponentState scene action id nodeData attrs model
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
+  SimulationComponentState scene action id nodeData linkRow attrs model
 toggleForce label = updateScene \s -> s {
   activeForces = if Set.member label s.activeForces
                  then Set.delete label s.activeForces
@@ -304,39 +312,39 @@ toggleForce label = updateScene \s -> s {
 -- ============================================================================
 
 -- | Get nodes from model
-getModelNodes :: forall scene action id nodeData attrs model nodes.
+getModelNodes :: forall scene action id nodeData linkRow attrs model nodes.
   { nodes :: nodes | model } ->
-  SimulationComponentState scene action id nodeData attrs { nodes :: nodes | model } ->
+  SimulationComponentState scene action id nodeData linkRow attrs { nodes :: nodes | model } ->
   nodes
 getModelNodes default state = case state.model of
   Just m -> m.nodes
   Nothing -> default.nodes
 
 -- | Get links from model
-getModelLinks :: forall scene action id nodeData attrs model links.
+getModelLinks :: forall scene action id nodeData linkRow attrs model links.
   { links :: links | model } ->
-  SimulationComponentState scene action id nodeData attrs { links :: links | model } ->
+  SimulationComponentState scene action id nodeData linkRow attrs { links :: links | model } ->
   links
 getModelLinks default state = case state.model of
   Just m -> m.links
   Nothing -> default.links
 
 -- | Get nodes from staging
-getStagingNodes :: forall scene action id nodeData attrs model nodes.
-  SimulationComponentState scene action id nodeData attrs model ->
+getStagingNodes :: forall scene action id nodeData linkRow attrs model.
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
   Array (SimulationNode nodeData)
 getStagingNodes state = state.staging.rawdata.nodes
 
 -- | Get links from staging
-getStagingLinks :: forall scene action id nodeData attrs model.
-  SimulationComponentState scene action id nodeData attrs model ->
-  Array D3Link_Unswizzled
+getStagingLinks :: forall scene action id nodeData linkRow attrs model.
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
+  Array (Link id linkRow)
 getStagingLinks state = state.staging.rawdata.links
 
 -- | Get link filter from staging
-getStagingLinkFilter :: forall scene action id nodeData attrs model.
-  SimulationComponentState scene action id nodeData attrs model ->
-  (Datum_ -> Boolean)
+getStagingLinkFilter :: forall scene action id nodeData linkRow attrs model.
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
+  (Link id linkRow -> Boolean)
 getStagingLinkFilter state = state.staging.linksWithForce
 
 -- ============================================================================
@@ -344,26 +352,26 @@ getStagingLinkFilter state = state.staging.linksWithForce
 -- ============================================================================
 
 -- | Set nodes in staging area
-setStagingNodes :: forall scene action id nodeData attrs model.
+setStagingNodes :: forall scene action id nodeData linkRow attrs model.
   Array (SimulationNode nodeData) ->
-  SimulationComponentState scene action id nodeData attrs model ->
-  SimulationComponentState scene action id nodeData attrs model
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
+  SimulationComponentState scene action id nodeData linkRow attrs model
 setStagingNodes nodes state =
   state { staging = state.staging { rawdata = state.staging.rawdata { nodes = nodes } } }
 
 -- | Set links in staging area
-setStagingLinks :: forall scene action id nodeData attrs model.
-  Array D3Link_Unswizzled ->
-  SimulationComponentState scene action id nodeData attrs model ->
-  SimulationComponentState scene action id nodeData attrs model
+setStagingLinks :: forall scene action id nodeData linkRow attrs model.
+  Array (Link id linkRow) ->
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
+  SimulationComponentState scene action id nodeData linkRow attrs model
 setStagingLinks links state =
   state { staging = state.staging { rawdata = state.staging.rawdata { links = links } } }
 
 -- | Set link filter in staging area
-setStagingLinkFilter :: forall scene action id nodeData attrs model.
-  (Datum_ -> Boolean) ->
-  SimulationComponentState scene action id nodeData attrs model ->
-  SimulationComponentState scene action id nodeData attrs model
+setStagingLinkFilter :: forall scene action id nodeData linkRow attrs model.
+  (Link id linkRow -> Boolean) ->
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
+  SimulationComponentState scene action id nodeData linkRow attrs model
 setStagingLinkFilter fn state =
   state { staging = state.staging { linksWithForce = fn } }
 
@@ -402,14 +410,14 @@ setStagingLinkFilter fn state =
 
 -- | Tag nodes matching a predicate
 -- | Tags accumulate - calling multiple times adds more tags
-tagNodes :: forall scene action id nodeData row attrs model.
+tagNodes :: forall scene action id nodeData row linkRow attrs model.
   Ord id =>
   (SimulationNode (id :: id | row) -> id) ->  -- ID extractor function
   String ->
   (SimulationNode (id :: id | row) -> Boolean) ->
   Array (SimulationNode (id :: id | row)) ->
-  SimulationComponentState scene action id (id :: id | row) attrs model ->
-  SimulationComponentState scene action id (id :: id | row) attrs model
+  SimulationComponentState scene action id (id :: id | row) linkRow attrs model ->
+  SimulationComponentState scene action id (id :: id | row) linkRow attrs model
 tagNodes getId label predicate nodes state =
   let newTags = foldl (\acc node ->
         if predicate node
@@ -424,13 +432,13 @@ tagNodes getId label predicate nodes state =
 
 -- | Remove a specific tag from nodes
 -- | If a node has no tags remaining, it's removed from the map
-untagNodes :: forall scene action id nodeData row attrs model.
+untagNodes :: forall scene action id nodeData row linkRow attrs model.
   Ord id =>
   (SimulationNode (id :: id | row) -> id) ->  -- ID extractor function
   String ->
   Array (SimulationNode (id :: id | row)) ->
-  SimulationComponentState scene action id (id :: id | row) attrs model ->
-  SimulationComponentState scene action id (id :: id | row) attrs model
+  SimulationComponentState scene action id (id :: id | row) linkRow attrs model ->
+  SimulationComponentState scene action id (id :: id | row) linkRow attrs model
 untagNodes getId label nodes state =
   let nodeIds = Set.fromFoldable $ getId <$> nodes
       newTags = M.mapMaybeWithKey (\id tags ->
@@ -442,11 +450,11 @@ untagNodes getId label nodes state =
   in state { tags = newTags }
 
 -- | Clear a specific tag from all nodes
-clearTag :: forall scene action id nodeData attrs model.
+clearTag :: forall scene action id nodeData linkRow attrs model.
   Ord id =>
   String ->
-  SimulationComponentState scene action id nodeData attrs model ->
-  SimulationComponentState scene action id nodeData attrs model
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
+  SimulationComponentState scene action id nodeData linkRow attrs model
 clearTag label state =
   let newTags = M.mapMaybe (\tags ->
         let tags' = Set.delete label tags
@@ -455,25 +463,25 @@ clearTag label state =
   in state { tags = newTags }
 
 -- | Clear all tags from all nodes
-clearAllTags :: forall scene action id nodeData attrs model.
-  SimulationComponentState scene action id nodeData attrs model ->
-  SimulationComponentState scene action id nodeData attrs model
+clearAllTags :: forall scene action id nodeData linkRow attrs model.
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
+  SimulationComponentState scene action id nodeData linkRow attrs model
 clearAllTags state = state { tags = M.empty }
 
 -- | Get all tags for a specific node
-getNodeTags :: forall scene action id nodeData attrs model.
+getNodeTags :: forall scene action id nodeData linkRow attrs model.
   Ord id =>
   id ->
-  SimulationComponentState scene action id nodeData attrs model ->
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
   Set String
 getNodeTags nodeId state = fromMaybe Set.empty $ M.lookup nodeId state.tags
 
 -- | Check if a node has a specific tag
-nodeHasTag :: forall scene action id nodeData attrs model.
+nodeHasTag :: forall scene action id nodeData linkRow attrs model.
   Ord id =>
   String ->
   id ->
-  SimulationComponentState scene action id nodeData attrs model ->
+  SimulationComponentState scene action id nodeData linkRow attrs model ->
   Boolean
 nodeHasTag label nodeId state =
   case M.lookup nodeId state.tags of

@@ -12,8 +12,8 @@ module D3.Viz.LesMisGUPV2 where
 import Prelude
 
 import Control.Monad.State (get)
-import D3.Viz.LesMiserables.Model (LesMisRawModel, LesMisSimNode)
-import PSD3.Data.Node (D3Link_Unswizzled)
+import D3.Viz.LesMiserables.Model (LesMisRawModel, LesMisSimNode, LesMisNodeRow, LesMisLinkRow, LesMisLink)
+import PSD3.Data.Node (SwizzledLink)
 import Data.Array as Array
 import Data.Int (toNumber, floor)
 import Data.Map as Map
@@ -24,7 +24,6 @@ import Data.Number (sqrt, cos, sin, pi, ceil, floor, (%)) as Number
 import Data.Tuple (Tuple(..))
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
-import PSD3.Data.Node (D3Link_Swizzled)
 import PSD3.Internal.Simulation.Types (Force)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
 import PSD3.Internal.FFI (keyIsID_)
@@ -56,7 +55,10 @@ foreign import transitionToCachedPositions_ :: forall a b. String -> String -> S
 
 -- | Indexed link for data join
 -- | We keep the index for array operations, but use source/target IDs for equality
-newtype IndexedLink = IndexedLink { index :: Int, link :: D3Link_Swizzled }
+-- | Swizzled link type alias for LesMis
+type LesMisSwizzledLink = SwizzledLink LesMisNodeRow LesMisLinkRow
+
+newtype IndexedLink = IndexedLink { index :: Int, link :: LesMisSwizzledLink }
 
 instance Eq IndexedLink where
   eq (IndexedLink a) (IndexedLink b) =
@@ -439,7 +441,7 @@ filterByGroup minGroup = do
 -- | should ideally be hidden behind a more declarative API.
 updateForceGraph :: forall row.
   Array LesMisSimNode ->
-  Array D3Link_Swizzled ->
+  Array LesMisSwizzledLink ->
   D3v2SimM row LesMisSimNode Unit
 updateForceGraph nodesInSim linksInSim = do
   log $ "updateForceGraph: " <> show (Array.length nodesInSim) <> " nodes, " <> show (Array.length linksInSim) <> " links"
@@ -518,7 +520,7 @@ updateForceGraph nodesInSim linksInSim = do
 -- | Now simplified to just: filter data, update simulation, call updateForceGraph
 filterByGroupWithOriginal :: forall row.
   Int ->
-  { nodes :: Array LesMisSimNode, links :: Array D3Link_Unswizzled } ->
+  { nodes :: Array LesMisSimNode, links :: Array LesMisLink } ->
   D3v2SimM row LesMisSimNode Unit
 filterByGroupWithOriginal minGroup originalGraph = do
   log $ "=== filterByGroupWithOriginal: minGroup = " <> show minGroup <> " ==="

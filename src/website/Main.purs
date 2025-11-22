@@ -413,8 +413,10 @@ handleAction = case _ of
 
   RouteChanged maybeRoute -> do
     -- When route changes (initial load, back/forward, or manual navigation)
+    let _ = spy "RouteChanged" maybeRoute
     case maybeRoute of
       Just route -> do
+        let _ = spy "Updating currentRoute to" route
         H.modify_ _ { currentRoute = route }
       Nothing -> H.modify_ _ { currentRoute = NotFound } -- Fallback if route doesn't match
 

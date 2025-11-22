@@ -26,7 +26,8 @@ import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import Partial.Unsafe (unsafePartial, unsafeCrashWith)
-import PSD3.Data.Node (D3Link_Swizzled)
+import PSD3.Data.Node (SwizzledLink)
+import D3.Viz.LesMiserables.Model (LesMisNodeRow, LesMisLinkRow)
 import PSD3.Internal.FFI (keyIsID_, linksForceName_)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
 import PSD3.Internal.Simulation.Types (Force, ForceType(..), RegularForceType(..), allNodes, initialSimulationState)
@@ -43,8 +44,11 @@ import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 import Web.DOM.Element (Element)
 
+-- | Swizzled link type alias for LesMis
+type LesMisSwizzledLink = SwizzledLink LesMisNodeRow LesMisLinkRow
+
 -- | Indexed link for data join (links don't have Ord instance, so we use index)
-newtype IndexedLink = IndexedLink { index :: Int, link :: D3Link_Swizzled }
+newtype IndexedLink = IndexedLink { index :: Int, link :: LesMisSwizzledLink }
 
 instance Eq IndexedLink where
   eq (IndexedLink a) (IndexedLink b) = a.index == b.index

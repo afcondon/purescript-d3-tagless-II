@@ -52,3 +52,17 @@ export function offsetX(event) {
 export function offsetY(event) {
   return event.offsetY;
 }
+
+// ============================================================================
+// Container clearing
+// ============================================================================
+
+// Clear all children from an element selected by CSS selector
+export function clearElement_(selector) {
+  return function() {
+    const el = document.querySelector(selector);
+    if (el) {
+      el.innerHTML = '';
+    }
+  };
+}

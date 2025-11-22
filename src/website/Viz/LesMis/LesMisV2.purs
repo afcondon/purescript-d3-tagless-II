@@ -19,7 +19,8 @@ import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
-import PSD3.Data.Node (D3Link_Swizzled, SimulationNode)
+import PSD3.Data.Node (SwizzledLink, SimulationNode)
+import D3.Viz.LesMiserables.Model (LesMisNodeRow, LesMisLinkRow)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Force)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
 import PSD3.Internal.FFI (keyIsID_)
@@ -35,8 +36,11 @@ import Data.Int (toNumber)
 import Web.DOM.Element (Element)
 import Data.Array as Array
 
+-- | Swizzled link type alias for LesMis
+type LesMisSwizzledLink = SwizzledLink LesMisNodeRow LesMisLinkRow
+
 -- | Indexed link for data join (links don't have Ord instance, so we use index)
-newtype IndexedLink = IndexedLink { index :: Int, link :: D3Link_Swizzled }
+newtype IndexedLink = IndexedLink { index :: Int, link :: LesMisSwizzledLink }
 
 instance Eq IndexedLink where
   eq (IndexedLink a) (IndexedLink b) = a.index == b.index

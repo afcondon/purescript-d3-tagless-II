@@ -3,9 +3,9 @@ module D3.Viz.Spago.Draw where
 import Prelude
 
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, svgAttrs)
+import D3.Viz.Spago.Files (SpagoLink)
 import D3.Viz.Spago.Model (SpagoSimNode)
 import D3.Viz.Spago.Render (spagoRenderCallbacks)
-import PSD3.Data.Node (D3Link_Unswizzled)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.FFI (keyIsID_)
 import PSD3.Internal.Types (Datum_)
@@ -82,12 +82,12 @@ updateSimulation :: forall m.
   , links :: D3v2Selection_ SEmpty Element SpagoSimNode
   } ->
   { allNodes :: Array SpagoSimNode                                         -- FULL dataset
-  , allLinks :: Array D3Link_Unswizzled                                   -- FULL dataset
+  , allLinks :: Array SpagoLink                                            -- FULL dataset (typed!)
   , nodeFilter :: SpagoSimNode -> Boolean                                 -- Which nodes to show
-  , linkFilter :: Maybe (D3Link_Unswizzled -> Boolean)                    -- Optional visual filtering (e.g., hide dev dependencies)
+  , linkFilter :: Maybe (SpagoLink -> Boolean)                             -- Optional visual filtering (e.g., hide dev dependencies)
   , nodeInitializers :: Array (Array SpagoSimNode -> Array SpagoSimNode)  -- Tree layout, grid, pinning, etc.
   , activeForces :: Set Label
-  , linksWithForce :: Datum_ -> Boolean
+  , linksWithForce :: SpagoLink -> Boolean                                 -- Which links exert force (now typed!)
   } ->
   SpagoSceneAttributes ->
   m Unit

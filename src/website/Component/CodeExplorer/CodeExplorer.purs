@@ -38,11 +38,12 @@ import D3.Viz.Spago.Files (NodeType(..))
 import D3.Viz.Spago.GitMetrics (loadGitMetrics_, ColorByOption(..))
 import D3.Viz.Spago.GitReplay (loadTimeline_, startReplay_, stopReplay_, resetReplay_, setUpdateCallback_)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage, isPackageOrVisibleModule)
-import Data.Array ((:), filter)
+import Data.Array ((:), filter, mapMaybe)
 import Data.Either (Either(..))
-import Data.Foldable (foldl, foldr)
+import Data.Foldable (foldl, foldr, maximum)
 import Data.Map as Map
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Nullable (toMaybe) as N
 import Data.Set as Set
 import Data.String as String
 import Data.Tuple (Tuple(..))
@@ -60,7 +61,7 @@ import PSD3.CodeExplorer.Actions (Action(..), FilterData(..), Scene(..), StyleCh
 import PSD3.CodeExplorer.Data (readModelData)
 import PSD3.CodeExplorer.Forces (forceLibrary)
 import PSD3.CodeExplorer.HTML (render)
-import PSD3.CodeExplorer.Scenes (horizontalTreeScene, layerSwarmScene, packageGraphScene, packageGridScene, radialTreeScene, verticalTreeScene)
+import PSD3.CodeExplorer.Scenes (horizontalTreeScene, layerSwarmScene, packageGraphScene, packageGridScene, radialTreeScene, verticalTreeScene, treeRevelationScene)
 import PSD3.CodeExplorer.State (State, TransitionMatrix, applySceneConfig, applySceneWithTransition, clearAllTags, getModelLinks, getModelNodes, getSelections, initialScene, setChooseNodes, setCssClass, setLinksActive, setLinksShown, setSceneAttributes, tagNodes, toggleForce, updateScene)
 import PSD3.Data.Tree (TreeLayout(..))
 import PSD3.Internal.Simulation.Types (initialSimulationState)
@@ -148,6 +149,8 @@ component = H.mkComponent
     , transitionListener: Nothing
     , tags: Map.empty
     , showWelcome: true
+    , revelationStep: 0
+    , maxTreeDepth: 0  -- Calculated when model loads
     }
 
 -- | Main action handler - processes all user interactions and internal events
@@ -161,6 +164,14 @@ handleAction = case _ of
     -- 1. Load model data from JSON files (async)
     (maybeModel :: Maybe SpagoModel) <- H.liftAff readModelData
     H.modify_ _ { model = maybeModel }
+
+    -- 1a. Calculate max tree depth for revelation slider
+    let maxDepth = case maybeModel of
+          Nothing -> 0
+          Just model ->
+            let depths = mapMaybe (\n -> N.toMaybe n.treeDepth) model.nodes
+            in fromMaybe 0 (maximum depths)
+    H.modify_ _ { maxTreeDepth = maxDepth }
 
     -- 1b. Load git metrics for color-by-metric feature (fire and forget)
     liftEffect loadGitMetrics_
@@ -192,7 +203,11 @@ handleAction = case _ of
     void $ H.subscribe transEmitter  -- Subscribe Halogen to transition events
     H.modify_ _ { transitionListener = Just transListener }
 
-    pure unit
+    -- 5. Apply tree revelation scene at step 0 to show initial package view
+    state' <- H.get
+    let sceneConfig = treeRevelationScene 0 state'.maxTreeDepth
+    H.modify_ $ applySceneConfig sceneConfig
+    runSimulation
 
   Finalize -> pure unit
 
@@ -344,6 +359,14 @@ handleAction = case _ of
 
   ReplayTick -> do
     -- Re-render with current replay state
+    runSimulation
+
+  SetRevelationStep step -> do
+    -- Update revelation step and apply tree revelation scene
+    state <- H.get
+    H.modify_ _ { revelationStep = step }
+    let sceneConfig = treeRevelationScene step state.maxTreeDepth
+    H.modify_ $ applySceneConfig sceneConfig
     runSimulation
 
 -- | The core simulation orchestrator - bridges Halogen state to D3 rendering

@@ -10,7 +10,7 @@ module D3.Viz.LesMis.LesMisGUP where
 
 import Prelude
 
-import D3.Viz.LesMiserables.Model (LesMisNodeRow, LesMisRawModel, LesMisSimNode)
+import D3.Viz.LesMiserables.Model (LesMisNodeRow, LesMisRawModel, LesMisSimNode, LesMisLinkRow, LesMisLink)
 import D3.Viz.LesMis.LesMisRenderCallbacks (LesMisAttributes, lesMisRenderCallbacks)
 import D3.Viz.LesMis.LesMisScenes (fullGraphScene, filteredGraphScene, gridScene, phylotaxisScene)
 import Data.Map as Map
@@ -18,7 +18,7 @@ import Data.Maybe (Maybe(..))
 import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Effect.Class (liftEffect)
-import PSD3.Data.Node (D3Link_Swizzled, D3Link_Unswizzled)
+import PSD3.Data.Node (SwizzledLink)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.FFI (keyIsID_)
 import PSD3.Internal.Simulation.Types (Force)
@@ -35,16 +35,19 @@ import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 import Web.DOM.Element (Element)
 
+-- | Swizzled link type alias for LesMis
+type LesMisSwizzledLink = SwizzledLink LesMisNodeRow LesMisLinkRow
+
 -- | Update the LesMis simulation with a new scene configuration
 -- |
 -- | This is the visualization-specific wrapper around genericUpdateSimulation
 updateLesMisSimulation :: forall row.
   { nodes :: D3v2Selection_ SEmpty Element LesMisSimNode
-  , links :: D3v2Selection_ SEmpty Element D3Link_Swizzled
+  , links :: D3v2Selection_ SEmpty Element LesMisSwizzledLink
   } ->
   { allNodes :: Array LesMisSimNode
-  , allLinks :: Array D3Link_Unswizzled
-  , scene :: SimSceneConfig LesMisNodeRow LesMisAttributes
+  , allLinks :: Array LesMisLink
+  , scene :: SimSceneConfig LesMisNodeRow String LesMisLinkRow LesMisAttributes
   } ->
   D3v2SimM row LesMisSimNode Unit
 updateLesMisSimulation selections { allNodes, allLinks, scene } = do
@@ -75,7 +78,7 @@ drawLesMisGUP :: forall row.
   String ->
   D3v2SimM row LesMisSimNode
     { nodesGroup :: D3v2Selection_ SEmpty Element LesMisSimNode
-    , linksGroup :: D3v2Selection_ SEmpty Element D3Link_Swizzled
+    , linksGroup :: D3v2Selection_ SEmpty Element LesMisSwizzledLink
     , model :: LesMisRawModel
     }
 drawLesMisGUP forcesArray activeForces model containerSelector = do
@@ -159,7 +162,7 @@ drawLesMisGUP forcesArray activeForces model containerSelector = do
 -- | Switch to full graph scene
 switchToFullGraph :: forall row.
   { nodes :: D3v2Selection_ SEmpty Element LesMisSimNode
-  , links :: D3v2Selection_ SEmpty Element D3Link_Swizzled
+  , links :: D3v2Selection_ SEmpty Element LesMisSwizzledLink
   } ->
   LesMisRawModel ->
   Set.Set Label ->
@@ -174,7 +177,7 @@ switchToFullGraph selections model activeForces = do
 -- | Switch to filtered graph scene (only nodes with group >= minGroup)
 switchToFilteredGraph :: forall row.
   { nodes :: D3v2Selection_ SEmpty Element LesMisSimNode
-  , links :: D3v2Selection_ SEmpty Element D3Link_Swizzled
+  , links :: D3v2Selection_ SEmpty Element LesMisSwizzledLink
   } ->
   LesMisRawModel ->
   Int ->
@@ -190,7 +193,7 @@ switchToFilteredGraph selections model minGroup activeForces = do
 -- | Switch to grid layout scene
 switchToGrid :: forall row.
   { nodes :: D3v2Selection_ SEmpty Element LesMisSimNode
-  , links :: D3v2Selection_ SEmpty Element D3Link_Swizzled
+  , links :: D3v2Selection_ SEmpty Element LesMisSwizzledLink
   } ->
   LesMisRawModel ->
   Number ->
@@ -204,7 +207,7 @@ switchToGrid selections model gridSpacing = do
 -- | Switch to phylotaxis (sunflower spiral) layout scene
 switchToPhylotaxis :: forall row.
   { nodes :: D3v2Selection_ SEmpty Element LesMisSimNode
-  , links :: D3v2Selection_ SEmpty Element D3Link_Swizzled
+  , links :: D3v2Selection_ SEmpty Element LesMisSwizzledLink
   } ->
   LesMisRawModel ->
   D3v2SimM row LesMisSimNode Unit

@@ -15,7 +15,7 @@ import Prelude
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Types (Datum_)
 import PSD3.Internal.Simulation.Types (Force)
-import PSD3.Data.Node (D3Link_Unswizzled, SimulationNode)
+import PSD3.Data.Node (Link, SimulationNode)
 import PSD3v2.Transition.Scene (TransitionSpec, smoothTransition, smoothTransitionPinned, quickTransition, instantTransition)
 import Data.Map (Map)
 import Data.Map as Data.Map
@@ -31,7 +31,7 @@ import PSD3v2.Transition.Scene (EnterBehavior(..), ExitBehavior(..), UpdateBehav
 -- ============================================================================
 
 -- | Generic scene configuration for force-directed visualizations
--- | Parameterized over node data type (d) and attributes type (attrs)
+-- | Parameterized over node data type (a), link data type (linkRow), and attributes type (attrs)
 -- |
 -- | A "scene" is a complete specification of:
 -- | - Which data to show (node/link filter predicates)
@@ -42,11 +42,11 @@ import PSD3v2.Transition.Scene (EnterBehavior(..), ExitBehavior(..), UpdateBehav
 -- |
 -- | This pattern enables declarative scene switching - just provide a new
 -- | SimSceneConfig and call runSimulation to transition between visualizations.
-type SimSceneConfig a attrs =
+type SimSceneConfig a id linkRow attrs =
   { -- Data filtering
     chooseNodes :: SimulationNode a -> Boolean           -- Which nodes to display
-  , linksShown :: D3Link_Unswizzled -> Boolean              -- Which links to render
-  , linksActive :: Datum_ -> Boolean                         -- Which links exert force
+  , linksShown :: Link id linkRow -> Boolean             -- Which links to render
+  , linksActive :: Link id linkRow -> Boolean            -- Which links exert force
 
   -- Force configuration
   , activeForces :: Set Label                                -- Which forces from library to enable
@@ -65,7 +65,7 @@ type SimSceneConfig a attrs =
 -- | Create a default simulation scene config with minimal settings
 -- | Usage: `defaultSimScene forceLibrary customAttrs`
 -- | Note: a is the node data type, Force wraps SimulationNode a
-defaultSimScene :: forall a attrs. Map Label (Force (SimulationNode a)) -> attrs -> SimSceneConfig a attrs
+defaultSimScene :: forall a id linkRow attrs. Map Label (Force (SimulationNode a)) -> attrs -> SimSceneConfig a id linkRow attrs
 defaultSimScene forceLibrary attrs =
   { chooseNodes: const true                                  -- Show all nodes
   , linksShown: const false                                  -- Hide all links
@@ -78,45 +78,45 @@ defaultSimScene forceLibrary attrs =
   }
 
 -- | Modify node filter in a scene
-withNodeFilter :: forall a attrs.
+withNodeFilter :: forall a id linkRow attrs.
   (SimulationNode a -> Boolean) ->
-  SimSceneConfig a attrs ->
-  SimSceneConfig a attrs
+  SimSceneConfig a id linkRow attrs ->
+  SimSceneConfig a id linkRow attrs
 withNodeFilter pred scene = scene { chooseNodes = pred }
 
 -- | Modify link filter in a scene
-withLinkFilter :: forall d attrs.
-  (D3Link_Unswizzled -> Boolean) ->
-  SimSceneConfig d attrs ->
-  SimSceneConfig d attrs
+withLinkFilter :: forall a id linkRow attrs.
+  (Link id linkRow -> Boolean) ->
+  SimSceneConfig a id linkRow attrs ->
+  SimSceneConfig a id linkRow attrs
 withLinkFilter pred scene = scene { linksShown = pred }
 
 -- | Set active forces in a scene
-withForces :: forall d attrs.
+withForces :: forall a id linkRow attrs.
   Set Label ->
-  SimSceneConfig d attrs ->
-  SimSceneConfig d attrs
+  SimSceneConfig a id linkRow attrs ->
+  SimSceneConfig a id linkRow attrs
 withForces forces scene = scene { activeForces = forces }
 
 -- | Add a node initializer function
-withInitializer :: forall a attrs.
+withInitializer :: forall a id linkRow attrs.
   (Array (SimulationNode a) -> Array (SimulationNode a)) ->
-  SimSceneConfig a attrs ->
-  SimSceneConfig a attrs
+  SimSceneConfig a id linkRow attrs ->
+  SimSceneConfig a id linkRow attrs
 withInitializer fn scene =
   scene { nodeInitializerFunctions = scene.nodeInitializerFunctions <> [fn] }
 
 -- | Set CSS class for scene
-withCssClass :: forall d attrs.
+withCssClass :: forall a id linkRow attrs.
   String ->
-  SimSceneConfig d attrs ->
-  SimSceneConfig d attrs
+  SimSceneConfig a id linkRow attrs ->
+  SimSceneConfig a id linkRow attrs
 withCssClass cls scene = scene { cssClass = cls }
 
 -- | Set transition config for scene
 -- | Use `Nothing` for instant transitions, or `Just smoothTransition` for animated
-withTransition :: forall d attrs.
+withTransition :: forall a id linkRow attrs.
   Maybe TransitionSpec ->
-  SimSceneConfig d attrs ->
-  SimSceneConfig d attrs
+  SimSceneConfig a id linkRow attrs ->
+  SimSceneConfig a id linkRow attrs
 withTransition trans scene = scene { transitionConfig = trans }

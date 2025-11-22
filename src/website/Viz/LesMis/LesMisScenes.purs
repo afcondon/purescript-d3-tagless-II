@@ -2,7 +2,7 @@ module D3.Viz.LesMis.LesMisScenes where
 
 import Prelude
 
-import D3.Viz.LesMiserables.Model (LesMisNodeRow)
+import D3.Viz.LesMiserables.Model (LesMisNodeRow, LesMisLinkRow)
 import D3.Viz.LesMis.LesMisRenderCallbacks (LesMisAttributes, defaultLesMisAttributes)
 import Data.Array as Array
 import Data.Int (toNumber, floor)
@@ -90,7 +90,7 @@ unpinAllNodes nodes = nodes <#> \node -> node { fx = toNullable Nothing, fy = to
 -- |
 -- | Shows all nodes with standard force-directed physics.
 -- | Nodes start in phylotaxis positions but are unpinned so forces can move them.
-fullGraphScene :: Set.Set Label -> SimSceneConfig LesMisNodeRow LesMisAttributes
+fullGraphScene :: Set.Set Label -> SimSceneConfig LesMisNodeRow String LesMisLinkRow LesMisAttributes
 fullGraphScene activeForces = {
   chooseNodes: const true  -- Show all nodes
 , linksShown: const true   -- Show all links
@@ -106,7 +106,7 @@ fullGraphScene activeForces = {
 -- |
 -- | Useful for creating subsets of the graph.
 -- | Links are automatically filtered to only connect visible nodes.
-filteredGraphScene :: Int -> Set.Set Label -> SimSceneConfig LesMisNodeRow LesMisAttributes
+filteredGraphScene :: Int -> Set.Set Label -> SimSceneConfig LesMisNodeRow String LesMisLinkRow LesMisAttributes
 filteredGraphScene minGroup activeForces = {
   chooseNodes: \n -> n.group >= minGroup  -- Filter by group
 , linksShown: const true
@@ -122,7 +122,7 @@ filteredGraphScene minGroup activeForces = {
 -- |
 -- | Nodes are pinned in grid positions.
 -- | No forces are active (empty set).
-gridScene :: Number -> SimSceneConfig LesMisNodeRow LesMisAttributes
+gridScene :: Number -> SimSceneConfig LesMisNodeRow String LesMisLinkRow LesMisAttributes
 gridScene gridSpacing = {
   chooseNodes: const true
 , linksShown: const true
@@ -138,7 +138,7 @@ gridScene gridSpacing = {
 -- |
 -- | Nodes are pinned in phylotaxis (sunflower spiral) positions.
 -- | No forces are active.
-phylotaxisScene :: SimSceneConfig LesMisNodeRow LesMisAttributes
+phylotaxisScene :: SimSceneConfig LesMisNodeRow String LesMisLinkRow LesMisAttributes
 phylotaxisScene = {
   chooseNodes: const true
 , linksShown: const true

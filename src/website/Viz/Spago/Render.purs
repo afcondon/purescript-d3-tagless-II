@@ -3,7 +3,7 @@ module D3.Viz.Spago.Render where
 import Prelude
 
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, enterAttrs, updateAttrs, translateNode)
-import D3.Viz.Spago.Files (LinkType(..))
+import D3.Viz.Spago.Files (D3_Radius, LinkType(..), SpagoLinkData, SpagoNodeRow)
 import D3.Viz.Spago.Model (SpagoSimNode)
 import D3.Viz.Spago.Tooltip (showNodeTooltip, hideNodeTooltip)
 import D3.Viz.Spago.Highlight (highlightConnected_, clearHighlights_)
@@ -14,9 +14,8 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Effect (Effect)
 import Data.Set as Set
 import Data.String as String
-import PSD3.Data.Node (D3Link_Swizzled, NodeID)
+import PSD3.Data.Node (D3_FocusXY, SwizzledLink, NodeID)
 import PSD3.Internal.FFI (keyIsID_, simdrag_)
-import Unsafe.Coerce (unsafeCoerce)
 import PSD3v2.Attribute.Types (class_, d, fill, stroke, transform, Attribute)
 import PSD3v2.Behavior.Types (Behavior(..), simulationDrag, onClickWithDatum, onMouseEnterWithInfo, onMouseLeave)
 import PSD3v2.Capabilities.Selection (class SelectionM, append, appendChild, appendChildInheriting, on, openSelection, remove, setAttrs)
@@ -25,8 +24,8 @@ import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, SBoundInherits, SEmp
 import PSD3v2.Simulation.Update (RenderCallbacks)
 import Web.DOM.Element (Element)
 
--- Helper type for swizzled links (what we get after D3 swizzles them)
-type SpagoSwizzledLink = { source :: SpagoSimNode, target :: SpagoSimNode, linktype :: LinkType }
+-- | Type alias for Spago's swizzled link type (using the typed SwizzledLink from library)
+type SpagoSwizzledLink = SwizzledLink (SpagoNodeRow (D3_FocusXY (D3_Radius ()))) SpagoLinkData
 
 -- Helper functions for links (phantom type friendly)
 linkClass :: SpagoSwizzledLink -> String
@@ -64,7 +63,7 @@ makeTagClassesAttr (Just tagMap) = class_ \(d :: SpagoSimNode) ->
 spagoRenderCallbacks :: forall m.
   Monad m =>
   SelectionM D3v2Selection_ m =>
-  RenderCallbacks SpagoSceneAttributes D3v2Selection_ m SpagoSimNode
+  RenderCallbacks SpagoSceneAttributes D3v2Selection_ m (SpagoNodeRow (D3_FocusXY (D3_Radius ()))) SpagoLinkData
 spagoRenderCallbacks = {
   -- Node rendering: Group with Circle + Text children
   -- v2 approach: Create group, then use appendChildInheriting to add children
@@ -120,8 +119,8 @@ spagoRenderCallbacks = {
   -- Link rendering: Path elements (can morph between diagonal and bezier)
   , onLinkEnter: \enterSel attrs -> do
       linkEnter <- append Path [
-          class_ (\(link :: D3Link_Swizzled) -> linkClass (unsafeCoerce link))
-        , stroke (\(link :: D3Link_Swizzled) -> linkColor (unsafeCoerce link))
+          class_ (\(link :: SpagoSwizzledLink) -> linkClass link)
+        , stroke (\(link :: SpagoSwizzledLink) -> linkColor link)
         , fill "none"
         , class_ "enter"
         ] enterSel
@@ -139,8 +138,7 @@ spagoRenderCallbacks = {
       [ transform \(d :: SpagoSimNode) -> translateNode d ]
 
   , linkTickAttrs:
-      [ d \(link :: D3Link_Swizzled) ->
-          let l = unsafeCoerce link :: SpagoSwizzledLink
-          in linkDiagonal l.source.x l.source.y l.target.x l.target.y
+      [ d \(link :: SpagoSwizzledLink) ->
+          linkDiagonal link.source.x link.source.y link.target.x link.target.y
       ]
 }

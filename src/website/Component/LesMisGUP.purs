@@ -29,8 +29,8 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import D3.Viz.LesMis.LesMisGUP as LesMisGUP
 import D3.Viz.LesMiserables.File (readGraphFromFileContents)
-import D3.Viz.LesMiserables.Model (LesMisRawModel, LesMisSimNode)
-import PSD3.Data.Node (D3Link_Swizzled)
+import D3.Viz.LesMiserables.Model (LesMisRawModel, LesMisSimNode, LesMisNodeRow, LesMisLinkRow)
+import PSD3.Data.Node (SwizzledLink)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.FFI (linksForceName_)
 import PSD3.Internal.Simulation.Config as F
@@ -40,13 +40,16 @@ import PSD3v2.Interpreter.D3v2 as D3v2
 import PSD3v2.Selection.Types (SEmpty)
 import Web.DOM.Element (Element)
 
+-- | Swizzled link type alias for LesMis
+type LesMisSwizzledLink = SwizzledLink LesMisNodeRow LesMisLinkRow
+
 -- | Application state
 type State =
   { simulation :: D3SimulationState_ LesMisSimNode
   , model :: Maybe LesMisRawModel
   , selections :: Maybe
       { nodesGroup :: D3v2.D3v2Selection_ SEmpty Element LesMisSimNode
-      , linksGroup :: D3v2.D3v2Selection_ SEmpty Element D3Link_Swizzled
+      , linksGroup :: D3v2.D3v2Selection_ SEmpty Element LesMisSwizzledLink
       }
   , currentScene :: SceneType
   , autoCycling :: Boolean

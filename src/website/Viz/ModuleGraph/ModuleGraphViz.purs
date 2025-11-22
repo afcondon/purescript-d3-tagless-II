@@ -5,7 +5,7 @@ module D3.Viz.ModuleGraph.Viz where
 
 import Prelude
 
-import D3.Viz.ModuleGraph.Model (ModuleGraph, ModuleSimNode)
+import D3.Viz.ModuleGraph.Model (ModuleGraph, ModuleSimNode, ModuleGraphLinkRow)
 import Data.Array as Array
 import Data.Int (toNumber)
 import Data.Map as Map
@@ -14,7 +14,7 @@ import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Class (liftEffect)
-import PSD3.Data.Node (D3Link_Swizzled)
+import PSD3.Data.Node (SwizzledLink)
 import PSD3.Internal.FFI (keyIsID_)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
 import PSD3.Internal.Simulation.Config as F
@@ -32,8 +32,14 @@ import PSD3v2.VizTree.Tree as T
 import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 
+-- | Module graph node row type (for swizzled links)
+type ModuleGraphNodeRow = (id :: String, name :: String, group :: Int, index :: Int)
+
+-- | Swizzled link type for ModuleGraph
+type ModuleGraphSwizzledLink = SwizzledLink ModuleGraphNodeRow ModuleGraphLinkRow
+
 -- | Indexed link for data join
-newtype IndexedLink = IndexedLink { index :: Int, link :: D3Link_Swizzled }
+newtype IndexedLink = IndexedLink { index :: Int, link :: ModuleGraphSwizzledLink }
 
 instance Eq IndexedLink where
   eq (IndexedLink a) (IndexedLink b) = a.index == b.index
@@ -114,7 +120,7 @@ drawModuleGraph forcesArray activeForces graph containerSelector = do
     }
 
   -- Swizzle links (after init)
-  let linksSwizzled = unsafeCoerce linksInSim :: Array D3Link_Swizzled
+  let linksSwizzled = unsafeCoerce linksInSim :: Array ModuleGraphSwizzledLink
 
   -- Create indexed links for data join
   let indexedLinks = Array.mapWithIndex (\i link -> IndexedLink { index: i, link }) linksSwizzled

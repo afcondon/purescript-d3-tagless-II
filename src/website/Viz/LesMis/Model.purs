@@ -1,7 +1,7 @@
 module D3.Viz.LesMiserables.Model where
 
 import Prelude
-import PSD3.Data.Node (D3Link_Unswizzled, SimulationNode)
+import PSD3.Data.Node (SimulationNode)
 import Data.Nullable (Nullable, null)
 
 -- | ==========================================================================================
@@ -16,12 +16,17 @@ type LesMisNodeRow = (id :: String, group :: Int, sx :: Nullable Number, sy :: N
 -- | This matches D3's behavior: it EXTENDS your data with simulation fields
 type LesMisSimNode = SimulationNode LesMisNodeRow
 
--- | Link data (value represents connection strength)
-type LesMisLinkData = { value :: Number }
+-- | Row type for Les Misérables link data
+type LesMisLinkRow = ( value :: Number )
 
--- | Raw model (unswizzled links - source/target are string IDs)
+-- | Typed link for LesMis (String IDs, not Int)
+-- | Note: LesMis uses String node IDs, so we define our own link type
+-- | rather than using the library's Link which assumes NodeID = Int
+type LesMisLink = { source :: String, target :: String, value :: Number }
+
+-- | Raw model (typed links - source/target are string IDs)
 type LesMisRawModel =
-  { links :: Array D3Link_Unswizzled
+  { links :: Array LesMisLink
   , nodes :: Array LesMisSimNode
   }
 

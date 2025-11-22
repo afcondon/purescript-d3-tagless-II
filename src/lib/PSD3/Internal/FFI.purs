@@ -133,10 +133,10 @@ foreign import d3PreserveSimulationPositions_ ::
   (SimulationNode row -> key) ->
   Array (SimulationNode row)
 foreign import d3PreserveLinkReferences_ ::
-  forall d.
+  forall d id linkRow.
   D3Selection_ d ->
-  Array D3Link_Unswizzled ->
-  Array D3Link_Unswizzled
+  Array (Link id linkRow) ->
+  Array (Link id linkRow)
 
 foreign import getIDsFromNodes_ :: forall d id key. Array (SimulationNode d) -> (SimulationNode d -> key) -> Array id
 
@@ -144,22 +144,23 @@ foreign import getNodes_ :: forall d.   D3Simulation_ -> Array (SimulationNode d
 foreign import setNodes_ :: forall d.   D3Simulation_ -> Array (SimulationNode d) -> Array (SimulationNode d)
 -- setLinks will do the swizzling AND prune any links that have source or target that is not in [nodes]
 foreign import setLinks_ ::
+  forall nodeData linkRow.
   D3Simulation_ ->
-  Array D3Link_Swizzled ->
+  Array (SwizzledLink nodeData linkRow) ->
   Unit
 foreign import swizzleLinks_ ::
-  forall d key.
-  Array D3Link_Unswizzled ->
-  Array (SimulationNode d) ->
-  (SimulationNode d -> key) ->
-  Array D3Link_Swizzled
+  forall id nodeData linkRow key.
+  Array (Link id linkRow) ->
+  Array (SimulationNode nodeData) ->
+  (SimulationNode nodeData -> key) ->
+  Array (SwizzledLink nodeData linkRow)
 
 foreign import getLinkID_              :: forall link key. (link -> key) -> link -> Index_
-foreign import getLinkIDs_             :: forall nodeData id key. (nodeData -> key) -> D3Link_Unswizzled -> { sourceID :: id, targetID :: id }
+foreign import getLinkIDs_             :: forall id linkRow. Link id linkRow -> { sourceID :: id, targetID :: id }
 foreign import unsetLinks_             :: D3Simulation_ -> D3Simulation_
 
-foreign import getLinksFromForce_      :: D3ForceHandle_ -> Array D3Link_Unswizzled
-foreign import getLinksFromSimulation_ :: D3Simulation_ -> Array D3Link_Swizzled
+foreign import getLinksFromForce_      :: forall id linkRow. D3ForceHandle_ -> Array (Link id linkRow)
+foreign import getLinksFromSimulation_ :: forall nodeData linkRow. D3Simulation_ -> Array (SwizzledLink nodeData linkRow)
 
 foreign import startSimulation_        :: D3Simulation_ -> Unit
 foreign import stopSimulation_         :: D3Simulation_ -> Unit

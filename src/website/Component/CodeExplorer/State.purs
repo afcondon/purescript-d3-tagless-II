@@ -3,8 +3,8 @@ module PSD3.CodeExplorer.State where
 import Prelude
 
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, clusterSceneAttributes)
-import D3.Viz.Spago.Files (D3_Radius, SpagoNodeRow)
-import PSD3.Data.Node (D3Link_Unswizzled, D3_FocusXY, NodeID)
+import D3.Viz.Spago.Files (D3_Radius, SpagoNodeRow, SpagoLinkData, SpagoLink)
+import PSD3.Data.Node (D3_FocusXY, NodeID)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_)
 import PSD3v2.Selection.Types (SEmpty)
@@ -35,14 +35,14 @@ import Type.Proxy (Proxy(..))
 
 -- | CodeExplorer state - specializes the generic SimulationComponentState
 -- | with Spago-specific types
-type State = SimState.SimulationComponentState Scene (Action SpagoSimNode) NodeID (SpagoNodeRow (D3_FocusXY (D3_Radius ()))) SpagoSceneAttributes SpagoModel
+type State = SimState.SimulationComponentState Scene (Action SpagoSimNode) NodeID (SpagoNodeRow (D3_FocusXY (D3_Radius ()))) SpagoLinkData SpagoSceneAttributes SpagoModel
 
 -- | Transition matrix type alias for convenience
 type TransitionMatrix = SimState.TransitionMatrix Scene
 
 -- | CodeExplorer's scene configuration - specialized version of library's SceneConfig
--- | Parameterized with Spago-specific node data row and attributes
-type SceneConfig = Scene.SimSceneConfig (SpagoNodeRow (D3_FocusXY (D3_Radius ()))) SpagoSceneAttributes
+-- | Parameterized with Spago-specific node data row, ID type, link row, and attributes
+type SceneConfig = Scene.SimSceneConfig (SpagoNodeRow (D3_FocusXY (D3_Radius ()))) NodeID SpagoLinkData SpagoSceneAttributes
 
 -- ============================================================================
 -- | Visualization-Specific Initialization
@@ -100,9 +100,9 @@ _activeForces :: Lens' State (Set Label)
 _activeForces = _scene <<< prop (Proxy :: Proxy "activeForces")
 _chooseNodes :: Lens' State (SpagoSimNode -> Boolean)
 _chooseNodes = _scene <<< prop (Proxy :: Proxy "chooseNodes")
-_linksShown :: Lens' State (D3Link_Unswizzled -> Boolean)
+_linksShown :: Lens' State (SpagoLink -> Boolean)
 _linksShown = _scene <<< prop (Proxy :: Proxy "linksShown")
-_linksActive :: Lens' State (Datum_ -> Boolean)
+_linksActive :: Lens' State (SpagoLink -> Boolean)
 _linksActive = _scene <<< prop (Proxy :: Proxy "linksActive")
 -- _sceneForces              = _scene <<< _forces
 _cssClass :: Lens' State String
@@ -127,7 +127,7 @@ _modelNodes = _model <<< _Just <<< _nodes
 _modelLinks :: forall p.
      Strong p
   => Choice p
-  => p (Array D3Link_Unswizzled) (Array D3Link_Unswizzled)
+  => p (Array SpagoLink) (Array SpagoLink)
   -> p State State
 _modelLinks = _model <<< _Just <<< _links
 
@@ -141,13 +141,13 @@ _stagingNodes = _staging <<< _rawdata <<< _nodes
 _stagingLinks :: forall p.
      Strong p
   => Choice p
-  => p (Array D3Link_Unswizzled) (Array D3Link_Unswizzled)
+  => p (Array SpagoLink) (Array SpagoLink)
   -> p State State
 _stagingLinks = _staging <<< _rawdata <<< _links
 
 _stagingLinkFilter :: forall p.
   Strong p =>
-  p (Datum_ -> Boolean) (Datum_ -> Boolean) ->
+  p (SpagoLink -> Boolean) (SpagoLink -> Boolean) ->
   p State State
 _stagingLinkFilter = _staging <<< _linksWithForce
 
@@ -176,10 +176,10 @@ applySceneWithTransition = SimState.applySceneWithTransition
 setChooseNodes :: (SpagoSimNode -> Boolean) -> State -> State
 setChooseNodes = SimState.setChooseNodes
 
-setLinksShown :: (D3Link_Unswizzled -> Boolean) -> State -> State
+setLinksShown :: (SpagoLink -> Boolean) -> State -> State
 setLinksShown = SimState.setLinksShown
 
-setLinksActive :: (Datum_ -> Boolean) -> State -> State
+setLinksActive :: (SpagoLink -> Boolean) -> State -> State
 setLinksActive = SimState.setLinksActive
 
 setActiveForces :: Set Label -> State -> State
@@ -206,7 +206,7 @@ getModelNodes state = case state.model of
   Just m -> m.nodes
   Nothing -> []
 
-getModelLinks :: State -> Array D3Link_Unswizzled
+getModelLinks :: State -> Array SpagoLink
 getModelLinks state = case state.model of
   Just m -> m.links
   Nothing -> []
@@ -214,10 +214,10 @@ getModelLinks state = case state.model of
 getStagingNodes :: State -> Array SpagoSimNode
 getStagingNodes = SimState.getStagingNodes
 
-getStagingLinks :: State -> Array D3Link_Unswizzled
+getStagingLinks :: State -> Array SpagoLink
 getStagingLinks = SimState.getStagingLinks
 
-getStagingLinkFilter :: State -> (Datum_ -> Boolean)
+getStagingLinkFilter :: State -> (SpagoLink -> Boolean)
 getStagingLinkFilter = SimState.getStagingLinkFilter
 
 -- | Get selections from staging, unwrapping Maybe for v2 API
@@ -237,10 +237,10 @@ getSelections state = case state.staging.selections.nodes, state.staging.selecti
 setStagingNodes :: Array SpagoSimNode -> State -> State
 setStagingNodes = SimState.setStagingNodes
 
-setStagingLinks :: Array D3Link_Unswizzled -> State -> State
+setStagingLinks :: Array SpagoLink -> State -> State
 setStagingLinks = SimState.setStagingLinks
 
-setStagingLinkFilter :: (Datum_ -> Boolean) -> State -> State
+setStagingLinkFilter :: (SpagoLink -> Boolean) -> State -> State
 setStagingLinkFilter = SimState.setStagingLinkFilter
 
 -- ============================================================================

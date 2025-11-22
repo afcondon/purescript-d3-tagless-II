@@ -164,6 +164,9 @@ instance SelectionM D3v2Selection_ D3v2M where
   remove (D3v2Selection_ exitingSelection) = D3v2M do
     Ops.remove exitingSelection
 
+  clear selector = D3v2M do
+    Ops.clear selector
+
   merge (D3v2Selection_ sel1) (D3v2Selection_ sel2) = D3v2M do
     result <- Ops.merge sel1 sel2
     pure $ D3v2Selection_ result
@@ -384,6 +387,9 @@ instance SelectionM D3v2Selection_ (D3v2SimM row d) where
 
   remove (D3v2Selection_ exiting) = liftEffect $
     Ops.remove exiting
+
+  clear selector = liftEffect $
+    Ops.clear selector
 
   selectAll tag (D3v2Selection_ parent) = liftEffect $ do
     selection <- Ops.selectAll tag parent

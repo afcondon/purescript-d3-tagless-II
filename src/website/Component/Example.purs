@@ -6,6 +6,7 @@ import CodeSnippets (getSnippet)
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
+import PSD3v2.Selection.Operations (clear) as Ops
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
@@ -47,6 +48,7 @@ type State =
 
 data Action
   = Initialize
+  | Receive String
 
 -- | Example page component
 component :: forall q o m. MonadAff m => H.Component q String o m
@@ -56,12 +58,19 @@ component = H.mkComponent
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
       , initialize = Just Initialize
+      , receive = Just <<< Receive
       }
   }
+
+-- | Clear the viz container before rendering new content
+clearVizContainer :: forall o m. MonadAff m => H.HalogenM State Action () o m Unit
+clearVizContainer = Ops.clear "#viz"
 
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
+    -- Clear any existing visualization first
+    clearVizContainer
     state <- H.get
     case state.exampleId of
       "three-little-circles" ->
@@ -89,6 +98,13 @@ handleAction = case _ of
       _ -> pure unit
     -- Highlight code blocks with Prism
     liftEffect Prism.highlightAll
+
+  Receive newExampleId -> do
+    state <- H.get
+    -- Only re-initialize if the example ID has changed
+    when (state.exampleId /= newExampleId) do
+      H.modify_ _ { exampleId = newExampleId }
+      handleAction Initialize
 
 -- | Example metadata
 type ExampleMeta =

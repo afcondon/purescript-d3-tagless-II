@@ -4,7 +4,7 @@ import Prelude
 
 import Affjax.ResponseFormat as ResponseFormat
 import Affjax.Web as AJAX
-import D3.Viz.ModuleGraph.Model (ModuleGraph, ModuleSimNode, SpagoModuleGraph, moduleGroup)
+import D3.Viz.ModuleGraph.Model (ModuleGraph, ModuleGraphLink, ModuleSimNode, SpagoModuleGraph, moduleGroup)
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
@@ -15,7 +15,6 @@ import Data.String as String
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Foreign.Object as Object
-import PSD3.Data.Node (D3Link_Unswizzled)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | Load and process the spago module graph, filtering to only local modules
@@ -76,7 +75,7 @@ makeNode index name =
   }
 
 -- | Create links from a module to its local dependencies
-makeLinks :: SpagoModuleGraph -> Set.Set String -> Int -> String -> Array D3Link_Unswizzled
+makeLinks :: SpagoModuleGraph -> Set.Set String -> Int -> String -> Array ModuleGraphLink
 makeLinks raw localModulesSet sourceIndex sourceName =
   case Object.lookup sourceName raw of
     Nothing -> []
@@ -84,7 +83,7 @@ makeLinks raw localModulesSet sourceIndex sourceName =
       let
         -- Filter dependencies to only local modules
         localDeps = Array.filter (\dep -> Set.member dep localModulesSet) node.depends
-        -- Create link records - will be coerced to D3Link_Unswizzled
-        makeLink target = unsafeCoerce { source: sourceName, target: target, value: 1.0 }
+        -- Create link records
+        makeLink target = { source: sourceName, target: target }
       in
         map makeLink localDeps

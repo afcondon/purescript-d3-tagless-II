@@ -18,21 +18,46 @@ import Type.Row (type (+))
 -- ============================================================================================================================
 -- | Links
 -- ============================================================================================================================
-type NodeID = Int -- REVIEW won't always be an Int, could be a String, but why complicate the types prematurely
 
--- | Opaque foreign types that distinguish swizzled from unswizzled links at compile time.
+-- | DEPRECATED: Use Link id r instead. Kept for backward compatibility.
+type NodeID = Int
+
+-- | Row-polymorphic link type parameterized by ID type (source of truth in PureScript)
 -- |
--- | **D3Link_Unswizzled**: Links where source/target are IDs (String, Int, etc.)
--- | - Used as INPUT to simulation init/update
--- | - Can be constructed from your data
--- | - Example: { source: "moduleA", target: "moduleB", id: "moduleA->moduleB" }
+-- | Links have required source/target fields with a configurable ID type.
+-- | User adds extra fields via row parameter.
+-- | This replaces the opaque D3Link_Unswizzled for type-safe link handling.
 -- |
--- | **D3Link_Swizzled**: Links where source/target are node object references
--- | - RETURNED from simulation init/update after swizzling
--- | - Used for rendering (accessing node positions via link.source.x, etc.)
--- | - Cannot be constructed manually - only created by D3 during swizzling
+-- | Example:
+-- | ```purescript
+-- | -- Spago uses Int IDs
+-- | type SpagoLinkRow = (linktype :: LinkType, inSim :: Boolean)
+-- | type SpagoLink = Link Int SpagoLinkRow
+-- | -- Expands to: { source :: Int, target :: Int, linktype :: LinkType, inSim :: Boolean }
 -- |
--- | The type system prevents you from passing the wrong form to functions that expect the other.
+-- | -- LesMis uses String IDs
+-- | type LesMisLink = Link String (value :: Number)
+-- | -- Expands to: { source :: String, target :: String, value :: Number }
+-- | ```
+type Link id r = { source :: id, target :: id | r }
+
+-- | Swizzled link where source/target are node object references
+-- |
+-- | After swizzling, links can access node positions via link.source.x, etc.
+-- | The nodeData parameter matches the SimulationNode's row parameter.
+-- |
+-- | Example:
+-- | ```purescript
+-- | type SpagoSwizzledLink = SwizzledLink SpagoNodeRow SpagoLinkRow
+-- | ```
+type SwizzledLink nodeData r =
+  { source :: SimulationNode nodeData
+  , target :: SimulationNode nodeData
+  | r
+  }
+
+-- | DEPRECATED: Opaque foreign types (kept temporarily for compatibility)
+-- | Migrate to Link r and SwizzledLink nodeData r
 foreign import data D3Link_Unswizzled :: Type
 foreign import data D3Link_Swizzled :: Type
 

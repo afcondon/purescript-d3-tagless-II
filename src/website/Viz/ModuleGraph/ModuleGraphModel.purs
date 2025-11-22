@@ -5,7 +5,6 @@ import Prelude
 import Data.Nullable (Nullable)
 import Data.String.CodeUnits as String
 import Foreign.Object (Object)
-import PSD3.Data.Node (D3Link_Unswizzled)
 
 -- | Raw module graph data from spago
 type SpagoModuleGraph = Object ModuleNode
@@ -29,10 +28,16 @@ type ModuleSimNode =
   , fy :: Nullable Number
   }
 
+-- | Link row type (empty for ModuleGraph - no additional fields)
+type ModuleGraphLinkRow = ()
+
+-- | Typed link for ModuleGraph (String IDs)
+type ModuleGraphLink = { source :: String, target :: String }
+
 -- | Processed graph ready for visualization
 type ModuleGraph =
   { nodes :: Array ModuleSimNode
-  , links :: Array D3Link_Unswizzled
+  , links :: Array ModuleGraphLink
   }
 
 -- | Determine group number based on module prefix

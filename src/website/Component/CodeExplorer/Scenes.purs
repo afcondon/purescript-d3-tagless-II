@@ -16,7 +16,7 @@ import Prelude
 
 import D3.Viz.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
 import D3.Viz.Spago.Files (isM2M_Tree_Link, isP2P_Link, isM2P_Link)
-import D3.Viz.Spago.Model (allNodes, fixNamedNodeTo, isPackage, isUsedModule, moduleNodesToContainerXY, packageNodesToGridXY, packagesNodesToPhyllotaxis, treeNodesToSwarmStart, treeNodesToTreeXY_H, treeNodesToTreeXY_R, treeNodesToTreeXY_V, unpinAllNodes)
+import D3.Viz.Spago.Model (allNodes, fixNamedNodeTo, isPackage, isUsedModule, moduleNodesToContainerXY, packageNodesToGridXY, packagesNodesToPhyllotaxis, pinnedPackagesToPhyllotaxis, treeNodesToSwarmStart, treeNodesToTreeXY_H, treeNodesToTreeXY_R, treeNodesToTreeXY_V, unpinAllNodes, nodesToRevelationXY)
 import PSD3.CodeExplorer.State (SceneConfig)
 import PSD3.Internal.FFI (linksForceName_)
 import PSD3v2.Simulation.Scene (smoothTransition)
@@ -112,3 +112,49 @@ verticalTreeScene = {
 , nodeInitializerFunctions: [ unpinAllNodes, treeNodesToTreeXY_V ]
 , transitionConfig: Just smoothTransition  -- Animated transition for pinned layout
 }
+
+-- | Tree Revelation Scene - Progressive reveal from grid to radial tree
+-- | Shows all nodes, with modules transitioning from grid (in packages) to tree positions
+-- | based on their depth and the current revelation step.
+-- |
+-- | Step 0: All modules in grid (packages at low opacity)
+-- | Step 1-N: Modules at depth <= step move to radial tree positions
+-- | Step N+1: Final state - packages fade out, tree relaxes to force layout
+-- |
+-- | @param step The current revelation step (0 to maxDepth+1)
+-- | @param maxDepth The maximum tree depth in the data
+treeRevelationScene :: Int -> Int -> SceneConfig
+treeRevelationScene step maxDepth
+  | step == 0 = {
+      -- Step 0: Phyllotaxis with pinned packages, modules clustered by forces
+      chooseNodes: allNodes
+    , linksShown: const false  -- No links at step 0
+    , linksActive: const false
+    , cssClass: "revelation step-0"
+    , attributes: clusterSceneAttributes
+    , activeForces: Set.fromFoldable [ "clusterx_M", "clustery_M", "collide2" ]  -- Module clustering forces
+    , nodeInitializerFunctions: [ unpinAllNodes, pinnedPackagesToPhyllotaxis, moduleNodesToContainerXY ]
+    , transitionConfig: Just smoothTransition
+    }
+  | step > maxDepth = {
+      -- Final step: Unpin and let force layout relax
+      chooseNodes: allNodes
+    , linksShown: isM2M_Tree_Link
+    , linksActive: const true
+    , cssClass: "revelation final"
+    , attributes: clusterSceneAttributes
+    , activeForces: Set.fromFoldable [ "center", "collide2", "charge2", linksForceName_ ]
+    , nodeInitializerFunctions: [ unpinAllNodes, packageNodesToGridXY, moduleNodesToContainerXY, treeNodesToTreeXY_R ]
+    , transitionConfig: Just smoothTransition
+    }
+  | otherwise = {
+      -- Steps 1-N: No simulation, just move newly revealed nodes to tree positions
+      chooseNodes: allNodes
+    , linksShown: isM2M_Tree_Link
+    , linksActive: const false  -- No link forces
+    , cssClass: "revelation"
+    , attributes: clusterSceneAttributes
+    , activeForces: Set.empty  -- NO forces - simulation effectively off
+    , nodeInitializerFunctions: [ nodesToRevelationXY step ]  -- Only modify newly revealed nodes
+    , transitionConfig: Nothing  -- No transition - avoid D3 interpolating all nodes to model positions
+    }

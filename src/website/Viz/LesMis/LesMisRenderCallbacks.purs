@@ -2,18 +2,22 @@ module D3.Viz.LesMis.LesMisRenderCallbacks where
 
 import Prelude
 
-import D3.Viz.LesMiserables.Model (LesMisSimNode)
+import D3.Viz.LesMiserables.Model (LesMisSimNode, LesMisNodeRow, LesMisLinkRow)
 import Data.Int (toNumber)
 import Data.Number (sqrt)
-import PSD3.Data.Node (D3Link_Swizzled)
+import PSD3.Data.Node (SwizzledLink)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
 import PSD3v2.Attribute.Types (Attribute, cx, cy, fill, radius, stroke, strokeWidth, x1, x2, y1, y2)
 import PSD3v2.Behavior.Types (Behavior(..), simulationDrag)
 import PSD3v2.Capabilities.Selection (class SelectionM, append, setAttrs, setAttrsExit, remove, on)
 import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, SBoundInherits, SPending, SExiting)
+
 import PSD3v2.Simulation.Update (RenderCallbacks)
 import Unsafe.Coerce (unsafeCoerce)
 import Web.DOM.Element (Element)
+
+-- | Type alias for LesMis swizzled links
+type LesMisSwizzledLink = SwizzledLink LesMisNodeRow LesMisLinkRow
 
 -- | Type alias for attributes passed to render callbacks
 -- | Can be extended with additional fields as needed
@@ -36,7 +40,7 @@ defaultLesMisAttributes = {}
 lesMisRenderCallbacks :: forall m sel.
   Monad m =>
   SelectionM sel m =>
-  RenderCallbacks LesMisAttributes sel m LesMisSimNode
+  RenderCallbacks LesMisAttributes sel m LesMisNodeRow LesMisLinkRow
 lesMisRenderCallbacks = {
   -- Node rendering: Simple circles
   onNodeEnter: \enterSel _attrs -> do
@@ -73,14 +77,14 @@ lesMisRenderCallbacks = {
   -- Link rendering: Simple lines
   , onLinkEnter: \enterSel _attrs ->
       append Line [
-        strokeWidth (\(il :: D3Link_Swizzled) -> sqrt (unsafeCoerce il).value :: Number)
-      , stroke (\(il :: D3Link_Swizzled) -> d3SchemeCategory10N_ (toNumber (unsafeCoerce il).target.group) :: String)
+        strokeWidth (\(il :: LesMisSwizzledLink) -> sqrt il.value)
+      , stroke (\(il :: LesMisSwizzledLink) -> d3SchemeCategory10N_ (toNumber il.target.group))
       ] enterSel
 
   , onLinkUpdate: \updateSel _attrs -> do
       -- Update link colors (in case target group changed)
       _ <- setAttrs [
-        stroke (\(il :: D3Link_Swizzled) -> d3SchemeCategory10N_ (toNumber (unsafeCoerce il).target.group) :: String)
+        stroke (\(il :: LesMisSwizzledLink) -> d3SchemeCategory10N_ (toNumber il.target.group))
       ] updateSel
       pure unit
 
@@ -95,9 +99,9 @@ lesMisRenderCallbacks = {
     ]
 
   , linkTickAttrs: [
-      x1 (\(il :: D3Link_Swizzled) -> (unsafeCoerce il).source.x :: Number)
-    , y1 (\(il :: D3Link_Swizzled) -> (unsafeCoerce il).source.y :: Number)
-    , x2 (\(il :: D3Link_Swizzled) -> (unsafeCoerce il).target.x :: Number)
-    , y2 (\(il :: D3Link_Swizzled) -> (unsafeCoerce il).target.y :: Number)
+      x1 (\(il :: LesMisSwizzledLink) -> il.source.x)
+    , y1 (\(il :: LesMisSwizzledLink) -> il.source.y)
+    , x2 (\(il :: LesMisSwizzledLink) -> il.target.x)
+    , y2 (\(il :: LesMisSwizzledLink) -> il.target.y)
     ]
 }

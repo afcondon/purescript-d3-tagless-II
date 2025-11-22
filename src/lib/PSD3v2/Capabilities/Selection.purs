@@ -14,6 +14,7 @@ module PSD3v2.Capabilities.Selection
   , setAttrs
   , setAttrsExit
   , remove
+  , clear
   , merge
   , on
   , renderTree
@@ -249,6 +250,20 @@ class Monad m <= SelectionM sel m | m -> sel where
   remove
     :: forall datum
      . sel SExiting Element datum
+    -> m Unit
+
+  -- | Clear all children from an element
+  -- |
+  -- | Selects the element and removes all its children.
+  -- | Useful for clearing a container before rendering new content.
+  -- |
+  -- | Example:
+  -- | ```purescript
+  -- | clear "#viz"
+  -- | svg <- appendChild SVG [...] container
+  -- | ```
+  clear
+    :: String  -- CSS selector
     -> m Unit
 
   -- | Merge two bound selections

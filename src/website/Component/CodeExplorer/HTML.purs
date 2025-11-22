@@ -128,6 +128,29 @@ renderSimControls state = do
           ]
         ]
 
+    , Format.subHeading_ [ HH.text "Tree Revelation" ]
+    , HH.div [ HP.classes [ HH.ClassName "control-group" ] ]
+        [ HH.input
+            [ HP.type_ HP.InputRange
+            , HP.id "revelation-slider"
+            , HP.class_ (H.ClassName "range-slider revelation-slider")
+            , HP.min 0.0
+            , HP.max (toNumber $ state.maxTreeDepth + 1)
+            , HP.step (Step 1.0)
+            , HP.value (show state.revelationStep)
+            , HP.disabled true  -- Read-only indicator
+            ]
+        , Format.caption_ [ HH.text ("Depth: " <> show state.revelationStep <> " / " <> show state.maxTreeDepth) ]
+        , Button.buttonGroup_
+            [ Button.buttonPrimaryLeft
+                [ HE.onClick $ const $ SetRevelationStep (max 0 (state.revelationStep - 1)) ]
+                [ HH.text "← Back" ]
+            , Button.buttonPrimaryRight
+                [ HE.onClick $ const $ SetRevelationStep (min (state.maxTreeDepth + 1) (state.revelationStep + 1)) ]
+                [ HH.text "Forward →" ]
+            ]
+        ]
+
     , Format.subHeading_ [ HH.text "Tagging (Demo)" ]
     , HH.div [ HP.classes [ HH.ClassName "control-group"]]
         [ Button.buttonGroup_

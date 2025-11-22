@@ -791,11 +791,11 @@
   };
   var clamp = function(dictOrd) {
     var min1 = min(dictOrd);
-    var max15 = max(dictOrd);
+    var max16 = max(dictOrd);
     return function(low2) {
       return function(hi) {
         return function(x47) {
-          return min1(hi)(max15(low2)(x47));
+          return min1(hi)(max16(low2)(x47));
         };
       };
     };
@@ -12242,17 +12242,17 @@
     return Finalize5;
   })();
   var Receive = /* @__PURE__ */ (function() {
-    function Receive2(value0, value1) {
+    function Receive3(value0, value1) {
       this.value0 = value0;
       this.value1 = value1;
     }
     ;
-    Receive2.create = function(value0) {
+    Receive3.create = function(value0) {
       return function(value1) {
-        return new Receive2(value0, value1);
+        return new Receive3(value0, value1);
       };
     };
-    return Receive2;
+    return Receive3;
   })();
   var Action2 = /* @__PURE__ */ (function() {
     function Action3(value0, value1) {
@@ -14302,12 +14302,12 @@
     if (!o) return new Hsl();
     if (o instanceof Hsl) return o;
     o = o.rgb();
-    var r = o.r / 255, g = o.g / 255, b10 = o.b / 255, min11 = Math.min(r, g, b10), max15 = Math.max(r, g, b10), h = NaN, s = max15 - min11, l = (max15 + min11) / 2;
+    var r = o.r / 255, g = o.g / 255, b10 = o.b / 255, min12 = Math.min(r, g, b10), max16 = Math.max(r, g, b10), h = NaN, s = max16 - min12, l = (max16 + min12) / 2;
     if (s) {
-      if (r === max15) h = (g - b10) / s + (g < b10) * 6;
-      else if (g === max15) h = (b10 - r) / s + 2;
+      if (r === max16) h = (g - b10) / s + (g < b10) * 6;
+      else if (g === max16) h = (b10 - r) / s + 2;
       else h = (r - g) / s + 4;
-      s /= l < 0.5 ? max15 + min11 : 2 - max15 - min11;
+      s /= l < 0.5 ? max16 + min12 : 2 - max16 - min12;
       h *= 60;
     } else {
       s = l > 0 && l < 1 ? 0 : h;
@@ -17564,7 +17564,7 @@
   var snippet_scatterPlot_content = 'scatterPlot :: Effect Unit\nscatterPlot = runD3v2M do\n  container <- select "#viz" :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  let dims = defaultDims\n  let iWidth = innerWidth dims\n  let iHeight = innerHeight dims\n\n  -- Calculate data extents\n  let xValues = map _.x scatterData\n  let yValues = map _.y scatterData\n  let minX = fromMaybe 0.0 $ minimum xValues\n  let maxX = fromMaybe 100.0 $ maximum xValues\n  let minY = fromMaybe 0.0 $ minimum yValues\n  let maxY = fromMaybe 100.0 $ maximum yValues\n\n  -- Simple linear scale functions\n  let xScale val = ((val - minX) / (maxX - minX)) * iWidth\n  let yScale val = iHeight - ((val - minY) / (maxY - minY)) * iHeight\n\n  -- Define the tree structure\n  let tree :: Tree Point\n      tree =\n        T.named SVG "svg"\n          [ width dims.width\n          , height dims.height\n          , viewBox ("0 0 " <> show dims.width <> " " <> show dims.height)\n          , class_ "scatter-plot-tree"\n          ]\n          `T.withChild`\n            (T.named Group "chartGroup"\n              [ class_ "chart-content"\n              , transform ("translate(" <> show dims.marginLeft <> "," <> show dims.marginTop <> ")")\n              ]\n              `T.withChild`\n                -- Data join for points\n                (joinData "points" "circle" scatterData $ \\point ->\n                  T.elem Circle\n                    [ cx (xScale point.x)\n                    , cy (yScale point.y)\n                    , radius 6.0\n                    , fill "#e74c3c"\n                    , opacity 0.7\n                    , class_ "point"\n                    ]\n                ))\n\n  -- Render the tree\n  selections <- renderTree container tree';
   var snippet_nestedElements_content = 'testNestedElements :: Effect Unit\ntestNestedElements = runD3v2M do\n  container <- select "#viz" :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  -- Define a tree with MULTI-LEVEL NESTING\n  -- This is the pattern: Group \u2192 (Circle + Text)\n  let tree :: Tree Unit\n      tree =\n        T.named SVG "svg"\n          [ width 600.0\n          , height 400.0\n          , viewBox "0 0 600 400"\n          , id_ "nested-example-svg"\n          ]\n          `T.withChild`\n            (T.named Group "mainGroup" [class_ "main-group"]\n              `T.withChildren`\n                -- Multiple node groups, each with Circle + Text\n                [ -- Node 1\n                  T.named Group "node1"\n                    [ class_ "node"\n                    , transform "translate(100, 100)"\n                    ]\n                    `T.withChildren`\n                      [ T.named Circle "node1Circle"\n                          [ cx 0.0, cy 0.0\n                          , radius 25.0\n                          , fill "steelblue"\n                          , stroke "white"\n                          , strokeWidth 2.0\n                          ]\n                      , T.named Text "node1Label"\n                          [ x 0.0, y 40.0\n                          , textContent "Node A"\n                          , textAnchor "middle"\n                          , fontSize 14.0\n                          ]\n                      ]\n\n                , -- Node 2\n                  T.named Group "node2"\n                    [ class_ "node"\n                    , transform "translate(300, 150)"\n                    ]\n                    `T.withChildren`\n                      [ T.named Circle "node2Circle"\n                          [ cx 0.0, cy 0.0\n                          , radius 20.0\n                          , fill "orange"\n                          , stroke "white"\n                          , strokeWidth 2.0\n                          ]\n                      , T.named Text "node2Label"\n                          [ x 0.0, y 35.0\n                          , textContent "Node B"\n                          , textAnchor "middle"\n                          , fontSize 14.0\n                          ]\n                      ]\n\n                , -- Node 3\n                  T.named Group "node3"\n                    [ class_ "node"\n                    , transform "translate(500, 100)"\n                    ]\n                    `T.withChildren`\n                      [ T.named Circle "node3Circle"\n                          [ cx 0.0, cy 0.0\n                          , radius 30.0\n                          , fill "green"\n                          , stroke "white"\n                          , strokeWidth 2.0\n                          ]\n                      , T.named Text "node3Label"\n                          [ x 0.0, y 45.0\n                          , textContent "Node C"\n                          , textAnchor "middle"\n                          , fontSize 14.0\n                          ]\n                      ]\n                ])';
   var snippet_lineChart_content = 'lineChart :: Effect Unit\nlineChart = runD3v2M do\n  container <- select "#viz" :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  let dims = defaultDims\n\n  -- Calculate data extents\n  let xValues = map _.x lineData\n  let yValues = map _.y lineData\n  let minX = fromMaybe 0.0 $ minimum xValues\n  let maxX = fromMaybe 10.0 $ maximum xValues\n  let minY = fromMaybe 0.0 $ minimum yValues\n  let maxY = fromMaybe 100.0 $ maximum yValues\n\n  -- Generate path data\n  let pathData = pointsToPath dims lineData minX maxX minY maxY\n\n  -- Define the tree structure\n  let tree :: Tree Unit\n      tree =\n        T.named SVG "svg"\n          [ width dims.width\n          , height dims.height\n          , viewBox ("0 0 " <> show dims.width <> " " <> show dims.height)\n          , class_ "line-chart-tree"\n          ]\n          `T.withChild`\n            (T.named Group "chartGroup"\n              [ class_ "chart-content"\n              , transform ("translate(" <> show dims.marginLeft <> "," <> show dims.marginTop <> ")")\n              ]\n              `T.withChild`\n                -- Single path element for the line\n                (T.named Path "line"\n                  [ d pathData\n                  , fill "none"\n                  , stroke "#2ecc71"\n                  , strokeWidth 2.0\n                  , class_ "line"\n                  ]\n                ))\n\n  -- Render the tree\n  selections <- renderTree container tree';
-  var snippet_lesMisTree_content = 'drawLesMisTree :: forall row.\n  Array (Force LesMisSimNode) ->\n  Set.Set String ->\n  LesMisRawModel ->\n  String ->\n  D3v2SimM row LesMisSimNode Unit\ndrawLesMisTree forcesArray activeForces model containerSelector = do\n  liftEffect $ Console.log $ "=== Drawing LesMis with Tree API ==="\n  liftEffect $ Console.log $ "Model has " <> show (Array.length model.nodes) <> " nodes, " <> show (Array.length model.links) <> " links"\n\n  -- Get window dimensions\n  (Tuple w h) <- liftEffect getWindowWidthHeight\n  liftEffect $ Console.log $ "Window dimensions: " <> show w <> " x " <> show h\n\n  -- Select container\n  container <- select containerSelector :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  -- Apply phylotaxis initial positions\n  let nodesWithPositions = setPhyllotaxisPositions model.nodes\n\n  -- Initialize simulation first (so we have node/link data with positions)\n  liftEffect $ Console.log "Initializing simulation..."\n  { nodes: nodesInSim, links: linksInSim } <- init\n    { nodes: nodesWithPositions\n    , links: model.links\n    , forces: forcesArray\n    , activeForces: activeForces\n    , config:\n        { alpha: 1.0\n        , alphaTarget: 0.0\n        , alphaMin: 0.001\n        , alphaDecay: 0.0228\n        , velocityDecay: 0.4\n        }\n    , keyFn: keyIsID_\n    , ticks: Map.empty\n    }\n\n  liftEffect $ Console.log $ "Simulation initialized with " <> show (Array.length nodesInSim) <> " nodes, " <> show (Array.length linksInSim) <> " links"\n\n  -- Wrap links with indices for data join\n  let indexedLinks = Array.mapWithIndex (\\i link -> IndexedLink { index: i, link }) linksInSim\n  liftEffect $ Console.log $ "Created " <> show (Array.length indexedLinks) <> " indexed links"\n\n  -- Declarative tree structure for force graph\n  let forceGraphTree :: T.Tree Unit\n      forceGraphTree =\n        T.named SVG "svg"\n          [ width w\n          , height h\n          , viewBox (show ((-w) / 2.0) <> " " <> show ((-h) / 2.0) <> " " <> show w <> " " <> show h)\n          , id_ "lesmis-tree-svg"\n          , class_ "lesmis-tree"\n          ]\n          `T.withChild`\n            (T.named Group "zoomGroup"\n              [ id_ "zoom-group"\n              , class_ "zoom-group"\n              ]\n              `T.withChildren`\n                [ -- Links group (structural, no data)\n                  T.named Group "linksGroup"\n                    [ id_ "links"\n                    , class_ "links"\n                    ]\n                , -- Nodes group (structural, no data)\n                  T.named Group "nodesGroup"\n                    [ id_ "nodes"\n                    , class_ "nodes"\n                    ]\n                ])\n\n  -- Render the structure tree\n  liftEffect $ Console.log "Rendering structure tree..."\n  selections <- renderTree container forceGraphTree\n  liftEffect $ Console.log $ "Structure rendered, selections: " <> show (Map.keys selections)\n\n  -- Extract the linksGroup and nodesGroup for rendering data\n  -- Use reselectD3v2 to convert from SBoundOwns Unit to SEmpty datumOut\n  linksGroupSel <- liftEffect $ reselectD3v2 "linksGroup" selections\n  nodesGroupSel <- liftEffect $ reselectD3v2 "nodesGroup" selections\n  liftEffect $ Console.log "Extracted linksGroup and nodesGroup selections"\n\n  -- Render links tree into linksGroup\n  let linksTree :: T.Tree IndexedLink\n      linksTree =\n        T.joinData "linkElements" "line" indexedLinks $ \\(IndexedLink il) ->\n          let link = unsafeCoerce il.link\n          in T.elem Line\n            [ x1 ((\\(_ :: IndexedLink) -> link.source.x) :: IndexedLink -> Number)\n            , y1 ((\\(_ :: IndexedLink) -> link.source.y) :: IndexedLink -> Number)\n            , x2 ((\\(_ :: IndexedLink) -> link.target.x) :: IndexedLink -> Number)\n            , y2 ((\\(_ :: IndexedLink) -> link.target.y) :: IndexedLink -> Number)\n            , strokeWidth ((\\(_ :: IndexedLink) -> sqrt link.value) :: IndexedLink -> Number)\n            , stroke ((\\(_ :: IndexedLink) -> d3SchemeCategory10N_ (toNumber link.target.group)) :: IndexedLink -> String)\n            ]\n\n  liftEffect $ Console.log $ "Rendering " <> show (Array.length indexedLinks) <> " links into linksGroup..."\n  linksSelections <- renderTree linksGroupSel linksTree\n  liftEffect $ Console.log $ "Links rendered, selections: " <> show (Map.keys linksSelections)\n\n  -- Render nodes tree into nodesGroup\n  let nodesTree :: T.Tree LesMisSimNode\n      nodesTree =\n        T.joinData "nodeElements" "circle" nodesInSim $ \\(d :: LesMisSimNode) ->\n          T.elem Circle\n            [ cx d.x\n            , cy d.y\n            , radius 5.0\n            , fill (d3SchemeCategory10N_ (toNumber d.group))\n            , stroke "#fff"\n            , strokeWidth 2.0\n            ]\n\n  liftEffect $ Console.log $ "Rendering " <> show (Array.length nodesInSim) <> " nodes into nodesGroup..."\n  nodesSelections <- renderTree nodesGroupSel nodesTree\n  liftEffect $ Console.log $ "Nodes rendered, selections: " <> show (Map.keys nodesSelections)\n\n  -- Extract final selections for behaviors\n  zoomGroupSel <- liftEffect $ reselectD3v2 "zoomGroup" selections\n  svgSel <- liftEffect $ reselectD3v2 "svg" selections\n\n  -- Extract bound selections for drag and tick\n  -- IMPORTANT: Must use `case` pattern matching, NOT `fromMaybe`, when default might throw!\n  --\n  -- ROOT CAUSE: PureScript is strict, so `fromMaybe (unsafeCrashWith "error") maybe_value`\n  -- evaluates unsafeCrashWith BEFORE calling fromMaybe (JavaScript evaluates all arguments\n  -- before calling functions). The crash happens even if maybe_value is Just!\n  --\n  -- Pattern matching with `case` is lazy in unevaluated branches, so the Nothing branch\n  -- only executes if we actually match Nothing. This is the correct pattern when the\n  -- default might throw an exception or have side effects.\n  let nodesSel :: D3v2Selection_ SBoundOwns Element LesMisSimNode\n      nodesSel = case Map.lookup "nodeElements" nodesSelections of\n        Just sel -> sel\n        Nothing -> unsafePartial $ unsafeCrashWith "nodeElements not found"\n\n  let linksSel :: D3v2Selection_ SBoundOwns Element IndexedLink\n      linksSel = case Map.lookup "linkElements" linksSelections of\n        Just sel -> sel\n        Nothing -> unsafePartial $ unsafeCrashWith "linkElements not found"\n\n  -- Attach behaviors\n  _ <- on (Drag defaultDrag) zoomGroupSel\n  _ <- on (Zoom $ defaultZoom (ScaleExtent 0.5 4.0) "#zoom-group") svgSel\n  _ <- on (Drag $ simulationDrag "lesmis-tree") nodesSel\n\n  -- Add tick functions to update positions\n  addTickFunction "nodes" $ Step nodesSel\n    [ cx (\\(d :: LesMisSimNode) -> d.x)\n    , cy (\\(d :: LesMisSimNode) -> d.y)\n    ]\n\n  addTickFunction "links" $ Step linksSel\n    [ x1 (\\(IndexedLink il) -> (unsafeCoerce il.link).source.x :: Number)\n    , y1 (\\(IndexedLink il) -> (unsafeCoerce il.link).source.y :: Number)\n    , x2 (\\(IndexedLink il) -> (unsafeCoerce il.link).target.x :: Number)\n    , y2 (\\(IndexedLink il) -> (unsafeCoerce il.link).target.y :: Number)\n    ]\n\n  -- Start the simulation\n  start\n\n  pure unit';
+  var snippet_lesMisTree_content = '  -- Run with simulation state management\n  void $ liftAff $ runD3v2SimM initialState do\n    drawLesMisTree forcesArray activeForces model "#viz"\n\ndrawLesMisTree :: forall row.\n  Array (Force LesMisSimNode) ->\n  Set.Set String ->\n  LesMisRawModel ->\n  String ->\n  D3v2SimM row LesMisSimNode Unit\ndrawLesMisTree forcesArray activeForces model containerSelector = do\n  liftEffect $ Console.log $ "=== Drawing LesMis with Tree API ==="\n  liftEffect $ Console.log $ "Model has " <> show (Array.length model.nodes) <> " nodes, " <> show (Array.length model.links) <> " links"\n\n  -- Get window dimensions\n  (Tuple w h) <- liftEffect getWindowWidthHeight\n  liftEffect $ Console.log $ "Window dimensions: " <> show w <> " x " <> show h\n\n  -- Select container\n  container <- select containerSelector :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  -- Apply phylotaxis initial positions\n  let nodesWithPositions = setPhyllotaxisPositions model.nodes\n\n  -- Initialize simulation first (so we have node/link data with positions)\n  liftEffect $ Console.log "Initializing simulation..."\n  { nodes: nodesInSim, links: linksInSim } <- init\n    { nodes: nodesWithPositions\n    , links: model.links\n    , forces: forcesArray\n    , activeForces: activeForces\n    , config:\n        { alpha: 1.0\n        , alphaTarget: 0.0\n        , alphaMin: 0.001\n        , alphaDecay: 0.0228\n        , velocityDecay: 0.4\n        }\n    , keyFn: keyIsID_\n    , ticks: Map.empty\n    }\n\n  liftEffect $ Console.log $ "Simulation initialized with " <> show (Array.length nodesInSim) <> " nodes, " <> show (Array.length linksInSim) <> " links"\n\n  -- Wrap links with indices for data join\n  let indexedLinks = Array.mapWithIndex (\\i link -> IndexedLink { index: i, link }) linksInSim\n  liftEffect $ Console.log $ "Created " <> show (Array.length indexedLinks) <> " indexed links"\n\n  -- Declarative tree structure for force graph\n  let forceGraphTree :: T.Tree Unit\n      forceGraphTree =\n        T.named SVG "svg"\n          [ width w\n          , height h\n          , viewBox (show ((-w) / 2.0) <> " " <> show ((-h) / 2.0) <> " " <> show w <> " " <> show h)\n          , id_ "lesmis-tree-svg"\n          , class_ "lesmis-tree"\n          ]\n          `T.withChild`\n            (T.named Group "zoomGroup"\n              [ id_ "zoom-group"\n              , class_ "zoom-group"\n              ]\n              `T.withChildren`\n                [ -- Links group (structural, no data)\n                  T.named Group "linksGroup"\n                    [ id_ "links"\n                    , class_ "links"\n                    ]\n                , -- Nodes group (structural, no data)\n                  T.named Group "nodesGroup"\n                    [ id_ "nodes"\n                    , class_ "nodes"\n                    ]\n                ])\n\n  -- Render the structure tree\n  liftEffect $ Console.log "Rendering structure tree..."\n  selections <- renderTree container forceGraphTree\n  liftEffect $ Console.log $ "Structure rendered, selections: " <> show (Map.keys selections)\n\n  -- Extract the linksGroup and nodesGroup for rendering data\n  -- Use reselectD3v2 to convert from SBoundOwns Unit to SEmpty datumOut\n  linksGroupSel <- liftEffect $ reselectD3v2 "linksGroup" selections\n  nodesGroupSel <- liftEffect $ reselectD3v2 "nodesGroup" selections\n  liftEffect $ Console.log "Extracted linksGroup and nodesGroup selections"\n\n  -- Render links tree into linksGroup\n  let linksTree :: T.Tree IndexedLink\n      linksTree =\n        T.joinData "linkElements" "line" indexedLinks $ \\(IndexedLink il) ->\n          let link = unsafeCoerce il.link\n          in T.elem Line\n            [ x1 ((\\(_ :: IndexedLink) -> link.source.x) :: IndexedLink -> Number)\n            , y1 ((\\(_ :: IndexedLink) -> link.source.y) :: IndexedLink -> Number)\n            , x2 ((\\(_ :: IndexedLink) -> link.target.x) :: IndexedLink -> Number)\n            , y2 ((\\(_ :: IndexedLink) -> link.target.y) :: IndexedLink -> Number)\n            , strokeWidth ((\\(_ :: IndexedLink) -> sqrt link.value) :: IndexedLink -> Number)\n            , stroke ((\\(_ :: IndexedLink) -> d3SchemeCategory10N_ (toNumber link.target.group)) :: IndexedLink -> String)\n            ]\n\n  liftEffect $ Console.log $ "Rendering " <> show (Array.length indexedLinks) <> " links into linksGroup..."\n  linksSelections <- renderTree linksGroupSel linksTree\n  liftEffect $ Console.log $ "Links rendered, selections: " <> show (Map.keys linksSelections)\n\n  -- Render nodes tree into nodesGroup\n  let nodesTree :: T.Tree LesMisSimNode\n      nodesTree =\n        T.joinData "nodeElements" "circle" nodesInSim $ \\(d :: LesMisSimNode) ->\n          T.elem Circle\n            [ cx d.x\n            , cy d.y\n            , radius 5.0\n            , fill (d3SchemeCategory10N_ (toNumber d.group))\n            , stroke "#fff"\n            , strokeWidth 2.0\n            ]\n\n  liftEffect $ Console.log $ "Rendering " <> show (Array.length nodesInSim) <> " nodes into nodesGroup..."\n  nodesSelections <- renderTree nodesGroupSel nodesTree\n  liftEffect $ Console.log $ "Nodes rendered, selections: " <> show (Map.keys nodesSelections)\n\n  -- Extract final selections for behaviors\n  zoomGroupSel <- liftEffect $ reselectD3v2 "zoomGroup" selections\n  svgSel <- liftEffect $ reselectD3v2 "svg" selections\n\n  -- Extract bound selections for drag and tick\n  -- IMPORTANT: Must use `case` pattern matching, NOT `fromMaybe`, when default might throw!\n  --\n  -- ROOT CAUSE: PureScript is strict, so `fromMaybe (unsafeCrashWith "error") maybe_value`\n  -- evaluates unsafeCrashWith BEFORE calling fromMaybe (JavaScript evaluates all arguments\n  -- before calling functions). The crash happens even if maybe_value is Just!\n  --\n  -- Pattern matching with `case` is lazy in unevaluated branches, so the Nothing branch\n  -- only executes if we actually match Nothing. This is the correct pattern when the\n  -- default might throw an exception or have side effects.\n  let nodesSel :: D3v2Selection_ SBoundOwns Element LesMisSimNode\n      nodesSel = case Map.lookup "nodeElements" nodesSelections of\n        Just sel -> sel\n        Nothing -> unsafePartial $ unsafeCrashWith "nodeElements not found"\n\n  let linksSel :: D3v2Selection_ SBoundOwns Element IndexedLink\n      linksSel = case Map.lookup "linkElements" linksSelections of\n        Just sel -> sel\n        Nothing -> unsafePartial $ unsafeCrashWith "linkElements not found"\n\n  -- Attach behaviors\n  _ <- on (Drag defaultDrag) zoomGroupSel\n  _ <- on (Zoom $ defaultZoom (ScaleExtent 0.5 4.0) "#zoom-group") svgSel\n  _ <- on (Drag $ simulationDrag "lesmis-tree") nodesSel\n\n  -- Add tick functions to update positions\n  addTickFunction "nodes" $ Step nodesSel\n    [ cx (\\(d :: LesMisSimNode) -> d.x)\n    , cy (\\(d :: LesMisSimNode) -> d.y)\n    ]\n\n  addTickFunction "links" $ Step linksSel\n    [ x1 (\\(IndexedLink il) -> (unsafeCoerce il.link).source.x :: Number)\n    , y1 (\\(IndexedLink il) -> (unsafeCoerce il.link).source.y :: Number)\n    , x2 (\\(IndexedLink il) -> (unsafeCoerce il.link).target.x :: Number)\n    , y2 (\\(IndexedLink il) -> (unsafeCoerce il.link).target.y :: Number)\n    ]';
   var snippet_groupedBarChart_content = 'drawGroupedBarChart :: String -> Array GroupedBarData -> Effect Unit\ndrawGroupedBarChart selector populationData = runD3v2M do\n  container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  let dims = defaultDims\n  let iWidth = innerWidth dims\n  let iHeight = innerHeight dims\n\n  -- Group data by state\n  let stateGroups = groupByState populationData\n  let ages = getAges populationData\n  let numStates = Array.length stateGroups\n  let numAges = Array.length ages\n\n  -- Calculate bar dimensions\n  let groupWidth = iWidth / Int.toNumber numStates\n  let barWidth = groupWidth / Int.toNumber numAges * 0.9\n\n  -- Calculate scales\n  let populationValues = map _.population populationData\n  let maxPop = fromMaybe 6000000.0 $ maximum populationValues\n\n  -- X scale maps state index to position\n  let xScale :: Scale\n      xScale =\n        { domain: { min: 0.0, max: Int.toNumber numStates }\n        , range: { min: 0.0, max: iWidth }\n        }\n\n  -- Y scale maps population to height\n  let yScale :: Scale\n      yScale =\n        { domain: { min: 0.0, max: maxPop }\n        , range: { min: iHeight, max: 0.0 }\n        }\n\n  -- Create axes\n  let xAxis = axisBottom xScale\n  let yAxis = axisLeft yScale\n\n  -- First tree: SVG container with axes\n  let axesTree :: T.Tree Unit\n      axesTree =\n        T.named SVG "svg"\n          [ width dims.width\n          , height dims.height\n          , viewBox ("0 0 " <> show dims.width <> " " <> show dims.height)\n          , class_ "grouped-bar-chart"\n          ]\n          `T.withChild`\n            (T.named Group "chartGroup"\n              [ class_ "chart-content"\n              , transform ("translate(" <> show dims.marginLeft <> "," <> show dims.marginTop <> ")")\n              ]\n              `T.withChildren`\n                [ -- X axis\n                  T.named Group "xAxis"\n                    [ transform ("translate(0," <> show iHeight <> ")")\n                    , class_ "x-axis"\n                    ]\n                    `T.withChild`\n                      renderAxis xAxis\n                , -- Y axis\n                  T.named Group "yAxis"\n                    [ class_ "y-axis"\n                    ]\n                    `T.withChild`\n                      renderAxis yAxis\n                ])\n\n  -- Render axes\n  axesSelections <- renderTree container axesTree\n\n  -- Second tree: Grouped bars\n  -- Extract the chartGroup selection for the second render\n  chartGroupSel <- liftEffect $ reselectD3v2 "chartGroup" axesSelections\n\n  -- Use nestedJoin to create state groups \u2192 bars\n  let barsTree :: T.Tree StateGroup\n      barsTree =\n        T.nestedJoin "stateGroups" "g" stateGroups (_.bars) $ \\bar ->\n          -- bar :: GroupedBarData\n          -- Calculate position for this bar\n          let\n            -- Find which state this bar belongs to\n            stateIdx = fromMaybe 0 $ findIndex (\\g -> g.state == bar.state) stateGroups\n            -- Find which age group this is\n            ageIdx = fromMaybe 0 $ findIndex (\\a -> a == bar.age) ages\n\n            -- X position: state position + age offset\n            xPos = Int.toNumber stateIdx * groupWidth + Int.toNumber ageIdx * barWidth\n\n            -- Y position and height from population\n            yPos = iHeight - ((bar.population / maxPop) * iHeight)\n            barHeight = (bar.population / maxPop) * iHeight\n          in\n            T.elem Rect\n              [ x xPos\n              , y yPos\n              , width barWidth\n              , height barHeight\n              , fill (colorForAge bar.age)\n              , class_ "bar"\n              ]\n\n  -- Render bars\n  barsSelections <- renderTree chartGroupSel barsTree';
   var snippet_barChart_content = 'barChart :: Effect Unit\nbarChart = runD3v2M do\n  container <- select "#viz" :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  let dims = defaultDims\n  let iWidth = innerWidth dims\n  let iHeight = innerHeight dims\n\n  -- Calculate data extents\n  let yValues = map _.y sampleData\n  let minY = 0.0  -- Start bars from zero\n  let maxY = fromMaybe 100.0 $ maximum yValues\n\n  -- Calculate bar width (80% of available space per bar)\n  let numBars = length sampleData\n  let barWidth = if numBars > 0 then (iWidth / (Int.toNumber numBars)) * 0.8 else 0.0\n\n  -- KEY: Create scales to map data values \u2192 pixel positions\n  -- Scales are the bridge between data space and visual space\n  let xScale :: Scale\n      xScale =\n        { domain: { min: 1.0, max: Int.toNumber numBars }  -- Data range\n        , range: { min: 0.0, max: iWidth }                  -- Pixel range\n        }\n\n  let yScale :: Scale\n      yScale =\n        { domain: { min: minY, max: maxY }    -- Data range (0 to max value)\n        , range: { min: iHeight, max: 0.0 }   -- Pixel range (inverted for SVG coords)\n        }\n\n  -- Create axes\n  let xAxis = axisBottom xScale\n  let yAxis = axisLeft yScale\n\n  -- First, render the SVG container with axes (datum type: Unit)\n  let axesTree :: Tree Unit\n      axesTree =\n        T.named SVG "svg"\n          [ width dims.width\n          , height dims.height\n          , viewBox ("0 0 " <> show dims.width <> " " <> show dims.height)\n          , class_ "bar-chart-tree"\n          ]\n          `T.withChild`\n            (T.named Group "chartGroup"\n              [ class_ "chart-content"\n              , transform ("translate(" <> show dims.marginLeft <> "," <> show dims.marginTop <> ")")\n              ]\n              `T.withChildren`\n                [ -- X axis\n                  T.named Group "xAxis"\n                    [ transform ("translate(0," <> show iHeight <> ")")\n                    , class_ "x-axis"\n                    ]\n                    `T.withChild`\n                      renderAxis xAxis\n                , -- Y axis\n                  T.named Group "yAxis"\n                    [ class_ "y-axis"\n                    ]\n                    `T.withChild`\n                      renderAxis yAxis\n                ])\n\n  -- Render axes first (underlaying)\n  axesSelections <- renderTree container axesTree\n\n  -- KEY: Reselect the chartGroup for layered rendering\n  -- This allows us to render bars on top of axes\n  chartGroupSel <- liftEffect $ reselectD3v2 "chartGroup" axesSelections\n\n  -- KEY: Data join creates one rect per data point\n  let barsTree :: Tree DataPoint\n      barsTree =\n        T.joinData "bars" "rect" sampleData $ \\point ->\n          -- Calculate bar position and dimensions from data\n          let xPos = (point.x - 1.0) * (iWidth / (Int.toNumber numBars)) + ((iWidth / (Int.toNumber numBars)) - barWidth) / 2.0\n              yPos = iHeight - ((point.y - minY) / (maxY - minY) * iHeight)  -- Manual scale calculation\n              barHeight = iHeight - yPos  -- Bar grows from baseline\n          in T.elem Rect\n            [ x xPos          -- Horizontal position\n            , y yPos          -- Top of bar (SVG coords from top-left)\n            , width barWidth  -- Bar width\n            , height barHeight  -- Bar height (grows downward in SVG)\n            , fill "#4a90e2"\n            , stroke "#357abd"\n            , strokeWidth 1.0\n            , class_ "bar"\n            ]\n\n  -- Render bars into the chart group (overlaying)\n  barsSelections <- renderTree chartGroupSel barsTree';
   var getSnippet = function(name16) {
@@ -18634,6 +18634,14 @@
   function offsetY(event) {
     return event.offsetY;
   }
+  function clearElement_(selector) {
+    return function() {
+      const el = document.querySelector(selector);
+      if (el) {
+        el.innerHTML = "";
+      }
+    };
+  }
 
   // output/PSD3v2.Behavior.FFI/foreign.js
   function attachZoom_(element3) {
@@ -19407,7 +19415,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 87, column 3 - line 95, column 8): " + [maybeElement.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 88, column 3 - line 96, column 8): " + [maybeElement.constructor.name]);
       });
     };
   };
@@ -19426,7 +19434,7 @@
               return v.value0.value0.parentElements;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1623, column 36 - line 1625, column 49): " + [v.value0.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1644, column 36 - line 1646, column 49): " + [v.value0.constructor.name]);
           })();
           return new EmptySelection({
             parentElements: elements,
@@ -19441,7 +19449,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1618, column 3 - line 1636, column 10): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1639, column 3 - line 1657, column 10): " + [v.constructor.name]);
       };
     };
   };
@@ -19454,7 +19462,7 @@
             return v.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 267, column 36 - line 268, column 32): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 268, column 36 - line 269, column 32): " + [v.constructor.name]);
         })();
         return traverse_4(function(element3) {
           var node = toNode(element3);
@@ -19468,7 +19476,7 @@
               return unit;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 272, column 5 - line 274, column 27): " + [maybeParent.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 273, column 5 - line 275, column 27): " + [maybeParent.constructor.name]);
           };
         })(v1.elements);
       })());
@@ -19509,7 +19517,7 @@
           return v1.value0.elements;
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 756, column 5 - line 756, column 61): " + [v1.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 777, column 5 - line 777, column 61): " + [v1.constructor.name]);
       };
       var applyBehavior = function(v1) {
         return function(v2) {
@@ -19587,7 +19595,7 @@
             }));
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 763, column 5 - line 763, column 62): " + [v1.constructor.name, v2.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 784, column 5 - line 784, column 62): " + [v1.constructor.name, v2.constructor.name]);
         };
       };
       var elements = getElements(v);
@@ -19606,14 +19614,14 @@
             return v.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 400, column 70 - line 401, column 30): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 421, column 70 - line 422, column 30): " + [v.constructor.name]);
         })();
         var v3 = (function() {
           if (v1 instanceof BoundSelection) {
             return v1.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 402, column 55 - line 403, column 30): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 423, column 55 - line 424, column 30): " + [v1.constructor.name]);
         })();
         return pure127(new BoundSelection({
           elements: append15(v2.elements)(v3.elements),
@@ -19640,7 +19648,7 @@
                       return v.value0;
                     }
                     ;
-                    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 517, column 57 - line 518, column 30): " + [v.constructor.name]);
+                    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 538, column 57 - line 539, column 30): " + [v.constructor.name]);
                   })();
                   return function __do3() {
                     var existingElements = querySelectorAllElements(selector)(v1.parentElements)();
@@ -19738,7 +19746,7 @@
                     return v.value0;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 433, column 57 - line 434, column 30): " + [v.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 454, column 57 - line 455, column 30): " + [v.constructor.name]);
                 })();
                 return function __do3() {
                   var existingElements = querySelectorAllElements(selector)(v1.parentElements)();
@@ -19821,8 +19829,8 @@
     };
   };
   var joinData1 = /* @__PURE__ */ joinData3(monadEffectEffect)(foldableArray);
-  var getSimulationHandle = function($622) {
-    return toMaybe(getSimulationHandle_($622));
+  var getSimulationHandle = function($624) {
+    return toMaybe(getSimulationHandle_($624));
   };
   var onWithSimulation = function(behavior) {
     return function(simState) {
@@ -19844,7 +19852,7 @@
             return v1.value0.elements;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 837, column 5 - line 837, column 61): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 858, column 5 - line 858, column 61): " + [v1.constructor.name]);
         };
         var applyBehaviorWithSim = function(v1) {
           return function(v2) {
@@ -19924,7 +19932,7 @@
                 }));
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 844, column 5 - line 844, column 93): " + [v1.constructor.name, v2.constructor.name, v3.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 865, column 5 - line 865, column 93): " + [v1.constructor.name, v2.constructor.name, v3.constructor.name]);
             };
           };
         };
@@ -19953,7 +19961,7 @@
       return pure9(v.value0.document);
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 700, column 1 - line 700, column 82): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 721, column 1 - line 721, column 82): " + [v.constructor.name]);
   };
   var selectAll = function(dictMonadEffect) {
     var liftEffect122 = liftEffect(dictMonadEffect);
@@ -19978,7 +19986,7 @@
               return querySelectorAllElements(selector)(v.value0.elements)();
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 116, column 15 - line 124, column 50): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 117, column 15 - line 125, column 50): " + [v.constructor.name]);
           })();
           return new EmptySelection({
             parentElements: elements,
@@ -20049,7 +20057,7 @@
       return "thead";
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 928, column 1 - line 928, column 45): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 949, column 1 - line 949, column 45): " + [v.constructor.name]);
   };
   var createElementWithNS = function(elemType) {
     return function(doc) {
@@ -20062,7 +20070,13 @@
         return createElement2(elementTypeToString(elemType))(doc);
       }
       ;
-      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 710, column 3 - line 716, column 64): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 731, column 3 - line 737, column 64): " + [v.constructor.name]);
+    };
+  };
+  var clear2 = function(dictMonadEffect) {
+    var liftEffect122 = liftEffect(dictMonadEffect);
+    return function(selector) {
+      return liftEffect122(clearElement_(selector));
     };
   };
   var attributeValueToString = function(v) {
@@ -20078,7 +20092,7 @@
       return show22(v.value0);
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 923, column 1 - line 923, column 51): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 944, column 1 - line 944, column 51): " + [v.constructor.name]);
   };
   var applyAttributes = function(element3) {
     return function(datum2) {
@@ -20086,8 +20100,8 @@
         return function(attrs) {
           return traverse_4(function(attr3) {
             if (attr3 instanceof StaticAttr) {
-              var $348 = attr3.value0 === "textContent";
-              if ($348) {
+              var $350 = attr3.value0 === "textContent";
+              if ($350) {
                 return setTextContent_(attributeValueToString(attr3.value1))(element3);
               }
               ;
@@ -20096,8 +20110,8 @@
             ;
             if (attr3 instanceof DataAttr) {
               var val = attributeValueToString(attr3.value1(datum2));
-              var $351 = attr3.value0 === "textContent";
-              if ($351) {
+              var $353 = attr3.value0 === "textContent";
+              if ($353) {
                 return setTextContent_(val)(element3);
               }
               ;
@@ -20106,15 +20120,15 @@
             ;
             if (attr3 instanceof IndexedAttr) {
               var val = attributeValueToString(attr3.value1(datum2)(index5));
-              var $354 = attr3.value0 === "textContent";
-              if ($354) {
+              var $356 = attr3.value0 === "textContent";
+              if ($356) {
                 return setTextContent_(val)(element3);
               }
               ;
               return setAttribute2(attr3.value0)(val)(element3);
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 905, column 30 - line 921, column 54): " + [attr3.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 926, column 30 - line 942, column 54): " + [attr3.constructor.name]);
           })(attrs);
         };
       };
@@ -20153,7 +20167,7 @@
               return v.value0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 206, column 78 - line 207, column 30): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 207, column 78 - line 208, column 30): " + [v.constructor.name]);
           })();
           var paired = zipWith(Tuple.create)(v1.data)(v1.elements);
           return function __do3() {
@@ -20168,7 +20182,7 @@
                     return arrayIndex;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 211, column 24 - line 213, column 32): " + [v1.indices.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 212, column 24 - line 214, column 32): " + [v1.indices.constructor.name]);
                 })();
                 return applyAttributes(v2.value1)(v2.value0)(logicalIndex)(attrs);
               };
@@ -20195,7 +20209,7 @@
               return v.value0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 239, column 69 - line 240, column 32): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 240, column 69 - line 241, column 32): " + [v.constructor.name]);
           })();
           var paired = zipWith(Tuple.create)(v1.data)(v1.elements);
           return function __do3() {
@@ -20241,7 +20255,7 @@
             return boundSel.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1445, column 68 - line 1446, column 34): " + [boundSel.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1466, column 68 - line 1467, column 34): " + [boundSel.constructor.name]);
         })();
         return traverseWithIndex2(function(idx) {
           return function(datum2) {
@@ -20264,7 +20278,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1450, column 5 - line 1473, column 39): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1471, column 5 - line 1494, column 39): " + [v1.constructor.name]);
           };
         })(v.data);
       };
@@ -20281,7 +20295,7 @@
                 return v.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 354, column 84 - line 355, column 30): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 375, column 84 - line 376, column 30): " + [v.constructor.name]);
             })();
             return function __do3() {
               var childElements = traverseWithIndex2(function(idx) {
@@ -20320,7 +20334,7 @@
                 return v.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 299, column 57 - line 300, column 30): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 320, column 57 - line 321, column 30): " + [v.constructor.name]);
             })();
             return function __do3() {
               var elements = traverse3(function(parent2) {
@@ -20352,7 +20366,7 @@
             return pendingSel.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1400, column 70 - line 1401, column 36): " + [pendingSel.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1421, column 70 - line 1422, column 36): " + [pendingSel.constructor.name]);
         })();
         return traverseWithIndex2(function(idx) {
           return function(datum2) {
@@ -20375,7 +20389,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1408, column 5 - line 1427, column 45): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1429, column 5 - line 1448, column 45): " + [v1.constructor.name]);
           };
         })(v.pendingData);
       };
@@ -20400,7 +20414,7 @@
                   return unsafeCrashWith("renderTree: appendChild returned empty selection");
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 986, column 31 - line 988, column 104): " + [v2.constructor.name]);
+                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1007, column 31 - line 1009, column 104): " + [v2.constructor.name]);
               }
               ;
               return unsafeCrashWith("renderTree: appendChild should return EmptySelection");
@@ -20416,7 +20430,7 @@
                 return combinedChildMap;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 996, column 23 - line 998, column 36): " + [v1.value0.name.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1017, column 23 - line 1019, column 36): " + [v1.value0.name.constructor.name]);
             })();
             return new Tuple(element3, selectionsMap);
           };
@@ -20472,7 +20486,7 @@
                 return v2.value0.update.value0.document;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1054, column 14 - line 1055, column 45): " + [v2.value0.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1075, column 14 - line 1076, column 45): " + [v2.value0.update.constructor.name]);
             })();
             var allData = (function() {
               if (v2.value0.enter instanceof PendingSelection) {
@@ -20505,7 +20519,7 @@
                 return unsafeCrashWith("renderTree Join: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1077, column 22 - line 1079, column 90): " + [v3.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1098, column 22 - line 1100, column 90): " + [v3.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
@@ -20523,7 +20537,7 @@
                 return v2.value0.enter.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1102, column 54 - line 1103, column 36): " + [v2.value0.enter.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1123, column 54 - line 1124, column 36): " + [v2.value0.enter.constructor.name]);
             })();
             var boundSel = new BoundSelection({
               elements,
@@ -20542,7 +20556,7 @@
                 return unsafeCrashWith("renderTree NestedJoin: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1117, column 22 - line 1119, column 96): " + [v4.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1138, column 22 - line 1140, column 96): " + [v4.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
@@ -20591,7 +20605,7 @@
                 return unit;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1147, column 3 - line 1158, column 16): " + [v1.value0.exitBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1168, column 3 - line 1179, column 16): " + [v1.value0.exitBehavior.constructor.name]);
             })();
             var enterElementsAndMaps = (function() {
               if (v1.value0.enterBehavior instanceof Just) {
@@ -20616,7 +20630,7 @@
                 return renderTemplatesForPendingSelection(dictOrd)(v1.value0.template)(v2.value0.enter)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1161, column 27 - line 1178, column 68): " + [v1.value0.enterBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1182, column 27 - line 1199, column 68): " + [v1.value0.enterBehavior.constructor.name]);
             })();
             var enterElements = map31(fst)(enterElementsAndMaps);
             var enterChildMaps = map31(snd)(enterElementsAndMaps);
@@ -20630,7 +20644,7 @@
                 return renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1184, column 28 - line 1195, column 67): " + [v1.value0.updateBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1205, column 28 - line 1216, column 67): " + [v1.value0.updateBehavior.constructor.name]);
             })();
             var updateElements = map31(fst)(updateElementsAndMaps);
             var updateChildMaps = map31(snd)(updateElementsAndMaps);
@@ -20646,7 +20660,7 @@
                 return v2.value0.update.value0.document;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1211, column 14 - line 1212, column 45): " + [v2.value0.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1232, column 14 - line 1233, column 45): " + [v2.value0.update.constructor.name]);
             })();
             var allData = (function() {
               if (v2.value0.enter instanceof PendingSelection) {
@@ -20679,7 +20693,7 @@
                 return unsafeCrashWith("renderTree SceneJoin: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1233, column 22 - line 1235, column 95): " + [v3.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1254, column 22 - line 1256, column 95): " + [v3.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
@@ -20729,7 +20743,7 @@
                 return unit;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1270, column 3 - line 1278, column 16): " + [v1.value0.exitBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1291, column 3 - line 1299, column 16): " + [v1.value0.exitBehavior.constructor.name]);
             })();
             var enterElementsAndMaps = (function() {
               if (v1.value0.enterBehavior instanceof Just) {
@@ -20754,7 +20768,7 @@
                 return renderTemplatesForPendingSelection(dictOrd)(v1.value0.template)(v2.value0.enter)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1281, column 27 - line 1290, column 92): " + [v1.value0.enterBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1302, column 27 - line 1311, column 92): " + [v1.value0.enterBehavior.constructor.name]);
             })();
             var updateElementsAndMaps = (function() {
               if (v1.value0.updateBehavior instanceof Just) {
@@ -20766,7 +20780,7 @@
                 return renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1293, column 28 - line 1298, column 91): " + [v1.value0.updateBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1314, column 28 - line 1319, column 91): " + [v1.value0.updateBehavior.constructor.name]);
             })();
             var updateElements = map31(fst)(updateElementsAndMaps);
             var enterElements = map31(fst)(enterElementsAndMaps);
@@ -20784,7 +20798,7 @@
                 return v2.value0.update.value0.document;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1316, column 14 - line 1317, column 45): " + [v2.value0.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1337, column 14 - line 1338, column 45): " + [v2.value0.update.constructor.name]);
             })();
             var boundSel = new BoundSelection({
               elements: allElements,
@@ -20803,13 +20817,13 @@
                 return unsafeCrashWith("renderTree SceneNestedJoin: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1329, column 22 - line 1331, column 101): " + [v5.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1350, column 22 - line 1352, column 101): " + [v5.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 973, column 1 - line 978, column 74): " + [v.constructor.name, v1.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 994, column 1 - line 999, column 74): " + [v.constructor.name, v1.constructor.name]);
       };
     };
   };
@@ -20823,7 +20837,7 @@
                 return pendingSel.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1351, column 70 - line 1352, column 36): " + [pendingSel.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1372, column 70 - line 1373, column 36): " + [pendingSel.constructor.name]);
             })();
             return traverseWithIndex2(function(idx) {
               return function(outerDatum) {
@@ -20856,7 +20870,7 @@
                   };
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1356, column 5 - line 1382, column 53): " + [v1.constructor.name]);
+                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1377, column 5 - line 1403, column 53): " + [v1.constructor.name]);
               };
             })(v.pendingData);
           };
@@ -20886,7 +20900,7 @@
                 return v.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 153, column 79 - line 154, column 32): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 154, column 79 - line 155, column 32): " + [v.constructor.name]);
             })();
             var parent2 = (function() {
               var v2 = head(v1.parentElements);
@@ -20898,7 +20912,7 @@
                 return unsafeIndex3(v1.parentElements)(0);
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 158, column 16 - line 160, column 70): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 159, column 16 - line 161, column 70): " + [v2.constructor.name]);
             })();
             return function __do3() {
               var elements = traverseWithIndex2(function(arrayIndex) {
@@ -20912,7 +20926,7 @@
                       return arrayIndex;
                     }
                     ;
-                    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 164, column 24 - line 166, column 32): " + [v1.indices.constructor.name]);
+                    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 165, column 24 - line 167, column 32): " + [v1.indices.constructor.name]);
                   })();
                   return function __do4() {
                     var element3 = createElementWithNS(elemType)(v1.document)();
@@ -20952,7 +20966,7 @@
                     return emptySelection.value0;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 657, column 57 - line 658, column 30): " + [emptySelection.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 678, column 57 - line 679, column 30): " + [emptySelection.constructor.name]);
                 })();
                 var dataArray = fromFoldable51(foldableData);
                 var pendingSelection = new PendingSelection({
@@ -21001,7 +21015,7 @@
                             return applyPerDatumAttrs1(enterAttrs.value0)(bound);
                           }
                           ;
-                          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 611, column 5 - line 613, column 55): " + [enterAttrs.constructor.name]);
+                          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 632, column 5 - line 634, column 55): " + [enterAttrs.constructor.name]);
                         }))(function(enterBound) {
                           return bind138((function() {
                             if (updateAttrs instanceof Nothing) {
@@ -21012,7 +21026,7 @@
                               return applyPerDatumAttrs1(updateAttrs.value0)(v.value0.update);
                             }
                             ;
-                            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 616, column 18 - line 618, column 54): " + [updateAttrs.constructor.name]);
+                            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 637, column 18 - line 639, column 54): " + [updateAttrs.constructor.name]);
                           })())(function(updateBound) {
                             return discard215((function() {
                               if (exitAttrs instanceof Nothing) {
@@ -21025,7 +21039,7 @@
                                 });
                               }
                               ;
-                              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 621, column 3 - line 625, column 18): " + [exitAttrs.constructor.name]);
+                              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 642, column 3 - line 646, column 18): " + [exitAttrs.constructor.name]);
                             })())(function() {
                               return merge1(enterBound)(updateBound);
                             });
@@ -21542,6 +21556,7 @@
   var setAttrs3 = /* @__PURE__ */ setAttrs2(monadEffectEffect);
   var setAttrsExit3 = /* @__PURE__ */ setAttrsExit2(monadEffectEffect);
   var remove6 = /* @__PURE__ */ remove4(monadEffectEffect);
+  var clear3 = /* @__PURE__ */ clear2(monadEffectEffect);
   var merge3 = /* @__PURE__ */ merge2(monadEffectEffect);
   var appendChild4 = /* @__PURE__ */ appendChild3(monadEffectEffect);
   var appendChildInheriting3 = /* @__PURE__ */ appendChildInheriting2(monadEffectEffect);
@@ -21736,6 +21751,9 @@
     remove: function(v) {
       return remove6(v);
     },
+    clear: function(selector) {
+      return clear3(selector);
+    },
     merge: function(v) {
       return function(v1) {
         return function __do3() {
@@ -21895,6 +21913,9 @@
     remove: function(v) {
       return liftEffect4(remove6(v));
     },
+    clear: function(selector) {
+      return liftEffect4(clear3(selector));
+    },
     selectAll: function(tag) {
       return function(v) {
         return liftEffect4(function __do3() {
@@ -22049,7 +22070,7 @@
       return show15(v.value0);
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 332, column 1 - line 332, column 51): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 335, column 1 - line 335, column 51): " + [v.constructor.name]);
   };
   var transitionMD3v2Selection_ = {
     withTransition: function(config) {
@@ -22060,7 +22081,7 @@
               return v.value0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 195, column 65 - line 196, column 44): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 198, column 65 - line 199, column 44): " + [v.constructor.name]);
           })();
           var paired = zipWith(function(d18) {
             return function(e) {
@@ -22081,7 +22102,7 @@
                   return arrayIndex;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 205, column 26 - line 207, column 34): " + [v1.indices.constructor.name]);
+                throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 208, column 26 - line 210, column 34): " + [v1.indices.constructor.name]);
               })();
               return function __do3() {
                 var transition2 = createTransition_(config.duration)(maybeMillisecondsToNullable(config.delay))(maybeEasingToNullable(config.easing))(v2.element)();
@@ -22098,7 +22119,7 @@
                     return transitionSetAttribute_(attr3.value0)(attributeValueToString2(attr3.value1(v2.datum)(logicalIndex)))(transition2);
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 217, column 34 - line 225, column 112): " + [attr3.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 220, column 34 - line 228, column 112): " + [attr3.constructor.name]);
                 })(attrs)();
               };
             };
@@ -22114,7 +22135,7 @@
               return v.value0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 229, column 56 - line 230, column 46): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 232, column 56 - line 233, column 46): " + [v.constructor.name]);
           })();
           var paired = zipWith(function(d18) {
             return function(e) {
@@ -22141,7 +22162,7 @@
                     return transitionSetAttribute_(attr3.value0)(attributeValueToString2(attr3.value1(v2.datum)(index5)))(transition2);
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 246, column 34 - line 254, column 105): " + [attr3.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 249, column 34 - line 257, column 105): " + [attr3.constructor.name]);
                 })(attrs)();
                 return transitionRemove_(transition2)();
               };
@@ -22159,7 +22180,7 @@
                 return v.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 261, column 65 - line 262, column 44): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 264, column 65 - line 265, column 44): " + [v.constructor.name]);
             })();
             var paired = zipWith(function(d18) {
               return function(e) {
@@ -22180,7 +22201,7 @@
                     return arrayIndex;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 271, column 26 - line 273, column 34): " + [v1.indices.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 274, column 26 - line 276, column 34): " + [v1.indices.constructor.name]);
                 })();
                 var v3 = delayFn(v2.datum)(logicalIndex);
                 return function __do3() {
@@ -22198,7 +22219,7 @@
                       return transitionSetAttribute_(attr3.value0)(attributeValueToString2(attr3.value1(v2.datum)(logicalIndex)))(transition2);
                     }
                     ;
-                    throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 286, column 34 - line 294, column 112): " + [attr3.constructor.name]);
+                    throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 289, column 34 - line 297, column 112): " + [attr3.constructor.name]);
                   })(attrs)();
                 };
               };
@@ -22216,7 +22237,7 @@
                 return v.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 298, column 56 - line 299, column 46): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 301, column 56 - line 302, column 46): " + [v.constructor.name]);
             })();
             var paired = zipWith(function(d18) {
               return function(e) {
@@ -22244,7 +22265,7 @@
                       return transitionSetAttribute_(attr3.value0)(attributeValueToString2(attr3.value1(v2.datum)(index5)))(transition2);
                     }
                     ;
-                    throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 318, column 34 - line 326, column 105): " + [attr3.constructor.name]);
+                    throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 321, column 34 - line 329, column 105): " + [attr3.constructor.name]);
                   })(attrs)();
                   return transitionRemove_(transition2)();
                 };
@@ -22274,7 +22295,7 @@
             return setAttributeSync_(attr3.value0)(attributeValueToString2(attr3.value1(datum2)(index5)))(element3);
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 552, column 47 - line 560, column 76): " + [attr3.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 558, column 47 - line 566, column 76): " + [attr3.constructor.name]);
         };
       };
     };
@@ -22285,21 +22306,21 @@
         return new Tuple(view(_name3)(f), f);
       }));
       return discard22(modify_4(function(state3) {
-        var $528 = {};
-        for (var $529 in state3) {
-          if ({}.hasOwnProperty.call(state3, $529)) {
-            $528[$529] = state3[$529];
+        var $529 = {};
+        for (var $530 in state3) {
+          if ({}.hasOwnProperty.call(state3, $530)) {
+            $529[$530] = state3[$530];
           }
           ;
         }
         ;
-        $528.simulation = set2((function() {
-          var $579 = prop6($$Proxy.value)(strongFn);
-          return function($580) {
-            return _Newtype3($579($580));
+        $529.simulation = set2((function() {
+          var $580 = prop6($$Proxy.value)(strongFn);
+          return function($581) {
+            return _Newtype3($580($581));
           };
         })())(forcesMap)(state3.simulation);
-        return $528;
+        return $529;
       }))(function() {
         return bind12(simulationSetNodes2(config.nodes))(function(nodesInSim) {
           return discard22(simulationActualizeForces2(config.activeForces))(function() {
@@ -22315,7 +22336,7 @@
                               return v.value1.value0.value0;
                             }
                             ;
-                            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 602, column 71 - line 603, column 50): " + [v.value1.value0.constructor.name]);
+                            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 608, column 71 - line 609, column 50): " + [v.value1.value0.constructor.name]);
                           })();
                           var makeTick = function(v2) {
                             var paired = zipWith(function(d18) {
@@ -22337,7 +22358,7 @@
                                     return arrayIndex;
                                   }
                                   ;
-                                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 609, column 46 - line 611, column 54): " + [v1.indices.constructor.name]);
+                                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 615, column 46 - line 617, column 54): " + [v1.indices.constructor.name]);
                                 })();
                                 var v5 = mapFlipped4(v.value1.value1)(function(attr3) {
                                   return applyAttributeSync(v4.element)(v4.datum)(logicalIndex)(attr3);
@@ -22372,7 +22393,7 @@
               return v.value0.value0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 627, column 65 - line 628, column 44): " + [v.value0.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 633, column 65 - line 634, column 44): " + [v.value0.constructor.name]);
           })();
           var makeTick = function(v2) {
             var paired = zipWith(function(d18) {
@@ -22394,7 +22415,7 @@
                     return arrayIndex;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 634, column 40 - line 636, column 48): " + [v1.indices.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 640, column 40 - line 642, column 48): " + [v1.indices.constructor.name]);
                 })();
                 var v5 = mapFlipped4(v.value1)(function(attr3) {
                   return applyAttributeSync(v4.element)(v4.datum)(logicalIndex)(attr3);
@@ -22433,7 +22454,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 659, column 26 - line 664, column 40): " + [config.nodes.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 665, column 26 - line 670, column 40): " + [config.nodes.constructor.name]);
       })())(function(nodesBeforeFilter) {
         var nodesInSim = (function() {
           if (config.nodeFilter instanceof Just) {
@@ -22444,7 +22465,7 @@
             return nodesBeforeFilter;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 667, column 22 - line 669, column 39): " + [config.nodeFilter.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 673, column 22 - line 675, column 39): " + [config.nodeFilter.constructor.name]);
         })();
         return bind12((function() {
           if (config.nodeFilter instanceof Just) {
@@ -22455,7 +22476,7 @@
             return pure12(nodesInSim);
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 672, column 10 - line 674, column 33): " + [config.nodeFilter.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 678, column 10 - line 680, column 33): " + [config.nodeFilter.constructor.name]);
         })())(function() {
           return bind12((function() {
             if (config.activeForces instanceof Just) {
@@ -22466,7 +22487,7 @@
               return pure12(unit);
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 677, column 10 - line 679, column 27): " + [config.activeForces.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 683, column 10 - line 685, column 27): " + [config.activeForces.constructor.name]);
           })())(function() {
             return bind12((function() {
               if (config.config instanceof Just) {
@@ -22483,7 +22504,7 @@
                 return pure12(unit);
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 682, column 10 - line 688, column 27): " + [config.config.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 688, column 10 - line 694, column 27): " + [config.config.constructor.name]);
             })())(function() {
               return bind12((function() {
                 if (config.links instanceof Just && config.linkFilter instanceof Just) {
@@ -22511,7 +22532,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 691, column 19 - line 713, column 27): " + [config.links.constructor.name, config.linkFilter.constructor.name]);
+                throw new Error("Failed pattern match at PSD3v2.Interpreter.D3v2 (line 697, column 19 - line 719, column 27): " + [config.links.constructor.name, config.linkFilter.constructor.name]);
               })())(function(linksInSim) {
                 return pure12({
                   nodes: nodesInSim,
@@ -23910,7 +23931,7 @@
                                                             return unsafeCrashWith("nodeElements not found");
                                                           }
                                                           ;
-                                                          throw new Error("Failed pattern match at D3.Viz.TreeAPI.LesMisTreeExample (line 238, column 18 - line 240, column 76): " + [v2.constructor.name]);
+                                                          throw new Error("Failed pattern match at D3.Viz.TreeAPI.LesMisTreeExample (line 242, column 18 - line 244, column 76): " + [v2.constructor.name]);
                                                         })();
                                                         var linksSel = (function() {
                                                           var v2 = lookup9("linkElements")(linksSelections);
@@ -23922,7 +23943,7 @@
                                                             return unsafeCrashWith("linkElements not found");
                                                           }
                                                           ;
-                                                          throw new Error("Failed pattern match at D3.Viz.TreeAPI.LesMisTreeExample (line 243, column 18 - line 245, column 76): " + [v2.constructor.name]);
+                                                          throw new Error("Failed pattern match at D3.Viz.TreeAPI.LesMisTreeExample (line 247, column 18 - line 249, column 76): " + [v2.constructor.name]);
                                                         })();
                                                         return bind10(on4(new Drag2(defaultDrag))(zoomGroupSel))(function() {
                                                           return bind10(on4(new Zoom2(defaultZoom(new ScaleExtent2(0.5, 4))("#zoom-group")))(svgSel))(function() {
@@ -26858,12 +26879,14 @@
   };
 
   // output/Component.Example/index.js
+  var map42 = /* @__PURE__ */ map(functorMaybe);
+  var discard16 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var bind26 = /* @__PURE__ */ bind(bindHalogenM);
   var get9 = /* @__PURE__ */ get(monadStateHalogenM);
-  var discard16 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var $$void9 = /* @__PURE__ */ $$void(functorEffect);
   var pure19 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var map42 = /* @__PURE__ */ map(functorMaybe);
+  var when3 = /* @__PURE__ */ when(applicativeHalogenM);
+  var modify_5 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var Initialize3 = /* @__PURE__ */ (function() {
     function Initialize52() {
     }
@@ -26871,62 +26894,16 @@
     Initialize52.value = new Initialize52();
     return Initialize52;
   })();
-  var handleAction2 = function(dictMonadAff) {
-    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
-    return function(v) {
-      return bind26(get9)(function(state3) {
-        return discard16((function() {
-          if (state3.exampleId === "three-little-circles") {
-            return liftEffect52(threeLittleCircles);
-          }
-          ;
-          if (state3.exampleId === "three-circles-transition") {
-            return liftEffect52($$void9(threeLittleCirclesTransition("#viz")));
-          }
-          ;
-          if (state3.exampleId === "simple-tree") {
-            return liftEffect52(testSimpleTree);
-          }
-          ;
-          if (state3.exampleId === "nested-elements") {
-            return liftEffect52(testNestedElements);
-          }
-          ;
-          if (state3.exampleId === "bar-chart") {
-            return liftEffect52(barChart);
-          }
-          ;
-          if (state3.exampleId === "scatter-plot") {
-            return liftEffect52(scatterPlot);
-          }
-          ;
-          if (state3.exampleId === "line-chart") {
-            return liftEffect52(lineChart);
-          }
-          ;
-          if (state3.exampleId === "grouped-bar-chart") {
-            return liftEffect52(groupedBarChart("#viz"));
-          }
-          ;
-          if (state3.exampleId === "simple-hierarchy") {
-            return liftEffect52(treeViz("#viz"));
-          }
-          ;
-          if (state3.exampleId === "three-little-dimensions") {
-            return liftEffect52(threeLittleDimensions);
-          }
-          ;
-          if (state3.exampleId === "lesmis-force") {
-            return liftEffect52(testLesMisTree);
-          }
-          ;
-          return pure19(unit);
-        })())(function() {
-          return liftEffect52(highlightAll);
-        });
-      });
+  var Receive2 = /* @__PURE__ */ (function() {
+    function Receive3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Receive3.create = function(value0) {
+      return new Receive3(value0);
     };
-  };
+    return Receive3;
+  })();
   var getPrevExampleId = function(currentId) {
     if (currentId === "three-little-circles") {
       return Nothing.value;
@@ -27245,7 +27222,92 @@
       return div2([classes(["example-page"])])([renderHeader(state3.exampleId)(new Just(v.value0)), main([classes(["example-content"])])([div2([classes(["example-description"])])([h1([classes(["example-title"])])([text2(v.value0.name)]), p([classes(["example-subtitle"])])([text2(v.value0.description)]), p([classes(["example-category-badge"])])([text2(v.value0.category)])]), div2([classes(["example-viz-panel"])])([div2([id3("viz"), classes(["example-viz"])])([])]), div2([classes(["example-code-panel"])])([h2([classes(["code-panel-title"])])([text2("Source Code")]), p([classes(["code-note"])])([text2("View the source for this example in the "), a([href(getGithubLink(v.value0.id)), target2("_blank"), rel("noopener noreferrer")])([text2("GitHub repository")])]), div2([classes(["code-block"])])(syntaxHighlightedCode(getExampleCodeSummary(v.value0.id)))])])]);
     }
     ;
-    throw new Error("Failed pattern match at Component.Example (line 162, column 3 - line 225, column 10): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Component.Example (line 178, column 3 - line 241, column 10): " + [v.constructor.name]);
+  };
+  var clearVizContainer = function(dictMonadAff) {
+    return clear2(monadEffectHalogenM(dictMonadAff.MonadEffect0()))("#viz");
+  };
+  var handleAction2 = function(dictMonadAff) {
+    var clearVizContainer1 = clearVizContainer(dictMonadAff);
+    var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    return function(v) {
+      if (v instanceof Initialize3) {
+        return discard16(clearVizContainer1)(function() {
+          return bind26(get9)(function(state3) {
+            return discard16((function() {
+              if (state3.exampleId === "three-little-circles") {
+                return liftEffect52(threeLittleCircles);
+              }
+              ;
+              if (state3.exampleId === "three-circles-transition") {
+                return liftEffect52($$void9(threeLittleCirclesTransition("#viz")));
+              }
+              ;
+              if (state3.exampleId === "simple-tree") {
+                return liftEffect52(testSimpleTree);
+              }
+              ;
+              if (state3.exampleId === "nested-elements") {
+                return liftEffect52(testNestedElements);
+              }
+              ;
+              if (state3.exampleId === "bar-chart") {
+                return liftEffect52(barChart);
+              }
+              ;
+              if (state3.exampleId === "scatter-plot") {
+                return liftEffect52(scatterPlot);
+              }
+              ;
+              if (state3.exampleId === "line-chart") {
+                return liftEffect52(lineChart);
+              }
+              ;
+              if (state3.exampleId === "grouped-bar-chart") {
+                return liftEffect52(groupedBarChart("#viz"));
+              }
+              ;
+              if (state3.exampleId === "simple-hierarchy") {
+                return liftEffect52(treeViz("#viz"));
+              }
+              ;
+              if (state3.exampleId === "three-little-dimensions") {
+                return liftEffect52(threeLittleDimensions);
+              }
+              ;
+              if (state3.exampleId === "lesmis-force") {
+                return liftEffect52(testLesMisTree);
+              }
+              ;
+              return pure19(unit);
+            })())(function() {
+              return liftEffect52(highlightAll);
+            });
+          });
+        });
+      }
+      ;
+      if (v instanceof Receive2) {
+        return bind26(get9)(function(state3) {
+          return when3(state3.exampleId !== v.value0)(discard16(modify_5(function(v1) {
+            var $38 = {};
+            for (var $39 in v1) {
+              if ({}.hasOwnProperty.call(v1, $39)) {
+                $38[$39] = v1[$39];
+              }
+              ;
+            }
+            ;
+            $38.exampleId = v.value0;
+            return $38;
+          }))(function() {
+            return handleAction2(dictMonadAff)(Initialize3.value);
+          }));
+        });
+      }
+      ;
+      throw new Error("Failed pattern match at Component.Example (line 70, column 16 - line 107, column 30): " + [v.constructor.name]);
+    };
   };
   var component2 = function(dictMonadAff) {
     return mkComponent({
@@ -27257,10 +27319,12 @@
       render: render6,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
         finalize: defaultEval.finalize,
         handleAction: handleAction2(dictMonadAff),
-        initialize: new Just(Initialize3.value)
+        initialize: new Just(Initialize3.value),
+        receive: function($42) {
+          return Just.create(Receive2.create($42));
+        }
       })
     });
   };
@@ -27499,7 +27563,7 @@
   var discard24 = /* @__PURE__ */ discard18(bindHalogenM);
   var bind27 = /* @__PURE__ */ bind(bindHalogenM);
   var forever2 = /* @__PURE__ */ forever(monadRecAff);
-  var modify_5 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var modify_6 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var get10 = /* @__PURE__ */ get(monadStateHalogenM);
   var pure110 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Running = /* @__PURE__ */ (function() {
@@ -27608,7 +27672,7 @@
         return discard24(log9("GeneralUpdatePattern: Initializing"))(function() {
           return bind27(runGeneralUpdatePattern2)(function(updateFn) {
             return bind27(liftAff4(forkAff(forever2(runUpdate(updateFn)))))(function(fiber) {
-              return discard24(modify_5(function(s) {
+              return discard24(modify_6(function(s) {
                 var $53 = {};
                 for (var $54 in s) {
                   if ({}.hasOwnProperty.call(s, $54)) {
@@ -27644,7 +27708,7 @@
                 ;
                 throw new Error("Failed pattern match at Component.GeneralUpdatePattern (line 142, column 9 - line 145, column 86): " + [state3.fiber.constructor.name]);
               })())(function() {
-                return modify_5(function(s) {
+                return modify_6(function(s) {
                   var $59 = {};
                   for (var $60 in s) {
                     if ({}.hasOwnProperty.call(s, $60)) {
@@ -27669,7 +27733,7 @@
               ;
               if (state3.update instanceof Just) {
                 return bind27(liftAff4(forkAff(forever2(runUpdate(state3.update.value0)))))(function(fiber) {
-                  return modify_5(function(s) {
+                  return modify_6(function(s) {
                     var $63 = {};
                     for (var $64 in s) {
                       if ({}.hasOwnProperty.call(s, $64)) {
@@ -27707,7 +27771,7 @@
               ;
               throw new Error("Failed pattern match at Component.GeneralUpdatePattern (line 158, column 5 - line 160, column 103): " + [state3.fiber.constructor.name]);
             })())(function() {
-              return modify_5(function(s) {
+              return modify_6(function(s) {
                 var $69 = {};
                 for (var $70 in s) {
                   if ({}.hasOwnProperty.call(s, $70)) {
@@ -28702,7 +28766,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var pure111 = /* @__PURE__ */ pure(applicativeD3v2M);
   var discard32 = /* @__PURE__ */ discard20(bindHalogenM);
   var bind32 = /* @__PURE__ */ bind(bindHalogenM);
-  var modify_6 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var modify_7 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var get11 = /* @__PURE__ */ get(monadStateHalogenM);
   var pure210 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Linear2 = /* @__PURE__ */ (function() {
@@ -29080,7 +29144,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return discard32(liftAff4(delay(100)))(function() {
           return bind32(liftAff4(loadFlareData))(function(result) {
             if (result instanceof Left) {
-              return modify_6(function(v1) {
+              return modify_7(function(v1) {
                 var $151 = {};
                 for (var $152 in v1) {
                   if ({}.hasOwnProperty.call(v1, $152)) {
@@ -29095,7 +29159,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             }
             ;
             if (result instanceof Right) {
-              return discard32(modify_6(function(v1) {
+              return discard32(modify_7(function(v1) {
                 var $155 = {};
                 for (var $156 in v1) {
                   if ({}.hasOwnProperty.call(v1, $156)) {
@@ -29120,7 +29184,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v instanceof SetMinSeparation) {
-        return discard32(modify_6(function(v1) {
+        return discard32(modify_7(function(v1) {
           var $159 = {};
           for (var $160 in v1) {
             if ({}.hasOwnProperty.call(v1, $160)) {
@@ -29137,7 +29201,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v instanceof SetLayerScalePreset) {
-        return discard32(modify_6(function(v1) {
+        return discard32(modify_7(function(v1) {
           var $163 = {};
           for (var $164 in v1) {
             if ({}.hasOwnProperty.call(v1, $164)) {
@@ -29154,7 +29218,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v instanceof SetExponent) {
-        return discard32(modify_6(function(v1) {
+        return discard32(modify_7(function(v1) {
           var $167 = {};
           for (var $168 in v1) {
             if ({}.hasOwnProperty.call(v1, $168)) {
@@ -29171,7 +29235,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v instanceof SetLinkStyle) {
-        return discard32(modify_6(function(v1) {
+        return discard32(modify_7(function(v1) {
           var $171 = {};
           for (var $172 in v1) {
             if ({}.hasOwnProperty.call(v1, $172)) {
@@ -29594,7 +29658,6 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
 
   // output/PSD3v2.Simulation.Update/index.js
   var foldl12 = /* @__PURE__ */ foldl(foldableArray);
-  var elem5 = /* @__PURE__ */ elem2(eqString);
   var log7 = /* @__PURE__ */ log3(monadEffectEffect);
   var show35 = /* @__PURE__ */ show(showInt);
   var discard21 = /* @__PURE__ */ discard(discardUnit);
@@ -29636,66 +29699,69 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return function(dictOrd) {
           var joinData13 = joinData7(dictOrd);
           return function(dictOrd1) {
-            return function(dictOrd2) {
-              var joinDataWithKey1 = joinDataWithKey6(dictOrd2);
-              return function(v) {
-                return function(nodeElement) {
-                  return function(linkElement) {
-                    return function(config) {
-                      return function(nodeKeyFn) {
-                        return function(linkKeyFn) {
-                          return function(attrs) {
-                            return function(callbacks) {
-                              var filteredNodes = filter(config.nodeFilter)(config.allNodes);
-                              var initializedNodes = foldl12(function(nodes) {
-                                return function(fn) {
-                                  return fn(nodes);
+            return function(dictEq) {
+              var elem8 = elem2(dictEq);
+              return function(dictOrd2) {
+                var joinDataWithKey1 = joinDataWithKey6(dictOrd2);
+                return function(v) {
+                  return function(nodeElement) {
+                    return function(linkElement) {
+                      return function(config) {
+                        return function(nodeKeyFn) {
+                          return function(linkKeyFn) {
+                            return function(attrs) {
+                              return function(callbacks) {
+                                var filteredNodes = filter(config.nodeFilter)(config.allNodes);
+                                var initializedNodes = foldl12(function(nodes) {
+                                  return function(fn) {
+                                    return fn(nodes);
+                                  };
+                                })(filteredNodes)(config.nodeInitializers);
+                                var nodeIDs = getIDsFromNodes_(initializedNodes)(nodeKeyFn);
+                                var validLink = function(link4) {
+                                  var linkIDs = getLinkIDs_(link4);
+                                  return elem8(linkIDs.sourceID)(nodeIDs) && elem8(linkIDs.targetID)(nodeIDs);
                                 };
-                              })(filteredNodes)(config.nodeInitializers);
-                              var nodeIDs = getIDsFromNodes_(initializedNodes)(nodeKeyFn);
-                              var validLink = function(link4) {
-                                var linkIDs = getLinkIDs_(nodeKeyFn)(link4);
-                                return elem5(linkIDs.sourceID)(nodeIDs) && elem5(linkIDs.targetID)(nodeIDs);
-                              };
-                              var structurallyFilteredLinks = filter(validLink)(config.allLinks);
-                              var finalLinks = (function() {
-                                if (config.linkFilter instanceof Nothing) {
-                                  return structurallyFilteredLinks;
-                                }
-                                ;
-                                if (config.linkFilter instanceof Just) {
-                                  return filter(config.linkFilter.value0)(structurallyFilteredLinks);
-                                }
-                                ;
-                                throw new Error("Failed pattern match at PSD3v2.Simulation.Update (line 197, column 20 - line 199, column 75): " + [config.linkFilter.constructor.name]);
-                              })();
-                              var internalUpdateConfig = {
-                                nodes: new Just(initializedNodes),
-                                links: new Just(finalLinks),
-                                nodeFilter: Nothing.value,
-                                linkFilter: Nothing.value,
-                                activeForces: config.activeForces,
-                                config: config.config,
-                                keyFn: nodeKeyFn
-                              };
-                              return bind89(update8(internalUpdateConfig))(function(enhanced) {
-                                var nodeSelector = elementTypeToString(nodeElement);
-                                return bind89(liftEffect52(log7("\u{1F50D} genericUpdateSimulation: joining nodes with selector '" + (nodeSelector + "'"))))(function() {
-                                  return bind89(liftEffect52(log7("\u{1F50D} genericUpdateSimulation: " + (show35(length(enhanced.nodes)) + " nodes in data"))))(function() {
-                                    return bind89(joinData13(enhanced.nodes)(nodeSelector)(v.nodes))(function(v1) {
-                                      return bind89(liftEffect52(log7("\u{1F50D} genericUpdateSimulation: join result - enter: " + (show35(length(getEnterData(v1.value0.enter))) + (", update: " + (show35(length(getUpdateData(v1.value0.update))) + (", exit: " + show35(length(getExitData(v1.value0.exit))))))))))(function() {
-                                        return bind89(callbacks.onNodeEnter(v1.value0.enter)(attrs))(function(nodeEnter) {
-                                          return discard120(callbacks.onNodeUpdate(v1.value0.update)(attrs))(function() {
-                                            return discard120(callbacks.onNodeExit(v1.value0.exit))(function() {
-                                              return bind89(merge7(nodeEnter)(v1.value0.update))(function(mergedNodes) {
-                                                return bind89(joinDataWithKey1(enhanced.links)(linkKeyFn)(elementTypeToString(linkElement))(v.links))(function(v2) {
-                                                  return bind89(callbacks.onLinkEnter(v2.value0.enter)(attrs))(function(linkEnter) {
-                                                    return discard120(callbacks.onLinkUpdate(v2.value0.update)(attrs))(function() {
-                                                      return discard120(callbacks.onLinkExit(v2.value0.exit))(function() {
-                                                        return bind89(merge7(linkEnter)(v2.value0.update))(function(mergedLinks) {
-                                                          return discard120(addTickFunction10("nodes")(new Step4(mergedNodes, callbacks.nodeTickAttrs(attrs))))(function() {
-                                                            return discard120(addTickFunction10("links")(new Step4(mergedLinks, callbacks.linkTickAttrs)))(function() {
-                                                              return pure91(unit);
+                                var structurallyFilteredLinks = filter(validLink)(config.allLinks);
+                                var finalLinks = (function() {
+                                  if (config.linkFilter instanceof Nothing) {
+                                    return structurallyFilteredLinks;
+                                  }
+                                  ;
+                                  if (config.linkFilter instanceof Just) {
+                                    return filter(config.linkFilter.value0)(structurallyFilteredLinks);
+                                  }
+                                  ;
+                                  throw new Error("Failed pattern match at PSD3v2.Simulation.Update (line 201, column 20 - line 203, column 75): " + [config.linkFilter.constructor.name]);
+                                })();
+                                var internalUpdateConfig = {
+                                  nodes: new Just(initializedNodes),
+                                  links: new Just(finalLinks),
+                                  nodeFilter: Nothing.value,
+                                  linkFilter: Nothing.value,
+                                  activeForces: config.activeForces,
+                                  config: config.config,
+                                  keyFn: nodeKeyFn
+                                };
+                                return bind89(update8(internalUpdateConfig))(function(enhanced) {
+                                  var nodeSelector = elementTypeToString(nodeElement);
+                                  return bind89(liftEffect52(log7("\u{1F50D} genericUpdateSimulation: joining nodes with selector '" + (nodeSelector + "'"))))(function() {
+                                    return bind89(liftEffect52(log7("\u{1F50D} genericUpdateSimulation: " + (show35(length(enhanced.nodes)) + " nodes in data"))))(function() {
+                                      return bind89(joinData13(enhanced.nodes)(nodeSelector)(v.nodes))(function(v1) {
+                                        return bind89(liftEffect52(log7("\u{1F50D} genericUpdateSimulation: join result - enter: " + (show35(length(getEnterData(v1.value0.enter))) + (", update: " + (show35(length(getUpdateData(v1.value0.update))) + (", exit: " + show35(length(getExitData(v1.value0.exit))))))))))(function() {
+                                          return bind89(callbacks.onNodeEnter(v1.value0.enter)(attrs))(function(nodeEnter) {
+                                            return discard120(callbacks.onNodeUpdate(v1.value0.update)(attrs))(function() {
+                                              return discard120(callbacks.onNodeExit(v1.value0.exit))(function() {
+                                                return bind89(merge7(nodeEnter)(v1.value0.update))(function(mergedNodes) {
+                                                  return bind89(joinDataWithKey1(enhanced.links)(linkKeyFn)(elementTypeToString(linkElement))(v.links))(function(v2) {
+                                                    return bind89(callbacks.onLinkEnter(v2.value0.enter)(attrs))(function(linkEnter) {
+                                                      return discard120(callbacks.onLinkUpdate(v2.value0.update)(attrs))(function() {
+                                                        return discard120(callbacks.onLinkExit(v2.value0.exit))(function() {
+                                                          return bind89(merge7(linkEnter)(v2.value0.update))(function(mergedLinks) {
+                                                            return discard120(addTickFunction10("nodes")(new Step4(mergedNodes, callbacks.nodeTickAttrs(attrs))))(function() {
+                                                              return discard120(addTickFunction10("links")(new Step4(mergedLinks, callbacks.linkTickAttrs)))(function() {
+                                                                return pure91(unit);
+                                                              });
                                                             });
                                                           });
                                                         });
@@ -29711,7 +29777,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                     });
                                   });
                                 });
-                              });
+                              };
                             };
                           };
                         };
@@ -29769,7 +29835,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     reflectSymbol: function() {
       return "fx";
     }
-  })(ordNullable3)))(ordString)(ordString);
+  })(ordNullable3)))(ordString)(eqString)(ordString);
   var lesMisRenderCallbacks2 = /* @__PURE__ */ lesMisRenderCallbacks(monadD3v2SimM)(selectionMD3v2Selection_D1);
   var discard26 = /* @__PURE__ */ discard(discardUnit)(bindD3v2SimM);
   var stop2 = /* @__PURE__ */ stop(simulationMD3v2Selection_);
@@ -29938,10 +30004,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var show116 = /* @__PURE__ */ show(showNumber);
   var discard27 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var bind31 = /* @__PURE__ */ bind(bindHalogenM);
-  var modify_7 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var modify_8 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var get12 = /* @__PURE__ */ get(monadStateHalogenM);
   var put3 = /* @__PURE__ */ put(monadStateHalogenM);
-  var when3 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when4 = /* @__PURE__ */ when(applicativeHalogenM);
   var FullGraph = /* @__PURE__ */ (function() {
     function FullGraph2() {
     }
@@ -30024,7 +30090,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return "Phylotaxis (sunflower spiral) layout (pinned)";
     }
     ;
-    throw new Error("Failed pattern match at Component.LesMisGUP (line 175, column 20 - line 179, column 64): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Component.LesMisGUP (line 178, column 20 - line 182, column 64): " + [v.constructor.name]);
   };
   var forces = /* @__PURE__ */ (function() {
     return {
@@ -30118,7 +30184,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               if (lesMisResponse instanceof Right) {
                 var model = readGraphFromFileContents(new Right(lesMisResponse.value0));
                 return discard27(log9("LesMisGUP: Loaded " + (show37(length(model.nodes)) + (" nodes and " + (show37(length(model.links)) + " links")))))(function() {
-                  return discard27(modify_7(function(v1) {
+                  return discard27(modify_8(function(v1) {
                     var $61 = {};
                     for (var $62 in v1) {
                       if ({}.hasOwnProperty.call(v1, $62)) {
@@ -30136,7 +30202,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                         return drawLesMisGUP(forcesArray)(activeForces)(model)("#lesmis-gup-viz");
                       })())))(function(v1) {
                         return discard27(put3(v1.value1))(function() {
-                          return discard27(modify_7(function(v2) {
+                          return discard27(modify_8(function(v2) {
                             var $65 = {};
                             for (var $66 in v2) {
                               if ({}.hasOwnProperty.call(v2, $66)) {
@@ -30160,7 +30226,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 });
               }
               ;
-              throw new Error("Failed pattern match at Component.LesMisGUP (line 190, column 5 - line 211, column 56): " + [lesMisResponse.constructor.name]);
+              throw new Error("Failed pattern match at Component.LesMisGUP (line 193, column 5 - line 214, column 56): " + [lesMisResponse.constructor.name]);
             });
           });
         });
@@ -30191,10 +30257,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   return switchToPhylotaxis(selections)(state3.model.value0);
                 }
                 ;
-                throw new Error("Failed pattern match at Component.LesMisGUP (line 222, column 11 - line 233, column 60): " + [v.value0.constructor.name]);
+                throw new Error("Failed pattern match at Component.LesMisGUP (line 225, column 11 - line 236, column 60): " + [v.value0.constructor.name]);
               })())))(function(v1) {
                 return discard27(put3(v1.value1))(function() {
-                  return modify_7(function(v2) {
+                  return modify_8(function(v2) {
                     var $77 = {};
                     for (var $78 in v2) {
                       if ({}.hasOwnProperty.call(v2, $78)) {
@@ -30218,7 +30284,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       if (v instanceof ToggleAutoCycle) {
         return bind31(get12)(function(state3) {
           var newState = !state3.autoCycling;
-          return discard27(modify_7(function(v1) {
+          return discard27(modify_8(function(v1) {
             var $85 = {};
             for (var $86 in v1) {
               if ({}.hasOwnProperty.call(v1, $86)) {
@@ -30243,7 +30309,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       ;
       if (v instanceof AutoCycleNext) {
         return bind31(get12)(function(state3) {
-          return when3(state3.autoCycling)((function() {
+          return when4(state3.autoCycling)((function() {
             var nextScene = (function() {
               if (state3.currentScene instanceof FullGraph) {
                 return new FilteredGraph(5);
@@ -30272,7 +30338,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         });
       }
       ;
-      throw new Error("Failed pattern match at Component.LesMisGUP (line 183, column 16 - line 272, column 33): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Component.LesMisGUP (line 186, column 16 - line 275, column 33): " + [v.constructor.name]);
     };
   };
   var component16 = function(dictMonadAff) {
@@ -30510,7 +30576,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard29 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var bind34 = /* @__PURE__ */ bind(bindHalogenM);
   var fromFoldable24 = /* @__PURE__ */ fromFoldable8(foldableArray)(ordString);
-  var modify_8 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var modify_9 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var get13 = /* @__PURE__ */ get(monadStateHalogenM);
   var bind113 = /* @__PURE__ */ bind(bindD3v2SimM);
   var pure35 = /* @__PURE__ */ pure(applicativeD3v2SimM);
@@ -30567,7 +30633,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   var graph = readGraphFromFileContents(new Right(lesMisResponse.value0));
                   var forcesArray = [forces2.manyBodyNeg, forces2.collision, forces2.center, forces2.links];
                   var activeForces2 = fromFoldable24(["many body negative", "collision", "center", linksForceName_]);
-                  return discard29(modify_8(function(s) {
+                  return discard29(modify_9(function(s) {
                     var $38 = {};
                     for (var $39 in s) {
                       if ({}.hasOwnProperty.call(s, $39)) {
@@ -30585,7 +30651,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                       })(bind113(drawLesMisGUPClean(forcesArray)(activeForces2)(graph)("#lesmis-gup-clean-viz"))(function() {
                         return pure35(unit);
                       }))))(function(newState) {
-                        return discard29(modify_8(function(s) {
+                        return discard29(modify_9(function(s) {
                           var $41 = {};
                           for (var $42 in s) {
                             if ({}.hasOwnProperty.call(s, $42)) {
@@ -30604,7 +30670,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at Component.LesMisGUPClean (line 144, column 5 - line 159, column 55): " + [lesMisResponse.constructor.name]);
+                throw new Error("Failed pattern match at Component.LesMisGUPClean (line 143, column 5 - line 158, column 55): " + [lesMisResponse.constructor.name]);
               })())(function() {
                 return pure112(unit);
               });
@@ -30635,7 +30701,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return bind34(liftAff4(execD3v2SimM({
                   simulation: state3.lesMisGUPSimulation
                 })(updateNodes(filteredNodes))))(function(newState) {
-                  return modify_8(function(s) {
+                  return modify_9(function(s) {
                     var $47 = {};
                     for (var $48 in s) {
                       if ({}.hasOwnProperty.call(s, $48)) {
@@ -30651,12 +30717,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               });
             }
             ;
-            throw new Error("Failed pattern match at Component.LesMisGUPClean (line 166, column 5 - line 177, column 72): " + [state3.originalGraph.constructor.name]);
+            throw new Error("Failed pattern match at Component.LesMisGUPClean (line 165, column 5 - line 176, column 72): " + [state3.originalGraph.constructor.name]);
           });
         });
       }
       ;
-      throw new Error("Failed pattern match at Component.LesMisGUPClean (line 137, column 16 - line 177, column 72): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Component.LesMisGUPClean (line 136, column 16 - line 176, column 72): " + [v.constructor.name]);
     };
   };
   var forceLibrary2 = /* @__PURE__ */ (function() {
@@ -30874,7 +30940,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                     return unsafeCrashWith("linkElements not found");
                                   }
                                   ;
-                                  throw new Error("Failed pattern match at D3.Viz.LesMis.LesMisGUPSimple (line 195, column 19 - line 197, column 76): " + [v2.constructor.name]);
+                                  throw new Error("Failed pattern match at D3.Viz.LesMis.LesMisGUPSimple (line 198, column 19 - line 200, column 76): " + [v2.constructor.name]);
                                 })();
                                 var scene = {
                                   nodes: v1.nodes
@@ -30890,7 +30956,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                       return unsafeCrashWith("nodeElements not found");
                                     }
                                     ;
-                                    throw new Error("Failed pattern match at D3.Viz.LesMis.LesMisGUPSimple (line 202, column 21 - line 204, column 76): " + [v2.constructor.name]);
+                                    throw new Error("Failed pattern match at D3.Viz.LesMis.LesMisGUPSimple (line 205, column 21 - line 207, column 76): " + [v2.constructor.name]);
                                   })();
                                   return bind35(on7(new Drag2(simulationDrag("lesmis-gup-simple")))(nodeCircles))(function() {
                                     return discard30(addTickFunction4("nodes")(new Step4(nodeCircles, [cx16(function(v2) {
@@ -30952,7 +31018,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard31 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var bind36 = /* @__PURE__ */ bind(bindHalogenM);
   var fromFoldable25 = /* @__PURE__ */ fromFoldable8(foldableArray)(ordString);
-  var modify_9 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var modify_10 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var get14 = /* @__PURE__ */ get(monadStateHalogenM);
   var bind114 = /* @__PURE__ */ bind(bindD3v2SimM);
   var pure37 = /* @__PURE__ */ pure(applicativeD3v2SimM);
@@ -31009,7 +31075,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   var graph = readGraphFromFileContents(new Right(lesMisResponse.value0));
                   var forcesArray = [forces3.manyBodyNeg, forces3.collision, forces3.center, forces3.links];
                   var activeForces2 = fromFoldable25(["many body negative", "collision", "center", linksForceName_]);
-                  return discard31(modify_9(function(s) {
+                  return discard31(modify_10(function(s) {
                     var $38 = {};
                     for (var $39 in s) {
                       if ({}.hasOwnProperty.call(s, $39)) {
@@ -31027,7 +31093,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                       })(bind114(drawLesMisGUPSimple(forcesArray)(activeForces2)(graph)("#lesmis-gup-simple-viz"))(function() {
                         return pure37(unit);
                       }))))(function(newState) {
-                        return discard31(modify_9(function(s) {
+                        return discard31(modify_10(function(s) {
                           var $41 = {};
                           for (var $42 in s) {
                             if ({}.hasOwnProperty.call(s, $42)) {
@@ -31046,7 +31112,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at Component.LesMisGUPSimple (line 142, column 5 - line 157, column 56): " + [lesMisResponse.constructor.name]);
+                throw new Error("Failed pattern match at Component.LesMisGUPSimple (line 141, column 5 - line 156, column 56): " + [lesMisResponse.constructor.name]);
               })())(function() {
                 return pure113(unit);
               });
@@ -31077,7 +31143,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return bind36(liftAff4(execD3v2SimM({
                   simulation: state3.lesMisGUPSimulation
                 })(updateNodes2(filteredNodes))))(function(newState) {
-                  return modify_9(function(s) {
+                  return modify_10(function(s) {
                     var $47 = {};
                     for (var $48 in s) {
                       if ({}.hasOwnProperty.call(s, $48)) {
@@ -31093,12 +31159,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               });
             }
             ;
-            throw new Error("Failed pattern match at Component.LesMisGUPSimple (line 164, column 5 - line 175, column 72): " + [state3.originalGraph.constructor.name]);
+            throw new Error("Failed pattern match at Component.LesMisGUPSimple (line 163, column 5 - line 174, column 72): " + [state3.originalGraph.constructor.name]);
           });
         });
       }
       ;
-      throw new Error("Failed pattern match at Component.LesMisGUPSimple (line 135, column 16 - line 175, column 72): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Component.LesMisGUPSimple (line 134, column 16 - line 174, column 72): " + [v.constructor.name]);
     };
   };
   var forceLibrary3 = /* @__PURE__ */ (function() {
@@ -31450,7 +31516,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     return unsafeCrashWith("nodeElements not found");
                   }
                   ;
-                  throw new Error("Failed pattern match at D3.Viz.LesMisGUPV2 (line 487, column 21 - line 489, column 76): " + [v.constructor.name]);
+                  throw new Error("Failed pattern match at D3.Viz.LesMisGUPV2 (line 489, column 21 - line 491, column 76): " + [v.constructor.name]);
                 })();
                 var linkLines = (function() {
                   var v = lookup18("linkElements")(linksSelections);
@@ -31462,7 +31528,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     return unsafeCrashWith("linkElements not found");
                   }
                   ;
-                  throw new Error("Failed pattern match at D3.Viz.LesMisGUPV2 (line 492, column 19 - line 494, column 76): " + [v.constructor.name]);
+                  throw new Error("Failed pattern match at D3.Viz.LesMisGUPV2 (line 494, column 19 - line 496, column 76): " + [v.constructor.name]);
                 })();
                 return bind37(on8(new Drag2(simulationDrag("lesmis-gup")))(nodeCircles))(function() {
                   return discard33(addTickFunction5("nodes")(new Step4(nodeCircles, [cx18(function(v) {
@@ -31667,7 +31733,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                       return unsafeCrashWith("nodeElements not found");
                                     }
                                     ;
-                                    throw new Error("Failed pattern match at D3.Viz.LesMisGUPV2 (line 273, column 21 - line 275, column 76): " + [v2.constructor.name]);
+                                    throw new Error("Failed pattern match at D3.Viz.LesMisGUPV2 (line 275, column 21 - line 277, column 76): " + [v2.constructor.name]);
                                   })();
                                   var linkLines = (function() {
                                     var v2 = lookup18("linkElements")(linksSelections);
@@ -31679,7 +31745,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                       return unsafeCrashWith("linkElements not found");
                                     }
                                     ;
-                                    throw new Error("Failed pattern match at D3.Viz.LesMisGUPV2 (line 278, column 19 - line 280, column 76): " + [v2.constructor.name]);
+                                    throw new Error("Failed pattern match at D3.Viz.LesMisGUPV2 (line 280, column 19 - line 282, column 76): " + [v2.constructor.name]);
                                   })();
                                   return bind37(on8(new Drag2(simulationDrag("lesmis-gup")))(nodeCircles))(function() {
                                     return discard33(addTickFunction5("nodes")(new Step4(nodeCircles, [cx18(function(v2) {
@@ -31726,7 +31792,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard34 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var bind38 = /* @__PURE__ */ bind(bindHalogenM);
   var fromFoldable27 = /* @__PURE__ */ fromFoldable8(foldableArray)(ordString);
-  var modify_10 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var modify_11 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var get16 = /* @__PURE__ */ get(monadStateHalogenM);
   var bind115 = /* @__PURE__ */ bind(bindD3v2SimM);
   var pure39 = /* @__PURE__ */ pure(applicativeD3v2SimM);
@@ -31810,7 +31876,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   var graph = readGraphFromFileContents(new Right(lesMisResponse.value0));
                   var forcesArray = [forces4.manyBodyNeg, forces4.collision, forces4.center, forces4.links];
                   var activeForces2 = fromFoldable27(["many body negative", "collision", "center", linksForceName_]);
-                  return discard34(modify_10(function(s) {
+                  return discard34(modify_11(function(s) {
                     var $42 = {};
                     for (var $43 in s) {
                       if ({}.hasOwnProperty.call(s, $43)) {
@@ -31828,7 +31894,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                       })(bind115(drawLesMisGUPV2(forcesArray)(activeForces2)(graph)("#lesmis-gup-tree-viz"))(function() {
                         return pure39(unit);
                       }))))(function(newState) {
-                        return discard34(modify_10(function(s) {
+                        return discard34(modify_11(function(s) {
                           var $45 = {};
                           for (var $46 in s) {
                             if ({}.hasOwnProperty.call(s, $46)) {
@@ -31862,7 +31928,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return bind38(liftAff4(execD3v2SimM({
               simulation: state3.lesMisGUPSimulation
             })(moveToGrid(30))))(function(newState) {
-              return modify_10(function(s) {
+              return modify_11(function(s) {
                 var $49 = {};
                 for (var $50 in s) {
                   if ({}.hasOwnProperty.call(s, $50)) {
@@ -31885,7 +31951,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return bind38(liftAff4(execD3v2SimM({
               simulation: state3.lesMisGUPSimulation
             })(moveToPhylotaxis)))(function(newState) {
-              return modify_10(function(s) {
+              return modify_11(function(s) {
                 var $52 = {};
                 for (var $53 in s) {
                   if ({}.hasOwnProperty.call(s, $53)) {
@@ -31908,7 +31974,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return bind38(liftAff4(execD3v2SimM({
               simulation: state3.lesMisGUPSimulation
             })(unpinNodes)))(function(newState) {
-              return modify_10(function(s) {
+              return modify_11(function(s) {
                 var $55 = {};
                 for (var $56 in s) {
                   if ({}.hasOwnProperty.call(s, $56)) {
@@ -31936,7 +32002,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return bind38(liftAff4(execD3v2SimM({
                 simulation: state3.lesMisGUPSimulation
               })(filterByGroupWithOriginal(v.value0)(state3.originalGraph.value0))))(function(newState) {
-                return modify_10(function(s) {
+                return modify_11(function(s) {
                   var $59 = {};
                   for (var $60 in s) {
                     if ({}.hasOwnProperty.call(s, $60)) {
@@ -32359,7 +32425,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var show45 = /* @__PURE__ */ show(showInt);
   var discard36 = /* @__PURE__ */ discard(discardUnit);
   var discard110 = /* @__PURE__ */ discard36(bindStateT2);
-  var modify_11 = /* @__PURE__ */ modify_2(monadStateStateT2);
+  var modify_12 = /* @__PURE__ */ modify_2(monadStateStateT2);
   var pure42 = /* @__PURE__ */ pure(applicativeStateT2);
   var showElement2 = function(v) {
     if (v instanceof SVG) {
@@ -32471,7 +32537,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         var nodeName3 = "n" + show45(state3.nodeCounter);
         var escapedLabel = escapeLabel(label5);
         var line = "    " + (nodeName3 + ('["' + (escapedLabel + ('"]:::' + (styleClass + "\n")))));
-        return discard110(modify_11(function(s) {
+        return discard110(modify_12(function(s) {
           var $46 = {};
           for (var $47 in s) {
             if ({}.hasOwnProperty.call(s, $47)) {
@@ -32494,7 +32560,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       var toName = "n" + show45(toId);
       var fromName = "n" + show45(fromId);
       var line = "    " + (fromName + (" --> " + (toName + "\n")));
-      return modify_11(function(s) {
+      return modify_12(function(s) {
         var $49 = {};
         for (var $50 in s) {
           if ({}.hasOwnProperty.call(s, $50)) {
@@ -32806,7 +32872,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var pure43 = /* @__PURE__ */ pure(applicativeHalogenM);
   var bind42 = /* @__PURE__ */ bind(bindHalogenM);
   var discard37 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var modify_12 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var modify_13 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var Initialize21 = /* @__PURE__ */ (function() {
     function Initialize52() {
     }
@@ -32865,7 +32931,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       if (v instanceof GenerateSimpleTree) {
         var tree3 = withChildren(named2(SVG.value)("svg")([staticAttr("width")("800"), staticAttr("height")("600")]))([withChild(elem4(Group2.value)([staticAttr("class")("container")]))(elem4(Circle2.value)([staticAttr("r")("50"), staticAttr("fill")("blue")])), elem4(Text3.value)([staticAttr("x")("100"), staticAttr("y")("100")])]);
         return bind42(liftEffect52(runMermaidTree(tree3)))(function(code2) {
-          return discard37(modify_12(function(v1) {
+          return discard37(modify_13(function(v1) {
             var $23 = {};
             for (var $24 in v1) {
               if ({}.hasOwnProperty.call(v1, $24)) {
@@ -32892,7 +32958,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           }), staticAttr("r")("20"), staticAttr("fill")("steelblue")]);
         }));
         return bind42(liftEffect52(runMermaidTree(tree3)))(function(code2) {
-          return discard37(modify_12(function(v1) {
+          return discard37(modify_13(function(v1) {
             var $26 = {};
             for (var $27 in v1) {
               if ({}.hasOwnProperty.call(v1, $27)) {
@@ -32978,7 +33044,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return 9;
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.ModuleGraph.Model (line 39, column 1 - line 39, column 29): " + [name16.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.ModuleGraph.Model (line 44, column 1 - line 44, column 29): " + [name16.constructor.name]);
   };
 
   // output/D3.Viz.ModuleGraph.LoadModuleGraph/index.js
@@ -33025,8 +33091,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             var makeLink = function(target7) {
               return {
                 source: sourceName,
-                target: target7,
-                value: 1
+                target: target7
               };
             };
             var localDeps = filter(function(dep) {
@@ -33035,7 +33100,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return map47(makeLink)(localDeps);
           }
           ;
-          throw new Error("Failed pattern match at D3.Viz.ModuleGraph.LoadModuleGraph (line 81, column 3 - line 90, column 31): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at D3.Viz.ModuleGraph.LoadModuleGraph (line 80, column 3 - line 89, column 31): " + [v.constructor.name]);
         };
       };
     };
@@ -33063,7 +33128,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return pure44(new Right(processModuleGraph(result.value0.body)));
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.ModuleGraph.LoadModuleGraph (line 25, column 3 - line 30, column 44): " + [result.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.ModuleGraph.LoadModuleGraph (line 24, column 3 - line 29, column 44): " + [result.constructor.name]);
   });
 
   // output/D3.Viz.ModuleGraph.Viz/index.js
@@ -33232,7 +33297,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                       return unsafeCrashWith("nodeElements not found");
                                     }
                                     ;
-                                    throw new Error("Failed pattern match at D3.Viz.ModuleGraph.Viz (line 173, column 21 - line 175, column 76): " + [v2.constructor.name]);
+                                    throw new Error("Failed pattern match at D3.Viz.ModuleGraph.Viz (line 179, column 21 - line 181, column 76): " + [v2.constructor.name]);
                                   })();
                                   var linkLines = (function() {
                                     var v2 = lookup19("linkElements")(linksSelections);
@@ -33244,7 +33309,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                       return unsafeCrashWith("linkElements not found");
                                     }
                                     ;
-                                    throw new Error("Failed pattern match at D3.Viz.ModuleGraph.Viz (line 178, column 19 - line 180, column 76): " + [v2.constructor.name]);
+                                    throw new Error("Failed pattern match at D3.Viz.ModuleGraph.Viz (line 184, column 19 - line 186, column 76): " + [v2.constructor.name]);
                                   })();
                                   var labelTexts = (function() {
                                     var v2 = lookup19("labelElements")(labelsSelections);
@@ -33256,7 +33321,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                       return unsafeCrashWith("labelElements not found");
                                     }
                                     ;
-                                    throw new Error("Failed pattern match at D3.Viz.ModuleGraph.Viz (line 183, column 20 - line 185, column 77): " + [v2.constructor.name]);
+                                    throw new Error("Failed pattern match at D3.Viz.ModuleGraph.Viz (line 189, column 20 - line 191, column 77): " + [v2.constructor.name]);
                                   })();
                                   return bind43(on10(new Drag2(simulationDrag("module-graph")))(nodeCircles))(function() {
                                     return discard38(addTickFunction7("links")(new Step4(linkLines, [x19(function(v2) {
@@ -33306,7 +33371,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var show47 = /* @__PURE__ */ show(showInt);
   var discard39 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var bind44 = /* @__PURE__ */ bind(bindHalogenM);
-  var modify_13 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var modify_14 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var fromFoldable30 = /* @__PURE__ */ fromFoldable8(foldableArray)(ordString);
   var get18 = /* @__PURE__ */ get(monadStateHalogenM);
   var pure46 = /* @__PURE__ */ pure(applicativeHalogenM);
@@ -33390,7 +33455,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               ;
               if (graphResult instanceof Right) {
                 return discard39(log9("Loaded " + (show47(length(graphResult.value0.nodes)) + " modules")))(function() {
-                  return discard39(modify_13(function(v1) {
+                  return discard39(modify_14(function(v1) {
                     var $35 = {};
                     for (var $36 in v1) {
                       if ({}.hasOwnProperty.call(v1, $36)) {
@@ -33409,7 +33474,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                       return bind44(liftAff4(execD3v2SimM({
                         simulation: state3.simulation
                       })(drawModuleGraph(forcesArray)(activeForces2)(graphResult.value0)("#module-graph-viz"))))(function(newState) {
-                        return discard39(modify_13(function(s) {
+                        return discard39(modify_14(function(s) {
                           var $38 = {};
                           for (var $39 in s) {
                             if ({}.hasOwnProperty.call(s, $39)) {
@@ -34636,7 +34701,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var monadStateStateT3 = /* @__PURE__ */ monadStateStateT(monadIdentity);
   var get19 = /* @__PURE__ */ get(monadStateStateT3);
   var lookup110 = /* @__PURE__ */ lookup2(ordString);
-  var modify_14 = /* @__PURE__ */ modify_2(monadStateStateT3);
+  var modify_15 = /* @__PURE__ */ modify_2(monadStateStateT3);
   var insert22 = /* @__PURE__ */ insert(ordString);
   var toUnfoldable7 = /* @__PURE__ */ toUnfoldable4(unfoldableArray);
   var member5 = /* @__PURE__ */ member2(ordNodeID);
@@ -35000,7 +35065,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         ;
         throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 110, column 7 - line 120, column 109): " + [s.constructor.name, t.constructor.name]);
       })();
-      return modify_14(function(v1) {
+      return modify_15(function(v1) {
         var $129 = {};
         for (var $130 in v1) {
           if ({}.hasOwnProperty.call(v1, $130)) {
@@ -35158,7 +35223,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var initialiseSankeyNodes = /* @__PURE__ */ bind50(get19)(function(model) {
     var nodeNames = toUnfoldable7(keys3(model.nodeIDToName));
     var sankeyNodes = catMaybes(map50(initialiseSankeyNode(model))(nodeNames));
-    return modify_14(function(v) {
+    return modify_15(function(v) {
       var $138 = {};
       for (var $139 in v) {
         if ({}.hasOwnProperty.call(v, $139)) {
@@ -35207,7 +35272,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
     return bind50(get19)(function(model) {
       var updatedNodes = map50(setNodeValue2(model.sankeyLinks))(model.sankeyNodes);
-      return modify_14(function(v) {
+      return modify_15(function(v) {
         var $141 = {};
         for (var $142 in v) {
           if ({}.hasOwnProperty.call(v, $142)) {
@@ -35303,7 +35368,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return v.index;
       })(sinkNodes));
       var result = bfsHeight(model.sankeyNodes)(0)(initialCurrent)(n);
-      return modify_14(function(v) {
+      return modify_15(function(v) {
         var $150 = {};
         for (var $151 in v) {
           if ({}.hasOwnProperty.call(v, $151)) {
@@ -35399,7 +35464,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return v.index;
       })(sourceNodes));
       var result = bfsDepth(model.sankeyNodes)(0)(initialCurrent)(n);
-      return modify_14(function(v) {
+      return modify_15(function(v) {
         var $159 = {};
         for (var $160 in v) {
           if ({}.hasOwnProperty.call(v, $160)) {
@@ -35597,7 +35662,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         };
       })(model.sankeyLinks);
       var linksWithY = calculateLinkYPositions(model.sankeyNodes)(linksWithWidth);
-      return modify_14(function(v) {
+      return modify_15(function(v) {
         var $177 = {};
         for (var $178 in v) {
           if ({}.hasOwnProperty.call(v, $178)) {
@@ -35702,7 +35767,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       };
     };
     var linksWithColor = map50(assignLinkColor(nodesWithColor)(model.config.linkColorMode))(model.sankeyLinks);
-    return modify_14(function(v) {
+    return modify_15(function(v) {
       var $182 = {};
       for (var $183 in v) {
         if ({}.hasOwnProperty.call(v, $183)) {
@@ -35889,7 +35954,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       ;
       throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 284, column 9 - line 286, column 31): " + [v2.constructor.name]);
     });
-    return modify_14(function(v2) {
+    return modify_15(function(v2) {
       var $200 = {};
       for (var $201 in v2) {
         if ({}.hasOwnProperty.call(v2, $201)) {
@@ -37525,7 +37590,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var lookup28 = /* @__PURE__ */ lookup2(ordString);
   var getAllEdges2 = /* @__PURE__ */ getAllEdges(ordString);
   var bind59 = /* @__PURE__ */ bind(bindMaybe);
-  var elem6 = /* @__PURE__ */ elem2(/* @__PURE__ */ eqTuple(eqString)(eqString));
+  var elem5 = /* @__PURE__ */ elem2(/* @__PURE__ */ eqTuple(eqString)(eqString));
   var pure58 = /* @__PURE__ */ pure(applicativeMaybe);
   var x112 = /* @__PURE__ */ x1(toAttrNumberNumber);
   var y112 = /* @__PURE__ */ y1(toAttrNumberNumber);
@@ -37623,7 +37688,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 var edgeElements = catMaybes(mapFlipped11(allEdges)(function(v) {
                   return bind59(getPos(v.value0))(function(sourcePos) {
                     return bind59(getPos(v.value1))(function(targetPos) {
-                      var isRemoved = highlightRemoved && elem6(new Tuple(v.value0, v.value1))(removedEdges);
+                      var isRemoved = highlightRemoved && elem5(new Tuple(v.value0, v.value1))(removedEdges);
                       return pure58(elem4(Line2.value)([x112(sourcePos.x), y112(sourcePos.y), x213(targetPos.x), y213(targetPos.y), stroke24((function() {
                         if (isRemoved) {
                           return "#E74C3C";
@@ -41123,7 +41188,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard57 = /* @__PURE__ */ discard(discardUnit)(/* @__PURE__ */ bindWriterT(semigroupString)(bindIdentity));
   var tell2 = /* @__PURE__ */ tell(/* @__PURE__ */ monadTellWriterT(monoidString)(monadIdentity));
   var applicativeWriterT2 = /* @__PURE__ */ applicativeWriterT(monoidString)(applicativeIdentity);
-  var when4 = /* @__PURE__ */ when(applicativeWriterT2);
+  var when5 = /* @__PURE__ */ when(applicativeWriterT2);
   var for_3 = /* @__PURE__ */ for_(applicativeWriterT2)(foldableArray);
   var show211 = /* @__PURE__ */ show(showInt);
   var showElemType = function(v) {
@@ -41243,12 +41308,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           ;
           throw new Error("Failed pattern match at PSD3v2.Interpreter.English (line 25, column 5 - line 27, column 77): " + [tree3.value0.name.constructor.name]);
         })())(function() {
-          return discard57(when4(!$$null(tree3.value0.attrs))(discard57(tell2(" with attributes:\n"))(function() {
+          return discard57(when5(!$$null(tree3.value0.attrs))(discard57(tell2(" with attributes:\n"))(function() {
             return for_3(tree3.value0.attrs)(function(attr3) {
               return tell2(indent(level + 1 | 0) + (describeAttribute(attr3) + "\n"));
             });
           })))(function() {
-            return when4(!$$null(tree3.value0.children))(discard57(tell2(indent(level) + ("Then add " + (show211(length(tree3.value0.children)) + " child element(s):\n"))))(function() {
+            return when5(!$$null(tree3.value0.children))(discard57(tell2(indent(level) + ("Then add " + (show211(length(tree3.value0.children)) + " child element(s):\n"))))(function() {
               return for_3(tree3.value0.children)(function(child) {
                 return describeTree(child)(level + 1 | 0);
               });
@@ -41281,9 +41346,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return discard57(tell2(indent(level) + ("For each of " + (show211(length(tree3.value0.joinData)) + " data items, "))))(function() {
           return discard57(tell2("create/update/remove " + (tree3.value0.key + (' (scene join named "' + (tree3.value0.name + '")')))))(function() {
             return discard57(tell2(" with General Update Pattern:\n"))(function() {
-              return discard57(when4(isJust(tree3.value0.enterBehavior))(tell2(indent(level + 1 | 0) + "- Enter: elements appear with initial attributes and transition\n")))(function() {
-                return discard57(when4(isJust(tree3.value0.updateBehavior))(tell2(indent(level + 1 | 0) + "- Update: elements transition to new state\n")))(function() {
-                  return discard57(when4(isJust(tree3.value0.exitBehavior))(tell2(indent(level + 1 | 0) + "- Exit: elements transition out then removed\n")))(function() {
+              return discard57(when5(isJust(tree3.value0.enterBehavior))(tell2(indent(level + 1 | 0) + "- Enter: elements appear with initial attributes and transition\n")))(function() {
+                return discard57(when5(isJust(tree3.value0.updateBehavior))(tell2(indent(level + 1 | 0) + "- Update: elements transition to new state\n")))(function() {
+                  return discard57(when5(isJust(tree3.value0.exitBehavior))(tell2(indent(level + 1 | 0) + "- Exit: elements transition out then removed\n")))(function() {
                     return tell2(indent(level + 1 | 0) + "(Template function defined for creating elements from data)\n");
                   });
                 });
@@ -41297,9 +41362,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return discard57(tell2(indent(level) + ("For each of " + (show211(length(tree3.value0.joinData)) + " nested data items, "))))(function() {
           return discard57(tell2("decompose and create/update/remove " + (tree3.value0.key + (' (scene nested join named "' + (tree3.value0.name + '")')))))(function() {
             return discard57(tell2(" with General Update Pattern:\n"))(function() {
-              return discard57(when4(isJust(tree3.value0.enterBehavior))(tell2(indent(level + 1 | 0) + "- Enter: elements appear with initial attributes and transition\n")))(function() {
-                return discard57(when4(isJust(tree3.value0.updateBehavior))(tell2(indent(level + 1 | 0) + "- Update: elements transition to new state\n")))(function() {
-                  return discard57(when4(isJust(tree3.value0.exitBehavior))(tell2(indent(level + 1 | 0) + "- Exit: elements transition out then removed\n")))(function() {
+              return discard57(when5(isJust(tree3.value0.enterBehavior))(tell2(indent(level + 1 | 0) + "- Enter: elements appear with initial attributes and transition\n")))(function() {
+                return discard57(when5(isJust(tree3.value0.updateBehavior))(tell2(indent(level + 1 | 0) + "- Update: elements transition to new state\n")))(function() {
+                  return discard57(when5(isJust(tree3.value0.exitBehavior))(tell2(indent(level + 1 | 0) + "- Exit: elements transition out then removed\n")))(function() {
                     return tell2(indent(level + 1 | 0) + "(Decompose and template functions defined)\n");
                   });
                 });
@@ -41637,7 +41702,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var renderTree56 = /* @__PURE__ */ renderTree(selectionMD3v2Selection_D)(ordUnit);
   var pure63 = /* @__PURE__ */ pure(applicativeD3v2M);
   var bind126 = /* @__PURE__ */ bind(bindHalogenM);
-  var modify_15 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var modify_16 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var pure119 = /* @__PURE__ */ pure(applicativeHalogenM);
   var ExThreeLittleCircles = /* @__PURE__ */ (function() {
     function ExThreeLittleCircles2() {
@@ -41854,7 +41919,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return pure63(unit);
             });
           }))))(function() {
-            return discard58(modify_15(function(v) {
+            return discard58(modify_16(function(v) {
               var $99 = {};
               for (var $100 in v) {
                 if ({}.hasOwnProperty.call(v, $100)) {
@@ -41888,7 +41953,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v instanceof SelectExample) {
-        return discard58(modify_15(function(v1) {
+        return discard58(modify_16(function(v1) {
           var $103 = {};
           for (var $104 in v1) {
             if ({}.hasOwnProperty.call(v1, $104)) {
@@ -41937,7 +42002,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard115 = /* @__PURE__ */ discard59(bindD3v2SimM);
   var reheat4 = /* @__PURE__ */ reheat(simulationM2D3v2Selection);
   var mapFlipped13 = /* @__PURE__ */ mapFlipped(functorArray);
-  var when5 = /* @__PURE__ */ when(applicativeD3v2SimM);
+  var when6 = /* @__PURE__ */ when(applicativeD3v2SimM);
   var x114 = /* @__PURE__ */ x1(toAttrNumberFunctionNumbe);
   var y114 = /* @__PURE__ */ y1(toAttrNumberFunctionNumbe);
   var x215 = /* @__PURE__ */ x22(toAttrNumberFunctionNumbe);
@@ -42054,7 +42119,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   };
                 };
               })(v.links);
-              return discard115(when5(length(indexedLinks) > 0)((function() {
+              return discard115(when6(length(indexedLinks) > 0)((function() {
                 var linksTree = joinData("linkElements")("line")(indexedLinks)(function(v1) {
                   return elem4(Line2.value)([x114(function(v2) {
                     return v1.link.source.x;
@@ -42319,7 +42384,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                         return unsafeCrashWith("nodeElements not found");
                                       }
                                       ;
-                                      throw new Error("Failed pattern match at D3.Viz.FPFTW.LesMisGUPAuto (line 238, column 18 - line 240, column 76): " + [v1.constructor.name]);
+                                      throw new Error("Failed pattern match at D3.Viz.FPFTW.LesMisGUPAuto (line 241, column 18 - line 243, column 76): " + [v1.constructor.name]);
                                     })();
                                     var linksSel = (function() {
                                       var v1 = lookup30("linkElements")(linksSelections);
@@ -42331,7 +42396,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                         return unsafeCrashWith("linkElements not found");
                                       }
                                       ;
-                                      throw new Error("Failed pattern match at D3.Viz.FPFTW.LesMisGUPAuto (line 243, column 18 - line 245, column 76): " + [v1.constructor.name]);
+                                      throw new Error("Failed pattern match at D3.Viz.FPFTW.LesMisGUPAuto (line 246, column 18 - line 248, column 76): " + [v1.constructor.name]);
                                     })();
                                     return bind69(on11(new Drag2(defaultDrag))(zoomGroupSel))(function() {
                                       return bind69(on11(new Zoom2(defaultZoom(new ScaleExtent2(0.1, 10))("#zoom-group")))(svgSel))(function() {
@@ -42695,7 +42760,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                 return unsafeCrashWith("nodeElements not found");
                               }
                               ;
-                              throw new Error("Failed pattern match at D3.Viz.TreeAPI.LesMisSimple (line 177, column 18 - line 179, column 76): " + [v1.constructor.name]);
+                              throw new Error("Failed pattern match at D3.Viz.TreeAPI.LesMisSimple (line 181, column 18 - line 183, column 76): " + [v1.constructor.name]);
                             })();
                             var linksSel = (function() {
                               var v1 = lookup31("linkElements")(linksSelections);
@@ -42707,7 +42772,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                 return unsafeCrashWith("linkElements not found");
                               }
                               ;
-                              throw new Error("Failed pattern match at D3.Viz.TreeAPI.LesMisSimple (line 182, column 18 - line 184, column 76): " + [v1.constructor.name]);
+                              throw new Error("Failed pattern match at D3.Viz.TreeAPI.LesMisSimple (line 186, column 18 - line 188, column 76): " + [v1.constructor.name]);
                             })();
                             return bind72(on12(new Zoom2(defaultZoom(new ScaleExtent2(0.1, 10))(".zoom-group")))(svgSel))(function() {
                               return bind72(on12(new Drag2(simulationDrag("lesmis-simple")))(nodesSel))(function() {
@@ -42859,7 +42924,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var pure67 = /* @__PURE__ */ pure(applicativeEffect);
   var discard63 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var bind128 = /* @__PURE__ */ bind(bindHalogenM);
-  var modify_16 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var modify_17 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var exGeneralUpdatePattern3 = /* @__PURE__ */ exGeneralUpdatePattern(d3TaglessD3M);
   var forever3 = /* @__PURE__ */ forever(monadRecHalogenM);
   var applySecond4 = /* @__PURE__ */ applySecond(applyEffect);
@@ -42934,7 +42999,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       if (v instanceof Initialize33) {
         return discard63(liftAff4(delay(100)))(function() {
           return bind128(liftEffect52(threeLittleCirclesTransition("#viz")))(function(trigger) {
-            return discard63(modify_16(function(v1) {
+            return discard63(modify_17(function(v1) {
               var $37 = {};
               for (var $38 in v1) {
                 if ({}.hasOwnProperty.call(v1, $38)) {
@@ -42947,7 +43012,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return $37;
             }))(function() {
               return bind128(liftEffect52(staggeredCircles("#staggered-container")))(function(staggered) {
-                return discard63(modify_16(function(v1) {
+                return discard63(modify_17(function(v1) {
                   var $40 = {};
                   for (var $41 in v1) {
                     if ({}.hasOwnProperty.call(v1, $41)) {
@@ -42965,7 +43030,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                         return liftAff4(delay(2300));
                       });
                     }))))(function(forkId) {
-                      return discard63(modify_16(function(v1) {
+                      return discard63(modify_17(function(v1) {
                         var $43 = {};
                         for (var $44 in v1) {
                           if ({}.hasOwnProperty.call(v1, $44)) {
@@ -43020,7 +43085,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             ;
             throw new Error("Failed pattern match at Component.Tour.TourMotion (line 101, column 5 - line 103, column 35): " + [state3.gupFiber.constructor.name]);
           })())(function() {
-            return modify_16(function(v1) {
+            return modify_17(function(v1) {
               var $51 = {};
               for (var $52 in v1) {
                 if ({}.hasOwnProperty.call(v1, $52)) {
@@ -44575,9 +44640,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard68 = /* @__PURE__ */ discard(discardUnit);
   var discard118 = /* @__PURE__ */ discard68(bindHalogenM);
   var pure74 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var modify_17 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var modify_18 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var get22 = /* @__PURE__ */ get(monadStateHalogenM);
-  var when6 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when7 = /* @__PURE__ */ when(applicativeHalogenM);
   var $$void14 = /* @__PURE__ */ $$void(functorHalogenM);
   var forever4 = /* @__PURE__ */ forever(monadRecAff);
   var discard213 = /* @__PURE__ */ discard68(bindAff);
@@ -44620,7 +44685,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         }
         ;
         if (v instanceof DataLoaded) {
-          return discard118(modify_17(function(v1) {
+          return discard118(modify_18(function(v1) {
             var $55 = {};
             for (var $56 in v1) {
               if ({}.hasOwnProperty.call(v1, $56)) {
@@ -44632,7 +44697,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             $55.model = new Just(v.value0);
             return $55;
           }))(function() {
-            return discard118(modify_17(function(v1) {
+            return discard118(modify_18(function(v1) {
               var $58 = {};
               for (var $59 in v1) {
                 if ({}.hasOwnProperty.call(v1, $59)) {
@@ -44646,7 +44711,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             }))(function() {
               return discard118(liftAff4(delay(100)))(function() {
                 return bind77(liftEffect122(initWealthHealth("#wealth-health-viz")))(function(updateFn) {
-                  return discard118(modify_17(function(v1) {
+                  return discard118(modify_18(function(v1) {
                     var $61 = {};
                     for (var $62 in v1) {
                       if ({}.hasOwnProperty.call(v1, $62)) {
@@ -44673,7 +44738,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         }
         ;
         if (v instanceof SetYear) {
-          return discard118(modify_17(function(v1) {
+          return discard118(modify_18(function(v1) {
             var $66 = {};
             for (var $67 in v1) {
               if ({}.hasOwnProperty.call(v1, $67)) {
@@ -44692,7 +44757,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         if (v instanceof TogglePlay) {
           return bind77(get22)(function(state3) {
             var newPlaying = !state3.playing;
-            return discard118(modify_17(function(v1) {
+            return discard118(modify_18(function(v1) {
               var $70 = {};
               for (var $71 in v1) {
                 if ({}.hasOwnProperty.call(v1, $71)) {
@@ -44704,11 +44769,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               $70.playing = newPlaying;
               return $70;
             }))(function() {
-              return discard118(when6(newPlaying)((function() {
+              return discard118(when7(newPlaying)((function() {
                 var intervalMs = 1e3 / state3.animationSpeed;
                 return bind77(liftEffect122(create))(function(v1) {
                   return bind77(subscribe2(v1.emitter))(function(subscriptionId) {
-                    return discard118(modify_17(function(v2) {
+                    return discard118(modify_18(function(v2) {
                       var $74 = {};
                       for (var $75 in v2) {
                         if ({}.hasOwnProperty.call(v2, $75)) {
@@ -44727,14 +44792,14 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   });
                 });
               })()))(function() {
-                return when6(!newPlaying)(bind77(get22)(function(state$prime) {
+                return when7(!newPlaying)(bind77(get22)(function(state$prime) {
                   if (state$prime.animationSubscriptionId instanceof Nothing) {
                     return pure74(unit);
                   }
                   ;
                   if (state$prime.animationSubscriptionId instanceof Just) {
                     return discard118(unsubscribe2(state$prime.animationSubscriptionId.value0))(function() {
-                      return modify_17(function(v1) {
+                      return modify_18(function(v1) {
                         var $80 = {};
                         for (var $81 in v1) {
                           if ({}.hasOwnProperty.call(v1, $81)) {
@@ -44767,7 +44832,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return discard118((function() {
                 var $85 = nextYear > state3.model.value0.yearRange.max;
                 if ($85) {
-                  return modify_17(function(v1) {
+                  return modify_18(function(v1) {
                     var $86 = {};
                     for (var $87 in v1) {
                       if ({}.hasOwnProperty.call(v1, $87)) {
@@ -44781,7 +44846,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   });
                 }
                 ;
-                return modify_17(function(v1) {
+                return modify_18(function(v1) {
                   var $89 = {};
                   for (var $90 in v1) {
                     if ({}.hasOwnProperty.call(v1, $90)) {
@@ -44803,7 +44868,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         }
         ;
         if (v instanceof HoverNation) {
-          return modify_17(function(v1) {
+          return modify_18(function(v1) {
             var $93 = {};
             for (var $94 in v1) {
               if ({}.hasOwnProperty.call(v1, $94)) {
@@ -44818,7 +44883,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         }
         ;
         if (v instanceof ToggleNationSelection) {
-          return modify_17(function(s) {
+          return modify_18(function(s) {
             var newSelected = (function() {
               var $97 = member7(v.value0)(s.selectedNations);
               if ($97) {
@@ -44841,7 +44906,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         }
         ;
         if (v instanceof SetAnimationSpeed) {
-          return modify_17(function(v1) {
+          return modify_18(function(v1) {
             var $102 = {};
             for (var $103 in v1) {
               if ({}.hasOwnProperty.call(v1, $103)) {
@@ -44856,7 +44921,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         }
         ;
         if (v instanceof ToggleLabels) {
-          return discard118(modify_17(function(s) {
+          return discard118(modify_18(function(s) {
             var $107 = {};
             for (var $108 in s) {
               if ({}.hasOwnProperty.call(s, $108)) {
@@ -45060,7 +45125,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
 
   // output/Component.TreeAPI/index.js
   var discard70 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var modify_18 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var modify_19 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var $$void15 = /* @__PURE__ */ $$void(functorEffect);
   var ThreeCircles = /* @__PURE__ */ (function() {
     function ThreeCircles2() {
@@ -45164,7 +45229,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v instanceof SelectExample2) {
-        return discard70(modify_18(function(v1) {
+        return discard70(modify_19(function(v1) {
           var $21 = {};
           for (var $22 in v1) {
             if ({}.hasOwnProperty.call(v1, $22)) {
@@ -46085,7 +46150,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var pure78 = /* @__PURE__ */ pure(applicativeEffect);
   var map75 = /* @__PURE__ */ map(functorEffect);
   var pure124 = /* @__PURE__ */ pure(applicativeAff);
-  var when7 = /* @__PURE__ */ when(applicativeEffect);
+  var when8 = /* @__PURE__ */ when(applicativeEffect);
   var renderStateX2 = /* @__PURE__ */ renderStateX(functorEffect);
   var $$void16 = /* @__PURE__ */ $$void(functorAff);
   var foreachSlot2 = /* @__PURE__ */ foreachSlot(applicativeEffect);
@@ -46214,7 +46279,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     var isDuplicate = map75(function($69) {
                       return isJust(slot.get($69));
                     })(read(childrenOutRef))();
-                    when7(isDuplicate)(warn("Halogen: Duplicate slot address was detected during rendering, unexpected results may occur"))();
+                    when8(isDuplicate)(warn("Halogen: Duplicate slot address was detected during rendering, unexpected results may occur"))();
                     modify_(slot.set($$var2))(childrenOutRef)();
                     return bind79(read($$var2))(renderStateX2(function(v) {
                       if (v instanceof Nothing) {
@@ -46238,7 +46303,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return function __do3() {
               var v = read($$var2)();
               var shouldProcessHandlers = map75(isNothing)(read(v.pendingHandlers))();
-              when7(shouldProcessHandlers)(write(new Just(Nil.value))(v.pendingHandlers))();
+              when8(shouldProcessHandlers)(write(new Just(Nil.value))(v.pendingHandlers))();
               write(empty4)(v.childrenOut)();
               write(v.children)(v.childrenIn)();
               var handler3 = (function() {
@@ -46286,7 +46351,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   children: children3
                 };
               }))();
-              return when7(shouldProcessHandlers)(flip(tailRecM4)(unit)(function(v1) {
+              return when8(shouldProcessHandlers)(flip(tailRecM4)(unit)(function(v1) {
                 return function __do4() {
                   var handlers = read(v.pendingHandlers)();
                   write(new Just(Nil.value))(v.pendingHandlers)();
@@ -46403,7 +46468,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var pure79 = /* @__PURE__ */ pure(applicativeEffect);
   var traverse_9 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
   var unwrap9 = /* @__PURE__ */ unwrap();
-  var when8 = /* @__PURE__ */ when(applicativeEffect);
+  var when9 = /* @__PURE__ */ when(applicativeEffect);
   var not3 = /* @__PURE__ */ not(/* @__PURE__ */ heytingAlgebraFunction(/* @__PURE__ */ heytingAlgebraFunction(heytingAlgebraBoolean)));
   var identity17 = /* @__PURE__ */ identity(categoryFn);
   var bind135 = /* @__PURE__ */ bind(bindAff);
@@ -46531,7 +46596,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   var nextSib = nextSibling(v1.value0.node)();
                   var machine$prime = step(v1.value0.machine, v);
                   var newNode = extract2(machine$prime);
-                  when8(not3(unsafeRefEq)(v1.value0.node)(newNode))(substInParent(newNode)(nextSib)(parent2))();
+                  when9(not3(unsafeRefEq)(v1.value0.node)(newNode))(substInParent(newNode)(nextSib)(parent2))();
                   return {
                     machine: machine$prime,
                     node: newNode,
@@ -46867,7 +46932,6 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }
   };
   var eq16 = /* @__PURE__ */ eq(eqLinkType);
-  var unpackLink$prime = unsafeCoerce2;
   var showLinkType = {
     show: function(v) {
       if (v instanceof M2M_Tree) {
@@ -46886,20 +46950,20 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return "module to package dependency";
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.Spago.Files (line 324, column 1 - line 328, column 44): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.Spago.Files (line 331, column 1 - line 335, column 44): " + [v.constructor.name]);
     }
   };
   var isP2P_Link = function(link4) {
-    return eq16(unpackLink$prime(link4).linktype)(P2P.value);
+    return eq16(link4.linktype)(P2P.value);
   };
   var isM2P_Link = function(link4) {
-    return eq16(unpackLink$prime(link4).linktype)(M2P.value);
+    return eq16(link4.linktype)(M2P.value);
   };
   var isM2M_Tree_Link = function(link4) {
-    return eq16(unpackLink$prime(link4).linktype)(M2M_Tree.value);
+    return eq16(link4.linktype)(M2M_Tree.value);
   };
   var isM2M_Graph_Link = function(link4) {
-    return eq16(unpackLink$prime(link4).linktype)(M2M_Graph.value);
+    return eq16(link4.linktype)(M2M_Graph.value);
   };
   var getGraphJSONData = function(v) {
     var names = append29(map78(function(v1) {
@@ -46929,11 +46993,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       getNodeId: function(v1) {
         return v1.id;
       },
-      getLinkSource: function(link4) {
-        return link4.source;
+      getLinkSource: function(v1) {
+        return v1.source;
       },
-      getLinkTarget: function(link4) {
-        return link4.target;
+      getLinkTarget: function(v1) {
+        return v1.target;
       }
     };
     var ids = range2(0)(length(names) - 1 | 0);
@@ -47024,8 +47088,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return bind80(index(pieces)(0))(function(root3) {
           return bind80(index(pieces)(1))(function(packageString) {
             if (root3 === ".spago") {
-              var $77 = packageString === "p";
-              if ($77) {
+              var $78 = packageString === "p";
+              if ($78) {
                 return index(pieces)(2);
               }
               ;
@@ -47090,16 +47154,16 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         contains: fromMaybe([])(lookup36(v1.key)(packageContainsMap))
       };
     };
-    var packagesCL = map78(function($121) {
-      return addRollUpLOC(addContains($121));
+    var packagesCL = map78(function($122) {
+      return addRollUpLOC(addContains($122));
     })(v.packages);
     var packageNodes = map78(makeNodeFromPackageJSONCL)(packagesCL);
     var nodes = append29(moduleNodes)(packageNodes);
     var linkGraph = buildGraphModel(linkGraphConfig)(nodes)(links);
     var getSourceLinks = function(v1) {
       var incomingLinks = getLinksTo(v1.id)(linkGraph);
-      var sources = map78(function($122) {
-        return $122.source;
+      var sources = map78(function(v2) {
+        return v2.source;
       })(incomingLinks);
       return new Tuple(v1.id, sources);
     };
@@ -47736,7 +47800,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       });
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 50, column 1 - line 50, column 88): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 49, column 1 - line 49, column 88): " + [v.constructor.name]);
   };
   var linkDiagonal2 = function(x1$prime) {
     return function(y1$prime) {
@@ -47764,7 +47828,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return "orange";
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 36, column 15 - line 40, column 23): " + [l.linktype.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 35, column 15 - line 39, column 23): " + [l.linktype.constructor.name]);
   };
   var linkClass = function(l) {
     return show140(l.linktype);
@@ -47799,7 +47863,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                         return pure91(unit);
                       }
                       ;
-                      throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 90, column 5 - line 92, column 27): " + [attrs.nodeClick.constructor.name]);
+                      throw new Error("Failed pattern match at D3.Viz.Spago.Render (line 89, column 5 - line 91, column 27): " + [attrs.nodeClick.constructor.name]);
                     })())(function() {
                       return bind89(on15(onMouseEnterWithInfo(function(info2) {
                         return function __do3() {
@@ -47867,6 +47931,1012 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       };
     };
   };
+
+  // output/D3.Viz.Spago.Draw/index.js
+  var ordRecord11 = /* @__PURE__ */ ordRecord();
+  var ordRecordCons10 = /* @__PURE__ */ ordRecordCons(ordRecordNil)();
+  var ordRecordCons16 = /* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons10({
+    reflectSymbol: function() {
+      return "y";
+    }
+  })(ordNumber))()({
+    reflectSymbol: function() {
+      return "x";
+    }
+  })(ordNumber);
+  var ordNullable7 = /* @__PURE__ */ ordNullable(/* @__PURE__ */ ordRecord11(ordRecordCons16));
+  var ordArray2 = /* @__PURE__ */ ordArray(ordInt);
+  var ordNullable1 = /* @__PURE__ */ ordNullable(ordNumber);
+  var ordRecord16 = /* @__PURE__ */ ordRecord11(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(ordRecordCons16)()({
+    reflectSymbol: function() {
+      return "vy";
+    }
+  })(ordNumber))()({
+    reflectSymbol: function() {
+      return "vx";
+    }
+  })(ordNumber))()({
+    reflectSymbol: function() {
+      return "treeXY";
+    }
+  })(ordNullable7))()({
+    reflectSymbol: function() {
+      return "treeDepth";
+    }
+  })(/* @__PURE__ */ ordNullable(ordInt)))()({
+    reflectSymbol: function() {
+      return "showChildren";
+    }
+  })(ordBoolean))()({
+    reflectSymbol: function() {
+      return "r";
+    }
+  })(ordNumber))()({
+    reflectSymbol: function() {
+      return "nodetype";
+    }
+  })(ordNodeType))()({
+    reflectSymbol: function() {
+      return "name";
+    }
+  })(ordString))()({
+    reflectSymbol: function() {
+      return "loc";
+    }
+  })(ordNumber))()({
+    reflectSymbol: function() {
+      return "links";
+    }
+  })(/* @__PURE__ */ ordRecord11(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons10({
+    reflectSymbol: function() {
+      return "treeChildren";
+    }
+  })(ordArray2))()({
+    reflectSymbol: function() {
+      return "targets";
+    }
+  })(ordArray2))()({
+    reflectSymbol: function() {
+      return "sources";
+    }
+  })(ordArray2))()({
+    reflectSymbol: function() {
+      return "outPackage";
+    }
+  })(ordArray2))()({
+    reflectSymbol: function() {
+      return "inPackage";
+    }
+  })(ordArray2))()({
+    reflectSymbol: function() {
+      return "contains";
+    }
+  })(ordArray2))))()({
+    reflectSymbol: function() {
+      return "inSim";
+    }
+  })(ordBoolean))()({
+    reflectSymbol: function() {
+      return "id";
+    }
+  })(ordInt))()({
+    reflectSymbol: function() {
+      return "gridXY";
+    }
+  })(ordNullable7))()({
+    reflectSymbol: function() {
+      return "fy";
+    }
+  })(ordNullable1))()({
+    reflectSymbol: function() {
+      return "fx";
+    }
+  })(ordNullable1))()({
+    reflectSymbol: function() {
+      return "focusY";
+    }
+  })(ordNumber))()({
+    reflectSymbol: function() {
+      return "focusX";
+    }
+  })(ordNumber))()({
+    reflectSymbol: function() {
+      return "containsMany";
+    }
+  })(ordBoolean))()({
+    reflectSymbol: function() {
+      return "containerName";
+    }
+  })(ordString))()({
+    reflectSymbol: function() {
+      return "containerID";
+    }
+  })(ordInt))()({
+    reflectSymbol: function() {
+      return "connected";
+    }
+  })(ordBoolean))()({
+    reflectSymbol: function() {
+      return "cluster";
+    }
+  })(ordInt));
+  var class_49 = /* @__PURE__ */ class_2(toAttrStringString);
+  var updateSimulation = function(dictBind) {
+    return function(dictMonadEffect) {
+      var genericUpdateSimulation3 = genericUpdateSimulation(dictMonadEffect);
+      var spagoRenderCallbacks2 = spagoRenderCallbacks(dictMonadEffect.Monad0());
+      return function(dictSelectionM) {
+        var genericUpdateSimulation1 = genericUpdateSimulation3(dictSelectionM);
+        var spagoRenderCallbacks1 = spagoRenderCallbacks2(dictSelectionM);
+        return function(dictSimulationM2) {
+          var genericUpdateSimulation22 = genericUpdateSimulation1(dictSimulationM2)(ordRecord16)(ordInt)(eqInt)(ordIndex_);
+          return function(selections) {
+            return function(dataConfig) {
+              return function(attrs) {
+                return genericUpdateSimulation22({
+                  nodes: selections.nodes,
+                  links: selections.links
+                })(Group2.value)(Path3.value)({
+                  allNodes: dataConfig.allNodes,
+                  allLinks: dataConfig.allLinks,
+                  nodeFilter: dataConfig.nodeFilter,
+                  linkFilter: dataConfig.linkFilter,
+                  nodeInitializers: dataConfig.nodeInitializers,
+                  activeForces: new Just(dataConfig.activeForces),
+                  config: Nothing.value
+                })(function(n) {
+                  return n.id;
+                })(keyIsID_)(attrs)(spagoRenderCallbacks1);
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+  var initialize5 = function(dictBind) {
+    var bind89 = bind(dictBind);
+    return function(dictMonadEffect) {
+      var liftEffect52 = liftEffect(dictMonadEffect);
+      var pure91 = pure(dictMonadEffect.Monad0().Applicative0());
+      return function(dictSimulationM2) {
+        return function(dictSelectionM) {
+          var select45 = select3(dictSelectionM);
+          var appendChild5 = appendChild(dictSelectionM);
+          var on15 = on2(dictSelectionM);
+          return bind89(liftEffect52(getWindowWidthHeight))(function(v) {
+            return bind89(select45("div.svg-container"))(function(root3) {
+              return bind89(appendChild5(SVG.value)(svgAttrs(v.value0)(v.value1))(root3))(function(svg2) {
+                return bind89(appendChild5(Group2.value)([])(svg2))(function(inner) {
+                  return bind89(on15(new Drag2(defaultDrag))(inner))(function() {
+                    return bind89(on15(new Zoom2(defaultZoom(new ScaleExtent2(0.1, 4))("g")))(svg2))(function() {
+                      return bind89(appendChild5(Group2.value)([class_49("links")])(inner))(function(linksGroup) {
+                        return bind89(appendChild5(Group2.value)([class_49("nodes")])(inner))(function(nodesGroup) {
+                          return pure91({
+                            nodes: nodesGroup,
+                            links: linksGroup
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        };
+      };
+    };
+  };
+
+  // output/D3.Viz.Spago.Model/foreign.js
+  var spotlitSelection;
+  var spotlitNode;
+  var sourcesSelection;
+  var targetSelection;
+  var spotlitID;
+  var spotlit = false;
+  spotlightNeighbours_ = (simulation, id5, nodetype) => {
+    spotlit = true;
+    spotlitID = id5;
+    simulation.stop();
+    svg = d3.select("div.svg-container svg");
+    nodeSelection = svg.selectAll("g.nodes g");
+    spotlitSelection = nodeSelection.filter((d18, i2) => d18.id == id5);
+    spotlitNode = spotlitSelection.node();
+    spotlitNode.__data__.fx = spotlitNode.__data__.fx || spotlitNode.__data__.x;
+    spotlitNode.__data__.fy = spotlitNode.__data__.fy || spotlitNode.__data__.y;
+    const targets = spotlitNode.__data__.links.targets;
+    const sources = spotlitNode.__data__.links.sources;
+    sourcesSelection = nodeSelection.filter((d18, i2) => sources.includes(d18.id));
+    targetSelection = nodeSelection.filter((d18, i2) => targets.includes(d18.id));
+    svg.classed("spotlight", true);
+    sourcesSelection.classed("source", true);
+    targetSelection.classed("target", true);
+    spotlitSelection.classed("spotlight", true);
+    spotlitSelection.classed("source target", false);
+    simulation.force(
+      "collide",
+      d3.forceCollide().radius(
+        (d18) => sources.includes(d18.id) || targets.includes(d18.id) ? d18.r * 4 : d18.id === d18.containerID ? 10 : d18.r
+      )
+    );
+    simulation.alpha(1).restart();
+  };
+  unSpotlightNeighbours_ = (simulation) => {
+    simulation.stop();
+    svg.classed("spotlight", false);
+    spotlitNode.__data__.fx = null;
+    spotlitNode.__data__.fy = null;
+    spotlitSelection.classed("spotlight", false);
+    sourcesSelection.classed("source", false);
+    targetSelection.classed("target", false);
+    simulation.force(
+      "collide",
+      d3.forceCollide().radius((d18) => d18.id === d18.containerID ? 10 : d18.r)
+    );
+    simulation.restart();
+    spotlit = false;
+  };
+
+  // output/D3.Viz.Spago.Model/index.js
+  var lookup38 = /* @__PURE__ */ lookup2(ordInt);
+  var map79 = /* @__PURE__ */ map(functorArray);
+  var append30 = /* @__PURE__ */ append(semigroupArray);
+  var fromFoldable45 = /* @__PURE__ */ fromFoldable6(ordInt)(foldableArray);
+  var foldlWithIndex3 = /* @__PURE__ */ foldlWithIndex(foldableWithIndexArray);
+  var bind81 = /* @__PURE__ */ bind(bindArray);
+  var mapFlipped16 = /* @__PURE__ */ mapFlipped(functorArray);
+  var upgradeSpagoNodeData = function(sourcesMap) {
+    return function(node) {
+      return {
+        links: {
+          targets: node.links.targets,
+          treeChildren: node.links.treeChildren,
+          inPackage: node.links.inPackage,
+          outPackage: node.links.outPackage,
+          contains: node.links.contains,
+          sources: fromMaybe([])(lookup38(node.id)(sourcesMap))
+        },
+        id: node.id,
+        cluster: node.containerID,
+        connected: node.connected,
+        showChildren: (function() {
+          if (node.nodetype instanceof IsPackage) {
+            return true;
+          }
+          ;
+          if (node.nodetype instanceof IsModule) {
+            return false;
+          }
+          ;
+          throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 101, column 20 - line 103, column 45): " + [node.nodetype.constructor.name]);
+        })(),
+        containerID: node.containerID,
+        containerName: node.containerName,
+        containsMany: node.containsMany,
+        focusX: 0,
+        focusY: 0,
+        fx: nullImpl,
+        fy: nullImpl,
+        inSim: true,
+        loc: node.loc,
+        name: node.name,
+        nodetype: node.nodetype,
+        r: sqrt(node.loc),
+        treeXY: nullImpl,
+        treeDepth: nullImpl,
+        gridXY: nullImpl,
+        vx: 0,
+        vy: 0,
+        x: 0,
+        y: 0
+      };
+    };
+  };
+  var unpinAllNodes2 = function(nodes) {
+    var unpin = function(d18) {
+      return {
+        x: d18.x,
+        y: d18.y,
+        vx: d18.vx,
+        vy: d18.vy,
+        id: d18.id,
+        links: d18.links,
+        connected: d18.connected,
+        showChildren: d18.showChildren,
+        containerID: d18.containerID,
+        containerName: d18.containerName,
+        containsMany: d18.containsMany,
+        inSim: d18.inSim,
+        loc: d18.loc,
+        name: d18.name,
+        nodetype: d18.nodetype,
+        treeXY: d18.treeXY,
+        treeDepth: d18.treeDepth,
+        gridXY: d18.gridXY,
+        cluster: d18.cluster,
+        focusX: d18.focusX,
+        focusY: d18.focusY,
+        r: d18.r,
+        fx: nullImpl,
+        fy: nullImpl
+      };
+    };
+    return map79(unpin)(nodes);
+  };
+  var treeDepthMultiplier = 2;
+  var spagoGraphConfig = {
+    getNodeId: function(v) {
+      return v.id;
+    },
+    getLinkSource: function(v) {
+      return v.source;
+    },
+    getLinkTarget: function(v) {
+      return v.target;
+    }
+  };
+  var scalePoint = function(xFactor) {
+    return function(yFactor) {
+      return function(xy) {
+        return {
+          x: xy.x * xFactor,
+          y: xy.y * yFactor
+        };
+      };
+    };
+  };
+  var offsetXY = function(offset) {
+    return function(xy) {
+      return {
+        x: xy.x + offset.x,
+        y: xy.y + offset.y
+      };
+    };
+  };
+  var numberToGridPoint2 = function(columns) {
+    return function(i2) {
+      var d18 = toNumber(i2);
+      var c = toNumber(columns);
+      var x47 = remainder(d18)(c);
+      var y48 = floor(d18 / c);
+      return {
+        x: x47,
+        y: y48
+      };
+    };
+  };
+  var isUsedModule = function(d18) {
+    if (d18.nodetype instanceof IsPackage) {
+      return false;
+    }
+    ;
+    if (d18.nodetype instanceof IsModule) {
+      return d18.connected;
+    }
+    ;
+    throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 91, column 18 - line 93, column 30): " + [d18.nodetype.constructor.name]);
+  };
+  var treeNodesToSwarmStart = function(nodes) {
+    var setSwarmStart = function(d18) {
+      var treeXY = fromMaybe({
+        x: d18.x,
+        y: d18.y
+      })(toMaybe(d18.treeXY));
+      return {
+        vx: d18.vx,
+        vy: d18.vy,
+        id: d18.id,
+        links: d18.links,
+        connected: d18.connected,
+        showChildren: d18.showChildren,
+        containerID: d18.containerID,
+        containerName: d18.containerName,
+        containsMany: d18.containsMany,
+        inSim: d18.inSim,
+        loc: d18.loc,
+        name: d18.name,
+        nodetype: d18.nodetype,
+        treeXY: d18.treeXY,
+        treeDepth: d18.treeDepth,
+        gridXY: d18.gridXY,
+        cluster: d18.cluster,
+        focusX: d18.focusX,
+        focusY: d18.focusY,
+        r: d18.r,
+        x: treeXY.y,
+        y: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      };
+    };
+    var partitioned = partition(isUsedModule)(nodes);
+    return append30(partitioned.no)(map79(setSwarmStart)(partitioned.yes));
+  };
+  var treeNodesToTreeXY_H = function(nodes) {
+    var setXYtoTreeXY = function(d18) {
+      var treeXY = fromMaybe({
+        x: d18.y,
+        y: d18.x
+      })(toMaybe(d18.treeXY));
+      return {
+        vx: d18.vx,
+        vy: d18.vy,
+        fx: d18.fx,
+        fy: d18.fy,
+        id: d18.id,
+        links: d18.links,
+        connected: d18.connected,
+        showChildren: d18.showChildren,
+        containerID: d18.containerID,
+        containerName: d18.containerName,
+        containsMany: d18.containsMany,
+        inSim: d18.inSim,
+        loc: d18.loc,
+        name: d18.name,
+        nodetype: d18.nodetype,
+        treeDepth: d18.treeDepth,
+        gridXY: d18.gridXY,
+        cluster: d18.cluster,
+        focusX: d18.focusX,
+        focusY: d18.focusY,
+        r: d18.r,
+        treeXY: notNull(treeXY),
+        x: treeXY.y * treeDepthMultiplier,
+        y: treeXY.x
+      };
+    };
+    var partitioned = partition(isUsedModule)(nodes);
+    return append30(partitioned.no)(map79(setXYtoTreeXY)(partitioned.yes));
+  };
+  var treeNodesToTreeXY_R = function(nodes) {
+    var setXYtoTreeXY = function(d18) {
+      var treeXY = fromMaybe({
+        x: d18.x,
+        y: d18.y
+      })(toMaybe(d18.treeXY));
+      var radialTranslate = function(p2) {
+        var radius40 = p2.y * treeDepthMultiplier;
+        var x47 = radius40 * cos(p2.x);
+        var y48 = radius40 * sin(p2.x);
+        return {
+          x: x47,
+          y: y48
+        };
+      };
+      var radialXY = radialTranslate(treeXY);
+      return {
+        vx: d18.vx,
+        vy: d18.vy,
+        fx: d18.fx,
+        fy: d18.fy,
+        id: d18.id,
+        links: d18.links,
+        connected: d18.connected,
+        showChildren: d18.showChildren,
+        containerID: d18.containerID,
+        containerName: d18.containerName,
+        containsMany: d18.containsMany,
+        inSim: d18.inSim,
+        loc: d18.loc,
+        name: d18.name,
+        nodetype: d18.nodetype,
+        treeDepth: d18.treeDepth,
+        gridXY: d18.gridXY,
+        cluster: d18.cluster,
+        focusX: d18.focusX,
+        focusY: d18.focusY,
+        r: d18.r,
+        treeXY: notNull(treeXY),
+        x: radialXY.x,
+        y: radialXY.y
+      };
+    };
+    var partitioned = partition(isUsedModule)(nodes);
+    return append30(partitioned.no)(map79(setXYtoTreeXY)(partitioned.yes));
+  };
+  var treeNodesToTreeXY_V = function(nodes) {
+    var setXYtoTreeXY = function(d18) {
+      var treeXY = fromMaybe({
+        x: d18.x,
+        y: d18.y
+      })(toMaybe(d18.treeXY));
+      return {
+        vx: d18.vx,
+        vy: d18.vy,
+        fx: d18.fx,
+        fy: d18.fy,
+        id: d18.id,
+        links: d18.links,
+        connected: d18.connected,
+        showChildren: d18.showChildren,
+        containerID: d18.containerID,
+        containerName: d18.containerName,
+        containsMany: d18.containsMany,
+        inSim: d18.inSim,
+        loc: d18.loc,
+        name: d18.name,
+        nodetype: d18.nodetype,
+        treeDepth: d18.treeDepth,
+        gridXY: d18.gridXY,
+        cluster: d18.cluster,
+        focusX: d18.focusX,
+        focusY: d18.focusY,
+        r: d18.r,
+        treeXY: notNull(treeXY),
+        x: treeXY.x,
+        y: treeXY.y * treeDepthMultiplier
+      };
+    };
+    var partitioned = partition(isUsedModule)(nodes);
+    return append30(partitioned.no)(map79(setXYtoTreeXY)(partitioned.yes));
+  };
+  var isPackageOrVisibleModule = function(id5) {
+    return function(d18) {
+      if (d18.nodetype instanceof IsModule) {
+        return d18.containerID === id5;
+      }
+      ;
+      if (d18.nodetype instanceof IsPackage) {
+        return true;
+      }
+      ;
+      throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 81, column 33 - line 83, column 24): " + [d18.nodetype.constructor.name]);
+    };
+  };
+  var isPackage = function(d18) {
+    if (d18.nodetype instanceof IsModule) {
+      return false;
+    }
+    ;
+    if (d18.nodetype instanceof IsPackage) {
+      return true;
+    }
+    ;
+    throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 76, column 15 - line 78, column 24): " + [d18.nodetype.constructor.name]);
+  };
+  var moduleNodesToContainerXY = function(nodes) {
+    var partitioned = partition(isPackage)(nodes);
+    var packagesIndexMap = fromFoldable45(foldl2(function(b10) {
+      return function(a2) {
+        return cons(new Tuple(a2.id, a2.gridXY))(b10);
+      };
+    })([])(partitioned.yes));
+    var setModuleGridXY = function(m) {
+      var v = lookup38(m.containerID)(packagesIndexMap);
+      if (v instanceof Nothing) {
+        return m;
+      }
+      ;
+      if (v instanceof Just) {
+        var v1 = toMaybe(v.value0);
+        if (v1 instanceof Nothing) {
+          return {
+            containerID: m.containerID,
+            cluster: m.cluster,
+            connected: m.connected,
+            containerName: m.containerName,
+            containsMany: m.containsMany,
+            focusX: m.focusX,
+            focusY: m.focusY,
+            fx: m.fx,
+            fy: m.fy,
+            id: m.id,
+            inSim: m.inSim,
+            links: m.links,
+            loc: m.loc,
+            name: m.name,
+            nodetype: m.nodetype,
+            r: m.r,
+            showChildren: m.showChildren,
+            treeDepth: m.treeDepth,
+            treeXY: m.treeXY,
+            vx: m.vx,
+            vy: m.vy,
+            x: 0,
+            y: 0,
+            gridXY: v.value0
+          };
+        }
+        ;
+        if (v1 instanceof Just) {
+          return {
+            containerID: m.containerID,
+            cluster: m.cluster,
+            connected: m.connected,
+            containerName: m.containerName,
+            containsMany: m.containsMany,
+            focusX: m.focusX,
+            focusY: m.focusY,
+            fx: m.fx,
+            fy: m.fy,
+            id: m.id,
+            inSim: m.inSim,
+            links: m.links,
+            loc: m.loc,
+            name: m.name,
+            nodetype: m.nodetype,
+            r: m.r,
+            showChildren: m.showChildren,
+            treeDepth: m.treeDepth,
+            treeXY: m.treeXY,
+            vx: m.vx,
+            vy: m.vy,
+            x: v1.value0.x,
+            y: v1.value0.y,
+            gridXY: v.value0
+          };
+        }
+        ;
+        throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 184, column 11 - line 186, column 65): " + [v1.constructor.name]);
+      }
+      ;
+      throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 181, column 7 - line 186, column 65): " + [v.constructor.name]);
+    };
+    var modulesWithGrid = map79(setModuleGridXY)(partitioned.no);
+    return append30(modulesWithGrid)(partitioned.yes);
+  };
+  var nodesToRevelationXY = function(step4) {
+    return function(nodes) {
+      var setToRadialTreeXY = function(node) {
+        var treeXY = fromMaybe({
+          x: node.x,
+          y: node.y
+        })(toMaybe(node.treeXY));
+        var radius40 = treeXY.y * treeDepthMultiplier;
+        var x47 = radius40 * cos(treeXY.x);
+        var y48 = radius40 * sin(treeXY.x);
+        return {
+          vx: node.vx,
+          vy: node.vy,
+          id: node.id,
+          links: node.links,
+          connected: node.connected,
+          showChildren: node.showChildren,
+          containerID: node.containerID,
+          containerName: node.containerName,
+          containsMany: node.containsMany,
+          inSim: node.inSim,
+          loc: node.loc,
+          name: node.name,
+          nodetype: node.nodetype,
+          treeXY: node.treeXY,
+          treeDepth: node.treeDepth,
+          gridXY: node.gridXY,
+          cluster: node.cluster,
+          focusX: node.focusX,
+          focusY: node.focusY,
+          r: node.r,
+          x: x47,
+          y: y48,
+          fx: notNull(x47),
+          fy: notNull(y48)
+        };
+      };
+      var setToContainerXY = function(node) {
+        var v = toMaybe(node.gridXY);
+        if (v instanceof Just) {
+          return {
+            vx: node.vx,
+            vy: node.vy,
+            id: node.id,
+            links: node.links,
+            connected: node.connected,
+            showChildren: node.showChildren,
+            containerID: node.containerID,
+            containerName: node.containerName,
+            containsMany: node.containsMany,
+            inSim: node.inSim,
+            loc: node.loc,
+            name: node.name,
+            nodetype: node.nodetype,
+            treeXY: node.treeXY,
+            treeDepth: node.treeDepth,
+            gridXY: node.gridXY,
+            cluster: node.cluster,
+            focusX: node.focusX,
+            focusY: node.focusY,
+            r: node.r,
+            x: v.value0.x,
+            y: v.value0.y,
+            fx: notNull(v.value0.x),
+            fy: notNull(v.value0.y)
+          };
+        }
+        ;
+        if (v instanceof Nothing) {
+          return node;
+        }
+        ;
+        throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 323, column 7 - line 325, column 24): " + [v.constructor.name]);
+      };
+      var positionModule = function(node) {
+        var nodeDepth = fromMaybe(0)(toMaybe(node.treeDepth));
+        var $91 = node.name === "PSD3.Main";
+        if ($91) {
+          return {
+            vx: node.vx,
+            vy: node.vy,
+            id: node.id,
+            links: node.links,
+            connected: node.connected,
+            showChildren: node.showChildren,
+            containerID: node.containerID,
+            containerName: node.containerName,
+            containsMany: node.containsMany,
+            inSim: node.inSim,
+            loc: node.loc,
+            name: node.name,
+            nodetype: node.nodetype,
+            treeXY: node.treeXY,
+            treeDepth: node.treeDepth,
+            gridXY: node.gridXY,
+            cluster: node.cluster,
+            focusX: node.focusX,
+            focusY: node.focusY,
+            r: node.r,
+            x: 0,
+            y: 0,
+            fx: notNull(0),
+            fy: notNull(0)
+          };
+        }
+        ;
+        var $92 = nodeDepth === step4 && nodeDepth > 0;
+        if ($92) {
+          return setToRadialTreeXY(node);
+        }
+        ;
+        return node;
+      };
+      var positionNode2 = function(node) {
+        if (isPackage(node)) {
+          return node;
+        }
+        ;
+        if (otherwise) {
+          return positionModule(node);
+        }
+        ;
+        throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 296, column 5 - line 296, column 49): " + [node.constructor.name]);
+      };
+      return map79(positionNode2)(nodes);
+    };
+  };
+  var packageNodesToGridXY = function(nodes) {
+    var partitioned = partition(isPackage)(nodes);
+    var packageCount = length(partitioned.yes);
+    var columns = floor2(ceil(sqrt(toNumber(packageCount))));
+    var offset = -(toNumber(columns) / 2);
+    var packagesWithGrid = (function() {
+      var setGridXY = function(p2) {
+        return function(i2) {
+          var gridXY = scalePoint(200)(200)(offsetXY({
+            x: offset,
+            y: offset
+          })(numberToGridPoint2(columns)(i2)));
+          return {
+            cluster: p2.cluster,
+            connected: p2.connected,
+            containerID: p2.containerID,
+            containerName: p2.containerName,
+            containsMany: p2.containsMany,
+            focusX: p2.focusX,
+            focusY: p2.focusY,
+            fx: p2.fx,
+            fy: p2.fy,
+            id: p2.id,
+            inSim: p2.inSim,
+            links: p2.links,
+            loc: p2.loc,
+            name: p2.name,
+            nodetype: p2.nodetype,
+            r: p2.r,
+            showChildren: p2.showChildren,
+            treeDepth: p2.treeDepth,
+            treeXY: p2.treeXY,
+            vx: p2.vx,
+            vy: p2.vy,
+            gridXY: notNull(gridXY),
+            x: gridXY.x,
+            y: gridXY.y
+          };
+        };
+      };
+      return foldlWithIndex3(function(i2) {
+        return function(b10) {
+          return function(a2) {
+            return cons(setGridXY(a2)(i2))(b10);
+          };
+        };
+      })([])(partitioned.yes);
+    })();
+    return append30(partitioned.no)(packagesWithGrid);
+  };
+  var isModule = function(d18) {
+    if (d18.nodetype instanceof IsModule) {
+      return true;
+    }
+    ;
+    if (d18.nodetype instanceof IsPackage) {
+      return false;
+    }
+    ;
+    throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 86, column 14 - line 88, column 25): " + [d18.nodetype.constructor.name]);
+  };
+  var initialRadius8 = 10;
+  var initialAngle6 = /* @__PURE__ */ (function() {
+    return pi * (3 - sqrt(5));
+  })();
+  var pinnedPackagesToPhyllotaxis = function(nodes) {
+    var setPinnedPhyllotaxis = function(index5) {
+      return function(d18) {
+        var i2 = toNumber(index5);
+        var radius40 = 100 * sqrt(0.5 + i2);
+        var angle = i2 * initialAngle6;
+        var x47 = radius40 * cos(angle);
+        var y48 = radius40 * sin(angle);
+        return {
+          vx: d18.vx,
+          vy: d18.vy,
+          id: d18.id,
+          links: d18.links,
+          connected: d18.connected,
+          showChildren: d18.showChildren,
+          containerID: d18.containerID,
+          containerName: d18.containerName,
+          containsMany: d18.containsMany,
+          inSim: d18.inSim,
+          loc: d18.loc,
+          name: d18.name,
+          nodetype: d18.nodetype,
+          treeXY: d18.treeXY,
+          treeDepth: d18.treeDepth,
+          cluster: d18.cluster,
+          focusX: d18.focusX,
+          focusY: d18.focusY,
+          r: d18.r,
+          x: x47,
+          y: y48,
+          fx: notNull(x47),
+          fy: notNull(y48),
+          gridXY: notNull({
+            x: x47,
+            y: y48
+          })
+        };
+      };
+    };
+    var partitioned = partition(isPackage)(nodes);
+    return append30(partitioned.no)(mapWithIndex2(setPinnedPhyllotaxis)(partitioned.yes));
+  };
+  var setForPhyllotaxis = function(index5) {
+    return function(d18) {
+      var i2 = toNumber(index5);
+      var radius40 = initialRadius8 * sqrt(0.5 + i2);
+      var angle = i2 * initialAngle6;
+      return {
+        vx: d18.vx,
+        vy: d18.vy,
+        fx: d18.fx,
+        fy: d18.fy,
+        id: d18.id,
+        links: d18.links,
+        connected: d18.connected,
+        showChildren: d18.showChildren,
+        containerID: d18.containerID,
+        containerName: d18.containerName,
+        containsMany: d18.containsMany,
+        inSim: d18.inSim,
+        loc: d18.loc,
+        name: d18.name,
+        nodetype: d18.nodetype,
+        treeXY: d18.treeXY,
+        treeDepth: d18.treeDepth,
+        gridXY: d18.gridXY,
+        cluster: d18.cluster,
+        focusX: d18.focusX,
+        focusY: d18.focusY,
+        r: d18.r,
+        x: radius40 * cos(angle),
+        y: radius40 * sin(angle)
+      };
+    };
+  };
+  var nodesToPhyllotaxis = function(predicate) {
+    return function(nodes) {
+      var partitioned = partition(predicate)(nodes);
+      return append30(partitioned.no)(mapWithIndex2(setForPhyllotaxis)(partitioned.yes));
+    };
+  };
+  var packagesNodesToPhyllotaxis = /* @__PURE__ */ nodesToPhyllotaxis(isPackage);
+  var fixNamedNodeTo = function(label5) {
+    return function(point) {
+      return function(nodes) {
+        var fixNamedNode$prime = function(d18) {
+          var $97 = d18.name === label5;
+          if ($97) {
+            return {
+              name: d18.name,
+              cluster: d18.cluster,
+              connected: d18.connected,
+              containerID: d18.containerID,
+              containerName: d18.containerName,
+              containsMany: d18.containsMany,
+              focusX: d18.focusX,
+              focusY: d18.focusY,
+              gridXY: d18.gridXY,
+              id: d18.id,
+              inSim: d18.inSim,
+              links: d18.links,
+              loc: d18.loc,
+              nodetype: d18.nodetype,
+              r: d18.r,
+              showChildren: d18.showChildren,
+              treeDepth: d18.treeDepth,
+              treeXY: d18.treeXY,
+              vx: d18.vx,
+              vy: d18.vy,
+              x: d18.x,
+              y: d18.y,
+              fx: notNull(point.x),
+              fy: notNull(point.y)
+            };
+          }
+          ;
+          return d18;
+        };
+        return map79(fixNamedNode$prime)(nodes);
+      };
+    };
+  };
+  var buildSpagoGraph = function(nodes) {
+    var links = bind81(nodes)(function(node) {
+      return mapFlipped16(node.links.targets)(function(target7) {
+        return {
+          source: node.id,
+          target: target7,
+          linktype: M2M_Graph.value,
+          inSim: true
+        };
+      });
+    });
+    var graphModel = buildGraphModel(spagoGraphConfig)(nodes)(links);
+    var graph = toDataGraph(spagoGraphConfig)(graphModel);
+    return {
+      graph,
+      graphModel
+    };
+  };
+  var makeSpagoGraphModel = function(json2) {
+    var v = getGraphJSONData(json2);
+    var v1 = buildSpagoGraph(v.nodes);
+    return {
+      links: v.links,
+      nodes: mapFlipped16(v.nodes)(upgradeSpagoNodeData(v.sourceLinksMap)),
+      graph: v1.graph,
+      graphModel: v1.graphModel,
+      tree: Nothing.value,
+      maps: {
+        name2ID: v.name2ID,
+        id2Name: v.id2Name,
+        id2Package: v.id2Package,
+        id2LOC: v.id2LOC,
+        id2TreeData: empty3
+      }
+    };
+  };
+  var convertFilesToGraphModel = function(moduleJSON) {
+    return function(packageJSON) {
+      return function(lsdepJSON) {
+        return function(locJSON) {
+          return makeSpagoGraphModel(readSpago_Raw_JSON_(moduleJSON.body)(packageJSON.body)(lsdepJSON.body)(locJSON.body));
+        };
+      };
+    };
+  };
+  var allNodes2 = /* @__PURE__ */ $$const(true);
 
   // output/PSD3.Data.Tree/index.js
   var Radial = /* @__PURE__ */ (function() {
@@ -48229,6 +49299,16 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     ReplayTick2.value = new ReplayTick2();
     return ReplayTick2;
   })();
+  var SetRevelationStep = /* @__PURE__ */ (function() {
+    function SetRevelationStep2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    SetRevelationStep2.create = function(value0) {
+      return new SetRevelationStep2(value0);
+    };
+    return SetRevelationStep2;
+  })();
   var eqScene = {
     eq: function(x47) {
       return function(y48) {
@@ -48318,843 +49398,6 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return eqScene;
     }
   };
-
-  // output/D3.Viz.Spago.Draw/index.js
-  var ordRecord11 = /* @__PURE__ */ ordRecord();
-  var ordRecordCons10 = /* @__PURE__ */ ordRecordCons(ordRecordNil)();
-  var ordRecordCons16 = /* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons10({
-    reflectSymbol: function() {
-      return "y";
-    }
-  })(ordNumber))()({
-    reflectSymbol: function() {
-      return "x";
-    }
-  })(ordNumber);
-  var ordNullable7 = /* @__PURE__ */ ordNullable(/* @__PURE__ */ ordRecord11(ordRecordCons16));
-  var ordArray2 = /* @__PURE__ */ ordArray(ordInt);
-  var ordNullable1 = /* @__PURE__ */ ordNullable(ordNumber);
-  var ordRecord16 = /* @__PURE__ */ ordRecord11(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(ordRecordCons16)()({
-    reflectSymbol: function() {
-      return "vy";
-    }
-  })(ordNumber))()({
-    reflectSymbol: function() {
-      return "vx";
-    }
-  })(ordNumber))()({
-    reflectSymbol: function() {
-      return "treeXY";
-    }
-  })(ordNullable7))()({
-    reflectSymbol: function() {
-      return "treeDepth";
-    }
-  })(/* @__PURE__ */ ordNullable(ordInt)))()({
-    reflectSymbol: function() {
-      return "showChildren";
-    }
-  })(ordBoolean))()({
-    reflectSymbol: function() {
-      return "r";
-    }
-  })(ordNumber))()({
-    reflectSymbol: function() {
-      return "nodetype";
-    }
-  })(ordNodeType))()({
-    reflectSymbol: function() {
-      return "name";
-    }
-  })(ordString))()({
-    reflectSymbol: function() {
-      return "loc";
-    }
-  })(ordNumber))()({
-    reflectSymbol: function() {
-      return "links";
-    }
-  })(/* @__PURE__ */ ordRecord11(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons10({
-    reflectSymbol: function() {
-      return "treeChildren";
-    }
-  })(ordArray2))()({
-    reflectSymbol: function() {
-      return "targets";
-    }
-  })(ordArray2))()({
-    reflectSymbol: function() {
-      return "sources";
-    }
-  })(ordArray2))()({
-    reflectSymbol: function() {
-      return "outPackage";
-    }
-  })(ordArray2))()({
-    reflectSymbol: function() {
-      return "inPackage";
-    }
-  })(ordArray2))()({
-    reflectSymbol: function() {
-      return "contains";
-    }
-  })(ordArray2))))()({
-    reflectSymbol: function() {
-      return "inSim";
-    }
-  })(ordBoolean))()({
-    reflectSymbol: function() {
-      return "id";
-    }
-  })(ordInt))()({
-    reflectSymbol: function() {
-      return "gridXY";
-    }
-  })(ordNullable7))()({
-    reflectSymbol: function() {
-      return "fy";
-    }
-  })(ordNullable1))()({
-    reflectSymbol: function() {
-      return "fx";
-    }
-  })(ordNullable1))()({
-    reflectSymbol: function() {
-      return "focusY";
-    }
-  })(ordNumber))()({
-    reflectSymbol: function() {
-      return "focusX";
-    }
-  })(ordNumber))()({
-    reflectSymbol: function() {
-      return "containsMany";
-    }
-  })(ordBoolean))()({
-    reflectSymbol: function() {
-      return "containerName";
-    }
-  })(ordString))()({
-    reflectSymbol: function() {
-      return "containerID";
-    }
-  })(ordInt))()({
-    reflectSymbol: function() {
-      return "connected";
-    }
-  })(ordBoolean))()({
-    reflectSymbol: function() {
-      return "cluster";
-    }
-  })(ordInt));
-  var class_49 = /* @__PURE__ */ class_2(toAttrStringString);
-  var updateSimulation = function(dictBind) {
-    return function(dictMonadEffect) {
-      var genericUpdateSimulation3 = genericUpdateSimulation(dictMonadEffect);
-      var spagoRenderCallbacks2 = spagoRenderCallbacks(dictMonadEffect.Monad0());
-      return function(dictSelectionM) {
-        var genericUpdateSimulation1 = genericUpdateSimulation3(dictSelectionM);
-        var spagoRenderCallbacks1 = spagoRenderCallbacks2(dictSelectionM);
-        return function(dictSimulationM2) {
-          var genericUpdateSimulation22 = genericUpdateSimulation1(dictSimulationM2)(ordRecord16)(ordInt)(ordIndex_);
-          return function(selections) {
-            return function(dataConfig) {
-              return function(attrs) {
-                return genericUpdateSimulation22({
-                  nodes: selections.nodes,
-                  links: selections.links
-                })(Group2.value)(Path3.value)({
-                  allNodes: dataConfig.allNodes,
-                  allLinks: dataConfig.allLinks,
-                  nodeFilter: dataConfig.nodeFilter,
-                  linkFilter: dataConfig.linkFilter,
-                  nodeInitializers: dataConfig.nodeInitializers,
-                  activeForces: new Just(dataConfig.activeForces),
-                  config: Nothing.value
-                })(function(n) {
-                  return n.id;
-                })(keyIsID_)(attrs)(spagoRenderCallbacks1);
-              };
-            };
-          };
-        };
-      };
-    };
-  };
-  var initialize5 = function(dictBind) {
-    var bind89 = bind(dictBind);
-    return function(dictMonadEffect) {
-      var liftEffect52 = liftEffect(dictMonadEffect);
-      var pure91 = pure(dictMonadEffect.Monad0().Applicative0());
-      return function(dictSimulationM2) {
-        return function(dictSelectionM) {
-          var select45 = select3(dictSelectionM);
-          var appendChild5 = appendChild(dictSelectionM);
-          var on15 = on2(dictSelectionM);
-          return bind89(liftEffect52(getWindowWidthHeight))(function(v) {
-            return bind89(select45("div.svg-container"))(function(root3) {
-              return bind89(appendChild5(SVG.value)(svgAttrs(v.value0)(v.value1))(root3))(function(svg2) {
-                return bind89(appendChild5(Group2.value)([])(svg2))(function(inner) {
-                  return bind89(on15(new Drag2(defaultDrag))(inner))(function() {
-                    return bind89(on15(new Zoom2(defaultZoom(new ScaleExtent2(0.1, 4))("g")))(svg2))(function() {
-                      return bind89(appendChild5(Group2.value)([class_49("links")])(inner))(function(linksGroup) {
-                        return bind89(appendChild5(Group2.value)([class_49("nodes")])(inner))(function(nodesGroup) {
-                          return pure91({
-                            nodes: nodesGroup,
-                            links: linksGroup
-                          });
-                        });
-                      });
-                    });
-                  });
-                });
-              });
-            });
-          });
-        };
-      };
-    };
-  };
-
-  // output/D3.Viz.Spago.Model/foreign.js
-  var spotlitSelection;
-  var spotlitNode;
-  var sourcesSelection;
-  var targetSelection;
-  var spotlitID;
-  var spotlit = false;
-  spotlightNeighbours_ = (simulation, id5, nodetype) => {
-    spotlit = true;
-    spotlitID = id5;
-    simulation.stop();
-    svg = d3.select("div.svg-container svg");
-    nodeSelection = svg.selectAll("g.nodes g");
-    spotlitSelection = nodeSelection.filter((d18, i2) => d18.id == id5);
-    spotlitNode = spotlitSelection.node();
-    spotlitNode.__data__.fx = spotlitNode.__data__.fx || spotlitNode.__data__.x;
-    spotlitNode.__data__.fy = spotlitNode.__data__.fy || spotlitNode.__data__.y;
-    const targets = spotlitNode.__data__.links.targets;
-    const sources = spotlitNode.__data__.links.sources;
-    sourcesSelection = nodeSelection.filter((d18, i2) => sources.includes(d18.id));
-    targetSelection = nodeSelection.filter((d18, i2) => targets.includes(d18.id));
-    svg.classed("spotlight", true);
-    sourcesSelection.classed("source", true);
-    targetSelection.classed("target", true);
-    spotlitSelection.classed("spotlight", true);
-    spotlitSelection.classed("source target", false);
-    simulation.force(
-      "collide",
-      d3.forceCollide().radius(
-        (d18) => sources.includes(d18.id) || targets.includes(d18.id) ? d18.r * 4 : d18.id === d18.containerID ? 10 : d18.r
-      )
-    );
-    simulation.alpha(1).restart();
-  };
-  unSpotlightNeighbours_ = (simulation) => {
-    simulation.stop();
-    svg.classed("spotlight", false);
-    spotlitNode.__data__.fx = null;
-    spotlitNode.__data__.fy = null;
-    spotlitSelection.classed("spotlight", false);
-    sourcesSelection.classed("source", false);
-    targetSelection.classed("target", false);
-    simulation.force(
-      "collide",
-      d3.forceCollide().radius((d18) => d18.id === d18.containerID ? 10 : d18.r)
-    );
-    simulation.restart();
-    spotlit = false;
-  };
-
-  // output/D3.Viz.Spago.Model/index.js
-  var lookup38 = /* @__PURE__ */ lookup2(ordInt);
-  var map79 = /* @__PURE__ */ map(functorArray);
-  var append30 = /* @__PURE__ */ append(semigroupArray);
-  var fromFoldable45 = /* @__PURE__ */ fromFoldable6(ordInt)(foldableArray);
-  var foldlWithIndex3 = /* @__PURE__ */ foldlWithIndex(foldableWithIndexArray);
-  var bind81 = /* @__PURE__ */ bind(bindArray);
-  var mapFlipped16 = /* @__PURE__ */ mapFlipped(functorArray);
-  var upgradeSpagoNodeData = function(sourcesMap) {
-    return function(node) {
-      return {
-        links: {
-          targets: node.links.targets,
-          treeChildren: node.links.treeChildren,
-          inPackage: node.links.inPackage,
-          outPackage: node.links.outPackage,
-          contains: node.links.contains,
-          sources: fromMaybe([])(lookup38(node.id)(sourcesMap))
-        },
-        id: node.id,
-        cluster: node.containerID,
-        connected: node.connected,
-        showChildren: (function() {
-          if (node.nodetype instanceof IsPackage) {
-            return true;
-          }
-          ;
-          if (node.nodetype instanceof IsModule) {
-            return false;
-          }
-          ;
-          throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 207, column 20 - line 209, column 45): " + [node.nodetype.constructor.name]);
-        })(),
-        containerID: node.containerID,
-        containerName: node.containerName,
-        containsMany: node.containsMany,
-        focusX: 0,
-        focusY: 0,
-        fx: nullImpl,
-        fy: nullImpl,
-        inSim: true,
-        loc: node.loc,
-        name: node.name,
-        nodetype: node.nodetype,
-        r: sqrt(node.loc),
-        treeXY: nullImpl,
-        treeDepth: nullImpl,
-        gridXY: nullImpl,
-        vx: 0,
-        vy: 0,
-        x: 0,
-        y: 0
-      };
-    };
-  };
-  var unpinAllNodes2 = function(nodes) {
-    var unpin = function(d18) {
-      return {
-        x: d18.x,
-        y: d18.y,
-        vx: d18.vx,
-        vy: d18.vy,
-        id: d18.id,
-        links: d18.links,
-        connected: d18.connected,
-        showChildren: d18.showChildren,
-        containerID: d18.containerID,
-        containerName: d18.containerName,
-        containsMany: d18.containsMany,
-        inSim: d18.inSim,
-        loc: d18.loc,
-        name: d18.name,
-        nodetype: d18.nodetype,
-        treeXY: d18.treeXY,
-        treeDepth: d18.treeDepth,
-        gridXY: d18.gridXY,
-        cluster: d18.cluster,
-        focusX: d18.focusX,
-        focusY: d18.focusY,
-        r: d18.r,
-        fx: nullImpl,
-        fy: nullImpl
-      };
-    };
-    return map79(unpin)(nodes);
-  };
-  var treeDepthMultiplier = 2;
-  var spagoGraphConfig = {
-    getNodeId: function(v) {
-      return v.id;
-    },
-    getLinkSource: function(link4) {
-      return link4.source;
-    },
-    getLinkTarget: function(link4) {
-      return link4.target;
-    }
-  };
-  var scalePoint = function(xFactor) {
-    return function(yFactor) {
-      return function(xy) {
-        return {
-          x: xy.x * xFactor,
-          y: xy.y * yFactor
-        };
-      };
-    };
-  };
-  var offsetXY = function(offset) {
-    return function(xy) {
-      return {
-        x: xy.x + offset.x,
-        y: xy.y + offset.y
-      };
-    };
-  };
-  var numberToGridPoint2 = function(columns) {
-    return function(i2) {
-      var d18 = toNumber(i2);
-      var c = toNumber(columns);
-      var x47 = remainder(d18)(c);
-      var y48 = floor(d18 / c);
-      return {
-        x: x47,
-        y: y48
-      };
-    };
-  };
-  var isUsedModule = function(d18) {
-    if (d18.nodetype instanceof IsPackage) {
-      return false;
-    }
-    ;
-    if (d18.nodetype instanceof IsModule) {
-      return d18.connected;
-    }
-    ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 197, column 18 - line 199, column 30): " + [d18.nodetype.constructor.name]);
-  };
-  var treeNodesToSwarmStart = function(nodes) {
-    var setSwarmStart = function(d18) {
-      var treeXY = fromMaybe({
-        x: d18.x,
-        y: d18.y
-      })(toMaybe(d18.treeXY));
-      return {
-        vx: d18.vx,
-        vy: d18.vy,
-        id: d18.id,
-        links: d18.links,
-        connected: d18.connected,
-        showChildren: d18.showChildren,
-        containerID: d18.containerID,
-        containerName: d18.containerName,
-        containsMany: d18.containsMany,
-        inSim: d18.inSim,
-        loc: d18.loc,
-        name: d18.name,
-        nodetype: d18.nodetype,
-        treeXY: d18.treeXY,
-        treeDepth: d18.treeDepth,
-        gridXY: d18.gridXY,
-        cluster: d18.cluster,
-        focusX: d18.focusX,
-        focusY: d18.focusY,
-        r: d18.r,
-        x: treeXY.y,
-        y: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      };
-    };
-    var partitioned = partition(isUsedModule)(nodes);
-    return append30(partitioned.no)(map79(setSwarmStart)(partitioned.yes));
-  };
-  var treeNodesToTreeXY_H = function(nodes) {
-    var setXYtoTreeXY = function(d18) {
-      var treeXY = fromMaybe({
-        x: d18.y,
-        y: d18.x
-      })(toMaybe(d18.treeXY));
-      return {
-        vx: d18.vx,
-        vy: d18.vy,
-        fx: d18.fx,
-        fy: d18.fy,
-        id: d18.id,
-        links: d18.links,
-        connected: d18.connected,
-        showChildren: d18.showChildren,
-        containerID: d18.containerID,
-        containerName: d18.containerName,
-        containsMany: d18.containsMany,
-        inSim: d18.inSim,
-        loc: d18.loc,
-        name: d18.name,
-        nodetype: d18.nodetype,
-        treeDepth: d18.treeDepth,
-        gridXY: d18.gridXY,
-        cluster: d18.cluster,
-        focusX: d18.focusX,
-        focusY: d18.focusY,
-        r: d18.r,
-        treeXY: notNull(treeXY),
-        x: treeXY.y * treeDepthMultiplier,
-        y: treeXY.x
-      };
-    };
-    var partitioned = partition(isUsedModule)(nodes);
-    return append30(partitioned.no)(map79(setXYtoTreeXY)(partitioned.yes));
-  };
-  var treeNodesToTreeXY_R = function(nodes) {
-    var setXYtoTreeXY = function(d18) {
-      var treeXY = fromMaybe({
-        x: d18.x,
-        y: d18.y
-      })(toMaybe(d18.treeXY));
-      var radialTranslate = function(p2) {
-        var radius40 = p2.y * treeDepthMultiplier;
-        var x47 = radius40 * cos(p2.x);
-        var y48 = radius40 * sin(p2.x);
-        return {
-          x: x47,
-          y: y48
-        };
-      };
-      var radialXY = radialTranslate(treeXY);
-      return {
-        vx: d18.vx,
-        vy: d18.vy,
-        fx: d18.fx,
-        fy: d18.fy,
-        id: d18.id,
-        links: d18.links,
-        connected: d18.connected,
-        showChildren: d18.showChildren,
-        containerID: d18.containerID,
-        containerName: d18.containerName,
-        containsMany: d18.containsMany,
-        inSim: d18.inSim,
-        loc: d18.loc,
-        name: d18.name,
-        nodetype: d18.nodetype,
-        treeDepth: d18.treeDepth,
-        gridXY: d18.gridXY,
-        cluster: d18.cluster,
-        focusX: d18.focusX,
-        focusY: d18.focusY,
-        r: d18.r,
-        treeXY: notNull(treeXY),
-        x: radialXY.x,
-        y: radialXY.y
-      };
-    };
-    var partitioned = partition(isUsedModule)(nodes);
-    return append30(partitioned.no)(map79(setXYtoTreeXY)(partitioned.yes));
-  };
-  var treeNodesToTreeXY_V = function(nodes) {
-    var setXYtoTreeXY = function(d18) {
-      var treeXY = fromMaybe({
-        x: d18.x,
-        y: d18.y
-      })(toMaybe(d18.treeXY));
-      return {
-        vx: d18.vx,
-        vy: d18.vy,
-        fx: d18.fx,
-        fy: d18.fy,
-        id: d18.id,
-        links: d18.links,
-        connected: d18.connected,
-        showChildren: d18.showChildren,
-        containerID: d18.containerID,
-        containerName: d18.containerName,
-        containsMany: d18.containsMany,
-        inSim: d18.inSim,
-        loc: d18.loc,
-        name: d18.name,
-        nodetype: d18.nodetype,
-        treeDepth: d18.treeDepth,
-        gridXY: d18.gridXY,
-        cluster: d18.cluster,
-        focusX: d18.focusX,
-        focusY: d18.focusY,
-        r: d18.r,
-        treeXY: notNull(treeXY),
-        x: treeXY.x,
-        y: treeXY.y * treeDepthMultiplier
-      };
-    };
-    var partitioned = partition(isUsedModule)(nodes);
-    return append30(partitioned.no)(map79(setXYtoTreeXY)(partitioned.yes));
-  };
-  var isPackageOrVisibleModule = function(id5) {
-    return function(d18) {
-      if (d18.nodetype instanceof IsModule) {
-        return d18.containerID === id5;
-      }
-      ;
-      if (d18.nodetype instanceof IsPackage) {
-        return true;
-      }
-      ;
-      throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 187, column 33 - line 189, column 24): " + [d18.nodetype.constructor.name]);
-    };
-  };
-  var isPackage = function(d18) {
-    if (d18.nodetype instanceof IsModule) {
-      return false;
-    }
-    ;
-    if (d18.nodetype instanceof IsPackage) {
-      return true;
-    }
-    ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 182, column 15 - line 184, column 24): " + [d18.nodetype.constructor.name]);
-  };
-  var moduleNodesToContainerXY = function(nodes) {
-    var partitioned = partition(isPackage)(nodes);
-    var packagesIndexMap = fromFoldable45(foldl2(function(b10) {
-      return function(a2) {
-        return cons(new Tuple(a2.id, a2.gridXY))(b10);
-      };
-    })([])(partitioned.yes));
-    var setModuleGridXY = function(m) {
-      var v = lookup38(m.containerID)(packagesIndexMap);
-      if (v instanceof Nothing) {
-        return m;
-      }
-      ;
-      if (v instanceof Just) {
-        var v1 = toMaybe(v.value0);
-        if (v1 instanceof Nothing) {
-          return {
-            containerID: m.containerID,
-            cluster: m.cluster,
-            connected: m.connected,
-            containerName: m.containerName,
-            containsMany: m.containsMany,
-            focusX: m.focusX,
-            focusY: m.focusY,
-            fx: m.fx,
-            fy: m.fy,
-            id: m.id,
-            inSim: m.inSim,
-            links: m.links,
-            loc: m.loc,
-            name: m.name,
-            nodetype: m.nodetype,
-            r: m.r,
-            showChildren: m.showChildren,
-            treeDepth: m.treeDepth,
-            treeXY: m.treeXY,
-            vx: m.vx,
-            vy: m.vy,
-            x: 0,
-            y: 0,
-            gridXY: v.value0
-          };
-        }
-        ;
-        if (v1 instanceof Just) {
-          return {
-            containerID: m.containerID,
-            cluster: m.cluster,
-            connected: m.connected,
-            containerName: m.containerName,
-            containsMany: m.containsMany,
-            focusX: m.focusX,
-            focusY: m.focusY,
-            fx: m.fx,
-            fy: m.fy,
-            id: m.id,
-            inSim: m.inSim,
-            links: m.links,
-            loc: m.loc,
-            name: m.name,
-            nodetype: m.nodetype,
-            r: m.r,
-            showChildren: m.showChildren,
-            treeDepth: m.treeDepth,
-            treeXY: m.treeXY,
-            vx: m.vx,
-            vy: m.vy,
-            x: v1.value0.x,
-            y: v1.value0.y,
-            gridXY: v.value0
-          };
-        }
-        ;
-        throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 290, column 11 - line 292, column 65): " + [v1.constructor.name]);
-      }
-      ;
-      throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 287, column 7 - line 292, column 65): " + [v.constructor.name]);
-    };
-    var modulesWithGrid = map79(setModuleGridXY)(partitioned.no);
-    return append30(modulesWithGrid)(partitioned.yes);
-  };
-  var packageNodesToGridXY = function(nodes) {
-    var partitioned = partition(isPackage)(nodes);
-    var packageCount = length(partitioned.yes);
-    var columns = floor2(ceil(sqrt(toNumber(packageCount))));
-    var offset = -(toNumber(columns) / 2);
-    var packagesWithGrid = (function() {
-      var setGridXY = function(p2) {
-        return function(i2) {
-          var gridXY = scalePoint(200)(200)(offsetXY({
-            x: offset,
-            y: offset
-          })(numberToGridPoint2(columns)(i2)));
-          return {
-            cluster: p2.cluster,
-            connected: p2.connected,
-            containerID: p2.containerID,
-            containerName: p2.containerName,
-            containsMany: p2.containsMany,
-            focusX: p2.focusX,
-            focusY: p2.focusY,
-            fx: p2.fx,
-            fy: p2.fy,
-            id: p2.id,
-            inSim: p2.inSim,
-            links: p2.links,
-            loc: p2.loc,
-            name: p2.name,
-            nodetype: p2.nodetype,
-            r: p2.r,
-            showChildren: p2.showChildren,
-            treeDepth: p2.treeDepth,
-            treeXY: p2.treeXY,
-            vx: p2.vx,
-            vy: p2.vy,
-            gridXY: notNull(gridXY),
-            x: gridXY.x,
-            y: gridXY.y
-          };
-        };
-      };
-      return foldlWithIndex3(function(i2) {
-        return function(b10) {
-          return function(a2) {
-            return cons(setGridXY(a2)(i2))(b10);
-          };
-        };
-      })([])(partitioned.yes);
-    })();
-    return append30(partitioned.no)(packagesWithGrid);
-  };
-  var isModule = function(d18) {
-    if (d18.nodetype instanceof IsModule) {
-      return true;
-    }
-    ;
-    if (d18.nodetype instanceof IsPackage) {
-      return false;
-    }
-    ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 192, column 14 - line 194, column 25): " + [d18.nodetype.constructor.name]);
-  };
-  var initialRadius8 = 10;
-  var initialAngle6 = /* @__PURE__ */ (function() {
-    return pi * (3 - sqrt(5));
-  })();
-  var setForPhyllotaxis = function(index5) {
-    return function(d18) {
-      var i2 = toNumber(index5);
-      var radius40 = initialRadius8 * sqrt(0.5 + i2);
-      var angle = i2 * initialAngle6;
-      return {
-        vx: d18.vx,
-        vy: d18.vy,
-        fx: d18.fx,
-        fy: d18.fy,
-        id: d18.id,
-        links: d18.links,
-        connected: d18.connected,
-        showChildren: d18.showChildren,
-        containerID: d18.containerID,
-        containerName: d18.containerName,
-        containsMany: d18.containsMany,
-        inSim: d18.inSim,
-        loc: d18.loc,
-        name: d18.name,
-        nodetype: d18.nodetype,
-        treeXY: d18.treeXY,
-        treeDepth: d18.treeDepth,
-        gridXY: d18.gridXY,
-        cluster: d18.cluster,
-        focusX: d18.focusX,
-        focusY: d18.focusY,
-        r: d18.r,
-        x: radius40 * cos(angle),
-        y: radius40 * sin(angle)
-      };
-    };
-  };
-  var nodesToPhyllotaxis = function(predicate) {
-    return function(nodes) {
-      var partitioned = partition(predicate)(nodes);
-      return append30(partitioned.no)(mapWithIndex2(setForPhyllotaxis)(partitioned.yes));
-    };
-  };
-  var packagesNodesToPhyllotaxis = /* @__PURE__ */ nodesToPhyllotaxis(isPackage);
-  var fixNamedNodeTo = function(label5) {
-    return function(point) {
-      return function(nodes) {
-        var fixNamedNode$prime = function(d18) {
-          var $83 = d18.name === label5;
-          if ($83) {
-            return {
-              name: d18.name,
-              cluster: d18.cluster,
-              connected: d18.connected,
-              containerID: d18.containerID,
-              containerName: d18.containerName,
-              containsMany: d18.containsMany,
-              focusX: d18.focusX,
-              focusY: d18.focusY,
-              gridXY: d18.gridXY,
-              id: d18.id,
-              inSim: d18.inSim,
-              links: d18.links,
-              loc: d18.loc,
-              nodetype: d18.nodetype,
-              r: d18.r,
-              showChildren: d18.showChildren,
-              treeDepth: d18.treeDepth,
-              treeXY: d18.treeXY,
-              vx: d18.vx,
-              vy: d18.vy,
-              x: d18.x,
-              y: d18.y,
-              fx: notNull(point.x),
-              fy: notNull(point.y)
-            };
-          }
-          ;
-          return d18;
-        };
-        return map79(fixNamedNode$prime)(nodes);
-      };
-    };
-  };
-  var buildSpagoGraph = function(nodes) {
-    var links = bind81(nodes)(function(node) {
-      return mapFlipped16(node.links.targets)(function(target7) {
-        return {
-          source: node.id,
-          target: target7,
-          linktype: M2M_Graph.value,
-          inSim: true
-        };
-      });
-    });
-    var graphModel = buildGraphModel(spagoGraphConfig)(nodes)(links);
-    var graph = toDataGraph(spagoGraphConfig)(graphModel);
-    return {
-      graph,
-      graphModel
-    };
-  };
-  var makeSpagoGraphModel = function(json2) {
-    var v = getGraphJSONData(json2);
-    var v1 = buildSpagoGraph(v.nodes);
-    return {
-      links: v.links,
-      nodes: mapFlipped16(v.nodes)(upgradeSpagoNodeData(v.sourceLinksMap)),
-      graph: v1.graph,
-      graphModel: v1.graphModel,
-      tree: Nothing.value,
-      maps: {
-        name2ID: v.name2ID,
-        id2Name: v.id2Name,
-        id2Package: v.id2Package,
-        id2LOC: v.id2LOC,
-        id2TreeData: empty3
-      }
-    };
-  };
-  var convertFilesToGraphModel = function(moduleJSON) {
-    return function(packageJSON) {
-      return function(lsdepJSON) {
-        return function(locJSON) {
-          return makeSpagoGraphModel(readSpago_Raw_JSON_(moduleJSON.body)(packageJSON.body)(lsdepJSON.body)(locJSON.body));
-        };
-      };
-    };
-  };
-  var allNodes2 = /* @__PURE__ */ $$const(true);
 
   // output/PSD3.Data.Graph.Algorithms/index.js
   var bind82 = /* @__PURE__ */ bind(bindMaybe);
@@ -49264,7 +49507,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var foldl17 = /* @__PURE__ */ foldl(foldableList);
   var fromFoldable119 = /* @__PURE__ */ fromFoldable2(foldableArray);
   var fromFoldable211 = /* @__PURE__ */ fromFoldable(foldableSet);
-  var elem7 = /* @__PURE__ */ elem2(eqInt);
+  var elem6 = /* @__PURE__ */ elem2(eqInt);
   var fromFoldable310 = /* @__PURE__ */ fromFoldable6(ordInt)(foldableArray);
   var append33 = /* @__PURE__ */ append(semigroupArray);
   var updateNodeTreeXY = function(nodes) {
@@ -49307,7 +49550,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           };
         }
         ;
-        throw new Error("Failed pattern match at D3.Viz.Spago.Tree (line 144, column 7 - line 150, column 17): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at D3.Viz.Spago.Tree (line 131, column 7 - line 137, column 17): " + [v.constructor.name]);
       };
       return map81(updateNode)(nodes);
     };
@@ -49326,13 +49569,6 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return function(v) {
       return new Node(f(v.value0), map121(mapTree(f))(v.value1));
     };
-  };
-  var isP2P_Link2 = function(link4) {
-    if (link4.linktype instanceof P2P) {
-      return true;
-    }
-    ;
-    return false;
   };
   var flattenTreeToMap = function(tree3) {
     var go2 = function(v) {
@@ -49370,8 +49606,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         var matchingLinks = filter(function(link4) {
           return link4.source === nodeId;
         })(links);
-        return map81(function(link4) {
-          return link4.target;
+        return map81(function(v) {
+          return v.target;
         })(matchingLinks);
       };
       var go2 = function(nodeId) {
@@ -49387,11 +49623,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       var reachable = getReachableNodes(spagoGraphConfig)(rootID)(model.graphModel);
       var reachableNodes = fromFoldable211(reachable.nodes);
       var treenodes = partition(function(n) {
-        return elem7(n.id)(reachableNodes) || n.id === rootID;
+        return elem6(n.id)(reachableNodes) || n.id === rootID;
       })(model.nodes);
       var treelinks = map81(tupleToLink(M2M_Tree.value))(reachable.spanningTree);
       var prunedTreeLinks = map81(tupleToLink(M2M_Graph.value))(reachable.redundantEdges);
-      var onlyPackageLinks = filter(isP2P_Link2)(model.links);
+      var onlyPackageLinks = filter(isP2P_Link)(model.links);
       var nodeMap = fromFoldable310(map81(function(n) {
         return new Tuple(n.id, n);
       })(model.nodes));
@@ -49417,7 +49653,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           };
         }
         ;
-        throw new Error("Failed pattern match at D3.Viz.Spago.Tree (line 108, column 9 - line 110, column 62): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at D3.Viz.Spago.Tree (line 95, column 9 - line 97, column 62): " + [v.constructor.name]);
       })(idTree);
       var config = {
         size: {
@@ -49604,7 +49840,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var lmap2 = /* @__PURE__ */ lmap(bifunctorTuple);
   var append122 = /* @__PURE__ */ append(semigroupArray);
   var rmap3 = /* @__PURE__ */ rmap(bifunctorTuple);
-  var elem8 = /* @__PURE__ */ elem2(eqString);
+  var elem7 = /* @__PURE__ */ elem2(eqString);
   var not4 = /* @__PURE__ */ not(/* @__PURE__ */ heytingAlgebraFunction(heytingAlgebraBoolean));
   var pure82 = /* @__PURE__ */ pure(applicativeArray);
   var map84 = /* @__PURE__ */ map(functorArray);
@@ -49682,7 +49918,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return append$prime("vertical")(classifyOverflow(drop3(2)(str2)));
     }
     ;
-    if (elem8(str2)(["auto", "hidden", "visible", "scroll"])) {
+    if (elem7(str2)(["auto", "hidden", "visible", "scroll"])) {
       return "";
     }
     ;
@@ -49793,6 +50029,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         transitionListener: state3.transitionListener,
         tags: state3.tags,
         showWelcome: state3.showWelcome,
+        revelationStep: state3.revelationStep,
+        maxTreeDepth: state3.maxTreeDepth,
         scene: f(state3.scene)
       };
     };
@@ -49835,7 +50073,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     return new Just(insert15(v)(v1.value0));
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.Component.SimulationState (line 421, column 5 - line 421, column 65): " + [v.constructor.name, v1.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.Component.SimulationState (line 429, column 5 - line 429, column 65): " + [v.constructor.name, v1.constructor.name]);
                 };
               };
               var newTags = foldl2(function(acc) {
@@ -49858,6 +50096,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 eventListener: state3.eventListener,
                 transitionListener: state3.transitionListener,
                 showWelcome: state3.showWelcome,
+                revelationStep: state3.revelationStep,
+                maxTreeDepth: state3.maxTreeDepth,
                 tags: newTags
               };
             };
@@ -49953,6 +50193,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       eventListener: state3.eventListener,
       transitionListener: state3.transitionListener,
       showWelcome: state3.showWelcome,
+      revelationStep: state3.revelationStep,
+      maxTreeDepth: state3.maxTreeDepth,
       tags: empty3
     };
   };
@@ -49982,9 +50224,29 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             transitionListener: state3.transitionListener,
             tags: state3.tags,
             showWelcome: state3.showWelcome,
+            revelationStep: state3.revelationStep,
+            maxTreeDepth: state3.maxTreeDepth,
             scene: config
           };
         };
+      };
+    };
+  };
+  var applySceneConfig = function(config) {
+    return function(state3) {
+      return {
+        simulation: state3.simulation,
+        model: state3.model,
+        staging: state3.staging,
+        currentScene: state3.currentScene,
+        transitionMatrix: state3.transitionMatrix,
+        eventListener: state3.eventListener,
+        transitionListener: state3.transitionListener,
+        tags: state3.tags,
+        showWelcome: state3.showWelcome,
+        revelationStep: state3.revelationStep,
+        maxTreeDepth: state3.maxTreeDepth,
+        scene: config
       };
     };
   };
@@ -50048,7 +50310,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return [];
     }
     ;
-    throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 213, column 23 - line 215, column 16): " + [state3.model.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 205, column 23 - line 207, column 16): " + [state3.model.constructor.name]);
   };
   var getModelLinks = function(state3) {
     if (state3.model instanceof Just) {
@@ -50059,10 +50321,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return [];
     }
     ;
-    throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 218, column 23 - line 220, column 16): " + [state3.model.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 210, column 23 - line 212, column 16): " + [state3.model.constructor.name]);
   };
   var clearAllTags2 = clearAllTags;
   var applySceneWithTransition2 = /* @__PURE__ */ applySceneWithTransition(ordScene);
+  var applySceneConfig2 = applySceneConfig;
 
   // output/PSD3.CodeExplorer.WelcomeOverlay/index.js
   var render50 = function(dismissAction) {
@@ -50101,12 +50364,14 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var toUnfoldable9 = /* @__PURE__ */ toUnfoldable3(unfoldableArray);
   var _forceLibrary3 = /* @__PURE__ */ _forceLibrary(strongForget);
   var show141 = /* @__PURE__ */ show(showInt);
+  var max15 = /* @__PURE__ */ max(ordInt);
+  var min11 = /* @__PURE__ */ min(ordInt);
   var slider = function(config) {
     var toScale = function(s) {
       return toNumber(fromMaybe(0)(fromString2(s))) / 100;
     };
-    return [onValueInput(function($20) {
-      return ChangeSimConfig.create(config["var"](toScale($20)));
+    return [onValueInput(function($24) {
+      return ChangeSimConfig.create(config["var"](toScale($24)));
     }), type_21(InputRange.value), id3(config.id), class_("range-slider scaling-slider"), min4(config.min), max4(config.max), step3(new Step(config.step)), value16(show79(config.value))];
   };
   var renderTableForces = function(state3) {
@@ -50139,7 +50404,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
   var renderSimControls = function(state3) {
     var params = getSimulationVariables(state3);
-    return div2([classes(["spago-sim-controls"])])([subHeading_([text2("Scene Selection")]), div2([classes(["control-group"])])([buttonGroup_([buttonPrimaryLeft([onClick($$const(new Scene(PackageGrid.value)))])([text2("Package Grid")]), buttonPrimaryRight([onClick($$const(new Scene(PackageGraph.value)))])([text2("Package Graph")])])]), div2([classes(["control-group"])])([buttonGroup_([buttonPrimaryLeft([onClick($$const(new Scene(new ModuleTree(Horizontal.value))))])([text2("Horiz. Tree")]), buttonPrimaryCenter([onClick($$const(new Scene(new ModuleTree(Vertical.value))))])([text2("Vert. Tree")]), buttonPrimaryRight([onClick($$const(new Scene(new ModuleTree(Radial.value))))])([text2("Radial Tree")])])]), div2([classes(["control-group"])])([buttonGroup_([buttonPrimaryLeft([onClick($$const(new Scene(LayerSwarm.value)))])([text2("Layer Swarm")])])]), subHeading_([text2("Tagging (Demo)")]), div2([classes(["control-group"])])([buttonGroup_([buttonPrimaryLeft([onClick($$const(TagHalogen.value))])([text2("Tag Halogen")]), buttonPrimaryRight([onClick($$const(ClearTags.value))])([text2("Clear Tags")])])]), subHeading_([text2("Simulation Control")]), div2([classes(["control-group"])])([input(slider({
+    return div2([classes(["spago-sim-controls"])])([subHeading_([text2("Scene Selection")]), div2([classes(["control-group"])])([buttonGroup_([buttonPrimaryLeft([onClick($$const(new Scene(PackageGrid.value)))])([text2("Package Grid")]), buttonPrimaryRight([onClick($$const(new Scene(PackageGraph.value)))])([text2("Package Graph")])])]), div2([classes(["control-group"])])([buttonGroup_([buttonPrimaryLeft([onClick($$const(new Scene(new ModuleTree(Horizontal.value))))])([text2("Horiz. Tree")]), buttonPrimaryCenter([onClick($$const(new Scene(new ModuleTree(Vertical.value))))])([text2("Vert. Tree")]), buttonPrimaryRight([onClick($$const(new Scene(new ModuleTree(Radial.value))))])([text2("Radial Tree")])])]), div2([classes(["control-group"])])([buttonGroup_([buttonPrimaryLeft([onClick($$const(new Scene(LayerSwarm.value)))])([text2("Layer Swarm")])])]), subHeading_([text2("Tree Revelation")]), div2([classes(["control-group"])])([input([type_21(InputRange.value), id3("revelation-slider"), class_("range-slider revelation-slider"), min4(0), max4(toNumber(state3.maxTreeDepth + 1 | 0)), step3(new Step(1)), value16(show141(state3.revelationStep)), disabled2(true)]), caption_2([text2("Depth: " + (show141(state3.revelationStep) + (" / " + show141(state3.maxTreeDepth))))]), buttonGroup_([buttonPrimaryLeft([onClick($$const(new SetRevelationStep(max15(0)(state3.revelationStep - 1 | 0))))])([text2("\u2190 Back")]), buttonPrimaryRight([onClick($$const(new SetRevelationStep(min11(state3.maxTreeDepth + 1 | 0)(state3.revelationStep + 1 | 0))))])([text2("Forward \u2192")])])]), subHeading_([text2("Tagging (Demo)")]), div2([classes(["control-group"])])([buttonGroup_([buttonPrimaryLeft([onClick($$const(TagHalogen.value))])([text2("Tag Halogen")]), buttonPrimaryRight([onClick($$const(ClearTags.value))])([text2("Clear Tags")])])]), subHeading_([text2("Simulation Control")]), div2([classes(["control-group"])])([input(slider({
       "var": Alpha.create,
       id: "alpha-slider",
       min: 0,
@@ -50179,6 +50444,50 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       transitionConfig: new Just(smoothTransition)
     };
   })();
+  var treeRevelationScene = function(step4) {
+    return function(maxDepth) {
+      if (step4 === 0) {
+        return {
+          chooseNodes: allNodes2,
+          linksShown: $$const(false),
+          linksActive: $$const(false),
+          cssClass: "revelation step-0",
+          attributes: clusterSceneAttributes,
+          activeForces: fromFoldable49(["clusterx_M", "clustery_M", "collide2"]),
+          nodeInitializerFunctions: [unpinAllNodes2, pinnedPackagesToPhyllotaxis, moduleNodesToContainerXY],
+          transitionConfig: new Just(smoothTransition)
+        };
+      }
+      ;
+      if (step4 > maxDepth) {
+        return {
+          chooseNodes: allNodes2,
+          linksShown: isM2M_Tree_Link,
+          linksActive: $$const(true),
+          cssClass: "revelation final",
+          attributes: clusterSceneAttributes,
+          activeForces: fromFoldable49(["center", "collide2", "charge2", linksForceName_]),
+          nodeInitializerFunctions: [unpinAllNodes2, packageNodesToGridXY, moduleNodesToContainerXY, treeNodesToTreeXY_R],
+          transitionConfig: new Just(smoothTransition)
+        };
+      }
+      ;
+      if (otherwise) {
+        return {
+          chooseNodes: allNodes2,
+          linksShown: isM2M_Tree_Link,
+          linksActive: $$const(false),
+          cssClass: "revelation",
+          attributes: clusterSceneAttributes,
+          activeForces: empty8,
+          nodeInitializerFunctions: [nodesToRevelationXY(step4)],
+          transitionConfig: Nothing.value
+        };
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3.CodeExplorer.Scenes (line 126, column 1 - line 126, column 49): " + [step4.constructor.name, maxDepth.constructor.name]);
+    };
+  };
   var radialTreeScene = /* @__PURE__ */ (function() {
     return {
       chooseNodes: isUsedModule,
@@ -50441,7 +50750,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var updateSimulation2 = /* @__PURE__ */ updateSimulation(bindD3v2SimM)(monadEffectD3v2SimM)(selectionMD3v2Selection_D1)(simulationM2D3v2Selection);
   var bind84 = /* @__PURE__ */ bind(bindHalogenM);
   var discard76 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var modify_19 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var modify_20 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var maximum15 = /* @__PURE__ */ maximum(ordInt)(foldableArray);
   var get23 = /* @__PURE__ */ get(monadStateHalogenM);
   var initialize6 = /* @__PURE__ */ initialize5(bindD3v2SimM)(monadEffectD3v2SimM)(simulationM2D3v2Selection)(selectionMD3v2Selection_D1);
   var $$void18 = /* @__PURE__ */ $$void(functorHalogenM);
@@ -50472,7 +50782,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   return Nothing.value;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.CodeExplorer (line 434, column 23 - line 437, column 31): " + [st.eventListener.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.CodeExplorer (line 457, column 23 - line 460, column 31): " + [st.eventListener.constructor.name]);
               })()
             };
           };
@@ -50488,77 +50798,109 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return function(v) {
       if (v instanceof Initialize45) {
         return bind84(liftAff4(readModelData))(function(v1) {
-          return discard76(modify_19(function(v2) {
-            var $67 = {};
-            for (var $68 in v2) {
-              if ({}.hasOwnProperty.call(v2, $68)) {
-                $67[$68] = v2[$68];
+          return discard76(modify_20(function(v2) {
+            var $71 = {};
+            for (var $72 in v2) {
+              if ({}.hasOwnProperty.call(v2, $72)) {
+                $71[$72] = v2[$72];
               }
               ;
             }
             ;
-            $67.model = v1;
-            return $67;
+            $71.model = v1;
+            return $71;
           }))(function() {
-            return discard76(liftEffect52(loadGitMetrics_))(function() {
-              return discard76(liftEffect52(loadTimeline_))(function() {
-                return bind84(get23)(function(state3) {
-                  return bind84(liftAff4(evalD3v2SimM(state3)(initialize6)))(function(openSelections) {
-                    return discard76(modify_19(function(s) {
-                      var $73 = {};
-                      for (var $74 in s) {
-                        if ({}.hasOwnProperty.call(s, $74)) {
-                          $73[$74] = s[$74];
-                        }
-                        ;
-                      }
-                      ;
-                      $73.staging = (function() {
-                        var $70 = {};
-                        for (var $71 in s.staging) {
-                          if ({}.hasOwnProperty.call(s.staging, $71)) {
-                            $70[$71] = s["staging"][$71];
+            var maxDepth = (function() {
+              if (v1 instanceof Nothing) {
+                return 0;
+              }
+              ;
+              if (v1 instanceof Just) {
+                var depths = mapMaybe(function(n) {
+                  return toMaybe(n.treeDepth);
+                })(v1.value0.nodes);
+                return fromMaybe(0)(maximum15(depths));
+              }
+              ;
+              throw new Error("Failed pattern match at PSD3.CodeExplorer (line 169, column 20 - line 173, column 44): " + [v1.constructor.name]);
+            })();
+            return discard76(modify_20(function(v2) {
+              var $76 = {};
+              for (var $77 in v2) {
+                if ({}.hasOwnProperty.call(v2, $77)) {
+                  $76[$77] = v2[$77];
+                }
+                ;
+              }
+              ;
+              $76.maxTreeDepth = maxDepth;
+              return $76;
+            }))(function() {
+              return discard76(liftEffect52(loadGitMetrics_))(function() {
+                return discard76(liftEffect52(loadTimeline_))(function() {
+                  return bind84(get23)(function(state3) {
+                    return bind84(liftAff4(evalD3v2SimM(state3)(initialize6)))(function(openSelections) {
+                      return discard76(modify_20(function(s) {
+                        var $82 = {};
+                        for (var $83 in s) {
+                          if ({}.hasOwnProperty.call(s, $83)) {
+                            $82[$83] = s[$83];
                           }
                           ;
                         }
                         ;
-                        $70.selections = {
-                          nodes: new Just(openSelections.nodes),
-                          links: new Just(openSelections.links)
-                        };
-                        return $70;
-                      })();
-                      return $73;
-                    }))(function() {
-                      return bind84(liftEffect52(create))(function(v2) {
-                        return discard76($$void18(subscribe2(v2.emitter)))(function() {
-                          return discard76(modify_19(function(v3) {
-                            var $77 = {};
-                            for (var $78 in v3) {
-                              if ({}.hasOwnProperty.call(v3, $78)) {
-                                $77[$78] = v3[$78];
-                              }
-                              ;
+                        $82.staging = (function() {
+                          var $79 = {};
+                          for (var $80 in s.staging) {
+                            if ({}.hasOwnProperty.call(s.staging, $80)) {
+                              $79[$80] = s["staging"][$80];
                             }
                             ;
-                            $77.eventListener = new Just(v2.listener);
-                            return $77;
-                          }))(function() {
-                            return bind84(liftEffect52(create))(function(v3) {
-                              return discard76($$void18(subscribe2(v3.emitter)))(function() {
-                                return discard76(modify_19(function(v4) {
-                                  var $81 = {};
-                                  for (var $82 in v4) {
-                                    if ({}.hasOwnProperty.call(v4, $82)) {
-                                      $81[$82] = v4[$82];
+                          }
+                          ;
+                          $79.selections = {
+                            nodes: new Just(openSelections.nodes),
+                            links: new Just(openSelections.links)
+                          };
+                          return $79;
+                        })();
+                        return $82;
+                      }))(function() {
+                        return bind84(liftEffect52(create))(function(v2) {
+                          return discard76($$void18(subscribe2(v2.emitter)))(function() {
+                            return discard76(modify_20(function(v3) {
+                              var $86 = {};
+                              for (var $87 in v3) {
+                                if ({}.hasOwnProperty.call(v3, $87)) {
+                                  $86[$87] = v3[$87];
+                                }
+                                ;
+                              }
+                              ;
+                              $86.eventListener = new Just(v2.listener);
+                              return $86;
+                            }))(function() {
+                              return bind84(liftEffect52(create))(function(v3) {
+                                return discard76($$void18(subscribe2(v3.emitter)))(function() {
+                                  return discard76(modify_20(function(v4) {
+                                    var $90 = {};
+                                    for (var $91 in v4) {
+                                      if ({}.hasOwnProperty.call(v4, $91)) {
+                                        $90[$91] = v4[$91];
+                                      }
+                                      ;
                                     }
                                     ;
-                                  }
-                                  ;
-                                  $81.transitionListener = new Just(v3.listener);
-                                  return $81;
-                                }))(function() {
-                                  return pure83(unit);
+                                    $90.transitionListener = new Just(v3.listener);
+                                    return $90;
+                                  }))(function() {
+                                    return bind84(get23)(function(state$prime) {
+                                      var sceneConfig = treeRevelationScene(0)(state$prime.maxTreeDepth);
+                                      return discard76(modify_20(applySceneConfig2(sceneConfig)))(function() {
+                                        return runSimulation1;
+                                      });
+                                    });
+                                  });
                                 });
                               });
                             });
@@ -50587,17 +50929,17 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return handleAction44(dictMonadAff)(new SpotlightNode(v.value0.value1));
         }
         ;
-        throw new Error("Failed pattern match at PSD3.CodeExplorer (line 200, column 5 - line 202, column 68): " + [v.value0.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.CodeExplorer (line 215, column 5 - line 217, column 68): " + [v.value0.constructor.name]);
       }
       ;
       if (v instanceof ToggleChildrenOfNode) {
-        return discard76(modify_19(setChooseNodes2(isPackageOrVisibleModule(v.value0))))(function() {
+        return discard76(modify_20(setChooseNodes2(isPackageOrVisibleModule(v.value0))))(function() {
           return runSimulation1;
         });
       }
       ;
       if (v instanceof UnToggleChildrenOfNode) {
-        return discard76(modify_19(setChooseNodes2(isPackage)))(function() {
+        return discard76(modify_20(setChooseNodes2(isPackage)))(function() {
           return runSimulation1;
         });
       }
@@ -50613,85 +50955,47 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v instanceof Scene && v.value0 instanceof PackageGrid) {
-        return discard76(modify_19(applySceneWithTransition2(PackageGrid.value)(packageGridScene)))(function() {
+        return discard76(modify_20(applySceneWithTransition2(PackageGrid.value)(packageGridScene)))(function() {
           return discard76(runSimulation1)(function() {
-            return modify_19(function(v1) {
-              var $100 = {};
-              for (var $101 in v1) {
-                if ({}.hasOwnProperty.call(v1, $101)) {
-                  $100[$101] = v1[$101];
+            return modify_20(function(v1) {
+              var $109 = {};
+              for (var $110 in v1) {
+                if ({}.hasOwnProperty.call(v1, $110)) {
+                  $109[$110] = v1[$110];
                 }
                 ;
               }
               ;
-              $100.currentScene = PackageGrid.value;
-              return $100;
+              $109.currentScene = PackageGrid.value;
+              return $109;
             });
           });
         });
       }
       ;
       if (v instanceof Scene && v.value0 instanceof PackageGraph) {
-        return discard76(modify_19(applySceneWithTransition2(PackageGraph.value)(packageGraphScene)))(function() {
+        return discard76(modify_20(applySceneWithTransition2(PackageGraph.value)(packageGraphScene)))(function() {
           return discard76(runSimulation1)(function() {
-            return modify_19(function(v1) {
-              var $104 = {};
-              for (var $105 in v1) {
-                if ({}.hasOwnProperty.call(v1, $105)) {
-                  $104[$105] = v1[$105];
+            return modify_20(function(v1) {
+              var $113 = {};
+              for (var $114 in v1) {
+                if ({}.hasOwnProperty.call(v1, $114)) {
+                  $113[$114] = v1[$114];
                 }
                 ;
               }
               ;
-              $104.currentScene = PackageGraph.value;
-              return $104;
+              $113.currentScene = PackageGraph.value;
+              return $113;
             });
           });
         });
       }
       ;
       if (v instanceof Scene && v.value0 instanceof LayerSwarm) {
-        return discard76(modify_19(applySceneWithTransition2(LayerSwarm.value)(layerSwarmScene)))(function() {
+        return discard76(modify_20(applySceneWithTransition2(LayerSwarm.value)(layerSwarmScene)))(function() {
           return discard76(runSimulation1)(function() {
-            return modify_19(function(v1) {
-              var $108 = {};
-              for (var $109 in v1) {
-                if ({}.hasOwnProperty.call(v1, $109)) {
-                  $108[$109] = v1[$109];
-                }
-                ;
-              }
-              ;
-              $108.currentScene = LayerSwarm.value;
-              return $108;
-            });
-          });
-        });
-      }
-      ;
-      if (v instanceof Scene && (v.value0 instanceof ModuleTree && v.value0.value0 instanceof Radial)) {
-        return discard76(modify_19(applySceneWithTransition2(new ModuleTree(Radial.value))(radialTreeScene)))(function() {
-          return discard76(runSimulation1)(function() {
-            return modify_19(function(v1) {
-              var $112 = {};
-              for (var $113 in v1) {
-                if ({}.hasOwnProperty.call(v1, $113)) {
-                  $112[$113] = v1[$113];
-                }
-                ;
-              }
-              ;
-              $112.currentScene = new ModuleTree(Radial.value);
-              return $112;
-            });
-          });
-        });
-      }
-      ;
-      if (v instanceof Scene && (v.value0 instanceof ModuleTree && v.value0.value0 instanceof Horizontal)) {
-        return discard76(modify_19(applySceneWithTransition2(new ModuleTree(Horizontal.value))(horizontalTreeScene)))(function() {
-          return discard76(runSimulation1)(function() {
-            return modify_19(function(v1) {
+            return modify_20(function(v1) {
               var $117 = {};
               for (var $118 in v1) {
                 if ({}.hasOwnProperty.call(v1, $118)) {
@@ -50700,35 +51004,73 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 ;
               }
               ;
-              $117.currentScene = new ModuleTree(Horizontal.value);
+              $117.currentScene = LayerSwarm.value;
               return $117;
             });
           });
         });
       }
       ;
-      if (v instanceof Scene && (v.value0 instanceof ModuleTree && v.value0.value0 instanceof Vertical)) {
-        return discard76(modify_19(applySceneWithTransition2(new ModuleTree(Vertical.value))(verticalTreeScene)))(function() {
+      if (v instanceof Scene && (v.value0 instanceof ModuleTree && v.value0.value0 instanceof Radial)) {
+        return discard76(modify_20(applySceneWithTransition2(new ModuleTree(Radial.value))(radialTreeScene)))(function() {
           return discard76(runSimulation1)(function() {
-            return modify_19(function(v1) {
-              var $122 = {};
-              for (var $123 in v1) {
-                if ({}.hasOwnProperty.call(v1, $123)) {
-                  $122[$123] = v1[$123];
+            return modify_20(function(v1) {
+              var $121 = {};
+              for (var $122 in v1) {
+                if ({}.hasOwnProperty.call(v1, $122)) {
+                  $121[$122] = v1[$122];
                 }
                 ;
               }
               ;
-              $122.currentScene = new ModuleTree(Vertical.value);
-              return $122;
+              $121.currentScene = new ModuleTree(Radial.value);
+              return $121;
+            });
+          });
+        });
+      }
+      ;
+      if (v instanceof Scene && (v.value0 instanceof ModuleTree && v.value0.value0 instanceof Horizontal)) {
+        return discard76(modify_20(applySceneWithTransition2(new ModuleTree(Horizontal.value))(horizontalTreeScene)))(function() {
+          return discard76(runSimulation1)(function() {
+            return modify_20(function(v1) {
+              var $126 = {};
+              for (var $127 in v1) {
+                if ({}.hasOwnProperty.call(v1, $127)) {
+                  $126[$127] = v1[$127];
+                }
+                ;
+              }
+              ;
+              $126.currentScene = new ModuleTree(Horizontal.value);
+              return $126;
+            });
+          });
+        });
+      }
+      ;
+      if (v instanceof Scene && (v.value0 instanceof ModuleTree && v.value0.value0 instanceof Vertical)) {
+        return discard76(modify_20(applySceneWithTransition2(new ModuleTree(Vertical.value))(verticalTreeScene)))(function() {
+          return discard76(runSimulation1)(function() {
+            return modify_20(function(v1) {
+              var $131 = {};
+              for (var $132 in v1) {
+                if ({}.hasOwnProperty.call(v1, $132)) {
+                  $131[$132] = v1[$132];
+                }
+                ;
+              }
+              ;
+              $131.currentScene = new ModuleTree(Vertical.value);
+              return $131;
             });
           });
         });
       }
       ;
       if (v instanceof ToggleForce) {
-        return discard76(modify_19(toggleForce3(v.value0)))(function() {
-          return discard76(modify_19(updateScene2(function(s) {
+        return discard76(modify_20(toggleForce3(v.value0)))(function() {
+          return discard76(modify_20(updateScene2(function(s) {
             return {
               chooseNodes: s.chooseNodes,
               linksShown: s.linksShown,
@@ -50746,29 +51088,29 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v instanceof Filter && v.value0 instanceof LinkShowFilter) {
-        return discard76(modify_19(setLinksShown2(v.value0.value0)))(function() {
+        return discard76(modify_20(setLinksShown2(v.value0.value0)))(function() {
           return runSimulation1;
         });
       }
       ;
       if (v instanceof Filter && v.value0 instanceof LinkForceFilter) {
-        return discard76(modify_19(setLinksActive2(v.value0.value0)))(function() {
+        return discard76(modify_20(setLinksActive2(v.value0.value0)))(function() {
           return runSimulation1;
         });
       }
       ;
       if (v instanceof Filter && v.value0 instanceof NodeFilter) {
-        return discard76(modify_19(setChooseNodes2(v.value0.value0)))(function() {
+        return discard76(modify_20(setChooseNodes2(v.value0.value0)))(function() {
           return runSimulation1;
         });
       }
       ;
       if (v instanceof ChangeStyling && v.value0 instanceof TopLevelCSS) {
-        return modify_19(setCssClass2(v.value0.value0));
+        return modify_20(setCssClass2(v.value0.value0));
       }
       ;
       if (v instanceof ChangeStyling && v.value0 instanceof GraphStyle) {
-        return discard76(modify_19(setSceneAttributes2(v.value0.value0)))(function() {
+        return discard76(modify_20(setSceneAttributes2(v.value0.value0)))(function() {
           return runSimulation1;
         });
       }
@@ -50799,41 +51141,41 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return false;
           };
           var allNodes3 = getModelNodes(state3);
-          return discard76(modify_19(tagNodes2("halogen")(isHalogenPackage)(allNodes3)))(function() {
+          return discard76(modify_20(tagNodes2("halogen")(isHalogenPackage)(allNodes3)))(function() {
             return runSimulation1;
           });
         });
       }
       ;
       if (v instanceof ClearTags) {
-        return discard76(modify_19(clearAllTags2))(function() {
+        return discard76(modify_20(clearAllTags2))(function() {
           return runSimulation1;
         });
       }
       ;
       if (v instanceof DismissWelcome) {
-        return modify_19(function(v1) {
-          var $141 = {};
-          for (var $142 in v1) {
-            if ({}.hasOwnProperty.call(v1, $142)) {
-              $141[$142] = v1[$142];
+        return modify_20(function(v1) {
+          var $150 = {};
+          for (var $151 in v1) {
+            if ({}.hasOwnProperty.call(v1, $151)) {
+              $150[$151] = v1[$151];
             }
             ;
           }
           ;
-          $141.showWelcome = false;
-          return $141;
+          $150.showWelcome = false;
+          return $150;
         });
       }
       ;
       if (v instanceof ChangeColorBy) {
-        return discard76(modify_19(setSceneAttributes2(sceneAttributesWithColorBy(v.value0))))(function() {
+        return discard76(modify_20(setSceneAttributes2(sceneAttributesWithColorBy(v.value0))))(function() {
           return runSimulation1;
         });
       }
       ;
       if (v instanceof StartReplay) {
-        return discard76(modify_19(setSceneAttributes2(sceneAttributesWithColorBy(ColorByReplay.value))))(function() {
+        return discard76(modify_20(setSceneAttributes2(sceneAttributesWithColorBy(ColorByReplay.value))))(function() {
           return bind84(liftEffect52(create))(function(v1) {
             return discard76($$void18(subscribe2(v1.emitter)))(function() {
               return discard76(liftEffect52(setUpdateCallback_(notify(v1.listener)(ReplayTick.value))))(function() {
@@ -50860,7 +51202,29 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return runSimulation1;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.CodeExplorer (line 158, column 16 - line 347, column 18): " + [v.constructor.name]);
+      if (v instanceof SetRevelationStep) {
+        return bind84(get23)(function(state3) {
+          return discard76(modify_20(function(v1) {
+            var $157 = {};
+            for (var $158 in v1) {
+              if ({}.hasOwnProperty.call(v1, $158)) {
+                $157[$158] = v1[$158];
+              }
+              ;
+            }
+            ;
+            $157.revelationStep = v.value0;
+            return $157;
+          }))(function() {
+            var sceneConfig = treeRevelationScene(v.value0)(state3.maxTreeDepth);
+            return discard76(modify_20(applySceneConfig2(sceneConfig)))(function() {
+              return runSimulation1;
+            });
+          });
+        });
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3.CodeExplorer (line 161, column 16 - line 370, column 18): " + [v.constructor.name]);
     };
   };
   var defaultTransitionMatrix = /* @__PURE__ */ (function() {
@@ -50887,7 +51251,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       eventListener: Nothing.value,
       transitionListener: Nothing.value,
       tags: empty3,
-      showWelcome: true
+      showWelcome: true,
+      revelationStep: 0,
+      maxTreeDepth: 0
     };
     return mkComponent({
       initialState: $$const(initialState4),
@@ -51644,12 +52010,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var pure88 = /* @__PURE__ */ pure(applicativeMaybe);
   var type_22 = /* @__PURE__ */ type_3(isPropInputType);
   var value17 = /* @__PURE__ */ value3(isPropString);
-  var modify_20 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var modify_21 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var bind137 = /* @__PURE__ */ bind(bindHalogenM);
   var get24 = /* @__PURE__ */ get(monadStateHalogenM);
   var discard78 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var pure126 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var when9 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when10 = /* @__PURE__ */ when(applicativeHalogenM);
   var ChooseDataset = /* @__PURE__ */ (function() {
     function ChooseDataset2() {
     }
@@ -52102,7 +52468,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     var liftEffect52 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
       if (v instanceof SelectDataset) {
-        return modify_20(function(v1) {
+        return modify_21(function(v1) {
           var $104 = {};
           for (var $105 in v1) {
             if ({}.hasOwnProperty.call(v1, $105)) {
@@ -52117,7 +52483,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v instanceof SetVizName) {
-        return modify_20(function(v1) {
+        return modify_21(function(v1) {
           var $108 = {};
           for (var $109 in v1) {
             if ({}.hasOwnProperty.call(v1, $109)) {
@@ -52132,7 +52498,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v instanceof ToggleIncludeMain) {
-        return modify_20(function(s) {
+        return modify_21(function(s) {
           var $112 = {};
           for (var $113 in s) {
             if ({}.hasOwnProperty.call(s, $113)) {
@@ -52149,7 +52515,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       if (v instanceof NextStep) {
         return bind137(get24)(function(state3) {
           if (state3.currentStep instanceof ChooseDataset) {
-            return modify_20(function(v1) {
+            return modify_21(function(v1) {
               var $116 = {};
               for (var $117 in v1) {
                 if ({}.hasOwnProperty.call(v1, $117)) {
@@ -52165,7 +52531,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           ;
           if (state3.currentStep instanceof NameModule) {
             return discard78(handleAction50(dictMonadAff)(GenerateFiles.value))(function() {
-              return modify_20(function(v1) {
+              return modify_21(function(v1) {
                 var $119 = {};
                 for (var $120 in v1) {
                   if ({}.hasOwnProperty.call(v1, $120)) {
@@ -52181,7 +52547,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           }
           ;
           if (state3.currentStep instanceof ReviewFiles) {
-            return modify_20(function(v1) {
+            return modify_21(function(v1) {
               var $122 = {};
               for (var $123 in v1) {
                 if ({}.hasOwnProperty.call(v1, $123)) {
@@ -52196,7 +52562,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           }
           ;
           if (state3.currentStep instanceof Download) {
-            return modify_20(function(v1) {
+            return modify_21(function(v1) {
               var $125 = {};
               for (var $126 in v1) {
                 if ({}.hasOwnProperty.call(v1, $126)) {
@@ -52217,7 +52583,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       if (v instanceof PreviousStep) {
         return bind137(get24)(function(state3) {
           if (state3.currentStep instanceof NameModule) {
-            return modify_20(function(v1) {
+            return modify_21(function(v1) {
               var $129 = {};
               for (var $130 in v1) {
                 if ({}.hasOwnProperty.call(v1, $130)) {
@@ -52232,7 +52598,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           }
           ;
           if (state3.currentStep instanceof ReviewFiles) {
-            return modify_20(function(v1) {
+            return modify_21(function(v1) {
               var $132 = {};
               for (var $133 in v1) {
                 if ({}.hasOwnProperty.call(v1, $133)) {
@@ -52247,7 +52613,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           }
           ;
           if (state3.currentStep instanceof Download) {
-            return modify_20(function(v1) {
+            return modify_21(function(v1) {
               var $135 = {};
               for (var $136 in v1) {
                 if ({}.hasOwnProperty.call(v1, $136)) {
@@ -52271,7 +52637,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       ;
       if (v instanceof GoToStep) {
         return bind137(get24)(function(state3) {
-          return when9(canGoToStep(state3)(v.value0))(modify_20(function(v1) {
+          return when10(canGoToStep(state3)(v.value0))(modify_21(function(v1) {
             var $138 = {};
             for (var $139 in v1) {
               if ({}.hasOwnProperty.call(v1, $139)) {
@@ -52295,7 +52661,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               includeMain: state3.includeMain
             };
             var files2 = generateProject(config);
-            return modify_20(function(v1) {
+            return modify_21(function(v1) {
               var $143 = {};
               for (var $144 in v1) {
                 if ({}.hasOwnProperty.call(v1, $144)) {
@@ -52332,7 +52698,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       if (v instanceof SetDifficultyFilter) {
-        return modify_20(function(v1) {
+        return modify_21(function(v1) {
           var $147 = {};
           for (var $148 in v1) {
             if ({}.hasOwnProperty.call(v1, $148)) {
@@ -52497,10 +52863,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var bind88 = /* @__PURE__ */ bind(bindHalogenM);
   var liftEffect51 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var discard80 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var when10 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when11 = /* @__PURE__ */ when(applicativeHalogenM);
   var pure90 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var modify_21 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var spy4 = /* @__PURE__ */ spy();
+  var modify_22 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var slot_3 = /* @__PURE__ */ slot_();
   var slot_1 = /* @__PURE__ */ slot_3({
     reflectSymbol: function() {
@@ -52826,9 +53192,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         var loc = location(w)();
         return hash(loc)();
       }))(function(currentHash) {
-        return discard80(when10(currentHash === "" || (currentHash === "#" || currentHash === "#/"))(liftEffect51(setHash2(routeToPath(Home.value)))))(function() {
+        return discard80(when11(currentHash === "" || (currentHash === "#" || currentHash === "#/"))(liftEffect51(setHash2(routeToPath(Home.value)))))(function() {
           return bind88(subscribe2(makeEmitter(function(push2) {
-            return matches2(routing)(function(v1) {
+            return matches2(routing)(function(v12) {
               return function(newRoute) {
                 return push2(new RouteChanged(new Just(newRoute)));
               };
@@ -52845,40 +53211,42 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }
     ;
     if (v instanceof RouteChanged) {
+      var v1 = spy4("RouteChanged")(v.value0);
       if (v.value0 instanceof Just) {
-        return modify_21(function(v1) {
-          var $215 = {};
-          for (var $216 in v1) {
-            if ({}.hasOwnProperty.call(v1, $216)) {
-              $215[$216] = v1[$216];
+        var v2 = spy4("Updating currentRoute to")(v.value0.value0);
+        return modify_22(function(v3) {
+          var $217 = {};
+          for (var $218 in v3) {
+            if ({}.hasOwnProperty.call(v3, $218)) {
+              $217[$218] = v3[$218];
             }
             ;
           }
           ;
-          $215.currentRoute = v.value0.value0;
-          return $215;
+          $217.currentRoute = v.value0.value0;
+          return $217;
         });
       }
       ;
       if (v.value0 instanceof Nothing) {
-        return modify_21(function(v1) {
-          var $219 = {};
-          for (var $220 in v1) {
-            if ({}.hasOwnProperty.call(v1, $220)) {
-              $219[$220] = v1[$220];
+        return modify_22(function(v22) {
+          var $221 = {};
+          for (var $222 in v22) {
+            if ({}.hasOwnProperty.call(v22, $222)) {
+              $221[$222] = v22[$222];
             }
             ;
           }
           ;
-          $219.currentRoute = NotFound.value;
-          return $219;
+          $221.currentRoute = NotFound.value;
+          return $221;
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Main (line 416, column 5 - line 419, column 57): " + [v.value0.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Main (line 417, column 5 - line 421, column 57): " + [v.value0.constructor.name]);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Main (line 392, column 16 - line 419, column 57): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Main (line 392, column 16 - line 421, column 57): " + [v.constructor.name]);
   };
   var _wizard = /* @__PURE__ */ (function() {
     return $$Proxy.value;

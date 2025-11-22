@@ -7,6 +7,7 @@ module PSD3v2.Selection.Operations
   , setAttrs
   , setAttrsExit
   , remove
+  , clear
   , merge
   , joinData
   , joinDataWithKey
@@ -272,6 +273,26 @@ remove (Selection impl) = liftEffect do
     case maybeParent of
       Just parent -> Node.removeChild node parent
       Nothing -> pure unit  -- Element not in DOM, nothing to remove
+
+-- | Clear all children from an element
+-- |
+-- | Selects the element and removes all its children.
+-- | Useful for clearing a container before rendering new content.
+-- |
+-- | Example:
+-- | ```purescript
+-- | clear "#viz"
+-- | svg <- appendChild SVG [...] container
+-- | ```
+clear
+  :: forall m
+   . MonadEffect m
+  => String  -- CSS selector
+  -> m Unit
+clear selector = liftEffect $ clearElement_ selector
+
+-- FFI for clearing an element's children
+foreign import clearElement_ :: String -> Effect Unit
 
 -- | Append a single child element to a parent selection
 -- |

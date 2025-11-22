@@ -24,7 +24,8 @@ import Data.Number (sqrt, cos, sin, pi)
 import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Effect.Class (liftEffect)
-import PSD3.Data.Node (D3Link_Swizzled)
+import PSD3.Data.Node (SwizzledLink)
+import D3.Viz.LesMiserables.Model (LesMisNodeRow, LesMisLinkRow)
 import PSD3.Internal.FFI (keyIsID_)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
 import PSD3.Internal.Simulation.Types (Force)
@@ -38,8 +39,11 @@ import PSD3v2.VizTree.Tree as T
 import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 
+-- | Swizzled link type alias for LesMis
+type LesMisSwizzledLink = SwizzledLink LesMisNodeRow LesMisLinkRow
+
 -- | Indexed link for data join
-newtype IndexedLink = IndexedLink { index :: Int, link :: D3Link_Swizzled }
+newtype IndexedLink = IndexedLink { index :: Int, link :: LesMisSwizzledLink }
 
 instance Eq IndexedLink where
   eq (IndexedLink a) (IndexedLink b) = a.index == b.index

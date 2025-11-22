@@ -3,14 +3,13 @@ module PSD3.CodeExplorer.Actions where
 import Prelude
 
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes)
-import D3.Viz.Spago.Files (NodeType)
+import D3.Viz.Spago.Files (NodeType, SpagoLink)
 import D3.Viz.Spago.GitMetrics (ColorByOption)
 import D3.Viz.Spago.Model (SpagoSimNode)
-import PSD3.Data.Node (D3Link_Unswizzled, NodeID)
+import PSD3.Data.Node (NodeID)
 import PSD3.Data.Tree (TreeLayout)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Simulation.Types (SimVariable)
-import PSD3.Internal.Types (Datum_)
 
 data Scene = EmptyScene | PackageGrid | PackageGraph | ModuleTree TreeLayout | LayerSwarm
 derive instance eqScene :: Eq Scene
@@ -22,10 +21,12 @@ instance showScene :: Show Scene where
   show (ModuleTree layout) = "ModuleTree " <> show layout
   show LayerSwarm = "LayerSwarm"
   show EmptyScene = "EmptyScene"
+data StyleChange :: forall k. k -> Type
 data StyleChange d = TopLevelCSS String | GraphStyle SpagoSceneAttributes
-data FilterData = LinkShowFilter (D3Link_Unswizzled -> Boolean)
-                | LinkForceFilter (Datum_ -> Boolean) -- because this is post- putting in the DOM, it's a filter on the opaque type
+data FilterData = LinkShowFilter (SpagoLink -> Boolean)
+                | LinkForceFilter (SpagoLink -> Boolean)  -- Now using typed link instead of Datum_
                 | NodeFilter (SpagoSimNode -> Boolean)
+data Action :: forall k. k -> Type
 data Action d
   = Initialize
   | Finalize
@@ -49,6 +50,8 @@ data Action d
   | StopReplay
   | ResetReplay
   | ReplayTick  -- Internal action for replay updates
+  -- Tree revelation actions (Act One)
+  | SetRevelationStep Int
 
 data VizEvent = NodeClick NodeType NodeID 
 -- to be added:
