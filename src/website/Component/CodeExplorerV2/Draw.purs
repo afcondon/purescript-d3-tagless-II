@@ -9,7 +9,7 @@ import Prelude
 import Component.CodeExplorerV2.Types (Scene(..))
 import D3.Viz.Spago.Draw.Attributes (graphSceneAttributes, svgAttrs)
 import D3.Viz.Spago.Files (LinkType(..), SpagoLinkData, SpagoNodeRow, SpagoLink, D3_Radius)
-import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isModule, isPackage, isUsedModule, moduleNodesToContainerXY, modulesToCircle, nodesToCircle, nodesToOrbitStart, nodesToRadialTree, packagesToCircle, pinMainAtXY, treeDepthMultiplier, unpinAllNodes)
+import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, SpagoSwizzledLink, isModule, isPackage, isUsedModule, moduleNodesToContainerXY, modulesToCircle, nodesToCircle, nodesToOrbitStart, nodesToRadialTree, packagesToCircle, pinMainAtXY, treeDepthMultiplier, unpinAllNodes)
 import D3.Viz.Spago.Render (spagoRenderCallbacks)
 import Data.Array (filter, length) as Array
 import Data.Int (toNumber)
@@ -27,15 +27,16 @@ import PSD3.Data.Node (D3_FocusXY)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.FFI (keyIsID_)
 import PSD3.Internal.Simulation.Types (Force)
-import PSD3v2.Attribute.Types (fill, opacity, transform)
+import PSD3v2.Attribute.Types (d, fill, opacity, stroke, strokeWidth, transform)
 import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom, ScaleExtent(..))
-import PSD3v2.Capabilities.Selection (class SelectionM, appendChild, select, on, joinDataWithKey, selectAllWithData)
+import PSD3v2.Capabilities.Selection (class SelectionM, append, appendChild, clear, select, on, joinDataWithKey, selectAllWithData)
 import PSD3v2.Capabilities.Simulation (class SimulationM2, init, start, stop)
 import PSD3v2.Capabilities.Transition (class TransitionM, withTransitionStaggered)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, JoinResult(..))
 import PSD3v2.Simulation.Update (DeclarativeUpdateConfig, genericUpdateSimulation, setupSimulationGroups, selectSimulationGroups)
 import PSD3v2.Transition.Types (transitionWith)
+import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 import Web.DOM.Element (Element)
 
@@ -81,6 +82,60 @@ depthToColor node =
       lightness = 50.0
   in "hsl(" <> show hue <> ", " <> show saturation <> "%, " <> show lightness <> "%)"
 
+-- | Calculate SVG path for a radial tree link
+-- |
+-- | Creates a curved bezier path from source to target using their treeXY positions.
+-- | Takes a node lookup map since links are not swizzled (source/target are IDs).
+-- | Uses the same coordinate system as nodeToTreeTransform (raw radians, no rotation).
+radialLinkPath :: Map.Map Int SpagoSimNode -> SpagoLink -> String
+radialLinkPath nodeMap link =
+  case Map.lookup link.source nodeMap, Map.lookup link.target nodeMap of
+    Just sourceNode, Just targetNode ->
+      let -- Get source position from treeXY (x = angle in radians, y = depth)
+          srcXY = fromMaybe { x: 0.0, y: 0.0 } $ toMaybe sourceNode.treeXY
+          srcAngle = srcXY.x
+          srcRadius = srcXY.y * treeDepthMultiplier
+
+          -- Get target position from treeXY
+          tgtXY = fromMaybe { x: 0.0, y: 0.0 } $ toMaybe targetNode.treeXY
+          tgtAngle = tgtXY.x
+          tgtRadius = tgtXY.y * treeDepthMultiplier
+
+          -- Convert to Cartesian (matches nodeToTreeTransform)
+          sx = srcRadius * cos srcAngle
+          sy = srcRadius * sin srcAngle
+          tx = tgtRadius * cos tgtAngle
+          ty = tgtRadius * sin tgtAngle
+
+          -- Control points for smooth bezier curve
+          -- Use midpoint radius for control points
+          cr = (srcRadius + tgtRadius) / 2.0
+          cx1 = cr * cos srcAngle
+          cy1 = cr * sin srcAngle
+          cx2 = cr * cos tgtAngle
+          cy2 = cr * sin tgtAngle
+
+      -- Bezier curve from source to target
+      in "M" <> show sx <> "," <> show sy <>
+         "C" <> show cx1 <> "," <> show cy1 <>
+         " " <> show cx2 <> "," <> show cy2 <>
+         " " <> show tx <> "," <> show ty
+    _, _ -> "" -- Skip links with missing nodes
+
+-- | Get target node depth for staggering link transitions
+-- |
+-- | Links should appear when their target node appears
+linkTargetDepth :: Map.Map Int SpagoSimNode -> SpagoLink -> Int
+linkTargetDepth nodeMap link =
+  case Map.lookup link.target nodeMap of
+    Just targetNode -> fromMaybe 0 $ toMaybe targetNode.treeDepth
+    Nothing -> 0
+
+-- | Stagger delay for links based on target node depth
+staggerLinkByTargetDepth :: Number -> Map.Map Int SpagoSimNode -> SpagoLink -> Int -> Milliseconds
+staggerLinkByTargetDepth msPerDepth nodeMap link _ =
+  Milliseconds (toNumber (linkTargetDepth nodeMap link) * msPerDepth)
+
 -- | Staggered tree reveal animation
 -- |
 -- | Stops simulation and animates nodes to their tree positions with
@@ -93,16 +148,21 @@ staggeredTreeReveal :: forall m.
   TransitionM D3v2Selection_ m =>
   SimulationM2 (D3v2Selection_ SBoundOwns Element) m =>
   SpagoModel ->
+  Array SpagoLink ->
   m Unit
-staggeredTreeReveal model = do
+staggeredTreeReveal model _unswizzledLinks = do
   log "CodeExplorerV2.Draw: Starting staggered tree reveal"
 
   -- Stop simulation
   stop
 
-  -- Filter to tree nodes
+  -- Filter to tree nodes and links (from model)
+  -- Build node map for looking up nodes by ID (since links are not swizzled)
   let treeNodes = Array.filter isUsedModule model.nodes
+      treeLinks = Array.filter (\l -> l.linktype == M2M_Tree) model.links
+      nodeMap = Map.fromFoldable $ map (\n -> Tuple n.id n) model.nodes
   log $ "Tree nodes to animate: " <> show (Array.length treeNodes)
+  log $ "Tree links to add: " <> show (Array.length treeLinks)
 
   -- Re-select groups and join to get SBoundOwns selection
   -- Must use same key function as genericUpdateSimulation to match existing elements
@@ -133,6 +193,28 @@ staggeredTreeReveal model = do
   textSel <- selectAllWithData "text" nodeJoin.update
   withTransitionStaggered config (staggerByTreeDepth 900.0) textSel
     [ opacity 0.0  -- Hide labels during reveal
+    ]
+
+  -- Add tree links
+  -- Join tree links data and create path elements
+  -- Use source-target as unique key since SpagoLink doesn't have an id field
+  JoinResult linkJoin <- joinDataWithKey treeLinks (\l -> Tuple l.source l.target) "path" groups.links
+
+  -- Create new link paths with enter selection (start invisible)
+  -- Use nodeMap to look up source/target nodes by ID
+  linkElements <- append Path
+    [ d (radialLinkPath nodeMap)
+    , stroke (\(_ :: SpagoLink) -> "#888")  -- Mid-gray
+    , strokeWidth (\(_ :: SpagoLink) -> 1.0)
+    , fill (\(_ :: SpagoLink) -> "none")
+    , opacity (\(_ :: SpagoLink) -> 0.0)  -- Start invisible
+    ]
+    linkJoin.enter
+
+  -- Transition links to fade in, staggered by target node depth
+  -- Links appear when their target nodes animate into place
+  withTransitionStaggered config (staggerLinkByTargetDepth 900.0 nodeMap) linkElements
+    [ opacity (\(_ :: SpagoLink) -> 0.3)  -- Fade to subtle visibility
     ]
 
   log "CodeExplorerV2.Draw: Staggered tree reveal started"
@@ -269,11 +351,11 @@ transitionToTreeReveal model unswizzledLinks = do
 
   log "CodeExplorerV2.Draw: Tree reveal transition started"
 
--- | Phase 3: Activate force-driven tree
+-- | Phase 3: Activate force-driven graph
 -- |
--- | - Changes links to straight lines
+-- | - Removes tree links, adds graph links
 -- | - Unpins nodes
--- | - Restarts simulation with tree-appropriate forces
+-- | - Sets up simulation forces (caller should start after delay)
 activateForceTree :: forall m.
   Bind m =>
   MonadEffect m =>
@@ -283,20 +365,27 @@ activateForceTree :: forall m.
   Array SpagoLink ->
   m Unit
 activateForceTree model unswizzledLinks = do
-  log "CodeExplorerV2.Draw: Activating force tree"
+  log "CodeExplorerV2.Draw: Activating force graph"
+
+  -- Clear existing tree links (they were added with different key function)
+  clear ".links"
 
   groups <- selectSimulationGroups
 
-  let treeLinks = Array.filter (\l -> l.linktype == M2M_Tree) unswizzledLinks
+  -- Use graph links instead of tree links for simulation
+  let graphLinks = Array.filter (\l -> l.linktype == M2M_Graph) unswizzledLinks
 
-  let forceTreeConfig :: DeclarativeUpdateConfig NodeRow Int SpagoLinkData
-      forceTreeConfig =
+  log $ "Graph links: " <> show (Array.length graphLinks)
+
+  -- Unpin nodes and use only graph simulation forces (no cluster forces)
+  let forceGraphConfig :: DeclarativeUpdateConfig NodeRow Int SpagoLinkData
+      forceGraphConfig =
         { allNodes: model.nodes
-        , allLinks: treeLinks
+        , allLinks: graphLinks
         , nodeFilter: isUsedModule
-        , linkFilter: Just (\l -> l.linktype == M2M_Tree)
+        , linkFilter: Just (\l -> l.linktype == M2M_Graph)
         , nodeInitializers: [ unpinAllNodes ]  -- Remove fx/fy to let forces work
-        , activeForces: Just $ Set.fromFoldable ["collision", "links"]
+        , activeForces: Just $ Set.fromFoldable ["charge", "collision", "links", "center"]
         , config: Nothing
         }
 
@@ -304,16 +393,20 @@ activateForceTree model unswizzledLinks = do
     groups
     Group
     Path
-    forceTreeConfig
+    forceGraphConfig
     (\n -> n.id)
     keyIsID_
-    graphSceneAttributes  -- TODO: Use straight line style
+    graphSceneAttributes
     spagoRenderCallbacks
 
-  -- Restart simulation
-  start
+  log "CodeExplorerV2.Draw: Force graph configured (simulation not started yet)"
 
-  log "CodeExplorerV2.Draw: Force tree activated"
+-- | Start the simulation
+-- | Call this after a delay to let links appear first
+startSimulation :: forall m.
+  SimulationM2 (D3v2Selection_ SBoundOwns Element) m =>
+  m Unit
+startSimulation = start
 
 -- | Update scene (for manual scene switching)
 updateScene :: forall m.

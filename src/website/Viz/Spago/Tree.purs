@@ -9,6 +9,7 @@ import PSD3.Data.Graph.Algorithms (getReachableNodes)
 import PSD3.Data.Node (NodeID)
 import PSD3.Layout.Hierarchy.Tree4 as Tree4
 import Data.Array (elem, filter, partition, (..))
+import Data.Number (pi)
 import Data.Array as Array
 import Data.Foldable (foldl)
 import Data.List (List(..))
@@ -98,7 +99,9 @@ treeReduction rootID model = do
       ) idTree
 
       -- Run tree layout
-      config = { size: { width: 4000.0, height: 800.0 }, minSeparation: 8.0, separation: Nothing, layerScale: Nothing }
+      -- For radial tree: width = 2π (full circle in radians), height = max radius
+      -- The height is divided by treeDepthMultiplier (2.0) in rendering, so use 800 for 400px radius
+      config = { size: { width: 2.0 * pi, height: 800.0 }, minSeparation: 0.1, separation: Nothing, layerScale: Nothing }
       laidOutTree = Tree4.tree config dataTree
 
       -- Flatten tree to map of positions

@@ -187,7 +187,7 @@ handleAction = case _ of
       Just model -> do
         -- Staggered transition to tree positions
         newState <- H.liftAff $ D3v2.execD3v2SimM { simulation: state.simulation } do
-          Draw.staggeredTreeReveal model
+          Draw.staggeredTreeReveal model model.links
 
         H.modify_ \s -> s { simulation = newState.simulation, currentScene = TreeReveal }
         log "Tree formation started"
@@ -200,10 +200,21 @@ handleAction = case _ of
     case state.model of
       Nothing -> log "Error: Model not loaded"
       Just model -> do
+        -- First, set up the graph links (removes tree links)
         newState <- H.liftAff $ D3v2.execD3v2SimM { simulation: state.simulation } do
           Draw.activateForceTree model model.links
 
         H.modify_ \s -> s { simulation = newState.simulation, currentScene = ForceTree }
+        log "Graph links added, waiting before starting simulation..."
+
+        -- Wait 1 second for links to appear, then start simulation
+        H.liftAff $ delay (Milliseconds 1000.0)
+
+        finalState <- H.get
+        newState2 <- H.liftAff $ D3v2.execD3v2SimM { simulation: finalState.simulation } do
+          Draw.startSimulation
+
+        H.modify_ \s -> s { simulation = newState2.simulation }
         log "Force layout activated"
 
     pure unit
