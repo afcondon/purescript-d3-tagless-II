@@ -19,6 +19,7 @@ module PSD3v2.Capabilities.Selection
   , on
   , renderTree
   , renderTreeWithSimulation
+  , withDatumType
   ) where
 
 import Prelude
@@ -30,6 +31,7 @@ import PSD3v2.Attribute.Types (Attribute)
 import PSD3v2.Behavior.Types (Behavior)
 import PSD3v2.Selection.Types (ElementType, JoinResult, SBoundOwns, SBoundInherits, SEmpty, SExiting, SPending)
 import PSD3v2.VizTree.Tree (Tree)
+import Unsafe.Coerce (unsafeCoerce)
 import Web.DOM.Element (Element)
 
 -- | Type class for selection operations
@@ -396,3 +398,29 @@ renderTreeWithSimulation container tree callback = do
   selections <- renderTree container tree
   callback selections
   pure selections
+
+-- | Cast the phantom datum type of an empty selection
+-- |
+-- | This is safe because SEmpty selections have no data bound - the datum type
+-- | is purely a phantom type that will be "filled in" when data is later bound.
+-- |
+-- | Use this to prepare container selections for `genericUpdateSimulation` which
+-- | expects specific datum types even though the selections are empty.
+-- |
+-- | Example:
+-- | ```purescript
+-- | nodesGroup <- appendChild Group [ class_ "nodes" ] inner
+-- | linksGroup <- appendChild Group [ class_ "links" ] inner
+-- |
+-- | -- Cast the phantom types for genericUpdateSimulation
+-- | genericUpdateSimulation
+-- |   { nodes: withDatumType nodesGroup
+-- |   , links: withDatumType linksGroup
+-- |   }
+-- |   ...
+-- | ```
+withDatumType
+  :: forall sel elem datumIn datumOut
+   . sel SEmpty elem datumIn
+  -> sel SEmpty elem datumOut
+withDatumType = unsafeCoerce

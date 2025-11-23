@@ -3,22 +3,21 @@ module PSD3v2.Simulation.Update where
 import Prelude
 
 import PSD3.Internal.Attributes.Instances (Label)
-import PSD3v2.Attribute.Types (Attribute)
-import PSD3v2.Capabilities.Selection (class SelectionM, joinData, joinDataWithKey, merge)
+import PSD3v2.Attribute.Types (Attribute, class_)
+import PSD3v2.Capabilities.Selection (class SelectionM, appendChild, joinData, joinDataWithKey, merge, select)
 import PSD3v2.Capabilities.Simulation (class SimulationM2, SimulationUpdate, Step(..), addTickFunction, update)
 import PSD3v2.Selection.Operations (elementTypeToString)
-import PSD3v2.Selection.Types (ElementType, JoinResult(..), SBoundOwns, SBoundInherits, SEmpty, SPending, SExiting, Selection(..), SelectionImpl(..))
+import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), SBoundOwns, SEmpty, SExiting, SPending, Selection(..), SelectionImpl(..))
 import Web.DOM.Element (Element)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Class.Console (log)
 import Data.Array as Array
 import Unsafe.Coerce (unsafeCoerce)
-import PSD3.Data.Node (Link, SwizzledLink, SimulationNode, NodeID)
+import PSD3.Data.Node (Link, SimulationNode, SwizzledLink)
 import PSD3.Internal.FFI (SimulationVariables, getIDsFromNodes_, getLinkIDs_, swizzleLinks_, swizzledLinkKey_)
 import Data.Maybe (Maybe(..))
-import Data.Set as Set
 import Data.Set (Set)
-import Data.Array (filter, elem, head)
+import Data.Array (elem, filter)
 import Data.Foldable (foldl)
 
 -- | Declarative callbacks for rendering nodes and links
@@ -310,3 +309,57 @@ getExitData :: forall sel parent datum. sel SExiting parent datum -> Array datum
 getExitData sel = case (unsafeCoerce sel :: Selection SExiting parent datum) of
   Selection (ExitingSelection r) -> r.data
   _ -> []
+
+-- | Type alias for simulation container groups
+-- |
+-- | Contains the nodes and links container groups needed by genericUpdateSimulation.
+-- | These are always SEmpty selections - they hold DOM groups that will have data bound to them.
+type SimulationGroups sel nodeRow linkRow =
+  { nodes :: sel SEmpty Element (SimulationNode nodeRow)
+  , links :: sel SEmpty Element (SwizzledLink nodeRow linkRow)
+  }
+
+-- | Create simulation container groups within a parent element
+-- |
+-- | Creates two SVG groups: g.links (rendered first, underneath) and g.nodes (rendered second, on top).
+-- | Returns properly-typed handles for use with genericUpdateSimulation.
+-- |
+-- | Example:
+-- | ```purescript
+-- | inner <- appendChild Group [] svg
+-- | groups <- setupSimulationGroups inner
+-- | genericUpdateSimulation groups Group Path sceneConfig ...
+-- | ```
+setupSimulationGroups
+  :: forall sel m parent parentDatum nodeRow linkRow
+   . SelectionM sel m
+  => sel SEmpty parent parentDatum
+  -> m (SimulationGroups sel nodeRow linkRow)
+setupSimulationGroups parent = do
+  -- Links underneath nodes (render order matters in SVG)
+  linksGroup <- appendChild Group [ class_ "links" ] parent
+  nodesGroup <- appendChild Group [ class_ "nodes" ] parent
+  pure
+    { nodes: nodesGroup  -- Safe: SEmpty selections, just casting phantom datum type
+    , links: linksGroup
+    }
+
+-- | Re-select existing simulation container groups
+-- |
+-- | Use this in update functions to get fresh SEmpty handles to existing DOM groups.
+-- | The groups must have been created previously with setupSimulationGroups.
+-- |
+-- | Example:
+-- | ```purescript
+-- | -- In update handler
+-- | groups <- selectSimulationGroups
+-- | genericUpdateSimulation groups Group Path newSceneConfig ...
+-- | ```
+selectSimulationGroups
+  :: forall sel m nodeRow linkRow
+   . SelectionM sel m
+  => m (SimulationGroups sel nodeRow linkRow)
+selectSimulationGroups = do
+  nodesGroup <- select "g.nodes"
+  linksGroup <- select "g.links"
+  pure { nodes: nodesGroup, links: linksGroup }

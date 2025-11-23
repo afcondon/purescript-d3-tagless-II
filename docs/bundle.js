@@ -23182,11 +23182,42 @@
   };
 
   // output/PSD3v2.Simulation.Update/index.js
+  var class_5 = /* @__PURE__ */ class_2(toAttrStringString);
   var foldl10 = /* @__PURE__ */ foldl(foldableArray);
   var log5 = /* @__PURE__ */ log3(monadEffectEffect);
   var show15 = /* @__PURE__ */ show(showInt);
   var discard9 = /* @__PURE__ */ discard(discardUnit);
   var show16 = /* @__PURE__ */ show(showBoolean);
+  var setupSimulationGroups = function(dictSelectionM) {
+    var Monad0 = dictSelectionM.Monad0();
+    var bind89 = bind(Monad0.Bind1());
+    var appendChild5 = appendChild(dictSelectionM);
+    var pure92 = pure(Monad0.Applicative0());
+    return function(parent2) {
+      return bind89(appendChild5(Group2.value)([class_5("links")])(parent2))(function(linksGroup) {
+        return bind89(appendChild5(Group2.value)([class_5("nodes")])(parent2))(function(nodesGroup) {
+          return pure92({
+            nodes: nodesGroup,
+            links: linksGroup
+          });
+        });
+      });
+    };
+  };
+  var selectSimulationGroups = function(dictSelectionM) {
+    var Monad0 = dictSelectionM.Monad0();
+    var bind89 = bind(Monad0.Bind1());
+    var select45 = select4(dictSelectionM);
+    var pure92 = pure(Monad0.Applicative0());
+    return bind89(select45("g.nodes"))(function(nodesGroup) {
+      return bind89(select45("g.links"))(function(linksGroup) {
+        return pure92({
+          nodes: nodesGroup,
+          links: linksGroup
+        });
+      });
+    });
+  };
   var getUpdateData = function(sel) {
     if (sel instanceof BoundSelection) {
       return sel.value0.data;
@@ -23266,7 +23297,7 @@
                                             });
                                           }
                                           ;
-                                          throw new Error("Failed pattern match at PSD3v2.Simulation.Update (line 202, column 3 - line 209, column 16): " + [firstLink.constructor.name]);
+                                          throw new Error("Failed pattern match at PSD3v2.Simulation.Update (line 201, column 3 - line 208, column 16): " + [firstLink.constructor.name]);
                                         })())(function() {
                                           var validLink = function(link4) {
                                             var linkIDs = getLinkIDs_(link4);
@@ -23284,7 +23315,7 @@
                                                   return filter(config.linkFilter.value0)(structurallyFilteredLinks);
                                                 }
                                                 ;
-                                                throw new Error("Failed pattern match at PSD3v2.Simulation.Update (line 223, column 20 - line 225, column 75): " + [config.linkFilter.constructor.name]);
+                                                throw new Error("Failed pattern match at PSD3v2.Simulation.Update (line 222, column 20 - line 224, column 75): " + [config.linkFilter.constructor.name]);
                                               })();
                                               return bind89(liftEffect52(log5("\u{1F517} genericUpdateSimulation: " + (show15(length(finalLinks)) + " links after visual filter"))))(function() {
                                                 var internalUpdateConfig = {
@@ -23375,7 +23406,6 @@
       return "t";
     }
   })(showInt))(showInt))));
-  var class_5 = /* @__PURE__ */ class_2(toAttrStringString);
   var ordRecord2 = /* @__PURE__ */ ordRecord();
   var ordRecordCons2 = /* @__PURE__ */ ordRecordCons(ordRecordNil)();
   var ordRecordCons1 = /* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons2({
@@ -23539,7 +23569,7 @@
         };
       }
       ;
-      throw new Error("Failed pattern match at Component.CodeExplorerV2.Draw (line 194, column 24 - line 196, column 103): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Component.CodeExplorerV2.Draw (line 187, column 24 - line 189, column 103): " + [v.constructor.name]);
     };
     return map36(positionByTree)(nodes);
   };
@@ -23574,7 +23604,7 @@
           };
         }
         ;
-        throw new Error("Failed pattern match at Component.CodeExplorerV2.Draw (line 169, column 46 - line 188, column 6): " + [scene.constructor.name]);
+        throw new Error("Failed pattern match at Component.CodeExplorerV2.Draw (line 162, column 46 - line 181, column 6): " + [scene.constructor.name]);
       };
     };
   };
@@ -23590,6 +23620,7 @@
         var select45 = select4(dictSelectionM);
         var appendChild5 = appendChild(dictSelectionM);
         var on15 = on2(dictSelectionM);
+        var setupSimulationGroups2 = setupSimulationGroups(dictSelectionM);
         var genericUpdateSimulation1 = genericUpdateSimulation3(dictSelectionM);
         var spagoRenderCallbacks1 = spagoRenderCallbacks2(dictSelectionM);
         return function(dictSimulationM2) {
@@ -23627,35 +23658,30 @@
                                         return bind89(appendChild5(Group2.value)([])(svg2))(function(inner) {
                                           return bind89(on15(new Drag2(defaultDrag))(inner))(function() {
                                             return bind89(on15(new Zoom2(defaultZoom(new ScaleExtent2(0.1, 4))("g")))(svg2))(function() {
-                                              return bind89(appendChild5(Group2.value)([class_5("links")])(inner))(function(linksGroup) {
-                                                return bind89(appendChild5(Group2.value)([class_5("nodes")])(inner))(function(nodesGroup) {
-                                                  return bind89(init14({
-                                                    nodes: model.nodes,
-                                                    links: model.links,
-                                                    forces: forcesArray,
-                                                    activeForces: activeForces2,
-                                                    config: {
-                                                      alpha: 1,
-                                                      alphaTarget: 0,
-                                                      alphaMin: 1e-3,
-                                                      alphaDecay: 0.0228,
-                                                      velocityDecay: 0.4
-                                                    },
-                                                    keyFn: function(n) {
-                                                      return n.id;
-                                                    },
-                                                    ticks: empty3
-                                                  }))(function() {
-                                                    var sceneConfig = getSceneConfig(model)(unswizzledLinks)(initialScene2);
-                                                    return discard122(genericUpdateSimulation22({
-                                                      nodes: nodesGroup,
-                                                      links: linksGroup
-                                                    })(Group2.value)(Path3.value)(sceneConfig)(function(n) {
-                                                      return n.id;
-                                                    })(keyIsID_)(graphSceneAttributes)(spagoRenderCallbacks1))(function() {
-                                                      return discard122(start14)(function() {
-                                                        return log10("CodeExplorerV2.Draw: Initialization complete");
-                                                      });
+                                              return bind89(setupSimulationGroups2(inner))(function(groups) {
+                                                return bind89(init14({
+                                                  nodes: model.nodes,
+                                                  links: model.links,
+                                                  forces: forcesArray,
+                                                  activeForces: activeForces2,
+                                                  config: {
+                                                    alpha: 1,
+                                                    alphaTarget: 0,
+                                                    alphaMin: 1e-3,
+                                                    alphaDecay: 0.0228,
+                                                    velocityDecay: 0.4
+                                                  },
+                                                  keyFn: function(n) {
+                                                    return n.id;
+                                                  },
+                                                  ticks: empty3
+                                                }))(function() {
+                                                  var sceneConfig = getSceneConfig(model)(unswizzledLinks)(initialScene2);
+                                                  return discard122(genericUpdateSimulation22(groups)(Group2.value)(Path3.value)(sceneConfig)(function(n) {
+                                                    return n.id;
+                                                  })(keyIsID_)(graphSceneAttributes)(spagoRenderCallbacks1))(function() {
+                                                    return discard122(start14)(function() {
+                                                      return log10("CodeExplorerV2.Draw: Initialization complete");
                                                     });
                                                   });
                                                 });
@@ -23690,7 +23716,7 @@
       var genericUpdateSimulation3 = genericUpdateSimulation(dictMonadEffect);
       var spagoRenderCallbacks2 = spagoRenderCallbacks(dictMonadEffect.Monad0());
       return function(dictSelectionM) {
-        var select45 = select4(dictSelectionM);
+        var selectSimulationGroups2 = selectSimulationGroups(dictSelectionM);
         var genericUpdateSimulation1 = genericUpdateSimulation3(dictSelectionM);
         var spagoRenderCallbacks1 = spagoRenderCallbacks2(dictSelectionM);
         return function(dictSimulationM2) {
@@ -23701,28 +23727,23 @@
               return function(targetScene) {
                 return function(_activeForces) {
                   return discard122(log10("CodeExplorerV2.Draw: Updating to scene"))(function() {
-                    return bind89(select45("g.nodes"))(function(nodesGroup) {
-                      return bind89(select45("g.links"))(function(linksGroup) {
-                        var sceneConfig = getSceneConfig(model)(links)(targetScene);
-                        var attrs = (function() {
-                          if (targetScene instanceof PackageGraph) {
-                            return graphSceneAttributes;
-                          }
-                          ;
-                          if (targetScene instanceof HorizontalTree) {
-                            return treeSceneAttributes;
-                          }
-                          ;
-                          throw new Error("Failed pattern match at Component.CodeExplorerV2.Draw (line 146, column 15 - line 148, column 46): " + [targetScene.constructor.name]);
-                        })();
-                        return discard122(genericUpdateSimulation22({
-                          nodes: nodesGroup,
-                          links: linksGroup
-                        })(Group2.value)(Path3.value)(sceneConfig)(function(n) {
-                          return n.id;
-                        })(keyIsID_)(attrs)(spagoRenderCallbacks1))(function() {
-                          return start14;
-                        });
+                    return bind89(selectSimulationGroups2)(function(groups) {
+                      var sceneConfig = getSceneConfig(model)(links)(targetScene);
+                      var attrs = (function() {
+                        if (targetScene instanceof PackageGraph) {
+                          return graphSceneAttributes;
+                        }
+                        ;
+                        if (targetScene instanceof HorizontalTree) {
+                          return treeSceneAttributes;
+                        }
+                        ;
+                        throw new Error("Failed pattern match at Component.CodeExplorerV2.Draw (line 141, column 15 - line 143, column 46): " + [targetScene.constructor.name]);
+                      })();
+                      return discard122(genericUpdateSimulation22(groups)(Group2.value)(Path3.value)(sceneConfig)(function(n) {
+                        return n.id;
+                      })(keyIsID_)(attrs)(spagoRenderCallbacks1))(function() {
+                        return start14;
                       });
                     });
                   });

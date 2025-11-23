@@ -30,8 +30,7 @@ import PSD3v2.Capabilities.Simulation (class SimulationM2, init, start)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_)
 import Data.Map as Map
 import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, SEmpty)
-import PSD3v2.Simulation.Update (DeclarativeUpdateConfig, genericUpdateSimulation)
-import Unsafe.Coerce (unsafeCoerce)
+import PSD3v2.Simulation.Update (DeclarativeUpdateConfig, genericUpdateSimulation, setupSimulationGroups, selectSimulationGroups)
 import Web.DOM.Element (Element)
 import Effect.Class (liftEffect)
 import Utility (getWindowWidthHeight)
@@ -79,9 +78,8 @@ initialize forcesArray activeForces model unswizzledLinks selector initialScene 
   _ <- on (Drag defaultDrag) inner
   _ <- on (Zoom (defaultZoom (ScaleExtent 0.1 4.0) "g")) svg
 
-  -- Create groups for links (under) and nodes (over)
-  linksGroup <- appendChild Group [ class_ "links" ] inner
-  nodesGroup <- appendChild Group [ class_ "nodes" ] inner
+  -- Create simulation container groups (links under, nodes over)
+  groups <- setupSimulationGroups inner
 
   -- Initialize simulation with forces
   _ <- init
@@ -105,9 +103,7 @@ initialize forcesArray activeForces model unswizzledLinks selector initialScene 
 
   -- Call genericUpdateSimulation with render callbacks
   genericUpdateSimulation
-    { nodes: nodesGroup
-    , links: unsafeCoerce linksGroup
-    }
+    groups
     Group   -- Node element type (Spago uses groups for circle+text)
     Path    -- Link element type (paths for bezier/diagonal)
     sceneConfig
@@ -135,9 +131,8 @@ updateScene :: forall m.
 updateScene model links targetScene _activeForces = do
   log $ "CodeExplorerV2.Draw: Updating to scene"
 
-  -- Get the DOM selections (they persist between updates)
-  nodesGroup <- select "g.nodes"
-  linksGroup <- select "g.links"
+  -- Re-select existing simulation container groups
+  groups <- selectSimulationGroups
 
   -- Get scene configuration (library handles link copying internally)
   let sceneConfig = getSceneConfig model links targetScene
@@ -149,9 +144,7 @@ updateScene model links targetScene _activeForces = do
 
   -- Call genericUpdateSimulation
   genericUpdateSimulation
-    { nodes: unsafeCoerce nodesGroup
-    , links: unsafeCoerce linksGroup
-    }
+    groups
     Group
     Path
     sceneConfig
