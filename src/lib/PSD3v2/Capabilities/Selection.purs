@@ -2,6 +2,7 @@ module PSD3v2.Capabilities.Selection
   ( class SelectionM
   , select
   , selectAll
+  , selectAllWithData
   , openSelection
   , renderData
   , appendData
@@ -95,6 +96,24 @@ class Monad m <= SelectionM sel m | m -> sel where
      . sel state parent parentDatum
     -> String  -- CSS selector
     -> m (sel SEmpty Element datum)
+
+  -- | Select all elements matching selector and extract their bound data
+  -- |
+  -- | Use this when selecting child elements that have inherited data from their parent.
+  -- | This is necessary when you want to use the selection with transitions that need
+  -- | access to the bound data (like withTransitionStaggered).
+  -- |
+  -- | Example:
+  -- | ```purescript
+  -- | groups <- selectSimulationGroups
+  -- | circles <- selectAllWithData "circle" groups.nodes
+  -- | withTransitionStaggered config delayFn circles [fill colorByDepth]
+  -- | ```
+  selectAllWithData
+    :: forall state parent parentDatum datum
+     . String  -- CSS selector
+    -> sel state parent parentDatum
+    -> m (sel SBoundOwns Element datum)
 
   -- | High-level data rendering (recommended for most use cases)
   -- |

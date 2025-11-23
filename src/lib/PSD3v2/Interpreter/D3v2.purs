@@ -117,6 +117,10 @@ instance SelectionM D3v2Selection_ D3v2M where
     result <- Ops.selectAll selector sel
     pure $ D3v2Selection_ result
 
+  selectAllWithData selector (D3v2Selection_ sel) = D3v2M do
+    result <- Ops.selectAllWithData selector sel
+    pure $ D3v2Selection_ result
+
   renderData elemType foldableData selector (D3v2Selection_ emptySelection) enterAttrs updateAttrs exitAttrs = D3v2M do
     result <- Ops.renderData elemType foldableData selector emptySelection enterAttrs updateAttrs exitAttrs
     pure $ D3v2Selection_ result
@@ -397,6 +401,10 @@ instance SelectionM D3v2Selection_ (D3v2SimM row d) where
 
   openSelection (D3v2Selection_ parent) tag = liftEffect $ do
     selection <- Ops.selectAll tag parent
+    pure $ D3v2Selection_ selection
+
+  selectAllWithData tag (D3v2Selection_ parent) = liftEffect $ do
+    selection <- Ops.selectAllWithData tag parent
     pure $ D3v2Selection_ selection
 
   updateJoin (D3v2Selection_ emptySelection) _elemType foldableData keyFn selector = liftEffect $ do

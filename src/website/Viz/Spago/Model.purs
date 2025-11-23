@@ -2,17 +2,12 @@ module D3.Viz.Spago.Model where
 
 import Prelude
 
-import PSD3.Internal.Attributes.Instances (Label)
-import PSD3.Internal.Types (D3Simulation_, PointXY)
-import D3.Viz.Spago.Files (D3_Radius, D3TreeRow, EmbeddedData, LinkType(..), NodeType(..), SpagoNodeData, SpagoNodeRow, SpagoLink, SpagoLinkData, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
-import PSD3.Internal.FFI (setInSimNodeFlag)
-import PSD3.Data.Node (D3_FocusXY, NodeID, SimulationNode)
+import D3.Viz.Spago.Files (D3TreeRow, D3_Radius, EmbeddedData, LinkType(..), NodeType(..), SpagoLink, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
 import Data.Array (foldl, length, mapWithIndex, partition, (:))
 import Data.FoldableWithIndex (foldlWithIndex)
 import Data.Graph (Graph)
-import PSD3.Data.Graph (GraphConfig, GraphModel, buildGraphModel, toDataGraph)
-import Data.Int (toNumber)
 import Data.Int (floor) as Int
+import Data.Int (toNumber)
 import Data.Map (fromFoldable, lookup)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -22,6 +17,11 @@ import Data.Number (ceil, cos, sin, sqrt, pi, (%))
 import Data.Number (floor) as Number
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
+import PSD3.Data.Graph (GraphConfig, GraphModel, buildGraphModel, toDataGraph)
+import PSD3.Data.Node (D3_FocusXY, NodeID, SimulationNode)
+import PSD3.Internal.Attributes.Instances (Label)
+import PSD3.Internal.FFI (setInSimNodeFlag)
+import PSD3.Internal.Types (D3Simulation_, PointXY)
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 import Web.Event.Internal.Types (Event)
@@ -208,6 +208,141 @@ pinnedPackagesToPhyllotaxis nodes = partitioned.no <> (setPinnedPhyllotaxis `map
 
 modulesNodesToPhyllotaxis :: Array SpagoSimNode -> Array SpagoSimNode
 modulesNodesToPhyllotaxis = nodesToPhyllotaxis isModule
+
+-- | Position nodes for orbit view initial state
+-- |
+-- | Packages are spread in a large phyllotaxis pattern (scale 100)
+-- | Modules are placed at their container package positions
+-- | This gives a good starting point for radial forces to work from
+nodesToOrbitStart :: Array SpagoSimNode -> Array SpagoSimNode
+nodesToOrbitStart nodes = modulesAtContainers
+  where
+    -- First pass: position packages in spread phyllotaxis (no pinning!) and store in gridXY
+    packagesPositioned = spreadPackagesToPhyllotaxis nodes
+
+    -- Second pass: place modules at their container's position
+    modulesAtContainers = moduleNodesToContainerXY packagesPositioned
+
+-- | Position packages in spread phyllotaxis WITHOUT pinning
+-- | Stores position in gridXY so modules can cluster around them
+spreadPackagesToPhyllotaxis :: Array SpagoSimNode -> Array SpagoSimNode
+spreadPackagesToPhyllotaxis nodes = partitioned.no <> (setSpreadPhyllotaxis `mapWithIndex` partitioned.yes)
+  where
+    partitioned = partition isPackage nodes
+    phyllotaxisScale = 100.0  -- Spread out for large number of packages
+    setSpreadPhyllotaxis :: Int -> SpagoSimNode -> SpagoSimNode
+    setSpreadPhyllotaxis index d =
+      let i = toNumber index
+          radius = phyllotaxisScale * sqrt (0.5 + i)
+          angle  = i * initialAngle
+          x = radius * cos angle
+          y = radius * sin angle
+      in d { x = x, y = y, gridXY = notNull { x, y } }  -- No fx/fy - let forces work
+
+-- | Distribute nodes evenly around a circle at given radius
+-- |
+-- | Unlike phyllotaxis which spirals outward, this pins all package nodes at exactly
+-- | the same radius, evenly spaced by angle and with modules tied to them but not pinned
+nodesToCircle :: (SpagoSimNode -> Boolean) -> Number -> Array SpagoSimNode -> Array SpagoSimNode
+nodesToCircle predicate radius nodes = setPositionByPackage <$> nodes
+  where
+    partitioned = partition predicate nodes
+
+    packagePositions = fromFoldable $ positionOnCircle  `mapWithIndex` partitioned.yes
+    
+    count = length partitioned.yes
+    angleStep = if count == 0 then 0.0 else (2.0 * pi) / toNumber count
+
+    positionOnCircle :: Int -> SpagoSimNode -> Tuple Int { x :: Number, y :: Number }
+    positionOnCircle index node =
+      let angle = toNumber index * angleStep
+          x = radius * cos angle
+          y = radius * sin angle
+      in  Tuple node.containerID { x,y }
+
+    setPositionByPackage :: SpagoSimNode -> SpagoSimNode
+    setPositionByPackage node =
+      let { x, y } = fromMaybe { x: 0.0, y: 0.0 } $ lookup node.containerID packagePositions
+      in 
+      case node.nodetype of 
+        (IsModule _) -> node { x = x, y = y, gridXY = notNull { x, y } } -- start modules at center of their packages, use clusterX_M and clusterY_M forces to keep them near their container 
+        -- (IsModule _) -> node { x = x, y = y, fx = notNull x, fy = notNull y, gridXY = notNull { x, y } } -- start modules at center of their packages, use clusterX_M and clusterY_M forces to keep them near their container 
+        (IsPackage _) -> node { x = x, y = y, fx = notNull x, fy = notNull y } -- modified to pin nodes
+
+
+-- | Distribute packages evenly around a circle
+packagesToCircle :: Number -> Array SpagoSimNode -> Array SpagoSimNode
+packagesToCircle = nodesToCircle isPackage
+
+-- | Distribute used modules evenly around a circle
+modulesToCircle :: Number -> Array SpagoSimNode -> Array SpagoSimNode
+modulesToCircle = nodesToCircle isModule
+
+-- | Convenience function to pin main node to a particular spot
+pinMainAtXY :: Number -> Number -> Array SpagoSimNode -> Array SpagoSimNode
+pinMainAtXY x y nodes = f <$> nodes
+  where f n = if n.name == "PSD3.Main" then n { fx = notNull x, fy = notNull y } else n
+
+-- | Position nodes in orbit pattern: packages outer ring, modules inner ring, main pinned center
+-- |
+-- | This creates concentric rings:
+-- | - Main module (PSD3.Main) pinned at center (0, 0)
+-- | - Modules spread in phyllotaxis at inner radius
+-- | - Packages spread in phyllotaxis at outer radius
+nodesToOrbit :: Number -> Number -> Array SpagoSimNode -> Array SpagoSimNode
+nodesToOrbit innerRadius outerRadius nodes = map positionNode nodes
+  where
+    -- Separate by type for phyllotaxis indexing
+    packages = partition isPackage nodes
+    modules = partition isModule packages.no
+
+    -- Build index maps for phyllotaxis positioning
+    packageIndices = foldlWithIndex (\i acc n -> M.insert n.id i acc) M.empty packages.yes
+    moduleIndices = foldlWithIndex (\i acc n -> M.insert n.id i acc) M.empty modules.yes
+
+    positionNode :: SpagoSimNode -> SpagoSimNode
+    positionNode node
+      | node.name == "PSD3.Main" =
+          node { x = 0.0, y = 0.0, fx = notNull 0.0, fy = notNull 0.0 }  -- Main pinned at center
+      | isPackage node =
+          case M.lookup node.id packageIndices of
+            Just i -> positionInRing outerRadius i node
+            Nothing -> node
+      | otherwise =
+          case M.lookup node.id moduleIndices of
+            Just i -> positionInRing innerRadius i node
+            Nothing -> node
+
+    positionInRing :: Number -> Int -> SpagoSimNode -> SpagoSimNode
+    positionInRing ringRadius index node =
+      let i = toNumber index
+          radius = ringRadius + (10.0 * sqrt (0.5 + i))  -- Slight spread within ring
+          angle = i * initialAngle
+          x = radius * cos angle
+          y = radius * sin angle
+      in node { x = x, y = y }
+
+-- | Position all tree modules to their radial tree positions and pin them
+-- |
+-- | Converts treeXY (angle, radius) to cartesian and sets fx/fy to pin in place.
+-- | Non-tree nodes (packages, unused modules) are left unchanged.
+nodesToRadialTree :: Array SpagoSimNode -> Array SpagoSimNode
+nodesToRadialTree nodes = map positionNode nodes
+  where
+    positionNode :: SpagoSimNode -> SpagoSimNode
+    positionNode node
+      | node.name == "PSD3.Main" =
+          node { x = 0.0, y = 0.0, fx = notNull 0.0, fy = notNull 0.0 }
+      | isUsedModule node =
+          case toMaybe node.treeXY of
+            Just treeXY ->
+              let angle = treeXY.x
+                  radius = treeXY.y * treeDepthMultiplier
+                  x = radius * cos angle
+                  y = radius * sin angle
+              in node { x = x, y = y, fx = notNull x, fy = notNull y }
+            Nothing -> node
+      | otherwise = node  -- Packages and unused modules unchanged
 
 -- | layout nodes in "sunflower pattern", both pleasing to the eye and good as a starting position for sim
 -- | (no two nodes in same spot). It's impossible to do this using D3 in simulation update situation

@@ -1,6 +1,7 @@
 module PSD3v2.Selection.Operations
   ( select
   , selectAll
+  , selectAllWithData
   , append
   , appendChild
   , appendChildInheriting
@@ -126,6 +127,52 @@ selectAll selector (Selection impl) = liftEffect do
 
   pure $ Selection $ EmptySelection
     { parentElements: elements
+    , document: doc
+    }
+
+-- | Select all elements matching selector and extract their bound data
+-- |
+-- | Use this when selecting child elements that have inherited data from their parent.
+-- | This is necessary when you want to use the selection with transitions that need
+-- | access to the bound data (like withTransitionStaggered).
+-- |
+-- | Example:
+-- | ```purescript
+-- | -- After creating nodes with appendChildInheriting
+-- | groups <- selectSimulationGroups
+-- | circles <- selectAllWithData "circle" groups.nodes
+-- | withTransitionStaggered config delayFn circles [fill colorByDepth]
+-- | ```
+selectAllWithData
+  :: forall state parent parentDatum datum m
+   . MonadEffect m
+  => String  -- CSS selector
+  -> Selection state parent parentDatum
+  -> m (Selection SBoundOwns Element datum)
+selectAllWithData selector (Selection impl) = liftEffect do
+  doc <- getDocument impl
+  elements <- case impl of
+    EmptySelection { parentElements } ->
+      querySelectorAllElements selector parentElements
+    BoundSelection { elements: parentElems } ->
+      querySelectorAllElements selector parentElems
+    PendingSelection { parentElements } ->
+      querySelectorAllElements selector parentElements
+    ExitingSelection { elements: exitElems } ->
+      querySelectorAllElements selector exitElems
+
+  -- Extract __data__ from each element
+  dataArray <- traverse (\el -> do
+    nullableDatum <- getElementData_ el
+    pure $ case toMaybe nullableDatum of
+      Just d -> d
+      Nothing -> unsafeCoerce unit  -- Fallback if no data (shouldn't happen with appendChildInheriting)
+    ) elements
+
+  pure $ Selection $ BoundSelection
+    { elements: elements
+    , data: dataArray
+    , indices: Nothing
     , document: doc
     }
 

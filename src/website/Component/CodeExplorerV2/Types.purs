@@ -3,10 +3,19 @@ module Component.CodeExplorerV2.Types where
 
 import Prelude
 
--- | Scene enumeration - start with just two scenes
-data Scene = PackageGraph | HorizontalTree
+-- | Scene enumeration for tree reveal animation
+-- |
+-- | Orbit: Initial view with packages in outer ring, modules in inner ring
+-- | TreeReveal: Simulation off, nodes transitioning to tree positions
+-- | ForceTree: Simulation on with force-driven radial tree
+data Scene
+  = Orbit        -- Packages outer ring, modules inner ring, main pinned center
+  | TreeReveal   -- Nodes transition to tree positions, bezier links appear
+  | ForceTree    -- Force simulation with straight links
+
 derive instance Eq Scene
 
 instance Show Scene where
-  show PackageGraph = "PackageGraph"
-  show HorizontalTree = "HorizontalTree"
+  show Orbit = "Orbit"
+  show TreeReveal = "TreeReveal"
+  show ForceTree = "ForceTree"

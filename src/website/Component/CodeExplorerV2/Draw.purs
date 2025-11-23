@@ -1,47 +1,148 @@
 -- | Draw module for CodeExplorerV2
 -- |
--- | Handles D3 visualization using genericUpdateSimulation following LesMisGUP patterns.
--- | Uses consistent Int IDs for nodes and links.
+-- | Handles D3 visualization for tree reveal animation.
+-- | Uses imperative choreography driven by Halogen timers.
 module Component.CodeExplorerV2.Draw where
 
 import Prelude
 
 import Component.CodeExplorerV2.Types (Scene(..))
+import D3.Viz.Spago.Draw.Attributes (graphSceneAttributes, svgAttrs)
 import D3.Viz.Spago.Files (LinkType(..), SpagoLinkData, SpagoNodeRow, SpagoLink, D3_Radius)
-import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage, isUsedModule, packagesNodesToPhyllotaxis)
-import Data.Array (filter, take, length) as Array
+import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isModule, isPackage, isUsedModule, moduleNodesToContainerXY, modulesToCircle, nodesToCircle, nodesToOrbitStart, nodesToRadialTree, packagesToCircle, pinMainAtXY, treeDepthMultiplier, unpinAllNodes)
 import D3.Viz.Spago.Render (spagoRenderCallbacks)
-import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, graphSceneAttributes, treeSceneAttributes, svgAttrs)
-import Data.Maybe (Maybe(..))
-import Data.Nullable as Nullable
+import Data.Array (filter, length) as Array
+import Data.Int (toNumber)
+import Data.Map as Map
+import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Nullable (toMaybe)
+import Data.Number (cos, sin)
 import Data.Set (Set)
 import Data.Set as Set
+import Data.Time.Duration (Milliseconds(..))
+import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Class.Console (log)
-import PSD3.Data.Node (D3_FocusXY, SwizzledLink)
+import PSD3.Data.Node (D3_FocusXY)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.FFI (keyIsID_)
 import PSD3.Internal.Simulation.Types (Force)
-import PSD3.Internal.Types (PointXY)
-import PSD3v2.Attribute.Types (class_)
+import PSD3v2.Attribute.Types (fill, opacity, transform)
 import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom, ScaleExtent(..))
-import PSD3v2.Capabilities.Selection (class SelectionM, appendChild, select, on)
-import PSD3v2.Capabilities.Simulation (class SimulationM2, init, start)
+import PSD3v2.Capabilities.Selection (class SelectionM, appendChild, select, on, joinDataWithKey, selectAllWithData)
+import PSD3v2.Capabilities.Simulation (class SimulationM2, init, start, stop)
+import PSD3v2.Capabilities.Transition (class TransitionM, withTransitionStaggered)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_)
-import Data.Map as Map
-import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, SEmpty)
+import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, JoinResult(..))
 import PSD3v2.Simulation.Update (DeclarativeUpdateConfig, genericUpdateSimulation, setupSimulationGroups, selectSimulationGroups)
-import Web.DOM.Element (Element)
-import Effect.Class (liftEffect)
+import PSD3v2.Transition.Types (transitionWith)
 import Utility (getWindowWidthHeight)
-import Data.Tuple (Tuple(..))
-
--- Type alias uses D3_Radius from D3.Viz.Spago.Files
+import Web.DOM.Element (Element)
 
 -- | Type alias for node row (matching Spago)
 type NodeRow = SpagoNodeRow (D3_FocusXY (D3_Radius ()))
 
--- | Initialize the visualization
+-- | Stagger delay based on tree depth
+-- |
+-- | Each depth layer animates after the previous one.
+-- | delay = depth * msPerDepth
+staggerByTreeDepth :: Number -> SpagoSimNode -> Int -> Milliseconds
+staggerByTreeDepth msPerDepth node _ =
+  let depth = fromMaybe 0 $ toMaybe node.treeDepth
+  in Milliseconds (toNumber depth * msPerDepth)
+
+-- | Calculate transform string for radial tree position
+-- |
+-- | Converts treeXY (angle, radius) to translate(x, y)
+nodeToTreeTransform :: SpagoSimNode -> String
+nodeToTreeTransform node =
+  case toMaybe node.treeXY of
+    Just treeXY ->
+      let angle = treeXY.x
+          radius = treeXY.y * treeDepthMultiplier
+          x = radius * cos angle
+          y = radius * sin angle
+      in "translate(" <> show x <> "," <> show y <> ")"
+    Nothing ->
+      -- Fallback to current position
+      "translate(" <> show node.x <> "," <> show node.y <> ")"
+
+-- | Calculate fill color based on tree depth
+-- |
+-- | Uses HSL interpolation from warm (depth 0) to cool (max depth)
+-- | Creates a rainbow effect across the tree layers
+depthToColor :: SpagoSimNode -> String
+depthToColor node =
+  let depth = fromMaybe 0 $ toMaybe node.treeDepth
+      -- Map depth to hue: 0 (red) -> 240 (blue) over ~20 levels
+      -- Adjust hue range for pleasing colors
+      hue = 30.0 + (toNumber depth * 10.0)  -- Orange to purple
+      saturation = 70.0
+      lightness = 50.0
+  in "hsl(" <> show hue <> ", " <> show saturation <> "%, " <> show lightness <> "%)"
+
+-- | Staggered tree reveal animation
+-- |
+-- | Stops simulation and animates nodes to their tree positions with
+-- | staggered delays based on depth. Nodes at depth 1 animate first,
+-- | then depth 2, etc.
+staggeredTreeReveal :: forall m.
+  Bind m =>
+  MonadEffect m =>
+  SelectionM D3v2Selection_ m =>
+  TransitionM D3v2Selection_ m =>
+  SimulationM2 (D3v2Selection_ SBoundOwns Element) m =>
+  SpagoModel ->
+  m Unit
+staggeredTreeReveal model = do
+  log "CodeExplorerV2.Draw: Starting staggered tree reveal"
+
+  -- Stop simulation
+  stop
+
+  -- Filter to tree nodes
+  let treeNodes = Array.filter isUsedModule model.nodes
+  log $ "Tree nodes to animate: " <> show (Array.length treeNodes)
+
+  -- Re-select groups and join to get SBoundOwns selection
+  -- Must use same key function as genericUpdateSimulation to match existing elements
+  groups <- selectSimulationGroups
+  JoinResult nodeJoin <- joinDataWithKey treeNodes (\n -> n.id) "g" groups.nodes
+
+  -- The update selection has our tree nodes with data bound
+  -- (enter and exit should be empty since we're re-binding same data)
+  let config = transitionWith
+        { duration: Milliseconds 2400.0  -- Slower, more dramatic
+        , delay: Nothing  -- Ignored when using staggered
+        , easing: Nothing
+        }
+
+  -- Apply staggered transition to groups (position)
+  -- 900ms delay between depth layers for ~18 second total with 20 depth levels
+  withTransitionStaggered config (staggerByTreeDepth 900.0) nodeJoin.update
+    [ transform nodeToTreeTransform
+    ]
+
+  -- Also transition the circles (fill) and text (opacity) inside the groups
+  -- Use selectAllWithData to get child elements with their inherited data
+  circlesSel <- selectAllWithData "circle" nodeJoin.update
+  withTransitionStaggered config (staggerByTreeDepth 900.0) circlesSel
+    [ fill depthToColor
+    ]
+
+  textSel <- selectAllWithData "text" nodeJoin.update
+  withTransitionStaggered config (staggerByTreeDepth 900.0) textSel
+    [ opacity 0.0  -- Hide labels during reveal
+    ]
+
+  log "CodeExplorerV2.Draw: Staggered tree reveal started"
+
+-- | Initialize the visualization in Orbit scene
+-- |
+-- | Sets up SVG structure and positions nodes in concentric rings:
+-- | - Main module pinned at center
+-- | - Modules in inner ring
+-- | - Packages in outer ring
 initialize :: forall m.
   Bind m =>
   MonadEffect m =>
@@ -50,23 +151,12 @@ initialize :: forall m.
   Array (Force SpagoSimNode) ->
   Set Label ->
   SpagoModel ->
-  Array SpagoLink ->  -- Unswizzled links (deep copy before D3 mutates them)
+  Array SpagoLink ->
   String ->
   Scene ->
   m Unit
-initialize forcesArray activeForces model unswizzledLinks selector initialScene = do
-  log "CodeExplorerV2.Draw: Initializing"
-
-  -- Debug: Show link counts by type
-  let allP2PLinks = Array.filter (\l -> l.linktype == P2P) unswizzledLinks
-      packageNodes = Array.filter isPackage model.nodes
-      packageIDs = map _.id packageNodes
-
-  log $ "DEBUG: Total links: " <> show (Array.length unswizzledLinks)
-  log $ "DEBUG: P2P links: " <> show (Array.length allP2PLinks)
-  log $ "DEBUG: Package nodes: " <> show (Array.length packageNodes)
-  log $ "DEBUG: First 5 package IDs: " <> show (Array.take 5 packageIDs)
-  log $ "DEBUG: First 5 P2P links (source->target): " <> show (map (\l -> { s: l.source, t: l.target }) (Array.take 5 allP2PLinks))
+initialize forcesArray activeForces model unswizzledLinks selector _initialScene = do
+  log "CodeExplorerV2.Draw: Initializing in Orbit scene"
 
   -- Get viewport dimensions
   (Tuple w h) <- liftEffect getWindowWidthHeight
@@ -78,7 +168,7 @@ initialize forcesArray activeForces model unswizzledLinks selector initialScene 
   _ <- on (Drag defaultDrag) inner
   _ <- on (Zoom (defaultZoom (ScaleExtent 0.1 4.0) "g")) svg
 
-  -- Create simulation container groups (links under, nodes over)
+  -- Create simulation container groups
   groups <- setupSimulationGroups inner
 
   -- Initialize simulation with forces
@@ -98,92 +188,166 @@ initialize forcesArray activeForces model unswizzledLinks selector initialScene 
     , ticks: Map.empty
     }
 
-  -- Get scene configuration (pass unswizzled links explicitly)
-  let sceneConfig = getSceneConfig model unswizzledLinks initialScene
+  let onlyMainAndPackages n = ((n.name /= "my-project") && (isPackage n)) || (n.name == "main")
+      excludeMyProject n = n.name /= "my-project"
+      onlyMain n = n.name == "PSD3.Main"
 
-  -- Call genericUpdateSimulation with render callbacks
+  -- Configure for Orbit scene: all nodes visible (except my-project), no links
+  -- nodesToOrbitStart gives good starting positions, then radial forces pull into orbits
+  let orbitConfig :: DeclarativeUpdateConfig NodeRow Int SpagoLinkData
+      orbitConfig =
+        { allNodes: model.nodes
+        , allLinks: []  -- No links in orbit view
+        , nodeFilter: \_ -> true
+        , linkFilter: Nothing
+        , nodeInitializers: [ (nodesToCircle isPackage 1600.0), pinMainAtXY 0.0 0.0 ]  -- Packages spread out beyond tree extent
+        , activeForces: Just $ Set.fromFoldable ["collision", "clusterX_M", "clusterY_M"]
+        , config: Nothing
+        }
+
   genericUpdateSimulation
     groups
-    Group   -- Node element type (Spago uses groups for circle+text)
-    Path    -- Link element type (paths for bezier/diagonal)
-    sceneConfig
-    (\n -> n.id)  -- Node key function (Int)
-    keyIsID_      -- Link key function (unused - library uses swizzledLinkKey_)
-    graphSceneAttributes  -- Use graph styling for initial scene
+    Group
+    Path
+    orbitConfig
+    (\n -> n.id)
+    keyIsID_
+    graphSceneAttributes
     spagoRenderCallbacks
 
-  -- Start simulation
+  start
+  log "CodeExplorerV2.Draw: Orbit scene initialized"
+
+-- | Phase 2: Transition to tree reveal
+-- |
+-- | - Stops simulation
+-- | - Transitions nodes to their radial tree positions
+-- | - Adds bezier tree links
+transitionToTreeReveal :: forall m.
+  Bind m =>
+  MonadEffect m =>
+  SelectionM D3v2Selection_ m =>
+  SimulationM2 (D3v2Selection_ SBoundOwns Element) m =>
+  SpagoModel ->
+  Array SpagoLink ->
+  m Unit
+transitionToTreeReveal model unswizzledLinks = do
+  log "CodeExplorerV2.Draw: Transitioning to tree reveal"
+
+  -- Stop simulation
+  stop
+
+  -- Re-select groups
+  groups <- selectSimulationGroups
+
+  -- Only tree modules and tree links
+  let treeLinks = Array.filter (\l -> l.linktype == M2M_Tree) unswizzledLinks
+
+  log $ "Tree links: " <> show (Array.length treeLinks)
+
+  let treeConfig :: DeclarativeUpdateConfig NodeRow Int SpagoLinkData
+      treeConfig =
+        { allNodes: model.nodes
+        , allLinks: treeLinks
+        , nodeFilter: isUsedModule  -- Only modules in tree
+        , linkFilter: Just (\l -> l.linktype == M2M_Tree)
+        , nodeInitializers: [ nodesToRadialTree ]  -- Position and pin at tree positions
+        , activeForces: Nothing  -- No forces during transition
+        , config: Nothing
+        }
+
+  -- This will animate nodes to tree positions and add links
+  genericUpdateSimulation
+    groups
+    Group
+    Path
+    treeConfig
+    (\n -> n.id)
+    keyIsID_
+    graphSceneAttributes  -- TODO: Use bezier link style
+    spagoRenderCallbacks
+
+  log "CodeExplorerV2.Draw: Tree reveal transition started"
+
+-- | Phase 3: Activate force-driven tree
+-- |
+-- | - Changes links to straight lines
+-- | - Unpins nodes
+-- | - Restarts simulation with tree-appropriate forces
+activateForceTree :: forall m.
+  Bind m =>
+  MonadEffect m =>
+  SelectionM D3v2Selection_ m =>
+  SimulationM2 (D3v2Selection_ SBoundOwns Element) m =>
+  SpagoModel ->
+  Array SpagoLink ->
+  m Unit
+activateForceTree model unswizzledLinks = do
+  log "CodeExplorerV2.Draw: Activating force tree"
+
+  groups <- selectSimulationGroups
+
+  let treeLinks = Array.filter (\l -> l.linktype == M2M_Tree) unswizzledLinks
+
+  let forceTreeConfig :: DeclarativeUpdateConfig NodeRow Int SpagoLinkData
+      forceTreeConfig =
+        { allNodes: model.nodes
+        , allLinks: treeLinks
+        , nodeFilter: isUsedModule
+        , linkFilter: Just (\l -> l.linktype == M2M_Tree)
+        , nodeInitializers: [ unpinAllNodes ]  -- Remove fx/fy to let forces work
+        , activeForces: Just $ Set.fromFoldable ["collision", "links"]
+        , config: Nothing
+        }
+
+  genericUpdateSimulation
+    groups
+    Group
+    Path
+    forceTreeConfig
+    (\n -> n.id)
+    keyIsID_
+    graphSceneAttributes  -- TODO: Use straight line style
+    spagoRenderCallbacks
+
+  -- Restart simulation
   start
 
-  log "CodeExplorerV2.Draw: Initialization complete"
+  log "CodeExplorerV2.Draw: Force tree activated"
 
--- | Update scene (switch between PackageGraph and HorizontalTree)
+-- | Update scene (for manual scene switching)
 updateScene :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3v2Selection_ m =>
   SimulationM2 (D3v2Selection_ SBoundOwns Element) m =>
   SpagoModel ->
-  Array SpagoLink ->  -- Unswizzled links
+  Array SpagoLink ->
   Scene ->
   Set Label ->
   m Unit
 updateScene model links targetScene _activeForces = do
-  log $ "CodeExplorerV2.Draw: Updating to scene"
+  log $ "CodeExplorerV2.Draw: Updating to " <> show targetScene
 
-  -- Re-select existing simulation container groups
-  groups <- selectSimulationGroups
+  case targetScene of
+    Orbit -> do
+      -- Reset to orbit view
+      groups <- selectSimulationGroups
+      let orbitConfig :: DeclarativeUpdateConfig NodeRow Int SpagoLinkData
+          orbitConfig =
+            { allNodes: model.nodes
+            , allLinks: []
+            , nodeFilter: \n -> n.name /= "my-project"
+            , linkFilter: Nothing
+            , nodeInitializers: [ nodesToOrbitStart ]
+            , activeForces: Just $ Set.fromFoldable ["collision", "clusterX_M", "clusterY_M"]
+            , config: Nothing
+            }
+      genericUpdateSimulation groups Group Path orbitConfig (\n -> n.id) keyIsID_ graphSceneAttributes spagoRenderCallbacks
+      start
 
-  -- Get scene configuration (library handles link copying internally)
-  let sceneConfig = getSceneConfig model links targetScene
+    TreeReveal ->
+      transitionToTreeReveal model links
 
-  -- Get appropriate attributes for scene
-  let attrs = case targetScene of
-        PackageGraph -> graphSceneAttributes
-        HorizontalTree -> treeSceneAttributes
-
-  -- Call genericUpdateSimulation
-  genericUpdateSimulation
-    groups
-    Group
-    Path
-    sceneConfig
-    (\n -> n.id)
-    keyIsID_
-    attrs
-    spagoRenderCallbacks
-
-  -- Restart simulation
-  start
-
--- | Get scene configuration for a given scene
--- | Takes unswizzled links explicitly since D3 mutates links in place after init
-getSceneConfig :: SpagoModel -> Array SpagoLink -> Scene -> DeclarativeUpdateConfig NodeRow Int SpagoLinkData
-getSceneConfig model unswizzledLinks scene = case scene of
-  PackageGraph ->
-    { allNodes: model.nodes
-    , allLinks: unswizzledLinks
-    , nodeFilter: isPackage  -- Only packages
-    , linkFilter: Just (\l -> l.linktype == P2P)  -- Only package-to-package links
-    , nodeInitializers: [ packagesNodesToPhyllotaxis ]  -- Arrange in sunflower spiral
-    , activeForces: Just $ Set.fromFoldable ["charge", "collision", "center", "links"]
-    , config: Nothing
-    }
-
-  HorizontalTree ->
-    { allNodes: model.nodes
-    , allLinks: unswizzledLinks
-    , nodeFilter: isUsedModule  -- Only modules in the tree
-    , linkFilter: Just (\l -> l.linktype == M2M_Tree)  -- Only tree links
-    , nodeInitializers: [ treePositionInitializer ]  -- Position nodes by tree coordinates
-    , activeForces: Just $ Set.fromFoldable ["collision"]
-    , config: Nothing
-    }
-
--- | Node initializer that positions nodes by their tree coordinates
-treePositionInitializer :: Array SpagoSimNode -> Array SpagoSimNode
-treePositionInitializer nodes = map positionByTree nodes
-  where
-    positionByTree n = case Nullable.toMaybe n.treeXY of
-      Nothing -> n
-      Just pos -> n { x = pos.x, y = pos.y, fx = Nullable.notNull pos.x, fy = Nullable.notNull pos.y }
+    ForceTree ->
+      activateForceTree model links
