@@ -9,7 +9,7 @@ import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Types (D3Selection_, Datum_, Index_)
 import PSD3.Data.Node (Link, SwizzledLink, SimulationNode)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
-import PSD3.Internal.Simulation.Types (D3SimulationState_(..), Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _d3Simulation, _force, _forceLibrary, _handle, _status, _tick, _velocityDecay)
+import PSD3.Internal.Simulation.Types (D3SimulationState_(..), Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _d3Simulation, _force, _forceLibrary, _handle, _name, _status, _tick, _velocityDecay)
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import PSD3.Capabilities.Simulation (RawData)
 import Data.Array (elem, filter, intercalate)
@@ -45,13 +45,34 @@ actualizeForcesDirect activeForces simState =
   in SimState_ $ record { forceLibrary = updatedLibrary }
 
 simulationRemoveAllForces :: forall d m row.
-  (MonadState { simulation :: D3SimulationState_ d | row } m) => 
+  (MonadState { simulation :: D3SimulationState_ d | row } m) =>
   m Unit
 simulationRemoveAllForces = do
   handle <- use _handle
   forces <- use _forceLibrary
   let _ = (setAsNullForceInSimulation_ handle) <$> (A.fromFoldable $ M.keys forces)
   _forceLibrary %= (const M.empty)
+
+-- | Replace all forces with a new array
+-- |
+-- | This is the core implementation for the setForces capability.
+-- | It removes all existing forces and adds the new ones.
+simulationSetForces :: forall d m row.
+  (MonadState { simulation :: D3SimulationState_ d | row } m) =>
+  Array (Force d) -> m Unit
+simulationSetForces newForces = do
+  -- 1. Remove all existing forces
+  simulationRemoveAllForces
+
+  -- 2. Build new force library from array
+  let newLibrary = M.fromFoldable $ newForces <#> \f ->
+        Tuple (view _name f) (enableForce f)  -- All new forces start active
+  _forceLibrary %= const newLibrary
+
+  -- 3. Add all forces to D3 simulation
+  handle <- use _handle
+  let _ = (putForceInSimulation <$> newForces) <*> pure handle
+  pure unit
 
 simulationToggleForce :: forall d m row.
   (MonadState { simulation :: D3SimulationState_ d | row } m) =>

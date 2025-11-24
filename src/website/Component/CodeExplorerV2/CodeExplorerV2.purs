@@ -1,21 +1,18 @@
--- | CodeExplorerV2 - Clean rebuild following LesMisGUP patterns
+-- | CodeExplorerV2 - Clean rebuild using scene-based architecture
 -- |
--- | This is a simplified version of CodeExplorer that:
--- | - Uses consistent ID types (Int) throughout
--- | - Follows the declarative genericUpdateSimulation pattern
--- | - Starts minimal and builds up incrementally
+-- | This component demonstrates the scene-based approach:
+-- | - Forces defined in Forces.purs (type-safe, no strings)
+-- | - Each scene has its own config file
+-- | - Orchestration handles transitions
+-- | - Component just manages state and user interaction
 module Component.CodeExplorerV2 where
 
 import Prelude
 
-import Component.CodeExplorerV2.Draw as Draw
-import Component.CodeExplorerV2.Types (Scene(..))
-import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isModule, isPackage, isUsedModule)
-import Data.Array as Array
-import Data.Map as Map
-import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Nullable (toMaybe)
-import Data.Set as Set
+import Component.CodeExplorerV2.Orchestration as Orchestration
+import Component.CodeExplorerV2.Scenes.Types (Scene(..))
+import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode)
+import Data.Maybe (Maybe(..))
 import Effect.Aff (Milliseconds(..), delay)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class.Console (log)
@@ -24,14 +21,11 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import PSD3.CodeExplorer.Data (readModelData)
-import PSD3.CodeExplorer.Forces (gridPointX)
-import PSD3.Internal.Simulation.Config as F
-import PSD3.Internal.Simulation.Forces (createForce, createLinkForce, initialize)
-import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, ForceFilter(..), ForceType(..), RegularForceType(..), allNodes, initialSimulationState)
+import Data.Map as Map
+import PSD3.Internal.Simulation.Types (D3SimulationState_, initialSimulationState)
 import PSD3v2.Interpreter.D3v2 as D3v2
-import Unsafe.Coerce (unsafeCoerce)
 
--- | Simple state following LesMisGUPTree pattern
+-- | Component state
 type State =
   { simulation :: D3SimulationState_ SpagoSimNode
   , model :: Maybe SpagoModel
@@ -42,60 +36,16 @@ data Action
   = Initialize
   | FormTree
   | ActivateForceLayout
-  | SwitchScene Scene
 
--- | Forces for Spago visualization
-forces :: { center :: Force SpagoSimNode
-          , collision :: Force SpagoSimNode
-          , charge :: Force SpagoSimNode
-          , links :: Force SpagoSimNode
-          , packageOrbit :: Force SpagoSimNode
-          , moduleOrbit :: Force SpagoSimNode
-          , clusterX_M :: Force SpagoSimNode
-          , clusterY_M :: Force SpagoSimNode
-          }
-forces =
-  { charge: createForce "charge" (RegularForce ForceManyBody) allNodes [ F.strengthVal (300.0) ]
-  , collision: createForce "collision" (RegularForce ForceCollide) allNodes [ F.radiusVal 20.0 ]
-  , center: createForce "center" (RegularForce ForceCenter) allNodes [ F.xVal 0.0, F.yVal 0.0, F.strengthVal 0.1 ]
-  , links: createLinkForce allNodes [ F.distanceVal 50.0 ]
-  -- Radial forces for orbit view
-  , packageOrbit: createForce "packageOrbit" (RegularForce ForceRadial) packagesOnly
-      [ F.strengthVal 0.7, F.xVal 0.0, F.yVal 0.0, F.radiusVal 900.0 ]
-  , moduleOrbit: createForce "moduleOrbit" (RegularForce ForceRadial) modulesOnly
-      [ F.strengthVal 0.8, F.xVal 0.0, F.yVal 0.0, F.radiusVal 900.0 ]
-  , clusterX_M: createForce "clusterX_M"     (RegularForce ForceX)        modulesOnly [ F.strengthVal 0.2, F.xFn (\d _ -> gridPointX (unsafeCoerce d)) ]
-  , clusterY_M: createForce "clusterY_M"     (RegularForce ForceY)        modulesOnly [ F.strengthVal 0.2, F.yFn (\d _ -> gridPointY (unsafeCoerce d)) ]
-
-  }
-  where
-    packagesOnly = Just $ ForceFilter "packages" (isPackage <<< unsafeCoerce)
-    modulesOnly = Just $ ForceFilter "modules" (isModule <<< unsafeCoerce)
-    usedModulesOnly = Just $ ForceFilter "used modules" (isUsedModule <<< unsafeCoerce)
-    gridPointX :: SpagoSimNode -> Number
-    gridPointX d = fromMaybe d.x $ map _.x $ toMaybe d.gridXY
-
-    gridPointY :: SpagoSimNode -> Number
-    gridPointY d = fromMaybe d.y $ map _.y $ toMaybe d.gridXY
-
-
-forceLibrary :: Map.Map String (Force SpagoSimNode)
-forceLibrary = initialize
-  [ forces.charge
-  , forces.collision
-  , forces.center
-  , forces.links
-  , forces.packageOrbit
-  , forces.moduleOrbit
-  , forces.clusterX_M
-  , forces.clusterY_M
-  ]
+-- | Initial simulation state
+initialSimState :: D3SimulationState_ SpagoSimNode
+initialSimState = initialSimulationState Map.empty
 
 component :: forall query input output m. MonadAff m => H.Component query input output m
 component =
   H.mkComponent
     { initialState: \_ ->
-        { simulation: initialSimulationState forceLibrary
+        { simulation: initialSimState
         , model: Nothing
         , currentScene: Orbit
         }
@@ -112,12 +62,12 @@ render state =
     [ HH.div [ HP.class_ (HH.ClassName "page-header") ]
         [ HH.h1_ [ HH.text "Code Explorer V2" ]
         , HH.p [ HP.class_ (HH.ClassName "page-description") ]
-            [ HH.text "Clean rebuild of Code Explorer using LesMisGUP patterns." ]
+            [ HH.text "Scene-based architecture with type-safe forces." ]
         ]
 
     , HH.div [ HP.class_ (HH.ClassName "controls-panel") ]
         [ HH.div [ HP.class_ (HH.ClassName "control-section") ]
-            [ HH.h3_ [ HH.text "Tree Reveal Animation" ]
+            [ HH.h3_ [ HH.text "Scene Transitions" ]
             , HH.div [ HP.class_ (HH.ClassName "button-group") ]
                 [ HH.button
                     [ HP.class_ (HH.ClassName "control-button primary")
@@ -142,12 +92,12 @@ render state =
         []
 
     , HH.div [ HP.class_ (HH.ClassName "info-panel") ]
-        [ HH.h3_ [ HH.text "About This Demo" ]
-        , HH.p_ [ HH.text "This is a clean rebuild of Code Explorer following the patterns established in LesMisGUP." ]
+        [ HH.h3_ [ HH.text "Architecture" ]
         , HH.ul_
-            [ HH.li_ [ HH.text "Consistent Int IDs for nodes and links" ]
-            , HH.li_ [ HH.text "Simple scene switching with proper GUP" ]
-            , HH.li_ [ HH.text "Uses genericUpdateSimulation correctly" ]
+            [ HH.li_ [ HH.text "Forces.purs - type-safe force definitions" ]
+            , HH.li_ [ HH.text "Scenes/*.purs - config per scene" ]
+            , HH.li_ [ HH.text "Orchestration.purs - transitions" ]
+            , HH.li_ [ HH.text "No string-based force lookups" ]
             ]
         ]
     ]
@@ -165,17 +115,12 @@ handleAction = case _ of
       Just model -> do
         H.modify_ _ { model = Just model }
 
-        -- Orbit scene: radial forces for packages and modules
-        let activeForces = Set.fromFoldable ["collision", "clusterX_M", "clusterY_M"]
-            forcesArray = [ forces.charge, forces.collision, forces.center, forces.links
-                          , forces.packageOrbit, forces.moduleOrbit, forces.clusterX_M, forces.clusterY_M ]
-
         state <- H.get
         newState <- H.liftAff $ D3v2.execD3v2SimM { simulation: state.simulation } do
-          Draw.initialize forcesArray activeForces model model.links "#code-explorer-v2-viz" Orbit
+          Orchestration.initialize model "#code-explorer-v2-viz"
 
         H.modify_ \s -> s { simulation = newState.simulation }
-        log $ "CodeExplorerV2: Initialized with " <> show (Array.length model.nodes) <> " nodes"
+        log "CodeExplorerV2: Initialized"
 
     pure unit
 
@@ -185,9 +130,8 @@ handleAction = case _ of
     case state.model of
       Nothing -> log "Error: Model not loaded"
       Just model -> do
-        -- Staggered transition to tree positions
         newState <- H.liftAff $ D3v2.execD3v2SimM { simulation: state.simulation } do
-          Draw.staggeredTreeReveal model model.links
+          Orchestration.transitionToTreeReveal model
 
         H.modify_ \s -> s { simulation = newState.simulation, currentScene = TreeReveal }
         log "Tree formation started"
@@ -200,11 +144,11 @@ handleAction = case _ of
     case state.model of
       Nothing -> log "Error: Model not loaded"
       Just model -> do
-        -- First, set up the graph links (removes tree links)
+        -- Transition to force graph
         newState <- H.liftAff $ D3v2.execD3v2SimM { simulation: state.simulation } do
-          Draw.activateForceTree model model.links
+          Orchestration.transitionToForceGraph model
 
-        H.modify_ \s -> s { simulation = newState.simulation, currentScene = ForceTree }
+        H.modify_ \s -> s { simulation = newState.simulation, currentScene = ForceGraph }
         log "Graph links added, waiting before starting simulation..."
 
         -- Wait 1 second for links to appear, then start simulation
@@ -212,25 +156,9 @@ handleAction = case _ of
 
         finalState <- H.get
         newState2 <- H.liftAff $ D3v2.execD3v2SimM { simulation: finalState.simulation } do
-          Draw.startSimulation
+          Orchestration.startSimulation
 
         H.modify_ \s -> s { simulation = newState2.simulation }
         log "Force layout activated"
-
-    pure unit
-
-  SwitchScene targetScene -> do
-    log $ "CodeExplorerV2: Switching to " <> show targetScene
-    state <- H.get
-    case state.model of
-      Nothing -> log "Error: Model not loaded"
-      Just model -> do
-        newState <- H.liftAff $ D3v2.execD3v2SimM { simulation: state.simulation } do
-          Draw.updateScene model model.links targetScene Set.empty
-
-        H.modify_ \s -> s
-          { simulation = newState.simulation
-          , currentScene = targetScene
-          }
 
     pure unit

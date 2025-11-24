@@ -66,3 +66,30 @@ export function clearElement_(selector) {
     }
   };
 }
+
+// ============================================================================
+// DOM-to-data synchronization
+// ============================================================================
+
+// Sync DOM transform positions back to __data__.x and __data__.y
+// This reads the current transform attribute and updates the bound data
+// Essential for transitioning from CSS animations to force simulation
+export function syncDOMToData_(selector) {
+  return function() {
+    const elements = document.querySelectorAll(selector);
+    elements.forEach(function(el) {
+      const d = el.__data__;
+      if (!d) return;
+
+      const transform = el.getAttribute('transform');
+      if (!transform) return;
+
+      // Parse translate(x, y) from transform
+      const match = transform.match(/translate\(\s*([^,\s]+)\s*,\s*([^)\s]+)\s*\)/);
+      if (match) {
+        d.x = parseFloat(match[1]);
+        d.y = parseFloat(match[2]);
+      }
+    });
+  };
+}

@@ -743,6 +743,8 @@ instance SimulationM2 (D3v2Selection_ SBoundOwns Element) (D3v2SimM row d) where
 
   reheat alpha = SimFn.simulationSetVariable $ Alpha alpha
 
+  setForces forces = SimFn.simulationSetForces (unsafeCoerce <$> forces)
+
 -- | Helper function for reselecting from D3v2 renderTree results
 -- |
 -- | This wraps the `reselect` function from Operations to work with D3v2Selection_ newtype.

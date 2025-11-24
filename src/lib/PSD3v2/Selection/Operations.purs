@@ -9,6 +9,7 @@ module PSD3v2.Selection.Operations
   , setAttrsExit
   , remove
   , clear
+  , syncDOMToData
   , merge
   , joinData
   , joinDataWithKey
@@ -340,6 +341,28 @@ clear selector = liftEffect $ clearElement_ selector
 
 -- FFI for clearing an element's children
 foreign import clearElement_ :: String -> Effect Unit
+
+-- | Sync DOM transform positions back to __data__.x and __data__.y
+-- |
+-- | Reads the current transform attribute from each element matching the selector
+-- | and updates the bound data's x/y coordinates. Essential for transitioning from
+-- | CSS animations to force simulation - ensures simulation sees current positions.
+-- |
+-- | Example:
+-- | ```purescript
+-- | -- After tree reveal animation completes:
+-- | syncDOMToData "g.nodes > g"  -- Sync group positions to node data
+-- | start  -- Simulation continues from current positions
+-- | ```
+syncDOMToData
+  :: forall m
+   . MonadEffect m
+  => String  -- CSS selector for elements to sync
+  -> m Unit
+syncDOMToData selector = liftEffect $ syncDOMToData_ selector
+
+-- FFI for syncing DOM transforms to __data__
+foreign import syncDOMToData_ :: String -> Effect Unit
 
 -- | Append a single child element to a parent selection
 -- |

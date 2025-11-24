@@ -253,3 +253,18 @@ class (Monad m, SimulationM sel m) <= SimulationM2 sel m | m -> sel where
   -- | Use this after updating data to re-animate the layout.
   -- | You still need to call `start` (from SimulationM) to begin animation.
   reheat :: Number -> m Unit
+
+  -- | Replace all forces with a new set
+  -- |
+  -- | This is the recommended way to change forces between scenes.
+  -- | Removes all existing forces and adds the new ones.
+  -- |
+  -- | Example:
+  -- | ```purescript
+  -- | -- Switch to orbit forces
+  -- | setForces [ collisionForce, clusterXForce, clusterYForce ]
+  -- |
+  -- | -- Switch to force graph
+  -- | setForces [ chargeForce, collisionForce, linksForce, centerForce ]
+  -- | ```
+  setForces :: forall a. Array (Force (SimulationNode a)) -> m Unit
