@@ -19448,17 +19448,29 @@
 
   // output/Component.CodeExplorerV2.Forces/index.js
   var map34 = /* @__PURE__ */ map(functorMaybe);
+  var treeParentsOnly = /* @__PURE__ */ (function() {
+    var isTreeParent2 = function(d19) {
+      if (d19.links.treeChildren.length === 0) {
+        return false;
+      }
+      ;
+      return true;
+    };
+    return new Just(new ForceFilter("tree parents", function($10) {
+      return isTreeParent2($10);
+    }));
+  })();
   var packagesOnly = /* @__PURE__ */ (function() {
-    return new Just(new ForceFilter("packages", function($6) {
-      return isPackage($6);
+    return new Just(new ForceFilter("packages", function($11) {
+      return isPackage($11);
     }));
   })();
   var packageOrbit = /* @__PURE__ */ (function() {
     return createForce("packageOrbit")(new RegularForce(ForceRadial.value))(packagesOnly)([strengthVal(0.7), xVal(0), yVal(0), radiusVal(900)]);
   })();
   var modulesOnly = /* @__PURE__ */ (function() {
-    return new Just(new ForceFilter("modules", function($7) {
-      return isModule($7);
+    return new Just(new ForceFilter("modules", function($12) {
+      return isModule($12);
     }));
   })();
   var moduleOrbit = /* @__PURE__ */ (function() {
@@ -19478,6 +19490,16 @@
   var collision = /* @__PURE__ */ (function() {
     return createForce("collision")(new RegularForce(ForceCollide.value))(allNodes)([radiusVal(20)]);
   })();
+  var collideRadiusBig = function(d19) {
+    return d19.r + 10;
+  };
+  var collide2 = /* @__PURE__ */ (function() {
+    return createForce("collide2")(new RegularForce(ForceCollide.value))(allNodes)([strengthVal(0.7), radiusFn(function(d19) {
+      return function(v) {
+        return collideRadiusBig(d19);
+      };
+    })]);
+  })();
   var clusterY = /* @__PURE__ */ (function() {
     return createForce("clusterY_M")(new RegularForce(ForceY.value))(modulesOnly)([strengthVal(0.2), yFn(function(d19) {
       return function(v) {
@@ -19492,13 +19514,22 @@
       };
     })]);
   })();
+  var chargeTree = /* @__PURE__ */ (function() {
+    return createForce("chargetree")(new RegularForce(ForceManyBody.value))(treeParentsOnly)([strengthVal(-100), thetaVal(0.9), distanceMinVal(1), distanceMaxVal(400)]);
+  })();
+  var charge2 = /* @__PURE__ */ (function() {
+    return createForce("charge2")(new RegularForce(ForceManyBody.value))(allNodes)([strengthVal(-100), thetaVal(0.9), distanceMinVal(1), distanceMaxVal(400)]);
+  })();
   var charge = /* @__PURE__ */ (function() {
     return createForce("charge")(new RegularForce(ForceManyBody.value))(allNodes)([strengthVal(300)]);
+  })();
+  var centerStrong = /* @__PURE__ */ (function() {
+    return createForce("centerStrong")(new RegularForce(ForceCenter.value))(allNodes)([xVal(0), yVal(0), strengthVal(0.5)]);
   })();
   var center2 = /* @__PURE__ */ (function() {
     return createForce("center")(new RegularForce(ForceCenter.value))(allNodes)([xVal(0), yVal(0), strengthVal(0.1)]);
   })();
-  var allForces = [charge, collision, center2, links, packageOrbit, moduleOrbit, clusterX, clusterY];
+  var allForces = [charge, collision, center2, centerStrong, links, collide2, charge2, chargeTree, packageOrbit, moduleOrbit, clusterX, clusterY];
 
   // output/Component.CodeExplorerV2.Scenes.Types/index.js
   var Orbit = /* @__PURE__ */ (function() {
@@ -19567,10 +19598,10 @@
     return {
       nodeFilter: isUsedModule,
       linkFilter: new Just(function(l) {
-        return eq4(l.linktype)(M2M_Graph.value);
+        return eq4(l.linktype)(M2M_Tree.value);
       }),
       nodeInitializers: [unpinAllNodes],
-      forces: [charge, collision, links, center2],
+      forces: [centerStrong, collide2, chargeTree, charge2, links],
       linkStyle: GraphStraight.value,
       domSync: new Just("g.nodes > g")
     };
@@ -24565,13 +24596,13 @@
                 return discard122(clear5(".links"))(function() {
                   return discard122(setForces2(forceGraphConfig.forces))(function() {
                     return bind89(selectSimulationGroups2)(function(groups) {
-                      var graphLinks = filter(function(l) {
-                        return eq6(l.linktype)(M2M_Graph.value);
+                      var treeLinks = filter(function(l) {
+                        return eq6(l.linktype)(M2M_Tree.value);
                       })(model.links);
-                      return discard122(log10("Graph links: " + show19(length(graphLinks))))(function() {
+                      return discard122(log10("Tree links for force layout: " + show19(length(treeLinks))))(function() {
                         var updateConfig = {
                           allNodes: model.nodes,
-                          allLinks: graphLinks,
+                          allLinks: treeLinks,
                           nodeFilter: forceGraphConfig.nodeFilter,
                           linkFilter: forceGraphConfig.linkFilter,
                           nodeInitializers: forceGraphConfig.nodeInitializers,
@@ -51122,7 +51153,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return v.x;
     })(toMaybe(d19.gridXY)));
   };
-  var collideRadiusBig = function(d19) {
+  var collideRadiusBig2 = function(d19) {
     return d19.r + 10;
   };
   var collideRadius = function(d19) {
@@ -51155,7 +51186,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       };
     })]), createForce("collide2")(new RegularForce(ForceCollide.value))(allNodes)([strengthVal(0.7), radiusFn(function(d19) {
       return function(v) {
-        return collideRadiusBig(d19);
+        return collideRadiusBig2(d19);
       };
     })]), createForce("charge1")(new RegularForce(ForceManyBody.value))(allNodes)([strengthVal(-50), thetaVal(0.9), distanceMinVal(1), distanceMaxVal(infinity)]), createForce("charge2")(new RegularForce(ForceManyBody.value))(allNodes)([strengthVal(-100), thetaVal(0.9), distanceMinVal(1), distanceMaxVal(400)]), createForce("chargetree")(new RegularForce(ForceManyBody.value))(treeExceptLeaves)([strengthVal(-100), thetaVal(0.9), distanceMinVal(1), distanceMaxVal(400)]), createForce("clusterx_M")(new RegularForce(ForceX.value))(modulesOnly2)([strengthVal(0.2), xFn(function(d19) {
       return function(v) {

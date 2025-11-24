@@ -213,14 +213,14 @@ transitionToForceGraph model = do
 
   groups <- selectSimulationGroups
 
-  -- Use graph links
-  let graphLinks = Array.filter (\l -> l.linktype == M2M_Graph) model.links
-  log $ "Graph links: " <> show (Array.length graphLinks)
+  -- Use tree links (spanning tree, not all dependencies)
+  let treeLinks = Array.filter (\l -> l.linktype == M2M_Tree) model.links
+  log $ "Tree links for force layout: " <> show (Array.length treeLinks)
 
   let updateConfig :: DeclarativeUpdateConfig NodeRow Int SpagoLinkData
       updateConfig =
         { allNodes: model.nodes
-        , allLinks: graphLinks
+        , allLinks: treeLinks
         , nodeFilter: forceGraphConfig.nodeFilter
         , linkFilter: forceGraphConfig.linkFilter
         , nodeInitializers: forceGraphConfig.nodeInitializers
