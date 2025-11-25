@@ -9,9 +9,13 @@ module Component.CodeExplorerV2 where
 
 import Prelude
 
+import Component.CodeExplorerV2.BubblePackData (loadAndPackModules)
+import Component.CodeExplorerV2.BubblePackRender (renderBubblePacks)
 import Component.CodeExplorerV2.Orchestration as Orchestration
 import Component.CodeExplorerV2.Scenes.Types (Scene(..))
+import Component.ForceControlPanel as ForceControlPanel
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode)
+import Data.Array as Data.Array
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Milliseconds(..), delay)
 import Effect.Aff.Class (class MonadAff)
@@ -24,6 +28,13 @@ import PSD3.CodeExplorer.Data (readModelData)
 import Data.Map as Map
 import PSD3.Internal.Simulation.Types (D3SimulationState_, initialSimulationState)
 import PSD3v2.Interpreter.D3v2 as D3v2
+import Type.Proxy (Proxy(..))
+
+-- | Slot type for child components
+type Slots = ( forcePanel :: H.Slot ForceControlPanel.Query Void Unit )
+
+_forcePanel :: Proxy "forcePanel"
+_forcePanel = Proxy
 
 -- | Component state
 type State =
@@ -36,6 +47,8 @@ data Action
   = Initialize
   | FormTree
   | ActivateForceLayout
+  | ActivateBubblePack
+  | ActivateBubblePackHybrid
 
 -- | Initial simulation state
 initialSimState :: D3SimulationState_ SpagoSimNode
@@ -56,7 +69,7 @@ component =
         }
     }
 
-render :: forall m. State -> H.ComponentHTML Action () m
+render :: forall m. MonadAff m => State -> H.ComponentHTML Action Slots m
 render state =
   HH.div [ HP.class_ (HH.ClassName "code-explorer-v2-page") ]
     [ HH.div [ HP.class_ (HH.ClassName "page-header") ]
@@ -79,6 +92,16 @@ render state =
                     , HE.onClick \_ -> ActivateForceLayout
                     ]
                     [ HH.text "Force Layout" ]
+                , HH.button
+                    [ HP.class_ (HH.ClassName "control-button")
+                    , HE.onClick \_ -> ActivateBubblePack
+                    ]
+                    [ HH.text "Bubble Pack" ]
+                , HH.button
+                    [ HP.class_ (HH.ClassName "control-button")
+                    , HE.onClick \_ -> ActivateBubblePackHybrid
+                    ]
+                    [ HH.text "Hybrid Pack" ]
                 ]
             , HH.p [ HP.class_ (HH.ClassName "scene-status") ]
                 [ HH.text $ "Current: " <> show state.currentScene ]
@@ -91,6 +114,9 @@ render state =
         ]
         []
 
+    -- Force Control Panel (Halogen child component)
+    , HH.slot_ _forcePanel unit ForceControlPanel.component unit
+
     , HH.div [ HP.class_ (HH.ClassName "info-panel") ]
         [ HH.h3_ [ HH.text "Architecture" ]
         , HH.ul_
@@ -102,7 +128,7 @@ render state =
         ]
     ]
 
-handleAction :: forall output m. MonadAff m => Action -> H.HalogenM State Action () output m Unit
+handleAction :: forall output m. MonadAff m => Action -> H.HalogenM State Action Slots output m Unit
 handleAction = case _ of
   Initialize -> do
     log "CodeExplorerV2: Initializing"
@@ -134,6 +160,8 @@ handleAction = case _ of
           Orchestration.transitionToTreeReveal model
 
         H.modify_ \s -> s { simulation = newState.simulation, currentScene = TreeReveal }
+        -- Tell force panel to refresh
+        void $ H.tell _forcePanel unit ForceControlPanel.Refresh
         log "Tree formation started"
 
     pure unit
@@ -159,6 +187,84 @@ handleAction = case _ of
           Orchestration.startSimulation
 
         H.modify_ \s -> s { simulation = newState2.simulation }
+        -- Tell force panel to refresh
+        void $ H.tell _forcePanel unit ForceControlPanel.Refresh
         log "Force layout activated"
+
+    pure unit
+
+  ActivateBubblePack -> do
+    log "CodeExplorerV2: Activating bubble pack"
+    state <- H.get
+    case state.model of
+      Nothing -> log "Error: Model not loaded"
+      Just model -> do
+        -- Load declarations and pack them
+        maybePackedModules <- H.liftAff loadAndPackModules
+
+        case maybePackedModules of
+          Nothing -> log "Error: Failed to load declarations"
+          Just packedModules -> do
+            log $ "Loaded " <> show (Data.Array.length packedModules) <> " packed modules"
+
+            -- Transition to bubble pack
+            newState <- H.liftAff $ D3v2.execD3v2SimM { simulation: state.simulation } do
+              Orchestration.transitionToBubblePack model
+
+            H.modify_ \s -> s { simulation = newState.simulation, currentScene = BubblePack }
+
+            -- Render bubble pack circles using FFI (after DOM is updated)
+            H.liftEffect $ renderBubblePacks packedModules
+            log "Bubble pack circles rendered, waiting before starting simulation..."
+
+            -- Wait 1 second then start simulation
+            H.liftAff $ delay (Milliseconds 1000.0)
+
+            finalState <- H.get
+            newState2 <- H.liftAff $ D3v2.execD3v2SimM { simulation: finalState.simulation } do
+              Orchestration.startSimulation
+
+            H.modify_ \s -> s { simulation = newState2.simulation }
+            -- Tell force panel to refresh
+            void $ H.tell _forcePanel unit ForceControlPanel.Refresh
+            log "Bubble pack activated"
+
+    pure unit
+
+  ActivateBubblePackHybrid -> do
+    log "CodeExplorerV2: Activating hybrid bubble pack"
+    state <- H.get
+    case state.model of
+      Nothing -> log "Error: Model not loaded"
+      Just model -> do
+        -- Load declarations and pack them (only my-project)
+        maybePackedModules <- H.liftAff loadAndPackModules
+
+        case maybePackedModules of
+          Nothing -> log "Error: Failed to load declarations"
+          Just packedModules -> do
+            log $ "Loaded " <> show (Data.Array.length packedModules) <> " packed modules"
+
+            -- Transition to hybrid bubble pack (keeps all nodes, packs only my-project)
+            newState <- H.liftAff $ D3v2.execD3v2SimM { simulation: state.simulation } do
+              Orchestration.transitionToBubblePackHybrid model
+
+            H.modify_ \s -> s { simulation = newState.simulation, currentScene = BubblePack }
+
+            -- Render bubble pack circles for my-project modules only
+            H.liftEffect $ renderBubblePacks packedModules
+            log "Hybrid bubble pack circles rendered, waiting before starting simulation..."
+
+            -- Wait 1 second then start simulation
+            H.liftAff $ delay (Milliseconds 1000.0)
+
+            finalState <- H.get
+            newState2 <- H.liftAff $ D3v2.execD3v2SimM { simulation: finalState.simulation } do
+              Orchestration.startSimulation
+
+            H.modify_ \s -> s { simulation = newState2.simulation }
+            -- Tell force panel to refresh
+            void $ H.tell _forcePanel unit ForceControlPanel.Refresh
+            log "Hybrid bubble pack activated"
 
     pure unit

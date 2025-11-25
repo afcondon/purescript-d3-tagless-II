@@ -13,6 +13,7 @@ data Scene
   = Orbit        -- Packages outer ring, modules clustered
   | TreeReveal   -- Staggered transition to radial tree
   | ForceGraph   -- Force simulation with graph links
+  | BubblePack   -- Modules as bubble packs with nested declarations
 
 derive instance Eq Scene
 
@@ -20,6 +21,7 @@ instance Show Scene where
   show Orbit = "Orbit"
   show TreeReveal = "TreeReveal"
   show ForceGraph = "ForceGraph"
+  show BubblePack = "BubblePack"
 
 -- | Link rendering style
 data LinkStyle

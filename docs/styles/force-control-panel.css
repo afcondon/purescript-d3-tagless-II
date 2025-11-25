@@ -1,0 +1,303 @@
+/* Force Control Panel - Interactive force tuning UI */
+
+.force-control-panel {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 320px;
+  max-height: calc(100vh - 100px);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 12px;
+  z-index: 1000;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.force-control-panel.minimized {
+  width: auto;
+  max-height: none;
+}
+
+.force-panel-header {
+  background: #2c3e50;
+  color: white;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.force-panel-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.force-panel-summary {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.force-panel-body {
+  overflow-y: auto;
+  flex: 1;
+  padding-bottom: 8px;
+}
+
+/* Simulation controls */
+.sim-controls {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f8f9fa;
+}
+
+.sim-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sim-btn.start {
+  background: #27ae60;
+  color: white;
+}
+
+.sim-btn.start:hover {
+  background: #219a52;
+}
+
+.sim-btn.stop {
+  background: #e74c3c;
+  color: white;
+}
+
+.sim-btn.stop:hover {
+  background: #c0392b;
+}
+
+.sim-btn.reset {
+  background: #3498db;
+  color: white;
+}
+
+.sim-btn.reset:hover {
+  background: #2980b9;
+}
+
+/* Force list */
+.force-list {
+  padding: 8px;
+}
+
+/* Individual force item */
+.force-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.force-item.active {
+  border-color: #27ae60;
+}
+
+.force-item.inactive {
+  opacity: 0.6;
+}
+
+.force-item-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  gap: 8px;
+}
+
+.force-toggle {
+  cursor: pointer;
+}
+
+.toggle-indicator {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.force-item.active .toggle-indicator {
+  background: #27ae60;
+  color: white;
+}
+
+.force-item.inactive .toggle-indicator {
+  background: #bdc3c7;
+  color: #7f8c8d;
+}
+
+.force-info {
+  flex: 1;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.force-name {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.force-type {
+  font-size: 10px;
+  color: #7f8c8d;
+  text-transform: uppercase;
+}
+
+.expand-toggle {
+  cursor: pointer;
+  color: #7f8c8d;
+  font-weight: bold;
+  padding: 4px 8px;
+}
+
+.expand-toggle:hover {
+  color: #2c3e50;
+}
+
+/* Force sliders (expanded view) */
+.force-sliders {
+  padding: 12px;
+  background: white;
+  border-top: 1px solid #e0e0e0;
+}
+
+.slider-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.slider-row:last-child {
+  margin-bottom: 0;
+}
+
+.slider-label {
+  width: 70px;
+  font-size: 11px;
+  color: #7f8c8d;
+  flex-shrink: 0;
+}
+
+.slider-input {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #e0e0e0;
+  border-radius: 2px;
+  outline: none;
+}
+
+.slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #3498db;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.slider-input::-webkit-slider-thumb:hover {
+  background: #2980b9;
+}
+
+.slider-input::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #3498db;
+  cursor: pointer;
+  border: none;
+}
+
+.slider-value {
+  width: 50px;
+  text-align: right;
+  font-size: 10px;
+  color: #2c3e50;
+  font-family: 'Monaco', 'Menlo', monospace;
+  flex-shrink: 0;
+}
+
+/* Scrollbar styling */
+.force-panel-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.force-panel-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.force-panel-body::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border-radius: 3px;
+}
+
+.force-panel-body::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+  .force-control-panel {
+    background: rgba(44, 62, 80, 0.95);
+    color: #ecf0f1;
+  }
+
+  .force-item {
+    border-color: #34495e;
+  }
+
+  .force-item-header,
+  .sim-controls {
+    background: #34495e;
+  }
+
+  .force-sliders {
+    background: #2c3e50;
+    border-color: #34495e;
+  }
+
+  .force-name {
+    color: #ecf0f1;
+  }
+
+  .slider-label {
+    color: #95a5a6;
+  }
+
+  .slider-input {
+    background: #34495e;
+  }
+
+  .slider-value {
+    color: #ecf0f1;
+  }
+}

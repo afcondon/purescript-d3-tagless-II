@@ -14,8 +14,8 @@ config =
   { nodeFilter: const true  -- All nodes visible
   , linkFilter: Nothing     -- No links in orbit view
   , nodeInitializers:
-      [ nodesToCircle isPackage 1600.0  -- Packages spread on circle
-      , pinMainAtXY 0.0 0.0             -- Main at center
+      [ nodesToCircle isPackage 1600.0  -- Packages spread on circle, modules get gridXY from packages
+      , pinMainAtXY 0.0 0.0              -- Main at center
       ]
   , forces: [ collision, clusterX, clusterY ]
   , linkStyle: NoLinks

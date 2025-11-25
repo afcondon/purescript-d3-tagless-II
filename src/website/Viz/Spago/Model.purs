@@ -3,8 +3,9 @@ module D3.Viz.Spago.Model where
 import Prelude
 
 import D3.Viz.Spago.Files (D3TreeRow, D3_Radius, EmbeddedData, LinkType(..), NodeType(..), SpagoLink, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
-import Data.Array (foldl, length, mapWithIndex, partition, (:))
+import Data.Array (foldl, length, mapMaybe, mapWithIndex, partition, (:))
 import Data.FoldableWithIndex (foldlWithIndex)
+import Debug (spy)
 import Data.Graph (Graph)
 import Data.Int (floor) as Int
 import Data.Int (toNumber)
@@ -91,6 +92,12 @@ isUsedModule :: SpagoSimNode -> Boolean
 isUsedModule d = case d.nodetype of
   (IsPackage _) -> false
   (IsModule _) -> d.connected
+
+-- | Check if node is a module from my-project (our source code)
+isMyProjectModule :: SpagoSimNode -> Boolean
+isMyProjectModule d = case d.nodetype of
+  (IsPackage _) -> false
+  (IsModule _) -> d.containerName == "my-project" && d.connected
               
 upgradeSpagoNodeData :: M.Map NodeID (Array NodeID) -> SpagoNodeData -> SpagoSimNode
 upgradeSpagoNodeData sourcesMap node = {
@@ -112,7 +119,9 @@ upgradeSpagoNodeData sourcesMap node = {
   , loc          : node.loc
   , name         : node.name
   , nodetype     : node.nodetype
-  , r            : sqrt node.loc
+  , r            : case node.nodetype of
+                     IsPackage _ -> 20.0  -- Fixed size for packages
+                     IsModule _ -> max 5.0 (sqrt node.loc)  -- Modules sized by LOC, min 5
   , treeXY       : (N.null :: N.Nullable PointXY)
   , treeDepth    : (N.null :: N.Nullable Int)
   , gridXY       : (N.null :: N.Nullable PointXY)
@@ -248,25 +257,32 @@ nodesToCircle predicate radius nodes = setPositionByPackage <$> nodes
   where
     partitioned = partition predicate nodes
 
+    -- Map package name to position (use String key since containerID is 0 for all modules)
+    packagePositions :: M.Map String { x :: Number, y :: Number }
     packagePositions = fromFoldable $ positionOnCircle  `mapWithIndex` partitioned.yes
-    
+
     count = length partitioned.yes
     angleStep = if count == 0 then 0.0 else (2.0 * pi) / toNumber count
 
-    positionOnCircle :: Int -> SpagoSimNode -> Tuple Int { x :: Number, y :: Number }
+    positionOnCircle :: Int -> SpagoSimNode -> Tuple String { x :: Number, y :: Number }
     positionOnCircle index node =
       let angle = toNumber index * angleStep
           x = radius * cos angle
           y = radius * sin angle
-      in  Tuple node.containerID { x,y }
+      in  Tuple node.name { x,y }  -- Use package name as key
 
     setPositionByPackage :: SpagoSimNode -> SpagoSimNode
     setPositionByPackage node =
-      let { x, y } = fromMaybe { x: 0.0, y: 0.0 } $ lookup node.containerID packagePositions
-      in 
-      case node.nodetype of 
-        (IsModule _) -> node { x = x, y = y, gridXY = notNull { x, y } } -- start modules at center of their packages, use clusterX_M and clusterY_M forces to keep them near their container 
-        -- (IsModule _) -> node { x = x, y = y, fx = notNull x, fy = notNull y, gridXY = notNull { x, y } } -- start modules at center of their packages, use clusterX_M and clusterY_M forces to keep them near their container 
+      let
+        maybePos = lookup node.containerName packagePositions  -- Look up by containerName
+        { x, y } = fromMaybe { x: 0.0, y: 0.0 } maybePos
+        _ = case node.nodetype, maybePos of
+              IsModule _, Nothing -> spy ("Module " <> node.name <> " container '" <> node.containerName <> "' not found in packagePositions") unit
+              _, _ -> unit
+      in
+      case node.nodetype of
+        (IsModule _) -> node { x = x, y = y, gridXY = notNull { x, y } } -- start modules at center of their packages, use clusterX_M and clusterY_M forces to keep them near their container
+        -- (IsModule _) -> node { x = x, y = y, fx = notNull x, fy = notNull y, gridXY = notNull { x, y } } -- start modules at center of their packages, use clusterX_M and clusterY_M forces to keep them near their container
         (IsPackage _) -> node { x = x, y = y, fx = notNull x, fy = notNull y } -- modified to pin nodes
 
 
@@ -282,6 +298,36 @@ modulesToCircle = nodesToCircle isModule
 pinMainAtXY :: Number -> Number -> Array SpagoSimNode -> Array SpagoSimNode
 pinMainAtXY x y nodes = f <$> nodes
   where f n = if n.name == "PSD3.Main" then n { fx = notNull x, fy = notNull y } else n
+
+-- | Pin modules to their containing package's position
+-- | Assumes packages already have gridXY set (e.g., from nodesToCircle)
+pinModulesToPackages :: Array SpagoSimNode -> Array SpagoSimNode
+pinModulesToPackages nodes = pinModule <$> nodes
+  where
+    -- Build map of package ID -> position
+    packagePositions :: M.Map Int { x :: Number, y :: Number }
+    packagePositions = fromFoldable $ mapMaybe getPackagePos nodes
+
+    getPackagePos :: SpagoSimNode -> Maybe (Tuple Int { x :: Number, y :: Number })
+    getPackagePos node = case node.nodetype of
+      IsPackage _ ->
+        case toMaybe node.gridXY of
+          Just pos -> Just (Tuple node.id pos)
+          Nothing -> Nothing
+      _ -> Nothing
+
+    pinModule :: SpagoSimNode -> SpagoSimNode
+    pinModule node = case node.nodetype of
+      IsModule _ ->
+        case lookup node.containerID packagePositions of
+          Just pos -> node
+            { fx = notNull pos.x
+            , fy = notNull pos.y
+            , x = pos.x
+            , y = pos.y
+            }
+          Nothing -> node  -- No package found, leave as is
+      _ -> node  -- Not a module, leave as is
 
 -- | Position nodes in orbit pattern: packages outer ring, modules inner ring, main pinned center
 -- |

@@ -828,6 +828,8 @@ export function initSimulation_(config) {
     if (true) {
       console.log(`FFI: initSimulation${simulation}`)
     }
+    // Expose simulation to window for force control panel
+    window._psd3_simulation = simulation;
     return simulation
   }
 }
@@ -1114,6 +1116,8 @@ export function putForceInSimulation_(simulation) {
   return label => force => {
     // console.log(`FFI: Putting ${label} force in the simulation`);
     simulation.force(label, force)
+    // Keep window._psd3_simulation updated for ForceControlPanel
+    window._psd3_simulation = simulation;
   }
 }
 // exports.restartLinksForceInSimulation_ = simulation => force => links => {

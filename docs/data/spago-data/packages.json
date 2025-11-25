@@ -11,6 +11,7 @@
       "parallel",
       "partial",
       "prelude",
+      "st",
       "tailrec",
       "transformers",
       "unsafe-coerce"
@@ -52,6 +53,26 @@
       "prelude"
     ]
   },
+  "argonaut-codecs": {
+    "depends": [
+      "argonaut-core",
+      "arrays",
+      "bifunctors",
+      "either",
+      "foldable-traversable",
+      "foreign-object",
+      "identity",
+      "integers",
+      "lists",
+      "maybe",
+      "nonempty",
+      "ordered-collections",
+      "prelude",
+      "record",
+      "strings",
+      "tuples"
+    ]
+  },
   "argonaut-core": {
     "depends": [
       "arrays",
@@ -75,10 +96,12 @@
       "bifunctors",
       "control",
       "foldable-traversable",
+      "functions",
       "maybe",
       "nonempty",
       "partial",
       "prelude",
+      "safe-coerce",
       "st",
       "tailrec",
       "tuples",
@@ -493,6 +516,12 @@
       "prelude"
     ]
   },
+  "indexed-monad": {
+    "depends": [
+      "newtype",
+      "prelude"
+    ]
+  },
   "integers": {
     "depends": [
       "maybe",
@@ -515,6 +544,17 @@
       "functions",
       "integers",
       "maybe",
+      "prelude"
+    ]
+  },
+  "js-promise": {
+    "depends": [
+      "effect",
+      "exceptions",
+      "foldable-traversable",
+      "functions",
+      "maybe",
+      "newtype",
       "prelude"
     ]
   },
@@ -563,56 +603,6 @@
       "prelude"
     ]
   },
-  "my-project": {
-    "depends": [
-      "aff",
-      "affjax",
-      "affjax-web",
-      "argonaut-core",
-      "arrays",
-      "bifunctors",
-      "console",
-      "const",
-      "control",
-      "datetime",
-      "debug",
-      "dom-indexed",
-      "effect",
-      "either",
-      "exceptions",
-      "foldable-traversable",
-      "foreign-object",
-      "functions",
-      "graphs",
-      "halogen",
-      "halogen-subscriptions",
-      "halogen-svg-elems",
-      "halogen-vdom",
-      "html-parser-halogen",
-      "integers",
-      "lists",
-      "maybe",
-      "newtype",
-      "nullable",
-      "numbers",
-      "ordered-collections",
-      "prelude",
-      "profunctor",
-      "profunctor-lenses",
-      "random",
-      "read",
-      "routing",
-      "strings",
-      "tailrec",
-      "transformers",
-      "tuples",
-      "typelevel-prelude",
-      "unsafe-coerce",
-      "web-dom",
-      "web-events",
-      "web-html"
-    ]
-  },
   "newtype": {
     "depends": [
       "prelude",
@@ -655,13 +645,14 @@
       "arrays",
       "control",
       "foldable-traversable",
+      "functions",
       "gen",
       "lists",
       "maybe",
       "newtype",
       "partial",
       "prelude",
-      "st",
+      "safe-coerce",
       "tailrec",
       "tuples",
       "unfoldable"
@@ -729,6 +720,61 @@
       "safe-coerce",
       "transformers",
       "tuples"
+    ]
+  },
+  "psd3": {
+    "depends": [
+      "aff",
+      "affjax",
+      "affjax-web",
+      "argonaut-core",
+      "arrays",
+      "bifunctors",
+      "console",
+      "contravariant",
+      "control",
+      "datetime",
+      "debug",
+      "dom-indexed",
+      "effect",
+      "either",
+      "enums",
+      "exceptions",
+      "foldable-traversable",
+      "foreign",
+      "foreign-object",
+      "functions",
+      "graphs",
+      "halogen",
+      "halogen-subscriptions",
+      "halogen-vdom",
+      "html-parser-halogen",
+      "integers",
+      "lists",
+      "maybe",
+      "newtype",
+      "nullable",
+      "numbers",
+      "ordered-collections",
+      "partial",
+      "prelude",
+      "profunctor",
+      "profunctor-lenses",
+      "random",
+      "read",
+      "refs",
+      "routing",
+      "strings",
+      "tailrec",
+      "transformers",
+      "tuples",
+      "typelevel-prelude",
+      "unsafe-coerce",
+      "unsafe-reference",
+      "web-dom",
+      "web-events",
+      "web-html",
+      "web-uievents"
     ]
   },
   "random": {
@@ -867,6 +913,7 @@
       "maybe",
       "newtype",
       "prelude",
+      "st",
       "tailrec",
       "tuples",
       "unfoldable"
@@ -917,6 +964,9 @@
   },
   "web-clipboard": {
     "depends": [
+      "effect",
+      "functions",
+      "js-promise",
       "maybe",
       "nullable",
       "prelude",

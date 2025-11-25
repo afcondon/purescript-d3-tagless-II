@@ -42,6 +42,10 @@ gridPointY d = fromMaybe d.y $ map _.y $ toMaybe d.gridXY
 collideRadiusBig :: SpagoSimNode -> Number
 collideRadiusBig d = d.r + 10.0
 
+-- Helper for bubble pack collision radius (larger padding)
+collideRadiusPack :: SpagoSimNode -> Number
+collideRadiusPack d = d.r + 5.0
+
 -- | Charge force - nodes repel each other
 charge :: Force SpagoSimNode
 charge = createForce "charge" (RegularForce ForceManyBody) allNodes [ F.strengthVal 300.0 ]
@@ -71,6 +75,16 @@ collide2 = createForce "collide2" (RegularForce ForceCollide) allNodes
 charge2 :: Force SpagoSimNode
 charge2 = createForce "charge2" (RegularForce ForceManyBody) allNodes
   [ F.strengthVal (-100.0), F.thetaVal 0.9, F.distanceMinVal 1.0, F.distanceMaxVal 400.0 ]
+
+-- | Collision force for bubble packs - uses actual node radius
+collidePack :: Force SpagoSimNode
+collidePack = createForce "collidePack" (RegularForce ForceCollide) allNodes
+  [ F.strengthVal 1.0, F.radiusFn (\d _ -> collideRadiusPack (unsafeCoerce d)), F.iterationsVal 3.0 ]
+
+-- | Stronger charge force for bubble packs
+chargePack :: Force SpagoSimNode
+chargePack = createForce "chargePack" (RegularForce ForceManyBody) allNodes
+  [ F.strengthVal (-200.0), F.thetaVal 0.9, F.distanceMinVal 1.0, F.distanceMaxVal 600.0 ]
 
 -- | Charge force only on tree parent nodes - spreads tree structure
 chargeTree :: Force SpagoSimNode
@@ -112,4 +126,6 @@ allForces =
   , moduleOrbit
   , clusterX
   , clusterY
+  , collidePack
+  , chargePack
   ]

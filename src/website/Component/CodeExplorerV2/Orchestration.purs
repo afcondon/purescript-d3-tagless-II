@@ -5,7 +5,9 @@ module Component.CodeExplorerV2.Orchestration where
 
 import Prelude
 
+import Component.CodeExplorerV2.BubblePackData (PackedModule, RenderCircle, getModuleCircles, getPackedRadius)
 import Component.CodeExplorerV2.Forces (allForces)
+import Component.CodeExplorerV2.Scenes.BubblePack as BubblePack
 import Component.CodeExplorerV2.Scenes.ForceGraph as ForceGraph
 import Component.CodeExplorerV2.Scenes.Orbit as Orbit
 import Component.CodeExplorerV2.Scenes.TreeReveal as TreeReveal
@@ -15,9 +17,10 @@ import D3.Viz.Spago.Files (LinkType(..), SpagoLink, SpagoLinkData, SpagoNodeRow,
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isUsedModule, treeDepthMultiplier)
 import D3.Viz.Spago.Render (spagoRenderCallbacks)
 import Data.Array (filter, length) as Array
+import Data.Array as Array
 import Data.Int (toNumber)
 import Data.Map as Map
-import Data.Foldable (traverse_)
+import Data.Foldable (for_, traverse_)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Nullable (toMaybe)
 import Data.Number (cos, sin)
@@ -28,8 +31,9 @@ import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Class.Console (log)
 import PSD3.Data.Node (D3_FocusXY)
 import PSD3.Internal.FFI (keyIsID_)
-import PSD3.Internal.Simulation.Types (Force)
-import PSD3v2.Attribute.Types (d, fill, opacity, stroke, strokeWidth, transform)
+import PSD3.Internal.Simulation.Types (Force(..))
+import Data.String (joinWith)
+import PSD3v2.Attribute.Types (cx, cy, d, fill, opacity, radius, stroke, strokeWidth, transform)
 import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom, ScaleExtent(..))
 import PSD3v2.Capabilities.Selection (class SelectionM, append, appendChild, clear, on, joinDataWithKey, select, selectAllWithData)
 import PSD3v2.Capabilities.Simulation (class SimulationM2, init, setForces, start, stop)
@@ -50,6 +54,17 @@ configFor :: Scene -> SceneConfig
 configFor Orbit = Orbit.config
 configFor TreeReveal = TreeReveal.config
 configFor ForceGraph = ForceGraph.config
+configFor BubblePack = BubblePack.config
+
+-- | Extract force name from Force
+forceName :: forall d. Force d -> String
+forceName (Force f) = f.name
+
+-- | Log active forces for a scene
+logActiveForces :: forall m. MonadEffect m => String -> Array (Force SpagoSimNode) -> m Unit
+logActiveForces sceneName forces = do
+  let names = map forceName forces
+  log $ "Scene " <> sceneName <> " active forces: [" <> joinWith ", " names <> "]"
 
 -- | Initialize the visualization (first render)
 initialize :: forall m.
@@ -107,6 +122,7 @@ initialize model selector = do
         }
 
   setForces orbitConfig.forces
+  logActiveForces "Orbit" orbitConfig.forces
 
   genericUpdateSimulation
     groups
@@ -210,6 +226,7 @@ transitionToForceGraph model = do
 
   -- Set forces for ForceGraph scene
   setForces forceGraphConfig.forces
+  logActiveForces "ForceGraph" forceGraphConfig.forces
 
   groups <- selectSimulationGroups
 
@@ -239,6 +256,177 @@ transitionToForceGraph model = do
     spagoRenderCallbacks
 
   log "CodeExplorerV2: Force graph configured (call start after delay)"
+
+-- | Transition to bubble pack (my-project modules with packed circles)
+transitionToBubblePack :: forall m.
+  Bind m =>
+  MonadEffect m =>
+  SelectionM D3v2Selection_ m =>
+  SimulationM2 (D3v2Selection_ SBoundOwns Element) m =>
+  SpagoModel ->
+  m Unit
+transitionToBubblePack model = do
+  log "CodeExplorerV2: Transitioning to BubblePack"
+
+  -- Get scene config
+  let bubblePackConfig = configFor BubblePack
+
+  -- Sync DOM positions to data if configured
+  traverse_ syncDOMToData bubblePackConfig.domSync
+
+  -- Clear existing links
+  clear ".links"
+
+  -- Set forces for BubblePack scene
+  setForces bubblePackConfig.forces
+  logActiveForces "BubblePack" bubblePackConfig.forces
+
+  groups <- selectSimulationGroups
+
+  -- Filter to tree links between my-project modules
+  let treeLinks = Array.filter (\l -> l.linktype == M2M_Tree) model.links
+  log $ "BubblePack links: " <> show (Array.length treeLinks)
+
+  let updateConfig :: DeclarativeUpdateConfig NodeRow Int SpagoLinkData
+      updateConfig =
+        { allNodes: model.nodes
+        , allLinks: treeLinks
+        , nodeFilter: bubblePackConfig.nodeFilter
+        , linkFilter: bubblePackConfig.linkFilter
+        , nodeInitializers: bubblePackConfig.nodeInitializers
+        , activeForces: Nothing
+        , config: Nothing
+        }
+
+  genericUpdateSimulation
+    groups
+    Group
+    Path
+    updateConfig
+    _.id
+    keyIsID_
+    graphSceneAttributes
+    spagoRenderCallbacks
+
+  log "CodeExplorerV2: BubblePack configured (call start after delay)"
+
+-- | Transition to hybrid bubble pack (all nodes visible, only my-project packed)
+transitionToBubblePackHybrid :: forall m.
+  Bind m =>
+  MonadEffect m =>
+  SelectionM D3v2Selection_ m =>
+  SimulationM2 (D3v2Selection_ SBoundOwns Element) m =>
+  SpagoModel ->
+  m Unit
+transitionToBubblePackHybrid model = do
+  log "CodeExplorerV2: Transitioning to Hybrid BubblePack"
+
+  -- Use hybrid config (keeps all nodes, packs only my-project)
+  let bubblePackConfig = BubblePack.configHybrid
+
+  -- Sync DOM positions to data if configured
+  traverse_ syncDOMToData bubblePackConfig.domSync
+
+  -- Clear existing links
+  clear ".links"
+
+  -- Set forces for BubblePack scene
+  setForces bubblePackConfig.forces
+  logActiveForces "BubblePackHybrid" bubblePackConfig.forces
+
+  groups <- selectSimulationGroups
+
+  -- Use all tree links (not just my-project)
+  let treeLinks = Array.filter (\l -> l.linktype == M2M_Tree) model.links
+  log $ "BubblePack Hybrid links: " <> show (Array.length treeLinks)
+
+  let updateConfig :: DeclarativeUpdateConfig NodeRow Int SpagoLinkData
+      updateConfig =
+        { allNodes: model.nodes
+        , allLinks: treeLinks
+        , nodeFilter: bubblePackConfig.nodeFilter  -- Keep all nodes (\_ -> true)
+        , linkFilter: bubblePackConfig.linkFilter
+        , nodeInitializers: bubblePackConfig.nodeInitializers
+        , activeForces: Nothing
+        , config: Nothing
+        }
+
+  genericUpdateSimulation
+    groups
+    Group
+    Path
+    updateConfig
+    _.id
+    keyIsID_
+    graphSceneAttributes
+    spagoRenderCallbacks
+
+  log "CodeExplorerV2: BubblePack Hybrid configured (call start after delay)"
+
+-- | Render bubble pack circles inside each module node
+-- | Takes pre-loaded pack data and replaces simple circles with nested packs
+renderBubblePackCircles :: forall m.
+  Bind m =>
+  MonadEffect m =>
+  SelectionM D3v2Selection_ m =>
+  Array PackedModule ->
+  m Unit
+renderBubblePackCircles packedModules = do
+  log $ "Rendering bubble pack circles for " <> show (Array.length packedModules) <> " modules"
+
+  -- Build a map from module name to packed circles
+  let packMap = Map.fromFoldable $ map (\pm -> Tuple pm.name (getModuleCircles pm)) packedModules
+
+  -- For each module, select its node group and replace the circle with nested circles
+  for_ packedModules \pm -> do
+    let circles = getModuleCircles pm
+        outerRadius = getPackedRadius pm
+
+    log $ "  " <> pm.name <> ": " <> show (Array.length circles) <> " circles, r=" <> show outerRadius
+
+    -- Select the node group by module name
+    -- D3 stores data in __data__, we need to select by the node's name property
+    -- For now, use selectAll and filter - this is a simplified approach
+    nodesGroup <- select "g.nodes"
+
+    -- Join circle data to create circles for this module
+    -- We need a unique key for each circle - use module name + index
+    let circlesWithKey = Array.mapWithIndex (\i c -> { circle: c, key: pm.name <> "-" <> show i }) circles
+
+    JoinResult circleJoin <- joinDataWithKey circlesWithKey _.key "circle.pack-circle" nodesGroup
+
+    -- Append new circles
+    let circleData :: { circle :: RenderCircle, key :: String } -> RenderCircle
+        circleData d = d.circle
+
+    _ <- append Circle
+      [ cx (\d -> (circleData d).x)
+      , cy (\d -> (circleData d).y)
+      , radius (\d -> (circleData d).r)
+      , fill (\d -> depthToFill (circleData d).depth)
+      , stroke (\d -> depthToStroke (circleData d).depth)
+      , strokeWidth (\d -> if (circleData d).depth == 0 then 1.5 else 0.5)
+      , opacity (\d -> if (circleData d).depth == 0 then 0.3 else 0.7)
+      ]
+      circleJoin.enter
+
+    pure unit
+
+  log "CodeExplorerV2: Bubble pack circles rendered"
+
+  where
+    -- Colors by depth level
+    depthToFill :: Int -> String
+    depthToFill depth = case depth of
+      0 -> "#e0e0e0"  -- Module (outer) - light gray
+      1 -> "#4a90d9"  -- Category - blue
+      _ -> "#2d5a87"  -- Declaration - dark blue
+
+    depthToStroke :: Int -> String
+    depthToStroke depth = case depth of
+      0 -> "#999"     -- Module outline
+      1 -> "#3a7bc8"  -- Category
+      _ -> "#1d4a77"  -- Declaration
 
 -- | Start the simulation
 startSimulation :: forall m.
