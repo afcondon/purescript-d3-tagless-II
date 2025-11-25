@@ -2865,19 +2865,19 @@
       "path": "src/website/Component/CodeExplorerV2/BubblePackRender.purs"
     },
     {
-      "loc": 209,
+      "loc": 270,
       "path": "src/website/Component/CodeExplorerV2/CodeExplorerV2.purs"
     },
     {
-      "loc": 115,
+      "loc": 131,
       "path": "src/website/Component/CodeExplorerV2/Forces.purs"
     },
     {
-      "loc": 406,
+      "loc": 473,
       "path": "src/website/Component/CodeExplorerV2/Orchestration.purs"
     },
     {
-      "loc": 23,
+      "loc": 36,
       "path": "src/website/Component/CodeExplorerV2/Scenes/BubblePack.purs"
     },
     {
@@ -2903,6 +2903,10 @@
     {
       "loc": 225,
       "path": "src/website/Component/ExamplesGallery.purs"
+    },
+    {
+      "loc": 330,
+      "path": "src/website/Component/ForceControlPanel.purs"
     },
     {
       "loc": 161,
@@ -3545,7 +3549,7 @@
       "path": "src/website/Viz/Spago/Highlight.purs"
     },
     {
-      "loc": 614,
+      "loc": 654,
       "path": "src/website/Viz/Spago/Model.purs"
     },
     {

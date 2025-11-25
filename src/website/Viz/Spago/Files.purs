@@ -7,11 +7,12 @@ import PSD3.Internal.Types (PointXY)
 import PSD3.Data.Node (D3_FocusXY, D3_ID, D3_VxyFxy, D3_XY, NodeID)
 import PSD3.Data.Graph (buildGraphModel, getLinksTo)
 import Unsafe.Coerce (unsafeCoerce)
-import Data.Array (catMaybes, foldl, groupBy, length, range, sortBy, zip, (!!), (:))
+import Data.Array (catMaybes, foldl, groupBy, length, range, sortBy, take, zip, (!!), (:))
 import Data.Foldable (sum)
 import Data.Map as M
 import Data.Maybe (fromMaybe, Maybe(..))
 import Data.Nullable (Nullable, null)
+import Data.String (Pattern(..), split, joinWith, take, length) as String
 import Data.String (Pattern(..), split)
 import Data.Tuple (Tuple(..))
 import Type.Row (type (+))
@@ -134,11 +135,24 @@ type SpagoDataRecord = Record SpagoDataRow
 getGraphJSONData :: Spago_Raw_JSON_ -> Spago_Cooked_JSON
 getGraphJSONData { packages, modules, lsDeps, loc } = do
   let
+    -- | Strip version suffix from package name (e.g., "aff-7.1.0" -> "aff")
+    stripVersion :: String -> String
+    stripVersion pkgName =
+      let parts = String.split (Pattern "-") pkgName
+          lastPart = parts !! (length parts - 1)
+      in case lastPart of
+        Just last ->
+          if String.take 1 last >= "0" && String.take 1 last <= "9" then
+            String.joinWith "-" (take (length parts - 1) parts)
+          else
+            pkgName
+        Nothing -> pkgName
+
     -- LOC is now already attached to modules from JS, just need to add package info
     addPackageInfo :: ModuleJSON -> ModuleJSONP
     addPackageInfo { key, depends, path, loc: locValue } = { key, depends, path, loc: locValue, package }
       where
-        package = fromMaybe "" packageName
+        package = stripVersion $ fromMaybe "" packageName  -- Strip version for LOC rollup to work
         packageName :: Maybe String
         packageName = do
           let pieces = split (Pattern "/") path
@@ -146,9 +160,9 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
           packageString <- pieces !! 1
           case root of
             ".spago" ->
-              -- Handle both .spago/p/pkg/hash and .spago/pkg/version formats
+              -- Handle both .spago/p/pkg-version/hash and .spago/pkg/version formats
               if packageString == "p"
-                then pieces !! 2  -- .spago/p/aff/hash -> aff
+                then pieces !! 2  -- .spago/p/aff-7.1.0/hash -> aff-7.1.0 (will be stripped)
                 else Just packageString  -- .spago/aff/version -> aff
             "src"    -> Just "my-project"  -- hardcoded for this project's source files
             _ -> Nothing
@@ -183,12 +197,16 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
 
     addRollUpLOC :: PackageJSONC -> PackageJSONCL
     addRollUpLOC { key, depends, contains } = { key, depends, contains, loc: (fromMaybe 0.0 $ M.lookup key packageLOCMap) }
-       
+
+    -- Add synthetic "my-project" package for source modules
+    myProjectPackage :: PackageJSON
+    myProjectPackage = { key: "my-project", depends: [] }
+
     packagesCL :: Array PackageJSONCL
-    packagesCL = (addRollUpLOC <<< addContains) <$> packages
+    packagesCL = (addRollUpLOC <<< addContains) <$> (packages <> [myProjectPackage])
 
     -- | Now we have everything needed to make the Model: Modules + package + LOC, Packages + contains + loc
-    names = (_.key <$> modules) <> (_.key <$> packages)
+    names = (_.key <$> modules) <> (_.key <$> packages) <> ["my-project"]
     ids   = 0 `range` ((length names) - 1 ) -- we need a zero-based index for the nodes in D3, so our id's start at 0
 
     -- | NB discards duplicates but should be impossible that there are any
@@ -203,8 +221,8 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
       let id = getId m.key
       { id           : id
       , name         : m.key
-      , containerID  : getId m.package
-      , containerName: m.package
+      , containerID  : getId m.package  -- m.package already has version stripped by addPackageInfo
+      , containerName: m.package  -- Already stripped
       , loc          : m.loc
       , nodetype     : IsModule m.path
       , inSim        : true

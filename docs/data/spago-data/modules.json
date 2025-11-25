@@ -164,6 +164,7 @@
       "Component.CodeExplorerV2.BubblePackRender",
       "Component.CodeExplorerV2.Orchestration",
       "Component.CodeExplorerV2.Scenes.Types",
+      "Component.ForceControlPanel",
       "D3.Viz.Spago.Model",
       "Data.Array",
       "Data.Maybe",
@@ -177,7 +178,8 @@
       "PSD3.CodeExplorer.Data",
       "Data.Map",
       "PSD3.Internal.Simulation.Types",
-      "PSD3v2.Interpreter.D3v2"
+      "PSD3v2.Interpreter.D3v2",
+      "Type.Proxy"
     ],
     "package": "psd3",
     "path": "src/website/Component/CodeExplorerV2/CodeExplorerV2.purs"
@@ -257,6 +259,7 @@
       "PSD3.Data.Node",
       "PSD3.Internal.FFI",
       "PSD3.Internal.Simulation.Types",
+      "Data.String",
       "PSD3v2.Attribute.Types",
       "PSD3v2.Behavior.Types",
       "PSD3v2.Capabilities.Selection",
@@ -378,6 +381,27 @@
     ],
     "package": "psd3",
     "path": "src/website/Component/ExamplesGallery.purs"
+  },
+  "Component.ForceControlPanel": {
+    "depends": [
+      "Prelude",
+      "Data.Array",
+      "Data.Maybe",
+      "Data.Nullable",
+      "Data.Set",
+      "Data.String",
+      "Data.Time.Duration",
+      "Effect",
+      "Effect.Aff",
+      "Effect.Aff.Class",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Events",
+      "Halogen.HTML.Properties"
+    ],
+    "package": "psd3",
+    "path": "src/website/Component/ForceControlPanel.purs"
   },
   "Component.GeneralUpdatePattern": {
     "depends": [
@@ -2849,6 +2873,7 @@
       "D3.Viz.Spago.Files",
       "Data.Array",
       "Data.FoldableWithIndex",
+      "Debug",
       "Data.Graph",
       "Data.Int",
       "Data.Int",

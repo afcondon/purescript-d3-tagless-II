@@ -119,9 +119,7 @@ upgradeSpagoNodeData sourcesMap node = {
   , loc          : node.loc
   , name         : node.name
   , nodetype     : node.nodetype
-  , r            : case node.nodetype of
-                     IsPackage _ -> 20.0  -- Fixed size for packages
-                     IsModule _ -> max 5.0 (sqrt node.loc)  -- Modules sized by LOC, min 5
+  , r            : max 5.0 (sqrt node.loc)  -- Size by LOC with minimum radius
   , treeXY       : (N.null :: N.Nullable PointXY)
   , treeDepth    : (N.null :: N.Nullable Int)
   , gridXY       : (N.null :: N.Nullable PointXY)
@@ -257,27 +255,27 @@ nodesToCircle predicate radius nodes = setPositionByPackage <$> nodes
   where
     partitioned = partition predicate nodes
 
-    -- Map package name to position (use String key since containerID is 0 for all modules)
-    packagePositions :: M.Map String { x :: Number, y :: Number }
+    -- Map package ID to position (containerID now set correctly after stripVersion fix)
+    packagePositions :: M.Map Int { x :: Number, y :: Number }
     packagePositions = fromFoldable $ positionOnCircle  `mapWithIndex` partitioned.yes
 
     count = length partitioned.yes
     angleStep = if count == 0 then 0.0 else (2.0 * pi) / toNumber count
 
-    positionOnCircle :: Int -> SpagoSimNode -> Tuple String { x :: Number, y :: Number }
+    positionOnCircle :: Int -> SpagoSimNode -> Tuple Int { x :: Number, y :: Number }
     positionOnCircle index node =
       let angle = toNumber index * angleStep
           x = radius * cos angle
           y = radius * sin angle
-      in  Tuple node.name { x,y }  -- Use package name as key
+      in  Tuple node.id { x,y }  -- Map by package node ID
 
     setPositionByPackage :: SpagoSimNode -> SpagoSimNode
     setPositionByPackage node =
       let
-        maybePos = lookup node.containerName packagePositions  -- Look up by containerName
+        maybePos = lookup node.containerID packagePositions  -- Look up by containerID
         { x, y } = fromMaybe { x: 0.0, y: 0.0 } maybePos
         _ = case node.nodetype, maybePos of
-              IsModule _, Nothing -> spy ("Module " <> node.name <> " container '" <> node.containerName <> "' not found in packagePositions") unit
+              IsModule _, Nothing -> spy ("Module " <> node.name <> " containerID " <> show node.containerID <> " not found in packagePositions") unit
               _, _ -> unit
       in
       case node.nodetype of

@@ -91,10 +91,10 @@ initialize model selector = do
   -- Create simulation container groups
   groups <- setupSimulationGroups inner
 
-  -- Initialize simulation with all forces
+  -- Initialize simulation with all forces (but no nodes yet - they'll be added by genericUpdateSimulation with initializers applied)
   _ <- init
-    { nodes: model.nodes
-    , links: model.links
+    { nodes: []  -- Empty - nodes will be added by genericUpdateSimulation with nodeInitializers applied
+    , links: []  -- Empty - links will be added by scene config
     , forces: allForces
     , activeForces: Set.fromFoldable ["collision", "clusterX_M", "clusterY_M"]
     , config:

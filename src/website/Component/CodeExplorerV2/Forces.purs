@@ -38,7 +38,11 @@ gridPointX d = fromMaybe d.x $ map _.x $ toMaybe d.gridXY
 gridPointY :: SpagoSimNode -> Number
 gridPointY d = fromMaybe d.y $ map _.y $ toMaybe d.gridXY
 
--- Helper for collision radius
+-- Helper for collision radius - use node's actual radius with padding
+collideRadius :: SpagoSimNode -> Number
+collideRadius d = d.r + 2.0
+
+-- Helper for collision radius with extra space
 collideRadiusBig :: SpagoSimNode -> Number
 collideRadiusBig d = d.r + 10.0
 
@@ -50,9 +54,9 @@ collideRadiusPack d = d.r + 5.0
 charge :: Force SpagoSimNode
 charge = createForce "charge" (RegularForce ForceManyBody) allNodes [ F.strengthVal 300.0 ]
 
--- | Collision force - prevents overlap
+-- | Collision force - prevents overlap, uses each node's actual radius
 collision :: Force SpagoSimNode
-collision = createForce "collision" (RegularForce ForceCollide) allNodes [ F.radiusVal 20.0 ]
+collision = createForce "collision" (RegularForce ForceCollide) allNodes [ F.radiusFn (\d _ -> collideRadius (unsafeCoerce d)) ]
 
 -- | Center force - pulls toward origin
 center :: Force SpagoSimNode
