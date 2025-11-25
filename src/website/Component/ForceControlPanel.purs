@@ -9,7 +9,7 @@ module Component.ForceControlPanel where
 
 import Prelude
 
-import Data.Array (length)
+import Data.Array (find, length)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Nullable (Nullable, toMaybe)
 import Data.Set as Set
@@ -100,6 +100,22 @@ component =
         }
     }
 
+-- | Helper: Update or add a slider value in the array
+updateSliderValue :: String -> String -> Number -> Array { forceName :: String, param :: String, value :: Number } -> Array { forceName :: String, param :: String, value :: Number }
+updateSliderValue forceName param value sliderValues =
+  let
+    -- Check if this force/param combo already exists
+    existing = find (\s -> s.forceName == forceName && s.param == param) sliderValues
+  in case existing of
+    Just _ ->
+      -- Update existing entry
+      map (\s -> if s.forceName == forceName && s.param == param
+                 then s { value = value }
+                 else s) sliderValues
+    Nothing ->
+      -- Add new entry
+      sliderValues <> [{ forceName, param, value }]
+
 handleQuery :: forall a m. MonadAff m => Query a -> H.HalogenM State Action () Void m (Maybe a)
 handleQuery = case _ of
   Refresh a -> do
@@ -135,7 +151,10 @@ handleAction = case _ of
   SetParam forceName param strValue -> do
     let value = unsafeParseFloat strValue
     unless (isNaN value) do
+      -- Update the force in the simulation
       liftEffect $ updateForceParam_ forceName param value
+      -- Update state so the UI displays the new value
+      H.modify_ \s -> s { sliderValues = updateSliderValue forceName param value s.sliderValues }
 
   ToggleMinimized -> do
     H.modify_ \s -> s { isMinimized = not s.isMinimized }
@@ -255,7 +274,7 @@ renderForceItem state name =
       , if isExpanded
           then HH.div
             [ HP.class_ (HH.ClassName "force-sliders") ]
-            (map (renderSlider name) sliders)
+            (map (renderSlider state name) sliders)
           else HH.text ""
       ]
 
@@ -308,23 +327,28 @@ getSlidersForForce forceType = case forceType of
 
   _ -> []
 
-renderSlider :: forall m. String -> SliderConfig -> H.ComponentHTML Action () m
-renderSlider forceName config =
-  HH.div
-    [ HP.class_ (HH.ClassName "slider-row") ]
-    [ HH.label
-        [ HP.class_ (HH.ClassName "slider-label") ]
-        [ HH.text config.label ]
-    , HH.input
-        [ HP.type_ HP.InputRange
-        , HP.class_ (HH.ClassName "slider-input")
-        , HP.min config.min
-        , HP.max config.max
-        , HP.step (HP.Step config.step)
-        , HP.value (show config.defaultValue)
-        , HE.onValueInput \val -> SetParam forceName config.param val
-        ]
-    , HH.span
-        [ HP.class_ (HH.ClassName "slider-value") ]
-        [ HH.text (show config.defaultValue) ]
-    ]
+renderSlider :: forall m. State -> String -> SliderConfig -> H.ComponentHTML Action () m
+renderSlider state forceName config =
+  let
+    -- Look up current value from state, fallback to default
+    currentValue = fromMaybe config.defaultValue $
+      map _.value $ find (\s -> s.forceName == forceName && s.param == config.param) state.sliderValues
+  in
+    HH.div
+      [ HP.class_ (HH.ClassName "slider-row") ]
+      [ HH.label
+          [ HP.class_ (HH.ClassName "slider-label") ]
+          [ HH.text config.label ]
+      , HH.input
+          [ HP.type_ HP.InputRange
+          , HP.class_ (HH.ClassName "slider-input")
+          , HP.min config.min
+          , HP.max config.max
+          , HP.step (HP.Step config.step)
+          , HP.value (show currentValue)
+          , HE.onValueInput \val -> SetParam forceName config.param val
+          ]
+      , HH.span
+          [ HP.class_ (HH.ClassName "slider-value") ]
+          [ HH.text (show currentValue) ]
+      ]

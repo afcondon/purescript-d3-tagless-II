@@ -12,6 +12,7 @@ import PSD3.Internal.Simulation.Types (Force)
 data Scene
   = Orbit        -- Packages outer ring, modules clustered
   | TreeReveal   -- Staggered transition to radial tree
+  | Tree         -- Radial tree with pinned positions
   | ForceGraph   -- Force simulation with graph links
   | BubblePack   -- Modules as bubble packs with nested declarations
 
@@ -20,6 +21,7 @@ derive instance Eq Scene
 instance Show Scene where
   show Orbit = "Orbit"
   show TreeReveal = "TreeReveal"
+  show Tree = "Tree"
   show ForceGraph = "ForceGraph"
   show BubblePack = "BubblePack"
 

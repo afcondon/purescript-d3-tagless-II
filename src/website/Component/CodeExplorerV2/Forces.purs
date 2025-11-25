@@ -43,8 +43,9 @@ collideRadius :: SpagoSimNode -> Number
 collideRadius d = d.r + 2.0
 
 -- Helper for collision radius with extra space
+-- Tuned to +19 for force graph layout
 collideRadiusBig :: SpagoSimNode -> Number
-collideRadiusBig d = d.r + 10.0
+collideRadiusBig d = d.r + 19.0
 
 -- Helper for bubble pack collision radius (larger padding)
 collideRadiusPack :: SpagoSimNode -> Number
@@ -67,13 +68,15 @@ centerStrong :: Force SpagoSimNode
 centerStrong = createForce "centerStrong" (RegularForce ForceCenter) allNodes [ F.xVal 0.0, F.yVal 0.0, F.strengthVal 0.5 ]
 
 -- | Link force - maintains link distances
+-- | Tuned to 40 for force graph layout
 links :: Force SpagoSimNode
-links = createLinkForce allNodes [ F.distanceVal 50.0 ]
+links = createLinkForce allNodes [ F.distanceVal 40.0 ]
 
 -- | Collision force with larger radius for tree layout
+-- | Tuned for force graph: radius +19, strength 0.6
 collide2 :: Force SpagoSimNode
 collide2 = createForce "collide2" (RegularForce ForceCollide) allNodes
-  [ F.strengthVal 0.7, F.radiusFn (\d _ -> collideRadiusBig (unsafeCoerce d)) ]
+  [ F.strengthVal 0.6, F.radiusFn (\d _ -> collideRadiusBig (unsafeCoerce d)) ]
 
 -- | Charge force for tree - repels all nodes with distance limit
 charge2 :: Force SpagoSimNode
@@ -91,9 +94,10 @@ chargePack = createForce "chargePack" (RegularForce ForceManyBody) allNodes
   [ F.strengthVal (-200.0), F.thetaVal 0.9, F.distanceMinVal 1.0, F.distanceMaxVal 600.0 ]
 
 -- | Charge force only on tree parent nodes - spreads tree structure
+-- | Tuned for balanced force graph layout: strength -290, theta 0.8, distanceMin 9, distanceMax 300
 chargeTree :: Force SpagoSimNode
 chargeTree = createForce "chargetree" (RegularForce ForceManyBody) treeParentsOnly
-  [ F.strengthVal (-100.0), F.thetaVal 0.9, F.distanceMinVal 1.0, F.distanceMaxVal 400.0 ]
+  [ F.strengthVal (-290.0), F.thetaVal 0.8, F.distanceMinVal 9.0, F.distanceMaxVal 300.0 ]
 
 -- | Package orbit - radial force for packages
 packageOrbit :: Force SpagoSimNode

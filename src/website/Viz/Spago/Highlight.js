@@ -39,6 +39,11 @@ export function highlightConnected_(node) {
       return d && d.id === node.id;
     });
 
+    // Show label for hovered node only
+    nodeGroups.select('text').classed('show-label', function(d) {
+      return d && d.id === node.id;
+    });
+
     // Dim non-connected nodes
     nodeGroups.classed('dimmed', function(d) {
       return d && d.id !== node.id && !connectedIds.has(d.id);
@@ -51,4 +56,5 @@ export function clearHighlights_() {
   d3.selectAll('.highlighted-connection').classed('highlighted-connection', false);
   d3.selectAll('.highlighted-source').classed('highlighted-source', false);
   d3.selectAll('.dimmed').classed('dimmed', false);
+  d3.selectAll('.show-label').classed('show-label', false);
 }

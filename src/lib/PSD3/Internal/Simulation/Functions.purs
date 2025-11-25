@@ -14,6 +14,7 @@ import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import PSD3.Capabilities.Simulation (RawData)
 import Data.Array (elem, filter, intercalate)
 import Data.Array as A
+import Data.Foldable (traverse_)
 import Data.Lens (modifying, set, use, view, (%=))
 import Data.Map (Map, toUnfoldable)
 import Data.Map as M
@@ -64,14 +65,16 @@ simulationSetForces newForces = do
   -- 1. Remove all existing forces
   simulationRemoveAllForces
 
-  -- 2. Build new force library from array
-  let newLibrary = M.fromFoldable $ newForces <#> \f ->
-        Tuple (view _name f) (enableForce f)  -- All new forces start active
-  _forceLibrary %= const newLibrary
+  -- 2. Refresh forces with new handles and enable them
+  -- This creates fresh D3 force handles, resetting any parameters modified by the control panel
+  let refreshedForces = map (enableForce <<< refreshForce) newForces
 
-  -- 3. Add all forces to D3 simulation
+  -- 3. Build new force library from refreshed forces
+  _forceLibrary %= const (M.fromFoldable $ map (\f -> Tuple (view _name f) f) refreshedForces)
+
+  -- 4. Add all forces to D3 simulation with their attributes applied
   handle <- use _handle
-  let _ = (putForceInSimulation <$> newForces) <*> pure handle
+  let _ = map (updateForceInSimulation handle) refreshedForces
   pure unit
 
 simulationToggleForce :: forall d m row.

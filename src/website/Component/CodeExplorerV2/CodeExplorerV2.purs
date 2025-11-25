@@ -14,6 +14,7 @@ import Component.CodeExplorerV2.BubblePackRender (renderBubblePacks)
 import Component.CodeExplorerV2.Orchestration as Orchestration
 import Component.CodeExplorerV2.Scenes.Types (Scene(..))
 import Component.ForceControlPanel as ForceControlPanel
+import D3.Viz.Spago.GitMetrics (loadGitMetrics_)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode)
 import Data.Array as Data.Array
 import Data.Maybe (Maybe(..))
@@ -134,6 +135,9 @@ handleAction = case _ of
     log "CodeExplorerV2: Initializing"
     H.liftAff $ delay (Milliseconds 100.0)
 
+    -- Load git metrics (asynchronously)
+    H.liftEffect loadGitMetrics_
+
     -- Load Spago model data
     maybeModel <- H.liftAff readModelData
     case maybeModel of
@@ -151,18 +155,30 @@ handleAction = case _ of
     pure unit
 
   FormTree -> do
-    log "CodeExplorerV2: Forming tree"
+    log "CodeExplorerV2: Forming tree (staggered animation)"
     state <- H.get
     case state.model of
       Nothing -> log "Error: Model not loaded"
       Just model -> do
+        -- Start the staggered tree reveal animation
         newState <- H.liftAff $ D3v2.execD3v2SimM { simulation: state.simulation } do
           Orchestration.transitionToTreeReveal model
 
         H.modify_ \s -> s { simulation = newState.simulation, currentScene = TreeReveal }
-        -- Tell force panel to refresh
         void $ H.tell _forcePanel unit ForceControlPanel.Refresh
-        log "Tree formation started"
+        log "Tree reveal animation started"
+
+        -- Wait for animation to complete (2400ms duration + ~3600ms max stagger = ~6s)
+        H.liftAff $ delay (Milliseconds 6000.0)
+
+        -- Now transition to Tree scene to pin nodes
+        finalState <- H.get
+        newState2 <- H.liftAff $ D3v2.execD3v2SimM { simulation: finalState.simulation } do
+          Orchestration.transitionToTree model
+
+        H.modify_ \s -> s { simulation = newState2.simulation, currentScene = Tree }
+        void $ H.tell _forcePanel unit ForceControlPanel.Refresh
+        log "Tree scene activated - nodes pinned"
 
     pure unit
 

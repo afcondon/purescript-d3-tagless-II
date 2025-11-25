@@ -60,6 +60,11 @@ disableForce = set _status ForceDisabled
 enableForce :: forall d. Force d -> Force d
 enableForce = set _status ForceActive
 
+-- | Create a fresh force with a new handle (to reset modified parameters)
+-- | This is necessary because force handles are mutable and get modified by the control panel
+refreshForce :: forall d. Force d -> Force d
+refreshForce (Force f) = Force $ f { force_ = createForce_ f.type }
+
 toggleForce :: forall d. Force d -> Force d
 toggleForce = over _status toggleForceStatus
 

@@ -10,6 +10,7 @@ import Component.CodeExplorerV2.Forces (allForces)
 import Component.CodeExplorerV2.Scenes.BubblePack as BubblePack
 import Component.CodeExplorerV2.Scenes.ForceGraph as ForceGraph
 import Component.CodeExplorerV2.Scenes.Orbit as Orbit
+import Component.CodeExplorerV2.Scenes.Tree as Tree
 import Component.CodeExplorerV2.Scenes.TreeReveal as TreeReveal
 import Component.CodeExplorerV2.Scenes.Types (Scene(..), SceneConfig)
 import D3.Viz.Spago.Draw.Attributes (graphSceneAttributes, svgAttrs)
@@ -53,6 +54,7 @@ type NodeRow = SpagoNodeRow (D3_FocusXY (D3_Radius ()))
 configFor :: Scene -> SceneConfig
 configFor Orbit = Orbit.config
 configFor TreeReveal = TreeReveal.config
+configFor Tree = Tree.config
 configFor ForceGraph = ForceGraph.config
 configFor BubblePack = BubblePack.config
 
@@ -175,12 +177,7 @@ transitionToTreeReveal model = do
     [ transform TreeReveal.nodeToTreeTransform
     ]
 
-  -- Also transition circles (fill) and text (opacity)
-  circlesSel <- selectAllWithData "circle" nodeJoin.update
-  withTransitionStaggered transConfig (TreeReveal.staggerByDepth 900.0) circlesSel
-    [ fill TreeReveal.depthToColor
-    ]
-
+  -- Transition text (opacity) - but keep colors as-is (package colors)
   textSel <- selectAllWithData "text" nodeJoin.update
   withTransitionStaggered transConfig (TreeReveal.staggerByDepth 900.0) textSel
     [ opacity 0.0
@@ -203,6 +200,57 @@ transitionToTreeReveal model = do
     ]
 
   log "CodeExplorerV2: Staggered tree reveal started"
+
+-- | Transition to tree (after reveal completes)
+transitionToTree :: forall m.
+  Bind m =>
+  MonadEffect m =>
+  SelectionM D3v2Selection_ m =>
+  SimulationM2 (D3v2Selection_ SBoundOwns Element) m =>
+  SpagoModel ->
+  m Unit
+transitionToTree model = do
+  log "CodeExplorerV2: Transitioning to Tree scene"
+
+  -- Get scene config
+  let treeConfig = configFor Tree
+
+  -- Sync DOM positions to data before applying initializers
+  traverse_ syncDOMToData treeConfig.domSync
+
+  -- Set forces for Tree scene
+  setForces treeConfig.forces
+  logActiveForces "Tree" treeConfig.forces
+
+  groups <- selectSimulationGroups
+
+  -- Use tree links
+  let treeLinks = Array.filter (\l -> l.linktype == M2M_Tree) model.links
+  log $ "Tree links: " <> show (Array.length treeLinks)
+
+  let updateConfig :: DeclarativeUpdateConfig NodeRow Int SpagoLinkData
+      updateConfig =
+        { allNodes: model.nodes
+        , allLinks: treeLinks
+        , nodeFilter: treeConfig.nodeFilter
+        , linkFilter: treeConfig.linkFilter
+        , nodeInitializers: treeConfig.nodeInitializers  -- Will clear gridXY and pin at tree
+        , activeForces: Nothing  -- Already set via setForces
+        , config: Nothing
+        }
+
+  genericUpdateSimulation
+    groups
+    Group
+    Path
+    updateConfig
+    _.id
+    keyIsID_
+    graphSceneAttributes
+    spagoRenderCallbacks
+
+  start
+  log "CodeExplorerV2: Tree scene configured and started"
 
 -- | Transition to force graph
 transitionToForceGraph :: forall m.
