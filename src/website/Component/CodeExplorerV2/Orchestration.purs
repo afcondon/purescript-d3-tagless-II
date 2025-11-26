@@ -9,10 +9,14 @@ import Component.CodeExplorerV2.BubblePackData (PackedModule, RenderCircle, getM
 import Component.CodeExplorerV2.Forces (allForces)
 import Component.CodeExplorerV2.Scenes.BubblePack as BubblePack
 import Component.CodeExplorerV2.Scenes.ForceGraph as ForceGraph
+import Component.CodeExplorerV2.Scenes.ForceGraphV2 as ForceGraphV2
 import Component.CodeExplorerV2.Scenes.Orbit as Orbit
 import Component.CodeExplorerV2.Scenes.Tree as Tree
 import Component.CodeExplorerV2.Scenes.TreeReveal as TreeReveal
 import Component.CodeExplorerV2.Scenes.Types (Scene(..), SceneConfig)
+import Effect (Effect)
+import PSD3.Config.Apply (applySceneConfig)
+import PSD3.Config.Scene as CFG
 import D3.Viz.Spago.Draw.Attributes (graphSceneAttributes, svgAttrs)
 import D3.Viz.Spago.Files (LinkType(..), SpagoLink, SpagoLinkData, SpagoNodeRow, D3_Radius)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isUsedModule, treeDepthMultiplier)
@@ -31,7 +35,7 @@ import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Class.Console (log)
 import PSD3.Data.Node (D3_FocusXY)
-import PSD3.Internal.FFI (keyIsID_)
+import PSD3.Internal.FFI (keyIsID_, startSimulation_)
 import PSD3.Internal.Simulation.Types (Force(..))
 import Data.String (joinWith)
 import PSD3v2.Attribute.Types (cx, cy, d, fill, opacity, radius, stroke, strokeWidth, transform)
@@ -50,13 +54,24 @@ import Web.DOM.Element (Element)
 -- | Type alias for node row
 type NodeRow = SpagoNodeRow (D3_FocusXY (D3_Radius ()))
 
--- | Get config for a scene
+-- | Get config for a scene (OLD SYSTEM)
 configFor :: Scene -> SceneConfig
 configFor Orbit = Orbit.config
 configFor TreeReveal = TreeReveal.config
 configFor Tree = Tree.config
 configFor ForceGraph = ForceGraph.config
 configFor BubblePack = BubblePack.config
+
+-- | Get NEW config for a scene (immutable force configuration system)
+configForV2 :: Scene -> CFG.SceneConfig
+configForV2 Orbit = Orbit.sceneConfig
+configForV2 TreeReveal = TreeReveal.sceneConfig
+configForV2 Tree = Tree.sceneConfig
+configForV2 ForceGraph = ForceGraphV2.sceneConfig  -- Using V2 module which has the new config
+configForV2 BubblePack = BubblePack.sceneConfig
+
+-- | FFI: Get the simulation object from window for direct access
+foreign import getSimulationFromWindow_ :: forall a. Effect a
 
 -- | Extract force name from Force
 forceName :: forall d. Force d -> String
@@ -126,6 +141,13 @@ initialize model selector = do
   setForces orbitConfig.forces
   logActiveForces "Orbit" orbitConfig.forces
 
+  -- NEW: Also apply V2 config for testing/comparison
+  simulation <- liftEffect getSimulationFromWindow_
+  liftEffect $ log "[V2] Applying Orbit scene config..."
+  liftEffect $ applySceneConfig (configForV2 Orbit) simulation
+  liftEffect $ let _ = startSimulation_ simulation in pure unit
+  liftEffect $ log "[V2] Orbit scene config applied and simulation restarted"
+
   genericUpdateSimulation
     groups
     Group
@@ -153,6 +175,12 @@ transitionToTreeReveal model = do
 
   -- Stop simulation
   stop
+
+  -- NEW: Apply V2 config (empty scene, alpha=0)
+  simulation <- liftEffect getSimulationFromWindow_
+  liftEffect $ log "[V2] Applying TreeReveal scene config (simulation stopped)..."
+  liftEffect $ applySceneConfig (configForV2 TreeReveal) simulation
+  liftEffect $ log "[V2] TreeReveal scene config applied (alpha=0, no restart needed)"
 
   -- Filter to tree nodes and links
   let treeNodes = Array.filter isUsedModule model.nodes
@@ -222,6 +250,13 @@ transitionToTree model = do
   setForces treeConfig.forces
   logActiveForces "Tree" treeConfig.forces
 
+  -- NEW: Also apply V2 config for testing/comparison
+  simulation <- liftEffect getSimulationFromWindow_
+  liftEffect $ log "[V2] Applying Tree scene config..."
+  liftEffect $ applySceneConfig (configForV2 Tree) simulation
+  liftEffect $ let _ = startSimulation_ simulation in pure unit
+  liftEffect $ log "[V2] Tree scene config applied and simulation restarted"
+
   groups <- selectSimulationGroups
 
   -- Use tree links
@@ -276,6 +311,13 @@ transitionToForceGraph model = do
   setForces forceGraphConfig.forces
   logActiveForces "ForceGraph" forceGraphConfig.forces
 
+  -- NEW: Also apply V2 config for testing/comparison
+  simulation <- liftEffect getSimulationFromWindow_
+  liftEffect $ log "[V2] Applying ForceGraph scene config..."
+  liftEffect $ applySceneConfig (configForV2 ForceGraph) simulation
+  liftEffect $ let _ = startSimulation_ simulation in pure unit
+  liftEffect $ log "[V2] ForceGraph scene config applied and simulation restarted"
+
   groups <- selectSimulationGroups
 
   -- Use tree links (spanning tree, not all dependencies)
@@ -329,6 +371,13 @@ transitionToBubblePack model = do
   setForces bubblePackConfig.forces
   logActiveForces "BubblePack" bubblePackConfig.forces
 
+  -- NEW: Also apply V2 config for testing/comparison
+  simulation <- liftEffect getSimulationFromWindow_
+  liftEffect $ log "[V2] Applying BubblePack scene config..."
+  liftEffect $ applySceneConfig (configForV2 BubblePack) simulation
+  liftEffect $ let _ = startSimulation_ simulation in pure unit
+  liftEffect $ log "[V2] BubblePack scene config applied and simulation restarted"
+
   groups <- selectSimulationGroups
 
   -- Filter to tree links between my-project modules
@@ -381,6 +430,13 @@ transitionToBubblePackHybrid model = do
   -- Set forces for BubblePack scene
   setForces bubblePackConfig.forces
   logActiveForces "BubblePackHybrid" bubblePackConfig.forces
+
+  -- NEW: Also apply V2 config for testing/comparison (using same config as regular BubblePack)
+  simulation <- liftEffect getSimulationFromWindow_
+  liftEffect $ log "[V2] Applying BubblePack (Hybrid) scene config..."
+  liftEffect $ applySceneConfig (configForV2 BubblePack) simulation
+  liftEffect $ let _ = startSimulation_ simulation in pure unit
+  liftEffect $ log "[V2] BubblePack (Hybrid) scene config applied and simulation restarted"
 
   groups <- selectSimulationGroups
 

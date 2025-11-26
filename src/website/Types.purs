@@ -135,6 +135,7 @@ data Route
   | ModuleGraph     -- Module dependency graph (dogfooding!)
   | MermaidTreeDemo -- Mermaid interpreter for Tree API (visualizes tree structure)
   | SceneJoinDemo   -- SceneNestedJoin demonstration (GUP with type decomposition)
+  | ForceConfigPOC  -- POC for testing new force configuration system
   | CodeExplorer    -- Interactive code exploration (PureScript module dependencies)
   | CodeExplorerV2  -- Rebuilt Code Explorer using LesMisGUP patterns
   -- Meta
@@ -194,6 +195,7 @@ instance showRoute :: Show Route where
   show ModuleGraph = "Module Graph"
   show MermaidTreeDemo = "Mermaid Tree Visualizer"
   show SceneJoinDemo = "SceneNestedJoin Demo"
+  show ForceConfigPOC = "Force Config POC"
   show CodeExplorer = "Code Explorer"
   show CodeExplorerV2 = "Code Explorer V2"
   show Acknowledgements = "Acknowledgements"

@@ -67,6 +67,7 @@ routes =
   <|> moduleGraph
   <|> mermaidTreeDemo
   <|> sceneJoinDemo
+  <|> forceConfigPOC
   <|> codeExplorer
   <|> codeExplorerV2
   <|> acknowledgements
@@ -277,6 +278,10 @@ mermaidTreeDemo = MermaidTreeDemo <$ lit "mermaid-tree-demo" <* end
 sceneJoinDemo :: Match Route
 sceneJoinDemo = SceneJoinDemo <$ lit "scene-join-demo" <* end
 
+-- | Match: /force-config-poc
+forceConfigPOC :: Match Route
+forceConfigPOC = ForceConfigPOC <$ lit "force-config-poc" <* end
+
 -- | Match: /code-explorer
 codeExplorer :: Match Route
 codeExplorer = CodeExplorer <$ lit "code-explorer" <* end
@@ -347,6 +352,7 @@ routeToPath LesMisQueryDemo = "/lesmis-query-demo"
 routeToPath ModuleGraph = "/module-graph"
 routeToPath MermaidTreeDemo = "/mermaid-tree-demo"
 routeToPath SceneJoinDemo = "/scene-join-demo"
+routeToPath ForceConfigPOC = "/force-config-poc"
 routeToPath CodeExplorer = "/code-explorer"
 routeToPath CodeExplorerV2 = "/code-explorer-v2"
 routeToPath Acknowledgements = "/acknowledgements"

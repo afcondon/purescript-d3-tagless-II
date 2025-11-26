@@ -11,8 +11,10 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Nullable (toMaybe)
 import Data.Number (cos, sin)
 import Data.Time.Duration (Milliseconds(..))
+import PSD3.Config.Scene as CFG
 
--- | TreeReveal scene configuration
+-- | TreeReveal scene configuration (OLD SYSTEM - using Force handles)
+-- | Kept for compatibility during transition
 -- | Note: No forces - simulation is stopped during tree reveal
 config :: SceneConfig
 config =
@@ -23,6 +25,14 @@ config =
   , linkStyle: TreeBezier
   , domSync: Nothing      -- Animated from current positions
   }
+
+-- | NEW: TreeReveal scene using immutable configuration
+-- | This uses the new PSD3.Config system
+-- | No forces - simulation stopped during animated transition
+sceneConfig :: CFG.SceneConfig
+sceneConfig = CFG.scene "TreeReveal" []  -- Empty force list - simulation stopped
+  # CFG.withDescription "Staggered animation transition to tree layout"
+  # CFG.withAlpha 0.0  -- Simulation stopped (alpha = 0)
 
 -- | Calculate transform string for radial tree position
 nodeToTreeTransform :: SpagoSimNode -> String

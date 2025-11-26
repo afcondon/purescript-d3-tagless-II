@@ -72,6 +72,7 @@ import Component.LesMisQueryDemo as LesMisQueryDemo
 import Component.ModuleGraph as ModuleGraph
 import Component.MermaidTreeDemo as MermaidTreeDemo
 import Component.SceneJoinDemo as SceneJoinDemo
+import Component.ForceConfigPOC as ForceConfigPOC
 import PSD3.CodeExplorer as CodeExplorer
 import Component.CodeExplorerV2 as CodeExplorerV2
 
@@ -143,6 +144,7 @@ type Slots =
   , moduleGraph :: forall q. H.Slot q Void Unit
   , mermaidTreeDemo :: forall q. H.Slot q Void Unit
   , sceneJoinDemo :: forall q. H.Slot q Void Unit
+  , forceConfigPOC :: forall q. H.Slot q Void Unit
   , codeExplorer :: forall q. H.Slot q Void Unit
   , codeExplorerV2 :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
@@ -197,6 +199,7 @@ _lesMisQueryDemo = Proxy :: Proxy "lesMisQueryDemo"
 _moduleGraph = Proxy :: Proxy "moduleGraph"
 _mermaidTreeDemo = Proxy :: Proxy "mermaidTreeDemo"
 _sceneJoinDemo = Proxy :: Proxy "sceneJoinDemo"
+_forceConfigPOC = Proxy :: Proxy "forceConfigPOC"
 _codeExplorer = Proxy :: Proxy "codeExplorer"
 _codeExplorerV2 = Proxy :: Proxy "codeExplorerV2"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
@@ -380,6 +383,9 @@ renderPage route = case spy "Route is" route of
 
   SceneJoinDemo ->
     HH.slot_ _sceneJoinDemo unit SceneJoinDemo.component unit
+
+  ForceConfigPOC ->
+    HH.slot_ _forceConfigPOC unit ForceConfigPOC.component unit
 
   CodeExplorer ->
     HH.slot_ _codeExplorer unit CodeExplorer.component unit
