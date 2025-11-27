@@ -7,6 +7,7 @@ import Prelude
 
 import Component.CodeExplorerV2.BubblePackData (PackedModule, RenderCircle, getModuleCircles, getPackedRadius)
 import Component.CodeExplorerV2.Forces (allForces)
+import Component.CodeExplorerV2.InitPositions (initPositionsFromGridXY_)
 import Component.CodeExplorerV2.Scenes.BubblePack as BubblePack
 import Component.CodeExplorerV2.Scenes.ForceGraph as ForceGraph
 import Component.CodeExplorerV2.Scenes.ForceGraphV2 as ForceGraphV2
@@ -73,6 +74,9 @@ configForV2 BubblePack = BubblePack.sceneConfig
 -- | FFI: Get the simulation object from window for direct access
 foreign import getSimulationFromWindow_ :: forall a. Effect a
 
+-- | FFI: Get nodes from the simulation (returns the actual node objects D3 is using)
+foreign import getNodesFromSimulation_ :: forall a node. a -> Effect (Array node)
+
 -- | Extract force name from Force
 forceName :: forall d. Force d -> String
 forceName (Force f) = f.name
@@ -127,9 +131,10 @@ initialize model selector = do
 
   -- Apply Orbit scene config
   let orbitConfig = configFor Orbit
+
   let updateConfig :: DeclarativeUpdateConfig NodeRow Int SpagoLinkData
       updateConfig =
-        { allNodes: model.nodes
+        { allNodes: model.nodes  -- All nodes now that initialization order is fixed
         , allLinks: []
         , nodeFilter: orbitConfig.nodeFilter
         , linkFilter: orbitConfig.linkFilter
@@ -138,16 +143,20 @@ initialize model selector = do
         , config: Nothing
         }
 
-  setForces orbitConfig.forces
-  logActiveForces "Orbit" orbitConfig.forces
+  -- OLD SYSTEM (disabled - using new config system only)
+  -- setForces orbitConfig.forces
+  -- logActiveForces "Orbit" orbitConfig.forces
 
-  -- NEW: Also apply V2 config for testing/comparison
+  -- Get simulation first
   simulation <- liftEffect getSimulationFromWindow_
-  liftEffect $ log "[V2] Applying Orbit scene config..."
-  liftEffect $ applySceneConfig (configForV2 Orbit) simulation
-  liftEffect $ let _ = startSimulation_ simulation in pure unit
-  liftEffect $ log "[V2] Orbit scene config applied and simulation restarted"
 
+  -- Apply V2 config BEFORE starting simulation to avoid force conflicts
+  liftEffect $ log "[V2] Applying Orbit scene config BEFORE genericUpdateSimulation..."
+  liftEffect $ applySceneConfig (configForV2 Orbit) simulation
+  liftEffect $ log "[V2] Orbit scene config applied (forces ready)"
+
+  -- Now run genericUpdateSimulation which will start the simulation
+  -- This applies nodeInitializers which set up gridXY and pin positions
   genericUpdateSimulation
     groups
     Group
@@ -158,7 +167,8 @@ initialize model selector = do
     graphSceneAttributes
     spagoRenderCallbacks
 
-  start
+  liftEffect $ log "CodeExplorerV2: Orbit scene initialized with V2 forces"
+
   log "CodeExplorerV2: Orbit scene initialized"
 
 -- | Transition to tree reveal (staggered animation)
@@ -246,16 +256,9 @@ transitionToTree model = do
   -- Sync DOM positions to data before applying initializers
   traverse_ syncDOMToData treeConfig.domSync
 
-  -- Set forces for Tree scene
-  setForces treeConfig.forces
-  logActiveForces "Tree" treeConfig.forces
-
-  -- NEW: Also apply V2 config for testing/comparison
-  simulation <- liftEffect getSimulationFromWindow_
-  liftEffect $ log "[V2] Applying Tree scene config..."
-  liftEffect $ applySceneConfig (configForV2 Tree) simulation
-  liftEffect $ let _ = startSimulation_ simulation in pure unit
-  liftEffect $ log "[V2] Tree scene config applied and simulation restarted"
+  -- OLD SYSTEM (disabled - using new config system only)
+  -- setForces treeConfig.forces
+  -- logActiveForces "Tree" treeConfig.forces
 
   groups <- selectSimulationGroups
 
@@ -274,6 +277,7 @@ transitionToTree model = do
         , config: Nothing
         }
 
+  -- IMPORTANT: Run genericUpdateSimulation FIRST to initialize node positions
   genericUpdateSimulation
     groups
     Group
@@ -284,7 +288,13 @@ transitionToTree model = do
     graphSceneAttributes
     spagoRenderCallbacks
 
-  start
+  -- Now apply V2 immutable config system (nodes have positions now)
+  simulation <- liftEffect getSimulationFromWindow_
+  liftEffect $ log "[V2] Applying Tree scene config..."
+  liftEffect $ applySceneConfig (configForV2 Tree) simulation
+  liftEffect $ let _ = startSimulation_ simulation in pure unit
+  liftEffect $ log "[V2] Tree scene config applied and simulation restarted"
+
   log "CodeExplorerV2: Tree scene configured and started"
 
 -- | Transition to force graph
@@ -307,22 +317,22 @@ transitionToForceGraph model = do
   -- Clear existing tree links
   clear ".links"
 
-  -- Set forces for ForceGraph scene
-  setForces forceGraphConfig.forces
-  logActiveForces "ForceGraph" forceGraphConfig.forces
-
-  -- NEW: Also apply V2 config for testing/comparison
-  simulation <- liftEffect getSimulationFromWindow_
-  liftEffect $ log "[V2] Applying ForceGraph scene config..."
-  liftEffect $ applySceneConfig (configForV2 ForceGraph) simulation
-  liftEffect $ let _ = startSimulation_ simulation in pure unit
-  liftEffect $ log "[V2] ForceGraph scene config applied and simulation restarted"
+  -- OLD SYSTEM (disabled - using new config system only)
+  -- setForces forceGraphConfig.forces
+  -- logActiveForces "ForceGraph" forceGraphConfig.forces
 
   groups <- selectSimulationGroups
 
   -- Use tree links (spanning tree, not all dependencies)
   let treeLinks = Array.filter (\l -> l.linktype == M2M_Tree) model.links
   log $ "Tree links for force layout: " <> show (Array.length treeLinks)
+
+  -- IMPORTANT: Apply scene config BEFORE genericUpdateSimulation so link force exists
+  -- when simulationSetLinks is called
+  simulation <- liftEffect getSimulationFromWindow_
+  liftEffect $ log "[V2] Applying ForceGraph scene config BEFORE genericUpdateSimulation..."
+  liftEffect $ applySceneConfig (configForV2 ForceGraph) simulation
+  liftEffect $ log "[V2] ForceGraph scene config applied (link force ready)"
 
   let updateConfig :: DeclarativeUpdateConfig NodeRow Int SpagoLinkData
       updateConfig =
@@ -331,10 +341,11 @@ transitionToForceGraph model = do
         , nodeFilter: forceGraphConfig.nodeFilter
         , linkFilter: forceGraphConfig.linkFilter
         , nodeInitializers: forceGraphConfig.nodeInitializers
-        , activeForces: Nothing  -- Already set via setForces
+        , activeForces: Nothing  -- Already set via applySceneConfig
         , config: Nothing
         }
 
+  -- Now run genericUpdateSimulation which will set links (force is ready)
   genericUpdateSimulation
     groups
     Group
@@ -345,7 +356,11 @@ transitionToForceGraph model = do
     graphSceneAttributes
     spagoRenderCallbacks
 
-  log "CodeExplorerV2: Force graph configured (call start after delay)"
+  -- Restart simulation
+  liftEffect $ let _ = startSimulation_ simulation in pure unit
+  liftEffect $ log "[V2] ForceGraph simulation restarted"
+
+  log "CodeExplorerV2: Force graph configured"
 
 -- | Transition to bubble pack (my-project modules with packed circles)
 transitionToBubblePack :: forall m.
@@ -367,22 +382,21 @@ transitionToBubblePack model = do
   -- Clear existing links
   clear ".links"
 
-  -- Set forces for BubblePack scene
-  setForces bubblePackConfig.forces
-  logActiveForces "BubblePack" bubblePackConfig.forces
-
-  -- NEW: Also apply V2 config for testing/comparison
-  simulation <- liftEffect getSimulationFromWindow_
-  liftEffect $ log "[V2] Applying BubblePack scene config..."
-  liftEffect $ applySceneConfig (configForV2 BubblePack) simulation
-  liftEffect $ let _ = startSimulation_ simulation in pure unit
-  liftEffect $ log "[V2] BubblePack scene config applied and simulation restarted"
+  -- OLD SYSTEM (disabled - using new config system only)
+  -- setForces bubblePackConfig.forces
+  -- logActiveForces "BubblePack" bubblePackConfig.forces
 
   groups <- selectSimulationGroups
 
   -- Filter to tree links between my-project modules
   let treeLinks = Array.filter (\l -> l.linktype == M2M_Tree) model.links
   log $ "BubblePack links: " <> show (Array.length treeLinks)
+
+  -- IMPORTANT: Apply scene config BEFORE genericUpdateSimulation so link force exists
+  simulation <- liftEffect getSimulationFromWindow_
+  liftEffect $ log "[V2] Applying BubblePack scene config BEFORE genericUpdateSimulation..."
+  liftEffect $ applySceneConfig (configForV2 BubblePack) simulation
+  liftEffect $ log "[V2] BubblePack scene config applied (link force ready)"
 
   let updateConfig :: DeclarativeUpdateConfig NodeRow Int SpagoLinkData
       updateConfig =
@@ -391,10 +405,11 @@ transitionToBubblePack model = do
         , nodeFilter: bubblePackConfig.nodeFilter
         , linkFilter: bubblePackConfig.linkFilter
         , nodeInitializers: bubblePackConfig.nodeInitializers
-        , activeForces: Nothing
+        , activeForces: Nothing  -- Already set via applySceneConfig
         , config: Nothing
         }
 
+  -- Now run genericUpdateSimulation which will set links (force is ready)
   genericUpdateSimulation
     groups
     Group
@@ -405,7 +420,11 @@ transitionToBubblePack model = do
     graphSceneAttributes
     spagoRenderCallbacks
 
-  log "CodeExplorerV2: BubblePack configured (call start after delay)"
+  -- Restart simulation
+  liftEffect $ let _ = startSimulation_ simulation in pure unit
+  liftEffect $ log "[V2] BubblePack simulation restarted"
+
+  log "CodeExplorerV2: BubblePack configured"
 
 -- | Transition to hybrid bubble pack (all nodes visible, only my-project packed)
 transitionToBubblePackHybrid :: forall m.
@@ -427,22 +446,21 @@ transitionToBubblePackHybrid model = do
   -- Clear existing links
   clear ".links"
 
-  -- Set forces for BubblePack scene
-  setForces bubblePackConfig.forces
-  logActiveForces "BubblePackHybrid" bubblePackConfig.forces
-
-  -- NEW: Also apply V2 config for testing/comparison (using same config as regular BubblePack)
-  simulation <- liftEffect getSimulationFromWindow_
-  liftEffect $ log "[V2] Applying BubblePack (Hybrid) scene config..."
-  liftEffect $ applySceneConfig (configForV2 BubblePack) simulation
-  liftEffect $ let _ = startSimulation_ simulation in pure unit
-  liftEffect $ log "[V2] BubblePack (Hybrid) scene config applied and simulation restarted"
+  -- OLD SYSTEM (disabled - using new config system only)
+  -- setForces bubblePackConfig.forces
+  -- logActiveForces "BubblePackHybrid" bubblePackConfig.forces
 
   groups <- selectSimulationGroups
 
   -- Use all tree links (not just my-project)
   let treeLinks = Array.filter (\l -> l.linktype == M2M_Tree) model.links
   log $ "BubblePack Hybrid links: " <> show (Array.length treeLinks)
+
+  -- IMPORTANT: Apply scene config BEFORE genericUpdateSimulation so link force exists
+  simulation <- liftEffect getSimulationFromWindow_
+  liftEffect $ log "[V2] Applying BubblePack (Hybrid) scene config BEFORE genericUpdateSimulation..."
+  liftEffect $ applySceneConfig (configForV2 BubblePack) simulation
+  liftEffect $ log "[V2] BubblePack (Hybrid) scene config applied (link force ready)"
 
   let updateConfig :: DeclarativeUpdateConfig NodeRow Int SpagoLinkData
       updateConfig =
@@ -451,10 +469,11 @@ transitionToBubblePackHybrid model = do
         , nodeFilter: bubblePackConfig.nodeFilter  -- Keep all nodes (\_ -> true)
         , linkFilter: bubblePackConfig.linkFilter
         , nodeInitializers: bubblePackConfig.nodeInitializers
-        , activeForces: Nothing
+        , activeForces: Nothing  -- Already set via applySceneConfig
         , config: Nothing
         }
 
+  -- Now run genericUpdateSimulation which will set links (force is ready)
   genericUpdateSimulation
     groups
     Group
@@ -465,7 +484,11 @@ transitionToBubblePackHybrid model = do
     graphSceneAttributes
     spagoRenderCallbacks
 
-  log "CodeExplorerV2: BubblePack Hybrid configured (call start after delay)"
+  -- Restart simulation
+  liftEffect $ let _ = startSimulation_ simulation in pure unit
+  liftEffect $ log "[V2] BubblePack (Hybrid) simulation restarted"
+
+  log "CodeExplorerV2: BubblePack Hybrid configured"
 
 -- | Render bubble pack circles inside each module node
 -- | Takes pre-loaded pack data and replaces simple circles with nested packs

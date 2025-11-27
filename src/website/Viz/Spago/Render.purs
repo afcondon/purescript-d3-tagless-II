@@ -137,6 +137,8 @@ spagoRenderCallbacks = {
   , nodeTickAttrs: \_attrs ->
       [ transform \(d :: SpagoSimNode) -> translateNode d ]
 
+  -- Link tick attrs - update link positions on each tick
+  -- Links are now properly swizzled by genericUpdateSimulation before DOM join
   , linkTickAttrs:
       [ d \(link :: SpagoSwizzledLink) ->
           linkDiagonal link.source.x link.source.y link.target.x link.target.y

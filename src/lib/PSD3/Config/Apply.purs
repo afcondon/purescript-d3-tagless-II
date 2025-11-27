@@ -14,12 +14,13 @@ module PSD3.Config.Apply where
 import Prelude
 
 import Data.Array as A
+import Data.Function.Uncurried (mkFn2)
 import Data.Maybe (Maybe(..), isJust)
 import Data.Traversable (for_)
 import Effect (Effect)
 import PSD3.Config.Force (AttrValue(..), ForceConfig(..), ForceFilter(..), ForceParams(..), ForceType(..))
 import PSD3.Config.Scene (SceneConfig(..), SimulationParams)
-import PSD3.Internal.FFI (D3Attr_, D3ForceHandle_, forceCenter_, forceCollideFn_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, setVelocityDecay_)
+import PSD3.Internal.FFI (D3Attr_, D3ForceHandle_, disableTick_, forceCenter_, forceCollideFn_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, setVelocityDecay_)
 import PSD3.Internal.Types (D3Simulation_, Datum_, Index_)
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -31,14 +32,23 @@ import Unsafe.Coerce (unsafeCoerce)
 -- | This is the main entry point for scene transitions
 -- |
 -- | Steps:
--- | 1. Remove all existing forces from simulation
--- | 2. Create fresh d3 handles for each force in the scene
--- | 3. Apply parameters to each handle (including filters)
--- | 4. Add handles to simulation
--- | 5. Update simulation parameters
+-- | 1. Clear all existing tick functions (prevents stale callbacks)
+-- | 2. Remove all existing forces from simulation
+-- | 3. Create fresh d3 handles for each force in the scene
+-- | 4. Apply parameters to each handle (including filters)
+-- | 5. Add handles to simulation
+-- | 6. Update simulation parameters
+-- |
+-- | Note: After calling applySceneConfig, use genericUpdateSimulation to
+-- | register appropriate tick functions for the new scene.
 applySceneConfig :: SceneConfig -> D3Simulation_ -> Effect Unit
 applySceneConfig (SceneConfig config) simulation = do
-  -- Step 1: Clear all existing forces
+  -- Step 1: Clear all existing tick functions
+  -- This prevents stale tick functions from running on data they don't understand
+  -- (e.g., linkTickAttrs expecting swizzled links running on raw links)
+  clearAllTickFunctions simulation
+
+  -- Step 2: Clear all existing forces
   removeAllForces simulation
 
   -- Step 2-4: Create and apply each force
@@ -51,6 +61,17 @@ applySceneConfig (SceneConfig config) simulation = do
 
   -- Step 5: Update simulation parameters
   applySimulationParams config.simParams simulation
+
+-- | Clear all tick functions from a simulation
+-- | This prevents stale tick callbacks from running during scene transitions
+-- | D3 tick functions are namespaced like "tick.nodes", "tick.links"
+clearAllTickFunctions :: D3Simulation_ -> Effect Unit
+clearAllTickFunctions simulation = do
+  -- Common tick function names - these are the labels we use
+  let tickNames = ["nodes", "links"]
+  for_ tickNames \name -> do
+    let _ = disableTick_ simulation name
+    pure unit
 
 -- | Remove all forces from a simulation
 -- | Gets the force names that are currently in the simulation and removes them
@@ -157,11 +178,13 @@ setParam handle paramName attrValue = do
 
 -- | Convert an AttrValue to a JavaScript value (Number or Function)
 -- | This is what actually gets passed to d3's setter methods
+-- | IMPORTANT: DynamicIndexedValue functions are curried in PureScript but D3
+-- | expects uncurried JavaScript functions. We use mkFn2 to convert.
 attrValueToJS :: AttrValue Number -> D3Attr_
 attrValueToJS = case _ of
   StaticValue n          -> unsafeCoerce n
   DynamicValue fn        -> unsafeCoerce fn
-  DynamicIndexedValue fn -> unsafeCoerce fn
+  DynamicIndexedValue fn -> unsafeCoerce (mkFn2 fn)
 
 -- | Apply a filter to an attribute value
 -- | Converts static values to functions that return default (0.0) for filtered-out nodes
