@@ -12,7 +12,7 @@ import Prelude
 import Data.Int (toNumber)
 import Data.Time.Duration (Milliseconds(..))
 import PSD3v2.Attribute.Types (Attribute)
-import PSD3v2.Selection.Types (SBoundOwns, SBoundInherits, SExiting)
+import PSD3v2.Selection.Types (SBoundOwns, SExiting)
 import PSD3v2.Transition.Types (TransitionConfig)
 import Web.DOM.Element (Element)
 

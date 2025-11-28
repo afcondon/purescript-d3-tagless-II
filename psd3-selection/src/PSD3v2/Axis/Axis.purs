@@ -14,11 +14,11 @@ module PSD3v2.Axis.Axis
 
 import Prelude
 
-import Data.Array (range, mapWithIndex)
+import Data.Array (range)
 import Data.Int as Int
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Number.Format (fixed, toStringWith)
-import PSD3v2.Attribute.Types (Attribute, class_, d, fill, stroke, textAnchor, x, y, x1, y1, x2, y2, transform, fontSize, dy, textContent)
+import PSD3v2.Attribute.Types (Attribute, class_, fill, stroke, textAnchor, x, y, x1, y1, x2, y2, transform, fontSize, dy, textContent)
 import PSD3v2.Selection.Types (ElementType(..))
 import PSD3v2.VizTree.Tree (Tree)
 import PSD3v2.VizTree.Tree as T
