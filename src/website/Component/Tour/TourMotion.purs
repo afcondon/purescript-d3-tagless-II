@@ -25,15 +25,12 @@ import Web.DOM.Element (Element)
 import D3.Viz.GUP as GUP
 import PSD3.Interpreter.D3 (eval_D3M, runD3M)
 import D3.Viz.AnimatedTreeClusterLoop as AnimatedTreeLoop
-import D3.Viz.TreeAPI.LesMisSimple as LesMisSimple
-import D3.Viz.LesMiserables.File (readGraphFromFileContents)
 import D3.Viz.TreeAPI.StaggeredCircles as StaggeredCircles
 import Data.Array (catMaybes)
 import Data.String.CodeUnits (toCharArray)
 import Data.Traversable (sequence)
 import Effect.Random (random)
 import Control.Monad.Rec.Class (forever)
-import Effect.Aff (forkAff)
 import Effect (Effect)
 
 -- | Tour page state
@@ -89,11 +86,7 @@ handleAction = case _ of
         let flareData = unsafeCoerce response.body
         liftEffect $ AnimatedTreeLoop.startAnimatedTreeClusterLoop flareData "#animated-tree-container"
 
-    -- Render Section 4: Les Mis simulation (load data and start simulation)
-    lesMisResult <- H.liftAff $ AJAX.get ResponseFormat.string "./data/miserables.json"
-    let lesMisModel = readGraphFromFileContents lesMisResult
-    liftEffect $ LesMisSimple.startLesMisSimple lesMisModel "#lesmis-container"
-
+    -- Note: Les Mis demo removed (archived with old simulation API)
     pure unit
 
   Finalize -> do
@@ -252,24 +245,6 @@ render _ =
                 ]
             ]
 
-        -- Section 5: Les Misérables Force Layout
-        , HH.section
-            [ HP.classes [ HH.ClassName "tutorial-section" ]
-            , HP.id "section-5"
-            ]
-            [ HH.h2
-                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "5. Force-Directed Graph: Les Misérables" ]
-            , HH.p_
-                [ HH.text "Force-directed graphs use physics simulation to position nodes and links. Nodes repel each other like charged particles, while links act as springs pulling connected nodes together. The simulation finds an equilibrium that naturally reveals the structure of the network." ]
-            , HH.p_
-                [ HH.text "The graph shows character co-occurrence in Victor Hugo's Les Misérables. Try dragging nodes to see the force simulation respond - the simulation applies multiple forces: center (pulls toward middle), charge (nodes repel), collision (prevents overlap), and link (pulls connected nodes together). You can also zoom and pan using the mouse wheel and drag gestures."
-                ]
-            , HH.div
-                [ HP.id "lesmis-container"
-                , HP.classes [ HH.ClassName "viz-container" ]
-                ]
-                []
-            ]
+        -- Note: Section 5 (Les Mis Force Layout) removed - archived with old simulation API
         ]
     ]

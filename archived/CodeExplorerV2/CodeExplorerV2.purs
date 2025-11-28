@@ -25,7 +25,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import PSD3.CodeExplorer.Data (readModelData)
+import D3.Viz.Spago.Data (readModelData)
 import Data.Map as Map
 import PSD3.Internal.Simulation.Types (D3SimulationState_, initialSimulationState)
 import PSD3v2.Interpreter.D3v2 as D3v2

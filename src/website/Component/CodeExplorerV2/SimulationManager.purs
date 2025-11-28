@@ -91,6 +91,11 @@ type SimState =
 foreign import setSimulationInWindow_ :: Ref SimState -> Effect Unit
 foreign import getSimulationFromWindow_ :: Effect (Ref SimState)
 
+-- Force registry (for control panel access)
+foreign import registerForce_ :: String -> ForceHandle -> Effect Unit
+foreign import clearForceRegistry_ :: Effect Unit
+foreign import setRestartCallback_ :: Effect Unit -> Effect Unit
+
 -- Animation
 foreign import requestAnimationFrame_ :: Effect Unit -> Effect (Effect Unit)
 
@@ -110,6 +115,7 @@ foreign import initializeLinkForce_ :: forall r l. ForceHandle -> Array { | r } 
 
 -- Force application
 foreign import applyForce_ :: ForceHandle -> Number -> Effect Unit
+foreign import applyAllRegisteredForces_ :: Number -> Effect Unit
 
 -- Position integration
 foreign import integratePositions_ :: forall r. Array { | r } -> Number -> Effect Unit
@@ -142,7 +148,17 @@ createSimulation = do
     , tickCallback: pure unit
     }
   setSimulationInWindow_ stateRef
+  -- Set restart callback for control panel to use
+  setRestartCallback_ (restartIfStopped stateRef)
   pure stateRef
+
+-- | Restart the loop if it's stopped (called from JS control panel)
+restartIfStopped :: Ref SimState -> Effect Unit
+restartIfStopped stateRef = do
+  state <- Ref.read stateRef
+  unless state.running do
+    Ref.modify_ (_ { running = true }) stateRef
+    runLoop stateRef
 
 -- | Set nodes and initialize them
 setNodes :: Array SpagoSimNode -> Ref SimState -> Effect Unit
@@ -200,9 +216,9 @@ runLoop stateRef = do
   state <- Ref.read stateRef
 
   when state.running do
-    -- Apply all forces
-    for_ (Map.values state.forces) \handle -> do
-      applyForce_ handle state.alpha
+    -- Apply all forces from window registry (source of truth for active forces)
+    -- This allows control panel to toggle forces on/off
+    applyAllRegisteredForces_ state.alpha
 
     -- Integrate positions (with fixed node support)
     integratePositions_ state.nodes state.velocityDecay
@@ -270,11 +286,15 @@ addForce name handle stateRef = do
   -- Initialize with current nodes
   _ <- initializeForce_ handle state.nodes
   Ref.modify_ (\s -> s { forces = Map.insert name handle s.forces }) stateRef
+  -- Register in window for control panel access
+  registerForce_ name handle
 
 -- | Clear all forces
 clearForces :: Ref SimState -> Effect Unit
-clearForces stateRef =
+clearForces stateRef = do
   Ref.modify_ (_ { forces = Map.empty }) stateRef
+  -- Clear the window registry too
+  clearForceRegistry_
 
 -- | Initialize a force with nodes
 initializeForce :: ForceHandle -> Array SpagoSimNode -> Effect ForceHandle

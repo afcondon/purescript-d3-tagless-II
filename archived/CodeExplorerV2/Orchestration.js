@@ -8,3 +8,10 @@ export function getSimulationFromWindow_() {
   }
   throw new Error("Simulation not found in window._psd3_simulation");
 }
+
+// Get nodes from the simulation
+export function getNodesFromSimulation_(simulation) {
+  return function() {
+    return simulation.nodes();
+  };
+}

@@ -10,7 +10,6 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Type.Proxy (Proxy(..))
 
 import D3.Viz.TreeAPI.ThreeLittleCircles as ThreeLittleCircles
 import D3.Viz.TreeAPI.ThreeLittleCirclesTransition as ThreeLittleCirclesTransition
@@ -22,7 +21,6 @@ import D3.Viz.TreeAPI.LineChartExample as LineChartExample
 import D3.Viz.TreeAPI.TreeViz as TreeViz
 import D3.Viz.TreeAPI.ThreeLittleDimensionsExample as ThreeLittleDimensionsExample
 import D3.Viz.TreeAPI.GroupedBarChartExample as GroupedBarChartExample
-import D3.Viz.TreeAPI.LesMisTreeExample as LesMisTreeExample
 
 -- | State for the TreeAPI examples component
 type State =
@@ -40,7 +38,6 @@ data Example
   | GroupedBarChart
   | SimpleHierarchy
   | ThreeDimensions
-  | LesMisForce
 
 derive instance eqExample :: Eq Example
 
@@ -101,10 +98,9 @@ render state =
             , exampleButton state LineChart "Line Chart" "Path element from data"
             , exampleButton state GroupedBarChart "Grouped Bar Chart" "Nested joins with multiple series"
             ]
-        , HH.h2_ [ HH.text "Hierarchy & Simulation Examples:" ]
+        , HH.h2_ [ HH.text "Hierarchy Examples:" ]
         , HH.div [ HP.class_ (HH.ClassName "buttons") ]
             [ exampleButton state SimpleHierarchy "Tree Layout" "Hierarchical node-link diagram"
-            , exampleButton state LesMisForce "Les Misérables" "Force-directed graph with simulation"
             ]
         ]
 
@@ -145,7 +141,6 @@ exampleTitle LineChart = "Line Chart"
 exampleTitle GroupedBarChart = "Grouped Bar Chart (Nested Joins)"
 exampleTitle SimpleHierarchy = "Tree Layout (Hierarchy)"
 exampleTitle ThreeDimensions = "Three Little Dimensions (Nested Joins)"
-exampleTitle LesMisForce = "Les Misérables (Force Simulation)"
 
 exampleCode :: Example -> String
 exampleCode ThreeCircles = """
@@ -320,41 +315,6 @@ tree = named Table "table" [...] `withChild`
 -- - Custom ADT decompositions
 """
 
-exampleCode LesMisForce = """
--- Initialize simulation with forces
-{ nodes, links } <- init
-  { nodes: nodesWithPositions
-  , links: model.links
-  , forces: [manyBody, center, forceLinks]
-  , ...
-  }
-
--- Declarative tree structure
-let forceGraphTree =
-      named SVG "svg" [...] `withChild`
-        (named Group "zoomGroup" [...] `withChildren`
-          [ named Group "linksGroup" [...] `withChild`
-              (joinData "linkElements" "line" links linkTemplate)
-          , named Group "nodesGroup" [...] `withChild`
-              (joinData "nodeElements" "circle" nodes nodeTemplate)
-          ])
-
--- Render structure
-selections <- renderTree container forceGraphTree
-
--- Extract selections and add behaviors
-on (Zoom ...) svgSel
-on (Drag $ simulationDrag ...) nodesSel
-
--- Add tick functions for position updates
-addTickFunction "nodes" $ Step nodesSel
-  [cx (\\d -> d.x), cy (\\d -> d.y)]
-addTickFunction "links" $ Step linksSel
-  [x1 (\\l -> l.source.x), y1 (\\l -> l.source.y), ...]
-
-start
-"""
-
 handleAction :: forall output m. MonadAff m => Action -> H.HalogenM State Action () output m Unit
 handleAction = case _ of
   Initialize -> do
@@ -379,7 +339,6 @@ handleAction = case _ of
       GroupedBarChart -> liftEffect $ GroupedBarChartExample.groupedBarChart "#viz"
       SimpleHierarchy -> liftEffect $ TreeViz.treeViz "#viz"
       ThreeDimensions -> liftEffect ThreeLittleDimensionsExample.threeLittleDimensions
-      LesMisForce -> liftEffect LesMisTreeExample.testLesMisTree
 
 -- FFI to clear the viz div
 foreign import clearViz :: Effect Unit

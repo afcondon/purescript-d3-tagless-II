@@ -1,40 +1,10 @@
 // Force Control Panel FFI
+// V2 only - works with SimulationManager's custom force loop
 
-// Get the current simulation
-export function getSimulation_() {
-  return window._psd3_simulation || null;
-}
-
-// Get list of active force names
+// Get list of active force names from V2 registry
 export function getForceNames_() {
-  const sim = window._psd3_simulation;
-  if (!sim) {
-    return [];
-  }
-
-  // D3 simulations store forces in an internal Map
-  // We need to access the force names that have been registered
-  // Try to get force names from the simulation's internal state
-  const activeForces = [];
-
-  // D3 stores forces internally - we can probe for them
-  // Check both the common names and try to access the internal map
-  const knownForces = [
-    'centerStrong', 'center',
-    'charge', 'charge2', 'chargePack', 'chargetree',
-    'collision', 'collide2', 'collidePack',
-    'link', 'links',  // D3 force link can be named either
-    'clusterX_M', 'clusterY_M',
-    'packageOrbit', 'moduleOrbit'
-  ];
-
-  for (const name of knownForces) {
-    if (sim.force(name)) {
-      activeForces.push(name);
-    }
-  }
-
-  return activeForces;
+  const forces = window._psd3_forces_v2 || {};
+  return Object.keys(forces);
 }
 
 // Update a force parameter
@@ -42,24 +12,28 @@ export function updateForceParam_(forceName) {
   return function(paramName) {
     return function(value) {
       return function() {
-        const sim = window._psd3_simulation;
-        if (!sim) {
-          console.warn('No simulation found');
-          return;
-        }
+        const forces = window._psd3_forces_v2 || {};
+        const force = forces[forceName];
 
-        const force = sim.force(forceName);
         if (!force) {
-          console.warn(`Force not found: ${forceName}`);
+          console.warn(`[V2] Force not found: ${forceName}`);
           return;
         }
 
         if (typeof force[paramName] === 'function') {
           force[paramName](value);
-          console.log(`Set ${forceName}.${paramName} = ${value}`);
-          sim.alpha(0.3).restart();
+          console.log(`[V2] Set ${forceName}.${paramName} = ${value}`);
+
+          // Bump alpha and restart
+          const ref = window._psd3_simulation_v2;
+          if (ref && ref.value) {
+            ref.value.alpha = Math.max(ref.value.alpha, 0.3);
+          }
+          if (window._psd3_restart_v2) {
+            window._psd3_restart_v2();
+          }
         } else {
-          console.warn(`Parameter not found: ${forceName}.${paramName}`);
+          console.warn(`[V2] Parameter not found: ${forceName}.${paramName}`);
         }
       };
     };
@@ -70,54 +44,78 @@ export function updateForceParam_(forceName) {
 export function toggleForce_(forceName) {
   return function(enabled) {
     return function() {
-      const sim = window._psd3_simulation;
-      if (!sim) return;
-
-      window._psd3_disabled_forces = window._psd3_disabled_forces || {};
+      const forces = window._psd3_forces_v2 || {};
+      window._psd3_disabled_forces_v2 = window._psd3_disabled_forces_v2 || {};
 
       if (enabled) {
-        // Re-enable
-        if (window._psd3_disabled_forces[forceName]) {
-          sim.force(forceName, window._psd3_disabled_forces[forceName]);
-          delete window._psd3_disabled_forces[forceName];
-          console.log(`Enabled force: ${forceName}`);
+        // Re-enable: restore from disabled storage
+        if (window._psd3_disabled_forces_v2[forceName]) {
+          forces[forceName] = window._psd3_disabled_forces_v2[forceName];
+          delete window._psd3_disabled_forces_v2[forceName];
+          console.log(`[V2] Enabled force: ${forceName}`);
         }
       } else {
-        // Disable
-        const force = sim.force(forceName);
-        if (force) {
-          window._psd3_disabled_forces[forceName] = force;
-          sim.force(forceName, null);
-          console.log(`Disabled force: ${forceName}`);
+        // Disable: move to disabled storage
+        if (forces[forceName]) {
+          window._psd3_disabled_forces_v2[forceName] = forces[forceName];
+          delete forces[forceName];
+          console.log(`[V2] Disabled force: ${forceName}`);
         }
       }
 
-      sim.alpha(0.3).restart();
+      // Bump alpha and restart
+      const ref = window._psd3_simulation_v2;
+      if (ref && ref.value) {
+        ref.value.alpha = 0.5;
+      }
+      if (window._psd3_restart_v2) {
+        window._psd3_restart_v2();
+      }
     };
   };
 }
 
 // Start simulation
 export function startSimulation_() {
-  const sim = window._psd3_simulation;
-  if (sim) {
-    sim.alpha(0.3).restart();
+  const ref = window._psd3_simulation_v2;
+  if (!ref || !ref.value) {
+    console.warn('[V2] No simulation found');
+    return;
+  }
+
+  ref.value.alpha = 0.3;
+  console.log('[V2] Start: alpha=0.3');
+
+  if (window._psd3_restart_v2) {
+    window._psd3_restart_v2();
   }
 }
 
 // Stop simulation
 export function stopSimulation_() {
-  const sim = window._psd3_simulation;
-  if (sim) {
-    sim.stop();
+  const ref = window._psd3_simulation_v2;
+  if (!ref || !ref.value) {
+    console.warn('[V2] No simulation found');
+    return;
   }
+
+  ref.value.running = false;
+  console.log('[V2] Stop: running=false');
 }
 
 // Reheat simulation
 export function reheatSimulation_() {
-  const sim = window._psd3_simulation;
-  if (sim) {
-    sim.alpha(1).restart();
+  const ref = window._psd3_simulation_v2;
+  if (!ref || !ref.value) {
+    console.warn('[V2] No simulation found');
+    return;
+  }
+
+  ref.value.alpha = 1.0;
+  console.log('[V2] Reheat: alpha=1.0');
+
+  if (window._psd3_restart_v2) {
+    window._psd3_restart_v2();
   }
 }
 
@@ -125,17 +123,26 @@ export function reheatSimulation_() {
 export function getForceParam_(forceName) {
   return function(paramName) {
     return function() {
-      const sim = window._psd3_simulation;
-      if (!sim) return null;
+      const forces = window._psd3_forces_v2 || {};
+      const force = forces[forceName];
 
-      const force = sim.force(forceName);
       if (!force) return null;
 
       if (typeof force[paramName] === 'function') {
         const val = force[paramName]();
-        // Handle functions that return functions (like radius)
         if (typeof val === 'function') {
-          return null; // Can't serialize a function
+          // D3 wraps constant values in constant() functions
+          // Call with dummy arg to extract the actual value
+          // But real per-node accessors will fail, so catch errors
+          try {
+            const extracted = val({});
+            if (typeof extracted === 'number') {
+              return extracted;
+            }
+          } catch (e) {
+            // Per-node accessor function, can't extract constant
+          }
+          return null;
         }
         return val;
       }
@@ -153,100 +160,49 @@ export function isNaN(n) {
   return Number.isNaN(n);
 }
 
-export function round(n) {
-  return Math.round(n);
-}
-
-// Delay function for Aff
-export function effectDelay(ms) {
-  return function() {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  };
-}
-
 // Get current force settings as formatted string
 export function getForceSettings_() {
-  const sim = window._psd3_simulation;
-  if (!sim) return "No simulation found";
+  const forces = window._psd3_forces_v2 || {};
+  const forceNames = Object.keys(forces);
 
-  const knownForces = [
-    'centerStrong', 'center',
-    'charge', 'charge2', 'chargePack', 'chargetree',
-    'collision', 'collide2', 'collidePack',
-    'link', 'links',
-    'clusterX_M', 'clusterY_M',
-    'packageOrbit', 'moduleOrbit'
-  ];
+  if (forceNames.length === 0) {
+    return "No forces registered";
+  }
 
   const paramsByType = {
     charge: ['strength', 'theta', 'distanceMin', 'distanceMax'],
-    collide: ['radius', 'strength', 'iterations'],
+    collide: ['strength', 'iterations'],
     center: ['strength', 'x', 'y'],
-    link: ['distance', 'iterations'],
+    link: ['distance', 'strength', 'iterations'],
     radial: ['strength', 'radius'],
     position: ['strength']
   };
 
   const getForceType = (name) => {
-    if (name.includes('charge')) return 'charge';
-    if (name.includes('collid')) return 'collide';
+    if (name.includes('charge') || name.includes('Charge')) return 'charge';
+    if (name.includes('collid') || name.includes('Collid') || name.includes('collision')) return 'collide';
     if (name.includes('center')) return 'center';
     if (name.includes('link')) return 'link';
-    if (name.includes('Orbit')) return 'radial';
-    if (name.includes('cluster')) return 'position';
+    if (name.includes('Orbit') || name.includes('radial')) return 'radial';
+    if (name.includes('cluster') || name.includes('Cluster')) return 'position';
     return 'unknown';
   };
 
-  let output = '-- Force Settings --\n';
+  let output = '-- Force Settings (V2) --\n';
 
-  for (const name of knownForces) {
-    const force = sim.force(name);
-    if (force) {
-      output += `\n${name}:\n`;
-      const forceType = getForceType(name);
-      const params = paramsByType[forceType] || [];
+  for (const name of forceNames) {
+    const force = forces[name];
+    output += `\n${name}:\n`;
+    const forceType = getForceType(name);
+    const params = paramsByType[forceType] || [];
 
-      for (const param of params) {
-        if (typeof force[param] === 'function') {
-          const val = force[param]();
-          if (typeof val === 'number') {
-            output += `  ${param}: ${val}\n`;
-          } else if (typeof val === 'function') {
-            // For function params, try to get slider value from DOM
-            // Find the force item by name, then find the slider for this param
-            const forceItems = document.querySelectorAll('.force-item');
-            let sliderValue = null;
-
-            for (const item of forceItems) {
-              const nameEl = item.querySelector('.force-name');
-              if (nameEl && nameEl.textContent === name) {
-                // Found the force item, now find the slider for this param
-                const sliders = item.querySelectorAll('.slider-row');
-                for (const row of sliders) {
-                  const label = row.querySelector('.slider-label');
-                  if (label) {
-                    // Match label to param (e.g., "Strength" -> "strength", "Dist Min" -> "distanceMin")
-                    const labelText = label.textContent.toLowerCase().replace(/\s+/g, '');
-                    const paramLower = param.toLowerCase();
-                    if (labelText.includes(paramLower) || paramLower.includes(labelText)) {
-                      const input = row.querySelector('input[type="range"]');
-                      if (input) {
-                        sliderValue = input.value;
-                        break;
-                      }
-                    }
-                  }
-                }
-                break;
-              }
-            }
-
-            if (sliderValue !== null) {
-              output += `  ${param}: <function> (slider: ${sliderValue})\n`;
-            } else {
-              output += `  ${param}: <function>\n`;
-            }
-          }
+    for (const param of params) {
+      if (typeof force[param] === 'function') {
+        const val = force[param]();
+        if (typeof val === 'number') {
+          output += `  ${param}: ${val}\n`;
+        } else if (typeof val === 'function') {
+          output += `  ${param}: <function>\n`;
         }
       }
     }
@@ -259,9 +215,9 @@ export function getForceSettings_() {
 export function copyToClipboard_(text) {
   return function() {
     navigator.clipboard.writeText(text).then(() => {
-      console.log('Settings copied to clipboard');
+      console.log('[V2] Settings copied to clipboard');
     }).catch(err => {
-      console.error('Failed to copy:', err);
+      console.error('[V2] Failed to copy:', err);
     });
   };
 }

@@ -48,7 +48,13 @@ render _ =
                 [ HP.classes [ HH.ClassName "tutorial-title" ] ]
                 [ HH.text "Building Force-Directed Graphs" ]
             , HH.p_
-                [ HH.text "PSD3 provides SimulationM and SimulationM2 capabilities for force-directed layouts." ]
+                [ HH.strong_ [ HH.text "Recommended: " ]
+                , HH.text "Use the new V3 approach with SimulationManager and SceneConfigs. See "
+                , HH.a [ HP.href "#/code-explorer-v3" ] [ HH.text "CodeExplorerV3" ]
+                , HH.text " for a complete example."
+                ]
+            , HH.p_
+                [ HH.text "The documentation below covers the older type-class based API (SimulationM/SimulationM2) which is still available but deprecated." ]
             ]
 
         -- Initialize Simulation
@@ -187,16 +193,24 @@ _ <- on (Drag (simulationDrag "my-simulation-id")) nodeCircles""" ]
             [ HP.classes [ HH.ClassName "tutorial-section" ] ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "Real Example" ]
+                [ HH.text "Real Example (V3 Recommended)" ]
             , HH.p_ [ HH.text "See force simulation in action:" ]
             , HH.ul_
                 [ HH.li_
-                    [ HH.code_ [ HH.text "src/website/Component/CodeExplorer" ]
-                    , HH.text " - Full force graph with scenes"
+                    [ HH.a [ HP.href "#/code-explorer-v3" ] [ HH.text "CodeExplorerV3" ]
+                    , HH.text " - Full force graph with multiple scenes"
                     ]
                 , HH.li_
-                    [ HH.code_ [ HH.text "src/lib/PSD3v2/Capabilities/Simulation.purs" ]
-                    , HH.text " - SimulationM type class"
+                    [ HH.code_ [ HH.text "src/website/Component/CodeExplorerV2/SimulationManager.purs" ]
+                    , HH.text " - Owns the force loop (recommended approach)"
+                    ]
+                , HH.li_
+                    [ HH.code_ [ HH.text "src/website/Component/CodeExplorerV2/SceneConfigs.purs" ]
+                    , HH.text " - Declarative force configurations per scene"
+                    ]
+                , HH.li_
+                    [ HH.code_ [ HH.text "src/website/Component/CodeExplorerV2/OrchestrationV2.purs" ]
+                    , HH.text " - Scene transitions and rendering"
                     ]
                 ]
             ]

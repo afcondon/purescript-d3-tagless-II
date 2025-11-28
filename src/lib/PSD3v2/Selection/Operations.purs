@@ -16,7 +16,6 @@ module PSD3v2.Selection.Operations
   , renderData
   , appendData
   , on
-  , onWithSimulation
   , renderTree
   , reselect
   , elementTypeToString
@@ -42,8 +41,6 @@ import Effect.Uncurried (mkEffectFn2)
 import Web.UIEvent.MouseEvent (MouseEvent, clientX, clientY, pageX, pageY)
 import Partial.Unsafe (unsafePartial, unsafeCrashWith)
 import Unsafe.Coerce (unsafeCoerce)
-import PSD3.Internal.Simulation.Types (D3SimulationState_)
-import PSD3.Internal.Types (D3Simulation_)
 import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..))
 import PSD3v2.Behavior.Types (Behavior(..), DragConfig(..), ZoomConfig(..), ScaleExtent(..))
 import PSD3v2.Behavior.FFI as BehaviorFFI
@@ -905,91 +902,6 @@ on behavior selection@(Selection impl) = do
 
 -- | Attach a behavior with simulation access (for SimulationDrag)
 -- |
--- | Works like `on` but also takes a simulation state for drag reheat.
--- | Use this from D3v2SimM when you need simulation-aware dragging.
--- |
--- | Example:
--- | ```purescript
--- | nodeCircles <- append Circle [...] nodeEnter
--- | onWithSimulation (Drag $ simulationDrag "lesmis") simState nodeCircles
--- | ```
-onWithSimulation :: forall state elem datum d. Behavior datum -> D3SimulationState_ d -> Selection state elem datum -> Effect (Selection state elem datum)
-onWithSimulation behavior simState selection@(Selection impl) = do
-  -- Extract elements from the selection
-  let elements = getElements impl
-
-  -- Apply the behavior to each element
-  traverse_ (applyBehaviorWithSim behavior simState) elements
-
-  -- Return selection unchanged
-  pure selection
-  where
-    -- Extract elements from any selection type
-    getElements :: SelectionImpl elem datum -> Array Element
-    getElements (EmptySelection { parentElements }) = parentElements
-    getElements (BoundSelection { elements: els }) = els
-    getElements (PendingSelection { parentElements }) = parentElements
-    getElements (ExitingSelection { elements: els }) = els
-
-    -- Apply behavior to a single element with simulation access
-    applyBehaviorWithSim :: Behavior datum -> D3SimulationState_ d -> Element -> Effect Unit
-    applyBehaviorWithSim (Zoom (ZoomConfig { scaleExtent: ScaleExtent scaleMin scaleMax, targetSelector })) _ element =
-      void $ BehaviorFFI.attachZoom_ element scaleMin scaleMax targetSelector
-    applyBehaviorWithSim (Drag SimpleDrag) _ element =
-      void $ BehaviorFFI.attachSimpleDrag_ element unit
-    applyBehaviorWithSim (Drag (SimulationDrag label)) simSt element =
-      -- Extract D3Simulation_ handle from simulation state
-      let simHandle = getSimulationHandle simSt
-      in void $ BehaviorFFI.attachSimulationDrag_ element (toNullable simHandle) label
-    applyBehaviorWithSim (Click handler) _ element =
-      void $ BehaviorFFI.attachClick_ element handler
-    applyBehaviorWithSim (ClickWithDatum handler) _ element =
-      void $ BehaviorFFI.attachClickWithDatum_ element handler
-    applyBehaviorWithSim (MouseEnter handler) _ element =
-      void $ BehaviorFFI.attachMouseEnter_ element handler
-    applyBehaviorWithSim (MouseLeave handler) _ element =
-      void $ BehaviorFFI.attachMouseLeave_ element handler
-    applyBehaviorWithSim (Highlight { enter, leave }) _ element =
-      void $ BehaviorFFI.attachHighlight_ element enter leave
-    -- Pure web-events versions
-    applyBehaviorWithSim (MouseMoveWithInfo handler) _ element =
-      void $ BehaviorFFI.attachMouseMoveWithEvent_ element $ mkEffectFn2 \d evt ->
-        handler { datum: d
-                , clientX: toNumber $ clientX evt
-                , clientY: toNumber $ clientY evt
-                , pageX: toNumber $ pageX evt
-                , pageY: toNumber $ pageY evt
-                , offsetX: offsetX evt
-                , offsetY: offsetY evt
-                }
-    applyBehaviorWithSim (MouseEnterWithInfo handler) _ element =
-      void $ BehaviorFFI.attachMouseEnterWithEvent_ element $ mkEffectFn2 \d evt ->
-        handler { datum: d
-                , clientX: toNumber $ clientX evt
-                , clientY: toNumber $ clientY evt
-                , pageX: toNumber $ pageX evt
-                , pageY: toNumber $ pageY evt
-                , offsetX: offsetX evt
-                , offsetY: offsetY evt
-                }
-    applyBehaviorWithSim (MouseLeaveWithInfo handler) _ element =
-      void $ BehaviorFFI.attachMouseLeaveWithEvent_ element $ mkEffectFn2 \d evt ->
-        handler { datum: d
-                , clientX: toNumber $ clientX evt
-                , clientY: toNumber $ clientY evt
-                , pageX: toNumber $ pageX evt
-                , pageY: toNumber $ pageY evt
-                , offsetX: offsetX evt
-                , offsetY: offsetY evt
-                }
-
--- | Extract D3 simulation handle from simulation state
--- | Returns Nothing if simulation is not initialized
-foreign import getSimulationHandle_ :: forall d. D3SimulationState_ d -> Nullable D3Simulation_
-
-getSimulationHandle :: forall d. D3SimulationState_ d -> Maybe D3Simulation_
-getSimulationHandle = toMaybe <<< getSimulationHandle_
-
 -- | Apply attributes to an element
 applyAttributes :: forall datum. Element -> datum -> Int -> Array (Attribute datum) -> Effect Unit
 applyAttributes element datum index attrs =

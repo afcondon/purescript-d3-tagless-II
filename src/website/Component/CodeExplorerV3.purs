@@ -10,6 +10,7 @@ module Component.CodeExplorerV3 where
 import Prelude
 
 import Component.CodeExplorerV2.OrchestrationV2 as Orch
+import Component.ForceControlPanel as FCP
 import D3.Viz.Spago.Model (SpagoModel)
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Milliseconds(..), delay)
@@ -20,11 +21,18 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import PSD3.CodeExplorer.Data (readModelData)
+import D3.Viz.Spago.Data (readModelData)
+import Type.Proxy (Proxy(..))
 
 -- =============================================================================
 -- Types
 -- =============================================================================
+
+-- | Child slots
+type Slots = ( forcePanel :: H.Slot FCP.Query Void Unit )
+
+_forcePanel :: Proxy "forcePanel"
+_forcePanel = Proxy
 
 -- | Component state
 type State =
@@ -42,6 +50,7 @@ data Action
   | GoToBubblePack
   | Reheat
   | Stop
+  | RefreshForcePanel
 
 -- =============================================================================
 -- Component
@@ -66,7 +75,7 @@ component =
 -- Render
 -- =============================================================================
 
-render :: forall m. State -> H.ComponentHTML Action () m
+render :: forall m. MonadAff m => State -> H.ComponentHTML Action Slots m
 render state =
   HH.div [ HP.class_ (HH.ClassName "code-explorer-v3") ]
     [ -- Header
@@ -100,12 +109,16 @@ render state =
             [ HH.text $ "Current: " <> state.currentScene ]
         ]
 
-    -- Visualization container
-    , HH.div
-        [ HP.id "code-explorer-v3-viz"
-        , HP.class_ (HH.ClassName "viz-container svg-container")
+    -- Visualization container with force panel overlay
+    , HH.div [ HP.class_ (HH.ClassName "viz-wrapper") ]
+        [ HH.div
+            [ HP.id "code-explorer-v3-viz"
+            , HP.class_ (HH.ClassName "viz-container svg-container")
+            ]
+            []
+        -- Force control panel (overlaid on viz)
+        , HH.slot _forcePanel unit FCP.component unit absurd
         ]
-        []
 
     -- Info
     , HH.div [ HP.class_ (HH.ClassName "info-panel") ]
@@ -120,7 +133,7 @@ render state =
         ]
     ]
 
-button :: forall m. String -> Action -> Boolean -> H.ComponentHTML Action () m
+button :: forall m. String -> Action -> Boolean -> H.ComponentHTML Action Slots m
 button label action active =
   HH.button
     [ HP.classes
@@ -135,7 +148,7 @@ button label action active =
 -- Action Handler
 -- =============================================================================
 
-handleAction :: forall output m. MonadAff m => Action -> H.HalogenM State Action () output m Unit
+handleAction :: forall output m. MonadAff m => Action -> H.HalogenM State Action Slots output m Unit
 handleAction = case _ of
   Initialize -> do
     log "[V3] Initializing..."
@@ -161,25 +174,34 @@ handleAction = case _ of
           }
         log "[V3] Initialized"
 
+        -- Refresh force panel after initialization
+        H.liftAff $ delay (Milliseconds 500.0)
+        _ <- H.tell _forcePanel unit FCP.Refresh
+        pure unit
+
   GoToOrbit -> do
     log "[V3] Going to Orbit"
     liftEffect Orch.transitionToOrbit
     H.modify_ _ { currentScene = "Orbit" }
+    handleAction RefreshForcePanel
 
   GoToTree -> do
     log "[V3] Going to Tree"
     liftEffect Orch.transitionToTree
     H.modify_ _ { currentScene = "Tree" }
+    handleAction RefreshForcePanel
 
   GoToForceGraph -> do
     log "[V3] Going to ForceGraph"
     liftEffect Orch.transitionToForceGraph
     H.modify_ _ { currentScene = "ForceGraph" }
+    handleAction RefreshForcePanel
 
   GoToBubblePack -> do
     log "[V3] Going to BubblePack"
     liftEffect Orch.transitionToBubblePack
     H.modify_ _ { currentScene = "BubblePack" }
+    handleAction RefreshForcePanel
 
   Reheat -> do
     log "[V3] Reheating"
@@ -188,3 +210,9 @@ handleAction = case _ of
   Stop -> do
     log "[V3] Stopping"
     liftEffect Orch.stopSimulation
+
+  RefreshForcePanel -> do
+    -- Small delay to let forces be registered
+    H.liftAff $ delay (Milliseconds 200.0)
+    _ <- H.tell _forcePanel unit FCP.Refresh
+    pure unit

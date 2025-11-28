@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>D3 Critical Behavior Tests</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+    .test { margin: 20px 0; padding: 15px; background: white; border: 2px solid #333; }
+    .pass { color: green; font-weight: bold; }
+    .fail { color: red; font-weight: bold; }
+    .info { color: blue; }
+    h2 { border-bottom: 2px solid #333; }
+  </style>
+</head>
+<body>
+  <h1>D3 Critical Behavior Tests</h1>
+  <p><strong>Focused tests on the exact D3 behaviors needed for PureScript</strong></p>
+  <div id="results"></div>
+
+  <script>
+    console.log('\n🔬 D3 CRITICAL BEHAVIOR TESTS\n');
+    console.log('Testing the exact D3 behaviors that PureScript PSD3 depends on\n');
+
+    const results = document.getElementById('results');
+    let passed = 0;
+    let failed = 0;
+
+    function test(name, fn) {
+      console.log('\n' + '─'.repeat(60));
+      console.log(`📋 ${name}`);
+      console.log('─'.repeat(60));
+
+      const div = document.createElement('div');
+      div.className = 'test';
+      div.innerHTML = `<h2>${name}</h2>`;
+      results.appendChild(div);
+
+      try {
+        fn(div);
+      } catch (e) {
+        log(div, `ERROR: ${e.message}`, false);
+        console.error('❌ Test threw error:', e);
+      }
+    }
+
+    function log(parent, message, pass = null) {
+      const p = document.createElement('p');
+      if (pass === true) {
+        p.className = 'pass';
+        p.textContent = '✅ PASS: ' + message;
+        console.log('✅', message);
+        passed++;
+      } else if (pass === false) {
+        p.className = 'fail';
+        p.textContent = '❌ FAIL: ' + message;
+        console.log('❌', message);
+        failed++;
+      } else {
+        p.className = 'info';
+        p.textContent = 'ℹ️  ' + message;
+        console.log('ℹ️ ', message);
+      }
+      parent.appendChild(p);
+    }
+
+    // ========================================================================
+    // TEST 1: Force handles are mutable references
+    // ========================================================================
+    test('1. Force Handles Are Mutable References', (div) => {
+      const sim = d3.forceSimulation([]).stop();
+      const force1 = d3.forceCenter(100, 100);
+
+      sim.force('center', force1);
+      log(div, 'Added center force at (100, 100)');
+
+      // Modify via original reference
+      force1.x(200);
+
+      const retrieved = sim.force('center');
+      log(div, `Force x after modification: ${retrieved.x()}`, retrieved.x() === 200);
+
+      // Key finding
+      if (retrieved.x() === 200) {
+        log(div, 'CONCLUSION: Force handles are MUTABLE - modifying the original affects simulation');
+      }
+    });
+
+    // ========================================================================
+    // TEST 2: Setting force to null removes it
+    // ========================================================================
+    test('2. Setting Force to Null Removes It', (div) => {
+      const sim = d3.forceSimulation([]).stop();
+      sim.force('center', d3.forceCenter(100, 100));
+
+      log(div, 'Added center force');
+
+      sim.force('center', null);
+      const after = sim.force('center');
+
+      log(div, `Force after setting to null: ${after}`, after === null || after === undefined);
+
+      if (after === null || after === undefined) {
+        log(div, 'CONCLUSION: Setting force to null properly removes it');
+      }
+    });
+
+    // ========================================================================
+    // TEST 3: Old force handles don't affect simulation after removal
+    // ========================================================================
+    test('3. Old Force Handles Don\'t Affect Simulation After Removal', (div) => {
+      const nodes = [{ id: 0, x: 0, y: 0, vx: 0, vy: 0 }];
+      const sim = d3.forceSimulation(nodes).stop();
+
+      // Add force and keep reference
+      const oldForce = d3.forceCenter(200, 200);
+      sim.force('center', oldForce);
+
+      log(div, 'Added center force at (200, 200)');
+
+      // Run a few ticks
+      for (let i = 0; i < 10; i++) sim.tick();
+      const pos1 = { x: nodes[0].x, y: nodes[0].y };
+      log(div, `After 10 ticks: (${pos1.x.toFixed(2)}, ${pos1.y.toFixed(2)})`);
+
+      // Remove force
+      sim.force('center', null);
+      log(div, 'Removed force by setting to null');
+
+      // Reset position
+      nodes[0].x = 0;
+      nodes[0].y = 0;
+      nodes[0].vx = 0;
+      nodes[0].vy = 0;
+
+      // Try to modify old force
+      oldForce.x(400).y(400);
+      log(div, 'Modified OLD force handle to (400, 400)');
+
+      // Run ticks
+      sim.alpha(0.5);
+      for (let i = 0; i < 10; i++) sim.tick();
+      const pos2 = { x: nodes[0].x, y: nodes[0].y };
+      log(div, `After 10 ticks: (${pos2.x.toFixed(2)}, ${pos2.y.toFixed(2)})`);
+
+      // Check if node moved toward old force
+      const distToOld = Math.sqrt(Math.pow(pos2.x - 400, 2) + Math.pow(pos2.y - 400, 2));
+      const movedTowardOld = distToOld < Math.sqrt(400*400 + 400*400);
+
+      log(div, `Node moved toward old force location: ${movedTowardOld}`, !movedTowardOld);
+
+      if (!movedTowardOld) {
+        log(div, 'CONCLUSION: Old force handles DO NOT affect simulation after removal ✓');
+      } else {
+        log(div, 'CONCLUSION: Old force handles STILL AFFECT simulation! This is the bug!');
+      }
+    });
+
+    // ========================================================================
+    // TEST 4: simulation.nodes() preserves object references
+    // ========================================================================
+    test('4. simulation.nodes() Preserves Object References', (div) => {
+      const nodes = [
+        { id: 'A', x: 0, y: 0 },
+        { id: 'B', x: 100, y: 0 }
+      ];
+
+      const nodeA = nodes[0];
+      const sim = d3.forceSimulation(nodes).stop();
+
+      log(div, 'Created simulation with 2 nodes');
+
+      // Update with one node removed
+      const newNodes = [nodes[0]]; // Keep A, remove B
+      sim.nodes(newNodes);
+
+      const retrieved = sim.nodes();
+      log(div, `Retrieved ${retrieved.length} nodes`, retrieved.length === 1);
+      log(div, 'Node A is same object', retrieved[0] === nodeA);
+
+      if (retrieved[0] === nodeA) {
+        log(div, 'CONCLUSION: simulation.nodes() preserves object identity ✓');
+      }
+    });
+
+    // ========================================================================
+    // TEST 5: New nodes get D3 properties
+    // ========================================================================
+    test('5. New Nodes Get D3 Properties', (div) => {
+      const nodes = [{ id: 'A', x: 0, y: 0 }];
+      const sim = d3.forceSimulation(nodes).stop();
+
+      log(div, 'Created simulation with 1 node');
+
+      // Add new node
+      const newNode = { id: 'B', x: 100, y: 0 };
+      nodes.push(newNode);
+      sim.nodes(nodes);
+
+      log(div, 'Added new node B');
+
+      const hasVx = 'vx' in newNode;
+      const hasVy = 'vy' in newNode;
+      const hasFx = 'fx' in newNode;
+      const hasFy = 'fy' in newNode;
+
+      log(div, `New node has vx: ${hasVx}`, hasVx);
+      log(div, `New node has vy: ${hasVy}`, hasVy);
+      log(div, `New node has fx: ${hasFx}`, hasFx);
+      log(div, `New node has fy: ${hasFy}`, hasFy);
+
+      if (hasVx && hasVy && hasFx && hasFy) {
+        log(div, 'CONCLUSION: New nodes get all D3 properties ✓');
+      }
+    });
+
+    // ========================================================================
+    // TEST 6: Changing forces then calling simulation.nodes() works
+    // ========================================================================
+    test('6. Force Change + GUP Update Works', (div) => {
+      const nodes = [{ id: 'A', x: 100, y: 300 }];
+      const sim = d3.forceSimulation(nodes)
+        .force('center', d3.forceCenter(200, 300))
+        .stop();
+
+      log(div, 'Created with center force at (200, 300)');
+
+      // Change force configuration
+      sim.force('center', null);
+      sim.force('x', d3.forceX(400).strength(0.1));
+      log(div, 'Changed forces: removed center, added forceX(400)');
+
+      // Do GUP update
+      const newNodes = [nodes[0], { id: 'B', x: 150, y: 300 }];
+      sim.nodes(newNodes);
+      log(div, 'Updated nodes: kept A, added B');
+
+      // Run simulation
+      sim.alpha(0.5);
+      for (let i = 0; i < 30; i++) sim.tick();
+
+      log(div, `Node A final x: ${newNodes[0].x.toFixed(2)}`);
+      log(div, `Node B final x: ${newNodes[1].x.toFixed(2)}`);
+
+      const aMovedRight = newNodes[0].x > 100;
+      const bMovedRight = newNodes[1].x > 150;
+
+      log(div, 'Node A moved toward x=400', aMovedRight);
+      log(div, 'Node B moved toward x=400', bMovedRight);
+
+      if (aMovedRight && bMovedRight) {
+        log(div, 'CONCLUSION: Force changes + GUP work together correctly ✓');
+      }
+    });
+
+    // ========================================================================
+    // TEST 7: Alpha management after force changes
+    // ========================================================================
+    test('7. Alpha Must Be Manually Set After Force Changes', (div) => {
+      const sim = d3.forceSimulation([{ id: 'A', x: 0, y: 0 }])
+        .force('center', d3.forceCenter(100, 100))
+        .stop();
+
+      // Let it cool
+      for (let i = 0; i < 300; i++) sim.tick();
+      const alphaCooled = sim.alpha();
+      log(div, `Alpha after cooling: ${alphaCooled.toFixed(6)}`);
+
+      // Change force
+      sim.force('center', null);
+      sim.force('x', d3.forceX(200));
+
+      const alphaAfterChange = sim.alpha();
+      log(div, `Alpha after force change: ${alphaAfterChange.toFixed(6)}`);
+
+      const alphaUnchanged = Math.abs(alphaAfterChange - alphaCooled) < 0.0001;
+      log(div, 'Alpha unchanged by force modification', alphaUnchanged);
+
+      if (alphaUnchanged) {
+        log(div, 'CONCLUSION: Must manually call .alpha() or .restart() after force changes ✓');
+      }
+    });
+
+    // ========================================================================
+    // SUMMARY
+    // ========================================================================
+    console.log('\n' + '='.repeat(60));
+    console.log('📊 SUMMARY');
+    console.log('='.repeat(60));
+    console.log(`✅ Passed: ${passed}`);
+    console.log(`❌ Failed: ${failed}`);
+    console.log('='.repeat(60));
+
+    if (failed === 0) {
+      console.log('\n✅ ALL CRITICAL TESTS PASSED');
+      console.log('D3 is behaving correctly. Issues are in PureScript code.');
+    } else {
+      console.log('\n❌ SOME TESTS FAILED');
+      console.log('Review failures above to understand D3 behavior.');
+    }
+
+    const summary = document.createElement('div');
+    summary.className = 'test';
+    summary.innerHTML = `
+      <h2>Summary</h2>
+      <p class="${failed === 0 ? 'pass' : 'fail'}">
+        ${passed} passed, ${failed} failed
+      </p>
+      <p>
+        ${failed === 0
+          ? '✅ All critical D3 behaviors work as expected. The issue is in our PureScript code.'
+          : '❌ Some D3 behaviors don\'t match expectations. Review failures above.'}
+      </p>
+    `;
+    results.appendChild(summary);
+  </script>
+</body>
+</html>

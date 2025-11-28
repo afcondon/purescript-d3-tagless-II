@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>D3 GUP + Forces Integration Test</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+    .test-section {
+      margin: 20px 0;
+      padding: 20px;
+      border: 2px solid #666;
+      background: white;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    }
+    .test-title {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #222;
+      border-bottom: 2px solid #222;
+      padding-bottom: 5px;
+    }
+    .step {
+      margin: 10px 0;
+      padding: 10px;
+      background: #f9f9f9;
+      border-left: 4px solid #666;
+    }
+    .step-title {
+      font-weight: bold;
+      color: #444;
+    }
+    .result {
+      margin: 5px 0 5px 20px;
+      padding: 5px;
+    }
+    .pass { color: green; font-weight: bold; }
+    .fail { color: red; font-weight: bold; }
+    .info { color: blue; }
+    .warn { color: orange; font-weight: bold; }
+    .critical { color: red; background: #ffe0e0; padding: 10px; font-weight: bold; }
+    pre {
+      background: #eee;
+      padding: 10px;
+      overflow-x: auto;
+      margin: 5px 0;
+      font-size: 11px;
+      border: 1px solid #ccc;
+    }
+    .node-state {
+      display: inline-block;
+      margin: 2px 5px;
+      padding: 3px 8px;
+      background: #e0e0e0;
+      border-radius: 3px;
+    }
+    #visualization {
+      margin: 20px 0;
+      border: 2px solid #333;
+      background: white;
+    }
+    .timeline {
+      margin: 20px 0;
+      padding: 15px;
+      background: #e8f4f8;
+      border: 1px solid #0066cc;
+    }
+    .timeline-event {
+      margin: 5px 0;
+      padding: 5px 10px;
+      background: white;
+      border-left: 3px solid #0066cc;
+    }
+  </style>
+</head>
+<body>
+  <h1>D3 General Update Pattern + Forces Integration Test</h1>
+  <p style="background: #fffacd; padding: 15px; border: 1px solid #666;">
+    <strong>Purpose:</strong> This test simulates exactly what PureScript PSD3 needs to do:
+    <br/>1. Manage nodes entering/exiting (General Update Pattern)
+    <br/>2. Change force configurations dynamically
+    <br/>3. Handle transitions
+    <br/>4. Keep simulation synchronized with DOM
+  </p>
+
+  <div id="results"></div>
+
+  <div class="test-section">
+    <div class="test-title">VISUALIZATION</div>
+    <svg id="visualization" width="800" height="600"></svg>
+  </div>
+
+  <script>
+    const svg = d3.select('#visualization');
+    const resultsDiv = document.getElementById('results');
+
+    function logSection(title) {
+      const section = document.createElement('div');
+      section.className = 'test-section';
+      section.innerHTML = `<div class="test-title">${title}</div>`;
+      resultsDiv.appendChild(section);
+
+      // Console logging
+      console.log('\n' + '='.repeat(80));
+      console.log(`📋 ${title}`);
+      console.log('='.repeat(80));
+
+      return section;
+    }
+
+    function logStep(section, title, content) {
+      const step = document.createElement('div');
+      step.className = 'step';
+      step.innerHTML = `<div class="step-title">${title}</div>${content}`;
+      section.appendChild(step);
+
+      // Console logging
+      const cleanContent = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+      console.log(`  ▶ ${title}`);
+      if (cleanContent) console.log(`    ${cleanContent.substring(0, 100)}${cleanContent.length > 100 ? '...' : ''}`);
+
+      return step;
+    }
+
+    function logResult(parent, message, type = 'info') {
+      const result = document.createElement('div');
+      result.className = `result ${type}`;
+      result.innerHTML = message;
+      parent.appendChild(result);
+
+      // Console logging with emoji
+      const cleanMessage = message.replace(/<[^>]*>/g, '').trim();
+      const emoji = type === 'pass' ? '✅' : type === 'fail' ? '❌' : type === 'warn' ? '⚠️' : type === 'critical' ? '🔴' : 'ℹ️';
+      console.log(`    ${emoji} ${cleanMessage}`);
+    }
+
+    function inspectNode(node, label) {
+      return `<div class="node-state">${label}: id=${node.id}, x=${node.x?.toFixed(1)}, y=${node.y?.toFixed(1)}, vx=${node.vx?.toFixed(2)}, vy=${node.vy?.toFixed(2)}</div>`;
+    }
+
+    function getAllForceNames(simulation) {
+      const forces = [];
+      // D3 doesn't expose force names directly, but we can check common ones
+      ['center', 'charge', 'collide', 'x', 'y', 'link', 'radial'].forEach(name => {
+        if (simulation.force(name) !== undefined) {
+          forces.push(name);
+        }
+      });
+      return forces;
+    }
+
+    // ============================================================================
+    // SCENARIO 1: Basic GUP without force changes
+    // ============================================================================
+    function scenario1_BasicGUP() {
+      const section = logSection('SCENARIO 1: Basic General Update Pattern (No Force Changes)');
+
+      // Initial data
+      let data = [
+        { id: 'A', x: 100, y: 300 },
+        { id: 'B', x: 200, y: 300 },
+        { id: 'C', x: 300, y: 300 }
+      ];
+
+      const simulation = d3.forceSimulation(data)
+        .force('center', d3.forceCenter(400, 300))
+        .force('charge', d3.forceManyBody().strength(-30))
+        .alpha(0.3)
+        .stop();
+
+      logStep(section, 'Step 1: Create simulation with 3 nodes (A, B, C)',
+        `Forces: center, charge<br/>${data.map((n,i) => inspectNode(n, `Node ${i}`)).join('')}`);
+
+      // Render circles
+      let circles = svg.selectAll('circle')
+        .data(data, d => d.id)
+        .join('circle')
+        .attr('r', 20)
+        .attr('fill', 'steelblue')
+        .attr('cx', d => d.x)
+        .attr('cy', d => d.y);
+
+      // Run simulation a bit
+      for (let i = 0; i < 20; i++) {
+        simulation.tick();
+        circles.attr('cx', d => d.x).attr('cy', d => d.y);
+      }
+
+      logResult(section, `After 20 ticks: ${data.map((n,i) => inspectNode(n, n.id)).join('')}`, 'info');
+
+      // UPDATE: Remove B, add D
+      data = [
+        data[0],  // Keep A (same object)
+        { id: 'D', x: 400, y: 300 }  // New node D
+      ];
+
+      logStep(section, 'Step 2: GUP Update - Remove B, Add D',
+        `New data array length: ${data.length}`);
+
+      // Update simulation - THIS IS THE KEY OPERATION
+      simulation.nodes(data);
+
+      logResult(section, `simulation.nodes() called with new data`, 'info');
+
+      // Check what happened to references
+      const retrievedNodes = simulation.nodes();
+      logResult(section, `Retrieved ${retrievedNodes.length} nodes from simulation`,
+        retrievedNodes.length === 2 ? 'pass' : 'fail');
+
+      // Update DOM
+      circles = svg.selectAll('circle')
+        .data(data, d => d.id)
+        .join(
+          enter => enter.append('circle')
+            .attr('r', 20)
+            .attr('fill', 'lightgreen')
+            .attr('cx', d => d.x)
+            .attr('cy', d => d.y),
+          update => update.attr('fill', 'steelblue'),
+          exit => exit.remove()
+        );
+
+      logStep(section, 'Step 3: Updated DOM with enter/update/exit',
+        `Now showing ${circles.size()} circles`);
+
+      // Run more ticks
+      simulation.alpha(0.3);
+      for (let i = 0; i < 20; i++) {
+        simulation.tick();
+        circles.attr('cx', d => d.x).attr('cy', d => d.y);
+      }
+
+      logResult(section, `After 20 more ticks: ${data.map(n => inspectNode(n, n.id)).join('')}`, 'info');
+
+      const nodeAMoved = Math.abs(data[0].vx) > 0.01 || Math.abs(data[0].vy) > 0.01;
+      logResult(section, `Node A still moving: ${nodeAMoved ? 'YES' : 'NO'} (vx=${data[0].vx?.toFixed(3)}, vy=${data[0].vy?.toFixed(3)})`,
+        nodeAMoved ? 'pass' : 'warn');
+
+      simulation.stop();
+      return { simulation, data, section };
+    }
+
+    // ============================================================================
+    // SCENARIO 2: GUP + Force Configuration Change
+    // ============================================================================
+    function scenario2_GUPWithForceChange() {
+      svg.selectAll('*').remove(); // Clear
+
+      const section = logSection('SCENARIO 2: GUP + Force Configuration Change (The PureScript Case)');
+
+      // Initial data
+      let data = [
+        { id: 'A', x: 100, y: 300 },
+        { id: 'B', x: 200, y: 300 },
+        { id: 'C', x: 300, y: 300 }
+      ];
+
+      const simulation = d3.forceSimulation(data)
+        .force('center', d3.forceCenter(400, 300))
+        .force('charge', d3.forceManyBody().strength(-30))
+        .alpha(0.3)
+        .stop();
+
+      logStep(section, 'Step 1: Create simulation with 3 nodes + 2 forces',
+        `Forces: center (400,300), charge (-30)`);
+
+      // Render
+      let circles = svg.selectAll('circle')
+        .data(data, d => d.id)
+        .join('circle')
+        .attr('r', 20)
+        .attr('fill', 'steelblue')
+        .attr('cx', d => d.x)
+        .attr('cy', d => d.y);
+
+      for (let i = 0; i < 20; i++) {
+        simulation.tick();
+        circles.attr('cx', d => d.x).attr('cy', d => d.y);
+      }
+
+      logResult(section, `After 20 ticks: ${data.map(n => inspectNode(n, n.id)).join('')}`, 'info');
+
+      // CHANGE FORCE CONFIGURATION
+      logStep(section, 'Step 2: Change Force Configuration',
+        `Remove: center, charge<br/>Add: collide, x, y`);
+
+      simulation.force('center', null);
+      simulation.force('charge', null);
+      simulation.force('collide', d3.forceCollide(30));
+      simulation.force('x', d3.forceX(500).strength(0.1));
+      simulation.force('y', d3.forceY(200).strength(0.1));
+
+      logResult(section, 'Forces removed and new ones added', 'info');
+
+      // Check alpha after force change
+      const alphaAfterForceChange = simulation.alpha();
+      logResult(section, `Alpha after force change: ${alphaAfterForceChange.toFixed(4)}`,
+        alphaAfterForceChange > 0 ? 'info' : 'warn');
+
+      // NOW DO GUP UPDATE
+      logStep(section, 'Step 3: GUP Update - Remove B, Add D',
+        `This simulates what PureScript does`);
+
+      data = [
+        data[0],  // Keep A
+        { id: 'D', x: 250, y: 300 }  // New node D
+      ];
+
+      simulation.nodes(data);
+
+      // Update DOM
+      circles = svg.selectAll('circle')
+        .data(data, d => d.id)
+        .join(
+          enter => enter.append('circle')
+            .attr('r', 20)
+            .attr('fill', 'lightgreen')
+            .attr('cx', d => d.x)
+            .attr('cy', d => d.y),
+          update => update.attr('fill', 'orange'),
+          exit => exit.attr('fill', 'red').remove()
+        );
+
+      logResult(section, `simulation.nodes() called, DOM updated`, 'info');
+
+      // Check if new forces are working
+      const alphaBeforeRestart = simulation.alpha();
+      simulation.alpha(0.5); // Manually reheat
+      const alphaAfterReheat = simulation.alpha();
+
+      logResult(section, `Alpha: before=${alphaBeforeRestart.toFixed(4)}, after reheat=${alphaAfterReheat.toFixed(4)}`, 'info');
+
+      // Run simulation with new forces
+      for (let i = 0; i < 30; i++) {
+        simulation.tick();
+        circles.attr('cx', d => d.x).attr('cy', d => d.y);
+      }
+
+      logResult(section, `After 30 ticks with new forces: ${data.map(n => inspectNode(n, n.id)).join('')}`, 'info');
+
+      // Check if nodes moved toward new force targets
+      const nodeAMovedTowardX500 = data[0].x > 100; // Should move right
+      const nodeAMovedTowardY200 = data[0].y < 300; // Should move up
+
+      logResult(section, `Node A moved toward x=500: ${nodeAMovedTowardX500 ? 'YES' : 'NO'} (x=${data[0].x.toFixed(1)})`,
+        nodeAMovedTowardX500 ? 'pass' : 'fail');
+      logResult(section, `Node A moved toward y=200: ${nodeAMovedTowardY200 ? 'YES' : 'NO'} (y=${data[0].y.toFixed(1)})`,
+        nodeAMovedTowardY200 ? 'pass' : 'fail');
+
+      simulation.stop();
+      return { simulation, data, section };
+    }
+
+    // ============================================================================
+    // SCENARIO 3: Multiple rapid force changes + GUP
+    // ============================================================================
+    function scenario3_RapidChanges() {
+      svg.selectAll('*').remove();
+
+      const section = logSection('SCENARIO 3: Rapid Force Changes + GUP (Scene Transitions)');
+
+      let data = [
+        { id: 'A', x: 100, y: 300 },
+        { id: 'B', x: 200, y: 300 }
+      ];
+
+      const simulation = d3.forceSimulation(data)
+        .force('center', d3.forceCenter(400, 300))
+        .alpha(0.3)
+        .stop();
+
+      logStep(section, 'Step 1: Initial simulation', 'Force: center (400, 300)');
+
+      // Render
+      let circles = svg.selectAll('circle')
+        .data(data, d => d.id)
+        .join('circle')
+        .attr('r', 15)
+        .attr('fill', 'steelblue')
+        .attr('cx', d => d.x)
+        .attr('cy', d => d.y);
+
+      // Scene 1 → Scene 2 transition
+      logStep(section, 'Step 2: Transition to Scene 2',
+        'Remove all forces, add collide + charge');
+
+      simulation.force('center', null);
+      simulation.force('collide', d3.forceCollide(25));
+      simulation.force('charge', d3.forceManyBody().strength(-50));
+      simulation.alpha(0.5);
+
+      for (let i = 0; i < 15; i++) {
+        simulation.tick();
+        circles.attr('cx', d => d.x).attr('cy', d => d.y);
+      }
+
+      logResult(section, `After Scene 2 forces: ${data.map(n => inspectNode(n, n.id)).join('')}`, 'info');
+
+      // Add node during Scene 2
+      data.push({ id: 'C', x: 300, y: 300 });
+      simulation.nodes(data);
+
+      circles = svg.selectAll('circle')
+        .data(data, d => d.id)
+        .join('circle')
+        .attr('r', 15)
+        .attr('fill', 'lightgreen')
+        .attr('cx', d => d.x)
+        .attr('cy', d => d.y);
+
+      logResult(section, 'Added node C', 'info');
+
+      // Scene 2 → Scene 3 transition
+      logStep(section, 'Step 3: Transition to Scene 3',
+        'Replace with radial force');
+
+      simulation.force('collide', null);
+      simulation.force('charge', null);
+      simulation.force('radial', d3.forceRadial(100, 400, 300));
+      simulation.alpha(0.5);
+
+      for (let i = 0; i < 20; i++) {
+        simulation.tick();
+        circles.attr('cx', d => d.x).attr('cy', d => d.y);
+      }
+
+      logResult(section, `After Scene 3 forces: ${data.map(n => inspectNode(n, n.id)).join('')}`, 'info');
+
+      // Check if nodes are at ~100px radius from (400, 300)
+      const distances = data.map(n => {
+        const dx = n.x - 400;
+        const dy = n.y - 300;
+        return Math.sqrt(dx * dx + dy * dy);
+      });
+
+      const avgDistance = distances.reduce((a, b) => a + b, 0) / distances.length;
+      const atCorrectRadius = Math.abs(avgDistance - 100) < 30;
+
+      logResult(section, `Average distance from center: ${avgDistance.toFixed(1)}px (target: 100px)`,
+        atCorrectRadius ? 'pass' : 'fail');
+
+      simulation.stop();
+      return { simulation, data, section };
+    }
+
+    // ============================================================================
+    // SCENARIO 4: The problematic case - Old forces persisting
+    // ============================================================================
+    function scenario4_OldForcesPersisting() {
+      svg.selectAll('*').remove();
+
+      const section = logSection('SCENARIO 4: Testing if Old Force Handles Persist (The Bug)');
+
+      let data = [{ id: 'A', x: 100, y: 100 }];
+
+      const simulation = d3.forceSimulation(data)
+        .force('center', d3.forceCenter(200, 200))
+        .stop();
+
+      logStep(section, 'Step 1: Create with center force at (200, 200)', '');
+
+      // Get reference to force
+      const oldCenterForce = simulation.force('center');
+      logResult(section, `Old center force: x=${oldCenterForce.x()}, y=${oldCenterForce.y()}`, 'info');
+
+      // Run a bit
+      for (let i = 0; i < 10; i++) simulation.tick();
+      const pos1 = { x: data[0].x, y: data[0].y };
+      logResult(section, `After 10 ticks: (${pos1.x.toFixed(1)}, ${pos1.y.toFixed(1)})`, 'info');
+
+      // Remove force
+      logStep(section, 'Step 2: Remove center force by setting to null', '');
+      simulation.force('center', null);
+
+      const forceAfterNull = simulation.force('center');
+      logResult(section, `Force after null: ${forceAfterNull}`,
+        forceAfterNull === null || forceAfterNull === undefined ? 'pass' : 'fail');
+
+      // Reset position and velocity
+      data[0].x = 100;
+      data[0].y = 100;
+      data[0].vx = 0;
+      data[0].vy = 0;
+
+      // Try to modify old force handle
+      logStep(section, 'Step 3: Try modifying old force handle',
+        'This tests if the old handle still affects simulation');
+
+      oldCenterForce.x(400).y(400);
+      logResult(section, `Modified old force to (400, 400)`, 'warn');
+
+      simulation.alpha(0.5);
+      for (let i = 0; i < 10; i++) simulation.tick();
+      const pos2 = { x: data[0].x, y: data[0].y };
+
+      logResult(section, `After 10 ticks: (${pos2.x.toFixed(1)}, ${pos2.y.toFixed(1)})`, 'info');
+
+      const movedTowardOldForce = Math.abs(pos2.x - 400) < Math.abs(pos1.x - 400);
+
+      if (movedTowardOldForce) {
+        logResult(section, '🔴 CRITICAL: Node moved toward old force location!', 'critical');
+        logResult(section, 'This means force handles persist even after removal', 'critical');
+      } else {
+        logResult(section, '✓ Node did NOT move toward old force - handles properly removed', 'pass');
+      }
+
+      // Add NEW center force
+      logStep(section, 'Step 4: Add NEW center force at (600, 300)', '');
+
+      simulation.force('center', d3.forceCenter(600, 300));
+      const newForce = simulation.force('center');
+
+      logResult(section, `New force is ${newForce === oldCenterForce ? 'SAME' : 'DIFFERENT'} object`,
+        newForce !== oldCenterForce ? 'pass' : 'fail');
+
+      data[0].x = 100;
+      data[0].y = 100;
+      data[0].vx = 0;
+      data[0].vy = 0;
+
+      simulation.alpha(0.5);
+      for (let i = 0; i < 10; i++) simulation.tick();
+      const pos3 = { x: data[0].x, y: data[0].y };
+
+      logResult(section, `After 10 ticks with new force: (${pos3.x.toFixed(1)}, ${pos3.y.toFixed(1)})`, 'info');
+
+      const movedTowardNewForce = pos3.x > 100;
+      logResult(section, `Node moved toward new force: ${movedTowardNewForce ? 'YES' : 'NO'}`,
+        movedTowardNewForce ? 'pass' : 'fail');
+
+      simulation.stop();
+    }
+
+    // ============================================================================
+    // SCENARIO 5: Simulating PureScript's exact pattern
+    // ============================================================================
+    function scenario5_PureScriptPattern() {
+      svg.selectAll('*').remove();
+
+      const section = logSection('SCENARIO 5: Exact PureScript Pattern Simulation');
+
+      logStep(section, 'Pattern Overview', `
+        1. Initialize with Old Forces system (mutable handles)<br/>
+        2. Apply V2 Config (immutable, removes all forces, adds new ones)<br/>
+        3. Do GUP update (nodes enter/exit)<br/>
+        4. Start simulation
+      `);
+
+      // Step 1: "Old" system initialization
+      let data = [
+        { id: 'M1', x: 100, y: 300 },
+        { id: 'M2', x: 200, y: 300 }
+      ];
+
+      const simulation = d3.forceSimulation(data);
+
+      // Simulate "old" system adding forces
+      const oldForces = {
+        charge: d3.forceManyBody().strength(-30),
+        center: d3.forceCenter(400, 300),
+        collision: d3.forceCollide(20)
+      };
+
+      simulation.force('charge', oldForces.charge);
+      simulation.force('center', oldForces.center);
+      simulation.force('collision', oldForces.collision);
+
+      simulation.stop();
+
+      logStep(section, 'Step 1: Old System Initialized',
+        `Forces: charge, center, collision (mutable handles stored)`);
+
+      // Step 2: V2 config "removes all and adds new"
+      logStep(section, 'Step 2: Apply V2 Config',
+        `Remove all forces, add new configuration`);
+
+      // V2: Remove all forces
+      simulation.force('charge', null);
+      simulation.force('center', null);
+      simulation.force('collision', null);
+
+      // V2: Add new forces
+      simulation.force('clusterX', d3.forceX(500).strength(0.1));
+      simulation.force('clusterY', d3.forceY(200).strength(0.1));
+      simulation.force('collide', d3.forceCollide(25));
+
+      simulation.alpha(0.3);
+
+      logResult(section, 'V2 forces applied: clusterX, clusterY, collide', 'info');
+
+      // Step 3: GUP Update
+      logStep(section, 'Step 3: GUP Update',
+        `Remove M2, add M3`);
+
+      data = [
+        data[0],  // Keep M1
+        { id: 'M3', x: 300, y: 300 }
+      ];
+
+      simulation.nodes(data);
+
+      // Render
+      const circles = svg.selectAll('circle')
+        .data(data, d => d.id)
+        .join('circle')
+        .attr('r', 15)
+        .attr('fill', d => d.id === 'M3' ? 'lightgreen' : 'steelblue')
+        .attr('cx', d => d.x)
+        .attr('cy', d => d.y);
+
+      logResult(section, `Nodes updated: ${data.length} nodes in simulation`, 'info');
+
+      // Step 4: Run simulation
+      logStep(section, 'Step 4: Run Simulation',
+        `Execute ticks and update positions`);
+
+      for (let i = 0; i < 30; i++) {
+        simulation.tick();
+        circles.attr('cx', d => d.x).attr('cy', d => d.y);
+      }
+
+      logResult(section, `After 30 ticks: ${data.map(n => inspectNode(n, n.id)).join('')}`, 'info');
+
+      // Validate
+      const m1MovedRight = data[0].x > 100;
+      const m1MovedUp = data[0].y < 300;
+      const m3HasVelocity = 'vx' in data[1] && 'vy' in data[1];
+
+      logResult(section, `M1 moved right (toward x=500): ${m1MovedRight ? 'YES' : 'NO'}`,
+        m1MovedRight ? 'pass' : 'fail');
+      logResult(section, `M1 moved up (toward y=200): ${m1MovedUp ? 'YES' : 'NO'}`,
+        m1MovedUp ? 'pass' : 'fail');
+      logResult(section, `M3 got velocity fields: ${m3HasVelocity ? 'YES' : 'NO'}`,
+        m3HasVelocity ? 'pass' : 'fail');
+
+      if (m1MovedRight && m1MovedUp && m3HasVelocity) {
+        logResult(section, '✅ V2 forces working correctly after GUP update!', 'pass');
+      } else {
+        logResult(section, '❌ Something is wrong with the force/GUP interaction', 'fail');
+      }
+
+      simulation.stop();
+    }
+
+    // ============================================================================
+    // RUN ALL SCENARIOS
+    // ============================================================================
+    console.log('\n\n🚀 STARTING GUP + FORCES INTEGRATION TESTS\n');
+    console.log('These tests simulate the exact patterns PureScript PSD3 uses\n');
+
+    const results = {
+      pass: 0,
+      fail: 0,
+      warn: 0,
+      critical: 0,
+      total: 0
+    };
+
+    // Track results
+    const originalLogResult = logResult;
+    logResult = function(parent, message, type = 'info') {
+      originalLogResult(parent, message, type);
+      if (type === 'pass') results.pass++;
+      if (type === 'fail') results.fail++;
+      if (type === 'warn') results.warn++;
+      if (type === 'critical') results.critical++;
+      if (type !== 'info') results.total++;
+    };
+
+    scenario1_BasicGUP();
+    scenario2_GUPWithForceChange();
+    scenario3_RapidChanges();
+    scenario4_OldForcesPersisting();
+    scenario5_PureScriptPattern();
+
+    // Print summary to console
+    console.log('\n' + '='.repeat(80));
+    console.log('📊 INTEGRATION TEST SUMMARY');
+    console.log('='.repeat(80));
+    console.log(`Total assertions: ${results.total}`);
+    console.log(`✅ Passed: ${results.pass}`);
+    console.log(`❌ Failed: ${results.fail}`);
+    console.log(`⚠️  Warnings: ${results.warn}`);
+    console.log(`🔴 Critical: ${results.critical}`);
+
+    if (results.critical > 0) {
+      console.log('\n🔴🔴🔴 CRITICAL ISSUES FOUND 🔴🔴🔴');
+      console.log('These issues directly explain the PureScript bugs!');
+      console.log('Review the critical test failures above.');
+    } else if (results.fail > 0) {
+      console.log('\n❌ FAILURES DETECTED - Review failed tests above');
+    } else if (results.warn > 0) {
+      console.log('\n⚠️  WARNINGS PRESENT - Review warnings above');
+    } else {
+      console.log('\n✅ ALL TESTS PASSED - D3 behaving as expected!');
+      console.log('The issue is likely in our PureScript code, not D3 itself.');
+    }
+    console.log('='.repeat(80) + '\n');
+
+    const summary = logSection('OVERALL SUMMARY');
+    logStep(summary, 'Test Results', `
+      <strong>Completed 5 integration test scenarios</strong><br/>
+      Results: ${results.pass} passed, ${results.fail} failed, ${results.warn} warnings, ${results.critical} critical<br/>
+      <br/>
+      <strong>These tests reveal how D3 actually behaves with:</strong><br/>
+      • Force handle mutability and persistence<br/>
+      • Node object mutation during GUP<br/>
+      • Force removal and replacement<br/>
+      • Interaction between force changes and node updates<br/>
+      <br/>
+      ${results.critical > 0 ? '<strong style="color: red;">⚠️ CRITICAL ISSUES FOUND - Review above!</strong>' : ''}
+      ${results.critical === 0 && results.fail === 0 ? '<strong style="color: green;">✅ All tests passed - D3 working correctly</strong>' : ''}
+    `);
+
+    console.log('All integration tests complete.');
+  </script>
+</body>
+</html>

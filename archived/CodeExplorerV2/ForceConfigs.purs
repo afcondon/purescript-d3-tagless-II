@@ -44,8 +44,12 @@ treeParentsOnly = Just $ ForceFilter {
 -- Helper Functions
 -- =============================================================================
 
+-- DEBUG: Log what gridPointX receives
+foreign import debugGridPointX_ :: forall a. a -> Number
+
 gridPointX :: SpagoSimNode -> Number
-gridPointX d = fromMaybe d.x $ map _.x $ toMaybe d.gridXY
+gridPointX d = debugGridPointX_ d
+-- gridPointX d = fromMaybe d.x $ map _.x $ toMaybe d.gridXY
 
 gridPointY :: SpagoSimNode -> Number
 gridPointY d = fromMaybe d.y $ map _.y $ toMaybe d.gridXY
@@ -55,6 +59,9 @@ collideRadius d = d.r + 2.0
 
 collideRadiusBig :: SpagoSimNode -> Number
 collideRadiusBig d = d.r + 19.0
+
+collideRadiusForceGraph :: SpagoSimNode -> Number
+collideRadiusForceGraph d = d.r + 53.0
 
 collideRadiusPack :: SpagoSimNode -> Number
 collideRadiusPack d = d.r + 5.0
@@ -102,34 +109,34 @@ centerStrong = ForceConfig {
   , params: CenterParams {
       x: StaticValue 0.0
     , y: StaticValue 0.0
-    , strength: StaticValue 0.5
+    , strength: StaticValue 0.85
     }
   , filter: Nothing
 }
 
 -- | Link force - maintains link distances
--- | Tuned to 40 for force graph layout
+-- | Tuned to 125 for force graph layout
 links :: ForceConfig
 links = ForceConfig {
     name: "links"
   , forceType: ForceLink
   , params: LinkParams {
-      distance: StaticValue 40.0
+      distance: StaticValue 125.0
     , strength: StaticValue 1.0
-    , iterations: StaticValue 1.0
+    , iterations: StaticValue 6.0
     }
   , filter: Nothing
 }
 
 -- | Collision force with larger radius for tree layout
--- | Tuned for force graph: radius +19, strength 0.6
+-- | Tuned for force graph: radius +53, strength 0.1
 collide2 :: ForceConfig
 collide2 = ForceConfig {
     name: "collide2"
   , forceType: ForceCollide
   , params: CollideParams {
-      radius: DynamicIndexedValue (\d _ -> collideRadiusBig (unsafeCoerce d))
-    , strength: StaticValue 0.6
+      radius: DynamicIndexedValue (\d _ -> collideRadiusForceGraph (unsafeCoerce d))
+    , strength: StaticValue 0.1
     , iterations: StaticValue 1.0
     }
   , filter: Nothing
@@ -177,16 +184,16 @@ chargePack = ForceConfig {
 }
 
 -- | Charge force only on tree parent nodes - spreads tree structure
--- | Tuned for balanced force graph layout: strength -290, theta 0.8, distanceMin 9, distanceMax 300
+-- | Tuned for balanced force graph layout: strength -270, theta 0.7, distanceMin 6, distanceMax 900
 chargeTree :: ForceConfig
 chargeTree = ForceConfig {
     name: "chargetree"
   , forceType: ForceManyBody
   , params: ManyBodyParams {
-      strength: StaticValue (-290.0)
-    , theta: StaticValue 0.8
-    , distanceMin: StaticValue 9.0
-    , distanceMax: StaticValue 300.0
+      strength: StaticValue (-270.0)
+    , theta: StaticValue 0.7
+    , distanceMin: StaticValue 6.0
+    , distanceMax: StaticValue 900.0
     }
   , filter: treeParentsOnly
 }

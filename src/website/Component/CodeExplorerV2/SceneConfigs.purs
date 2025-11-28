@@ -7,6 +7,7 @@ module Component.CodeExplorerV2.SceneConfigs
   , orbitScene
   , treeScene
   , forceGraphScene
+  , forceGraphEmptyScene
   , bubblePackScene
   , applyScene
   ) where
@@ -119,7 +120,32 @@ forceGraphScene =
         , create: pure $ Sim.createCenter
             { x: 0.0
             , y: 0.0
-            , strength: 0.85
+            , strength: 0.05  -- Gentle centering, just prevents drift
+            }
+        }
+      ]
+  , alpha: 1.0
+  , velocityDecay: 0.4
+  }
+
+-- | Tuned force graph scene - settings from interactive debugging
+forceGraphEmptyScene :: SceneConfig
+forceGraphEmptyScene =
+  { name: "ForceGraphTuned"
+  , forces:
+      [ { name: "collision"
+        , create: pure $ Sim.createCollision
+            { padding: 0.0  -- radius 0.0 from slider (uses node.r + padding)
+            , strength: 1.0
+            , iterations: 3.0
+            }
+        }
+      , { name: "charge"
+        , create: pure $ Sim.createCharge
+            { strength: -390.0
+            , theta: 0.9
+            , distanceMin: 1.0
+            , distanceMax: 400.0
             }
         }
       ]

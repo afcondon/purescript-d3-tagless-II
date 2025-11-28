@@ -400,6 +400,17 @@ export function transitionToTreePositions_(nodes) {
             // After fade out, add straight links
             setTimeout(() => {
               joinStraightLinksToDOM(links, nodes);
+
+              // Fade out non-tree nodes (packages and modules without treeXY)
+              nodesGroup.selectAll('g.node')
+                .filter(d => !d.treeXY)
+                .transition()
+                .duration(500)
+                .style('opacity', 0)
+                .on('end', function() {
+                  d3.select(this).classed('hidden-node', true);
+                });
+
               onComplete();
             }, 350);
 
@@ -474,6 +485,23 @@ export function unpinNodes_(nodes) {
     nodes.forEach(node => {
       node.fx = null;
       node.fy = null;
+    });
+  };
+}
+
+// Unpin only tree nodes, keep non-tree nodes pinned (so they don't move)
+export function unpinTreeNodesOnly_(nodes) {
+  return function() {
+    nodes.forEach(node => {
+      if (node.treeXY) {
+        // Tree node - unpin so it can move
+        node.fx = null;
+        node.fy = null;
+      } else {
+        // Non-tree node - pin at current position (or offscreen)
+        node.fx = node.x || -9999;
+        node.fy = node.y || -9999;
+      }
     });
   };
 }

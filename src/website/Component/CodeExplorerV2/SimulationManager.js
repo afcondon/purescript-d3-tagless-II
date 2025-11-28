@@ -8,11 +8,48 @@ import * as d3 from 'd3';
 export function setSimulationInWindow_(sim) {
   return function() {
     window._psd3_simulation_v2 = sim;
+    // Also initialize forces object for control panel access
+    window._psd3_forces_v2 = window._psd3_forces_v2 || {};
   };
 }
 
 export function getSimulationFromWindow_() {
   return window._psd3_simulation_v2;
+}
+
+// =============================================================================
+// Force Registry (for control panel access)
+// =============================================================================
+
+// Register a force by name (called from PureScript addForce)
+export function registerForce_(name) {
+  return function(force) {
+    return function() {
+      window._psd3_forces_v2 = window._psd3_forces_v2 || {};
+      window._psd3_forces_v2[name] = force;
+    };
+  };
+}
+
+// Unregister a force
+export function unregisterForce_(name) {
+  return function() {
+    if (window._psd3_forces_v2) {
+      delete window._psd3_forces_v2[name];
+    }
+  };
+}
+
+// Clear all forces from registry
+export function clearForceRegistry_() {
+  window._psd3_forces_v2 = {};
+}
+
+// Store restart callback (called from PureScript)
+export function setRestartCallback_(callback) {
+  return function() {
+    window._psd3_restart_v2 = callback;
+  };
 }
 
 // =============================================================================
@@ -222,6 +259,19 @@ export function applyForce_(force) {
   };
 }
 
+// Apply all forces from the window registry (source of truth for active forces)
+export function applyAllRegisteredForces_(alpha) {
+  return function() {
+    const forces = window._psd3_forces_v2 || {};
+    for (const name in forces) {
+      const force = forces[name];
+      if (typeof force === 'function') {
+        force(alpha);
+      }
+    }
+  };
+}
+
 // =============================================================================
 // Position Integration
 // =============================================================================
@@ -285,4 +335,185 @@ export function decayAlpha_(alpha) {
       };
     };
   };
+}
+
+// =============================================================================
+// Control Panel Helpers (plain JS functions, not curried)
+// =============================================================================
+
+// Get all registered force names
+export function getForceNamesV2() {
+  const forces = window._psd3_forces_v2 || {};
+  return Object.keys(forces);
+}
+
+// Get a force by name
+export function getForceV2(name) {
+  const forces = window._psd3_forces_v2 || {};
+  return forces[name] || null;
+}
+
+// Update a force parameter and reheat
+export function updateForceParamV2(forceName, paramName, value) {
+  const force = getForceV2(forceName);
+  if (!force) {
+    console.warn(`Force not found: ${forceName}`);
+    return;
+  }
+
+  if (typeof force[paramName] === 'function') {
+    force[paramName](value);
+    console.log(`Set ${forceName}.${paramName} = ${value}`);
+    // Bump alpha and restart if needed
+    const ref = window._psd3_simulation_v2;
+    if (ref && ref.value) {
+      ref.value.alpha = Math.max(ref.value.alpha, 0.3);
+    }
+    if (window._psd3_restart_v2) {
+      window._psd3_restart_v2();
+    }
+  } else {
+    console.warn(`Parameter not found: ${forceName}.${paramName}`);
+  }
+}
+
+// Start simulation (set alpha and call restart callback)
+export function startSimulationV2() {
+  const ref = window._psd3_simulation_v2;
+  if (!ref) return;
+
+  const state = ref.value;
+  if (state) {
+    state.alpha = 0.3;
+    console.log('[ControlPanel] Set alpha=0.3');
+    // Call the restart callback to start the loop
+    if (window._psd3_restart_v2) {
+      window._psd3_restart_v2();
+    }
+  }
+}
+
+// Stop simulation
+export function stopSimulationV2() {
+  const ref = window._psd3_simulation_v2;
+  if (!ref) return;
+
+  const state = ref.value;
+  if (state) {
+    state.running = false;
+    console.log('[ControlPanel] Set running=false');
+  }
+}
+
+// Reheat simulation (set alpha to 1.0 and restart)
+export function reheatSimulationV2() {
+  const ref = window._psd3_simulation_v2;
+  if (!ref) return;
+
+  const state = ref.value;
+  if (state) {
+    state.alpha = 1.0;
+    console.log('[ControlPanel] Set alpha=1.0');
+    // Call the restart callback to ensure loop is running
+    if (window._psd3_restart_v2) {
+      window._psd3_restart_v2();
+    }
+  }
+}
+
+// Toggle a force on/off (removes/re-adds from registry)
+export function toggleForceV2(forceName, enabled) {
+  window._psd3_disabled_forces_v2 = window._psd3_disabled_forces_v2 || {};
+  const forces = window._psd3_forces_v2 || {};
+
+  if (enabled) {
+    // Re-enable: restore from disabled storage
+    if (window._psd3_disabled_forces_v2[forceName]) {
+      forces[forceName] = window._psd3_disabled_forces_v2[forceName];
+      delete window._psd3_disabled_forces_v2[forceName];
+      console.log(`Enabled force: ${forceName}`);
+    }
+  } else {
+    // Disable: move to disabled storage
+    if (forces[forceName]) {
+      window._psd3_disabled_forces_v2[forceName] = forces[forceName];
+      delete forces[forceName];
+      console.log(`Disabled force: ${forceName}`);
+    }
+  }
+  // Bump alpha and restart
+  const ref = window._psd3_simulation_v2;
+  if (ref && ref.value) {
+    ref.value.alpha = 0.5;
+  }
+  if (window._psd3_restart_v2) {
+    window._psd3_restart_v2();
+  }
+}
+
+// Get force parameter value
+export function getForceParamV2(forceName, paramName) {
+  const force = getForceV2(forceName);
+  if (!force) return null;
+
+  if (typeof force[paramName] === 'function') {
+    const val = force[paramName]();
+    // Handle functions that return functions (like radius)
+    if (typeof val === 'function') {
+      return null;
+    }
+    return val;
+  }
+  return null;
+}
+
+// Get all force settings as string
+export function getForceSettingsV2() {
+  const forces = window._psd3_forces_v2 || {};
+  const forceNames = Object.keys(forces);
+
+  if (forceNames.length === 0) {
+    return "No forces registered";
+  }
+
+  const paramsByType = {
+    charge: ['strength', 'theta', 'distanceMin', 'distanceMax'],
+    collide: ['strength', 'iterations'],
+    center: ['strength', 'x', 'y'],
+    link: ['distance', 'strength', 'iterations'],
+    radial: ['strength', 'radius'],
+    position: ['strength']
+  };
+
+  const getForceType = (name) => {
+    if (name.includes('charge') || name.includes('Charge')) return 'charge';
+    if (name.includes('collid') || name.includes('Collid') || name.includes('collision')) return 'collide';
+    if (name.includes('center')) return 'center';
+    if (name.includes('link')) return 'link';
+    if (name.includes('Orbit') || name.includes('radial')) return 'radial';
+    if (name.includes('cluster') || name.includes('Cluster')) return 'position';
+    return 'unknown';
+  };
+
+  let output = '-- Force Settings (V2) --\n';
+
+  for (const name of forceNames) {
+    const force = forces[name];
+    output += `\n${name}:\n`;
+    const forceType = getForceType(name);
+    const params = paramsByType[forceType] || [];
+
+    for (const param of params) {
+      if (typeof force[param] === 'function') {
+        const val = force[param]();
+        if (typeof val === 'number') {
+          output += `  ${param}: ${val}\n`;
+        } else if (typeof val === 'function') {
+          output += `  ${param}: <function>\n`;
+        }
+      }
+    }
+  }
+
+  return output;
 }

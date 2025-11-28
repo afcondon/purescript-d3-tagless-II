@@ -234,6 +234,11 @@ unpinAllNodesInPlace :: Array SpagoSimNode -> Effect Unit
 unpinAllNodesInPlace nodes = unpinNodes_ nodes
 
 foreign import unpinNodes_ :: Array SpagoSimNode -> Effect Unit
+foreign import unpinTreeNodesOnly_ :: Array SpagoSimNode -> Effect Unit
+
+-- | Unpin only tree nodes (keep packages/non-tree nodes pinned)
+unpinTreeNodesOnly :: Array SpagoSimNode -> Effect Unit
+unpinTreeNodesOnly = unpinTreeNodesOnly_
 
 -- | Transition to Force Graph scene
 transitionToForceGraph :: Effect Unit
@@ -250,8 +255,9 @@ transitionToForceGraph = do
   simState <- Ref.read state.simRef
   let nodes = simState.nodes
 
-  -- Unpin nodes IN PLACE (mutate, don't create new objects)
-  unpinAllNodesInPlace nodes
+  -- Unpin only tree nodes - non-tree nodes stay pinned offscreen
+  -- This keeps packages and non-tree modules out of the force layout
+  unpinTreeNodesOnly nodes
 
   -- Get tree links for force graph
   let treeLinks = Array.filter (\l -> l.linktype == M2M_Tree) state.model.links
@@ -265,14 +271,15 @@ transitionToForceGraph = do
   joinLinksToDOM_ treeLinks
 
   -- Create link force and initialize (D3 will swizzle the links in place)
-  let linkForce = Sim.createLink { distance: 125.0, strength: 1.0, iterations: 6.0 }
+  -- Settings from interactive tuning: distance 60, strength 1.0, iterations 6
+  let linkForce = Sim.createLink { distance: 60.0, strength: 1.0, iterations: 6.0 }
   _ <- Sim.initializeLinkForce linkForce nodes treeLinks
 
   -- Update tick callback
   Sim.setTickCallback (makeTickCallback newState) state.simRef
 
-  -- Apply ForceGraph scene forces
-  Scenes.applyScene Scenes.forceGraphScene state.simRef
+  -- Apply ForceGraph scene forces (using empty scene - add forces via control panel)
+  Scenes.applyScene Scenes.forceGraphEmptyScene state.simRef
 
   -- Add the initialized link force
   Sim.addForce "links" linkForce state.simRef

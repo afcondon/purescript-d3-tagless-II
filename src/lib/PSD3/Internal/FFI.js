@@ -903,6 +903,19 @@ export function setNodes_(simulation) {
   return nodes => {
     console.log(`FFI: setting nodes in simulation, there are ${nodes.length} nodes`);
 
+    // DEBUG: Check incoming node x/y values
+    if (nodes.length > 0) {
+      const first5 = nodes.slice(0, 5);
+      console.log('FFI setNodes_ INCOMING - first 5 nodes x/y:', first5.map(n => ({ id: n.id, name: n.name, x: n.x, y: n.y, gridXY: n.gridXY })));
+
+      // Check for any NaN or undefined values
+      const badNodes = nodes.filter(n => isNaN(n.x) || isNaN(n.y) || n.x === undefined || n.y === undefined);
+      if (badNodes.length > 0) {
+        console.error(`FFI setNodes_ INCOMING: ${badNodes.length} nodes have NaN/undefined x or y!`);
+        console.error('First bad node:', badNodes[0]);
+      }
+    }
+
     // Get old nodes from simulation to preserve their positions
     const oldNodes = simulation.nodes();
 
@@ -928,8 +941,39 @@ export function setNodes_(simulation) {
       return newNode; // New node, no position to preserve
     });
 
+    // DEBUG: Check outgoing node x/y values
+    if (nodesWithPositions.length > 0) {
+      const first5 = nodesWithPositions.slice(0, 5);
+      console.log('FFI setNodes_ OUTGOING - first 5 nodes x/y:', first5.map(n => ({ id: n.id, name: n.name, x: n.x, y: n.y })));
+
+      const badNodes = nodesWithPositions.filter(n => isNaN(n.x) || isNaN(n.y) || n.x === undefined || n.y === undefined);
+      if (badNodes.length > 0) {
+        console.error(`FFI setNodes_ OUTGOING: ${badNodes.length} nodes have NaN/undefined x or y!`);
+        console.error('First bad node:', badNodes[0]);
+      }
+    }
+
     simulation.nodes(nodesWithPositions);
-    return simulation.nodes();
+
+    // DEBUG: Check nodes immediately after setting
+    const afterNodes = simulation.nodes();
+    if (afterNodes.length > 0) {
+      const first = afterNodes[0];
+      console.log('FFI setNodes_ AFTER simulation.nodes() - first node:', {
+        id: first.id,
+        name: first.name,
+        x: first.x,
+        y: first.y,
+        vx: first.vx,
+        vy: first.vy,
+        gridXY: first.gridXY
+      });
+      if (isNaN(first.x) || isNaN(first.y)) {
+        console.error('FFI setNodes_: NaN detected IMMEDIATELY after simulation.nodes()!');
+      }
+    }
+
+    return afterNodes;
   }
 }
 // we're going to always use the same name for the links force denominated by the linksForceName string
@@ -1015,7 +1059,21 @@ export function getLinksFromSimulation_(simulation) {
 }
 export function onTick_(simulation) {
   return name => tickFn => {
+    let tickCount = 0;
     var result = simulation.on('tick.' + name, () => {
+      tickCount++;
+      // Debug: log simulation node state on first few ticks
+      if (tickCount <= 3) {
+        const simNodes = simulation.nodes();
+        if (simNodes.length > 0) {
+          const first = simNodes[0];
+          console.log(`TICK ${tickCount} (${name}): first sim node x=${first.x}, y=${first.y}, vx=${first.vx}, vy=${first.vy}`);
+          // Check for NaN
+          if (isNaN(first.x) || isNaN(first.y)) {
+            console.error(`TICK ${tickCount}: NaN detected in simulation nodes!`);
+          }
+        }
+      }
       tickFn()
     })
     return result;

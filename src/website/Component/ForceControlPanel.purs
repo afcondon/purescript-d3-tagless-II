@@ -9,7 +9,7 @@ module Component.ForceControlPanel where
 
 import Prelude
 
-import Data.Array (find, length)
+import Data.Array (find, length, catMaybes, concat, uncons)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Nullable (Nullable, toMaybe)
 import Data.Set as Set
@@ -116,6 +116,48 @@ updateSliderValue forceName param value sliderValues =
       -- Add new entry
       sliderValues <> [{ forceName, param, value }]
 
+-- | Read all parameter values from all forces
+readAllForceParams :: Array String -> Effect (Array { forceName :: String, param :: String, value :: Number })
+readAllForceParams forceNames = do
+  -- For each force, read its parameters based on type
+  results <- traverse readForceParams forceNames
+  pure $ join results
+  where
+  readForceParams :: String -> Effect (Array { forceName :: String, param :: String, value :: Number })
+  readForceParams name = do
+    let forceType = getForceType name
+        params = getParamNames forceType
+    -- Read each parameter
+    values <- traverse (readParam name) params
+    pure $ catMaybes values
+
+  readParam :: String -> String -> Effect (Maybe { forceName :: String, param :: String, value :: Number })
+  readParam forceName param = do
+    maybeVal <- getForceParam_ forceName param
+    pure $ case toMaybe maybeVal of
+      Just val -> Just { forceName, param, value: val }
+      Nothing -> Nothing
+
+  getParamNames :: String -> Array String
+  getParamNames "charge" = ["strength", "theta", "distanceMin", "distanceMax"]
+  getParamNames "collide" = ["strength", "iterations"]  -- radius returns function, skip it
+  getParamNames "center" = ["strength", "x", "y"]
+  getParamNames "link" = ["distance", "strength", "iterations"]
+  getParamNames "radial" = ["strength", "radius"]
+  getParamNames "position" = ["strength"]
+  getParamNames _ = []
+
+  traverse :: forall a b. (a -> Effect b) -> Array a -> Effect (Array b)
+  traverse f arr = case uncons arr of
+    Nothing -> pure []
+    Just { head, tail } -> do
+      x <- f head
+      xs <- traverse f tail
+      pure $ [x] <> xs
+
+  join :: forall a. Array (Array a) -> Array a
+  join = concat
+
 handleQuery :: forall a m. MonadAff m => Query a -> H.HalogenM State Action () Void m (Maybe a)
 handleQuery = case _ of
   Refresh a -> do
@@ -131,7 +173,9 @@ handleAction = case _ of
 
   RefreshForces -> do
     names <- liftEffect getForceNames_
-    H.modify_ _ { forceNames = names, activeForces = Set.fromFoldable names }
+    -- Read actual parameter values from forces
+    sliderVals <- liftEffect $ readAllForceParams names
+    H.modify_ _ { forceNames = names, activeForces = Set.fromFoldable names, sliderValues = sliderVals }
 
   ToggleForce name -> do
     state <- H.get
@@ -283,6 +327,7 @@ getForceType :: String -> String
 getForceType name
   | contains (Pattern "charge") name = "charge"
   | contains (Pattern "collid") name = "collide"
+  | contains (Pattern "collision") name = "collide"
   | contains (Pattern "center") name = "center"
   | contains (Pattern "link") name = "link"
   | contains (Pattern "Orbit") name = "radial"
@@ -293,14 +338,14 @@ getForceType name
 getSlidersForForce :: String -> Array SliderConfig
 getSlidersForForce forceType = case forceType of
   "charge" ->
-    [ { label: "Strength", param: "strength", min: -500.0, max: 100.0, step: 10.0, defaultValue: -100.0 }
+    [ { label: "Strength", param: "strength", min: -500.0, max: 100.0, step: 10.0, defaultValue: -390.0 }
     , { label: "Theta", param: "theta", min: 0.0, max: 2.0, step: 0.1, defaultValue: 0.9 }
     , { label: "Dist Min", param: "distanceMin", min: 0.0, max: 100.0, step: 1.0, defaultValue: 1.0 }
     , { label: "Dist Max", param: "distanceMax", min: 0.0, max: 1000.0, step: 50.0, defaultValue: 400.0 }
     ]
 
   "collide" ->
-    [ { label: "Radius", param: "radius", min: 0.0, max: 100.0, step: 1.0, defaultValue: 10.0 }
+    [ { label: "Padding", param: "radius", min: 0.0, max: 100.0, step: 1.0, defaultValue: 0.0 }
     , { label: "Strength", param: "strength", min: 0.0, max: 2.0, step: 0.1, defaultValue: 1.0 }
     , { label: "Iterations", param: "iterations", min: 1.0, max: 10.0, step: 1.0, defaultValue: 3.0 }
     ]
@@ -312,8 +357,9 @@ getSlidersForForce forceType = case forceType of
     ]
 
   "link" ->
-    [ { label: "Distance", param: "distance", min: 0.0, max: 200.0, step: 5.0, defaultValue: 50.0 }
-    , { label: "Iterations", param: "iterations", min: 1.0, max: 10.0, step: 1.0, defaultValue: 1.0 }
+    [ { label: "Distance", param: "distance", min: 0.0, max: 300.0, step: 5.0, defaultValue: 60.0 }
+    , { label: "Strength", param: "strength", min: 0.0, max: 2.0, step: 0.1, defaultValue: 1.0 }
+    , { label: "Iterations", param: "iterations", min: 1.0, max: 10.0, step: 1.0, defaultValue: 6.0 }
     ]
 
   "radial" ->

@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>D3 Simulation Test Harness</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body { font-family: monospace; padding: 20px; }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ccc;
+      background: #f9f9f9;
+    }
+    .test-title {
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .result {
+      margin: 5px 0;
+      padding: 5px;
+      background: white;
+    }
+    .pass { color: green; }
+    .fail { color: red; }
+    .info { color: blue; }
+    .warn { color: orange; }
+    pre {
+      background: #eee;
+      padding: 10px;
+      overflow-x: auto;
+      margin: 5px 0;
+    }
+    #svg-container {
+      margin: 20px 0;
+      border: 1px solid #999;
+    }
+  </style>
+</head>
+<body>
+  <h1>D3 Force Simulation Test Harness</h1>
+  <p>Comprehensive testing of d3-force behavior for PureScript integration</p>
+
+  <div id="results"></div>
+  <div id="svg-container"></div>
+
+  <script>
+    // Utility functions
+    function log(testName, message, type = 'info') {
+      const resultsDiv = document.getElementById('results');
+      const result = document.createElement('div');
+      result.className = `result ${type}`;
+      result.innerHTML = `<strong>${testName}:</strong> ${message}`;
+      resultsDiv.appendChild(result);
+
+      // Also log to console with emoji indicators
+      const emoji = type === 'pass' ? '✅' : type === 'fail' ? '❌' : type === 'warn' ? '⚠️' : 'ℹ️';
+      console.log(`${emoji} ${testName}: ${message.replace(/<[^>]*>/g, '')}`);
+    }
+
+    function logSection(title) {
+      const resultsDiv = document.getElementById('results');
+      const section = document.createElement('div');
+      section.className = 'test-section';
+      section.innerHTML = `<div class="test-title">${title}</div>`;
+      resultsDiv.appendChild(section);
+
+      // Log section header to console
+      console.log('\n' + '='.repeat(80));
+      console.log(`📋 ${title}`);
+      console.log('='.repeat(80));
+
+      return section;
+    }
+
+    function compareObjects(obj1, obj2, path = '') {
+      const diffs = [];
+      const allKeys = new Set([...Object.keys(obj1), ...Object.keys(obj2)]);
+
+      for (const key of allKeys) {
+        const fullPath = path ? `${path}.${key}` : key;
+        if (!(key in obj1)) {
+          diffs.push(`${fullPath}: missing in obj1`);
+        } else if (!(key in obj2)) {
+          diffs.push(`${fullPath}: missing in obj2`);
+        } else if (obj1[key] !== obj2[key]) {
+          diffs.push(`${fullPath}: ${obj1[key]} !== ${obj2[key]}`);
+        }
+      }
+      return diffs;
+    }
+
+    function inspectObject(obj, label) {
+      console.group(label);
+      console.log('Object:', obj);
+      console.log('Keys:', Object.keys(obj));
+      console.log('Prototype:', Object.getPrototypeOf(obj));
+      console.groupEnd();
+    }
+
+    // ============================================================================
+    // TEST 1: Simulation Creation and State
+    // ============================================================================
+    function test1_SimulationCreation() {
+      const section = logSection('TEST 1: Simulation Creation and State');
+
+      const simulation = d3.forceSimulation();
+
+      section.innerHTML += `<div class="result info">Created simulation</div>`;
+      section.innerHTML += `<pre>${JSON.stringify({
+        alpha: simulation.alpha(),
+        alphaMin: simulation.alphaMin(),
+        alphaDecay: simulation.alphaDecay(),
+        alphaTarget: simulation.alphaTarget(),
+        velocityDecay: simulation.velocityDecay()
+      }, null, 2)}</pre>`;
+
+      // Test if simulation is mutable
+      const sim1Ref = simulation;
+      simulation.alpha(0.5);
+      const alpha1 = sim1Ref.alpha();
+
+      section.innerHTML += `<div class="result ${alpha1 === 0.5 ? 'pass' : 'fail'}">
+        Simulation is ${alpha1 === 0.5 ? 'MUTABLE' : 'IMMUTABLE'} - alpha changed via reference
+      </div>`;
+
+      // Check what methods return
+      const stopResult = simulation.stop();
+      section.innerHTML += `<div class="result info">
+        simulation.stop() returns: ${stopResult === simulation ? 'SELF (chainable)' : 'OTHER'}
+      </div>`;
+
+      return simulation;
+    }
+
+    // ============================================================================
+    // TEST 2: Node Object Mutation
+    // ============================================================================
+    function test2_NodeMutation() {
+      const section = logSection('TEST 2: Node Object Mutation');
+
+      // Create nodes with initial positions
+      const nodes = [
+        { id: 0, x: 100, y: 100 },
+        { id: 1, x: 200, y: 200 }
+      ];
+
+      section.innerHTML += `<div class="result info">Initial nodes:</div>`;
+      section.innerHTML += `<pre>${JSON.stringify(nodes, null, 2)}</pre>`;
+
+      // Store references to original objects
+      const node0Ref = nodes[0];
+      const node1Ref = nodes[1];
+
+      // Create simulation and add nodes
+      const simulation = d3.forceSimulation(nodes);
+
+      section.innerHTML += `<div class="result info">After adding to simulation:</div>`;
+      section.innerHTML += `<pre>${JSON.stringify(nodes, null, 2)}</pre>`;
+
+      // Check if nodes are the same objects
+      const sameObjects = (node0Ref === nodes[0] && node1Ref === nodes[1]);
+      section.innerHTML += `<div class="result ${sameObjects ? 'pass' : 'fail'}">
+        Node objects are ${sameObjects ? 'SAME (mutated)' : 'DIFFERENT (copied)'}
+      </div>`;
+
+      // Check what fields were added
+      const addedFields = Object.keys(nodes[0]).filter(k => !['id', 'x', 'y'].includes(k));
+      section.innerHTML += `<div class="result info">
+        Fields added by D3: ${addedFields.join(', ') || 'none'}
+      </div>`;
+
+      // Get nodes back from simulation
+      const retrievedNodes = simulation.nodes();
+      section.innerHTML += `<div class="result ${retrievedNodes === nodes ? 'pass' : 'fail'}">
+        simulation.nodes() returns ${retrievedNodes === nodes ? 'SAME array' : 'DIFFERENT array'}
+      </div>`;
+
+      section.innerHTML += `<div class="result ${retrievedNodes[0] === node0Ref ? 'pass' : 'fail'}">
+        Retrieved node[0] is ${retrievedNodes[0] === node0Ref ? 'SAME object' : 'DIFFERENT object'}
+      </div>`;
+
+      simulation.stop();
+      return { simulation, nodes, node0Ref };
+    }
+
+    // ============================================================================
+    // TEST 3: Force Configuration - Mutability
+    // ============================================================================
+    function test3_ForceConfiguration() {
+      const section = logSection('TEST 3: Force Configuration - Mutability');
+
+      const simulation = d3.forceSimulation();
+
+      // Add a force
+      const centerForce = d3.forceCenter(0, 0);
+      simulation.force('center', centerForce);
+
+      section.innerHTML += `<div class="result info">Added center force at (0, 0)</div>`;
+
+      // Get the force back
+      const retrievedForce = simulation.force('center');
+      section.innerHTML += `<div class="result ${retrievedForce === centerForce ? 'pass' : 'fail'}">
+        simulation.force('center') returns ${retrievedForce === centerForce ? 'SAME object' : 'DIFFERENT object'}
+      </div>`;
+
+      // Modify the force directly
+      centerForce.x(100);
+      const newX = simulation.force('center').x();
+      section.innerHTML += `<div class="result ${newX === 100 ? 'pass' : 'fail'}">
+        Force modification via original reference: ${newX === 100 ? 'REFLECTED' : 'NOT REFLECTED'}
+      </div>`;
+
+      // Try to "replace" the force with null
+      simulation.force('center', null);
+      const afterNull = simulation.force('center');
+      section.innerHTML += `<div class="result ${afterNull === null ? 'pass' : 'fail'}">
+        Setting force to null: ${afterNull === null ? 'REMOVES IT' : 'KEEPS IT'}
+      </div>`;
+
+      // Re-add and then replace with new force
+      simulation.force('center', d3.forceCenter(50, 50));
+      const force1 = simulation.force('center');
+      simulation.force('center', d3.forceCenter(75, 75));
+      const force2 = simulation.force('center');
+
+      section.innerHTML += `<div class="result ${force1 !== force2 ? 'pass' : 'fail'}">
+        Replacing force creates ${force1 !== force2 ? 'NEW object' : 'SAME object'}
+      </div>`;
+      section.innerHTML += `<div class="result info">
+        New force position: (${force2.x()}, ${force2.y()})
+      </div>`;
+
+      simulation.stop();
+      return simulation;
+    }
+
+    // ============================================================================
+    // TEST 4: Force Removal and Re-addition
+    // ============================================================================
+    function test4_ForceRemovalReaddition() {
+      const section = logSection('TEST 4: Force Removal and Re-addition');
+
+      const nodes = [
+        { id: 0, x: 0, y: 0 },
+        { id: 1, x: 100, y: 0 }
+      ];
+
+      const simulation = d3.forceSimulation(nodes)
+        .force('center', d3.forceCenter(200, 200))
+        .force('collide', d3.forceCollide(10))
+        .stop();
+
+      section.innerHTML += `<div class="result info">Created simulation with center and collide forces</div>`;
+
+      // Take snapshot of node positions
+      const pos1 = { x: nodes[0].x, y: nodes[0].y };
+
+      // Run a few ticks
+      for (let i = 0; i < 10; i++) simulation.tick();
+      const pos2 = { x: nodes[0].x, y: nodes[0].y };
+
+      section.innerHTML += `<div class="result info">
+        After 10 ticks: node[0] moved from (${pos1.x.toFixed(2)}, ${pos1.y.toFixed(2)}) to (${pos2.x.toFixed(2)}, ${pos2.y.toFixed(2)})
+      </div>`;
+
+      // Remove forces
+      simulation.force('center', null);
+      simulation.force('collide', null);
+
+      section.innerHTML += `<div class="result info">Removed all forces</div>`;
+
+      // Reset positions
+      nodes[0].x = 0;
+      nodes[0].y = 0;
+      nodes[0].vx = 0;
+      nodes[0].vy = 0;
+
+      // Run ticks without forces
+      for (let i = 0; i < 10; i++) simulation.tick();
+      const pos3 = { x: nodes[0].x, y: nodes[0].y };
+
+      section.innerHTML += `<div class="result info">
+        After 10 ticks with no forces: node[0] at (${pos3.x.toFixed(2)}, ${pos3.y.toFixed(2)})
+      </div>`;
+
+      // Re-add different forces
+      simulation.force('center', d3.forceCenter(300, 300));
+      simulation.alpha(1).restart();
+
+      for (let i = 0; i < 10; i++) simulation.tick();
+      const pos4 = { x: nodes[0].x, y: nodes[0].y };
+
+      section.innerHTML += `<div class="result info">
+        After re-adding center at (300,300) and 10 ticks: node[0] at (${pos4.x.toFixed(2)}, ${pos4.y.toFixed(2)})
+      </div>`;
+
+      const movedTowardNewCenter = Math.abs(pos4.x - 300) < Math.abs(pos3.x - 300);
+      section.innerHTML += `<div class="result ${movedTowardNewCenter ? 'pass' : 'fail'}">
+        Node ${movedTowardNewCenter ? 'MOVED toward new center' : 'DID NOT move toward new center'}
+      </div>`;
+
+      simulation.stop();
+      return { simulation, nodes };
+    }
+
+    // ============================================================================
+    // TEST 5: General Update Pattern Simulation
+    // ============================================================================
+    function test5_GeneralUpdatePattern() {
+      const section = logSection('TEST 5: General Update Pattern (Enter/Exit)');
+
+      // Initial data
+      let data = [
+        { id: 'a', x: 100, y: 100 },
+        { id: 'b', x: 200, y: 100 }
+      ];
+
+      const simulation = d3.forceSimulation(data)
+        .force('center', d3.forceCenter(400, 300))
+        .stop();
+
+      section.innerHTML += `<div class="result info">Initial: ${data.length} nodes (a, b)</div>`;
+
+      // Store node object references
+      const nodeA = data[0];
+      const nodeB = data[1];
+
+      // Simulate entering a new node (c) and removing one (b)
+      const newData = [
+        { id: 'a', x: 100, y: 100 },
+        { id: 'c', x: 300, y: 100 }
+      ];
+
+      section.innerHTML += `<div class="result info">Update: remove 'b', add 'c'</div>`;
+
+      // Update simulation with new data
+      simulation.nodes(newData);
+      const updatedNodes = simulation.nodes();
+
+      section.innerHTML += `<div class="result info">After simulation.nodes(newData):</div>`;
+      section.innerHTML += `<div class="result ${updatedNodes[0] === nodeA ? 'pass' : 'fail'}">
+        Node 'a' is ${updatedNodes[0] === nodeA ? 'SAME object (preserved)' : 'DIFFERENT object (replaced)'}
+      </div>`;
+
+      section.innerHTML += `<div class="result ${updatedNodes.includes(nodeB) ? 'fail' : 'pass'}">
+        Node 'b' is ${updatedNodes.includes(nodeB) ? 'STILL in simulation' : 'REMOVED from simulation'}
+      </div>`;
+
+      section.innerHTML += `<div class="result info">
+        Node 'c' has D3 fields: ${Object.keys(updatedNodes[1]).filter(k => !['id', 'x', 'y'].includes(k)).join(', ')}
+      </div>`;
+
+      // Check if D3 added vx, vy to new node
+      const hasVelocity = 'vx' in updatedNodes[1] && 'vy' in updatedNodes[1];
+      section.innerHTML += `<div class="result ${hasVelocity ? 'pass' : 'fail'}">
+        New node 'c' ${hasVelocity ? 'HAS' : 'LACKS'} velocity fields (vx, vy)
+      </div>`;
+
+      simulation.stop();
+      return { simulation, data: newData };
+    }
+
+    // ============================================================================
+    // TEST 6: Force Parameters - Static vs Dynamic
+    // ============================================================================
+    function test6_ForceParameters() {
+      const section = logSection('TEST 6: Force Parameters - Static vs Dynamic');
+
+      const nodes = [
+        { id: 0, x: 0, y: 0, r: 10 },
+        { id: 1, x: 50, y: 0, r: 20 }
+      ];
+
+      // Test static radius
+      const collide1 = d3.forceCollide(15);
+      const simulation1 = d3.forceSimulation(nodes)
+        .force('collide', collide1)
+        .stop();
+
+      section.innerHTML += `<div class="result info">Created collide force with static radius 15</div>`;
+
+      const radius1 = collide1.radius();
+      section.innerHTML += `<div class="result info">
+        collide.radius() returns: ${typeof radius1} = ${radius1}
+      </div>`;
+
+      // Test dynamic radius
+      const collide2 = d3.forceCollide(d => d.r + 5);
+      const simulation2 = d3.forceSimulation([...nodes])
+        .force('collide', collide2)
+        .stop();
+
+      section.innerHTML += `<div class="result info">Created collide force with dynamic radius (d => d.r + 5)</div>`;
+
+      const radius2 = collide2.radius();
+      section.innerHTML += `<div class="result info">
+        collide.radius() returns: ${typeof radius2} = ${radius2.toString().substring(0, 50)}
+      </div>`;
+
+      // Change radius after creation
+      collide1.radius(25);
+      const newRadius = collide1.radius();
+      section.innerHTML += `<div class="result ${newRadius === 25 ? 'pass' : 'fail'}">
+        Changed radius to 25: ${newRadius === 25 ? 'SUCCESS' : 'FAILED'}
+      </div>`;
+
+      // Try changing from function to static
+      collide2.radius(30);
+      const changedRadius = collide2.radius();
+      section.innerHTML += `<div class="result ${changedRadius === 30 ? 'pass' : 'fail'}">
+        Changed from function to static: ${typeof changedRadius === 'number' ? 'SUCCESS' : 'FAILED'}
+      </div>`;
+
+      simulation1.stop();
+      simulation2.stop();
+    }
+
+    // ============================================================================
+    // TEST 7: Simulation Restart and Alpha
+    // ============================================================================
+    function test7_RestartAndAlpha() {
+      const section = logSection('TEST 7: Simulation Restart and Alpha');
+
+      const nodes = [{ id: 0, x: 0, y: 0 }];
+      const simulation = d3.forceSimulation(nodes)
+        .force('center', d3.forceCenter(200, 200))
+        .stop();
+
+      const initialAlpha = simulation.alpha();
+      section.innerHTML += `<div class="result info">Initial alpha: ${initialAlpha}</div>`;
+
+      // Let it cool down
+      for (let i = 0; i < 300; i++) simulation.tick();
+      const cooledAlpha = simulation.alpha();
+      section.innerHTML += `<div class="result info">After 300 ticks: alpha = ${cooledAlpha.toFixed(6)}</div>`;
+
+      // Restart
+      simulation.restart();
+      const restartAlpha = simulation.alpha();
+      section.innerHTML += `<div class="result info">After restart(): alpha = ${restartAlpha.toFixed(6)}</div>`;
+
+      section.innerHTML += `<div class="result ${restartAlpha > cooledAlpha ? 'pass' : 'fail'}">
+        restart() ${restartAlpha > cooledAlpha ? 'REHEATS' : 'DOES NOT REHEAT'} alpha
+      </div>`;
+
+      // Set alpha manually
+      simulation.alpha(0.5);
+      const setAlpha = simulation.alpha();
+      section.innerHTML += `<div class="result ${setAlpha === 0.5 ? 'pass' : 'fail'}">
+        alpha(0.5) ${setAlpha === 0.5 ? 'SETS' : 'DOES NOT SET'} alpha
+      </div>`;
+
+      simulation.stop();
+    }
+
+    // ============================================================================
+    // TEST 8: Tick Callbacks
+    // ============================================================================
+    function test8_TickCallbacks() {
+      const section = logSection('TEST 8: Tick Callbacks');
+
+      const nodes = [{ id: 0, x: 0, y: 0 }];
+      let tickCount = 0;
+      let lastNodePos = { x: 0, y: 0 };
+
+      const simulation = d3.forceSimulation(nodes)
+        .force('center', d3.forceCenter(100, 100))
+        .on('tick', () => {
+          tickCount++;
+          lastNodePos = { x: nodes[0].x, y: nodes[0].y };
+        })
+        .stop();
+
+      section.innerHTML += `<div class="result info">Set up tick callback</div>`;
+
+      // Manual tick
+      simulation.tick();
+      section.innerHTML += `<div class="result ${tickCount === 1 ? 'pass' : 'fail'}">
+        Manual tick() ${tickCount === 1 ? 'TRIGGERS' : 'DOES NOT TRIGGER'} callback (count: ${tickCount})
+      </div>`;
+
+      section.innerHTML += `<div class="result info">
+        Node position after 1 tick: (${lastNodePos.x.toFixed(2)}, ${lastNodePos.y.toFixed(2)})
+      </div>`;
+
+      // Multiple ticks
+      tickCount = 0;
+      for (let i = 0; i < 10; i++) simulation.tick();
+
+      section.innerHTML += `<div class="result ${tickCount === 10 ? 'pass' : 'fail'}">
+        10 manual ticks triggered ${tickCount} callbacks
+      </div>`;
+
+      simulation.stop();
+    }
+
+    // ============================================================================
+    // TEST 9: Coordinate Systems and Positioning
+    // ============================================================================
+    function test9_CoordinateSystems() {
+      const section = logSection('TEST 9: Coordinate Systems and Positioning');
+
+      // Create nodes at specific positions
+      const nodes = [
+        { id: 0, x: 100, y: 100, fx: null, fy: null },
+        { id: 1, x: 200, y: 200, fx: 200, fy: 200 } // Fixed position
+      ];
+
+      const simulation = d3.forceSimulation(nodes)
+        .force('center', d3.forceCenter(0, 0))
+        .stop();
+
+      section.innerHTML += `<div class="result info">Node 0: free at (100, 100)</div>`;
+      section.innerHTML += `<div class="result info">Node 1: fixed at (200, 200)</div>`;
+
+      // Run simulation
+      for (let i = 0; i < 50; i++) simulation.tick();
+
+      section.innerHTML += `<div class="result info">After 50 ticks:</div>`;
+      section.innerHTML += `<div class="result info">
+        Node 0: (${nodes[0].x.toFixed(2)}, ${nodes[0].y.toFixed(2)})
+      </div>`;
+      section.innerHTML += `<div class="result info">
+        Node 1: (${nodes[1].x.toFixed(2)}, ${nodes[1].y.toFixed(2)})
+      </div>`;
+
+      const node0MovedTowardCenter = Math.abs(nodes[0].x) < 100 && Math.abs(nodes[0].y) < 100;
+      section.innerHTML += `<div class="result ${node0MovedTowardCenter ? 'pass' : 'fail'}">
+        Free node ${node0MovedTowardCenter ? 'MOVED' : 'DID NOT MOVE'} toward center (0,0)
+      </div>`;
+
+      const node1Stayed = nodes[1].x === 200 && nodes[1].y === 200;
+      section.innerHTML += `<div class="result ${node1Stayed ? 'pass' : 'fail'}">
+        Fixed node ${node1Stayed ? 'STAYED' : 'DID NOT STAY'} at (200, 200)
+      </div>`;
+
+      simulation.stop();
+    }
+
+    // ============================================================================
+    // TEST 10: Force Initialization Timing
+    // ============================================================================
+    function test10_ForceInitializationTiming() {
+      const section = logSection('TEST 10: Force Initialization Timing');
+
+      const nodes = [{ id: 0, x: 0, y: 0 }];
+
+      // Create simulation without forces
+      const simulation = d3.forceSimulation(nodes).stop();
+
+      section.innerHTML += `<div class="result info">Created simulation with 1 node, no forces</div>`;
+
+      // Check initial velocity
+      const vx1 = nodes[0].vx;
+      const vy1 = nodes[0].vy;
+      section.innerHTML += `<div class="result info">Initial velocity: (${vx1}, ${vy1})</div>`;
+
+      // Add force AFTER simulation creation
+      simulation.force('center', d3.forceCenter(100, 100));
+
+      section.innerHTML += `<div class="result info">Added center force AFTER creation</div>`;
+
+      // Don't tick yet - check if force was initialized
+      const force = simulation.force('center');
+      section.innerHTML += `<div class="result ${force !== null ? 'pass' : 'fail'}">
+        Force is ${force !== null ? 'PRESENT' : 'NULL'} immediately after adding
+      </div>`;
+
+      // Now tick and check movement
+      simulation.tick();
+      const movedX = Math.abs(nodes[0].x) > 0;
+
+      section.innerHTML += `<div class="result ${movedX ? 'pass' : 'fail'}">
+        Node ${movedX ? 'MOVED' : 'DID NOT MOVE'} after first tick with late-added force
+      </div>`;
+
+      section.innerHTML += `<div class="result info">
+        Node position after 1 tick: (${nodes[0].x.toFixed(4)}, ${nodes[0].y.toFixed(4)})
+      </div>`;
+
+      simulation.stop();
+    }
+
+    // ============================================================================
+    // TEST 11: Memory and Reference Leaks
+    // ============================================================================
+    function test11_MemoryAndReferences() {
+      const section = logSection('TEST 11: Memory and Reference Leaks');
+
+      const originalNodes = [
+        { id: 0, x: 0, y: 0 },
+        { id: 1, x: 100, y: 0 }
+      ];
+
+      const simulation = d3.forceSimulation(originalNodes)
+        .force('center', d3.forceCenter(200, 200))
+        .stop();
+
+      // Store reference to force
+      const originalForce = simulation.force('center');
+
+      // Replace with null
+      simulation.force('center', null);
+
+      section.innerHTML += `<div class="result info">Removed center force by setting to null</div>`;
+
+      // Check if we can still access the old force
+      const canModifyOldForce = true;
+      try {
+        originalForce.x(300);
+        section.innerHTML += `<div class="result warn">
+          Old force object still accessible and modifiable after removal
+        </div>`;
+      } catch (e) {
+        section.innerHTML += `<div class="result pass">
+          Old force object throws error when accessed: ${e.message}
+        </div>`;
+      }
+
+      // Replace nodes entirely
+      const newNodes = [{ id: 2, x: 50, y: 50 }];
+      simulation.nodes(newNodes);
+
+      section.innerHTML += `<div class="result info">Replaced all nodes with simulation.nodes()</div>`;
+
+      // Check if old nodes still have D3 properties
+      const oldNodeHasVelocity = 'vx' in originalNodes[0];
+      section.innerHTML += `<div class="result info">
+        Old node (removed from simulation) ${oldNodeHasVelocity ? 'STILL HAS' : 'LOST'} velocity fields
+      </div>`;
+
+      // Check if new node got D3 properties
+      const newNodeHasVelocity = 'vx' in newNodes[0];
+      section.innerHTML += `<div class="result ${newNodeHasVelocity ? 'pass' : 'fail'}">
+        New node ${newNodeHasVelocity ? 'GOT' : 'DID NOT GET'} velocity fields
+      </div>`;
+
+      simulation.stop();
+    }
+
+    // ============================================================================
+    // RUN ALL TESTS
+    // ============================================================================
+    console.log('\n\n🚀 STARTING D3 SIMULATION TEST HARNESS\n');
+    console.log('This will test 11 aspects of D3 force simulation behavior\n');
+
+    const results = {
+      pass: 0,
+      fail: 0,
+      warn: 0,
+      total: 0
+    };
+
+    // Track results
+    const originalLog = log;
+    log = function(testName, message, type = 'info') {
+      originalLog(testName, message, type);
+      if (type === 'pass') results.pass++;
+      if (type === 'fail') results.fail++;
+      if (type === 'warn') results.warn++;
+      if (type !== 'info') results.total++;
+    };
+
+    test1_SimulationCreation();
+    test2_NodeMutation();
+    test3_ForceConfiguration();
+    test4_ForceRemovalReaddition();
+    test5_GeneralUpdatePattern();
+    test6_ForceParameters();
+    test7_RestartAndAlpha();
+    test8_TickCallbacks();
+    test9_CoordinateSystems();
+    test10_ForceInitializationTiming();
+    test11_MemoryAndReferences();
+
+    // Print summary
+    console.log('\n' + '='.repeat(80));
+    console.log('📊 TEST SUMMARY');
+    console.log('='.repeat(80));
+    console.log(`Total assertions: ${results.total}`);
+    console.log(`✅ Passed: ${results.pass}`);
+    console.log(`❌ Failed: ${results.fail}`);
+    console.log(`⚠️  Warnings: ${results.warn}`);
+
+    if (results.fail > 0) {
+      console.log('\n🔴 FAILURES DETECTED - Review failed tests above');
+      console.log('These failures indicate unexpected D3 behavior that may affect PureScript integration');
+    } else if (results.warn > 0) {
+      console.log('\n⚠️  WARNINGS PRESENT - Review warnings above');
+      console.log('These warnings indicate notable D3 behavior worth understanding');
+    } else {
+      console.log('\n✅ ALL TESTS PASSED');
+    }
+    console.log('='.repeat(80) + '\n');
+
+    // Add summary
+    const summary = logSection('TEST SUMMARY');
+    summary.innerHTML += `<div class="result info">
+      Completed 11 test suites examining D3 force simulation behavior.<br/>
+      <strong>Results: ${results.pass} passed, ${results.fail} failed, ${results.warn} warnings</strong><br/>
+      Check console for detailed output.
+    </div>`;
+  </script>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Force Engine Test</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 20px;
+      background: #1a1a2e;
+      color: #eee;
+    }
+    h1 {
+      color: #00d9ff;
+    }
+    svg {
+      border: 1px solid #333;
+      background: #0f0f23;
+    }
+    .node {
+      fill: #00d9ff;
+      stroke: #fff;
+      stroke-width: 1px;
+    }
+    .link {
+      stroke: #666;
+      stroke-width: 1px;
+    }
+    #info {
+      margin-top: 10px;
+      font-family: monospace;
+      font-size: 12px;
+      color: #888;
+    }
+    button {
+      background: #00d9ff;
+      border: none;
+      padding: 8px 16px;
+      margin: 5px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #00b8d9;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pure Force Engine Test</h1>
+  <p>Testing the new force engine that uses D3's calculations without the simulation wrapper.</p>
+
+  <div>
+    <button id="start">Start</button>
+    <button id="stop">Stop</button>
+    <button id="reheat">Reheat</button>
+  </div>
+
+  <svg id="viz" width="800" height="600">
+    <g id="links"></g>
+    <g id="nodes"></g>
+  </svg>
+
+  <div id="info">
+    Tick: <span id="tick-count">0</span> |
+    Alpha: <span id="alpha">1.0</span> |
+    Running: <span id="running">false</span>
+  </div>
+
+  <script type="module">
+    import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
+
+    // Simple force engine implementation in JS for testing
+    // This mirrors what the PureScript code does
+
+    const width = 800;
+    const height = 600;
+    const centerX = width / 2;
+    const centerY = height / 2;
+
+    // Create nodes in a grid
+    const nodeCount = 20;
+    const nodes = [];
+    for (let i = 0; i < nodeCount; i++) {
+      nodes.push({
+        x: (i % 5) * 60 - 120 + centerX,
+        y: Math.floor(i / 5) * 60 - 120 + centerY,
+        vx: 0,
+        vy: 0,
+        index: i,
+        id: i
+      });
+    }
+
+    // Create links (chain + some cross-links)
+    const links = [];
+    for (let i = 0; i < nodeCount - 1; i++) {
+      links.push({ source: i, target: i + 1, index: links.length });
+    }
+    // Add some cross-links for more interesting structure
+    links.push({ source: 0, target: 5, index: links.length });
+    links.push({ source: 5, target: 10, index: links.length });
+    links.push({ source: 10, target: 15, index: links.length });
+    links.push({ source: 1, target: 6, index: links.length });
+
+    // Create D3 forces (without simulation wrapper!)
+    const chargeForce = d3.forceManyBody()
+      .strength(-100)
+      .distanceMax(300);
+
+    const collideForce = d3.forceCollide()
+      .radius(15)
+      .strength(0.7);
+
+    const linkForce = d3.forceLink()
+      .distance(50)
+      .strength(0.5)
+      .iterations(2);
+
+    const centerForce = d3.forceCenter(centerX, centerY)
+      .strength(0.1);
+
+    // Initialize forces with nodes
+    // D3 forces expect (nodes, random) - random is used for jiggle
+    const random = Math.random;
+    chargeForce.initialize(nodes, random);
+    collideForce.initialize(nodes, random);
+    centerForce.initialize(nodes, random);
+    linkForce.initialize(nodes, random);
+    linkForce.links(links);  // Note: This swizzles links - source/target become node refs!
+
+    // Simulation state (we manage this, not D3!)
+    let alpha = 1.0;
+    const alphaMin = 0.001;
+    const alphaDecay = 0.0228;
+    const alphaTarget = 0.0;
+    const velocityDecay = 0.4;
+    let running = false;
+    let tickCount = 0;
+    let animationId = null;
+
+    // SVG setup
+    const svg = d3.select('#viz');
+    const linksGroup = svg.select('#links');
+    const nodesGroup = svg.select('#nodes');
+
+    // Create link elements
+    const linkElements = linksGroup.selectAll('line')
+      .data(links)
+      .join('line')
+      .attr('class', 'link');
+
+    // Create node elements
+    const nodeElements = nodesGroup.selectAll('circle')
+      .data(nodes)
+      .join('circle')
+      .attr('class', 'node')
+      .attr('r', 10)
+      .call(d3.drag()
+        .on('start', dragStarted)
+        .on('drag', dragged)
+        .on('end', dragEnded));
+
+    // Our own tick function (the key insight!)
+    function tick() {
+      // Apply forces (just call them with alpha!)
+      chargeForce(alpha);
+      collideForce(alpha);
+      linkForce(alpha);
+      centerForce(alpha);
+
+      // Integrate positions
+      for (const node of nodes) {
+        node.vx *= velocityDecay;
+        node.vy *= velocityDecay;
+        node.x += node.vx;
+        node.y += node.vy;
+      }
+
+      // Decay alpha
+      alpha += (alphaTarget - alpha) * alphaDecay;
+      if (alpha < alphaMin) {
+        alpha = 0;
+        running = false;
+      }
+
+      tickCount++;
+
+      // Update DOM
+      render();
+      updateInfo();
+
+      // Continue animation if running
+      if (running && alpha > 0) {
+        animationId = requestAnimationFrame(tick);
+      }
+    }
+
+    function render() {
+      nodeElements
+        .attr('cx', d => d.x)
+        .attr('cy', d => d.y);
+
+      // Links are swizzled by D3 - source/target are now node objects, not indices!
+      linkElements
+        .attr('x1', d => d.source.x)
+        .attr('y1', d => d.source.y)
+        .attr('x2', d => d.target.x)
+        .attr('y2', d => d.target.y);
+    }
+
+    function updateInfo() {
+      document.getElementById('tick-count').textContent = tickCount;
+      document.getElementById('alpha').textContent = alpha.toFixed(4);
+      document.getElementById('running').textContent = running;
+    }
+
+    // Drag handlers
+    function dragStarted(event, d) {
+      if (!running) {
+        running = true;
+        alpha = 0.3;
+        tick();
+      }
+      d.fx = d.x;
+      d.fy = d.y;
+    }
+
+    function dragged(event, d) {
+      d.fx = event.x;
+      d.fy = event.y;
+      d.x = event.x;
+      d.y = event.y;
+      alpha = Math.max(alpha, 0.3);
+    }
+
+    function dragEnded(event, d) {
+      d.fx = null;
+      d.fy = null;
+    }
+
+    // Button handlers
+    document.getElementById('start').onclick = () => {
+      if (!running) {
+        running = true;
+        alpha = Math.max(alpha, 0.3);
+        tick();
+      }
+    };
+
+    document.getElementById('stop').onclick = () => {
+      running = false;
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+      updateInfo();
+    };
+
+    document.getElementById('reheat').onclick = () => {
+      alpha = 1.0;
+      if (!running) {
+        running = true;
+        tick();
+      }
+    };
+
+    // Initial render
+    render();
+    updateInfo();
+
+    // Auto-start
+    running = true;
+    tick();
+
+    console.log('[Force Engine Test] Running with pure force calculations (no d3.forceSimulation!)');
+  </script>
+</body>
+</html>

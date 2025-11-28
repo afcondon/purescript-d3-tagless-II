@@ -26,8 +26,6 @@ import PSD3.Website.Types (Route(..))
 -- SNIPPET: groupedBarChart src/website/Viz/TreeAPI/GroupedBarChartExample.purs 134-240
 -- SNIPPET: treeViz src/website/Viz/TreeAPI/TreeViz.purs 54-141
 -- SNIPPET: threeLittleDimensions src/website/Viz/TreeAPI/ThreeLittleDimensionsExample.purs 27-54
--- SNIPPET: lesMisTree src/website/Viz/TreeAPI/LesMisTreeExample.purs 104-268
-
 -- Import TreeAPI examples
 import D3.Viz.TreeAPI.ThreeLittleCircles as ThreeLittleCircles
 import D3.Viz.TreeAPI.ThreeLittleCirclesTransition as ThreeLittleCirclesTransition
@@ -39,7 +37,6 @@ import D3.Viz.TreeAPI.LineChartExample as LineChartExample
 import D3.Viz.TreeAPI.TreeViz as TreeViz
 import D3.Viz.TreeAPI.ThreeLittleDimensionsExample as ThreeLittleDimensionsExample
 import D3.Viz.TreeAPI.GroupedBarChartExample as GroupedBarChartExample
-import D3.Viz.TreeAPI.LesMisTreeExample as LesMisTreeExample
 
 -- | Component state
 type State =
@@ -93,8 +90,6 @@ handleAction = case _ of
         liftEffect $ TreeViz.treeViz "#viz"
       "three-little-dimensions" ->
         liftEffect ThreeLittleDimensionsExample.threeLittleDimensions
-      "lesmis-force" ->
-        liftEffect LesMisTreeExample.testLesMisTree
       _ -> pure unit
     -- Highlight code blocks with Prism
     liftEffect Prism.highlightAll
@@ -137,8 +132,6 @@ getExampleMeta id = case id of
     { id, name: "Tree Layout", description: "Hierarchical node-link diagram (pure PureScript)", category: "Hierarchies & Simulations" }
   "three-little-dimensions" -> Just
     { id, name: "Three Little Dimensions", description: "Nested data joins (2D array → table)", category: "Basic Examples" }
-  "lesmis-force" -> Just
-    { id, name: "Les Misérables Network", description: "Force-directed graph with simulation", category: "Hierarchies & Simulations" }
   _ -> Nothing
 
 -- | Get next example ID in the list
@@ -153,8 +146,7 @@ getNextExampleId currentId = case currentId of
   "scatter-plot" -> Just "line-chart"
   "line-chart" -> Just "grouped-bar-chart"
   "grouped-bar-chart" -> Just "simple-hierarchy"
-  "simple-hierarchy" -> Just "lesmis-force"
-  "lesmis-force" -> Nothing
+  "simple-hierarchy" -> Nothing
   _ -> Nothing
 
 -- | Get previous example ID in the list
@@ -170,7 +162,6 @@ getPrevExampleId currentId = case currentId of
   "line-chart" -> Just "scatter-plot"
   "grouped-bar-chart" -> Just "line-chart"
   "simple-hierarchy" -> Just "grouped-bar-chart"
-  "lesmis-force" -> Just "simple-hierarchy"
   _ -> Nothing
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -271,7 +262,6 @@ getModuleName = case _ of
   "grouped-bar-chart" -> "GroupedBarChartExample"
   "simple-hierarchy" -> "SimpleHierarchyExample"
   "three-little-dimensions" -> "ThreeLittleDimensionsExample"
-  "lesmis-force" -> "LesMisTreeExample"
   _ -> "Unknown"
 
 -- | Get example code summary from extracted snippets
@@ -287,5 +277,4 @@ getExampleCodeSummary = case _ of
   "grouped-bar-chart" -> getSnippet "groupedBarChart"
   "simple-hierarchy" -> getSnippet "treeViz"
   "three-little-dimensions" -> getSnippet "threeLittleDimensions"
-  "lesmis-force" -> getSnippet "lesMisTree"
   _ -> "-- See GitHub for full source code"

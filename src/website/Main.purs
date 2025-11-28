@@ -51,7 +51,6 @@ import Component.Tour.TourWealthHealth as TourWealthHealth
 import Component.Tour.TourInterpreters as TourInterpreters
 import Component.Tour.TourFPFTW as TourFPFTW
 import Component.Tour.TourGraphAlgorithms as TourGraphAlgorithms
-import Component.Tour.TourLesMisGUP as TourLesMisGUP
 import Component.Tour.TourShowcase as TourShowcase
 
 -- Showcase
@@ -63,19 +62,10 @@ import Component.Example as Example
 import Component.TreeAPI as TreeAPI
 import Component.AnimatedTreeCluster as AnimatedTreeCluster
 import Component.GeneralUpdatePattern as GeneralUpdatePattern
-import Component.LesMisGUPTree as LesMisGUPTree
-import Component.LesMisGUP as LesMisGUP
-import Component.LesMisGUPSimple as LesMisGUPSimple
-import Component.LesMisGUPTreeAPI as LesMisGUPTreeAPI
-import Component.LesMisGUPClean as LesMisGUPClean
-import Component.LesMisQueryDemo as LesMisQueryDemo
-import Component.ModuleGraph as ModuleGraph
 import Component.MermaidTreeDemo as MermaidTreeDemo
 import Component.SceneJoinDemo as SceneJoinDemo
 import Component.ForceConfigPOC as ForceConfigPOC
 import Component.ForceConfigV2Test as ForceConfigV2Test
-import PSD3.CodeExplorer as CodeExplorer
-import Component.CodeExplorerV2 as CodeExplorerV2
 import Component.CodeExplorerV3 as CodeExplorerV3
 
 -- Routing
@@ -129,7 +119,6 @@ type Slots =
   , tourInterpreters :: forall q. H.Slot q Void Unit
   , tourFPFTW :: forall q. H.Slot q Void Unit
   , tourGraphAlgorithms :: forall q. H.Slot q Void Unit
-  , tourLesMisGUP :: forall q. H.Slot q Void Unit
   , tourShowcase :: forall q. H.Slot q Void Unit
   , showcase :: forall q. H.Slot q Void Unit
   , gallery :: forall q. H.Slot q Void Unit
@@ -137,19 +126,10 @@ type Slots =
   , treeAPI :: forall q. H.Slot q Void Unit
   , animatedTreeCluster :: forall q. H.Slot q Void Unit
   , generalUpdatePattern :: forall q. H.Slot q Void Unit
-  , lesMisGUPTree :: forall q. H.Slot q Void Unit
-  , lesMisGUP :: forall q. H.Slot q Void Unit
-  , lesMisGUPSimple :: forall q. H.Slot q Void Unit
-  , lesMisGUPTreeAPI :: forall q. H.Slot q Void Unit
-  , lesMisGUPClean :: forall q. H.Slot q Void Unit
-  , lesMisQueryDemo :: forall q. H.Slot q Void Unit
-  , moduleGraph :: forall q. H.Slot q Void Unit
   , mermaidTreeDemo :: forall q. H.Slot q Void Unit
   , sceneJoinDemo :: forall q. H.Slot q Void Unit
   , forceConfigPOC :: forall q. H.Slot q Void Unit
   , forceConfigV2Test :: forall q. H.Slot q Void Unit
-  , codeExplorer :: forall q. H.Slot q Void Unit
-  , codeExplorerV2 :: forall q. H.Slot q Void Unit
   , codeExplorerV3 :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
@@ -186,7 +166,6 @@ _tourWealthHealth = Proxy :: Proxy "tourWealthHealth"
 _tourInterpreters = Proxy :: Proxy "tourInterpreters"
 _tourFPFTW = Proxy :: Proxy "tourFPFTW"
 _tourGraphAlgorithms = Proxy :: Proxy "tourGraphAlgorithms"
-_tourLesMisGUP = Proxy :: Proxy "tourLesMisGUP"
 _tourShowcase = Proxy :: Proxy "tourShowcase"
 _showcase = Proxy :: Proxy "showcase"
 _gallery = Proxy :: Proxy "gallery"
@@ -194,19 +173,10 @@ _example = Proxy :: Proxy "example"
 _treeAPI = Proxy :: Proxy "treeAPI"
 _animatedTreeCluster = Proxy :: Proxy "animatedTreeCluster"
 _generalUpdatePattern = Proxy :: Proxy "generalUpdatePattern"
-_lesMisGUPTree = Proxy :: Proxy "lesMisGUPTree"
-_lesMisGUP = Proxy :: Proxy "lesMisGUP"
-_lesMisGUPSimple = Proxy :: Proxy "lesMisGUPSimple"
-_lesMisGUPTreeAPI = Proxy :: Proxy "lesMisGUPTreeAPI"
-_lesMisGUPClean = Proxy :: Proxy "lesMisGUPClean"
-_lesMisQueryDemo = Proxy :: Proxy "lesMisQueryDemo"
-_moduleGraph = Proxy :: Proxy "moduleGraph"
 _mermaidTreeDemo = Proxy :: Proxy "mermaidTreeDemo"
 _sceneJoinDemo = Proxy :: Proxy "sceneJoinDemo"
 _forceConfigPOC = Proxy :: Proxy "forceConfigPOC"
 _forceConfigV2Test = Proxy :: Proxy "forceConfigV2Test"
-_codeExplorer = Proxy :: Proxy "codeExplorer"
-_codeExplorerV2 = Proxy :: Proxy "codeExplorerV2"
 _codeExplorerV3 = Proxy :: Proxy "codeExplorerV3"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
@@ -338,7 +308,8 @@ renderPage route = case spy "Route is" route of
     HH.slot_ _tourGraphAlgorithms unit TourGraphAlgorithms.component unit
 
   TourLesMisGUP ->
-    HH.slot_ _tourLesMisGUP unit TourLesMisGUP.component unit
+    -- Archived, redirect to CodeExplorerV3
+    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
 
   TourShowcase ->
     HH.slot_ _tourShowcase unit TourShowcase.component unit
@@ -364,25 +335,32 @@ renderPage route = case spy "Route is" route of
     HH.slot_ _generalUpdatePattern unit GeneralUpdatePattern.component unit
 
   LesMisGUPTree ->
-    HH.slot_ _lesMisGUPTree unit LesMisGUPTree.component unit
+    -- Archived, redirect to V3
+    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
 
   LesMisGUP ->
-    HH.slot_ _lesMisGUP unit LesMisGUP.component unit
+    -- Archived, redirect to V3
+    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
 
   LesMisGUPSimple ->
-    HH.slot_ _lesMisGUPSimple unit LesMisGUPSimple.component unit
+    -- Archived, redirect to V3
+    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
 
   LesMisGUPTreeAPI ->
-    HH.slot_ _lesMisGUPTreeAPI unit LesMisGUPTreeAPI.component unit
+    -- Archived, redirect to V3
+    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
 
   LesMisGUPClean ->
-    HH.slot_ _lesMisGUPClean unit LesMisGUPClean.component unit
+    -- Archived, redirect to V3
+    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
 
   LesMisQueryDemo ->
-    HH.slot_ _lesMisQueryDemo unit LesMisQueryDemo.component unit
+    -- Archived, redirect to V3
+    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
 
   ModuleGraph ->
-    HH.slot_ _moduleGraph unit ModuleGraph.component unit
+    -- Archived, redirect to V3
+    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
 
   MermaidTreeDemo ->
     HH.slot_ _mermaidTreeDemo unit MermaidTreeDemo.component unit
@@ -397,10 +375,12 @@ renderPage route = case spy "Route is" route of
     HH.slot_ _forceConfigV2Test unit ForceConfigV2Test.component unit
 
   CodeExplorer ->
-    HH.slot_ _codeExplorer unit CodeExplorer.component unit
+    -- V1 archived, redirect to V3
+    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
 
   CodeExplorerV2 ->
-    HH.slot_ _codeExplorerV2 unit CodeExplorerV2.component unit
+    -- V2 archived, redirect to V3
+    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
 
   CodeExplorerV3 ->
     HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
