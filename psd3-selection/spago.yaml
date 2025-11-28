@@ -1,6 +1,12 @@
 package:
   name: psd3-selection
   description: Type-safe D3 selection and attribute library for PureScript
+  publish:
+    version: 0.1.0
+    license: MIT
+    location:
+      githubOwner: afcondon
+      githubRepo: purescript-psd3-selection
   dependencies:
     - aff
     - arrays
