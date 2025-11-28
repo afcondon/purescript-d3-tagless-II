@@ -9,6 +9,7 @@ module PSD3v2.Interpreter.D3v2
 
 import Prelude
 
+import Partial.Unsafe (unsafePartial)
 import Data.Array as Array
 import Data.FoldableWithIndex (traverseWithIndex_)
 import Data.Map as Map
@@ -17,7 +18,7 @@ import Data.Nullable (toNullable)
 import Data.Time.Duration (Milliseconds(..))
 import Data.Traversable (traverse_)
 import Effect (Effect)
-import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Class (class MonadEffect)
 import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..))
 import PSD3v2.Capabilities.Selection (class SelectionM)
 import PSD3v2.Capabilities.Transition (class TransitionM)

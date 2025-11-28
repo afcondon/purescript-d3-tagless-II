@@ -9,10 +9,10 @@ module PSD3.Layout.Sankey.Compute where
 
 import Prelude
 
-import Control.Monad.State (State, execState, get, modify, modify_, put)
-import Data.Array (catMaybes, filter, find, findIndex, foldl, foldr, length, mapWithIndex, snoc, sortWith, (!!))
+import Control.Monad.State (State, execState, get, modify_)
+import Data.Array (catMaybes, filter, find, foldl, foldr, length, mapWithIndex, snoc, (!!))
 import Data.Array as Array
-import Data.Foldable (sum, for_)
+import Data.Foldable (for_)
 import Data.Int (toNumber)
 import Data.Map as M
 import Data.Map as Map

@@ -11,8 +11,8 @@ module PSD3.Config.Scene where
 import Prelude
 
 import Data.Array as A
-import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Newtype (class Newtype, over, unwrap)
+import Data.Maybe (Maybe(..))
+import Data.Newtype (class Newtype, over)
 import PSD3.Config.Force (ForceConfig(..))
 import PSD3.Internal.Attributes.Instances (Label)
 

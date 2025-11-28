@@ -24,13 +24,13 @@ module PSD3v2.Selection.Operations
 import Prelude
 
 import Data.Array as Array
-import Data.Foldable (class Foldable, foldl, traverse_)
+import Data.Foldable (class Foldable, traverse_)
 import Data.Int (toNumber)
 import Data.FoldableWithIndex (traverseWithIndex_)
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
-import Data.Nullable (Nullable, toMaybe, toNullable)
+import Data.Nullable (Nullable, toMaybe)
 import Data.Traversable (traverse)
 import Data.TraversableWithIndex (traverseWithIndex)
 import Data.Tuple (Tuple(..), fst, snd)

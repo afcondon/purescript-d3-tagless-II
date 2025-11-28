@@ -7,8 +7,8 @@ module PSD3.Layout.Hierarchy.Tree4 where
 import Prelude
 
 import Data.Tree (Tree(..))
-import Data.List (List(..), fromFoldable, zipWith, scanl, (..))
-import Data.Foldable (foldl, maximum, minimum)
+import Data.List (List(..), fromFoldable, length, scanl, zipWith)
+import Data.Foldable (maximum, minimum)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
 import Data.Array as Array

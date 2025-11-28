@@ -9,7 +9,7 @@ import Prelude
 
 import Data.Map (Map, empty, lookup) as Map
 import Data.Maybe (Maybe, fromMaybe)
-import Data.Set (Set)
+import Data.Set as Set
 
 -- | Input format for links from CSV (user-provided flow data with named nodes)
 type LinkCSVRow = { s :: String, t :: String, v :: Number }

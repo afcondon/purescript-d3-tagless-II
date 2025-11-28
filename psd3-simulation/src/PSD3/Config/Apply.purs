@@ -13,15 +13,14 @@ module PSD3.Config.Apply where
 
 import Prelude
 
-import Data.Array as A
 import Data.Function.Uncurried (mkFn2)
-import Data.Maybe (Maybe(..), isJust)
+import Data.Maybe (Maybe(..))
 import Data.Traversable (for_)
 import Effect (Effect)
 import PSD3.Config.Force (AttrValue(..), ForceConfig(..), ForceFilter(..), ForceParams(..), ForceType(..))
 import PSD3.Config.Scene (SceneConfig(..), SimulationParams)
 import PSD3.Internal.FFI (D3Attr_, D3ForceHandle_, disableTick_, forceCenter_, forceCollideFn_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, setVelocityDecay_)
-import PSD3.Internal.Types (D3Simulation_, Datum_, Index_)
+import PSD3.Internal.Types (D3Simulation_, Datum_)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- =============================================================================

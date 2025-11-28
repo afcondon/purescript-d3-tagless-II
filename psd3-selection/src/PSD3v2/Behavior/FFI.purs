@@ -22,7 +22,7 @@ import Prelude
 
 import Data.Nullable (Nullable)
 import Effect (Effect)
-import Effect.Uncurried (EffectFn1, EffectFn2)
+import Effect.Uncurried (EffectFn2)
 import PSD3.Internal.Types (D3Simulation_)
 import Web.DOM.Element (Element)
 import Web.UIEvent.MouseEvent (MouseEvent)

@@ -36,7 +36,7 @@ module PSD3v2.Attribute.Types
   ) where
 
 import Prelude
-import Data.Functor.Contravariant (class Contravariant, cmap)
+import Data.Functor.Contravariant (class Contravariant)
 
 -- | Type-safe attribute with datum phantom type
 -- |

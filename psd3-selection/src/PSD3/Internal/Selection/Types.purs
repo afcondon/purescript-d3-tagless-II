@@ -3,8 +3,8 @@ module PSD3.Internal.Selection.Types where
 import PSD3.Internal.FFI
 
 import Data.Array (foldl)
-import PSD3.Internal.Attributes.Instances (AttributeSetter(..), Listener_, EffectfulListener_, attributeLabel, unboxAttr)
-import PSD3.Internal.Types (D3Selection_, Datum_, MouseEvent, Transition)
+import PSD3.Internal.Attributes.Instances (AttributeSetter(..), Label, Listener_, EffectfulListener_, attributeLabel, unboxAttr)
+import PSD3.Internal.Types (D3Selection_, MouseEvent, Transition)
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomConfig, ZoomExtent(..))
 import Prelude (class Eq, class Ord, class Show, show, (<>))
 

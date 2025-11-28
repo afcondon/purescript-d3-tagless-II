@@ -117,7 +117,6 @@ module PSD3v2.Selection.Query
 import Prelude
 
 import Data.Array as Array
-import Data.Foldable (foldl, traverse_)
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
@@ -132,7 +131,6 @@ import Web.DOM.DOMTokenList as DOMTokenList
 import Web.DOM.Element (Element, classList, getAttribute, toParentNode, fromNode)
 import Web.DOM.Element as Element
 import Web.DOM.Node (Node, childNodes, parentNode)
-import Web.DOM.Node as Node
 import Web.DOM.NodeList as NodeList
 import Web.DOM.ParentNode (QuerySelector(..), querySelector, querySelectorAll)
 import Web.HTML (window)

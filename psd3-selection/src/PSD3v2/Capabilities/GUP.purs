@@ -39,8 +39,8 @@ module PSD3v2.Capabilities.GUP where
 
 import Prelude
 
+import Data.Maybe (Maybe)
 import PSD3v2.Attribute.Types (Attribute)
-import PSD3v2.Selection.Types (ElementType)
 import PSD3v2.Transition.Types (TransitionConfig)
 
 -- | Specification for entering elements.

@@ -9,7 +9,6 @@ import Prelude
 import Data.Array (length, intercalate)
 import Data.Maybe (Maybe(..))
 import Data.Generic.Rep (class Generic)
-import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..))
 import PSD3v2.Selection.Types (ElementType(..))
 import PSD3v2.VizTree.Tree (Tree(..))
 
