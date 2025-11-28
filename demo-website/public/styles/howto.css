@@ -1,0 +1,1065 @@
+/* How-to Page Styles - Clean, Minimal Design */
+
+.docs-page {
+  min-height: 100vh;
+  background-color: #f5f1e8;
+  /* Beige background */
+}
+
+/* TOC Floating Panel - Left side */
+/* Positioned relative to center column (52rem wide) */
+.toc-panel {
+  position: fixed;
+  top: 2rem;
+  /* Position to left of center column: 50% - half column width - panel width - gap */
+  left: calc(50% - 26rem - 360px - 2rem);
+  width: 360px;
+  max-height: calc(100vh - 4rem);
+  display: flex;
+  z-index: 1000;
+  font-family: var(--font-mono);
+}
+
+.toc-panel__bookmark-pin {
+  width: 80px;
+  height: auto;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.toc-panel__main {
+  flex: 1;
+  background-color: var(--color-beige-light);
+  border: 2px solid var(--color-gray-medium);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+.floating-panel__header {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-red-accent);
+  color: var(--color-beige-light);
+  border-bottom: 2px solid var(--color-gray-medium);
+  cursor: move;
+}
+
+.floating-panel__title {
+  flex: 1;
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: var(--font-mono);
+}
+
+.floating-panel__toggle {
+  background: none;
+  border: 1px solid var(--color-beige-light);
+  color: var(--color-beige-light);
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  line-height: 1;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-panel__toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.floating-panel__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.floating-panel--collapsed .floating-panel__content {
+  display: none;
+}
+
+.toc-panel__content {
+  padding: 0.5rem 0;
+}
+
+.toc-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.toc-nav__item {
+  display: block;
+  padding: 0.625rem 1rem;
+  color: var(--color-gray-darker);
+  text-decoration: none;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  border-left: 3px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.toc-nav__item:hover {
+  background-color: var(--color-beige-base);
+  border-left-color: var(--color-red-accent);
+  color: var(--color-gray-darker);
+}
+
+.toc-nav__item--level-2 {
+  padding-left: 1.75rem;
+  font-size: 0.875rem;
+}
+
+.toc-nav__item--level-3 {
+  padding-left: 2.5rem;
+  font-size: 0.8125rem;
+  color: var(--color-gray-medium);
+}
+
+/* Control Panel - Alternative to TOC for interactive pages */
+/* Unlike TOC which has bookmark on the side, control panel is just the main box */
+.control-panel.toc-panel {
+  /* Control panel doesn't use the bookmark/main layout */
+  display: block;
+}
+
+.control-panel__main {
+  width: 100%;
+}
+
+.control-panel__icon {
+  width: 50%;
+  /* Half the panel width */
+  max-width: 180px;
+  height: auto;
+  margin: 1rem 0 1rem 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.control-panel__content {
+  padding: 1rem;
+}
+
+.control-panel__section {
+  margin-bottom: 1.5rem;
+}
+
+.control-panel__section:last-child {
+  margin-bottom: 0;
+}
+
+.control-panel__section-title {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-gray-medium);
+  margin: 0 0 0.75rem 0;
+}
+
+.control-panel__options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.control-panel__option {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  background-color: transparent;
+  border: 1px solid var(--color-gray-medium);
+  border-left: 3px solid transparent;
+  color: var(--color-gray-darker);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.control-panel__option:hover {
+  background-color: var(--color-beige-base);
+  border-left-color: var(--color-red-accent);
+}
+
+.control-panel__option--active {
+  background-color: var(--color-beige-base);
+  border-left-color: var(--color-red-accent);
+  font-weight: bold;
+  color: var(--color-gray-darker);
+}
+
+.control-panel__current {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-gray-light);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-gray-darker);
+}
+
+/* Navigation Panel (RHS) */
+/* Positioned relative to center column (52rem wide) */
+.docs-page__nav-panel {
+  position: fixed;
+  top: 2rem;
+  /* Position to right of center column: 50% - half column width - panel width - gap */
+  right: calc(50% - 26rem - 240px - 2rem);
+  width: 240px;
+  background-color: var(--color-beige-light);
+  border: 2px solid var(--color-gray-medium);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 1.5rem;
+  z-index: 1000;
+}
+
+.docs-page__nav-title {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 1rem 0;
+  color: var(--color-gray-darker);
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-red-accent);
+}
+
+.docs-page__nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.docs-page__nav-link {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-gray-darker);
+  text-decoration: none;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.docs-page__nav-link:hover {
+  background-color: var(--color-beige-base);
+  border-left-color: var(--color-red-accent);
+  color: var(--color-gray-darker);
+}
+
+.docs-page__nav-link--active {
+  background-color: var(--color-beige-base);
+  border-left-color: var(--color-red-accent);
+  font-weight: bold;
+  color: var(--color-gray-darker);
+  cursor: default;
+}
+
+.docs-page__nav-link--external {
+  color: var(--color-teal);
+}
+
+.docs-page__nav-link--external:hover {
+  color: var(--color-teal);
+  border-left-color: var(--color-teal);
+}
+
+.tutorial-section {
+  max-width: 52rem;
+  margin: 0 auto 3rem auto;
+  background-color: #F5F1E8;
+  padding: 2rem 3rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  position: relative;
+  /* For positioning margin notes */
+}
+
+.tutorial-intro {
+  margin-bottom: 4rem;
+}
+
+.tutorial-title {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 3px solid var(--color-red-accent);
+  color: var(--color-gray-darker);
+}
+
+.tutorial-section-title {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-red-accent);
+  color: var(--color-gray-darker);
+}
+
+.tutorial-section p {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.8;
+  color: #2A2A2A;
+  margin-bottom: 1rem;
+}
+
+.tutorial-section ul {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.8;
+  color: #2A2A2A;
+  margin-bottom: 1rem;
+  padding-left: 2rem;
+  list-style-type: square;
+}
+
+.tutorial-section li {
+  margin-bottom: 0.5rem;
+}
+
+.tutorial-section ol {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.8;
+  color: #2A2A2A;
+  margin-bottom: 1rem;
+  padding-left: 2rem;
+  list-style-type: decimal;
+}
+
+.tutorial-section h2 {
+  font-family: var(--font-mono);
+  font-size: 1.125rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  color: var(--color-gray-darker);
+}
+
+.tutorial-section h3 {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: bold;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-gray-darker);
+}
+
+.tutorial-section h4 {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-teal);
+}
+
+.tutorial-section a {
+  color: var(--color-red-accent);
+  text-decoration: underline;
+}
+
+.tutorial-section a:hover {
+  color: var(--color-coral);
+}
+
+.tutorial-section strong {
+  font-weight: bold;
+  color: var(--color-gray-darker);
+}
+
+.tutorial-section em {
+  font-style: italic;
+}
+
+.tutorial-section code {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  background-color: #f5f0e6;
+  padding: 0.125rem 0.375rem;
+  border-radius: 2px;
+  color: #333;
+}
+
+.tutorial-section pre {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  background-color: #f5f0e6;
+  color: #2a2a2a;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  border-left: 3px solid var(--color-teal);
+  line-height: 1.6;
+}
+
+.tutorial-section pre code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+/* Tables */
+.tutorial-table {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+
+.tutorial-table th,
+.tutorial-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-gray-light);
+}
+
+.tutorial-table th {
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: var(--color-beige-dark);
+  border-bottom: 2px solid var(--color-gray-medium);
+}
+
+.tutorial-table tr:hover {
+  background-color: var(--color-beige-base);
+}
+
+/* Visualization Container */
+.tutorial-viz-container {
+  margin: 2rem 0;
+  padding: 2rem;
+  background-color: white;
+  border: 2px solid var(--color-gray-medium);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Embedded visualization divs */
+.tutorial-viz-container .three-circles-viz,
+.tutorial-viz-container .gup-viz,
+.tutorial-viz-container .parabola-viz,
+.tutorial-viz-container .barchart-viz,
+.tutorial-viz-container .linechart-viz,
+.tutorial-viz-container .quartet-viz {
+  width: 100%;
+  /* Let SVG determine height naturally based on viewBox aspect ratio */
+}
+
+/* Make SVG responsive - scales to fit container while maintaining aspect ratio */
+.tutorial-viz-container svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* Specific sizing for small examples to keep them readable */
+.tutorial-viz-container .three-circles-viz svg,
+.tutorial-viz-container .parabola-viz svg {
+  max-width: 600px;
+  /* Keep small examples from getting too large */
+  min-height: 100px;
+  /* Ensure minimum readable size */
+}
+
+/* GUP needs more vertical space for animation */
+.tutorial-viz-container .gup-viz svg {
+  max-width: 600px;
+  min-height: 200px;
+}
+
+/* Chart examples can be larger */
+.tutorial-viz-container .barchart-viz svg,
+.tutorial-viz-container .linechart-viz svg {
+  max-width: 800px;
+}
+
+/* Quartet needs full width for side-by-side charts */
+.tutorial-viz-container .quartet-viz svg {
+  max-width: 100%;
+  min-height: 300px;
+}
+
+/* Hierarchies visualization - full width for tree layouts */
+.tutorial-viz-container .hierarchies-viz {
+  width: 100%;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tutorial-viz-container .hierarchies-viz svg {
+  max-width: 100%;
+  min-height: 400px;
+}
+
+/* Layout placeholder styling */
+.layout-placeholder {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-gray-medium);
+  text-align: center;
+  padding: 3rem;
+}
+
+/* Code blocks in tutorial - use existing Prism editorial theme */
+.tutorial-code-block {
+  margin: 1.5rem 0;
+}
+
+.tutorial-code-block pre {
+  margin: 0;
+  overflow-x: auto;
+  /* Allow horizontal scroll for long lines */
+}
+
+.tutorial-code-block code {
+  /* Font size defined in prism-editorial.css (0.6875rem / 11px) */
+  line-height: 1.7;
+  white-space: pre;
+  /* Preserve formatting, don't wrap */
+}
+
+/* Ensure Prism styles apply correctly */
+.tutorial-code-block pre[class*="language-"] {
+  /* Font size defined in prism-editorial.css */
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.tutorial-code-block code[class*="language-"] {
+  /* Font size defined in prism-editorial.css */
+  white-space: pre;
+}
+
+/* Margin Notes */
+.tutorial-margin-note {
+  position: absolute;
+  right: -280px;
+  /* Position outside the main content column */
+  width: 240px;
+  background-color: var(--color-beige-light);
+  border: 2px solid var(--color-gray-medium);
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-top: -1rem;
+  /* Align with adjacent content */
+}
+
+.tutorial-margin-note__label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-gray-medium);
+  margin: 0 0 0.75rem 0;
+}
+
+.tutorial-margin-note__link {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-red-accent);
+  text-decoration: none;
+  padding: 0.5rem 0;
+  border-left: 3px solid transparent;
+  padding-left: 0.75rem;
+  transition: all 0.15s ease;
+}
+
+.tutorial-margin-note__link:hover {
+  border-left-color: var(--color-red-accent);
+  background-color: var(--color-beige-base);
+}
+
+/* Responsive */
+/* On narrower screens, fall back to edge-based positioning */
+@media (max-width: 1600px) {
+  .toc-panel {
+    /* Switch to edge positioning when viewport is too narrow */
+    left: 2rem;
+  }
+
+  .docs-page__nav-panel {
+    /* Switch to edge positioning when viewport is too narrow */
+    right: 2rem;
+  }
+}
+
+@media (max-width: 1400px) {
+  .toc-panel {
+    width: 320px;
+    left: 1.5rem;
+  }
+
+  .toc-panel__bookmark-pin {
+    width: 60px;
+  }
+
+  .docs-page__nav-panel {
+    width: 200px;
+    right: 1.5rem;
+  }
+
+  .tutorial-section {
+    margin-right: 1rem;
+  }
+
+  .tutorial-margin-note {
+    right: -240px;
+    width: 200px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .toc-panel {
+    width: 280px;
+    left: 1rem;
+  }
+
+  .toc-panel__bookmark-pin {
+    width: 50px;
+  }
+
+  /* Move margin notes inline on smaller screens */
+  .tutorial-margin-note {
+    position: static;
+    width: auto;
+    margin: 1.5rem 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .tutorial-section {
+    padding: 1.5rem;
+  }
+
+  .tutorial-title {
+    font-size: 1.5rem;
+  }
+
+  .tutorial-section-title {
+    font-size: 1.25rem;
+  }
+
+  .tutorial-section p,
+  .tutorial-section ul {
+    font-size: 0.8125rem;
+  }
+
+  .tutorial-viz-container {
+    padding: 1rem;
+  }
+
+  /* Reduce code font size slightly on mobile */
+  .tutorial-code-block code,
+  .tutorial-code-block pre[class*="language-"],
+  .tutorial-code-block code[class*="language-"] {
+    font-size: 0.625rem;
+    /* 10px on mobile */
+  }
+
+  /* Adjust min heights for mobile */
+  .tutorial-viz-container .three-circles-viz svg,
+  .tutorial-viz-container .parabola-viz svg {
+    min-height: 80px;
+  }
+
+  .tutorial-viz-container .gup-viz svg {
+    min-height: 150px;
+  }
+
+  .tutorial-viz-container .quartet-viz svg {
+    min-height: 200px;
+  }
+
+  /* Hide TOC and Nav panel on mobile */
+  .toc-panel,
+  .docs-page__nav-panel {
+    display: none;
+  }
+}
+
+/* How-to Item List Styles */
+.howto-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.howto-item {
+  background-color: var(--color-beige-light);
+  border: 2px solid var(--color-gray-medium);
+  border-left: 4px solid var(--color-red-accent);
+  padding: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.howto-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translateX(4px);
+}
+
+.howto-item__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  gap: 1rem;
+}
+
+.howto-item__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: bold;
+  flex: 1;
+}
+
+.howto-item__link {
+  color: var(--color-gray-darker);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.howto-item__link:hover {
+  color: var(--color-red-accent);
+}
+
+.howto-item__difficulty {
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.375rem 0.75rem;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.howto-item__difficulty--beginner {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.howto-item__difficulty--intermediate {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.howto-item__difficulty--advanced {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.howto-item__description {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-gray-medium);
+  margin: 0;
+}
+
+
+/* New Minimal How-to Page Styles */
+
+/* Header */
+.howto-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0ddd4;
+  padding: 2rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.howto-header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.howto-logo-link {
+  display: flex;
+  align-items: center;
+}
+
+.howto-logo {
+  height: 36px;
+  width: auto;
+}
+
+.howto-nav {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.howto-nav-link {
+  font-size: 1rem;
+  color: #666;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.howto-nav-link:hover {
+  color: #333;
+}
+
+/* Hero Section */
+.docs-hero {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 4rem 3rem 3rem 3rem;
+}
+
+.docs-hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.docs-hero-title {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.3;
+  margin: 0 0 1.5rem 0;
+  letter-spacing: -0.02em;
+}
+
+.docs-hero-description {
+  font-size: 1.1rem;
+  color: #666;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Sections */
+.docs-section {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 3rem 3rem;
+  background-color: #ffffff;
+  margin-bottom: 2rem;
+}
+
+.docs-section-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.02em;
+}
+
+.docs-section-description {
+  font-size: 1rem;
+  color: #666;
+  margin: 0 0 2rem 0;
+  line-height: 1.6;
+}
+
+/* Grid */
+.docs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Card Grid */
+.howto-card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.howto-card-grid .howto-card {
+  flex: 1 1 300px;
+  max-width: 400px;
+}
+
+/* Cards */
+.howto-card {
+  background-color: #fafaf8;
+  border: 1px solid #e0ddd4;
+  border-radius: 4px;
+  padding: 1.5rem;
+  text-decoration: none;
+  display: block;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.howto-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #007acc;
+}
+
+.howto-card--coming-soon {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.howto-card--coming-soon:hover {
+  transform: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-color: #e0ddd4;
+}
+
+/* Card header with type badge */
+.howto-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.howto-card-type {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.howto-card--howto .howto-card-type {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.howto-card--best-practice .howto-card-type {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.howto-card-status {
+  font-size: 0.75rem;
+  color: #999;
+  font-weight: 500;
+}
+
+.howto-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.3;
+}
+
+.howto-card-description {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .howto-header-content {
+    padding: 0 2rem;
+  }
+
+  .docs-hero {
+    padding: 3rem 2rem 2rem 2rem;
+  }
+
+  .docs-section {
+    padding: 2rem 2rem;
+  }
+
+  .docs-hero-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .howto-header {
+    padding: 1.5rem 0;
+  }
+
+  .howto-header-content {
+    padding: 0 1.5rem;
+  }
+
+  .howto-logo {
+    height: 28px;
+  }
+
+  .docs-hero {
+    padding: 2rem 1.5rem;
+  }
+
+  .docs-hero-title {
+    font-size: 1.75rem;
+  }
+
+  .docs-hero-description {
+    font-size: 1rem;
+  }
+
+  .docs-section {
+    padding: 2rem 1.5rem;
+  }
+
+  .docs-section-title {
+    font-size: 1.5rem;
+  }
+
+  .docs-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .howto-card {
+    padding: 1.25rem;
+  }
+
+  .howto-card-title {
+    font-size: 1.1rem;
+  }
+
+  .howto-card-description {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .docs-hero-title {
+    font-size: 1.5rem;
+  }
+
+  .docs-section-title {
+    font-size: 1.25rem;
+  }
+}

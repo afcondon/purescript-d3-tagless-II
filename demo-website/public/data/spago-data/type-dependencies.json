@@ -1,0 +1,4511 @@
+{
+  "types": {
+    "Affjax.Error": {
+      "module": "Affjax",
+      "name": "Error",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Affjax.AffjaxDriver": {
+      "module": "Affjax",
+      "name": "AffjaxDriver",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Affjax.RequestBody.RequestBody": {
+      "module": "Affjax.RequestBody",
+      "name": "RequestBody",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Affjax.RequestHeader.RequestHeader": {
+      "module": "Affjax.RequestHeader",
+      "name": "RequestHeader",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Affjax.ResponseFormat.ResponseFormat": {
+      "module": "Affjax.ResponseFormat",
+      "name": "ResponseFormat",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Affjax.ResponseHeader.ResponseHeader": {
+      "module": "Affjax.ResponseHeader",
+      "name": "ResponseHeader",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Affjax.StatusCode.StatusCode": {
+      "module": "Affjax.StatusCode",
+      "name": "StatusCode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.AnimatedTreeCluster.Action": {
+      "module": "Component.AnimatedTreeCluster",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.CodeExplorerV2.Action": {
+      "module": "Component.CodeExplorerV2",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.CodeExplorerV2.BubblePackData.PackDatum": {
+      "module": "Component.CodeExplorerV2.BubblePackData",
+      "name": "PackDatum",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.CodeExplorerV2.Scenes.Types.Scene": {
+      "module": "Component.CodeExplorerV2.Scenes.Types",
+      "name": "Scene",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.CodeExplorerV2.Scenes.Types.LinkStyle": {
+      "module": "Component.CodeExplorerV2.Scenes.Types",
+      "name": "LinkStyle",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.CodeExplorerV2.Types.Scene": {
+      "module": "Component.CodeExplorerV2.Types",
+      "name": "Scene",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Example.Action": {
+      "module": "Component.Example",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.ForceControlPanel.Action": {
+      "module": "Component.ForceControlPanel",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.ForceControlPanel.Query": {
+      "module": "Component.ForceControlPanel",
+      "name": "Query",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.GeneralUpdatePattern.Status": {
+      "module": "Component.GeneralUpdatePattern",
+      "name": "Status",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.GeneralUpdatePattern.Action": {
+      "module": "Component.GeneralUpdatePattern",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.HowTo.HowtoAxesScales.Action": {
+      "module": "Component.HowTo.HowtoAxesScales",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.HowTo.HowtoDebugging.Action": {
+      "module": "Component.HowTo.HowtoDebugging",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.HowTo.HowtoEvents.Action": {
+      "module": "Component.HowTo.HowtoEvents",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.HowTo.HowtoForceGraphs.Action": {
+      "module": "Component.HowTo.HowtoForceGraphs",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.HowTo.HowtoHierarchical.Action": {
+      "module": "Component.HowTo.HowtoHierarchical",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.HowTo.HowtoLoadingData.Action": {
+      "module": "Component.HowTo.HowtoLoadingData",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.HowTo.HowtoPerformance.Action": {
+      "module": "Component.HowTo.HowtoPerformance",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.HowTo.HowtoTooltips.Action": {
+      "module": "Component.HowTo.HowtoTooltips",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.HowTo.HowtoTransitions.Action": {
+      "module": "Component.HowTo.HowtoTransitions",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.HowTo.HowtoTreeAPI.Action": {
+      "module": "Component.HowTo.HowtoTreeAPI",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.HowTo.HowtoTreeExplorer.LayerScalePreset": {
+      "module": "Component.HowTo.HowtoTreeExplorer",
+      "name": "LayerScalePreset",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.HowTo.HowtoTreeExplorer.Action": {
+      "module": "Component.HowTo.HowtoTreeExplorer",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.LesMisGUP.SceneType": {
+      "module": "Component.LesMisGUP",
+      "name": "SceneType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.LesMisGUP.Action": {
+      "module": "Component.LesMisGUP",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.LesMisGUPClean.Action": {
+      "module": "Component.LesMisGUPClean",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.LesMisGUPSimple.Action": {
+      "module": "Component.LesMisGUPSimple",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.LesMisGUPTree.Action": {
+      "module": "Component.LesMisGUPTree",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.LesMisGUPTreeAPI.Action": {
+      "module": "Component.LesMisGUPTreeAPI",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.LesMisQueryDemo.Action": {
+      "module": "Component.LesMisQueryDemo",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.MermaidTreeDemo.Action": {
+      "module": "Component.MermaidTreeDemo",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.ModuleGraph.Action": {
+      "module": "Component.ModuleGraph",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.SceneJoinDemo.Action": {
+      "module": "Component.SceneJoinDemo",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Showcase.ShowcaseIndex.Action": {
+      "module": "Component.Showcase.ShowcaseIndex",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Tour.TourFPFTW.Action": {
+      "module": "Component.Tour.TourFPFTW",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Tour.TourFlow.Action": {
+      "module": "Component.Tour.TourFlow",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Tour.TourFoundations.Action": {
+      "module": "Component.Tour.TourFoundations",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Tour.TourGraphAlgorithms.Action": {
+      "module": "Component.Tour.TourGraphAlgorithms",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Tour.TourHierarchies.Action": {
+      "module": "Component.Tour.TourHierarchies",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Tour.TourIndex.Action": {
+      "module": "Component.Tour.TourIndex",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Tour.TourInterpreters.ExampleSelection": {
+      "module": "Component.Tour.TourInterpreters",
+      "name": "ExampleSelection",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Tour.TourInterpreters.Action": {
+      "module": "Component.Tour.TourInterpreters",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Tour.TourLesMisGUP.Action": {
+      "module": "Component.Tour.TourLesMisGUP",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Tour.TourMotion.Action": {
+      "module": "Component.Tour.TourMotion",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Tour.TourProfessional.Action": {
+      "module": "Component.Tour.TourProfessional",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Tour.TourShowcase.Action": {
+      "module": "Component.Tour.TourShowcase",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Tour.TourWealthHealth.Action": {
+      "module": "Component.Tour.TourWealthHealth",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.TreeAPI.Example": {
+      "module": "Component.TreeAPI",
+      "name": "Example",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.TreeAPI.Action": {
+      "module": "Component.TreeAPI",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Understanding.UnderstandingAttributes.Action": {
+      "module": "Component.Understanding.UnderstandingAttributes",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Understanding.UnderstandingGrammar.Action": {
+      "module": "Component.Understanding.UnderstandingGrammar",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Understanding.UnderstandingScenes.Action": {
+      "module": "Component.Understanding.UnderstandingScenes",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Understanding.UnderstandingSelections.Action": {
+      "module": "Component.Understanding.UnderstandingSelections",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.Understanding.UnderstandingTreeAPI.Action": {
+      "module": "Component.Understanding.UnderstandingTreeAPI",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.WealthHealth.Actions.Action": {
+      "module": "Component.WealthHealth.Actions",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.WealthHealth.State.LabelMode": {
+      "module": "Component.WealthHealth.State",
+      "name": "LabelMode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Component.WealthHealth.Types.Region": {
+      "module": "Component.WealthHealth.Types",
+      "name": "Region",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Applicative.Free.FreeAp": {
+      "module": "Control.Applicative.Free",
+      "name": "FreeAp",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Comonad.Cofree.Cofree": {
+      "module": "Control.Comonad.Cofree",
+      "name": "Cofree",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Comonad.Env.Trans.EnvT": {
+      "module": "Control.Comonad.Env.Trans",
+      "name": "EnvT",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Comonad.Store.Trans.StoreT": {
+      "module": "Control.Comonad.Store.Trans",
+      "name": "StoreT",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Comonad.Traced.Trans.TracedT": {
+      "module": "Control.Comonad.Traced.Trans",
+      "name": "TracedT",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.Cont.Trans.ContT": {
+      "module": "Control.Monad.Cont.Trans",
+      "name": "ContT",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.Except.Trans.ExceptT": {
+      "module": "Control.Monad.Except.Trans",
+      "name": "ExceptT",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.Fork.Class.BracketCondition": {
+      "module": "Control.Monad.Fork.Class",
+      "name": "BracketCondition",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.Free.Free": {
+      "module": "Control.Monad.Free",
+      "name": "Free",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.Identity.Trans.IdentityT": {
+      "module": "Control.Monad.Identity.Trans",
+      "name": "IdentityT",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.List.Trans.ListT": {
+      "module": "Control.Monad.List.Trans",
+      "name": "ListT",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.List.Trans.Step": {
+      "module": "Control.Monad.List.Trans",
+      "name": "Step",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.Maybe.Trans.MaybeT": {
+      "module": "Control.Monad.Maybe.Trans",
+      "name": "MaybeT",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.RWS.Trans.RWSResult": {
+      "module": "Control.Monad.RWS.Trans",
+      "name": "RWSResult",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.RWS.Trans.RWST": {
+      "module": "Control.Monad.RWS.Trans",
+      "name": "RWST",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.Reader.Trans.ReaderT": {
+      "module": "Control.Monad.Reader.Trans",
+      "name": "ReaderT",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.Rec.Class.Step": {
+      "module": "Control.Monad.Rec.Class",
+      "name": "Step",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.ST.Global.Global": {
+      "module": "Control.Monad.ST.Global",
+      "name": "Global",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.ST.Internal.Region": {
+      "module": "Control.Monad.ST.Internal",
+      "name": "Region",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.ST.Internal.ST": {
+      "module": "Control.Monad.ST.Internal",
+      "name": "ST",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.ST.Internal.STRef": {
+      "module": "Control.Monad.ST.Internal",
+      "name": "STRef",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.ST.Uncurried.STFn1": {
+      "module": "Control.Monad.ST.Uncurried",
+      "name": "STFn1",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.ST.Uncurried.STFn2": {
+      "module": "Control.Monad.ST.Uncurried",
+      "name": "STFn2",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.ST.Uncurried.STFn3": {
+      "module": "Control.Monad.ST.Uncurried",
+      "name": "STFn3",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.ST.Uncurried.STFn4": {
+      "module": "Control.Monad.ST.Uncurried",
+      "name": "STFn4",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.ST.Uncurried.STFn5": {
+      "module": "Control.Monad.ST.Uncurried",
+      "name": "STFn5",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.ST.Uncurried.STFn6": {
+      "module": "Control.Monad.ST.Uncurried",
+      "name": "STFn6",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.ST.Uncurried.STFn7": {
+      "module": "Control.Monad.ST.Uncurried",
+      "name": "STFn7",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.ST.Uncurried.STFn8": {
+      "module": "Control.Monad.ST.Uncurried",
+      "name": "STFn8",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.ST.Uncurried.STFn9": {
+      "module": "Control.Monad.ST.Uncurried",
+      "name": "STFn9",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.ST.Uncurried.STFn10": {
+      "module": "Control.Monad.ST.Uncurried",
+      "name": "STFn10",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.State.Trans.StateT": {
+      "module": "Control.Monad.State.Trans",
+      "name": "StateT",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Monad.Writer.Trans.WriterT": {
+      "module": "Control.Monad.Writer.Trans",
+      "name": "WriterT",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Control.Parallel.Class.ParCont": {
+      "module": "Control.Parallel.Class",
+      "name": "ParCont",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.AnimatedTree4Cluster4.LayoutType": {
+      "module": "D3.Viz.AnimatedTree4Cluster4",
+      "name": "LayoutType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.FPFTW.LesMisGUPAuto.IndexedLink": {
+      "module": "D3.Viz.FPFTW.LesMisGUPAuto",
+      "name": "IndexedLink",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.FPFTW.LesMisGUPAuto.KeyedNode": {
+      "module": "D3.Viz.FPFTW.LesMisGUPAuto",
+      "name": "KeyedNode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.LesMis.LesMisGUPClean.IndexedLink": {
+      "module": "D3.Viz.LesMis.LesMisGUPClean",
+      "name": "IndexedLink",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.LesMis.LesMisGUPSimple.KeyedNode": {
+      "module": "D3.Viz.LesMis.LesMisGUPSimple",
+      "name": "KeyedNode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.LesMis.LesMisGUPSimple.SceneData": {
+      "module": "D3.Viz.LesMis.LesMisGUPSimple",
+      "name": "SceneData",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.LesMis.LesMisGUPSimple.IndexedLink": {
+      "module": "D3.Viz.LesMis.LesMisGUPSimple",
+      "name": "IndexedLink",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.LesMis.QueryDemo.IndexedLink": {
+      "module": "D3.Viz.LesMis.QueryDemo",
+      "name": "IndexedLink",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.LesMisGUPTreeAPI.IndexedLink": {
+      "module": "D3.Viz.LesMisGUPTreeAPI",
+      "name": "IndexedLink",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.LesMisGUPTreeAPI.KeyedNode": {
+      "module": "D3.Viz.LesMisGUPTreeAPI",
+      "name": "KeyedNode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.LesMisGUPV2.IndexedLink": {
+      "module": "D3.Viz.LesMisGUPV2",
+      "name": "IndexedLink",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.LesMisGUPV2.KeyedNode": {
+      "module": "D3.Viz.LesMisGUPV2",
+      "name": "KeyedNode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.LesMisV2.IndexedLink": {
+      "module": "D3.Viz.LesMisV2",
+      "name": "IndexedLink",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.ModuleGraph.Viz.IndexedLink": {
+      "module": "D3.Viz.ModuleGraph.Viz",
+      "name": "IndexedLink",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.Spago.Files.D3_TreeNode": {
+      "module": "D3.Viz.Spago.Files",
+      "name": "D3_TreeNode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.Spago.Files.LinkType": {
+      "module": "D3.Viz.Spago.Files",
+      "name": "LinkType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.Spago.Files.PackageInfo": {
+      "module": "D3.Viz.Spago.Files",
+      "name": "PackageInfo",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.Spago.Files.NodeType": {
+      "module": "D3.Viz.Spago.Files",
+      "name": "NodeType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.Spago.GitMetrics.ColorByOption": {
+      "module": "D3.Viz.Spago.GitMetrics",
+      "name": "ColorByOption",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.TreeAPI.ChordDiagram.IndexedArc": {
+      "module": "D3.Viz.TreeAPI.ChordDiagram",
+      "name": "IndexedArc",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.TreeAPI.ChordDiagram.IndexedRibbon": {
+      "module": "D3.Viz.TreeAPI.ChordDiagram",
+      "name": "IndexedRibbon",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.TreeAPI.LesMisSimple.IndexedLink": {
+      "module": "D3.Viz.TreeAPI.LesMisSimple",
+      "name": "IndexedLink",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.TreeAPI.LesMisTreeExample.IndexedLink": {
+      "module": "D3.Viz.TreeAPI.LesMisTreeExample",
+      "name": "IndexedLink",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.TreeAPI.SankeyDiagram.IndexedLink": {
+      "module": "D3.Viz.TreeAPI.SankeyDiagram",
+      "name": "IndexedLink",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.TreeAPI.SankeyDiagram.IndexedNode": {
+      "module": "D3.Viz.TreeAPI.SankeyDiagram",
+      "name": "IndexedNode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "D3.Viz.TreeAPI.ThreeLittleCirclesTransition.CircleState": {
+      "module": "D3.Viz.TreeAPI.ThreeLittleCirclesTransition",
+      "name": "CircleState",
+      "kind": "data",
+      "usedBy": []
+    },
+    "DOM.HTML.Indexed.AutocompleteType.AutocompleteType": {
+      "module": "DOM.HTML.Indexed.AutocompleteType",
+      "name": "AutocompleteType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "DOM.HTML.Indexed.ButtonType.ButtonType": {
+      "module": "DOM.HTML.Indexed.ButtonType",
+      "name": "ButtonType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "DOM.HTML.Indexed.CrossOriginValue.CrossOriginValue": {
+      "module": "DOM.HTML.Indexed.CrossOriginValue",
+      "name": "CrossOriginValue",
+      "kind": "data",
+      "usedBy": []
+    },
+    "DOM.HTML.Indexed.DirValue.DirValue": {
+      "module": "DOM.HTML.Indexed.DirValue",
+      "name": "DirValue",
+      "kind": "data",
+      "usedBy": []
+    },
+    "DOM.HTML.Indexed.FormMethod.FormMethod": {
+      "module": "DOM.HTML.Indexed.FormMethod",
+      "name": "FormMethod",
+      "kind": "data",
+      "usedBy": []
+    },
+    "DOM.HTML.Indexed.InputAcceptType.InputAcceptType": {
+      "module": "DOM.HTML.Indexed.InputAcceptType",
+      "name": "InputAcceptType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "DOM.HTML.Indexed.InputAcceptType.InputAcceptTypeAtom": {
+      "module": "DOM.HTML.Indexed.InputAcceptType",
+      "name": "InputAcceptTypeAtom",
+      "kind": "data",
+      "usedBy": []
+    },
+    "DOM.HTML.Indexed.InputType.InputType": {
+      "module": "DOM.HTML.Indexed.InputType",
+      "name": "InputType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "DOM.HTML.Indexed.KindValue.KindValue": {
+      "module": "DOM.HTML.Indexed.KindValue",
+      "name": "KindValue",
+      "kind": "data",
+      "usedBy": []
+    },
+    "DOM.HTML.Indexed.MenuType.MenuType": {
+      "module": "DOM.HTML.Indexed.MenuType",
+      "name": "MenuType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "DOM.HTML.Indexed.MenuitemType.MenuitemType": {
+      "module": "DOM.HTML.Indexed.MenuitemType",
+      "name": "MenuitemType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "DOM.HTML.Indexed.OrderedListType.CaseType": {
+      "module": "DOM.HTML.Indexed.OrderedListType",
+      "name": "CaseType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "DOM.HTML.Indexed.OrderedListType.NumeralType": {
+      "module": "DOM.HTML.Indexed.OrderedListType",
+      "name": "NumeralType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "DOM.HTML.Indexed.OrderedListType.OrderedListType": {
+      "module": "DOM.HTML.Indexed.OrderedListType",
+      "name": "OrderedListType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "DOM.HTML.Indexed.PreloadValue.PreloadValue": {
+      "module": "DOM.HTML.Indexed.PreloadValue",
+      "name": "PreloadValue",
+      "kind": "data",
+      "usedBy": []
+    },
+    "DOM.HTML.Indexed.ScopeValue.ScopeValue": {
+      "module": "DOM.HTML.Indexed.ScopeValue",
+      "name": "ScopeValue",
+      "kind": "data",
+      "usedBy": []
+    },
+    "DOM.HTML.Indexed.StepValue.StepValue": {
+      "module": "DOM.HTML.Indexed.StepValue",
+      "name": "StepValue",
+      "kind": "data",
+      "usedBy": []
+    },
+    "DOM.HTML.Indexed.WrapValue.WrapValue": {
+      "module": "DOM.HTML.Indexed.WrapValue",
+      "name": "WrapValue",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Argonaut.Core.Json": {
+      "module": "Data.Argonaut.Core",
+      "name": "Json",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Argonaut.Decode.Error.JsonDecodeError": {
+      "module": "Data.Argonaut.Decode.Error",
+      "name": "JsonDecodeError",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Array.NonEmpty.Internal.NonEmptyArray": {
+      "module": "Data.Array.NonEmpty.Internal",
+      "name": "NonEmptyArray",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Array.ST.STArray": {
+      "module": "Data.Array.ST",
+      "name": "STArray",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Array.ST.Iterator.Iterator": {
+      "module": "Data.Array.ST.Iterator",
+      "name": "Iterator",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.ArrayBuffer.Types.ArrayBuffer": {
+      "module": "Data.ArrayBuffer.Types",
+      "name": "ArrayBuffer",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.ArrayBuffer.Types.DataView": {
+      "module": "Data.ArrayBuffer.Types",
+      "name": "DataView",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.ArrayBuffer.Types.ArrayView": {
+      "module": "Data.ArrayBuffer.Types",
+      "name": "ArrayView",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.ArrayBuffer.Types.ArrayViewType": {
+      "module": "Data.ArrayBuffer.Types",
+      "name": "ArrayViewType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.ArrayBuffer.Types.Int8": {
+      "module": "Data.ArrayBuffer.Types",
+      "name": "Int8",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.ArrayBuffer.Types.Int16": {
+      "module": "Data.ArrayBuffer.Types",
+      "name": "Int16",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.ArrayBuffer.Types.Int32": {
+      "module": "Data.ArrayBuffer.Types",
+      "name": "Int32",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.ArrayBuffer.Types.Uint8": {
+      "module": "Data.ArrayBuffer.Types",
+      "name": "Uint8",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.ArrayBuffer.Types.Uint16": {
+      "module": "Data.ArrayBuffer.Types",
+      "name": "Uint16",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.ArrayBuffer.Types.Uint32": {
+      "module": "Data.ArrayBuffer.Types",
+      "name": "Uint32",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.ArrayBuffer.Types.Uint8Clamped": {
+      "module": "Data.ArrayBuffer.Types",
+      "name": "Uint8Clamped",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.ArrayBuffer.Types.Float32": {
+      "module": "Data.ArrayBuffer.Types",
+      "name": "Float32",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.ArrayBuffer.Types.Float64": {
+      "module": "Data.ArrayBuffer.Types",
+      "name": "Float64",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Bifunctor.Join.Join": {
+      "module": "Data.Bifunctor.Join",
+      "name": "Join",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.CatList.CatList": {
+      "module": "Data.CatList",
+      "name": "CatList",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.CatQueue.CatQueue": {
+      "module": "Data.CatQueue",
+      "name": "CatQueue",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Comparison.Comparison": {
+      "module": "Data.Comparison",
+      "name": "Comparison",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Const.Const": {
+      "module": "Data.Const",
+      "name": "Const",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Coyoneda.Coyoneda": {
+      "module": "Data.Coyoneda",
+      "name": "Coyoneda",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Coyoneda.CoyonedaF": {
+      "module": "Data.Coyoneda",
+      "name": "CoyonedaF",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Date.Date": {
+      "module": "Data.Date",
+      "name": "Date",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Date.Component.Year": {
+      "module": "Data.Date.Component",
+      "name": "Year",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Date.Component.Month": {
+      "module": "Data.Date.Component",
+      "name": "Month",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Date.Component.Day": {
+      "module": "Data.Date.Component",
+      "name": "Day",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Date.Component.Weekday": {
+      "module": "Data.Date.Component",
+      "name": "Weekday",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.DateTime.DateTime": {
+      "module": "Data.DateTime",
+      "name": "DateTime",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.DateTime.Instant.Instant": {
+      "module": "Data.DateTime.Instant",
+      "name": "Instant",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Either.Either": {
+      "module": "Data.Either",
+      "name": "Either",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Enum.Cardinality": {
+      "module": "Data.Enum",
+      "name": "Cardinality",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Equivalence.Equivalence": {
+      "module": "Data.Equivalence",
+      "name": "Equivalence",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Exists.Exists": {
+      "module": "Data.Exists",
+      "name": "Exists",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.FormURLEncoded.FormURLEncoded": {
+      "module": "Data.FormURLEncoded",
+      "name": "FormURLEncoded",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Function.Uncurried.Fn0": {
+      "module": "Data.Function.Uncurried",
+      "name": "Fn0",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Function.Uncurried.Fn2": {
+      "module": "Data.Function.Uncurried",
+      "name": "Fn2",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Function.Uncurried.Fn3": {
+      "module": "Data.Function.Uncurried",
+      "name": "Fn3",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Function.Uncurried.Fn4": {
+      "module": "Data.Function.Uncurried",
+      "name": "Fn4",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Function.Uncurried.Fn5": {
+      "module": "Data.Function.Uncurried",
+      "name": "Fn5",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Function.Uncurried.Fn6": {
+      "module": "Data.Function.Uncurried",
+      "name": "Fn6",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Function.Uncurried.Fn7": {
+      "module": "Data.Function.Uncurried",
+      "name": "Fn7",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Function.Uncurried.Fn8": {
+      "module": "Data.Function.Uncurried",
+      "name": "Fn8",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Function.Uncurried.Fn9": {
+      "module": "Data.Function.Uncurried",
+      "name": "Fn9",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Function.Uncurried.Fn10": {
+      "module": "Data.Function.Uncurried",
+      "name": "Fn10",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Functor.App.App": {
+      "module": "Data.Functor.App",
+      "name": "App",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Functor.Clown.Clown": {
+      "module": "Data.Functor.Clown",
+      "name": "Clown",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Functor.Compose.Compose": {
+      "module": "Data.Functor.Compose",
+      "name": "Compose",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Functor.Coproduct.Coproduct": {
+      "module": "Data.Functor.Coproduct",
+      "name": "Coproduct",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Functor.Costar.Costar": {
+      "module": "Data.Functor.Costar",
+      "name": "Costar",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Functor.Flip.Flip": {
+      "module": "Data.Functor.Flip",
+      "name": "Flip",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Functor.Joker.Joker": {
+      "module": "Data.Functor.Joker",
+      "name": "Joker",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Functor.Product.Product": {
+      "module": "Data.Functor.Product",
+      "name": "Product",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Functor.Product2.Product2": {
+      "module": "Data.Functor.Product2",
+      "name": "Product2",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Generic.Rep.NoConstructors": {
+      "module": "Data.Generic.Rep",
+      "name": "NoConstructors",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Generic.Rep.NoArguments": {
+      "module": "Data.Generic.Rep",
+      "name": "NoArguments",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Generic.Rep.Sum": {
+      "module": "Data.Generic.Rep",
+      "name": "Sum",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Generic.Rep.Product": {
+      "module": "Data.Generic.Rep",
+      "name": "Product",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Generic.Rep.Constructor": {
+      "module": "Data.Generic.Rep",
+      "name": "Constructor",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Generic.Rep.Argument": {
+      "module": "Data.Generic.Rep",
+      "name": "Argument",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Graph.Graph": {
+      "module": "Data.Graph",
+      "name": "Graph",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.HTTP.Method.Method": {
+      "module": "Data.HTTP.Method",
+      "name": "Method",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.HTTP.Method.CustomMethod": {
+      "module": "Data.HTTP.Method",
+      "name": "CustomMethod",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Identity.Identity": {
+      "module": "Data.Identity",
+      "name": "Identity",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Indexed.Indexed": {
+      "module": "Data.Indexed",
+      "name": "Indexed",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Int.Radix": {
+      "module": "Data.Int",
+      "name": "Radix",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Int.Parity": {
+      "module": "Data.Int",
+      "name": "Parity",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Interval.Interval": {
+      "module": "Data.Interval",
+      "name": "Interval",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Interval.RecurringInterval": {
+      "module": "Data.Interval",
+      "name": "RecurringInterval",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Interval.Duration.Duration": {
+      "module": "Data.Interval.Duration",
+      "name": "Duration",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Interval.Duration.DurationComponent": {
+      "module": "Data.Interval.Duration",
+      "name": "DurationComponent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Interval.Duration.Iso.IsoDuration": {
+      "module": "Data.Interval.Duration.Iso",
+      "name": "IsoDuration",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Interval.Duration.Iso.Error": {
+      "module": "Data.Interval.Duration.Iso",
+      "name": "Error",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.JSDate.JSDate": {
+      "module": "Data.JSDate",
+      "name": "JSDate",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Lazy.Lazy": {
+      "module": "Data.Lazy",
+      "name": "Lazy",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Lens.Internal.Bazaar.Bazaar": {
+      "module": "Data.Lens.Internal.Bazaar",
+      "name": "Bazaar",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Lens.Internal.Exchange.Exchange": {
+      "module": "Data.Lens.Internal.Exchange",
+      "name": "Exchange",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Lens.Internal.Focusing.Focusing": {
+      "module": "Data.Lens.Internal.Focusing",
+      "name": "Focusing",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Lens.Internal.Forget.Forget": {
+      "module": "Data.Lens.Internal.Forget",
+      "name": "Forget",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Lens.Internal.Grating.Grating": {
+      "module": "Data.Lens.Internal.Grating",
+      "name": "Grating",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Lens.Internal.Indexed.Indexed": {
+      "module": "Data.Lens.Internal.Indexed",
+      "name": "Indexed",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Lens.Internal.Market.Market": {
+      "module": "Data.Lens.Internal.Market",
+      "name": "Market",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Lens.Internal.Re.Re": {
+      "module": "Data.Lens.Internal.Re",
+      "name": "Re",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Lens.Internal.Shop.Shop": {
+      "module": "Data.Lens.Internal.Shop",
+      "name": "Shop",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Lens.Internal.Stall.Stall": {
+      "module": "Data.Lens.Internal.Stall",
+      "name": "Stall",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Lens.Internal.Tagged.Tagged": {
+      "module": "Data.Lens.Internal.Tagged",
+      "name": "Tagged",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Lens.Internal.Zipping.Zipping": {
+      "module": "Data.Lens.Internal.Zipping",
+      "name": "Zipping",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.List.Pattern": {
+      "module": "Data.List",
+      "name": "Pattern",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.List.Internal.Set": {
+      "module": "Data.List.Internal",
+      "name": "Set",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.List.Lazy.Pattern": {
+      "module": "Data.List.Lazy",
+      "name": "Pattern",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.List.Lazy.Types.List": {
+      "module": "Data.List.Lazy.Types",
+      "name": "List",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.List.Lazy.Types.Step": {
+      "module": "Data.List.Lazy.Types",
+      "name": "Step",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.List.Lazy.Types.NonEmptyList": {
+      "module": "Data.List.Lazy.Types",
+      "name": "NonEmptyList",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.List.Types.List": {
+      "module": "Data.List.Types",
+      "name": "List",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.List.Types.NonEmptyList": {
+      "module": "Data.List.Types",
+      "name": "NonEmptyList",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.List.ZipList.ZipList": {
+      "module": "Data.List.ZipList",
+      "name": "ZipList",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Map.SemigroupMap": {
+      "module": "Data.Map",
+      "name": "SemigroupMap",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Map.Internal.Map": {
+      "module": "Data.Map.Internal",
+      "name": "Map",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Map.Internal.MapIter": {
+      "module": "Data.Map.Internal",
+      "name": "MapIter",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Map.Internal.MapIterStep": {
+      "module": "Data.Map.Internal",
+      "name": "MapIterStep",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Map.Internal.Split": {
+      "module": "Data.Map.Internal",
+      "name": "Split",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Maybe.Maybe": {
+      "module": "Data.Maybe",
+      "name": "Maybe",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Maybe.First.First": {
+      "module": "Data.Maybe.First",
+      "name": "First",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Maybe.Last.Last": {
+      "module": "Data.Maybe.Last",
+      "name": "Last",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.MediaType.MediaType": {
+      "module": "Data.MediaType",
+      "name": "MediaType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Monoid.Additive.Additive": {
+      "module": "Data.Monoid.Additive",
+      "name": "Additive",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Monoid.Alternate.Alternate": {
+      "module": "Data.Monoid.Alternate",
+      "name": "Alternate",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Monoid.Conj.Conj": {
+      "module": "Data.Monoid.Conj",
+      "name": "Conj",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Monoid.Disj.Disj": {
+      "module": "Data.Monoid.Disj",
+      "name": "Disj",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Monoid.Dual.Dual": {
+      "module": "Data.Monoid.Dual",
+      "name": "Dual",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Monoid.Endo.Endo": {
+      "module": "Data.Monoid.Endo",
+      "name": "Endo",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Monoid.Multiplicative.Multiplicative": {
+      "module": "Data.Monoid.Multiplicative",
+      "name": "Multiplicative",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.NonEmpty.NonEmpty": {
+      "module": "Data.NonEmpty",
+      "name": "NonEmpty",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Nullable.Nullable": {
+      "module": "Data.Nullable",
+      "name": "Nullable",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Number.Approximate.Fraction": {
+      "module": "Data.Number.Approximate",
+      "name": "Fraction",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Number.Approximate.Tolerance": {
+      "module": "Data.Number.Approximate",
+      "name": "Tolerance",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Number.Format.Format": {
+      "module": "Data.Number.Format",
+      "name": "Format",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Op.Op": {
+      "module": "Data.Op",
+      "name": "Op",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Ord.Down.Down": {
+      "module": "Data.Ord.Down",
+      "name": "Down",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Ord.Max.Max": {
+      "module": "Data.Ord.Max",
+      "name": "Max",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Ord.Min.Min": {
+      "module": "Data.Ord.Min",
+      "name": "Min",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Ordering.Ordering": {
+      "module": "Data.Ordering",
+      "name": "Ordering",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Predicate.Predicate": {
+      "module": "Data.Predicate",
+      "name": "Predicate",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Profunctor.Join.Join": {
+      "module": "Data.Profunctor.Join",
+      "name": "Join",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Profunctor.Split.Split": {
+      "module": "Data.Profunctor.Split",
+      "name": "Split",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Profunctor.Star.Star": {
+      "module": "Data.Profunctor.Star",
+      "name": "Star",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Semigroup.First.First": {
+      "module": "Data.Semigroup.First",
+      "name": "First",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Semigroup.Last.Last": {
+      "module": "Data.Semigroup.Last",
+      "name": "Last",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Semiring.Free.Free": {
+      "module": "Data.Semiring.Free",
+      "name": "Free",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Set.Set": {
+      "module": "Data.Set",
+      "name": "Set",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Set.NonEmpty.NonEmptySet": {
+      "module": "Data.Set.NonEmpty",
+      "name": "NonEmptySet",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.String.CaseInsensitive.CaseInsensitiveString": {
+      "module": "Data.String.CaseInsensitive",
+      "name": "CaseInsensitiveString",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.String.CodePoints.CodePoint": {
+      "module": "Data.String.CodePoints",
+      "name": "CodePoint",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.String.NonEmpty.CaseInsensitive.CaseInsensitiveNonEmptyString": {
+      "module": "Data.String.NonEmpty.CaseInsensitive",
+      "name": "CaseInsensitiveNonEmptyString",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.String.NonEmpty.Internal.NonEmptyString": {
+      "module": "Data.String.NonEmpty.Internal",
+      "name": "NonEmptyString",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.String.NonEmpty.Internal.NonEmptyReplacement": {
+      "module": "Data.String.NonEmpty.Internal",
+      "name": "NonEmptyReplacement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.String.Pattern.Pattern": {
+      "module": "Data.String.Pattern",
+      "name": "Pattern",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.String.Pattern.Replacement": {
+      "module": "Data.String.Pattern",
+      "name": "Replacement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.String.Regex.Regex": {
+      "module": "Data.String.Regex",
+      "name": "Regex",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.String.Regex.Flags.RegexFlags": {
+      "module": "Data.String.Regex.Flags",
+      "name": "RegexFlags",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Time.Time": {
+      "module": "Data.Time",
+      "name": "Time",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Time.Component.Hour": {
+      "module": "Data.Time.Component",
+      "name": "Hour",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Time.Component.Minute": {
+      "module": "Data.Time.Component",
+      "name": "Minute",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Time.Component.Second": {
+      "module": "Data.Time.Component",
+      "name": "Second",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Time.Component.Millisecond": {
+      "module": "Data.Time.Component",
+      "name": "Millisecond",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Time.Duration.Milliseconds": {
+      "module": "Data.Time.Duration",
+      "name": "Milliseconds",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Time.Duration.Seconds": {
+      "module": "Data.Time.Duration",
+      "name": "Seconds",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Time.Duration.Minutes": {
+      "module": "Data.Time.Duration",
+      "name": "Minutes",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Time.Duration.Hours": {
+      "module": "Data.Time.Duration",
+      "name": "Hours",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Time.Duration.Days": {
+      "module": "Data.Time.Duration",
+      "name": "Days",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Traversable.Accum.Internal.StateL": {
+      "module": "Data.Traversable.Accum.Internal",
+      "name": "StateL",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Traversable.Accum.Internal.StateR": {
+      "module": "Data.Traversable.Accum.Internal",
+      "name": "StateR",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Tree.Tree": {
+      "module": "Data.Tree",
+      "name": "Tree",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Tuple.Tuple": {
+      "module": "Data.Tuple",
+      "name": "Tuple",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Unit.Unit": {
+      "module": "Data.Unit",
+      "name": "Unit",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Validation.Semigroup.V": {
+      "module": "Data.Validation.Semigroup",
+      "name": "V",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Validation.Semiring.V": {
+      "module": "Data.Validation.Semiring",
+      "name": "V",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Void.Void": {
+      "module": "Data.Void",
+      "name": "Void",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Data.Yoneda.Yoneda": {
+      "module": "Data.Yoneda",
+      "name": "Yoneda",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.Effect": {
+      "module": "Effect",
+      "name": "Effect",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.AVar.AVar": {
+      "module": "Effect.AVar",
+      "name": "AVar",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.AVar.AVarStatus": {
+      "module": "Effect.AVar",
+      "name": "AVarStatus",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.Aff.Aff": {
+      "module": "Effect.Aff",
+      "name": "Aff",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.Aff.Fiber": {
+      "module": "Effect.Aff",
+      "name": "Fiber",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.Aff.ParAff": {
+      "module": "Effect.Aff",
+      "name": "ParAff",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.Aff.Canceler": {
+      "module": "Effect.Aff",
+      "name": "Canceler",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.Aff.Compat.EffectFnAff": {
+      "module": "Effect.Aff.Compat",
+      "name": "EffectFnAff",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.Aff.Compat.EffectFnCanceler": {
+      "module": "Effect.Aff.Compat",
+      "name": "EffectFnCanceler",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.Exception.Error": {
+      "module": "Effect.Exception",
+      "name": "Error",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.Ref.Ref": {
+      "module": "Effect.Ref",
+      "name": "Ref",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.Uncurried.EffectFn1": {
+      "module": "Effect.Uncurried",
+      "name": "EffectFn1",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.Uncurried.EffectFn2": {
+      "module": "Effect.Uncurried",
+      "name": "EffectFn2",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.Uncurried.EffectFn3": {
+      "module": "Effect.Uncurried",
+      "name": "EffectFn3",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.Uncurried.EffectFn4": {
+      "module": "Effect.Uncurried",
+      "name": "EffectFn4",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.Uncurried.EffectFn5": {
+      "module": "Effect.Uncurried",
+      "name": "EffectFn5",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.Uncurried.EffectFn6": {
+      "module": "Effect.Uncurried",
+      "name": "EffectFn6",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.Uncurried.EffectFn7": {
+      "module": "Effect.Uncurried",
+      "name": "EffectFn7",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.Uncurried.EffectFn8": {
+      "module": "Effect.Uncurried",
+      "name": "EffectFn8",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.Uncurried.EffectFn9": {
+      "module": "Effect.Uncurried",
+      "name": "EffectFn9",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Effect.Uncurried.EffectFn10": {
+      "module": "Effect.Uncurried",
+      "name": "EffectFn10",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Foreign.Foreign": {
+      "module": "Foreign",
+      "name": "Foreign",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Foreign.ForeignError": {
+      "module": "Foreign",
+      "name": "ForeignError",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Foreign.Object.Object": {
+      "module": "Foreign.Object",
+      "name": "Object",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Foreign.Object.ST.STObject": {
+      "module": "Foreign.Object.ST",
+      "name": "STObject",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Aff.Driver.State.DriverState": {
+      "module": "Halogen.Aff.Driver.State",
+      "name": "DriverState",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Aff.Driver.State.DriverStateRef": {
+      "module": "Halogen.Aff.Driver.State",
+      "name": "DriverStateRef",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Aff.Driver.State.DriverStateX": {
+      "module": "Halogen.Aff.Driver.State",
+      "name": "DriverStateX",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Aff.Driver.State.RenderStateX": {
+      "module": "Halogen.Aff.Driver.State",
+      "name": "RenderStateX",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Component.Component": {
+      "module": "Halogen.Component",
+      "name": "Component",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Component.ComponentSlotBox": {
+      "module": "Halogen.Component",
+      "name": "ComponentSlotBox",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Component.ComponentSlot": {
+      "module": "Halogen.Component",
+      "name": "ComponentSlot",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Component.Profunctor.ProComponent": {
+      "module": "Halogen.Component.Profunctor",
+      "name": "ProComponent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Data.OrdBox.OrdBox": {
+      "module": "Halogen.Data.OrdBox",
+      "name": "OrdBox",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Data.Slot.Slot": {
+      "module": "Halogen.Data.Slot",
+      "name": "Slot",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Data.Slot.SlotStorage": {
+      "module": "Halogen.Data.Slot",
+      "name": "SlotStorage",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.HTML.Core.HTML": {
+      "module": "Halogen.HTML.Core",
+      "name": "HTML",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.HTML.Properties.IProp": {
+      "module": "Halogen.HTML.Properties",
+      "name": "IProp",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Query.ChildQuery.ChildQueryBox": {
+      "module": "Halogen.Query.ChildQuery",
+      "name": "ChildQueryBox",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Query.ChildQuery.ChildQuery": {
+      "module": "Halogen.Query.ChildQuery",
+      "name": "ChildQuery",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Query.HalogenM.HalogenF": {
+      "module": "Halogen.Query.HalogenM",
+      "name": "HalogenF",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Query.HalogenM.HalogenM": {
+      "module": "Halogen.Query.HalogenM",
+      "name": "HalogenM",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Query.HalogenM.HalogenAp": {
+      "module": "Halogen.Query.HalogenM",
+      "name": "HalogenAp",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Query.HalogenM.SubscriptionId": {
+      "module": "Halogen.Query.HalogenM",
+      "name": "SubscriptionId",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Query.HalogenM.ForkId": {
+      "module": "Halogen.Query.HalogenM",
+      "name": "ForkId",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Query.HalogenQ.HalogenQ": {
+      "module": "Halogen.Query.HalogenQ",
+      "name": "HalogenQ",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Query.Input.RefLabel": {
+      "module": "Halogen.Query.Input",
+      "name": "RefLabel",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Query.Input.Input": {
+      "module": "Halogen.Query.Input",
+      "name": "Input",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Subscription.Listener": {
+      "module": "Halogen.Subscription",
+      "name": "Listener",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Subscription.Emitter": {
+      "module": "Halogen.Subscription",
+      "name": "Emitter",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Subscription.Subscription": {
+      "module": "Halogen.Subscription",
+      "name": "Subscription",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.Align.Align": {
+      "module": "Halogen.Svg.Attributes.Align",
+      "name": "Align",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.Baseline.Baseline": {
+      "module": "Halogen.Svg.Attributes.Baseline",
+      "name": "Baseline",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.CSSLength.CSSLength": {
+      "module": "Halogen.Svg.Attributes.CSSLength",
+      "name": "CSSLength",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.Color.Color": {
+      "module": "Halogen.Svg.Attributes.Color",
+      "name": "Color",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.FillState.FillState": {
+      "module": "Halogen.Svg.Attributes.FillState",
+      "name": "FillState",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.FontSize.FontSize": {
+      "module": "Halogen.Svg.Attributes.FontSize",
+      "name": "FontSize",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.FontStretch.FontStretch": {
+      "module": "Halogen.Svg.Attributes.FontStretch",
+      "name": "FontStretch",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.FontStyle.FontStyle": {
+      "module": "Halogen.Svg.Attributes.FontStyle",
+      "name": "FontStyle",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.FontWeight.FontWeight": {
+      "module": "Halogen.Svg.Attributes.FontWeight",
+      "name": "FontWeight",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.MarkerUnit.MarkerUnit": {
+      "module": "Halogen.Svg.Attributes.MarkerUnit",
+      "name": "MarkerUnit",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.MaskUnit.MaskUnit": {
+      "module": "Halogen.Svg.Attributes.MaskUnit",
+      "name": "MaskUnit",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.MeetOrSlice.MeetOrSlice": {
+      "module": "Halogen.Svg.Attributes.MeetOrSlice",
+      "name": "MeetOrSlice",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.Orient.Orient": {
+      "module": "Halogen.Svg.Attributes.Orient",
+      "name": "Orient",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.Path.PathCommand": {
+      "module": "Halogen.Svg.Attributes.Path",
+      "name": "PathCommand",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.Path.CommandPositionReference": {
+      "module": "Halogen.Svg.Attributes.Path",
+      "name": "CommandPositionReference",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.Path.CommandArcChoice": {
+      "module": "Halogen.Svg.Attributes.Path",
+      "name": "CommandArcChoice",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.Path.CommandSweepChoice": {
+      "module": "Halogen.Svg.Attributes.Path",
+      "name": "CommandSweepChoice",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.StrokeLineCap.StrokeLineCap": {
+      "module": "Halogen.Svg.Attributes.StrokeLineCap",
+      "name": "StrokeLineCap",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.StrokeLineJoin.StrokeLineJoin": {
+      "module": "Halogen.Svg.Attributes.StrokeLineJoin",
+      "name": "StrokeLineJoin",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.TextAnchor.TextAnchor": {
+      "module": "Halogen.Svg.Attributes.TextAnchor",
+      "name": "TextAnchor",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.Svg.Attributes.Transform.Transform": {
+      "module": "Halogen.Svg.Attributes.Transform",
+      "name": "Transform",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.VDom.DOM.VDomSpec": {
+      "module": "Halogen.VDom.DOM",
+      "name": "VDomSpec",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.VDom.DOM.Prop.Prop": {
+      "module": "Halogen.VDom.DOM.Prop",
+      "name": "Prop",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.VDom.DOM.Prop.ElemRef": {
+      "module": "Halogen.VDom.DOM.Prop",
+      "name": "ElemRef",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.VDom.DOM.Prop.PropValue": {
+      "module": "Halogen.VDom.DOM.Prop",
+      "name": "PropValue",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.VDom.Machine.Step'": {
+      "module": "Halogen.VDom.Machine",
+      "name": "Step'",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.VDom.Machine.Step": {
+      "module": "Halogen.VDom.Machine",
+      "name": "Step",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.VDom.Thunk.Thunk": {
+      "module": "Halogen.VDom.Thunk",
+      "name": "Thunk",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.VDom.Types.VDom": {
+      "module": "Halogen.VDom.Types",
+      "name": "VDom",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.VDom.Types.Graft": {
+      "module": "Halogen.VDom.Types",
+      "name": "Graft",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.VDom.Types.GraftX": {
+      "module": "Halogen.VDom.Types",
+      "name": "GraftX",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.VDom.Types.ElemName": {
+      "module": "Halogen.VDom.Types",
+      "name": "ElemName",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.VDom.Types.Namespace": {
+      "module": "Halogen.VDom.Types",
+      "name": "Namespace",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Halogen.VDom.Util.JsUndefined": {
+      "module": "Halogen.VDom.Util",
+      "name": "JsUndefined",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Html.Parser.HtmlNode": {
+      "module": "Html.Parser",
+      "name": "HtmlNode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Html.Parser.HtmlAttribute": {
+      "module": "Html.Parser",
+      "name": "HtmlAttribute",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Acknowledgements.Action": {
+      "module": "PSD3.Acknowledgements",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.CodeExplorer.Actions.Scene": {
+      "module": "PSD3.CodeExplorer.Actions",
+      "name": "Scene",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.CodeExplorer.Actions.StyleChange": {
+      "module": "PSD3.CodeExplorer.Actions",
+      "name": "StyleChange",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.CodeExplorer.Actions.FilterData": {
+      "module": "PSD3.CodeExplorer.Actions",
+      "name": "FilterData",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.CodeExplorer.Actions.Action": {
+      "module": "PSD3.CodeExplorer.Actions",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.CodeExplorer.Actions.VizEvent": {
+      "module": "PSD3.CodeExplorer.Actions",
+      "name": "VizEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Data.Node.D3Link_Unswizzled": {
+      "module": "PSD3.Data.Node",
+      "name": "D3Link_Unswizzled",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Data.Node.D3Link_Swizzled": {
+      "module": "PSD3.Data.Node",
+      "name": "D3Link_Swizzled",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Data.Node.D3_SimulationNode": {
+      "module": "PSD3.Data.Node",
+      "name": "D3_SimulationNode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Data.Tree.TreeJson_": {
+      "module": "PSD3.Data.Tree",
+      "name": "TreeJson_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Data.Tree.TreeLayoutFn_": {
+      "module": "PSD3.Data.Tree",
+      "name": "TreeLayoutFn_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Data.Tree.D3_TreeNode": {
+      "module": "PSD3.Data.Tree",
+      "name": "D3_TreeNode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Data.Tree.TreeType": {
+      "module": "PSD3.Data.Tree",
+      "name": "TreeType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Data.Tree.TreeLayout": {
+      "module": "PSD3.Data.Tree",
+      "name": "TreeLayout",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Expandable.Status": {
+      "module": "PSD3.Expandable",
+      "name": "Status",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Home.Action": {
+      "module": "PSD3.Home",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.HowTo.HowtoIndex.Action": {
+      "module": "PSD3.HowTo.HowtoIndex",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Attributes.Instances.DatumFn": {
+      "module": "PSD3.Internal.Attributes.Instances",
+      "name": "DatumFn",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Attributes.Instances.DatumFnI": {
+      "module": "PSD3.Internal.Attributes.Instances",
+      "name": "DatumFnI",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Attributes.Instances.AttributeSetter": {
+      "module": "PSD3.Internal.Attributes.Instances",
+      "name": "AttributeSetter",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Attributes.Instances.AttrBuilder": {
+      "module": "PSD3.Internal.Attributes.Instances",
+      "name": "AttrBuilder",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Attributes.Instances.Attr": {
+      "module": "PSD3.Internal.Attributes.Instances",
+      "name": "Attr",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Attributes.Sugar.AlignAspectRatio_X": {
+      "module": "PSD3.Internal.Attributes.Sugar",
+      "name": "AlignAspectRatio_X",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Attributes.Sugar.AlignAspectRatio_Y": {
+      "module": "PSD3.Internal.Attributes.Sugar",
+      "name": "AlignAspectRatio_Y",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Attributes.Sugar.AspectRatioPreserve": {
+      "module": "PSD3.Internal.Attributes.Sugar",
+      "name": "AspectRatioPreserve",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Attributes.Sugar.AspectRatioSpec": {
+      "module": "PSD3.Internal.Attributes.Sugar",
+      "name": "AspectRatioSpec",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Attributes.Sugar.LineJoin": {
+      "module": "PSD3.Internal.Attributes.Sugar",
+      "name": "LineJoin",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.FFI.ZoomBehavior_": {
+      "module": "PSD3.Internal.FFI",
+      "name": "ZoomBehavior_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.FFI.D3Attr_": {
+      "module": "PSD3.Internal.FFI",
+      "name": "D3Attr_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.FFI.D3DragFunction_": {
+      "module": "PSD3.Internal.FFI",
+      "name": "D3DragFunction_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.FFI.D3ForceHandle_": {
+      "module": "PSD3.Internal.FFI",
+      "name": "D3ForceHandle_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.FFI.CustomForceConfig_": {
+      "module": "PSD3.Internal.FFI",
+      "name": "CustomForceConfig_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.FFI.RecursiveD3TreeNode_": {
+      "module": "PSD3.Internal.FFI",
+      "name": "RecursiveD3TreeNode_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.FFI.ChordLayout_": {
+      "module": "PSD3.Internal.FFI",
+      "name": "ChordLayout_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.FFI.ChordGenerator_": {
+      "module": "PSD3.Internal.FFI",
+      "name": "ChordGenerator_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.FFI.RibbonGenerator_": {
+      "module": "PSD3.Internal.FFI",
+      "name": "RibbonGenerator_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.FFI.ArcGenerator_": {
+      "module": "PSD3.Internal.FFI",
+      "name": "ArcGenerator_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Sankey.Types.SankeyLayoutState_": {
+      "module": "PSD3.Internal.Sankey.Types",
+      "name": "SankeyLayoutState_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Sankey.Types.SankeyNode_": {
+      "module": "PSD3.Internal.Sankey.Types",
+      "name": "SankeyNode_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Sankey.Types.SankeyLink_": {
+      "module": "PSD3.Internal.Sankey.Types",
+      "name": "SankeyLink_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Selection.Types.DragBehavior": {
+      "module": "PSD3.Internal.Selection.Types",
+      "name": "DragBehavior",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Selection.Types.Behavior": {
+      "module": "PSD3.Internal.Selection.Types",
+      "name": "Behavior",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Selection.Types.SelectionName": {
+      "module": "PSD3.Internal.Selection.Types",
+      "name": "SelectionName",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Selection.Types.OrderingAttribute": {
+      "module": "PSD3.Internal.Selection.Types",
+      "name": "OrderingAttribute",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Selection.Types.SelectionAttribute": {
+      "module": "PSD3.Internal.Selection.Types",
+      "name": "SelectionAttribute",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Simulation.Types.D3SimulationState_": {
+      "module": "PSD3.Internal.Simulation.Types",
+      "name": "D3SimulationState_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Simulation.Types.SimVariable": {
+      "module": "PSD3.Internal.Simulation.Types",
+      "name": "SimVariable",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Simulation.Types.Step": {
+      "module": "PSD3.Internal.Simulation.Types",
+      "name": "Step",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Simulation.Types.ForceType": {
+      "module": "PSD3.Internal.Simulation.Types",
+      "name": "ForceType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Simulation.Types.Force": {
+      "module": "PSD3.Internal.Simulation.Types",
+      "name": "Force",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Simulation.Types.ChainableF": {
+      "module": "PSD3.Internal.Simulation.Types",
+      "name": "ChainableF",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Simulation.Types.ForceStatus": {
+      "module": "PSD3.Internal.Simulation.Types",
+      "name": "ForceStatus",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Simulation.Types.ForceFilter": {
+      "module": "PSD3.Internal.Simulation.Types",
+      "name": "ForceFilter",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Simulation.Types.RegularForceType": {
+      "module": "PSD3.Internal.Simulation.Types",
+      "name": "RegularForceType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Simulation.Types.LinkForceType": {
+      "module": "PSD3.Internal.Simulation.Types",
+      "name": "LinkForceType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Simulation.Types.CustomForceType": {
+      "module": "PSD3.Internal.Simulation.Types",
+      "name": "CustomForceType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Types.Datum_": {
+      "module": "PSD3.Internal.Types",
+      "name": "Datum_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Types.Index_": {
+      "module": "PSD3.Internal.Types",
+      "name": "Index_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Types.D3Data_": {
+      "module": "PSD3.Internal.Types",
+      "name": "D3Data_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Types.D3Selection_": {
+      "module": "PSD3.Internal.Types",
+      "name": "D3Selection_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Types.D3Simulation_": {
+      "module": "PSD3.Internal.Types",
+      "name": "D3Simulation_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Types.D3Transition_": {
+      "module": "PSD3.Internal.Types",
+      "name": "D3Transition_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Types.D3This_": {
+      "module": "PSD3.Internal.Types",
+      "name": "D3This_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Types.D3DomNode_": {
+      "module": "PSD3.Internal.Types",
+      "name": "D3DomNode_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Types.Element": {
+      "module": "PSD3.Internal.Types",
+      "name": "Element",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Types.UnitType": {
+      "module": "PSD3.Internal.Types",
+      "name": "UnitType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Types.MouseEvent": {
+      "module": "PSD3.Internal.Types",
+      "name": "MouseEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Types.EasingFunction": {
+      "module": "PSD3.Internal.Types",
+      "name": "EasingFunction",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Zoom.ScaleExtent": {
+      "module": "PSD3.Internal.Zoom",
+      "name": "ScaleExtent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Zoom.ZoomExtent": {
+      "module": "PSD3.Internal.Zoom",
+      "name": "ZoomExtent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Zoom.ZoomType": {
+      "module": "PSD3.Internal.Zoom",
+      "name": "ZoomType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Internal.Zoom.ZoomTransform": {
+      "module": "PSD3.Internal.Zoom",
+      "name": "ZoomTransform",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Interpreter.D3.D3M": {
+      "module": "PSD3.Interpreter.D3",
+      "name": "D3M",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Interpreter.D3.D3SimM": {
+      "module": "PSD3.Interpreter.D3",
+      "name": "D3SimM",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Interpreter.D3.D3SankeyM": {
+      "module": "PSD3.Interpreter.D3",
+      "name": "D3SankeyM",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Interpreter.MermaidAST.MermaidSelection": {
+      "module": "PSD3.Interpreter.MermaidAST",
+      "name": "MermaidSelection",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Interpreter.MermaidAST.MermaidASTM": {
+      "module": "PSD3.Interpreter.MermaidAST",
+      "name": "MermaidASTM",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Layout.Hierarchy.Link.LinkStyle": {
+      "module": "PSD3.Layout.Hierarchy.Link",
+      "name": "LinkStyle",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Layout.Hierarchy.Pack.CollisionResult": {
+      "module": "PSD3.Layout.Hierarchy.Pack",
+      "name": "CollisionResult",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Layout.Hierarchy.Pack.PackNode": {
+      "module": "PSD3.Layout.Hierarchy.Pack",
+      "name": "PackNode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Layout.Hierarchy.Pack.HierarchyData": {
+      "module": "PSD3.Layout.Hierarchy.Pack",
+      "name": "HierarchyData",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Layout.Hierarchy.Partition.PartitionNode": {
+      "module": "PSD3.Layout.Hierarchy.Partition",
+      "name": "PartitionNode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Layout.Hierarchy.Partition.HierarchyData": {
+      "module": "PSD3.Layout.Hierarchy.Partition",
+      "name": "HierarchyData",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Layout.Hierarchy.Tree4.Contours": {
+      "module": "PSD3.Layout.Hierarchy.Tree4",
+      "name": "Contours",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Layout.Hierarchy.Treemap.TreemapNode": {
+      "module": "PSD3.Layout.Hierarchy.Treemap",
+      "name": "TreemapNode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Layout.Hierarchy.Types.HierarchyNode": {
+      "module": "PSD3.Layout.Hierarchy.Types",
+      "name": "HierarchyNode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Layout.Hierarchy.Types.ValuedNode": {
+      "module": "PSD3.Layout.Hierarchy.Types",
+      "name": "ValuedNode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Layout.Sankey.Types.NodeID": {
+      "module": "PSD3.Layout.Sankey.Types",
+      "name": "NodeID",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Layout.Sankey.Types.LinkID": {
+      "module": "PSD3.Layout.Sankey.Types",
+      "name": "LinkID",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Layout.Sankey.Types.Link": {
+      "module": "PSD3.Layout.Sankey.Types",
+      "name": "Link",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Layout.Sankey.Types.Alignment": {
+      "module": "PSD3.Layout.Sankey.Types",
+      "name": "Alignment",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Layout.Sankey.Types.LinkColorMode": {
+      "module": "PSD3.Layout.Sankey.Types",
+      "name": "LinkColorMode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Main.Action": {
+      "module": "PSD3.Main",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.ModuleViewer.Action": {
+      "module": "PSD3.Reference.ModuleViewer",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Attributes.Action": {
+      "module": "PSD3.Reference.Modules.Attributes",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Capabilities.Sankey.Action": {
+      "module": "PSD3.Reference.Modules.Capabilities.Sankey",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Capabilities.Selection.Action": {
+      "module": "PSD3.Reference.Modules.Capabilities.Selection",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Capabilities.Simulation.Action": {
+      "module": "PSD3.Reference.Modules.Capabilities.Simulation",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Data.Node.Action": {
+      "module": "PSD3.Reference.Modules.Data.Node",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Data.Tree.Action": {
+      "module": "PSD3.Reference.Modules.Data.Tree",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Data.Utility.Action": {
+      "module": "PSD3.Reference.Modules.Data.Utility",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Internal.Attributes.Instances.Action": {
+      "module": "PSD3.Reference.Modules.Internal.Attributes.Instances",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Internal.Attributes.Sugar.Action": {
+      "module": "PSD3.Reference.Modules.Internal.Attributes.Sugar",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Internal.Axes.Action": {
+      "module": "PSD3.Reference.Modules.Internal.Axes",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Internal.FFI.Action": {
+      "module": "PSD3.Reference.Modules.Internal.FFI",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Internal.Generators.Line.Action": {
+      "module": "PSD3.Reference.Modules.Internal.Generators.Line",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Internal.Hierarchical.Action": {
+      "module": "PSD3.Reference.Modules.Internal.Hierarchical",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Internal.Sankey.Functions.Action": {
+      "module": "PSD3.Reference.Modules.Internal.Sankey.Functions",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Internal.Sankey.Types.Action": {
+      "module": "PSD3.Reference.Modules.Internal.Sankey.Types",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Internal.Scales.Linear.Action": {
+      "module": "PSD3.Reference.Modules.Internal.Scales.Linear",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Internal.Scales.Scales.Action": {
+      "module": "PSD3.Reference.Modules.Internal.Scales.Scales",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Internal.Selection.Functions.Action": {
+      "module": "PSD3.Reference.Modules.Internal.Selection.Functions",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Internal.Selection.Types.Action": {
+      "module": "PSD3.Reference.Modules.Internal.Selection.Types",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Internal.Simulation.Config.Action": {
+      "module": "PSD3.Reference.Modules.Internal.Simulation.Config",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Internal.Simulation.Forces.Action": {
+      "module": "PSD3.Reference.Modules.Internal.Simulation.Forces",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Internal.Simulation.Functions.Action": {
+      "module": "PSD3.Reference.Modules.Internal.Simulation.Functions",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Internal.Simulation.Types.Action": {
+      "module": "PSD3.Reference.Modules.Internal.Simulation.Types",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Internal.Types.Action": {
+      "module": "PSD3.Reference.Modules.Internal.Types",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Internal.Utility.Action": {
+      "module": "PSD3.Reference.Modules.Internal.Utility",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Internal.Zoom.Action": {
+      "module": "PSD3.Reference.Modules.Internal.Zoom",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Interpreter.D3.Action": {
+      "module": "PSD3.Reference.Modules.Interpreter.D3",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Interpreter.MetaTree.Action": {
+      "module": "PSD3.Reference.Modules.Interpreter.MetaTree",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Interpreter.String.Action": {
+      "module": "PSD3.Reference.Modules.Interpreter.String",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Modules.Types.Action": {
+      "module": "PSD3.Reference.Modules.Types",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.Reference.Action": {
+      "module": "PSD3.Reference.Reference",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Reference.ReferenceOld.Action": {
+      "module": "PSD3.Reference.ReferenceOld",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Shared.Data.DataFile": {
+      "module": "PSD3.Shared.Data",
+      "name": "DataFile",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Shared.Data.HierData": {
+      "module": "PSD3.Shared.Data",
+      "name": "HierData",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Shared.DataLoader.LoadStrategy": {
+      "module": "PSD3.Shared.DataLoader",
+      "name": "LoadStrategy",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Shared.DataLoader.LoadError": {
+      "module": "PSD3.Shared.DataLoader",
+      "name": "LoadError",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Shared.DocsCardGrid.CardType": {
+      "module": "PSD3.Shared.DocsCardGrid",
+      "name": "CardType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Shared.SiteNav.Quadrant": {
+      "module": "PSD3.Shared.SiteNav",
+      "name": "Quadrant",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Shared.SiteNav.LogoSize": {
+      "module": "PSD3.Shared.SiteNav",
+      "name": "LogoSize",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Tutorial.GettingStarted.Action": {
+      "module": "PSD3.Tutorial.GettingStarted",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Understanding.Action": {
+      "module": "PSD3.Understanding",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Understanding.TOC.TOCLinkTarget": {
+      "module": "PSD3.Understanding.TOC",
+      "name": "TOCLinkTarget",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Website.Types.Difficulty": {
+      "module": "PSD3.Website.Types",
+      "name": "Difficulty",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Website.Types.Category": {
+      "module": "PSD3.Website.Types",
+      "name": "Category",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Website.Types.Section": {
+      "module": "PSD3.Website.Types",
+      "name": "Section",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Website.Types.Route": {
+      "module": "PSD3.Website.Types",
+      "name": "Route",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Wizard.Datasets.Difficulty": {
+      "module": "PSD3.Wizard.Datasets",
+      "name": "Difficulty",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Wizard.FileDownload.JSZip": {
+      "module": "PSD3.Wizard.FileDownload",
+      "name": "JSZip",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Wizard.Wizard.WizardStep": {
+      "module": "PSD3.Wizard.Wizard",
+      "name": "WizardStep",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3.Wizard.Wizard.Action": {
+      "module": "PSD3.Wizard.Wizard",
+      "name": "Action",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Attribute.Types.Attribute": {
+      "module": "PSD3v2.Attribute.Types",
+      "name": "Attribute",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Attribute.Types.AttributeName": {
+      "module": "PSD3v2.Attribute.Types",
+      "name": "AttributeName",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Attribute.Types.AttributeValue": {
+      "module": "PSD3v2.Attribute.Types",
+      "name": "AttributeValue",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Axis.Axis.Orientation": {
+      "module": "PSD3v2.Axis.Axis",
+      "name": "Orientation",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Behavior.Types.Behavior": {
+      "module": "PSD3v2.Behavior.Types",
+      "name": "Behavior",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Behavior.Types.ZoomConfig": {
+      "module": "PSD3v2.Behavior.Types",
+      "name": "ZoomConfig",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Behavior.Types.DragConfig": {
+      "module": "PSD3v2.Behavior.Types",
+      "name": "DragConfig",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Behavior.Types.ScaleExtent": {
+      "module": "PSD3v2.Behavior.Types",
+      "name": "ScaleExtent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Capabilities.Simulation.Step": {
+      "module": "PSD3v2.Capabilities.Simulation",
+      "name": "Step",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Interpreter.D3v2.D3v2Selection_": {
+      "module": "PSD3v2.Interpreter.D3v2",
+      "name": "D3v2Selection_",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Interpreter.D3v2.D3v2M": {
+      "module": "PSD3v2.Interpreter.D3v2",
+      "name": "D3v2M",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Interpreter.D3v2.D3v2SimM": {
+      "module": "PSD3v2.Interpreter.D3v2",
+      "name": "D3v2SimM",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Interpreter.MermaidTree.MermaidTreeM": {
+      "module": "PSD3v2.Interpreter.MermaidTree",
+      "name": "MermaidTreeM",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Interpreter.MetaAST.TreeAST": {
+      "module": "PSD3v2.Interpreter.MetaAST",
+      "name": "TreeAST",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Selection.Indexed.IxSelectionM": {
+      "module": "PSD3v2.Selection.Indexed",
+      "name": "IxSelectionM",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Selection.Types.SEmpty": {
+      "module": "PSD3v2.Selection.Types",
+      "name": "SEmpty",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Selection.Types.SBoundOwns": {
+      "module": "PSD3v2.Selection.Types",
+      "name": "SBoundOwns",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Selection.Types.SBoundInherits": {
+      "module": "PSD3v2.Selection.Types",
+      "name": "SBoundInherits",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Selection.Types.SPending": {
+      "module": "PSD3v2.Selection.Types",
+      "name": "SPending",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Selection.Types.SExiting": {
+      "module": "PSD3v2.Selection.Types",
+      "name": "SExiting",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Selection.Types.Selection": {
+      "module": "PSD3v2.Selection.Types",
+      "name": "Selection",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Selection.Types.SelectionImpl": {
+      "module": "PSD3v2.Selection.Types",
+      "name": "SelectionImpl",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Selection.Types.JoinResult": {
+      "module": "PSD3v2.Selection.Types",
+      "name": "JoinResult",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Selection.Types.RenderContext": {
+      "module": "PSD3v2.Selection.Types",
+      "name": "RenderContext",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Selection.Types.ElementType": {
+      "module": "PSD3v2.Selection.Types",
+      "name": "ElementType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Transition.FFI.D3Transition": {
+      "module": "PSD3v2.Transition.FFI",
+      "name": "D3Transition",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Transition.Scene.EnterBehavior": {
+      "module": "PSD3v2.Transition.Scene",
+      "name": "EnterBehavior",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Transition.Scene.ExitBehavior": {
+      "module": "PSD3v2.Transition.Scene",
+      "name": "ExitBehavior",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Transition.Scene.UpdateBehavior": {
+      "module": "PSD3v2.Transition.Scene",
+      "name": "UpdateBehavior",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.Transition.Types.Easing": {
+      "module": "PSD3v2.Transition.Types",
+      "name": "Easing",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.VizTree.Core.Tree": {
+      "module": "PSD3v2.VizTree.Core",
+      "name": "Tree",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.VizTree.Tree.Tree": {
+      "module": "PSD3v2.VizTree.Tree",
+      "name": "Tree",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.VizTree.Types.VizTree": {
+      "module": "PSD3v2.VizTree.Types",
+      "name": "VizTree",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.VizTree.Types.Leaf": {
+      "module": "PSD3v2.VizTree.Types",
+      "name": "Leaf",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.VizTree.Types.Branch": {
+      "module": "PSD3v2.VizTree.Types",
+      "name": "Branch",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.VizTree.Types.Siblings": {
+      "module": "PSD3v2.VizTree.Types",
+      "name": "Siblings",
+      "kind": "data",
+      "usedBy": []
+    },
+    "PSD3v2.VizTree.Types.DataJoin": {
+      "module": "PSD3v2.VizTree.Types",
+      "name": "DataJoin",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Promise.Internal.Promise": {
+      "module": "Promise.Internal",
+      "name": "Promise",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Promise.Lazy.Box": {
+      "module": "Promise.Lazy",
+      "name": "Box",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Promise.Lazy.LazyPromise": {
+      "module": "Promise.Lazy",
+      "name": "LazyPromise",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Promise.Rejection.Rejection": {
+      "module": "Promise.Rejection",
+      "name": "Rejection",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Record.Builder.Builder": {
+      "module": "Record.Builder",
+      "name": "Builder",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Routing.Match.Match": {
+      "module": "Routing.Match",
+      "name": "Match",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Routing.Match.Error.MatchError": {
+      "module": "Routing.Match.Error",
+      "name": "MatchError",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Routing.Types.RoutePart": {
+      "module": "Routing.Types",
+      "name": "RoutePart",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Snippets.Cell": {
+      "module": "Snippets",
+      "name": "Cell",
+      "kind": "data",
+      "usedBy": []
+    },
+    "StringParser.Expr.Assoc": {
+      "module": "StringParser.Expr",
+      "name": "Assoc",
+      "kind": "data",
+      "usedBy": []
+    },
+    "StringParser.Expr.Operator": {
+      "module": "StringParser.Expr",
+      "name": "Operator",
+      "kind": "data",
+      "usedBy": []
+    },
+    "StringParser.Parser.Parser": {
+      "module": "StringParser.Parser",
+      "name": "Parser",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Type.Proxy.Proxy": {
+      "module": "Type.Proxy",
+      "name": "Proxy",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Unsafe.Reference.UnsafeRefEq": {
+      "module": "Unsafe.Reference",
+      "name": "UnsafeRefEq",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Unsafe.Reference.UnsafeRefEqFallback": {
+      "module": "Unsafe.Reference",
+      "name": "UnsafeRefEqFallback",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.Clipboard.Clipboard": {
+      "module": "Web.Clipboard",
+      "name": "Clipboard",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.Clipboard.ClipboardEvent.ClipboardEvent": {
+      "module": "Web.Clipboard.ClipboardEvent",
+      "name": "ClipboardEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.CharacterData.CharacterData": {
+      "module": "Web.DOM.CharacterData",
+      "name": "CharacterData",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.ChildNode.ChildNode": {
+      "module": "Web.DOM.ChildNode",
+      "name": "ChildNode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.Comment.Comment": {
+      "module": "Web.DOM.Comment",
+      "name": "Comment",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.DOMTokenList.DOMTokenList": {
+      "module": "Web.DOM.DOMTokenList",
+      "name": "DOMTokenList",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.Document.Document": {
+      "module": "Web.DOM.Document",
+      "name": "Document",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.DocumentFragment.DocumentFragment": {
+      "module": "Web.DOM.DocumentFragment",
+      "name": "DocumentFragment",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.DocumentType.DocumentType": {
+      "module": "Web.DOM.DocumentType",
+      "name": "DocumentType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.Internal.Types.Node": {
+      "module": "Web.DOM.Internal.Types",
+      "name": "Node",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.Internal.Types.NodeList": {
+      "module": "Web.DOM.Internal.Types",
+      "name": "NodeList",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.Internal.Types.Element": {
+      "module": "Web.DOM.Internal.Types",
+      "name": "Element",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.Internal.Types.HTMLCollection": {
+      "module": "Web.DOM.Internal.Types",
+      "name": "HTMLCollection",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.MutationObserver.MutationObserver": {
+      "module": "Web.DOM.MutationObserver",
+      "name": "MutationObserver",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.MutationRecord.MutationRecord": {
+      "module": "Web.DOM.MutationRecord",
+      "name": "MutationRecord",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.MutationRecord.MutationRecordType": {
+      "module": "Web.DOM.MutationRecord",
+      "name": "MutationRecordType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.NodeType.NodeType": {
+      "module": "Web.DOM.NodeType",
+      "name": "NodeType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.NonDocumentTypeChildNode.NonDocumentTypeChildNode": {
+      "module": "Web.DOM.NonDocumentTypeChildNode",
+      "name": "NonDocumentTypeChildNode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.NonElementParentNode.NonElementParentNode": {
+      "module": "Web.DOM.NonElementParentNode",
+      "name": "NonElementParentNode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.ParentNode.ParentNode": {
+      "module": "Web.DOM.ParentNode",
+      "name": "ParentNode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.ParentNode.QuerySelector": {
+      "module": "Web.DOM.ParentNode",
+      "name": "QuerySelector",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.ProcessingInstruction.ProcessingInstruction": {
+      "module": "Web.DOM.ProcessingInstruction",
+      "name": "ProcessingInstruction",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.ShadowRoot.ShadowRoot": {
+      "module": "Web.DOM.ShadowRoot",
+      "name": "ShadowRoot",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.ShadowRoot.ShadowRootMode": {
+      "module": "Web.DOM.ShadowRoot",
+      "name": "ShadowRootMode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.DOM.Text.Text": {
+      "module": "Web.DOM.Text",
+      "name": "Text",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.Event.CustomEvent.CustomEvent": {
+      "module": "Web.Event.CustomEvent",
+      "name": "CustomEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.Event.Event.EventType": {
+      "module": "Web.Event.Event",
+      "name": "EventType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.Event.EventPhase.EventPhase": {
+      "module": "Web.Event.EventPhase",
+      "name": "EventPhase",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.Event.EventTarget.EventListener": {
+      "module": "Web.Event.EventTarget",
+      "name": "EventListener",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.Event.Internal.Types.Event": {
+      "module": "Web.Event.Internal.Types",
+      "name": "Event",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.Event.Internal.Types.EventTarget": {
+      "module": "Web.Event.Internal.Types",
+      "name": "EventTarget",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.File.Blob.Blob": {
+      "module": "Web.File.Blob",
+      "name": "Blob",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.File.Blob.StartByte": {
+      "module": "Web.File.Blob",
+      "name": "StartByte",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.File.Blob.EndByte": {
+      "module": "Web.File.Blob",
+      "name": "EndByte",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.File.Blob.ByteIdx": {
+      "module": "Web.File.Blob",
+      "name": "ByteIdx",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.File.File.File": {
+      "module": "Web.File.File",
+      "name": "File",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.File.FileList.FileList": {
+      "module": "Web.File.FileList",
+      "name": "FileList",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.File.FileReader.FileReader": {
+      "module": "Web.File.FileReader",
+      "name": "FileReader",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.File.FileReader.ReadyState.ReadyState": {
+      "module": "Web.File.FileReader.ReadyState",
+      "name": "ReadyState",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Common.PropName": {
+      "module": "Web.HTML.Common",
+      "name": "PropName",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Common.AttrName": {
+      "module": "Web.HTML.Common",
+      "name": "AttrName",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Common.ClassName": {
+      "module": "Web.HTML.Common",
+      "name": "ClassName",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Event.BeforeUnloadEvent.BeforeUnloadEvent": {
+      "module": "Web.HTML.Event.BeforeUnloadEvent",
+      "name": "BeforeUnloadEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Event.DataTransfer.DataTransfer": {
+      "module": "Web.HTML.Event.DataTransfer",
+      "name": "DataTransfer",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Event.DataTransfer.DropEffect": {
+      "module": "Web.HTML.Event.DataTransfer",
+      "name": "DropEffect",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Event.DataTransfer.DataTransferItem.DataTransferItem": {
+      "module": "Web.HTML.Event.DataTransfer.DataTransferItem",
+      "name": "DataTransferItem",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Event.DataTransfer.DataTransferItem.DataTransferItemKind": {
+      "module": "Web.HTML.Event.DataTransfer.DataTransferItem",
+      "name": "DataTransferItemKind",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Event.DataTransfer.DataTransferItem.DataTransferItemList": {
+      "module": "Web.HTML.Event.DataTransfer.DataTransferItem",
+      "name": "DataTransferItemList",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Event.DragEvent.DragEvent": {
+      "module": "Web.HTML.Event.DragEvent",
+      "name": "DragEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Event.ErrorEvent.ErrorEvent": {
+      "module": "Web.HTML.Event.ErrorEvent",
+      "name": "ErrorEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Event.HashChangeEvent.HashChangeEvent": {
+      "module": "Web.HTML.Event.HashChangeEvent",
+      "name": "HashChangeEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Event.PageTransitionEvent.PageTransitionEvent": {
+      "module": "Web.HTML.Event.PageTransitionEvent",
+      "name": "PageTransitionEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Event.PopStateEvent.PopStateEvent": {
+      "module": "Web.HTML.Event.PopStateEvent",
+      "name": "PopStateEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Event.TrackEvent.TrackEvent": {
+      "module": "Web.HTML.Event.TrackEvent",
+      "name": "TrackEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLAnchorElement.HTMLAnchorElement": {
+      "module": "Web.HTML.HTMLAnchorElement",
+      "name": "HTMLAnchorElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLAreaElement.HTMLAreaElement": {
+      "module": "Web.HTML.HTMLAreaElement",
+      "name": "HTMLAreaElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLAudioElement.HTMLAudioElement": {
+      "module": "Web.HTML.HTMLAudioElement",
+      "name": "HTMLAudioElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLBRElement.HTMLBRElement": {
+      "module": "Web.HTML.HTMLBRElement",
+      "name": "HTMLBRElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLBaseElement.HTMLBaseElement": {
+      "module": "Web.HTML.HTMLBaseElement",
+      "name": "HTMLBaseElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLBodyElement.HTMLBodyElement": {
+      "module": "Web.HTML.HTMLBodyElement",
+      "name": "HTMLBodyElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLButtonElement.HTMLButtonElement": {
+      "module": "Web.HTML.HTMLButtonElement",
+      "name": "HTMLButtonElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLCanvasElement.HTMLCanvasElement": {
+      "module": "Web.HTML.HTMLCanvasElement",
+      "name": "HTMLCanvasElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLDListElement.HTMLDListElement": {
+      "module": "Web.HTML.HTMLDListElement",
+      "name": "HTMLDListElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLDataElement.HTMLDataElement": {
+      "module": "Web.HTML.HTMLDataElement",
+      "name": "HTMLDataElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLDataListElement.HTMLDataListElement": {
+      "module": "Web.HTML.HTMLDataListElement",
+      "name": "HTMLDataListElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLDivElement.HTMLDivElement": {
+      "module": "Web.HTML.HTMLDivElement",
+      "name": "HTMLDivElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLDocument.HTMLDocument": {
+      "module": "Web.HTML.HTMLDocument",
+      "name": "HTMLDocument",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLDocument.ReadyState.ReadyState": {
+      "module": "Web.HTML.HTMLDocument.ReadyState",
+      "name": "ReadyState",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLDocument.VisibilityState.VisibilityState": {
+      "module": "Web.HTML.HTMLDocument.VisibilityState",
+      "name": "VisibilityState",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLElement.HTMLElement": {
+      "module": "Web.HTML.HTMLElement",
+      "name": "HTMLElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLEmbedElement.HTMLEmbedElement": {
+      "module": "Web.HTML.HTMLEmbedElement",
+      "name": "HTMLEmbedElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLFieldSetElement.HTMLFieldSetElement": {
+      "module": "Web.HTML.HTMLFieldSetElement",
+      "name": "HTMLFieldSetElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLFormElement.HTMLFormElement": {
+      "module": "Web.HTML.HTMLFormElement",
+      "name": "HTMLFormElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLHRElement.HTMLHRElement": {
+      "module": "Web.HTML.HTMLHRElement",
+      "name": "HTMLHRElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLHeadElement.HTMLHeadElement": {
+      "module": "Web.HTML.HTMLHeadElement",
+      "name": "HTMLHeadElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLHeadingElement.HTMLHeadingElement": {
+      "module": "Web.HTML.HTMLHeadingElement",
+      "name": "HTMLHeadingElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLHtmlElement.HTMLHtmlElement": {
+      "module": "Web.HTML.HTMLHtmlElement",
+      "name": "HTMLHtmlElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLHyperlinkElementUtils.HTMLHyperlinkElementUtils": {
+      "module": "Web.HTML.HTMLHyperlinkElementUtils",
+      "name": "HTMLHyperlinkElementUtils",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLIFrameElement.HTMLIFrameElement": {
+      "module": "Web.HTML.HTMLIFrameElement",
+      "name": "HTMLIFrameElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLImageElement.HTMLImageElement": {
+      "module": "Web.HTML.HTMLImageElement",
+      "name": "HTMLImageElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLImageElement.CORSMode.CORSMode": {
+      "module": "Web.HTML.HTMLImageElement.CORSMode",
+      "name": "CORSMode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLImageElement.DecodingHint.DecodingHint": {
+      "module": "Web.HTML.HTMLImageElement.DecodingHint",
+      "name": "DecodingHint",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLImageElement.Laziness.Laziness": {
+      "module": "Web.HTML.HTMLImageElement.Laziness",
+      "name": "Laziness",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLInputElement.HTMLInputElement": {
+      "module": "Web.HTML.HTMLInputElement",
+      "name": "HTMLInputElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLKeygenElement.HTMLKeygenElement": {
+      "module": "Web.HTML.HTMLKeygenElement",
+      "name": "HTMLKeygenElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLLIElement.HTMLLIElement": {
+      "module": "Web.HTML.HTMLLIElement",
+      "name": "HTMLLIElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLLabelElement.HTMLLabelElement": {
+      "module": "Web.HTML.HTMLLabelElement",
+      "name": "HTMLLabelElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLLegendElement.HTMLLegendElement": {
+      "module": "Web.HTML.HTMLLegendElement",
+      "name": "HTMLLegendElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLLinkElement.HTMLLinkElement": {
+      "module": "Web.HTML.HTMLLinkElement",
+      "name": "HTMLLinkElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLMapElement.HTMLMapElement": {
+      "module": "Web.HTML.HTMLMapElement",
+      "name": "HTMLMapElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLMediaElement.HTMLMediaElement": {
+      "module": "Web.HTML.HTMLMediaElement",
+      "name": "HTMLMediaElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLMediaElement.CanPlayType.CanPlayType": {
+      "module": "Web.HTML.HTMLMediaElement.CanPlayType",
+      "name": "CanPlayType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLMediaElement.NetworkState.NetworkState": {
+      "module": "Web.HTML.HTMLMediaElement.NetworkState",
+      "name": "NetworkState",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLMediaElement.ReadyState.ReadyState": {
+      "module": "Web.HTML.HTMLMediaElement.ReadyState",
+      "name": "ReadyState",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLMetaElement.HTMLMetaElement": {
+      "module": "Web.HTML.HTMLMetaElement",
+      "name": "HTMLMetaElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLMeterElement.HTMLMeterElement": {
+      "module": "Web.HTML.HTMLMeterElement",
+      "name": "HTMLMeterElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLModElement.HTMLModElement": {
+      "module": "Web.HTML.HTMLModElement",
+      "name": "HTMLModElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLOListElement.HTMLOListElement": {
+      "module": "Web.HTML.HTMLOListElement",
+      "name": "HTMLOListElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLObjectElement.HTMLObjectElement": {
+      "module": "Web.HTML.HTMLObjectElement",
+      "name": "HTMLObjectElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLOptGroupElement.HTMLOptGroupElement": {
+      "module": "Web.HTML.HTMLOptGroupElement",
+      "name": "HTMLOptGroupElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLOptionElement.HTMLOptionElement": {
+      "module": "Web.HTML.HTMLOptionElement",
+      "name": "HTMLOptionElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLOutputElement.HTMLOutputElement": {
+      "module": "Web.HTML.HTMLOutputElement",
+      "name": "HTMLOutputElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLParagraphElement.HTMLParagraphElement": {
+      "module": "Web.HTML.HTMLParagraphElement",
+      "name": "HTMLParagraphElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLParamElement.HTMLParamElement": {
+      "module": "Web.HTML.HTMLParamElement",
+      "name": "HTMLParamElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLPreElement.HTMLPreElement": {
+      "module": "Web.HTML.HTMLPreElement",
+      "name": "HTMLPreElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLProgressElement.HTMLProgressElement": {
+      "module": "Web.HTML.HTMLProgressElement",
+      "name": "HTMLProgressElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLQuoteElement.HTMLQuoteElement": {
+      "module": "Web.HTML.HTMLQuoteElement",
+      "name": "HTMLQuoteElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLScriptElement.HTMLScriptElement": {
+      "module": "Web.HTML.HTMLScriptElement",
+      "name": "HTMLScriptElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLSelectElement.HTMLSelectElement": {
+      "module": "Web.HTML.HTMLSelectElement",
+      "name": "HTMLSelectElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLSourceElement.HTMLSourceElement": {
+      "module": "Web.HTML.HTMLSourceElement",
+      "name": "HTMLSourceElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLSpanElement.HTMLSpanElement": {
+      "module": "Web.HTML.HTMLSpanElement",
+      "name": "HTMLSpanElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLStyleElement.HTMLStyleElement": {
+      "module": "Web.HTML.HTMLStyleElement",
+      "name": "HTMLStyleElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLTableCaptionElement.HTMLTableCaptionElement": {
+      "module": "Web.HTML.HTMLTableCaptionElement",
+      "name": "HTMLTableCaptionElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLTableCellElement.HTMLTableCellElement": {
+      "module": "Web.HTML.HTMLTableCellElement",
+      "name": "HTMLTableCellElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLTableColElement.HTMLTableColElement": {
+      "module": "Web.HTML.HTMLTableColElement",
+      "name": "HTMLTableColElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLTableDataCellElement.HTMLTableDataCellElement": {
+      "module": "Web.HTML.HTMLTableDataCellElement",
+      "name": "HTMLTableDataCellElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLTableElement.HTMLTableElement": {
+      "module": "Web.HTML.HTMLTableElement",
+      "name": "HTMLTableElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLTableHeaderCellElement.HTMLTableHeaderCellElement": {
+      "module": "Web.HTML.HTMLTableHeaderCellElement",
+      "name": "HTMLTableHeaderCellElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLTableRowElement.HTMLTableRowElement": {
+      "module": "Web.HTML.HTMLTableRowElement",
+      "name": "HTMLTableRowElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLTableSectionElement.HTMLTableSectionElement": {
+      "module": "Web.HTML.HTMLTableSectionElement",
+      "name": "HTMLTableSectionElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLTemplateElement.HTMLTemplateElement": {
+      "module": "Web.HTML.HTMLTemplateElement",
+      "name": "HTMLTemplateElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLTextAreaElement.HTMLTextAreaElement": {
+      "module": "Web.HTML.HTMLTextAreaElement",
+      "name": "HTMLTextAreaElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLTimeElement.HTMLTimeElement": {
+      "module": "Web.HTML.HTMLTimeElement",
+      "name": "HTMLTimeElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLTitleElement.HTMLTitleElement": {
+      "module": "Web.HTML.HTMLTitleElement",
+      "name": "HTMLTitleElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLTrackElement.HTMLTrackElement": {
+      "module": "Web.HTML.HTMLTrackElement",
+      "name": "HTMLTrackElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLTrackElement.ReadyState.ReadyState": {
+      "module": "Web.HTML.HTMLTrackElement.ReadyState",
+      "name": "ReadyState",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLUListElement.HTMLUListElement": {
+      "module": "Web.HTML.HTMLUListElement",
+      "name": "HTMLUListElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.HTMLVideoElement.HTMLVideoElement": {
+      "module": "Web.HTML.HTMLVideoElement",
+      "name": "HTMLVideoElement",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.History.History": {
+      "module": "Web.HTML.History",
+      "name": "History",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.History.DocumentTitle": {
+      "module": "Web.HTML.History",
+      "name": "DocumentTitle",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.History.Delta": {
+      "module": "Web.HTML.History",
+      "name": "Delta",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.History.URL": {
+      "module": "Web.HTML.History",
+      "name": "URL",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Location.Location": {
+      "module": "Web.HTML.Location",
+      "name": "Location",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Navigator.Navigator": {
+      "module": "Web.HTML.Navigator",
+      "name": "Navigator",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.SelectionMode.SelectionMode": {
+      "module": "Web.HTML.SelectionMode",
+      "name": "SelectionMode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.ValidityState.ValidityState": {
+      "module": "Web.HTML.ValidityState",
+      "name": "ValidityState",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Window.Window": {
+      "module": "Web.HTML.Window",
+      "name": "Window",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Window.RequestAnimationFrameId": {
+      "module": "Web.HTML.Window",
+      "name": "RequestAnimationFrameId",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.HTML.Window.RequestIdleCallbackId": {
+      "module": "Web.HTML.Window",
+      "name": "RequestIdleCallbackId",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.PointerEvent.PointerEvent.PointerEvent": {
+      "module": "Web.PointerEvent.PointerEvent",
+      "name": "PointerEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.PointerEvent.PointerEvent.PointerId": {
+      "module": "Web.PointerEvent.PointerEvent",
+      "name": "PointerId",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.PointerEvent.PointerEvent.PointerType": {
+      "module": "Web.PointerEvent.PointerEvent",
+      "name": "PointerType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.Storage.Event.StorageEvent.StorageEvent": {
+      "module": "Web.Storage.Event.StorageEvent",
+      "name": "StorageEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.Storage.Storage.Storage": {
+      "module": "Web.Storage.Storage",
+      "name": "Storage",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.TouchEvent.Touch.Touch": {
+      "module": "Web.TouchEvent.Touch",
+      "name": "Touch",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.TouchEvent.TouchEvent.TouchEvent": {
+      "module": "Web.TouchEvent.TouchEvent",
+      "name": "TouchEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.TouchEvent.TouchList.TouchList": {
+      "module": "Web.TouchEvent.TouchList",
+      "name": "TouchList",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.UIEvent.CompositionEvent.CompositionEvent": {
+      "module": "Web.UIEvent.CompositionEvent",
+      "name": "CompositionEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.UIEvent.FocusEvent.FocusEvent": {
+      "module": "Web.UIEvent.FocusEvent",
+      "name": "FocusEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.UIEvent.InputEvent.InputEvent": {
+      "module": "Web.UIEvent.InputEvent",
+      "name": "InputEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.UIEvent.InputEvent.InputType.InputType": {
+      "module": "Web.UIEvent.InputEvent.InputType",
+      "name": "InputType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.UIEvent.KeyboardEvent.KeyboardEvent": {
+      "module": "Web.UIEvent.KeyboardEvent",
+      "name": "KeyboardEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.UIEvent.KeyboardEvent.KeyLocation": {
+      "module": "Web.UIEvent.KeyboardEvent",
+      "name": "KeyLocation",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.UIEvent.MouseEvent.MouseEvent": {
+      "module": "Web.UIEvent.MouseEvent",
+      "name": "MouseEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.UIEvent.UIEvent.UIEvent": {
+      "module": "Web.UIEvent.UIEvent",
+      "name": "UIEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.UIEvent.WheelEvent.WheelEvent": {
+      "module": "Web.UIEvent.WheelEvent",
+      "name": "WheelEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.UIEvent.WheelEvent.DeltaMode": {
+      "module": "Web.UIEvent.WheelEvent",
+      "name": "DeltaMode",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.XHR.FormData.FormData": {
+      "module": "Web.XHR.FormData",
+      "name": "FormData",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.XHR.FormData.EntryName": {
+      "module": "Web.XHR.FormData",
+      "name": "EntryName",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.XHR.FormData.FileName": {
+      "module": "Web.XHR.FormData",
+      "name": "FileName",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.XHR.ProgressEvent.ProgressEvent": {
+      "module": "Web.XHR.ProgressEvent",
+      "name": "ProgressEvent",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.XHR.ReadyState.ReadyState": {
+      "module": "Web.XHR.ReadyState",
+      "name": "ReadyState",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.XHR.ResponseType.ResponseType": {
+      "module": "Web.XHR.ResponseType",
+      "name": "ResponseType",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.XHR.XMLHttpRequest.XMLHttpRequest": {
+      "module": "Web.XHR.XMLHttpRequest",
+      "name": "XMLHttpRequest",
+      "kind": "data",
+      "usedBy": []
+    },
+    "Web.XHR.XMLHttpRequestUpload.XMLHttpRequestUpload": {
+      "module": "Web.XHR.XMLHttpRequestUpload",
+      "name": "XMLHttpRequestUpload",
+      "kind": "data",
+      "usedBy": []
+    }
+  },
+  "edges": []
+}

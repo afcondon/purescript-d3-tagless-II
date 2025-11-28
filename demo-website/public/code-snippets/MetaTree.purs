@@ -1,0 +1,64 @@
+-- | "script" to produce the documentation-ready rendering of another script's structure
+-- | (could also be the basis for graphical editor of scripts / trees)
+draw :: forall m selection. Bind m => SelectionM selection m => 
+  Tuple Number Number -> MetaTreeNode -> m selection
+draw (Tuple w h) tree = do
+  let 
+    -- configure dimensions
+    numberOfLevels             = (hNodeHeight_ tree) + 1.0
+    spacing                    = { interChild: (w/5.0), interLevel: h / numberOfLevels}
+    layoutFn                   = (getLayout TidyTree) `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
+    laidOutRoot_               = layoutFn `runLayoutFn_` tree
+    { xMin, xMax, yMin, yMax } = treeMinMax_ laidOutRoot_
+    xExtent = abs $ xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250
+    yExtent = abs $ yMax - yMin -- ie if tree spans from -50 to 200, it's extent is 250
+    vtreeYOffset = (abs (h - yExtent)) / 2.0
+    vtreeXOffset = pad xMin -- the left and right sides might be different so (xExtent / 2) would not necessarily be right
+    pad n = n * 1.2
+
+
+  -- "script"
+  root       <- attach ".svg-container"                           
+  svg        <- appendTo root Svg [ viewBox vtreeXOffset (-vtreeYOffset) (pad xExtent) (pad yExtent)
+                                  , preserveAspectRatio $ AspectRatio XMin YMid Meet 
+                                  , width w
+                                  , height h
+                                  , classed "metatree" ]
+  container  <- appendTo svg  Group [ fontFamily      "sans-serif"
+                                    , fontSize        18.0
+                                    ]
+  links      <- appendTo container Group [ classed "links"]
+  nodes      <- appendTo container Group [ classed "nodes"]
+
+  theLinks_  <- simpleJoin links Path (links_ tree) keyIsID_
+  setAttributes theLinks_ 
+    [ strokeWidth 1.5, strokeColor "black", strokeOpacity 0.4, fill "none", verticalLink]
+
+  nodeJoin_  <- simpleJoin nodes Group (descendants_ tree) keyIsID_ 
+  setAttributes nodeJoin_ [ transform [ datum_.positionXY ] ]
+  
+
+  theNodes <- appendTo nodeJoin_ 
+                Circle  [ fill         "blue"
+                        , radius       20.0
+                        , strokeColor "white"
+                        , strokeWidth 3.0
+                        ]
+
+  labelsWhite <- appendTo nodeJoin_
+                Text  [ x          0.0
+                      , y          3.0
+                      , textAnchor "middle"
+                      , text       datum_.symbol
+                      , fill       "white"
+                      ]
+                            
+  labelsGray <- appendTo nodeJoin_
+                Text  [ x          22.0
+                      , y          3.0
+                      , textAnchor "start"
+                      , text       datum_.param1
+                      , fill       "gray"
+                      ]
+                            
+  pure svg

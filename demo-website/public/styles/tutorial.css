@@ -1,0 +1,1251 @@
+/* Tutorial Page Styles - Getting Started guides */
+
+.tutorial-page {
+  min-height: 100vh;
+  background-color: #fffdf7;
+  /* Light cream - warm and welcoming */
+  padding: 0 1rem 2rem 1rem;
+  position: relative;
+}
+
+/* TOC Floating Panel - Left side */
+/* Positioned relative to center column (52rem wide) */
+.toc-panel {
+  position: fixed;
+  top: 2rem;
+  /* Position to left of center column: 50% - half column width - panel width - gap */
+  left: calc(50% - 26rem - 360px - 2rem);
+  width: 360px;
+  max-height: calc(100vh - 4rem);
+  display: flex;
+  z-index: 1000;
+  font-family: var(--font-mono);
+}
+
+.toc-panel__bookmark-pin {
+  width: 80px;
+  height: auto;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.toc-panel__main {
+  flex: 1;
+  background-color: var(--color-beige-light);
+  border: 2px solid var(--color-gray-medium);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+.floating-panel__header {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-red-accent);
+  color: var(--color-beige-light);
+  border-bottom: 2px solid var(--color-gray-medium);
+  cursor: move;
+}
+
+.floating-panel__title {
+  flex: 1;
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: var(--font-mono);
+}
+
+.floating-panel__toggle {
+  background: none;
+  border: 1px solid var(--color-beige-light);
+  color: var(--color-beige-light);
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  line-height: 1;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-panel__toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.floating-panel__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.floating-panel--collapsed .floating-panel__content {
+  display: none;
+}
+
+.toc-panel__content {
+  padding: 0.5rem 0;
+}
+
+.toc-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.toc-nav__item {
+  display: block;
+  padding: 0.625rem 1rem;
+  color: var(--color-gray-darker);
+  text-decoration: none;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  border-left: 3px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.toc-nav__item:hover {
+  background-color: var(--color-beige-base);
+  border-left-color: var(--color-red-accent);
+  color: var(--color-gray-darker);
+}
+
+.toc-nav__item--level-2 {
+  padding-left: 1.75rem;
+  font-size: 0.875rem;
+}
+
+.toc-nav__item--level-3 {
+  padding-left: 2.5rem;
+  font-size: 0.8125rem;
+  color: var(--color-gray-medium);
+}
+
+/* Control Panel - Alternative to TOC for interactive pages */
+/* Unlike TOC which has bookmark on the side, control panel is just the main box */
+.control-panel.toc-panel {
+  /* Control panel doesn't use the bookmark/main layout */
+  display: block;
+}
+
+.control-panel__main {
+  width: 100%;
+}
+
+.control-panel__icon {
+  width: 50%;
+  /* Half the panel width */
+  max-width: 180px;
+  height: auto;
+  margin: 1rem 0 1rem 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.control-panel__content {
+  padding: 1rem;
+}
+
+.control-panel__section {
+  margin-bottom: 1.5rem;
+}
+
+.control-panel__section:last-child {
+  margin-bottom: 0;
+}
+
+.control-panel__section-title {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-gray-medium);
+  margin: 0 0 0.75rem 0;
+}
+
+.control-panel__options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.control-panel__option {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  background-color: transparent;
+  border: 1px solid var(--color-gray-medium);
+  border-left: 3px solid transparent;
+  color: var(--color-gray-darker);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.control-panel__option:hover {
+  background-color: var(--color-beige-base);
+  border-left-color: var(--color-red-accent);
+}
+
+.control-panel__option--active {
+  background-color: var(--color-beige-base);
+  border-left-color: var(--color-red-accent);
+  font-weight: bold;
+  color: var(--color-gray-darker);
+}
+
+.control-panel__current {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-gray-light);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-gray-darker);
+}
+
+/* Navigation Panel (RHS) */
+/* Positioned relative to center column (52rem wide) */
+.tutorial-page__nav-panel {
+  position: fixed;
+  top: 2rem;
+  /* Position to right of center column: 50% - half column width - panel width - gap */
+  right: calc(50% - 26rem - 240px - 2rem);
+  width: 240px;
+  background-color: var(--color-beige-light);
+  border: 2px solid var(--color-gray-medium);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 1.5rem;
+  z-index: 1000;
+}
+
+.tutorial-page__nav-title {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 1rem 0;
+  color: var(--color-gray-darker);
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-red-accent);
+}
+
+.tutorial-page__nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tutorial-page__nav-link {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-gray-darker);
+  text-decoration: none;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.tutorial-page__nav-link:hover {
+  background-color: var(--color-beige-base);
+  border-left-color: var(--color-red-accent);
+  color: var(--color-gray-darker);
+}
+
+.tutorial-page__nav-link--active {
+  background-color: var(--color-beige-base);
+  border-left-color: var(--color-red-accent);
+  font-weight: bold;
+  color: var(--color-gray-darker);
+  cursor: default;
+}
+
+.tutorial-page__nav-link--external {
+  color: var(--color-teal);
+}
+
+.tutorial-page__nav-link--external:hover {
+  color: var(--color-teal);
+  border-left-color: var(--color-teal);
+}
+
+.tutorial-section {
+  max-width: 52rem;
+  margin: 0 auto 3rem auto;
+  background-color: #F5F1E8;
+  padding: 2rem 3rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  position: relative;
+  /* For positioning margin notes */
+}
+
+.tutorial-intro {
+  margin-bottom: 4rem;
+}
+
+.tutorial-title {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 3px solid var(--color-red-accent);
+  color: var(--color-gray-darker);
+}
+
+.tutorial-section-title {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-red-accent);
+  color: var(--color-gray-darker);
+}
+
+.tutorial-section p {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.8;
+  color: #2A2A2A;
+  margin-bottom: 1rem;
+}
+
+.tutorial-section ul {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.8;
+  color: #2A2A2A;
+  margin-bottom: 1rem;
+  padding-left: 2rem;
+  list-style-type: square;
+}
+
+.tutorial-section li {
+  margin-bottom: 0.5rem;
+}
+
+.tutorial-section ol {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.8;
+  color: #2A2A2A;
+  margin-bottom: 1rem;
+  padding-left: 2rem;
+  list-style-type: decimal;
+}
+
+.tutorial-section h2 {
+  font-family: var(--font-mono);
+  font-size: 1.125rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  color: var(--color-gray-darker);
+}
+
+.tutorial-section h3 {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: bold;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-gray-darker);
+}
+
+.tutorial-section h4 {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-teal);
+}
+
+.tutorial-section a {
+  color: var(--color-red-accent);
+  text-decoration: underline;
+}
+
+.tutorial-section a:hover {
+  color: var(--color-coral);
+}
+
+.tutorial-section strong {
+  font-weight: bold;
+  color: var(--color-gray-darker);
+}
+
+.tutorial-section em {
+  font-style: italic;
+}
+
+.tutorial-section code {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  background-color: #2d2d2d;
+  /* Dark background for high contrast */
+  color: #f8f8f2;
+  /* Light text */
+  padding: 0.125rem 0.375rem;
+  border-radius: 2px;
+}
+
+.tutorial-section pre {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  background-color: #2d2d2d;
+  /* Dark background for high contrast */
+  color: #f8f8f2;
+  /* Light text */
+  padding: 1rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  border-left: 3px solid var(--color-teal);
+  line-height: 1.6;
+}
+
+.tutorial-section pre code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+/* Tables */
+.tutorial-table {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+
+.tutorial-table th,
+.tutorial-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-gray-light);
+}
+
+.tutorial-table th {
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: var(--color-beige-dark);
+  border-bottom: 2px solid var(--color-gray-medium);
+}
+
+.tutorial-table tr:hover {
+  background-color: var(--color-beige-base);
+}
+
+/* Visualization Container */
+.tutorial-viz-container {
+  margin: 2rem 0;
+  padding: 2rem;
+  background-color: white;
+  border: 2px solid var(--color-gray-medium);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Generic viz-container - make SVGs responsive */
+.viz-container svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
+/* GUP container on tour page needs explicit height */
+#gup-container {
+  min-height: 300px;
+}
+
+#gup-container svg {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Embedded visualization divs */
+.tutorial-viz-container .three-circles-viz,
+.tutorial-viz-container .gup-viz,
+.tutorial-viz-container .parabola-viz,
+.tutorial-viz-container .barchart-viz,
+.tutorial-viz-container .linechart-viz,
+.tutorial-viz-container .quartet-viz {
+  width: 100%;
+  /* Let SVG determine height naturally based on viewBox aspect ratio */
+}
+
+/* Make SVG responsive - scales to fit container while maintaining aspect ratio */
+.tutorial-viz-container svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* Specific sizing for small examples to keep them readable */
+.tutorial-viz-container .three-circles-viz svg,
+.tutorial-viz-container .parabola-viz svg {
+  max-width: 600px;
+  /* Keep small examples from getting too large */
+  min-height: 100px;
+  /* Ensure minimum readable size */
+}
+
+/* GUP needs more vertical space for animation */
+.tutorial-viz-container .gup-viz svg {
+  max-width: 600px;
+  min-height: 200px;
+}
+
+/* Chart examples can be larger */
+.tutorial-viz-container .barchart-viz svg,
+.tutorial-viz-container .linechart-viz svg {
+  max-width: 800px;
+}
+
+/* Quartet needs full width for side-by-side charts */
+.tutorial-viz-container .quartet-viz svg {
+  max-width: 100%;
+  min-height: 300px;
+}
+
+/* Hierarchies visualization - full width for tree layouts */
+.tutorial-viz-container .hierarchies-viz {
+  width: 100%;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tutorial-viz-container .hierarchies-viz svg {
+  max-width: 100%;
+  min-height: 400px;
+}
+
+/* Layout placeholder styling */
+.layout-placeholder {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-gray-medium);
+  text-align: center;
+  padding: 3rem;
+}
+
+/* Code blocks in tutorial - use existing Prism editorial theme */
+.tutorial-code-block {
+  margin: 1.5rem 0;
+}
+
+.tutorial-code-block pre {
+  margin: 0;
+  overflow-x: auto;
+  /* Allow horizontal scroll for long lines */
+}
+
+.tutorial-code-block code {
+  /* Font size defined in prism-editorial.css (0.6875rem / 11px) */
+  line-height: 1.7;
+  white-space: pre;
+  /* Preserve formatting, don't wrap */
+}
+
+/* Ensure Prism styles apply correctly */
+.tutorial-code-block pre[class*="language-"] {
+  /* Font size defined in prism-editorial.css */
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.tutorial-code-block code[class*="language-"] {
+  /* Font size defined in prism-editorial.css */
+  white-space: pre;
+}
+
+/* Margin Notes */
+.tutorial-margin-note {
+  position: absolute;
+  right: -280px;
+  /* Position outside the main content column */
+  width: 240px;
+  background-color: var(--color-beige-light);
+  border: 2px solid var(--color-gray-medium);
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-top: -1rem;
+  /* Align with adjacent content */
+}
+
+.tutorial-margin-note__label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-gray-medium);
+  margin: 0 0 0.75rem 0;
+}
+
+.tutorial-margin-note__link {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-red-accent);
+  text-decoration: none;
+  padding: 0.5rem 0;
+  border-left: 3px solid transparent;
+  padding-left: 0.75rem;
+  transition: all 0.15s ease;
+}
+
+.tutorial-margin-note__link:hover {
+  border-left-color: var(--color-red-accent);
+  background-color: var(--color-beige-base);
+}
+
+/* Responsive */
+/* On narrower screens, fall back to edge-based positioning */
+@media (max-width: 1600px) {
+  .toc-panel {
+    /* Switch to edge positioning when viewport is too narrow */
+    left: 2rem;
+  }
+
+  .tutorial-page__nav-panel {
+    /* Switch to edge positioning when viewport is too narrow */
+    right: 2rem;
+  }
+}
+
+@media (max-width: 1400px) {
+  .toc-panel {
+    width: 320px;
+    left: 1.5rem;
+  }
+
+  .toc-panel__bookmark-pin {
+    width: 60px;
+  }
+
+  .tutorial-page__nav-panel {
+    width: 200px;
+    right: 1.5rem;
+  }
+
+  .tutorial-section {
+    margin-right: 1rem;
+  }
+
+  .tutorial-margin-note {
+    right: -240px;
+    width: 200px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .toc-panel {
+    width: 280px;
+    left: 1rem;
+  }
+
+  .toc-panel__bookmark-pin {
+    width: 50px;
+  }
+
+  /* Move margin notes inline on smaller screens */
+  .tutorial-margin-note {
+    position: static;
+    width: auto;
+    margin: 1.5rem 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .tutorial-section {
+    padding: 1.5rem;
+  }
+
+  .tutorial-title {
+    font-size: 1.5rem;
+  }
+
+  .tutorial-section-title {
+    font-size: 1.25rem;
+  }
+
+  .tutorial-section p,
+  .tutorial-section ul {
+    font-size: 0.8125rem;
+  }
+
+  .tutorial-viz-container {
+    padding: 1rem;
+  }
+
+  /* Reduce code font size slightly on mobile */
+  .tutorial-code-block code,
+  .tutorial-code-block pre[class*="language-"],
+  .tutorial-code-block code[class*="language-"] {
+    font-size: 0.625rem;
+    /* 10px on mobile */
+  }
+
+  /* Adjust min heights for mobile */
+  .tutorial-viz-container .three-circles-viz svg,
+  .tutorial-viz-container .parabola-viz svg {
+    min-height: 80px;
+  }
+
+  .tutorial-viz-container .gup-viz svg {
+    min-height: 150px;
+  }
+
+  .tutorial-viz-container .quartet-viz svg {
+    min-height: 200px;
+  }
+
+  /* Hide TOC and Nav panel on mobile */
+  .toc-panel,
+  .tutorial-page__nav-panel {
+    display: none;
+  }
+}
+
+/* Wizard Callout Box */
+.tutorial-callout {
+  background: linear-gradient(135deg, #e8dcc6 0%, #d4c4b0 100%);
+  color: var(--color-gray-darker);
+  padding: 2rem;
+  border-radius: 8px;
+  margin: 2rem 0;
+  box-shadow: 0 4px 12px rgba(139, 115, 85, 0.2);
+  border: 2px solid var(--color-gray-medium);
+}
+
+.tutorial-callout h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.tutorial-callout p {
+  margin-bottom: 0.75rem;
+}
+
+/* Wizard Launch Button */
+.tutorial-button {
+  display: inline-block;
+  padding: 0.875rem 1.75rem;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 1.125rem;
+}
+
+.tutorial-button--primary {
+  background: white;
+  color: var(--color-red-accent);
+  border: 2px solid var(--color-red-accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tutorial-button--primary:hover {
+  background: var(--color-red-accent);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
+}
+
+/* Transition Button - Color Mixing Demo */
+.transition-button {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  margin-top: 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+  background: white;
+  color: var(--color-red-accent);
+  border: 2px solid var(--color-red-accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.transition-button:hover {
+  background: var(--color-red-accent);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
+}
+
+.transition-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Example Selector - Interpreter Tour */
+.example-selector {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.example-button {
+  padding: 0.625rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  background: white;
+  color: #666;
+  border: 2px solid #ddd;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.example-button:hover {
+  background: #f5f5f5;
+  border-color: #bbb;
+  color: #333;
+}
+
+.example-button.active {
+  background: var(--color-red-accent);
+  color: white;
+  border-color: var(--color-red-accent);
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
+}
+
+.example-button.active:hover {
+  background: #d64d2d;
+  border-color: #d64d2d;
+}
+
+/* Nested Data Table - Three Little Dimensions */
+.three-dimensions-viz {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+}
+
+.nested-data-table {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 0 auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 2px solid var(--color-gray-medium);
+}
+
+.nested-data-table tr {
+  background-color: white;
+}
+
+.nested-data-table tr:nth-child(odd) {
+  background-color: var(--color-beige-light);
+}
+
+.nested-data-table tr:hover {
+  background-color: #f0ead6;
+}
+
+.nested-data-table td {
+  padding: 1rem 1.5rem;
+  text-align: center;
+  border-right: 1px solid var(--color-gray-light);
+  border-bottom: 1px solid var(--color-gray-light);
+  color: var(--color-gray-darker);
+  font-weight: 500;
+  min-width: 60px;
+}
+
+.nested-data-table td:last-child {
+  border-right: none;
+}
+
+.nested-data-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Sets table - variable width cells for tag display */
+.three-dimensions-sets-viz {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+}
+
+.nested-data-table--sets {
+  font-size: 0.9rem;
+}
+
+.nested-data-table--sets td {
+  padding: 0.75rem 1rem;
+  min-width: auto;
+  max-width: 200px;
+}
+
+.nested-data-table--sets .tag-cell {
+  background-color: var(--color-teal);
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  margin: 0.25rem;
+  border-radius: 4px;
+  border: none !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* Empty cells in sets table */
+.nested-data-table--sets td:empty {
+  background-color: #f9f9f9;
+  position: relative;
+}
+
+.nested-data-table--sets td:empty::after {
+  content: '∅';
+  color: var(--color-gray-light);
+  font-size: 1.5rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Code Snippet Metadata */
+.code-snippet-container {
+  margin: 1.5rem 0;
+}
+
+.code-snippet-meta {
+  font-size: 0.85rem;
+  color: var(--color-gray-dark, #666);
+  font-family: var(--font-mono);
+  margin-bottom: 0.5rem;
+  opacity: 0.7;
+}
+
+.code-snippet-meta:hover {
+  opacity: 1;
+}
+
+/* Ensure Prism line numbers display properly */
+pre.line-numbers {
+  position: relative;
+  padding-left: 3.8em;
+  counter-reset: linenumber;
+}
+
+pre.line-numbers>code {
+  position: relative;
+  white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+  position: absolute;
+  pointer-events: none;
+  top: 0;
+  font-size: 100%;
+  left: -3.8em;
+  width: 3em;
+  letter-spacing: -1px;
+  border-right: 1px solid #999;
+  user-select: none;
+}
+
+.line-numbers-rows>span {
+  display: block;
+  counter-increment: linenumber;
+}
+
+.line-numbers-rows>span:before {
+  content: counter(linenumber);
+  color: #999;
+  display: block;
+  padding-right: 0.8em;
+  text-align: right;
+}
+
+/* Multi-Line Chart - Observable style with blend mode */
+.multi-line-chart .line {
+  mix-blend-mode: multiply;
+}
+
+/* On hover, dim all lines except the hovered one */
+.multi-line-chart:hover .line {
+  stroke: #ddd;
+  mix-blend-mode: normal;
+}
+
+.multi-line-chart:hover .line:hover {
+  stroke: #4682b4;
+  stroke-width: 2;
+  z-index: 1;
+}
+
+/* Anscombe's Quartet - smaller, lighter axis text */
+.anscombe-plot .axis text {
+  font-size: 4px;
+  fill: #999;
+  stroke: none;
+}
+
+.anscombe-plot .axis .domain,
+.anscombe-plot .axis .tick line {
+  stroke: #ccc;
+}
+
+/* Anscombe data tables - 2x2 grid matching charts */
+.anscombe-data-tables {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin: 2rem 0;
+  max-width: 600px;
+}
+
+.dataset-table-container {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 1rem;
+  background: #fafafa;
+}
+
+.dataset-table-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  text-align: center;
+  color: #333;
+}
+
+.dataset-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.dataset-table th,
+.dataset-table td {
+  padding: 0.4rem 0.6rem;
+  text-align: right;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.dataset-table th {
+  background: #f0f0f0;
+  font-weight: 600;
+  color: #666;
+}
+
+.dataset-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.dataset-table tbody tr:hover {
+  background: #f5f5f5;
+}
+
+/* Section Navigation Cards - for in-page section links */
+.section-nav-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.section-nav-card {
+  display: block;
+  padding: 1rem;
+  background: #f5f0e6;
+  border: 2px solid #e0d5c5;
+  border-radius: 4px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.section-nav-card:hover {
+  background: #ebe3d5;
+  border-color: #c9a227;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.section-nav-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  color: #8b7355;
+}
+
+.section-nav-card p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* Understanding Page Navigation Grid - Four Squares */
+.understanding-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.understanding-nav-grid.single-column {
+  grid-template-columns: 1fr;
+  max-width: 50%;
+}
+
+@media (max-width: 768px) {
+  .understanding-nav-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .understanding-nav-grid.single-column {
+    max-width: 100%;
+  }
+}
+
+.understanding-nav-card {
+  display: block;
+  padding: 1.5rem;
+  background: #f5f0e6;
+  border: 2px solid #e0d5c5;
+  border-radius: 6px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.understanding-nav-card:hover {
+  background: #ebe3d5;
+  border-color: #c9a227;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.understanding-nav-card__title {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.125rem;
+  color: #8b7355;
+  font-weight: 600;
+}
+
+.understanding-nav-card__description {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* How-to Wiki Card Styles */
+.howto-wiki .docs-section {
+  margin-bottom: 2rem;
+}
+
+.howto-card {
+  background: #f8f5ef;
+  border: 1px solid #e0d5c5;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.howto-card__title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  color: #8b7355;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.howto-card__badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  background: #fef3cd;
+  color: #856404;
+  border-radius: 4px;
+  border: 1px solid #ffc107;
+}
+
+.howto-card__description {
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  color: #555;
+  font-style: italic;
+}
+
+.howto-card__bullets {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.howto-card__bullets li {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #444;
+  line-height: 1.4;
+}
+
+.howto-card__bullets li:last-child {
+  margin-bottom: 0;
+}
+
+/* Print styles for how-to wiki */
+@media print {
+  .howto-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border: 1px solid #ccc;
+    margin-bottom: 1rem;
+  }
+
+  .howto-card__bullets li {
+    line-height: 2;
+    /* More space for handwritten notes */
+  }
+}
+
+/* Button row for multiple buttons */
+.button-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.transition-button.secondary {
+  background-color: #6c757d;
+}
+
+.transition-button.secondary:hover {
+  background-color: #5a6268;
+}

@@ -1,0 +1,21 @@
+package:
+  name: psd3-simulation
+  description: Force-directed graph simulation for PureScript D3
+  dependencies:
+    - arrays
+    - console
+    - effect
+    - foldable-traversable
+    - functions
+    - integers
+    - maybe
+    - newtype
+    - numbers
+    - ordered-collections
+    - partial
+    - prelude
+    - psd3-selection
+    - refs
+    - tuples
+    - unsafe-coerce
+    - web-dom

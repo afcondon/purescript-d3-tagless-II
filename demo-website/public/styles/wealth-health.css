@@ -1,0 +1,489 @@
+/* Wealth & Health of Nations Visualization Styles */
+
+/* Showcase page wrapper - minimal padding for full-screen visualizations */
+.showcase-page {
+  min-height: 100vh;
+  background-color: var(--color-beige-base);
+}
+
+.wealth-health-showcase {
+  display: flex;
+  flex-direction: column;
+}
+
+.wealth-health-showcase .wealth-health-page {
+  flex: 1;
+  padding-top: 0;
+}
+
+.wealth-health-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--color-beige-base);
+}
+
+.wealth-health-page {
+  min-height: 100vh;
+  background-color: var(--color-beige-base);
+  padding: 1rem;
+}
+
+/* Header */
+.wealth-health-header {
+  max-width: 1400px;
+  margin: 0 auto 2rem auto;
+  text-align: center;
+}
+
+.wealth-health-header h1 {
+  font-family: var(--font-mono);
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 1rem 0;
+  color: var(--color-gray-darker);
+}
+
+.wealth-health-header p {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  color: var(--color-gray-medium);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Content layout */
+.wealth-health-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  gap: 2rem;
+}
+
+/* Sidebar (controls + legend) */
+.wealth-health-sidebar {
+  flex-shrink: 0;
+  width: 300px;
+  background-color: var(--color-beige-light);
+  border: 2px solid var(--color-gray-medium);
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Controls */
+.wealth-health-controls {
+  margin-bottom: 2rem;
+}
+
+/* Year display */
+.wealth-health-year-display {
+  font-family: var(--font-mono);
+  font-size: 3rem;
+  font-weight: bold;
+  text-align: center;
+  color: var(--color-red-accent);
+  margin-bottom: 1.5rem;
+}
+
+/* Scrubber */
+.wealth-health-scrubber {
+  margin-bottom: 1.5rem;
+}
+
+.wealth-health-scrubber label {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-gray-darker);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.wealth-health-scrubber__slider {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--color-beige-dark);
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.wealth-health-scrubber__slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-red-accent);
+  cursor: pointer;
+}
+
+.wealth-health-scrubber__slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-red-accent);
+  cursor: pointer;
+  border: none;
+}
+
+/* Playback controls */
+.wealth-health-playback {
+  margin-bottom: 1.5rem;
+}
+
+.wealth-health-playback__button {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: bold;
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--color-red-accent);
+  color: var(--color-beige-light);
+  border: 2px solid var(--color-red-accent);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.wealth-health-playback__button:hover {
+  background-color: var(--color-coral);
+  border-color: var(--color-coral);
+}
+
+/* Speed control */
+.wealth-health-speed {
+  margin-bottom: 1.5rem;
+}
+
+.wealth-health-speed label {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-gray-darker);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.wealth-health-speed__slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-beige-dark);
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.wealth-health-speed__slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-teal);
+  cursor: pointer;
+}
+
+.wealth-health-speed__slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-teal);
+  cursor: pointer;
+  border: none;
+}
+
+.wealth-health-speed__value {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-gray-medium);
+  display: block;
+  margin-top: 0.25rem;
+}
+
+/* Label toggle control */
+.wealth-health-labels {
+  margin-bottom: 1.5rem;
+}
+
+.wealth-health-labels label {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-gray-darker);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.wealth-health-labels__toggle {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: bold;
+  width: 100%;
+  padding: 0.625rem 1rem;
+  background-color: var(--color-teal);
+  color: white;
+  border: 2px solid var(--color-teal);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-transform: none;
+}
+
+.wealth-health-labels__toggle:hover {
+  background-color: #4a7575;
+  border-color: #4a7575;
+}
+
+/* Legend */
+.wealth-health-legend {
+  border-top: 2px solid var(--color-gray-light);
+  padding-top: 1.5rem;
+}
+
+.wealth-health-legend h3 {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 1rem 0;
+  color: var(--color-gray-darker);
+}
+
+.wealth-health-legend__items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.wealth-health-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.wealth-health-legend__color {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid var(--color-gray-light);
+}
+
+.wealth-health-legend__label {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--color-gray-darker);
+}
+
+/* Visualization area */
+.wealth-health-visualization {
+  flex: 1;
+  background-color: white;
+  border: 2px solid var(--color-gray-medium);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 600px;
+}
+
+.wealth-health-loading {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  color: var(--color-gray-medium);
+  text-align: center;
+}
+
+.wealth-health-viz-container {
+  width: 100%;
+  height: 100%;
+}
+
+.wealth-health-svg {
+  width: 100%;
+  height: auto;
+  max-height: 600px;
+}
+
+/* Tooltip */
+.wealth-health-tooltip {
+  position: fixed;
+  background-color: rgba(42, 42, 42, 0.95);
+  color: var(--color-beige-light);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.wealth-health-tooltip h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--color-beige-light);
+}
+
+.wealth-health-tooltip div {
+  margin-bottom: 0.25rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .wealth-health-content {
+    flex-direction: column;
+  }
+
+  .wealth-health-sidebar {
+    width: 100%;
+  }
+
+  .wealth-health-year-display {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .wealth-health-page {
+    padding: 1rem;
+  }
+
+  .wealth-health-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .wealth-health-header p {
+    font-size: 0.875rem;
+  }
+
+  .wealth-health-sidebar {
+    padding: 1rem;
+  }
+
+  .wealth-health-visualization {
+    padding: 1rem;
+    min-height: 400px;
+  }
+}
+
+/* Tooltip */
+.wealth-health-tooltip {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: var(--color-beige-dark);
+  border: 2px solid var(--color-gray-darker);
+  border-radius: 4px;
+  padding: 1rem;
+  min-width: 250px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  font-family: var(--font-mono);
+}
+
+.wealth-health-tooltip h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: var(--color-red-accent);
+  border-bottom: 1px solid var(--color-gray-light);
+  padding-bottom: 0.5rem;
+}
+
+.wealth-health-tooltip div {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: var(--color-gray-darker);
+  line-height: 1.4;
+}
+
+.wealth-health-viz-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Axes and labels */
+.y-axis-label {
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+
+.tribute {
+  font-style: italic;
+  opacity: 0.7;
+}
+
+/* Nation groups, circles and labels */
+.nation-group {
+  cursor: pointer;
+}
+
+.nation-circle {
+  transition: opacity 0.2s ease;
+}
+
+.nation-label {
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+/* Show label on group hover */
+.nation-group:hover .nation-label {
+  fill-opacity: 1 !important;
+  opacity: 1 !important;
+}
+
+/* Always show labels when in "always show" mode */
+.wealth-health-viz-container.labels-always-show .nation-label {
+  fill-opacity: 1 !important;
+  opacity: 1 !important;
+}
+
+/* Credits section */
+.wealth-health-credits {
+  max-width: 1400px;
+  margin: 2rem auto 0 auto;
+  padding: 1.5rem;
+  background-color: var(--color-beige-light);
+  border: 2px solid var(--color-gray-medium);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-family: var(--font-mono);
+}
+
+.wealth-health-credits__tribute {
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-gray-darker);
+}
+
+.wealth-health-credits__adaptation {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-gray-darker);
+}
+
+.wealth-health-credits__link {
+  color: var(--color-red-accent);
+  text-decoration: none;
+  font-weight: bold;
+  border-bottom: 1px solid transparent;
+  transition: border-bottom-color 0.2s ease;
+}
+
+.wealth-health-credits__link:hover {
+  border-bottom-color: var(--color-red-accent);
+}

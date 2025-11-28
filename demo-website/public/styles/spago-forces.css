@@ -1,0 +1,115 @@
+/* Force Grid - Visual On/Off Indicators */
+
+.force-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.force-item {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background: var(--color-light);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.force-item:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.force-item.force-active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.force-item.force-active .force-name {
+  color: white;
+}
+
+.force-item.force-active .force-type {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.force-item.force-inactive {
+  background: #f5f5f5;
+  opacity: 0.6;
+}
+
+.force-item.force-inactive:hover {
+  opacity: 0.8;
+}
+
+.force-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+  color: var(--color-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.force-type {
+  font-size: 0.65rem;
+  color: var(--color-text-light);
+  opacity: 0.8;
+}
+
+.force-filter {
+  font-size: 0.6rem;
+  margin-top: 2px;
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Status indicator dot */
+.force-item::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-border);
+  transition: all var(--transition-fast);
+}
+
+.force-item.force-active::before {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+/* Force sections */
+.force-section {
+  margin-bottom: var(--spacing-md);
+}
+
+.force-section-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-sm);
+  opacity: 0.6;
+}
+
+/* Compact force grid for small panels */
+@media (max-width: 400px) {
+  .force-grid {
+    grid-template-columns: 1fr;
+  }
+}

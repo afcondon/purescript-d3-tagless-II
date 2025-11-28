@@ -1,0 +1,36 @@
+package:
+  name: psd3-selection
+  description: Type-safe D3 selection and attribute library for PureScript
+  dependencies:
+    - aff
+    - arrays
+    - console
+    - contravariant
+    - datetime
+    - debug
+    - effect
+    - either
+    - foldable-traversable
+    - foreign-object
+    - functions
+    - graphs
+    - integers
+    - lists
+    - maybe
+    - newtype
+    - nullable
+    - numbers
+    - ordered-collections
+    - partial
+    - prelude
+    - profunctor
+    - strings
+    - transformers
+    - tuples
+    - typelevel-prelude
+    - unsafe-coerce
+    - unsafe-reference
+    - web-dom
+    - web-events
+    - web-html
+    - web-uievents

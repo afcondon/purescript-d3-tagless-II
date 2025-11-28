@@ -1,0 +1,510 @@
+/*
+ * Editorial/Print Aesthetic
+ *
+ * Minimalist design language inspired by print editorial design.
+ * Features: monospace typography, warm beige palette, thin divider lines,
+ * small uppercase labels, vertical rhythm.
+ *
+ * Can be applied to specific components via .editorial class or
+ * used globally via body.editorial
+ */
+
+/* ========================================
+   EDITORIAL FLOATING PANELS
+   ======================================== */
+
+/* Base editorial panel - overrides floating-panel defaults */
+.floating-panel.editorial,
+.editorial .floating-panel {
+  background-color: rgba(212, 201, 168, 0.95);
+  /* var(--color-beige-base) with transparency */
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-line);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  /* Subtle shadow only */
+  padding: var(--spacing-lg);
+  font-family: var(--font-mono);
+}
+
+/* Panel titles - small uppercase with wide spacing */
+.floating-panel.editorial .floating-panel__title,
+.editorial .floating-panel .floating-panel__title,
+.floating-panel.editorial h2,
+.editorial .floating-panel h2,
+.floating-panel.editorial h3,
+.editorial .floating-panel h3 {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  /* 11px */
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  /* 2px */
+  text-transform: uppercase;
+  color: var(--color-text-dark);
+  margin: 0 0 var(--spacing-md) 0;
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--color-line);
+  opacity: 1;
+}
+
+/* Section headers within panels */
+.floating-panel.editorial h4,
+.editorial .floating-panel h4,
+.editorial .control-group h4 {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  /* 9px */
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: var(--spacing-md) 0 var(--spacing-xs) 0;
+  opacity: 1;
+}
+
+/* Body text in panels */
+.floating-panel.editorial p,
+.editorial .floating-panel p,
+.floating-panel.editorial .small-text,
+.editorial .floating-panel .small-text {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-tiny);
+  /* 8px */
+  letter-spacing: var(--letter-spacing-normal);
+  /* 1px */
+  line-height: 1.8;
+  color: var(--color-text-muted);
+  margin: var(--spacing-xs) 0;
+}
+
+/* ========================================
+   EDITORIAL DIVIDER LINES
+   ======================================== */
+
+/* Vertical divider lines between sections */
+.editorial-divider {
+  width: 1px;
+  height: 60px;
+  background-color: var(--color-line);
+  margin: var(--spacing-md) auto;
+}
+
+.editorial-divider--thick {
+  width: 3px;
+  height: 80px;
+  background-color: var(--color-red-accent);
+}
+
+.editorial-divider--tall {
+  height: 120px;
+}
+
+/* Horizontal dividers */
+.editorial-divider--horizontal {
+  width: 100%;
+  height: 1px;
+  margin: var(--spacing-md) 0;
+}
+
+/* ========================================
+   EDITORIAL BUTTONS & CONTROLS
+   ======================================== */
+
+/* Button base style - minimal flat design */
+.editorial .btn,
+.btn.editorial,
+button.editorial {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  /* 9px */
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-line);
+  background-color: transparent;
+  color: var(--color-text-dark);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border-radius: 0;
+  /* Flat edges */
+}
+
+.editorial .btn:hover,
+.btn.editorial:hover,
+button.editorial:hover {
+  background-color: var(--color-beige-light);
+  border-color: var(--color-text-dark);
+}
+
+/* Active/selected button state */
+.editorial .btn--active,
+.btn.editorial--active,
+button.editorial--active {
+  background-color: var(--color-red-accent);
+  border-color: var(--color-red-accent);
+  color: white;
+}
+
+.editorial .btn--active:hover,
+.btn.editorial--active:hover {
+  background-color: #d62839;
+  /* Darker red on hover */
+}
+
+/* Secondary button variant */
+.editorial .btn--secondary,
+.btn.editorial--secondary {
+  border-color: var(--color-text-muted);
+  color: var(--color-text-muted);
+}
+
+/* ========================================
+   EDITORIAL LABELS & TEXT BLOCKS
+   ======================================== */
+
+.editorial-label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  /* 11px */
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-dark);
+  display: block;
+  margin-bottom: var(--spacing-xs);
+}
+
+.editorial-label--small {
+  font-size: var(--font-size-small);
+  /* 9px */
+}
+
+.editorial-label--accent {
+  color: var(--color-red-accent);
+}
+
+.editorial-text {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  letter-spacing: var(--letter-spacing-normal);
+  line-height: 1.6;
+  color: var(--color-text-dark);
+}
+
+.editorial-text--small {
+  font-size: var(--font-size-tiny);
+  /* 8px */
+  line-height: 1.8;
+  color: var(--color-text-muted);
+}
+
+/* ========================================
+   EDITORIAL COLOR ACCENTS
+   ======================================== */
+
+/* Accent circle (like the red circle in sketch) */
+.editorial-accent-circle {
+  width: 120px;
+  height: 120px;
+  background-color: var(--color-red-accent);
+  border-radius: 50%;
+  margin: var(--spacing-lg) auto;
+  box-shadow: 0 10px 30px rgba(230, 57, 70, 0.3);
+}
+
+.editorial-accent-circle--small {
+  width: 60px;
+  height: 60px;
+}
+
+/* Color swatch blocks */
+.editorial-color-swatches {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin: var(--spacing-md) 0;
+}
+
+.editorial-color-swatch {
+  width: 60px;
+  height: 45px;
+  border: 1px solid var(--color-line);
+}
+
+.editorial-color-swatch--teal {
+  background-color: var(--color-teal);
+}
+
+.editorial-color-swatch--beige {
+  background-color: var(--color-beige-dark);
+}
+
+.editorial-color-swatch--coral {
+  background-color: var(--color-coral);
+}
+
+.editorial-color-swatch--light-beige {
+  background-color: var(--color-beige-light);
+}
+
+.editorial-color-swatch--peach {
+  background-color: var(--color-peach);
+}
+
+/* ========================================
+   EDITORIAL INFO BOXES
+   ======================================== */
+
+.editorial-info-box {
+  background-color: rgba(217, 201, 184, 0.5);
+  /* Lighter beige */
+  border: 1px solid var(--color-line);
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin: var(--spacing-md) 0;
+}
+
+.editorial-info-box p {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-tiny);
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  margin: var(--spacing-xs) 0;
+}
+
+/* ========================================
+   EDITORIAL CODE PANELS
+   ======================================== */
+
+/* Code panel with editorial styling */
+.floating-panel.editorial-code,
+.editorial .floating-panel--code {
+  background-color: rgba(212, 201, 168, 0.98);
+  /* More opaque for readability */
+  border: 1px solid var(--color-line);
+}
+
+.floating-panel.editorial-code pre,
+.editorial .floating-panel--code pre {
+  background-color: transparent;
+  border: 1px solid var(--color-line);
+  padding: var(--spacing-md);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  line-height: 1.8;
+  overflow-x: auto;
+}
+
+.floating-panel.editorial-code code,
+.editorial .floating-panel--code code {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  background: transparent;
+}
+
+/* ========================================
+   EDITORIAL FORM CONTROLS
+   ======================================== */
+
+/* Range sliders with editorial styling */
+.editorial input[type="range"],
+.editorial .range-slider {
+  background: var(--color-line);
+  height: 4px;
+}
+
+.editorial input[type="range"]::-webkit-slider-thumb,
+.editorial .range-slider::-webkit-slider-thumb {
+  background: var(--color-red-accent);
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--color-text-dark);
+}
+
+.editorial input[type="range"]::-moz-range-thumb,
+.editorial .range-slider::-moz-range-thumb {
+  background: var(--color-red-accent);
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--color-text-dark);
+}
+
+/* Checkboxes */
+.editorial input[type="checkbox"] {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--color-line);
+  background-color: transparent;
+  cursor: pointer;
+  position: relative;
+}
+
+.editorial input[type="checkbox"]:checked {
+  background-color: var(--color-red-accent);
+  border-color: var(--color-red-accent);
+}
+
+.editorial input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -2px;
+  left: 2px;
+  font-size: 10px;
+  color: white;
+  font-weight: bold;
+}
+
+/* Select dropdowns */
+.editorial select {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--color-line);
+  background-color: transparent;
+  color: var(--color-text-dark);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+/* ========================================
+   EDITORIAL SCROLLBARS
+   ======================================== */
+
+.floating-panel.editorial::-webkit-scrollbar,
+.editorial .floating-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.floating-panel.editorial::-webkit-scrollbar-track,
+.editorial .floating-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.floating-panel.editorial::-webkit-scrollbar-thumb,
+.editorial .floating-panel::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 0;
+}
+
+.floating-panel.editorial::-webkit-scrollbar-thumb:hover,
+.editorial .floating-panel::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* ========================================
+   EDITORIAL TABLES
+   ======================================== */
+
+.editorial table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-tiny);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+.editorial table th {
+  font-size: var(--font-size-small);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  text-align: left;
+  border-bottom: 1px solid var(--color-line);
+  color: var(--color-text-dark);
+}
+
+.editorial table td {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-bottom: 1px solid rgba(153, 153, 153, 0.3);
+  color: var(--color-text-muted);
+}
+
+.editorial table tr:hover {
+  background-color: rgba(217, 201, 184, 0.3);
+}
+
+/* ========================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================== */
+
+@media (max-width: 768px) {
+
+  /* Increase font sizes slightly on mobile for readability */
+  .floating-panel.editorial,
+  .editorial .floating-panel {
+    font-size: var(--font-size-small);
+    /* 9px base instead of 8px */
+  }
+
+  .editorial-label {
+    font-size: 0.75rem;
+    /* 12px instead of 11px */
+  }
+}
+
+/* ========================================
+   LEGEND ITEMS (for Code Atlas bubbles)
+   ======================================== */
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-small);
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--color-line);
+  flex-shrink: 0;
+}
+
+.legend-label {
+  font-family: var(--font-mono);
+  color: var(--color-text-dark);
+}
+
+/* ========================================
+   DETAILS PANEL (for Code Atlas hover)
+   ======================================== */
+
+.details-section {
+  margin-top: var(--spacing-md);
+}
+
+.details-section h4 {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-dark);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.details-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: var(--font-size-small);
+}
+
+.details-section li {
+  padding: 2px 0;
+  font-family: var(--font-mono);
+  color: var(--color-text-dark);
+}
+
+.details-section .empty-list {
+  font-style: italic;
+  color: var(--color-text-light);
+  margin: 0;
+}

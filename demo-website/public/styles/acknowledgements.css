@@ -1,0 +1,105 @@
+/* Acknowledgements Page Styles - Editorial Theme */
+
+.acknowledgements-page {
+  min-height: 100vh;
+  background-color: var(--color-beige-base);
+  padding: 0 1rem 2rem 1rem;
+  position: relative;
+}
+
+.acknowledgements-content {
+  max-width: 52rem;
+  /* ~832px - optimal reading width */
+  margin: 0 auto;
+  background-color: #F5F1E8;
+  /* Lighter background for better readability */
+  padding: 3rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.acknowledgements-title {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  /* 24px */
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0;
+  margin-bottom: 2rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-red-accent);
+  color: var(--color-gray-darker);
+}
+
+.acknowledgements-section {
+  margin-bottom: 2.5rem;
+}
+
+.acknowledgements-section h2 {
+  font-family: var(--font-mono);
+  font-size: 1.125rem;
+  /* 18px */
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  color: var(--color-gray-darker);
+}
+
+.acknowledgements-section p {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  /* 14px */
+  margin-bottom: 1rem;
+  line-height: 1.8;
+  color: #2A2A2A;
+}
+
+.acknowledgements-section ul {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  padding-left: 2rem;
+  line-height: 1.8;
+  list-style-type: square;
+}
+
+.acknowledgements-section li {
+  margin-bottom: 0.5rem;
+  color: #2A2A2A;
+}
+
+.acknowledgements-section a {
+  color: var(--color-red-accent);
+  text-decoration: underline;
+}
+
+.acknowledgements-section a:hover {
+  color: var(--color-coral);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .acknowledgements-page {
+    padding: 1rem 0.5rem;
+  }
+
+  .acknowledgements-content {
+    padding: 1.5rem;
+  }
+
+  .acknowledgements-title {
+    font-size: 1.25rem;
+  }
+
+  .acknowledgements-section h2 {
+    font-size: 1rem;
+  }
+
+  .acknowledgements-section p,
+  .acknowledgements-section ul,
+  .acknowledgements-section li {
+    font-size: 0.8125rem;
+  }
+}

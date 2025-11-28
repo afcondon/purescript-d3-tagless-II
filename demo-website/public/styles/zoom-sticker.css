@@ -1,0 +1,87 @@
+/* Zoom Sticker - Visual indicator for zoomable visualizations */
+
+/* Ensure parent containers have relative positioning for sticker placement */
+.viz-container {
+  position: relative;
+}
+
+/* Fullscreen containers that already have positioning can also contain stickers */
+.svg-container,
+.fullscreen-viz,
+.spago-viz-container {
+  /* These already have position: absolute, so they can contain the sticker */
+}
+
+.zoom-sticker {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--color-beige-light);
+  border: 2px solid var(--color-red-accent);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-gray-darker);
+  z-index: 100;
+  pointer-events: none;
+  animation: zoomStickerFadeIn 0.5s ease-in-out, zoomStickerFadeOut 1s ease-in-out 5s forwards;
+}
+
+/* Position bottom-right for fullscreen viz to avoid floating panels */
+.spago-viz-container .zoom-sticker {
+  top: auto;
+  bottom: 1rem;
+  right: 1rem;
+}
+
+.zoom-sticker__icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.zoom-sticker__text {
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* Fade in animation */
+@keyframes zoomStickerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade out after 5 seconds */
+@keyframes zoomStickerFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .zoom-sticker {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.5rem;
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .zoom-sticker__icon {
+    font-size: 0.875rem;
+  }
+}

@@ -1,0 +1,399 @@
+/* V2 Main Styles - Modern Responsive Design */
+
+/* CSS Variables for Design System */
+:root {
+  /* Colors - Editorial Palette */
+  --color-primary: #4a90e2;     /* D3 blue (keep for compatibility) */
+  --color-secondary: #50c878;   /* PureScript green (keep for compatibility) */
+  --color-accent: #f39c12;      /* Highlight orange (keep for compatibility) */
+  --color-dark: #2c3e50;        /* Code background */
+  --color-light: #ecf0f1;       /* Page background */
+  --color-text: #333333;
+  --color-text-light: #666666;
+  --color-border: #dddddd;
+
+  /* Editorial/Print Aesthetic Colors */
+  --color-beige-base: #D4C9A8;      /* Warm beige background */
+  --color-beige-light: #D9C9B8;     /* Light beige */
+  --color-beige-dark: #C9B8A0;      /* Darker beige */
+  --color-red-accent: #E63946;      /* Bold red focal point */
+  --color-coral: #D97560;           /* Coral accent */
+  --color-peach: #E8B8A0;           /* Peach accent */
+  --color-teal: #5A8A8A;            /* Muted teal */
+  --color-line: #999999;            /* Divider lines */
+  --color-text-dark: #333333;       /* Primary text */
+  --color-text-muted: #666666;      /* Secondary text */
+
+  /* Gray Scale */
+  --color-gray-darker: #2c1810;     /* Dark brown-gray for text */
+  --color-gray-dark: #4a3f35;       /* Medium brown-gray for text */
+  --color-gray-medium: #8b7355;     /* Medium brown-gray for borders */
+  --color-gray-light: #c9b8a0;      /* Light brown-gray for subtle borders */
+
+  /* Typography */
+  --font-headers: Inter, system-ui, -apple-system, sans-serif;
+  --font-body: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-code: 'Fira Code', Monaco, 'Courier New', monospace;
+
+  /* Editorial Typography */
+  --font-mono: 'Courier New', 'Courier', Monaco, monospace;
+  --font-size-tiny: 0.5rem;        /* 8px - small labels */
+  --font-size-small: 0.5625rem;    /* 9px - small text */
+  --font-size-label: 0.6875rem;    /* 11px - main labels */
+  --letter-spacing-wide: 0.125rem; /* 2px - uppercase labels */
+  --letter-spacing-normal: 0.0625rem; /* 1px - body text */
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  /* Breakpoints (for reference in media queries) */
+  --breakpoint-mobile: 768px;
+  --breakpoint-tablet: 1024px;
+  --breakpoint-desktop: 1280px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-base: 250ms ease-in-out;
+  --transition-slow: 350ms ease-in-out;
+}
+
+/* Reset and Base Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background-color: var(--color-light);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-headers);
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: var(--spacing-md);
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1rem; }
+
+p {
+  margin-bottom: var(--spacing-md);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-secondary);
+}
+
+code, pre {
+  font-family: var(--font-code);
+  font-size: 0.875rem;
+}
+
+/* Layout Utilities */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+.container-fluid {
+  width: 100%;
+  padding: 0 var(--spacing-lg);
+}
+
+/* App Root */
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Placeholder Styles - To be replaced by component-specific styles */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-size: 1.25rem;
+  color: var(--color-text-light);
+}
+
+/* Responsive Utilities */
+.mobile-only {
+  display: block;
+}
+
+.tablet-up {
+  display: none;
+}
+
+.desktop-up {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .mobile-only {
+    display: none;
+  }
+  .tablet-up {
+    display: block;
+  }
+}
+
+@media (min-width: 1024px) {
+  .desktop-up {
+    display: block;
+  }
+}
+
+/* Accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Module Graph Styles */
+.node-label {
+  opacity: 0;
+  pointer-events: none;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  fill: #000;
+  stroke: #fff;
+  stroke-width: 3px;
+  paint-order: stroke;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  transition: opacity 0.2s ease;
+}
+
+.node-group:hover .node-label {
+  opacity: 1;
+}
+
+/* Ensure hovered node group is on top */
+.node-group:hover {
+  cursor: pointer;
+}
+
+.node-circle {
+  cursor: pointer;
+  stroke: #fff;
+  stroke-width: 1.5;
+  transition: stroke-width 0.2s ease;
+}
+
+.node-group:hover .node-circle {
+  stroke-width: 2.5;
+}
+
+/* Highlighting connected nodes */
+.node-group.dimmed {
+  opacity: 0.2;
+  transition: opacity 0.3s ease;
+}
+
+.node-group.highlighted .node-circle {
+  stroke: #f39c12;
+  stroke-width: 3;
+}
+
+.node-group.highlighted {
+  opacity: 1;
+}
+
+/* Unpin button */
+.unpin-button {
+  cursor: pointer;
+}
+
+.unpin-button-bg {
+  rx: 5;
+  ry: 5;
+}
+
+.unpin-button:hover .unpin-button-bg {
+  fill: #e67e22;
+}
+
+.unpin-button-text {
+  text-anchor: middle;
+  dominant-baseline: middle;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+/* Site Footer */
+.site-footer {
+  margin-top: 4rem;
+  padding: 2rem 1rem 3rem;
+}
+
+.site-footer__rule {
+  width: 80%;
+  margin: 0 auto;
+  border: none;
+  border-top: 1px solid var(--color-gray-medium);
+}
+
+.site-footer__content {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.site-footer__link {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-red-accent);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+}
+
+.site-footer__link:hover {
+  text-decoration: underline;
+  color: var(--color-coral);
+}
+
+/* Dark Mode Support (future) */
+@media (prefers-color-scheme: dark) {
+  /* Dark mode variables will go here */
+}
+
+/* Mermaid Diagram Styles */
+.mermaid-container {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background-color: #faf8f5;
+  border: 1px solid var(--color-beige-dark);
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+.mermaid {
+  display: flex;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Specific diagram styles */
+.pipeline-diagram {
+  margin: 2rem 0;
+}
+
+.diagram-container {
+  position: relative;
+  margin: 2rem 0;
+}
+
+.mermaid-error {
+  padding: 1rem;
+  background-color: #fee;
+  border: 1px solid #fcc;
+  border-radius: 4px;
+  color: #c33;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+
+/* Logo Watermark Background */
+.logo-watermark {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100vw;
+  max-width: none;
+  height: auto;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 0;
+  user-select: none;
+}
+
+/* Utility class to add watermark to any page */
+.page-with-watermark {
+  position: relative;
+}
+
+.page-with-watermark::before {
+  content: '';
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100vw;
+  height: auto;
+  aspect-ratio: 840 / 360;
+  background-image: url('../assets/psd3-logo.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 0;
+}

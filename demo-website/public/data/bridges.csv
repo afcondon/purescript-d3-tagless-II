@@ -1,0 +1,33 @@
+From;To;Value
+EBR-S;WBR;51
+Livingston;WBR;4
+I-10 NOLA;WBR;4
+I-12;WBR;5
+WBR;EBR-M;9
+Iberville;EBR-M;5
+EBR-S;EBR-M;5
+Point Coupe;EBR-S;8
+Iberville;EBR-S;18
+WBR;Ascension;5
+I-10 Lafayette;Ascension;6
+I-10 Lafayette;Livingston;5
+EBR-S;I-10 Lafayette;31
+I-10 NOLA;I-10 Lafayette;9
+I-12;I-10 Lafayette;15
+US-190 Opelousas;EBR-S;6
+WBR;EBR-S;50
+WBR;Livingston;3
+WBR;I-10 NOLA;3
+WBR;I-12;4
+EBR-M;WBR;8
+EBR-M;Iberville;4
+EBR-M;EBR-S;4
+EBR-S;Point Coupe;7
+EBR-S;Iberville;17
+Ascension;WBR;4
+Ascension;I-10 Lafayette;5
+Livingston;I-10 Lafayette;4
+I-10 Lafayette;EBR-S;30
+I-10 Lafayette;I-10 NOLA;8
+I-10 Lafayette;I-12;14
+US-190 Opelousas;EBR-S;5
