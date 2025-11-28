@@ -26,6 +26,8 @@ import D3.Viz.GUP as GUP
 import PSD3.Interpreter.D3 (eval_D3M, runD3M)
 import D3.Viz.AnimatedTreeClusterLoop as AnimatedTreeLoop
 import D3.Viz.TreeAPI.StaggeredCircles as StaggeredCircles
+import D3.Viz.LesMisV3.Model as LesMisModel
+import D3.Viz.LesMisV3.Draw as LesMisDraw
 import Data.Array (catMaybes)
 import Data.String.CodeUnits (toCharArray)
 import Data.Traversable (sequence)
@@ -39,6 +41,7 @@ type State =
   , colorMixingTrigger :: Maybe { stateRef :: Ref.Ref ThreeLittleCirclesTransition.CircleState
                                  , circlesSel :: D3v2Selection_ SBoundOwns Element ThreeLittleCirclesTransition.CircleData }
   , staggeredTrigger :: Maybe { trigger :: Effect Unit, reset :: Effect Unit }
+  , lesMisCleanup :: Maybe (Effect Unit)
   }
 
 -- | Tour page actions
@@ -47,7 +50,7 @@ data Action = Initialize | Finalize | TriggerColorMixing | TriggerStaggered | Re
 -- | Tour page component
 component :: forall q i o m. MonadAff m => H.Component q i o m
 component = H.mkComponent
-  { initialState: \_ -> { gupFiber: Nothing, colorMixingTrigger: Nothing, staggeredTrigger: Nothing }
+  { initialState: \_ -> { gupFiber: Nothing, colorMixingTrigger: Nothing, staggeredTrigger: Nothing, lesMisCleanup: Nothing }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -86,15 +89,30 @@ handleAction = case _ of
         let flareData = unsafeCoerce response.body
         liftEffect $ AnimatedTreeLoop.startAnimatedTreeClusterLoop flareData "#animated-tree-container"
 
-    -- Note: Les Mis demo removed (archived with old simulation API)
+    -- Render Section 5: Les Misérables Force-Directed Graph (V3 architecture)
+    lesMisResult <- H.liftAff $ AJAX.get ResponseFormat.json "./data/miserables.json"
+    case lesMisResult of
+      Left err -> pure unit  -- Silently fail for now
+      Right response -> do
+        let rawModel :: LesMisModel.LesMisRawModel
+            rawModel = unsafeCoerce response.body
+            model = LesMisModel.processRawModel rawModel
+        cleanup <- liftEffect $ LesMisDraw.startLesMis model "#lesmis-container"
+        H.modify_ _ { lesMisCleanup = Just cleanup }
+
     pure unit
 
   Finalize -> do
     state <- H.get
+    -- Clean up GUP fiber
     case state.gupFiber of
       Nothing -> pure unit
       Just forkId -> H.kill forkId
-    H.modify_ _ { gupFiber = Nothing }
+    -- Clean up Les Mis simulation
+    case state.lesMisCleanup of
+      Nothing -> pure unit
+      Just cleanup -> liftEffect cleanup
+    H.modify_ _ { gupFiber = Nothing, lesMisCleanup = Nothing }
 
   TriggerColorMixing -> do
     state <- H.get
@@ -245,6 +263,24 @@ render _ =
                 ]
             ]
 
-        -- Note: Section 5 (Les Mis Force Layout) removed - archived with old simulation API
+        -- Section 5: Les Misérables Force-Directed Graph
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ]
+            , HP.id "section-5"
+            ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "5. Force-Directed Graph: Les Misérables" ]
+            , HH.p_
+                [ HH.text "Force-directed graphs use physics simulation to position nodes and links. Nodes repel each other like charged particles, while links act as springs pulling connected nodes together. The simulation finds an equilibrium that naturally reveals the structure of the network." ]
+            , HH.p_
+                [ HH.text "This graph shows character co-occurrence in Victor Hugo's Les Misérables. The simulation applies multiple forces: charge (nodes repel), center (prevents drift), collision (prevents overlap), and link (pulls connected nodes together). You can zoom and pan using the mouse wheel and drag gestures."
+                ]
+            , HH.div
+                [ HP.id "lesmis-container"
+                , HP.classes [ HH.ClassName "viz-container" ]
+                ]
+                []
+            ]
         ]
     ]

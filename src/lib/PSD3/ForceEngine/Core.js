@@ -340,6 +340,51 @@ export function getCancelRef(ref) {
 }
 
 // =============================================================================
+// Drag Behavior
+// =============================================================================
+
+// Attach simulation-aware drag to an array of DOM elements
+// Takes a PureScript Effect Unit callback for reheating
+// Works with ForceEngine's PureScript-based simulation
+export function attachDragWithReheat_(elements) {
+  return function(reheatCallback) {
+    return function() {
+      function dragstarted(event) {
+        // Reheat the simulation
+        reheatCallback();
+        // Set fixed position
+        event.subject.fx = event.subject.x;
+        event.subject.fy = event.subject.y;
+      }
+
+      function dragged(event) {
+        // Update fixed position to follow mouse
+        event.subject.fx = event.x;
+        event.subject.fy = event.y;
+      }
+
+      function dragended(event) {
+        // Release fixed position (unless we want sticky drag)
+        event.subject.fx = null;
+        event.subject.fy = null;
+      }
+
+      const drag = d3.drag()
+        .on('start', dragstarted)
+        .on('drag', dragged)
+        .on('end', dragended);
+
+      // Apply drag to each element
+      elements.forEach(function(el) {
+        d3.select(el)
+          .call(drag)
+          .style('cursor', 'grab');
+      });
+    };
+  };
+}
+
+// =============================================================================
 // Debug Helpers
 // =============================================================================
 

@@ -4,6 +4,7 @@ module PSD3v2.Interpreter.D3v2
   , runD3v2M
   , reselectD3v2
   , queryAllD3v2
+  , getElementsD3v2
   ) where
 
 import Prelude
@@ -324,3 +325,10 @@ queryAllD3v2 selector selectionsMap = do
   result <- Query.queryAll selector unwrappedMap
   -- Wrap result back in D3v2Selection_
   pure $ D3v2Selection_ result
+
+-- | Extract DOM elements from a D3v2Selection_
+-- |
+-- | Useful for attaching behaviors that need raw DOM elements,
+-- | such as drag handlers for force simulations.
+getElementsD3v2 :: forall state parent datum. D3v2Selection_ state parent datum -> Array Element
+getElementsD3v2 (D3v2Selection_ sel) = Query.toArray sel

@@ -30,6 +30,8 @@ module PSD3.ForceEngine.Core
   , AnimationHandle
   , startAnimation
   , stopAnimation
+    -- * Drag Behavior
+  , attachDragWithReheat
     -- * Debug
   , logNodes
   ) where
@@ -39,6 +41,7 @@ import Prelude
 import Data.Traversable (for_)
 import Effect (Effect)
 import PSD3.ForceEngine.Types (ManyBodyConfig, CollideConfig, LinkConfig, CenterConfig, ForceXConfig, ForceYConfig, RadialConfig)
+import Web.DOM.Element (Element)
 
 -- =============================================================================
 -- Foreign Imports
@@ -208,6 +211,24 @@ foreign import data CancelRef :: Type
 -- | Stop a running animation
 stopAnimation :: AnimationHandle -> Effect Unit
 stopAnimation cancel = cancel
+
+-- =============================================================================
+-- Drag Behavior
+-- =============================================================================
+
+-- | Attach simulation-aware drag behavior to node elements
+-- |
+-- | This sets up D3 drag handlers that:
+-- | 1. Call the reheat callback on drag start
+-- | 2. Update fx/fy (fixed position) during drag
+-- | 3. Clear fx/fy on drag end (release node)
+-- |
+-- | The reheat callback should restart the simulation when dragging begins.
+foreign import attachDragWithReheat_ :: Array Element -> Effect Unit -> Effect Unit
+
+-- | Attach drag with a reheat callback
+attachDragWithReheat :: Array Element -> Effect Unit -> Effect Unit
+attachDragWithReheat = attachDragWithReheat_
 
 -- =============================================================================
 -- Debug
