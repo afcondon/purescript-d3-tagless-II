@@ -24,7 +24,7 @@ import Prelude
 import Component.CodeExplorerV2.SceneConfigs as Scenes
 import Component.CodeExplorerV2.SimulationManager as Sim
 import D3.Viz.Spago.Files (LinkType(..), SpagoLink)
-import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage, isUsedModule, nodesToCircle, nodesToRadialTree, unpinAllNodes)
+import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage, nodesToCircle)
 import Data.Array (filter) as Array
 import Data.Array as Array
 import Data.Int (toNumber)
@@ -264,11 +264,12 @@ transitionToForceGraph = do
   -- Clear existing links
   clearLinks_
 
-  -- Unpin all nodes so forces can move them
-  let unpinnedNodes = unpinAllNodes state.model.nodes
+  -- Read current nodes from simulation (these are the actual mutable objects)
+  simState <- Ref.read state.simRef
+  let nodes = simState.nodes
 
-  -- Update nodes in simulation
-  Sim.setNodes unpinnedNodes state.simRef
+  -- Unpin nodes IN PLACE (mutate, don't create new objects)
+  unpinAllNodesInPlace nodes
 
   -- Get tree links for force graph
   let treeLinks = Array.filter (\l -> l.linktype == M2M_Tree) state.model.links
@@ -277,21 +278,21 @@ transitionToForceGraph = do
   let newState = state { currentLinks = treeLinks }
   setOrchestraState_ newState
 
-  -- Create link force and initialize with links
+  -- Create link force and initialize with the SAME node objects
   let linkForce = Sim.createLink { distance: 125.0, strength: 1.0, iterations: 6.0 }
-  _ <- Sim.initializeLinkForce linkForce unpinnedNodes treeLinks
+  _ <- Sim.initializeLinkForce linkForce nodes treeLinks
 
   -- Join to DOM
-  joinNodesToDOM_ unpinnedNodes
+  joinNodesToDOM_ nodes
   joinLinksToDOM_ treeLinks
 
   -- Update tick callback
   Sim.setTickCallback (makeTickCallback newState) state.simRef
 
-  -- Apply ForceGraph scene (includes link force)
+  -- Apply ForceGraph scene forces
   Scenes.applyScene Scenes.forceGraphScene state.simRef
 
-  -- Also need to add the initialized link force
+  -- Add the initialized link force
   Sim.addForce "links" linkForce state.simRef
 
   -- Reheat to full energy
@@ -311,12 +312,12 @@ transitionToBubblePack = do
   -- Clear links
   clearLinks_
 
-  -- Use current node positions but unpin
+  -- Read current nodes from simulation (these are the actual mutable objects)
   simState <- Ref.read state.simRef
-  let unpinnedNodes = unpinAllNodes simState.nodes
+  let nodes = simState.nodes
 
-  -- Update nodes
-  Sim.setNodes unpinnedNodes state.simRef
+  -- Unpin nodes IN PLACE (mutate, don't create new objects)
+  unpinAllNodesInPlace nodes
 
   -- Get tree links
   let treeLinks = Array.filter (\l -> l.linktype == M2M_Tree) state.model.links
@@ -325,12 +326,12 @@ transitionToBubblePack = do
   let newState = state { currentLinks = treeLinks }
   setOrchestraState_ newState
 
-  -- Create and initialize link force
+  -- Create and initialize link force with the SAME node objects
   let linkForce = Sim.createLink { distance: 50.0, strength: 0.5, iterations: 2.0 }
-  _ <- Sim.initializeLinkForce linkForce unpinnedNodes treeLinks
+  _ <- Sim.initializeLinkForce linkForce nodes treeLinks
 
   -- Join to DOM
-  joinNodesToDOM_ unpinnedNodes
+  joinNodesToDOM_ nodes
   joinLinksToDOM_ treeLinks
 
   -- Update tick callback

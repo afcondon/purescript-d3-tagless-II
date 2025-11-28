@@ -95,18 +95,12 @@ treeScene =
 -- =============================================================================
 
 -- | Force graph scene - tree links with force-directed layout
+-- | Note: links force is added separately in OrchestrationV2 after initialization
 forceGraphScene :: SceneConfig
 forceGraphScene =
   { name: "ForceGraph"
   , forces:
-      [ { name: "links"
-        , create: pure $ Sim.createLink
-            { distance: 125.0
-            , strength: 1.0
-            , iterations: 6.0
-            }
-        }
-      , { name: "chargeTree"
+      [ { name: "chargeTree"
         , create: pure $ Sim.createChargeFiltered
             { strength: -270.0
             , theta: 0.7
@@ -139,18 +133,12 @@ forceGraphScene =
 -- =============================================================================
 
 -- | Bubble pack scene - packed circles for my-project modules
+-- | Note: links force is added separately in OrchestrationV2 after initialization
 bubblePackScene :: SceneConfig
 bubblePackScene =
   { name: "BubblePack"
   , forces:
-      [ { name: "links"
-        , create: pure $ Sim.createLink
-            { distance: 50.0
-            , strength: 0.5
-            , iterations: 2.0
-            }
-        }
-      , { name: "chargePack"
+      [ { name: "chargePack"
         , create: pure $ Sim.createCharge
             { strength: -200.0
             , theta: 0.9

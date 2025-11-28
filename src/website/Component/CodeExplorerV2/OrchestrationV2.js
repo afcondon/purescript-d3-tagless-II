@@ -140,6 +140,14 @@ function getNodeColor(d) {
 // Link DOM Updates
 // =============================================================================
 
+// Helper to get ID from source/target (handles both raw int and swizzled object)
+function getLinkId(sourceOrTarget) {
+  if (typeof sourceOrTarget === 'object' && sourceOrTarget !== null) {
+    return sourceOrTarget.id;  // Swizzled - extract node ID
+  }
+  return sourceOrTarget;  // Raw integer
+}
+
 export function joinLinksToDOM_(links) {
   return function() {
     if (!linksGroup) {
@@ -149,16 +157,18 @@ export function joinLinksToDOM_(links) {
 
     console.log(`[OrchV2 FFI] Joining ${links.length} links to DOM`);
 
-    // Join data to paths
-    const linkPaths = linksGroup.selectAll('path.link')
-      .data(links, d => `${d.source}-${d.target}`);
+    // Join data to paths - use link--force class so tick callback updates them
+    const linkPaths = linksGroup.selectAll('path.link--force')
+      .data(links, d => `${getLinkId(d.source)}-${getLinkId(d.target)}`);
 
-    // Enter: create new paths (initially invisible, will be updated by tick)
+    // Enter: create new paths with data attributes for tick updates
     linkPaths.enter()
       .append('path')
-      .attr('class', 'link')
+      .attr('class', 'link link--force')
+      .attr('data-source', d => getLinkId(d.source))
+      .attr('data-target', d => getLinkId(d.target))
       .attr('fill', 'none')
-      .attr('stroke', '#666')
+      .attr('stroke', '#4a9')
       .attr('stroke-width', 1)
       .attr('stroke-opacity', 0.6);
 
@@ -535,6 +545,7 @@ function joinStraightLinksToDOM(links, nodes) {
 }
 
 // Update link paths for force simulation links (link--force class)
+let _updateLinkLogCount = 0;
 export function updateLinkPathsFromRaw_(nodes) {
   return function(rawLinks) {
     return function() {
@@ -544,7 +555,23 @@ export function updateLinkPathsFromRaw_(nodes) {
       const nodeMap = new Map(nodes.map(n => [n.id, n]));
 
       // Update all link paths using data-source/data-target attributes
-      linksGroup.selectAll('path.link--force').each(function() {
+      const linkElements = linksGroup.selectAll('path.link--force');
+
+      // Debug every 60 frames
+      if (_updateLinkLogCount++ % 60 === 0) {
+        console.log(`[OrchV2 FFI] updateLinkPaths: ${linkElements.size()} link elements, ${nodes.length} nodes`);
+        // Debug: check node ID types
+        if (nodes.length > 0) {
+          const sampleNode = nodes[0];
+          const firstLink = linkElements.node();
+          const srcAttr = firstLink ? d3.select(firstLink).attr('data-source') : null;
+          console.log(`[OrchV2 FFI] Node ID type: ${typeof sampleNode.id}, value: ${sampleNode.id}, Link data-source: ${srcAttr}, type: ${typeof srcAttr}`);
+        }
+      }
+
+      let updateCount = 0;
+      let missingCount = 0;
+      linkElements.each(function() {
         const el = d3.select(this);
         const sourceId = +el.attr('data-source');
         const targetId = +el.attr('data-target');
@@ -552,8 +579,16 @@ export function updateLinkPathsFromRaw_(nodes) {
         const target = nodeMap.get(targetId);
         if (source && target) {
           el.attr('d', `M${source.x},${source.y}L${target.x},${target.y}`);
+          updateCount++;
+        } else {
+          missingCount++;
         }
       });
+
+      // Debug: log if there's a mismatch
+      if (_updateLinkLogCount % 60 === 1 && (missingCount > 0 || updateCount !== linkElements.size())) {
+        console.log(`[OrchV2 FFI] Link update: ${updateCount} updated, ${missingCount} missing nodes`);
+      }
     };
   };
 }

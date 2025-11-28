@@ -31394,6 +31394,12 @@ ${name16}:
     const cluster2 = d19.cluster !== void 0 ? d19.cluster : 0;
     return category10_default[cluster2 % 10];
   }
+  function getLinkId(sourceOrTarget) {
+    if (typeof sourceOrTarget === "object" && sourceOrTarget !== null) {
+      return sourceOrTarget.id;
+    }
+    return sourceOrTarget;
+  }
   function joinLinksToDOM_(links3) {
     return function() {
       if (!linksGroup) {
@@ -31401,8 +31407,8 @@ ${name16}:
         return;
       }
       console.log(`[OrchV2 FFI] Joining ${links3.length} links to DOM`);
-      const linkPaths = linksGroup.selectAll("path.link").data(links3, (d19) => `${d19.source}-${d19.target}`);
-      linkPaths.enter().append("path").attr("class", "link").attr("fill", "none").attr("stroke", "#666").attr("stroke-width", 1).attr("stroke-opacity", 0.6);
+      const linkPaths = linksGroup.selectAll("path.link--force").data(links3, (d19) => `${getLinkId(d19.source)}-${getLinkId(d19.target)}`);
+      linkPaths.enter().append("path").attr("class", "link link--force").attr("data-source", (d19) => getLinkId(d19.source)).attr("data-target", (d19) => getLinkId(d19.target)).attr("fill", "none").attr("stroke", "#4a9").attr("stroke-width", 1).attr("stroke-opacity", 0.6);
       linkPaths.exit().remove();
       console.log("[OrchV2 FFI] Links joined");
     };
@@ -31588,12 +31594,25 @@ ${name16}:
     linkPaths.exit().remove();
     console.log(`[OrchV2 FFI] Added ${entered.size()} straight links to DOM (link--force class)`);
   }
+  var _updateLinkLogCount = 0;
   function updateLinkPathsFromRaw_(nodes) {
     return function(rawLinks) {
       return function() {
         if (!linksGroup) return;
         const nodeMap = new Map(nodes.map((n) => [n.id, n]));
-        linksGroup.selectAll("path.link--force").each(function() {
+        const linkElements = linksGroup.selectAll("path.link--force");
+        if (_updateLinkLogCount++ % 60 === 0) {
+          console.log(`[OrchV2 FFI] updateLinkPaths: ${linkElements.size()} link elements, ${nodes.length} nodes`);
+          if (nodes.length > 0) {
+            const sampleNode = nodes[0];
+            const firstLink = linkElements.node();
+            const srcAttr = firstLink ? select_default2(firstLink).attr("data-source") : null;
+            console.log(`[OrchV2 FFI] Node ID type: ${typeof sampleNode.id}, value: ${sampleNode.id}, Link data-source: ${srcAttr}, type: ${typeof srcAttr}`);
+          }
+        }
+        let updateCount = 0;
+        let missingCount = 0;
+        linkElements.each(function() {
           const el = select_default2(this);
           const sourceId = +el.attr("data-source");
           const targetId = +el.attr("data-target");
@@ -31601,8 +31620,14 @@ ${name16}:
           const target7 = nodeMap.get(targetId);
           if (source2 && target7) {
             el.attr("d", `M${source2.x},${source2.y}L${target7.x},${target7.y}`);
+            updateCount++;
+          } else {
+            missingCount++;
           }
         });
+        if (_updateLinkLogCount % 60 === 1 && (missingCount > 0 || updateCount !== linkElements.size())) {
+          console.log(`[OrchV2 FFI] Link update: ${updateCount} updated, ${missingCount} missing nodes`);
+        }
       };
     };
   }
@@ -32166,13 +32191,6 @@ ${name16}:
     return {
       name: "ForceGraph",
       forces: [{
-        name: "links",
-        create: pure20(createLink({
-          distance: 125,
-          strength: 1,
-          iterations: 6
-        }))
-      }, {
         name: "chargeTree",
         create: pure20(createChargeFiltered({
           strength: -270,
@@ -32203,13 +32221,6 @@ ${name16}:
     return {
       name: "BubblePack",
       forces: [{
-        name: "links",
-        create: pure20(createLink({
-          distance: 50,
-          strength: 0.5,
-          iterations: 2
-        }))
-      }, {
         name: "chargePack",
         create: pure20(createCharge({
           strength: -200,
@@ -32252,7 +32263,7 @@ ${name16}:
             };
           }
           ;
-          throw new Error("Failed pattern match at Component.CodeExplorerV2.SceneConfigs (line 204, column 21 - line 208, column 23): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at Component.CodeExplorerV2.SceneConfigs (line 192, column 21 - line 196, column 23): " + [v.constructor.name]);
         };
       };
       var for_8 = function(arr) {
@@ -32299,8 +32310,7 @@ ${name16}:
     stop2(state3.simRef)();
     clearLinks_();
     var simState = read(state3.simRef)();
-    var unpinnedNodes = unpinAllNodes(simState.nodes);
-    setNodes(unpinnedNodes)(state3.simRef)();
+    unpinAllNodesInPlace(simState.nodes)();
     var treeLinks = filter(function(l) {
       return eq8(l.linktype)(M2M_Tree.value);
     })(state3.model.links);
@@ -32315,8 +32325,8 @@ ${name16}:
       strength: 0.5,
       iterations: 2
     });
-    initializeLinkForce(linkForce)(unpinnedNodes)(treeLinks)();
-    joinNodesToDOM_(unpinnedNodes)();
+    initializeLinkForce(linkForce)(simState.nodes)(treeLinks)();
+    joinNodesToDOM_(simState.nodes)();
     joinLinksToDOM_(treeLinks)();
     setTickCallback(makeTickCallback(newState))(state3.simRef)();
     applyScene(bubblePackScene)(state3.simRef)();
@@ -32329,8 +32339,8 @@ ${name16}:
     var state3 = getOrchestraState_();
     stop2(state3.simRef)();
     clearLinks_();
-    var unpinnedNodes = unpinAllNodes(state3.model.nodes);
-    setNodes(unpinnedNodes)(state3.simRef)();
+    var simState = read(state3.simRef)();
+    unpinAllNodesInPlace(simState.nodes)();
     var treeLinks = filter(function(l) {
       return eq8(l.linktype)(M2M_Tree.value);
     })(state3.model.links);
@@ -32345,8 +32355,8 @@ ${name16}:
       strength: 1,
       iterations: 6
     });
-    initializeLinkForce(linkForce)(unpinnedNodes)(treeLinks)();
-    joinNodesToDOM_(unpinnedNodes)();
+    initializeLinkForce(linkForce)(simState.nodes)(treeLinks)();
+    joinNodesToDOM_(simState.nodes)();
     joinLinksToDOM_(treeLinks)();
     setTickCallback(makeTickCallback(newState))(state3.simRef)();
     applyScene(forceGraphScene)(state3.simRef)();
