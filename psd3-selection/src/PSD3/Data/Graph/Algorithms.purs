@@ -8,8 +8,7 @@ module PSD3.Data.Graph.Algorithms
 
 import Prelude
 
-import Data.Array (elem, filter, head, null, partition, uncons, (:))
-import Data.List (List(..))
+import Data.Array (filter, head, null, partition, uncons, (:))
 import Data.List as L
 import Data.Maybe (Maybe(..))
 import Data.Set (Set)

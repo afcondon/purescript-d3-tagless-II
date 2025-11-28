@@ -7,7 +7,7 @@ module PSD3.Layout.Sankey.CSV where
 import Prelude
 
 import Data.Array (drop, filter, mapMaybe)
-import Data.Either (Either(..), hush)
+import Data.Either (hush)
 import Data.Maybe (Maybe(..))
 import Data.Number as Number
 import Data.String (Pattern(..), split, trim)

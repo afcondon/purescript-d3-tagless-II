@@ -59,7 +59,7 @@ selectionUpdateJoin   :: forall d datum key m.
   Element -> (Array datum) ->
   (datum -> key) ->
   m { enter :: D3Selection_ datum, exit :: D3Selection_ d, update :: D3Selection_ datum }
-selectionUpdateJoin openSelection e theData keyFn = do
+selectionUpdateJoin openSelection _e theData keyFn = do
   let
     -- REVIEW use these FFI function to decompose the update Selection into it's component parts
     -- d3DataWithKeyFunction_ rebinds data, changing phantom type from d to datum
@@ -78,7 +78,7 @@ selectionMergeSelections :: forall d m. (SelectionM D3Selection_ m) => D3Selecti
 selectionMergeSelections selectionA selectionB = pure $ d3MergeSelectionWith_ selectionA selectionB
 
 selectionOn :: forall d m. (SelectionM D3Selection_ m) => D3Selection_ d -> Behavior (D3Selection_ d) -> m Unit
-selectionOn selection (Drag drag) = do
+selectionOn _selection (Drag _drag) = do
 -- TODO need to provide the simpler, non-simulation version here
   -- let _ = case drag of 
   --           DefaultDrag     -> defaultDrag_ selection 

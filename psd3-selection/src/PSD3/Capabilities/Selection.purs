@@ -69,7 +69,6 @@
 module PSD3.Capabilities.Selection where
 
 import Data.Foldable (class Foldable)
-import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Types (Datum_, Element, Index_, Selector)
 import PSD3.Internal.Selection.Types (Behavior, SelectionAttribute)
 import Prelude (class Monad, Unit)

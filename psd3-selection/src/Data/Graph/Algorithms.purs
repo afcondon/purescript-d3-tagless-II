@@ -5,7 +5,7 @@ module Data.Graph.Algorithms where
 
 import Prelude
 
-import Data.Array (concat, elem, filter, foldl, length, (\\))
+import Data.Array (concat, foldl, (\\))
 import Data.Array as Array
 import Data.Foldable (maximum)
 import Data.Graph (Graph, fromMap, topologicalSort)

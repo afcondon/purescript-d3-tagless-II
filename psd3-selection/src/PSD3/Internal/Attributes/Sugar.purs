@@ -71,14 +71,14 @@ instance Show AspectRatioPreserve where
 data AspectRatioSpec = AspectRatio AlignAspectRatio_X AlignAspectRatio_Y AspectRatioPreserve
 
 instance Show AspectRatioSpec where
-  show (AspectRatio x y None) =  "none"
-  show (AspectRatio x y p)    =  show x <> show y <> " " <> show p
+  show (AspectRatio _ _ None)   = "none"
+  show (AspectRatio ax ay p)    = show ax <> show ay <> " " <> show p
 
 autoBox :: ∀ d. SelectionAttribute d
 autoBox = AttrT <<< AttributeSetter "viewBox" $ toAttr vb
   where
     vb :: d -> String
-    vb = \d -> intercalate " " $ show <$> (autoBox_ (unsafeCoerce d))
+    vb = \datum -> intercalate " " $ show <$> (autoBox_ (unsafeCoerce datum))
 
 fontFamily :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 fontFamily = AttrT <<< AttributeSetter "font-family" <<< toAttr
@@ -223,7 +223,7 @@ transform = transform' <<< unsafeCoerce <<< assembleTransforms
 -- we can't know here in the library code if this is safe but if the transforms themselves are written in terms of 
 -- what we know the Datum_ will actually be (ie D3TreeNode for example) then we have some limited type checking
 assembleTransforms :: Array (Datum_ -> String) -> (Datum_ -> String)
-assembleTransforms fs = unsafeCoerce (\d -> intercalate " " $ flap fs d)
+assembleTransforms fs = unsafeCoerce (\datum -> intercalate " " $ flap fs datum)
 
 
 -- helpers for Ordering type attributes

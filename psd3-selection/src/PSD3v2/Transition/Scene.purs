@@ -12,8 +12,6 @@ module PSD3v2.Transition.Scene
   , instantTransition
   ) where
 
-import Prelude
-
 -- ============================================================================
 -- Declarative Transition Configuration
 -- ============================================================================

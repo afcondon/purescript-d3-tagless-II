@@ -6,7 +6,6 @@ export function d3SchemeCategory10S_(string) { return d3SchemeCategory10(string)
 
 const d3SchemePaired = d3.scaleOrdinal(d3.schemePaired)
 export function d3SchemePairedN_(number) { return d3SchemePaired(number) }
-export function d3SchemePairedS_(string) { return d3SchemePaired(string) }
 
 const d3SchemeDiverging10 = d3.scaleDiverging(d3.interpolateBrBG)
     .domain([0, 250, 500]); // TODO this should be determined by number of nodes in sim

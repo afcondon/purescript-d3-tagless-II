@@ -1,21 +1,20 @@
 module PSD3.Interpreter.MermaidAST where
 
-import PSD3.Internal.Selection.Types
-import PSD3.Data.Node (NodeID)
+import Prelude (class Monad, Unit, bind, discard, pure, show, unit, ($), (+), (<>))
 
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
-import PSD3.Internal.Attributes.Instances (AttributeSetter(..))
-import PSD3.Internal.Types (Datum_, Element, Index_, Selector, Transition)
-import PSD3.Internal.FFI (ComputeKeyFunction_)
-import PSD3.Capabilities.Selection (class SelectionM)
-import Data.Array (length, foldl, snoc)
-import Data.Tuple (Tuple(..))
-import Effect (Effect)
-import Effect.Class (class MonadEffect)
-import Prelude
+import Data.Array (foldl, snoc)
 import Data.Foldable (class Foldable)
 import Data.String.Common (replaceAll)
 import Data.String.Pattern (Pattern(..), Replacement(..))
+import Data.Tuple (Tuple(..))
+import Effect (Effect)
+import Effect.Class (class MonadEffect)
+import PSD3.Capabilities.Selection (class SelectionM)
+import PSD3.Data.Node (NodeID)
+import PSD3.Internal.Attributes.Instances (AttributeSetter(..))
+import PSD3.Internal.Selection.Types (Behavior, SelectionAttribute(..))
+import PSD3.Internal.Types (Datum_, Element, Index_, Selector)
 
 -- | Phantom-type-aware selection type for Mermaid interpreter
 -- | The type parameter d tracks the datum type (for compatibility with phantom types)

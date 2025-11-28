@@ -17,7 +17,7 @@ module PSD3.Data.Graph
 
 import Prelude
 
-import Data.Array (catMaybes, foldl, filter)
+import Data.Array (catMaybes, foldl)
 import Data.Graph (Graph)
 import Data.Graph as DG
 import Data.List as L

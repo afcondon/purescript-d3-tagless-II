@@ -5,12 +5,11 @@ module PSD3.Internal.FFI where
 
 import PSD3.Data.Node
 
-import PSD3.Data.Tree (TreeJson_, TreeLayoutFn_, TreeType(..))
+import PSD3.Data.Tree (TreeJson_)
 import PSD3.Internal.Types (D3Data_, D3Selection_, D3Simulation_, Datum_, Index_, PointXY, Selector, Transition, ZoomConfigDefault_, ZoomConfig_)
-import Data.Function.Uncurried (Fn2)
 import Data.Nullable (Nullable)
 import Effect (Effect)
-import Prelude (Unit, unit)
+import Prelude (Unit)
 
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for D3js zoom module       *********************************************
