@@ -1,4 +1,0 @@
-{"packageName":"p1","version":"v6.0.0","repo":{"tag":"Remote","contents":"https://github.com/purescript-contrib/purescript-aff.git"}}
-{"packageName":"p2","version":"v12.0.0","repo":{"tag":"Remote","contents":"https://github.com/purescript-contrib/purescript-affjax.git"}}
-{"packageName":"p3","version":"v6.0.0","repo":{"tag":"Remote","contents":"https://github.com/purescript/purescript-arrays.git"}}
-{"packageName":"p4","version":"v5.0.0","repo":{"tag":"Remote","contents":"https://github.com/purescript/purescript-bifunctors.git"}}
