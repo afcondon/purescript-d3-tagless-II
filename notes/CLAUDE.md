@@ -6,17 +6,37 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a PureScript library implementing a Finally Tagless embedded DSL for building interactive data visualizations. The library wraps D3.js functionality in a purely functional, composable API with strong type safety. The project targets PureScript 0.15.
 
+## Repository Structure
+
+This is a **Spago monorepo** with three packages:
+
+```
+├── psd3-selection/       # Core D3 selection/attribute library (publishable)
+│   ├── spago.yaml        # Package config only
+│   └── src/PSD3/         # Selection, attributes, layouts, interpreters
+├── psd3-simulation/      # Force simulation library (publishable)
+│   ├── spago.yaml        # Depends on psd3-selection
+│   └── src/PSD3/         # ForceEngine, Config
+├── demo-website/         # Documentation and examples website
+│   ├── spago.yaml        # Depends on both libraries
+│   ├── src/              # Halogen components, visualizations
+│   └── public/           # Static assets, bundle.js
+└── spago.yaml            # Workspace-only config (no package section)
+```
+
 ## Build Commands
 
-- **Install dependencies**: `yarn install` or `npm install`
-- **Build PureScript**: `npm run build`
-- **Bundle application**: `npm run bundle` (outputs to `docs/bundle.js`)
-- **Upgrade package set**: `npm run upgrade-set`
-- **Extract code snippets**: `npm run snippets`
+- **Install dependencies**: `npm install`
+- **Build all packages**: `npm run build`
+- **Build individual packages**:
+  - `npm run build:selection`
+  - `npm run build:simulation`
+  - `npm run build:website`
+- **Bundle website**: `npm run bundle` (outputs to `demo-website/public/bundle.js`)
+- **Serve website**: `npm run serve` (http://localhost:1234)
+- **Dev workflow**: `npm run dev` (build + bundle)
 
-The website/demo is served from the `docs/` directory (GitHub Pages hosting).
-
-**Important**: This repo uses Spago 0.93 (via npm), NOT the system spago (0.21). Always use `npm run build`, not `spago build` directly. Configuration is in `spago.yaml`, not `spago.dhall`.
+**Important**: This repo uses Spago 0.93 (via npm). Configuration is in `spago.yaml` files (one per package + workspace root).
 
 ## Architecture
 
@@ -31,50 +51,57 @@ The library uses a Finally Tagless encoding that allows multiple interpreters fo
 
 Three interpreters demonstrate the pattern:
 
-1. **D3 Interpreter** (src/lib/Interpreters/D3/): Primary interpreter using D3.js via FFI
-2. **MetaTree Interpreter** (src/lib/Interpreters/MetaTree/): Generates visualizations of the DSL syntax tree itself
-3. **String Interpreter** (src/lib/Interpreters/String/): Generates code or documentation from visualization definitions
+1. **D3 Interpreter** (psd3-selection/src/PSD3v2/Interpreter/D3v2.purs): Primary interpreter using D3.js via FFI
+2. **MetaTree Interpreter** (psd3-selection/src/PSD3v2/Interpreter/MetaAST.purs): Generates visualizations of the DSL syntax tree itself
+3. **English Interpreter** (psd3-selection/src/PSD3v2/Interpreter/English.purs): Generates human-readable descriptions
 
-### Core Library Modules (src/lib/)
+### psd3-selection Package
 
-**Data Layer** (src/lib/D3/Data/):
-- `Tree.purs`, `Graph.purs`, `Node.purs`: Type-safe data structures for visualizations
-- Separate from visualization logic to enable clear separation of concerns
+Core library for D3 selections, attributes, and layouts:
 
-**Selection API** (src/lib/D3/Selection/):
-- `Selection.purs`: Defines `SelectionAttribute` ADT and behaviors (drag, zoom)
-- `Functions.purs`: FFI wrappers and interpreter implementation for selections
+**Selection API** (PSD3v2/Selection/):
+- `Types.purs`, `Operations.purs`, `Query.purs`, `Join.purs`
+- Defines typed selection operations and the General Update Pattern
 
-**Simulation API** (src/lib/D3/Layouts/Simulation/):
-- `Types.purs`: Simulation state, forces, and configuration
-- `Forces.purs`: Force constructors (manybody, center, collide, link, radial)
-- `Functions.purs`: Implementation of simulation operations
-- Manages stateful D3 simulation engine with typed PureScript interface
+**Attributes** (PSD3v2/Attribute/, PSD3/Internal/Attributes/):
+- Type-safe attribute setters with phantom types
 
-**FFI Layer** (src/lib/D3/FFI/):
-- Low-level JavaScript interop
-- Keeps state management and side effects isolated to FFI boundary
+**Layouts** (PSD3/Layout/):
+- `Hierarchy/`: Tree, cluster, pack, partition, treemap layouts
+- `Sankey/`: Sankey diagram layout
 
-### Website/Demo Application (src/website/)
+**Data Structures** (Data/, PSD3/Data/):
+- `Tree.purs`, `Graph.purs`, `Node.purs`: Type-safe data structures
+- Graph algorithms and dependency graph utilities
 
-The website demonstrates library usage with multiple examples:
+### psd3-simulation Package
 
-**Structure**:
-- `Main.purs`, `Router.purs`, `Types.purs`: Top-level Halogen application
-- **Component/**: Reusable Halogen components
-  - Complex components have subdirectories (e.g., Component/Spago/, Component/ForceNavigator/)
-  - Simpler components are single files (e.g., Button.purs, Checkbox.purs)
-- **HTML/**: Non-Halogen reusable HTML chunks
-- **Viz/**: D3 visualization implementations organized by example
-  - Each visualization has Model, Draw, Unsafe, and often Attributes modules
-  - Examples: Spago (force-directed graph), LesMis, Trees, Sankey, BubbleChart, etc.
+Force-directed graph simulation:
+
+**ForceEngine** (PSD3/ForceEngine/):
+- `Core.purs/.js`: D3 force simulation wrapper
+- `Simulation.purs`: High-level simulation API
+- `Types.purs`: Force and simulation types
+
+**Configuration** (PSD3/Config/):
+- `Force.purs`: Immutable force configuration
+- `Scene.purs`: Scene definitions
+- `Apply.purs`: Apply configs to simulations
+
+### demo-website Package
+
+Halogen web application demonstrating the libraries:
+
+**Structure** (demo-website/src/):
+- `Main.purs`, `RoutingDSL.purs`, `Types.purs`: Top-level application
+- **Component/**: Halogen components (CodeExplorerV3, ForceControlPanel, etc.)
+- **HTML/**: Reusable HTML helpers
+- **Viz/**: D3 visualization implementations (LesMis, Spago, Trees, etc.)
 
 **Key Examples**:
-- **Spago** (Component/Spago/ + Viz/Spago/): The flagship example showing the MiseEnScene pattern for complex force simulations with multiple scenes/views
-- Simple selections and attributes (ThreeLittleCircles)
+- Code Explorer (Component/CodeExplorerV3.purs): Force-directed module graph
 - General Update Pattern with transitions (GUP)
-- D3 hierarchy layouts (Trees, MetaTree)
-- Force-directed graphs (LesMis)
+- D3 hierarchy layouts (AnimatedTreeCluster, etc.)
 - Interactive behaviors (dragging, zooming, panning)
 
 ## Key Design Decisions
@@ -113,7 +140,7 @@ The project aims to be both an impressive demonstration of functional visualizat
 - **Lenses**: Prefix with `_` (e.g., `_chooseNodes`, `_simulation`)
 - **Foreign functions and types**: Postfix with `_` (e.g., `Datum_`, `d3SelectFirstInDOM_`)
 - **datum_ pattern**: Record of accessor functions for safely extracting data from D3's opaque `Datum_` type
-- **FFI consolidation**: All D3.js FFI should live in src/lib/D3/FFI.purs/.js
+- **FFI consolidation**: D3.js FFI lives in psd3-selection/src/PSD3/Internal/FFI.purs/.js
 - **Debug statements**: Use purescript-debug library's `spy` function (generates warnings to prevent shipping debug code)
 
 ## Common PureScript Gotchas

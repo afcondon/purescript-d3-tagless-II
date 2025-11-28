@@ -16,11 +16,32 @@ There's a demo, see it working [here](https://afcondon.github.io/purescript-d3-t
 
 After cloning the repo, you should be able to do:
 
-* `yarn install`
-* `yarn run build`
-* `yarn run bundle`
+* `npm install`
+* `npm run build`
+* `npm run bundle`
+* `npm run serve`
 
-and then if you serve `http` from the `docs` directory you should be able to see the same demo as at the link above.
+This starts a server at http://localhost:1234 serving the demo website.
+
+### Repository Structure
+
+This is a Spago monorepo with three packages:
+
+```
+├── psd3-selection/       # Core D3 selection/attribute library (publishable)
+│   └── src/PSD3/
+├── psd3-simulation/      # Force simulation library (publishable)
+│   └── src/PSD3/
+├── demo-website/         # Documentation and examples website
+│   ├── src/              # Halogen components and visualizations
+│   └── public/           # Static assets and bundle.js
+└── spago.yaml            # Workspace configuration
+```
+
+Build individual packages with:
+* `npm run build:selection`
+* `npm run build:simulation`
+* `npm run build:website`
 
 ![image](https://user-images.githubusercontent.com/1260895/138859399-a758dcb2-e05b-407f-9538-035acd99845f.png)
 
@@ -376,20 +397,10 @@ Generate Pursuit-style API documentation for the library:
 npm run docs:api
 ```
 
-This generates HTML documentation for library modules in `docs/api/`. The script:
-1. Generates full docs (including dependencies) in `generated-docs/html/` using Spago
-2. Filters to only include modules from `src/lib/` (the core library, excluding the website app)
-3. Replaces external module links with a helpful explanation page
-4. Copies the filtered docs to `docs/api/` for serving on GitHub Pages
+This generates HTML documentation in `generated-docs/html/` using Spago.
 
-To view the full unfiltered docs (all 834 modules including dependencies):
+To view the docs directly in your browser:
 
 ```bash
 npm run docs:api:open
-```
-
-To generate and view the filtered docs locally:
-
-```bash
-npm run docs:api:local
 ```
