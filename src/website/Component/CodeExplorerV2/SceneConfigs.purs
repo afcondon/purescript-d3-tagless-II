@@ -14,10 +14,9 @@ module Component.CodeExplorerV2.SceneConfigs
 import Prelude
 
 import Component.CodeExplorerV2.SimulationManager as Sim
-import D3.Viz.Spago.Model (SpagoSimNode, isModule, isPackage)
+import D3.Viz.Spago.Model (SpagoSimNode, isModule)
 import Data.Array as Array
-import Data.Maybe (Maybe(..), isJust)
-import Data.Nullable (toMaybe)
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Ref (Ref)
 

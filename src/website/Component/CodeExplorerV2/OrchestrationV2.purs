@@ -26,13 +26,7 @@ import Component.CodeExplorerV2.SimulationManager as Sim
 import D3.Viz.Spago.Files (LinkType(..), SpagoLink)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage, nodesToCircle)
 import Data.Array (filter) as Array
-import Data.Array as Array
-import Data.Int (toNumber)
-import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Nullable (notNull, null, toMaybe)
-import Data.Number (cos, sin)
 import Effect (Effect)
-import Effect.Console (log)
 import Effect.Ref (Ref)
 import Effect.Ref as Ref
 
@@ -112,8 +106,6 @@ makeTickCallback state = do
 -- | Initialize the visualization
 initialize :: SpagoModel -> String -> Effect (Ref Sim.SimState)
 initialize model selector = do
-  log "[OrchV2] Initializing"
-
   -- Get window size
   { width, height } <- getWindowSize_
 
@@ -149,7 +141,6 @@ initialize model selector = do
   -- Start simulation
   Sim.start simRef
 
-  log "[OrchV2] Initialized with Orbit scene"
   pure simRef
 
 -- =============================================================================
@@ -159,7 +150,6 @@ initialize model selector = do
 -- | Transition to Orbit scene
 transitionToOrbit :: Effect Unit
 transitionToOrbit = do
-  log "[OrchV2] Transitioning to Orbit"
   state <- getOrchestraState_
 
   -- Stop simulation
@@ -190,12 +180,9 @@ transitionToOrbit = do
   -- Start simulation
   Sim.reheat state.simRef
 
-  log "[OrchV2] Orbit scene active"
-
 -- | Transition to Tree scene (staged: animate -> pin -> links -> simulate)
 transitionToTree :: Effect Unit
 transitionToTree = do
-  log "[OrchV2] Transitioning to Tree (staged)"
   state <- getOrchestraState_
 
   -- Stop any running simulation
@@ -219,8 +206,6 @@ transitionToTree = do
   -- Called after D3 transition + link swap is complete
   onTreeTransitionComplete :: OrchestraState -> Effect Unit
   onTreeTransitionComplete newState = do
-    log "[OrchV2] Tree transition complete, engaging simulation"
-
     -- Read the nodes (they've been updated in place by JS)
     simState <- Ref.read newState.simRef
 
@@ -244,8 +229,6 @@ transitionToTree = do
     -- Start simulation with moderate energy
     Sim.reheat newState.simRef
 
-    log "[OrchV2] Tree scene active with simulation"
-
 -- | Unpin nodes in place (mutates)
 unpinAllNodesInPlace :: Array SpagoSimNode -> Effect Unit
 unpinAllNodesInPlace nodes = unpinNodes_ nodes
@@ -255,7 +238,6 @@ foreign import unpinNodes_ :: Array SpagoSimNode -> Effect Unit
 -- | Transition to Force Graph scene
 transitionToForceGraph :: Effect Unit
 transitionToForceGraph = do
-  log "[OrchV2] Transitioning to ForceGraph"
   state <- getOrchestraState_
 
   -- Stop simulation
@@ -278,13 +260,13 @@ transitionToForceGraph = do
   let newState = state { currentLinks = treeLinks }
   setOrchestraState_ newState
 
-  -- Create link force and initialize with the SAME node objects
-  let linkForce = Sim.createLink { distance: 125.0, strength: 1.0, iterations: 6.0 }
-  _ <- Sim.initializeLinkForce linkForce nodes treeLinks
-
-  -- Join to DOM
+  -- Join to DOM FIRST (before D3 swizzles the links)
   joinNodesToDOM_ nodes
   joinLinksToDOM_ treeLinks
+
+  -- Create link force and initialize (D3 will swizzle the links in place)
+  let linkForce = Sim.createLink { distance: 125.0, strength: 1.0, iterations: 6.0 }
+  _ <- Sim.initializeLinkForce linkForce nodes treeLinks
 
   -- Update tick callback
   Sim.setTickCallback (makeTickCallback newState) state.simRef
@@ -298,12 +280,9 @@ transitionToForceGraph = do
   -- Reheat to full energy
   Sim.reheat state.simRef
 
-  log "[OrchV2] ForceGraph scene active"
-
 -- | Transition to Bubble Pack scene
 transitionToBubblePack :: Effect Unit
 transitionToBubblePack = do
-  log "[OrchV2] Transitioning to BubblePack"
   state <- getOrchestraState_
 
   -- Stop simulation
@@ -326,13 +305,13 @@ transitionToBubblePack = do
   let newState = state { currentLinks = treeLinks }
   setOrchestraState_ newState
 
-  -- Create and initialize link force with the SAME node objects
-  let linkForce = Sim.createLink { distance: 50.0, strength: 0.5, iterations: 2.0 }
-  _ <- Sim.initializeLinkForce linkForce nodes treeLinks
-
-  -- Join to DOM
+  -- Join to DOM FIRST (before D3 swizzles the links)
   joinNodesToDOM_ nodes
   joinLinksToDOM_ treeLinks
+
+  -- Create link force and initialize (D3 will swizzle the links in place)
+  let linkForce = Sim.createLink { distance: 50.0, strength: 0.5, iterations: 2.0 }
+  _ <- Sim.initializeLinkForce linkForce nodes treeLinks
 
   -- Update tick callback
   Sim.setTickCallback (makeTickCallback newState) state.simRef
@@ -343,8 +322,6 @@ transitionToBubblePack = do
 
   -- Reheat
   Sim.reheat state.simRef
-
-  log "[OrchV2] BubblePack scene active"
 
 -- =============================================================================
 -- Simulation Control

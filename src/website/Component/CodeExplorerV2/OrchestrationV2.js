@@ -10,7 +10,6 @@ let orchestraState = null;
 export function setOrchestraState_(state) {
   return function() {
     orchestraState = state;
-    console.log('[OrchV2 FFI] Orchestra state set');
   };
 }
 
@@ -31,8 +30,6 @@ export function createSvgStructure_(selector) {
   return function(width) {
     return function(height) {
       return function() {
-        console.log(`[OrchV2 FFI] Creating SVG structure in ${selector}`);
-
         // Clear existing
         d3.select(selector).selectAll('*').remove();
 
@@ -57,8 +54,6 @@ export function createSvgStructure_(selector) {
         // Create groups for links and nodes (links below nodes)
         linksGroup = innerGroup.append('g').attr('class', 'links');
         nodesGroup = innerGroup.append('g').attr('class', 'nodes');
-
-        console.log('[OrchV2 FFI] SVG structure created');
       };
     };
   };
@@ -70,12 +65,7 @@ export function createSvgStructure_(selector) {
 
 export function joinNodesToDOM_(nodes) {
   return function() {
-    if (!nodesGroup) {
-      console.error('[OrchV2 FFI] nodesGroup not initialized');
-      return;
-    }
-
-    console.log(`[OrchV2 FFI] Joining ${nodes.length} nodes to DOM`);
+    if (!nodesGroup) return;
 
     // Join data to groups
     const nodeGroups = nodesGroup.selectAll('g.node')
@@ -114,8 +104,6 @@ export function joinNodesToDOM_(nodes) {
 
     // Exit: remove old groups
     nodeGroups.exit().remove();
-
-    console.log('[OrchV2 FFI] Nodes joined');
   };
 }
 
@@ -129,9 +117,8 @@ export function updateNodeTransforms_(nodes) {
   };
 }
 
-// Node color based on cluster (uses d3.schemeCategory10 like the PureScript version)
+// Node color based on cluster (uses d3.schemeCategory10)
 function getNodeColor(d) {
-  // Use cluster property for consistent coloring across scenes
   const cluster = d.cluster !== undefined ? d.cluster : 0;
   return d3.schemeCategory10[cluster % 10];
 }
@@ -140,33 +127,23 @@ function getNodeColor(d) {
 // Link DOM Updates
 // =============================================================================
 
-// Helper to get ID from source/target (handles both raw int and swizzled object)
-function getLinkId(sourceOrTarget) {
-  if (typeof sourceOrTarget === 'object' && sourceOrTarget !== null) {
-    return sourceOrTarget.id;  // Swizzled - extract node ID
-  }
-  return sourceOrTarget;  // Raw integer
-}
-
+// Join raw links (with integer source/target) to DOM
+// IMPORTANT: This must be called BEFORE initializing the D3 link force,
+// because D3's forceLink mutates links in place (swizzles IDs to node refs)
 export function joinLinksToDOM_(links) {
   return function() {
-    if (!linksGroup) {
-      console.error('[OrchV2 FFI] linksGroup not initialized');
-      return;
-    }
-
-    console.log(`[OrchV2 FFI] Joining ${links.length} links to DOM`);
+    if (!linksGroup) return;
 
     // Join data to paths - use link--force class so tick callback updates them
     const linkPaths = linksGroup.selectAll('path.link--force')
-      .data(links, d => `${getLinkId(d.source)}-${getLinkId(d.target)}`);
+      .data(links, d => `${d.source}-${d.target}`);
 
     // Enter: create new paths with data attributes for tick updates
     linkPaths.enter()
       .append('path')
       .attr('class', 'link link--force')
-      .attr('data-source', d => getLinkId(d.source))
-      .attr('data-target', d => getLinkId(d.target))
+      .attr('data-source', d => d.source)
+      .attr('data-target', d => d.target)
       .attr('fill', 'none')
       .attr('stroke', '#4a9')
       .attr('stroke-width', 1)
@@ -174,8 +151,6 @@ export function joinLinksToDOM_(links) {
 
     // Exit: remove old paths
     linkPaths.exit().remove();
-
-    console.log('[OrchV2 FFI] Links joined');
   };
 }
 
@@ -198,7 +173,6 @@ export function updateLinkPaths_(swizzledLinks) {
 export function clearLinks_() {
   if (linksGroup) {
     linksGroup.selectAll('*').remove();
-    console.log('[OrchV2 FFI] Links cleared');
   }
 }
 
@@ -207,11 +181,6 @@ export function clearLinks_() {
 // =============================================================================
 
 function dragStarted(event, d) {
-  // Reheat simulation
-  if (orchestraState && orchestraState.simRef) {
-    // We can't call PureScript from here directly, but the simulation
-    // should respond to node movement
-  }
   d.fx = d.x;
   d.fy = d.y;
 }
@@ -246,13 +215,26 @@ export function getWindowSize_() {
 const treeDepthMultiplier = 180;  // Radial spacing per depth level
 
 // Calculate target tree position from treeXY.x (angle) and treeDepth (integer depth)
+//
+// PURE FUNCTION - This could be moved to PureScript, but is kept here because:
+// 1. It's called from within D3 transition callbacks (would need FFI round-trip)
+// 2. The math is simple and self-contained
+// 3. Performance: avoiding FFI overhead in animation code
+//
+// Equivalent PureScript:
+//   getTreePosition :: SpagoSimNode -> { x :: Number, y :: Number }
+//   getTreePosition node = case node.treeXY of
+//     Just { x: angle } ->
+//       let depth = fromMaybe 1 node.treeDepth
+//           radius = toNumber depth * treeDepthMultiplier
+//       in { x: radius * cos angle, y: radius * sin angle }
+//     Nothing -> { x: fromMaybe 0.0 node.x, y: fromMaybe 0.0 node.y }
 function getTreePosition(node) {
   if (node.name === 'PSD3.Main') {
     return { x: 0, y: 0 };
   }
   if (node.treeXY) {
     const angle = node.treeXY.x;
-    // Use integer treeDepth for radius, NOT treeXY.y (which is D3's raw layout value)
     const depth = node.treeDepth !== undefined ? node.treeDepth : 1;
     const radius = depth * treeDepthMultiplier;
     return {
@@ -264,6 +246,7 @@ function getTreePosition(node) {
 }
 
 // Get tree depth from node.treeDepth (0 = root, 1 = first level, etc)
+// PURE FUNCTION - kept in JS for same reasons as getTreePosition (callback context)
 function getTreeDepth(node) {
   if (node.treeDepth !== undefined) return node.treeDepth;
   if (node.name === 'PSD3.Main') return 0;
@@ -275,21 +258,12 @@ function getTreeDepth(node) {
  * Phase 1: D3 transition with layer-based stagger + progressive link appearance
  * Phase 2: Pin nodes at final positions
  * Phase 3: After pause, swap to straight links and engage simulation
- *
- * @param nodes - Array of nodes with treeXY data
- * @param links - Tree links to display
- * @param onComplete - Callback when ready for simulation
  */
 export function transitionToTreePositions_(nodes) {
   return function(links) {
     return function(onComplete) {
       return function() {
-        if (!nodesGroup || !linksGroup) {
-          console.error('[OrchV2 FFI] Groups not initialized');
-          return;
-        }
-
-        console.log('[OrchV2 FFI] Starting tree transition');
+        if (!nodesGroup || !linksGroup) return;
 
         // Clear existing links
         linksGroup.selectAll('*').remove();
@@ -299,9 +273,6 @@ export function transitionToTreePositions_(nodes) {
 
         // Only include nodes that have tree positions (filter out packages, etc.)
         const treeNodes = nodes.filter(n => n.treeXY !== undefined && n.treeXY !== null);
-        const nonTreeNodes = nodes.filter(n => n.treeXY === undefined || n.treeXY === null);
-
-        console.log(`[OrchV2 FFI] Tree nodes: ${treeNodes.length}, non-tree nodes: ${nonTreeNodes.length}`);
 
         // Group tree nodes by depth for staggering
         const nodesByDepth = new Map();
@@ -313,28 +284,10 @@ export function transitionToTreePositions_(nodes) {
           nodesByDepth.get(depth).push(node);
         });
 
-        // Debug: log any non-numeric depths
-        const allDepths = Array.from(nodesByDepth.keys());
-        const nonNumericDepths = allDepths.filter(d => typeof d !== 'number' || isNaN(d));
-        if (nonNumericDepths.length > 0) {
-          console.warn(`[OrchV2 FFI] WARNING: Found non-numeric depths:`, nonNumericDepths);
-          // Log some example nodes with non-numeric depths
-          nonNumericDepths.forEach(badDepth => {
-            const examples = nodesByDepth.get(badDepth).slice(0, 3);
-            console.warn(`[OrchV2 FFI] Nodes with depth=${badDepth}:`, examples.map(n => ({
-              name: n.name,
-              treeDepth: n.treeDepth,
-              treeXY: n.treeXY,
-              nodetype: n.nodetype
-            })));
-          });
-        }
-
         // Sort depths (filter out any non-numeric)
-        const depths = allDepths
+        const depths = Array.from(nodesByDepth.keys())
           .filter(d => typeof d === 'number' && !isNaN(d))
           .sort((a, b) => a - b);
-        console.log(`[OrchV2 FFI] Tree depths: ${depths.join(', ')}`);
 
         // Calculate timing
         const layerDuration = 400;  // ms per layer
@@ -342,9 +295,8 @@ export function transitionToTreePositions_(nodes) {
         const totalDuration = depths.length * layerDuration +
           Math.max(...Array.from(nodesByDepth.values()).map(arr => arr.length)) * withinLayerStagger;
 
-        // Create radial link path using cubic bezier (matches PureScript radialLinkPath)
+        // Create radial link path using cubic bezier
         const makeTreeLinkPath = (source, target) => {
-          // Get angles and depths
           const srcAngle = source.treeXY ? source.treeXY.x : 0;
           const tgtAngle = target.treeXY ? target.treeXY.x : 0;
           const srcDepth = source.treeDepth !== undefined ? source.treeDepth : 0;
@@ -352,7 +304,6 @@ export function transitionToTreePositions_(nodes) {
           const srcRadius = srcDepth * treeDepthMultiplier;
           const tgtRadius = tgtDepth * treeDepthMultiplier;
 
-          // Source and target positions
           const sx = srcRadius * Math.cos(srcAngle);
           const sy = srcRadius * Math.sin(srcAngle);
           const tx = tgtRadius * Math.cos(tgtAngle);
@@ -373,7 +324,7 @@ export function transitionToTreePositions_(nodes) {
           .data(nodes, d => d.id);
 
         nodeSelection
-          .filter(d => d.treeXY)  // Only animate nodes with tree positions
+          .filter(d => d.treeXY)
           .transition()
           .duration(layerDuration)
           .delay(d => {
@@ -388,10 +339,7 @@ export function transitionToTreePositions_(nodes) {
             const pos = getTreePosition(d);
             return `translate(${pos.x}, ${pos.y})`;
           })
-          .on('start', function(event, d) {
-            // D3 v6+: callback is (event, d) - but for selection.transition().on(),
-            // the signature is actually (event, d) where d is the datum
-            // However, `this` is the DOM element, so we can get data via d3.select(this).datum()
+          .on('start', function() {
             const datum = d3.select(this).datum();
             if (!datum) return;
 
@@ -401,7 +349,6 @@ export function transitionToTreePositions_(nodes) {
               const source = nodeMap.get(link.source);
               const target = nodeMap.get(link.target);
               if (source && target && source.treeXY && target.treeXY) {
-                // Add the link with a fade-in using our custom path generator
                 const path = linksGroup.append('path')
                   .attr('class', 'link link--tree')
                   .attr('data-source', link.source)
@@ -418,8 +365,7 @@ export function transitionToTreePositions_(nodes) {
               }
             });
           })
-          .on('end', function(event, d) {
-            // Update node data with final position
+          .on('end', function() {
             const datum = d3.select(this).datum();
             if (!datum) return;
             const pos = getTreePosition(datum);
@@ -429,8 +375,6 @@ export function transitionToTreePositions_(nodes) {
 
         // After all transitions complete
         setTimeout(() => {
-          console.log('[OrchV2 FFI] Tree transition complete, pinning nodes');
-
           // Phase 2: Pin all nodes at their current/tree positions
           nodes.forEach(node => {
             if (node.treeXY) {
@@ -446,10 +390,6 @@ export function transitionToTreePositions_(nodes) {
 
           // Phase 3: After a pause, swap to straight links and engage simulation
           setTimeout(() => {
-            console.log('[OrchV2 FFI] Swapping to straight links, engaging simulation');
-            console.log(`[OrchV2 FFI] Links to add: ${links.length}`);
-            console.log(`[OrchV2 FFI] Tree links in DOM before swap: ${linksGroup.selectAll('.link--tree').size()}`);
-
             // Fade out tree links, then add straight links
             linksGroup.selectAll('.link--tree')
               .transition()
@@ -457,62 +397,23 @@ export function transitionToTreePositions_(nodes) {
               .attr('stroke-opacity', 0)
               .remove();
 
-            // After fade out, add straight links (pass nodes for initial positions)
+            // After fade out, add straight links
             setTimeout(() => {
               joinStraightLinksToDOM(links, nodes);
-              console.log(`[OrchV2 FFI] Force links in DOM after add: ${linksGroup.selectAll('.link--force').size()}`);
-
-              // Call completion callback (will unpin and start simulation)
               onComplete();
             }, 350);
 
           }, 1000);
 
-        }, totalDuration + 500);  // Wait for all transitions plus buffer
+        }, totalDuration + 500);
       };
     };
   };
 }
 
-// Join bezier tree links (curved, hierarchical look)
-function joinTreeLinksToDOM(nodes, links) {
-  if (!linksGroup) return;
-
-  // Build node lookup
-  const nodeMap = new Map(nodes.map(n => [n.id, n]));
-
-  // Create link generator for radial tree
-  // Use treeDepth (integer) for radius, treeXY.x for angle
-  const linkGen = d3.linkRadial()
-    .angle(d => d.treeXY ? d.treeXY.x : 0)
-    .radius(d => (d.treeDepth !== undefined ? d.treeDepth : 0) * treeDepthMultiplier);
-
-  const linkPaths = linksGroup.selectAll('path.tree-link')
-    .data(links, d => `${d.source}-${d.target}`);
-
-  linkPaths.enter()
-    .append('path')
-    .attr('class', 'tree-link')
-    .attr('fill', 'none')
-    .attr('stroke', '#666')
-    .attr('stroke-width', 1)
-    .attr('stroke-opacity', 0.6)
-    .attr('d', d => {
-      const source = nodeMap.get(d.source);
-      const target = nodeMap.get(d.target);
-      if (!source || !target) return '';
-      return linkGen({ source, target });
-    });
-
-  console.log(`[OrchV2 FFI] Added ${links.length} tree links`);
-}
-
 // Join straight simulation links (uses raw links with source/target as IDs)
-// Also draws initial positions based on current node positions
 function joinStraightLinksToDOM(links, nodes) {
   if (!linksGroup) return;
-
-  console.log(`[OrchV2 FFI] joinStraightLinksToDOM called with ${links.length} links`);
 
   // Build node map for initial positions
   const nodeMap = nodes ? new Map(nodes.map(n => [n.id, n])) : null;
@@ -521,7 +422,7 @@ function joinStraightLinksToDOM(links, nodes) {
   const linkPaths = linksGroup.selectAll('path.link--force')
     .data(links, d => `${d.source}-${d.target}`);
 
-  const entered = linkPaths.enter()
+  linkPaths.enter()
     .append('path')
     .attr('class', 'link link--force')
     .attr('data-source', d => d.source)
@@ -531,7 +432,6 @@ function joinStraightLinksToDOM(links, nodes) {
     .attr('stroke-width', 1)
     .attr('stroke-opacity', 0.6)
     .attr('d', d => {
-      // Draw initial position if we have nodes
       if (!nodeMap) return '';
       const source = nodeMap.get(d.source);
       const target = nodeMap.get(d.target);
@@ -540,37 +440,17 @@ function joinStraightLinksToDOM(links, nodes) {
     });
 
   linkPaths.exit().remove();
-
-  console.log(`[OrchV2 FFI] Added ${entered.size()} straight links to DOM (link--force class)`);
 }
 
-// Update link paths for force simulation links (link--force class)
-let _updateLinkLogCount = 0;
+// Update link paths for force simulation (uses data-source/data-target attributes)
 export function updateLinkPathsFromRaw_(nodes) {
-  return function(rawLinks) {
+  return function(_rawLinks) {
     return function() {
       if (!linksGroup) return;
 
-      // Build node map for position lookup
       const nodeMap = new Map(nodes.map(n => [n.id, n]));
-
-      // Update all link paths using data-source/data-target attributes
       const linkElements = linksGroup.selectAll('path.link--force');
 
-      // Debug every 60 frames
-      if (_updateLinkLogCount++ % 60 === 0) {
-        console.log(`[OrchV2 FFI] updateLinkPaths: ${linkElements.size()} link elements, ${nodes.length} nodes`);
-        // Debug: check node ID types
-        if (nodes.length > 0) {
-          const sampleNode = nodes[0];
-          const firstLink = linkElements.node();
-          const srcAttr = firstLink ? d3.select(firstLink).attr('data-source') : null;
-          console.log(`[OrchV2 FFI] Node ID type: ${typeof sampleNode.id}, value: ${sampleNode.id}, Link data-source: ${srcAttr}, type: ${typeof srcAttr}`);
-        }
-      }
-
-      let updateCount = 0;
-      let missingCount = 0;
       linkElements.each(function() {
         const el = d3.select(this);
         const sourceId = +el.attr('data-source');
@@ -579,16 +459,8 @@ export function updateLinkPathsFromRaw_(nodes) {
         const target = nodeMap.get(targetId);
         if (source && target) {
           el.attr('d', `M${source.x},${source.y}L${target.x},${target.y}`);
-          updateCount++;
-        } else {
-          missingCount++;
         }
       });
-
-      // Debug: log if there's a mismatch
-      if (_updateLinkLogCount % 60 === 1 && (missingCount > 0 || updateCount !== linkElements.size())) {
-        console.log(`[OrchV2 FFI] Link update: ${updateCount} updated, ${missingCount} missing nodes`);
-      }
     };
   };
 }
@@ -599,7 +471,6 @@ export function updateLinkPathsFromRaw_(nodes) {
 
 export function unpinNodes_(nodes) {
   return function() {
-    console.log(`[OrchV2 FFI] Unpinning ${nodes.length} nodes`);
     nodes.forEach(node => {
       node.fx = null;
       node.fy = null;

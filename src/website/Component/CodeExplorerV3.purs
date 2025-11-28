@@ -10,7 +10,6 @@ module Component.CodeExplorerV3 where
 import Prelude
 
 import Component.CodeExplorerV2.OrchestrationV2 as Orch
-import Component.CodeExplorerV2.SceneConfigs (SceneConfig)
 import D3.Viz.Spago.Model (SpagoModel)
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Milliseconds(..), delay)

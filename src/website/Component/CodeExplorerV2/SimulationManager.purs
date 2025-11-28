@@ -34,21 +34,17 @@ module Component.CodeExplorerV2.SimulationManager
     -- * Swizzling
   , swizzleLinks
   , SwizzledLink
-    -- * Debug
-  , logState
   ) where
 
 import Prelude
 
-import D3.Viz.Spago.Model (SpagoSimNode, isModule, isPackage)
+import D3.Viz.Spago.Model (SpagoSimNode)
 import Data.Array as Array
 import Data.Foldable (for_)
 import Data.Map (Map)
 import Data.Map as Map
-import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
-import Effect.Console (log)
 import Effect.Ref (Ref)
 import Effect.Ref as Ref
 
@@ -126,10 +122,6 @@ foreign import decayAlpha_ :: Number -> Number -> Number -> Number -> Number
 foreign import buildSwizzledLink_ :: forall node linkData.
   node -> node -> { source :: Int, target :: Int | linkData } -> SwizzledLink node linkData
 
--- Debug
-foreign import logForceState_ :: forall r. String -> Array { | r } -> Number -> Effect Unit
-foreign import setSimNodes_ :: Array SpagoSimNode -> Effect Unit
-
 -- =============================================================================
 -- Simulation Lifecycle
 -- =============================================================================
@@ -137,7 +129,6 @@ foreign import setSimNodes_ :: Array SpagoSimNode -> Effect Unit
 -- | Create a new simulation and store it in window
 createSimulation :: Effect (Ref SimState)
 createSimulation = do
-  log "[SimManager] Creating simulation"
   stateRef <- Ref.new
     { nodes: []
     , links: []
@@ -156,9 +147,7 @@ createSimulation = do
 -- | Set nodes and initialize them
 setNodes :: Array SpagoSimNode -> Ref SimState -> Effect Unit
 setNodes nodes stateRef = do
-  log $ "[SimManager] Setting " <> show (Array.length nodes) <> " nodes"
   initializeNodes_ nodes
-  setSimNodes_ nodes  -- Store for identity check in applyForce_
   Ref.modify_ (_ { nodes = nodes }) stateRef
 
   -- Re-initialize all forces with new nodes
@@ -170,8 +159,6 @@ setNodes nodes stateRef = do
 -- | Set links
 setLinks :: forall linkData. Array { source :: Int, target :: Int | linkData } -> Ref SimState -> Effect Unit
 setLinks links stateRef = do
-  log $ "[SimManager] Setting " <> show (Array.length links) <> " links"
-  -- Store links (we need to cast to our expected type)
   Ref.modify_ (_ { links = unsafeCoerceLinks links }) stateRef
   where
   unsafeCoerceLinks :: forall r. Array { source :: Int, target :: Int | r } -> Array { source :: Int, target :: Int, linktype :: String }
@@ -182,20 +169,17 @@ start :: Ref SimState -> Effect Unit
 start stateRef = do
   state <- Ref.read stateRef
   unless state.running do
-    log "[SimManager] Starting"
     Ref.modify_ (_ { running = true }) stateRef
     runLoop stateRef
 
 -- | Stop the simulation
 stop :: Ref SimState -> Effect Unit
-stop stateRef = do
-  log "[SimManager] Stopping"
+stop stateRef =
   Ref.modify_ (_ { running = false }) stateRef
 
 -- | Reheat the simulation
 reheat :: Ref SimState -> Effect Unit
 reheat stateRef = do
-  log "[SimManager] Reheating"
   Ref.modify_ (_ { alpha = 1.0 }) stateRef
   state <- Ref.read stateRef
   unless state.running do
@@ -233,9 +217,7 @@ runLoop stateRef = do
     -- Continue or stop
     if newAlpha > 0.0
       then void $ requestAnimationFrame_ (runLoop stateRef)
-      else do
-        log "[SimManager] Cooled down"
-        Ref.modify_ (_ { running = false }) stateRef
+      else Ref.modify_ (_ { running = false }) stateRef
 
 -- =============================================================================
 -- Force Creation
@@ -288,12 +270,10 @@ addForce name handle stateRef = do
   -- Initialize with current nodes
   _ <- initializeForce_ handle state.nodes
   Ref.modify_ (\s -> s { forces = Map.insert name handle s.forces }) stateRef
-  log $ "[SimManager] Added force: " <> name
 
 -- | Clear all forces
 clearForces :: Ref SimState -> Effect Unit
-clearForces stateRef = do
-  log "[SimManager] Clearing all forces"
+clearForces stateRef =
   Ref.modify_ (_ { forces = Map.empty }) stateRef
 
 -- | Initialize a force with nodes
@@ -325,13 +305,3 @@ swizzleLinks nodes rawLinks =
     src <- Map.lookup raw.source nodeMap
     tgt <- Map.lookup raw.target nodeMap
     pure $ buildSwizzledLink_ src tgt raw
-
--- =============================================================================
--- Debug
--- =============================================================================
-
--- | Log simulation state
-logState :: String -> Ref SimState -> Effect Unit
-logState label stateRef = do
-  state <- Ref.read stateRef
-  logForceState_ label state.nodes state.alpha
