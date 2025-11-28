@@ -17,8 +17,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import D3.Viz.GUP as GUP
-import PSD3.Interpreter.D3 (eval_D3M, runD3M)
+import D3.Viz.GUPv2 as GUP
 
 type State =
   { status :: Status
@@ -103,8 +102,8 @@ setAttributes newlyEntered [classed "enter", ...]""" ]
 runGeneralUpdatePattern :: forall m. Bind m => MonadAff m => m (Array Char -> Aff Unit)
 runGeneralUpdatePattern = do
   log "General Update Pattern example"
-  update <- liftEffect $ eval_D3M $ GUP.exGeneralUpdatePattern "div.svg-container"
-  pure (\letters -> liftEffect $ runD3M (update letters) *> pure unit)
+  update <- liftEffect $ GUP.initGUP "div.svg-container"
+  pure (\letters -> liftEffect $ update letters)
 
 -- | Choose a string of random letters (no duplicates), ordered alphabetically
 getLetters :: Aff (Array Char)

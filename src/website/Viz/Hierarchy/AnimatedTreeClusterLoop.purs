@@ -2,35 +2,23 @@ module D3.Viz.AnimatedTreeClusterLoop where
 
 -- | Auto-looping animated transition between Tree4 and Cluster4 layouts
 -- | For Tour Motion page - no manual controls, just automatic cycling
+-- | V2 implementation using PSD3v2 primitives
 
 import Prelude
 
 import PSD3.Shared.FlareData (HierData)
 import Data.Time.Duration (Milliseconds(..))
-import Data.Tree (Tree)
-import Data.Tuple (fst)
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_, delay)
 import Effect.Class (liftEffect)
 import Effect.Ref as Ref
-import PSD3.Interpreter.D3 (runD3M)
-import PSD3.Internal.Types (D3Selection_)
-import D3.Viz.AnimatedTree4Cluster4 as AnimatedTree
-import D3.Viz.AnimatedTree4Cluster4 (LayoutType(..), TreeModel)
+import D3.Viz.AnimatedTree4Cluster4v2 as AnimatedTree
+import D3.Viz.AnimatedTree4Cluster4v2 (LayoutType(..), VizState)
 
 -- | Toggle layout type
 toggleLayout :: LayoutType -> LayoutType
 toggleLayout TreeLayout = ClusterLayout
 toggleLayout ClusterLayout = TreeLayout
-
--- | Type alias for viz state
-type VizState =
-  { dataTree :: Tree TreeModel
-  , linksGroup :: D3Selection_ Unit
-  , nodesGroup :: D3Selection_ Unit
-  , chartWidth :: Number
-  , chartHeight :: Number
-  }
 
 -- | Animation loop that cycles between layouts
 animationLoop ::
@@ -43,8 +31,8 @@ animationLoop vizState layoutRef = do
   let newLayout = toggleLayout currentLayout
   liftEffect $ Ref.write newLayout layoutRef
 
-  -- Apply the new layout with animation
-  _ <- liftEffect $ runD3M $ AnimatedTree.animationStep
+  -- Apply the new layout with animation (v2 returns Effect directly)
+  liftEffect $ AnimatedTree.animationStep
     vizState.dataTree
     vizState.linksGroup
     vizState.nodesGroup
@@ -61,15 +49,14 @@ animationLoop vizState layoutRef = do
 -- | Initialize and start the auto-looping animation
 startAnimatedTreeClusterLoop :: HierData -> String -> Effect Unit
 startAnimatedTreeClusterLoop flareData containerSelector = launchAff_ do
-  -- Initialize visualization (runD3M returns Tuple result state, we want the result)
-  vizStateTuple <- liftEffect $ runD3M $ AnimatedTree.draw flareData containerSelector
-  let vizState = fst vizStateTuple
+  -- Initialize visualization (v2 returns Effect directly)
+  vizState <- liftEffect $ AnimatedTree.draw flareData containerSelector
 
   -- Create ref to track current layout
   layoutRef <- liftEffect $ Ref.new TreeLayout
 
   -- Perform initial layout (Tree)
-  _ <- liftEffect $ runD3M $ AnimatedTree.animationStep
+  liftEffect $ AnimatedTree.animationStep
     vizState.dataTree
     vizState.linksGroup
     vizState.nodesGroup

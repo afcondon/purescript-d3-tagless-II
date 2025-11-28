@@ -22,8 +22,7 @@ import Effect.Ref as Ref
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_)
 import PSD3v2.Selection.Types (SBoundOwns)
 import Web.DOM.Element (Element)
-import D3.Viz.GUP as GUP
-import PSD3.Interpreter.D3 (eval_D3M, runD3M)
+import D3.Viz.GUPv2 as GUP
 import D3.Viz.AnimatedTreeClusterLoop as AnimatedTreeLoop
 import D3.Viz.TreeAPI.StaggeredCircles as StaggeredCircles
 import D3.Viz.LesMisV3.Model as LesMisModel
@@ -73,11 +72,11 @@ handleAction = case _ of
     staggered <- liftEffect $ StaggeredCircles.staggeredCircles "#staggered-container"
     H.modify_ _ { staggeredTrigger = Just staggered }
 
-    -- Render Section 3: General Update Pattern (v1 restored)
-    update <- liftEffect $ eval_D3M $ GUP.exGeneralUpdatePattern "#gup-container"
+    -- Render Section 3: General Update Pattern (v2)
+    update <- liftEffect $ GUP.initGUP "#gup-container"
     forkId <- H.fork $ forever do
       letters <- liftEffect getLetters
-      liftEffect $ runD3M (update letters) *> pure unit
+      liftEffect $ update letters
       H.liftAff $ delay (Milliseconds 2300.0)
     H.modify_ _ { gupFiber = Just forkId }
 

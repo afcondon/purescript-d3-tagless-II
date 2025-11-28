@@ -14,6 +14,7 @@ import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
 import D3.Viz.FPFTW.TopologicalSort as TopoSort
 import D3.Viz.FPFTW.TransitiveReduction as TransReduction
+import D3.Viz.FPFTW.KoenigsbergBridges as Koenigsberg
 
 -- | Tour page state
 type State = Unit
@@ -43,6 +44,9 @@ handleAction = case _ of
 
     -- Render transitive reduction
     liftEffect $ TransReduction.drawTransitiveReduction "#transitive-reduction"
+
+    -- Render Königsberg bridges
+    _ <- liftEffect $ Koenigsberg.drawKoenigsbergBridges "#koenigsberg-bridges"
 
     pure unit
 
@@ -221,6 +225,40 @@ transitiveReduction graph =
                 , HH.li_ [ HH.strong_ [ HH.text "Recursive traversal: " ], HH.text "Reachability computed via tail-recursive function" ]
                 , HH.li_ [ HH.strong_ [ HH.text "Set operations: " ], HH.text "Union, difference, membership checks are declarative and clear" ]
                 , HH.li_ [ HH.strong_ [ HH.text "Visualization-friendly: " ], HH.text "Easy to highlight removed edges for before/after comparison" ]
+                ]
+            ]
+
+        -- Section 3: Königsberg Bridges
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ]
+            , HP.id "koenigsberg-section"
+            ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "3. Königsberg Bridges: The Birth of Graph Theory" ]
+            , HH.p_
+                [ HH.text "In 1736, Euler solved the famous "
+                , HH.em_ [ HH.text "\"Seven Bridges of Königsberg\"" ]
+                , HH.text " problem and invented graph theory in the process. The city had four land masses connected by seven bridges. The question: "
+                , HH.strong_ [ HH.text "Can you walk through the city crossing each bridge exactly once?" ]
+                ]
+            , HH.div
+                [ HP.id "koenigsberg-bridges"
+                , HP.classes [ HH.ClassName "viz-container" ]
+                , HP.style "margin: 20px 0; text-align: center;"
+                ]
+                []
+            , HH.p_
+                [ HH.text "Euler proved it's "
+                , HH.strong_ [ HH.text "impossible" ]
+                , HH.text ". His insight: a walk crossing each edge exactly once ("
+                , HH.em_ [ HH.text "Eulerian path" ]
+                , HH.text ") exists only if at most 2 nodes have odd degree. Here, "
+                , HH.strong_ [ HH.text "all 4 nodes have odd degree" ]
+                , HH.text " (the Island has degree 5, all others have degree 3)."
+                ]
+            , HH.p_
+                [ HH.text "This tiny graph—just 4 nodes and 7 edges—launched an entire field of mathematics. Today we use Eulerian paths for DNA sequencing, circuit board routing, and garbage truck routes."
                 ]
             ]
 

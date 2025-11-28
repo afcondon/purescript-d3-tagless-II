@@ -66,6 +66,7 @@ import Component.MermaidTreeDemo as MermaidTreeDemo
 import Component.SceneJoinDemo as SceneJoinDemo
 import Component.ForceConfigPOC as ForceConfigPOC
 import Component.ForceConfigV2Test as ForceConfigV2Test
+import Component.SimpleForceGraph as SimpleForceGraph
 import Component.CodeExplorerV3 as CodeExplorerV3
 
 -- Routing
@@ -130,6 +131,7 @@ type Slots =
   , sceneJoinDemo :: forall q. H.Slot q Void Unit
   , forceConfigPOC :: forall q. H.Slot q Void Unit
   , forceConfigV2Test :: forall q. H.Slot q Void Unit
+  , simpleForceGraph :: forall q. H.Slot q Void Unit
   , codeExplorerV3 :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
@@ -177,6 +179,7 @@ _mermaidTreeDemo = Proxy :: Proxy "mermaidTreeDemo"
 _sceneJoinDemo = Proxy :: Proxy "sceneJoinDemo"
 _forceConfigPOC = Proxy :: Proxy "forceConfigPOC"
 _forceConfigV2Test = Proxy :: Proxy "forceConfigV2Test"
+_simpleForceGraph = Proxy :: Proxy "simpleForceGraph"
 _codeExplorerV3 = Proxy :: Proxy "codeExplorerV3"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
@@ -373,6 +376,9 @@ renderPage route = case spy "Route is" route of
 
   ForceConfigV2Test ->
     HH.slot_ _forceConfigV2Test unit ForceConfigV2Test.component unit
+
+  SimpleForceGraph ->
+    HH.slot_ _simpleForceGraph unit SimpleForceGraph.component unit
 
   CodeExplorer ->
     -- V1 archived, redirect to V3

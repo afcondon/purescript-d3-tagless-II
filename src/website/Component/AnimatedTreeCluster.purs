@@ -12,29 +12,16 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import PSD3.Interpreter.D3 (runD3M)
 import Affjax.Web as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Data.Either (Either(..))
-import Data.Tuple (Tuple(..), fst)
 import PSD3.Shared.FlareData (HierData)
-import Data.Tree (Tree)
-import PSD3.Internal.Types (D3Selection_)
 import Unsafe.Coerce (unsafeCoerce)
-import D3.Viz.AnimatedTree4Cluster4 as AnimatedTree
-import D3.Viz.AnimatedTree4Cluster4 (LayoutType(..))
-
-type VizState r =
-  { dataTree :: Tree r
-  , linksGroup :: D3Selection_ Unit
-  , nodesGroup :: D3Selection_ Unit
-  , chartWidth :: Number
-  , chartHeight :: Number
-  }
+import D3.Viz.AnimatedTree4Cluster4v2 as AnimatedTree
+import D3.Viz.AnimatedTree4Cluster4v2 (LayoutType(..), VizState)
 
 type State =
   { currentLayout :: LayoutType
-  , vizState :: Maybe (VizState AnimatedTree.TreeModel)
+  , vizState :: Maybe VizState
   }
 
 data Action
@@ -100,12 +87,12 @@ handleAction = case _ of
         let flareData :: HierData
             flareData = unsafeCoerce response.body
 
-        -- Initialize visualization
-        Tuple vizState _ <- liftEffect $ runD3M $ AnimatedTree.draw flareData "#animated-tree-cluster"
+        -- Initialize visualization (v2 returns Effect directly)
+        vizState <- liftEffect $ AnimatedTree.draw flareData "#animated-tree-cluster"
         H.modify_ _ { vizState = Just vizState }
 
         -- Perform initial layout with Tree
-        _ <- liftEffect $ runD3M $ AnimatedTree.animationStep
+        liftEffect $ AnimatedTree.animationStep
           vizState.dataTree
           vizState.linksGroup
           vizState.nodesGroup
@@ -124,11 +111,10 @@ handleAction = case _ of
     case state.vizState of
       Nothing -> log "No viz state available"
       Just viz -> do
-        _ <- liftEffect $ runD3M $ AnimatedTree.animationStep
+        liftEffect $ AnimatedTree.animationStep
           viz.dataTree
           viz.linksGroup
           viz.nodesGroup
           viz.chartWidth
           viz.chartHeight
           newLayout
-        pure unit

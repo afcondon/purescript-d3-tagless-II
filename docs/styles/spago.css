@@ -192,13 +192,13 @@ g {
   transition: opacity 0.15s ease;
 }
 
-/* Label visibility - hide by default, show on hover */
-g text {
+/* Label visibility - hide by default, show on hover (scoped to spago viz) */
+.spago-viz-container g text {
   opacity: 0;
   transition: opacity 0.2s ease;
   pointer-events: none;  /* Don't interfere with hover detection */
 }
 
-g text.show-label {
+.spago-viz-container g text.show-label {
   opacity: 1;
 }

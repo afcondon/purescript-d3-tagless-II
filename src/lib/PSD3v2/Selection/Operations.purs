@@ -113,18 +113,16 @@ selectAll
   -> m (Selection SEmpty Element datum)
 selectAll selector (Selection impl) = liftEffect do
   doc <- getDocument impl
-  elements <- case impl of
-    EmptySelection { parentElements } ->
-      querySelectorAllElements selector parentElements
-    BoundSelection { elements: parentElems } ->
-      querySelectorAllElements selector parentElems
-    PendingSelection { parentElements } ->
-      querySelectorAllElements selector parentElements
-    ExitingSelection { elements: exitElems } ->
-      querySelectorAllElements selector exitElems
+  -- Get the parent elements (where new children will be appended)
+  -- NOT the query results - those are fetched by joinData when needed
+  let parentElems = case impl of
+        EmptySelection { parentElements } -> parentElements
+        BoundSelection { elements } -> elements
+        PendingSelection { parentElements } -> parentElements
+        ExitingSelection { elements } -> elements
 
   pure $ Selection $ EmptySelection
-    { parentElements: elements
+    { parentElements: parentElems  -- Preserve parents for appending
     , document: doc
     }
 

@@ -137,6 +137,7 @@ data Route
   | SceneJoinDemo   -- SceneNestedJoin demonstration (GUP with type decomposition)
   | ForceConfigPOC  -- POC for testing new force configuration system
   | ForceConfigV2Test -- Minimal standalone test of V2 force configuration
+  | SimpleForceGraph  -- Simplest force graph with hardcoded data
   | CodeExplorer    -- Interactive code exploration (PureScript module dependencies)
   | CodeExplorerV2  -- Rebuilt Code Explorer using LesMisGUP patterns
   | CodeExplorerV3  -- Code Explorer using our own force engine (no D3 simulation)
@@ -199,6 +200,7 @@ instance showRoute :: Show Route where
   show SceneJoinDemo = "SceneNestedJoin Demo"
   show ForceConfigPOC = "Force Config POC"
   show ForceConfigV2Test = "Force Config V2 Test"
+  show SimpleForceGraph = "Simple Force Graph"
   show CodeExplorer = "Code Explorer"
   show CodeExplorerV2 = "Code Explorer V2"
   show CodeExplorerV3 = "Code Explorer V3"

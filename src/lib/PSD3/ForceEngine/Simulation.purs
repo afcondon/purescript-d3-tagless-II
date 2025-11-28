@@ -213,8 +213,11 @@ start sim = do
       if running
         then do
           newAlpha <- tick sim
-          -- Continue if alpha > 0
-          pure (newAlpha > 0.0)
+          -- Continue if alpha > 0, otherwise mark as stopped
+          let shouldContinue = newAlpha > 0.0
+          unless shouldContinue do
+            Ref.write false sim.running
+          pure shouldContinue
         else pure false
 
     Ref.write cancel sim.cancelAnimation

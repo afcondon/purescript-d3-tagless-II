@@ -80,14 +80,14 @@ render _ =
                 , HH.text ". Statistics can lie; plots don't!"
                 ]
             , HH.p_
-                [ HH.text "This example showcases functional programming's " ]
-            , HH.em_ [ HH.text "map" ]
-            , HH.text " pattern: we define "
-            , HH.strong_ [ HH.text "one scatterplot component" ]
-            , HH.text " and "
-            , HH.strong_ [ HH.text "map it over four datasets" ]
-            , HH.text ". Same code, different data, four visualizations. This is composability in action:"
-            ]
+                [ HH.text "This example showcases functional programming's "
+                , HH.em_ [ HH.text "map" ]
+                , HH.text " pattern: we define "
+                , HH.strong_ [ HH.text "one scatterplot component" ]
+                , HH.text " and "
+                , HH.strong_ [ HH.text "map it over four datasets" ]
+                , HH.text ". Same code, different data, four visualizations. This is composability in action:"
+                ]
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ]
                 , HP.style "background: #f5f5f5; padding: 15px; border-radius: 5px; color: #333; overflow-x: auto;"
@@ -137,10 +137,10 @@ render _ =
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
                 [ HH.text "2. Set Operations: Map + Foldable + Phylotaxis" ]
             , HH.p_
-                [ HH.text "Sets are unordered, unique collections. This example demonstrates " ]
-            , HH.strong_ [ HH.text "three FP wins at once" ]
-            , HH.text ":"
-            
+                [ HH.text "Sets are unordered, unique collections. This example demonstrates "
+                , HH.strong_ [ HH.text "three FP wins at once" ]
+                , HH.text ":"
+                ]
             , HH.ul_
                 [ HH.li_
                     [ HH.strong_ [ HH.text "Map pattern: " ]
@@ -243,5 +243,4 @@ render _ =
                 ]
             ]
         ]
-    
-
+    ]

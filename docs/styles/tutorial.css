@@ -470,6 +470,16 @@
   max-width: 100%;
 }
 
+/* GUP container on tour page needs explicit height */
+#gup-container {
+  min-height: 300px;
+}
+
+#gup-container svg {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
 /* Embedded visualization divs */
 .tutorial-viz-container .three-circles-viz,
 .tutorial-viz-container .gup-viz,

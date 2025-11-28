@@ -69,6 +69,7 @@ routes =
   <|> sceneJoinDemo
   <|> forceConfigPOC
   <|> forceConfigV2Test
+  <|> simpleForceGraphRoute
   <|> codeExplorer
   <|> codeExplorerV2
   <|> codeExplorerV3
@@ -288,6 +289,10 @@ forceConfigPOC = ForceConfigPOC <$ lit "force-config-poc" <* end
 forceConfigV2Test :: Match Route
 forceConfigV2Test = ForceConfigV2Test <$ lit "force-config-v2-test" <* end
 
+-- | Match: /simple-force-graph
+simpleForceGraphRoute :: Match Route
+simpleForceGraphRoute = SimpleForceGraph <$ lit "simple-force-graph" <* end
+
 -- | Match: /code-explorer
 codeExplorer :: Match Route
 codeExplorer = CodeExplorer <$ lit "code-explorer" <* end
@@ -364,6 +369,7 @@ routeToPath MermaidTreeDemo = "/mermaid-tree-demo"
 routeToPath SceneJoinDemo = "/scene-join-demo"
 routeToPath ForceConfigPOC = "/force-config-poc"
 routeToPath ForceConfigV2Test = "/force-config-v2-test"
+routeToPath SimpleForceGraph = "/simple-force-graph"
 routeToPath CodeExplorer = "/code-explorer"
 routeToPath CodeExplorerV2 = "/code-explorer-v2"
 routeToPath CodeExplorerV3 = "/code-explorer-v3"

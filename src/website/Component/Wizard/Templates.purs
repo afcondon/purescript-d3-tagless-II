@@ -112,8 +112,9 @@ draw dataPoints selector = do
   pure unit
 
 -- | Entry point
-run :: Array """ <> dataTypeName <> """ -> Effect Unit
-run dataPoints = eval_D3M $ draw dataPoints "#chart"
+-- TODO: Update to use PSD3v2 when wizard is overhauled
+-- run :: Array """ <> dataTypeName <> """ -> Effect Unit
+-- run dataPoints = eval_D3M $ draw dataPoints "#chart"
 """
 
 -- | Generate Main.purs module
