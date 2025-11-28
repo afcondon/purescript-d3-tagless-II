@@ -136,8 +136,10 @@ data Route
   | MermaidTreeDemo -- Mermaid interpreter for Tree API (visualizes tree structure)
   | SceneJoinDemo   -- SceneNestedJoin demonstration (GUP with type decomposition)
   | ForceConfigPOC  -- POC for testing new force configuration system
+  | ForceConfigV2Test -- Minimal standalone test of V2 force configuration
   | CodeExplorer    -- Interactive code exploration (PureScript module dependencies)
   | CodeExplorerV2  -- Rebuilt Code Explorer using LesMisGUP patterns
+  | CodeExplorerV3  -- Code Explorer using our own force engine (no D3 simulation)
   -- Meta
   | Acknowledgements -- Credits and acknowledgements
   | NotFound
@@ -196,7 +198,9 @@ instance showRoute :: Show Route where
   show MermaidTreeDemo = "Mermaid Tree Visualizer"
   show SceneJoinDemo = "SceneNestedJoin Demo"
   show ForceConfigPOC = "Force Config POC"
+  show ForceConfigV2Test = "Force Config V2 Test"
   show CodeExplorer = "Code Explorer"
   show CodeExplorerV2 = "Code Explorer V2"
+  show CodeExplorerV3 = "Code Explorer V3"
   show Acknowledgements = "Acknowledgements"
   show NotFound = "Not Found"

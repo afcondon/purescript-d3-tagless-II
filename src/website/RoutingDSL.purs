@@ -68,8 +68,10 @@ routes =
   <|> mermaidTreeDemo
   <|> sceneJoinDemo
   <|> forceConfigPOC
+  <|> forceConfigV2Test
   <|> codeExplorer
   <|> codeExplorerV2
+  <|> codeExplorerV3
   <|> acknowledgements
   <|> rootRedirect
   <|> notFound
@@ -282,6 +284,10 @@ sceneJoinDemo = SceneJoinDemo <$ lit "scene-join-demo" <* end
 forceConfigPOC :: Match Route
 forceConfigPOC = ForceConfigPOC <$ lit "force-config-poc" <* end
 
+-- | Match: /force-config-v2-test
+forceConfigV2Test :: Match Route
+forceConfigV2Test = ForceConfigV2Test <$ lit "force-config-v2-test" <* end
+
 -- | Match: /code-explorer
 codeExplorer :: Match Route
 codeExplorer = CodeExplorer <$ lit "code-explorer" <* end
@@ -289,6 +295,10 @@ codeExplorer = CodeExplorer <$ lit "code-explorer" <* end
 -- | Match: /code-explorer-v2
 codeExplorerV2 :: Match Route
 codeExplorerV2 = CodeExplorerV2 <$ lit "code-explorer-v2" <* end
+
+-- | Match: /code-explorer-v3
+codeExplorerV3 :: Match Route
+codeExplorerV3 = CodeExplorerV3 <$ lit "code-explorer-v3" <* end
 
 -- | Match: /acknowledgements
 acknowledgements :: Match Route
@@ -353,7 +363,9 @@ routeToPath ModuleGraph = "/module-graph"
 routeToPath MermaidTreeDemo = "/mermaid-tree-demo"
 routeToPath SceneJoinDemo = "/scene-join-demo"
 routeToPath ForceConfigPOC = "/force-config-poc"
+routeToPath ForceConfigV2Test = "/force-config-v2-test"
 routeToPath CodeExplorer = "/code-explorer"
 routeToPath CodeExplorerV2 = "/code-explorer-v2"
+routeToPath CodeExplorerV3 = "/code-explorer-v3"
 routeToPath Acknowledgements = "/acknowledgements"
 routeToPath NotFound = "/not-found"

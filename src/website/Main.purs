@@ -73,8 +73,10 @@ import Component.ModuleGraph as ModuleGraph
 import Component.MermaidTreeDemo as MermaidTreeDemo
 import Component.SceneJoinDemo as SceneJoinDemo
 import Component.ForceConfigPOC as ForceConfigPOC
+import Component.ForceConfigV2Test as ForceConfigV2Test
 import PSD3.CodeExplorer as CodeExplorer
 import Component.CodeExplorerV2 as CodeExplorerV2
+import Component.CodeExplorerV3 as CodeExplorerV3
 
 -- Routing
 import PSD3.RoutingDSL (routing, routeToPath)
@@ -145,8 +147,10 @@ type Slots =
   , mermaidTreeDemo :: forall q. H.Slot q Void Unit
   , sceneJoinDemo :: forall q. H.Slot q Void Unit
   , forceConfigPOC :: forall q. H.Slot q Void Unit
+  , forceConfigV2Test :: forall q. H.Slot q Void Unit
   , codeExplorer :: forall q. H.Slot q Void Unit
   , codeExplorerV2 :: forall q. H.Slot q Void Unit
+  , codeExplorerV3 :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
 
@@ -200,8 +204,10 @@ _moduleGraph = Proxy :: Proxy "moduleGraph"
 _mermaidTreeDemo = Proxy :: Proxy "mermaidTreeDemo"
 _sceneJoinDemo = Proxy :: Proxy "sceneJoinDemo"
 _forceConfigPOC = Proxy :: Proxy "forceConfigPOC"
+_forceConfigV2Test = Proxy :: Proxy "forceConfigV2Test"
 _codeExplorer = Proxy :: Proxy "codeExplorer"
 _codeExplorerV2 = Proxy :: Proxy "codeExplorerV2"
+_codeExplorerV3 = Proxy :: Proxy "codeExplorerV3"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
 -- | Main application component
@@ -387,11 +393,17 @@ renderPage route = case spy "Route is" route of
   ForceConfigPOC ->
     HH.slot_ _forceConfigPOC unit ForceConfigPOC.component unit
 
+  ForceConfigV2Test ->
+    HH.slot_ _forceConfigV2Test unit ForceConfigV2Test.component unit
+
   CodeExplorer ->
     HH.slot_ _codeExplorer unit CodeExplorer.component unit
 
   CodeExplorerV2 ->
     HH.slot_ _codeExplorerV2 unit CodeExplorerV2.component unit
+
+  CodeExplorerV3 ->
+    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
 
   Acknowledgements ->
     HH.slot_ _acknowledgements unit Acknowledgements.component unit
