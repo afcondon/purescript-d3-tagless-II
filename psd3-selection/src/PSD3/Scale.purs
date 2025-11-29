@@ -1,0 +1,441 @@
+-- | PSD3.Scale - Type-safe scales with functional programming idioms
+-- |
+-- | This module provides D3-compatible scales with PureScript type safety
+-- | and functional programming abstractions.
+-- |
+-- | ## Basic Usage
+-- |
+-- | ```purescript
+-- | import PSD3.Scale (linear, domain, range, apply, ticks)
+-- |
+-- | -- Create a linear scale
+-- | myScale = linear # domain [0.0, 100.0] # range [0.0, 800.0]
+-- |
+-- | -- Apply the scale
+-- | pixelX = apply myScale 50.0  -- Returns 400.0
+-- |
+-- | -- Get tick marks
+-- | tickValues = ticks 10 myScale  -- Returns nice tick values
+-- | ```
+-- |
+-- | ## Functional Idioms
+-- |
+-- | Scales can be composed and transformed:
+-- |
+-- | ```purescript
+-- | -- Compose scales
+-- | timeToPixel = timeScale `andThen` positionScale
+-- |
+-- | -- Transform with Profunctor-like operations
+-- | celsiusScale = fahrenheitScale # contramap fahrenheitToCelsius
+-- | ```
+module PSD3.Scale
+  ( -- * Scale Types
+    Scale
+  , Continuous
+  , Ordinal
+  , Band
+  , Point
+  , Time
+  , ContinuousScale
+  , OrdinalScale
+  , BandScale
+  , TimeScale
+
+    -- * Continuous Scale Constructors
+  , linear
+  , log
+  , pow
+  , sqrt
+  , symlog
+
+    -- * Ordinal Scale Constructors
+  , ordinal
+  , band
+  , point
+
+    -- * Scale Configuration
+  , domain
+  , range
+  , clamp
+  , nice
+  , niceCount
+  , padding
+  , paddingInner
+  , paddingOuter
+  , align
+  , round
+  , base
+  , exponent
+  , constant
+
+    -- * Scale Operations
+  , applyScale
+  , invert
+  , ticks
+  , tickFormat
+  , bandwidth
+  , step
+  , copy
+
+    -- * Functional Combinators
+  , andThen
+  , contramap
+  , map
+  , dimap
+
+    -- * Interpolators (for color scales)
+  , Interpolator
+  , interpolateNumber
+  , interpolateRgb
+  , interpolateHsl
+
+    -- * Color Schemes
+  , schemeCategory10
+  , schemePaired
+  , schemeSet1
+  , schemeSet2
+  , schemeSet3
+
+    -- * Sequential Interpolators
+  , interpolateViridis
+  , interpolatePlasma
+  , interpolateInferno
+  , interpolateMagma
+  , interpolateTurbo
+  , interpolateWarm
+  , interpolateCool
+  , interpolateRainbow
+
+    -- * Diverging Interpolators
+  , interpolateRdYlGn
+  , interpolateRdBu
+  , interpolatePiYG
+  , interpolateBrBG
+
+  ) where
+
+import Prelude
+
+import Data.Maybe (Maybe)
+
+-- ============================================================================
+-- SCALE TYPES
+-- ============================================================================
+
+-- | A scale maps values from a domain to a range
+-- | The phantom types track:
+-- |   - `domain` - the input type
+-- |   - `range` - the output type
+-- |   - `kind` - the scale kind (Continuous, Ordinal, Band, etc.)
+foreign import data Scale :: Type -> Type -> Type -> Type
+
+-- | Phantom type for continuous scales (Linear, Log, Pow, etc.)
+data Continuous
+
+-- | Phantom type for ordinal scales
+data Ordinal
+
+-- | Phantom type for band scales
+data Band
+
+-- | Phantom type for point scales
+data Point
+
+-- | Phantom type for time scales
+data Time
+
+-- | Convenient type aliases
+type ContinuousScale = Scale Number Number Continuous
+type OrdinalScale domain range = Scale domain range Ordinal
+type BandScale domain = Scale domain Number Band
+type TimeScale = Scale Number Number Time  -- TODO: proper Date type
+
+-- ============================================================================
+-- CONTINUOUS SCALE CONSTRUCTORS
+-- ============================================================================
+
+-- | Create a linear scale
+-- | Maps domain values linearly to range values
+-- |
+-- | ```purescript
+-- | scale = linear # domain [0.0, 100.0] # range [0.0, 500.0]
+-- | apply scale 50.0  -- Returns 250.0
+-- | ```
+foreign import linear :: ContinuousScale
+
+-- | Create a logarithmic scale
+-- | Uses log transformation - domain must not include zero
+-- |
+-- | ```purescript
+-- | scale = log # domain [1.0, 1000.0] # range [0.0, 300.0]
+-- | ```
+foreign import log :: ContinuousScale
+
+-- | Create a power scale with configurable exponent
+-- |
+-- | ```purescript
+-- | scale = pow # exponent 2.0 # domain [0.0, 100.0] # range [0.0, 500.0]
+-- | ```
+foreign import pow :: ContinuousScale
+
+-- | Create a square root scale (pow with exponent 0.5)
+-- |
+-- | Useful for sizing circles by area
+-- |
+-- | ```purescript
+-- | radiusScale = sqrt # domain [0.0, maxValue] # range [0.0, 50.0]
+-- | ```
+foreign import sqrt :: ContinuousScale
+
+-- | Create a symlog scale (symmetric log)
+-- | Handles negative values and zero gracefully
+-- |
+-- | ```purescript
+-- | scale = symlog # constant 1.0 # domain [-100.0, 100.0] # range [0.0, 500.0]
+-- | ```
+foreign import symlog :: ContinuousScale
+
+-- ============================================================================
+-- ORDINAL SCALE CONSTRUCTORS
+-- ============================================================================
+
+-- | Create an ordinal scale
+-- | Maps discrete domain values to discrete range values
+-- |
+-- | ```purescript
+-- | colorScale = ordinal
+-- |   # domain ["a", "b", "c"]
+-- |   # range ["red", "green", "blue"]
+-- | ```
+foreign import ordinal :: forall d r. OrdinalScale d r
+
+-- | Create a band scale
+-- | Maps discrete domain values to continuous bands with configurable padding
+-- |
+-- | ```purescript
+-- | xScale = band
+-- |   # domain ["Mon", "Tue", "Wed", "Thu", "Fri"]
+-- |   # range [0.0, 500.0]
+-- |   # padding 0.1
+-- | ```
+foreign import band :: forall d. BandScale d
+
+-- | Create a point scale
+-- | Like band but with zero bandwidth - just points
+-- |
+-- | ```purescript
+-- | xScale = point
+-- |   # domain ["A", "B", "C"]
+-- |   # range [0.0, 500.0]
+-- | ```
+foreign import point :: forall d. BandScale d
+
+-- ============================================================================
+-- SCALE CONFIGURATION
+-- ============================================================================
+
+-- | Set the domain (input extent) of a scale
+-- |
+-- | For continuous scales: `[min, max]` (can include intermediate values for piecewise)
+-- | For ordinal/band: array of discrete values
+foreign import domain :: forall d r k. Array d -> Scale d r k -> Scale d r k
+
+-- | Set the range (output extent) of a scale
+-- |
+-- | For continuous scales: `[min, max]`
+-- | For band scales: `[start, end]` of the band space
+foreign import range :: forall d r k. Array r -> Scale d r k -> Scale d r k
+
+-- | Enable or disable clamping
+-- | When enabled, output is constrained to the range even for out-of-domain inputs
+foreign import clamp :: forall d r k. Boolean -> Scale d r k -> Scale d r k
+
+-- | Extend the domain to nice round values
+foreign import nice :: forall r k. Scale Number r k -> Scale Number r k
+
+-- | Extend the domain to nice round values with specified tick count hint
+foreign import niceCount :: forall r k. Int -> Scale Number r k -> Scale Number r k
+
+-- | Set padding for band scales (both inner and outer)
+foreign import padding :: forall d. Number -> BandScale d -> BandScale d
+
+-- | Set inner padding (between bands) for band scales
+foreign import paddingInner :: forall d. Number -> BandScale d -> BandScale d
+
+-- | Set outer padding (before first and after last band) for band scales
+foreign import paddingOuter :: forall d. Number -> BandScale d -> BandScale d
+
+-- | Set alignment for band scales (0 = left, 0.5 = center, 1 = right)
+foreign import align :: forall d. Number -> BandScale d -> BandScale d
+
+-- | Enable rounding of output values
+foreign import round :: forall d r k. Boolean -> Scale d r k -> Scale d r k
+
+-- | Set the base for logarithmic scales (default 10)
+foreign import base :: forall r. Number -> Scale Number r Continuous -> Scale Number r Continuous
+
+-- | Set the exponent for power scales
+foreign import exponent :: forall r. Number -> Scale Number r Continuous -> Scale Number r Continuous
+
+-- | Set the constant for symlog scales
+foreign import constant :: forall r. Number -> Scale Number r Continuous -> Scale Number r Continuous
+
+-- ============================================================================
+-- SCALE OPERATIONS
+-- ============================================================================
+
+-- | Apply a scale to a value
+-- |
+-- | ```purescript
+-- | scale = linear # domain [0.0, 100.0] # range [0.0, 500.0]
+-- | applyScale scale 50.0  -- Returns 250.0
+-- | ```
+foreign import applyScale :: forall d r k. Scale d r k -> d -> r
+
+-- | Invert a continuous scale (range value → domain value)
+-- |
+-- | ```purescript
+-- | scale = linear # domain [0.0, 100.0] # range [0.0, 500.0]
+-- | invert scale 250.0  -- Returns Just 50.0
+-- | ```
+foreign import invert :: forall r. Scale Number r Continuous -> r -> Maybe Number
+
+-- | Generate tick values for a continuous scale
+-- |
+-- | ```purescript
+-- | scale = linear # domain [0.0, 100.0] # range [0.0, 500.0]
+-- | ticks 5 scale  -- Returns [0.0, 20.0, 40.0, 60.0, 80.0, 100.0]
+-- | ```
+foreign import ticks :: forall r k. Int -> Scale Number r k -> Array Number
+
+-- | Get a tick formatter function
+foreign import tickFormat :: forall r k. Int -> String -> Scale Number r k -> (Number -> String)
+
+-- | Get the bandwidth of a band scale
+foreign import bandwidth :: forall d. BandScale d -> Number
+
+-- | Get the step size of a band scale (bandwidth + padding)
+foreign import step :: forall d. BandScale d -> Number
+
+-- | Create a copy of a scale
+foreign import copy :: forall d r k. Scale d r k -> Scale d r k
+
+-- ============================================================================
+-- FUNCTIONAL COMBINATORS
+-- ============================================================================
+
+-- | Compose two scales: apply first, then second
+-- |
+-- | ```purescript
+-- | -- Time → normalized → pixels
+-- | combined = timeScale `andThen` pixelScale
+-- | ```
+andThen :: forall a b c k1 k2. Scale a b k1 -> Scale b c k2 -> (a -> c)
+andThen s1 s2 = applyScale s2 <<< applyScale s1
+
+-- | Transform the domain type (contravariant)
+-- |
+-- | ```purescript
+-- | -- Convert Celsius input to a Fahrenheit scale
+-- | celsiusScale = fahrenheitScale # contramap celsiusToFahrenheit
+-- | ```
+contramap :: forall a a' b k. (a' -> a) -> Scale a b k -> (a' -> b)
+contramap f scale = applyScale scale <<< f
+
+-- | Transform the range type (covariant/functor-like)
+-- |
+-- | ```purescript
+-- | -- Add offset to all positions
+-- | offsetScale = positionScale # map (_ + 50.0)
+-- | ```
+map :: forall a b b' k. (b -> b') -> Scale a b k -> (a -> b')
+map f scale = f <<< applyScale scale
+
+-- | Transform both domain and range (profunctor-like)
+-- |
+-- | ```purescript
+-- | transformed = scale # dimap preprocess postprocess
+-- | ```
+dimap :: forall a a' b b' k. (a' -> a) -> (b -> b') -> Scale a b k -> (a' -> b')
+dimap pre post scale = post <<< applyScale scale <<< pre
+
+-- ============================================================================
+-- INTERPOLATORS
+-- ============================================================================
+
+-- | An interpolator maps [0, 1] to a value
+type Interpolator a = Number -> a
+
+-- | Linear number interpolation
+interpolateNumber :: Number -> Number -> Interpolator Number
+interpolateNumber a b t = a + (b - a) * t
+
+-- | RGB color interpolation
+foreign import interpolateRgb :: String -> String -> Interpolator String
+
+-- | HSL color interpolation (better for perceptual uniformity)
+foreign import interpolateHsl :: String -> String -> Interpolator String
+
+-- ============================================================================
+-- COLOR SCHEMES (Categorical)
+-- ============================================================================
+
+-- | Category10 color scheme (10 colors)
+foreign import schemeCategory10 :: Array String
+
+-- | Paired color scheme (12 colors)
+foreign import schemePaired :: Array String
+
+-- | Set1 color scheme (9 colors)
+foreign import schemeSet1 :: Array String
+
+-- | Set2 color scheme (8 colors)
+foreign import schemeSet2 :: Array String
+
+-- | Set3 color scheme (12 colors)
+foreign import schemeSet3 :: Array String
+
+-- ============================================================================
+-- SEQUENTIAL INTERPOLATORS
+-- ============================================================================
+
+-- | Viridis perceptually-uniform colormap
+foreign import interpolateViridis :: Interpolator String
+
+-- | Plasma colormap
+foreign import interpolatePlasma :: Interpolator String
+
+-- | Inferno colormap
+foreign import interpolateInferno :: Interpolator String
+
+-- | Magma colormap
+foreign import interpolateMagma :: Interpolator String
+
+-- | Turbo colormap (rainbow-like but more perceptual)
+foreign import interpolateTurbo :: Interpolator String
+
+-- | Warm colormap (red to yellow)
+foreign import interpolateWarm :: Interpolator String
+
+-- | Cool colormap (cyan to purple)
+foreign import interpolateCool :: Interpolator String
+
+-- | Rainbow colormap
+foreign import interpolateRainbow :: Interpolator String
+
+-- ============================================================================
+-- DIVERGING INTERPOLATORS
+-- ============================================================================
+
+-- | Red-Yellow-Green diverging
+foreign import interpolateRdYlGn :: Interpolator String
+
+-- | Red-Blue diverging
+foreign import interpolateRdBu :: Interpolator String
+
+-- | Pink-Yellow-Green diverging
+foreign import interpolatePiYG :: Interpolator String
+
+-- | Brown-Blue-Green diverging
+foreign import interpolateBrBG :: Interpolator String
