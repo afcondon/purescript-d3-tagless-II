@@ -1,4 +1,17 @@
-module PSD3.Internal.Types where
+module PSD3.Internal.Types
+  ( -- Datum and Index types
+    Datum_
+  , Index_
+  , index_ToInt
+  , index_ToNumber
+  , intToIndex_
+  -- D3 opaque types
+  , D3Selection_
+  , D3Simulation_
+  -- Type aliases
+  , Selector
+  , PointXY
+  ) where
 
 import Data.Int (toNumber)
 import Prelude (class Eq, class Ord, compare, eq, ($))

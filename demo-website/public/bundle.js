@@ -12946,7 +12946,7 @@
       return HTMLContext.value;
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Selection.Types (line 188, column 1 - line 188, column 47): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Selection.Types (line 203, column 1 - line 203, column 47): " + [v.constructor.name]);
   };
 
   // output/PSD3v2.VizTree.Tree/index.js
@@ -13028,7 +13028,7 @@
         return new SceneNestedJoin(parent2.value0);
       }
       ;
-      throw new Error("Failed pattern match at PSD3v2.VizTree.Tree (line 157, column 35 - line 162, column 45): " + [parent2.constructor.name]);
+      throw new Error("Failed pattern match at PSD3v2.VizTree.Tree (line 179, column 35 - line 184, column 45): " + [parent2.constructor.name]);
     };
   };
   var withChild = function(parent2) {
@@ -13058,7 +13058,7 @@
         return new SceneNestedJoin(parent2.value0);
       }
       ;
-      throw new Error("Failed pattern match at PSD3v2.VizTree.Tree (line 146, column 26 - line 151, column 45): " + [parent2.constructor.name]);
+      throw new Error("Failed pattern match at PSD3v2.VizTree.Tree (line 168, column 26 - line 173, column 45): " + [parent2.constructor.name]);
     };
   };
   var sceneNestedJoin = function(name16) {

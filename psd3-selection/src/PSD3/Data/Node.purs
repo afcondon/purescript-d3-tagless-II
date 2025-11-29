@@ -1,4 +1,16 @@
-module PSD3.Data.Node where
+module PSD3.Data.Node
+  ( -- Node ID type
+    NodeID
+  -- Link types
+  , Link
+  , SwizzledLink
+  -- Simulation node and row types
+  , SimulationNode
+  , D3_ID
+  , D3_XY
+  , D3_VxyFxy
+  , D3_FocusXY
+  ) where
 
 import Data.Nullable (Nullable)
 import Type.Row (type (+))

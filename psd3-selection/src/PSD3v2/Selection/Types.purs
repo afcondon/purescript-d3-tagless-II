@@ -1,4 +1,19 @@
-module PSD3v2.Selection.Types where
+module PSD3v2.Selection.Types
+  ( -- Phantom state types
+    SEmpty
+  , SBoundOwns
+  , SBoundInherits
+  , SPending
+  , SExiting
+  -- Selection types
+  , Selection(..)
+  , SelectionImpl(..)
+  , JoinResult(..)
+  -- Element types
+  , ElementType(..)
+  , RenderContext(..)
+  , elementContext
+  ) where
 
 import Prelude
 

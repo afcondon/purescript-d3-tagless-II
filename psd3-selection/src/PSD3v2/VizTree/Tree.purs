@@ -1,4 +1,26 @@
-module PSD3v2.VizTree.Tree where
+module PSD3v2.VizTree.Tree
+  ( Tree(..)
+  , TreeNode
+  , EnterBehavior
+  , UpdateBehavior
+  , ExitBehavior
+  -- Smart constructors
+  , named
+  , elem
+  , withChild
+  , withChildren
+  -- Data joins
+  , joinData
+  , nestedJoin
+  , sceneJoin
+  , sceneNestedJoin
+  -- Combinators
+  , beside
+  , siblings
+  -- Operators
+  , (>:)
+  , (+:)
+  ) where
 
 import Prelude
 
