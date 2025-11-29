@@ -106,7 +106,7 @@
 -- |
 module PSD3 (module X) where
 
-import Prelude as X
+import Prelude as X -- TODO don't include Prelude, let each module include it with selective includes, prevents clashes over append and so on
 
 -- PSD3v2 Core Exports
 import PSD3v2.Interpreter.D3v2 (D3v2M, D3v2Selection_, runD3v2M, reselectD3v2) as X
@@ -123,5 +123,5 @@ import PSD3v2.Attribute.Types (Attribute, cx, cy, x, y, x1, y1, x2, y2, width, h
 import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, ScaleExtent(..)) as X
 
 -- Shared data types
-import PSD3.Data.Node (SimulationNode, D3Link_Unswizzled, D3Link_Swizzled) as X
+import PSD3.Data.Node (SimulationNode) as X
 import PSD3.Internal.Types (D3Simulation_, Datum_, Index_, Selector) as X

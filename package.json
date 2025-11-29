@@ -8,7 +8,7 @@
     "build:selection": "spago build -p psd3-selection",
     "build:simulation": "spago build -p psd3-simulation",
     "build:website": "spago build -p demo-website",
-    "clean-build": "rm -rf output && spago build",
+    "clean-build": "rm -rf output/PSD3* && spago build",
     "install": "spago install",
     "upgrade-set": "spago upgrade-set",
     "convert-about": "node scripts/convert-about.js",
