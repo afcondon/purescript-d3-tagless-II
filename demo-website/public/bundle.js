@@ -8499,6 +8499,9 @@
       }
     };
   }
+  function jsonStringify_(value18) {
+    return JSON.stringify(value18);
+  }
 
   // output/Effect.Console/foreign.js
   var log2 = function(s) {
@@ -12949,6 +12952,496 @@
     throw new Error("Failed pattern match at PSD3v2.Selection.Types (line 203, column 1 - line 203, column 47): " + [v.constructor.name]);
   };
 
+  // output/PSD3v2.Transition.FFI/foreign.js
+  function createTransition_(duration2) {
+    return function(delay2) {
+      return function(easingName) {
+        return function(element3) {
+          return function() {
+            let transition3 = select_default2(element3).transition();
+            transition3 = transition3.duration(duration2);
+            if (delay2 != null) {
+              transition3 = transition3.delay(delay2);
+            }
+            if (easingName != null) {
+              const easingFn = getD3EasingFunction(easingName);
+              if (easingFn) {
+                transition3 = transition3.ease(easingFn);
+              }
+            }
+            return transition3;
+          };
+        };
+      };
+    };
+  }
+  function transitionSetAttribute_(name16) {
+    return function(value18) {
+      return function(transition3) {
+        return function() {
+          transition3.attr(name16, value18);
+        };
+      };
+    };
+  }
+  function transitionRemove_(transition3) {
+    return function() {
+      transition3.remove();
+    };
+  }
+  function getD3EasingFunction(name16) {
+    const easingMap = {
+      // Linear
+      "linear": linear2,
+      // Polynomial (Quad, Cubic)
+      "quad": quadInOut,
+      "quadIn": quadIn,
+      "quadOut": quadOut,
+      "quadInOut": quadInOut,
+      "cubic": cubicInOut,
+      "cubicIn": cubicIn,
+      "cubicOut": cubicOut,
+      "cubicInOut": cubicInOut,
+      // Sinusoidal
+      "sin": sinInOut,
+      "sinIn": sinIn,
+      "sinOut": sinOut,
+      "sinInOut": sinInOut,
+      // Exponential
+      "exp": expInOut,
+      "expIn": expIn,
+      "expOut": expOut,
+      "expInOut": expInOut,
+      // Circular
+      "circle": circleInOut,
+      "circleIn": circleIn,
+      "circleOut": circleOut,
+      "circleInOut": circleInOut,
+      // Elastic
+      "elastic": elasticOut,
+      "elasticIn": elasticIn,
+      "elasticOut": elasticOut,
+      "elasticInOut": elasticInOut,
+      // Back
+      "back": backInOut,
+      "backIn": backIn,
+      "backOut": backOut,
+      "backInOut": backInOut,
+      // Bounce
+      "bounce": bounceOut,
+      "bounceIn": bounceIn,
+      "bounceOut": bounceOut,
+      "bounceInOut": bounceInOut
+    };
+    return easingMap[name16];
+  }
+
+  // output/PSD3v2.Transition.Types/index.js
+  var Linear = /* @__PURE__ */ (function() {
+    function Linear3() {
+    }
+    ;
+    Linear3.value = new Linear3();
+    return Linear3;
+  })();
+  var Cubic = /* @__PURE__ */ (function() {
+    function Cubic2() {
+    }
+    ;
+    Cubic2.value = new Cubic2();
+    return Cubic2;
+  })();
+  var CubicIn = /* @__PURE__ */ (function() {
+    function CubicIn2() {
+    }
+    ;
+    CubicIn2.value = new CubicIn2();
+    return CubicIn2;
+  })();
+  var CubicOut = /* @__PURE__ */ (function() {
+    function CubicOut2() {
+    }
+    ;
+    CubicOut2.value = new CubicOut2();
+    return CubicOut2;
+  })();
+  var CubicInOut = /* @__PURE__ */ (function() {
+    function CubicInOut2() {
+    }
+    ;
+    CubicInOut2.value = new CubicInOut2();
+    return CubicInOut2;
+  })();
+  var Quad = /* @__PURE__ */ (function() {
+    function Quad2() {
+    }
+    ;
+    Quad2.value = new Quad2();
+    return Quad2;
+  })();
+  var QuadIn = /* @__PURE__ */ (function() {
+    function QuadIn2() {
+    }
+    ;
+    QuadIn2.value = new QuadIn2();
+    return QuadIn2;
+  })();
+  var QuadOut = /* @__PURE__ */ (function() {
+    function QuadOut2() {
+    }
+    ;
+    QuadOut2.value = new QuadOut2();
+    return QuadOut2;
+  })();
+  var QuadInOut = /* @__PURE__ */ (function() {
+    function QuadInOut2() {
+    }
+    ;
+    QuadInOut2.value = new QuadInOut2();
+    return QuadInOut2;
+  })();
+  var Sin = /* @__PURE__ */ (function() {
+    function Sin2() {
+    }
+    ;
+    Sin2.value = new Sin2();
+    return Sin2;
+  })();
+  var SinIn = /* @__PURE__ */ (function() {
+    function SinIn2() {
+    }
+    ;
+    SinIn2.value = new SinIn2();
+    return SinIn2;
+  })();
+  var SinOut = /* @__PURE__ */ (function() {
+    function SinOut2() {
+    }
+    ;
+    SinOut2.value = new SinOut2();
+    return SinOut2;
+  })();
+  var SinInOut = /* @__PURE__ */ (function() {
+    function SinInOut2() {
+    }
+    ;
+    SinInOut2.value = new SinInOut2();
+    return SinInOut2;
+  })();
+  var Exp = /* @__PURE__ */ (function() {
+    function Exp2() {
+    }
+    ;
+    Exp2.value = new Exp2();
+    return Exp2;
+  })();
+  var ExpIn = /* @__PURE__ */ (function() {
+    function ExpIn2() {
+    }
+    ;
+    ExpIn2.value = new ExpIn2();
+    return ExpIn2;
+  })();
+  var ExpOut = /* @__PURE__ */ (function() {
+    function ExpOut2() {
+    }
+    ;
+    ExpOut2.value = new ExpOut2();
+    return ExpOut2;
+  })();
+  var ExpInOut = /* @__PURE__ */ (function() {
+    function ExpInOut2() {
+    }
+    ;
+    ExpInOut2.value = new ExpInOut2();
+    return ExpInOut2;
+  })();
+  var Circle2 = /* @__PURE__ */ (function() {
+    function Circle3() {
+    }
+    ;
+    Circle3.value = new Circle3();
+    return Circle3;
+  })();
+  var CircleIn = /* @__PURE__ */ (function() {
+    function CircleIn2() {
+    }
+    ;
+    CircleIn2.value = new CircleIn2();
+    return CircleIn2;
+  })();
+  var CircleOut = /* @__PURE__ */ (function() {
+    function CircleOut2() {
+    }
+    ;
+    CircleOut2.value = new CircleOut2();
+    return CircleOut2;
+  })();
+  var CircleInOut = /* @__PURE__ */ (function() {
+    function CircleInOut2() {
+    }
+    ;
+    CircleInOut2.value = new CircleInOut2();
+    return CircleInOut2;
+  })();
+  var Elastic = /* @__PURE__ */ (function() {
+    function Elastic2() {
+    }
+    ;
+    Elastic2.value = new Elastic2();
+    return Elastic2;
+  })();
+  var ElasticIn = /* @__PURE__ */ (function() {
+    function ElasticIn2() {
+    }
+    ;
+    ElasticIn2.value = new ElasticIn2();
+    return ElasticIn2;
+  })();
+  var ElasticOut = /* @__PURE__ */ (function() {
+    function ElasticOut2() {
+    }
+    ;
+    ElasticOut2.value = new ElasticOut2();
+    return ElasticOut2;
+  })();
+  var ElasticInOut = /* @__PURE__ */ (function() {
+    function ElasticInOut2() {
+    }
+    ;
+    ElasticInOut2.value = new ElasticInOut2();
+    return ElasticInOut2;
+  })();
+  var Back = /* @__PURE__ */ (function() {
+    function Back2() {
+    }
+    ;
+    Back2.value = new Back2();
+    return Back2;
+  })();
+  var BackIn = /* @__PURE__ */ (function() {
+    function BackIn2() {
+    }
+    ;
+    BackIn2.value = new BackIn2();
+    return BackIn2;
+  })();
+  var BackOut = /* @__PURE__ */ (function() {
+    function BackOut2() {
+    }
+    ;
+    BackOut2.value = new BackOut2();
+    return BackOut2;
+  })();
+  var BackInOut = /* @__PURE__ */ (function() {
+    function BackInOut2() {
+    }
+    ;
+    BackInOut2.value = new BackInOut2();
+    return BackInOut2;
+  })();
+  var Bounce = /* @__PURE__ */ (function() {
+    function Bounce2() {
+    }
+    ;
+    Bounce2.value = new Bounce2();
+    return Bounce2;
+  })();
+  var BounceIn = /* @__PURE__ */ (function() {
+    function BounceIn2() {
+    }
+    ;
+    BounceIn2.value = new BounceIn2();
+    return BounceIn2;
+  })();
+  var BounceOut = /* @__PURE__ */ (function() {
+    function BounceOut2() {
+    }
+    ;
+    BounceOut2.value = new BounceOut2();
+    return BounceOut2;
+  })();
+  var BounceInOut = /* @__PURE__ */ (function() {
+    function BounceInOut2() {
+    }
+    ;
+    BounceInOut2.value = new BounceInOut2();
+    return BounceInOut2;
+  })();
+  var showEasing = {
+    show: function(v) {
+      if (v instanceof Linear) {
+        return "linear";
+      }
+      ;
+      if (v instanceof Cubic) {
+        return "cubic";
+      }
+      ;
+      if (v instanceof CubicIn) {
+        return "cubicIn";
+      }
+      ;
+      if (v instanceof CubicOut) {
+        return "cubicOut";
+      }
+      ;
+      if (v instanceof CubicInOut) {
+        return "cubicInOut";
+      }
+      ;
+      if (v instanceof Quad) {
+        return "quad";
+      }
+      ;
+      if (v instanceof QuadIn) {
+        return "quadIn";
+      }
+      ;
+      if (v instanceof QuadOut) {
+        return "quadOut";
+      }
+      ;
+      if (v instanceof QuadInOut) {
+        return "quadInOut";
+      }
+      ;
+      if (v instanceof Sin) {
+        return "sin";
+      }
+      ;
+      if (v instanceof SinIn) {
+        return "sinIn";
+      }
+      ;
+      if (v instanceof SinOut) {
+        return "sinOut";
+      }
+      ;
+      if (v instanceof SinInOut) {
+        return "sinInOut";
+      }
+      ;
+      if (v instanceof Exp) {
+        return "exp";
+      }
+      ;
+      if (v instanceof ExpIn) {
+        return "expIn";
+      }
+      ;
+      if (v instanceof ExpOut) {
+        return "expOut";
+      }
+      ;
+      if (v instanceof ExpInOut) {
+        return "expInOut";
+      }
+      ;
+      if (v instanceof Circle2) {
+        return "circle";
+      }
+      ;
+      if (v instanceof CircleIn) {
+        return "circleIn";
+      }
+      ;
+      if (v instanceof CircleOut) {
+        return "circleOut";
+      }
+      ;
+      if (v instanceof CircleInOut) {
+        return "circleInOut";
+      }
+      ;
+      if (v instanceof Elastic) {
+        return "elastic";
+      }
+      ;
+      if (v instanceof ElasticIn) {
+        return "elasticIn";
+      }
+      ;
+      if (v instanceof ElasticOut) {
+        return "elasticOut";
+      }
+      ;
+      if (v instanceof ElasticInOut) {
+        return "elasticInOut";
+      }
+      ;
+      if (v instanceof Back) {
+        return "back";
+      }
+      ;
+      if (v instanceof BackIn) {
+        return "backIn";
+      }
+      ;
+      if (v instanceof BackOut) {
+        return "backOut";
+      }
+      ;
+      if (v instanceof BackInOut) {
+        return "backInOut";
+      }
+      ;
+      if (v instanceof Bounce) {
+        return "bounce";
+      }
+      ;
+      if (v instanceof BounceIn) {
+        return "bounceIn";
+      }
+      ;
+      if (v instanceof BounceOut) {
+        return "bounceOut";
+      }
+      ;
+      if (v instanceof BounceInOut) {
+        return "bounceInOut";
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3v2.Transition.Types (line 79, column 1 - line 112, column 35): " + [v.constructor.name]);
+    }
+  };
+  var transitionWith = /* @__PURE__ */ identity(categoryFn);
+  var transition2 = function(duration2) {
+    return {
+      duration: duration2,
+      delay: Nothing.value,
+      easing: Nothing.value
+    };
+  };
+
+  // output/PSD3v2.Transition.FFI/index.js
+  var show3 = /* @__PURE__ */ show(showEasing);
+  var maybeMillisecondsToNullable = function(v) {
+    if (v instanceof Nothing) {
+      return toNullable(Nothing.value);
+    }
+    ;
+    if (v instanceof Just) {
+      return toNullable(new Just(v.value0));
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3v2.Transition.FFI (line 53, column 1 - line 53, column 69): " + [v.constructor.name]);
+  };
+  var easingToD3Name = function(easing) {
+    return show3(easing);
+  };
+  var maybeEasingToNullable = function(v) {
+    if (v instanceof Nothing) {
+      return toNullable(Nothing.value);
+    }
+    ;
+    if (v instanceof Just) {
+      return toNullable(new Just(easingToD3Name(v.value0)));
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3v2.Transition.FFI (line 58, column 1 - line 58, column 57): " + [v.constructor.name]);
+  };
+
   // output/PSD3v2.VizTree.Tree/index.js
   var append4 = /* @__PURE__ */ append(semigroupArray);
   var Node3 = /* @__PURE__ */ (function() {
@@ -13566,7 +14059,7 @@
   var append12 = /* @__PURE__ */ append(semigroupArray);
   var liftEffect3 = /* @__PURE__ */ liftEffect(monadEffectEffect);
   var log4 = /* @__PURE__ */ log3(monadEffectEffect);
-  var show3 = /* @__PURE__ */ show(showInt);
+  var show4 = /* @__PURE__ */ show(showInt);
   var mapFlipped1 = /* @__PURE__ */ mapFlipped(functorMaybe);
   var compare5 = /* @__PURE__ */ compare(ordInt);
   var mapFlipped22 = /* @__PURE__ */ mapFlipped(functorArray);
@@ -13665,7 +14158,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 87, column 3 - line 95, column 8): " + [maybeElement.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 90, column 3 - line 98, column 8): " + [maybeElement.constructor.name]);
       });
     };
   };
@@ -13684,7 +14177,7 @@
               return v.value0.value0.parentElements;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1624, column 36 - line 1626, column 49): " + [v.value0.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1802, column 36 - line 1804, column 49): " + [v.value0.constructor.name]);
           })();
           return new EmptySelection({
             parentElements: elements,
@@ -13699,7 +14192,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1619, column 3 - line 1637, column 10): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1797, column 3 - line 1815, column 10): " + [v.constructor.name]);
       };
     };
   };
@@ -13712,7 +14205,7 @@
             return v.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 311, column 36 - line 312, column 32): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 314, column 36 - line 315, column 32): " + [v.constructor.name]);
         })();
         return traverse_2(function(element3) {
           var node = toNode(element3);
@@ -13726,7 +14219,7 @@
               return unit;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 316, column 5 - line 318, column 27): " + [maybeParent.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 319, column 5 - line 321, column 27): " + [maybeParent.constructor.name]);
           };
         })(v1.elements);
       })());
@@ -13767,7 +14260,7 @@
           return v1.value0.elements;
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 842, column 5 - line 842, column 61): " + [v1.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 845, column 5 - line 845, column 61): " + [v1.constructor.name]);
       };
       var applyBehavior = function(v1) {
         return function(v2) {
@@ -13845,7 +14338,7 @@
             }));
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 849, column 5 - line 849, column 62): " + [v1.constructor.name, v2.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 852, column 5 - line 852, column 62): " + [v1.constructor.name, v2.constructor.name]);
         };
       };
       var elements = getElements2(v);
@@ -13864,14 +14357,14 @@
             return v.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 486, column 70 - line 487, column 30): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 489, column 70 - line 490, column 30): " + [v.constructor.name]);
         })();
         var v3 = (function() {
           if (v1 instanceof BoundSelection) {
             return v1.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 488, column 55 - line 489, column 30): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 491, column 55 - line 492, column 30): " + [v1.constructor.name]);
         })();
         return pure122(new BoundSelection({
           elements: append12(v2.elements)(v3.elements),
@@ -13898,7 +14391,7 @@
                       return v.value0;
                     }
                     ;
-                    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 603, column 57 - line 604, column 30): " + [v.constructor.name]);
+                    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 606, column 57 - line 607, column 30): " + [v.constructor.name]);
                   })();
                   return function __do8() {
                     var existingElements = querySelectorAllElements(selector)(v1.parentElements)();
@@ -13912,8 +14405,8 @@
                         };
                       };
                     })(existingElements)();
-                    liftEffect3(log4("joinDataWithKey: found " + (show3(length(existingElements)) + (" existing elements with selector '" + (selector + "'")))))();
-                    liftEffect3(log4("joinDataWithKey: " + (show3(length(mapMaybe(function(v2) {
+                    liftEffect3(log4("joinDataWithKey: found " + (show4(length(existingElements)) + (" existing elements with selector '" + (selector + "'")))))();
+                    liftEffect3(log4("joinDataWithKey: " + (show4(length(mapMaybe(function(v2) {
                       return v2.datum;
                     })(oldBindings))) + " of those have data bound")))();
                     var validOldBindings = mapMaybe(function(v2) {
@@ -13981,6 +14474,7 @@
       };
     };
   };
+  var joinDataWithKey1 = /* @__PURE__ */ joinDataWithKey2(monadEffectEffect)(foldableArray)(eqString);
   var joinData2 = function(dictMonadEffect) {
     var liftEffect120 = liftEffect(dictMonadEffect);
     return function(dictFoldable) {
@@ -13996,7 +14490,7 @@
                     return v.value0;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 519, column 57 - line 520, column 30): " + [v.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 522, column 57 - line 523, column 30): " + [v.constructor.name]);
                 })();
                 return function __do8() {
                   var existingElements = querySelectorAllElements(selector)(v1.parentElements)();
@@ -14010,8 +14504,8 @@
                       };
                     };
                   })(existingElements)();
-                  liftEffect3(log4("joinData: found " + (show3(length(existingElements)) + (" existing elements with selector '" + (selector + "'")))))();
-                  liftEffect3(log4("joinData: " + (show3(length(mapMaybe(function(v2) {
+                  liftEffect3(log4("joinData: found " + (show4(length(existingElements)) + (" existing elements with selector '" + (selector + "'")))))();
+                  liftEffect3(log4("joinData: " + (show4(length(mapMaybe(function(v2) {
                     return v2.datum;
                   })(oldBindings))) + " of those have data bound")))();
                   var validOldBindings = mapMaybe(function(v2) {
@@ -14079,6 +14573,16 @@
     };
   };
   var joinData1 = /* @__PURE__ */ joinData2(monadEffectEffect)(foldableArray);
+  var getExitingElementDatumPairs = function(v) {
+    var v1 = (function() {
+      if (v instanceof ExitingSelection) {
+        return v.value0;
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1040, column 54 - line 1041, column 32): " + [v.constructor.name]);
+    })();
+    return zipWith(Tuple.create)(v1.elements)(v1.data);
+  };
   var getDocument = function(v) {
     if (v instanceof EmptySelection) {
       return pure4(v.value0.document);
@@ -14096,7 +14600,7 @@
       return pure4(v.value0.document);
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 786, column 1 - line 786, column 82): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 789, column 1 - line 789, column 82): " + [v.constructor.name]);
   };
   var selectAll = function(dictMonadEffect) {
     var liftEffect120 = liftEffect(dictMonadEffect);
@@ -14121,7 +14625,7 @@
               return v.value0.elements;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 118, column 21 - line 122, column 50): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 121, column 21 - line 125, column 50): " + [v.constructor.name]);
           })();
           return new EmptySelection({
             parentElements: parentElems,
@@ -14154,7 +14658,7 @@
               return querySelectorAllElements(selector)(v.value0.elements)();
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 150, column 15 - line 158, column 50): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 153, column 15 - line 161, column 50): " + [v.constructor.name]);
           })();
           var dataArray = traverse3(function(el) {
             return function __do9() {
@@ -14168,7 +14672,7 @@
                 return unit;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 163, column 12 - line 165, column 35): " + [v1.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 166, column 12 - line 168, column 35): " + [v1.constructor.name]);
             };
           })(elements)();
           return new BoundSelection({
@@ -14180,6 +14684,16 @@
         });
       };
     };
+  };
+  var getBoundElementDatumPairs = function(v) {
+    var v1 = (function() {
+      if (v instanceof BoundSelection) {
+        return v.value0;
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1050, column 54 - line 1051, column 30): " + [v.constructor.name]);
+    })();
+    return zipWith(Tuple.create)(v1.elements)(v1.data);
   };
   var elementTypeToString = function(v) {
     if (v instanceof Circle) {
@@ -14242,7 +14756,7 @@
       return "thead";
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 929, column 1 - line 929, column 45): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 932, column 1 - line 932, column 45): " + [v.constructor.name]);
   };
   var createElementWithNS = function(elemType) {
     return function(doc) {
@@ -14255,7 +14769,7 @@
         return createElement(elementTypeToString(elemType))(doc);
       }
       ;
-      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 796, column 3 - line 802, column 64): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 799, column 3 - line 805, column 64): " + [v.constructor.name]);
     };
   };
   var clear2 = function(dictMonadEffect) {
@@ -14277,7 +14791,68 @@
       return show22(v.value0);
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 924, column 1 - line 924, column 51): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 927, column 1 - line 927, column 51): " + [v.constructor.name]);
+  };
+  var applyTransitionToElements = function(config) {
+    return function(elementDatumPairs) {
+      return function(attrs) {
+        var delayNullable = maybeMillisecondsToNullable(config.delay);
+        var easingNullable = maybeEasingToNullable(config.easing);
+        return traverseWithIndex_2(function(index5) {
+          return function(v) {
+            return function __do8() {
+              var transition3 = createTransition_(config.duration)(delayNullable)(easingNullable)(v.value0)();
+              return traverse_2(function(attr3) {
+                if (attr3 instanceof StaticAttr) {
+                  return transitionSetAttribute_(attr3.value0)(attributeValueToString(attr3.value1))(transition3);
+                }
+                ;
+                if (attr3 instanceof DataAttr) {
+                  return transitionSetAttribute_(attr3.value0)(attributeValueToString(attr3.value1(v.value1)))(transition3);
+                }
+                ;
+                if (attr3 instanceof IndexedAttr) {
+                  return transitionSetAttribute_(attr3.value0)(attributeValueToString(attr3.value1(v.value1)(index5)))(transition3);
+                }
+                ;
+                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 993, column 32 - line 1001, column 103): " + [attr3.constructor.name]);
+              })(attrs)();
+            };
+          };
+        })(elementDatumPairs);
+      };
+    };
+  };
+  var applyExitTransitionToElements = function(config) {
+    return function(elementDatumPairs) {
+      return function(attrs) {
+        var delayNullable = maybeMillisecondsToNullable(config.delay);
+        var easingNullable = maybeEasingToNullable(config.easing);
+        return traverseWithIndex_2(function(index5) {
+          return function(v) {
+            return function __do8() {
+              var transition3 = createTransition_(config.duration)(delayNullable)(easingNullable)(v.value0)();
+              traverse_2(function(attr3) {
+                if (attr3 instanceof StaticAttr) {
+                  return transitionSetAttribute_(attr3.value0)(attributeValueToString(attr3.value1))(transition3);
+                }
+                ;
+                if (attr3 instanceof DataAttr) {
+                  return transitionSetAttribute_(attr3.value0)(attributeValueToString(attr3.value1(v.value1)))(transition3);
+                }
+                ;
+                if (attr3 instanceof IndexedAttr) {
+                  return transitionSetAttribute_(attr3.value0)(attributeValueToString(attr3.value1(v.value1)(index5)))(transition3);
+                }
+                ;
+                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1021, column 32 - line 1029, column 103): " + [attr3.constructor.name]);
+              })(attrs)();
+              return transitionRemove_(transition3)();
+            };
+          };
+        })(elementDatumPairs);
+      };
+    };
   };
   var applyAttributes = function(element3) {
     return function(datum2) {
@@ -14285,8 +14860,8 @@
         return function(attrs) {
           return traverse_2(function(attr3) {
             if (attr3 instanceof StaticAttr) {
-              var $330 = attr3.value0 === "textContent";
-              if ($330) {
+              var $380 = attr3.value0 === "textContent";
+              if ($380) {
                 return setTextContent_(attributeValueToString(attr3.value1))(element3);
               }
               ;
@@ -14295,8 +14870,8 @@
             ;
             if (attr3 instanceof DataAttr) {
               var val = attributeValueToString(attr3.value1(datum2));
-              var $333 = attr3.value0 === "textContent";
-              if ($333) {
+              var $383 = attr3.value0 === "textContent";
+              if ($383) {
                 return setTextContent_(val)(element3);
               }
               ;
@@ -14305,15 +14880,15 @@
             ;
             if (attr3 instanceof IndexedAttr) {
               var val = attributeValueToString(attr3.value1(datum2)(index5));
-              var $336 = attr3.value0 === "textContent";
-              if ($336) {
+              var $386 = attr3.value0 === "textContent";
+              if ($386) {
                 return setTextContent_(val)(element3);
               }
               ;
               return setAttribute(attr3.value0)(val)(element3);
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 906, column 30 - line 922, column 54): " + [attr3.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 909, column 30 - line 925, column 54): " + [attr3.constructor.name]);
           })(attrs);
         };
       };
@@ -14352,7 +14927,7 @@
               return v.value0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 250, column 78 - line 251, column 30): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 253, column 78 - line 254, column 30): " + [v.constructor.name]);
           })();
           var paired = zipWith(Tuple.create)(v1.data)(v1.elements);
           return function __do8() {
@@ -14367,7 +14942,7 @@
                     return arrayIndex;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 255, column 24 - line 257, column 32): " + [v1.indices.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 258, column 24 - line 260, column 32): " + [v1.indices.constructor.name]);
                 })();
                 return applyAttributes(v2.value1)(v2.value0)(logicalIndex)(attrs);
               };
@@ -14394,7 +14969,7 @@
               return v.value0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 283, column 69 - line 284, column 32): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 286, column 69 - line 287, column 32): " + [v.constructor.name]);
           })();
           var paired = zipWith(Tuple.create)(v1.data)(v1.elements);
           return function __do8() {
@@ -14440,7 +15015,7 @@
             return boundSel.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1446, column 68 - line 1447, column 34): " + [boundSel.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1624, column 68 - line 1625, column 34): " + [boundSel.constructor.name]);
         })();
         return traverseWithIndex2(function(idx) {
           return function(datum2) {
@@ -14463,7 +15038,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1451, column 5 - line 1474, column 39): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1629, column 5 - line 1652, column 39): " + [v1.constructor.name]);
           };
         })(v.data);
       };
@@ -14480,7 +15055,7 @@
                 return v.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 440, column 84 - line 441, column 30): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 443, column 84 - line 444, column 30): " + [v.constructor.name]);
             })();
             return function __do8() {
               var childElements = traverseWithIndex2(function(idx) {
@@ -14519,7 +15094,7 @@
                 return v.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 385, column 57 - line 386, column 30): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 388, column 57 - line 389, column 30): " + [v.constructor.name]);
             })();
             return function __do8() {
               var elements = traverse3(function(parent2) {
@@ -14551,7 +15126,7 @@
             return pendingSel.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1401, column 70 - line 1402, column 36): " + [pendingSel.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1579, column 70 - line 1580, column 36): " + [pendingSel.constructor.name]);
         })();
         return traverseWithIndex2(function(idx) {
           return function(datum2) {
@@ -14574,7 +15149,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1409, column 5 - line 1428, column 45): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1587, column 5 - line 1606, column 45): " + [v1.constructor.name]);
           };
         })(v.pendingData);
       };
@@ -14599,7 +15174,7 @@
                   return unsafeCrashWith("renderTree: appendChild returned empty selection");
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 987, column 31 - line 989, column 104): " + [v2.constructor.name]);
+                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1073, column 31 - line 1075, column 104): " + [v2.constructor.name]);
               }
               ;
               return unsafeCrashWith("renderTree: appendChild should return EmptySelection");
@@ -14615,7 +15190,7 @@
                 return combinedChildMap;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 997, column 23 - line 999, column 36): " + [v1.value0.name.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1083, column 23 - line 1085, column 36): " + [v1.value0.name.constructor.name]);
             })();
             return new Tuple(element3, selectionsMap);
           };
@@ -14650,7 +15225,7 @@
                 ;
                 return 0;
               })();
-              return log4("Tree API Join '" + (v1.value0.name + ("': enter=" + (show3(enterCount) + (", update=" + (show3(updateCount) + (", exit=" + show3(exitCount))))))));
+              return log4("Tree API Join '" + (v1.value0.name + ("': enter=" + (show4(enterCount) + (", update=" + (show4(updateCount) + (", exit=" + show4(exitCount))))))));
             })())();
             remove1(v2.value0.exit)();
             var enterElementsAndMaps = renderTemplatesForPendingSelection(dictOrd)(v1.value0.template)(v2.value0.enter)();
@@ -14671,7 +15246,7 @@
                 return v2.value0.update.value0.document;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1055, column 14 - line 1056, column 45): " + [v2.value0.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1141, column 14 - line 1142, column 45): " + [v2.value0.update.constructor.name]);
             })();
             var allData = (function() {
               if (v2.value0.enter instanceof PendingSelection) {
@@ -14704,7 +15279,7 @@
                 return unsafeCrashWith("renderTree Join: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1078, column 22 - line 1080, column 90): " + [v3.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1164, column 22 - line 1166, column 90): " + [v3.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
@@ -14722,7 +15297,7 @@
                 return v2.value0.enter.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1103, column 54 - line 1104, column 36): " + [v2.value0.enter.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1189, column 54 - line 1190, column 36): " + [v2.value0.enter.constructor.name]);
             })();
             var boundSel = new BoundSelection({
               elements,
@@ -14741,7 +15316,7 @@
                 return unsafeCrashWith("renderTree NestedJoin: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1118, column 22 - line 1120, column 96): " + [v4.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1204, column 22 - line 1206, column 96): " + [v4.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
@@ -14776,13 +15351,22 @@
                 ;
                 return 0;
               })();
-              return log4("Tree API SceneJoin '" + (v1.value0.name + ("': enter=" + (show3(enterCount) + (", update=" + (show3(updateCount) + (", exit=" + show3(exitCount))))))));
+              return log4("Tree API SceneJoin '" + (v1.value0.name + ("': enter=" + (show4(enterCount) + (", update=" + (show4(updateCount) + (", exit=" + show4(exitCount))))))));
             })())();
             (function() {
               if (v1.value0.exitBehavior instanceof Just) {
-                setAttrsExit1(v1.value0.exitBehavior.value0.attrs)(v2.value0.exit)();
-                remove1(v2.value0.exit)();
-                return unit;
+                if (v1.value0.exitBehavior.value0.transition instanceof Just) {
+                  var pairs = getExitingElementDatumPairs(v2.value0.exit);
+                  return liftEffect3(applyExitTransitionToElements(v1.value0.exitBehavior.value0.transition.value0)(pairs)(v1.value0.exitBehavior.value0.attrs))();
+                }
+                ;
+                if (v1.value0.exitBehavior.value0.transition instanceof Nothing) {
+                  setAttrsExit1(v1.value0.exitBehavior.value0.attrs)(v2.value0.exit)();
+                  remove1(v2.value0.exit)();
+                  return unit;
+                }
+                ;
+                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1243, column 7 - line 1251, column 20): " + [v1.value0.exitBehavior.value0.transition.constructor.name]);
               }
               ;
               if (v1.value0.exitBehavior instanceof Nothing) {
@@ -14790,7 +15374,7 @@
                 return unit;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1148, column 3 - line 1159, column 16): " + [v1.value0.exitBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1241, column 3 - line 1255, column 16): " + [v1.value0.exitBehavior.constructor.name]);
             })();
             var enterElementsAndMaps = (function() {
               if (v1.value0.enterBehavior instanceof Just) {
@@ -14801,13 +15385,43 @@
                       name: v3.value0.name,
                       elemType: v3.value0.elemType,
                       children: v3.value0.children,
-                      attrs: append12(v1.value0.enterBehavior.value0.initialAttrs)(v3.value0.attrs)
+                      attrs: append12(v3.value0.attrs)(v1.value0.enterBehavior.value0.initialAttrs)
                     });
                   }
                   ;
                   return v3;
                 };
                 var rendered = renderTemplatesForPendingSelection(dictOrd)(modifiedTemplate)(v2.value0.enter)();
+                (function() {
+                  if (v1.value0.enterBehavior.value0.transition instanceof Just) {
+                    var enterElements2 = map25(fst)(rendered);
+                    var pendingData = (function() {
+                      if (v2.value0.enter instanceof PendingSelection) {
+                        return v2.value0.enter.value0.pendingData;
+                      }
+                      ;
+                      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1282, column 43 - line 1283, column 56): " + [v2.value0.enter.constructor.name]);
+                    })();
+                    var pairs = zipWith(Tuple.create)(enterElements2)(pendingData);
+                    return liftEffect3(traverse_2(function(v3) {
+                      var finalAttrs = (function() {
+                        var v4 = v1.value0.template(v3.value1);
+                        if (v4 instanceof Node3) {
+                          return v4.value0.attrs;
+                        }
+                        ;
+                        return [];
+                      })();
+                      return applyTransitionToElements(v1.value0.enterBehavior.value0.transition.value0)([new Tuple(v3.value0, v3.value1)])(finalAttrs);
+                    })(pairs))();
+                  }
+                  ;
+                  if (v1.value0.enterBehavior.value0.transition instanceof Nothing) {
+                    return unit;
+                  }
+                  ;
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1278, column 7 - line 1291, column 29): " + [v1.value0.enterBehavior.value0.transition.constructor.name]);
+                })();
                 return rendered;
               }
               ;
@@ -14815,13 +15429,25 @@
                 return renderTemplatesForPendingSelection(dictOrd)(v1.value0.template)(v2.value0.enter)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1162, column 27 - line 1179, column 68): " + [v1.value0.enterBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1266, column 27 - line 1296, column 68): " + [v1.value0.enterBehavior.constructor.name]);
             })();
             var enterElements = map25(fst)(enterElementsAndMaps);
             var enterChildMaps = map25(snd)(enterElementsAndMaps);
             var updateElementsAndMaps = (function() {
               if (v1.value0.updateBehavior instanceof Just) {
-                setAttrs1(v1.value0.updateBehavior.value0.attrs)(v2.value0.update)();
+                (function() {
+                  if (v1.value0.updateBehavior.value0.transition instanceof Just) {
+                    var pairs = getBoundElementDatumPairs(v2.value0.update);
+                    return liftEffect3(applyTransitionToElements(v1.value0.updateBehavior.value0.transition.value0)(pairs)(v1.value0.updateBehavior.value0.attrs))();
+                  }
+                  ;
+                  if (v1.value0.updateBehavior.value0.transition instanceof Nothing) {
+                    setAttrs1(v1.value0.updateBehavior.value0.attrs)(v2.value0.update)();
+                    return unit;
+                  }
+                  ;
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1305, column 7 - line 1313, column 20): " + [v1.value0.updateBehavior.value0.transition.constructor.name]);
+                })();
                 return renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
               }
               ;
@@ -14829,7 +15455,7 @@
                 return renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1185, column 28 - line 1196, column 67): " + [v1.value0.updateBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1302, column 28 - line 1319, column 67): " + [v1.value0.updateBehavior.constructor.name]);
             })();
             var updateElements = map25(fst)(updateElementsAndMaps);
             var updateChildMaps = map25(snd)(updateElementsAndMaps);
@@ -14845,7 +15471,7 @@
                 return v2.value0.update.value0.document;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1212, column 14 - line 1213, column 45): " + [v2.value0.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1335, column 14 - line 1336, column 45): " + [v2.value0.update.constructor.name]);
             })();
             var allData = (function() {
               if (v2.value0.enter instanceof PendingSelection) {
@@ -14878,7 +15504,7 @@
                 return unsafeCrashWith("renderTree SceneJoin: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1234, column 22 - line 1236, column 95): " + [v3.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1357, column 22 - line 1359, column 95): " + [v3.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
@@ -14887,7 +15513,7 @@
         if (v1 instanceof SceneNestedJoin) {
           var innerData = join2(map25(v1.value0.decompose)(v1.value0.joinData));
           return function __do8() {
-            var v2 = joinData22(innerData)(v1.value0.key)(v)();
+            var v2 = joinDataWithKey1(innerData)(jsonStringify_)(v1.value0.key)(v)();
             liftEffect3((function() {
               var enterCount = (function() {
                 if (v2.value0.enter instanceof PendingSelection) {
@@ -14914,13 +15540,22 @@
                 ;
                 return 0;
               })();
-              return log4("Tree API SceneNestedJoin '" + (v1.value0.name + ("': enter=" + (show3(enterCount) + (", update=" + (show3(updateCount) + (", exit=" + show3(exitCount))))))));
+              return log4("Tree API SceneNestedJoin '" + (v1.value0.name + ("': enter=" + (show4(enterCount) + (", update=" + (show4(updateCount) + (", exit=" + show4(exitCount))))))));
             })())();
             (function() {
               if (v1.value0.exitBehavior instanceof Just) {
-                setAttrsExit1(v1.value0.exitBehavior.value0.attrs)(v2.value0.exit)();
-                remove1(v2.value0.exit)();
-                return unit;
+                if (v1.value0.exitBehavior.value0.transition instanceof Just) {
+                  var pairs = getExitingElementDatumPairs(v2.value0.exit);
+                  return liftEffect3(applyExitTransitionToElements(v1.value0.exitBehavior.value0.transition.value0)(pairs)(v1.value0.exitBehavior.value0.attrs))();
+                }
+                ;
+                if (v1.value0.exitBehavior.value0.transition instanceof Nothing) {
+                  setAttrsExit1(v1.value0.exitBehavior.value0.attrs)(v2.value0.exit)();
+                  remove1(v2.value0.exit)();
+                  return unit;
+                }
+                ;
+                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1406, column 7 - line 1414, column 20): " + [v1.value0.exitBehavior.value0.transition.constructor.name]);
               }
               ;
               if (v1.value0.exitBehavior instanceof Nothing) {
@@ -14928,7 +15563,7 @@
                 return unit;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1271, column 3 - line 1279, column 16): " + [v1.value0.exitBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1404, column 3 - line 1417, column 16): " + [v1.value0.exitBehavior.constructor.name]);
             })();
             var enterElementsAndMaps = (function() {
               if (v1.value0.enterBehavior instanceof Just) {
@@ -14939,13 +15574,43 @@
                       name: v3.value0.name,
                       elemType: v3.value0.elemType,
                       children: v3.value0.children,
-                      attrs: append12(v1.value0.enterBehavior.value0.initialAttrs)(v3.value0.attrs)
+                      attrs: append12(v3.value0.attrs)(v1.value0.enterBehavior.value0.initialAttrs)
                     });
                   }
                   ;
                   return v3;
                 };
                 var rendered = renderTemplatesForPendingSelection(dictOrd)(modifiedTemplate)(v2.value0.enter)();
+                (function() {
+                  if (v1.value0.enterBehavior.value0.transition instanceof Just) {
+                    var enterElements2 = map25(fst)(rendered);
+                    var pendingData = (function() {
+                      if (v2.value0.enter instanceof PendingSelection) {
+                        return v2.value0.enter.value0.pendingData;
+                      }
+                      ;
+                      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1448, column 43 - line 1449, column 56): " + [v2.value0.enter.constructor.name]);
+                    })();
+                    var pairs = zipWith(Tuple.create)(enterElements2)(pendingData);
+                    return liftEffect3(traverse_2(function(v4) {
+                      var finalAttrs = (function() {
+                        var v5 = v1.value0.template(v4.value1);
+                        if (v5 instanceof Node3) {
+                          return v5.value0.attrs;
+                        }
+                        ;
+                        return [];
+                      })();
+                      return applyTransitionToElements(v1.value0.enterBehavior.value0.transition.value0)([new Tuple(v4.value0, v4.value1)])(finalAttrs);
+                    })(pairs))();
+                  }
+                  ;
+                  if (v1.value0.enterBehavior.value0.transition instanceof Nothing) {
+                    return unit;
+                  }
+                  ;
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1444, column 7 - line 1457, column 29): " + [v1.value0.enterBehavior.value0.transition.constructor.name]);
+                })();
                 return rendered;
               }
               ;
@@ -14953,11 +15618,23 @@
                 return renderTemplatesForPendingSelection(dictOrd)(v1.value0.template)(v2.value0.enter)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1282, column 27 - line 1291, column 92): " + [v1.value0.enterBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1434, column 27 - line 1460, column 92): " + [v1.value0.enterBehavior.constructor.name]);
             })();
             var updateElementsAndMaps = (function() {
               if (v1.value0.updateBehavior instanceof Just) {
-                setAttrs1(v1.value0.updateBehavior.value0.attrs)(v2.value0.update)();
+                (function() {
+                  if (v1.value0.updateBehavior.value0.transition instanceof Just) {
+                    var pairs = getBoundElementDatumPairs(v2.value0.update);
+                    return liftEffect3(applyTransitionToElements(v1.value0.updateBehavior.value0.transition.value0)(pairs)(v1.value0.updateBehavior.value0.attrs))();
+                  }
+                  ;
+                  if (v1.value0.updateBehavior.value0.transition instanceof Nothing) {
+                    setAttrs1(v1.value0.updateBehavior.value0.attrs)(v2.value0.update)();
+                    return unit;
+                  }
+                  ;
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1466, column 7 - line 1474, column 20): " + [v1.value0.updateBehavior.value0.transition.constructor.name]);
+                })();
                 return renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
               }
               ;
@@ -14965,7 +15642,7 @@
                 return renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1294, column 28 - line 1299, column 91): " + [v1.value0.updateBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1463, column 28 - line 1477, column 91): " + [v1.value0.updateBehavior.constructor.name]);
             })();
             var updateElements = map25(fst)(updateElementsAndMaps);
             var enterElements = map25(fst)(enterElementsAndMaps);
@@ -14983,7 +15660,7 @@
                 return v2.value0.update.value0.document;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1317, column 14 - line 1318, column 45): " + [v2.value0.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1495, column 14 - line 1496, column 45): " + [v2.value0.update.constructor.name]);
             })();
             var boundSel = new BoundSelection({
               elements: allElements,
@@ -15002,13 +15679,13 @@
                 return unsafeCrashWith("renderTree SceneNestedJoin: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1330, column 22 - line 1332, column 101): " + [v5.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1508, column 22 - line 1510, column 101): " + [v5.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 974, column 1 - line 979, column 74): " + [v.constructor.name, v1.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1060, column 1 - line 1065, column 74): " + [v.constructor.name, v1.constructor.name]);
       };
     };
   };
@@ -15022,7 +15699,7 @@
                 return pendingSel.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1352, column 70 - line 1353, column 36): " + [pendingSel.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1530, column 70 - line 1531, column 36): " + [pendingSel.constructor.name]);
             })();
             return traverseWithIndex2(function(idx) {
               return function(outerDatum) {
@@ -15055,7 +15732,7 @@
                   };
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1357, column 5 - line 1383, column 53): " + [v1.constructor.name]);
+                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1535, column 5 - line 1561, column 53): " + [v1.constructor.name]);
               };
             })(v.pendingData);
           };
@@ -15085,7 +15762,7 @@
                 return v.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 197, column 79 - line 198, column 32): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 200, column 79 - line 201, column 32): " + [v.constructor.name]);
             })();
             var parent2 = (function() {
               var v2 = head(v1.parentElements);
@@ -15097,7 +15774,7 @@
                 return unsafeIndex3(v1.parentElements)(0);
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 202, column 16 - line 204, column 70): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 205, column 16 - line 207, column 70): " + [v2.constructor.name]);
             })();
             return function __do8() {
               var elements = traverseWithIndex2(function(arrayIndex) {
@@ -15111,7 +15788,7 @@
                       return arrayIndex;
                     }
                     ;
-                    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 208, column 24 - line 210, column 32): " + [v1.indices.constructor.name]);
+                    throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 211, column 24 - line 213, column 32): " + [v1.indices.constructor.name]);
                   })();
                   return function __do9() {
                     var element3 = createElementWithNS(elemType)(v1.document)();
@@ -15151,7 +15828,7 @@
                     return emptySelection.value0;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 743, column 57 - line 744, column 30): " + [emptySelection.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 746, column 57 - line 747, column 30): " + [emptySelection.constructor.name]);
                 })();
                 var dataArray = fromFoldable41(foldableData);
                 var pendingSelection = new PendingSelection({
@@ -15200,7 +15877,7 @@
                             return applyPerDatumAttrs1(enterAttrs.value0)(bound);
                           }
                           ;
-                          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 697, column 5 - line 699, column 55): " + [enterAttrs.constructor.name]);
+                          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 700, column 5 - line 702, column 55): " + [enterAttrs.constructor.name]);
                         }))(function(enterBound) {
                           return bind134((function() {
                             if (updateAttrs instanceof Nothing) {
@@ -15211,7 +15888,7 @@
                               return applyPerDatumAttrs1(updateAttrs.value0)(v.value0.update);
                             }
                             ;
-                            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 702, column 18 - line 704, column 54): " + [updateAttrs.constructor.name]);
+                            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 705, column 18 - line 707, column 54): " + [updateAttrs.constructor.name]);
                           })())(function(updateBound) {
                             return discard214((function() {
                               if (exitAttrs instanceof Nothing) {
@@ -15224,7 +15901,7 @@
                                 });
                               }
                               ;
-                              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 707, column 3 - line 711, column 18): " + [exitAttrs.constructor.name]);
+                              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 710, column 3 - line 714, column 18): " + [exitAttrs.constructor.name]);
                             })())(function() {
                               return merge1(enterBound)(updateBound);
                             });
@@ -15273,501 +15950,6 @@
     throw new Error("Failed pattern match at PSD3v2.Selection.Query (line 146, column 46 - line 150, column 35): " + [v.constructor.name]);
   };
   var toArray3 = getElements;
-
-  // output/PSD3v2.Transition.FFI/foreign.js
-  function createTransition_(duration2) {
-    return function(delay2) {
-      return function(easingName) {
-        return function(element3) {
-          return function() {
-            console.log("createTransition_: Creating transition", { duration: duration2, delay: delay2, easingName, element: element3 });
-            let transition3 = select_default2(element3).transition();
-            transition3 = transition3.duration(duration2);
-            if (delay2 != null) {
-              transition3 = transition3.delay(delay2);
-            }
-            if (easingName != null) {
-              const easingFn = getD3EasingFunction(easingName);
-              if (easingFn) {
-                transition3 = transition3.ease(easingFn);
-              }
-              console.log("createTransition_: Applied easing", easingName);
-            }
-            console.log("createTransition_: Transition created", transition3);
-            return transition3;
-          };
-        };
-      };
-    };
-  }
-  function transitionSetAttribute_(name16) {
-    return function(value18) {
-      return function(transition3) {
-        return function() {
-          console.log("transitionSetAttribute_: Setting attribute", { name: name16, value: value18, transition: transition3 });
-          transition3.attr(name16, value18);
-        };
-      };
-    };
-  }
-  function transitionRemove_(transition3) {
-    return function() {
-      console.log("transitionRemove_: Scheduling removal after transition");
-      transition3.remove();
-    };
-  }
-  function getD3EasingFunction(name16) {
-    const easingMap = {
-      // Linear
-      "linear": linear2,
-      // Polynomial (Quad, Cubic)
-      "quad": quadInOut,
-      "quadIn": quadIn,
-      "quadOut": quadOut,
-      "quadInOut": quadInOut,
-      "cubic": cubicInOut,
-      "cubicIn": cubicIn,
-      "cubicOut": cubicOut,
-      "cubicInOut": cubicInOut,
-      // Sinusoidal
-      "sin": sinInOut,
-      "sinIn": sinIn,
-      "sinOut": sinOut,
-      "sinInOut": sinInOut,
-      // Exponential
-      "exp": expInOut,
-      "expIn": expIn,
-      "expOut": expOut,
-      "expInOut": expInOut,
-      // Circular
-      "circle": circleInOut,
-      "circleIn": circleIn,
-      "circleOut": circleOut,
-      "circleInOut": circleInOut,
-      // Elastic
-      "elastic": elasticOut,
-      "elasticIn": elasticIn,
-      "elasticOut": elasticOut,
-      "elasticInOut": elasticInOut,
-      // Back
-      "back": backInOut,
-      "backIn": backIn,
-      "backOut": backOut,
-      "backInOut": backInOut,
-      // Bounce
-      "bounce": bounceOut,
-      "bounceIn": bounceIn,
-      "bounceOut": bounceOut,
-      "bounceInOut": bounceInOut
-    };
-    return easingMap[name16];
-  }
-
-  // output/PSD3v2.Transition.Types/index.js
-  var Linear = /* @__PURE__ */ (function() {
-    function Linear3() {
-    }
-    ;
-    Linear3.value = new Linear3();
-    return Linear3;
-  })();
-  var Cubic = /* @__PURE__ */ (function() {
-    function Cubic2() {
-    }
-    ;
-    Cubic2.value = new Cubic2();
-    return Cubic2;
-  })();
-  var CubicIn = /* @__PURE__ */ (function() {
-    function CubicIn2() {
-    }
-    ;
-    CubicIn2.value = new CubicIn2();
-    return CubicIn2;
-  })();
-  var CubicOut = /* @__PURE__ */ (function() {
-    function CubicOut2() {
-    }
-    ;
-    CubicOut2.value = new CubicOut2();
-    return CubicOut2;
-  })();
-  var CubicInOut = /* @__PURE__ */ (function() {
-    function CubicInOut2() {
-    }
-    ;
-    CubicInOut2.value = new CubicInOut2();
-    return CubicInOut2;
-  })();
-  var Quad = /* @__PURE__ */ (function() {
-    function Quad2() {
-    }
-    ;
-    Quad2.value = new Quad2();
-    return Quad2;
-  })();
-  var QuadIn = /* @__PURE__ */ (function() {
-    function QuadIn2() {
-    }
-    ;
-    QuadIn2.value = new QuadIn2();
-    return QuadIn2;
-  })();
-  var QuadOut = /* @__PURE__ */ (function() {
-    function QuadOut2() {
-    }
-    ;
-    QuadOut2.value = new QuadOut2();
-    return QuadOut2;
-  })();
-  var QuadInOut = /* @__PURE__ */ (function() {
-    function QuadInOut2() {
-    }
-    ;
-    QuadInOut2.value = new QuadInOut2();
-    return QuadInOut2;
-  })();
-  var Sin = /* @__PURE__ */ (function() {
-    function Sin2() {
-    }
-    ;
-    Sin2.value = new Sin2();
-    return Sin2;
-  })();
-  var SinIn = /* @__PURE__ */ (function() {
-    function SinIn2() {
-    }
-    ;
-    SinIn2.value = new SinIn2();
-    return SinIn2;
-  })();
-  var SinOut = /* @__PURE__ */ (function() {
-    function SinOut2() {
-    }
-    ;
-    SinOut2.value = new SinOut2();
-    return SinOut2;
-  })();
-  var SinInOut = /* @__PURE__ */ (function() {
-    function SinInOut2() {
-    }
-    ;
-    SinInOut2.value = new SinInOut2();
-    return SinInOut2;
-  })();
-  var Exp = /* @__PURE__ */ (function() {
-    function Exp2() {
-    }
-    ;
-    Exp2.value = new Exp2();
-    return Exp2;
-  })();
-  var ExpIn = /* @__PURE__ */ (function() {
-    function ExpIn2() {
-    }
-    ;
-    ExpIn2.value = new ExpIn2();
-    return ExpIn2;
-  })();
-  var ExpOut = /* @__PURE__ */ (function() {
-    function ExpOut2() {
-    }
-    ;
-    ExpOut2.value = new ExpOut2();
-    return ExpOut2;
-  })();
-  var ExpInOut = /* @__PURE__ */ (function() {
-    function ExpInOut2() {
-    }
-    ;
-    ExpInOut2.value = new ExpInOut2();
-    return ExpInOut2;
-  })();
-  var Circle2 = /* @__PURE__ */ (function() {
-    function Circle3() {
-    }
-    ;
-    Circle3.value = new Circle3();
-    return Circle3;
-  })();
-  var CircleIn = /* @__PURE__ */ (function() {
-    function CircleIn2() {
-    }
-    ;
-    CircleIn2.value = new CircleIn2();
-    return CircleIn2;
-  })();
-  var CircleOut = /* @__PURE__ */ (function() {
-    function CircleOut2() {
-    }
-    ;
-    CircleOut2.value = new CircleOut2();
-    return CircleOut2;
-  })();
-  var CircleInOut = /* @__PURE__ */ (function() {
-    function CircleInOut2() {
-    }
-    ;
-    CircleInOut2.value = new CircleInOut2();
-    return CircleInOut2;
-  })();
-  var Elastic = /* @__PURE__ */ (function() {
-    function Elastic2() {
-    }
-    ;
-    Elastic2.value = new Elastic2();
-    return Elastic2;
-  })();
-  var ElasticIn = /* @__PURE__ */ (function() {
-    function ElasticIn2() {
-    }
-    ;
-    ElasticIn2.value = new ElasticIn2();
-    return ElasticIn2;
-  })();
-  var ElasticOut = /* @__PURE__ */ (function() {
-    function ElasticOut2() {
-    }
-    ;
-    ElasticOut2.value = new ElasticOut2();
-    return ElasticOut2;
-  })();
-  var ElasticInOut = /* @__PURE__ */ (function() {
-    function ElasticInOut2() {
-    }
-    ;
-    ElasticInOut2.value = new ElasticInOut2();
-    return ElasticInOut2;
-  })();
-  var Back = /* @__PURE__ */ (function() {
-    function Back2() {
-    }
-    ;
-    Back2.value = new Back2();
-    return Back2;
-  })();
-  var BackIn = /* @__PURE__ */ (function() {
-    function BackIn2() {
-    }
-    ;
-    BackIn2.value = new BackIn2();
-    return BackIn2;
-  })();
-  var BackOut = /* @__PURE__ */ (function() {
-    function BackOut2() {
-    }
-    ;
-    BackOut2.value = new BackOut2();
-    return BackOut2;
-  })();
-  var BackInOut = /* @__PURE__ */ (function() {
-    function BackInOut2() {
-    }
-    ;
-    BackInOut2.value = new BackInOut2();
-    return BackInOut2;
-  })();
-  var Bounce = /* @__PURE__ */ (function() {
-    function Bounce2() {
-    }
-    ;
-    Bounce2.value = new Bounce2();
-    return Bounce2;
-  })();
-  var BounceIn = /* @__PURE__ */ (function() {
-    function BounceIn2() {
-    }
-    ;
-    BounceIn2.value = new BounceIn2();
-    return BounceIn2;
-  })();
-  var BounceOut = /* @__PURE__ */ (function() {
-    function BounceOut2() {
-    }
-    ;
-    BounceOut2.value = new BounceOut2();
-    return BounceOut2;
-  })();
-  var BounceInOut = /* @__PURE__ */ (function() {
-    function BounceInOut2() {
-    }
-    ;
-    BounceInOut2.value = new BounceInOut2();
-    return BounceInOut2;
-  })();
-  var showEasing = {
-    show: function(v) {
-      if (v instanceof Linear) {
-        return "linear";
-      }
-      ;
-      if (v instanceof Cubic) {
-        return "cubic";
-      }
-      ;
-      if (v instanceof CubicIn) {
-        return "cubicIn";
-      }
-      ;
-      if (v instanceof CubicOut) {
-        return "cubicOut";
-      }
-      ;
-      if (v instanceof CubicInOut) {
-        return "cubicInOut";
-      }
-      ;
-      if (v instanceof Quad) {
-        return "quad";
-      }
-      ;
-      if (v instanceof QuadIn) {
-        return "quadIn";
-      }
-      ;
-      if (v instanceof QuadOut) {
-        return "quadOut";
-      }
-      ;
-      if (v instanceof QuadInOut) {
-        return "quadInOut";
-      }
-      ;
-      if (v instanceof Sin) {
-        return "sin";
-      }
-      ;
-      if (v instanceof SinIn) {
-        return "sinIn";
-      }
-      ;
-      if (v instanceof SinOut) {
-        return "sinOut";
-      }
-      ;
-      if (v instanceof SinInOut) {
-        return "sinInOut";
-      }
-      ;
-      if (v instanceof Exp) {
-        return "exp";
-      }
-      ;
-      if (v instanceof ExpIn) {
-        return "expIn";
-      }
-      ;
-      if (v instanceof ExpOut) {
-        return "expOut";
-      }
-      ;
-      if (v instanceof ExpInOut) {
-        return "expInOut";
-      }
-      ;
-      if (v instanceof Circle2) {
-        return "circle";
-      }
-      ;
-      if (v instanceof CircleIn) {
-        return "circleIn";
-      }
-      ;
-      if (v instanceof CircleOut) {
-        return "circleOut";
-      }
-      ;
-      if (v instanceof CircleInOut) {
-        return "circleInOut";
-      }
-      ;
-      if (v instanceof Elastic) {
-        return "elastic";
-      }
-      ;
-      if (v instanceof ElasticIn) {
-        return "elasticIn";
-      }
-      ;
-      if (v instanceof ElasticOut) {
-        return "elasticOut";
-      }
-      ;
-      if (v instanceof ElasticInOut) {
-        return "elasticInOut";
-      }
-      ;
-      if (v instanceof Back) {
-        return "back";
-      }
-      ;
-      if (v instanceof BackIn) {
-        return "backIn";
-      }
-      ;
-      if (v instanceof BackOut) {
-        return "backOut";
-      }
-      ;
-      if (v instanceof BackInOut) {
-        return "backInOut";
-      }
-      ;
-      if (v instanceof Bounce) {
-        return "bounce";
-      }
-      ;
-      if (v instanceof BounceIn) {
-        return "bounceIn";
-      }
-      ;
-      if (v instanceof BounceOut) {
-        return "bounceOut";
-      }
-      ;
-      if (v instanceof BounceInOut) {
-        return "bounceInOut";
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3v2.Transition.Types (line 79, column 1 - line 112, column 35): " + [v.constructor.name]);
-    }
-  };
-  var transitionWith = /* @__PURE__ */ identity(categoryFn);
-  var transition2 = function(duration2) {
-    return {
-      duration: duration2,
-      delay: Nothing.value,
-      easing: Nothing.value
-    };
-  };
-
-  // output/PSD3v2.Transition.FFI/index.js
-  var show4 = /* @__PURE__ */ show(showEasing);
-  var maybeMillisecondsToNullable = function(v) {
-    if (v instanceof Nothing) {
-      return toNullable(Nothing.value);
-    }
-    ;
-    if (v instanceof Just) {
-      return toNullable(new Just(v.value0));
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3v2.Transition.FFI (line 53, column 1 - line 53, column 69): " + [v.constructor.name]);
-  };
-  var easingToD3Name = function(easing) {
-    return show4(easing);
-  };
-  var maybeEasingToNullable = function(v) {
-    if (v instanceof Nothing) {
-      return toNullable(Nothing.value);
-    }
-    ;
-    if (v instanceof Just) {
-      return toNullable(new Just(easingToD3Name(v.value0)));
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3v2.Transition.FFI (line 58, column 1 - line 58, column 57): " + [v.constructor.name]);
-  };
 
   // output/PSD3v2.Interpreter.D3v2/index.js
   var select5 = /* @__PURE__ */ select4(monadEffectEffect);
@@ -15887,9 +16069,9 @@
       };
     },
     joinDataWithKey: function(dictFoldable) {
-      var joinDataWithKey1 = joinDataWithKey3(dictFoldable);
+      var joinDataWithKey12 = joinDataWithKey3(dictFoldable);
       return function(dictOrd) {
-        var joinDataWithKey22 = joinDataWithKey1(dictOrd.Eq0());
+        var joinDataWithKey22 = joinDataWithKey12(dictOrd.Eq0());
         return function(foldableData) {
           return function(keyFn) {
             return function(selector) {
@@ -15909,9 +16091,9 @@
       };
     },
     updateJoin: function(dictFoldable) {
-      var joinDataWithKey1 = joinDataWithKey3(dictFoldable);
+      var joinDataWithKey12 = joinDataWithKey3(dictFoldable);
       return function(dictOrd) {
-        var joinDataWithKey22 = joinDataWithKey1(dictOrd.Eq0());
+        var joinDataWithKey22 = joinDataWithKey12(dictOrd.Eq0());
         return function(v) {
           return function(_elemType) {
             return function(foldableData) {

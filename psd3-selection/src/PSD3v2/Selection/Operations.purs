@@ -45,6 +45,9 @@ import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(
 import PSD3v2.Behavior.Types (Behavior(..), DragConfig(..), ZoomConfig(..), ScaleExtent(..))
 import PSD3v2.Behavior.FFI as BehaviorFFI
 import PSD3v2.Selection.Join as Join
+import PSD3v2.Transition.FFI as TransitionFFI
+import PSD3v2.Transition.Types (TransitionConfig)
+import Data.Time.Duration (Milliseconds(..))
 import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), RenderContext(..), SBoundOwns, SBoundInherits, SEmpty, SExiting, SPending, Selection(..), SelectionImpl(..), elementContext)
 import PSD3v2.VizTree.Tree (Tree(..))
 import Web.DOM.Document (Document)
@@ -966,6 +969,89 @@ stringToElementType _ = Group  -- Default to Group for unknown types
 foreign import setTextContent_ :: String -> Element -> Effect Unit
 
 -- ============================================================================
+-- Transition Helpers for Tree API
+-- ============================================================================
+
+-- | Apply a transition with attributes to an array of elements
+-- | Used for enter/update phases - elements are animated but not removed
+applyTransitionToElements
+  :: forall datum
+   . TransitionConfig
+  -> Array (Tuple Element datum)  -- Elements with their data
+  -> Array (Attribute datum)       -- Attributes to transition to
+  -> Effect Unit
+applyTransitionToElements config elementDatumPairs attrs = do
+  let Milliseconds duration = config.duration
+  let delayNullable = TransitionFFI.maybeMillisecondsToNullable config.delay
+  let easingNullable = TransitionFFI.maybeEasingToNullable config.easing
+
+  elementDatumPairs # traverseWithIndex_ \index (Tuple element datum) -> do
+    -- Create transition for this element
+    transition <- TransitionFFI.createTransition_ duration delayNullable easingNullable element
+
+    -- Apply each attribute to the transition (animates to target value)
+    attrs # traverse_ \attr -> case attr of
+      StaticAttr (AttributeName name) value ->
+        TransitionFFI.transitionSetAttribute_ name (attributeValueToString value) transition
+
+      DataAttr (AttributeName name) f ->
+        TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum)) transition
+
+      IndexedAttr (AttributeName name) f ->
+        TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum index)) transition
+
+-- | Apply a transition with removal to an array of elements
+-- | Used for exit phase - elements animate out then are removed from DOM
+applyExitTransitionToElements
+  :: forall datum
+   . TransitionConfig
+  -> Array (Tuple Element datum)  -- Elements with their data
+  -> Array (Attribute datum)       -- Attributes to transition to before removal
+  -> Effect Unit
+applyExitTransitionToElements config elementDatumPairs attrs = do
+  let Milliseconds duration = config.duration
+  let delayNullable = TransitionFFI.maybeMillisecondsToNullable config.delay
+  let easingNullable = TransitionFFI.maybeEasingToNullable config.easing
+
+  elementDatumPairs # traverseWithIndex_ \index (Tuple element datum) -> do
+    -- Create transition for this element
+    transition <- TransitionFFI.createTransition_ duration delayNullable easingNullable element
+
+    -- Apply each attribute to the transition
+    attrs # traverse_ \attr -> case attr of
+      StaticAttr (AttributeName name) value ->
+        TransitionFFI.transitionSetAttribute_ name (attributeValueToString value) transition
+
+      DataAttr (AttributeName name) f ->
+        TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum)) transition
+
+      IndexedAttr (AttributeName name) f ->
+        TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum index)) transition
+
+    -- Schedule removal after transition completes
+    TransitionFFI.transitionRemove_ transition
+
+-- | Extract element-datum pairs from an exiting selection
+getExitingElementDatumPairs
+  :: forall datum
+   . Selection SExiting Element datum
+  -> Array (Tuple Element datum)
+getExitingElementDatumPairs (Selection impl) =
+  let { elements, data: datumArray } = unsafePartial case impl of
+        ExitingSelection r -> r
+  in Array.zipWith Tuple elements datumArray
+
+-- | Extract element-datum pairs from a bound selection
+getBoundElementDatumPairs
+  :: forall datum
+   . Selection SBoundOwns Element datum
+  -> Array (Tuple Element datum)
+getBoundElementDatumPairs (Selection impl) =
+  let { elements, data: datumArray } = unsafePartial case impl of
+        BoundSelection r -> r
+  in Array.zipWith Tuple elements datumArray
+
+-- ============================================================================
 -- Declarative Tree Rendering
 -- ============================================================================
 
@@ -1145,33 +1231,64 @@ renderNodeHelper parentSel (SceneJoin joinSpec) = do
     log $ "Tree API SceneJoin '" <> joinSpec.name <> "': enter=" <> show enterCount <> ", update=" <> show updateCount <> ", exit=" <> show exitCount
 
   -- 2. Handle EXIT with behavior
+  --
+  -- EXIT TRANSITION DESIGN:
+  -- When a transition is specified, we must NOT apply exit attrs immediately.
+  -- D3 transitions work by animating FROM current values TO target values.
+  -- If we set attrs before creating the transition, there's nothing to animate.
+  -- Instead, we create the transition and let it animate to the exit attrs,
+  -- then D3's transition.remove() handles cleanup after animation completes.
   case joinSpec.exitBehavior of
     Just exitBehavior -> do
-      -- Apply exit attributes
-      _ <- setAttrsExit exitBehavior.attrs exitSel
-      -- TODO: Apply exit transition (requires TransitionM in monad stack)
-      -- For now, just remove immediately
-      _ <- remove exitSel
-      pure unit
+      case exitBehavior.transition of
+        Just transConfig -> do
+          let pairs = getExitingElementDatumPairs exitSel
+          liftEffect $ applyExitTransitionToElements transConfig pairs exitBehavior.attrs
+        Nothing -> do
+          -- No transition - apply attrs immediately, then remove
+          _ <- setAttrsExit exitBehavior.attrs exitSel
+          _ <- remove exitSel
+          pure unit
     Nothing -> do
       -- No exit behavior specified, just remove
       _ <- remove exitSel
       pure unit
 
   -- 3. Handle ENTER with behavior
+  --
+  -- ENTER TRANSITION DESIGN:
+  -- For enter transitions, elements need to start at initialAttrs and animate
+  -- to their final template attrs. We achieve this by:
+  -- 1. Modifying the template to include initialAttrs at the END of the attrs array
+  --    (Array append means last value wins when same attribute appears twice)
+  -- 2. Rendering elements with this modified template (they start at initialAttrs)
+  -- 3. Creating a transition that animates to the original template attrs
   enterElementsAndMaps <- case joinSpec.enterBehavior of
     Just enterBehavior -> do
-      -- First apply initial attributes to pending selection
-      -- (This sets the starting state before any transition)
+      -- Modify template: append initialAttrs so they override template attrs
+      -- (last occurrence of an attribute wins when applied to DOM)
       let modifiedTemplate datum = case joinSpec.template datum of
-            Node nodeSpec -> Node nodeSpec { attrs = enterBehavior.initialAttrs <> nodeSpec.attrs }
+            Node nodeSpec -> Node nodeSpec { attrs = nodeSpec.attrs <> enterBehavior.initialAttrs }
             other -> other  -- For non-Node trees, can't modify attrs easily
 
-      -- Render with modified template
+      -- Render with modified template (elements start with initialAttrs)
       rendered <- renderTemplatesForPendingSelection modifiedTemplate enterSel
 
-      -- TODO: Apply enter transition (requires TransitionM)
-      -- The transition would animate from initialAttrs to final template attrs
+      -- Apply enter transition to animate from initialAttrs to final template attrs
+      case enterBehavior.transition of
+        Just transConfig -> do
+          let enterElements = map fst rendered
+          let Selection pendImpl = enterSel
+          let pendingData = unsafePartial case pendImpl of
+                PendingSelection rec -> rec.pendingData
+          let pairs = Array.zipWith Tuple enterElements pendingData
+          -- For each element, extract final attrs from original template and animate to them
+          liftEffect $ pairs # traverse_ \(Tuple element datum) -> do
+            let finalAttrs = case joinSpec.template datum of
+                  Node nodeSpec -> nodeSpec.attrs
+                  _ -> []  -- Non-Node templates don't have attrs
+            applyTransitionToElements transConfig [Tuple element datum] finalAttrs
+        Nothing -> pure unit
 
       pure rendered
     Nothing ->
@@ -1184,10 +1301,16 @@ renderNodeHelper parentSel (SceneJoin joinSpec) = do
   -- 4. Handle UPDATE with behavior
   updateElementsAndMaps <- case joinSpec.updateBehavior of
     Just updateBehavior -> do
-      -- Apply update attributes immediately
-      _ <- setAttrs updateBehavior.attrs updateSel
-
-      -- TODO: Apply update transition (requires TransitionM)
+      -- Check for transition
+      case updateBehavior.transition of
+        Just transConfig -> do
+          -- Apply attributes via transition (animated)
+          let pairs = getBoundElementDatumPairs updateSel
+          liftEffect $ applyTransitionToElements transConfig pairs updateBehavior.attrs
+        Nothing -> do
+          -- No transition, apply attributes immediately
+          _ <- setAttrs updateBehavior.attrs updateSel
+          pure unit
 
       -- Then render with template to update structure
       renderTemplatesForBoundSelection joinSpec.template updateSel
@@ -1247,8 +1370,11 @@ renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
       innerData = join $ map (unsafeCoerce joinSpec.decompose) joinSpec.joinData
 
   -- 2. Perform data join on the INNER data (enter/update/exit)
+  --    IMPORTANT: We use joinDataWithKey with JSON stringify because types are erased.
+  --    The compiler thinks datum is the outer type, but at runtime it's the decomposed inner type.
+  --    Using the Ord instance would compare with wrong field names and crash.
   JoinResult { enter: enterSel, update: updateSel, exit: exitSel } <-
-    joinData innerData joinSpec.key parentSel
+    joinDataWithKey innerData jsonStringify_ joinSpec.key parentSel
 
   -- Log join results (extract counts from selection implementations)
   liftEffect $ do
@@ -1268,33 +1394,85 @@ renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
     log $ "Tree API SceneNestedJoin '" <> joinSpec.name <> "': enter=" <> show enterCount <> ", update=" <> show updateCount <> ", exit=" <> show exitCount
 
   -- 3. Handle EXIT with behavior
+  --
+  -- EXIT TRANSITION DESIGN:
+  -- When a transition is specified, we must NOT apply exit attrs immediately.
+  -- D3 transitions work by animating FROM current values TO target values.
+  -- If we set attrs before creating the transition, there's nothing to animate.
+  -- Instead, we create the transition and let it animate to the exit attrs,
+  -- then D3's transition.remove() handles cleanup after animation completes.
   case joinSpec.exitBehavior of
     Just exitBehavior -> do
-      _ <- setAttrsExit (unsafeCoerce exitBehavior.attrs) exitSel
-      -- TODO: Apply exit transition (requires TransitionM in monad stack)
-      _ <- remove exitSel
-      pure unit
+      case (unsafeCoerce exitBehavior).transition of
+        Just transConfig -> do
+          let pairs = getExitingElementDatumPairs exitSel
+          liftEffect $ applyExitTransitionToElements transConfig pairs (unsafeCoerce exitBehavior.attrs)
+        Nothing -> do
+          -- No transition - apply attrs immediately, then remove
+          _ <- setAttrsExit (unsafeCoerce exitBehavior.attrs) exitSel
+          _ <- remove exitSel
+          pure unit
     Nothing -> do
       _ <- remove exitSel
       pure unit
 
   -- 4. Handle ENTER with behavior
+  --
+  -- ENTER TRANSITION DESIGN:
+  -- For enter transitions, elements need to start at initialAttrs and animate
+  -- to their final template attrs. We achieve this by:
+  -- 1. Modifying the template to include initialAttrs at the END of the attrs array
+  --    (Array append means last value wins when same attribute appears twice)
+  -- 2. Rendering elements with this modified template (they start at initialAttrs)
+  -- 3. Creating a transition that animates to the original template attrs
+  --
+  -- TYPE ERASURE NOTE:
+  -- SceneNestedJoin uses unsafeCoerce because the outer datum type differs from
+  -- the inner (decomposed) datum type. The template and behaviors are typed for
+  -- inner datum but we're in a context typed for outer datum. At runtime, the
+  -- data IS the correct inner type due to decomposition, so the coercion is safe.
   enterElementsAndMaps <- case joinSpec.enterBehavior of
     Just enterBehavior -> do
-      -- Apply initial attributes by modifying the template
+      -- Modify template: append initialAttrs so they override template attrs
+      -- (last occurrence of an attribute wins when applied to DOM)
       let modifiedTemplate datum = case (unsafeCoerce joinSpec.template) datum of
-            Node nodeSpec -> Node nodeSpec { attrs = (unsafeCoerce enterBehavior.initialAttrs) <> nodeSpec.attrs }
+            Node nodeSpec -> Node nodeSpec { attrs = nodeSpec.attrs <> (unsafeCoerce enterBehavior.initialAttrs) }
             other -> other
       rendered <- renderTemplatesForPendingSelection modifiedTemplate enterSel
-      -- TODO: Apply enter transition
+
+      -- Apply enter transition to animate from initialAttrs to final template attrs
+      case (unsafeCoerce enterBehavior).transition of
+        Just transConfig -> do
+          let enterElements = map fst rendered
+          let Selection pendImpl = enterSel
+          let pendingData = unsafePartial case pendImpl of
+                PendingSelection rec -> rec.pendingData
+          let pairs = Array.zipWith Tuple enterElements pendingData
+          -- For each element, extract final attrs from original template and animate to them
+          liftEffect $ pairs # traverse_ \(Tuple element datum) -> do
+            let finalAttrs = case (unsafeCoerce joinSpec.template) datum of
+                  Node nodeSpec -> nodeSpec.attrs
+                  _ -> []
+            applyTransitionToElements transConfig [Tuple element datum] finalAttrs
+        Nothing -> pure unit
+
       pure rendered
     Nothing -> renderTemplatesForPendingSelection (unsafeCoerce joinSpec.template) enterSel
 
   -- 5. Handle UPDATE with behavior
   updateElementsAndMaps <- case joinSpec.updateBehavior of
     Just updateBehavior -> do
-      _ <- setAttrs (unsafeCoerce updateBehavior.attrs) updateSel
-      -- TODO: Apply update transition
+      -- Check for transition
+      case (unsafeCoerce updateBehavior).transition of
+        Just transConfig -> do
+          -- Apply attributes via transition (animated)
+          let pairs = getBoundElementDatumPairs updateSel
+          liftEffect $ applyTransitionToElements transConfig pairs (unsafeCoerce updateBehavior.attrs)
+        Nothing -> do
+          -- No transition, apply attributes immediately
+          _ <- setAttrs (unsafeCoerce updateBehavior.attrs) updateSel
+          pure unit
+
       renderTemplatesForBoundSelection (unsafeCoerce joinSpec.template) updateSel
     Nothing -> renderTemplatesForBoundSelection (unsafeCoerce joinSpec.template) updateSel
 
@@ -1646,3 +1824,8 @@ foreign import getElementData_ :: forall datum. Element -> Effect (Nullable datu
 
 -- | Set data on an element (D3-style __data__ property)
 foreign import setElementData_ :: forall datum. datum -> Element -> Effect Unit
+
+-- | JSON stringify for use as key function in joins
+-- | This allows comparing objects by their JSON representation
+-- | Used when types are erased and we can't rely on Eq instances
+foreign import jsonStringify_ :: forall a. a -> String

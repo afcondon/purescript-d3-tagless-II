@@ -68,6 +68,16 @@ export function clearElement_(selector) {
 }
 
 // ============================================================================
+// JSON stringify for key-based joins
+// ============================================================================
+
+// Convert any value to JSON string for use as join key
+// Used when types are erased and we can't rely on Eq instances
+export function jsonStringify_(value) {
+  return JSON.stringify(value);
+}
+
+// ============================================================================
 // DOM-to-data synchronization
 // ============================================================================
 

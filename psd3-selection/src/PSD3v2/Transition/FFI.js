@@ -2,13 +2,18 @@ import * as d3 from 'd3';
 
 // Create a D3 transition from an element
 // Configures duration, optional delay, and optional easing
+//
+// D3 TRANSITION MECHANICS:
+// D3 transitions animate FROM the element's current attribute values
+// TO the target values set via transition.attr(). This means:
+// 1. The element must have initial values set BEFORE the transition is created
+// 2. The transition animates to values set on the transition object
+// 3. If current and target values are the same, no visible animation occurs
 export function createTransition_(duration) {
   return function(delay) {
     return function(easingName) {
       return function(element) {
         return function() {
-          console.log('createTransition_: Creating transition', { duration, delay, easingName, element });
-
           // Select the element and start a transition
           let transition = d3.select(element).transition();
 
@@ -27,10 +32,8 @@ export function createTransition_(duration) {
             if (easingFn) {
               transition = transition.ease(easingFn);
             }
-            console.log('createTransition_: Applied easing', easingName);
           }
 
-          console.log('createTransition_: Transition created', transition);
           return transition;
         };
       };
@@ -44,7 +47,6 @@ export function transitionSetAttribute_(name) {
   return function(value) {
     return function(transition) {
       return function() {
-        console.log('transitionSetAttribute_: Setting attribute', { name, value, transition });
         transition.attr(name, value);
       };
     };
@@ -55,7 +57,6 @@ export function transitionSetAttribute_(name) {
 // This is the D3 pattern: transition.remove()
 export function transitionRemove_(transition) {
   return function() {
-    console.log('transitionRemove_: Scheduling removal after transition');
     transition.remove();
   };
 }
