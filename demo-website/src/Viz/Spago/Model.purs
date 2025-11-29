@@ -20,13 +20,14 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import PSD3.Data.Graph (GraphConfig, GraphModel, buildGraphModel, toDataGraph)
 import PSD3.Data.Node (D3_FocusXY, NodeID, SimulationNode)
-import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.FFI (setInSimNodeFlag)
 import PSD3.Internal.Types (D3Simulation_, PointXY)
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 import Web.Event.Internal.Types (Event)
 
+-- Label is just String
+type Label = String
 
 -- Model data types specialized with inital data
 type SpagoTreeNode = Record (D3TreeRow (EmbeddedData SpagoNodeData + ()))

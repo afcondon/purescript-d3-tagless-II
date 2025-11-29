@@ -21568,7 +21568,7 @@
             return false;
           }
           ;
-          throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 108, column 20 - line 110, column 45): " + [node.nodetype.constructor.name]);
+          throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 109, column 20 - line 111, column 45): " + [node.nodetype.constructor.name]);
         })(),
         containerID: node.containerID,
         containerName: node.containerName,
@@ -21702,7 +21702,7 @@
             };
           }
           ;
-          throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 281, column 7 - line 284, column 79): " + [node.nodetype.constructor.name]);
+          throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 282, column 7 - line 285, column 79): " + [node.nodetype.constructor.name]);
         };
         return map36(setPositionByPackage)(nodes3);
       };
@@ -21717,7 +21717,7 @@
       return true;
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 77, column 15 - line 79, column 24): " + [d16.nodetype.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 78, column 15 - line 80, column 24): " + [d16.nodetype.constructor.name]);
   };
   var isModule = function(d16) {
     if (d16.nodetype instanceof IsModule) {
@@ -21728,7 +21728,7 @@
       return false;
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 87, column 14 - line 89, column 25): " + [d16.nodetype.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 88, column 14 - line 90, column 25): " + [d16.nodetype.constructor.name]);
   };
   var buildSpagoGraph = function(nodes3) {
     var links3 = bind8(nodes3)(function(node) {
@@ -28644,7 +28644,7 @@ ${name16}:
           return "fn(datum, index)";
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Config.Force (line 35, column 1 - line 38, column 52): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Config.Force (line 37, column 1 - line 40, column 52): " + [v.constructor.name]);
       }
     };
   };
@@ -28679,7 +28679,7 @@ ${name16}:
         return "Link { distance: " + (show114(v.value0.distance) + (", strength: " + (show114(v.value0.strength) + " }")));
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Config.Force (line 110, column 1 - line 124, column 88): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Config.Force (line 112, column 1 - line 126, column 88): " + [v.constructor.name]);
     }
   };
   var withStrength = function(val) {
@@ -28775,7 +28775,7 @@ ${name16}:
         };
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Config.Force (line 261, column 55 - line 268, column 88): " + [v.params.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Config.Force (line 263, column 55 - line 270, column 88): " + [v.params.constructor.name]);
     };
   };
   var manyBodyForce = function(name16) {

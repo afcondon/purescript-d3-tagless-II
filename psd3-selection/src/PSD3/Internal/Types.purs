@@ -1,101 +1,45 @@
 module PSD3.Internal.Types where
 
 import Data.Int (toNumber)
-import Data.Time.Duration (Milliseconds)
-import Prelude (class Eq, class Ord, class Show, compare, eq, ($))
+import Prelude (class Eq, class Ord, compare, eq, ($))
 import Unsafe.Coerce (unsafeCoerce)
 
+-- | Opaque type representing data bound to D3 elements
+-- | Used at FFI boundary when the actual data type is erased
 foreign import data Datum_ :: Type
+
+-- | Opaque type representing array indices in D3 callbacks
+-- | Int under the hood, but kept opaque to match D3's conventions
 foreign import data Index_ :: Type
 
--- Index_ is a foreign type representing array indices (Int under the hood)
--- We provide Eq and Ord instances to support data joins with key functions
+-- Eq and Ord instances to support data joins with key functions
 instance eqIndex_ :: Eq Index_ where
   eq a b = eq (index_ToInt a) (index_ToInt b)
 
 instance ordIndex_ :: Ord Index_ where
   compare a b = compare (index_ToInt a) (index_ToInt b)
 
+-- | Convert Index_ to Int
 index_ToInt :: Index_ -> Int
 index_ToInt = unsafeCoerce
+
+-- | Convert Index_ to Number (useful for calculations)
 index_ToNumber :: Index_ -> Number
 index_ToNumber i = toNumber $ index_ToInt i
+
+-- | Convert Int to Index_
 intToIndex_ :: Int -> Index_
 intToIndex_ = unsafeCoerce
 
-foreign import data D3Data_       :: Type
-foreign import data D3Selection_  :: Type -> Type  -- Phantom type parameter tracks datum type
-foreign import data D3Simulation_ :: Type -- has to be declared here to avoid cycle with Simulation.purs
-foreign import data D3Transition_ :: Type -- not clear yet if we need to distinguish from Selection
-foreign import data D3This_       :: Type -- not yet used but may be needed, ex. in callbacks
-foreign import data D3DomNode_    :: Type
+-- | Opaque type for D3 selections (v1 style, still used by FFI)
+foreign import data D3Selection_ :: Type -> Type
 
+-- | Opaque type for D3 simulations
+foreign import data D3Simulation_ :: Type
+
+-- | CSS selector type - phantom typed but just String underneath
 type Selector :: forall k. k -> Type
-type Selector selection = String 
+type Selector selection = String
 
-data Element = Div | Svg | Circle | Line | Group | Text | Path | Rect | Title | Span | Table | Tr | Td
-instance showElement :: Show Element where
-  show Div    = "div"
-  show Svg    = "svg"
-  show Circle = "circle"
-  show Line   = "line"
-  show Group  = "g"
-  show Text   = "text"
-  show Path   = "path"
-  show Rect   = "rect"
-  show Title  = "title"
-  show Span   = "span"
-  show Table  = "table"
-  show Tr     = "tr"
-  show Td     = "td"
-  
--- TODO find a way to get units back in without making DSL hideous
-data UnitType = Px | Pt | Em | Rem | Percent
-instance showUnitType :: Show UnitType where
-  show Px = "px"
-  show Pt = "pt"
-  show Em = "em"
-  show Rem = "rem"
-  show Percent = "%"
-
--- TODO we could / should also allow keyboard and other events, all this on long finger for now
-data MouseEvent = MouseEnter | MouseLeave | MouseClick | MouseDown | MouseUp 
-instance showMouseEvent :: Show MouseEvent where
-  show MouseEnter = "mouseenter"
-  show MouseLeave = "mouseleave"
-  show MouseClick = "click"
-  show MouseDown  = "mousedown"
-  show MouseUp    = "mouseup"
-
+-- | Simple 2D point record
 type PointXY = { x :: Number, y :: Number }
-
--- | Transition definitions
--- TODO make this a Newtype and give it monoid instance
-type Transition = { name     :: String
-                  , delay    :: Milliseconds-- can also be a function, ie (\d -> f d)
-                  , duration :: Milliseconds -- can also be a function, ie (\d -> f d)
-                  , easing   :: EasingFunction
-}
-type D3Group_ = Array D3DomNode_
-
-
-type EasingTime = Number
-type D3EasingFn = EasingTime -> EasingTime -- easing function maps 0-1 to 0-1 in some way with 0 -> 0, 1 -> 1
-data EasingFunction = 
-    DefaultCubic
-  | EasingFunction D3EasingFn
-  | EasingFactory (Datum_ -> Int -> D3Group_ -> D3This_ -> D3EasingFn)
-
--- Zoom types
--- TODO some Attr polymorphism needed here too
-type ZoomConfig_ d = {
-    extent      :: Array (Array Number)
-  , scaleExtent :: Array Number
-  , name        :: String
-  , target      :: D3Selection_ d
-}
-type ZoomConfigDefault_ d = {
-    scaleExtent :: Array Number
-  , name        :: String
-  , target      :: D3Selection_ d
-}

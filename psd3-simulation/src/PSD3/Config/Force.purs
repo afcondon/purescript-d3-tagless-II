@@ -18,8 +18,10 @@ import Prelude
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype, over)
 import Data.Number (infinity)
-import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Types (Datum_, Index_)
+
+-- Label is just String
+type Label = String
 
 -- | An attribute value can be:
 -- | - Static: a constant value for all nodes

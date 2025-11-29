@@ -14,7 +14,8 @@ import Data.Array as A
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype, over)
 import PSD3.Config.Force (ForceConfig(..))
-import PSD3.Internal.Attributes.Instances (Label)
+-- Label is just String
+type Label = String
 
 -- | Simulation-level parameters
 -- | These control the physics engine behavior

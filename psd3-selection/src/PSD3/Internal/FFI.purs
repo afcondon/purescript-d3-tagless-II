@@ -6,22 +6,13 @@ module PSD3.Internal.FFI where
 import PSD3.Data.Node
 
 import PSD3.Data.Tree (TreeJson_)
-import PSD3.Internal.Types (D3Data_, D3Selection_, D3Simulation_, Datum_, Index_, PointXY, Selector, Transition, ZoomConfigDefault_, ZoomConfig_)
+import PSD3.Internal.Types (D3Selection_, D3Simulation_, Datum_, Index_, PointXY, Selector)
 import Data.Nullable (Nullable)
 import Effect (Effect)
 import Prelude (Unit)
 
 -- | *********************************************************************************************************************
--- | ***************************   FFI signatures for D3js zoom module       *********************************************
--- | *********************************************************************************************************************
-foreign import data ZoomBehavior_ :: Type  -- the zoom behavior, provided to Event Handler
-foreign import d3AttachZoom_              :: forall d. D3Selection_ d -> ZoomConfig_ d        -> D3Selection_ d
-foreign import d3AttachZoomDefaultExtent_ :: forall d. D3Selection_ d -> ZoomConfigDefault_ d -> D3Selection_ d
-foreign import showAttachZoomDefaultExtent_ :: forall selection d. selection -> ZoomConfigDefault_ d -> selection
-foreign import showAttachZoom_              :: forall selection d. selection -> ZoomConfig_ d -> selection
-
--- | *********************************************************************************************************************
--- | ***************************   FFI signatures for Selection & Transition  ********************************************
+-- | ***************************   FFI signatures for Selection                ********************************************
 -- | *********************************************************************************************************************
 
 foreign import d3SelectAllInDOM_     :: forall d. Selector (D3Selection_ d) -> D3Selection_ d
@@ -67,17 +58,10 @@ foreign import d3DataWithFunction_ :: forall d. (Datum_ -> Array Datum_) -> Comp
 -- we'll coerce everything to this type if we can validate attr lambdas against provided data
 -- ... and we'll also just coerce all our setters to one thing for the FFI since JS don't care
 foreign import data D3Attr_ :: Type 
--- NB D3 returns the selection after setting an Attr but we will only capture Selections that are
--- meaningfully different _as_ selections, we're not chaining them in the same way
--- foreign import d3GetAttr_ :: String -> D3Selection -> ???? -- solve the ???? as needed later
-foreign import d3AddTransition_ :: forall d. D3Selection_ d -> Transition -> D3Selection_ d -- this is the PS transition record
-
 foreign import d3SetAttr_       :: forall d. String -> D3Attr_ -> D3Selection_ d -> D3Selection_ d
 foreign import d3SetText_       :: forall d. D3Attr_ -> D3Selection_ d -> D3Selection_ d
 foreign import d3SetProperty_   :: forall d. D3Attr_ -> D3Selection_ d -> D3Selection_ d
 foreign import d3SetHTML_       :: forall d. D3Attr_ -> D3Selection_ d -> D3Selection_ d
-
-foreign import emptyD3Data_ :: D3Data_ -- probably just null, could this be monoid too??? ie Last (Maybe D3Data_)
 
 foreign import data D3DragFunction_ :: Type
 foreign import simulationDrag_ :: forall d. String -> D3Selection_ d -> D3Simulation_ -> D3DragFunction_ -> D3Selection_ d
