@@ -8,8 +8,6 @@ import PSD3.Internal.Types (D3Selection_, MouseEvent, Transition)
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomConfig, ZoomExtent(..))
 import Prelude (class Eq, class Ord, class Show, show, (<>))
 
--- type D3Selection  = Last D3Selection_
-
 data DragBehavior = 
     DefaultDrag
   | NoDrag
@@ -31,19 +29,6 @@ defaultZoomConfig w h target =
 newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName
 derive instance ordSelectionName :: Ord SelectionName
-
--- data D3_Node = D3_Node Element (Array SelectionAttribute)
-
--- instance showD3_Node :: Show D3_Node where
---   show (D3_Node e _) = "D3Node: " <> show e
-
--- -- sugar for appending WITH attributes
--- node :: Element -> (Array SelectionAttribute) -> D3_Node
--- node e a = D3_Node e a
-
--- -- sugar for appending with NO attributes
--- node_ :: Element -> D3_Node
--- node_ e = D3_Node e []
 
 data OrderingAttribute d = Order | Sort (d -> d -> Int) | Raise | Lower
 

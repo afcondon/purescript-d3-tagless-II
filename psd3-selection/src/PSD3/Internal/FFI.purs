@@ -189,9 +189,6 @@ unsetInSimNodeFlag node = do
   let _ = unsetInSimNodeFlag_ node
   node -- NB mutated value, inSim now false
 
--- TODO this all has to change completely to work within Tagless 
--- foreign import data NativeSelection :: Type -- just temporarily defined to allow foreign functions to pass
--- foreign import addAttrFnToTick_           :: D3Selection_ -> D3Attr_ -> Unit
 foreign import onTick_                :: D3Simulation_ -> String -> (Unit -> Unit) -> Unit
 foreign import disableTick_           :: D3Simulation_ -> String -> Unit
 foreign import defaultNodeTick_       :: forall d. String -> D3Simulation_ -> D3Selection_ d -> Unit
@@ -227,8 +224,6 @@ foreign import setForceDistance_    :: D3ForceHandle_ -> D3Attr_ -> D3ForceHandl
 foreign import setLinksKeyFunction_ :: D3ForceHandle_ -> D3Attr_ -> D3ForceHandle_
 
 foreign import putForceInSimulation_        :: D3Simulation_ -> String -> D3ForceHandle_ -> D3Simulation_
--- foreign import restartLinksForceInSimulation_ :: D3Simulation_ -> D3ForceHandle_ -> Array Datum_ -> D3Simulation_
--- foreign import putForceInSimulationWithFilter_ :: D3Simulation_ -> String -> (Datum_ -> Boolean) -> D3ForceHandle_ -> D3Simulation_
 foreign import lookupForceByName_           :: D3Simulation_ -> String -> Nullable D3ForceHandle_
 foreign import removeFixForceXY_            :: D3Simulation_ -> (Datum_ -> Boolean) -> D3Simulation_
 foreign import removeFixForceX_             :: D3Simulation_ -> (Datum_ -> Boolean) -> D3Simulation_
@@ -241,24 +236,13 @@ foreign import setAsNullForceInSimulation_  :: D3Simulation_ -> String -> D3Simu
 -- | ***************************   FFI signatures for D3js Hierarchy module  *********************************************
 -- | *********************************************************************************************************************
 
--- this is an opaque type behind which hides the data type of the Purescript tree that was converted
+-- Opaque type for D3 hierarchy nodes
 foreign import data RecursiveD3TreeNode_ :: Type
--- this is the Purescript Tree after processing in JS to remove empty child fields from leaves etc
--- =======================================================================================
--- | REMOVED: Old D3 hierarchy FFI functions
--- | We now use pure PureScript hierarchy layouts (PSD3.Layout.Hierarchy.*)
--- | These old FFI functions are no longer needed:
--- |   - hierarchyFromJSON_, descendants_, links_, runLayoutFn_, etc.
--- |   - treeSortForCirclePack_, treeSortForTreeMap_, treeSortForTree_
--- |   - hasChildren_, getHierarchyValue_, getHierarchyChildren_, getHierarchyParent_
--- |   - getTreeLayoutFn_, getClusterLayoutFn_, treeSetSize_, treeSetSeparation_, etc.
--- |   - hNodeDepth_, hNodeHeight_, hNodeX_, hNodeY_, hNodeR_
--- =======================================================================================
 
--- Kept: cloneTreeJson_ is still used for creating copies of tree data
+-- Tree JSON cloning for creating copies of tree data
 foreign import cloneTreeJson_           :: TreeJson_ -> TreeJson_
 
--- Kept: Link generators are still used for rendering connections
+-- Link generators for rendering connections
 foreign import linkHorizontal_        :: (Datum_ -> String)
 foreign import linkHorizontal2_       :: (Datum_ -> String)
 foreign import linkVertical_          :: (Datum_ -> String)
@@ -286,17 +270,6 @@ foreign import arcPath_                :: ArcGenerator_ -> Datum_ -> String
 foreign import setRibbonRadius_        :: RibbonGenerator_ -> Number -> RibbonGenerator_
 foreign import setArcInnerRadius_      :: ArcGenerator_ -> Number -> ArcGenerator_
 foreign import setArcOuterRadius_      :: ArcGenerator_ -> Number -> ArcGenerator_
-
--- | *********************************************************************************************************************
--- | REMOVED: Old D3 hierarchy layout FFI functions (Pack, Treemap, Partition)
--- | We now use pure PureScript implementations in PSD3.Layout.Hierarchy.*
--- | These old FFI functions are no longer needed:
--- |   - packLayout_, packSetSize_, packSetPadding_, runPackLayout_
--- |   - treemapLayout_, treemapSetSize_, treemapSetPadding_, runTreemapLayout_
--- |   - partitionLayout_, partitionSetSize_, partitionSetPadding_, runPartitionLayout_
--- |   - treeSortForCirclePack_, treeSortForTreeMap_, treeSortForPartition_
--- |   - hNodeX0_, hNodeY0_, hNodeX1_, hNodeY1_, hNodeR_
--- | *********************************************************************************************************************
 
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for Details Panel manipulation  *************************************

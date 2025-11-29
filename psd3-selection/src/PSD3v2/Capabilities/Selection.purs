@@ -82,12 +82,12 @@ class Monad m <= SelectionM sel m | m -> sel where
     -> sel state parent parentDatum
     -> m (sel SEmpty Element datum)
 
-  -- | Open selection (v1 compatibility API)
+  -- | Open selection (parent-first argument order)
   -- |
-  -- | Alias for selectAll with arguments flipped to match v1 convention.
-  -- | In v1, openSelection took parent first, then selector.
+  -- | Alias for selectAll with arguments flipped.
+  -- | Takes parent selection first, then selector string.
   -- |
-  -- | Example (v1 style):
+  -- | Example:
   -- | ```purescript
   -- | openSel <- openSelection letterGroup "text"
   -- | ```
@@ -210,16 +210,12 @@ class Monad m <= SelectionM sel m | m -> sel where
     -> sel SEmpty parent parentDatum
     -> m (JoinResult sel parent datum)
 
-  -- | Update join (v1 compatibility API)
+  -- | Update join with key function
   -- |
-  -- | This is a compatibility wrapper that provides similar semantics to v1's updateJoin.
-  -- | Unlike v1 which could infer the selector from the open selection, v2 requires
-  -- | passing the selector string explicitly.
+  -- | Performs a data join using a key function for object constancy.
+  -- | The element type parameter is for API consistency but not used internally.
   -- |
-  -- | Parameters match v1 order: openSelection -> Element -> data -> keyFn -> selector
-  -- | The Element parameter is kept for compatibility but not used internally.
-  -- |
-  -- | Example (v2 style with selector):
+  -- | Example:
   -- | ```purescript
   -- | openSel <- openSelection letterGroup "text"
   -- | { enter, update, exit } <- updateJoin openSel Text letters charToKey "text"
@@ -229,10 +225,10 @@ class Monad m <= SelectionM sel m | m -> sel where
      . Foldable f
     => Ord key
     => sel SEmpty parent parentDatum
-    -> elemType  -- Element type (not used in v2, kept for v1 compatibility)
+    -> elemType  -- Element type (for API consistency)
     -> f datum
     -> (datum -> key)  -- Key extraction function
-    -> String  -- Selector string (required in v2, inferred in v1)
+    -> String  -- Selector string
     -> m (JoinResult sel parent datum)
 
   -- | Append new elements to a pending (enter) selection

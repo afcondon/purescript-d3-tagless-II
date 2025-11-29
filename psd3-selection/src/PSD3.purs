@@ -1,22 +1,9 @@
 -- | PSD3: PureScript D3 - Type-safe, composable data visualization
 -- |
--- | **Version 2 (PSD3v2)** - Complete rewrite with phantom types and Tree API
--- |
--- | PSD3v2 is a PureScript library for creating D3.js visualizations using phantom types
+-- | PSD3 is a PureScript library for creating D3.js visualizations using phantom types
 -- | for compile-time safety and a declarative Tree API for clean, maintainable code.
 -- |
--- | ## ⚠️ Breaking Changes from v1
--- |
--- | This is a **major version** with breaking changes. The old v1 architecture has been
--- | archived to `src/lib/PSD3_v1_Archive/`. See that directory's README for migration guide.
--- |
--- | **Key Changes**:
--- | - ❌ Old SelectionM monad → ✅ Phantom-typed selections
--- | - ❌ Manual append/select chains → ✅ Declarative Tree API
--- | - ❌ Old SimulationM → ✅ Direct SimulationManager (Effect-based)
--- | - ❌ Manual GUP → ✅ Automatic enter/update/exit with `joinData`
--- |
--- | ## Quick Start (v2)
+-- | ## Quick Start
 -- |
 -- | ```purescript
 -- | import PSD3v2.Interpreter.D3v2 as D3v2
@@ -113,42 +100,9 @@
 -- | import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom, simulationDrag)
 -- | ```
 -- |
--- | ## Migration from v1
--- |
--- | See `src/lib/PSD3_v1_Archive/README.md` for detailed migration guide.
--- |
--- | **Quick comparison**:
--- |
--- | v1 (OLD):
--- | ```purescript
--- | import PSD3.Interpreter.D3 (runD3, D3M)
--- | import PSD3.Capabilities.Selection (select, append)
--- |
--- | example :: D3M Unit
--- | example = do
--- |   sel <- select "body"
--- |   svg <- append SVG sel
--- |   -- manual DOM manipulation...
--- | ```
--- |
--- | v2 (NEW):
--- | ```purescript
--- | import PSD3v2.Interpreter.D3v2 as D3v2
--- | import PSD3v2.Capabilities.Selection (select, renderTree)
--- | import PSD3v2.VizTree.Tree as T
--- |
--- | example :: D3v2M SUnbound Unit
--- | example = do
--- |   container <- select "body"
--- |   let tree = T.elem SVG [] `T.withChild` ...
--- |   renderTree container tree
--- | ```
--- |
 -- | ## Exports
 -- |
--- | This module currently re-exports the **NEW PSD3v2** modules.
--- |
--- | For the old v1 modules, see `src/lib/PSD3_v1_Archive/`.
+-- | This module re-exports the core PSD3 modules for convenient imports.
 -- |
 module PSD3 (module X) where
 
