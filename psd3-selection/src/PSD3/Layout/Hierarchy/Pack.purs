@@ -26,8 +26,10 @@ import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Number (sqrt, abs)
 import Data.Tuple (Tuple(..))
+import Effect (Effect)
 import Effect.Unsafe (unsafePerformEffect)
 import Effect.Console (log) as Console
+import Data.Traversable (traverse_) as Array
 
 -- | Circle ID for map-based storage
 type CircleId = Int
@@ -216,63 +218,89 @@ shortenChainOnly aId jId chain =
 --     _, _ -> chain
 
 -- ============================================================================
--- COLLISION DETECTION
+-- COLLISION DETECTION (D3-style bidirectional search)
 -- ============================================================================
 
+-- | Result of bidirectional collision search
+-- | Includes which direction the collision was found (affects how we update a/b)
 data CollisionResult
   = NoCollision
-  | CollisionAt CircleId
+  | CollisionFromJ CircleId  -- Collision found walking forward (b becomes j)
+  | CollisionFromK CircleId  -- Collision found walking backward (a becomes k)
 
--- | Get segment of chain to check for collisions (from startId.next to startId, wrapping)
-getChainSegmentFrom :: CircleId -> Array CircleId -> Array CircleId
-getChainSegmentFrom startId chain =
-  case Array.elemIndex startId chain of
-    Nothing -> []
-    Just startIdx ->
-      -- Get all IDs after startId, wrapping around
-      let
-        after = Array.drop (startIdx + 1) chain
-        before = Array.take startIdx chain
-      in
-        after <> before
+-- | Get next ID in circular chain (wrapping)
+getNextInChain :: CircleId -> Array CircleId -> Maybe CircleId
+getNextInChain nodeId chain =
+  case Array.elemIndex nodeId chain of
+    Nothing -> Nothing
+    Just idx ->
+      let nextIdx = (idx + 1) `mod` Array.length chain
+      in Array.index chain nextIdx
 
--- | Find first collision in chain segment
-findFirstCollision :: Array CircleId -> Circle -> Map CircleId Circle -> Maybe CircleId
-findFirstCollision idsToCheck newCircle circles =
-  Array.findMap
-    ( \id ->
-        case Map.lookup id circles of
-          Just c ->
-            if intersects c newCircle then Just id
-            else Nothing
-          Nothing -> Nothing
-    )
-    idsToCheck
+-- | Get previous ID in circular chain (wrapping)
+getPrevInChain :: CircleId -> Array CircleId -> Maybe CircleId
+getPrevInChain nodeId chain =
+  case Array.elemIndex nodeId chain of
+    Nothing -> Nothing
+    Just idx ->
+      let n = Array.length chain
+          prevIdx = (idx - 1 + n) `mod` n
+      in Array.index chain prevIdx
 
--- | Walk chain from startId looking for collision with newCircle
--- | D3 only checks collisions with circles in the frontChain (boundary circles)
--- | Circles removed from chain during shortening are interior and don't need checking
-walkChainForCollision :: CircleId -> Circle -> PackState -> CollisionResult
-walkChainForCollision startId newCircle state =
-  let
-    idsToCheck = getChainSegmentFrom startId state.frontChain
-  in
-    case findFirstCollision idsToCheck newCircle state.circles of
-      Just collisionId -> CollisionAt collisionId
-      Nothing -> NoCollision
-
--- | Check collision against ALL placed circles (not just frontChain)
--- | This is used to detect if shortening caused us to skip interior circles
--- checkAllCollisions :: Circle -> PackState -> Maybe CircleId -- TODO not used/not exported
--- checkAllCollisions newCircle state =
---   let
---     allIds = Set.toUnfoldable (Map.keys state.circles) :: Array CircleId
---   in
---     Array.find (\id ->
---       case Map.lookup id state.circles of
---         Just c -> intersects c newCircle
---         Nothing -> false
---     ) allIds
+-- | D3-style bidirectional collision search
+-- | Walks both directions (j forward from b, k backward from a) simultaneously
+-- | Uses accumulated radii to decide which direction to check next
+-- | Returns collision info including direction (so caller knows to update a or b)
+-- | IMPORTANT: Uses do-while semantics - check at least one circle before stopping
+bidirectionalCollisionSearch :: CircleId -> CircleId -> Circle -> PackState -> CollisionResult
+bidirectionalCollisionSearch aId bId newCircle state =
+  case Map.lookup aId state.circles, Map.lookup bId state.circles of
+    Just a, Just b ->
+      -- Initialize: j = b.next, k = a.previous
+      case getNextInChain bId state.frontChain, getPrevInChain aId state.frontChain of
+        Just jInit, Just kInit ->
+          -- Initial accumulated radii: sj = b.r, sk = a.r
+          -- D3 uses do-while, so we run the body FIRST, then check stop condition
+          doWhileStep jInit kInit b.r a.r
+        _, _ -> NoCollision
+    _, _ -> NoCollision
+  where
+  -- D3's do-while loop: run body first, then check if j === k.next
+  doWhileStep :: CircleId -> CircleId -> Number -> Number -> CollisionResult
+  doWhileStep j k sj sk =
+    -- Run loop body first (check collision)
+    if sj <= sk then
+      -- Check collision at j
+      case Map.lookup j state.circles of
+        Just jCircle ->
+          if intersects jCircle newCircle then
+            CollisionFromJ j
+          else
+            -- Advance j forward, add j.r to sj
+            case getNextInChain j state.frontChain of
+              Just jNext ->
+                -- NOW check stop condition: j (after advancing) === k.next?
+                case getNextInChain k state.frontChain of
+                  Just kNext | jNext == kNext -> NoCollision  -- Pointers met, done
+                  _ -> doWhileStep jNext k (sj + jCircle.r) sk  -- Continue
+              Nothing -> NoCollision
+        Nothing -> NoCollision
+    else
+      -- Check collision at k
+      case Map.lookup k state.circles of
+        Just kCircle ->
+          if intersects kCircle newCircle then
+            CollisionFromK k
+          else
+            -- Advance k backward, add k.r to sk
+            case getPrevInChain k state.frontChain of
+              Just kPrev ->
+                -- NOW check stop condition: j === kPrev.next?
+                case getNextInChain kPrev state.frontChain of
+                  Just kPrevNext | j == kPrevNext -> NoCollision  -- Pointers met, done
+                  _ -> doWhileStep j kPrev sj (sk + kCircle.r)  -- Continue
+              Nothing -> NoCollision
+        Nothing -> NoCollision
 
 -- ============================================================================
 -- STATE MANIPULATION
@@ -326,21 +354,23 @@ initState c0 c1 c2 =
       , Tuple 1 c1'
       , Tuple 2 c2'
       ]
+
+    _ = unsafePerformEffect $ Console.log $
+      "   Initial positions: c0=(" <> show c0'.x <> "," <> show c0'.y <> ") c1=(" <> show c1'.x <> "," <> show c1'.y <> ") c2=(" <> show c2'.x <> "," <> show c2'.y <> ")"
   in
     { circles
-    , frontChain: [ 0, 2, 1 ] -- Circular order (counterclockwise): a -> c -> b -> a
+    , frontChain: [ 0, 2, 1 ] -- D3 order: a -> c -> b -> a (counterclockwise around boundary)
     , nextId: 3
     }
 
 -- | Add one circle to the pack
 -- | Try to place a circle, retrying with new front pairs until no collision
 -- | maxRetries parameter prevents infinite recursion
+-- | D3's algorithm: on collision from j-direction, b=j; on collision from k-direction, a=k
 tryPlaceCircleWithLimit :: Int -> Circle -> CircleId -> CircleId -> PackState -> PackState
 tryPlaceCircleWithLimit maxRetries newCircle aId bId state
   | maxRetries <= 0 =
       -- CRITICAL: We've exhausted retries! This means our retry logic is broken.
-      -- We're giving up without placing the circle, which drops it from output.
-      -- TODO: This should NEVER happen with a correct algorithm!
       let
         _ = unsafePerformEffect $ Console.log $ "❌ RETRY LIMIT HIT! Failed to place circle r=" <> show newCircle.r
       in
@@ -352,43 +382,43 @@ tryPlaceCircleWithLimit maxRetries newCircle aId bId state
             -- Place circle tangent to pair
             positioned = place b a newCircle
 
-            -- Log placement attempt
+            -- Log placement attempt (reduced verbosity)
             _ = unsafePerformEffect $ Console.log $
               "  Try r=" <> show newCircle.r <> " at (" <> show aId <> "," <> show bId <> ")"
-                <> " -> pos=("
-                <> show positioned.x
-                <> ","
-                <> show positioned.y
-                <> ")"
-                <> " [retries left: "
-                <> show maxRetries
-                <> "]"
 
-            -- Check for collisions starting from bId (matches D3: j = b.next)
-            collisionResult = walkChainForCollision bId positioned state
+            -- D3-style bidirectional collision search
+            collisionResult = bidirectionalCollisionSearch aId bId positioned state
           in
             case collisionResult of
               NoCollision ->
                 let
-                  _ = unsafePerformEffect $ Console.log $ "    ✅ NO COLLISION - placed successfully"
+                  _ = unsafePerformEffect $ Console.log $ "    ✅ Placed at (" <> show positioned.x <> ", " <> show positioned.y <> ")"
                 in
                   insertBetween aId bId positioned state
-              CollisionAt jId ->
-                -- Collision! Shorten chain and retry with new front pair (a, j)
+
+              CollisionFromJ jId ->
+                -- Collision walking forward: b = j, retry with (a, j)
+                -- D3: a.next = b, b.previous = a (splice out nodes between old b and j)
                 let
                   _ = unsafePerformEffect $ Console.log $
-                    "    ❌ COLLISION at circle " <> show jId <> " - shortening chain and retrying with (" <> show aId <> "," <> show jId <> ")"
-
-                  -- Update chain to skip over circles between a and j
+                    "    ⚠️ Collision at j=" <> show jId <> " - b:=" <> show jId
+                  -- Shorten chain: keep a, skip to j
                   shortenedChain = shortenChainOnly aId jId state.frontChain
-                  _ = unsafePerformEffect $ Console.log $
-                    "       Chain before: " <> show state.frontChain
-                  _ = unsafePerformEffect $ Console.log $
-                    "       Chain after:  " <> show shortenedChain
                   stateWithShortenedChain = state { frontChain = shortenedChain }
                 in
-                  -- Retry placement with new front pair (a, j), decrement retry limit
                   tryPlaceCircleWithLimit (maxRetries - 1) newCircle aId jId stateWithShortenedChain
+
+              CollisionFromK kId ->
+                -- Collision walking backward: a = k, retry with (k, b)
+                -- D3: a.next = b, b.previous = a (splice out nodes between k and old a)
+                let
+                  _ = unsafePerformEffect $ Console.log $
+                    "    ⚠️ Collision at k=" <> show kId <> " - a:=" <> show kId
+                  -- Shorten chain: skip from k to b
+                  shortenedChain = shortenChainOnly kId bId state.frontChain
+                  stateWithShortenedChain = state { frontChain = shortenedChain }
+                in
+                  tryPlaceCircleWithLimit (maxRetries - 1) newCircle kId bId stateWithShortenedChain
         _, _ -> state
 
 tryPlaceCircle :: Circle -> CircleId -> CircleId -> PackState -> PackState
@@ -420,6 +450,10 @@ packSiblingsMap :: Array Circle -> { circles :: Array Circle, radius :: Number }
 packSiblingsMap inputCircles =
   let
     n = Array.length inputCircles
+    _ = unsafePerformEffect $ Console.log $
+      "📦 packSiblingsMap called with " <> show n <> " circles"
+    _ = unsafePerformEffect $ Console.log $
+      "   Radii: " <> show (map _.r inputCircles)
   in
     if n == 0 then { circles: [], radius: 0.0 }
     else if n == 1 then
@@ -458,9 +492,51 @@ packSiblingsMap inputCircles =
 
             -- Translate to center
             translated = map (\c -> c { x = c.x - enclosing.x, y = c.y - enclosing.y }) positioned
+
+            -- Detect and report overlaps
+            overlaps = detectOverlaps translated
+            _ = if Array.length overlaps > 0
+                then unsafePerformEffect $ Console.log $
+                  "⚠️ OVERLAPS DETECTED: " <> show (Array.length overlaps) <> " pairs"
+                else unit
+            _ = unsafePerformEffect $ reportOverlaps overlaps
           in
             { circles: translated, radius: enclosing.r }
         _, _, _ -> { circles: [], radius: 0.0 }
+
+-- | Detect all pairwise overlaps in final positioned circles
+detectOverlaps :: Array Circle -> Array { i :: Int, j :: Int, overlap :: Number }
+detectOverlaps circles =
+  let
+    n = Array.length circles
+    pairs = do
+      i <- Array.range 0 (n - 2)
+      j <- Array.range (i + 1) (n - 1)
+      pure (Tuple i j)
+  in
+    Array.mapMaybe (checkPair circles) pairs
+  where
+  checkPair :: Array Circle -> Tuple Int Int -> Maybe { i :: Int, j :: Int, overlap :: Number }
+  checkPair cs (Tuple i j) = do
+    ci <- Array.index cs i
+    cj <- Array.index cs j
+    let dx = cj.x - ci.x
+        dy = cj.y - ci.y
+        dist = sqrt (dx * dx + dy * dy)
+        minDist = ci.r + cj.r
+        overlap = minDist - dist
+    -- Report if overlap > small tolerance (not just touching)
+    if overlap > 0.1
+      then Just { i, j, overlap }
+      else Nothing
+
+-- | Report overlaps to console
+reportOverlaps :: Array { i :: Int, j :: Int, overlap :: Number } -> Effect Unit
+reportOverlaps overlaps =
+  Array.traverse_ (\o ->
+    Console.log $ "  Overlap: circles " <> show o.i <> " and " <> show o.j
+      <> " overlap by " <> show o.overlap <> " pixels"
+  ) overlaps
 
 -- ============================================================================
 -- ENCLOSING CIRCLE (from Pack.purs)

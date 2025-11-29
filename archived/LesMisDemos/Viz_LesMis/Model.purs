@@ -1,8 +1,6 @@
 module D3.Viz.LesMiserables.Model where
 
-import Prelude
-import PSD3.Data.Node (SimulationNode)
-import Data.Nullable (Nullable, null)
+import PSD3.Data.Node (D3Link_Unswizzled, SimulationNode)
 
 -- | ==========================================================================================
 -- |                  Model data types using row-polymorphic SimulationNode
@@ -10,23 +8,18 @@ import Data.Nullable (Nullable, null)
 
 -- | Row type for Les Misérables node user data
 -- | Includes sx, sy for caching simulation positions during layout transitions
-type LesMisNodeRow = (id :: String, group :: Int, sx :: Nullable Number, sy :: Nullable Number)
+type LesMisNodeRow = (id :: String, group :: Int)
 
 -- | Simulation node with user data fields directly in the record
 -- | This matches D3's behavior: it EXTENDS your data with simulation fields
 type LesMisSimNode = SimulationNode LesMisNodeRow
 
--- | Row type for Les Misérables link data
-type LesMisLinkRow = ( value :: Number )
+-- | Link data (value represents connection strength)
+type LesMisLinkData = { value :: Number }
 
--- | Typed link for LesMis (String IDs, not Int)
--- | Note: LesMis uses String node IDs, so we define our own link type
--- | rather than using the library's Link which assumes NodeID = Int
-type LesMisLink = { source :: String, target :: String, value :: Number }
-
--- | Raw model (typed links - source/target are string IDs)
+-- | Raw model (unswizzled links - source/target are string IDs)
 type LesMisRawModel =
-  { links :: Array LesMisLink
+  { links :: Array D3Link_Unswizzled
   , nodes :: Array LesMisSimNode
   }
 
