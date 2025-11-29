@@ -3,13 +3,16 @@ module Component.HowTo.HowtoAxesScales where
 import Prelude
 
 import Data.Maybe (Maybe(..))
+import Effect.Aff (Milliseconds(..), delay)
 import Effect.Aff.Class (class MonadAff)
+import Effect.Class (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Shared.SiteNav as SiteNav
 import PSD3.Website.Types (Route(..))
+import D3.Viz.FPFTW.ScalesDemo as ScalesDemo
 
 type State = Unit
 
@@ -27,7 +30,11 @@ component = H.mkComponent
 
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
-  Initialize -> pure unit
+  Initialize -> do
+    H.liftAff $ delay (Milliseconds 100.0)
+    liftEffect $ ScalesDemo.drawGradientComparison "#gradient-demo"
+    liftEffect $ ScalesDemo.drawScalePipeline "#pipeline-demo"
+    pure unit
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render _ =
@@ -46,90 +53,208 @@ render _ =
             [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
             [ HH.h1
                 [ HP.classes [ HH.ClassName "tutorial-title" ] ]
-                [ HH.text "Creating Axes and Scales" ]
+                [ HH.text "Scales: The PSD3 Way" ]
             , HH.p_
-                [ HH.text "PSD3 provides color scales and supports D3's scale/axis FFI for custom scales." ]
+                [ HH.text "PSD3 provides a comprehensive, type-safe Scale module with full D3 parity plus functional programming idioms. Scales transform data from a domain (input) to a range (output)." ]
             ]
 
-        -- Color Scales
+        -- Quick Start
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ] ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "Color Scales" ]
-
-            , HH.p_ [ HH.text "Built-in color interpolation (0-1 input):" ]
+                [ HH.text "Quick Start" ]
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3.Internal.Scales.Scales
+                    [ HH.text """import PSD3.Scale (linear, domain, range, applyScale, ticks)
 
--- Sequential scales
-fill (\\d -> d3InterpolateViridis_ (d.value / maxValue))
-fill (\\d -> d3InterpolatePlasma_ (d.value / maxValue))
+-- Create a linear scale
+xScale = linear
+  # domain [0.0, 100.0]
+  # range [0.0, 800.0]
 
--- Diverging scales (good for -1 to 1 ranges)
-fill (\\d -> d3InterpolateRdYlGn_ (normalize d.change))
+-- Apply it
+pixelX = applyScale xScale 50.0  -- Returns 400.0
 
--- Categorical by index
-fill (\\d -> d3SchemeCategory10N_ (toNumber d.index))""" ]
+-- Get tick marks for an axis
+tickValues = ticks 10 xScale     -- [0, 10, 20, ..., 100]""" ]
                 ]
             ]
 
-        -- FFI Scales
+        -- Scale Types
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ] ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "Custom D3 Scales via FFI" ]
-
-            , HH.p_ [ HH.text "For linear/band/time scales, use FFI:" ]
-            , HH.h3_ [ HH.text "JavaScript FFI" ]
+                [ HH.text "Scale Types" ]
+            , HH.h3_ [ HH.text "Continuous Scales" ]
+            , HH.p_ [ HH.text "Map continuous domain to continuous range:" ]
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """export const scaleLinear_ = domain => range => () =>
-  d3.scaleLinear().domain(domain).range(range);
+                    [ HH.text """-- Linear (most common)
+linear # domain [0.0, 100.0] # range [0.0, 500.0]
 
-export const scaleBand_ = domain => range => padding => () =>
-  d3.scaleBand().domain(domain).range(range).padding(padding);
+-- Logarithmic (for exponential data)
+log # domain [1.0, 1000.0] # range [0.0, 300.0]
 
-export const applyScale_ = scale => value => scale(value);""" ]
+-- Power/Square root (for area scaling)
+sqrt # domain [0.0, maxValue] # range [0.0, 50.0]
+
+-- Symlog (handles negative values and zero)
+symlog # constant 1.0 # domain [-100.0, 100.0] # range [0.0, 500.0]""" ]
                 ]
 
-            , HH.h3_ [ HH.text "PureScript" ]
+            , HH.h3_ [ HH.text "Band Scales (for bar charts)" ]
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """foreign import scaleLinear_ :: Array Number -> Array Number -> Effect Scale
-foreign import scaleBand_ :: Array String -> Array Number -> Number -> Effect Scale
-foreign import applyScale_ :: Scale -> Number -> Number
+                    [ HH.text """-- Band scale with padding
+xScale = band
+  # domain ["Mon", "Tue", "Wed", "Thu", "Fri"]
+  # range [0.0, 500.0]
+  # padding 0.1
 
--- Usage
-xScale <- liftEffect $ scaleLinear_ [0.0, maxX] [0.0, width]
-let xPos d = applyScale_ xScale d.value""" ]
+-- Get bar position and width
+barX = applyScale xScale "Wed"
+barWidth = bandwidth xScale""" ]
+                ]
+
+            , HH.h3_ [ HH.text "Ordinal Scales (categorical → categorical)" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """-- Map categories to colors
+colorScale = ordinal
+  # domain ["A", "B", "C"]
+  # range ["red", "green", "blue"]
+
+color = applyScale colorScale "B"  -- "green" """ ]
                 ]
             ]
 
-        -- Axes
+        -- Color Interpolators
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ] ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "Creating Axes" ]
+                [ HH.text "Color Interpolators" ]
+            , HH.p_ [ HH.text "Built-in color interpolators take a value in [0, 1] and return a color:" ]
 
-            , HH.p_ [ HH.text "Axes via FFI:" ]
+            -- Gradient demo container
+            , HH.div
+                [ HP.id "gradient-demo"
+                , HP.style "margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;"
+                ]
+                [ HH.div [ HP.id "gradient-demo-viridis" ] []
+                , HH.div [ HP.id "gradient-demo-plasma" ] []
+                , HH.div [ HP.id "gradient-demo-inferno" ] []
+                , HH.div [ HP.id "gradient-demo-turbo" ] []
+                , HH.div [ HP.id "gradient-demo-rdylgn" ] []
+                ]
+
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """-- JavaScript
-export const axisBottom_ = scale => () => d3.axisBottom(scale);
-export const axisLeft_ = scale => () => d3.axisLeft(scale);
-export const callAxis_ = selection => axis => () => selection.call(axis);
+                    [ HH.text """import PSD3.Scale (interpolateViridis, interpolatePlasma, interpolateRdYlGn)
 
--- PureScript: Append group then call axis
-axisGroup <- append Group [transform ("translate(0," <> show height <> ")")] svg
-liftEffect $ callAxis_ axisGroup xAxis""" ]
+-- Sequential (for continuous data)
+fill (\\d -> interpolateViridis (d.value / maxValue))
+
+-- Diverging (for data with meaningful midpoint)
+fill (\\d -> interpolateRdYlGn ((d.change + 1.0) / 2.0))
+
+-- Use with sample for gradients
+colors = Array.range 0 99 <#> \\i -> interpolateViridis (toNumber i / 99.0)""" ]
+                ]
+            ]
+
+        -- Scale Composition
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Scale Composition (FP Power!)" ]
+            , HH.p_ [ HH.text "Scales compose beautifully. Here's a pipeline: raw data → normalize → color:" ]
+
+            -- Pipeline demo
+            , HH.div
+                [ HP.id "pipeline-demo"
+                , HP.style "margin: 20px 0;"
+                ]
+                []
+
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """import PSD3.Scale (andThen, contramap, map)
+import PSD3.Scale.FP (normalize)
+
+-- Compose scales with andThen
+tempToColor = normalize (-10.0) 40.0 `andThen` interpolateRdYlGn
+
+-- Or use contramap/map for transformations
+celsiusScale = fahrenheitScale # contramap celsiusToFahrenheit
+offsetScale = pixelScale # map (_ + margin)
+
+-- Full dimap (profunctor-like)
+transformed = scale # dimap preprocess postprocess""" ]
+                ]
+            ]
+
+        -- Configuration
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Scale Configuration" ]
+            , HH.p_ [ HH.text "All configuration returns a new scale (immutable API):" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """-- Chain configurations with #
+myScale = linear
+  # domain [0.0, 100.0]
+  # range [0.0, 500.0]
+  # nice           -- Round domain to nice values
+  # clamp true     -- Constrain output to range
+
+-- Use modifiers from PSD3.Scale.FP
+import PSD3.Scale.FP (niceModifier, clampModifier, combineModifiers)
+
+combined = combineModifiers [niceModifier, clampModifier]
+myScale = linear # combined # domain [...] # range [...]""" ]
+                ]
+            ]
+
+        -- Operations
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Scale Operations" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ] ]
+                [ HH.code_
+                    [ HH.text """-- Apply scale
+y = applyScale scale x
+
+-- Invert (range → domain)
+case invert scale pixelY of
+  Just dataY -> -- use dataY
+  Nothing -> -- out of range
+
+-- Generate tick values
+tickVals = ticks 10 scale
+
+-- Format ticks
+formatter = tickFormat 10 ".1f" scale
+labels = tickVals <#> formatter
+
+-- Band scale specifics
+barWidth = bandwidth bandScale
+stepSize = step bandScale""" ]
                 ]
             ]
 
@@ -140,60 +265,36 @@ liftEffect $ callAxis_ axisGroup xAxis""" ]
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
                 [ HH.text "Key Points" ]
             , HH.ul_
-                [ HH.li_ [ HH.strong_ [ HH.text "Color interpolators" ], HH.text " - Take 0-1, return color string" ]
-                , HH.li_ [ HH.strong_ [ HH.text "Normalize data" ], HH.text " - Scale values to 0-1 for interpolators" ]
-                , HH.li_ [ HH.strong_ [ HH.text "FFI for numeric scales" ], HH.text " - scaleLinear, scaleBand, scaleTime" ]
-                , HH.li_ [ HH.strong_ [ HH.text "Axis via .call()" ], HH.text " - D3 pattern for rendering axes" ]
+                [ HH.li_ [ HH.strong_ [ HH.text "Type-safe: " ], HH.text "Phantom types track scale kind (Continuous, Band, etc.)" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Immutable: " ], HH.text "Configuration returns new scales, safe to share" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Composable: " ], HH.text "Use andThen, contramap, map, dimap" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Full D3 parity: " ], HH.text "All D3 scale types and methods available" ]
+                , HH.li_ [ HH.strong_ [ HH.text "FP extras: " ], HH.text "PSD3.Scale.FP adds sampling, modifiers, utilities" ]
                 ]
             ]
 
-        -- Real Example
+        -- See Also
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ] ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "Real Example" ]
-            , HH.p_ [ HH.text "See scales in action:" ]
+                [ HH.text "See Also" ]
             , HH.ul_
                 [ HH.li_
-                    [ HH.code_ [ HH.text "src/lib/PSD3/Internal/Scales/Scales.purs" ]
-                    , HH.text " - Color interpolators"
+                    [ HH.code_ [ HH.text "PSD3.Scale" ]
+                    , HH.text " - Core scale module"
                     ]
                 , HH.li_
-                    [ HH.code_ [ HH.text "src/website/Viz/Spago/Draw/Attributes.purs" ]
-                    , HH.text " - Color-by-metric scales"
+                    [ HH.code_ [ HH.text "PSD3.Scale.FP" ]
+                    , HH.text " - Functional programming abstractions"
+                    ]
+                , HH.li_
+                    [ HH.a
+                        [ HP.href $ "#" <> routeToPath TourFPFTW ]
+                        [ HH.text "FP For The Win Tour" ]
+                    , HH.text " - See scales as profunctors in action"
                     ]
                 ]
-            ]
-        ]
-    ]
-
-renderHeader :: forall w i. String -> HH.HTML w i
-renderHeader title =
-  HH.header
-    [ HP.classes [ HH.ClassName "example-header" ] ]
-    [ HH.div
-        [ HP.classes [ HH.ClassName "example-header-left" ] ]
-        [ HH.a
-            [ HP.href $ "#" <> routeToPath Home
-            , HP.classes [ HH.ClassName "example-logo-link" ]
-            ]
-            [ HH.img
-                [ HP.src "assets/psd3-logo-color.svg"
-                , HP.alt "PSD3 Logo"
-                , HP.classes [ HH.ClassName "example-logo" ]
-                ]
-            ]
-        , HH.a
-            [ HP.href "#/howto"
-            , HP.classes [ HH.ClassName "example-gallery-link" ]
-            ]
-            [ HH.text "How-to" ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "example-title-container" ] ]
-            [ HH.h1
-                [ HP.classes [ HH.ClassName "example-title" ] ]
-                [ HH.text title ]
             ]
         ]
     ]
