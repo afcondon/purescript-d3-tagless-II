@@ -106,8 +106,6 @@
 -- |
 module PSD3 (module X) where
 
-import Prelude as X -- TODO don't include Prelude, let each module include it with selective includes, prevents clashes over append and so on
-
 -- PSD3v2 Core Exports
 import PSD3v2.Interpreter.D3v2 (D3v2M, D3v2Selection_, runD3v2M, reselectD3v2) as X
 

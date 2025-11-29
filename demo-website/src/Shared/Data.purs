@@ -7,7 +7,6 @@ import Affjax.ResponseFormat as ResponseFormat
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (traverse_)
-import Data.Int as Int
 import Data.List (List(..), fromFoldable)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
@@ -22,13 +21,13 @@ import Effect.Class.Console (log)
 
 -- | Available data files with type-safe identifiers
 data DataFile
-  = EnergyCSV                    -- Sankey diagram data
-  | FlareJSON                    -- Hierarchical data for tree/pack/partition layouts
-  | MiserablesJSON               -- Character network graph
-  | NationsJSON                  -- Wealth & Health of Nations
-  | MetroUnemploymentCSV         -- BLS metro unemployment data
-  | USPopulationStateAgeCSV      -- US population by state and age (for grouped bar chart)
-  | BridgesCSV                   -- Baton Rouge bridge traffic data (for chord diagram)
+  = EnergyCSV -- Sankey diagram data
+  | FlareJSON -- Hierarchical data for tree/pack/partition layouts
+  | MiserablesJSON -- Character network graph
+  | NationsJSON -- Wealth & Health of Nations
+  | MetroUnemploymentCSV -- BLS metro unemployment data
+  | USPopulationStateAgeCSV -- US population by state and age (for grouped bar chart)
+  | BridgesCSV -- Baton Rouge bridge traffic data (for chord diagram)
 
 derive instance Eq DataFile
 
@@ -71,52 +70,58 @@ loadDataFile dataFile = do
 -- | Good enough for our data files, not a full RFC 4180 implementation
 parseCSVRow :: String -> Array String
 parseCSVRow line =
-  let chars = CodeUnits.toCharArray line
-  in parseFields chars []
+  let
+    chars = CodeUnits.toCharArray line
+  in
+    parseFields chars []
   where
-    parseFields :: Array Char -> Array String -> Array String
-    parseFields chars acc
-      | Array.null chars = acc
-      | otherwise =
-          case Array.head chars of
-            Just '"' ->
-              -- Quoted field - find closing quote
-              case findClosingQuote (Array.drop 1 chars) 0 of
-                { field, rest } ->
-                  let nextFields = if Array.null rest
-                                   then []
-                                   else Array.drop 1 rest -- skip comma
-                  in parseFields nextFields (Array.snoc acc field)
-            _ ->
-              -- Unquoted field - read until comma or end
-              let { field, rest } = readUntilComma chars
-              in parseFields rest (Array.snoc acc field)
+  parseFields :: Array Char -> Array String -> Array String
+  parseFields chars acc
+    | Array.null chars = acc
+    | otherwise =
+        case Array.head chars of
+          Just '"' ->
+            -- Quoted field - find closing quote
+            case findClosingQuote (Array.drop 1 chars) 0 of
+              { field, rest } ->
+                let
+                  nextFields =
+                    if Array.null rest then []
+                    else Array.drop 1 rest -- skip comma
+                in
+                  parseFields nextFields (Array.snoc acc field)
+          _ ->
+            -- Unquoted field - read until comma or end
+            let
+              { field, rest } = readUntilComma chars
+            in
+              parseFields rest (Array.snoc acc field)
 
-    findClosingQuote :: Array Char -> Int -> { field :: String, rest :: Array Char }
-    findClosingQuote chars idx =
-      case Array.index chars idx of
-        Just '"' ->
-          { field: CodeUnits.fromCharArray (Array.slice 0 idx chars)
-          , rest: Array.drop (idx + 1) chars
-          }
-        Just _ -> findClosingQuote chars (idx + 1)
-        Nothing ->
-          -- No closing quote found, take everything
-          { field: CodeUnits.fromCharArray chars
-          , rest: []
-          }
+  findClosingQuote :: Array Char -> Int -> { field :: String, rest :: Array Char }
+  findClosingQuote chars idx =
+    case Array.index chars idx of
+      Just '"' ->
+        { field: CodeUnits.fromCharArray (Array.slice 0 idx chars)
+        , rest: Array.drop (idx + 1) chars
+        }
+      Just _ -> findClosingQuote chars (idx + 1)
+      Nothing ->
+        -- No closing quote found, take everything
+        { field: CodeUnits.fromCharArray chars
+        , rest: []
+        }
 
-    readUntilComma :: Array Char -> { field :: String, rest :: Array Char }
-    readUntilComma chars =
-      case Array.findIndex (\c -> c == ',') chars of
-        Just idx ->
-          { field: CodeUnits.fromCharArray (Array.slice 0 idx chars)
-          , rest: Array.drop (idx + 1) chars
-          }
-        Nothing ->
-          { field: CodeUnits.fromCharArray chars
-          , rest: []
-          }
+  readUntilComma :: Array Char -> { field :: String, rest :: Array Char }
+  readUntilComma chars =
+    case Array.findIndex (\c -> c == ',') chars of
+      Just idx ->
+        { field: CodeUnits.fromCharArray (Array.slice 0 idx chars)
+        , rest: Array.drop (idx + 1) chars
+        }
+      Nothing ->
+        { field: CodeUnits.fromCharArray chars
+        , rest: []
+        }
 
 -- | Hierarchical data type (for Flare, etc.)
 -- | JavaScript object with hierarchical structure (blessed JSON)
@@ -170,52 +175,58 @@ type BridgeData =
 -- | Parse semicolon-delimited CSV row
 parseCSVRowSemicolon :: String -> Array String
 parseCSVRowSemicolon line =
-  let chars = CodeUnits.toCharArray line
-  in parseFields chars []
+  let
+    chars = CodeUnits.toCharArray line
+  in
+    parseFields chars []
   where
-    parseFields :: Array Char -> Array String -> Array String
-    parseFields chars acc
-      | Array.null chars = acc
-      | otherwise =
-          case Array.head chars of
-            Just '"' ->
-              -- Quoted field - find closing quote
-              case findClosingQuote (Array.drop 1 chars) 0 of
-                { field, rest } ->
-                  let nextFields = if Array.null rest
-                                   then []
-                                   else Array.drop 1 rest -- skip semicolon
-                  in parseFields nextFields (Array.snoc acc field)
-            _ ->
-              -- Unquoted field - read until semicolon or end
-              let { field, rest } = readUntilSemicolon chars
-              in parseFields rest (Array.snoc acc field)
+  parseFields :: Array Char -> Array String -> Array String
+  parseFields chars acc
+    | Array.null chars = acc
+    | otherwise =
+        case Array.head chars of
+          Just '"' ->
+            -- Quoted field - find closing quote
+            case findClosingQuote (Array.drop 1 chars) 0 of
+              { field, rest } ->
+                let
+                  nextFields =
+                    if Array.null rest then []
+                    else Array.drop 1 rest -- skip semicolon
+                in
+                  parseFields nextFields (Array.snoc acc field)
+          _ ->
+            -- Unquoted field - read until semicolon or end
+            let
+              { field, rest } = readUntilSemicolon chars
+            in
+              parseFields rest (Array.snoc acc field)
 
-    findClosingQuote :: Array Char -> Int -> { field :: String, rest :: Array Char }
-    findClosingQuote chars idx =
-      case Array.index chars idx of
-        Just '"' ->
-          { field: CodeUnits.fromCharArray (Array.slice 0 idx chars)
-          , rest: Array.drop (idx + 1) chars
-          }
-        Just _ -> findClosingQuote chars (idx + 1)
-        Nothing ->
-          -- No closing quote found, take everything
-          { field: CodeUnits.fromCharArray chars
-          , rest: []
-          }
+  findClosingQuote :: Array Char -> Int -> { field :: String, rest :: Array Char }
+  findClosingQuote chars idx =
+    case Array.index chars idx of
+      Just '"' ->
+        { field: CodeUnits.fromCharArray (Array.slice 0 idx chars)
+        , rest: Array.drop (idx + 1) chars
+        }
+      Just _ -> findClosingQuote chars (idx + 1)
+      Nothing ->
+        -- No closing quote found, take everything
+        { field: CodeUnits.fromCharArray chars
+        , rest: []
+        }
 
-    readUntilSemicolon :: Array Char -> { field :: String, rest :: Array Char }
-    readUntilSemicolon chars =
-      case Array.findIndex (\c -> c == ';') chars of
-        Just idx ->
-          { field: CodeUnits.fromCharArray (Array.slice 0 idx chars)
-          , rest: Array.drop (idx + 1) chars
-          }
-        Nothing ->
-          { field: CodeUnits.fromCharArray chars
-          , rest: []
-          }
+  readUntilSemicolon :: Array Char -> { field :: String, rest :: Array Char }
+  readUntilSemicolon chars =
+    case Array.findIndex (\c -> c == ';') chars of
+      Just idx ->
+        { field: CodeUnits.fromCharArray (Array.slice 0 idx chars)
+        , rest: Array.drop (idx + 1) chars
+        }
+      Nothing ->
+        { field: CodeUnits.fromCharArray chars
+        , rest: []
+        }
 
 -- | Parse bridges CSV data into matrix format
 -- | CSV format: origin;destination;value (with optional header row)
@@ -225,28 +236,32 @@ parseBridgesCSV csvContent = do
   let nonEmptyLines = Array.filter (\line -> trim line /= "") lines
 
   -- Skip header row if it exists (check if first row contains "From" or "To" or "Value")
-  let dataLines = case Array.head nonEmptyLines of
-        Just firstLine ->
-          let lowerFirst = trim firstLine
-          in if lowerFirst == "From;To;Value" || lowerFirst == "from;to;value" || lowerFirst == "Origin;Destination;Value"
-             then Array.drop 1 nonEmptyLines
-             else nonEmptyLines
-        Nothing -> nonEmptyLines
+  let
+    dataLines = case Array.head nonEmptyLines of
+      Just firstLine ->
+        let
+          lowerFirst = trim firstLine
+        in
+          if lowerFirst == "From;To;Value" || lowerFirst == "from;to;value" || lowerFirst == "Origin;Destination;Value" then Array.drop 1 nonEmptyLines
+          else nonEmptyLines
+      Nothing -> nonEmptyLines
 
   -- Parse each row
   let parsedRows = Array.mapMaybe parseRow dataLines
 
   -- Extract unique region labels (origins and destinations)
-  let allRegions = Array.nub $ do
-        row <- parsedRows
-        [row.origin, row.destination]
+  let
+    allRegions = Array.nub $ do
+      row <- parsedRows
+      [ row.origin, row.destination ]
 
   let labels = Array.sort allRegions
   let n = Array.length labels
 
   -- Create index lookup map
-  let labelIndexMap = Map.fromFoldable $
-        Array.mapWithIndex (\i label -> Tuple label i) labels
+  let
+    labelIndexMap = Map.fromFoldable $
+      Array.mapWithIndex (\i label -> Tuple label i) labels
 
   -- Initialize matrix with zeros
   let emptyMatrix = Array.replicate n (Array.replicate n 0.0)
@@ -256,29 +271,31 @@ parseBridgesCSV csvContent = do
 
   pure { matrix, labels }
   where
-    parseRow :: String -> Maybe BridgeFlowRow
-    parseRow line = do
-      let fields = parseCSVRowSemicolon (trim line)
-      origin <- Array.index fields 0
-      destination <- Array.index fields 1
-      valueStr <- Array.index fields 2
-      value <- Number.fromString (trim valueStr)
-      pure { origin: trim origin, destination: trim destination, value }
+  parseRow :: String -> Maybe BridgeFlowRow
+  parseRow line = do
+    let fields = parseCSVRowSemicolon (trim line)
+    origin <- Array.index fields 0
+    destination <- Array.index fields 1
+    valueStr <- Array.index fields 2
+    value <- Number.fromString (trim valueStr)
+    pure { origin: trim origin, destination: trim destination, value }
 
-    fillMatrixCell :: Map.Map String Int -> Array (Array Number) -> BridgeFlowRow -> Array (Array Number)
-    fillMatrixCell labelMap matrix row =
-      case Tuple <$> Map.lookup row.origin labelMap <*> Map.lookup row.destination labelMap of
-        Just (Tuple originIdx destIdx) ->
-          case Array.index matrix originIdx of
-            Just rowArray ->
-              let updatedRow = Array.updateAt destIdx row.value rowArray
-              in case updatedRow of
-                   Just newRow -> case Array.updateAt originIdx newRow matrix of
-                                    Just newMatrix -> newMatrix
-                                    Nothing -> matrix
-                   Nothing -> matrix
-            Nothing -> matrix
-        Nothing -> matrix
+  fillMatrixCell :: Map.Map String Int -> Array (Array Number) -> BridgeFlowRow -> Array (Array Number)
+  fillMatrixCell labelMap matrix row =
+    case Tuple <$> Map.lookup row.origin labelMap <*> Map.lookup row.destination labelMap of
+      Just (Tuple originIdx destIdx) ->
+        case Array.index matrix originIdx of
+          Just rowArray ->
+            let
+              updatedRow = Array.updateAt destIdx row.value rowArray
+            in
+              case updatedRow of
+                Just newRow -> case Array.updateAt originIdx newRow matrix of
+                  Just newMatrix -> newMatrix
+                  Nothing -> matrix
+                Nothing -> matrix
+          Nothing -> matrix
+      Nothing -> matrix
 
 -- | Load and parse bridges CSV data
 loadBridgesData :: Aff (Either String BridgeData)
@@ -296,12 +313,15 @@ loadBridgesData = do
           log $ show bridgeData.labels
           log "\nMatrix (rows = from, cols = to):"
           let indexedRows = Array.mapWithIndex (\i row -> { i, row }) bridgeData.matrix
-          traverse_ (\{i, row} -> do
-            let label = case Array.index bridgeData.labels i of
-                         Just l -> l
-                         Nothing -> "?"
-            log $ label <> ": " <> show row
-          ) indexedRows
+          traverse_
+            ( \{ i, row } -> do
+                let
+                  label = case Array.index bridgeData.labels i of
+                    Just l -> l
+                    Nothing -> "?"
+                log $ label <> ": " <> show row
+            )
+            indexedRows
           log "=== End Bridges Data ==="
           pure $ Right bridgeData
         Left err -> pure $ Left err

@@ -9,13 +9,13 @@ import Prelude
 import Data.Array (concat, filter, length, mapWithIndex, range)
 import Data.Array as Array
 import Data.Foldable (maximum)
-import Data.Graph.Algorithms (LayeredNode, TaskNode, addLayers)
+import Data.Graph.Algorithms (TaskNode, addLayers)
 import Data.Int (toNumber)
 import Data.Map as Map
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe, fromMaybe)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
-import PSD3v2.Attribute.Types (class_, cx, cy, fill, fillOpacity, height, radius, stroke, strokeWidth, textAnchor, textContent, transform, viewBox, width, x, x1, x2, y, y1, y2)
+import PSD3v2.Attribute.Types (class_, cx, cy, fill, height, radius, stroke, strokeWidth, textAnchor, textContent, viewBox, width, x, x1, x2, y, y1, y2)
 import PSD3v2.Capabilities.Selection (renderTree, select)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_, runD3v2M)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
@@ -37,12 +37,12 @@ type LayeredTask =
 buildPipelineTasks :: Array { id :: String, name :: String, depends :: Array String }
 buildPipelineTasks =
   [ { id: "clone", name: "Clone Repo", depends: [] }
-  , { id: "install", name: "Install Deps", depends: ["clone"] }
-  , { id: "lint", name: "Lint", depends: ["install"] }
-  , { id: "test", name: "Test", depends: ["install"] }
-  , { id: "build", name: "Build", depends: ["lint", "test"] }
-  , { id: "docker", name: "Docker Image", depends: ["build"] }
-  , { id: "deploy", name: "Deploy", depends: ["docker"] }
+  , { id: "install", name: "Install Deps", depends: [ "clone" ] }
+  , { id: "lint", name: "Lint", depends: [ "install" ] }
+  , { id: "test", name: "Test", depends: [ "install" ] }
+  , { id: "build", name: "Build", depends: [ "lint", "test" ] }
+  , { id: "docker", name: "Docker Image", depends: [ "build" ] }
+  , { id: "deploy", name: "Deploy", depends: [ "docker" ] }
   ]
 
 -- | Add layer information to tasks with names
@@ -70,9 +70,9 @@ visualizeTask :: Number -> Number -> Number -> Int -> Int -> LayeredTask -> Arra
 visualizeTask totalWidth totalHeight layerHeight tasksInLayerCount indexInLayer task =
   let
     layerWidth = totalWidth - 100.0
-    xPos = if tasksInLayerCount > 1
-           then (toNumber indexInLayer * layerWidth / toNumber (tasksInLayerCount - 1)) + 50.0
-           else totalWidth / 2.0
+    xPos =
+      if tasksInLayerCount > 1 then (toNumber indexInLayer * layerWidth / toNumber (tasksInLayerCount - 1)) + 50.0
+      else totalWidth / 2.0
     yPos = (toNumber task.layer * layerHeight) + 50.0
   in
     [ -- Circle for task
@@ -108,18 +108,18 @@ visualizeDependencyLink totalWidth totalHeight layerHeight allTasks task depId =
     tasksInSourceLayer = filter (\t -> t.layer == task.layer) allTasks
     sourceCount = length tasksInSourceLayer
     sourceIndex = fromMaybe 0 $ Array.findIndex (\t -> t.id == task.id) tasksInSourceLayer
-    sourceX = if sourceCount > 1
-              then (toNumber sourceIndex * layerWidth / toNumber (sourceCount - 1)) + 50.0
-              else totalWidth / 2.0
+    sourceX =
+      if sourceCount > 1 then (toNumber sourceIndex * layerWidth / toNumber (sourceCount - 1)) + 50.0
+      else totalWidth / 2.0
     sourceY = (toNumber task.layer * layerHeight) + 50.0
 
     -- Target task (dependency)
     tasksInTargetLayer = filter (\t -> t.layer == depTask.layer) allTasks
     targetCount = length tasksInTargetLayer
     targetIndex = fromMaybe 0 $ Array.findIndex (\t -> t.id == depTask.id) tasksInTargetLayer
-    targetX = if targetCount > 1
-              then (toNumber targetIndex * layerWidth / toNumber (targetCount - 1)) + 50.0
-              else totalWidth / 2.0
+    targetX =
+      if targetCount > 1 then (toNumber targetIndex * layerWidth / toNumber (targetCount - 1)) + 50.0
+      else totalWidth / 2.0
     targetY = (toNumber depTask.layer * layerHeight) + 50.0
 
   pure $ T.elem Line
@@ -144,9 +144,9 @@ drawTopologicalSort containerSelector = runD3v2M do
     layeredTasks = addLayersWithNames buildPipelineTasks
     layerValues = layeredTasks <#> _.layer
     maxLayer = fromMaybe 0 $ maximum layerValues
-    layerHeight = if maxLayer > 0
-                  then (totalHeight - 100.0) / toNumber maxLayer
-                  else 100.0
+    layerHeight =
+      if maxLayer > 0 then (totalHeight - 100.0) / toNumber maxLayer
+      else 100.0
 
     -- Generate all dependency links
     allLinks :: Array (T.Tree Unit)
@@ -157,11 +157,15 @@ drawTopologicalSort containerSelector = runD3v2M do
     -- Generate all task nodes
     allNodes :: Array (T.Tree Unit)
     allNodes = concat $ range 0 maxLayer <#> \layer ->
-      let tasksInLayer = filter (\t -> t.layer == layer) layeredTasks
-          count = length tasksInLayer
-      in concat $ mapWithIndex (\idx task ->
-           visualizeTask totalWidth totalHeight layerHeight count idx task
-         ) tasksInLayer
+      let
+        tasksInLayer = filter (\t -> t.layer == layer) layeredTasks
+        count = length tasksInLayer
+      in
+        concat $ mapWithIndex
+          ( \idx task ->
+              visualizeTask totalWidth totalHeight layerHeight count idx task
+          )
+          tasksInLayer
 
     -- Generate layer labels
     layerLabels :: Array (T.Tree Unit)

@@ -4,15 +4,13 @@ import Prelude
 
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import PSD3.RoutingDSL (routeToPath)
-import PSD3.Website.Types (Route(..))
 import PSD3.Shared.Utilities (syntaxHighlightedCode)
 
 -- | Configuration for a code example display
 type CodeExampleConfig =
-  { code :: String           -- The code to display
-  , snippetId :: String      -- ID for the snippet (e.g., "TLCSimple")
-  , title :: String          -- Optional title to show above code
+  { code :: String -- The code to display
+  , snippetId :: String -- ID for the snippet (e.g., "TLCSimple")
+  , title :: String -- Optional title to show above code
   }
 
 -- | Render a code example with syntax highlighting and an "Explore" button
@@ -21,11 +19,10 @@ renderCodeExample config =
   HH.div
     [ HP.classes [ HH.ClassName "code-example" ] ]
     [ -- Optional title
-      if config.title == ""
-        then HH.text ""
-        else HH.div
-          [ HP.classes [ HH.ClassName "code-example__title" ] ]
-          [ HH.text config.title ]
+      if config.title == "" then HH.text ""
+      else HH.div
+        [ HP.classes [ HH.ClassName "code-example__title" ] ]
+        [ HH.text config.title ]
 
     -- Code block with syntax highlighting
     , HH.div

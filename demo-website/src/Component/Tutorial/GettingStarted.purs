@@ -9,10 +9,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.Footer as Footer
 import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
-import PSD3.Shared.SectionNav as SectionNav
 import PSD3.Shared.SiteNav as SiteNav
-import PSD3.Understanding.TOC (renderTOC, tocAnchor)
-import PSD3.Website.Types (Route(..), Section(..))
 import Type.Proxy (Proxy(..))
 
 -- | Getting Started page state
@@ -22,14 +19,16 @@ type State = Unit
 data Action = Initialize
 
 -- | Child component slots
-type Slots = ( sectionNav :: forall q. H.Slot q Void Unit
-   )
+type Slots =
+  ( sectionNav :: forall q. H.Slot q Void Unit
+  )
 
 _sectionNav = Proxy :: Proxy "sectionNav"
 
 -- | Mermaid diagram for the wizard workflow decision tree
 wizardWorkflowDiagram :: String
-wizardWorkflowDiagram = """
+wizardWorkflowDiagram =
+  """
 flowchart TD
     Start([Start Wizard]) --> Choice{Choose Method}
 
@@ -96,7 +95,6 @@ render _ =
             ]
         ]
 
-
     -- Page introduction
     , HH.section
         [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
@@ -161,13 +159,15 @@ render _ =
             [ HH.text "Clone the PSD3 repository which includes the visualization wizard:" ]
         , HH.pre_
             [ HH.code_
-                [ HH.text """# Clone the PSD3 repository
+                [ HH.text
+                    """# Clone the PSD3 repository
 git clone https://github.com/afcondon/PureScript-Tagless-D3.git
 cd PureScript-Tagless-D3
 
 # Install dependencies
 npm install
-spago build""" ]
+spago build"""
+                ]
             ]
         , HH.p_
             [ HH.text "The wizard is located in " ]
@@ -247,7 +247,8 @@ spago build""" ]
         , HH.h3_ [ HH.text "Example Session" ]
         , HH.pre_
             [ HH.code_
-                [ HH.text """Visualization module name: ParabolaChart
+                [ HH.text
+                    """Visualization module name: ParabolaChart
 Data record fields: x:Number,y:Number
 Output directory: src/viz/ParabolaChart
 Generate Main.purs? (y/n): y
@@ -258,21 +259,24 @@ Generate index.html? (y/n): y
 ✓ Created src/viz/ParabolaChart/Draw.purs
 ✓ Created src/viz/ParabolaChart/Main.purs
 ✓ Created src/viz/ParabolaChart/index.html
-✓ Created src/viz/ParabolaChart/README.md""" ]
+✓ Created src/viz/ParabolaChart/README.md"""
+                ]
             ]
         , HH.h3_ [ HH.text "Build and View" ]
         , HH.p_
             [ HH.text "Now build and bundle your visualization:" ]
         , HH.pre_
             [ HH.code_
-                [ HH.text """# Compile the PureScript
+                [ HH.text
+                    """# Compile the PureScript
 spago build
 
 # Bundle for the browser
 spago bundle --module Main --outfile src/viz/ParabolaChart/bundle.js
 
 # Open in browser
-open src/viz/ParabolaChart/index.html""" ]
+open src/viz/ParabolaChart/index.html"""
+                ]
             ]
         ]
 
@@ -330,7 +334,8 @@ open src/viz/ParabolaChart/index.html""" ]
             ]
         , HH.pre_
             [ HH.code_
-                [ HH.text """-- Use data in attributes
+                [ HH.text
+                    """-- Use data in attributes
 A.cx (\\(d :: Datum_) _ -> datum_.x d)
 
 -- Use both data and index
@@ -338,7 +343,8 @@ A.fill (\\(d :: Datum_) (i :: Index_) ->
   if datum_.index i > 5 then "red" else "blue")
 
 -- Scale by data value
-A.radius (\\(d :: Datum_) _ -> datum_.y d * 2.0)""" ]
+A.radius (\\(d :: Datum_) _ -> datum_.y d * 2.0)"""
+                ]
             ]
         , HH.p_
             [ HH.text "The type annotations "

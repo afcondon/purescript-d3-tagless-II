@@ -7,8 +7,6 @@ import Prelude
 import Data.Array as Array
 import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable, null)
-import Data.Traversable (traverse_)
-import Effect (Effect)
 import Effect.Class.Console as Console
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
@@ -47,30 +45,31 @@ testNodes =
 -- Simple scene config: just center and collision forces
 -- Center at (400, 300) which is the middle of the 800x600 SVG
 testSceneConfig :: CFG.SceneConfig
-testSceneConfig = CFG.scene "V2Test" [
-    ForceConfig {
-      name: "center"
-    , forceType: ForceCenter
-    , params: CenterParams {
-        x: StaticValue 400.0  -- Center of 800px width
-      , y: StaticValue 300.0  -- Center of 600px height
-      , strength: StaticValue 0.1
-      }
-    , filter: Nothing
-    }
-  , ForceConfig {
-      name: "collision"
-    , forceType: ForceCollide
-    , params: CollideParams {
-        radius: StaticValue 12.0  -- Fixed radius for all nodes (slightly larger than node circles)
-      , strength: StaticValue 1.0
-      , iterations: StaticValue 1.0
-      }
-    , filter: Nothing
-    }
-  ]
-  # CFG.withDescription "Simple test: center + collision"
-  # CFG.withAlpha 0.3
+testSceneConfig =
+  CFG.scene "V2Test"
+    [ ForceConfig
+        { name: "center"
+        , forceType: ForceCenter
+        , params: CenterParams
+            { x: StaticValue 400.0 -- Center of 800px width
+            , y: StaticValue 300.0 -- Center of 600px height
+            , strength: StaticValue 0.1
+            }
+        , filter: Nothing
+        }
+    , ForceConfig
+        { name: "collision"
+        , forceType: ForceCollide
+        , params: CollideParams
+            { radius: StaticValue 12.0 -- Fixed radius for all nodes (slightly larger than node circles)
+            , strength: StaticValue 1.0
+            , iterations: StaticValue 1.0
+            }
+        , filter: Nothing
+        }
+    ]
+    # CFG.withDescription "Simple test: center + collision"
+    # CFG.withAlpha 0.3
 
 -- Component
 type State = Unit
@@ -114,14 +113,15 @@ handleAction = case _ of
       Console.log "Created SVG"
 
       -- 2. Create simulation with default config
-      let simConfig :: SimulationVariables
-          simConfig =
-            { alpha: 1.0
-            , alphaTarget: 0.0
-            , alphaMin: 0.001
-            , alphaDecay: 0.0228
-            , velocityDecay: 0.4
-            }
+      let
+        simConfig :: SimulationVariables
+        simConfig =
+          { alpha: 1.0
+          , alphaTarget: 0.0
+          , alphaMin: 0.001
+          , alphaDecay: 0.0228
+          , velocityDecay: 0.4
+          }
 
       let nodeKey = \n -> n.id
       let simulation = initSimulation_ simConfig nodeKey
@@ -141,13 +141,16 @@ handleAction = case _ of
       let _ = d3SetAttr_ "class" (unsafeCoerce "nodes") circles
 
       -- Add a circle for each node
-      let renderCircle n =
-            let circle = d3Append_ "circle" circles
-                _ = d3SetAttr_ "r" (unsafeCoerce $ show n.r) circle
-                _ = d3SetAttr_ "fill" (unsafeCoerce "steelblue") circle
-                _ = d3SetAttr_ "stroke" (unsafeCoerce "white") circle
-                _ = d3SetAttr_ "stroke-width" (unsafeCoerce "2") circle
-            in unit
+      let
+        renderCircle n =
+          let
+            circle = d3Append_ "circle" circles
+            _ = d3SetAttr_ "r" (unsafeCoerce $ show n.r) circle
+            _ = d3SetAttr_ "fill" (unsafeCoerce "steelblue") circle
+            _ = d3SetAttr_ "stroke" (unsafeCoerce "white") circle
+            _ = d3SetAttr_ "stroke-width" (unsafeCoerce "2") circle
+          in
+            unit
 
       let _ = map renderCircle testNodes
       Console.log "Created circle elements"

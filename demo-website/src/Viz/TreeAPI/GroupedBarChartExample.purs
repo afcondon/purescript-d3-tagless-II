@@ -2,7 +2,7 @@ module D3.Viz.TreeAPI.GroupedBarChartExample where
 
 import Prelude
 
-import Data.Array (nub, filter, findIndex, mapMaybe)
+import Data.Array (filter, findIndex, nub)
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (maximum)
@@ -37,14 +37,15 @@ type GroupedBarData =
 parsePopulationRow :: String -> Array GroupedBarData
 parsePopulationRow line =
   case parseCSVRow line of
-    [state, under5Str, age5to13Str, age14to17Str, age18to24Str, age25to44Str, age45to64Str, age65plusStr] -> do
-      let under5 = fromMaybe 0.0 $ Number.fromString (trim under5Str)
-          age5to13 = fromMaybe 0.0 $ Number.fromString (trim age5to13Str)
-          age14to17 = fromMaybe 0.0 $ Number.fromString (trim age14to17Str)
-          age18to24 = fromMaybe 0.0 $ Number.fromString (trim age18to24Str)
-          age25to44 = fromMaybe 0.0 $ Number.fromString (trim age25to44Str)
-          age45to64 = fromMaybe 0.0 $ Number.fromString (trim age45to64Str)
-          age65plus = fromMaybe 0.0 $ Number.fromString (trim age65plusStr)
+    [ state, under5Str, age5to13Str, age14to17Str, age18to24Str, age25to44Str, age45to64Str, age65plusStr ] -> do
+      let
+        under5 = fromMaybe 0.0 $ Number.fromString (trim under5Str)
+        age5to13 = fromMaybe 0.0 $ Number.fromString (trim age5to13Str)
+        age14to17 = fromMaybe 0.0 $ Number.fromString (trim age14to17Str)
+        age18to24 = fromMaybe 0.0 $ Number.fromString (trim age18to24Str)
+        age25to44 = fromMaybe 0.0 $ Number.fromString (trim age25to44Str)
+        age45to64 = fromMaybe 0.0 $ Number.fromString (trim age45to64Str)
+        age65plus = fromMaybe 0.0 $ Number.fromString (trim age65plusStr)
       [ { state: trim state, age: "<10", population: under5 + age5to13 * 0.5 }
       , { state: trim state, age: "10-19", population: age5to13 * 0.5 + age14to17 }
       , { state: trim state, age: "20-29", population: age18to24 + age25to44 * 0.25 }
@@ -67,7 +68,7 @@ loadPopulationData = do
       pure []
     Right body -> do
       let lines = split (Pattern "\n") body
-      let dataLines = Array.drop 1 lines  -- Skip header
+      let dataLines = Array.drop 1 lines -- Skip header
       let parsed = Array.concatMap parsePopulationRow dataLines
       liftEffect $ Console.log $ "Loaded " <> show (Array.length parsed) <> " population data points"
       pure parsed
@@ -103,9 +104,11 @@ type StateGroup = { state :: String, bars :: Array GroupedBarData }
 
 groupByState :: Array GroupedBarData -> Array StateGroup
 groupByState data' =
-  let states = nub $ map _.state data'
-      getStateData st = filter (\d -> d.state == st) data'
-  in map (\st -> { state: st, bars: getStateData st }) states
+  let
+    states = nub $ map _.state data'
+    getStateData st = filter (\d -> d.state == st) data'
+  in
+    map (\st -> { state: st, bars: getStateData st }) states
 
 -- | Get all unique age groups
 getAges :: Array GroupedBarData -> Array String
@@ -154,34 +157,37 @@ drawGroupedBarChart selector populationData = runD3v2M do
   let maxPop = fromMaybe 6000000.0 $ maximum populationValues
 
   -- X scale maps state index to position
-  let xScale :: Scale
-      xScale =
-        { domain: { min: 0.0, max: Int.toNumber numStates }
-        , range: { min: 0.0, max: iWidth }
-        }
+  let
+    xScale :: Scale
+    xScale =
+      { domain: { min: 0.0, max: Int.toNumber numStates }
+      , range: { min: 0.0, max: iWidth }
+      }
 
   -- Y scale maps population to height
-  let yScale :: Scale
-      yScale =
-        { domain: { min: 0.0, max: maxPop }
-        , range: { min: iHeight, max: 0.0 }
-        }
+  let
+    yScale :: Scale
+    yScale =
+      { domain: { min: 0.0, max: maxPop }
+      , range: { min: iHeight, max: 0.0 }
+      }
 
   -- Create axes
   let xAxis = axisBottom xScale
   let yAxis = axisLeft yScale
 
   -- First tree: SVG container with axes
-  let axesTree :: T.Tree Unit
-      axesTree =
-        T.named SVG "svg"
-          [ width dims.width
-          , height dims.height
-          , viewBox ("0 0 " <> show dims.width <> " " <> show dims.height)
-          , class_ "grouped-bar-chart"
-          ]
-          `T.withChild`
-            (T.named Group "chartGroup"
+  let
+    axesTree :: T.Tree Unit
+    axesTree =
+      T.named SVG "svg"
+        [ width dims.width
+        , height dims.height
+        , viewBox ("0 0 " <> show dims.width <> " " <> show dims.height)
+        , class_ "grouped-bar-chart"
+        ]
+        `T.withChild`
+          ( T.named Group "chartGroup"
               [ class_ "chart-content"
               , transform ("translate(" <> show dims.marginLeft <> "," <> show dims.marginTop <> ")")
               ]
@@ -199,7 +205,8 @@ drawGroupedBarChart selector populationData = runD3v2M do
                     ]
                     `T.withChild`
                       renderAxis yAxis
-                ])
+                ]
+          )
 
   -- Render axes
   axesSelections <- renderTree container axesTree
@@ -209,32 +216,33 @@ drawGroupedBarChart selector populationData = runD3v2M do
   chartGroupSel <- liftEffect $ reselectD3v2 "chartGroup" axesSelections
 
   -- Use nestedJoin to create state groups → bars
-  let barsTree :: T.Tree StateGroup
-      barsTree =
-        T.nestedJoin "stateGroups" "g" stateGroups (_.bars) $ \bar ->
-          -- bar :: GroupedBarData
-          -- Calculate position for this bar
-          let
-            -- Find which state this bar belongs to
-            stateIdx = fromMaybe 0 $ findIndex (\g -> g.state == bar.state) stateGroups
-            -- Find which age group this is
-            ageIdx = fromMaybe 0 $ findIndex (\a -> a == bar.age) ages
+  let
+    barsTree :: T.Tree StateGroup
+    barsTree =
+      T.nestedJoin "stateGroups" "g" stateGroups (_.bars) $ \bar ->
+        -- bar :: GroupedBarData
+        -- Calculate position for this bar
+        let
+          -- Find which state this bar belongs to
+          stateIdx = fromMaybe 0 $ findIndex (\g -> g.state == bar.state) stateGroups
+          -- Find which age group this is
+          ageIdx = fromMaybe 0 $ findIndex (\a -> a == bar.age) ages
 
-            -- X position: state position + age offset
-            xPos = Int.toNumber stateIdx * groupWidth + Int.toNumber ageIdx * barWidth
+          -- X position: state position + age offset
+          xPos = Int.toNumber stateIdx * groupWidth + Int.toNumber ageIdx * barWidth
 
-            -- Y position and height from population
-            yPos = iHeight - ((bar.population / maxPop) * iHeight)
-            barHeight = (bar.population / maxPop) * iHeight
-          in
-            T.elem Rect
-              [ x xPos
-              , y yPos
-              , width barWidth
-              , height barHeight
-              , fill (colorForAge bar.age)
-              , class_ "bar"
-              ]
+          -- Y position and height from population
+          yPos = iHeight - ((bar.population / maxPop) * iHeight)
+          barHeight = (bar.population / maxPop) * iHeight
+        in
+          T.elem Rect
+            [ x xPos
+            , y yPos
+            , width barWidth
+            , height barHeight
+            , fill (colorForAge bar.age)
+            , class_ "bar"
+            ]
 
   -- Render bars
   barsSelections <- renderTree chartGroupSel barsTree
@@ -243,7 +251,8 @@ drawGroupedBarChart selector populationData = runD3v2M do
     Console.log "=== Grouped Bar Chart (Tree API) ==="
     Console.log ""
     Console.log $ "Rendered " <> show (Array.length populationData) <> " bars in "
-                  <> show numStates <> " groups"
+      <> show numStates
+      <> " groups"
 
     case Map.lookup "svg" axesSelections of
       Just _ -> Console.log "✓ SVG created"

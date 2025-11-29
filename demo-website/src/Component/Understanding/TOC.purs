@@ -2,7 +2,7 @@ module PSD3.Understanding.TOC where -- Understanding
 
 import Prelude
 
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe, fromMaybe)
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Halogen.HTML.Properties (attr)
@@ -12,21 +12,21 @@ import PSD3.RoutingDSL (routeToPath)
 
 -- | Link target - either an anchor on the same page or a route to another page
 data TOCLinkTarget
-  = AnchorLink String  -- #anchor on the current page
-  | RouteLink Route    -- Link to another route
+  = AnchorLink String -- #anchor on the current page
+  | RouteLink Route -- Link to another route
 
 -- | A single item in the table of contents
 type TOCItem =
-  { target :: TOCLinkTarget  -- Where the link goes
-  , label :: String          -- The display text for the link
-  , level :: Int             -- Indentation level (0 = top level, 1 = level-2, 2 = level-3, etc.)
+  { target :: TOCLinkTarget -- Where the link goes
+  , label :: String -- The display text for the link
+  , level :: Int -- Indentation level (0 = top level, 1 = level-2, 2 = level-3, etc.)
   }
 
 -- | Configuration for the TOC panel
 type TOCConfig =
-  { title :: String           -- Title for the TOC (e.g., "Contents", "Interpreters")
-  , items :: Array TOCItem    -- The navigation items
-  , image :: Maybe String     -- Optional image to use instead of bookmark.jpeg
+  { title :: String -- Title for the TOC (e.g., "Contents", "Interpreters")
+  , items :: Array TOCItem -- The navigation items
+  , image :: Maybe String -- Optional image to use instead of bookmark.jpeg
   }
 
 -- | Render a table of contents panel
@@ -79,9 +79,9 @@ renderTOCItem item =
       -- For anchor links, use data attribute for JavaScript handling
       AnchorLink anchor ->
         HH.a
-          [ HP.href $ "#" <> anchor  -- Keep href for accessibility
+          [ HP.href $ "#" <> anchor -- Keep href for accessibility
           , HP.classes classes
-          , attr (AttrName "data-anchor-link") anchor  -- Mark as anchor link
+          , attr (AttrName "data-anchor-link") anchor -- Mark as anchor link
           ]
           [ HH.text item.label ]
       -- For route links, use normal navigation

@@ -14,7 +14,6 @@ import Data.Int (toNumber)
 import Data.Nullable (null)
 import Effect (Effect)
 import PSD3.Data.Node (SimulationNode, SwizzledLink)
-import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultCenter, defaultLink, swizzleLinks)
 import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, x1, x2, y1, y2, radius, viewBox, width, height, x, y, textContent, textAnchor, fontSize)
@@ -56,13 +55,13 @@ nodes =
 -- | 1 bridge from Island to East
 links :: Array Link
 links =
-  [ { source: 0, target: 2 }  -- North - Island (bridge 1)
-  , { source: 0, target: 2 }  -- North - Island (bridge 2)
-  , { source: 1, target: 2 }  -- South - Island (bridge 3)
-  , { source: 1, target: 2 }  -- South - Island (bridge 4)
-  , { source: 0, target: 3 }  -- North - East (bridge 5)
-  , { source: 1, target: 3 }  -- South - East (bridge 6)
-  , { source: 2, target: 3 }  -- Island - East (bridge 7)
+  [ { source: 0, target: 2 } -- North - Island (bridge 1)
+  , { source: 0, target: 2 } -- North - Island (bridge 2)
+  , { source: 1, target: 2 } -- South - Island (bridge 3)
+  , { source: 1, target: 2 } -- South - Island (bridge 4)
+  , { source: 0, target: 3 } -- North - East (bridge 5)
+  , { source: 1, target: 3 } -- South - East (bridge 6)
+  , { source: 2, target: 3 } -- Island - East (bridge 7)
   ]
 
 -- =============================================================================
@@ -89,9 +88,11 @@ drawKoenigsbergBridges selector = do
     container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
 
     svg <- appendChild SVG
-      [ width 400.0, height 300.0
+      [ width 400.0
+      , height 300.0
       , viewBox "-200 -150 400 300"
-      ] container
+      ]
+      container
     g <- appendChild Group [] svg
 
     linksGroup <- appendChild Group [] g
@@ -104,19 +105,21 @@ drawKoenigsbergBridges selector = do
       , y1 (_.source.y :: SLink -> Number)
       , x2 (_.target.x :: SLink -> Number)
       , y2 (_.target.y :: SLink -> Number)
-      , stroke "#8B4513"  -- Brown for bridges
+      , stroke "#8B4513" -- Brown for bridges
       , strokeWidth 4.0
-      ] linksGroup
+      ]
+      linksGroup
 
     -- Nodes (land masses) - size by degree
     nodeSel <- appendData Circle nodes
       [ cx (_.x :: Node -> Number)
       , cy (_.y :: Node -> Number)
       , radius ((\n -> 12.0 + toNumber n.degree * 3.0) :: Node -> Number)
-      , fill "#4a7c59"  -- Green for land
+      , fill "#4a7c59" -- Green for land
       , stroke "#2d4f35"
       , strokeWidth 2.0
-      ] nodesGroup
+      ]
+      nodesGroup
 
     -- Labels
     labelSel <- appendData Text nodes
@@ -126,7 +129,8 @@ drawKoenigsbergBridges selector = do
       , textAnchor "middle"
       , fill "#fff"
       , fontSize 10.0
-      ] labelsGroup
+      ]
+      labelsGroup
 
     pure { nodeSel, linkSel, labelSel }
 
@@ -137,18 +141,23 @@ drawKoenigsbergBridges selector = do
 
   where
 
-  tick :: D3v2Selection_ SBoundOwns Element Node
-       -> D3v2Selection_ SBoundOwns Element SLink
-       -> D3v2Selection_ SBoundOwns Element Node
-       -> Effect Unit
+  tick
+    :: D3v2Selection_ SBoundOwns Element Node
+    -> D3v2Selection_ SBoundOwns Element SLink
+    -> D3v2Selection_ SBoundOwns Element Node
+    -> Effect Unit
   tick nodeSel linkSel labelSel = runD3v2M do
     _ <- setAttrs [ cx (_.x :: Node -> Number), cy (_.y :: Node -> Number) ] nodeSel
     _ <- setAttrs
-           [ x1 (_.source.x :: SLink -> Number), y1 (_.source.y :: SLink -> Number)
-           , x2 (_.target.x :: SLink -> Number), y2 (_.target.y :: SLink -> Number)
-           ] linkSel
+      [ x1 (_.source.x :: SLink -> Number)
+      , y1 (_.source.y :: SLink -> Number)
+      , x2 (_.target.x :: SLink -> Number)
+      , y2 (_.target.y :: SLink -> Number)
+      ]
+      linkSel
     _ <- setAttrs
-           [ x (_.x :: Node -> Number)
-           , y ((_.y >>> (_ + 4.0)) :: Node -> Number)
-           ] labelSel
+      [ x (_.x :: Node -> Number)
+      , y ((_.y >>> (_ + 4.0)) :: Node -> Number)
+      ]
+      labelSel
     pure unit

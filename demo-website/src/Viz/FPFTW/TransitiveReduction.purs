@@ -6,7 +6,7 @@ module D3.Viz.FPFTW.TransitiveReduction where
 
 import Prelude
 
-import Data.Array (elem, length, mapWithIndex, (!!))
+import Data.Array (elem, mapWithIndex, (!!))
 import Data.Array as Array
 import Data.Graph.Algorithms (SimpleGraph, getAllEdges, getRemovedEdges, transitiveReduction)
 import Data.Map as Map
@@ -14,7 +14,7 @@ import Data.Maybe (Maybe(..))
 import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
-import PSD3v2.Attribute.Types (class_, cx, cy, fill, fillOpacity, height, radius, stroke, strokeOpacity, strokeWidth, textAnchor, textContent, transform, viewBox, width, x, x1, x2, y, y1, y2)
+import PSD3v2.Attribute.Types (class_, cx, cy, fill, height, radius, stroke, strokeOpacity, strokeWidth, textAnchor, textContent, viewBox, width, x, x1, x2, y, y1, y2)
 import PSD3v2.Capabilities.Selection (renderTree, select)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_, runD3v2M)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
@@ -35,13 +35,13 @@ type PositionedNode =
 -- | "A depends on B" means edge A -> B
 exampleGraph :: Graph
 exampleGraph =
-  { nodes: ["A", "B", "C", "D", "E"]
+  { nodes: [ "A", "B", "C", "D", "E" ]
   , edges: Map.fromFoldable
-      [ Tuple "A" (Set.fromFoldable ["B", "C"])       -- A -> B, A -> C
-      , Tuple "B" (Set.fromFoldable ["D"])             -- B -> D
-      , Tuple "C" (Set.fromFoldable ["D", "E"])        -- C -> D, C -> E
-      , Tuple "D" (Set.fromFoldable ["E"])             -- D -> E
-      , Tuple "E" Set.empty                             -- E has no dependencies
+      [ Tuple "A" (Set.fromFoldable [ "B", "C" ]) -- A -> B, A -> C
+      , Tuple "B" (Set.fromFoldable [ "D" ]) -- B -> D
+      , Tuple "C" (Set.fromFoldable [ "D", "E" ]) -- C -> D, C -> E
+      , Tuple "D" (Set.fromFoldable [ "E" ]) -- D -> E
+      , Tuple "E" Set.empty -- E has no dependencies
       ]
   }
 
@@ -51,10 +51,10 @@ exampleGraphWithTransitive :: Graph
 exampleGraphWithTransitive =
   { nodes: exampleGraph.nodes
   , edges: Map.fromFoldable
-      [ Tuple "A" (Set.fromFoldable ["B", "C", "D", "E"])  -- Added transitive: D, E
-      , Tuple "B" (Set.fromFoldable ["D"])
-      , Tuple "C" (Set.fromFoldable ["D", "E"])
-      , Tuple "D" (Set.fromFoldable ["E"])
+      [ Tuple "A" (Set.fromFoldable [ "B", "C", "D", "E" ]) -- Added transitive: D, E
+      , Tuple "B" (Set.fromFoldable [ "D" ])
+      , Tuple "C" (Set.fromFoldable [ "D", "E" ])
+      , Tuple "D" (Set.fromFoldable [ "E" ])
       , Tuple "E" Set.empty
       ]
   }
@@ -65,26 +65,28 @@ circularLayout centerX centerY circleRadius nodes =
   let
     -- Hardcoded positions for 5 nodes in a circle (avoiding trig functions)
     positions =
-      [ { dx: 0.0, dy: -1.0 }      -- Top
-      , { dx: 0.95, dy: -0.31 }    -- Top right
-      , { dx: 0.59, dy: 0.81 }     -- Bottom right
-      , { dx: -0.59, dy: 0.81 }    -- Bottom left
-      , { dx: -0.95, dy: -0.31 }   -- Top left
+      [ { dx: 0.0, dy: -1.0 } -- Top
+      , { dx: 0.95, dy: -0.31 } -- Top right
+      , { dx: 0.59, dy: 0.81 } -- Bottom right
+      , { dx: -0.59, dy: 0.81 } -- Bottom left
+      , { dx: -0.95, dy: -0.31 } -- Top left
       ]
   in
-    mapWithIndex (\i node ->
-      case positions !! i of
-        Just pos ->
-          { id: node
-          , x: centerX + circleRadius * pos.dx
-          , y: centerY + circleRadius * pos.dy
-          }
-        Nothing ->
-          { id: node
-          , x: centerX
-          , y: centerY
-          }
-    ) nodes
+    mapWithIndex
+      ( \i node ->
+          case positions !! i of
+            Just pos ->
+              { id: node
+              , x: centerX + circleRadius * pos.dx
+              , y: centerY + circleRadius * pos.dy
+              }
+            Nothing ->
+              { id: node
+              , x: centerX
+              , y: centerY
+              }
+      )
+      nodes
 
 -- | Visualize a graph (nodes + edges)
 visualizeGraph :: String -> Graph -> Number -> Number -> Number -> Boolean -> Array (Tuple String String) -> T.Tree Unit
@@ -151,7 +153,7 @@ visualizeGraph title graph centerX centerY circleRadius highlightRemoved removed
     T.named Group ("graph-" <> title)
       []
       `T.withChildren`
-        ([titleElement] <> edgeElements <> nodeElements)
+        ([ titleElement ] <> edgeElements <> nodeElements)
 
 -- | Draw transitive reduction comparison (before and after)
 drawTransitiveReduction :: String -> Effect Unit

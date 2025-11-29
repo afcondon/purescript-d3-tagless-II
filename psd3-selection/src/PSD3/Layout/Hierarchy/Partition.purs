@@ -24,15 +24,15 @@ import Data.Number (ceil, floor)
 
 -- | Partition node with rectangular coordinates
 data PartitionNode a = PartNode
-  { data_ :: a          -- Original data
-  , depth :: Int        -- Distance from root
-  , height :: Int       -- Distance to deepest leaf
-  , value :: Number     -- Aggregated value
+  { data_ :: a -- Original data
+  , depth :: Int -- Distance from root
+  , height :: Int -- Distance to deepest leaf
+  , value :: Number -- Aggregated value
   , children :: Array (PartitionNode a)
-  , x0 :: Number        -- Left/inner edge
-  , y0 :: Number        -- Top/start edge
-  , x1 :: Number        -- Right/outer edge
-  , y1 :: Number        -- Bottom/end edge
+  , x0 :: Number -- Left/inner edge
+  , y0 :: Number -- Top/start edge
+  , x1 :: Number -- Right/outer edge
+  , y1 :: Number -- Bottom/end edge
   }
 
 derive instance Eq a => Eq (PartitionNode a)
@@ -41,22 +41,33 @@ derive instance Functor PartitionNode
 
 instance Show a => Show (PartitionNode a) where
   show (PartNode n) =
-    "PartNode { data_: " <> show n.data_ <>
-    ", depth: " <> show n.depth <>
-    ", height: " <> show n.height <>
-    ", value: " <> show n.value <>
-    ", children: [" <> show (Array.length n.children) <> " items]" <>
-    ", x0: " <> show n.x0 <>
-    ", y0: " <> show n.y0 <>
-    ", x1: " <> show n.x1 <>
-    ", y1: " <> show n.y1 <>
-    " }"
+    "PartNode { data_: " <> show n.data_
+      <> ", depth: "
+      <> show n.depth
+      <> ", height: "
+      <> show n.height
+      <> ", value: "
+      <> show n.value
+      <> ", children: ["
+      <> show (Array.length n.children)
+      <> " items]"
+      <> ", x0: "
+      <> show n.x0
+      <> ", y0: "
+      <> show n.y0
+      <> ", x1: "
+      <> show n.x1
+      <> ", y1: "
+      <> show n.y1
+      <>
+        " }"
 
 -- | Configuration for partition layout
+type PartitionConfig :: forall k. k -> Type
 type PartitionConfig a =
-  { size :: { width :: Number, height :: Number }  -- Canvas size (dx, dy)
-  , padding :: Number                              -- Padding between rectangles
-  , round :: Boolean                               -- Round to integers for pixels
+  { size :: { width :: Number, height :: Number } -- Canvas size (dx, dy)
+  , padding :: Number -- Padding between rectangles
+  , round :: Boolean -- Round to integers for pixels
   }
 
 -- | Default configuration
@@ -78,34 +89,34 @@ newtype HierarchyData a = HierarchyData
 hierarchy :: forall a. HierarchyData a -> PartitionNode a
 hierarchy = go 0
   where
-    go :: Int -> HierarchyData a -> PartitionNode a
-    go depth (HierarchyData node) =
-      let
-        kids = fromMaybe [] $ map (map (go (depth + 1))) node.children
+  go :: Int -> HierarchyData a -> PartitionNode a
+  go depth (HierarchyData node) =
+    let
+      kids = fromMaybe [] $ map (map (go (depth + 1))) node.children
 
-        -- Calculate height (distance to deepest leaf)
-        childHeights = map (\(PartNode n) -> n.height) kids
-        maxChildHeight = Array.foldl max 0 childHeights
-        nodeHeight = if Array.null kids then 0 else maxChildHeight + 1
+      -- Calculate height (distance to deepest leaf)
+      childHeights = map (\(PartNode n) -> n.height) kids
+      maxChildHeight = Array.foldl max 0 childHeights
+      nodeHeight = if Array.null kids then 0 else maxChildHeight + 1
 
-        -- Calculate value (sum of children or leaf value)
-        childValues = map (\(PartNode n) -> n.value) kids
-        sumChildValues = Array.foldl (+) 0.0 childValues
-        nodeValue = case node.value of
-          Just v -> v
-          Nothing -> if Array.null kids then 0.0 else sumChildValues
-      in
-        PartNode
-          { data_: node.data_
-          , depth: depth
-          , height: nodeHeight
-          , value: nodeValue
-          , children: kids
-          , x0: 0.0  -- Will be set by partition
-          , y0: 0.0
-          , x1: 0.0
-          , y1: 0.0
-          }
+      -- Calculate value (sum of children or leaf value)
+      childValues = map (\(PartNode n) -> n.value) kids
+      sumChildValues = Array.foldl (+) 0.0 childValues
+      nodeValue = case node.value of
+        Just v -> v
+        Nothing -> if Array.null kids then 0.0 else sumChildValues
+    in
+      PartNode
+        { data_: node.data_
+        , depth: depth
+        , height: nodeHeight
+        , value: nodeValue
+        , children: kids
+        , x0: 0.0 -- Will be set by partition
+        , y0: 0.0
+        , x1: 0.0
+        , y1: 0.0
+        }
 
 -- | Apply partition layout to hierarchical data
 -- |
@@ -122,7 +133,7 @@ partition config root =
     padding = config.padding
 
     PartNode rootData = root
-    n = rootData.height + 1  -- Total number of layers
+    n = rootData.height + 1 -- Total number of layers
 
     -- Initialize root coordinates
     initialRoot = PartNode $ rootData
@@ -145,8 +156,8 @@ positionNode :: forall a. PartitionConfig a -> Number -> Int -> PartitionNode a 
 positionNode config dy n (PartNode node) =
   let
     -- If node has children, partition them horizontally
-    positionedChildren = if Array.null node.children
-      then node.children
+    positionedChildren =
+      if Array.null node.children then node.children
       else
         let
           -- Children occupy the next layer down
@@ -168,12 +179,12 @@ positionNode config dy n (PartNode node) =
     y1' = node.y1 - config.padding
 
     -- Handle edge case: padding too large
-    { x0: finalX0, x1: finalX1 } = if x1' < x0
-      then { x0: (x0 + x1') / 2.0, x1: (x0 + x1') / 2.0 }
+    { x0: finalX0, x1: finalX1 } =
+      if x1' < x0 then { x0: (x0 + x1') / 2.0, x1: (x0 + x1') / 2.0 }
       else { x0: x0, x1: x1' }
 
-    { y0: finalY0, y1: finalY1 } = if y1' < y0
-      then { y0: (y0 + y1') / 2.0, y1: (y0 + y1') / 2.0 }
+    { y0: finalY0, y1: finalY1 } =
+      if y1' < y0 then { y0: (y0 + y1') / 2.0, y1: (y0 + y1') / 2.0 }
       else { y0: y0, y1: y1' }
   in
     PartNode $ node
@@ -196,9 +207,9 @@ dice children x0 y0 x1 y1 =
     totalValue = Array.foldl (\acc (PartNode n) -> acc + n.value) 0.0 children
 
     -- Scaling factor
-    k = if totalValue > 0.0
-        then (x1 - x0) / totalValue
-        else 0.0
+    k =
+      if totalValue > 0.0 then (x1 - x0) / totalValue
+      else 0.0
 
     -- Position each child
     result = Array.foldl (positionChild k y0 y1) { positioned: [], currentX: x0 } children
@@ -206,10 +217,14 @@ dice children x0 y0 x1 y1 =
     result.positioned
 
 -- | Helper for dice: position a single child
-positionChild :: forall a. Number -> Number -> Number ->
-                 { positioned :: Array (PartitionNode a), currentX :: Number } ->
-                 PartitionNode a ->
-                 { positioned :: Array (PartitionNode a), currentX :: Number }
+positionChild
+  :: forall a
+   . Number
+  -> Number
+  -> Number
+  -> { positioned :: Array (PartitionNode a), currentX :: Number }
+  -> PartitionNode a
+  -> { positioned :: Array (PartitionNode a), currentX :: Number }
 positionChild k y0 y1 acc (PartNode node) =
   let
     x0' = acc.currentX

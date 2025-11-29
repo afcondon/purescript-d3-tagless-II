@@ -24,8 +24,8 @@ data Status
 instance read :: Read Status where
   read = case _ of
     "collapsed" -> pure Collapsed
-    "expanded"  -> pure Expanded
-    otherwise   -> Nothing
+    "expanded" -> pure Expanded
+    _ -> Nothing
 
 instance isPropStatus :: IsProp Status where
   toPropValue = propFromString <<< toProp
@@ -33,7 +33,7 @@ instance isPropStatus :: IsProp Status where
 toProp :: Status -> String
 toProp = case _ of
   Collapsed -> "collapsed"
-  Expanded  -> "expanded"
+  Expanded -> "expanded"
 
 toBoolean :: Status -> Boolean
 toBoolean Collapsed = false
@@ -81,23 +81,23 @@ contentSharedClasses = HH.ClassName <$>
 contentClasses :: Status -> Array HH.ClassName
 contentClasses status_ = contentSharedClasses <>
   ( case status_ of
-    Collapsed -> HH.ClassName <$>
-      [ "max-h-0"
-      , "opacity-0"
-      , "w-0" -- TODO this should be a parameter, and actually all classes here should be @apply's
-      , "overflow-hidden"
-      , "transition-1/2-in"
-      ]
-    Expanded -> HH.ClassName <$>
-      [ "max-h-full"
-      , "opacity-100"
-      , "transition-1/2-out"
-      ]
+      Collapsed -> HH.ClassName <$>
+        [ "max-h-0"
+        , "opacity-0"
+        , "w-0" -- TODO this should be a parameter, and actually all classes here should be @apply's
+        , "overflow-hidden"
+        , "transition-1/2-in"
+        ]
+      Expanded -> HH.ClassName <$>
+        [ "max-h-full"
+        , "opacity-100"
+        , "transition-1/2-out"
+        ]
   )
 
-type HTMLexpandable = Interactive ( expanded :: Status )
+type HTMLexpandable = Interactive (expanded :: Status)
 
-status :: ∀ r i. Status -> HP.IProp ( expanded :: Status | r ) i
+status :: ∀ r i. Status -> HP.IProp (expanded :: Status | r) i
 status = HP.prop (PropName "expanded")
 
 -- Takes a row of `IProps` containing the `expanded` label
@@ -105,20 +105,20 @@ status = HP.prop (PropName "expanded")
 -- well as the original row, minus the `expanded` label
 extractStatus
   :: ∀ r i
-   . Array (HH.IProp ( expanded :: Status | r) i)
+   . Array (HH.IProp (expanded :: Status | r) i)
   -> Tuple Status (Array (HH.IProp r i))
 extractStatus =
   foldr f (Tuple Expanded [])
   where
-    f (HP.IProp (Property "expanded" expanded)) =
-      lmap (const $ coerceExpanded expanded)
-    f iprop = rmap $ (flip snoc) $ coerceR iprop
+  f (HP.IProp (Property "expanded" expanded)) =
+    lmap (const $ coerceExpanded expanded)
+  f iprop = rmap $ (flip snoc) $ coerceR iprop
 
-    coerceExpanded :: PropValue -> Status
-    coerceExpanded = fromMaybe Expanded <<< read <<< unsafeCoerce
+  coerceExpanded :: PropValue -> Status
+  coerceExpanded = fromMaybe Expanded <<< read <<< unsafeCoerce
 
-    coerceR :: HH.IProp ( expanded :: Status | r ) i -> HH.IProp r i
-    coerceR = unsafeCoerce
+  coerceR :: HH.IProp (expanded :: Status | r) i -> HH.IProp r i
+  coerceR = unsafeCoerce
 
 heading
   :: ∀ p i
@@ -126,15 +126,17 @@ heading
   -> Array (HH.HTML p i)
   -> HH.HTML p i
 heading iprops html =
-  let (Tuple status_ iprops') = extractStatus iprops in
-  HH.header
-    ( [ HP.classes headingClasses ] <&> iprops' )
-    [ HH.div
-      [ HP.classes headingInnerClasses ]
-      html
-    , HH.div_
-      [ chevron_ status_ ]
-    ]
+  let
+    (Tuple status_ iprops') = extractStatus iprops
+  in
+    HH.header
+      ([ HP.classes headingClasses ] <&> iprops')
+      [ HH.div
+          [ HP.classes headingInnerClasses ]
+          html
+      , HH.div_
+          [ chevron_ status_ ]
+      ]
 
 -- Simple chevron without icon dependency
 chevron
@@ -144,7 +146,7 @@ chevron
   -> HH.HTML p i
 chevron status_ iprops =
   HH.span
-    ( [ HP.classes chevronClasses ] <&> iprops )
+    ([ HP.classes chevronClasses ] <&> iprops)
     [ HH.text $ case status_ of
         Collapsed -> "▼"
         Expanded -> "▲"
@@ -164,7 +166,7 @@ content
   -> HH.HTML p i
 content status_ iprops =
   HH.div
-    ( [ HP.classes $ contentClasses status_ ] <&> iprops )
+    ([ HP.classes $ contentClasses status_ ] <&> iprops)
 
 content_
   :: ∀ p i

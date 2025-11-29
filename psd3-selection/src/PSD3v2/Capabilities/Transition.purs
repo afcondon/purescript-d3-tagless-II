@@ -118,7 +118,7 @@ class Monad m <= TransitionM sel m | m -> sel where
   withTransitionStaggered
     :: forall datum
      . TransitionConfig
-    -> (datum -> Int -> Milliseconds)  -- Per-element delay function
+    -> (datum -> Int -> Milliseconds) -- Per-element delay function
     -> sel SBoundOwns Element datum
     -> Array (Attribute datum)
     -> m Unit

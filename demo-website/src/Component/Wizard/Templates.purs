@@ -13,21 +13,40 @@ generateUnsafe vizName dataTypeName fields =
   let
     recordType = generateRecordType fields
   in
-    """module """ <> vizName <> """.Unsafe where
+    """module """ <> vizName
+      <>
+        """.Unsafe where
 
 import PSD3.Internal.Types (Datum_, Index_)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | Data type for this visualization
-type """ <> dataTypeName <> """ =
-  { """ <> recordType <> """
+type """
+      <> dataTypeName
+      <>
+        """ =
+  { """
+      <> recordType
+      <>
+        """
   }
 
--- | Coerce Datum_ to """ <> dataTypeName <> """
+-- | Coerce Datum_ to """
+      <> dataTypeName
+      <>
+        """
 -- This is safe because D3's data join ensures Datum_ contains
 -- the data we originally passed to simpleJoin/updateJoin
-coerceTo""" <> dataTypeName <> """ :: Datum_ -> """ <> dataTypeName <> """
-coerceTo""" <> dataTypeName <> """ = unsafeCoerce
+coerceTo"""
+      <> dataTypeName
+      <> """ :: Datum_ -> """
+      <> dataTypeName
+      <>
+        """
+coerceTo"""
+      <> dataTypeName
+      <>
+        """ = unsafeCoerce
 
 -- | Coerce Index_ to Int (always provided by D3)
 coerceIndex :: Index_ -> Int
@@ -40,18 +59,32 @@ generateModel vizName dataTypeName fields exampleData =
   let
     recordType = generateRecordType fields
   in
-    """module """ <> vizName <> """.Model where
+    """module """ <> vizName
+      <>
+        """.Model where
 
 -- | Data type for this visualization
 -- Re-exported from Unsafe for use in type signatures
-type """ <> dataTypeName <> """ =
-  { """ <> recordType <> """
+type """
+      <> dataTypeName
+      <>
+        """ =
+  { """
+      <> recordType
+      <>
+        """
   }
 
 -- | Example data for testing
-exampleData :: Array """ <> dataTypeName <> """
+exampleData :: Array """
+      <> dataTypeName
+      <>
+        """
 exampleData =
-  """ <> exampleData <> """
+  """
+      <> exampleData
+      <>
+        """
 """
 
 -- | Generate the Draw.purs module
@@ -62,30 +95,51 @@ generateDraw vizName dataTypeName fields coerceFnName =
     datumType = generateDatumType fields
     firstField = fromMaybe "x" (map (\f -> f.name) (head fields))
   in
-    """module """ <> vizName <> """.Draw where
+    """module """ <> vizName
+      <>
+        """.Draw where
 
 import Prelude
 
 import PSD3
 import PSD3.Attributes as A
 import PSD3.Internal.FFI (keyIsID_)
-import """ <> vizName <> """.Unsafe (""" <> coerceFnName <> """, coerceIndex)
-import """ <> vizName <> """.Model (""" <> dataTypeName <> """)
+import """
+      <> vizName
+      <> """.Unsafe ("""
+      <> coerceFnName
+      <>
+        """, coerceIndex)
+import """
+      <> vizName
+      <> """.Model ("""
+      <> dataTypeName
+      <>
+        """)
 import Data.Int (toNumber)
 import Effect (Effect)
 
 -- | Accessor record for working with bound data
 datum_ ::
-  { """ <> datumType <> """
+  { """
+      <> datumType
+      <>
+        """
   , index :: Index_ -> Int
   }
 datum_ =
-  { """ <> accessors <> """
+  { """
+      <> accessors
+      <>
+        """
   , index: coerceIndex
   }
 
 -- | Main drawing function
-draw :: forall m. SelectionM D3Selection_ m => Array """ <> dataTypeName <> """ -> Selector D3Selection_ -> m Unit
+draw :: forall m. SelectionM D3Selection_ m => Array """
+      <> dataTypeName
+      <>
+        """ -> Selector D3Selection_ -> m Unit
 draw dataPoints selector = do
   (root :: D3Selection_) <- attach selector
   svg <- appendTo root Svg
@@ -105,27 +159,41 @@ draw dataPoints selector = do
     ]
 
   -- Examples of using your data fields in attributes:
-  -- A.cx (\\(d :: Datum_) _ -> datum_.""" <> firstField <> """ d)  -- Use first data field
+  -- A.cx (\\(d :: Datum_) _ -> datum_."""
+      <> firstField
+      <>
+        """ d)  -- Use first data field
   -- A.fill (\\(d :: Datum_) (i :: Index_) -> if datum_.index i > 5 then "red" else "blue")
-  -- A.radius (\\(d :: Datum_) _ -> datum_.""" <> firstField <> """ d * 2.0)  -- Scale by data
+  -- A.radius (\\(d :: Datum_) _ -> datum_."""
+      <> firstField
+      <>
+        """ d * 2.0)  -- Scale by data
 
   pure unit
 
 -- | Entry point
 -- TODO: Update to use PSD3v2 when wizard is overhauled
--- run :: Array """ <> dataTypeName <> """ -> Effect Unit
+-- run :: Array """
+      <> dataTypeName
+      <>
+        """ -> Effect Unit
 -- run dataPoints = eval_D3M $ draw dataPoints "#chart"
 """
 
 -- | Generate Main.purs module
 generateMain :: String -> String -> String
-generateMain vizName dataTypeName =
+generateMain vizName _ =
   """module Main where
 
 import Prelude
 import Effect (Effect)
-import """ <> vizName <> """.Draw (run)
-import """ <> vizName <> """.Model (exampleData)
+import """ <> vizName
+    <>
+      """.Draw (run)
+import """
+    <> vizName
+    <>
+      """.Model (exampleData)
 
 main :: Effect Unit
 main = run exampleData
@@ -139,7 +207,9 @@ generateHTML vizName =
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>""" <> vizName <> """ - PSD3 Visualization</title>
+  <title>""" <> vizName
+    <>
+      """ - PSD3 Visualization</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -172,7 +242,10 @@ generateHTML vizName =
 </head>
 <body>
   <div class="container">
-    <h1>""" <> vizName <> """</h1>
+    <h1>"""
+    <> vizName
+    <>
+      """</h1>
     <div id="chart"></div>
   </div>
 
@@ -195,7 +268,9 @@ generateREADME vizName dataTypeName fields =
     firstField = fromMaybe "x" (map (\f -> f.name) (head fields))
     datumType = generateDatumType fields
   in
-    """# """ <> vizName <> """
+    """# """ <> vizName
+      <>
+        """
 
 PSD3 visualization scaffold generated by the web wizard.
 
@@ -209,8 +284,14 @@ PSD3 visualization scaffold generated by the web wizard.
 ## Data Type
 
 ```purescript
-type """ <> dataTypeName <> """ =
-  { """ <> fieldList <> """
+type """
+      <> dataTypeName
+      <>
+        """ =
+  { """
+      <> fieldList
+      <>
+        """
   }
 ```
 
@@ -218,9 +299,15 @@ type """ <> dataTypeName <> """ =
 
 1. **Add your data** in `Model.purs`:
    ```purescript
-   exampleData :: Array """ <> dataTypeName <> """
+   exampleData :: Array """
+      <> dataTypeName
+      <>
+        """
    exampleData =
-     [ { """ <> exampleFields <> """ }
+     [ { """
+      <> exampleFields
+      <>
+        """ }
      -- Add more data points
      ]
    ```
@@ -248,14 +335,20 @@ The `datum_` accessor record provides type-safe access to your data:
 
 ```purescript
 datum_ ::
-  { """ <> datumType <> """
+  { """
+      <> datumType
+      <>
+        """
   , index :: Index_ -> Int
   }
 ```
 
 Use it in attributes like this:
 ```purescript
-A.cx (\\(d :: Datum_) _ -> datum_.""" <> firstField <> """ d)
+A.cx (\\(d :: Datum_) _ -> datum_."""
+      <> firstField
+      <>
+        """ d)
 ```
 
 The type annotations `(d :: Datum_)` and `(i :: Index_)` help PureScript's type checker

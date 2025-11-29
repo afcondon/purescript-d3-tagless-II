@@ -5,9 +5,6 @@ module D3.Viz.FPFTW.AnscombeQuartet where
 
 import Prelude
 
-import Data.Array (range, zipWith)
-import Data.Int (toNumber)
-import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import PSD3v2.Attribute.Types (class_, cx, cy, fill, fillOpacity, height, radius, stroke, strokeWidth, textAnchor, textContent, transform, viewBox, width, x, y, x1, y1, x2, y2)
 import PSD3v2.Capabilities.Selection (renderTree, select)
@@ -94,10 +91,10 @@ anscombeData =
 
 -- | Scale helpers
 scaleX :: Number -> Number
-scaleX x = (x - 4.0) * 30.0 + 30.0  -- Domain [4, 19] -> Range [30, 480]
+scaleX x = (x - 4.0) * 30.0 + 30.0 -- Domain [4, 19] -> Range [30, 480]
 
 scaleY :: Number -> Number
-scaleY y = 280.0 - ((y - 3.0) * 20.0)  -- Domain [3, 13] -> Range [280, 80] (inverted)
+scaleY y = 280.0 - ((y - 3.0) * 20.0) -- Domain [3, 13] -> Range [280, 80] (inverted)
 
 -- | Create a single scatterplot for one dataset
 -- | This is the component we'll MAP over the four datasets!
@@ -106,47 +103,51 @@ scatterplot datasetName points =
   T.named Group ("plot-" <> datasetName)
     [ class_ "anscombe-plot" ]
     `T.withChildren`
-      ([ -- Title
-         T.elem Text
-           [ x 260.0
-           , y 30.0
-           , textContent datasetName
-           , textAnchor "middle"
-           , fill "#333"
-           , class_ "plot-title"
-           ]
-       -- X axis
-       , T.elem Line
-           [ x1 30.0
-           , y1 280.0
-           , x2 480.0
-           , y2 280.0
-           , stroke "#999"
-           , strokeWidth 1.0
-           ]
-       -- Y axis
-       , T.elem Line
-           [ x1 30.0
-           , y1 80.0
-           , x2 30.0
-           , y2 280.0
-           , stroke "#999"
-           , strokeWidth 1.0
-           ]
-       ] <>
-       -- Data points
-       (map (\pt ->
-         T.elem Circle
-           [ cx (scaleX pt.x)
-           , cy (scaleY pt.y)
-           , radius 4.0
-           , fill "#4A90E2"
-           , fillOpacity 0.7
-           , stroke "#2E5C8A"
-           , strokeWidth 1.5
-           , class_ "data-point"
-           ]
-       ) points))
+      ( [ -- Title
+          T.elem Text
+            [ x 260.0
+            , y 30.0
+            , textContent datasetName
+            , textAnchor "middle"
+            , fill "#333"
+            , class_ "plot-title"
+            ]
+        -- X axis
+        , T.elem Line
+            [ x1 30.0
+            , y1 280.0
+            , x2 480.0
+            , y2 280.0
+            , stroke "#999"
+            , strokeWidth 1.0
+            ]
+        -- Y axis
+        , T.elem Line
+            [ x1 30.0
+            , y1 80.0
+            , x2 30.0
+            , y2 280.0
+            , stroke "#999"
+            , strokeWidth 1.0
+            ]
+        ] <>
+          -- Data points
+          ( map
+              ( \pt ->
+                  T.elem Circle
+                    [ cx (scaleX pt.x)
+                    , cy (scaleY pt.y)
+                    , radius 4.0
+                    , fill "#4A90E2"
+                    , fillOpacity 0.7
+                    , stroke "#2E5C8A"
+                    , strokeWidth 1.5
+                    , class_ "data-point"
+                    ]
+              )
+              points
+          )
+      )
 
 -- | Draw all four scatterplots in a 2x2 grid
 -- | This demonstrates MAP: same component, different data!
@@ -155,23 +156,29 @@ drawAnscombeQuartet containerSelector = runD3v2M do
   container <- select containerSelector :: _ (D3v2Selection_ SEmpty Element Unit)
 
   -- Create the main SVG with 2x2 grid layout
-  let quartetTree =
-        T.named SVG "svg"
-          [ width 1040.0
-          , height 600.0
-          , viewBox "0 0 1040 600"
-          , class_ "anscombe-quartet"
-          ]
-          `T.withChildren`
-            -- Map the scatterplot component over all four datasets!
-            -- This is the FP win: one definition, four instances
-            (map (\{ name, points } ->
-              let xOffset = if name == "Dataset I" || name == "Dataset III" then 0.0 else 520.0
-                  yOffset = if name == "Dataset I" || name == "Dataset II" then 0.0 else 300.0
-              in T.named Group ("group-" <> name)
-                   [ transform ("translate(" <> show xOffset <> "," <> show yOffset <> ")") ]
-                   `T.withChild` scatterplot name points
-            ) anscombeData)
+  let
+    quartetTree =
+      T.named SVG "svg"
+        [ width 1040.0
+        , height 600.0
+        , viewBox "0 0 1040 600"
+        , class_ "anscombe-quartet"
+        ]
+        `T.withChildren`
+          -- Map the scatterplot component over all four datasets!
+          -- This is the FP win: one definition, four instances
+          ( map
+              ( \{ name, points } ->
+                  let
+                    xOffset = if name == "Dataset I" || name == "Dataset III" then 0.0 else 520.0
+                    yOffset = if name == "Dataset I" || name == "Dataset II" then 0.0 else 300.0
+                  in
+                    T.named Group ("group-" <> name)
+                      [ transform ("translate(" <> show xOffset <> "," <> show yOffset <> ")") ]
+                      `T.withChild` scatterplot name points
+              )
+              anscombeData
+          )
 
   _ <- renderTree container quartetTree
 

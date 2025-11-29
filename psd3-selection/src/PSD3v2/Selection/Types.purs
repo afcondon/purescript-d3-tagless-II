@@ -1,17 +1,14 @@
 module PSD3v2.Selection.Types
-  ( -- Phantom state types
-    SEmpty
-  , SBoundOwns
+  ( ElementType(..)
+  , JoinResult(..)
+  , RenderContext(..)
   , SBoundInherits
-  , SPending
+  , SBoundOwns
+  , SEmpty
   , SExiting
-  -- Selection types
+  , SPending
   , Selection(..)
   , SelectionImpl(..)
-  , JoinResult(..)
-  -- Element types
-  , ElementType(..)
-  , RenderContext(..)
   , elementContext
   ) where
 
@@ -27,11 +24,11 @@ import Web.DOM.Document (Document)
 -- |
 -- | These are uninhabited types used only at the type level
 -- | to track what operations are legal on a selection.
-data SEmpty         -- Selection has parent elements but no data bound
-data SBoundOwns     -- Elements with data bound (owns the __data__ binding)
+data SEmpty -- Selection has parent elements but no data bound
+data SBoundOwns -- Elements with data bound (owns the __data__ binding)
 data SBoundInherits -- Elements with data bound (inherited from parent)
-data SPending       -- Data without elements (enter selection)
-data SExiting       -- Elements without matching data (exit selection)
+data SPending -- Data without elements (enter selection)
+data SExiting -- Elements without matching data (exit selection)
 
 -- | A type-safe D3-style selection
 -- |
@@ -53,8 +50,7 @@ data SExiting       -- Elements without matching data (exit selection)
 -- | entering :: Selection SPending SVGElement Number
 -- | leaving :: Selection SExiting SVGElement Number
 -- | ```
-newtype Selection (state :: Type) (parent :: Type) (datum :: Type)
-  = Selection (SelectionImpl parent datum)
+newtype Selection (state :: Type) (parent :: Type) (datum :: Type) = Selection (SelectionImpl parent datum)
 
 -- | Functor instance for Selection
 -- |
@@ -72,27 +68,27 @@ newtype Selection (state :: Type) (parent :: Type) (datum :: Type)
 -- | ages = map _.age people
 -- | ```
 instance Functor (Selection state parent) where
-  map f (Selection impl) = Selection (mapSelectionImpl f impl)
+  map f' (Selection impl) = Selection (mapSelectionImpl f' impl)
     where
-      mapSelectionImpl :: forall a b. (a -> b) -> SelectionImpl parent a -> SelectionImpl parent b
-      mapSelectionImpl _ (EmptySelection r) = EmptySelection r
-      mapSelectionImpl f (BoundSelection r) = BoundSelection
-        { elements: r.elements
-        , data: map f r.data
-        , indices: r.indices
-        , document: r.document
-        }
-      mapSelectionImpl f (PendingSelection r) = PendingSelection
-        { parentElements: r.parentElements
-        , pendingData: map f r.pendingData
-        , indices: r.indices
-        , document: r.document
-        }
-      mapSelectionImpl f (ExitingSelection r) = ExitingSelection
-        { elements: r.elements
-        , data: map f r.data
-        , document: r.document
-        }
+    mapSelectionImpl :: forall a b. (a -> b) -> SelectionImpl parent a -> SelectionImpl parent b
+    mapSelectionImpl _ (EmptySelection r) = EmptySelection r
+    mapSelectionImpl f (BoundSelection r) = BoundSelection
+      { elements: r.elements
+      , data: map f r.data
+      , indices: r.indices
+      , document: r.document
+      }
+    mapSelectionImpl f (PendingSelection r) = PendingSelection
+      { parentElements: r.parentElements
+      , pendingData: map f r.pendingData
+      , indices: r.indices
+      , document: r.document
+      }
+    mapSelectionImpl f (ExitingSelection r) = ExitingSelection
+      { elements: r.elements
+      , data: map f r.data
+      , document: r.document
+      }
 
 -- | Internal implementation of selections (not exported to users)
 -- |
@@ -110,13 +106,13 @@ data SelectionImpl parent datum
   | BoundSelection
       { elements :: Array Element
       , data :: Array datum
-      , indices :: Maybe (Array Int)  -- Nothing for regular selections, Just for update selections
+      , indices :: Maybe (Array Int) -- Nothing for regular selections, Just for update selections
       , document :: Document
       }
   | PendingSelection
       { parentElements :: Array Element
       , pendingData :: Array datum
-      , indices :: Maybe (Array Int)  -- Nothing for regular, Just for enter with indices
+      , indices :: Maybe (Array Int) -- Nothing for regular, Just for enter with indices
       , document :: Document
       }
   | ExitingSelection
@@ -138,31 +134,33 @@ data SelectionImpl parent datum
 -- | - exit is SExiting (should be removed)
 -- | Polymorphic join result that works with any selection type wrapper
 -- | This allows interpreters to use their own selection types (e.g., D3v2Selection_)
+data JoinResult :: forall k. (Type -> Type -> k -> Type) -> Type -> k -> Type
 data JoinResult sel parent datum = JoinResult
-  { enter  :: sel SPending parent datum
+  { enter :: sel SPending parent datum
   , update :: sel SBoundOwns Element datum
-  , exit   :: sel SExiting Element datum
+  , exit :: sel SExiting Element datum
   }
 
 -- | Output context for rendering
 -- | Determines which namespace to use when creating elements
 data RenderContext
-  = SVGContext    -- SVG namespace (for graphics)
-  | HTMLContext   -- HTML namespace (for DOM elements)
-  -- Future extensions:
-  -- | CanvasContext  -- Canvas 2D/WebGL rendering
-  -- | AudioContext   -- Web Audio API
-  -- | ARContext      -- Augmented reality / spatial
-  -- | StringContext  -- String-based interpreters (testing, pretty-printing, etc.)
-  --                  -- In this mode, elements become indentation groups:
-  --                  --   Group "chart" [...]
-  --                  --     Circle [cx 10, cy 20]
-  --                  --     Text "Hello"
-  --                  -- Useful for:
-  --                  -- - Unit testing (check structure without DOM)
-  --                  -- - Debugging (inspect tree as text)
-  --                  -- - Documentation generation
-  --                  -- - Alternative formats (Markdown, LaTeX, etc.)
+  = SVGContext -- SVG namespace (for graphics)
+  | HTMLContext -- HTML namespace (for DOM elements)
+
+-- Future extensions:
+-- | CanvasContext  -- Canvas 2D/WebGL rendering
+-- | AudioContext   -- Web Audio API
+-- | ARContext      -- Augmented reality / spatial
+-- | StringContext  -- String-based interpreters (testing, pretty-printing, etc.)
+--                  -- In this mode, elements become indentation groups:
+--                  --   Group "chart" [...]
+--                  --     Circle [cx 10, cy 20]
+--                  --     Text "Hello"
+--                  -- Useful for:
+--                  -- - Unit testing (check structure without DOM)
+--                  -- - Debugging (inspect tree as text)
+--                  -- - Documentation generation
+--                  -- - Alternative formats (Markdown, LaTeX, etc.)
 
 derive instance Eq RenderContext
 derive instance Ord RenderContext

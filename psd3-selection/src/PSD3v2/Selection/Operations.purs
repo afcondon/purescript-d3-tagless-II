@@ -21,16 +21,17 @@ module PSD3v2.Selection.Operations
   , elementTypeToString
   ) where
 
-import Prelude
+import Prelude hiding (append)
 
 import Data.Array as Array
 import Data.Foldable (class Foldable, traverse_)
-import Data.Int (toNumber)
 import Data.FoldableWithIndex (traverseWithIndex_)
+import Data.Int (toNumber)
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable, toMaybe)
+import Data.Time.Duration (Milliseconds(..))
 import Data.Traversable (traverse)
 import Data.TraversableWithIndex (traverseWithIndex)
 import Data.Tuple (Tuple(..), fst, snd)
@@ -38,18 +39,16 @@ import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Class.Console (log)
 import Effect.Uncurried (mkEffectFn2)
-import Web.UIEvent.MouseEvent (MouseEvent, clientX, clientY, pageX, pageY)
-import Partial.Unsafe (unsafePartial, unsafeCrashWith)
-import Unsafe.Coerce (unsafeCoerce)
 import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..))
-import PSD3v2.Behavior.Types (Behavior(..), DragConfig(..), ZoomConfig(..), ScaleExtent(..))
 import PSD3v2.Behavior.FFI as BehaviorFFI
+import PSD3v2.Behavior.Types (Behavior(..), DragConfig(..), ZoomConfig(..), ScaleExtent(..))
 import PSD3v2.Selection.Join as Join
+import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), RenderContext(..), SBoundInherits, SBoundOwns, SEmpty, SExiting, SPending, Selection(..), SelectionImpl(..), elementContext)
 import PSD3v2.Transition.FFI as TransitionFFI
 import PSD3v2.Transition.Types (TransitionConfig)
-import Data.Time.Duration (Milliseconds(..))
-import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), RenderContext(..), SBoundOwns, SBoundInherits, SEmpty, SExiting, SPending, Selection(..), SelectionImpl(..), elementContext)
 import PSD3v2.VizTree.Tree (Tree(..))
+import Partial.Unsafe (unsafePartial, unsafeCrashWith)
+import Unsafe.Coerce (unsafeCoerce)
 import Web.DOM.Document (Document)
 import Web.DOM.Document as Document
 import Web.DOM.Element (Element, fromNode, toNode, toParentNode)
@@ -61,6 +60,7 @@ import Web.HTML (window)
 import Web.HTML.HTMLDocument (toDocument)
 import Web.HTML.HTMLDocument as HTMLDocument
 import Web.HTML.Window (document)
+import Web.UIEvent.MouseEvent (MouseEvent, clientX, clientY, pageX, pageY)
 
 -- FFI for offsetX/offsetY (not yet in purescript-web-uievents - PR candidate)
 foreign import offsetX :: MouseEvent -> Number
@@ -80,7 +80,7 @@ foreign import offsetY :: MouseEvent -> Number
 select
   :: forall m datum
    . MonadEffect m
-  => String  -- CSS selector
+  => String -- CSS selector
   -> m (Selection SEmpty Element datum)
 select selector = liftEffect do
   htmlDoc <- window >>= document
@@ -93,7 +93,7 @@ select selector = liftEffect do
       , document: doc
       }
     Just element -> pure $ Selection $ EmptySelection
-      { parentElements: [element]
+      { parentElements: [ element ]
       , document: doc
       }
 
@@ -111,21 +111,22 @@ select selector = liftEffect do
 selectAll
   :: forall state parent parentDatum datum m
    . MonadEffect m
-  => String  -- CSS selector
+  => String -- CSS selector
   -> Selection state parent parentDatum
   -> m (Selection SEmpty Element datum)
 selectAll selector (Selection impl) = liftEffect do
   doc <- getDocument impl
   -- Get the parent elements (where new children will be appended)
   -- NOT the query results - those are fetched by joinData when needed
-  let parentElems = case impl of
-        EmptySelection { parentElements } -> parentElements
-        BoundSelection { elements } -> elements
-        PendingSelection { parentElements } -> parentElements
-        ExitingSelection { elements } -> elements
+  let
+    parentElems = case impl of
+      EmptySelection { parentElements } -> parentElements
+      BoundSelection { elements } -> elements
+      PendingSelection { parentElements } -> parentElements
+      ExitingSelection { elements } -> elements
 
   pure $ Selection $ EmptySelection
-    { parentElements: parentElems  -- Preserve parents for appending
+    { parentElements: parentElems -- Preserve parents for appending
     , document: doc
     }
 
@@ -145,7 +146,7 @@ selectAll selector (Selection impl) = liftEffect do
 selectAllWithData
   :: forall state parent parentDatum datum m
    . MonadEffect m
-  => String  -- CSS selector
+  => String -- CSS selector
   -> Selection state parent parentDatum
   -> m (Selection SBoundOwns Element datum)
 selectAllWithData selector (Selection impl) = liftEffect do
@@ -161,12 +162,14 @@ selectAllWithData selector (Selection impl) = liftEffect do
       querySelectorAllElements selector exitElems
 
   -- Extract __data__ from each element
-  dataArray <- traverse (\el -> do
-    nullableDatum <- getElementData_ el
-    pure $ case toMaybe nullableDatum of
-      Just d -> d
-      Nothing -> unsafeCoerce unit  -- Fallback if no data (shouldn't happen with appendChildInheriting)
-    ) elements
+  dataArray <- traverse
+    ( \el -> do
+        nullableDatum <- getElementData_ el
+        pure $ case toMaybe nullableDatum of
+          Just d -> d
+          Nothing -> unsafeCoerce unit -- Fallback if no data (shouldn't happen with appendChildInheriting)
+    )
+    elements
 
   pure $ Selection $ BoundSelection
     { elements: elements
@@ -197,20 +200,23 @@ append
   -> Selection SPending parent datum
   -> m (Selection SBoundOwns Element datum)
 append elemType attrs (Selection impl) = liftEffect do
-  let { parentElements, pendingData, indices, document: doc } = unsafePartial case impl of
-        PendingSelection r -> r
+  let
+    { parentElements, pendingData, indices, document: doc } = unsafePartial case impl of
+      PendingSelection r -> r
   -- Create elements for each datum
   -- In D3, if there's one parent, all elements go to that parent
   -- If there are multiple parents, they're distributed (but that's rare)
-  let parent = case Array.head parentElements of
-        Just p -> p
-        Nothing -> unsafePartial $ Array.unsafeIndex parentElements 0  -- Should never happen
+  let
+    parent = case Array.head parentElements of
+      Just p -> p
+      Nothing -> unsafePartial $ Array.unsafeIndex parentElements 0 -- Should never happen
 
   elements <- pendingData # traverseWithIndex \arrayIndex datum -> do
     -- Use logical index from indices array if present (for enter selections from joins)
-    let logicalIndex = case indices of
-          Just indexArray -> unsafePartial $ Array.unsafeIndex indexArray arrayIndex
-          Nothing -> arrayIndex
+    let
+      logicalIndex = case indices of
+        Just indexArray -> unsafePartial $ Array.unsafeIndex indexArray arrayIndex
+        Nothing -> arrayIndex
 
     element <- createElementWithNS elemType doc
     -- Set attributes on the new element using logical index
@@ -226,7 +232,7 @@ append elemType attrs (Selection impl) = liftEffect do
   pure $ Selection $ BoundSelection
     { elements
     , data: pendingData
-    , indices  -- Preserve indices from pending selection (for enter selections from joins)
+    , indices -- Preserve indices from pending selection (for enter selections from joins)
     , document: doc
     }
 
@@ -250,20 +256,22 @@ setAttrs
   -> Selection SBoundOwns Element datum
   -> m (Selection SBoundOwns Element datum)
 setAttrs attrs (Selection impl) = liftEffect do
-  let { elements, data: datumArray, indices, document: doc } = unsafePartial case impl of
-        BoundSelection r -> r
+  let
+    { elements, data: datumArray, indices, document: doc } = unsafePartial case impl of
+      BoundSelection r -> r
   -- Apply attributes to each element, using logical indices if present
   let paired = Array.zipWith Tuple datumArray elements
   paired # traverseWithIndex_ \arrayIndex (Tuple datum element) -> do
-    let logicalIndex = case indices of
-          Just indexArray -> unsafePartial $ Array.unsafeIndex indexArray arrayIndex
-          Nothing -> arrayIndex
+    let
+      logicalIndex = case indices of
+        Just indexArray -> unsafePartial $ Array.unsafeIndex indexArray arrayIndex
+        Nothing -> arrayIndex
     applyAttributes element datum logicalIndex attrs
 
   pure $ Selection $ BoundSelection
     { elements
     , data: datumArray
-    , indices  -- Preserve indices from input selection
+    , indices -- Preserve indices from input selection
     , document: doc
     }
 
@@ -283,8 +291,9 @@ setAttrsExit
   -> Selection SExiting Element datum
   -> m (Selection SExiting Element datum)
 setAttrsExit attrs (Selection impl) = liftEffect do
-  let { elements, data: datumArray, document: doc } = unsafePartial case impl of
-        ExitingSelection r -> r
+  let
+    { elements, data: datumArray, document: doc } = unsafePartial case impl of
+      ExitingSelection r -> r
   -- Apply attributes to each element
   let paired = Array.zipWith Tuple datumArray elements
   paired # traverseWithIndex_ \index (Tuple datum element) ->
@@ -311,14 +320,15 @@ remove
   => Selection SExiting Element datum
   -> m Unit
 remove (Selection impl) = liftEffect do
-  let { elements } = unsafePartial case impl of
-        ExitingSelection r -> r
+  let
+    { elements } = unsafePartial case impl of
+      ExitingSelection r -> r
   elements # traverse_ \element -> do
     let node = toNode element
     maybeParent <- Node.parentNode node
     case maybeParent of
       Just parent -> Node.removeChild node parent
-      Nothing -> pure unit  -- Element not in DOM, nothing to remove
+      Nothing -> pure unit -- Element not in DOM, nothing to remove
 
 -- | Clear all children from an element
 -- |
@@ -333,7 +343,7 @@ remove (Selection impl) = liftEffect do
 clear
   :: forall m
    . MonadEffect m
-  => String  -- CSS selector
+  => String -- CSS selector
   -> m Unit
 clear selector = liftEffect $ clearElement_ selector
 
@@ -355,7 +365,7 @@ foreign import clearElement_ :: String -> Effect Unit
 syncDOMToData
   :: forall m
    . MonadEffect m
-  => String  -- CSS selector for elements to sync
+  => String -- CSS selector for elements to sync
   -> m Unit
 syncDOMToData selector = liftEffect $ syncDOMToData_ selector
 
@@ -385,8 +395,9 @@ appendChild
   -> Selection SEmpty parent datum
   -> m (Selection SEmpty Element datumOut)
 appendChild elemType attrs (Selection impl) = liftEffect do
-  let { parentElements, document: doc } = unsafePartial case impl of
-        EmptySelection r -> r
+  let
+    { parentElements, document: doc } = unsafePartial case impl of
+      EmptySelection r -> r
 
   -- Create one element for each parent
   elements <- parentElements # traverse \parent -> do
@@ -440,8 +451,9 @@ appendChildInheriting
   -> Selection SBoundOwns parent datum
   -> m (Selection SBoundInherits Element datum)
 appendChildInheriting elemType attrs (Selection impl) = liftEffect do
-  let { elements: parentElements, data: dataArray, document: doc } = unsafePartial case impl of
-        BoundSelection r -> r
+  let
+    { elements: parentElements, data: dataArray, document: doc } = unsafePartial case impl of
+      BoundSelection r -> r
 
   -- Create one child for each parent, inheriting the parent's data
   childElements <- Array.zipWith Tuple parentElements dataArray # traverseWithIndex \idx (Tuple parent datum) -> do
@@ -465,7 +477,7 @@ appendChildInheriting elemType attrs (Selection impl) = liftEffect do
   -- Return as SBoundInherits selection
   pure $ Selection $ BoundSelection
     { elements: childElements
-    , data: dataArray  -- Same data as parent
+    , data: dataArray -- Same data as parent
     , indices: Nothing
     , document: doc
     }
@@ -486,14 +498,16 @@ merge
   -> Selection SBoundOwns Element datum
   -> m (Selection SBoundOwns Element datum)
 merge (Selection impl1) (Selection impl2) = do
-  let { elements: els1, data: data1, document: doc } = unsafePartial case impl1 of
-        BoundSelection r -> r
-  let { elements: els2, data: data2 } = unsafePartial case impl2 of
-        BoundSelection r -> r
+  let
+    { elements: els1, data: data1, document: doc } = unsafePartial case impl1 of
+      BoundSelection r -> r
+  let
+    { elements: els2, data: data2 } = unsafePartial case impl2 of
+      BoundSelection r -> r
   pure $ Selection $ BoundSelection
     { elements: els1 <> els2
     , data: data1 <> data2
-    , indices: Nothing  -- Merged selections lose index information
+    , indices: Nothing -- Merged selections lose index information
     , document: doc
     }
 
@@ -515,12 +529,13 @@ joinData
   => Foldable f
   => Ord datum
   => f datum
-  -> String  -- Element selector for existing elements
+  -> String -- Element selector for existing elements
   -> Selection SEmpty parent parentDatum
   -> m (JoinResult Selection parent datum)
 joinData foldableData selector (Selection impl) = liftEffect do
-  let { parentElements, document: doc } = unsafePartial case impl of
-        EmptySelection r -> r
+  let
+    { parentElements, document: doc } = unsafePartial case impl of
+      EmptySelection r -> r
   -- Query for existing elements within parents
   existingElements <- querySelectorAllElements selector parentElements
 
@@ -535,8 +550,9 @@ joinData foldableData selector (Selection impl) = liftEffect do
   liftEffect $ log $ "joinData: " <> show (Array.length (Array.mapMaybe _.datum oldBindings)) <> " of those have data bound"
 
   -- Filter to only elements that have data bound
-  let validOldBindings = oldBindings # Array.mapMaybe \{ element, datum } ->
-        datum <#> \d -> { element, datum: d }
+  let
+    validOldBindings = oldBindings # Array.mapMaybe \{ element, datum } ->
+      datum <#> \d -> { element, datum: d }
 
   -- Convert foldable to array
   let newDataArray = Array.fromFoldable foldableData
@@ -548,28 +564,31 @@ joinData foldableData selector (Selection impl) = liftEffect do
   -- Sort enter bindings by newIndex to match the order in the new data
   let sortedEnter = Array.sortBy (\a b -> compare a.newIndex b.newIndex) joinSets.enter
 
-  let enterSelection = Selection $ PendingSelection
-        { parentElements
-        , pendingData: sortedEnter <#> _.datum
-        , indices: Just (sortedEnter <#> _.newIndex)  -- Preserve logical positions for element creation
-        , document: doc
-        }
+  let
+    enterSelection = Selection $ PendingSelection
+      { parentElements
+      , pendingData: sortedEnter <#> _.datum
+      , indices: Just (sortedEnter <#> _.newIndex) -- Preserve logical positions for element creation
+      , document: doc
+      }
 
   -- Sort update bindings by newIndex to match the order in the new data
   let sortedUpdate = Array.sortBy (\a b -> compare a.newIndex b.newIndex) joinSets.update
 
-  let updateSelection = Selection $ BoundSelection
-        { elements: sortedUpdate <#> _.element
-        , data: sortedUpdate <#> _.newDatum
-        , indices: Just (sortedUpdate <#> _.newIndex)  -- Preserve logical positions for transitions
-        , document: doc
-        }
+  let
+    updateSelection = Selection $ BoundSelection
+      { elements: sortedUpdate <#> _.element
+      , data: sortedUpdate <#> _.newDatum
+      , indices: Just (sortedUpdate <#> _.newIndex) -- Preserve logical positions for transitions
+      , document: doc
+      }
 
-  let exitSelection = Selection $ ExitingSelection
-        { elements: joinSets.exit <#> _.element
-        , data: joinSets.exit <#> _.datum
-        , document: doc
-        }
+  let
+    exitSelection = Selection $ ExitingSelection
+      { elements: joinSets.exit <#> _.element
+      , data: joinSets.exit <#> _.datum
+      , document: doc
+      }
 
   pure $ JoinResult
     { enter: enterSelection
@@ -598,13 +617,14 @@ joinDataWithKey
   => Foldable f
   => Eq key
   => f datum
-  -> (datum -> key)  -- Key extraction function
-  -> String  -- Element selector for existing elements
+  -> (datum -> key) -- Key extraction function
+  -> String -- Element selector for existing elements
   -> Selection SEmpty parent parentDatum
   -> m (JoinResult Selection parent datum)
 joinDataWithKey foldableData keyFn selector (Selection impl) = liftEffect do
-  let { parentElements, document: doc } = unsafePartial case impl of
-        EmptySelection r -> r
+  let
+    { parentElements, document: doc } = unsafePartial case impl of
+      EmptySelection r -> r
   -- Query for existing elements within parents
   existingElements <- querySelectorAllElements selector parentElements
 
@@ -619,8 +639,9 @@ joinDataWithKey foldableData keyFn selector (Selection impl) = liftEffect do
   liftEffect $ log $ "joinDataWithKey: " <> show (Array.length (Array.mapMaybe _.datum oldBindings)) <> " of those have data bound"
 
   -- Filter to only elements that have data bound
-  let validOldBindings = oldBindings # Array.mapMaybe \{ element, datum } ->
-        datum <#> \d -> { element, datum: d }
+  let
+    validOldBindings = oldBindings # Array.mapMaybe \{ element, datum } ->
+      datum <#> \d -> { element, datum: d }
 
   -- Convert foldable to array
   let newDataArray = Array.fromFoldable foldableData
@@ -632,28 +653,31 @@ joinDataWithKey foldableData keyFn selector (Selection impl) = liftEffect do
   -- Sort enter bindings by newIndex to match the order in the new data
   let sortedEnter = Array.sortBy (\a b -> compare a.newIndex b.newIndex) joinSets.enter
 
-  let enterSelection = Selection $ PendingSelection
-        { parentElements
-        , pendingData: sortedEnter <#> _.datum
-        , indices: Just (sortedEnter <#> _.newIndex)  -- Preserve logical positions for element creation
-        , document: doc
-        }
+  let
+    enterSelection = Selection $ PendingSelection
+      { parentElements
+      , pendingData: sortedEnter <#> _.datum
+      , indices: Just (sortedEnter <#> _.newIndex) -- Preserve logical positions for element creation
+      , document: doc
+      }
 
   -- Sort update bindings by newIndex to match the order in the new data
   let sortedUpdate = Array.sortBy (\a b -> compare a.newIndex b.newIndex) joinSets.update
 
-  let updateSelection = Selection $ BoundSelection
-        { elements: sortedUpdate <#> _.element
-        , data: sortedUpdate <#> _.newDatum
-        , indices: Just (sortedUpdate <#> _.newIndex)  -- Preserve logical positions for transitions
-        , document: doc
-        }
+  let
+    updateSelection = Selection $ BoundSelection
+      { elements: sortedUpdate <#> _.element
+      , data: sortedUpdate <#> _.newDatum
+      , indices: Just (sortedUpdate <#> _.newIndex) -- Preserve logical positions for transitions
+      , document: doc
+      }
 
-  let exitSelection = Selection $ ExitingSelection
-        { elements: joinSets.exit <#> _.element
-        , data: joinSets.exit <#> _.datum
-        , document: doc
-        }
+  let
+    exitSelection = Selection $ ExitingSelection
+      { elements: joinSets.exit <#> _.element
+      , data: joinSets.exit <#> _.datum
+      , document: doc
+      }
 
   pure $ JoinResult
     { enter: enterSelection
@@ -682,11 +706,11 @@ renderData
   => Ord datum
   => ElementType
   -> f datum
-  -> String  -- Element selector
+  -> String -- Element selector
   -> Selection SEmpty parent datum
-  -> Maybe (datum -> Array (Attribute datum))  -- Enter attributes
-  -> Maybe (datum -> Array (Attribute datum))  -- Update attributes
-  -> Maybe (datum -> Array (Attribute datum))  -- Exit attributes (applied before removal)
+  -> Maybe (datum -> Array (Attribute datum)) -- Enter attributes
+  -> Maybe (datum -> Array (Attribute datum)) -- Update attributes
+  -> Maybe (datum -> Array (Attribute datum)) -- Exit attributes (applied before removal)
   -> m (Selection SBoundOwns Element datum)
 renderData elemType foldableData selector emptySelection enterAttrs updateAttrs exitAttrs = do
   -- Perform the join
@@ -743,19 +767,21 @@ appendData
 appendData elemType foldableData attrs emptySelection = liftEffect do
   -- Extract parent elements and document from the empty selection
   let Selection impl = emptySelection
-  let { parentElements, document: doc } = unsafePartial case impl of
-        EmptySelection r -> r
+  let
+    { parentElements, document: doc } = unsafePartial case impl of
+      EmptySelection r -> r
 
   -- Convert data to array
   let dataArray = Array.fromFoldable foldableData
 
   -- Create a pending selection with the data
-  let pendingSelection = Selection $ PendingSelection
-        { parentElements: parentElements
-        , pendingData: dataArray
-        , indices: Just (Array.range 0 (Array.length dataArray - 1))
-        , document: doc
-        }
+  let
+    pendingSelection = Selection $ PendingSelection
+      { parentElements: parentElements
+      , pendingData: dataArray
+      , indices: Just (Array.range 0 (Array.length dataArray - 1))
+      , document: doc
+      }
 
   -- Append elements with attributes
   append elemType attrs pendingSelection
@@ -784,7 +810,7 @@ applyPerDatumAttrs mkAttrs (Selection impl) = liftEffect do
         applyAttributes element datum index attrs
       -- Return the selection unchanged
       pure $ Selection impl
-    _ -> pure $ Selection impl  -- Non-bound selections: no-op
+    _ -> pure $ Selection impl -- Non-bound selections: no-op
 
 getDocument :: forall parent datum. SelectionImpl parent datum -> Effect Document
 getDocument (EmptySelection { document: doc }) = pure doc
@@ -841,65 +867,68 @@ on behavior selection@(Selection impl) = do
   -- Return selection unchanged
   pure selection
   where
-    -- Extract elements from any selection type
-    getElements :: SelectionImpl elem datum -> Array Element
-    getElements (EmptySelection { parentElements }) = parentElements
-    getElements (BoundSelection { elements: els }) = els
-    getElements (PendingSelection { parentElements }) = parentElements
-    getElements (ExitingSelection { elements: els }) = els
+  -- Extract elements from any selection type
+  getElements :: SelectionImpl elem datum -> Array Element
+  getElements (EmptySelection { parentElements }) = parentElements
+  getElements (BoundSelection { elements: els }) = els
+  getElements (PendingSelection { parentElements }) = parentElements
+  getElements (ExitingSelection { elements: els }) = els
 
-    -- Apply behavior to a single element
-    applyBehavior :: Behavior datum -> Element -> Effect Unit
-    applyBehavior (Zoom (ZoomConfig { scaleExtent: ScaleExtent scaleMin scaleMax, targetSelector })) element =
-      void $ BehaviorFFI.attachZoom_ element scaleMin scaleMax targetSelector
-    applyBehavior (Drag SimpleDrag) element =
-      void $ BehaviorFFI.attachSimpleDrag_ element unit
-    applyBehavior (Drag (SimulationDrag _)) _ =
-      -- Simulation drag requires simulation handle, which is only available in D3v2SimM
-      -- This case should not be reached when calling from D3v2M
-      pure unit
-    applyBehavior (Click handler) element =
-      void $ BehaviorFFI.attachClick_ element handler
-    applyBehavior (ClickWithDatum handler) element =
-      void $ BehaviorFFI.attachClickWithDatum_ element handler
-    applyBehavior (MouseEnter handler) element =
-      void $ BehaviorFFI.attachMouseEnter_ element handler
-    applyBehavior (MouseLeave handler) element =
-      void $ BehaviorFFI.attachMouseLeave_ element handler
-    applyBehavior (Highlight { enter, leave }) element =
-      void $ BehaviorFFI.attachHighlight_ element enter leave
-    -- Pure web-events versions - use MouseEvent accessors directly
-    -- Note: MouseEvent coords are Int, but MouseEventInfo uses Number for flexibility
-    applyBehavior (MouseMoveWithInfo handler) element =
-      void $ BehaviorFFI.attachMouseMoveWithEvent_ element $ mkEffectFn2 \d evt ->
-        handler { datum: d
-                , clientX: toNumber $ clientX evt
-                , clientY: toNumber $ clientY evt
-                , pageX: toNumber $ pageX evt
-                , pageY: toNumber $ pageY evt
-                , offsetX: offsetX evt
-                , offsetY: offsetY evt
-                }
-    applyBehavior (MouseEnterWithInfo handler) element =
-      void $ BehaviorFFI.attachMouseEnterWithEvent_ element $ mkEffectFn2 \d evt ->
-        handler { datum: d
-                , clientX: toNumber $ clientX evt
-                , clientY: toNumber $ clientY evt
-                , pageX: toNumber $ pageX evt
-                , pageY: toNumber $ pageY evt
-                , offsetX: offsetX evt
-                , offsetY: offsetY evt
-                }
-    applyBehavior (MouseLeaveWithInfo handler) element =
-      void $ BehaviorFFI.attachMouseLeaveWithEvent_ element $ mkEffectFn2 \d evt ->
-        handler { datum: d
-                , clientX: toNumber $ clientX evt
-                , clientY: toNumber $ clientY evt
-                , pageX: toNumber $ pageX evt
-                , pageY: toNumber $ pageY evt
-                , offsetX: offsetX evt
-                , offsetY: offsetY evt
-                }
+  -- Apply behavior to a single element
+  applyBehavior :: Behavior datum -> Element -> Effect Unit
+  applyBehavior (Zoom (ZoomConfig { scaleExtent: ScaleExtent scaleMin scaleMax, targetSelector })) element =
+    void $ BehaviorFFI.attachZoom_ element scaleMin scaleMax targetSelector
+  applyBehavior (Drag SimpleDrag) element =
+    void $ BehaviorFFI.attachSimpleDrag_ element unit
+  applyBehavior (Drag (SimulationDrag _)) _ =
+    -- Simulation drag requires simulation handle, which is only available in D3v2SimM
+    -- This case should not be reached when calling from D3v2M
+    pure unit
+  applyBehavior (Click handler) element =
+    void $ BehaviorFFI.attachClick_ element handler
+  applyBehavior (ClickWithDatum handler) element =
+    void $ BehaviorFFI.attachClickWithDatum_ element handler
+  applyBehavior (MouseEnter handler) element =
+    void $ BehaviorFFI.attachMouseEnter_ element handler
+  applyBehavior (MouseLeave handler) element =
+    void $ BehaviorFFI.attachMouseLeave_ element handler
+  applyBehavior (Highlight { enter, leave }) element =
+    void $ BehaviorFFI.attachHighlight_ element enter leave
+  -- Pure web-events versions - use MouseEvent accessors directly
+  -- Note: MouseEvent coords are Int, but MouseEventInfo uses Number for flexibility
+  applyBehavior (MouseMoveWithInfo handler) element =
+    void $ BehaviorFFI.attachMouseMoveWithEvent_ element $ mkEffectFn2 \d evt ->
+      handler
+        { datum: d
+        , clientX: toNumber $ clientX evt
+        , clientY: toNumber $ clientY evt
+        , pageX: toNumber $ pageX evt
+        , pageY: toNumber $ pageY evt
+        , offsetX: offsetX evt
+        , offsetY: offsetY evt
+        }
+  applyBehavior (MouseEnterWithInfo handler) element =
+    void $ BehaviorFFI.attachMouseEnterWithEvent_ element $ mkEffectFn2 \d evt ->
+      handler
+        { datum: d
+        , clientX: toNumber $ clientX evt
+        , clientY: toNumber $ clientY evt
+        , pageX: toNumber $ pageX evt
+        , pageY: toNumber $ pageY evt
+        , offsetX: offsetX evt
+        , offsetY: offsetY evt
+        }
+  applyBehavior (MouseLeaveWithInfo handler) element =
+    void $ BehaviorFFI.attachMouseLeaveWithEvent_ element $ mkEffectFn2 \d evt ->
+      handler
+        { datum: d
+        , clientX: toNumber $ clientX evt
+        , clientY: toNumber $ clientY evt
+        , pageX: toNumber $ pageX evt
+        , pageY: toNumber $ pageY evt
+        , offsetX: offsetX evt
+        , offsetY: offsetY evt
+        }
 
 -- | Attach a behavior with simulation access (for SimulationDrag)
 -- |
@@ -908,21 +937,22 @@ applyAttributes :: forall datum. Element -> datum -> Int -> Array (Attribute dat
 applyAttributes element datum index attrs =
   attrs # traverse_ \attr -> case attr of
     StaticAttr (AttributeName name) value ->
-      if name == "textContent"
-        then setTextContent_ (attributeValueToString value) element
-        else Element.setAttribute name (attributeValueToString value) element
+      if name == "textContent" then setTextContent_ (attributeValueToString value) element
+      else Element.setAttribute name (attributeValueToString value) element
 
     DataAttr (AttributeName name) f ->
-      let val = attributeValueToString (f datum)
-      in if name == "textContent"
-           then setTextContent_ val element
-           else Element.setAttribute name val element
+      let
+        val = attributeValueToString (f datum)
+      in
+        if name == "textContent" then setTextContent_ val element
+        else Element.setAttribute name val element
 
     IndexedAttr (AttributeName name) f ->
-      let val = attributeValueToString (f datum index)
-      in if name == "textContent"
-           then setTextContent_ val element
-           else Element.setAttribute name val element
+      let
+        val = attributeValueToString (f datum index)
+      in
+        if name == "textContent" then setTextContent_ val element
+        else Element.setAttribute name val element
 
 attributeValueToString :: AttributeValue -> String
 attributeValueToString (StringValue s) = s
@@ -963,7 +993,7 @@ stringToElementType "td" = Td
 stringToElementType "th" = Th
 stringToElementType "tbody" = Tbody
 stringToElementType "thead" = Thead
-stringToElementType _ = Group  -- Default to Group for unknown types
+stringToElementType _ = Group -- Default to Group for unknown types
 
 -- | FFI function to set textContent property
 foreign import setTextContent_ :: String -> Element -> Effect Unit
@@ -977,8 +1007,8 @@ foreign import setTextContent_ :: String -> Element -> Effect Unit
 applyTransitionToElements
   :: forall datum
    . TransitionConfig
-  -> Array (Tuple Element datum)  -- Elements with their data
-  -> Array (Attribute datum)       -- Attributes to transition to
+  -> Array (Tuple Element datum) -- Elements with their data
+  -> Array (Attribute datum) -- Attributes to transition to
   -> Effect Unit
 applyTransitionToElements config elementDatumPairs attrs = do
   let Milliseconds duration = config.duration
@@ -1005,8 +1035,8 @@ applyTransitionToElements config elementDatumPairs attrs = do
 applyExitTransitionToElements
   :: forall datum
    . TransitionConfig
-  -> Array (Tuple Element datum)  -- Elements with their data
-  -> Array (Attribute datum)       -- Attributes to transition to before removal
+  -> Array (Tuple Element datum) -- Elements with their data
+  -> Array (Attribute datum) -- Attributes to transition to before removal
   -> Effect Unit
 applyExitTransitionToElements config elementDatumPairs attrs = do
   let Milliseconds duration = config.duration
@@ -1037,9 +1067,11 @@ getExitingElementDatumPairs
    . Selection SExiting Element datum
   -> Array (Tuple Element datum)
 getExitingElementDatumPairs (Selection impl) =
-  let { elements, data: datumArray } = unsafePartial case impl of
-        ExitingSelection r -> r
-  in Array.zipWith Tuple elements datumArray
+  let
+    { elements, data: datumArray } = unsafePartial case impl of
+      ExitingSelection r -> r
+  in
+    Array.zipWith Tuple elements datumArray
 
 -- | Extract element-datum pairs from a bound selection
 getBoundElementDatumPairs
@@ -1047,9 +1079,11 @@ getBoundElementDatumPairs
    . Selection SBoundOwns Element datum
   -> Array (Tuple Element datum)
 getBoundElementDatumPairs (Selection impl) =
-  let { elements, data: datumArray } = unsafePartial case impl of
-        BoundSelection r -> r
-  in Array.zipWith Tuple elements datumArray
+  let
+    { elements, data: datumArray } = unsafePartial case impl of
+      BoundSelection r -> r
+  in
+    Array.zipWith Tuple elements datumArray
 
 -- ============================================================================
 -- Declarative Tree Rendering
@@ -1059,7 +1093,7 @@ getBoundElementDatumPairs (Selection impl) =
 -- | Returns the created element and accumulated selections map
 renderNodeHelper
   :: forall p pd d
-   . Ord d  -- Needed for joinData
+   . Ord d -- Needed for joinData
   => Selection SEmpty p pd
   -> Tree d
   -> Effect (Tuple Element (Map String (Selection SBoundOwns Element d)))
@@ -1069,20 +1103,22 @@ renderNodeHelper parentSel (Node node) = do
 
   -- Get the first element from the created selection
   let Selection impl = childSel
-  let element = case impl of
-        EmptySelection rec -> case Array.head rec.parentElements of
-          Just el -> el
-          Nothing -> unsafePartial $ unsafeCrashWith "renderTree: appendChild returned empty selection"
-        _ -> unsafePartial $ unsafeCrashWith "renderTree: appendChild should return EmptySelection"
+  let
+    element = case impl of
+      EmptySelection rec -> case Array.head rec.parentElements of
+        Just el -> el
+        Nothing -> unsafePartial $ unsafeCrashWith "renderTree: appendChild returned empty selection"
+      _ -> unsafePartial $ unsafeCrashWith "renderTree: appendChild should return EmptySelection"
 
   -- Recursively render children
   childMaps <- traverse (renderNodeHelper childSel) node.children
   let combinedChildMap = Array.foldl Map.union Map.empty (map snd childMaps)
 
   -- Add this node to the map if it has a name
-  let selectionsMap = case node.name of
-        Just name -> Map.insert name (unsafeCoerce childSel :: Selection SBoundOwns Element d) combinedChildMap
-        Nothing -> combinedChildMap
+  let
+    selectionsMap = case node.name of
+      Just name -> Map.insert name (unsafeCoerce childSel :: Selection SBoundOwns Element d) combinedChildMap
+      Nothing -> combinedChildMap
 
   pure $ Tuple element selectionsMap
 
@@ -1098,16 +1134,19 @@ renderNodeHelper parentSel (Join joinSpec) = do
   let Selection updateImpl = updateSel
   let Selection exitImpl = exitSel
   liftEffect $ do
-    let enterCount = case enterImpl of
-          PendingSelection rec -> Array.length rec.pendingData
-          _ -> 0
-    let updateCount = case updateImpl of
-          BoundSelection rec -> Array.length rec.data
-          _ -> 0
-    let exitCount = case exitImpl of
-          BoundSelection rec -> Array.length rec.data
-          ExitingSelection rec -> Array.length rec.data
-          _ -> 0
+    let
+      enterCount = case enterImpl of
+        PendingSelection rec -> Array.length rec.pendingData
+        _ -> 0
+    let
+      updateCount = case updateImpl of
+        BoundSelection rec -> Array.length rec.data
+        _ -> 0
+    let
+      exitCount = case exitImpl of
+        BoundSelection rec -> Array.length rec.data
+        ExitingSelection rec -> Array.length rec.data
+        _ -> 0
     log $ "Tree API Join '" <> joinSpec.name <> "': enter=" <> show enterCount <> ", update=" <> show updateCount <> ", exit=" <> show exitCount
 
   -- 2. Handle EXIT: remove exiting elements
@@ -1136,34 +1175,39 @@ renderNodeHelper parentSel (Join joinSpec) = do
   let Selection updateImpl = updateSel
 
   -- Extract document from whichever selection is non-empty
-  let doc = unsafePartial case enterImpl of
-        PendingSelection rec -> rec.document
-        _ -> case updateImpl of
-          BoundSelection rec -> rec.document
+  let
+    doc = unsafePartial case enterImpl of
+      PendingSelection rec -> rec.document
+      _ -> case updateImpl of
+        BoundSelection rec -> rec.document
 
   -- Extract data arrays
-  let allData = unsafePartial case enterImpl of
-        PendingSelection rec -> rec.pendingData
-        _ -> []
-  let updateData = unsafePartial case updateImpl of
-        BoundSelection rec -> rec.data
-        _ -> []
+  let
+    allData = unsafePartial case enterImpl of
+      PendingSelection rec -> rec.pendingData
+      _ -> []
+  let
+    updateData = unsafePartial case updateImpl of
+      BoundSelection rec -> rec.data
+      _ -> []
 
   -- 7. Create a bound selection from all elements (enter + update)
-  let boundSel = Selection $ BoundSelection
-        { elements: allElements
-        , data: allData <> updateData
-        , indices: Just (Array.range 0 (Array.length allElements - 1))
-        , document: doc
-        }
+  let
+    boundSel = Selection $ BoundSelection
+      { elements: allElements
+      , data: allData <> updateData
+      , indices: Just (Array.range 0 (Array.length allElements - 1))
+      , document: doc
+      }
 
   -- 8. Add the join's collection to the selections map
   let selectionsMap = Map.insert joinSpec.name (unsafeCoerce boundSel) combinedChildMap
 
   -- 9. Get first element for return value
-  let firstElement = case Array.head allElements of
-        Just el -> el
-        Nothing -> unsafePartial $ unsafeCrashWith "renderTree Join: no elements created"
+  let
+    firstElement = case Array.head allElements of
+      Just el -> el
+      Nothing -> unsafePartial $ unsafeCrashWith "renderTree Join: no elements created"
 
   pure $ Tuple firstElement selectionsMap
 
@@ -1186,24 +1230,27 @@ renderNodeHelper parentSel (NestedJoin joinSpec) = do
 
   -- 3. Get the data array and document from enter selection
   let Selection enterImpl = enterSel
-  let { pendingData, document: doc } = unsafePartial case enterImpl of
-        PendingSelection rec -> rec
+  let
+    { pendingData, document: doc } = unsafePartial case enterImpl of
+      PendingSelection rec -> rec
 
   -- 4. Create a bound selection from the rendered elements
-  let boundSel = Selection $ BoundSelection
-        { elements
-        , data: pendingData
-        , indices: Just (Array.range 0 (Array.length elements - 1))
-        , document: doc
-        }
+  let
+    boundSel = Selection $ BoundSelection
+      { elements
+      , data: pendingData
+      , indices: Just (Array.range 0 (Array.length elements - 1))
+      , document: doc
+      }
 
   -- 5. Add the join's collection to the selections map
   let selectionsMap = Map.insert joinSpec.name (unsafeCoerce boundSel) combinedChildMap
 
   -- 6. Get first element for return value
-  let firstElement = case Array.head elements of
-        Just el -> el
-        Nothing -> unsafePartial $ unsafeCrashWith "renderTree NestedJoin: no elements created"
+  let
+    firstElement = case Array.head elements of
+      Just el -> el
+      Nothing -> unsafePartial $ unsafeCrashWith "renderTree NestedJoin: no elements created"
 
   pure $ Tuple firstElement selectionsMap
 
@@ -1218,16 +1265,19 @@ renderNodeHelper parentSel (SceneJoin joinSpec) = do
   let Selection updateImpl = updateSel
   let Selection exitImpl = exitSel
   liftEffect $ do
-    let enterCount = case enterImpl of
-          PendingSelection rec -> Array.length rec.pendingData
-          _ -> 0
-    let updateCount = case updateImpl of
-          BoundSelection rec -> Array.length rec.data
-          _ -> 0
-    let exitCount = case exitImpl of
-          BoundSelection rec -> Array.length rec.data
-          ExitingSelection rec -> Array.length rec.data
-          _ -> 0
+    let
+      enterCount = case enterImpl of
+        PendingSelection rec -> Array.length rec.pendingData
+        _ -> 0
+    let
+      updateCount = case updateImpl of
+        BoundSelection rec -> Array.length rec.data
+        _ -> 0
+    let
+      exitCount = case exitImpl of
+        BoundSelection rec -> Array.length rec.data
+        ExitingSelection rec -> Array.length rec.data
+        _ -> 0
     log $ "Tree API SceneJoin '" <> joinSpec.name <> "': enter=" <> show enterCount <> ", update=" <> show updateCount <> ", exit=" <> show exitCount
 
   -- 2. Handle EXIT with behavior
@@ -1267,9 +1317,10 @@ renderNodeHelper parentSel (SceneJoin joinSpec) = do
     Just enterBehavior -> do
       -- Modify template: append initialAttrs so they override template attrs
       -- (last occurrence of an attribute wins when applied to DOM)
-      let modifiedTemplate datum = case joinSpec.template datum of
-            Node nodeSpec -> Node nodeSpec { attrs = nodeSpec.attrs <> enterBehavior.initialAttrs }
-            other -> other  -- For non-Node trees, can't modify attrs easily
+      let
+        modifiedTemplate datum = case joinSpec.template datum of
+          Node nodeSpec -> Node nodeSpec { attrs = nodeSpec.attrs <> enterBehavior.initialAttrs }
+          other -> other -- For non-Node trees, can't modify attrs easily
 
       -- Render with modified template (elements start with initialAttrs)
       rendered <- renderTemplatesForPendingSelection modifiedTemplate enterSel
@@ -1279,15 +1330,17 @@ renderNodeHelper parentSel (SceneJoin joinSpec) = do
         Just transConfig -> do
           let enterElements = map fst rendered
           let Selection pendImpl = enterSel
-          let pendingData = unsafePartial case pendImpl of
-                PendingSelection rec -> rec.pendingData
+          let
+            pendingData = unsafePartial case pendImpl of
+              PendingSelection rec -> rec.pendingData
           let pairs = Array.zipWith Tuple enterElements pendingData
           -- For each element, extract final attrs from original template and animate to them
           liftEffect $ pairs # traverse_ \(Tuple element datum) -> do
-            let finalAttrs = case joinSpec.template datum of
-                  Node nodeSpec -> nodeSpec.attrs
-                  _ -> []  -- Non-Node templates don't have attrs
-            applyTransitionToElements transConfig [Tuple element datum] finalAttrs
+            let
+              finalAttrs = case joinSpec.template datum of
+                Node nodeSpec -> nodeSpec.attrs
+                _ -> [] -- Non-Node templates don't have attrs
+            applyTransitionToElements transConfig [ Tuple element datum ] finalAttrs
         Nothing -> pure unit
 
       pure rendered
@@ -1330,33 +1383,38 @@ renderNodeHelper parentSel (SceneJoin joinSpec) = do
   let Selection enterImpl = enterSel
   let Selection updateImpl = updateSel
 
-  let doc = unsafePartial case enterImpl of
-        PendingSelection rec -> rec.document
-        _ -> case updateImpl of
-          BoundSelection rec -> rec.document
+  let
+    doc = unsafePartial case enterImpl of
+      PendingSelection rec -> rec.document
+      _ -> case updateImpl of
+        BoundSelection rec -> rec.document
 
-  let allData = unsafePartial case enterImpl of
-        PendingSelection rec -> rec.pendingData
-        _ -> []
-  let updateData = unsafePartial case updateImpl of
-        BoundSelection rec -> rec.data
-        _ -> []
+  let
+    allData = unsafePartial case enterImpl of
+      PendingSelection rec -> rec.pendingData
+      _ -> []
+  let
+    updateData = unsafePartial case updateImpl of
+      BoundSelection rec -> rec.data
+      _ -> []
 
   -- 7. Create a bound selection from all elements (enter + update)
-  let boundSel = Selection $ BoundSelection
-        { elements: allElements
-        , data: allData <> updateData
-        , indices: Just (Array.range 0 (Array.length allElements - 1))
-        , document: doc
-        }
+  let
+    boundSel = Selection $ BoundSelection
+      { elements: allElements
+      , data: allData <> updateData
+      , indices: Just (Array.range 0 (Array.length allElements - 1))
+      , document: doc
+      }
 
   -- 8. Add the join's collection to the selections map
   let selectionsMap = Map.insert joinSpec.name (unsafeCoerce boundSel) combinedChildMap
 
   -- 9. Get first element for return value
-  let firstElement = case Array.head allElements of
-        Just el -> el
-        Nothing -> unsafePartial $ unsafeCrashWith "renderTree SceneJoin: no elements created"
+  let
+    firstElement = case Array.head allElements of
+      Just el -> el
+      Nothing -> unsafePartial $ unsafeCrashWith "renderTree SceneJoin: no elements created"
 
   pure $ Tuple firstElement selectionsMap
 
@@ -1366,8 +1424,9 @@ renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
   --    joinSpec.joinData :: Array outerDatum
   --    joinSpec.decompose :: outerDatum -> Array innerDatum
   --    We need to flatten: Array outerDatum -> Array (Array innerDatum) -> Array innerDatum
-  let innerData :: Array _ -- Type is erased, but logically Array innerDatum
-      innerData = join $ map (unsafeCoerce joinSpec.decompose) joinSpec.joinData
+  let
+    innerData :: Array _ -- Type is erased, but logically Array innerDatum
+    innerData = join $ map (unsafeCoerce joinSpec.decompose) joinSpec.joinData
 
   -- 2. Perform data join on the INNER data (enter/update/exit)
   --    IMPORTANT: We use joinDataWithKey with JSON stringify because types are erased.
@@ -1379,18 +1438,21 @@ renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
   -- Log join results (extract counts from selection implementations)
   liftEffect $ do
     let Selection enterImpl = unsafeCoerce enterSel
-    let enterCount = case enterImpl of
-          PendingSelection rec -> Array.length rec.pendingData
-          _ -> 0
+    let
+      enterCount = case enterImpl of
+        PendingSelection rec -> Array.length rec.pendingData
+        _ -> 0
     let Selection updateImpl = unsafeCoerce updateSel
-    let updateCount = case updateImpl of
-          BoundSelection rec -> Array.length rec.data
-          _ -> 0
+    let
+      updateCount = case updateImpl of
+        BoundSelection rec -> Array.length rec.data
+        _ -> 0
     let Selection exitImpl = unsafeCoerce exitSel
-    let exitCount = case exitImpl of
-          BoundSelection rec -> Array.length rec.data
-          ExitingSelection rec -> Array.length rec.data
-          _ -> 0
+    let
+      exitCount = case exitImpl of
+        BoundSelection rec -> Array.length rec.data
+        ExitingSelection rec -> Array.length rec.data
+        _ -> 0
     log $ "Tree API SceneNestedJoin '" <> joinSpec.name <> "': enter=" <> show enterCount <> ", update=" <> show updateCount <> ", exit=" <> show exitCount
 
   -- 3. Handle EXIT with behavior
@@ -1435,9 +1497,10 @@ renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
     Just enterBehavior -> do
       -- Modify template: append initialAttrs so they override template attrs
       -- (last occurrence of an attribute wins when applied to DOM)
-      let modifiedTemplate datum = case (unsafeCoerce joinSpec.template) datum of
-            Node nodeSpec -> Node nodeSpec { attrs = nodeSpec.attrs <> (unsafeCoerce enterBehavior.initialAttrs) }
-            other -> other
+      let
+        modifiedTemplate datum = case (unsafeCoerce joinSpec.template) datum of
+          Node nodeSpec -> Node nodeSpec { attrs = nodeSpec.attrs <> (unsafeCoerce enterBehavior.initialAttrs) }
+          other -> other
       rendered <- renderTemplatesForPendingSelection modifiedTemplate enterSel
 
       -- Apply enter transition to animate from initialAttrs to final template attrs
@@ -1445,15 +1508,17 @@ renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
         Just transConfig -> do
           let enterElements = map fst rendered
           let Selection pendImpl = enterSel
-          let pendingData = unsafePartial case pendImpl of
-                PendingSelection rec -> rec.pendingData
+          let
+            pendingData = unsafePartial case pendImpl of
+              PendingSelection rec -> rec.pendingData
           let pairs = Array.zipWith Tuple enterElements pendingData
           -- For each element, extract final attrs from original template and animate to them
           liftEffect $ pairs # traverse_ \(Tuple element datum) -> do
-            let finalAttrs = case (unsafeCoerce joinSpec.template) datum of
-                  Node nodeSpec -> nodeSpec.attrs
-                  _ -> []
-            applyTransitionToElements transConfig [Tuple element datum] finalAttrs
+            let
+              finalAttrs = case (unsafeCoerce joinSpec.template) datum of
+                Node nodeSpec -> nodeSpec.attrs
+                _ -> []
+            applyTransitionToElements transConfig [ Tuple element datum ] finalAttrs
         Nothing -> pure unit
 
       pure rendered
@@ -1477,37 +1542,42 @@ renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
     Nothing -> renderTemplatesForBoundSelection (unsafeCoerce joinSpec.template) updateSel
 
   -- 6-9. Combine results (same as SceneJoin)
-  let enterElements = map fst enterElementsAndMaps
-      updateElements = map fst updateElementsAndMaps
-      allElements = enterElements <> updateElements
+  let
+    enterElements = map fst enterElementsAndMaps
+    updateElements = map fst updateElementsAndMaps
+    allElements = enterElements <> updateElements
 
-  let enterChildMaps = map snd enterElementsAndMaps
-      updateChildMaps = map snd updateElementsAndMaps
-      allChildMaps = enterChildMaps <> updateChildMaps
-      combinedChildMap = Array.foldl Map.union Map.empty allChildMaps
+  let
+    enterChildMaps = map snd enterElementsAndMaps
+    updateChildMaps = map snd updateElementsAndMaps
+    allChildMaps = enterChildMaps <> updateChildMaps
+    combinedChildMap = Array.foldl Map.union Map.empty allChildMaps
 
   -- Get document from selections
   let Selection enterImpl = unsafeCoerce enterSel
   let Selection updateImpl = unsafeCoerce updateSel
 
-  let doc = unsafePartial case enterImpl of
-        PendingSelection rec -> rec.document
-        _ -> case updateImpl of
-          BoundSelection rec -> rec.document
+  let
+    doc = unsafePartial case enterImpl of
+      PendingSelection rec -> rec.document
+      _ -> case updateImpl of
+        BoundSelection rec -> rec.document
 
   -- Create bound selection from all elements
-  let boundSel = Selection $ BoundSelection
-        { elements: allElements
-        , data: innerData
-        , indices: Just (Array.range 0 (Array.length allElements - 1))
-        , document: doc
-        }
+  let
+    boundSel = Selection $ BoundSelection
+      { elements: allElements
+      , data: innerData
+      , indices: Just (Array.range 0 (Array.length allElements - 1))
+      , document: doc
+      }
 
   let selectionsMap = Map.insert joinSpec.name (unsafeCoerce boundSel) combinedChildMap
 
-  let firstElement = case Array.head allElements of
-        Just el -> el
-        Nothing -> unsafePartial $ unsafeCrashWith "renderTree SceneNestedJoin: no elements created"
+  let
+    firstElement = case Array.head allElements of
+      Just el -> el
+      Nothing -> unsafePartial $ unsafeCrashWith "renderTree SceneNestedJoin: no elements created"
 
   pure $ Tuple firstElement selectionsMap
 
@@ -1520,46 +1590,52 @@ renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
 renderNestedTemplatesForPendingSelection
   :: forall outerDatum innerDatum parent
    . Ord innerDatum
-  => (outerDatum -> Array outerDatum)  -- Decomposer (type-erased to outerDatum)
-  -> (outerDatum -> Tree outerDatum)   -- Template (type-erased to outerDatum)
-  -> ElementType                        -- Wrapper element type
-  -> Selection SPending parent outerDatum  -- Pending selection (pendingData has type Array outerDatum)
+  => (outerDatum -> Array outerDatum) -- Decomposer (type-erased to outerDatum)
+  -> (outerDatum -> Tree outerDatum) -- Template (type-erased to outerDatum)
+  -> ElementType -- Wrapper element type
+  -> Selection SPending parent outerDatum -- Pending selection (pendingData has type Array outerDatum)
   -> Effect (Array (Tuple Element (Map String (Selection SBoundOwns Element innerDatum))))
 renderNestedTemplatesForPendingSelection decomposer templateFn wrapperType pendingSel = do
   let Selection impl = pendingSel
-  let { parentElements, pendingData, document: doc } = unsafePartial case impl of
-        PendingSelection rec -> rec
+  let
+    { parentElements, pendingData, document: doc } = unsafePartial case impl of
+      PendingSelection rec -> rec
 
-  traverseWithIndex (\idx outerDatum -> do
-    let parentIdx = idx `mod` Array.length parentElements
-    case Array.index parentElements parentIdx of
-      Nothing -> unsafeCrashWith "renderNestedTemplatesForPendingSelection: no parent elements"
-      Just parent -> do
-        -- Create the wrapper element (e.g., <tr>)
-        wrapperElement <- createElementWithNS wrapperType doc
-        let wrapperNode = toNode wrapperElement
-        let parentNode = toNode parent
-        Node.appendChild wrapperNode parentNode
+  traverseWithIndex
+    ( \idx outerDatum -> do
+        let parentIdx = idx `mod` Array.length parentElements
+        case Array.index parentElements parentIdx of
+          Nothing -> unsafeCrashWith "renderNestedTemplatesForPendingSelection: no parent elements"
+          Just parent -> do
+            -- Create the wrapper element (e.g., <tr>)
+            wrapperElement <- createElementWithNS wrapperType doc
+            let wrapperNode = toNode wrapperElement
+            let parentNode = toNode parent
+            Node.appendChild wrapperNode parentNode
 
-        -- Decompose to get inner data
-        let innerDataArray = decomposer outerDatum
+            -- Decompose to get inner data
+            let innerDataArray = decomposer outerDatum
 
-        -- Render template for each inner datum
-        innerMaps <- traverse (\innerDatum -> do
-          let tree = unsafeCoerce templateFn innerDatum :: Tree innerDatum
+            -- Render template for each inner datum
+            innerMaps <- traverse
+              ( \innerDatum -> do
+                  let tree = unsafeCoerce templateFn innerDatum :: Tree innerDatum
 
-          let singleParentSel = Selection $ EmptySelection
-                { parentElements: [wrapperElement]
-                , document: doc
-                }
+                  let
+                    singleParentSel = Selection $ EmptySelection
+                      { parentElements: [ wrapperElement ]
+                      , document: doc
+                      }
 
-          Tuple _ childSelections <- renderNodeHelper singleParentSel tree
-          pure childSelections
-          ) innerDataArray
+                  Tuple _ childSelections <- renderNodeHelper singleParentSel tree
+                  pure childSelections
+              )
+              innerDataArray
 
-        let combinedInnerMap = Array.foldl Map.union Map.empty innerMaps
-        pure $ Tuple wrapperElement combinedInnerMap
-    ) pendingData
+            let combinedInnerMap = Array.foldl Map.union Map.empty innerMaps
+            pure $ Tuple wrapperElement combinedInnerMap
+    )
+    pendingData
 
 -- | Helper: Render templates for each datum in a pending selection
 -- |
@@ -1569,42 +1645,46 @@ renderNestedTemplatesForPendingSelection decomposer templateFn wrapperType pendi
 -- | 3. Return the element and its child selections
 renderTemplatesForPendingSelection
   :: forall datum parent
-   . Ord datum  -- Needed for recursive renderNodeHelper calls
-  => (datum -> Tree datum)  -- Template function
-  -> Selection SPending parent datum  -- Pending selection from join (pendingData has type Array datum)
+   . Ord datum -- Needed for recursive renderNodeHelper calls
+  => (datum -> Tree datum) -- Template function
+  -> Selection SPending parent datum -- Pending selection from join (pendingData has type Array datum)
   -> Effect (Array (Tuple Element (Map String (Selection SBoundOwns Element datum))))
 renderTemplatesForPendingSelection templateFn pendingSel = do
   -- Extract pending data from the selection
   let Selection impl = pendingSel
-  let { parentElements, pendingData, document: doc } = unsafePartial case impl of
-        PendingSelection rec -> rec
+  let
+    { parentElements, pendingData, document: doc } = unsafePartial case impl of
+      PendingSelection rec -> rec
 
   -- For each (parent, datum) pair, render the template
-  traverseWithIndex (\idx datum -> do
-    -- Get the parent element for this datum
-    -- Distribute data across parents cyclically if there are more data than parents
-    let parentIdx = idx `mod` Array.length parentElements
-    case Array.index parentElements parentIdx of
-      Nothing -> unsafeCrashWith "renderTemplatesForPendingSelection: no parent elements"
-      Just parent -> do
-        -- Build the template tree for this datum
-        let tree = templateFn datum
+  traverseWithIndex
+    ( \idx datum -> do
+        -- Get the parent element for this datum
+        -- Distribute data across parents cyclically if there are more data than parents
+        let parentIdx = idx `mod` Array.length parentElements
+        case Array.index parentElements parentIdx of
+          Nothing -> unsafeCrashWith "renderTemplatesForPendingSelection: no parent elements"
+          Just parent -> do
+            -- Build the template tree for this datum
+            let tree = templateFn datum
 
-        -- Create an empty selection for this single parent
-        let singleParentSel = Selection $ EmptySelection
-              { parentElements: [parent]
-              , document: doc
-              }
+            -- Create an empty selection for this single parent
+            let
+              singleParentSel = Selection $ EmptySelection
+                { parentElements: [ parent ]
+                , document: doc
+                }
 
-        -- Render the tree
-        Tuple element childSelections <- renderNodeHelper singleParentSel tree
+            -- Render the tree
+            Tuple element childSelections <- renderNodeHelper singleParentSel tree
 
-        -- CRITICAL: Bind the datum to the root element created by the template
-        -- This allows future joins to match this element with updated data
-        setElementData_ (unsafeCoerce datum) element
+            -- CRITICAL: Bind the datum to the root element created by the template
+            -- This allows future joins to match this element with updated data
+            setElementData_ (unsafeCoerce datum) element
 
-        pure $ Tuple element childSelections
-    ) pendingData
+            pure $ Tuple element childSelections
+    )
+    pendingData
 
 -- | Helper: Update existing elements from a template function for each datum in a bound selection
 -- |
@@ -1615,42 +1695,46 @@ renderTemplatesForPendingSelection templateFn pendingSel = do
 renderTemplatesForBoundSelection
   :: forall datum parent
    . Ord datum
-  => (datum -> Tree datum)  -- Template function
-  -> Selection SBoundOwns parent datum  -- Bound selection from join (update set)
+  => (datum -> Tree datum) -- Template function
+  -> Selection SBoundOwns parent datum -- Bound selection from join (update set)
   -> Effect (Array (Tuple Element (Map String (Selection SBoundOwns Element datum))))
 renderTemplatesForBoundSelection templateFn boundSel = do
   -- Extract elements and data from the bound selection
   let Selection impl = boundSel
-  let { elements, data: dataArray, document: doc } = unsafePartial case impl of
-        BoundSelection rec -> rec
+  let
+    { elements, data: dataArray, document: doc } = unsafePartial case impl of
+      BoundSelection rec -> rec
 
   -- For each (element, datum) pair, update the element based on template
-  traverseWithIndex (\idx datum -> do
-    case Array.index elements idx of
-      Nothing -> unsafeCrashWith "renderTemplatesForBoundSelection: index out of bounds"
-      Just element -> do
-        -- Build the template tree for this datum
-        let tree = templateFn datum
+  traverseWithIndex
+    ( \idx datum -> do
+        case Array.index elements idx of
+          Nothing -> unsafeCrashWith "renderTemplatesForBoundSelection: index out of bounds"
+          Just element -> do
+            -- Build the template tree for this datum
+            let tree = templateFn datum
 
-        -- Apply template attributes to existing element
-        -- For now, we re-render the tree structure (this updates attributes)
-        -- TODO: optimize to only update attributes without recreating structure
+            -- Apply template attributes to existing element
+            -- For now, we re-render the tree structure (this updates attributes)
+            -- TODO: optimize to only update attributes without recreating structure
 
-        -- Create a selection containing just this element
-        let elementSel = Selection $ BoundSelection
-              { elements: [element]
-              , data: [datum]
-              , indices: Just [idx]
-              , document: doc
-              }
+            -- Create a selection containing just this element
+            let
+              elementSel = Selection $ BoundSelection
+                { elements: [ element ]
+                , data: [ datum ]
+                , indices: Just [ idx ]
+                , document: doc
+                }
 
-        -- For UPDATE, we need to update the element's attributes based on the template
-        -- The template is a Tree, so we extract attribute updates from it
-        _ <- updateElementFromTree element datum idx tree doc
+            -- For UPDATE, we need to update the element's attributes based on the template
+            -- The template is a Tree, so we extract attribute updates from it
+            _ <- updateElementFromTree element datum idx tree doc
 
-        -- Return the element (unchanged) and empty child map for now
-        pure $ Tuple element Map.empty
-    ) dataArray
+            -- Return the element (unchanged) and empty child map for now
+            pure $ Tuple element Map.empty
+    )
+    dataArray
 
 -- | Helper: Update a single element's attributes from a tree template
 updateElementFromTree :: forall datum. Element -> datum -> Int -> Tree datum -> Document -> Effect Unit
@@ -1662,7 +1746,7 @@ updateElementFromTree element datum index tree doc = do
     Node nodeSpec -> do
       -- Apply each attribute from the template to the element
       applyAttributes element datum index nodeSpec.attrs
-    _ -> pure unit  -- For joins/groups, we don't update attributes directly
+    _ -> pure unit -- For joins/groups, we don't update attributes directly
 
 -- | Helper: Render children from a template function for each datum in a bound selection
 -- |
@@ -1673,35 +1757,39 @@ updateElementFromTree element datum index tree doc = do
 -- | 4. Collect all named selections from all children
 appendChildrenFromTemplate
   :: forall datum
-   . Ord datum  -- Needed for recursive renderNodeHelper calls
-  => (datum -> Tree datum)  -- Template function
-  -> Selection SBoundOwns Element datum  -- Parent selection with bound data
+   . Ord datum -- Needed for recursive renderNodeHelper calls
+  => (datum -> Tree datum) -- Template function
+  -> Selection SBoundOwns Element datum -- Parent selection with bound data
   -> Effect (Map String (Selection SBoundOwns Element datum))
 appendChildrenFromTemplate templateFn boundSel = do
   -- Extract elements and data from the bound selection
   let Selection impl = boundSel
-  let { elements, data: dataArray, document: doc } = unsafePartial case impl of
-        BoundSelection rec -> rec
+  let
+    { elements, data: dataArray, document: doc } = unsafePartial case impl of
+      BoundSelection rec -> rec
 
   -- For each (element, datum) pair, render children
-  childMaps <- traverseWithIndex (\idx datum -> do
-    -- Get the element for this datum
-    case Array.index elements idx of
-      Nothing -> pure Map.empty
-      Just element -> do
-        -- Build the template tree for this datum
-        let childTree = templateFn datum
+  childMaps <- traverseWithIndex
+    ( \idx datum -> do
+        -- Get the element for this datum
+        case Array.index elements idx of
+          Nothing -> pure Map.empty
+          Just element -> do
+            -- Build the template tree for this datum
+            let childTree = templateFn datum
 
-        -- Create an empty selection for this single element
-        let singleParentSel = Selection $ EmptySelection
-              { parentElements: [element]
-              , document: doc
-              }
+            -- Create an empty selection for this single element
+            let
+              singleParentSel = Selection $ EmptySelection
+                { parentElements: [ element ]
+                , document: doc
+                }
 
-        -- Render the child tree
-        Tuple _ childSelections <- renderNodeHelper singleParentSel childTree
-        pure childSelections
-    ) dataArray
+            -- Render the child tree
+            Tuple _ childSelections <- renderNodeHelper singleParentSel childTree
+            pure childSelections
+    )
+    dataArray
 
   -- Combine all the child selection maps
   pure $ Array.foldl Map.union Map.empty childMaps
@@ -1716,45 +1804,51 @@ appendChildrenFromTemplate templateFn boundSel = do
 -- | 5. Collect all named selections from all children
 appendChildrenFromNestedTemplate
   :: forall outerDatum innerDatum
-   . Ord innerDatum  -- Needed for recursive renderNodeHelper calls
-  => (outerDatum -> Array innerDatum)  -- Decomposer function
-  -> (innerDatum -> Tree innerDatum)    -- Template function
-  -> Selection SBoundOwns Element outerDatum  -- Parent selection with outer data
+   . Ord innerDatum -- Needed for recursive renderNodeHelper calls
+  => (outerDatum -> Array innerDatum) -- Decomposer function
+  -> (innerDatum -> Tree innerDatum) -- Template function
+  -> Selection SBoundOwns Element outerDatum -- Parent selection with outer data
   -> Effect (Map String (Selection SBoundOwns Element innerDatum))
 appendChildrenFromNestedTemplate decomposer templateFn boundSel = do
   -- Extract elements and data from the bound selection
   let Selection impl = boundSel
-  let { elements, data: outerDataArray, document: doc } = unsafePartial case impl of
-        BoundSelection rec -> rec
+  let
+    { elements, data: outerDataArray, document: doc } = unsafePartial case impl of
+      BoundSelection rec -> rec
 
   -- For each (element, outerDatum) pair, decompose and render inner children
-  childMaps <- traverseWithIndex (\idx outerDatum -> do
-    -- Get the element for this outer datum
-    case Array.index elements idx of
-      Nothing -> pure Map.empty
-      Just element -> do
-        -- Decompose outer datum to get inner data
-        let innerDataArray = decomposer outerDatum
+  childMaps <- traverseWithIndex
+    ( \idx outerDatum -> do
+        -- Get the element for this outer datum
+        case Array.index elements idx of
+          Nothing -> pure Map.empty
+          Just element -> do
+            -- Decompose outer datum to get inner data
+            let innerDataArray = decomposer outerDatum
 
-        -- For each inner datum, render the template
-        innerMaps <- traverse (\innerDatum -> do
-          -- Build the template tree for this inner datum
-          let childTree = templateFn innerDatum
+            -- For each inner datum, render the template
+            innerMaps <- traverse
+              ( \innerDatum -> do
+                  -- Build the template tree for this inner datum
+                  let childTree = templateFn innerDatum
 
-          -- Create an empty selection for this single element
-          let singleParentSel = Selection $ EmptySelection
-                { parentElements: [element]
-                , document: doc
-                }
+                  -- Create an empty selection for this single element
+                  let
+                    singleParentSel = Selection $ EmptySelection
+                      { parentElements: [ element ]
+                      , document: doc
+                      }
 
-          -- Render the child tree
-          Tuple _ childSelections <- renderNodeHelper singleParentSel childTree
-          pure childSelections
-          ) innerDataArray
+                  -- Render the child tree
+                  Tuple _ childSelections <- renderNodeHelper singleParentSel childTree
+                  pure childSelections
+              )
+              innerDataArray
 
-        -- Combine selections from all inner items
-        pure $ Array.foldl Map.union Map.empty innerMaps
-    ) outerDataArray
+            -- Combine selections from all inner items
+            pure $ Array.foldl Map.union Map.empty innerMaps
+    )
+    outerDataArray
 
   -- Combine all the child selection maps
   pure $ Array.foldl Map.union Map.empty childMaps
@@ -1765,7 +1859,7 @@ appendChildrenFromNestedTemplate decomposer templateFn boundSel = do
 -- | This is the core implementation of the declarative API.
 renderTree
   :: forall parent parentDatum datum
-   . Ord datum  -- Needed for data joins
+   . Ord datum -- Needed for data joins
   => Selection SEmpty parent parentDatum
   -> Tree datum
   -> Effect (Map String (Selection SBoundOwns Element datum))
@@ -1789,7 +1883,7 @@ renderTree parent tree = do
 -- | If the named selection is not found, returns an empty selection.
 reselect
   :: forall datum datumOut
-   . String  -- Name of the selection to extract
+   . String -- Name of the selection to extract
   -> Map String (Selection SBoundOwns Element datum)
   -> Effect (Selection SEmpty Element datumOut)
 reselect name selectionsMap = do
@@ -1799,9 +1893,10 @@ reselect name selectionsMap = do
       -- Extract the elements from the selection
       -- Note: selections in the map might be EmptySelection (from appendChild)
       -- or BoundSelection (from data joins), so we handle both
-      let elements = unsafePartial case impl of
-            BoundSelection r -> r.elements
-            EmptySelection r -> r.parentElements
+      let
+        elements = unsafePartial case impl of
+          BoundSelection r -> r.elements
+          EmptySelection r -> r.parentElements
       -- Return as empty selection (parent for next render)
       pure $ Selection $ EmptySelection
         { parentElements: elements

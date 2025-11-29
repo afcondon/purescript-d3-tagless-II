@@ -1,6 +1,6 @@
 module D3.Viz.TreeAPI.WealthHealthDraw where
 
-import Prelude
+import Prelude hiding (append)
 
 import Data.Int (floor)
 import Data.Number (log, sqrt)
@@ -21,8 +21,8 @@ type NationPoint =
   , income :: Number
   , population :: Number
   , lifeExpectancy :: Number
-  , region :: String  -- Region name for display
-  , regionColor :: String  -- Color for the region
+  , region :: String -- Region name for display
+  , regionColor :: String -- Color for the region
   }
 
 -- | Configuration for visualization dimensions and margins
@@ -50,7 +50,7 @@ scaleX :: VizConfig -> Number -> Number
 scaleX config income =
   let
     -- Logarithmic scale for income ($200 to $100,000)
-    minLog = 5.298317  -- log(200)
+    minLog = 5.298317 -- log(200)
     maxLog = 11.512925 -- log(100000)
     logIncome = if income > 0.0 then log income else minLog
     normalized = (logIncome - minLog) / (maxLog - minLog)
@@ -75,7 +75,7 @@ scaleRadius population =
     -- Square root scale for population (area proportional to population)
     minRadius = 3.0
     maxRadius = 80.0
-    maxPop = 5000000000.0  -- 5 billion
+    maxPop = 5000000000.0 -- 5 billion
     normalized = population / maxPop
     scaled = sqrt normalized * maxRadius
   in
@@ -89,10 +89,10 @@ formatIncome value
 
 -- | Tick values for axes
 xTicks :: Array Number
-xTicks = [200.0, 500.0, 1000.0, 2000.0, 5000.0, 10000.0, 20000.0, 50000.0, 100000.0]
+xTicks = [ 200.0, 500.0, 1000.0, 2000.0, 5000.0, 10000.0, 20000.0, 50000.0, 100000.0 ]
 
 yTicks :: Array Number
-yTicks = [20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0]
+yTicks = [ 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0 ]
 
 -- | Build vertical grid line
 verticalGridLine :: VizConfig -> Number -> Tree NationPoint
@@ -168,133 +168,146 @@ initWealthHealth selector = runD3v2M do
   let config = defaultConfig
 
   -- Build the static visualization tree (without data-bound circles)
-  let staticTree :: Tree NationPoint
-      staticTree =
-        T.named SVG "svg"
-          [ width config.width
-          , height config.height
-          , viewBox ("0 0 " <> show config.width <> " " <> show config.height)
-          , class_ "wealth-health-viz"
+  let
+    staticTree :: Tree NationPoint
+    staticTree =
+      T.named SVG "svg"
+        [ width config.width
+        , height config.height
+        , viewBox ("0 0 " <> show config.width <> " " <> show config.height)
+        , class_ "wealth-health-viz"
+        ]
+        `T.withChildren`
+          [ -- Grid lines
+            T.named Group "grid"
+              [ stroke "currentColor"
+              , strokeOpacity 0.1
+              ]
+              `T.withChildren`
+                ( map (verticalGridLine config) xTicks <>
+                    map (horizontalGridLine config) yTicks
+                )
+
+          -- X-axis
+          , T.named Group "x-axis" []
+              `T.withChildren`
+                [ T.elem Line
+                    [ x1 config.marginLeft
+                    , y1 (config.height - config.marginBottom)
+                    , x2 (config.width - config.marginRight)
+                    , y2 (config.height - config.marginBottom)
+                    , stroke "#333"
+                    , strokeWidth 1.5
+                    ]
+                ]
+
+          -- X-axis ticks
+          , T.named Group "x-ticks" []
+              `T.withChildren` map (xAxisTick config) xTicks
+
+          -- X-axis label
+          , T.elem Text
+              [ x (config.width / 2.0)
+              , y (config.height - 5.0)
+              , textAnchor "middle"
+              , fontSize 14.0
+              , fill "#333"
+              , textContent "Income per Person (GDP/capita, PPP$ inflation-adjusted)"
+              ]
+
+          -- Y-axis
+          , T.named Group "y-axis" []
+              `T.withChildren`
+                [ T.elem Line
+                    [ x1 config.marginLeft
+                    , y1 config.marginTop
+                    , x2 config.marginLeft
+                    , y2 (config.height - config.marginBottom)
+                    , stroke "#333"
+                    , strokeWidth 1.5
+                    ]
+                ]
+
+          -- Y-axis ticks
+          , T.named Group "y-ticks" []
+              `T.withChildren` map (yAxisTick config) yTicks
+
+          -- Y-axis label
+          , T.elem Text
+              [ x 15.0
+              , y (config.height / 2.0)
+              , textAnchor "middle"
+              , fontSize 14.0
+              , fill "#333"
+              , textContent "Life Expectancy (years)"
+              ]
+
+          -- Empty group for nations (will be populated by update function)
+          , T.named Group "nations-container" [ class_ "nations" ] `T.withChildren` []
           ]
-          `T.withChildren`
-            [ -- Grid lines
-              T.named Group "grid"
-                [ stroke "currentColor"
-                , strokeOpacity 0.1
-                ]
-                `T.withChildren`
-                  (map (verticalGridLine config) xTicks <>
-                   map (horizontalGridLine config) yTicks)
-
-            -- X-axis
-            , T.named Group "x-axis" []
-                `T.withChildren`
-                  [ T.elem Line
-                      [ x1 config.marginLeft
-                      , y1 (config.height - config.marginBottom)
-                      , x2 (config.width - config.marginRight)
-                      , y2 (config.height - config.marginBottom)
-                      , stroke "#333"
-                      , strokeWidth 1.5
-                      ]
-                  ]
-
-            -- X-axis ticks
-            , T.named Group "x-ticks" []
-                `T.withChildren` map (xAxisTick config) xTicks
-
-            -- X-axis label
-            , T.elem Text
-                [ x (config.width / 2.0)
-                , y (config.height - 5.0)
-                , textAnchor "middle"
-                , fontSize 14.0
-                , fill "#333"
-                , textContent "Income per Person (GDP/capita, PPP$ inflation-adjusted)"
-                ]
-
-            -- Y-axis
-            , T.named Group "y-axis" []
-                `T.withChildren`
-                  [ T.elem Line
-                      [ x1 config.marginLeft
-                      , y1 config.marginTop
-                      , x2 config.marginLeft
-                      , y2 (config.height - config.marginBottom)
-                      , stroke "#333"
-                      , strokeWidth 1.5
-                      ]
-                  ]
-
-            -- Y-axis ticks
-            , T.named Group "y-ticks" []
-                `T.withChildren` map (yAxisTick config) yTicks
-
-            -- Y-axis label
-            , T.elem Text
-                [ x 15.0
-                , y (config.height / 2.0)
-                , textAnchor "middle"
-                , fontSize 14.0
-                , fill "#333"
-                , textContent "Life Expectancy (years)"
-                ]
-
-            -- Empty group for nations (will be populated by update function)
-            , T.named Group "nations-container" [ class_ "nations" ] `T.withChildren` []
-            ]
 
   -- Render the static structure
   _ <- renderTree container staticTree
 
   -- Return the update function
   pure $ \nations -> runD3v2M do
-      -- Select the nations container
-      nationsContainer <- select "#wealth-health-viz .nations" :: _ (D3v2Selection_ SEmpty Element Unit)
+    -- Select the nations container
+    nationsContainer <- select "#wealth-health-viz .nations" :: _ (D3v2Selection_ SEmpty Element Unit)
 
-      -- Data join using Selection API with nation name as key
-      JoinResult { enter, update: updateSel, exit } <- joinDataWithKey nations (_.name) "circle" nationsContainer
+    -- Data join using Selection API with nation name as key
+    JoinResult { enter, update: updateSel, exit } <- joinDataWithKey nations (_.name) "circle" nationsContainer
 
-      -- Attributes for circles (using datum-only functions with explicit types)
-      let circleAttrs :: Array (Attribute NationPoint)
-          circleAttrs =
-            [ cx ((\n -> scaleX config n.income) :: NationPoint -> Number)
-            , cy ((\n -> scaleY config n.lifeExpectancy) :: NationPoint -> Number)
-            , radius ((\n -> scaleRadius n.population) :: NationPoint -> Number)
-            , fill ((_.regionColor) :: NationPoint -> String)
-            , fillOpacity 0.7
-            , stroke "#333"
-            , strokeWidth 0.5
-            , class_ "nation-circle"
-            ]
+    -- Attributes for circles (using datum-only functions with explicit types)
+    let
+      circleAttrs :: Array (Attribute NationPoint)
+      circleAttrs =
+        [ cx ((\n -> scaleX config n.income) :: NationPoint -> Number)
+        , cy ((\n -> scaleY config n.lifeExpectancy) :: NationPoint -> Number)
+        , radius ((\n -> scaleRadius n.population) :: NationPoint -> Number)
+        , fill ((_.regionColor) :: NationPoint -> String)
+        , fillOpacity 0.7
+        , stroke "#333"
+        , strokeWidth 0.5
+        , class_ "nation-circle"
+        ]
 
-      -- Handle enter: create new circles
-      enterCircles <- append Circle circleAttrs enter
+    -- Handle enter: create new circles
+    enterCircles <- append Circle circleAttrs enter
 
-      -- Handle update: update existing circles
-      _ <- setAttrs circleAttrs updateSel
+    -- Handle update: update existing circles
+    _ <- setAttrs circleAttrs updateSel
 
-      -- Handle exit: remove old circles
-      remove exit
+    -- Handle exit: remove old circles
+    remove exit
 
-      -- Merge enter and update for tooltips
-      merged <- merge enterCircles updateSel
+    -- Merge enter and update for tooltips
+    merged <- merge enterCircles updateSel
 
-      -- Add tooltips to all circles
-      _ <- on (onMouseEnterWithInfo \(info :: MouseEventInfo NationPoint) -> do
-        let nation = info.datum
-        let content = "<strong>" <> nation.name <> "</strong><br/>"
-                   <> "Region: " <> nation.region <> "<br/>"
-                   <> "Income: $" <> show (floor nation.income) <> "<br/>"
-                   <> "Life Expectancy: " <> show (floor nation.lifeExpectancy) <> " years<br/>"
-                   <> "Population: " <> formatPopulation nation.population
-        showTooltip content info.clientX info.clientY
-        ) merged
+    -- Add tooltips to all circles
+    _ <- on
+      ( onMouseEnterWithInfo \(info :: MouseEventInfo NationPoint) -> do
+          let nation = info.datum
+          let
+            content = "<strong>" <> nation.name <> "</strong><br/>"
+              <> "Region: "
+              <> nation.region
+              <> "<br/>"
+              <> "Income: $"
+              <> show (floor nation.income)
+              <> "<br/>"
+              <> "Life Expectancy: "
+              <> show (floor nation.lifeExpectancy)
+              <> " years<br/>"
+              <> "Population: "
+              <> formatPopulation nation.population
+          showTooltip content info.clientX info.clientY
+      )
+      merged
 
-      -- Hide tooltip on leave
-      _ <- on (onMouseLeaveWithInfo \(_ :: MouseEventInfo NationPoint) -> hideTooltip) merged
+    -- Hide tooltip on leave
+    _ <- on (onMouseLeaveWithInfo \(_ :: MouseEventInfo NationPoint) -> hideTooltip) merged
 
-      pure unit
+    pure unit
 
 -- | Format population for display
 formatPopulation :: Number -> String

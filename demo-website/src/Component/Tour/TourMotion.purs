@@ -27,6 +27,8 @@ import D3.Viz.AnimatedTreeClusterLoop as AnimatedTreeLoop
 import D3.Viz.TreeAPI.StaggeredCircles as StaggeredCircles
 import D3.Viz.LesMisV3.Model as LesMisModel
 import D3.Viz.LesMisV3.Draw as LesMisDraw
+import D3.Viz.LesMisV3.GUPDemo as GUPDemo
+import Effect.Ref (Ref)
 import Data.Array (catMaybes)
 import Data.String.CodeUnits (toCharArray)
 import Data.Traversable (sequence)
@@ -41,15 +43,24 @@ type State =
                                  , circlesSel :: D3v2Selection_ SBoundOwns Element ThreeLittleCirclesTransition.CircleData }
   , staggeredTrigger :: Maybe { trigger :: Effect Unit, reset :: Effect Unit }
   , lesMisCleanup :: Maybe (Effect Unit)
+  , lesMisGUPState :: Maybe (Ref GUPDemo.LesMisGUPState)
   }
 
 -- | Tour page actions
-data Action = Initialize | Finalize | TriggerColorMixing | TriggerStaggered | ResetStaggered
+data Action
+  = Initialize
+  | Finalize
+  | TriggerColorMixing
+  | TriggerStaggered
+  | ResetStaggered
+  | AddGUPNodes
+  | RemoveGUPNodes
+  | ResetGUP
 
 -- | Tour page component
 component :: forall q i o m. MonadAff m => H.Component q i o m
 component = H.mkComponent
-  { initialState: \_ -> { gupFiber: Nothing, colorMixingTrigger: Nothing, staggeredTrigger: Nothing, lesMisCleanup: Nothing }
+  { initialState: \_ -> { gupFiber: Nothing, colorMixingTrigger: Nothing, staggeredTrigger: Nothing, lesMisCleanup: Nothing, lesMisGUPState: Nothing }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -99,6 +110,10 @@ handleAction = case _ of
         cleanup <- liftEffect $ LesMisDraw.startLesMis model "#lesmis-container"
         H.modify_ _ { lesMisCleanup = Just cleanup }
 
+        -- Render Section 6: Les Misérables with GUP (reuse same model)
+        gupState <- liftEffect $ GUPDemo.initGUPDemo model "#lesmis-gup-container"
+        H.modify_ _ { lesMisGUPState = Just gupState }
+
     pure unit
 
   Finalize -> do
@@ -130,6 +145,24 @@ handleAction = case _ of
     case state.staggeredTrigger of
       Nothing -> pure unit
       Just { reset } -> liftEffect reset
+
+  AddGUPNodes -> do
+    state <- H.get
+    case state.lesMisGUPState of
+      Nothing -> pure unit
+      Just stateRef -> liftEffect $ GUPDemo.addRandomNodes 5 stateRef
+
+  RemoveGUPNodes -> do
+    state <- H.get
+    case state.lesMisGUPState of
+      Nothing -> pure unit
+      Just stateRef -> liftEffect $ GUPDemo.removeRandomNodes 5 stateRef
+
+  ResetGUP -> do
+    state <- H.get
+    case state.lesMisGUPState of
+      Nothing -> pure unit
+      Just stateRef -> liftEffect $ GUPDemo.resetToFull stateRef
 
 -- | Choose a string of random letters (no duplicates), ordered alphabetically
 getLetters :: Effect (Array Char)
@@ -215,35 +248,14 @@ render _ =
                 ]
             ]
 
-        -- Section 3: General Update Pattern
+        -- Section 3: Animated Tree Transitions
         , HH.section
             [ HP.classes [ HH.ClassName "tutorial-section" ]
             , HP.id "section-3"
             ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "3. The General Update Pattern" ]
-            , HH.p_
-                [ HH.text "This deceptively simple example shows off an aspect of screen-based data visualization that has no analogue in paper visualizations: the ability to specify how updates to the data should be represented." ]
-            , HH.p_
-                [ HH.text "In this example, some letters of the alphabet are presented and then constantly updated. When a letter enters at first, it falls in from the top and it is green. If it's still present in the next set of letters it stays on the screen, but it turns gray and moves to an alphabetically correct new position. And if it's not present in the new data, it turns red and falls out before disappearing." ]
-            , HH.div
-                [ HP.id "gup-container"
-                , HP.classes [ HH.ClassName "viz-container" ]
-                ]
-                []
-            , HH.p_
-                [ HH.text "The example automatically cycles through random letter selections every 2 seconds, demonstrating all three parts of the pattern: green letters entering from above, gray letters sliding to new positions, and brown letters exiting below." ]
-            ]
-
-        -- Section 4: Animated Tree Transitions
-        , HH.section
-            [ HP.classes [ HH.ClassName "tutorial-section" ]
-            , HP.id "section-4"
-            ]
-            [ HH.h2
-                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "4. Animated Tree Transitions" ]
+                [ HH.text "3. Animated Tree Transitions" ]
             , HH.p_
                 [ HH.text "This demonstration shows smooth automatic transitions between Tidy Tree and Dendrogram (Cluster) layouts. The visualization automatically alternates between layouts every 3 seconds. The same 252 nodes from the Flare visualization toolkit smoothly animate to their new positions—no enter/exit, just updates." ]
             , HH.p_
@@ -260,6 +272,27 @@ render _ =
                     [ HH.text "full Animated Tree ↔ Cluster demo" ]
                 , HH.text "."
                 ]
+            ]
+
+        -- Section 4: General Update Pattern
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ]
+            , HP.id "section-4"
+            ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "4. The General Update Pattern" ]
+            , HH.p_
+                [ HH.text "This deceptively simple example shows off an aspect of screen-based data visualization that has no analogue in paper visualizations: the ability to specify how updates to the data should be represented." ]
+            , HH.p_
+                [ HH.text "In this example, some letters of the alphabet are presented and then constantly updated. When a letter enters at first, it falls in from the top and it is green. If it's still present in the next set of letters it stays on the screen, but it turns gray and moves to an alphabetically correct new position. And if it's not present in the new data, it turns red and falls out before disappearing." ]
+            , HH.div
+                [ HP.id "gup-container"
+                , HP.classes [ HH.ClassName "viz-container" ]
+                ]
+                []
+            , HH.p_
+                [ HH.text "The example automatically cycles through random letter selections every 2 seconds, demonstrating all three parts of the pattern: green letters entering from above, gray letters sliding to new positions, and brown letters exiting below." ]
             ]
 
         -- Section 5: Les Misérables Force-Directed Graph
@@ -280,6 +313,44 @@ render _ =
                 , HP.classes [ HH.ClassName "viz-container" ]
                 ]
                 []
+            ]
+
+        -- Section 6: Les Misérables with GUP transitions
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ]
+            , HP.id "section-6"
+            ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "6. Force Simulation + GUP Transitions" ]
+            , HH.p_
+                [ HH.text "This combines force simulation with the General Update Pattern. The simulation runs continuously controlling node positions, while GUP transitions animate non-positional properties when data changes: entering nodes appear green, updating nodes turn gray, and exiting nodes turn brown before removal." ]
+            , HH.p_
+                [ HH.text "Use the buttons to add/remove random nodes and observe the enter/update/exit transitions. This demonstrates how to compose continuous physics simulation with discrete data-driven transitions."
+                ]
+            , HH.div
+                [ HP.id "lesmis-gup-container"
+                , HP.classes [ HH.ClassName "viz-container" ]
+                ]
+                []
+            , HH.div
+                [ HP.classes [ HH.ClassName "button-row" ] ]
+                [ HH.button
+                    [ HP.classes [ HH.ClassName "transition-button" ]
+                    , HE.onClick \_ -> AddGUPNodes
+                    ]
+                    [ HH.text "Add 5 Nodes" ]
+                , HH.button
+                    [ HP.classes [ HH.ClassName "transition-button" ]
+                    , HE.onClick \_ -> RemoveGUPNodes
+                    ]
+                    [ HH.text "Remove 5 Nodes" ]
+                , HH.button
+                    [ HP.classes [ HH.ClassName "transition-button", HH.ClassName "secondary" ]
+                    , HE.onClick \_ -> ResetGUP
+                    ]
+                    [ HH.text "Reset All" ]
+                ]
             ]
         ]
     ]

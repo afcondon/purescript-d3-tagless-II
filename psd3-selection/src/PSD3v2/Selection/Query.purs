@@ -130,7 +130,7 @@ import Web.DOM.Document (Document)
 import Web.DOM.DOMTokenList as DOMTokenList
 import Web.DOM.Element (Element, classList, getAttribute, toParentNode, fromNode)
 import Web.DOM.Element as Element
-import Web.DOM.Node (Node, childNodes, parentNode)
+import Web.DOM.Node (childNodes, parentNode)
 import Web.DOM.NodeList as NodeList
 import Web.DOM.ParentNode (QuerySelector(..), querySelector, querySelectorAll)
 import Web.HTML (window)
@@ -166,9 +166,11 @@ nubElements arr = go [] arr
     case Array.uncons remaining of
       Nothing -> acc
       Just { head: x, tail: xs } ->
-        let alreadySeen = Array.any (\elem -> unsafeRefEq elem x) acc
-        in if alreadySeen then go acc xs
-           else go (Array.snoc acc x) xs
+        let
+          alreadySeen = Array.any (\elem -> unsafeRefEq elem x) acc
+        in
+          if alreadySeen then go acc xs
+          else go (Array.snoc acc x) xs
 
 -- | Create an empty selection from elements
 emptySelectionFromElements :: forall datum. Array Element -> Effect (Selection SEmpty Element datum)
@@ -193,9 +195,10 @@ querySelectorAllElements selector parents = do
 querySelectorFirstElement :: String -> Array Element -> Effect (Maybe Element)
 querySelectorFirstElement selector parents = do
   -- Try each parent in order until we find a match
-  let tryParent parent = do
-        let parentNode = toParentNode parent
-        querySelector (QuerySelector selector) parentNode
+  let
+    tryParent parent = do
+      let parentNode = toParentNode parent
+      querySelector (QuerySelector selector) parentNode
   results <- traverse tryParent parents
   pure $ Array.head $ Array.mapMaybe identity results
 
@@ -214,8 +217,8 @@ querySelectorFirstElement selector parents = do
 -- | ```
 queryIn
   :: forall datum datumOut
-   . String  -- ^ Name of selection in map
-  -> String  -- ^ CSS selector
+   . String -- ^ Name of selection in map
+  -> String -- ^ CSS selector
   -> Map String (Selection SBoundOwns Element datum)
   -> Effect (Selection SEmpty Element datumOut)
 queryIn name selector selectionsMap = do
@@ -238,7 +241,7 @@ queryIn name selector selectionsMap = do
 -- | ```
 queryAll
   :: forall datum datumOut
-   . String  -- ^ CSS selector
+   . String -- ^ CSS selector
   -> Map String (Selection SBoundOwns Element datum)
   -> Effect (Selection SEmpty Element datumOut)
 queryAll selector selectionsMap = do
@@ -259,8 +262,8 @@ queryAll selector selectionsMap = do
 -- | ```
 queryFirst
   :: forall datum datumOut
-   . String  -- ^ Name of selection in map
-  -> String  -- ^ CSS selector
+   . String -- ^ Name of selection in map
+  -> String -- ^ CSS selector
   -> Map String (Selection SBoundOwns Element datum)
   -> Effect (Selection SEmpty Element datumOut)
 queryFirst name selector selectionsMap = do
@@ -281,7 +284,7 @@ queryFirst name selector selectionsMap = do
 -- | ```
 queryInBound
   :: forall datum datumOut
-   . String  -- ^ CSS selector
+   . String -- ^ CSS selector
   -> Selection SBoundOwns Element datum
   -> Effect (Selection SEmpty Element datumOut)
 queryInBound selector selection = do
@@ -303,7 +306,7 @@ queryInBound selector selection = do
 -- | ```
 filterByClass
   :: forall datumOut
-   . String  -- ^ Class name to filter by
+   . String -- ^ Class name to filter by
   -> Selection SEmpty Element datumOut
   -> Effect (Selection SEmpty Element datumOut)
 filterByClass className selection = do
@@ -323,8 +326,8 @@ filterByClass className selection = do
 -- | ```
 filterByAttribute
   :: forall datumOut
-   . String  -- ^ Attribute name
-  -> String  -- ^ Attribute value to match
+   . String -- ^ Attribute name
+  -> String -- ^ Attribute value to match
   -> Selection SEmpty Element datumOut
   -> Effect (Selection SEmpty Element datumOut)
 filterByAttribute attrName attrValue selection = do
@@ -342,7 +345,7 @@ filterByAttribute attrName attrValue selection = do
 -- | ```
 hasClass
   :: forall datum
-   . String  -- ^ Class name
+   . String -- ^ Class name
   -> Selection SEmpty Element datum
   -> Effect Boolean
 hasClass className selection = do
@@ -360,7 +363,7 @@ hasClass className selection = do
 -- | ```
 hasAttribute
   :: forall datum
-   . String  -- ^ Attribute name
+   . String -- ^ Attribute name
   -> Selection SEmpty Element datum
   -> Effect Boolean
 hasAttribute attrName selection = do
@@ -385,16 +388,18 @@ hasAttribute attrName selection = do
 -- | ```
 filterByData
   :: forall datum
-   . (datum -> Boolean)  -- ^ Predicate on bound data
+   . (datum -> Boolean) -- ^ Predicate on bound data
   -> Selection SBoundOwns Element datum
   -> Effect (Selection SBoundOwns Element datum)
 filterByData predicate (Selection impl) = do
-  let { elements, data: boundData, indices, document: doc } = unsafePartial case impl of
-        BoundSelection r -> r
+  let
+    { elements, data: boundData, indices, document: doc } = unsafePartial case impl of
+      BoundSelection r -> r
 
   -- Filter elements and data together
-  let filtered = Array.zipWith Tuple elements boundData
-        # Array.filter (\(Tuple _ datum) -> predicate datum)
+  let
+    filtered = Array.zipWith Tuple elements boundData
+      # Array.filter (\(Tuple _ datum) -> predicate datum)
 
   let filteredElements = map (\(Tuple elem _) -> elem) filtered
   let filteredData = map (\(Tuple _ datum) -> datum) filtered
@@ -420,8 +425,9 @@ findByData
   -> Selection SBoundOwns Element datum
   -> Effect (Selection SBoundOwns Element datum)
 findByData predicate (Selection impl) = do
-  let { elements, data: boundData, indices, document: doc } = unsafePartial case impl of
-        BoundSelection r -> r
+  let
+    { elements, data: boundData, indices, document: doc } = unsafePartial case impl of
+      BoundSelection r -> r
 
   let zipped = Array.zipWith Tuple elements boundData
   let maybeMatch = Array.find (\(Tuple _ datum) -> predicate datum) zipped
@@ -434,8 +440,8 @@ findByData predicate (Selection impl) = do
       , document: doc
       }
     Just (Tuple elem datum) -> pure $ Selection $ BoundSelection
-      { elements: [elem]
-      , data: [datum]
+      { elements: [ elem ]
+      , data: [ datum ]
       , indices: indices
       , document: doc
       }
@@ -493,7 +499,7 @@ children selection = do
 -- | ```
 descendants
   :: forall datum datumOut
-   . String  -- ^ CSS selector
+   . String -- ^ CSS selector
   -> Selection SEmpty Element datum
   -> Effect (Selection SEmpty Element datumOut)
 descendants selector selection = do
@@ -552,14 +558,15 @@ ancestors selection = do
 
   -- For each element, walk up the tree collecting ancestors
   ancestorArrays <- elements # traverse \element -> do
-    let walkUp :: Element -> Effect (Array Element)
-        walkUp elem = do
-          maybeParent <- Element.toNode elem # parentNode
-          case maybeParent >>= fromNode of
-            Nothing -> pure []
-            Just parent -> do
-              rest <- walkUp parent
-              pure $ Array.cons parent rest
+    let
+      walkUp :: Element -> Effect (Array Element)
+      walkUp elem = do
+        maybeParent <- Element.toNode elem # parentNode
+        case maybeParent >>= fromNode of
+          Nothing -> pure []
+          Just parent -> do
+            rest <- walkUp parent
+            pure $ Array.cons parent rest
     walkUp element
 
   emptySelectionFromElements $ nubElements $ Array.concat ancestorArrays
@@ -686,7 +693,7 @@ last selection = do
 -- | ```
 nth
   :: forall datumOut
-   . Int  -- ^ Index (0-based)
+   . Int -- ^ Index (0-based)
   -> Selection SEmpty Element datumOut
   -> Effect (Selection SEmpty Element datumOut)
 nth index selection = do

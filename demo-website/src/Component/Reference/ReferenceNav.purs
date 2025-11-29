@@ -2,9 +2,9 @@ module PSD3.Reference.ReferenceNav where
 
 import Prelude
 
-import Data.Array (length, take, (!!))
-import Data.Maybe (Maybe(..), fromMaybe)
-import Data.String (Pattern(..), split, joinWith)
+import Data.Array (length, (!!))
+import Data.Maybe (fromMaybe)
+import Data.String (Pattern(..), split)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
@@ -54,8 +54,8 @@ renderQuadrant targetSection currentSection =
     [ HP.href $ "#" <> routeToPath (sectionDefaultRoute targetSection)
     , HP.classes
         [ HH.ClassName "reference-nav__quadrant-box"
-        , HH.ClassName $ if targetSection == currentSection
-            then "reference-nav__quadrant-box--active"
+        , HH.ClassName $
+            if targetSection == currentSection then "reference-nav__quadrant-box--active"
             else "reference-nav__quadrant-box--inactive"
         ]
     , HP.title $ sectionTitle targetSection
@@ -65,7 +65,7 @@ renderQuadrant targetSection currentSection =
 -- | Get default route for a section
 sectionDefaultRoute :: Section -> Route
 sectionDefaultRoute = case _ of
-  UnderstandingSection -> Home  -- No understanding pages anymore
+  UnderstandingSection -> Home -- No understanding pages anymore
   TutorialSection -> GettingStarted
   HowToSection -> HowtoIndex
   APISection -> Reference
@@ -92,7 +92,13 @@ renderCategory currentRoute category =
     ]
 
 -- | Render a module link
-renderModuleLink :: forall w i. Route -> _ -> HH.HTML w i
+renderModuleLink
+  :: forall w i r
+   . Route
+  -> { name :: String
+     | r
+     }
+  -> HH.HTML w i
 renderModuleLink currentRoute moduleInfo =
   HH.li
     [ HP.classes [ HH.ClassName "reference-nav__module-item" ] ]
@@ -106,15 +112,17 @@ renderModuleLink currentRoute moduleInfo =
         [ HH.text $ formatModuleName moduleInfo.name ]
     ]
   where
-    isCurrentModule = currentRoute == moduleNameToRoute moduleInfo.name
+  isCurrentModule = currentRoute == moduleNameToRoute moduleInfo.name
 
 -- | Convert module name to route (placeholder - will be replaced with actual routes)
 moduleNameToRoute :: String -> Route
-moduleNameToRoute _ = Reference  -- TODO: Add individual module routes
+moduleNameToRoute _ = Reference -- TODO: Add individual module routes
 
 -- | Format module name for display (show just the last part)
 formatModuleName :: String -> String
 formatModuleName name =
-  let parts = split (Pattern ".") name
-      len = length parts
-  in fromMaybe name (parts !! (len - 1))
+  let
+    parts = split (Pattern ".") name
+    len = length parts
+  in
+    fromMaybe name (parts !! (len - 1))

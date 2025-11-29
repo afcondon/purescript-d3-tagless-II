@@ -6,7 +6,7 @@ import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (foldl)
 import Data.Int (toNumber)
-import Data.List (List(..), fromFoldable)
+import Data.List (List(..))
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Number (pow, sqrt, log)
@@ -69,7 +69,7 @@ computeRadius node =
     -- Scale to get variation, use remainder for pseudo-randomness
     base = hash - (floor (hash / 4.0)) * 4.0 + 1.0
   in
-    base * 0.5 + 0.5  -- Range roughly 1.0 to 2.5 in tree units
+    base * 0.5 + 0.5 -- Range roughly 1.0 to 2.5 in tree units
 
 foreign import floor :: Number -> Number
 
@@ -96,39 +96,38 @@ computeScaleFactor :: Number -> Array NodeWithRadius -> Number
 computeScaleFactor minSep nodes =
   let
     -- Group nodes by depth
-    grouped = foldl (\m n -> Map.insertWith (<>) n.depth [n] m) Map.empty nodes
+    grouped = foldl (\m n -> Map.insertWith (<>) n.depth [ n ] m) Map.empty nodes
 
     -- For each depth level, get scale samples from adjacent pairs
     samples = Array.concatMap getScaleSamples (Array.fromFoldable $ Map.values grouped)
 
     -- Average the samples, or use fallback
-    avgScale = if Array.length samples == 0
-               then 5.0  -- fallback
-               else (foldl (+) 0.0 samples) / toNumber (Array.length samples)
+    avgScale =
+      if Array.length samples == 0 then 5.0 -- fallback
+      else (foldl (+) 0.0 samples) / toNumber (Array.length samples)
   in
     avgScale
   where
-    getScaleSamples :: Array NodeWithRadius -> Array Number
-    getScaleSamples depthNodes =
-      let
-        -- Sort by x coordinate
-        sorted = Array.sortWith _.x depthNodes
-        -- Get adjacent pairs
-        pairs = Array.zip sorted (Array.drop 1 sorted)
-      in
-        Array.mapMaybe computePairScale pairs
+  getScaleSamples :: Array NodeWithRadius -> Array Number
+  getScaleSamples depthNodes =
+    let
+      -- Sort by x coordinate
+      sorted = Array.sortWith _.x depthNodes
+      -- Get adjacent pairs
+      pairs = Array.zip sorted (Array.drop 1 sorted)
+    in
+      Array.mapMaybe computePairScale pairs
 
-    computePairScale :: Tuple NodeWithRadius NodeWithRadius -> Maybe Number
-    computePairScale (Tuple a b) =
-      let
-        pixelDist = b.x - a.x
-        -- Expected tree-unit separation = radiusSeparation + minSep
-        expectedSep = radiusSeparation a b + minSep
-      in
-        -- Only include if reasonable
-        if pixelDist > 1.0 && expectedSep > 0.01
-        then Just (pixelDist / expectedSep)
-        else Nothing
+  computePairScale :: Tuple NodeWithRadius NodeWithRadius -> Maybe Number
+  computePairScale (Tuple a b) =
+    let
+      pixelDist = b.x - a.x
+      -- Expected tree-unit separation = radiusSeparation + minSep
+      expectedSep = radiusSeparation a b + minSep
+    in
+      -- Only include if reasonable
+      if pixelDist > 1.0 && expectedSep > 0.01 then Just (pixelDist / expectedSep)
+      else Nothing
 
 -- | Compute color for a node (HSL with varying hue)
 computeColor :: NodeWithRadius -> String
@@ -145,7 +144,7 @@ type State =
   { flareData :: Maybe (Tree HierNode)
   , minSeparation :: Number
   , layerScalePreset :: LayerScalePreset
-  , exponent :: Number  -- For exponential preset
+  , exponent :: Number -- For exponential preset
   , linkStyle :: LinkStyle
   , error :: Maybe String
   }
@@ -220,27 +219,33 @@ handleAction = case _ of
       Just tree -> liftEffect $ drawTreeExplorer "#tree-explorer-viz" state tree
 
 -- | Create links from parent to children
-makeLinks :: forall r. Tree { x :: Number, y :: Number | r }
+makeLinks
+  :: forall r
+   . Tree { x :: Number, y :: Number | r }
   -> Array { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
 makeLinks tree' = Array.fromFoldable $ makeLinksList tree'
   where
-    makeLinksList :: Tree { x :: Number, y :: Number | r }
-      -> List { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
-    makeLinksList (Node val children) =
-      let
-        childLinks = children >>= \(Node childVal _) ->
-          Cons { source: { x: val.x, y: val.y }, target: { x: childVal.x, y: childVal.y } } Nil
-        grandchildLinks = children >>= makeLinksList
-      in
-        childLinks <> grandchildLinks
+  makeLinksList
+    :: Tree { x :: Number, y :: Number | r }
+    -> List { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
+  makeLinksList (Node val children) =
+    let
+      childLinks = children >>= \(Node childVal _) ->
+        Cons { source: { x: val.x, y: val.y }, target: { x: childVal.x, y: childVal.y } } Nil
+      grandchildLinks = children >>= makeLinksList
+    in
+      childLinks <> grandchildLinks
 
 -- | Link path generator (step links for dendrogram style)
 linkPath :: Number -> Number -> Number -> Number -> String
 linkPath x1' y1' x2' y2' =
-  "M" <> show x1' <> "," <> show y1' <>
-  "V" <> show ((y1' + y2') / 2.0) <>
-  "H" <> show x2' <>
-  "V" <> show y2'
+  "M" <> show x1' <> "," <> show y1'
+    <> "V"
+    <> show ((y1' + y2') / 2.0)
+    <> "H"
+    <> show x2'
+    <> "V"
+    <> show y2'
 
 -- | Clear container contents
 clearContainer :: String -> Effect Unit
@@ -272,14 +277,17 @@ drawTreeExplorer selector state flareTree = do
 
     -- Build TreeConfig from state with separation function
     let layerScaleFn = getLayerScaleFn state.layerScalePreset state.exponent
-    let config :: Tree4.TreeConfig NodeWithRadius
-        config = Tree4.defaultTreeConfig
-          { size = { width: chartWidth - (2.0 * padding)
-                   , height: chartHeight - (2.0 * padding) }
-          , minSeparation = state.minSeparation
-          , layerScale = Just layerScaleFn
-          , separation = Just radiusSeparation
-          }
+    let
+      config :: Tree4.TreeConfig NodeWithRadius
+      config = Tree4.defaultTreeConfig
+        { size =
+            { width: chartWidth - (2.0 * padding)
+            , height: chartHeight - (2.0 * padding)
+            }
+        , minSeparation = state.minSeparation
+        , layerScale = Just layerScaleFn
+        , separation = Just radiusSeparation
+        }
 
     -- Get link generator for selected style
     let linkPathFn = linkGenerator state.linkStyle
@@ -297,36 +305,39 @@ drawTreeExplorer selector state flareTree = do
     liftEffect $ Console.log $ "TreeExplorer: " <> show (Array.length nodes) <> " nodes, minSep=" <> show state.minSeparation <> ", radiusScale=" <> show radiusScale
 
     -- Build SVG tree structure for links
-    let linksTree :: T.Tree LinkDatum
-        linksTree =
-          T.named SVG "svg"
-            [ width chartWidth
-            , height chartHeight
-            , viewBox ("0 0 " <> show chartWidth <> " " <> show chartHeight)
-            , class_ "tree-explorer-svg"
-            ]
-            `T.withChild`
-              (T.named Group "chartGroup"
+    let
+      linksTree :: T.Tree LinkDatum
+      linksTree =
+        T.named SVG "svg"
+          [ width chartWidth
+          , height chartHeight
+          , viewBox ("0 0 " <> show chartWidth <> " " <> show chartHeight)
+          , class_ "tree-explorer-svg"
+          ]
+          `T.withChild`
+            ( T.named Group "chartGroup"
                 [ class_ "tree-content" ]
                 `T.withChild`
-                  (T.named Group "linksGroup"
-                    [ class_ "links" ]
-                    `T.withChild`
-                      (T.joinData "links" "path" links $ \link ->
-                        T.elem Path
-                          [ d (linkPathFn
-                              (link.source.x + padding)
-                              (link.source.y + padding)
-                              (link.target.x + padding)
-                              (link.target.y + padding))
-                          , fill "none"
-                          , stroke "#555"
-                          , strokeWidth 1.5
-                          , class_ "link"
-                          ]
-                      )
+                  ( T.named Group "linksGroup"
+                      [ class_ "links" ]
+                      `T.withChild`
+                        ( T.joinData "links" "path" links $ \link ->
+                            T.elem Path
+                              [ d
+                                  ( linkPathFn
+                                      (link.source.x + padding)
+                                      (link.source.y + padding)
+                                      (link.target.x + padding)
+                                      (link.target.y + padding)
+                                  )
+                              , fill "none"
+                              , stroke "#555"
+                              , strokeWidth 1.5
+                              , class_ "link"
+                              ]
+                        )
                   )
-              )
+            )
 
     -- Render links first
     linksSelections <- renderTree container linksTree
@@ -335,22 +346,23 @@ drawTreeExplorer selector state flareTree = do
     chartGroupSel <- liftEffect $ reselectD3v2 "chartGroup" linksSelections
 
     -- Build nodes tree with variable radius and color
-    let nodesTree :: T.Tree NodeWithRadius
-        nodesTree =
-          T.named Group "nodesGroup"
-            [ class_ "nodes" ]
-            `T.withChild`
-              (T.joinData "nodeGroups" "g" nodes $ \node ->
+    let
+      nodesTree :: T.Tree NodeWithRadius
+      nodesTree =
+        T.named Group "nodesGroup"
+          [ class_ "nodes" ]
+          `T.withChild`
+            ( T.joinData "nodeGroups" "g" nodes $ \node ->
                 T.elem Circle
                   [ cx (node.x + padding)
                   , cy (node.y + padding)
-                  , radius (node.radius * radiusScale)  -- Scale from tree units to pixels
+                  , radius (node.radius * radiusScale) -- Scale from tree units to pixels
                   , fill (computeColor node)
                   , stroke "none"
                   , strokeOpacity 0.0
                   , class_ "node"
                   ]
-              )
+            )
 
     -- Render nodes on top
     _ <- renderTree chartGroupSel nodesTree
@@ -359,13 +371,15 @@ drawTreeExplorer selector state flareTree = do
 -- | Get the layer scale function for a preset
 getLayerScaleFn :: LayerScalePreset -> Number -> Int -> Number
 getLayerScaleFn preset exponent depth =
-  let d = toNumber depth
-  in case preset of
-    Linear -> d
-    SquareRoot -> sqrt d
-    Logarithmic -> log (d + 1.0)
-    Exponential -> pow d exponent
-    Custom -> d  -- Default to linear for custom
+  let
+    d = toNumber depth
+  in
+    case preset of
+      Linear -> d
+      SquareRoot -> sqrt d
+      Logarithmic -> log (d + 1.0)
+      Exponential -> pow d exponent
+      Custom -> d -- Default to linear for custom
 
 -- | Render the component
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -419,8 +433,7 @@ render state =
             ]
 
         -- Exponent slider (only for Exponential)
-        , if state.layerScalePreset == Exponential
-          then HH.div
+        , if state.layerScalePreset == Exponential then HH.div
             [ HP.classes [ HH.ClassName "control-group" ] ]
             [ HH.label_ [ HH.text $ "Exponent: " <> show state.exponent ]
             , HH.input

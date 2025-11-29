@@ -39,9 +39,9 @@ import Data.Int (toNumber)
 -- | ```
 type TreeConfig a =
   { size :: { width :: Number, height :: Number }
-  , minSeparation :: Number  -- Minimum horizontal separation between siblings
-  , separation :: Maybe (a -> a -> Number)  -- Custom separation function based on node data
-  , layerScale :: Maybe (Int -> Number)  -- Custom vertical spacing by depth
+  , minSeparation :: Number -- Minimum horizontal separation between siblings
+  , separation :: Maybe (a -> a -> Number) -- Custom separation function based on node data
+  , layerScale :: Maybe (Int -> Number) -- Custom vertical spacing by depth
   }
 
 -- | Default configuration
@@ -77,16 +77,16 @@ type Contour = List Number
 
 -- | Contours for a subtree: left edge and right edge at each depth
 data Contours = Contours
-  { left :: Contour   -- Leftmost x offset at each depth
-  , right :: Contour  -- Rightmost x offset at each depth
+  { left :: Contour -- Leftmost x offset at each depth
+  , right :: Contour -- Rightmost x offset at each depth
   }
 
 -- | Empty contours for a leaf
-emptyContours :: Contours
-emptyContours = Contours { left: Nil, right: Nil }
+-- emptyContours :: Contours -- TODO not used
+-- emptyContours = Contours { left: Nil, right: Nil }
 
 -- | Single node contours (just the root at position 0)
-singletonContours :: Contours
+singletonContours :: Contours -- TODO not used
 singletonContours = Contours { left: Cons 0.0 Nil, right: Cons 0.0 Nil }
 
 -- | Tree layout in 3 steps:
@@ -96,10 +96,11 @@ singletonContours = Contours { left: Cons 0.0 Nil, right: Cons 0.0 Nil }
 -- |
 -- | Uses Tuple annotation to temporarily hold offset values during layout computation
 -- | Input must have x, y, depth fields (initial values don't matter, they'll be overwritten)
-tree :: forall r.
-  TreeConfig { x :: Number, y :: Number, depth :: Int | r } ->
-  Tree { x :: Number, y :: Number, depth :: Int | r } ->
-  Tree { x :: Number, y :: Number, depth :: Int | r }
+tree
+  :: forall r
+   . TreeConfig { x :: Number, y :: Number, depth :: Int | r }
+  -> Tree { x :: Number, y :: Number, depth :: Int | r }
+  -> Tree { x :: Number, y :: Number, depth :: Int | r }
 tree config inputTree =
   let
     -- Step 1: Add depth field
@@ -120,10 +121,11 @@ tree config inputTree =
 
 -- | Tree layout with height-based sorting for consistent ordering with Cluster4
 -- | Use this variant when your tree has height computed and you want sorted children
-treeWithSorting :: forall r.
-  TreeConfig { x :: Number, y :: Number, depth :: Int, height :: Int | r } ->
-  Tree { x :: Number, y :: Number, depth :: Int, height :: Int | r } ->
-  Tree { x :: Number, y :: Number, depth :: Int, height :: Int | r }
+treeWithSorting
+  :: forall r
+   . TreeConfig { x :: Number, y :: Number, depth :: Int, height :: Int | r }
+  -> Tree { x :: Number, y :: Number, depth :: Int, height :: Int | r }
+  -> Tree { x :: Number, y :: Number, depth :: Int, height :: Int | r }
 treeWithSorting config inputTree =
   let
     -- Step 1: Add depth field
@@ -158,20 +160,23 @@ addDepth currentDepth (Node val children) =
 
 -- | Bottom-up pass: compute relative positions using contour scanning
 -- | Annotates tree with Tuple containing offset and original data
-render :: forall r.
-  Number ->
-  Maybe ({ x :: Number, y :: Number, depth :: Int | r } -> { x :: Number, y :: Number, depth :: Int | r } -> Number) ->
-  Tree { x :: Number, y :: Number, depth :: Int | r } ->
-  Tree (Tuple { offset :: Number } { x :: Number, y :: Number, depth :: Int | r })
+render
+  :: forall r
+   . Number
+  -> Maybe ({ x :: Number, y :: Number, depth :: Int | r } -> { x :: Number, y :: Number, depth :: Int | r } -> Number)
+  -> Tree { x :: Number, y :: Number, depth :: Int | r }
+  -> Tree (Tuple { offset :: Number } { x :: Number, y :: Number, depth :: Int | r })
 render minSep separationFn inputTree =
   case renderWithContours inputTree of
     Tuple t _ -> t
   where
-    -- Internal function that also returns contours (captures minSep and separationFn from outer scope)
-    renderWithContours :: Tree { x :: Number, y :: Number, depth :: Int | r } -> Tuple (Tree (Tuple { offset :: Number } { x :: Number, y :: Number, depth :: Int | r })) Contours
-    renderWithContours (Node val children) =
-      let childCount = length children
-      in case childCount of
+  -- Internal function that also returns contours (captures minSep and separationFn from outer scope)
+  renderWithContours :: Tree { x :: Number, y :: Number, depth :: Int | r } -> Tuple (Tree (Tuple { offset :: Number } { x :: Number, y :: Number, depth :: Int | r })) Contours
+  renderWithContours (Node val children) =
+    let
+      childCount = length children
+    in
+      case childCount of
         -- Leaf node: offset = 0, contours = singleton
         0 -> Tuple (Node (Tuple { offset: 0.0 } val) Nil) singletonContours
 
@@ -217,10 +222,10 @@ render minSep separationFn inputTree =
           in
             Tuple resultTree parentContours
 
-    -- Update a child tree's offset in its Tuple annotation
-    updateOffset :: Tree (Tuple { offset :: Number } { x :: Number, y :: Number, depth :: Int | r }) -> Number -> Tree (Tuple { offset :: Number } { x :: Number, y :: Number, depth :: Int | r })
-    updateOffset (Node (Tuple offsetRec original) children) newOffset =
-      Node (Tuple (offsetRec { offset = newOffset }) original) children
+  -- Update a child tree's offset in its Tuple annotation
+  updateOffset :: Tree (Tuple { offset :: Number } { x :: Number, y :: Number, depth :: Int | r }) -> Number -> Tree (Tuple { offset :: Number } { x :: Number, y :: Number, depth :: Int | r })
+  updateOffset (Node (Tuple offsetRec original) children) newOffset =
+    Node (Tuple (offsetRec { offset = newOffset }) original) children
 
 -- | Extract root node data from a tree with Tuple annotation
 getRootData :: forall r. Tree (Tuple { offset :: Number } r) -> r
@@ -228,25 +233,29 @@ getRootData (Node (Tuple _ nodeData) _) = nodeData
 
 -- | Compute base separations for adjacent pairs using separation function
 -- | For n nodes, returns (n-1) separation values
-computeBaseSeparations :: forall r.
-  Number ->  -- default minSep
-  Maybe (r -> r -> Number) ->  -- optional separation function
-  List r ->  -- node data for each child
-  List Number  -- base separation for each adjacent pair
+computeBaseSeparations
+  :: forall r
+   . Number
+  -> -- default minSep
+  Maybe (r -> r -> Number)
+  -> -- optional separation function
+  List r
+  -> -- node data for each child
+  List Number -- base separation for each adjacent pair
 computeBaseSeparations minSep separationFn nodes =
   case nodes of
     Nil -> Nil
     Cons _ Nil -> Nil
     _ -> zipWith (getSep separationFn minSep) nodes (tailSafe nodes)
   where
-    -- When separation function exists, ADD minSep to it (minSep acts as base spacing)
-    getSep :: Maybe (r -> r -> Number) -> Number -> r -> r -> Number
-    getSep Nothing defSep _ _ = defSep
-    getSep (Just sepFn) baseMinSep a b = sepFn a b + baseMinSep
+  -- When separation function exists, ADD minSep to it (minSep acts as base spacing)
+  getSep :: Maybe (r -> r -> Number) -> Number -> r -> r -> Number
+  getSep Nothing defSep _ _ = defSep
+  getSep (Just sepFn) baseMinSep a b = sepFn a b + baseMinSep
 
-    tailSafe :: forall a. List a -> List a
-    tailSafe Nil = Nil
-    tailSafe (Cons _ xs) = xs
+  tailSafe :: forall a. List a -> List a
+  tailSafe Nil = Nil
+  tailSafe (Cons _ xs) = xs
 
 -- | Compute separations with per-pair base separations
 -- | Uses base separation for each pair instead of uniform minSep
@@ -258,45 +267,47 @@ computeSeparationsWithBase baseSeps contours =
     Tuple _ (Cons _ Nil) -> Nil
     _ ->
       -- Zip baseSeps with pairs of contours
-      let contourPairs = zipWith Tuple contours (tailSafe contours)
-      in zipWith applyBase baseSeps contourPairs
+      let
+        contourPairs = zipWith Tuple contours (tailSafe contours)
+      in
+        zipWith applyBase baseSeps contourPairs
   where
-    applyBase :: Number -> Tuple Contours Contours -> Number
-    applyBase base (Tuple c1 c2) = scanContoursWithBase base c1 c2
+  applyBase :: Number -> Tuple Contours Contours -> Number
+  applyBase base (Tuple c1 c2) = scanContoursWithBase base c1 c2
 
-    tailSafe :: forall a. List a -> List a
-    tailSafe Nil = Nil
-    tailSafe (Cons _ xs) = xs
+  tailSafe :: forall a. List a -> List a
+  tailSafe Nil = Nil
+  tailSafe (Cons _ xs) = xs
 
 -- | Scan two contours with a specific base separation
 scanContoursWithBase :: Number -> Contours -> Contours -> Number
 scanContoursWithBase baseSep (Contours left) (Contours right) =
   go baseSep left.right right.left
   where
-    go :: Number -> Contour -> Contour -> Number
-    go currentSep Nil _ = currentSep
-    go currentSep _ Nil = currentSep
-    go currentSep (Cons lr rest1) (Cons rl rest2) =
-      let
-        actualSep = currentSep + rl - lr
-        neededSep = if actualSep < baseSep
-                    then currentSep + (baseSep - actualSep)
-                    else currentSep
-      in
-        go neededSep rest1 rest2
+  go :: Number -> Contour -> Contour -> Number
+  go currentSep Nil _ = currentSep
+  go currentSep _ Nil = currentSep
+  go currentSep (Cons lr rest1) (Cons rl rest2) =
+    let
+      actualSep = currentSep + rl - lr
+      neededSep =
+        if actualSep < baseSep then currentSep + (baseSep - actualSep)
+        else currentSep
+    in
+      go neededSep rest1 rest2
 
 -- | Compute separations needed between adjacent child subtrees
 -- | For n children, returns (n-1) separation values
-computeSeparations :: Number -> List Contours -> List Number
-computeSeparations minSep contours =
-  case contours of
-    Nil -> Nil
-    Cons _ Nil -> Nil
-    _ -> zipWith (scanContours minSep) contours (tailSafe contours)
-  where
-    tailSafe :: forall a. List a -> List a
-    tailSafe Nil = Nil
-    tailSafe (Cons _ xs) = xs
+-- computeSeparations :: Number -> List Contours -> List Number -- TODO not used
+-- computeSeparations minSep contours =
+--   case contours of
+--     Nil -> Nil
+--     Cons _ Nil -> Nil
+--     _ -> zipWith (scanContours minSep) contours (tailSafe contours)
+--   where
+--   tailSafe :: forall a. List a -> List a
+--   tailSafe Nil = Nil
+--   tailSafe (Cons _ xs) = xs
 
 -- | Scan two contours to find minimum separation needed
 -- | Walks down both contours level by level, ensuring minSep at each level
@@ -304,22 +315,22 @@ scanContours :: Number -> Contours -> Contours -> Number
 scanContours minSep (Contours left) (Contours right) =
   go minSep left.right right.left
   where
-    -- Current separation starts at minSep
-    -- Walk down right contour of left subtree and left contour of right subtree
-    go :: Number -> Contour -> Contour -> Number
-    go currentSep Nil _ = currentSep
-    go currentSep _ Nil = currentSep
-    go currentSep (Cons lr rest1) (Cons rl rest2) =
-      let
-        -- Distance between the two nodes at this level
-        actualSep = currentSep + rl - lr
+  -- Current separation starts at minSep
+  -- Walk down right contour of left subtree and left contour of right subtree
+  go :: Number -> Contour -> Contour -> Number
+  go currentSep Nil _ = currentSep
+  go currentSep _ Nil = currentSep
+  go currentSep (Cons lr rest1) (Cons rl rest2) =
+    let
+      -- Distance between the two nodes at this level
+      actualSep = currentSep + rl - lr
 
-        -- If too close, increase separation
-        neededSep = if actualSep < minSep
-                    then currentSep + (minSep - actualSep)
-                    else currentSep
-      in
-        go neededSep rest1 rest2
+      -- If too close, increase separation
+      neededSep =
+        if actualSep < minSep then currentSep + (minSep - actualSep)
+        else currentSep
+    in
+      go neededSep rest1 rest2
 
 -- | Combine child contours into parent contours
 -- | Given n children at positions offsets[0..n-1], build the parent's contours
@@ -327,8 +338,8 @@ scanContours minSep (Contours left) (Contours right) =
 spliceContours :: List Number -> List Contours -> Contours
 spliceContours offsets contours =
   case Array.fromFoldable $ zipWith Tuple offsets contours of
-    [] -> singletonContours  -- No children (shouldn't happen, but safe)
-    [Tuple offset (Contours c)] ->
+    [] -> singletonContours -- No children (shouldn't happen, but safe)
+    [ Tuple offset (Contours c) ] ->
       -- Single child: shift its contours by offset
       Contours
         { left: Cons 0.0 (map (\x -> x + offset) c.left)
@@ -339,10 +350,14 @@ spliceContours offsets contours =
       -- At each level, take the leftmost of all left contours and rightmost of all right contours
       let
         -- Shift all contours by their offsets
-        shiftedContours = map (\(Tuple offset (Contours c)) ->
-          Contours { left: map (\x -> x + offset) c.left
-                   , right: map (\x -> x + offset) c.right
-                   }) pairs
+        shiftedContours = map
+          ( \(Tuple offset (Contours c)) ->
+              Contours
+                { left: map (\x -> x + offset) c.left
+                , right: map (\x -> x + offset) c.right
+                }
+          )
+          pairs
 
         -- Merge contours level by level
         mergedLeft = mergeContoursLeft (map (\(Contours c) -> c.left) shiftedContours)
@@ -357,29 +372,31 @@ mergeContoursLeft contours =
     [] -> Nil
     _ -> mergeLevel contours
   where
-    mergeLevel :: Array Contour -> Contour
-    mergeLevel cs =
-      let
-        -- Get all values at current level (filter out Nil)
-        currentLevels = Array.mapMaybe
-          (\c -> case c of
+  mergeLevel :: Array Contour -> Contour
+  mergeLevel cs =
+    let
+      -- Get all values at current level (filter out Nil)
+      currentLevels = Array.mapMaybe
+        ( \c -> case c of
             Cons x _ -> Just x
-            Nil -> Nothing)
-          cs
-      in
-        case Array.head currentLevels of
-          Nothing -> Nil  -- All contours ended
-          Just _ ->
-            let
-              minVal = fromMaybe 0.0 $ minimum currentLevels
-              -- Get rest of each contour
-              restContours = Array.mapMaybe
-                (\c -> case c of
+            Nil -> Nothing
+        )
+        cs
+    in
+      case Array.head currentLevels of
+        Nothing -> Nil -- All contours ended
+        Just _ ->
+          let
+            minVal = fromMaybe 0.0 $ minimum currentLevels
+            -- Get rest of each contour
+            restContours = Array.mapMaybe
+              ( \c -> case c of
                   Cons _ rest -> Just rest
-                  Nil -> Nothing)
-                cs
-            in
-              Cons minVal (mergeLevel restContours)
+                  Nil -> Nothing
+              )
+              cs
+          in
+            Cons minVal (mergeLevel restContours)
 
 -- | Merge right contours: at each level, take the maximum
 mergeContoursRight :: Array Contour -> Contour
@@ -388,43 +405,47 @@ mergeContoursRight contours =
     [] -> Nil
     _ -> mergeLevel contours
   where
-    mergeLevel :: Array Contour -> Contour
-    mergeLevel cs =
-      let
-        -- Get all values at current level (filter out Nil)
-        currentLevels = Array.mapMaybe
-          (\c -> case c of
+  mergeLevel :: Array Contour -> Contour
+  mergeLevel cs =
+    let
+      -- Get all values at current level (filter out Nil)
+      currentLevels = Array.mapMaybe
+        ( \c -> case c of
             Cons x _ -> Just x
-            Nil -> Nothing)
-          cs
-      in
-        case Array.head currentLevels of
-          Nothing -> Nil  -- All contours ended
-          Just _ ->
-            let
-              maxVal = fromMaybe 0.0 $ maximum currentLevels
-              -- Get rest of each contour
-              restContours = Array.mapMaybe
-                (\c -> case c of
+            Nil -> Nothing
+        )
+        cs
+    in
+      case Array.head currentLevels of
+        Nothing -> Nil -- All contours ended
+        Just _ ->
+          let
+            maxVal = fromMaybe 0.0 $ maximum currentLevels
+            -- Get rest of each contour
+            restContours = Array.mapMaybe
+              ( \c -> case c of
                   Cons _ rest -> Just rest
-                  Nil -> Nothing)
-                cs
-            in
-              Cons maxVal (mergeLevel restContours)
+                  Nil -> Nothing
+              )
+              cs
+          in
+            Cons maxVal (mergeLevel restContours)
 
 -- | Top-down pass: convert offsets to absolute (x, y) coordinates
 -- | Strips Tuple annotation and updates x, y fields in the original record
 -- | Each node's x = parent.x + node.offset
 -- | Each node's y = depth
-petrify :: forall r.
-  Number ->  -- Parent's x coordinate
-  Tree (Tuple { offset :: Number } { x :: Number, y :: Number, depth :: Int | r }) ->
-  Tree { x :: Number, y :: Number, depth :: Int | r }
+petrify
+  :: forall r
+   . Number
+  -> -- Parent's x coordinate
+  Tree (Tuple { offset :: Number } { x :: Number, y :: Number, depth :: Int | r })
+  -> Tree { x :: Number, y :: Number, depth :: Int | r }
 petrify parentX (Node (Tuple offsetRec original) children) =
   let
     -- Node's x is parent's x plus its offset
     nodeX = parentX + offsetRec.offset
-    nodeY = toNumber original.depth  -- y is just depth (will be scaled later)
+    nodeY = toNumber original.depth -- y is just depth (will be scaled later)
 
     -- Recursively process children with this node's x as parent
     childrenWithCoords = map (petrify nodeX) children
@@ -432,10 +453,11 @@ petrify parentX (Node (Tuple offsetRec original) children) =
     Node (original { x = nodeX, y = nodeY }) childrenWithCoords
 
 -- | Scale abstract coordinates to pixel coordinates
-scaleToPixels :: forall r.
-  TreeConfig { depth :: Int, x :: Number, y :: Number | r } ->
-  Tree { depth :: Int, x :: Number, y :: Number | r } ->
-  Tree { depth :: Int, x :: Number, y :: Number | r }
+scaleToPixels
+  :: forall r
+   . TreeConfig { depth :: Int, x :: Number, y :: Number | r }
+  -> Tree { depth :: Int, x :: Number, y :: Number | r }
+  -> Tree { depth :: Int, x :: Number, y :: Number | r }
 scaleToPixels config inputTree =
   let
     -- Find x range using Foldable instance
@@ -446,8 +468,8 @@ scaleToPixels config inputTree =
     xRange = if maxX - minX == 0.0 then 1.0 else maxX - minX
 
     -- Find max depth
-    allDepths = map (\n -> n.depth) allNodes
-    maxDepth = fromMaybe 1 $ maximum allDepths
+    -- allDepths = map (\n -> n.depth) allNodes
+    -- maxDepth = fromMaybe 1 $ maximum allDepths
 
     -- Apply layer scale function if provided
     layerScaleFn = fromMaybe toNumber config.layerScale
@@ -459,8 +481,10 @@ scaleToPixels config inputTree =
     -- Scale functions
     scaleX x = ((x - minX) / xRange) * config.size.width
     scaleY depth =
-      let scaledDepth = layerScaleFn depth
-      in (scaledDepth / maxScaledDepth) * config.size.height
+      let
+        scaledDepth = layerScaleFn depth
+      in
+        (scaledDepth / maxScaledDepth) * config.size.height
 
     -- Apply scaling via map
     go (Node val children) =
@@ -483,9 +507,11 @@ addHeightField (Node val children) =
     nodeHeight = case Array.fromFoldable childrenWithHeight of
       [] -> 0
       childArray ->
-        let childHeights = map (\(Node v _) -> v.height) childArray
-            maxChildHeight = fromMaybe 0 (maximum childHeights)
-        in maxChildHeight + 1
+        let
+          childHeights = map (\(Node v _) -> v.height) childArray
+          maxChildHeight = fromMaybe 0 (maximum childHeights)
+        in
+          maxChildHeight + 1
   in
     Node (val { height = nodeHeight }) childrenWithHeight
 
@@ -504,5 +530,5 @@ sortByHeight (Node val children) =
   in
     Node val sortedChildrenList
   where
-    compareByHeight :: forall s. Tree { height :: Int | s } -> Tree { height :: Int | s } -> Ordering
-    compareByHeight (Node a _) (Node b _) = compare b.height a.height  -- Descending
+  compareByHeight :: forall s. Tree { height :: Int | s } -> Tree { height :: Int | s } -> Ordering
+  compareByHeight (Node a _) (Node b _) = compare b.height a.height -- Descending

@@ -30,15 +30,6 @@ export function setTextContent_(text) {
   };
 }
 
-// Extract D3 simulation handle from simulation state
-// D3SimulationState_ is a newtype: SimState_ { handle_: ..., forceLibrary: ..., ... }
-// Returns null if not initialized
-export function getSimulationHandle_(simState) {
-  // simState is SimState_ record, we need to unwrap and get handle_
-  // In JavaScript, newtypes are transparent, so simState IS the record
-  return simState.handle_ || null;
-}
-
 // ============================================================================
 // MouseEvent accessors (candidates for purescript-web-uievents PR)
 // ============================================================================

@@ -2,9 +2,9 @@ module PSD3.Wizard.Wizard where
 
 import Prelude
 
-import Data.Array (find, filter, uncons, head)
+import Data.Array (filter, head, uncons)
 import Data.Maybe (Maybe(..), fromMaybe, isJust, maybe)
-import Data.String (Pattern(..), contains, trim)
+import Data.String (trim)
 import Data.String.CodeUnits (toCharArray, fromCharArray)
 import Data.Char (toCharCode, fromCharCode)
 import Effect.Aff (Aff)
@@ -100,28 +100,29 @@ renderProgressBar state =
     , renderStep Download "4" "Download"
     ]
   where
-    renderStep :: WizardStep -> String -> String -> HH.HTML w Action
-    renderStep step num label =
-      let
-        isActive = state.currentStep == step
-        isCompleted = stepIndex state.currentStep > stepIndex step
-        classes = HH.ClassName $ "wizard__step" <>
-          (if isActive then " wizard__step--active" else "") <>
+  renderStep :: WizardStep -> String -> String -> HH.HTML w Action
+  renderStep step num label =
+    let
+      isActive = state.currentStep == step
+      isCompleted = stepIndex state.currentStep > stepIndex step
+      classes = HH.ClassName $ "wizard__step"
+        <> (if isActive then " wizard__step--active" else "")
+        <>
           (if isCompleted then " wizard__step--completed" else "")
-      in
-        HH.div
-          [ HP.classes [ classes ]
-          , HE.onClick \_ -> GoToStep step
-          ]
-          [ HH.div [ HP.classes [ HH.ClassName "wizard__step-number" ] ] [ HH.text num ]
-          , HH.div [ HP.classes [ HH.ClassName "wizard__step-label" ] ] [ HH.text label ]
-          ]
+    in
+      HH.div
+        [ HP.classes [ classes ]
+        , HE.onClick \_ -> GoToStep step
+        ]
+        [ HH.div [ HP.classes [ HH.ClassName "wizard__step-number" ] ] [ HH.text num ]
+        , HH.div [ HP.classes [ HH.ClassName "wizard__step-label" ] ] [ HH.text label ]
+        ]
 
-    stepIndex :: WizardStep -> Int
-    stepIndex ChooseDataset = 0
-    stepIndex NameModule = 1
-    stepIndex ReviewFiles = 2
-    stepIndex Download = 3
+  stepIndex :: WizardStep -> Int
+  stepIndex ChooseDataset = 0
+  stepIndex NameModule = 1
+  stepIndex ReviewFiles = 2
+  stepIndex Download = 3
 
 -- | Render current step content
 renderStepContent :: forall m. MonadAff m => State -> H.ComponentHTML Action () m
@@ -170,56 +171,58 @@ renderChooseDataset state =
         (map renderDatasetCard filteredDatasets)
     ]
   where
-    filteredDatasets = case state.filterDifficulty of
-      Nothing -> allDatasets
-      Just difficulty -> filter (\d -> d.difficulty == difficulty) allDatasets
+  filteredDatasets = case state.filterDifficulty of
+    Nothing -> allDatasets
+    Just difficulty -> filter (\d -> d.difficulty == difficulty) allDatasets
 
-    renderDatasetCard :: Dataset -> HH.HTML w Action
-    renderDatasetCard dataset =
-      let
-        isSelected = case state.selectedDataset of
-          Just selected -> selected.id == dataset.id
-          Nothing -> false
-        cardClass = HH.ClassName $ "dataset-card" <> if isSelected then " dataset-card--selected" else ""
-      in
-        HH.div
-          [ HP.classes [ cardClass ]
-          , HE.onClick \_ -> SelectDataset dataset
-          ]
-          [ HH.div
-              [ HP.classes [ HH.ClassName "dataset-card__header" ] ]
-              [ HH.h3_ [ HH.text dataset.name ]
-              , HH.span
-                  [ HP.classes [ HH.ClassName $ "difficulty-badge difficulty-badge--" <> toLowerCase (show dataset.difficulty) ] ]
-                  [ HH.text $ show dataset.difficulty ]
-              ]
-          , HH.p
-              [ HP.classes [ HH.ClassName "dataset-card__description" ] ]
-              [ HH.text dataset.description ]
-          , HH.div
-              [ HP.classes [ HH.ClassName "dataset-card__info" ] ]
-              [ HH.strong_ [ HH.text "Fields: " ]
-              , HH.text $ intercalate ", " (map (\f -> f.name <> ": " <> f.fieldType) dataset.fields)
-              ]
-          , HH.div
-              [ HP.classes [ HH.ClassName "dataset-card__viz" ] ]
-              [ HH.strong_ [ HH.text "Suggested: " ]
-              , HH.text dataset.suggestedViz
-              ]
-          , HH.div
-              [ HP.classes [ HH.ClassName "dataset-card__note" ] ]
-              [ HH.text dataset.educationalNote ]
-          ]
+  renderDatasetCard :: Dataset -> HH.HTML w Action
+  renderDatasetCard dataset =
+    let
+      isSelected = case state.selectedDataset of
+        Just selected -> selected.id == dataset.id
+        Nothing -> false
+      cardClass = HH.ClassName $ "dataset-card" <> if isSelected then " dataset-card--selected" else ""
+    in
+      HH.div
+        [ HP.classes [ cardClass ]
+        , HE.onClick \_ -> SelectDataset dataset
+        ]
+        [ HH.div
+            [ HP.classes [ HH.ClassName "dataset-card__header" ] ]
+            [ HH.h3_ [ HH.text dataset.name ]
+            , HH.span
+                [ HP.classes [ HH.ClassName $ "difficulty-badge difficulty-badge--" <> toLowerCase (show dataset.difficulty) ] ]
+                [ HH.text $ show dataset.difficulty ]
+            ]
+        , HH.p
+            [ HP.classes [ HH.ClassName "dataset-card__description" ] ]
+            [ HH.text dataset.description ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "dataset-card__info" ] ]
+            [ HH.strong_ [ HH.text "Fields: " ]
+            , HH.text $ intercalate ", " (map (\f -> f.name <> ": " <> f.fieldType) dataset.fields)
+            ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "dataset-card__viz" ] ]
+            [ HH.strong_ [ HH.text "Suggested: " ]
+            , HH.text dataset.suggestedViz
+            ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "dataset-card__note" ] ]
+            [ HH.text dataset.educationalNote ]
+        ]
 
-    toLowerCase :: String -> String
-    toLowerCase = fromCharArray <<< map toLower <<< toCharArray
-      where
-        toLower c = if c >= 'A' && c <= 'Z' then fromMaybe c (fromCharCode (toCharCode c + 32)) else c
+  toLowerCase :: String -> String
+  toLowerCase = fromCharArray <<< map toLower <<< toCharArray
+    where
+    toLower c = if c >= 'A' && c <= 'Z' then fromMaybe c (fromCharCode (toCharCode c + 32)) else c
 
-    intercalate :: String -> Array String -> String
-    intercalate sep arr = maybe "" (\{ head: first, tail: rest } ->
-      if rest == [] then first else first <> sep <> intercalate sep rest
-    ) (uncons arr)
+  intercalate :: String -> Array String -> String
+  intercalate sep arr = maybe ""
+    ( \{ head: first, tail: rest } ->
+        if rest == [] then first else first <> sep <> intercalate sep rest
+    )
+    (uncons arr)
 
 -- | Step 2: Name Module
 renderNameModule :: forall w. State -> HH.HTML w Action
@@ -242,11 +245,10 @@ renderNameModule state =
             , HE.onValueInput SetVizName
             , HP.classes [ HH.ClassName "wizard__input" ]
             ]
-        , if isValidModuleName state.vizName || state.vizName == ""
-            then HH.div_ []
-            else HH.div
-                  [ HP.classes [ HH.ClassName "wizard__error" ] ]
-                  [ HH.text "Module name must start with uppercase and contain only letters and numbers" ]
+        , if isValidModuleName state.vizName || state.vizName == "" then HH.div_ []
+          else HH.div
+            [ HP.classes [ HH.ClassName "wizard__error" ] ]
+            [ HH.text "Module name must start with uppercase and contain only letters and numbers" ]
         ]
 
     , HH.div
@@ -265,22 +267,20 @@ renderNameModule state =
         ]
 
     -- Preview
-    , if state.vizName /= "" && isValidModuleName state.vizName
-        then HH.div
-              [ HP.classes [ HH.ClassName "wizard__preview" ] ]
-              [ HH.h3_ [ HH.text "Files that will be generated:" ]
-              , HH.ul_
-                  [ HH.li_ [ HH.text $ state.vizName <> "/Unsafe.purs" ]
-                  , HH.li_ [ HH.text $ state.vizName <> "/Model.purs" ]
-                  , HH.li_ [ HH.text $ state.vizName <> "/Draw.purs" ]
-                  , HH.li_ [ HH.text $ state.vizName <> "/index.html" ]
-                  , HH.li_ [ HH.text $ state.vizName <> "/README.md" ]
-                  , if state.includeMain
-                      then HH.li_ [ HH.text "Main.purs" ]
-                      else HH.text ""
-                  ]
-              ]
-        else HH.div_ []
+    , if state.vizName /= "" && isValidModuleName state.vizName then HH.div
+        [ HP.classes [ HH.ClassName "wizard__preview" ] ]
+        [ HH.h3_ [ HH.text "Files that will be generated:" ]
+        , HH.ul_
+            [ HH.li_ [ HH.text $ state.vizName <> "/Unsafe.purs" ]
+            , HH.li_ [ HH.text $ state.vizName <> "/Model.purs" ]
+            , HH.li_ [ HH.text $ state.vizName <> "/Draw.purs" ]
+            , HH.li_ [ HH.text $ state.vizName <> "/index.html" ]
+            , HH.li_ [ HH.text $ state.vizName <> "/README.md" ]
+            , if state.includeMain then HH.li_ [ HH.text "Main.purs" ]
+              else HH.text ""
+            ]
+        ]
+      else HH.div_ []
     ]
 
 -- | Step 3: Review Files
@@ -296,15 +296,15 @@ renderReviewFiles state =
         (map renderFile state.generatedFiles)
     ]
   where
-    renderFile :: GeneratedFile -> HH.HTML w Action
-    renderFile file =
-      HH.details
-        [ HP.classes [ HH.ClassName "wizard__file" ] ]
-        [ HH.summary_ [ HH.text file.filename ]
-        , HH.pre
-            [ HP.classes [ HH.ClassName "wizard__code" ] ]
-            [ HH.code_ [ HH.text file.content ] ]
-        ]
+  renderFile :: GeneratedFile -> HH.HTML w Action
+  renderFile file =
+    HH.details
+      [ HP.classes [ HH.ClassName "wizard__file" ] ]
+      [ HH.summary_ [ HH.text file.filename ]
+      , HH.pre
+          [ HP.classes [ HH.ClassName "wizard__code" ] ]
+          [ HH.code_ [ HH.text file.content ] ]
+      ]
 
 -- | Step 4: Download
 renderDownload :: forall w. State -> HH.HTML w Action
@@ -360,11 +360,11 @@ renderNavigation state =
         [ HH.text $ if state.currentStep == Download then "Restart" else "Next →" ]
     ]
   where
-    canProceed = case state.currentStep of
-      ChooseDataset -> isJust state.selectedDataset
-      NameModule -> state.vizName /= "" && isValidModuleName state.vizName
-      ReviewFiles -> true
-      Download -> true
+  canProceed = case state.currentStep of
+    ChooseDataset -> isJust state.selectedDataset
+    NameModule -> state.vizName /= "" && isValidModuleName state.vizName
+    ReviewFiles -> true
+    Download -> true
 
 -- | Handle actions
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
@@ -443,9 +443,9 @@ isValidModuleName :: String -> Boolean
 isValidModuleName name =
   let
     chars = toCharArray name
-    isUpperCase c = let code = toCharCode c in code >= 65 && code <= 90  -- A-Z
-    isLowerCase c = let code = toCharCode c in code >= 97 && code <= 122  -- a-z
-    isDigitChar c = let code = toCharCode c in code >= 48 && code <= 57  -- 0-9
+    isUpperCase c = let code = toCharCode c in code >= 65 && code <= 90 -- A-Z
+    isLowerCase c = let code = toCharCode c in code >= 97 && code <= 122 -- a-z
+    isDigitChar c = let code = toCharCode c in code >= 48 && code <= 57 -- 0-9
     isAlphaNum c = isUpperCase c || isLowerCase c || isDigitChar c
   in
     case chars of
@@ -454,7 +454,7 @@ isValidModuleName name =
         first <- head chars
         pure $ isUpperCase first && all isAlphaNum chars
   where
-    all :: forall a. (a -> Boolean) -> Array a -> Boolean
-    all pred arr = case uncons arr of
-      Nothing -> true
-      Just { head: x, tail: xs } -> pred x && all pred xs
+  all :: forall a. (a -> Boolean) -> Array a -> Boolean
+  all pred arr = case uncons arr of
+    Nothing -> true
+    Just { head: x, tail: xs } -> pred x && all pred xs

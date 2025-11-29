@@ -7,9 +7,7 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import PSD3.Shared.SectionNav as SectionNav
 import PSD3.Understanding.TOC (renderTOC, tocAnchor)
-import PSD3.Website.Types (Route(..), Section(..))
 import Type.Proxy (Proxy(..))
 
 -- | Reference page state
@@ -19,7 +17,7 @@ type State = Unit
 data Action = Initialize
 
 -- | Child component slots
-type Slots = ( sectionNav :: forall q. H.Slot q Void Unit )
+type Slots = (sectionNav :: forall q. H.Slot q Void Unit)
 
 _sectionNav = Proxy :: Proxy "sectionNav"
 
@@ -54,7 +52,6 @@ render _ =
         , image: Just "images/reference-bookmark-deepseavent.jpeg"
         }
 
-
     -- Page introduction
     , HH.section
         [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
@@ -81,11 +78,13 @@ render _ =
         , HH.h3_ [ HH.text "The SelectionM Type Class" ]
         , HH.pre_
             [ HH.code_
-                [ HH.text """class Monad m <= SelectionM s m | m -> s where
+                [ HH.text
+                    """class Monad m <= SelectionM s m | m -> s where
   attach :: Selector s -> m s
   appendTo :: s -> Element -> Array (Attr s) -> m s
   selectAll :: s -> Selector s -> m s
-  -- ... and many more operations""" ]
+  -- ... and many more operations"""
+                ]
             ]
         , HH.p_
             [ HH.text "This type class defines the operations you can perform on D3 selections. The "
@@ -170,11 +169,13 @@ render _ =
             [ HH.strong_ [ HH.text "Example:" ] ]
         , HH.pre_
             [ HH.code_
-                [ HH.text """svg <- appendTo root Svg
+                [ HH.text
+                    """svg <- appendTo root Svg
   [ Width 400.0
   , Height 300.0
   , ViewBox 0.0 0.0 400.0 300.0
-  ]""" ]
+  ]"""
+                ]
             ]
 
         -- selectAll function

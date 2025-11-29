@@ -69,7 +69,7 @@ class Monad m <= SelectionM sel m | m -> sel where
   -- | This is typically the starting point for data binding.
   select
     :: forall datum
-     . String  -- CSS selector
+     . String -- CSS selector
     -> m (sel SEmpty Element datum)
 
   -- | Select all elements matching selector within a parent selection
@@ -78,7 +78,7 @@ class Monad m <= SelectionM sel m | m -> sel where
   -- | The datum type is polymorphic and will be inferred from usage.
   selectAll
     :: forall state parent parentDatum datum
-     . String  -- CSS selector
+     . String -- CSS selector
     -> sel state parent parentDatum
     -> m (sel SEmpty Element datum)
 
@@ -94,7 +94,7 @@ class Monad m <= SelectionM sel m | m -> sel where
   openSelection
     :: forall state parent parentDatum datum
      . sel state parent parentDatum
-    -> String  -- CSS selector
+    -> String -- CSS selector
     -> m (sel SEmpty Element datum)
 
   -- | Select all elements matching selector and extract their bound data
@@ -111,7 +111,7 @@ class Monad m <= SelectionM sel m | m -> sel where
   -- | ```
   selectAllWithData
     :: forall state parent parentDatum datum
-     . String  -- CSS selector
+     . String -- CSS selector
     -> sel state parent parentDatum
     -> m (sel SBoundOwns Element datum)
 
@@ -135,12 +135,12 @@ class Monad m <= SelectionM sel m | m -> sel where
      . Foldable f
     => Ord datum
     => ElementType
-    -> f datum  -- Data to bind
-    -> String   -- Selector for existing elements
+    -> f datum -- Data to bind
+    -> String -- Selector for existing elements
     -> sel SEmpty parent datum
-    -> Maybe (datum -> Array (Attribute datum))  -- Enter attributes
-    -> Maybe (datum -> Array (Attribute datum))  -- Update attributes
-    -> Maybe (datum -> Array (Attribute datum))  -- Exit attributes (applied before removal)
+    -> Maybe (datum -> Array (Attribute datum)) -- Enter attributes
+    -> Maybe (datum -> Array (Attribute datum)) -- Update attributes
+    -> Maybe (datum -> Array (Attribute datum)) -- Exit attributes (applied before removal)
     -> m (sel SBoundOwns Element datum)
 
   -- | Simple data append for initial renders
@@ -184,7 +184,7 @@ class Monad m <= SelectionM sel m | m -> sel where
      . Foldable f
     => Ord datum
     => f datum
-    -> String  -- Selector for existing elements
+    -> String -- Selector for existing elements
     -> sel SEmpty parent parentDatum
     -> m (JoinResult sel parent datum)
 
@@ -205,8 +205,8 @@ class Monad m <= SelectionM sel m | m -> sel where
      . Foldable f
     => Ord key
     => f datum
-    -> (datum -> key)  -- Key extraction function
-    -> String  -- Selector for existing elements
+    -> (datum -> key) -- Key extraction function
+    -> String -- Selector for existing elements
     -> sel SEmpty parent parentDatum
     -> m (JoinResult sel parent datum)
 
@@ -225,10 +225,10 @@ class Monad m <= SelectionM sel m | m -> sel where
      . Foldable f
     => Ord key
     => sel SEmpty parent parentDatum
-    -> elemType  -- Element type (for API consistency)
+    -> elemType -- Element type (for API consistency)
     -> f datum
-    -> (datum -> key)  -- Key extraction function
-    -> String  -- Selector string
+    -> (datum -> key) -- Key extraction function
+    -> String -- Selector string
     -> m (JoinResult sel parent datum)
 
   -- | Append new elements to a pending (enter) selection
@@ -281,7 +281,7 @@ class Monad m <= SelectionM sel m | m -> sel where
   -- | svg <- appendChild SVG [...] container
   -- | ```
   clear
-    :: String  -- CSS selector
+    :: String -- CSS selector
     -> m Unit
 
   -- | Merge two bound selections

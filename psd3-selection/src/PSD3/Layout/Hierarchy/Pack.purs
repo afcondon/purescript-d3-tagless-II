@@ -25,7 +25,6 @@ import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Number (sqrt, abs)
-import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Effect.Unsafe (unsafePerformEffect)
 import Effect.Console (log) as Console
@@ -42,9 +41,9 @@ type Circle =
 
 -- | State for map-based pack algorithm
 type PackState =
-  { circles :: Map CircleId Circle  -- All circle data
-  , frontChain :: Array CircleId     -- Front-chain as circular array of IDs
-  , nextId :: CircleId               -- Next available ID
+  { circles :: Map CircleId Circle -- All circle data
+  , frontChain :: Array CircleId -- Front-chain as circular array of IDs
+  , nextId :: CircleId -- Next available ID
   }
 
 -- ============================================================================
@@ -89,14 +88,12 @@ place b a c =
     dy = b.y - a.y
     d2 = dx * dx + dy * dy
   in
-    if d2 /= 0.0
-    then
+    if d2 /= 0.0 then
       let
         a2 = (a.r + c.r) * (a.r + c.r)
         b2 = (b.r + c.r) * (b.r + c.r)
       in
-        if a2 > b2
-        then
+        if a2 > b2 then
           -- Use b-relative positioning
           let
             x = (d2 + b2 - a2) / (2.0 * d2)
@@ -143,8 +140,10 @@ getNextId nodeId chain =
   case Array.elemIndex nodeId chain of
     Nothing -> Nothing
     Just idx ->
-      let nextIdx = (idx + 1) `mod` Array.length chain
-      in Array.index chain nextIdx
+      let
+        nextIdx = (idx + 1) `mod` Array.length chain
+      in
+        Array.index chain nextIdx
 
 -- | Score a node (based on pair of node and node.next)
 scoreNode :: CircleId -> PackState -> Maybe { nodeId :: CircleId, score :: Number }
@@ -192,8 +191,8 @@ shortenChainOnly aId jId chain =
       if jIdx > aIdx then
         -- Normal case: j is after a in array, keep [0..a] ++ [j..end]
         let
-          before = Array.take (aIdx + 1) chain  -- Include aId
-          after = Array.drop jIdx chain         -- Include jId
+          before = Array.take (aIdx + 1) chain -- Include aId
+          after = Array.drop jIdx chain -- Include jId
         in
           before <> after
       else if jIdx < aIdx then
@@ -205,16 +204,16 @@ shortenChainOnly aId jId chain =
     _, _ -> chain
 
 -- | Shorten chain and insert new circle (for final insertion after collision)
-shortenChain :: CircleId -> CircleId -> CircleId -> Array CircleId -> Array CircleId
-shortenChain aId jId newId chain =
-  case Array.elemIndex aId chain, Array.elemIndex jId chain of
-    Just aIdx, Just jIdx ->
-      let
-        before = Array.take aIdx chain
-        after = Array.drop (jIdx + 1) chain
-      in
-        before <> [aId, newId, jId] <> after
-    _, _ -> chain
+-- shortenChain :: CircleId -> CircleId -> CircleId -> Array CircleId -> Array CircleId
+-- shortenChain aId jId newId chain =
+--   case Array.elemIndex aId chain, Array.elemIndex jId chain of
+--     Just aIdx, Just jIdx ->
+--       let
+--         before = Array.take aIdx chain
+--         after = Array.drop (jIdx + 1) chain
+--       in
+--         before <> [ aId, newId, jId ] <> after
+--     _, _ -> chain
 
 -- ============================================================================
 -- COLLISION DETECTION
@@ -240,14 +239,15 @@ getChainSegmentFrom startId chain =
 -- | Find first collision in chain segment
 findFirstCollision :: Array CircleId -> Circle -> Map CircleId Circle -> Maybe CircleId
 findFirstCollision idsToCheck newCircle circles =
-  Array.findMap (\id ->
-    case Map.lookup id circles of
-      Just c ->
-        if intersects c newCircle
-        then Just id
-        else Nothing
-      Nothing -> Nothing
-  ) idsToCheck
+  Array.findMap
+    ( \id ->
+        case Map.lookup id circles of
+          Just c ->
+            if intersects c newCircle then Just id
+            else Nothing
+          Nothing -> Nothing
+    )
+    idsToCheck
 
 -- | Walk chain from startId looking for collision with newCircle
 -- | D3 only checks collisions with circles in the frontChain (boundary circles)
@@ -263,16 +263,16 @@ walkChainForCollision startId newCircle state =
 
 -- | Check collision against ALL placed circles (not just frontChain)
 -- | This is used to detect if shortening caused us to skip interior circles
-checkAllCollisions :: Circle -> PackState -> Maybe CircleId
-checkAllCollisions newCircle state =
-  let
-    allIds = Set.toUnfoldable (Map.keys state.circles) :: Array CircleId
-  in
-    Array.find (\id ->
-      case Map.lookup id state.circles of
-        Just c -> intersects c newCircle
-        Nothing -> false
-    ) allIds
+-- checkAllCollisions :: Circle -> PackState -> Maybe CircleId -- TODO not used/not exported
+-- checkAllCollisions newCircle state =
+--   let
+--     allIds = Set.toUnfoldable (Map.keys state.circles) :: Array CircleId
+--   in
+--     Array.find (\id ->
+--       case Map.lookup id state.circles of
+--         Just c -> intersects c newCircle
+--         Nothing -> false
+--     ) allIds
 
 -- ============================================================================
 -- STATE MANIPULATION
@@ -293,18 +293,18 @@ insertBetween aId bId newCircle state =
       }
 
 -- | Insert circle with shortcut (collision found at jId)
-insertWithShortcut :: CircleId -> CircleId -> Circle -> PackState -> PackState
-insertWithShortcut aId jId newCircle state =
-  let
-    newId = state.nextId
-    newCircles = Map.insert newId newCircle state.circles
-    newChain = shortenChain aId jId newId state.frontChain
-  in
-    state
-      { circles = newCircles
-      , frontChain = newChain
-      , nextId = newId + 1
-      }
+-- insertWithShortcut :: CircleId -> CircleId -> Circle -> PackState -> PackState -- TODO not used
+-- insertWithShortcut aId jId newCircle state =
+--   let
+--     newId = state.nextId
+--     newCircles = Map.insert newId newCircle state.circles
+--     newChain = shortenChain aId jId newId state.frontChain
+--   in
+--     state
+--       { circles = newCircles
+--       , frontChain = newChain
+--       , nextId = newId + 1
+--       }
 
 -- ============================================================================
 -- MAIN ALGORITHM
@@ -328,7 +328,7 @@ initState c0 c1 c2 =
       ]
   in
     { circles
-    , frontChain: [0, 2, 1]  -- Circular order (counterclockwise): a -> c -> b -> a
+    , frontChain: [ 0, 2, 1 ] -- Circular order (counterclockwise): a -> c -> b -> a
     , nextId: 3
     }
 
@@ -341,8 +341,10 @@ tryPlaceCircleWithLimit maxRetries newCircle aId bId state
       -- CRITICAL: We've exhausted retries! This means our retry logic is broken.
       -- We're giving up without placing the circle, which drops it from output.
       -- TODO: This should NEVER happen with a correct algorithm!
-      let _ = unsafePerformEffect $ Console.log $ "❌ RETRY LIMIT HIT! Failed to place circle r=" <> show newCircle.r
-      in insertBetween aId bId newCircle state  -- Insert anyway to avoid dropping it
+      let
+        _ = unsafePerformEffect $ Console.log $ "❌ RETRY LIMIT HIT! Failed to place circle r=" <> show newCircle.r
+      in
+        insertBetween aId bId newCircle state -- Insert anyway to avoid dropping it
   | otherwise =
       case Map.lookup aId state.circles, Map.lookup bId state.circles of
         Just a, Just b ->
@@ -352,29 +354,37 @@ tryPlaceCircleWithLimit maxRetries newCircle aId bId state
 
             -- Log placement attempt
             _ = unsafePerformEffect $ Console.log $
-                "  Try r=" <> show newCircle.r <> " at (" <> show aId <> "," <> show bId <> ")" <>
-                " -> pos=(" <> show positioned.x <> "," <> show positioned.y <> ")" <>
-                " [retries left: " <> show maxRetries <> "]"
+              "  Try r=" <> show newCircle.r <> " at (" <> show aId <> "," <> show bId <> ")"
+                <> " -> pos=("
+                <> show positioned.x
+                <> ","
+                <> show positioned.y
+                <> ")"
+                <> " [retries left: "
+                <> show maxRetries
+                <> "]"
 
             -- Check for collisions starting from bId (matches D3: j = b.next)
             collisionResult = walkChainForCollision bId positioned state
           in
             case collisionResult of
               NoCollision ->
-                let _ = unsafePerformEffect $ Console.log $ "    ✅ NO COLLISION - placed successfully"
-                in insertBetween aId bId positioned state
+                let
+                  _ = unsafePerformEffect $ Console.log $ "    ✅ NO COLLISION - placed successfully"
+                in
+                  insertBetween aId bId positioned state
               CollisionAt jId ->
                 -- Collision! Shorten chain and retry with new front pair (a, j)
                 let
                   _ = unsafePerformEffect $ Console.log $
-                      "    ❌ COLLISION at circle " <> show jId <> " - shortening chain and retrying with (" <> show aId <> "," <> show jId <> ")"
+                    "    ❌ COLLISION at circle " <> show jId <> " - shortening chain and retrying with (" <> show aId <> "," <> show jId <> ")"
 
                   -- Update chain to skip over circles between a and j
                   shortenedChain = shortenChainOnly aId jId state.frontChain
                   _ = unsafePerformEffect $ Console.log $
-                      "       Chain before: " <> show state.frontChain
+                    "       Chain before: " <> show state.frontChain
                   _ = unsafePerformEffect $ Console.log $
-                      "       Chain after:  " <> show shortenedChain
+                    "       Chain after:  " <> show shortenedChain
                   stateWithShortenedChain = state { frontChain = shortenedChain }
                 in
                   -- Retry placement with new front pair (a, j), decrement retry limit
@@ -382,25 +392,28 @@ tryPlaceCircleWithLimit maxRetries newCircle aId bId state
         _, _ -> state
 
 tryPlaceCircle :: Circle -> CircleId -> CircleId -> PackState -> PackState
-tryPlaceCircle = tryPlaceCircleWithLimit 100  -- Allow up to 100 retries
+tryPlaceCircle = tryPlaceCircleWithLimit 100 -- Allow up to 100 retries
 
 addCircle :: Circle -> PackState -> PackState
 addCircle newCircle state =
   let
     _ = unsafePerformEffect $ Console.log $
-        "\n➤ Adding circle r=" <> show newCircle.r <>
-        " (total circles so far: " <> show (Map.size state.circles) <> ")"
+      "\n➤ Adding circle r=" <> show newCircle.r
+        <> " (total circles so far: "
+        <> show (Map.size state.circles)
+        <> ")"
     _ = unsafePerformEffect $ Console.log $
-        "  Current front chain: " <> show state.frontChain
+      "  Current front chain: " <> show state.frontChain
   in
     case findBestPair state of
-      Nothing -> state  -- No pairs available (shouldn't happen)
+      Nothing -> state -- No pairs available (shouldn't happen)
       Just (Tuple aId bId) ->
         let
           _ = unsafePerformEffect $ Console.log $
-              "  Best pair: (" <> show aId <> "," <> show bId <> ")"
+            "  Best pair: (" <> show aId <> "," <> show bId <> ")"
           result = tryPlaceCircle newCircle aId bId state
-        in result
+        in
+          result
 
 -- | Pack siblings using map-based front-chain algorithm
 packSiblingsMap :: Array Circle -> { circles :: Array Circle, radius :: Number }
@@ -411,7 +424,7 @@ packSiblingsMap inputCircles =
     if n == 0 then { circles: [], radius: 0.0 }
     else if n == 1 then
       case Array.index inputCircles 0 of
-        Just c -> { circles: [c { x = 0.0, y = 0.0 }], radius: c.r }
+        Just c -> { circles: [ c { x = 0.0, y = 0.0 } ], radius: c.r }
         Nothing -> { circles: [], radius: 0.0 }
     else if n == 2 then
       case Array.index inputCircles 0, Array.index inputCircles 1 of
@@ -419,7 +432,8 @@ packSiblingsMap inputCircles =
           let
             c0' = c0 { x = -c1.r, y = 0.0 }
             c1' = c1 { x = c0.r, y = 0.0 }
-          in { circles: [c0', c1'], radius: c0.r + c1.r }
+          in
+            { circles: [ c0', c1' ], radius: c0.r + c1.r }
         _, _ -> { circles: [], radius: 0.0 }
     else
       -- Three or more circles - use front-chain algorithm
@@ -437,7 +451,7 @@ packSiblingsMap inputCircles =
             -- Note: We extract ALL circles (0 to n-1), even those not in the final chain,
             -- because circles removed from the chain during shortening are still part of the pack
             positioned = Array.mapMaybe (\i -> Map.lookup i finalState.circles)
-                                        (Array.range 0 (n - 1))
+              (Array.range 0 (n - 1))
 
             -- Compute enclosing circle
             enclosing = packEnclose positioned
@@ -516,9 +530,9 @@ encloseBasis3 a b c =
     bigB = 2.0 * (r1 + xa * xb + ya * yb)
     bigC = xa * xa + ya * ya - r1 * r1
 
-    r = if abs bigA > epsilon6
-        then -(bigB + sqrt (bigB * bigB - 4.0 * bigA * bigC)) / (2.0 * bigA)
-        else -bigC / bigB
+    r =
+      if abs bigA > epsilon6 then -(bigB + sqrt (bigB * bigB - 4.0 * bigA * bigC)) / (2.0 * bigA)
+      else -bigC / bigB
   in
     { x: x1 + xa + xb * r
     , y: y1 + ya + yb * r
@@ -528,16 +542,16 @@ encloseBasis3 a b c =
 encloseBasis :: Array Circle -> Circle
 encloseBasis basis =
   case Array.length basis of
-    1 -> fromMaybe {x: 0.0, y: 0.0, r: 0.0} $ encloseBasis1 <$> Array.index basis 0
-    2 -> fromMaybe {x: 0.0, y: 0.0, r: 0.0} $
-           encloseBasis2 <$> Array.index basis 0 <*> Array.index basis 1
-    3 -> fromMaybe {x: 0.0, y: 0.0, r: 0.0} $
-           encloseBasis3 <$> Array.index basis 0 <*> Array.index basis 1 <*> Array.index basis 2
-    _ -> {x: 0.0, y: 0.0, r: 0.0}
+    1 -> fromMaybe { x: 0.0, y: 0.0, r: 0.0 } $ encloseBasis1 <$> Array.index basis 0
+    2 -> fromMaybe { x: 0.0, y: 0.0, r: 0.0 } $
+      encloseBasis2 <$> Array.index basis 0 <*> Array.index basis 1
+    3 -> fromMaybe { x: 0.0, y: 0.0, r: 0.0 } $
+      encloseBasis3 <$> Array.index basis 0 <*> Array.index basis 1 <*> Array.index basis 2
+    _ -> { x: 0.0, y: 0.0, r: 0.0 }
 
 extendBasis :: Array Circle -> Circle -> Array Circle
 extendBasis basis p
-  | enclosesWeakAll p basis = [p]
+  | enclosesWeakAll p basis = [ p ]
   | otherwise =
       case findTwoCircleBasis 0 of
         Just result -> result
@@ -545,68 +559,70 @@ extendBasis basis p
           case findThreeCircleBasis 0 of
             Just result -> result
             Nothing -> basis
-  where
-    n = Array.length basis
+      where
+      n = Array.length basis
 
-    findTwoCircleBasis :: Int -> Maybe (Array Circle)
-    findTwoCircleBasis i
-      | i >= n = Nothing
-      | otherwise =
-          case Array.index basis i of
-            Just bi ->
-              let candidate = encloseBasis2 bi p
-              in if enclosesNot p bi && enclosesWeakAll candidate basis
-                 then Just [bi, p]
-                 else findTwoCircleBasis (i + 1)
-            Nothing -> findTwoCircleBasis (i + 1)
+      findTwoCircleBasis :: Int -> Maybe (Array Circle)
+      findTwoCircleBasis i
+        | i >= n = Nothing
+        | otherwise =
+            case Array.index basis i of
+              Just bi ->
+                let
+                  candidate = encloseBasis2 bi p
+                in
+                  if enclosesNot p bi && enclosesWeakAll candidate basis then Just [ bi, p ]
+                  else findTwoCircleBasis (i + 1)
+              Nothing -> findTwoCircleBasis (i + 1)
 
-    findThreeCircleBasis :: Int -> Maybe (Array Circle)
-    findThreeCircleBasis i
-      | i >= n - 1 = Nothing
-      | otherwise =
-          case findInnerPair i (i + 1) of
-            Just result -> Just result
-            Nothing -> findThreeCircleBasis (i + 1)
+      findThreeCircleBasis :: Int -> Maybe (Array Circle)
+      findThreeCircleBasis i
+        | i >= n - 1 = Nothing
+        | otherwise =
+            case findInnerPair i (i + 1) of
+              Just result -> Just result
+              Nothing -> findThreeCircleBasis (i + 1)
 
-    findInnerPair :: Int -> Int -> Maybe (Array Circle)
-    findInnerPair i j
-      | j >= n = Nothing
-      | otherwise =
-          case Array.index basis i, Array.index basis j of
-            Just bi, Just bj ->
-              let
-                candidate = encloseBasis3 bi bj p
-                cij = encloseBasis2 bi bj
-                cip = encloseBasis2 bi p
-                cjp = encloseBasis2 bj p
-              in
-                if enclosesNot cij p && enclosesNot cip bj && enclosesNot cjp bi && enclosesWeakAll candidate basis
-                then Just [bi, bj, p]
-                else findInnerPair i (j + 1)
-            _, _ -> findInnerPair i (j + 1)
+      findInnerPair :: Int -> Int -> Maybe (Array Circle)
+      findInnerPair i j
+        | j >= n = Nothing
+        | otherwise =
+            case Array.index basis i, Array.index basis j of
+              Just bi, Just bj ->
+                let
+                  candidate = encloseBasis3 bi bj p
+                  cij = encloseBasis2 bi bj
+                  cip = encloseBasis2 bi p
+                  cjp = encloseBasis2 bj p
+                in
+                  if enclosesNot cij p && enclosesNot cip bj && enclosesNot cjp bi && enclosesWeakAll candidate basis then Just [ bi, bj, p ]
+                  else findInnerPair i (j + 1)
+              _, _ -> findInnerPair i (j + 1)
 
 packEnclose :: Array Circle -> Circle
 packEnclose circles = go 0 [] Nothing
   where
-    n = Array.length circles
+  n = Array.length circles
 
-    go :: Int -> Array Circle -> Maybe Circle -> Circle
-    go i basis maybeE
-      | i >= n =
-          case maybeE of
-            Just e -> e
-            Nothing -> {x: 0.0, y: 0.0, r: 0.0}
-      | otherwise =
-          case Array.index circles i of
-            Nothing -> go (i + 1) basis maybeE
-            Just p ->
-              case maybeE of
-                Just e | enclosesWeak e p ->
-                  go (i + 1) basis maybeE
-                _ ->
-                  let newBasis = extendBasis basis p
-                      newE = encloseBasis newBasis
-                  in go 0 newBasis (Just newE)
+  go :: Int -> Array Circle -> Maybe Circle -> Circle
+  go i basis maybeE
+    | i >= n =
+        case maybeE of
+          Just e -> e
+          Nothing -> { x: 0.0, y: 0.0, r: 0.0 }
+    | otherwise =
+        case Array.index circles i of
+          Nothing -> go (i + 1) basis maybeE
+          Just p ->
+            case maybeE of
+              Just e | enclosesWeak e p ->
+                go (i + 1) basis maybeE
+              _ ->
+                let
+                  newBasis = extendBasis basis p
+                  newE = encloseBasis newBasis
+                in
+                  go 0 newBasis (Just newE)
 
 -- ============================================================================
 -- HIERARCHY INTEGRATION
@@ -630,14 +646,22 @@ derive instance ordPackNode :: Ord a => Ord (PackNode a)
 instance showPackNode :: Show a => Show (PackNode a) where
   show (PackNode node) =
     "PackNode { data_: " <> show node.data_
-    <> ", depth: " <> show node.depth
-    <> ", height: " <> show node.height
-    <> ", value: " <> show node.value
-    <> ", x: " <> show node.x
-    <> ", y: " <> show node.y
-    <> ", r: " <> show node.r
-    <> ", children: [" <> show (Array.length node.children) <> " children]"
-    <> " }"
+      <> ", depth: "
+      <> show node.depth
+      <> ", height: "
+      <> show node.height
+      <> ", value: "
+      <> show node.value
+      <> ", x: "
+      <> show node.x
+      <> ", y: "
+      <> show node.y
+      <> ", r: "
+      <> show node.r
+      <> ", children: ["
+      <> show (Array.length node.children)
+      <> " children]"
+      <> " }"
 
 -- | Configuration for pack layout
 type PackConfig a =
@@ -666,41 +690,41 @@ newtype HierarchyData a = HierarchyData
 hierarchy :: forall a. HierarchyData a -> PackNode a
 hierarchy (HierarchyData root) = go root 0
   where
-    go :: { data_ :: a, value :: Maybe Number, children :: Maybe (Array (HierarchyData a)) } -> Int -> PackNode a
-    go node depth =
-      case node.children of
-        Nothing ->
-          -- Leaf node
+  go :: { data_ :: a, value :: Maybe Number, children :: Maybe (Array (HierarchyData a)) } -> Int -> PackNode a
+  go node depth =
+    case node.children of
+      Nothing ->
+        -- Leaf node
+        PackNode
+          { data_: node.data_
+          , depth: depth
+          , height: 0
+          , value: fromMaybe 0.0 node.value
+          , children: []
+          , x: 0.0
+          , y: 0.0
+          , r: 0.0
+          }
+      Just kids ->
+        -- Internal node - recursively process children
+        let
+          childNodes = map (\(HierarchyData child) -> go child (depth + 1)) kids
+          -- Sort children by value in descending order (matches D3 behavior)
+          sortedChildren = Array.sortWith (\(PackNode c) -> negate c.value) childNodes
+          childHeights = map (\(PackNode c) -> c.height) sortedChildren
+          maxChildHeight = foldl max 0 childHeights
+          sumValue = foldl (\acc (PackNode c) -> acc + c.value) 0.0 sortedChildren
+        in
           PackNode
             { data_: node.data_
             , depth: depth
-            , height: 0
-            , value: fromMaybe 0.0 node.value
-            , children: []
+            , height: maxChildHeight + 1
+            , value: sumValue
+            , children: sortedChildren
             , x: 0.0
             , y: 0.0
             , r: 0.0
             }
-        Just kids ->
-          -- Internal node - recursively process children
-          let
-            childNodes = map (\(HierarchyData child) -> go child (depth + 1)) kids
-            -- Sort children by value in descending order (matches D3 behavior)
-            sortedChildren = Array.sortWith (\(PackNode c) -> negate c.value) childNodes
-            childHeights = map (\(PackNode c) -> c.height) sortedChildren
-            maxChildHeight = foldl max 0 childHeights
-            sumValue = foldl (\acc (PackNode c) -> acc + c.value) 0.0 sortedChildren
-          in
-            PackNode
-              { data_: node.data_
-              , depth: depth
-              , height: maxChildHeight + 1
-              , value: sumValue
-              , children: sortedChildren
-              , x: 0.0
-              , y: 0.0
-              , r: 0.0
-              }
 
 -- | Apply pack layout to a hierarchy using the map-based algorithm
 -- | Implements D3's two-pass algorithm for proper padding
@@ -734,10 +758,12 @@ assignRadii config (PackNode node) =
   case node.children of
     [] ->
       -- Leaf node - assign radius
-      let r = case config.radius of
-            Just radiusFn -> radiusFn node.data_
-            Nothing -> sqrt node.value
-      in PackNode (node { r = max 0.0 r })
+      let
+        r = case config.radius of
+          Just radiusFn -> radiusFn node.data_
+          Nothing -> sqrt node.value
+      in
+        PackNode (node { r = max 0.0 r })
     _ ->
       -- Internal node - recursively assign to children
       PackNode (node { children = map (assignRadii config) node.children })
@@ -747,7 +773,7 @@ assignRadii config (PackNode node) =
 packChildren :: forall a. Number -> PackConfig a -> PackNode a -> PackNode a
 packChildren k config (PackNode node) =
   case node.children of
-    [] -> PackNode node  -- Leaf node, nothing to pack
+    [] -> PackNode node -- Leaf node, nothing to pack
     kids ->
       -- Internal node - pack children
       let
@@ -773,17 +799,17 @@ packChildren k config (PackNode node) =
         PackNode nodeWithR
 
   where
-    nodeToCircle :: PackNode a -> Circle
-    nodeToCircle (PackNode n) = { x: n.x, y: n.y, r: n.r }
+  nodeToCircle :: PackNode a -> Circle
+  nodeToCircle (PackNode n) = { x: n.x, y: n.y, r: n.r }
 
-    addPadding :: Number -> Circle -> Circle
-    addPadding p c = c { r = c.r + p }
+  addPadding :: Number -> Circle -> Circle
+  addPadding p c = c { r = c.r + p }
 
-    removePadding :: Number -> Circle -> Circle
-    removePadding p c = c { r = c.r - p }
+  removePadding :: Number -> Circle -> Circle
+  removePadding p c = c { r = c.r - p }
 
-    updateNodePosition :: PackNode a -> Circle -> PackNode a
-    updateNodePosition (PackNode n) c = PackNode (n { x = c.x, y = c.y })  -- Don't update radius!
+  updateNodePosition :: PackNode a -> Circle -> PackNode a
+  updateNodePosition (PackNode n) c = PackNode (n { x = c.x, y = c.y }) -- Don't update radius!
 
 -- | Scale the packed layout to fit the configured size
 scaleToSize :: forall a. PackConfig a -> PackNode a -> PackNode a
@@ -794,16 +820,16 @@ scaleToSize config (PackNode node) =
     k = min dx dy / (2.0 * node.r)
     centerX = dx / 2.0
     centerY = dy / 2.0
-    scaledRootR = k * node.r  -- Scale the root's radius too!
+    scaledRootR = k * node.r -- Scale the root's radius too!
   in
     PackNode (node { x = centerX, y = centerY, r = scaledRootR, children = map (scaleNode k centerX centerY) node.children })
 
   where
-    scaleNode :: Number -> Number -> Number -> PackNode a -> PackNode a
-    scaleNode scale parentX parentY (PackNode child) =
-      let
-        scaledX = parentX + scale * child.x
-        scaledY = parentY + scale * child.y
-        scaledR = scale * child.r
-      in
-        PackNode (child { x = scaledX, y = scaledY, r = scaledR, children = map (scaleNode scale scaledX scaledY) child.children })
+  scaleNode :: Number -> Number -> Number -> PackNode a -> PackNode a
+  scaleNode scale parentX parentY (PackNode child) =
+    let
+      scaledX = parentX + scale * child.x
+      scaledY = parentY + scale * child.y
+      scaledR = scale * child.r
+    in
+      PackNode (child { x = scaledX, y = scaledY, r = scaledR, children = map (scaleNode scale scaledX scaledY) child.children })

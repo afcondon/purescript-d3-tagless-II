@@ -78,9 +78,9 @@ instance Show (Attribute datum) where
 -- | data accessor, allowing attributes written for simple types to work with
 -- | complex types via field selection.
 instance Contravariant Attribute where
-  cmap f (StaticAttr name val) = StaticAttr name val  -- Static doesn't depend on datum
-  cmap f (DataAttr name g) = DataAttr name (g <<< f)   -- Compose: first project, then extract value
-  cmap f (IndexedAttr name g) = IndexedAttr name (\b i -> g (f b) i)  -- Project datum before indexing
+  cmap _ (StaticAttr name val) = StaticAttr name val -- Static doesn't depend on datum
+  cmap f (DataAttr name g) = DataAttr name (g <<< f) -- Compose: first project, then extract value
+  cmap f (IndexedAttr name g) = IndexedAttr name (\b i -> g (f b) i) -- Project datum before indexing
 
 -- | Attribute names (SVG/HTML properties)
 -- |

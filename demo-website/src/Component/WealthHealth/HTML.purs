@@ -3,7 +3,7 @@ module Component.WealthHealth.HTML where
 import Prelude
 
 import Data.Int (floor, toNumber)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe, fromMaybe)
 import Data.Number (fromString) as Number
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -83,11 +83,11 @@ renderControlPanel state =
         ]
     ]
   where
-    toInt :: String -> Maybe Int
-    toInt s = map floor (toNum s)
+  toInt :: String -> Maybe Int
+  toInt s = map floor (toNum s)
 
-    toNum :: String -> Maybe Number
-    toNum s = Number.fromString s
+  toNum :: String -> Maybe Number
+  toNum s = Number.fromString s
 
 -- | Render the region legend
 renderLegend :: forall w i. HH.HTML w i
@@ -135,5 +135,7 @@ formatNumber n =
 -- | Format population (in millions)
 formatPopulation :: Number -> String
 formatPopulation n =
-  let millions = n / 1000000.0
-  in show (floor millions) <> "M"
+  let
+    millions = n / 1000000.0
+  in
+    show (floor millions) <> "M"

@@ -80,27 +80,29 @@ handleAction = case _ of
     pure unit
 
   GenerateSimpleTree -> do
-    let tree = T.named SVG "svg" [staticAttr "width" "800", staticAttr "height" "600"] `T.withChildren`
-          [ T.elem Group [staticAttr "class" "container"] `T.withChild`
-              T.elem Circle [staticAttr "r" "50", staticAttr "fill" "blue"]
-          , T.elem Text [staticAttr "x" "100", staticAttr "y" "100"]
-          ]
+    let
+      tree = T.named SVG "svg" [ staticAttr "width" "800", staticAttr "height" "600" ] `T.withChildren`
+        [ T.elem Group [ staticAttr "class" "container" ] `T.withChild`
+            T.elem Circle [ staticAttr "r" "50", staticAttr "fill" "blue" ]
+        , T.elem Text [ staticAttr "x" "100", staticAttr "y" "100" ]
+        ]
     code <- liftEffect $ runMermaidTree tree
     H.modify_ _ { mermaidCode = Just code }
     -- Trigger Mermaid rendering after DOM update
     liftEffect runMermaid
 
   GenerateJoinTree -> do
-    let sampleData = [1, 2, 3, 4, 5]
-        tree = T.named SVG "svg" [staticAttr "width" "800"] `T.withChild`
-          (T.joinData "circles" "circle" sampleData $ \n ->
+    let
+      sampleData = [ 1, 2, 3, 4, 5 ]
+      tree = T.named SVG "svg" [ staticAttr "width" "800" ] `T.withChild`
+        ( T.joinData "circles" "circle" sampleData $ \_ ->
             T.elem Circle
               [ dataAttr "cx" (\d -> NumberValue (toNumber d * 50.0))
               , dataAttr "cy" (\_ -> NumberValue 100.0)
               , staticAttr "r" "20"
               , staticAttr "fill" "steelblue"
               ]
-          )
+        )
     code <- liftEffect $ runMermaidTree tree
     H.modify_ _ { mermaidCode = Just code }
     -- Trigger Mermaid rendering after DOM update

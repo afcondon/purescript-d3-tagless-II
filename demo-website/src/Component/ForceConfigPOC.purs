@@ -16,7 +16,6 @@ module Component.ForceConfigPOC where
 import Prelude
 
 import Data.Array as A
-import Data.Foldable (foldr)
 import Data.Maybe (Maybe(..))
 import Data.Nullable (null)
 import Effect (Effect)
@@ -27,11 +26,11 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import PSD3.Config.Apply (applySceneConfig)
-import PSD3.Config.Force (AttrValue(..), ForceConfig(..), centerForce, collideForce, manyBodyForce, withRadius, withStrength)
-import PSD3.Config.Scene (SceneConfig(..), defaultSimParams, forceCount, scene, withAlpha)
+import PSD3.Config.Force (AttrValue(..), ForceConfig(..), centerForce, collideForce, manyBodyForce, withStrength)
+import PSD3.Config.Scene (SceneConfig(..), forceCount, scene, withAlpha)
 import PSD3.Data.Node (SimulationNode)
 import PSD3.Internal.FFI (SimulationVariables, d3Append_, d3DataWithKeyFunction_, d3EnterAndAppend_, d3SelectFirstInDOM_, d3SelectionSelectAll_, d3SetAttr_, defaultNodeTick_, initSimulation_, setNodes_, startSimulation_)
-import PSD3.Internal.Types (D3Selection_, D3Simulation_)
+import PSD3.Internal.Types (D3Simulation_)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- =============================================================================
@@ -68,59 +67,64 @@ center = centerForce "center"
 -- =============================================================================
 
 compactScene :: SceneConfig
-compactScene = scene "Compact" [chargeWeak, collisionSmall, center]
+compactScene = scene "Compact" [ chargeWeak, collisionSmall, center ]
   # withAlpha 0.3
 
 spreadScene :: SceneConfig
-spreadScene = scene "Spread" [chargeStrong, collisionLarge, center]
+spreadScene = scene "Spread" [ chargeStrong, collisionLarge, center ]
   # withAlpha 0.3
 
 -- =============================================================================
 -- Test Data
 -- =============================================================================
 
-type TestNode = ( id :: String, label :: String, r :: Number )
+type TestNode = (id :: String, label :: String, r :: Number)
 
 -- Create 20 test nodes in a grid-like pattern
 testNodes :: Array (SimulationNode TestNode)
 testNodes =
-  map (\i -> {
-    id: "node-" <> show i
-  , label: "N" <> show i
-  , r: 8.0
-  , x: 0.0
-  , y: 0.0
-  , vx: 0.0
-  , vy: 0.0
-  , fx: null
-  , fy: null
-  }) (A.range 1 20)
+  map
+    ( \i ->
+        { id: "node-" <> show i
+        , label: "N" <> show i
+        , r: 8.0
+        , x: 0.0
+        , y: 0.0
+        , vx: 0.0
+        , vy: 0.0
+        , fx: null
+        , fy: null
+        }
+    )
+    (A.range 1 20)
 
 -- Simulation configuration matching our scene parameters
 simConfig :: SimulationVariables
-simConfig = {
-    alpha: 1.0
+simConfig =
+  { alpha: 1.0
   , alphaTarget: 0.0
   , alphaMin: 0.001
   , alphaDecay: 0.0228
   , velocityDecay: 0.4
-}
+  }
 
 -- Key function for node identification
 nodeKey :: forall r. SimulationNode r -> String
 nodeKey node =
-  let nodeWithId = unsafeCoerce node :: { id :: String }
-  in nodeWithId.id
+  let
+    nodeWithId = unsafeCoerce node :: { id :: String }
+  in
+    nodeWithId.id
 
 -- =============================================================================
 -- Component
 -- =============================================================================
 
-type State = {
-    currentScene :: SceneConfig
+type State =
+  { currentScene :: SceneConfig
   , sceneName :: String
   , simulation :: Maybe D3Simulation_
-}
+  }
 
 data Action
   = Initialize
@@ -128,18 +132,18 @@ data Action
   | SwitchToSpread
 
 component :: forall query input output m. MonadAff m => H.Component query input output m
-component = H.mkComponent {
-    initialState: \_ -> {
-      currentScene: compactScene
-    , sceneName: "Compact"
-    , simulation: Nothing
-    }
+component = H.mkComponent
+  { initialState: \_ ->
+      { currentScene: compactScene
+      , sceneName: "Compact"
+      , simulation: Nothing
+      }
   , render
-  , eval: H.mkEval $ H.defaultEval {
-      handleAction = handleAction
-    , initialize = Just Initialize
-    }
-}
+  , eval: H.mkEval $ H.defaultEval
+      { handleAction = handleAction
+      , initialize = Just Initialize
+      }
+  }
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render state =
@@ -191,19 +195,19 @@ render state =
         , HP.class_ (HH.ClassName "svg-container")
         , HP.attr (HH.AttrName "style") "position: relative; margin-top: 20px; border: 1px solid #ccc;"
         ]
-        []  -- SVG created programmatically in Initialize
+        [] -- SVG created programmatically in Initialize
     ]
 
 renderSceneParams :: forall w i. SceneConfig -> Array (HH.HTML w i)
 renderSceneParams (SceneConfig config) =
   map renderForce config.forces
   where
-    renderForce (ForceConfig force) =
-      HH.div
-        [ HP.class_ (HH.ClassName "force-params") ]
-        [ HH.strong_ [ HH.text $ force.name <> ": " ]
-        , HH.text $ show force.params
-        ]
+  renderForce (ForceConfig force) =
+    HH.div
+      [ HP.class_ (HH.ClassName "force-params") ]
+      [ HH.strong_ [ HH.text $ force.name <> ": " ]
+      , HH.text $ show force.params
+      ]
 
 handleAction :: forall output m. MonadAff m => Action -> H.HalogenM State Action () output m Unit
 handleAction = case _ of
@@ -225,7 +229,7 @@ handleAction = case _ of
     let _ = d3SetAttr_ "height" (unsafeCoerce 600) svgEl
     let _ = d3SetAttr_ "style" (unsafeCoerce "display: block; background-color: #f9f9f9;") svgEl
     let g = d3Append_ "g" svgEl
-    let _ = d3SetAttr_ "transform" (unsafeCoerce "translate(400,300)") g  -- Center the group
+    let _ = d3SetAttr_ "transform" (unsafeCoerce "translate(400,300)") g -- Center the group
     liftEffect $ logMessage "POC: Set up SVG (800x600)"
 
     -- Create circles with data binding (enter pattern)
@@ -236,8 +240,8 @@ handleAction = case _ of
     liftEffect $ logMessage "POC: Bound data to selection"
     let circles = d3EnterAndAppend_ "circle" dataSelection
     liftEffect $ logMessage "POC: Created enter circles"
-    let _ = d3SetAttr_ "r" (unsafeCoerce 8.0) circles  -- Set radius
-    let _ = d3SetAttr_ "fill" (unsafeCoerce "#69b3a2") circles  -- Set color
+    let _ = d3SetAttr_ "r" (unsafeCoerce 8.0) circles -- Set radius
+    let _ = d3SetAttr_ "fill" (unsafeCoerce "#69b3a2") circles -- Set color
     liftEffect $ logMessage "POC: Set attributes on circles"
 
     -- Store simulation in state

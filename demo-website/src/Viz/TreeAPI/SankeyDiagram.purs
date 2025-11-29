@@ -6,12 +6,9 @@ module D3.Viz.TreeAPI.SankeyDiagram where
 import Prelude
 
 import Data.Array as Array
-import Data.Map as Map
-import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
-import Partial.Unsafe (unsafePartial, unsafeCrashWith)
 import PSD3.Layout.Sankey.CSV (parseSankeyCSV)
 import PSD3.Layout.Sankey.Compute (computeLayout)
 import PSD3.Layout.Sankey.Path (generateLinkPath)
@@ -42,12 +39,12 @@ instance Ord IndexedNode where
   compare (IndexedNode a) (IndexedNode b) = compare a.index b.index
 
 -- | Draw Sankey diagram with TreeAPI
-drawSankey ::
-  String ->
-  String ->
-  Number ->
-  Number ->
-  Effect Unit
+drawSankey
+  :: String
+  -> String
+  -> Number
+  -> Number
+  -> Effect Unit
 drawSankey csvData containerSelector w h = runD3v2M do
   liftEffect $ Console.log "=== Drawing Sankey with TreeAPI ==="
 
@@ -60,27 +57,29 @@ drawSankey csvData containerSelector w h = runD3v2M do
 
   let layoutResult = computeLayout linkInputs w h
   liftEffect $ Console.log $ "Layout computed: " <> show (Array.length layoutResult.nodes) <> " nodes, "
-                                              <> show (Array.length layoutResult.links) <> " links"
+    <> show (Array.length layoutResult.links)
+    <> " links"
 
   -- Wrap nodes and links with indices for unique keys
   let indexedNodes = Array.mapWithIndex (\i node -> IndexedNode { index: i, node }) layoutResult.nodes
   let indexedLinks = Array.mapWithIndex (\i link -> IndexedLink { index: i, link }) layoutResult.links
 
   -- Declarative tree structure (SVG groups only, no data)
-  let sankeyTree :: T.Tree Unit
-      sankeyTree =
-        T.named SVG "svg"
-          [ width w
-          , height h
-          , viewBox ("0 0 " <> show w <> " " <> show h)
-          , id_ "sankey-svg"
-          , class_ "sankey"
+  let
+    sankeyTree :: T.Tree Unit
+    sankeyTree =
+      T.named SVG "svg"
+        [ width w
+        , height h
+        , viewBox ("0 0 " <> show w <> " " <> show h)
+        , id_ "sankey-svg"
+        , class_ "sankey"
+        ]
+        `T.withChildren`
+          [ T.named Group "linksGroup" [ class_ "links" ]
+          , T.named Group "nodesGroup" [ class_ "nodes" ]
+          , T.named Group "labelsGroup" [ class_ "labels" ]
           ]
-          `T.withChildren`
-            [ T.named Group "linksGroup" [ class_ "links" ]
-            , T.named Group "nodesGroup" [ class_ "nodes" ]
-            , T.named Group "labelsGroup" [ class_ "labels" ]
-            ]
 
   -- Render structure
   selections <- renderTree container sankeyTree
@@ -91,25 +90,31 @@ drawSankey csvData containerSelector w h = runD3v2M do
   labelsGroupSel <- liftEffect $ reselectD3v2 "labelsGroup" selections
 
   -- Render links (filled paths - ribbons)
-  let linksTree :: T.Tree IndexedLink
-      linksTree =
-        T.joinData "linkElements" "path" indexedLinks $ \(IndexedLink il) ->
-          let link = il.link
-          in T.elem Path
+  let
+    linksTree :: T.Tree IndexedLink
+    linksTree =
+      T.joinData "linkElements" "path" indexedLinks $ \(IndexedLink il) ->
+        let
+          link = il.link
+        in
+          T.elem Path
             [ class_ "sankey-link"
-            , d ((\_  -> generateLinkPath layoutResult.nodes link) :: IndexedLink -> String)
-            , fill ((\_  -> link.color) :: IndexedLink -> String)
+            , d ((\_ -> generateLinkPath layoutResult.nodes link) :: IndexedLink -> String)
+            , fill ((\_ -> link.color) :: IndexedLink -> String)
             , fillOpacity 0.5
             ]
 
   _ <- renderTree linksGroupSel linksTree
 
   -- Render nodes (rectangles)
-  let nodesTree :: T.Tree IndexedNode
-      nodesTree =
-        T.joinData "nodeElements" "rect" indexedNodes $ \(IndexedNode in_) ->
-          let node = in_.node
-          in T.elem Rect
+  let
+    nodesTree :: T.Tree IndexedNode
+    nodesTree =
+      T.joinData "nodeElements" "rect" indexedNodes $ \(IndexedNode in_) ->
+        let
+          node = in_.node
+        in
+          T.elem Rect
             [ class_ "sankey-node"
             , x node.x0
             , y node.y0
@@ -124,15 +129,18 @@ drawSankey csvData containerSelector w h = runD3v2M do
   _ <- renderTree nodesGroupSel nodesTree
 
   -- Render labels (text positioned by node layer)
-  let labelsTree :: T.Tree IndexedNode
-      labelsTree =
-        T.joinData "labelElements" "text" indexedNodes $ \(IndexedNode in_) ->
-          let node = in_.node
-          in T.elem Text
+  let
+    labelsTree :: T.Tree IndexedNode
+    labelsTree =
+      T.joinData "labelElements" "text" indexedNodes $ \(IndexedNode in_) ->
+        let
+          node = in_.node
+        in
+          T.elem Text
             [ class_ "sankey-label"
             , x (if node.x0 < w / 2.0 then node.x1 + 6.0 else node.x0 - 6.0)
             , y ((node.y0 + node.y1) / 2.0)
-            , textAnchor ((\_  -> if node.x0 < w / 2.0 then "start" else "end") :: IndexedNode -> String)
+            , textAnchor ((\_ -> if node.x0 < w / 2.0 then "start" else "end") :: IndexedNode -> String)
             , fill "#000"
             , textContent node.name
             ]

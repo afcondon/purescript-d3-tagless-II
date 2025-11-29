@@ -3,7 +3,7 @@ module D3.Viz.TreeAPI.BarChartExample where
 import Prelude
 
 import Data.Array (length)
-import Data.Foldable (maximum, minimum)
+import Data.Foldable (maximum)
 import Data.Int as Int
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -15,9 +15,8 @@ import PSD3v2.Axis.Axis (axisBottom, axisLeft, renderAxis, Scale)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, reselectD3v2)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
-import PSD3v2.VizTree.Tree (Tree, joinData)
+import PSD3v2.VizTree.Tree (Tree)
 import PSD3v2.VizTree.Tree as T
-import Unsafe.Coerce (unsafeCoerce)
 import Web.DOM.Element (Element)
 
 -- | Simple data point
@@ -72,7 +71,7 @@ barChart = runD3v2M do
 
   -- Calculate data extents
   let yValues = map _.y sampleData
-  let minY = 0.0  -- Start bars from zero
+  let minY = 0.0 -- Start bars from zero
   let maxY = fromMaybe 100.0 $ maximum yValues
 
   -- Calculate bar width (80% of available space per bar)
@@ -81,33 +80,36 @@ barChart = runD3v2M do
 
   -- KEY: Create scales to map data values → pixel positions
   -- Scales are the bridge between data space and visual space
-  let xScale :: Scale
-      xScale =
-        { domain: { min: 1.0, max: Int.toNumber numBars }  -- Data range
-        , range: { min: 0.0, max: iWidth }                  -- Pixel range
-        }
+  let
+    xScale :: Scale
+    xScale =
+      { domain: { min: 1.0, max: Int.toNumber numBars } -- Data range
+      , range: { min: 0.0, max: iWidth } -- Pixel range
+      }
 
-  let yScale :: Scale
-      yScale =
-        { domain: { min: minY, max: maxY }    -- Data range (0 to max value)
-        , range: { min: iHeight, max: 0.0 }   -- Pixel range (inverted for SVG coords)
-        }
+  let
+    yScale :: Scale
+    yScale =
+      { domain: { min: minY, max: maxY } -- Data range (0 to max value)
+      , range: { min: iHeight, max: 0.0 } -- Pixel range (inverted for SVG coords)
+      }
 
   -- Create axes
   let xAxis = axisBottom xScale
   let yAxis = axisLeft yScale
 
   -- First, render the SVG container with axes (datum type: Unit)
-  let axesTree :: Tree Unit
-      axesTree =
-        T.named SVG "svg"
-          [ width dims.width
-          , height dims.height
-          , viewBox ("0 0 " <> show dims.width <> " " <> show dims.height)
-          , class_ "bar-chart-tree"
-          ]
-          `T.withChild`
-            (T.named Group "chartGroup"
+  let
+    axesTree :: Tree Unit
+    axesTree =
+      T.named SVG "svg"
+        [ width dims.width
+        , height dims.height
+        , viewBox ("0 0 " <> show dims.width <> " " <> show dims.height)
+        , class_ "bar-chart-tree"
+        ]
+        `T.withChild`
+          ( T.named Group "chartGroup"
               [ class_ "chart-content"
               , transform ("translate(" <> show dims.marginLeft <> "," <> show dims.marginTop <> ")")
               ]
@@ -125,7 +127,8 @@ barChart = runD3v2M do
                     ]
                     `T.withChild`
                       renderAxis yAxis
-                ])
+                ]
+          )
 
   -- Render axes first (underlaying)
   axesSelections <- renderTree container axesTree
@@ -135,18 +138,21 @@ barChart = runD3v2M do
   chartGroupSel <- liftEffect $ reselectD3v2 "chartGroup" axesSelections
 
   -- KEY: Data join creates one rect per data point
-  let barsTree :: Tree DataPoint
-      barsTree =
-        T.joinData "bars" "rect" sampleData $ \point ->
-          -- Calculate bar position and dimensions from data
-          let xPos = (point.x - 1.0) * (iWidth / (Int.toNumber numBars)) + ((iWidth / (Int.toNumber numBars)) - barWidth) / 2.0
-              yPos = iHeight - ((point.y - minY) / (maxY - minY) * iHeight)  -- Manual scale calculation
-              barHeight = iHeight - yPos  -- Bar grows from baseline
-          in T.elem Rect
-            [ x xPos          -- Horizontal position
-            , y yPos          -- Top of bar (SVG coords from top-left)
-            , width barWidth  -- Bar width
-            , height barHeight  -- Bar height (grows downward in SVG)
+  let
+    barsTree :: Tree DataPoint
+    barsTree =
+      T.joinData "bars" "rect" sampleData $ \point ->
+        -- Calculate bar position and dimensions from data
+        let
+          xPos = (point.x - 1.0) * (iWidth / (Int.toNumber numBars)) + ((iWidth / (Int.toNumber numBars)) - barWidth) / 2.0
+          yPos = iHeight - ((point.y - minY) / (maxY - minY) * iHeight) -- Manual scale calculation
+          barHeight = iHeight - yPos -- Bar grows from baseline
+        in
+          T.elem Rect
+            [ x xPos -- Horizontal position
+            , y yPos -- Top of bar (SVG coords from top-left)
+            , width barWidth -- Bar width
+            , height barHeight -- Bar height (grows downward in SVG)
             , fill "#4a90e2"
             , stroke "#357abd"
             , strokeWidth 1.0
