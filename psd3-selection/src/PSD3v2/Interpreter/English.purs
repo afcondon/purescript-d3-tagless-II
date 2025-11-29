@@ -1,4 +1,12 @@
-module PSD3v2.Interpreter.English where
+module PSD3v2.Interpreter.English
+  ( runEnglish
+  , describeTree
+  , describeAttribute
+  , showElemType
+  , showAttrName
+  , showAttrValue
+  , indent
+  ) where
 
 -- | English description interpreter for TreeAPI
 -- | Translates tree structure into English description of HOW it's built

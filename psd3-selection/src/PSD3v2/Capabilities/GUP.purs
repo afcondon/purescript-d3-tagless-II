@@ -35,7 +35,11 @@
 -- |   addTickFunction "nodes" $ Step nodeCircles [cx _.x, cy _.y]
 -- |   start
 -- | ```
-module PSD3v2.Capabilities.GUP where
+module PSD3v2.Capabilities.GUP
+  ( EnterSpec
+  , ExitSpec
+  , JoinSpec
+  ) where
 
 import Prelude
 

@@ -3,7 +3,28 @@
 -- | Pure PureScript implementation of Sankey diagram layout types.
 -- | This replaces the FFI-based approach with first-class PureScript types
 -- | that integrate naturally with the phantom type system.
-module PSD3.Layout.Sankey.Types where
+module PSD3.Layout.Sankey.Types
+  ( LinkCSVRow
+  , NodeID(..)
+  , LinkID(..)
+  , Link(..)
+  , NodeIDMap
+  , NodeNameMap
+  , DependencyMap
+  , SankeyNodeInput
+  , SankeyNode
+  , SankeyLink
+  , initialiseSankeyLink
+  , SankeyLayoutResult
+  , SankeyConfig
+  , Alignment(..)
+  , LinkColorMode(..)
+  , defaultSankeyConfig
+  , withConfig
+  , SankeyGraphModel
+  , initialSankeyGraphModel
+  , initialiseSankeyNode
+  ) where
 
 import Prelude
 

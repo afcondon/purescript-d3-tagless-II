@@ -1,4 +1,14 @@
-module Data.Tree where
+module Data.Tree
+  ( Tree(..)
+  , treeMapDeep
+  , treeMapOverChildren
+  , hasChildren
+  , subTree
+  , filterTransformToList
+  , filterTransformToListRecursive
+  , leaf
+  , node
+  ) where
 
 import Prelude
 

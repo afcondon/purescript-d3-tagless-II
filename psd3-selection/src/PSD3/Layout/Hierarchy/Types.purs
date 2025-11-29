@@ -2,7 +2,23 @@
 -- |
 -- | Pure PureScript implementation of D3 hierarchy types.
 -- | Follows D3's conceptual model but uses separate types for each processing phase.
-module PSD3.Layout.Hierarchy.Types where
+module PSD3.Layout.Hierarchy.Types
+  ( HierarchyNode(..)
+  , ValuedNode(..)
+  , getData
+  , getDepth
+  , getHeight
+  , getParent
+  , getChildren
+  , getValuedData
+  , getValue
+  , getValuedDepth
+  , getValuedHeight
+  , getValuedChildren
+  , HierarchyConfig
+  , Hierarchy
+  , ValuedHierarchy
+  ) where
 
 import Prelude
 

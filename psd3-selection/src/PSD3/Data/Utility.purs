@@ -1,4 +1,11 @@
-module Utility where
+module Utility
+  ( getWindowWidthHeight
+  , compareFst
+  , compareSnd
+  , equalFst
+  , equalSnd
+  , chunk
+  ) where
 
 import Prelude
 

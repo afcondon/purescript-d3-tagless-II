@@ -1,4 +1,18 @@
-module PSD3.Internal.Scales.Scales where
+module PSD3.Internal.Scales.Scales
+  ( ScaleNumeric_
+  , ScaleString_
+  , d3SchemeCategory10N_
+  , d3SchemeDiverging10N_
+  , d3SchemeSequential10N_
+  , d3SchemeCategory10S_
+  , d3SchemePairedN_
+  , d3InterpolateViridis_
+  , d3InterpolateRdYlGn_
+  , d3InterpolatePlasma_
+  , d3InterpolateInferno_
+  , d3InterpolateMagma_
+  , d3InterpolateTurbo_
+  ) where
 
 -- TODO much more to be ported over / wrapped here
 

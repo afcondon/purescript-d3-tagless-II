@@ -1,4 +1,9 @@
-module PSD3v2.Interpreter.MetaAST where
+module PSD3v2.Interpreter.MetaAST
+  ( TreeAST(..)
+  , toAST
+  , prettyPrintAST
+  , showElemType
+  ) where
 
 -- | Meta/AST interpreter for TreeAPI
 -- | Produces a PureScript data structure representation of the tree

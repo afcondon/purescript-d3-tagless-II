@@ -1,4 +1,8 @@
-module Data.DependencyGraph where
+module Data.DependencyGraph
+  ( DepPath
+  , GraphSearchRecord
+  , getReachableNodes
+  ) where
 
 import Data.Array (elem, head, null, partition, uncons, (:))
 import Data.Graph (Graph)

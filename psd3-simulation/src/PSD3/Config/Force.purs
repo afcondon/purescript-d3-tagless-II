@@ -11,7 +11,27 @@
 -- | - ForceConfig: Complete force specification (type, name, params, filter)
 -- | - ForceParams: Type-specific parameters (ManyBody, Collide, etc.)
 -- | - AttrValue: Parameter values (static or function-based)
-module PSD3.Config.Force where
+module PSD3.Config.Force
+  ( Label
+  , AttrValue(..)
+  , ForceFilter(..)
+  , ForceType(..)
+  , ForceParams(..)
+  , ForceConfig(..)
+  , manyBodyForce
+  , centerForce
+  , collideForce
+  , forceX
+  , forceY
+  , radialForce
+  , linkForce
+  , updateParams
+  , withFilter
+  , withoutFilter
+  , withStrength
+  , withRadius
+  , withDistance
+  ) where
 
 import Prelude
 

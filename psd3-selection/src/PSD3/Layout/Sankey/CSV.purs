@@ -2,7 +2,10 @@
 -- |
 -- | CSV parsing utilities for Sankey diagram data.
 -- | Parses CSV files with source,target,value format.
-module PSD3.Layout.Sankey.CSV where
+module PSD3.Layout.Sankey.CSV
+  ( parseSankeyCSV
+  , parseLine
+  ) where
 
 import Prelude
 

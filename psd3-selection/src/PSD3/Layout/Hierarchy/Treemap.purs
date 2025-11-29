@@ -2,7 +2,20 @@
 -- |
 -- | Pure PureScript implementation of D3's treemap layout.
 -- | Partitions rectangles to represent hierarchical data with area proportional to value.
-module PSD3.Layout.Hierarchy.Treemap where
+module PSD3.Layout.Hierarchy.Treemap
+  ( TreemapNode(..)
+  , TileFunction
+  , TreemapConfig
+  , phi
+  , defaultTreemapConfig
+  , toTreemapNode
+  , treemap
+  , dice
+  , slice
+  , sliceDice
+  , binary
+  , squarify
+  ) where
 
 import Prelude
 

@@ -6,7 +6,31 @@
 -- | - Optionally, node positions/constraints
 -- |
 -- | Scenes are composable and can be merged, filtered, or transformed.
-module PSD3.Config.Scene where
+module PSD3.Config.Scene
+  ( Label
+  , SimulationParams
+  , defaultSimParams
+  , fastSimParams
+  , slowSimParams
+  , SceneConfig(..)
+  , scene
+  , sceneWithParams
+  , withDescription
+  , withSimParams
+  , withAlpha
+  , withAlphaTarget
+  , addForce
+  , removeForce
+  , keepForces
+  , excludeForces
+  , replaceForce
+  , updateForce
+  , mergeScenes
+  , getForce
+  , hasForce
+  , forceNames
+  , forceCount
+  ) where
 
 import Prelude
 

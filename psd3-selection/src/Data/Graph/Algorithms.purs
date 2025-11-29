@@ -1,4 +1,23 @@
-module Data.Graph.Algorithms where
+module Data.Graph.Algorithms
+  ( -- Types
+    SimpleGraph
+  , TaskNode
+  , LayeredNode
+  -- Reachability
+  , reachableFrom
+  -- Topological sort
+  , buildGraph
+  , getTopologicalOrder
+  , computeLayers
+  , addLayers
+  -- Transitive reduction
+  , transitiveReduction
+  , getRemovedEdges
+  , getAllEdges
+  -- Conversion
+  , taskNodesToSimpleGraph
+  , simpleGraphToTaskNodes
+  ) where
 
 -- | Graph algorithms for DAGs (Directed Acyclic Graphs)
 -- | Provides topological sort, transitive reduction, and reachability analysis

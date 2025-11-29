@@ -1,4 +1,13 @@
-module PSD3.Layout.Hierarchy.Link where
+module PSD3.Layout.Hierarchy.Link
+  ( LinkStyle(..)
+  , linkStepHorizontal
+  , linkStepVertical
+  , linkBezierVertical
+  , linkBezierHorizontal
+  , linkBezierRadial
+  , linkDiagonal
+  , linkGenerator
+  ) where
 
 import Prelude
 

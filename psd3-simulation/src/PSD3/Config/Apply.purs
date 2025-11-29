@@ -9,7 +9,21 @@
 -- |
 -- | Design principle: d3 force handles are ephemeral runtime artifacts.
 -- | They are created from configurations and discarded when no longer needed.
-module PSD3.Config.Apply where
+module PSD3.Config.Apply
+  ( applySceneConfig
+  , clearAllTickFunctions
+  , removeAllForces
+  , createForceHandle
+  , applyForceParams
+  , applyParam
+  , setParam
+  , attrValueToJS
+  , applyFilterToAttr
+  , applySimulationParams
+  , addForceToSimulation
+  , removeForceFromSimulation
+  , updateForceParams
+  ) where
 
 import Prelude
 

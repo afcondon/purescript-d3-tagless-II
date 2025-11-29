@@ -5,7 +5,11 @@
 -- | Starts with Array SankeyLinkInput and generates nodes dynamically.
 -- |
 -- | Reference: https://github.com/d3/d3-sankey (ISC License)
-module PSD3.Layout.Sankey.Compute where
+module PSD3.Layout.Sankey.Compute
+  ( epsilon
+  , computeLayout
+  , computeLayoutWithConfig
+  ) where
 
 import Prelude
 

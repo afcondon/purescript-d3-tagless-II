@@ -2,7 +2,17 @@
 -- |
 -- | Pure PureScript implementation of D3 hierarchy core functions.
 -- | Matches D3's algorithms exactly but using pure functional style.
-module PSD3.Layout.Hierarchy.Core where
+module PSD3.Layout.Hierarchy.Core
+  ( hierarchy
+  , getHeight
+  , sum
+  , count
+  , eachBefore
+  , eachAfter
+  , descendants
+  , leaves
+  , sortHierarchy
+  ) where
 
 import Prelude
 

@@ -6600,7 +6600,7 @@
         return 0;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Cluster4 (line 87, column 12 - line 89, column 21): " + [firstLeaf.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Cluster4 (line 91, column 12 - line 93, column 21): " + [firstLeaf.constructor.name]);
     })();
     var lastLeaf = last(leaves);
     var maxX = (function() {
@@ -6612,7 +6612,7 @@
         return 0;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Cluster4 (line 91, column 12 - line 93, column 21): " + [lastLeaf.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Cluster4 (line 95, column 12 - line 97, column 21): " + [lastLeaf.constructor.name]);
     })();
     var targetX = (minX + maxX) / 2;
     var offset = targetX - tree3.value0.x;
@@ -6764,7 +6764,7 @@
                   return;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 267, column 5 - line 267, column 49): " + [v2.constructor.name, v3.constructor.name, v4.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 276, column 5 - line 276, column 49): " + [v2.constructor.name, v3.constructor.name, v4.constructor.name]);
               }
               ;
               while (!$tco_done) {
@@ -6860,7 +6860,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 387, column 18 - line 389, column 27): " + [c.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 396, column 18 - line 398, column 27): " + [c.constructor.name]);
       })(cs);
       var v = head(currentLevels);
       if (v instanceof Nothing) {
@@ -6877,13 +6877,13 @@
             return Nothing.value;
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 399, column 24 - line 401, column 33): " + [c.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 408, column 24 - line 410, column 33): " + [c.constructor.name]);
         })(cs);
         var maxVal = fromMaybe(0)(maximum3(currentLevels));
         return new Cons(maxVal, mergeLevel(restContours));
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 392, column 9 - line 404, column 52): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 401, column 9 - line 413, column 52): " + [v.constructor.name]);
     };
     if (contours.length === 0) {
       return Nil.value;
@@ -6902,7 +6902,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 356, column 18 - line 358, column 27): " + [c.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 365, column 18 - line 367, column 27): " + [c.constructor.name]);
       })(cs);
       var v = head(currentLevels);
       if (v instanceof Nothing) {
@@ -6919,13 +6919,13 @@
             return Nothing.value;
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 368, column 24 - line 370, column 33): " + [c.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 377, column 24 - line 379, column 33): " + [c.constructor.name]);
         })(cs);
         var minVal = fromMaybe(0)(minimum3(currentLevels));
         return new Cons(minVal, mergeLevel(restContours));
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 361, column 9 - line 373, column 52): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 370, column 9 - line 382, column 52): " + [v.constructor.name]);
     };
     if (contours.length === 0) {
       return Nil.value;
@@ -6998,7 +6998,7 @@
           return v2.value1;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 258, column 5 - line 258, column 43): " + [v2.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 267, column 5 - line 267, column 43): " + [v2.constructor.name]);
       };
       var applyBase = function(base2) {
         return function(v2) {
@@ -7034,7 +7034,7 @@
             return v.value1;
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 238, column 5 - line 238, column 43): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 247, column 5 - line 247, column 43): " + [v.constructor.name]);
         };
         var getSep = function(v) {
           return function(v1) {
@@ -7048,7 +7048,7 @@
                   return v.value0(v2)(v3) + v1;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 234, column 5 - line 234, column 69): " + [v.constructor.name, v1.constructor.name, v2.constructor.name, v3.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 243, column 5 - line 243, column 69): " + [v.constructor.name, v1.constructor.name, v2.constructor.name, v3.constructor.name]);
               };
             };
           };
@@ -28644,7 +28644,7 @@ ${name16}:
           return "fn(datum, index)";
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Config.Force (line 37, column 1 - line 40, column 52): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Config.Force (line 57, column 1 - line 60, column 52): " + [v.constructor.name]);
       }
     };
   };
@@ -28679,7 +28679,7 @@ ${name16}:
         return "Link { distance: " + (show114(v.value0.distance) + (", strength: " + (show114(v.value0.strength) + " }")));
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Config.Force (line 112, column 1 - line 126, column 88): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Config.Force (line 132, column 1 - line 146, column 88): " + [v.constructor.name]);
     }
   };
   var withStrength = function(val) {
@@ -28775,7 +28775,7 @@ ${name16}:
         };
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Config.Force (line 263, column 55 - line 270, column 88): " + [v.params.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Config.Force (line 283, column 55 - line 290, column 88): " + [v.params.constructor.name]);
     };
   };
   var manyBodyForce = function(name16) {
@@ -28857,7 +28857,7 @@ ${name16}:
       return forceLink_(unit);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Config.Apply (line 98, column 42 - line 105, column 35): " + [v.forceType.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Config.Apply (line 112, column 42 - line 119, column 35): " + [v.forceType.constructor.name]);
   };
   var clearAllTickFunctions = function(simulation) {
     var tickNames = ["nodes", "links"];
@@ -28879,7 +28879,7 @@ ${name16}:
       return mkFn2(v.value0);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Config.Apply (line 183, column 17 - line 186, column 52): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Config.Apply (line 197, column 17 - line 200, column 52): " + [v.constructor.name]);
   };
   var setParam = function(handle) {
     return function(paramName) {
@@ -28975,7 +28975,7 @@ ${name16}:
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Config.Apply (line 191, column 31 - line 202, column 52): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Config.Apply (line 205, column 31 - line 216, column 52): " + [v.constructor.name]);
     };
   };
   var applyParam = function(handle) {
@@ -28990,7 +28990,7 @@ ${name16}:
             return setParam(handle)(paramName)(applyFilterToAttr(maybeFilter.value0.value0.predicate)(attrValue));
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Config.Apply (line 151, column 3 - line 158, column 79): " + [maybeFilter.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Config.Apply (line 165, column 3 - line 172, column 79): " + [maybeFilter.constructor.name]);
         };
       };
     };
@@ -29054,7 +29054,7 @@ ${name16}:
           };
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Config.Apply (line 111, column 46 - line 145, column 56): " + [params.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Config.Apply (line 125, column 46 - line 159, column 56): " + [params.constructor.name]);
       };
     };
   };
@@ -30370,7 +30370,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return linkDiagonal;
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Link (line 104, column 1 - line 104, column 79): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Link (line 113, column 1 - line 113, column 79): " + [v.constructor.name]);
   };
   var eqLinkStyle = {
     eq: function(x39) {
@@ -31083,7 +31083,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return "tbody";
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 58, column 1 - line 58, column 37): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 71, column 1 - line 71, column 37): " + [v.constructor.name]);
   };
   var generateStyleDefinitions = /* @__PURE__ */ (function() {
     return "\n    %% Style definitions\n    classDef elementNode fill:#e6f598,stroke:#abdda4,stroke-width:2px\n    classDef joinNode fill:#f46d43,stroke:#d53e4f,stroke-width:2px\n    classDef nestedJoinNode fill:#fdae61,stroke:#f46d43,stroke-width:2px\n    classDef templateNode fill:#abdda4,stroke:#66c2a5,stroke-width:2px\n    classDef decomposeNode fill:#fee08b,stroke:#fdae61,stroke-width:2px\n";
@@ -31101,7 +31101,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return v.value0 + "(datum, i)";
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 77, column 19 - line 80, column 61): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 90, column 19 - line 93, column 61): " + [v.constructor.name]);
   };
   var formatAttributeList = function(attrs) {
     if (attrs.length === 0) {
@@ -31190,7 +31190,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return showElement(tree3.value0.elemType);
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 94, column 21 - line 96, column 47): " + [tree3.value0.name.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 107, column 21 - line 109, column 47): " + [tree3.value0.name.constructor.name]);
         })();
         var attrSuffix = (function() {
           var $55 = length(tree3.value0.attrs) > 0;
@@ -31211,7 +31211,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return pure211(unit);
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 105, column 5 - line 107, column 27): " + [parentId.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 118, column 5 - line 120, column 27): " + [parentId.constructor.name]);
           })())(function() {
             return bind212(traverseWithParent(nodeId)(tree3.value0.children))(function() {
               return pure211(nodeId);
@@ -31232,7 +31232,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return pure211(unit);
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 119, column 5 - line 121, column 27): " + [parentId.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 132, column 5 - line 134, column 27): " + [parentId.constructor.name]);
           })())(function() {
             return bind212(addNode("template(datum) \u2192")("templateNode"))(function(templateLabel) {
               return discard24(addEdge(joinId)(templateLabel))(function() {
@@ -31249,7 +31249,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     });
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 128, column 5 - line 133, column 18): " + [v.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 141, column 5 - line 146, column 18): " + [v.constructor.name]);
                 })())(function() {
                   return pure211(joinId);
                 });
@@ -31271,7 +31271,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return pure211(unit);
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 143, column 5 - line 145, column 27): " + [parentId.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 156, column 5 - line 158, column 27): " + [parentId.constructor.name]);
           })())(function() {
             return bind212(addNode("decompose(datum) \u2192")("decomposeNode"))(function(decomposeId) {
               return discard24(addEdge(joinId)(decomposeId))(function() {
@@ -31297,10 +31297,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                           });
                         }
                         ;
-                        throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 160, column 9 - line 165, column 22): " + [v1.constructor.name]);
+                        throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 173, column 9 - line 178, column 22): " + [v1.constructor.name]);
                       }
                       ;
-                      throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 156, column 5 - line 165, column 22): " + [v.constructor.name]);
+                      throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 169, column 5 - line 178, column 22): " + [v.constructor.name]);
                     })())(function() {
                       return pure211(joinId);
                     });
@@ -31346,7 +31346,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return pure211(unit);
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 180, column 5 - line 182, column 27): " + [parentId.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 193, column 5 - line 195, column 27): " + [parentId.constructor.name]);
           })())(function() {
             return bind212(addNode("template(datum) \u2192")("templateNode"))(function(templateLabel) {
               return discard24(addEdge(joinId)(templateLabel))(function() {
@@ -31363,7 +31363,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     });
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 189, column 5 - line 194, column 18): " + [v.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 202, column 5 - line 207, column 18): " + [v.constructor.name]);
                 })())(function() {
                   return pure211(joinId);
                 });
@@ -31407,7 +31407,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return pure211(unit);
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 209, column 5 - line 211, column 27): " + [parentId.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 222, column 5 - line 224, column 27): " + [parentId.constructor.name]);
           })())(function() {
             return bind212(addNode("decompose(datum) \u2192")("decomposeNode"))(function(decomposeId) {
               return discard24(addEdge(joinId)(decomposeId))(function() {
@@ -31433,10 +31433,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                           });
                         }
                         ;
-                        throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 226, column 9 - line 231, column 22): " + [v1.constructor.name]);
+                        throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 239, column 9 - line 244, column 22): " + [v1.constructor.name]);
                       }
                       ;
-                      throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 222, column 5 - line 231, column 22): " + [v.constructor.name]);
+                      throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 235, column 5 - line 244, column 22): " + [v.constructor.name]);
                     })())(function() {
                       return pure211(joinId);
                     });
@@ -31448,7 +31448,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 91, column 28 - line 233, column 16): " + [tree3.constructor.name]);
+      throw new Error("Failed pattern match at PSD3v2.Interpreter.MermaidTree (line 104, column 28 - line 246, column 16): " + [tree3.constructor.name]);
     };
   };
   var runMermaidTree = function(tree3) {
@@ -33326,7 +33326,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return Nothing.value;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Sankey.CSV (line 41, column 9 - line 44, column 29): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Layout.Sankey.CSV (line 44, column 9 - line 47, column 29): " + [v.constructor.name]);
     }
     ;
     return Nothing.value;
@@ -33554,7 +33554,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return insert11(tid)(v.value0);
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 95, column 11 - line 97, column 53): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 99, column 11 - line 101, column 53): " + [v.constructor.name]);
         })();
         return insert12(sid)(targetSet)(deps);
       };
@@ -33579,7 +33579,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     return node;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 661, column 9 - line 663, column 26): " + [v.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 665, column 9 - line 667, column 26): " + [v.constructor.name]);
                 })(allNodes);
               };
             };
@@ -33689,7 +33689,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                           return acc;
                         }
                         ;
-                        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 570, column 13 - line 578, column 29): " + [v.constructor.name]);
+                        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 574, column 13 - line 582, column 29): " + [v.constructor.name]);
                       }
                       ;
                       return acc;
@@ -33731,7 +33731,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                           return acc;
                         }
                         ;
-                        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 595, column 13 - line 603, column 29): " + [v.constructor.name]);
+                        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 599, column 13 - line 607, column 29): " + [v.constructor.name]);
                       }
                       ;
                       return acc;
@@ -33892,7 +33892,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           };
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 110, column 7 - line 120, column 109): " + [s.constructor.name, t.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 114, column 7 - line 124, column 109): " + [s.constructor.name, t.constructor.name]);
       })();
       return modify_12(function(v1) {
         var $129 = {};
@@ -34021,7 +34021,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                       return 1;
                     }
                     ;
-                    throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 444, column 18 - line 446, column 25): " + [v12.constructor.name]);
+                    throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 448, column 18 - line 450, column 25): " + [v12.constructor.name]);
                   })();
                   var v1 = unsafePerformEffect(log2("calculateKy result (min of all scales): " + show120(result)));
                   return result;
@@ -34176,7 +34176,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 220, column 5 - line 220, column 86): " + [nodes3.constructor.name, height47.constructor.name, current.constructor.name, maxHeight.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 224, column 5 - line 224, column 86): " + [nodes3.constructor.name, height47.constructor.name, current.constructor.name, maxHeight.constructor.name]);
             }
             ;
             while (!$tco_done) {
@@ -34272,7 +34272,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 181, column 5 - line 181, column 85): " + [nodes3.constructor.name, depth.constructor.name, current.constructor.name, maxDepth.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 185, column 5 - line 185, column 85): " + [nodes3.constructor.name, depth.constructor.name, current.constructor.name, maxDepth.constructor.name]);
             }
             ;
             while (!$tco_done) {
@@ -34364,7 +34364,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return link3;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 737, column 15 - line 739, column 32): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 741, column 15 - line 743, column 32): " + [v.constructor.name]);
             })(currentLinks);
           };
         })(links3)(nodes3);
@@ -34422,7 +34422,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return link3;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 767, column 15 - line 769, column 32): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 771, column 15 - line 773, column 32): " + [v.constructor.name]);
             })(currentLinks);
           };
         })(linksWithY0)(nodes3);
@@ -34471,7 +34471,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return 1;
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 705, column 9 - line 707, column 25): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 709, column 9 - line 711, column 25): " + [v.constructor.name]);
           };
         };
       };
@@ -34591,7 +34591,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             };
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 795, column 9 - line 805, column 31): " + [mode.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 799, column 9 - line 809, column 31): " + [mode.constructor.name]);
         };
       };
     };
@@ -34639,7 +34639,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return 0;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 386, column 3 - line 396, column 13): " + [alignment.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 390, column 3 - line 400, column 13): " + [alignment.constructor.name]);
       };
     };
   };
@@ -34711,7 +34711,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return unit;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 262, column 9 - line 264, column 31): " + [v13.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 266, column 9 - line 268, column 31): " + [v13.constructor.name]);
       })();
       (function() {
         var v13 = find2(function(n) {
@@ -34725,7 +34725,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return unit;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 265, column 9 - line 267, column 31): " + [v13.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 269, column 9 - line 271, column 31): " + [v13.constructor.name]);
       })();
       var v12 = find2(function(n) {
         return n.name === "Losses";
@@ -34738,7 +34738,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return unit;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 268, column 9 - line 270, column 31): " + [v12.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 272, column 9 - line 274, column 31): " + [v12.constructor.name]);
     });
     var relaxedNodes = relaxation(nodesWithY)(model.sankeyLinks)(model.config)(model.config.extent.y0)(model.config.extent.y1);
     var v1 = unsafePerformEffect(function __do8() {
@@ -34754,7 +34754,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return unit;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 278, column 9 - line 280, column 31): " + [v22.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 282, column 9 - line 284, column 31): " + [v22.constructor.name]);
       })();
       (function() {
         var v22 = find2(function(n) {
@@ -34768,7 +34768,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return unit;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 281, column 9 - line 283, column 31): " + [v22.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 285, column 9 - line 287, column 31): " + [v22.constructor.name]);
       })();
       var v2 = find2(function(n) {
         return n.name === "Losses";
@@ -34781,7 +34781,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return unit;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 284, column 9 - line 286, column 31): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 288, column 9 - line 290, column 31): " + [v2.constructor.name]);
     });
     return modify_12(function(v2) {
       var $200 = {};
@@ -36140,7 +36140,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return;
               }
               ;
-              throw new Error("Failed pattern match at Data.Graph.Algorithms (line 41, column 5 - line 41, column 43): " + [visited.constructor.name, frontier.constructor.name]);
+              throw new Error("Failed pattern match at Data.Graph.Algorithms (line 60, column 5 - line 60, column 43): " + [visited.constructor.name, frontier.constructor.name]);
             }
             ;
             while (!$tco_done) {
@@ -36200,7 +36200,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           });
         }
         ;
-        throw new Error("Failed pattern match at Data.Graph.Algorithms (line 177, column 5 - line 180, column 28): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at Data.Graph.Algorithms (line 196, column 5 - line 199, column 28): " + [v.constructor.name]);
       }));
     };
   };
@@ -36272,12 +36272,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return 0;
               }
               ;
-              throw new Error("Failed pattern match at Data.Graph.Algorithms (line 116, column 22 - line 118, column 36): " + [v1.constructor.name]);
+              throw new Error("Failed pattern match at Data.Graph.Algorithms (line 135, column 22 - line 137, column 36): " + [v1.constructor.name]);
             })();
             return insert17(taskId)(layer)(accLayers);
           }
           ;
-          throw new Error("Failed pattern match at Data.Graph.Algorithms (line 105, column 7 - line 119, column 47): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at Data.Graph.Algorithms (line 124, column 7 - line 138, column 47): " + [v.constructor.name]);
         };
       };
       return foldl2(processTask)(empty3)(toUnfoldable22(sortedIds));
@@ -37186,7 +37186,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return fromMaybe(chain)(insertAt(v.value0 + 1 | 0)(newId2)(chain));
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 160, column 3 - line 164, column 62): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 177, column 3 - line 181, column 62): " + [v.constructor.name]);
         };
       };
     };
@@ -37273,7 +37273,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 654, column 7 - line 686, column 16): " + [node.children.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 671, column 7 - line 703, column 16): " + [node.children.constructor.name]);
       };
     };
     return go2(v)(0);
@@ -37290,7 +37290,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return index(chain)(nextIdx);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 126, column 3 - line 130, column 35): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 143, column 3 - line 147, column 35): " + [v.constructor.name]);
     };
   };
   var getChainSegmentFrom = function(startId) {
@@ -37306,7 +37306,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return append116(after)(before);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 213, column 3 - line 221, column 24): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 230, column 3 - line 238, column 24): " + [v.constructor.name]);
     };
   };
   var eqPackNode = function(dictEq) {
@@ -37423,7 +37423,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return Nothing.value;
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 227, column 5 - line 232, column 25): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 244, column 5 - line 249, column 25): " + [v.constructor.name]);
         })(idsToCheck);
       };
     };
@@ -37441,7 +37441,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return NoCollision.value;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 243, column 5 - line 245, column 29): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 260, column 5 - line 262, column 29): " + [v.constructor.name]);
       };
     };
   };
@@ -37494,14 +37494,14 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     return;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 345, column 13 - line 364, column 101): " + [collisionResult.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 362, column 13 - line 381, column 101): " + [collisionResult.constructor.name]);
                 }
                 ;
                 $tco_done = true;
                 return state3;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 321, column 1 - line 321, column 91): " + [maxRetries.constructor.name, newCircle.constructor.name, aId.constructor.name, bId.constructor.name, state3.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 338, column 1 - line 338, column 91): " + [maxRetries.constructor.name, newCircle.constructor.name, aId.constructor.name, bId.constructor.name, state3.constructor.name]);
             }
             ;
             while (!$tco_done) {
@@ -37622,10 +37622,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 538, column 11 - line 544, column 50): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 555, column 11 - line 561, column 50): " + [v2.constructor.name]);
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 534, column 5 - line 534, column 54): " + [i2.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 551, column 5 - line 551, column 54): " + [i2.constructor.name]);
           }
           ;
           while (!$tco_done) {
@@ -37669,7 +37669,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 554, column 5 - line 554, column 56): " + [i2.constructor.name, j.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 571, column 5 - line 571, column 56): " + [i2.constructor.name, j.constructor.name]);
             }
             ;
             while (!$tco_done1) {
@@ -37700,10 +37700,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 550, column 11 - line 552, column 52): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 567, column 11 - line 569, column 52): " + [v2.constructor.name]);
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 546, column 5 - line 546, column 56): " + [i2.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 563, column 5 - line 563, column 56): " + [i2.constructor.name]);
           }
           ;
           while (!$tco_done2) {
@@ -37727,13 +37727,13 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return basis2;
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 528, column 11 - line 530, column 29): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 545, column 11 - line 547, column 29): " + [v1.constructor.name]);
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 525, column 7 - line 530, column 29): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 542, column 7 - line 547, column 29): " + [v.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 521, column 1 - line 521, column 54): " + [basis2.constructor.name, p2.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 538, column 1 - line 538, column 54): " + [basis2.constructor.name, p2.constructor.name]);
     };
   };
   var encloseBasis1 = function(a2) {
@@ -37800,7 +37800,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 };
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 579, column 11 - line 581, column 48): " + [maybeE.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 596, column 11 - line 598, column 48): " + [maybeE.constructor.name]);
             }
             ;
             if (otherwise) {
@@ -37828,10 +37828,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 583, column 11 - line 592, column 47): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 600, column 11 - line 609, column 47): " + [v.constructor.name]);
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 576, column 5 - line 576, column 56): " + [i2.constructor.name, basis2.constructor.name, maybeE.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 593, column 5 - line 593, column 56): " + [i2.constructor.name, basis2.constructor.name, maybeE.constructor.name]);
           }
           ;
           while (!$tco_done) {
@@ -37893,7 +37893,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       });
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 151, column 5 - line 155, column 40): " + [bestNode.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 168, column 5 - line 172, column 40): " + [bestNode.constructor.name]);
   };
   var assignRadii = function(config) {
     return function(v) {
@@ -37907,7 +37907,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return sqrt(v.value0.value);
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 720, column 15 - line 722, column 39): " + [config.radius.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 737, column 15 - line 739, column 39): " + [config.radius.constructor.name]);
         })();
         return new PackNode({
           data_: v.value0.data_,
@@ -37948,7 +37948,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return result;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 379, column 5 - line 386, column 18): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 396, column 5 - line 403, column 18): " + [v2.constructor.name]);
     };
   };
   var packSiblingsMap = function(inputCircles) {
@@ -37982,7 +37982,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         };
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 396, column 7 - line 398, column 48): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 413, column 7 - line 415, column 48): " + [v.constructor.name]);
     }
     ;
     var $254 = n === 2;
@@ -39132,7 +39132,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return nodeWithChildren;
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Core (line 25, column 7 - line 60, column 29): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Core (line 35, column 7 - line 70, column 29): " + [v.constructor.name]);
           };
         };
       };
@@ -39236,7 +39236,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return 0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Treemap (line 112, column 9 - line 114, column 21): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Treemap (line 125, column 9 - line 127, column 21): " + [v1.constructor.name]);
         })();
         var x0 = v.value0.x0 + p2;
         var x116 = v.value0.x1 - p2;
@@ -39571,7 +39571,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                           return new TNode(v.value0);
                                         }
                                         ;
-                                        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Treemap (line 333, column 33 - line 335, column 44): " + [v2.constructor.name]);
+                                        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Treemap (line 346, column 33 - line 348, column 44): " + [v2.constructor.name]);
                                       })();
                                       var $155 = v12.value0.value !== 0;
                                       if ($155) {
@@ -39631,7 +39631,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                                 return new TNode(v.value0);
                                               }
                                               ;
-                                              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Treemap (line 356, column 31 - line 358, column 42): " + [v2.constructor.name]);
+                                              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Treemap (line 369, column 31 - line 371, column 42): " + [v2.constructor.name]);
                                             })();
                                             var newSum = sumVal + v12.value0.value;
                                             var newMin = min9(minVal)(v12.value0.value);
@@ -39676,7 +39676,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                     return new TNode(v.value0);
                                   }
                                   ;
-                                  throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Treemap (line 370, column 30 - line 372, column 36): " + [v2.constructor.name]);
+                                  throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Treemap (line 383, column 30 - line 385, column 36): " + [v2.constructor.name]);
                                 })();
                                 var isDice = dx < dy4;
                                 var initial = tryAdd(firstNode.i1)(firstNode.sumValue)(v1.value0.value)(v1.value0.value)(max13(v1.value0.value / beta0)(beta0 / v1.value0.value));
@@ -40176,7 +40176,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return "table header";
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Interpreter.English (line 84, column 1 - line 84, column 38): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Interpreter.English (line 92, column 1 - line 92, column 38): " + [v.constructor.name]);
   };
   var showAttrValue2 = function(v) {
     if (v instanceof StringValue) {
@@ -40191,7 +40191,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return show131(v.value0);
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Interpreter.English (line 106, column 1 - line 106, column 42): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Interpreter.English (line 114, column 1 - line 114, column 42): " + [v.constructor.name]);
   };
   var showAttrName = function(v) {
     return v;
@@ -40216,7 +40216,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return "Set " + (showAttrName(v.value0) + " based on data and index (dynamic)");
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Interpreter.English (line 73, column 1 - line 73, column 61): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Interpreter.English (line 81, column 1 - line 81, column 61): " + [v.constructor.name]);
   };
   var describeTree = function(tree3) {
     return function(level) {
@@ -40230,7 +40230,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return tell4(indent(level) + ("Create a " + showElemType(tree3.value0.elemType)));
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Interpreter.English (line 25, column 5 - line 27, column 77): " + [tree3.value0.name.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Interpreter.English (line 33, column 5 - line 35, column 77): " + [tree3.value0.name.constructor.name]);
         })())(function() {
           return discard44(when6(!$$null(tree3.value0.attrs))(discard44(tell4(" with attributes:\n"))(function() {
             return for_7(tree3.value0.attrs)(function(attr3) {
@@ -40298,7 +40298,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3v2.Interpreter.English (line 23, column 27 - line 70, column 80): " + [tree3.constructor.name]);
+      throw new Error("Failed pattern match at PSD3v2.Interpreter.English (line 31, column 27 - line 78, column 80): " + [tree3.constructor.name]);
     };
   };
   var runEnglish = function(tree3) {
@@ -40421,7 +40421,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return "Th";
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 184, column 1 - line 184, column 38): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 189, column 1 - line 189, column 38): " + [v.constructor.name]);
   };
   var toAST = function(tree3) {
     if (tree3 instanceof Node3) {
@@ -40465,7 +40465,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return false;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 88, column 19 - line 90, column 27): " + [tree3.value0.enterBehavior.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 93, column 19 - line 95, column 27): " + [tree3.value0.enterBehavior.constructor.name]);
         })(),
         hasUpdate: (function() {
           if (tree3.value0.updateBehavior instanceof Just) {
@@ -40476,7 +40476,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return false;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 91, column 20 - line 93, column 27): " + [tree3.value0.updateBehavior.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 96, column 20 - line 98, column 27): " + [tree3.value0.updateBehavior.constructor.name]);
         })(),
         hasExit: (function() {
           if (tree3.value0.exitBehavior instanceof Just) {
@@ -40487,7 +40487,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return false;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 94, column 18 - line 96, column 27): " + [tree3.value0.exitBehavior.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 99, column 18 - line 101, column 27): " + [tree3.value0.exitBehavior.constructor.name]);
         })(),
         hasTemplate: true
       });
@@ -40507,7 +40507,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return false;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 105, column 19 - line 107, column 27): " + [tree3.value0.enterBehavior.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 110, column 19 - line 112, column 27): " + [tree3.value0.enterBehavior.constructor.name]);
         })(),
         hasUpdate: (function() {
           if (tree3.value0.updateBehavior instanceof Just) {
@@ -40518,7 +40518,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return false;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 108, column 20 - line 110, column 27): " + [tree3.value0.updateBehavior.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 113, column 20 - line 115, column 27): " + [tree3.value0.updateBehavior.constructor.name]);
         })(),
         hasExit: (function() {
           if (tree3.value0.exitBehavior instanceof Just) {
@@ -40529,13 +40529,13 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return false;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 111, column 18 - line 113, column 27): " + [tree3.value0.exitBehavior.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 116, column 18 - line 118, column 27): " + [tree3.value0.exitBehavior.constructor.name]);
         })(),
         hasTemplate: true
       });
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 58, column 14 - line 115, column 8): " + [tree3.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 63, column 14 - line 120, column 8): " + [tree3.constructor.name]);
   };
   var prettyPrintAST = function(ast) {
     var power = function(v) {
@@ -40562,7 +40562,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return "anonymous";
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 124, column 23 - line 126, column 37): " + [tree3.value0.name.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 129, column 23 - line 131, column 37): " + [tree3.value0.name.constructor.name]);
           })();
           var childrenStr = (function() {
             var $85 = length(tree3.value0.children) > 0;
@@ -40593,7 +40593,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return indent2(level) + ("SceneNestedJoinAST\n" + (indent2(level + 1 | 0) + ('{ name: "' + (tree3.value0.name + ('"\n' + (indent2(level + 1 | 0) + (', key: "' + (tree3.value0.key + ('"\n' + (indent2(level + 1 | 0) + (", dataCount: " + (show57(tree3.value0.dataCount) + ("\n" + (indent2(level + 1 | 0) + (", hasEnter: " + (show132(tree3.value0.hasEnter) + ("\n" + (indent2(level + 1 | 0) + (", hasUpdate: " + (show132(tree3.value0.hasUpdate) + ("\n" + (indent2(level + 1 | 0) + (", hasExit: " + (show132(tree3.value0.hasExit) + ("\n" + (indent2(level + 1 | 0) + (", hasTemplate: " + (show132(tree3.value0.hasTemplate) + ("\n" + (indent2(level) + "}"))))))))))))))))))))))))))))));
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 122, column 30 - line 174, column 31): " + [tree3.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 127, column 30 - line 179, column 31): " + [tree3.constructor.name]);
       };
     };
     return prettyPrint(ast)(0);

@@ -1,4 +1,21 @@
-module PSD3.Layout.Hierarchy.Pack where
+module PSD3.Layout.Hierarchy.Pack
+  ( CircleId
+  , Circle
+  , PackState
+  , epsilon
+  , epsilon6
+  , enclosesWeak
+  , intersects
+  , place
+  , packSiblingsMap
+  , packEnclose
+  , PackNode(..)
+  , PackConfig
+  , defaultPackConfig
+  , HierarchyData(..)
+  , hierarchy
+  , pack
+  ) where
 
 import Prelude
 

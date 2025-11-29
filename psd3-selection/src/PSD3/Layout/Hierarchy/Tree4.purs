@@ -2,7 +2,16 @@
 -- |
 -- | Reingold-Tilford tree layout adapted from the elegant Haskell implementation
 -- | Translates binary tree algorithm to n-ary trees (Data.Tree)
-module PSD3.Layout.Hierarchy.Tree4 where
+module PSD3.Layout.Hierarchy.Tree4
+  ( TreeConfig
+  , defaultTreeConfig
+  , withLayerScale
+  , withSeparation
+  , Contour
+  , Contours(..)
+  , tree
+  , treeWithSorting
+  ) where
 
 import Prelude
 
