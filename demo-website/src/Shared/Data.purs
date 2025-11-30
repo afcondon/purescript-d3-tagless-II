@@ -23,6 +23,7 @@ import Effect.Class.Console (log)
 data DataFile
   = EnergyCSV -- Sankey diagram data
   | FlareJSON -- Hierarchical data for tree/pack/partition layouts
+  | FlareImportsJSON -- Flare data with imports for edge bundling
   | MiserablesJSON -- Character network graph
   | NationsJSON -- Wealth & Health of Nations
   | MetroUnemploymentCSV -- BLS metro unemployment data
@@ -35,6 +36,7 @@ derive instance Eq DataFile
 dataFilePath :: DataFile -> String
 dataFilePath EnergyCSV = "./data/energy.csv"
 dataFilePath FlareJSON = "./data/flare-2.json"
+dataFilePath FlareImportsJSON = "./data/flare-imports.json"
 dataFilePath MiserablesJSON = "./data/miserables.json"
 dataFilePath NationsJSON = "./data/nations.json"
 dataFilePath MetroUnemploymentCSV = "./data/bls-metro-unemployment.csv"
@@ -45,6 +47,7 @@ dataFilePath BridgesCSV = "./data/bridges.csv"
 dataFileDescription :: DataFile -> String
 dataFileDescription EnergyCSV = "Energy flow data for Sankey diagrams"
 dataFileDescription FlareJSON = "Flare visualization toolkit hierarchy (252 nodes)"
+dataFileDescription FlareImportsJSON = "Flare data with imports for edge bundling (252 classes, ~600 dependencies)"
 dataFileDescription MiserablesJSON = "Les Misérables character co-occurrence network (77 nodes, 254 links)"
 dataFileDescription NationsJSON = "Wealth & Health of Nations time series data"
 dataFileDescription MetroUnemploymentCSV = "BLS metro area unemployment rates"
@@ -325,3 +328,42 @@ loadBridgesData = do
           log "=== End Bridges Data ==="
           pure $ Right bridgeData
         Left err -> pure $ Left err
+
+-- | Flare imports data type (for edge bundling)
+-- | JavaScript object with {name, size, imports} structure
+foreign import data FlareImportNode :: Type
+
+-- | Parse JSON string into array of FlareImportNode
+foreign import parseFlareImportsJson :: String -> Array FlareImportNode
+
+-- | FFI accessors for flare-imports data
+foreign import getImportNodeName :: FlareImportNode -> String
+foreign import getImportNodeSize :: FlareImportNode -> Number
+foreign import getImportNodeImports :: FlareImportNode -> Array String
+
+-- | Flare import node type (PureScript record)
+type FlareImportRecord =
+  { name :: String
+  , size :: Number
+  , imports :: Array String
+  }
+
+-- | Convert FFI node to PureScript record
+flareImportNodeToRecord :: FlareImportNode -> FlareImportRecord
+flareImportNodeToRecord node =
+  { name: getImportNodeName node
+  , size: getImportNodeSize node
+  , imports: getImportNodeImports node
+  }
+
+-- | Load and parse flare-imports JSON data
+loadFlareImportsData :: Aff (Either String (Array FlareImportRecord))
+loadFlareImportsData = do
+  result <- loadDataFile FlareImportsJSON
+  case result of
+    Left err -> pure $ Left err
+    Right jsonString -> do
+      let nodes = parseFlareImportsJson jsonString
+      let records = map flareImportNodeToRecord nodes
+      log $ "Loaded flare-imports: " <> show (Array.length records) <> " nodes"
+      pure $ Right records

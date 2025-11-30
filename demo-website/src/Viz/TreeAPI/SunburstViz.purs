@@ -20,12 +20,21 @@ import PSD3v2.VizTree.Tree as T
 import Web.DOM.Element (Element)
 
 -- | Convert HierData to Partition's HierarchyData
+-- | Non-leaf nodes use Nothing for value so hierarchy computes sum of children
 toHierarchyData :: HierData -> HierarchyData String
-toHierarchyData node = HierarchyData
-  { data_: getName node
-  , value: Just (getValue node)
-  , children: map (map toHierarchyData) (getChildren node)
-  }
+toHierarchyData node =
+  let
+    children = getChildren node
+    -- Only leaf nodes have explicit values; non-leaf nodes sum children
+    nodeValue = case children of
+      Nothing -> Just (getValue node)
+      Just _ -> Nothing
+  in
+    HierarchyData
+      { data_: getName node
+      , value: nodeValue
+      , children: map (map toHierarchyData) children
+      }
 
 -- | Color palette
 colors :: Array String

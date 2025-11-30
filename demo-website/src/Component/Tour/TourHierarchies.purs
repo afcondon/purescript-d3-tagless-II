@@ -19,6 +19,7 @@ import D3.Viz.TreeAPI.PackViz as PackViz
 import D3.Viz.TreeAPI.TreemapViz as TreemapViz
 import D3.Viz.TreeAPI.PartitionViz as PartitionViz
 import D3.Viz.TreeAPI.SunburstViz as SunburstViz
+import D3.Viz.TreeAPI.EdgeBundleViz as EdgeBundleViz
 
 -- | Tour page state
 type State = Unit
@@ -49,6 +50,7 @@ handleAction = case _ of
     liftEffect $ SunburstViz.sunburstViz "#sunburst-viz"
     liftEffect $ TreemapViz.treemapViz "#treemap-viz"
     liftEffect $ PackViz.packViz "#pack-viz"
+    liftEffect $ EdgeBundleViz.edgeBundleViz "#edge-bundle-viz"
     pure unit
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -196,8 +198,15 @@ render _ =
                 [ HH.text "Edge bundling is a technique for reducing visual clutter in graphs with many edges. Edges are bundled together along the hierarchical structure, creating visually appealing flow patterns that reveal high-level connectivity patterns." ]
             , HH.p_
                 [ HH.text "This technique is particularly effective for visualizing dependencies, relationships, or flows in large hierarchical datasets like software dependencies, communication networks, or biological pathways." ]
+            , HH.h3_
+                [ HH.text "Flare Class Dependencies" ]
             , HH.p_
-                [ HH.em_ [ HH.text "[Edge bundling not yet implemented in TreeAPI - coming soon]" ] ]
+                [ HH.text "This diagram shows the import relationships between 252 classes in the Flare ActionScript visualization library. Each class is positioned around the circle based on its package hierarchy, and edges are bundled together based on shared ancestry. The bundling reveals which packages are tightly coupled." ]
+            , HH.div
+                [ HP.id "edge-bundle-viz"
+                , HP.classes [ HH.ClassName "viz-container" ]
+                ]
+                []
             ]
 
         -- Interactive exploration note

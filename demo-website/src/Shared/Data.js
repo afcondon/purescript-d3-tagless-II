@@ -14,3 +14,13 @@ export const getChildren_ = (node) => {
   }
   return null;
 };
+
+// Parse flare-imports JSON (array of {name, size, imports})
+export function parseFlareImportsJson(jsonString) {
+  return JSON.parse(jsonString);
+}
+
+// FFI accessors for flare-imports data
+export const getImportNodeName = (node) => node.name || "";
+export const getImportNodeSize = (node) => node.size || 0;
+export const getImportNodeImports = (node) => node.imports || [];
