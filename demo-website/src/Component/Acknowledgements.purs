@@ -2,12 +2,18 @@ module PSD3.Acknowledgements where
 
 import Prelude
 
+import Affjax.Web as AX
+import Affjax.ResponseFormat as ResponseFormat
+import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
-import Effect.Aff (Aff)
+import Effect.Aff (Milliseconds(..), delay)
+import Effect.Aff.Class (class MonadAff, liftAff)
+import Effect.Class (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.Footer as Footer
+import D3.Viz.TreeAPI.SankeyDiagram (drawSankey)
 
 -- | Acknowledgements page state
 type State = Unit
@@ -16,7 +22,7 @@ type State = Unit
 data Action = Initialize
 
 -- | Acknowledgements page component
-component :: forall q i o. H.Component q i o Aff
+component :: forall q i o m. MonadAff m => H.Component q i o m
 component = H.mkComponent
   { initialState: \_ -> unit
   , render
@@ -49,6 +55,24 @@ render _ =
             , HH.p_
                 [ HH.text "Thanks so much to Mike for creating D3, for his clear documentation and examples, and for making the library open source. His work on Observable and continued contributions to visualization continue to inspire."
                 ]
+            , HH.h3_ [ HH.text "Library Dependencies" ]
+            , HH.p_
+                [ HH.text "This diagram shows how D3 modules flow into our library packages. Note D3's own internal dependencies on the left - modules like d3-zoom depend on d3-transition, d3-drag, etc. Unused D3 modules are tree-shaken from the bundle."
+                ]
+            , HH.div
+                [ HP.id "d3-library-sankey"
+                , HP.style "margin: 20px 0; background: #fafafa; border-radius: 8px; padding: 10px;"
+                ]
+                []
+            , HH.h3_ [ HH.text "Website Dependencies" ]
+            , HH.p_
+                [ HH.text "This diagram shows how the demo website depends on our libraries. The SimulationManager represents temporary FFI code that will eventually move into psd3-simulation."
+                ]
+            , HH.div
+                [ HP.id "d3-website-sankey"
+                , HP.style "margin: 20px 0; background: #fafafa; border-radius: 8px; padding: 10px;"
+                ]
+                []
             ]
 
         , HH.section
@@ -121,6 +145,18 @@ render _ =
     , Footer.render
     ]
 
-handleAction :: forall o. Action -> H.HalogenM State Action () o Aff Unit
+handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
-  Initialize -> pure unit
+  Initialize -> do
+    -- Small delay to ensure DOM is ready
+    liftAff $ delay (Milliseconds 100.0)
+    -- Load and draw Library Dependencies Sankey
+    libraryResult <- liftAff $ AX.get ResponseFormat.string "/data/d3-library-deps.csv"
+    case libraryResult of
+      Left _ -> pure unit
+      Right response -> liftEffect $ drawSankey response.body "#d3-library-sankey" 900.0 800.0
+    -- Load and draw Website Dependencies Sankey
+    websiteResult <- liftAff $ AX.get ResponseFormat.string "/data/d3-website-deps.csv"
+    case websiteResult of
+      Left _ -> pure unit
+      Right response -> liftEffect $ drawSankey response.body "#d3-website-sankey" 600.0 300.0

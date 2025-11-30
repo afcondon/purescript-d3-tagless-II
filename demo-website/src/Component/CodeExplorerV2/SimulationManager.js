@@ -1,5 +1,9 @@
 // SimulationManager FFI
-import * as d3 from 'd3';
+// D3 dependencies: d3-force
+import {
+  forceCollide, forceManyBody, forceCenter, forceLink,
+  forceX, forceY, forceRadial
+} from "d3-force";
 
 // =============================================================================
 // Window Storage
@@ -106,7 +110,7 @@ export function buildSwizzledLink_(sourceNode) {
 export function createSpagoCollision_(padding) {
   return function(strength) {
     return function(iterations) {
-      return d3.forceCollide()
+      return forceCollide()
         .radius(d => d.r + padding)
         .strength(strength)
         .iterations(iterations);
@@ -119,7 +123,7 @@ export function createSpagoCharge_(strength) {
   return function(theta) {
     return function(distanceMin) {
       return function(distanceMax) {
-        return d3.forceManyBody()
+        return forceManyBody()
           .strength(strength)
           .theta(theta)
           .distanceMin(distanceMin)
@@ -135,7 +139,7 @@ export function createSpagoChargeFiltered_(strength) {
     return function(distanceMin) {
       return function(distanceMax) {
         return function(predicate) {
-          return d3.forceManyBody()
+          return forceManyBody()
             .strength(d => predicate(d) ? strength : 0)
             .theta(theta)
             .distanceMin(distanceMin)
@@ -150,7 +154,7 @@ export function createSpagoChargeFiltered_(strength) {
 export function createSpagoCenter_(x) {
   return function(y) {
     return function(strength) {
-      return d3.forceCenter(x, y).strength(strength);
+      return forceCenter(x, y).strength(strength);
     };
   };
 }
@@ -159,7 +163,7 @@ export function createSpagoCenter_(x) {
 export function createSpagoLink_(distance) {
   return function(strength) {
     return function(iterations) {
-      return d3.forceLink()
+      return forceLink()
         .distance(distance)
         .strength(strength)
         .iterations(iterations)
@@ -171,7 +175,7 @@ export function createSpagoLink_(distance) {
 // Create X positioning force toward gridXY.x (for module clustering)
 export function createSpagoClusterX_(strength) {
   return function(predicate) {
-    return d3.forceX()
+    return forceX()
       .x(d => (d.gridXY && d.gridXY.x !== undefined) ? d.gridXY.x : (d.x || 0))
       .strength(d => predicate(d) ? strength : 0);
   };
@@ -180,7 +184,7 @@ export function createSpagoClusterX_(strength) {
 // Create Y positioning force toward gridXY.y (for module clustering)
 export function createSpagoClusterY_(strength) {
   return function(predicate) {
-    return d3.forceY()
+    return forceY()
       .y(d => (d.gridXY && d.gridXY.y !== undefined) ? d.gridXY.y : (d.y || 0))
       .strength(d => predicate(d) ? strength : 0);
   };
@@ -192,7 +196,7 @@ export function createSpagoRadial_(radius) {
     return function(y) {
       return function(strength) {
         return function(predicate) {
-          return d3.forceRadial(radius, x, y)
+          return forceRadial(radius, x, y)
             .strength(d => predicate(d) ? strength : 0);
         };
       };

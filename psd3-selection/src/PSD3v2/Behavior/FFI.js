@@ -1,5 +1,8 @@
 // FFI for D3 zoom and drag behaviors
-import * as d3 from 'd3';
+// D3 dependencies: d3-selection, d3-zoom, d3-drag
+import { select, selectAll, pointer } from "d3-selection";
+import { zoom } from "d3-zoom";
+import { drag } from "d3-drag";
 
 /**
  * Attach zoom behavior to an element
@@ -12,7 +15,7 @@ import * as d3 from 'd3';
 export function attachZoom_(element) {
   return scaleMin => scaleMax => targetSelector => () => {
     // Create D3 selection from element
-    const selection = d3.select(element);
+    const selection = select(element);
 
     // Find the target element to transform
     const target = selection.select(targetSelector);
@@ -21,11 +24,11 @@ export function attachZoom_(element) {
       target.attr('transform', event.transform);
     }
 
-    const zoom = d3.zoom()
+    const zoomBehavior = zoom()
       .scaleExtent([scaleMin, scaleMax])
       .on('zoom', zoomed);
 
-    selection.call(zoom);
+    selection.call(zoomBehavior);
 
     return element;
   };
@@ -39,25 +42,25 @@ export function attachZoom_(element) {
 export function attachSimpleDrag_(element) {
   return () => () => {
     // Create D3 selection from element
-    const selection = d3.select(element);
+    const selection = select(element);
 
     let transform = { x: 0, y: 0 };
 
     function dragstarted(event) {
-      d3.select(this).raise();
+      select(this).raise();
     }
 
     function dragged(event) {
       transform.x += event.dx;
       transform.y += event.dy;
-      d3.select(this).attr('transform', `translate(${transform.x},${transform.y})`);
+      select(this).attr('transform', `translate(${transform.x},${transform.y})`);
     }
 
-    const drag = d3.drag()
+    const dragBehavior = drag()
       .on('start', dragstarted)
       .on('drag', dragged);
 
-    selection.call(drag);
+    selection.call(dragBehavior);
 
     return element;
   };
@@ -73,7 +76,7 @@ export function attachSimpleDrag_(element) {
 export function attachSimulationDrag_(element) {
   return simulation => label => () => {
     // Create D3 selection from element
-    const selection = d3.select(element);
+    const selection = select(element);
 
     function dragstarted(event) {
       if (simulation) {
@@ -100,13 +103,13 @@ export function attachSimulationDrag_(element) {
       event.subject.fy = null;
     }
 
-    const drag = d3.drag()
+    const dragBehavior = drag()
       .on('start.' + label, dragstarted)
       .on('drag.' + label, dragged)
       .on('end.' + label, dragended);
 
     selection
-      .call(drag)
+      .call(dragBehavior)
       .style('cursor', 'pointer');  // Set cursor to pointer for draggable elements
 
     return element;
@@ -122,7 +125,7 @@ export function attachSimulationDrag_(element) {
 export function attachClick_(element) {
   return handler => () => {
     // Create D3 selection from element
-    const selection = d3.select(element);
+    const selection = select(element);
 
     // Attach click event listener
     selection.on('click', function(event) {
@@ -146,7 +149,7 @@ export function attachClick_(element) {
 export function attachClickWithDatum_(element) {
   return handler => () => {
     // Create D3 selection from element
-    const selection = d3.select(element);
+    const selection = select(element);
 
     // Attach click event listener
     selection.on('click', function(event, d) {
@@ -171,7 +174,7 @@ export function attachClickWithDatum_(element) {
 export function attachMouseEnter_(element) {
   return handler => () => {
     // Create D3 selection from element
-    const selection = d3.select(element);
+    const selection = select(element);
 
     // Attach mouseenter event listener
     selection.on('mouseenter', function(event, d) {
@@ -193,7 +196,7 @@ export function attachMouseEnter_(element) {
 export function attachMouseLeave_(element) {
   return handler => () => {
     // Create D3 selection from element
-    const selection = d3.select(element);
+    const selection = select(element);
 
     // Attach mouseleave event listener
     selection.on('mouseleave', function(event, d) {
@@ -216,11 +219,11 @@ export function attachMouseLeave_(element) {
 export function attachHighlight_(element) {
   return enterStyles => leaveStyles => () => {
     // Create D3 selection from element
-    const selection = d3.select(element);
+    const selection = select(element);
 
     // Attach mouseenter handler
     selection.on('mouseenter', function(event) {
-      const sel = d3.select(this);
+      const sel = select(this);
       // Raise element to front
       sel.raise();
       // Apply enter styles
@@ -231,7 +234,7 @@ export function attachHighlight_(element) {
 
     // Attach mouseleave handler
     selection.on('mouseleave', function(event) {
-      const sel = d3.select(this);
+      const sel = select(this);
       // Apply leave styles
       leaveStyles.forEach(style => {
         sel.attr(style.attr, style.value);
@@ -264,7 +267,7 @@ export function attachMouseMoveWithEvent_(element) {
  */
 export function attachMouseMoveWithInfo_(element) {
   return handler => () => {
-    const selection = d3.select(element);
+    const selection = select(element);
 
     selection.on('mousemove', function(event, d) {
       const info = {
@@ -300,7 +303,7 @@ export function attachMouseEnterWithEvent_(element) {
  */
 export function attachMouseEnterWithInfo_(element) {
   return handler => () => {
-    const selection = d3.select(element);
+    const selection = select(element);
 
     selection.on('mouseenter', function(event, d) {
       const info = {
@@ -336,7 +339,7 @@ export function attachMouseLeaveWithEvent_(element) {
  */
 export function attachMouseLeaveWithInfo_(element) {
   return handler => () => {
-    const selection = d3.select(element);
+    const selection = select(element);
 
     selection.on('mouseleave', function(event, d) {
       const info = {
@@ -360,13 +363,13 @@ export function attachMouseLeaveWithInfo_(element) {
  */
 export function attachLineTooltip_(svgElement) {
   return pathElement => seriesName => points => margin => () => {
-    const svg = d3.select(svgElement);
-    const path = d3.select(pathElement);
+    const svg = select(svgElement);
+    const path = select(pathElement);
 
     // Get or create tooltip div
-    let tooltip = d3.select('body').select('.line-tooltip');
+    let tooltip = select('body').select('.line-tooltip');
     if (tooltip.empty()) {
-      tooltip = d3.select('body')
+      tooltip = select('body')
         .append('div')
         .attr('class', 'line-tooltip')
         .style('position', 'absolute')
@@ -414,7 +417,7 @@ export function attachLineTooltip_(svgElement) {
     path
       .on('mouseenter.tooltip', function(event) {
         // Highlight the line
-        d3.select(this)
+        select(this)
           .raise()
           .attr('stroke', '#333')
           .attr('stroke-width', 2.5);
@@ -424,7 +427,7 @@ export function attachLineTooltip_(svgElement) {
       })
       .on('mousemove.tooltip', function(event) {
         // Get mouse position relative to SVG
-        const [mouseX, mouseY] = d3.pointer(event, svgElement);
+        const [mouseX, mouseY] = pointer(event, svgElement);
 
         // Find nearest data point
         const point = findNearestPoint(mouseX);
@@ -437,7 +440,7 @@ export function attachLineTooltip_(svgElement) {
       })
       .on('mouseleave.tooltip', function(event) {
         // Reset line style
-        d3.select(this)
+        select(this)
           .attr('stroke', '#ddd')
           .attr('stroke-width', 1.5);
 

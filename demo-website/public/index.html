@@ -34,13 +34,13 @@
 
     <!-- Prism.js for syntax highlighting - Editorial theme -->
     <link rel="stylesheet" href="styles/prism-editorial.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
 
-    <!-- D3.js -->
-    <script src="./d3/d3.js"></script>
-    <script src="./d3/d3-color.js"></script>
-    <script src="./d3/d3-interpolate.js"></script>
-    <script src="./d3/d3-scale-chromatic.js"></script>
+    <!-- D3.js is bundled into bundle.js via ES module imports -->
+    <!-- Individual D3 modules used: d3-selection, d3-scale, d3-scale-chromatic,
+         d3-interpolate, d3-array, d3-shape, d3-force, d3-zoom, d3-drag,
+         d3-ease, d3-transition, d3-sankey -->
 
     <!-- JSZip for wizard file downloads -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -62,9 +62,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
     <script
         src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
-
-    <!-- Mermaid diagram support -->
-    <script src="js/mermaid-init.js"></script>
 
     <!-- Main application bundle -->
     <script src="bundle.js"></script>

@@ -1,0 +1,9 @@
+source,target,value
+d3-dispatch,d3-force,2
+d3-quadtree,d3-force,3
+d3-timer,d3-force,2
+d3-force,SimulationManager,25
+SimulationManager,demo-website,25
+psd3-selection,demo-website,80
+psd3-simulation,demo-website,30
+demo-website,PSD3 Website,135

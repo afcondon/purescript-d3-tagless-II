@@ -4,8 +4,14 @@
 // No simulation wrapper, no timers, no lifecycle management.
 //
 // Each force is just: initialize(nodes) -> force(alpha) -> mutates vx/vy
-
-import * as d3 from 'd3';
+//
+// D3 dependencies: d3-force, d3-selection, d3-drag
+import {
+  forceManyBody, forceCollide, forceLink, forceCenter,
+  forceX, forceY, forceRadial
+} from "d3-force";
+import { select } from "d3-selection";
+import { drag } from "d3-drag";
 
 // =============================================================================
 // Force Creation (returns D3 force objects)
@@ -13,7 +19,7 @@ import * as d3 from 'd3';
 
 // Create a many-body (charge) force
 export function createManyBody_(config) {
-  const force = d3.forceManyBody()
+  const force = forceManyBody()
     .strength(config.strength)
     .theta(config.theta)
     .distanceMin(config.distanceMin)
@@ -24,7 +30,7 @@ export function createManyBody_(config) {
 // Create a collision force
 // Note: radius and strength can be numbers or functions
 export function createCollide_(config) {
-  const force = d3.forceCollide()
+  const force = forceCollide()
     .radius(config.radius)
     .strength(config.strength)
     .iterations(config.iterations);
@@ -35,7 +41,7 @@ export function createCollide_(config) {
 export function createCollideWithRadius_(radiusFn) {
   return function(strength) {
     return function(iterations) {
-      const force = d3.forceCollide()
+      const force = forceCollide()
         .radius(function(d, i) { return radiusFn(d)(i)(); })
         .strength(strength)
         .iterations(iterations);
@@ -46,7 +52,7 @@ export function createCollideWithRadius_(radiusFn) {
 
 // Create a link force
 export function createLink_(config) {
-  const force = d3.forceLink()
+  const force = forceLink()
     .distance(config.distance)
     .strength(config.strength)
     .iterations(config.iterations);
@@ -55,28 +61,28 @@ export function createLink_(config) {
 
 // Create a center force
 export function createCenter_(config) {
-  const force = d3.forceCenter(config.x, config.y)
+  const force = forceCenter(config.x, config.y)
     .strength(config.strength);
   return force;
 }
 
 // Create an X positioning force
 export function createForceX_(config) {
-  const force = d3.forceX(config.x)
+  const force = forceX(config.x)
     .strength(config.strength);
   return force;
 }
 
 // Create a Y positioning force
 export function createForceY_(config) {
-  const force = d3.forceY(config.y)
+  const force = forceY(config.y)
     .strength(config.strength);
   return force;
 }
 
 // Create a radial force
 export function createRadial_(config) {
-  const force = d3.forceRadial(config.radius, config.x, config.y)
+  const force = forceRadial(config.radius, config.x, config.y)
     .strength(config.strength);
   return force;
 }
@@ -369,15 +375,15 @@ export function attachDragWithReheat_(elements) {
         event.subject.fy = null;
       }
 
-      const drag = d3.drag()
+      const dragBehavior = drag()
         .on('start', dragstarted)
         .on('drag', dragged)
         .on('end', dragended);
 
       // Apply drag to each element
       elements.forEach(function(el) {
-        d3.select(el)
-          .call(drag)
+        select(el)
+          .call(dragBehavior)
           .style('cursor', 'grab');
       });
     };

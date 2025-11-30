@@ -1,7 +1,8 @@
 // PSD3.Scale.FP - FFI for functional scale operations
-import * as d3 from "d3";
+// D3 dependencies: d3-scale
+import { scaleLinear } from "d3-scale";
 
-export const createLinear = d3.scaleLinear();
+export const createLinear = scaleLinear();
 
 export function unsafeCoerceScale(scale) {
   return scale;

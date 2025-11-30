@@ -1,29 +1,40 @@
 // PSD3.Scale - D3 Scale FFI bindings
-import * as d3 from "d3";
+// D3 dependencies: d3-scale, d3-scale-chromatic, d3-interpolate
+import {
+  scaleLinear, scaleLog, scalePow, scaleSqrt, scaleSymlog,
+  scaleOrdinal, scaleBand, scalePoint
+} from "d3-scale";
+import {
+  schemeCategory10, schemePaired, schemeSet1, schemeSet2, schemeSet3,
+  interpolateViridis, interpolatePlasma, interpolateInferno, interpolateMagma,
+  interpolateTurbo, interpolateWarm, interpolateCool, interpolateRainbow,
+  interpolateRdYlGn, interpolateRdBu, interpolatePiYG, interpolateBrBG
+} from "d3-scale-chromatic";
+import { interpolateRgb, interpolateHsl } from "d3-interpolate";
 
 // ============================================================================
 // CONTINUOUS SCALE CONSTRUCTORS
 // ============================================================================
 
-export const linear = d3.scaleLinear();
+export const linear = scaleLinear();
 
-export const log = d3.scaleLog();
+export const log = scaleLog();
 
-export const pow = d3.scalePow();
+export const pow = scalePow();
 
-export const sqrt = d3.scaleSqrt();
+export const sqrt = scaleSqrt();
 
-export const symlog = d3.scaleSymlog();
+export const symlog = scaleSymlog();
 
 // ============================================================================
 // ORDINAL SCALE CONSTRUCTORS
 // ============================================================================
 
-export const ordinal = d3.scaleOrdinal();
+export const ordinal = scaleOrdinal();
 
-export const band = d3.scaleBand();
+export const band = scaleBand();
 
-export const point = d3.scalePoint();
+export const point = scalePoint();
 
 // ============================================================================
 // SCALE CONFIGURATION
@@ -172,60 +183,48 @@ export function copy(scale) {
 // INTERPOLATORS
 // ============================================================================
 
-export function interpolateRgb(a) {
+export function interpolateRgb_(a) {
   return function(b) {
-    return d3.interpolateRgb(a, b);
+    return interpolateRgb(a, b);
   };
 }
 
-export function interpolateHsl(a) {
+export function interpolateHsl_(a) {
   return function(b) {
-    return d3.interpolateHsl(a, b);
+    return interpolateHsl(a, b);
   };
 }
 
 // ============================================================================
 // COLOR SCHEMES (Categorical)
+// Re-exported directly from d3-scale-chromatic
 // ============================================================================
 
-export const schemeCategory10 = d3.schemeCategory10;
+export { schemeCategory10, schemePaired, schemeSet1, schemeSet2, schemeSet3 };
 
-export const schemePaired = d3.schemePaired;
+// Indexed access to schemeCategory10 with modular wrapping
+export function schemeCategory10At(index) {
+  return schemeCategory10[Math.abs(index) % 10];
+}
 
-export const schemeSet1 = d3.schemeSet1;
-
-export const schemeSet2 = d3.schemeSet2;
-
-export const schemeSet3 = d3.schemeSet3;
+// Indexed access to schemePaired with modular wrapping
+export function schemePairedAt(index) {
+  return schemePaired[Math.abs(index) % 12];
+}
 
 // ============================================================================
 // SEQUENTIAL INTERPOLATORS
+// Re-exported directly from d3-scale-chromatic
 // ============================================================================
 
-export const interpolateViridis = d3.interpolateViridis;
-
-export const interpolatePlasma = d3.interpolatePlasma;
-
-export const interpolateInferno = d3.interpolateInferno;
-
-export const interpolateMagma = d3.interpolateMagma;
-
-export const interpolateTurbo = d3.interpolateTurbo;
-
-export const interpolateWarm = d3.interpolateWarm;
-
-export const interpolateCool = d3.interpolateCool;
-
-export const interpolateRainbow = d3.interpolateRainbow;
+export {
+  interpolateViridis, interpolatePlasma, interpolateInferno, interpolateMagma,
+  interpolateTurbo, interpolateWarm, interpolateCool, interpolateRainbow
+};
 
 // ============================================================================
 // DIVERGING INTERPOLATORS
+// Re-exported directly from d3-scale-chromatic
 // ============================================================================
 
-export const interpolateRdYlGn = d3.interpolateRdYlGn;
-
-export const interpolateRdBu = d3.interpolateRdBu;
-
-export const interpolatePiYG = d3.interpolatePiYG;
-
-export const interpolateBrBG = d3.interpolateBrBG;
+export { interpolateRdYlGn, interpolateRdBu, interpolatePiYG, interpolateBrBG };

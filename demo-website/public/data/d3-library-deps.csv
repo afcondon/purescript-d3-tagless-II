@@ -1,0 +1,67 @@
+source,target,value
+d3-array,d3-sankey,3
+d3-array,d3-scale,4
+d3-array,d3-time,2
+d3-color,d3-interpolate,3
+d3-color,d3-scale-chromatic,2
+d3-color,d3-transition,2
+d3-dispatch,d3-drag,2
+d3-dispatch,d3-force,2
+d3-dispatch,d3-transition,2
+d3-dispatch,d3-zoom,2
+d3-ease,d3-transition,2
+d3-format,d3-scale,3
+d3-interpolate,d3-scale,3
+d3-interpolate,d3-scale-chromatic,2
+d3-interpolate,d3-transition,2
+d3-interpolate,d3-zoom,2
+d3-path,d3-chord,2
+d3-path,d3-shape,2
+d3-quadtree,d3-force,3
+d3-selection,d3-drag,2
+d3-selection,d3-zoom,2
+d3-shape,d3-sankey,3
+d3-time,d3-scale,3
+d3-time,d3-time-format,2
+d3-time-format,d3-scale,3
+d3-timer,d3-force,2
+d3-timer,d3-transition,2
+d3-drag,d3-zoom,3
+d3-transition,d3-zoom,3
+d3-array,Internal.Scales,3
+d3-chord,PSD3.Chord,8
+d3-drag,PSD3v2.Behavior.FFI,13
+d3-ease,PSD3v2.Transition.FFI,8
+d3-force,ForceEngine.Core,20
+d3-hierarchy,PSD3.Hierarchy,15
+d3-interpolate,PSD3.Scale,6
+d3-sankey,PSD3.Layout.Sankey,12
+d3-scale,PSD3.Scale,15
+d3-scale,Internal.Scales,5
+d3-scale-chromatic,PSD3.Scale,15
+d3-selection,PSD3v2.Behavior.FFI,10
+d3-selection,PSD3v2.Transition.FFI,5
+d3-selection,ForceEngine.Core,3
+d3-shape,Internal.Generators,5
+d3-shape,PSD3.Chord,3
+d3-transition,PSD3v2.Transition.FFI,10
+d3-zoom,PSD3v2.Behavior.FFI,8
+d3-axis,Not used,3
+d3-brush,Not used,48
+d3-contour,Not used,9
+d3-delaunay,Not used,19
+d3-dsv,Not used,4
+d3-fetch,Not used,4
+d3-geo,Not used,38
+d3-polygon,Not used,2
+d3-random,Not used,4
+PSD3v2.Behavior.FFI,psd3-selection,31
+PSD3v2.Transition.FFI,psd3-selection,23
+PSD3.Scale,psd3-selection,36
+PSD3.Chord,psd3-selection,11
+PSD3.Hierarchy,psd3-selection,15
+PSD3.Layout.Sankey,psd3-selection,12
+Internal.Scales,psd3-selection,8
+Internal.Generators,psd3-selection,8
+ForceEngine.Core,psd3-simulation,23
+Not used,Excluded,144

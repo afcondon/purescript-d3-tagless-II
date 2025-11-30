@@ -1,8 +1,9 @@
-import * as d3 from "d3";
+// D3 dependencies: d3-shape
+import { line } from "d3-shape";
 
 export function createLineGenerator_(config) {
   return () => {
-    return d3.line()
+    return line()
       .x(d => config.xScale(d.x))
       .y(d => config.yScale(d.y));
   };

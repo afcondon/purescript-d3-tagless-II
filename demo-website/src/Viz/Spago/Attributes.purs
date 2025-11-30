@@ -7,7 +7,7 @@ import D3.Viz.Spago.Files (NodeType(..))
 import D3.Viz.Spago.GitMetrics (ColorByOption(..), getModuleMetric_)
 import D3.Viz.Spago.GitReplay (getReplayColor_)
 import PSD3.Data.Node (NodeID)
-import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_, d3SchemeSequential10N_, d3InterpolateViridis_, d3InterpolateRdYlGn_, d3InterpolatePlasma_)
+import PSD3.Scale (schemeCategory10At, interpolateViridis, interpolateRdYlGn, interpolatePlasma)
 import PSD3v2.Attribute.Types (Attribute, class_, fill, height, opacity, radius, stroke, strokeWidth, textContent, textAnchor, transform, viewBox, width, x, y)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))
@@ -41,12 +41,13 @@ strokeByUsage :: SpagoSimNode -> String
 strokeByUsage d = if d.connected then "none" else colorByGroup d
 
 colorByGroup :: SpagoSimNode -> String
-colorByGroup d = d3SchemeCategory10N_ (toNumber d.cluster)
+colorByGroup d = schemeCategory10At d.cluster
 
 colorByDepth :: SpagoSimNode -> String
 colorByDepth d = case toMaybe d.treeDepth of
   Nothing -> "none"
-  Just depth -> d3SchemeSequential10N_ (toNumber depth)
+  -- Normalize depth to [0,1] assuming max depth of 10, then apply color
+  Just depth -> interpolateViridis (min 1.0 (toNumber depth / 10.0))
 
 -- | Color by git metric - uses the metric value to interpolate a color
 colorByMetric :: ColorByOption -> SpagoSimNode -> String
@@ -60,16 +61,6 @@ colorByMetric option d = case option of
   ColorByChurn -> interpolatePlasma $ getModuleMetric_ d.name "churn"
   ColorBySize -> interpolateViridis $ getModuleMetric_ d.name "size"
   ColorByReplay -> getReplayColor_ d.name
-  where
-  -- Interpolate functions that convert 0-1 value to color string
-  interpolateViridis :: Number -> String
-  interpolateViridis t = d3InterpolateViridis_ t
-
-  interpolateRdYlGn :: Number -> String
-  interpolateRdYlGn t = d3InterpolateRdYlGn_ t
-
-  interpolatePlasma :: Number -> String
-  interpolatePlasma t = d3InterpolatePlasma_ t
 
 opacityByType :: SpagoSimNode -> Number
 opacityByType d = case d.nodetype of

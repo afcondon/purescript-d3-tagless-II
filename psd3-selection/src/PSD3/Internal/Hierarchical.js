@@ -81,3 +81,49 @@ export function horizontalClusterLink_(interLevel) {
     return `M${source.y},${source.x} H${midX} V${target.x} H${target.y}`;
   };
 }
+
+// =======================================================================================
+// D3 Pack Layout FFI
+// =======================================================================================
+
+// Create D3 pack layout with size and padding
+// Returns a function that applies the layout to a hierarchy root
+export function createPackLayout_(width) {
+  return function(height) {
+    return function(padding) {
+      return d3.pack()
+        .size([width, height])
+        .padding(padding);
+    };
+  };
+}
+
+// Apply pack layout to a hierarchy root
+// D3 pack modifies nodes in place, adding x, y, r properties
+export function applyPackLayout_(layout) {
+  return function(root) {
+    // Sum values for proper radius computation
+    root.sum(d => d.value || 0);
+    // Apply the layout
+    return layout(root);
+  };
+}
+
+// Create pack layout and apply in one step (convenience function)
+export function packHierarchy_(width) {
+  return function(height) {
+    return function(padding) {
+      return function(root) {
+        const layout = d3.pack()
+          .size([width, height])
+          .padding(padding);
+
+        // Sum values for proper radius computation
+        root.sum(d => d.value || 0);
+
+        // Apply layout and return
+        return layout(root);
+      };
+    };
+  };
+}

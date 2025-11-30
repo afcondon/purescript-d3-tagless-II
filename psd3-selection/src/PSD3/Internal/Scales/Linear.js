@@ -1,8 +1,9 @@
-import * as d3 from "d3";
+// D3 dependencies: d3-scale
+import { scaleLinear } from "d3-scale";
 
 export function createLinearScale_(config) {
   return () => {
-    return d3.scaleLinear()
+    return scaleLinear()
       .domain(config.domain)
       .range(config.range);
   };

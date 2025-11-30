@@ -1,7 +1,8 @@
 -- | PSD3.Scale - Type-safe scales with functional programming idioms
 -- |
 -- | This module provides D3-compatible scales with PureScript type safety
--- | and functional programming abstractions.
+-- | and functional programming abstractions. Uses d3-scale-chromatic.js
+-- | via FFI. 
 -- |
 -- | ## Basic Usage
 -- |
@@ -42,19 +43,19 @@ module PSD3.Scale
   , BandScale
   , TimeScale
 
-    -- * Continuous Scale Constructors
+  -- * Continuous Scale Constructors
   , linear
   , log
   , pow
   , sqrt
   , symlog
 
-    -- * Ordinal Scale Constructors
+  -- * Ordinal Scale Constructors
   , ordinal
   , band
   , point
 
-    -- * Scale Configuration
+  -- * Scale Configuration
   , domain
   , range
   , clamp
@@ -69,7 +70,7 @@ module PSD3.Scale
   , exponent
   , constant
 
-    -- * Scale Operations
+  -- * Scale Operations
   , applyScale
   , invert
   , ticks
@@ -78,26 +79,28 @@ module PSD3.Scale
   , step
   , copy
 
-    -- * Functional Combinators
+  -- * Functional Combinators
   , andThen
   , contramap
   , map
   , dimap
 
-    -- * Interpolators (for color scales)
+  -- * Interpolators (for color scales)
   , Interpolator
   , interpolateNumber
   , interpolateRgb
   , interpolateHsl
 
-    -- * Color Schemes
+  -- * Color Schemes
   , schemeCategory10
+  , schemeCategory10At
   , schemePaired
+  , schemePairedAt
   , schemeSet1
   , schemeSet2
   , schemeSet3
 
-    -- * Sequential Interpolators
+  -- * Sequential Interpolators
   , interpolateViridis
   , interpolatePlasma
   , interpolateInferno
@@ -107,7 +110,7 @@ module PSD3.Scale
   , interpolateCool
   , interpolateRainbow
 
-    -- * Diverging Interpolators
+  -- * Diverging Interpolators
   , interpolateRdYlGn
   , interpolateRdBu
   , interpolatePiYG
@@ -149,7 +152,7 @@ data Time
 type ContinuousScale = Scale Number Number Continuous
 type OrdinalScale domain range = Scale domain range Ordinal
 type BandScale domain = Scale domain Number Band
-type TimeScale = Scale Number Number Time  -- TODO: proper Date type
+type TimeScale = Scale Number Number Time -- TODO: proper Date type
 
 -- ============================================================================
 -- CONTINUOUS SCALE CONSTRUCTORS
@@ -372,10 +375,17 @@ interpolateNumber :: Number -> Number -> Interpolator Number
 interpolateNumber a b t = a + (b - a) * t
 
 -- | RGB color interpolation
-foreign import interpolateRgb :: String -> String -> Interpolator String
+foreign import interpolateRgb_ :: String -> String -> Interpolator String
+
+-- | RGB color interpolation
+interpolateRgb :: String -> String -> Interpolator String
+interpolateRgb = interpolateRgb_
 
 -- | HSL color interpolation (better for perceptual uniformity)
-foreign import interpolateHsl :: String -> String -> Interpolator String
+foreign import interpolateHsl_ :: String -> String -> Interpolator String
+
+interpolateHsl :: String -> String -> Interpolator String
+interpolateHsl = interpolateHsl_
 
 -- ============================================================================
 -- COLOR SCHEMES (Categorical)
@@ -384,8 +394,19 @@ foreign import interpolateHsl :: String -> String -> Interpolator String
 -- | Category10 color scheme (10 colors)
 foreign import schemeCategory10 :: Array String
 
+-- | Get a Category10 color by index (wraps around modularly)
+-- | Useful for coloring nodes by group number
+-- |
+-- | ```purescript
+-- | fill = schemeCategory10At node.group
+-- | ```
+foreign import schemeCategory10At :: Int -> String
+
 -- | Paired color scheme (12 colors)
 foreign import schemePaired :: Array String
+
+-- | Get a Paired color by index (wraps around modularly)
+foreign import schemePairedAt :: Int -> String
 
 -- | Set1 color scheme (9 colors)
 foreign import schemeSet1 :: Array String

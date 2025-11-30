@@ -112,6 +112,18 @@ moduleCategories =
           }
         ]
     }
+  , { title: "Scales"
+    , modules:
+        [ { name: "PSD3.Scale"
+          , path: "PSD3/Scale.purs"
+          , description: "Type-safe scales with D3 parity and FP idioms"
+          }
+        , { name: "PSD3.Scale.FP"
+          , path: "PSD3/Scale/FP.purs"
+          , description: "Functional programming abstractions for scales"
+          }
+        ]
+    }
   , { title: "Internal - Other"
     , modules:
         [ { name: "PSD3.Internal.Types"
@@ -130,10 +142,6 @@ moduleCategories =
           , path: "PSD3/Internal/Attributes/Sugar.purs"
           , description: "Syntactic sugar for attributes"
           }
-        , { name: "PSD3.Internal.Axes"
-          , path: "PSD3/Internal/Axes.purs"
-          , description: "Axis generation"
-          }
         , { name: "PSD3.Internal.Hierarchical"
           , path: "PSD3/Internal/Hierarchical.purs"
           , description: "Hierarchical layout algorithms"
@@ -141,14 +149,6 @@ moduleCategories =
         , { name: "PSD3.Internal.Generators.Line"
           , path: "PSD3/Internal/Generators/Line.purs"
           , description: "Line and area generators"
-          }
-        , { name: "PSD3.Internal.Scales.Scales"
-          , path: "PSD3/Internal/Scales/Scales.purs"
-          , description: "Scale functions"
-          }
-        , { name: "PSD3.Internal.Scales.Linear"
-          , path: "PSD3/Internal/Scales/Linear.purs"
-          , description: "Linear scale implementation"
           }
         , { name: "PSD3.Internal.Sankey.Types"
           , path: "PSD3/Internal/Sankey/Types.purs"

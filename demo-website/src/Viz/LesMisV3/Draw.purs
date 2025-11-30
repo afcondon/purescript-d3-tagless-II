@@ -11,7 +11,6 @@ module D3.Viz.LesMisV3.Draw
 import Prelude
 
 import D3.Viz.LesMisV3.Model (LesMisModel, LesMisNode)
-import Data.Int (toNumber)
 import Data.Number (sqrt)
 import Effect (Effect)
 import Effect.Class (liftEffect)
@@ -20,7 +19,7 @@ import Effect.Ref as Ref
 import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultLink, defaultCenter, swizzleLinks)
-import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
+import PSD3.Scale (schemeCategory10At)
 import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, x1, x2, y1, y2, radius, id_, class_, width, height, viewBox, opacity)
 import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom)
 import PSD3v2.Capabilities.Selection (select, appendChild, appendData, setAttrs, on)
@@ -134,7 +133,7 @@ renderInitialDOM containerSelector nodes swizzledLinks = runD3v2M do
     [ cx (_.x :: LesMisNode -> Number)
     , cy (_.y :: LesMisNode -> Number)
     , radius 5.0
-    , fill ((\node -> d3SchemeCategory10N_ (toNumber node.group)) :: LesMisNode -> String)
+    , fill ((\node -> schemeCategory10At node.group) :: LesMisNode -> String)
     , stroke "#fff"
     , strokeWidth 1.5
     ] nodesGroup

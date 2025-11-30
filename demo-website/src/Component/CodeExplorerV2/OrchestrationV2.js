@@ -1,5 +1,6 @@
 // OrchestrationV2 FFI
-import * as d3 from 'd3';
+// D3 dependencies: via psd3-selection library (path relative to output/ after PureScript compile)
+import { select, zoom, drag, easeCubicOut, schemeCategory10 } from "../PSD3.Internal.FFI/foreign.js";
 
 // =============================================================================
 // Orchestra State (module-level)
@@ -31,10 +32,10 @@ export function createSvgStructure_(selector) {
     return function(height) {
       return function() {
         // Clear existing
-        d3.select(selector).selectAll('*').remove();
+        select(selector).selectAll('*').remove();
 
         // Create SVG
-        svg = d3.select(selector)
+        svg = select(selector)
           .append('svg')
           .attr('viewBox', `${-width/2} ${-height/2} ${width} ${height}`)
           .attr('width', '100%')
@@ -44,12 +45,12 @@ export function createSvgStructure_(selector) {
         innerGroup = svg.append('g').attr('class', 'inner');
 
         // Add zoom behavior
-        const zoom = d3.zoom()
+        const zoomBehavior = zoom()
           .scaleExtent([0.1, 4])
           .on('zoom', (event) => {
             innerGroup.attr('transform', event.transform);
           });
-        svg.call(zoom);
+        svg.call(zoomBehavior);
 
         // Create groups for links and nodes (links below nodes)
         linksGroup = innerGroup.append('g').attr('class', 'links');
@@ -93,7 +94,7 @@ export function joinNodesToDOM_(nodes) {
       .text(d => d.name ? d.name.split('.').pop() : '');
 
     // Add drag behavior
-    enter.call(d3.drag()
+    enter.call(drag()
       .on('start', dragStarted)
       .on('drag', dragged)
       .on('end', dragEnded));
@@ -117,10 +118,10 @@ export function updateNodeTransforms_(nodes) {
   };
 }
 
-// Node color based on cluster (uses d3.schemeCategory10)
+// Node color based on cluster (uses schemeCategory10)
 function getNodeColor(d) {
   const cluster = d.cluster !== undefined ? d.cluster : 0;
-  return d3.schemeCategory10[cluster % 10];
+  return schemeCategory10[cluster % 10];
 }
 
 // =============================================================================
@@ -334,13 +335,13 @@ export function transitionToTreePositions_(nodes) {
             const indexInLayer = nodesAtDepth.indexOf(d);
             return depthIndex * layerDuration + indexInLayer * withinLayerStagger;
           })
-          .ease(d3.easeCubicOut)
+          .ease(easeCubicOut)
           .attr('transform', d => {
             const pos = getTreePosition(d);
             return `translate(${pos.x}, ${pos.y})`;
           })
           .on('start', function() {
-            const datum = d3.select(this).datum();
+            const datum = select(this).datum();
             if (!datum) return;
 
             // When a node starts transitioning, draw links TO it (from parent)
@@ -366,7 +367,7 @@ export function transitionToTreePositions_(nodes) {
             });
           })
           .on('end', function() {
-            const datum = d3.select(this).datum();
+            const datum = select(this).datum();
             if (!datum) return;
             const pos = getTreePosition(datum);
             datum.x = pos.x;
@@ -408,7 +409,7 @@ export function transitionToTreePositions_(nodes) {
                 .duration(500)
                 .style('opacity', 0)
                 .on('end', function() {
-                  d3.select(this).classed('hidden-node', true);
+                  select(this).classed('hidden-node', true);
                 });
 
               onComplete();
@@ -463,7 +464,7 @@ export function updateLinkPathsFromRaw_(nodes) {
       const linkElements = linksGroup.selectAll('path.link--force');
 
       linkElements.each(function() {
-        const el = d3.select(this);
+        const el = select(this);
         const sourceId = +el.attr('data-source');
         const targetId = +el.attr('data-target');
         const source = nodeMap.get(sourceId);

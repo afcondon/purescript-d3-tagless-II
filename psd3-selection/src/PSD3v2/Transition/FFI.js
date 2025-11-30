@@ -1,4 +1,17 @@
-import * as d3 from 'd3';
+// D3 dependencies: d3-selection, d3-transition, d3-ease
+import { select } from "d3-selection";
+import "d3-transition"; // Extends selection with .transition()
+import {
+  easeLinear,
+  easeQuad, easeQuadIn, easeQuadOut, easeQuadInOut,
+  easeCubic, easeCubicIn, easeCubicOut, easeCubicInOut,
+  easeSin, easeSinIn, easeSinOut, easeSinInOut,
+  easeExp, easeExpIn, easeExpOut, easeExpInOut,
+  easeCircle, easeCircleIn, easeCircleOut, easeCircleInOut,
+  easeElastic, easeElasticIn, easeElasticOut, easeElasticInOut,
+  easeBack, easeBackIn, easeBackOut, easeBackInOut,
+  easeBounce, easeBounceIn, easeBounceOut, easeBounceInOut
+} from "d3-ease";
 
 // Create a D3 transition from an element
 // Configures duration, optional delay, and optional easing
@@ -15,7 +28,7 @@ export function createTransition_(duration) {
       return function(element) {
         return function() {
           // Select the element and start a transition
-          let transition = d3.select(element).transition();
+          let transition = select(element).transition();
 
           // Set duration (required)
           transition = transition.duration(duration);
@@ -68,54 +81,54 @@ function getD3EasingFunction(name) {
 
   const easingMap = {
     // Linear
-    'linear': d3.easeLinear,
+    'linear': easeLinear,
 
     // Polynomial (Quad, Cubic)
-    'quad': d3.easeQuad,
-    'quadIn': d3.easeQuadIn,
-    'quadOut': d3.easeQuadOut,
-    'quadInOut': d3.easeQuadInOut,
+    'quad': easeQuad,
+    'quadIn': easeQuadIn,
+    'quadOut': easeQuadOut,
+    'quadInOut': easeQuadInOut,
 
-    'cubic': d3.easeCubic,
-    'cubicIn': d3.easeCubicIn,
-    'cubicOut': d3.easeCubicOut,
-    'cubicInOut': d3.easeCubicInOut,
+    'cubic': easeCubic,
+    'cubicIn': easeCubicIn,
+    'cubicOut': easeCubicOut,
+    'cubicInOut': easeCubicInOut,
 
     // Sinusoidal
-    'sin': d3.easeSin,
-    'sinIn': d3.easeSinIn,
-    'sinOut': d3.easeSinOut,
-    'sinInOut': d3.easeSinInOut,
+    'sin': easeSin,
+    'sinIn': easeSinIn,
+    'sinOut': easeSinOut,
+    'sinInOut': easeSinInOut,
 
     // Exponential
-    'exp': d3.easeExp,
-    'expIn': d3.easeExpIn,
-    'expOut': d3.easeExpOut,
-    'expInOut': d3.easeExpInOut,
+    'exp': easeExp,
+    'expIn': easeExpIn,
+    'expOut': easeExpOut,
+    'expInOut': easeExpInOut,
 
     // Circular
-    'circle': d3.easeCircle,
-    'circleIn': d3.easeCircleIn,
-    'circleOut': d3.easeCircleOut,
-    'circleInOut': d3.easeCircleInOut,
+    'circle': easeCircle,
+    'circleIn': easeCircleIn,
+    'circleOut': easeCircleOut,
+    'circleInOut': easeCircleInOut,
 
     // Elastic
-    'elastic': d3.easeElastic,
-    'elasticIn': d3.easeElasticIn,
-    'elasticOut': d3.easeElasticOut,
-    'elasticInOut': d3.easeElasticInOut,
+    'elastic': easeElastic,
+    'elasticIn': easeElasticIn,
+    'elasticOut': easeElasticOut,
+    'elasticInOut': easeElasticInOut,
 
     // Back
-    'back': d3.easeBack,
-    'backIn': d3.easeBackIn,
-    'backOut': d3.easeBackOut,
-    'backInOut': d3.easeBackInOut,
+    'back': easeBack,
+    'backIn': easeBackIn,
+    'backOut': easeBackOut,
+    'backInOut': easeBackInOut,
 
     // Bounce
-    'bounce': d3.easeBounce,
-    'bounceIn': d3.easeBounceIn,
-    'bounceOut': d3.easeBounceOut,
-    'bounceInOut': d3.easeBounceInOut,
+    'bounce': easeBounce,
+    'bounceIn': easeBounceIn,
+    'bounceOut': easeBounceOut,
+    'bounceInOut': easeBounceInOut,
   };
 
   return easingMap[name];

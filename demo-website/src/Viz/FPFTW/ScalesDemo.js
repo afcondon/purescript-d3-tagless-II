@@ -1,12 +1,19 @@
 // ScalesDemo FFI - D3 rendering for scale visualizations
-import * as d3 from "d3";
+// D3 dependencies: via psd3-selection library (path relative to output/ after PureScript compile)
+import { select, scaleLinear } from "../PSD3.Internal.FFI/foreign.js";
+
+// Inline extent function (avoids d3-array dependency)
+const extent = (data, accessor) => {
+  const values = data.map(accessor);
+  return [Math.min(...values), Math.max(...values)];
+};
 
 // Draw a horizontal gradient strip with label
 export function drawGradientStrip_(selector) {
   return function(label) {
     return function(colors) {
       return function() {
-        const container = d3.select(selector);
+        const container = select(selector);
         if (container.empty()) {
           console.warn("ScalesDemo: selector not found:", selector);
           return;
@@ -52,7 +59,7 @@ export function drawGradientStrip_(selector) {
 export function drawPipelineDiagram_(selector) {
   return function(data) {
     return function() {
-      const container = d3.select(selector);
+      const container = select(selector);
       if (container.empty()) {
         console.warn("ScalesDemo: selector not found:", selector);
         return;
@@ -74,8 +81,8 @@ export function drawPipelineDiagram_(selector) {
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
       // X scale for positioning
-      const xScale = d3.scaleLinear()
-        .domain(d3.extent(data, d => d.x))
+      const xScale = scaleLinear()
+        .domain(extent(data, d => d.x))
         .range([0, innerWidth]);
 
       // Draw pipeline arrow
@@ -141,7 +148,7 @@ export function drawPipelineDiagram_(selector) {
 // Draw scale composition diagram
 export function drawScaleComposition_(selector) {
   return function() {
-    const container = d3.select(selector);
+    const container = select(selector);
     if (container.empty()) {
       console.warn("ScalesDemo: selector not found:", selector);
       return;

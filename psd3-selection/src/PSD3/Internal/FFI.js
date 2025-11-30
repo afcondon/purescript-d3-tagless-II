@@ -1,3 +1,30 @@
+// D3 dependencies: d3-selection, d3-drag, d3-force, d3-hierarchy, d3-shape, d3-chord, d3-zoom, d3-ease, d3-scale-chromatic, d3-scale
+import { select, selectAll } from "d3-selection";
+import { drag } from "d3-drag";
+import {
+  forceSimulation, forceCenter, forceCollide, forceLink,
+  forceManyBody, forceRadial, forceX, forceY
+} from "d3-force";
+import {
+  hierarchy, cluster, tree, pack, treemap, partition
+} from "d3-hierarchy";
+import {
+  linkHorizontal, linkVertical, linkRadial, arc
+} from "d3-shape";
+import { chord, ribbon } from "d3-chord";
+import { zoom } from "d3-zoom";
+import { easeCubicOut, easeLinear, easeQuadInOut, easeBounceOut } from "d3-ease";
+import { schemeCategory10, schemeTableau10, interpolateRdYlGn, interpolateViridis } from "d3-scale-chromatic";
+import { scaleLinear, scaleOrdinal } from "d3-scale";
+
+// =============================================================================
+// Direct D3 Re-exports (for demo components to use without direct D3 imports)
+// =============================================================================
+export { select, selectAll, drag, zoom };
+export { easeCubicOut, easeLinear, easeQuadInOut, easeBounceOut };
+export { schemeCategory10, schemeTableau10, interpolateRdYlGn, interpolateViridis };
+export { scaleLinear, scaleOrdinal };
+
 const debug = false
 export const emptyD3Data_ = null
 export function d3Append_(element) { return selection => { return selection.append(element) } }
@@ -14,8 +41,8 @@ export function d3MergeSelectionWith_(enter) { return update => { return enter.m
 export function d3OrderSelection_(selection) { return selection.order() }
 export function d3RaiseSelection_(selection) { return selection.raise() }
 export function d3RemoveSelection_(selection) { return selection.remove() }
-export function d3SelectAllInDOM_(selector) { return d3.selectAll(selector) }
-export function d3SelectFirstInDOM_(selector) { return d3.select(selector) }
+export function d3SelectAllInDOM_(selector) { return selectAll(selector) }
+export function d3SelectFirstInDOM_(selector) { return select(selector) }
 export function d3SelectionIsEmpty_(selection) { return selection.empty() }
 export function d3SelectionSelect_(selector) { return selection => { return selection.select(selector) } }
 export function d3SelectionSelectAll_(selector) { return selection => { return selection.selectAll(selector) } }
@@ -67,7 +94,7 @@ export function simdrag_(label, simulation) {
     event.subject.fx = null;
     event.subject.fy = null;
   }
-  return d3.drag()
+  return drag()
     .on('start.' + label, dragstarted)
     .on('drag.' + label, dragged)
     .on('end.' + label, dragended);
@@ -89,7 +116,7 @@ export function simdragHorizontal_(label, simulation) {
     event.subject.fx = null;
     // Don't touch fy - keep it pinned
   }
-  return d3.drag()
+  return drag()
     .on('start.' + label, dragstarted)
     .on('drag.' + label, dragged)
     .on('end.' + label, dragended);
@@ -125,7 +152,7 @@ export function unpinAllNodes_(simulation) {
 export function updateBubbleRadii_(simulation) {
   return nodeRadiusFn => {
     // Select all circles and update their radius
-    d3.selectAll('.bubble-graph .node-group circle.node-circle')
+    selectAll('.bubble-graph .node-group circle.node-circle')
       .attr('r', d => nodeRadiusFn(d.expanded)(d.loc))
 
     // Reheat the simulation so collision forces update
@@ -186,7 +213,7 @@ function highlightDependencies(qualifiedName, functionCallsData, isHighlighted) 
   // Highlight all related declaration circles
   relatedNames.forEach(name => {
     const selector = `.decl-circle[data-qualified-name="${name}"]`
-    d3.selectAll(selector)
+    selectAll(selector)
       .classed('dep-highlighted', true)
       .attr('stroke', '#FFD700')  // Gold stroke
       .attr('stroke-width', 3)
@@ -195,7 +222,7 @@ function highlightDependencies(qualifiedName, functionCallsData, isHighlighted) 
 
   // Also highlight the hovered circle itself with a different style
   const hoveredSelector = `.decl-circle[data-qualified-name="${qualifiedName}"]`
-  d3.selectAll(hoveredSelector)
+  selectAll(hoveredSelector)
     .classed('dep-source', true)
     .attr('stroke', '#FF4500')  // Orange-red stroke
     .attr('stroke-width', 4)
@@ -204,12 +231,12 @@ function highlightDependencies(qualifiedName, functionCallsData, isHighlighted) 
 
 // Clear dependency highlights
 function clearDependencyHighlights() {
-  d3.selectAll('.decl-circle.dep-highlighted')
+  selectAll('.decl-circle.dep-highlighted')
     .classed('dep-highlighted', false)
     .attr('stroke', '#fff')
     .attr('stroke-width', 1)
 
-  d3.selectAll('.decl-circle.dep-source')
+  selectAll('.decl-circle.dep-source')
     .classed('dep-source', false)
     .attr('stroke', '#fff')
     .attr('stroke-width', 1)
@@ -252,7 +279,7 @@ export function updateNodeExpansion_(simulation) {
     const isExpanded = clickedNodeData.expanded
 
     // Find the node group for this module
-    const nodeGroup = d3.selectAll('.bubble-graph .node-group')
+    const nodeGroup = selectAll('.bubble-graph .node-group')
       .filter(d => d.id === moduleName)
 
     if (isExpanded) {
@@ -316,12 +343,12 @@ export function updateNodeExpansion_(simulation) {
         children: categoryChildren
       }
 
-      const root = d3.hierarchy(hierarchyData)
+      const root = hierarchy(hierarchyData)
         .sum(d => d.value)
 
       // Compute pack layout (size based on expanded radius)
       const expandedRadius = nodeRadiusFn(true)(clickedNodeData.loc)
-      const packLayout = d3.pack()
+      const packLayout = pack()
         .size([expandedRadius * 2, expandedRadius * 2])
         .padding(3)  // More padding for labels
 
@@ -460,8 +487,8 @@ export function updateNodeExpansion_(simulation) {
         })
 
       // Add arrowhead marker definition (if not already defined)
-      if (!d3.select('defs marker#arrowhead').node()) {
-        d3.select('.bubble-graph').append('defs')
+      if (!select('defs marker#arrowhead').node()) {
+        select('.bubble-graph').append('defs')
           .append('marker')
           .attr('id', 'arrowhead')
           .attr('viewBox', '0 -5 10 10')
@@ -547,7 +574,7 @@ export function drawInterModuleDeclarationLinks_(zoomGroupSelection) {
   return nodeRadiusFn => declarationsData => functionCallsData => () => {
     // Find all expanded module nodes
     const expandedModules = []
-    d3.selectAll('.bubble-graph .node-group').each(function(d) {
+    selectAll('.bubble-graph .node-group').each(function(d) {
       if (d && d.expanded) {
         const moduleDecls = declarationsData.modules.find(m => m.name === d.name)
         if (moduleDecls && moduleDecls.declarations) {
@@ -601,8 +628,8 @@ export function drawInterModuleDeclarationLinks_(zoomGroupSelection) {
             children: categoryChildren
           }
 
-          const root = d3.hierarchy(hierarchyData).sum(node => node.value)
-          const packLayout = d3.pack()
+          const root = hierarchy(hierarchyData).sum(node => node.value)
+          const packLayout = pack()
             .size([expandedRadius * 2, expandedRadius * 2])
             .padding(3)
           packLayout(root)
@@ -728,13 +755,13 @@ export function filterToConnectedNodes_(simulation) {
 
     // Update DOM - remove nodes that aren't in the filtered set
     // Find all node groups and filter them
-    d3.select('div.svg-container')
+    select('div.svg-container')
       .selectAll('g.node g.node-group')
       .filter(d => !idSet.has(keyFn(d)))
       .remove();
 
     // Update DOM - remove links that aren't in the filtered set
-    d3.select('div.svg-container')
+    select('div.svg-container')
       .selectAll('g.link path')
       .filter(d => {
         const sourceId = typeof d.source === 'object' ? keyFn(d.source) : d.source;
@@ -751,14 +778,14 @@ export function filterToConnectedNodes_(simulation) {
 export const linksForceName_ = "links"
 export const dummyForceHandle_ = null
 export function disableTick_(simulation) { return name => { return simulation.on('tick.' + name, () => null) } }
-export function forceCenter_() { return d3.forceCenter() }
-export function forceCollideFn_() { return d3.forceCollide() }
+export function forceCenter_() { return forceCenter() }
+export function forceCollideFn_() { return forceCollide() }
 export function forceCustom_(forceFn) { return forceFn() }
-export function forceLink_() { return d3.forceLink().id(d => d.id) }
-export function forceMany_() { return d3.forceManyBody() }
-export function forceRadial_() { return d3.forceRadial() }
-export function forceX_() { return d3.forceX() }
-export function forceY_() { return d3.forceY() }
+export function forceLink_() { return forceLink().id(d => d.id) }
+export function forceMany_() { return forceManyBody() }
+export function forceRadial_() { return forceRadial() }
+export function forceX_() { return forceX() }
+export function forceY_() { return forceY() }
 export function getLinksFromForce_(linkForce) { return linkForce.links() }
 export function getNodes_(simulation) { return simulation.nodes() }
 export function keyIsID_(d) {
@@ -817,9 +844,8 @@ export function startSimulation_(simulation) {
 export function stopSimulation_(simulation) { return simulation.stop() }
 export function initSimulation_(config) {
   return keyFn => {
-    const simulation = d3
-      .forceSimulation([])
-      .force(linksForceName_, d3.forceLink([]).id(keyFn))
+    const simulation = forceSimulation([])
+      .force(linksForceName_, forceLink([]).id(keyFn))
       .alpha(config.alpha) // default is 1
       .alphaTarget(config.alphaTarget) // default is 0
       .alphaMin(config.alphaMin) // default is 0.0001
@@ -1216,13 +1242,13 @@ export function unpinNode_(node) { node.fx = null; node.fy = null; return node }
 export function ancestors_(tree) { return tree.ancestors() }
 export function descendants_(tree) { return tree.descendants() }
 export function find_(tree) { return filter => tree.find(filter) }
-export function getClusterLayoutFn_() { return d3.cluster() }
-export function getTreeLayoutFn_() { return d3.tree() }
+export function getClusterLayoutFn_() { return cluster() }
+export function getTreeLayoutFn_() { return tree() }
 export function hasChildren_(d) { return (d.children === 'undefined') ? false : true }
 export function getHierarchyValue_(d) { return (d.value === 'undefined') ? null : d.value } // returns a Nullable Number 
 export function getHierarchyChildren_(d) { return !d.children ? [] : d.children }
 export function getHierarchyParent_(d) { return !d.parent ? [] : d.parent } // don't think this can ever be null in valid hierarchy node but this gives us confidence that PureScript type is right 
-export function hierarchyFromJSON_(json) { return d3.hierarchy(json) }
+export function hierarchyFromJSON_(json) { return hierarchy(json) }
 export function cloneTreeJson_(json) { return structuredClone(json) }
 export function hNodeDepth_(node) { return node.depth }
 export function hNodeHeight_(node) { return node.height }
@@ -1289,16 +1315,13 @@ export function treeMinMax_(root) {
   })
   return { xMin: min_x, xMax: max_x, yMin: min_y, yMax: max_y }
 }
-export const linkHorizontal_ = d3
-  .linkHorizontal()
+export const linkHorizontal_ = linkHorizontal()
   .x(d => d.y)
   .y(d => d.x)
-export const linkHorizontal2_ = d3
-  .linkHorizontal()
+export const linkHorizontal2_ = linkHorizontal()
   .x(d => d.x)
   .y(d => d.y)
-export const linkVertical_ = d3
-  .linkVertical()
+export const linkVertical_ = linkVertical()
   .x(d => d.x)
   .y(d => d.y)
 export function linkClusterHorizontal_(levelSpacing) {
@@ -1317,8 +1340,7 @@ export function linkClusterVertical_(levelSpacing) {
 }
 export function linkRadial_(angleFn) {
   return radiusFn =>
-    d3
-      .linkRadial()
+    linkRadial()
       .angle(angleFn)
       .radius(radiusFn)
 }
@@ -1332,17 +1354,17 @@ export function autoBox_() {
 // ************************** functions from d3js Chord module         *****************************************
 // *****************************************************************************************************************
 export function chordLayout_(matrix) {
-  return d3.chord()(matrix);
+  return chord()(matrix);
 }
 export function chordLayoutWithPadAngle_(matrix) {
-  return padAngle => d3.chord().padAngle(padAngle)(matrix);
+  return padAngle => chord().padAngle(padAngle)(matrix);
 }
 export function chordGroups_(chordLayout) { return chordLayout.groups }
 export function chordArray_(chordLayout) {
   return Array.from(chordLayout);
 }
-export function ribbonGenerator_() { return d3.ribbon() }
-export function arcGenerator_() { return d3.arc() }
+export function ribbonGenerator_() { return ribbon() }
+export function arcGenerator_() { return arc() }
 export function ribbonPath_(generator) { return chord => generator(chord) }
 export function arcPath_(generator) { return group => generator(group) }
 export function setRibbonRadius_(generator) { return radius => { generator.radius(radius); return generator } }
@@ -1351,7 +1373,7 @@ export function setArcOuterRadius_(generator) { return radius => { generator.out
 // *****************************************************************************************************************
 // ************************** functions from d3js Pack (bubble) module         *****************************************
 // *****************************************************************************************************************
-export function packLayout_() { return d3.pack() }
+export function packLayout_() { return pack() }
 export function packSetSize_(layout) { return width => height => { layout.size([width, height]); return layout } }
 export function packSetPadding_(layout) { return padding => { layout.padding(padding); return layout } }
 export function runPackLayout_(layout) { return root => layout(root) }
@@ -1360,7 +1382,7 @@ export function hNodeR_(node) { return node.r }
 // *****************************************************************************************************************
 // ************************** functions from d3js Treemap module         *****************************************
 // *****************************************************************************************************************
-export function treemapLayout_() { return d3.treemap() }
+export function treemapLayout_() { return treemap() }
 export function treemapSetSize_(layout) { return width => height => { layout.size([width, height]); return layout } }
 export function treemapSetPadding_(layout) { return padding => { layout.padding(padding); return layout } }
 export function runTreemapLayout_(layout) { return root => layout(root) }
@@ -1373,7 +1395,7 @@ export function hNodeY1_(node) { return node.y1 }
 // *****************************************************************************************************************
 // ************************** functions from d3js Partition (icicle/sunburst) module  ******************************
 // *****************************************************************************************************************
-export function partitionLayout_() { return d3.partition() }
+export function partitionLayout_() { return partition() }
 export function partitionSetSize_(layout) { return width => height => { layout.size([width, height]); return layout } }
 export function partitionSetPadding_(layout) { return padding => { layout.padding(padding); return layout } }
 export function runPartitionLayout_(layout) { return root => layout(root) }
@@ -1399,10 +1421,9 @@ export function d3AttachZoomDefaultExtent_(selection) {
     // "If extent is not specified, returns the current extent accessor, which
     // defaults to [[0, 0], [width, height]] where width is the client width of the
     // element and height is its client height; for SVG elements, the nearest
-    // ancestor SVG element’s viewBox, or width and height attributes, are used.""
+    // ancestor SVG element's viewBox, or width and height attributes, are used.""
     return selection.call(
-      d3
-        .zoom()
+      zoom()
         .scaleExtent(config.scaleExtent)
         .on(`zoom.${config.name}`, zoomed)
     )
@@ -1411,8 +1432,7 @@ export function d3AttachZoomDefaultExtent_(selection) {
 export function d3AttachZoom_(selection) {
   return config => {
     selection.call(
-      d3
-        .zoom()
+      zoom()
         .extent(config.extent) // extent is [ [], [] ]
         .scaleExtent(config.scaleExtent)
         .on(`zoom.${config.name}`, (event) => { config.target.attr('transform', event.transform) })
@@ -1497,7 +1517,7 @@ export function showModuleLabels_(nodesGroup) {
       const baseRadius = (Math.sqrt(loc)) * 0.15 + 2.0  // Match PureScript formula
       const radius = expanded ? baseRadius * 4.0 : baseRadius
       console.log('Setting label y for', d.name, 'to', -radius)
-      d3.select(this).attr('y', -radius)
+      select(this).attr('y', -radius)
     })
     console.log('showModuleLabels_ done')
   }
