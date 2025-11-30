@@ -154,11 +154,11 @@ instance showLinkColorMode :: Show LinkColorMode where
 -- | Default configuration matching D3 defaults
 defaultSankeyConfig :: Number -> Number -> SankeyConfig
 defaultSankeyConfig width height =
-  { alignment: Justify
+  { alignment: Left  -- Use Left alignment for fair comparison with D3's sankeyLeft
   , linkColorMode: SourceColor
   , nodeWidth: 15.0  -- Match D3 default
   , nodePadding: 10.0  -- Match D3 default
-  , iterations: 6  -- Match D3 default
+  , iterations: 6   -- Must match D3's default for correct beta ramp-up
 -- Set up extent to match D3 FFI: [[1, 1], [width - 1, height - 5]]
   , extent: { x0: 1.0
             , y0: 1.0
@@ -173,11 +173,12 @@ withConfig overrides base = base  -- TODO: implement record merge
 
 -- | Graph model for State monad - contains all intermediate computation state
 -- | SankeyGraphModel is created by folding rows of CSV
-type SankeyGraphModel = 
+type SankeyGraphModel =
   { linkCount :: Int
   , nodeCount :: Int
   , nodeNameToID :: NodeIDMap
   , nodeIDToName :: NodeNameMap
+  , nodeOrder :: Array NodeID  -- Nodes in encounter order (matches D3's Set insertion order)
   , deps :: DependencyMap -- source to Set targets
   , sped :: DependencyMap -- target to Set sources
   , sankeyNodes :: Array SankeyNode
@@ -191,6 +192,7 @@ initialSankeyGraphModel config = {
   , nodeCount: 0
   , nodeNameToID: Map.empty
   , nodeIDToName: Map.empty
+  , nodeOrder: []  -- Will be populated in encounter order
   , deps: Map.empty
   , sped: Map.empty
   , sankeyNodes: []

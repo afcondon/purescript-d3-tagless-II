@@ -66,26 +66,48 @@ computeLayoutWithConfig linkInputs config =
     -- Step 1: Build graph from link inputs (creates nodes and links)
     for_ linkInputs processCSVLink
     initialiseSankeyNodes
+    logStep "After initialiseSankeyNodes (nodeLinks)"
 
     -- Step 2: Compute node links (populate sourceLinks/targetLinks arrays)
 
     -- Step 3: Compute node values (max flow through each node)
     computeNodeValues
+    logStep "After computeNodeValues"
 
     -- Step 4: Compute node depths (left-to-right BFS)
     computeNodeDepths
+    logStep "After computeNodeDepths"
 
     -- Step 5: Compute node heights (right-to-left BFS)
     computeNodeHeights
+    logStep "After computeNodeHeights"
 
     -- Step 6: Compute node breadths (vertical positioning with relaxation)
     computeNodeBreadths
+    logStep "After computeNodeBreadths (FINAL)"
 
     -- Step 7: Compute link breadths (link y0/y1 positions)
     computeLinkBreadths
 
     -- Step 8: Assign colors
     assignColors
+
+  -- Helper to log current node state
+  logStep :: String -> State SankeyGraphModel Unit
+  logStep stepName = do
+    model <- get
+    let
+      _ = unsafePerformEffect $ do
+        log $ "\n=== " <> stepName <> " ==="
+        for_ (Array.sortBy (\a b -> compare a.name b.name) model.sankeyNodes) $ \n -> do
+          log $ "  " <> n.name
+            <> " | layer=" <> show n.layer
+            <> " | depth=" <> show n.depth
+            <> " | height=" <> show n.nodeHeight
+            <> " | value=" <> show n.value
+            <> " | y0=" <> show n.y0
+            <> " | y1=" <> show n.y1
+    pure unit
 
 -- ============================================================================
 -- Step 1: Build Graph from Link Inputs
@@ -110,24 +132,26 @@ processCSVLink link = do
     s = M.lookup link.s model.nodeNameToID
     t = M.lookup link.t model.nodeNameToID
 
-    { sid, tid, nodeCount } =
+    -- Track which nodes are new (for nodeOrder - must match D3's Set insertion order: source first, then target)
+    { sid, tid, nodeCount, newNodes } =
       case s, t of -- have we seen either or both of these nodes before?
         (Just sid), (Just tid) -> -- neither new, simple
-          { nodeCount: model.nodeCount, sid, tid }
+          { nodeCount: model.nodeCount, sid, tid, newNodes: [] }
         -- one new, count increments by one
-        (Just sid), Nothing -> -- 
-          { nodeCount: model.nodeCount + 1, sid, tid: NodeID model.nodeCount }
-        Nothing, (Just tid) -> -- 
-          { nodeCount: model.nodeCount + 1, sid: NodeID model.nodeCount, tid: tid }
-        -- both new, count increments by two
+        (Just sid), Nothing ->
+          { nodeCount: model.nodeCount + 1, sid, tid: NodeID model.nodeCount, newNodes: [NodeID model.nodeCount] }
+        Nothing, (Just tid) ->
+          { nodeCount: model.nodeCount + 1, sid: NodeID model.nodeCount, tid: tid, newNodes: [NodeID model.nodeCount] }
+        -- both new, count increments by two (source added first, then target - matches D3's Set.add order)
         Nothing, Nothing ->
-          { nodeCount: model.nodeCount + 2, sid: NodeID model.nodeCount, tid: NodeID (model.nodeCount + 1) }
+          { nodeCount: model.nodeCount + 2, sid: NodeID model.nodeCount, tid: NodeID (model.nodeCount + 1), newNodes: [NodeID model.nodeCount, NodeID (model.nodeCount + 1)] }
 
   modify_ _
     { linkCount = model.linkCount + 1
     , nodeCount = nodeCount
     , nodeNameToID = M.insert link.s sid $ M.insert link.t tid model.nodeNameToID
     , nodeIDToName = M.insert sid link.s $ M.insert tid link.t model.nodeIDToName
+    , nodeOrder = model.nodeOrder <> newNodes  -- Append new nodes in encounter order
     , deps = unionInsert sid tid model.deps
     , sped = unionInsert tid sid model.sped
     , sankeyLinks =
@@ -135,12 +159,14 @@ processCSVLink link = do
     }
 
 -- | Once all the links have been made and all the source and target maps are filled we can create the sankeyNodes
+-- | Uses nodeOrder to preserve encounter order (matching D3's JavaScript Set insertion order)
 initialiseSankeyNodes :: State SankeyGraphModel Unit
 initialiseSankeyNodes = do
   model <- get
   let
-    nodeNames = Set.toUnfoldable $ Map.keys model.nodeIDToName
-    sankeyNodes = catMaybes $ (initialiseSankeyNode model) <$> nodeNames
+    -- Use nodeOrder (encounter order) instead of Map.keys (sorted order)
+    -- This matches D3's JavaScript Set which preserves insertion order
+    sankeyNodes = catMaybes $ (initialiseSankeyNode model) <$> model.nodeOrder
   modify_ _ { sankeyNodes = sankeyNodes }
 
 -- ============================================================================
@@ -255,6 +281,30 @@ computeNodeHeights = do
 -- Step 6: computeNodeBreadths - Vertical positioning with relaxation
 -- ============================================================================
 
+-- | Calculate the global scale factor (ky) - pixels per unit of value
+-- | Uses the minimum scale across all layers to ensure all nodes fit
+calculateGlobalKy :: Array SankeyNode -> Number -> Number -> Number -> Number
+calculateGlobalKy nodes y0 y1 padding =
+  let
+    maxLayer = foldl (\acc node -> max acc node.layer) 0 nodes
+    layers = map (\layerIdx -> filter (\node -> node.layer == layerIdx) nodes) (Array.range 0 maxLayer)
+
+    scaleForLayer layerNodes =
+      let
+        totalValue = foldl (\sum node -> sum + node.value) 0.0 layerNodes
+        numNodes = toNumber (length layerNodes)
+        availableHeight = (y1 - y0) - (numNodes - 1.0) * padding
+      in
+        if totalValue > 0.0 then availableHeight / totalValue else 1.0
+
+    scales = map scaleForLayer layers
+    nonEmptyScales = filter (\s -> s > 0.0) scales
+  in
+    -- Use minimum scale to ensure all nodes fit
+    case Array.head nonEmptyScales of
+      Just firstScale -> foldl min firstScale nonEmptyScales
+      Nothing -> 1.0
+
 -- | Compute node layers, x positions, and y positions with relaxation
 -- | This is the main positioning algorithm that makes the Sankey look good
 computeNodeBreadths :: State SankeyGraphModel Unit
@@ -269,22 +319,27 @@ computeNodeBreadths = do
   -- Step 6b: Initialize y positions by stacking nodes in each layer
   let nodesWithY = initializeNodeBreadths nodesWithLayers model.sankeyLinks config extent.y0 extent.y1
 
-  -- DEBUG: Log positions BEFORE relaxation for key nodes
+  -- CRITICAL: Set link widths NOW, before relaxation (D3 does this in initializeNodeBreadths)
+  -- Without this, targetTop/sourceTop use link.width=0 and calculations are wrong
+  let ky = calculateGlobalKy nodesWithY extent.y0 extent.y1 config.nodePadding
+  let linksWithWidth = map (\link -> link { width = link.value * ky }) model.sankeyLinks
+
+  -- DEBUG: Log positions AFTER initializeNodeBreadths (before relaxation)
   let
     _ = unsafePerformEffect $ do
-      case find (\n -> n.name == "Nuclear") nodesWithY of
-        Just n -> log $ "BEFORE relaxation - Nuclear: y0=" <> show n.y0 <> ", y1=" <> show n.y1
-        Nothing -> pure unit
-      case find (\n -> n.name == "Thermal generation") nodesWithY of
-        Just n -> log $ "BEFORE relaxation - Thermal generation: y0=" <> show n.y0 <> ", y1=" <> show n.y1
-        Nothing -> pure unit
-      case find (\n -> n.name == "Losses") nodesWithY of
-        Just n -> log $ "BEFORE relaxation - Losses: y0=" <> show n.y0 <> ", y1=" <> show n.y1
-        Nothing -> pure unit
+      log $ "\n=== After initializeNodeBreadths (ky=" <> show ky <> ") ==="
+      -- Group by layer for easier comparison with D3
+      let maxLayer = foldl (\acc node -> max acc node.layer) 0 nodesWithY
+      for_ (Array.range 0 maxLayer) $ \layerIdx -> do
+        let layerNodes = Array.sortBy (\a b -> compare a.y0 b.y0) $ filter (\n -> n.layer == layerIdx) nodesWithY
+        log $ "  Layer " <> show layerIdx <> ":"
+        for_ layerNodes $ \n ->
+          log $ "    " <> n.name <> " | y0=" <> show n.y0 <> " | y1=" <> show n.y1 <> " | value=" <> show n.value
 
   -- Step 6c: Run relaxation iterations to minimize crossings
   -- D3 doesn't pre-sort, it relies on relaxation + collision resolution to establish order
-  let relaxedNodes = relaxation nodesWithY model.sankeyLinks config extent.y0 extent.y1
+  -- IMPORTANT: Use linksWithWidth so targetTop/sourceTop have correct link widths
+  let relaxedNodes = relaxation nodesWithY linksWithWidth config extent.y0 extent.y1
 
   -- DEBUG: Log positions AFTER relaxation for key nodes
   let
@@ -299,7 +354,8 @@ computeNodeBreadths = do
         Just n -> log $ "AFTER relaxation - Losses: y0=" <> show n.y0 <> ", y1=" <> show n.y1
         Nothing -> pure unit
 
-  modify_ _ { sankeyNodes = relaxedNodes }
+  -- Store both nodes AND links (with widths) so computeLinkBreadths can use them
+  modify_ _ { sankeyNodes = relaxedNodes, sankeyLinks = linksWithWidth }
 
 -- | Pre-sort nodes by topology to establish initial order before relaxation
 -- | Sorts nodes within each layer by weighted average of their target y-positions
@@ -536,11 +592,17 @@ relaxation nodes links config y0 y1 =
             alpha = pow 0.99 (toNumber i)
             -- Beta parameter for collision resolution (increases over iterations)
             beta = max (1.0 - alpha) (toNumber (i + 1) / toNumber iterations)
-            _ = unsafePerformEffect $ log $ "Relaxation iteration " <> show i <> ", alpha=" <> show alpha <> ", beta=" <> show beta
             -- Relax right to left (by decreasing layer)
             rtl = relaxByLayer currentNodes links config.nodePadding false alpha beta
             -- Then left to right (by increasing layer)
             ltr = relaxByLayer rtl links config.nodePadding true alpha beta
+            -- Log after each iteration (only for first 6 iterations to match D3 debug)
+            _ = unsafePerformEffect $
+                  if i < 6 then do
+                    log $ "\n=== After iteration " <> show i <> " (alpha=" <> show alpha <> ", beta=" <> show beta <> ") ==="
+                    for_ (Array.sortBy (\a b -> compare a.layer b.layer) ltr) $ \n ->
+                      log $ "  " <> n.name <> " | layer=" <> show n.layer <> " | y0=" <> show n.y0 <> " | y1=" <> show n.y1
+                  else pure unit
           in
             ltr
       )
@@ -570,150 +632,322 @@ relaxation nodes links config y0 y1 =
 
   -- Relax a single layer, with alpha controlling how much to move toward weighted center
   -- ascending tells us if we're going left-to-right (true) or right-to-left (false)
+  -- KEY: D3 processes nodes ONE AT A TIME, updating positions immediately
   relaxLayer :: Array SankeyNode -> Array SankeyLink -> Int -> Number -> Boolean -> Number -> Number -> Array SankeyNode
   relaxLayer currentNodes allLinks layerIdx padding ascending alpha beta =
     let
-      -- Get nodes in this layer
-      layerNodes = filter (\n -> n.layer == layerIdx) currentNodes
+      -- Get node indices in this layer
+      layerNodeIndices = map _.index $ filter (\n -> n.layer == layerIdx) currentNodes
 
-      -- Calculate target y position for each node based on connected links
-      -- D3 separates relaxRightToLeft (uses outgoing/sourceLinks) from relaxLeftToRight (uses incoming/targetLinks)
-      nodesWithTarget = map
-        ( \node ->
-            let
-              weightedY =
-                if ascending then calculateWeightedFromSources node currentNodes allLinks -- left-to-right: look at sources
-                else calculateWeightedFromTargets node currentNodes allLinks -- right-to-left: look at targets
-              -- D3 formula: dy = (y / w - node.y0) * alpha
-              dy = (weightedY - node.y0) * alpha
-              newY0 = node.y0 + dy
-              newY1 = node.y1 + dy
-            in
-              { node: node { y0 = newY0, y1 = newY1 }, targetY: newY0 }
+      -- Process each node one at a time, updating the array immediately (D3's approach)
+      nodesAfterRelax = foldl
+        ( \nodes nodeIdx ->
+            case find (\n -> n.index == nodeIdx) nodes of
+              Nothing -> nodes
+              Just node ->
+                let
+                  -- Calculate weighted position based on CURRENT positions of all nodes
+                  -- D3: relaxLeftToRight (ascending) looks at INCOMING links, uses targetTop
+                  -- D3: relaxRightToLeft (descending) looks at OUTGOING links, uses sourceTop
+                  weightedY =
+                    if ascending then calculateWeightedFromSources node nodes allLinks padding
+                    else calculateWeightedFromTargets node nodes allLinks padding
+                  -- D3 formula: dy = (y / w - node.y0) * alpha
+                  dy = (weightedY - node.y0) * alpha
+                  newY0 = node.y0 + dy
+                  newY1 = node.y1 + dy
+                  updatedNode = node { y0 = newY0, y1 = newY1 }
+                in
+                  -- Update this node immediately so next node sees the change
+                  map (\n -> if n.index == nodeIdx then updatedNode else n) nodes
         )
-        layerNodes
+        currentNodes
+        layerNodeIndices
 
-      -- Sort by target position, but use value as tiebreaker to maintain stable order
-      sorted = Array.sortBy
-        ( \a b ->
-            let
-              posCompare = compare a.targetY b.targetY
-            in
-              if posCompare == EQ then compare b.node.value a.node.value -- Larger value first
-              else posCompare
-        )
-        nodesWithTarget
+      -- Get the updated layer nodes for sorting and collision resolution
+      layerNodesUpdated = filter (\n -> n.layer == layerIdx) nodesAfterRelax
 
-      -- Resolve overlaps - push down then push back up
-      resolved = resolveCollisions sorted padding y0 y1
+      -- Sort by y0 position (D3's ascendingBreadth)
+      sorted = Array.sortBy (\a b -> compare a.y0 b.y0) layerNodesUpdated
+
+      -- Wrap for collision resolution
+      sortedWithTarget = map (\node -> { node, targetY: node.y0 }) sorted
+
+      -- Resolve overlaps - D3 uses beta for dampening
+      resolved = resolveCollisions sortedWithTarget padding y0 y1 beta
     in
-      -- Update the main nodes array with new positions
-      updateNodes currentNodes resolved
+      -- Update the main nodes array with resolved positions
+      updateNodes nodesAfterRelax resolved
 
   -- Calculate weighted y-position based on OUTGOING links (targets)
-  -- Used in relaxRightToLeft - D3 sankey.js:268-289
-  calculateWeightedFromTargets :: SankeyNode -> Array SankeyNode -> Array SankeyLink -> Number
-  calculateWeightedFromTargets node allNodes allLinks =
+  -- Used in relaxRightToLeft - D3 uses sourceTop for this pass
+  -- D3 sankey.js:268-289
+  calculateWeightedFromTargets :: SankeyNode -> Array SankeyNode -> Array SankeyLink -> Number -> Number
+  calculateWeightedFromTargets node allNodes allLinks padding =
     let
-      -- Find outgoing links and weight by value * layer distance
+      -- Get outgoing links sorted by target y position (for consistent ordering)
+      outgoingLinks = filter (\l -> l.sourceIndex == node.index) allLinks
+      sortedLinks = Array.sortBy
+        ( \a b ->
+            case find (\n -> n.index == a.targetIndex) allNodes, find (\n -> n.index == b.targetIndex) allNodes of
+              Just na, Just nb -> compare na.y0 nb.y0
+              _, _ -> EQ
+        )
+        outgoingLinks
+
+      -- Calculate weighted sum using sourceTop positioning
+      -- For each outgoing link, calculate ideal position based on where target is
       result = foldl
         ( \acc link ->
-            if link.sourceIndex == node.index then
-              case find (\n -> n.index == link.targetIndex) allNodes of
-                Just targetNode ->
-                  let
-                    -- D3 KEY INSIGHT: weight = value * (target.layer - source.layer)
-                    layerDist = toNumber (targetNode.layer - node.layer)
-                    v = link.value * layerDist
-                    center = (targetNode.y0 + targetNode.y1) / 2.0
-                  in
-                    { sum: acc.sum + center * v, totalWeight: acc.totalWeight + v }
-                Nothing -> acc
-            else acc
+            case find (\n -> n.index == link.targetIndex) allNodes of
+              Just targetNode ->
+                let
+                  -- D3's sourceTop: where should source be based on target position
+                  layerDist = toNumber (targetNode.layer - node.layer)
+                  v = link.value * max 1.0 layerDist
+                  -- sourceTop(source, target) - calculate ideal y for source based on target
+                  idealY = sourceTop node targetNode sortedLinks allNodes allLinks padding
+                in
+                  { sum: acc.sum + idealY * v, totalWeight: acc.totalWeight + v }
+              Nothing -> acc
         )
         { sum: 0.0, totalWeight: 0.0 }
-        allLinks
+        sortedLinks
     in
       if result.totalWeight > 0.0 then result.sum / result.totalWeight
-      else node.y0 -- No outgoing links, stay at current position
+      else node.y0
 
   -- Calculate weighted y-position based on INCOMING links (sources)
-  -- Used in relaxLeftToRight - D3 sankey.js:245-266
-  calculateWeightedFromSources :: SankeyNode -> Array SankeyNode -> Array SankeyLink -> Number
-  calculateWeightedFromSources node allNodes allLinks =
+  -- Used in relaxLeftToRight - D3 uses targetTop for this pass
+  -- D3 sankey.js:245-266
+  calculateWeightedFromSources :: SankeyNode -> Array SankeyNode -> Array SankeyLink -> Number -> Number
+  calculateWeightedFromSources node allNodes allLinks padding =
     let
-      -- Find incoming links and weight by value * layer distance
+      -- Get incoming links sorted by source y position
+      incomingLinks = filter (\l -> l.targetIndex == node.index) allLinks
+      sortedLinks = Array.sortBy
+        ( \a b ->
+            case find (\n -> n.index == a.sourceIndex) allNodes, find (\n -> n.index == b.sourceIndex) allNodes of
+              Just na, Just nb -> compare na.y0 nb.y0
+              _, _ -> EQ
+        )
+        incomingLinks
+
+      -- Calculate weighted sum using targetTop positioning
+      -- For each incoming link, calculate ideal position based on where source is
       result = foldl
         ( \acc link ->
-            if link.targetIndex == node.index then
-              case find (\n -> n.index == link.sourceIndex) allNodes of
-                Just sourceNode ->
-                  let
-                    -- D3 KEY INSIGHT: weight = value * (target.layer - source.layer)
-                    layerDist = toNumber (node.layer - sourceNode.layer)
-                    v = link.value * layerDist
-                    center = (sourceNode.y0 + sourceNode.y1) / 2.0
-                  in
-                    { sum: acc.sum + center * v, totalWeight: acc.totalWeight + v }
-                Nothing -> acc
-            else acc
+            case find (\n -> n.index == link.sourceIndex) allNodes of
+              Just sourceNode ->
+                let
+                  layerDist = toNumber (node.layer - sourceNode.layer)
+                  v = link.value * max 1.0 layerDist
+                  -- targetTop(source, target) - calculate ideal y for target based on source
+                  idealY = targetTop sourceNode node sortedLinks allNodes allLinks padding
+                in
+                  { sum: acc.sum + idealY * v, totalWeight: acc.totalWeight + v }
+              Nothing -> acc
         )
         { sum: 0.0, totalWeight: 0.0 }
-        allLinks
+        sortedLinks
     in
       if result.totalWeight > 0.0 then result.sum / result.totalWeight
-      else node.y0 -- No incoming links, stay at current position
+      else node.y0
+
+  -- D3's targetTop: Returns the target.y0 that would produce an ideal link from source to target
+  -- Accounts for link stacking order at both source and target nodes
+  targetTop :: SankeyNode -> SankeyNode -> Array SankeyLink -> Array SankeyNode -> Array SankeyLink -> Number -> Number
+  targetTop source target _sortedSourceLinks allNodes allLinks py =
+    let
+      -- Get all outgoing links from source, sorted by target y
+      sourceOutgoing = Array.sortBy
+        ( \a b ->
+            case find (\n -> n.index == a.targetIndex) allNodes, find (\n -> n.index == b.targetIndex) allNodes of
+              Just na, Just nb -> compare na.y0 nb.y0
+              _, _ -> EQ
+        )
+        (filter (\l -> l.sourceIndex == source.index) allLinks)
+
+      -- Get all incoming links to target, sorted by source y
+      targetIncoming = Array.sortBy
+        ( \a b ->
+            case find (\n -> n.index == a.sourceIndex) allNodes, find (\n -> n.index == b.sourceIndex) allNodes of
+              Just na, Just nb -> compare na.y0 nb.y0
+              _, _ -> EQ
+        )
+        (filter (\l -> l.targetIndex == target.index) allLinks)
+
+      numSourceLinks = toNumber (Array.length sourceOutgoing)
+
+      -- Start position: source.y0 offset for centering links
+      startY = source.y0 - (numSourceLinks - 1.0) * py / 2.0
+
+      -- Sum widths of links before this one at source
+      yAtSource = foldl
+        ( \acc link ->
+            if acc.found then acc  -- Already found target, skip remaining
+            else if link.targetIndex == target.index then acc { found = true }  -- Found it, mark and stop
+            else { y: acc.y + link.width + py, found: false }  -- Not found yet, keep adding
+        )
+        { y: startY, found: false }
+        sourceOutgoing
+
+      -- Subtract widths of links before this one at target
+      yFinal = foldl
+        ( \acc link ->
+            if acc.found then acc  -- Already found source, skip remaining
+            else if link.sourceIndex == source.index then acc { found = true }  -- Found it, mark and stop
+            else { y: acc.y - link.width, found: false }  -- Not found yet, keep subtracting
+        )
+        { y: yAtSource.y, found: false }
+        targetIncoming
+    in
+      yFinal.y
+
+  -- D3's sourceTop: Returns the source.y0 that would produce an ideal link from source to target
+  sourceTop :: SankeyNode -> SankeyNode -> Array SankeyLink -> Array SankeyNode -> Array SankeyLink -> Number -> Number
+  sourceTop source target _sortedTargetLinks allNodes allLinks py =
+    let
+      -- Get all incoming links to target, sorted by source y
+      targetIncoming = Array.sortBy
+        ( \a b ->
+            case find (\n -> n.index == a.sourceIndex) allNodes, find (\n -> n.index == b.sourceIndex) allNodes of
+              Just na, Just nb -> compare na.y0 nb.y0
+              _, _ -> EQ
+        )
+        (filter (\l -> l.targetIndex == target.index) allLinks)
+
+      -- Get all outgoing links from source, sorted by target y
+      sourceOutgoing = Array.sortBy
+        ( \a b ->
+            case find (\n -> n.index == a.targetIndex) allNodes, find (\n -> n.index == b.targetIndex) allNodes of
+              Just na, Just nb -> compare na.y0 nb.y0
+              _, _ -> EQ
+        )
+        (filter (\l -> l.sourceIndex == source.index) allLinks)
+
+      numTargetLinks = toNumber (Array.length targetIncoming)
+
+      -- Start position: target.y0 offset for centering links
+      startY = target.y0 - (numTargetLinks - 1.0) * py / 2.0
+
+      -- Sum widths of links before this one at target
+      yAtTarget = foldl
+        ( \acc link ->
+            if acc.found then acc  -- Already found source, skip remaining
+            else if link.sourceIndex == source.index then acc { found = true }  -- Found it, mark and stop
+            else { y: acc.y + link.width + py, found: false }  -- Not found yet, keep adding
+        )
+        { y: startY, found: false }
+        targetIncoming
+
+      -- Subtract widths of links before this one at source
+      yFinal = foldl
+        ( \acc link ->
+            if acc.found then acc  -- Already found target, skip remaining
+            else if link.targetIndex == target.index then acc { found = true }  -- Found it, mark and stop
+            else { y: acc.y - link.width, found: false }  -- Not found yet, keep subtracting
+        )
+        { y: yAtTarget.y, found: false }
+        sourceOutgoing
+    in
+      yFinal.y
 
   -- Resolve collisions by pushing overlapping nodes apart
-  -- D3 approach: start from top, push down to avoid overlaps, then push back up if exceeded bounds
-  resolveCollisions :: Array { node :: SankeyNode, targetY :: Number } -> Number -> Number -> Number -> Array { node :: SankeyNode, targetY :: Number }
-  resolveCollisions sorted padding yMin yMax =
+  -- D3 approach: start from MIDDLE, push outward in both directions
+  -- This preserves the relative positions better than starting from edges
+  -- beta parameter dampens collision resolution (starts low, increases over iterations)
+  resolveCollisions :: Array { node :: SankeyNode, targetY :: Number } -> Number -> Number -> Number -> Number -> Array { node :: SankeyNode, targetY :: Number }
+  resolveCollisions sorted padding yMin yMax beta =
     if Array.null sorted then sorted
     else
       let
-        nodeHeight n = n.node.y1 - n.node.y0
+        n = Array.length sorted
+        middleIdx = n / 2  -- Integer division via /
 
-        -- Pass 1: Push nodes down to avoid overlaps, starting from yMin (top)
-        -- Try to position each node at its targetY, but push down if it would overlap
-        pushedDown = foldl
-          ( \acc item ->
-              let
-                prevY = acc.y
-                height = nodeHeight item
-                -- Desired position: center the node at targetY
-                desiredY0 = item.targetY - height / 2.0
-                -- Actual position: at least prevY to avoid overlap
-                actualY0 = max prevY desiredY0
-                actualY1 = actualY0 + height
-                updatedNode = item.node { y0 = actualY0, y1 = actualY1 }
-              in
-                { y: actualY1 + padding
-                , nodes: Array.snoc acc.nodes { node: updatedNode, targetY: item.targetY }
-                }
-          )
-          { y: yMin, nodes: [] }
-          sorted
+        -- Get the middle node as the anchor point
+        middleNode = sorted !! middleIdx
 
-        -- Pass 2: Push nodes back up if we exceeded yMax
-        pushedUp = foldr
-          ( \item acc ->
-              let
-                nextY = acc.y
-                height = nodeHeight item
-                -- Make sure we don't exceed yMax
-                desiredY1 = min item.node.y1 (nextY - padding)
-                actualY1 = desiredY1
-                actualY0 = actualY1 - height
-                updatedNode = item.node { y0 = actualY0, y1 = actualY1 }
-              in
-                { y: actualY0
-                , nodes: Array.cons { node: updatedNode, targetY: item.targetY } acc.nodes
-                }
-          )
-          { y: yMax, nodes: [] }
-          pushedDown.nodes
+        -- Phase 1: Push nodes UP from middle-1 down to 0 (resolveCollisionsBottomToTop)
+        -- Starting y is the top of the middle node minus padding
+        startYUp = case middleNode of
+          Just m -> m.node.y0 - padding
+          Nothing -> yMax
+
+        pushedUp = resolveCollisionsBottomToTop sorted (middleIdx - 1) startYUp padding beta
+
+        -- Phase 2: Push nodes DOWN from middle+1 to end (resolveCollisionsTopToBottom)
+        -- Starting y is the bottom of the middle node plus padding
+        startYDown = case middleNode of
+          Just m -> m.node.y1 + padding
+          Nothing -> yMin
+
+        pushedUpAndDown = resolveCollisionsTopToBottom pushedUp (middleIdx + 1) startYDown padding beta
+
+        -- Phase 3: Clamp to bounds - push up from bottom edge
+        clampedBottom = resolveCollisionsBottomToTop pushedUpAndDown (n - 1) yMax padding beta
+
+        -- Phase 4: Clamp to bounds - push down from top edge
+        clampedTop = resolveCollisionsTopToBottom clampedBottom 0 yMin padding beta
       in
-        pushedUp.nodes
+        clampedTop
+
+  -- Push overlapping nodes UP (from index i down to 0)
+  -- beta dampens the displacement (starts low, increases over iterations)
+  resolveCollisionsBottomToTop :: Array { node :: SankeyNode, targetY :: Number } -> Int -> Number -> Number -> Number -> Array { node :: SankeyNode, targetY :: Number }
+  resolveCollisionsBottomToTop nodes startIdx targetY padding beta =
+    if startIdx < 0 then nodes
+    else
+      let
+        go :: Int -> Number -> Array { node :: SankeyNode, targetY :: Number } -> Array { node :: SankeyNode, targetY :: Number }
+        go idx y currentNodes =
+          if idx < 0 then currentNodes
+          else case currentNodes !! idx of
+            Nothing -> currentNodes
+            Just item ->
+              let
+                -- Calculate how much to push up (D3 multiplies by alpha/beta)
+                dy = (item.node.y1 - y) * beta
+                updated = if dy > epsilon
+                  then
+                    let newNode = item.node { y0 = item.node.y0 - dy, y1 = item.node.y1 - dy }
+                    in fromMaybe currentNodes (Array.updateAt idx { node: newNode, targetY: item.targetY } currentNodes)
+                  else currentNodes
+                newY = case updated !! idx of
+                  Just n -> n.node.y0 - padding
+                  Nothing -> y
+              in
+                go (idx - 1) newY updated
+      in
+        go startIdx targetY nodes
+
+  -- Push overlapping nodes DOWN (from index i up to end)
+  -- beta dampens the displacement (starts low, increases over iterations)
+  resolveCollisionsTopToBottom :: Array { node :: SankeyNode, targetY :: Number } -> Int -> Number -> Number -> Number -> Array { node :: SankeyNode, targetY :: Number }
+  resolveCollisionsTopToBottom nodes startIdx targetY padding beta =
+    let
+      n = Array.length nodes
+      go :: Int -> Number -> Array { node :: SankeyNode, targetY :: Number } -> Array { node :: SankeyNode, targetY :: Number }
+      go idx y currentNodes =
+        if idx >= n then currentNodes
+        else case currentNodes !! idx of
+          Nothing -> currentNodes
+          Just item ->
+            let
+              -- Calculate how much to push down (D3 multiplies by alpha/beta)
+              dy = (y - item.node.y0) * beta
+              updated = if dy > epsilon
+                then
+                  let newNode = item.node { y0 = item.node.y0 + dy, y1 = item.node.y1 + dy }
+                  in fromMaybe currentNodes (Array.updateAt idx { node: newNode, targetY: item.targetY } currentNodes)
+                else currentNodes
+              newY = case updated !! idx of
+                Just n' -> n'.node.y1 + padding
+                Nothing -> y
+            in
+              go (idx + 1) newY updated
+    in
+      go startIdx targetY nodes
 
   -- Update nodes array with new positions
   updateNodes :: Array SankeyNode -> Array { node :: SankeyNode, targetY :: Number } -> Array SankeyNode

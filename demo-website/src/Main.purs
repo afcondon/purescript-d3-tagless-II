@@ -9,6 +9,7 @@ import Effect.Aff (Aff)
 import Web.HTML (window)
 import Web.HTML.Location as Web.HTML.Location
 import Web.HTML.Window as Web.HTML.Window
+import Web.HTML.Window (scroll)
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
@@ -435,6 +436,10 @@ handleAction = case _ of
         let _ = spy "Updating currentRoute to" route
         H.modify_ _ { currentRoute = route }
       Nothing -> H.modify_ _ { currentRoute = NotFound } -- Fallback if route doesn't match
+    -- Scroll to top of page on route change
+    H.liftEffect do
+      w <- window
+      scroll 0 0 w
 
 -- | Entry point
 main :: Effect Unit
