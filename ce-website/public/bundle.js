@@ -156,10 +156,10 @@
   };
   var applySecond = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map25 = map(dictApply.Functor0());
+    var map26 = map(dictApply.Functor0());
     return function(a2) {
       return function(b10) {
-        return apply1(map25($$const(identity2))(a2))(b10);
+        return apply1(map26($$const(identity2))(a2))(b10);
       };
     };
   };
@@ -243,13 +243,15 @@
     }
   };
   var join = function(dictBind) {
-    var bind17 = bind(dictBind);
+    var bind16 = bind(dictBind);
     return function(m) {
-      return bind17(m)(identity3);
+      return bind16(m)(identity3);
     };
   };
 
   // output/Data.Bounded/foreign.js
+  var topInt = 2147483647;
+  var bottomInt = -2147483648;
   var topChar = String.fromCharCode(65535);
   var bottomChar = String.fromCharCode(0);
   var topNumber = Number.POSITIVE_INFINITY;
@@ -257,18 +259,44 @@
 
   // output/Data.Ord/foreign.js
   var unsafeCompareImpl = function(lt) {
-    return function(eq3) {
+    return function(eq5) {
       return function(gt) {
         return function(x2) {
           return function(y2) {
-            return x2 < y2 ? lt : x2 === y2 ? eq3 : gt;
+            return x2 < y2 ? lt : x2 === y2 ? eq5 : gt;
           };
         };
       };
     };
   };
   var ordIntImpl = unsafeCompareImpl;
+  var ordNumberImpl = unsafeCompareImpl;
   var ordStringImpl = unsafeCompareImpl;
+  var ordArrayImpl = function(f) {
+    return function(xs) {
+      return function(ys) {
+        var i2 = 0;
+        var xlen = xs.length;
+        var ylen = ys.length;
+        while (i2 < xlen && i2 < ylen) {
+          var x2 = xs[i2];
+          var y2 = ys[i2];
+          var o = f(x2)(y2);
+          if (o !== 0) {
+            return o;
+          }
+          i2++;
+        }
+        if (xlen === ylen) {
+          return 0;
+        } else if (xlen > ylen) {
+          return -1;
+        } else {
+          return 1;
+        }
+      };
+    };
+  };
 
   // output/Data.Eq/foreign.js
   var refEq = function(r1) {
@@ -276,8 +304,21 @@
       return r1 === r2;
     };
   };
+  var eqBooleanImpl = refEq;
   var eqIntImpl = refEq;
+  var eqNumberImpl = refEq;
   var eqStringImpl = refEq;
+  var eqArrayImpl = function(f) {
+    return function(xs) {
+      return function(ys) {
+        if (xs.length !== ys.length) return false;
+        for (var i2 = 0; i2 < xs.length; i2++) {
+          if (!f(xs[i2])(ys[i2])) return false;
+        }
+        return true;
+      };
+    };
+  };
 
   // output/Data.Symbol/index.js
   var reflectSymbol = function(dict) {
@@ -285,17 +326,22 @@
   };
 
   // output/Record.Unsafe/foreign.js
+  var unsafeGet = function(label5) {
+    return function(rec) {
+      return rec[label5];
+    };
+  };
   var unsafeSet = function(label5) {
     return function(value13) {
       return function(rec) {
-        var copy = {};
+        var copy4 = {};
         for (var key in rec) {
           if ({}.hasOwnProperty.call(rec, key)) {
-            copy[key] = rec[key];
+            copy4[key] = rec[key];
           }
         }
-        copy[label5] = value13;
-        return copy;
+        copy4[label5] = value13;
+        return copy4;
       };
     };
   };
@@ -304,11 +350,73 @@
   var eqString = {
     eq: eqStringImpl
   };
+  var eqRowNil = {
+    eqRecord: function(v) {
+      return function(v1) {
+        return function(v2) {
+          return true;
+        };
+      };
+    }
+  };
+  var eqRecord = function(dict) {
+    return dict.eqRecord;
+  };
+  var eqRec = function() {
+    return function(dictEqRecord) {
+      return {
+        eq: eqRecord(dictEqRecord)($$Proxy.value)
+      };
+    };
+  };
+  var eqNumber = {
+    eq: eqNumberImpl
+  };
   var eqInt = {
     eq: eqIntImpl
   };
+  var eqBoolean = {
+    eq: eqBooleanImpl
+  };
   var eq = function(dict) {
     return dict.eq;
+  };
+  var eq2 = /* @__PURE__ */ eq(eqBoolean);
+  var eqArray = function(dictEq) {
+    return {
+      eq: eqArrayImpl(eq(dictEq))
+    };
+  };
+  var eqRowCons = function(dictEqRecord) {
+    var eqRecord1 = eqRecord(dictEqRecord);
+    return function() {
+      return function(dictIsSymbol) {
+        var reflectSymbol2 = reflectSymbol(dictIsSymbol);
+        return function(dictEq) {
+          var eq32 = eq(dictEq);
+          return {
+            eqRecord: function(v) {
+              return function(ra) {
+                return function(rb) {
+                  var tail2 = eqRecord1($$Proxy.value)(ra)(rb);
+                  var key = reflectSymbol2($$Proxy.value);
+                  var get6 = unsafeGet(key);
+                  return eq32(get6(ra))(get6(rb)) && tail2;
+                };
+              };
+            }
+          };
+        };
+      };
+    };
+  };
+  var notEq = function(dictEq) {
+    var eq32 = eq(dictEq);
+    return function(x2) {
+      return function(y2) {
+        return eq2(eq32(x2)(y2))(false);
+      };
+    };
   };
 
   // output/Data.Ordering/index.js
@@ -333,6 +441,25 @@
     EQ2.value = new EQ2();
     return EQ2;
   })();
+  var eqOrdering = {
+    eq: function(v) {
+      return function(v1) {
+        if (v instanceof LT && v1 instanceof LT) {
+          return true;
+        }
+        ;
+        if (v instanceof GT && v1 instanceof GT) {
+          return true;
+        }
+        ;
+        if (v instanceof EQ && v1 instanceof EQ) {
+          return true;
+        }
+        ;
+        return false;
+      };
+    }
+  };
 
   // output/Data.Ring/foreign.js
   var intSub = function(x2) {
@@ -370,11 +497,33 @@
   };
 
   // output/Data.Ord/index.js
+  var eqRec2 = /* @__PURE__ */ eqRec();
+  var notEq2 = /* @__PURE__ */ notEq(eqOrdering);
   var ordString = /* @__PURE__ */ (function() {
     return {
       compare: ordStringImpl(LT.value)(EQ.value)(GT.value),
       Eq0: function() {
         return eqString;
+      }
+    };
+  })();
+  var ordRecordNil = {
+    compareRecord: function(v) {
+      return function(v1) {
+        return function(v2) {
+          return EQ.value;
+        };
+      };
+    },
+    EqRecord0: function() {
+      return eqRowNil;
+    }
+  };
+  var ordNumber = /* @__PURE__ */ (function() {
+    return {
+      compare: ordNumberImpl(LT.value)(EQ.value)(GT.value),
+      Eq0: function() {
+        return eqNumber;
       }
     };
   })();
@@ -386,8 +535,126 @@
       }
     };
   })();
+  var compareRecord = function(dict) {
+    return dict.compareRecord;
+  };
+  var ordRecord = function() {
+    return function(dictOrdRecord) {
+      var eqRec1 = eqRec2(dictOrdRecord.EqRecord0());
+      return {
+        compare: compareRecord(dictOrdRecord)($$Proxy.value),
+        Eq0: function() {
+          return eqRec1;
+        }
+      };
+    };
+  };
   var compare = function(dict) {
     return dict.compare;
+  };
+  var compare2 = /* @__PURE__ */ compare(ordInt);
+  var min = function(dictOrd) {
+    var compare32 = compare(dictOrd);
+    return function(x2) {
+      return function(y2) {
+        var v = compare32(x2)(y2);
+        if (v instanceof LT) {
+          return x2;
+        }
+        ;
+        if (v instanceof EQ) {
+          return x2;
+        }
+        ;
+        if (v instanceof GT) {
+          return y2;
+        }
+        ;
+        throw new Error("Failed pattern match at Data.Ord (line 172, column 3 - line 175, column 12): " + [v.constructor.name]);
+      };
+    };
+  };
+  var ordArray = function(dictOrd) {
+    var compare32 = compare(dictOrd);
+    var eqArray2 = eqArray(dictOrd.Eq0());
+    return {
+      compare: /* @__PURE__ */ (function() {
+        var toDelta = function(x2) {
+          return function(y2) {
+            var v = compare32(x2)(y2);
+            if (v instanceof EQ) {
+              return 0;
+            }
+            ;
+            if (v instanceof LT) {
+              return 1;
+            }
+            ;
+            if (v instanceof GT) {
+              return -1 | 0;
+            }
+            ;
+            throw new Error("Failed pattern match at Data.Ord (line 79, column 7 - line 82, column 17): " + [v.constructor.name]);
+          };
+        };
+        return function(xs) {
+          return function(ys) {
+            return compare2(0)(ordArrayImpl(toDelta)(xs)(ys));
+          };
+        };
+      })(),
+      Eq0: function() {
+        return eqArray2;
+      }
+    };
+  };
+  var ordRecordCons = function(dictOrdRecord) {
+    var compareRecord1 = compareRecord(dictOrdRecord);
+    var eqRowCons3 = eqRowCons(dictOrdRecord.EqRecord0())();
+    return function() {
+      return function(dictIsSymbol) {
+        var reflectSymbol2 = reflectSymbol(dictIsSymbol);
+        var eqRowCons1 = eqRowCons3(dictIsSymbol);
+        return function(dictOrd) {
+          var compare32 = compare(dictOrd);
+          var eqRowCons22 = eqRowCons1(dictOrd.Eq0());
+          return {
+            compareRecord: function(v) {
+              return function(ra) {
+                return function(rb) {
+                  var key = reflectSymbol2($$Proxy.value);
+                  var left = compare32(unsafeGet(key)(ra))(unsafeGet(key)(rb));
+                  var $95 = notEq2(left)(EQ.value);
+                  if ($95) {
+                    return left;
+                  }
+                  ;
+                  return compareRecord1($$Proxy.value)(ra)(rb);
+                };
+              };
+            },
+            EqRecord0: function() {
+              return eqRowCons22;
+            }
+          };
+        };
+      };
+    };
+  };
+
+  // output/Data.Bounded/index.js
+  var top = function(dict) {
+    return dict.top;
+  };
+  var boundedInt = {
+    top: topInt,
+    bottom: bottomInt,
+    Ord0: function() {
+      return ordInt;
+    }
+  };
+  var bottom = function(dict) {
+    return dict.bottom;
   };
 
   // output/Data.Show/foreign.js
@@ -720,6 +987,54 @@
       throw new Error("Failed pattern match at Data.Maybe (line 288, column 1 - line 288, column 46): " + [v.constructor.name]);
     };
   };
+  var eqMaybe = function(dictEq) {
+    var eq5 = eq(dictEq);
+    return {
+      eq: function(x2) {
+        return function(y2) {
+          if (x2 instanceof Nothing && y2 instanceof Nothing) {
+            return true;
+          }
+          ;
+          if (x2 instanceof Just && y2 instanceof Just) {
+            return eq5(x2.value0)(y2.value0);
+          }
+          ;
+          return false;
+        };
+      }
+    };
+  };
+  var ordMaybe = function(dictOrd) {
+    var compare4 = compare(dictOrd);
+    var eqMaybe1 = eqMaybe(dictOrd.Eq0());
+    return {
+      compare: function(x2) {
+        return function(y2) {
+          if (x2 instanceof Nothing && y2 instanceof Nothing) {
+            return EQ.value;
+          }
+          ;
+          if (x2 instanceof Nothing) {
+            return LT.value;
+          }
+          ;
+          if (y2 instanceof Nothing) {
+            return GT.value;
+          }
+          ;
+          if (x2 instanceof Just && y2 instanceof Just) {
+            return compare4(x2.value0)(y2.value0);
+          }
+          ;
+          throw new Error("Failed pattern match at Data.Maybe (line 0, column 0 - line 0, column 0): " + [x2.constructor.name, y2.constructor.name]);
+        };
+      },
+      Eq0: function() {
+        return eqMaybe1;
+      }
+    };
+  };
   var applyMaybe = {
     apply: function(v) {
       return function(v1) {
@@ -781,23 +1096,23 @@
 
   // output/Control.Monad/index.js
   var unlessM = function(dictMonad) {
-    var bind10 = bind(dictMonad.Bind1());
+    var bind11 = bind(dictMonad.Bind1());
     var unless3 = unless(dictMonad.Applicative0());
     return function(mb) {
       return function(m) {
-        return bind10(mb)(function(b10) {
+        return bind11(mb)(function(b10) {
           return unless3(b10)(m);
         });
       };
     };
   };
   var ap = function(dictMonad) {
-    var bind10 = bind(dictMonad.Bind1());
+    var bind11 = bind(dictMonad.Bind1());
     var pure18 = pure(dictMonad.Applicative0());
     return function(f) {
       return function(a2) {
-        return bind10(f)(function(f$prime) {
-          return bind10(a2)(function(a$prime) {
+        return bind11(f)(function(f$prime) {
+          return bind11(a2)(function(a$prime) {
             return pure18(f$prime(a$prime));
           });
         });
@@ -881,6 +1196,53 @@
     var $67 = liftEffect(dictMonadEffect);
     return function($68) {
       return $67(log($68));
+    };
+  };
+
+  // output/Effect.Ref/foreign.js
+  var _new = function(val) {
+    return function() {
+      return { value: val };
+    };
+  };
+  var read = function(ref2) {
+    return function() {
+      return ref2.value;
+    };
+  };
+  var modifyImpl = function(f) {
+    return function(ref2) {
+      return function() {
+        var t = f(ref2.value);
+        ref2.value = t.state;
+        return t.value;
+      };
+    };
+  };
+  var write = function(val) {
+    return function(ref2) {
+      return function() {
+        ref2.value = val;
+      };
+    };
+  };
+
+  // output/Effect.Ref/index.js
+  var $$void2 = /* @__PURE__ */ $$void(functorEffect);
+  var $$new = _new;
+  var modify$prime = modifyImpl;
+  var modify = function(f) {
+    return modify$prime(function(s) {
+      var s$prime = f(s);
+      return {
+        state: s$prime,
+        value: s$prime
+      };
+    });
+  };
+  var modify_2 = function(f) {
+    return function(s) {
+      return $$void2(modify(f)(s));
     };
   };
 
@@ -1269,23 +1631,23 @@
       };
     }
     return function(apply3) {
-      return function(map25) {
+      return function(map26) {
         return function(pure18) {
           return function(f) {
             return function(array4) {
-              function go2(bot, top2) {
-                switch (top2 - bot) {
+              function go2(bot, top3) {
+                switch (top3 - bot) {
                   case 0:
                     return pure18([]);
                   case 1:
-                    return map25(array1)(f(array4[bot]));
+                    return map26(array1)(f(array4[bot]));
                   case 2:
-                    return apply3(map25(array2)(f(array4[bot])))(f(array4[bot + 1]));
+                    return apply3(map26(array2)(f(array4[bot])))(f(array4[bot + 1]));
                   case 3:
-                    return apply3(apply3(map25(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
+                    return apply3(apply3(map26(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
                   default:
-                    var pivot = bot + Math.floor((top2 - bot) / 4) * 2;
-                    return apply3(map25(concat2)(go2(bot, pivot)))(go2(pivot, top2));
+                    var pivot = bot + Math.floor((top3 - bot) / 4) * 2;
+                    return apply3(map26(concat2)(go2(bot, pivot)))(go2(pivot, top3));
                 }
               }
               return go2(0, array4.length);
@@ -1975,7 +2337,7 @@
     };
   };
   var unsafeBalancedNode = /* @__PURE__ */ (function() {
-    var height10 = function(v) {
+    var height8 = function(v) {
       if (v instanceof Leaf) {
         return 0;
       }
@@ -1987,14 +2349,14 @@
       throw new Error("Failed pattern match at Data.Map.Internal (line 757, column 12 - line 759, column 26): " + [v.constructor.name]);
     };
     var rotateLeft = function(k, v, l, rk, rv, rl, rr) {
-      if (rl instanceof Node && rl.value0 > height10(rr)) {
+      if (rl instanceof Node && rl.value0 > height8(rr)) {
         return unsafeNode(rl.value2, rl.value3, unsafeNode(k, v, l, rl.value4), unsafeNode(rk, rv, rl.value5, rr));
       }
       ;
       return unsafeNode(rk, rv, unsafeNode(k, v, l, rl), rr);
     };
     var rotateRight = function(k, v, lk, lv, ll, lr, r) {
-      if (lr instanceof Node && height10(ll) <= lr.value0) {
+      if (lr instanceof Node && height8(ll) <= lr.value0) {
         return unsafeNode(lr.value2, lr.value3, unsafeNode(lk, lv, ll, lr.value4), unsafeNode(k, v, lr.value5, r));
       }
       ;
@@ -2121,11 +2483,11 @@
   });
   var unsafeUnionWith = /* @__PURE__ */ $lazy_unsafeUnionWith(803);
   var unionWith = function(dictOrd) {
-    var compare3 = compare(dictOrd);
+    var compare4 = compare(dictOrd);
     return function(app) {
       return function(m1) {
         return function(m2) {
-          return unsafeUnionWith(compare3, app, m1, m2);
+          return unsafeUnionWith(compare4, app, m1, m2);
         };
       };
     };
@@ -2134,7 +2496,7 @@
     return unionWith(dictOrd)($$const);
   };
   var lookup = function(dictOrd) {
-    var compare3 = compare(dictOrd);
+    var compare4 = compare(dictOrd);
     return function(k) {
       var go2 = function($copy_v) {
         var $tco_done = false;
@@ -2146,7 +2508,7 @@
           }
           ;
           if (v instanceof Node) {
-            var v1 = compare3(k)(v.value2);
+            var v1 = compare4(k)(v.value2);
             if (v1 instanceof LT) {
               $copy_v = v.value4;
               return;
@@ -2215,10 +2577,10 @@
   })();
   var stepAscCps = /* @__PURE__ */ stepWith(iterMapL);
   var stepUnfoldr = /* @__PURE__ */ (function() {
-    var step3 = function(k, v, next) {
+    var step4 = function(k, v, next) {
       return new Just(new Tuple(new Tuple(k, v), next));
     };
-    return stepAscCps(step3)(function(v) {
+    return stepAscCps(step4)(function(v) {
       return Nothing.value;
     });
   })();
@@ -2229,7 +2591,7 @@
     };
   };
   var insert = function(dictOrd) {
-    var compare3 = compare(dictOrd);
+    var compare4 = compare(dictOrd);
     return function(k) {
       return function(v) {
         var go2 = function(v1) {
@@ -2238,7 +2600,7 @@
           }
           ;
           if (v1 instanceof Node) {
-            var v2 = compare3(k)(v1.value2);
+            var v2 = compare4(k)(v1.value2);
             if (v2 instanceof LT) {
               return unsafeBalancedNode(v1.value2, v1.value3, go2(v1.value4), v1.value5);
             }
@@ -2321,7 +2683,7 @@
     },
     foldMap: function(dictMonoid) {
       var mempty2 = mempty(dictMonoid);
-      var append14 = append(dictMonoid.Semigroup0());
+      var append15 = append(dictMonoid.Semigroup0());
       return function(f) {
         var go2 = function(v) {
           if (v instanceof Leaf) {
@@ -2329,7 +2691,7 @@
           }
           ;
           if (v instanceof Node) {
-            return append14(go2(v.value4))(append14(f(v.value3))(go2(v.value5)));
+            return append15(go2(v.value4))(append15(f(v.value3))(go2(v.value5)));
           }
           ;
           throw new Error("Failed pattern match at Data.Map.Internal (line 181, column 10 - line 184, column 28): " + [v.constructor.name]);
@@ -2355,7 +2717,7 @@
     };
   };
   var $$delete = function(dictOrd) {
-    var compare3 = compare(dictOrd);
+    var compare4 = compare(dictOrd);
     return function(k) {
       var go2 = function(v) {
         if (v instanceof Leaf) {
@@ -2363,7 +2725,7 @@
         }
         ;
         if (v instanceof Node) {
-          var v1 = compare3(k)(v.value2);
+          var v1 = compare4(k)(v.value2);
           if (v1 instanceof LT) {
             return unsafeBalancedNode(v.value2, v.value3, go2(v.value4), v.value5);
           }
@@ -2385,11 +2747,11 @@
     };
   };
   var alter = function(dictOrd) {
-    var compare3 = compare(dictOrd);
+    var compare4 = compare(dictOrd);
     return function(f) {
       return function(k) {
         return function(m) {
-          var v = unsafeSplit(compare3, k, m);
+          var v = unsafeSplit(compare4, k, m);
           var v2 = f(v.value0);
           if (v2 instanceof Nothing) {
             return unsafeJoinNodes(v.value1, v.value2);
@@ -2452,12 +2814,12 @@
 
   // output/Data.Array/foreign.js
   var rangeImpl = function(start4, end) {
-    var step3 = start4 > end ? -1 : 1;
-    var result = new Array(step3 * (end - start4) + 1);
+    var step4 = start4 > end ? -1 : 1;
+    var result = new Array(step4 * (end - start4) + 1);
     var i2 = start4, n = 0;
     while (i2 !== end) {
       result[n++] = i2;
-      i2 += step3;
+      i2 += step4;
     }
     result[n] = i2;
     return result;
@@ -2537,8 +2899,11 @@
     }
     return result;
   };
+  var filterImpl = function(f, xs) {
+    return xs.filter(f);
+  };
   var sortByImpl = /* @__PURE__ */ (function() {
-    function mergeFromTo(compare3, fromOrdering, xs1, xs2, from3, to) {
+    function mergeFromTo(compare4, fromOrdering, xs1, xs2, from3, to) {
       var mid;
       var i2;
       var j;
@@ -2547,15 +2912,15 @@
       var y2;
       var c;
       mid = from3 + (to - from3 >> 1);
-      if (mid - from3 > 1) mergeFromTo(compare3, fromOrdering, xs2, xs1, from3, mid);
-      if (to - mid > 1) mergeFromTo(compare3, fromOrdering, xs2, xs1, mid, to);
+      if (mid - from3 > 1) mergeFromTo(compare4, fromOrdering, xs2, xs1, from3, mid);
+      if (to - mid > 1) mergeFromTo(compare4, fromOrdering, xs2, xs1, mid, to);
       i2 = from3;
       j = mid;
       k = from3;
       while (i2 < mid && j < to) {
         x2 = xs2[i2];
         y2 = xs2[j];
-        c = fromOrdering(compare3(x2)(y2));
+        c = fromOrdering(compare4(x2)(y2));
         if (c > 0) {
           xs1[k++] = y2;
           ++j;
@@ -2571,17 +2936,14 @@
         xs1[k++] = xs2[j++];
       }
     }
-    return function(compare3, fromOrdering, xs) {
+    return function(compare4, fromOrdering, xs) {
       var out;
       if (xs.length < 2) return xs;
       out = xs.slice(0);
-      mergeFromTo(compare3, fromOrdering, out, xs.slice(0), 0, xs.length);
+      mergeFromTo(compare4, fromOrdering, out, xs.slice(0), 0, xs.length);
       return out;
     };
   })();
-  var sliceImpl = function(s, e, l) {
-    return l.slice(s, e);
-  };
   var zipWithImpl = function(f, xs, ys) {
     var l = xs.length < ys.length ? xs.length : ys.length;
     var result = new Array(l);
@@ -2592,53 +2954,6 @@
   };
   var unsafeIndexImpl = function(xs, n) {
     return xs[n];
-  };
-
-  // output/Effect.Ref/foreign.js
-  var _new = function(val) {
-    return function() {
-      return { value: val };
-    };
-  };
-  var read = function(ref2) {
-    return function() {
-      return ref2.value;
-    };
-  };
-  var modifyImpl = function(f) {
-    return function(ref2) {
-      return function() {
-        var t = f(ref2.value);
-        ref2.value = t.state;
-        return t.value;
-      };
-    };
-  };
-  var write = function(val) {
-    return function(ref2) {
-      return function() {
-        ref2.value = val;
-      };
-    };
-  };
-
-  // output/Effect.Ref/index.js
-  var $$void2 = /* @__PURE__ */ $$void(functorEffect);
-  var $$new = _new;
-  var modify$prime = modifyImpl;
-  var modify = function(f) {
-    return modify$prime(function(s) {
-      var s$prime = f(s);
-      return {
-        state: s$prime,
-        value: s$prime
-      };
-    });
-  };
-  var modify_2 = function(f) {
-    return function(s) {
-      return $$void2(modify(f)(s));
-    };
   };
 
   // output/Control.Monad.Rec.Class/index.js
@@ -2705,6 +3020,29 @@
     Monad0: function() {
       return monadEffect;
     }
+  };
+
+  // output/Control.Monad.ST.Internal/foreign.js
+  var map_ = function(f) {
+    return function(a2) {
+      return function() {
+        return f(a2());
+      };
+    };
+  };
+  var foreach = function(as) {
+    return function(f) {
+      return function() {
+        for (var i2 = 0, l = as.length; i2 < l; i2++) {
+          f(as[i2])();
+        }
+      };
+    };
+  };
+
+  // output/Control.Monad.ST.Internal/index.js
+  var functorST = {
+    map: map_
   };
 
   // output/Data.Array.ST/foreign.js
@@ -2829,17 +3167,6 @@
       return withArray(push(x2))(xs)();
     };
   };
-  var slice = /* @__PURE__ */ runFn3(sliceImpl);
-  var take = function(n) {
-    return function(xs) {
-      var $152 = n < 1;
-      if ($152) {
-        return [];
-      }
-      ;
-      return slice(0)(n)(xs);
-    };
-  };
   var singleton4 = function(a2) {
     return [a2];
   };
@@ -2858,6 +3185,7 @@
   var findIndex = /* @__PURE__ */ (function() {
     return runFn4(findIndexImpl)(Just.create)(Nothing.value);
   })();
+  var filter = /* @__PURE__ */ runFn2(filterImpl);
   var deleteAt = /* @__PURE__ */ (function() {
     return runFn4(_deleteAt)(Just.create)(Nothing.value);
   })();
@@ -2902,6 +3230,20 @@
   var toNullable = /* @__PURE__ */ maybe(nullImpl)(notNull);
   var toMaybe = function(n) {
     return nullable(n, Nothing.value, Just.create);
+  };
+  var eqNullable = function(dictEq) {
+    return {
+      eq: on(eq(eqMaybe(dictEq)))(toMaybe)
+    };
+  };
+  var ordNullable = function(dictOrd) {
+    var eqNullable1 = eqNullable(dictOrd.Eq0());
+    return {
+      compare: on(compare(ordMaybe(dictOrd)))(toMaybe),
+      Eq0: function() {
+        return eqNullable1;
+      }
+    };
   };
 
   // output/Halogen.VDom.Machine/index.js
@@ -3655,10 +3997,10 @@
   var $$try = function(dictMonadError) {
     var catchError1 = catchError(dictMonadError);
     var Monad0 = dictMonadError.MonadThrow0().Monad0();
-    var map25 = map(Monad0.Bind1().Apply0().Functor0());
+    var map26 = map(Monad0.Bind1().Apply0().Functor0());
     var pure18 = pure(Monad0.Applicative0());
     return function(a2) {
-      return catchError1(map25(Right.create)(a2))(function($52) {
+      return catchError1(map26(Right.create)(a2))(function($52) {
         return pure18(Left.create($52));
       });
     };
@@ -3696,12 +4038,12 @@
     };
   };
   var bindExceptT = function(dictMonad) {
-    var bind10 = bind(dictMonad.Bind1());
+    var bind11 = bind(dictMonad.Bind1());
     var pure18 = pure(dictMonad.Applicative0());
     return {
       bind: function(v) {
         return function(k) {
-          return bind10(v)(either(function($193) {
+          return bind11(v)(either(function($193) {
             return pure18(Left.create($193));
           })(function(a2) {
             var v1 = k(a2);
@@ -3754,19 +4096,19 @@
     var append8 = append(dictSemigroup);
     return function(dictMonad) {
       var Bind1 = dictMonad.Bind1();
-      var bind10 = bind(Bind1);
+      var bind11 = bind(Bind1);
       var pure18 = pure(dictMonad.Applicative0());
       var functorExceptT1 = functorExceptT(Bind1.Apply0().Functor0());
       return {
         alt: function(v) {
           return function(v1) {
-            return bind10(v)(function(rm) {
+            return bind11(v)(function(rm) {
               if (rm instanceof Right) {
                 return pure18(new Right(rm.value0));
               }
               ;
               if (rm instanceof Left) {
-                return bind10(v1)(function(rn) {
+                return bind11(v1)(function(rn) {
                   if (rn instanceof Right) {
                     return pure18(new Right(rn.value0));
                   }
@@ -3803,7 +4145,10 @@
   };
 
   // output/Data.Number/foreign.js
+  var isFiniteImpl = isFinite;
+  var ceil = Math.ceil;
   var cos = Math.cos;
+  var floor = Math.floor;
   var sin = Math.sin;
   var sqrt = Math.sqrt;
 
@@ -3811,9 +4156,36 @@
   var pi = 3.141592653589793;
 
   // output/Data.Int/index.js
+  var top2 = /* @__PURE__ */ top(boundedInt);
+  var bottom2 = /* @__PURE__ */ bottom(boundedInt);
   var fromNumber = /* @__PURE__ */ (function() {
     return fromNumberImpl(Just.create)(Nothing.value);
   })();
+  var unsafeClamp = function(x2) {
+    if (!isFiniteImpl(x2)) {
+      return 0;
+    }
+    ;
+    if (x2 >= toNumber(top2)) {
+      return top2;
+    }
+    ;
+    if (x2 <= toNumber(bottom2)) {
+      return bottom2;
+    }
+    ;
+    if (otherwise) {
+      return fromMaybe(0)(fromNumber(x2));
+    }
+    ;
+    throw new Error("Failed pattern match at Data.Int (line 72, column 1 - line 72, column 29): " + [x2.constructor.name]);
+  };
+  var floor2 = function($39) {
+    return unsafeClamp(floor($39));
+  };
+  var ceil2 = function($40) {
+    return unsafeClamp(ceil($40));
+  };
 
   // output/Data.List/index.js
   var reverse2 = /* @__PURE__ */ (function() {
@@ -4048,7 +4420,7 @@
     }
     return m;
   }
-  function _foldM(bind10) {
+  function _foldM(bind11) {
     return function(f) {
       return function(mz) {
         return function(m) {
@@ -4060,12 +4432,20 @@
           }
           for (var k in m) {
             if (hasOwnProperty.call(m, k)) {
-              acc = bind10(acc)(g(k));
+              acc = bind11(acc)(g(k));
             }
           }
           return acc;
         };
       };
+    };
+  }
+  function all2(f) {
+    return function(m) {
+      for (var k in m) {
+        if (hasOwnProperty.call(m, k) && !f(k)(m[k])) return false;
+      }
+      return true;
     };
   }
   function _lookup(no, yes, k, m) {
@@ -4089,6 +4469,7 @@
   });
 
   // output/Foreign.Object/index.js
+  var $$void3 = /* @__PURE__ */ $$void(functorST);
   var foldr3 = /* @__PURE__ */ foldr(foldableArray);
   var identity7 = /* @__PURE__ */ identity(categoryFn);
   var values2 = /* @__PURE__ */ toArrayWithKey(function(v) {
@@ -4121,6 +4502,19 @@
   var lookup2 = /* @__PURE__ */ (function() {
     return runFn4(_lookup)(Nothing.value)(Just.create);
   })();
+  var isSubmap = function(dictEq) {
+    var eq5 = eq(dictEq);
+    return function(m1) {
+      return function(m2) {
+        var f = function(k) {
+          return function(v) {
+            return _lookup(false, eq5(v), k, m2);
+          };
+        };
+        return all2(f)(m1);
+      };
+    };
+  };
   var insert2 = function(k) {
     return function(v) {
       return mutate(poke2(k)(v));
@@ -4139,15 +4533,27 @@
       return functorObject;
     }
   };
+  var fromFoldable4 = function(dictFoldable) {
+    var fromFoldable1 = fromFoldable2(dictFoldable);
+    return function(l) {
+      return runST(function __do3() {
+        var s = newImpl();
+        foreach(fromFoldable1(l))(function(v) {
+          return $$void3(poke2(v.value0)(v.value1)(s));
+        })();
+        return s;
+      });
+    };
+  };
   var fold2 = /* @__PURE__ */ _foldM(applyFlipped);
   var foldMap2 = function(dictMonoid) {
-    var append14 = append(dictMonoid.Semigroup0());
+    var append15 = append(dictMonoid.Semigroup0());
     var mempty2 = mempty(dictMonoid);
     return function(f) {
       return fold2(function(acc) {
         return function(k) {
           return function(v) {
-            return append14(acc)(f(k)(v));
+            return append15(acc)(f(k)(v));
           };
         };
       })(mempty2);
@@ -4197,14 +4603,14 @@
     traverseWithIndex: function(dictApplicative) {
       var Apply0 = dictApplicative.Apply0();
       var apply3 = apply(Apply0);
-      var map25 = map(Apply0.Functor0());
+      var map26 = map(Apply0.Functor0());
       var pure18 = pure(dictApplicative);
       return function(f) {
         return function(ms) {
           return fold2(function(acc) {
             return function(k) {
               return function(v) {
-                return apply3(map25(flip(insert2(k)))(acc))(f(k)(v));
+                return apply3(map26(flip(insert2(k)))(acc))(f(k)(v));
               };
             };
           })(pure18(empty4))(ms);
@@ -4237,6 +4643,16 @@
     Foldable1: function() {
       return foldableObject;
     }
+  };
+  var eqObject = function(dictEq) {
+    var isSubmap1 = isSubmap(dictEq);
+    return {
+      eq: function(m1) {
+        return function(m2) {
+          return isSubmap1(m1)(m2) && isSubmap1(m2)(m1);
+        };
+      }
+    };
   };
 
   // output/Web.Event.EventTarget/foreign.js
@@ -4393,8 +4809,8 @@
           }
           ;
           if (v1 instanceof Handler) {
-            var handler2 = unsafeLookup(v1.value0, prevEvents);
-            return removeEventListener(v1.value0, fst(handler2), el);
+            var handler3 = unsafeLookup(v1.value0, prevEvents);
+            return removeEventListener(v1.value0, fst(handler3), el);
           }
           ;
           if (v1 instanceof Ref) {
@@ -4453,9 +4869,9 @@
           }
           ;
           if (v11 instanceof Handler && v2 instanceof Handler) {
-            var handler2 = unsafeLookup(v2.value0, prevEvents);
-            write(v2.value1)(snd(handler2))();
-            pokeMutMap(v2.value0, handler2, events);
+            var handler3 = unsafeLookup(v2.value0, prevEvents);
+            write(v2.value1)(snd(handler3))();
+            pokeMutMap(v2.value0, handler3, events);
             return v2;
           }
           ;
@@ -4551,6 +4967,9 @@
   var isPropString = {
     toPropValue: propFromString
   };
+  var handler = /* @__PURE__ */ (function() {
+    return Handler.create;
+  })();
   var element = function(ns) {
     return function(name16) {
       return function(props) {
@@ -5179,30 +5598,30 @@
       fn.tag = tag;
       return fn;
     }
-    function nonCanceler2(error3) {
+    function nonCanceler2(error4) {
       return new Aff2(PURE, void 0);
     }
     function runEff(eff) {
       try {
         eff();
-      } catch (error3) {
+      } catch (error4) {
         setTimeout(function() {
-          throw error3;
+          throw error4;
         }, 0);
       }
     }
     function runSync(left, right, eff) {
       try {
         return right(eff());
-      } catch (error3) {
-        return left(error3);
+      } catch (error4) {
+        return left(error4);
       }
     }
     function runAsync(left, eff, k) {
       try {
         return eff(k)();
-      } catch (error3) {
-        k(left(error3))();
+      } catch (error4) {
+        k(left(error4))();
         return nonCanceler2;
       }
     }
@@ -5297,7 +5716,7 @@
             fibers = {};
             fiberId = 0;
             count = 0;
-            return function(error3) {
+            return function(error4) {
               return new Aff2(SYNC, function() {
                 for (var k2 in kills) {
                   if (kills.hasOwnProperty(k2)) {
@@ -5320,7 +5739,7 @@
     function Fiber(util, supervisor, aff) {
       var runTick = 0;
       var status = SUSPENDED;
-      var step3 = aff;
+      var step4 = aff;
       var fail3 = null;
       var interrupt = null;
       var bhead = null;
@@ -5340,7 +5759,7 @@
             case STEP_BIND:
               status = CONTINUE;
               try {
-                step3 = bhead(step3);
+                step4 = bhead(step4);
                 if (btail === null) {
                   bhead = null;
                 } else {
@@ -5350,47 +5769,47 @@
               } catch (e) {
                 status = RETURN;
                 fail3 = util.left(e);
-                step3 = null;
+                step4 = null;
               }
               break;
             case STEP_RESULT:
-              if (util.isLeft(step3)) {
+              if (util.isLeft(step4)) {
                 status = RETURN;
-                fail3 = step3;
-                step3 = null;
+                fail3 = step4;
+                step4 = null;
               } else if (bhead === null) {
                 status = RETURN;
               } else {
                 status = STEP_BIND;
-                step3 = util.fromRight(step3);
+                step4 = util.fromRight(step4);
               }
               break;
             case CONTINUE:
-              switch (step3.tag) {
+              switch (step4.tag) {
                 case BIND:
                   if (bhead) {
                     btail = new Aff2(CONS, bhead, btail);
                   }
-                  bhead = step3._2;
+                  bhead = step4._2;
                   status = CONTINUE;
-                  step3 = step3._1;
+                  step4 = step4._1;
                   break;
                 case PURE:
                   if (bhead === null) {
                     status = RETURN;
-                    step3 = util.right(step3._1);
+                    step4 = util.right(step4._1);
                   } else {
                     status = STEP_BIND;
-                    step3 = step3._1;
+                    step4 = step4._1;
                   }
                   break;
                 case SYNC:
                   status = STEP_RESULT;
-                  step3 = runSync(util.left, util.right, step3._1);
+                  step4 = runSync(util.left, util.right, step4._1);
                   break;
                 case ASYNC:
                   status = PENDING;
-                  step3 = runAsync(util.left, step3._1, function(result2) {
+                  step4 = runAsync(util.left, step4._1, function(result2) {
                     return function() {
                       if (runTick !== localRunTick) {
                         return;
@@ -5401,7 +5820,7 @@
                           return;
                         }
                         status = STEP_RESULT;
-                        step3 = result2;
+                        step4 = result2;
                         run3(runTick);
                       });
                     };
@@ -5409,50 +5828,50 @@
                   return;
                 case THROW:
                   status = RETURN;
-                  fail3 = util.left(step3._1);
-                  step3 = null;
+                  fail3 = util.left(step4._1);
+                  step4 = null;
                   break;
                 // Enqueue the Catch so that we can call the error handler later on
                 // in case of an exception.
                 case CATCH:
                   if (bhead === null) {
-                    attempts = new Aff2(CONS, step3, attempts, interrupt);
+                    attempts = new Aff2(CONS, step4, attempts, interrupt);
                   } else {
-                    attempts = new Aff2(CONS, step3, new Aff2(CONS, new Aff2(RESUME, bhead, btail), attempts, interrupt), interrupt);
+                    attempts = new Aff2(CONS, step4, new Aff2(CONS, new Aff2(RESUME, bhead, btail), attempts, interrupt), interrupt);
                   }
                   bhead = null;
                   btail = null;
                   status = CONTINUE;
-                  step3 = step3._1;
+                  step4 = step4._1;
                   break;
                 // Enqueue the Bracket so that we can call the appropriate handlers
                 // after resource acquisition.
                 case BRACKET:
                   bracketCount++;
                   if (bhead === null) {
-                    attempts = new Aff2(CONS, step3, attempts, interrupt);
+                    attempts = new Aff2(CONS, step4, attempts, interrupt);
                   } else {
-                    attempts = new Aff2(CONS, step3, new Aff2(CONS, new Aff2(RESUME, bhead, btail), attempts, interrupt), interrupt);
+                    attempts = new Aff2(CONS, step4, new Aff2(CONS, new Aff2(RESUME, bhead, btail), attempts, interrupt), interrupt);
                   }
                   bhead = null;
                   btail = null;
                   status = CONTINUE;
-                  step3 = step3._1;
+                  step4 = step4._1;
                   break;
                 case FORK:
                   status = STEP_RESULT;
-                  tmp = Fiber(util, supervisor, step3._2);
+                  tmp = Fiber(util, supervisor, step4._2);
                   if (supervisor) {
                     supervisor.register(tmp);
                   }
-                  if (step3._1) {
+                  if (step4._1) {
                     tmp.run();
                   }
-                  step3 = util.right(tmp);
+                  step4 = util.right(tmp);
                   break;
                 case SEQ:
                   status = CONTINUE;
-                  step3 = sequential3(util, supervisor, step3._1);
+                  step4 = sequential3(util, supervisor, step4._1);
                   break;
               }
               break;
@@ -5461,7 +5880,7 @@
               btail = null;
               if (attempts === null) {
                 status = COMPLETED;
-                step3 = interrupt || fail3 || step3;
+                step4 = interrupt || fail3 || step4;
               } else {
                 tmp = attempts._3;
                 attempt = attempts._1;
@@ -5475,7 +5894,7 @@
                       status = RETURN;
                     } else if (fail3) {
                       status = CONTINUE;
-                      step3 = attempt._2(util.fromLeft(fail3));
+                      step4 = attempt._2(util.fromLeft(fail3));
                       fail3 = null;
                     }
                     break;
@@ -5487,7 +5906,7 @@
                       bhead = attempt._1;
                       btail = attempt._2;
                       status = STEP_BIND;
-                      step3 = util.fromRight(step3);
+                      step4 = util.fromRight(step4);
                     }
                     break;
                   // If we have a bracket, we should enqueue the handlers,
@@ -5497,39 +5916,39 @@
                   case BRACKET:
                     bracketCount--;
                     if (fail3 === null) {
-                      result = util.fromRight(step3);
+                      result = util.fromRight(step4);
                       attempts = new Aff2(CONS, new Aff2(RELEASE, attempt._2, result), attempts, tmp);
                       if (interrupt === tmp || bracketCount > 0) {
                         status = CONTINUE;
-                        step3 = attempt._3(result);
+                        step4 = attempt._3(result);
                       }
                     }
                     break;
                   // Enqueue the appropriate handler. We increase the bracket count
                   // because it should not be cancelled.
                   case RELEASE:
-                    attempts = new Aff2(CONS, new Aff2(FINALIZED, step3, fail3), attempts, interrupt);
+                    attempts = new Aff2(CONS, new Aff2(FINALIZED, step4, fail3), attempts, interrupt);
                     status = CONTINUE;
                     if (interrupt && interrupt !== tmp && bracketCount === 0) {
-                      step3 = attempt._1.killed(util.fromLeft(interrupt))(attempt._2);
+                      step4 = attempt._1.killed(util.fromLeft(interrupt))(attempt._2);
                     } else if (fail3) {
-                      step3 = attempt._1.failed(util.fromLeft(fail3))(attempt._2);
+                      step4 = attempt._1.failed(util.fromLeft(fail3))(attempt._2);
                     } else {
-                      step3 = attempt._1.completed(util.fromRight(step3))(attempt._2);
+                      step4 = attempt._1.completed(util.fromRight(step4))(attempt._2);
                     }
                     fail3 = null;
                     bracketCount++;
                     break;
                   case FINALIZER:
                     bracketCount++;
-                    attempts = new Aff2(CONS, new Aff2(FINALIZED, step3, fail3), attempts, interrupt);
+                    attempts = new Aff2(CONS, new Aff2(FINALIZED, step4, fail3), attempts, interrupt);
                     status = CONTINUE;
-                    step3 = attempt._1;
+                    step4 = attempt._1;
                     break;
                   case FINALIZED:
                     bracketCount--;
                     status = RETURN;
-                    step3 = attempt._1;
+                    step4 = attempt._1;
                     fail3 = attempt._2;
                     break;
                 }
@@ -5539,7 +5958,7 @@
               for (var k in joins) {
                 if (joins.hasOwnProperty(k)) {
                   rethrow = rethrow && joins[k].rethrow;
-                  runEff(joins[k].handler(step3));
+                  runEff(joins[k].handler(step4));
                 }
               }
               joins = null;
@@ -5547,10 +5966,10 @@
                 setTimeout(function() {
                   throw util.fromLeft(fail3);
                 }, 0);
-              } else if (util.isLeft(step3) && rethrow) {
+              } else if (util.isLeft(step4) && rethrow) {
                 setTimeout(function() {
                   if (rethrow) {
-                    throw util.fromLeft(step3);
+                    throw util.fromLeft(step4);
                   }
                 }, 0);
               }
@@ -5567,7 +5986,7 @@
         return function() {
           if (status === COMPLETED) {
             rethrow = rethrow && join5.rethrow;
-            join5.handler(step3)();
+            join5.handler(step4)();
             return function() {
             };
           }
@@ -5581,7 +6000,7 @@
           };
         };
       }
-      function kill2(error3, cb) {
+      function kill2(error4, cb) {
         return function() {
           if (status === COMPLETED) {
             cb(util.right(void 0))();
@@ -5596,32 +6015,32 @@
           })();
           switch (status) {
             case SUSPENDED:
-              interrupt = util.left(error3);
+              interrupt = util.left(error4);
               status = COMPLETED;
-              step3 = interrupt;
+              step4 = interrupt;
               run3(runTick);
               break;
             case PENDING:
               if (interrupt === null) {
-                interrupt = util.left(error3);
+                interrupt = util.left(error4);
               }
               if (bracketCount === 0) {
                 if (status === PENDING) {
-                  attempts = new Aff2(CONS, new Aff2(FINALIZER, step3(error3)), attempts, interrupt);
+                  attempts = new Aff2(CONS, new Aff2(FINALIZER, step4(error4)), attempts, interrupt);
                 }
                 status = RETURN;
-                step3 = null;
+                step4 = null;
                 fail3 = null;
                 run3(++runTick);
               }
               break;
             default:
               if (interrupt === null) {
-                interrupt = util.left(error3);
+                interrupt = util.left(error4);
               }
               if (bracketCount === 0) {
                 status = RETURN;
-                step3 = null;
+                step4 = null;
                 fail3 = null;
               }
           }
@@ -5668,8 +6087,8 @@
       var early = new Error("[ParAff] Early exit");
       var interrupt = null;
       var root2 = EMPTY;
-      function kill2(error3, par2, cb2) {
-        var step3 = par2;
+      function kill2(error4, par2, cb2) {
+        var step4 = par2;
         var head4 = null;
         var tail2 = null;
         var count = 0;
@@ -5677,11 +6096,11 @@
         var tmp, kid;
         loop: while (true) {
           tmp = null;
-          switch (step3.tag) {
+          switch (step4.tag) {
             case FORKED:
-              if (step3._3 === EMPTY) {
-                tmp = fibers[step3._1];
-                kills2[count++] = tmp.kill(error3, function(result) {
+              if (step4._3 === EMPTY) {
+                tmp = fibers[step4._1];
+                kills2[count++] = tmp.kill(error4, function(result) {
                   return function() {
                     count--;
                     if (count === 0) {
@@ -5693,7 +6112,7 @@
               if (head4 === null) {
                 break loop;
               }
-              step3 = head4._2;
+              step4 = head4._2;
               if (tail2 === null) {
                 head4 = null;
               } else {
@@ -5702,15 +6121,15 @@
               }
               break;
             case MAP:
-              step3 = step3._2;
+              step4 = step4._2;
               break;
             case APPLY:
             case ALT:
               if (head4) {
                 tail2 = new Aff2(CONS, head4, tail2);
               }
-              head4 = step3;
-              step3 = step3._1;
+              head4 = step4;
+              step4 = step4._1;
               break;
           }
         }
@@ -5726,12 +6145,12 @@
         return kills2;
       }
       function join4(result, head4, tail2) {
-        var fail3, step3, lhs, rhs, tmp, kid;
+        var fail3, step4, lhs, rhs, tmp, kid;
         if (util.isLeft(result)) {
           fail3 = result;
-          step3 = null;
+          step4 = null;
         } else {
-          step3 = result;
+          step4 = result;
           fail3 = null;
         }
         loop: while (true) {
@@ -5743,7 +6162,7 @@
             return;
           }
           if (head4 === null) {
-            cb(fail3 || step3)();
+            cb(fail3 || step4)();
             return;
           }
           if (head4._3 !== EMPTY) {
@@ -5752,8 +6171,8 @@
           switch (head4.tag) {
             case MAP:
               if (fail3 === null) {
-                head4._3 = util.right(head4._1(util.fromRight(step3)));
-                step3 = head4._3;
+                head4._3 = util.right(head4._1(util.fromRight(step4)));
+                step4 = head4._3;
               } else {
                 head4._3 = fail3;
               }
@@ -5784,8 +6203,8 @@
               } else if (lhs === EMPTY || rhs === EMPTY) {
                 return;
               } else {
-                step3 = util.right(util.fromRight(lhs)(util.fromRight(rhs)));
-                head4._3 = step3;
+                step4 = util.right(util.fromRight(lhs)(util.fromRight(rhs)));
+                head4._3 = step4;
               }
               break;
             case ALT:
@@ -5795,22 +6214,22 @@
                 return;
               }
               if (lhs !== EMPTY && util.isLeft(lhs) && rhs !== EMPTY && util.isLeft(rhs)) {
-                fail3 = step3 === lhs ? rhs : lhs;
-                step3 = null;
+                fail3 = step4 === lhs ? rhs : lhs;
+                step4 = null;
                 head4._3 = fail3;
               } else {
-                head4._3 = step3;
+                head4._3 = step4;
                 tmp = true;
                 kid = killId++;
-                kills[kid] = kill2(early, step3 === lhs ? head4._2 : head4._1, function() {
+                kills[kid] = kill2(early, step4 === lhs ? head4._2 : head4._1, function() {
                   return function() {
                     delete kills[kid];
                     if (tmp) {
                       tmp = false;
                     } else if (tail2 === null) {
-                      join4(step3, null, null);
+                      join4(step4, null, null);
                     } else {
-                      join4(step3, tail2._1, tail2._2);
+                      join4(step4, tail2._1, tail2._2);
                     }
                   };
                 });
@@ -5840,7 +6259,7 @@
       }
       function run3() {
         var status = CONTINUE;
-        var step3 = par;
+        var step4 = par;
         var head4 = null;
         var tail2 = null;
         var tmp, fid;
@@ -5849,37 +6268,37 @@
           fid = null;
           switch (status) {
             case CONTINUE:
-              switch (step3.tag) {
+              switch (step4.tag) {
                 case MAP:
                   if (head4) {
                     tail2 = new Aff2(CONS, head4, tail2);
                   }
-                  head4 = new Aff2(MAP, step3._1, EMPTY, EMPTY);
-                  step3 = step3._2;
+                  head4 = new Aff2(MAP, step4._1, EMPTY, EMPTY);
+                  step4 = step4._2;
                   break;
                 case APPLY:
                   if (head4) {
                     tail2 = new Aff2(CONS, head4, tail2);
                   }
-                  head4 = new Aff2(APPLY, EMPTY, step3._2, EMPTY);
-                  step3 = step3._1;
+                  head4 = new Aff2(APPLY, EMPTY, step4._2, EMPTY);
+                  step4 = step4._1;
                   break;
                 case ALT:
                   if (head4) {
                     tail2 = new Aff2(CONS, head4, tail2);
                   }
-                  head4 = new Aff2(ALT, EMPTY, step3._2, EMPTY);
-                  step3 = step3._1;
+                  head4 = new Aff2(ALT, EMPTY, step4._2, EMPTY);
+                  step4 = step4._1;
                   break;
                 default:
                   fid = fiberId++;
                   status = RETURN;
-                  tmp = step3;
-                  step3 = new Aff2(FORKED, fid, new Aff2(CONS, head4, tail2), EMPTY);
+                  tmp = step4;
+                  step4 = new Aff2(FORKED, fid, new Aff2(CONS, head4, tail2), EMPTY);
                   tmp = Fiber(util, supervisor, tmp);
                   tmp.onComplete({
                     rethrow: false,
-                    handler: resolve(step3)
+                    handler: resolve(step4)
                   })();
                   fibers[fid] = tmp;
                   if (supervisor) {
@@ -5892,13 +6311,13 @@
                 break loop;
               }
               if (head4._1 === EMPTY) {
-                head4._1 = step3;
+                head4._1 = step4;
                 status = CONTINUE;
-                step3 = head4._2;
+                step4 = head4._2;
                 head4._2 = EMPTY;
               } else {
-                head4._2 = step3;
-                step3 = head4;
+                head4._2 = step4;
+                step4 = head4;
                 if (tail2 === null) {
                   head4 = null;
                 } else {
@@ -5908,13 +6327,13 @@
               }
           }
         }
-        root2 = step3;
+        root2 = step4;
         for (fid = 0; fid < fiberId; fid++) {
           fibers[fid].run();
         }
       }
-      function cancel(error3, cb2) {
-        interrupt = util.left(error3);
+      function cancel(error4, cb2) {
+        interrupt = util.left(error4);
         var innerKills;
         for (var kid in kills) {
           if (kills.hasOwnProperty(kid)) {
@@ -5927,7 +6346,7 @@
           }
         }
         kills = null;
-        var newKills = kill2(error3, root2, cb2);
+        var newKills = kill2(error4, root2, cb2);
         return function(killError) {
           return new Aff2(ASYNC, function(killCb) {
             return function() {
@@ -6087,7 +6506,7 @@
     };
   };
   var pure3 = /* @__PURE__ */ pure(applicativeEffect);
-  var $$void3 = /* @__PURE__ */ $$void(functorEffect);
+  var $$void4 = /* @__PURE__ */ $$void(functorEffect);
   var map8 = /* @__PURE__ */ map(functorEffect);
   var Canceler = function(x2) {
     return x2;
@@ -6154,7 +6573,7 @@
     };
   };
   var launchAff_ = function($75) {
-    return $$void3(launchAff($75));
+    return $$void4(launchAff($75));
   };
   var bracket = function(acquire) {
     return function(completed) {
@@ -6253,7 +6672,7 @@
     return function(v) {
       return bind1(liftEffect2(v.isSuspended))(function(suspended) {
         if (suspended) {
-          return liftEffect2($$void3(v.kill(e, $$const(pure3(unit)))));
+          return liftEffect2($$void4(v.kill(e, $$const(pure3(unit)))));
         }
         ;
         return makeAff(function(k) {
@@ -6284,7 +6703,7 @@
   };
   var runAff_ = function(k) {
     return function(aff) {
-      return $$void3(runAff(k)(aff));
+      return $$void4(runAff(k)(aff));
     };
   };
   var monadRecAff = {
@@ -6332,7 +6751,7 @@
   var unsafeRefEq = reallyUnsafeRefEq;
 
   // output/Halogen.Subscription/index.js
-  var $$void4 = /* @__PURE__ */ $$void(functorEffect);
+  var $$void5 = /* @__PURE__ */ $$void(functorEffect);
   var bind2 = /* @__PURE__ */ bind(bindEffect);
   var append5 = /* @__PURE__ */ append(semigroupArray);
   var traverse_2 = /* @__PURE__ */ traverse_(applicativeEffect);
@@ -6343,7 +6762,7 @@
   var subscribe = function(v) {
     return function(k) {
       return v(function($76) {
-        return $$void4(k($76));
+        return $$void5(k($76));
       });
     };
   };
@@ -6725,9 +7144,35 @@
   })();
   var h1 = /* @__PURE__ */ element2("h1");
   var div2 = /* @__PURE__ */ element2("div");
+  var button = /* @__PURE__ */ element2("button");
+
+  // output/Control.Monad.Except/index.js
+  var unwrap2 = /* @__PURE__ */ unwrap();
+  var runExcept = function($3) {
+    return unwrap2(runExceptT($3));
+  };
+
+  // output/Web.UIEvent.MouseEvent.EventTypes/index.js
+  var click = "click";
+
+  // output/Halogen.HTML.Events/index.js
+  var mouseHandler = unsafeCoerce2;
+  var handler2 = function(et) {
+    return function(f) {
+      return handler(et)(function(ev) {
+        return new Just(new Action(f(ev)));
+      });
+    };
+  };
+  var onClick = /* @__PURE__ */ (function() {
+    var $15 = handler2(click);
+    return function($16) {
+      return $15(mouseHandler($16));
+    };
+  })();
 
   // output/Halogen.HTML.Properties/index.js
-  var unwrap2 = /* @__PURE__ */ unwrap();
+  var unwrap3 = /* @__PURE__ */ unwrap();
   var prop2 = function(dictIsProp) {
     return prop(dictIsProp);
   };
@@ -6736,13 +7181,149 @@
   var class_ = /* @__PURE__ */ (function() {
     var $36 = prop22("className");
     return function($37) {
-      return $36(unwrap2($37));
+      return $36(unwrap3($37));
     };
   })();
   var attr2 = /* @__PURE__ */ (function() {
     return attr(Nothing.value);
   })();
   var style = /* @__PURE__ */ attr2("style");
+
+  // output/Types/index.js
+  var Grid = /* @__PURE__ */ (function() {
+    function Grid2() {
+    }
+    ;
+    Grid2.value = new Grid2();
+    return Grid2;
+  })();
+  var Orbit = /* @__PURE__ */ (function() {
+    function Orbit2() {
+    }
+    ;
+    Orbit2.value = new Orbit2();
+    return Orbit2;
+  })();
+  var Tree = /* @__PURE__ */ (function() {
+    function Tree2() {
+    }
+    ;
+    Tree2.value = new Tree2();
+    return Tree2;
+  })();
+  var BubblePack = /* @__PURE__ */ (function() {
+    function BubblePack2() {
+    }
+    ;
+    BubblePack2.value = new BubblePack2();
+    return BubblePack2;
+  })();
+  var ModuleNode = /* @__PURE__ */ (function() {
+    function ModuleNode2() {
+    }
+    ;
+    ModuleNode2.value = new ModuleNode2();
+    return ModuleNode2;
+  })();
+  var PackageNode = /* @__PURE__ */ (function() {
+    function PackageNode2() {
+    }
+    ;
+    PackageNode2.value = new PackageNode2();
+    return PackageNode2;
+  })();
+  var ModuleToModule = /* @__PURE__ */ (function() {
+    function ModuleToModule2() {
+    }
+    ;
+    ModuleToModule2.value = new ModuleToModule2();
+    return ModuleToModule2;
+  })();
+  var showScene = {
+    show: function(v) {
+      if (v instanceof Grid) {
+        return "Grid";
+      }
+      ;
+      if (v instanceof Orbit) {
+        return "Orbit";
+      }
+      ;
+      if (v instanceof Tree) {
+        return "Tree";
+      }
+      ;
+      if (v instanceof BubblePack) {
+        return "BubblePack";
+      }
+      ;
+      throw new Error("Failed pattern match at Types (line 85, column 1 - line 89, column 33): " + [v.constructor.name]);
+    }
+  };
+  var eqScene = {
+    eq: function(x2) {
+      return function(y2) {
+        if (x2 instanceof Grid && y2 instanceof Grid) {
+          return true;
+        }
+        ;
+        if (x2 instanceof Orbit && y2 instanceof Orbit) {
+          return true;
+        }
+        ;
+        if (x2 instanceof Tree && y2 instanceof Tree) {
+          return true;
+        }
+        ;
+        if (x2 instanceof BubblePack && y2 instanceof BubblePack) {
+          return true;
+        }
+        ;
+        return false;
+      };
+    }
+  };
+  var eqNodeType = {
+    eq: function(x2) {
+      return function(y2) {
+        if (x2 instanceof ModuleNode && y2 instanceof ModuleNode) {
+          return true;
+        }
+        ;
+        if (x2 instanceof PackageNode && y2 instanceof PackageNode) {
+          return true;
+        }
+        ;
+        return false;
+      };
+    }
+  };
+  var ordNodeType = {
+    compare: function(x2) {
+      return function(y2) {
+        if (x2 instanceof ModuleNode && y2 instanceof ModuleNode) {
+          return EQ.value;
+        }
+        ;
+        if (x2 instanceof ModuleNode) {
+          return LT.value;
+        }
+        ;
+        if (y2 instanceof ModuleNode) {
+          return GT.value;
+        }
+        ;
+        if (x2 instanceof PackageNode && y2 instanceof PackageNode) {
+          return EQ.value;
+        }
+        ;
+        throw new Error("Failed pattern match at Types (line 0, column 0 - line 0, column 0): " + [x2.constructor.name, y2.constructor.name]);
+      };
+    },
+    Eq0: function() {
+      return eqNodeType;
+    }
+  };
 
   // output/Affjax/foreign.js
   function _ajax(platformSpecificDriver, timeoutErrorMessageIdent, requestFailedMessageIdent, mkHeader, options2) {
@@ -6783,7 +7364,7 @@
       xhr.withCredentials = options2.withCredentials;
       xhr.timeout = options2.timeout;
       xhr.send(options2.content);
-      return function(error3, cancelErrback, cancelCallback) {
+      return function(error4, cancelErrback, cancelCallback) {
         try {
           xhr.abort();
         } catch (e) {
@@ -6882,7 +7463,7 @@
   };
 
   // output/Affjax.RequestHeader/index.js
-  var unwrap3 = /* @__PURE__ */ unwrap();
+  var unwrap4 = /* @__PURE__ */ unwrap();
   var Accept = /* @__PURE__ */ (function() {
     function Accept2(value0) {
       this.value0 = value0;
@@ -6916,13 +7497,13 @@
     };
     return RequestHeader2;
   })();
-  var value = function(v) {
+  var value2 = function(v) {
     if (v instanceof Accept) {
-      return unwrap3(v.value0);
+      return unwrap4(v.value0);
     }
     ;
     if (v instanceof ContentType) {
-      return unwrap3(v.value0);
+      return unwrap4(v.value0);
     }
     ;
     if (v instanceof RequestHeader) {
@@ -6931,7 +7512,7 @@
     ;
     throw new Error("Failed pattern match at Affjax.RequestHeader (line 26, column 1 - line 26, column 33): " + [v.constructor.name]);
   };
-  var name2 = function(v) {
+  var name3 = function(v) {
     if (v instanceof Accept) {
       return "Accept";
     }
@@ -7065,12 +7646,6 @@
     return ResponseHeader2;
   })();
 
-  // output/Control.Monad.Except/index.js
-  var unwrap4 = /* @__PURE__ */ unwrap();
-  var runExcept = function($3) {
-    return unwrap4(runExceptT($3));
-  };
-
   // output/Data.Argonaut.Core/foreign.js
   function id3(x2) {
     return x2;
@@ -7146,14 +7721,14 @@
   };
 
   // output/JSURI/foreign.js
-  function encodeURIComponent_to_RFC3986(input2) {
-    return input2.replace(/[!'()*]/g, function(c) {
+  function encodeURIComponent_to_RFC3986(input3) {
+    return input3.replace(/[!'()*]/g, function(c) {
       return "%" + c.charCodeAt(0).toString(16);
     });
   }
-  function _encodeFormURLComponent(fail3, succeed, input2) {
+  function _encodeFormURLComponent(fail3, succeed, input3) {
     try {
-      return succeed(encodeURIComponent_to_RFC3986(encodeURIComponent(input2)).replace(/%20/g, "+"));
+      return succeed(encodeURIComponent_to_RFC3986(encodeURIComponent(input3)).replace(/%20/g, "+"));
     } catch (err) {
       return fail3(err);
     }
@@ -7379,7 +7954,7 @@
       throw new Error("Failed pattern match at Data.HTTP.Method (line 43, column 1 - line 59, column 23): " + [v.constructor.name]);
     }
   };
-  var print = /* @__PURE__ */ either(/* @__PURE__ */ show(showMethod))(unCustomMethod);
+  var print2 = /* @__PURE__ */ either(/* @__PURE__ */ show(showMethod))(unCustomMethod);
 
   // output/Effect.Aff.Compat/index.js
   var fromEffectFnAff = function(v) {
@@ -7410,11 +7985,11 @@
   var pure5 = /* @__PURE__ */ pure(/* @__PURE__ */ applicativeExceptT(monadIdentity));
   var fail2 = /* @__PURE__ */ fail(monadIdentity);
   var unsafeReadTagged2 = /* @__PURE__ */ unsafeReadTagged(monadIdentity);
-  var alt2 = /* @__PURE__ */ alt(/* @__PURE__ */ altExceptT(semigroupNonEmptyList)(monadIdentity));
+  var alt3 = /* @__PURE__ */ alt(/* @__PURE__ */ altExceptT(semigroupNonEmptyList)(monadIdentity));
   var composeKleisliFlipped2 = /* @__PURE__ */ composeKleisliFlipped(/* @__PURE__ */ bindExceptT(monadIdentity));
   var map11 = /* @__PURE__ */ map(functorMaybe);
   var any2 = /* @__PURE__ */ any(foldableArray)(heytingAlgebraBoolean);
-  var eq2 = /* @__PURE__ */ eq(eqString);
+  var eq3 = /* @__PURE__ */ eq(eqString);
   var bindFlipped4 = /* @__PURE__ */ bindFlipped(bindMaybe);
   var map13 = /* @__PURE__ */ map(functorArray);
   var mapFlipped2 = /* @__PURE__ */ mapFlipped(functorAff);
@@ -7489,7 +8064,7 @@
         ;
         if (req.responseFormat instanceof Document2) {
           return function(x2) {
-            return alt2(unsafeReadTagged2("Document")(x2))(alt2(unsafeReadTagged2("XMLDocument")(x2))(unsafeReadTagged2("HTMLDocument")(x2)));
+            return alt3(unsafeReadTagged2("Document")(x2))(alt3(unsafeReadTagged2("XMLDocument")(x2))(unsafeReadTagged2("HTMLDocument")(x2)));
           };
         }
         ;
@@ -7542,7 +8117,7 @@
       };
       var addHeader = function(mh) {
         return function(hs) {
-          if (mh instanceof Just && !any2(on(eq2)(name2)(mh.value0))(hs)) {
+          if (mh instanceof Just && !any2(on(eq3)(name3)(mh.value0))(hs)) {
             return snoc(hs)(mh.value0);
           }
           ;
@@ -7554,12 +8129,12 @@
       };
       var ajaxRequest = function(v2) {
         return {
-          method: print(req.method),
+          method: print2(req.method),
           url: req.url,
           headers: map13(function(h) {
             return {
-              field: name2(h),
-              value: value(h)
+              field: name3(h),
+              value: value2(h)
             };
           })(headers(req.content)),
           content: v2,
@@ -7973,29 +8548,6 @@
     };
   };
 
-  // output/Types/index.js
-  var ModuleNode = /* @__PURE__ */ (function() {
-    function ModuleNode2() {
-    }
-    ;
-    ModuleNode2.value = new ModuleNode2();
-    return ModuleNode2;
-  })();
-  var PackageNode = /* @__PURE__ */ (function() {
-    function PackageNode2() {
-    }
-    ;
-    PackageNode2.value = new PackageNode2();
-    return PackageNode2;
-  })();
-  var ModuleToModule = /* @__PURE__ */ (function() {
-    function ModuleToModule2() {
-    }
-    ;
-    ModuleToModule2.value = new ModuleToModule2();
-    return ModuleToModule2;
-  })();
-
   // output/Data.Loader/index.js
   var div3 = /* @__PURE__ */ div(euclideanRingInt);
   var mod2 = /* @__PURE__ */ mod(euclideanRingInt);
@@ -8006,7 +8558,7 @@
   var lookup4 = /* @__PURE__ */ lookup(ordString);
   var insert6 = /* @__PURE__ */ insert(ordString);
   var toUnfoldable5 = /* @__PURE__ */ toUnfoldable3(unfoldableArray);
-  var fromFoldable5 = /* @__PURE__ */ fromFoldable(ordString)(foldableArray);
+  var fromFoldable6 = /* @__PURE__ */ fromFoldable(ordString)(foldableArray);
   var map15 = /* @__PURE__ */ map(functorArray);
   var append12 = /* @__PURE__ */ append(semigroupArray);
   var bind12 = /* @__PURE__ */ bind(bindEither);
@@ -8147,7 +8699,7 @@
                     var offsetX2 = cos(offsetAngle) * offsetDist;
                     var offsetY2 = sin(offsetAngle) * offsetDist;
                     var loc = fromMaybe(50)(lookup4(path)(locMap));
-                    var r = 3 + sqrt(toNumber(loc)) * 0.3;
+                    var r = 4 + sqrt(toNumber(loc)) * 0.8;
                     var cluster = fromMaybe(0)(lookup4(pkgName)(packageIdMap));
                     var absGridY = pkgGridY + offsetY2;
                     var absGridX = pkgGridX + offsetX2;
@@ -8191,7 +8743,7 @@
     return foldl3(addModule)(empty2)(toUnfoldable5(modulesObj));
   };
   var buildLocMap = function(entries) {
-    return fromFoldable5(map15(function(e) {
+    return fromFoldable6(map15(function(e) {
       return new Tuple(e.path, e.loc);
     })(entries));
   };
@@ -8236,7 +8788,7 @@
             };
           };
         })(packageNames);
-        var packageIdMap = fromFoldable5(mapWithIndex3(function(i2) {
+        var packageIdMap = fromFoldable6(mapWithIndex3(function(i2) {
           return function(n) {
             return new Tuple(n, i2);
           };
@@ -8244,7 +8796,7 @@
         var packageCount = length(packageNames);
         var packageNodes = mapWithIndex3(mkPackageNode(packageNames)(packageCount))(packageNames);
         var moduleNames = keys(modulesObj);
-        var moduleIdMap = fromFoldable5(mapWithIndex3(function(i2) {
+        var moduleIdMap = fromFoldable6(mapWithIndex3(function(i2) {
           return function(n) {
             return new Tuple(n, i2 + packageCount | 0);
           };
@@ -8298,14 +8850,14 @@
   }
   function add2(tree, x2, y2, d) {
     if (isNaN(x2) || isNaN(y2)) return tree;
-    var parent2, node = tree._root, leaf = { data: d }, x0 = tree._x0, y0 = tree._y0, x1 = tree._x1, y1 = tree._y1, xm, ym, xp, yp, right, bottom2, i2, j;
+    var parent2, node = tree._root, leaf = { data: d }, x0 = tree._x0, y0 = tree._y0, x1 = tree._x1, y1 = tree._y1, xm, ym, xp, yp, right, bottom3, i2, j;
     if (!node) return tree._root = leaf, tree;
     while (node.length) {
       if (right = x2 >= (xm = (x0 + x1) / 2)) x0 = xm;
       else x1 = xm;
-      if (bottom2 = y2 >= (ym = (y0 + y1) / 2)) y0 = ym;
+      if (bottom3 = y2 >= (ym = (y0 + y1) / 2)) y0 = ym;
       else y1 = ym;
-      if (parent2 = node, !(node = node[i2 = bottom2 << 1 | right])) return parent2[i2] = leaf, tree;
+      if (parent2 = node, !(node = node[i2 = bottom3 << 1 | right])) return parent2[i2] = leaf, tree;
     }
     xp = +tree._x.call(null, node.data);
     yp = +tree._y.call(null, node.data);
@@ -8314,9 +8866,9 @@
       parent2 = parent2 ? parent2[i2] = new Array(4) : tree._root = new Array(4);
       if (right = x2 >= (xm = (x0 + x1) / 2)) x0 = xm;
       else x1 = xm;
-      if (bottom2 = y2 >= (ym = (y0 + y1) / 2)) y0 = ym;
+      if (bottom3 = y2 >= (ym = (y0 + y1) / 2)) y0 = ym;
       else y1 = ym;
-    } while ((i2 = bottom2 << 1 | right) === (j = (yp >= ym) << 1 | xp >= xm));
+    } while ((i2 = bottom3 << 1 | right) === (j = (yp >= ym) << 1 | xp >= xm));
     return parent2[j] = node, parent2[i2] = leaf, tree;
   }
   function addAll(data) {
@@ -8440,14 +8992,14 @@
   // node_modules/d3-quadtree/src/remove.js
   function remove_default(d) {
     if (isNaN(x2 = +this._x.call(null, d)) || isNaN(y2 = +this._y.call(null, d))) return this;
-    var parent2, node = this._root, retainer, previous, next, x0 = this._x0, y0 = this._y0, x1 = this._x1, y1 = this._y1, x2, y2, xm, ym, right, bottom2, i2, j;
+    var parent2, node = this._root, retainer, previous, next, x0 = this._x0, y0 = this._y0, x1 = this._x1, y1 = this._y1, x2, y2, xm, ym, right, bottom3, i2, j;
     if (!node) return this;
     if (node.length) while (true) {
       if (right = x2 >= (xm = (x0 + x1) / 2)) x0 = xm;
       else x1 = xm;
-      if (bottom2 = y2 >= (ym = (y0 + y1) / 2)) y0 = ym;
+      if (bottom3 = y2 >= (ym = (y0 + y1) / 2)) y0 = ym;
       else y1 = ym;
-      if (!(parent2 = node, node = node[i2 = bottom2 << 1 | right])) return this;
+      if (!(parent2 = node, node = node[i2 = bottom3 << 1 | right])) return this;
       if (!node.length) break;
       if (parent2[i2 + 1 & 3] || parent2[i2 + 2 & 3] || parent2[i2 + 3 & 3]) retainer = parent2, j = i2;
     }
@@ -8551,16 +9103,16 @@
     this._root = void 0;
   }
   function leaf_copy(leaf) {
-    var copy = { data: leaf.data }, next = copy;
+    var copy4 = { data: leaf.data }, next = copy4;
     while (leaf = leaf.next) next = next.next = { data: leaf.data };
-    return copy;
+    return copy4;
   }
   var treeProto = quadtree.prototype = Quadtree.prototype;
   treeProto.copy = function() {
-    var copy = new Quadtree(this._x, this._y, this._x0, this._y0, this._x1, this._y1), node = this._root, nodes, child;
-    if (!node) return copy;
-    if (!node.length) return copy._root = leaf_copy(node), copy;
-    nodes = [{ source: node, target: copy._root = new Array(4) }];
+    var copy4 = new Quadtree(this._x, this._y, this._x0, this._y0, this._x1, this._y1), node = this._root, nodes, child;
+    if (!node) return copy4;
+    if (!node.length) return copy4._root = leaf_copy(node), copy4;
+    nodes = [{ source: node, target: copy4._root = new Array(4) }];
     while (node = nodes.pop()) {
       for (var i2 = 0; i2 < 4; ++i2) {
         if (child = node.source[i2]) {
@@ -8569,7 +9121,7 @@
         }
       }
     }
-    return copy;
+    return copy4;
   };
   treeProto.add = add_default;
   treeProto.addAll = addAll;
@@ -8708,9 +9260,9 @@
       return this;
     },
     copy: function() {
-      var copy = {}, _ = this._;
-      for (var t in _) copy[t] = _[t].slice();
-      return new Dispatch(copy);
+      var copy4 = {}, _ = this._;
+      for (var t in _) copy4[t] = _[t].slice();
+      return new Dispatch(copy4);
     },
     call: function(type, that) {
       if ((n = arguments.length - 2) > 0) for (var args = new Array(n), i2 = 0, n, t; i2 < n; ++i2) args[i2] = arguments[i2 + 2];
@@ -8951,20 +9503,20 @@
   }
 
   // node_modules/d3-selection/src/selector.js
-  function none() {
+  function none2() {
   }
   function selector_default(selector) {
-    return selector == null ? none : function() {
+    return selector == null ? none2 : function() {
       return this.querySelector(selector);
     };
   }
 
   // node_modules/d3-selection/src/selection/select.js
-  function select_default(select8) {
-    if (typeof select8 !== "function") select8 = selector_default(select8);
+  function select_default(select9) {
+    if (typeof select9 !== "function") select9 = selector_default(select9);
     for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {
       for (var group4 = groups[j], n = group4.length, subgroup = subgroups[j] = new Array(n), node, subnode, i2 = 0; i2 < n; ++i2) {
-        if ((node = group4[i2]) && (subnode = select8.call(node, node.__data__, i2, group4))) {
+        if ((node = group4[i2]) && (subnode = select9.call(node, node.__data__, i2, group4))) {
           if ("__data__" in node) subnode.__data__ = node.__data__;
           subgroup[i2] = subnode;
         }
@@ -8989,18 +9541,18 @@
   }
 
   // node_modules/d3-selection/src/selection/selectAll.js
-  function arrayAll(select8) {
+  function arrayAll(select9) {
     return function() {
-      return array(select8.apply(this, arguments));
+      return array(select9.apply(this, arguments));
     };
   }
-  function selectAll_default(select8) {
-    if (typeof select8 === "function") select8 = arrayAll(select8);
-    else select8 = selectorAll_default(select8);
+  function selectAll_default(select9) {
+    if (typeof select9 === "function") select9 = arrayAll(select9);
+    else select9 = selectorAll_default(select9);
     for (var groups = this._groups, m = groups.length, subgroups = [], parents = [], j = 0; j < m; ++j) {
       for (var group4 = groups[j], n = group4.length, node, i2 = 0; i2 < n; ++i2) {
         if (node = group4[i2]) {
-          subgroups.push(select8.call(node, node.__data__, i2, group4));
+          subgroups.push(select9.call(node, node.__data__, i2, group4));
           parents.push(node);
         }
       }
@@ -9062,8 +9614,8 @@
   }
 
   // node_modules/d3-selection/src/selection/sparse.js
-  function sparse_default(update) {
-    return new Array(update.length);
+  function sparse_default(update2) {
+    return new Array(update2.length);
   }
 
   // node_modules/d3-selection/src/selection/enter.js
@@ -9101,12 +9653,12 @@
   }
 
   // node_modules/d3-selection/src/selection/data.js
-  function bindIndex(parent2, group4, enter, update, exit, data) {
+  function bindIndex(parent2, group4, enter, update2, exit, data) {
     var i2 = 0, node, groupLength = group4.length, dataLength = data.length;
     for (; i2 < dataLength; ++i2) {
       if (node = group4[i2]) {
         node.__data__ = data[i2];
-        update[i2] = node;
+        update2[i2] = node;
       } else {
         enter[i2] = new EnterNode(parent2, data[i2]);
       }
@@ -9117,7 +9669,7 @@
       }
     }
   }
-  function bindKey(parent2, group4, enter, update, exit, data, key) {
+  function bindKey(parent2, group4, enter, update2, exit, data, key) {
     var i2, node, nodeByKeyValue = /* @__PURE__ */ new Map(), groupLength = group4.length, dataLength = data.length, keyValues = new Array(groupLength), keyValue;
     for (i2 = 0; i2 < groupLength; ++i2) {
       if (node = group4[i2]) {
@@ -9132,7 +9684,7 @@
     for (i2 = 0; i2 < dataLength; ++i2) {
       keyValue = key.call(parent2, data[i2], i2, data) + "";
       if (node = nodeByKeyValue.get(keyValue)) {
-        update[i2] = node;
+        update2[i2] = node;
         node.__data__ = data[i2];
         nodeByKeyValue.delete(keyValue);
       } else {
@@ -9150,11 +9702,11 @@
   }
   function data_default2(value13, key) {
     if (!arguments.length) return Array.from(this, datum);
-    var bind10 = key ? bindKey : bindIndex, parents = this._parents, groups = this._groups;
+    var bind11 = key ? bindKey : bindIndex, parents = this._parents, groups = this._groups;
     if (typeof value13 !== "function") value13 = constant_default2(value13);
-    for (var m = groups.length, update = new Array(m), enter = new Array(m), exit = new Array(m), j = 0; j < m; ++j) {
-      var parent2 = parents[j], group4 = groups[j], groupLength = group4.length, data = arraylike(value13.call(parent2, parent2 && parent2.__data__, j, parents)), dataLength = data.length, enterGroup = enter[j] = new Array(dataLength), updateGroup = update[j] = new Array(dataLength), exitGroup = exit[j] = new Array(groupLength);
-      bind10(parent2, group4, enterGroup, updateGroup, exitGroup, data, key);
+    for (var m = groups.length, update2 = new Array(m), enter = new Array(m), exit = new Array(m), j = 0; j < m; ++j) {
+      var parent2 = parents[j], group4 = groups[j], groupLength = group4.length, data = arraylike(value13.call(parent2, parent2 && parent2.__data__, j, parents)), dataLength = data.length, enterGroup = enter[j] = new Array(dataLength), updateGroup = update2[j] = new Array(dataLength), exitGroup = exit[j] = new Array(groupLength);
+      bind11(parent2, group4, enterGroup, updateGroup, exitGroup, data, key);
       for (var i0 = 0, i1 = 0, previous, next; i0 < dataLength; ++i0) {
         if (previous = enterGroup[i0]) {
           if (i0 >= i1) i1 = i0 + 1;
@@ -9163,10 +9715,10 @@
         }
       }
     }
-    update = new Selection(update, parents);
-    update._enter = enter;
-    update._exit = exit;
-    return update;
+    update2 = new Selection(update2, parents);
+    update2._enter = enter;
+    update2._exit = exit;
+    return update2;
   }
   function arraylike(data) {
     return typeof data === "object" && "length" in data ? data : Array.from(data);
@@ -9179,7 +9731,7 @@
 
   // node_modules/d3-selection/src/selection/join.js
   function join_default(onenter, onupdate, onexit) {
-    var enter = this.enter(), update = this, exit = this.exit();
+    var enter = this.enter(), update2 = this, exit = this.exit();
     if (typeof onenter === "function") {
       enter = onenter(enter);
       if (enter) enter = enter.selection();
@@ -9187,12 +9739,12 @@
       enter = enter.append(onenter + "");
     }
     if (onupdate != null) {
-      update = onupdate(update);
-      if (update) update = update.selection();
+      update2 = onupdate(update2);
+      if (update2) update2 = update2.selection();
     }
     if (onexit == null) exit.remove();
     else onexit(exit);
-    return enter && update ? enter.merge(update).order() : update;
+    return enter && update2 ? enter.merge(update2).order() : update2;
   }
 
   // node_modules/d3-selection/src/selection/merge.js
@@ -9225,10 +9777,10 @@
   }
 
   // node_modules/d3-selection/src/selection/sort.js
-  function sort_default(compare3) {
-    if (!compare3) compare3 = ascending;
+  function sort_default(compare4) {
+    if (!compare4) compare4 = ascending;
     function compareNode(a2, b10) {
-      return a2 && b10 ? compare3(a2.__data__, b10.__data__) : !a2 - !b10;
+      return a2 && b10 ? compare4(a2.__data__, b10.__data__) : !a2 - !b10;
     }
     for (var groups = this._groups, m = groups.length, sortgroups = new Array(m), j = 0; j < m; ++j) {
       for (var group4 = groups[j], n = group4.length, sortgroup = sortgroups[j] = new Array(n), node, i2 = 0; i2 < n; ++i2) {
@@ -9516,9 +10068,9 @@
     return null;
   }
   function insert_default(name16, before) {
-    var create6 = typeof name16 === "function" ? name16 : creator_default(name16), select8 = before == null ? constantNull : typeof before === "function" ? before : selector_default(before);
+    var create6 = typeof name16 === "function" ? name16 : creator_default(name16), select9 = before == null ? constantNull : typeof before === "function" ? before : selector_default(before);
     return this.select(function() {
-      return this.insertBefore(create6.apply(this, arguments), select8.apply(this, arguments) || null);
+      return this.insertBefore(create6.apply(this, arguments), select9.apply(this, arguments) || null);
     });
   }
 
@@ -9718,10 +10270,10 @@
     if (node) {
       var svg = node.ownerSVGElement || node;
       if (svg.createSVGPoint) {
-        var point = svg.createSVGPoint();
-        point.x = event.clientX, point.y = event.clientY;
-        point = point.matrixTransform(node.getScreenCTM().inverse());
-        return [point.x, point.y];
+        var point3 = svg.createSVGPoint();
+        point3.x = event.clientX, point3.y = event.clientY;
+        point3 = point3.matrixTransform(node.getScreenCTM().inverse());
+        return [point3.x, point3.y];
       }
       if (node.getBoundingClientRect) {
         var rect = node.getBoundingClientRect();
@@ -9775,7 +10327,7 @@
   function DragEvent(type, {
     sourceEvent,
     subject,
-    target: target5,
+    target: target6,
     identifier,
     active,
     x: x2,
@@ -9788,7 +10340,7 @@
       type: { value: type, enumerable: true, configurable: true },
       sourceEvent: { value: sourceEvent, enumerable: true, configurable: true },
       subject: { value: subject, enumerable: true, configurable: true },
-      target: { value: target5, enumerable: true, configurable: true },
+      target: { value: target6, enumerable: true, configurable: true },
       identifier: { value: identifier, enumerable: true, configurable: true },
       active: { value: active, enumerable: true, configurable: true },
       x: { value: x2, enumerable: true, configurable: true },
@@ -9817,12 +10369,12 @@
     return navigator.maxTouchPoints || "ontouchstart" in this;
   }
   function drag_default() {
-    var filter4 = defaultFilter, container = defaultContainer, subject = defaultSubject, touchable = defaultTouchable, gestures = {}, listeners = dispatch_default("start", "drag", "end"), active = 0, mousedownx, mousedowny, mousemoving, touchending, clickDistance2 = 0;
-    function drag(selection2) {
+    var filter5 = defaultFilter, container = defaultContainer, subject = defaultSubject, touchable = defaultTouchable, gestures = {}, listeners = dispatch_default("start", "drag", "end"), active = 0, mousedownx, mousedowny, mousemoving, touchending, clickDistance2 = 0;
+    function drag2(selection2) {
       selection2.on("mousedown.drag", mousedowned).filter(touchable).on("touchstart.drag", touchstarted).on("touchmove.drag", touchmoved, nonpassive).on("touchend.drag touchcancel.drag", touchended).style("touch-action", "none").style("-webkit-tap-highlight-color", "rgba(0,0,0,0)");
     }
     function mousedowned(event, d) {
-      if (touchending || !filter4.call(this, event, d)) return;
+      if (touchending || !filter5.call(this, event, d)) return;
       var gesture = beforestart(this, container.call(this, event, d), event, d, "mouse");
       if (!gesture) return;
       select_default2(event.view).on("mousemove.drag", mousemoved, nonpassivecapture).on("mouseup.drag", mouseupped, nonpassivecapture);
@@ -9848,7 +10400,7 @@
       gestures.mouse("end", event);
     }
     function touchstarted(event, d) {
-      if (!filter4.call(this, event, d)) return;
+      if (!filter5.call(this, event, d)) return;
       var touches = event.changedTouches, c = container.call(this, event, d), n = touches.length, i2, gesture;
       for (i2 = 0; i2 < n; ++i2) {
         if (gesture = beforestart(this, c, event, d, touches[i2].identifier, touches[i2])) {
@@ -9883,7 +10435,7 @@
       var dispatch2 = listeners.copy(), p2 = pointer_default(touch || event, container2), dx, dy, s;
       if ((s = subject.call(that, new DragEvent("beforestart", {
         sourceEvent: event,
-        target: drag,
+        target: drag2,
         identifier,
         active,
         x: p2[0],
@@ -9913,7 +10465,7 @@
           new DragEvent(type, {
             sourceEvent: event2,
             subject: s,
-            target: drag,
+            target: drag2,
             identifier,
             active: n,
             x: p2[0] + dx,
@@ -9926,26 +10478,26 @@
         );
       };
     }
-    drag.filter = function(_) {
-      return arguments.length ? (filter4 = typeof _ === "function" ? _ : constant_default3(!!_), drag) : filter4;
+    drag2.filter = function(_) {
+      return arguments.length ? (filter5 = typeof _ === "function" ? _ : constant_default3(!!_), drag2) : filter5;
     };
-    drag.container = function(_) {
-      return arguments.length ? (container = typeof _ === "function" ? _ : constant_default3(_), drag) : container;
+    drag2.container = function(_) {
+      return arguments.length ? (container = typeof _ === "function" ? _ : constant_default3(_), drag2) : container;
     };
-    drag.subject = function(_) {
-      return arguments.length ? (subject = typeof _ === "function" ? _ : constant_default3(_), drag) : subject;
+    drag2.subject = function(_) {
+      return arguments.length ? (subject = typeof _ === "function" ? _ : constant_default3(_), drag2) : subject;
     };
-    drag.touchable = function(_) {
-      return arguments.length ? (touchable = typeof _ === "function" ? _ : constant_default3(!!_), drag) : touchable;
+    drag2.touchable = function(_) {
+      return arguments.length ? (touchable = typeof _ === "function" ? _ : constant_default3(!!_), drag2) : touchable;
     };
-    drag.on = function() {
+    drag2.on = function() {
       var value13 = listeners.on.apply(listeners, arguments);
-      return value13 === listeners ? drag : value13;
+      return value13 === listeners ? drag2 : value13;
     };
-    drag.clickDistance = function(_) {
-      return arguments.length ? (clickDistance2 = (_ = +_) * _, drag) : Math.sqrt(clickDistance2);
+    drag2.clickDistance = function(_) {
+      return arguments.length ? (clickDistance2 = (_ = +_) * _, drag2) : Math.sqrt(clickDistance2);
     };
-    return drag;
+    return drag2;
   }
 
   // output/PSD3.ForceEngine.Core/foreign.js
@@ -9955,10 +10507,10 @@
   function createForceYGrid_(strength) {
     return y_default2().y((d) => d.gridY).strength(strength);
   }
-  function createCollideGrid_(padding) {
+  function createCollideGrid_(padding2) {
     return function(strength) {
       return function(iterations) {
-        return collide_default().radius((d) => d.r + padding).strength(strength).iterations(iterations);
+        return collide_default().radius((d) => d.r + padding2).strength(strength).iterations(iterations);
       };
     };
   }
@@ -10063,7 +10615,7 @@
       const scheduleTime = performance.now();
       const gapSinceLastTick = scheduleTime - lastTickEnd;
       let id5;
-      const handler2 = function(timestamp) {
+      const handler3 = function(timestamp) {
         const fireTime = performance.now();
         const waitTime = fireTime - scheduleTime;
         const start4 = performance.now();
@@ -10086,12 +10638,12 @@
         }
       };
       if (USE_SETTIMEOUT) {
-        id5 = setTimeout(handler2, FRAME_TIME);
+        id5 = setTimeout(handler3, FRAME_TIME);
         return function() {
           clearTimeout(id5);
         };
       } else {
-        id5 = requestAnimationFrame(handler2);
+        id5 = requestAnimationFrame(handler3);
         return function() {
           cancelAnimationFrame(id5);
         };
@@ -10155,17 +10707,6 @@
     };
   };
 
-  // output/PSD3.ForceEngine.Render/foreign.js
-  var updateCirclePositions_ = (selector) => () => {
-    select_default2(selector).selectAll("circle").attr("cx", (d) => d.x).attr("cy", (d) => d.y);
-  };
-
-  // output/PSD3.ForceEngine.Render/index.js
-  var unwrap5 = /* @__PURE__ */ unwrap();
-  var updateCirclePositions = function(gid) {
-    return updateCirclePositions_(unwrap5(gid));
-  };
-
   // output/PSD3.ForceEngine.Types/index.js
   var defaultSimParams = {
     alpha: 1,
@@ -10176,7 +10717,7 @@
   };
 
   // output/PSD3.ForceEngine.Simulation/index.js
-  var fromFoldable6 = /* @__PURE__ */ fromFoldable2(foldableList);
+  var fromFoldable7 = /* @__PURE__ */ fromFoldable2(foldableList);
   var pure7 = /* @__PURE__ */ pure(applicativeEffect);
   var unless2 = /* @__PURE__ */ unless(applicativeEffect);
   var for_3 = /* @__PURE__ */ for_(applicativeEffect)(foldableArray);
@@ -10186,7 +10727,7 @@
       var nodes = read(sim.nodes)();
       var forces = read(sim.forces)();
       var alpha = read(sim.alpha)();
-      var forceHandles = fromFoldable6(values(forces));
+      var forceHandles = fromFoldable7(values(forces));
       applyForces(forceHandles)(alpha)();
       integratePositions(nodes)(sim.config.velocityDecay)();
       var newAlpha = decayAlpha(alpha)(sim.config.alphaMin)(sim.config.alphaDecay)(sim.config.alphaTarget);
@@ -10233,6 +10774,13 @@
       };
     };
   };
+  var reheat = function(sim) {
+    return function __do3() {
+      write(1)(sim.alpha)();
+      var running = read(sim.running)();
+      return unless2(running)(start(sim))();
+    };
+  };
   var onTick = function(callback) {
     return function(sim) {
       return write(callback)(sim.tickCallback);
@@ -10271,377 +10819,286 @@
     };
   };
 
-  // output/PSD3v2.Attribute.Types/index.js
-  var StringValue = /* @__PURE__ */ (function() {
-    function StringValue2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    StringValue2.create = function(value0) {
-      return new StringValue2(value0);
-    };
-    return StringValue2;
-  })();
-  var NumberValue = /* @__PURE__ */ (function() {
-    function NumberValue2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    NumberValue2.create = function(value0) {
-      return new NumberValue2(value0);
-    };
-    return NumberValue2;
-  })();
-  var BooleanValue = /* @__PURE__ */ (function() {
-    function BooleanValue2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    BooleanValue2.create = function(value0) {
-      return new BooleanValue2(value0);
-    };
-    return BooleanValue2;
-  })();
-  var StaticAttr = /* @__PURE__ */ (function() {
-    function StaticAttr2(value0, value1) {
-      this.value0 = value0;
-      this.value1 = value1;
-    }
-    ;
-    StaticAttr2.create = function(value0) {
-      return function(value1) {
-        return new StaticAttr2(value0, value1);
-      };
-    };
-    return StaticAttr2;
-  })();
-  var DataAttr = /* @__PURE__ */ (function() {
-    function DataAttr2(value0, value1) {
-      this.value0 = value0;
-      this.value1 = value1;
-    }
-    ;
-    DataAttr2.create = function(value0) {
-      return function(value1) {
-        return new DataAttr2(value0, value1);
-      };
-    };
-    return DataAttr2;
-  })();
-  var IndexedAttr = /* @__PURE__ */ (function() {
-    function IndexedAttr2(value0, value1) {
-      this.value0 = value0;
-      this.value1 = value1;
-    }
-    ;
-    IndexedAttr2.create = function(value0) {
-      return function(value1) {
-        return new IndexedAttr2(value0, value1);
-      };
-    };
-    return IndexedAttr2;
-  })();
-  var toAttrStringString = {
-    toAttr: function(value13) {
-      return function(name16) {
-        return new StaticAttr(name16, new StringValue(value13));
-      };
-    }
-  };
-  var toAttrStringFunctionStrin = {
-    toAttr: function(fn) {
-      return function(name16) {
-        return new DataAttr(name16, function($158) {
-          return StringValue.create(fn($158));
-        });
-      };
-    }
-  };
-  var toAttrNumberNumber = {
-    toAttr: function(value13) {
-      return function(name16) {
-        return new StaticAttr(name16, new NumberValue(value13));
-      };
-    }
-  };
-  var toAttrNumberFunctionNumbe = {
-    toAttr: function(fn) {
-      return function(name16) {
-        return new DataAttr(name16, function($159) {
-          return NumberValue.create(fn($159));
-        });
-      };
-    }
-  };
-  var toAttr = function(dict) {
-    return dict.toAttr;
-  };
-  var viewBox = function(dictToAttr) {
-    var toAttr1 = toAttr(dictToAttr);
-    return function(value13) {
-      return toAttr1(value13)("viewBox");
-    };
-  };
-  var width = function(dictToAttr) {
-    var toAttr1 = toAttr(dictToAttr);
-    return function(value13) {
-      return toAttr1(value13)("width");
-    };
-  };
-  var strokeWidth = function(dictToAttr) {
-    var toAttr1 = toAttr(dictToAttr);
-    return function(value13) {
-      return toAttr1(value13)("stroke-width");
-    };
-  };
-  var stroke = function(dictToAttr) {
-    var toAttr1 = toAttr(dictToAttr);
-    return function(value13) {
-      return toAttr1(value13)("stroke");
-    };
-  };
-  var radius = function(dictToAttr) {
-    var toAttr1 = toAttr(dictToAttr);
-    return function(value13) {
-      return toAttr1(value13)("r");
-    };
-  };
-  var id_ = function(dictToAttr) {
-    var toAttr1 = toAttr(dictToAttr);
-    return function(value13) {
-      return toAttr1(value13)("id");
-    };
-  };
-  var height = function(dictToAttr) {
-    var toAttr1 = toAttr(dictToAttr);
-    return function(value13) {
-      return toAttr1(value13)("height");
-    };
-  };
-  var fill = function(dictToAttr) {
-    var toAttr1 = toAttr(dictToAttr);
-    return function(value13) {
-      return toAttr1(value13)("fill");
-    };
-  };
-  var cy = function(dictToAttr) {
-    var toAttr1 = toAttr(dictToAttr);
-    return function(value13) {
-      return toAttr1(value13)("cy");
-    };
-  };
-  var cx = function(dictToAttr) {
-    var toAttr1 = toAttr(dictToAttr);
-    return function(value13) {
-      return toAttr1(value13)("cx");
-    };
-  };
-  var class_2 = function(dictToAttr) {
-    var toAttr1 = toAttr(dictToAttr);
-    return function(value13) {
-      return toAttr1(value13)("class");
-    };
-  };
+  // node_modules/d3-array/src/ascending.js
+  function ascending2(a2, b10) {
+    return a2 == null || b10 == null ? NaN : a2 < b10 ? -1 : a2 > b10 ? 1 : a2 >= b10 ? 0 : NaN;
+  }
 
-  // output/PSD3v2.Behavior.Types/index.js
-  var ScaleExtent = /* @__PURE__ */ (function() {
-    function ScaleExtent2(value0, value1) {
-      this.value0 = value0;
-      this.value1 = value1;
-    }
-    ;
-    ScaleExtent2.create = function(value0) {
-      return function(value1) {
-        return new ScaleExtent2(value0, value1);
-      };
-    };
-    return ScaleExtent2;
-  })();
-  var SimpleDrag = /* @__PURE__ */ (function() {
-    function SimpleDrag2() {
-    }
-    ;
-    SimpleDrag2.value = new SimpleDrag2();
-    return SimpleDrag2;
-  })();
-  var SimulationDrag = /* @__PURE__ */ (function() {
-    function SimulationDrag2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SimulationDrag2.create = function(value0) {
-      return new SimulationDrag2(value0);
-    };
-    return SimulationDrag2;
-  })();
-  var Zoom = /* @__PURE__ */ (function() {
-    function Zoom2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Zoom2.create = function(value0) {
-      return new Zoom2(value0);
-    };
-    return Zoom2;
-  })();
-  var Drag = /* @__PURE__ */ (function() {
-    function Drag2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Drag2.create = function(value0) {
-      return new Drag2(value0);
-    };
-    return Drag2;
-  })();
-  var Click = /* @__PURE__ */ (function() {
-    function Click2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Click2.create = function(value0) {
-      return new Click2(value0);
-    };
-    return Click2;
-  })();
-  var ClickWithDatum = /* @__PURE__ */ (function() {
-    function ClickWithDatum2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    ClickWithDatum2.create = function(value0) {
-      return new ClickWithDatum2(value0);
-    };
-    return ClickWithDatum2;
-  })();
-  var MouseEnter = /* @__PURE__ */ (function() {
-    function MouseEnter2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    MouseEnter2.create = function(value0) {
-      return new MouseEnter2(value0);
-    };
-    return MouseEnter2;
-  })();
-  var MouseLeave = /* @__PURE__ */ (function() {
-    function MouseLeave2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    MouseLeave2.create = function(value0) {
-      return new MouseLeave2(value0);
-    };
-    return MouseLeave2;
-  })();
-  var Highlight = /* @__PURE__ */ (function() {
-    function Highlight2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Highlight2.create = function(value0) {
-      return new Highlight2(value0);
-    };
-    return Highlight2;
-  })();
-  var MouseMoveWithInfo = /* @__PURE__ */ (function() {
-    function MouseMoveWithInfo2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    MouseMoveWithInfo2.create = function(value0) {
-      return new MouseMoveWithInfo2(value0);
-    };
-    return MouseMoveWithInfo2;
-  })();
-  var MouseEnterWithInfo = /* @__PURE__ */ (function() {
-    function MouseEnterWithInfo2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    MouseEnterWithInfo2.create = function(value0) {
-      return new MouseEnterWithInfo2(value0);
-    };
-    return MouseEnterWithInfo2;
-  })();
-  var MouseLeaveWithInfo = /* @__PURE__ */ (function() {
-    function MouseLeaveWithInfo2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    MouseLeaveWithInfo2.create = function(value0) {
-      return new MouseLeaveWithInfo2(value0);
-    };
-    return MouseLeaveWithInfo2;
-  })();
-  var defaultZoom = function(scaleExtent) {
-    return function(targetSelector) {
-      return {
-        scaleExtent,
-        targetSelector
-      };
-    };
-  };
+  // node_modules/d3-array/src/descending.js
+  function descending(a2, b10) {
+    return a2 == null || b10 == null ? NaN : b10 < a2 ? -1 : b10 > a2 ? 1 : b10 >= a2 ? 0 : NaN;
+  }
 
-  // output/PSD3v2.Capabilities.Selection/index.js
-  var select = function(dict) {
-    return dict.select;
-  };
-  var on2 = function(dict) {
-    return dict.on;
-  };
-  var appendData = function(dict) {
-    return dict.appendData;
-  };
-  var appendChild = function(dict) {
-    return dict.appendChild;
-  };
-
-  // output/PSD3v2.Selection.Operations/foreign.js
-  function getElementData_(element3) {
-    return function() {
-      return element3.__data__;
-    };
-  }
-  var bindDebugCount = 0;
-  function setElementData_(datum2) {
-    return function(element3) {
-      return function() {
-        element3.__data__ = datum2;
-        if (datum2?.id === 93 && bindDebugCount === 0) {
-          const hasMarker = datum2.__simMarker__ === true;
-          console.log(`[BindData] node93 bound to element, hasMarker=${hasMarker}, x=${datum2.x?.toFixed(1)}`);
-          if (!hasMarker) {
-            console.log(`[BindData] PROBLEM: node93 does NOT have __simMarker__ at bind time!`);
-          }
-          bindDebugCount++;
-        }
-      };
-    };
-  }
-  function setTextContent_(text6) {
-    return function(element3) {
-      return function() {
-        element3.textContent = text6;
-      };
-    };
-  }
-  function offsetX(event) {
-    return event.offsetX;
-  }
-  function offsetY(event) {
-    return event.offsetY;
-  }
-  function clearElement_(selector) {
-    return function() {
-      const el = document.querySelector(selector);
-      if (el) {
-        el.innerHTML = "";
+  // node_modules/d3-array/src/bisector.js
+  function bisector(f) {
+    let compare12, compare22, delta;
+    if (f.length !== 2) {
+      compare12 = ascending2;
+      compare22 = (d, x2) => ascending2(f(d), x2);
+      delta = (d, x2) => f(d) - x2;
+    } else {
+      compare12 = f === ascending2 || f === descending ? f : zero2;
+      compare22 = f;
+      delta = f;
+    }
+    function left(a2, x2, lo = 0, hi = a2.length) {
+      if (lo < hi) {
+        if (compare12(x2, x2) !== 0) return hi;
+        do {
+          const mid = lo + hi >>> 1;
+          if (compare22(a2[mid], x2) < 0) lo = mid + 1;
+          else hi = mid;
+        } while (lo < hi);
       }
-    };
+      return lo;
+    }
+    function right(a2, x2, lo = 0, hi = a2.length) {
+      if (lo < hi) {
+        if (compare12(x2, x2) !== 0) return hi;
+        do {
+          const mid = lo + hi >>> 1;
+          if (compare22(a2[mid], x2) <= 0) lo = mid + 1;
+          else hi = mid;
+        } while (lo < hi);
+      }
+      return lo;
+    }
+    function center(a2, x2, lo = 0, hi = a2.length) {
+      const i2 = left(a2, x2, lo, hi - 1);
+      return i2 > lo && delta(a2[i2 - 1], x2) > -delta(a2[i2], x2) ? i2 - 1 : i2;
+    }
+    return { left, center, right };
   }
-  function jsonStringify_(value13) {
-    return JSON.stringify(value13);
+  function zero2() {
+    return 0;
+  }
+
+  // node_modules/d3-array/src/number.js
+  function number(x2) {
+    return x2 === null ? NaN : +x2;
+  }
+
+  // node_modules/d3-array/src/bisect.js
+  var ascendingBisect = bisector(ascending2);
+  var bisectRight = ascendingBisect.right;
+  var bisectLeft = ascendingBisect.left;
+  var bisectCenter = bisector(number).center;
+  var bisect_default = bisectRight;
+
+  // node_modules/internmap/src/index.js
+  var InternMap = class extends Map {
+    constructor(entries, key = keyof) {
+      super();
+      Object.defineProperties(this, { _intern: { value: /* @__PURE__ */ new Map() }, _key: { value: key } });
+      if (entries != null) for (const [key2, value13] of entries) this.set(key2, value13);
+    }
+    get(key) {
+      return super.get(intern_get(this, key));
+    }
+    has(key) {
+      return super.has(intern_get(this, key));
+    }
+    set(key, value13) {
+      return super.set(intern_set(this, key), value13);
+    }
+    delete(key) {
+      return super.delete(intern_delete(this, key));
+    }
+  };
+  function intern_get({ _intern, _key }, value13) {
+    const key = _key(value13);
+    return _intern.has(key) ? _intern.get(key) : value13;
+  }
+  function intern_set({ _intern, _key }, value13) {
+    const key = _key(value13);
+    if (_intern.has(key)) return _intern.get(key);
+    _intern.set(key, value13);
+    return value13;
+  }
+  function intern_delete({ _intern, _key }, value13) {
+    const key = _key(value13);
+    if (_intern.has(key)) {
+      value13 = _intern.get(key);
+      _intern.delete(key);
+    }
+    return value13;
+  }
+  function keyof(value13) {
+    return value13 !== null && typeof value13 === "object" ? value13.valueOf() : value13;
+  }
+
+  // node_modules/d3-array/src/ticks.js
+  var e10 = Math.sqrt(50);
+  var e5 = Math.sqrt(10);
+  var e2 = Math.sqrt(2);
+  function tickSpec(start4, stop, count) {
+    const step4 = (stop - start4) / Math.max(0, count), power = Math.floor(Math.log10(step4)), error4 = step4 / Math.pow(10, power), factor = error4 >= e10 ? 10 : error4 >= e5 ? 5 : error4 >= e2 ? 2 : 1;
+    let i1, i2, inc;
+    if (power < 0) {
+      inc = Math.pow(10, -power) / factor;
+      i1 = Math.round(start4 * inc);
+      i2 = Math.round(stop * inc);
+      if (i1 / inc < start4) ++i1;
+      if (i2 / inc > stop) --i2;
+      inc = -inc;
+    } else {
+      inc = Math.pow(10, power) * factor;
+      i1 = Math.round(start4 / inc);
+      i2 = Math.round(stop / inc);
+      if (i1 * inc < start4) ++i1;
+      if (i2 * inc > stop) --i2;
+    }
+    if (i2 < i1 && 0.5 <= count && count < 2) return tickSpec(start4, stop, count * 2);
+    return [i1, i2, inc];
+  }
+  function ticks(start4, stop, count) {
+    stop = +stop, start4 = +start4, count = +count;
+    if (!(count > 0)) return [];
+    if (start4 === stop) return [start4];
+    const reverse3 = stop < start4, [i1, i2, inc] = reverse3 ? tickSpec(stop, start4, count) : tickSpec(start4, stop, count);
+    if (!(i2 >= i1)) return [];
+    const n = i2 - i1 + 1, ticks3 = new Array(n);
+    if (reverse3) {
+      if (inc < 0) for (let i3 = 0; i3 < n; ++i3) ticks3[i3] = (i2 - i3) / -inc;
+      else for (let i3 = 0; i3 < n; ++i3) ticks3[i3] = (i2 - i3) * inc;
+    } else {
+      if (inc < 0) for (let i3 = 0; i3 < n; ++i3) ticks3[i3] = (i1 + i3) / -inc;
+      else for (let i3 = 0; i3 < n; ++i3) ticks3[i3] = (i1 + i3) * inc;
+    }
+    return ticks3;
+  }
+  function tickIncrement(start4, stop, count) {
+    stop = +stop, start4 = +start4, count = +count;
+    return tickSpec(start4, stop, count)[2];
+  }
+  function tickStep(start4, stop, count) {
+    stop = +stop, start4 = +start4, count = +count;
+    const reverse3 = stop < start4, inc = reverse3 ? tickIncrement(stop, start4, count) : tickIncrement(start4, stop, count);
+    return (reverse3 ? -1 : 1) * (inc < 0 ? 1 / -inc : inc);
+  }
+
+  // node_modules/d3-array/src/range.js
+  function range3(start4, stop, step4) {
+    start4 = +start4, stop = +stop, step4 = (n = arguments.length) < 2 ? (stop = start4, start4 = 0, 1) : n < 3 ? 1 : +step4;
+    var i2 = -1, n = Math.max(0, Math.ceil((stop - start4) / step4)) | 0, range5 = new Array(n);
+    while (++i2 < n) {
+      range5[i2] = start4 + i2 * step4;
+    }
+    return range5;
+  }
+
+  // node_modules/d3-scale/src/init.js
+  function initRange(domain2, range5) {
+    switch (arguments.length) {
+      case 0:
+        break;
+      case 1:
+        this.range(domain2);
+        break;
+      default:
+        this.range(range5).domain(domain2);
+        break;
+    }
+    return this;
+  }
+
+  // node_modules/d3-scale/src/ordinal.js
+  var implicit = Symbol("implicit");
+  function ordinal() {
+    var index4 = new InternMap(), domain2 = [], range5 = [], unknown = implicit;
+    function scale(d) {
+      let i2 = index4.get(d);
+      if (i2 === void 0) {
+        if (unknown !== implicit) return unknown;
+        index4.set(d, i2 = domain2.push(d) - 1);
+      }
+      return range5[i2 % range5.length];
+    }
+    scale.domain = function(_) {
+      if (!arguments.length) return domain2.slice();
+      domain2 = [], index4 = new InternMap();
+      for (const value13 of _) {
+        if (index4.has(value13)) continue;
+        index4.set(value13, domain2.push(value13) - 1);
+      }
+      return scale;
+    };
+    scale.range = function(_) {
+      return arguments.length ? (range5 = Array.from(_), scale) : range5.slice();
+    };
+    scale.unknown = function(_) {
+      return arguments.length ? (unknown = _, scale) : unknown;
+    };
+    scale.copy = function() {
+      return ordinal(domain2, range5).unknown(unknown);
+    };
+    initRange.apply(scale, arguments);
+    return scale;
+  }
+
+  // node_modules/d3-scale/src/band.js
+  function band() {
+    var scale = ordinal().unknown(void 0), domain2 = scale.domain, ordinalRange = scale.range, r0 = 0, r1 = 1, step4, bandwidth2, round4 = false, paddingInner2 = 0, paddingOuter2 = 0, align2 = 0.5;
+    delete scale.unknown;
+    function rescale() {
+      var n = domain2().length, reverse3 = r1 < r0, start4 = reverse3 ? r1 : r0, stop = reverse3 ? r0 : r1;
+      step4 = (stop - start4) / Math.max(1, n - paddingInner2 + paddingOuter2 * 2);
+      if (round4) step4 = Math.floor(step4);
+      start4 += (stop - start4 - step4 * (n - paddingInner2)) * align2;
+      bandwidth2 = step4 * (1 - paddingInner2);
+      if (round4) start4 = Math.round(start4), bandwidth2 = Math.round(bandwidth2);
+      var values3 = range3(n).map(function(i2) {
+        return start4 + step4 * i2;
+      });
+      return ordinalRange(reverse3 ? values3.reverse() : values3);
+    }
+    scale.domain = function(_) {
+      return arguments.length ? (domain2(_), rescale()) : domain2();
+    };
+    scale.range = function(_) {
+      return arguments.length ? ([r0, r1] = _, r0 = +r0, r1 = +r1, rescale()) : [r0, r1];
+    };
+    scale.rangeRound = function(_) {
+      return [r0, r1] = _, r0 = +r0, r1 = +r1, round4 = true, rescale();
+    };
+    scale.bandwidth = function() {
+      return bandwidth2;
+    };
+    scale.step = function() {
+      return step4;
+    };
+    scale.round = function(_) {
+      return arguments.length ? (round4 = !!_, rescale()) : round4;
+    };
+    scale.padding = function(_) {
+      return arguments.length ? (paddingInner2 = Math.min(1, paddingOuter2 = +_), rescale()) : paddingInner2;
+    };
+    scale.paddingInner = function(_) {
+      return arguments.length ? (paddingInner2 = Math.min(1, _), rescale()) : paddingInner2;
+    };
+    scale.paddingOuter = function(_) {
+      return arguments.length ? (paddingOuter2 = +_, rescale()) : paddingOuter2;
+    };
+    scale.align = function(_) {
+      return arguments.length ? (align2 = Math.max(0, Math.min(1, _)), rescale()) : align2;
+    };
+    scale.copy = function() {
+      return band(domain2(), [r0, r1]).round(round4).paddingInner(paddingInner2).paddingOuter(paddingOuter2).align(align2);
+    };
+    return initRange.apply(rescale(), arguments);
+  }
+  function pointish(scale) {
+    var copy4 = scale.copy;
+    scale.padding = scale.paddingOuter;
+    delete scale.paddingInner;
+    delete scale.paddingOuter;
+    scale.copy = function() {
+      return pointish(copy4());
+    };
+    return scale;
+  }
+  function point() {
+    return pointish(band.apply(null, arguments).paddingInner(1));
   }
 
   // node_modules/d3-color/src/define.js
@@ -10847,10 +11304,10 @@
   function color_formatRgb() {
     return this.rgb().formatRgb();
   }
-  function color(format) {
+  function color(format2) {
     var m, l;
-    format = (format + "").trim().toLowerCase();
-    return (m = reHex.exec(format)) ? (l = m[1].length, m = parseInt(m[1], 16), l === 6 ? rgbn(m) : l === 3 ? new Rgb(m >> 8 & 15 | m >> 4 & 240, m >> 4 & 15 | m & 240, (m & 15) << 4 | m & 15, 1) : l === 8 ? rgba(m >> 24 & 255, m >> 16 & 255, m >> 8 & 255, (m & 255) / 255) : l === 4 ? rgba(m >> 12 & 15 | m >> 8 & 240, m >> 8 & 15 | m >> 4 & 240, m >> 4 & 15 | m & 240, ((m & 15) << 4 | m & 15) / 255) : null) : (m = reRgbInteger.exec(format)) ? new Rgb(m[1], m[2], m[3], 1) : (m = reRgbPercent.exec(format)) ? new Rgb(m[1] * 255 / 100, m[2] * 255 / 100, m[3] * 255 / 100, 1) : (m = reRgbaInteger.exec(format)) ? rgba(m[1], m[2], m[3], m[4]) : (m = reRgbaPercent.exec(format)) ? rgba(m[1] * 255 / 100, m[2] * 255 / 100, m[3] * 255 / 100, m[4]) : (m = reHslPercent.exec(format)) ? hsla(m[1], m[2] / 100, m[3] / 100, 1) : (m = reHslaPercent.exec(format)) ? hsla(m[1], m[2] / 100, m[3] / 100, m[4]) : named.hasOwnProperty(format) ? rgbn(named[format]) : format === "transparent" ? new Rgb(NaN, NaN, NaN, 0) : null;
+    format2 = (format2 + "").trim().toLowerCase();
+    return (m = reHex.exec(format2)) ? (l = m[1].length, m = parseInt(m[1], 16), l === 6 ? rgbn(m) : l === 3 ? new Rgb(m >> 8 & 15 | m >> 4 & 240, m >> 4 & 15 | m & 240, (m & 15) << 4 | m & 15, 1) : l === 8 ? rgba(m >> 24 & 255, m >> 16 & 255, m >> 8 & 255, (m & 255) / 255) : l === 4 ? rgba(m >> 12 & 15 | m >> 8 & 240, m >> 8 & 15 | m >> 4 & 240, m >> 4 & 15 | m & 240, ((m & 15) << 4 | m & 15) / 255) : null) : (m = reRgbInteger.exec(format2)) ? new Rgb(m[1], m[2], m[3], 1) : (m = reRgbPercent.exec(format2)) ? new Rgb(m[1] * 255 / 100, m[2] * 255 / 100, m[3] * 255 / 100, 1) : (m = reRgbaInteger.exec(format2)) ? rgba(m[1], m[2], m[3], m[4]) : (m = reRgbaPercent.exec(format2)) ? rgba(m[1] * 255 / 100, m[2] * 255 / 100, m[3] * 255 / 100, m[4]) : (m = reHslPercent.exec(format2)) ? hsla(m[1], m[2] / 100, m[3] / 100, 1) : (m = reHslaPercent.exec(format2)) ? hsla(m[1], m[2] / 100, m[3] / 100, m[4]) : named.hasOwnProperty(format2) ? rgbn(named[format2]) : format2 === "transparent" ? new Rgb(NaN, NaN, NaN, 0) : null;
   }
   function rgbn(n) {
     return new Rgb(n >> 16 & 255, n >> 8 & 255, n & 255, 1);
@@ -10931,12 +11388,12 @@
     if (!o) return new Hsl();
     if (o instanceof Hsl) return o;
     o = o.rgb();
-    var r = o.r / 255, g = o.g / 255, b10 = o.b / 255, min5 = Math.min(r, g, b10), max6 = Math.max(r, g, b10), h = NaN, s = max6 - min5, l = (max6 + min5) / 2;
+    var r = o.r / 255, g = o.g / 255, b10 = o.b / 255, min6 = Math.min(r, g, b10), max6 = Math.max(r, g, b10), h = NaN, s = max6 - min6, l = (max6 + min6) / 2;
     if (s) {
       if (r === max6) h = (g - b10) / s + (g < b10) * 6;
       else if (g === max6) h = (b10 - r) / s + 2;
       else h = (r - g) / s + 4;
-      s /= l < 0.5 ? max6 + min5 : 2 - max6 - min5;
+      s /= l < 0.5 ? max6 + min6 : 2 - max6 - min6;
       h *= 60;
     } else {
       s = l > 0 && l < 1 ? 0 : h;
@@ -11078,6 +11535,38 @@
   var rgbBasis = rgbSpline(basis_default);
   var rgbBasisClosed = rgbSpline(basisClosed_default);
 
+  // node_modules/d3-interpolate/src/numberArray.js
+  function numberArray_default(a2, b10) {
+    if (!b10) b10 = [];
+    var n = a2 ? Math.min(b10.length, a2.length) : 0, c = b10.slice(), i2;
+    return function(t) {
+      for (i2 = 0; i2 < n; ++i2) c[i2] = a2[i2] * (1 - t) + b10[i2] * t;
+      return c;
+    };
+  }
+  function isNumberArray(x2) {
+    return ArrayBuffer.isView(x2) && !(x2 instanceof DataView);
+  }
+
+  // node_modules/d3-interpolate/src/array.js
+  function genericArray(a2, b10) {
+    var nb = b10 ? b10.length : 0, na = a2 ? Math.min(nb, a2.length) : 0, x2 = new Array(na), c = new Array(nb), i2;
+    for (i2 = 0; i2 < na; ++i2) x2[i2] = value_default(a2[i2], b10[i2]);
+    for (; i2 < nb; ++i2) c[i2] = b10[i2];
+    return function(t) {
+      for (i2 = 0; i2 < na; ++i2) c[i2] = x2[i2](t);
+      return c;
+    };
+  }
+
+  // node_modules/d3-interpolate/src/date.js
+  function date_default(a2, b10) {
+    var d = /* @__PURE__ */ new Date();
+    return a2 = +a2, b10 = +b10, function(t) {
+      return d.setTime(a2 * (1 - t) + b10 * t), d;
+    };
+  }
+
   // node_modules/d3-interpolate/src/number.js
   function number_default(a2, b10) {
     return a2 = +a2, b10 = +b10, function(t) {
@@ -11085,10 +11574,28 @@
     };
   }
 
+  // node_modules/d3-interpolate/src/object.js
+  function object_default(a2, b10) {
+    var i2 = {}, c = {}, k;
+    if (a2 === null || typeof a2 !== "object") a2 = {};
+    if (b10 === null || typeof b10 !== "object") b10 = {};
+    for (k in b10) {
+      if (k in a2) {
+        i2[k] = value_default(a2[k], b10[k]);
+      } else {
+        c[k] = b10[k];
+      }
+    }
+    return function(t) {
+      for (k in i2) c[k] = i2[k](t);
+      return c;
+    };
+  }
+
   // node_modules/d3-interpolate/src/string.js
   var reA = /[-+]?(?:\d+\.?\d*|\.?\d+)(?:[eE][-+]?\d+)?/g;
   var reB = new RegExp(reA.source, "g");
-  function zero2(b10) {
+  function zero3(b10) {
     return function() {
       return b10;
     };
@@ -11121,10 +11628,23 @@
       if (s[i2]) s[i2] += bs;
       else s[++i2] = bs;
     }
-    return s.length < 2 ? q2[0] ? one2(q2[0].x) : zero2(b10) : (b10 = q2.length, function(t) {
+    return s.length < 2 ? q2[0] ? one2(q2[0].x) : zero3(b10) : (b10 = q2.length, function(t) {
       for (var i3 = 0, o; i3 < b10; ++i3) s[(o = q2[i3]).i] = o.x(t);
       return s.join("");
     });
+  }
+
+  // node_modules/d3-interpolate/src/value.js
+  function value_default(a2, b10) {
+    var t = typeof b10, c;
+    return b10 == null || t === "boolean" ? constant_default4(b10) : (t === "number" ? number_default : t === "string" ? (c = color(b10)) ? (b10 = c, rgb_default) : string_default : b10 instanceof color ? rgb_default : b10 instanceof Date ? date_default : isNumberArray(b10) ? numberArray_default : Array.isArray(b10) ? genericArray : typeof b10.valueOf !== "function" && typeof b10.toString !== "function" || isNaN(b10) ? object_default : number_default)(a2, b10);
+  }
+
+  // node_modules/d3-interpolate/src/round.js
+  function round_default(a2, b10) {
+    return a2 = +a2, b10 = +b10, function(t) {
+      return Math.round(a2 * (1 - t) + b10 * t);
+    };
   }
 
   // node_modules/d3-interpolate/src/transform/decompose.js
@@ -11267,6 +11787,992 @@
     };
     return zoom;
   })(Math.SQRT2, 2, 4);
+
+  // node_modules/d3-scale/src/constant.js
+  function constants(x2) {
+    return function() {
+      return x2;
+    };
+  }
+
+  // node_modules/d3-scale/src/number.js
+  function number2(x2) {
+    return +x2;
+  }
+
+  // node_modules/d3-scale/src/continuous.js
+  var unit2 = [0, 1];
+  function identity13(x2) {
+    return x2;
+  }
+  function normalize(a2, b10) {
+    return (b10 -= a2 = +a2) ? function(x2) {
+      return (x2 - a2) / b10;
+    } : constants(isNaN(b10) ? NaN : 0.5);
+  }
+  function clamper(a2, b10) {
+    var t;
+    if (a2 > b10) t = a2, a2 = b10, b10 = t;
+    return function(x2) {
+      return Math.max(a2, Math.min(b10, x2));
+    };
+  }
+  function bimap3(domain2, range5, interpolate) {
+    var d0 = domain2[0], d1 = domain2[1], r0 = range5[0], r1 = range5[1];
+    if (d1 < d0) d0 = normalize(d1, d0), r0 = interpolate(r1, r0);
+    else d0 = normalize(d0, d1), r0 = interpolate(r0, r1);
+    return function(x2) {
+      return r0(d0(x2));
+    };
+  }
+  function polymap(domain2, range5, interpolate) {
+    var j = Math.min(domain2.length, range5.length) - 1, d = new Array(j), r = new Array(j), i2 = -1;
+    if (domain2[j] < domain2[0]) {
+      domain2 = domain2.slice().reverse();
+      range5 = range5.slice().reverse();
+    }
+    while (++i2 < j) {
+      d[i2] = normalize(domain2[i2], domain2[i2 + 1]);
+      r[i2] = interpolate(range5[i2], range5[i2 + 1]);
+    }
+    return function(x2) {
+      var i3 = bisect_default(domain2, x2, 1, j) - 1;
+      return r[i3](d[i3](x2));
+    };
+  }
+  function copy2(source2, target6) {
+    return target6.domain(source2.domain()).range(source2.range()).interpolate(source2.interpolate()).clamp(source2.clamp()).unknown(source2.unknown());
+  }
+  function transformer() {
+    var domain2 = unit2, range5 = unit2, interpolate = value_default, transform2, untransform, unknown, clamp3 = identity13, piecewise, output2, input3;
+    function rescale() {
+      var n = Math.min(domain2.length, range5.length);
+      if (clamp3 !== identity13) clamp3 = clamper(domain2[0], domain2[n - 1]);
+      piecewise = n > 2 ? polymap : bimap3;
+      output2 = input3 = null;
+      return scale;
+    }
+    function scale(x2) {
+      return x2 == null || isNaN(x2 = +x2) ? unknown : (output2 || (output2 = piecewise(domain2.map(transform2), range5, interpolate)))(transform2(clamp3(x2)));
+    }
+    scale.invert = function(y2) {
+      return clamp3(untransform((input3 || (input3 = piecewise(range5, domain2.map(transform2), number_default)))(y2)));
+    };
+    scale.domain = function(_) {
+      return arguments.length ? (domain2 = Array.from(_, number2), rescale()) : domain2.slice();
+    };
+    scale.range = function(_) {
+      return arguments.length ? (range5 = Array.from(_), rescale()) : range5.slice();
+    };
+    scale.rangeRound = function(_) {
+      return range5 = Array.from(_), interpolate = round_default, rescale();
+    };
+    scale.clamp = function(_) {
+      return arguments.length ? (clamp3 = _ ? true : identity13, rescale()) : clamp3 !== identity13;
+    };
+    scale.interpolate = function(_) {
+      return arguments.length ? (interpolate = _, rescale()) : interpolate;
+    };
+    scale.unknown = function(_) {
+      return arguments.length ? (unknown = _, scale) : unknown;
+    };
+    return function(t, u2) {
+      transform2 = t, untransform = u2;
+      return rescale();
+    };
+  }
+  function continuous() {
+    return transformer()(identity13, identity13);
+  }
+
+  // node_modules/d3-format/src/formatDecimal.js
+  function formatDecimal_default(x2) {
+    return Math.abs(x2 = Math.round(x2)) >= 1e21 ? x2.toLocaleString("en").replace(/,/g, "") : x2.toString(10);
+  }
+  function formatDecimalParts(x2, p2) {
+    if ((i2 = (x2 = p2 ? x2.toExponential(p2 - 1) : x2.toExponential()).indexOf("e")) < 0) return null;
+    var i2, coefficient = x2.slice(0, i2);
+    return [
+      coefficient.length > 1 ? coefficient[0] + coefficient.slice(2) : coefficient,
+      +x2.slice(i2 + 1)
+    ];
+  }
+
+  // node_modules/d3-format/src/exponent.js
+  function exponent_default(x2) {
+    return x2 = formatDecimalParts(Math.abs(x2)), x2 ? x2[1] : NaN;
+  }
+
+  // node_modules/d3-format/src/formatGroup.js
+  function formatGroup_default(grouping, thousands) {
+    return function(value13, width8) {
+      var i2 = value13.length, t = [], j = 0, g = grouping[0], length9 = 0;
+      while (i2 > 0 && g > 0) {
+        if (length9 + g + 1 > width8) g = Math.max(1, width8 - length9);
+        t.push(value13.substring(i2 -= g, i2 + g));
+        if ((length9 += g + 1) > width8) break;
+        g = grouping[j = (j + 1) % grouping.length];
+      }
+      return t.reverse().join(thousands);
+    };
+  }
+
+  // node_modules/d3-format/src/formatNumerals.js
+  function formatNumerals_default(numerals) {
+    return function(value13) {
+      return value13.replace(/[0-9]/g, function(i2) {
+        return numerals[+i2];
+      });
+    };
+  }
+
+  // node_modules/d3-format/src/formatSpecifier.js
+  var re = /^(?:(.)?([<>=^]))?([+\-( ])?([$#])?(0)?(\d+)?(,)?(\.\d+)?(~)?([a-z%])?$/i;
+  function formatSpecifier(specifier) {
+    if (!(match = re.exec(specifier))) throw new Error("invalid format: " + specifier);
+    var match;
+    return new FormatSpecifier({
+      fill: match[1],
+      align: match[2],
+      sign: match[3],
+      symbol: match[4],
+      zero: match[5],
+      width: match[6],
+      comma: match[7],
+      precision: match[8] && match[8].slice(1),
+      trim: match[9],
+      type: match[10]
+    });
+  }
+  formatSpecifier.prototype = FormatSpecifier.prototype;
+  function FormatSpecifier(specifier) {
+    this.fill = specifier.fill === void 0 ? " " : specifier.fill + "";
+    this.align = specifier.align === void 0 ? ">" : specifier.align + "";
+    this.sign = specifier.sign === void 0 ? "-" : specifier.sign + "";
+    this.symbol = specifier.symbol === void 0 ? "" : specifier.symbol + "";
+    this.zero = !!specifier.zero;
+    this.width = specifier.width === void 0 ? void 0 : +specifier.width;
+    this.comma = !!specifier.comma;
+    this.precision = specifier.precision === void 0 ? void 0 : +specifier.precision;
+    this.trim = !!specifier.trim;
+    this.type = specifier.type === void 0 ? "" : specifier.type + "";
+  }
+  FormatSpecifier.prototype.toString = function() {
+    return this.fill + this.align + this.sign + this.symbol + (this.zero ? "0" : "") + (this.width === void 0 ? "" : Math.max(1, this.width | 0)) + (this.comma ? "," : "") + (this.precision === void 0 ? "" : "." + Math.max(0, this.precision | 0)) + (this.trim ? "~" : "") + this.type;
+  };
+
+  // node_modules/d3-format/src/formatTrim.js
+  function formatTrim_default(s) {
+    out: for (var n = s.length, i2 = 1, i0 = -1, i1; i2 < n; ++i2) {
+      switch (s[i2]) {
+        case ".":
+          i0 = i1 = i2;
+          break;
+        case "0":
+          if (i0 === 0) i0 = i2;
+          i1 = i2;
+          break;
+        default:
+          if (!+s[i2]) break out;
+          if (i0 > 0) i0 = 0;
+          break;
+      }
+    }
+    return i0 > 0 ? s.slice(0, i0) + s.slice(i1 + 1) : s;
+  }
+
+  // node_modules/d3-format/src/formatPrefixAuto.js
+  var prefixExponent;
+  function formatPrefixAuto_default(x2, p2) {
+    var d = formatDecimalParts(x2, p2);
+    if (!d) return x2 + "";
+    var coefficient = d[0], exponent2 = d[1], i2 = exponent2 - (prefixExponent = Math.max(-8, Math.min(8, Math.floor(exponent2 / 3))) * 3) + 1, n = coefficient.length;
+    return i2 === n ? coefficient : i2 > n ? coefficient + new Array(i2 - n + 1).join("0") : i2 > 0 ? coefficient.slice(0, i2) + "." + coefficient.slice(i2) : "0." + new Array(1 - i2).join("0") + formatDecimalParts(x2, Math.max(0, p2 + i2 - 1))[0];
+  }
+
+  // node_modules/d3-format/src/formatRounded.js
+  function formatRounded_default(x2, p2) {
+    var d = formatDecimalParts(x2, p2);
+    if (!d) return x2 + "";
+    var coefficient = d[0], exponent2 = d[1];
+    return exponent2 < 0 ? "0." + new Array(-exponent2).join("0") + coefficient : coefficient.length > exponent2 + 1 ? coefficient.slice(0, exponent2 + 1) + "." + coefficient.slice(exponent2 + 1) : coefficient + new Array(exponent2 - coefficient.length + 2).join("0");
+  }
+
+  // node_modules/d3-format/src/formatTypes.js
+  var formatTypes_default = {
+    "%": (x2, p2) => (x2 * 100).toFixed(p2),
+    "b": (x2) => Math.round(x2).toString(2),
+    "c": (x2) => x2 + "",
+    "d": formatDecimal_default,
+    "e": (x2, p2) => x2.toExponential(p2),
+    "f": (x2, p2) => x2.toFixed(p2),
+    "g": (x2, p2) => x2.toPrecision(p2),
+    "o": (x2) => Math.round(x2).toString(8),
+    "p": (x2, p2) => formatRounded_default(x2 * 100, p2),
+    "r": formatRounded_default,
+    "s": formatPrefixAuto_default,
+    "X": (x2) => Math.round(x2).toString(16).toUpperCase(),
+    "x": (x2) => Math.round(x2).toString(16)
+  };
+
+  // node_modules/d3-format/src/identity.js
+  function identity_default(x2) {
+    return x2;
+  }
+
+  // node_modules/d3-format/src/locale.js
+  var map16 = Array.prototype.map;
+  var prefixes = ["y", "z", "a", "f", "p", "n", "\xB5", "m", "", "k", "M", "G", "T", "P", "E", "Z", "Y"];
+  function locale_default(locale2) {
+    var group4 = locale2.grouping === void 0 || locale2.thousands === void 0 ? identity_default : formatGroup_default(map16.call(locale2.grouping, Number), locale2.thousands + ""), currencyPrefix = locale2.currency === void 0 ? "" : locale2.currency[0] + "", currencySuffix = locale2.currency === void 0 ? "" : locale2.currency[1] + "", decimal = locale2.decimal === void 0 ? "." : locale2.decimal + "", numerals = locale2.numerals === void 0 ? identity_default : formatNumerals_default(map16.call(locale2.numerals, String)), percent = locale2.percent === void 0 ? "%" : locale2.percent + "", minus = locale2.minus === void 0 ? "\u2212" : locale2.minus + "", nan2 = locale2.nan === void 0 ? "NaN" : locale2.nan + "";
+    function newFormat(specifier) {
+      specifier = formatSpecifier(specifier);
+      var fill3 = specifier.fill, align2 = specifier.align, sign2 = specifier.sign, symbol = specifier.symbol, zero4 = specifier.zero, width8 = specifier.width, comma = specifier.comma, precision = specifier.precision, trim2 = specifier.trim, type = specifier.type;
+      if (type === "n") comma = true, type = "g";
+      else if (!formatTypes_default[type]) precision === void 0 && (precision = 12), trim2 = true, type = "g";
+      if (zero4 || fill3 === "0" && align2 === "=") zero4 = true, fill3 = "0", align2 = "=";
+      var prefix = symbol === "$" ? currencyPrefix : symbol === "#" && /[boxX]/.test(type) ? "0" + type.toLowerCase() : "", suffix = symbol === "$" ? currencySuffix : /[%p]/.test(type) ? percent : "";
+      var formatType = formatTypes_default[type], maybeSuffix = /[defgprs%]/.test(type);
+      precision = precision === void 0 ? 6 : /[gprs]/.test(type) ? Math.max(1, Math.min(21, precision)) : Math.max(0, Math.min(20, precision));
+      function format2(value13) {
+        var valuePrefix = prefix, valueSuffix = suffix, i2, n, c;
+        if (type === "c") {
+          valueSuffix = formatType(value13) + valueSuffix;
+          value13 = "";
+        } else {
+          value13 = +value13;
+          var valueNegative = value13 < 0 || 1 / value13 < 0;
+          value13 = isNaN(value13) ? nan2 : formatType(Math.abs(value13), precision);
+          if (trim2) value13 = formatTrim_default(value13);
+          if (valueNegative && +value13 === 0 && sign2 !== "+") valueNegative = false;
+          valuePrefix = (valueNegative ? sign2 === "(" ? sign2 : minus : sign2 === "-" || sign2 === "(" ? "" : sign2) + valuePrefix;
+          valueSuffix = (type === "s" ? prefixes[8 + prefixExponent / 3] : "") + valueSuffix + (valueNegative && sign2 === "(" ? ")" : "");
+          if (maybeSuffix) {
+            i2 = -1, n = value13.length;
+            while (++i2 < n) {
+              if (c = value13.charCodeAt(i2), 48 > c || c > 57) {
+                valueSuffix = (c === 46 ? decimal + value13.slice(i2 + 1) : value13.slice(i2)) + valueSuffix;
+                value13 = value13.slice(0, i2);
+                break;
+              }
+            }
+          }
+        }
+        if (comma && !zero4) value13 = group4(value13, Infinity);
+        var length9 = valuePrefix.length + value13.length + valueSuffix.length, padding2 = length9 < width8 ? new Array(width8 - length9 + 1).join(fill3) : "";
+        if (comma && zero4) value13 = group4(padding2 + value13, padding2.length ? width8 - valueSuffix.length : Infinity), padding2 = "";
+        switch (align2) {
+          case "<":
+            value13 = valuePrefix + value13 + valueSuffix + padding2;
+            break;
+          case "=":
+            value13 = valuePrefix + padding2 + value13 + valueSuffix;
+            break;
+          case "^":
+            value13 = padding2.slice(0, length9 = padding2.length >> 1) + valuePrefix + value13 + valueSuffix + padding2.slice(length9);
+            break;
+          default:
+            value13 = padding2 + valuePrefix + value13 + valueSuffix;
+            break;
+        }
+        return numerals(value13);
+      }
+      format2.toString = function() {
+        return specifier + "";
+      };
+      return format2;
+    }
+    function formatPrefix2(specifier, value13) {
+      var f = newFormat((specifier = formatSpecifier(specifier), specifier.type = "f", specifier)), e = Math.max(-8, Math.min(8, Math.floor(exponent_default(value13) / 3))) * 3, k = Math.pow(10, -e), prefix = prefixes[8 + e / 3];
+      return function(value14) {
+        return f(k * value14) + prefix;
+      };
+    }
+    return {
+      format: newFormat,
+      formatPrefix: formatPrefix2
+    };
+  }
+
+  // node_modules/d3-format/src/defaultLocale.js
+  var locale;
+  var format;
+  var formatPrefix;
+  defaultLocale({
+    thousands: ",",
+    grouping: [3],
+    currency: ["$", ""]
+  });
+  function defaultLocale(definition) {
+    locale = locale_default(definition);
+    format = locale.format;
+    formatPrefix = locale.formatPrefix;
+    return locale;
+  }
+
+  // node_modules/d3-format/src/precisionFixed.js
+  function precisionFixed_default(step4) {
+    return Math.max(0, -exponent_default(Math.abs(step4)));
+  }
+
+  // node_modules/d3-format/src/precisionPrefix.js
+  function precisionPrefix_default(step4, value13) {
+    return Math.max(0, Math.max(-8, Math.min(8, Math.floor(exponent_default(value13) / 3))) * 3 - exponent_default(Math.abs(step4)));
+  }
+
+  // node_modules/d3-format/src/precisionRound.js
+  function precisionRound_default(step4, max6) {
+    step4 = Math.abs(step4), max6 = Math.abs(max6) - step4;
+    return Math.max(0, exponent_default(max6) - exponent_default(step4)) + 1;
+  }
+
+  // node_modules/d3-scale/src/tickFormat.js
+  function tickFormat(start4, stop, count, specifier) {
+    var step4 = tickStep(start4, stop, count), precision;
+    specifier = formatSpecifier(specifier == null ? ",f" : specifier);
+    switch (specifier.type) {
+      case "s": {
+        var value13 = Math.max(Math.abs(start4), Math.abs(stop));
+        if (specifier.precision == null && !isNaN(precision = precisionPrefix_default(step4, value13))) specifier.precision = precision;
+        return formatPrefix(specifier, value13);
+      }
+      case "":
+      case "e":
+      case "g":
+      case "p":
+      case "r": {
+        if (specifier.precision == null && !isNaN(precision = precisionRound_default(step4, Math.max(Math.abs(start4), Math.abs(stop))))) specifier.precision = precision - (specifier.type === "e");
+        break;
+      }
+      case "f":
+      case "%": {
+        if (specifier.precision == null && !isNaN(precision = precisionFixed_default(step4))) specifier.precision = precision - (specifier.type === "%") * 2;
+        break;
+      }
+    }
+    return format(specifier);
+  }
+
+  // node_modules/d3-scale/src/linear.js
+  function linearish(scale) {
+    var domain2 = scale.domain;
+    scale.ticks = function(count) {
+      var d = domain2();
+      return ticks(d[0], d[d.length - 1], count == null ? 10 : count);
+    };
+    scale.tickFormat = function(count, specifier) {
+      var d = domain2();
+      return tickFormat(d[0], d[d.length - 1], count == null ? 10 : count, specifier);
+    };
+    scale.nice = function(count) {
+      if (count == null) count = 10;
+      var d = domain2();
+      var i0 = 0;
+      var i1 = d.length - 1;
+      var start4 = d[i0];
+      var stop = d[i1];
+      var prestep;
+      var step4;
+      var maxIter = 10;
+      if (stop < start4) {
+        step4 = start4, start4 = stop, stop = step4;
+        step4 = i0, i0 = i1, i1 = step4;
+      }
+      while (maxIter-- > 0) {
+        step4 = tickIncrement(start4, stop, count);
+        if (step4 === prestep) {
+          d[i0] = start4;
+          d[i1] = stop;
+          return domain2(d);
+        } else if (step4 > 0) {
+          start4 = Math.floor(start4 / step4) * step4;
+          stop = Math.ceil(stop / step4) * step4;
+        } else if (step4 < 0) {
+          start4 = Math.ceil(start4 * step4) / step4;
+          stop = Math.floor(stop * step4) / step4;
+        } else {
+          break;
+        }
+        prestep = step4;
+      }
+      return scale;
+    };
+    return scale;
+  }
+  function linear2() {
+    var scale = continuous();
+    scale.copy = function() {
+      return copy2(scale, linear2());
+    };
+    initRange.apply(scale, arguments);
+    return linearish(scale);
+  }
+
+  // node_modules/d3-scale/src/nice.js
+  function nice(domain2, interval2) {
+    domain2 = domain2.slice();
+    var i0 = 0, i1 = domain2.length - 1, x0 = domain2[i0], x1 = domain2[i1], t;
+    if (x1 < x0) {
+      t = i0, i0 = i1, i1 = t;
+      t = x0, x0 = x1, x1 = t;
+    }
+    domain2[i0] = interval2.floor(x0);
+    domain2[i1] = interval2.ceil(x1);
+    return domain2;
+  }
+
+  // node_modules/d3-scale/src/log.js
+  function transformLog(x2) {
+    return Math.log(x2);
+  }
+  function transformExp(x2) {
+    return Math.exp(x2);
+  }
+  function transformLogn(x2) {
+    return -Math.log(-x2);
+  }
+  function transformExpn(x2) {
+    return -Math.exp(-x2);
+  }
+  function pow10(x2) {
+    return isFinite(x2) ? +("1e" + x2) : x2 < 0 ? 0 : x2;
+  }
+  function powp(base3) {
+    return base3 === 10 ? pow10 : base3 === Math.E ? Math.exp : (x2) => Math.pow(base3, x2);
+  }
+  function logp(base3) {
+    return base3 === Math.E ? Math.log : base3 === 10 && Math.log10 || base3 === 2 && Math.log2 || (base3 = Math.log(base3), (x2) => Math.log(x2) / base3);
+  }
+  function reflect(f) {
+    return (x2, k) => -f(-x2, k);
+  }
+  function loggish(transform2) {
+    const scale = transform2(transformLog, transformExp);
+    const domain2 = scale.domain;
+    let base3 = 10;
+    let logs;
+    let pows;
+    function rescale() {
+      logs = logp(base3), pows = powp(base3);
+      if (domain2()[0] < 0) {
+        logs = reflect(logs), pows = reflect(pows);
+        transform2(transformLogn, transformExpn);
+      } else {
+        transform2(transformLog, transformExp);
+      }
+      return scale;
+    }
+    scale.base = function(_) {
+      return arguments.length ? (base3 = +_, rescale()) : base3;
+    };
+    scale.domain = function(_) {
+      return arguments.length ? (domain2(_), rescale()) : domain2();
+    };
+    scale.ticks = (count) => {
+      const d = domain2();
+      let u2 = d[0];
+      let v = d[d.length - 1];
+      const r = v < u2;
+      if (r) [u2, v] = [v, u2];
+      let i2 = logs(u2);
+      let j = logs(v);
+      let k;
+      let t;
+      const n = count == null ? 10 : +count;
+      let z = [];
+      if (!(base3 % 1) && j - i2 < n) {
+        i2 = Math.floor(i2), j = Math.ceil(j);
+        if (u2 > 0) for (; i2 <= j; ++i2) {
+          for (k = 1; k < base3; ++k) {
+            t = i2 < 0 ? k / pows(-i2) : k * pows(i2);
+            if (t < u2) continue;
+            if (t > v) break;
+            z.push(t);
+          }
+        }
+        else for (; i2 <= j; ++i2) {
+          for (k = base3 - 1; k >= 1; --k) {
+            t = i2 > 0 ? k / pows(-i2) : k * pows(i2);
+            if (t < u2) continue;
+            if (t > v) break;
+            z.push(t);
+          }
+        }
+        if (z.length * 2 < n) z = ticks(u2, v, n);
+      } else {
+        z = ticks(i2, j, Math.min(j - i2, n)).map(pows);
+      }
+      return r ? z.reverse() : z;
+    };
+    scale.tickFormat = (count, specifier) => {
+      if (count == null) count = 10;
+      if (specifier == null) specifier = base3 === 10 ? "s" : ",";
+      if (typeof specifier !== "function") {
+        if (!(base3 % 1) && (specifier = formatSpecifier(specifier)).precision == null) specifier.trim = true;
+        specifier = format(specifier);
+      }
+      if (count === Infinity) return specifier;
+      const k = Math.max(1, base3 * count / scale.ticks().length);
+      return (d) => {
+        let i2 = d / pows(Math.round(logs(d)));
+        if (i2 * base3 < base3 - 0.5) i2 *= base3;
+        return i2 <= k ? specifier(d) : "";
+      };
+    };
+    scale.nice = () => {
+      return domain2(nice(domain2(), {
+        floor: (x2) => pows(Math.floor(logs(x2))),
+        ceil: (x2) => pows(Math.ceil(logs(x2)))
+      }));
+    };
+    return scale;
+  }
+  function log4() {
+    const scale = loggish(transformer()).domain([1, 10]);
+    scale.copy = () => copy2(scale, log4()).base(scale.base());
+    initRange.apply(scale, arguments);
+    return scale;
+  }
+
+  // node_modules/d3-scale/src/symlog.js
+  function transformSymlog(c) {
+    return function(x2) {
+      return Math.sign(x2) * Math.log1p(Math.abs(x2 / c));
+    };
+  }
+  function transformSymexp(c) {
+    return function(x2) {
+      return Math.sign(x2) * Math.expm1(Math.abs(x2)) * c;
+    };
+  }
+  function symlogish(transform2) {
+    var c = 1, scale = transform2(transformSymlog(c), transformSymexp(c));
+    scale.constant = function(_) {
+      return arguments.length ? transform2(transformSymlog(c = +_), transformSymexp(c)) : c;
+    };
+    return linearish(scale);
+  }
+  function symlog() {
+    var scale = symlogish(transformer());
+    scale.copy = function() {
+      return copy2(scale, symlog()).constant(scale.constant());
+    };
+    return initRange.apply(scale, arguments);
+  }
+
+  // node_modules/d3-scale/src/pow.js
+  function transformPow(exponent2) {
+    return function(x2) {
+      return x2 < 0 ? -Math.pow(-x2, exponent2) : Math.pow(x2, exponent2);
+    };
+  }
+  function transformSqrt(x2) {
+    return x2 < 0 ? -Math.sqrt(-x2) : Math.sqrt(x2);
+  }
+  function transformSquare(x2) {
+    return x2 < 0 ? -x2 * x2 : x2 * x2;
+  }
+  function powish(transform2) {
+    var scale = transform2(identity13, identity13), exponent2 = 1;
+    function rescale() {
+      return exponent2 === 1 ? transform2(identity13, identity13) : exponent2 === 0.5 ? transform2(transformSqrt, transformSquare) : transform2(transformPow(exponent2), transformPow(1 / exponent2));
+    }
+    scale.exponent = function(_) {
+      return arguments.length ? (exponent2 = +_, rescale()) : exponent2;
+    };
+    return linearish(scale);
+  }
+  function pow3() {
+    var scale = powish(transformer());
+    scale.copy = function() {
+      return copy2(scale, pow3()).exponent(scale.exponent());
+    };
+    initRange.apply(scale, arguments);
+    return scale;
+  }
+  function sqrt2() {
+    return pow3.apply(null, arguments).exponent(0.5);
+  }
+
+  // node_modules/d3-scale-chromatic/src/sequential-multi/turbo.js
+  function turbo_default(t) {
+    t = Math.max(0, Math.min(1, t));
+    return "rgb(" + Math.max(0, Math.min(255, Math.round(34.61 + t * (1172.33 - t * (10793.56 - t * (33300.12 - t * (38394.49 - t * 14825.05))))))) + ", " + Math.max(0, Math.min(255, Math.round(23.31 + t * (557.33 + t * (1225.33 - t * (3574.96 - t * (1073.77 + t * 707.56))))))) + ", " + Math.max(0, Math.min(255, Math.round(27.2 + t * (3211.1 - t * (15327.97 - t * (27814 - t * (22569.18 - t * 6838.66))))))) + ")";
+  }
+
+  // output/PSD3.Scale/foreign.js
+  var linear3 = linear2();
+  var log5 = log4();
+  var pow4 = pow3();
+  var sqrt3 = sqrt2();
+  var symlog2 = symlog();
+  var ordinal2 = ordinal();
+  var band2 = band();
+  var point2 = point();
+
+  // output/PSD3.Transition.Tick/index.js
+  var ticksForDuration = function(milliseconds) {
+    var ticks3 = toNumber(milliseconds) / 16.67;
+    return 1 / ticks3;
+  };
+  var lerp = function(start4) {
+    return function(end) {
+      return function(t) {
+        return start4 + (end - start4) * t;
+      };
+    };
+  };
+  var easeInOutCubic = function(t) {
+    var $21 = t < 0.5;
+    if ($21) {
+      return 4 * t * t * t;
+    }
+    ;
+    return 1 - (-2 * t + 2) * (-2 * t + 2) * (-2 * t + 2) / 2;
+  };
+
+  // output/PSD3v2.Attribute.Types/index.js
+  var StringValue = /* @__PURE__ */ (function() {
+    function StringValue2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    StringValue2.create = function(value0) {
+      return new StringValue2(value0);
+    };
+    return StringValue2;
+  })();
+  var NumberValue = /* @__PURE__ */ (function() {
+    function NumberValue2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    NumberValue2.create = function(value0) {
+      return new NumberValue2(value0);
+    };
+    return NumberValue2;
+  })();
+  var BooleanValue = /* @__PURE__ */ (function() {
+    function BooleanValue2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    BooleanValue2.create = function(value0) {
+      return new BooleanValue2(value0);
+    };
+    return BooleanValue2;
+  })();
+  var StaticAttr = /* @__PURE__ */ (function() {
+    function StaticAttr2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    StaticAttr2.create = function(value0) {
+      return function(value1) {
+        return new StaticAttr2(value0, value1);
+      };
+    };
+    return StaticAttr2;
+  })();
+  var DataAttr = /* @__PURE__ */ (function() {
+    function DataAttr2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    DataAttr2.create = function(value0) {
+      return function(value1) {
+        return new DataAttr2(value0, value1);
+      };
+    };
+    return DataAttr2;
+  })();
+  var IndexedAttr = /* @__PURE__ */ (function() {
+    function IndexedAttr2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    IndexedAttr2.create = function(value0) {
+      return function(value1) {
+        return new IndexedAttr2(value0, value1);
+      };
+    };
+    return IndexedAttr2;
+  })();
+  var toAttrStringString = {
+    toAttr: function(value13) {
+      return function(name16) {
+        return new StaticAttr(name16, new StringValue(value13));
+      };
+    }
+  };
+  var toAttrNumberNumber = {
+    toAttr: function(value13) {
+      return function(name16) {
+        return new StaticAttr(name16, new NumberValue(value13));
+      };
+    }
+  };
+  var toAttr = function(dict) {
+    return dict.toAttr;
+  };
+  var viewBox = function(dictToAttr) {
+    var toAttr1 = toAttr(dictToAttr);
+    return function(value13) {
+      return toAttr1(value13)("viewBox");
+    };
+  };
+  var strokeWidth = function(dictToAttr) {
+    var toAttr1 = toAttr(dictToAttr);
+    return function(value13) {
+      return toAttr1(value13)("stroke-width");
+    };
+  };
+  var stroke = function(dictToAttr) {
+    var toAttr1 = toAttr(dictToAttr);
+    return function(value13) {
+      return toAttr1(value13)("stroke");
+    };
+  };
+  var radius = function(dictToAttr) {
+    var toAttr1 = toAttr(dictToAttr);
+    return function(value13) {
+      return toAttr1(value13)("r");
+    };
+  };
+  var id_ = function(dictToAttr) {
+    var toAttr1 = toAttr(dictToAttr);
+    return function(value13) {
+      return toAttr1(value13)("id");
+    };
+  };
+  var fill = function(dictToAttr) {
+    var toAttr1 = toAttr(dictToAttr);
+    return function(value13) {
+      return toAttr1(value13)("fill");
+    };
+  };
+  var cy = function(dictToAttr) {
+    var toAttr1 = toAttr(dictToAttr);
+    return function(value13) {
+      return toAttr1(value13)("cy");
+    };
+  };
+  var cx = function(dictToAttr) {
+    var toAttr1 = toAttr(dictToAttr);
+    return function(value13) {
+      return toAttr1(value13)("cx");
+    };
+  };
+  var class_2 = function(dictToAttr) {
+    var toAttr1 = toAttr(dictToAttr);
+    return function(value13) {
+      return toAttr1(value13)("class");
+    };
+  };
+
+  // output/PSD3v2.Behavior.Types/index.js
+  var ScaleExtent = /* @__PURE__ */ (function() {
+    function ScaleExtent2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    ScaleExtent2.create = function(value0) {
+      return function(value1) {
+        return new ScaleExtent2(value0, value1);
+      };
+    };
+    return ScaleExtent2;
+  })();
+  var SimpleDrag = /* @__PURE__ */ (function() {
+    function SimpleDrag2() {
+    }
+    ;
+    SimpleDrag2.value = new SimpleDrag2();
+    return SimpleDrag2;
+  })();
+  var SimulationDrag = /* @__PURE__ */ (function() {
+    function SimulationDrag2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    SimulationDrag2.create = function(value0) {
+      return new SimulationDrag2(value0);
+    };
+    return SimulationDrag2;
+  })();
+  var Zoom = /* @__PURE__ */ (function() {
+    function Zoom2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Zoom2.create = function(value0) {
+      return new Zoom2(value0);
+    };
+    return Zoom2;
+  })();
+  var Drag = /* @__PURE__ */ (function() {
+    function Drag2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Drag2.create = function(value0) {
+      return new Drag2(value0);
+    };
+    return Drag2;
+  })();
+  var Click = /* @__PURE__ */ (function() {
+    function Click2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Click2.create = function(value0) {
+      return new Click2(value0);
+    };
+    return Click2;
+  })();
+  var ClickWithDatum = /* @__PURE__ */ (function() {
+    function ClickWithDatum2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ClickWithDatum2.create = function(value0) {
+      return new ClickWithDatum2(value0);
+    };
+    return ClickWithDatum2;
+  })();
+  var MouseEnter = /* @__PURE__ */ (function() {
+    function MouseEnter2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    MouseEnter2.create = function(value0) {
+      return new MouseEnter2(value0);
+    };
+    return MouseEnter2;
+  })();
+  var MouseLeave = /* @__PURE__ */ (function() {
+    function MouseLeave2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    MouseLeave2.create = function(value0) {
+      return new MouseLeave2(value0);
+    };
+    return MouseLeave2;
+  })();
+  var Highlight = /* @__PURE__ */ (function() {
+    function Highlight2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Highlight2.create = function(value0) {
+      return new Highlight2(value0);
+    };
+    return Highlight2;
+  })();
+  var MouseMoveWithInfo = /* @__PURE__ */ (function() {
+    function MouseMoveWithInfo2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    MouseMoveWithInfo2.create = function(value0) {
+      return new MouseMoveWithInfo2(value0);
+    };
+    return MouseMoveWithInfo2;
+  })();
+  var MouseEnterWithInfo = /* @__PURE__ */ (function() {
+    function MouseEnterWithInfo2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    MouseEnterWithInfo2.create = function(value0) {
+      return new MouseEnterWithInfo2(value0);
+    };
+    return MouseEnterWithInfo2;
+  })();
+  var MouseLeaveWithInfo = /* @__PURE__ */ (function() {
+    function MouseLeaveWithInfo2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    MouseLeaveWithInfo2.create = function(value0) {
+      return new MouseLeaveWithInfo2(value0);
+    };
+    return MouseLeaveWithInfo2;
+  })();
+  var defaultZoom = function(scaleExtent) {
+    return function(targetSelector) {
+      return {
+        scaleExtent,
+        targetSelector
+      };
+    };
+  };
+
+  // output/PSD3v2.Capabilities.Selection/index.js
+  var select3 = function(dict) {
+    return dict.select;
+  };
+  var renderTree = function(dict) {
+    return dict.renderTree;
+  };
+  var on2 = function(dict) {
+    return dict.on;
+  };
+  var appendChild = function(dict) {
+    return dict.appendChild;
+  };
+
+  // output/PSD3v2.Selection.Operations/foreign.js
+  function getElementData_(element3) {
+    return function() {
+      return element3.__data__;
+    };
+  }
+  var bindDebugCount = 0;
+  function setElementData_(datum2) {
+    return function(element3) {
+      return function() {
+        element3.__data__ = datum2;
+        if (datum2?.id === 93 && bindDebugCount === 0) {
+          const hasMarker = datum2.__simMarker__ === true;
+          console.log(`[BindData] node93 bound to element, hasMarker=${hasMarker}, x=${datum2.x?.toFixed(1)}`);
+          if (!hasMarker) {
+            console.log(`[BindData] PROBLEM: node93 does NOT have __simMarker__ at bind time!`);
+          }
+          bindDebugCount++;
+        }
+      };
+    };
+  }
+  function setTextContent_(text6) {
+    return function(element3) {
+      return function() {
+        element3.textContent = text6;
+      };
+    };
+  }
+  function offsetX(event) {
+    return event.offsetX;
+  }
+  function offsetY(event) {
+    return event.offsetY;
+  }
+  function clearElement_(selector) {
+    return function() {
+      const el = document.querySelector(selector);
+      if (el) {
+        el.innerHTML = "";
+      }
+    };
+  }
+  function jsonStringify_(value13) {
+    return JSON.stringify(value13);
+  }
 
   // node_modules/d3-transition/src/transition/schedule.js
   var emptyOn = dispatch_default("start", "end", "cancel", "interrupt");
@@ -11682,12 +13188,12 @@
   }
 
   // node_modules/d3-transition/src/transition/select.js
-  function select_default3(select8) {
+  function select_default3(select9) {
     var name16 = this._name, id5 = this._id;
-    if (typeof select8 !== "function") select8 = selector_default(select8);
+    if (typeof select9 !== "function") select9 = selector_default(select9);
     for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {
       for (var group4 = groups[j], n = group4.length, subgroup = subgroups[j] = new Array(n), node, subnode, i2 = 0; i2 < n; ++i2) {
-        if ((node = group4[i2]) && (subnode = select8.call(node, node.__data__, i2, group4))) {
+        if ((node = group4[i2]) && (subnode = select9.call(node, node.__data__, i2, group4))) {
           if ("__data__" in node) subnode.__data__ = node.__data__;
           subgroup[i2] = subnode;
           schedule_default(subgroup[i2], name16, id5, i2, subgroup, get5(node, id5));
@@ -11698,13 +13204,13 @@
   }
 
   // node_modules/d3-transition/src/transition/selectAll.js
-  function selectAll_default2(select8) {
+  function selectAll_default2(select9) {
     var name16 = this._name, id5 = this._id;
-    if (typeof select8 !== "function") select8 = selectorAll_default(select8);
+    if (typeof select9 !== "function") select9 = selectorAll_default(select9);
     for (var groups = this._groups, m = groups.length, subgroups = [], parents = [], j = 0; j < m; ++j) {
       for (var group4 = groups[j], n = group4.length, node, i2 = 0; i2 < n; ++i2) {
         if (node = group4[i2]) {
-          for (var children3 = select8.call(node, node.__data__, i2, group4), child, inherit2 = get5(node, id5), k = 0, l = children3.length; k < l; ++k) {
+          for (var children3 = select9.call(node, node.__data__, i2, group4), child, inherit2 = get5(node, id5), k = 0, l = children3.length; k < l; ++k) {
             if (child = children3[k]) {
               schedule_default(child, name16, id5, k, children3, inherit2);
             }
@@ -11917,7 +13423,7 @@
   };
 
   // node_modules/d3-ease/src/linear.js
-  var linear2 = (t) => +t;
+  var linear4 = (t) => +t;
 
   // node_modules/d3-ease/src/quad.js
   function quadIn(t) {
@@ -12117,14 +13623,14 @@
   // node_modules/d3-zoom/src/event.js
   function ZoomEvent(type, {
     sourceEvent,
-    target: target5,
+    target: target6,
     transform: transform2,
     dispatch: dispatch2
   }) {
     Object.defineProperties(this, {
       type: { value: type, enumerable: true, configurable: true },
       sourceEvent: { value: sourceEvent, enumerable: true, configurable: true },
-      target: { value: target5, enumerable: true, configurable: true },
+      target: { value: target6, enumerable: true, configurable: true },
       transform: { value: transform2, enumerable: true, configurable: true },
       _: { value: dispatch2 }
     });
@@ -12144,8 +13650,8 @@
     translate: function(x2, y2) {
       return x2 === 0 & y2 === 0 ? this : new Transform(this.k, this.x + this.k * x2, this.y + this.k * y2);
     },
-    apply: function(point) {
-      return [point[0] * this.k + this.x, point[1] * this.k + this.y];
+    apply: function(point3) {
+      return [point3[0] * this.k + this.x, point3[1] * this.k + this.y];
     },
     applyX: function(x2) {
       return x2 * this.k + this.x;
@@ -12172,10 +13678,10 @@
       return "translate(" + this.x + "," + this.y + ") scale(" + this.k + ")";
     }
   };
-  var identity13 = new Transform(1, 0, 0);
+  var identity14 = new Transform(1, 0, 0);
   transform.prototype = Transform.prototype;
   function transform(node) {
-    while (!node.__zoom) if (!(node = node.parentNode)) return identity13;
+    while (!node.__zoom) if (!(node = node.parentNode)) return identity14;
     return node.__zoom;
   }
 
@@ -12205,7 +13711,7 @@
     return [[0, 0], [e.clientWidth, e.clientHeight]];
   }
   function defaultTransform() {
-    return this.__zoom || identity13;
+    return this.__zoom || identity14;
   }
   function defaultWheelDelta(event) {
     return -event.deltaY * (event.deltaMode === 1 ? 0.05 : event.deltaMode ? 1 : 2e-3) * (event.ctrlKey ? 10 : 1);
@@ -12221,15 +13727,15 @@
     );
   }
   function zoom_default2() {
-    var filter4 = defaultFilter2, extent = defaultExtent, constrain = defaultConstrain, wheelDelta = defaultWheelDelta, touchable = defaultTouchable2, scaleExtent = [0, Infinity], translateExtent = [[-Infinity, -Infinity], [Infinity, Infinity]], duration2 = 250, interpolate = zoom_default, listeners = dispatch_default("start", "zoom", "end"), touchstarting, touchfirst, touchending, touchDelay = 500, wheelDelay = 150, clickDistance2 = 0, tapDistance = 10;
+    var filter5 = defaultFilter2, extent = defaultExtent, constrain = defaultConstrain, wheelDelta = defaultWheelDelta, touchable = defaultTouchable2, scaleExtent = [0, Infinity], translateExtent = [[-Infinity, -Infinity], [Infinity, Infinity]], duration2 = 250, interpolate = zoom_default, listeners = dispatch_default("start", "zoom", "end"), touchstarting, touchfirst, touchending, touchDelay = 500, wheelDelay = 150, clickDistance2 = 0, tapDistance = 10;
     function zoom(selection2) {
       selection2.property("__zoom", defaultTransform).on("wheel.zoom", wheeled, { passive: false }).on("mousedown.zoom", mousedowned).on("dblclick.zoom", dblclicked).filter(touchable).on("touchstart.zoom", touchstarted).on("touchmove.zoom", touchmoved).on("touchend.zoom touchcancel.zoom", touchended).style("-webkit-tap-highlight-color", "rgba(0,0,0,0)");
     }
-    zoom.transform = function(collection, transform2, point, event) {
+    zoom.transform = function(collection, transform2, point3, event) {
       var selection2 = collection.selection ? collection.selection() : collection;
       selection2.property("__zoom", defaultTransform);
       if (collection !== selection2) {
-        schedule(collection, transform2, point, event);
+        schedule(collection, transform2, point3, event);
       } else {
         selection2.interrupt().each(function() {
           gesture(this, arguments).event(event).start().zoom(null, typeof transform2 === "function" ? transform2.apply(this, arguments) : transform2).end();
@@ -12259,7 +13765,7 @@
     zoom.translateTo = function(selection2, x2, y2, p2, event) {
       zoom.transform(selection2, function() {
         var e = extent.apply(this, arguments), t = this.__zoom, p0 = p2 == null ? centroid(e) : typeof p2 === "function" ? p2.apply(this, arguments) : p2;
-        return constrain(identity13.translate(p0[0], p0[1]).scale(t.k).translate(
+        return constrain(identity14.translate(p0[0], p0[1]).scale(t.k).translate(
           typeof x2 === "function" ? -x2.apply(this, arguments) : -x2,
           typeof y2 === "function" ? -y2.apply(this, arguments) : -y2
         ), e, translateExtent);
@@ -12276,13 +13782,13 @@
     function centroid(extent2) {
       return [(+extent2[0][0] + +extent2[1][0]) / 2, (+extent2[0][1] + +extent2[1][1]) / 2];
     }
-    function schedule(transition2, transform2, point, event) {
+    function schedule(transition2, transform2, point3, event) {
       transition2.on("start.zoom", function() {
         gesture(this, arguments).event(event).start();
       }).on("interrupt.zoom end.zoom", function() {
         gesture(this, arguments).event(event).end();
       }).tween("zoom", function() {
-        var that = this, args = arguments, g = gesture(that, args).event(event), e = extent.apply(that, args), p2 = point == null ? centroid(e) : typeof point === "function" ? point.apply(that, args) : point, w = Math.max(e[1][0] - e[0][0], e[1][1] - e[0][1]), a2 = that.__zoom, b10 = typeof transform2 === "function" ? transform2.apply(that, args) : transform2, i2 = interpolate(a2.invert(p2).concat(w / a2.k), b10.invert(p2).concat(w / b10.k));
+        var that = this, args = arguments, g = gesture(that, args).event(event), e = extent.apply(that, args), p2 = point3 == null ? centroid(e) : typeof point3 === "function" ? point3.apply(that, args) : point3, w = Math.max(e[1][0] - e[0][0], e[1][1] - e[0][1]), a2 = that.__zoom, b10 = typeof transform2 === "function" ? transform2.apply(that, args) : transform2, i2 = interpolate(a2.invert(p2).concat(w / a2.k), b10.invert(p2).concat(w / b10.k));
         return function(t) {
           if (t === 1) t = b10;
           else {
@@ -12348,7 +13854,7 @@
       }
     };
     function wheeled(event, ...args) {
-      if (!filter4.apply(this, arguments)) return;
+      if (!filter5.apply(this, arguments)) return;
       var g = gesture(this, args).event(event), t = this.__zoom, k = Math.max(scaleExtent[0], Math.min(scaleExtent[1], t.k * Math.pow(2, wheelDelta.apply(this, arguments)))), p2 = pointer_default(event);
       if (g.wheel) {
         if (g.mouse[0][0] !== p2[0] || g.mouse[0][1] !== p2[1]) {
@@ -12370,8 +13876,8 @@
       }
     }
     function mousedowned(event, ...args) {
-      if (touchending || !filter4.apply(this, arguments)) return;
-      var currentTarget = event.currentTarget, g = gesture(this, args, true).event(event), v = select_default2(event.view).on("mousemove.zoom", mousemoved, true).on("mouseup.zoom", mouseupped, true), p2 = pointer_default(event, currentTarget), x0 = event.clientX, y0 = event.clientY;
+      if (touchending || !filter5.apply(this, arguments)) return;
+      var currentTarget2 = event.currentTarget, g = gesture(this, args, true).event(event), v = select_default2(event.view).on("mousemove.zoom", mousemoved, true).on("mouseup.zoom", mouseupped, true), p2 = pointer_default(event, currentTarget2), x0 = event.clientX, y0 = event.clientY;
       nodrag_default(event.view);
       nopropagation2(event);
       g.mouse = [p2, this.__zoom.invert(p2)];
@@ -12383,7 +13889,7 @@
           var dx = event2.clientX - x0, dy = event2.clientY - y0;
           g.moved = dx * dx + dy * dy > clickDistance2;
         }
-        g.event(event2).zoom("mouse", constrain(translate(g.that.__zoom, g.mouse[0] = pointer_default(event2, currentTarget), g.mouse[1]), g.extent, translateExtent));
+        g.event(event2).zoom("mouse", constrain(translate(g.that.__zoom, g.mouse[0] = pointer_default(event2, currentTarget2), g.mouse[1]), g.extent, translateExtent));
       }
       function mouseupped(event2) {
         v.on("mousemove.zoom mouseup.zoom", null);
@@ -12393,14 +13899,14 @@
       }
     }
     function dblclicked(event, ...args) {
-      if (!filter4.apply(this, arguments)) return;
+      if (!filter5.apply(this, arguments)) return;
       var t0 = this.__zoom, p0 = pointer_default(event.changedTouches ? event.changedTouches[0] : event, this), p1 = t0.invert(p0), k1 = t0.k * (event.shiftKey ? 0.5 : 2), t1 = constrain(translate(scale(t0, k1), p0, p1), extent.apply(this, args), translateExtent);
       noevent_default2(event);
       if (duration2 > 0) select_default2(this).transition().duration(duration2).call(schedule, t1, p0, event);
       else select_default2(this).call(zoom.transform, t1, p0, event);
     }
     function touchstarted(event, ...args) {
-      if (!filter4.apply(this, arguments)) return;
+      if (!filter5.apply(this, arguments)) return;
       var touches = event.touches, n = touches.length, g = gesture(this, args, event.changedTouches.length === n).event(event), started, i2, t, p2;
       nopropagation2(event);
       for (i2 = 0; i2 < n; ++i2) {
@@ -12467,7 +13973,7 @@
       return arguments.length ? (wheelDelta = typeof _ === "function" ? _ : constant_default5(+_), zoom) : wheelDelta;
     };
     zoom.filter = function(_) {
-      return arguments.length ? (filter4 = typeof _ === "function" ? _ : constant_default5(!!_), zoom) : filter4;
+      return arguments.length ? (filter5 = typeof _ === "function" ? _ : constant_default5(!!_), zoom) : filter5;
     };
     zoom.touchable = function(_) {
       return arguments.length ? (touchable = typeof _ === "function" ? _ : constant_default5(!!_), zoom) : touchable;
@@ -12507,9 +14013,9 @@
   function attachZoom_(element3) {
     return (scaleMin) => (scaleMax) => (targetSelector) => () => {
       const selection2 = select_default2(element3);
-      const target5 = selection2.select(targetSelector);
+      const target6 = selection2.select(targetSelector);
       function zoomed(event) {
-        target5.attr("transform", event.transform);
+        target6.attr("transform", event.transform);
       }
       const zoomBehavior = zoom_default2().scaleExtent([scaleMin, scaleMax]).on("zoom", zoomed);
       selection2.call(zoomBehavior);
@@ -12534,39 +14040,39 @@
     };
   }
   function attachClick_(element3) {
-    return (handler2) => () => {
+    return (handler3) => () => {
       const selection2 = select_default2(element3);
       selection2.on("click", function(event) {
-        handler2();
+        handler3();
       });
       selection2.style("cursor", "pointer");
       return element3;
     };
   }
   function attachClickWithDatum_(element3) {
-    return (handler2) => () => {
+    return (handler3) => () => {
       const selection2 = select_default2(element3);
       selection2.on("click", function(event, d) {
-        handler2(d)();
+        handler3(d)();
       });
       selection2.style("cursor", "pointer");
       return element3;
     };
   }
   function attachMouseEnter_(element3) {
-    return (handler2) => () => {
+    return (handler3) => () => {
       const selection2 = select_default2(element3);
       selection2.on("mouseenter", function(event, d) {
-        handler2(d)();
+        handler3(d)();
       });
       return element3;
     };
   }
   function attachMouseLeave_(element3) {
-    return (handler2) => () => {
+    return (handler3) => () => {
       const selection2 = select_default2(element3);
       selection2.on("mouseleave", function(event, d) {
-        handler2(d)();
+        handler3(d)();
       });
       return element3;
     };
@@ -12591,28 +14097,28 @@
     };
   }
   function attachMouseMoveWithEvent_(element3) {
-    return (handler2) => () => {
+    return (handler3) => () => {
       element3.addEventListener("mousemove", function(event) {
         const datum2 = this.__data__;
-        handler2(datum2, event);
+        handler3(datum2, event);
       });
       return element3;
     };
   }
   function attachMouseEnterWithEvent_(element3) {
-    return (handler2) => () => {
+    return (handler3) => () => {
       element3.addEventListener("mouseenter", function(event) {
         const datum2 = this.__data__;
-        handler2(datum2, event);
+        handler3(datum2, event);
       });
       return element3;
     };
   }
   function attachMouseLeaveWithEvent_(element3) {
-    return (handler2) => () => {
+    return (handler3) => () => {
       element3.addEventListener("mouseleave", function(event) {
         const datum2 = this.__data__;
-        handler2(datum2, event);
+        handler3(datum2, event);
       });
       return element3;
     };
@@ -12622,7 +14128,7 @@
   var unsafeIndex2 = /* @__PURE__ */ unsafeIndex();
   var foldlWithIndex2 = /* @__PURE__ */ foldlWithIndex(foldableWithIndexArray);
   var computeJoinWithKey = function(dictEq) {
-    var eq3 = eq(dictEq);
+    var eq5 = eq(dictEq);
     return function(newData) {
       return function(oldBindings) {
         return function(keyFn) {
@@ -12631,7 +14137,7 @@
               return function(datum2) {
                 var newKey = keyFn(datum2);
                 var v = findIndex(function(v1) {
-                  return eq3(keyFn(v1.datum))(newKey);
+                  return eq5(keyFn(v1.datum))(newKey);
                 })(state3.remainingOld);
                 if (v instanceof Nothing) {
                   var enterBinding = {
@@ -12683,14 +14189,14 @@
     };
   };
   var computeJoin = function(dictEq) {
-    var eq3 = eq(dictEq);
+    var eq5 = eq(dictEq);
     return function(newData) {
       return function(oldBindings) {
         var processNewDatum = function(newIndex) {
           return function(state3) {
             return function(datum2) {
               var v = findIndex(function(v1) {
-                return eq3(v1.datum)(datum2);
+                return eq5(v1.datum)(datum2);
               })(state3.remainingOld);
               if (v instanceof Nothing) {
                 var enterBinding = {
@@ -13015,7 +14521,7 @@
   function getD3EasingFunction(name16) {
     const easingMap = {
       // Linear
-      "linear": linear2,
+      "linear": linear4,
       // Polynomial (Quad, Cubic)
       "quad": quadInOut,
       "quadIn": quadIn,
@@ -13508,6 +15014,38 @@
     };
     return SceneNestedJoin2;
   })();
+  var sceneNestedJoin = function(name16) {
+    return function(key) {
+      return function(data$prime) {
+        return function(decomposeFn) {
+          return function(templateFn) {
+            return function(behaviors) {
+              return new SceneNestedJoin({
+                name: name16,
+                key,
+                joinData: data$prime,
+                decompose: decomposeFn,
+                template: templateFn,
+                enterBehavior: behaviors.enterBehavior,
+                updateBehavior: behaviors.updateBehavior,
+                exitBehavior: behaviors.exitBehavior
+              });
+            };
+          };
+        };
+      };
+    };
+  };
+  var elem3 = function(elemType) {
+    return function(attrs) {
+      return new Node2({
+        name: Nothing.value,
+        elemType,
+        attrs,
+        children: []
+      });
+    };
+  };
 
   // output/Web.DOM.Document/foreign.js
   var getEffProp2 = function(name16) {
@@ -13590,15 +15128,15 @@
   }
 
   // output/Web.DOM.Node/index.js
-  var map16 = /* @__PURE__ */ map(functorEffect);
+  var map17 = /* @__PURE__ */ map(functorEffect);
   var parentNode2 = /* @__PURE__ */ (function() {
-    var $6 = map16(toMaybe);
+    var $6 = map17(toMaybe);
     return function($7) {
       return $6(_parentNode($7));
     };
   })();
   var nextSibling = /* @__PURE__ */ (function() {
-    var $15 = map16(toMaybe);
+    var $15 = map17(toMaybe);
     return function($16) {
       return $15(_nextSibling($16));
     };
@@ -13662,14 +15200,14 @@
   var pure8 = /* @__PURE__ */ pure(applicativeEffect);
   var traverse_4 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableArray);
   var traverse3 = /* @__PURE__ */ traverse(traversableArray)(applicativeEffect);
-  var $$void5 = /* @__PURE__ */ $$void(functorEffect);
+  var $$void6 = /* @__PURE__ */ $$void(functorEffect);
   var discard2 = /* @__PURE__ */ discard(discardUnit);
   var append13 = /* @__PURE__ */ append(semigroupArray);
   var liftEffect3 = /* @__PURE__ */ liftEffect(monadEffectEffect);
-  var log4 = /* @__PURE__ */ log2(monadEffectEffect);
+  var log6 = /* @__PURE__ */ log2(monadEffectEffect);
   var show4 = /* @__PURE__ */ show(showInt);
   var mapFlipped1 = /* @__PURE__ */ mapFlipped(functorMaybe);
-  var compare2 = /* @__PURE__ */ compare(ordInt);
+  var compare3 = /* @__PURE__ */ compare(ordInt);
   var mapFlipped22 = /* @__PURE__ */ mapFlipped(functorArray);
   var show13 = /* @__PURE__ */ show(showNumber);
   var show22 = /* @__PURE__ */ show(showBoolean);
@@ -13678,7 +15216,7 @@
   var traverseWithIndex3 = /* @__PURE__ */ traverseWithIndex(traversableWithIndexArray)(applicativeEffect);
   var mod3 = /* @__PURE__ */ mod(euclideanRingInt);
   var union3 = /* @__PURE__ */ union(ordString);
-  var map17 = /* @__PURE__ */ map(functorArray);
+  var map18 = /* @__PURE__ */ map(functorArray);
   var insert7 = /* @__PURE__ */ insert(ordString);
   var join2 = /* @__PURE__ */ join(bindArray);
   var stringToElementType = function(v) {
@@ -13744,7 +15282,7 @@
     ;
     return Group.value;
   };
-  var select4 = function(dictMonadEffect) {
+  var select5 = function(dictMonadEffect) {
     var liftEffect12 = liftEffect(dictMonadEffect);
     return function(selector) {
       return liftEffect12(function __do3() {
@@ -13839,11 +15377,11 @@
       var applyBehavior = function(v1) {
         return function(v2) {
           if (v1 instanceof Zoom) {
-            return $$void5(attachZoom_(v2)(v1.value0.scaleExtent.value0)(v1.value0.scaleExtent.value1)(v1.value0.targetSelector));
+            return $$void6(attachZoom_(v2)(v1.value0.scaleExtent.value0)(v1.value0.scaleExtent.value1)(v1.value0.targetSelector));
           }
           ;
           if (v1 instanceof Drag && v1.value0 instanceof SimpleDrag) {
-            return $$void5(attachSimpleDrag_(v2)(unit));
+            return $$void6(attachSimpleDrag_(v2)(unit));
           }
           ;
           if (v1 instanceof Drag && v1.value0 instanceof SimulationDrag) {
@@ -13851,27 +15389,27 @@
           }
           ;
           if (v1 instanceof Click) {
-            return $$void5(attachClick_(v2)(v1.value0));
+            return $$void6(attachClick_(v2)(v1.value0));
           }
           ;
           if (v1 instanceof ClickWithDatum) {
-            return $$void5(attachClickWithDatum_(v2)(v1.value0));
+            return $$void6(attachClickWithDatum_(v2)(v1.value0));
           }
           ;
           if (v1 instanceof MouseEnter) {
-            return $$void5(attachMouseEnter_(v2)(v1.value0));
+            return $$void6(attachMouseEnter_(v2)(v1.value0));
           }
           ;
           if (v1 instanceof MouseLeave) {
-            return $$void5(attachMouseLeave_(v2)(v1.value0));
+            return $$void6(attachMouseLeave_(v2)(v1.value0));
           }
           ;
           if (v1 instanceof Highlight) {
-            return $$void5(attachHighlight_(v2)(v1.value0.enter)(v1.value0.leave));
+            return $$void6(attachHighlight_(v2)(v1.value0.enter)(v1.value0.leave));
           }
           ;
           if (v1 instanceof MouseMoveWithInfo) {
-            return $$void5(attachMouseMoveWithEvent_(v2)(function(d, evt) {
+            return $$void6(attachMouseMoveWithEvent_(v2)(function(d, evt) {
               return v1.value0({
                 datum: d,
                 clientX: toNumber(clientX(evt)),
@@ -13885,7 +15423,7 @@
           }
           ;
           if (v1 instanceof MouseEnterWithInfo) {
-            return $$void5(attachMouseEnterWithEvent_(v2)(function(d, evt) {
+            return $$void6(attachMouseEnterWithEvent_(v2)(function(d, evt) {
               return v1.value0({
                 datum: d,
                 clientX: toNumber(clientX(evt)),
@@ -13899,7 +15437,7 @@
           }
           ;
           if (v1 instanceof MouseLeaveWithInfo) {
-            return $$void5(attachMouseLeaveWithEvent_(v2)(function(d, evt) {
+            return $$void6(attachMouseLeaveWithEvent_(v2)(function(d, evt) {
               return v1.value0({
                 datum: d,
                 clientX: toNumber(clientX(evt)),
@@ -13952,7 +15490,7 @@
   var joinDataWithKey = function(dictMonadEffect) {
     var liftEffect12 = liftEffect(dictMonadEffect);
     return function(dictFoldable) {
-      var fromFoldable8 = fromFoldable2(dictFoldable);
+      var fromFoldable9 = fromFoldable2(dictFoldable);
       return function(dictEq) {
         var computeJoinWithKey2 = computeJoinWithKey(dictEq);
         return function(foldableData) {
@@ -13979,8 +15517,8 @@
                         };
                       };
                     })(existingElements)();
-                    liftEffect3(log4("joinDataWithKey: found " + (show4(length(existingElements)) + (" existing elements with selector '" + (selector + "'")))))();
-                    liftEffect3(log4("joinDataWithKey: " + (show4(length(mapMaybe(function(v2) {
+                    liftEffect3(log6("joinDataWithKey: found " + (show4(length(existingElements)) + (" existing elements with selector '" + (selector + "'")))))();
+                    liftEffect3(log6("joinDataWithKey: " + (show4(length(mapMaybe(function(v2) {
                       return v2.datum;
                     })(oldBindings))) + " of those have data bound")))();
                     var validOldBindings = mapMaybe(function(v2) {
@@ -13991,11 +15529,11 @@
                         };
                       });
                     })(oldBindings);
-                    var newDataArray = fromFoldable8(foldableData);
+                    var newDataArray = fromFoldable9(foldableData);
                     var joinSets = computeJoinWithKey2(newDataArray)(validOldBindings)(keyFn);
                     var sortedEnter = sortBy(function(a2) {
                       return function(b10) {
-                        return compare2(a2.newIndex)(b10.newIndex);
+                        return compare3(a2.newIndex)(b10.newIndex);
                       };
                     })(joinSets.enter);
                     var enterSelection = new PendingSelection({
@@ -14010,7 +15548,7 @@
                     });
                     var sortedUpdate = sortBy(function(a2) {
                       return function(b10) {
-                        return compare2(a2.newIndex)(b10.newIndex);
+                        return compare3(a2.newIndex)(b10.newIndex);
                       };
                     })(joinSets.update);
                     var updateSelection = new BoundSelection({
@@ -14052,7 +15590,7 @@
   var joinData = function(dictMonadEffect) {
     var liftEffect12 = liftEffect(dictMonadEffect);
     return function(dictFoldable) {
-      var fromFoldable8 = fromFoldable2(dictFoldable);
+      var fromFoldable9 = fromFoldable2(dictFoldable);
       return function(dictOrd) {
         var computeJoin2 = computeJoin(dictOrd.Eq0());
         return function(foldableData) {
@@ -14078,8 +15616,8 @@
                       };
                     };
                   })(existingElements)();
-                  liftEffect3(log4("joinData: found " + (show4(length(existingElements)) + (" existing elements with selector '" + (selector + "'")))))();
-                  liftEffect3(log4("joinData: " + (show4(length(mapMaybe(function(v2) {
+                  liftEffect3(log6("joinData: found " + (show4(length(existingElements)) + (" existing elements with selector '" + (selector + "'")))))();
+                  liftEffect3(log6("joinData: " + (show4(length(mapMaybe(function(v2) {
                     return v2.datum;
                   })(oldBindings))) + " of those have data bound")))();
                   var validOldBindings = mapMaybe(function(v2) {
@@ -14090,11 +15628,11 @@
                       };
                     });
                   })(oldBindings);
-                  var newDataArray = fromFoldable8(foldableData);
+                  var newDataArray = fromFoldable9(foldableData);
                   var joinSets = computeJoin2(newDataArray)(validOldBindings);
                   var sortedEnter = sortBy(function(a2) {
                     return function(b10) {
-                      return compare2(a2.newIndex)(b10.newIndex);
+                      return compare3(a2.newIndex)(b10.newIndex);
                     };
                   })(joinSets.enter);
                   var enterSelection = new PendingSelection({
@@ -14109,7 +15647,7 @@
                   });
                   var sortedUpdate = sortBy(function(a2) {
                     return function(b10) {
-                      return compare2(a2.newIndex)(b10.newIndex);
+                      return compare3(a2.newIndex)(b10.newIndex);
                     };
                   })(joinSets.update);
                   var updateSelection = new BoundSelection({
@@ -14754,7 +16292,7 @@
               return unsafeCrashWith("renderTree: appendChild should return EmptySelection");
             })();
             var childMaps = traverse3(renderNodeHelper(dictOrd)(childSel))(v1.value0.children)();
-            var combinedChildMap = foldl2(union3)(empty2)(map17(snd)(childMaps));
+            var combinedChildMap = foldl2(union3)(empty2)(map18(snd)(childMaps));
             var selectionsMap = (function() {
               if (v1.value0.name instanceof Just) {
                 return insert7(v1.value0.name.value0)(childSel)(combinedChildMap);
@@ -14799,15 +16337,15 @@
                 ;
                 return 0;
               })();
-              return log4("Tree API Join '" + (v1.value0.name + ("': enter=" + (show4(enterCount) + (", update=" + (show4(updateCount) + (", exit=" + show4(exitCount))))))));
+              return log6("Tree API Join '" + (v1.value0.name + ("': enter=" + (show4(enterCount) + (", update=" + (show4(updateCount) + (", exit=" + show4(exitCount))))))));
             })())();
             remove1(v2.value0.exit)();
             var enterElementsAndMaps = renderTemplatesForPendingSelection(dictOrd)(v1.value0.template)(v2.value0.enter)();
-            var enterElements = map17(fst)(enterElementsAndMaps);
-            var enterChildMaps = map17(snd)(enterElementsAndMaps);
+            var enterElements = map18(fst)(enterElementsAndMaps);
+            var enterChildMaps = map18(snd)(enterElementsAndMaps);
             var updateElementsAndMaps = renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
-            var updateElements = map17(fst)(updateElementsAndMaps);
-            var updateChildMaps = map17(snd)(updateElementsAndMaps);
+            var updateElements = map18(fst)(updateElementsAndMaps);
+            var updateChildMaps = map18(snd)(updateElementsAndMaps);
             var allElements = append13(enterElements)(updateElements);
             var allChildMaps = append13(enterChildMaps)(updateChildMaps);
             var combinedChildMap = foldl2(union3)(empty2)(allChildMaps);
@@ -14863,8 +16401,8 @@
           return function __do3() {
             var v2 = joinData22(v1.value0.joinData)(v1.value0.key)(v)();
             var elementsAndMaps = renderNestedTemplatesForPendingSelection(dictOrd)(v1.value0.decompose)(v1.value0.template)(stringToElementType(v1.value0.key))(v2.value0.enter)();
-            var elements = map17(fst)(elementsAndMaps);
-            var childMaps = map17(snd)(elementsAndMaps);
+            var elements = map18(fst)(elementsAndMaps);
+            var childMaps = map18(snd)(elementsAndMaps);
             var combinedChildMap = foldl2(union3)(empty2)(childMaps);
             var v3 = (function() {
               if (v2.value0.enter instanceof PendingSelection) {
@@ -14925,7 +16463,7 @@
                 ;
                 return 0;
               })();
-              return log4("Tree API SceneJoin '" + (v1.value0.name + ("': enter=" + (show4(enterCount) + (", update=" + (show4(updateCount) + (", exit=" + show4(exitCount))))))));
+              return log6("Tree API SceneJoin '" + (v1.value0.name + ("': enter=" + (show4(enterCount) + (", update=" + (show4(updateCount) + (", exit=" + show4(exitCount))))))));
             })())();
             (function() {
               if (v1.value0.exitBehavior instanceof Just) {
@@ -14968,7 +16506,7 @@
                 var rendered = renderTemplatesForPendingSelection(dictOrd)(modifiedTemplate)(v2.value0.enter)();
                 (function() {
                   if (v1.value0.enterBehavior.value0.transition instanceof Just) {
-                    var enterElements2 = map17(fst)(rendered);
+                    var enterElements2 = map18(fst)(rendered);
                     var pendingData = (function() {
                       if (v2.value0.enter instanceof PendingSelection) {
                         return v2.value0.enter.value0.pendingData;
@@ -15005,8 +16543,8 @@
               ;
               throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1316, column 27 - line 1349, column 68): " + [v1.value0.enterBehavior.constructor.name]);
             })();
-            var enterElements = map17(fst)(enterElementsAndMaps);
-            var enterChildMaps = map17(snd)(enterElementsAndMaps);
+            var enterElements = map18(fst)(enterElementsAndMaps);
+            var enterChildMaps = map18(snd)(enterElementsAndMaps);
             var updateElementsAndMaps = (function() {
               if (v1.value0.updateBehavior instanceof Just) {
                 (function() {
@@ -15031,8 +16569,8 @@
               ;
               throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1355, column 28 - line 1372, column 67): " + [v1.value0.updateBehavior.constructor.name]);
             })();
-            var updateElements = map17(fst)(updateElementsAndMaps);
-            var updateChildMaps = map17(snd)(updateElementsAndMaps);
+            var updateElements = map18(fst)(updateElementsAndMaps);
+            var updateChildMaps = map18(snd)(updateElementsAndMaps);
             var allElements = append13(enterElements)(updateElements);
             var allChildMaps = append13(enterChildMaps)(updateChildMaps);
             var combinedChildMap = foldl2(union3)(empty2)(allChildMaps);
@@ -15085,7 +16623,7 @@
         }
         ;
         if (v1 instanceof SceneNestedJoin) {
-          var innerData = join2(map17(v1.value0.decompose)(v1.value0.joinData));
+          var innerData = join2(map18(v1.value0.decompose)(v1.value0.joinData));
           return function __do3() {
             var v2 = joinDataWithKey1(innerData)(jsonStringify_)(v1.value0.key)(v)();
             liftEffect3((function() {
@@ -15114,7 +16652,7 @@
                 ;
                 return 0;
               })();
-              return log4("Tree API SceneNestedJoin '" + (v1.value0.name + ("': enter=" + (show4(enterCount) + (", update=" + (show4(updateCount) + (", exit=" + show4(exitCount))))))));
+              return log6("Tree API SceneNestedJoin '" + (v1.value0.name + ("': enter=" + (show4(enterCount) + (", update=" + (show4(updateCount) + (", exit=" + show4(exitCount))))))));
             })())();
             (function() {
               if (v1.value0.exitBehavior instanceof Just) {
@@ -15157,7 +16695,7 @@
                 var rendered = renderTemplatesForPendingSelection(dictOrd)(modifiedTemplate)(v2.value0.enter)();
                 (function() {
                   if (v1.value0.enterBehavior.value0.transition instanceof Just) {
-                    var enterElements2 = map17(fst)(rendered);
+                    var enterElements2 = map18(fst)(rendered);
                     var pendingData = (function() {
                       if (v2.value0.enter instanceof PendingSelection) {
                         return v2.value0.enter.value0.pendingData;
@@ -15218,11 +16756,11 @@
               ;
               throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1528, column 28 - line 1542, column 91): " + [v1.value0.updateBehavior.constructor.name]);
             })();
-            var updateElements = map17(fst)(updateElementsAndMaps);
-            var enterElements = map17(fst)(enterElementsAndMaps);
+            var updateElements = map18(fst)(updateElementsAndMaps);
+            var enterElements = map18(fst)(enterElementsAndMaps);
             var allElements = append13(enterElements)(updateElements);
-            var updateChildMaps = map17(snd)(updateElementsAndMaps);
-            var enterChildMaps = map17(snd)(enterElementsAndMaps);
+            var updateChildMaps = map18(snd)(updateElementsAndMaps);
+            var enterChildMaps = map18(snd)(enterElementsAndMaps);
             var allChildMaps = append13(enterChildMaps)(updateChildMaps);
             var combinedChildMap = foldl2(union3)(empty2)(allChildMaps);
             var doc = (function() {
@@ -15314,7 +16852,7 @@
       };
     };
   };
-  var renderTree = function(dictOrd) {
+  var renderTree2 = function(dictOrd) {
     var renderNodeHelper1 = renderNodeHelper(dictOrd);
     return function(parent2) {
       return function(tree) {
@@ -15388,10 +16926,10 @@
     };
   };
   var append32 = /* @__PURE__ */ append6(monadEffectEffect);
-  var appendData2 = function(dictMonadEffect) {
+  var appendData = function(dictMonadEffect) {
     var liftEffect12 = liftEffect(dictMonadEffect);
     return function(dictFoldable) {
-      var fromFoldable8 = fromFoldable2(dictFoldable);
+      var fromFoldable9 = fromFoldable2(dictFoldable);
       return function(elemType) {
         return function(foldableData) {
           return function(attrs) {
@@ -15404,7 +16942,7 @@
                   ;
                   throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 771, column 55 - line 772, column 28): " + [emptySelection.constructor.name]);
                 })();
-                var dataArray = fromFoldable8(foldableData);
+                var dataArray = fromFoldable9(foldableData);
                 var pendingSelection = new PendingSelection({
                   parentElements: v.parentElements,
                   pendingData: dataArray,
@@ -15422,12 +16960,12 @@
   var renderData = function(dictMonadEffect) {
     var Monad0 = dictMonadEffect.Monad0();
     var Bind1 = Monad0.Bind1();
-    var bind17 = bind(Bind1);
+    var bind16 = bind(Bind1);
     var joinData22 = joinData(dictMonadEffect);
     var append42 = append6(dictMonadEffect);
     var pure18 = pure(Monad0.Applicative0());
     var applyPerDatumAttrs1 = applyPerDatumAttrs(dictMonadEffect);
-    var discard24 = discard2(Bind1);
+    var discard25 = discard2(Bind1);
     var remove22 = remove2(dictMonadEffect);
     var merge1 = merge(dictMonadEffect);
     return function(dictFoldable) {
@@ -15441,8 +16979,8 @@
                 return function(enterAttrs) {
                   return function(updateAttrs) {
                     return function(exitAttrs) {
-                      return bind17(joinData4(foldableData)(selector)(emptySelection))(function(v) {
-                        return bind17(bind17(append42(elemType)([])(v.value0.enter))(function(bound) {
+                      return bind16(joinData4(foldableData)(selector)(emptySelection))(function(v) {
+                        return bind16(bind16(append42(elemType)([])(v.value0.enter))(function(bound) {
                           if (enterAttrs instanceof Nothing) {
                             return pure18(bound);
                           }
@@ -15453,7 +16991,7 @@
                           ;
                           throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 724, column 5 - line 726, column 55): " + [enterAttrs.constructor.name]);
                         }))(function(enterBound) {
-                          return bind17((function() {
+                          return bind16((function() {
                             if (updateAttrs instanceof Nothing) {
                               return pure18(v.value0.update);
                             }
@@ -15464,13 +17002,13 @@
                             ;
                             throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 729, column 18 - line 731, column 54): " + [updateAttrs.constructor.name]);
                           })())(function(updateBound) {
-                            return discard24((function() {
+                            return discard25((function() {
                               if (exitAttrs instanceof Nothing) {
                                 return remove22(v.value0.exit);
                               }
                               ;
                               if (exitAttrs instanceof Just) {
-                                return bind17(applyPerDatumAttrs1(exitAttrs.value0)(v.value0.exit))(function() {
+                                return bind16(applyPerDatumAttrs1(exitAttrs.value0)(v.value0.exit))(function() {
                                   return remove22(v.value0.exit);
                                 });
                               }
@@ -15494,11 +17032,11 @@
   };
 
   // output/PSD3v2.Interpreter.D3v2/index.js
-  var select5 = /* @__PURE__ */ select4(monadEffectEffect);
+  var select6 = /* @__PURE__ */ select5(monadEffectEffect);
   var selectAll2 = /* @__PURE__ */ selectAll(monadEffectEffect);
   var selectAllWithData2 = /* @__PURE__ */ selectAllWithData(monadEffectEffect);
   var renderData2 = /* @__PURE__ */ renderData(monadEffectEffect);
-  var appendData3 = /* @__PURE__ */ appendData2(monadEffectEffect);
+  var appendData2 = /* @__PURE__ */ appendData(monadEffectEffect);
   var joinData2 = /* @__PURE__ */ joinData(monadEffectEffect);
   var joinDataWithKey2 = /* @__PURE__ */ joinDataWithKey(monadEffectEffect);
   var append7 = /* @__PURE__ */ append6(monadEffectEffect);
@@ -15509,7 +17047,7 @@
   var merge2 = /* @__PURE__ */ merge(monadEffectEffect);
   var appendChild4 = /* @__PURE__ */ appendChild3(monadEffectEffect);
   var appendChildInheriting2 = /* @__PURE__ */ appendChildInheriting(monadEffectEffect);
-  var map18 = /* @__PURE__ */ map(functorMap);
+  var map19 = /* @__PURE__ */ map(functorMap);
   var D3v2Selection_ = function(x2) {
     return x2;
   };
@@ -15517,7 +17055,7 @@
   var selectionMD3v2Selection_D = {
     select: function(selector) {
       return function __do3() {
-        var sel = select5(selector)();
+        var sel = select6(selector)();
         return sel;
       };
     },
@@ -15570,7 +17108,7 @@
       };
     },
     appendData: function(dictFoldable) {
-      var appendData1 = appendData3(dictFoldable);
+      var appendData1 = appendData2(dictFoldable);
       return function(elemType) {
         return function(foldableData) {
           return function(attrs) {
@@ -15719,12 +17257,12 @@
       };
     },
     renderTree: function(dictOrd) {
-      var renderTree2 = renderTree(dictOrd);
+      var renderTree4 = renderTree2(dictOrd);
       return function(v) {
         return function(tree) {
           return function __do3() {
-            var selectionsMap = renderTree2(v)(tree)();
-            return map18(D3v2Selection_)(selectionsMap);
+            var selectionsMap = renderTree4(v)(tree)();
+            return map19(D3v2Selection_)(selectionsMap);
           };
         };
       };
@@ -15740,44 +17278,252 @@
   };
 
   // output/Viz.SpagoGridTest/index.js
-  var fromFoldable7 = /* @__PURE__ */ fromFoldable(ordInt)(foldableArray);
-  var pure9 = /* @__PURE__ */ pure(applicativeEffect);
-  var lookup5 = /* @__PURE__ */ lookup(ordInt);
-  var traverse4 = /* @__PURE__ */ traverse(traversableArray)(applicativeEffect);
-  var bind13 = /* @__PURE__ */ bind(bindD3v2M);
-  var select6 = /* @__PURE__ */ select(selectionMD3v2Selection_D);
+  var bind7 = /* @__PURE__ */ bind(bindD3v2M);
+  var select7 = /* @__PURE__ */ select3(selectionMD3v2Selection_D);
   var appendChild5 = /* @__PURE__ */ appendChild(selectionMD3v2Selection_D);
-  var width9 = /* @__PURE__ */ width(toAttrNumberNumber);
-  var height9 = /* @__PURE__ */ height(toAttrNumberNumber);
   var viewBox2 = /* @__PURE__ */ viewBox(toAttrStringString);
   var show5 = /* @__PURE__ */ show(showNumber);
   var id_2 = /* @__PURE__ */ id_(toAttrStringString);
   var class_3 = /* @__PURE__ */ class_2(toAttrStringString);
-  var discard3 = /* @__PURE__ */ discard(discardUnit);
-  var discard1 = /* @__PURE__ */ discard3(bindD3v2M);
-  var pure12 = /* @__PURE__ */ pure(applicativeD3v2M);
-  var appendData4 = /* @__PURE__ */ appendData(selectionMD3v2Selection_D)(foldableArray);
-  var cx2 = /* @__PURE__ */ cx(toAttrNumberFunctionNumbe);
-  var cy2 = /* @__PURE__ */ cy(toAttrNumberFunctionNumbe);
-  var radius2 = /* @__PURE__ */ radius(toAttrNumberFunctionNumbe);
-  var fill2 = /* @__PURE__ */ fill(toAttrStringFunctionStrin);
+  var on4 = /* @__PURE__ */ on2(selectionMD3v2Selection_D);
+  var pure9 = /* @__PURE__ */ pure(applicativeD3v2M);
+  var div1 = /* @__PURE__ */ div(euclideanRingInt);
+  var mod4 = /* @__PURE__ */ mod(euclideanRingInt);
+  var map20 = /* @__PURE__ */ map(functorArray);
+  var show14 = /* @__PURE__ */ show(showInt);
+  var fromFoldable8 = /* @__PURE__ */ fromFoldable4(foldableArray);
+  var pure12 = /* @__PURE__ */ pure(applicativeEffect);
+  var traverse4 = /* @__PURE__ */ traverse(traversableArray)(applicativeEffect);
+  var identity15 = /* @__PURE__ */ identity(categoryFn);
+  var cx2 = /* @__PURE__ */ cx(toAttrNumberNumber);
+  var cy2 = /* @__PURE__ */ cy(toAttrNumberNumber);
+  var radius2 = /* @__PURE__ */ radius(toAttrNumberNumber);
+  var fill2 = /* @__PURE__ */ fill(toAttrStringString);
   var stroke2 = /* @__PURE__ */ stroke(toAttrStringString);
   var strokeWidth2 = /* @__PURE__ */ strokeWidth(toAttrNumberNumber);
-  var on4 = /* @__PURE__ */ on2(selectionMD3v2Selection_D);
-  var log5 = /* @__PURE__ */ log2(monadEffectEffect);
-  var map19 = /* @__PURE__ */ map(functorArray);
-  var show14 = /* @__PURE__ */ show(showInt);
+  var ordRecord2 = /* @__PURE__ */ ordRecord();
+  var ordRecordCons2 = /* @__PURE__ */ ordRecordCons(ordRecordNil)();
+  var yIsSymbol = {
+    reflectSymbol: function() {
+      return "y";
+    }
+  };
+  var xIsSymbol = {
+    reflectSymbol: function() {
+      return "x";
+    }
+  };
+  var ordArray2 = /* @__PURE__ */ ordArray(ordInt);
+  var ordNullable2 = /* @__PURE__ */ ordNullable(ordNumber);
+  var renderTree3 = /* @__PURE__ */ renderTree(selectionMD3v2Selection_D)(/* @__PURE__ */ ordArray(/* @__PURE__ */ ordRecord2(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons2({
+    reflectSymbol: function() {
+      return "renderY";
+    }
+  })(ordNumber))()({
+    reflectSymbol: function() {
+      return "renderX";
+    }
+  })(ordNumber))()({
+    reflectSymbol: function() {
+      return "node";
+    }
+  })(/* @__PURE__ */ ordRecord2(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons(/* @__PURE__ */ ordRecordCons2(yIsSymbol)(ordNumber))()(xIsSymbol)(ordNumber))()({
+    reflectSymbol: function() {
+      return "vy";
+    }
+  })(ordNumber))()({
+    reflectSymbol: function() {
+      return "vx";
+    }
+  })(ordNumber))()({
+    reflectSymbol: function() {
+      return "treeY";
+    }
+  })(ordNumber))()({
+    reflectSymbol: function() {
+      return "treeX";
+    }
+  })(ordNumber))()({
+    reflectSymbol: function() {
+      return "targets";
+    }
+  })(ordArray2))()({
+    reflectSymbol: function() {
+      return "sources";
+    }
+  })(ordArray2))()({
+    reflectSymbol: function() {
+      return "r";
+    }
+  })(ordNumber))()({
+    reflectSymbol: function() {
+      return "package";
+    }
+  })(ordString))()({
+    reflectSymbol: function() {
+      return "orbitAngle";
+    }
+  })(ordNumber))()({
+    reflectSymbol: function() {
+      return "nodeType";
+    }
+  })(ordNodeType))()({
+    reflectSymbol: function() {
+      return "name";
+    }
+  })(ordString))()({
+    reflectSymbol: function() {
+      return "id";
+    }
+  })(ordInt))()({
+    reflectSymbol: function() {
+      return "gridY";
+    }
+  })(ordNumber))()({
+    reflectSymbol: function() {
+      return "gridX";
+    }
+  })(ordNumber))()({
+    reflectSymbol: function() {
+      return "fy";
+    }
+  })(ordNullable2))()({
+    reflectSymbol: function() {
+      return "fx";
+    }
+  })(ordNullable2))()({
+    reflectSymbol: function() {
+      return "cluster";
+    }
+  })(ordInt))))));
+  var eq4 = /* @__PURE__ */ eq(eqNodeType);
+  var append14 = /* @__PURE__ */ append(semigroupArray);
+  var when3 = /* @__PURE__ */ when(applicativeEffect);
+  var notEq3 = /* @__PURE__ */ notEq(eqScene);
+  var eqRec3 = /* @__PURE__ */ eqRec();
+  var eqRowCons2 = /* @__PURE__ */ eqRowCons(eqRowNil)();
+  var eqObject2 = /* @__PURE__ */ eqObject(/* @__PURE__ */ eqRec3(/* @__PURE__ */ eqRowCons(/* @__PURE__ */ eqRowCons2(yIsSymbol)(eqNumber))()(xIsSymbol)(eqNumber)));
+  var eq12 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(/* @__PURE__ */ eqRec3(/* @__PURE__ */ eqRowCons(/* @__PURE__ */ eqRowCons(/* @__PURE__ */ eqRowCons(/* @__PURE__ */ eqRowCons2({
+    reflectSymbol: function() {
+      return "targetScene";
+    }
+  })(eqScene))()({
+    reflectSymbol: function() {
+      return "targetPositions";
+    }
+  })(eqObject2))()({
+    reflectSymbol: function() {
+      return "startPositions";
+    }
+  })(eqObject2))()({
+    reflectSymbol: function() {
+      return "progress";
+    }
+  })(eqNumber))));
+  var discard3 = /* @__PURE__ */ discard(discardUnit);
+  var log7 = /* @__PURE__ */ log2(monadEffectEffect);
+  var show23 = /* @__PURE__ */ show(showScene);
+  var min5 = /* @__PURE__ */ min(ordNumber);
   var insert8 = /* @__PURE__ */ insert(ordString);
-  var discard32 = /* @__PURE__ */ discard3(bindAff);
+  var discard22 = /* @__PURE__ */ discard3(bindAff);
   var log1 = /* @__PURE__ */ log2(monadEffectAff);
   var bind22 = /* @__PURE__ */ bind(bindAff);
   var liftEffect4 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var svgWidth = 1200;
-  var svgHeight = 800;
+  var viewBoxWidth = 4e3;
+  var viewBoxHeight = 2500;
+  var transitionDelta = /* @__PURE__ */ ticksForDuration(2e3);
+  var renderSVGContainer = function(containerSelector) {
+    return bind7(select7(containerSelector))(function(container) {
+      return bind7(appendChild5(SVG.value)([viewBox2(show5(-viewBoxWidth / 2) + (" " + (show5(-viewBoxHeight / 2) + (" " + (show5(viewBoxWidth) + (" " + show5(viewBoxHeight))))))), id_2("spago-test-svg"), class_3("ce-viz")])(container))(function(svg) {
+        return bind7(appendChild5(Group.value)([id_2("spago-test-zoom-group")])(svg))(function(zoomGroup) {
+          return bind7(appendChild5(Group.value)([id_2("spago-test-links")])(zoomGroup))(function() {
+            return bind7(appendChild5(Group.value)([id_2("spago-test-nodes")])(zoomGroup))(function() {
+              return bind7(on4(new Zoom(defaultZoom(new ScaleExtent(0.1, 10))("#spago-test-zoom-group")))(svg))(function() {
+                return pure9(unit);
+              });
+            });
+          });
+        });
+      });
+    });
+  };
+  var recalculateGridPositions = function(nodes) {
+    return function(packageCount) {
+      var usableHeight = viewBoxHeight * (1 - 2 * 0.1);
+      var usableWidth = viewBoxWidth * (1 - 2 * 0.1);
+      var aspect = viewBoxWidth / viewBoxHeight;
+      var gridCols = ceil2(sqrt(toNumber(packageCount) * aspect));
+      var gridColsN = toNumber(gridCols);
+      var gridRows = ceil2(toNumber(packageCount) / toNumber(gridCols));
+      var gridRowsN = toNumber(gridRows);
+      var spacingY = usableHeight / toNumber(gridRows);
+      var spacingX = usableWidth / toNumber(gridCols);
+      var updateNode = function(node) {
+        if (node.nodeType instanceof PackageNode) {
+          var row = div1(node.id)(gridCols);
+          var gy = (toNumber(row) - gridRowsN / 2 + 0.5) * spacingY;
+          var col2 = mod4(node.id)(gridCols);
+          var gx = (toNumber(col2) - gridColsN / 2 + 0.5) * spacingX;
+          return {
+            id: node.id,
+            nodeType: node.nodeType,
+            cluster: node.cluster,
+            fx: node.fx,
+            fy: node.fy,
+            name: node.name,
+            orbitAngle: node.orbitAngle,
+            "package": node["package"],
+            r: node.r,
+            sources: node.sources,
+            targets: node.targets,
+            treeX: node.treeX,
+            treeY: node.treeY,
+            vx: node.vx,
+            vy: node.vy,
+            gridX: gx,
+            gridY: gy,
+            x: gx,
+            y: gy
+          };
+        }
+        ;
+        if (node.nodeType instanceof ModuleNode) {
+          var pkgRow = div1(node.cluster)(gridCols);
+          var pkgY = (toNumber(pkgRow) - gridRowsN / 2 + 0.5) * spacingY;
+          var pkgCol = mod4(node.cluster)(gridCols);
+          var pkgX = (toNumber(pkgCol) - gridColsN / 2 + 0.5) * spacingX;
+          return {
+            cluster: node.cluster,
+            id: node.id,
+            nodeType: node.nodeType,
+            fx: node.fx,
+            fy: node.fy,
+            name: node.name,
+            orbitAngle: node.orbitAngle,
+            "package": node["package"],
+            r: node.r,
+            sources: node.sources,
+            targets: node.targets,
+            treeX: node.treeX,
+            treeY: node.treeY,
+            vx: node.vx,
+            vy: node.vy,
+            gridX: pkgX,
+            gridY: pkgY,
+            x: pkgX,
+            y: pkgY
+          };
+        }
+        ;
+        throw new Error("Failed pattern match at Viz.SpagoGridTest (line 456, column 23 - line 473, column 67): " + [node.nodeType.constructor.name]);
+      };
+      return map20(updateNode)(nodes);
+    };
+  };
   var randomizeModulePositions = function(nodes) {
     var getPackagePos = function(n) {
       if (n.nodeType instanceof PackageNode) {
-        return new Just(new Tuple(n.id, {
+        return new Just(new Tuple(show14(n.id), {
           x: n.gridX,
           y: n.gridY
         }));
@@ -15787,12 +17533,12 @@
         return Nothing.value;
       }
       ;
-      throw new Error("Failed pattern match at Viz.SpagoGridTest (line 145, column 21 - line 147, column 26): " + [n.nodeType.constructor.name]);
+      throw new Error("Failed pattern match at Viz.SpagoGridTest (line 186, column 21 - line 188, column 26): " + [n.nodeType.constructor.name]);
     };
-    var packagePositions = fromFoldable7(mapMaybe(getPackagePos)(nodes));
+    var packagePositions = fromFoldable8(mapMaybe(getPackagePos)(nodes));
     var randomizeIfModule = function(n) {
       if (n.nodeType instanceof PackageNode) {
-        return pure9(n);
+        return pure12(n);
       }
       ;
       if (n.nodeType instanceof ModuleNode) {
@@ -15800,7 +17546,7 @@
           var rx = random();
           var ry = random();
           var v = (function() {
-            var v1 = lookup5(n.cluster)(packagePositions);
+            var v1 = lookup2(show14(n.cluster))(packagePositions);
             if (v1 instanceof Just) {
               return v1.value0;
             }
@@ -15812,7 +17558,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at Viz.SpagoGridTest (line 154, column 34 - line 156, column 42): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at Viz.SpagoGridTest (line 195, column 34 - line 197, column 42): " + [v1.constructor.name]);
           })();
           var jitterX = (rx - 0.5) * 100;
           var jitterY = (ry - 0.5) * 100;
@@ -15840,59 +17586,44 @@
         };
       }
       ;
-      throw new Error("Failed pattern match at Viz.SpagoGridTest (line 149, column 25 - line 159, column 58): " + [n.nodeType.constructor.name]);
+      throw new Error("Failed pattern match at Viz.SpagoGridTest (line 190, column 25 - line 200, column 58): " + [n.nodeType.constructor.name]);
     };
     return traverse4(randomizeIfModule)(nodes);
   };
-  var nodesGroupId = "#spago-test-nodes";
-  var onTick2 = function(stateRef) {
-    return function __do3() {
-      var _state = read(stateRef)();
-      return updateCirclePositions(nodesGroupId)();
+  var numMod = function(a2) {
+    return function(b10) {
+      return a2 - b10 * toNumber(floor2(a2 / b10));
     };
   };
   var nodeColor = function(n) {
-    if (n.nodeType instanceof PackageNode) {
-      return "#ff7f0e";
-    }
-    ;
-    if (n.nodeType instanceof ModuleNode) {
-      return "#1f77b4";
-    }
-    ;
-    throw new Error("Failed pattern match at Viz.SpagoGridTest (line 216, column 15 - line 218, column 26): " + [n.nodeType.constructor.name]);
+    var t = numMod(toNumber(n.cluster) * 0.618033988749895)(1);
+    return turbo_default(t);
   };
-  var renderSVG = function(containerSelector) {
-    return function(nodes) {
-      return function(links) {
-        return bind13(select6(containerSelector))(function(container) {
-          return bind13(appendChild5(SVG.value)([width9(svgWidth), height9(svgHeight), viewBox2(show5(-svgWidth / 2) + (" " + (show5(-svgHeight / 2) + (" " + (show5(svgWidth) + (" " + show5(svgHeight))))))), id_2("spago-test-svg"), class_3("spago-test")])(container))(function(svg) {
-            return bind13(appendChild5(Group.value)([id_2("spago-test-zoom-group")])(svg))(function(zoomGroup) {
-              return bind13(appendChild5(Group.value)([id_2("spago-test-links")])(zoomGroup))(function(linksGroup) {
-                return bind13(appendChild5(Group.value)([id_2("spago-test-nodes")])(zoomGroup))(function(nodesGroup) {
-                  return discard1(pure12(unit))(function() {
-                    return bind13(appendData4(Circle.value)(nodes)([cx2(function(v) {
-                      return v.x;
-                    }), cy2(function(v) {
-                      return v.y;
-                    }), radius2(function(v) {
-                      return v.r;
-                    }), fill2(nodeColor), stroke2("#fff"), strokeWidth2(0.5)])(nodesGroup))(function(nodeSel) {
-                      return bind13(on4(new Zoom(defaultZoom(new ScaleExtent(0.1, 10))("#spago-test-zoom-group")))(svg))(function() {
-                        return pure12({
-                          nodeSel
-                        });
-                      });
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
+  var interpolateNodePosition = function(t) {
+    return function(easedProgress) {
+      return function(node) {
+        var nodeKey = show14(node.id);
+        var startPos = lookup2(nodeKey)(t.startPositions);
+        var targetPos = lookup2(nodeKey)(t.targetPositions);
+        if (startPos instanceof Just && targetPos instanceof Just) {
+          return {
+            node,
+            renderX: lerp(startPos.value0.x)(targetPos.value0.x)(easedProgress),
+            renderY: lerp(startPos.value0.y)(targetPos.value0.y)(easedProgress)
+          };
+        }
+        ;
+        return {
+          node,
+          renderX: node.x,
+          renderY: node.y
+        };
       };
     };
   };
+  var globalExplorerRef = /* @__PURE__ */ (function() {
+    return unsafePerformEffect($$new(Nothing.value));
+  })();
   var fixPackagePosition = function(node) {
     if (node.nodeType instanceof PackageNode) {
       return {
@@ -15922,16 +17653,267 @@
       return node;
     }
     ;
-    throw new Error("Failed pattern match at Viz.SpagoGridTest (line 136, column 27 - line 138, column 21): " + [node.nodeType.constructor.name]);
+    throw new Error("Failed pattern match at Viz.SpagoGridTest (line 177, column 27 - line 179, column 21): " + [node.nodeType.constructor.name]);
+  };
+  var finalizeNodePosition = function(t) {
+    return function(node) {
+      var nodeKey = show14(node.id);
+      var v = lookup2(nodeKey)(t.targetPositions);
+      if (v instanceof Just) {
+        return {
+          node,
+          renderX: v.value0.x,
+          renderY: v.value0.y
+        };
+      }
+      ;
+      if (v instanceof Nothing) {
+        return {
+          node,
+          renderX: node.x,
+          renderY: node.y
+        };
+      }
+      ;
+      throw new Error("Failed pattern match at Viz.SpagoGridTest (line 280, column 6 - line 282, column 58): " + [v.constructor.name]);
+    };
+  };
+  var createNodesTree = function(renderNodes) {
+    return sceneNestedJoin("circles")("circle")([renderNodes])(identity15)(function(rn) {
+      return elem3(Circle.value)([cx2(rn.renderX), cy2(rn.renderY), radius2(rn.node.r), fill2(nodeColor(rn.node)), stroke2("#fff"), strokeWidth2(0.5)]);
+    })({
+      enterBehavior: Nothing.value,
+      updateBehavior: Nothing.value,
+      exitBehavior: Nothing.value
+    });
+  };
+  var renderScene = function(renderNodes) {
+    return bind7(select7("#spago-test-nodes"))(function(nodesGroup) {
+      var nodesTree = createNodesTree(renderNodes);
+      return bind7(renderTree3(nodesGroup)(nodesTree))(function() {
+        return pure9(unit);
+      });
+    });
+  };
+  var renderVisualization = function(renderNodes) {
+    return runD3v2M(renderScene(renderNodes));
+  };
+  var calculateTreePositions = function(nodes) {
+    var packages = filter(function(n) {
+      return eq4(n.nodeType)(PackageNode.value);
+    })(nodes);
+    var packageCount = length(packages);
+    var packagePositions = mapWithIndex3(function(i2) {
+      return function(pkg) {
+        var angle = 2 * 3.14159265358979 * toNumber(i2) / toNumber(packageCount);
+        var x2 = cos(angle) * 800;
+        var y2 = sin(angle) * 800;
+        return new Tuple(show14(pkg.id), {
+          x: x2,
+          y: y2
+        });
+      };
+    })(packages);
+    var packagePosMap = fromFoldable8(packagePositions);
+    var modulePositions = mapMaybe(function(n) {
+      var $225 = eq4(n.nodeType)(ModuleNode.value);
+      if ($225) {
+        var v = lookup2(show14(n.cluster))(packagePosMap);
+        if (v instanceof Just) {
+          var offsetDist = 50 + toNumber(mod4(n.id)(100)) * 0.5;
+          var offsetAngle = toNumber(n.id) * 0.3;
+          var my = v.value0.y + sin(offsetAngle) * offsetDist;
+          var mx = v.value0.x + cos(offsetAngle) * offsetDist;
+          return new Just(new Tuple(show14(n.id), {
+            x: mx,
+            y: my
+          }));
+        }
+        ;
+        if (v instanceof Nothing) {
+          return Nothing.value;
+        }
+        ;
+        throw new Error("Failed pattern match at Viz.SpagoGridTest (line 356, column 14 - line 364, column 29): " + [v.constructor.name]);
+      }
+      ;
+      return Nothing.value;
+    })(nodes);
+    return fromFoldable8(append14(packagePositions)(modulePositions));
+  };
+  var calculateGridPositions = function(nodes) {
+    return fromFoldable8(map20(function(n) {
+      return new Tuple(show14(n.id), {
+        x: n.gridX,
+        y: n.gridY
+      });
+    })(nodes));
+  };
+  var calculateTargetPositions = function(scene) {
+    return function(nodes) {
+      if (scene instanceof Grid) {
+        return calculateGridPositions(nodes);
+      }
+      ;
+      if (scene instanceof Tree) {
+        return calculateTreePositions(nodes);
+      }
+      ;
+      return empty4;
+    };
+  };
+  var transitionToScene = function(targetScene) {
+    return function(stateRef) {
+      return function __do3() {
+        var state3 = read(stateRef)();
+        return when3(notEq3(state3.currentScene)(targetScene) && eq12(state3.transition)(Nothing.value))(function __do4() {
+          log7("[Explorer] Starting transition: " + (show23(state3.currentScene) + (" \u2192 " + show23(targetScene))))();
+          var nodes = getNodes(state3.simulation)();
+          var startPositions = fromFoldable8(map20(function(n) {
+            return new Tuple(show14(n.id), {
+              x: n.x,
+              y: n.y
+            });
+          })(nodes));
+          var targetPositions = calculateTargetPositions(targetScene)(nodes);
+          write({
+            currentScene: state3.currentScene,
+            simulation: state3.simulation,
+            transition: new Just({
+              targetScene,
+              progress: 0,
+              startPositions,
+              targetPositions
+            })
+          })(stateRef)();
+          return reheat(state3.simulation)();
+        })();
+      };
+    };
+  };
+  var applyFinalPosition = function(t) {
+    return function(node) {
+      var nodeKey = show14(node.id);
+      var v = lookup2(nodeKey)(t.targetPositions);
+      if (v instanceof Just) {
+        if (t.targetScene instanceof Grid) {
+          return {
+            id: node.id,
+            name: node.name,
+            nodeType: node.nodeType,
+            "package": node["package"],
+            vx: node.vx,
+            vy: node.vy,
+            r: node.r,
+            cluster: node.cluster,
+            targets: node.targets,
+            sources: node.sources,
+            gridX: node.gridX,
+            gridY: node.gridY,
+            orbitAngle: node.orbitAngle,
+            treeX: node.treeX,
+            treeY: node.treeY,
+            x: v.value0.x,
+            y: v.value0.y,
+            fx: nullImpl,
+            fy: nullImpl
+          };
+        }
+        ;
+        return {
+          id: node.id,
+          name: node.name,
+          nodeType: node.nodeType,
+          "package": node["package"],
+          vx: node.vx,
+          vy: node.vy,
+          r: node.r,
+          cluster: node.cluster,
+          targets: node.targets,
+          sources: node.sources,
+          gridX: node.gridX,
+          gridY: node.gridY,
+          orbitAngle: node.orbitAngle,
+          treeX: node.treeX,
+          treeY: node.treeY,
+          x: v.value0.x,
+          y: v.value0.y,
+          fx: notNull(v.value0.x),
+          fy: notNull(v.value0.y)
+        };
+      }
+      ;
+      if (v instanceof Nothing) {
+        return node;
+      }
+      ;
+      throw new Error("Failed pattern match at Viz.SpagoGridTest (line 288, column 6 - line 293, column 20): " + [v.constructor.name]);
+    };
+  };
+  var onTick2 = function(stateRef) {
+    return function __do3() {
+      var state3 = read(stateRef)();
+      var simNodes = getNodes(state3.simulation)();
+      if (state3.transition instanceof Nothing) {
+        var renderNodes = map20(function(n) {
+          return {
+            node: n,
+            renderX: n.x,
+            renderY: n.y
+          };
+        })(simNodes);
+        return renderVisualization(renderNodes)();
+      }
+      ;
+      if (state3.transition instanceof Just) {
+        var newProgress = min5(1)(state3.transition.value0.progress + transitionDelta);
+        var $235 = newProgress >= 1;
+        if ($235) {
+          log7("[Explorer] Transition complete: " + show23(state3.transition.value0.targetScene))();
+          var renderNodes = map20(finalizeNodePosition(state3.transition.value0))(simNodes);
+          var finalizedNodes = map20(applyFinalPosition(state3.transition.value0))(simNodes);
+          setNodes(finalizedNodes)(state3.simulation)();
+          write({
+            simulation: state3.simulation,
+            currentScene: state3.transition.value0.targetScene,
+            transition: Nothing.value
+          })(stateRef)();
+          (function() {
+            if (state3.transition.value0.targetScene instanceof Grid) {
+              return reheat(state3.simulation)();
+            }
+            ;
+            return unit;
+          })();
+          return renderVisualization(renderNodes)();
+        }
+        ;
+        var easedProgress = easeInOutCubic(newProgress);
+        var renderNodes = map20(interpolateNodePosition(state3.transition.value0)(easedProgress))(simNodes);
+        write({
+          currentScene: state3.currentScene,
+          simulation: state3.simulation,
+          transition: new Just({
+            startPositions: state3.transition.value0.startPositions,
+            targetPositions: state3.transition.value0.targetPositions,
+            targetScene: state3.transition.value0.targetScene,
+            progress: newProgress
+          })
+        })(stateRef)();
+        return renderVisualization(renderNodes)();
+      }
+      ;
+      throw new Error("Failed pattern match at Viz.SpagoGridTest (line 214, column 3 - line 257, column 42): " + [state3.transition.constructor.name]);
+    };
   };
   var initWithModel = function(model) {
     return function(containerSelector) {
       return function __do3() {
-        log5("[SpagoGridTest] BUILD: 2024-12-01 18:50 - NO links (Grid scene baseline)")();
-        log5("[SpagoGridTest] Initializing with grid forces...")();
-        var randomizedNodes = randomizeModulePositions(model.nodes)();
-        var nodesWithFix = map19(fixPackagePosition)(randomizedNodes);
-        log5("[SpagoGridTest] Nodes prepared: " + show14(length(nodesWithFix)))();
+        log7("[Explorer] BUILD: Using library Tick module for transitions")();
+        var gridNodes = recalculateGridPositions(model.nodes)(model.packageCount);
+        var randomizedNodes = randomizeModulePositions(gridNodes)();
+        var nodesWithFix = map20(fixPackagePosition)(randomizedNodes);
+        log7("[SpagoGridTest] Nodes prepared: " + show14(length(nodesWithFix)))();
         var sim = create2(defaultConfig)();
         setNodes(nodesWithFix)(sim)();
         var collideHandle = createCollideGrid(5)(0.7)(1);
@@ -15943,34 +17925,37 @@
         var forceYHandle = createForceYGrid(0.5);
         initializeForce(forceYHandle)(nodesWithFix)();
         modify_2(insert8("gridY")(forceYHandle))(sim.forces)();
-        var simNodes = getNodes(sim)();
-        log5("[SpagoGridTest] Sim nodes: " + show14(length(simNodes)))();
-        var limitedLinks = take(3e3)(model.links);
-        log5("[SpagoGridTest] Links: " + (show14(length(limitedLinks)) + (" (limited from " + (show14(length(model.links)) + ")"))))();
-        runD3v2M(renderSVG(containerSelector)(simNodes)(limitedLinks))();
+        runD3v2M(renderSVGContainer(containerSelector))();
         var stateRef = $$new({
-          simulation: sim
+          simulation: sim,
+          currentScene: Grid.value,
+          transition: Nothing.value
         })();
         onTick(onTick2(stateRef))(sim)();
         start(sim)();
-        return log5("[SpagoGridTest] Simulation started")();
+        log7("[Explorer] Simulation started")();
+        return stateRef;
       };
     };
   };
   var initSpagoGridTest = function(containerSelector) {
-    return launchAff_(discard32(log1("[SpagoGridTest] Loading spago data..."))(function() {
+    return launchAff_(discard22(log1("[Explorer] Loading spago data..."))(function() {
       return bind22(loadModel)(function(result) {
         if (result instanceof Left) {
-          return liftEffect4(log5("[SpagoGridTest] Error: " + result.value0));
+          return liftEffect4(log7("[Explorer] Error: " + result.value0));
         }
         ;
         if (result instanceof Right) {
-          return discard32(liftEffect4(log5("[SpagoGridTest] Loaded: " + (show14(result.value0.moduleCount) + (" modules, " + (show14(result.value0.packageCount) + " packages"))))))(function() {
-            return liftEffect4(initWithModel(result.value0)(containerSelector));
+          return discard22(liftEffect4(log7("[Explorer] Loaded: " + (show14(result.value0.moduleCount) + (" modules, " + (show14(result.value0.packageCount) + " packages"))))))(function() {
+            return bind22(liftEffect4(initWithModel(result.value0)(containerSelector)))(function(stateRef) {
+              return discard22(liftEffect4(write(new Just(stateRef))(globalExplorerRef)))(function() {
+                return liftEffect4(log7("[Explorer] State ref stored in global"));
+              });
+            });
           });
         }
         ;
-        throw new Error("Failed pattern match at Viz.SpagoGridTest (line 77, column 3 - line 81, column 57): " + [result.constructor.name]);
+        throw new Error("Failed pattern match at Viz.SpagoGridTest (line 115, column 3 - line 121, column 63): " + [result.constructor.name]);
       });
     }));
   };
@@ -15978,6 +17963,7 @@
   // output/Component.SpagoGridApp/index.js
   var discard4 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_3 = /* @__PURE__ */ modify_(monadStateHalogenM);
+  var log8 = /* @__PURE__ */ log2(monadEffectEffect);
   var Initialize2 = /* @__PURE__ */ (function() {
     function Initialize3() {
     }
@@ -15985,32 +17971,86 @@
     Initialize3.value = new Initialize3();
     return Initialize3;
   })();
+  var GoToGrid = /* @__PURE__ */ (function() {
+    function GoToGrid2() {
+    }
+    ;
+    GoToGrid2.value = new GoToGrid2();
+    return GoToGrid2;
+  })();
+  var GoToTree = /* @__PURE__ */ (function() {
+    function GoToTree2() {
+    }
+    ;
+    GoToTree2.value = new GoToTree2();
+    return GoToTree2;
+  })();
   var render = function(v) {
-    return div2([class_("spago-grid-app"), style("width: 100%; height: 100%;")])([h1([style("position: absolute; top: 10px; left: 10px; z-index: 100; color: white;")])([text("Spago Grid Test (Halogen)")]), div2([id2("viz"), style("width: 100%; height: 100%;")])([])]);
+    return div2([class_("explorer-app"), style("width: 100%; height: 100%; position: relative;")])([div2([style("position: absolute; top: 10px; left: 10px; z-index: 100; display: flex; gap: 10px; align-items: center;")])([h1([style("margin: 0; font-size: 18px; color: #333;")])([text("Code Explorer")]), button([style("padding: 8px 16px; border: none; border-radius: 4px; background: #4a90d9; color: white; cursor: pointer; font-size: 14px;"), onClick(function(v1) {
+      return GoToGrid.value;
+    })])([text("Grid")]), button([style("padding: 8px 16px; border: none; border-radius: 4px; background: #4a90d9; color: white; cursor: pointer; font-size: 14px;"), onClick(function(v1) {
+      return GoToTree.value;
+    })])([text("Tree")])]), div2([id2("viz"), style("width: 100%; height: 100%;")])([])]);
   };
   var handleAction = function(dictMonadAff) {
     var monadEffectHalogenM2 = monadEffectHalogenM(dictMonadAff.MonadEffect0());
-    var log6 = log2(monadEffectHalogenM2);
+    var log12 = log2(monadEffectHalogenM2);
     var liftEffect10 = liftEffect(monadEffectHalogenM2);
     return function(v) {
-      return discard4(log6("[SpagoGridApp] Initializing via Halogen..."))(function() {
-        return discard4(liftEffect10(initSpagoGridTest("#viz")))(function() {
-          return discard4(modify_3(function(v1) {
-            var $16 = {};
-            for (var $17 in v1) {
-              if ({}.hasOwnProperty.call(v1, $17)) {
-                $16[$17] = v1[$17];
+      if (v instanceof Initialize2) {
+        return discard4(log12("[Explorer] Initializing..."))(function() {
+          return discard4(liftEffect10(initSpagoGridTest("#viz")))(function() {
+            return modify_3(function(v1) {
+              var $20 = {};
+              for (var $21 in v1) {
+                if ({}.hasOwnProperty.call(v1, $21)) {
+                  $20[$21] = v1[$21];
+                }
+                ;
               }
               ;
-            }
-            ;
-            $16.initialized = true;
-            return $16;
-          }))(function() {
-            return log6("[SpagoGridApp] Initialized");
+              $20.initialized = true;
+              return $20;
+            });
           });
         });
-      });
+      }
+      ;
+      if (v instanceof GoToGrid) {
+        return discard4(log12("[Explorer] Grid button clicked"))(function() {
+          return liftEffect10(function __do3() {
+            var mRef = read(globalExplorerRef)();
+            if (mRef instanceof Nothing) {
+              return log8("[Explorer] Not ready yet")();
+            }
+            ;
+            if (mRef instanceof Just) {
+              return transitionToScene(Grid.value)(mRef.value0)();
+            }
+            ;
+            throw new Error("Failed pattern match at Component.SpagoGridApp (line 81, column 7 - line 83, column 47): " + [mRef.constructor.name]);
+          });
+        });
+      }
+      ;
+      if (v instanceof GoToTree) {
+        return discard4(log12("[Explorer] Tree button clicked"))(function() {
+          return liftEffect10(function __do3() {
+            var mRef = read(globalExplorerRef)();
+            if (mRef instanceof Nothing) {
+              return log8("[Explorer] Not ready yet")();
+            }
+            ;
+            if (mRef instanceof Just) {
+              return transitionToScene(Tree.value)(mRef.value0)();
+            }
+            ;
+            throw new Error("Failed pattern match at Component.SpagoGridApp (line 89, column 7 - line 91, column 47): " + [mRef.constructor.name]);
+          });
+        });
+      }
+      ;
+      throw new Error("Failed pattern match at Component.SpagoGridApp (line 71, column 16 - line 91, column 47): " + [v.constructor.name]);
     };
   };
   var component = function(dictMonadAff) {
@@ -16032,7 +18072,7 @@
   };
 
   // output/Halogen.Aff.Util/index.js
-  var bind7 = /* @__PURE__ */ bind(bindAff);
+  var bind8 = /* @__PURE__ */ bind(bindAff);
   var liftEffect5 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var bindFlipped5 = /* @__PURE__ */ bindFlipped(bindEffect);
   var composeKleisliFlipped4 = /* @__PURE__ */ composeKleisliFlipped(bindEffect);
@@ -16040,7 +18080,7 @@
   var bindFlipped1 = /* @__PURE__ */ bindFlipped(bindMaybe);
   var pure13 = /* @__PURE__ */ pure(applicativeEffect);
   var selectElement = function(query2) {
-    return bind7(liftEffect5(bindFlipped5(composeKleisliFlipped4((function() {
+    return bind8(liftEffect5(bindFlipped5(composeKleisliFlipped4((function() {
       var $16 = querySelector(query2);
       return function($17) {
         return $16(toParentNode2($17));
@@ -16093,14 +18133,14 @@
     };
   };
   var initDriverState = function(component3) {
-    return function(input2) {
-      return function(handler2) {
+    return function(input3) {
+      return function(handler3) {
         return function(lchs) {
           return function __do3() {
             var selfRef = $$new({})();
             var childrenIn = $$new(empty3)();
             var childrenOut = $$new(empty3)();
-            var handlerRef = $$new(handler2)();
+            var handlerRef = $$new(handler3)();
             var pendingQueries = $$new(new Just(Nil.value))();
             var pendingOuts = $$new(new Just(Nil.value))();
             var pendingHandlers = $$new(Nothing.value)();
@@ -16109,7 +18149,7 @@
             var forks = $$new(empty2)();
             var ds = {
               component: component3,
-              state: component3.initialState(input2),
+              state: component3.initialState(input3),
               refs: empty2,
               children: empty3,
               childrenIn,
@@ -16136,21 +18176,21 @@
   // output/Halogen.Aff.Driver.Eval/index.js
   var traverse_5 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
   var bindFlipped6 = /* @__PURE__ */ bindFlipped(bindMaybe);
-  var lookup6 = /* @__PURE__ */ lookup(ordSubscriptionId);
-  var bind14 = /* @__PURE__ */ bind(bindAff);
+  var lookup5 = /* @__PURE__ */ lookup(ordSubscriptionId);
+  var bind13 = /* @__PURE__ */ bind(bindAff);
   var liftEffect6 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var discard5 = /* @__PURE__ */ discard(discardUnit);
-  var discard12 = /* @__PURE__ */ discard5(bindAff);
+  var discard1 = /* @__PURE__ */ discard5(bindAff);
   var traverse_12 = /* @__PURE__ */ traverse_(applicativeAff);
   var traverse_22 = /* @__PURE__ */ traverse_12(foldableList);
   var fork3 = /* @__PURE__ */ fork(monadForkAff);
   var parSequence_2 = /* @__PURE__ */ parSequence_(parallelAff)(applicativeParAff)(foldableList);
   var pure11 = /* @__PURE__ */ pure(applicativeAff);
-  var map21 = /* @__PURE__ */ map(functorCoyoneda);
+  var map22 = /* @__PURE__ */ map(functorCoyoneda);
   var parallel3 = /* @__PURE__ */ parallel(parallelAff);
   var map110 = /* @__PURE__ */ map(functorAff);
   var sequential2 = /* @__PURE__ */ sequential(parallelAff);
-  var map22 = /* @__PURE__ */ map(functorMaybe);
+  var map23 = /* @__PURE__ */ map(functorMaybe);
   var insert9 = /* @__PURE__ */ insert(ordSubscriptionId);
   var retractFreeAp2 = /* @__PURE__ */ retractFreeAp(applicativeParAff);
   var $$delete4 = /* @__PURE__ */ $$delete(ordForkId);
@@ -16166,13 +18206,13 @@
       return function __do3() {
         var v = read(ref2)();
         var subs = read(v.subscriptions)();
-        return traverse_5(unsubscribe)(bindFlipped6(lookup6(sid))(subs))();
+        return traverse_5(unsubscribe)(bindFlipped6(lookup5(sid))(subs))();
       };
     };
   };
   var queueOrRun = function(ref2) {
     return function(au) {
-      return bind14(liftEffect6(read(ref2)))(function(v) {
+      return bind13(liftEffect6(read(ref2)))(function(v) {
         if (v instanceof Nothing) {
           return au;
         }
@@ -16187,14 +18227,14 @@
   };
   var handleLifecycle = function(lchs) {
     return function(f) {
-      return discard12(liftEffect6(write({
+      return discard1(liftEffect6(write({
         initializers: Nil.value,
         finalizers: Nil.value
       })(lchs)))(function() {
-        return bind14(liftEffect6(f))(function(result) {
-          return bind14(liftEffect6(read(lchs)))(function(v) {
-            return discard12(traverse_22(fork3)(v.finalizers))(function() {
-              return discard12(parSequence_2(v.initializers))(function() {
+        return bind13(liftEffect6(f))(function(result) {
+          return bind13(liftEffect6(read(lchs)))(function(v) {
+            return discard1(traverse_22(fork3)(v.finalizers))(function() {
+              return discard1(parSequence_2(v.initializers))(function() {
                 return pure11(result);
               });
             });
@@ -16206,7 +18246,7 @@
   var handleAff = /* @__PURE__ */ runAff_(/* @__PURE__ */ either(throwException)(/* @__PURE__ */ $$const(/* @__PURE__ */ pure(applicativeEffect)(unit))));
   var fresh = function(f) {
     return function(ref2) {
-      return bind14(liftEffect6(read(ref2)))(function(v) {
+      return bind13(liftEffect6(read(ref2)))(function(v) {
         return liftEffect6(modify$prime(function(i2) {
           return {
             state: i2 + 1 | 0,
@@ -16219,8 +18259,8 @@
   var evalQ = function(render2) {
     return function(ref2) {
       return function(q2) {
-        return bind14(liftEffect6(read(ref2)))(function(v) {
-          return evalM(render2)(ref2)(v["component"]["eval"](new Query(map21(Just.create)(liftCoyoneda(q2)), $$const(Nothing.value))));
+        return bind13(liftEffect6(read(ref2)))(function(v) {
+          return evalM(render2)(ref2)(v["component"]["eval"](new Query(map22(Just.create)(liftCoyoneda(q2)), $$const(Nothing.value))));
         });
       };
     };
@@ -16230,10 +18270,10 @@
       return function(v) {
         var evalChildQuery = function(ref2) {
           return function(cqb) {
-            return bind14(liftEffect6(read(ref2)))(function(v1) {
+            return bind13(liftEffect6(read(ref2)))(function(v1) {
               return unChildQueryBox(function(v2) {
                 var evalChild = function(v3) {
-                  return parallel3(bind14(liftEffect6(read(v3)))(function(dsx) {
+                  return parallel3(bind13(liftEffect6(read(v3)))(function(dsx) {
                     return unDriverStateX(function(ds) {
                       return evalQ(render2)(ds.selfRef)(v2.value1);
                     })(dsx);
@@ -16247,14 +18287,14 @@
         var go2 = function(ref2) {
           return function(v1) {
             if (v1 instanceof State) {
-              return bind14(liftEffect6(read(ref2)))(function(v2) {
+              return bind13(liftEffect6(read(ref2)))(function(v2) {
                 var v3 = v1.value0(v2.state);
                 if (unsafeRefEq(v2.state)(v3.value1)) {
                   return pure11(v3.value0);
                 }
                 ;
                 if (otherwise) {
-                  return discard12(liftEffect6(write({
+                  return discard1(liftEffect6(write({
                     component: v2.component,
                     refs: v2.refs,
                     children: v2.children,
@@ -16272,7 +18312,7 @@
                     lifecycleHandlers: v2.lifecycleHandlers,
                     state: v3.value1
                   })(ref2)))(function() {
-                    return discard12(handleLifecycle(v2.lifecycleHandlers)(render2(v2.lifecycleHandlers)(ref2)))(function() {
+                    return discard1(handleLifecycle(v2.lifecycleHandlers)(render2(v2.lifecycleHandlers)(ref2)))(function() {
                       return pure11(v3.value0);
                     });
                   });
@@ -16283,12 +18323,12 @@
             }
             ;
             if (v1 instanceof Subscribe) {
-              return bind14(fresh(SubscriptionId)(ref2))(function(sid) {
-                return bind14(liftEffect6(subscribe(v1.value0(sid))(function(act) {
+              return bind13(fresh(SubscriptionId)(ref2))(function(sid) {
+                return bind13(liftEffect6(subscribe(v1.value0(sid))(function(act) {
                   return handleAff(evalF(render2)(ref2)(new Action(act)));
                 })))(function(finalize) {
-                  return bind14(liftEffect6(read(ref2)))(function(v2) {
-                    return discard12(liftEffect6(modify_2(map22(insert9(sid)(finalize)))(v2.subscriptions)))(function() {
+                  return bind13(liftEffect6(read(ref2)))(function(v2) {
+                    return discard1(liftEffect6(modify_2(map23(insert9(sid)(finalize)))(v2.subscriptions)))(function() {
                       return pure11(v1.value1(sid));
                     });
                   });
@@ -16297,7 +18337,7 @@
             }
             ;
             if (v1 instanceof Unsubscribe) {
-              return discard12(liftEffect6(unsubscribe3(v1.value0)(ref2)))(function() {
+              return discard1(liftEffect6(unsubscribe3(v1.value0)(ref2)))(function() {
                 return pure11(v1.value1);
               });
             }
@@ -16311,9 +18351,9 @@
             }
             ;
             if (v1 instanceof Raise) {
-              return bind14(liftEffect6(read(ref2)))(function(v2) {
-                return bind14(liftEffect6(read(v2.handlerRef)))(function(handler2) {
-                  return discard12(queueOrRun(v2.pendingOuts)(handler2(v1.value0)))(function() {
+              return bind13(liftEffect6(read(ref2)))(function(v2) {
+                return bind13(liftEffect6(read(v2.handlerRef)))(function(handler3) {
+                  return discard1(queueOrRun(v2.pendingOuts)(handler3(v1.value0)))(function() {
                     return pure11(v1.value1);
                   });
                 });
@@ -16330,14 +18370,14 @@
             }
             ;
             if (v1 instanceof Fork) {
-              return bind14(fresh(ForkId)(ref2))(function(fid) {
-                return bind14(liftEffect6(read(ref2)))(function(v2) {
-                  return bind14(liftEffect6($$new(false)))(function(doneRef) {
-                    return bind14(fork3($$finally(liftEffect6(function __do3() {
+              return bind13(fresh(ForkId)(ref2))(function(fid) {
+                return bind13(liftEffect6(read(ref2)))(function(v2) {
+                  return bind13(liftEffect6($$new(false)))(function(doneRef) {
+                    return bind13(fork3($$finally(liftEffect6(function __do3() {
                       modify_2($$delete4(fid))(v2.forks)();
                       return write(true)(doneRef)();
                     }))(evalM(render2)(ref2)(v1.value0))))(function(fiber) {
-                      return discard12(liftEffect6(unlessM2(read(doneRef))(modify_2(insert1(fid)(fiber))(v2.forks))))(function() {
+                      return discard1(liftEffect6(unlessM2(read(doneRef))(modify_2(insert1(fid)(fiber))(v2.forks))))(function() {
                         return pure11(v1.value1(fid));
                       });
                     });
@@ -16347,9 +18387,9 @@
             }
             ;
             if (v1 instanceof Join) {
-              return bind14(liftEffect6(read(ref2)))(function(v2) {
-                return bind14(liftEffect6(read(v2.forks)))(function(forkMap) {
-                  return discard12(traverse_32(joinFiber)(lookup1(v1.value0)(forkMap)))(function() {
+              return bind13(liftEffect6(read(ref2)))(function(v2) {
+                return bind13(liftEffect6(read(v2.forks)))(function(forkMap) {
+                  return discard1(traverse_32(joinFiber)(lookup1(v1.value0)(forkMap)))(function() {
                     return pure11(v1.value1);
                   });
                 });
@@ -16357,9 +18397,9 @@
             }
             ;
             if (v1 instanceof Kill) {
-              return bind14(liftEffect6(read(ref2)))(function(v2) {
-                return bind14(liftEffect6(read(v2.forks)))(function(forkMap) {
-                  return discard12(traverse_32(killFiber(error2("Cancelled")))(lookup1(v1.value0)(forkMap)))(function() {
+              return bind13(liftEffect6(read(ref2)))(function(v2) {
+                return bind13(liftEffect6(read(v2.forks)))(function(forkMap) {
+                  return discard1(traverse_32(killFiber(error2("Cancelled")))(lookup1(v1.value0)(forkMap)))(function() {
                     return pure11(v1.value1);
                   });
                 });
@@ -16367,7 +18407,7 @@
             }
             ;
             if (v1 instanceof GetRef) {
-              return bind14(liftEffect6(read(ref2)))(function(v2) {
+              return bind13(liftEffect6(read(ref2)))(function(v2) {
                 return pure11(v1.value1(lookup22(v1.value0)(v2.refs)));
               });
             }
@@ -16406,7 +18446,7 @@
         }
         ;
         if (v instanceof Action) {
-          return bind14(liftEffect6(read(ref2)))(function(v1) {
+          return bind13(liftEffect6(read(ref2)))(function(v1) {
             return evalM(render2)(ref2)(v1["component"]["eval"](new Action2(v.value0, unit)));
           });
         }
@@ -16417,7 +18457,7 @@
   };
 
   // output/Halogen.Aff.Driver/index.js
-  var bind8 = /* @__PURE__ */ bind(bindEffect);
+  var bind9 = /* @__PURE__ */ bind(bindEffect);
   var discard6 = /* @__PURE__ */ discard(discardUnit);
   var for_4 = /* @__PURE__ */ for_(applicativeEffect)(foldableMaybe);
   var traverse_6 = /* @__PURE__ */ traverse_(applicativeAff)(foldableList);
@@ -16426,20 +18466,20 @@
   var traverse_13 = /* @__PURE__ */ traverse_(applicativeEffect);
   var traverse_23 = /* @__PURE__ */ traverse_13(foldableMaybe);
   var traverse_33 = /* @__PURE__ */ traverse_13(foldableMap);
-  var discard22 = /* @__PURE__ */ discard6(bindAff);
+  var discard23 = /* @__PURE__ */ discard6(bindAff);
   var parSequence_3 = /* @__PURE__ */ parSequence_(parallelAff)(applicativeParAff)(foldableList);
   var liftEffect7 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var pure14 = /* @__PURE__ */ pure(applicativeEffect);
-  var map23 = /* @__PURE__ */ map(functorEffect);
+  var map24 = /* @__PURE__ */ map(functorEffect);
   var pure15 = /* @__PURE__ */ pure(applicativeAff);
-  var when3 = /* @__PURE__ */ when(applicativeEffect);
+  var when4 = /* @__PURE__ */ when(applicativeEffect);
   var renderStateX2 = /* @__PURE__ */ renderStateX(functorEffect);
-  var $$void6 = /* @__PURE__ */ $$void(functorAff);
+  var $$void7 = /* @__PURE__ */ $$void(functorAff);
   var foreachSlot2 = /* @__PURE__ */ foreachSlot(applicativeEffect);
   var renderStateX_2 = /* @__PURE__ */ renderStateX_(applicativeEffect);
   var tailRecM3 = /* @__PURE__ */ tailRecM(monadRecEffect);
   var voidLeft3 = /* @__PURE__ */ voidLeft(functorEffect);
-  var bind15 = /* @__PURE__ */ bind(bindAff);
+  var bind14 = /* @__PURE__ */ bind(bindAff);
   var liftEffect1 = /* @__PURE__ */ liftEffect(monadEffectEffect);
   var newLifecycleHandlers = /* @__PURE__ */ (function() {
     return $$new({
@@ -16481,8 +18521,8 @@
               var parentInitializer = evalM(render2)(st.selfRef)(st["component"]["eval"](new Initialize(unit)));
               return modify_2(function(handlers) {
                 return {
-                  initializers: new Cons(discard22(parSequence_3(reverse2(handlers.initializers)))(function() {
-                    return discard22(parentInitializer)(function() {
+                  initializers: new Cons(discard23(parSequence_3(reverse2(handlers.initializers)))(function() {
+                    return discard23(parentInitializer)(function() {
                       return liftEffect7(function __do3() {
                         handlePending(st.pendingQueries)();
                         return handlePending(st.pendingOuts)();
@@ -16496,12 +18536,12 @@
           };
         };
         var runComponent = function(lchs) {
-          return function(handler2) {
+          return function(handler3) {
             return function(j) {
               return unComponent(function(c) {
                 return function __do3() {
                   var lchs$prime = newLifecycleHandlers();
-                  var $$var2 = initDriverState(c)(j)(handler2)(lchs$prime)();
+                  var $$var2 = initDriverState(c)(j)(handler3)(lchs$prime)();
                   var pre2 = read(lchs)();
                   write({
                     initializers: Nil.value,
@@ -16523,12 +18563,12 @@
           };
         };
         var renderChild = function(lchs) {
-          return function(handler2) {
+          return function(handler3) {
             return function(childrenInRef) {
               return function(childrenOutRef) {
                 return unComponentSlot(function(slot) {
                   return function __do3() {
-                    var childrenIn = map23(slot.pop)(read(childrenInRef))();
+                    var childrenIn = map24(slot.pop)(read(childrenInRef))();
                     var $$var2 = (function() {
                       if (childrenIn instanceof Just) {
                         write(childrenIn.value0.value1)(childrenInRef)();
@@ -16536,7 +18576,7 @@
                         unDriverStateX(function(st) {
                           return function __do4() {
                             flip(write)(st.handlerRef)((function() {
-                              var $65 = maybe(pure15(unit))(handler2);
+                              var $65 = maybe(pure15(unit))(handler3);
                               return function($66) {
                                 return $65(slot.output($66));
                               };
@@ -16549,7 +18589,7 @@
                       ;
                       if (childrenIn instanceof Nothing) {
                         return runComponent(lchs)((function() {
-                          var $67 = maybe(pure15(unit))(handler2);
+                          var $67 = maybe(pure15(unit))(handler3);
                           return function($68) {
                             return $67(slot.output($68));
                           };
@@ -16558,12 +18598,12 @@
                       ;
                       throw new Error("Failed pattern match at Halogen.Aff.Driver (line 213, column 14 - line 222, column 98): " + [childrenIn.constructor.name]);
                     })();
-                    var isDuplicate = map23(function($69) {
+                    var isDuplicate = map24(function($69) {
                       return isJust(slot.get($69));
                     })(read(childrenOutRef))();
-                    when3(isDuplicate)(warn("Halogen: Duplicate slot address was detected during rendering, unexpected results may occur"))();
+                    when4(isDuplicate)(warn("Halogen: Duplicate slot address was detected during rendering, unexpected results may occur"))();
                     modify_2(slot.set($$var2))(childrenOutRef)();
-                    return bind8(read($$var2))(renderStateX2(function(v) {
+                    return bind9(read($$var2))(renderStateX2(function(v) {
                       if (v instanceof Nothing) {
                         return $$throw("Halogen internal error: child was not initialized in renderChild");
                       }
@@ -16584,25 +18624,25 @@
           return function($$var2) {
             return function __do3() {
               var v = read($$var2)();
-              var shouldProcessHandlers = map23(isNothing)(read(v.pendingHandlers))();
-              when3(shouldProcessHandlers)(write(new Just(Nil.value))(v.pendingHandlers))();
+              var shouldProcessHandlers = map24(isNothing)(read(v.pendingHandlers))();
+              when4(shouldProcessHandlers)(write(new Just(Nil.value))(v.pendingHandlers))();
               write(empty3)(v.childrenOut)();
               write(v.children)(v.childrenIn)();
-              var handler2 = (function() {
+              var handler3 = (function() {
                 var $70 = queueOrRun(v.pendingHandlers);
                 var $71 = evalF(render2)(v.selfRef);
                 return function($72) {
-                  return $70($$void6($71($72)));
+                  return $70($$void7($71($72)));
                 };
               })();
               var childHandler = (function() {
                 var $73 = queueOrRun(v.pendingQueries);
                 return function($74) {
-                  return $73(handler2(Action.create($74)));
+                  return $73(handler3(Action.create($74)));
                 };
               })();
               var rendering = renderSpec2.render(function($75) {
-                return handleAff(handler2($75));
+                return handleAff(handler3($75));
               })(renderChild(lchs)(childHandler)(v.childrenIn)(v.childrenOut))(v.component.render(v.state))(v.rendering)();
               var children3 = read(v.childrenOut)();
               var childrenIn = read(v.childrenIn)();
@@ -16633,7 +18673,7 @@
                   children: children3
                 };
               }))();
-              return when3(shouldProcessHandlers)(flip(tailRecM3)(unit)(function(v1) {
+              return when4(shouldProcessHandlers)(flip(tailRecM3)(unit)(function(v1) {
                 return function __do4() {
                   var handlers = read(v.pendingHandlers)();
                   write(new Just(Nil.value))(v.pendingHandlers)();
@@ -16678,7 +18718,7 @@
         var evalDriver = function(disposed) {
           return function(ref2) {
             return function(q2) {
-              return bind15(liftEffect7(read(disposed)))(function(v) {
+              return bind14(liftEffect7(read(disposed)))(function(v) {
                 if (v) {
                   return pure15(Nothing.value);
                 }
@@ -16709,8 +18749,8 @@
             };
           };
         };
-        return bind15(liftEffect7(newLifecycleHandlers))(function(lchs) {
-          return bind15(liftEffect7($$new(false)))(function(disposed) {
+        return bind14(liftEffect7(newLifecycleHandlers))(function(lchs) {
+          return bind14(liftEffect7($$new(false)))(function(disposed) {
             return handleLifecycle(lchs)(function __do3() {
               var sio = create();
               var dsx = bindFlipped7(read)(runComponent(lchs)((function() {
@@ -16746,26 +18786,26 @@
       return val;
     };
   };
-  var $$void7 = /* @__PURE__ */ $$void(functorEffect);
+  var $$void8 = /* @__PURE__ */ $$void(functorEffect);
   var pure16 = /* @__PURE__ */ pure(applicativeEffect);
   var traverse_7 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
-  var unwrap6 = /* @__PURE__ */ unwrap();
-  var when4 = /* @__PURE__ */ when(applicativeEffect);
+  var unwrap5 = /* @__PURE__ */ unwrap();
+  var when5 = /* @__PURE__ */ when(applicativeEffect);
   var not2 = /* @__PURE__ */ not(/* @__PURE__ */ heytingAlgebraFunction(/* @__PURE__ */ heytingAlgebraFunction(heytingAlgebraBoolean)));
-  var identity14 = /* @__PURE__ */ identity(categoryFn);
-  var bind16 = /* @__PURE__ */ bind(bindAff);
+  var identity16 = /* @__PURE__ */ identity(categoryFn);
+  var bind15 = /* @__PURE__ */ bind(bindAff);
   var liftEffect8 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var map24 = /* @__PURE__ */ map(functorEffect);
+  var map25 = /* @__PURE__ */ map(functorEffect);
   var bindFlipped8 = /* @__PURE__ */ bindFlipped(bindEffect);
   var substInParent = function(v) {
     return function(v1) {
       return function(v2) {
         if (v1 instanceof Just && v2 instanceof Just) {
-          return $$void7(insertBefore(v)(v1.value0)(v2.value0));
+          return $$void8(insertBefore(v)(v1.value0)(v2.value0));
         }
         ;
         if (v1 instanceof Nothing && v2 instanceof Just) {
-          return $$void7(appendChild2(v)(v2.value0));
+          return $$void8(appendChild2(v)(v2.value0));
         }
         ;
         return pure16(unit);
@@ -16780,7 +18820,7 @@
       })(npn)();
     };
   };
-  var mkSpec = function(handler2) {
+  var mkSpec = function(handler3) {
     return function(renderChildRef) {
       return function(document3) {
         var getNode = unRenderStateX(function(v) {
@@ -16794,7 +18834,7 @@
           return unit;
         };
         var buildWidget2 = function(spec) {
-          var buildThunk2 = buildThunk(unwrap6)(spec);
+          var buildThunk2 = buildThunk(unwrap5)(spec);
           var $lazy_patch = $runtime_lazy8("patch", "Halogen.VDom.Driver", function() {
             return function(st, slot) {
               if (st instanceof Just) {
@@ -16821,8 +18861,8 @@
               }
               ;
               if (slot instanceof ThunkSlot) {
-                var step3 = buildThunk2(slot.value0);
-                return mkStep(new Step(extract2(step3), new Just(step3), $lazy_patch(89), done));
+                var step4 = buildThunk2(slot.value0);
+                return mkStep(new Step(extract2(step4), new Just(step4), $lazy_patch(89), done));
               }
               ;
               throw new Error("Failed pattern match at Halogen.VDom.Driver (line 84, column 7 - line 89, column 75): " + [slot.constructor.name]);
@@ -16841,7 +18881,7 @@
           var renderComponentSlot = $lazy_renderComponentSlot(109);
           return render2;
         };
-        var buildAttributes = buildProp(handler2);
+        var buildAttributes = buildProp(handler3);
         return {
           buildWidget: buildWidget2,
           buildAttributes,
@@ -16852,17 +18892,17 @@
   };
   var renderSpec = function(document3) {
     return function(container) {
-      var render2 = function(handler2) {
+      var render2 = function(handler3) {
         return function(child) {
           return function(v) {
             return function(v1) {
               if (v1 instanceof Nothing) {
                 return function __do3() {
                   var renderChildRef = $$new(child)();
-                  var spec = mkSpec(handler2)(renderChildRef)(document3);
+                  var spec = mkSpec(handler3)(renderChildRef)(document3);
                   var machine = buildVDom(spec)(v);
                   var node = extract2(machine);
-                  $$void7(appendChild2(node)(toNode2(container)))();
+                  $$void8(appendChild2(node)(toNode2(container)))();
                   return {
                     machine,
                     node,
@@ -16878,7 +18918,7 @@
                   var nextSib = nextSibling(v1.value0.node)();
                   var machine$prime = step(v1.value0.machine, v);
                   var newNode = extract2(machine$prime);
-                  when4(not2(unsafeRefEq)(v1.value0.node)(newNode))(substInParent(newNode)(nextSib)(parent2))();
+                  when5(not2(unsafeRefEq)(v1.value0.node)(newNode))(substInParent(newNode)(nextSib)(parent2))();
                   return {
                     machine: machine$prime,
                     node: newNode,
@@ -16894,7 +18934,7 @@
       };
       return {
         render: render2,
-        renderChild: identity14,
+        renderChild: identity16,
         removeChild: removeChild3,
         dispose: removeChild3
       };
@@ -16903,7 +18943,7 @@
   var runUI2 = function(component3) {
     return function(i2) {
       return function(element3) {
-        return bind16(liftEffect8(map24(toDocument)(bindFlipped8(document2)(windowImpl))))(function(document3) {
+        return bind15(liftEffect8(map25(toDocument)(bindFlipped8(document2)(windowImpl))))(function(document3) {
           return runUI(renderSpec(document3)(element3))(component3)(i2);
         });
       };
@@ -16912,22 +18952,22 @@
 
   // output/Main/index.js
   var discard7 = /* @__PURE__ */ discard(discardUnit);
-  var bind9 = /* @__PURE__ */ bind(bindAff);
+  var bind10 = /* @__PURE__ */ bind(bindAff);
   var liftEffect9 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var discard23 = /* @__PURE__ */ discard7(bindAff);
+  var discard24 = /* @__PURE__ */ discard7(bindAff);
   var component2 = /* @__PURE__ */ component(monadAffAff);
   var pure17 = /* @__PURE__ */ pure(applicativeAff);
   var main2 = function __do2() {
     log("[Main] Starting with Halogen wrapper around SpagoGridTest...")();
     log("[Main] IMPORTANT: Using selectElement to mount into #app (not body)")();
-    return runHalogenAff(bind9(selectElement("#app"))(function(mAppEl) {
+    return runHalogenAff(bind10(selectElement("#app"))(function(mAppEl) {
       if (mAppEl instanceof Nothing) {
         return liftEffect9(log("[Main] ERROR: Could not find #app element!"));
       }
       ;
       if (mAppEl instanceof Just) {
-        return discard23(liftEffect9(log("[Main] Found #app, mounting Halogen...")))(function() {
-          return bind9(runUI2(component2)(unit)(mAppEl.value0))(function() {
+        return discard24(liftEffect9(log("[Main] Found #app, mounting Halogen...")))(function() {
+          return bind10(runUI2(component2)(unit)(mAppEl.value0))(function() {
             return pure17(unit);
           });
         });

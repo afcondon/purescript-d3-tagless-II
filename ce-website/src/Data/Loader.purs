@@ -211,8 +211,8 @@ mkModuleNode name idx modulesObj locMap packageIdMap moduleIdMap packageCount mo
     -- Get cluster from package
     cluster = fromMaybe 0 (Map.lookup pkgName packageIdMap)
 
-    -- Module radius based on LOC (sqrt scale)
-    r = 3.0 + sqrt (toNumber loc) * 0.3
+    -- Module radius based on LOC (sqrt scale, visible range ~4-25)
+    r = 4.0 + sqrt (toNumber loc) * 0.8
 
     -- Get parent package's grid position
     pkgId = fromMaybe 0 (Map.lookup pkgName packageIdMap)

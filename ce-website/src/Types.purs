@@ -50,6 +50,7 @@ data NodeType
   | PackageNode
 
 derive instance eqNodeType :: Eq NodeType
+derive instance ordNodeType :: Ord NodeType
 
 -- | A link between nodes
 type SimLink =
