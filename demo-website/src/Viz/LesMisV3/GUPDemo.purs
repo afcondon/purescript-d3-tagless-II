@@ -50,8 +50,8 @@ import PSD3v2.VizTree.Tree as T
 -- =============================================================================
 
 -- | Row types for the simulation (extra fields beyond x, y, vx, vy / source, target)
-type LesMisNodeRow = ( id :: String, group :: Int, fx :: Nullable Number, fy :: Nullable Number, index :: Int )
-type LesMisLinkRow = ( value :: Number )
+type LesMisNodeRow = (id :: String, group :: Int, fx :: Nullable Number, fy :: Nullable Number, index :: Int)
+type LesMisLinkRow = (value :: Number)
 
 -- | Concrete simulation type for Les Misérables
 type LesMisSimulation = Sim.Simulation LesMisNodeRow LesMisLinkRow
@@ -62,8 +62,8 @@ type ExitingNode = Tick.Transitioning LesMisNode
 -- | Node ready for rendering with computed visual state
 type RenderNode =
   { node :: LesMisNode
-  , enterProgress :: Maybe Number   -- Just 0.0-1.0 if entering, Nothing if not
-  , exitProgress :: Maybe Number    -- Just 0.0-1.0 if exiting, Nothing if not
+  , enterProgress :: Maybe Number -- Just 0.0-1.0 if entering, Nothing if not
+  , exitProgress :: Maybe Number -- Just 0.0-1.0 if exiting, Nothing if not
   }
 
 -- | Swizzled link for rendering (node references instead of indices)
@@ -84,12 +84,12 @@ type SceneData =
 -- | State for the GUP demo
 -- | Tracks transitions with progress, driven by simulation tick
 type LesMisGUPState =
-  { fullModel :: LesMisModel                    -- Original full dataset
-  , visibleNodeIds :: Array String              -- Currently visible node IDs
+  { fullModel :: LesMisModel -- Original full dataset
+  , visibleNodeIds :: Array String -- Currently visible node IDs
   , enteringProgress :: Map String Tick.Progress -- nodeId → progress (0→1)
-  , exitingNodes :: Array ExitingNode           -- Nodes being animated out with progress
-  , simulation :: LesMisSimulation              -- Force simulation handle
-  , containerSelector :: String                 -- DOM container
+  , exitingNodes :: Array ExitingNode -- Nodes being animated out with progress
+  , simulation :: LesMisSimulation -- Force simulation handle
+  , containerSelector :: String -- DOM container
   }
 
 -- =============================================================================
@@ -160,8 +160,9 @@ addRandomNodes :: Int -> Ref LesMisGUPState -> Effect Unit
 addRandomNodes count stateRef = do
   state <- Ref.read stateRef
 
-  let hiddenIds = filter (\id -> not (Array.elem id state.visibleNodeIds))
-                         (map _.id state.fullModel.nodes)
+  let
+    hiddenIds = filter (\id -> not (Array.elem id state.visibleNodeIds))
+      (map _.id state.fullModel.nodes)
 
   -- Pick random hidden nodes to add
   nodesToAdd <- pickRandom count hiddenIds
@@ -171,9 +172,13 @@ addRandomNodes count stateRef = do
   let newEntering = Tick.startProgress nodesToAdd state.enteringProgress
 
   -- Update state
-  Ref.write (state { visibleNodeIds = newVisible
-                   , enteringProgress = newEntering
-                   }) stateRef
+  Ref.write
+    ( state
+        { visibleNodeIds = newVisible
+        , enteringProgress = newEntering
+        }
+    )
+    stateRef
 
   -- Reheat simulation so nodes settle into new positions
   Sim.reheat state.simulation
@@ -196,10 +201,14 @@ removeRandomNodes count stateRef = do
   let newEntering = Array.foldl (\m id -> Map.delete id m) state.enteringProgress nodesToRemove
 
   -- Update state
-  Ref.write (state { visibleNodeIds = newVisible
-                   , enteringProgress = newEntering
-                   , exitingNodes = state.exitingNodes <> newExiting
-                   }) stateRef
+  Ref.write
+    ( state
+        { visibleNodeIds = newVisible
+        , enteringProgress = newEntering
+        , exitingNodes = state.exitingNodes <> newExiting
+        }
+    )
+    stateRef
 
   -- Reheat simulation so remaining nodes settle
   Sim.reheat state.simulation
@@ -215,10 +224,14 @@ resetToFull stateRef = do
   let newEntering = Tick.startProgress currentlyHidden state.enteringProgress
 
   -- Clear exiting nodes and set all as visible
-  Ref.write (state { visibleNodeIds = allIds
-                   , enteringProgress = newEntering
-                   , exitingNodes = []
-                   }) stateRef
+  Ref.write
+    ( state
+        { visibleNodeIds = allIds
+        , enteringProgress = newEntering
+        , exitingNodes = []
+        }
+    )
+    stateRef
 
   Sim.reheat state.simulation
 
@@ -237,9 +250,13 @@ onSimulationTick stateRef = do
   let { active: stillExiting } = Tick.tickTransitions transitionDelta state.exitingNodes
 
   -- Update state with advanced transitions
-  Ref.write (state { enteringProgress = stillEntering
-                   , exitingNodes = stillExiting
-                   }) stateRef
+  Ref.write
+    ( state
+        { enteringProgress = stillEntering
+        , exitingNodes = stillExiting
+        }
+    )
+    stateRef
 
   -- Render with current state
   renderVisualization stateRef
@@ -259,7 +276,8 @@ renderSVGContainer containerSelector = do
     , viewBox (show ((-svgWidth) / 2.0) <> " " <> show ((-svgHeight) / 2.0) <> " " <> show svgWidth <> " " <> show svgHeight)
     , id_ "lesmis-gup-svg"
     , class_ "lesmis-gup"
-    ] container
+    ]
+    container
 
   zoomGroup <- appendChild ET.Group [ id_ "lesmis-gup-zoom-group", class_ "zoom-group" ] svg
   _ <- appendChild ET.Group [ id_ "lesmis-gup-links", class_ "links" ] zoomGroup
@@ -281,25 +299,34 @@ renderVisualization stateRef = do
   -- Build render nodes with transition state
   let visibleNodes = filter (\n -> Array.elem n.id state.visibleNodeIds) currentNodes
 
-  let renderNodes = map (\n ->
-        { node: n
-        , enterProgress: Map.lookup n.id state.enteringProgress
-        , exitProgress: Nothing
-        }) visibleNodes
+  let
+    renderNodes = map
+      ( \n ->
+          { node: n
+          , enterProgress: Map.lookup n.id state.enteringProgress
+          , exitProgress: Nothing
+          }
+      )
+      visibleNodes
 
   -- Add exiting nodes (with frozen positions and exit progress)
-  let exitingRenderNodes = map (\e ->
-        { node: e.item
-        , enterProgress: Nothing
-        , exitProgress: Just e.progress
-        }) state.exitingNodes
+  let
+    exitingRenderNodes = map
+      ( \e ->
+          { node: e.item
+          , enterProgress: Nothing
+          , exitProgress: Just e.progress
+          }
+      )
+      state.exitingNodes
 
   let allRenderNodes = renderNodes <> exitingRenderNodes
 
   -- Create links only between visible nodes (not exiting)
   let visibleLinks = filterLinksToSubset _.index visibleNodes state.fullModel.links
-  let swizzledLinks = swizzleLinksByIndex _.index visibleNodes visibleLinks \src tgt i link ->
-        { source: src, target: tgt, value: link.value, index: i, isExiting: false }
+  let
+    swizzledLinks = swizzleLinksByIndex _.index visibleNodes visibleLinks \src tgt i link ->
+      { source: src, target: tgt, value: link.value, index: i, isExiting: false }
 
   -- Create scene data
   let scene = { nodes: allRenderNodes, links: swizzledLinks }
@@ -326,17 +353,18 @@ renderGUPScene scene = do
 createNodesTree :: SceneData -> T.Tree SceneData
 createNodesTree scene =
   T.sceneNestedJoin "nodes" "circle"
-    [scene]
+    [ scene ]
     (_.nodes)
-    (\rn -> T.elem ET.Circle
-      [ cx rn.node.x
-      , cy rn.node.y
-      , radius (radiusForNode rn)
-      , fill (fillForNode rn)
-      , opacity (opacityForNode rn)
-      , stroke "#fff"
-      , strokeWidth 1.5
-      ])
+    ( \rn -> T.elem ET.Circle
+        [ cx rn.node.x
+        , cy rn.node.y
+        , radius (radiusForNode rn)
+        , fill (fillForNode rn)
+        , opacity (opacityForNode rn)
+        , stroke "#fff"
+        , strokeWidth 1.5
+        ]
+    )
     { enterBehavior: Nothing
     , updateBehavior: Nothing
     , exitBehavior: Nothing
@@ -353,41 +381,42 @@ createNodesTree scene =
 radiusForNode :: RenderNode -> Number
 radiusForNode { enterProgress, exitProgress } =
   case enterProgress, exitProgress of
-    Just p, _ -> Tick.lerp 20.0 5.0 p   -- Entering: large → normal
-    _, Just p -> Tick.lerp 5.0 20.0 p   -- Exiting: normal → large (pop)
-    _, _      -> 5.0                     -- Normal
+    Just p, _ -> Tick.lerp 20.0 5.0 p -- Entering: large → normal
+    _, Just p -> Tick.lerp 5.0 20.0 p -- Exiting: normal → large (pop)
+    _, _ -> 5.0 -- Normal
 
 -- | Get fill color for a node based on transition state
 fillForNode :: RenderNode -> String
 fillForNode { enterProgress, exitProgress } =
   case enterProgress, exitProgress of
-    Just _, _ -> "#2ca02c"   -- Green for entering
-    _, Just _ -> "#8c564b"   -- Brown for exiting
-    _, _      -> "#7f7f7f"   -- Gray for normal
+    Just _, _ -> "#2ca02c" -- Green for entering
+    _, Just _ -> "#8c564b" -- Brown for exiting
+    _, _ -> "#7f7f7f" -- Gray for normal
 
 -- | Get opacity for a node based on transition state
 -- | Exiting: fades from 1 → 0
 opacityForNode :: RenderNode -> Number
 opacityForNode { exitProgress } =
   case exitProgress of
-    Just p -> Tick.lerp 1.0 0.0 p  -- Fade out
-    _      -> 1.0
+    Just p -> Tick.lerp 1.0 0.0 p -- Fade out
+    _ -> 1.0
 
 -- | Create links tree
 createLinksTree :: SceneData -> T.Tree SceneData
 createLinksTree scene =
   T.sceneNestedJoin "links" "line"
-    [scene]
+    [ scene ]
     (_.links)
-    (\link -> T.elem ET.Line
-      [ x1 link.source.x
-      , y1 link.source.y
-      , x2 link.target.x
-      , y2 link.target.y
-      , strokeWidth (sqrt link.value)
-      , stroke "#999"
-      , opacity 0.6
-      ])
+    ( \link -> T.elem ET.Line
+        [ x1 link.source.x
+        , y1 link.source.y
+        , x2 link.target.x
+        , y2 link.target.y
+        , strokeWidth (sqrt link.value)
+        , stroke "#999"
+        , opacity 0.6
+        ]
+    )
     { enterBehavior: Nothing
     , updateBehavior: Nothing
     , exitBehavior: Nothing
@@ -400,17 +429,15 @@ createLinksTree scene =
 -- | Pick N random elements from an array
 pickRandom :: forall a. Int -> Array a -> Effect (Array a)
 pickRandom n arr = do
-  if n <= 0 || length arr == 0
-    then pure []
-    else do
-      indices <- pickRandomIndices n (length arr) []
-      pure $ Array.mapMaybe (\i -> arr !! i) indices
+  if n <= 0 || length arr == 0 then pure []
+  else do
+    indices <- pickRandomIndices n (length arr) []
+    pure $ Array.mapMaybe (\i -> arr !! i) indices
 
 pickRandomIndices :: Int -> Int -> Array Int -> Effect (Array Int)
 pickRandomIndices 0 _ acc = pure acc
 pickRandomIndices _ 0 acc = pure acc
 pickRandomIndices n maxIdx acc = do
   idx <- randomInt 0 (maxIdx - 1)
-  if Array.elem idx acc
-    then pickRandomIndices n maxIdx acc  -- Try again
-    else pickRandomIndices (n - 1) maxIdx (acc <> [idx])
+  if Array.elem idx acc then pickRandomIndices n maxIdx acc -- Try again
+  else pickRandomIndices (n - 1) maxIdx (acc <> [ idx ])

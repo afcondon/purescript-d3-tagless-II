@@ -179,8 +179,9 @@ export function initializeForce_(force) {
 
 // Initialize a link force with links
 // Link forces need both nodes (via initialize) and links (via links())
-// Note: We COPY links before passing to D3 because forceLink.links() MUTATES
-// the link objects, replacing source/target integers with node references.
+// Note: D3's forceLink.links() MUTATES link objects in place, replacing
+// source/target integers with node object references. This is intentional -
+// use Sim.getSwizzledLinks to get the swizzled links for rendering.
 export function initializeLinkForce_(force) {
   return function(nodes) {
     return function(links) {
@@ -188,9 +189,8 @@ export function initializeLinkForce_(force) {
         if (force.initialize) {
           force.initialize(nodes, Math.random);
         }
-        // Copy links to preserve originals for DOM operations
-        const linksCopy = links.map(l => ({...l}));
-        force.links(linksCopy);
+        // Let D3 mutate links in place - swizzles source/target to node refs
+        force.links(links);
         return force;
       };
     };
