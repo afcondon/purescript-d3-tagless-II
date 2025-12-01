@@ -99,6 +99,15 @@ export function joinNodesToDOM_(nodes) {
       .on('drag', dragged)
       .on('end', dragEnded));
 
+    // Add hover handlers for highlighting
+    enter
+      .on('mouseenter', function(event, d) {
+        highlightConnectedNodes(d);
+      })
+      .on('mouseleave', function(event, d) {
+        clearHighlights();
+      });
+
     // Update: update existing groups
     nodeGroups
       .attr('transform', d => `translate(${d.x || 0}, ${d.y || 0})`);
@@ -196,6 +205,77 @@ function dragged(event, d) {
 function dragEnded(event, d) {
   d.fx = null;
   d.fy = null;
+}
+
+// =============================================================================
+// Hover Highlighting
+// =============================================================================
+
+/**
+ * Highlight nodes connected to the hovered node
+ * - Upstream (sources): nodes that this node depends on
+ * - Downstream (targets): nodes that depend on this node
+ * - Tree children: direct children in tree structure
+ */
+function highlightConnectedNodes(hoveredNode) {
+  if (!hoveredNode || !hoveredNode.links || !nodesGroup) return;
+
+  // Collect all connected node IDs
+  const upstreamIds = new Set(hoveredNode.links.targets || []);
+  const downstreamIds = new Set(hoveredNode.links.sources || []);
+  const treeChildIds = new Set(hoveredNode.links.treeChildren || []);
+
+  // All connected IDs for dimming calculation
+  const allConnectedIds = new Set([
+    ...upstreamIds,
+    ...downstreamIds,
+    ...treeChildIds
+  ]);
+
+  // Apply classes to node groups
+  nodesGroup.selectAll('g.node')
+    .classed('highlighted-source', d => d && d.id === hoveredNode.id)
+    .classed('highlighted-upstream', d => d && upstreamIds.has(d.id))
+    .classed('highlighted-downstream', d => d && downstreamIds.has(d.id))
+    .classed('highlighted-tree-child', d => d && treeChildIds.has(d.id))
+    .classed('dimmed', d => d && d.id !== hoveredNode.id && !allConnectedIds.has(d.id));
+
+  // Also highlight connected links
+  if (linksGroup) {
+    linksGroup.selectAll('path.link')
+      .classed('highlighted-link', function() {
+        const el = select(this);
+        const sourceId = +el.attr('data-source');
+        const targetId = +el.attr('data-target');
+        // Link is highlighted if it connects to the hovered node
+        return sourceId === hoveredNode.id || targetId === hoveredNode.id;
+      })
+      .classed('dimmed-link', function() {
+        const el = select(this);
+        const sourceId = +el.attr('data-source');
+        const targetId = +el.attr('data-target');
+        return sourceId !== hoveredNode.id && targetId !== hoveredNode.id;
+      });
+  }
+}
+
+/**
+ * Clear all highlight classes
+ */
+function clearHighlights() {
+  if (nodesGroup) {
+    nodesGroup.selectAll('g.node')
+      .classed('highlighted-source', false)
+      .classed('highlighted-upstream', false)
+      .classed('highlighted-downstream', false)
+      .classed('highlighted-tree-child', false)
+      .classed('dimmed', false);
+  }
+  if (linksGroup) {
+    linksGroup.selectAll('path.link')
+      .classed('highlighted-link', false)
+      .classed('dimmed-link', false);
+  }
 }
 
 // =============================================================================

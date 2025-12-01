@@ -183,6 +183,39 @@ g.package.halogen circle {
   filter: none !important;
 }
 
+/* Upstream dependencies (nodes this node depends on) - blue tint */
+.highlighted-upstream circle {
+  stroke: #3b82f6 !important;
+  stroke-width: 3px !important;
+  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.7));
+}
+
+/* Downstream dependencies (nodes that depend on this node) - green tint */
+.highlighted-downstream circle {
+  stroke: #10b981 !important;
+  stroke-width: 3px !important;
+  filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.7));
+}
+
+/* Tree children - orange tint */
+.highlighted-tree-child circle {
+  stroke: #f59e0b !important;
+  stroke-width: 2px !important;
+  filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.6));
+}
+
+/* Highlighted links */
+.highlighted-link {
+  stroke: #fbbf24 !important;
+  stroke-width: 2.5px !important;
+  stroke-opacity: 1 !important;
+}
+
+/* Dimmed links */
+.dimmed-link {
+  stroke-opacity: 0.1 !important;
+}
+
 /* Smooth transitions for highlight effects */
 g circle {
   transition: opacity 0.15s ease, stroke 0.15s ease, stroke-width 0.15s ease, filter 0.15s ease;
@@ -190,6 +223,10 @@ g circle {
 
 g {
   transition: opacity 0.15s ease;
+}
+
+path.link {
+  transition: stroke 0.15s ease, stroke-width 0.15s ease, stroke-opacity 0.15s ease;
 }
 
 /* Label visibility - hide by default, show on hover (scoped to spago viz) */

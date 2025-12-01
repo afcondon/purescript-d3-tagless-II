@@ -16,6 +16,12 @@ module PSD3.ForceEngine.Core
   , createForceX
   , createForceY
   , createRadial
+    -- * Filtered/Dynamic Forces
+  , createManyBodyFiltered
+  , createRadialFiltered
+  , createCollideDynamic
+  , createForceXDynamic
+  , createForceYDynamic
     -- * Initialization
   , initializeNodes
   , initializeForce
@@ -40,7 +46,7 @@ import Prelude
 
 import Data.Traversable (for_)
 import Effect (Effect)
-import PSD3.ForceEngine.Types (ManyBodyConfig, CollideConfig, LinkConfig, CenterConfig, ForceXConfig, ForceYConfig, RadialConfig)
+import PSD3.ForceEngine.Types (ManyBodyConfig, CollideConfig, LinkConfig, CenterConfig, ForceXConfig, ForceYConfig, RadialConfig, ManyBodyFilteredConfig, RadialFilteredConfig, CollideDynamicConfig, ForceXDynamicConfig, ForceYDynamicConfig)
 import Web.DOM.Element (Element)
 
 -- =============================================================================
@@ -58,6 +64,13 @@ foreign import createCenter_ :: CenterConfig -> ForceHandle
 foreign import createForceX_ :: ForceXConfig -> ForceHandle
 foreign import createForceY_ :: ForceYConfig -> ForceHandle
 foreign import createRadial_ :: RadialConfig -> ForceHandle
+
+-- Filtered/Dynamic force creation
+foreign import createManyBodyFiltered_ :: forall node. ManyBodyFilteredConfig node -> ForceHandle
+foreign import createRadialFiltered_ :: forall node. RadialFilteredConfig node -> ForceHandle
+foreign import createCollideDynamic_ :: forall node. CollideDynamicConfig node -> ForceHandle
+foreign import createForceXDynamic_ :: forall node. ForceXDynamicConfig node -> ForceHandle
+foreign import createForceYDynamic_ :: forall node. ForceYDynamicConfig node -> ForceHandle
 
 -- Initialization
 foreign import initializeNodes_ :: forall r. Array { | r } -> Effect Unit
@@ -110,6 +123,35 @@ createForceY = createForceY_
 -- | Create a radial force
 createRadial :: RadialConfig -> ForceHandle
 createRadial = createRadial_
+
+-- =============================================================================
+-- Filtered/Dynamic Force Creation (Pure)
+-- =============================================================================
+
+-- | Create a many-body force that only applies to nodes matching a predicate
+-- | Useful for applying charge only to certain node types (e.g., tree parents)
+createManyBodyFiltered :: forall node. ManyBodyFilteredConfig node -> ForceHandle
+createManyBodyFiltered = createManyBodyFiltered_
+
+-- | Create a radial force that only applies to nodes matching a predicate
+createRadialFiltered :: forall node. RadialFilteredConfig node -> ForceHandle
+createRadialFiltered = createRadialFiltered_
+
+-- | Create a collision force with dynamic radius per-node
+-- | The radiusAccessor function is called for each node to determine collision radius
+-- | Example: `{ radiusAccessor: \n -> n.r + 5.0, strength: 1.0, iterations: 1 }`
+createCollideDynamic :: forall node. CollideDynamicConfig node -> ForceHandle
+createCollideDynamic = createCollideDynamic_
+
+-- | Create an X positioning force with dynamic target per-node
+-- | The xAccessor function is called for each node to determine target X
+-- | Useful for clustering (e.g., modules toward their parent package's X)
+createForceXDynamic :: forall node. ForceXDynamicConfig node -> ForceHandle
+createForceXDynamic = createForceXDynamic_
+
+-- | Create a Y positioning force with dynamic target per-node
+createForceYDynamic :: forall node. ForceYDynamicConfig node -> ForceHandle
+createForceYDynamic = createForceYDynamic_
 
 -- =============================================================================
 -- Initialization (Effectful)

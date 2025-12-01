@@ -27,6 +27,12 @@ module PSD3.ForceEngine.Types
   , ForceXConfig
   , ForceYConfig
   , RadialConfig
+    -- * Filtered/Dynamic Configurations
+  , ManyBodyFilteredConfig
+  , RadialFilteredConfig
+  , CollideDynamicConfig
+  , ForceXDynamicConfig
+  , ForceYDynamicConfig
     -- * Force Specification
   , ForceSpec(..)
   , forceName
@@ -193,6 +199,52 @@ type RadialConfig =
   , x :: Number              -- Center x
   , y :: Number              -- Center y
   , strength :: Number       -- How strongly to pull (0-1)
+  }
+
+-- =============================================================================
+-- Filtered/Dynamic Force Configurations
+-- =============================================================================
+-- These allow forces to be applied conditionally or with dynamic parameters.
+-- The accessor functions are passed to JS which calls them per-node.
+
+-- | Configuration for filtered many-body force
+-- | Applies charge only to nodes matching the predicate
+type ManyBodyFilteredConfig node =
+  { strength :: Number
+  , theta :: Number
+  , distanceMin :: Number
+  , distanceMax :: Number
+  , filter :: node -> Boolean  -- Only apply to matching nodes
+  }
+
+-- | Configuration for filtered radial force
+type RadialFilteredConfig node =
+  { radius :: Number
+  , x :: Number
+  , y :: Number
+  , strength :: Number
+  , filter :: node -> Boolean  -- Only apply to matching nodes
+  }
+
+-- | Configuration for collision force with dynamic radius
+-- | Radius is computed per-node via accessor function
+type CollideDynamicConfig node =
+  { radiusAccessor :: node -> Number  -- Get radius from node (e.g., d.r + padding)
+  , strength :: Number
+  , iterations :: Int
+  }
+
+-- | Configuration for X positioning force with dynamic target
+-- | Target X is computed per-node via accessor function
+type ForceXDynamicConfig node =
+  { xAccessor :: node -> Number  -- Get target X from node
+  , strength :: Number
+  }
+
+-- | Configuration for Y positioning force with dynamic target
+type ForceYDynamicConfig node =
+  { yAccessor :: node -> Number  -- Get target Y from node
+  , strength :: Number
   }
 
 -- =============================================================================

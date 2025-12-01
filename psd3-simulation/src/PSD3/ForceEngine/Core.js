@@ -88,6 +88,65 @@ export function createRadial_(config) {
 }
 
 // =============================================================================
+// Filtered/Dynamic Force Creation
+// =============================================================================
+
+// Create a many-body force with filter predicate
+// Only applies charge to nodes where filter(node) returns true
+export function createManyBodyFiltered_(config) {
+  const force = forceManyBody()
+    .strength(function(d) {
+      return config.filter(d) ? config.strength : 0;
+    })
+    .theta(config.theta)
+    .distanceMin(config.distanceMin)
+    .distanceMax(config.distanceMax);
+  return force;
+}
+
+// Create a radial force with filter predicate
+export function createRadialFiltered_(config) {
+  const force = forceRadial(config.radius, config.x, config.y)
+    .strength(function(d) {
+      return config.filter(d) ? config.strength : 0;
+    });
+  return force;
+}
+
+// Create a collision force with dynamic radius accessor
+// radiusAccessor is called per-node to get collision radius
+export function createCollideDynamic_(config) {
+  const force = forceCollide()
+    .radius(function(d) {
+      return config.radiusAccessor(d);
+    })
+    .strength(config.strength)
+    .iterations(config.iterations);
+  return force;
+}
+
+// Create an X positioning force with dynamic target accessor
+// xAccessor is called per-node to get target X position
+export function createForceXDynamic_(config) {
+  const force = forceX()
+    .x(function(d) {
+      return config.xAccessor(d);
+    })
+    .strength(config.strength);
+  return force;
+}
+
+// Create a Y positioning force with dynamic target accessor
+export function createForceYDynamic_(config) {
+  const force = forceY()
+    .y(function(d) {
+      return config.yAccessor(d);
+    })
+    .strength(config.strength);
+  return force;
+}
+
+// =============================================================================
 // Force Initialization
 // =============================================================================
 

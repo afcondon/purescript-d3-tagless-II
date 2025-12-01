@@ -143,6 +143,16 @@ The project aims to be both an impressive demonstration of functional visualizat
 - **FFI consolidation**: D3.js FFI lives in psd3-selection/src/PSD3/Internal/FFI.purs/.js
 - **Debug statements**: Use purescript-debug library's `spy` function (generates warnings to prevent shipping debug code)
 
+## Demo Website Rules
+
+**No JavaScript in demos unless explicitly discussed.** The demo-website exists to showcase the PSD3 library's capabilities, not to build a commercial application. If functionality is missing:
+
+1. **Add it to the library** (psd3-selection or psd3-simulation) with proper PureScript bindings
+2. Only use JavaScript FFI within the library packages, not in demo-website
+3. Demo code should demonstrate what's possible with the library's PureScript API
+
+This rule ensures demos accurately represent library capabilities and drives library improvements.
+
 ## Common PureScript Gotchas
 
 - **Math functions**: There is NO `Math` module in PureScript! Use `Data.Number` for floating-point math functions (sqrt, sin, cos, etc.) or `Data.Int` for integer operations. The module `Data.Math` is deprecated and should not be used.

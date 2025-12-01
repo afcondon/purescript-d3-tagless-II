@@ -21653,6 +21653,11 @@
       enter.append("circle").attr("r", (d17) => d17.r || 5).attr("fill", (d17) => getNodeColor(d17)).attr("stroke", "#fff").attr("stroke-width", 1);
       enter.append("text").attr("dy", "0.35em").attr("text-anchor", "middle").attr("font-size", (d17) => Math.min(d17.r * 0.8, 10)).attr("fill", "#fff").text((d17) => d17.name ? d17.name.split(".").pop() : "");
       enter.call(drag_default().on("start", dragStarted).on("drag", dragged).on("end", dragEnded));
+      enter.on("mouseenter", function(event, d17) {
+        highlightConnectedNodes(d17);
+      }).on("mouseleave", function(event, d17) {
+        clearHighlights();
+      });
       nodeGroups.attr("transform", (d17) => `translate(${d17.x || 0}, ${d17.y || 0})`);
       nodeGroups.exit().remove();
     };
@@ -21693,6 +21698,39 @@
   function dragEnded(event, d17) {
     d17.fx = null;
     d17.fy = null;
+  }
+  function highlightConnectedNodes(hoveredNode) {
+    if (!hoveredNode || !hoveredNode.links || !nodesGroup) return;
+    const upstreamIds = new Set(hoveredNode.links.targets || []);
+    const downstreamIds = new Set(hoveredNode.links.sources || []);
+    const treeChildIds = new Set(hoveredNode.links.treeChildren || []);
+    const allConnectedIds = /* @__PURE__ */ new Set([
+      ...upstreamIds,
+      ...downstreamIds,
+      ...treeChildIds
+    ]);
+    nodesGroup.selectAll("g.node").classed("highlighted-source", (d17) => d17 && d17.id === hoveredNode.id).classed("highlighted-upstream", (d17) => d17 && upstreamIds.has(d17.id)).classed("highlighted-downstream", (d17) => d17 && downstreamIds.has(d17.id)).classed("highlighted-tree-child", (d17) => d17 && treeChildIds.has(d17.id)).classed("dimmed", (d17) => d17 && d17.id !== hoveredNode.id && !allConnectedIds.has(d17.id));
+    if (linksGroup) {
+      linksGroup.selectAll("path.link").classed("highlighted-link", function() {
+        const el = select_default2(this);
+        const sourceId = +el.attr("data-source");
+        const targetId = +el.attr("data-target");
+        return sourceId === hoveredNode.id || targetId === hoveredNode.id;
+      }).classed("dimmed-link", function() {
+        const el = select_default2(this);
+        const sourceId = +el.attr("data-source");
+        const targetId = +el.attr("data-target");
+        return sourceId !== hoveredNode.id && targetId !== hoveredNode.id;
+      });
+    }
+  }
+  function clearHighlights() {
+    if (nodesGroup) {
+      nodesGroup.selectAll("g.node").classed("highlighted-source", false).classed("highlighted-upstream", false).classed("highlighted-downstream", false).classed("highlighted-tree-child", false).classed("dimmed", false);
+    }
+    if (linksGroup) {
+      linksGroup.selectAll("path.link").classed("highlighted-link", false).classed("dimmed-link", false);
+    }
   }
   function getWindowSize_() {
     return {
