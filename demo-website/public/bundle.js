@@ -8635,10 +8635,19 @@
       return element3.__data__;
     };
   }
+  var bindDebugCount = 0;
   function setElementData_(datum2) {
     return function(element3) {
       return function() {
         element3.__data__ = datum2;
+        if (datum2?.id === 93 && bindDebugCount === 0) {
+          const hasMarker = datum2.__simMarker__ === true;
+          console.log(`[BindData] node93 bound to element, hasMarker=${hasMarker}, x=${datum2.x?.toFixed(1)}`);
+          if (!hasMarker) {
+            console.log(`[BindData] PROBLEM: node93 does NOT have __simMarker__ at bind time!`);
+          }
+          bindDebugCount++;
+        }
       };
     };
   }
@@ -34126,8 +34135,13 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   function initializeForce_2(force2) {
     return function(nodes3) {
       return function() {
+        const start5 = performance.now();
         if (force2.initialize) {
           force2.initialize(nodes3, Math.random);
+        }
+        const elapsed = performance.now() - start5;
+        if (elapsed > 1) {
+          console.log(`[InitForce] Took ${elapsed.toFixed(1)}ms for ${nodes3.length} nodes`);
         }
         return force2;
       };
@@ -34150,13 +34164,29 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   function applyForce_(force2) {
     return function(alpha) {
       return function() {
+        const start5 = performance.now();
         force2(alpha);
+        const elapsed = performance.now() - start5;
+        if (elapsed > 5) {
+          console.log(`[Force] ${force2.name || "unknown"} took ${elapsed.toFixed(1)}ms`);
+        }
       };
     };
   }
+  var integrateDebugCount = 0;
   function integratePositions_2(nodes3) {
     return function(velocityDecay) {
       return function() {
+        const start5 = performance.now();
+        if (integrateDebugCount % 100 === 0) {
+          const freeNode = nodes3.find((n) => n.fx == null);
+          if (freeNode) {
+            console.log(`[IntegrateDebug tick=${integrateDebugCount}] free node ${freeNode.id}: x=${freeNode.x?.toFixed(1)}, y=${freeNode.y?.toFixed(1)}, vx=${freeNode.vx?.toFixed(3)}, vy=${freeNode.vy?.toFixed(3)}`);
+          } else {
+            console.log(`[IntegrateDebug tick=${integrateDebugCount}] NO FREE NODES! All ${nodes3.length} nodes have fx set`);
+          }
+        }
+        integrateDebugCount++;
         for (let i2 = 0; i2 < nodes3.length; i2++) {
           const node = nodes3[i2];
           if (node.fx != null) {
@@ -34173,6 +34203,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             node.vy *= velocityDecay;
             node.y += node.vy;
           }
+        }
+        const elapsed = performance.now() - start5;
+        if (elapsed > 2) {
+          console.log(`[Integrate] Took ${elapsed.toFixed(1)}ms for ${nodes3.length} nodes`);
         }
       };
     };
@@ -34196,17 +34230,56 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         if (node.vy === void 0) node.vy = 0;
         if (node.x === void 0) node.x = Math.random() * 100 - 50;
         if (node.y === void 0) node.y = Math.random() * 100 - 50;
+        if (node.id === 93) {
+          node.__simMarker__ = true;
+          console.log(`[InitNodes] Marked node 93 with __simMarker__, x=${node.x?.toFixed(1)}`);
+        }
       }
     };
   }
+  var tickStats = { count: 0, totalTime: 0, maxTime: 0, lastReport: Date.now() };
+  var lastTickEnd = performance.now();
+  var gapStats = { total: 0, max: 0, count: 0 };
+  var USE_SETTIMEOUT = true;
+  var FRAME_TIME = 8;
   function requestAnimationFrame_2(callback) {
     return function() {
-      const id5 = requestAnimationFrame(function(timestamp) {
-        callback(timestamp)();
-      });
-      return function() {
-        cancelAnimationFrame(id5);
+      const scheduleTime = performance.now();
+      const gapSinceLastTick = scheduleTime - lastTickEnd;
+      let id5;
+      const handler3 = function(timestamp) {
+        const fireTime = performance.now();
+        const waitTime = fireTime - scheduleTime;
+        const start5 = performance.now();
+        callback(timestamp || fireTime)();
+        const elapsed = performance.now() - start5;
+        lastTickEnd = performance.now();
+        tickStats.count++;
+        tickStats.totalTime += elapsed;
+        tickStats.maxTime = Math.max(tickStats.maxTime, elapsed);
+        gapStats.total += waitTime;
+        gapStats.max = Math.max(gapStats.max, waitTime);
+        gapStats.count++;
+        const now3 = Date.now();
+        if (now3 - tickStats.lastReport > 2e3) {
+          const avg = tickStats.totalTime / tickStats.count;
+          const avgGap = gapStats.total / gapStats.count;
+          console.log(`[AnimLoop] ${tickStats.count} ticks, work=${avg.toFixed(1)}ms, wait=${avgGap.toFixed(0)}ms (max=${gapStats.max.toFixed(0)}ms) [${USE_SETTIMEOUT ? "setTimeout" : "rAF"}]`);
+          tickStats = { count: 0, totalTime: 0, maxTime: 0, lastReport: now3 };
+          gapStats = { total: 0, max: 0, count: 0 };
+        }
       };
+      if (USE_SETTIMEOUT) {
+        id5 = setTimeout(handler3, FRAME_TIME);
+        return function() {
+          clearTimeout(id5);
+        };
+      } else {
+        id5 = requestAnimationFrame(handler3);
+        return function() {
+          cancelAnimationFrame(id5);
+        };
+      }
     };
   }
   function newCancelRef() {
@@ -34295,12 +34368,24 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
 
+  // output/PSD3.ForceEngine.Links/foreign.js
+  var buildIntSet = (arr) => new Set(arr);
+  var intSetMember = (key) => (set3) => set3.has(key);
+  var buildIntMap_ = (pairs) => {
+    const map98 = /* @__PURE__ */ new Map();
+    for (let i2 = 0; i2 < pairs.length; i2++) {
+      map98.set(pairs[i2].key, pairs[i2].value);
+    }
+    return map98;
+  };
+  var intMapLookup_ = (key) => (map98) => map98.get(key);
+  var isNull2 = (x41) => x41 == null;
+
   // output/PSD3.ForceEngine.Links/index.js
   var show36 = /* @__PURE__ */ show(showInt);
+  var map56 = /* @__PURE__ */ map(functorArray);
   var bind40 = /* @__PURE__ */ bind(bindMaybe);
   var pure43 = /* @__PURE__ */ pure(applicativeMaybe);
-  var map56 = /* @__PURE__ */ map(functorArray);
-  var elem5 = /* @__PURE__ */ elem2(eqInt);
   var unsafeArrayIndex = function(arr) {
     return function(i2) {
       var v = index(arr)(i2);
@@ -34312,36 +34397,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return unsafeCrashWith("swizzleLinks: Array index out of bounds: " + show36(i2));
       }
       ;
-      throw new Error("Failed pattern match at PSD3.ForceEngine.Links (line 59, column 26 - line 61, column 85): " + [v.constructor.name]);
-    };
-  };
-  var swizzleLinksByIndex = function(getIndex) {
-    return function(nodes3) {
-      return function(links3) {
-        return function(transform20) {
-          var swizzle = function(link4) {
-            return bind40(find2(function(n) {
-              return getIndex(n) === link4.source;
-            })(nodes3))(function(srcNode) {
-              return bind40(find2(function(n) {
-                return getIndex(n) === link4.target;
-              })(nodes3))(function(tgtNode) {
-                return pure43({
-                  src: srcNode,
-                  tgt: tgtNode,
-                  link: link4
-                });
-              });
-            });
-          };
-          var reindex = function(i2) {
-            return function(v) {
-              return transform20(v.src)(v.tgt)(i2)(v.link);
-            };
-          };
-          return mapWithIndex2(reindex)(mapMaybe(swizzle)(links3));
-        };
-      };
+      throw new Error("Failed pattern match at PSD3.ForceEngine.Links (line 115, column 26 - line 117, column 85): " + [v.constructor.name]);
     };
   };
   var swizzleLinks = function(nodes3) {
@@ -34358,13 +34414,62 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       };
     };
   };
+  var intMapLookup = function(key) {
+    return function(m2) {
+      var result = intMapLookup_(key)(m2);
+      var $10 = isNull2(result);
+      if ($10) {
+        return Nothing.value;
+      }
+      ;
+      return new Just(result);
+    };
+  };
   var filterLinksToSubset = function(getIndex) {
     return function(nodes3) {
       return function(links3) {
-        var nodeIndices = map56(getIndex)(nodes3);
+        var nodeIndices = buildIntSet(map56(getIndex)(nodes3));
         return filter(function(l) {
-          return elem5(l.source)(nodeIndices) && elem5(l.target)(nodeIndices);
+          return intSetMember(l.source)(nodeIndices) && intSetMember(l.target)(nodeIndices);
         })(links3);
+      };
+    };
+  };
+  var buildIntMap = function(getIndex) {
+    return function(nodes3) {
+      return buildIntMap_(map56(function(n) {
+        return {
+          key: getIndex(n),
+          value: n
+        };
+      })(nodes3));
+    };
+  };
+  var swizzleLinksByIndex = function(getIndex) {
+    return function(nodes3) {
+      return function(links3) {
+        return function(transform20) {
+          var swizzle = function(nodeMap2) {
+            return function(link4) {
+              return bind40(intMapLookup(link4.source)(nodeMap2))(function(srcNode) {
+                return bind40(intMapLookup(link4.target)(nodeMap2))(function(tgtNode) {
+                  return pure43({
+                    src: srcNode,
+                    tgt: tgtNode,
+                    link: link4
+                  });
+                });
+              });
+            };
+          };
+          var reindex = function(i2) {
+            return function(v) {
+              return transform20(v.src)(v.tgt)(i2)(v.link);
+            };
+          };
+          var nodeMap = buildIntMap(getIndex)(nodes3);
+          return mapWithIndex2(reindex)(mapMaybe(swizzle(nodeMap))(links3));
+        };
       };
     };
   };
@@ -39289,7 +39394,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var lookup30 = /* @__PURE__ */ lookup2(ordString);
   var getAllEdges2 = /* @__PURE__ */ getAllEdges(ordString);
   var bind57 = /* @__PURE__ */ bind(bindMaybe);
-  var elem6 = /* @__PURE__ */ elem2(/* @__PURE__ */ eqTuple(eqString)(eqString));
+  var elem5 = /* @__PURE__ */ elem2(/* @__PURE__ */ eqTuple(eqString)(eqString));
   var pure58 = /* @__PURE__ */ pure(applicativeMaybe);
   var x112 = /* @__PURE__ */ x1(toAttrNumberNumber);
   var y112 = /* @__PURE__ */ y1(toAttrNumberNumber);
@@ -39387,7 +39492,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 var edgeElements = catMaybes(mapFlipped13(allEdges)(function(v) {
                   return bind57(getPos(v.value0))(function(sourcePos) {
                     return bind57(getPos(v.value1))(function(targetPos) {
-                      var isRemoved = highlightRemoved && elem6(new Tuple(v.value0, v.value1))(removedEdges);
+                      var isRemoved = highlightRemoved && elem5(new Tuple(v.value0, v.value1))(removedEdges);
                       return pure58(elem3(Line.value)([x112(sourcePos.x), y112(sourcePos.y), x29(targetPos.x), y29(targetPos.y), stroke17((function() {
                         if (isRemoved) {
                           return "#E74C3C";
@@ -39922,7 +40027,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/PSD3.Layout.Hierarchy.EdgeBundle.Hierarchy/index.js
   var map65 = /* @__PURE__ */ map(functorMaybe);
   var map114 = /* @__PURE__ */ map(functorArray);
-  var elem7 = /* @__PURE__ */ elem2(eqString);
+  var elem6 = /* @__PURE__ */ elem2(eqString);
   var append118 = /* @__PURE__ */ append(semigroupArray);
   var foldl14 = /* @__PURE__ */ foldl(foldableArray);
   var max11 = /* @__PURE__ */ max(ordInt);
@@ -39969,7 +40074,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return function(bs) {
             var bNames = map114(getFullName)(bs);
             var common = filter(function(a3) {
-              return elem7(getFullName(a3))(bNames);
+              return elem6(getFullName(a3))(bNames);
             })(as);
             return last(common);
           };
@@ -45118,7 +45223,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
 
   // output/D3.Viz.LesMisV3.GUPDemo/index.js
   var map81 = /* @__PURE__ */ map(functorArray);
-  var elem8 = /* @__PURE__ */ elem2(eqString);
+  var elem7 = /* @__PURE__ */ elem2(eqString);
   var startProgress2 = /* @__PURE__ */ startProgress(ordString);
   var bind126 = /* @__PURE__ */ bind(bindD3v2M);
   var select38 = /* @__PURE__ */ select(selectionMD3v2Selection_D);
@@ -45237,7 +45342,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return v.id;
       })(state3.fullModel.nodes);
       var currentlyHidden = filter(function(id5) {
-        return !elem8(id5)(state3.visibleNodeIds);
+        return !elem7(id5)(state3.visibleNodeIds);
       })(allIds);
       var newEntering = startProgress2(currentlyHidden)(state3.enteringProgress);
       write({
@@ -45321,11 +45426,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         var state3 = read(stateRef)();
         var nodesToRemove = pickRandom(count)(state3.visibleNodeIds)();
         var newVisible = filter(function(id5) {
-          return !elem8(id5)(nodesToRemove);
+          return !elem7(id5)(nodesToRemove);
         })(state3.visibleNodeIds);
         var currentNodes = getNodes(state3.simulation)();
         var exitingNodeData = filter(function(n) {
-          return elem8(n.id)(nodesToRemove);
+          return elem7(n.id)(nodesToRemove);
         })(currentNodes);
         var newExiting = startTransitions(exitingNodeData);
         var newEntering = foldl2(function(m2) {
@@ -45403,7 +45508,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       var state3 = read(stateRef)();
       var currentNodes = getNodes(state3.simulation)();
       var visibleNodes = filter(function(n) {
-        return elem8(n.id)(state3.visibleNodeIds);
+        return elem7(n.id)(state3.visibleNodeIds);
       })(currentNodes);
       var renderNodes = map81(function(n) {
         return {
@@ -45514,7 +45619,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return function __do8() {
         var state3 = read(stateRef)();
         var hiddenIds = filter(function(id5) {
-          return !elem8(id5)(state3.visibleNodeIds);
+          return !elem7(id5)(state3.visibleNodeIds);
         })(map81(function(v) {
           return v.id;
         })(state3.fullModel.nodes));

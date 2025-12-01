@@ -32,7 +32,6 @@ module PSD3.ForceEngine.Simulation
   , isRunning
   , getAlpha
   , getNodes
-  , getSwizzledLinks
   ) where
 
 import Prelude
@@ -47,7 +46,6 @@ import Effect.Ref (Ref)
 import Effect.Ref as Ref
 import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultSimParams)
-import Unsafe.Coerce (unsafeCoerce)
 
 -- =============================================================================
 -- Types
@@ -304,33 +302,3 @@ getNodes :: forall nodeRow linkRow.
   Simulation nodeRow linkRow
   -> Effect (Array { x :: Number, y :: Number, vx :: Number, vy :: Number | nodeRow })
 getNodes sim = Ref.read sim.nodes
-
--- | Get links with node references instead of indices ("swizzled")
--- |
--- | IMPORTANT: Only call this AFTER adding a Link force with `addForce (Link ...)`.
--- | The Link force initialization mutates link objects, replacing integer
--- | source/target indices with actual node object references.
--- |
--- | The returned links have the same shape as nodes for source/target,
--- | so you can read `link.source.x`, `link.source.y`, etc.
--- |
--- | Example:
--- | ```purescript
--- | -- After setup:
--- | Sim.addForce (Link "links" defaultLink { ... }) sim
--- |
--- | -- Get swizzled links for rendering:
--- | swizzled <- Sim.getSwizzledLinks sim
--- | linkSel <- appendData Line swizzled [x1 (_.source.x), ...]
--- | ```
-getSwizzledLinks :: forall nodeRow linkRow.
-  Simulation nodeRow linkRow
-  -> Effect (Array { source :: { x :: Number, y :: Number, vx :: Number, vy :: Number | nodeRow }
-                   , target :: { x :: Number, y :: Number, vx :: Number, vy :: Number | nodeRow }
-                   | linkRow })
-getSwizzledLinks sim = do
-  links <- Ref.read sim.links
-  -- D3's forceLink mutates links in place, replacing Int indices with node objects.
-  -- At runtime, link.source IS a node object. We just need to tell PureScript's
-  -- type system about this reality.
-  pure (unsafeCoerce links)

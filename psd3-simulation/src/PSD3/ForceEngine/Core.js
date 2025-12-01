@@ -155,6 +155,37 @@ export function createForceYDynamic_(config) {
 }
 
 // =============================================================================
+// Optimized Grid Forces (no FFI callbacks - reads node.gridX/gridY directly)
+// =============================================================================
+
+// Create ForceX that reads node.gridX directly (no PureScript callback)
+export function createForceXGrid_(strength) {
+  return forceX()
+    .x(d => d.gridX)
+    .strength(strength);
+}
+
+// Create ForceY that reads node.gridY directly (no PureScript callback)
+export function createForceYGrid_(strength) {
+  return forceY()
+    .y(d => d.gridY)
+    .strength(strength);
+}
+
+// Create collision force that reads node.r directly (no PureScript callback)
+// Adds padding to node radius
+export function createCollideGrid_(padding) {
+  return function(strength) {
+    return function(iterations) {
+      return forceCollide()
+        .radius(d => d.r + padding)
+        .strength(strength)
+        .iterations(iterations);
+    };
+  };
+}
+
+// =============================================================================
 // Force Initialization
 // =============================================================================
 
@@ -179,9 +210,8 @@ export function initializeForce_(force) {
 
 // Initialize a link force with links
 // Link forces need both nodes (via initialize) and links (via links())
-// Note: D3's forceLink.links() MUTATES link objects in place, replacing
-// source/target integers with node object references. This is intentional -
-// use Sim.getSwizzledLinks to get the swizzled links for rendering.
+// Note: We COPY links before passing to D3 because forceLink.links() MUTATES
+// the link objects, replacing source/target integers with node references.
 export function initializeLinkForce_(force) {
   return function(nodes) {
     return function(links) {
@@ -189,8 +219,9 @@ export function initializeLinkForce_(force) {
         if (force.initialize) {
           force.initialize(nodes, Math.random);
         }
-        // Let D3 mutate links in place - swizzles source/target to node refs
-        force.links(links);
+        // Copy links to preserve originals for DOM operations
+        const linksCopy = links.map(l => ({...l}));
+        force.links(linksCopy);
         return force;
       };
     };
@@ -249,10 +280,23 @@ export function updatePositions_(nodes) {
 
 // Combined: apply velocity decay and update positions
 // Respects fixed nodes (fx/fy) - if set, node is pinned there
+let integrateDebugCount = 0;
 export function integratePositions_(nodes) {
   return function(velocityDecay) {
     return function() {
       const start = performance.now();
+
+      // Debug: log first FREE node (fx == null)
+      if (integrateDebugCount % 100 === 0) {
+        const freeNode = nodes.find(n => n.fx == null);
+        if (freeNode) {
+          console.log(`[IntegrateDebug tick=${integrateDebugCount}] free node ${freeNode.id}: x=${freeNode.x?.toFixed(1)}, y=${freeNode.y?.toFixed(1)}, vx=${freeNode.vx?.toFixed(3)}, vy=${freeNode.vy?.toFixed(3)}`);
+        } else {
+          console.log(`[IntegrateDebug tick=${integrateDebugCount}] NO FREE NODES! All ${nodes.length} nodes have fx set`);
+        }
+      }
+      integrateDebugCount++;
+
       for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];
 
@@ -315,6 +359,12 @@ export function initializeNodes_(nodes) {
       // If no position, use random (D3's default behavior)
       if (node.x === undefined) node.x = Math.random() * 100 - 50;
       if (node.y === undefined) node.y = Math.random() * 100 - 50;
+
+      // DEBUG: Mark node 93 (first module) with a unique marker
+      if (node.id === 93) {
+        node.__simMarker__ = true;
+        console.log(`[InitNodes] Marked node 93 with __simMarker__, x=${node.x?.toFixed(1)}`);
+      }
     }
   };
 }

@@ -15,6 +15,17 @@ import Effect.Class (liftEffect)
 import Effect.Console (log)
 import Viz.LesMis.Model (LesMisRawModel, LesMisModel, LesMisNode, LesMisLink, processRawModel)
 import Viz.LesMis.GUPDemo (initGUPDemo)
+import Viz.LesMis.GUPGridTest (initGridTest)
+import Viz.SpagoGridTest (initSpagoGridTest)
+import Component.SpagoGridApp as SpagoGridApp
+import Halogen.Aff as HA
+import Halogen.VDom.Driver (runUI)
+import Web.HTML.HTMLElement (toElement, fromElement)
+import Web.DOM.ParentNode (querySelector, QuerySelector(..))
+import Web.HTML (window)
+import Web.HTML.Window (document)
+import Web.HTML.HTMLDocument (toParentNode)
+import Data.Maybe (Maybe(..))
 
 -- | Scale factor: 13 copies = ~1000 nodes (77 * 13 = 1001)
 scaleFactor :: Int
@@ -22,22 +33,17 @@ scaleFactor = 13
 
 main :: Effect Unit
 main = do
-  log "[LesMis Scale Test] Starting..."
-  log $ "[LesMis Scale Test] Build: 2024-12-01 15:10 (scale=" <> show scaleFactor <> "x)"
-  launchAff_ do
-    result <- AW.get ResponseFormat.json "/data/miserables.json"
-    case result of
-      Left err -> liftEffect $ log $ "[LesMis] Fetch error: " <> AW.printError err
-      Right response -> do
-        case decodeJson response.body of
-          Left err -> liftEffect $ log $ "[LesMis] Decode error: " <> printJsonDecodeError err
-          Right (rawModel :: LesMisRawModel) -> do
-            let baseModel = processRawModel rawModel
-            let scaledModel = scaleModel scaleFactor baseModel
-            liftEffect $ log $ "[LesMis] Base: " <> show (length baseModel.nodes) <> " nodes, " <> show (length baseModel.links) <> " links"
-            liftEffect $ log $ "[LesMis] Scaled: " <> show (length scaledModel.nodes) <> " nodes, " <> show (length scaledModel.links) <> " links"
-            liftEffect $ void $ initGUPDemo scaledModel "#app"
-            liftEffect $ log "[LesMis] Demo initialized"
+  log "[Main] Starting with Halogen wrapper around SpagoGridTest..."
+  log "[Main] IMPORTANT: Using selectElement to mount into #app (not body)"
+  HA.runHalogenAff do
+    -- Mount into #app, not body!
+    mAppEl <- HA.selectElement (QuerySelector "#app")
+    case mAppEl of
+      Nothing -> liftEffect $ log "[Main] ERROR: Could not find #app element!"
+      Just appEl -> do
+        liftEffect $ log "[Main] Found #app, mounting Halogen..."
+        _ <- runUI SpagoGridApp.component unit appEl
+        pure unit
 
 -- | Scale up a model by replicating nodes and links N times
 -- | Each replica gets offset IDs and slightly different initial positions

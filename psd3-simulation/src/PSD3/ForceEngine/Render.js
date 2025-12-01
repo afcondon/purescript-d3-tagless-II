@@ -6,8 +6,7 @@ import { select } from "d3-selection";
 // Update circle positions (cx, cy) from bound data's x, y fields
 // O(n) DOM updates only, no data join
 export const updateCirclePositions_ = (selector) => () => {
-  select(selector)
-    .selectAll("circle")
+  select(selector).selectAll("circle")
     .attr("cx", d => d.x)
     .attr("cy", d => d.y);
 };

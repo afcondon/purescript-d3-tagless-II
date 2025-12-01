@@ -14,29 +14,35 @@ import Data.Array as Array
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
+import Data.Traversable (traverse)
 import Data.Number (cos, sin)
 import Data.Nullable (Nullable, null, notNull)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Class.Console (log)
+import Effect.Random (random)
 import Effect.Ref (Ref)
 import Effect.Ref as Ref
 import Data.Loader (LoadedModel)
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Core as Core
-import PSD3.ForceEngine.Types (ForceSpec(..))
+import PSD3.ForceEngine.Render (GroupId(..), updateCirclePositions)
 import PSD3.Transition.Tick as Tick
 import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, radius, id_, class_, width, height, viewBox, opacity)
 import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom)
-import PSD3v2.Capabilities.Selection (select, appendChild, appendData, setAttrs, on)
+import PSD3v2.Capabilities.Selection (select, appendChild, appendData, on)
 import PSD3v2.Interpreter.D3v2 (D3v2M, runD3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SBoundOwns)
 import Types (Scene(..), SimNode, SimLink, NodeType(..), LinkType)
 import Web.DOM.Element (Element)
 
--- FFI for fast tick updates (bypasses PureScript array traversal)
-foreign import updateNodePositions :: forall s d. D3v2Selection_ s Element d -> Effect Unit
-foreign import updateLinkPositions :: forall s d. D3v2Selection_ s Element d -> Effect Unit
+-- Type-safe group IDs for DOM elements
+nodesGroupId :: GroupId
+nodesGroupId = GroupId "#ce-nodes"
+
+-- TODO: Add when links are rendered
+-- linksGroupId :: GroupId
+-- linksGroupId = GroupId "#ce-links"
 
 -- =============================================================================
 -- Types
@@ -86,13 +92,19 @@ initExplorer model containerSelector = do
   -- Create simulation
   sim <- Sim.create Sim.defaultConfig
 
-  -- Fix packages at their grid positions, modules start free
-  let nodesWithFix = map fixPackagePosition model.nodes
+  -- CRITICAL: Randomize initial positions so nodes animate toward grid positions
+  -- Packages stay at grid positions (pinned), modules start at center with jitter
+  randomizedNodes <- randomizeModulePositions model.nodes
+  let nodesWithFix = map fixPackagePosition randomizedNodes
   Sim.setNodes nodesWithFix sim
   Sim.setLinks model.links sim
 
   -- Add Grid forces (pass nodes for dynamic force initialization)
   addGridForces nodesWithFix sim
+
+  -- CRITICAL: Get nodes FROM simulation after setup - these are the actual
+  -- objects the simulation will update. Use these for DOM binding!
+  simNodes <- Sim.getNodes sim
 
   -- Create state
   stateRef <- Ref.new
@@ -104,11 +116,13 @@ initExplorer model containerSelector = do
     , nodePositions: Map.empty
     }
 
-  -- Render initial SVG structure
-  { nodeSel, linkSel } <- runD3v2M $ renderSVGContainer containerSelector model.nodes model.links
+  -- Render initial SVG structure (bind data once)
+  -- IMPORTANT: Must use simNodes (from Sim.getNodes) - these are the actual objects
+  -- the simulation updates, not copies!
+  _ <- runD3v2M $ renderSVGContainer containerSelector simNodes model.links
 
   -- Set up tick callback
-  Sim.onTick (onTick stateRef nodeSel linkSel) sim
+  Sim.onTick (onTick stateRef) sim
 
   -- Start simulation
   Sim.start sim
@@ -126,41 +140,31 @@ fixPackagePosition node = case node.nodeType of
   ModuleNode -> node  -- Modules stay free
 
 -- | Add forces for Grid scene
--- | Based on working CodeExplorerV1/Forces.purs:
--- | - NO ManyBody charge! (was causing explosion)
--- | - Packages: strong positioning (0.8)
--- | - Modules: weaker positioning (0.2)
--- | - Collision: node radius + padding
+-- | Uses optimized grid forces that read node.gridX/gridY/r directly
+-- | (no PureScript callbacks, much faster than Dynamic forces)
 addGridForces :: Array SimNode -> CESimulation -> Effect Unit
 addGridForces nodes sim = do
   -- NO ManyBody! Grid scene doesn't need charge repulsion
 
-  -- Collision: based on node radius + padding
-  let collideConfig = { radiusAccessor: (\n -> n.r + 5.0) :: SimNode -> Number
-                      , strength: 0.7
-                      , iterations: 1 }
-  let collideHandle = Core.createCollideDynamic collideConfig
+  -- Collision: reads node.r directly, adds 5px padding
+  let collideHandle = Core.createCollideGrid 5.0 0.7 1
   _ <- Core.initializeForce collideHandle nodes
   Ref.modify_ (Map.insert "collide" collideHandle) sim.forces
 
-  -- Package ForceX: STRONG pull to grid (0.8)
-  -- Module ForceX: WEAK pull to grid (0.2)
-  let forceXConfig = { xAccessor: _.gridX :: SimNode -> Number
-                     , strength: 0.5 }  -- Intermediate for now, could split by type
-  let forceXHandle = Core.createForceXDynamic forceXConfig
+  -- ForceX: reads node.gridX directly
+  let forceXHandle = Core.createForceXGrid 0.5
   _ <- Core.initializeForce forceXHandle nodes
   Ref.modify_ (Map.insert "gridX" forceXHandle) sim.forces
 
-  -- ForceY: same pattern
-  let forceYConfig = { yAccessor: _.gridY :: SimNode -> Number
-                     , strength: 0.5 }
-  let forceYHandle = Core.createForceYDynamic forceYConfig
+  -- ForceY: reads node.gridY directly
+  let forceYHandle = Core.createForceYGrid 0.5
   _ <- Core.initializeForce forceYHandle nodes
   Ref.modify_ (Map.insert "gridY" forceYHandle) sim.forces
 
   -- Debug: check how many forces we have
   forces <- Ref.read sim.forces
   log $ "[CE] Added " <> show (Map.size forces) <> " forces to simulation"
+  log $ "[CE] Build: 2024-12-01 16:20 - using nodesWithFix for DOM binding"
 
 -- =============================================================================
 -- Transitions
@@ -254,12 +258,8 @@ calculateTreePositions model =
 -- Tick Handler
 -- =============================================================================
 
-onTick
-  :: Ref ExplorerState
-  -> D3v2Selection_ SBoundOwns Element SimNode
-  -> D3v2Selection_ SBoundOwns Element SimLink
-  -> Effect Unit
-onTick stateRef nodeSel _linkSel = do
+onTick :: Ref ExplorerState -> Effect Unit
+onTick stateRef = do
   state <- Ref.read stateRef
 
   -- Handle transition progress if transitioning
@@ -292,8 +292,8 @@ onTick stateRef nodeSel _linkSel = do
 
           Ref.write (state { transitionProgress = Just newProgress }) stateRef
 
-  -- Update visual positions (using fast FFI, not PureScript traversal)
-  updateNodePositions nodeSel
+  -- Update visual positions (using library FFI helpers)
+  updateCirclePositions nodesGroupId
 
 -- | Interpolate a node's position toward its target
 interpolateNode :: Tick.Progress -> Map Int { x :: Number, y :: Number } -> SimNode -> SimNode
@@ -360,3 +360,39 @@ nodeColor :: SimNode -> String
 nodeColor n = case n.nodeType of
   PackageNode -> "#ff7f0e"  -- Orange for packages
   ModuleNode -> "#1f77b4"   -- Blue for modules
+
+-- =============================================================================
+-- Initial Position Randomization
+-- =============================================================================
+
+-- | Randomize initial positions for modules (so they animate toward grid positions)
+-- | Packages keep their grid positions (they'll be pinned anyway)
+-- | Modules start at their parent package position with small random offset
+randomizeModulePositions :: Array SimNode -> Effect (Array SimNode)
+randomizeModulePositions nodes = traverse randomizeIfModule nodes
+  where
+  -- Build a map of package positions for quick lookup
+  packagePositions :: Map Int { x :: Number, y :: Number }
+  packagePositions = Map.fromFoldable $ Array.mapMaybe getPackagePos nodes
+
+  getPackagePos :: SimNode -> Maybe (Tuple Int { x :: Number, y :: Number })
+  getPackagePos n = case n.nodeType of
+    PackageNode -> Just (Tuple n.id { x: n.gridX, y: n.gridY })
+    ModuleNode -> Nothing
+
+  randomizeIfModule :: SimNode -> Effect SimNode
+  randomizeIfModule n = case n.nodeType of
+    PackageNode -> pure n  -- Packages stay at their grid positions
+    ModuleNode -> do
+      -- Start modules at their parent package position with random jitter
+      rx <- random
+      ry <- random
+      let
+        -- Get parent package position or default to (0, 0)
+        { x: pkgX, y: pkgY } = case Map.lookup n.cluster packagePositions of
+          Just pos -> pos
+          Nothing -> { x: 0.0, y: 0.0 }
+        -- Add random offset (-50 to +50)
+        jitterX = (rx - 0.5) * 100.0
+        jitterY = (ry - 0.5) * 100.0
+      pure $ n { x = pkgX + jitterX, y = pkgY + jitterY }

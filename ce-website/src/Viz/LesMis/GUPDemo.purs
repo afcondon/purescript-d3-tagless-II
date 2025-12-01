@@ -25,11 +25,13 @@ module Viz.LesMis.GUPDemo
 
 import Prelude
 
-import Data.Array (filter, length, (!!))
 import Data.Array as Array
+import Data.Array (filter, length, (!!))
 import Data.Map (Map)
 import Data.Map as Map
+import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable)
+import Data.Number (sqrt)
 import Effect (Effect)
 import Effect.Random (randomInt)
 import Effect.Ref (Ref)
@@ -37,7 +39,6 @@ import Effect.Ref as Ref
 import Viz.LesMis.Model (LesMisModel, LesMisNode)
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultLink, defaultCenter)
-import PSD3.ForceEngine.Render (GroupId(..), updateCirclePositions, updateLinkPositions)
 import PSD3.Transition.Tick as Tick
 import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, x1, x2, y1, y2, radius, id_, class_, width, height, viewBox, opacity)
 import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom)
@@ -45,6 +46,16 @@ import PSD3v2.Capabilities.Selection (select, appendChild, appendData, on)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SBoundOwns)
 import Web.DOM.Element (Element)
+
+-- =============================================================================
+-- FFI for fast tick updates (bypasses PureScript array traversal)
+-- =============================================================================
+
+-- | Update node positions directly via D3 selection - O(n) DOM updates only
+foreign import updateNodePositions :: forall s d. D3v2Selection_ s Element d -> Effect Unit
+
+-- | Update link positions directly via D3 selection
+foreign import updateLinkPositions :: forall s d. D3v2Selection_ s Element d -> Effect Unit
 
 -- =============================================================================
 -- Types
@@ -95,16 +106,18 @@ svgHeight = 600.0
 transitionDelta :: Tick.TickDelta
 transitionDelta = 0.025
 
--- | Type-safe group IDs for DOM elements (defined once, used consistently)
-nodesGroupId :: GroupId
-nodesGroupId = GroupId "#lesmis-gup-nodes"
-
-linksGroupId :: GroupId
-linksGroupId = GroupId "#lesmis-gup-links"
-
 -- =============================================================================
 -- Initialization
 -- =============================================================================
+
+-- | Simple link swizzle for initial setup (full node array, array indices match)
+swizzleLinksSimple :: Array LesMisNode -> Array { source :: Int, target :: Int, value :: Number } -> Array SwizzledLink_
+swizzleLinksSimple nodes links = Array.mapMaybe swizzle links
+  where
+  swizzle link = do
+    src <- nodes Array.!! link.source
+    tgt <- nodes Array.!! link.target
+    pure { source: src, target: tgt, value: link.value }
 
 -- | Initialize the GUP demo
 -- | Returns a state ref for controlling the visualization
@@ -114,21 +127,24 @@ initGUPDemo model containerSelector = do
   let allNodeIds = map _.id model.nodes
   let initialEntering = Tick.startProgress allNodeIds Map.empty
 
+  -- IMPORTANT: Swizzle links BEFORE simulation setup!
+  -- D3's forceLink mutates link objects, replacing indices with node refs.
+  -- We need to do our own swizzle first while indices are still integers.
+  let swizzledLinks = swizzleLinksSimple model.nodes model.links
+
   -- Create simulation
   sim <- Sim.create Sim.defaultConfig
   Sim.setNodes model.nodes sim
-  Sim.setLinks model.links sim
+  Sim.setLinks model.links sim  -- This mutates model.links (indices → node refs)
 
-  -- Add forces (Link force swizzles links internally)
+  -- Add forces
   Sim.addForce (ManyBody "charge" defaultManyBody { strength = -100.0, distanceMax = 500.0 }) sim
   Sim.addForce (Collide "collision" defaultCollide { radius = 5.0, strength = 1.0, iterations = 1 }) sim
   Sim.addForce (Center "center" defaultCenter { x = 0.0, y = 0.0, strength = 0.1 }) sim
   Sim.addForce (Link "links" defaultLink { distance = 30.0, strength = 0.5, iterations = 1 }) sim
 
-  -- Get nodes and swizzled links AFTER simulation setup
-  -- The Link force has already converted indices to node references
+  -- Get nodes after simulation has initialized their positions
   currentNodes <- Sim.getNodes sim
-  swizzledLinks <- Sim.getSwizzledLinks sim
 
   -- Render initial SVG structure and get bound selections
   { nodeSel, linkSel } <- runD3v2M $ renderInitial containerSelector currentNodes swizzledLinks
@@ -244,9 +260,8 @@ onSimulationTick stateRef = do
                    }) stateRef
 
   -- Fast path: update positions directly via FFI (no data join!)
-  -- Uses library helpers from ForceEngine.Render
-  updateCirclePositions nodesGroupId
-  updateLinkPositions linksGroupId
+  updateNodePositions state.nodeSelection
+  updateLinkPositions state.linkSelection
 
 -- =============================================================================
 -- Initial Rendering (uses PSD3v2 Selection API, NOT Tree API)
