@@ -120,8 +120,7 @@ import PSD3v2.Selection.Types (SEmpty, SBoundOwns, SBoundInherits, SPending, SEx
 import PSD3v2.Attribute.Types (Attribute, cx, cy, x, y, x1, y1, x2, y2, width, height, radius, fill, stroke, strokeWidth, opacity, transform, viewBox, id_, class_) as X
 import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, ScaleExtent(..)) as X
 
--- Shared data types
-import PSD3.Data.Node (SimulationNode) as X
+-- Shared data types (note: SimulationNode now comes from psd3-simulation)
 import PSD3.Internal.Types (D3Simulation_, Datum_, Index_, Selector) as X
 
 -- Scales
