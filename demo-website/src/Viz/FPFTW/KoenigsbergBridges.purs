@@ -13,8 +13,8 @@ import Prelude
 import Data.Int (toNumber)
 import Data.Nullable (null)
 import Effect (Effect)
-import PSD3.Data.Node (SimulationNode, SwizzledLink)
 import PSD3.ForceEngine.Simulation as Sim
+import PSD3.ForceEngine.Simulation (SimulationNode, SwizzledLink)
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultCenter, defaultLink)
 import PSD3.ForceEngine.Links (swizzleLinks)
 import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, x1, x2, y1, y2, radius, viewBox, width, height, x, y, textContent, textAnchor, fontSize)
@@ -27,9 +27,10 @@ import Web.DOM.Element (Element)
 -- Types
 -- =============================================================================
 
-type Node = SimulationNode (id :: String, name :: String, degree :: Int)
+-- SimulationNode includes id :: Int, so we add name and degree
+type Node = SimulationNode (name :: String, degree :: Int)
 type Link = { source :: Int, target :: Int }
-type SLink = SwizzledLink (id :: String, name :: String, degree :: Int) (index :: Int)
+type SLink = SwizzledLink (name :: String, degree :: Int) (index :: Int)
 
 -- =============================================================================
 -- Data: The Königsberg Graph
@@ -42,10 +43,10 @@ type SLink = SwizzledLink (id :: String, name :: String, degree :: Int) (index :
 -- | - East bank (degree 3: bridges to North, South, Island)
 nodes :: Array Node
 nodes =
-  [ { id: "N", name: "North", degree: 3, x: 0.0, y: -80.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
-  , { id: "S", name: "South", degree: 3, x: 0.0, y: 80.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
-  , { id: "I", name: "Island", degree: 5, x: -80.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
-  , { id: "E", name: "East", degree: 3, x: 80.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
+  [ { id: 0, name: "North", degree: 3, x: 0.0, y: -80.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
+  , { id: 1, name: "South", degree: 3, x: 0.0, y: 80.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
+  , { id: 2, name: "Island", degree: 5, x: -80.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
+  , { id: 3, name: "East", degree: 3, x: 80.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
   ]
 
 -- | The seven bridges

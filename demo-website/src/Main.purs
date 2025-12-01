@@ -65,8 +65,6 @@ import Component.AnimatedTreeCluster as AnimatedTreeCluster
 import Component.GeneralUpdatePattern as GeneralUpdatePattern
 import Component.MermaidTreeDemo as MermaidTreeDemo
 import Component.SceneJoinDemo as SceneJoinDemo
-import Component.ForceConfigPOC as ForceConfigPOC
-import Component.ForceConfigV2Test as ForceConfigV2Test
 import Component.SimpleForceGraph as SimpleForceGraph
 import Component.CodeExplorerV3 as CodeExplorerV3
 
@@ -373,10 +371,12 @@ renderPage route = case spy "Route is" route of
     HH.slot_ _sceneJoinDemo unit SceneJoinDemo.component unit
 
   ForceConfigPOC ->
-    HH.slot_ _forceConfigPOC unit ForceConfigPOC.component unit
+    -- Legacy POC archived, redirect to SimpleForceGraph
+    HH.slot_ _simpleForceGraph unit SimpleForceGraph.component unit
 
   ForceConfigV2Test ->
-    HH.slot_ _forceConfigV2Test unit ForceConfigV2Test.component unit
+    -- Legacy POC archived, redirect to SimpleForceGraph
+    HH.slot_ _simpleForceGraph unit SimpleForceGraph.component unit
 
   SimpleForceGraph ->
     HH.slot_ _simpleForceGraph unit SimpleForceGraph.component unit

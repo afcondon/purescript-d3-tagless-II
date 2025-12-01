@@ -49,8 +49,8 @@ import PSD3v2.VizTree.Tree as T
 -- Types
 -- =============================================================================
 
--- | Row types for the simulation (extra fields beyond x, y, vx, vy / source, target)
-type LesMisNodeRow = (id :: String, group :: Int, fx :: Nullable Number, fy :: Nullable Number, index :: Int)
+-- | Row types for the simulation (extra fields beyond SimulationNode's id, x, y, vx, vy, fx, fy)
+type LesMisNodeRow = (name :: String, group :: Int)
 type LesMisLinkRow = (value :: Number)
 
 -- | Concrete simulation type for Les Misérables
@@ -116,7 +116,7 @@ transitionDelta = 0.025
 initGUPDemo :: LesMisModel -> String -> Effect (Ref LesMisGUPState)
 initGUPDemo model containerSelector = do
   -- Start with all nodes visible, all entering
-  let allNodeIds = map _.id model.nodes
+  let allNodeIds = map _.name model.nodes
   let initialEntering = Tick.startProgress allNodeIds Map.empty
 
   -- Create simulation
@@ -162,7 +162,7 @@ addRandomNodes count stateRef = do
 
   let
     hiddenIds = filter (\id -> not (Array.elem id state.visibleNodeIds))
-      (map _.id state.fullModel.nodes)
+      (map _.name state.fullModel.nodes)
 
   -- Pick random hidden nodes to add
   nodesToAdd <- pickRandom count hiddenIds
@@ -194,7 +194,7 @@ removeRandomNodes count stateRef = do
 
   -- Get the actual node data for exiting nodes (freeze their positions)
   currentNodes <- Sim.getNodes state.simulation
-  let exitingNodeData = filter (\n -> Array.elem n.id nodesToRemove) currentNodes
+  let exitingNodeData = filter (\n -> Array.elem n.name nodesToRemove) currentNodes
   let newExiting = Tick.startTransitions exitingNodeData
 
   -- Remove from entering if they were still entering
@@ -217,7 +217,7 @@ removeRandomNodes count stateRef = do
 resetToFull :: Ref LesMisGUPState -> Effect Unit
 resetToFull stateRef = do
   state <- Ref.read stateRef
-  let allIds = map _.id state.fullModel.nodes
+  let allIds = map _.name state.fullModel.nodes
 
   -- Find newly visible nodes (were hidden, now visible)
   let currentlyHidden = filter (\id -> not (Array.elem id state.visibleNodeIds)) allIds
@@ -297,13 +297,13 @@ renderVisualization stateRef = do
   currentNodes <- Sim.getNodes state.simulation
 
   -- Build render nodes with transition state
-  let visibleNodes = filter (\n -> Array.elem n.id state.visibleNodeIds) currentNodes
+  let visibleNodes = filter (\n -> Array.elem n.name state.visibleNodeIds) currentNodes
 
   let
     renderNodes = map
       ( \n ->
           { node: n
-          , enterProgress: Map.lookup n.id state.enteringProgress
+          , enterProgress: Map.lookup n.name state.enteringProgress
           , exitProgress: Nothing
           }
       )
@@ -323,9 +323,9 @@ renderVisualization stateRef = do
   let allRenderNodes = renderNodes <> exitingRenderNodes
 
   -- Create links only between visible nodes (not exiting)
-  let visibleLinks = filterLinksToSubset _.index visibleNodes state.fullModel.links
+  let visibleLinks = filterLinksToSubset _.id visibleNodes state.fullModel.links
   let
-    swizzledLinks = swizzleLinksByIndex _.index visibleNodes visibleLinks \src tgt i link ->
+    swizzledLinks = swizzleLinksByIndex _.id visibleNodes visibleLinks \src tgt i link ->
       { source: src, target: tgt, value: link.value, index: i, isExiting: false }
 
   -- Create scene data

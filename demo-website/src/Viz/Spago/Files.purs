@@ -103,9 +103,9 @@ type SpagoLink =
 
 type SpagoTreeObj = D3_TreeNode SpagoNodeData
 
+-- | Core spago node fields (id provided by SimulationNode when used together)
 type SpagoNodeRow row =
-  ( id :: NodeID
-  , links ::
+  ( links ::
       { targets :: Dependencies -- the nodes on which this nodes depends
       , sources :: Dependencies -- the nodes which depend on this node
       , treeChildren :: Dependencies
@@ -128,7 +128,8 @@ type SpagoNodeRow row =
   | row
   )
 
-type SpagoNodeData = { | SpagoNodeRow () }
+-- | Raw node data loaded from JSON (includes id explicitly)
+type SpagoNodeData = { id :: NodeID | SpagoNodeRow () }
 -- Note: r (radius) field is added by upgradeSpagoNodeData in Model.purs
 type D3_Radius row = (r :: Number | row)
 type SpagoDataRow = (D3_XY + D3_VxyFxy + SpagoNodeRow + D3_FocusXY + D3_Radius + ())

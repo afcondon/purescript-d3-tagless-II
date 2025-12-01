@@ -24,9 +24,11 @@ import Data.Tuple (Tuple(..))
 -- =============================================================================
 
 -- | A Les Misérables character node
--- | Matches the structure expected by ForceEngine
+-- | Matches the structure expected by ForceEngine (SimulationNode pattern)
+-- | Uses Int id (from index), stores character name separately
 type LesMisNode =
-  { id :: String      -- Character name
+  { id :: Int         -- Node id (same as index, required by SimulationNode)
+  , name :: String    -- Character name (original string id)
   , group :: Int      -- Character group (for coloring)
   , x :: Number       -- X position (simulation)
   , y :: Number       -- Y position (simulation)
@@ -34,13 +36,13 @@ type LesMisNode =
   , vy :: Number      -- Y velocity
   , fx :: Nullable Number  -- Fixed X (for pinning)
   , fy :: Nullable Number  -- Fixed Y (for pinning)
-  , index :: Int      -- Array index (set by initialization)
   }
 
--- | Create a node from JSON data
-mkNode :: { id :: String, group :: Int } -> LesMisNode
-mkNode { id, group } =
-  { id
+-- | Create a node from JSON data with its index
+mkNode :: Int -> { id :: String, group :: Int } -> LesMisNode
+mkNode idx { id, group } =
+  { id: idx           -- Use index as Int id
+  , name: id          -- Store original string id as name
   , group
   , x: 0.0
   , y: 0.0
@@ -48,7 +50,6 @@ mkNode { id, group } =
   , vy: 0.0
   , fx: null
   , fy: null
-  , index: 0
   }
 
 -- =============================================================================
@@ -94,10 +95,10 @@ type LesMisModel =
 processRawModel :: LesMisRawModel -> LesMisModel
 processRawModel raw =
   let
-    -- Create nodes with initialized simulation fields
-    nodes = Array.mapWithIndex (\i n -> (mkNode n) { index = i }) raw.nodes
+    -- Create nodes with initialized simulation fields (index becomes id)
+    nodes = Array.mapWithIndex mkNode raw.nodes
 
-    -- Build ID -> index map
+    -- Build ID -> index map (using original string id from raw data)
     idToIndex = Map.fromFoldable $
       Array.mapWithIndex (\i n -> Tuple n.id i) raw.nodes
 

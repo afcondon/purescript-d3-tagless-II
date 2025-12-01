@@ -19,8 +19,8 @@ import Data.Number (floor) as Number
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import PSD3.Data.Graph (GraphConfig, GraphModel, buildGraphModel, toDataGraph)
-import PSD3.Data.Node (D3_FocusXY, NodeID, SimulationNode)
-import PSD3.Internal.FFI (setInSimNodeFlag)
+import PSD3.Data.Node (D3_FocusXY, NodeID)
+import PSD3.ForceEngine.Simulation (SimulationNode)
 import PSD3.Internal.Types (D3Simulation_, PointXY)
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
@@ -635,9 +635,6 @@ modifyModelNodesInPlace fn model predicate = model { nodes = updatedNodes }
   where
     nodes = partition predicate model.nodes 
     updatedNodes = (fn <$> nodes.yes) <> nodes.no
-
-markNodesToAddToSimulation :: SpagoModel -> (SpagoSimNode -> Boolean) -> SpagoModel
-markNodesToAddToSimulation = modifyModelNodesInPlace setInSimNodeFlag
 
 pinNodesInModel :: PointXY -> SpagoModel -> (SpagoSimNode -> Boolean) -> SpagoModel
 pinNodesInModel xy = modifyModelNodesInPlace (pinNode xy)

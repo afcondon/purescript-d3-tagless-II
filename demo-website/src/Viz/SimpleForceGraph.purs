@@ -10,9 +10,9 @@ import Prelude
 
 import Data.Nullable (null)
 import Effect (Effect)
-import PSD3.Data.Node (SimulationNode, SwizzledLink)
 import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Simulation as Sim
+import PSD3.ForceEngine.Simulation (SimulationNode, SwizzledLink)
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultCenter, defaultLink)
 import PSD3.ForceEngine.Links (swizzleLinks)
 import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, x1, x2, y1, y2, radius, viewBox, width, height)
@@ -26,9 +26,10 @@ import Web.DOM.Element (Element)
 -- Types
 -- =============================================================================
 
-type Node = SimulationNode (id :: String)
+-- SimulationNode already includes id :: Int, so just add name for display
+type Node = SimulationNode (name :: String)
 type Link = { source :: Int, target :: Int }
-type SLink = SwizzledLink (id :: String) (index :: Int)
+type SLink = SwizzledLink (name :: String) (index :: Int)
 
 -- =============================================================================
 -- Data
@@ -36,11 +37,11 @@ type SLink = SwizzledLink (id :: String) (index :: Int)
 
 nodes :: Array Node
 nodes =
-  [ { id: "A", x: 0.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
-  , { id: "B", x: 0.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
-  , { id: "C", x: 0.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
-  , { id: "D", x: 0.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
-  , { id: "E", x: 0.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
+  [ { id: 0, name: "A", x: 0.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
+  , { id: 1, name: "B", x: 0.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
+  , { id: 2, name: "C", x: 0.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
+  , { id: 3, name: "D", x: 0.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
+  , { id: 4, name: "E", x: 0.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
   ]
 
 links :: Array Link
