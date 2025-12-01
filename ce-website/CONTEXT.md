@@ -80,6 +80,71 @@ From `public/data/spago-data/`:
 }
 ```
 
+## Tick-Driven Transitions (NEW - 2024-12-01)
+
+A new `PSD3.Transition.Tick` module provides simulation-tick-driven transitions as an alternative to CSS transitions. This is particularly relevant for scene transitions in the code explorer.
+
+### Why Tick-Driven?
+
+Force simulations already have a tick loop. Instead of coordinating CSS timing separately, we can drive enter/exit animations from the same tick that updates positions. Benefits:
+- Predictable, debuggable behavior
+- No CSS timing coordination
+- Pure PureScript interpolation
+- Transitions and physics are synchronized
+
+### Key API
+
+```purescript
+import PSD3.Transition.Tick as Tick
+
+-- Track progress for entering items (by key)
+enteringProgress :: Map String Tick.Progress
+
+-- Track exiting items with frozen state
+exitingNodes :: Array (Tick.Transitioning Node)
+
+-- In tick handler:
+let { active: stillEntering } = Tick.tickProgressMap 0.025 enteringProgress
+let { active: stillExiting } = Tick.tickTransitions 0.025 exitingNodes
+
+-- In render:
+radius = case enterProgress of
+  Just p -> Tick.lerp 20.0 5.0 (Tick.easeOut p)  -- Large → normal
+  Nothing -> 5.0
+```
+
+### Available Functions
+
+- **Progress tracking**: `tickProgressMap`, `tickTransitions`, `startProgress`, `startTransitions`
+- **Interpolation**: `lerp`, `lerpClamped`, `lerpInt`
+- **Easing**: `linear`, `easeIn`, `easeOut`, `easeInOut`, `easeInQuad`, `easeOutQuad`, etc.
+- **Combinators**: `withEasing`, `ticksForDuration`
+
+### Application to Scene Transitions
+
+For the Code Explorer's scene transitions (Orbit → Tree → Bubblepack), tick-driven transitions enable:
+- Staggered node appearances (assign different starting progress values)
+- Synchronized link drawing with node arrival
+- Smooth property interpolation (position, size, opacity, color)
+- Multi-stage transitions (e.g., tree appears → links straighten → forces engage)
+
+Reference implementation: `demo-website/src/Viz/LesMisV3/GUPDemo.purs`
+
+## Link Filtering & Swizzling (NEW - 2024-12-01)
+
+New `PSD3.ForceEngine.Links` module for working with links in GUP scenarios:
+
+```purescript
+import PSD3.ForceEngine.Links (filterLinksToSubset, swizzleLinksByIndex)
+
+-- Keep only links between visible nodes
+let visibleLinks = filterLinksToSubset _.index visibleNodes allLinks
+
+-- Convert index-based links to node-reference links
+let swizzled = swizzleLinksByIndex _.index nodes links \src tgt idx link ->
+  { source: src, target: tgt, index: idx }
+```
+
 ## Architecture Notes
 
 - No JavaScript in this demo (per CLAUDE.md rules)

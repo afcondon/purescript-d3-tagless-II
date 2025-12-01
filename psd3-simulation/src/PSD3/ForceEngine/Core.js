@@ -127,10 +127,18 @@ export function createCollideDynamic_(config) {
 
 // Create an X positioning force with dynamic target accessor
 // xAccessor is called per-node to get target X position
+let forceXDebugCount = 0;
 export function createForceXDynamic_(config) {
   const force = forceX()
     .x(function(d) {
-      return config.xAccessor(d);
+      const target = config.xAccessor(d);
+      // Only log modules (id >= 93), not packages
+      if (forceXDebugCount < 5 && d.id >= 93) {
+        const dist = Math.abs(d.x - target);
+        console.log(`[ForceXDynamic] module ${d.id} (${d.name?.substring(0,20)}) -> gridX=${target?.toFixed(0)}, x=${d.x?.toFixed(0)}, dist=${dist.toFixed(0)}`);
+        forceXDebugCount++;
+      }
+      return target;
     })
     .strength(config.strength);
   return force;
@@ -156,8 +164,13 @@ export function createForceYDynamic_(config) {
 export function initializeForce_(force) {
   return function(nodes) {
     return function() {
+      const start = performance.now();
       if (force.initialize) {
         force.initialize(nodes, Math.random);
+      }
+      const elapsed = performance.now() - start;
+      if (elapsed > 1) {
+        console.log(`[InitForce] Took ${elapsed.toFixed(1)}ms for ${nodes.length} nodes`);
       }
       return force;
     };
@@ -194,7 +207,12 @@ export function applyForce_(force) {
   return function(alpha) {
     return function() {
       // D3 forces are callable - force(alpha) applies the force
+      const start = performance.now();
       force(alpha);
+      const elapsed = performance.now() - start;
+      if (elapsed > 5) {
+        console.log(`[Force] ${force.name || 'unknown'} took ${elapsed.toFixed(1)}ms`);
+      }
     };
   };
 }
@@ -234,6 +252,7 @@ export function updatePositions_(nodes) {
 export function integratePositions_(nodes) {
   return function(velocityDecay) {
     return function() {
+      const start = performance.now();
       for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];
 
@@ -254,6 +273,10 @@ export function integratePositions_(nodes) {
           node.vy *= velocityDecay;
           node.y += node.vy;
         }
+      }
+      const elapsed = performance.now() - start;
+      if (elapsed > 2) {
+        console.log(`[Integrate] Took ${elapsed.toFixed(1)}ms for ${nodes.length} nodes`);
       }
     };
   };
@@ -300,15 +323,56 @@ export function initializeNodes_(nodes) {
 // Animation Frame
 // =============================================================================
 
+// Tick timing stats
+let tickStats = { count: 0, totalTime: 0, maxTime: 0, lastReport: Date.now() };
+let lastTickEnd = performance.now();
+let gapStats = { total: 0, max: 0, count: 0 };
+
+// Use setTimeout instead of rAF to avoid browser throttling
+// Set to true to use setTimeout instead of requestAnimationFrame
+const USE_SETTIMEOUT = true;
+const FRAME_TIME = 8; // Target ~60fps (accounting for ~8ms work time)
+
 // Request animation frame - returns a cancel function
 export function requestAnimationFrame_(callback) {
   return function() {
-    const id = requestAnimationFrame(function(timestamp) {
-      callback(timestamp)();
-    });
-    return function() {
-      cancelAnimationFrame(id);
+    const scheduleTime = performance.now();
+    const gapSinceLastTick = scheduleTime - lastTickEnd;
+
+    let id;
+    const handler = function(timestamp) {
+      const fireTime = performance.now();
+      const waitTime = fireTime - scheduleTime;
+
+      const start = performance.now();
+      callback(timestamp || fireTime)();
+      const elapsed = performance.now() - start;
+      lastTickEnd = performance.now();
+
+      tickStats.count++;
+      tickStats.totalTime += elapsed;
+      tickStats.maxTime = Math.max(tickStats.maxTime, elapsed);
+      gapStats.total += waitTime;
+      gapStats.max = Math.max(gapStats.max, waitTime);
+      gapStats.count++;
+
+      const now = Date.now();
+      if (now - tickStats.lastReport > 2000) {
+        const avg = tickStats.totalTime / tickStats.count;
+        const avgGap = gapStats.total / gapStats.count;
+        console.log(`[AnimLoop] ${tickStats.count} ticks, work=${avg.toFixed(1)}ms, wait=${avgGap.toFixed(0)}ms (max=${gapStats.max.toFixed(0)}ms) [${USE_SETTIMEOUT ? 'setTimeout' : 'rAF'}]`);
+        tickStats = { count: 0, totalTime: 0, maxTime: 0, lastReport: now };
+        gapStats = { total: 0, max: 0, count: 0 };
+      }
     };
+
+    if (USE_SETTIMEOUT) {
+      id = setTimeout(handler, FRAME_TIME);
+      return function() { clearTimeout(id); };
+    } else {
+      id = requestAnimationFrame(handler);
+      return function() { cancelAnimationFrame(id); };
+    }
   };
 }
 

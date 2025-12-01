@@ -136,20 +136,21 @@ Forces needed from `psd3-simulation`:
 | Force | Current Status | Needed |
 |-------|----------------|--------|
 | `forceManyBody` | ✅ Available | - |
-| `forceManyBody` (filtered) | ❌ Missing | Apply only to nodes matching predicate |
+| `forceManyBody` (filtered) | ✅ Available | `createManyBodyFiltered` in Core |
 | `forceCollide` | ✅ Available (fixed radius) | - |
-| `forceCollide` (dynamic) | ❌ Missing | Radius from accessor function `(node -> Number)` |
+| `forceCollide` (dynamic) | ✅ Available | `createCollideDynamic` with `(node -> Number)` accessor |
 | `forceLink` | ✅ Available | - |
 | `forceCenter` | ✅ Available | - |
 | `forceX` / `forceY` | ✅ Available (fixed target) | - |
-| `forceX` / `forceY` (dynamic) | ❌ Missing | Target from accessor `(node -> Number)` |
+| `forceX` / `forceY` (dynamic) | ✅ Available | `createForceXDynamic`/`createForceYDynamic` |
 | `forceRadial` | ✅ Available | - |
-| `forceRadial` (filtered) | ❌ Missing | Apply only to matching nodes |
+| `forceRadial` (filtered) | ✅ Available | `createRadialFiltered` in Core |
 
 Selection API needed from `psd3-selection`:
 - General Update Pattern (GUP) - ✅ Available
 - Transitions - ✅ Available (basic)
-- Staggered transitions - Need to verify
+- Tick-driven transitions - ✅ Available via `PSD3.Transition.Tick` (recommended for simulations)
+- Staggered transitions - ✅ Achievable via `startProgressFrom` with offset values
 
 ## Development Phases
 
