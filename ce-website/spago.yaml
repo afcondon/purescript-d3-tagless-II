@@ -22,6 +22,7 @@ package:
     - numbers
     - ordered-collections
     - prelude
+    - random
     - psd3-selection
     - psd3-simulation
     - refs
