@@ -18,7 +18,8 @@ import Effect.Ref (Ref)
 import Effect.Ref as Ref
 import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Simulation as Sim
-import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultLink, defaultCenter, swizzleLinks)
+import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultLink, defaultCenter)
+import PSD3.ForceEngine.Links (swizzleLinks)
 import PSD3.Scale (schemeCategory10At)
 import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, x1, x2, y1, y2, radius, id_, class_, width, height, viewBox, opacity)
 import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom)

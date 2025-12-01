@@ -1250,39 +1250,7 @@ pre.line-numbers>code {
   background-color: #5a6268;
 }
 /* ============================================
-   Les Misérables GUP Demo - CSS-based transitions
+   Les Misérables GUP Demo
+   ALL visual properties controlled by PureScript tick handler.
+   No CSS transitions - simulation tick drives everything.
    ============================================ */
-
-/* Base node style with CSS transitions */
-.gup-node {
-  fill: #4682b4;  /* Steel blue for normal state */
-  transition: fill 0.5s ease-out, r 0.5s ease-out, opacity 0.5s ease-out;
-}
-
-/* Entering nodes - start green, small, invisible */
-.gup-node--entering {
-  fill: #2ca02c !important;  /* Green */
-  r: 0 !important;
-  opacity: 0 !important;
-}
-
-/* Updating nodes - gray */
-.gup-node--updating {
-  fill: #7f7f7f !important;  /* Gray */
-}
-
-/* Exiting nodes - brown, shrink, fade */
-.gup-node--exiting {
-  fill: #8c564b !important;  /* Brown */
-  r: 0 !important;
-  opacity: 0 !important;
-}
-
-/* Links also get transitions */
-.gup-link {
-  transition: opacity 0.3s ease-out;
-}
-
-.gup-link--exiting {
-  opacity: 0 !important;
-}

@@ -13,7 +13,8 @@ import Effect (Effect)
 import PSD3.Data.Node (SimulationNode, SwizzledLink)
 import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Simulation as Sim
-import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultCenter, defaultLink, swizzleLinks)
+import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultCenter, defaultLink)
+import PSD3.ForceEngine.Links (swizzleLinks)
 import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, x1, x2, y1, y2, radius, viewBox, width, height)
 import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom)
 import PSD3v2.Capabilities.Selection (select, appendChild, appendData, setAttrs, on)

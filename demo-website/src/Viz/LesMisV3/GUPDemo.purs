@@ -2,17 +2,15 @@
 -- |
 -- | Combines:
 -- | - Force simulation for continuous position updates
--- | - Enter/Update/Exit with CSS transitions for visual feedback
+-- | - Tick-driven transitions for enter/exit animations
 -- |
--- | KEY INSIGHT: Simulation controls position (cx, cy) continuously.
--- | CSS transitions animate non-positional properties based on class:
--- | - Enter: .gup-node--entering (green, radius 0, opacity 0) → .gup-node (normal)
--- | - Update: .gup-node → .gup-node--updating (gray)
--- | - Exit: .gup-node → .gup-node--exiting (brown, radius 0, opacity 0) → removed
+-- | KEY INSIGHT: Simulation tick drives EVERYTHING - positions AND transitions.
+-- | No CSS transitions needed. All visual properties interpolated in PureScript.
 -- |
 -- | NO FFI - uses only library functionality.
 module D3.Viz.LesMisV3.GUPDemo
   ( LesMisGUPState
+  , ExitingNode
   , LesMisSimulation
   , LesMisNodeRow
   , LesMisLinkRow
@@ -26,19 +24,21 @@ import Prelude
 
 import Data.Array as Array
 import Data.Array (filter, length, (!!))
+import Data.Map (Map)
+import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable)
 import Data.Number (sqrt)
 import Effect (Effect)
-import Effect.Aff (Milliseconds(..), delay, launchAff_)
-import Effect.Class (liftEffect)
 import Effect.Random (randomInt)
 import Effect.Ref (Ref)
 import Effect.Ref as Ref
-import D3.Viz.LesMisV3.Model (LesMisModel, LesMisNode, LesMisLink)
+import D3.Viz.LesMisV3.Model (LesMisModel, LesMisNode)
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultLink, defaultCenter)
-import PSD3v2.Attribute.Types (cx, cy, stroke, strokeWidth, x1, x2, y1, y2, radius, id_, class_, width, height, viewBox, opacity)
+import PSD3.ForceEngine.Links (filterLinksToSubset, swizzleLinksByIndex)
+import PSD3.Transition.Tick as Tick
+import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, x1, x2, y1, y2, radius, id_, class_, width, height, viewBox, opacity)
 import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom)
 import PSD3v2.Capabilities.Selection (select, appendChild, on, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M)
@@ -56,16 +56,14 @@ type LesMisLinkRow = ( value :: Number )
 -- | Concrete simulation type for Les Misérables
 type LesMisSimulation = Sim.Simulation LesMisNodeRow LesMisLinkRow
 
--- | GUP state for a node (which class to apply)
-data NodeGUPState = Entering | Updating | Exiting | Normal
+-- | Exiting node uses library's Transitioning type
+type ExitingNode = Tick.Transitioning LesMisNode
 
-derive instance eqNodeGUPState :: Eq NodeGUPState
-derive instance ordNodeGUPState :: Ord NodeGUPState
-
--- | Node with its GUP state
-type GUPNodeWithState =
+-- | Node ready for rendering with computed visual state
+type RenderNode =
   { node :: LesMisNode
-  , gupState :: NodeGUPState
+  , enterProgress :: Maybe Number   -- Just 0.0-1.0 if entering, Nothing if not
+  , exitProgress :: Maybe Number    -- Just 0.0-1.0 if exiting, Nothing if not
   }
 
 -- | Swizzled link for rendering (node references instead of indices)
@@ -79,19 +77,19 @@ type SwizzledLink =
 
 -- | Scene data for the Tree API
 type SceneData =
-  { nodes :: Array GUPNodeWithState
+  { nodes :: Array RenderNode
   , links :: Array SwizzledLink
   }
 
 -- | State for the GUP demo
--- | Tracks previous visible nodes to compute enter/update/exit
+-- | Tracks transitions with progress, driven by simulation tick
 type LesMisGUPState =
-  { fullModel :: LesMisModel           -- Original full dataset
-  , visibleNodeIds :: Array String     -- Currently visible node IDs
-  , previousNodeIds :: Array String    -- Previously visible node IDs (for GUP)
-  , exitingNodes :: Array LesMisNode   -- Nodes being animated out
-  , simulation :: LesMisSimulation     -- Force simulation handle
-  , containerSelector :: String        -- DOM container
+  { fullModel :: LesMisModel                    -- Original full dataset
+  , visibleNodeIds :: Array String              -- Currently visible node IDs
+  , enteringProgress :: Map String Tick.Progress -- nodeId → progress (0→1)
+  , exitingNodes :: Array ExitingNode           -- Nodes being animated out with progress
+  , simulation :: LesMisSimulation              -- Force simulation handle
+  , containerSelector :: String                 -- DOM container
   }
 
 -- =============================================================================
@@ -104,9 +102,10 @@ svgWidth = 900.0
 svgHeight :: Number
 svgHeight = 600.0
 
--- | Transition duration
-transitionDuration :: Milliseconds
-transitionDuration = Milliseconds 500.0
+-- | Transition speed: progress increment per tick
+-- | At 60fps, 0.025 ≈ 40 ticks ≈ 0.67 seconds
+transitionDelta :: Tick.TickDelta
+transitionDelta = 0.025
 
 -- =============================================================================
 -- Initialization
@@ -116,8 +115,9 @@ transitionDuration = Milliseconds 500.0
 -- | Returns a state ref for controlling the visualization
 initGUPDemo :: LesMisModel -> String -> Effect (Ref LesMisGUPState)
 initGUPDemo model containerSelector = do
-  -- Start with all nodes visible
+  -- Start with all nodes visible, all entering
   let allNodeIds = map _.id model.nodes
+  let initialEntering = Tick.startProgress allNodeIds Map.empty
 
   -- Create simulation
   sim <- Sim.create Sim.defaultConfig
@@ -134,7 +134,7 @@ initGUPDemo model containerSelector = do
   stateRef <- Ref.new
     { fullModel: model
     , visibleNodeIds: allNodeIds
-    , previousNodeIds: []  -- No previous state yet
+    , enteringProgress: initialEntering
     , exitingNodes: []
     , simulation: sim
     , containerSelector
@@ -143,22 +143,11 @@ initGUPDemo model containerSelector = do
   -- Render initial SVG structure
   runD3v2M $ renderSVGContainer containerSelector
 
-  -- Set up tick callback
+  -- Set up tick callback - this drives EVERYTHING
   Sim.onTick (onSimulationTick stateRef) sim
 
   -- Start simulation
   Sim.start sim
-
-  -- Do initial render (all nodes will be "entering")
-  updateVisualization stateRef
-
-  -- After enter transition completes, switch entering nodes to normal
-  launchAff_ do
-    delay transitionDuration
-    liftEffect do
-      state <- Ref.read stateRef
-      Ref.write (state { previousNodeIds = state.visibleNodeIds }) stateRef
-      updateVisualization stateRef
 
   pure stateRef
 
@@ -178,20 +167,16 @@ addRandomNodes count stateRef = do
   nodesToAdd <- pickRandom count hiddenIds
   let newVisible = state.visibleNodeIds <> nodesToAdd
 
-  -- Update state: new nodes will show as "entering"
-  Ref.write (state { visibleNodeIds = newVisible }) stateRef
+  -- Add entering transitions for new nodes (start at progress 0)
+  let newEntering = Tick.startProgress nodesToAdd state.enteringProgress
+
+  -- Update state
+  Ref.write (state { visibleNodeIds = newVisible
+                   , enteringProgress = newEntering
+                   }) stateRef
 
   -- Reheat simulation so nodes settle into new positions
   Sim.reheat state.simulation
-
-  updateVisualization stateRef
-
-  -- After transition, update previousNodeIds
-  launchAff_ do
-    delay transitionDuration
-    liftEffect do
-      s <- Ref.read stateRef
-      Ref.write (s { previousNodeIds = s.visibleNodeIds }) stateRef
 
 -- | Remove N random visible nodes
 removeRandomNodes :: Int -> Ref LesMisGUPState -> Effect Unit
@@ -205,28 +190,19 @@ removeRandomNodes count stateRef = do
   -- Get the actual node data for exiting nodes (freeze their positions)
   currentNodes <- Sim.getNodes state.simulation
   let exitingNodeData = filter (\n -> Array.elem n.id nodesToRemove) currentNodes
+  let newExiting = Tick.startTransitions exitingNodeData
 
-  -- Update state: removed nodes will show as "exiting"
+  -- Remove from entering if they were still entering
+  let newEntering = Array.foldl (\m id -> Map.delete id m) state.enteringProgress nodesToRemove
+
+  -- Update state
   Ref.write (state { visibleNodeIds = newVisible
-                   , exitingNodes = state.exitingNodes <> exitingNodeData
+                   , enteringProgress = newEntering
+                   , exitingNodes = state.exitingNodes <> newExiting
                    }) stateRef
 
   -- Reheat simulation so remaining nodes settle
   Sim.reheat state.simulation
-
-  updateVisualization stateRef
-
-  -- After transition, clean up exiting nodes and update previousNodeIds
-  launchAff_ do
-    delay transitionDuration
-    liftEffect do
-      s <- Ref.read stateRef
-      -- Remove the exiting nodes that were added in this batch
-      let remainingExiting = filter (\n -> not (Array.elem n.id nodesToRemove)) s.exitingNodes
-      Ref.write (s { previousNodeIds = s.visibleNodeIds
-                   , exitingNodes = remainingExiting
-                   }) stateRef
-      updateVisualization stateRef
 
 -- | Reset to full dataset
 resetToFull :: Ref LesMisGUPState -> Effect Unit
@@ -234,16 +210,39 @@ resetToFull stateRef = do
   state <- Ref.read stateRef
   let allIds = map _.id state.fullModel.nodes
 
-  -- Clear exiting nodes and set all as visible
-  Ref.write (state { visibleNodeIds = allIds, exitingNodes = [] }) stateRef
-  updateVisualization stateRef
+  -- Find newly visible nodes (were hidden, now visible)
+  let currentlyHidden = filter (\id -> not (Array.elem id state.visibleNodeIds)) allIds
+  let newEntering = Tick.startProgress currentlyHidden state.enteringProgress
 
-  -- After transition, update previousNodeIds
-  launchAff_ do
-    delay transitionDuration
-    liftEffect do
-      s <- Ref.read stateRef
-      Ref.write (s { previousNodeIds = s.visibleNodeIds }) stateRef
+  -- Clear exiting nodes and set all as visible
+  Ref.write (state { visibleNodeIds = allIds
+                   , enteringProgress = newEntering
+                   , exitingNodes = []
+                   }) stateRef
+
+  Sim.reheat state.simulation
+
+-- =============================================================================
+-- Simulation Tick Handler - THE HEART OF TICK-DRIVEN TRANSITIONS
+-- =============================================================================
+
+-- | Called on each simulation tick
+-- | Advances transition progress AND re-renders
+onSimulationTick :: Ref LesMisGUPState -> Effect Unit
+onSimulationTick stateRef = do
+  state <- Ref.read stateRef
+
+  -- Advance and filter transitions using library functions
+  let { active: stillEntering } = Tick.tickProgressMap transitionDelta state.enteringProgress
+  let { active: stillExiting } = Tick.tickTransitions transitionDelta state.exitingNodes
+
+  -- Update state with advanced transitions
+  Ref.write (state { enteringProgress = stillEntering
+                   , exitingNodes = stillExiting
+                   }) stateRef
+
+  -- Render with current state
+  renderVisualization stateRef
 
 -- =============================================================================
 -- Rendering
@@ -271,53 +270,47 @@ renderSVGContainer containerSelector = do
 
   pure unit
 
--- | Update visualization with current visible nodes
--- | Computes enter/update/exit based on previous state
-updateVisualization :: Ref LesMisGUPState -> Effect Unit
-updateVisualization stateRef = do
+-- | Render visualization with current state
+renderVisualization :: Ref LesMisGUPState -> Effect Unit
+renderVisualization stateRef = do
   state <- Ref.read stateRef
 
   -- Get current node positions from simulation
   currentNodes <- Sim.getNodes state.simulation
 
-  -- Compute GUP states
+  -- Build render nodes with transition state
   let visibleNodes = filter (\n -> Array.elem n.id state.visibleNodeIds) currentNodes
 
-  let nodesWithState = map (\n ->
-        let gupState = computeGUPState n.id state.previousNodeIds state.visibleNodeIds
-        in { node: n, gupState }
-      ) visibleNodes
+  let renderNodes = map (\n ->
+        { node: n
+        , enterProgress: Map.lookup n.id state.enteringProgress
+        , exitProgress: Nothing
+        }) visibleNodes
 
-  -- Add exiting nodes (with frozen positions from when they were removed)
-  let exitingWithState = map (\n -> { node: n, gupState: Exiting }) state.exitingNodes
+  -- Add exiting nodes (with frozen positions and exit progress)
+  let exitingRenderNodes = map (\e ->
+        { node: e.item
+        , enterProgress: Nothing
+        , exitProgress: Just e.progress
+        }) state.exitingNodes
 
-  let allNodesWithState = nodesWithState <> exitingWithState
+  let allRenderNodes = renderNodes <> exitingRenderNodes
 
   -- Create links only between visible nodes (not exiting)
-  let visibleLinks = filterLinksForNodes state.fullModel.links visibleNodes
-  let swizzledLinks = swizzleLinksForGUP visibleNodes visibleLinks false
+  let visibleLinks = filterLinksToSubset _.index visibleNodes state.fullModel.links
+  let swizzledLinks = swizzleLinksByIndex _.index visibleNodes visibleLinks \src tgt i link ->
+        { source: src, target: tgt, value: link.value, index: i, isExiting: false }
 
   -- Create scene data
-  let scene = { nodes: allNodesWithState, links: swizzledLinks }
+  let scene = { nodes: allRenderNodes, links: swizzledLinks }
 
-  -- Render with CSS-based GUP
+  -- Render
   runD3v2M $ renderGUPScene scene
 
--- | Compute the GUP state for a node
-computeGUPState :: String -> Array String -> Array String -> NodeGUPState
-computeGUPState nodeId previousIds currentIds =
-  let wasVisible = Array.elem nodeId previousIds
-      isVisible = Array.elem nodeId currentIds
-  in case wasVisible, isVisible of
-    false, true  -> Entering   -- New node
-    true,  true  -> Normal     -- Existing node (could be Updating if we want to flash)
-    true,  false -> Exiting    -- Being removed
-    false, false -> Normal     -- Shouldn't happen
-
--- | Render scene with CSS-based transitions
+-- | Render the scene
 renderGUPScene :: SceneData -> D3v2M Unit
 renderGUPScene scene = do
-  -- Render nodes with GUP classes
+  -- Render nodes
   nodesGroup <- select "#lesmis-gup-nodes"
   let nodesTree = createNodesTree scene
   _ <- renderTree nodesGroup nodesTree
@@ -329,36 +322,58 @@ renderGUPScene scene = do
 
   pure unit
 
--- | Create nodes tree with CSS-based GUP classes
--- | All colors controlled by CSS classes - no inline fill
+-- | Create nodes tree with tick-driven visual properties
 createNodesTree :: SceneData -> T.Tree SceneData
 createNodesTree scene =
   T.sceneNestedJoin "nodes" "circle"
     [scene]
     (_.nodes)
-    (\{ node, gupState } -> T.elem ET.Circle
-      [ cx node.x
-      , cy node.y
-      , radius 5.0
-      -- No fill here - CSS controls all colors via classes
+    (\rn -> T.elem ET.Circle
+      [ cx rn.node.x
+      , cy rn.node.y
+      , radius (radiusForNode rn)
+      , fill (fillForNode rn)
+      , opacity (opacityForNode rn)
       , stroke "#fff"
       , strokeWidth 1.5
-      , class_ (nodeClassForState gupState)
       ])
-    { enterBehavior: Nothing  -- CSS handles transitions
+    { enterBehavior: Nothing
     , updateBehavior: Nothing
     , exitBehavior: Nothing
     }
 
--- | Get the CSS class for a node based on its GUP state
-nodeClassForState :: NodeGUPState -> String
-nodeClassForState = case _ of
-  Entering -> "gup-node gup-node--entering"
-  Updating -> "gup-node gup-node--updating"
-  Exiting  -> "gup-node gup-node--exiting"
-  Normal   -> "gup-node"
+-- =============================================================================
+-- Visual Property Interpolation (Tick-Driven)
+-- =============================================================================
 
--- | Create links tree (simple join, no fancy transitions)
+-- | Get radius for a node based on transition state
+-- | Entering: starts large (20), shrinks to normal (5)
+-- | Exiting: starts normal (5), grows large (20) before disappearing
+-- | Normal: 5
+radiusForNode :: RenderNode -> Number
+radiusForNode { enterProgress, exitProgress } =
+  case enterProgress, exitProgress of
+    Just p, _ -> Tick.lerp 20.0 5.0 p   -- Entering: large → normal
+    _, Just p -> Tick.lerp 5.0 20.0 p   -- Exiting: normal → large (pop)
+    _, _      -> 5.0                     -- Normal
+
+-- | Get fill color for a node based on transition state
+fillForNode :: RenderNode -> String
+fillForNode { enterProgress, exitProgress } =
+  case enterProgress, exitProgress of
+    Just _, _ -> "#2ca02c"   -- Green for entering
+    _, Just _ -> "#8c564b"   -- Brown for exiting
+    _, _      -> "#7f7f7f"   -- Gray for normal
+
+-- | Get opacity for a node based on transition state
+-- | Exiting: fades from 1 → 0
+opacityForNode :: RenderNode -> Number
+opacityForNode { exitProgress } =
+  case exitProgress of
+    Just p -> Tick.lerp 1.0 0.0 p  -- Fade out
+    _      -> 1.0
+
+-- | Create links tree
 createLinksTree :: SceneData -> T.Tree SceneData
 createLinksTree scene =
   T.sceneNestedJoin "links" "line"
@@ -372,21 +387,11 @@ createLinksTree scene =
       , strokeWidth (sqrt link.value)
       , stroke "#999"
       , opacity 0.6
-      , class_ (if link.isExiting then "gup-link gup-link--exiting" else "gup-link")
       ])
-    { enterBehavior: Nothing  -- CSS handles transitions
+    { enterBehavior: Nothing
     , updateBehavior: Nothing
     , exitBehavior: Nothing
     }
-
--- =============================================================================
--- Simulation Tick Handler
--- =============================================================================
-
--- | Called on each simulation tick - update positions
--- | Re-renders the entire scene with updated positions from simulation
-onSimulationTick :: Ref LesMisGUPState -> Effect Unit
-onSimulationTick stateRef = updateVisualization stateRef
 
 -- =============================================================================
 -- Helpers
@@ -409,27 +414,3 @@ pickRandomIndices n maxIdx acc = do
   if Array.elem idx acc
     then pickRandomIndices n maxIdx acc  -- Try again
     else pickRandomIndices (n - 1) maxIdx (acc <> [idx])
-
--- | Filter links to only those between visible nodes
-filterLinksForNodes :: Array LesMisLink -> Array LesMisNode -> Array LesMisLink
-filterLinksForNodes links nodes =
-  let nodeIndices = map _.index nodes
-  in filter (\l -> Array.elem l.source nodeIndices && Array.elem l.target nodeIndices) links
-
--- | Swizzle links for GUP (convert indices to node refs)
--- | Uses mapMaybe to filter out any links where endpoints aren't found
-swizzleLinksForGUP :: Array LesMisNode -> Array LesMisLink -> Boolean -> Array SwizzledLink
-swizzleLinksForGUP nodes links isExiting =
-  Array.mapMaybe swizzleLink links
-    # Array.mapWithIndex (\i l -> l { index = i })
-  where
-  swizzleLink :: LesMisLink -> Maybe SwizzledLink
-  swizzleLink link = do
-    sourceNode <- Array.find (\n -> n.index == link.source) nodes
-    targetNode <- Array.find (\n -> n.index == link.target) nodes
-    pure { source: sourceNode
-         , target: targetNode
-         , value: link.value
-         , index: 0  -- Will be set by mapWithIndex
-         , isExiting
-         }

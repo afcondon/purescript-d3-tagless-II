@@ -27,6 +27,8 @@ module PSD3.ForceEngine
   , module Simulation
     -- * Re-exports from Core (low-level)
   , module Core
+    -- * Re-exports from Links
+  , module Links
   ) where
 
 import PSD3.ForceEngine.Types
@@ -88,3 +90,9 @@ import PSD3.ForceEngine.Core
   , simulationTick
   , logNodes
   ) as Core
+
+import PSD3.ForceEngine.Links
+  ( swizzleLinks
+  , swizzleLinksByIndex
+  , filterLinksToSubset
+  ) as Links

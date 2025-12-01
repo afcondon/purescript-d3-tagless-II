@@ -11,7 +11,6 @@ module PSD3.ForceEngine.Types
     -- * Link Types
   , SimLink
   , RawLink
-  , swizzleLinks
     -- * Simulation State
   , SimulationState
   , defaultSimParams
@@ -39,10 +38,6 @@ module PSD3.ForceEngine.Types
   ) where
 
 import Prelude
-
-import Data.Array as Array
-import Data.Maybe (Maybe(..))
-import Partial.Unsafe (unsafeCrashWith)
 
 
 -- =============================================================================
@@ -272,40 +267,3 @@ forceName = case _ of
   PositionY name _ -> name
   Radial name _ -> name
 
--- =============================================================================
--- Link Swizzling
--- =============================================================================
-
--- | Convert raw links (integer indices) to swizzled links (node references)
--- |
--- | This is needed because:
--- | 1. D3's forceLink mutates links by replacing indices with node references
--- | 2. We need node references for rendering (to read x,y from source/target)
--- | 3. We want to keep the original links intact for the simulation
--- |
--- | The transform function allows you to copy extra fields from the raw link.
--- |
--- | Example:
--- | ```purescript
--- | let swizzled = swizzleLinks nodes rawLinks \src tgt i link ->
--- |       { source: src, target: tgt, index: i, value: link.value }
--- | ```
-swizzleLinks
-  :: forall node rawLink swizzled
-   . Array node
-  -> Array { source :: Int, target :: Int | rawLink }
-  -> (node -> node -> Int -> { source :: Int, target :: Int | rawLink } -> swizzled)
-  -> Array swizzled
-swizzleLinks nodes links transform =
-  Array.mapWithIndex swizzle links
-  where
-  swizzle i link =
-    let src = unsafeArrayIndex nodes link.source
-        tgt = unsafeArrayIndex nodes link.target
-    in transform src tgt i link
-
--- | Safe-ish array index (crashes with helpful message if out of bounds)
-unsafeArrayIndex :: forall a. Array a -> Int -> a
-unsafeArrayIndex arr i = case Array.index arr i of
-  Just x -> x
-  Nothing -> unsafeCrashWith ("swizzleLinks: Array index out of bounds: " <> show i)
