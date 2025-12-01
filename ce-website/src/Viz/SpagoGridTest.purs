@@ -4,8 +4,8 @@
 -- | Supports Grid and Tree scenes with smooth tick-driven transitions.
 -- |
 -- | KEY INSIGHT: Simulation tick drives EVERYTHING - positions AND transitions.
--- | All visual properties interpolated in PureScript using library primitives.
--- | NO custom FFI - uses only library functionality.
+-- | All visual properties interpolated using library primitives.
+-- | Efficient pattern: appendData (bind once) + mutation (update in place)
 module Viz.SpagoGridTest
   ( initSpagoGridTest
   , transitionToScene
@@ -16,12 +16,12 @@ import Prelude
 
 import Data.Array as Array
 import Data.Either (Either(..))
+import Viz.SpagoGridTest.GridLayout as GridLayout
+import Viz.SpagoGridTest.TreeLayout as TreeLayout
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
-import Data.Nullable (Nullable)
 import Data.Nullable as Nullable
 import Effect.Unsafe (unsafePerformEffect)
-import Foreign.Object (Object)
 import Foreign.Object as Object
 import Data.Tuple (Tuple(..))
 import Data.Traversable (traverse)
@@ -32,51 +32,52 @@ import Effect.Ref (Ref)
 import Effect.Ref as Ref
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
-import Data.Int (toNumber, ceil, floor)
+import Data.Int (toNumber, floor)
 import Data.Loader (loadModel, LoadedModel)
-import Data.Number (sqrt) as Num
-import Data.Number (cos, sin) as Data.Number
 import PSD3.Scale (interpolateTurbo)
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Core as Core
+import PSD3.ForceEngine.Render (GroupId(..), updateCirclePositions)
 import PSD3.Transition.Tick as Tick
 import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, radius, id_, class_, viewBox)
 import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom)
-import PSD3v2.Capabilities.Selection (select, appendChild, on, renderTree)
-import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M)
-import PSD3v2.Selection.Types (ElementType(..))
-import PSD3v2.VizTree.Tree as T
-import Types (SimNode, SimLink, NodeType(..), LinkType, Scene(..))
+import PSD3v2.Capabilities.Selection (select, appendChild, appendData, on)
+import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M, D3v2Selection_)
+import PSD3v2.Selection.Types (ElementType(..), SBoundOwns)
+import Types (SimNode, NodeType(..), LinkType, Scene(..))
 import Web.DOM.Element (Element)
 
 -- =============================================================================
 -- Types
 -- =============================================================================
 
-type NodeRow = ( id :: Int, name :: String, nodeType :: NodeType, package :: String
-               , r :: Number, cluster :: Int, targets :: Array Int, sources :: Array Int
-               , gridX :: Number, gridY :: Number, orbitAngle :: Number
-               , treeX :: Number, treeY :: Number
-               , fx :: Nullable Number, fy :: Nullable Number )
-type LinkRow = ( linkType :: LinkType )
+-- | Extra fields beyond SimulationNode (id, x, y, vx, vy, fx, fy are in SimulationNode)
+type NodeRow =
+  ( name :: String
+  , nodeType :: NodeType
+  , package :: String
+  , r :: Number
+  , cluster :: Int
+  , targets :: Array Int
+  , sources :: Array Int
+  , gridX :: Number
+  , gridY :: Number
+  , orbitAngle :: Number
+  , treeX :: Number
+  , treeY :: Number
+  )
+
+type LinkRow = (linkType :: LinkType)
 
 type SpagoSimulation = Sim.Simulation NodeRow LinkRow
 
--- | Node ready for rendering with computed position
--- | During transition, x/y are interpolated; otherwise from simulation
-type RenderNode =
-  { node :: SimNode
-  , renderX :: Number
-  , renderY :: Number
-  }
-
 -- | Transition state during scene changes
--- | Stores both start and target positions for pure interpolation
+-- | Stores both start and target positions for interpolation
 type TransitionState =
   { targetScene :: Scene
-  , progress :: Tick.Progress  -- 0.0 to 1.0
-  , startPositions :: Object { x :: Number, y :: Number }   -- snapshot at transition start
-  , targetPositions :: Object { x :: Number, y :: Number }  -- calculated for target scene
+  , progress :: Tick.Progress -- 0.0 to 1.0
+  , startPositions :: Sim.PositionMap -- snapshot at transition start
+  , targetPositions :: Sim.PositionMap -- calculated for target scene
   }
 
 -- | Main application state
@@ -98,11 +99,8 @@ globalExplorerRef = unsafePerformEffect $ Ref.new Nothing
 -- Constants
 -- =============================================================================
 
-viewBoxWidth :: Number
-viewBoxWidth = 4000.0
-
-viewBoxHeight :: Number
-viewBoxHeight = 2500.0
+nodesGroupId :: GroupId
+nodesGroupId = GroupId "#spago-test-nodes"
 
 -- =============================================================================
 -- Initialization
@@ -122,10 +120,10 @@ initSpagoGridTest containerSelector = launchAff_ do
 
 initWithModel :: LoadedModel -> String -> Effect (Ref ExplorerState)
 initWithModel model containerSelector = do
-  log "[Explorer] BUILD: Using library Tick module for transitions"
+  log "[Explorer] BUILD: Using library Sim.interpolatePositionsInPlace for fast transitions"
 
   -- Recalculate grid positions based on viewBox dimensions
-  let gridNodes = recalculateGridPositions model.nodes model.packageCount
+  let gridNodes = GridLayout.recalculateGridPositions model.nodes model.packageCount
 
   -- Randomize module positions
   randomizedNodes <- randomizeModulePositions gridNodes
@@ -150,8 +148,11 @@ initWithModel model containerSelector = do
   _ <- Core.initializeForce forceYHandle nodesWithFix
   Ref.modify_ (Map.insert "gridY" forceYHandle) sim.forces
 
-  -- Render initial SVG container structure
-  _ <- runD3v2M $ renderSVGContainer containerSelector
+  -- Get nodes from simulation for initial render
+  simNodes <- Sim.getNodes sim
+
+  -- Render SVG and bind data ONCE
+  _ <- runD3v2M $ renderSVG containerSelector simNodes
 
   -- Create state
   stateRef <- Ref.new
@@ -192,9 +193,10 @@ randomizeModulePositions nodes = traverse randomizeIfModule nodes
     ModuleNode -> do
       rx <- random
       ry <- random
-      let { x: pkgX, y: pkgY } = case Object.lookup (show n.cluster) packagePositions of
-            Just pos -> pos
-            Nothing -> { x: 0.0, y: 0.0 }
+      let
+        { x: pkgX, y: pkgY } = case Object.lookup (show n.cluster) packagePositions of
+          Just pos -> pos
+          Nothing -> { x: 0.0, y: 0.0 }
       let jitterX = (rx - 0.5) * 100.0
       let jitterY = (ry - 0.5) * 100.0
       pure $ n { x = pkgX + jitterX, y = pkgY + jitterY }
@@ -207,90 +209,47 @@ onTick :: Ref ExplorerState -> Effect Unit
 onTick stateRef = do
   state <- Ref.read stateRef
 
-  -- Get current node positions from simulation
-  simNodes <- Sim.getNodes state.simulation
-
-  -- Advance transition if active, build render nodes
   case state.transition of
-    Nothing -> do
-      -- Not transitioning: use simulation positions directly
-      let renderNodes = map (\n -> { node: n, renderX: n.x, renderY: n.y }) simNodes
-      renderVisualization renderNodes
+    Nothing ->
+      -- Not transitioning: simulation updates positions, just render
+      pure unit
 
     Just t -> do
       let newProgress = min 1.0 (t.progress + transitionDelta)
 
-      if newProgress >= 1.0
-        then do
-          -- Transition complete
-          log $ "[Explorer] Transition complete: " <> show t.targetScene
+      if newProgress >= 1.0 then do
+        -- Transition complete
+        log $ "[Explorer] Transition complete: " <> show t.targetScene
 
-          -- Build render nodes at final positions
-          let renderNodes = map (finalizeNodePosition t) simNodes
+        -- Finalize positions
+        case t.targetScene of
+          Grid -> do
+            -- Set final positions and unpin (let forces take over)
+            Sim.updatePositionsInPlace t.targetPositions state.simulation
+            Sim.unpinNodesInPlace state.simulation
+          _ -> do
+            -- Pin at final positions (no forces for Tree/Orbit)
+            Sim.pinNodesAtPositions t.targetPositions state.simulation
 
-          -- Update simulation nodes to target positions (for next scene)
-          let finalizedNodes = map (applyFinalPosition t) simNodes
-          Sim.setNodes finalizedNodes state.simulation
+        -- Clear transition, update scene
+        Ref.write
+          ( state
+              { currentScene = t.targetScene
+              , transition = Nothing
+              }
+          )
+          stateRef
 
-          -- Clear transition, update scene
-          Ref.write (state
-            { currentScene = t.targetScene
-            , transition = Nothing
-            }) stateRef
+      else do
+        -- Interpolate positions in place (mutates simulation nodes)
+        let easedProgress = Tick.easeInOutCubic newProgress
+        Sim.interpolatePositionsInPlace t.startPositions t.targetPositions easedProgress state.simulation
 
-          -- For Grid: unpin nodes so forces take over
-          -- For Tree: keep nodes pinned at final positions
-          case t.targetScene of
-            Grid -> Sim.reheat state.simulation
-            _ -> pure unit
+        -- Update progress
+        Ref.write (state { transition = Just (t { progress = newProgress }) }) stateRef
 
-          renderVisualization renderNodes
-
-        else do
-          -- Interpolate positions using library functions
-          let easedProgress = Tick.easeInOutCubic newProgress
-          let renderNodes = map (interpolateNodePosition t easedProgress) simNodes
-
-          -- Update progress
-          Ref.write (state { transition = Just (t { progress = newProgress }) }) stateRef
-
-          renderVisualization renderNodes
-
--- | Interpolate a node's render position between start and target
-interpolateNodePosition :: TransitionState -> Tick.Progress -> SimNode -> RenderNode
-interpolateNodePosition t easedProgress node =
-  let
-    nodeKey = show node.id
-    startPos = Object.lookup nodeKey t.startPositions
-    targetPos = Object.lookup nodeKey t.targetPositions
-  in case startPos, targetPos of
-    Just s, Just tgt ->
-      { node
-      , renderX: Tick.lerp s.x tgt.x easedProgress
-      , renderY: Tick.lerp s.y tgt.y easedProgress
-      }
-    _, _ ->
-      -- Fallback to current position
-      { node, renderX: node.x, renderY: node.y }
-
--- | Finalize node position at end of transition
-finalizeNodePosition :: TransitionState -> SimNode -> RenderNode
-finalizeNodePosition t node =
-  let nodeKey = show node.id
-  in case Object.lookup nodeKey t.targetPositions of
-    Just tgt -> { node, renderX: tgt.x, renderY: tgt.y }
-    Nothing -> { node, renderX: node.x, renderY: node.y }
-
--- | Apply final position to node (for updating simulation state)
-applyFinalPosition :: TransitionState -> SimNode -> SimNode
-applyFinalPosition t node =
-  let nodeKey = show node.id
-  in case Object.lookup nodeKey t.targetPositions of
-    Just tgt ->
-      case t.targetScene of
-        Grid -> node { x = tgt.x, y = tgt.y, fx = Nullable.null, fy = Nullable.null }
-        _ -> node { x = tgt.x, y = tgt.y, fx = Nullable.notNull tgt.x, fy = Nullable.notNull tgt.y }
-    Nothing -> node
+  -- Always update DOM positions from (possibly mutated) node data
+  updateCirclePositions nodesGroupId
 
 -- =============================================================================
 -- Scene Transitions
@@ -310,169 +269,74 @@ transitionToScene targetScene stateRef = do
     -- Calculate target positions for new scene
     let targetPositions = calculateTargetPositions targetScene nodes
 
+    -- Pin all nodes at current positions
+    Sim.pinNodesInPlace state.simulation
+
     -- Start transition
-    Ref.write (state
-      { transition = Just
-          { targetScene
-          , progress: 0.0
-          , startPositions
-          , targetPositions
+    Ref.write
+      ( state
+          { transition = Just
+              { targetScene
+              , progress: 0.0
+              , startPositions
+              , targetPositions
+              }
           }
-      }) stateRef
+      )
+      stateRef
 
     -- Keep simulation ticking during transition
     Sim.reheat state.simulation
 
 -- | Calculate target positions for a scene
-calculateTargetPositions :: Scene -> Array SimNode -> Object { x :: Number, y :: Number }
+calculateTargetPositions :: Scene -> Array SimNode -> Sim.PositionMap
 calculateTargetPositions scene nodes = case scene of
-  Grid -> calculateGridPositions nodes
-  Tree -> calculateTreePositions nodes
+  Grid -> GridLayout.calculateGridPositions nodes
+  Tree -> TreeLayout.calculateTreePositions nodes
   _ -> Object.empty
 
-calculateGridPositions :: Array SimNode -> Object { x :: Number, y :: Number }
-calculateGridPositions nodes =
-  Object.fromFoldable $ map (\n -> Tuple (show n.id) { x: n.gridX, y: n.gridY }) nodes
-
-calculateTreePositions :: Array SimNode -> Object { x :: Number, y :: Number }
-calculateTreePositions nodes =
-  let
-    packages = Array.filter (\n -> n.nodeType == PackageNode) nodes
-    packageCount = Array.length packages
-
-    ringRadius = 800.0
-    packagePositions = Array.mapWithIndex (\i pkg ->
-      let
-        angle = 2.0 * pi * toNumber i / toNumber packageCount
-        x = cos angle * ringRadius
-        y = sin angle * ringRadius
-      in Tuple (show pkg.id) { x, y }
-    ) packages
-
-    packagePosMap = Object.fromFoldable packagePositions
-
-    modulePositions = Array.mapMaybe (\n ->
-      if n.nodeType == ModuleNode
-        then case Object.lookup (show n.cluster) packagePosMap of
-          Just { x: px, y: py } ->
-            let
-              offsetAngle = toNumber n.id * 0.3
-              offsetDist = 50.0 + toNumber (n.id `mod` 100) * 0.5
-              mx = px + cos offsetAngle * offsetDist
-              my = py + sin offsetAngle * offsetDist
-            in Just (Tuple (show n.id) { x: mx, y: my })
-          Nothing -> Nothing
-        else Nothing
-    ) nodes
-  in
-    Object.fromFoldable (packagePositions <> modulePositions)
-  where
-  pi = 3.14159265358979
-  cos = Data.Number.cos
-  sin = Data.Number.sin
-
 -- =============================================================================
--- Rendering (Declarative Tree API)
+-- Rendering (bind data ONCE at initialization)
 -- =============================================================================
 
-renderSVGContainer :: String -> D3v2M Unit
-renderSVGContainer containerSelector = do
+renderSVG :: String -> Array SimNode -> D3v2M { nodeSel :: D3v2Selection_ SBoundOwns Element SimNode }
+renderSVG containerSelector nodes = do
   container <- select containerSelector
 
   svg <- appendChild SVG
-    [ viewBox (show ((-viewBoxWidth) / 2.0) <> " " <> show ((-viewBoxHeight) / 2.0) <> " " <> show viewBoxWidth <> " " <> show viewBoxHeight)
+    [ viewBox (show ((-GridLayout.viewBoxWidth) / 2.0) <> " " <> show ((-GridLayout.viewBoxHeight) / 2.0) <> " " <> show GridLayout.viewBoxWidth <> " " <> show GridLayout.viewBoxHeight)
     , id_ "spago-test-svg"
     , class_ "ce-viz"
-    ] container
+    ]
+    container
 
   zoomGroup <- appendChild Group [ id_ "spago-test-zoom-group" ] svg
   _ <- appendChild Group [ id_ "spago-test-links" ] zoomGroup
-  _ <- appendChild Group [ id_ "spago-test-nodes" ] zoomGroup
+  nodesGroup <- appendChild Group [ id_ "spago-test-nodes" ] zoomGroup
+
+  -- Bind node data ONCE - these same objects will be mutated during transitions
+  nodeSel <- appendData Circle nodes
+    [ cx (_.x :: SimNode -> Number)
+    , cy (_.y :: SimNode -> Number)
+    , radius (_.r :: SimNode -> Number)
+    , fill (nodeColor :: SimNode -> String)
+    , stroke "#fff"
+    , strokeWidth 0.5
+    ]
+    nodesGroup
 
   _ <- on (Zoom $ defaultZoom (ScaleExtent 0.1 10.0) "#spago-test-zoom-group") svg
 
-  pure unit
-
--- | Render visualization with current render nodes
-renderVisualization :: Array RenderNode -> Effect Unit
-renderVisualization renderNodes = do
-  runD3v2M $ renderScene renderNodes
-
--- | Render the scene using Tree API
-renderScene :: Array RenderNode -> D3v2M Unit
-renderScene renderNodes = do
-  nodesGroup <- select "#spago-test-nodes"
-  let nodesTree = createNodesTree renderNodes
-  _ <- renderTree nodesGroup nodesTree
-  pure unit
-
--- | Create nodes tree with positions from render nodes
-createNodesTree :: Array RenderNode -> T.Tree (Array RenderNode)
-createNodesTree renderNodes =
-  T.sceneNestedJoin "circles" "circle"
-    [ renderNodes ]
-    identity
-    ( \rn -> T.elem Circle
-        [ cx rn.renderX
-        , cy rn.renderY
-        , radius rn.node.r
-        , fill (nodeColor rn.node)
-        , stroke "#fff"
-        , strokeWidth 0.5
-        ]
-    )
-    { enterBehavior: Nothing
-    , updateBehavior: Nothing
-    , exitBehavior: Nothing
-    }
+  pure { nodeSel }
 
 -- | Color by package cluster using Turbo interpolator
 nodeColor :: SimNode -> String
 nodeColor n =
-  let t = numMod (toNumber n.cluster * 0.618033988749895) 1.0
-  in interpolateTurbo t
-
--- =============================================================================
--- Grid Layout
--- =============================================================================
-
-recalculateGridPositions :: Array SimNode -> Int -> Array SimNode
-recalculateGridPositions nodes packageCount =
   let
-    aspect = viewBoxWidth / viewBoxHeight
-    gridCols = ceil (Num.sqrt (toNumber packageCount * aspect))
-    gridRows = ceil (toNumber packageCount / toNumber gridCols)
-
-    margin = 0.1
-    usableWidth = viewBoxWidth * (1.0 - 2.0 * margin)
-    usableHeight = viewBoxHeight * (1.0 - 2.0 * margin)
-
-    spacingX = usableWidth / toNumber gridCols
-    spacingY = usableHeight / toNumber gridRows
-
-    gridColsN = toNumber gridCols
-    gridRowsN = toNumber gridRows
-
-    updateNode node = case node.nodeType of
-      PackageNode ->
-        let
-          idx = node.id
-          row = idx / gridCols
-          col = idx `mod` gridCols
-          gx = (toNumber col - gridColsN / 2.0 + 0.5) * spacingX
-          gy = (toNumber row - gridRowsN / 2.0 + 0.5) * spacingY
-        in node { gridX = gx, gridY = gy, x = gx, y = gy }
-
-      ModuleNode ->
-        let
-          pkgIdx = node.cluster
-          pkgRow = pkgIdx / gridCols
-          pkgCol = pkgIdx `mod` gridCols
-          pkgX = (toNumber pkgCol - gridColsN / 2.0 + 0.5) * spacingX
-          pkgY = (toNumber pkgRow - gridRowsN / 2.0 + 0.5) * spacingY
-        in node { gridX = pkgX, gridY = pkgY, x = pkgX, y = pkgY }
+    t = numMod (toNumber n.cluster * 0.618033988749895) 1.0
   in
-    map updateNode nodes
+    interpolateTurbo t
 
+-- | Floating point modulo
 numMod :: Number -> Number -> Number
 numMod a b = a - b * toNumber (floor (a / b))

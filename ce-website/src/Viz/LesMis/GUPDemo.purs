@@ -29,9 +29,6 @@ import Data.Array as Array
 import Data.Array (filter, length, (!!))
 import Data.Map (Map)
 import Data.Map as Map
-import Data.Maybe (Maybe(..))
-import Data.Nullable (Nullable)
-import Data.Number (sqrt)
 import Effect (Effect)
 import Effect.Random (randomInt)
 import Effect.Ref (Ref)
@@ -61,8 +58,9 @@ foreign import updateLinkPositions :: forall s d. D3v2Selection_ s Element d -> 
 -- Types
 -- =============================================================================
 
--- | Row types for the simulation (extra fields beyond x, y, vx, vy / source, target)
-type LesMisNodeRow = ( id :: String, group :: Int, fx :: Nullable Number, fy :: Nullable Number, index :: Int )
+-- | Row types for the simulation (extra fields beyond SimulationNode)
+-- | Note: Original string id stored as 'name', id is now Int (same as index)
+type LesMisNodeRow = ( name :: String, group :: Int )
 type LesMisLinkRow = ( value :: Number )
 
 -- | Concrete simulation type for Les Misérables
@@ -124,7 +122,7 @@ swizzleLinksSimple nodes links = Array.mapMaybe swizzle links
 initGUPDemo :: LesMisModel -> String -> Effect (Ref LesMisGUPState)
 initGUPDemo model containerSelector = do
   -- Start with all nodes visible, all entering
-  let allNodeIds = map _.id model.nodes
+  let allNodeIds = map _.name model.nodes
   let initialEntering = Tick.startProgress allNodeIds Map.empty
 
   -- IMPORTANT: Swizzle links BEFORE simulation setup!
@@ -179,7 +177,7 @@ addRandomNodes count stateRef = do
   state <- Ref.read stateRef
 
   let hiddenIds = filter (\id -> not (Array.elem id state.visibleNodeIds))
-                         (map _.id state.fullModel.nodes)
+                         (map _.name state.fullModel.nodes)
 
   -- Pick random hidden nodes to add
   nodesToAdd <- pickRandom count hiddenIds
@@ -207,7 +205,7 @@ removeRandomNodes count stateRef = do
 
   -- Get the actual node data for exiting nodes (freeze their positions)
   currentNodes <- Sim.getNodes state.simulation
-  let exitingNodeData = filter (\n -> Array.elem n.id nodesToRemove) currentNodes
+  let exitingNodeData = filter (\n -> Array.elem n.name nodesToRemove) currentNodes
   let newExiting = Tick.startTransitions exitingNodeData
 
   -- Remove from entering if they were still entering
@@ -226,7 +224,7 @@ removeRandomNodes count stateRef = do
 resetToFull :: Ref LesMisGUPState -> Effect Unit
 resetToFull stateRef = do
   state <- Ref.read stateRef
-  let allIds = map _.id state.fullModel.nodes
+  let allIds = map _.name state.fullModel.nodes
 
   -- Find newly visible nodes (were hidden, now visible)
   let currentlyHidden = filter (\id -> not (Array.elem id state.visibleNodeIds)) allIds

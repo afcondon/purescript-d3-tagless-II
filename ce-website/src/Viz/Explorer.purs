@@ -49,12 +49,11 @@ nodesGroupId = GroupId "#ce-nodes"
 -- =============================================================================
 
 -- | Row types for simulation
--- | Note: fx/fy are included here because getNodes returns { x, y, vx, vy | nodeRow }
-type NodeRow = ( id :: Int, name :: String, nodeType :: NodeType, package :: String
+-- | Extra fields beyond SimulationNode (id, x, y, vx, vy, fx, fy are in SimulationNode)
+type NodeRow = ( name :: String, nodeType :: NodeType, package :: String
                , r :: Number, cluster :: Int, targets :: Array Int, sources :: Array Int
                , gridX :: Number, gridY :: Number, orbitAngle :: Number
-               , treeX :: Number, treeY :: Number
-               , fx :: Nullable Number, fy :: Nullable Number )
+               , treeX :: Number, treeY :: Number )
 type LinkRow = ( linkType :: LinkType )
 
 type CESimulation = Sim.Simulation NodeRow LinkRow

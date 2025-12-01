@@ -3,7 +3,7 @@ module Types where
 
 import Prelude
 import Data.Maybe (Maybe)
-import Data.Nullable (Nullable)
+import PSD3.ForceEngine.Simulation (SimulationNode)
 
 -- | A module in the codebase
 type Module =
@@ -22,17 +22,11 @@ type Package =
   }
 
 -- | A simulation node (module or package)
-type SimNode =
-  { id :: Int
-  , name :: String
+-- | Extends SimulationNode with app-specific fields
+type SimNode = SimulationNode
+  ( name :: String
   , nodeType :: NodeType
   , package :: String
-  , x :: Number
-  , y :: Number
-  , vx :: Number
-  , vy :: Number
-  , fx :: Nullable Number  -- Fixed x (for pinning during transitions)
-  , fy :: Nullable Number  -- Fixed y (for pinning during transitions)
   , r :: Number            -- Radius (based on LOC or constant)
   , cluster :: Int         -- For coloring by package
   , targets :: Array Int   -- Outgoing dependency IDs
@@ -42,7 +36,7 @@ type SimNode =
   , orbitAngle :: Number   -- Orbital angle (for Orbit scene, packages only)
   , treeX :: Number        -- Tree position (calculated from radial tree layout)
   , treeY :: Number
-  }
+  )
 
 -- | Node type discriminator
 data NodeType

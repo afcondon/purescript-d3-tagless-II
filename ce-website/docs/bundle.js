@@ -7057,7 +7057,7 @@
         return "BubblePack";
       }
       ;
-      throw new Error("Failed pattern match at Types (line 85, column 1 - line 89, column 33): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Types (line 79, column 1 - line 83, column 33): " + [v.constructor.name]);
     }
   };
   var eqScene = {
@@ -17356,7 +17356,7 @@
         return Nothing.value;
       }
       ;
-      throw new Error("Failed pattern match at Viz.SpagoGridTest (line 177, column 21 - line 179, column 26): " + [n.nodeType.constructor.name]);
+      throw new Error("Failed pattern match at Viz.SpagoGridTest (line 187, column 21 - line 189, column 26): " + [n.nodeType.constructor.name]);
     };
     var packagePositions = fromFoldable10(mapMaybe(getPackagePos)(nodes));
     var randomizeIfModule = function(n) {
@@ -17381,7 +17381,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at Viz.SpagoGridTest (line 186, column 34 - line 188, column 42): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at Viz.SpagoGridTest (line 197, column 32 - line 199, column 40): " + [v1.constructor.name]);
           })();
           var jitterX = (rx - 0.5) * 100;
           var jitterY = (ry - 0.5) * 100;
@@ -17409,7 +17409,7 @@
         };
       }
       ;
-      throw new Error("Failed pattern match at Viz.SpagoGridTest (line 181, column 25 - line 191, column 58): " + [n.nodeType.constructor.name]);
+      throw new Error("Failed pattern match at Viz.SpagoGridTest (line 191, column 25 - line 202, column 58): " + [n.nodeType.constructor.name]);
     };
     return traverse4(randomizeIfModule)(nodes);
   };
@@ -17461,7 +17461,7 @@
           })(stateRef)();
         }
         ;
-        throw new Error("Failed pattern match at Viz.SpagoGridTest (line 201, column 3 - line 236, column 90): " + [state3.transition.constructor.name]);
+        throw new Error("Failed pattern match at Viz.SpagoGridTest (line 212, column 3 - line 249, column 88): " + [state3.transition.constructor.name]);
       })();
       return updateCirclePositions(nodesGroupId)();
     };
@@ -17504,13 +17504,13 @@
     if (node.nodeType instanceof PackageNode) {
       return {
         id: node.id,
-        name: node.name,
-        nodeType: node.nodeType,
-        "package": node["package"],
         x: node.x,
         y: node.y,
         vx: node.vx,
         vy: node.vy,
+        name: node.name,
+        nodeType: node.nodeType,
+        "package": node["package"],
         r: node.r,
         cluster: node.cluster,
         targets: node.targets,
@@ -17529,7 +17529,7 @@
       return node;
     }
     ;
-    throw new Error("Failed pattern match at Viz.SpagoGridTest (line 168, column 27 - line 170, column 21): " + [node.nodeType.constructor.name]);
+    throw new Error("Failed pattern match at Viz.SpagoGridTest (line 178, column 27 - line 180, column 21): " + [node.nodeType.constructor.name]);
   };
   var initWithModel = function(model) {
     return function(containerSelector) {
@@ -17581,7 +17581,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at Viz.SpagoGridTest (line 103, column 3 - line 109, column 63): " + [result.constructor.name]);
+        throw new Error("Failed pattern match at Viz.SpagoGridTest (line 113, column 3 - line 119, column 63): " + [result.constructor.name]);
       });
     }));
   };
@@ -18642,7 +18642,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Main (line 41, column 5 - line 46, column 18): " + [mAppEl.constructor.name]);
+      throw new Error("Failed pattern match at Main (line 21, column 5 - line 26, column 18): " + [mAppEl.constructor.name]);
     }))();
   };
 

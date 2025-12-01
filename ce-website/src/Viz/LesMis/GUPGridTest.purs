@@ -11,7 +11,6 @@ import Prelude
 import Data.Array as Array
 import Data.Traversable (traverse)
 import Data.Int (toNumber)
-import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable, null)
 import Effect (Effect)
 import Effect.Random (random)
@@ -35,23 +34,24 @@ import Web.DOM.Element (Element)
 -- =============================================================================
 
 -- | Extended node type with grid positions
+-- | Note: Uses index as Int id (SimulationNode requires Int id)
 type GridNode =
-  { id :: String
+  { id :: Int         -- Using index as numeric id
+  , name :: String    -- Original string id stored here
   , group :: Int
-  , index :: Int
   , x :: Number
   , y :: Number
   , vx :: Number
   , vy :: Number
   , fx :: Nullable Number
   , fy :: Nullable Number
-  , gridX :: Number  -- Target X position
-  , gridY :: Number  -- Target Y position
-  , r :: Number      -- Node radius
+  , gridX :: Number   -- Target X position
+  , gridY :: Number   -- Target Y position
+  , r :: Number       -- Node radius
   }
 
--- | Row types for the simulation
-type GridNodeRow = ( id :: String, group :: Int, fx :: Nullable Number, fy :: Nullable Number, index :: Int, gridX :: Number, gridY :: Number, r :: Number )
+-- | Row types for the simulation (extra fields beyond SimulationNode)
+type GridNodeRow = ( name :: String, group :: Int, gridX :: Number, gridY :: Number, r :: Number )
 type GridLinkRow = ()
 
 type GridSimulation = Sim.Simulation GridNodeRow GridLinkRow
@@ -160,16 +160,16 @@ assignNode numGroups spacing node = do
   let startY = (ry - 0.5) * 400.0  -- Random in [-200, 200]
 
   pure
-    { id: node.id
+    { id: node.id       -- LesMisNode.id is now Int (same as index)
+    , name: node.name   -- Character name (original string id)
     , group: node.group
-    , index: node.index
-    , x: startX      -- Start at random position
+    , x: startX         -- Start at random position
     , y: startY
     , vx: 0.0
     , vy: 0.0
     , fx: null
     , fy: null
-    , gridX: gridX   -- Target grid position
+    , gridX: gridX      -- Target grid position
     , gridY: gridY
     , r: 5.0
     }

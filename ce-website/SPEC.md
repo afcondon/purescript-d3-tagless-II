@@ -16,30 +16,39 @@
 
 ## Scenes
 
-### Scene 1: Orbital Overview
+### Scene 1: Grid Overview
 
-**Purpose**: Show package structure and relative sizes at a glance.
+**Purpose**: Show package structure and relative sizes at a glance. Opening scene.
 
 **Layout**:
-- Packages arranged on an outer orbital ring (radial force)
-- Modules clustered around their parent package (cluster forces)
-- Circle sizes represent LOC or complexity
+- Packages arranged on a grid (fixed positions)
+- Modules clustered around their parent package (ForceX/Y toward package)
+- Circle sizes represent LOC (both packages and modules)
+- Modules colored by parent package
 
 **Interactions**:
 - Hover: Highlight package and its modules
-- Click package: Filter to just that package's modules
+- Click package: Select for tree exploration
 - Drag: Rearrange nodes
 
 **Forces**:
-- `forceRadial` - Packages on outer ring
-- `forceX`/`forceY` with accessor - Modules toward parent package
-- `forceCollide` - Prevent overlap
+- `forceXGrid`/`forceYGrid` - Modules toward parent package's grid position
+- `forceCollideGrid` - Prevent overlap, reads radius from node
+
+**Links**: None in Grid scene
 
 ### Scene 2: Dependency Tree
 
-**Purpose**: Show the module dependency hierarchy rooted at a focal module (e.g., `PSD3.Main`).
+**Purpose**: Show the module dependency hierarchy rooted at a focal module (e.g., `Main`).
 
-**Transition from Scene 1**:
+**Transition from Grid** (two phases):
+
+*Phase 1: Package Orbit Formation*
+1. Packages move from grid to radial ring (forceRadial)
+2. Modules follow their parent packages
+3. Selected package moves to center
+
+*Phase 2: Tree Formation*
 1. Staggered radial tree animation (layers appear in sequence)
 2. Curved bezier links draw as nodes arrive
 3. Pause to show tree structure
@@ -51,6 +60,8 @@
   - `forceLink(distance: 0, strength: 1)` - Tight links
   - `forceManyBody(strength: -50)` - Gentle repulsion
   - `forceX(0)` + `forceY(0)` - Centering
+
+**Links**: Rendered with actual source/target positions (varied, so fast)
 
 **Interactions**:
 - Hover: Highlight upstream (dependencies) and downstream (dependents)
@@ -154,24 +165,40 @@ Selection API needed from `psd3-selection`:
 
 ## Development Phases
 
-### Phase 1: Foundation
-- [ ] Set up ce-website subrepo
-- [ ] Add missing force variants to library
-- [ ] Create basic data loader
-- [ ] Implement minimal Scene 1 (orbit)
+### Phase 1: Foundation ✅
+- [x] Set up ce-website subrepo
+- [x] Add grid force variants to library (forceXGrid, forceYGrid, forceCollideGrid)
+- [x] Create basic data loader (spago modules/packages JSON)
+- [x] Implement Grid scene baseline (fast, 1003 nodes at 60fps)
+- [x] Debug performance issues (overlapping lines = slow, varied positions = fast)
 
-### Phase 2: Tree Scene
-- [ ] Implement Scene 2 force config
-- [ ] Build transition from Scene 1 → 2
-- [ ] Add hover highlighting
+### Phase 2: Grid Scene Polish
+- [ ] Add hover highlighting (package + modules)
+- [ ] Add click selection for tree exploration
+- [ ] Add drag interaction
+- [ ] Scale node sizes by LOC
 
-### Phase 3: Bubblepack
+### Phase 3: Tree Scene
+- [ ] Implement package orbit formation (transition phase 1)
+- [ ] Implement tree formation (transition phase 2)
+- [ ] Add links with proper source/target positions
+- [ ] Add hover upstream/downstream highlighting
+
+### Phase 4: Bubblepack
 - [ ] Implement Scene 3 with pack layout
 - [ ] Build transition from Scene 2 → 3
 - [ ] Add internal element interactions
 
-### Phase 4: Polish
+### Phase 5: Polish
 - [ ] Refine animations and transitions
 - [ ] Add keyboard navigation
 - [ ] Performance optimization
 - [ ] Documentation
+
+## Performance Notes
+
+**Key finding**: SVG line elements at identical positions cause severe browser rendering slowdown. Lines with varied positions render fast.
+
+- Grid scene: No links (fast)
+- Tree/Orbit scenes: Links have actual source/target positions (fast)
+- Never render links at same/overlapping positions
