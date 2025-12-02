@@ -39,7 +39,8 @@ import PSD3.Scale (interpolateTurbo)
 import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, radius, id_, class_, viewBox, d, opacity, x1, x2, y1, y2)
 import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom, onMouseEnter, onMouseLeave)
 import PSD3v2.Capabilities.Selection (select, appendChild, appendData, on)
-import PSD3v2.Highlight (highlightConnected, clearHighlights)
+import PSD3v2.Classify (classifyElements, clearClasses)
+import Data.Set as Set
 import PSD3v2.Tooltip (onTooltip, onTooltipHide)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SBoundOwns)
@@ -336,10 +337,22 @@ renderSVG containerSelector nodes = do
   _ <- on (Zoom $ defaultZoom (ScaleExtent 0.1 10.0) "#explorer-zoom-group") svg
 
   -- Add highlight on hover (mouse enter highlights connected nodes)
-  _ <- on (onMouseEnter \node -> highlightConnected "#explorer-nodes" node.id node.targets node.sources) nodeSel
+  let highlightClasses = ["highlighted-source", "highlighted-upstream", "highlighted-downstream", "dimmed"]
+  _ <- on (onMouseEnter \node -> do
+    -- Clear previous highlight classes first
+    clearClasses "#explorer-nodes" "circle" highlightClasses
+    -- Then apply new classification
+    let targetSet = Set.fromFoldable node.targets
+    let sourceSet = Set.fromFoldable node.sources
+    classifyElements "#explorer-nodes" "circle" \n ->
+      if n.id == node.id then "highlighted-source"
+      else if Set.member n.id targetSet then "highlighted-upstream"
+      else if Set.member n.id sourceSet then "highlighted-downstream"
+      else "dimmed"
+    ) nodeSel
 
   -- Add clear highlight on mouse leave
-  _ <- on (onMouseLeave \_ -> clearHighlights "#explorer-nodes") nodeSel
+  _ <- on (onMouseLeave \_ -> clearClasses "#explorer-nodes" "circle" highlightClasses) nodeSel
 
   -- Add tooltip on hover
   _ <- on (onTooltip formatNodeTooltip) nodeSel

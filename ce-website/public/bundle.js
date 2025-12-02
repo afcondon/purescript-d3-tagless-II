@@ -13206,47 +13206,45 @@
     return dict.appendChild;
   };
 
-  // output/PSD3v2.Highlight/foreign.js
-  function highlightConnected_(containerSelector) {
-    return function(nodeId) {
-      return function(targets) {
-        return function(sources) {
-          return function() {
-            const targetSet = new Set(targets);
-            const sourceSet = new Set(sources);
-            const circles = select_default2(containerSelector).selectAll("circle");
-            circles.each(function(d3) {
-              if (!d3 || d3.id === void 0) return;
-              const el = select_default2(this);
-              const id5 = d3.id;
-              if (id5 === nodeId) {
-                el.classed("highlighted-source", true);
-                el.classed("dimmed", false);
-              } else if (targetSet.has(id5)) {
-                el.classed("highlighted-upstream", true);
-                el.classed("dimmed", false);
-              } else if (sourceSet.has(id5)) {
-                el.classed("highlighted-downstream", true);
-                el.classed("dimmed", false);
-              } else {
-                el.classed("dimmed", true);
+  // output/PSD3v2.Classify/foreign.js
+  function classifyElements_(containerSelector) {
+    return function(elementType) {
+      return function(classifier) {
+        return function() {
+          const selector = containerSelector + " " + elementType;
+          const elements = document.querySelectorAll(selector);
+          elements.forEach((el) => {
+            const data = el.__data__;
+            if (data !== void 0) {
+              const className2 = classifier(data);
+              if (className2) {
+                el.classList.add(className2);
               }
-            });
-          };
+            }
+          });
         };
       };
     };
   }
-  function clearHighlights_(containerSelector) {
-    return function() {
-      const circles = select_default2(containerSelector).selectAll("circle");
-      circles.classed("highlighted-source", false).classed("highlighted-upstream", false).classed("highlighted-downstream", false).classed("dimmed", false);
+  function clearClasses_(containerSelector) {
+    return function(elementType) {
+      return function(classNames) {
+        return function() {
+          const selector = containerSelector + " " + elementType;
+          const elements = document.querySelectorAll(selector);
+          elements.forEach((el) => {
+            classNames.forEach((cls) => {
+              el.classList.remove(cls);
+            });
+          });
+        };
+      };
     };
   }
 
-  // output/PSD3v2.Highlight/index.js
-  var highlightConnected = highlightConnected_;
-  var clearHighlights = clearHighlights_;
+  // output/PSD3v2.Classify/index.js
+  var clearClasses = clearClasses_;
+  var classifyElements = classifyElements_;
 
   // output/PSD3v2.Selection.Operations/foreign.js
   function getElementData_(element3) {
@@ -18005,6 +18003,8 @@
   var stroke1 = /* @__PURE__ */ stroke(toAttrStringString);
   var strokeWidth1 = /* @__PURE__ */ strokeWidth(toAttrNumberNumber);
   var on4 = /* @__PURE__ */ on2(selectionMD3v2Selection_D);
+  var fromFoldable24 = /* @__PURE__ */ fromFoldable5(foldableArray)(ordInt);
+  var member5 = /* @__PURE__ */ member2(ordInt);
   var insert8 = /* @__PURE__ */ insert3(ordString);
   var discard22 = /* @__PURE__ */ discard3(bindAff);
   var log1 = /* @__PURE__ */ log2(monadEffectAff);
@@ -18033,7 +18033,7 @@
         return log8("[Explorer] Could not find #explorer-nodes for CSS class")();
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 509, column 3 - line 516, column 77): " + [mElement.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 522, column 3 - line 529, column 77): " + [mElement.constructor.name]);
     };
   };
   var renderForceLinksD3 = function(links) {
@@ -18099,7 +18099,7 @@
         return Nothing.value;
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 206, column 21 - line 208, column 26): " + [n.nodeType.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 207, column 21 - line 209, column 26): " + [n.nodeType.constructor.name]);
     };
     var packagePositions = fromFoldable15(mapMaybe(getPackagePos)(nodes));
     var randomizeIfModule = function(n) {
@@ -18124,7 +18124,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at Engine.Explorer (line 215, column 34 - line 217, column 42): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at Engine.Explorer (line 216, column 34 - line 218, column 42): " + [v1.constructor.name]);
           })();
           var jitterX = (rx - 0.5) * 100;
           var jitterY = (ry - 0.5) * 100;
@@ -18153,7 +18153,7 @@
         };
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 210, column 25 - line 220, column 58): " + [n.nodeType.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 211, column 25 - line 221, column 58): " + [n.nodeType.constructor.name]);
     };
     return traverse4(randomizeIfModule)(nodes);
   };
@@ -18183,7 +18183,7 @@
       ;
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 361, column 15 - line 365, column 42): " + [n.nodeType.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 374, column 15 - line 378, column 42): " + [n.nodeType.constructor.name]);
   };
   var linkPathFn = function(nodeMap) {
     return function(link3) {
@@ -18241,7 +18241,7 @@
         return "Module";
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 301, column 3 - line 301, column 38): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 302, column 3 - line 302, column 38): " + [v.constructor.name]);
     };
     var metric = function(label5) {
       return function(value13) {
@@ -18265,11 +18265,34 @@
                   return v.r;
                 }), fill2(nodeColor), stroke1("#fff"), strokeWidth1(0.5), class_2(nodeClass)])(nodesGroup))(function(nodeSel) {
                   return bind13(on4(new Zoom(defaultZoom(new ScaleExtent(0.1, 10))("#explorer-zoom-group")))(svg))(function() {
+                    var highlightClasses = ["highlighted-source", "highlighted-upstream", "highlighted-downstream", "dimmed"];
                     return bind13(on4(onMouseEnter(function(node) {
-                      return highlightConnected("#explorer-nodes")(node.id)(node.targets)(node.sources);
+                      return function __do4() {
+                        clearClasses("#explorer-nodes")("circle")(highlightClasses)();
+                        var targetSet = fromFoldable24(node.targets);
+                        var sourceSet = fromFoldable24(node.sources);
+                        return classifyElements("#explorer-nodes")("circle")(function(n) {
+                          var $95 = n.id === node.id;
+                          if ($95) {
+                            return "highlighted-source";
+                          }
+                          ;
+                          var $96 = member5(n.id)(targetSet);
+                          if ($96) {
+                            return "highlighted-upstream";
+                          }
+                          ;
+                          var $97 = member5(n.id)(sourceSet);
+                          if ($97) {
+                            return "highlighted-downstream";
+                          }
+                          ;
+                          return "dimmed";
+                        })();
+                      };
                     }))(nodeSel))(function() {
                       return bind13(on4(onMouseLeave(function(v) {
-                        return clearHighlights("#explorer-nodes");
+                        return clearClasses("#explorer-nodes")("circle")(highlightClasses);
                       }))(nodeSel))(function() {
                         return bind13(on4(onTooltip(formatNodeTooltip))(nodeSel))(function() {
                           return bind13(on4(onTooltipHide)(nodeSel))(function() {
@@ -18320,7 +18343,7 @@
       return node;
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 196, column 27 - line 198, column 21): " + [node.nodeType.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 197, column 27 - line 199, column 21): " + [node.nodeType.constructor.name]);
   };
   var clearElement = function(element3) {
     var clearNode = function(node) {
@@ -18335,7 +18358,7 @@
           return unit;
         }
         ;
-        throw new Error("Failed pattern match at Engine.Explorer (line 496, column 5 - line 500, column 27): " + [mChild.constructor.name]);
+        throw new Error("Failed pattern match at Engine.Explorer (line 509, column 5 - line 513, column 27): " + [mChild.constructor.name]);
       };
     };
     return clearNode(toNode(element3));
@@ -18354,7 +18377,7 @@
       return log8("[Explorer] Could not find #explorer-links")();
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 481, column 3 - line 486, column 63): " + [mElement.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 494, column 3 - line 499, column 63): " + [mElement.constructor.name]);
   };
   var addTreeForces = function(nodes) {
     return function(links) {
@@ -18460,7 +18483,7 @@
             });
           }
           ;
-          throw new Error("Failed pattern match at Engine.Explorer (line 89, column 3 - line 97, column 42): " + [result.constructor.name]);
+          throw new Error("Failed pattern match at Engine.Explorer (line 90, column 3 - line 98, column 42): " + [result.constructor.name]);
         });
       });
     }));
@@ -18541,7 +18564,7 @@
         return log8("[Explorer] Unknown scene: " + sceneName);
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 155, column 3 - line 186, column 63): " + [mScene.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 156, column 3 - line 187, column 63): " + [mScene.constructor.name]);
     };
   };
 
