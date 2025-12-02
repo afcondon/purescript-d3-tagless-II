@@ -7,12 +7,14 @@
 -- | 2. layout: Where DumbEngine moves nodes
 -- | 3. finalRules: Applied after transition completes
 module Engine.Scenes
-  ( gridScene
-  , tree1Scene
-  , tree2Scene
-  , tree3Scene
-  , tree4Scene
-  , tree5Scene
+  ( -- Form scenes (transition to positions, then Static)
+    gridFormScene
+  , orbitFormScene
+  , treeFormScene
+  -- Run scenes (enable physics/forces)
+  , gridRunScene
+  , orbitRunScene
+  , treeRunScene
   -- Rule helpers
   , isPackage
   , isModule
@@ -27,8 +29,9 @@ module Engine.Scenes
 import Prelude
 
 import Data.Array as Array
+import Data.Int (toNumber, ceil)
 import Data.Maybe (Maybe(..))
-import Data.Number (cos, sin)
+import Data.Number (cos, sin, sqrt)
 import Data.Nullable as Nullable
 import Data.Tuple (Tuple(..))
 import Foreign.Object as Object
@@ -107,52 +110,136 @@ pinAllRule =
   }
 
 -- =============================================================================
--- Grid Scene
+-- Grid Scenes (Form + Run)
 -- =============================================================================
 
-gridScene :: SceneConfig
-gridScene =
-  { name: "Grid"
+-- | Form Grid: Transition to grid positions, then stop (Static)
+gridFormScene :: SceneConfig
+gridFormScene =
+  { name: "GridForm"
   , initRules: [ pinAllRule ]
   , layout: GridLayout.calculateGridPositions
-  , finalRules: \_ ->
-      [ { name: "pinPackagesAtGrid"
-        , select: isPackage
-        , apply: \n -> n
-            { fx = Nullable.notNull n.gridX
-            , fy = Nullable.notNull n.gridY
-            }
-        }
-      , { name: "unpinModules"
-        , select: isModule
-        , apply: unpinNode
-        }
-      ]
+  , finalRules: gridFormFinalRules
+  , stableMode: Static
+  , cssTransition: Nothing
+  }
+
+-- | Grid Run: Enable physics with grid forces
+gridRunScene :: SceneConfig
+gridRunScene =
+  { name: "GridRun"
+  , initRules: [ pinAllRule ]
+  , layout: GridLayout.calculateGridPositions
+  , finalRules: gridRunFinalRules
   , stableMode: Physics {}
   , cssTransition: Nothing
   }
 
+-- | Form Grid final rules - pin everything at grid positions
+gridFormFinalRules :: Array SimNode -> Array NodeRule
+gridFormFinalRules nodes =
+  let calc = gridCalc nodes
+  in
+    [ { name: "pinPackagesAtGrid"
+      , select: isPackage
+      , apply: \n ->
+          let pos = calc.pkgGridPos n.id
+          in n { fx = Nullable.notNull pos.x
+               , fy = Nullable.notNull pos.y
+               , gridX = pos.x
+               , gridY = pos.y
+               }
+      }
+    , { name: "pinModulesAtGrid"
+      , select: isModule
+      , apply: \n ->
+          let pos = calc.pkgGridPos n.cluster
+          in n { fx = Nullable.notNull pos.x
+               , fy = Nullable.notNull pos.y
+               , gridX = pos.x
+               , gridY = pos.y
+               }
+      }
+    ]
+
+-- | Grid Run final rules - pin packages, unpin modules (forces will spread them)
+gridRunFinalRules :: Array SimNode -> Array NodeRule
+gridRunFinalRules nodes =
+  let calc = gridCalc nodes
+  in
+    [ { name: "pinPackagesAtGrid"
+      , select: isPackage
+      , apply: \n ->
+          let pos = calc.pkgGridPos n.id
+          in n { fx = Nullable.notNull pos.x
+               , fy = Nullable.notNull pos.y
+               , gridX = pos.x
+               , gridY = pos.y
+               }
+      }
+    , { name: "unpinModulesSetGrid"
+      , select: isModule
+      , apply: \n ->
+          let pos = calc.pkgGridPos n.cluster
+          in n { fx = Nullable.null
+               , fy = Nullable.null
+               , gridX = pos.x
+               , gridY = pos.y
+               }
+      }
+    ]
+
+-- | Grid calculation helper
+gridCalc :: Array SimNode -> { pkgGridPos :: Int -> { x :: Number, y :: Number } }
+gridCalc nodes =
+  let
+    packageCount = Array.length $ Array.filter isPackage nodes
+    aspect = GridLayout.viewBoxWidth / GridLayout.viewBoxHeight
+    gridCols = ceil (sqrt (toNumber packageCount * aspect))
+    gridRows = ceil (toNumber packageCount / toNumber gridCols)
+    spacingX = GridLayout.viewBoxWidth * 0.8 / toNumber gridCols
+    spacingY = GridLayout.viewBoxHeight * 0.8 / toNumber gridRows
+    gridColsN = toNumber gridCols
+    gridRowsN = toNumber gridRows
+  in
+    { pkgGridPos: \pkgId ->
+        let row = pkgId / gridCols
+            col = pkgId `mod` gridCols
+            gx = (toNumber col - gridColsN / 2.0 + 0.5) * spacingX
+            gy = (toNumber row - gridRowsN / 2.0 + 0.5) * spacingY
+        in { x: gx, y: gy }
+    }
+
 -- =============================================================================
--- Tree1 Scene (Transition to Orbit)
+-- Orbit Scenes (Form + Run)
 -- =============================================================================
 
--- | Tree1: Packages to orbit ring, modules cluster around their package
-tree1Scene :: SceneConfig
-tree1Scene =
-  { name: "Tree1"
+-- | Form Orbit: Transition to orbit positions, then stop (Static)
+orbitFormScene :: SceneConfig
+orbitFormScene =
+  { name: "OrbitForm"
   , initRules: [ pinAllRule ]
-  , layout: tree1Layout
-  , finalRules: tree1FinalRules
+  , layout: orbitLayout
+  , finalRules: orbitFormFinalRules
+  , stableMode: Static
+  , cssTransition: Nothing
+  }
+
+-- | Orbit Run: Enable physics with orbit forces
+orbitRunScene :: SceneConfig
+orbitRunScene =
+  { name: "OrbitRun"
+  , initRules: [ pinAllRule ]
+  , layout: orbitLayout
+  , finalRules: orbitRunFinalRules
   , stableMode: Physics {}
   , cssTransition: Nothing
   }
 
 -- | Layout: All nodes to their package's orbit position
--- | (Modules and packages at same spot - forces will spread modules)
-tree1Layout :: Array SimNode -> PositionMap
-tree1Layout nodes =
+orbitLayout :: Array SimNode -> PositionMap
+orbitLayout nodes =
   let
-    -- Build package orbit positions
     packages = Array.filter isPackage nodes
     packagePositions = Object.fromFoldable $ map getPackageOrbitPos packages
 
@@ -160,9 +247,6 @@ tree1Layout nodes =
       let px = cos pkg.orbitAngle * OrbitLayout.orbitRadius
           py = sin pkg.orbitAngle * OrbitLayout.orbitRadius
       in Tuple (show pkg.id) { x: px, y: py }
-
-    -- All nodes go to their package's orbit position
-    allPositions = map (getNodeOrbitPos packagePositions) nodes
 
     getNodeOrbitPos pkgMap node = case node.nodeType of
       PackageNode ->
@@ -174,14 +258,49 @@ tree1Layout nodes =
           Just pos -> Tuple (show node.id) pos
           Nothing -> Tuple (show node.id) { x: node.x, y: node.y }
   in
-    Object.fromFoldable allPositions
+    Object.fromFoldable $ map (getNodeOrbitPos packagePositions) nodes
 
--- | Final rules for Tree1: packages pinned, modules unpinned with gridXY at package orbit
--- | Takes all nodes to build package orbit map for context
-tree1FinalRules :: Array SimNode -> Array NodeRule
-tree1FinalRules nodes =
+-- | Form Orbit final rules - pin everything at orbit positions
+orbitFormFinalRules :: Array SimNode -> Array NodeRule
+orbitFormFinalRules nodes =
   let
-    -- Build package ID -> orbit position map
+    packages = Array.filter isPackage nodes
+    pkgOrbitMap = Object.fromFoldable $ map getPackageOrbitPos packages
+
+    getPackageOrbitPos pkg =
+      let px = cos pkg.orbitAngle * OrbitLayout.orbitRadius
+          py = sin pkg.orbitAngle * OrbitLayout.orbitRadius
+      in Tuple (show pkg.id) { x: px, y: py }
+  in
+    [ { name: "pinPackagesAtOrbit"
+      , select: isPackage
+      , apply: \n ->
+          let px = cos n.orbitAngle * OrbitLayout.orbitRadius
+              py = sin n.orbitAngle * OrbitLayout.orbitRadius
+          in n { fx = Nullable.notNull px
+               , fy = Nullable.notNull py
+               , gridX = px
+               , gridY = py
+               }
+      }
+    , { name: "pinModulesAtOrbit"
+      , select: isModule
+      , apply: \n ->
+          case Object.lookup (show n.cluster) pkgOrbitMap of
+            Just { x: px, y: py } -> n
+              { fx = Nullable.notNull px
+              , fy = Nullable.notNull py
+              , gridX = px
+              , gridY = py
+              }
+            Nothing -> pinAtCurrent n
+      }
+    ]
+
+-- | Orbit Run final rules - pin packages, unpin modules (forces will spread them)
+orbitRunFinalRules :: Array SimNode -> Array NodeRule
+orbitRunFinalRules nodes =
+  let
     packages = Array.filter isPackage nodes
     pkgOrbitMap = Object.fromFoldable $ map getPackageOrbitPos packages
 
@@ -197,7 +316,6 @@ tree1FinalRules nodes =
     , { name: "unpinModulesSetGridToOrbit"
       , select: isModule
       , apply: \n ->
-          -- Look up package's orbit position by cluster ID
           case Object.lookup (show n.cluster) pkgOrbitMap of
             Just { x: px, y: py } -> n
               { fx = Nullable.null
@@ -210,17 +328,16 @@ tree1FinalRules nodes =
     ]
 
 -- =============================================================================
--- Tree2 Scene (Tree Setup - move tree modules to tree positions)
+-- Tree Scenes (Form + Run)
 -- =============================================================================
 
--- | Tree2: Tree modules transition to their tree positions
--- | Packages and non-tree modules stay where they are (will fade via CSS)
--- | Final state: tree modules pinned at tree positions, static mode
-tree2Scene :: SceneConfig
-tree2Scene =
-  { name: "Tree2"
+-- | Form Tree: Transition to tree positions, then stop (Static)
+-- | Tree modules go to tree positions, packages/non-tree stay where they are
+treeFormScene :: SceneConfig
+treeFormScene =
+  { name: "TreeForm"
   , initRules: [ pinAllRule ]
-  , layout: tree2Layout
+  , layout: treeFormLayout
   , finalRules: \_ ->
       [ { name: "pinTreeModulesAtTree"
         , select: isTreeModule
@@ -231,93 +348,45 @@ tree2Scene =
         }
       , { name: "pinOthersAtCurrent"
         , select: \n -> not (isTreeModule n)
-        , apply: pinAtCurrent  -- Keep packages/non-tree where they are
-        }
-      ]
-  , stableMode: Static
-  , cssTransition: Nothing  -- TODO: CSS fade for packages/non-tree
-  }
-
--- | Layout for Tree2: tree modules go to tree positions, others stay put
-tree2Layout :: Array SimNode -> PositionMap
-tree2Layout nodes =
-  Object.fromFoldable $ map getPosition nodes
-  where
-  getPosition node =
-    if isTreeModule node
-    then Tuple (show node.id) { x: node.treeX, y: node.treeY }
-    else Tuple (show node.id) { x: node.x, y: node.y }  -- Stay at current position
-
--- =============================================================================
--- Tree3 Scene (Transition to Tree Layout)
--- =============================================================================
-
-tree3Scene :: SceneConfig
-tree3Scene =
-  { name: "Tree3"
-  , initRules: [ pinAllRule ]
-  , layout: TreeLayout.calculateTreePositions
-  , finalRules: \_ ->
-      [ { name: "pinModulesAtTree"
-        , select: isModule
-        , apply: \n -> n
-            { fx = Nullable.notNull n.treeX
-            , fy = Nullable.notNull n.treeY
-            }
+        , apply: pinAtCurrent
         }
       ]
   , stableMode: Static
   , cssTransition: Nothing
   }
 
--- =============================================================================
--- Tree4 Scene (Force-Directed Tree)
--- =============================================================================
-
--- | Tree4: Force-directed tree layout
+-- | Tree Run: Force-directed tree with link forces
 -- | Tree modules are unpinned and connected by link forces
--- | Packages and non-tree modules stay faded (via CSS)
-tree4Scene :: SceneConfig
-tree4Scene =
-  { name: "Tree4"
+treeRunScene :: SceneConfig
+treeRunScene =
+  { name: "TreeRun"
   , initRules: [ pinAllRule ]
-  , layout: tree4Layout  -- Keep current positions, forces will move them
+  , layout: treeRunLayout
   , finalRules: \_ ->
       [ { name: "unpinTreeModules"
         , select: isTreeModule
-        , apply: unpinNode  -- Let link forces move them
+        , apply: unpinNode
         }
       , { name: "pinOthersAtCurrent"
         , select: \n -> not (isTreeModule n)
-        , apply: pinAtCurrent  -- Keep packages/non-tree where they are
-        }
-      ]
-  , stableMode: Physics {}  -- Forces will run
-  , cssTransition: Nothing
-  }
-
--- | Layout for Tree4: keep current positions (forces will arrange)
-tree4Layout :: Array SimNode -> PositionMap
-tree4Layout nodes =
-  Object.fromFoldable $ map getPosition nodes
-  where
-  getPosition node = Tuple (show node.id) { x: node.x, y: node.y }
-
--- =============================================================================
--- Tree5 Scene (Force-Directed Tree)
--- =============================================================================
-
-tree5Scene :: SceneConfig
-tree5Scene =
-  { name: "Tree5"
-  , initRules: [ pinAllRule ]
-  , layout: TreeLayout.calculateTreePositions
-  , finalRules: \_ ->
-      [ { name: "unpinAll"
-        , select: const true
-        , apply: unpinNode
+        , apply: pinAtCurrent
         }
       ]
   , stableMode: Physics {}
   , cssTransition: Nothing
   }
+
+-- | Layout for Form Tree: tree modules to tree positions, others stay put
+treeFormLayout :: Array SimNode -> PositionMap
+treeFormLayout nodes =
+  Object.fromFoldable $ map getPosition nodes
+  where
+  getPosition node =
+    if isTreeModule node
+    then Tuple (show node.id) { x: node.treeX, y: node.treeY }
+    else Tuple (show node.id) { x: node.x, y: node.y }
+
+-- | Layout for Tree Run: keep current positions (forces will arrange)
+treeRunLayout :: Array SimNode -> PositionMap
+treeRunLayout nodes =
+  Object.fromFoldable $ map (\n -> Tuple (show n.id) { x: n.x, y: n.y }) nodes

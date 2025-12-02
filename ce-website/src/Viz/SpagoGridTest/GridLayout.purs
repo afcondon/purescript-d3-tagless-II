@@ -11,6 +11,7 @@ module Viz.SpagoGridTest.GridLayout
 
 import Prelude
 
+import Data.Array as Array
 import Data.Int (toNumber, ceil)
 import Data.Number (sqrt) as Num
 import Data.Tuple (Tuple(..))
@@ -72,7 +73,41 @@ recalculateGridPositions nodes packageCount =
   in
     map updateNode nodes
 
--- | Convert nodes to a PositionMap using their stored grid positions
+-- | Calculate grid positions for scene transitions
+-- | Recalculates positions based on node IDs (not stored gridX/gridY which may be stale)
 calculateGridPositions :: Array SimNode -> Object { x :: Number, y :: Number }
 calculateGridPositions nodes =
-  Object.fromFoldable $ map (\n -> Tuple (show n.id) { x: n.gridX, y: n.gridY }) nodes
+  let
+    -- Count packages to determine grid layout
+    packageCount = Array.length $ Array.filter (\n -> n.nodeType == PackageNode) nodes
+
+    aspect = viewBoxWidth / viewBoxHeight
+    gridCols = ceil (Num.sqrt (toNumber packageCount * aspect))
+    gridRows = ceil (toNumber packageCount / toNumber gridCols)
+
+    spacingX = viewBoxWidth * 0.8 / toNumber gridCols
+    spacingY = viewBoxHeight * 0.8 / toNumber gridRows
+
+    gridColsN = toNumber gridCols
+    gridRowsN = toNumber gridRows
+
+    getGridPos node = case node.nodeType of
+      PackageNode ->
+        let
+          idx = node.id
+          row = idx / gridCols
+          col = idx `mod` gridCols
+          gx = (toNumber col - gridColsN / 2.0 + 0.5) * spacingX
+          gy = (toNumber row - gridRowsN / 2.0 + 0.5) * spacingY
+        in Tuple (show node.id) { x: gx, y: gy }
+
+      ModuleNode ->
+        let
+          pkgIdx = node.cluster
+          pkgRow = pkgIdx / gridCols
+          pkgCol = pkgIdx `mod` gridCols
+          pkgX = (toNumber pkgCol - gridColsN / 2.0 + 0.5) * spacingX
+          pkgY = (toNumber pkgRow - gridRowsN / 2.0 + 0.5) * spacingY
+        in Tuple (show node.id) { x: pkgX, y: pkgY }
+  in
+    Object.fromFoldable $ map getGridPos nodes

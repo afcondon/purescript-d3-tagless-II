@@ -13,12 +13,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Effect (Effect)
 import Engine.Explorer as Explorer
-import Viz.FlareRadialTree as FlareRadialTree
-
--- | FFI to show the flare container
-foreign import showFlareContainer :: Effect Unit
 
 -- | Component state (minimal - explorer state is in global ref)
 type State = { initialized :: Boolean }
@@ -26,14 +21,12 @@ type State = { initialized :: Boolean }
 -- | Actions
 data Action
   = Initialize
-  | GoToGrid
-  | GoToTree1
-  | GoToTree2
-  | GoToTree3
-  | GoToTree4
-  | ShowFlareTree
-  | ShowDependencyTree
-  | ShowVerticalTree
+  | FormGrid    -- Transition to Grid layout (Static)
+  | GridRun     -- Run physics in Grid layout
+  | FormOrbit   -- Form orbit ring (Static)
+  | OrbitRun    -- Run physics in Orbit layout
+  | FormTree    -- Form tree positions (Static)
+  | TreeRun     -- Run force-directed tree
 
 -- | Main app component
 component :: forall query input output m. MonadAff m => H.Component query input output m
@@ -61,61 +54,42 @@ render _ =
             [ HP.style "margin: 0; font-size: 18px; color: #333;" ]
             [ HH.text "Code Explorer" ]
         , HH.button
-            [ HP.style buttonStyle
-            , HE.onClick \_ -> GoToGrid
+            [ HP.style formButtonStyle
+            , HE.onClick \_ -> FormGrid
             ]
-            [ HH.text "Grid" ]
+            [ HH.text "Form Grid" ]
         , HH.button
-            [ HP.style buttonStyle
-            , HE.onClick \_ -> GoToTree1
+            [ HP.style runButtonStyle
+            , HE.onClick \_ -> GridRun
             ]
-            [ HH.text "Tree1" ]
+            [ HH.text "Grid Run" ]
         , HH.button
-            [ HP.style buttonStyle
-            , HE.onClick \_ -> GoToTree2
+            [ HP.style formButtonStyle
+            , HE.onClick \_ -> FormOrbit
             ]
-            [ HH.text "Tree2" ]
+            [ HH.text "Form Orbit" ]
         , HH.button
-            [ HP.style buttonStyle
-            , HE.onClick \_ -> GoToTree3
+            [ HP.style runButtonStyle
+            , HE.onClick \_ -> OrbitRun
             ]
-            [ HH.text "Tree3" ]
+            [ HH.text "Orbit Run" ]
         , HH.button
-            [ HP.style tree4ButtonStyle
-            , HE.onClick \_ -> GoToTree4
+            [ HP.style formButtonStyle
+            , HE.onClick \_ -> FormTree
             ]
-            [ HH.text "Tree4" ]
+            [ HH.text "Form Tree" ]
         , HH.button
-            [ HP.style flareButtonStyle
-            , HE.onClick \_ -> ShowFlareTree
+            [ HP.style runButtonStyle
+            , HE.onClick \_ -> TreeRun
             ]
-            [ HH.text "Flare Test" ]
-        , HH.button
-            [ HP.style depTreeButtonStyle
-            , HE.onClick \_ -> ShowDependencyTree
-            ]
-            [ HH.text "Dep Tree" ]
-        , HH.button
-            [ HP.style vertTreeButtonStyle
-            , HE.onClick \_ -> ShowVerticalTree
-            ]
-            [ HH.text "Vertical" ]
+            [ HH.text "Tree Run" ]
         ]
     , -- Visualization container
       HH.div [ HP.id "viz", HP.style "width: 100%; height: 100%;" ] []
-    , -- Flare tree test container (overlaid)
-      HH.div
-        [ HP.id "flare-tree-container"
-        , HP.style "position: absolute; top: 60px; right: 10px; width: 620px; height: 620px; background: white; border: 2px solid #999; border-radius: 8px; display: none; z-index: 200;"
-        ]
-        []
     ]
   where
-  buttonStyle = "padding: 8px 16px; border: none; border-radius: 4px; background: #4a90d9; color: white; cursor: pointer; font-size: 14px;"
-  tree4ButtonStyle = "padding: 8px 16px; border: none; border-radius: 4px; background: #9b4ad9; color: white; cursor: pointer; font-size: 14px;"
-  flareButtonStyle = "padding: 8px 16px; border: none; border-radius: 4px; background: #d94a90; color: white; cursor: pointer; font-size: 14px;"
-  depTreeButtonStyle = "padding: 8px 16px; border: none; border-radius: 4px; background: #4ad990; color: white; cursor: pointer; font-size: 14px;"
-  vertTreeButtonStyle = "padding: 8px 16px; border: none; border-radius: 4px; background: #d9904a; color: white; cursor: pointer; font-size: 14px;"
+  formButtonStyle = "padding: 8px 16px; border: none; border-radius: 4px; background: #4a90d9; color: white; cursor: pointer; font-size: 14px;"
+  runButtonStyle = "padding: 8px 16px; border: none; border-radius: 4px; background: #9b4ad9; color: white; cursor: pointer; font-size: 14px;"
 
 handleAction :: forall output m. MonadAff m => Action -> H.HalogenM State Action () output m Unit
 handleAction = case _ of
@@ -124,25 +98,12 @@ handleAction = case _ of
     liftEffect $ Explorer.initExplorer "#viz"
     H.modify_ _ { initialized = true }
 
-  GoToGrid -> goToScene "Grid"
-  GoToTree1 -> goToScene "Tree1"
-  GoToTree2 -> goToScene "Tree2"
-  GoToTree3 -> goToScene "Tree3"
-  GoToTree4 -> goToScene "Tree4"
-  ShowFlareTree -> do
-    log "[Explorer] Showing Flare radial tree test..."
-    liftEffect $ showFlareContainer
-    liftEffect $ FlareRadialTree.loadAndRenderFlareTree "#flare-tree-container"
-
-  ShowDependencyTree -> do
-    log "[Explorer] Showing dependency tree test..."
-    liftEffect $ showFlareContainer
-    liftEffect $ FlareRadialTree.loadAndRenderDependencyTree "#flare-tree-container"
-
-  ShowVerticalTree -> do
-    log "[Explorer] Showing vertical tree for debugging..."
-    liftEffect $ showFlareContainer
-    liftEffect $ FlareRadialTree.loadAndRenderDependencyTreeVertical "#flare-tree-container"
+  FormGrid -> goToScene "GridForm"
+  GridRun -> goToScene "GridRun"
+  FormOrbit -> goToScene "OrbitForm"
+  OrbitRun -> goToScene "OrbitRun"
+  FormTree -> goToScene "TreeForm"
+  TreeRun -> goToScene "TreeRun"
 
 -- | Helper to transition to a scene by name
 goToScene :: forall output m. MonadAff m => String -> H.HalogenM State Action () output m Unit

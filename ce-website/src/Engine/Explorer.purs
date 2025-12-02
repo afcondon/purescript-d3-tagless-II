@@ -130,8 +130,8 @@ initWithModel model containerSelector = do
   -- (no transition on startup - nodes start randomized, forces pull them in)
   Sim.start sim
 
-  -- Mark Grid as current scene (we're already in Grid state, just not via transition)
-  Ref.modify_ (_ { currentScene = Just Scenes.gridScene }) stateRef
+  -- Mark GridRun as current scene (we're already in Grid state with forces, just not via transition)
+  Ref.modify_ (_ { currentScene = Just Scenes.gridRunScene }) stateRef
 
   pure stateRef
 
@@ -143,36 +143,36 @@ initWithModel model containerSelector = do
 goToScene :: String -> Ref Scene.SceneState -> Effect Unit
 goToScene sceneName stateRef = do
   let mScene = case sceneName of
-        "Grid" -> Just Scenes.gridScene
-        "Tree1" -> Just Scenes.tree1Scene
-        "Tree2" -> Just Scenes.tree2Scene
-        "Tree3" -> Just Scenes.tree3Scene
-        "Tree4" -> Just Scenes.tree4Scene
-        "Tree5" -> Just Scenes.tree5Scene
+        "GridForm" -> Just Scenes.gridFormScene
+        "GridRun" -> Just Scenes.gridRunScene
+        "OrbitForm" -> Just Scenes.orbitFormScene
+        "OrbitRun" -> Just Scenes.orbitRunScene
+        "TreeForm" -> Just Scenes.treeFormScene
+        "TreeRun" -> Just Scenes.treeRunScene
         _ -> Nothing
   case mScene of
     Just scene -> do
-      -- Handle tree-specific setup when entering Tree2
-      when (sceneName == "Tree2") do
+      -- Handle TreeForm: render tree bezier links
+      when (sceneName == "TreeForm") do
         state <- Ref.read stateRef
         nodes <- Sim.getNodes state.simulation
+        clearTreeLinks  -- Clear any existing links
         renderTreeLinks nodes
-        -- Add tree-scene class to trigger CSS fade
         setTreeSceneClass true
 
-      -- Handle Tree4: force-directed tree with link forces
-      when (sceneName == "Tree4") do
+      -- Handle TreeRun: force-directed tree with link forces
+      when (sceneName == "TreeRun") do
         state <- Ref.read stateRef
         nodes <- Sim.getNodes state.simulation
         links <- Ref.read globalLinksRef
-        clearTreeLinks  -- Remove the bezier tree links
+        clearTreeLinks  -- Remove any existing links
         addTreeForces nodes links state.simulation
         renderForceLinks nodes links  -- Render straight line links
         Scene.setLinksGroupId forceLinksGroupId stateRef  -- Enable link updates
         setTreeSceneClass true  -- Keep packages/non-tree faded
 
-      -- Remove tree-scene class and restore grid forces when leaving tree scenes
-      when (sceneName == "Grid" || sceneName == "Tree1") do
+      -- For Grid/Orbit scenes: restore grid forces and clear tree stuff
+      when (isGridOrOrbitScene sceneName) do
         state <- Ref.read stateRef
         nodes <- Sim.getNodes state.simulation
         restoreGridForces nodes state.simulation
@@ -182,6 +182,8 @@ goToScene sceneName stateRef = do
 
       Scene.transitionTo scene stateRef
     Nothing -> log $ "[Explorer] Unknown scene: " <> sceneName
+  where
+  isGridOrOrbitScene name = name == "GridForm" || name == "GridRun" || name == "OrbitForm" || name == "OrbitRun"
 
 -- =============================================================================
 -- Helpers
