@@ -117,7 +117,7 @@ html, body {
 /* Node styles */
 .node circle {
   cursor: pointer;
-  transition: opacity 0.15s, stroke 0.15s, stroke-width 0.15s;
+  /* No transitions - instant highlight response */
 }
 
 .node text {
@@ -144,19 +144,19 @@ html, body {
 }
 
 /* Highlight states */
-.highlighted-source circle {
+circle.highlighted-source {
   stroke: #fff !important;
   stroke-width: 4px !important;
   filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
 }
 
-.highlighted-upstream circle {
+circle.highlighted-upstream {
   stroke: #3b82f6 !important;
   stroke-width: 3px !important;
   filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.7));
 }
 
-.highlighted-downstream circle {
+circle.highlighted-downstream {
   stroke: #10b981 !important;
   stroke-width: 3px !important;
   filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.7));
@@ -164,6 +164,7 @@ html, body {
 
 .dimmed {
   opacity: 0.15 !important;
+  transition: none !important;  /* Instant - override scene transitions */
 }
 
 .dimmed circle {
@@ -184,9 +185,9 @@ html, body {
    Node Type Styles (for scene transitions)
    ============================================================================= */
 
-/* All nodes have opacity transition for smooth fading */
+/* No transitions on nodes - hover highlighting is instant */
 .node {
-  transition: opacity 1.5s ease-in-out;
+  transition: none;
 }
 
 .package-node {
@@ -237,4 +238,62 @@ html, body {
 
 .ce-info p {
   margin: 0;
+}
+
+/* =============================================================================
+   Tooltip
+   ============================================================================= */
+
+/* Default PSD3 tooltip (from library) */
+.psd3-tooltip {
+  position: fixed;
+  z-index: 1000;
+  background: rgba(20, 20, 30, 0.95);
+  color: #f0f0f0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 350px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+}
+
+.tooltip-header {
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+
+.tooltip-package {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tooltip-metrics {
+  margin-top: 4px;
+}
+
+.tooltip-metric {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 3px;
+  font-size: 12px;
+}
+
+.metric-label {
+  color: #999;
+}
+
+.metric-value {
+  color: #fff;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }

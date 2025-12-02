@@ -1102,15 +1102,6 @@
     };
   };
 
-  // output/Engine.Explorer/foreign.js
-  function clearElement(element3) {
-    return function() {
-      while (element3.firstChild) {
-        element3.removeChild(element3.firstChild);
-      }
-    };
-  }
-
   // output/Data.Array/foreign.js
   var rangeImpl = function(start4, end) {
     var step4 = start4 > end ? -1 : 1;
@@ -4760,9 +4751,9 @@
     var sequential3 = sequential(dictParallel);
     var parallel4 = parallel(dictParallel);
     return function(dictApplicative) {
-      var traverse_9 = traverse_(dictApplicative);
+      var traverse_8 = traverse_(dictApplicative);
       return function(dictFoldable) {
-        var traverse_14 = traverse_9(dictFoldable);
+        var traverse_14 = traverse_8(dictFoldable);
         return function(f) {
           var $51 = traverse_14(function($53) {
             return parallel4(f($53));
@@ -8071,41 +8062,6 @@
   // output/Effect.Random/foreign.js
   var random = Math.random;
 
-  // output/Engine.Scene/foreign.js
-  function applyTransformWhereInPlace_(predicate) {
-    return function(transform2) {
-      return function(nodesRef) {
-        return function() {
-          const nodes = nodesRef.value;
-          let matchCount = 0;
-          let firstMatch = null;
-          for (let i2 = 0; i2 < nodes.length; i2++) {
-            const original = nodes[i2];
-            if (predicate(original)) {
-              matchCount++;
-              const oldGridX = original.gridX;
-              const oldGridY = original.gridY;
-              const updated = transform2(original);
-              Object.assign(original, updated);
-              if (!firstMatch && original.nodeType === "ModuleNode") {
-                firstMatch = {
-                  id: original.id,
-                  oldGridX,
-                  oldGridY,
-                  newGridX: original.gridX,
-                  newGridY: original.gridY
-                };
-              }
-            }
-          }
-          if (firstMatch) {
-            console.log("[ApplyInPlace] Matched", matchCount, "nodes. First module:", firstMatch);
-          }
-        };
-      };
-    };
-  }
-
   // node_modules/d3-quadtree/src/add.js
   function add_default(d3) {
     const x3 = +this._x.call(null, d3), y3 = +this._y.call(null, d3);
@@ -10356,6 +10312,43 @@
     };
   };
 
+  // output/PSD3.Simulation.Scene/foreign.js
+  function applyRulesInPlace_(rules) {
+    return function(nodesRef) {
+      const nodes = nodesRef.value;
+      for (let i2 = 0; i2 < nodes.length; i2++) {
+        const node = nodes[i2];
+        for (let j = 0; j < rules.length; j++) {
+          const rule = rules[j];
+          if (rule.select(node)) {
+            const updated = rule.apply(node);
+            Object.assign(node, updated);
+            break;
+          }
+        }
+      }
+    };
+  }
+
+  // output/PSD3.Simulation.Scene/index.js
+  var Physics = /* @__PURE__ */ (function() {
+    function Physics2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Physics2.create = function(value0) {
+      return new Physics2(value0);
+    };
+    return Physics2;
+  })();
+  var Static = /* @__PURE__ */ (function() {
+    function Static2() {
+    }
+    ;
+    Static2.value = new Static2();
+    return Static2;
+  })();
+
   // output/PSD3.Transition.Tick/index.js
   var ticksForDuration = function(milliseconds) {
     var ticks3 = toNumber(milliseconds) / 16.67;
@@ -10378,25 +10371,7 @@
   var fromFoldable11 = /* @__PURE__ */ fromFoldable2(foldableArray);
   var map18 = /* @__PURE__ */ map(functorArray);
   var show3 = /* @__PURE__ */ show(showInt);
-  var traverse_2 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableArray);
   var min3 = /* @__PURE__ */ min(ordNumber);
-  var Physics = /* @__PURE__ */ (function() {
-    function Physics2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Physics2.create = function(value0) {
-      return new Physics2(value0);
-    };
-    return Physics2;
-  })();
-  var Static = /* @__PURE__ */ (function() {
-    function Static2() {
-    }
-    ;
-    Static2.value = new Static2();
-    return Static2;
-  })();
   var transitionDelta = /* @__PURE__ */ ticksForDuration(2e3);
   var startCSSTransition = function(css) {
     return function __do4() {
@@ -10431,10 +10406,10 @@
         return pure6(unit);
       }
       ;
-      throw new Error("Failed pattern match at Engine.Scene (line 369, column 17 - line 371, column 24): " + [state3.currentScene.value0.stableMode.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Scene (line 288, column 17 - line 290, column 33): " + [state3.currentScene.value0.stableMode.constructor.name]);
     }
     ;
-    throw new Error("Failed pattern match at Engine.Scene (line 367, column 25 - line 371, column 24): " + [state3.currentScene.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Scene (line 286, column 25 - line 290, column 33): " + [state3.currentScene.constructor.name]);
   };
   var reinitializeForces = function(sim) {
     return function __do4() {
@@ -10480,10 +10455,8 @@
   };
   var applyRulesInPlace = function(rules) {
     return function(sim) {
-      var applyRule = function(rule) {
-        return applyTransformWhereInPlace_(rule.select)(rule.apply)(sim.nodes);
-      };
-      return traverse_2(applyRule)(rules);
+      var v = applyRulesInPlace_(rules)(sim.nodes);
+      return pure6(unit);
     };
   };
   var completeTransition = function(t) {
@@ -10508,7 +10481,7 @@
               return unit;
             }
             ;
-            throw new Error("Failed pattern match at Engine.Scene (line 351, column 3 - line 357, column 16): " + [t.targetScene.stableMode.constructor.name]);
+            throw new Error("Failed pattern match at Engine.Scene (line 270, column 3 - line 276, column 16): " + [t.targetScene.stableMode.constructor.name]);
           })();
           return write({
             linksGroupId: state3.linksGroupId,
@@ -10525,8 +10498,8 @@
     return function(stateRef) {
       return function(state3) {
         var newProgress = min3(1)(t.progress + transitionDelta);
-        var $34 = newProgress >= 1;
-        if ($34) {
+        var $32 = newProgress >= 1;
+        if ($32) {
           return completeTransition(t)(stateRef)(state3);
         }
         ;
@@ -10561,7 +10534,7 @@
           return runStableEngine(state3)();
         }
         ;
-        throw new Error("Failed pattern match at Engine.Scene (line 296, column 3 - line 298, column 37): " + [state3.transition.constructor.name]);
+        throw new Error("Failed pattern match at Engine.Scene (line 215, column 3 - line 217, column 37): " + [state3.transition.constructor.name]);
       })();
       updateCirclePositions(state3.nodesGroupId)();
       if (state3.linksGroupId instanceof Just) {
@@ -10572,7 +10545,7 @@
         return unit;
       }
       ;
-      throw new Error("Failed pattern match at Engine.Scene (line 304, column 3 - line 306, column 25): " + [state3.linksGroupId.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Scene (line 223, column 3 - line 225, column 25): " + [state3.linksGroupId.constructor.name]);
     };
   };
   var transitionTo = function(targetScene) {
@@ -10599,7 +10572,7 @@
               return unit;
             }
             ;
-            throw new Error("Failed pattern match at Engine.Scene (line 256, column 7 - line 258, column 29): " + [targetScene.cssTransition.constructor.name]);
+            throw new Error("Failed pattern match at Engine.Scene (line 175, column 7 - line 177, column 29): " + [targetScene.cssTransition.constructor.name]);
           })();
           write({
             currentScene: state3.currentScene,
@@ -10616,7 +10589,7 @@
           return reheat(state3.simulation)();
         }
         ;
-        throw new Error("Failed pattern match at Engine.Scene (line 239, column 3 - line 271, column 34): " + [state3.transition.constructor.name]);
+        throw new Error("Failed pattern match at Engine.Scene (line 158, column 3 - line 190, column 34): " + [state3.transition.constructor.name]);
       };
     };
   };
@@ -13204,6 +13177,12 @@
     };
     return MouseLeaveWithInfo2;
   })();
+  var onMouseLeave = /* @__PURE__ */ (function() {
+    return MouseLeave.create;
+  })();
+  var onMouseEnter = /* @__PURE__ */ (function() {
+    return MouseEnter.create;
+  })();
   var defaultZoom = function(scaleExtent) {
     return function(targetSelector) {
       return {
@@ -13226,6 +13205,48 @@
   var appendChild = function(dict) {
     return dict.appendChild;
   };
+
+  // output/PSD3v2.Highlight/foreign.js
+  function highlightConnected_(containerSelector) {
+    return function(nodeId) {
+      return function(targets) {
+        return function(sources) {
+          return function() {
+            const targetSet = new Set(targets);
+            const sourceSet = new Set(sources);
+            const circles = select_default2(containerSelector).selectAll("circle");
+            circles.each(function(d3) {
+              if (!d3 || d3.id === void 0) return;
+              const el = select_default2(this);
+              const id5 = d3.id;
+              if (id5 === nodeId) {
+                el.classed("highlighted-source", true);
+                el.classed("dimmed", false);
+              } else if (targetSet.has(id5)) {
+                el.classed("highlighted-upstream", true);
+                el.classed("dimmed", false);
+              } else if (sourceSet.has(id5)) {
+                el.classed("highlighted-downstream", true);
+                el.classed("dimmed", false);
+              } else {
+                el.classed("dimmed", true);
+              }
+            });
+          };
+        };
+      };
+    };
+  }
+  function clearHighlights_(containerSelector) {
+    return function() {
+      const circles = select_default2(containerSelector).selectAll("circle");
+      circles.classed("highlighted-source", false).classed("highlighted-upstream", false).classed("highlighted-downstream", false).classed("dimmed", false);
+    };
+  }
+
+  // output/PSD3v2.Highlight/index.js
+  var highlightConnected = highlightConnected_;
+  var clearHighlights = clearHighlights_;
 
   // output/PSD3v2.Selection.Operations/foreign.js
   function getElementData_(element3) {
@@ -15705,6 +15726,12 @@
       return $15(_nextSibling($16));
     };
   })();
+  var firstChild = /* @__PURE__ */ (function() {
+    var $25 = map23(toMaybe);
+    return function($26) {
+      return $25(_firstChild($26));
+    };
+  })();
 
   // output/Web.DOM.NodeList/foreign.js
   function toArray3(list) {
@@ -15762,7 +15789,7 @@
   // output/PSD3v2.Selection.Operations/index.js
   var bind6 = /* @__PURE__ */ bind(bindEffect);
   var pure7 = /* @__PURE__ */ pure(applicativeEffect);
-  var traverse_3 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableArray);
+  var traverse_2 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableArray);
   var traverse3 = /* @__PURE__ */ traverse(traversableArray)(applicativeEffect);
   var $$void5 = /* @__PURE__ */ $$void(functorEffect);
   var discard2 = /* @__PURE__ */ discard(discardUnit);
@@ -15883,7 +15910,7 @@
           ;
           throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 324, column 34 - line 325, column 30): " + [v.constructor.name]);
         })();
-        return traverse_3(function(element3) {
+        return traverse_2(function(element3) {
           var node = toNode(element3);
           return function __do4() {
             var maybeParent = parentNode(node)();
@@ -16019,7 +16046,7 @@
       };
       var elements = getElements(v);
       return function __do4() {
-        traverse_3(applyBehavior(behavior))(elements)();
+        traverse_2(applyBehavior(behavior))(elements)();
         return v;
       };
     };
@@ -16478,7 +16505,7 @@
           return function(v) {
             return function __do4() {
               var transition2 = createTransition_(config.duration)(delayNullable)(easingNullable)(v.value0)();
-              return traverse_3(function(attr3) {
+              return traverse_2(function(attr3) {
                 if (attr3 instanceof StaticAttr) {
                   return transitionSetAttribute_(attr3.value0)(attributeValueToString(attr3.value1))(transition2);
                 }
@@ -16508,7 +16535,7 @@
           return function(v) {
             return function __do4() {
               var transition2 = createTransition_(config.duration)(delayNullable)(easingNullable)(v.value0)();
-              traverse_3(function(attr3) {
+              traverse_2(function(attr3) {
                 if (attr3 instanceof StaticAttr) {
                   return transitionSetAttribute_(attr3.value0)(attributeValueToString(attr3.value1))(transition2);
                 }
@@ -16534,7 +16561,7 @@
     return function(datum2) {
       return function(index5) {
         return function(attrs) {
-          return traverse_3(function(attr3) {
+          return traverse_2(function(attr3) {
             if (attr3 instanceof StaticAttr) {
               var $380 = attr3.value0 === "textContent";
               if ($380) {
@@ -17079,7 +17106,7 @@
                       throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1334, column 41 - line 1335, column 54): " + [v2.value0.enter.constructor.name]);
                     })();
                     var pairs = zipWith(Tuple.create)(enterElements2)(pendingData);
-                    return liftEffect3(traverse_3(function(v3) {
+                    return liftEffect3(traverse_2(function(v3) {
                       var finalAttrs = (function() {
                         var v4 = v1.value0.template(v3.value1);
                         if (v4 instanceof Node3) {
@@ -17268,7 +17295,7 @@
                       throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1512, column 41 - line 1513, column 54): " + [v2.value0.enter.constructor.name]);
                     })();
                     var pairs = zipWith(Tuple.create)(enterElements2)(pendingData);
-                    return liftEffect3(traverse_3(function(v4) {
+                    return liftEffect3(traverse_2(function(v4) {
                       var finalAttrs = (function() {
                         var v5 = v1.value0.template(v4.value1);
                         if (v5 instanceof Node3) {
@@ -17867,6 +17894,60 @@
     return v;
   };
 
+  // output/PSD3v2.Tooltip/foreign.js
+  var tooltip = null;
+  var ensureTooltip = () => {
+    if (!tooltip) {
+      tooltip = document.createElement("div");
+      tooltip.className = "psd3-tooltip";
+      tooltip.style.cssText = `
+      position: fixed;
+      display: none;
+      background: rgba(20, 20, 30, 0.95);
+      color: #f0f0f0;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      max-width: 300px;
+      pointer-events: none;
+      z-index: 10000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    `;
+      document.body.appendChild(tooltip);
+    }
+    return tooltip;
+  };
+  var showTooltip_ = (content3) => (x3) => (y3) => () => {
+    const el = ensureTooltip();
+    el.innerHTML = content3;
+    el.style.display = "block";
+    const rect = el.getBoundingClientRect();
+    const viewW = window.innerWidth;
+    const viewH = window.innerHeight;
+    let posX = x3 + 15;
+    let posY = y3 + 10;
+    if (posX + rect.width > viewW) posX = x3 - rect.width - 15;
+    if (posY + rect.height > viewH) posY = y3 - rect.height - 10;
+    el.style.left = posX + "px";
+    el.style.top = posY + "px";
+  };
+  var hideTooltip_ = () => {
+    ensureTooltip().style.display = "none";
+  };
+
+  // output/PSD3v2.Tooltip/index.js
+  var onTooltipHide = /* @__PURE__ */ (function() {
+    return new MouseLeave(function(v) {
+      return hideTooltip_;
+    });
+  })();
+  var onTooltip = function(formatContent) {
+    var handler3 = function(info2) {
+      return showTooltip_(formatContent(info2.datum))(info2.pageX)(info2.pageY);
+    };
+    return new MouseEnterWithInfo(handler3);
+  };
+
   // output/Viz.SpagoGridTest.TreeLinks/index.js
   var show9 = /* @__PURE__ */ show(showNumber);
   var radialLinkPath = function(x13) {
@@ -17908,6 +17989,11 @@
   var pure12 = /* @__PURE__ */ pure(applicativeEffect);
   var fromFoldable15 = /* @__PURE__ */ fromFoldable2(foldableArray);
   var traverse4 = /* @__PURE__ */ traverse(traversableArray)(applicativeEffect);
+  var lookup5 = /* @__PURE__ */ lookup2(ordInt);
+  var d2 = /* @__PURE__ */ d(toAttrStringFunctionStrin);
+  var fill2 = /* @__PURE__ */ fill(toAttrStringFunctionStrin);
+  var fromFoldable16 = /* @__PURE__ */ fromFoldable4(ordInt)(foldableArray);
+  var map26 = /* @__PURE__ */ map(functorArray);
   var appendChild5 = /* @__PURE__ */ appendChild(selectionMD3v2Selection_D);
   var viewBox2 = /* @__PURE__ */ viewBox(toAttrStringString);
   var show23 = /* @__PURE__ */ show(showNumber);
@@ -17916,14 +18002,9 @@
   var cx2 = /* @__PURE__ */ cx(toAttrNumberFunctionNumbe);
   var cy2 = /* @__PURE__ */ cy(toAttrNumberFunctionNumbe);
   var radius2 = /* @__PURE__ */ radius(toAttrNumberFunctionNumbe);
-  var fill2 = /* @__PURE__ */ fill(toAttrStringFunctionStrin);
   var stroke1 = /* @__PURE__ */ stroke(toAttrStringString);
   var strokeWidth1 = /* @__PURE__ */ strokeWidth(toAttrNumberNumber);
   var on4 = /* @__PURE__ */ on2(selectionMD3v2Selection_D);
-  var lookup5 = /* @__PURE__ */ lookup2(ordInt);
-  var d2 = /* @__PURE__ */ d(toAttrStringFunctionStrin);
-  var fromFoldable16 = /* @__PURE__ */ fromFoldable4(ordInt)(foldableArray);
-  var map26 = /* @__PURE__ */ map(functorArray);
   var insert8 = /* @__PURE__ */ insert3(ordString);
   var discard22 = /* @__PURE__ */ discard3(bindAff);
   var log1 = /* @__PURE__ */ log2(monadEffectAff);
@@ -17952,7 +18033,7 @@
         return log8("[Explorer] Could not find #explorer-nodes for CSS class")();
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 459, column 3 - line 466, column 77): " + [mElement.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 509, column 3 - line 516, column 77): " + [mElement.constructor.name]);
     };
   };
   var renderForceLinksD3 = function(links) {
@@ -18018,7 +18099,7 @@
         return Nothing.value;
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 203, column 21 - line 205, column 26): " + [n.nodeType.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 206, column 21 - line 208, column 26): " + [n.nodeType.constructor.name]);
     };
     var packagePositions = fromFoldable15(mapMaybe(getPackagePos)(nodes));
     var randomizeIfModule = function(n) {
@@ -18043,7 +18124,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at Engine.Explorer (line 212, column 34 - line 214, column 42): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at Engine.Explorer (line 215, column 34 - line 217, column 42): " + [v1.constructor.name]);
           })();
           var jitterX = (rx - 0.5) * 100;
           var jitterY = (ry - 0.5) * 100;
@@ -18072,7 +18153,7 @@
         };
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 207, column 25 - line 217, column 58): " + [n.nodeType.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 210, column 25 - line 220, column 58): " + [n.nodeType.constructor.name]);
     };
     return traverse4(randomizeIfModule)(nodes);
   };
@@ -18102,34 +18183,7 @@
       ;
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 322, column 15 - line 326, column 42): " + [n.nodeType.constructor.name]);
-  };
-  var renderSVG = function(containerSelector) {
-    return function(nodes) {
-      return bind13(select6(containerSelector))(function(container) {
-        return bind13(appendChild5(SVG.value)([viewBox2(show23(-viewBoxWidth / 2) + (" " + (show23(-viewBoxHeight / 2) + (" " + (show23(viewBoxWidth) + (" " + show23(viewBoxHeight))))))), id_2("explorer-svg"), class_1("ce-viz")])(container))(function(svg) {
-          return bind13(appendChild5(Group.value)([id_2("explorer-zoom-group")])(svg))(function(zoomGroup) {
-            return bind13(appendChild5(Group.value)([id_2("explorer-links")])(zoomGroup))(function() {
-              return bind13(appendChild5(Group.value)([id_2("explorer-nodes")])(zoomGroup))(function(nodesGroup) {
-                return bind13(appendData4(Circle.value)(nodes)([cx2(function(v) {
-                  return v.x;
-                }), cy2(function(v) {
-                  return v.y;
-                }), radius2(function(v) {
-                  return v.r;
-                }), fill2(nodeColor), stroke1("#fff"), strokeWidth1(0.5), class_2(nodeClass)])(nodesGroup))(function(nodeSel) {
-                  return bind13(on4(new Zoom(defaultZoom(new ScaleExtent(0.1, 10))("#explorer-zoom-group")))(svg))(function() {
-                    return pure8({
-                      nodeSel
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    };
+    throw new Error("Failed pattern match at Engine.Explorer (line 361, column 15 - line 365, column 42): " + [n.nodeType.constructor.name]);
   };
   var linkPathFn = function(nodeMap) {
     return function(link3) {
@@ -18177,6 +18231,64 @@
       return unit;
     };
   };
+  var formatNodeTooltip = function(node) {
+    var nodeTypeLabel = function(v) {
+      if (v instanceof PackageNode) {
+        return "Package";
+      }
+      ;
+      if (v instanceof ModuleNode) {
+        return "Module";
+      }
+      ;
+      throw new Error("Failed pattern match at Engine.Explorer (line 301, column 3 - line 301, column 38): " + [v.constructor.name]);
+    };
+    var metric = function(label5) {
+      return function(value13) {
+        return '<div class="tooltip-metric">' + ('<span class="metric-label">' + (label5 + ("</span>" + ('<span class="metric-value">' + (value13 + "</span></div>")))));
+      };
+    };
+    return '<div class="tooltip-header">' + (node.name + ("</div>" + ('<div class="tooltip-package">' + (node["package"] + ("</div>" + ('<div class="tooltip-metrics">' + (metric("Type")(nodeTypeLabel(node.nodeType)) + (metric("Dependencies")(show14(length(node.targets))) + (metric("Dependents")(show14(length(node.sources))) + "</div>")))))))));
+  };
+  var renderSVG = function(containerSelector) {
+    return function(nodes) {
+      return bind13(select6(containerSelector))(function(container) {
+        return bind13(appendChild5(SVG.value)([viewBox2(show23(-viewBoxWidth / 2) + (" " + (show23(-viewBoxHeight / 2) + (" " + (show23(viewBoxWidth) + (" " + show23(viewBoxHeight))))))), id_2("explorer-svg"), class_1("ce-viz")])(container))(function(svg) {
+          return bind13(appendChild5(Group.value)([id_2("explorer-zoom-group")])(svg))(function(zoomGroup) {
+            return bind13(appendChild5(Group.value)([id_2("explorer-links")])(zoomGroup))(function() {
+              return bind13(appendChild5(Group.value)([id_2("explorer-nodes")])(zoomGroup))(function(nodesGroup) {
+                return bind13(appendData4(Circle.value)(nodes)([cx2(function(v) {
+                  return v.x;
+                }), cy2(function(v) {
+                  return v.y;
+                }), radius2(function(v) {
+                  return v.r;
+                }), fill2(nodeColor), stroke1("#fff"), strokeWidth1(0.5), class_2(nodeClass)])(nodesGroup))(function(nodeSel) {
+                  return bind13(on4(new Zoom(defaultZoom(new ScaleExtent(0.1, 10))("#explorer-zoom-group")))(svg))(function() {
+                    return bind13(on4(onMouseEnter(function(node) {
+                      return highlightConnected("#explorer-nodes")(node.id)(node.targets)(node.sources);
+                    }))(nodeSel))(function() {
+                      return bind13(on4(onMouseLeave(function(v) {
+                        return clearHighlights("#explorer-nodes");
+                      }))(nodeSel))(function() {
+                        return bind13(on4(onTooltip(formatNodeTooltip))(nodeSel))(function() {
+                          return bind13(on4(onTooltipHide)(nodeSel))(function() {
+                            return pure8({
+                              nodeSel
+                            });
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    };
+  };
   var forceLinksGroupId = "#explorer-links";
   var fixPackagePosition = function(node) {
     if (node.nodeType instanceof PackageNode) {
@@ -18208,7 +18320,25 @@
       return node;
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 193, column 27 - line 195, column 21): " + [node.nodeType.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 196, column 27 - line 198, column 21): " + [node.nodeType.constructor.name]);
+  };
+  var clearElement = function(element3) {
+    var clearNode = function(node) {
+      return function __do4() {
+        var mChild = firstChild(node)();
+        if (mChild instanceof Just) {
+          removeChild(mChild.value0)(node)();
+          return clearNode(node)();
+        }
+        ;
+        if (mChild instanceof Nothing) {
+          return unit;
+        }
+        ;
+        throw new Error("Failed pattern match at Engine.Explorer (line 496, column 5 - line 500, column 27): " + [mChild.constructor.name]);
+      };
+    };
+    return clearNode(toNode(element3));
   };
   var clearTreeLinks = function __do() {
     var win = windowImpl();
@@ -18224,7 +18354,7 @@
       return log8("[Explorer] Could not find #explorer-links")();
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 442, column 3 - line 447, column 63): " + [mElement.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 481, column 3 - line 486, column 63): " + [mElement.constructor.name]);
   };
   var addTreeForces = function(nodes) {
     return function(links) {
@@ -18330,7 +18460,7 @@
             });
           }
           ;
-          throw new Error("Failed pattern match at Engine.Explorer (line 86, column 3 - line 94, column 42): " + [result.constructor.name]);
+          throw new Error("Failed pattern match at Engine.Explorer (line 89, column 3 - line 97, column 42): " + [result.constructor.name]);
         });
       });
     }));
@@ -18411,7 +18541,7 @@
         return log8("[Explorer] Unknown scene: " + sceneName);
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 152, column 3 - line 183, column 63): " + [mScene.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 155, column 3 - line 186, column 63): " + [mScene.constructor.name]);
     };
   };
 
@@ -18460,10 +18590,10 @@
 
   // output/Halogen.Data.Slot/index.js
   var foreachSlot = function(dictApplicative) {
-    var traverse_9 = traverse_(dictApplicative)(foldableMap);
+    var traverse_8 = traverse_(dictApplicative)(foldableMap);
     return function(v) {
       return function(k) {
-        return traverse_9(function($54) {
+        return traverse_8(function($54) {
           return k($54);
         })(v);
       };
@@ -19827,8 +19957,8 @@
   var $$void6 = /* @__PURE__ */ $$void(functorEffect);
   var bind7 = /* @__PURE__ */ bind(bindEffect);
   var append9 = /* @__PURE__ */ append(semigroupArray);
-  var traverse_4 = /* @__PURE__ */ traverse_(applicativeEffect);
-  var traverse_1 = /* @__PURE__ */ traverse_4(foldableArray);
+  var traverse_3 = /* @__PURE__ */ traverse_(applicativeEffect);
+  var traverse_1 = /* @__PURE__ */ traverse_3(foldableArray);
   var unsubscribe = function(v) {
     return v;
   };
@@ -20145,7 +20275,7 @@
 
   // output/Halogen.Component/index.js
   var voidLeft2 = /* @__PURE__ */ voidLeft(functorHalogenM);
-  var traverse_5 = /* @__PURE__ */ traverse_(applicativeHalogenM)(foldableMaybe);
+  var traverse_4 = /* @__PURE__ */ traverse_(applicativeHalogenM)(foldableMaybe);
   var map28 = /* @__PURE__ */ map(functorHalogenM);
   var pure10 = /* @__PURE__ */ pure(applicativeHalogenM);
   var ComponentSlot = /* @__PURE__ */ (function() {
@@ -20173,15 +20303,15 @@
   var mkEval = function(args) {
     return function(v) {
       if (v instanceof Initialize) {
-        return voidLeft2(traverse_5(args.handleAction)(args.initialize))(v.value0);
+        return voidLeft2(traverse_4(args.handleAction)(args.initialize))(v.value0);
       }
       ;
       if (v instanceof Finalize) {
-        return voidLeft2(traverse_5(args.handleAction)(args.finalize))(v.value0);
+        return voidLeft2(traverse_4(args.handleAction)(args.finalize))(v.value0);
       }
       ;
       if (v instanceof Receive) {
-        return voidLeft2(traverse_5(args.handleAction)(args.receive(v.value0)))(v.value1);
+        return voidLeft2(traverse_4(args.handleAction)(args.receive(v.value0)))(v.value1);
       }
       ;
       if (v instanceof Action2) {
@@ -20455,10 +20585,10 @@
   var unRenderStateX = unsafeCoerce2;
   var unDriverStateX = unsafeCoerce2;
   var renderStateX_ = function(dictApplicative) {
-    var traverse_9 = traverse_(dictApplicative)(foldableMaybe);
+    var traverse_8 = traverse_(dictApplicative)(foldableMaybe);
     return function(f) {
       return unDriverStateX(function(st) {
-        return traverse_9(f)(st.rendering);
+        return traverse_8(f)(st.rendering);
       });
     };
   };
@@ -20518,7 +20648,7 @@
   };
 
   // output/Halogen.Aff.Driver.Eval/index.js
-  var traverse_6 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
+  var traverse_5 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
   var bindFlipped6 = /* @__PURE__ */ bindFlipped(bindMaybe);
   var lookup7 = /* @__PURE__ */ lookup2(ordSubscriptionId);
   var bind14 = /* @__PURE__ */ bind(bindAff);
@@ -20550,7 +20680,7 @@
       return function __do4() {
         var v = read(ref2)();
         var subs = read(v.subscriptions)();
-        return traverse_6(unsubscribe)(bindFlipped6(lookup7(sid))(subs))();
+        return traverse_5(unsubscribe)(bindFlipped6(lookup7(sid))(subs))();
       };
     };
   };
@@ -20804,7 +20934,7 @@
   var bind9 = /* @__PURE__ */ bind(bindEffect);
   var discard6 = /* @__PURE__ */ discard(discardUnit);
   var for_5 = /* @__PURE__ */ for_(applicativeEffect)(foldableMaybe);
-  var traverse_7 = /* @__PURE__ */ traverse_(applicativeAff)(foldableList);
+  var traverse_6 = /* @__PURE__ */ traverse_(applicativeAff)(foldableList);
   var fork4 = /* @__PURE__ */ fork(monadForkAff);
   var bindFlipped7 = /* @__PURE__ */ bindFlipped(bindEffect);
   var traverse_13 = /* @__PURE__ */ traverse_(applicativeEffect);
@@ -20836,7 +20966,7 @@
       var queue = read(ref2)();
       write(Nothing.value)(ref2)();
       return for_5(queue)((function() {
-        var $59 = traverse_7(fork4);
+        var $59 = traverse_6(fork4);
         return function($60) {
           return handleAff($59(reverse2($60)));
         };
@@ -21022,7 +21152,7 @@
                   var handlers = read(v.pendingHandlers)();
                   write(new Just(Nil.value))(v.pendingHandlers)();
                   traverse_23((function() {
-                    var $76 = traverse_7(fork4);
+                    var $76 = traverse_6(fork4);
                     return function($77) {
                       return handleAff($76(reverse2($77)));
                     };
@@ -21132,7 +21262,7 @@
   };
   var $$void8 = /* @__PURE__ */ $$void(functorEffect);
   var pure17 = /* @__PURE__ */ pure(applicativeEffect);
-  var traverse_8 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
+  var traverse_7 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
   var unwrap6 = /* @__PURE__ */ unwrap();
   var when5 = /* @__PURE__ */ when(applicativeEffect);
   var not2 = /* @__PURE__ */ not(/* @__PURE__ */ heytingAlgebraFunction(/* @__PURE__ */ heytingAlgebraFunction(heytingAlgebraBoolean)));
@@ -21159,7 +21289,7 @@
   var removeChild3 = function(v) {
     return function __do4() {
       var npn = parentNode(v.node)();
-      return traverse_8(function(pn) {
+      return traverse_7(function(pn) {
         return removeChild(v.node)(pn);
       })(npn)();
     };

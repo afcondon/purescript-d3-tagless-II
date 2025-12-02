@@ -37,8 +37,10 @@ import PSD3.ForceEngine.Render (GroupId(..))
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3.Scale (interpolateTurbo)
 import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, radius, id_, class_, viewBox, d, opacity, x1, x2, y1, y2)
-import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom)
+import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom, onMouseEnter, onMouseLeave)
 import PSD3v2.Capabilities.Selection (select, appendChild, appendData, on)
+import PSD3v2.Highlight (highlightConnected, clearHighlights)
+import PSD3v2.Tooltip (onTooltip, onTooltipHide)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SBoundOwns)
 import Types (SimNode, SimLink, NodeType(..), LinkType, isTreeLink)
@@ -276,6 +278,31 @@ restoreGridForces nodes sim = do
   addGridForces nodes sim
 
 -- =============================================================================
+-- Tooltip Formatting
+-- =============================================================================
+
+-- | Format tooltip HTML for a node
+formatNodeTooltip :: SimNode -> String
+formatNodeTooltip node =
+  "<div class=\"tooltip-header\">" <> node.name <> "</div>" <>
+  "<div class=\"tooltip-package\">" <> node.package <> "</div>" <>
+  "<div class=\"tooltip-metrics\">" <>
+    metric "Type" (nodeTypeLabel node.nodeType) <>
+    metric "Dependencies" (show (Array.length node.targets)) <>
+    metric "Dependents" (show (Array.length node.sources)) <>
+  "</div>"
+  where
+  metric label value =
+    "<div class=\"tooltip-metric\">" <>
+      "<span class=\"metric-label\">" <> label <> "</span>" <>
+      "<span class=\"metric-value\">" <> value <> "</span>" <>
+    "</div>"
+
+  nodeTypeLabel :: NodeType -> String
+  nodeTypeLabel PackageNode = "Package"
+  nodeTypeLabel ModuleNode = "Module"
+
+-- =============================================================================
 -- Rendering
 -- =============================================================================
 
@@ -305,7 +332,18 @@ renderSVG containerSelector nodes = do
     ]
     nodesGroup
 
+  -- Add zoom behavior
   _ <- on (Zoom $ defaultZoom (ScaleExtent 0.1 10.0) "#explorer-zoom-group") svg
+
+  -- Add highlight on hover (mouse enter highlights connected nodes)
+  _ <- on (onMouseEnter \node -> highlightConnected "#explorer-nodes" node.id node.targets node.sources) nodeSel
+
+  -- Add clear highlight on mouse leave
+  _ <- on (onMouseLeave \_ -> clearHighlights "#explorer-nodes") nodeSel
+
+  -- Add tooltip on hover
+  _ <- on (onTooltip formatNodeTooltip) nodeSel
+  _ <- on onTooltipHide nodeSel
 
   pure { nodeSel }
 
