@@ -10,7 +10,7 @@ import {
   forceManyBody, forceCollide, forceLink, forceCenter,
   forceX, forceY, forceRadial
 } from "d3-force";
-import { select } from "d3-selection";
+import { select, pointer } from "d3-selection";
 import { drag } from "d3-drag";
 
 // =============================================================================
@@ -559,6 +559,54 @@ export function attachDragWithReheat_(elements) {
           .call(dragBehavior)
           .style('cursor', 'grab');
       });
+    };
+  };
+}
+
+// Attach drag to transformed group elements (like bubble packs)
+// Uses a container selector to get pointer coordinates in the right space
+// containerSelector: CSS selector for the coordinate reference container (e.g., "#zoom-group" or "svg")
+export function attachGroupDragWithReheat_(elements) {
+  return function(containerSelector) {
+    return function(reheatCallback) {
+      return function() {
+        const container = select(containerSelector).node();
+        if (!container) {
+          console.warn('[attachGroupDragWithReheat] Container not found:', containerSelector);
+          return;
+        }
+
+        const dragBehavior = drag()
+          // Custom subject: walk up DOM from click target to find .module-pack group's data
+          .subject(function(event) {
+            let el = event.sourceEvent.target;
+            while (el && !el.classList?.contains('module-pack')) {
+              el = el.parentElement;
+            }
+            return el?.__data__;
+          })
+          .on('start', function(event) {
+            reheatCallback();
+            event.subject.fx = event.subject.x;
+            event.subject.fy = event.subject.y;
+          })
+          .on('drag', function(event) {
+            const [px, py] = pointer(event, container);
+            event.subject.fx = px;
+            event.subject.fy = py;
+          })
+          .on('end', function(event) {
+            event.subject.fx = null;
+            event.subject.fy = null;
+          });
+
+        // Apply drag to each element
+        elements.forEach(function(el) {
+          select(el)
+            .call(dragBehavior)
+            .style('cursor', 'grab');
+        });
+      };
     };
   };
 }

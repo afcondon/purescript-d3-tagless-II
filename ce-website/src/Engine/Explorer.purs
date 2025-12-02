@@ -28,17 +28,21 @@ import Effect.Ref (Ref)
 import Effect.Ref as Ref
 import Effect.Unsafe (unsafePerformEffect)
 import Foreign.Object as Object
-import Data.Loader (loadModel, LoadedModel)
+import Data.Loader (loadModel, LoadedModel, DeclarationsMap)
+import Data.Traversable (for_)
+import Engine.BubblePack (renderModulePack)
+import PSD3v2.Tooltip (hideTooltip) as Tooltip
 import Engine.Scene as Scene
 import Engine.Scenes as Scenes
 import PSD3.ForceEngine.Core as Core
-import PSD3.ForceEngine.Links (swizzleLinks)
-import PSD3.ForceEngine.Render (GroupId(..))
+import PSD3.ForceEngine.Links (swizzleLinks, swizzleLinksByIndex)
+import PSD3.ForceEngine.Render (GroupId(..), updateGroupPositions, updateLinkPositions)
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3.Scale (interpolateTurbo)
 import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, radius, id_, class_, viewBox, d, opacity, x1, x2, y1, y2)
-import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom, onMouseEnter, onMouseLeave)
-import PSD3v2.Capabilities.Selection (select, appendChild, appendData, on)
+import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom, onMouseEnter, onMouseLeave, onClickWithDatum)
+import PSD3v2.Capabilities.Selection (select, selectAll, appendChild, appendData, on)
+import PSD3v2.Interpreter.D3v2 (getElementsD3v2) as D3v2
 import PSD3v2.Classify (classifyElements, clearClasses)
 import Data.Set as Set
 import PSD3v2.Tooltip (onTooltip, onTooltipHide)
@@ -67,6 +71,20 @@ globalStateRef = unsafePerformEffect $ Ref.new Nothing
 globalLinksRef :: Ref (Array SimLink)
 globalLinksRef = unsafePerformEffect $ Ref.new []
 
+-- | Global ref for declarations (for bubble packs)
+globalDeclarationsRef :: Ref DeclarationsMap
+globalDeclarationsRef = unsafePerformEffect $ Ref.new Object.empty
+
+-- | Focus state for neighborhood drill-down
+type FocusState =
+  { focusedNodeId :: Maybe Int  -- Currently focused node (Nothing = full view)
+  , fullNodes :: Array SimNode   -- Original full node set for restoration
+  }
+
+-- | Global ref for focus state
+globalFocusRef :: Ref FocusState
+globalFocusRef = unsafePerformEffect $ Ref.new { focusedNodeId: Nothing, fullNodes: [] }
+
 -- =============================================================================
 -- Constants
 -- =============================================================================
@@ -91,8 +109,9 @@ initExplorer containerSelector = launchAff_ do
     Left err -> liftEffect $ log $ "[Explorer] Error: " <> err
     Right model -> do
       liftEffect $ log $ "[Explorer] Loaded: " <> show model.moduleCount <> " modules, " <> show model.packageCount <> " packages"
-      -- Store links for later use
+      -- Store links and declarations for later use
       liftEffect $ Ref.write model.links globalLinksRef
+      liftEffect $ Ref.write model.declarations globalDeclarationsRef
       stateRef <- liftEffect $ initWithModel model containerSelector
       liftEffect $ Ref.write (Just stateRef) globalStateRef
       liftEffect $ log "[Explorer] Ready"
@@ -358,6 +377,9 @@ renderSVG containerSelector nodes = do
   _ <- on (onTooltip formatNodeTooltip) nodeSel
   _ <- on onTooltipHide nodeSel
 
+  -- Add click to focus on neighborhood
+  _ <- on (onClickWithDatum toggleFocus) nodeSel
+
   pure { nodeSel }
 
 -- | Color by package cluster
@@ -527,3 +549,343 @@ setTreeSceneClass shouldAdd = do
         else DOMTokenList.remove classes "tree-scene"
       log $ "[Explorer] Set tree-scene class: " <> show shouldAdd
     Nothing -> log "[Explorer] Could not find #explorer-nodes for CSS class"
+
+-- =============================================================================
+-- Neighborhood Focus
+-- =============================================================================
+
+-- | Toggle focus on a node's neighborhood
+-- | Click once to drill down to neighborhood, click again to restore full view
+toggleFocus :: SimNode -> Effect Unit
+toggleFocus clickedNode = do
+  focus <- Ref.read globalFocusRef
+  mStateRef <- Ref.read globalStateRef
+
+  case mStateRef of
+    Nothing -> log "[Explorer] No state ref available"
+    Just stateRef -> do
+      state <- Ref.read stateRef
+
+      case focus.focusedNodeId of
+        -- Currently focused on this node - restore full view
+        Just fid | fid == clickedNode.id -> do
+          log $ "[Explorer] Unfocusing from node " <> show clickedNode.id
+          restoreFullView focus.fullNodes state.simulation
+          Ref.write { focusedNodeId: Nothing, fullNodes: [] } globalFocusRef
+
+        -- Not focused, or focused on different node - focus on this neighborhood
+        _ -> do
+          -- Get current nodes before filtering
+          currentNodes <- Sim.getNodes state.simulation
+
+          -- Store full nodes if not already stored
+          let nodesToStore = if Array.null focus.fullNodes then currentNodes else focus.fullNodes
+
+          -- Build neighborhood: clicked node + its targets + its sources
+          let neighborhoodIds = Set.fromFoldable $
+                [clickedNode.id] <> clickedNode.targets <> clickedNode.sources
+
+          let neighborhoodNodes = Array.filter (\n -> Set.member n.id neighborhoodIds) currentNodes
+
+          log $ "[Explorer] Focusing on node " <> show clickedNode.id <>
+                " (neighborhood: " <> show (Array.length neighborhoodNodes) <> " nodes)"
+
+          -- Update focus state
+          Ref.write { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore } globalFocusRef
+
+          -- Update simulation and DOM
+          focusOnNeighborhood neighborhoodNodes state.simulation
+
+-- | Focus on a subset of nodes
+focusOnNeighborhood :: Array SimNode -> Scene.CESimulation -> Effect Unit
+focusOnNeighborhood nodes sim = do
+  log $ "[Explorer] Focusing on neighborhood with " <> show (Array.length nodes) <> " nodes"
+
+  -- Hide any existing tooltip
+  Tooltip.hideTooltip
+
+  -- Clear any existing DOM elements
+  clearTreeLinks
+  clearNodesGroup
+
+  -- Update simulation with neighborhood nodes
+  Sim.setNodes nodes sim
+
+  -- Get LIVE nodes from simulation (these are the objects D3 will mutate)
+  liveNodes <- Sim.getNodes sim
+
+  -- Set up neighborhood forces
+  setNeighborhoodForces liveNodes sim
+
+  -- Render bubble packs using FFI (binds SimNode to groups for tick updates)
+  declarations <- Ref.read globalDeclarationsRef
+  for_ liveNodes \node -> do
+    _ <- renderModulePack declarations node
+    pure unit
+
+  -- Attach drag behavior using library API
+  -- Select all module-pack groups and get their DOM elements
+  packElements <- runD3v2M do
+    nodesContainer <- select "#explorer-nodes"
+    packGroups <- selectAll "g.module-pack" nodesContainer
+    pure $ D3v2.getElementsD3v2 packGroups
+
+  -- Attach group drag with reheat callback
+  -- Use #explorer-zoom-group as coordinate reference (handles viewBox transforms)
+  Core.attachGroupDragWithReheat packElements "#explorer-zoom-group" (Sim.reheat sim)
+
+  -- Render links between neighborhood modules
+  renderNeighborhoodLinks liveNodes
+
+  -- Set up custom tick callback for bubble pack mode
+  -- This updates group transforms and link positions
+  Sim.onTick (bubblePackTick) sim
+
+  -- Reheat simulation to animate
+  Sim.reheat sim
+
+  pure unit
+
+-- | Tick callback for bubble pack mode
+-- | Updates group transforms and link positions
+bubblePackTick :: Effect Unit
+bubblePackTick = do
+  -- Update bubble pack group positions
+  updateGroupPositions nodesGroupId
+
+  -- Update link positions
+  updateLinkPositions forceLinksGroupId
+
+-- | Pin a node at its current position (set fx/fy to current x/y)
+pinNodeAtCurrent :: SimNode -> SimNode
+pinNodeAtCurrent n = n { fx = Nullable.notNull n.x, fy = Nullable.notNull n.y }
+
+-- | Unpin a node (clear fx/fy so simulation can move it)
+unpinNode :: SimNode -> SimNode
+unpinNode n = n { fx = Nullable.null, fy = Nullable.null }
+
+-- | Swizzled link for neighborhood rendering
+type NeighborhoodLink =
+  { source :: SimNode
+  , target :: SimNode
+  , linkType :: LinkType
+  }
+
+-- | Render links between neighborhood nodes (full graph edges, not tree)
+renderNeighborhoodLinks :: Array SimNode -> Effect Unit
+renderNeighborhoodLinks nodes = do
+  allLinks <- Ref.read globalLinksRef
+
+  -- Build set of node IDs in neighborhood
+  let nodeIdSet = Set.fromFoldable $ map _.id nodes
+
+  -- Filter to links where BOTH source and target are in neighborhood
+  let neighborhoodLinks = Array.filter
+        (\link -> Set.member link.source nodeIdSet && Set.member link.target nodeIdSet)
+        allLinks
+
+  log $ "[Explorer] Rendering " <> show (Array.length neighborhoodLinks) <> " neighborhood links"
+
+  -- Swizzle: convert IDs to node references (by node.id lookup, not array index)
+  let swizzled = swizzleLinksByIndex _.id nodes neighborhoodLinks \src tgt _i link ->
+        { source: src, target: tgt, linkType: link.linkType }
+
+  -- Render as straight lines
+  _ <- runD3v2M $ renderNeighborhoodLinksD3 swizzled
+  pure unit
+
+-- | Render static links for bubble pack view (no simulation updates)
+-- | Uses node x/y directly to create line coordinates
+renderStaticNeighborhoodLinks :: Array SimNode -> Effect Unit
+renderStaticNeighborhoodLinks nodes = do
+  allLinks <- Ref.read globalLinksRef
+
+  -- Build map of node ID -> node for position lookup
+  let nodeMap = Map.fromFoldable $ map (\n -> Tuple n.id n) nodes
+  let nodeIdSet = Set.fromFoldable $ map _.id nodes
+
+  -- Filter to links where BOTH source and target are in neighborhood
+  let neighborhoodLinks = Array.filter
+        (\link -> Set.member link.source nodeIdSet && Set.member link.target nodeIdSet)
+        allLinks
+
+  log $ "[Explorer] Rendering " <> show (Array.length neighborhoodLinks) <> " static neighborhood links"
+
+  -- Render as straight lines using node positions
+  _ <- runD3v2M $ renderStaticLinksD3 nodeMap neighborhoodLinks
+  pure unit
+
+-- | Static link type with pre-computed coordinates
+type StaticLink =
+  { x1 :: Number
+  , y1 :: Number
+  , x2 :: Number
+  , y2 :: Number
+  }
+
+-- | D3 rendering for static links
+renderStaticLinksD3 :: Map.Map Int SimNode -> Array SimLink -> D3v2M Unit
+renderStaticLinksD3 nodeMap links = do
+  linksGroup <- select "#explorer-links"
+
+  -- Convert links to static coordinates
+  let staticLinks = Array.mapMaybe (toStaticLink nodeMap) links
+
+  _ <- appendData Line staticLinks
+    [ x1 (_.x1 :: StaticLink -> Number)
+    , y1 (_.y1 :: StaticLink -> Number)
+    , x2 (_.x2 :: StaticLink -> Number)
+    , y2 (_.y2 :: StaticLink -> Number)
+    , stroke (\(_ :: StaticLink) -> "#666")
+    , strokeWidth (\(_ :: StaticLink) -> 1.5)
+    , opacity (\(_ :: StaticLink) -> 0.6)
+    , class_ (\(_ :: StaticLink) -> "neighborhood-link")
+    ]
+    linksGroup
+
+  pure unit
+
+-- | Convert a SimLink to StaticLink using node positions
+toStaticLink :: Map.Map Int SimNode -> SimLink -> Maybe StaticLink
+toStaticLink nodeMap link = do
+  srcNode <- Map.lookup link.source nodeMap
+  tgtNode <- Map.lookup link.target nodeMap
+  pure { x1: srcNode.x, y1: srcNode.y, x2: tgtNode.x, y2: tgtNode.y }
+
+-- | D3 rendering for neighborhood links
+renderNeighborhoodLinksD3 :: Array NeighborhoodLink -> D3v2M Unit
+renderNeighborhoodLinksD3 links = do
+  linksGroup <- select "#explorer-links"
+
+  _ <- appendData Line links
+    [ x1 getSourceX
+    , y1 getSourceY
+    , x2 getTargetX
+    , y2 getTargetY
+    , stroke (\(_ :: NeighborhoodLink) -> "#666")
+    , strokeWidth (\(_ :: NeighborhoodLink) -> 1.5)
+    , opacity (\(_ :: NeighborhoodLink) -> 0.6)
+    , class_ (\(_ :: NeighborhoodLink) -> "neighborhood-link")
+    ]
+    linksGroup
+
+  pure unit
+  where
+  getSourceX :: NeighborhoodLink -> Number
+  getSourceX l = l.source.x
+
+  getSourceY :: NeighborhoodLink -> Number
+  getSourceY l = l.source.y
+
+  getTargetX :: NeighborhoodLink -> Number
+  getTargetX l = l.target.x
+
+  getTargetY :: NeighborhoodLink -> Number
+  getTargetY l = l.target.y
+
+-- | Restore full view
+restoreFullView :: Array SimNode -> Scene.CESimulation -> Effect Unit
+restoreFullView fullNodes sim = do
+  -- Update simulation with full nodes
+  Sim.setNodes fullNodes sim
+
+  -- Restore grid forces
+  restoreGridForces fullNodes sim
+
+  -- Clear neighborhood links and disable link updates
+  clearTreeLinks
+
+  -- Re-render DOM with circles
+  clearNodesGroup
+  _ <- runD3v2M $ renderNodesOnly fullNodes
+
+  -- Restore the original Scene tick handler (uses circle positions)
+  mStateRef <- Ref.read globalStateRef
+  case mStateRef of
+    Just stateRef -> do
+      Scene.clearLinksGroupId stateRef
+      Sim.onTick (Scene.onTick stateRef) sim
+    Nothing -> pure unit
+
+  Sim.reheat sim
+  pure unit
+
+-- | Set forces appropriate for neighborhood view (spread out, no grid)
+setNeighborhoodForces :: Array SimNode -> Scene.CESimulation -> Effect Unit
+setNeighborhoodForces nodes sim = do
+  -- Clear existing forces
+  Ref.write Map.empty sim.forces
+
+  -- Many-body repulsion to spread nodes out
+  let manyBodyHandle = Core.createManyBody { strength: -200.0, theta: 0.9, distanceMin: 1.0, distanceMax: 1.0e10 }
+  _ <- Core.initializeForce manyBodyHandle nodes
+  Ref.modify_ (Map.insert "charge" manyBodyHandle) sim.forces
+
+  -- Collision to prevent overlap
+  let collideHandle = Core.createCollideGrid 10.0 0.7 1
+  _ <- Core.initializeForce collideHandle nodes
+  Ref.modify_ (Map.insert "collide" collideHandle) sim.forces
+
+  -- Centering force to keep neighborhood on screen
+  let forceXHandle = Core.createForceX { x: 0.0, strength: 0.05 }
+  _ <- Core.initializeForce forceXHandle nodes
+  Ref.modify_ (Map.insert "x" forceXHandle) sim.forces
+
+  let forceYHandle = Core.createForceY { y: 0.0, strength: 0.05 }
+  _ <- Core.initializeForce forceYHandle nodes
+  Ref.modify_ (Map.insert "y" forceYHandle) sim.forces
+
+  log "[Explorer] Neighborhood forces set (charge, collide, center)"
+
+-- | Clear the nodes group (remove all circles)
+clearNodesGroup :: Effect Unit
+clearNodesGroup = do
+  win <- window
+  doc <- document win
+  let parentNode = toParentNode doc
+  mElement <- querySelector (QuerySelector "#explorer-nodes") parentNode
+  case mElement of
+    Just nodesGroup -> clearElement nodesGroup
+    Nothing -> log "[Explorer] Could not find #explorer-nodes"
+
+-- | Render nodes only (without full SVG setup)
+renderNodesOnly :: Array SimNode -> D3v2M Unit
+renderNodesOnly nodes = do
+  nodesGroup <- select "#explorer-nodes"
+
+  _ <- appendData Circle nodes
+    [ cx (_.x :: SimNode -> Number)
+    , cy (_.y :: SimNode -> Number)
+    , radius (_.r :: SimNode -> Number)
+    , fill (nodeColor :: SimNode -> String)
+    , stroke "#fff"
+    , strokeWidth 0.5
+    , class_ nodeClass
+    ]
+    nodesGroup
+
+  -- Re-attach behaviors to new circles
+  circlesSel <- select "#explorer-nodes circle"
+
+  -- Re-attach highlight behavior
+  let highlightClasses = ["highlighted-source", "highlighted-upstream", "highlighted-downstream", "dimmed"]
+  _ <- on (onMouseEnter \node -> do
+    clearClasses "#explorer-nodes" "circle" highlightClasses
+    let targetSet = Set.fromFoldable node.targets
+    let sourceSet = Set.fromFoldable node.sources
+    classifyElements "#explorer-nodes" "circle" \n ->
+      if n.id == node.id then "highlighted-source"
+      else if Set.member n.id targetSet then "highlighted-upstream"
+      else if Set.member n.id sourceSet then "highlighted-downstream"
+      else "dimmed"
+    ) circlesSel
+  _ <- on (onMouseLeave \_ -> clearClasses "#explorer-nodes" "circle" highlightClasses) circlesSel
+
+  -- Re-attach tooltip
+  _ <- on (onTooltip formatNodeTooltip) circlesSel
+  _ <- on onTooltipHide circlesSel
+
+  -- Re-attach click handler
+  _ <- on (onClickWithDatum toggleFocus) circlesSel
+
+  pure unit

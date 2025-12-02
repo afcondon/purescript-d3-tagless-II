@@ -28,6 +28,7 @@ module PSD3.ForceEngine.Render
     -- * Position Updates (FFI-optimized)
   , updateCirclePositions
   , updateLinkPositions
+  , updateGroupPositions
     -- * Custom Position Updates
   , updatePositions
   ) where
@@ -69,6 +70,7 @@ derive newtype instance Show GroupId
 
 foreign import updateCirclePositions_ :: String -> Effect Unit
 foreign import updateLinkPositions_ :: String -> Effect Unit
+foreign import updateGroupPositions_ :: String -> Effect Unit
 foreign import updatePositions_ :: forall a. String -> (a -> Effect Unit) -> Effect Unit
 
 -- =============================================================================
@@ -108,6 +110,21 @@ updateCirclePositions gid = updateCirclePositions_ (unwrap gid)
 -- | ```
 updateLinkPositions :: GroupId -> Effect Unit
 updateLinkPositions gid = updateLinkPositions_ (unwrap gid)
+
+-- | Update group positions (transform) from bound data's x, y fields.
+-- |
+-- | Selects `g.module-pack` elements and updates their transform attribute.
+-- | Assumes data bound to groups has `x :: Number` and `y :: Number` fields.
+-- |
+-- | Example:
+-- | ```purescript
+-- | nodesGroup :: GroupId
+-- | nodesGroup = GroupId "#nodes"
+-- |
+-- | updateGroupPositions nodesGroup
+-- | ```
+updateGroupPositions :: GroupId -> Effect Unit
+updateGroupPositions gid = updateGroupPositions_ (unwrap gid)
 
 -- | Generic position update with custom attribute setter.
 -- |

@@ -23,6 +23,14 @@ export const updateLinkPositions_ = (selector) => () => {
     .attr("y2", d => d.target.y);
 };
 
+// Update group positions (transform) from bound data's x, y fields
+// For bubble packs and other grouped visualizations
+// O(n) DOM updates only, no data join
+export const updateGroupPositions_ = (selector) => () => {
+  select(selector).selectAll("g.module-pack")
+    .attr("transform", d => `translate(${d.x},${d.y})`);
+};
+
 // Generic position update with custom callback
 // The callback receives the D3 selection and can set any attributes
 export const updatePositions_ = (selector) => (callback) => () => {

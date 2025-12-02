@@ -42,6 +42,7 @@ module PSD3.ForceEngine.Core
   , stopAnimation
     -- * Drag Behavior
   , attachDragWithReheat
+  , attachGroupDragWithReheat
     -- * Debug
   , logNodes
   ) where
@@ -303,6 +304,23 @@ foreign import attachDragWithReheat_ :: Array Element -> Effect Unit -> Effect U
 -- | Attach drag with a reheat callback
 attachDragWithReheat :: Array Element -> Effect Unit -> Effect Unit
 attachDragWithReheat = attachDragWithReheat_
+
+-- | FFI for group drag (uses container for coordinate space)
+foreign import attachGroupDragWithReheat_ :: Array Element -> String -> Effect Unit -> Effect Unit
+
+-- | Attach drag to transformed group elements (like bubble packs)
+-- |
+-- | Unlike `attachDragWithReheat`, this version takes a container selector to
+-- | get pointer coordinates in the correct coordinate space. Use this when
+-- | dragging `<g>` elements that have `transform` attributes.
+-- |
+-- | Example:
+-- | ```purescript
+-- | -- For bubble packs inside a zoom group
+-- | attachGroupDragWithReheat packElements "#zoom-group" (Sim.reheat sim)
+-- | ```
+attachGroupDragWithReheat :: Array Element -> String -> Effect Unit -> Effect Unit
+attachGroupDragWithReheat = attachGroupDragWithReheat_
 
 -- =============================================================================
 -- Debug

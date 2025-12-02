@@ -5,6 +5,8 @@
 module Data.Loader
   ( loadModel
   , LoadedModel
+  , Declaration
+  , DeclarationsMap
   , getDependencyTree
   ) where
 
@@ -65,11 +67,21 @@ type LocFile =
   { loc :: Array LocEntry
   }
 
+-- | Declaration summary from declarations-summary.json
+type Declaration =
+  { kind :: String  -- "typeClass", "data", "typeSynonym", "externData", "alias", "value"
+  , title :: String
+  }
+
+-- | Module declarations map: module name -> array of declarations
+type DeclarationsMap = Object (Array Declaration)
+
 -- | Loaded and transformed model
 type LoadedModel =
   { nodes :: Array SimNode
   , links :: Array SimLink
   , packages :: Array Package
+  , declarations :: DeclarationsMap  -- Module declarations for bubble packs
   , moduleCount :: Int
   , packageCount :: Int
   }
@@ -84,22 +96,25 @@ loadModel = do
   modulesResult <- fetchJson "/data/spago-data/modules.json"
   packagesResult <- fetchJson "/data/spago-data/packages.json"
   locResult <- fetchJson "/data/spago-data/LOC.json"
+  declarationsResult <- fetchJson "/data/spago-data/declarations-summary.json"
 
   pure $ do
     modulesJson <- modulesResult
     packagesJson <- packagesResult
     locJson <- locResult
+    declarationsJson <- declarationsResult
 
     -- Decode JSON
     modules :: Object RawModule <- decodeJson modulesJson # mapLeft printJsonDecodeError
     packages :: Object RawPackage <- decodeJson packagesJson # mapLeft printJsonDecodeError
     locFile :: LocFile <- decodeJson locJson # mapLeft printJsonDecodeError
+    declarations :: DeclarationsMap <- decodeJson declarationsJson # mapLeft printJsonDecodeError
 
     -- Build LOC map (path -> loc)
     let locMap = buildLocMap locFile.loc
 
     -- Transform to model
-    Right $ transformToModel modules packages locMap
+    Right $ transformToModel modules packages locMap declarations
 
 fetchJson :: String -> Aff (Either String Json)
 fetchJson url = do
@@ -116,8 +131,8 @@ mapLeft _ (Right b) = Right b
 -- Transformation
 -- =============================================================================
 
-transformToModel :: Object RawModule -> Object RawPackage -> Map String Int -> LoadedModel
-transformToModel modulesObj packagesObj locMap =
+transformToModel :: Object RawModule -> Object RawPackage -> Map String Int -> DeclarationsMap -> LoadedModel
+transformToModel modulesObj packagesObj locMap declarations =
   let
     -- Get arrays
     moduleNames = Object.keys modulesObj
@@ -218,16 +233,19 @@ transformToModel modulesObj packagesObj locMap =
       , modules: fromMaybe [] $ Map.lookup name packageModules
       }) packageNames
   in
-    { nodes, links, packages, moduleCount, packageCount }
+    { nodes, links, packages, declarations, moduleCount, packageCount }
 
--- | Find the root module (one with no incoming dependencies)
+-- | Find the root module (the project's main entry point)
+-- | Looks for PSD3.Main by name, falls back to module with most dependents
 findRootModule :: Array SimNode -> Int
 findRootModule modules =
-  case Array.find (\m -> Array.null m.sources) modules of
+  -- First, look for PSD3.Main by name (the project's entry point)
+  case Array.find (\m -> m.name == "PSD3.Main") modules of
     Just m -> m.id
     Nothing ->
-      -- Fallback: find module with fewest sources (closest to root)
-      case Array.head $ Array.sortWith (\m -> Array.length m.sources) modules of
+      -- Fallback: find module with MOST sources (most dependents = likely root)
+      -- This is the opposite of before - we want the module others depend on
+      case Array.last $ Array.sortWith (\m -> Array.length m.sources) modules of
         Just m -> m.id
         Nothing -> 0  -- Empty modules array
 
