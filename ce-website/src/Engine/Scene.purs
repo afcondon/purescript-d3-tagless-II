@@ -8,18 +8,14 @@
 -- |
 -- | CSS transitions can run in parallel with either engine for opacity/color changes.
 module Engine.Scene
-  ( SceneConfig
-  , EngineMode(..)
-  , ForceConfig
-  , CSSConfig
+  ( -- Re-exported from library
+    module SimScene
+  -- App-specific types
   , SceneState
   , CESimulation
-  , PositionMap
-  , TransitionState
   , NodeRow
   , LinkRow
-  , NodeRule
-  , applyRules
+  -- App-specific functions
   , applyRulesInPlace
   , mkSceneState
   , transitionTo
@@ -30,20 +26,29 @@ module Engine.Scene
 
 import Prelude
 
+import Data.Array as Array
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Traversable (traverse_, for_)
+import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Ref (Ref)
 import Effect.Ref as Ref
 import Effect.Class.Console (log)
-import Foreign.Object (Object)
 import Foreign.Object as Object
-import Data.Tuple (Tuple(..))
-import Data.Array as Array
 import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Render (GroupId, updateCirclePositions, updateLinkPositions)
+import PSD3.Simulation.Scene
+  ( NodeRule
+  , SceneConfig
+  , TransitionState
+  , EngineMode(..)
+  , ForceConfig
+  , CSSConfig
+  , PositionMap
+  , applyRules
+  ) as SimScene
 import PSD3.Transition.Tick as Tick
 import Types (SimNode, NodeType, LinkType)
 
@@ -55,110 +60,8 @@ foreign import applyTransformWhereInPlace_
   -> Effect Unit
 
 -- =============================================================================
--- Types
+-- App-Specific Types
 -- =============================================================================
-
--- | Position map: node ID -> {x, y}
-type PositionMap = Object { x :: Number, y :: Number }
-
--- | Force configuration for Physics engine
-type ForceConfig =
-  { -- Forces are already in the simulation, this just tracks which scene we're in
-    -- In future: could specify force strengths, etc.
-  }
-
--- | CSS transition configuration
-type CSSConfig =
-  { selector :: String      -- CSS selector for elements to transition
-  , property :: String      -- CSS property (e.g., "opacity")
-  , targetValue :: String   -- Target value (e.g., "0")
-  , duration :: Number      -- Duration in ms
-  }
-
--- | Engine mode determines what drives node positions
-data EngineMode
-  = Physics ForceConfig                    -- D3 simulation runs, forces apply
-  | Static                                 -- Nodes stay where they are (pinned)
-
--- =============================================================================
--- Node Rules (D3-like selection + transform)
--- =============================================================================
-
--- | A rule that selects nodes and applies a transform
--- | Like CSS: selector { properties }
--- | Parameterized by node type for library reuse
-type NodeRule node =
-  { name :: String                         -- For debugging
-  , select :: node -> Boolean              -- Which nodes this applies to
-  , apply :: node -> node                  -- What to do to them
-  }
-
--- | Apply rules to nodes (first matching rule wins) - creates new array
--- | Generic over node type for library reuse
-applyRules :: forall node. Array (NodeRule node) -> Array node -> Array node
-applyRules rules nodes = map (applyFirstMatch rules) nodes
-  where
-  applyFirstMatch :: Array (NodeRule node) -> node -> node
-  applyFirstMatch rs node =
-    case Array.find (\r -> r.select node) rs of
-      Just r -> r.apply node
-      Nothing -> node
-
--- | Apply rules in place (mutates simulation nodes directly)
--- | Preserves object identity for D3 data binding
--- | Note: This stays app-specific due to FFI requirements
-applyRulesInPlace :: Array (NodeRule SimNode) -> CESimulation -> Effect Unit
-applyRulesInPlace rules sim =
-  traverse_ applyRule rules
-  where
-  applyRule :: NodeRule SimNode -> Effect Unit
-  applyRule rule = applyTransformWhereInPlace_ rule.select rule.apply sim.nodes
-
--- | Re-initialize all forces after node data changes
--- | D3 forces may cache values from nodes, so we need to tell them to re-read
-reinitializeForces :: CESimulation -> Effect Unit
-reinitializeForces sim = do
-  nodes <- Ref.read sim.nodes
-  forces <- Ref.read sim.forces
-  for_ (Map.toUnfoldable forces :: Array (Tuple String Core.ForceHandle)) \(Tuple name handle) -> do
-    _ <- Core.initializeForce handle nodes
-    log $ "[Scene] Re-initialized force: " <> name
-
--- =============================================================================
--- Scene Configuration
--- =============================================================================
-
--- | Scene configuration with three-phase lifecycle:
--- | 1. Initialize: Rules applied before transition starts
--- | 2. Transition: DumbEngine interpolates to layout positions
--- | 3. Finalize: Rules applied after transition completes
--- | Parameterized by node type for library reuse
-type SceneConfig node =
-  { name :: String
-
-  -- Phase 1: Initialize (before transition)
-  , initRules :: Array (NodeRule node)
-
-  -- Phase 2: Transition (DumbEngine targets)
-  , layout :: Array node -> PositionMap
-
-  -- Phase 3: Finalize (after transition)
-  -- Takes all nodes as context for building rules that need cross-node info
-  , finalRules :: Array node -> Array (NodeRule node)
-
-  -- Stable state
-  , stableMode :: EngineMode
-  , cssTransition :: Maybe CSSConfig
-  }
-
--- | Transition state while DumbEngine is running
--- | Parameterized by node type for library reuse
-type TransitionState node =
-  { targetScene :: SceneConfig node
-  , startPositions :: PositionMap
-  , targetPositions :: PositionMap
-  , progress :: Tick.Progress
-  }
 
 -- | Node row type (matches SimNode extra fields)
 type NodeRow =
@@ -186,11 +89,35 @@ type CESimulation = Sim.Simulation NodeRow LinkRow
 -- | Uses SimNode specifically as this is the app's concrete state type
 type SceneState =
   { simulation :: CESimulation
-  , currentScene :: Maybe (SceneConfig SimNode)
-  , transition :: Maybe (TransitionState SimNode)
+  , currentScene :: Maybe (SimScene.SceneConfig SimNode)
+  , transition :: Maybe (SimScene.TransitionState SimNode)
   , nodesGroupId :: GroupId
   , linksGroupId :: Maybe GroupId  -- Set when force links should be updated
   }
+
+-- =============================================================================
+-- App-Specific Functions
+-- =============================================================================
+
+-- | Apply rules in place (mutates simulation nodes directly)
+-- | Preserves object identity for D3 data binding
+-- | Note: This stays app-specific due to FFI requirements
+applyRulesInPlace :: Array (SimScene.NodeRule SimNode) -> CESimulation -> Effect Unit
+applyRulesInPlace rules sim =
+  traverse_ applyRule rules
+  where
+  applyRule :: SimScene.NodeRule SimNode -> Effect Unit
+  applyRule rule = applyTransformWhereInPlace_ rule.select rule.apply sim.nodes
+
+-- | Re-initialize all forces after node data changes
+-- | D3 forces may cache values from nodes, so we need to tell them to re-read
+reinitializeForces :: CESimulation -> Effect Unit
+reinitializeForces sim = do
+  nodes <- Ref.read sim.nodes
+  forces <- Ref.read sim.forces
+  for_ (Map.toUnfoldable forces :: Array (Tuple String Core.ForceHandle)) \(Tuple name handle) -> do
+    _ <- Core.initializeForce handle nodes
+    log $ "[Scene] Re-initialized force: " <> name
 
 -- =============================================================================
 -- State Management
@@ -229,7 +156,7 @@ transitionDelta = Tick.ticksForDuration 2000
 
 -- | Start transition to a new scene
 transitionTo
-  :: SceneConfig SimNode
+  :: SimScene.SceneConfig SimNode
   -> Ref SceneState
   -> Effect Unit
 transitionTo targetScene stateRef = do
@@ -271,12 +198,12 @@ transitionTo targetScene stateRef = do
       Sim.reheat state.simulation
 
 -- | Capture current positions from nodes
-capturePositions :: Array SimNode -> PositionMap
+capturePositions :: Array SimNode -> SimScene.PositionMap
 capturePositions nodes =
   Object.fromFoldable $ map (\n -> Tuple (show n.id) { x: n.x, y: n.y }) nodes
 
 -- | Start a CSS transition (sets CSS custom properties or classes)
-startCSSTransition :: CSSConfig -> Effect Unit
+startCSSTransition :: SimScene.CSSConfig -> Effect Unit
 startCSSTransition css = do
   log $ "[Scene] Starting CSS transition: " <> css.property <> " -> " <> css.targetValue
   -- TODO: Implement via FFI - set transition property and target value
@@ -307,7 +234,7 @@ onTick stateRef = do
 
 -- | DumbEngine: Interpolate positions toward target
 runDumbEngine
-  :: TransitionState SimNode
+  :: SimScene.TransitionState SimNode
   -> Ref SceneState
   -> SceneState
   -> Effect Unit
@@ -326,7 +253,7 @@ runDumbEngine t stateRef state = do
 
 -- | Complete a transition - enter the target scene's stable mode
 completeTransition
-  :: TransitionState SimNode
+  :: SimScene.TransitionState SimNode
   -> Ref SceneState
   -> SceneState
   -> Effect Unit
@@ -349,10 +276,10 @@ completeTransition t stateRef state = do
 
   -- Enter stable mode
   case t.targetScene.stableMode of
-    Physics _ -> do
+    SimScene.Physics _ -> do
       log "[Scene] Entering Physics mode"
       Sim.reheat state.simulation
-    Static -> do
+    SimScene.Static -> do
       log "[Scene] Entering Static mode"
       pure unit
 
@@ -367,5 +294,5 @@ runStableEngine :: SceneState -> Effect Unit
 runStableEngine state = case state.currentScene of
   Nothing -> pure unit  -- No scene yet
   Just scene -> case scene.stableMode of
-    Physics _ -> pure unit  -- Simulation is already running
-    Static -> pure unit     -- Nothing to do
+    SimScene.Physics _ -> pure unit  -- Simulation is already running
+    SimScene.Static -> pure unit     -- Nothing to do
