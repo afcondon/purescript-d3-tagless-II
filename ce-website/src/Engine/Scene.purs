@@ -86,17 +86,19 @@ data EngineMode
 
 -- | A rule that selects nodes and applies a transform
 -- | Like CSS: selector { properties }
-type NodeRule =
+-- | Parameterized by node type for library reuse
+type NodeRule node =
   { name :: String                         -- For debugging
-  , select :: SimNode -> Boolean           -- Which nodes this applies to
-  , apply :: SimNode -> SimNode            -- What to do to them
+  , select :: node -> Boolean              -- Which nodes this applies to
+  , apply :: node -> node                  -- What to do to them
   }
 
 -- | Apply rules to nodes (first matching rule wins) - creates new array
-applyRules :: Array NodeRule -> Array SimNode -> Array SimNode
+-- | Generic over node type for library reuse
+applyRules :: forall node. Array (NodeRule node) -> Array node -> Array node
 applyRules rules nodes = map (applyFirstMatch rules) nodes
   where
-  applyFirstMatch :: Array NodeRule -> SimNode -> SimNode
+  applyFirstMatch :: Array (NodeRule node) -> node -> node
   applyFirstMatch rs node =
     case Array.find (\r -> r.select node) rs of
       Just r -> r.apply node
@@ -104,11 +106,12 @@ applyRules rules nodes = map (applyFirstMatch rules) nodes
 
 -- | Apply rules in place (mutates simulation nodes directly)
 -- | Preserves object identity for D3 data binding
-applyRulesInPlace :: Array NodeRule -> CESimulation -> Effect Unit
+-- | Note: This stays app-specific due to FFI requirements
+applyRulesInPlace :: Array (NodeRule SimNode) -> CESimulation -> Effect Unit
 applyRulesInPlace rules sim =
   traverse_ applyRule rules
   where
-  applyRule :: NodeRule -> Effect Unit
+  applyRule :: NodeRule SimNode -> Effect Unit
   applyRule rule = applyTransformWhereInPlace_ rule.select rule.apply sim.nodes
 
 -- | Re-initialize all forces after node data changes
@@ -129,18 +132,19 @@ reinitializeForces sim = do
 -- | 1. Initialize: Rules applied before transition starts
 -- | 2. Transition: DumbEngine interpolates to layout positions
 -- | 3. Finalize: Rules applied after transition completes
-type SceneConfig =
+-- | Parameterized by node type for library reuse
+type SceneConfig node =
   { name :: String
 
   -- Phase 1: Initialize (before transition)
-  , initRules :: Array NodeRule
+  , initRules :: Array (NodeRule node)
 
   -- Phase 2: Transition (DumbEngine targets)
-  , layout :: Array SimNode -> PositionMap
+  , layout :: Array node -> PositionMap
 
   -- Phase 3: Finalize (after transition)
   -- Takes all nodes as context for building rules that need cross-node info
-  , finalRules :: Array SimNode -> Array NodeRule
+  , finalRules :: Array node -> Array (NodeRule node)
 
   -- Stable state
   , stableMode :: EngineMode
@@ -148,8 +152,9 @@ type SceneConfig =
   }
 
 -- | Transition state while DumbEngine is running
-type TransitionState =
-  { targetScene :: SceneConfig
+-- | Parameterized by node type for library reuse
+type TransitionState node =
+  { targetScene :: SceneConfig node
   , startPositions :: PositionMap
   , targetPositions :: PositionMap
   , progress :: Tick.Progress
@@ -178,10 +183,11 @@ type LinkRow = (linkType :: LinkType)
 type CESimulation = Sim.Simulation NodeRow LinkRow
 
 -- | Main scene state
+-- | Uses SimNode specifically as this is the app's concrete state type
 type SceneState =
   { simulation :: CESimulation
-  , currentScene :: Maybe SceneConfig
-  , transition :: Maybe TransitionState
+  , currentScene :: Maybe (SceneConfig SimNode)
+  , transition :: Maybe (TransitionState SimNode)
   , nodesGroupId :: GroupId
   , linksGroupId :: Maybe GroupId  -- Set when force links should be updated
   }
@@ -223,7 +229,7 @@ transitionDelta = Tick.ticksForDuration 2000
 
 -- | Start transition to a new scene
 transitionTo
-  :: SceneConfig
+  :: SceneConfig SimNode
   -> Ref SceneState
   -> Effect Unit
 transitionTo targetScene stateRef = do
@@ -301,7 +307,7 @@ onTick stateRef = do
 
 -- | DumbEngine: Interpolate positions toward target
 runDumbEngine
-  :: TransitionState
+  :: TransitionState SimNode
   -> Ref SceneState
   -> SceneState
   -> Effect Unit
@@ -320,7 +326,7 @@ runDumbEngine t stateRef state = do
 
 -- | Complete a transition - enter the target scene's stable mode
 completeTransition
-  :: TransitionState
+  :: TransitionState SimNode
   -> Ref SceneState
   -> SceneState
   -> Effect Unit

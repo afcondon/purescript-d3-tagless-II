@@ -101,7 +101,7 @@ setGridXYToPackageOrbit pkgMap n =
 -- =============================================================================
 
 -- | Standard init: pin all nodes at current positions
-pinAllRule :: NodeRule
+pinAllRule :: NodeRule SimNode
 pinAllRule =
   { name: "pinAll"
   , select: const true
@@ -113,7 +113,7 @@ pinAllRule =
 -- =============================================================================
 
 -- | Form Grid: Transition to grid positions, then stop (Static)
-gridFormScene :: SceneConfig
+gridFormScene :: SceneConfig SimNode
 gridFormScene =
   { name: "GridForm"
   , initRules: [ pinAllRule ]
@@ -124,7 +124,7 @@ gridFormScene =
   }
 
 -- | Grid Run: Enable physics with grid forces
-gridRunScene :: SceneConfig
+gridRunScene :: SceneConfig SimNode
 gridRunScene =
   { name: "GridRun"
   , initRules: [ pinAllRule ]
@@ -135,7 +135,7 @@ gridRunScene =
   }
 
 -- | Form Grid final rules - pin everything at grid positions
-gridFormFinalRules :: Array SimNode -> Array NodeRule
+gridFormFinalRules :: Array SimNode -> Array (NodeRule SimNode)
 gridFormFinalRules nodes =
   let calc = gridCalc nodes
   in
@@ -162,7 +162,7 @@ gridFormFinalRules nodes =
     ]
 
 -- | Grid Run final rules - pin packages, unpin modules (forces will spread them)
-gridRunFinalRules :: Array SimNode -> Array NodeRule
+gridRunFinalRules :: Array SimNode -> Array (NodeRule SimNode)
 gridRunFinalRules nodes =
   let calc = gridCalc nodes
   in
@@ -214,7 +214,7 @@ gridCalc nodes =
 -- =============================================================================
 
 -- | Form Orbit: Transition to orbit positions, then stop (Static)
-orbitFormScene :: SceneConfig
+orbitFormScene :: SceneConfig SimNode
 orbitFormScene =
   { name: "OrbitForm"
   , initRules: [ pinAllRule ]
@@ -225,7 +225,7 @@ orbitFormScene =
   }
 
 -- | Orbit Run: Enable physics with orbit forces
-orbitRunScene :: SceneConfig
+orbitRunScene :: SceneConfig SimNode
 orbitRunScene =
   { name: "OrbitRun"
   , initRules: [ pinAllRule ]
@@ -260,7 +260,7 @@ orbitLayout nodes =
     Object.fromFoldable $ map (getNodeOrbitPos packagePositions) nodes
 
 -- | Form Orbit final rules - pin everything at orbit positions
-orbitFormFinalRules :: Array SimNode -> Array NodeRule
+orbitFormFinalRules :: Array SimNode -> Array (NodeRule SimNode)
 orbitFormFinalRules nodes =
   let
     packages = Array.filter isPackage nodes
@@ -297,7 +297,7 @@ orbitFormFinalRules nodes =
     ]
 
 -- | Orbit Run final rules - pin packages, unpin modules (forces will spread them)
-orbitRunFinalRules :: Array SimNode -> Array NodeRule
+orbitRunFinalRules :: Array SimNode -> Array (NodeRule SimNode)
 orbitRunFinalRules nodes =
   let
     packages = Array.filter isPackage nodes
@@ -332,7 +332,7 @@ orbitRunFinalRules nodes =
 
 -- | Form Tree: Transition to tree positions, then stop (Static)
 -- | Tree modules go to tree positions, packages/non-tree stay where they are
-treeFormScene :: SceneConfig
+treeFormScene :: SceneConfig SimNode
 treeFormScene =
   { name: "TreeForm"
   , initRules: [ pinAllRule ]
@@ -356,7 +356,7 @@ treeFormScene =
 
 -- | Tree Run: Force-directed tree with link forces
 -- | Tree modules are unpinned and connected by link forces
-treeRunScene :: SceneConfig
+treeRunScene :: SceneConfig SimNode
 treeRunScene =
   { name: "TreeRun"
   , initRules: [ pinAllRule ]

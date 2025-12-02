@@ -1,20 +1,19 @@
--- | Scene Configuration Module
+-- | Simulation Setup Configuration Module
 -- |
--- | A scene represents a complete simulation state:
+-- | A SimulationSetup represents a complete D3 simulation configuration:
 -- | - Which forces are active
 -- | - Simulation parameters (alpha, decay rates, etc.)
--- | - Optionally, node positions/constraints
 -- |
--- | Scenes are composable and can be merged, filtered, or transformed.
+-- | Setups are composable and can be merged, filtered, or transformed.
 module PSD3.Config.Scene
   ( Label
   , SimulationParams
   , defaultSimParams
   , fastSimParams
   , slowSimParams
-  , SceneConfig(..)
-  , scene
-  , sceneWithParams
+  , SimulationSetup(..)
+  , setup
+  , setupWithParams
   , withDescription
   , withSimParams
   , withAlpha
@@ -25,7 +24,7 @@ module PSD3.Config.Scene
   , excludeForces
   , replaceForce
   , updateForce
-  , mergeScenes
+  , mergeSetups
   , getForce
   , hasForce
   , forceNames
@@ -76,96 +75,96 @@ slowSimParams = defaultSimParams {
 }
 
 -- | Complete scene configuration
-newtype SceneConfig = SceneConfig {
+newtype SimulationSetup = SimulationSetup {
     name        :: String              -- Scene name (for debugging/display)
   , description :: Maybe String        -- Optional description
   , forces      :: Array ForceConfig   -- Active forces in this scene
   , simParams   :: SimulationParams    -- Simulation parameters
 }
 
-derive instance Newtype SceneConfig _
+derive instance Newtype SimulationSetup _
 
--- | Create a scene with default simulation parameters
-scene :: String -> Array ForceConfig -> SceneConfig
-scene name forces = SceneConfig {
+-- | Create a setup with default simulation parameters
+setup :: String -> Array ForceConfig -> SimulationSetup
+setup name forces = SimulationSetup {
     name
   , description: Nothing
   , forces
   , simParams: defaultSimParams
 }
 
--- | Create a scene with custom simulation parameters
-sceneWithParams :: String -> Array ForceConfig -> SimulationParams -> SceneConfig
-sceneWithParams name forces simParams = SceneConfig {
+-- | Create a setup with custom simulation parameters
+setupWithParams :: String -> Array ForceConfig -> SimulationParams -> SimulationSetup
+setupWithParams name forces simParams = SimulationSetup {
     name
   , description: Nothing
   , forces
   , simParams
 }
 
--- | Add description to a scene
-withDescription :: String -> SceneConfig -> SceneConfig
-withDescription desc = over SceneConfig (_ { description = Just desc })
+-- | Add description to a setup
+withDescription :: String -> SimulationSetup -> SimulationSetup
+withDescription desc = over SimulationSetup (_ { description = Just desc })
 
 -- | Update simulation parameters
-withSimParams :: SimulationParams -> SceneConfig -> SceneConfig
-withSimParams params = over SceneConfig (_ { simParams = params })
+withSimParams :: SimulationParams -> SimulationSetup -> SimulationSetup
+withSimParams params = over SimulationSetup (_ { simParams = params })
 
--- | Set alpha (energy level) for a scene
-withAlpha :: Number -> SceneConfig -> SceneConfig
-withAlpha alpha (SceneConfig config) = SceneConfig $ config { simParams = config.simParams { alpha = alpha } }
+-- | Set alpha (energy level) for a setup
+withAlpha :: Number -> SimulationSetup -> SimulationSetup
+withAlpha alpha (SimulationSetup config) = SimulationSetup $ config { simParams = config.simParams { alpha = alpha } }
 
 -- | Set alpha target (simulation runs until alpha ≤ target)
-withAlphaTarget :: Number -> SceneConfig -> SceneConfig
-withAlphaTarget target (SceneConfig config) = SceneConfig $ config { simParams = config.simParams { alphaTarget = target } }
+withAlphaTarget :: Number -> SimulationSetup -> SimulationSetup
+withAlphaTarget target (SimulationSetup config) = SimulationSetup $ config { simParams = config.simParams { alphaTarget = target } }
 
 -- =============================================================================
--- Scene Composition
+-- Setup Composition
 -- =============================================================================
 
--- | Add a force to a scene
-addForce :: ForceConfig -> SceneConfig -> SceneConfig
-addForce force (SceneConfig config) = SceneConfig $ config { forces = A.snoc config.forces force }
+-- | Add a force to a setup
+addForce :: ForceConfig -> SimulationSetup -> SimulationSetup
+addForce force (SimulationSetup config) = SimulationSetup $ config { forces = A.snoc config.forces force }
 
--- | Remove a force from a scene by name
-removeForce :: Label -> SceneConfig -> SceneConfig
-removeForce name (SceneConfig config) = SceneConfig $ config { forces = A.filter (\(ForceConfig f) -> f.name /= name) config.forces }
+-- | Remove a force from a setup by name
+removeForce :: Label -> SimulationSetup -> SimulationSetup
+removeForce name (SimulationSetup config) = SimulationSetup $ config { forces = A.filter (\(ForceConfig f) -> f.name /= name) config.forces }
 
 -- | Keep only specified forces
-keepForces :: Array Label -> SceneConfig -> SceneConfig
-keepForces names (SceneConfig config) = SceneConfig $ config { forces = A.filter (\(ForceConfig f) -> f.name `A.elem` names) config.forces }
+keepForces :: Array Label -> SimulationSetup -> SimulationSetup
+keepForces names (SimulationSetup config) = SimulationSetup $ config { forces = A.filter (\(ForceConfig f) -> f.name `A.elem` names) config.forces }
 
 -- | Remove specified forces
-excludeForces :: Array Label -> SceneConfig -> SceneConfig
-excludeForces names (SceneConfig config) = SceneConfig $ config { forces = A.filter (\(ForceConfig f) -> not (f.name `A.elem` names)) config.forces }
+excludeForces :: Array Label -> SimulationSetup -> SimulationSetup
+excludeForces names (SimulationSetup config) = SimulationSetup $ config { forces = A.filter (\(ForceConfig f) -> not (f.name `A.elem` names)) config.forces }
 
--- | Replace a force in a scene (by name)
-replaceForce :: ForceConfig -> SceneConfig -> SceneConfig
-replaceForce newForce (SceneConfig config) =
+-- | Replace a force in a setup (by name)
+replaceForce :: ForceConfig -> SimulationSetup -> SimulationSetup
+replaceForce newForce (SimulationSetup config) =
   let (ForceConfig nf) = newForce
-  in SceneConfig $ config {
+  in SimulationSetup $ config {
     forces = map (\f@(ForceConfig fc) -> if fc.name == nf.name then newForce else f) config.forces
   }
 
--- | Update a force in a scene using a transformation function
-updateForce :: Label -> (ForceConfig -> ForceConfig) -> SceneConfig -> SceneConfig
-updateForce name fn (SceneConfig config) = SceneConfig $ config {
+-- | Update a force in a setup using a transformation function
+updateForce :: Label -> (ForceConfig -> ForceConfig) -> SimulationSetup -> SimulationSetup
+updateForce name fn (SimulationSetup config) = SimulationSetup $ config {
   forces = map (\f@(ForceConfig fc) -> if fc.name == name then fn f else f) config.forces
 }
 
--- | Merge two scenes
--- | Forces from the second scene override those with the same name from the first
--- | Simulation params from the second scene are used
-mergeScenes :: SceneConfig -> SceneConfig -> SceneConfig
-mergeScenes (SceneConfig s1) (SceneConfig s2) =
+-- | Merge two setups
+-- | Forces from the second setup override those with the same name from the first
+-- | Simulation params from the second setup are used
+mergeSetups :: SimulationSetup -> SimulationSetup -> SimulationSetup
+mergeSetups (SimulationSetup s1) (SimulationSetup s2) =
   let
-    scene2ForceNames = map (\(ForceConfig f) -> f.name) s2.forces
-    -- Get forces from scene1 that aren't in scene2
-    uniqueFromScene1 = A.filter (\(ForceConfig f) -> not (f.name `A.elem` scene2ForceNames)) s1.forces
-  in SceneConfig {
+    setup2ForceNames = map (\(ForceConfig f) -> f.name) s2.forces
+    -- Get forces from setup1 that aren't in setup2
+    uniqueFromSetup1 = A.filter (\(ForceConfig f) -> not (f.name `A.elem` setup2ForceNames)) s1.forces
+  in SimulationSetup {
     name: s1.name <> "+" <> s2.name
   , description: Nothing
-  , forces: uniqueFromScene1 <> s2.forces
+  , forces: uniqueFromSetup1 <> s2.forces
   , simParams: s2.simParams
   }
 
@@ -173,27 +172,27 @@ mergeScenes (SceneConfig s1) (SceneConfig s2) =
 -- Query Functions
 -- =============================================================================
 
--- | Get a force from a scene by name
-getForce :: Label -> SceneConfig -> Maybe ForceConfig
-getForce name (SceneConfig config) = A.find (\(ForceConfig f) -> f.name == name) config.forces
+-- | Get a force from a setup by name
+getForce :: Label -> SimulationSetup -> Maybe ForceConfig
+getForce name (SimulationSetup config) = A.find (\(ForceConfig f) -> f.name == name) config.forces
 
--- | Check if a scene has a force with the given name
-hasForce :: Label -> SceneConfig -> Boolean
-hasForce name (SceneConfig config) = A.any (\(ForceConfig f) -> f.name == name) config.forces
+-- | Check if a setup has a force with the given name
+hasForce :: Label -> SimulationSetup -> Boolean
+hasForce name (SimulationSetup config) = A.any (\(ForceConfig f) -> f.name == name) config.forces
 
--- | Get all force names in a scene
-forceNames :: SceneConfig -> Array Label
-forceNames (SceneConfig config) = map (\(ForceConfig fc) -> fc.name) config.forces
+-- | Get all force names in a setup
+forceNames :: SimulationSetup -> Array Label
+forceNames (SimulationSetup config) = map (\(ForceConfig fc) -> fc.name) config.forces
 
--- | Count forces in a scene
-forceCount :: SceneConfig -> Int
-forceCount (SceneConfig config) = A.length config.forces
+-- | Count forces in a setup
+forceCount :: SimulationSetup -> Int
+forceCount (SimulationSetup config) = A.length config.forces
 
 -- =============================================================================
 -- Display
 -- =============================================================================
 
-instance Show SceneConfig where
-  show sc@(SceneConfig config) =
+instance Show SimulationSetup where
+  show sc@(SimulationSetup config) =
     "Scene \"" <> config.name <> "\" [" <> show (forceCount sc) <> " forces]: " <>
     A.intercalate ", " (map (\(ForceConfig f) -> f.name) config.forces)

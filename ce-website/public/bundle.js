@@ -10431,10 +10431,10 @@
         return pure6(unit);
       }
       ;
-      throw new Error("Failed pattern match at Engine.Scene (line 363, column 17 - line 365, column 24): " + [state3.currentScene.value0.stableMode.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Scene (line 369, column 17 - line 371, column 24): " + [state3.currentScene.value0.stableMode.constructor.name]);
     }
     ;
-    throw new Error("Failed pattern match at Engine.Scene (line 361, column 25 - line 365, column 24): " + [state3.currentScene.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Scene (line 367, column 25 - line 371, column 24): " + [state3.currentScene.constructor.name]);
   };
   var reinitializeForces = function(sim) {
     return function __do4() {
@@ -10508,7 +10508,7 @@
               return unit;
             }
             ;
-            throw new Error("Failed pattern match at Engine.Scene (line 345, column 3 - line 351, column 16): " + [t.targetScene.stableMode.constructor.name]);
+            throw new Error("Failed pattern match at Engine.Scene (line 351, column 3 - line 357, column 16): " + [t.targetScene.stableMode.constructor.name]);
           })();
           return write({
             linksGroupId: state3.linksGroupId,
@@ -10561,7 +10561,7 @@
           return runStableEngine(state3)();
         }
         ;
-        throw new Error("Failed pattern match at Engine.Scene (line 290, column 3 - line 292, column 37): " + [state3.transition.constructor.name]);
+        throw new Error("Failed pattern match at Engine.Scene (line 296, column 3 - line 298, column 37): " + [state3.transition.constructor.name]);
       })();
       updateCirclePositions(state3.nodesGroupId)();
       if (state3.linksGroupId instanceof Just) {
@@ -10572,7 +10572,7 @@
         return unit;
       }
       ;
-      throw new Error("Failed pattern match at Engine.Scene (line 298, column 3 - line 300, column 25): " + [state3.linksGroupId.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Scene (line 304, column 3 - line 306, column 25): " + [state3.linksGroupId.constructor.name]);
     };
   };
   var transitionTo = function(targetScene) {
@@ -10599,7 +10599,7 @@
               return unit;
             }
             ;
-            throw new Error("Failed pattern match at Engine.Scene (line 250, column 7 - line 252, column 29): " + [targetScene.cssTransition.constructor.name]);
+            throw new Error("Failed pattern match at Engine.Scene (line 256, column 7 - line 258, column 29): " + [targetScene.cssTransition.constructor.name]);
           })();
           write({
             currentScene: state3.currentScene,
@@ -10616,7 +10616,7 @@
           return reheat(state3.simulation)();
         }
         ;
-        throw new Error("Failed pattern match at Engine.Scene (line 233, column 3 - line 265, column 34): " + [state3.transition.constructor.name]);
+        throw new Error("Failed pattern match at Engine.Scene (line 239, column 3 - line 271, column 34): " + [state3.transition.constructor.name]);
       };
     };
   };
