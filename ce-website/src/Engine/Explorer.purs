@@ -35,7 +35,6 @@ import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Links (swizzleLinks)
 import PSD3.ForceEngine.Render (GroupId(..))
 import PSD3.ForceEngine.Simulation as Sim
-import PSD3.ForceEngine.Types as FT
 import PSD3.Scale (interpolateTurbo)
 import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, radius, id_, class_, viewBox, d, opacity, x1, x2, y1, y2)
 import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom)

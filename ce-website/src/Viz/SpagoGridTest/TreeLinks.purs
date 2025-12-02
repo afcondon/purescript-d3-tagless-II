@@ -17,6 +17,9 @@ import Types (SimNode, SimLink)
 -- | Radial link path generator
 -- | Creates cubic Bezier curves that follow the radial structure.
 -- | Takes Cartesian coordinates and converts back to polar for proper radial control points.
+-- |
+-- | TODO: Promote to PSD3.Layout.Hierarchy.Link as `linkBezierRadialCartesian`
+-- | (complements existing `linkBezierRadial` which takes angle/radius coords)
 radialLinkPath :: Number -> Number -> Number -> Number -> String
 radialLinkPath x1 y1 x2 y2 =
   let

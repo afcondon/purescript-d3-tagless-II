@@ -39,7 +39,6 @@ import Engine.Scene (SceneConfig, EngineMode(..), NodeRule, PositionMap)
 import Types (SimNode, NodeType(..))
 import Viz.SpagoGridTest.GridLayout as GridLayout
 import Viz.SpagoGridTest.OrbitLayout as OrbitLayout
-import Viz.SpagoGridTest.TreeLayout as TreeLayout
 
 -- =============================================================================
 -- Node Predicates (Selectors)

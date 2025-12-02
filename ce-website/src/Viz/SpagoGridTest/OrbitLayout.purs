@@ -43,7 +43,6 @@ calculateOrbitPositions :: Array SimNode -> Object { x :: Number, y :: Number }
 calculateOrbitPositions nodes =
   let
     packages = Array.filter (\n -> n.nodeType == PackageNode) nodes
-    packageCount = Array.length packages
 
     -- Calculate package positions on the orbit ring
     packagePositions = map (\pkg ->

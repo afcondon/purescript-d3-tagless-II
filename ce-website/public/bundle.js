@@ -270,11 +270,11 @@
 
   // output/Data.Ord/foreign.js
   var unsafeCompareImpl = function(lt) {
-    return function(eq5) {
+    return function(eq6) {
       return function(gt) {
         return function(x3) {
           return function(y3) {
-            return x3 < y3 ? lt : x3 === y3 ? eq5 : gt;
+            return x3 < y3 ? lt : x3 === y3 ? eq6 : gt;
           };
         };
       };
@@ -773,13 +773,13 @@
     return v.value0;
   };
   var eqTuple = function(dictEq) {
-    var eq5 = eq(dictEq);
+    var eq6 = eq(dictEq);
     return function(dictEq1) {
       var eq13 = eq(dictEq1);
       return {
         eq: function(x3) {
           return function(y3) {
-            return eq5(x3.value0)(y3.value0) && eq13(x3.value1)(y3.value1);
+            return eq6(x3.value0)(y3.value0) && eq13(x3.value1)(y3.value1);
           };
         }
       };
@@ -7503,9 +7503,9 @@
       };
     }
   };
-  var eq22 = /* @__PURE__ */ eq(eqLinkType);
+  var eq3 = /* @__PURE__ */ eq(eqLinkType);
   var isTreeLink = function(l) {
-    return eq22(l.linkType)(M2M_Tree.value);
+    return eq3(l.linkType)(M2M_Tree.value);
   };
 
   // output/Data.Loader/index.js
@@ -7598,7 +7598,7 @@
             return node;
           }
           ;
-          throw new Error("Failed pattern match at Data.Loader (line 275, column 19 - line 286, column 22): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at Data.Loader (line 274, column 19 - line 285, column 22): " + [v.constructor.name]);
         })();
         var inTree = member4(node.id)(reachableIds);
         return {
@@ -7626,7 +7626,7 @@
       };
     };
   };
-  var mkPackageNode = function(allPackages) {
+  var mkPackageNode = function(_allPackages) {
     return function(totalPackages) {
       return function(packageLocMap) {
         return function(idx) {
@@ -7699,7 +7699,7 @@
         return new Right(v1.value0);
       }
       ;
-      throw new Error("Failed pattern match at Data.Loader (line 112, column 1 - line 112, column 62): " + [v.constructor.name, v1.constructor.name]);
+      throw new Error("Failed pattern match at Data.Loader (line 111, column 1 - line 111, column 62): " + [v.constructor.name, v1.constructor.name]);
     };
   };
   var flattenTreeToPositionMap = function(v) {
@@ -7740,10 +7740,10 @@
         return 0;
       }
       ;
-      throw new Error("Failed pattern match at Data.Loader (line 231, column 7 - line 233, column 21): " + [v1.constructor.name]);
+      throw new Error("Failed pattern match at Data.Loader (line 230, column 7 - line 232, column 21): " + [v1.constructor.name]);
     }
     ;
-    throw new Error("Failed pattern match at Data.Loader (line 227, column 3 - line 233, column 21): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Data.Loader (line 226, column 3 - line 232, column 21): " + [v.constructor.name]);
   };
   var fetchJson = function(url2) {
     return bind4(get2(json)(url2))(function(result) {
@@ -7756,7 +7756,7 @@
           return new Right(result.value0.body);
         }
         ;
-        throw new Error("Failed pattern match at Data.Loader (line 108, column 10 - line 110, column 42): " + [result.constructor.name]);
+        throw new Error("Failed pattern match at Data.Loader (line 107, column 10 - line 109, column 42): " + [result.constructor.name]);
       })());
     });
   };
@@ -7770,7 +7770,7 @@
       return 0;
     }
     ;
-    throw new Error("Failed pattern match at Data.Loader (line 487, column 14 - line 489, column 15): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Data.Loader (line 486, column 14 - line 488, column 15): " + [v.constructor.name]);
   };
   var stringHash = function(s) {
     var chars = toCharArray(s);
@@ -7785,9 +7785,9 @@
       return function(modulesObj) {
         return function(locMap) {
           return function(packageIdMap) {
-            return function(moduleIdMap) {
+            return function(_moduleIdMap) {
               return function(packageCount) {
-                return function(moduleCount) {
+                return function(_moduleCount) {
                   return function(packageNodes) {
                     return function(targetsMap) {
                       return function(sourcesMap) {
@@ -7888,7 +7888,7 @@
             return insert6(v1.value0)(targets)(acc);
           }
           ;
-          throw new Error("Failed pattern match at Data.Loader (line 462, column 5 - line 466, column 43): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Data.Loader (line 461, column 5 - line 465, column 43): " + [v1.constructor.name]);
         };
       };
       return foldl12(addTargets)(empty3)(toUnfoldable5(modulesObj));
@@ -7953,7 +7953,7 @@
           })(v.value1.depends);
         }
         ;
-        throw new Error("Failed pattern match at Data.Loader (line 446, column 5 - line 454, column 30): " + [v1.constructor.name]);
+        throw new Error("Failed pattern match at Data.Loader (line 445, column 5 - line 453, column 30): " + [v1.constructor.name]);
       };
       return concat(map17(mkLinks)(toUnfoldable5(modulesObj)));
     };
@@ -10625,123 +10625,87 @@
   var div12 = /* @__PURE__ */ div(euclideanRingInt);
   var mod3 = /* @__PURE__ */ mod(euclideanRingInt);
   var map19 = /* @__PURE__ */ map(functorArray);
-  var eq3 = /* @__PURE__ */ eq(eqNodeType);
-  var show4 = /* @__PURE__ */ show(showInt);
+  var eq4 = /* @__PURE__ */ eq(eqNodeType);
   var fromFoldable13 = /* @__PURE__ */ fromFoldable2(foldableArray);
+  var show4 = /* @__PURE__ */ show(showInt);
   var viewBoxWidth = 4e3;
   var viewBoxHeight = 2500;
+  var nodeGridIndex = function(node) {
+    if (node.nodeType instanceof PackageNode) {
+      return node.id;
+    }
+    ;
+    if (node.nodeType instanceof ModuleNode) {
+      return node.cluster;
+    }
+    ;
+    throw new Error("Failed pattern match at Viz.SpagoGridTest.GridLayout (line 75, column 22 - line 77, column 29): " + [node.nodeType.constructor.name]);
+  };
+  var mkGridConfig = function(packageCount) {
+    var aspect = viewBoxWidth / viewBoxHeight;
+    var gridCols = ceil2(sqrt(toNumber(packageCount) * aspect));
+    var gridRows = ceil2(toNumber(packageCount) / toNumber(gridCols));
+    var spacingY = viewBoxHeight * 0.8 / toNumber(gridRows);
+    var spacingX = viewBoxWidth * 0.8 / toNumber(gridCols);
+    return {
+      gridCols,
+      gridColsN: toNumber(gridCols),
+      gridRowsN: toNumber(gridRows),
+      spacingX,
+      spacingY
+    };
+  };
+  var gridPosForIndex = function(cfg) {
+    return function(idx) {
+      var row = div12(idx)(cfg.gridCols);
+      var y3 = (toNumber(row) - cfg.gridRowsN / 2 + 0.5) * cfg.spacingY;
+      var col2 = mod3(idx)(cfg.gridCols);
+      var x3 = (toNumber(col2) - cfg.gridColsN / 2 + 0.5) * cfg.spacingX;
+      return {
+        x: x3,
+        y: y3
+      };
+    };
+  };
   var recalculateGridPositions = function(nodes) {
     return function(packageCount) {
-      var usableHeight = viewBoxHeight * (1 - 2 * 0.1);
-      var usableWidth = viewBoxWidth * (1 - 2 * 0.1);
-      var aspect = viewBoxWidth / viewBoxHeight;
-      var gridCols = ceil2(sqrt(toNumber(packageCount) * aspect));
-      var gridColsN = toNumber(gridCols);
-      var gridRows = ceil2(toNumber(packageCount) / toNumber(gridCols));
-      var gridRowsN = toNumber(gridRows);
-      var spacingY = usableHeight / toNumber(gridRows);
-      var spacingX = usableWidth / toNumber(gridCols);
+      var cfg = mkGridConfig(packageCount);
       var updateNode = function(node) {
-        if (node.nodeType instanceof PackageNode) {
-          var row = div12(node.id)(gridCols);
-          var gy = (toNumber(row) - gridRowsN / 2 + 0.5) * spacingY;
-          var col2 = mod3(node.id)(gridCols);
-          var gx = (toNumber(col2) - gridColsN / 2 + 0.5) * spacingX;
-          return {
-            id: node.id,
-            nodeType: node.nodeType,
-            cluster: node.cluster,
-            fx: node.fx,
-            fy: node.fy,
-            isInTree: node.isInTree,
-            name: node.name,
-            orbitAngle: node.orbitAngle,
-            "package": node["package"],
-            r: node.r,
-            sources: node.sources,
-            targets: node.targets,
-            treeX: node.treeX,
-            treeY: node.treeY,
-            vx: node.vx,
-            vy: node.vy,
-            gridX: gx,
-            gridY: gy,
-            x: gx,
-            y: gy
-          };
-        }
-        ;
-        if (node.nodeType instanceof ModuleNode) {
-          var pkgRow = div12(node.cluster)(gridCols);
-          var pkgY = (toNumber(pkgRow) - gridRowsN / 2 + 0.5) * spacingY;
-          var pkgCol = mod3(node.cluster)(gridCols);
-          var pkgX = (toNumber(pkgCol) - gridColsN / 2 + 0.5) * spacingX;
-          return {
-            cluster: node.cluster,
-            id: node.id,
-            nodeType: node.nodeType,
-            fx: node.fx,
-            fy: node.fy,
-            isInTree: node.isInTree,
-            name: node.name,
-            orbitAngle: node.orbitAngle,
-            "package": node["package"],
-            r: node.r,
-            sources: node.sources,
-            targets: node.targets,
-            treeX: node.treeX,
-            treeY: node.treeY,
-            vx: node.vx,
-            vy: node.vy,
-            gridX: pkgX,
-            gridY: pkgY,
-            x: pkgX,
-            y: pkgY
-          };
-        }
-        ;
-        throw new Error("Failed pattern match at Viz.SpagoGridTest.GridLayout (line 55, column 23 - line 72, column 67): " + [node.nodeType.constructor.name]);
+        var v = gridPosForIndex(cfg)(nodeGridIndex(node));
+        return {
+          cluster: node.cluster,
+          fx: node.fx,
+          fy: node.fy,
+          id: node.id,
+          isInTree: node.isInTree,
+          name: node.name,
+          nodeType: node.nodeType,
+          orbitAngle: node.orbitAngle,
+          "package": node["package"],
+          r: node.r,
+          sources: node.sources,
+          targets: node.targets,
+          treeX: node.treeX,
+          treeY: node.treeY,
+          vx: node.vx,
+          vy: node.vy,
+          gridX: v.x,
+          gridY: v.y,
+          x: v.x,
+          y: v.y
+        };
       };
       return map19(updateNode)(nodes);
     };
   };
   var calculateGridPositions = function(nodes) {
     var packageCount = length(filter(function(n) {
-      return eq3(n.nodeType)(PackageNode.value);
+      return eq4(n.nodeType)(PackageNode.value);
     })(nodes));
-    var aspect = viewBoxWidth / viewBoxHeight;
-    var gridCols = ceil2(sqrt(toNumber(packageCount) * aspect));
-    var gridColsN = toNumber(gridCols);
-    var gridRows = ceil2(toNumber(packageCount) / toNumber(gridCols));
-    var gridRowsN = toNumber(gridRows);
-    var spacingY = viewBoxHeight * 0.8 / toNumber(gridRows);
-    var spacingX = viewBoxWidth * 0.8 / toNumber(gridCols);
-    var getGridPos = function(node) {
-      if (node.nodeType instanceof PackageNode) {
-        var row = div12(node.id)(gridCols);
-        var gy = (toNumber(row) - gridRowsN / 2 + 0.5) * spacingY;
-        var col2 = mod3(node.id)(gridCols);
-        var gx = (toNumber(col2) - gridColsN / 2 + 0.5) * spacingX;
-        return new Tuple(show4(node.id), {
-          x: gx,
-          y: gy
-        });
-      }
-      ;
-      if (node.nodeType instanceof ModuleNode) {
-        var pkgRow = div12(node.cluster)(gridCols);
-        var pkgY = (toNumber(pkgRow) - gridRowsN / 2 + 0.5) * spacingY;
-        var pkgCol = mod3(node.cluster)(gridCols);
-        var pkgX = (toNumber(pkgCol) - gridColsN / 2 + 0.5) * spacingX;
-        return new Tuple(show4(node.id), {
-          x: pkgX,
-          y: pkgY
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at Viz.SpagoGridTest.GridLayout (line 94, column 23 - line 111, column 53): " + [node.nodeType.constructor.name]);
-    };
-    return fromFoldable13(map19(getGridPos)(nodes));
+    var cfg = mkGridConfig(packageCount);
+    return fromFoldable13(map19(function(n) {
+      return new Tuple(show4(n.id), gridPosForIndex(cfg)(nodeGridIndex(n)));
+    })(nodes));
   };
 
   // output/Viz.SpagoGridTest.OrbitLayout/index.js
@@ -10751,7 +10715,7 @@
   var fromFoldable14 = /* @__PURE__ */ fromFoldable2(foldableArray);
   var map20 = /* @__PURE__ */ map(functorArray);
   var show5 = /* @__PURE__ */ show(showInt);
-  var eq4 = /* @__PURE__ */ eq(eqNodeType);
+  var eq5 = /* @__PURE__ */ eq(eqNodeType);
   var div13 = /* @__PURE__ */ div(euclideanRingInt);
   var mod4 = /* @__PURE__ */ mod(euclideanRingInt);
   var unpinNode = function(n) {
@@ -10842,7 +10806,7 @@
     apply: pinAtCurrent
   };
   var isTreeModule = function(n) {
-    return eq4(n.nodeType)(ModuleNode.value) && n.isInTree;
+    return eq5(n.nodeType)(ModuleNode.value) && n.isInTree;
   };
   var treeFormLayout = function(nodes) {
     var getPosition = function(node) {
@@ -10929,7 +10893,7 @@
     };
   })();
   var isPackage = function(n) {
-    return eq4(n.nodeType)(PackageNode.value);
+    return eq5(n.nodeType)(PackageNode.value);
   };
   var orbitLayout = function(nodes) {
     var packages = filter(isPackage)(nodes);
@@ -10966,16 +10930,16 @@
             });
           }
           ;
-          throw new Error("Failed pattern match at Engine.Scenes (line 257, column 9 - line 259, column 67): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at Engine.Scenes (line 256, column 9 - line 258, column 67): " + [v.constructor.name]);
         }
         ;
-        throw new Error("Failed pattern match at Engine.Scenes (line 251, column 35 - line 259, column 67): " + [node.nodeType.constructor.name]);
+        throw new Error("Failed pattern match at Engine.Scenes (line 250, column 35 - line 258, column 67): " + [node.nodeType.constructor.name]);
       };
     };
     return fromFoldable14(map20(getNodeOrbitPos(packagePositions))(nodes));
   };
   var isModule = function(n) {
-    return eq4(n.nodeType)(ModuleNode.value);
+    return eq5(n.nodeType)(ModuleNode.value);
   };
   var orbitFormFinalRules = function(nodes) {
     var packages = filter(isPackage)(nodes);
@@ -11051,7 +11015,7 @@
           return pinAtCurrent(n);
         }
         ;
-        throw new Error("Failed pattern match at Engine.Scenes (line 289, column 11 - line 296, column 38): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at Engine.Scenes (line 288, column 11 - line 295, column 38): " + [v.constructor.name]);
       }
     }];
   };
@@ -11114,7 +11078,7 @@
           return unpinNode(n);
         }
         ;
-        throw new Error("Failed pattern match at Engine.Scenes (line 319, column 11 - line 326, column 35): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at Engine.Scenes (line 318, column 11 - line 325, column 35): " + [v.constructor.name]);
       }
     }];
   };
@@ -14664,7 +14628,7 @@
   var unsafeIndex2 = /* @__PURE__ */ unsafeIndex();
   var foldlWithIndex2 = /* @__PURE__ */ foldlWithIndex(foldableWithIndexArray);
   var computeJoinWithKey = function(dictEq) {
-    var eq5 = eq(dictEq);
+    var eq6 = eq(dictEq);
     return function(newData) {
       return function(oldBindings) {
         return function(keyFn) {
@@ -14673,7 +14637,7 @@
               return function(datum2) {
                 var newKey = keyFn(datum2);
                 var v = findIndex(function(v1) {
-                  return eq5(keyFn(v1.datum))(newKey);
+                  return eq6(keyFn(v1.datum))(newKey);
                 })(state3.remainingOld);
                 if (v instanceof Nothing) {
                   var enterBinding = {
@@ -14725,14 +14689,14 @@
     };
   };
   var computeJoin = function(dictEq) {
-    var eq5 = eq(dictEq);
+    var eq6 = eq(dictEq);
     return function(newData) {
       return function(oldBindings) {
         var processNewDatum = function(newIndex) {
           return function(state3) {
             return function(datum2) {
               var v = findIndex(function(v1) {
-                return eq5(v1.datum)(datum2);
+                return eq6(v1.datum)(datum2);
               })(state3.remainingOld);
               if (v instanceof Nothing) {
                 var enterBinding = {
@@ -17988,7 +17952,7 @@
         return log8("[Explorer] Could not find #explorer-nodes for CSS class")();
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 460, column 3 - line 467, column 77): " + [mElement.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 459, column 3 - line 466, column 77): " + [mElement.constructor.name]);
     };
   };
   var renderForceLinksD3 = function(links) {
@@ -18054,7 +18018,7 @@
         return Nothing.value;
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 204, column 21 - line 206, column 26): " + [n.nodeType.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 203, column 21 - line 205, column 26): " + [n.nodeType.constructor.name]);
     };
     var packagePositions = fromFoldable15(mapMaybe(getPackagePos)(nodes));
     var randomizeIfModule = function(n) {
@@ -18079,7 +18043,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at Engine.Explorer (line 213, column 34 - line 215, column 42): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at Engine.Explorer (line 212, column 34 - line 214, column 42): " + [v1.constructor.name]);
           })();
           var jitterX = (rx - 0.5) * 100;
           var jitterY = (ry - 0.5) * 100;
@@ -18108,7 +18072,7 @@
         };
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 208, column 25 - line 218, column 58): " + [n.nodeType.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 207, column 25 - line 217, column 58): " + [n.nodeType.constructor.name]);
     };
     return traverse4(randomizeIfModule)(nodes);
   };
@@ -18138,7 +18102,7 @@
       ;
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 323, column 15 - line 327, column 42): " + [n.nodeType.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 322, column 15 - line 326, column 42): " + [n.nodeType.constructor.name]);
   };
   var renderSVG = function(containerSelector) {
     return function(nodes) {
@@ -18244,7 +18208,7 @@
       return node;
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 194, column 27 - line 196, column 21): " + [node.nodeType.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 193, column 27 - line 195, column 21): " + [node.nodeType.constructor.name]);
   };
   var clearTreeLinks = function __do() {
     var win = windowImpl();
@@ -18260,7 +18224,7 @@
       return log8("[Explorer] Could not find #explorer-links")();
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 443, column 3 - line 448, column 63): " + [mElement.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 442, column 3 - line 447, column 63): " + [mElement.constructor.name]);
   };
   var addTreeForces = function(nodes) {
     return function(links) {
@@ -18366,7 +18330,7 @@
             });
           }
           ;
-          throw new Error("Failed pattern match at Engine.Explorer (line 87, column 3 - line 95, column 42): " + [result.constructor.name]);
+          throw new Error("Failed pattern match at Engine.Explorer (line 86, column 3 - line 94, column 42): " + [result.constructor.name]);
         });
       });
     }));
@@ -18447,7 +18411,7 @@
         return log8("[Explorer] Unknown scene: " + sceneName);
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 153, column 3 - line 184, column 63): " + [mScene.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 152, column 3 - line 183, column 63): " + [mScene.constructor.name]);
     };
   };
 

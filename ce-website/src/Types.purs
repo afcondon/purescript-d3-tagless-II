@@ -3,7 +3,7 @@ module Types where
 
 import Prelude
 import Data.Maybe (Maybe)
-import PSD3.ForceEngine.Simulation (SimulationNode)
+import PSD3.ForceEngine.Simulation (SimulationNode, Link)
 
 -- | A module in the codebase
 type Module =
@@ -48,11 +48,8 @@ derive instance eqNodeType :: Eq NodeType
 derive instance ordNodeType :: Ord NodeType
 
 -- | A link between nodes
-type SimLink =
-  { source :: Int
-  , target :: Int
-  , linkType :: LinkType
-  }
+-- | Extends the library's Link type with app-specific linkType field
+type SimLink = Link Int (linkType :: LinkType)
 
 -- | Link type discriminator
 -- | M2M_Tree: Module-to-module link in spanning tree (for tree visualization)
@@ -86,30 +83,3 @@ type Model =
   , links :: Array SimLink
   , packages :: Array Package
   }
-
--- | Which scene we're in
--- | Tree progression: Grid → Tree1 → Tree2 → Tree3 → Tree4 → Tree5
-data Scene
-  = Grid   -- Packages on grid, modules clustering (Physics)
-  | Tree1  -- Transition: packages to orbit, modules toward packages (Dumb)
-  | Tree2  -- Packages on orbit, modules cluster (Physics)
-  | Tree3  -- Transition: tree modules to tree positions (Dumb)
-  | Tree4  -- CSS fade: packages + non-tree modules fade out
-  | Tree5  -- Force-directed tree with links (Physics)
-
-derive instance eqScene :: Eq Scene
-
-instance showScene :: Show Scene where
-  show Grid = "Grid"
-  show Tree1 = "Tree1"
-  show Tree2 = "Tree2"
-  show Tree3 = "Tree3"
-  show Tree4 = "Tree4"
-  show Tree5 = "Tree5"
-
--- | Transition phase tracking
-data TransitionPhase
-  = Stable              -- Not transitioning
-  | TransitioningTo Scene Number  -- Target scene and progress (0→1)
-
-derive instance eqTransitionPhase :: Eq TransitionPhase

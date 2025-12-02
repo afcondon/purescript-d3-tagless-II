@@ -14,7 +14,6 @@ import Affjax.Web as AW
 import Affjax.ResponseFormat as ResponseFormat
 import Data.Argonaut.Core (Json)
 import Data.Argonaut.Decode (decodeJson, printJsonDecodeError)
-import Data.Argonaut.Decode.Class (class DecodeJson)
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.List as List
@@ -30,7 +29,7 @@ import Data.Nullable (null)
 import Data.String.CodeUnits as SCU
 import Data.String.Pattern (Pattern(..))
 import Data.Tree (Tree(..))
-import Data.Tuple (Tuple(..), fst)
+import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Foreign.Object (Object)
 import Foreign.Object as Object
@@ -300,7 +299,7 @@ markLinkType spanningTreeEdges link =
 -- =============================================================================
 
 mkPackageNode :: Array String -> Int -> Map String Int -> Int -> String -> SimNode
-mkPackageNode allPackages totalPackages packageLocMap idx name =
+mkPackageNode _allPackages totalPackages packageLocMap idx name =
   let
     -- Grid position (arrange in rows of ~8)
     gridCols = 8
@@ -352,7 +351,7 @@ mkModuleNode
   -> Map Int (Array Int)  -- targetsMap
   -> Map Int (Array Int)  -- sourcesMap
   -> SimNode
-mkModuleNode name idx modulesObj locMap packageIdMap moduleIdMap packageCount moduleCount packageNodes targetsMap sourcesMap =
+mkModuleNode name idx modulesObj locMap packageIdMap _moduleIdMap packageCount _moduleCount packageNodes targetsMap sourcesMap =
   let
     nodeId = idx + packageCount
     rawMod = Object.lookup name modulesObj

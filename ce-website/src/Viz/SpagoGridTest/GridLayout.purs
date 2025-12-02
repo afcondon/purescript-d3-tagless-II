@@ -30,84 +30,75 @@ viewBoxHeight :: Number
 viewBoxHeight = 2500.0
 
 -- =============================================================================
--- Grid Layout
+-- Grid Configuration
+-- =============================================================================
+
+-- | Grid layout configuration computed from package count
+type GridConfig =
+  { gridCols :: Int
+  , gridColsN :: Number
+  , gridRowsN :: Number
+  , spacingX :: Number
+  , spacingY :: Number
+  }
+
+-- | Create grid config from package count
+mkGridConfig :: Int -> GridConfig
+mkGridConfig packageCount =
+  let
+    aspect = viewBoxWidth / viewBoxHeight
+    gridCols = ceil (Num.sqrt (toNumber packageCount * aspect))
+    gridRows = ceil (toNumber packageCount / toNumber gridCols)
+    spacingX = viewBoxWidth * 0.8 / toNumber gridCols
+    spacingY = viewBoxHeight * 0.8 / toNumber gridRows
+  in
+    { gridCols
+    , gridColsN: toNumber gridCols
+    , gridRowsN: toNumber gridRows
+    , spacingX
+    , spacingY
+    }
+
+-- | Get grid position for a package index
+gridPosForIndex :: GridConfig -> Int -> { x :: Number, y :: Number }
+gridPosForIndex cfg idx =
+  let
+    row = idx / cfg.gridCols
+    col = idx `mod` cfg.gridCols
+    x = (toNumber col - cfg.gridColsN / 2.0 + 0.5) * cfg.spacingX
+    y = (toNumber row - cfg.gridRowsN / 2.0 + 0.5) * cfg.spacingY
+  in
+    { x, y }
+
+-- | Get grid index for a node (packages use their id, modules use their cluster)
+nodeGridIndex :: SimNode -> Int
+nodeGridIndex node = case node.nodeType of
+  PackageNode -> node.id
+  ModuleNode -> node.cluster
+
+-- =============================================================================
+-- Public API
 -- =============================================================================
 
 -- | Calculate grid positions for all nodes based on package count
 -- | Packages get grid positions, modules inherit their package's position
+-- | Also sets x/y to the grid position (for initialization)
 recalculateGridPositions :: Array SimNode -> Int -> Array SimNode
 recalculateGridPositions nodes packageCount =
   let
-    aspect = viewBoxWidth / viewBoxHeight
-    gridCols = ceil (Num.sqrt (toNumber packageCount * aspect))
-    gridRows = ceil (toNumber packageCount / toNumber gridCols)
-
-    margin = 0.1
-    usableWidth = viewBoxWidth * (1.0 - 2.0 * margin)
-    usableHeight = viewBoxHeight * (1.0 - 2.0 * margin)
-
-    spacingX = usableWidth / toNumber gridCols
-    spacingY = usableHeight / toNumber gridRows
-
-    gridColsN = toNumber gridCols
-    gridRowsN = toNumber gridRows
-
-    updateNode node = case node.nodeType of
-      PackageNode ->
-        let
-          idx = node.id
-          row = idx / gridCols
-          col = idx `mod` gridCols
-          gx = (toNumber col - gridColsN / 2.0 + 0.5) * spacingX
-          gy = (toNumber row - gridRowsN / 2.0 + 0.5) * spacingY
-        in node { gridX = gx, gridY = gy, x = gx, y = gy }
-
-      ModuleNode ->
-        let
-          pkgIdx = node.cluster
-          pkgRow = pkgIdx / gridCols
-          pkgCol = pkgIdx `mod` gridCols
-          pkgX = (toNumber pkgCol - gridColsN / 2.0 + 0.5) * spacingX
-          pkgY = (toNumber pkgRow - gridRowsN / 2.0 + 0.5) * spacingY
-        in node { gridX = pkgX, gridY = pkgY, x = pkgX, y = pkgY }
+    cfg = mkGridConfig packageCount
+    updateNode node =
+      let { x: gx, y: gy } = gridPosForIndex cfg (nodeGridIndex node)
+      in node { gridX = gx, gridY = gy, x = gx, y = gy }
   in
     map updateNode nodes
 
 -- | Calculate grid positions for scene transitions
--- | Recalculates positions based on node IDs (not stored gridX/gridY which may be stale)
+-- | Returns PositionMap for use with DumbEngine interpolation
 calculateGridPositions :: Array SimNode -> Object { x :: Number, y :: Number }
 calculateGridPositions nodes =
   let
-    -- Count packages to determine grid layout
     packageCount = Array.length $ Array.filter (\n -> n.nodeType == PackageNode) nodes
-
-    aspect = viewBoxWidth / viewBoxHeight
-    gridCols = ceil (Num.sqrt (toNumber packageCount * aspect))
-    gridRows = ceil (toNumber packageCount / toNumber gridCols)
-
-    spacingX = viewBoxWidth * 0.8 / toNumber gridCols
-    spacingY = viewBoxHeight * 0.8 / toNumber gridRows
-
-    gridColsN = toNumber gridCols
-    gridRowsN = toNumber gridRows
-
-    getGridPos node = case node.nodeType of
-      PackageNode ->
-        let
-          idx = node.id
-          row = idx / gridCols
-          col = idx `mod` gridCols
-          gx = (toNumber col - gridColsN / 2.0 + 0.5) * spacingX
-          gy = (toNumber row - gridRowsN / 2.0 + 0.5) * spacingY
-        in Tuple (show node.id) { x: gx, y: gy }
-
-      ModuleNode ->
-        let
-          pkgIdx = node.cluster
-          pkgRow = pkgIdx / gridCols
-          pkgCol = pkgIdx `mod` gridCols
-          pkgX = (toNumber pkgCol - gridColsN / 2.0 + 0.5) * spacingX
-          pkgY = (toNumber pkgRow - gridRowsN / 2.0 + 0.5) * spacingY
-        in Tuple (show node.id) { x: pkgX, y: pkgY }
+    cfg = mkGridConfig packageCount
   in
-    Object.fromFoldable $ map getGridPos nodes
+    Object.fromFoldable $ map (\n -> Tuple (show n.id) (gridPosForIndex cfg (nodeGridIndex n))) nodes
