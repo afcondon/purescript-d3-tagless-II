@@ -180,6 +180,42 @@ html, body {
   stroke-opacity: 0.1 !important;
 }
 
+/* =============================================================================
+   Node Type Styles (for scene transitions)
+   ============================================================================= */
+
+/* All nodes have opacity transition for smooth fading */
+.node {
+  transition: opacity 1.5s ease-in-out;
+}
+
+.package-node {
+  /* Package nodes - fade out in tree scene */
+}
+
+.tree-module {
+  /* Tree modules - always visible in tree scene */
+}
+
+.non-tree-module {
+  /* Non-tree modules - fade out in tree scene */
+}
+
+/* Tree scene: fade out packages and non-tree modules */
+.tree-scene .package-node,
+.tree-scene .non-tree-module {
+  opacity: 0.08;
+}
+
+/* Tree links */
+.tree-link {
+  transition: opacity 0.5s ease-in-out;
+}
+
+/* =============================================================================
+   Info panel
+   ============================================================================= */
+
 /* Info panel */
 .ce-info {
   position: absolute;

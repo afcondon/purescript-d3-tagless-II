@@ -1,6 +1,10 @@
 package:
   name: ce-website
   description: Code Explorer - Interactive codebase visualization
+  bundle:
+    module: Main
+    outfile: public/bundle.js
+    platform: browser
   dependencies:
     - aff
     - affjax
