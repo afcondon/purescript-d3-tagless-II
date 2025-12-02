@@ -280,21 +280,42 @@ computeSeparationsWithBase baseSeps contours =
   tailSafe (Cons _ xs) = xs
 
 -- | Scan two contours with a specific base separation
+-- | When one contour is shorter, continue comparing against the last known position
+-- | This prevents deep subtrees from overlapping with shallow ones
 scanContoursWithBase :: Number -> Contours -> Contours -> Number
 scanContoursWithBase baseSep (Contours left) (Contours right) =
-  go baseSep left.right right.left
+  go baseSep 0.0 0.0 left.right right.left
   where
-  go :: Number -> Contour -> Contour -> Number
-  go currentSep Nil _ = currentSep
-  go currentSep _ Nil = currentSep
-  go currentSep (Cons lr rest1) (Cons rl rest2) =
+  -- Track lastLr and lastRl to continue comparing when one contour ends
+  go :: Number -> Number -> Number -> Contour -> Contour -> Number
+  go currentSep _ _ Nil Nil = currentSep
+  -- Left contour ended but right continues - compare against last known left position
+  go currentSep lastLr _ Nil (Cons rl rest2) =
+    let
+      actualSep = currentSep + rl - lastLr
+      neededSep =
+        if actualSep < baseSep then currentSep + (baseSep - actualSep)
+        else currentSep
+    in
+      go neededSep lastLr rl Nil rest2
+  -- Right contour ended but left continues - compare against last known right position
+  go currentSep _ lastRl (Cons lr rest1) Nil =
+    let
+      actualSep = currentSep + lastRl - lr
+      neededSep =
+        if actualSep < baseSep then currentSep + (baseSep - actualSep)
+        else currentSep
+    in
+      go neededSep lr lastRl rest1 Nil
+  -- Both contours have values at this level
+  go currentSep _ _ (Cons lr rest1) (Cons rl rest2) =
     let
       actualSep = currentSep + rl - lr
       neededSep =
         if actualSep < baseSep then currentSep + (baseSep - actualSep)
         else currentSep
     in
-      go neededSep rest1 rest2
+      go neededSep lr rl rest1 rest2
 
 -- | Compute separations needed between adjacent child subtrees
 -- | For n children, returns (n-1) separation values
@@ -311,26 +332,40 @@ scanContoursWithBase baseSep (Contours left) (Contours right) =
 
 -- | Scan two contours to find minimum separation needed
 -- | Walks down both contours level by level, ensuring minSep at each level
+-- | Continues comparing when one contour ends to prevent overlap
 scanContours :: Number -> Contours -> Contours -> Number
 scanContours minSep (Contours left) (Contours right) =
-  go minSep left.right right.left
+  go minSep 0.0 0.0 left.right right.left
   where
   -- Current separation starts at minSep
   -- Walk down right contour of left subtree and left contour of right subtree
-  go :: Number -> Contour -> Contour -> Number
-  go currentSep Nil _ = currentSep
-  go currentSep _ Nil = currentSep
-  go currentSep (Cons lr rest1) (Cons rl rest2) =
+  -- Track lastLr and lastRl to continue comparing when one contour ends
+  go :: Number -> Number -> Number -> Contour -> Contour -> Number
+  go currentSep _ _ Nil Nil = currentSep
+  go currentSep lastLr _ Nil (Cons rl rest2) =
     let
-      -- Distance between the two nodes at this level
-      actualSep = currentSep + rl - lr
-
-      -- If too close, increase separation
+      actualSep = currentSep + rl - lastLr
       neededSep =
         if actualSep < minSep then currentSep + (minSep - actualSep)
         else currentSep
     in
-      go neededSep rest1 rest2
+      go neededSep lastLr rl Nil rest2
+  go currentSep _ lastRl (Cons lr rest1) Nil =
+    let
+      actualSep = currentSep + lastRl - lr
+      neededSep =
+        if actualSep < minSep then currentSep + (minSep - actualSep)
+        else currentSep
+    in
+      go neededSep lr lastRl rest1 Nil
+  go currentSep _ _ (Cons lr rest1) (Cons rl rest2) =
+    let
+      actualSep = currentSep + rl - lr
+      neededSep =
+        if actualSep < minSep then currentSep + (minSep - actualSep)
+        else currentSep
+    in
+      go neededSep lr rl rest1 rest2
 
 -- | Combine child contours into parent contours
 -- | Given n children at positions offsets[0..n-1], build the parent's contours
