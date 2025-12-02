@@ -44,7 +44,8 @@ import PSD3v2.Selection.Types (ElementType(..), SBoundOwns)
 import Types (SimNode, SimLink, NodeType(..), LinkType, isTreeLink)
 import Viz.SpagoGridTest.GridLayout as GridLayout
 import Viz.SpagoGridTest.TreeLinks (radialLinkPath)
-import Web.DOM.Element (Element, classList)
+import Web.DOM.Element (Element, classList, toNode)
+import Web.DOM.Node as Node
 import Web.DOM.DOMTokenList as DOMTokenList
 import Web.DOM.ParentNode (querySelector, QuerySelector(..))
 import Web.HTML (window)
@@ -446,8 +447,19 @@ clearTreeLinks = do
       log "[Explorer] Cleared tree links"
     Nothing -> log "[Explorer] Could not find #explorer-links"
 
--- | FFI to clear all children from an element
-foreign import clearElement :: Element -> Effect Unit
+-- | Clear all children from an element using web-dom
+-- | (Pure PureScript implementation, no FFI needed)
+clearElement :: Element -> Effect Unit
+clearElement element = clearNode (toNode element)
+  where
+  clearNode :: Node.Node -> Effect Unit
+  clearNode node = do
+    mChild <- Node.firstChild node
+    case mChild of
+      Just child -> do
+        _ <- Node.removeChild child node
+        clearNode node  -- recurse until no more children
+      Nothing -> pure unit
 
 -- | Add or remove the tree-scene class from the nodes group to trigger CSS fade
 setTreeSceneClass :: Boolean -> Effect Unit
