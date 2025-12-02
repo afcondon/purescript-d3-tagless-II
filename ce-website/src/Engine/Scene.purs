@@ -29,7 +29,7 @@ import Prelude
 import Data.Array as Array
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
-import Data.Traversable (traverse_, for_)
+import Data.Traversable (for_)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Ref (Ref)
@@ -48,16 +48,10 @@ import PSD3.Simulation.Scene
   , CSSConfig
   , PositionMap
   , applyRules
+  , applyRulesInPlace_
   ) as SimScene
 import PSD3.Transition.Tick as Tick
 import Types (SimNode, NodeType, LinkType)
-
--- FFI imports for in-place mutation
-foreign import applyTransformWhereInPlace_
-  :: (SimNode -> Boolean)
-  -> (SimNode -> SimNode)
-  -> Ref (Array SimNode)
-  -> Effect Unit
 
 -- =============================================================================
 -- App-Specific Types
@@ -101,13 +95,11 @@ type SceneState =
 
 -- | Apply rules in place (mutates simulation nodes directly)
 -- | Preserves object identity for D3 data binding
--- | Note: This stays app-specific due to FFI requirements
+-- | Uses library's first-match-wins semantics (CSS-like cascade)
 applyRulesInPlace :: Array (SimScene.NodeRule SimNode) -> CESimulation -> Effect Unit
-applyRulesInPlace rules sim =
-  traverse_ applyRule rules
-  where
-  applyRule :: SimScene.NodeRule SimNode -> Effect Unit
-  applyRule rule = applyTransformWhereInPlace_ rule.select rule.apply sim.nodes
+applyRulesInPlace rules sim = do
+  let _ = SimScene.applyRulesInPlace_ rules sim.nodes
+  pure unit
 
 -- | Re-initialize all forces after node data changes
 -- | D3 forces may cache values from nodes, so we need to tell them to re-read

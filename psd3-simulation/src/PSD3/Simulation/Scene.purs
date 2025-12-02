@@ -20,12 +20,14 @@ module PSD3.Simulation.Scene
   , PositionMap
   -- Functions
   , applyRules
+  , applyRulesInPlace_
   ) where
 
 import Prelude
 
 import Data.Array as Array
 import Data.Maybe (Maybe(..))
+import Effect.Ref (Ref)
 import Foreign.Object (Object)
 import PSD3.Transition.Tick as Tick
 
@@ -115,3 +117,19 @@ type TransitionState node =
   , targetPositions :: PositionMap
   , progress :: Tick.Progress
   }
+
+-- =============================================================================
+-- In-Place Mutation (FFI)
+-- =============================================================================
+
+-- | Apply rules in place with first-match-wins semantics (CSS-like cascade)
+-- | For each node, find the first matching rule and apply it via Object.assign.
+-- | Preserves object identity for D3 data binding.
+-- |
+-- | Note: Mutates in place, not wrapped in Effect.
+-- | TODO: Consider proper ST-based approach for principled mutation tracking.
+foreign import applyRulesInPlace_
+  :: forall node
+   . Array (NodeRule node)
+  -> Ref (Array node)
+  -> Unit
