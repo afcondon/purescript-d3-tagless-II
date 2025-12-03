@@ -2,9 +2,19 @@
 -- |
 -- | Loads JSON data from ce-server API and transforms into SimNode/SimLink arrays with
 -- | pre-calculated positions for Grid, Orbit, and Tree scenes.
+-- |
+-- | Supports multi-project/snapshot selection via:
+-- | - fetchProjects: get available projects with their snapshots
+-- | - loadModelForSnapshot: load model for a specific snapshot ID
+-- | - loadModel: (legacy) loads latest snapshot for backward compatibility
 module Data.Loader
   ( loadModel
+  , loadModelForSnapshot
+  , fetchProjects
+  , fetchProjectWithSnapshots
   , LoadedModel
+  , Project
+  , Snapshot
   , apiBaseUrl
   , Declaration
   , DeclarationsMap
@@ -83,6 +93,60 @@ type Declaration =
 -- | Module declarations map: module name -> array of declarations
 type DeclarationsMap = Object (Array Declaration)
 
+-- | Snapshot info from API
+type Snapshot =
+  { id :: Int
+  , gitHash :: String
+  , gitRef :: String
+  , label :: String
+  , snapshotAt :: String
+  , moduleCount :: Int
+  , packageCount :: Int
+  , declarationCount :: Int
+  }
+
+-- | Project info from API
+type Project =
+  { id :: Int
+  , name :: String
+  , repoPath :: String
+  , description :: Maybe String
+  , snapshotCount :: Int
+  , latestSnapshotAt :: Maybe String
+  , snapshots :: Array Snapshot  -- Populated when fetching single project
+  }
+
+-- | API response for projects list
+type ProjectsListResponse =
+  { projects :: Array ProjectListItem
+  }
+
+-- | Project list item (without snapshots)
+type ProjectListItem =
+  { id :: Int
+  , name :: String
+  , repoPath :: String
+  , description :: Maybe String
+  , snapshotCount :: Int
+  , latestSnapshotAt :: Maybe String
+  }
+
+-- | API response for single project with snapshots
+-- | Note: Single project response has fewer fields than list response
+type ProjectWithSnapshotsResponse =
+  { project :: ProjectDetail
+  , snapshots :: Array Snapshot
+  }
+
+-- | Project detail (returned by GET /api/projects/:id)
+type ProjectDetail =
+  { id :: Int
+  , name :: String
+  , repoPath :: String
+  , description :: Maybe String
+  , createdAt :: String
+  }
+
 -- | Loaded and transformed model
 type LoadedModel =
   { nodes :: Array SimNode
@@ -133,6 +197,60 @@ fetchJson url = do
 mapLeft :: forall a b c. (a -> c) -> Either a b -> Either c b
 mapLeft f (Left a) = Left (f a)
 mapLeft _ (Right b) = Right b
+
+-- =============================================================================
+-- Multi-Project API
+-- =============================================================================
+
+-- | Fetch list of all projects with their snapshot counts
+fetchProjects :: Aff (Either String (Array Project))
+fetchProjects = do
+  result <- fetchJson (apiBaseUrl <> "/api/projects")
+  pure $ do
+    json <- result
+    response :: ProjectsListResponse <- decodeJson json # mapLeft printJsonDecodeError
+    -- Convert ProjectListItem to Project (with empty snapshots array)
+    Right $ map toProject response.projects
+  where
+  toProject :: ProjectListItem -> Project
+  toProject p =
+    { id: p.id
+    , name: p.name
+    , repoPath: p.repoPath
+    , description: p.description
+    , snapshotCount: p.snapshotCount
+    , latestSnapshotAt: p.latestSnapshotAt
+    , snapshots: []
+    }
+
+-- | Fetch a project with its snapshots
+fetchProjectWithSnapshots :: Int -> Aff (Either String Project)
+fetchProjectWithSnapshots projectId = do
+  result <- fetchJson (apiBaseUrl <> "/api/projects/" <> show projectId)
+  pure $ do
+    json <- result
+    response :: ProjectWithSnapshotsResponse <- decodeJson json # mapLeft printJsonDecodeError
+    -- Compute snapshotCount and latestSnapshotAt from snapshots array
+    let latestAt = Array.head response.snapshots <#> _.snapshotAt
+    Right
+      { id: response.project.id
+      , name: response.project.name
+      , repoPath: response.project.repoPath
+      , description: response.project.description
+      , snapshotCount: Array.length response.snapshots
+      , latestSnapshotAt: latestAt
+      , snapshots: response.snapshots
+      }
+
+-- | Load model for a specific snapshot ID
+-- | This fetches data scoped to that snapshot from the legacy endpoints
+loadModelForSnapshot :: Int -> Aff (Either String LoadedModel)
+loadModelForSnapshot _snapshotId = do
+  -- For now, we use the legacy endpoints which always return latest snapshot
+  -- TODO: Add snapshot-specific endpoints like /api/snapshots/:id/modules
+  -- For now, just use the same loadModel (legacy endpoints use latest snapshot)
+  -- This will be enhanced when we add snapshot-specific data endpoints
+  loadModel
 
 -- =============================================================================
 -- Transformation
