@@ -10,9 +10,9 @@ import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import PSD3.Shared.Data (HierData, getName, getValue, getChildren, loadDataFile, DataFile(..), parseFlareJson)
-import PSD3.Layout.Hierarchy.Core (hierarchy, sum) as H
-import PSD3.Layout.Hierarchy.Types (ValuedNode(..))
-import PSD3.Layout.Hierarchy.Treemap (TreemapNode(..), defaultTreemapConfig, treemap, squarify, phi)
+import DataViz.Layout.Hierarchy.Core (hierarchy, sum) as H
+import DataViz.Layout.Hierarchy.Types (ValuedNode(..))
+import DataViz.Layout.Hierarchy.Treemap (TreemapNode(..), defaultTreemapConfig, treemap, squarify, phi)
 import PSD3v2.Attribute.Types (width, height, viewBox, class_, fill, fillOpacity, stroke, strokeWidth, textContent, textAnchor, x, y, fontSize)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
@@ -22,7 +22,7 @@ import Web.DOM.Element (Element)
 
 -- | Color palette
 colors :: Array String
-colors = ["#e7ba52", "#c7c7c7", "#aec7e8", "#1f77b4", "#9467bd"]
+colors = [ "#e7ba52", "#c7c7c7", "#aec7e8", "#1f77b4", "#9467bd" ]
 
 getColor :: Int -> String
 getColor depth = case colors Array.!! (depth `mod` Array.length colors) of
@@ -32,8 +32,7 @@ getColor depth = case colors Array.!! (depth `mod` Array.length colors) of
 -- | Get all leaves
 getLeaves :: forall a. TreemapNode a -> Array (TreemapNode a)
 getLeaves node@(TNode n) =
-  if Array.length n.children == 0
-  then [node]
+  if Array.length n.children == 0 then [ node ]
   else n.children >>= getLeaves
 
 -- | Map over ValuedNode to transform the data type
@@ -43,7 +42,7 @@ mapValuedNode f (VNode n) =
     { data_: f n.data_
     , depth: n.depth
     , height: n.height
-    , parent: Nothing  -- Parent references are dropped
+    , parent: Nothing -- Parent references are dropped
     , children: map (mapValuedNode f) n.children
     , value: n.value
     }
@@ -65,26 +64,28 @@ drawTreemap selector flareData = runD3v2M do
   let stringValued = mapValuedNode getName valued
 
   -- Apply treemap layout
-  let config = defaultTreemapConfig
-        { size = { width: chartWidth, height: chartHeight }
-        , tile = squarify phi
-        }
+  let
+    config = defaultTreemapConfig
+      { size = { width: chartWidth, height: chartHeight }
+      , tile = squarify phi
+      }
   let layout = treemap config stringValued
   let leaves = getLeaves layout
 
   liftEffect $ Console.log $ "Rendering treemap: " <> show (Array.length leaves) <> " rectangles"
 
   -- Build tree
-  let tree :: T.Tree (TreemapNode String)
-      tree =
-        T.named SVG "svg"
-          [ width chartWidth
-          , height chartHeight
-          , viewBox ("0 0 " <> show chartWidth <> " " <> show chartHeight)
-          , class_ "treemap-viz"
-          ]
-          `T.withChild`
-            (T.joinData "rects" "g" leaves $ \(TNode node) ->
+  let
+    tree :: T.Tree (TreemapNode String)
+    tree =
+      T.named SVG "svg"
+        [ width chartWidth
+        , height chartHeight
+        , viewBox ("0 0 " <> show chartWidth <> " " <> show chartHeight)
+        , class_ "treemap-viz"
+        ]
+        `T.withChild`
+          ( T.joinData "rects" "g" leaves $ \(TNode node) ->
               T.named Group ("rect-" <> node.data_)
                 [ class_ "node" ]
                 `T.withChildren`
@@ -107,7 +108,7 @@ drawTreemap selector flareData = runD3v2M do
                       , fillOpacity (if (node.x1 - node.x0) > 30.0 && (node.y1 - node.y0) > 15.0 then 1.0 else 0.0)
                       ]
                   ]
-            )
+          )
 
   _ <- renderTree container tree
 

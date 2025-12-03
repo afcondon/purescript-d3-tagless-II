@@ -1,6 +1,10 @@
 package:
   name: ce-website
   description: Code Explorer - Interactive codebase visualization
+  bundle:
+    module: Main
+    outfile: public/bundle.js
+    platform: browser
   dependencies:
     - aff
     - affjax
@@ -22,6 +26,8 @@ package:
     - numbers
     - ordered-collections
     - prelude
+    - random
+    - psd3-layout
     - psd3-selection
     - psd3-simulation
     - refs

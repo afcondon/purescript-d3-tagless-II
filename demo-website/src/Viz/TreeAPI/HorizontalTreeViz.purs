@@ -5,13 +5,14 @@ import Prelude
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.List (List(..))
-import Data.Tree (Tree(..))
+import Control.Comonad.Cofree (head, tail)
+import Data.Tree (Tree, mkTree)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import PSD3.Shared.Data (loadFlareData)
-import PSD3.Layout.Hierarchy.Tree4 (tree, defaultTreeConfig)
+import DataViz.Layout.Hierarchy.Tree (tree, defaultTreeConfig)
 import PSD3v2.Attribute.Types (width, height, viewBox, class_, cx, cy, radius, fill, stroke, strokeWidth, d, x, y, textContent, textAnchor, fontSize)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, reselectD3v2)
@@ -27,34 +28,51 @@ type LinkDatum = { source :: { x :: Number, y :: Number }, target :: { x :: Numb
 
 -- | Swap x and y coordinates for horizontal orientation
 swapXY :: forall r. Tree { x :: Number, y :: Number | r } -> Tree { x :: Number, y :: Number | r }
-swapXY (Node val children) =
+swapXY t =
   let
+    val = head t
+    children = tail t
     swappedChildren = map swapXY children
   in
-    Node (val { x = val.y, y = val.x }) swappedChildren
+    mkTree (val { x = val.y, y = val.x }) swappedChildren
 
 -- | Create links from parent to children
-makeLinks :: forall r. Tree { x :: Number, y :: Number | r }
+makeLinks
+  :: forall r
+   . Tree { x :: Number, y :: Number | r }
   -> Array { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
 makeLinks tree' = Array.fromFoldable $ makeLinksList tree'
   where
-    makeLinksList :: Tree { x :: Number, y :: Number | r }
-      -> List { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
-    makeLinksList (Node val children) =
-      let
-        childLinks = children >>= \(Node childVal _) ->
-          Cons { source: { x: val.x, y: val.y }, target: { x: childVal.x, y: childVal.y } } Nil
-        grandchildLinks = children >>= makeLinksList
-      in
-        childLinks <> grandchildLinks
+  makeLinksList
+    :: Tree { x :: Number, y :: Number | r }
+    -> List { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
+  makeLinksList t =
+    let
+      val = head t
+      children = tail t
+      childLinks = children >>= \child ->
+        let childVal = head child
+        in Cons { source: { x: val.x, y: val.y }, target: { x: childVal.x, y: childVal.y } } Nil
+      grandchildLinks = children >>= makeLinksList
+    in
+      childLinks <> grandchildLinks
 
 -- | Horizontal link path generator (draws from left to right)
 linkPath :: Number -> Number -> Number -> Number -> String
 linkPath x1' y1' x2' y2' =
-  "M" <> show x1' <> "," <> show y1' <>
-  "C" <> show ((x1' + x2') / 2.0) <> "," <> show y1' <>
-  " " <> show ((x1' + x2') / 2.0) <> "," <> show y2' <>
-  " " <> show x2' <> "," <> show y2'
+  "M" <> show x1' <> "," <> show y1'
+    <> "C"
+    <> show ((x1' + x2') / 2.0)
+    <> ","
+    <> show y1'
+    <> " "
+    <> show ((x1' + x2') / 2.0)
+    <> ","
+    <> show y2'
+    <> " "
+    <> show x2'
+    <> ","
+    <> show y2'
 
 -- | Draw horizontal tree hierarchy with loaded data
 drawHorizontalTree :: String -> Tree HierNode -> Effect Unit
@@ -66,11 +84,15 @@ drawHorizontalTree selector flareTree = runD3v2M do
   let chartHeight = 500.0
   let padding = 40.0
 
-  -- Apply Tree4 layout with swapped dimensions
+  -- Apply Tree layout with swapped dimensions
   -- For horizontal tree, we swap width/height so the tree grows left-to-right
-  let config = defaultTreeConfig
-        { size = { width: chartHeight - (2.0 * padding)
-                 , height: chartWidth - (2.0 * padding) } }
+  let
+    config = defaultTreeConfig
+      { size =
+          { width: chartHeight - (2.0 * padding)
+          , height: chartWidth - (2.0 * padding)
+          }
+      }
   let positioned = tree config flareTree
 
   -- Swap x and y for horizontal orientation
@@ -83,36 +105,39 @@ drawHorizontalTree selector flareTree = runD3v2M do
   liftEffect $ Console.log $ "Rendering horizontal tree: " <> show (Array.length nodes) <> " nodes, " <> show (Array.length links) <> " links"
 
   -- First tree: SVG container with links (datum type: link data)
-  let linksTree :: T.Tree LinkDatum
-      linksTree =
-        T.named SVG "svg"
-          [ width chartWidth
-          , height chartHeight
-          , viewBox ("0 0 " <> show chartWidth <> " " <> show chartHeight)
-          , class_ "horizontal-tree-viz"
-          ]
-          `T.withChild`
-            (T.named Group "chartGroup"
+  let
+    linksTree :: T.Tree LinkDatum
+    linksTree =
+      T.named SVG "svg"
+        [ width chartWidth
+        , height chartHeight
+        , viewBox ("0 0 " <> show chartWidth <> " " <> show chartHeight)
+        , class_ "horizontal-tree-viz"
+        ]
+        `T.withChild`
+          ( T.named Group "chartGroup"
               [ class_ "tree-content" ]
               `T.withChild`
-                (T.named Group "linksGroup"
-                  [ class_ "links" ]
-                  `T.withChild`
-                    (T.joinData "links" "path" links $ \link ->
-                      T.elem Path
-                        [ d (linkPath
-                            (link.source.x + padding)
-                            (link.source.y + padding)
-                            (link.target.x + padding)
-                            (link.target.y + padding))
-                        , fill "none"
-                        , stroke "#999"
-                        , strokeWidth 1.5
-                        , class_ "link"
-                        ]
-                    )
+                ( T.named Group "linksGroup"
+                    [ class_ "links" ]
+                    `T.withChild`
+                      ( T.joinData "links" "path" links $ \link ->
+                          T.elem Path
+                            [ d
+                                ( linkPath
+                                    (link.source.x + padding)
+                                    (link.source.y + padding)
+                                    (link.target.x + padding)
+                                    (link.target.y + padding)
+                                )
+                            , fill "none"
+                            , stroke "#999"
+                            , strokeWidth 1.5
+                            , class_ "link"
+                            ]
+                      )
                 )
-            )
+          )
 
   -- Render links first (underlaying)
   linksSelections <- renderTree container linksTree
@@ -121,12 +146,13 @@ drawHorizontalTree selector flareTree = runD3v2M do
   -- Reselect the chartGroup from rendered selections (not global CSS selector!)
   chartGroupSel <- liftEffect $ reselectD3v2 "chartGroup" linksSelections
 
-  let nodesTree :: T.Tree HierNode
-      nodesTree =
-        T.named Group "nodesGroup"
-          [ class_ "nodes" ]
-          `T.withChild`
-            (T.joinData "nodeGroups" "g" nodes $ \node ->
+  let
+    nodesTree :: T.Tree HierNode
+    nodesTree =
+      T.named Group "nodesGroup"
+        [ class_ "nodes" ]
+        `T.withChild`
+          ( T.joinData "nodeGroups" "g" nodes $ \node ->
               T.named Group ("node-" <> node.name)
                 [ class_ "node" ]
                 `T.withChildren`
@@ -146,7 +172,7 @@ drawHorizontalTree selector flareTree = runD3v2M do
                       , textAnchor "start"
                       ]
                   ]
-            )
+          )
 
   -- Render nodes on top (overlaying)
   _ <- renderTree chartGroupSel nodesTree

@@ -3,7 +3,7 @@ module Types where
 
 import Prelude
 import Data.Maybe (Maybe)
-import Data.Nullable (Nullable)
+import PSD3.ForceEngine.Simulation (SimulationNode, Link)
 
 -- | A module in the codebase
 type Module =
@@ -22,17 +22,11 @@ type Package =
   }
 
 -- | A simulation node (module or package)
-type SimNode =
-  { id :: Int
-  , name :: String
+-- | Extends SimulationNode with app-specific fields
+type SimNode = SimulationNode
+  ( name :: String
   , nodeType :: NodeType
   , package :: String
-  , x :: Number
-  , y :: Number
-  , vx :: Number
-  , vy :: Number
-  , fx :: Nullable Number  -- Fixed x (for pinning during transitions)
-  , fy :: Nullable Number  -- Fixed y (for pinning during transitions)
   , r :: Number            -- Radius (based on LOC or constant)
   , cluster :: Int         -- For coloring by package
   , targets :: Array Int   -- Outgoing dependency IDs
@@ -42,7 +36,8 @@ type SimNode =
   , orbitAngle :: Number   -- Orbital angle (for Orbit scene, packages only)
   , treeX :: Number        -- Tree position (calculated from radial tree layout)
   , treeY :: Number
-  }
+  , isInTree :: Boolean    -- True if node is reachable from root in spanning tree
+  )
 
 -- | Node type discriminator
 data NodeType
@@ -50,20 +45,37 @@ data NodeType
   | PackageNode
 
 derive instance eqNodeType :: Eq NodeType
+derive instance ordNodeType :: Ord NodeType
 
 -- | A link between nodes
-type SimLink =
-  { source :: Int
-  , target :: Int
-  , linkType :: LinkType
-  }
+-- | Extends the library's Link type with app-specific linkType field
+type SimLink = Link Int (linkType :: LinkType)
 
 -- | Link type discriminator
+-- | M2M_Tree: Module-to-module link in spanning tree (for tree visualization)
+-- | M2M_Graph: Module-to-module link NOT in spanning tree (redundant edge)
+-- | P2P: Package-to-package dependency
+-- | M2P: Module-to-package containment
 data LinkType
-  = ModuleToModule  -- Module depends on module
-  | PackageToPackage -- Package depends on package
+  = M2M_Tree       -- Module link in spanning tree
+  | M2M_Graph      -- Module link not in spanning tree
+  | P2P            -- Package to package
+  | M2P            -- Module to package (containment)
 
 derive instance eqLinkType :: Eq LinkType
+
+instance showLinkType :: Show LinkType where
+  show M2M_Tree = "M2M-Tree"
+  show M2M_Graph = "M2M-Graph"
+  show P2P = "P2P"
+  show M2P = "M2P"
+
+-- | Link predicates
+isTreeLink :: SimLink -> Boolean
+isTreeLink l = l.linkType == M2M_Tree
+
+isGraphLink :: SimLink -> Boolean
+isGraphLink l = l.linkType == M2M_Graph
 
 -- | The complete model
 type Model =
@@ -71,25 +83,3 @@ type Model =
   , links :: Array SimLink
   , packages :: Array Package
   }
-
--- | Which scene we're in
-data Scene
-  = Grid       -- Starting view: packages on grid, modules clustering
-  | Orbit      -- Packages on radial ring, main module at center
-  | Tree       -- Dependency tree rooted at main module
-  | BubblePack -- Module internals
-
-derive instance eqScene :: Eq Scene
-
-instance showScene :: Show Scene where
-  show Grid = "Grid"
-  show Orbit = "Orbit"
-  show Tree = "Tree"
-  show BubblePack = "BubblePack"
-
--- | Transition phase tracking
-data TransitionPhase
-  = Stable              -- Not transitioning
-  | TransitioningTo Scene Number  -- Target scene and progress (0→1)
-
-derive instance eqTransitionPhase :: Eq TransitionPhase

@@ -14,7 +14,8 @@ import Data.String (length)
 import Data.Tuple (Tuple(..))
 import Data.String.CodePoints (codePointAt)
 import Data.Enum (fromEnum)
-import Data.Tree (Tree(..))
+import Control.Comonad.Cofree (head, tail)
+import Data.Tree (Tree, mkTree)
 import Effect (Effect)
 import Effect.Aff (Milliseconds(..), delay)
 import Effect.Aff.Class (class MonadAff)
@@ -24,8 +25,8 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import PSD3.Layout.Hierarchy.Tree4 as Tree4
-import PSD3.Layout.Hierarchy.Link (LinkStyle(..), linkGenerator)
+import DataViz.Layout.Hierarchy.Tree as Tree
+import DataViz.Layout.Hierarchy.Link (LinkStyle(..), linkGenerator)
 import PSD3.Shared.Data (loadFlareData)
 import PSD3v2.Attribute.Types (width, height, viewBox, class_, cx, cy, radius, fill, stroke, strokeWidth, strokeOpacity, d)
 import PSD3v2.Capabilities.Selection (select, renderTree)
@@ -228,10 +229,13 @@ makeLinks tree' = Array.fromFoldable $ makeLinksList tree'
   makeLinksList
     :: Tree { x :: Number, y :: Number | r }
     -> List { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
-  makeLinksList (Node val children) =
+  makeLinksList t =
     let
-      childLinks = children >>= \(Node childVal _) ->
-        Cons { source: { x: val.x, y: val.y }, target: { x: childVal.x, y: childVal.y } } Nil
+      val = head t
+      children = tail t
+      childLinks = children >>= \child ->
+        let childVal = head child
+        in Cons { source: { x: val.x, y: val.y }, target: { x: childVal.x, y: childVal.y } } Nil
       grandchildLinks = children >>= makeLinksList
     in
       childLinks <> grandchildLinks
@@ -278,8 +282,8 @@ drawTreeExplorer selector state flareTree = do
     -- Build TreeConfig from state with separation function
     let layerScaleFn = getLayerScaleFn state.layerScalePreset state.exponent
     let
-      config :: Tree4.TreeConfig NodeWithRadius
-      config = Tree4.defaultTreeConfig
+      config :: Tree.TreeConfig NodeWithRadius
+      config = Tree.defaultTreeConfig
         { size =
             { width: chartWidth - (2.0 * padding)
             , height: chartHeight - (2.0 * padding)
@@ -292,8 +296,8 @@ drawTreeExplorer selector state flareTree = do
     -- Get link generator for selected style
     let linkPathFn = linkGenerator state.linkStyle
 
-    -- Apply Tree4 layout
-    let positioned = Tree4.tree config treeWithRadius
+    -- Apply Tree layout
+    let positioned = Tree.tree config treeWithRadius
 
     -- Flatten to arrays
     let nodes = Array.fromFoldable positioned

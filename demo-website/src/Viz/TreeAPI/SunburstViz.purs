@@ -11,7 +11,7 @@ import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import PSD3.Shared.Data (HierData, getName, getValue, getChildren, loadDataFile, DataFile(..), parseFlareJson)
-import PSD3.Layout.Hierarchy.Partition (HierarchyData(..), PartitionNode(..), defaultPartitionConfig, hierarchy, partition)
+import DataViz.Layout.Hierarchy.Partition (HierarchyData(..), PartitionNode(..), defaultPartitionConfig, hierarchy, partition)
 import PSD3v2.Attribute.Types (width, height, viewBox, class_, fill, fillOpacity, stroke, strokeWidth, d)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
@@ -38,7 +38,7 @@ toHierarchyData node =
 
 -- | Color palette
 colors :: Array String
-colors = ["#e7ba52", "#c7c7c7", "#aec7e8", "#1f77b4", "#9467bd"]
+colors = [ "#e7ba52", "#c7c7c7", "#aec7e8", "#1f77b4", "#9467bd" ]
 
 getColor :: Int -> String
 getColor depth = case colors Array.!! (depth `mod` Array.length colors) of
@@ -48,9 +48,8 @@ getColor depth = case colors Array.!! (depth `mod` Array.length colors) of
 -- | Get all nodes (recursive traversal)
 getAllNodes :: forall a. PartitionNode a -> Array (PartitionNode a)
 getAllNodes node@(PartNode n) =
-  if Array.length n.children == 0
-  then [node]
-  else [node] <> (n.children >>= getAllNodes)
+  if Array.length n.children == 0 then [ node ]
+  else [ node ] <> (n.children >>= getAllNodes)
 
 -- | Convert partition coordinates to sunburst arc path
 -- | x0, x1 are normalized [0,1] representing angles around the circle
@@ -80,11 +79,33 @@ arcPath x0_ y0_ x1_ y1_ radius =
     largeArc = if (endAngle - startAngle) > pi then 1 else 0
   in
     -- SVG path for arc segment
-    "M" <> show x10 <> "," <> show y10 <>
-    "A" <> show outerRadius <> "," <> show outerRadius <> " 0 " <> show largeArc <> " 1 " <> show x11 <> "," <> show y11 <>
-    "L" <> show x01 <> "," <> show y01 <>
-    "A" <> show innerRadius <> "," <> show innerRadius <> " 0 " <> show largeArc <> " 0 " <> show x00 <> "," <> show y00 <>
-    "Z"
+    "M" <> show x10 <> "," <> show y10
+      <> "A"
+      <> show outerRadius
+      <> ","
+      <> show outerRadius
+      <> " 0 "
+      <> show largeArc
+      <> " 1 "
+      <> show x11
+      <> ","
+      <> show y11
+      <> "L"
+      <> show x01
+      <> ","
+      <> show y01
+      <> "A"
+      <> show innerRadius
+      <> ","
+      <> show innerRadius
+      <> " 0 "
+      <> show largeArc
+      <> " 0 "
+      <> show x00
+      <> ","
+      <> show y00
+      <>
+        "Z"
 
 -- | Draw sunburst diagram
 drawSunburst :: String -> HierData -> Effect Unit
@@ -102,10 +123,11 @@ drawSunburst selector flareData = runD3v2M do
   let partRoot = hierarchy hierData
 
   -- Apply partition layout (creates normalized coordinates)
-  let config = defaultPartitionConfig
-        { size = { width: 1.0, height: 1.0 }  -- Normalized for conversion to polar
-        , padding = 0.001  -- Small padding for visibility
-        }
+  let
+    config = defaultPartitionConfig
+      { size = { width: 1.0, height: 1.0 } -- Normalized for conversion to polar
+      , padding = 0.001 -- Small padding for visibility
+      }
   let partitioned = partition config partRoot
 
   -- Get all nodes except root (root would be full circle)
@@ -115,28 +137,29 @@ drawSunburst selector flareData = runD3v2M do
   liftEffect $ Console.log $ "Rendering sunburst: " <> show (Array.length nodes) <> " arcs"
 
   -- Build tree using TreeAPI
-  let tree :: T.Tree (PartitionNode String)
-      tree =
-        T.named SVG "svg"
-          [ width chartSize
-          , height chartSize
-          , viewBox (show (-radius) <> " " <> show (-radius) <> " " <> show chartSize <> " " <> show chartSize)
-          , class_ "sunburst-viz"
-          ]
-          `T.withChild`
-            (T.joinData "arcs" "g" nodes $ \(PartNode node) ->
+  let
+    tree :: T.Tree (PartitionNode String)
+    tree =
+      T.named SVG "svg"
+        [ width chartSize
+        , height chartSize
+        , viewBox (show (-radius) <> " " <> show (-radius) <> " " <> show chartSize <> " " <> show chartSize)
+        , class_ "sunburst-viz"
+        ]
+        `T.withChild`
+          ( T.joinData "arcs" "g" nodes $ \(PartNode node) ->
               T.named Group ("arc-" <> node.data_)
                 [ class_ "node" ]
                 `T.withChild`
-                  (T.elem Path
-                    [ d (arcPath node.x0 node.y0 node.x1 node.y1 radius)
-                    , fill (getColor node.depth)
-                    , fillOpacity 0.7
-                    , stroke "#fff"
-                    , strokeWidth 1.0
-                    ]
+                  ( T.elem Path
+                      [ d (arcPath node.x0 node.y0 node.x1 node.y1 radius)
+                      , fill (getColor node.depth)
+                      , fillOpacity 0.7
+                      , stroke "#fff"
+                      , strokeWidth 1.0
+                      ]
                   )
-            )
+          )
 
   _ <- renderTree container tree
 

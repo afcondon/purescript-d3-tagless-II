@@ -16,8 +16,8 @@ import Affjax.Web as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import PSD3.Shared.FlareData (HierData)
 import Unsafe.Coerce (unsafeCoerce)
-import D3.Viz.AnimatedTree4Cluster4v2 as AnimatedTree
-import D3.Viz.AnimatedTree4Cluster4v2 (LayoutType(..), VizState)
+import D3.Viz.AnimatedTreeClusterv2 as AnimatedTree
+import D3.Viz.AnimatedTreeClusterv2 (LayoutType(..), VizState)
 
 type State =
   { currentLayout :: LayoutType
@@ -84,8 +84,9 @@ handleAction = case _ of
       Left err -> log $ "Failed to load Flare data: " <> AJAX.printError err
       Right response -> do
         -- Extract JSON body (unsafeCoerce since we trust flare-2.json format)
-        let flareData :: HierData
-            flareData = unsafeCoerce response.body
+        let
+          flareData :: HierData
+          flareData = unsafeCoerce response.body
 
         -- Initialize visualization (v2 returns Effect directly)
         vizState <- liftEffect $ AnimatedTree.draw flareData "#animated-tree-cluster"

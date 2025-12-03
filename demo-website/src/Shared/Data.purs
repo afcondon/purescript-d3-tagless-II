@@ -14,7 +14,7 @@ import Data.Number as Number
 import Data.Nullable (Nullable, toMaybe)
 import Data.String (Pattern(..), split, trim)
 import Data.String.CodeUnits as CodeUnits
-import Data.Tree (Tree(..))
+import Data.Tree (Tree, mkTree)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Effect.Class.Console (log)
@@ -153,7 +153,7 @@ hierDataToTree hierData =
       Nothing -> Nil
       Just childrenArray -> fromFoldable $ map hierDataToTree childrenArray
   in
-    Node { name, value, x: 0.0, y: 0.0, depth: 0, height: 0 } childrenList
+    mkTree { name, value, x: 0.0, y: 0.0, depth: 0, height: 0 } childrenList
 
 -- | Load and parse Flare JSON data
 loadFlareData :: Aff (Either String (Tree { name :: String, value :: Number, x :: Number, y :: Number, depth :: Int, height :: Int }))

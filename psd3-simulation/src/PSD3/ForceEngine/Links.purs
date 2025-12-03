@@ -8,20 +8,76 @@
 -- | - Rendering (need node references to read x,y positions)
 -- | - GUP patterns (filtering to visible nodes)
 -- | - Dynamic graph updates
+-- |
+-- | PERFORMANCE: Hot-path functions use FFI-backed O(1) Set/Map lookups
+-- | instead of O(n) array scans to handle 1000+ node graphs at 60fps.
 module PSD3.ForceEngine.Links
   ( -- * Swizzling (index → node reference)
     swizzleLinks
   , swizzleLinksByIndex
     -- * Filtering
   , filterLinksToSubset
+    -- * Fast membership (FFI-backed)
+  , IntSet
+  , buildIntSet
+  , intSetMember
+  , IntMap
+  , buildIntMap
+  , intMapLookup
+    -- * String sets (for ID-based membership)
+  , StringSet
+  , buildStringSet
+  , stringSetMember
   ) where
 
 import Prelude
 
 import Data.Array as Array
-import Data.Array (filter)
 import Data.Maybe (Maybe(..))
 import Partial.Unsafe (unsafeCrashWith)
+
+-- =============================================================================
+-- FFI-backed Fast Data Structures
+-- =============================================================================
+
+-- | Opaque IntSet backed by JavaScript Set - O(1) membership
+foreign import data IntSet :: Type
+
+-- | Build an IntSet from an array of integers - O(n)
+foreign import buildIntSet :: Array Int -> IntSet
+
+-- | Check membership - O(1)
+foreign import intSetMember :: Int -> IntSet -> Boolean
+
+-- | Opaque IntMap backed by JavaScript Map - O(1) lookup
+foreign import data IntMap :: Type -> Type
+
+-- | Build an IntMap from an array of (key, value) pairs - O(n)
+foreign import buildIntMap_ :: forall a. Array { key :: Int, value :: a } -> IntMap a
+
+-- | Build an IntMap from nodes using an index accessor
+buildIntMap :: forall node. (node -> Int) -> Array node -> IntMap node
+buildIntMap getIndex nodes = buildIntMap_ (map (\n -> { key: getIndex n, value: n }) nodes)
+
+-- | Lookup by key - O(1), returns null if not found
+foreign import intMapLookup_ :: forall a. Int -> IntMap a -> a
+
+-- | Safe lookup wrapper
+intMapLookup :: forall a. Int -> IntMap a -> Maybe a
+intMapLookup key m =
+  let result = intMapLookup_ key m
+  in if isNull result then Nothing else Just result
+
+foreign import isNull :: forall a. a -> Boolean
+
+-- | Opaque StringSet backed by JavaScript Set - O(1) membership
+foreign import data StringSet :: Type
+
+-- | Build a StringSet from an array of strings - O(n)
+foreign import buildStringSet :: Array String -> StringSet
+
+-- | Check membership - O(1)
+foreign import stringSetMember :: String -> StringSet -> Boolean
 
 -- =============================================================================
 -- Swizzling: Convert index-based links to node-reference links
@@ -66,6 +122,8 @@ unsafeArrayIndex arr i = case Array.index arr i of
 -- | don't match node.index values. Looks up nodes by their `.index` field
 -- | and silently drops links where either endpoint is not found.
 -- |
+-- | PERFORMANCE: Uses FFI-backed IntMap for O(1) lookups instead of O(n) find.
+-- |
 -- | This is essential for GUP patterns where you show only a subset of nodes.
 -- |
 -- | Example:
@@ -82,12 +140,14 @@ swizzleLinksByIndex
   -> (node -> node -> Int -> { source :: Int, target :: Int | rawLink } -> swizzled)
   -> Array swizzled                          -- ^ Only links where both endpoints found
 swizzleLinksByIndex getIndex nodes links transform =
-  Array.mapMaybe swizzle links
-    # Array.mapWithIndex reindex
+  -- Build O(1) lookup map once, then process all links
+  let nodeMap = buildIntMap getIndex nodes
+  in Array.mapMaybe (swizzle nodeMap) links
+       # Array.mapWithIndex reindex
   where
-  swizzle link = do
-    srcNode <- Array.find (\n -> getIndex n == link.source) nodes
-    tgtNode <- Array.find (\n -> getIndex n == link.target) nodes
+  swizzle nodeMap link = do
+    srcNode <- intMapLookup link.source nodeMap
+    tgtNode <- intMapLookup link.target nodeMap
     pure { src: srcNode, tgt: tgtNode, link }
 
   reindex i { src, tgt, link } = transform src tgt i link
@@ -97,6 +157,8 @@ swizzleLinksByIndex getIndex nodes links transform =
 -- =============================================================================
 
 -- | Filter links to only those where both endpoints are in the node subset
+-- |
+-- | PERFORMANCE: Uses FFI-backed IntSet for O(1) membership instead of O(n) elem.
 -- |
 -- | Use this before swizzling when you want to show links only between
 -- | visible/selected nodes. Pairs naturally with `swizzleLinksByIndex`.
@@ -114,5 +176,6 @@ filterLinksToSubset
   -> Array { source :: Int, target :: Int | linkData }  -- ^ All links
   -> Array { source :: Int, target :: Int | linkData }  -- ^ Links between subset nodes only
 filterLinksToSubset getIndex nodes links =
-  let nodeIndices = map getIndex nodes
-  in filter (\l -> Array.elem l.source nodeIndices && Array.elem l.target nodeIndices) links
+  -- Build O(1) membership set once, then filter all links
+  let nodeIndices = buildIntSet (map getIndex nodes)
+  in Array.filter (\l -> intSetMember l.source nodeIndices && intSetMember l.target nodeIndices) links

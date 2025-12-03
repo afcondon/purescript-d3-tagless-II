@@ -22,6 +22,10 @@ module PSD3.ForceEngine.Core
   , createCollideDynamic
   , createForceXDynamic
   , createForceYDynamic
+    -- * Optimized Grid Forces (no FFI callbacks)
+  , createForceXGrid
+  , createForceYGrid
+  , createCollideGrid
     -- * Initialization
   , initializeNodes
   , initializeForce
@@ -38,6 +42,7 @@ module PSD3.ForceEngine.Core
   , stopAnimation
     -- * Drag Behavior
   , attachDragWithReheat
+  , attachGroupDragWithReheat
     -- * Debug
   , logNodes
   ) where
@@ -71,6 +76,11 @@ foreign import createRadialFiltered_ :: forall node. RadialFilteredConfig node -
 foreign import createCollideDynamic_ :: forall node. CollideDynamicConfig node -> ForceHandle
 foreign import createForceXDynamic_ :: forall node. ForceXDynamicConfig node -> ForceHandle
 foreign import createForceYDynamic_ :: forall node. ForceYDynamicConfig node -> ForceHandle
+
+-- Optimized Grid force creation (no PureScript callbacks - reads node properties directly)
+foreign import createForceXGrid_ :: Number -> ForceHandle
+foreign import createForceYGrid_ :: Number -> ForceHandle
+foreign import createCollideGrid_ :: Number -> Number -> Int -> ForceHandle
 
 -- Initialization
 foreign import initializeNodes_ :: forall r. Array { | r } -> Effect Unit
@@ -152,6 +162,29 @@ createForceXDynamic = createForceXDynamic_
 -- | Create a Y positioning force with dynamic target per-node
 createForceYDynamic :: forall node. ForceYDynamicConfig node -> ForceHandle
 createForceYDynamic = createForceYDynamic_
+
+-- =============================================================================
+-- Optimized Grid Forces (no FFI callbacks)
+-- =============================================================================
+
+-- | Create an X positioning force that reads node.gridX directly
+-- | Much faster than createForceXDynamic because it avoids FFI callbacks.
+-- | Nodes must have a `gridX :: Number` field.
+createForceXGrid :: Number -> ForceHandle
+createForceXGrid = createForceXGrid_
+
+-- | Create a Y positioning force that reads node.gridY directly
+-- | Much faster than createForceYDynamic because it avoids FFI callbacks.
+-- | Nodes must have a `gridY :: Number` field.
+createForceYGrid :: Number -> ForceHandle
+createForceYGrid = createForceYGrid_
+
+-- | Create a collision force that reads node.r directly
+-- | Much faster than createCollideDynamic because it avoids FFI callbacks.
+-- | Nodes must have an `r :: Number` field (radius).
+-- | Parameters: padding, strength, iterations
+createCollideGrid :: Number -> Number -> Int -> ForceHandle
+createCollideGrid = createCollideGrid_
 
 -- =============================================================================
 -- Initialization (Effectful)
@@ -271,6 +304,23 @@ foreign import attachDragWithReheat_ :: Array Element -> Effect Unit -> Effect U
 -- | Attach drag with a reheat callback
 attachDragWithReheat :: Array Element -> Effect Unit -> Effect Unit
 attachDragWithReheat = attachDragWithReheat_
+
+-- | FFI for group drag (uses container for coordinate space)
+foreign import attachGroupDragWithReheat_ :: Array Element -> String -> Effect Unit -> Effect Unit
+
+-- | Attach drag to transformed group elements (like bubble packs)
+-- |
+-- | Unlike `attachDragWithReheat`, this version takes a container selector to
+-- | get pointer coordinates in the correct coordinate space. Use this when
+-- | dragging `<g>` elements that have `transform` attributes.
+-- |
+-- | Example:
+-- | ```purescript
+-- | -- For bubble packs inside a zoom group
+-- | attachGroupDragWithReheat packElements "#zoom-group" (Sim.reheat sim)
+-- | ```
+attachGroupDragWithReheat :: Array Element -> String -> Effect Unit -> Effect Unit
+attachGroupDragWithReheat = attachGroupDragWithReheat_
 
 -- =============================================================================
 -- Debug

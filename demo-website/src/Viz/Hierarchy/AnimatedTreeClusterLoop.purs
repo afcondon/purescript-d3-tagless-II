@@ -1,6 +1,6 @@
 module D3.Viz.AnimatedTreeClusterLoop where
 
--- | Auto-looping animated transition between Tree4 and Cluster4 layouts
+-- | Auto-looping animated transition between Tree and Cluster layouts
 -- | For Tour Motion page - no manual controls, just automatic cycling
 -- | V2 implementation using PSD3v2 primitives
 
@@ -12,8 +12,8 @@ import Effect (Effect)
 import Effect.Aff (Aff, launchAff_, delay)
 import Effect.Class (liftEffect)
 import Effect.Ref as Ref
-import D3.Viz.AnimatedTree4Cluster4v2 as AnimatedTree
-import D3.Viz.AnimatedTree4Cluster4v2 (LayoutType(..), VizState)
+import D3.Viz.AnimatedTreeClusterv2 as AnimatedTree
+import D3.Viz.AnimatedTreeClusterv2 (LayoutType(..), VizState)
 
 -- | Toggle layout type
 toggleLayout :: LayoutType -> LayoutType
@@ -21,10 +21,10 @@ toggleLayout TreeLayout = ClusterLayout
 toggleLayout ClusterLayout = TreeLayout
 
 -- | Animation loop that cycles between layouts
-animationLoop ::
-  VizState ->
-  Ref.Ref LayoutType ->
-  Aff Unit
+animationLoop
+  :: VizState
+  -> Ref.Ref LayoutType
+  -> Aff Unit
 animationLoop vizState layoutRef = do
   -- Read current layout and toggle it
   currentLayout <- liftEffect $ Ref.read layoutRef

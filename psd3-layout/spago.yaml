@@ -1,0 +1,28 @@
+package:
+  name: psd3-layout
+  description: Pure PureScript implementations of D3-style layout algorithms (tree, pack, sankey, edge-bundle, etc.)
+  publish:
+    version: 0.1.0
+    license: MIT
+    location:
+      githubOwner: afcondon
+      githubRepo: purescript-d3-layout
+  dependencies:
+    - arrays
+    - console
+    - effect
+    - either
+    - foldable-traversable
+    - foreign
+    - foreign-object
+    - integers
+    - lists
+    - maybe
+    - numbers
+    - ordered-collections
+    - prelude
+    - psd3-tree
+    - strings
+    - transformers
+    - tuples
+    - unsafe-coerce

@@ -10,7 +10,7 @@ import {
   forceManyBody, forceCollide, forceLink, forceCenter,
   forceX, forceY, forceRadial
 } from "d3-force";
-import { select } from "d3-selection";
+import { select, pointer } from "d3-selection";
 import { drag } from "d3-drag";
 
 // =============================================================================
@@ -155,6 +155,37 @@ export function createForceYDynamic_(config) {
 }
 
 // =============================================================================
+// Optimized Grid Forces (no FFI callbacks - reads node.gridX/gridY directly)
+// =============================================================================
+
+// Create ForceX that reads node.gridX directly (no PureScript callback)
+export function createForceXGrid_(strength) {
+  return forceX()
+    .x(d => d.gridX)
+    .strength(strength);
+}
+
+// Create ForceY that reads node.gridY directly (no PureScript callback)
+export function createForceYGrid_(strength) {
+  return forceY()
+    .y(d => d.gridY)
+    .strength(strength);
+}
+
+// Create collision force that reads node.r directly (no PureScript callback)
+// Adds padding to node radius
+export function createCollideGrid_(padding) {
+  return function(strength) {
+    return function(iterations) {
+      return forceCollide()
+        .radius(d => d.r + padding)
+        .strength(strength)
+        .iterations(iterations);
+    };
+  };
+}
+
+// =============================================================================
 // Force Initialization
 // =============================================================================
 
@@ -249,10 +280,23 @@ export function updatePositions_(nodes) {
 
 // Combined: apply velocity decay and update positions
 // Respects fixed nodes (fx/fy) - if set, node is pinned there
+let integrateDebugCount = 0;
 export function integratePositions_(nodes) {
   return function(velocityDecay) {
     return function() {
       const start = performance.now();
+
+      // Debug: log first FREE node (fx == null)
+      if (integrateDebugCount % 100 === 0) {
+        const freeNode = nodes.find(n => n.fx == null);
+        if (freeNode) {
+          console.log(`[IntegrateDebug tick=${integrateDebugCount}] free node ${freeNode.id}: x=${freeNode.x?.toFixed(1)}, y=${freeNode.y?.toFixed(1)}, vx=${freeNode.vx?.toFixed(3)}, vy=${freeNode.vy?.toFixed(3)}`);
+        } else {
+          console.log(`[IntegrateDebug tick=${integrateDebugCount}] NO FREE NODES! All ${nodes.length} nodes have fx set`);
+        }
+      }
+      integrateDebugCount++;
+
       for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];
 
@@ -315,6 +359,12 @@ export function initializeNodes_(nodes) {
       // If no position, use random (D3's default behavior)
       if (node.x === undefined) node.x = Math.random() * 100 - 50;
       if (node.y === undefined) node.y = Math.random() * 100 - 50;
+
+      // DEBUG: Mark node 93 (first module) with a unique marker
+      if (node.id === 93) {
+        node.__simMarker__ = true;
+        console.log(`[InitNodes] Marked node 93 with __simMarker__, x=${node.x?.toFixed(1)}`);
+      }
     }
   };
 }
@@ -509,6 +559,54 @@ export function attachDragWithReheat_(elements) {
           .call(dragBehavior)
           .style('cursor', 'grab');
       });
+    };
+  };
+}
+
+// Attach drag to transformed group elements (like bubble packs)
+// Uses a container selector to get pointer coordinates in the right space
+// containerSelector: CSS selector for the coordinate reference container (e.g., "#zoom-group" or "svg")
+export function attachGroupDragWithReheat_(elements) {
+  return function(containerSelector) {
+    return function(reheatCallback) {
+      return function() {
+        const container = select(containerSelector).node();
+        if (!container) {
+          console.warn('[attachGroupDragWithReheat] Container not found:', containerSelector);
+          return;
+        }
+
+        const dragBehavior = drag()
+          // Custom subject: walk up DOM from click target to find .module-pack group's data
+          .subject(function(event) {
+            let el = event.sourceEvent.target;
+            while (el && !el.classList?.contains('module-pack')) {
+              el = el.parentElement;
+            }
+            return el?.__data__;
+          })
+          .on('start', function(event) {
+            reheatCallback();
+            event.subject.fx = event.subject.x;
+            event.subject.fy = event.subject.y;
+          })
+          .on('drag', function(event) {
+            const [px, py] = pointer(event, container);
+            event.subject.fx = px;
+            event.subject.fy = py;
+          })
+          .on('end', function(event) {
+            event.subject.fx = null;
+            event.subject.fy = null;
+          });
+
+        // Apply drag to each element
+        elements.forEach(function(el) {
+          select(el)
+            .call(dragBehavior)
+            .style('cursor', 'grab');
+        });
+      };
     };
   };
 }

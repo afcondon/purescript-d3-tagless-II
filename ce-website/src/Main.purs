@@ -2,22 +2,25 @@ module Main where
 
 import Prelude
 
-import Data.Maybe (Maybe(..))
 import Effect (Effect)
-import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Console (log)
+import Component.SpagoGridApp as SpagoGridApp
 import Halogen.Aff as HA
 import Halogen.VDom.Driver (runUI)
 import Web.DOM.ParentNode (QuerySelector(..))
-import Component.App as App
+import Data.Maybe (Maybe(..))
 
 main :: Effect Unit
 main = do
-  log "[CE] Starting Code Explorer..."
-  log "[CE] Build: 2024-12-01 14:45 (no ManyBody)"
+  log "[Main] Starting with Halogen wrapper around SpagoGridTest..."
+  log "[Main] IMPORTANT: Using selectElement to mount into #app (not body)"
   HA.runHalogenAff do
-    appEl <- HA.selectElement (QuerySelector "#app")
-    case appEl of
-      Nothing -> liftEffect $ log "[CE] Error: #app element not found"
-      Just el -> void $ runUI App.component unit el
+    -- Mount into #app, not body!
+    mAppEl <- HA.selectElement (QuerySelector "#app")
+    case mAppEl of
+      Nothing -> liftEffect $ log "[Main] ERROR: Could not find #app element!"
+      Just appEl -> do
+        liftEffect $ log "[Main] Found #app, mounting Halogen..."
+        _ <- runUI SpagoGridApp.component unit appEl
+        pure unit

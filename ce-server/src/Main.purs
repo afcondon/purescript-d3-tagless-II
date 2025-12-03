@@ -1,4 +1,4 @@
-module Main where
+module Server.Main where
 
 import Prelude
 
@@ -22,6 +22,7 @@ data Route
   = ModulesJson
   | PackagesJson
   | LocJson
+  | DeclarationsSummaryJson
   | ModuleMetricsJson
   | CommitTimelineJson
   | Health
@@ -34,6 +35,7 @@ route = root $ sum
   { "ModulesJson": path "data/spago-data/modules.json" noArgs
   , "PackagesJson": path "data/spago-data/packages.json" noArgs
   , "LocJson": path "data/spago-data/LOC.json" noArgs
+  , "DeclarationsSummaryJson": path "data/spago-data/declarations-summary.json" noArgs
   , "ModuleMetricsJson": path "data/module-metrics.json" noArgs
   , "CommitTimelineJson": path "data/commit-timeline.json" noArgs
   , "Health": path "health" noArgs
@@ -65,6 +67,7 @@ main = launchAff_ do
     log "  GET /data/spago-data/modules.json"
     log "  GET /data/spago-data/packages.json"
     log "  GET /data/spago-data/LOC.json"
+    log "  GET /data/spago-data/declarations-summary.json"
     log "  GET /data/module-metrics.json"
     log "  GET /data/commit-timeline.json"
   where
@@ -72,6 +75,7 @@ main = launchAff_ do
     ModulesJson -> Legacy.modulesJson db
     PackagesJson -> Legacy.packagesJson db
     LocJson -> Legacy.locJson db
+    DeclarationsSummaryJson -> Legacy.declarationsSummaryJson db
     ModuleMetricsJson -> Legacy.moduleMetricsJson db
     CommitTimelineJson -> Legacy.commitTimelineJson db
     Health -> ok "OK"

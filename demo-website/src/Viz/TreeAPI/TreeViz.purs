@@ -5,13 +5,14 @@ import Prelude
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.List (List(..))
-import Data.Tree (Tree(..))
+import Control.Comonad.Cofree (head, tail)
+import Data.Tree (Tree, mkTree)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import PSD3.Shared.Data (loadFlareData)
-import PSD3.Layout.Hierarchy.Tree4 (tree, defaultTreeConfig)
+import DataViz.Layout.Hierarchy.Tree (tree, defaultTreeConfig)
 import PSD3v2.Attribute.Types (width, height, viewBox, class_, cx, cy, radius, fill, stroke, strokeWidth, d, x, y, textContent, textAnchor, fontSize)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, reselectD3v2)
@@ -35,10 +36,13 @@ makeLinks tree' = Array.fromFoldable $ makeLinksList tree'
   makeLinksList
     :: Tree { x :: Number, y :: Number | r }
     -> List { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
-  makeLinksList (Node val children) =
+  makeLinksList t =
     let
-      childLinks = children >>= \(Node childVal _) ->
-        Cons { source: { x: val.x, y: val.y }, target: { x: childVal.x, y: childVal.y } } Nil
+      val = head t
+      children = tail t
+      childLinks = children >>= \child ->
+        let childVal = head child
+        in Cons { source: { x: val.x, y: val.y }, target: { x: childVal.x, y: childVal.y } } Nil
       grandchildLinks = children >>= makeLinksList
     in
       childLinks <> grandchildLinks
@@ -69,7 +73,7 @@ drawTree selector flareTree = runD3v2M do
   let chartHeight = 600.0
   let padding = 40.0
 
-  -- Apply Tree4 layout
+  -- Apply Tree layout
   let
     config = defaultTreeConfig
       { size =

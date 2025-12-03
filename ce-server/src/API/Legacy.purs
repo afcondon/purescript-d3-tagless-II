@@ -6,6 +6,7 @@ module API.Legacy
   ( modulesJson
   , packagesJson
   , locJson
+  , declarationsSummaryJson
   , moduleMetricsJson
   , commitTimelineJson
   ) where
@@ -83,6 +84,26 @@ locJson db = do
   ok' jsonHeaders json
 
 foreign import buildLocJson :: Array Foreign -> String
+
+-- =============================================================================
+-- /data/spago-data/declarations-summary.json
+-- =============================================================================
+
+-- | Returns declarations summary in format: { "ModuleName": [{ kind: "", title: "" }] }
+declarationsSummaryJson :: Database -> Aff Response
+declarationsSummaryJson db = do
+  rows <- queryAll db """
+    SELECT
+      module,
+      kind,
+      identifier as title
+    FROM declarations
+    ORDER BY module, identifier
+  """
+  let json = buildDeclarationsSummaryJson rows
+  ok' jsonHeaders json
+
+foreign import buildDeclarationsSummaryJson :: Array Foreign -> String
 
 -- =============================================================================
 -- /data/module-metrics.json

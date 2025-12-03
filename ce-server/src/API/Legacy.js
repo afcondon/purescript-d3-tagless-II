@@ -48,6 +48,25 @@ export function buildLocJson(rows) {
 }
 
 // =============================================================================
+// declarations-summary.json builder
+// =============================================================================
+
+export function buildDeclarationsSummaryJson(rows) {
+  // Group by module: { "ModuleName": [{ kind, title }] }
+  const result = {};
+  for (const row of rows) {
+    if (!result[row.module]) {
+      result[row.module] = [];
+    }
+    result[row.module].push({
+      kind: row.kind,
+      title: row.title
+    });
+  }
+  return JSON.stringify(result);
+}
+
+// =============================================================================
 // module-metrics.json builder
 // =============================================================================
 

@@ -13,11 +13,13 @@ import Prelude
 
 import Data.Array ((..))
 import Data.Int (toNumber)
+import Data.Nullable as Nullable
 import Effect (Effect)
 import Effect.Console (log)
 import Effect.Ref (Ref)
 import Effect.Ref as Ref
 import PSD3.ForceEngine.Core as Core
+import PSD3.ForceEngine.Simulation (SimulationNode)
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultLink, defaultCenter)
 
@@ -25,15 +27,8 @@ import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, d
 -- Demo Types
 -- =============================================================================
 
--- | Demo node - just an ID for now
-type DemoNode =
-  { x :: Number
-  , y :: Number
-  , vx :: Number
-  , vy :: Number
-  , index :: Int
-  , id :: Int
-  }
+-- | Demo node - extends SimulationNode with index
+type DemoNode = SimulationNode (index :: Int)
 
 -- | Demo link
 type DemoLink =
@@ -58,12 +53,14 @@ createNodes count =
   map makeNode (0 .. (count - 1))
   where
   makeNode i =
-    { x: toNumber (i `mod` 5) * 50.0 - 100.0
+    { id: i
+    , x: toNumber (i `mod` 5) * 50.0 - 100.0
     , y: toNumber (i / 5) * 50.0 - 100.0
     , vx: 0.0
     , vy: 0.0
+    , fx: Nullable.null
+    , fy: Nullable.null
     , index: i
-    , id: i
     }
 
 -- | Create links forming a simple chain
