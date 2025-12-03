@@ -19,21 +19,21 @@ import Data.Loader (Declaration, DeclarationsMap)
 import Effect (Effect)
 import Effect.Class.Console (log)
 import Foreign.Object as Object
-import D3.Layout.Hierarchy.Pack (HierarchyData(..), PackNode(..), defaultPackConfig, hierarchy, pack)
+import DataViz.Layout.Hierarchy.Pack (HierarchyData(..), PackNode(..), defaultPackConfig, hierarchy, pack)
 import Types (SimNode)
 
 -- | FFI for rendering bubble pack with proper data binding
 foreign import renderBoundBubblePack_
-  :: String           -- Container selector
-  -> SimNode          -- Node (bound to group as __data__)
+  :: String -- Container selector
+  -> SimNode -- Node (bound to group as __data__)
   -> Array PackCircle -- Pack circles
-  -> Number           -- Center offset
+  -> Number -- Center offset
   -> (PackCircle -> Effect String) -- Category color function
   -> Effect Unit
 
 -- | FFI for rendering re-export (umbrella) modules
 foreign import renderReexportModule_
-  :: String  -- Container selector
+  :: String -- Container selector
   -> SimNode -- Node (bound to group as __data__)
   -> Boolean -- isReexport (true = re-export, false = empty)
   -> Effect Unit
@@ -62,7 +62,7 @@ type PackCircle =
   , r :: Number
   , depth :: Int
   , data_ :: String
-  , category :: String  -- Parent category (for coloring declarations)
+  , category :: String -- Parent category (for coloring declarations)
   }
 
 -- | Data for a module pack (position + declarations)
@@ -73,22 +73,22 @@ type ModulePackData =
 
 -- | Category colors (mid-saturation for category circles)
 categoryColor :: String -> String
-categoryColor "typeClass" = "#9467bd"   -- purple
-categoryColor "data" = "#2ca02c"         -- green
-categoryColor "typeSynonym" = "#17becf"  -- cyan
-categoryColor "externData" = "#bcbd22"   -- yellow-green
-categoryColor "alias" = "#7f7f7f"        -- gray
-categoryColor "value" = "#1f77b4"        -- blue
+categoryColor "typeClass" = "#9467bd" -- purple
+categoryColor "data" = "#2ca02c" -- green
+categoryColor "typeSynonym" = "#17becf" -- cyan
+categoryColor "externData" = "#bcbd22" -- yellow-green
+categoryColor "alias" = "#7f7f7f" -- gray
+categoryColor "value" = "#1f77b4" -- blue
 categoryColor _ = "#cccccc"
 
 -- | Intense category colors (higher saturation for declaration circles)
 categoryColorIntense :: String -> String
-categoryColorIntense "typeClass" = "#7b3fa9"   -- deeper purple
-categoryColorIntense "data" = "#1a8a1a"         -- deeper green
-categoryColorIntense "typeSynonym" = "#0d9fb0"  -- deeper cyan
-categoryColorIntense "externData" = "#9a9b0a"   -- deeper yellow-green
-categoryColorIntense "alias" = "#5f5f5f"        -- darker gray
-categoryColorIntense "value" = "#0d5a91"        -- deeper blue
+categoryColorIntense "typeClass" = "#7b3fa9" -- deeper purple
+categoryColorIntense "data" = "#1a8a1a" -- deeper green
+categoryColorIntense "typeSynonym" = "#0d9fb0" -- deeper cyan
+categoryColorIntense "externData" = "#9a9b0a" -- deeper yellow-green
+categoryColorIntense "alias" = "#5f5f5f" -- darker gray
+categoryColorIntense "value" = "#0d5a91" -- deeper blue
 categoryColorIntense _ = "#999999"
 
 -- | Build HierarchyData from module declarations
@@ -104,10 +104,10 @@ buildModuleHierarchy moduleName decls =
   in
     HierarchyData
       { data_: moduleName
-      , value: Nothing  -- Value is sum of children
-      , children: if Array.null categoryChildren
-                  then Nothing
-                  else Just categoryChildren
+      , value: Nothing -- Value is sum of children
+      , children:
+          if Array.null categoryChildren then Nothing
+          else Just categoryChildren
       }
 
 -- | Group declarations by kind
@@ -138,7 +138,7 @@ buildCategory { kind, decls } =
 buildDeclaration :: Declaration -> HierarchyData String
 buildDeclaration decl = HierarchyData
   { data_: decl.title
-  , value: Just 1.0  -- Each declaration has value 1
+  , value: Just 1.0 -- Each declaration has value 1
   , children: Nothing
   }
 
@@ -165,9 +165,8 @@ renderModulePack declarationsMap node = do
     -- No declarations - likely a re-export module
     -- Detect: has dependencies but no declarations = umbrella/re-export module
     let isReexport = not (Array.null node.targets)
-    if isReexport
-      then log $ "[BubblePack] Re-export module: " <> moduleName <> " (depends on " <> show (Array.length node.targets) <> " modules)"
-      else log $ "[BubblePack] Empty module: " <> moduleName
+    if isReexport then log $ "[BubblePack] Re-export module: " <> moduleName <> " (depends on " <> show (Array.length node.targets) <> " modules)"
+    else log $ "[BubblePack] Empty module: " <> moduleName
 
     -- Render a distinctive visual for re-export modules
     renderReexportModule node isReexport
@@ -182,11 +181,12 @@ renderModulePack declarationsMap node = do
     let packRoot = hierarchy hierData
 
     -- Apply pack layout - size based on original node radius
-    let packSize = node.r * 3.0  -- Make pack bigger than original circle
-    let config = defaultPackConfig
-          { size = { width: packSize, height: packSize }
-          , padding = 1.0
-          }
+    let packSize = node.r * 3.0 -- Make pack bigger than original circle
+    let
+      config = defaultPackConfig
+        { size = { width: packSize, height: packSize }
+        , padding = 1.0
+        }
     let packed = pack config packRoot
 
     -- Get all nodes for rendering with category tracking
@@ -224,7 +224,7 @@ getPackFillEffect pc = pure $ getPackFill pc
 -- | Depth 2+ (declaration): intense version of parent category color
 getPackFill :: PackCircle -> String
 getPackFill pc = case pc.depth of
-  0 -> "#333"  -- Module (outer) - dark
-  1 -> categoryColor pc.data_  -- Category
-  _ -> categoryColorIntense pc.category  -- Declaration uses intense parent category color
+  0 -> "#333" -- Module (outer) - dark
+  1 -> categoryColor pc.data_ -- Category
+  _ -> categoryColorIntense pc.category -- Declaration uses intense parent category color
 

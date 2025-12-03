@@ -1,9 +1,9 @@
--- | D3.Layout.Hierarchy.EdgeBundle.Hierarchy
+-- | DataViz.Layout.Hierarchy.EdgeBundle.Hierarchy
 -- |
 -- | Build a tree hierarchy from flat dot-notation names.
 -- | This implements the same algorithm as D3's Observable example:
 -- | names like "flare.animate.Easing" become nested tree nodes.
-module D3.Layout.Hierarchy.EdgeBundle.Hierarchy
+module DataViz.Layout.Hierarchy.EdgeBundle.Hierarchy
   ( buildHierarchy
   , TreeNode(..)
   , getTreeNodeName
@@ -31,12 +31,12 @@ import Data.Tuple (Tuple(..))
 -- | A node in the hierarchy tree
 -- | Generic over the leaf data type
 data TreeNode a = TreeNode
-  { name :: String                     -- Short name (e.g. "Easing")
-  , fullName :: String                 -- Full path (e.g. "flare.animate.Easing")
-  , children :: Array (TreeNode a)     -- Child nodes (empty for leaves)
-  , data_ :: Maybe a                   -- User data (only for leaves)
-  , depth :: Int                       -- Distance from root
-  , height :: Int                      -- Distance to deepest leaf
+  { name :: String -- Short name (e.g. "Easing")
+  , fullName :: String -- Full path (e.g. "flare.animate.Easing")
+  , children :: Array (TreeNode a) -- Child nodes (empty for leaves)
+  , data_ :: Maybe a -- User data (only for leaves)
+  , depth :: Int -- Distance from root
+  , height :: Int -- Distance to deepest leaf
   }
 
 instance showTreeNode :: Show a => Show (TreeNode a) where
@@ -69,7 +69,7 @@ leaves root = Array.filter isLeaf (descendants root)
 -- | Get all descendant nodes (pre-order traversal, including self)
 descendants :: forall a. TreeNode a -> Array (TreeNode a)
 descendants node@(TreeNode n) =
-  [node] <> Array.concatMap descendants n.children
+  [ node ] <> Array.concatMap descendants n.children
 
 -- | Find a node by its full name
 findNode :: forall a. String -> TreeNode a -> Maybe (TreeNode a)
@@ -83,13 +83,15 @@ findNode targetName root@(TreeNode n)
 getAncestors :: forall a. TreeNode a -> TreeNode a -> Array (TreeNode a)
 getAncestors root target = fromMaybe [] (findPath root target)
   where
-    findPath :: TreeNode a -> TreeNode a -> Maybe (Array (TreeNode a))
-    findPath node@(TreeNode n) (TreeNode t)
-      | n.fullName == t.fullName = Just [node]
-      | otherwise =
-          Array.findMap (\child ->
-            map (Array.cons node) (findPath child (TreeNode t))
-          ) n.children
+  findPath :: TreeNode a -> TreeNode a -> Maybe (Array (TreeNode a))
+  findPath node@(TreeNode n) (TreeNode t)
+    | n.fullName == t.fullName = Just [ node ]
+    | otherwise =
+        Array.findMap
+          ( \child ->
+              map (Array.cons node) (findPath child (TreeNode t))
+          )
+          n.children
 
 -- | Find the path between two nodes through their lowest common ancestor
 -- | Returns: path from source up to LCA, then down to target
@@ -108,29 +110,33 @@ pathBetween root source target =
     sourceToLCA = case lca of
       Nothing -> sourceAncestors
       Just lcaNode ->
-        let lcaName = getFullName lcaNode
-        in Array.reverse $ Array.takeWhile (\n -> getFullName n /= lcaName) (Array.reverse sourceAncestors)
+        let
+          lcaName = getFullName lcaNode
+        in
+          Array.reverse $ Array.takeWhile (\n -> getFullName n /= lcaName) (Array.reverse sourceAncestors)
 
     -- Path from LCA to target (target ancestors from LCA down)
     lcaToTarget = case lca of
       Nothing -> targetAncestors
       Just lcaNode ->
-        let lcaName = getFullName lcaNode
-        in Array.dropWhile (\n -> getFullName n /= lcaName) targetAncestors
+        let
+          lcaName = getFullName lcaNode
+        in
+          Array.dropWhile (\n -> getFullName n /= lcaName) targetAncestors
   in
     -- Combine: source → LCA → target (LCA appears once in the middle)
     sourceToLCA <> lcaToTarget
 
   where
-    findLCA :: Array (TreeNode a) -> Array (TreeNode a) -> Maybe (TreeNode a)
-    findLCA as bs =
-      let
-        -- Build set of ancestor names for efficient lookup
-        bNames = map getFullName bs
-        -- Find the deepest ancestor that's in both paths
-        common = Array.filter (\a -> Array.elem (getFullName a) bNames) as
-      in
-        Array.last common  -- Last = deepest
+  findLCA :: Array (TreeNode a) -> Array (TreeNode a) -> Maybe (TreeNode a)
+  findLCA as bs =
+    let
+      -- Build set of ancestor names for efficient lookup
+      bNames = map getFullName bs
+      -- Find the deepest ancestor that's in both paths
+      common = Array.filter (\a -> Array.elem (getFullName a) bNames) as
+    in
+      Array.last common -- Last = deepest
 
 -- | Build a hierarchy from flat imported nodes
 -- | Takes an array of nodes with dot-notation names and builds a tree
@@ -139,10 +145,11 @@ pathBetween root source target =
 -- | 1. For each node, split name by "." to get path components
 -- | 2. Create/find intermediate nodes for each path component
 -- | 3. Attach leaf data at the final node
-buildHierarchy :: forall a.
-  { getName :: a -> String } ->
-  Array a ->
-  TreeNode a
+buildHierarchy
+  :: forall a
+   . { getName :: a -> String }
+  -> Array a
+  -> TreeNode a
 buildHierarchy config nodes =
   let
     -- Start with empty root
@@ -164,10 +171,14 @@ buildHierarchy config nodes =
     withHeights
 
 -- | Insert a node into the tree at the appropriate path
-insertNode :: forall a.
-  (a -> String) ->      -- Get name from data
-  TreeNode a ->         -- Current tree
-  a ->                  -- Data to insert
+insertNode
+  :: forall a
+   . (a -> String)
+  -> -- Get name from data
+  TreeNode a
+  -> -- Current tree
+  a
+  -> -- Data to insert
   TreeNode a
 insertNode getName root nodeData =
   let
@@ -177,12 +188,18 @@ insertNode getName root nodeData =
     insertAtPath parts fullName nodeData "" root
 
 -- | Recursively insert at a path, creating intermediate nodes as needed
-insertAtPath :: forall a.
-  Array String ->       -- Remaining path parts
-  String ->             -- Full original name
-  a ->                  -- Data to insert (at leaf)
-  String ->             -- Current path prefix
-  TreeNode a ->         -- Current node
+insertAtPath
+  :: forall a
+   . Array String
+  -> -- Remaining path parts
+  String
+  -> -- Full original name
+  a
+  -> -- Data to insert (at leaf)
+  String
+  -> -- Current path prefix
+  TreeNode a
+  -> -- Current node
   TreeNode a
 insertAtPath parts fullName nodeData prefix (TreeNode node) =
   case Array.uncons parts of
@@ -235,9 +252,11 @@ addOrUpdateChild name newChild children =
     exists = Array.any (\(TreeNode c) -> c.name == name) children
   in
     if exists then
-      map (\child@(TreeNode c) ->
-        if c.name == name then newChild else child
-      ) children
+      map
+        ( \child@(TreeNode c) ->
+            if c.name == name then newChild else child
+        )
+        children
     else
       Array.snoc children newChild
 

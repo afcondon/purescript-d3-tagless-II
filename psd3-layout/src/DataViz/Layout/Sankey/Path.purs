@@ -1,8 +1,8 @@
--- | D3.Layout.Sankey.Path
+-- | DataViz.Layout.Sankey.Path
 -- |
 -- | SVG path generation for Sankey link curves.
 -- | Generates the characteristic curved ribbons for flow visualization.
-module D3.Layout.Sankey.Path
+module DataViz.Layout.Sankey.Path
   ( findNode
   , generateLinkPath
   , generateStraightPath
@@ -10,7 +10,7 @@ module D3.Layout.Sankey.Path
 
 import Prelude
 import Data.Number.Format (toString)
-import D3.Layout.Sankey.Types (SankeyLink, SankeyNode, NodeID)
+import DataViz.Layout.Sankey.Types (SankeyLink, SankeyNode, NodeID)
 import Data.Array (find)
 import Data.Maybe (Maybe(..))
 
@@ -54,24 +54,46 @@ generateLinkPath nodes link =
           -- Control point x (halfway between source and target for s-curve)
           xi = (x0 + x1) / 2.0
 
-          -- Draw ribbon as a closed path:
-          -- 1. Start at top of source
-          -- 2. Curve to top of target
-          -- 3. Line down to bottom of target
-          -- 4. Curve back to bottom of source
-          -- 5. Line up to close
+        -- Draw ribbon as a closed path:
+        -- 1. Start at top of source
+        -- 2. Curve to top of target
+        -- 3. Line down to bottom of target
+        -- 4. Curve back to bottom of source
+        -- 5. Line up to close
         in
-          "M" <> toString x0 <> "," <> toString y0Top <>
-          " C" <> toString xi <> "," <> toString y0Top <>
-          " " <> toString xi <> "," <> toString y1Top <>
-          " " <> toString x1 <> "," <> toString y1Top <>
-          " L" <> toString x1 <> "," <> toString y1Bottom <>
-          " C" <> toString xi <> "," <> toString y1Bottom <>
-          " " <> toString xi <> "," <> toString y0Bottom <>
-          " " <> toString x0 <> "," <> toString y0Bottom <>
-          " Z"
+          "M" <> toString x0 <> "," <> toString y0Top
+            <> " C"
+            <> toString xi
+            <> ","
+            <> toString y0Top
+            <> " "
+            <> toString xi
+            <> ","
+            <> toString y1Top
+            <> " "
+            <> toString x1
+            <> ","
+            <> toString y1Top
+            <> " L"
+            <> toString x1
+            <> ","
+            <> toString y1Bottom
+            <> " C"
+            <> toString xi
+            <> ","
+            <> toString y1Bottom
+            <> " "
+            <> toString xi
+            <> ","
+            <> toString y0Bottom
+            <> " "
+            <> toString x0
+            <> ","
+            <> toString y0Bottom
+            <>
+              " Z"
 
-      _, _ -> ""  -- Invalid link, return empty path
+      _, _ -> "" -- Invalid link, return empty path
 
 -- | Alternative: Generate horizontal link path (straight lines)
 -- | Useful for debugging or different visual styles
@@ -89,7 +111,10 @@ generateStraightPath nodes link =
           x1 = target.x0
           y1 = link.y1
         in
-          "M" <> toString x0 <> "," <> toString y0 <>
-          " L" <> toString x1 <> "," <> toString y1
+          "M" <> toString x0 <> "," <> toString y0
+            <> " L"
+            <> toString x1
+            <> ","
+            <> toString y1
 
       _, _ -> ""

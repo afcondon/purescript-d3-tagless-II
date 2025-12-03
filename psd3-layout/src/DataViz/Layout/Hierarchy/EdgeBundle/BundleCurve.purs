@@ -1,4 +1,4 @@
--- | D3.Layout.Hierarchy.EdgeBundle.BundleCurve
+-- | DataViz.Layout.Hierarchy.EdgeBundle.BundleCurve
 -- |
 -- | Bundle curve generator for hierarchical edge bundling.
 -- | Implements Danny Holten's algorithm with adjustable beta (tension) parameter.
@@ -7,7 +7,7 @@
 -- | - beta = 0: straight line from source to target
 -- | - beta = 1: curve goes through all ancestor nodes
 -- | - beta = 0.85: D3's default, good balance of bundling and readability
-module D3.Layout.Hierarchy.EdgeBundle.BundleCurve
+module DataViz.Layout.Hierarchy.EdgeBundle.BundleCurve
   ( bundlePath
   , bundlePathRadial
   , bundlePathCartesian
@@ -48,8 +48,11 @@ bundlePath tension points =
       Nothing -> ""
     2 -> case Array.head points, Array.last points of
       Just p1, Just p2 ->
-        "M" <> show p1.x <> "," <> show p1.y <>
-        "L" <> show p2.x <> "," <> show p2.y
+        "M" <> show p1.x <> "," <> show p1.y
+          <> "L"
+          <> show p2.x
+          <> ","
+          <> show p2.y
       _, _ -> ""
     _ ->
       -- Apply bundle transformation and draw B-spline
@@ -94,23 +97,25 @@ applyBundleTension tension points =
       let
         n = Array.length points
       in
-        Array.mapWithIndex (\i point ->
-          let
-            -- Parametric position along the path (0 to 1)
-            t = toNumber i / toNumber (n - 1)
+        Array.mapWithIndex
+          ( \i point ->
+              let
+                -- Parametric position along the path (0 to 1)
+                t = toNumber i / toNumber (n - 1)
 
-            -- Position on straight line from start to end
-            straightX = lerp start.x end.x t
-            straightY = lerp start.y end.y t
+                -- Position on straight line from start to end
+                straightX = lerp start.x end.x t
+                straightY = lerp start.y end.y t
 
-            -- Interpolate between straight line and actual path based on tension
-            -- tension = 0: follow straight line
-            -- tension = 1: follow actual path
-            bundledX = lerp straightX point.x tension
-            bundledY = lerp straightY point.y tension
-          in
-            { x: bundledX, y: bundledY }
-        ) points
+                -- Interpolate between straight line and actual path based on tension
+                -- tension = 0: follow straight line
+                -- tension = 1: follow actual path
+                bundledX = lerp straightX point.x tension
+                bundledY = lerp straightY point.y tension
+              in
+                { x: bundledX, y: bundledY }
+          )
+          points
     _, _ -> points
 
 -- | Linear interpolation
@@ -131,8 +136,11 @@ drawBSpline points =
         Just { head: second, tail: remaining } ->
           if Array.null remaining then
             -- Two points - straight line
-            "M" <> show first.x <> "," <> show first.y <>
-            "L" <> show second.x <> "," <> show second.y
+            "M" <> show first.x <> "," <> show first.y
+              <> "L"
+              <> show second.x
+              <> ","
+              <> show second.y
           else
             -- Three or more points - use B-spline
             let
@@ -160,19 +168,22 @@ buildBSplineCurves prev points =
         -- Build quadratic Bezier segments
         -- For B-spline, use midpoints between control points
         result = foldl
-          (\acc point ->
-            let
-              -- Midpoint between previous and current point
-              midX = (acc.prevPoint.x + point.x) / 2.0
-              midY = (acc.prevPoint.y + point.y) / 2.0
+          ( \acc point ->
+              let
+                -- Midpoint between previous and current point
+                midX = (acc.prevPoint.x + point.x) / 2.0
+                midY = (acc.prevPoint.y + point.y) / 2.0
 
-              -- Quadratic Bezier: control is previous point, end is midpoint
-              segment = "Q" <> show acc.prevPoint.x <> "," <> show acc.prevPoint.y <>
-                        " " <> show midX <> "," <> show midY
-            in
-              { path: acc.path <> segment
-              , prevPoint: point
-              }
+                -- Quadratic Bezier: control is previous point, end is midpoint
+                segment = "Q" <> show acc.prevPoint.x <> "," <> show acc.prevPoint.y
+                  <> " "
+                  <> show midX
+                  <> ","
+                  <> show midY
+              in
+                { path: acc.path <> segment
+                , prevPoint: point
+                }
           )
           { path: "", prevPoint: prev }
           points
@@ -180,8 +191,11 @@ buildBSplineCurves prev points =
         -- Final segment to last point
         finalSegment = case Array.last points of
           Just lastPoint ->
-            "Q" <> show result.prevPoint.x <> "," <> show result.prevPoint.y <>
-            " " <> show lastPoint.x <> "," <> show lastPoint.y
+            "Q" <> show result.prevPoint.x <> "," <> show result.prevPoint.y
+              <> " "
+              <> show lastPoint.x
+              <> ","
+              <> show lastPoint.y
           Nothing -> ""
       in
         result.path <> finalSegment
@@ -205,8 +219,11 @@ drawCubicBSpline points =
       Nothing -> ""
     2 -> case Array.head points, Array.last points of
       Just p1, Just p2 ->
-        "M" <> show p1.x <> "," <> show p1.y <>
-        "L" <> show p2.x <> "," <> show p2.y
+        "M" <> show p1.x <> "," <> show p1.y
+          <> "L"
+          <> show p2.x
+          <> ","
+          <> show p2.y
       _, _ -> ""
     _ ->
       case Array.head points of
@@ -230,27 +247,35 @@ buildCatmullRomCurves points =
       let
         -- Process each segment (from point i to point i+1)
         -- Using points i-1, i, i+1, i+2 as control points
-        segments = Array.mapWithIndex (\i _ ->
-          if i == 0 || i >= Array.length points - 1 then
-            Nothing
-          else
-            let
-              p0 = fromMaybe { x: 0.0, y: 0.0 } $ Array.index points (max 0 (i - 1))
-              p1 = fromMaybe { x: 0.0, y: 0.0 } $ Array.index points i
-              p2 = fromMaybe { x: 0.0, y: 0.0 } $ Array.index points (i + 1)
-              p3 = fromMaybe { x: 0.0, y: 0.0 } $ Array.index points (min (Array.length points - 1) (i + 2))
+        segments = Array.mapWithIndex
+          ( \i _ ->
+              if i == 0 || i >= Array.length points - 1 then
+                Nothing
+              else
+                let
+                  p0 = fromMaybe { x: 0.0, y: 0.0 } $ Array.index points (max 0 (i - 1))
+                  p1 = fromMaybe { x: 0.0, y: 0.0 } $ Array.index points i
+                  p2 = fromMaybe { x: 0.0, y: 0.0 } $ Array.index points (i + 1)
+                  p3 = fromMaybe { x: 0.0, y: 0.0 } $ Array.index points (min (Array.length points - 1) (i + 2))
 
-              -- Convert Catmull-Rom to Cubic Bezier
-              -- Control point 1 = p1 + (p2 - p0) / 6
-              -- Control point 2 = p2 - (p3 - p1) / 6
-              cp1x = p1.x + (p2.x - p0.x) / 6.0
-              cp1y = p1.y + (p2.y - p0.y) / 6.0
-              cp2x = p2.x - (p3.x - p1.x) / 6.0
-              cp2y = p2.y - (p3.y - p1.y) / 6.0
-            in
-              Just $ "C" <> show cp1x <> "," <> show cp1y <>
-                     " " <> show cp2x <> "," <> show cp2y <>
-                     " " <> show p2.x <> "," <> show p2.y
-        ) points
+                  -- Convert Catmull-Rom to Cubic Bezier
+                  -- Control point 1 = p1 + (p2 - p0) / 6
+                  -- Control point 2 = p2 - (p3 - p1) / 6
+                  cp1x = p1.x + (p2.x - p0.x) / 6.0
+                  cp1y = p1.y + (p2.y - p0.y) / 6.0
+                  cp2x = p2.x - (p3.x - p1.x) / 6.0
+                  cp2y = p2.y - (p3.y - p1.y) / 6.0
+                in
+                  Just $ "C" <> show cp1x <> "," <> show cp1y
+                    <> " "
+                    <> show cp2x
+                    <> ","
+                    <> show cp2y
+                    <> " "
+                    <> show p2.x
+                    <> ","
+                    <> show p2.y
+          )
+          points
       in
         Array.intercalate "" (Array.catMaybes segments)

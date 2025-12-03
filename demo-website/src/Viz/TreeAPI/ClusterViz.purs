@@ -11,7 +11,7 @@ import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import PSD3.Shared.Data (loadFlareData)
-import D3.Layout.Hierarchy.Cluster4 (cluster, defaultClusterConfig)
+import DataViz.Layout.Hierarchy.Cluster (cluster, defaultClusterConfig)
 import PSD3v2.Attribute.Types (width, height, viewBox, class_, cx, cy, radius, fill, stroke, strokeWidth, d, x, y, textContent, textAnchor, fontSize)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, reselectD3v2)
@@ -26,29 +26,43 @@ type HierNode = { name :: String, value :: Number, x :: Number, y :: Number, dep
 type LinkDatum = { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
 
 -- | Create links from parent to children
-makeLinks :: forall r. Tree { x :: Number, y :: Number | r }
+makeLinks
+  :: forall r
+   . Tree { x :: Number, y :: Number | r }
   -> Array { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
 makeLinks tree' = Array.fromFoldable $ makeLinksList tree'
   where
-    makeLinksList :: Tree { x :: Number, y :: Number | r }
-      -> List { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
-    makeLinksList (Node val children) =
-      let
-        childLinks = children >>= \(Node childVal _) ->
-          Cons { source: { x: val.x, y: val.y }, target: { x: childVal.x, y: childVal.y } } Nil
-        grandchildLinks = children >>= makeLinksList
-      in
-        childLinks <> grandchildLinks
+  makeLinksList
+    :: Tree { x :: Number, y :: Number | r }
+    -> List { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
+  makeLinksList (Node val children) =
+    let
+      childLinks = children >>= \(Node childVal _) ->
+        Cons { source: { x: val.x, y: val.y }, target: { x: childVal.x, y: childVal.y } } Nil
+      grandchildLinks = children >>= makeLinksList
+    in
+      childLinks <> grandchildLinks
 
 -- | Dendrogram link path generator (vertical with stepped Bezier)
 -- | Creates orthogonal "elbow" connectors
 linkPath :: Number -> Number -> Number -> Number -> String
 linkPath x1' y1' x2' y2' =
-  let midY = (y1' + y2') / 2.0
-  in "M" <> show x1' <> "," <> show y1' <>
-     " C" <> show x1' <> "," <> show midY <>
-     " " <> show x2' <> "," <> show midY <>
-     " " <> show x2' <> "," <> show y2'
+  let
+    midY = (y1' + y2') / 2.0
+  in
+    "M" <> show x1' <> "," <> show y1'
+      <> " C"
+      <> show x1'
+      <> ","
+      <> show midY
+      <> " "
+      <> show x2'
+      <> ","
+      <> show midY
+      <> " "
+      <> show x2'
+      <> ","
+      <> show y2'
 
 -- | Draw cluster (dendrogram) hierarchy with loaded data
 drawCluster :: String -> Tree HierNode -> Effect Unit
@@ -60,10 +74,14 @@ drawCluster selector flareTree = runD3v2M do
   let chartHeight = 500.0
   let padding = 40.0
 
-  -- Apply Cluster4 layout (height field already computed by data loader)
-  let config = defaultClusterConfig
-        { size = { width: chartWidth - (2.0 * padding)
-                 , height: chartHeight - (2.0 * padding) } }
+  -- Apply Cluster layout (height field already computed by data loader)
+  let
+    config = defaultClusterConfig
+      { size =
+          { width: chartWidth - (2.0 * padding)
+          , height: chartHeight - (2.0 * padding)
+          }
+      }
   let positioned = cluster config flareTree
 
   -- Flatten to arrays
@@ -73,36 +91,39 @@ drawCluster selector flareTree = runD3v2M do
   liftEffect $ Console.log $ "Rendering cluster (dendrogram): " <> show (Array.length nodes) <> " nodes, " <> show (Array.length links) <> " links"
 
   -- First tree: SVG container with links (datum type: link data)
-  let linksTree :: T.Tree LinkDatum
-      linksTree =
-        T.named SVG "svg"
-          [ width chartWidth
-          , height chartHeight
-          , viewBox ("0 0 " <> show chartWidth <> " " <> show chartHeight)
-          , class_ "cluster-viz"
-          ]
-          `T.withChild`
-            (T.named Group "chartGroup"
+  let
+    linksTree :: T.Tree LinkDatum
+    linksTree =
+      T.named SVG "svg"
+        [ width chartWidth
+        , height chartHeight
+        , viewBox ("0 0 " <> show chartWidth <> " " <> show chartHeight)
+        , class_ "cluster-viz"
+        ]
+        `T.withChild`
+          ( T.named Group "chartGroup"
               [ class_ "tree-content" ]
               `T.withChild`
-                (T.named Group "linksGroup"
-                  [ class_ "links" ]
-                  `T.withChild`
-                    (T.joinData "links" "path" links $ \link ->
-                      T.elem Path
-                        [ d (linkPath
-                            (link.source.x + padding)
-                            (link.source.y + padding)
-                            (link.target.x + padding)
-                            (link.target.y + padding))
-                        , fill "none"
-                        , stroke "#999"
-                        , strokeWidth 1.5
-                        , class_ "link"
-                        ]
-                    )
+                ( T.named Group "linksGroup"
+                    [ class_ "links" ]
+                    `T.withChild`
+                      ( T.joinData "links" "path" links $ \link ->
+                          T.elem Path
+                            [ d
+                                ( linkPath
+                                    (link.source.x + padding)
+                                    (link.source.y + padding)
+                                    (link.target.x + padding)
+                                    (link.target.y + padding)
+                                )
+                            , fill "none"
+                            , stroke "#999"
+                            , strokeWidth 1.5
+                            , class_ "link"
+                            ]
+                      )
                 )
-            )
+          )
 
   -- Render links first (underlaying)
   linksSelections <- renderTree container linksTree
@@ -111,12 +132,13 @@ drawCluster selector flareTree = runD3v2M do
   -- Reselect the chartGroup from rendered selections (not global CSS selector!)
   chartGroupSel <- liftEffect $ reselectD3v2 "chartGroup" linksSelections
 
-  let nodesTree :: T.Tree HierNode
-      nodesTree =
-        T.named Group "nodesGroup"
-          [ class_ "nodes" ]
-          `T.withChild`
-            (T.joinData "nodeGroups" "g" nodes $ \node ->
+  let
+    nodesTree :: T.Tree HierNode
+    nodesTree =
+      T.named Group "nodesGroup"
+        [ class_ "nodes" ]
+        `T.withChild`
+          ( T.joinData "nodeGroups" "g" nodes $ \node ->
               T.named Group ("node-" <> node.name)
                 [ class_ "node" ]
                 `T.withChildren`
@@ -136,7 +158,7 @@ drawCluster selector flareTree = runD3v2M do
                       , textAnchor "start"
                       ]
                   ]
-            )
+          )
 
   -- Render nodes on top (overlaying)
   _ <- renderTree chartGroupSel nodesTree

@@ -1,8 +1,8 @@
--- | D3.Layout.Hierarchy.Tree4
+-- | DataViz.Layout.Hierarchy.Tree
 -- |
 -- | Reingold-Tilford tree layout adapted from the elegant Haskell implementation
 -- | Translates binary tree algorithm to n-ary trees (Data.Tree)
-module D3.Layout.Hierarchy.Tree4
+module DataViz.Layout.Hierarchy.Tree
   ( TreeConfig
   , defaultTreeConfig
   , withLayerScale
@@ -119,7 +119,7 @@ tree config inputTree =
   in
     scaled
 
--- | Tree layout with height-based sorting for consistent ordering with Cluster4
+-- | Tree layout with height-based sorting for consistent ordering with Cluster
 -- | Use this variant when your tree has height computed and you want sorted children
 treeWithSorting
   :: forall r
@@ -134,7 +134,7 @@ treeWithSorting config inputTree =
     -- Step 2: Compute height field (distance from deepest leaf)
     withHeight = addHeightField withDepth
 
-    -- Step 3: Sort children by height (descending) for consistent ordering with Cluster4
+    -- Step 3: Sort children by height (descending) for consistent ordering with Cluster
     sorted = sortByHeight withHeight
 
     -- Step 4: Compute relative positions (bottom-up)
@@ -551,7 +551,7 @@ addHeightField (Node val children) =
     Node (val { height = nodeHeight }) childrenWithHeight
 
 -- | Sort children by height (descending) to minimize crossovers
--- | This matches Cluster4's behavior for consistent child ordering during animations
+-- | This matches Cluster's behavior for consistent child ordering during animations
 sortByHeight :: forall r. Tree { x :: Number, y :: Number, depth :: Int, height :: Int | r } -> Tree { x :: Number, y :: Number, depth :: Int, height :: Int | r }
 sortByHeight (Node val children) =
   let

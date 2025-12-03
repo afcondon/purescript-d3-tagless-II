@@ -1,4 +1,4 @@
--- | D3.Layout.Hierarchy.EdgeBundle
+-- | DataViz.Layout.Hierarchy.EdgeBundle
 -- |
 -- | Hierarchical edge bundling layout for visualizing dependencies in hierarchical data.
 -- |
@@ -14,7 +14,7 @@
 -- | ## Example Usage:
 -- |
 -- | ```purescript
--- | import D3.Layout.Hierarchy.EdgeBundle as EdgeBundle
+-- | import DataViz.Layout.Hierarchy.EdgeBundle as EdgeBundle
 -- |
 -- | -- Given flat data with imports
 -- | nodes :: Array { name :: String, size :: Number, imports :: Array String }
@@ -32,14 +32,14 @@
 -- | --   nodes: positioned nodes for rendering
 -- | --   links: paths between connected nodes
 -- | ```
-module D3.Layout.Hierarchy.EdgeBundle
+module DataViz.Layout.Hierarchy.EdgeBundle
   ( -- * Main API
     edgeBundle
   , EdgeBundleConfig
   , EdgeBundleResult
   , PositionedNode
   , BundledLink
-    -- * Re-exports for advanced usage
+  -- * Re-exports for advanced usage
   , module Hierarchy
   , module Bilink
   , module RadialCluster
@@ -51,33 +51,33 @@ import Prelude
 import Data.Array as Array
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Number (cos, sin, pi)
-import D3.Layout.Hierarchy.EdgeBundle.Hierarchy as Hierarchy
-import D3.Layout.Hierarchy.EdgeBundle.Hierarchy (TreeNode(..), buildHierarchy, pathBetween, leaves, findNode, getFullName)
-import D3.Layout.Hierarchy.EdgeBundle.Bilink as Bilink
-import D3.Layout.Hierarchy.EdgeBundle.Bilink (BilinkedNode(..), Link(..), bilink, getOutgoing, getBilinkedFullName, allBilinkedNodes)
-import D3.Layout.Hierarchy.EdgeBundle.RadialCluster as RadialCluster
-import D3.Layout.Hierarchy.EdgeBundle.RadialCluster (RadialNode(..), radialCluster, toCartesian, RadialLayoutConfig)
-import D3.Layout.Hierarchy.EdgeBundle.BundleCurve as BundleCurve
-import D3.Layout.Hierarchy.EdgeBundle.BundleCurve (bundlePathRadial, BundlePoint)
+import DataViz.Layout.Hierarchy.EdgeBundle.Hierarchy as Hierarchy
+import DataViz.Layout.Hierarchy.EdgeBundle.Hierarchy (TreeNode(..), buildHierarchy, pathBetween, leaves, findNode, getFullName)
+import DataViz.Layout.Hierarchy.EdgeBundle.Bilink as Bilink
+import DataViz.Layout.Hierarchy.EdgeBundle.Bilink (BilinkedNode(..), Link(..), bilink, getOutgoing, getBilinkedFullName, allBilinkedNodes)
+import DataViz.Layout.Hierarchy.EdgeBundle.RadialCluster as RadialCluster
+import DataViz.Layout.Hierarchy.EdgeBundle.RadialCluster (RadialNode(..), radialCluster, toCartesian, RadialLayoutConfig)
+import DataViz.Layout.Hierarchy.EdgeBundle.BundleCurve as BundleCurve
+import DataViz.Layout.Hierarchy.EdgeBundle.BundleCurve (bundlePathRadial, BundlePoint)
 
 -- | Configuration for edge bundle layout
 type EdgeBundleConfig a =
-  { getName :: a -> String           -- Extract full name from data
-  , getImports :: a -> Array String  -- Extract imports from data
-  , beta :: Number                   -- Bundle tension (0-1, default 0.85)
-  , innerRadius :: Number            -- Radius for root (default 100)
-  , outerRadius :: Number            -- Radius for leaves (default 400)
+  { getName :: a -> String -- Extract full name from data
+  , getImports :: a -> Array String -- Extract imports from data
+  , beta :: Number -- Bundle tension (0-1, default 0.85)
+  , innerRadius :: Number -- Radius for root (default 100)
+  , outerRadius :: Number -- Radius for leaves (default 400)
   }
 
 -- | A node positioned for rendering
 type PositionedNode a =
   { fullName :: String
   , shortName :: String
-  , x :: Number          -- Angle in radians
-  , y :: Number          -- Radius from center
-  , cartX :: Number      -- Cartesian x coordinate
-  , cartY :: Number      -- Cartesian y coordinate
-  , data_ :: Maybe a     -- Original data (for leaves)
+  , x :: Number -- Angle in radians
+  , y :: Number -- Radius from center
+  , cartX :: Number -- Cartesian x coordinate
+  , cartY :: Number -- Cartesian y coordinate
+  , data_ :: Maybe a -- Original data (for leaves)
   , isLeaf :: Boolean
   , outgoingCount :: Int
   , incomingCount :: Int
@@ -87,7 +87,7 @@ type PositionedNode a =
 type BundledLink =
   { source :: String
   , target :: String
-  , path :: String       -- SVG path data
+  , path :: String -- SVG path data
   }
 
 -- | Result of edge bundle layout
@@ -100,10 +100,11 @@ type EdgeBundleResult a =
 -- |
 -- | Takes configuration and array of nodes with imports,
 -- | returns positioned nodes and bundled link paths.
-edgeBundle :: forall a.
-  EdgeBundleConfig a ->
-  Array a ->
-  EdgeBundleResult a
+edgeBundle
+  :: forall a
+   . EdgeBundleConfig a
+  -> Array a
+  -> EdgeBundleResult a
 edgeBundle config inputNodes =
   let
     -- Step 1: Build hierarchy from flat nodes
@@ -132,10 +133,11 @@ edgeBundle config inputNodes =
     }
 
 -- | Extract positioned nodes by combining bilink info with radial layout
-extractPositionedNodes :: forall a.
-  BilinkedNode a ->
-  RadialNode a ->
-  Array (PositionedNode a)
+extractPositionedNodes
+  :: forall a
+   . BilinkedNode a
+  -> RadialNode a
+  -> Array (PositionedNode a)
 extractPositionedNodes bilinked radial =
   let
     -- Get all bilinked nodes with link counts
@@ -145,38 +147,45 @@ extractPositionedNodes bilinked radial =
     allRadial = getAllRadialNodes radial
 
     -- Merge by fullName
-    merged = Array.mapMaybe (\rNode ->
-      let
-        name = getRadialFullName rNode
-        maybeBilinked = Array.find (\b -> getBilinkedFullName b == name) allBilinked
-        cart = toCartesian rNode
-      in
-        Just
-          { fullName: name
-          , shortName: getRadialShortName rNode
-          , x: getRadialAngle rNode
-          , y: getRadialRadius rNode
-          , cartX: cart.x
-          , cartY: cart.y
-          , data_: getRadialData rNode
-          , isLeaf: Array.null (getRadialChildren rNode)
-          , outgoingCount: case maybeBilinked of
-              Just b -> Array.length (getOutgoing b)
-              Nothing -> 0
-          , incomingCount: case maybeBilinked of
-              Just b -> Array.length (Bilink.getIncoming b)
-              Nothing -> 0
-          }
-    ) allRadial
+    merged = Array.mapMaybe
+      ( \rNode ->
+          let
+            name = getRadialFullName rNode
+            maybeBilinked = Array.find (\b -> getBilinkedFullName b == name) allBilinked
+            cart = toCartesian rNode
+          in
+            Just
+              { fullName: name
+              , shortName: getRadialShortName rNode
+              , x: getRadialAngle rNode
+              , y: getRadialRadius rNode
+              , cartX: cart.x
+              , cartY: cart.y
+              , data_: getRadialData rNode
+              , isLeaf: Array.null (getRadialChildren rNode)
+              , outgoingCount: case maybeBilinked of
+                  Just b -> Array.length (getOutgoing b)
+                  Nothing -> 0
+              , incomingCount: case maybeBilinked of
+                  Just b -> Array.length (Bilink.getIncoming b)
+                  Nothing -> 0
+              }
+      )
+      allRadial
   in
     merged
 
 -- | Generate bundled links by finding paths and rendering curves
-generateBundledLinks :: forall a.
-  Number ->              -- Beta tension
-  TreeNode a ->          -- Original tree (for path finding)
-  RadialNode a ->        -- Radial tree (for positions)
-  BilinkedNode a ->      -- Bilinked tree (for link info)
+generateBundledLinks
+  :: forall a
+   . Number
+  -> -- Beta tension
+  TreeNode a
+  -> -- Original tree (for path finding)
+  RadialNode a
+  -> -- Radial tree (for positions)
+  BilinkedNode a
+  -> -- Bilinked tree (for link info)
   Array BundledLink
 generateBundledLinks tension tree radialTree bilinked =
   let
@@ -187,45 +196,53 @@ generateBundledLinks tension tree radialTree bilinked =
     radialNodes = getAllRadialNodes radialTree
 
     -- For each link, compute the path and render
-    bundled = Array.mapMaybe (\(Link link) ->
-      -- Find source and target in trees
-      case findNode link.source tree, findNode link.target tree of
-        Just sourceTree, Just targetTree ->
-          -- Get path through tree
-          let
-            pathNodes = pathBetween tree sourceTree targetTree
+    bundled = Array.mapMaybe
+      ( \(Link link) ->
+          -- Find source and target in trees
+          case findNode link.source tree, findNode link.target tree of
+            Just sourceTree, Just targetTree ->
+              -- Get path through tree
+              let
+                pathNodes = pathBetween tree sourceTree targetTree
 
-            -- Convert path to radial coordinates
-            radialPath = Array.mapMaybe (\pathNode ->
-              let name = getFullName pathNode
-              in Array.find (\r -> getRadialFullName r == name) radialNodes
-            ) pathNodes
+                -- Convert path to radial coordinates
+                radialPath = Array.mapMaybe
+                  ( \pathNode ->
+                      let
+                        name = getFullName pathNode
+                      in
+                        Array.find (\r -> getRadialFullName r == name) radialNodes
+                  )
+                  pathNodes
 
-            -- Convert to angle/radius pairs
-            radialPoints = map (\r ->
-              { angle: getRadialAngle r
-              , radius: getRadialRadius r
-              }
-            ) radialPath
+                -- Convert to angle/radius pairs
+                radialPoints = map
+                  ( \r ->
+                      { angle: getRadialAngle r
+                      , radius: getRadialRadius r
+                      }
+                  )
+                  radialPath
 
-            -- Generate SVG path
-            svgPath = bundlePathRadial tension radialPoints
-          in
-            Just { source: link.source, target: link.target, path: svgPath }
-        _, _ -> Nothing
-    ) allLinks
+                -- Generate SVG path
+                svgPath = bundlePathRadial tension radialPoints
+              in
+                Just { source: link.source, target: link.target, path: svgPath }
+            _, _ -> Nothing
+      )
+      allLinks
   in
     bundled
 
 -- | Helper: get all nodes from a bilinked tree
 getAllBilinkedNodes :: forall a. BilinkedNode a -> Array (BilinkedNode a)
 getAllBilinkedNodes node@(BilinkedNode n) =
-  [node] <> Array.concatMap getAllBilinkedNodes n.children
+  [ node ] <> Array.concatMap getAllBilinkedNodes n.children
 
 -- | Helper: get all nodes from a radial tree
 getAllRadialNodes :: forall a. RadialNode a -> Array (RadialNode a)
 getAllRadialNodes node@(RadialNode n) =
-  [node] <> Array.concatMap getAllRadialNodes n.children
+  [ node ] <> Array.concatMap getAllRadialNodes n.children
 
 -- | Helper accessors for RadialNode
 getRadialFullName :: forall a. RadialNode a -> String

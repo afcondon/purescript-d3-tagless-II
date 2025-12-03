@@ -6,7 +6,7 @@
 -- | - Sunburst charts (radial partitions)
 -- |
 -- | Based on: https://github.com/d3/d3-hierarchy/blob/main/src/partition.js
-module D3.Layout.Hierarchy.Partition
+module DataViz.Layout.Hierarchy.Partition
   ( PartitionNode(..)
   , PartitionConfig
   , defaultPartitionConfig

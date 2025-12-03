@@ -1,4 +1,4 @@
--- | D3.Layout.Hierarchy.EdgeBundle.RadialCluster
+-- | DataViz.Layout.Hierarchy.EdgeBundle.RadialCluster
 -- |
 -- | Radial cluster layout for edge bundling.
 -- | Positions leaf nodes around a circle and internal nodes at the center.
@@ -6,7 +6,7 @@
 -- | The layout uses (angle, radius) coordinates:
 -- | - angle: position around the circle (0 to 2π radians)
 -- | - radius: distance from center (internal nodes closer to center, leaves at edge)
-module D3.Layout.Hierarchy.EdgeBundle.RadialCluster
+module DataViz.Layout.Hierarchy.EdgeBundle.RadialCluster
   ( RadialLayoutConfig
   , defaultRadialConfig
   , RadialNode(..)
@@ -22,14 +22,14 @@ import Data.Foldable (foldl)
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Number (cos, sin, pi)
-import D3.Layout.Hierarchy.EdgeBundle.Hierarchy (TreeNode(..), getFullName, getTreeNodeChildren, isLeaf, leaves)
+import DataViz.Layout.Hierarchy.EdgeBundle.Hierarchy (TreeNode(..), getFullName, getTreeNodeChildren, isLeaf, leaves)
 
 -- | Configuration for radial cluster layout
 type RadialLayoutConfig =
-  { innerRadius :: Number   -- Radius for internal nodes
-  , outerRadius :: Number   -- Radius for leaf nodes
-  , startAngle :: Number    -- Starting angle (default: 0)
-  , endAngle :: Number      -- Ending angle (default: 2π)
+  { innerRadius :: Number -- Radius for internal nodes
+  , outerRadius :: Number -- Radius for leaf nodes
+  , startAngle :: Number -- Starting angle (default: 0)
+  , endAngle :: Number -- Ending angle (default: 2π)
   }
 
 -- | Default configuration
@@ -49,13 +49,17 @@ data RadialNode a = RadialNode
   , data_ :: Maybe a
   , depth :: Int
   , height :: Int
-  , x :: Number           -- Angle in radians
-  , y :: Number           -- Radius from center
+  , x :: Number -- Angle in radians
+  , y :: Number -- Radius from center
   }
 
 instance showRadialNode :: Show a => Show (RadialNode a) where
-  show (RadialNode n) = "RadialNode { fullName: " <> n.fullName <>
-    ", x: " <> show n.x <> ", y: " <> show n.y <> " }"
+  show (RadialNode n) = "RadialNode { fullName: " <> n.fullName
+    <> ", x: "
+    <> show n.x
+    <> ", y: "
+    <> show n.y
+    <> " }"
 
 -- | Convert radial coordinates to Cartesian for SVG rendering
 toCartesian :: forall a. RadialNode a -> { x :: Number, y :: Number }
@@ -87,13 +91,17 @@ radialCluster config tree =
     result.node
 
 -- | Layout a single node, threading through the current leaf index
-layoutNode :: forall a.
-  RadialLayoutConfig ->
-  Int ->                              -- Max tree height
-  Number ->                           -- Angle step per leaf
-  { currentIndex :: Int } ->          -- State: current leaf index
-  TreeNode a ->
-  { node :: RadialNode a, state :: { currentIndex :: Int } }
+layoutNode
+  :: forall a
+   . RadialLayoutConfig
+  -> Int
+  -> -- Max tree height
+  Number
+  -> -- Angle step per leaf
+  { currentIndex :: Int }
+  -> -- State: current leaf index
+  TreeNode a
+  -> { node :: RadialNode a, state :: { currentIndex :: Int } }
 layoutNode config maxHeight angleStep state (TreeNode n) =
   if Array.null n.children then
     -- Leaf node: assign next available angle
@@ -119,9 +127,11 @@ layoutNode config maxHeight angleStep state (TreeNode n) =
     let
       -- Process all children, threading state
       childResults = foldl
-        (\acc child ->
-          let result = layoutNode config maxHeight angleStep acc.state child
-          in { children: Array.snoc acc.children result.node, state: result.state }
+        ( \acc child ->
+            let
+              result = layoutNode config maxHeight angleStep acc.state child
+            in
+              { children: Array.snoc acc.children result.node, state: result.state }
         )
         { children: [], state: state }
         n.children

@@ -1,11 +1,11 @@
--- | D3.Layout.Sankey.Compute
+-- | DataViz.Layout.Sankey.Compute
 -- |
 -- | Pure PureScript implementation of Sankey diagram layout computation.
 -- | Uses State monad to thread graph model through all layout functions.
 -- | Starts with Array SankeyLinkInput and generates nodes dynamically.
 -- |
 -- | Reference: https://github.com/d3/d3-sankey (ISC License)
-module D3.Layout.Sankey.Compute
+module DataViz.Layout.Sankey.Compute
   ( epsilon
   , computeLayout
   , computeLayoutWithConfig
@@ -25,7 +25,7 @@ import Data.Number (pow)
 import Data.Set as Set
 import Effect.Console (log)
 import Effect.Unsafe (unsafePerformEffect)
-import D3.Layout.Sankey.Types (Alignment(..), DependencyMap, LinkCSVRow, LinkColorMode(..), LinkID(..), NodeID(..), SankeyConfig, SankeyGraphModel, SankeyLayoutResult, SankeyLink, SankeyNode, defaultSankeyConfig, initialSankeyGraphModel, initialiseSankeyLink, initialiseSankeyNode)
+import DataViz.Layout.Sankey.Types (Alignment(..), DependencyMap, LinkCSVRow, LinkColorMode(..), LinkID(..), NodeID(..), SankeyConfig, SankeyGraphModel, SankeyLayoutResult, SankeyLink, SankeyNode, defaultSankeyConfig, initialSankeyGraphModel, initialiseSankeyLink, initialiseSankeyNode)
 
 -- Constants
 epsilon :: Number
@@ -101,12 +101,18 @@ computeLayoutWithConfig linkInputs config =
         log $ "\n=== " <> stepName <> " ==="
         for_ (Array.sortBy (\a b -> compare a.name b.name) model.sankeyNodes) $ \n -> do
           log $ "  " <> n.name
-            <> " | layer=" <> show n.layer
-            <> " | depth=" <> show n.depth
-            <> " | height=" <> show n.nodeHeight
-            <> " | value=" <> show n.value
-            <> " | y0=" <> show n.y0
-            <> " | y1=" <> show n.y1
+            <> " | layer="
+            <> show n.layer
+            <> " | depth="
+            <> show n.depth
+            <> " | height="
+            <> show n.nodeHeight
+            <> " | value="
+            <> show n.value
+            <> " | y0="
+            <> show n.y0
+            <> " | y1="
+            <> show n.y1
     pure unit
 
 -- ============================================================================
@@ -139,19 +145,19 @@ processCSVLink link = do
           { nodeCount: model.nodeCount, sid, tid, newNodes: [] }
         -- one new, count increments by one
         (Just sid), Nothing ->
-          { nodeCount: model.nodeCount + 1, sid, tid: NodeID model.nodeCount, newNodes: [NodeID model.nodeCount] }
+          { nodeCount: model.nodeCount + 1, sid, tid: NodeID model.nodeCount, newNodes: [ NodeID model.nodeCount ] }
         Nothing, (Just tid) ->
-          { nodeCount: model.nodeCount + 1, sid: NodeID model.nodeCount, tid: tid, newNodes: [NodeID model.nodeCount] }
+          { nodeCount: model.nodeCount + 1, sid: NodeID model.nodeCount, tid: tid, newNodes: [ NodeID model.nodeCount ] }
         -- both new, count increments by two (source added first, then target - matches D3's Set.add order)
         Nothing, Nothing ->
-          { nodeCount: model.nodeCount + 2, sid: NodeID model.nodeCount, tid: NodeID (model.nodeCount + 1), newNodes: [NodeID model.nodeCount, NodeID (model.nodeCount + 1)] }
+          { nodeCount: model.nodeCount + 2, sid: NodeID model.nodeCount, tid: NodeID (model.nodeCount + 1), newNodes: [ NodeID model.nodeCount, NodeID (model.nodeCount + 1) ] }
 
   modify_ _
     { linkCount = model.linkCount + 1
     , nodeCount = nodeCount
     , nodeNameToID = M.insert link.s sid $ M.insert link.t tid model.nodeNameToID
     , nodeIDToName = M.insert sid link.s $ M.insert tid link.t model.nodeIDToName
-    , nodeOrder = model.nodeOrder <> newNodes  -- Append new nodes in encounter order
+    , nodeOrder = model.nodeOrder <> newNodes -- Append new nodes in encounter order
     , deps = unionInsert sid tid model.deps
     , sped = unionInsert tid sid model.sped
     , sankeyLinks =
@@ -322,9 +328,10 @@ computeNodeBreadths = do
   let maxLayer = foldl (\acc node -> max acc node.layer) 0 nodesWithLayers
   let layers = map (\layerIdx -> filter (\node -> node.layer == layerIdx) nodesWithLayers) (Array.range 0 maxLayer)
   let maxNodesInLayer = foldl (\acc layer -> max acc (length layer)) 0 layers
-  let adjustedPadding = if maxNodesInLayer > 1
-        then min config.nodePadding (totalHeight / (toNumber maxNodesInLayer - 1.0))
-        else config.nodePadding
+  let
+    adjustedPadding =
+      if maxNodesInLayer > 1 then min config.nodePadding (totalHeight / (toNumber maxNodesInLayer - 1.0))
+      else config.nodePadding
 
   -- Step 6b: Initialize y positions by stacking nodes in each layer
   let nodesWithY = initializeNodeBreadths nodesWithLayers model.sankeyLinks config adjustedPadding extent.y0 extent.y1
@@ -610,11 +617,11 @@ relaxation nodes links config padding y0 y1 =
             ltr = relaxByLayer rtl links padding true alpha beta
             -- Log after each iteration (only for first 6 iterations to match D3 debug)
             _ = unsafePerformEffect $
-                  if i < 6 then do
-                    log $ "\n=== After iteration " <> show i <> " (alpha=" <> show alpha <> ", beta=" <> show beta <> ") ==="
-                    for_ (Array.sortBy (\a b -> compare a.layer b.layer) ltr) $ \n ->
-                      log $ "  " <> n.name <> " | layer=" <> show n.layer <> " | y0=" <> show n.y0 <> " | y1=" <> show n.y1
-                  else pure unit
+              if i < 6 then do
+                log $ "\n=== After iteration " <> show i <> " (alpha=" <> show alpha <> ", beta=" <> show beta <> ") ==="
+                for_ (Array.sortBy (\a b -> compare a.layer b.layer) ltr) $ \n ->
+                  log $ "  " <> n.name <> " | layer=" <> show n.layer <> " | y0=" <> show n.y0 <> " | y1=" <> show n.y1
+              else pure unit
           in
             ltr
       )
@@ -797,9 +804,9 @@ relaxation nodes links config padding y0 y1 =
       -- Sum widths of links before this one at source
       yAtSource = foldl
         ( \acc link ->
-            if acc.found then acc  -- Already found target, skip remaining
-            else if link.targetIndex == target.index then acc { found = true }  -- Found it, mark and stop
-            else { y: acc.y + link.width + py, found: false }  -- Not found yet, keep adding
+            if acc.found then acc -- Already found target, skip remaining
+            else if link.targetIndex == target.index then acc { found = true } -- Found it, mark and stop
+            else { y: acc.y + link.width + py, found: false } -- Not found yet, keep adding
         )
         { y: startY, found: false }
         sourceOutgoing
@@ -807,9 +814,9 @@ relaxation nodes links config padding y0 y1 =
       -- Subtract widths of links before this one at target
       yFinal = foldl
         ( \acc link ->
-            if acc.found then acc  -- Already found source, skip remaining
-            else if link.sourceIndex == source.index then acc { found = true }  -- Found it, mark and stop
-            else { y: acc.y - link.width, found: false }  -- Not found yet, keep subtracting
+            if acc.found then acc -- Already found source, skip remaining
+            else if link.sourceIndex == source.index then acc { found = true } -- Found it, mark and stop
+            else { y: acc.y - link.width, found: false } -- Not found yet, keep subtracting
         )
         { y: yAtSource.y, found: false }
         targetIncoming
@@ -846,9 +853,9 @@ relaxation nodes links config padding y0 y1 =
       -- Sum widths of links before this one at target
       yAtTarget = foldl
         ( \acc link ->
-            if acc.found then acc  -- Already found source, skip remaining
-            else if link.sourceIndex == source.index then acc { found = true }  -- Found it, mark and stop
-            else { y: acc.y + link.width + py, found: false }  -- Not found yet, keep adding
+            if acc.found then acc -- Already found source, skip remaining
+            else if link.sourceIndex == source.index then acc { found = true } -- Found it, mark and stop
+            else { y: acc.y + link.width + py, found: false } -- Not found yet, keep adding
         )
         { y: startY, found: false }
         targetIncoming
@@ -856,9 +863,9 @@ relaxation nodes links config padding y0 y1 =
       -- Subtract widths of links before this one at source
       yFinal = foldl
         ( \acc link ->
-            if acc.found then acc  -- Already found target, skip remaining
-            else if link.targetIndex == target.index then acc { found = true }  -- Found it, mark and stop
-            else { y: acc.y - link.width, found: false }  -- Not found yet, keep subtracting
+            if acc.found then acc -- Already found target, skip remaining
+            else if link.targetIndex == target.index then acc { found = true } -- Found it, mark and stop
+            else { y: acc.y - link.width, found: false } -- Not found yet, keep subtracting
         )
         { y: yAtTarget.y, found: false }
         sourceOutgoing
@@ -875,7 +882,7 @@ relaxation nodes links config padding y0 y1 =
     else
       let
         n = Array.length sorted
-        middleIdx = n / 2  -- Integer division via /
+        middleIdx = n / 2 -- Integer division via /
 
         -- Get the middle node as the anchor point
         middleNode = sorted !! middleIdx
@@ -920,10 +927,12 @@ relaxation nodes links config padding y0 y1 =
               let
                 -- Calculate how much to push up (D3 multiplies by alpha/beta)
                 dy = (item.node.y1 - y) * beta
-                updated = if dy > epsilon
-                  then
-                    let newNode = item.node { y0 = item.node.y0 - dy, y1 = item.node.y1 - dy }
-                    in fromMaybe currentNodes (Array.updateAt idx { node: newNode, targetY: item.targetY } currentNodes)
+                updated =
+                  if dy > epsilon then
+                    let
+                      newNode = item.node { y0 = item.node.y0 - dy, y1 = item.node.y1 - dy }
+                    in
+                      fromMaybe currentNodes (Array.updateAt idx { node: newNode, targetY: item.targetY } currentNodes)
                   else currentNodes
                 newY = case updated !! idx of
                   Just n -> n.node.y0 - padding
@@ -939,6 +948,7 @@ relaxation nodes links config padding y0 y1 =
   resolveCollisionsTopToBottom nodes startIdx targetY padding beta =
     let
       n = Array.length nodes
+
       go :: Int -> Number -> Array { node :: SankeyNode, targetY :: Number } -> Array { node :: SankeyNode, targetY :: Number }
       go idx y currentNodes =
         if idx >= n then currentNodes
@@ -948,10 +958,12 @@ relaxation nodes links config padding y0 y1 =
             let
               -- Calculate how much to push down (D3 multiplies by alpha/beta)
               dy = (y - item.node.y0) * beta
-              updated = if dy > epsilon
-                then
-                  let newNode = item.node { y0 = item.node.y0 + dy, y1 = item.node.y1 + dy }
-                  in fromMaybe currentNodes (Array.updateAt idx { node: newNode, targetY: item.targetY } currentNodes)
+              updated =
+                if dy > epsilon then
+                  let
+                    newNode = item.node { y0 = item.node.y0 + dy, y1 = item.node.y1 + dy }
+                  in
+                    fromMaybe currentNodes (Array.updateAt idx { node: newNode, targetY: item.targetY } currentNodes)
                 else currentNodes
               newY = case updated !! idx of
                 Just n' -> n'.node.y1 + padding
@@ -991,14 +1003,17 @@ computeLinkBreadths = do
   let linksWithY = calculateLinkYPositions model.sankeyNodes linksWithWidth
 
   -- DEBUG: Log link breadths for key links
-  let _ = unsafePerformEffect do
-        log "\n=== After computeLinkBreadths ==="
-        for_ linksWithY $ \link -> do
-          case find (\n -> n.index == link.sourceIndex) model.sankeyNodes,
-               find (\n -> n.index == link.targetIndex) model.sankeyNodes of
-            Just srcNode, Just tgtNode ->
-              log $ "  " <> srcNode.name <> " -> " <> tgtNode.name <> " | y0=" <> show link.y0 <> " | y1=" <> show link.y1 <> " | width=" <> show link.width
-            _, _ -> pure unit
+  let
+    _ = unsafePerformEffect do
+      log "\n=== After computeLinkBreadths ==="
+      for_ linksWithY $ \link -> do
+        case
+          find (\n -> n.index == link.sourceIndex) model.sankeyNodes,
+          find (\n -> n.index == link.targetIndex) model.sankeyNodes
+          of
+          Just srcNode, Just tgtNode ->
+            log $ "  " <> srcNode.name <> " -> " <> tgtNode.name <> " | y0=" <> show link.y0 <> " | y1=" <> show link.y1 <> " | width=" <> show link.width
+          _, _ -> pure unit
 
   modify_ _ { sankeyLinks = linksWithY }
   where

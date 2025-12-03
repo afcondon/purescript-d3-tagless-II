@@ -1,8 +1,8 @@
--- | D3.Layout.Hierarchy.Treemap
+-- | DataViz.Layout.Hierarchy.Treemap
 -- |
 -- | Pure PureScript implementation of D3's treemap layout.
 -- | Partitions rectangles to represent hierarchical data with area proportional to value.
-module D3.Layout.Hierarchy.Treemap
+module DataViz.Layout.Hierarchy.Treemap
   ( TreemapNode(..)
   , TileFunction
   , TreemapConfig
@@ -23,7 +23,7 @@ import Data.Array as Array
 import Data.Foldable (foldl)
 import Data.Maybe (Maybe(..))
 import Data.Number (sqrt)
-import D3.Layout.Hierarchy.Types (ValuedNode(..))
+import DataViz.Layout.Hierarchy.Types (ValuedNode(..))
 
 -- | Node with treemap layout coordinates
 -- | Extends ValuedNode with x0, y0, x1, y1 bounds
@@ -33,10 +33,10 @@ data TreemapNode a = TNode
   , height :: Int
   , value :: Number
   , children :: Array (TreemapNode a)
-  , x0 :: Number  -- Left edge
-  , y0 :: Number  -- Top edge
-  , x1 :: Number  -- Right edge
-  , y1 :: Number  -- Bottom edge
+  , x0 :: Number -- Left edge
+  , y0 :: Number -- Top edge
+  , x1 :: Number -- Right edge
+  , y1 :: Number -- Bottom edge
   }
 
 derive instance eqTreemapNode :: Eq a => Eq (TreemapNode a)
@@ -64,7 +64,7 @@ type TreemapConfig a =
 
 -- | Golden ratio for squarify
 phi :: Number
-phi = (1.0 + sqrt 5.0) / 2.0  -- ≈ 1.618034
+phi = (1.0 + sqrt 5.0) / 2.0 -- ≈ 1.618034
 
 -- | Default treemap configuration
 defaultTreemapConfig :: forall a. TreemapConfig a
@@ -142,13 +142,12 @@ positionTree config (TNode n) paddingStack =
     nodeWithPadding = TNode (n { x0 = x0', y0 = y0', x1 = x1', y1 = y1' })
 
   in
-    if Array.null n.children
-    then nodeWithPadding  -- Leaf node
+    if Array.null n.children then nodeWithPadding -- Leaf node
     else
       let
         -- Calculate inner padding for children
         innerPad = config.paddingInner / 2.0
-        newPaddingStack = paddingStack <> [innerPad]
+        newPaddingStack = paddingStack <> [ innerPad ]
 
         -- Apply directional padding
         childX0 = x0' + config.paddingLeft - innerPad
@@ -177,28 +176,33 @@ dice :: forall a. TreemapNode a -> Number -> Number -> Number -> Number -> Treem
 dice (TNode parent) x0 y0 x1 y1 =
   let
     -- Scaling factor
-    k = if parent.value /= 0.0
-        then (x1 - x0) / parent.value
-        else 0.0
+    k =
+      if parent.value /= 0.0 then (x1 - x0) / parent.value
+      else 0.0
 
     -- Position each child
-    positioned = foldl (\acc child ->
-      let
-        TNode c = child
-        currentX = acc.x
-        width = c.value * k
+    positioned = foldl
+      ( \acc child ->
+          let
+            TNode c = child
+            currentX = acc.x
+            width = c.value * k
 
-        positionedChild = TNode (c
-          { x0 = currentX
-          , x1 = currentX + width
-          , y0 = y0
-          , y1 = y1
-          })
-      in
-        { children: Array.snoc acc.children positionedChild
-        , x: currentX + width
-        }
-    ) { children: [], x: x0 } parent.children
+            positionedChild = TNode
+              ( c
+                  { x0 = currentX
+                  , x1 = currentX + width
+                  , y0 = y0
+                  , y1 = y1
+                  }
+              )
+          in
+            { children: Array.snoc acc.children positionedChild
+            , x: currentX + width
+            }
+      )
+      { children: [], x: x0 }
+      parent.children
 
   in
     TNode (parent { children = positioned.children })
@@ -208,28 +212,33 @@ slice :: forall a. TreemapNode a -> Number -> Number -> Number -> Number -> Tree
 slice (TNode parent) x0 y0 x1 y1 =
   let
     -- Scaling factor
-    k = if parent.value /= 0.0
-        then (y1 - y0) / parent.value
-        else 0.0
+    k =
+      if parent.value /= 0.0 then (y1 - y0) / parent.value
+      else 0.0
 
     -- Position each child
-    positioned = foldl (\acc child ->
-      let
-        TNode c = child
-        currentY = acc.y
-        height = c.value * k
+    positioned = foldl
+      ( \acc child ->
+          let
+            TNode c = child
+            currentY = acc.y
+            height = c.value * k
 
-        positionedChild = TNode (c
-          { x0 = x0
-          , x1 = x1
-          , y0 = currentY
-          , y1 = currentY + height
-          })
-      in
-        { children: Array.snoc acc.children positionedChild
-        , y: currentY + height
-        }
-    ) { children: [], y: y0 } parent.children
+            positionedChild = TNode
+              ( c
+                  { x0 = x0
+                  , x1 = x1
+                  , y0 = currentY
+                  , y1 = currentY + height
+                  }
+              )
+          in
+            { children: Array.snoc acc.children positionedChild
+            , y: currentY + height
+            }
+      )
+      { children: [], y: y0 }
+      parent.children
 
   in
     TNode (parent { children = positioned.children })
@@ -238,10 +247,11 @@ slice (TNode parent) x0 y0 x1 y1 =
 -- | Provides a simple alternating pattern
 sliceDice :: forall a. TileFunction a
 sliceDice parent x0 y0 x1 y1 =
-  let TNode p = parent
-  in if (p.depth `mod` 2) == 0
-     then slice parent x0 y0 x1 y1
-     else dice parent x0 y0 x1 y1
+  let
+    TNode p = parent
+  in
+    if (p.depth `mod` 2) == 0 then slice parent x0 y0 x1 y1
+    else dice parent x0 y0 x1 y1
 
 -- | Binary tiling: divides space based on splitting the value sum
 -- | Simpler approach: split children into two groups, position each group with slice/dice
@@ -251,14 +261,12 @@ binary (TNode parent) x0 y0 x1 y1 =
     children = parent.children
     n = Array.length children
   in
-    if n == 0
-    then TNode parent
-    else if n == 1
-    then
+    if n == 0 then TNode parent
+    else if n == 1 then
       -- Single child gets full space
       case Array.index children 0 of
         Just (TNode child) ->
-          TNode (parent { children = [TNode (child { x0 = x0, y0 = y0, x1 = x1, y1 = y1 })] })
+          TNode (parent { children = [ TNode (child { x0 = x0, y0 = y0, x1 = x1, y1 = y1 }) ] })
         Nothing -> TNode parent
     else
       -- Multiple children: split into two groups
@@ -276,15 +284,15 @@ binary (TNode parent) x0 y0 x1 y1 =
         -- Find split index
         findSplitIndex :: Number -> Int -> Int
         findSplitIndex accValue idx =
-          if idx >= n - 1
-          then idx
+          if idx >= n - 1 then idx
           else
             case Array.index children idx of
               Just (TNode child) ->
-                let newAccValue = accValue + child.value
-                in if newAccValue >= halfValue
-                   then idx
-                   else findSplitIndex newAccValue (idx + 1)
+                let
+                  newAccValue = accValue + child.value
+                in
+                  if newAccValue >= halfValue then idx
+                  else findSplitIndex newAccValue (idx + 1)
               Nothing -> findSplitIndex accValue (idx + 1)
 
         splitIdx = findSplitIndex 0.0 0
@@ -294,18 +302,18 @@ binary (TNode parent) x0 y0 x1 y1 =
         leftValue = foldl (\sum (TNode c) -> sum + c.value) 0.0 leftChildren
 
         -- Calculate split position
-        splitPos = if totalValue > 0.0
-                   then leftValue / totalValue
-                   else 0.5
+        splitPos =
+          if totalValue > 0.0 then leftValue / totalValue
+          else 0.5
 
         -- Position left and right groups
-        leftPositioned = if splitVertically
-                         then dice (TNode (parent { children = leftChildren, value = leftValue })) x0 y0 (x0 + dx * splitPos) y1
-                         else slice (TNode (parent { children = leftChildren, value = leftValue })) x0 y0 x1 (y0 + dy * splitPos)
+        leftPositioned =
+          if splitVertically then dice (TNode (parent { children = leftChildren, value = leftValue })) x0 y0 (x0 + dx * splitPos) y1
+          else slice (TNode (parent { children = leftChildren, value = leftValue })) x0 y0 x1 (y0 + dy * splitPos)
 
-        rightPositioned = if splitVertically
-                          then dice (TNode (parent { children = rightChildren, value = totalValue - leftValue })) (x0 + dx * splitPos) y0 x1 y1
-                          else slice (TNode (parent { children = rightChildren, value = totalValue - leftValue })) x0 (y0 + dy * splitPos) x1 y1
+        rightPositioned =
+          if splitVertically then dice (TNode (parent { children = rightChildren, value = totalValue - leftValue })) (x0 + dx * splitPos) y0 x1 y1
+          else slice (TNode (parent { children = rightChildren, value = totalValue - leftValue })) x0 (y0 + dy * splitPos) x1 y1
 
         TNode leftNode = leftPositioned
         TNode rightNode = rightPositioned
@@ -321,8 +329,15 @@ squarify ratio (TNode parent) x0 y0 x1 y1 =
     TNode (parent { children = result.children })
 
 -- | Core squarify algorithm
-squarifyRatio :: forall a. Number -> TreemapNode a -> Number -> Number -> Number -> Number ->
-  { children :: Array (TreemapNode a), x0 :: Number, y0 :: Number }
+squarifyRatio
+  :: forall a
+   . Number
+  -> TreemapNode a
+  -> Number
+  -> Number
+  -> Number
+  -> Number
+  -> { children :: Array (TreemapNode a), x0 :: Number, y0 :: Number }
 squarifyRatio ratio (TNode parent) initX0 initY0 initX1 initY1 =
   let
     nodes = parent.children
@@ -330,8 +345,7 @@ squarifyRatio ratio (TNode parent) initX0 initY0 initX1 initY1 =
 
     go :: Int -> Int -> Number -> Number -> Number -> Number -> Number -> Array (TreemapNode a) -> Array (TreemapNode a)
     go i0 i1 x0 y0 x1 y1 remainingValue acc =
-      if i0 >= n
-      then acc
+      if i0 >= n then acc
       else
         let
           dx = x1 - x0
@@ -340,16 +354,15 @@ squarifyRatio ratio (TNode parent) initX0 initY0 initX1 initY1 =
           -- Find first non-empty node
           findNonEmpty :: Int -> Number -> { i1 :: Int, sumValue :: Number }
           findNonEmpty idx sv =
-            if idx >= n
-            then { i1: idx, sumValue: sv }
+            if idx >= n then { i1: idx, sumValue: sv }
             else
-              let TNode child = case Array.index nodes idx of
-                    Just c -> c
-                    Nothing -> TNode parent  -- Shouldn't happen
-                  val = child.value
+              let
+                TNode child = case Array.index nodes idx of
+                  Just c -> c
+                  Nothing -> TNode parent -- Shouldn't happen
+                val = child.value
               in
-                if val /= 0.0
-                then { i1: idx + 1, sumValue: val }
+                if val /= 0.0 then { i1: idx + 1, sumValue: val }
                 else findNonEmpty (idx + 1) sv
 
           firstNode = findNonEmpty i1 0.0
@@ -359,11 +372,15 @@ squarifyRatio ratio (TNode parent) initX0 initY0 initX1 initY1 =
           beta0 = firstNode.sumValue * firstNode.sumValue * alpha
 
           -- Try adding more nodes while ratio improves
-          tryAdd :: Int -> Number -> Number -> Number -> Number ->
-            { i1 :: Int, sumValue :: Number, minRatio :: Number }
+          tryAdd
+            :: Int
+            -> Number
+            -> Number
+            -> Number
+            -> Number
+            -> { i1 :: Int, sumValue :: Number, minRatio :: Number }
           tryAdd idx sumVal minVal maxVal minRat =
-            if idx >= n
-            then { i1: idx, sumValue: sumVal, minRatio: minRat }
+            if idx >= n then { i1: idx, sumValue: sumVal, minRatio: minRat }
             else
               let
                 TNode child = case Array.index nodes idx of
@@ -376,9 +393,8 @@ squarifyRatio ratio (TNode parent) initX0 initY0 initX1 initY1 =
                 newBeta = newSum * newSum * alpha
                 newRatio = max (newMax / newBeta) (newBeta / newMin)
               in
-                if newRatio > minRat
-                then { i1: idx, sumValue: sumVal, minRatio: minRat }  -- Reject
-                else tryAdd (idx + 1) newSum newMin newMax newRatio    -- Accept
+                if newRatio > minRat then { i1: idx, sumValue: sumVal, minRatio: minRat } -- Reject
+                else tryAdd (idx + 1) newSum newMin newMax newRatio -- Accept
 
           TNode firstChild = case Array.index nodes (firstNode.i1 - 1) of
             Just c -> c
@@ -396,19 +412,23 @@ squarifyRatio ratio (TNode parent) initX0 initY0 initX1 initY1 =
           -- Create row node with correct value (row's sum, not parent's value)
           rowNode = TNode (parent { children = rowChildren, value = initial.sumValue })
 
-          positioned = if isDice
-            then
-              let newY0 = if remainingValue /= 0.0
-                          then y0 + dy * initial.sumValue / remainingValue
-                          else y1
-                  TNode diced = dice rowNode x0 y0 x1 newY0
-              in { children: diced.children, nextX0: x0, nextY0: newY0, nextX1: x1, nextY1: y1 }
+          positioned =
+            if isDice then
+              let
+                newY0 =
+                  if remainingValue /= 0.0 then y0 + dy * initial.sumValue / remainingValue
+                  else y1
+                TNode diced = dice rowNode x0 y0 x1 newY0
+              in
+                { children: diced.children, nextX0: x0, nextY0: newY0, nextX1: x1, nextY1: y1 }
             else
-              let newX0 = if remainingValue /= 0.0
-                          then x0 + dx * initial.sumValue / remainingValue
-                          else x1
-                  TNode sliced = slice rowNode x0 y0 newX0 y1
-              in { children: sliced.children, nextX0: newX0, nextY0: y0, nextX1: x1, nextY1: y1 }
+              let
+                newX0 =
+                  if remainingValue /= 0.0 then x0 + dx * initial.sumValue / remainingValue
+                  else x1
+                TNode sliced = slice rowNode x0 y0 newX0 y1
+              in
+                { children: sliced.children, nextX0: newX0, nextY0: y0, nextX1: x1, nextY1: y1 }
 
         in
           go initial.i1 initial.i1 positioned.nextX0 positioned.nextY0 positioned.nextX1 positioned.nextY1

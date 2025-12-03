@@ -1,6 +1,6 @@
-module D3.Viz.AnimatedTree4Cluster4v2 where
+module D3.Viz.AnimatedTreeClusterv2 where
 
--- | Animated transition between Tree4 (Reingold-Tilford) and Cluster4 (dendrogram) layouts
+-- | Animated transition between Tree (Reingold-Tilford) and Cluster (dendrogram) layouts
 -- | V2 implementation using PSD3v2 primitives
 
 import Prelude hiding (append)
@@ -18,8 +18,8 @@ import PSD3v2.Capabilities.Transition (withTransition)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), SEmpty)
 import PSD3v2.Transition.Types (TransitionConfig, transition)
-import D3.Layout.Hierarchy.Cluster4 (cluster, defaultClusterConfig)
-import D3.Layout.Hierarchy.Tree4 (treeWithSorting, defaultTreeConfig)
+import DataViz.Layout.Hierarchy.Cluster (cluster, defaultClusterConfig)
+import DataViz.Layout.Hierarchy.Tree (treeWithSorting, defaultTreeConfig)
 import Web.DOM.Element (Element)
 
 -- | Layout type
@@ -63,7 +63,7 @@ makeLinks :: forall r. Tree { name :: String, x :: Number, y :: Number | r } -> 
 makeLinks (Node val children) =
   let
     childLinks = Array.fromFoldable children >>= \(Node childVal _) ->
-      [{ source: { name: val.name, x: val.x, y: val.y }, target: { name: childVal.name, x: childVal.x, y: childVal.y } }]
+      [ { source: { name: val.name, x: val.x, y: val.y }, target: { name: childVal.name, x: childVal.x, y: childVal.y } } ]
     grandchildLinks = Array.fromFoldable children >>= makeLinks
   in
     childLinks <> grandchildLinks
@@ -71,11 +71,22 @@ makeLinks (Node val children) =
 -- | Vertical link path for tree layout
 verticalLinkPath :: Number -> Number -> Number -> Number -> String
 verticalLinkPath x1 y1 x2 y2 =
-  let midY = (y1 + y2) / 2.0
-  in "M" <> show x1 <> "," <> show y1 <>
-     " C" <> show x1 <> "," <> show midY <>
-     " " <> show x2 <> "," <> show midY <>
-     " " <> show x2 <> "," <> show y2
+  let
+    midY = (y1 + y2) / 2.0
+  in
+    "M" <> show x1 <> "," <> show y1
+      <> " C"
+      <> show x1
+      <> ","
+      <> show midY
+      <> " "
+      <> show x2
+      <> ","
+      <> show midY
+      <> " "
+      <> show x2
+      <> ","
+      <> show y2
 
 -- | Key function: use node name as unique identifier
 nodeKey :: forall r. { name :: String | r } -> String
@@ -113,7 +124,8 @@ draw flareData selector = runD3v2M do
   svg <- appendChild SVG
     [ viewBox ("0 0 " <> show chartWidth <> " " <> show chartHeight)
     , class_ "animated-tree4-cluster4"
-    ] container
+    ]
+    container
 
   -- Create groups
   linksGroup <- appendChild Group [ class_ "links" ] svg
@@ -122,23 +134,28 @@ draw flareData selector = runD3v2M do
   pure { dataTree, linksGroup, nodesGroup, chartWidth, chartHeight }
 
 -- | Single animation step: applies layout and updates DOM
-animationStep ::
-  Tree TreeModel ->
-  D3v2Selection_ SEmpty Element Unit ->
-  D3v2Selection_ SEmpty Element Unit ->
-  Number ->
-  Number ->
-  LayoutType ->
-  Effect Unit
+animationStep
+  :: Tree TreeModel
+  -> D3v2Selection_ SEmpty Element Unit
+  -> D3v2Selection_ SEmpty Element Unit
+  -> Number
+  -> Number
+  -> LayoutType
+  -> Effect Unit
 animationStep dataTree linksGroup nodesGroup chartWidth chartHeight currentLayout = runD3v2M do
   -- Apply layout
-  let positioned = case currentLayout of
-        TreeLayout ->
-          let config = defaultTreeConfig { size = { width: chartWidth, height: chartHeight } }
-          in treeWithSorting config dataTree
-        ClusterLayout ->
-          let config = defaultClusterConfig { size = { width: chartWidth, height: chartHeight } }
-          in cluster config dataTree
+  let
+    positioned = case currentLayout of
+      TreeLayout ->
+        let
+          config = defaultTreeConfig { size = { width: chartWidth, height: chartHeight } }
+        in
+          treeWithSorting config dataTree
+      ClusterLayout ->
+        let
+          config = defaultClusterConfig { size = { width: chartWidth, height: chartHeight } }
+        in
+          cluster config dataTree
 
   -- Flatten nodes and create links
   let nodes = flattenTree positioned
@@ -152,13 +169,16 @@ animationStep dataTree linksGroup nodesGroup chartWidth chartHeight currentLayou
   remove linkExit
 
   -- Create actual DOM elements from enter placeholders
-  let linkPathFn :: LinkData -> String
-      linkPathFn link =
-        let sx = link.source.x
-            sy = link.source.y
-            tx = link.target.x
-            ty = link.target.y
-        in verticalLinkPath sx sy tx ty
+  let
+    linkPathFn :: LinkData -> String
+    linkPathFn link =
+      let
+        sx = link.source.x
+        sy = link.source.y
+        tx = link.target.x
+        ty = link.target.y
+      in
+        verticalLinkPath sx sy tx ty
 
   -- ENTER links: Set initial path and static attributes
   _ <- append Path
@@ -167,7 +187,8 @@ animationStep dataTree linksGroup nodesGroup chartWidth chartHeight currentLayou
     , strokeWidth 1.5
     , class_ "link"
     , d (linkPathFn :: LinkData -> String)
-    ] linkEnter
+    ]
+    linkEnter
 
   -- UPDATE links: Set static attributes
   _ <- setAttrs
@@ -175,7 +196,8 @@ animationStep dataTree linksGroup nodesGroup chartWidth chartHeight currentLayou
     , stroke "#555"
     , strokeWidth 1.5
     , class_ "link"
-    ] linkUpdate
+    ]
+    linkUpdate
 
   -- UPDATE links: Transition path to new positions
   withTransition transitionConfig linkUpdate [ d (linkPathFn :: LinkData -> String) ]
@@ -196,7 +218,8 @@ animationStep dataTree linksGroup nodesGroup chartWidth chartHeight currentLayou
     , class_ "node"
     , cx (\(node :: TreeModel) -> node.x)
     , cy (\(node :: TreeModel) -> node.y)
-    ] nodeEnter
+    ]
+    nodeEnter
 
   -- UPDATE nodes: Set static attributes
   _ <- setAttrs
@@ -205,7 +228,8 @@ animationStep dataTree linksGroup nodesGroup chartWidth chartHeight currentLayou
     , stroke "#555"
     , strokeWidth 1.5
     , class_ "node"
-    ] nodeUpdate
+    ]
+    nodeUpdate
 
   -- UPDATE nodes: Transition to new position
   withTransition transitionConfig nodeUpdate

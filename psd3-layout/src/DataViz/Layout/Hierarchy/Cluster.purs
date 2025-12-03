@@ -1,10 +1,10 @@
--- | D3.Layout.Hierarchy.Cluster4
+-- | DataViz.Layout.Hierarchy.Cluster
 -- |
 -- | Cluster (dendrogram) layout using Data.Tree
--- | Uses Reingold-Tilford algorithm for x-positioning (like Tree4)
+-- | Uses Reingold-Tilford algorithm for x-positioning (like Tree)
 -- | But positions nodes by height (distance from leaves) instead of depth
 -- | Result: All leaf nodes appear at the same level (y = 0)
-module D3.Layout.Hierarchy.Cluster4
+module DataViz.Layout.Hierarchy.Cluster
   ( ClusterConfig
   , defaultClusterConfig
   , cluster
@@ -23,7 +23,7 @@ import Data.Int (toNumber)
 -- | Configuration for cluster layout
 type ClusterConfig =
   { size :: { width :: Number, height :: Number }
-  , minSeparation :: Number  -- Minimum horizontal separation between siblings
+  , minSeparation :: Number -- Minimum horizontal separation between siblings
   }
 
 -- | Default configuration
@@ -33,7 +33,6 @@ defaultClusterConfig =
   , minSeparation: 1.0
   }
 
-
 -- | Cluster layout in 4 steps:
 -- | 1. addHeight: Bottom-up pass computing height (distance from deepest leaf)
 -- | 2. sortByHeight: Sort children by height to minimize crossovers (D3 pattern)
@@ -41,17 +40,18 @@ defaultClusterConfig =
 -- | 4. addY: Add y coordinates based on height (leaves at 0)
 -- | 5. scale: Scale abstract coordinates to pixel coordinates
 -- |
--- | Key difference from Tree4:
+-- | Key difference from Tree:
 -- | - All leaves get sequential x positions (not contour-based)
 -- | - y is based on height (distance from leaves) not depth
 -- | - All leaves appear at y = 0 (dendrogram)
 -- | - Children sorted by height (descending) to minimize crossovers
 -- |
 -- | Input must have x, y, height fields (initial values don't matter, they'll be overwritten)
-cluster :: forall r.
-  ClusterConfig ->
-  Tree { x :: Number, y :: Number, height :: Int | r } ->
-  Tree { x :: Number, y :: Number, height :: Int | r }
+cluster
+  :: forall r
+   . ClusterConfig
+  -> Tree { x :: Number, y :: Number, height :: Int | r }
+  -> Tree { x :: Number, y :: Number, height :: Int | r }
 cluster config inputTree =
   let
     -- Step 1: Compute height field (distance from deepest leaf)
@@ -129,8 +129,8 @@ sortByHeight (Node val children) =
   in
     Node val sortedChildrenList
   where
-    compareByHeight :: forall s. Tree { height :: Int | s } -> Tree { height :: Int | s } -> Ordering
-    compareByHeight (Node a _) (Node b _) = compare b.height a.height  -- Descending
+  compareByHeight :: forall s. Tree { height :: Int | s } -> Tree { height :: Int | s } -> Ordering
+  compareByHeight (Node a _) (Node b _) = compare b.height a.height -- Descending
 
 -- | Compute height field (distance from deepest leaf)
 -- | Bottom-up traversal: leaves get 0, parents get 1 + max(children's height)
@@ -156,67 +156,72 @@ addHeight (Node val children) =
 -- | Bottom-up pass: assign sequential x positions to ALL leaves
 -- | Then set parent x = midpoint between leftmost and rightmost descendants
 -- | This centers each parent on its subtree's full extent, reducing crossovers
--- | Returns tree with absolute x positions (not offsets like Tree4)
-render :: forall r.
-  Number ->
-  Tree { x :: Number, y :: Number, height :: Int | r } ->
-  { tree :: Tree { x :: Number, y :: Number, height :: Int | r }, lastLeafX :: Number }
+-- | Returns tree with absolute x positions (not offsets like Tree)
+render
+  :: forall r
+   . Number
+  -> Tree { x :: Number, y :: Number, height :: Int | r }
+  -> { tree :: Tree { x :: Number, y :: Number, height :: Int | r }, lastLeafX :: Number }
 render minSep inputTree =
   renderInternal 0.0 inputTree
   where
-    -- Find extent (min and max x) of all leaves in a subtree
-    findExtent :: Tree { x :: Number, y :: Number, height :: Int | r } -> { minX :: Number, maxX :: Number }
-    findExtent (Node val children) =
-      case Array.fromFoldable children of
-        [] -> { minX: val.x, maxX: val.x }  -- Leaf node
-        childArray ->
-          let
-            childExtents = map findExtent childArray
-            minX = fromMaybe val.x $ minimum $ map (\e -> e.minX) childExtents
-            maxX = fromMaybe val.x $ maximum $ map (\e -> e.maxX) childExtents
-          in
-            { minX, maxX }
+  -- Find extent (min and max x) of all leaves in a subtree
+  findExtent :: Tree { x :: Number, y :: Number, height :: Int | r } -> { minX :: Number, maxX :: Number }
+  findExtent (Node val children) =
+    case Array.fromFoldable children of
+      [] -> { minX: val.x, maxX: val.x } -- Leaf node
+      childArray ->
+        let
+          childExtents = map findExtent childArray
+          minX = fromMaybe val.x $ minimum $ map (\e -> e.minX) childExtents
+          maxX = fromMaybe val.x $ maximum $ map (\e -> e.maxX) childExtents
+        in
+          { minX, maxX }
 
-    -- Thread through lastLeafX to assign sequential positions
-    renderInternal :: Number -> Tree { x :: Number, y :: Number, height :: Int | r } -> { tree :: Tree { x :: Number, y :: Number, height :: Int | r }, lastLeafX :: Number }
-    renderInternal currentLeafX (Node val children) =
-      case Array.fromFoldable children of
-        -- Leaf node: assign sequential x position
-        [] ->
-          let leafX = currentLeafX
-              leafNode = Node (val { x = leafX }) Nil
-          in { tree: leafNode, lastLeafX: leafX + minSep }
+  -- Thread through lastLeafX to assign sequential positions
+  renderInternal :: Number -> Tree { x :: Number, y :: Number, height :: Int | r } -> { tree :: Tree { x :: Number, y :: Number, height :: Int | r }, lastLeafX :: Number }
+  renderInternal currentLeafX (Node val children) =
+    case Array.fromFoldable children of
+      -- Leaf node: assign sequential x position
+      [] ->
+        let
+          leafX = currentLeafX
+          leafNode = Node (val { x = leafX }) Nil
+        in
+          { tree: leafNode, lastLeafX: leafX + minSep }
 
-        -- Internal node: process children, then center on subtree extent
-        childArray ->
-          let
-            -- Process all children, threading through lastLeafX
-            processChildren = foldl
-              (\acc child ->
-                let result = renderInternal acc.lastLeafX child
-                in { trees: Array.snoc acc.trees result.tree
-                   , lastLeafX: result.lastLeafX
-                   }
-              )
-              { trees: [], lastLeafX: currentLeafX }
-              childArray
+      -- Internal node: process children, then center on subtree extent
+      childArray ->
+        let
+          -- Process all children, threading through lastLeafX
+          processChildren = foldl
+            ( \acc child ->
+                let
+                  result = renderInternal acc.lastLeafX child
+                in
+                  { trees: Array.snoc acc.trees result.tree
+                  , lastLeafX: result.lastLeafX
+                  }
+            )
+            { trees: [], lastLeafX: currentLeafX }
+            childArray
 
-            childTrees = processChildren.trees
-            childrenList = fromFoldable childTrees
+          childTrees = processChildren.trees
+          childrenList = fromFoldable childTrees
 
-            -- Center parent on full subtree extent (leftmost to rightmost leaf)
-            -- Fold over all children to find the min and max x positions
-            allChildExtents = map findExtent childTrees
-            minX = fromMaybe 0.0 $ minimum $ map (\e -> e.minX) allChildExtents
-            maxX = fromMaybe 0.0 $ maximum $ map (\e -> e.maxX) allChildExtents
-            centerX = (minX + maxX) / 2.0
+          -- Center parent on full subtree extent (leftmost to rightmost leaf)
+          -- Fold over all children to find the min and max x positions
+          allChildExtents = map findExtent childTrees
+          minX = fromMaybe 0.0 $ minimum $ map (\e -> e.minX) allChildExtents
+          maxX = fromMaybe 0.0 $ maximum $ map (\e -> e.maxX) allChildExtents
+          centerX = (minX + maxX) / 2.0
 
-            internalNode = Node (val { x = centerX }) childrenList
-          in
-            { tree: internalNode, lastLeafX: processChildren.lastLeafX }
+          internalNode = Node (val { x = centerX }) childrenList
+        in
+          { tree: internalNode, lastLeafX: processChildren.lastLeafX }
 
-    foldl :: forall a b. (a -> b -> a) -> a -> Array b -> a
-    foldl f init arr = Data.Foldable.foldl f init arr
+  foldl :: forall a b. (a -> b -> a) -> a -> Array b -> a
+  foldl f init arr = Data.Foldable.foldl f init arr
 
 -- | Add y coordinates based on height
 -- | For cluster: y = height (leaves have height=0, so y=0, all at same level)
@@ -231,10 +236,11 @@ addYCoordinates (Node val children) =
     Node (val { y = nodeY }) childrenWithY
 
 -- | Scale abstract coordinates to pixel coordinates
-scaleToPixels :: forall r.
-  ClusterConfig ->
-  Tree { height :: Int, x :: Number, y :: Number | r } ->
-  Tree { height :: Int, x :: Number, y :: Number | r }
+scaleToPixels
+  :: forall r
+   . ClusterConfig
+  -> Tree { height :: Int, x :: Number, y :: Number | r }
+  -> Tree { height :: Int, x :: Number, y :: Number | r }
 scaleToPixels config inputTree =
   let
     -- Find x range using Foldable instance

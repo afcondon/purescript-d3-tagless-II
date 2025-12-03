@@ -77,8 +77,8 @@ globalDeclarationsRef = unsafePerformEffect $ Ref.new Object.empty
 
 -- | Focus state for neighborhood drill-down
 type FocusState =
-  { focusedNodeId :: Maybe Int  -- Currently focused node (Nothing = full view)
-  , fullNodes :: Array SimNode   -- Original full node set for restoration
+  { focusedNodeId :: Maybe Int -- Currently focused node (Nothing = full view)
+  , fullNodes :: Array SimNode -- Original full node set for restoration
   }
 
 -- | Global ref for focus state
@@ -102,7 +102,7 @@ forceLinksGroupId = GroupId "#explorer-links"
 -- | Initialize the explorer
 initExplorer :: String -> Effect Unit
 initExplorer containerSelector = launchAff_ do
-  log "[Explorer] BUILD: 2025-12-02 15:00 - Tree4 with force links"
+  log "[Explorer] BUILD: 2025-12-02 15:00 - Tree with force links"
   log "[Explorer] Loading data..."
   result <- loadModel
   case result of
@@ -164,21 +164,22 @@ initWithModel model containerSelector = do
 -- | Go to a named scene
 goToScene :: String -> Ref Scene.SceneState -> Effect Unit
 goToScene sceneName stateRef = do
-  let mScene = case sceneName of
-        "GridForm" -> Just Scenes.gridFormScene
-        "GridRun" -> Just Scenes.gridRunScene
-        "OrbitForm" -> Just Scenes.orbitFormScene
-        "OrbitRun" -> Just Scenes.orbitRunScene
-        "TreeForm" -> Just Scenes.treeFormScene
-        "TreeRun" -> Just Scenes.treeRunScene
-        _ -> Nothing
+  let
+    mScene = case sceneName of
+      "GridForm" -> Just Scenes.gridFormScene
+      "GridRun" -> Just Scenes.gridRunScene
+      "OrbitForm" -> Just Scenes.orbitFormScene
+      "OrbitRun" -> Just Scenes.orbitRunScene
+      "TreeForm" -> Just Scenes.treeFormScene
+      "TreeRun" -> Just Scenes.treeRunScene
+      _ -> Nothing
   case mScene of
     Just scene -> do
       -- Handle TreeForm: render tree bezier links
       when (sceneName == "TreeForm") do
         state <- Ref.read stateRef
         nodes <- Sim.getNodes state.simulation
-        clearTreeLinks  -- Clear any existing links
+        clearTreeLinks -- Clear any existing links
         renderTreeLinks nodes
         setTreeSceneClass true
 
@@ -187,19 +188,19 @@ goToScene sceneName stateRef = do
         state <- Ref.read stateRef
         nodes <- Sim.getNodes state.simulation
         links <- Ref.read globalLinksRef
-        clearTreeLinks  -- Remove any existing links
+        clearTreeLinks -- Remove any existing links
         addTreeForces nodes links state.simulation
-        renderForceLinks nodes links  -- Render straight line links
-        Scene.setLinksGroupId forceLinksGroupId stateRef  -- Enable link updates
-        setTreeSceneClass true  -- Keep packages/non-tree faded
+        renderForceLinks nodes links -- Render straight line links
+        Scene.setLinksGroupId forceLinksGroupId stateRef -- Enable link updates
+        setTreeSceneClass true -- Keep packages/non-tree faded
 
       -- For Grid/Orbit scenes: restore grid forces and clear tree stuff
       when (isGridOrOrbitScene sceneName) do
         state <- Ref.read stateRef
         nodes <- Sim.getNodes state.simulation
         restoreGridForces nodes state.simulation
-        clearTreeLinks  -- Clear any force links
-        Scene.clearLinksGroupId stateRef  -- Disable link updates
+        clearTreeLinks -- Clear any force links
+        Scene.clearLinksGroupId stateRef -- Disable link updates
         setTreeSceneClass false
 
       Scene.transitionTo scene stateRef
@@ -232,9 +233,10 @@ randomizeModulePositions nodes = traverse randomizeIfModule nodes
     ModuleNode -> do
       rx <- random
       ry <- random
-      let { x: pkgX, y: pkgY } = case Object.lookup (show n.cluster) packagePositions of
-            Just pos -> pos
-            Nothing -> { x: 0.0, y: 0.0 }
+      let
+        { x: pkgX, y: pkgY } = case Object.lookup (show n.cluster) packagePositions of
+          Just pos -> pos
+          Nothing -> { x: 0.0, y: 0.0 }
       let jitterX = (rx - 0.5) * 100.0
       let jitterY = (ry - 0.5) * 100.0
       pure $ n { x = pkgX + jitterX, y = pkgY + jitterY }
@@ -304,19 +306,27 @@ restoreGridForces nodes sim = do
 -- | Format tooltip HTML for a node
 formatNodeTooltip :: SimNode -> String
 formatNodeTooltip node =
-  "<div class=\"tooltip-header\">" <> node.name <> "</div>" <>
-  "<div class=\"tooltip-package\">" <> node.package <> "</div>" <>
-  "<div class=\"tooltip-metrics\">" <>
-    metric "Type" (nodeTypeLabel node.nodeType) <>
-    metric "Dependencies" (show (Array.length node.targets)) <>
-    metric "Dependents" (show (Array.length node.sources)) <>
-  "</div>"
+  "<div class=\"tooltip-header\">" <> node.name <> "</div>"
+    <> "<div class=\"tooltip-package\">"
+    <> node.package
+    <> "</div>"
+    <> "<div class=\"tooltip-metrics\">"
+    <> metric "Type" (nodeTypeLabel node.nodeType)
+    <> metric "Dependencies" (show (Array.length node.targets))
+    <> metric "Dependents" (show (Array.length node.sources))
+    <>
+      "</div>"
   where
   metric label value =
-    "<div class=\"tooltip-metric\">" <>
-      "<span class=\"metric-label\">" <> label <> "</span>" <>
-      "<span class=\"metric-value\">" <> value <> "</span>" <>
-    "</div>"
+    "<div class=\"tooltip-metric\">"
+      <> "<span class=\"metric-label\">"
+      <> label
+      <> "</span>"
+      <> "<span class=\"metric-value\">"
+      <> value
+      <> "</span>"
+      <>
+        "</div>"
 
   nodeTypeLabel :: NodeType -> String
   nodeTypeLabel PackageNode = "Package"
@@ -348,7 +358,7 @@ renderSVG containerSelector nodes = do
     , fill (nodeColor :: SimNode -> String)
     , stroke "#fff"
     , strokeWidth 0.5
-    , class_ nodeClass  -- CSS class for type-based styling/transitions
+    , class_ nodeClass -- CSS class for type-based styling/transitions
     ]
     nodesGroup
 
@@ -356,19 +366,21 @@ renderSVG containerSelector nodes = do
   _ <- on (Zoom $ defaultZoom (ScaleExtent 0.1 10.0) "#explorer-zoom-group") svg
 
   -- Add highlight on hover (mouse enter highlights connected nodes)
-  let highlightClasses = ["highlighted-source", "highlighted-upstream", "highlighted-downstream", "dimmed"]
-  _ <- on (onMouseEnter \node -> do
-    -- Clear previous highlight classes first
-    clearClasses "#explorer-nodes" "circle" highlightClasses
-    -- Then apply new classification
-    let targetSet = Set.fromFoldable node.targets
-    let sourceSet = Set.fromFoldable node.sources
-    classifyElements "#explorer-nodes" "circle" \n ->
-      if n.id == node.id then "highlighted-source"
-      else if Set.member n.id targetSet then "highlighted-upstream"
-      else if Set.member n.id sourceSet then "highlighted-downstream"
-      else "dimmed"
-    ) nodeSel
+  let highlightClasses = [ "highlighted-source", "highlighted-upstream", "highlighted-downstream", "dimmed" ]
+  _ <- on
+    ( onMouseEnter \node -> do
+        -- Clear previous highlight classes first
+        clearClasses "#explorer-nodes" "circle" highlightClasses
+        -- Then apply new classification
+        let targetSet = Set.fromFoldable node.targets
+        let sourceSet = Set.fromFoldable node.sources
+        classifyElements "#explorer-nodes" "circle" \n ->
+          if n.id == node.id then "highlighted-source"
+          else if Set.member n.id targetSet then "highlighted-upstream"
+          else if Set.member n.id sourceSet then "highlighted-downstream"
+          else "dimmed"
+    )
+    nodeSel
 
   -- Add clear highlight on mouse leave
   _ <- on (onMouseLeave \_ -> clearClasses "#explorer-nodes" "circle" highlightClasses) nodeSel
@@ -385,8 +397,10 @@ renderSVG containerSelector nodes = do
 -- | Color by package cluster
 nodeColor :: SimNode -> String
 nodeColor n =
-  let t = numMod (toNumber n.cluster * 0.618033988749895) 1.0
-  in interpolateTurbo t
+  let
+    t = numMod (toNumber n.cluster * 0.618033988749895) 1.0
+  in
+    interpolateTurbo t
 
 numMod :: Number -> Number -> Number
 numMod a b = a - b * toNumber (floor (a / b))
@@ -444,7 +458,7 @@ linkPathFn nodeMap link =
     _, _ -> ""
 
 -- =============================================================================
--- Force Link Rendering (for Tree4)
+-- Force Link Rendering (for Tree)
 -- =============================================================================
 
 -- | Swizzled link type for D3 rendering
@@ -463,8 +477,9 @@ renderForceLinks nodes links = do
   log $ "[Explorer] Rendering " <> show (Array.length treeLinks) <> " force links"
 
   -- Swizzle links: convert integer IDs to node references
-  let swizzled = swizzleLinks nodes treeLinks \src tgt _i link ->
-        { source: src, target: tgt, linkType: link.linkType }
+  let
+    swizzled = swizzleLinks nodes treeLinks \src tgt _i link ->
+      { source: src, target: tgt, linkType: link.linkType }
 
   -- Render via D3
   _ <- runD3v2M $ renderForceLinksD3 swizzled
@@ -531,7 +546,7 @@ clearElement element = clearNode (toNode element)
     case mChild of
       Just child -> do
         _ <- Node.removeChild child node
-        clearNode node  -- recurse until no more children
+        clearNode node -- recurse until no more children
       Nothing -> pure unit
 
 -- | Add or remove the tree-scene class from the nodes group to trigger CSS fade
@@ -544,9 +559,8 @@ setTreeSceneClass shouldAdd = do
   case mElement of
     Just element -> do
       classes <- classList element
-      if shouldAdd
-        then DOMTokenList.add classes "tree-scene"
-        else DOMTokenList.remove classes "tree-scene"
+      if shouldAdd then DOMTokenList.add classes "tree-scene"
+      else DOMTokenList.remove classes "tree-scene"
       log $ "[Explorer] Set tree-scene class: " <> show shouldAdd
     Nothing -> log "[Explorer] Could not find #explorer-nodes for CSS class"
 
@@ -582,13 +596,16 @@ toggleFocus clickedNode = do
           let nodesToStore = if Array.null focus.fullNodes then currentNodes else focus.fullNodes
 
           -- Build neighborhood: clicked node + its targets + its sources
-          let neighborhoodIds = Set.fromFoldable $
-                [clickedNode.id] <> clickedNode.targets <> clickedNode.sources
+          let
+            neighborhoodIds = Set.fromFoldable $
+              [ clickedNode.id ] <> clickedNode.targets <> clickedNode.sources
 
           let neighborhoodNodes = Array.filter (\n -> Set.member n.id neighborhoodIds) currentNodes
 
-          log $ "[Explorer] Focusing on node " <> show clickedNode.id <>
-                " (neighborhood: " <> show (Array.length neighborhoodNodes) <> " nodes)"
+          log $ "[Explorer] Focusing on node " <> show clickedNode.id
+            <> " (neighborhood: "
+            <> show (Array.length neighborhoodNodes)
+            <> " nodes)"
 
           -- Update focus state
           Ref.write { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore } globalFocusRef
@@ -683,15 +700,17 @@ renderNeighborhoodLinks nodes = do
   let nodeIdSet = Set.fromFoldable $ map _.id nodes
 
   -- Filter to links where BOTH source and target are in neighborhood
-  let neighborhoodLinks = Array.filter
-        (\link -> Set.member link.source nodeIdSet && Set.member link.target nodeIdSet)
-        allLinks
+  let
+    neighborhoodLinks = Array.filter
+      (\link -> Set.member link.source nodeIdSet && Set.member link.target nodeIdSet)
+      allLinks
 
   log $ "[Explorer] Rendering " <> show (Array.length neighborhoodLinks) <> " neighborhood links"
 
   -- Swizzle: convert IDs to node references (by node.id lookup, not array index)
-  let swizzled = swizzleLinksByIndex _.id nodes neighborhoodLinks \src tgt _i link ->
-        { source: src, target: tgt, linkType: link.linkType }
+  let
+    swizzled = swizzleLinksByIndex _.id nodes neighborhoodLinks \src tgt _i link ->
+      { source: src, target: tgt, linkType: link.linkType }
 
   -- Render as straight lines
   _ <- runD3v2M $ renderNeighborhoodLinksD3 swizzled
@@ -708,9 +727,10 @@ renderStaticNeighborhoodLinks nodes = do
   let nodeIdSet = Set.fromFoldable $ map _.id nodes
 
   -- Filter to links where BOTH source and target are in neighborhood
-  let neighborhoodLinks = Array.filter
-        (\link -> Set.member link.source nodeIdSet && Set.member link.target nodeIdSet)
-        allLinks
+  let
+    neighborhoodLinks = Array.filter
+      (\link -> Set.member link.source nodeIdSet && Set.member link.target nodeIdSet)
+      allLinks
 
   log $ "[Explorer] Rendering " <> show (Array.length neighborhoodLinks) <> " static neighborhood links"
 
@@ -874,17 +894,19 @@ renderNodesOnly nodes = do
   circlesSel <- select "#explorer-nodes circle"
 
   -- Re-attach highlight behavior
-  let highlightClasses = ["highlighted-source", "highlighted-upstream", "highlighted-downstream", "dimmed"]
-  _ <- on (onMouseEnter \node -> do
-    clearClasses "#explorer-nodes" "circle" highlightClasses
-    let targetSet = Set.fromFoldable node.targets
-    let sourceSet = Set.fromFoldable node.sources
-    classifyElements "#explorer-nodes" "circle" \n ->
-      if n.id == node.id then "highlighted-source"
-      else if Set.member n.id targetSet then "highlighted-upstream"
-      else if Set.member n.id sourceSet then "highlighted-downstream"
-      else "dimmed"
-    ) circlesSel
+  let highlightClasses = [ "highlighted-source", "highlighted-upstream", "highlighted-downstream", "dimmed" ]
+  _ <- on
+    ( onMouseEnter \node -> do
+        clearClasses "#explorer-nodes" "circle" highlightClasses
+        let targetSet = Set.fromFoldable node.targets
+        let sourceSet = Set.fromFoldable node.sources
+        classifyElements "#explorer-nodes" "circle" \n ->
+          if n.id == node.id then "highlighted-source"
+          else if Set.member n.id targetSet then "highlighted-upstream"
+          else if Set.member n.id sourceSet then "highlighted-downstream"
+          else "dimmed"
+    )
+    circlesSel
   _ <- on (onMouseLeave \_ -> clearClasses "#explorer-nodes" "circle" highlightClasses) circlesSel
 
   -- Re-attach tooltip

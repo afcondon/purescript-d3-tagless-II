@@ -24,8 +24,8 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import D3.Layout.Hierarchy.Tree4 as Tree4
-import D3.Layout.Hierarchy.Link (LinkStyle(..), linkGenerator)
+import DataViz.Layout.Hierarchy.Tree as Tree
+import DataViz.Layout.Hierarchy.Link (LinkStyle(..), linkGenerator)
 import PSD3.Shared.Data (loadFlareData)
 import PSD3v2.Attribute.Types (width, height, viewBox, class_, cx, cy, radius, fill, stroke, strokeWidth, strokeOpacity, d)
 import PSD3v2.Capabilities.Selection (select, renderTree)
@@ -278,8 +278,8 @@ drawTreeExplorer selector state flareTree = do
     -- Build TreeConfig from state with separation function
     let layerScaleFn = getLayerScaleFn state.layerScalePreset state.exponent
     let
-      config :: Tree4.TreeConfig NodeWithRadius
-      config = Tree4.defaultTreeConfig
+      config :: Tree.TreeConfig NodeWithRadius
+      config = Tree.defaultTreeConfig
         { size =
             { width: chartWidth - (2.0 * padding)
             , height: chartHeight - (2.0 * padding)
@@ -292,8 +292,8 @@ drawTreeExplorer selector state flareTree = do
     -- Get link generator for selected style
     let linkPathFn = linkGenerator state.linkStyle
 
-    -- Apply Tree4 layout
-    let positioned = Tree4.tree config treeWithRadius
+    -- Apply Tree layout
+    let positioned = Tree.tree config treeWithRadius
 
     -- Flatten to arrays
     let nodes = Array.fromFoldable positioned

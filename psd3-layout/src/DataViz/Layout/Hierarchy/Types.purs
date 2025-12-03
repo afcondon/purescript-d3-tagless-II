@@ -1,8 +1,8 @@
--- | D3.Layout.Hierarchy.Types
+-- | DataViz.Layout.Hierarchy.Types
 -- |
 -- | Pure PureScript implementation of D3 hierarchy types.
 -- | Follows D3's conceptual model but uses separate types for each processing phase.
-module D3.Layout.Hierarchy.Types
+module DataViz.Layout.Hierarchy.Types
   ( HierarchyNode(..)
   , ValuedNode(..)
   , getData
@@ -33,10 +33,10 @@ import Data.Maybe (Maybe)
 -- | 2. Pattern matching
 -- | 3. Direct field access via record syntax
 data HierarchyNode a = HNode
-  { data_ :: a                           -- Original user data (embedded like D3)
-  , depth :: Int                        -- Distance from root (root = 0)
-  , height :: Int                       -- Distance to deepest descendant (leaf = 0)
-  , parent :: Maybe (HierarchyNode a)   -- Reference to parent (Nothing for root)
+  { data_ :: a -- Original user data (embedded like D3)
+  , depth :: Int -- Distance from root (root = 0)
+  , height :: Int -- Distance to deepest descendant (leaf = 0)
+  , parent :: Maybe (HierarchyNode a) -- Reference to parent (Nothing for root)
   , children :: Array (HierarchyNode a) -- Child nodes (empty for leaves)
   }
 
@@ -53,7 +53,7 @@ data ValuedNode a = VNode
   , height :: Int
   , parent :: Maybe (ValuedNode a)
   , children :: Array (ValuedNode a)
-  , value :: Number                     -- NEW: Computed aggregate value
+  , value :: Number -- NEW: Computed aggregate value
   }
 
 derive instance eqValuedNode :: Eq a => Eq (ValuedNode a)
@@ -95,7 +95,7 @@ getValuedChildren (VNode n) = n.children
 
 -- | Configuration for hierarchy construction
 type HierarchyConfig a =
-  { children :: a -> Maybe (Array a)    -- Accessor function for children
+  { children :: a -> Maybe (Array a) -- Accessor function for children
   }
 
 -- | Result of hierarchy construction

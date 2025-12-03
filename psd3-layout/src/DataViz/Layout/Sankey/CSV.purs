@@ -1,8 +1,8 @@
--- | D3.Layout.Sankey.CSV
+-- | DataViz.Layout.Sankey.CSV
 -- |
 -- | CSV parsing utilities for Sankey diagram data.
 -- | Parses CSV files with source,target,value format.
-module D3.Layout.Sankey.CSV
+module DataViz.Layout.Sankey.CSV
   ( parseSankeyCSV
   , parseLine
   ) where
@@ -14,7 +14,7 @@ import Data.Maybe (Maybe(..))
 import Data.Number as Number
 import Data.String (Pattern(..), split, trim)
 import Data.String.Common (null) as String
-import D3.Layout.Sankey.Types (LinkCSVRow)
+import DataViz.Layout.Sankey.Types (LinkCSVRow)
 
 -- | Parse CSV string into array of LinkCSVRow
 -- | Expected format: "source,target,value" with header row
@@ -26,12 +26,12 @@ parseSankeyCSV :: String -> Array LinkCSVRow
 parseSankeyCSV csvString =
   let
     lines = split (Pattern "\n") csvString
-    dataLines = filter (not <<< isEmpty) $ drop 1 lines  -- Skip header
+    dataLines = filter (not <<< isEmpty) $ drop 1 lines -- Skip header
   in
     mapMaybe parseLine dataLines
   where
-    isEmpty :: String -> Boolean
-    isEmpty s = String.null (trim s)
+  isEmpty :: String -> Boolean
+  isEmpty s = String.null (trim s)
 
 -- | Parse a single CSV line into LinkCSVRow
 parseLine :: String -> Maybe LinkCSVRow
@@ -40,7 +40,7 @@ parseLine line =
     parts = map trim $ split (Pattern ",") line
   in
     case parts of
-      [s, t, valueStr] ->
+      [ s, t, valueStr ] ->
         case Number.fromString valueStr of
           Just v ->
             Just { s, t, v }

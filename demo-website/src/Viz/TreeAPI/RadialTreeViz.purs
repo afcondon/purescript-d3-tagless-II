@@ -12,7 +12,7 @@ import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import PSD3.Shared.Data (loadFlareData)
-import D3.Layout.Hierarchy.Tree4 (tree, defaultTreeConfig)
+import DataViz.Layout.Hierarchy.Tree (tree, defaultTreeConfig)
 import PSD3v2.Attribute.Types (width, height, viewBox, class_, cx, cy, radius, fill, stroke, strokeWidth, d, x, y, textContent, textAnchor, fontSize, transform)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, reselectD3v2)
@@ -32,10 +32,10 @@ radialPoint :: forall r. { x :: Number, y :: Number | r } -> Number -> Number ->
 radialPoint node w h =
   let
     -- Map x to angle (0 to 2π)
-    angle = (node.x / w) * 2.0 * pi - (pi / 2.0)  -- Start at top (-π/2)
+    angle = (node.x / w) * 2.0 * pi - (pi / 2.0) -- Start at top (-π/2)
     -- Map y (depth) to radius
     minDim = if w < h then w else h
-    rad = (node.y / h) * (minDim / 2.0) * 0.85  -- Scale to 85% of radius
+    rad = (node.y / h) * (minDim / 2.0) * 0.85 -- Scale to 85% of radius
   in
     { x: rad * cos angle
     , y: rad * sin angle
@@ -51,19 +51,22 @@ projectRadial w h (Node val children) =
     Node (val { x = projected.x, y = projected.y }) projectedChildren
 
 -- | Create links from parent to children
-makeLinks :: forall r. Tree { x :: Number, y :: Number | r }
+makeLinks
+  :: forall r
+   . Tree { x :: Number, y :: Number | r }
   -> Array { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
 makeLinks tree' = Array.fromFoldable $ makeLinksList tree'
   where
-    makeLinksList :: Tree { x :: Number, y :: Number | r }
-      -> List { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
-    makeLinksList (Node val children) =
-      let
-        childLinks = children >>= \(Node childVal _) ->
-          Cons { source: { x: val.x, y: val.y }, target: { x: childVal.x, y: childVal.y } } Nil
-        grandchildLinks = children >>= makeLinksList
-      in
-        childLinks <> grandchildLinks
+  makeLinksList
+    :: Tree { x :: Number, y :: Number | r }
+    -> List { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
+  makeLinksList (Node val children) =
+    let
+      childLinks = children >>= \(Node childVal _) ->
+        Cons { source: { x: val.x, y: val.y }, target: { x: childVal.x, y: childVal.y } } Nil
+      grandchildLinks = children >>= makeLinksList
+    in
+      childLinks <> grandchildLinks
 
 -- | Radial link path generator
 -- | Creates cubic Bezier curves that follow the radial structure
@@ -87,10 +90,19 @@ radialLinkPath x1 y1 x2 y2 =
     cp2x = midRadius * cos angle2
     cp2y = midRadius * sin angle2
   in
-    "M" <> show x1 <> "," <> show y1 <>
-    "C" <> show cp1x <> "," <> show cp1y <>
-    " " <> show cp2x <> "," <> show cp2y <>
-    " " <> show x2 <> "," <> show y2
+    "M" <> show x1 <> "," <> show y1
+      <> "C"
+      <> show cp1x
+      <> ","
+      <> show cp1y
+      <> " "
+      <> show cp2x
+      <> ","
+      <> show cp2y
+      <> " "
+      <> show x2
+      <> ","
+      <> show y2
 
 -- | Draw radial tree hierarchy with loaded data
 drawRadialTree :: String -> Tree HierNode -> Effect Unit
@@ -102,9 +114,10 @@ drawRadialTree selector flareTree = runD3v2M do
   let centerX = chartSize / 2.0
   let centerY = chartSize / 2.0
 
-  -- Apply Tree4 layout
-  let config = defaultTreeConfig
-        { size = { width: chartSize, height: chartSize } }
+  -- Apply Tree layout
+  let
+    config = defaultTreeConfig
+      { size = { width: chartSize, height: chartSize } }
   let positioned = tree config flareTree
 
   -- Apply radial projection to all nodes
@@ -117,38 +130,41 @@ drawRadialTree selector flareTree = runD3v2M do
   liftEffect $ Console.log $ "Rendering radial tree: " <> show (Array.length nodes) <> " nodes, " <> show (Array.length links) <> " links"
 
   -- First tree: SVG container with links (datum type: link data)
-  let linksTree :: T.Tree LinkDatum
-      linksTree =
-        T.named SVG "svg"
-          [ width chartSize
-          , height chartSize
-          , viewBox ("0 0 " <> show chartSize <> " " <> show chartSize)
-          , class_ "radial-tree-viz"
-          ]
-          `T.withChild`
-            (T.named Group "chartGroup"
+  let
+    linksTree :: T.Tree LinkDatum
+    linksTree =
+      T.named SVG "svg"
+        [ width chartSize
+        , height chartSize
+        , viewBox ("0 0 " <> show chartSize <> " " <> show chartSize)
+        , class_ "radial-tree-viz"
+        ]
+        `T.withChild`
+          ( T.named Group "chartGroup"
               [ class_ "tree-content"
               , transform ("translate(" <> show centerX <> "," <> show centerY <> ")")
               ]
               `T.withChild`
-                (T.named Group "linksGroup"
-                  [ class_ "links" ]
-                  `T.withChild`
-                    (T.joinData "links" "path" links $ \link ->
-                      T.elem Path
-                        [ d (radialLinkPath
-                            link.source.x
-                            link.source.y
-                            link.target.x
-                            link.target.y)
-                        , fill "none"
-                        , stroke "#999"
-                        , strokeWidth 1.5
-                        , class_ "link"
-                        ]
-                    )
+                ( T.named Group "linksGroup"
+                    [ class_ "links" ]
+                    `T.withChild`
+                      ( T.joinData "links" "path" links $ \link ->
+                          T.elem Path
+                            [ d
+                                ( radialLinkPath
+                                    link.source.x
+                                    link.source.y
+                                    link.target.x
+                                    link.target.y
+                                )
+                            , fill "none"
+                            , stroke "#999"
+                            , strokeWidth 1.5
+                            , class_ "link"
+                            ]
+                      )
                 )
-            )
+          )
 
   -- Render links first (underlaying)
   linksSelections <- renderTree container linksTree
@@ -157,12 +173,13 @@ drawRadialTree selector flareTree = runD3v2M do
   -- Reselect the chartGroup from rendered selections (not global CSS selector!)
   chartGroupSel <- liftEffect $ reselectD3v2 "chartGroup" linksSelections
 
-  let nodesTree :: T.Tree HierNode
-      nodesTree =
-        T.named Group "nodesGroup"
-          [ class_ "nodes" ]
-          `T.withChild`
-            (T.joinData "nodeGroups" "g" nodes $ \node ->
+  let
+    nodesTree :: T.Tree HierNode
+    nodesTree =
+      T.named Group "nodesGroup"
+        [ class_ "nodes" ]
+        `T.withChild`
+          ( T.joinData "nodeGroups" "g" nodes $ \node ->
               T.named Group ("node-" <> node.name)
                 [ class_ "node" ]
                 `T.withChildren`
@@ -183,7 +200,7 @@ drawRadialTree selector flareTree = runD3v2M do
                       , transform ("translate(6, 3)")
                       ]
                   ]
-            )
+          )
 
   -- Render nodes on top (overlaying)
   _ <- renderTree chartGroupSel nodesTree

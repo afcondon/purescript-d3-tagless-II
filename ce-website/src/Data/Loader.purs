@@ -37,7 +37,7 @@ import Foreign.Object (Object)
 import Foreign.Object as Object
 import PSD3.Data.Graph as Graph
 import PSD3.Data.Graph.Algorithms as Algorithms
-import D3.Layout.Hierarchy.Tree4 as Tree4
+import DataViz.Layout.Hierarchy.Tree as Tree
 import Types (SimNode, SimLink, NodeType(..), LinkType(..), Package)
 
 -- =============================================================================
@@ -69,7 +69,7 @@ type LocFile =
 
 -- | Declaration summary from declarations-summary.json
 type Declaration =
-  { kind :: String  -- "typeClass", "data", "typeSynonym", "externData", "alias", "value"
+  { kind :: String -- "typeClass", "data", "typeSynonym", "externData", "alias", "value"
   , title :: String
   }
 
@@ -81,7 +81,7 @@ type LoadedModel =
   { nodes :: Array SimNode
   , links :: Array SimLink
   , packages :: Array Package
-  , declarations :: DeclarationsMap  -- Module declarations for bubble packs
+  , declarations :: DeclarationsMap -- Module declarations for bubble packs
   , moduleCount :: Int
   , packageCount :: Int
   }
@@ -214,11 +214,11 @@ transformToModel modulesObj packagesObj locMap declarations =
     treeLayoutSize = 1000.0
     treeConfig =
       { size: { width: treeLayoutSize, height: treeLayoutSize }
-      , minSeparation: 1.0  -- Default value
+      , minSeparation: 1.0 -- Default value
       , separation: Nothing
       , layerScale: Nothing
       }
-    laidOutTree = Tree4.tree treeConfig dataTree
+    laidOutTree = Tree.tree treeConfig dataTree
 
     -- Flatten tree to map of rectangular positions (will be projected to radial)
     treePositionMap = flattenTreeToPositionMap treeLayoutSize laidOutTree
@@ -227,11 +227,14 @@ transformToModel modulesObj packagesObj locMap declarations =
     nodes = map (updateNodeWithTreeData treePositionMap reachableNodeIds) nodesBeforeTree
 
     -- Create Package records for model
-    packages = Array.mapWithIndex (\_ name ->
-      { name
-      , depends: fromMaybe [] $ Object.lookup name packagesObj <#> _.depends
-      , modules: fromMaybe [] $ Map.lookup name packageModules
-      }) packageNames
+    packages = Array.mapWithIndex
+      ( \_ name ->
+          { name
+          , depends: fromMaybe [] $ Object.lookup name packagesObj <#> _.depends
+          , modules: fromMaybe [] $ Map.lookup name packageModules
+          }
+      )
+      packageNames
   in
     { nodes, links, packages, declarations, moduleCount, packageCount }
 
@@ -247,7 +250,7 @@ findRootModule modules =
       -- This is the opposite of before - we want the module others depend on
       case Array.last $ Array.sortWith (\m -> Array.length m.sources) modules of
         Just m -> m.id
-        Nothing -> 0  -- Empty modules array
+        Nothing -> 0 -- Empty modules array
 
 -- | Build tree from spanning tree edges (array of source->target tuples)
 buildTreeFromEdges :: Int -> Array (Tuple Int Int) -> Tree Int
@@ -261,56 +264,63 @@ buildTreeFromEdges rootId edges = go rootId
   -- Recursively build tree
   go :: Int -> Tree Int
   go nodeId =
-    let children = getChildren nodeId
-        childTrees = go <$> children
-    in Node nodeId (List.fromFoldable childTrees)
+    let
+      children = getChildren nodeId
+      childTrees = go <$> children
+    in
+      Node nodeId (List.fromFoldable childTrees)
 
 -- | Map function over tree values
 mapTree :: forall a b. (a -> b) -> Tree a -> Tree b
 mapTree f (Node value children) = Node (f value) (map (mapTree f) children)
 
--- | Flatten tree to map of rectangular positions (x, y from Tree4)
+-- | Flatten tree to map of rectangular positions (x, y from Tree)
 flattenTreeToPositionMap :: Number -> Tree { id :: Int, x :: Number, y :: Number, depth :: Int, height :: Int } -> Map Int { x :: Number, y :: Number }
 flattenTreeToPositionMap _ tree = go tree Map.empty
   where
   go :: Tree { id :: Int, x :: Number, y :: Number, depth :: Int, height :: Int } -> Map Int { x :: Number, y :: Number } -> Map Int { x :: Number, y :: Number }
   go (Node node children) acc =
-    let acc' = Map.insert node.id { x: node.x, y: node.y } acc
-    in foldl (\a child -> go child a) acc' children
+    let
+      acc' = Map.insert node.id { x: node.x, y: node.y } acc
+    in
+      foldl (\a child -> go child a) acc' children
 
 -- | Update node with tree position AND isInTree flag
 -- | Uses RadialTreeViz approach:
--- | - Tree4 produces rectangular coords (x in [0, width], y in [0, height])
+-- | - Tree produces rectangular coords (x in [0, width], y in [0, height])
 -- | - Project to radial: x → angle, y → radius
 updateNodeWithTreeData :: Map Int { x :: Number, y :: Number } -> Set Int -> SimNode -> SimNode
 updateNodeWithTreeData treePositions reachableIds node =
   let
     inTree = Set.member node.id reachableIds
-    layoutSize = 1000.0  -- Must match treeLayoutSize
-    maxRadius = 500.0    -- Maximum tree radius (half of layoutSize * 0.85 like RadialTreeViz)
+    layoutSize = 1000.0 -- Must match treeLayoutSize
+    maxRadius = 500.0 -- Maximum tree radius (half of layoutSize * 0.85 like RadialTreeViz)
 
     withTreePos = case Map.lookup node.id treePositions of
       Just { x: treeX, y: treeY } ->
         -- RadialTreeViz projection formula:
         -- x → angle: map [0, layoutSize] to [0, 2π], offset by -π/2 to start at top
-        let angle = (treeX / layoutSize) * 2.0 * pi - (pi / 2.0)
-            -- y → radius: map [0, layoutSize] to [0, maxRadius]
-            radius = (treeY / layoutSize) * maxRadius
-            -- Convert polar to Cartesian
-            cartX = radius * cos angle
-            cartY = radius * sin angle
-        in node { treeX = cartX, treeY = cartY }
-      Nothing -> node  -- Node not in tree (e.g., packages)
+        let
+          angle = (treeX / layoutSize) * 2.0 * pi - (pi / 2.0)
+          -- y → radius: map [0, layoutSize] to [0, maxRadius]
+          radius = (treeY / layoutSize) * maxRadius
+          -- Convert polar to Cartesian
+          cartX = radius * cos angle
+          cartY = radius * sin angle
+        in
+          node { treeX = cartX, treeY = cartY }
+      Nothing -> node -- Node not in tree (e.g., packages)
   in
     withTreePos { isInTree = inTree }
 
 -- | Mark a link as M2M_Tree if it's in the spanning tree, otherwise M2M_Graph
 markLinkType :: Set (Tuple Int Int) -> SimLink -> SimLink
 markLinkType spanningTreeEdges link =
-  let edge = Tuple link.source link.target
-  in if Set.member edge spanningTreeEdges
-     then link { linkType = M2M_Tree }
-     else link { linkType = M2M_Graph }
+  let
+    edge = Tuple link.source link.target
+  in
+    if Set.member edge spanningTreeEdges then link { linkType = M2M_Tree }
+    else link { linkType = M2M_Graph }
 
 -- =============================================================================
 -- Node Creation
@@ -344,7 +354,7 @@ mkPackageNode _allPackages totalPackages packageLocMap idx name =
     , vy: 0.0
     , fx: null
     , fy: null
-    , r  -- Package sized by total LOC
+    , r -- Package sized by total LOC
     , cluster: idx
     , targets: []
     , sources: []
@@ -353,7 +363,7 @@ mkPackageNode _allPackages totalPackages packageLocMap idx name =
     , orbitAngle: angle
     , treeX: 0.0
     , treeY: 0.0
-    , isInTree: false  -- Packages are never in the tree
+    , isInTree: false -- Packages are never in the tree
     }
 
 mkModuleNode
@@ -365,9 +375,9 @@ mkModuleNode
   -> Map String Int
   -> Int
   -> Int
-  -> Array SimNode  -- Pass package nodes to get their positions
-  -> Map Int (Array Int)  -- targetsMap
-  -> Map Int (Array Int)  -- sourcesMap
+  -> Array SimNode -- Pass package nodes to get their positions
+  -> Map Int (Array Int) -- targetsMap
+  -> Map Int (Array Int) -- sourcesMap
   -> SimNode
 mkModuleNode name idx modulesObj locMap packageIdMap _moduleIdMap packageCount _moduleCount packageNodes targetsMap sourcesMap =
   let
@@ -409,7 +419,7 @@ mkModuleNode name idx modulesObj locMap packageIdMap _moduleIdMap packageCount _
     , name
     , nodeType: ModuleNode
     , package: pkgName
-    , x: absGridX  -- Start at grid position
+    , x: absGridX -- Start at grid position
     , y: absGridY
     , vx: 0.0
     , vy: 0.0
@@ -419,12 +429,12 @@ mkModuleNode name idx modulesObj locMap packageIdMap _moduleIdMap packageCount _
     , cluster
     , targets
     , sources
-    , gridX: absGridX  -- Absolute position for Grid scene
+    , gridX: absGridX -- Absolute position for Grid scene
     , gridY: absGridY
-    , orbitAngle: 0.0  -- Modules don't have orbit angle
+    , orbitAngle: 0.0 -- Modules don't have orbit angle
     , treeX: 0.0
     , treeY: 0.0
-    , isInTree: false  -- Will be set true by updateNodeWithTreeData if reachable
+    , isInTree: false -- Will be set true by updateNodeWithTreeData if reachable
     }
 
 -- =============================================================================
@@ -440,9 +450,11 @@ buildPackageModulesMap modulesObj =
   foldl addModule Map.empty (Object.toUnfoldable modulesObj :: Array (Tuple String RawModule))
   where
   addModule acc (Tuple modName rawMod) =
-    let pkg = rawMod.package
-        existing = fromMaybe [] (Map.lookup pkg acc)
-    in Map.insert pkg (Array.snoc existing modName) acc
+    let
+      pkg = rawMod.package
+      existing = fromMaybe [] (Map.lookup pkg acc)
+    in
+      Map.insert pkg (Array.snoc existing modName) acc
 
 -- | Build map from package name to total LOC (sum of all module LOC)
 buildPackageLocMap :: Object RawModule -> Map String Int -> Map String Int
@@ -450,10 +462,12 @@ buildPackageLocMap modulesObj locMap =
   foldl addModuleLoc Map.empty (Object.toUnfoldable modulesObj :: Array (Tuple String RawModule))
   where
   addModuleLoc acc (Tuple _ rawMod) =
-    let pkg = rawMod.package
-        moduleLoc = fromMaybe 50 (Map.lookup rawMod.path locMap)
-        existing = fromMaybe 0 (Map.lookup pkg acc)
-    in Map.insert pkg (existing + moduleLoc) acc
+    let
+      pkg = rawMod.package
+      moduleLoc = fromMaybe 50 (Map.lookup rawMod.path locMap)
+      existing = fromMaybe 0 (Map.lookup pkg acc)
+    in
+      Map.insert pkg (existing + moduleLoc) acc
 
 buildLinks :: Object RawModule -> Map String Int -> Array SimLink
 buildLinks modulesObj moduleIdMap =
@@ -463,12 +477,15 @@ buildLinks modulesObj moduleIdMap =
     case Map.lookup modName moduleIdMap of
       Nothing -> []
       Just sourceId ->
-        Array.mapMaybe (\depName ->
-          Map.lookup depName moduleIdMap <#> \targetId ->
-            { source: sourceId
-            , target: targetId
-            , linkType: M2M_Graph  -- Default to graph; markLinkType will change to M2M_Tree if in spanning tree
-            }) rawMod.depends
+        Array.mapMaybe
+          ( \depName ->
+              Map.lookup depName moduleIdMap <#> \targetId ->
+                { source: sourceId
+                , target: targetId
+                , linkType: M2M_Graph -- Default to graph; markLinkType will change to M2M_Tree if in spanning tree
+                }
+          )
+          rawMod.depends
 
 -- | Build map from module ID to its dependencies (targets)
 buildTargetsMap :: Object RawModule -> Map String Int -> Map Int (Array Int)
@@ -479,8 +496,10 @@ buildTargetsMap modulesObj moduleIdMap =
     case Map.lookup modName moduleIdMap of
       Nothing -> acc
       Just sourceId ->
-        let targets = Array.mapMaybe (\depName -> Map.lookup depName moduleIdMap) rawMod.depends
-        in Map.insert sourceId targets acc
+        let
+          targets = Array.mapMaybe (\depName -> Map.lookup depName moduleIdMap) rawMod.depends
+        in
+          Map.insert sourceId targets acc
 
 -- | Build map from module ID to modules that depend on it (sources/dependents)
 buildSourcesMap :: Map Int (Array Int) -> Map Int (Array Int)
@@ -488,16 +507,23 @@ buildSourcesMap targetsMap =
   foldl addSources Map.empty (Map.toUnfoldable targetsMap :: Array (Tuple Int (Array Int)))
   where
   addSources acc (Tuple sourceId targets) =
-    foldl (\acc' targetId ->
-      let existing = fromMaybe [] (Map.lookup targetId acc')
-      in Map.insert targetId (Array.snoc existing sourceId) acc'
-    ) acc targets
+    foldl
+      ( \acc' targetId ->
+          let
+            existing = fromMaybe [] (Map.lookup targetId acc')
+          in
+            Map.insert targetId (Array.snoc existing sourceId) acc'
+      )
+      acc
+      targets
 
 -- Simple string hash function for deterministic positioning
 stringHash :: String -> Int
 stringHash s =
-  let chars = SCU.toCharArray s
-  in foldl (\acc c -> (acc * 31 + charCode c) `mod` 1000000) 0 chars
+  let
+    chars = SCU.toCharArray s
+  in
+    foldl (\acc c -> (acc * 31 + charCode c) `mod` 1000000) 0 chars
 
 -- Get char code (simple implementation)
 charCode :: Char -> Int
@@ -533,32 +559,34 @@ getDependencyTree = do
     let locMap = buildLocMap locFile.loc
 
     -- Build nodes/links exactly like transformToModel
-    let moduleNames = Object.keys modules
-        packageNames = Object.keys packages
-        packageCount = Array.length packageNames
-        moduleCount = Array.length moduleNames
-        packageIdMap = Map.fromFoldable $ Array.mapWithIndex (\i n -> Tuple n i) packageNames
-        moduleIdMap = Map.fromFoldable $ Array.mapWithIndex (\i n -> Tuple n (i + packageCount)) moduleNames
-        targetsMap = buildTargetsMap modules moduleIdMap
-        sourcesMap = buildSourcesMap targetsMap
-        packageLocMap = buildPackageLocMap modules locMap
-        packageNodes = Array.mapWithIndex (mkPackageNode packageNames packageCount packageLocMap) packageNames
-        moduleNodes = Array.mapWithIndex
-          (\i name -> mkModuleNode name i modules locMap packageIdMap moduleIdMap packageCount moduleCount packageNodes targetsMap sourcesMap)
-          moduleNames
-        nodesBeforeTree = packageNodes <> moduleNodes
-        allModuleLinks = buildLinks modules moduleIdMap
+    let
+      moduleNames = Object.keys modules
+      packageNames = Object.keys packages
+      packageCount = Array.length packageNames
+      moduleCount = Array.length moduleNames
+      packageIdMap = Map.fromFoldable $ Array.mapWithIndex (\i n -> Tuple n i) packageNames
+      moduleIdMap = Map.fromFoldable $ Array.mapWithIndex (\i n -> Tuple n (i + packageCount)) moduleNames
+      targetsMap = buildTargetsMap modules moduleIdMap
+      sourcesMap = buildSourcesMap targetsMap
+      packageLocMap = buildPackageLocMap modules locMap
+      packageNodes = Array.mapWithIndex (mkPackageNode packageNames packageCount packageLocMap) packageNames
+      moduleNodes = Array.mapWithIndex
+        (\i name -> mkModuleNode name i modules locMap packageIdMap moduleIdMap packageCount moduleCount packageNodes targetsMap sourcesMap)
+        moduleNames
+      nodesBeforeTree = packageNodes <> moduleNodes
+      allModuleLinks = buildLinks modules moduleIdMap
 
     -- Build graph for reachability
-    let graphConfig :: Graph.GraphConfig SimNode SimLink
-        graphConfig =
-          { getNodeId: _.id
-          , getLinkSource: _.source
-          , getLinkTarget: _.target
-          }
-        graphModel = Graph.buildGraphModel graphConfig nodesBeforeTree allModuleLinks
-        rootId = findRootModule moduleNodes
-        reachability = Algorithms.getReachableNodes graphConfig rootId graphModel
+    let
+      graphConfig :: Graph.GraphConfig SimNode SimLink
+      graphConfig =
+        { getNodeId: _.id
+        , getLinkSource: _.source
+        , getLinkTarget: _.target
+        }
+      graphModel = Graph.buildGraphModel graphConfig nodesBeforeTree allModuleLinks
+      rootId = findRootModule moduleNodes
+      reachability = Algorithms.getReachableNodes graphConfig rootId graphModel
 
     -- Build tree from spanning tree edges
     let idTree = buildTreeFromEdges rootId reachability.spanningTree
@@ -567,9 +595,14 @@ getDependencyTree = do
     let idToName = Map.fromFoldable $ Array.mapWithIndex (\i n -> Tuple (i + packageCount) n) moduleNames
 
     -- Convert ID tree to HierNode tree (same format as Flare)
-    let hierTree = mapTree (\nodeId ->
-          let name = fromMaybe ("node-" <> show nodeId) (Map.lookup nodeId idToName)
-          in { name, value: 1.0, x: 0.0, y: 0.0, depth: 0, height: 0 }
-          ) idTree
+    let
+      hierTree = mapTree
+        ( \nodeId ->
+            let
+              name = fromMaybe ("node-" <> show nodeId) (Map.lookup nodeId idToName)
+            in
+              { name, value: 1.0, x: 0.0, y: 0.0, depth: 0, height: 0 }
+        )
+        idTree
 
     Right hierTree

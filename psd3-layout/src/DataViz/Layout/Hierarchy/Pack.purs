@@ -1,4 +1,4 @@
-module D3.Layout.Hierarchy.Pack
+module DataViz.Layout.Hierarchy.Pack
   ( CircleId
   , Circle
   , PackState
@@ -225,8 +225,8 @@ shortenChainOnly aId jId chain =
 -- | Includes which direction the collision was found (affects how we update a/b)
 data CollisionResult
   = NoCollision
-  | CollisionFromJ CircleId  -- Collision found walking forward (b becomes j)
-  | CollisionFromK CircleId  -- Collision found walking backward (a becomes k)
+  | CollisionFromJ CircleId -- Collision found walking forward (b becomes j)
+  | CollisionFromK CircleId -- Collision found walking backward (a becomes k)
 
 -- | Get next ID in circular chain (wrapping)
 getNextInChain :: CircleId -> Array CircleId -> Maybe CircleId
@@ -234,8 +234,10 @@ getNextInChain nodeId chain =
   case Array.elemIndex nodeId chain of
     Nothing -> Nothing
     Just idx ->
-      let nextIdx = (idx + 1) `mod` Array.length chain
-      in Array.index chain nextIdx
+      let
+        nextIdx = (idx + 1) `mod` Array.length chain
+      in
+        Array.index chain nextIdx
 
 -- | Get previous ID in circular chain (wrapping)
 getPrevInChain :: CircleId -> Array CircleId -> Maybe CircleId
@@ -243,9 +245,11 @@ getPrevInChain nodeId chain =
   case Array.elemIndex nodeId chain of
     Nothing -> Nothing
     Just idx ->
-      let n = Array.length chain
-          prevIdx = (idx - 1 + n) `mod` n
-      in Array.index chain prevIdx
+      let
+        n = Array.length chain
+        prevIdx = (idx - 1 + n) `mod` n
+      in
+        Array.index chain prevIdx
 
 -- | D3-style bidirectional collision search
 -- | Walks both directions (j forward from b, k backward from a) simultaneously
@@ -281,8 +285,8 @@ bidirectionalCollisionSearch aId bId newCircle state =
               Just jNext ->
                 -- NOW check stop condition: j (after advancing) === k.next?
                 case getNextInChain k state.frontChain of
-                  Just kNext | jNext == kNext -> NoCollision  -- Pointers met, done
-                  _ -> doWhileStep jNext k (sj + jCircle.r) sk  -- Continue
+                  Just kNext | jNext == kNext -> NoCollision -- Pointers met, done
+                  _ -> doWhileStep jNext k (sj + jCircle.r) sk -- Continue
               Nothing -> NoCollision
         Nothing -> NoCollision
     else
@@ -297,8 +301,8 @@ bidirectionalCollisionSearch aId bId newCircle state =
               Just kPrev ->
                 -- NOW check stop condition: j === kPrev.next?
                 case getNextInChain kPrev state.frontChain of
-                  Just kPrevNext | j == kPrevNext -> NoCollision  -- Pointers met, done
-                  _ -> doWhileStep j kPrev sj (sk + kCircle.r)  -- Continue
+                  Just kPrevNext | j == kPrevNext -> NoCollision -- Pointers met, done
+                  _ -> doWhileStep j kPrev sj (sk + kCircle.r) -- Continue
               Nothing -> NoCollision
         Nothing -> NoCollision
 
@@ -495,10 +499,10 @@ packSiblingsMap inputCircles =
 
             -- Detect and report overlaps
             overlaps = detectOverlaps translated
-            _ = if Array.length overlaps > 0
-                then unsafePerformEffect $ Console.log $
-                  "⚠️ OVERLAPS DETECTED: " <> show (Array.length overlaps) <> " pairs"
-                else unit
+            _ =
+              if Array.length overlaps > 0 then unsafePerformEffect $ Console.log $
+                "⚠️ OVERLAPS DETECTED: " <> show (Array.length overlaps) <> " pairs"
+              else unit
             _ = unsafePerformEffect $ reportOverlaps overlaps
           in
             { circles: translated, radius: enclosing.r }
@@ -520,23 +524,27 @@ detectOverlaps circles =
   checkPair cs (Tuple i j) = do
     ci <- Array.index cs i
     cj <- Array.index cs j
-    let dx = cj.x - ci.x
-        dy = cj.y - ci.y
-        dist = sqrt (dx * dx + dy * dy)
-        minDist = ci.r + cj.r
-        overlap = minDist - dist
+    let
+      dx = cj.x - ci.x
+      dy = cj.y - ci.y
+      dist = sqrt (dx * dx + dy * dy)
+      minDist = ci.r + cj.r
+      overlap = minDist - dist
     -- Report if overlap > small tolerance (not just touching)
-    if overlap > 0.1
-      then Just { i, j, overlap }
-      else Nothing
+    if overlap > 0.1 then Just { i, j, overlap }
+    else Nothing
 
 -- | Report overlaps to console
 reportOverlaps :: Array { i :: Int, j :: Int, overlap :: Number } -> Effect Unit
 reportOverlaps overlaps =
-  Array.traverse_ (\o ->
-    Console.log $ "  Overlap: circles " <> show o.i <> " and " <> show o.j
-      <> " overlap by " <> show o.overlap <> " pixels"
-  ) overlaps
+  Array.traverse_
+    ( \o ->
+        Console.log $ "  Overlap: circles " <> show o.i <> " and " <> show o.j
+          <> " overlap by "
+          <> show o.overlap
+          <> " pixels"
+    )
+    overlaps
 
 -- ============================================================================
 -- ENCLOSING CIRCLE (from Pack.purs)
