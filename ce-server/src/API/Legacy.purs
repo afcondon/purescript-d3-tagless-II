@@ -96,9 +96,9 @@ declarationsSummaryJson db = do
     SELECT
       module,
       kind,
-      identifier as title
+      title
     FROM declarations
-    ORDER BY module, identifier
+    ORDER BY module, title
   """
   let json = buildDeclarationsSummaryJson rows
   ok' jsonHeaders json
