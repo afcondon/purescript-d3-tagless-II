@@ -78,53 +78,70 @@ render state =
                 ]
             ]
 
-        -- View Mode section
+        -- Layout section
         , HH.div [ HP.class_ (HH.ClassName "control-section") ]
-            [ HH.div [ HP.class_ (HH.ClassName "section-label") ] [ HH.text "View Mode" ]
+            [ HH.div [ HP.class_ (HH.ClassName "section-label") ] [ HH.text "Arrange" ]
             , HH.div [ HP.class_ (HH.ClassName "control-row") ]
                 [ HH.div [ HP.class_ (HH.ClassName "btn-group") ]
                     [ HH.button
                         [ HP.class_ (HH.ClassName "btn-editorial")
                         , HE.onClick \_ -> FormGrid
+                        , HP.title "Arrange modules in a grid by size"
                         ]
-                        [ HH.text "Grid" ]
+                        [ HH.text "By Size" ]
                     , HH.button
                         [ HP.class_ (HH.ClassName "btn-editorial")
                         , HE.onClick \_ -> FormOrbit
+                        , HP.title "Arrange modules in a circular ring"
                         ]
-                        [ HH.text "Orbit" ]
+                        [ HH.text "Ring" ]
                     , HH.button
                         [ HP.class_ (HH.ClassName "btn-editorial")
                         , HE.onClick \_ -> FormTree
+                        , HP.title "Arrange by import hierarchy"
                         ]
-                        [ HH.text "Tree" ]
+                        [ HH.text "Hierarchy" ]
                     ]
                 ]
             ]
 
-        -- Simulation section
+        -- Physics section
         , HH.div [ HP.class_ (HH.ClassName "control-section") ]
-            [ HH.div [ HP.class_ (HH.ClassName "section-label") ] [ HH.text "Physics" ]
+            [ HH.div [ HP.class_ (HH.ClassName "section-label") ] [ HH.text "Simulate" ]
             , HH.div [ HP.class_ (HH.ClassName "control-row") ]
                 [ HH.div [ HP.class_ (HH.ClassName "btn-group") ]
                     [ HH.button
                         [ HP.class_ (HH.ClassName "btn-editorial")
                         , HE.onClick \_ -> GridRun
+                        , HP.title "Cluster modules by dependencies"
                         ]
                         [ HH.text "Cluster" ]
                     , HH.button
                         [ HP.class_ (HH.ClassName "btn-editorial")
                         , HE.onClick \_ -> OrbitRun
+                        , HP.title "Spread modules with physics"
                         ]
-                        [ HH.text "Expand" ]
+                        [ HH.text "Spread" ]
                     , HH.button
                         [ HP.class_ (HH.ClassName "btn-editorial")
                         , HE.onClick \_ -> TreeRun
+                        , HP.title "Flow along import graph"
                         ]
-                        [ HH.text "Tree" ]
+                        [ HH.text "Flow" ]
                     ]
                 ]
             ]
+        ]
+
+    -- Color Key Panel (top-right)
+    , HH.div
+        [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-right", HH.ClassName "legend-panel" ] ]
+        [ HH.div [ HP.class_ (HH.ClassName "section-label") ] [ HH.text "Color = Package" ]
+        , HH.div [ HP.class_ (HH.ClassName "info-text") ]
+            [ HH.text "Modules are colored by their package. Similar colors indicate related code." ]
+        , HH.div [ HP.class_ (HH.ClassName "section-label") ] [ HH.text "Size = Lines" ]
+        , HH.div [ HP.class_ (HH.ClassName "info-text") ]
+            [ HH.text "Circle size shows lines of code. Larger modules have more code." ]
         ]
 
     -- Error message

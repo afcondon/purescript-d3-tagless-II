@@ -9558,16 +9558,16 @@
     z-index: 1000;
     pointer-events: none;
   `;
-    const title3 = document.createElement("div");
-    title3.textContent = "Declaration Types";
-    title3.style.cssText = `
+    const title4 = document.createElement("div");
+    title4.textContent = "Declaration Types";
+    title4.style.cssText = `
     color: #fff;
     font-size: 14px;
     font-weight: bold;
     margin-bottom: 10px;
     text-align: center;
   `;
-    legend2.appendChild(title3);
+    legend2.appendChild(title4);
     legendData.forEach((item) => {
       const row = document.createElement("div");
       row.style.cssText = `
@@ -22853,6 +22853,7 @@
   var prop1 = /* @__PURE__ */ prop2(isPropBoolean);
   var prop22 = /* @__PURE__ */ prop2(isPropString);
   var selected2 = /* @__PURE__ */ prop1("selected");
+  var title2 = /* @__PURE__ */ prop22("title");
   var id4 = /* @__PURE__ */ prop22("id");
   var disabled10 = /* @__PURE__ */ prop1("disabled");
   var classes = /* @__PURE__ */ (function() {
@@ -22984,7 +22985,7 @@
         return LoadProjects.value;
       }
       ;
-      throw new Error("Failed pattern match at Component.SpagoGridApp (line 156, column 5 - line 158, column 30): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Component.SpagoGridApp (line 173, column 5 - line 175, column 30): " + [v.constructor.name]);
     };
     return select7([class_3("select-editorial"), onSelectedIndexChange(handleProjectChange)])(append11([option([disabled10(true), selected2(eq13(state3.selectedProjectId)(Nothing.value))])([text5((function() {
       if (state3.loading) {
@@ -23010,7 +23011,7 @@
             return goToScene(sceneName)(mRef.value0)();
           }
           ;
-          throw new Error("Failed pattern match at Component.SpagoGridApp (line 282, column 5 - line 284, column 51): " + [mRef.constructor.name]);
+          throw new Error("Failed pattern match at Component.SpagoGridApp (line 299, column 5 - line 301, column 51): " + [mRef.constructor.name]);
         });
       });
     };
@@ -23104,12 +23105,12 @@
                       return pure17(unit);
                     }
                     ;
-                    throw new Error("Failed pattern match at Component.SpagoGridApp (line 233, column 9 - line 235, column 31): " + [firstProjectId.constructor.name]);
+                    throw new Error("Failed pattern match at Component.SpagoGridApp (line 250, column 9 - line 252, column 31): " + [firstProjectId.constructor.name]);
                   });
                 });
               }
               ;
-              throw new Error("Failed pattern match at Component.SpagoGridApp (line 219, column 5 - line 235, column 31): " + [result.constructor.name]);
+              throw new Error("Failed pattern match at Component.SpagoGridApp (line 236, column 5 - line 252, column 31): " + [result.constructor.name]);
             });
           });
         });
@@ -23173,11 +23174,11 @@
                     return pure17(unit);
                   }
                   ;
-                  throw new Error("Failed pattern match at Component.SpagoGridApp (line 253, column 9 - line 255, column 31): " + [v1.constructor.name]);
+                  throw new Error("Failed pattern match at Component.SpagoGridApp (line 270, column 9 - line 272, column 31): " + [v1.constructor.name]);
                 });
               }
               ;
-              throw new Error("Failed pattern match at Component.SpagoGridApp (line 242, column 5 - line 255, column 31): " + [result.constructor.name]);
+              throw new Error("Failed pattern match at Component.SpagoGridApp (line 259, column 5 - line 272, column 31): " + [result.constructor.name]);
             });
           });
         });
@@ -23224,7 +23225,7 @@
         return goToScene1("TreeRun");
       }
       ;
-      throw new Error("Failed pattern match at Component.SpagoGridApp (line 206, column 16 - line 269, column 33): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Component.SpagoGridApp (line 223, column 16 - line 286, column 33): " + [v.constructor.name]);
     };
   };
   var findSelectedProject = function(state3) {
@@ -23246,7 +23247,7 @@
           return LoadProjects.value;
         }
         ;
-        throw new Error("Failed pattern match at Component.SpagoGridApp (line 185, column 5 - line 187, column 30): " + [v2.constructor.name]);
+        throw new Error("Failed pattern match at Component.SpagoGridApp (line 202, column 5 - line 204, column 30): " + [v2.constructor.name]);
       };
     };
     var formatSnapshotLabel = function(s) {
@@ -23279,22 +23280,22 @@
       return select7([class_3("select-editorial"), onSelectedIndexChange(handleSnapshotChange(v.value0.snapshots))])(append11([option([disabled10(true), selected2(eq13(state3.selectedSnapshotId)(Nothing.value))])([text5("Snapshot")])])(map36(snapshotOption(state3))(v.value0.snapshots)));
     }
     ;
-    throw new Error("Failed pattern match at Component.SpagoGridApp (line 168, column 3 - line 181, column 12): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Component.SpagoGridApp (line 185, column 3 - line 198, column 12): " + [v.constructor.name]);
   };
   var render2 = function(state3) {
-    return div2([class_3("explorer-app")])([div2([classes(["floating-panel", "floating-panel--top-left"])])([h2([class_3("panel-title")])([text5("Code Explorer")]), div2([class_3("control-section")])([div2([class_3("section-label")])([text5("Data Source")]), div2([class_3("control-row")])([renderProjectSelector(state3), renderSnapshotSelector(state3)])]), div2([class_3("control-section")])([div2([class_3("section-label")])([text5("View Mode")]), div2([class_3("control-row")])([div2([class_3("btn-group")])([button2([class_3("btn-editorial"), onClick(function(v) {
+    return div2([class_3("explorer-app")])([div2([classes(["floating-panel", "floating-panel--top-left"])])([h2([class_3("panel-title")])([text5("Code Explorer")]), div2([class_3("control-section")])([div2([class_3("section-label")])([text5("Data Source")]), div2([class_3("control-row")])([renderProjectSelector(state3), renderSnapshotSelector(state3)])]), div2([class_3("control-section")])([div2([class_3("section-label")])([text5("Arrange")]), div2([class_3("control-row")])([div2([class_3("btn-group")])([button2([class_3("btn-editorial"), onClick(function(v) {
       return FormGrid.value;
-    })])([text5("Grid")]), button2([class_3("btn-editorial"), onClick(function(v) {
+    }), title2("Arrange modules in a grid by size")])([text5("By Size")]), button2([class_3("btn-editorial"), onClick(function(v) {
       return FormOrbit.value;
-    })])([text5("Orbit")]), button2([class_3("btn-editorial"), onClick(function(v) {
+    }), title2("Arrange modules in a circular ring")])([text5("Ring")]), button2([class_3("btn-editorial"), onClick(function(v) {
       return FormTree.value;
-    })])([text5("Tree")])])])]), div2([class_3("control-section")])([div2([class_3("section-label")])([text5("Physics")]), div2([class_3("control-row")])([div2([class_3("btn-group")])([button2([class_3("btn-editorial"), onClick(function(v) {
+    }), title2("Arrange by import hierarchy")])([text5("Hierarchy")])])])]), div2([class_3("control-section")])([div2([class_3("section-label")])([text5("Simulate")]), div2([class_3("control-row")])([div2([class_3("btn-group")])([button2([class_3("btn-editorial"), onClick(function(v) {
       return GridRun.value;
-    })])([text5("Cluster")]), button2([class_3("btn-editorial"), onClick(function(v) {
+    }), title2("Cluster modules by dependencies")])([text5("Cluster")]), button2([class_3("btn-editorial"), onClick(function(v) {
       return OrbitRun.value;
-    })])([text5("Expand")]), button2([class_3("btn-editorial"), onClick(function(v) {
+    }), title2("Spread modules with physics")])([text5("Spread")]), button2([class_3("btn-editorial"), onClick(function(v) {
       return TreeRun.value;
-    })])([text5("Tree")])])])])]), (function() {
+    }), title2("Flow along import graph")])([text5("Flow")])])])])]), div2([classes(["floating-panel", "floating-panel--top-right", "legend-panel"])])([div2([class_3("section-label")])([text5("Color = Package")]), div2([class_3("info-text")])([text5("Modules are colored by their package. Similar colors indicate related code.")]), div2([class_3("section-label")])([text5("Size = Lines")]), div2([class_3("info-text")])([text5("Circle size shows lines of code. Larger modules have more code.")])]), (function() {
       if (state3.error instanceof Just) {
         return div2([classes(["floating-panel", "floating-panel--bottom-left", "error-message"])])([text5(state3.error.value0)]);
       }
@@ -23303,7 +23304,7 @@
         return text5("");
       }
       ;
-      throw new Error("Failed pattern match at Component.SpagoGridApp (line 131, column 7 - line 135, column 30): " + [state3.error.constructor.name]);
+      throw new Error("Failed pattern match at Component.SpagoGridApp (line 148, column 7 - line 152, column 30): " + [state3.error.constructor.name]);
     })(), div2([id4("viz")])([])]);
   };
   var component = function(dictMonadAff) {
