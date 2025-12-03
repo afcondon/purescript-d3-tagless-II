@@ -17,7 +17,8 @@ import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Nullable (notNull)
-import Data.Tree (Tree(..))
+import Control.Comonad.Cofree (head, tail)
+import Data.Tree (Tree, mkTree)
 import Data.Tuple (Tuple(..))
 
 -- | Helper to create links from tuples
@@ -49,7 +50,7 @@ buildIDTree rootID links = go rootID
       children = getChildren nodeId
       childTrees = go <$> children
     in
-      Node nodeId (List.fromFoldable childTrees)
+      mkTree nodeId (List.fromFoldable childTrees)
 
 -- | Flatten tree structure to map of node positions
 -- | Recursively walks tree and builds Map NodeID TreeFields
@@ -57,12 +58,14 @@ flattenTreeToMap :: forall r. Tree { id :: NodeID, x :: Number, y :: Number, dep
 flattenTreeToMap tree = go tree M.empty
   where
   go :: Tree { id :: NodeID, x :: Number, y :: Number, depth :: Int | r } -> Map NodeID TreeFields -> Map NodeID TreeFields
-  go (Node node children) acc =
+  go t acc =
     let
+      node = head t
+      children = tail t
       isLeaf = case children of
         Nil -> true
         _ -> false
-      childIDs = Array.fromFoldable $ (\(Node child _) -> child.id) <$> children
+      childIDs = Array.fromFoldable $ (\child -> (head child).id) <$> children
       treeFields = { x: node.x, y: node.y, isTreeLeaf: isLeaf, depth: node.depth, childIDs }
       accWithNode = M.insert node.id treeFields acc
     in
@@ -131,7 +134,7 @@ treeReduction rootID model = do
 
 -- | Map function over tree values
 mapTree :: forall a b. (a -> b) -> Tree a -> Tree b
-mapTree f (Node value children) = Node (f value) (mapTree f <$> children)
+mapTree f t = mkTree (f (head t)) (mapTree f <$> tail t)
 
 -- | Update simulation nodes with tree XY positions
 -- | IMPORTANT: Also sets connected = true for nodes in the tree

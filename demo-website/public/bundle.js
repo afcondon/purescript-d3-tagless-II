@@ -465,10 +465,10 @@
             eqRecord: function(v) {
               return function(ra) {
                 return function(rb) {
-                  var tail2 = eqRecord1($$Proxy.value)(ra)(rb);
+                  var tail3 = eqRecord1($$Proxy.value)(ra)(rb);
                   var key = reflectSymbol2($$Proxy.value);
                   var get16 = unsafeGet(key);
-                  return eq33(get16(ra))(get16(rb)) && tail2;
+                  return eq33(get16(ra))(get16(rb)) && tail3;
                 };
               };
             }
@@ -2404,14 +2404,14 @@
   };
   var replicateImpl = typeof Array.prototype.fill === "function" ? replicateFill : replicatePolyfill;
   var fromFoldableImpl = /* @__PURE__ */ (function() {
-    function Cons2(head6, tail2) {
+    function Cons2(head6, tail3) {
       this.head = head6;
-      this.tail = tail2;
+      this.tail = tail3;
     }
     var emptyList = {};
     function curryCons(head6) {
-      return function(tail2) {
-        return new Cons2(head6, tail2);
+      return function(tail3) {
+        return new Cons2(head6, tail3);
       };
     }
     function listToArray(list) {
@@ -2424,8 +2424,8 @@
       }
       return result;
     }
-    return function(foldr7, xs) {
-      return listToArray(foldr7(curryCons)(emptyList)(xs));
+    return function(foldr6, xs) {
+      return listToArray(foldr6(curryCons)(emptyList)(xs));
     };
   })();
   var length = function(xs) {
@@ -5120,7 +5120,7 @@
       function kill2(error4, par2, cb2) {
         var step5 = par2;
         var head6 = null;
-        var tail2 = null;
+        var tail3 = null;
         var count = 0;
         var kills2 = {};
         var tmp, kid;
@@ -5143,11 +5143,11 @@
                 break loop;
               }
               step5 = head6._2;
-              if (tail2 === null) {
+              if (tail3 === null) {
                 head6 = null;
               } else {
-                head6 = tail2._1;
-                tail2 = tail2._2;
+                head6 = tail3._1;
+                tail3 = tail3._2;
               }
               break;
             case MAP:
@@ -5156,7 +5156,7 @@
             case APPLY:
             case ALT:
               if (head6) {
-                tail2 = new Aff2(CONS, head6, tail2);
+                tail3 = new Aff2(CONS, head6, tail3);
               }
               head6 = step5;
               step5 = step5._1;
@@ -5174,7 +5174,7 @@
         }
         return kills2;
       }
-      function join5(result, head6, tail2) {
+      function join5(result, head6, tail3) {
         var fail3, step5, lhs, rhs, tmp, kid;
         if (util2.isLeft(result)) {
           fail3 = result;
@@ -5219,10 +5219,10 @@
                     delete kills[kid];
                     if (tmp) {
                       tmp = false;
-                    } else if (tail2 === null) {
+                    } else if (tail3 === null) {
                       join5(fail3, null, null);
                     } else {
-                      join5(fail3, tail2._1, tail2._2);
+                      join5(fail3, tail3._1, tail3._2);
                     }
                   };
                 });
@@ -5256,10 +5256,10 @@
                     delete kills[kid];
                     if (tmp) {
                       tmp = false;
-                    } else if (tail2 === null) {
+                    } else if (tail3 === null) {
                       join5(step5, null, null);
                     } else {
-                      join5(step5, tail2._1, tail2._2);
+                      join5(step5, tail3._1, tail3._2);
                     }
                   };
                 });
@@ -5270,11 +5270,11 @@
               }
               break;
           }
-          if (tail2 === null) {
+          if (tail3 === null) {
             head6 = null;
           } else {
-            head6 = tail2._1;
-            tail2 = tail2._2;
+            head6 = tail3._1;
+            tail3 = tail3._2;
           }
         }
       }
@@ -5291,7 +5291,7 @@
         var status = CONTINUE;
         var step5 = par;
         var head6 = null;
-        var tail2 = null;
+        var tail3 = null;
         var tmp, fid;
         loop: while (true) {
           tmp = null;
@@ -5301,21 +5301,21 @@
               switch (step5.tag) {
                 case MAP:
                   if (head6) {
-                    tail2 = new Aff2(CONS, head6, tail2);
+                    tail3 = new Aff2(CONS, head6, tail3);
                   }
                   head6 = new Aff2(MAP, step5._1, EMPTY, EMPTY);
                   step5 = step5._2;
                   break;
                 case APPLY:
                   if (head6) {
-                    tail2 = new Aff2(CONS, head6, tail2);
+                    tail3 = new Aff2(CONS, head6, tail3);
                   }
                   head6 = new Aff2(APPLY, EMPTY, step5._2, EMPTY);
                   step5 = step5._1;
                   break;
                 case ALT:
                   if (head6) {
-                    tail2 = new Aff2(CONS, head6, tail2);
+                    tail3 = new Aff2(CONS, head6, tail3);
                   }
                   head6 = new Aff2(ALT, EMPTY, step5._2, EMPTY);
                   step5 = step5._1;
@@ -5324,7 +5324,7 @@
                   fid = fiberId++;
                   status = RETURN;
                   tmp = step5;
-                  step5 = new Aff2(FORKED, fid, new Aff2(CONS, head6, tail2), EMPTY);
+                  step5 = new Aff2(FORKED, fid, new Aff2(CONS, head6, tail3), EMPTY);
                   tmp = Fiber(util2, supervisor, tmp);
                   tmp.onComplete({
                     rethrow: false,
@@ -5348,11 +5348,11 @@
               } else {
                 head6._2 = step5;
                 step5 = head6;
-                if (tail2 === null) {
+                if (tail3 === null) {
                   head6 = null;
                 } else {
-                  head6 = tail2._1;
-                  tail2 = tail2._2;
+                  head6 = tail3._1;
+                  tail3 = tail3._2;
                 }
               }
           }
@@ -6492,79 +6492,602 @@
   // output/Affjax.Web/index.js
   var get3 = /* @__PURE__ */ get2(driver);
 
-  // output/Data.Tree/index.js
-  var map15 = /* @__PURE__ */ map(functorList);
-  var foldr4 = /* @__PURE__ */ foldr(foldableList);
-  var foldl5 = /* @__PURE__ */ foldl(foldableList);
-  var foldMap2 = /* @__PURE__ */ foldMap(foldableList);
-  var Node = /* @__PURE__ */ (function() {
-    function Node4(value0, value1) {
+  // output/Data.CatQueue/index.js
+  var CatQueue = /* @__PURE__ */ (function() {
+    function CatQueue2(value0, value1) {
       this.value0 = value0;
       this.value1 = value1;
     }
     ;
-    Node4.create = function(value0) {
+    CatQueue2.create = function(value0) {
       return function(value1) {
-        return new Node4(value0, value1);
+        return new CatQueue2(value0, value1);
       };
     };
-    return Node4;
+    return CatQueue2;
   })();
-  var functorTree = {
-    map: function(f) {
-      return function(v) {
-        return new Node(f(v.value0), map15(map(functorTree)(f))(v.value1));
+  var uncons3 = function($copy_v) {
+    var $tco_done = false;
+    var $tco_result;
+    function $tco_loop(v) {
+      if (v.value0 instanceof Nil && v.value1 instanceof Nil) {
+        $tco_done = true;
+        return Nothing.value;
+      }
+      ;
+      if (v.value0 instanceof Nil) {
+        $copy_v = new CatQueue(reverse2(v.value1), Nil.value);
+        return;
+      }
+      ;
+      if (v.value0 instanceof Cons) {
+        $tco_done = true;
+        return new Just(new Tuple(v.value0.value0, new CatQueue(v.value0.value1, v.value1)));
+      }
+      ;
+      throw new Error("Failed pattern match at Data.CatQueue (line 82, column 1 - line 82, column 63): " + [v.constructor.name]);
+    }
+    ;
+    while (!$tco_done) {
+      $tco_result = $tco_loop($copy_v);
+    }
+    ;
+    return $tco_result;
+  };
+  var snoc3 = function(v) {
+    return function(a2) {
+      return new CatQueue(v.value0, new Cons(a2, v.value1));
+    };
+  };
+  var $$null4 = function(v) {
+    if (v.value0 instanceof Nil && v.value1 instanceof Nil) {
+      return true;
+    }
+    ;
+    return false;
+  };
+  var empty3 = /* @__PURE__ */ (function() {
+    return new CatQueue(Nil.value, Nil.value);
+  })();
+
+  // output/Data.CatList/index.js
+  var CatNil = /* @__PURE__ */ (function() {
+    function CatNil2() {
+    }
+    ;
+    CatNil2.value = new CatNil2();
+    return CatNil2;
+  })();
+  var CatCons = /* @__PURE__ */ (function() {
+    function CatCons2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    CatCons2.create = function(value0) {
+      return function(value1) {
+        return new CatCons2(value0, value1);
+      };
+    };
+    return CatCons2;
+  })();
+  var link = function(v) {
+    return function(v1) {
+      if (v instanceof CatNil) {
+        return v1;
+      }
+      ;
+      if (v1 instanceof CatNil) {
+        return v;
+      }
+      ;
+      if (v instanceof CatCons) {
+        return new CatCons(v.value0, snoc3(v.value1)(v1));
+      }
+      ;
+      throw new Error("Failed pattern match at Data.CatList (line 108, column 1 - line 108, column 54): " + [v.constructor.name, v1.constructor.name]);
+    };
+  };
+  var foldr4 = function(k) {
+    return function(b10) {
+      return function(q2) {
+        var foldl19 = function($copy_v) {
+          return function($copy_v1) {
+            return function($copy_v2) {
+              var $tco_var_v = $copy_v;
+              var $tco_var_v1 = $copy_v1;
+              var $tco_done = false;
+              var $tco_result;
+              function $tco_loop(v, v1, v2) {
+                if (v2 instanceof Nil) {
+                  $tco_done = true;
+                  return v1;
+                }
+                ;
+                if (v2 instanceof Cons) {
+                  $tco_var_v = v;
+                  $tco_var_v1 = v(v1)(v2.value0);
+                  $copy_v2 = v2.value1;
+                  return;
+                }
+                ;
+                throw new Error("Failed pattern match at Data.CatList (line 124, column 3 - line 124, column 59): " + [v.constructor.name, v1.constructor.name, v2.constructor.name]);
+              }
+              ;
+              while (!$tco_done) {
+                $tco_result = $tco_loop($tco_var_v, $tco_var_v1, $copy_v2);
+              }
+              ;
+              return $tco_result;
+            };
+          };
+        };
+        var go2 = function($copy_xs) {
+          return function($copy_ys) {
+            var $tco_var_xs = $copy_xs;
+            var $tco_done1 = false;
+            var $tco_result;
+            function $tco_loop(xs, ys) {
+              var v = uncons3(xs);
+              if (v instanceof Nothing) {
+                $tco_done1 = true;
+                return foldl19(function(x41) {
+                  return function(i2) {
+                    return i2(x41);
+                  };
+                })(b10)(ys);
+              }
+              ;
+              if (v instanceof Just) {
+                $tco_var_xs = v.value0.value1;
+                $copy_ys = new Cons(k(v.value0.value0), ys);
+                return;
+              }
+              ;
+              throw new Error("Failed pattern match at Data.CatList (line 120, column 14 - line 122, column 67): " + [v.constructor.name]);
+            }
+            ;
+            while (!$tco_done1) {
+              $tco_result = $tco_loop($tco_var_xs, $copy_ys);
+            }
+            ;
+            return $tco_result;
+          };
+        };
+        return go2(q2)(Nil.value);
+      };
+    };
+  };
+  var uncons4 = function(v) {
+    if (v instanceof CatNil) {
+      return Nothing.value;
+    }
+    ;
+    if (v instanceof CatCons) {
+      return new Just(new Tuple(v.value0, (function() {
+        var $66 = $$null4(v.value1);
+        if ($66) {
+          return CatNil.value;
+        }
+        ;
+        return foldr4(link)(CatNil.value)(v.value1);
+      })()));
+    }
+    ;
+    throw new Error("Failed pattern match at Data.CatList (line 99, column 1 - line 99, column 61): " + [v.constructor.name]);
+  };
+  var empty4 = /* @__PURE__ */ (function() {
+    return CatNil.value;
+  })();
+  var append3 = link;
+  var cons3 = function(a2) {
+    return function(cat) {
+      return append3(new CatCons(a2, empty3))(cat);
+    };
+  };
+  var singleton8 = function(a2) {
+    return cons3(a2)(CatNil.value);
+  };
+  var semigroupCatList = {
+    append: append3
+  };
+  var monoidCatList = /* @__PURE__ */ (function() {
+    return {
+      mempty: CatNil.value,
+      Semigroup0: function() {
+        return semigroupCatList;
+      }
+    };
+  })();
+  var fromFoldable3 = function(dictFoldable) {
+    var foldMap12 = foldMap(dictFoldable)(monoidCatList);
+    return function(f) {
+      return foldMap12(singleton8)(f);
+    };
+  };
+  var snoc4 = function(cat) {
+    return function(a2) {
+      return append3(cat)(new CatCons(a2, empty3));
+    };
+  };
+
+  // output/Control.Monad.Free/index.js
+  var $runtime_lazy4 = function(name16, moduleName, init4) {
+    var state3 = 0;
+    var val;
+    return function(lineNumber) {
+      if (state3 === 2) return val;
+      if (state3 === 1) throw new ReferenceError(name16 + " was needed before it finished initializing (module " + moduleName + ", line " + lineNumber + ")", moduleName, lineNumber);
+      state3 = 1;
+      val = init4();
+      state3 = 2;
+      return val;
+    };
+  };
+  var append4 = /* @__PURE__ */ append(semigroupCatList);
+  var Free = /* @__PURE__ */ (function() {
+    function Free2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    Free2.create = function(value0) {
+      return function(value1) {
+        return new Free2(value0, value1);
+      };
+    };
+    return Free2;
+  })();
+  var Return = /* @__PURE__ */ (function() {
+    function Return2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Return2.create = function(value0) {
+      return new Return2(value0);
+    };
+    return Return2;
+  })();
+  var Bind = /* @__PURE__ */ (function() {
+    function Bind2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    Bind2.create = function(value0) {
+      return function(value1) {
+        return new Bind2(value0, value1);
+      };
+    };
+    return Bind2;
+  })();
+  var toView = function($copy_v) {
+    var $tco_done = false;
+    var $tco_result;
+    function $tco_loop(v) {
+      var runExpF = function(v22) {
+        return v22;
+      };
+      var concatF = function(v22) {
+        return function(r) {
+          return new Free(v22.value0, append4(v22.value1)(r));
+        };
+      };
+      if (v.value0 instanceof Return) {
+        var v2 = uncons4(v.value1);
+        if (v2 instanceof Nothing) {
+          $tco_done = true;
+          return new Return(v.value0.value0);
+        }
+        ;
+        if (v2 instanceof Just) {
+          $copy_v = concatF(runExpF(v2.value0.value0)(v.value0.value0))(v2.value0.value1);
+          return;
+        }
+        ;
+        throw new Error("Failed pattern match at Control.Monad.Free (line 227, column 7 - line 231, column 64): " + [v2.constructor.name]);
+      }
+      ;
+      if (v.value0 instanceof Bind) {
+        $tco_done = true;
+        return new Bind(v.value0.value0, function(a2) {
+          return concatF(v.value0.value1(a2))(v.value1);
+        });
+      }
+      ;
+      throw new Error("Failed pattern match at Control.Monad.Free (line 225, column 3 - line 233, column 56): " + [v.value0.constructor.name]);
+    }
+    ;
+    while (!$tco_done) {
+      $tco_result = $tco_loop($copy_v);
+    }
+    ;
+    return $tco_result;
+  };
+  var fromView = function(f) {
+    return new Free(f, empty4);
+  };
+  var freeMonad = {
+    Applicative0: function() {
+      return freeApplicative;
+    },
+    Bind1: function() {
+      return freeBind;
+    }
+  };
+  var freeFunctor = {
+    map: function(k) {
+      return function(f) {
+        return bindFlipped(freeBind)((function() {
+          var $189 = pure(freeApplicative);
+          return function($190) {
+            return $189(k($190));
+          };
+        })())(f);
       };
     }
   };
-  var foldableTree = {
-    foldr: function(f) {
-      return function(b10) {
-        return function(v) {
-          return f(v.value0)(foldr4(flip(foldr(foldableTree)(f)))(b10)(v.value1));
-        };
+  var freeBind = {
+    bind: function(v) {
+      return function(k) {
+        return new Free(v.value0, snoc4(v.value1)(k));
       };
     },
-    foldl: function(f) {
-      return function(b10) {
-        return function(v) {
-          return f(foldl5(foldl(foldableTree)(f))(b10)(v.value1))(v.value0);
-        };
-      };
+    Apply0: function() {
+      return $lazy_freeApply(0);
+    }
+  };
+  var freeApplicative = {
+    pure: function($191) {
+      return fromView(Return.create($191));
     },
-    foldMap: function(dictMonoid) {
-      var append128 = append(dictMonoid.Semigroup0());
-      var foldMap12 = foldMap2(dictMonoid);
-      return function(f) {
+    Apply0: function() {
+      return $lazy_freeApply(0);
+    }
+  };
+  var $lazy_freeApply = /* @__PURE__ */ $runtime_lazy4("freeApply", "Control.Monad.Free", function() {
+    return {
+      apply: ap(freeMonad),
+      Functor0: function() {
+        return freeFunctor;
+      }
+    };
+  });
+  var pure4 = /* @__PURE__ */ pure(freeApplicative);
+  var liftF = function(f) {
+    return fromView(new Bind(f, function($192) {
+      return pure4($192);
+    }));
+  };
+  var foldFree = function(dictMonadRec) {
+    var Monad0 = dictMonadRec.Monad0();
+    var map124 = map(Monad0.Bind1().Apply0().Functor0());
+    var pure125 = pure(Monad0.Applicative0());
+    var tailRecM4 = tailRecM(dictMonadRec);
+    return function(k) {
+      var go2 = function(f) {
+        var v = toView(f);
+        if (v instanceof Return) {
+          return map124(Done.create)(pure125(v.value0));
+        }
+        ;
+        if (v instanceof Bind) {
+          return map124(function($199) {
+            return Loop.create(v.value1($199));
+          })(k(v.value0));
+        }
+        ;
+        throw new Error("Failed pattern match at Control.Monad.Free (line 158, column 10 - line 160, column 37): " + [v.constructor.name]);
+      };
+      return tailRecM4(go2);
+    };
+  };
+
+  // output/Control.Monad.State.Trans/index.js
+  var runStateT = function(v) {
+    return v;
+  };
+  var functorStateT = function(dictFunctor) {
+    var map96 = map(dictFunctor);
+    return {
+      map: function(f) {
         return function(v) {
-          return append128(f(v.value0))(foldMap12(foldMap(foldableTree)(dictMonoid)(f))(v.value1));
+          return function(s) {
+            return map96(function(v1) {
+              return new Tuple(f(v1.value0), v1.value1);
+            })(v(s));
+          };
         };
+      }
+    };
+  };
+  var monadStateT = function(dictMonad) {
+    return {
+      Applicative0: function() {
+        return applicativeStateT(dictMonad);
+      },
+      Bind1: function() {
+        return bindStateT(dictMonad);
+      }
+    };
+  };
+  var bindStateT = function(dictMonad) {
+    var bind83 = bind(dictMonad.Bind1());
+    return {
+      bind: function(v) {
+        return function(f) {
+          return function(s) {
+            return bind83(v(s))(function(v1) {
+              var v3 = f(v1.value0);
+              return v3(v1.value1);
+            });
+          };
+        };
+      },
+      Apply0: function() {
+        return applyStateT(dictMonad);
+      }
+    };
+  };
+  var applyStateT = function(dictMonad) {
+    var functorStateT1 = functorStateT(dictMonad.Bind1().Apply0().Functor0());
+    return {
+      apply: ap(monadStateT(dictMonad)),
+      Functor0: function() {
+        return functorStateT1;
+      }
+    };
+  };
+  var applicativeStateT = function(dictMonad) {
+    var pure86 = pure(dictMonad.Applicative0());
+    return {
+      pure: function(a2) {
+        return function(s) {
+          return pure86(new Tuple(a2, s));
+        };
+      },
+      Apply0: function() {
+        return applyStateT(dictMonad);
+      }
+    };
+  };
+  var monadStateStateT = function(dictMonad) {
+    var pure86 = pure(dictMonad.Applicative0());
+    var monadStateT1 = monadStateT(dictMonad);
+    return {
+      state: function(f) {
+        return function($206) {
+          return pure86(f($206));
+        };
+      },
+      Monad0: function() {
+        return monadStateT1;
+      }
+    };
+  };
+
+  // output/Control.Monad.State/index.js
+  var execState = function(v) {
+    return function(s) {
+      var v1 = v(s);
+      return v1.value1;
+    };
+  };
+
+  // output/Data.Lazy/foreign.js
+  var defer2 = function(thunk) {
+    var v = null;
+    return function() {
+      if (thunk === void 0) return v;
+      v = thunk();
+      thunk = void 0;
+      return v;
+    };
+  };
+  var force = function(l) {
+    return l();
+  };
+
+  // output/Data.Lazy/index.js
+  var functorLazy = {
+    map: function(f) {
+      return function(l) {
+        return defer2(function(v) {
+          return f(force(l));
+        });
       };
     }
   };
 
-  // output/PSD3.Layout.Hierarchy.Cluster4/index.js
+  // output/Control.Comonad.Cofree/index.js
+  var map15 = /* @__PURE__ */ map(functorLazy);
+  var tail = function(v) {
+    return snd(force(v));
+  };
+  var mkCofree = function(a2) {
+    return function(t) {
+      return defer2(function(v) {
+        return new Tuple(a2, t);
+      });
+    };
+  };
+  var head3 = function(v) {
+    return fst(force(v));
+  };
+  var functorCofree = function(dictFunctor) {
+    var map212 = map(dictFunctor);
+    return {
+      map: function(f) {
+        var loop2 = function(v) {
+          return map15(function(v1) {
+            return new Tuple(f(v1.value0), map212(loop2)(v1.value1));
+          })(v);
+        };
+        return loop2;
+      }
+    };
+  };
+  var foldableCofree = function(dictFoldable) {
+    var foldr6 = foldr(dictFoldable);
+    var foldl19 = foldl(dictFoldable);
+    var foldMap3 = foldMap(dictFoldable);
+    return {
+      foldr: function(f) {
+        var go2 = function(fa) {
+          return function(b10) {
+            return f(head3(fa))(foldr6(go2)(b10)(tail(fa)));
+          };
+        };
+        return flip(go2);
+      },
+      foldl: function(f) {
+        var go2 = function(b10) {
+          return function(fa) {
+            return foldl19(go2)(f(b10)(head3(fa)))(tail(fa));
+          };
+        };
+        return go2;
+      },
+      foldMap: function(dictMonoid) {
+        var append36 = append(dictMonoid.Semigroup0());
+        var foldMap12 = foldMap3(dictMonoid);
+        return function(f) {
+          var go2 = function(fa) {
+            return append36(f(head3(fa)))(foldMap12(go2)(tail(fa)));
+          };
+          return go2;
+        };
+      }
+    };
+  };
+
+  // output/Data.Tree/index.js
+  var mkTree = mkCofree;
+
+  // output/DataViz.Layout.Hierarchy.Cluster/index.js
   var compare3 = /* @__PURE__ */ compare(ordInt);
   var map16 = /* @__PURE__ */ map(functorList);
-  var fromFoldable3 = /* @__PURE__ */ fromFoldable(foldableList);
+  var fromFoldable4 = /* @__PURE__ */ fromFoldable(foldableList);
   var fromFoldable1 = /* @__PURE__ */ fromFoldable2(foldableArray);
-  var fromFoldable22 = /* @__PURE__ */ fromFoldable(foldableTree);
+  var fromFoldable22 = /* @__PURE__ */ fromFoldable(/* @__PURE__ */ foldableCofree(foldableList));
   var map17 = /* @__PURE__ */ map(functorArray);
   var maximum2 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var minimum2 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
   var maximum1 = /* @__PURE__ */ maximum(ordInt)(foldableArray);
-  var foldl6 = /* @__PURE__ */ foldl(foldableArray);
-  var sortByHeight = function(v) {
-    var compareByHeight = function(v1) {
-      return function(v2) {
-        return compare3(v2.value0.height)(v1.value0.height);
+  var foldl5 = /* @__PURE__ */ foldl(foldableArray);
+  var sortByHeight = function(t) {
+    var compareByHeight = function(t1) {
+      return function(t2) {
+        return compare3(head3(t2).height)(head3(t1).height);
       };
     };
-    var sortedGrandchildren = map16(sortByHeight)(v.value1);
-    var childArray = fromFoldable3(sortedGrandchildren);
+    var val = head3(t);
+    var children3 = tail(t);
+    var sortedGrandchildren = map16(sortByHeight)(children3);
+    var childArray = fromFoldable4(sortedGrandchildren);
     var sortedArray = sortBy(compareByHeight)(childArray);
     var sortedChildrenList = fromFoldable1(sortedArray);
-    return new Node(v.value0, sortedChildrenList);
+    return mkTree(val)(sortedChildrenList);
   };
   var scaleToPixels = function(config) {
     return function(inputTree) {
@@ -6575,8 +7098,8 @@
       var maxX = fromMaybe(1)(maximum2(allX));
       var minX = fromMaybe(0)(minimum2(allX));
       var xRange = (function() {
-        var $48 = maxX - minX === 0;
-        if ($48) {
+        var $30 = maxX - minX === 0;
+        if ($30) {
           return 1;
         }
         ;
@@ -6592,47 +7115,51 @@
       var scaleY3 = function(height49) {
         return (1 - toNumber(height49) / toNumber(maxHeight)) * config.size.height;
       };
-      var go2 = function(v) {
-        return new Node((function() {
-          var $50 = {};
-          for (var $51 in v.value0) {
-            if ({}.hasOwnProperty.call(v.value0, $51)) {
-              $50[$51] = v["value0"][$51];
+      var go2 = function(t) {
+        var val = head3(t);
+        var children3 = tail(t);
+        return mkTree((function() {
+          var $31 = {};
+          for (var $32 in val) {
+            if ({}.hasOwnProperty.call(val, $32)) {
+              $31[$32] = val[$32];
             }
             ;
           }
           ;
-          $50.x = scaleX3(v.value0.x);
-          $50.y = scaleY3(v.value0.height);
-          return $50;
-        })(), map16(go2)(v.value1));
+          $31.x = scaleX3(val.x);
+          $31.y = scaleY3(val.height);
+          return $31;
+        })())(map16(go2)(children3));
       };
       return go2(inputTree);
     };
   };
   var render = function(minSep) {
     return function(inputTree) {
-      var foldl110 = function(f) {
+      var foldl19 = function(f) {
         return function(init4) {
           return function(arr) {
-            return foldl6(f)(init4)(arr);
+            return foldl5(f)(init4)(arr);
           };
         };
       };
-      var findExtent = function(v) {
-        var v1 = fromFoldable3(v.value1);
-        if (v1.length === 0) {
+      var findExtent = function(t) {
+        var val = head3(t);
+        var children3 = tail(t);
+        var v = fromFoldable4(children3);
+        if (v.length === 0) {
           return {
-            minX: v.value0.x,
-            maxX: v.value0.x
+            minX: val.x,
+            maxX: val.x
           };
         }
         ;
-        var childExtents = map17(findExtent)(v1);
-        var maxX = fromMaybe(v.value0.x)(maximum2(map17(function(e) {
+        var childExtents = map17(findExtent)(v);
+        var maxX = fromMaybe(val.x)(maximum2(map17(function(e) {
           return e.maxX;
         })(childExtents)));
-        var minX = fromMaybe(v.value0.x)(minimum2(map17(function(e) {
+        var minX = fromMaybe(val.x)(minimum2(map17(function(e) {
           return e.minX;
         })(childExtents)));
         return {
@@ -6641,28 +7168,30 @@
         };
       };
       var renderInternal = function(currentLeafX) {
-        return function(v) {
-          var v1 = fromFoldable3(v.value1);
-          if (v1.length === 0) {
-            var leafNode = new Node((function() {
-              var $62 = {};
-              for (var $63 in v.value0) {
-                if ({}.hasOwnProperty.call(v.value0, $63)) {
-                  $62[$63] = v["value0"][$63];
+        return function(t) {
+          var val = head3(t);
+          var children3 = tail(t);
+          var v = fromFoldable4(children3);
+          if (v.length === 0) {
+            var leafNode = mkTree((function() {
+              var $36 = {};
+              for (var $37 in val) {
+                if ({}.hasOwnProperty.call(val, $37)) {
+                  $36[$37] = val[$37];
                 }
                 ;
               }
               ;
-              $62.x = currentLeafX;
-              return $62;
-            })(), Nil.value);
+              $36.x = currentLeafX;
+              return $36;
+            })())(Nil.value);
             return {
               tree: leafNode,
               lastLeafX: currentLeafX + minSep
             };
           }
           ;
-          var processChildren = foldl110(function(acc) {
+          var processChildren = foldl19(function(acc) {
             return function(child) {
               var result = renderInternal(acc.lastLeafX)(child);
               return {
@@ -6673,7 +7202,7 @@
           })({
             trees: [],
             lastLeafX: currentLeafX
-          })(v1);
+          })(v);
           var childrenList = fromFoldable1(processChildren.trees);
           var allChildExtents = map17(findExtent)(processChildren.trees);
           var maxX = fromMaybe(0)(maximum2(map17(function(e) {
@@ -6683,18 +7212,18 @@
             return e.minX;
           })(allChildExtents)));
           var centerX = (minX + maxX) / 2;
-          var internalNode = new Node((function() {
-            var $65 = {};
-            for (var $66 in v.value0) {
-              if ({}.hasOwnProperty.call(v.value0, $66)) {
-                $65[$66] = v["value0"][$66];
+          var internalNode = mkTree((function() {
+            var $39 = {};
+            for (var $40 in val) {
+              if ({}.hasOwnProperty.call(val, $40)) {
+                $39[$40] = val[$40];
               }
               ;
             }
             ;
-            $65.x = centerX;
-            return $65;
-          })(), childrenList);
+            $39.x = centerX;
+            return $39;
+          })())(childrenList);
           return {
             tree: internalNode,
             lastLeafX: processChildren.lastLeafX
@@ -6712,6 +7241,7 @@
     minSeparation: 1
   };
   var centerRoot = function(tree2) {
+    var root3 = head3(tree2);
     var allNodes = fromFoldable22(tree2);
     var leaves2 = filter(function(n) {
       return n.height === 0;
@@ -6726,7 +7256,7 @@
         return 0;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Cluster4 (line 91, column 12 - line 93, column 21): " + [firstLeaf.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Cluster (line 92, column 12 - line 94, column 21): " + [firstLeaf.constructor.name]);
     })();
     var lastLeaf = last(leaves2);
     var maxX = (function() {
@@ -6738,68 +7268,74 @@
         return 0;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Cluster4 (line 95, column 12 - line 97, column 21): " + [lastLeaf.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Cluster (line 96, column 12 - line 98, column 21): " + [lastLeaf.constructor.name]);
     })();
     var targetX = (minX + maxX) / 2;
-    var offset = targetX - tree2.value0.x;
-    var shiftTree = function(v) {
-      return new Node((function() {
-        var $76 = {};
-        for (var $77 in v.value0) {
-          if ({}.hasOwnProperty.call(v.value0, $77)) {
-            $76[$77] = v["value0"][$77];
+    var offset = targetX - root3.x;
+    var shiftTree = function(t) {
+      var val = head3(t);
+      var children3 = tail(t);
+      return mkTree((function() {
+        var $46 = {};
+        for (var $47 in val) {
+          if ({}.hasOwnProperty.call(val, $47)) {
+            $46[$47] = val[$47];
           }
           ;
         }
         ;
-        $76.x = v.value0.x + offset;
-        return $76;
-      })(), map16(shiftTree)(v.value1));
+        $46.x = val.x + offset;
+        return $46;
+      })())(map16(shiftTree)(children3));
     };
     return shiftTree(tree2);
   };
-  var addYCoordinates = function(v) {
-    var nodeY = toNumber(v.value0.height);
-    var childrenWithY = map16(addYCoordinates)(v.value1);
-    return new Node((function() {
-      var $84 = {};
-      for (var $85 in v.value0) {
-        if ({}.hasOwnProperty.call(v.value0, $85)) {
-          $84[$85] = v["value0"][$85];
+  var addYCoordinates = function(t) {
+    var val = head3(t);
+    var nodeY = toNumber(val.height);
+    var children3 = tail(t);
+    var childrenWithY = map16(addYCoordinates)(children3);
+    return mkTree((function() {
+      var $49 = {};
+      for (var $50 in val) {
+        if ({}.hasOwnProperty.call(val, $50)) {
+          $49[$50] = val[$50];
         }
         ;
       }
       ;
-      $84.y = nodeY;
-      return $84;
-    })(), childrenWithY);
+      $49.y = nodeY;
+      return $49;
+    })())(childrenWithY);
   };
-  var addHeight = function(v) {
-    var childrenWithHeight = map16(addHeight)(v.value1);
+  var addHeight = function(t) {
+    var val = head3(t);
+    var children3 = tail(t);
+    var childrenWithHeight = map16(addHeight)(children3);
     var nodeHeight = (function() {
-      var v1 = fromFoldable3(childrenWithHeight);
-      if (v1.length === 0) {
+      var v = fromFoldable4(childrenWithHeight);
+      if (v.length === 0) {
         return 0;
       }
       ;
-      var childHeights = map17(function(v2) {
-        return v2.value0.height;
-      })(v1);
+      var childHeights = map17(function(c) {
+        return head3(c).height;
+      })(v);
       var maxChildHeight = fromMaybe(0)(maximum1(childHeights));
       return 1 + maxChildHeight | 0;
     })();
-    return new Node((function() {
-      var $94 = {};
-      for (var $95 in v.value0) {
-        if ({}.hasOwnProperty.call(v.value0, $95)) {
-          $94[$95] = v["value0"][$95];
+    return mkTree((function() {
+      var $53 = {};
+      for (var $54 in val) {
+        if ({}.hasOwnProperty.call(val, $54)) {
+          $53[$54] = val[$54];
         }
         ;
       }
       ;
-      $94.height = nodeHeight;
-      return $94;
-    })(), childrenWithHeight);
+      $53.height = nodeHeight;
+      return $53;
+    })())(childrenWithHeight);
   };
   var cluster = function(config) {
     return function(inputTree) {
@@ -6813,13 +7349,13 @@
     };
   };
 
-  // output/PSD3.Layout.Hierarchy.Tree4/index.js
+  // output/DataViz.Layout.Hierarchy.Tree/index.js
   var compare4 = /* @__PURE__ */ compare(ordInt);
   var map18 = /* @__PURE__ */ map(functorList);
-  var fromFoldable4 = /* @__PURE__ */ fromFoldable(foldableList);
+  var fromFoldable5 = /* @__PURE__ */ fromFoldable(foldableList);
   var fromFoldable12 = /* @__PURE__ */ fromFoldable2(foldableArray);
   var add2 = /* @__PURE__ */ add(semiringNumber);
-  var fromFoldable23 = /* @__PURE__ */ fromFoldable(foldableTree);
+  var fromFoldable23 = /* @__PURE__ */ fromFoldable(/* @__PURE__ */ foldableCofree(foldableList));
   var map19 = /* @__PURE__ */ map(functorArray);
   var maximum3 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var minimum3 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
@@ -6835,17 +7371,19 @@
     };
     return Contours2;
   })();
-  var sortByHeight2 = function(v) {
-    var compareByHeight = function(v1) {
-      return function(v2) {
-        return compare4(v2.value0.height)(v1.value0.height);
+  var sortByHeight2 = function(t) {
+    var compareByHeight = function(t1) {
+      return function(t2) {
+        return compare4(head3(t2).height)(head3(t1).height);
       };
     };
-    var sortedGrandchildren = map18(sortByHeight2)(v.value1);
-    var childArray = fromFoldable4(sortedGrandchildren);
+    var val = head3(t);
+    var children3 = tail(t);
+    var sortedGrandchildren = map18(sortByHeight2)(children3);
+    var childArray = fromFoldable5(sortedGrandchildren);
     var sortedArray = sortBy(compareByHeight)(childArray);
     var sortedChildrenList = fromFoldable12(sortedArray);
-    return new Node(v.value0, sortedChildrenList);
+    return mkTree(val)(sortedChildrenList);
   };
   var singletonContours = /* @__PURE__ */ (function() {
     return new Contours({
@@ -6859,49 +7397,88 @@
         var go2 = function($copy_v2) {
           return function($copy_v3) {
             return function($copy_v4) {
-              var $tco_var_v2 = $copy_v2;
-              var $tco_var_v3 = $copy_v3;
-              var $tco_done = false;
-              var $tco_result;
-              function $tco_loop(v2, v3, v4) {
-                if (v3 instanceof Nil) {
-                  $tco_done = true;
-                  return v2;
-                }
-                ;
-                if (v4 instanceof Nil) {
-                  $tco_done = true;
-                  return v2;
-                }
-                ;
-                if (v3 instanceof Cons && v4 instanceof Cons) {
-                  var actualSep = v2 + v4.value0 - v3.value0;
-                  var neededSep = (function() {
-                    var $81 = actualSep < baseSep;
-                    if ($81) {
-                      return v2 + (baseSep - actualSep);
+              return function($copy_v5) {
+                return function($copy_v6) {
+                  var $tco_var_v2 = $copy_v2;
+                  var $tco_var_v3 = $copy_v3;
+                  var $tco_var_v4 = $copy_v4;
+                  var $tco_var_v5 = $copy_v5;
+                  var $tco_done = false;
+                  var $tco_result;
+                  function $tco_loop(v2, v3, v4, v5, v6) {
+                    if (v5 instanceof Nil && v6 instanceof Nil) {
+                      $tco_done = true;
+                      return v2;
                     }
                     ;
-                    return v2;
-                  })();
-                  $tco_var_v2 = neededSep;
-                  $tco_var_v3 = v3.value1;
-                  $copy_v4 = v4.value1;
-                  return;
-                }
-                ;
-                throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 287, column 3 - line 287, column 47): " + [v2.constructor.name, v3.constructor.name, v4.constructor.name]);
-              }
-              ;
-              while (!$tco_done) {
-                $tco_result = $tco_loop($tco_var_v2, $tco_var_v3, $copy_v4);
-              }
-              ;
-              return $tco_result;
+                    if (v5 instanceof Nil && v6 instanceof Cons) {
+                      var actualSep = v2 + v6.value0 - v3;
+                      var neededSep = (function() {
+                        var $71 = actualSep < baseSep;
+                        if ($71) {
+                          return v2 + (baseSep - actualSep);
+                        }
+                        ;
+                        return v2;
+                      })();
+                      $tco_var_v2 = neededSep;
+                      $tco_var_v3 = v3;
+                      $tco_var_v4 = v6.value0;
+                      $tco_var_v5 = Nil.value;
+                      $copy_v6 = v6.value1;
+                      return;
+                    }
+                    ;
+                    if (v5 instanceof Cons && v6 instanceof Nil) {
+                      var actualSep = v2 + v4 - v5.value0;
+                      var neededSep = (function() {
+                        var $74 = actualSep < baseSep;
+                        if ($74) {
+                          return v2 + (baseSep - actualSep);
+                        }
+                        ;
+                        return v2;
+                      })();
+                      $tco_var_v2 = neededSep;
+                      $tco_var_v3 = v5.value0;
+                      $tco_var_v4 = v4;
+                      $tco_var_v5 = v5.value1;
+                      $copy_v6 = Nil.value;
+                      return;
+                    }
+                    ;
+                    if (v5 instanceof Cons && v6 instanceof Cons) {
+                      var actualSep = v2 + v6.value0 - v5.value0;
+                      var neededSep = (function() {
+                        var $77 = actualSep < baseSep;
+                        if ($77) {
+                          return v2 + (baseSep - actualSep);
+                        }
+                        ;
+                        return v2;
+                      })();
+                      $tco_var_v2 = neededSep;
+                      $tco_var_v3 = v5.value0;
+                      $tco_var_v4 = v6.value0;
+                      $tco_var_v5 = v5.value1;
+                      $copy_v6 = v6.value1;
+                      return;
+                    }
+                    ;
+                    throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 292, column 3 - line 292, column 67): " + [v2.constructor.name, v3.constructor.name, v4.constructor.name, v5.constructor.name, v6.constructor.name]);
+                  }
+                  ;
+                  while (!$tco_done) {
+                    $tco_result = $tco_loop($tco_var_v2, $tco_var_v3, $tco_var_v4, $tco_var_v5, $copy_v6);
+                  }
+                  ;
+                  return $tco_result;
+                };
+              };
             };
           };
         };
-        return go2(baseSep)(v.value0.right)(v1.value0.left);
+        return go2(baseSep)(0)(0)(v.value0.right)(v1.value0.left);
       };
     };
   };
@@ -6915,8 +7492,8 @@
       var maxX = fromMaybe(1)(maximum3(allX));
       var minX = fromMaybe(0)(minimum3(allX));
       var xRange = (function() {
-        var $101 = maxX - minX === 0;
-        if ($101) {
+        var $105 = maxX - minX === 0;
+        if ($105) {
           return 1;
         }
         ;
@@ -6933,34 +7510,38 @@
         var scaledDepth = layerScaleFn(depth);
         return scaledDepth / maxScaledDepth * config.size.height;
       };
-      var go2 = function(v) {
-        return new Node((function() {
-          var $103 = {};
-          for (var $104 in v.value0) {
-            if ({}.hasOwnProperty.call(v.value0, $104)) {
-              $103[$104] = v["value0"][$104];
+      var go2 = function(tr2) {
+        var val = head3(tr2);
+        var cs = tail(tr2);
+        return mkTree((function() {
+          var $106 = {};
+          for (var $107 in val) {
+            if ({}.hasOwnProperty.call(val, $107)) {
+              $106[$107] = val[$107];
             }
             ;
           }
           ;
-          $103.x = scaleX3(v.value0.x);
-          $103.y = scaleY3(v.value0.depth);
-          return $103;
-        })(), map18(go2)(v.value1));
+          $106.x = scaleX3(val.x);
+          $106.y = scaleY3(val.depth);
+          return $106;
+        })())(map18(go2)(cs));
       };
       return go2(inputTree);
     };
   };
   var petrify = function(parentX) {
-    return function(v) {
-      var nodeY = toNumber(v.value0.value1.depth);
-      var nodeX = parentX + v.value0.value0.offset;
-      var childrenWithCoords = map18(petrify(nodeX))(v.value1);
-      return new Node((function() {
+    return function(t) {
+      var v = head3(t);
+      var nodeY = toNumber(v.value1.depth);
+      var nodeX = parentX + v.value0.offset;
+      var children3 = tail(t);
+      var childrenWithCoords = map18(petrify(nodeX))(children3);
+      return mkTree((function() {
         var $110 = {};
-        for (var $111 in v.value0.value1) {
-          if ({}.hasOwnProperty.call(v.value0.value1, $111)) {
-            $110[$111] = v["value0"]["value1"][$111];
+        for (var $111 in v.value1) {
+          if ({}.hasOwnProperty.call(v.value1, $111)) {
+            $110[$111] = v["value1"][$111];
           }
           ;
         }
@@ -6968,7 +7549,7 @@
         $110.x = nodeX;
         $110.y = nodeY;
         return $110;
-      })(), childrenWithCoords);
+      })())(childrenWithCoords);
     };
   };
   var mergeContoursRight = function(contours) {
@@ -6982,7 +7563,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 413, column 17 - line 415, column 27): " + [c.constructor.name]);
+        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 437, column 17 - line 439, column 27): " + [c.constructor.name]);
       })(cs);
       var v = head(currentLevels);
       if (v instanceof Nothing) {
@@ -6999,13 +7580,13 @@
             return Nothing.value;
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 426, column 23 - line 428, column 33): " + [c.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 450, column 23 - line 452, column 33): " + [c.constructor.name]);
         })(cs);
         var maxVal = fromMaybe(0)(maximum3(currentLevels));
         return new Cons(maxVal, mergeLevel(restContours));
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 419, column 7 - line 432, column 50): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 443, column 7 - line 456, column 50): " + [v.constructor.name]);
     };
     if (contours.length === 0) {
       return Nil.value;
@@ -7024,7 +7605,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 380, column 17 - line 382, column 27): " + [c.constructor.name]);
+        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 404, column 17 - line 406, column 27): " + [c.constructor.name]);
       })(cs);
       var v = head(currentLevels);
       if (v instanceof Nothing) {
@@ -7041,13 +7622,13 @@
             return Nothing.value;
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 393, column 23 - line 395, column 33): " + [c.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 417, column 23 - line 419, column 33): " + [c.constructor.name]);
         })(cs);
         var minVal = fromMaybe(0)(minimum3(currentLevels));
         return new Cons(minVal, mergeLevel(restContours));
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 386, column 7 - line 399, column 50): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 410, column 7 - line 423, column 50): " + [v.constructor.name]);
     };
     if (contours.length === 0) {
       return Nil.value;
@@ -7057,7 +7638,7 @@
   };
   var spliceContours = function(offsets) {
     return function(contours) {
-      var v = fromFoldable4(zipWith2(Tuple.create)(offsets)(contours));
+      var v = fromFoldable5(zipWith2(Tuple.create)(offsets)(contours));
       if (v.length === 0) {
         return singletonContours;
       }
@@ -7095,8 +7676,9 @@
       });
     };
   };
-  var getRootData = function(v) {
-    return v.value0.value1;
+  var getRootData = function(t) {
+    var v = head3(t);
+    return v.value1;
   };
   var defaultTreeConfig = /* @__PURE__ */ (function() {
     return {
@@ -7120,7 +7702,7 @@
           return v2.value1;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 278, column 3 - line 278, column 41): " + [v2.constructor.name]);
+        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 280, column 3 - line 280, column 41): " + [v2.constructor.name]);
       };
       var applyBase = function(base3) {
         return function(v2) {
@@ -7156,7 +7738,7 @@
             return v.value1;
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 256, column 3 - line 256, column 41): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 258, column 3 - line 258, column 41): " + [v.constructor.name]);
         };
         var getSep = function(v) {
           return function(v1) {
@@ -7170,7 +7752,7 @@
                   return v.value0(v2)(v3) + v1;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 252, column 3 - line 252, column 67): " + [v.constructor.name, v1.constructor.name, v2.constructor.name, v3.constructor.name]);
+                throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 254, column 3 - line 254, column 67): " + [v.constructor.name, v1.constructor.name, v2.constructor.name, v3.constructor.name]);
               };
             };
           };
@@ -7190,43 +7772,47 @@
   var render2 = function(minSep) {
     return function(separationFn) {
       return function(inputTree) {
-        var updateOffset = function(v2) {
+        var updateOffset = function(tr2) {
           return function(newOffset) {
-            return new Node(new Tuple({
+            var v2 = head3(tr2);
+            var children3 = tail(tr2);
+            return mkTree(new Tuple({
               offset: newOffset
-            }, v2.value0.value1), v2.value1);
+            }, v2.value1))(children3);
           };
         };
-        var renderWithContours = function(v2) {
-          var childCount = length2(v2.value1);
+        var renderWithContours = function(t) {
+          var val = head3(t);
+          var children3 = tail(t);
+          var childCount = length2(children3);
           if (childCount === 0) {
-            return new Tuple(new Node(new Tuple({
+            return new Tuple(mkTree(new Tuple({
               offset: 0
-            }, v2.value0), Nil.value), singletonContours);
+            }, val))(Nil.value), singletonContours);
           }
           ;
-          var childResults = map18(renderWithContours)(v2.value1);
-          var childTrees = map18(function(v1) {
-            return v1.value0;
+          var childResults = map18(renderWithContours)(children3);
+          var childTrees = map18(function(v2) {
+            return v2.value0;
           })(childResults);
           var childRootData = map18(getRootData)(childTrees);
-          var childContours = map18(function(v1) {
-            return v1.value1;
+          var childContours = map18(function(v2) {
+            return v2.value1;
           })(childResults);
           var baseSeparations = computeBaseSeparations(minSep)(separationFn)(childRootData);
           var separations = computeSeparationsWithBase(baseSeparations)(childContours);
           var childAbsoluteOffsets = new Cons(0, scanl2(add2)(0)(separations));
-          var leftmostOffset = fromMaybe(0)(head(fromFoldable4(childAbsoluteOffsets)));
-          var rightmostOffset = fromMaybe(0)(last(fromFoldable4(childAbsoluteOffsets)));
+          var leftmostOffset = fromMaybe(0)(head(fromFoldable5(childAbsoluteOffsets)));
+          var rightmostOffset = fromMaybe(0)(last(fromFoldable5(childAbsoluteOffsets)));
           var parentOffset = (leftmostOffset + rightmostOffset) / 2;
           var childRelativeOffsets = map18(function(absOffset) {
             return absOffset - parentOffset;
           })(childAbsoluteOffsets);
           var childrenWithOffsets = zipWith2(updateOffset)(childTrees)(childRelativeOffsets);
           var parentContours = spliceContours(childRelativeOffsets)(childContours);
-          var resultTree = new Node(new Tuple({
+          var resultTree = mkTree(new Tuple({
             offset: parentOffset
-          }, v2.value0), childrenWithOffsets);
+          }, val))(childrenWithOffsets);
           return new Tuple(resultTree, parentContours);
         };
         var v = renderWithContours(inputTree);
@@ -7234,47 +7820,51 @@
       };
     };
   };
-  var addHeightField = function(v) {
-    var childrenWithHeight = map18(addHeightField)(v.value1);
+  var addHeightField = function(t) {
+    var val = head3(t);
+    var children3 = tail(t);
+    var childrenWithHeight = map18(addHeightField)(children3);
     var nodeHeight = (function() {
-      var v1 = fromFoldable4(childrenWithHeight);
-      if (v1.length === 0) {
+      var v = fromFoldable5(childrenWithHeight);
+      if (v.length === 0) {
         return 0;
       }
       ;
-      var childHeights = map19(function(v2) {
-        return v2.value0.height;
-      })(v1);
+      var childHeights = map19(function(c) {
+        return head3(c).height;
+      })(v);
       var maxChildHeight = fromMaybe(0)(maximum12(childHeights));
       return maxChildHeight + 1 | 0;
     })();
-    return new Node((function() {
-      var $204 = {};
-      for (var $205 in v.value0) {
-        if ({}.hasOwnProperty.call(v.value0, $205)) {
-          $204[$205] = v["value0"][$205];
+    return mkTree((function() {
+      var $190 = {};
+      for (var $191 in val) {
+        if ({}.hasOwnProperty.call(val, $191)) {
+          $190[$191] = val[$191];
         }
         ;
       }
       ;
-      $204.height = nodeHeight;
-      return $204;
-    })(), childrenWithHeight);
+      $190.height = nodeHeight;
+      return $190;
+    })())(childrenWithHeight);
   };
   var addDepth = function(currentDepth) {
-    return function(v) {
-      return new Node((function() {
-        var $211 = {};
-        for (var $212 in v.value0) {
-          if ({}.hasOwnProperty.call(v.value0, $212)) {
-            $211[$212] = v["value0"][$212];
+    return function(t) {
+      var val = head3(t);
+      var children3 = tail(t);
+      return mkTree((function() {
+        var $193 = {};
+        for (var $194 in val) {
+          if ({}.hasOwnProperty.call(val, $194)) {
+            $193[$194] = val[$194];
           }
           ;
         }
         ;
-        $211.depth = currentDepth;
-        return $211;
-      })(), map18(addDepth(currentDepth + 1 | 0))(v.value1));
+        $193.depth = currentDepth;
+        return $193;
+      })())(map18(addDepth(currentDepth + 1 | 0))(children3));
     };
   };
   var tree = function(config) {
@@ -7623,7 +8213,7 @@
   var appendChild = function(dict) {
     return dict.appendChild;
   };
-  var append3 = function(dict) {
+  var append5 = function(dict) {
     return dict.append;
   };
 
@@ -7646,7 +8236,7 @@
   };
 
   // output/Data.Map.Internal/index.js
-  var $runtime_lazy4 = function(name16, moduleName, init4) {
+  var $runtime_lazy5 = function(name16, moduleName, init4) {
     var state3 = 0;
     var val;
     return function(lineNumber) {
@@ -7666,8 +8256,8 @@
     Leaf2.value = new Leaf2();
     return Leaf2;
   })();
-  var Node2 = /* @__PURE__ */ (function() {
-    function Node4(value0, value1, value22, value32, value42, value52) {
+  var Node = /* @__PURE__ */ (function() {
+    function Node3(value0, value1, value22, value32, value42, value52) {
       this.value0 = value0;
       this.value1 = value1;
       this.value2 = value22;
@@ -7676,20 +8266,20 @@
       this.value5 = value52;
     }
     ;
-    Node4.create = function(value0) {
+    Node3.create = function(value0) {
       return function(value1) {
         return function(value22) {
           return function(value32) {
             return function(value42) {
               return function(value52) {
-                return new Node4(value0, value1, value22, value32, value42, value52);
+                return new Node3(value0, value1, value22, value32, value42, value52);
               };
             };
           };
         };
       };
     };
-    return Node4;
+    return Node3;
   })();
   var IterLeaf = /* @__PURE__ */ (function() {
     function IterLeaf2() {
@@ -7762,23 +8352,23 @@
   var unsafeNode = function(k, v, l, r) {
     if (l instanceof Leaf) {
       if (r instanceof Leaf) {
-        return new Node2(1, 1, k, v, l, r);
+        return new Node(1, 1, k, v, l, r);
       }
       ;
-      if (r instanceof Node2) {
-        return new Node2(1 + r.value0 | 0, 1 + r.value1 | 0, k, v, l, r);
+      if (r instanceof Node) {
+        return new Node(1 + r.value0 | 0, 1 + r.value1 | 0, k, v, l, r);
       }
       ;
       throw new Error("Failed pattern match at Data.Map.Internal (line 702, column 5 - line 706, column 39): " + [r.constructor.name]);
     }
     ;
-    if (l instanceof Node2) {
+    if (l instanceof Node) {
       if (r instanceof Leaf) {
-        return new Node2(1 + l.value0 | 0, 1 + l.value1 | 0, k, v, l, r);
+        return new Node(1 + l.value0 | 0, 1 + l.value1 | 0, k, v, l, r);
       }
       ;
-      if (r instanceof Node2) {
-        return new Node2(1 + (function() {
+      if (r instanceof Node) {
+        return new Node(1 + (function() {
           var $280 = l.value0 > r.value0;
           if ($280) {
             return l.value0;
@@ -7836,15 +8426,15 @@
       return 0;
     }
     ;
-    if (v instanceof Node2) {
+    if (v instanceof Node) {
       return v.value1;
     }
     ;
     throw new Error("Failed pattern match at Data.Map.Internal (line 618, column 8 - line 620, column 24): " + [v.constructor.name]);
   };
-  var singleton8 = function(k) {
+  var singleton9 = function(k) {
     return function(v) {
-      return new Node2(1, 1, k, v, Leaf.value, Leaf.value);
+      return new Node(1, 1, k, v, Leaf.value, Leaf.value);
     };
   };
   var unsafeBalancedNode = /* @__PURE__ */ (function() {
@@ -7853,21 +8443,21 @@
         return 0;
       }
       ;
-      if (v instanceof Node2) {
+      if (v instanceof Node) {
         return v.value0;
       }
       ;
       throw new Error("Failed pattern match at Data.Map.Internal (line 757, column 12 - line 759, column 26): " + [v.constructor.name]);
     };
     var rotateLeft = function(k, v, l, rk, rv, rl, rr) {
-      if (rl instanceof Node2 && rl.value0 > height49(rr)) {
+      if (rl instanceof Node && rl.value0 > height49(rr)) {
         return unsafeNode(rl.value2, rl.value3, unsafeNode(k, v, l, rl.value4), unsafeNode(rk, rv, rl.value5, rr));
       }
       ;
       return unsafeNode(rk, rv, unsafeNode(k, v, l, rl), rr);
     };
     var rotateRight = function(k, v, lk, lv, ll, lr, r) {
-      if (lr instanceof Node2 && height49(ll) <= lr.value0) {
+      if (lr instanceof Node && height49(ll) <= lr.value0) {
         return unsafeNode(lr.value2, lr.value3, unsafeNode(lk, lv, ll, lr.value4), unsafeNode(k, v, lr.value5, r));
       }
       ;
@@ -7876,18 +8466,18 @@
     return function(k, v, l, r) {
       if (l instanceof Leaf) {
         if (r instanceof Leaf) {
-          return singleton8(k)(v);
+          return singleton9(k)(v);
         }
         ;
-        if (r instanceof Node2 && r.value0 > 1) {
+        if (r instanceof Node && r.value0 > 1) {
           return rotateLeft(k, v, l, r.value2, r.value3, r.value4, r.value5);
         }
         ;
         return unsafeNode(k, v, l, r);
       }
       ;
-      if (l instanceof Node2) {
-        if (r instanceof Node2) {
+      if (l instanceof Node) {
+        if (r instanceof Node) {
           if (r.value0 > (l.value0 + 1 | 0)) {
             return rotateLeft(k, v, l, r.value2, r.value3, r.value4, r.value5);
           }
@@ -7908,13 +8498,13 @@
       throw new Error("Failed pattern match at Data.Map.Internal (line 717, column 40 - line 738, column 34): " + [l.constructor.name]);
     };
   })();
-  var $lazy_unsafeSplit = /* @__PURE__ */ $runtime_lazy4("unsafeSplit", "Data.Map.Internal", function() {
+  var $lazy_unsafeSplit = /* @__PURE__ */ $runtime_lazy5("unsafeSplit", "Data.Map.Internal", function() {
     return function(comp, k, m) {
       if (m instanceof Leaf) {
         return new Split(Nothing.value, Leaf.value, Leaf.value);
       }
       ;
-      if (m instanceof Node2) {
+      if (m instanceof Node) {
         var v = comp(k)(m.value2);
         if (v instanceof LT) {
           var v1 = $lazy_unsafeSplit(793)(comp, k, m.value4);
@@ -7937,13 +8527,13 @@
     };
   });
   var unsafeSplit = /* @__PURE__ */ $lazy_unsafeSplit(786);
-  var $lazy_unsafeSplitLast = /* @__PURE__ */ $runtime_lazy4("unsafeSplitLast", "Data.Map.Internal", function() {
+  var $lazy_unsafeSplitLast = /* @__PURE__ */ $runtime_lazy5("unsafeSplitLast", "Data.Map.Internal", function() {
     return function(k, v, l, r) {
       if (r instanceof Leaf) {
         return new SplitLast(k, v, l);
       }
       ;
-      if (r instanceof Node2) {
+      if (r instanceof Node) {
         var v1 = $lazy_unsafeSplitLast(779)(r.value2, r.value3, r.value4, r.value5);
         return new SplitLast(v1.value0, v1.value1, unsafeBalancedNode(k, v, l, v1.value2));
       }
@@ -7957,14 +8547,14 @@
       return v1;
     }
     ;
-    if (v instanceof Node2) {
+    if (v instanceof Node) {
       var v2 = unsafeSplitLast(v.value2, v.value3, v.value4, v.value5);
       return unsafeBalancedNode(v2.value0, v2.value1, v2.value2, v1);
     }
     ;
     throw new Error("Failed pattern match at Data.Map.Internal (line 764, column 25 - line 768, column 38): " + [v.constructor.name, v1.constructor.name]);
   };
-  var $lazy_unsafeDifference = /* @__PURE__ */ $runtime_lazy4("unsafeDifference", "Data.Map.Internal", function() {
+  var $lazy_unsafeDifference = /* @__PURE__ */ $runtime_lazy5("unsafeDifference", "Data.Map.Internal", function() {
     return function(comp, l, r) {
       if (l instanceof Leaf) {
         return Leaf.value;
@@ -7974,7 +8564,7 @@
         return l;
       }
       ;
-      if (r instanceof Node2) {
+      if (r instanceof Node) {
         var v = unsafeSplit(comp, r.value2, l);
         var l$prime = $lazy_unsafeDifference(841)(comp, v.value1, r.value4);
         var r$prime = $lazy_unsafeDifference(842)(comp, v.value2, r.value5);
@@ -7985,7 +8575,7 @@
     };
   });
   var unsafeDifference = /* @__PURE__ */ $lazy_unsafeDifference(835);
-  var $lazy_unsafeIntersectionWith = /* @__PURE__ */ $runtime_lazy4("unsafeIntersectionWith", "Data.Map.Internal", function() {
+  var $lazy_unsafeIntersectionWith = /* @__PURE__ */ $runtime_lazy5("unsafeIntersectionWith", "Data.Map.Internal", function() {
     return function(comp, app, l, r) {
       if (l instanceof Leaf) {
         return Leaf.value;
@@ -7995,7 +8585,7 @@
         return Leaf.value;
       }
       ;
-      if (r instanceof Node2) {
+      if (r instanceof Node) {
         var v = unsafeSplit(comp, r.value2, l);
         var l$prime = $lazy_unsafeIntersectionWith(825)(comp, app, v.value1, r.value4);
         var r$prime = $lazy_unsafeIntersectionWith(826)(comp, app, v.value2, r.value5);
@@ -8014,7 +8604,7 @@
     };
   });
   var unsafeIntersectionWith = /* @__PURE__ */ $lazy_unsafeIntersectionWith(819);
-  var $lazy_unsafeUnionWith = /* @__PURE__ */ $runtime_lazy4("unsafeUnionWith", "Data.Map.Internal", function() {
+  var $lazy_unsafeUnionWith = /* @__PURE__ */ $runtime_lazy5("unsafeUnionWith", "Data.Map.Internal", function() {
     return function(comp, app, l, r) {
       if (l instanceof Leaf) {
         return r;
@@ -8024,7 +8614,7 @@
         return l;
       }
       ;
-      if (r instanceof Node2) {
+      if (r instanceof Node) {
         var v = unsafeSplit(comp, r.value2, l);
         var l$prime = $lazy_unsafeUnionWith(809)(comp, app, v.value1, r.value4);
         var r$prime = $lazy_unsafeUnionWith(810)(comp, app, v.value2, r.value5);
@@ -8079,7 +8669,7 @@
             return false;
           }
           ;
-          if (v instanceof Node2) {
+          if (v instanceof Node) {
             var v1 = compare21(k)(v.value2);
             if (v1 instanceof LT) {
               $copy_v = v.value4;
@@ -8123,7 +8713,7 @@
             return Nothing.value;
           }
           ;
-          if (v instanceof Node2) {
+          if (v instanceof Node) {
             var v1 = compare21(k)(v.value2);
             if (v1 instanceof LT) {
               $copy_v = v.value4;
@@ -8167,7 +8757,7 @@
             return iter;
           }
           ;
-          if (v instanceof Node2) {
+          if (v instanceof Node) {
             if (v.value5 instanceof Leaf) {
               $tco_var_iter = new IterEmit(v.value2, v.value3, iter);
               $copy_v = v.value4;
@@ -8233,10 +8823,10 @@
         return function(v) {
           var go2 = function(v1) {
             if (v1 instanceof Leaf) {
-              return singleton8(k)(v);
+              return singleton9(k)(v);
             }
             ;
-            if (v1 instanceof Node2) {
+            if (v1 instanceof Node) {
               var v2 = compare21(k)(v1.value2);
               if (v2 instanceof LT) {
                 return unsafeBalancedNode(v1.value2, v1.value3, go2(v1.value4), v1.value5);
@@ -8247,7 +8837,7 @@
               }
               ;
               if (v2 instanceof EQ) {
-                return new Node2(v1.value0, v1.value1, k, app(v1.value3)(v), v1.value4, v1.value5);
+                return new Node(v1.value0, v1.value1, k, app(v1.value3)(v), v1.value4, v1.value5);
               }
               ;
               throw new Error("Failed pattern match at Data.Map.Internal (line 486, column 7 - line 489, column 44): " + [v2.constructor.name]);
@@ -8266,10 +8856,10 @@
       return function(v) {
         var go2 = function(v1) {
           if (v1 instanceof Leaf) {
-            return singleton8(k)(v);
+            return singleton9(k)(v);
           }
           ;
-          if (v1 instanceof Node2) {
+          if (v1 instanceof Node) {
             var v2 = compare21(k)(v1.value2);
             if (v2 instanceof LT) {
               return unsafeBalancedNode(v1.value2, v1.value3, go2(v1.value4), v1.value5);
@@ -8280,7 +8870,7 @@
             }
             ;
             if (v2 instanceof EQ) {
-              return new Node2(v1.value0, v1.value1, k, v, v1.value4, v1.value5);
+              return new Node(v1.value0, v1.value1, k, v, v1.value4, v1.value5);
             }
             ;
             throw new Error("Failed pattern match at Data.Map.Internal (line 471, column 7 - line 474, column 35): " + [v2.constructor.name]);
@@ -8299,8 +8889,8 @@
           return Leaf.value;
         }
         ;
-        if (v instanceof Node2) {
-          return new Node2(v.value0, v.value1, v.value2, f(v.value3), go2(v.value4), go2(v.value5));
+        if (v instanceof Node) {
+          return new Node(v.value0, v.value1, v.value2, f(v.value3), go2(v.value4), go2(v.value5));
         }
         ;
         throw new Error("Failed pattern match at Data.Map.Internal (line 147, column 10 - line 150, column 39): " + [v.constructor.name]);
@@ -8311,13 +8901,13 @@
   var foldableMap = {
     foldr: function(f) {
       return function(z) {
-        var $lazy_go = $runtime_lazy4("go", "Data.Map.Internal", function() {
+        var $lazy_go = $runtime_lazy5("go", "Data.Map.Internal", function() {
           return function(m$prime, z$prime) {
             if (m$prime instanceof Leaf) {
               return z$prime;
             }
             ;
-            if (m$prime instanceof Node2) {
+            if (m$prime instanceof Node) {
               return $lazy_go(172)(m$prime.value4, f(m$prime.value3)($lazy_go(172)(m$prime.value5, z$prime)));
             }
             ;
@@ -8332,13 +8922,13 @@
     },
     foldl: function(f) {
       return function(z) {
-        var $lazy_go = $runtime_lazy4("go", "Data.Map.Internal", function() {
+        var $lazy_go = $runtime_lazy5("go", "Data.Map.Internal", function() {
           return function(z$prime, m$prime) {
             if (m$prime instanceof Leaf) {
               return z$prime;
             }
             ;
-            if (m$prime instanceof Node2) {
+            if (m$prime instanceof Node) {
               return $lazy_go(178)(f($lazy_go(178)(z$prime, m$prime.value4))(m$prime.value3), m$prime.value5);
             }
             ;
@@ -8360,7 +8950,7 @@
             return mempty3;
           }
           ;
-          if (v instanceof Node2) {
+          if (v instanceof Node) {
             return append128(go2(v.value4))(append128(f(v.value3))(go2(v.value5)));
           }
           ;
@@ -8373,13 +8963,13 @@
   var foldableWithIndexMap = {
     foldrWithIndex: function(f) {
       return function(z) {
-        var $lazy_go = $runtime_lazy4("go", "Data.Map.Internal", function() {
+        var $lazy_go = $runtime_lazy5("go", "Data.Map.Internal", function() {
           return function(m$prime, z$prime) {
             if (m$prime instanceof Leaf) {
               return z$prime;
             }
             ;
-            if (m$prime instanceof Node2) {
+            if (m$prime instanceof Node) {
               return $lazy_go(192)(m$prime.value4, f(m$prime.value2)(m$prime.value3)($lazy_go(192)(m$prime.value5, z$prime)));
             }
             ;
@@ -8394,13 +8984,13 @@
     },
     foldlWithIndex: function(f) {
       return function(z) {
-        var $lazy_go = $runtime_lazy4("go", "Data.Map.Internal", function() {
+        var $lazy_go = $runtime_lazy5("go", "Data.Map.Internal", function() {
           return function(z$prime, m$prime) {
             if (m$prime instanceof Leaf) {
               return z$prime;
             }
             ;
-            if (m$prime instanceof Node2) {
+            if (m$prime instanceof Node) {
               return $lazy_go(198)(f(m$prime.value2)($lazy_go(198)(z$prime, m$prime.value4))(m$prime.value3), m$prime.value5);
             }
             ;
@@ -8422,7 +9012,7 @@
             return mempty3;
           }
           ;
-          if (v instanceof Node2) {
+          if (v instanceof Node) {
             return append128(go2(v.value4))(append128(f(v.value2)(v.value3))(go2(v.value5)));
           }
           ;
@@ -8456,7 +9046,7 @@
         return Nothing.value;
       }
       ;
-      if (v instanceof Node2) {
+      if (v instanceof Node) {
         if (v.value4 instanceof Leaf) {
           $tco_done = true;
           return new Just({
@@ -8485,7 +9075,7 @@
           return Leaf.value;
         }
         ;
-        if (v instanceof Node2) {
+        if (v instanceof Node) {
           if (f(v.value2)(v.value3)) {
             return unsafeBalancedNode(v.value2, v.value3, go2(v.value4), go2(v.value5));
           }
@@ -8508,7 +9098,7 @@
           return Leaf.value;
         }
         ;
-        if (v instanceof Node2) {
+        if (v instanceof Node) {
           if (f(v.value2)) {
             return unsafeBalancedNode(v.value2, v.value3, go2(v.value4), go2(v.value5));
           }
@@ -8530,30 +9120,30 @@
       return $786($$const($787));
     };
   };
-  var empty3 = /* @__PURE__ */ (function() {
+  var empty5 = /* @__PURE__ */ (function() {
     return Leaf.value;
   })();
-  var fromFoldable5 = function(dictOrd) {
+  var fromFoldable6 = function(dictOrd) {
     var insert18 = insert(dictOrd);
     return function(dictFoldable) {
       return foldl(dictFoldable)(function(m) {
         return function(v) {
           return insert18(v.value0)(v.value1)(m);
         };
-      })(empty3);
+      })(empty5);
     };
   };
   var fromFoldableWith = function(dictOrd) {
     var insertWith1 = insertWith(dictOrd);
     return function(dictFoldable) {
-      var foldl20 = foldl(dictFoldable);
+      var foldl19 = foldl(dictFoldable);
       return function(f) {
         var f$prime = insertWith1(flip(f));
-        return foldl20(function(m) {
+        return foldl19(function(m) {
           return function(v) {
             return f$prime(v.value0)(v.value1)(m);
           };
-        })(empty3);
+        })(empty5);
       };
     };
   };
@@ -8573,7 +9163,7 @@
           return Leaf.value;
         }
         ;
-        if (v instanceof Node2) {
+        if (v instanceof Node) {
           var v1 = compare21(k)(v.value2);
           if (v1 instanceof LT) {
             return unsafeBalancedNode(v.value2, v.value3, go2(v.value4), v.value5);
@@ -8622,19 +9212,10 @@
       return element3.__data__;
     };
   }
-  var bindDebugCount = 0;
   function setElementData_(datum2) {
     return function(element3) {
       return function() {
         element3.__data__ = datum2;
-        if (datum2?.id === 93 && bindDebugCount === 0) {
-          const hasMarker = datum2.__simMarker__ === true;
-          console.log(`[BindData] node93 bound to element, hasMarker=${hasMarker}, x=${datum2.x?.toFixed(1)}`);
-          if (!hasMarker) {
-            console.log(`[BindData] PROBLEM: node93 does NOT have __simMarker__ at bind time!`);
-          }
-          bindDebugCount++;
-        }
       };
     };
   }
@@ -8746,11 +9327,11 @@
   }
 
   // node_modules/d3-selection/src/selectorAll.js
-  function empty4() {
+  function empty6() {
     return [];
   }
   function selectorAll_default(selector) {
-    return selector == null ? empty4 : function() {
+    return selector == null ? empty6 : function() {
       return this.querySelectorAll(selector);
     };
   }
@@ -12932,16 +13513,16 @@
   };
 
   // output/PSD3v2.VizTree.Tree/index.js
-  var append4 = /* @__PURE__ */ append(semigroupArray);
-  var Node3 = /* @__PURE__ */ (function() {
-    function Node4(value0) {
+  var append6 = /* @__PURE__ */ append(semigroupArray);
+  var Node2 = /* @__PURE__ */ (function() {
+    function Node3(value0) {
       this.value0 = value0;
     }
     ;
-    Node4.create = function(value0) {
-      return new Node4(value0);
+    Node3.create = function(value0) {
+      return new Node3(value0);
     };
-    return Node4;
+    return Node3;
   })();
   var Join = /* @__PURE__ */ (function() {
     function Join3(value0) {
@@ -12985,12 +13566,12 @@
   })();
   var withChildren = function(parent2) {
     return function(newChildren) {
-      if (parent2 instanceof Node3) {
-        return new Node3({
+      if (parent2 instanceof Node2) {
+        return new Node2({
           name: parent2.value0.name,
           elemType: parent2.value0.elemType,
           attrs: parent2.value0.attrs,
-          children: append4(parent2.value0.children)(newChildren)
+          children: append6(parent2.value0.children)(newChildren)
         });
       }
       ;
@@ -13015,12 +13596,12 @@
   };
   var withChild = function(parent2) {
     return function(child) {
-      if (parent2 instanceof Node3) {
-        return new Node3({
+      if (parent2 instanceof Node2) {
+        return new Node2({
           name: parent2.value0.name,
           elemType: parent2.value0.elemType,
           attrs: parent2.value0.attrs,
-          children: append4(parent2.value0.children)([child])
+          children: append6(parent2.value0.children)([child])
         });
       }
       ;
@@ -13085,7 +13666,7 @@
   var named2 = function(elemType) {
     return function(name16) {
       return function(attrs) {
-        return new Node3({
+        return new Node2({
           name: new Just(name16),
           elemType,
           attrs,
@@ -13110,7 +13691,7 @@
   };
   var elem3 = function(elemType) {
     return function(attrs) {
-      return new Node3({
+      return new Node2({
         name: Nothing.value,
         elemType,
         attrs,
@@ -13547,7 +14128,7 @@
 
   // output/PSD3v2.Selection.Operations/index.js
   var bind2 = /* @__PURE__ */ bind(bindEffect);
-  var pure4 = /* @__PURE__ */ pure(applicativeEffect);
+  var pure5 = /* @__PURE__ */ pure(applicativeEffect);
   var mapFlipped3 = /* @__PURE__ */ mapFlipped(functorEffect);
   var lookup3 = /* @__PURE__ */ lookup2(ordString);
   var traverse_2 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableArray);
@@ -13771,7 +14352,7 @@
           }
           ;
           if (v1 instanceof Drag && v1.value0 instanceof SimulationDrag) {
-            return pure4(unit);
+            return pure5(unit);
           }
           ;
           if (v1 instanceof Click) {
@@ -14083,19 +14664,19 @@
   };
   var getDocument = function(v) {
     if (v instanceof EmptySelection) {
-      return pure4(v.value0.document);
+      return pure5(v.value0.document);
     }
     ;
     if (v instanceof BoundSelection) {
-      return pure4(v.value0.document);
+      return pure5(v.value0.document);
     }
     ;
     if (v instanceof PendingSelection) {
-      return pure4(v.value0.document);
+      return pure5(v.value0.document);
     }
     ;
     if (v instanceof ExitingSelection) {
-      return pure4(v.value0.document);
+      return pure5(v.value0.document);
     }
     ;
     throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 815, column 1 - line 815, column 82): " + [v.constructor.name]);
@@ -14410,7 +14991,7 @@
             };
           }
           ;
-          return pure4(v);
+          return pure5(v);
         })());
       };
     };
@@ -14494,7 +15075,7 @@
           return function(doc) {
             return function __do8() {
               setElementData_(datum2)(element3)();
-              if (tree2 instanceof Node3) {
+              if (tree2 instanceof Node2) {
                 return applyAttributes(element3)(datum2)(index5)(tree2.value0.attrs)();
               }
               ;
@@ -14532,7 +15113,7 @@
               });
               return function __do8() {
                 updateElementFromTree(v1.value0)(datum2)(idx)(tree2)(v.document)();
-                return new Tuple(v1.value0, empty3);
+                return new Tuple(v1.value0, empty5);
               };
             }
             ;
@@ -14658,7 +15239,7 @@
     var renderTemplatesForBoundSelection1 = renderTemplatesForBoundSelection(dictOrd);
     return function(v) {
       return function(v1) {
-        if (v1 instanceof Node3) {
+        if (v1 instanceof Node2) {
           return function __do8() {
             var childSel = appendChild1(v1.value0.elemType)(v1.value0.attrs)(v)();
             var element3 = (function() {
@@ -14678,7 +15259,7 @@
               return unsafeCrashWith("renderTree: appendChild should return EmptySelection");
             })();
             var childMaps = traverse3(renderNodeHelper(dictOrd)(childSel))(v1.value0.children)();
-            var combinedChildMap = foldl2(union3)(empty3)(map25(snd)(childMaps));
+            var combinedChildMap = foldl2(union3)(empty5)(map25(snd)(childMaps));
             var selectionsMap = (function() {
               if (v1.value0.name instanceof Just) {
                 return insert2(v1.value0.name.value0)(childSel)(combinedChildMap);
@@ -14734,7 +15315,7 @@
             var updateChildMaps = map25(snd)(updateElementsAndMaps);
             var allElements = append12(enterElements)(updateElements);
             var allChildMaps = append12(enterChildMaps)(updateChildMaps);
-            var combinedChildMap = foldl2(union3)(empty3)(allChildMaps);
+            var combinedChildMap = foldl2(union3)(empty5)(allChildMaps);
             var doc = (function() {
               if (v2.value0.enter instanceof PendingSelection) {
                 return v2.value0.enter.value0.document;
@@ -14789,7 +15370,7 @@
             var elementsAndMaps = renderNestedTemplatesForPendingSelection(dictOrd)(v1.value0.decompose)(v1.value0.template)(stringToElementType(v1.value0.key))(v2.value0.enter)();
             var elements = map25(fst)(elementsAndMaps);
             var childMaps = map25(snd)(elementsAndMaps);
-            var combinedChildMap = foldl2(union3)(empty3)(childMaps);
+            var combinedChildMap = foldl2(union3)(empty5)(childMaps);
             var v3 = (function() {
               if (v2.value0.enter instanceof PendingSelection) {
                 return v2.value0.enter.value0;
@@ -14878,8 +15459,8 @@
               if (v1.value0.enterBehavior instanceof Just) {
                 var modifiedTemplate = function(datum2) {
                   var v3 = v1.value0.template(datum2);
-                  if (v3 instanceof Node3) {
-                    return new Node3({
+                  if (v3 instanceof Node2) {
+                    return new Node2({
                       name: v3.value0.name,
                       elemType: v3.value0.elemType,
                       children: v3.value0.children,
@@ -14904,7 +15485,7 @@
                     return liftEffect3(traverse_2(function(v3) {
                       var finalAttrs = (function() {
                         var v4 = v1.value0.template(v3.value1);
-                        if (v4 instanceof Node3) {
+                        if (v4 instanceof Node2) {
                           return v4.value0.attrs;
                         }
                         ;
@@ -14959,7 +15540,7 @@
             var updateChildMaps = map25(snd)(updateElementsAndMaps);
             var allElements = append12(enterElements)(updateElements);
             var allChildMaps = append12(enterChildMaps)(updateChildMaps);
-            var combinedChildMap = foldl2(union3)(empty3)(allChildMaps);
+            var combinedChildMap = foldl2(union3)(empty5)(allChildMaps);
             var doc = (function() {
               if (v2.value0.enter instanceof PendingSelection) {
                 return v2.value0.enter.value0.document;
@@ -15067,8 +15648,8 @@
               if (v1.value0.enterBehavior instanceof Just) {
                 var modifiedTemplate = function(datum2) {
                   var v3 = v1.value0.template(datum2);
-                  if (v3 instanceof Node3) {
-                    return new Node3({
+                  if (v3 instanceof Node2) {
+                    return new Node2({
                       name: v3.value0.name,
                       elemType: v3.value0.elemType,
                       children: v3.value0.children,
@@ -15093,7 +15674,7 @@
                     return liftEffect3(traverse_2(function(v4) {
                       var finalAttrs = (function() {
                         var v5 = v1.value0.template(v4.value1);
-                        if (v5 instanceof Node3) {
+                        if (v5 instanceof Node2) {
                           return v5.value0.attrs;
                         }
                         ;
@@ -15148,7 +15729,7 @@
             var updateChildMaps = map25(snd)(updateElementsAndMaps);
             var enterChildMaps = map25(snd)(enterElementsAndMaps);
             var allChildMaps = append12(enterChildMaps)(updateChildMaps);
-            var combinedChildMap = foldl2(union3)(empty3)(allChildMaps);
+            var combinedChildMap = foldl2(union3)(empty5)(allChildMaps);
             var doc = (function() {
               if (v2.value0.enter instanceof PendingSelection) {
                 return v2.value0.enter.value0.document;
@@ -15225,7 +15806,7 @@
                         return v2.value1;
                       };
                     })(innerDataArray)();
-                    var combinedInnerMap = foldl2(union3)(empty3)(innerMaps);
+                    var combinedInnerMap = foldl2(union3)(empty5)(innerMaps);
                     return new Tuple(wrapperElement, combinedInnerMap);
                   };
                 }
@@ -15249,7 +15830,7 @@
       };
     };
   };
-  var append5 = function(dictMonadEffect) {
+  var append7 = function(dictMonadEffect) {
     var liftEffect121 = liftEffect(dictMonadEffect);
     return function(elemType) {
       return function(attrs) {
@@ -15311,7 +15892,7 @@
       };
     };
   };
-  var append32 = /* @__PURE__ */ append5(monadEffectEffect);
+  var append32 = /* @__PURE__ */ append7(monadEffectEffect);
   var appendData2 = function(dictMonadEffect) {
     var liftEffect121 = liftEffect(dictMonadEffect);
     return function(dictFoldable) {
@@ -15348,7 +15929,7 @@
     var Bind1 = Monad0.Bind1();
     var bind137 = bind(Bind1);
     var joinData22 = joinData2(dictMonadEffect);
-    var append42 = append5(dictMonadEffect);
+    var append42 = append7(dictMonadEffect);
     var pure125 = pure(Monad0.Applicative0());
     var applyPerDatumAttrs1 = applyPerDatumAttrs(dictMonadEffect);
     var discard213 = discard2(Bind1);
@@ -15457,7 +16038,7 @@
   var appendData3 = /* @__PURE__ */ appendData2(monadEffectEffect);
   var joinData3 = /* @__PURE__ */ joinData2(monadEffectEffect);
   var joinDataWithKey3 = /* @__PURE__ */ joinDataWithKey2(monadEffectEffect);
-  var append6 = /* @__PURE__ */ append5(monadEffectEffect);
+  var append8 = /* @__PURE__ */ append7(monadEffectEffect);
   var setAttrs3 = /* @__PURE__ */ setAttrs2(monadEffectEffect);
   var setAttrsExit3 = /* @__PURE__ */ setAttrsExit2(monadEffectEffect);
   var remove5 = /* @__PURE__ */ remove3(monadEffectEffect);
@@ -15616,7 +16197,7 @@
       return function(attrs) {
         return function(v) {
           return function __do8() {
-            var result = append6(elemType)(attrs)(v)();
+            var result = append8(elemType)(attrs)(v)();
             return result;
           };
         };
@@ -15937,10 +16518,10 @@
     }
   };
 
-  // output/D3.Viz.AnimatedTree4Cluster4v2/index.js
+  // output/D3.Viz.AnimatedTreeClusterv2/index.js
   var show6 = /* @__PURE__ */ show(showNumber);
   var bind3 = /* @__PURE__ */ bind(bindArray);
-  var fromFoldable6 = /* @__PURE__ */ fromFoldable(foldableList);
+  var fromFoldable7 = /* @__PURE__ */ fromFoldable(foldableList);
   var append13 = /* @__PURE__ */ append(semigroupArray);
   var fromFoldable13 = /* @__PURE__ */ fromFoldable2(foldableArray);
   var map27 = /* @__PURE__ */ map(functorArray);
@@ -15949,12 +16530,12 @@
   var appendChild5 = /* @__PURE__ */ appendChild(selectionMD3v2Selection_D);
   var viewBox2 = /* @__PURE__ */ viewBox(toAttrStringString);
   var class_2 = /* @__PURE__ */ class_(toAttrStringString);
-  var pure5 = /* @__PURE__ */ pure(applicativeD3v2M);
+  var pure6 = /* @__PURE__ */ pure(applicativeD3v2M);
   var openSelection2 = /* @__PURE__ */ openSelection(selectionMD3v2Selection_D);
   var updateJoin2 = /* @__PURE__ */ updateJoin(selectionMD3v2Selection_D)(foldableArray)(ordString);
   var discard3 = /* @__PURE__ */ discard(discardUnit)(bindD3v2M);
   var remove6 = /* @__PURE__ */ remove(selectionMD3v2Selection_D);
-  var append22 = /* @__PURE__ */ append3(selectionMD3v2Selection_D);
+  var append22 = /* @__PURE__ */ append5(selectionMD3v2Selection_D);
   var fill2 = /* @__PURE__ */ fill(toAttrStringString);
   var stroke2 = /* @__PURE__ */ stroke(toAttrStringString);
   var strokeWidth2 = /* @__PURE__ */ strokeWidth(toAttrNumberNumber);
@@ -15988,7 +16569,7 @@
         return "Cluster (Dendrogram)";
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.AnimatedTree4Cluster4v2 (line 32, column 1 - line 34, column 46): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.AnimatedTreeClusterv2 (line 33, column 1 - line 35, column 46): " + [v.constructor.name]);
     }
   };
   var verticalLinkPath = function(x117) {
@@ -16011,24 +16592,27 @@
       return TreeLayout.value;
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.AnimatedTree4Cluster4v2 (line 37, column 1 - line 37, column 41): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.AnimatedTreeClusterv2 (line 38, column 1 - line 38, column 41): " + [v.constructor.name]);
   };
   var nodeKey = function(node) {
     return node.name;
   };
-  var makeLinks = function(v) {
-    var grandchildLinks = bind3(fromFoldable6(v.value1))(makeLinks);
-    var childLinks = bind3(fromFoldable6(v.value1))(function(v1) {
+  var makeLinks = function(t) {
+    var val = head3(t);
+    var children3 = tail(t);
+    var grandchildLinks = bind3(fromFoldable7(children3))(makeLinks);
+    var childLinks = bind3(fromFoldable7(children3))(function(child) {
+      var childVal = head3(child);
       return [{
         source: {
-          name: v.value0.name,
-          x: v.value0.x,
-          y: v.value0.y
+          name: val.name,
+          x: val.x,
+          y: val.y
         },
         target: {
-          name: v1.value0.name,
-          x: v1.value0.x,
-          y: v1.value0.y
+          name: childVal.name,
+          x: childVal.x,
+          y: childVal.y
         }
       }];
     });
@@ -16050,18 +16634,18 @@
         return fromFoldable13(map27(hierDataToTree)(childrenMaybe.value0));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.AnimatedTree4Cluster4v2 (line 48, column 20 - line 50, column 76): " + [childrenMaybe.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.AnimatedTreeClusterv2 (line 49, column 20 - line 51, column 76): " + [childrenMaybe.constructor.name]);
     })();
-    return new Node({
+    return mkTree({
       name: name16,
       value: value18,
       x: 0,
       y: 0,
       depth: 0,
       height: 0
-    }, childrenList);
+    })(childrenList);
   };
-  var flattenTree = /* @__PURE__ */ fromFoldable(foldableTree);
+  var flattenTree = /* @__PURE__ */ fromFoldable(/* @__PURE__ */ foldableCofree(foldableList));
   var draw = function(flareData) {
     return function(selector) {
       return runD3v2M((function() {
@@ -16070,7 +16654,7 @@
           return bind12(appendChild5(SVG.value)([viewBox2("0 0 " + (show6(1200) + (" " + show6(900)))), class_2("animated-tree4-cluster4")])(container))(function(svg3) {
             return bind12(appendChild5(Group.value)([class_2("links")])(svg3))(function(linksGroup2) {
               return bind12(appendChild5(Group.value)([class_2("nodes")])(svg3))(function(nodesGroup2) {
-                return pure5({
+                return pure6({
                   dataTree,
                   linksGroup: linksGroup2,
                   nodesGroup: nodesGroup2,
@@ -16116,7 +16700,7 @@
                     return cluster(config)(dataTree);
                   }
                   ;
-                  throw new Error("Failed pattern match at D3.Viz.AnimatedTree4Cluster4v2 (line 135, column 20 - line 141, column 37): " + [currentLayout.constructor.name]);
+                  throw new Error("Failed pattern match at D3.Viz.AnimatedTreeClusterv2 (line 152, column 18 - line 162, column 34): " + [currentLayout.constructor.name]);
                 })();
                 var nodes3 = flattenTree(positioned);
                 var links3 = makeLinks(positioned);
@@ -16143,7 +16727,7 @@
                                       }), cy2(function(v2) {
                                         return v2.y;
                                       })]))(function() {
-                                        return pure5(unit);
+                                        return pure6(unit);
                                       });
                                     });
                                   });
@@ -16161,89 +16745,6 @@
           };
         };
       };
-    };
-  };
-
-  // output/Control.Monad.State.Trans/index.js
-  var runStateT = function(v) {
-    return v;
-  };
-  var functorStateT = function(dictFunctor) {
-    var map96 = map(dictFunctor);
-    return {
-      map: function(f) {
-        return function(v) {
-          return function(s) {
-            return map96(function(v1) {
-              return new Tuple(f(v1.value0), v1.value1);
-            })(v(s));
-          };
-        };
-      }
-    };
-  };
-  var monadStateT = function(dictMonad) {
-    return {
-      Applicative0: function() {
-        return applicativeStateT(dictMonad);
-      },
-      Bind1: function() {
-        return bindStateT(dictMonad);
-      }
-    };
-  };
-  var bindStateT = function(dictMonad) {
-    var bind83 = bind(dictMonad.Bind1());
-    return {
-      bind: function(v) {
-        return function(f) {
-          return function(s) {
-            return bind83(v(s))(function(v1) {
-              var v3 = f(v1.value0);
-              return v3(v1.value1);
-            });
-          };
-        };
-      },
-      Apply0: function() {
-        return applyStateT(dictMonad);
-      }
-    };
-  };
-  var applyStateT = function(dictMonad) {
-    var functorStateT1 = functorStateT(dictMonad.Bind1().Apply0().Functor0());
-    return {
-      apply: ap(monadStateT(dictMonad)),
-      Functor0: function() {
-        return functorStateT1;
-      }
-    };
-  };
-  var applicativeStateT = function(dictMonad) {
-    var pure86 = pure(dictMonad.Applicative0());
-    return {
-      pure: function(a2) {
-        return function(s) {
-          return pure86(new Tuple(a2, s));
-        };
-      },
-      Apply0: function() {
-        return applyStateT(dictMonad);
-      }
-    };
-  };
-  var monadStateStateT = function(dictMonad) {
-    var pure86 = pure(dictMonad.Applicative0());
-    var monadStateT1 = monadStateT(dictMonad);
-    return {
-      state: function(f) {
-        return function($206) {
-          return pure86(f($206));
-        };
-      },
-      Monad0: function() {
-        return monadStateT1;
-      }
     };
   };
 
@@ -16401,7 +16902,7 @@
       };
     };
   };
-  var empty5 = empty3;
+  var empty7 = empty5;
 
   // output/DOM.HTML.Indexed.InputType/index.js
   var InputButton = /* @__PURE__ */ (function() {
@@ -17016,7 +17517,7 @@
   var newMutMap = newImpl;
 
   // output/Halogen.VDom.DOM/index.js
-  var $runtime_lazy5 = function(name16, moduleName, init4) {
+  var $runtime_lazy6 = function(name16, moduleName, init4) {
     var state3 = 0;
     var val;
     return function(lineNumber) {
@@ -17031,7 +17532,7 @@
   var haltWidget = function(v) {
     return halt(v.widget);
   };
-  var $lazy_patchWidget = /* @__PURE__ */ $runtime_lazy5("patchWidget", "Halogen.VDom.DOM", function() {
+  var $lazy_patchWidget = /* @__PURE__ */ $runtime_lazy6("patchWidget", "Halogen.VDom.DOM", function() {
     return function(state3, vdom) {
       if (vdom instanceof Grafted) {
         return $lazy_patchWidget(291)(state3, runGraft(vdom.value0));
@@ -17057,7 +17558,7 @@
     var parent2 = parentNode2(v.node);
     return removeChild2(v.node, parent2);
   };
-  var $lazy_patchText = /* @__PURE__ */ $runtime_lazy5("patchText", "Halogen.VDom.DOM", function() {
+  var $lazy_patchText = /* @__PURE__ */ $runtime_lazy6("patchText", "Halogen.VDom.DOM", function() {
     return function(state3, vdom) {
       if (vdom instanceof Grafted) {
         return $lazy_patchText(82)(state3, runGraft(vdom.value0));
@@ -17115,7 +17616,7 @@
     ;
     return false;
   };
-  var $lazy_patchElem = /* @__PURE__ */ $runtime_lazy5("patchElem", "Halogen.VDom.DOM", function() {
+  var $lazy_patchElem = /* @__PURE__ */ $runtime_lazy6("patchElem", "Halogen.VDom.DOM", function() {
     return function(state3, vdom) {
       if (vdom instanceof Grafted) {
         return $lazy_patchElem(135)(state3, runGraft(vdom.value0));
@@ -17168,7 +17669,7 @@
     };
   });
   var patchElem = /* @__PURE__ */ $lazy_patchElem(130);
-  var $lazy_patchKeyed = /* @__PURE__ */ $runtime_lazy5("patchKeyed", "Halogen.VDom.DOM", function() {
+  var $lazy_patchKeyed = /* @__PURE__ */ $runtime_lazy6("patchKeyed", "Halogen.VDom.DOM", function() {
     return function(state3, vdom) {
       if (vdom instanceof Grafted) {
         return $lazy_patchKeyed(222)(state3, runGraft(vdom.value0));
@@ -17283,7 +17784,7 @@
     return mkStep(new Step2(node, state3, patchElem, haltElem));
   };
   var buildVDom = function(spec) {
-    var $lazy_build = $runtime_lazy5("build", "Halogen.VDom.DOM", function() {
+    var $lazy_build = $runtime_lazy6("build", "Halogen.VDom.DOM", function() {
       return function(v) {
         if (v instanceof Text2) {
           return buildText(spec, $lazy_build(59), v.value0);
@@ -17344,7 +17845,7 @@
   }
 
   // output/Halogen.VDom.DOM.Prop/index.js
-  var $runtime_lazy6 = function(name16, moduleName, init4) {
+  var $runtime_lazy7 = function(name16, moduleName, init4) {
     var state3 = 0;
     var val;
     return function(lineNumber) {
@@ -17598,7 +18099,7 @@
           throw new Error("Failed pattern match at Halogen.VDom.DOM.Prop (line 113, column 5 - line 135, column 15): " + [v2.constructor.name]);
         };
       };
-      var $lazy_patchProp = $runtime_lazy6("patchProp", "Halogen.VDom.DOM.Prop", function() {
+      var $lazy_patchProp = $runtime_lazy7("patchProp", "Halogen.VDom.DOM.Prop", function() {
         return function(state3, ps2) {
           var events = newMutMap();
           var onThis = removeProp(state3.events);
@@ -17891,397 +18392,6 @@
     return foldFreeAp1(function($54) {
       return liftFreeAp(f($54));
     });
-  };
-
-  // output/Data.CatQueue/index.js
-  var CatQueue = /* @__PURE__ */ (function() {
-    function CatQueue2(value0, value1) {
-      this.value0 = value0;
-      this.value1 = value1;
-    }
-    ;
-    CatQueue2.create = function(value0) {
-      return function(value1) {
-        return new CatQueue2(value0, value1);
-      };
-    };
-    return CatQueue2;
-  })();
-  var uncons3 = function($copy_v) {
-    var $tco_done = false;
-    var $tco_result;
-    function $tco_loop(v) {
-      if (v.value0 instanceof Nil && v.value1 instanceof Nil) {
-        $tco_done = true;
-        return Nothing.value;
-      }
-      ;
-      if (v.value0 instanceof Nil) {
-        $copy_v = new CatQueue(reverse2(v.value1), Nil.value);
-        return;
-      }
-      ;
-      if (v.value0 instanceof Cons) {
-        $tco_done = true;
-        return new Just(new Tuple(v.value0.value0, new CatQueue(v.value0.value1, v.value1)));
-      }
-      ;
-      throw new Error("Failed pattern match at Data.CatQueue (line 82, column 1 - line 82, column 63): " + [v.constructor.name]);
-    }
-    ;
-    while (!$tco_done) {
-      $tco_result = $tco_loop($copy_v);
-    }
-    ;
-    return $tco_result;
-  };
-  var snoc3 = function(v) {
-    return function(a2) {
-      return new CatQueue(v.value0, new Cons(a2, v.value1));
-    };
-  };
-  var $$null4 = function(v) {
-    if (v.value0 instanceof Nil && v.value1 instanceof Nil) {
-      return true;
-    }
-    ;
-    return false;
-  };
-  var empty6 = /* @__PURE__ */ (function() {
-    return new CatQueue(Nil.value, Nil.value);
-  })();
-
-  // output/Data.CatList/index.js
-  var CatNil = /* @__PURE__ */ (function() {
-    function CatNil2() {
-    }
-    ;
-    CatNil2.value = new CatNil2();
-    return CatNil2;
-  })();
-  var CatCons = /* @__PURE__ */ (function() {
-    function CatCons2(value0, value1) {
-      this.value0 = value0;
-      this.value1 = value1;
-    }
-    ;
-    CatCons2.create = function(value0) {
-      return function(value1) {
-        return new CatCons2(value0, value1);
-      };
-    };
-    return CatCons2;
-  })();
-  var link = function(v) {
-    return function(v1) {
-      if (v instanceof CatNil) {
-        return v1;
-      }
-      ;
-      if (v1 instanceof CatNil) {
-        return v;
-      }
-      ;
-      if (v instanceof CatCons) {
-        return new CatCons(v.value0, snoc3(v.value1)(v1));
-      }
-      ;
-      throw new Error("Failed pattern match at Data.CatList (line 108, column 1 - line 108, column 54): " + [v.constructor.name, v1.constructor.name]);
-    };
-  };
-  var foldr5 = function(k) {
-    return function(b10) {
-      return function(q2) {
-        var foldl20 = function($copy_v) {
-          return function($copy_v1) {
-            return function($copy_v2) {
-              var $tco_var_v = $copy_v;
-              var $tco_var_v1 = $copy_v1;
-              var $tco_done = false;
-              var $tco_result;
-              function $tco_loop(v, v1, v2) {
-                if (v2 instanceof Nil) {
-                  $tco_done = true;
-                  return v1;
-                }
-                ;
-                if (v2 instanceof Cons) {
-                  $tco_var_v = v;
-                  $tco_var_v1 = v(v1)(v2.value0);
-                  $copy_v2 = v2.value1;
-                  return;
-                }
-                ;
-                throw new Error("Failed pattern match at Data.CatList (line 124, column 3 - line 124, column 59): " + [v.constructor.name, v1.constructor.name, v2.constructor.name]);
-              }
-              ;
-              while (!$tco_done) {
-                $tco_result = $tco_loop($tco_var_v, $tco_var_v1, $copy_v2);
-              }
-              ;
-              return $tco_result;
-            };
-          };
-        };
-        var go2 = function($copy_xs) {
-          return function($copy_ys) {
-            var $tco_var_xs = $copy_xs;
-            var $tco_done1 = false;
-            var $tco_result;
-            function $tco_loop(xs, ys) {
-              var v = uncons3(xs);
-              if (v instanceof Nothing) {
-                $tco_done1 = true;
-                return foldl20(function(x41) {
-                  return function(i2) {
-                    return i2(x41);
-                  };
-                })(b10)(ys);
-              }
-              ;
-              if (v instanceof Just) {
-                $tco_var_xs = v.value0.value1;
-                $copy_ys = new Cons(k(v.value0.value0), ys);
-                return;
-              }
-              ;
-              throw new Error("Failed pattern match at Data.CatList (line 120, column 14 - line 122, column 67): " + [v.constructor.name]);
-            }
-            ;
-            while (!$tco_done1) {
-              $tco_result = $tco_loop($tco_var_xs, $copy_ys);
-            }
-            ;
-            return $tco_result;
-          };
-        };
-        return go2(q2)(Nil.value);
-      };
-    };
-  };
-  var uncons4 = function(v) {
-    if (v instanceof CatNil) {
-      return Nothing.value;
-    }
-    ;
-    if (v instanceof CatCons) {
-      return new Just(new Tuple(v.value0, (function() {
-        var $66 = $$null4(v.value1);
-        if ($66) {
-          return CatNil.value;
-        }
-        ;
-        return foldr5(link)(CatNil.value)(v.value1);
-      })()));
-    }
-    ;
-    throw new Error("Failed pattern match at Data.CatList (line 99, column 1 - line 99, column 61): " + [v.constructor.name]);
-  };
-  var empty7 = /* @__PURE__ */ (function() {
-    return CatNil.value;
-  })();
-  var append7 = link;
-  var cons3 = function(a2) {
-    return function(cat) {
-      return append7(new CatCons(a2, empty6))(cat);
-    };
-  };
-  var singleton9 = function(a2) {
-    return cons3(a2)(CatNil.value);
-  };
-  var semigroupCatList = {
-    append: append7
-  };
-  var monoidCatList = /* @__PURE__ */ (function() {
-    return {
-      mempty: CatNil.value,
-      Semigroup0: function() {
-        return semigroupCatList;
-      }
-    };
-  })();
-  var fromFoldable7 = function(dictFoldable) {
-    var foldMap12 = foldMap(dictFoldable)(monoidCatList);
-    return function(f) {
-      return foldMap12(singleton9)(f);
-    };
-  };
-  var snoc4 = function(cat) {
-    return function(a2) {
-      return append7(cat)(new CatCons(a2, empty6));
-    };
-  };
-
-  // output/Control.Monad.Free/index.js
-  var $runtime_lazy7 = function(name16, moduleName, init4) {
-    var state3 = 0;
-    var val;
-    return function(lineNumber) {
-      if (state3 === 2) return val;
-      if (state3 === 1) throw new ReferenceError(name16 + " was needed before it finished initializing (module " + moduleName + ", line " + lineNumber + ")", moduleName, lineNumber);
-      state3 = 1;
-      val = init4();
-      state3 = 2;
-      return val;
-    };
-  };
-  var append8 = /* @__PURE__ */ append(semigroupCatList);
-  var Free = /* @__PURE__ */ (function() {
-    function Free2(value0, value1) {
-      this.value0 = value0;
-      this.value1 = value1;
-    }
-    ;
-    Free2.create = function(value0) {
-      return function(value1) {
-        return new Free2(value0, value1);
-      };
-    };
-    return Free2;
-  })();
-  var Return = /* @__PURE__ */ (function() {
-    function Return2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Return2.create = function(value0) {
-      return new Return2(value0);
-    };
-    return Return2;
-  })();
-  var Bind = /* @__PURE__ */ (function() {
-    function Bind2(value0, value1) {
-      this.value0 = value0;
-      this.value1 = value1;
-    }
-    ;
-    Bind2.create = function(value0) {
-      return function(value1) {
-        return new Bind2(value0, value1);
-      };
-    };
-    return Bind2;
-  })();
-  var toView = function($copy_v) {
-    var $tco_done = false;
-    var $tco_result;
-    function $tco_loop(v) {
-      var runExpF = function(v22) {
-        return v22;
-      };
-      var concatF = function(v22) {
-        return function(r) {
-          return new Free(v22.value0, append8(v22.value1)(r));
-        };
-      };
-      if (v.value0 instanceof Return) {
-        var v2 = uncons4(v.value1);
-        if (v2 instanceof Nothing) {
-          $tco_done = true;
-          return new Return(v.value0.value0);
-        }
-        ;
-        if (v2 instanceof Just) {
-          $copy_v = concatF(runExpF(v2.value0.value0)(v.value0.value0))(v2.value0.value1);
-          return;
-        }
-        ;
-        throw new Error("Failed pattern match at Control.Monad.Free (line 227, column 7 - line 231, column 64): " + [v2.constructor.name]);
-      }
-      ;
-      if (v.value0 instanceof Bind) {
-        $tco_done = true;
-        return new Bind(v.value0.value0, function(a2) {
-          return concatF(v.value0.value1(a2))(v.value1);
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at Control.Monad.Free (line 225, column 3 - line 233, column 56): " + [v.value0.constructor.name]);
-    }
-    ;
-    while (!$tco_done) {
-      $tco_result = $tco_loop($copy_v);
-    }
-    ;
-    return $tco_result;
-  };
-  var fromView = function(f) {
-    return new Free(f, empty7);
-  };
-  var freeMonad = {
-    Applicative0: function() {
-      return freeApplicative;
-    },
-    Bind1: function() {
-      return freeBind;
-    }
-  };
-  var freeFunctor = {
-    map: function(k) {
-      return function(f) {
-        return bindFlipped(freeBind)((function() {
-          var $189 = pure(freeApplicative);
-          return function($190) {
-            return $189(k($190));
-          };
-        })())(f);
-      };
-    }
-  };
-  var freeBind = {
-    bind: function(v) {
-      return function(k) {
-        return new Free(v.value0, snoc4(v.value1)(k));
-      };
-    },
-    Apply0: function() {
-      return $lazy_freeApply(0);
-    }
-  };
-  var freeApplicative = {
-    pure: function($191) {
-      return fromView(Return.create($191));
-    },
-    Apply0: function() {
-      return $lazy_freeApply(0);
-    }
-  };
-  var $lazy_freeApply = /* @__PURE__ */ $runtime_lazy7("freeApply", "Control.Monad.Free", function() {
-    return {
-      apply: ap(freeMonad),
-      Functor0: function() {
-        return freeFunctor;
-      }
-    };
-  });
-  var pure6 = /* @__PURE__ */ pure(freeApplicative);
-  var liftF = function(f) {
-    return fromView(new Bind(f, function($192) {
-      return pure6($192);
-    }));
-  };
-  var foldFree = function(dictMonadRec) {
-    var Monad0 = dictMonadRec.Monad0();
-    var map124 = map(Monad0.Bind1().Apply0().Functor0());
-    var pure125 = pure(Monad0.Applicative0());
-    var tailRecM4 = tailRecM(dictMonadRec);
-    return function(k) {
-      var go2 = function(f) {
-        var v = toView(f);
-        if (v instanceof Return) {
-          return map124(Done.create)(pure125(v.value0));
-        }
-        ;
-        if (v instanceof Bind) {
-          return map124(function($199) {
-            return Loop.create(v.value1($199));
-          })(k(v.value0));
-        }
-        ;
-        throw new Error("Failed pattern match at Control.Monad.Free (line 158, column 10 - line 160, column 37): " + [v.constructor.name]);
-      };
-      return tailRecM4(go2);
-    };
   };
 
   // output/Halogen.Query.ChildQuery/index.js
@@ -19064,7 +19174,7 @@
                 });
               }
               ;
-              throw new Error("Failed pattern match at Component.AnimatedTreeCluster (line 83, column 5 - line 103, column 47): " + [flareResult.constructor.name]);
+              throw new Error("Failed pattern match at Component.AnimatedTreeCluster (line 83, column 5 - line 104, column 47): " + [flareResult.constructor.name]);
             });
           });
         });
@@ -19094,13 +19204,13 @@
                 return liftEffect44(animationStep(state3.vizState.value0.dataTree)(state3.vizState.value0.linksGroup)(state3.vizState.value0.nodesGroup)(state3.vizState.value0.chartWidth)(state3.vizState.value0.chartHeight)(newLayout));
               }
               ;
-              throw new Error("Failed pattern match at Component.AnimatedTreeCluster (line 111, column 5 - line 120, column 20): " + [state3.vizState.constructor.name]);
+              throw new Error("Failed pattern match at Component.AnimatedTreeCluster (line 112, column 5 - line 121, column 20): " + [state3.vizState.constructor.name]);
             });
           });
         });
       }
       ;
-      throw new Error("Failed pattern match at Component.AnimatedTreeCluster (line 75, column 16 - line 120, column 20): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Component.AnimatedTreeCluster (line 75, column 16 - line 121, column 20): " + [v.constructor.name]);
     };
   };
   var component = function(dictMonadAff) {
@@ -20522,17 +20632,17 @@
   var e5 = Math.sqrt(10);
   var e2 = Math.sqrt(2);
   function tickSpec(start5, stop3, count) {
-    const step5 = (stop3 - start5) / Math.max(0, count), power = Math.floor(Math.log10(step5)), error4 = step5 / Math.pow(10, power), factor = error4 >= e10 ? 10 : error4 >= e5 ? 5 : error4 >= e2 ? 2 : 1;
+    const step5 = (stop3 - start5) / Math.max(0, count), power2 = Math.floor(Math.log10(step5)), error4 = step5 / Math.pow(10, power2), factor = error4 >= e10 ? 10 : error4 >= e5 ? 5 : error4 >= e2 ? 2 : 1;
     let i1, i2, inc;
-    if (power < 0) {
-      inc = Math.pow(10, -power) / factor;
+    if (power2 < 0) {
+      inc = Math.pow(10, -power2) / factor;
       i1 = Math.round(start5 * inc);
       i2 = Math.round(stop3 * inc);
       if (i1 / inc < start5) ++i1;
       if (i2 / inc > stop3) --i2;
       inc = -inc;
     } else {
-      inc = Math.pow(10, power) * factor;
+      inc = Math.pow(10, power2) * factor;
       i1 = Math.round(start5 / inc);
       i2 = Math.round(stop3 / inc);
       if (i1 * inc < start5) ++i1;
@@ -21992,7 +22102,7 @@
     var stateRef = $$new({
       nodes: [],
       links: [],
-      forces: empty3,
+      forces: empty5,
       alpha: 1,
       alphaMin: 1e-3,
       alphaDecay: 0.0228,
@@ -22040,7 +22150,7 @@
           running: v.running,
           tickCallback: v.tickCallback,
           velocityDecay: v.velocityDecay,
-          forces: empty3
+          forces: empty5
         };
       })(stateRef)();
       return clearForceRegistry_();
@@ -22511,8 +22621,8 @@
   var map33 = /* @__PURE__ */ map(functorList);
   var mempty2 = /* @__PURE__ */ mempty(monoidList);
   var append11 = /* @__PURE__ */ append(semigroupCatList);
-  var fromFoldable8 = /* @__PURE__ */ fromFoldable7(foldableList);
-  var fromFoldable14 = /* @__PURE__ */ fromFoldable7(foldableArray);
+  var fromFoldable8 = /* @__PURE__ */ fromFoldable3(foldableList);
+  var fromFoldable14 = /* @__PURE__ */ fromFoldable3(foldableArray);
   var Emit = /* @__PURE__ */ (function() {
     function Emit2(value0) {
       this.value0 = value0;
@@ -22628,9 +22738,9 @@
 
   // output/Data.Set/index.js
   var coerce4 = /* @__PURE__ */ coerce();
-  var foldMap3 = /* @__PURE__ */ foldMap(foldableList);
-  var foldl7 = /* @__PURE__ */ foldl(foldableList);
-  var foldr6 = /* @__PURE__ */ foldr(foldableList);
+  var foldMap2 = /* @__PURE__ */ foldMap(foldableList);
+  var foldl6 = /* @__PURE__ */ foldl(foldableList);
+  var foldr5 = /* @__PURE__ */ foldr(foldableList);
   var $$Set = function(x41) {
     return x41;
   };
@@ -22648,7 +22758,7 @@
   };
   var size5 = /* @__PURE__ */ coerce4(size2);
   var singleton11 = function(a2) {
-    return singleton8(a2)(unit);
+    return singleton9(a2)(unit);
   };
   var semigroupSet = function(dictOrd) {
     return {
@@ -22673,7 +22783,7 @@
   var fromMap2 = $$Set;
   var foldableSet = {
     foldMap: function(dictMonoid) {
-      var foldMap12 = foldMap3(dictMonoid);
+      var foldMap12 = foldMap2(dictMonoid);
       return function(f) {
         var $98 = foldMap12(f);
         return function($99) {
@@ -22683,7 +22793,7 @@
     },
     foldl: function(f) {
       return function(x41) {
-        var $100 = foldl7(f)(x41);
+        var $100 = foldl6(f)(x41);
         return function($101) {
           return $100(toList2($101));
         };
@@ -22691,7 +22801,7 @@
     },
     foldr: function(f) {
       return function(x41) {
-        var $102 = foldr6(f)(x41);
+        var $102 = foldr5(f)(x41);
         return function($103) {
           return $102(toList2($103));
         };
@@ -22701,7 +22811,7 @@
   var filter5 = function(dictOrd) {
     return coerce4(filterKeys(dictOrd));
   };
-  var empty8 = empty3;
+  var empty8 = empty5;
   var fromFoldable9 = function(dictFoldable) {
     var foldl22 = foldl(dictFoldable);
     return function(dictOrd) {
@@ -22730,7 +22840,7 @@
   var map34 = /* @__PURE__ */ map(functorArray);
   var lookup7 = /* @__PURE__ */ lookup2(ordInt);
   var fromFoldable10 = /* @__PURE__ */ fromFoldable2(foldableArray);
-  var fromFoldable15 = /* @__PURE__ */ fromFoldable5(ordInt)(foldableArray);
+  var fromFoldable15 = /* @__PURE__ */ fromFoldable6(ordInt)(foldableArray);
   var append14 = /* @__PURE__ */ append(semigroupArray);
   var fromFoldable24 = /* @__PURE__ */ fromFoldable9(foldableArray)(ordInt);
   var alter2 = /* @__PURE__ */ alter(ordInt);
@@ -22800,13 +22910,13 @@
             var targetId = config.getLinkTarget(link4);
             return alter2(addToArray(link4))(targetId)(acc);
           };
-        })(empty3)(links3);
+        })(empty5)(links3);
         var linksBySource = foldl2(function(acc) {
           return function(link4) {
             var sourceId = config.getLinkSource(link4);
             return alter2(addToArray(link4))(sourceId)(acc);
           };
-        })(empty3)(links3);
+        })(empty5)(links3);
         var maps = {
           nodeById,
           linksBySource,
@@ -22866,13 +22976,13 @@
   var map36 = /* @__PURE__ */ map(functorArray);
   var fromFoldableWith2 = /* @__PURE__ */ fromFoldableWith(ordString)(foldableArray);
   var lookup8 = /* @__PURE__ */ lookup2(ordString);
-  var fromFoldable11 = /* @__PURE__ */ fromFoldable5(ordString)(foldableArray);
+  var fromFoldable11 = /* @__PURE__ */ fromFoldable6(ordString)(foldableArray);
   var mapFlipped4 = /* @__PURE__ */ mapFlipped(functorArray);
   var bind7 = /* @__PURE__ */ bind(bindMaybe);
   var sum2 = /* @__PURE__ */ sum(foldableArray)(semiringNumber);
   var equalSnd2 = /* @__PURE__ */ equalSnd(eqString);
   var compareSnd2 = /* @__PURE__ */ compareSnd(ordString);
-  var fromFoldable16 = /* @__PURE__ */ fromFoldable5(ordInt)(foldableArray);
+  var fromFoldable16 = /* @__PURE__ */ fromFoldable6(ordInt)(foldableArray);
   var PackageInfo = /* @__PURE__ */ (function() {
     function PackageInfo2(value0) {
       this.value0 = value0;
@@ -23193,9 +23303,9 @@
       modulePackageLinks,
       sourceLinksMap,
       name2ID,
-      id2Name: empty3,
-      id2Package: empty3,
-      id2LOC: empty3
+      id2Name: empty5,
+      id2Package: empty5,
+      id2LOC: empty5
     };
   };
 
@@ -23244,7 +23354,7 @@
   var lookup9 = /* @__PURE__ */ lookup2(ordInt);
   var max9 = /* @__PURE__ */ max(ordNumber);
   var map37 = /* @__PURE__ */ map(functorArray);
-  var fromFoldable17 = /* @__PURE__ */ fromFoldable5(ordInt)(foldableArray);
+  var fromFoldable17 = /* @__PURE__ */ fromFoldable6(ordInt)(foldableArray);
   var spy2 = /* @__PURE__ */ spy();
   var show9 = /* @__PURE__ */ show(showInt);
   var bind8 = /* @__PURE__ */ bind(bindArray);
@@ -23466,7 +23576,7 @@
         id2Name: v.id2Name,
         id2Package: v.id2Package,
         id2LOC: v.id2LOC,
-        id2TreeData: empty3
+        id2TreeData: empty5
       }
     };
   };
@@ -24736,11 +24846,11 @@ ${name16}:
   var map112 = /* @__PURE__ */ map(functorList);
   var fromFoldable20 = /* @__PURE__ */ fromFoldable(foldableList);
   var insert9 = /* @__PURE__ */ insert(ordInt);
-  var foldl9 = /* @__PURE__ */ foldl(foldableList);
+  var foldl7 = /* @__PURE__ */ foldl(foldableList);
   var fromFoldable110 = /* @__PURE__ */ fromFoldable2(foldableArray);
   var fromFoldable25 = /* @__PURE__ */ fromFoldable(foldableSet);
   var elem4 = /* @__PURE__ */ elem2(eqInt);
-  var fromFoldable32 = /* @__PURE__ */ fromFoldable5(ordInt)(foldableArray);
+  var fromFoldable32 = /* @__PURE__ */ fromFoldable6(ordInt)(foldableArray);
   var append19 = /* @__PURE__ */ append(semigroupArray);
   var updateNodeTreeXY = function(nodes3) {
     return function(treeDerivedDataMap) {
@@ -24782,7 +24892,7 @@ ${name16}:
           };
         }
         ;
-        throw new Error("Failed pattern match at D3.Viz.Spago.Tree (line 143, column 5 - line 150, column 12): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at D3.Viz.Spago.Tree (line 146, column 5 - line 153, column 12): " + [v.constructor.name]);
       };
       return map40(updateNode)(nodes3);
     };
@@ -24798,39 +24908,41 @@ ${name16}:
     };
   };
   var mapTree = function(f) {
-    return function(v) {
-      return new Node(f(v.value0), map112(mapTree(f))(v.value1));
+    return function(t) {
+      return mkTree(f(head3(t)))(map112(mapTree(f))(tail(t)));
     };
   };
   var flattenTreeToMap = function(tree2) {
-    var go2 = function(v) {
+    var go2 = function(t) {
       return function(acc) {
+        var node = head3(t);
+        var children3 = tail(t);
         var isLeaf2 = (function() {
-          if (v.value1 instanceof Nil) {
+          if (children3 instanceof Nil) {
             return true;
           }
           ;
           return false;
         })();
-        var childIDs = fromFoldable20(map112(function(v1) {
-          return v1.value0.id;
-        })(v.value1));
+        var childIDs = fromFoldable20(map112(function(child) {
+          return head3(child).id;
+        })(children3));
         var treeFields = {
-          x: v.value0.x,
-          y: v.value0.y,
+          x: node.x,
+          y: node.y,
           isTreeLeaf: isLeaf2,
-          depth: v.value0.depth,
+          depth: node.depth,
           childIDs
         };
-        var accWithNode = insert9(v.value0.id)(treeFields)(acc);
-        return foldl9(function(m) {
+        var accWithNode = insert9(node.id)(treeFields)(acc);
+        return foldl7(function(m) {
           return function(child) {
             return go2(child)(m);
           };
-        })(accWithNode)(v.value1);
+        })(accWithNode)(children3);
       };
     };
-    return go2(tree2)(empty3);
+    return go2(tree2)(empty5);
   };
   var buildIDTree = function(rootID) {
     return function(links3) {
@@ -24845,7 +24957,7 @@ ${name16}:
       var go2 = function(nodeId) {
         var children3 = getChildren4(nodeId);
         var childTrees = map40(go2)(children3);
-        return new Node(nodeId, fromFoldable110(childTrees));
+        return mkTree(nodeId)(fromFoldable110(childTrees));
       };
       return go2(rootID);
     };
@@ -24885,7 +24997,7 @@ ${name16}:
           };
         }
         ;
-        throw new Error("Failed pattern match at D3.Viz.Spago.Tree (line 103, column 11 - line 105, column 64): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at D3.Viz.Spago.Tree (line 106, column 11 - line 108, column 64): " + [v.constructor.name]);
       })(idTree);
       var config = {
         size: {
@@ -25304,7 +25416,7 @@ ${name16}:
   };
 
   // output/CodeSnippets/index.js
-  var snippet_treeViz_content = 'drawTree :: String -> Tree HierNode -> Effect Unit\ndrawTree selector flareTree = runD3v2M do\n  container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  let chartWidth = 800.0\n  let chartHeight = 600.0\n  let padding = 40.0\n\n  -- Apply Tree4 layout\n  let config = defaultTreeConfig\n        { size = { width: chartWidth - (2.0 * padding)\n                 , height: chartHeight - (2.0 * padding) } }\n  let positioned = tree config flareTree\n\n  -- Flatten to arrays\n  let nodes = Array.fromFoldable positioned\n  let links = makeLinks positioned\n\n  liftEffect $ Console.log $ "Rendering " <> show (Array.length nodes) <> " nodes, " <> show (Array.length links) <> " links"\n\n  -- First tree: SVG container with links (datum type: link data)\n  let linksTree :: T.Tree LinkDatum\n      linksTree =\n        T.named SVG "svg"\n          [ width chartWidth\n          , height chartHeight\n          , viewBox ("0 0 " <> show chartWidth <> " " <> show chartHeight)\n          , class_ "simple-hierarchy-tree"\n          ]\n          `T.withChild`\n            (T.named Group "chartGroup"\n              [ class_ "tree-content" ]\n              `T.withChild`\n                (T.named Group "linksGroup"\n                  [ class_ "links" ]\n                  `T.withChild`\n                    (T.joinData "links" "path" links $ \\link ->\n                      T.elem Path\n                        [ d (linkPath\n                            (link.source.x + padding)\n                            (link.source.y + padding)\n                            (link.target.x + padding)\n                            (link.target.y + padding))\n                        , fill "none"\n                        , stroke "#999"\n                        , strokeWidth 1.5\n                        , class_ "link"\n                        ]\n                    )\n                )\n            )\n\n  -- Render links first (underlaying)\n  linksSelections <- renderTree container linksTree\n\n  -- Second tree: Nodes on top (datum type: HierNode)\n  -- Reselect the chartGroup from rendered selections (not global CSS selector!)\n  chartGroupSel <- liftEffect $ reselectD3v2 "chartGroup" linksSelections\n\n  let nodesTree :: T.Tree HierNode\n      nodesTree =\n        T.named Group "nodesGroup"\n          [ class_ "nodes" ]\n          `T.withChild`\n            (T.joinData "nodeGroups" "g" nodes $ \\node ->\n              T.named Group ("node-" <> node.name)\n                [ class_ "node" ]\n                `T.withChildren`\n                  [ T.elem Circle\n                      [ cx (node.x + padding)\n                      , cy (node.y + padding)\n                      , radius 6.0\n                      , fill "#69b3a2"\n                      , stroke "#fff"\n                      , strokeWidth 2.0\n                      ]\n                  , T.elem Text\n                      [ x (node.x + padding + 10.0)\n                      , y (node.y + padding + 4.0)\n                      , textContent node.name\n                      , fontSize 12.0\n                      , textAnchor "start"\n                      ]\n                  ]\n            )\n\n  -- Render nodes on top (overlaying)\n  nodesSelections <- renderTree chartGroupSel nodesTree';
+  var snippet_treeViz_content = 'drawTree :: String -> Tree HierNode -> Effect Unit\ndrawTree selector flareTree = runD3v2M do\n  container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  let chartWidth = 800.0\n  let chartHeight = 600.0\n  let padding = 40.0\n\n  -- Apply Tree layout\n  let config = defaultTreeConfig\n        { size = { width: chartWidth - (2.0 * padding)\n                 , height: chartHeight - (2.0 * padding) } }\n  let positioned = tree config flareTree\n\n  -- Flatten to arrays\n  let nodes = Array.fromFoldable positioned\n  let links = makeLinks positioned\n\n  liftEffect $ Console.log $ "Rendering " <> show (Array.length nodes) <> " nodes, " <> show (Array.length links) <> " links"\n\n  -- First tree: SVG container with links (datum type: link data)\n  let linksTree :: T.Tree LinkDatum\n      linksTree =\n        T.named SVG "svg"\n          [ width chartWidth\n          , height chartHeight\n          , viewBox ("0 0 " <> show chartWidth <> " " <> show chartHeight)\n          , class_ "simple-hierarchy-tree"\n          ]\n          `T.withChild`\n            (T.named Group "chartGroup"\n              [ class_ "tree-content" ]\n              `T.withChild`\n                (T.named Group "linksGroup"\n                  [ class_ "links" ]\n                  `T.withChild`\n                    (T.joinData "links" "path" links $ \\link ->\n                      T.elem Path\n                        [ d (linkPath\n                            (link.source.x + padding)\n                            (link.source.y + padding)\n                            (link.target.x + padding)\n                            (link.target.y + padding))\n                        , fill "none"\n                        , stroke "#999"\n                        , strokeWidth 1.5\n                        , class_ "link"\n                        ]\n                    )\n                )\n            )\n\n  -- Render links first (underlaying)\n  linksSelections <- renderTree container linksTree\n\n  -- Second tree: Nodes on top (datum type: HierNode)\n  -- Reselect the chartGroup from rendered selections (not global CSS selector!)\n  chartGroupSel <- liftEffect $ reselectD3v2 "chartGroup" linksSelections\n\n  let nodesTree :: T.Tree HierNode\n      nodesTree =\n        T.named Group "nodesGroup"\n          [ class_ "nodes" ]\n          `T.withChild`\n            (T.joinData "nodeGroups" "g" nodes $ \\node ->\n              T.named Group ("node-" <> node.name)\n                [ class_ "node" ]\n                `T.withChildren`\n                  [ T.elem Circle\n                      [ cx (node.x + padding)\n                      , cy (node.y + padding)\n                      , radius 6.0\n                      , fill "#69b3a2"\n                      , stroke "#fff"\n                      , strokeWidth 2.0\n                      ]\n                  , T.elem Text\n                      [ x (node.x + padding + 10.0)\n                      , y (node.y + padding + 4.0)\n                      , textContent node.name\n                      , fontSize 12.0\n                      , textAnchor "start"\n                      ]\n                  ]\n            )\n\n  -- Render nodes on top (overlaying)\n  nodesSelections <- renderTree chartGroupSel nodesTree';
   var snippet_threeLittleDimensions_content = 'threeLittleDimensions :: Effect Unit\nthreeLittleDimensions = runD3v2M do\n  container <- select "#viz" :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  -- The challenge: how to represent nested decomposition in a tree?\n  -- Outer datum type: Array Int (a row)\n  -- Inner datum type: Int (a cell value)\n\n  -- Approach: Use nestedJoin to handle datum type decomposition\n  -- Outer type: Array Int (a row)\n  -- Inner type: Int (a cell value)\n  let tree :: T.Tree (Array Int)\n      tree =\n        T.named Table "table"\n          [ class_ "nested-data-table" ]\n          `T.withChild`\n            -- nestedJoin handles the type change from Array Int \u2192 Int\n            -- identity is the decomposer: it just returns the row data as-is\n            (T.nestedJoin "rows" "tr" matrixData identity $ \\cellValue ->\n              -- cellValue :: Int (decomposed from Array Int)\n              T.elem Td\n                [ class_ "table-cell"\n                , textContent (show cellValue)\n                ]\n            )\n\n  -- Render the tree\n  selections <- renderTree container tree';
   var snippet_threeLittleCircles_content = 'type CircleData =\n  { x :: Number\n  , y :: Number\n  , r :: Number\n  , color :: String\n  }\n\ncircleData :: Array CircleData\ncircleData =\n  [ { x: 100.0, y: 100.0, r: 40.0, color: "red" }\n  , { x: 200.0, y: 100.0, r: 30.0, color: "green" }\n  , { x: 300.0, y: 100.0, r: 50.0, color: "blue" }\n  ]\n\nthreeLittleCircles :: Effect Unit\nthreeLittleCircles = runD3v2M do\n  container <- select "#viz" :: _ (D3v2Selection_ SEmpty Element Unit)\n\n  -- Define the tree with a DATA JOIN\n  -- Note: The datum type is CircleData because we\'re using joinData with CircleData\n  let tree :: Tree CircleData\n      tree =\n        T.named SVG "svg"\n          [ width 400.0\n          , height 200.0\n          , viewBox "0 0 400 200"\n          , id_ "three-circles-svg"\n          , class_ "tree-api-example"\n          ]\n          `T.withChild`\n            -- Here\'s the magic: joinData creates N copies of the template\n            (joinData "circles" "circle" circleData $ \\d ->\n              T.elem Circle\n                [ cx d.x\n                , cy d.y\n                , radius d.r\n                , fill d.color\n                ])';
   var snippet_threeLittleCirclesTransition_content = 'threeLittleCirclesTransition :: String -> Effect { stateRef :: Ref.Ref CircleState, circlesSel :: D3v2Selection_ SBoundOwns Element CircleData }\nthreeLittleCirclesTransition selector = do\n  -- Create state ref - start with green circles\n  stateRef <- Ref.new StateGreen\n\n  runD3v2M do\n    container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)\n\n    -- Initial tree: three green circles in a row\n    let initialTree :: T.Tree CircleData\n        initialTree =\n          T.named SVG "svg"\n            [ width 400.0\n            , height 250.0\n            , viewBox "0 0 400 250"\n            , id_ "three-circles-transition-tree"\n            ]\n            `T.withChild`\n              (T.joinData "circles" "circle" [0, 1, 2] $ \\d ->\n                T.elem Circle\n                  [ fill "#00ff00"  -- Start green\n                  , cx (100.0 + toNumber d * 100.0)  -- Three in a row\n                  , cy 125.0\n                  , radius 40.0\n                  , fillOpacity 1.0\n                  ]\n              )\n\n    -- Render initial state\n    selections <- renderTree container initialTree\n\n    -- Extract the circles selection for transitions\n    let circlesSel = case Map.lookup "circles" selections of\n          Just sel -> sel\n          Nothing -> unsafePartial $ unsafeCrashWith "circles selection not found"\n\n    -- Return the state ref and selection so external button can trigger transition\n    pure { stateRef, circlesSel }';
@@ -25830,7 +25942,7 @@ ${name16}:
   var nub3 = /* @__PURE__ */ nub(ordString);
   var bind17 = /* @__PURE__ */ bind(bindArray);
   var sort2 = /* @__PURE__ */ sort(ordString);
-  var fromFoldable21 = /* @__PURE__ */ fromFoldable5(ordString)(foldableArray);
+  var fromFoldable21 = /* @__PURE__ */ fromFoldable6(ordString)(foldableArray);
   var pure18 = /* @__PURE__ */ pure(applicativeEither);
   var fromFoldable111 = /* @__PURE__ */ fromFoldable2(foldableArray);
   var map113 = /* @__PURE__ */ map(functorArray);
@@ -26230,14 +26342,14 @@ ${name16}:
       ;
       throw new Error("Failed pattern match at PSD3.Shared.Data (line 152, column 20 - line 154, column 76): " + [childrenMaybe.constructor.name]);
     })();
-    return new Node({
+    return mkTree({
       name: name16,
       value: value18,
       x: 0,
       y: 0,
       depth: 0,
       height: 0
-    }, childrenList);
+    })(childrenList);
   };
   var flareImportNodeToRecord = function(node) {
     return {
@@ -27416,7 +27528,7 @@ ${name16}:
   var show27 = /* @__PURE__ */ show(showNumber);
   var bind111 = /* @__PURE__ */ bind(bindD3v2M);
   var select11 = /* @__PURE__ */ select(selectionMD3v2Selection_D);
-  var fromFoldable112 = /* @__PURE__ */ fromFoldable(foldableTree);
+  var fromFoldable112 = /* @__PURE__ */ fromFoldable(/* @__PURE__ */ foldableCofree(foldableList));
   var discard10 = /* @__PURE__ */ discard(discardUnit);
   var discard13 = /* @__PURE__ */ discard10(bindD3v2M);
   var liftEffect12 = /* @__PURE__ */ liftEffect(monadEffectD3v2M);
@@ -27479,17 +27591,20 @@ ${name16}:
   var bind28 = /* @__PURE__ */ bind(bindAff);
   var liftEffect13 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var makeLinks2 = function(tree$prime) {
-    var makeLinksList = function(v) {
-      var grandchildLinks = bind27(v.value1)(makeLinksList);
-      var childLinks = bind27(v.value1)(function(v1) {
+    var makeLinksList = function(t) {
+      var val = head3(t);
+      var children3 = tail(t);
+      var grandchildLinks = bind27(children3)(makeLinksList);
+      var childLinks = bind27(children3)(function(child) {
+        var childVal = head3(child);
         return new Cons({
           source: {
-            x: v.value0.x,
-            y: v.value0.y
+            x: val.x,
+            y: val.y
           },
           target: {
-            x: v1.value0.x,
-            y: v1.value0.y
+            x: childVal.x,
+            y: childVal.y
           }
         }, Nil.value);
       });
@@ -27555,7 +27670,7 @@ ${name16}:
         return liftEffect13(drawTree(selector)(result.value0));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.TreeAPI.TreeViz (line 172, column 3 - line 174, column 64): " + [result.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.TreeAPI.TreeViz (line 176, column 3 - line 178, column 64): " + [result.constructor.name]);
     }));
   };
 
@@ -28721,7 +28836,7 @@ ${name16}:
 
   // output/Routing.Match/index.js
   var pure24 = /* @__PURE__ */ pure(/* @__PURE__ */ applicativeV(semiringFree));
-  var foldl10 = /* @__PURE__ */ foldl(foldableList);
+  var foldl9 = /* @__PURE__ */ foldl(foldableList);
   var bind30 = /* @__PURE__ */ bind(bindList);
   var map49 = /* @__PURE__ */ map(functorList);
   var unwrap5 = /* @__PURE__ */ unwrap();
@@ -28740,12 +28855,12 @@ ${name16}:
   var runMatch = function(v) {
     return function(route) {
       var foldErrors = function(errs) {
-        return new Left(foldl10(function(b10) {
+        return new Left(foldl9(function(b10) {
           return function(a2) {
             return a2 + ("\n" + b10);
           };
         })("")(bind30(map49(reverse2)(unwrap5(errs)))(function(es) {
-          return pure110(foldl10(function(b10) {
+          return pure110(foldl9(function(b10) {
             return function(a2) {
               return a2 + (";" + b10);
             };
@@ -30233,7 +30348,7 @@ ${name16}:
   var setAttrs5 = /* @__PURE__ */ setAttrs(selectionMD3v2Selection_D);
   var withTransition4 = /* @__PURE__ */ withTransition(transitionMD3v2Selection_);
   var x13 = /* @__PURE__ */ x(toAttrNumberFunctionIntFu);
-  var append21 = /* @__PURE__ */ append3(selectionMD3v2Selection_D);
+  var append21 = /* @__PURE__ */ append5(selectionMD3v2Selection_D);
   var textContent8 = /* @__PURE__ */ textContent(toAttrStringFunctionStrin);
   var fontSize5 = /* @__PURE__ */ fontSize(toAttrNumberNumber);
   var xFromIndex = function(v) {
@@ -31077,7 +31192,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
   var floor3 = Math.floor;
 
-  // output/PSD3.Layout.Hierarchy.Link/index.js
+  // output/DataViz.Layout.Hierarchy.Link/index.js
   var show31 = /* @__PURE__ */ show(showNumber);
   var StepHorizontal = /* @__PURE__ */ (function() {
     function StepHorizontal2() {
@@ -31215,7 +31330,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return linkDiagonal;
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Link (line 113, column 1 - line 113, column 79): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Link (line 157, column 1 - line 157, column 79): " + [v.constructor.name]);
   };
   var eqLinkStyle = {
     eq: function(x41) {
@@ -31260,14 +31375,14 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var type_20 = /* @__PURE__ */ type_18(isPropInputType);
   var value15 = /* @__PURE__ */ value13(isPropString);
   var sortWith2 = /* @__PURE__ */ sortWith(ordNumber);
-  var foldl11 = /* @__PURE__ */ foldl(foldableArray);
+  var foldl10 = /* @__PURE__ */ foldl(foldableArray);
   var insertWith2 = /* @__PURE__ */ insertWith(ordInt);
   var fromEnum3 = /* @__PURE__ */ fromEnum(boundedEnumCodePoint);
   var discard18 = /* @__PURE__ */ discard(discardUnit);
   var bind211 = /* @__PURE__ */ bind(bindD3v2M);
   var select13 = /* @__PURE__ */ select(selectionMD3v2Selection_D);
-  var map53 = /* @__PURE__ */ map(functorTree);
-  var fromFoldable113 = /* @__PURE__ */ fromFoldable(foldableTree);
+  var map53 = /* @__PURE__ */ map(/* @__PURE__ */ functorCofree(functorList));
+  var fromFoldable113 = /* @__PURE__ */ fromFoldable(/* @__PURE__ */ foldableCofree(foldableList));
   var discard23 = /* @__PURE__ */ discard18(bindD3v2M);
   var liftEffect15 = /* @__PURE__ */ liftEffect(monadEffectD3v2M);
   var show114 = /* @__PURE__ */ show(showInt);
@@ -31432,17 +31547,20 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
   var makeLinks3 = function(tree$prime) {
-    var makeLinksList = function(v) {
-      var grandchildLinks = bind33(v.value1)(makeLinksList);
-      var childLinks = bind33(v.value1)(function(v1) {
+    var makeLinksList = function(t) {
+      var val = head3(t);
+      var children3 = tail(t);
+      var grandchildLinks = bind33(children3)(makeLinksList);
+      var childLinks = bind33(children3)(function(child) {
+        var childVal = head3(child);
         return new Cons({
           source: {
-            x: v.value0.x,
-            y: v.value0.y
+            x: val.x,
+            y: val.y
           },
           target: {
-            x: v1.value0.x,
-            y: v1.value0.y
+            x: childVal.x,
+            y: childVal.y
           }
         }, Nil.value);
       });
@@ -31454,8 +31572,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return function(label5) {
       return function(current) {
         return button2([classes(append112(["preset-btn"])((function() {
-          var $134 = eq6(style3)(current);
-          if ($134) {
+          var $128 = eq6(style3)(current);
+          if ($128) {
             return ["active"];
           }
           ;
@@ -31500,7 +31618,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return d1;
         }
         ;
-        throw new Error("Failed pattern match at Component.HowTo.HowtoTreeExplorer (line 377, column 5 - line 382, column 18): " + [preset.constructor.name]);
+        throw new Error("Failed pattern match at Component.HowTo.HowtoTreeExplorer (line 381, column 5 - line 386, column 18): " + [preset.constructor.name]);
       };
     };
   };
@@ -31536,8 +31654,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return function(label5) {
       return function(current) {
         return button2([classes(append112(["preset-btn"])((function() {
-          var $138 = eq22(preset)(current);
-          if ($138) {
+          var $132 = eq22(preset)(current);
+          if ($132) {
             return ["active"];
           }
           ;
@@ -31563,19 +31681,19 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return text5("");
       }
       ;
-      throw new Error("Failed pattern match at Component.HowTo.HowtoTreeExplorer (line 401, column 7 - line 403, column 30): " + [state3.error.constructor.name]);
+      throw new Error("Failed pattern match at Component.HowTo.HowtoTreeExplorer (line 405, column 7 - line 407, column 30): " + [state3.error.constructor.name]);
     })(), div2([classes(["tree-explorer-controls"])])([div2([classes(["control-group"])])([label_([text5("Min Separation: " + show32(state3.minSeparation))]), input([type_20(InputRange.value), min5(0.1), max6(5), step3(new Step(0.1)), value15(show32(state3.minSeparation)), onValueInput((function() {
-      var $177 = parseNumber(1);
-      return function($178) {
-        return SetMinSeparation.create($177($178));
+      var $171 = parseNumber(1);
+      return function($172) {
+        return SetMinSeparation.create($171($172));
       };
     })())])]), div2([classes(["control-group"])])([label_([text5("Layer Scale:")]), div2([classes(["button-group"])])([presetButton(Linear2.value)("Linear")(state3.layerScalePreset), presetButton(SquareRoot.value)("\u221A Sqrt")(state3.layerScalePreset), presetButton(Logarithmic.value)("Log")(state3.layerScalePreset), presetButton(Exponential2.value)("d^n")(state3.layerScalePreset)])]), (function() {
-      var $141 = eq22(state3.layerScalePreset)(Exponential2.value);
-      if ($141) {
+      var $135 = eq22(state3.layerScalePreset)(Exponential2.value);
+      if ($135) {
         return div2([classes(["control-group"])])([label_([text5("Exponent: " + show32(state3.exponent))]), input([type_20(InputRange.value), min5(0.5), max6(3), step3(new Step(0.1)), value15(show32(state3.exponent)), onValueInput((function() {
-          var $179 = parseNumber(1.5);
-          return function($180) {
-            return SetExponent.create($179($180));
+          var $173 = parseNumber(1.5);
+          return function($174) {
+            return SetExponent.create($173($174));
           };
         })())])]);
       }
@@ -31588,8 +31706,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       var computePairScale = function(v) {
         var pixelDist = v.value1.x - v.value0.x;
         var expectedSep = radiusSeparation(v.value0)(v.value1) + minSep;
-        var $143 = pixelDist > 1 && expectedSep > 0.01;
-        if ($143) {
+        var $137 = pixelDist > 1 && expectedSep > 0.01;
+        if ($137) {
           return new Just(pixelDist / expectedSep);
         }
         ;
@@ -31602,19 +31720,19 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         var pairs = zip(sorted)(drop(1)(sorted));
         return mapMaybe(computePairScale)(pairs);
       };
-      var grouped = foldl11(function(m) {
+      var grouped = foldl10(function(m) {
         return function(n) {
           return insertWith2(append112)(n.depth)([n])(m);
         };
-      })(empty3)(nodes3);
+      })(empty5)(nodes3);
       var samples = concatMap(getScaleSamples)(fromFoldable28(values(grouped)));
       var avgScale = (function() {
-        var $146 = length(samples) === 0;
-        if ($146) {
+        var $140 = length(samples) === 0;
+        if ($140) {
           return 5;
         }
         ;
-        return foldl11(add5)(0)(samples) / toNumber(length(samples));
+        return foldl10(add5)(0)(samples) / toNumber(length(samples));
       })();
       return avgScale;
     };
@@ -31643,7 +31761,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return setInnerHTML(maybeEl.value0)("")();
       }
       ;
-      throw new Error("Failed pattern match at Component.HowTo.HowtoTreeExplorer (line 256, column 3 - line 258, column 34): " + [maybeEl.constructor.name]);
+      throw new Error("Failed pattern match at Component.HowTo.HowtoTreeExplorer (line 260, column 3 - line 262, column 34): " + [maybeEl.constructor.name]);
     };
   };
   var addRadius = function(node) {
@@ -31708,32 +31826,32 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return bind34(liftAff2(loadFlareData))(function(result) {
             if (result instanceof Left) {
               return modify_8(function(v1) {
-                var $151 = {};
-                for (var $152 in v1) {
-                  if ({}.hasOwnProperty.call(v1, $152)) {
-                    $151[$152] = v1[$152];
+                var $145 = {};
+                for (var $146 in v1) {
+                  if ({}.hasOwnProperty.call(v1, $146)) {
+                    $145[$146] = v1[$146];
                   }
                   ;
                 }
                 ;
-                $151.error = new Just(result.value0);
-                return $151;
+                $145.error = new Just(result.value0);
+                return $145;
               });
             }
             ;
             if (result instanceof Right) {
               return discard32(modify_8(function(v1) {
-                var $155 = {};
-                for (var $156 in v1) {
-                  if ({}.hasOwnProperty.call(v1, $156)) {
-                    $155[$156] = v1[$156];
+                var $149 = {};
+                for (var $150 in v1) {
+                  if ({}.hasOwnProperty.call(v1, $150)) {
+                    $149[$150] = v1[$150];
                   }
                   ;
                 }
                 ;
-                $155.flareData = new Just(result.value0);
-                $155.error = Nothing.value;
-                return $155;
+                $149.flareData = new Just(result.value0);
+                $149.error = Nothing.value;
+                return $149;
               }))(function() {
                 return bind34(get10)(function(state3) {
                   return liftEffect121(drawTreeExplorer("#tree-explorer-viz")(state3)(result.value0));
@@ -31741,23 +31859,23 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               });
             }
             ;
-            throw new Error("Failed pattern match at Component.HowTo.HowtoTreeExplorer (line 191, column 5 - line 197, column 70): " + [result.constructor.name]);
+            throw new Error("Failed pattern match at Component.HowTo.HowtoTreeExplorer (line 192, column 5 - line 198, column 70): " + [result.constructor.name]);
           });
         });
       }
       ;
       if (v instanceof SetMinSeparation) {
         return discard32(modify_8(function(v1) {
-          var $159 = {};
-          for (var $160 in v1) {
-            if ({}.hasOwnProperty.call(v1, $160)) {
-              $159[$160] = v1[$160];
+          var $153 = {};
+          for (var $154 in v1) {
+            if ({}.hasOwnProperty.call(v1, $154)) {
+              $153[$154] = v1[$154];
             }
             ;
           }
           ;
-          $159.minSeparation = v.value0;
-          return $159;
+          $153.minSeparation = v.value0;
+          return $153;
         }))(function() {
           return handleAction16(dictMonadAff)(Redraw.value);
         });
@@ -31765,16 +31883,16 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       ;
       if (v instanceof SetLayerScalePreset) {
         return discard32(modify_8(function(v1) {
-          var $163 = {};
-          for (var $164 in v1) {
-            if ({}.hasOwnProperty.call(v1, $164)) {
-              $163[$164] = v1[$164];
+          var $157 = {};
+          for (var $158 in v1) {
+            if ({}.hasOwnProperty.call(v1, $158)) {
+              $157[$158] = v1[$158];
             }
             ;
           }
           ;
-          $163.layerScalePreset = v.value0;
-          return $163;
+          $157.layerScalePreset = v.value0;
+          return $157;
         }))(function() {
           return handleAction16(dictMonadAff)(Redraw.value);
         });
@@ -31782,16 +31900,16 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       ;
       if (v instanceof SetExponent) {
         return discard32(modify_8(function(v1) {
-          var $167 = {};
-          for (var $168 in v1) {
-            if ({}.hasOwnProperty.call(v1, $168)) {
-              $167[$168] = v1[$168];
+          var $161 = {};
+          for (var $162 in v1) {
+            if ({}.hasOwnProperty.call(v1, $162)) {
+              $161[$162] = v1[$162];
             }
             ;
           }
           ;
-          $167.exponent = v.value0;
-          return $167;
+          $161.exponent = v.value0;
+          return $161;
         }))(function() {
           return handleAction16(dictMonadAff)(Redraw.value);
         });
@@ -31799,16 +31917,16 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       ;
       if (v instanceof SetLinkStyle) {
         return discard32(modify_8(function(v1) {
-          var $171 = {};
-          for (var $172 in v1) {
-            if ({}.hasOwnProperty.call(v1, $172)) {
-              $171[$172] = v1[$172];
+          var $165 = {};
+          for (var $166 in v1) {
+            if ({}.hasOwnProperty.call(v1, $166)) {
+              $165[$166] = v1[$166];
             }
             ;
           }
           ;
-          $171.linkStyle = v.value0;
-          return $171;
+          $165.linkStyle = v.value0;
+          return $165;
         }))(function() {
           return handleAction16(dictMonadAff)(Redraw.value);
         });
@@ -31824,11 +31942,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return liftEffect121(drawTreeExplorer("#tree-explorer-viz")(state3)(state3.flareData.value0));
           }
           ;
-          throw new Error("Failed pattern match at Component.HowTo.HowtoTreeExplorer (line 217, column 5 - line 219, column 81): " + [state3.flareData.constructor.name]);
+          throw new Error("Failed pattern match at Component.HowTo.HowtoTreeExplorer (line 218, column 5 - line 220, column 81): " + [state3.flareData.constructor.name]);
         });
       }
       ;
-      throw new Error("Failed pattern match at Component.HowTo.HowtoTreeExplorer (line 184, column 16 - line 219, column 81): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Component.HowTo.HowtoTreeExplorer (line 185, column 16 - line 220, column 81): " + [v.constructor.name]);
     };
   };
   var component17 = function(dictMonadAff) {
@@ -32025,7 +32143,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           });
         };
       };
-      if (tree2 instanceof Node3) {
+      if (tree2 instanceof Node2) {
         var nodeLabel = (function() {
           if (tree2.value0.name instanceof Just) {
             return "<" + (showElement(tree2.value0.elemType) + (' "' + (tree2.value0.name.value0 + '">')));
@@ -33332,7 +33450,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return function __do8() {
       var nodesRef = $$new([])();
       var linksRef = $$new([])();
-      var forcesRef = $$new(empty3)();
+      var forcesRef = $$new(empty5)();
       var alphaRef = $$new(1)();
       var runningRef = $$new(false)();
       var cancelRef = $$new(pure42(unit))();
@@ -34154,7 +34272,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
   var renderTree32 = /* @__PURE__ */ renderTree27(ordIndexedArc);
   var regionColorMap = /* @__PURE__ */ (function() {
-    return fromFoldable5(ordString)(foldableArray)([new Tuple("WBR", "#d62728"), new Tuple("Pointe Coupee", "#ff9896"), new Tuple("Point Coupe", "#ff9896"), new Tuple("Iberville", "#e7969c"), new Tuple("EBR-M", "#5ab4ac"), new Tuple("EBR - M", "#5ab4ac"), new Tuple("EBR-S", "#c7eae5"), new Tuple("EBR - S", "#c7eae5"), new Tuple("Ascension", "#80cdc1"), new Tuple("Livingston", "#d8daeb"), new Tuple("I-10 Lafayette", "#b2abd2"), new Tuple("US-190 Opelousas", "#ff7f0e"), new Tuple("US 190 Opelousas", "#ff7f0e"), new Tuple("I-10 NOLA", "#ffbb78"), new Tuple("I-12", "#98df8a")]);
+    return fromFoldable6(ordString)(foldableArray)([new Tuple("WBR", "#d62728"), new Tuple("Pointe Coupee", "#ff9896"), new Tuple("Point Coupe", "#ff9896"), new Tuple("Iberville", "#e7969c"), new Tuple("EBR-M", "#5ab4ac"), new Tuple("EBR - M", "#5ab4ac"), new Tuple("EBR-S", "#c7eae5"), new Tuple("EBR - S", "#c7eae5"), new Tuple("Ascension", "#80cdc1"), new Tuple("Livingston", "#d8daeb"), new Tuple("I-10 Lafayette", "#b2abd2"), new Tuple("US-190 Opelousas", "#ff7f0e"), new Tuple("US 190 Opelousas", "#ff7f0e"), new Tuple("I-10 NOLA", "#ffbb78"), new Tuple("I-12", "#98df8a")]);
   })();
   var getTargetValue = function(d1) {
     return d1.target.value;
@@ -34302,7 +34420,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }));
   };
 
-  // output/PSD3.Layout.Sankey.CSV/index.js
+  // output/DataViz.Layout.Sankey.CSV/index.js
   var map56 = /* @__PURE__ */ map(functorArray);
   var parseLine = function(line) {
     var parts = map56(trim)(split(",")(line));
@@ -34320,7 +34438,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return Nothing.value;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Sankey.CSV (line 44, column 9 - line 47, column 29): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Sankey.CSV (line 44, column 9 - line 47, column 29): " + [v.constructor.name]);
     }
     ;
     return Nothing.value;
@@ -34336,15 +34454,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return mapMaybe(parseLine)(dataLines);
   };
 
-  // output/Control.Monad.State/index.js
-  var execState = function(v) {
-    return function(s) {
-      var v1 = v(s);
-      return v1.value1;
-    };
-  };
-
-  // output/PSD3.Layout.Sankey.Types/index.js
+  // output/DataViz.Layout.Sankey.Types/index.js
   var compare8 = /* @__PURE__ */ compare(ordInt);
   var bind45 = /* @__PURE__ */ bind(bindMaybe);
   var pure49 = /* @__PURE__ */ pure(applicativeMaybe);
@@ -34423,11 +34533,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return {
       linkCount: 0,
       nodeCount: 0,
-      nodeNameToID: empty3,
-      nodeIDToName: empty3,
+      nodeNameToID: empty5,
+      nodeIDToName: empty5,
       nodeOrder: [],
-      deps: empty3,
-      sped: empty3,
+      deps: empty5,
+      sped: empty5,
       sankeyNodes: [],
       sankeyLinks: [],
       config
@@ -34509,7 +34619,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
 
-  // output/PSD3.Layout.Sankey.Compute/index.js
+  // output/DataViz.Layout.Sankey.Compute/index.js
   var lookup24 = /* @__PURE__ */ lookup2(ordNodeID);
   var insert11 = /* @__PURE__ */ insert6(ordNodeID);
   var insert12 = /* @__PURE__ */ insert(ordNodeID);
@@ -34559,7 +34669,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return insert11(tid)(v.value0);
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 121, column 5 - line 123, column 47): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 127, column 5 - line 129, column 47): " + [v.constructor.name]);
         })();
         return insert12(sid)(targetSet)(deps);
       };
@@ -34606,7 +34716,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           };
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 137, column 7 - line 147, column 175): " + [s.constructor.name, t.constructor.name]);
+        throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 143, column 7 - line 153, column 177): " + [s.constructor.name, t.constructor.name]);
       })();
       return modify_11(function(v1) {
         var $149 = {};
@@ -34737,7 +34847,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                         return 1;
                       }
                       ;
-                      throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 546, column 16 - line 548, column 23): " + [v12.constructor.name]);
+                      throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 553, column 16 - line 555, column 23): " + [v12.constructor.name]);
                     })();
                     var v1 = unsafePerformEffect(log2("calculateKy result (min of all scales): " + show39(result)));
                     return result;
@@ -34802,7 +34912,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                       return node;
                     }
                     ;
-                    throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 969, column 11 - line 971, column 28): " + [v.constructor.name]);
+                    throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 981, column 11 - line 983, column 28): " + [v.constructor.name]);
                   })(allNodes);
                 };
               };
@@ -35060,7 +35170,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                       return y42;
                                     }
                                     ;
-                                    throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 956, column 22 - line 958, column 29): " + [v1.constructor.name]);
+                                    throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 968, column 22 - line 970, column 29): " + [v1.constructor.name]);
                                   })();
                                   $tco_var_idx = idx + 1 | 0;
                                   $tco_var_y = newY;
@@ -35068,7 +35178,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                   return;
                                 }
                                 ;
-                                throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 945, column 14 - line 960, column 40): " + [v.constructor.name]);
+                                throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 955, column 14 - line 972, column 40): " + [v.constructor.name]);
                               }
                               ;
                               while (!$tco_done) {
@@ -35153,7 +35263,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                       return y42;
                                     }
                                     ;
-                                    throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 928, column 24 - line 930, column 31): " + [v1.constructor.name]);
+                                    throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 937, column 24 - line 939, column 31): " + [v1.constructor.name]);
                                   })();
                                   $tco_var_idx = idx - 1 | 0;
                                   $tco_var_y = newY;
@@ -35161,7 +35271,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                   return;
                                 }
                                 ;
-                                throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 917, column 16 - line 932, column 42): " + [v.constructor.name]);
+                                throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 924, column 16 - line 941, column 42): " + [v.constructor.name]);
                               }
                               ;
                               while (!$tco_done1) {
@@ -35200,7 +35310,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                             return yMin;
                           }
                           ;
-                          throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 893, column 22 - line 895, column 26): " + [middleNode.constructor.name]);
+                          throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 900, column 22 - line 902, column 26): " + [middleNode.constructor.name]);
                         })();
                         var startYUp = (function() {
                           if (middleNode instanceof Just) {
@@ -35211,7 +35321,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                             return yMax;
                           }
                           ;
-                          throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 885, column 20 - line 887, column 26): " + [middleNode.constructor.name]);
+                          throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 892, column 20 - line 894, column 26): " + [middleNode.constructor.name]);
                         })();
                         var pushedUp = resolveCollisionsBottomToTop(sorted)(middleIdx - 1 | 0)(startYUp)(padding1)(beta2);
                         var pushedUpAndDown = resolveCollisionsTopToBottom(pushedUp)(middleIdx + 1 | 0)(startYDown)(padding1)(beta2);
@@ -35264,7 +35374,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                             return acc;
                           }
                           ;
-                          throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 714, column 13 - line 724, column 29): " + [v.constructor.name]);
+                          throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 721, column 13 - line 731, column 29): " + [v.constructor.name]);
                         };
                       })({
                         sum: 0,
@@ -35321,7 +35431,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                             return acc;
                           }
                           ;
-                          throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 752, column 13 - line 761, column 29): " + [v.constructor.name]);
+                          throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 759, column 13 - line 768, column 29): " + [v.constructor.name]);
                         };
                       })({
                         sum: 0,
@@ -35394,7 +35504,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                   })(nodes1);
                                 }
                                 ;
-                                throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 657, column 13 - line 674, column 82): " + [v.constructor.name]);
+                                throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 664, column 13 - line 681, column 82): " + [v.constructor.name]);
                               };
                             })(currentNodes)(layerNodeIndices);
                             var layerNodesUpdated = filter(function(n) {
@@ -35594,7 +35704,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 255, column 3 - line 255, column 84): " + [nodes3.constructor.name, height49.constructor.name, current.constructor.name, maxHeight.constructor.name]);
+              throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 261, column 3 - line 261, column 84): " + [nodes3.constructor.name, height49.constructor.name, current.constructor.name, maxHeight.constructor.name]);
             }
             ;
             while (!$tco_done) {
@@ -35690,7 +35800,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 213, column 3 - line 213, column 83): " + [nodes3.constructor.name, depth.constructor.name, current.constructor.name, maxDepth.constructor.name]);
+              throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 219, column 3 - line 219, column 83): " + [nodes3.constructor.name, depth.constructor.name, current.constructor.name, maxDepth.constructor.name]);
             }
             ;
             while (!$tco_done) {
@@ -35782,7 +35892,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return link4;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 1064, column 21 - line 1066, column 38): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 1079, column 21 - line 1081, column 38): " + [v.constructor.name]);
             })(currentLinks);
           };
         })(links3)(nodes3);
@@ -35840,7 +35950,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return link4;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 1105, column 21 - line 1107, column 38): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 1120, column 21 - line 1122, column 38): " + [v.constructor.name]);
             })(currentLinks);
           };
         })(linksWithY0)(nodes3);
@@ -35889,7 +35999,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return 1;
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 1024, column 7 - line 1026, column 23): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 1039, column 7 - line 1041, column 23): " + [v.constructor.name]);
           };
         };
       };
@@ -35981,7 +36091,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return 1;
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 304, column 5 - line 306, column 21): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 310, column 5 - line 312, column 21): " + [v.constructor.name]);
         };
       };
     };
@@ -36072,7 +36182,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             };
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 1150, column 7 - line 1164, column 29): " + [mode.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 1165, column 7 - line 1179, column 29): " + [mode.constructor.name]);
         };
       };
     };
@@ -36120,7 +36230,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return 0;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 485, column 3 - line 495, column 13): " + [alignment.constructor.name]);
+        throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 492, column 3 - line 502, column 13): " + [alignment.constructor.name]);
       };
     };
   };
@@ -36253,7 +36363,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return unit;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 358, column 7 - line 360, column 29): " + [v22.constructor.name]);
+        throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 365, column 7 - line 367, column 29): " + [v22.constructor.name]);
       })();
       (function() {
         var v22 = find2(function(n) {
@@ -36267,7 +36377,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return unit;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 361, column 7 - line 363, column 29): " + [v22.constructor.name]);
+        throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 368, column 7 - line 370, column 29): " + [v22.constructor.name]);
       })();
       var v2 = find2(function(n) {
         return n.name === "Losses";
@@ -36280,7 +36390,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return unit;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Sankey.Compute (line 364, column 7 - line 366, column 29): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Sankey.Compute (line 371, column 7 - line 373, column 29): " + [v2.constructor.name]);
     });
     return modify_11(function(v2) {
       var $287 = {};
@@ -36353,7 +36463,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
 
-  // output/PSD3.Layout.Sankey.Path/index.js
+  // output/DataViz.Layout.Sankey.Path/index.js
   var eq9 = /* @__PURE__ */ eq(eqNodeID);
   var findNode = function(nodes3) {
     return function(nodeId) {
@@ -37685,7 +37795,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     var member7 = member2(dictOrd);
     var reachableFrom1 = reachableFrom(dictOrd);
     var filter7 = filter5(dictOrd);
-    var fromFoldable211 = fromFoldable5(dictOrd)(foldableArray);
+    var fromFoldable211 = fromFoldable6(dictOrd)(foldableArray);
     return function(graph) {
       var isTransitive = function(source2) {
         return function(target7) {
@@ -37749,7 +37859,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return insert18(task.id)(new Tuple(task, fromFoldable114(task.depends)))(acc);
         };
       };
-      var graphMap = foldl2(addTask)(empty3)(tasks);
+      var graphMap = foldl2(addTask)(empty5)(tasks);
       return fromMap(graphMap);
     };
   };
@@ -37762,7 +37872,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
   var computeLayers = function(dictOrd) {
-    var fromFoldable211 = fromFoldable5(dictOrd)(foldableArray);
+    var fromFoldable211 = fromFoldable6(dictOrd)(foldableArray);
     var getTopologicalOrder1 = getTopologicalOrder(dictOrd);
     var lookup38 = lookup2(dictOrd);
     var insert18 = insert(dictOrd);
@@ -37805,7 +37915,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           throw new Error("Failed pattern match at Data.Graph.Algorithms (line 124, column 7 - line 138, column 47): " + [v.constructor.name]);
         };
       };
-      return foldl2(processTask)(empty3)(toUnfoldable22(sortedIds));
+      return foldl2(processTask)(empty5)(toUnfoldable22(sortedIds));
     };
   };
   var addLayers = function(dictOrd) {
@@ -37842,7 +37952,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var x27 = /* @__PURE__ */ x2(toAttrNumberNumber);
   var y27 = /* @__PURE__ */ y2(toAttrNumberNumber);
   var mapFlipped11 = /* @__PURE__ */ mapFlipped(functorArray);
-  var fromFoldable33 = /* @__PURE__ */ fromFoldable5(ordString)(foldableArray);
+  var fromFoldable33 = /* @__PURE__ */ fromFoldable6(ordString)(foldableArray);
   var addLayers2 = /* @__PURE__ */ addLayers(ordString);
   var lookup29 = /* @__PURE__ */ lookup2(ordString);
   var bind114 = /* @__PURE__ */ bind(bindD3v2M);
@@ -38019,7 +38129,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
 
   // output/D3.Viz.FPFTW.TransitiveReduction/index.js
-  var fromFoldable34 = /* @__PURE__ */ fromFoldable5(ordString)(foldableArray);
+  var fromFoldable34 = /* @__PURE__ */ fromFoldable6(ordString)(foldableArray);
   var fromFoldable115 = /* @__PURE__ */ fromFoldable9(foldableArray)(ordString);
   var x28 = /* @__PURE__ */ x(toAttrNumberNumber);
   var y28 = /* @__PURE__ */ y(toAttrNumberNumber);
@@ -38237,7 +38347,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var show47 = /* @__PURE__ */ show(showNumber);
   var bind116 = /* @__PURE__ */ bind(bindD3v2M);
   var select28 = /* @__PURE__ */ select(selectionMD3v2Selection_D);
-  var fromFoldable116 = /* @__PURE__ */ fromFoldable(foldableTree);
+  var fromFoldable116 = /* @__PURE__ */ fromFoldable(/* @__PURE__ */ foldableCofree(foldableList));
   var discard34 = /* @__PURE__ */ discard(discardUnit);
   var discard111 = /* @__PURE__ */ discard34(bindD3v2M);
   var liftEffect25 = /* @__PURE__ */ liftEffect(monadEffectD3v2M);
@@ -38300,17 +38410,20 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var bind213 = /* @__PURE__ */ bind(bindAff);
   var liftEffect110 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var makeLinks4 = function(tree$prime) {
-    var makeLinksList = function(v) {
-      var grandchildLinks = bind58(v.value1)(makeLinksList);
-      var childLinks = bind58(v.value1)(function(v1) {
+    var makeLinksList = function(t) {
+      var val = head3(t);
+      var children3 = tail(t);
+      var grandchildLinks = bind58(children3)(makeLinksList);
+      var childLinks = bind58(children3)(function(child) {
+        var childVal = head3(child);
         return new Cons({
           source: {
-            x: v.value0.x,
-            y: v.value0.y
+            x: val.x,
+            y: val.y
           },
           target: {
-            x: v1.value0.x,
-            y: v1.value0.y
+            x: childVal.x,
+            y: childVal.y
           }
         }, Nil.value);
       });
@@ -38374,20 +38487,20 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return liftEffect110(drawCluster(selector)(result.value0));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.TreeAPI.ClusterViz (line 154, column 3 - line 156, column 67): " + [result.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.TreeAPI.ClusterViz (line 180, column 3 - line 182, column 67): " + [result.constructor.name]);
     }));
   };
 
   // output/D3.Viz.TreeAPI.EdgeBundleViz/foreign.js
   var atan23 = (y42) => (x41) => Math.atan2(y42, x41);
 
-  // output/PSD3.Layout.Hierarchy.EdgeBundle.Bilink/index.js
+  // output/DataViz.Layout.Hierarchy.EdgeBundle.Bilink/index.js
   var map61 = /* @__PURE__ */ map(functorArray);
-  var foldl12 = /* @__PURE__ */ foldl(foldableArray);
+  var foldl11 = /* @__PURE__ */ foldl(foldableArray);
   var lookup31 = /* @__PURE__ */ lookup2(ordString);
   var insert13 = /* @__PURE__ */ insert(ordString);
   var append117 = /* @__PURE__ */ append(semigroupArray);
-  var fromFoldable36 = /* @__PURE__ */ fromFoldable5(ordString)(foldableArray);
+  var fromFoldable36 = /* @__PURE__ */ fromFoldable6(ordString)(foldableArray);
   var BilinkedNode = /* @__PURE__ */ (function() {
     function BilinkedNode2(value0) {
       this.value0 = value0;
@@ -38414,7 +38527,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         })(imports);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.EdgeBundle.Bilink (line 165, column 3 - line 169, column 70): " + [v.value0.data_.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.EdgeBundle.Bilink (line 175, column 3 - line 181, column 69): " + [v.value0.data_.constructor.name]);
     };
   };
   var getOutgoing = function(v) {
@@ -38445,13 +38558,13 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
   var buildLinkMap = function(getKey) {
     return function(links3) {
-      return foldl12(function(acc) {
+      return foldl11(function(acc) {
         return function(link4) {
           var key = getKey(link4);
           var existing = fromMaybe([])(lookup31(key)(acc));
           return insert13(key)(snoc(existing)(link4))(acc);
         };
-      })(empty3)(links3);
+      })(empty5)(links3);
     };
   };
   var applyLinks = function(outgoingMap) {
@@ -38507,9 +38620,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
 
-  // output/PSD3.Layout.Hierarchy.EdgeBundle.BundleCurve/index.js
+  // output/DataViz.Layout.Hierarchy.EdgeBundle.BundleCurve/index.js
   var show48 = /* @__PURE__ */ show(showNumber);
-  var foldl13 = /* @__PURE__ */ foldl(foldableArray);
+  var foldl12 = /* @__PURE__ */ foldl(foldableArray);
   var map62 = /* @__PURE__ */ map(functorArray);
   var toCartesianPoint = function(v) {
     return {
@@ -38541,10 +38654,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return "";
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.EdgeBundle.BundleCurve (line 155, column 10 - line 157, column 20): " + [v1.constructor.name]);
+        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.EdgeBundle.BundleCurve (line 163, column 10 - line 165, column 20): " + [v1.constructor.name]);
       }
       ;
-      var result = foldl13(function(acc) {
+      var result = foldl12(function(acc) {
         return function(point3) {
           var midY = (acc.prevPoint.y + point3.y) / 2;
           var midX = (acc.prevPoint.x + point3.x) / 2;
@@ -38568,7 +38681,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return "";
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.EdgeBundle.BundleCurve (line 181, column 24 - line 185, column 24): " + [v12.constructor.name]);
+        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.EdgeBundle.BundleCurve (line 192, column 24 - line 199, column 24): " + [v12.constructor.name]);
       })();
       return result.path + finalSegment;
     };
@@ -38596,10 +38709,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return start5 + curves;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.EdgeBundle.BundleCurve (line 127, column 7 - line 147, column 30): " + [v1.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.EdgeBundle.BundleCurve (line 132, column 7 - line 155, column 30): " + [v1.constructor.name]);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.EdgeBundle.BundleCurve (line 124, column 3 - line 147, column 30): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.EdgeBundle.BundleCurve (line 129, column 3 - line 155, column 30): " + [v.constructor.name]);
   };
   var applyBundleTension = function(tension) {
     return function(points) {
@@ -38642,7 +38755,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return "";
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.EdgeBundle.BundleCurve (line 46, column 10 - line 48, column 20): " + [v1.constructor.name]);
+        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.EdgeBundle.BundleCurve (line 46, column 10 - line 48, column 20): " + [v1.constructor.name]);
       }
       ;
       if (v === 2) {
@@ -38666,12 +38779,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
 
-  // output/PSD3.Layout.Hierarchy.EdgeBundle.Hierarchy/index.js
+  // output/DataViz.Layout.Hierarchy.EdgeBundle.Hierarchy/index.js
   var map63 = /* @__PURE__ */ map(functorMaybe);
   var map114 = /* @__PURE__ */ map(functorArray);
   var elem6 = /* @__PURE__ */ elem2(eqString);
   var append118 = /* @__PURE__ */ append(semigroupArray);
-  var foldl14 = /* @__PURE__ */ foldl(foldableArray);
+  var foldl13 = /* @__PURE__ */ foldl(foldableArray);
   var max11 = /* @__PURE__ */ max(ordInt);
   var TreeNode = /* @__PURE__ */ (function() {
     function TreeNode2(value0) {
@@ -38703,7 +38816,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             })(v.value0.children);
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.EdgeBundle.Hierarchy (line 86, column 5 - line 86, column 71): " + [v.constructor.name, v1.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.EdgeBundle.Hierarchy (line 86, column 3 - line 86, column 69): " + [v.constructor.name, v1.constructor.name]);
         };
       };
       return fromMaybe([])(findPath(root3)(target7));
@@ -38736,7 +38849,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             })(targetAncestors);
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.EdgeBundle.Hierarchy (line 115, column 19 - line 119, column 76): " + [lca.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.EdgeBundle.Hierarchy (line 119, column 19 - line 125, column 75): " + [lca.constructor.name]);
         })();
         var sourceToLCA = (function() {
           if (lca instanceof Nothing) {
@@ -38750,7 +38863,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             })(reverse(sourceAncestors)));
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.EdgeBundle.Hierarchy (line 108, column 19 - line 112, column 108): " + [lca.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.EdgeBundle.Hierarchy (line 110, column 19 - line 116, column 107): " + [lca.constructor.name]);
         })();
         return append118(sourceToLCA)(lcaToTarget);
       };
@@ -38766,7 +38879,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return findMap(findNode2(targetName))(v.value0.children);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.EdgeBundle.Hierarchy (line 75, column 1 - line 75, column 65): " + [targetName.constructor.name, v.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.EdgeBundle.Hierarchy (line 75, column 1 - line 75, column 65): " + [targetName.constructor.name, v.constructor.name]);
     };
   };
   var descendants = function(v) {
@@ -38789,7 +38902,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }
     ;
     var childrenWithHeights = map114(computeHeights)(v.value0.children);
-    var maxChildHeight = foldl14(function(acc) {
+    var maxChildHeight = foldl13(function(acc) {
       return function(v1) {
         return max11(acc)(v1.value0.height);
       };
@@ -38883,7 +38996,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.EdgeBundle.Hierarchy (line 215, column 25 - line 224, column 18): " + [existingChild.constructor.name]);
+                throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.EdgeBundle.Hierarchy (line 232, column 25 - line 241, column 18): " + [existingChild.constructor.name]);
               })();
               var updatedChild = insertAtPath(v1.value0.tail)(fullName)(nodeData)(newPrefix)(childNode);
               return new TreeNode({
@@ -38896,7 +39009,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               });
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.EdgeBundle.Hierarchy (line 188, column 3 - line 229, column 92): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.EdgeBundle.Hierarchy (line 205, column 3 - line 246, column 92): " + [v1.constructor.name]);
           };
         };
       };
@@ -38921,15 +39034,15 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         depth: 0,
         height: 0
       });
-      var treeWithNodes = foldl14(insertNode(config.getName))(emptyRoot)(nodes3);
+      var treeWithNodes = foldl13(insertNode(config.getName))(emptyRoot)(nodes3);
       var withHeights = computeHeights(treeWithNodes);
       return withHeights;
     };
   };
 
-  // output/PSD3.Layout.Hierarchy.EdgeBundle.RadialCluster/index.js
+  // output/DataViz.Layout.Hierarchy.EdgeBundle.RadialCluster/index.js
   var add1 = /* @__PURE__ */ add(semiringNumber);
-  var foldl15 = /* @__PURE__ */ foldl(foldableArray);
+  var foldl14 = /* @__PURE__ */ foldl(foldableArray);
   var map64 = /* @__PURE__ */ map(functorArray);
   var RadialNode = /* @__PURE__ */ (function() {
     function RadialNode2(value0) {
@@ -38975,7 +39088,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             ;
             var heightRatio = toNumber(v.value0.height) / toNumber(maxHeight);
             var radius33 = config.innerRadius + (config.outerRadius - config.innerRadius) * (1 - heightRatio);
-            var childResults = foldl15(function(acc) {
+            var childResults = foldl14(function(acc) {
               return function(child) {
                 var result = layoutNode(config)(maxHeight)(angleStep)(acc.state)(child);
                 return {
@@ -38995,7 +39108,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return 0;
               }
               ;
-              return foldl15(add1)(0)(childAngles) / toNumber(length(childAngles));
+              return foldl14(add1)(0)(childAngles) / toNumber(length(childAngles));
             })();
             return {
               node: new RadialNode({
@@ -39031,7 +39144,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
 
-  // output/PSD3.Layout.Hierarchy.EdgeBundle/index.js
+  // output/DataViz.Layout.Hierarchy.EdgeBundle/index.js
   var append27 = /* @__PURE__ */ append(semigroupArray);
   var map65 = /* @__PURE__ */ map(functorArray);
   var getRadialShortName = function(v) {
@@ -39124,7 +39237,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return 0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.EdgeBundle (line 163, column 28 - line 165, column 27): " + [maybeBilinked.constructor.name]);
+            throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.EdgeBundle (line 166, column 32 - line 168, column 31): " + [maybeBilinked.constructor.name]);
           })(),
           incomingCount: (function() {
             if (maybeBilinked instanceof Just) {
@@ -39135,7 +39248,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return 0;
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.EdgeBundle (line 166, column 28 - line 168, column 27): " + [maybeBilinked.constructor.name]);
+            throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.EdgeBundle (line 169, column 32 - line 171, column 31): " + [maybeBilinked.constructor.name]);
           })()
         });
       })(allRadial);
@@ -39327,7 +39440,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return liftEffect111(drawEdgeBundle(selector)(result.value0));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.TreeAPI.EdgeBundleViz (line 167, column 3 - line 169, column 72): " + [result.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.TreeAPI.EdgeBundleViz (line 180, column 3 - line 182, column 72): " + [result.constructor.name]);
     }));
   };
 
@@ -39339,7 +39452,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var show50 = /* @__PURE__ */ show(showNumber);
   var bind118 = /* @__PURE__ */ bind(bindD3v2M);
   var select30 = /* @__PURE__ */ select(selectionMD3v2Selection_D);
-  var fromFoldable117 = /* @__PURE__ */ fromFoldable(foldableTree);
+  var fromFoldable117 = /* @__PURE__ */ fromFoldable(/* @__PURE__ */ foldableCofree(foldableList));
   var discard36 = /* @__PURE__ */ discard(discardUnit);
   var discard113 = /* @__PURE__ */ discard36(bindD3v2M);
   var liftEffect27 = /* @__PURE__ */ liftEffect(monadEffectD3v2M);
@@ -39401,34 +39514,39 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   })(ordInt)));
   var bind214 = /* @__PURE__ */ bind(bindAff);
   var liftEffect112 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var swapXY = function(v) {
-    var swappedChildren = map67(swapXY)(v.value1);
-    return new Node((function() {
-      var $87 = {};
-      for (var $88 in v.value0) {
-        if ({}.hasOwnProperty.call(v.value0, $88)) {
-          $87[$88] = v["value0"][$88];
+  var swapXY = function(t) {
+    var val = head3(t);
+    var children3 = tail(t);
+    var swappedChildren = map67(swapXY)(children3);
+    return mkTree((function() {
+      var $84 = {};
+      for (var $85 in val) {
+        if ({}.hasOwnProperty.call(val, $85)) {
+          $84[$85] = val[$85];
         }
         ;
       }
       ;
-      $87.x = v.value0.y;
-      $87.y = v.value0.x;
-      return $87;
-    })(), swappedChildren);
+      $84.x = val.y;
+      $84.y = val.x;
+      return $84;
+    })())(swappedChildren);
   };
   var makeLinks5 = function(tree$prime) {
-    var makeLinksList = function(v) {
-      var grandchildLinks = bind60(v.value1)(makeLinksList);
-      var childLinks = bind60(v.value1)(function(v1) {
+    var makeLinksList = function(t) {
+      var val = head3(t);
+      var children3 = tail(t);
+      var grandchildLinks = bind60(children3)(makeLinksList);
+      var childLinks = bind60(children3)(function(child) {
+        var childVal = head3(child);
         return new Cons({
           source: {
-            x: v.value0.x,
-            y: v.value0.y
+            x: val.x,
+            y: val.y
           },
           target: {
-            x: v1.value0.x,
-            y: v1.value0.y
+            x: childVal.x,
+            y: childVal.y
           }
         }, Nil.value);
       });
@@ -39494,11 +39612,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return liftEffect112(drawHorizontalTree(selector)(result.value0));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.TreeAPI.HorizontalTreeViz (line 164, column 3 - line 166, column 74): " + [result.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.TreeAPI.HorizontalTreeViz (line 190, column 3 - line 192, column 74): " + [result.constructor.name]);
     }));
   };
 
-  // output/PSD3.Layout.Hierarchy.Pack/index.js
+  // output/DataViz.Layout.Hierarchy.Pack/index.js
   var show51 = /* @__PURE__ */ show(showInt);
   var show123 = /* @__PURE__ */ show(showNumber);
   var elemIndex2 = /* @__PURE__ */ elemIndex(eqInt);
@@ -39508,9 +39626,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var traverse_7 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableArray);
   var max12 = /* @__PURE__ */ max(ordNumber);
   var insert14 = /* @__PURE__ */ insert(ordInt);
-  var fromFoldable38 = /* @__PURE__ */ fromFoldable5(ordInt)(foldableArray);
+  var fromFoldable38 = /* @__PURE__ */ fromFoldable6(ordInt)(foldableArray);
   var sortWith3 = /* @__PURE__ */ sortWith(ordNumber);
-  var foldl16 = /* @__PURE__ */ foldl(foldableArray);
+  var foldl15 = /* @__PURE__ */ foldl(foldableArray);
   var max13 = /* @__PURE__ */ max(ordInt);
   var mod7 = /* @__PURE__ */ mod(euclideanRingInt);
   var compare11 = /* @__PURE__ */ compare(ordInt);
@@ -39683,7 +39801,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return fromMaybe(chain)(insertAt(v.value0 + 1 | 0)(newId2)(chain));
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 178, column 3 - line 182, column 62): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 178, column 3 - line 182, column 62): " + [v.constructor.name]);
         };
       };
     };
@@ -39750,7 +39868,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           var sortedChildren = sortWith3(function(v1) {
             return -v1.value0.value;
           })(childNodes2);
-          var sumValue = foldl16(function(acc) {
+          var sumValue = foldl15(function(acc) {
             return function(v1) {
               return acc + v1.value0.value;
             };
@@ -39758,7 +39876,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           var childHeights = map68(function(v1) {
             return v1.value0.height;
           })(sortedChildren);
-          var maxChildHeight = foldl16(max13)(0)(childHeights);
+          var maxChildHeight = foldl15(max13)(0)(childHeights);
           return new PackNode({
             data_: node.data_,
             depth,
@@ -39771,7 +39889,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 771, column 5 - line 803, column 14): " + [node.children.constructor.name]);
+        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 779, column 5 - line 811, column 14): " + [node.children.constructor.name]);
       };
     };
     return go2(v)(0);
@@ -39789,7 +39907,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return index(chain)(prevIdx);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 243, column 3 - line 248, column 35): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 245, column 3 - line 252, column 34): " + [v.constructor.name]);
     };
   };
   var getNextInChain = function(nodeId) {
@@ -39804,7 +39922,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return index(chain)(nextIdx);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 234, column 3 - line 238, column 35): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 234, column 3 - line 240, column 34): " + [v.constructor.name]);
     };
   };
   var getNextId = function(nodeId) {
@@ -39819,7 +39937,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return index(chain)(nextIdx);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 142, column 3 - line 148, column 34): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 142, column 3 - line 148, column 34): " + [v.constructor.name]);
     };
   };
   var eqPackNode = function(dictEq) {
@@ -40025,10 +40143,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 645, column 13 - line 652, column 52): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 653, column 13 - line 660, column 52): " + [v2.constructor.name]);
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 641, column 7 - line 641, column 56): " + [i2.constructor.name]);
+            throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 649, column 7 - line 649, column 56): " + [i2.constructor.name]);
           }
           ;
           while (!$tco_done) {
@@ -40072,7 +40190,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 662, column 7 - line 662, column 58): " + [i2.constructor.name, j.constructor.name]);
+              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 670, column 7 - line 670, column 58): " + [i2.constructor.name, j.constructor.name]);
             }
             ;
             while (!$tco_done1) {
@@ -40103,10 +40221,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 658, column 13 - line 660, column 54): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 666, column 13 - line 668, column 54): " + [v2.constructor.name]);
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 654, column 7 - line 654, column 58): " + [i2.constructor.name]);
+            throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 662, column 7 - line 662, column 58): " + [i2.constructor.name]);
           }
           ;
           while (!$tco_done2) {
@@ -40130,13 +40248,13 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return basis2;
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 635, column 11 - line 637, column 29): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 643, column 11 - line 645, column 29): " + [v1.constructor.name]);
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 632, column 7 - line 637, column 29): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 640, column 7 - line 645, column 29): " + [v.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 628, column 1 - line 628, column 54): " + [basis2.constructor.name, p2.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 636, column 1 - line 636, column 54): " + [basis2.constructor.name, p2.constructor.name]);
     };
   };
   var encloseBasis1 = function(a2) {
@@ -40203,7 +40321,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 };
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 686, column 9 - line 688, column 48): " + [maybeE.constructor.name]);
+              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 694, column 9 - line 696, column 48): " + [maybeE.constructor.name]);
             }
             ;
             if (otherwise) {
@@ -40231,10 +40349,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 690, column 9 - line 701, column 44): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 698, column 9 - line 709, column 44): " + [v.constructor.name]);
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 683, column 3 - line 683, column 54): " + [i2.constructor.name, basis2.constructor.name, maybeE.constructor.name]);
+            throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 691, column 3 - line 691, column 54): " + [i2.constructor.name, basis2.constructor.name, maybeE.constructor.name]);
           }
           ;
           while (!$tco_done) {
@@ -40328,7 +40446,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       });
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 169, column 5 - line 173, column 40): " + [bestNode.constructor.name]);
+    throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 169, column 5 - line 173, column 40): " + [bestNode.constructor.name]);
   };
   var bidirectionalCollisionSearch = function(aId) {
     return function(bId) {
@@ -40374,7 +40492,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                           return NoCollision.value;
                         }
                         ;
-                        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 280, column 13 - line 286, column 37): " + [v12.constructor.name]);
+                        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 284, column 13 - line 290, column 37): " + [v12.constructor.name]);
                       }
                       ;
                       if (v4 instanceof Nothing) {
@@ -40382,7 +40500,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                         return NoCollision.value;
                       }
                       ;
-                      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 274, column 7 - line 287, column 31): " + [v4.constructor.name]);
+                      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 278, column 7 - line 291, column 31): " + [v4.constructor.name]);
                     }
                     ;
                     var v4 = lookup32(k)(state3.circles);
@@ -40413,7 +40531,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                         return NoCollision.value;
                       }
                       ;
-                      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 296, column 13 - line 302, column 37): " + [v12.constructor.name]);
+                      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 300, column 13 - line 306, column 37): " + [v12.constructor.name]);
                     }
                     ;
                     if (v4 instanceof Nothing) {
@@ -40421,7 +40539,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                       return NoCollision.value;
                     }
                     ;
-                    throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 290, column 7 - line 303, column 31): " + [v4.constructor.name]);
+                    throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 294, column 7 - line 307, column 31): " + [v4.constructor.name]);
                   }
                   ;
                   while (!$tco_done) {
@@ -40513,14 +40631,14 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     return;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 392, column 13 - line 421, column 101): " + [collisionResult.constructor.name]);
+                  throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 396, column 13 - line 425, column 101): " + [collisionResult.constructor.name]);
                 }
                 ;
                 $tco_done = true;
                 return state3;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 370, column 1 - line 370, column 91): " + [maxRetries.constructor.name, newCircle.constructor.name, aId.constructor.name, bId.constructor.name, state3.constructor.name]);
+              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 374, column 1 - line 374, column 91): " + [maxRetries.constructor.name, newCircle.constructor.name, aId.constructor.name, bId.constructor.name, state3.constructor.name]);
             }
             ;
             while (!$tco_done) {
@@ -40546,7 +40664,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return sqrt(v.value0.value);
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 838, column 13 - line 840, column 37): " + [config.radius.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 846, column 13 - line 848, column 37): " + [config.radius.constructor.name]);
         })();
         return new PackNode({
           data_: v.value0.data_,
@@ -40587,7 +40705,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return result;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 438, column 5 - line 446, column 17): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 442, column 5 - line 450, column 17): " + [v2.constructor.name]);
     };
   };
   var packSiblingsMap = function(inputCircles) {
@@ -40625,7 +40743,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         };
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 460, column 7 - line 462, column 48): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 464, column 7 - line 466, column 48): " + [v2.constructor.name]);
     }
     ;
     var $292 = n === 2;
@@ -40661,7 +40779,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     if (v4 instanceof Just && (v3 instanceof Just && v2 instanceof Just)) {
       var remaining = drop(3)(inputCircles);
       var initialState4 = initState(v4.value0)(v3.value0)(v2.value0);
-      var finalState = foldl16(flip(addCircle))(initialState4)(remaining);
+      var finalState = foldl15(flip(addCircle))(initialState4)(remaining);
       var positioned = mapMaybe(function(i2) {
         return lookup32(i2)(finalState.circles);
       })(range2(0)(n - 1 | 0));
@@ -40901,7 +41019,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }));
   };
 
-  // output/PSD3.Layout.Hierarchy.Partition/index.js
+  // output/DataViz.Layout.Hierarchy.Partition/index.js
   var map70 = /* @__PURE__ */ map(functorArray);
   var compare14 = /* @__PURE__ */ compare(ordInt);
   var compare15 = /* @__PURE__ */ compare(ordNumber);
@@ -41075,7 +41193,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return sumChildValues;
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Partition (line 105, column 19 - line 107, column 67): " + [v.value.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Partition (line 105, column 19 - line 107, column 67): " + [v.value.constructor.name]);
         })();
         var childHeights = map70(function(v1) {
           return v1.value0.height;
@@ -41338,7 +41456,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return liftEffect114(drawPartition(selector)(parseFlareJson(result.value0)));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.TreeAPI.PartitionViz (line 124, column 3 - line 126, column 88): " + [result.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.TreeAPI.PartitionViz (line 125, column 3 - line 127, column 88): " + [result.constructor.name]);
     }));
   };
 
@@ -41350,7 +41468,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var fromFoldable39 = /* @__PURE__ */ fromFoldable(foldableList);
   var bind122 = /* @__PURE__ */ bind(bindD3v2M);
   var select33 = /* @__PURE__ */ select(selectionMD3v2Selection_D);
-  var fromFoldable118 = /* @__PURE__ */ fromFoldable(foldableTree);
+  var fromFoldable118 = /* @__PURE__ */ fromFoldable(/* @__PURE__ */ foldableCofree(foldableList));
   var discard39 = /* @__PURE__ */ discard(discardUnit);
   var discard115 = /* @__PURE__ */ discard39(bindD3v2M);
   var liftEffect30 = /* @__PURE__ */ liftEffect(monadEffectD3v2M);
@@ -41417,8 +41535,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return function(w) {
       return function(h) {
         var minDim = (function() {
-          var $88 = w < h;
-          if ($88) {
+          var $86 = w < h;
+          if ($86) {
             return w;
           }
           ;
@@ -41453,37 +41571,42 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
   var projectRadial = function(w) {
     return function(h) {
-      return function(v) {
-        var projectedChildren = map72(projectRadial(w)(h))(v.value1);
-        var projected = radialPoint(v.value0)(w)(h);
-        return new Node((function() {
-          var $92 = {};
-          for (var $93 in v.value0) {
-            if ({}.hasOwnProperty.call(v.value0, $93)) {
-              $92[$93] = v["value0"][$93];
+      return function(t) {
+        var val = head3(t);
+        var projected = radialPoint(val)(w)(h);
+        var children3 = tail(t);
+        var projectedChildren = map72(projectRadial(w)(h))(children3);
+        return mkTree((function() {
+          var $87 = {};
+          for (var $88 in val) {
+            if ({}.hasOwnProperty.call(val, $88)) {
+              $87[$88] = val[$88];
             }
             ;
           }
           ;
-          $92.x = projected.x;
-          $92.y = projected.y;
-          return $92;
-        })(), projectedChildren);
+          $87.x = projected.x;
+          $87.y = projected.y;
+          return $87;
+        })())(projectedChildren);
       };
     };
   };
   var makeLinks6 = function(tree$prime) {
-    var makeLinksList = function(v) {
-      var grandchildLinks = bind64(v.value1)(makeLinksList);
-      var childLinks = bind64(v.value1)(function(v1) {
+    var makeLinksList = function(t) {
+      var val = head3(t);
+      var children3 = tail(t);
+      var grandchildLinks = bind64(children3)(makeLinksList);
+      var childLinks = bind64(children3)(function(child) {
+        var childVal = head3(child);
         return new Cons({
           source: {
-            x: v.value0.x,
-            y: v.value0.y
+            x: val.x,
+            y: val.y
           },
           target: {
-            x: v1.value0.x,
-            y: v1.value0.y
+            x: childVal.x,
+            y: childVal.y
           }
         }, Nil.value);
       });
@@ -41542,7 +41665,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return liftEffect115(drawRadialTree(selector)(result.value0));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.TreeAPI.RadialTreeViz (line 201, column 3 - line 203, column 70): " + [result.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.TreeAPI.RadialTreeViz (line 224, column 3 - line 226, column 70): " + [result.constructor.name]);
     }));
   };
 
@@ -41681,11 +41804,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return liftEffect116(drawSunburst(selector)(parseFlareJson(result.value0)));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.TreeAPI.SunburstViz (line 149, column 3 - line 151, column 87): " + [result.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.TreeAPI.SunburstViz (line 172, column 3 - line 174, column 87): " + [result.constructor.name]);
     }));
   };
 
-  // output/PSD3.Layout.Hierarchy.Types/index.js
+  // output/DataViz.Layout.Hierarchy.Types/index.js
   var VNode = /* @__PURE__ */ (function() {
     function VNode2(value0) {
       this.value0 = value0;
@@ -41710,9 +41833,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return v.value0.value;
   };
 
-  // output/PSD3.Layout.Hierarchy.Core/index.js
+  // output/DataViz.Layout.Hierarchy.Core/index.js
   var map74 = /* @__PURE__ */ map(functorArray);
-  var foldl17 = /* @__PURE__ */ foldl(foldableArray);
+  var foldl16 = /* @__PURE__ */ foldl(foldableArray);
   var maximum10 = /* @__PURE__ */ maximum(ordInt)(foldableArray);
   var sum4 = function(v) {
     return function(valueAccessor) {
@@ -41732,7 +41855,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       var childrenValued = map74(function(child) {
         return sum4(child)(valueAccessor);
       })(v.value0.children);
-      var childrenSum = foldl17(function(acc) {
+      var childrenSum = foldl16(function(acc) {
         return function(child) {
           return acc + getValue3(child);
         };
@@ -41809,7 +41932,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return nodeWithChildren;
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Core (line 35, column 7 - line 70, column 29): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Core (line 35, column 5 - line 70, column 27): " + [v.constructor.name]);
           };
         };
       };
@@ -41817,9 +41940,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
 
-  // output/PSD3.Layout.Hierarchy.Treemap/index.js
+  // output/DataViz.Layout.Hierarchy.Treemap/index.js
   var map75 = /* @__PURE__ */ map(functorArray);
-  var foldl18 = /* @__PURE__ */ foldl(foldableArray);
+  var foldl17 = /* @__PURE__ */ foldl(foldableArray);
   var append121 = /* @__PURE__ */ append(semigroupArray);
   var compare16 = /* @__PURE__ */ compare(ordInt);
   var compare17 = /* @__PURE__ */ compare(ordNumber);
@@ -41861,7 +41984,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               ;
               return 0;
             })();
-            var positioned = foldl18(function(acc) {
+            var positioned = foldl17(function(acc) {
               return function(child) {
                 var height49 = child.value0.value * k;
                 var positionedChild = new TNode({
@@ -41913,7 +42036,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return 0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Treemap (line 125, column 9 - line 127, column 21): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Treemap (line 125, column 9 - line 127, column 21): " + [v1.constructor.name]);
         })();
         var x0 = v.value0.x0 + p2;
         var x117 = v.value0.x1 - p2;
@@ -42153,7 +42276,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               ;
               return 0;
             })();
-            var positioned = foldl18(function(acc) {
+            var positioned = foldl17(function(acc) {
               return function(child) {
                 var width49 = child.value0.value * k;
                 var positionedChild = new TNode({
@@ -42248,7 +42371,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                           return new TNode(v.value0);
                                         }
                                         ;
-                                        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Treemap (line 346, column 33 - line 348, column 44): " + [v2.constructor.name]);
+                                        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Treemap (line 360, column 31 - line 362, column 42): " + [v2.constructor.name]);
                                       })();
                                       var $155 = v12.value0.value !== 0;
                                       if ($155) {
@@ -42308,7 +42431,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                                 return new TNode(v.value0);
                                               }
                                               ;
-                                              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Treemap (line 369, column 31 - line 371, column 42): " + [v2.constructor.name]);
+                                              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Treemap (line 386, column 31 - line 388, column 42): " + [v2.constructor.name]);
                                             })();
                                             var newSum = sumVal + v12.value0.value;
                                             var newMin = min9(minVal)(v12.value0.value);
@@ -42353,7 +42476,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                     return new TNode(v.value0);
                                   }
                                   ;
-                                  throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Treemap (line 383, column 30 - line 385, column 36): " + [v2.constructor.name]);
+                                  throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Treemap (line 399, column 30 - line 401, column 36): " + [v2.constructor.name]);
                                 })();
                                 var isDice = dx < dy4;
                                 var initial = tryAdd(firstNode.i1)(firstNode.sumValue)(v1.value0.value)(v1.value0.value)(max15(v1.value0.value / beta0)(beta0 / v1.value0.value));
@@ -42589,7 +42712,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return liftEffect117(drawTreemap(selector)(parseFlareJson(result.value0)));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.TreeAPI.TreemapViz (line 120, column 3 - line 122, column 86): " + [result.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.TreeAPI.TreemapViz (line 121, column 3 - line 123, column 86): " + [result.constructor.name]);
     }));
   };
 
@@ -42899,7 +43022,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
   var describeTree = function(tree2) {
     return function(level) {
-      if (tree2 instanceof Node3) {
+      if (tree2 instanceof Node2) {
         return discard44((function() {
           if (tree2.value0.name instanceof Just) {
             return tell4(indent(level) + ("Create a " + (showElemType(tree2.value0.elemType) + (' named "' + (tree2.value0.name.value0 + '"')))));
@@ -43103,7 +43226,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 189, column 1 - line 189, column 38): " + [v.constructor.name]);
   };
   var toAST = function(tree2) {
-    if (tree2 instanceof Node3) {
+    if (tree2 instanceof Node2) {
       return new NodeAST({
         name: tree2.value0.name,
         elemType: showElemType2(tree2.value0.elemType),
@@ -43217,17 +43340,17 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     throw new Error("Failed pattern match at PSD3v2.Interpreter.MetaAST (line 63, column 14 - line 120, column 8): " + [tree2.constructor.name]);
   };
   var prettyPrintAST = function(ast) {
-    var power = function(v) {
+    var power2 = function(v) {
       return function(v1) {
         if (v1 === 0) {
           return "";
         }
         ;
-        return v + power(v)(v1 - 1 | 0);
+        return v + power2(v)(v1 - 1 | 0);
       };
     };
     var indent2 = function(n) {
-      return power("  ")(n);
+      return power2("  ")(n);
     };
     var prettyPrint = function(tree2) {
       return function(level) {
@@ -44218,7 +44341,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       var allNodeIds = map79(function(v) {
         return v.name;
       })(model.nodes);
-      var initialEntering = startProgress2(allNodeIds)(empty3);
+      var initialEntering = startProgress2(allNodeIds)(empty5);
       return function __do8() {
         var sim = create5(defaultConfig)();
         setNodes2(model.nodes)(sim)();
@@ -44288,7 +44411,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var bind70 = /* @__PURE__ */ bind(bindMaybe);
   var lookup34 = /* @__PURE__ */ lookup2(ordString);
   var pure64 = /* @__PURE__ */ pure(applicativeMaybe);
-  var fromFoldable40 = /* @__PURE__ */ fromFoldable5(ordString)(foldableArray);
+  var fromFoldable40 = /* @__PURE__ */ fromFoldable6(ordString)(foldableArray);
   var mkNode = function(idx) {
     return function(v) {
       return {
@@ -44864,7 +44987,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var maximum11 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var nub5 = /* @__PURE__ */ nub(ordString);
   var show131 = /* @__PURE__ */ show(showNumber);
-  var foldl19 = /* @__PURE__ */ foldl(foldableArray);
+  var foldl18 = /* @__PURE__ */ foldl(foldableArray);
   var width46 = /* @__PURE__ */ width(toAttrNumberNumber);
   var height46 = /* @__PURE__ */ height(toAttrNumberNumber);
   var viewBox41 = /* @__PURE__ */ viewBox(toAttrStringString);
@@ -45025,7 +45148,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               var lineSegments = map80(function(p2) {
                 return "L" + (show131(scaleX3(p2.date)) + ("," + show131(scaleY3(p2.rate))));
               })(v.value0.tail);
-              return moveCmd + foldl19(function(acc) {
+              return moveCmd + foldl18(function(acc) {
                 return function(seg) {
                   return acc + seg;
                 };
@@ -46123,7 +46246,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var radius32 = /* @__PURE__ */ radius(toAttrNumberFunctionNumbe);
   var fill111 = /* @__PURE__ */ fill(toAttrStringFunctionStrin);
   var fillOpacity11 = /* @__PURE__ */ fillOpacity(toAttrNumberNumber);
-  var append210 = /* @__PURE__ */ append3(selectionMD3v2Selection_D);
+  var append210 = /* @__PURE__ */ append5(selectionMD3v2Selection_D);
   var setAttrs9 = /* @__PURE__ */ setAttrs(selectionMD3v2Selection_D);
   var discard51 = /* @__PURE__ */ discard(discardUnit)(bindD3v2M);
   var remove7 = /* @__PURE__ */ remove(selectionMD3v2Selection_D);
@@ -47397,20 +47520,20 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return function(lchs) {
           return function __do8() {
             var selfRef = $$new({})();
-            var childrenIn = $$new(empty5)();
-            var childrenOut = $$new(empty5)();
+            var childrenIn = $$new(empty7)();
+            var childrenOut = $$new(empty7)();
             var handlerRef = $$new(handler3)();
             var pendingQueries = $$new(new Just(Nil.value))();
             var pendingOuts = $$new(new Just(Nil.value))();
             var pendingHandlers = $$new(Nothing.value)();
             var fresh2 = $$new(1)();
-            var subscriptions = $$new(new Just(empty3))();
-            var forks = $$new(empty3)();
+            var subscriptions = $$new(new Just(empty5))();
+            var forks = $$new(empty5)();
             var ds = {
               component: component49,
               state: component49.initialState(input3),
-              refs: empty3,
-              children: empty5,
+              refs: empty5,
+              children: empty7,
               childrenIn,
               childrenOut,
               selfRef,
@@ -47768,7 +47891,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return handleAff($61($62));
         };
       })()))(read(v.forks))();
-      return write(empty3)(v.forks)();
+      return write(empty5)(v.forks)();
     };
   };
   var runUI = function(renderSpec2) {
@@ -47885,7 +48008,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               var v = read($$var2)();
               var shouldProcessHandlers = map88(isNothing)(read(v.pendingHandlers))();
               when8(shouldProcessHandlers)(write(new Just(Nil.value))(v.pendingHandlers))();
-              write(empty5)(v.childrenOut)();
+              write(empty7)(v.childrenOut)();
               write(v.children)(v.childrenIn)();
               var handler3 = (function() {
                 var $70 = queueOrRun(v.pendingHandlers);
@@ -49744,7 +49867,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var guard2 = /* @__PURE__ */ guard(alternativeMaybe);
   var apply6 = /* @__PURE__ */ apply(applyMaybe);
   var map123 = /* @__PURE__ */ map(functorMaybe);
-  var fromFoldable41 = /* @__PURE__ */ fromFoldable5(ordString)(foldableArray);
+  var fromFoldable41 = /* @__PURE__ */ fromFoldable6(ordString)(foldableArray);
   var traverse5 = /* @__PURE__ */ traverse(traversableArray)(applicativeMaybe);
   var fromFoldable119 = /* @__PURE__ */ fromFoldable2(foldableArray);
   var append35 = /* @__PURE__ */ append(semigroupList);

@@ -30,7 +30,8 @@ import Data.Number (pi, cos, sin, sqrt)
 import Data.Nullable (null)
 import Data.String.CodeUnits as SCU
 import Data.String.Pattern (Pattern(..))
-import Data.Tree (Tree(..))
+import Control.Comonad.Cofree (head, tail)
+import Data.Tree (Tree, mkTree)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Foreign.Object (Object)
@@ -268,20 +269,21 @@ buildTreeFromEdges rootId edges = go rootId
       children = getChildren nodeId
       childTrees = go <$> children
     in
-      Node nodeId (List.fromFoldable childTrees)
+      mkTree nodeId (List.fromFoldable childTrees)
 
 -- | Map function over tree values
 mapTree :: forall a b. (a -> b) -> Tree a -> Tree b
-mapTree f (Node value children) = Node (f value) (map (mapTree f) children)
+mapTree f t = mkTree (f (head t)) (map (mapTree f) (tail t))
 
 -- | Flatten tree to map of rectangular positions (x, y from Tree)
 flattenTreeToPositionMap :: Number -> Tree { id :: Int, x :: Number, y :: Number, depth :: Int, height :: Int } -> Map Int { x :: Number, y :: Number }
 flattenTreeToPositionMap _ tree = go tree Map.empty
   where
   go :: Tree { id :: Int, x :: Number, y :: Number, depth :: Int, height :: Int } -> Map Int { x :: Number, y :: Number } -> Map Int { x :: Number, y :: Number }
-  go (Node node children) acc =
-    let
-      acc' = Map.insert node.id { x: node.x, y: node.y } acc
+  go t acc =
+    let node = head t
+        children = tail t
+        acc' = Map.insert node.id { x: node.x, y: node.y } acc
     in
       foldl (\a child -> go child a) acc' children
 

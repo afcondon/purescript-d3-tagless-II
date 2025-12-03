@@ -12,7 +12,8 @@ module DataViz.Layout.Hierarchy.Cluster
 
 import Prelude
 
-import Data.Tree (Tree(..))
+import Control.Comonad.Cofree (head, tail)
+import Data.Tree (Tree, mkTree)
 import Data.List (List(..), fromFoldable)
 import Data.Foldable (maximum, minimum)
 import Data.Foldable as Data.Foldable
@@ -97,7 +98,7 @@ centerRoot tree =
       Nothing -> 0.0
 
     -- Find root's current x
-    Node root _ = tree
+    root = head tree
     rootX = root.x
 
     -- Calculate where root should be (center of LEAF spread)
@@ -108,8 +109,10 @@ centerRoot tree =
 
     -- Shift all nodes by offset
     shiftTree :: Tree { x :: Number, y :: Number, height :: Int | r } -> Tree { x :: Number, y :: Number, height :: Int | r }
-    shiftTree (Node val children) =
-      Node (val { x = val.x + offset }) (map shiftTree children)
+    shiftTree t =
+      let val = head t
+          children = tail t
+      in mkTree (val { x = val.x + offset }) (map shiftTree children)
   in
     shiftTree tree
 
@@ -117,8 +120,10 @@ centerRoot tree =
 -- | This is the D3 recommended pattern for dendrograms
 -- | Ensures deeper subtrees are positioned before shallower ones
 sortByHeight :: forall r. Tree { x :: Number, y :: Number, height :: Int | r } -> Tree { x :: Number, y :: Number, height :: Int | r }
-sortByHeight (Node val children) =
+sortByHeight t =
   let
+    val = head t
+    children = tail t
     -- Recursively sort grandchildren first
     sortedGrandchildren = map sortByHeight children
 
@@ -127,16 +132,18 @@ sortByHeight (Node val children) =
     sortedArray = Array.sortBy compareByHeight childArray
     sortedChildrenList = fromFoldable sortedArray
   in
-    Node val sortedChildrenList
+    mkTree val sortedChildrenList
   where
   compareByHeight :: forall s. Tree { height :: Int | s } -> Tree { height :: Int | s } -> Ordering
-  compareByHeight (Node a _) (Node b _) = compare b.height a.height -- Descending
+  compareByHeight t1 t2 = compare (head t2).height (head t1).height -- Descending
 
 -- | Compute height field (distance from deepest leaf)
 -- | Bottom-up traversal: leaves get 0, parents get 1 + max(children's height)
 addHeight :: forall r. Tree { x :: Number, y :: Number, height :: Int | r } -> Tree { x :: Number, y :: Number, height :: Int | r }
-addHeight (Node val children) =
+addHeight t =
   let
+    val = head t
+    children = tail t
     -- Recursively compute children's heights
     childrenWithHeight = map addHeight children
 
@@ -146,12 +153,12 @@ addHeight (Node val children) =
       [] -> 0
       childArray ->
         let
-          childHeights = map (\(Node v _) -> v.height) childArray
+          childHeights = map (\c -> (head c).height) childArray
           maxChildHeight = fromMaybe 0 $ maximum childHeights
         in
           1 + maxChildHeight
   in
-    Node (val { height = nodeHeight }) childrenWithHeight
+    mkTree (val { height = nodeHeight }) childrenWithHeight
 
 -- | Bottom-up pass: assign sequential x positions to ALL leaves
 -- | Then set parent x = midpoint between leftmost and rightmost descendants
@@ -167,8 +174,10 @@ render minSep inputTree =
   where
   -- Find extent (min and max x) of all leaves in a subtree
   findExtent :: Tree { x :: Number, y :: Number, height :: Int | r } -> { minX :: Number, maxX :: Number }
-  findExtent (Node val children) =
-    case Array.fromFoldable children of
+  findExtent t =
+    let val = head t
+        children = tail t
+    in case Array.fromFoldable children of
       [] -> { minX: val.x, maxX: val.x } -- Leaf node
       childArray ->
         let
@@ -180,13 +189,15 @@ render minSep inputTree =
 
   -- Thread through lastLeafX to assign sequential positions
   renderInternal :: Number -> Tree { x :: Number, y :: Number, height :: Int | r } -> { tree :: Tree { x :: Number, y :: Number, height :: Int | r }, lastLeafX :: Number }
-  renderInternal currentLeafX (Node val children) =
-    case Array.fromFoldable children of
+  renderInternal currentLeafX t =
+    let val = head t
+        children = tail t
+    in case Array.fromFoldable children of
       -- Leaf node: assign sequential x position
       [] ->
         let
           leafX = currentLeafX
-          leafNode = Node (val { x = leafX }) Nil
+          leafNode = mkTree (val { x = leafX }) Nil
         in
           { tree: leafNode, lastLeafX: leafX + minSep }
 
@@ -216,7 +227,7 @@ render minSep inputTree =
           maxX = fromMaybe 0.0 $ maximum $ map (\e -> e.maxX) allChildExtents
           centerX = (minX + maxX) / 2.0
 
-          internalNode = Node (val { x = centerX }) childrenList
+          internalNode = mkTree (val { x = centerX }) childrenList
         in
           { tree: internalNode, lastLeafX: processChildren.lastLeafX }
 
@@ -226,14 +237,16 @@ render minSep inputTree =
 -- | Add y coordinates based on height
 -- | For cluster: y = height (leaves have height=0, so y=0, all at same level)
 addYCoordinates :: forall r. Tree { x :: Number, y :: Number, height :: Int | r } -> Tree { x :: Number, y :: Number, height :: Int | r }
-addYCoordinates (Node val children) =
+addYCoordinates t =
   let
+    val = head t
+    children = tail t
     -- y is simply the height (distance from deepest leaf)
     nodeY = toNumber val.height
     -- Recursively process children
     childrenWithY = map addYCoordinates children
   in
-    Node (val { y = nodeY }) childrenWithY
+    mkTree (val { y = nodeY }) childrenWithY
 
 -- | Scale abstract coordinates to pixel coordinates
 scaleToPixels
@@ -262,9 +275,9 @@ scaleToPixels config inputTree =
     scaleY height = (1.0 - (toNumber height / toNumber maxHeight)) * config.size.height
 
     -- Apply scaling via map
-    go (Node val children) =
-      Node
-        (val { x = scaleX val.x, y = scaleY val.height })
-        (map go children)
+    go t =
+      let val = head t
+          children = tail t
+      in mkTree (val { x = scaleX val.x, y = scaleY val.height }) (map go children)
   in
     go inputTree

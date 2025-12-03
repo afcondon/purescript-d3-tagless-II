@@ -14,7 +14,8 @@ import Data.String (length)
 import Data.Tuple (Tuple(..))
 import Data.String.CodePoints (codePointAt)
 import Data.Enum (fromEnum)
-import Data.Tree (Tree(..))
+import Control.Comonad.Cofree (head, tail)
+import Data.Tree (Tree, mkTree)
 import Effect (Effect)
 import Effect.Aff (Milliseconds(..), delay)
 import Effect.Aff.Class (class MonadAff)
@@ -228,10 +229,13 @@ makeLinks tree' = Array.fromFoldable $ makeLinksList tree'
   makeLinksList
     :: Tree { x :: Number, y :: Number | r }
     -> List { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
-  makeLinksList (Node val children) =
+  makeLinksList t =
     let
-      childLinks = children >>= \(Node childVal _) ->
-        Cons { source: { x: val.x, y: val.y }, target: { x: childVal.x, y: childVal.y } } Nil
+      val = head t
+      children = tail t
+      childLinks = children >>= \child ->
+        let childVal = head child
+        in Cons { source: { x: val.x, y: val.y }, target: { x: childVal.x, y: childVal.y } } Nil
       grandchildLinks = children >>= makeLinksList
     in
       childLinks <> grandchildLinks

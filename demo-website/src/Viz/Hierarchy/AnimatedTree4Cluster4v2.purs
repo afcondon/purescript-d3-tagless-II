@@ -10,7 +10,8 @@ import PSD3.Shared.FlareData (HierData, getName, getValue, getChildren)
 import Data.Array as Array
 import Data.List (List(..), fromFoldable)
 import Data.Time.Duration (Milliseconds(..))
-import Data.Tree (Tree(..))
+import Control.Comonad.Cofree (head, tail)
+import Data.Tree (Tree, mkTree)
 import Effect (Effect)
 import PSD3v2.Attribute.Types (class_, cx, cy, d, fill, radius, stroke, strokeWidth, viewBox)
 import PSD3v2.Capabilities.Selection (appendChild, openSelection, select, setAttrs, updateJoin, append, remove)
@@ -49,7 +50,7 @@ hierDataToTree hierData =
       Nothing -> Nil
       Just childrenArray -> fromFoldable $ map hierDataToTree childrenArray
   in
-    Node { name, value, x: 0.0, y: 0.0, depth: 0, height: 0 } childrenList
+    mkTree { name, value, x: 0.0, y: 0.0, depth: 0, height: 0 } childrenList
 
 -- | Flatten tree to array
 flattenTree :: forall r. Tree { name :: String | r } -> Array { name :: String | r }
@@ -60,10 +61,13 @@ flattenTree = Array.fromFoldable
 type LinkData = { source :: { name :: String, x :: Number, y :: Number }, target :: { name :: String, x :: Number, y :: Number } }
 
 makeLinks :: forall r. Tree { name :: String, x :: Number, y :: Number | r } -> Array LinkData
-makeLinks (Node val children) =
+makeLinks t =
   let
-    childLinks = Array.fromFoldable children >>= \(Node childVal _) ->
-      [ { source: { name: val.name, x: val.x, y: val.y }, target: { name: childVal.name, x: childVal.x, y: childVal.y } } ]
+    val = head t
+    children = tail t
+    childLinks = Array.fromFoldable children >>= \child ->
+      let childVal = head child
+      in [ { source: { name: val.name, x: val.x, y: val.y }, target: { name: childVal.name, x: childVal.x, y: childVal.y } } ]
     grandchildLinks = Array.fromFoldable children >>= makeLinks
   in
     childLinks <> grandchildLinks

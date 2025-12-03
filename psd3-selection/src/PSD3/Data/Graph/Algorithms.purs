@@ -13,7 +13,7 @@ import Data.List as L
 import Data.Maybe (Maybe(..))
 import Data.Set (Set)
 import Data.Set as Set
-import Data.Tree (Tree(..))
+import Data.Tree (Tree, mkTree)
 import Data.Tuple (Tuple(..))
 import PSD3.Data.Graph (GraphModel, GraphConfig, getLinksFrom)
 import PSD3.Data.Node (NodeID)
@@ -116,7 +116,7 @@ extractSpanningTree rootId result =
         -- Recursively build subtrees
         childTrees = buildTree <$> children <@> edges
       in
-        Node nodeId (L.fromFoldable childTrees)
+        mkTree nodeId (L.fromFoldable childTrees)
 
 -- | Depth-first search traversal
 -- |

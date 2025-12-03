@@ -15,7 +15,8 @@ module DataViz.Layout.Hierarchy.Tree
 
 import Prelude
 
-import Data.Tree (Tree(..))
+import Control.Comonad.Cofree (head, tail)
+import Data.Tree (Tree, mkTree)
 import Data.List (List(..), fromFoldable, length, scanl, zipWith)
 import Data.Foldable (maximum, minimum)
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -81,12 +82,8 @@ data Contours = Contours
   , right :: Contour -- Rightmost x offset at each depth
   }
 
--- | Empty contours for a leaf
--- emptyContours :: Contours -- TODO not used
--- emptyContours = Contours { left: Nil, right: Nil }
-
 -- | Single node contours (just the root at position 0)
-singletonContours :: Contours -- TODO not used
+singletonContours :: Contours
 singletonContours = Contours { left: Cons 0.0 Nil, right: Cons 0.0 Nil }
 
 -- | Tree layout in 3 steps:
@@ -153,10 +150,10 @@ treeWithSorting config inputTree =
 -- | Update depth field (top-down traversal)
 -- | Input must already have depth field, which gets overwritten
 addDepth :: forall r. Int -> Tree { x :: Number, y :: Number, depth :: Int | r } -> Tree { x :: Number, y :: Number, depth :: Int | r }
-addDepth currentDepth (Node val children) =
-  Node
-    (val { depth = currentDepth })
-    (map (addDepth (currentDepth + 1)) children)
+addDepth currentDepth t =
+  let val = head t
+      children = tail t
+  in mkTree (val { depth = currentDepth }) (map (addDepth (currentDepth + 1)) children)
 
 -- | Bottom-up pass: compute relative positions using contour scanning
 -- | Annotates tree with Tuple containing offset and original data
@@ -172,20 +169,22 @@ render minSep separationFn inputTree =
   where
   -- Internal function that also returns contours (captures minSep and separationFn from outer scope)
   renderWithContours :: Tree { x :: Number, y :: Number, depth :: Int | r } -> Tuple (Tree (Tuple { offset :: Number } { x :: Number, y :: Number, depth :: Int | r })) Contours
-  renderWithContours (Node val children) =
+  renderWithContours t =
     let
+      val = head t
+      children = tail t
       childCount = length children
     in
       case childCount of
         -- Leaf node: offset = 0, contours = singleton
-        0 -> Tuple (Node (Tuple { offset: 0.0 } val) Nil) singletonContours
+        0 -> Tuple (mkTree (Tuple { offset: 0.0 } val) Nil) singletonContours
 
         -- Internal node: process children, position them, compute contours
         _ ->
           let
             -- Recursively process all children to get their trees and contours
             childResults = map renderWithContours children
-            childTrees = map (\(Tuple t _) -> t) childResults
+            childTrees = map (\(Tuple tr _) -> tr) childResults
             childContours = map (\(Tuple _ c) -> c) childResults
 
             -- Extract root node data from each child tree for separation calculation
@@ -218,18 +217,21 @@ render minSep separationFn inputTree =
             -- Combine child contours into parent contours
             parentContours = spliceContours childRelativeOffsets childContours
 
-            resultTree = Node (Tuple { offset: parentOffset } val) childrenWithOffsets
+            resultTree = mkTree (Tuple { offset: parentOffset } val) childrenWithOffsets
           in
             Tuple resultTree parentContours
 
   -- Update a child tree's offset in its Tuple annotation
   updateOffset :: Tree (Tuple { offset :: Number } { x :: Number, y :: Number, depth :: Int | r }) -> Number -> Tree (Tuple { offset :: Number } { x :: Number, y :: Number, depth :: Int | r })
-  updateOffset (Node (Tuple offsetRec original) children) newOffset =
-    Node (Tuple (offsetRec { offset = newOffset }) original) children
+  updateOffset tr newOffset =
+    let Tuple offsetRec original = head tr
+        children = tail tr
+    in mkTree (Tuple (offsetRec { offset = newOffset }) original) children
 
 -- | Extract root node data from a tree with Tuple annotation
 getRootData :: forall r. Tree (Tuple { offset :: Number } r) -> r
-getRootData (Node (Tuple _ nodeData) _) = nodeData
+getRootData t = case head t of
+  Tuple _ nodeData -> nodeData
 
 -- | Compute base separations for adjacent pairs using separation function
 -- | For n nodes, returns (n-1) separation values
@@ -316,19 +318,6 @@ scanContoursWithBase baseSep (Contours left) (Contours right) =
         else currentSep
     in
       go neededSep lr rl rest1 rest2
-
--- | Compute separations needed between adjacent child subtrees
--- | For n children, returns (n-1) separation values
--- computeSeparations :: Number -> List Contours -> List Number -- TODO not used
--- computeSeparations minSep contours =
---   case contours of
---     Nil -> Nil
---     Cons _ Nil -> Nil
---     _ -> zipWith (scanContours minSep) contours (tailSafe contours)
---   where
---   tailSafe :: forall a. List a -> List a
---   tailSafe Nil = Nil
---   tailSafe (Cons _ xs) = xs
 
 -- | Scan two contours to find minimum separation needed
 -- | Walks down both contours level by level, ensuring minSep at each level
@@ -476,8 +465,10 @@ petrify
   -> -- Parent's x coordinate
   Tree (Tuple { offset :: Number } { x :: Number, y :: Number, depth :: Int | r })
   -> Tree { x :: Number, y :: Number, depth :: Int | r }
-petrify parentX (Node (Tuple offsetRec original) children) =
+petrify parentX t =
   let
+    Tuple offsetRec original = head t
+    children = tail t
     -- Node's x is parent's x plus its offset
     nodeX = parentX + offsetRec.offset
     nodeY = toNumber original.depth -- y is just depth (will be scaled later)
@@ -485,7 +476,7 @@ petrify parentX (Node (Tuple offsetRec original) children) =
     -- Recursively process children with this node's x as parent
     childrenWithCoords = map (petrify nodeX) children
   in
-    Node (original { x = nodeX, y = nodeY }) childrenWithCoords
+    mkTree (original { x = nodeX, y = nodeY }) childrenWithCoords
 
 -- | Scale abstract coordinates to pixel coordinates
 scaleToPixels
@@ -501,10 +492,6 @@ scaleToPixels config inputTree =
     minX = fromMaybe 0.0 $ minimum allX
     maxX = fromMaybe 1.0 $ maximum allX
     xRange = if maxX - minX == 0.0 then 1.0 else maxX - minX
-
-    -- Find max depth
-    -- allDepths = map (\n -> n.depth) allNodes
-    -- maxDepth = fromMaybe 1 $ maximum allDepths
 
     -- Apply layer scale function if provided
     layerScaleFn = fromMaybe toNumber config.layerScale
@@ -522,18 +509,20 @@ scaleToPixels config inputTree =
         (scaledDepth / maxScaledDepth) * config.size.height
 
     -- Apply scaling via map
-    go (Node val children) =
-      Node
-        (val { x = scaleX val.x, y = scaleY val.depth })
-        (map go children)
+    go tr =
+      let val = head tr
+          cs = tail tr
+      in mkTree (val { x = scaleX val.x, y = scaleY val.depth }) (map go cs)
   in
     go inputTree
 
 -- | Compute height field (distance from deepest leaf)
 -- | Bottom-up traversal: leaves get 0, parents get 1 + max(children's height)
 addHeightField :: forall r. Tree { x :: Number, y :: Number, depth :: Int, height :: Int | r } -> Tree { x :: Number, y :: Number, depth :: Int, height :: Int | r }
-addHeightField (Node val children) =
+addHeightField t =
   let
+    val = head t
+    children = tail t
     -- Recursively compute children's heights
     childrenWithHeight = map addHeightField children
 
@@ -543,18 +532,20 @@ addHeightField (Node val children) =
       [] -> 0
       childArray ->
         let
-          childHeights = map (\(Node v _) -> v.height) childArray
+          childHeights = map (\c -> (head c).height) childArray
           maxChildHeight = fromMaybe 0 (maximum childHeights)
         in
           maxChildHeight + 1
   in
-    Node (val { height = nodeHeight }) childrenWithHeight
+    mkTree (val { height = nodeHeight }) childrenWithHeight
 
 -- | Sort children by height (descending) to minimize crossovers
 -- | This matches Cluster's behavior for consistent child ordering during animations
 sortByHeight :: forall r. Tree { x :: Number, y :: Number, depth :: Int, height :: Int | r } -> Tree { x :: Number, y :: Number, depth :: Int, height :: Int | r }
-sortByHeight (Node val children) =
+sortByHeight t =
   let
+    val = head t
+    children = tail t
     -- Recursively sort grandchildren first
     sortedGrandchildren = map sortByHeight children
 
@@ -563,7 +554,7 @@ sortByHeight (Node val children) =
     sortedArray = Array.sortBy compareByHeight childArray
     sortedChildrenList = fromFoldable sortedArray
   in
-    Node val sortedChildrenList
+    mkTree val sortedChildrenList
   where
   compareByHeight :: forall s. Tree { height :: Int | s } -> Tree { height :: Int | s } -> Ordering
-  compareByHeight (Node a _) (Node b _) = compare b.height a.height -- Descending
+  compareByHeight t1 t2 = compare (head t2).height (head t1).height -- Descending

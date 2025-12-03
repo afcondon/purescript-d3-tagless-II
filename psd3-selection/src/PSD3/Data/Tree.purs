@@ -12,6 +12,7 @@ module PSD3.Data.Tree
 
 import Prelude
 
+import Control.Comonad.Cofree (head, tail)
 import Data.Array (filter)
 import Data.Array as A
 import Data.Either (Either(..))
@@ -19,7 +20,7 @@ import Data.List (List(..))
 import Data.List as L
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Tree (Tree(..))
+import Data.Tree (Tree, mkTree)
 import PSD3.Data.Node (NodeID)
 
 foreign import data TreeJson_ :: Type
@@ -60,7 +61,7 @@ foreign import data TreeLayoutFn_ :: Type
 -- |
 -- | Example:
 -- | ```purescript
--- | let tree = Node "root" [Node "child1" [], Node "child2" []]
+-- | let tree = mkTree "root" $ L.fromFoldable [mkTree "child1" Nil, mkTree "child2" Nil]
 -- | let dataMap = M.fromFoldable [
 -- |   Tuple "root" {name: "Root", value: 100},
 -- |   Tuple "child1" {name: "Child 1", value: 50}
@@ -72,8 +73,10 @@ foreign import data TreeLayoutFn_ :: Type
 makeD3TreeJSONFromTreeID :: forall d. Tree NodeID -> M.Map NodeID d -> TreeJson_
 makeD3TreeJSONFromTreeID root nodesMap = go root
   where
-    go (Node id children) =
-      case M.lookup id nodesMap of
+    go tree =
+      let id = head tree
+          children = tail tree
+      in case M.lookup id nodesMap of
         Nothing -> emptyTreeJson_
         Just obj -> case children of
           Nil -> idTreeLeaf_ obj
@@ -86,16 +89,19 @@ makeD3TreeJSONFromTreeID root nodesMap = go root
 -- |
 -- | Example:
 -- | ```purescript
--- | let tree = Node {name: "Root", value: 100}
--- |              [ Node {name: "Child 1", value: 50} []
--- |              , Node {name: "Child 2", value: 30} []
+-- | let tree = mkTree {name: "Root", value: 100} $ L.fromFoldable
+-- |              [ mkTree {name: "Child 1", value: 50} Nil
+-- |              , mkTree {name: "Child 2", value: 30} Nil
 -- |              ]
 -- | let d3Tree = treeToD3Tree tree
 -- | ```
 treeToD3Tree :: forall d. Tree d -> TreeJson_
-treeToD3Tree (Node data_ children) = case children of
-  Nil -> idTreeLeaf_ data_
-  _ -> idTreeParent_ data_ (treeToD3Tree <$> (A.fromFoldable children))
+treeToD3Tree tree =
+  let data_ = head tree
+      children = tail tree
+  in case children of
+    Nil -> idTreeLeaf_ data_
+    _ -> idTreeParent_ data_ (treeToD3Tree <$> (A.fromFoldable children))
 
 -- | Build a Tree from an array of nodes with parent pointers
 -- |
@@ -133,10 +139,10 @@ arrayToTree config = do
 
   case A.uncons roots of
     Nothing -> Left "No root node found (no node with parent = Nothing)"
-    Just { head: root, tail } ->
-      if A.length tail > 0
+    Just { head: rootNode, tail: tailNodes } ->
+      if A.length tailNodes > 0
         then Left $ "Multiple root nodes found: " <> show (A.length roots)
-        else Right $ buildSubtree root
+        else Right $ buildSubtree rootNode
   where
     buildSubtree :: d -> Tree d
     buildSubtree node =
@@ -147,9 +153,8 @@ arrayToTree config = do
         -- Recursively build subtrees
         childTrees = buildSubtree <$> children
       in
-        Node node (L.fromFoldable childTrees)
+        mkTree node (L.fromFoldable childTrees)
 
 -- FFI imports
 foreign import idTreeLeaf_   :: forall d. d -> TreeJson_
 foreign import idTreeParent_ :: forall d. d -> Array TreeJson_ -> TreeJson_
-

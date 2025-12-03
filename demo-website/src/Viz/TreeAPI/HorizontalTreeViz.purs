@@ -5,7 +5,8 @@ import Prelude
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.List (List(..))
-import Data.Tree (Tree(..))
+import Control.Comonad.Cofree (head, tail)
+import Data.Tree (Tree, mkTree)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
@@ -27,11 +28,13 @@ type LinkDatum = { source :: { x :: Number, y :: Number }, target :: { x :: Numb
 
 -- | Swap x and y coordinates for horizontal orientation
 swapXY :: forall r. Tree { x :: Number, y :: Number | r } -> Tree { x :: Number, y :: Number | r }
-swapXY (Node val children) =
+swapXY t =
   let
+    val = head t
+    children = tail t
     swappedChildren = map swapXY children
   in
-    Node (val { x = val.y, y = val.x }) swappedChildren
+    mkTree (val { x = val.y, y = val.x }) swappedChildren
 
 -- | Create links from parent to children
 makeLinks
@@ -43,10 +46,13 @@ makeLinks tree' = Array.fromFoldable $ makeLinksList tree'
   makeLinksList
     :: Tree { x :: Number, y :: Number | r }
     -> List { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number } }
-  makeLinksList (Node val children) =
+  makeLinksList t =
     let
-      childLinks = children >>= \(Node childVal _) ->
-        Cons { source: { x: val.x, y: val.y }, target: { x: childVal.x, y: childVal.y } } Nil
+      val = head t
+      children = tail t
+      childLinks = children >>= \child ->
+        let childVal = head child
+        in Cons { source: { x: val.x, y: val.y }, target: { x: childVal.x, y: childVal.y } } Nil
       grandchildLinks = children >>= makeLinksList
     in
       childLinks <> grandchildLinks
