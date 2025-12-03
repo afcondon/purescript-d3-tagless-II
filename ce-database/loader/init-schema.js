@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 /**
  * Initialize the DuckDB database with schema
+ *
+ * Usage:
+ *   node init-schema.js           # Use v2 schema (default)
+ *   node init-schema.js --v1      # Use legacy v1 schema
+ *   node init-schema.js --fresh   # Delete existing DB first
  */
 
 import duckdb from 'duckdb';
@@ -10,13 +15,20 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DB_PATH = path.join(__dirname, '..', 'ce-data.duckdb');
-const SCHEMA_PATH = path.join(__dirname, '..', 'schema', 'init.sql');
+
+// Parse args
+const args = process.argv.slice(2);
+const useV1 = args.includes('--v1');
+const fresh = args.includes('--fresh');
+
+const SCHEMA_PATH = path.join(__dirname, '..', 'schema', useV1 ? 'init.sql' : 'init-v2.sql');
 
 console.log('Initializing Code Explorer database...\n');
+console.log(`Schema: ${useV1 ? 'v1 (legacy)' : 'v2 (multi-project)'}`);
 
-// Remove existing database if it exists
-if (fs.existsSync(DB_PATH)) {
-  console.log('Removing existing database...');
+// Remove existing database if --fresh flag
+if (fresh && fs.existsSync(DB_PATH)) {
+  console.log('Removing existing database (--fresh)...');
   fs.unlinkSync(DB_PATH);
 }
 
