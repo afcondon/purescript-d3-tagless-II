@@ -63,91 +63,104 @@ component =
 render :: forall m. State -> H.ComponentHTML Action () m
 render state =
   HH.div
-    [ HP.class_ (HH.ClassName "explorer-app")
-    , HP.style "width: 100%; height: 100%; position: relative;"
-    ]
-    [ -- Control panel
+    [ HP.class_ (HH.ClassName "explorer-app") ]
+    [ -- Floating Control Panel (top-left)
       HH.div
-        [ HP.style "position: absolute; top: 10px; left: 10px; z-index: 100; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;"
+        [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-left" ] ]
+        [ HH.h2 [ HP.class_ (HH.ClassName "panel-title") ] [ HH.text "Code Explorer" ]
+
+        -- Data Source section
+        , HH.div [ HP.class_ (HH.ClassName "control-section") ]
+            [ HH.div [ HP.class_ (HH.ClassName "section-label") ] [ HH.text "Data Source" ]
+            , HH.div [ HP.class_ (HH.ClassName "control-row") ]
+                [ renderProjectSelector state
+                , renderSnapshotSelector state
+                ]
+            ]
+
+        -- View Mode section
+        , HH.div [ HP.class_ (HH.ClassName "control-section") ]
+            [ HH.div [ HP.class_ (HH.ClassName "section-label") ] [ HH.text "View Mode" ]
+            , HH.div [ HP.class_ (HH.ClassName "control-row") ]
+                [ HH.div [ HP.class_ (HH.ClassName "btn-group") ]
+                    [ HH.button
+                        [ HP.class_ (HH.ClassName "btn-editorial")
+                        , HE.onClick \_ -> FormGrid
+                        ]
+                        [ HH.text "Grid" ]
+                    , HH.button
+                        [ HP.class_ (HH.ClassName "btn-editorial")
+                        , HE.onClick \_ -> FormOrbit
+                        ]
+                        [ HH.text "Orbit" ]
+                    , HH.button
+                        [ HP.class_ (HH.ClassName "btn-editorial")
+                        , HE.onClick \_ -> FormTree
+                        ]
+                        [ HH.text "Tree" ]
+                    ]
+                ]
+            ]
+
+        -- Simulation section
+        , HH.div [ HP.class_ (HH.ClassName "control-section") ]
+            [ HH.div [ HP.class_ (HH.ClassName "section-label") ] [ HH.text "Physics" ]
+            , HH.div [ HP.class_ (HH.ClassName "control-row") ]
+                [ HH.div [ HP.class_ (HH.ClassName "btn-group") ]
+                    [ HH.button
+                        [ HP.class_ (HH.ClassName "btn-editorial")
+                        , HE.onClick \_ -> GridRun
+                        ]
+                        [ HH.text "Cluster" ]
+                    , HH.button
+                        [ HP.class_ (HH.ClassName "btn-editorial")
+                        , HE.onClick \_ -> OrbitRun
+                        ]
+                        [ HH.text "Expand" ]
+                    , HH.button
+                        [ HP.class_ (HH.ClassName "btn-editorial")
+                        , HE.onClick \_ -> TreeRun
+                        ]
+                        [ HH.text "Tree" ]
+                    ]
+                ]
+            ]
         ]
-        [ HH.h1
-            [ HP.style "margin: 0; font-size: 18px; color: #333;" ]
-            [ HH.text "Code Explorer" ]
-        -- Project selector
-        , renderProjectSelector state
-        -- Snapshot selector
-        , renderSnapshotSelector state
-        -- Scene buttons
-        , HH.button
-            [ HP.style formButtonStyle
-            , HE.onClick \_ -> FormGrid
-            ]
-            [ HH.text "Form Grid" ]
-        , HH.button
-            [ HP.style runButtonStyle
-            , HE.onClick \_ -> GridRun
-            ]
-            [ HH.text "Grid Run" ]
-        , HH.button
-            [ HP.style formButtonStyle
-            , HE.onClick \_ -> FormOrbit
-            ]
-            [ HH.text "Form Orbit" ]
-        , HH.button
-            [ HP.style runButtonStyle
-            , HE.onClick \_ -> OrbitRun
-            ]
-            [ HH.text "Orbit Run" ]
-        , HH.button
-            [ HP.style formButtonStyle
-            , HE.onClick \_ -> FormTree
-            ]
-            [ HH.text "Form Tree" ]
-        , HH.button
-            [ HP.style runButtonStyle
-            , HE.onClick \_ -> TreeRun
-            ]
-            [ HH.text "Tree Run" ]
-        ]
+
     -- Error message
     , case state.error of
         Just err -> HH.div
-          [ HP.style "position: absolute; top: 60px; left: 10px; color: red; z-index: 100;" ]
+          [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--bottom-left", HH.ClassName "error-message" ] ]
           [ HH.text err ]
         Nothing -> HH.text ""
+
     -- Visualization container
-    , HH.div [ HP.id "viz", HP.style "width: 100%; height: 100%;" ] []
+    , HH.div [ HP.id "viz" ] []
     ]
-  where
-  formButtonStyle = "padding: 8px 16px; border: none; border-radius: 4px; background: #4a90d9; color: white; cursor: pointer; font-size: 14px;"
-  runButtonStyle = "padding: 8px 16px; border: none; border-radius: 4px; background: #9b4ad9; color: white; cursor: pointer; font-size: 14px;"
 
 -- | Render project dropdown selector
 renderProjectSelector :: forall m. State -> H.ComponentHTML Action () m
 renderProjectSelector state =
   HH.select
-    [ HP.style selectStyle
+    [ HP.class_ (HH.ClassName "select-editorial")
     , HE.onSelectedIndexChange handleProjectChange
     ]
     ( [ HH.option [ HP.disabled true, HP.selected (state.selectedProjectId == Nothing) ]
-        [ HH.text (if state.loading then "Loading..." else "Select Project") ]
+        [ HH.text (if state.loading then "Loading..." else "Project") ]
       ]
       <> map projectOption state.projects
     )
   where
-  selectStyle = "padding: 6px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; min-width: 150px;"
-
   handleProjectChange :: Int -> Action
   handleProjectChange idx =
-    -- idx 0 is the "Select Project" placeholder
     case Array.index state.projects (idx - 1) of
       Just p -> SelectProject p.id
-      Nothing -> LoadProjects -- Fallback to reload
+      Nothing -> LoadProjects
 
   projectOption :: Project -> H.ComponentHTML Action () m
   projectOption p = HH.option
     [ HP.selected (state.selectedProjectId == Just p.id) ]
-    [ HH.text $ p.name <> " (" <> show p.snapshotCount <> " snapshots)" ]
+    [ HH.text p.name ]
 
 -- | Render snapshot dropdown selector
 renderSnapshotSelector :: forall m. State -> H.ComponentHTML Action () m
@@ -158,17 +171,15 @@ renderSnapshotSelector state =
       if Array.length project.snapshots == 0 then HH.text ""
       else
         HH.select
-          [ HP.style selectStyle
+          [ HP.class_ (HH.ClassName "select-editorial")
           , HE.onSelectedIndexChange (handleSnapshotChange project.snapshots)
           ]
           ( [ HH.option [ HP.disabled true, HP.selected (state.selectedSnapshotId == Nothing) ]
-              [ HH.text "Select Snapshot" ]
+              [ HH.text "Snapshot" ]
             ]
             <> map (snapshotOption state) project.snapshots
           )
   where
-  selectStyle = "padding: 6px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; min-width: 200px;"
-
   handleSnapshotChange :: Array Snapshot -> Int -> Action
   handleSnapshotChange snapshots idx =
     case Array.index snapshots (idx - 1) of
@@ -183,7 +194,7 @@ renderSnapshotSelector state =
   formatSnapshotLabel :: Snapshot -> String
   formatSnapshotLabel s =
     let label = if s.label == "" then s.gitRef else s.label
-    in label <> " - " <> show s.moduleCount <> " modules"
+    in label
 
 -- | Find the currently selected project
 findSelectedProject :: State -> Maybe Project

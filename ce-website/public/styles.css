@@ -1,13 +1,50 @@
-/* Code Explorer Styles */
+/* =============================================================================
+   Code Explorer - Editorial Data Viz Theme
+
+   "Data viz, not SaaS" - Minimalist print-inspired design with warm beige
+   palette, monospace typography, and clean visual hierarchy.
+   ============================================================================= */
+
+/* =============================================================================
+   CSS Variables - Editorial Palette
+   ============================================================================= */
 
 :root {
-  --bg-dark: #1a1a2e;
-  --bg-medium: #16213e;
-  --bg-light: #0f3460;
-  --accent: #e94560;
-  --text: #eee;
-  --text-muted: #888;
+  /* Editorial/Print Aesthetic Colors */
+  --color-beige-base: #D4C9A8;
+  --color-beige-light: #E8E0CC;
+  --color-beige-dark: #C9B8A0;
+  --color-red-accent: #E63946;
+  --color-coral: #D97560;
+  --color-peach: #E8B8A0;
+  --color-teal: #5A8A8A;
+  --color-line: #999999;
+  --color-text-dark: #333333;
+  --color-text-muted: #666666;
+  --color-canvas: #FAFAF8;
+
+  /* Typography */
+  --font-mono: 'Courier New', 'Courier', Monaco, monospace;
+  --font-size-tiny: 0.5rem;
+  --font-size-small: 0.5625rem;
+  --font-size-label: 0.6875rem;
+  --font-size-body: 0.75rem;
+  --letter-spacing-wide: 0.125rem;
+  --letter-spacing-normal: 0.0625rem;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
 }
+
+/* =============================================================================
+   Reset & Base
+   ============================================================================= */
 
 * {
   box-sizing: border-box;
@@ -19,111 +56,268 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #f0f0f0;
-  color: var(--text);
+  font-family: var(--font-mono);
+  background: var(--color-canvas);
+  color: var(--color-text-dark);
 }
 
 #app {
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
 }
 
-/* Loading state */
-.loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  font-size: 1.5rem;
-  color: var(--text-muted);
-}
+/* =============================================================================
+   Full-Screen Visualization Canvas
+   ============================================================================= */
 
-/* Main layout */
-.ce-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.ce-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem 1rem;
-  background: var(--bg-medium);
-  border-bottom: 1px solid var(--bg-light);
-}
-
-.ce-header h1 {
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-.ce-controls {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.ce-btn {
-  padding: 0.4rem 0.8rem;
-  border: none;
-  border-radius: 4px;
-  background: var(--bg-light);
-  color: var(--text);
-  cursor: pointer;
-  font-size: 0.875rem;
-  transition: background 0.2s;
-}
-
-.ce-btn:hover {
-  background: var(--accent);
-}
-
-.ce-btn.active {
-  background: var(--accent);
-}
-
-/* Visualization area */
-.ce-viz {
-  flex: 1;
+.explorer-app {
   position: relative;
-  overflow: hidden;
-}
-
-.ce-viz svg {
   width: 100%;
   height: 100%;
+  background: var(--color-canvas);
 }
 
-/* Full window viz container */
 #viz {
   width: 100%;
   height: 100%;
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 1;
 }
 
-#viz svg,
-#spago-test-svg {
+#viz svg {
   width: 100%;
   height: 100%;
   display: block;
 }
 
-/* Node styles */
+/* =============================================================================
+   Floating Control Panel - Editorial Style
+   ============================================================================= */
+
+.floating-panel {
+  position: fixed;
+  background-color: rgba(212, 201, 168, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-line);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  padding: var(--spacing-md);
+  z-index: 100;
+  font-family: var(--font-mono);
+}
+
+.floating-panel--top-left {
+  top: var(--spacing-md);
+  left: var(--spacing-md);
+}
+
+.floating-panel--top-right {
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+}
+
+.floating-panel--bottom-left {
+  bottom: var(--spacing-md);
+  left: var(--spacing-md);
+}
+
+.floating-panel--bottom-right {
+  bottom: var(--spacing-md);
+  right: var(--spacing-md);
+}
+
+/* Panel Title */
+.panel-title {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-dark);
+  margin: 0 0 var(--spacing-md) 0;
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--color-line);
+}
+
+/* Section Headers */
+.section-label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: var(--spacing-md) 0 var(--spacing-xs) 0;
+}
+
+/* =============================================================================
+   Editorial Buttons
+   ============================================================================= */
+
+.btn-editorial {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-line);
+  background-color: transparent;
+  color: var(--color-text-dark);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-editorial:hover {
+  background-color: var(--color-beige-light);
+  border-color: var(--color-text-dark);
+}
+
+.btn-editorial--active,
+.btn-editorial:active {
+  background-color: var(--color-red-accent);
+  border-color: var(--color-red-accent);
+  color: white;
+}
+
+/* Button Group - connected buttons */
+.btn-group {
+  display: flex;
+}
+
+.btn-group .btn-editorial {
+  margin: 0;
+}
+
+.btn-group .btn-editorial:not(:first-child) {
+  border-left: none;
+}
+
+.btn-group .btn-editorial:first-child {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.btn-group .btn-editorial:last-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* =============================================================================
+   Editorial Select Dropdowns
+   ============================================================================= */
+
+.select-editorial {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  letter-spacing: var(--letter-spacing-normal);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--color-line);
+  background-color: transparent;
+  color: var(--color-text-dark);
+  cursor: pointer;
+  min-width: 140px;
+}
+
+.select-editorial:focus {
+  outline: none;
+  border-color: var(--color-text-dark);
+}
+
+/* =============================================================================
+   Control Groups
+   ============================================================================= */
+
+.control-row {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-sm);
+}
+
+.control-section {
+  margin-bottom: var(--spacing-md);
+}
+
+/* Divider */
+.divider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--color-line);
+  margin: 0 var(--spacing-xs);
+}
+
+/* =============================================================================
+   Info Text
+   ============================================================================= */
+
+.info-text {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-tiny);
+  letter-spacing: var(--letter-spacing-normal);
+  line-height: 1.8;
+  color: var(--color-text-muted);
+}
+
+/* Error message */
+.error-message {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  color: var(--color-red-accent);
+  padding: var(--spacing-sm);
+  background: rgba(230, 57, 70, 0.1);
+  border: 1px solid var(--color-red-accent);
+}
+
+/* =============================================================================
+   Color Key / Legend Panel
+   ============================================================================= */
+
+.legend-panel {
+  min-width: 160px;
+}
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.legend-color {
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--color-line);
+  flex-shrink: 0;
+}
+
+.legend-label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-tiny);
+  color: var(--color-text-dark);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+/* =============================================================================
+   Node Styles (Visualization)
+   ============================================================================= */
+
 .node circle {
   cursor: pointer;
-  /* No transitions - instant highlight response */
 }
 
 .node text {
   pointer-events: none;
-  fill: white;
-  font-size: 10px;
+  fill: var(--color-text-dark);
+  font-family: var(--font-mono);
+  font-size: 9px;
   text-anchor: middle;
   dominant-baseline: middle;
   opacity: 0;
@@ -134,37 +328,43 @@ html, body {
   opacity: 1;
 }
 
-/* Link styles */
+/* =============================================================================
+   Link Styles
+   ============================================================================= */
+
 .link {
   fill: none;
-  stroke: #4a9;
-  stroke-opacity: 0.6;
+  stroke: var(--color-teal);
+  stroke-opacity: 0.5;
   stroke-width: 1;
   transition: stroke 0.15s, stroke-opacity 0.15s, stroke-width 0.15s;
 }
 
-/* Highlight states */
+/* =============================================================================
+   Highlight States
+   ============================================================================= */
+
 circle.highlighted-source {
-  stroke: #fff !important;
+  stroke: var(--color-red-accent) !important;
   stroke-width: 4px !important;
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+  filter: drop-shadow(0 0 6px rgba(230, 57, 70, 0.6));
 }
 
 circle.highlighted-upstream {
-  stroke: #3b82f6 !important;
+  stroke: var(--color-teal) !important;
   stroke-width: 3px !important;
-  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.7));
+  filter: drop-shadow(0 0 5px rgba(90, 138, 138, 0.6));
 }
 
 circle.highlighted-downstream {
-  stroke: #10b981 !important;
+  stroke: var(--color-coral) !important;
   stroke-width: 3px !important;
-  filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.7));
+  filter: drop-shadow(0 0 5px rgba(217, 117, 96, 0.6));
 }
 
 .dimmed {
-  opacity: 0.15 !important;
-  transition: none !important;  /* Instant - override scene transitions */
+  opacity: 0.12 !important;
+  transition: none !important;
 }
 
 .dimmed circle {
@@ -172,128 +372,101 @@ circle.highlighted-downstream {
 }
 
 .highlighted-link {
-  stroke: #fbbf24 !important;
-  stroke-width: 2.5px !important;
-  stroke-opacity: 1 !important;
+  stroke: var(--color-red-accent) !important;
+  stroke-width: 2px !important;
+  stroke-opacity: 0.8 !important;
 }
 
 .dimmed-link {
-  stroke-opacity: 0.1 !important;
+  stroke-opacity: 0.08 !important;
 }
 
 /* =============================================================================
-   Node Type Styles (for scene transitions)
+   Scene-Specific Styles
    ============================================================================= */
 
-/* No transitions on nodes - hover highlighting is instant */
 .node {
   transition: none;
 }
 
-.package-node {
-  /* Package nodes - fade out in tree scene */
-}
-
-.tree-module {
-  /* Tree modules - always visible in tree scene */
-}
-
-.non-tree-module {
-  /* Non-tree modules - fade out in tree scene */
-}
-
-/* Tree scene: fade out packages and non-tree modules */
 .tree-scene .package-node,
 .tree-scene .non-tree-module {
-  opacity: 0.08;
+  opacity: 0.06;
 }
 
-/* Tree links */
 .tree-link {
   transition: opacity 0.5s ease-in-out;
 }
 
 /* =============================================================================
-   Info panel
+   Tooltip - Editorial Style
    ============================================================================= */
 
-/* Info panel */
-.ce-info {
-  position: absolute;
-  bottom: 1rem;
-  left: 1rem;
-  padding: 0.75rem 1rem;
-  background: rgba(22, 33, 62, 0.9);
-  border-radius: 6px;
-  font-size: 0.875rem;
-  max-width: 300px;
-}
-
-.ce-info h3 {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 0.25rem;
-}
-
-.ce-info p {
-  margin: 0;
-}
-
-/* =============================================================================
-   Tooltip
-   ============================================================================= */
-
-/* Default PSD3 tooltip (from library) */
 .psd3-tooltip {
   position: fixed;
   z-index: 1000;
-  background: rgba(20, 20, 30, 0.95);
-  color: #f0f0f0;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  line-height: 1.5;
-  max-width: 350px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(212, 201, 168, 0.98);
+  color: var(--color-text-dark);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-line);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  line-height: 1.6;
+  max-width: 300px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   pointer-events: none;
-  backdrop-filter: blur(10px);
 }
 
 .tooltip-header {
-  font-weight: 600;
-  font-size: 14px;
-  color: #fff;
+  font-weight: bold;
+  font-size: var(--font-size-label);
+  letter-spacing: var(--letter-spacing-normal);
+  color: var(--color-text-dark);
   margin-bottom: 4px;
   word-break: break-all;
 }
 
 .tooltip-package {
-  font-size: 11px;
-  color: #888;
-  margin-bottom: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: var(--font-size-tiny);
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-xs);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--color-line);
 }
 
 .tooltip-metrics {
-  margin-top: 4px;
+  margin-top: var(--spacing-xs);
 }
 
 .tooltip-metric {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 3px;
-  font-size: 12px;
+  margin-bottom: 2px;
+  font-size: var(--font-size-tiny);
 }
 
 .metric-label {
-  color: #999;
+  color: var(--color-text-muted);
 }
 
 .metric-value {
-  color: #fff;
-  font-weight: 500;
+  color: var(--color-text-dark);
+  font-weight: bold;
   font-variant-numeric: tabular-nums;
+}
+
+/* =============================================================================
+   Loading State
+   ============================================================================= */
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
 }

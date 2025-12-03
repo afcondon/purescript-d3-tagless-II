@@ -1892,12 +1892,12 @@
   var foldMapDefaultR = function(dictFoldable) {
     var foldr22 = foldr(dictFoldable);
     return function(dictMonoid) {
-      var append11 = append(dictMonoid.Semigroup0());
+      var append17 = append(dictMonoid.Semigroup0());
       var mempty2 = mempty(dictMonoid);
       return function(f) {
         return foldr22(function(x3) {
           return function(acc) {
-            return append11(f(x3))(acc);
+            return append17(f(x3))(acc);
           };
         })(mempty2);
       };
@@ -2869,7 +2869,7 @@
     };
   };
   var altExceptT = function(dictSemigroup) {
-    var append11 = append(dictSemigroup);
+    var append17 = append(dictSemigroup);
     return function(dictMonad) {
       var Bind1 = dictMonad.Bind1();
       var bind20 = bind(Bind1);
@@ -2890,7 +2890,7 @@
                   }
                   ;
                   if (rn instanceof Left) {
-                    return pure26(new Left(append11(rm.value0)(rn.value0)));
+                    return pure26(new Left(append17(rm.value0)(rn.value0)));
                   }
                   ;
                   throw new Error("Failed pattern match at Control.Monad.Except.Trans (line 87, column 9 - line 89, column 49): " + [rn.constructor.name]);
@@ -3033,13 +3033,13 @@
   var foldMapWithIndexDefaultR = function(dictFoldableWithIndex) {
     var foldrWithIndex1 = foldrWithIndex(dictFoldableWithIndex);
     return function(dictMonoid) {
-      var append11 = append(dictMonoid.Semigroup0());
+      var append17 = append(dictMonoid.Semigroup0());
       var mempty2 = mempty(dictMonoid);
       return function(f) {
         return foldrWithIndex1(function(i2) {
           return function(x3) {
             return function(acc) {
-              return append11(f(i2)(x3))(acc);
+              return append17(f(i2)(x3))(acc);
             };
           };
         })(mempty2);
@@ -3194,13 +3194,13 @@
   };
   var fold2 = /* @__PURE__ */ _foldM(applyFlipped);
   var foldMap2 = function(dictMonoid) {
-    var append18 = append(dictMonoid.Semigroup0());
+    var append17 = append(dictMonoid.Semigroup0());
     var mempty2 = mempty(dictMonoid);
     return function(f) {
       return fold2(function(acc) {
         return function(k) {
           return function(v) {
-            return append18(acc)(f(k)(v));
+            return append17(acc)(f(k)(v));
           };
         };
       })(mempty2);
@@ -6116,11 +6116,11 @@
         return go2;
       },
       foldMap: function(dictMonoid) {
-        var append11 = append(dictMonoid.Semigroup0());
+        var append17 = append(dictMonoid.Semigroup0());
         var foldMap12 = foldMap4(dictMonoid);
         return function(f) {
           var go2 = function(fa) {
-            return append11(f(head3(fa)))(foldMap12(go2)(tail(fa)));
+            return append17(f(head3(fa)))(foldMap12(go2)(tail(fa)));
           };
           return go2;
         };
@@ -6819,7 +6819,7 @@
     },
     foldMap: function(dictMonoid) {
       var mempty2 = mempty(dictMonoid);
-      var append18 = append(dictMonoid.Semigroup0());
+      var append17 = append(dictMonoid.Semigroup0());
       return function(f) {
         var go2 = function(v) {
           if (v instanceof Leaf) {
@@ -6827,7 +6827,7 @@
           }
           ;
           if (v instanceof Node) {
-            return append18(go2(v.value4))(append18(f(v.value3))(go2(v.value5)));
+            return append17(go2(v.value4))(append17(f(v.value3))(go2(v.value5)));
           }
           ;
           throw new Error("Failed pattern match at Data.Map.Internal (line 181, column 10 - line 184, column 28): " + [v.constructor.name]);
@@ -6881,7 +6881,7 @@
     },
     foldMapWithIndex: function(dictMonoid) {
       var mempty2 = mempty(dictMonoid);
-      var append18 = append(dictMonoid.Semigroup0());
+      var append17 = append(dictMonoid.Semigroup0());
       return function(f) {
         var go2 = function(v) {
           if (v instanceof Leaf) {
@@ -6889,7 +6889,7 @@
           }
           ;
           if (v instanceof Node) {
-            return append18(go2(v.value4))(append18(f(v.value2)(v.value3))(go2(v.value5)));
+            return append17(go2(v.value4))(append17(f(v.value2)(v.value3))(go2(v.value5)));
           }
           ;
           throw new Error("Failed pattern match at Data.Map.Internal (line 201, column 10 - line 204, column 30): " + [v.constructor.name]);
@@ -16862,14 +16862,14 @@
       selection2.on("mouseenter", function(event) {
         const sel = select_default2(this);
         sel.raise();
-        enterStyles.forEach((style3) => {
-          sel.attr(style3.attr, style3.value);
+        enterStyles.forEach((style2) => {
+          sel.attr(style2.attr, style2.value);
         });
       });
       selection2.on("mouseleave", function(event) {
         const sel = select_default2(this);
-        leaveStyles.forEach((style3) => {
-          sel.attr(style3.attr, style3.value);
+        leaveStyles.forEach((style2) => {
+          sel.attr(style2.attr, style2.value);
         });
       });
       return element3;
@@ -20307,13 +20307,13 @@
       var parentNode3 = toParentNode2(doc);
       var mElement = querySelector("#explorer-nodes")(parentNode3)();
       if (mElement instanceof Just) {
-        var classes = classList2(mElement.value0)();
+        var classes2 = classList2(mElement.value0)();
         (function() {
           if (shouldAdd) {
-            return add4(classes)("tree-scene")();
+            return add4(classes2)("tree-scene")();
           }
           ;
-          return remove3(classes)("tree-scene")();
+          return remove3(classes2)("tree-scene")();
         })();
         return log9("[Explorer] Set tree-scene class: " + show16(shouldAdd))();
       }
@@ -22142,11 +22142,6 @@
       };
     };
   };
-  var attr = function(ns) {
-    return function(v) {
-      return Attribute.create(ns)(v);
-    };
-  };
 
   // output/Control.Applicative.Free/index.js
   var identity15 = /* @__PURE__ */ identity(categoryFn);
@@ -22765,7 +22760,7 @@
   var element2 = /* @__PURE__ */ (function() {
     return element(Nothing.value);
   })();
-  var h1 = /* @__PURE__ */ element2("h1");
+  var h2 = /* @__PURE__ */ element2("h2");
   var option = /* @__PURE__ */ element2("option");
   var select7 = /* @__PURE__ */ element2("select");
   var div2 = /* @__PURE__ */ element2("div");
@@ -22860,26 +22855,30 @@
   var selected2 = /* @__PURE__ */ prop1("selected");
   var id4 = /* @__PURE__ */ prop22("id");
   var disabled10 = /* @__PURE__ */ prop1("disabled");
+  var classes = /* @__PURE__ */ (function() {
+    var $32 = prop22("className");
+    var $33 = joinWith(" ");
+    var $34 = map(functorArray)(unwrap5);
+    return function($35) {
+      return $32($33($34($35)));
+    };
+  })();
   var class_3 = /* @__PURE__ */ (function() {
     var $36 = prop22("className");
     return function($37) {
       return $36(unwrap5($37));
     };
   })();
-  var attr2 = /* @__PURE__ */ (function() {
-    return attr(Nothing.value);
-  })();
-  var style = /* @__PURE__ */ attr2("style");
 
   // output/Component.SpagoGridApp/index.js
   var map36 = /* @__PURE__ */ map(functorArray);
   var eq13 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqInt));
-  var show18 = /* @__PURE__ */ show(showInt);
-  var append17 = /* @__PURE__ */ append(semigroupArray);
+  var append11 = /* @__PURE__ */ append(semigroupArray);
   var discard4 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var log10 = /* @__PURE__ */ log3(monadEffectEffect);
   var modify_3 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var bind14 = /* @__PURE__ */ bind(bindHalogenM);
+  var show18 = /* @__PURE__ */ show(showInt);
   var mapFlipped5 = /* @__PURE__ */ mapFlipped(functorMaybe);
   var pure17 = /* @__PURE__ */ pure(applicativeHalogenM);
   var bind23 = /* @__PURE__ */ bind(bindMaybe);
@@ -22973,7 +22972,7 @@
   };
   var renderProjectSelector = function(state3) {
     var projectOption = function(p2) {
-      return option([selected2(eq13(state3.selectedProjectId)(new Just(p2.id)))])([text5(p2.name + (" (" + (show18(p2.snapshotCount) + " snapshots)")))]);
+      return option([selected2(eq13(state3.selectedProjectId)(new Just(p2.id)))])([text5(p2.name)]);
     };
     var handleProjectChange = function(idx) {
       var v = index(state3.projects)(idx - 1 | 0);
@@ -22985,14 +22984,14 @@
         return LoadProjects.value;
       }
       ;
-      throw new Error("Failed pattern match at Component.SpagoGridApp (line 143, column 5 - line 145, column 30): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Component.SpagoGridApp (line 156, column 5 - line 158, column 30): " + [v.constructor.name]);
     };
-    return select7([style("padding: 6px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; min-width: 150px;"), onSelectedIndexChange(handleProjectChange)])(append17([option([disabled10(true), selected2(eq13(state3.selectedProjectId)(Nothing.value))])([text5((function() {
+    return select7([class_3("select-editorial"), onSelectedIndexChange(handleProjectChange)])(append11([option([disabled10(true), selected2(eq13(state3.selectedProjectId)(Nothing.value))])([text5((function() {
       if (state3.loading) {
         return "Loading...";
       }
       ;
-      return "Select Project";
+      return "Project";
     })())])])(map36(projectOption)(state3.projects)));
   };
   var goToScene2 = function(dictMonadAff) {
@@ -23011,7 +23010,7 @@
             return goToScene(sceneName)(mRef.value0)();
           }
           ;
-          throw new Error("Failed pattern match at Component.SpagoGridApp (line 271, column 5 - line 273, column 51): " + [mRef.constructor.name]);
+          throw new Error("Failed pattern match at Component.SpagoGridApp (line 282, column 5 - line 284, column 51): " + [mRef.constructor.name]);
         });
       });
     };
@@ -23105,12 +23104,12 @@
                       return pure17(unit);
                     }
                     ;
-                    throw new Error("Failed pattern match at Component.SpagoGridApp (line 222, column 9 - line 224, column 31): " + [firstProjectId.constructor.name]);
+                    throw new Error("Failed pattern match at Component.SpagoGridApp (line 233, column 9 - line 235, column 31): " + [firstProjectId.constructor.name]);
                   });
                 });
               }
               ;
-              throw new Error("Failed pattern match at Component.SpagoGridApp (line 208, column 5 - line 224, column 31): " + [result.constructor.name]);
+              throw new Error("Failed pattern match at Component.SpagoGridApp (line 219, column 5 - line 235, column 31): " + [result.constructor.name]);
             });
           });
         });
@@ -23174,11 +23173,11 @@
                     return pure17(unit);
                   }
                   ;
-                  throw new Error("Failed pattern match at Component.SpagoGridApp (line 242, column 9 - line 244, column 31): " + [v1.constructor.name]);
+                  throw new Error("Failed pattern match at Component.SpagoGridApp (line 253, column 9 - line 255, column 31): " + [v1.constructor.name]);
                 });
               }
               ;
-              throw new Error("Failed pattern match at Component.SpagoGridApp (line 231, column 5 - line 244, column 31): " + [result.constructor.name]);
+              throw new Error("Failed pattern match at Component.SpagoGridApp (line 242, column 5 - line 255, column 31): " + [result.constructor.name]);
             });
           });
         });
@@ -23225,7 +23224,7 @@
         return goToScene1("TreeRun");
       }
       ;
-      throw new Error("Failed pattern match at Component.SpagoGridApp (line 195, column 16 - line 258, column 33): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Component.SpagoGridApp (line 206, column 16 - line 269, column 33): " + [v.constructor.name]);
     };
   };
   var findSelectedProject = function(state3) {
@@ -23247,7 +23246,7 @@
           return LoadProjects.value;
         }
         ;
-        throw new Error("Failed pattern match at Component.SpagoGridApp (line 174, column 5 - line 176, column 30): " + [v2.constructor.name]);
+        throw new Error("Failed pattern match at Component.SpagoGridApp (line 185, column 5 - line 187, column 30): " + [v2.constructor.name]);
       };
     };
     var formatSnapshotLabel = function(s) {
@@ -23259,7 +23258,7 @@
         ;
         return s.label;
       })();
-      return label5 + (" - " + (show18(s.moduleCount) + " modules"));
+      return label5;
     };
     var snapshotOption = function(st) {
       return function(s) {
@@ -23277,35 +23276,35 @@
         return text5("");
       }
       ;
-      return select7([style("padding: 6px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; min-width: 200px;"), onSelectedIndexChange(handleSnapshotChange(v.value0.snapshots))])(append17([option([disabled10(true), selected2(eq13(state3.selectedSnapshotId)(Nothing.value))])([text5("Select Snapshot")])])(map36(snapshotOption(state3))(v.value0.snapshots)));
+      return select7([class_3("select-editorial"), onSelectedIndexChange(handleSnapshotChange(v.value0.snapshots))])(append11([option([disabled10(true), selected2(eq13(state3.selectedSnapshotId)(Nothing.value))])([text5("Snapshot")])])(map36(snapshotOption(state3))(v.value0.snapshots)));
     }
     ;
-    throw new Error("Failed pattern match at Component.SpagoGridApp (line 155, column 3 - line 168, column 12): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Component.SpagoGridApp (line 168, column 3 - line 181, column 12): " + [v.constructor.name]);
   };
   var render2 = function(state3) {
-    return div2([class_3("explorer-app"), style("width: 100%; height: 100%; position: relative;")])([div2([style("position: absolute; top: 10px; left: 10px; z-index: 100; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;")])([h1([style("margin: 0; font-size: 18px; color: #333;")])([text5("Code Explorer")]), renderProjectSelector(state3), renderSnapshotSelector(state3), button2([style("padding: 8px 16px; border: none; border-radius: 4px; background: #4a90d9; color: white; cursor: pointer; font-size: 14px;"), onClick(function(v) {
+    return div2([class_3("explorer-app")])([div2([classes(["floating-panel", "floating-panel--top-left"])])([h2([class_3("panel-title")])([text5("Code Explorer")]), div2([class_3("control-section")])([div2([class_3("section-label")])([text5("Data Source")]), div2([class_3("control-row")])([renderProjectSelector(state3), renderSnapshotSelector(state3)])]), div2([class_3("control-section")])([div2([class_3("section-label")])([text5("View Mode")]), div2([class_3("control-row")])([div2([class_3("btn-group")])([button2([class_3("btn-editorial"), onClick(function(v) {
       return FormGrid.value;
-    })])([text5("Form Grid")]), button2([style("padding: 8px 16px; border: none; border-radius: 4px; background: #9b4ad9; color: white; cursor: pointer; font-size: 14px;"), onClick(function(v) {
-      return GridRun.value;
-    })])([text5("Grid Run")]), button2([style("padding: 8px 16px; border: none; border-radius: 4px; background: #4a90d9; color: white; cursor: pointer; font-size: 14px;"), onClick(function(v) {
+    })])([text5("Grid")]), button2([class_3("btn-editorial"), onClick(function(v) {
       return FormOrbit.value;
-    })])([text5("Form Orbit")]), button2([style("padding: 8px 16px; border: none; border-radius: 4px; background: #9b4ad9; color: white; cursor: pointer; font-size: 14px;"), onClick(function(v) {
-      return OrbitRun.value;
-    })])([text5("Orbit Run")]), button2([style("padding: 8px 16px; border: none; border-radius: 4px; background: #4a90d9; color: white; cursor: pointer; font-size: 14px;"), onClick(function(v) {
+    })])([text5("Orbit")]), button2([class_3("btn-editorial"), onClick(function(v) {
       return FormTree.value;
-    })])([text5("Form Tree")]), button2([style("padding: 8px 16px; border: none; border-radius: 4px; background: #9b4ad9; color: white; cursor: pointer; font-size: 14px;"), onClick(function(v) {
+    })])([text5("Tree")])])])]), div2([class_3("control-section")])([div2([class_3("section-label")])([text5("Physics")]), div2([class_3("control-row")])([div2([class_3("btn-group")])([button2([class_3("btn-editorial"), onClick(function(v) {
+      return GridRun.value;
+    })])([text5("Cluster")]), button2([class_3("btn-editorial"), onClick(function(v) {
+      return OrbitRun.value;
+    })])([text5("Expand")]), button2([class_3("btn-editorial"), onClick(function(v) {
       return TreeRun.value;
-    })])([text5("Tree Run")])]), (function() {
+    })])([text5("Tree")])])])])]), (function() {
       if (state3.error instanceof Just) {
-        return div2([style("position: absolute; top: 60px; left: 10px; color: red; z-index: 100;")])([text5(state3.error.value0)]);
+        return div2([classes(["floating-panel", "floating-panel--bottom-left", "error-message"])])([text5(state3.error.value0)]);
       }
       ;
       if (state3.error instanceof Nothing) {
         return text5("");
       }
       ;
-      throw new Error("Failed pattern match at Component.SpagoGridApp (line 113, column 7 - line 117, column 30): " + [state3.error.constructor.name]);
-    })(), div2([id4("viz"), style("width: 100%; height: 100%;")])([])]);
+      throw new Error("Failed pattern match at Component.SpagoGridApp (line 131, column 7 - line 135, column 30): " + [state3.error.constructor.name]);
+    })(), div2([id4("viz")])([])]);
   };
   var component = function(dictMonadAff) {
     return mkComponent({
