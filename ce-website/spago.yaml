@@ -27,6 +27,7 @@ package:
     - ordered-collections
     - prelude
     - random
+    - psd3-layout
     - psd3-selection
     - psd3-simulation
     - refs

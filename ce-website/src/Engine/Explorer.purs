@@ -30,7 +30,7 @@ import Effect.Unsafe (unsafePerformEffect)
 import Foreign.Object as Object
 import Data.Loader (loadModel, LoadedModel, DeclarationsMap)
 import Data.Traversable (for_)
-import Engine.BubblePack (renderModulePack)
+import Engine.BubblePack (renderModulePack, renderColorLegend, clearColorLegend)
 import PSD3v2.Tooltip (hideTooltip) as Tooltip
 import Engine.Scene as Scene
 import Engine.Scenes as Scenes
@@ -623,6 +623,9 @@ focusOnNeighborhood nodes sim = do
     _ <- renderModulePack declarations node
     pure unit
 
+  -- Render color legend for bubble pack view
+  renderColorLegend
+
   -- Attach drag behavior using library API
   -- Select all module-pack groups and get their DOM elements
   packElements <- runD3v2M do
@@ -794,6 +797,9 @@ restoreFullView fullNodes sim = do
 
   -- Clear neighborhood links and disable link updates
   clearTreeLinks
+
+  -- Clear color legend
+  clearColorLegend
 
   -- Re-render DOM with circles
   clearNodesGroup

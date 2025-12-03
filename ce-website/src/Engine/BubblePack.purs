@@ -7,6 +7,8 @@
 module Engine.BubblePack
   ( renderModulePack
   , ModulePackData
+  , renderColorLegend
+  , clearColorLegend
   ) where
 
 import Prelude
@@ -36,6 +38,18 @@ foreign import renderReexportModule_
   -> Boolean -- isReexport (true = re-export, false = empty)
   -> Effect Unit
 
+-- | FFI for color legend
+foreign import renderColorLegend_ :: Effect Unit
+foreign import clearColorLegend_ :: Effect Unit
+
+-- | Render the color legend (shows declaration types)
+renderColorLegend :: Effect Unit
+renderColorLegend = renderColorLegend_
+
+-- | Clear the color legend
+clearColorLegend :: Effect Unit
+clearColorLegend = clearColorLegend_
+
 -- | Render a re-export or empty module
 renderReexportModule :: SimNode -> Boolean -> Effect Unit
 renderReexportModule node isReexport =
@@ -48,6 +62,7 @@ type PackCircle =
   , r :: Number
   , depth :: Int
   , data_ :: String
+  , category :: String  -- Parent category (for coloring declarations)
   }
 
 -- | Data for a module pack (position + declarations)
@@ -56,7 +71,7 @@ type ModulePackData =
   , declarations :: Array Declaration
   }
 
--- | Category colors
+-- | Category colors (mid-saturation for category circles)
 categoryColor :: String -> String
 categoryColor "typeClass" = "#9467bd"   -- purple
 categoryColor "data" = "#2ca02c"         -- green
@@ -65,6 +80,16 @@ categoryColor "externData" = "#bcbd22"   -- yellow-green
 categoryColor "alias" = "#7f7f7f"        -- gray
 categoryColor "value" = "#1f77b4"        -- blue
 categoryColor _ = "#cccccc"
+
+-- | Intense category colors (higher saturation for declaration circles)
+categoryColorIntense :: String -> String
+categoryColorIntense "typeClass" = "#7b3fa9"   -- deeper purple
+categoryColorIntense "data" = "#1a8a1a"         -- deeper green
+categoryColorIntense "typeSynonym" = "#0d9fb0"  -- deeper cyan
+categoryColorIntense "externData" = "#9a9b0a"   -- deeper yellow-green
+categoryColorIntense "alias" = "#5f5f5f"        -- darker gray
+categoryColorIntense "value" = "#0d5a91"        -- deeper blue
+categoryColorIntense _ = "#999999"
 
 -- | Build HierarchyData from module declarations
 -- | Structure: Module -> [Category -> [Declaration]]
@@ -117,11 +142,17 @@ buildDeclaration decl = HierarchyData
   , children: Nothing
   }
 
--- | Get all nodes from pack tree (recursive)
-getAllPackNodes :: forall a. PackNode a -> Array (PackNode a)
-getAllPackNodes node@(PackNode n) =
-  if Array.null n.children then [ node ]
-  else [ node ] <> (n.children >>= getAllPackNodes)
+-- | Get all nodes from pack tree with category tracking (recursive)
+-- | At depth 1, the node's data_ IS the category name
+-- | At depth 2+, we pass down the parent category
+getAllPackNodesWithCategory :: PackNode String -> String -> Array { node :: PackNode String, category :: String }
+getAllPackNodesWithCategory node@(PackNode n) parentCategory =
+  let
+    -- At depth 1, this node IS a category, so use its data_ as category for children
+    thisCategory = if n.depth == 1 then n.data_ else parentCategory
+    childResults = n.children >>= (\child -> getAllPackNodesWithCategory child thisCategory)
+  in
+    [ { node, category: thisCategory } ] <> childResults
 
 -- | Render a module as a bubble pack
 -- | Returns the pack's radius for layout purposes
@@ -158,9 +189,9 @@ renderModulePack declarationsMap node = do
           }
     let packed = pack config packRoot
 
-    -- Get all nodes for rendering (as flat PackCircle records)
-    let allNodes = getAllPackNodes packed
-    let packCircles = map packNodeToCircle allNodes
+    -- Get all nodes for rendering with category tracking
+    let allNodesWithCategory = getAllPackNodesWithCategory packed ""
+    let packCircles = map packNodeToCircleWithCategory allNodesWithCategory
 
     -- Center offset for positioning circles relative to group origin
     let centerOffset = packSize / 2.0
@@ -172,14 +203,15 @@ renderModulePack declarationsMap node = do
     let PackNode rootData = packed
     pure rootData.r
 
--- | Convert PackNode to flat PackCircle for FFI
-packNodeToCircle :: PackNode String -> PackCircle
-packNodeToCircle (PackNode n) =
+-- | Convert PackNode to flat PackCircle for FFI (with category)
+packNodeToCircleWithCategory :: { node :: PackNode String, category :: String } -> PackCircle
+packNodeToCircleWithCategory { node: PackNode n, category } =
   { x: n.x
   , y: n.y
   , r: n.r
   , depth: n.depth
   , data_: n.data_
+  , category
   }
 
 -- | Get fill color as Effect (for FFI callback)
@@ -187,9 +219,12 @@ getPackFillEffect :: PackCircle -> Effect String
 getPackFillEffect pc = pure $ getPackFill pc
 
 -- | Get fill color based on depth
+-- | Depth 0 (module): dark gray
+-- | Depth 1 (category): category color
+-- | Depth 2+ (declaration): intense version of parent category color
 getPackFill :: PackCircle -> String
 getPackFill pc = case pc.depth of
   0 -> "#333"  -- Module (outer) - dark
   1 -> categoryColor pc.data_  -- Category
-  _ -> categoryColor "value"  -- Declaration inherits parent category color (simplified)
+  _ -> categoryColorIntense pc.category  -- Declaration uses intense parent category color
 

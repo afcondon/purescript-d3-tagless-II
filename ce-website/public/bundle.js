@@ -1166,14 +1166,14 @@
   };
   var replicateImpl = typeof Array.prototype.fill === "function" ? replicateFill : replicatePolyfill;
   var fromFoldableImpl = /* @__PURE__ */ (function() {
-    function Cons2(head5, tail2) {
-      this.head = head5;
+    function Cons2(head4, tail2) {
+      this.head = head4;
       this.tail = tail2;
     }
     var emptyList = {};
-    function curryCons(head5) {
+    function curryCons(head4) {
       return function(tail2) {
-        return new Cons2(head5, tail2);
+        return new Cons2(head4, tail2);
       };
     }
     function listToArray(list) {
@@ -4573,7 +4573,7 @@
       var root2 = EMPTY;
       function kill2(error4, par2, cb2) {
         var step4 = par2;
-        var head5 = null;
+        var head4 = null;
         var tail2 = null;
         var count = 0;
         var kills2 = {};
@@ -4593,14 +4593,14 @@
                   };
                 });
               }
-              if (head5 === null) {
+              if (head4 === null) {
                 break loop;
               }
-              step4 = head5._2;
+              step4 = head4._2;
               if (tail2 === null) {
-                head5 = null;
+                head4 = null;
               } else {
-                head5 = tail2._1;
+                head4 = tail2._1;
                 tail2 = tail2._2;
               }
               break;
@@ -4609,10 +4609,10 @@
               break;
             case APPLY:
             case ALT:
-              if (head5) {
-                tail2 = new Aff2(CONS, head5, tail2);
+              if (head4) {
+                tail2 = new Aff2(CONS, head4, tail2);
               }
-              head5 = step4;
+              head4 = step4;
               step4 = step4._1;
               break;
           }
@@ -4628,7 +4628,7 @@
         }
         return kills2;
       }
-      function join4(result, head5, tail2) {
+      function join4(result, head4, tail2) {
         var fail3, step4, lhs, rhs, tmp, kid;
         if (util.isLeft(result)) {
           fail3 = result;
@@ -4645,30 +4645,30 @@
           if (interrupt !== null) {
             return;
           }
-          if (head5 === null) {
+          if (head4 === null) {
             cb(fail3 || step4)();
             return;
           }
-          if (head5._3 !== EMPTY) {
+          if (head4._3 !== EMPTY) {
             return;
           }
-          switch (head5.tag) {
+          switch (head4.tag) {
             case MAP:
               if (fail3 === null) {
-                head5._3 = util.right(head5._1(util.fromRight(step4)));
-                step4 = head5._3;
+                head4._3 = util.right(head4._1(util.fromRight(step4)));
+                step4 = head4._3;
               } else {
-                head5._3 = fail3;
+                head4._3 = fail3;
               }
               break;
             case APPLY:
-              lhs = head5._1._3;
-              rhs = head5._2._3;
+              lhs = head4._1._3;
+              rhs = head4._2._3;
               if (fail3) {
-                head5._3 = fail3;
+                head4._3 = fail3;
                 tmp = true;
                 kid = killId++;
-                kills[kid] = kill2(early, fail3 === lhs ? head5._2 : head5._1, function() {
+                kills[kid] = kill2(early, fail3 === lhs ? head4._2 : head4._1, function() {
                   return function() {
                     delete kills[kid];
                     if (tmp) {
@@ -4688,24 +4688,24 @@
                 return;
               } else {
                 step4 = util.right(util.fromRight(lhs)(util.fromRight(rhs)));
-                head5._3 = step4;
+                head4._3 = step4;
               }
               break;
             case ALT:
-              lhs = head5._1._3;
-              rhs = head5._2._3;
+              lhs = head4._1._3;
+              rhs = head4._2._3;
               if (lhs === EMPTY && util.isLeft(rhs) || rhs === EMPTY && util.isLeft(lhs)) {
                 return;
               }
               if (lhs !== EMPTY && util.isLeft(lhs) && rhs !== EMPTY && util.isLeft(rhs)) {
                 fail3 = step4 === lhs ? rhs : lhs;
                 step4 = null;
-                head5._3 = fail3;
+                head4._3 = fail3;
               } else {
-                head5._3 = step4;
+                head4._3 = step4;
                 tmp = true;
                 kid = killId++;
-                kills[kid] = kill2(early, step4 === lhs ? head5._2 : head5._1, function() {
+                kills[kid] = kill2(early, step4 === lhs ? head4._2 : head4._1, function() {
                   return function() {
                     delete kills[kid];
                     if (tmp) {
@@ -4725,9 +4725,9 @@
               break;
           }
           if (tail2 === null) {
-            head5 = null;
+            head4 = null;
           } else {
-            head5 = tail2._1;
+            head4 = tail2._1;
             tail2 = tail2._2;
           }
         }
@@ -4744,7 +4744,7 @@
       function run3() {
         var status = CONTINUE;
         var step4 = par;
-        var head5 = null;
+        var head4 = null;
         var tail2 = null;
         var tmp, fid;
         loop: while (true) {
@@ -4754,31 +4754,31 @@
             case CONTINUE:
               switch (step4.tag) {
                 case MAP:
-                  if (head5) {
-                    tail2 = new Aff2(CONS, head5, tail2);
+                  if (head4) {
+                    tail2 = new Aff2(CONS, head4, tail2);
                   }
-                  head5 = new Aff2(MAP, step4._1, EMPTY, EMPTY);
+                  head4 = new Aff2(MAP, step4._1, EMPTY, EMPTY);
                   step4 = step4._2;
                   break;
                 case APPLY:
-                  if (head5) {
-                    tail2 = new Aff2(CONS, head5, tail2);
+                  if (head4) {
+                    tail2 = new Aff2(CONS, head4, tail2);
                   }
-                  head5 = new Aff2(APPLY, EMPTY, step4._2, EMPTY);
+                  head4 = new Aff2(APPLY, EMPTY, step4._2, EMPTY);
                   step4 = step4._1;
                   break;
                 case ALT:
-                  if (head5) {
-                    tail2 = new Aff2(CONS, head5, tail2);
+                  if (head4) {
+                    tail2 = new Aff2(CONS, head4, tail2);
                   }
-                  head5 = new Aff2(ALT, EMPTY, step4._2, EMPTY);
+                  head4 = new Aff2(ALT, EMPTY, step4._2, EMPTY);
                   step4 = step4._1;
                   break;
                 default:
                   fid = fiberId++;
                   status = RETURN;
                   tmp = step4;
-                  step4 = new Aff2(FORKED, fid, new Aff2(CONS, head5, tail2), EMPTY);
+                  step4 = new Aff2(FORKED, fid, new Aff2(CONS, head4, tail2), EMPTY);
                   tmp = Fiber(util, supervisor, tmp);
                   tmp.onComplete({
                     rethrow: false,
@@ -4791,21 +4791,21 @@
               }
               break;
             case RETURN:
-              if (head5 === null) {
+              if (head4 === null) {
                 break loop;
               }
-              if (head5._1 === EMPTY) {
-                head5._1 = step4;
+              if (head4._1 === EMPTY) {
+                head4._1 = step4;
                 status = CONTINUE;
-                step4 = head5._2;
-                head5._2 = EMPTY;
+                step4 = head4._2;
+                head4._2 = EMPTY;
               } else {
-                head5._2 = step4;
-                step4 = head5;
+                head4._2 = step4;
+                step4 = head4;
                 if (tail2 === null) {
-                  head5 = null;
+                  head4 = null;
                 } else {
-                  head5 = tail2._1;
+                  head4 = tail2._1;
                   tail2 = tail2._2;
                 }
               }
@@ -5662,6 +5662,509 @@
   // output/Affjax.Web/index.js
   var get2 = /* @__PURE__ */ get(driver);
 
+  // output/Data.Tree/index.js
+  var foldr4 = /* @__PURE__ */ foldr(foldableList);
+  var foldl5 = /* @__PURE__ */ foldl(foldableList);
+  var foldMap3 = /* @__PURE__ */ foldMap(foldableList);
+  var Node = /* @__PURE__ */ (function() {
+    function Node4(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    Node4.create = function(value0) {
+      return function(value1) {
+        return new Node4(value0, value1);
+      };
+    };
+    return Node4;
+  })();
+  var foldableTree = {
+    foldr: function(f) {
+      return function(b10) {
+        return function(v) {
+          return f(v.value0)(foldr4(flip(foldr(foldableTree)(f)))(b10)(v.value1));
+        };
+      };
+    },
+    foldl: function(f) {
+      return function(b10) {
+        return function(v) {
+          return f(foldl5(foldl(foldableTree)(f))(b10)(v.value1))(v.value0);
+        };
+      };
+    },
+    foldMap: function(dictMonoid) {
+      var append17 = append(dictMonoid.Semigroup0());
+      var foldMap12 = foldMap3(dictMonoid);
+      return function(f) {
+        return function(v) {
+          return append17(f(v.value0))(foldMap12(foldMap(foldableTree)(dictMonoid)(f))(v.value1));
+        };
+      };
+    }
+  };
+
+  // output/D3.Layout.Hierarchy.Tree4/index.js
+  var map10 = /* @__PURE__ */ map(functorList);
+  var fromFoldable4 = /* @__PURE__ */ fromFoldable(foldableList);
+  var add2 = /* @__PURE__ */ add(semiringNumber);
+  var fromFoldable22 = /* @__PURE__ */ fromFoldable(foldableTree);
+  var map14 = /* @__PURE__ */ map(functorArray);
+  var maximum2 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
+  var minimum2 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
+  var scanl2 = /* @__PURE__ */ scanl(traversableList);
+  var Contours = /* @__PURE__ */ (function() {
+    function Contours2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Contours2.create = function(value0) {
+      return new Contours2(value0);
+    };
+    return Contours2;
+  })();
+  var singletonContours = /* @__PURE__ */ (function() {
+    return new Contours({
+      left: new Cons(0, Nil.value),
+      right: new Cons(0, Nil.value)
+    });
+  })();
+  var scanContoursWithBase = function(baseSep) {
+    return function(v) {
+      return function(v1) {
+        var go2 = function($copy_v2) {
+          return function($copy_v3) {
+            return function($copy_v4) {
+              return function($copy_v5) {
+                return function($copy_v6) {
+                  var $tco_var_v2 = $copy_v2;
+                  var $tco_var_v3 = $copy_v3;
+                  var $tco_var_v4 = $copy_v4;
+                  var $tco_var_v5 = $copy_v5;
+                  var $tco_done = false;
+                  var $tco_result;
+                  function $tco_loop(v2, v3, v4, v5, v6) {
+                    if (v5 instanceof Nil && v6 instanceof Nil) {
+                      $tco_done = true;
+                      return v2;
+                    }
+                    ;
+                    if (v5 instanceof Nil && v6 instanceof Cons) {
+                      var actualSep = v2 + v6.value0 - v3;
+                      var neededSep = (function() {
+                        var $87 = actualSep < baseSep;
+                        if ($87) {
+                          return v2 + (baseSep - actualSep);
+                        }
+                        ;
+                        return v2;
+                      })();
+                      $tco_var_v2 = neededSep;
+                      $tco_var_v3 = v3;
+                      $tco_var_v4 = v6.value0;
+                      $tco_var_v5 = Nil.value;
+                      $copy_v6 = v6.value1;
+                      return;
+                    }
+                    ;
+                    if (v5 instanceof Cons && v6 instanceof Nil) {
+                      var actualSep = v2 + v4 - v5.value0;
+                      var neededSep = (function() {
+                        var $90 = actualSep < baseSep;
+                        if ($90) {
+                          return v2 + (baseSep - actualSep);
+                        }
+                        ;
+                        return v2;
+                      })();
+                      $tco_var_v2 = neededSep;
+                      $tco_var_v3 = v5.value0;
+                      $tco_var_v4 = v4;
+                      $tco_var_v5 = v5.value1;
+                      $copy_v6 = Nil.value;
+                      return;
+                    }
+                    ;
+                    if (v5 instanceof Cons && v6 instanceof Cons) {
+                      var actualSep = v2 + v6.value0 - v5.value0;
+                      var neededSep = (function() {
+                        var $93 = actualSep < baseSep;
+                        if ($93) {
+                          return v2 + (baseSep - actualSep);
+                        }
+                        ;
+                        return v2;
+                      })();
+                      $tco_var_v2 = neededSep;
+                      $tco_var_v3 = v5.value0;
+                      $tco_var_v4 = v6.value0;
+                      $tco_var_v5 = v5.value1;
+                      $copy_v6 = v6.value1;
+                      return;
+                    }
+                    ;
+                    throw new Error("Failed pattern match at D3.Layout.Hierarchy.Tree4 (line 290, column 3 - line 290, column 67): " + [v2.constructor.name, v3.constructor.name, v4.constructor.name, v5.constructor.name, v6.constructor.name]);
+                  }
+                  ;
+                  while (!$tco_done) {
+                    $tco_result = $tco_loop($tco_var_v2, $tco_var_v3, $tco_var_v4, $tco_var_v5, $copy_v6);
+                  }
+                  ;
+                  return $tco_result;
+                };
+              };
+            };
+          };
+        };
+        return go2(baseSep)(0)(0)(v.value0.right)(v1.value0.left);
+      };
+    };
+  };
+  var scaleToPixels = function(config) {
+    return function(inputTree) {
+      var layerScaleFn = fromMaybe(toNumber)(config.layerScale);
+      var allNodes = fromFoldable22(inputTree);
+      var allX = map14(function(n) {
+        return n.x;
+      })(allNodes);
+      var maxX = fromMaybe(1)(maximum2(allX));
+      var minX = fromMaybe(0)(minimum2(allX));
+      var xRange = (function() {
+        var $121 = maxX - minX === 0;
+        if ($121) {
+          return 1;
+        }
+        ;
+        return maxX - minX;
+      })();
+      var scaleX = function(x3) {
+        return (x3 - minX) / xRange * config.size.width;
+      };
+      var scaledDepths = map14(function(n) {
+        return layerScaleFn(n.depth);
+      })(allNodes);
+      var maxScaledDepth = fromMaybe(1)(maximum2(scaledDepths));
+      var scaleY = function(depth) {
+        var scaledDepth = layerScaleFn(depth);
+        return scaledDepth / maxScaledDepth * config.size.height;
+      };
+      var go2 = function(v) {
+        return new Node((function() {
+          var $123 = {};
+          for (var $124 in v.value0) {
+            if ({}.hasOwnProperty.call(v.value0, $124)) {
+              $123[$124] = v["value0"][$124];
+            }
+            ;
+          }
+          ;
+          $123.x = scaleX(v.value0.x);
+          $123.y = scaleY(v.value0.depth);
+          return $123;
+        })(), map10(go2)(v.value1));
+      };
+      return go2(inputTree);
+    };
+  };
+  var petrify = function(parentX) {
+    return function(v) {
+      var nodeY = toNumber(v.value0.value1.depth);
+      var nodeX = parentX + v.value0.value0.offset;
+      var childrenWithCoords = map10(petrify(nodeX))(v.value1);
+      return new Node((function() {
+        var $130 = {};
+        for (var $131 in v.value0.value1) {
+          if ({}.hasOwnProperty.call(v.value0.value1, $131)) {
+            $130[$131] = v["value0"]["value1"][$131];
+          }
+          ;
+        }
+        ;
+        $130.x = nodeX;
+        $130.y = nodeY;
+        return $130;
+      })(), childrenWithCoords);
+    };
+  };
+  var mergeContoursRight = function(contours) {
+    var mergeLevel = function(cs) {
+      var currentLevels = mapMaybe(function(c) {
+        if (c instanceof Cons) {
+          return new Just(c.value0);
+        }
+        ;
+        if (c instanceof Nil) {
+          return Nothing.value;
+        }
+        ;
+        throw new Error("Failed pattern match at D3.Layout.Hierarchy.Tree4 (line 448, column 17 - line 450, column 27): " + [c.constructor.name]);
+      })(cs);
+      var v = head(currentLevels);
+      if (v instanceof Nothing) {
+        return Nil.value;
+      }
+      ;
+      if (v instanceof Just) {
+        var restContours = mapMaybe(function(c) {
+          if (c instanceof Cons) {
+            return new Just(c.value1);
+          }
+          ;
+          if (c instanceof Nil) {
+            return Nothing.value;
+          }
+          ;
+          throw new Error("Failed pattern match at D3.Layout.Hierarchy.Tree4 (line 461, column 23 - line 463, column 33): " + [c.constructor.name]);
+        })(cs);
+        var maxVal = fromMaybe(0)(maximum2(currentLevels));
+        return new Cons(maxVal, mergeLevel(restContours));
+      }
+      ;
+      throw new Error("Failed pattern match at D3.Layout.Hierarchy.Tree4 (line 454, column 7 - line 467, column 50): " + [v.constructor.name]);
+    };
+    if (contours.length === 0) {
+      return Nil.value;
+    }
+    ;
+    return mergeLevel(contours);
+  };
+  var mergeContoursLeft = function(contours) {
+    var mergeLevel = function(cs) {
+      var currentLevels = mapMaybe(function(c) {
+        if (c instanceof Cons) {
+          return new Just(c.value0);
+        }
+        ;
+        if (c instanceof Nil) {
+          return Nothing.value;
+        }
+        ;
+        throw new Error("Failed pattern match at D3.Layout.Hierarchy.Tree4 (line 415, column 17 - line 417, column 27): " + [c.constructor.name]);
+      })(cs);
+      var v = head(currentLevels);
+      if (v instanceof Nothing) {
+        return Nil.value;
+      }
+      ;
+      if (v instanceof Just) {
+        var restContours = mapMaybe(function(c) {
+          if (c instanceof Cons) {
+            return new Just(c.value1);
+          }
+          ;
+          if (c instanceof Nil) {
+            return Nothing.value;
+          }
+          ;
+          throw new Error("Failed pattern match at D3.Layout.Hierarchy.Tree4 (line 428, column 23 - line 430, column 33): " + [c.constructor.name]);
+        })(cs);
+        var minVal = fromMaybe(0)(minimum2(currentLevels));
+        return new Cons(minVal, mergeLevel(restContours));
+      }
+      ;
+      throw new Error("Failed pattern match at D3.Layout.Hierarchy.Tree4 (line 421, column 7 - line 434, column 50): " + [v.constructor.name]);
+    };
+    if (contours.length === 0) {
+      return Nil.value;
+    }
+    ;
+    return mergeLevel(contours);
+  };
+  var spliceContours = function(offsets) {
+    return function(contours) {
+      var v = fromFoldable4(zipWith2(Tuple.create)(offsets)(contours));
+      if (v.length === 0) {
+        return singletonContours;
+      }
+      ;
+      if (v.length === 1) {
+        return new Contours({
+          left: new Cons(0, map10(function(x3) {
+            return x3 + v[0].value0;
+          })(v[0].value1.value0.left)),
+          right: new Cons(0, map10(function(x3) {
+            return x3 + v[0].value0;
+          })(v[0].value1.value0.right))
+        });
+      }
+      ;
+      var shiftedContours = map14(function(v1) {
+        return new Contours({
+          left: map10(function(x3) {
+            return x3 + v1.value0;
+          })(v1.value1.value0.left),
+          right: map10(function(x3) {
+            return x3 + v1.value0;
+          })(v1.value1.value0.right)
+        });
+      })(v);
+      var mergedRight = mergeContoursRight(map14(function(v1) {
+        return v1.value0.right;
+      })(shiftedContours));
+      var mergedLeft = mergeContoursLeft(map14(function(v1) {
+        return v1.value0.left;
+      })(shiftedContours));
+      return new Contours({
+        left: new Cons(0, mergedLeft),
+        right: new Cons(0, mergedRight)
+      });
+    };
+  };
+  var getRootData = function(v) {
+    return v.value0.value1;
+  };
+  var computeSeparationsWithBase = function(baseSeps) {
+    return function(contours) {
+      var tailSafe = function(v2) {
+        if (v2 instanceof Nil) {
+          return Nil.value;
+        }
+        ;
+        if (v2 instanceof Cons) {
+          return v2.value1;
+        }
+        ;
+        throw new Error("Failed pattern match at D3.Layout.Hierarchy.Tree4 (line 278, column 3 - line 278, column 41): " + [v2.constructor.name]);
+      };
+      var applyBase = function(base3) {
+        return function(v2) {
+          return scanContoursWithBase(base3)(v2.value0)(v2.value1);
+        };
+      };
+      var v = new Tuple(baseSeps, contours);
+      if (v.value0 instanceof Nil) {
+        return Nil.value;
+      }
+      ;
+      if (v.value1 instanceof Nil) {
+        return Nil.value;
+      }
+      ;
+      if (v.value1 instanceof Cons && v.value1.value1 instanceof Nil) {
+        return Nil.value;
+      }
+      ;
+      var contourPairs = zipWith2(Tuple.create)(contours)(tailSafe(contours));
+      return zipWith2(applyBase)(baseSeps)(contourPairs);
+    };
+  };
+  var computeBaseSeparations = function(minSep) {
+    return function(separationFn) {
+      return function(nodes) {
+        var tailSafe = function(v) {
+          if (v instanceof Nil) {
+            return Nil.value;
+          }
+          ;
+          if (v instanceof Cons) {
+            return v.value1;
+          }
+          ;
+          throw new Error("Failed pattern match at D3.Layout.Hierarchy.Tree4 (line 256, column 3 - line 256, column 41): " + [v.constructor.name]);
+        };
+        var getSep = function(v) {
+          return function(v1) {
+            return function(v2) {
+              return function(v3) {
+                if (v instanceof Nothing) {
+                  return v1;
+                }
+                ;
+                if (v instanceof Just) {
+                  return v.value0(v2)(v3) + v1;
+                }
+                ;
+                throw new Error("Failed pattern match at D3.Layout.Hierarchy.Tree4 (line 252, column 3 - line 252, column 67): " + [v.constructor.name, v1.constructor.name, v2.constructor.name, v3.constructor.name]);
+              };
+            };
+          };
+        };
+        if (nodes instanceof Nil) {
+          return Nil.value;
+        }
+        ;
+        if (nodes instanceof Cons && nodes.value1 instanceof Nil) {
+          return Nil.value;
+        }
+        ;
+        return zipWith2(getSep(separationFn)(minSep))(nodes)(tailSafe(nodes));
+      };
+    };
+  };
+  var render = function(minSep) {
+    return function(separationFn) {
+      return function(inputTree) {
+        var updateOffset = function(v2) {
+          return function(newOffset) {
+            return new Node(new Tuple({
+              offset: newOffset
+            }, v2.value0.value1), v2.value1);
+          };
+        };
+        var renderWithContours = function(v2) {
+          var childCount = length2(v2.value1);
+          if (childCount === 0) {
+            return new Tuple(new Node(new Tuple({
+              offset: 0
+            }, v2.value0), Nil.value), singletonContours);
+          }
+          ;
+          var childResults = map10(renderWithContours)(v2.value1);
+          var childTrees = map10(function(v1) {
+            return v1.value0;
+          })(childResults);
+          var childRootData = map10(getRootData)(childTrees);
+          var childContours = map10(function(v1) {
+            return v1.value1;
+          })(childResults);
+          var baseSeparations = computeBaseSeparations(minSep)(separationFn)(childRootData);
+          var separations = computeSeparationsWithBase(baseSeparations)(childContours);
+          var childAbsoluteOffsets = new Cons(0, scanl2(add2)(0)(separations));
+          var leftmostOffset = fromMaybe(0)(head(fromFoldable4(childAbsoluteOffsets)));
+          var rightmostOffset = fromMaybe(0)(last(fromFoldable4(childAbsoluteOffsets)));
+          var parentOffset = (leftmostOffset + rightmostOffset) / 2;
+          var childRelativeOffsets = map10(function(absOffset) {
+            return absOffset - parentOffset;
+          })(childAbsoluteOffsets);
+          var childrenWithOffsets = zipWith2(updateOffset)(childTrees)(childRelativeOffsets);
+          var parentContours = spliceContours(childRelativeOffsets)(childContours);
+          var resultTree = new Node(new Tuple({
+            offset: parentOffset
+          }, v2.value0), childrenWithOffsets);
+          return new Tuple(resultTree, parentContours);
+        };
+        var v = renderWithContours(inputTree);
+        return v.value0;
+      };
+    };
+  };
+  var addDepth = function(currentDepth) {
+    return function(v) {
+      return new Node((function() {
+        var $231 = {};
+        for (var $232 in v.value0) {
+          if ({}.hasOwnProperty.call(v.value0, $232)) {
+            $231[$232] = v["value0"][$232];
+          }
+          ;
+        }
+        ;
+        $231.depth = currentDepth;
+        return $231;
+      })(), map10(addDepth(currentDepth + 1 | 0))(v.value1));
+    };
+  };
+  var tree = function(config) {
+    return function(inputTree) {
+      var withDepth = addDepth(0)(inputTree);
+      var rendered = render(config.minSeparation)(config.separation)(withDepth);
+      var withCoords = petrify(0)(rendered);
+      var scaled = scaleToPixels(config)(withCoords);
+      return scaled;
+    };
+  };
+
   // output/Data.Argonaut.Decode.Error/index.js
   var show12 = /* @__PURE__ */ show(showInt);
   var TypeMismatch2 = /* @__PURE__ */ (function() {
@@ -5781,7 +6284,7 @@
     Leaf2.value = new Leaf2();
     return Leaf2;
   })();
-  var Node = /* @__PURE__ */ (function() {
+  var Node2 = /* @__PURE__ */ (function() {
     function Node4(value0, value1, value22, value32, value42, value52) {
       this.value0 = value0;
       this.value1 = value1;
@@ -5877,23 +6380,23 @@
   var unsafeNode = function(k, v, l, r) {
     if (l instanceof Leaf) {
       if (r instanceof Leaf) {
-        return new Node(1, 1, k, v, l, r);
+        return new Node2(1, 1, k, v, l, r);
       }
       ;
-      if (r instanceof Node) {
-        return new Node(1 + r.value0 | 0, 1 + r.value1 | 0, k, v, l, r);
+      if (r instanceof Node2) {
+        return new Node2(1 + r.value0 | 0, 1 + r.value1 | 0, k, v, l, r);
       }
       ;
       throw new Error("Failed pattern match at Data.Map.Internal (line 702, column 5 - line 706, column 39): " + [r.constructor.name]);
     }
     ;
-    if (l instanceof Node) {
+    if (l instanceof Node2) {
       if (r instanceof Leaf) {
-        return new Node(1 + l.value0 | 0, 1 + l.value1 | 0, k, v, l, r);
+        return new Node2(1 + l.value0 | 0, 1 + l.value1 | 0, k, v, l, r);
       }
       ;
-      if (r instanceof Node) {
-        return new Node(1 + (function() {
+      if (r instanceof Node2) {
+        return new Node2(1 + (function() {
           var $280 = l.value0 > r.value0;
           if ($280) {
             return l.value0;
@@ -5951,7 +6454,7 @@
       return 0;
     }
     ;
-    if (v instanceof Node) {
+    if (v instanceof Node2) {
       return v.value1;
     }
     ;
@@ -5959,7 +6462,7 @@
   };
   var singleton7 = function(k) {
     return function(v) {
-      return new Node(1, 1, k, v, Leaf.value, Leaf.value);
+      return new Node2(1, 1, k, v, Leaf.value, Leaf.value);
     };
   };
   var unsafeBalancedNode = /* @__PURE__ */ (function() {
@@ -5968,21 +6471,21 @@
         return 0;
       }
       ;
-      if (v instanceof Node) {
+      if (v instanceof Node2) {
         return v.value0;
       }
       ;
       throw new Error("Failed pattern match at Data.Map.Internal (line 757, column 12 - line 759, column 26): " + [v.constructor.name]);
     };
     var rotateLeft = function(k, v, l, rk, rv, rl, rr) {
-      if (rl instanceof Node && rl.value0 > height8(rr)) {
+      if (rl instanceof Node2 && rl.value0 > height8(rr)) {
         return unsafeNode(rl.value2, rl.value3, unsafeNode(k, v, l, rl.value4), unsafeNode(rk, rv, rl.value5, rr));
       }
       ;
       return unsafeNode(rk, rv, unsafeNode(k, v, l, rl), rr);
     };
     var rotateRight = function(k, v, lk, lv, ll, lr, r) {
-      if (lr instanceof Node && height8(ll) <= lr.value0) {
+      if (lr instanceof Node2 && height8(ll) <= lr.value0) {
         return unsafeNode(lr.value2, lr.value3, unsafeNode(lk, lv, ll, lr.value4), unsafeNode(k, v, lr.value5, r));
       }
       ;
@@ -5994,15 +6497,15 @@
           return singleton7(k)(v);
         }
         ;
-        if (r instanceof Node && r.value0 > 1) {
+        if (r instanceof Node2 && r.value0 > 1) {
           return rotateLeft(k, v, l, r.value2, r.value3, r.value4, r.value5);
         }
         ;
         return unsafeNode(k, v, l, r);
       }
       ;
-      if (l instanceof Node) {
-        if (r instanceof Node) {
+      if (l instanceof Node2) {
+        if (r instanceof Node2) {
           if (r.value0 > (l.value0 + 1 | 0)) {
             return rotateLeft(k, v, l, r.value2, r.value3, r.value4, r.value5);
           }
@@ -6029,7 +6532,7 @@
         return new Split(Nothing.value, Leaf.value, Leaf.value);
       }
       ;
-      if (m instanceof Node) {
+      if (m instanceof Node2) {
         var v = comp(k)(m.value2);
         if (v instanceof LT) {
           var v1 = $lazy_unsafeSplit(793)(comp, k, m.value4);
@@ -6058,7 +6561,7 @@
         return new SplitLast(k, v, l);
       }
       ;
-      if (r instanceof Node) {
+      if (r instanceof Node2) {
         var v1 = $lazy_unsafeSplitLast(779)(r.value2, r.value3, r.value4, r.value5);
         return new SplitLast(v1.value0, v1.value1, unsafeBalancedNode(k, v, l, v1.value2));
       }
@@ -6072,7 +6575,7 @@
       return v1;
     }
     ;
-    if (v instanceof Node) {
+    if (v instanceof Node2) {
       var v2 = unsafeSplitLast(v.value2, v.value3, v.value4, v.value5);
       return unsafeBalancedNode(v2.value0, v2.value1, v2.value2, v1);
     }
@@ -6089,7 +6592,7 @@
         return l;
       }
       ;
-      if (r instanceof Node) {
+      if (r instanceof Node2) {
         var v = unsafeSplit(comp, r.value2, l);
         var l$prime = $lazy_unsafeUnionWith(809)(comp, app, v.value1, r.value4);
         var r$prime = $lazy_unsafeUnionWith(810)(comp, app, v.value2, r.value5);
@@ -6133,7 +6636,7 @@
             return false;
           }
           ;
-          if (v instanceof Node) {
+          if (v instanceof Node2) {
             var v1 = compare3(k)(v.value2);
             if (v1 instanceof LT) {
               $copy_v = v.value4;
@@ -6177,7 +6680,7 @@
             return Nothing.value;
           }
           ;
-          if (v instanceof Node) {
+          if (v instanceof Node2) {
             var v1 = compare3(k)(v.value2);
             if (v1 instanceof LT) {
               $copy_v = v.value4;
@@ -6221,7 +6724,7 @@
             return iter;
           }
           ;
-          if (v instanceof Node) {
+          if (v instanceof Node2) {
             if (v.value5 instanceof Leaf) {
               $tco_var_iter = new IterEmit(v.value2, v.value3, iter);
               $copy_v = v.value4;
@@ -6269,7 +6772,7 @@
             return singleton7(k)(v);
           }
           ;
-          if (v1 instanceof Node) {
+          if (v1 instanceof Node2) {
             var v2 = compare3(k)(v1.value2);
             if (v2 instanceof LT) {
               return unsafeBalancedNode(v1.value2, v1.value3, go2(v1.value4), v1.value5);
@@ -6280,7 +6783,7 @@
             }
             ;
             if (v2 instanceof EQ) {
-              return new Node(v1.value0, v1.value1, k, v, v1.value4, v1.value5);
+              return new Node2(v1.value0, v1.value1, k, v, v1.value4, v1.value5);
             }
             ;
             throw new Error("Failed pattern match at Data.Map.Internal (line 471, column 7 - line 474, column 35): " + [v2.constructor.name]);
@@ -6299,8 +6802,8 @@
           return Leaf.value;
         }
         ;
-        if (v instanceof Node) {
-          return new Node(v.value0, v.value1, v.value2, f(v.value3), go2(v.value4), go2(v.value5));
+        if (v instanceof Node2) {
+          return new Node2(v.value0, v.value1, v.value2, f(v.value3), go2(v.value4), go2(v.value5));
         }
         ;
         throw new Error("Failed pattern match at Data.Map.Internal (line 147, column 10 - line 150, column 39): " + [v.constructor.name]);
@@ -6317,7 +6820,7 @@
               return z$prime;
             }
             ;
-            if (m$prime instanceof Node) {
+            if (m$prime instanceof Node2) {
               return $lazy_go(172)(m$prime.value4, f(m$prime.value3)($lazy_go(172)(m$prime.value5, z$prime)));
             }
             ;
@@ -6338,7 +6841,7 @@
               return z$prime;
             }
             ;
-            if (m$prime instanceof Node) {
+            if (m$prime instanceof Node2) {
               return $lazy_go(178)(f($lazy_go(178)(z$prime, m$prime.value4))(m$prime.value3), m$prime.value5);
             }
             ;
@@ -6360,7 +6863,7 @@
             return mempty2;
           }
           ;
-          if (v instanceof Node) {
+          if (v instanceof Node2) {
             return append17(go2(v.value4))(append17(f(v.value3))(go2(v.value5)));
           }
           ;
@@ -6379,7 +6882,7 @@
               return z$prime;
             }
             ;
-            if (m$prime instanceof Node) {
+            if (m$prime instanceof Node2) {
               return $lazy_go(192)(m$prime.value4, f(m$prime.value2)(m$prime.value3)($lazy_go(192)(m$prime.value5, z$prime)));
             }
             ;
@@ -6400,7 +6903,7 @@
               return z$prime;
             }
             ;
-            if (m$prime instanceof Node) {
+            if (m$prime instanceof Node2) {
               return $lazy_go(198)(f(m$prime.value2)($lazy_go(198)(z$prime, m$prime.value4))(m$prime.value3), m$prime.value5);
             }
             ;
@@ -6422,7 +6925,7 @@
             return mempty2;
           }
           ;
-          if (v instanceof Node) {
+          if (v instanceof Node2) {
             return append17(go2(v.value4))(append17(f(v.value2)(v.value3))(go2(v.value5)));
           }
           ;
@@ -6450,7 +6953,7 @@
   var empty3 = /* @__PURE__ */ (function() {
     return Leaf.value;
   })();
-  var fromFoldable4 = function(dictOrd) {
+  var fromFoldable5 = function(dictOrd) {
     var insert13 = insert3(dictOrd);
     return function(dictFoldable) {
       return foldl(dictFoldable)(function(m) {
@@ -6468,7 +6971,7 @@
           return Leaf.value;
         }
         ;
-        if (v instanceof Node) {
+        if (v instanceof Node2) {
           var v1 = compare3(k)(v.value2);
           if (v1 instanceof LT) {
             return unsafeBalancedNode(v.value2, v.value3, go2(v.value4), v.value5);
@@ -6513,9 +7016,9 @@
 
   // output/Data.Set/index.js
   var coerce3 = /* @__PURE__ */ coerce();
-  var foldMap3 = /* @__PURE__ */ foldMap(foldableList);
-  var foldl5 = /* @__PURE__ */ foldl(foldableList);
-  var foldr4 = /* @__PURE__ */ foldr(foldableList);
+  var foldMap4 = /* @__PURE__ */ foldMap(foldableList);
+  var foldl6 = /* @__PURE__ */ foldl(foldableList);
+  var foldr5 = /* @__PURE__ */ foldr(foldableList);
   var union3 = function(dictOrd) {
     return coerce3(union2(dictOrd));
   };
@@ -6540,7 +7043,7 @@
   };
   var foldableSet = {
     foldMap: function(dictMonoid) {
-      var foldMap12 = foldMap3(dictMonoid);
+      var foldMap12 = foldMap4(dictMonoid);
       return function(f) {
         var $98 = foldMap12(f);
         return function($99) {
@@ -6550,7 +7053,7 @@
     },
     foldl: function(f) {
       return function(x3) {
-        var $100 = foldl5(f)(x3);
+        var $100 = foldl6(f)(x3);
         return function($101) {
           return $100(toList2($101));
         };
@@ -6558,7 +7061,7 @@
     },
     foldr: function(f) {
       return function(x3) {
-        var $102 = foldr4(f)(x3);
+        var $102 = foldr5(f)(x3);
         return function($103) {
           return $102(toList2($103));
         };
@@ -6566,7 +7069,7 @@
     }
   };
   var empty4 = empty3;
-  var fromFoldable5 = function(dictFoldable) {
+  var fromFoldable6 = function(dictFoldable) {
     var foldl22 = foldl(dictFoldable);
     return function(dictOrd) {
       var insert13 = insert4(dictOrd);
@@ -6656,7 +7159,7 @@
   // output/Data.Argonaut.Decode.Class/index.js
   var bind2 = /* @__PURE__ */ bind(bindEither);
   var lmap3 = /* @__PURE__ */ lmap(bifunctorEither);
-  var map10 = /* @__PURE__ */ map(functorMaybe);
+  var map11 = /* @__PURE__ */ map(functorMaybe);
   var gDecodeJsonNil = {
     gDecodeJson: function(v) {
       return function(v1) {
@@ -6743,7 +7246,7 @@
     var decodeJson12 = decodeJson(dictDecodeJson);
     return {
       decodeJsonField: function(j) {
-        return map10(decodeJson12)(j);
+        return map11(decodeJson12)(j);
       }
     };
   };
@@ -6751,49 +7254,6 @@
     return {
       decodeJson: decodeArray(decodeJson(dictDecodeJson))
     };
-  };
-
-  // output/Data.Tree/index.js
-  var foldr5 = /* @__PURE__ */ foldr(foldableList);
-  var foldl6 = /* @__PURE__ */ foldl(foldableList);
-  var foldMap4 = /* @__PURE__ */ foldMap(foldableList);
-  var Node2 = /* @__PURE__ */ (function() {
-    function Node4(value0, value1) {
-      this.value0 = value0;
-      this.value1 = value1;
-    }
-    ;
-    Node4.create = function(value0) {
-      return function(value1) {
-        return new Node4(value0, value1);
-      };
-    };
-    return Node4;
-  })();
-  var foldableTree = {
-    foldr: function(f) {
-      return function(b10) {
-        return function(v) {
-          return f(v.value0)(foldr5(flip(foldr(foldableTree)(f)))(b10)(v.value1));
-        };
-      };
-    },
-    foldl: function(f) {
-      return function(b10) {
-        return function(v) {
-          return f(foldl6(foldl(foldableTree)(f))(b10)(v.value1))(v.value0);
-        };
-      };
-    },
-    foldMap: function(dictMonoid) {
-      var append17 = append(dictMonoid.Semigroup0());
-      var foldMap12 = foldMap4(dictMonoid);
-      return function(f) {
-        return function(v) {
-          return append17(f(v.value0))(foldMap12(foldMap(foldableTree)(dictMonoid)(f))(v.value1));
-        };
-      };
-    }
   };
 
   // output/Data.CatQueue/index.js
@@ -6994,11 +7454,11 @@
   };
 
   // output/PSD3.Data.Graph/index.js
-  var map11 = /* @__PURE__ */ map(functorArray);
+  var map15 = /* @__PURE__ */ map(functorArray);
   var lookup3 = /* @__PURE__ */ lookup2(ordInt);
-  var fromFoldable1 = /* @__PURE__ */ fromFoldable4(ordInt)(foldableArray);
+  var fromFoldable1 = /* @__PURE__ */ fromFoldable5(ordInt)(foldableArray);
   var append4 = /* @__PURE__ */ append(semigroupArray);
-  var fromFoldable22 = /* @__PURE__ */ fromFoldable5(foldableArray)(ordInt);
+  var fromFoldable23 = /* @__PURE__ */ fromFoldable6(foldableArray)(ordInt);
   var alter2 = /* @__PURE__ */ alter(ordInt);
   var getLinksFrom = function(nodeId) {
     return function(model) {
@@ -7030,8 +7490,8 @@
             throw new Error("Failed pattern match at PSD3.Data.Graph (line 112, column 5 - line 112, column 68): " + [v.constructor.name, v1.constructor.name]);
           };
         };
-        var nodeIds = fromFoldable22(map11(config.getNodeId)(nodes));
-        var nodeById = fromFoldable1(map11(function(n) {
+        var nodeIds = fromFoldable23(map15(config.getNodeId)(nodes));
+        var nodeById = fromFoldable1(map15(function(n) {
           return new Tuple(config.getNodeId(n), n);
         })(nodes));
         var linksByTarget = foldl2(function(acc) {
@@ -7063,12 +7523,12 @@
 
   // output/PSD3.Data.Graph.Algorithms/index.js
   var bind3 = /* @__PURE__ */ bind(bindMaybe);
-  var map14 = /* @__PURE__ */ map(functorArray);
+  var map16 = /* @__PURE__ */ map(functorArray);
   var member3 = /* @__PURE__ */ member2(ordInt);
   var mapFlipped3 = /* @__PURE__ */ mapFlipped(functorArray);
   var append5 = /* @__PURE__ */ append(semigroupArray);
   var append12 = /* @__PURE__ */ append(/* @__PURE__ */ semigroupSet(ordInt));
-  var fromFoldable7 = /* @__PURE__ */ fromFoldable5(foldableArray)(ordInt);
+  var fromFoldable8 = /* @__PURE__ */ fromFoldable6(foldableArray)(ordInt);
   var getReachableNodes = function(config) {
     return function(rootId) {
       return function(graph) {
@@ -7076,7 +7536,7 @@
           return bind3(uncons(state3.openPaths))(function(x3) {
             return bind3(head(x3.head))(function(currentId) {
               var links = getLinksFrom(currentId)(graph);
-              var targetIds = map14(config.getLinkTarget)(links);
+              var targetIds = map16(config.getLinkTarget)(links);
               var newTargets = partition(function(targetId) {
                 return !member3(targetId)(state3.nodes);
               })(targetIds);
@@ -7100,8 +7560,8 @@
               return new Just({
                 paths: state3.paths,
                 openPaths: append5(x3.tail)(newPaths),
-                nodes: append12(state3.nodes)(fromFoldable7(newTargets.yes)),
-                spanningTree: append5(state3.spanningTree)(map14(function(targetId) {
+                nodes: append12(state3.nodes)(fromFoldable8(newTargets.yes)),
+                spanningTree: append5(state3.spanningTree)(map16(function(targetId) {
                   return new Tuple(currentId, targetId);
                 })(newTargets.yes)),
                 redundantEdges: append5(state3.redundantEdges)(prunedEdges)
@@ -7157,466 +7617,6 @@
           paths: finalState.paths
         };
       };
-    };
-  };
-
-  // output/PSD3.Layout.Hierarchy.Tree4/index.js
-  var map15 = /* @__PURE__ */ map(functorList);
-  var fromFoldable8 = /* @__PURE__ */ fromFoldable(foldableList);
-  var add2 = /* @__PURE__ */ add(semiringNumber);
-  var fromFoldable23 = /* @__PURE__ */ fromFoldable(foldableTree);
-  var map16 = /* @__PURE__ */ map(functorArray);
-  var maximum2 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
-  var minimum2 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
-  var scanl3 = /* @__PURE__ */ scanl(traversableList);
-  var Contours = /* @__PURE__ */ (function() {
-    function Contours2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Contours2.create = function(value0) {
-      return new Contours2(value0);
-    };
-    return Contours2;
-  })();
-  var singletonContours = /* @__PURE__ */ (function() {
-    return new Contours({
-      left: new Cons(0, Nil.value),
-      right: new Cons(0, Nil.value)
-    });
-  })();
-  var scanContoursWithBase = function(baseSep) {
-    return function(v) {
-      return function(v1) {
-        var go2 = function($copy_v2) {
-          return function($copy_v3) {
-            return function($copy_v4) {
-              return function($copy_v5) {
-                return function($copy_v6) {
-                  var $tco_var_v2 = $copy_v2;
-                  var $tco_var_v3 = $copy_v3;
-                  var $tco_var_v4 = $copy_v4;
-                  var $tco_var_v5 = $copy_v5;
-                  var $tco_done = false;
-                  var $tco_result;
-                  function $tco_loop(v2, v3, v4, v5, v6) {
-                    if (v5 instanceof Nil && v6 instanceof Nil) {
-                      $tco_done = true;
-                      return v2;
-                    }
-                    ;
-                    if (v5 instanceof Nil && v6 instanceof Cons) {
-                      var actualSep = v2 + v6.value0 - v3;
-                      var neededSep = (function() {
-                        var $87 = actualSep < baseSep;
-                        if ($87) {
-                          return v2 + (baseSep - actualSep);
-                        }
-                        ;
-                        return v2;
-                      })();
-                      $tco_var_v2 = neededSep;
-                      $tco_var_v3 = v3;
-                      $tco_var_v4 = v6.value0;
-                      $tco_var_v5 = Nil.value;
-                      $copy_v6 = v6.value1;
-                      return;
-                    }
-                    ;
-                    if (v5 instanceof Cons && v6 instanceof Nil) {
-                      var actualSep = v2 + v4 - v5.value0;
-                      var neededSep = (function() {
-                        var $90 = actualSep < baseSep;
-                        if ($90) {
-                          return v2 + (baseSep - actualSep);
-                        }
-                        ;
-                        return v2;
-                      })();
-                      $tco_var_v2 = neededSep;
-                      $tco_var_v3 = v5.value0;
-                      $tco_var_v4 = v4;
-                      $tco_var_v5 = v5.value1;
-                      $copy_v6 = Nil.value;
-                      return;
-                    }
-                    ;
-                    if (v5 instanceof Cons && v6 instanceof Cons) {
-                      var actualSep = v2 + v6.value0 - v5.value0;
-                      var neededSep = (function() {
-                        var $93 = actualSep < baseSep;
-                        if ($93) {
-                          return v2 + (baseSep - actualSep);
-                        }
-                        ;
-                        return v2;
-                      })();
-                      $tco_var_v2 = neededSep;
-                      $tco_var_v3 = v5.value0;
-                      $tco_var_v4 = v6.value0;
-                      $tco_var_v5 = v5.value1;
-                      $copy_v6 = v6.value1;
-                      return;
-                    }
-                    ;
-                    throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 290, column 3 - line 290, column 67): " + [v2.constructor.name, v3.constructor.name, v4.constructor.name, v5.constructor.name, v6.constructor.name]);
-                  }
-                  ;
-                  while (!$tco_done) {
-                    $tco_result = $tco_loop($tco_var_v2, $tco_var_v3, $tco_var_v4, $tco_var_v5, $copy_v6);
-                  }
-                  ;
-                  return $tco_result;
-                };
-              };
-            };
-          };
-        };
-        return go2(baseSep)(0)(0)(v.value0.right)(v1.value0.left);
-      };
-    };
-  };
-  var scaleToPixels = function(config) {
-    return function(inputTree) {
-      var layerScaleFn = fromMaybe(toNumber)(config.layerScale);
-      var allNodes = fromFoldable23(inputTree);
-      var allX = map16(function(n) {
-        return n.x;
-      })(allNodes);
-      var maxX = fromMaybe(1)(maximum2(allX));
-      var minX = fromMaybe(0)(minimum2(allX));
-      var xRange = (function() {
-        var $121 = maxX - minX === 0;
-        if ($121) {
-          return 1;
-        }
-        ;
-        return maxX - minX;
-      })();
-      var scaleX = function(x3) {
-        return (x3 - minX) / xRange * config.size.width;
-      };
-      var scaledDepths = map16(function(n) {
-        return layerScaleFn(n.depth);
-      })(allNodes);
-      var maxScaledDepth = fromMaybe(1)(maximum2(scaledDepths));
-      var scaleY = function(depth) {
-        var scaledDepth = layerScaleFn(depth);
-        return scaledDepth / maxScaledDepth * config.size.height;
-      };
-      var go2 = function(v) {
-        return new Node2((function() {
-          var $123 = {};
-          for (var $124 in v.value0) {
-            if ({}.hasOwnProperty.call(v.value0, $124)) {
-              $123[$124] = v["value0"][$124];
-            }
-            ;
-          }
-          ;
-          $123.x = scaleX(v.value0.x);
-          $123.y = scaleY(v.value0.depth);
-          return $123;
-        })(), map15(go2)(v.value1));
-      };
-      return go2(inputTree);
-    };
-  };
-  var petrify = function(parentX) {
-    return function(v) {
-      var nodeY = toNumber(v.value0.value1.depth);
-      var nodeX = parentX + v.value0.value0.offset;
-      var childrenWithCoords = map15(petrify(nodeX))(v.value1);
-      return new Node2((function() {
-        var $130 = {};
-        for (var $131 in v.value0.value1) {
-          if ({}.hasOwnProperty.call(v.value0.value1, $131)) {
-            $130[$131] = v["value0"]["value1"][$131];
-          }
-          ;
-        }
-        ;
-        $130.x = nodeX;
-        $130.y = nodeY;
-        return $130;
-      })(), childrenWithCoords);
-    };
-  };
-  var mergeContoursRight = function(contours) {
-    var mergeLevel = function(cs) {
-      var currentLevels = mapMaybe(function(c) {
-        if (c instanceof Cons) {
-          return new Just(c.value0);
-        }
-        ;
-        if (c instanceof Nil) {
-          return Nothing.value;
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 448, column 17 - line 450, column 27): " + [c.constructor.name]);
-      })(cs);
-      var v = head(currentLevels);
-      if (v instanceof Nothing) {
-        return Nil.value;
-      }
-      ;
-      if (v instanceof Just) {
-        var restContours = mapMaybe(function(c) {
-          if (c instanceof Cons) {
-            return new Just(c.value1);
-          }
-          ;
-          if (c instanceof Nil) {
-            return Nothing.value;
-          }
-          ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 461, column 23 - line 463, column 33): " + [c.constructor.name]);
-        })(cs);
-        var maxVal = fromMaybe(0)(maximum2(currentLevels));
-        return new Cons(maxVal, mergeLevel(restContours));
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 454, column 7 - line 467, column 50): " + [v.constructor.name]);
-    };
-    if (contours.length === 0) {
-      return Nil.value;
-    }
-    ;
-    return mergeLevel(contours);
-  };
-  var mergeContoursLeft = function(contours) {
-    var mergeLevel = function(cs) {
-      var currentLevels = mapMaybe(function(c) {
-        if (c instanceof Cons) {
-          return new Just(c.value0);
-        }
-        ;
-        if (c instanceof Nil) {
-          return Nothing.value;
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 415, column 17 - line 417, column 27): " + [c.constructor.name]);
-      })(cs);
-      var v = head(currentLevels);
-      if (v instanceof Nothing) {
-        return Nil.value;
-      }
-      ;
-      if (v instanceof Just) {
-        var restContours = mapMaybe(function(c) {
-          if (c instanceof Cons) {
-            return new Just(c.value1);
-          }
-          ;
-          if (c instanceof Nil) {
-            return Nothing.value;
-          }
-          ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 428, column 23 - line 430, column 33): " + [c.constructor.name]);
-        })(cs);
-        var minVal = fromMaybe(0)(minimum2(currentLevels));
-        return new Cons(minVal, mergeLevel(restContours));
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 421, column 7 - line 434, column 50): " + [v.constructor.name]);
-    };
-    if (contours.length === 0) {
-      return Nil.value;
-    }
-    ;
-    return mergeLevel(contours);
-  };
-  var spliceContours = function(offsets) {
-    return function(contours) {
-      var v = fromFoldable8(zipWith2(Tuple.create)(offsets)(contours));
-      if (v.length === 0) {
-        return singletonContours;
-      }
-      ;
-      if (v.length === 1) {
-        return new Contours({
-          left: new Cons(0, map15(function(x3) {
-            return x3 + v[0].value0;
-          })(v[0].value1.value0.left)),
-          right: new Cons(0, map15(function(x3) {
-            return x3 + v[0].value0;
-          })(v[0].value1.value0.right))
-        });
-      }
-      ;
-      var shiftedContours = map16(function(v1) {
-        return new Contours({
-          left: map15(function(x3) {
-            return x3 + v1.value0;
-          })(v1.value1.value0.left),
-          right: map15(function(x3) {
-            return x3 + v1.value0;
-          })(v1.value1.value0.right)
-        });
-      })(v);
-      var mergedRight = mergeContoursRight(map16(function(v1) {
-        return v1.value0.right;
-      })(shiftedContours));
-      var mergedLeft = mergeContoursLeft(map16(function(v1) {
-        return v1.value0.left;
-      })(shiftedContours));
-      return new Contours({
-        left: new Cons(0, mergedLeft),
-        right: new Cons(0, mergedRight)
-      });
-    };
-  };
-  var getRootData = function(v) {
-    return v.value0.value1;
-  };
-  var computeSeparationsWithBase = function(baseSeps) {
-    return function(contours) {
-      var tailSafe = function(v2) {
-        if (v2 instanceof Nil) {
-          return Nil.value;
-        }
-        ;
-        if (v2 instanceof Cons) {
-          return v2.value1;
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 278, column 3 - line 278, column 41): " + [v2.constructor.name]);
-      };
-      var applyBase = function(base3) {
-        return function(v2) {
-          return scanContoursWithBase(base3)(v2.value0)(v2.value1);
-        };
-      };
-      var v = new Tuple(baseSeps, contours);
-      if (v.value0 instanceof Nil) {
-        return Nil.value;
-      }
-      ;
-      if (v.value1 instanceof Nil) {
-        return Nil.value;
-      }
-      ;
-      if (v.value1 instanceof Cons && v.value1.value1 instanceof Nil) {
-        return Nil.value;
-      }
-      ;
-      var contourPairs = zipWith2(Tuple.create)(contours)(tailSafe(contours));
-      return zipWith2(applyBase)(baseSeps)(contourPairs);
-    };
-  };
-  var computeBaseSeparations = function(minSep) {
-    return function(separationFn) {
-      return function(nodes) {
-        var tailSafe = function(v) {
-          if (v instanceof Nil) {
-            return Nil.value;
-          }
-          ;
-          if (v instanceof Cons) {
-            return v.value1;
-          }
-          ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 256, column 3 - line 256, column 41): " + [v.constructor.name]);
-        };
-        var getSep = function(v) {
-          return function(v1) {
-            return function(v2) {
-              return function(v3) {
-                if (v instanceof Nothing) {
-                  return v1;
-                }
-                ;
-                if (v instanceof Just) {
-                  return v.value0(v2)(v3) + v1;
-                }
-                ;
-                throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree4 (line 252, column 3 - line 252, column 67): " + [v.constructor.name, v1.constructor.name, v2.constructor.name, v3.constructor.name]);
-              };
-            };
-          };
-        };
-        if (nodes instanceof Nil) {
-          return Nil.value;
-        }
-        ;
-        if (nodes instanceof Cons && nodes.value1 instanceof Nil) {
-          return Nil.value;
-        }
-        ;
-        return zipWith2(getSep(separationFn)(minSep))(nodes)(tailSafe(nodes));
-      };
-    };
-  };
-  var render = function(minSep) {
-    return function(separationFn) {
-      return function(inputTree) {
-        var updateOffset = function(v2) {
-          return function(newOffset) {
-            return new Node2(new Tuple({
-              offset: newOffset
-            }, v2.value0.value1), v2.value1);
-          };
-        };
-        var renderWithContours = function(v2) {
-          var childCount = length2(v2.value1);
-          if (childCount === 0) {
-            return new Tuple(new Node2(new Tuple({
-              offset: 0
-            }, v2.value0), Nil.value), singletonContours);
-          }
-          ;
-          var childResults = map15(renderWithContours)(v2.value1);
-          var childTrees = map15(function(v1) {
-            return v1.value0;
-          })(childResults);
-          var childRootData = map15(getRootData)(childTrees);
-          var childContours = map15(function(v1) {
-            return v1.value1;
-          })(childResults);
-          var baseSeparations = computeBaseSeparations(minSep)(separationFn)(childRootData);
-          var separations = computeSeparationsWithBase(baseSeparations)(childContours);
-          var childAbsoluteOffsets = new Cons(0, scanl3(add2)(0)(separations));
-          var leftmostOffset = fromMaybe(0)(head(fromFoldable8(childAbsoluteOffsets)));
-          var rightmostOffset = fromMaybe(0)(last(fromFoldable8(childAbsoluteOffsets)));
-          var parentOffset = (leftmostOffset + rightmostOffset) / 2;
-          var childRelativeOffsets = map15(function(absOffset) {
-            return absOffset - parentOffset;
-          })(childAbsoluteOffsets);
-          var childrenWithOffsets = zipWith2(updateOffset)(childTrees)(childRelativeOffsets);
-          var parentContours = spliceContours(childRelativeOffsets)(childContours);
-          var resultTree = new Node2(new Tuple({
-            offset: parentOffset
-          }, v2.value0), childrenWithOffsets);
-          return new Tuple(resultTree, parentContours);
-        };
-        var v = renderWithContours(inputTree);
-        return v.value0;
-      };
-    };
-  };
-  var addDepth = function(currentDepth) {
-    return function(v) {
-      return new Node2((function() {
-        var $231 = {};
-        for (var $232 in v.value0) {
-          if ({}.hasOwnProperty.call(v.value0, $232)) {
-            $231[$232] = v["value0"][$232];
-          }
-          ;
-        }
-        ;
-        $231.depth = currentDepth;
-        return $231;
-      })(), map15(addDepth(currentDepth + 1 | 0))(v.value1));
-    };
-  };
-  var tree = function(config) {
-    return function(inputTree) {
-      var withDepth = addDepth(0)(inputTree);
-      var rendered = render(config.minSeparation)(config.separation)(withDepth);
-      var withCoords = petrify(0)(rendered);
-      var scaled = scaleToPixels(config)(withCoords);
-      return scaled;
     };
   };
 
@@ -7728,7 +7728,7 @@
   var toUnfoldable5 = /* @__PURE__ */ toUnfoldable2(unfoldableArray);
   var toUnfoldable1 = /* @__PURE__ */ toUnfoldable3(unfoldableArray);
   var insert1 = /* @__PURE__ */ insert3(ordString);
-  var fromFoldable12 = /* @__PURE__ */ fromFoldable4(ordString)(foldableArray);
+  var fromFoldable12 = /* @__PURE__ */ fromFoldable5(ordString)(foldableArray);
   var bind12 = /* @__PURE__ */ bind(bindEither);
   var gDecodeJsonCons2 = /* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(/* @__PURE__ */ decodeArray2(decodeJsonString)));
   var gDecodeJsonCons1 = /* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(decodeJsonString));
@@ -7757,8 +7757,8 @@
   var decodeJson22 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(/* @__PURE__ */ decodeArray2(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(decodeJsonInt))(gDecodeJsonCons3)(locIsSymbol)()())())))(gDecodeJsonNil)(locIsSymbol)()())());
   var append13 = /* @__PURE__ */ append(semigroupArray);
   var insert22 = /* @__PURE__ */ insert4(ordInt);
-  var fromFoldable32 = /* @__PURE__ */ fromFoldable5(foldableSet)(ordInt);
-  var fromFoldable42 = /* @__PURE__ */ fromFoldable5(foldableArray)(ordTuple2);
+  var fromFoldable32 = /* @__PURE__ */ fromFoldable6(foldableSet)(ordInt);
+  var fromFoldable42 = /* @__PURE__ */ fromFoldable6(foldableArray)(ordTuple2);
   var decodeJson3 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeForeignObject2(/* @__PURE__ */ decodeArray2(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons1(/* @__PURE__ */ gDecodeJsonCons22({
     reflectSymbol: function() {
       return "title";
@@ -7894,7 +7894,7 @@
   };
   var mapTree = function(f) {
     return function(v) {
-      return new Node2(f(v.value0), map17(mapTree(f))(v.value1));
+      return new Node(f(v.value0), map17(mapTree(f))(v.value1));
     };
   };
   var mapLeft = function(v) {
@@ -8075,7 +8075,7 @@
       var go2 = function(nodeId) {
         var children3 = getChildren(nodeId);
         var childTrees = map18(go2)(children3);
-        return new Node2(nodeId, fromFoldable9(childTrees));
+        return new Node(nodeId, fromFoldable9(childTrees));
       };
       return go2(rootId);
     };
@@ -9104,6 +9104,82 @@
   }
 
   // output/Engine.BubblePack/foreign.js
+  var legendData = [
+    { label: "Type Class", color: "#9467bd", intense: "#7b3fa9" },
+    { label: "Data Type", color: "#2ca02c", intense: "#1a8a1a" },
+    { label: "Type Synonym", color: "#17becf", intense: "#0d9fb0" },
+    { label: "Extern Data", color: "#bcbd22", intense: "#9a9b0a" },
+    { label: "Alias", color: "#7f7f7f", intense: "#5f5f5f" },
+    { label: "Value", color: "#1f77b4", intense: "#0d5a91" }
+  ];
+  var renderColorLegend_ = () => {
+    const existing = document.getElementById("color-legend");
+    if (existing) existing.remove();
+    const container = document.body;
+    const legend2 = document.createElement("div");
+    legend2.id = "color-legend";
+    legend2.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: system-ui, -apple-system, sans-serif;
+    z-index: 1000;
+    pointer-events: none;
+  `;
+    const title3 = document.createElement("div");
+    title3.textContent = "Declaration Types";
+    title3.style.cssText = `
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+  `;
+    legend2.appendChild(title3);
+    legendData.forEach((item) => {
+      const row = document.createElement("div");
+      row.style.cssText = `
+      display: flex;
+      align-items: center;
+      margin: 6px 0;
+    `;
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("width", "24");
+      svg.setAttribute("height", "24");
+      svg.style.marginRight = "8px";
+      const outer = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      outer.setAttribute("cx", "12");
+      outer.setAttribute("cy", "12");
+      outer.setAttribute("r", "10");
+      outer.setAttribute("fill", item.color);
+      outer.setAttribute("fill-opacity", "0.6");
+      svg.appendChild(outer);
+      const inner = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      inner.setAttribute("cx", "12");
+      inner.setAttribute("cy", "12");
+      inner.setAttribute("r", "6");
+      inner.setAttribute("fill", item.intense);
+      inner.setAttribute("fill-opacity", "0.9");
+      svg.appendChild(inner);
+      row.appendChild(svg);
+      const label5 = document.createElement("span");
+      label5.textContent = item.label;
+      label5.style.cssText = `
+      color: #fff;
+      font-size: 12px;
+    `;
+      row.appendChild(label5);
+      legend2.appendChild(row);
+    });
+    container.appendChild(legend2);
+  };
+  var clearColorLegend_ = () => {
+    const legend2 = document.getElementById("color-legend");
+    if (legend2) legend2.remove();
+  };
   var renderReexportModule_ = (containerSelector) => (node) => (isReexport) => () => {
     const container = select_default2(containerSelector);
     const group4 = container.append("g").datum(node).attr("class", `module-pack pack-${node.id} ${isReexport ? "reexport-module" : "empty-module"}`).attr("transform", `translate(${node.x},${node.y})`);
@@ -9128,7 +9204,7 @@
     });
   };
 
-  // output/PSD3.Layout.Hierarchy.Pack/index.js
+  // output/D3.Layout.Hierarchy.Pack/index.js
   var show3 = /* @__PURE__ */ show(showInt);
   var show13 = /* @__PURE__ */ show(showNumber);
   var elemIndex2 = /* @__PURE__ */ elemIndex(eqInt);
@@ -9138,7 +9214,7 @@
   var traverse_2 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableArray);
   var max4 = /* @__PURE__ */ max(ordNumber);
   var insert7 = /* @__PURE__ */ insert3(ordInt);
-  var fromFoldable10 = /* @__PURE__ */ fromFoldable4(ordInt)(foldableArray);
+  var fromFoldable10 = /* @__PURE__ */ fromFoldable5(ordInt)(foldableArray);
   var sortWith3 = /* @__PURE__ */ sortWith(ordNumber);
   var foldl9 = /* @__PURE__ */ foldl(foldableArray);
   var max1 = /* @__PURE__ */ max(ordInt);
@@ -9311,7 +9387,7 @@
             return fromMaybe(chain)(insertAt(v.value0 + 1 | 0)(newId2)(chain));
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 178, column 3 - line 182, column 62): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 178, column 3 - line 182, column 62): " + [v.constructor.name]);
         };
       };
     };
@@ -9399,7 +9475,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 771, column 5 - line 803, column 14): " + [node.children.constructor.name]);
+        throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 771, column 5 - line 803, column 14): " + [node.children.constructor.name]);
       };
     };
     return go2(v)(0);
@@ -9417,7 +9493,7 @@
         return index(chain)(prevIdx);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 243, column 3 - line 248, column 35): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 243, column 3 - line 248, column 35): " + [v.constructor.name]);
     };
   };
   var getNextInChain = function(nodeId) {
@@ -9432,7 +9508,7 @@
         return index(chain)(nextIdx);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 234, column 3 - line 238, column 35): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 234, column 3 - line 238, column 35): " + [v.constructor.name]);
     };
   };
   var getNextId = function(nodeId) {
@@ -9447,7 +9523,7 @@
         return index(chain)(nextIdx);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 142, column 3 - line 148, column 34): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 142, column 3 - line 148, column 34): " + [v.constructor.name]);
     };
   };
   var epsilon6 = 1e-6;
@@ -9566,10 +9642,10 @@
                 return;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 645, column 13 - line 652, column 52): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 645, column 13 - line 652, column 52): " + [v2.constructor.name]);
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 641, column 7 - line 641, column 56): " + [i2.constructor.name]);
+            throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 641, column 7 - line 641, column 56): " + [i2.constructor.name]);
           }
           ;
           while (!$tco_done) {
@@ -9613,7 +9689,7 @@
                 return;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 662, column 7 - line 662, column 58): " + [i2.constructor.name, j.constructor.name]);
+              throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 662, column 7 - line 662, column 58): " + [i2.constructor.name, j.constructor.name]);
             }
             ;
             while (!$tco_done1) {
@@ -9644,10 +9720,10 @@
                 return;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 658, column 13 - line 660, column 54): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 658, column 13 - line 660, column 54): " + [v2.constructor.name]);
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 654, column 7 - line 654, column 58): " + [i2.constructor.name]);
+            throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 654, column 7 - line 654, column 58): " + [i2.constructor.name]);
           }
           ;
           while (!$tco_done2) {
@@ -9671,13 +9747,13 @@
             return basis2;
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 635, column 11 - line 637, column 29): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 635, column 11 - line 637, column 29): " + [v1.constructor.name]);
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 632, column 7 - line 637, column 29): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 632, column 7 - line 637, column 29): " + [v.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 628, column 1 - line 628, column 54): " + [basis2.constructor.name, p2.constructor.name]);
+      throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 628, column 1 - line 628, column 54): " + [basis2.constructor.name, p2.constructor.name]);
     };
   };
   var encloseBasis1 = function(a2) {
@@ -9744,7 +9820,7 @@
                 };
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 686, column 9 - line 688, column 48): " + [maybeE.constructor.name]);
+              throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 686, column 9 - line 688, column 48): " + [maybeE.constructor.name]);
             }
             ;
             if (otherwise) {
@@ -9772,10 +9848,10 @@
                 return;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 690, column 9 - line 701, column 44): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 690, column 9 - line 701, column 44): " + [v.constructor.name]);
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 683, column 3 - line 683, column 54): " + [i2.constructor.name, basis2.constructor.name, maybeE.constructor.name]);
+            throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 683, column 3 - line 683, column 54): " + [i2.constructor.name, basis2.constructor.name, maybeE.constructor.name]);
           }
           ;
           while (!$tco_done) {
@@ -9869,7 +9945,7 @@
       });
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 169, column 5 - line 173, column 40): " + [bestNode.constructor.name]);
+    throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 169, column 5 - line 173, column 40): " + [bestNode.constructor.name]);
   };
   var bidirectionalCollisionSearch = function(aId) {
     return function(bId) {
@@ -9915,7 +9991,7 @@
                           return NoCollision.value;
                         }
                         ;
-                        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 280, column 13 - line 286, column 37): " + [v12.constructor.name]);
+                        throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 280, column 13 - line 286, column 37): " + [v12.constructor.name]);
                       }
                       ;
                       if (v4 instanceof Nothing) {
@@ -9923,7 +9999,7 @@
                         return NoCollision.value;
                       }
                       ;
-                      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 274, column 7 - line 287, column 31): " + [v4.constructor.name]);
+                      throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 274, column 7 - line 287, column 31): " + [v4.constructor.name]);
                     }
                     ;
                     var v4 = lookup5(k)(state3.circles);
@@ -9954,7 +10030,7 @@
                         return NoCollision.value;
                       }
                       ;
-                      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 296, column 13 - line 302, column 37): " + [v12.constructor.name]);
+                      throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 296, column 13 - line 302, column 37): " + [v12.constructor.name]);
                     }
                     ;
                     if (v4 instanceof Nothing) {
@@ -9962,7 +10038,7 @@
                       return NoCollision.value;
                     }
                     ;
-                    throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 290, column 7 - line 303, column 31): " + [v4.constructor.name]);
+                    throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 290, column 7 - line 303, column 31): " + [v4.constructor.name]);
                   }
                   ;
                   while (!$tco_done) {
@@ -10054,14 +10130,14 @@
                     return;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 392, column 13 - line 421, column 101): " + [collisionResult.constructor.name]);
+                  throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 392, column 13 - line 421, column 101): " + [collisionResult.constructor.name]);
                 }
                 ;
                 $tco_done = true;
                 return state3;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 370, column 1 - line 370, column 91): " + [maxRetries.constructor.name, newCircle.constructor.name, aId.constructor.name, bId.constructor.name, state3.constructor.name]);
+              throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 370, column 1 - line 370, column 91): " + [maxRetries.constructor.name, newCircle.constructor.name, aId.constructor.name, bId.constructor.name, state3.constructor.name]);
             }
             ;
             while (!$tco_done) {
@@ -10087,7 +10163,7 @@
             return sqrt(v.value0.value);
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 838, column 13 - line 840, column 37): " + [config.radius.constructor.name]);
+          throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 838, column 13 - line 840, column 37): " + [config.radius.constructor.name]);
         })();
         return new PackNode({
           data_: v.value0.data_,
@@ -10128,7 +10204,7 @@
         return result;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 438, column 5 - line 446, column 17): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 438, column 5 - line 446, column 17): " + [v2.constructor.name]);
     };
   };
   var packSiblingsMap = function(inputCircles) {
@@ -10166,7 +10242,7 @@
         };
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Pack (line 460, column 7 - line 462, column 48): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at D3.Layout.Hierarchy.Pack (line 460, column 7 - line 462, column 48): " + [v2.constructor.name]);
     }
     ;
     var $292 = n === 2;
@@ -10325,8 +10401,8 @@
   var nub3 = /* @__PURE__ */ nub(ordString);
   var map20 = /* @__PURE__ */ map(functorArray);
   var sortWith4 = /* @__PURE__ */ sortWith(ordInt);
-  var append6 = /* @__PURE__ */ append(semigroupArray);
   var bind6 = /* @__PURE__ */ bind(bindArray);
+  var append6 = /* @__PURE__ */ append(semigroupArray);
   var pure6 = /* @__PURE__ */ pure(applicativeEffect);
   var log4 = /* @__PURE__ */ log2(monadEffectEffect);
   var show4 = /* @__PURE__ */ show(showInt);
@@ -10335,13 +10411,15 @@
       return renderReexportModule_("#explorer-nodes")(node)(isReexport);
     };
   };
-  var packNodeToCircle = function(v) {
+  var renderColorLegend = renderColorLegend_;
+  var packNodeToCircleWithCategory = function(v) {
     return {
-      x: v.value0.x,
-      y: v.value0.y,
-      r: v.value0.r,
-      depth: v.value0.depth,
-      data_: v.value0.data_
+      x: v.node.value0.x,
+      y: v.node.value0.y,
+      r: v.node.value0.r,
+      depth: v.node.value0.depth,
+      data_: v.node.value0.data_,
+      category: v.category
     };
   };
   var groupByKind = function(decls) {
@@ -10362,13 +10440,52 @@
       return !$$null(g.decls);
     })(groups));
   };
-  var getAllPackNodes = function(v) {
-    var $25 = $$null(v.value0.children);
-    if ($25) {
-      return [v];
+  var getAllPackNodesWithCategory = function(v) {
+    return function(parentCategory) {
+      var thisCategory = (function() {
+        var $30 = v.value0.depth === 1;
+        if ($30) {
+          return v.value0.data_;
+        }
+        ;
+        return parentCategory;
+      })();
+      var childResults = bind6(v.value0.children)(function(child) {
+        return getAllPackNodesWithCategory(child)(thisCategory);
+      });
+      return append6([{
+        node: v,
+        category: thisCategory
+      }])(childResults);
+    };
+  };
+  var clearColorLegend = clearColorLegend_;
+  var categoryColorIntense = function(v) {
+    if (v === "typeClass") {
+      return "#7b3fa9";
     }
     ;
-    return append6([v])(bind6(v.value0.children)(getAllPackNodes));
+    if (v === "data") {
+      return "#1a8a1a";
+    }
+    ;
+    if (v === "typeSynonym") {
+      return "#0d9fb0";
+    }
+    ;
+    if (v === "externData") {
+      return "#9a9b0a";
+    }
+    ;
+    if (v === "alias") {
+      return "#5f5f5f";
+    }
+    ;
+    if (v === "value") {
+      return "#0d5a91";
+    }
+    ;
+    return "#999999";
   };
   var categoryColor = function(v) {
     if (v === "typeClass") {
@@ -10406,7 +10523,7 @@
       return categoryColor(pc.data_);
     }
     ;
-    return categoryColor("value");
+    return categoryColorIntense(pc.category);
   };
   var getPackFillEffect = function(pc) {
     return pure6(getPackFill(pc));
@@ -10419,8 +10536,8 @@
     };
   };
   var buildCategory = function(v) {
-    var $30 = $$null(v.decls);
-    if ($30) {
+    var $36 = $$null(v.decls);
+    if ($36) {
       return Nothing.value;
     }
     ;
@@ -10438,8 +10555,8 @@
         data_: moduleName,
         value: Nothing.value,
         children: (function() {
-          var $33 = $$null(categoryChildren);
-          if ($33) {
+          var $39 = $$null(categoryChildren);
+          if ($39) {
             return Nothing.value;
           }
           ;
@@ -10451,8 +10568,8 @@
   var renderModulePack = function(declarationsMap) {
     return function(node) {
       var decls = fromMaybe([])(lookup(node.name)(declarationsMap));
-      var $34 = $$null(decls);
-      if ($34) {
+      var $40 = $$null(decls);
+      if ($40) {
         var isReexport = !$$null(node.targets);
         return function __do6() {
           (function() {
@@ -10481,8 +10598,8 @@
           padding: 1
         };
         var packed = pack(config)(packRoot);
-        var allNodes = getAllPackNodes(packed);
-        var packCircles = map20(packNodeToCircle)(allNodes);
+        var allNodesWithCategory = getAllPackNodesWithCategory(packed)("");
+        var packCircles = map20(packNodeToCircleWithCategory)(allNodesWithCategory);
         var centerOffset = packSize / 2;
         renderBoundBubblePack_("#explorer-nodes")(node)(packCircles)(centerOffset)(getPackFillEffect)();
         return packed.value0.r;
@@ -14975,19 +15092,10 @@
       return element3.__data__;
     };
   }
-  var bindDebugCount = 0;
   function setElementData_(datum2) {
     return function(element3) {
       return function() {
         element3.__data__ = datum2;
-        if (datum2?.id === 93 && bindDebugCount === 0) {
-          const hasMarker = datum2.__simMarker__ === true;
-          console.log(`[BindData] node93 bound to element, hasMarker=${hasMarker}, x=${datum2.x?.toFixed(1)}`);
-          if (!hasMarker) {
-            console.log(`[BindData] PROBLEM: node93 does NOT have __simMarker__ at bind time!`);
-          }
-          bindDebugCount++;
-        }
       };
     };
   }
@@ -19740,10 +19848,10 @@
   var traverse4 = /* @__PURE__ */ traverse(traversableArray)(applicativeEffect);
   var d2 = /* @__PURE__ */ d(toAttrStringFunctionStrin);
   var fill2 = /* @__PURE__ */ fill(toAttrStringFunctionStrin);
-  var fromFoldable17 = /* @__PURE__ */ fromFoldable5(foldableArray)(ordInt);
+  var fromFoldable17 = /* @__PURE__ */ fromFoldable6(foldableArray)(ordInt);
   var map31 = /* @__PURE__ */ map(functorArray);
   var member5 = /* @__PURE__ */ member2(ordInt);
-  var fromFoldable24 = /* @__PURE__ */ fromFoldable4(ordInt)(foldableArray);
+  var fromFoldable24 = /* @__PURE__ */ fromFoldable5(ordInt)(foldableArray);
   var for_5 = /* @__PURE__ */ for_(applicativeEffect)(foldableArray);
   var selectAll4 = /* @__PURE__ */ selectAll(selectionMD3v2Selection_D);
   var when4 = /* @__PURE__ */ when(applicativeEffect);
@@ -20160,7 +20268,7 @@
       return log9("[Explorer] Could not find #explorer-nodes")();
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 847, column 3 - line 849, column 63): " + [mElement.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 853, column 3 - line 855, column 63): " + [mElement.constructor.name]);
   };
   var clearTreeLinks = function __do2() {
     var win = windowImpl();
@@ -20199,6 +20307,7 @@
             return unit;
           };
         })();
+        renderColorLegend();
         var packElements = runD3v2M(bind22(select6("#explorer-nodes"))(function(nodesContainer) {
           return bind22(selectAll4("g.module-pack")(nodesContainer))(function(packGroups) {
             return pure13(getElementsD3v2(packGroups));
@@ -20395,6 +20504,7 @@
         setNodes(fullNodes)(sim)();
         restoreGridForces(fullNodes)(sim)();
         clearTreeLinks();
+        clearColorLegend();
         clearNodesGroup();
         runD3v2M(renderNodesOnly(fullNodes))();
         var mStateRef = read(globalStateRef)();
@@ -20408,7 +20518,7 @@
             return unit;
           }
           ;
-          throw new Error("Failed pattern match at Engine.Explorer (line 804, column 3 - line 808, column 25): " + [mStateRef.constructor.name]);
+          throw new Error("Failed pattern match at Engine.Explorer (line 810, column 3 - line 814, column 25): " + [mStateRef.constructor.name]);
         })();
         reheat(sim)();
         return unit;

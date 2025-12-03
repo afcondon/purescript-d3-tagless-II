@@ -3,6 +3,109 @@
 
 import { select } from "d3-selection";
 
+// Category legend data - matches categoryColor/categoryColorIntense in BubblePack.purs
+const legendData = [
+  { label: "Type Class", color: "#9467bd", intense: "#7b3fa9" },
+  { label: "Data Type", color: "#2ca02c", intense: "#1a8a1a" },
+  { label: "Type Synonym", color: "#17becf", intense: "#0d9fb0" },
+  { label: "Extern Data", color: "#bcbd22", intense: "#9a9b0a" },
+  { label: "Alias", color: "#7f7f7f", intense: "#5f5f5f" },
+  { label: "Value", color: "#1f77b4", intense: "#0d5a91" },
+];
+
+// Render the color legend as a floating HTML element in top-right corner
+export const renderColorLegend_ = () => {
+  // Remove any existing legend
+  const existing = document.getElementById("color-legend");
+  if (existing) existing.remove();
+
+  // Append to body for position:fixed to work correctly
+  // (transforms on parent elements can break fixed positioning)
+  const container = document.body;
+
+  // Create legend div
+  const legend = document.createElement("div");
+  legend.id = "color-legend";
+  legend.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: system-ui, -apple-system, sans-serif;
+    z-index: 1000;
+    pointer-events: none;
+  `;
+
+  // Title
+  const title = document.createElement("div");
+  title.textContent = "Declaration Types";
+  title.style.cssText = `
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+  `;
+  legend.appendChild(title);
+
+  // Legend items
+  legendData.forEach(item => {
+    const row = document.createElement("div");
+    row.style.cssText = `
+      display: flex;
+      align-items: center;
+      margin: 6px 0;
+    `;
+
+    // Color circles container (SVG for circles)
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", "24");
+    svg.setAttribute("height", "24");
+    svg.style.marginRight = "8px";
+
+    // Outer circle (category color)
+    const outer = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    outer.setAttribute("cx", "12");
+    outer.setAttribute("cy", "12");
+    outer.setAttribute("r", "10");
+    outer.setAttribute("fill", item.color);
+    outer.setAttribute("fill-opacity", "0.6");
+    svg.appendChild(outer);
+
+    // Inner circle (intense color)
+    const inner = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    inner.setAttribute("cx", "12");
+    inner.setAttribute("cy", "12");
+    inner.setAttribute("r", "6");
+    inner.setAttribute("fill", item.intense);
+    inner.setAttribute("fill-opacity", "0.9");
+    svg.appendChild(inner);
+
+    row.appendChild(svg);
+
+    // Label
+    const label = document.createElement("span");
+    label.textContent = item.label;
+    label.style.cssText = `
+      color: #fff;
+      font-size: 12px;
+    `;
+    row.appendChild(label);
+
+    legend.appendChild(row);
+  });
+
+  container.appendChild(legend);
+};
+
+// Remove the color legend
+export const clearColorLegend_ = () => {
+  const legend = document.getElementById("color-legend");
+  if (legend) legend.remove();
+};
+
 // Render a re-export (umbrella) module - hollow ring to show "pass-through" nature
 // isReexport: true for re-export modules, false for empty modules
 export const renderReexportModule_ = (containerSelector) => (node) => (isReexport) => () => {
