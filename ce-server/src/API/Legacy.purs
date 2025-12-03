@@ -10,6 +10,10 @@ module API.Legacy
   , declarationsSummaryJson
   , moduleMetricsJson
   , commitTimelineJson
+  , functionCallsJson
+  -- Granular module endpoints
+  , moduleDeclarationsJson
+  , moduleFunctionCallsJson
   ) where
 
 import Prelude
@@ -197,3 +201,66 @@ commitTimelineJson db snapshotId = do
   ok' jsonHeaders json
 
 foreign import buildCommitTimelineJson :: Array Foreign -> Array Foreign -> String
+
+-- =============================================================================
+-- /data/function-calls.json
+-- =============================================================================
+
+-- | Returns function calls in format: { functions: { "Module.func": { module, name, calls, calledBy } } }
+functionCallsJson :: Database -> Int -> Aff Response
+functionCallsJson db snapshotId = do
+  rows <- queryAllParams db """
+    SELECT
+      module,
+      name,
+      calls,
+      called_by
+    FROM function_calls
+    WHERE snapshot_id = ?
+    ORDER BY module, name
+  """ [unsafeToForeign snapshotId]
+  let json = buildFunctionCallsJson rows
+  ok' jsonHeaders json
+
+foreign import buildFunctionCallsJson :: Array Foreign -> String
+
+-- =============================================================================
+-- /api/modules/:name/declarations
+-- =============================================================================
+
+-- | Returns declarations for a specific module: [{ kind: "", title: "" }]
+moduleDeclarationsJson :: Database -> Int -> String -> Aff Response
+moduleDeclarationsJson db snapshotId moduleName = do
+  rows <- queryAllParams db """
+    SELECT
+      kind,
+      title
+    FROM declarations
+    WHERE snapshot_id = ? AND module = ?
+    ORDER BY title
+  """ [unsafeToForeign snapshotId, unsafeToForeign moduleName]
+  let json = buildModuleDeclarationsJson rows
+  ok' jsonHeaders json
+
+foreign import buildModuleDeclarationsJson :: Array Foreign -> String
+
+-- =============================================================================
+-- /api/modules/:name/function-calls
+-- =============================================================================
+
+-- | Returns function calls for a specific module: { "funcName": { calls, calledBy } }
+moduleFunctionCallsJson :: Database -> Int -> String -> Aff Response
+moduleFunctionCallsJson db snapshotId moduleName = do
+  rows <- queryAllParams db """
+    SELECT
+      name,
+      calls,
+      called_by
+    FROM function_calls
+    WHERE snapshot_id = ? AND module = ?
+    ORDER BY name
+  """ [unsafeToForeign snapshotId, unsafeToForeign moduleName]
+  let json = buildModuleFunctionCallsJson moduleName rows
+  ok' jsonHeaders json
+
+foreign import buildModuleFunctionCallsJson :: String -> Array Foreign -> String

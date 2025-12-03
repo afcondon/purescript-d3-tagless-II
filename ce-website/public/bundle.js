@@ -7931,7 +7931,12 @@
       return "name";
     }
   };
-  var decodeJson2 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(/* @__PURE__ */ decodeForeignObject2(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons2(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(/* @__PURE__ */ decodeArray2(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons1(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(decodeJsonBoolean))(/* @__PURE__ */ gDecodeJsonCons1(/* @__PURE__ */ gDecodeJsonCons22({
+  var moduleIsSymbol = {
+    reflectSymbol: function() {
+      return "module";
+    }
+  };
+  var gDecodeJsonCons3 = /* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(/* @__PURE__ */ decodeForeignObject2(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons2(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(/* @__PURE__ */ decodeArray2(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons1(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(decodeJsonBoolean))(/* @__PURE__ */ gDecodeJsonCons1(/* @__PURE__ */ gDecodeJsonCons22({
     reflectSymbol: function() {
       return "targetModule";
     }
@@ -7947,11 +7952,7 @@
     reflectSymbol: function() {
       return "identifier";
     }
-  })()())())))(/* @__PURE__ */ gDecodeJsonCons1(/* @__PURE__ */ gDecodeJsonCons22(nameIsSymbol)()())({
-    reflectSymbol: function() {
-      return "module";
-    }
-  })()())({
+  })()())())))(/* @__PURE__ */ gDecodeJsonCons1(/* @__PURE__ */ gDecodeJsonCons22(nameIsSymbol)()())(moduleIsSymbol)()())({
     reflectSymbol: function() {
       return "calls";
     }
@@ -7959,13 +7960,24 @@
     reflectSymbol: function() {
       return "calledBy";
     }
-  })()())())))(gDecodeJsonNil)({
+  })()())())));
+  var functionsIsSymbol = {
     reflectSymbol: function() {
       return "functions";
     }
+  };
+  var decodeJson2 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons3(gDecodeJsonNil)(functionsIsSymbol)()())());
+  var decodeArray3 = /* @__PURE__ */ decodeArray2(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons1(/* @__PURE__ */ gDecodeJsonCons22({
+    reflectSymbol: function() {
+      return "title";
+    }
+  })()())({
+    reflectSymbol: function() {
+      return "kind";
+    }
   })()())());
-  var gDecodeJsonCons4 = /* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(decodeJsonInt));
-  var gDecodeJsonCons5 = /* @__PURE__ */ gDecodeJsonCons22({
+  var gDecodeJsonCons5 = /* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(decodeJsonInt));
+  var gDecodeJsonCons6 = /* @__PURE__ */ gDecodeJsonCons22({
     reflectSymbol: function() {
       return "path";
     }
@@ -7975,27 +7987,19 @@
       return "depends";
     }
   };
-  var decodeJson3 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeForeignObject2(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons2(/* @__PURE__ */ gDecodeJsonCons1(gDecodeJsonCons5)({
+  var decodeJson5 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeForeignObject2(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons2(/* @__PURE__ */ gDecodeJsonCons1(gDecodeJsonCons6)({
     reflectSymbol: function() {
       return "package";
     }
   })()())(dependsIsSymbol)()())()));
-  var decodeJson4 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeForeignObject2(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons2(gDecodeJsonNil)(dependsIsSymbol)()())()));
+  var decodeJson6 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeForeignObject2(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons2(gDecodeJsonNil)(dependsIsSymbol)()())()));
   var locIsSymbol = {
     reflectSymbol: function() {
       return "loc";
     }
   };
-  var decodeJson5 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(/* @__PURE__ */ decodeArray2(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons4(gDecodeJsonCons5)(locIsSymbol)()())())))(gDecodeJsonNil)(locIsSymbol)()())());
-  var decodeJson6 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeForeignObject2(/* @__PURE__ */ decodeArray2(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons1(/* @__PURE__ */ gDecodeJsonCons22({
-    reflectSymbol: function() {
-      return "title";
-    }
-  })()())({
-    reflectSymbol: function() {
-      return "kind";
-    }
-  })()())())));
+  var decodeJson7 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons(/* @__PURE__ */ decodeFieldId(/* @__PURE__ */ decodeArray2(/* @__PURE__ */ decodeRecord(/* @__PURE__ */ gDecodeJsonCons5(gDecodeJsonCons6)(locIsSymbol)()())())))(gDecodeJsonNil)(locIsSymbol)()())());
+  var decodeJson8 = /* @__PURE__ */ decodeJson(/* @__PURE__ */ decodeForeignObject2(decodeArray3));
   var updateNodeWithTreeData = function(treePositions) {
     return function(reachableIds) {
       return function(node) {
@@ -8034,7 +8038,7 @@
             return node;
           }
           ;
-          throw new Error("Failed pattern match at Data.Loader (line 462, column 19 - line 475, column 22): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at Data.Loader (line 501, column 19 - line 514, column 22): " + [v.constructor.name]);
         })();
         var inTree = member4(node.id)(reachableIds);
         return {
@@ -8104,8 +8108,8 @@
   var markLinkType = function(spanningTreeEdges) {
     return function(link3) {
       var edge = new Tuple(link3.source, link3.target);
-      var $336 = member1(edge)(spanningTreeEdges);
-      if ($336) {
+      var $358 = member1(edge)(spanningTreeEdges);
+      if ($358) {
         return {
           source: link3.source,
           target: link3.target,
@@ -8135,7 +8139,7 @@
         return new Right(v1.value0);
       }
       ;
-      throw new Error("Failed pattern match at Data.Loader (line 225, column 1 - line 225, column 62): " + [v.constructor.name, v1.constructor.name]);
+      throw new Error("Failed pattern match at Data.Loader (line 231, column 1 - line 231, column 62): " + [v.constructor.name, v1.constructor.name]);
     };
   };
   var flattenTreeToPositionMap = function(v) {
@@ -8178,10 +8182,10 @@
         return 0;
       }
       ;
-      throw new Error("Failed pattern match at Data.Loader (line 413, column 7 - line 415, column 21): " + [v1.constructor.name]);
+      throw new Error("Failed pattern match at Data.Loader (line 452, column 7 - line 454, column 21): " + [v1.constructor.name]);
     }
     ;
-    throw new Error("Failed pattern match at Data.Loader (line 408, column 3 - line 415, column 21): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Data.Loader (line 447, column 3 - line 454, column 21): " + [v.constructor.name]);
   };
   var fetchJson = function(url2) {
     return bind4(get2(json)(url2))(function(result) {
@@ -8194,7 +8198,7 @@
           return new Right(result.value0.body);
         }
         ;
-        throw new Error("Failed pattern match at Data.Loader (line 221, column 10 - line 223, column 42): " + [result.constructor.name]);
+        throw new Error("Failed pattern match at Data.Loader (line 227, column 10 - line 229, column 42): " + [result.constructor.name]);
       })());
     });
   };
@@ -8208,7 +8212,7 @@
       return 0;
     }
     ;
-    throw new Error("Failed pattern match at Data.Loader (line 693, column 14 - line 695, column 15): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Data.Loader (line 732, column 14 - line 734, column 15): " + [v.constructor.name]);
   };
   var stringHash = function(s) {
     var chars = toCharArray(s);
@@ -8294,8 +8298,8 @@
     return function(edges) {
       var getChildren = function(nodeId) {
         return mapMaybe(function(v) {
-          var $351 = v.value0 === nodeId;
-          if ($351) {
+          var $373 = v.value0 === nodeId;
+          if ($373) {
             return new Just(v.value1);
           }
           ;
@@ -8326,7 +8330,7 @@
             return insert6(v1.value0)(targets)(acc);
           }
           ;
-          throw new Error("Failed pattern match at Data.Loader (line 659, column 5 - line 665, column 42): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Data.Loader (line 698, column 5 - line 704, column 42): " + [v1.constructor.name]);
         };
       };
       return foldl12(addTargets)(empty5)(toUnfoldable5(modulesObj));
@@ -8391,7 +8395,7 @@
           })(v.value1.depends);
         }
         ;
-        throw new Error("Failed pattern match at Data.Loader (line 640, column 5 - line 651, column 25): " + [v1.constructor.name]);
+        throw new Error("Failed pattern match at Data.Loader (line 679, column 5 - line 690, column 25): " + [v1.constructor.name]);
       };
       return concat(map18(mkLinks)(toUnfoldable5(modulesObj)));
     };
@@ -8507,10 +8511,10 @@
               return bind12(packagesResult)(function(packagesJson) {
                 return bind12(locResult)(function(locJson) {
                   return bind12(declarationsResult)(function(declarationsJson) {
-                    return bind12(mapLeft(printJsonDecodeError)(decodeJson3(modulesJson)))(function(v) {
-                      return bind12(mapLeft(printJsonDecodeError)(decodeJson4(packagesJson)))(function(v1) {
-                        return bind12(mapLeft(printJsonDecodeError)(decodeJson5(locJson)))(function(v2) {
-                          return bind12(mapLeft(printJsonDecodeError)(decodeJson6(declarationsJson)))(function(v3) {
+                    return bind12(mapLeft(printJsonDecodeError)(decodeJson5(modulesJson)))(function(v) {
+                      return bind12(mapLeft(printJsonDecodeError)(decodeJson6(packagesJson)))(function(v1) {
+                        return bind12(mapLeft(printJsonDecodeError)(decodeJson7(locJson)))(function(v2) {
+                          return bind12(mapLeft(printJsonDecodeError)(decodeJson8(declarationsJson)))(function(v3) {
                             var locMap = buildLocMap(v2.loc);
                             return new Right(transformToModel(v)(v1)(locMap)(v3));
                           });

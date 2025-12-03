@@ -29,6 +29,10 @@ data Route
   | DeclarationsSummaryJson
   | ModuleMetricsJson
   | CommitTimelineJson
+  | FunctionCallsJson
+  -- Granular module endpoints (on-demand loading)
+  | GetModuleDeclarations String
+  | GetModuleFunctionCalls String
   -- Project/Snapshot API
   | ListProjects
   | GetProject Int
@@ -48,6 +52,10 @@ route = root $ sum
   , "DeclarationsSummaryJson": path "data/spago-data/declarations-summary.json" noArgs
   , "ModuleMetricsJson": path "data/module-metrics.json" noArgs
   , "CommitTimelineJson": path "data/commit-timeline.json" noArgs
+  , "FunctionCallsJson": path "data/function-calls.json" noArgs
+  -- Granular module endpoints (flat URLs for routing-duplex compatibility)
+  , "GetModuleDeclarations": path "api/module-declarations" segment
+  , "GetModuleFunctionCalls": path "api/module-function-calls" segment
   -- Project/Snapshot API
   , "ListProjects": path "api/projects" noArgs
   , "GetProject": path "api/projects" (int segment)
@@ -84,6 +92,10 @@ main = launchAff_ do
     log "  GET /api/projects/:id       - Get project with snapshots"
     log "  GET /api/snapshots/:id      - Get snapshot details"
     log ""
+    log "Granular module endpoints:"
+    log "  GET /api/module-declarations/:name    - Declarations for a module"
+    log "  GET /api/module-function-calls/:name  - Function calls for a module"
+    log ""
     log "Legacy endpoints (uses latest snapshot):"
     log "  GET /data/spago-data/modules.json"
     log "  GET /data/spago-data/packages.json"
@@ -100,6 +112,10 @@ main = launchAff_ do
     DeclarationsSummaryJson -> withLatestSnapshot db \sid -> Legacy.declarationsSummaryJson db sid
     ModuleMetricsJson -> withLatestSnapshot db \sid -> Legacy.moduleMetricsJson db sid
     CommitTimelineJson -> withLatestSnapshot db \sid -> Legacy.commitTimelineJson db sid
+    FunctionCallsJson -> withLatestSnapshot db \sid -> Legacy.functionCallsJson db sid
+    -- Granular module endpoints
+    GetModuleDeclarations modName -> withLatestSnapshot db \sid -> Legacy.moduleDeclarationsJson db sid modName
+    GetModuleFunctionCalls modName -> withLatestSnapshot db \sid -> Legacy.moduleFunctionCallsJson db sid modName
     -- Project/Snapshot API
     ListProjects -> Projects.listProjects db
     GetProject pid -> Projects.getProject db pid

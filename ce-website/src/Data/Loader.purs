@@ -13,6 +13,12 @@ module Data.Loader
   , fetchProjects
   , fetchProjectWithSnapshots
   , fetchFunctionCalls
+  -- Granular on-demand fetchers
+  , fetchModuleDeclarations
+  , fetchModuleFunctionCalls
+  , ModuleDeclarationsResponse
+  , ModuleFunctionCallsResponse
+  -- Types
   , LoadedModel
   , Project
   , Snapshot
@@ -277,6 +283,39 @@ fetchFunctionCalls = do
   pure $ do
     json <- result
     response :: FunctionCallsResponse <- decodeJson json # mapLeft printJsonDecodeError
+    Right response.functions
+
+-- =============================================================================
+-- Granular On-Demand Fetchers
+-- =============================================================================
+
+-- | Response type for module declarations endpoint
+type ModuleDeclarationsResponse =
+  { declarations :: Array Declaration
+  }
+
+-- | Response type for module function-calls endpoint
+type ModuleFunctionCallsResponse =
+  { module :: String
+  , functions :: Object FunctionInfo
+  }
+
+-- | Fetch declarations for a specific module
+fetchModuleDeclarations :: String -> Aff (Either String (Array Declaration))
+fetchModuleDeclarations moduleName = do
+  result <- fetchJson (apiBaseUrl <> "/api/module-declarations/" <> moduleName)
+  pure $ do
+    json <- result
+    response :: ModuleDeclarationsResponse <- decodeJson json # mapLeft printJsonDecodeError
+    Right response.declarations
+
+-- | Fetch function calls for a specific module
+fetchModuleFunctionCalls :: String -> Aff (Either String (Object FunctionInfo))
+fetchModuleFunctionCalls moduleName = do
+  result <- fetchJson (apiBaseUrl <> "/api/module-function-calls/" <> moduleName)
+  pure $ do
+    json <- result
+    response :: ModuleFunctionCallsResponse <- decodeJson json # mapLeft printJsonDecodeError
     Right response.functions
 
 -- | Load model for a specific snapshot ID

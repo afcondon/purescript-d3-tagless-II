@@ -157,3 +157,64 @@ export function buildCommitTimelineJson(metaRows) {
     return JSON.stringify(result);
   };
 }
+
+// =============================================================================
+// function-calls.json builder
+// =============================================================================
+
+export function buildFunctionCallsJson(rows) {
+  // Build functions object: { "Module.func": { module, name, calls, calledBy } }
+  const functions = {};
+
+  for (const row of rows) {
+    const key = `${row.module}.${row.name}`;
+    functions[key] = {
+      module: row.module,
+      name: row.name,
+      calls: JSON.parse(row.calls || '[]'),
+      calledBy: JSON.parse(row.called_by || '[]')
+    };
+  }
+
+  const result = {
+    functions: functions
+  };
+
+  return JSON.stringify(result);
+}
+
+// =============================================================================
+// module declarations builder (granular endpoint)
+// =============================================================================
+
+export function buildModuleDeclarationsJson(rows) {
+  // Simple array of declarations: [{ kind, title }]
+  const declarations = rows.map(row => ({
+    kind: row.kind,
+    title: row.title
+  }));
+
+  return JSON.stringify({ declarations });
+}
+
+// =============================================================================
+// module function-calls builder (granular endpoint)
+// =============================================================================
+
+export function buildModuleFunctionCallsJson(moduleName) {
+  return function(rows) {
+    // Build functions object for this module: { "funcName": { calls, calledBy } }
+    const functions = {};
+
+    for (const row of rows) {
+      functions[row.name] = {
+        module: moduleName,
+        name: row.name,
+        calls: JSON.parse(row.calls || '[]'),
+        calledBy: JSON.parse(row.called_by || '[]')
+      };
+    }
+
+    return JSON.stringify({ module: moduleName, functions });
+  };
+}
