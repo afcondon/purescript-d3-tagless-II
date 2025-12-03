@@ -6089,7 +6089,7 @@
         return new Right(v1.value0);
       }
       ;
-      throw new Error("Failed pattern match at Data.Loader (line 104, column 1 - line 104, column 62): " + [v.constructor.name, v1.constructor.name]);
+      throw new Error("Failed pattern match at Data.Loader (line 110, column 1 - line 110, column 62): " + [v.constructor.name, v1.constructor.name]);
     };
   };
   var fetchJson = function(url2) {
@@ -6103,7 +6103,7 @@
           return new Right(result.value0.body);
         }
         ;
-        throw new Error("Failed pattern match at Data.Loader (line 100, column 10 - line 102, column 42): " + [result.constructor.name]);
+        throw new Error("Failed pattern match at Data.Loader (line 106, column 10 - line 108, column 42): " + [result.constructor.name]);
       })());
     });
   };
@@ -6117,7 +6117,7 @@
       return 0;
     }
     ;
-    throw new Error("Failed pattern match at Data.Loader (line 296, column 14 - line 298, column 15): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Data.Loader (line 302, column 14 - line 304, column 15): " + [v.constructor.name]);
   };
   var stringHash = function(s) {
     var chars = toCharArray(s);
@@ -6226,7 +6226,7 @@
           })(v.value1.depends);
         }
         ;
-        throw new Error("Failed pattern match at Data.Loader (line 278, column 5 - line 286, column 30): " + [v1.constructor.name]);
+        throw new Error("Failed pattern match at Data.Loader (line 284, column 5 - line 292, column 30): " + [v1.constructor.name]);
       };
       return concat(map10(mkLinks)(toUnfoldable5(modulesObj)));
     };
@@ -6278,26 +6278,29 @@
       };
     };
   };
-  var loadModel = /* @__PURE__ */ bind3(/* @__PURE__ */ fetchJson("/data/spago-data/modules.json"))(function(modulesResult) {
-    return bind3(fetchJson("/data/spago-data/packages.json"))(function(packagesResult) {
-      return bind3(fetchJson("/data/spago-data/LOC.json"))(function(locResult) {
-        return pure4(bind12(modulesResult)(function(modulesJson) {
-          return bind12(packagesResult)(function(packagesJson) {
-            return bind12(locResult)(function(locJson) {
-              return bind12(mapLeft(printJsonDecodeError)(decodeJson2(modulesJson)))(function(v) {
-                return bind12(mapLeft(printJsonDecodeError)(decodeJson1(packagesJson)))(function(v1) {
-                  return bind12(mapLeft(printJsonDecodeError)(decodeJson22(locJson)))(function(v2) {
-                    var locMap = buildLocMap(v2.loc);
-                    return new Right(transformToModel(v)(v1)(locMap));
+  var apiBaseUrl = "http://localhost:8080";
+  var loadModel = /* @__PURE__ */ (function() {
+    return bind3(fetchJson(apiBaseUrl + "/data/spago-data/modules.json"))(function(modulesResult) {
+      return bind3(fetchJson(apiBaseUrl + "/data/spago-data/packages.json"))(function(packagesResult) {
+        return bind3(fetchJson(apiBaseUrl + "/data/spago-data/LOC.json"))(function(locResult) {
+          return pure4(bind12(modulesResult)(function(modulesJson) {
+            return bind12(packagesResult)(function(packagesJson) {
+              return bind12(locResult)(function(locJson) {
+                return bind12(mapLeft(printJsonDecodeError)(decodeJson2(modulesJson)))(function(v) {
+                  return bind12(mapLeft(printJsonDecodeError)(decodeJson1(packagesJson)))(function(v1) {
+                    return bind12(mapLeft(printJsonDecodeError)(decodeJson22(locJson)))(function(v2) {
+                      var locMap = buildLocMap(v2.loc);
+                      return new Right(transformToModel(v)(v1)(locMap));
+                    });
                   });
                 });
               });
             });
-          });
-        }));
+          }));
+        });
       });
     });
-  });
+  })();
 
   // output/Effect.Aff.Class/index.js
   var monadAffAff = {

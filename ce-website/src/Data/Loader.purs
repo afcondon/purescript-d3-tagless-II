@@ -1,10 +1,11 @@
 -- | Data loading and transformation
 -- |
--- | Loads JSON data and transforms into SimNode/SimLink arrays with
+-- | Loads JSON data from ce-server API and transforms into SimNode/SimLink arrays with
 -- | pre-calculated positions for Grid, Orbit, and Tree scenes.
 module Data.Loader
   ( loadModel
   , LoadedModel
+  , apiBaseUrl
   ) where
 
 import Prelude
@@ -30,6 +31,11 @@ import Effect.Aff (Aff)
 import Foreign.Object (Object)
 import Foreign.Object as Object
 import Types (SimNode, SimLink, NodeType(..), LinkType(..), Package)
+
+-- | API base URL for ce-server
+-- | TODO: Make this configurable via environment or runtime config
+apiBaseUrl :: String
+apiBaseUrl = "http://localhost:8080"
 
 -- =============================================================================
 -- Types
@@ -71,12 +77,12 @@ type LoadedModel =
 -- Loading
 -- =============================================================================
 
--- | Load all data files and transform to model
+-- | Load all data from ce-server API and transform to model
 loadModel :: Aff (Either String LoadedModel)
 loadModel = do
-  modulesResult <- fetchJson "/data/spago-data/modules.json"
-  packagesResult <- fetchJson "/data/spago-data/packages.json"
-  locResult <- fetchJson "/data/spago-data/LOC.json"
+  modulesResult <- fetchJson (apiBaseUrl <> "/data/spago-data/modules.json")
+  packagesResult <- fetchJson (apiBaseUrl <> "/data/spago-data/packages.json")
+  locResult <- fetchJson (apiBaseUrl <> "/data/spago-data/LOC.json")
 
   pure $ do
     modulesJson <- modulesResult
