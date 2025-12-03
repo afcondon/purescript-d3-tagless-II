@@ -17,7 +17,7 @@ import Data.Loader (Declaration, DeclarationsMap)
 import Effect (Effect)
 import Effect.Class.Console (log)
 import Foreign.Object as Object
-import PSD3.Layout.Hierarchy.Pack (HierarchyData(..), PackNode(..), defaultPackConfig, hierarchy, pack)
+import D3.Layout.Hierarchy.Pack (HierarchyData(..), PackNode(..), defaultPackConfig, hierarchy, pack)
 import Types (SimNode)
 
 -- | FFI for rendering bubble pack with proper data binding

@@ -1,9 +1,9 @@
--- | PSD3.Layout.Hierarchy.EdgeBundle.Hierarchy
+-- | D3.Layout.Hierarchy.EdgeBundle.Hierarchy
 -- |
 -- | Build a tree hierarchy from flat dot-notation names.
 -- | This implements the same algorithm as D3's Observable example:
 -- | names like "flare.animate.Easing" become nested tree nodes.
-module PSD3.Layout.Hierarchy.EdgeBundle.Hierarchy
+module D3.Layout.Hierarchy.EdgeBundle.Hierarchy
   ( buildHierarchy
   , TreeNode(..)
   , getTreeNodeName

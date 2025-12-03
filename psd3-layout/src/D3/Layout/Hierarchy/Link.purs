@@ -1,4 +1,4 @@
-module PSD3.Layout.Hierarchy.Link
+module D3.Layout.Hierarchy.Link
   ( LinkStyle(..)
   , linkStepHorizontal
   , linkStepVertical

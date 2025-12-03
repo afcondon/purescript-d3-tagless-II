@@ -1,4 +1,4 @@
--- | PSD3.Layout.Hierarchy.EdgeBundle.BundleCurve
+-- | D3.Layout.Hierarchy.EdgeBundle.BundleCurve
 -- |
 -- | Bundle curve generator for hierarchical edge bundling.
 -- | Implements Danny Holten's algorithm with adjustable beta (tension) parameter.
@@ -7,7 +7,7 @@
 -- | - beta = 0: straight line from source to target
 -- | - beta = 1: curve goes through all ancestor nodes
 -- | - beta = 0.85: D3's default, good balance of bundling and readability
-module PSD3.Layout.Hierarchy.EdgeBundle.BundleCurve
+module D3.Layout.Hierarchy.EdgeBundle.BundleCurve
   ( bundlePath
   , bundlePathRadial
   , bundlePathCartesian

@@ -1,9 +1,9 @@
--- | PSD3.Layout.Sankey.Types
+-- | D3.Layout.Sankey.Types
 -- |
 -- | Pure PureScript implementation of Sankey diagram layout types.
 -- | This replaces the FFI-based approach with first-class PureScript types
 -- | that integrate naturally with the phantom type system.
-module PSD3.Layout.Sankey.Types
+module D3.Layout.Sankey.Types
   ( LinkCSVRow
   , NodeID(..)
   , LinkID(..)

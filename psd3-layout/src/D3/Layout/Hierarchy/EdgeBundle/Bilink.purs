@@ -1,10 +1,10 @@
--- | PSD3.Layout.Hierarchy.EdgeBundle.Bilink
+-- | D3.Layout.Hierarchy.EdgeBundle.Bilink
 -- |
 -- | Create bidirectional links between nodes based on imports.
 -- | This implements D3's bilink pattern:
 -- | - Each leaf node gets an "outgoing" array (imports it makes)
 -- | - Each leaf node gets an "incoming" array (nodes that import it)
-module PSD3.Layout.Hierarchy.EdgeBundle.Bilink
+module D3.Layout.Hierarchy.EdgeBundle.Bilink
   ( BilinkedTree
   , BilinkedNode(..)
   , Link(..)
@@ -27,8 +27,8 @@ import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
-import PSD3.Layout.Hierarchy.EdgeBundle.Hierarchy (TreeNode(..), getFullName, getTreeNodeChildren, isLeaf, leaves)
-import PSD3.Layout.Hierarchy.EdgeBundle.Types (ImportedNode)
+import D3.Layout.Hierarchy.EdgeBundle.Hierarchy (TreeNode(..), getFullName, getTreeNodeChildren, isLeaf, leaves)
+import D3.Layout.Hierarchy.EdgeBundle.Types (ImportedNode)
 
 -- | A link between two nodes
 newtype Link = Link

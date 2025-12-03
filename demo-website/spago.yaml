@@ -39,6 +39,7 @@ package:
     - prelude
     - profunctor
     - profunctor-lenses
+    - psd3-layout
     - psd3-selection
     - psd3-simulation
     - psci-support

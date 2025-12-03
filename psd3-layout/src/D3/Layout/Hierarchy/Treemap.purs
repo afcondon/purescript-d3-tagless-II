@@ -1,8 +1,8 @@
--- | PSD3.Layout.Hierarchy.Treemap
+-- | D3.Layout.Hierarchy.Treemap
 -- |
 -- | Pure PureScript implementation of D3's treemap layout.
 -- | Partitions rectangles to represent hierarchical data with area proportional to value.
-module PSD3.Layout.Hierarchy.Treemap
+module D3.Layout.Hierarchy.Treemap
   ( TreemapNode(..)
   , TileFunction
   , TreemapConfig
@@ -23,7 +23,7 @@ import Data.Array as Array
 import Data.Foldable (foldl)
 import Data.Maybe (Maybe(..))
 import Data.Number (sqrt)
-import PSD3.Layout.Hierarchy.Types (ValuedNode(..))
+import D3.Layout.Hierarchy.Types (ValuedNode(..))
 
 -- | Node with treemap layout coordinates
 -- | Extends ValuedNode with x0, y0, x1, y1 bounds

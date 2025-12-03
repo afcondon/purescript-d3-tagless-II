@@ -30,6 +30,7 @@ package:
     - partial
     - prelude
     - profunctor
+    - psd3-tree
     - strings
     - transformers
     - tuples

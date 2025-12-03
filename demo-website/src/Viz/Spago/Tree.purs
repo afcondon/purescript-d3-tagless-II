@@ -6,7 +6,7 @@ import D3.Viz.Spago.Files (LinkType(..), SpagoLink, isP2P_Link)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, TreeFields, spagoGraphConfig)
 import PSD3.Data.Graph.Algorithms (getReachableNodes)
 import PSD3.Data.Node (NodeID)
-import PSD3.Layout.Hierarchy.Tree4 as Tree4
+import D3.Layout.Hierarchy.Tree4 as Tree4
 import Data.Array (elem, filter, partition)
 import Data.Number (pi)
 import Data.Array as Array

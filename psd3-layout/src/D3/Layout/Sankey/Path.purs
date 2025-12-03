@@ -1,8 +1,8 @@
--- | PSD3.Layout.Sankey.Path
+-- | D3.Layout.Sankey.Path
 -- |
 -- | SVG path generation for Sankey link curves.
 -- | Generates the characteristic curved ribbons for flow visualization.
-module PSD3.Layout.Sankey.Path
+module D3.Layout.Sankey.Path
   ( findNode
   , generateLinkPath
   , generateStraightPath
@@ -10,7 +10,7 @@ module PSD3.Layout.Sankey.Path
 
 import Prelude
 import Data.Number.Format (toString)
-import PSD3.Layout.Sankey.Types (SankeyLink, SankeyNode, NodeID)
+import D3.Layout.Sankey.Types (SankeyLink, SankeyNode, NodeID)
 import Data.Array (find)
 import Data.Maybe (Maybe(..))
 

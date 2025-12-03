@@ -37,7 +37,7 @@ import Foreign.Object (Object)
 import Foreign.Object as Object
 import PSD3.Data.Graph as Graph
 import PSD3.Data.Graph.Algorithms as Algorithms
-import PSD3.Layout.Hierarchy.Tree4 as Tree4
+import D3.Layout.Hierarchy.Tree4 as Tree4
 import Types (SimNode, SimLink, NodeType(..), LinkType(..), Package)
 
 -- =============================================================================

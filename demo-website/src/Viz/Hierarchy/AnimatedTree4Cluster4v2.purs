@@ -18,8 +18,8 @@ import PSD3v2.Capabilities.Transition (withTransition)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), SEmpty)
 import PSD3v2.Transition.Types (TransitionConfig, transition)
-import PSD3.Layout.Hierarchy.Cluster4 (cluster, defaultClusterConfig)
-import PSD3.Layout.Hierarchy.Tree4 (treeWithSorting, defaultTreeConfig)
+import D3.Layout.Hierarchy.Cluster4 (cluster, defaultClusterConfig)
+import D3.Layout.Hierarchy.Tree4 (treeWithSorting, defaultTreeConfig)
 import Web.DOM.Element (Element)
 
 -- | Layout type

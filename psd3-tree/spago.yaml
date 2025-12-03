@@ -1,0 +1,14 @@
+package:
+  name: psd3-tree
+  description: Rose tree data structure for PureScript D3 visualization libraries
+  publish:
+    version: 0.1.0
+    license: MIT
+    location:
+      githubOwner: afcondon
+      githubRepo: purescript-psd3-tree
+  dependencies:
+    - foldable-traversable
+    - lists
+    - maybe
+    - prelude

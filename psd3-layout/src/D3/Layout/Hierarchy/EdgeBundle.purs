@@ -1,4 +1,4 @@
--- | PSD3.Layout.Hierarchy.EdgeBundle
+-- | D3.Layout.Hierarchy.EdgeBundle
 -- |
 -- | Hierarchical edge bundling layout for visualizing dependencies in hierarchical data.
 -- |
@@ -14,7 +14,7 @@
 -- | ## Example Usage:
 -- |
 -- | ```purescript
--- | import PSD3.Layout.Hierarchy.EdgeBundle as EdgeBundle
+-- | import D3.Layout.Hierarchy.EdgeBundle as EdgeBundle
 -- |
 -- | -- Given flat data with imports
 -- | nodes :: Array { name :: String, size :: Number, imports :: Array String }
@@ -32,7 +32,7 @@
 -- | --   nodes: positioned nodes for rendering
 -- | --   links: paths between connected nodes
 -- | ```
-module PSD3.Layout.Hierarchy.EdgeBundle
+module D3.Layout.Hierarchy.EdgeBundle
   ( -- * Main API
     edgeBundle
   , EdgeBundleConfig
@@ -51,14 +51,14 @@ import Prelude
 import Data.Array as Array
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Number (cos, sin, pi)
-import PSD3.Layout.Hierarchy.EdgeBundle.Hierarchy as Hierarchy
-import PSD3.Layout.Hierarchy.EdgeBundle.Hierarchy (TreeNode(..), buildHierarchy, pathBetween, leaves, findNode, getFullName)
-import PSD3.Layout.Hierarchy.EdgeBundle.Bilink as Bilink
-import PSD3.Layout.Hierarchy.EdgeBundle.Bilink (BilinkedNode(..), Link(..), bilink, getOutgoing, getBilinkedFullName, allBilinkedNodes)
-import PSD3.Layout.Hierarchy.EdgeBundle.RadialCluster as RadialCluster
-import PSD3.Layout.Hierarchy.EdgeBundle.RadialCluster (RadialNode(..), radialCluster, toCartesian, RadialLayoutConfig)
-import PSD3.Layout.Hierarchy.EdgeBundle.BundleCurve as BundleCurve
-import PSD3.Layout.Hierarchy.EdgeBundle.BundleCurve (bundlePathRadial, BundlePoint)
+import D3.Layout.Hierarchy.EdgeBundle.Hierarchy as Hierarchy
+import D3.Layout.Hierarchy.EdgeBundle.Hierarchy (TreeNode(..), buildHierarchy, pathBetween, leaves, findNode, getFullName)
+import D3.Layout.Hierarchy.EdgeBundle.Bilink as Bilink
+import D3.Layout.Hierarchy.EdgeBundle.Bilink (BilinkedNode(..), Link(..), bilink, getOutgoing, getBilinkedFullName, allBilinkedNodes)
+import D3.Layout.Hierarchy.EdgeBundle.RadialCluster as RadialCluster
+import D3.Layout.Hierarchy.EdgeBundle.RadialCluster (RadialNode(..), radialCluster, toCartesian, RadialLayoutConfig)
+import D3.Layout.Hierarchy.EdgeBundle.BundleCurve as BundleCurve
+import D3.Layout.Hierarchy.EdgeBundle.BundleCurve (bundlePathRadial, BundlePoint)
 
 -- | Configuration for edge bundle layout
 type EdgeBundleConfig a =

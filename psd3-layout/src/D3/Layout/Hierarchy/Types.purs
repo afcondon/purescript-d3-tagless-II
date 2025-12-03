@@ -1,8 +1,8 @@
--- | PSD3.Layout.Hierarchy.Types
+-- | D3.Layout.Hierarchy.Types
 -- |
 -- | Pure PureScript implementation of D3 hierarchy types.
 -- | Follows D3's conceptual model but uses separate types for each processing phase.
-module PSD3.Layout.Hierarchy.Types
+module D3.Layout.Hierarchy.Types
   ( HierarchyNode(..)
   , ValuedNode(..)
   , getData

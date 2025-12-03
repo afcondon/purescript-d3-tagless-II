@@ -1,8 +1,8 @@
--- | PSD3.Layout.Sankey.CSV
+-- | D3.Layout.Sankey.CSV
 -- |
 -- | CSV parsing utilities for Sankey diagram data.
 -- | Parses CSV files with source,target,value format.
-module PSD3.Layout.Sankey.CSV
+module D3.Layout.Sankey.CSV
   ( parseSankeyCSV
   , parseLine
   ) where
@@ -14,7 +14,7 @@ import Data.Maybe (Maybe(..))
 import Data.Number as Number
 import Data.String (Pattern(..), split, trim)
 import Data.String.Common (null) as String
-import PSD3.Layout.Sankey.Types (LinkCSVRow)
+import D3.Layout.Sankey.Types (LinkCSVRow)
 
 -- | Parse CSV string into array of LinkCSVRow
 -- | Expected format: "source,target,value" with header row

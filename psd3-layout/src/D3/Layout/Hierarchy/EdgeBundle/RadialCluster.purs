@@ -1,4 +1,4 @@
--- | PSD3.Layout.Hierarchy.EdgeBundle.RadialCluster
+-- | D3.Layout.Hierarchy.EdgeBundle.RadialCluster
 -- |
 -- | Radial cluster layout for edge bundling.
 -- | Positions leaf nodes around a circle and internal nodes at the center.
@@ -6,7 +6,7 @@
 -- | The layout uses (angle, radius) coordinates:
 -- | - angle: position around the circle (0 to 2π radians)
 -- | - radius: distance from center (internal nodes closer to center, leaves at edge)
-module PSD3.Layout.Hierarchy.EdgeBundle.RadialCluster
+module D3.Layout.Hierarchy.EdgeBundle.RadialCluster
   ( RadialLayoutConfig
   , defaultRadialConfig
   , RadialNode(..)
@@ -22,7 +22,7 @@ import Data.Foldable (foldl)
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Number (cos, sin, pi)
-import PSD3.Layout.Hierarchy.EdgeBundle.Hierarchy (TreeNode(..), getFullName, getTreeNodeChildren, isLeaf, leaves)
+import D3.Layout.Hierarchy.EdgeBundle.Hierarchy (TreeNode(..), getFullName, getTreeNodeChildren, isLeaf, leaves)
 
 -- | Configuration for radial cluster layout
 type RadialLayoutConfig =

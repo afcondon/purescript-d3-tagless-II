@@ -1,10 +1,10 @@
--- | PSD3.Layout.Hierarchy.Cluster4
+-- | D3.Layout.Hierarchy.Cluster4
 -- |
 -- | Cluster (dendrogram) layout using Data.Tree
 -- | Uses Reingold-Tilford algorithm for x-positioning (like Tree4)
 -- | But positions nodes by height (distance from leaves) instead of depth
 -- | Result: All leaf nodes appear at the same level (y = 0)
-module PSD3.Layout.Hierarchy.Cluster4
+module D3.Layout.Hierarchy.Cluster4
   ( ClusterConfig
   , defaultClusterConfig
   , cluster

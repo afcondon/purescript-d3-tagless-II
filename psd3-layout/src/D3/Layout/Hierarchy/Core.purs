@@ -1,8 +1,8 @@
--- | PSD3.Layout.Hierarchy.Core
+-- | D3.Layout.Hierarchy.Core
 -- |
 -- | Pure PureScript implementation of D3 hierarchy core functions.
 -- | Matches D3's algorithms exactly but using pure functional style.
-module PSD3.Layout.Hierarchy.Core
+module D3.Layout.Hierarchy.Core
   ( hierarchy
   , getHeight
   , sum
@@ -19,7 +19,7 @@ import Prelude
 import Data.Array as Array
 import Data.Foldable (foldl, foldr, maximum)
 import Data.Maybe (Maybe(..), fromMaybe)
-import PSD3.Layout.Hierarchy.Types (HierarchyNode(..), ValuedNode(..), getChildren, getValue)
+import D3.Layout.Hierarchy.Types (HierarchyNode(..), ValuedNode(..), getChildren, getValue)
 
 -- | Construct a hierarchy from user data
 -- | Matches D3's hierarchy() function

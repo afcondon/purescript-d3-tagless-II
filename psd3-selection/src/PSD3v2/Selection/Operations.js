@@ -13,21 +13,10 @@ export function getElementData_(element) {
 }
 
 // Set data on an element (D3-style __data__ property)
-let bindDebugCount = 0;
 export function setElementData_(datum) {
   return function(element) {
     return function() {
       element.__data__ = datum;
-
-      // DEBUG: Log when binding node 93 to check if it has the marker
-      if (datum?.id === 93 && bindDebugCount === 0) {
-        const hasMarker = datum.__simMarker__ === true;
-        console.log(`[BindData] node93 bound to element, hasMarker=${hasMarker}, x=${datum.x?.toFixed(1)}`);
-        if (!hasMarker) {
-          console.log(`[BindData] PROBLEM: node93 does NOT have __simMarker__ at bind time!`);
-        }
-        bindDebugCount++;
-      }
     };
   };
 }

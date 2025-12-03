@@ -1,4 +1,4 @@
-module PSD3.Layout.Hierarchy.Pack
+module D3.Layout.Hierarchy.Pack
   ( CircleId
   , Circle
   , PackState

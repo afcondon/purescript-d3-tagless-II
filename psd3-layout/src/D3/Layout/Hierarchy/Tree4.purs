@@ -1,8 +1,8 @@
--- | PSD3.Layout.Hierarchy.Tree4
+-- | D3.Layout.Hierarchy.Tree4
 -- |
 -- | Reingold-Tilford tree layout adapted from the elegant Haskell implementation
 -- | Translates binary tree algorithm to n-ary trees (Data.Tree)
-module PSD3.Layout.Hierarchy.Tree4
+module D3.Layout.Hierarchy.Tree4
   ( TreeConfig
   , defaultTreeConfig
   , withLayerScale

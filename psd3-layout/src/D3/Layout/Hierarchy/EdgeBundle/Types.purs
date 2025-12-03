@@ -1,4 +1,4 @@
--- | PSD3.Layout.Hierarchy.EdgeBundle.Types
+-- | D3.Layout.Hierarchy.EdgeBundle.Types
 -- |
 -- | Types for hierarchical edge bundling visualization.
 -- | Based on Danny Holten's algorithm and D3's implementation.
@@ -7,7 +7,7 @@
 -- | 1. Arranging nodes in a radial cluster layout
 -- | 2. Drawing curved edges that bundle together based on shared ancestry
 -- | 3. The tighter the bundle (higher beta), the more edges follow tree structure
-module PSD3.Layout.Hierarchy.EdgeBundle.Types
+module D3.Layout.Hierarchy.EdgeBundle.Types
   ( -- * Input types
     ImportedNode
   , parseImportedNode

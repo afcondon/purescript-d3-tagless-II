@@ -1,11 +1,11 @@
--- | PSD3.Layout.Sankey.Compute
+-- | D3.Layout.Sankey.Compute
 -- |
 -- | Pure PureScript implementation of Sankey diagram layout computation.
 -- | Uses State monad to thread graph model through all layout functions.
 -- | Starts with Array SankeyLinkInput and generates nodes dynamically.
 -- |
 -- | Reference: https://github.com/d3/d3-sankey (ISC License)
-module PSD3.Layout.Sankey.Compute
+module D3.Layout.Sankey.Compute
   ( epsilon
   , computeLayout
   , computeLayoutWithConfig
@@ -25,7 +25,7 @@ import Data.Number (pow)
 import Data.Set as Set
 import Effect.Console (log)
 import Effect.Unsafe (unsafePerformEffect)
-import PSD3.Layout.Sankey.Types (Alignment(..), DependencyMap, LinkCSVRow, LinkColorMode(..), LinkID(..), NodeID(..), SankeyConfig, SankeyGraphModel, SankeyLayoutResult, SankeyLink, SankeyNode, defaultSankeyConfig, initialSankeyGraphModel, initialiseSankeyLink, initialiseSankeyNode)
+import D3.Layout.Sankey.Types (Alignment(..), DependencyMap, LinkCSVRow, LinkColorMode(..), LinkID(..), NodeID(..), SankeyConfig, SankeyGraphModel, SankeyLayoutResult, SankeyLink, SankeyNode, defaultSankeyConfig, initialSankeyGraphModel, initialiseSankeyLink, initialiseSankeyNode)
 
 -- Constants
 epsilon :: Number

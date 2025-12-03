@@ -10,9 +10,9 @@ import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import PSD3.Shared.Data (HierData, getName, getValue, getChildren, loadDataFile, DataFile(..), parseFlareJson)
-import PSD3.Layout.Hierarchy.Core (hierarchy, sum) as H
-import PSD3.Layout.Hierarchy.Types (ValuedNode(..))
-import PSD3.Layout.Hierarchy.Treemap (TreemapNode(..), defaultTreemapConfig, treemap, squarify, phi)
+import D3.Layout.Hierarchy.Core (hierarchy, sum) as H
+import D3.Layout.Hierarchy.Types (ValuedNode(..))
+import D3.Layout.Hierarchy.Treemap (TreemapNode(..), defaultTreemapConfig, treemap, squarify, phi)
 import PSD3v2.Attribute.Types (width, height, viewBox, class_, fill, fillOpacity, stroke, strokeWidth, textContent, textAnchor, x, y, fontSize)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)

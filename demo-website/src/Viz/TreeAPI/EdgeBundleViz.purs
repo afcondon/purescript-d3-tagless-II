@@ -10,7 +10,7 @@ import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import PSD3.Shared.Data (loadFlareImportsData, FlareImportRecord)
-import PSD3.Layout.Hierarchy.EdgeBundle as EdgeBundle
+import D3.Layout.Hierarchy.EdgeBundle as EdgeBundle
 import PSD3v2.Attribute.Types (width, height, viewBox, class_, fill, stroke, strokeWidth, d, x, y, textContent, textAnchor, fontSize, transform, strokeOpacity)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, reselectD3v2)

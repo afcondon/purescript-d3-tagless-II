@@ -24,8 +24,8 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import PSD3.Layout.Hierarchy.Tree4 as Tree4
-import PSD3.Layout.Hierarchy.Link (LinkStyle(..), linkGenerator)
+import D3.Layout.Hierarchy.Tree4 as Tree4
+import D3.Layout.Hierarchy.Link (LinkStyle(..), linkGenerator)
 import PSD3.Shared.Data (loadFlareData)
 import PSD3v2.Attribute.Types (width, height, viewBox, class_, cx, cy, radius, fill, stroke, strokeWidth, strokeOpacity, d)
 import PSD3v2.Capabilities.Selection (select, renderTree)
