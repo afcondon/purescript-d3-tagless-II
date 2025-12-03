@@ -1,0 +1,23 @@
+package:
+  name: ce-server
+  description: HTTP server for Code Explorer data API
+  dependencies:
+    - aff
+    - argonaut-core
+    - argonaut-codecs
+    - arrays
+    - ce-database
+    - console
+    - effect
+    - either
+    - foldable-traversable
+    - foreign
+    - foreign-object
+    - httpurple
+    - maybe
+    - node-buffer
+    - node-fs
+    - prelude
+    - strings
+    - transformers
+    - tuples

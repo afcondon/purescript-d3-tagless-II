@@ -1,0 +1,17 @@
+package:
+  name: ce-database
+  description: DuckDB database for Code Explorer data
+  dependencies:
+    - aff
+    - aff-promise
+    - argonaut-core
+    - argonaut-codecs
+    - arrays
+    - effect
+    - either
+    - foreign
+    - foreign-object
+    - maybe
+    - nullable
+    - prelude
+    - transformers

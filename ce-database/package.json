@@ -1,0 +1,13 @@
+{
+  "name": "ce-database",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "DuckDB database for Code Explorer data",
+  "scripts": {
+    "init-db": "node loader/init-schema.js",
+    "load-data": "node loader/load-from-json.js"
+  },
+  "dependencies": {
+    "duckdb": "^1.1.3"
+  }
+}

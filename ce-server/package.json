@@ -1,0 +1,12 @@
+{
+  "name": "ce-server",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "HTTP server for Code Explorer data API",
+  "scripts": {
+    "start": "node --enable-source-maps output/Main/index.js"
+  },
+  "dependencies": {
+    "duckdb": "^1.1.3"
+  }
+}
