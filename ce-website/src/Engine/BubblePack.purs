@@ -6,9 +6,14 @@
 -- | - Inner circles: Individual declarations
 module Engine.BubblePack
   ( renderModulePack
+  , renderModulePackWithCallbacks
   , ModulePackData
   , renderColorLegend
   , clearColorLegend
+  , highlightCallGraph
+  , clearCallGraphHighlight
+  , DeclarationClickCallback
+  , DeclarationHoverCallback
   ) where
 
 import Prelude
@@ -22,6 +27,14 @@ import Foreign.Object as Object
 import DataViz.Layout.Hierarchy.Pack (HierarchyData(..), PackNode(..), defaultPackConfig, hierarchy, pack)
 import Types (SimNode)
 
+-- | Callback type for declaration clicks
+-- | Parameters: moduleName -> declarationName -> kind -> Effect Unit
+type DeclarationClickCallback = String -> String -> String -> Effect Unit
+
+-- | Callback type for declaration hover
+-- | Parameters: moduleName -> declarationName -> kind -> Effect Unit
+type DeclarationHoverCallback = String -> String -> String -> Effect Unit
+
 -- | FFI for rendering bubble pack with proper data binding
 foreign import renderBoundBubblePack_
   :: String -- Container selector
@@ -29,7 +42,20 @@ foreign import renderBoundBubblePack_
   -> Array PackCircle -- Pack circles
   -> Number -- Center offset
   -> (PackCircle -> Effect String) -- Category color function
+  -> DeclarationClickCallback -- On declaration click (module, declaration, kind) -> Effect Unit
+  -> DeclarationHoverCallback -- On declaration hover (module, declaration, kind) -> Effect Unit
+  -> Effect Unit -- On declaration leave -> Effect Unit
   -> Effect Unit
+
+-- | FFI for highlighting call graph modules
+foreign import highlightCallGraph_
+  :: String -- Source module
+  -> Array String -- Caller modules
+  -> Array String -- Callee modules
+  -> Effect Unit
+
+-- | FFI for clearing call graph highlights
+foreign import clearCallGraphHighlight_ :: Effect Unit
 
 -- | FFI for rendering re-export (umbrella) modules
 foreign import renderReexportModule_
@@ -154,10 +180,40 @@ getAllPackNodesWithCategory node@(PackNode n) parentCategory =
   in
     [ { node, category: thisCategory } ] <> childResults
 
--- | Render a module as a bubble pack
+-- | Default no-op callbacks for backwards compatibility
+noOpClickCallback :: DeclarationClickCallback
+noOpClickCallback _ _ _ = pure unit
+
+noOpHoverCallback :: DeclarationHoverCallback
+noOpHoverCallback _ _ _ = pure unit
+
+noOpLeaveCallback :: Effect Unit
+noOpLeaveCallback = pure unit
+
+-- | Highlight modules based on call graph relationships
+highlightCallGraph :: String -> Array String -> Array String -> Effect Unit
+highlightCallGraph = highlightCallGraph_
+
+-- | Clear call graph highlighting
+clearCallGraphHighlight :: Effect Unit
+clearCallGraphHighlight = clearCallGraphHighlight_
+
+-- | Render a module as a bubble pack (without callbacks)
 -- | Returns the pack's radius for layout purposes
 renderModulePack :: DeclarationsMap -> SimNode -> Effect Number
-renderModulePack declarationsMap node = do
+renderModulePack declarationsMap node =
+  renderModulePackWithCallbacks declarationsMap noOpClickCallback noOpHoverCallback noOpLeaveCallback node
+
+-- | Render a module as a bubble pack with click and hover handlers
+-- | Returns the pack's radius for layout purposes
+renderModulePackWithCallbacks
+  :: DeclarationsMap
+  -> DeclarationClickCallback
+  -> DeclarationHoverCallback
+  -> Effect Unit -- onLeave callback
+  -> SimNode
+  -> Effect Number
+renderModulePackWithCallbacks declarationsMap onDeclClick onDeclHover onDeclLeave node = do
   let moduleName = node.name
   let decls = fromMaybe [] $ Object.lookup moduleName declarationsMap
 
@@ -196,8 +252,8 @@ renderModulePack declarationsMap node = do
     -- Center offset for positioning circles relative to group origin
     let centerOffset = packSize / 2.0
 
-    -- Render using FFI with proper data binding
-    renderBoundBubblePack_ "#explorer-nodes" node packCircles centerOffset getPackFillEffect
+    -- Render using FFI with proper data binding, click, and hover callbacks
+    renderBoundBubblePack_ "#explorer-nodes" node packCircles centerOffset getPackFillEffect onDeclClick onDeclHover onDeclLeave
 
     -- Return the pack's radius
     let PackNode rootData = packed

@@ -20,7 +20,7 @@ import Data.Nullable as Nullable
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
-import Effect.Aff (launchAff_)
+import Effect.Aff (launchAff_, forkAff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Random (random)
@@ -28,9 +28,11 @@ import Effect.Ref (Ref)
 import Effect.Ref as Ref
 import Effect.Unsafe (unsafePerformEffect)
 import Foreign.Object as Object
-import Data.Loader (loadModel, LoadedModel, DeclarationsMap)
+import Data.Loader (loadModel, LoadedModel, DeclarationsMap, FunctionCallsMap, fetchFunctionCalls)
 import Data.Traversable (for_)
-import Engine.BubblePack (renderModulePack, renderColorLegend, clearColorLegend)
+import Engine.AtomicView (renderAtomicView)
+import Engine.BubblePack (renderModulePackWithCallbacks, renderColorLegend, clearColorLegend, highlightCallGraph, clearCallGraphHighlight, DeclarationClickCallback, DeclarationHoverCallback)
+import Engine.NarrativePanel as Narrative
 import PSD3v2.Tooltip (hideTooltip) as Tooltip
 import Engine.Scene as Scene
 import Engine.Scenes as Scenes
@@ -75,6 +77,21 @@ globalLinksRef = unsafePerformEffect $ Ref.new []
 globalDeclarationsRef :: Ref DeclarationsMap
 globalDeclarationsRef = unsafePerformEffect $ Ref.new Object.empty
 
+-- | Global ref for function calls (for atomic view)
+globalFunctionCallsRef :: Ref FunctionCallsMap
+globalFunctionCallsRef = unsafePerformEffect $ Ref.new Object.empty
+
+-- | Model info for narrative panel
+type ModelInfo =
+  { projectName :: String
+  , moduleCount :: Int
+  , packageCount :: Int
+  }
+
+-- | Global ref for model info (for narrative)
+globalModelInfoRef :: Ref ModelInfo
+globalModelInfoRef = unsafePerformEffect $ Ref.new { projectName: "", moduleCount: 0, packageCount: 0 }
+
 -- | Focus state for neighborhood drill-down
 type FocusState =
   { focusedNodeId :: Maybe Int -- Currently focused node (Nothing = full view)
@@ -102,7 +119,7 @@ forceLinksGroupId = GroupId "#explorer-links"
 -- | Initialize the explorer
 initExplorer :: String -> Effect Unit
 initExplorer containerSelector = launchAff_ do
-  log "[Explorer] BUILD: 2025-12-02 15:00 - Tree with force links"
+  log "[Explorer] BUILD: 2025-12-03 - Deferred function calls loading"
   log "[Explorer] Loading data..."
   result <- loadModel
   case result of
@@ -112,14 +129,40 @@ initExplorer containerSelector = launchAff_ do
       -- Store links and declarations for later use
       liftEffect $ Ref.write model.links globalLinksRef
       liftEffect $ Ref.write model.declarations globalDeclarationsRef
+
+      -- Initialize visualization immediately (don't wait for function calls)
       stateRef <- liftEffect $ initWithModel model containerSelector
       liftEffect $ Ref.write (Just stateRef) globalStateRef
-      liftEffect $ log "[Explorer] Ready"
+      liftEffect $ log "[Explorer] Ready - loading function calls in background..."
+
+      -- Load function calls data in a separate fiber (truly parallel)
+      -- This doesn't block the main visualization from rendering
+      _ <- forkAff do
+        fnCallsResult <- fetchFunctionCalls
+        case fnCallsResult of
+          Left err -> liftEffect $ log $ "[Explorer] Warning: Could not load function calls: " <> err
+          Right fnCalls -> do
+            liftEffect $ Ref.write fnCalls globalFunctionCallsRef
+            liftEffect $ log $ "[Explorer] Function calls loaded: " <> show (Object.size fnCalls) <> " functions"
+      pure unit
 
 -- | Initialize with loaded model
 initWithModel :: LoadedModel -> String -> Effect (Ref Scene.SceneState)
 initWithModel model containerSelector = do
   log "[Explorer] Initializing with new Scene Engine"
+
+  -- Store model info for narrative
+  Ref.write { projectName: "purescript-d3-dataviz", moduleCount: model.moduleCount, packageCount: model.packageCount } globalModelInfoRef
+
+  -- Initialize narrative panel with Back button callback
+  Narrative.initNarrativePanel handleBackButton
+
+  -- Set color palette for the color key
+  let colorPalette = Array.mapWithIndex mkPackageColorEntry model.packages
+  Narrative.setColorPalette colorPalette
+
+  -- Set initial full view narrative
+  Narrative.setFullViewNarrative "purescript-d3-dataviz" model.moduleCount model.packageCount
 
   -- Recalculate grid positions
   let gridNodes = GridLayout.recalculateGridPositions model.nodes model.packageCount
@@ -405,6 +448,15 @@ nodeColor n =
 numMod :: Number -> Number -> Number
 numMod a b = a - b * toNumber (floor (a / b))
 
+-- | Create a color entry for a package (for the narrative color key)
+mkPackageColorEntry :: Int -> { name :: String, depends :: Array String, modules :: Array String } -> Narrative.ColorEntry
+mkPackageColorEntry idx pkg =
+  let
+    t = numMod (toNumber idx * 0.618033988749895) 1.0
+    color = interpolateTurbo t
+  in
+    { name: pkg.name, color }
+
 -- | CSS class based on node type for styling and transitions
 nodeClass :: SimNode -> String
 nodeClass n = case n.nodeType of
@@ -568,6 +620,20 @@ setTreeSceneClass shouldAdd = do
 -- Neighborhood Focus
 -- =============================================================================
 
+-- | Handle Back button click from narrative panel
+handleBackButton :: Effect Unit
+handleBackButton = do
+  log "[Explorer] Back button clicked"
+  focus <- Ref.read globalFocusRef
+  mStateRef <- Ref.read globalStateRef
+
+  case mStateRef, focus.focusedNodeId of
+    Just stateRef, Just _ -> do
+      state <- Ref.read stateRef
+      restoreFullView focus.fullNodes state.simulation
+      Ref.write { focusedNodeId: Nothing, fullNodes: [] } globalFocusRef
+    _, _ -> log "[Explorer] No focused state to go back from"
+
 -- | Toggle focus on a node's neighborhood
 -- | Click once to drill down to neighborhood, click again to restore full view
 toggleFocus :: SimNode -> Effect Unit
@@ -610,6 +676,9 @@ toggleFocus clickedNode = do
           -- Update focus state
           Ref.write { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore } globalFocusRef
 
+          -- Update narrative for neighborhood view
+          Narrative.setNeighborhoodNarrative clickedNode.name (Array.length clickedNode.targets) (Array.length clickedNode.sources)
+
           -- Update simulation and DOM
           focusOnNeighborhood neighborhoodNodes state.simulation
 
@@ -637,7 +706,7 @@ focusOnNeighborhood nodes sim = do
   -- Render bubble packs using FFI (binds SimNode to groups for tick updates)
   declarations <- Ref.read globalDeclarationsRef
   for_ liveNodes \node -> do
-    _ <- renderModulePack declarations node
+    _ <- renderModulePackWithCallbacks declarations onDeclarationClick onDeclarationHover onDeclarationLeave node
     pure unit
 
   -- Render color legend for bubble pack view
@@ -833,6 +902,10 @@ restoreFullView fullNodes sim = do
       Sim.onTick (Scene.onTick stateRef) sim
     Nothing -> pure unit
 
+  -- Restore full view narrative
+  modelInfo <- Ref.read globalModelInfoRef
+  Narrative.setFullViewNarrative modelInfo.projectName modelInfo.moduleCount modelInfo.packageCount
+
   Sim.reheat sim
   pure unit
 
@@ -917,3 +990,90 @@ renderNodesOnly nodes = do
   _ <- on (onClickWithDatum toggleFocus) circlesSel
 
   pure unit
+
+-- =============================================================================
+-- Declaration Click Handler
+-- =============================================================================
+
+-- | Handle click on a declaration circle
+-- | Shows the function call graph centered on the clicked declaration
+onDeclarationClick :: DeclarationClickCallback
+onDeclarationClick moduleName declarationName kind = do
+  log $ "[Explorer] Declaration clicked: " <> moduleName <> "." <> declarationName <> " (kind: " <> kind <> ")"
+
+  -- Only look up function calls for values (functions)
+  -- Types, data, typeSynonyms etc. don't have runtime call data
+  if kind /= "value" then
+    log $ "[Explorer] Skipping - " <> kind <> " declarations don't have call data"
+  else do
+    -- Look up function calls for this declaration
+    fnCalls <- Ref.read globalFunctionCallsRef
+    let key = moduleName <> "." <> declarationName
+    case Object.lookup key fnCalls of
+      Nothing -> log $ "[Explorer] No function call data for: " <> key
+      Just fnInfo -> do
+        log $ "[Explorer] Found " <> show (Array.length fnInfo.calls) <> " outgoing calls, " <> show (Array.length fnInfo.calledBy) <> " callers"
+        -- Show atomic force tree visualization
+        renderAtomicView fnInfo
+
+-- | Handle hover on a declaration circle
+-- | Highlights modules that contain callers/callees
+onDeclarationHover :: DeclarationHoverCallback
+onDeclarationHover moduleName declarationName _kind = do
+  -- Look up function calls for this declaration
+  fnCalls <- Ref.read globalFunctionCallsRef
+  let key = moduleName <> "." <> declarationName
+  case Object.lookup key fnCalls of
+    Nothing -> pure unit -- No call data, no highlighting
+    Just fnInfo -> do
+      -- Extract unique module names from calls and calledBy
+      let calleeModules = Array.nub $ map _.targetModule fnInfo.calls
+      let callerModules = Array.nub $ Array.mapMaybe extractModuleName fnInfo.calledBy
+      -- Highlight the modules
+      highlightCallGraph moduleName callerModules calleeModules
+      -- Update narrative hint
+      Narrative.setDeclarationHoverNarrative moduleName declarationName (Array.length fnInfo.calls) (Array.length fnInfo.calledBy)
+
+-- | Handle mouse leave from a declaration
+onDeclarationLeave :: Effect Unit
+onDeclarationLeave = do
+  clearCallGraphHighlight
+  Narrative.clearDeclarationHoverNarrative
+
+-- | Extract module name from "Module.name" string
+extractModuleName :: String -> Maybe String
+extractModuleName fullName =
+  let parts = splitAtLastDot fullName
+  in if parts.module == "" then Nothing else Just parts.module
+  where
+  -- Split "Foo.Bar.baz" into { module: "Foo.Bar", name: "baz" }
+  splitAtLastDot :: String -> { module :: String, name :: String }
+  splitAtLastDot s =
+    let len = stringLength s
+        lastDotIdx = findLastDot s (len - 1)
+    in if lastDotIdx < 0
+       then { module: "", name: s }
+       else { module: substring 0 lastDotIdx s, name: substring (lastDotIdx + 1) len s }
+
+  findLastDot :: String -> Int -> Int
+  findLastDot _ (-1) = -1
+  findLastDot str idx =
+    if charAt idx str == "."
+    then idx
+    else findLastDot str (idx - 1)
+
+  stringLength :: String -> Int
+  stringLength = go 0
+    where
+    go n str = case charAt n str of
+      "" -> n
+      _ -> go (n + 1) str
+
+  charAt :: Int -> String -> String
+  charAt = charAtFFI
+
+  substring :: Int -> Int -> String -> String
+  substring = substringFFI
+
+foreign import charAtFFI :: Int -> String -> String
+foreign import substringFFI :: Int -> Int -> String -> String

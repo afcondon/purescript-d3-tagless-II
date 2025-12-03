@@ -12,12 +12,16 @@ module Data.Loader
   , loadModelForSnapshot
   , fetchProjects
   , fetchProjectWithSnapshots
+  , fetchFunctionCalls
   , LoadedModel
   , Project
   , Snapshot
   , apiBaseUrl
   , Declaration
   , DeclarationsMap
+  , FunctionCallsMap
+  , FunctionInfo
+  , CallInfo
   , getDependencyTree
   ) where
 
@@ -92,6 +96,30 @@ type Declaration =
 
 -- | Module declarations map: module name -> array of declarations
 type DeclarationsMap = Object (Array Declaration)
+
+-- | Call information from function-calls.json
+type CallInfo =
+  { target :: String
+  , targetModule :: String
+  , identifier :: String
+  , isCrossModule :: Boolean
+  }
+
+-- | Function info from function-calls.json
+type FunctionInfo =
+  { module :: String
+  , name :: String
+  , calls :: Array CallInfo
+  , calledBy :: Array String -- "Module.func" format
+  }
+
+-- | Function calls map: "Module.name" -> FunctionInfo
+type FunctionCallsMap = Object FunctionInfo
+
+-- | Response wrapper for function-calls.json
+type FunctionCallsResponse =
+  { functions :: FunctionCallsMap
+  }
 
 -- | Snapshot info from API
 type Snapshot =
@@ -241,6 +269,15 @@ fetchProjectWithSnapshots projectId = do
       , latestSnapshotAt: latestAt
       , snapshots: response.snapshots
       }
+
+-- | Fetch function calls data
+fetchFunctionCalls :: Aff (Either String FunctionCallsMap)
+fetchFunctionCalls = do
+  result <- fetchJson (apiBaseUrl <> "/data/function-calls.json")
+  pure $ do
+    json <- result
+    response :: FunctionCallsResponse <- decodeJson json # mapLeft printJsonDecodeError
+    Right response.functions
 
 -- | Load model for a specific snapshot ID
 -- | This fetches data scoped to that snapshot from the legacy endpoints

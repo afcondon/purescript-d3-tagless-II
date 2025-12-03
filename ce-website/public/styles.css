@@ -470,3 +470,180 @@ circle.highlighted-downstream {
   text-transform: uppercase;
   color: var(--color-text-muted);
 }
+
+/* =============================================================================
+   Call Graph Highlighting (Declaration Hover)
+   ============================================================================= */
+
+/* Source module - the module containing the hovered declaration (cyan) */
+g.module-pack.highlight-source {
+  filter: drop-shadow(0 0 12px rgba(125, 211, 252, 0.8));
+}
+
+g.module-pack.highlight-source circle {
+  stroke: #7dd3fc !important;
+  stroke-width: 3px !important;
+}
+
+/* Caller modules - modules that call this function (orange) */
+g.module-pack.highlight-caller {
+  filter: drop-shadow(0 0 10px rgba(249, 115, 22, 0.7));
+}
+
+g.module-pack.highlight-caller circle {
+  stroke: #f97316 !important;
+  stroke-width: 2.5px !important;
+}
+
+/* Callee modules - modules this function calls (green) */
+g.module-pack.highlight-callee {
+  filter: drop-shadow(0 0 10px rgba(74, 222, 128, 0.7));
+}
+
+g.module-pack.highlight-callee circle {
+  stroke: #4ade80 !important;
+  stroke-width: 2.5px !important;
+}
+
+/* Dimmed modules - unrelated during call graph highlight */
+g.module-pack.highlight-dimmed {
+  opacity: 0.15;
+}
+
+g.module-pack.highlight-dimmed circle {
+  filter: none !important;
+}
+
+/* Dimmed links during call graph highlight */
+line.highlight-dimmed {
+  opacity: 0.1 !important;
+}
+
+/* =============================================================================
+   Narrative Panel - "What Is Being Shown"
+   ============================================================================= */
+
+.narrative-panel {
+  max-width: 320px;
+  min-width: 280px;
+}
+
+/* Larger title for narrative panel */
+.narrative-panel .panel-title {
+  font-size: 0.875rem; /* 14px */
+  letter-spacing: var(--letter-spacing-wide);
+  margin-bottom: var(--spacing-lg);
+}
+
+.narrative-hero {
+  font-family: var(--font-mono);
+  font-size: 0.875rem; /* 14px - body text */
+  line-height: 1.7;
+  color: var(--color-text-dark);
+  margin-bottom: var(--spacing-md);
+}
+
+.narrative-hero strong {
+  color: var(--color-text-dark);
+  font-weight: bold;
+}
+
+.narrative-module {
+  color: var(--color-teal);
+  font-weight: bold;
+}
+
+.narrative-path {
+  font-size: 0.75rem; /* 12px */
+  color: var(--color-text-muted);
+}
+
+.narrative-stat {
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+  padding: 0 2px;
+}
+
+.narrative-stat.narrative-callee {
+  color: #16a34a; /* green-600 */
+}
+
+.narrative-stat.narrative-caller {
+  color: #ea580c; /* orange-600 */
+}
+
+.narrative-hint {
+  font-family: var(--font-mono);
+  font-size: 0.75rem; /* 12px - subtext */
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-line);
+}
+
+.narrative-hint em {
+  font-style: normal;
+  color: var(--color-text-dark);
+  font-weight: bold;
+}
+
+.narrative-hint strong {
+  color: var(--color-teal);
+}
+
+.narrative-back {
+  margin-top: var(--spacing-md);
+  width: 100%;
+  font-size: 0.75rem;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.narrative-back:hover {
+  background-color: var(--color-beige-dark);
+}
+
+/* =============================================================================
+   Narrative Color Key
+   ============================================================================= */
+
+.narrative-color-key {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-line);
+}
+
+.color-key-title {
+  font-family: var(--font-mono);
+  font-size: 0.625rem; /* 10px */
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-sm);
+}
+
+.color-key-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.color-key-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.color-key-swatch {
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--color-line);
+  flex-shrink: 0;
+}
+
+.color-key-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem; /* 11px */
+  color: var(--color-text-dark);
+  letter-spacing: var(--letter-spacing-normal);
+}

@@ -150,14 +150,71 @@ export const renderReexportModule_ = (containerSelector) => (node) => (isReexpor
   }
 };
 
+// Highlight modules by their relationship to a declaration
+// callerModules: Array of module names that call the declaration (orange)
+// calleeModules: Array of module names that the declaration calls (green)
+// sourceModule: The module containing the hovered declaration (cyan)
+export const highlightCallGraph_ = (sourceModule) => (callerModules) => (calleeModules) => () => {
+  const callerSet = new Set(callerModules);
+  const calleeSet = new Set(calleeModules);
+
+  // Select all module-pack groups and apply highlighting
+  select("#explorer-nodes").selectAll("g.module-pack").each(function() {
+    const group = select(this);
+    const node = group.datum();
+    if (!node) return;
+
+    const moduleName = node.name;
+
+    // Remove existing highlight classes
+    group.classed("highlight-caller", false)
+         .classed("highlight-callee", false)
+         .classed("highlight-source", false)
+         .classed("highlight-dimmed", false);
+
+    // Apply new classes based on relationship
+    if (moduleName === sourceModule) {
+      group.classed("highlight-source", true);
+    } else if (callerSet.has(moduleName)) {
+      group.classed("highlight-caller", true);
+    } else if (calleeSet.has(moduleName)) {
+      group.classed("highlight-callee", true);
+    } else {
+      group.classed("highlight-dimmed", true);
+    }
+  });
+
+  // Also highlight the neighborhood links
+  select("#explorer-links").selectAll("line").each(function() {
+    const line = select(this);
+    // Dim all links during highlight
+    line.classed("highlight-dimmed", true);
+  });
+};
+
+// Clear all call graph highlighting
+export const clearCallGraphHighlight_ = () => {
+  select("#explorer-nodes").selectAll("g.module-pack")
+    .classed("highlight-caller", false)
+    .classed("highlight-callee", false)
+    .classed("highlight-source", false)
+    .classed("highlight-dimmed", false);
+
+  select("#explorer-links").selectAll("line")
+    .classed("highlight-dimmed", false);
+};
+
 // Render a complete bubble pack with SimNode bound to the group
 // Parameters:
 // - containerSelector: selector for parent element (e.g., "#explorer-nodes")
 // - node: SimNode with x, y, r, id, name fields
-// - packCircles: Array of { x, y, r, depth, data_ } objects from pack layout
+// - packCircles: Array of { x, y, r, depth, data_, category } objects from pack layout
 // - centerOffset: offset to center pack circles
 // - categoryColorFn: function to get fill color for a pack circle
-export const renderBoundBubblePack_ = (containerSelector) => (node) => (packCircles) => (centerOffset) => (categoryColorFn) => () => {
+// - onDeclarationClick: callback for declaration click (module, declaration) -> Effect Unit
+// - onDeclarationHover: callback for declaration hover (module, declaration, kind) -> Effect Unit
+// - onDeclarationLeave: callback for declaration mouse leave -> Effect Unit
+export const renderBoundBubblePack_ = (containerSelector) => (node) => (packCircles) => (centerOffset) => (categoryColorFn) => (onDeclarationClick) => (onDeclarationHover) => (onDeclarationLeave) => () => {
   const container = select(containerSelector);
 
   // Create group with SimNode bound as __data__
@@ -187,5 +244,35 @@ export const renderBoundBubblePack_ = (containerSelector) => (node) => (packCirc
       if (d.depth === 0) return "pack-module";
       if (d.depth === 1) return "pack-category";
       return "pack-declaration";
+    })
+    .style("cursor", d => d.depth === 2 ? "pointer" : "default")
+    .on("click", function(event, d) {
+      if (d.depth === 2) {
+        // Declaration clicked - call PureScript callback with module, name, and kind
+        event.stopPropagation();  // Don't bubble to module group
+        onDeclarationClick(node.name)(d.data_)(d.category)();
+      }
+    })
+    .on("mouseenter", function(event, d) {
+      if (d.depth === 2) {
+        select(this)
+          .attr("stroke", "#000")
+          .attr("stroke-width", 2);
+        // Call hover callback for value declarations
+        if (d.category === "value") {
+          onDeclarationHover(node.name)(d.data_)(d.category)();
+        }
+      }
+    })
+    .on("mouseleave", function(event, d) {
+      if (d.depth === 2) {
+        select(this)
+          .attr("stroke", "#fff")
+          .attr("stroke-width", 0.5);
+        // Call leave callback
+        if (d.category === "value") {
+          onDeclarationLeave();
+        }
+      }
     });
 };
