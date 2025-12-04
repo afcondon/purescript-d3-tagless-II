@@ -56,14 +56,14 @@
   };
   var flip = function(f) {
     return function(b10) {
-      return function(a3) {
-        return f(a3)(b10);
+      return function(a2) {
+        return f(a2)(b10);
       };
     };
   };
-  var $$const = function(a3) {
+  var $$const = function(a2) {
     return function(v) {
-      return a3;
+      return a2;
     };
   };
   var applyFlipped = function(x5) {
@@ -137,9 +137,9 @@
   var applySecond = function(dictApply) {
     var apply1 = apply(dictApply);
     var map45 = map(dictApply.Functor0());
-    return function(a3) {
+    return function(a2) {
       return function(b10) {
-        return apply1(map45($$const(identity2))(a3))(b10);
+        return apply1(map45($$const(identity2))(a2))(b10);
       };
     };
   };
@@ -147,9 +147,9 @@
     var apply1 = apply(dictApply);
     var map45 = map(dictApply.Functor0());
     return function(f) {
-      return function(a3) {
+      return function(a2) {
         return function(b10) {
-          return apply1(map45(f)(a3))(b10);
+          return apply1(map45(f)(a2))(b10);
         };
       };
     };
@@ -195,8 +195,8 @@
     var apply4 = apply(dictApplicative.Apply0());
     var pure111 = pure(dictApplicative);
     return function(f) {
-      return function(a3) {
-        return apply4(pure111(f))(a3);
+      return function(a2) {
+        return apply4(pure111(f))(a2);
       };
     };
   };
@@ -242,8 +242,8 @@
     var bindFlipped12 = bindFlipped(dictBind);
     return function(f) {
       return function(g) {
-        return function(a3) {
-          return bindFlipped12(f)(g(a3));
+        return function(a2) {
+          return bindFlipped12(f)(g(a2));
         };
       };
     };
@@ -255,8 +255,8 @@
   };
   var join = function(dictBind) {
     var bind110 = bind(dictBind);
-    return function(m2) {
-      return bind110(m2)(identity3);
+    return function(m) {
+      return bind110(m)(identity3);
     };
   };
 
@@ -647,11 +647,11 @@
     return '"' + s.replace(
       /[\0-\x1F\x7F"\\]/g,
       // eslint-disable-line no-control-regex
-      function(c2, i2) {
-        switch (c2) {
+      function(c, i2) {
+        switch (c) {
           case '"':
           case "\\":
-            return "\\" + c2;
+            return "\\" + c;
           case "\x07":
             return "\\a";
           case "\b":
@@ -669,7 +669,7 @@
         }
         var k = i2 + 1;
         var empty9 = k < l && s[k] >= "0" && s[k] <= "9" ? "\\&" : "";
-        return "\\" + c2.charCodeAt(0).toString(10) + empty9;
+        return "\\" + c.charCodeAt(0).toString(10) + empty9;
       }
     ) + '"';
   };
@@ -735,9 +735,9 @@
   var heytingAlgebraBoolean = {
     ff: false,
     tt: true,
-    implies: function(a3) {
+    implies: function(a2) {
       return function(b10) {
-        return disj(heytingAlgebraBoolean)(not(heytingAlgebraBoolean)(a3))(b10);
+        return disj(heytingAlgebraBoolean)(not(heytingAlgebraBoolean)(a2))(b10);
       };
     },
     conj: boolConj,
@@ -763,28 +763,28 @@
       },
       implies: function(f) {
         return function(g) {
-          return function(a3) {
-            return implies1(f(a3))(g(a3));
+          return function(a2) {
+            return implies1(f(a2))(g(a2));
           };
         };
       },
       conj: function(f) {
         return function(g) {
-          return function(a3) {
-            return conj1(f(a3))(g(a3));
+          return function(a2) {
+            return conj1(f(a2))(g(a2));
           };
         };
       },
       disj: function(f) {
         return function(g) {
-          return function(a3) {
-            return disj1(f(a3))(g(a3));
+          return function(a2) {
+            return disj1(f(a2))(g(a2));
           };
         };
       },
       not: function(f) {
-        return function(a3) {
-          return not1(f(a3));
+        return function(a2) {
+          return not1(f(a2));
         };
       }
     };
@@ -877,8 +877,8 @@
   };
   var functorTuple = {
     map: function(f) {
-      return function(m2) {
-        return new Tuple(m2.value0, f(m2.value1));
+      return function(m) {
+        return new Tuple(m.value0, f(m.value1));
       };
     }
   };
@@ -1012,10 +1012,10 @@
     }
     return nothing;
   };
-  var _insertAt = function(just, nothing, i2, a3, l) {
+  var _insertAt = function(just, nothing, i2, a2, l) {
     if (i2 < 0 || i2 > l.length) return nothing;
     var l1 = l.slice();
-    l1.splice(i2, 0, a3);
+    l1.splice(i2, 0, a2);
     return just(l1);
   };
   var _deleteAt = function(just, nothing, i2, l) {
@@ -1034,7 +1034,7 @@
     var result = [];
     for (var i2 = 0, l = xss.length; i2 < l; i2++) {
       var xs = xss[i2];
-      for (var j = 0, m2 = xs.length; j < m2; j++) {
+      for (var j = 0, m = xs.length; j < m; j++) {
         result.push(xs[j]);
       }
     }
@@ -1063,7 +1063,7 @@
       var k;
       var x5;
       var y5;
-      var c2;
+      var c;
       mid = from3 + (to - from3 >> 1);
       if (mid - from3 > 1) mergeFromTo(compare3, fromOrdering, xs2, xs1, from3, mid);
       if (to - mid > 1) mergeFromTo(compare3, fromOrdering, xs2, xs1, mid, to);
@@ -1073,8 +1073,8 @@
       while (i2 < mid && j < to) {
         x5 = xs2[i2];
         y5 = xs2[j];
-        c2 = fromOrdering(compare3(x5)(y5));
-        if (c2 > 0) {
+        c = fromOrdering(compare3(x5)(y5));
+        if (c > 0) {
           xs1[k++] = y5;
           ++j;
         } else {
@@ -1136,9 +1136,9 @@
     var bind21 = bind(dictMonad.Bind1());
     var unless3 = unless(dictMonad.Applicative0());
     return function(mb) {
-      return function(m2) {
+      return function(m) {
         return bind21(mb)(function(b10) {
-          return unless3(b10)(m2);
+          return unless3(b10)(m);
         });
       };
     };
@@ -1147,9 +1147,9 @@
     var bind21 = bind(dictMonad.Bind1());
     var pure26 = pure(dictMonad.Applicative0());
     return function(f) {
-      return function(a3) {
+      return function(a2) {
         return bind21(f)(function(f$prime) {
-          return bind21(a3)(function(a$prime) {
+          return bind21(a2)(function(a$prime) {
             return pure26(f$prime(a$prime));
           });
         });
@@ -1205,8 +1205,8 @@
     }
   };
   var map2 = /* @__PURE__ */ map(functorMaybe);
-  var fromMaybe = function(a3) {
-    return maybe(a3)(identity4);
+  var fromMaybe = function(a2) {
+    return maybe(a2)(identity4);
   };
   var fromJust = function() {
     return function(v) {
@@ -1301,21 +1301,21 @@
     };
     return Right2;
   })();
-  var note = function(a3) {
-    return maybe(new Left(a3))(Right.create);
+  var note = function(a2) {
+    return maybe(new Left(a2))(Right.create);
   };
   var functorEither = {
     map: function(f) {
-      return function(m2) {
-        if (m2 instanceof Left) {
-          return new Left(m2.value0);
+      return function(m) {
+        if (m instanceof Left) {
+          return new Left(m.value0);
         }
         ;
-        if (m2 instanceof Right) {
-          return new Right(f(m2.value0));
+        if (m instanceof Right) {
+          return new Right(f(m.value0));
         }
         ;
-        throw new Error("Failed pattern match at Data.Either (line 0, column 0 - line 0, column 0): " + [m2.constructor.name]);
+        throw new Error("Failed pattern match at Data.Either (line 0, column 0 - line 0, column 0): " + [m.constructor.name]);
       };
     }
   };
@@ -1358,9 +1358,9 @@
       return function(v) {
         return new Left(e);
       };
-    })(function(a3) {
+    })(function(a2) {
       return function(f) {
-        return f(a3);
+        return f(a2);
       };
     }),
     Apply0: function() {
@@ -1382,8 +1382,8 @@
   };
   var functorIdentity = {
     map: function(f) {
-      return function(m2) {
-        return f(m2);
+      return function(m) {
+        return f(m);
       };
     }
   };
@@ -1423,15 +1423,15 @@
   };
 
   // output/Effect/foreign.js
-  var pureE = function(a3) {
+  var pureE = function(a2) {
     return function() {
-      return a3;
+      return a2;
     };
   };
-  var bindE = function(a3) {
+  var bindE = function(a2) {
     return function(f) {
       return function() {
-        return f(a3())();
+        return f(a2())();
       };
     };
   };
@@ -1559,7 +1559,7 @@
   };
   var monadRecEffect = {
     tailRecM: function(f) {
-      return function(a3) {
+      return function(a2) {
         var fromDone = function(v) {
           if (v instanceof Done) {
             return v.value0;
@@ -1568,7 +1568,7 @@
           throw new Error("Failed pattern match at Control.Monad.Rec.Class (line 137, column 30 - line 137, column 44): " + [v.constructor.name]);
         };
         return function __do8() {
-          var r = bindFlipped2($$new)(f(a3))();
+          var r = bindFlipped2($$new)(f(a2))();
           (function() {
             while (!(function __do9() {
               var v = read(r)();
@@ -1599,21 +1599,21 @@
 
   // output/Control.Monad.ST.Internal/foreign.js
   var map_ = function(f) {
-    return function(a3) {
+    return function(a2) {
       return function() {
-        return f(a3());
+        return f(a2());
       };
     };
   };
-  var pure_ = function(a3) {
+  var pure_ = function(a2) {
     return function() {
-      return a3;
+      return a2;
     };
   };
-  var bind_ = function(a3) {
+  var bind_ = function(a2) {
     return function(f) {
       return function() {
-        return f(a3())();
+        return f(a2())();
       };
     };
   };
@@ -1682,23 +1682,23 @@
     return xs.slice();
   }
   var thawImpl = copyImpl;
-  var pushImpl = function(a3, xs) {
-    return xs.push(a3);
+  var pushImpl = function(a2, xs) {
+    return xs.push(a2);
   };
 
   // output/Control.Monad.ST.Uncurried/foreign.js
   var runSTFn1 = function runSTFn12(fn) {
-    return function(a3) {
+    return function(a2) {
       return function() {
-        return fn(a3);
+        return fn(a2);
       };
     };
   };
   var runSTFn2 = function runSTFn22(fn) {
-    return function(a3) {
+    return function(a2) {
       return function(b10) {
         return function() {
-          return fn(a3, b10);
+          return fn(a2, b10);
         };
       };
     };
@@ -2002,39 +2002,39 @@
 
   // output/Data.Function.Uncurried/foreign.js
   var runFn2 = function(fn) {
-    return function(a3) {
+    return function(a2) {
       return function(b10) {
-        return fn(a3, b10);
+        return fn(a2, b10);
       };
     };
   };
   var runFn3 = function(fn) {
-    return function(a3) {
+    return function(a2) {
       return function(b10) {
-        return function(c2) {
-          return fn(a3, b10, c2);
+        return function(c) {
+          return fn(a2, b10, c);
         };
       };
     };
   };
   var runFn4 = function(fn) {
-    return function(a3) {
+    return function(a2) {
       return function(b10) {
-        return function(c2) {
+        return function(c) {
           return function(d3) {
-            return fn(a3, b10, c2, d3);
+            return fn(a2, b10, c, d3);
           };
         };
       };
     };
   };
   var runFn5 = function(fn) {
-    return function(a3) {
+    return function(a2) {
       return function(b10) {
-        return function(c2) {
+        return function(c) {
           return function(d3) {
             return function(e) {
-              return fn(a3, b10, c2, d3, e);
+              return fn(a2, b10, c, d3, e);
             };
           };
         };
@@ -2067,18 +2067,18 @@
 
   // output/Data.Traversable/foreign.js
   var traverseArrayImpl = /* @__PURE__ */ (function() {
-    function array1(a3) {
-      return [a3];
+    function array1(a2) {
+      return [a2];
     }
-    function array2(a3) {
+    function array2(a2) {
       return function(b10) {
-        return [a3, b10];
+        return [a2, b10];
       };
     }
-    function array3(a3) {
+    function array3(a2) {
       return function(b10) {
-        return function(c2) {
-          return [a3, b10, c2];
+        return function(c) {
+          return [a2, b10, c];
         };
       };
     }
@@ -2150,11 +2150,11 @@
     }
   };
   var applicativeStateL = {
-    pure: function(a3) {
+    pure: function(a2) {
       return function(s) {
         return {
           accum: s,
-          value: a3
+          value: a2
         };
       };
     },
@@ -2197,9 +2197,9 @@
     return function(f) {
       return function(s0) {
         return function(xs) {
-          return stateL(traverse22(function(a3) {
+          return stateL(traverse22(function(a2) {
             return function(s) {
-              return f(s)(a3);
+              return f(s)(a2);
             };
           })(xs))(s0);
         };
@@ -2212,8 +2212,8 @@
       return function(b02) {
         return function(xs) {
           return mapAccumL1(function(b10) {
-            return function(a3) {
-              var b$prime = f(b10)(a3);
+            return function(a2) {
+              var b$prime = f(b10)(a2);
               return {
                 accum: b$prime,
                 value: b$prime
@@ -2371,8 +2371,8 @@
       return slice(0)(n)(xs);
     };
   };
-  var singleton2 = function(a3) {
-    return [a3];
+  var singleton2 = function(a2) {
+    return [a2];
   };
   var replicate = /* @__PURE__ */ runFn2(replicateImpl);
   var range2 = /* @__PURE__ */ runFn2(rangeImpl);
@@ -2496,13 +2496,13 @@
   var all2 = /* @__PURE__ */ runFn2(allImpl);
 
   // node_modules/d3-array/src/ascending.js
-  function ascending(a3, b10) {
-    return a3 == null || b10 == null ? NaN : a3 < b10 ? -1 : a3 > b10 ? 1 : a3 >= b10 ? 0 : NaN;
+  function ascending(a2, b10) {
+    return a2 == null || b10 == null ? NaN : a2 < b10 ? -1 : a2 > b10 ? 1 : a2 >= b10 ? 0 : NaN;
   }
 
   // node_modules/d3-array/src/descending.js
-  function descending(a3, b10) {
-    return a3 == null || b10 == null ? NaN : b10 < a3 ? -1 : b10 > a3 ? 1 : b10 >= a3 ? 0 : NaN;
+  function descending(a2, b10) {
+    return a2 == null || b10 == null ? NaN : b10 < a2 ? -1 : b10 > a2 ? 1 : b10 >= a2 ? 0 : NaN;
   }
 
   // node_modules/d3-array/src/bisector.js
@@ -2517,31 +2517,31 @@
       compare22 = f;
       delta = f;
     }
-    function left(a3, x5, lo = 0, hi = a3.length) {
+    function left(a2, x5, lo = 0, hi = a2.length) {
       if (lo < hi) {
         if (compare12(x5, x5) !== 0) return hi;
         do {
           const mid = lo + hi >>> 1;
-          if (compare22(a3[mid], x5) < 0) lo = mid + 1;
+          if (compare22(a2[mid], x5) < 0) lo = mid + 1;
           else hi = mid;
         } while (lo < hi);
       }
       return lo;
     }
-    function right(a3, x5, lo = 0, hi = a3.length) {
+    function right(a2, x5, lo = 0, hi = a2.length) {
       if (lo < hi) {
         if (compare12(x5, x5) !== 0) return hi;
         do {
           const mid = lo + hi >>> 1;
-          if (compare22(a3[mid], x5) <= 0) lo = mid + 1;
+          if (compare22(a2[mid], x5) <= 0) lo = mid + 1;
           else hi = mid;
         } while (lo < hi);
       }
       return lo;
     }
-    function center(a3, x5, lo = 0, hi = a3.length) {
-      const i2 = left(a3, x5, lo, hi - 1);
-      return i2 > lo && delta(a3[i2 - 1], x5) > -delta(a3[i2], x5) ? i2 - 1 : i2;
+    function center(a2, x5, lo = 0, hi = a2.length) {
+      const i2 = left(a2, x5, lo, hi - 1);
+      return i2 > lo && delta(a2[i2 - 1], x5) > -delta(a2[i2], x5) ? i2 - 1 : i2;
     }
     return { left, center, right };
   }
@@ -2981,16 +2981,16 @@
     return this.rgb().formatRgb();
   }
   function color(format2) {
-    var m2, l;
+    var m, l;
     format2 = (format2 + "").trim().toLowerCase();
-    return (m2 = reHex.exec(format2)) ? (l = m2[1].length, m2 = parseInt(m2[1], 16), l === 6 ? rgbn(m2) : l === 3 ? new Rgb(m2 >> 8 & 15 | m2 >> 4 & 240, m2 >> 4 & 15 | m2 & 240, (m2 & 15) << 4 | m2 & 15, 1) : l === 8 ? rgba(m2 >> 24 & 255, m2 >> 16 & 255, m2 >> 8 & 255, (m2 & 255) / 255) : l === 4 ? rgba(m2 >> 12 & 15 | m2 >> 8 & 240, m2 >> 8 & 15 | m2 >> 4 & 240, m2 >> 4 & 15 | m2 & 240, ((m2 & 15) << 4 | m2 & 15) / 255) : null) : (m2 = reRgbInteger.exec(format2)) ? new Rgb(m2[1], m2[2], m2[3], 1) : (m2 = reRgbPercent.exec(format2)) ? new Rgb(m2[1] * 255 / 100, m2[2] * 255 / 100, m2[3] * 255 / 100, 1) : (m2 = reRgbaInteger.exec(format2)) ? rgba(m2[1], m2[2], m2[3], m2[4]) : (m2 = reRgbaPercent.exec(format2)) ? rgba(m2[1] * 255 / 100, m2[2] * 255 / 100, m2[3] * 255 / 100, m2[4]) : (m2 = reHslPercent.exec(format2)) ? hsla(m2[1], m2[2] / 100, m2[3] / 100, 1) : (m2 = reHslaPercent.exec(format2)) ? hsla(m2[1], m2[2] / 100, m2[3] / 100, m2[4]) : named.hasOwnProperty(format2) ? rgbn(named[format2]) : format2 === "transparent" ? new Rgb(NaN, NaN, NaN, 0) : null;
+    return (m = reHex.exec(format2)) ? (l = m[1].length, m = parseInt(m[1], 16), l === 6 ? rgbn(m) : l === 3 ? new Rgb(m >> 8 & 15 | m >> 4 & 240, m >> 4 & 15 | m & 240, (m & 15) << 4 | m & 15, 1) : l === 8 ? rgba(m >> 24 & 255, m >> 16 & 255, m >> 8 & 255, (m & 255) / 255) : l === 4 ? rgba(m >> 12 & 15 | m >> 8 & 240, m >> 8 & 15 | m >> 4 & 240, m >> 4 & 15 | m & 240, ((m & 15) << 4 | m & 15) / 255) : null) : (m = reRgbInteger.exec(format2)) ? new Rgb(m[1], m[2], m[3], 1) : (m = reRgbPercent.exec(format2)) ? new Rgb(m[1] * 255 / 100, m[2] * 255 / 100, m[3] * 255 / 100, 1) : (m = reRgbaInteger.exec(format2)) ? rgba(m[1], m[2], m[3], m[4]) : (m = reRgbaPercent.exec(format2)) ? rgba(m[1] * 255 / 100, m[2] * 255 / 100, m[3] * 255 / 100, m[4]) : (m = reHslPercent.exec(format2)) ? hsla(m[1], m[2] / 100, m[3] / 100, 1) : (m = reHslaPercent.exec(format2)) ? hsla(m[1], m[2] / 100, m[3] / 100, m[4]) : named.hasOwnProperty(format2) ? rgbn(named[format2]) : format2 === "transparent" ? new Rgb(NaN, NaN, NaN, 0) : null;
   }
   function rgbn(n) {
     return new Rgb(n >> 16 & 255, n >> 8 & 255, n & 255, 1);
   }
-  function rgba(r, g, b10, a3) {
-    if (a3 <= 0) r = g = b10 = NaN;
-    return new Rgb(r, g, b10, a3);
+  function rgba(r, g, b10, a2) {
+    if (a2 <= 0) r = g = b10 = NaN;
+    return new Rgb(r, g, b10, a2);
   }
   function rgbConvert(o) {
     if (!(o instanceof Color)) o = color(o);
@@ -3039,8 +3039,8 @@
     return `#${hex(this.r)}${hex(this.g)}${hex(this.b)}${hex((isNaN(this.opacity) ? 1 : this.opacity) * 255)}`;
   }
   function rgb_formatRgb() {
-    const a3 = clampa(this.opacity);
-    return `${a3 === 1 ? "rgb(" : "rgba("}${clampi(this.r)}, ${clampi(this.g)}, ${clampi(this.b)}${a3 === 1 ? ")" : `, ${a3})`}`;
+    const a2 = clampa(this.opacity);
+    return `${a2 === 1 ? "rgb(" : "rgba("}${clampi(this.r)}, ${clampi(this.g)}, ${clampi(this.b)}${a2 === 1 ? ")" : `, ${a2})`}`;
   }
   function clampa(opacity4) {
     return isNaN(opacity4) ? 1 : Math.max(0, Math.min(1, opacity4));
@@ -3052,11 +3052,11 @@
     value13 = clampi(value13);
     return (value13 < 16 ? "0" : "") + value13.toString(16);
   }
-  function hsla(h, s, l, a3) {
-    if (a3 <= 0) h = s = l = NaN;
+  function hsla(h, s, l, a2) {
+    if (a2 <= 0) h = s = l = NaN;
     else if (l <= 0 || l >= 1) h = s = NaN;
     else if (s <= 0) h = NaN;
-    return new Hsl(h, s, l, a3);
+    return new Hsl(h, s, l, a2);
   }
   function hslConvert(o) {
     if (o instanceof Hsl) return new Hsl(o.h, o.s, o.l, o.opacity);
@@ -3110,8 +3110,8 @@
       return (0 <= this.s && this.s <= 1 || isNaN(this.s)) && (0 <= this.l && this.l <= 1) && (0 <= this.opacity && this.opacity <= 1);
     },
     formatHsl() {
-      const a3 = clampa(this.opacity);
-      return `${a3 === 1 ? "hsl(" : "hsla("}${clamph(this.h)}, ${clampt(this.s) * 100}%, ${clampt(this.l) * 100}%${a3 === 1 ? ")" : `, ${a3})`}`;
+      const a2 = clampa(this.opacity);
+      return `${a2 === 1 ? "hsl(" : "hsla("}${clamph(this.h)}, ${clampt(this.s) * 100}%, ${clampt(this.l) * 100}%${a2 === 1 ? ")" : `, ${a2})`}`;
     }
   }));
   function clamph(value13) {
@@ -3151,24 +3151,24 @@
   var constant_default = (x5) => () => x5;
 
   // node_modules/d3-interpolate/src/color.js
-  function linear(a3, d3) {
+  function linear(a2, d3) {
     return function(t) {
-      return a3 + t * d3;
+      return a2 + t * d3;
     };
   }
-  function exponential(a3, b10, y5) {
-    return a3 = Math.pow(a3, y5), b10 = Math.pow(b10, y5) - a3, y5 = 1 / y5, function(t) {
-      return Math.pow(a3 + t * b10, y5);
+  function exponential(a2, b10, y5) {
+    return a2 = Math.pow(a2, y5), b10 = Math.pow(b10, y5) - a2, y5 = 1 / y5, function(t) {
+      return Math.pow(a2 + t * b10, y5);
     };
   }
   function gamma(y5) {
-    return (y5 = +y5) === 1 ? nogamma : function(a3, b10) {
-      return b10 - a3 ? exponential(a3, b10, y5) : constant_default(isNaN(a3) ? b10 : a3);
+    return (y5 = +y5) === 1 ? nogamma : function(a2, b10) {
+      return b10 - a2 ? exponential(a2, b10, y5) : constant_default(isNaN(a2) ? b10 : a2);
     };
   }
-  function nogamma(a3, b10) {
-    var d3 = b10 - a3;
-    return d3 ? linear(a3, d3) : constant_default(isNaN(a3) ? b10 : a3);
+  function nogamma(a2, b10) {
+    var d3 = b10 - a2;
+    return d3 ? linear(a2, d3) : constant_default(isNaN(a2) ? b10 : a2);
   }
 
   // node_modules/d3-interpolate/src/rgb.js
@@ -3212,12 +3212,12 @@
   var rgbBasisClosed = rgbSpline(basisClosed_default);
 
   // node_modules/d3-interpolate/src/numberArray.js
-  function numberArray_default(a3, b10) {
+  function numberArray_default(a2, b10) {
     if (!b10) b10 = [];
-    var n = a3 ? Math.min(b10.length, a3.length) : 0, c2 = b10.slice(), i2;
+    var n = a2 ? Math.min(b10.length, a2.length) : 0, c = b10.slice(), i2;
     return function(t) {
-      for (i2 = 0; i2 < n; ++i2) c2[i2] = a3[i2] * (1 - t) + b10[i2] * t;
-      return c2;
+      for (i2 = 0; i2 < n; ++i2) c[i2] = a2[i2] * (1 - t) + b10[i2] * t;
+      return c;
     };
   }
   function isNumberArray(x5) {
@@ -3225,46 +3225,46 @@
   }
 
   // node_modules/d3-interpolate/src/array.js
-  function genericArray(a3, b10) {
-    var nb = b10 ? b10.length : 0, na = a3 ? Math.min(nb, a3.length) : 0, x5 = new Array(na), c2 = new Array(nb), i2;
-    for (i2 = 0; i2 < na; ++i2) x5[i2] = value_default(a3[i2], b10[i2]);
-    for (; i2 < nb; ++i2) c2[i2] = b10[i2];
+  function genericArray(a2, b10) {
+    var nb = b10 ? b10.length : 0, na = a2 ? Math.min(nb, a2.length) : 0, x5 = new Array(na), c = new Array(nb), i2;
+    for (i2 = 0; i2 < na; ++i2) x5[i2] = value_default(a2[i2], b10[i2]);
+    for (; i2 < nb; ++i2) c[i2] = b10[i2];
     return function(t) {
-      for (i2 = 0; i2 < na; ++i2) c2[i2] = x5[i2](t);
-      return c2;
+      for (i2 = 0; i2 < na; ++i2) c[i2] = x5[i2](t);
+      return c;
     };
   }
 
   // node_modules/d3-interpolate/src/date.js
-  function date_default(a3, b10) {
+  function date_default(a2, b10) {
     var d3 = /* @__PURE__ */ new Date();
-    return a3 = +a3, b10 = +b10, function(t) {
-      return d3.setTime(a3 * (1 - t) + b10 * t), d3;
+    return a2 = +a2, b10 = +b10, function(t) {
+      return d3.setTime(a2 * (1 - t) + b10 * t), d3;
     };
   }
 
   // node_modules/d3-interpolate/src/number.js
-  function number_default(a3, b10) {
-    return a3 = +a3, b10 = +b10, function(t) {
-      return a3 * (1 - t) + b10 * t;
+  function number_default(a2, b10) {
+    return a2 = +a2, b10 = +b10, function(t) {
+      return a2 * (1 - t) + b10 * t;
     };
   }
 
   // node_modules/d3-interpolate/src/object.js
-  function object_default(a3, b10) {
-    var i2 = {}, c2 = {}, k;
-    if (a3 === null || typeof a3 !== "object") a3 = {};
+  function object_default(a2, b10) {
+    var i2 = {}, c = {}, k;
+    if (a2 === null || typeof a2 !== "object") a2 = {};
     if (b10 === null || typeof b10 !== "object") b10 = {};
     for (k in b10) {
-      if (k in a3) {
-        i2[k] = value_default(a3[k], b10[k]);
+      if (k in a2) {
+        i2[k] = value_default(a2[k], b10[k]);
       } else {
-        c2[k] = b10[k];
+        c[k] = b10[k];
       }
     }
     return function(t) {
-      for (k in i2) c2[k] = i2[k](t);
-      return c2;
+      for (k in i2) c[k] = i2[k](t);
+      return c;
     };
   }
 
@@ -3281,10 +3281,10 @@
       return b10(t) + "";
     };
   }
-  function string_default(a3, b10) {
+  function string_default(a2, b10) {
     var bi = reA.lastIndex = reB.lastIndex = 0, am, bm, bs, i2 = -1, s = [], q2 = [];
-    a3 = a3 + "", b10 = b10 + "";
-    while ((am = reA.exec(a3)) && (bm = reB.exec(b10))) {
+    a2 = a2 + "", b10 = b10 + "";
+    while ((am = reA.exec(a2)) && (bm = reB.exec(b10))) {
       if ((bs = bm.index) > bi) {
         bs = b10.slice(bi, bs);
         if (s[i2]) s[i2] += bs;
@@ -3311,15 +3311,15 @@
   }
 
   // node_modules/d3-interpolate/src/value.js
-  function value_default(a3, b10) {
-    var t = typeof b10, c2;
-    return b10 == null || t === "boolean" ? constant_default(b10) : (t === "number" ? number_default : t === "string" ? (c2 = color(b10)) ? (b10 = c2, rgb_default) : string_default : b10 instanceof color ? rgb_default : b10 instanceof Date ? date_default : isNumberArray(b10) ? numberArray_default : Array.isArray(b10) ? genericArray : typeof b10.valueOf !== "function" && typeof b10.toString !== "function" || isNaN(b10) ? object_default : number_default)(a3, b10);
+  function value_default(a2, b10) {
+    var t = typeof b10, c;
+    return b10 == null || t === "boolean" ? constant_default(b10) : (t === "number" ? number_default : t === "string" ? (c = color(b10)) ? (b10 = c, rgb_default) : string_default : b10 instanceof color ? rgb_default : b10 instanceof Date ? date_default : isNumberArray(b10) ? numberArray_default : Array.isArray(b10) ? genericArray : typeof b10.valueOf !== "function" && typeof b10.toString !== "function" || isNaN(b10) ? object_default : number_default)(a2, b10);
   }
 
   // node_modules/d3-interpolate/src/round.js
-  function round_default(a3, b10) {
-    return a3 = +a3, b10 = +b10, function(t) {
-      return Math.round(a3 * (1 - t) + b10 * t);
+  function round_default(a2, b10) {
+    return a2 = +a2, b10 = +b10, function(t) {
+      return Math.round(a2 * (1 - t) + b10 * t);
     };
   }
 
@@ -3333,16 +3333,16 @@
     scaleX: 1,
     scaleY: 1
   };
-  function decompose_default(a3, b10, c2, d3, e, f) {
+  function decompose_default(a2, b10, c, d3, e, f) {
     var scaleX, scaleY, skewX;
-    if (scaleX = Math.sqrt(a3 * a3 + b10 * b10)) a3 /= scaleX, b10 /= scaleX;
-    if (skewX = a3 * c2 + b10 * d3) c2 -= a3 * skewX, d3 -= b10 * skewX;
-    if (scaleY = Math.sqrt(c2 * c2 + d3 * d3)) c2 /= scaleY, d3 /= scaleY, skewX /= scaleY;
-    if (a3 * d3 < b10 * c2) a3 = -a3, b10 = -b10, skewX = -skewX, scaleX = -scaleX;
+    if (scaleX = Math.sqrt(a2 * a2 + b10 * b10)) a2 /= scaleX, b10 /= scaleX;
+    if (skewX = a2 * c + b10 * d3) c -= a2 * skewX, d3 -= b10 * skewX;
+    if (scaleY = Math.sqrt(c * c + d3 * d3)) c /= scaleY, d3 /= scaleY, skewX /= scaleY;
+    if (a2 * d3 < b10 * c) a2 = -a2, b10 = -b10, skewX = -skewX, scaleX = -scaleX;
     return {
       translateX: e,
       translateY: f,
-      rotate: Math.atan2(b10, a3) * degrees,
+      rotate: Math.atan2(b10, a2) * degrees,
       skewX: Math.atan(skewX) * degrees,
       scaleX,
       scaleY
@@ -3352,8 +3352,8 @@
   // node_modules/d3-interpolate/src/transform/parse.js
   var svgNode;
   function parseCss(value13) {
-    const m2 = new (typeof DOMMatrix === "function" ? DOMMatrix : WebKitCSSMatrix)(value13 + "");
-    return m2.isIdentity ? identity7 : decompose_default(m2.a, m2.b, m2.c, m2.d, m2.e, m2.f);
+    const m = new (typeof DOMMatrix === "function" ? DOMMatrix : WebKitCSSMatrix)(value13 + "");
+    return m.isIdentity ? identity7 : decompose_default(m.a, m.b, m.c, m.d, m.e, m.f);
   }
   function parseSvg(value13) {
     if (value13 == null) return identity7;
@@ -3377,18 +3377,18 @@
         s.push("translate(" + xb + pxComma + yb + pxParen);
       }
     }
-    function rotate(a3, b10, s, q2) {
-      if (a3 !== b10) {
-        if (a3 - b10 > 180) b10 += 360;
-        else if (b10 - a3 > 180) a3 += 360;
-        q2.push({ i: s.push(pop4(s) + "rotate(", null, degParen) - 2, x: number_default(a3, b10) });
+    function rotate(a2, b10, s, q2) {
+      if (a2 !== b10) {
+        if (a2 - b10 > 180) b10 += 360;
+        else if (b10 - a2 > 180) a2 += 360;
+        q2.push({ i: s.push(pop4(s) + "rotate(", null, degParen) - 2, x: number_default(a2, b10) });
       } else if (b10) {
         s.push(pop4(s) + "rotate(" + b10 + degParen);
       }
     }
-    function skewX(a3, b10, s, q2) {
-      if (a3 !== b10) {
-        q2.push({ i: s.push(pop4(s) + "skewX(", null, degParen) - 2, x: number_default(a3, b10) });
+    function skewX(a2, b10, s, q2) {
+      if (a2 !== b10) {
+        q2.push({ i: s.push(pop4(s) + "skewX(", null, degParen) - 2, x: number_default(a2, b10) });
       } else if (b10) {
         s.push(pop4(s) + "skewX(" + b10 + degParen);
       }
@@ -3401,14 +3401,14 @@
         s.push(pop4(s) + "scale(" + xb + "," + yb + ")");
       }
     }
-    return function(a3, b10) {
+    return function(a2, b10) {
       var s = [], q2 = [];
-      a3 = parse7(a3), b10 = parse7(b10);
-      translate(a3.translateX, a3.translateY, b10.translateX, b10.translateY, s, q2);
-      rotate(a3.rotate, b10.rotate, s, q2);
-      skewX(a3.skewX, b10.skewX, s, q2);
-      scale(a3.scaleX, a3.scaleY, b10.scaleX, b10.scaleY, s, q2);
-      a3 = b10 = null;
+      a2 = parse7(a2), b10 = parse7(b10);
+      translate(a2.translateX, a2.translateY, b10.translateX, b10.translateY, s, q2);
+      rotate(a2.rotate, b10.rotate, s, q2);
+      skewX(a2.skewX, b10.skewX, s, q2);
+      scale(a2.scaleX, a2.scaleY, b10.scaleX, b10.scaleY, s, q2);
+      a2 = b10 = null;
       return function(t) {
         var i2 = -1, n = q2.length, o;
         while (++i2 < n) s[(o = q2[i2]).i] = o.x(t);
@@ -3481,16 +3481,16 @@
   function identity8(x5) {
     return x5;
   }
-  function normalize(a3, b10) {
-    return (b10 -= a3 = +a3) ? function(x5) {
-      return (x5 - a3) / b10;
+  function normalize(a2, b10) {
+    return (b10 -= a2 = +a2) ? function(x5) {
+      return (x5 - a2) / b10;
     } : constants(isNaN(b10) ? NaN : 0.5);
   }
-  function clamper(a3, b10) {
+  function clamper(a2, b10) {
     var t;
-    if (a3 > b10) t = a3, a3 = b10, b10 = t;
+    if (a2 > b10) t = a2, a2 = b10, b10 = t;
     return function(x5) {
-      return Math.max(a3, Math.min(b10, x5));
+      return Math.max(a2, Math.min(b10, x5));
     };
   }
   function bimap2(domain2, range5, interpolate) {
@@ -3711,7 +3711,7 @@
       var formatType = formatTypes_default[type], maybeSuffix = /[defgprs%]/.test(type);
       precision = precision === void 0 ? 6 : /[gprs]/.test(type) ? Math.max(1, Math.min(21, precision)) : Math.max(0, Math.min(20, precision));
       function format2(value13) {
-        var valuePrefix = prefix, valueSuffix = suffix, i2, n, c2;
+        var valuePrefix = prefix, valueSuffix = suffix, i2, n, c;
         if (type === "c") {
           valueSuffix = formatType(value13) + valueSuffix;
           value13 = "";
@@ -3726,8 +3726,8 @@
           if (maybeSuffix) {
             i2 = -1, n = value13.length;
             while (++i2 < n) {
-              if (c2 = value13.charCodeAt(i2), 48 > c2 || c2 > 57) {
-                valueSuffix = (c2 === 46 ? decimal + value13.slice(i2 + 1) : value13.slice(i2)) + valueSuffix;
+              if (c = value13.charCodeAt(i2), 48 > c || c > 57) {
+                valueSuffix = (c === 46 ? decimal + value13.slice(i2 + 1) : value13.slice(i2)) + valueSuffix;
                 value13 = value13.slice(0, i2);
                 break;
               }
@@ -4011,20 +4011,20 @@
   }
 
   // node_modules/d3-scale/src/symlog.js
-  function transformSymlog(c2) {
+  function transformSymlog(c) {
     return function(x5) {
-      return Math.sign(x5) * Math.log1p(Math.abs(x5 / c2));
+      return Math.sign(x5) * Math.log1p(Math.abs(x5 / c));
     };
   }
-  function transformSymexp(c2) {
+  function transformSymexp(c) {
     return function(x5) {
-      return Math.sign(x5) * Math.expm1(Math.abs(x5)) * c2;
+      return Math.sign(x5) * Math.expm1(Math.abs(x5)) * c;
     };
   }
   function symlogish(transform4) {
-    var c2 = 1, scale = transform4(transformSymlog(c2), transformSymexp(c2));
+    var c = 1, scale = transform4(transformSymlog(c), transformSymexp(c));
     scale.constant = function(_) {
-      return arguments.length ? transform4(transformSymlog(c2 = +_), transformSymexp(c2)) : c2;
+      return arguments.length ? transform4(transformSymlog(c = +_), transformSymexp(c)) : c;
     };
     return linearish(scale);
   }
@@ -4076,9 +4076,6 @@
     while (i2 < n) colors[i2] = "#" + specifier.slice(i2 * 6, ++i2 * 6);
     return colors;
   }
-
-  // node_modules/d3-scale-chromatic/src/categorical/category10.js
-  var category10_default = colors_default("1f77b4ff7f0e2ca02cd627289467bd8c564be377c27f7f7fbcbd2217becf");
 
   // node_modules/d3-scale-chromatic/src/categorical/Tableau10.js
   var Tableau10_default = colors_default("4e79a7f28e2ce1575976b7b259a14fedc949af7aa1ff9da79c755fbab0ab");
@@ -4438,11 +4435,11 @@
   };
 
   // output/Data.Enum/foreign.js
-  function toCharCode(c2) {
-    return c2.charCodeAt(0);
+  function toCharCode(c) {
+    return c.charCodeAt(0);
   }
-  function fromCharCode(c2) {
-    return String.fromCharCode(c2);
+  function fromCharCode(c) {
+    return String.fromCharCode(c);
   }
 
   // output/Data.Enum/index.js
@@ -4482,15 +4479,15 @@
   };
   var defaultSucc = function(toEnum$prime) {
     return function(fromEnum$prime) {
-      return function(a3) {
-        return toEnum$prime(fromEnum$prime(a3) + 1 | 0);
+      return function(a2) {
+        return toEnum$prime(fromEnum$prime(a2) + 1 | 0);
       };
     };
   };
   var defaultPred = function(toEnum$prime) {
     return function(fromEnum$prime) {
-      return function(a3) {
-        return toEnum$prime(fromEnum$prime(a3) - 1 | 0);
+      return function(a2) {
+        return toEnum$prime(fromEnum$prime(a2) - 1 | 0);
       };
     };
   };
@@ -4587,8 +4584,8 @@
   var toCharArray = function(s) {
     return s.split("");
   };
-  var singleton3 = function(c2) {
-    return c2;
+  var singleton3 = function(c) {
+    return c;
   };
   var length2 = function(s) {
     return s.length;
@@ -5192,8 +5189,8 @@
   })();
   var singleton5 = function(dictPlus) {
     var empty9 = empty(dictPlus);
-    return function(a3) {
-      return new NonEmpty(a3, empty9);
+    return function(a2) {
+      return new NonEmpty(a2, empty9);
     };
   };
 
@@ -5684,31 +5681,31 @@
     };
   })();
   var $lazy_unsafeSplit = /* @__PURE__ */ $runtime_lazy3("unsafeSplit", "Data.Map.Internal", function() {
-    return function(comp, k, m2) {
-      if (m2 instanceof Leaf) {
+    return function(comp, k, m) {
+      if (m instanceof Leaf) {
         return new Split(Nothing.value, Leaf.value, Leaf.value);
       }
       ;
-      if (m2 instanceof Node) {
-        var v = comp(k)(m2.value2);
+      if (m instanceof Node) {
+        var v = comp(k)(m.value2);
         if (v instanceof LT) {
-          var v1 = $lazy_unsafeSplit(793)(comp, k, m2.value4);
-          return new Split(v1.value0, v1.value1, unsafeBalancedNode(m2.value2, m2.value3, v1.value2, m2.value5));
+          var v1 = $lazy_unsafeSplit(793)(comp, k, m.value4);
+          return new Split(v1.value0, v1.value1, unsafeBalancedNode(m.value2, m.value3, v1.value2, m.value5));
         }
         ;
         if (v instanceof GT) {
-          var v1 = $lazy_unsafeSplit(796)(comp, k, m2.value5);
-          return new Split(v1.value0, unsafeBalancedNode(m2.value2, m2.value3, m2.value4, v1.value1), v1.value2);
+          var v1 = $lazy_unsafeSplit(796)(comp, k, m.value5);
+          return new Split(v1.value0, unsafeBalancedNode(m.value2, m.value3, m.value4, v1.value1), v1.value2);
         }
         ;
         if (v instanceof EQ) {
-          return new Split(new Just(m2.value3), m2.value4, m2.value5);
+          return new Split(new Just(m.value3), m.value4, m.value5);
         }
         ;
         throw new Error("Failed pattern match at Data.Map.Internal (line 791, column 5 - line 799, column 30): " + [v.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at Data.Map.Internal (line 787, column 34 - line 799, column 30): " + [m2.constructor.name]);
+      throw new Error("Failed pattern match at Data.Map.Internal (line 787, column 34 - line 799, column 30): " + [m.constructor.name]);
     };
   });
   var unsafeSplit = /* @__PURE__ */ $lazy_unsafeSplit(786);
@@ -5784,10 +5781,10 @@
   var pop = function(dictOrd) {
     var compare3 = compare(dictOrd);
     return function(k) {
-      return function(m2) {
-        var v = unsafeSplit(compare3, k, m2);
-        return map8(function(a3) {
-          return new Tuple(a3, unsafeJoinNodes(v.value1, v.value2));
+      return function(m) {
+        var v = unsafeSplit(compare3, k, m);
+        return map8(function(a2) {
+          return new Tuple(a2, unsafeJoinNodes(v.value1, v.value2));
         })(v.value0);
       };
     };
@@ -5996,8 +5993,8 @@
           };
         });
         var go2 = $lazy_go(169);
-        return function(m2) {
-          return go2(m2, z);
+        return function(m) {
+          return go2(m, z);
         };
       };
     },
@@ -6017,8 +6014,8 @@
           };
         });
         var go2 = $lazy_go(175);
-        return function(m2) {
-          return go2(z, m2);
+        return function(m) {
+          return go2(z, m);
         };
       };
     },
@@ -6058,8 +6055,8 @@
           };
         });
         var go2 = $lazy_go(189);
-        return function(m2) {
-          return go2(m2, z);
+        return function(m) {
+          return go2(m, z);
         };
       };
     },
@@ -6079,8 +6076,8 @@
           };
         });
         var go2 = $lazy_go(195);
-        return function(m2) {
-          return go2(z, m2);
+        return function(m) {
+          return go2(z, m);
         };
       };
     },
@@ -6124,9 +6121,9 @@
   var fromFoldable2 = function(dictOrd) {
     var insert15 = insert(dictOrd);
     return function(dictFoldable) {
-      return foldl(dictFoldable)(function(m2) {
+      return foldl(dictFoldable)(function(m) {
         return function(v) {
-          return insert15(v.value0)(v.value1)(m2);
+          return insert15(v.value0)(v.value1)(m);
         };
       })(empty2);
     };
@@ -6165,8 +6162,8 @@
     var compare3 = compare(dictOrd);
     return function(f) {
       return function(k) {
-        return function(m2) {
-          var v = unsafeSplit(compare3, k, m2);
+        return function(m) {
+          var v = unsafeSplit(compare3, k, m);
           var v2 = f(v.value0);
           if (v2 instanceof Nothing) {
             return unsafeJoinNodes(v.value1, v.value2);
@@ -6311,8 +6308,8 @@
 
   // output/Data.Nullable/foreign.js
   var nullImpl = null;
-  function nullable(a3, r, f) {
-    return a3 == null ? r : f(a3);
+  function nullable(a2, r, f) {
+    return a2 == null ? r : f(a2);
   }
   function notNull(x5) {
     return x5;
@@ -6345,8 +6342,8 @@
     return Step3;
   })();
   var unStep = unsafeCoerce2;
-  var step2 = function(v, a3) {
-    return v.value2(v.value1, a3);
+  var step2 = function(v, a2) {
+    return v.value2(v.value1, a2);
   };
   var mkStep = unsafeCoerce2;
   var halt = function(v) {
@@ -6500,16 +6497,16 @@
   function unsafeSetAny(key, val, obj) {
     obj[key] = val;
   }
-  function forE2(a3, f) {
+  function forE2(a2, f) {
     var b10 = [];
-    for (var i2 = 0; i2 < a3.length; i2++) {
-      b10.push(f(i2, a3[i2]));
+    for (var i2 = 0; i2 < a2.length; i2++) {
+      b10.push(f(i2, a2[i2]));
     }
     return b10;
   }
-  function forEachE(a3, f) {
-    for (var i2 = 0; i2 < a3.length; i2++) {
-      f(a3[i2]);
+  function forEachE(a2, f) {
+    for (var i2 = 0; i2 < a2.length; i2++) {
+      f(a2[i2]);
     }
   }
   function forInE(o, f) {
@@ -6519,20 +6516,20 @@
       f(k, o[k]);
     }
   }
-  function diffWithIxE(a1, a22, f1, f2, f3) {
+  function diffWithIxE(a1, a2, f1, f2, f3) {
     var a3 = [];
     var l1 = a1.length;
-    var l2 = a22.length;
+    var l2 = a2.length;
     var i2 = 0;
     while (1) {
       if (i2 < l1) {
         if (i2 < l2) {
-          a3.push(f1(i2, a1[i2], a22[i2]));
+          a3.push(f1(i2, a1[i2], a2[i2]));
         } else {
           f2(i2, a1[i2]);
         }
       } else if (i2 < l2) {
-        a3.push(f3(i2, a22[i2]));
+        a3.push(f3(i2, a2[i2]));
       } else {
         break;
       }
@@ -6543,21 +6540,21 @@
   function strMapWithIxE(as, fk, f) {
     var o = {};
     for (var i2 = 0; i2 < as.length; i2++) {
-      var a3 = as[i2];
-      var k = fk(a3);
-      o[k] = f(k, i2, a3);
+      var a2 = as[i2];
+      var k = fk(a2);
+      o[k] = f(k, i2, a2);
     }
     return o;
   }
   function diffWithKeyAndIxE(o1, as, fk, f1, f2, f3) {
     var o2 = {};
     for (var i2 = 0; i2 < as.length; i2++) {
-      var a3 = as[i2];
-      var k = fk(a3);
+      var a2 = as[i2];
+      var k = fk(a2);
       if (o1.hasOwnProperty(k)) {
-        o2[k] = f1(k, i2, o1[k], a3);
+        o2[k] = f1(k, i2, o1[k], a2);
       } else {
-        o2[k] = f3(k, i2, a3);
+        o2[k] = f3(k, i2, a2);
       }
     }
     for (var k in o1) {
@@ -6568,8 +6565,8 @@
     }
     return o2;
   }
-  function refEq2(a3, b10) {
-    return a3 === b10;
+  function refEq2(a2, b10) {
+    return a2 === b10;
   }
   function createTextNode(s, doc) {
     return doc.createTextNode(s);
@@ -6584,19 +6581,19 @@
       return doc.createElement(name16);
     }
   }
-  function insertChildIx(i2, a3, b10) {
+  function insertChildIx(i2, a2, b10) {
     var n = b10.childNodes.item(i2) || null;
-    if (n !== a3) {
-      b10.insertBefore(a3, n);
+    if (n !== a2) {
+      b10.insertBefore(a2, n);
     }
   }
-  function removeChild(a3, b10) {
-    if (b10 && a3.parentNode === b10) {
-      b10.removeChild(a3);
+  function removeChild(a2, b10) {
+    if (b10 && a2.parentNode === b10) {
+      b10.removeChild(a2);
     }
   }
-  function parentNode(a3) {
-    return a3.parentNode;
+  function parentNode(a2) {
+    return a2.parentNode;
   }
   function setAttribute(ns, attr3, val, el) {
     if (ns != null) {
@@ -6633,10 +6630,10 @@
   };
   function poke2(k) {
     return function(v) {
-      return function(m2) {
+      return function(m) {
         return function() {
-          m2[k] = v;
-          return m2;
+          m[k] = v;
+          return m;
         };
       };
     };
@@ -7082,8 +7079,8 @@
     var Monad0 = dictMonadError.MonadThrow0().Monad0();
     var map45 = map(Monad0.Bind1().Apply0().Functor0());
     var pure26 = pure(Monad0.Applicative0());
-    return function(a3) {
-      return catchError1(map45(Right.create)(a3))(function($52) {
+    return function(a2) {
+      return catchError1(map45(Right.create)(a2))(function($52) {
         return pure26(Left.create($52));
       });
     };
@@ -7128,8 +7125,8 @@
         return function(k) {
           return bind21(v)(either(function($193) {
             return pure26(Left.create($193));
-          })(function(a3) {
-            var v1 = k(a3);
+          })(function(a2) {
+            var v1 = k(a2);
             return v1;
           }));
         };
@@ -7444,12 +7441,12 @@
   };
 
   // output/Foreign.Object/foreign.js
-  function _copyST(m2) {
+  function _copyST(m) {
     return function() {
       var r = {};
-      for (var k in m2) {
-        if (hasOwnProperty.call(m2, k)) {
-          r[k] = m2[k];
+      for (var k in m) {
+        if (hasOwnProperty.call(m, k)) {
+          r[k] = m[k];
         }
       }
       return r;
@@ -7460,35 +7457,35 @@
     return f();
   }
   function _fmapObject(m0, f) {
-    var m2 = {};
+    var m = {};
     for (var k in m0) {
       if (hasOwnProperty.call(m0, k)) {
-        m2[k] = f(m0[k]);
+        m[k] = f(m0[k]);
       }
     }
-    return m2;
+    return m;
   }
   function _mapWithKey(m0, f) {
-    var m2 = {};
+    var m = {};
     for (var k in m0) {
       if (hasOwnProperty.call(m0, k)) {
-        m2[k] = f(k)(m0[k]);
+        m[k] = f(k)(m0[k]);
       }
     }
-    return m2;
+    return m;
   }
   function _foldM(bind21) {
     return function(f) {
       return function(mz) {
-        return function(m2) {
+        return function(m) {
           var acc = mz;
           function g(k2) {
             return function(z) {
-              return f(z)(k2)(m2[k2]);
+              return f(z)(k2)(m[k2]);
             };
           }
-          for (var k in m2) {
-            if (hasOwnProperty.call(m2, k)) {
+          for (var k in m) {
+            if (hasOwnProperty.call(m, k)) {
               acc = bind21(acc)(g(k));
             }
           }
@@ -7497,24 +7494,24 @@
       };
     };
   }
-  function size(m2) {
+  function size(m) {
     var s = 0;
-    for (var k in m2) {
-      if (hasOwnProperty.call(m2, k)) {
+    for (var k in m) {
+      if (hasOwnProperty.call(m, k)) {
         ++s;
       }
     }
     return s;
   }
-  function _lookup(no, yes, k, m2) {
-    return k in m2 ? yes(m2[k]) : no;
+  function _lookup(no, yes, k, m) {
+    return k in m ? yes(m[k]) : no;
   }
   function toArrayWithKey(f) {
-    return function(m2) {
+    return function(m) {
       var r = [];
-      for (var k in m2) {
-        if (hasOwnProperty.call(m2, k)) {
-          r.push(f(k)(m2[k]));
+      for (var k in m) {
+        if (hasOwnProperty.call(m, k)) {
+          r.push(f(k)(m[k]));
         }
       }
       return r;
@@ -7544,17 +7541,17 @@
   };
   var thawST = _copyST;
   var mutate = function(f) {
-    return function(m2) {
+    return function(m) {
       return runST(function __do8() {
-        var s = thawST(m2)();
+        var s = thawST(m)();
         f(s)();
         return s;
       });
     };
   };
   var mapWithKey = function(f) {
-    return function(m2) {
-      return _mapWithKey(m2, f);
+    return function(m) {
+      return _mapWithKey(m, f);
     };
   };
   var lookup3 = /* @__PURE__ */ (function() {
@@ -7567,8 +7564,8 @@
   };
   var functorObject = {
     map: function(f) {
-      return function(m2) {
-        return _fmapObject(m2, f);
+      return function(m) {
+        return _fmapObject(m, f);
       };
     }
   };
@@ -7614,8 +7611,8 @@
     },
     foldr: function(f) {
       return function(z) {
-        return function(m2) {
-          return foldr3(f)(z)(values2(m2));
+        return function(m) {
+          return foldr3(f)(z)(values2(m));
         };
       };
     },
@@ -7632,8 +7629,8 @@
     },
     foldrWithIndex: function(f) {
       return function(z) {
-        return function(m2) {
-          return foldr3(uncurry(f))(z)(toArrayWithKey(Tuple.create)(m2));
+        return function(m) {
+          return foldr3(uncurry(f))(z)(toArrayWithKey(Tuple.create)(m));
         };
       };
     },
@@ -8278,8 +8275,8 @@
     return $tco_result;
   };
   var snoc3 = function(v) {
-    return function(a3) {
-      return new CatQueue(v.value0, new Cons(a3, v.value1));
+    return function(a2) {
+      return new CatQueue(v.value0, new Cons(a2, v.value1));
     };
   };
   var $$null3 = function(v) {
@@ -8427,8 +8424,8 @@
     append: append3
   };
   var snoc4 = function(cat) {
-    return function(a3) {
-      return append3(cat)(new CatCons(a3, empty5));
+    return function(a2) {
+      return append3(cat)(new CatCons(a2, empty5));
     };
   };
 
@@ -8511,8 +8508,8 @@
       ;
       if (v.value0 instanceof Bind) {
         $tco_done = true;
-        return new Bind(v.value0.value0, function(a3) {
-          return concatF(v.value0.value1(a3))(v.value1);
+        return new Bind(v.value0.value0, function(a2) {
+          return concatF(v.value0.value1(a2))(v.value1);
         });
       }
       ;
@@ -9710,8 +9707,8 @@
   var bind1 = /* @__PURE__ */ bind(bindAff);
   var bindFlipped3 = /* @__PURE__ */ bindFlipped(bindAff);
   var $$finally = function(fin) {
-    return function(a3) {
-      return bracket(pure22(unit))($$const(fin))($$const(a3));
+    return function(a2) {
+      return bracket(pure22(unit))($$const(fin))($$const(a2));
     };
   };
   var parallelAff = {
@@ -9795,8 +9792,8 @@
   };
   var monadRecAff = {
     tailRecM: function(k) {
-      var go2 = function(a3) {
-        return bind1(k(a3))(function(res) {
+      var go2 = function(a2) {
+        return bind1(k(a2))(function(res) {
           if (res instanceof Done) {
             return pure22(res.value0);
           }
@@ -9848,9 +9845,9 @@
   var mkChildQueryBox = unsafeCoerce2;
 
   // output/Unsafe.Reference/foreign.js
-  function reallyUnsafeRefEq(a3) {
+  function reallyUnsafeRefEq(a2) {
     return function(b10) {
-      return a3 === b10;
+      return a2 === b10;
     };
   }
 
@@ -9874,8 +9871,8 @@
     };
   };
   var notify = function(v) {
-    return function(a3) {
-      return v(a3);
+    return function(a2) {
+      return v(a2);
     };
   };
   var create = function __do() {
@@ -9889,9 +9886,9 @@
           return modify_2(deleteBy(unsafeRefEq)(k))(subscribers);
         };
       },
-      listener: function(a3) {
+      listener: function(a2) {
         return bind2(read(subscribers))(traverse_1(function(k) {
-          return k(a3);
+          return k(a2);
         }));
       }
     };
@@ -10916,10 +10913,10 @@
       var findControlForText = function(inner) {
         return function(ctrls) {
           var lowerInner = toLower(inner);
-          return find2(function(c2) {
-            return toLower(c2.current) === lowerInner || any2(function(opt) {
+          return find2(function(c) {
+            return toLower(c.current) === lowerInner || any2(function(opt) {
               return toLower(opt) === lowerInner;
-            })(c2.options);
+            })(c.options);
           })(ctrls);
         };
       };
@@ -11439,8 +11436,8 @@
 
   // output/JSURI/foreign.js
   function encodeURIComponent_to_RFC3986(input3) {
-    return input3.replace(/[!'()*]/g, function(c2) {
-      return "%" + c2.charCodeAt(0).toString(16);
+    return input3.replace(/[!'()*]/g, function(c) {
+      return "%" + c.charCodeAt(0).toString(16);
     });
   }
   function _encodeFormURLComponent(fail3, succeed, input3) {
@@ -11995,10 +11992,10 @@
   var tail = function(v) {
     return snd(force(v));
   };
-  var mkCofree = function(a3) {
+  var mkCofree = function(a2) {
     return function(t) {
       return defer2(function(v) {
-        return new Tuple(a3, t);
+        return new Tuple(a2, t);
       });
     };
   };
@@ -12159,9 +12156,9 @@
   };
   var insert6 = function(dictOrd) {
     var insert15 = insert(dictOrd);
-    return function(a3) {
+    return function(a2) {
       return function(v) {
-        return insert15(a3)(unit)(v);
+        return insert15(a2)(unit)(v);
       };
     };
   };
@@ -12197,9 +12194,9 @@
     var foldl22 = foldl(dictFoldable);
     return function(dictOrd) {
       var insert15 = insert6(dictOrd);
-      return foldl22(function(m2) {
-        return function(a3) {
-          return insert15(a3)(m2);
+      return foldl22(function(m) {
+        return function(a2) {
+          return insert15(a2)(m);
         };
       })(empty7);
     };
@@ -12282,9 +12279,9 @@
     return function() {
       return function() {
         return function(l) {
-          return function(a3) {
+          return function(a2) {
             return function(r) {
-              return unsafeSet(reflectSymbol2(l))(a3)(r);
+              return unsafeSet(reflectSymbol2(l))(a2)(r);
             };
           };
         };
@@ -12607,16 +12604,16 @@
   };
   var mergeContoursRight = function(contours) {
     var mergeLevel = function(cs) {
-      var currentLevels = mapMaybe(function(c2) {
-        if (c2 instanceof Cons) {
-          return new Just(c2.value0);
+      var currentLevels = mapMaybe(function(c) {
+        if (c instanceof Cons) {
+          return new Just(c.value0);
         }
         ;
-        if (c2 instanceof Nil) {
+        if (c instanceof Nil) {
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 437, column 17 - line 439, column 27): " + [c2.constructor.name]);
+        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 437, column 17 - line 439, column 27): " + [c.constructor.name]);
       })(cs);
       var v = head(currentLevels);
       if (v instanceof Nothing) {
@@ -12624,16 +12621,16 @@
       }
       ;
       if (v instanceof Just) {
-        var restContours = mapMaybe(function(c2) {
-          if (c2 instanceof Cons) {
-            return new Just(c2.value1);
+        var restContours = mapMaybe(function(c) {
+          if (c instanceof Cons) {
+            return new Just(c.value1);
           }
           ;
-          if (c2 instanceof Nil) {
+          if (c instanceof Nil) {
             return Nothing.value;
           }
           ;
-          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 450, column 23 - line 452, column 33): " + [c2.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 450, column 23 - line 452, column 33): " + [c.constructor.name]);
         })(cs);
         var maxVal = fromMaybe(0)(maximum2(currentLevels));
         return new Cons(maxVal, mergeLevel(restContours));
@@ -12649,16 +12646,16 @@
   };
   var mergeContoursLeft = function(contours) {
     var mergeLevel = function(cs) {
-      var currentLevels = mapMaybe(function(c2) {
-        if (c2 instanceof Cons) {
-          return new Just(c2.value0);
+      var currentLevels = mapMaybe(function(c) {
+        if (c instanceof Cons) {
+          return new Just(c.value0);
         }
         ;
-        if (c2 instanceof Nil) {
+        if (c instanceof Nil) {
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 404, column 17 - line 406, column 27): " + [c2.constructor.name]);
+        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 404, column 17 - line 406, column 27): " + [c.constructor.name]);
       })(cs);
       var v = head(currentLevels);
       if (v instanceof Nothing) {
@@ -12666,16 +12663,16 @@
       }
       ;
       if (v instanceof Just) {
-        var restContours = mapMaybe(function(c2) {
-          if (c2 instanceof Cons) {
-            return new Just(c2.value1);
+        var restContours = mapMaybe(function(c) {
+          if (c instanceof Cons) {
+            return new Just(c.value1);
           }
           ;
-          if (c2 instanceof Nil) {
+          if (c instanceof Nil) {
             return Nothing.value;
           }
           ;
-          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 417, column 23 - line 419, column 33): " + [c2.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 417, column 23 - line 419, column 33): " + [c.constructor.name]);
         })(cs);
         var minVal = fromMaybe(0)(minimum2(currentLevels));
         return new Cons(minVal, mergeLevel(restContours));
@@ -13430,9 +13427,9 @@
             x: node.x,
             y: node.y
           })(acc);
-          return foldl6(function(a3) {
+          return foldl6(function(a2) {
             return function(child) {
-              return go2(child)(a3);
+              return go2(child)(a2);
             };
           })(acc$prime)(children3);
         };
@@ -13441,16 +13438,16 @@
     };
   };
   var findRootModule = function(modules) {
-    var v = find2(function(m2) {
-      return m2.name === "PSD3.Main";
+    var v = find2(function(m) {
+      return m.name === "PSD3.Main";
     })(modules);
     if (v instanceof Just) {
       return v.value0.id;
     }
     ;
     if (v instanceof Nothing) {
-      var v1 = last(sortWith2(function(m2) {
-        return length(m2.sources);
+      var v1 = last(sortWith2(function(m) {
+        return length(m.sources);
       })(modules));
       if (v1 instanceof Just) {
         return v1.value0.id;
@@ -13480,8 +13477,8 @@
       })());
     });
   };
-  var charCode = function(c2) {
-    var v = indexOf(singleton3(c2))("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-");
+  var charCode = function(c) {
+    var v = indexOf(singleton3(c))("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-");
     if (v instanceof Just) {
       return v.value0;
     }
@@ -13495,8 +13492,8 @@
   var stringHash = function(s) {
     var chars = toCharArray(s);
     return foldl12(function(acc) {
-      return function(c2) {
-        return mod3((acc * 31 | 0) + charCode(c2) | 0)(1e6);
+      return function(c) {
+        return mod3((acc * 31 | 0) + charCode(c) | 0)(1e6);
       };
     })(0)(chars);
   };
@@ -13926,7 +13923,7 @@
   // node_modules/d3-selection/src/selection/select.js
   function select_default(select10) {
     if (typeof select10 !== "function") select10 = selector_default(select10);
-    for (var groups = this._groups, m2 = groups.length, subgroups = new Array(m2), j = 0; j < m2; ++j) {
+    for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {
       for (var group4 = groups[j], n = group4.length, subgroup = subgroups[j] = new Array(n), node, subnode, i2 = 0; i2 < n; ++i2) {
         if ((node = group4[i2]) && (subnode = select10.call(node, node.__data__, i2, group4))) {
           if ("__data__" in node) subnode.__data__ = node.__data__;
@@ -13961,7 +13958,7 @@
   function selectAll_default(select10) {
     if (typeof select10 === "function") select10 = arrayAll(select10);
     else select10 = selectorAll_default(select10);
-    for (var groups = this._groups, m2 = groups.length, subgroups = [], parents = [], j = 0; j < m2; ++j) {
+    for (var groups = this._groups, m = groups.length, subgroups = [], parents = [], j = 0; j < m; ++j) {
       for (var group4 = groups[j], n = group4.length, node, i2 = 0; i2 < n; ++i2) {
         if (node = group4[i2]) {
           subgroups.push(select10.call(node, node.__data__, i2, group4));
@@ -14015,7 +14012,7 @@
   // node_modules/d3-selection/src/selection/filter.js
   function filter_default(match) {
     if (typeof match !== "function") match = matcher_default(match);
-    for (var groups = this._groups, m2 = groups.length, subgroups = new Array(m2), j = 0; j < m2; ++j) {
+    for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {
       for (var group4 = groups[j], n = group4.length, subgroup = subgroups[j] = [], node, i2 = 0; i2 < n; ++i2) {
         if ((node = group4[i2]) && match.call(node, node.__data__, i2, group4)) {
           subgroup.push(node);
@@ -14116,7 +14113,7 @@
     if (!arguments.length) return Array.from(this, datum);
     var bind21 = key ? bindKey : bindIndex, parents = this._parents, groups = this._groups;
     if (typeof value13 !== "function") value13 = constant_default2(value13);
-    for (var m2 = groups.length, update2 = new Array(m2), enter = new Array(m2), exit = new Array(m2), j = 0; j < m2; ++j) {
+    for (var m = groups.length, update2 = new Array(m), enter = new Array(m), exit = new Array(m), j = 0; j < m; ++j) {
       var parent2 = parents[j], group4 = groups[j], groupLength = group4.length, data = arraylike(value13.call(parent2, parent2 && parent2.__data__, j, parents)), dataLength = data.length, enterGroup = enter[j] = new Array(dataLength), updateGroup = update2[j] = new Array(dataLength), exitGroup = exit[j] = new Array(groupLength);
       bind21(parent2, group4, enterGroup, updateGroup, exitGroup, data, key);
       for (var i0 = 0, i1 = 0, previous, next; i0 < dataLength; ++i0) {
@@ -14162,7 +14159,7 @@
   // node_modules/d3-selection/src/selection/merge.js
   function merge_default(context) {
     var selection2 = context.selection ? context.selection() : context;
-    for (var groups0 = this._groups, groups1 = selection2._groups, m0 = groups0.length, m1 = groups1.length, m2 = Math.min(m0, m1), merges = new Array(m0), j = 0; j < m2; ++j) {
+    for (var groups0 = this._groups, groups1 = selection2._groups, m0 = groups0.length, m1 = groups1.length, m = Math.min(m0, m1), merges = new Array(m0), j = 0; j < m; ++j) {
       for (var group0 = groups0[j], group1 = groups1[j], n = group0.length, merge3 = merges[j] = new Array(n), node, i2 = 0; i2 < n; ++i2) {
         if (node = group0[i2] || group1[i2]) {
           merge3[i2] = node;
@@ -14177,7 +14174,7 @@
 
   // node_modules/d3-selection/src/selection/order.js
   function order_default() {
-    for (var groups = this._groups, j = -1, m2 = groups.length; ++j < m2; ) {
+    for (var groups = this._groups, j = -1, m = groups.length; ++j < m; ) {
       for (var group4 = groups[j], i2 = group4.length - 1, next = group4[i2], node; --i2 >= 0; ) {
         if (node = group4[i2]) {
           if (next && node.compareDocumentPosition(next) ^ 4) next.parentNode.insertBefore(node, next);
@@ -14191,10 +14188,10 @@
   // node_modules/d3-selection/src/selection/sort.js
   function sort_default(compare3) {
     if (!compare3) compare3 = ascending2;
-    function compareNode(a3, b10) {
-      return a3 && b10 ? compare3(a3.__data__, b10.__data__) : !a3 - !b10;
+    function compareNode(a2, b10) {
+      return a2 && b10 ? compare3(a2.__data__, b10.__data__) : !a2 - !b10;
     }
-    for (var groups = this._groups, m2 = groups.length, sortgroups = new Array(m2), j = 0; j < m2; ++j) {
+    for (var groups = this._groups, m = groups.length, sortgroups = new Array(m), j = 0; j < m; ++j) {
       for (var group4 = groups[j], n = group4.length, sortgroup = sortgroups[j] = new Array(n), node, i2 = 0; i2 < n; ++i2) {
         if (node = group4[i2]) {
           sortgroup[i2] = node;
@@ -14204,8 +14201,8 @@
     }
     return new Selection(sortgroups, this._parents).order();
   }
-  function ascending2(a3, b10) {
-    return a3 < b10 ? -1 : a3 > b10 ? 1 : a3 >= b10 ? 0 : NaN;
+  function ascending2(a2, b10) {
+    return a2 < b10 ? -1 : a2 > b10 ? 1 : a2 >= b10 ? 0 : NaN;
   }
 
   // node_modules/d3-selection/src/selection/call.js
@@ -14223,7 +14220,7 @@
 
   // node_modules/d3-selection/src/selection/node.js
   function node_default() {
-    for (var groups = this._groups, j = 0, m2 = groups.length; j < m2; ++j) {
+    for (var groups = this._groups, j = 0, m = groups.length; j < m; ++j) {
       for (var group4 = groups[j], i2 = 0, n = group4.length; i2 < n; ++i2) {
         var node = group4[i2];
         if (node) return node;
@@ -14246,7 +14243,7 @@
 
   // node_modules/d3-selection/src/selection/each.js
   function each_default(callback) {
-    for (var groups = this._groups, j = 0, m2 = groups.length; j < m2; ++j) {
+    for (var groups = this._groups, j = 0, m = groups.length; j < m; ++j) {
       for (var group4 = groups[j], i2 = 0, n = group4.length, node; i2 < n; ++i2) {
         if (node = group4[i2]) callback.call(node, node.__data__, i2, group4);
       }
@@ -14530,7 +14527,7 @@
     return function() {
       var on5 = this.__on;
       if (!on5) return;
-      for (var j = 0, i2 = -1, m2 = on5.length, o; j < m2; ++j) {
+      for (var j = 0, i2 = -1, m = on5.length, o; j < m; ++j) {
         if (o = on5[j], (!typename.type || o.type === typename.type) && o.name === typename.name) {
           this.removeEventListener(o.type, o.listener, o.options);
         } else {
@@ -14544,7 +14541,7 @@
   function onAdd(typename, value13, options2) {
     return function() {
       var on5 = this.__on, o, listener = contextListener(value13);
-      if (on5) for (var j = 0, m2 = on5.length; j < m2; ++j) {
+      if (on5) for (var j = 0, m = on5.length; j < m; ++j) {
         if ((o = on5[j]).type === typename.type && o.name === typename.name) {
           this.removeEventListener(o.type, o.listener, o.options);
           this.addEventListener(o.type, o.listener = listener, o.options = options2);
@@ -14562,7 +14559,7 @@
     var typenames = parseTypenames(typename + ""), i2, n = typenames.length, t;
     if (arguments.length < 2) {
       var on5 = this.node().__on;
-      if (on5) for (var j = 0, m2 = on5.length, o; j < m2; ++j) {
+      if (on5) for (var j = 0, m = on5.length, o; j < m; ++j) {
         for (i2 = 0, o = on5[j]; i2 < n; ++i2) {
           if ((t = typenames[i2]).type === o.type && t.name === o.name) {
             return o.value;
@@ -14604,7 +14601,7 @@
 
   // node_modules/d3-selection/src/selection/iterator.js
   function* iterator_default() {
-    for (var groups = this._groups, j = 0, m2 = groups.length; j < m2; ++j) {
+    for (var groups = this._groups, j = 0, m = groups.length; j < m; ++j) {
       for (var group4 = groups[j], i2 = 0, n = group4.length, node; i2 < n; ++i2) {
         if (node = group4[i2]) yield node;
       }
@@ -14694,6 +14691,1556 @@
     }
     return [event.pageX, event.pageY];
   }
+
+  // psd3-selection/src/PSD3v2/Tooltip.js
+  var tooltip = null;
+  var tooltipConfig = null;
+  var ensureTooltip = () => {
+    if (!tooltip) {
+      tooltip = document.createElement("div");
+      tooltip.className = "psd3-tooltip";
+      tooltip.style.cssText = `
+      position: fixed;
+      display: none;
+      pointer-events: none;
+      z-index: 10000;
+    `;
+      document.body.appendChild(tooltip);
+      if (tooltipConfig) {
+        applyConfig(tooltipConfig);
+      }
+    }
+    return tooltip;
+  };
+  var applyConfig = (config) => {
+    const el = ensureTooltip();
+    if (config.background) el.style.background = config.background;
+    if (config.color) el.style.color = config.color;
+    if (config.padding) el.style.padding = config.padding;
+    if (config.borderRadius) el.style.borderRadius = config.borderRadius;
+    if (config.fontSize) el.style.fontSize = config.fontSize;
+    if (config.fontFamily) el.style.fontFamily = config.fontFamily;
+    if (config.border) el.style.border = config.border;
+    if (config.boxShadow) el.style.boxShadow = config.boxShadow;
+    if (config.maxWidth) el.style.maxWidth = config.maxWidth;
+    if (config.lineHeight) el.style.lineHeight = config.lineHeight;
+    if (config.backdropFilter) {
+      el.style.backdropFilter = config.backdropFilter;
+      el.style.webkitBackdropFilter = config.backdropFilter;
+    }
+  };
+  var showTooltip_ = (content3) => (x5) => (y5) => () => {
+    const el = ensureTooltip();
+    el.innerHTML = content3;
+    el.style.display = "block";
+    const rect = el.getBoundingClientRect();
+    const viewW = window.innerWidth;
+    const viewH = window.innerHeight;
+    let posX = x5 + 15;
+    let posY = y5 + 10;
+    if (posX + rect.width > viewW) posX = x5 - rect.width - 15;
+    if (posY + rect.height > viewH) posY = y5 - rect.height - 10;
+    el.style.left = posX + "px";
+    el.style.top = posY + "px";
+  };
+  var hideTooltip_ = () => {
+    ensureTooltip().style.display = "none";
+  };
+
+  // output/Engine.BubblePack/foreign.js
+  var renderReexportModule_ = (containerSelector) => (node) => (isReexport) => () => {
+    const container = select_default2(containerSelector);
+    const group4 = container.append("g").datum(node).attr("class", `module-pack pack-${node.id} ${isReexport ? "reexport-module" : "empty-module"}`).attr("transform", `translate(${node.x},${node.y})`);
+    if (isReexport) {
+      group4.append("circle").attr("cx", 0).attr("cy", 0).attr("r", node.r * 1.5).attr("fill", "none").attr("stroke", "#9467bd").attr("stroke-width", 3).attr("stroke-dasharray", "5,3").attr("class", "reexport-ring");
+      group4.append("circle").attr("cx", 0).attr("cy", 0).attr("r", 4).attr("fill", "#9467bd").attr("class", "reexport-center");
+    } else {
+      group4.append("circle").attr("cx", 0).attr("cy", 0).attr("r", node.r).attr("fill", "#ccc").attr("stroke", "#999").attr("stroke-width", 1).attr("class", "empty-module-circle");
+    }
+  };
+  var highlightCallGraph_ = (sourceModule) => (callerModules) => (calleeModules) => () => {
+    const callerSet = new Set(callerModules);
+    const calleeSet = new Set(calleeModules);
+    select_default2("#explorer-nodes").selectAll("g.module-pack").each(function() {
+      const group4 = select_default2(this);
+      const node = group4.datum();
+      if (!node) return;
+      const moduleName = node.name;
+      group4.classed("highlight-caller", false).classed("highlight-callee", false).classed("highlight-source", false).classed("highlight-dimmed", false);
+      if (moduleName === sourceModule) {
+        group4.classed("highlight-source", true);
+      } else if (callerSet.has(moduleName)) {
+        group4.classed("highlight-caller", true);
+      } else if (calleeSet.has(moduleName)) {
+        group4.classed("highlight-callee", true);
+      } else {
+        group4.classed("highlight-dimmed", true);
+      }
+    });
+    select_default2("#explorer-links").selectAll("line").each(function() {
+      const line = select_default2(this);
+      line.classed("highlight-dimmed", true);
+    });
+  };
+  var clearCallGraphHighlight_ = () => {
+    select_default2("#explorer-nodes").selectAll("g.module-pack").classed("highlight-caller", false).classed("highlight-callee", false).classed("highlight-source", false).classed("highlight-dimmed", false);
+    select_default2("#explorer-links").selectAll("line").classed("highlight-dimmed", false);
+  };
+  var renderBoundBubblePack_ = (containerSelector) => (node) => (packCircles) => (centerOffset) => (categoryColorFn) => (onDeclarationClick2) => (onDeclarationHover2) => (onDeclarationLeave2) => () => {
+    const container = select_default2(containerSelector);
+    const group4 = container.append("g").datum(node).attr("class", `module-pack pack-${node.id}`).attr("transform", `translate(${node.x},${node.y})`);
+    group4.selectAll("circle").data(packCircles).enter().append("circle").attr("cx", (d3) => d3.x - centerOffset).attr("cy", (d3) => d3.y - centerOffset).attr("r", (d3) => d3.r).attr("fill", (d3) => categoryColorFn(d3)()).attr("fill-opacity", (d3) => {
+      if (d3.depth === 0) return 0.3;
+      if (d3.depth === 1) return 0.6;
+      return 0.8;
+    }).attr("stroke", "#fff").attr("stroke-width", 0.5).attr("class", (d3) => {
+      if (d3.depth === 0) return "pack-module";
+      if (d3.depth === 1) return "pack-category";
+      return "pack-declaration";
+    }).style("cursor", (d3) => d3.depth === 2 ? "pointer" : "default").on("click", function(event, d3) {
+      if (d3.depth === 2) {
+        event.stopPropagation();
+        onDeclarationClick2(node.name)(d3.data_)(d3.category)();
+      }
+    }).on("mouseenter", function(event, d3) {
+      if (d3.depth === 2) {
+        select_default2(this).attr("stroke", "#000").attr("stroke-width", 2);
+        const tooltipContent = `
+          <div class="tooltip-header">${d3.data_}</div>
+          <div class="tooltip-package">${node.name}</div>
+          <div class="tooltip-metrics">
+            <div class="tooltip-metric">
+              <span class="metric-label">Type</span>
+              <span class="metric-value">${d3.category}</span>
+            </div>
+          </div>
+        `;
+        showTooltip_(tooltipContent)(event.pageX)(event.pageY)();
+        if (d3.category === "value") {
+          onDeclarationHover2(node.name)(d3.data_)(d3.category)();
+        }
+      }
+    }).on("mouseleave", function(event, d3) {
+      if (d3.depth === 2) {
+        select_default2(this).attr("stroke", "#fff").attr("stroke-width", 0.5);
+        hideTooltip_();
+        if (d3.category === "value") {
+          onDeclarationLeave2();
+        }
+      }
+    });
+  };
+
+  // output/DataViz.Layout.Hierarchy.Pack/index.js
+  var elemIndex2 = /* @__PURE__ */ elemIndex(eqInt);
+  var append15 = /* @__PURE__ */ append(semigroupArray);
+  var map27 = /* @__PURE__ */ map(functorArray);
+  var min4 = /* @__PURE__ */ min(ordNumber);
+  var max5 = /* @__PURE__ */ max(ordNumber);
+  var insert9 = /* @__PURE__ */ insert(ordInt);
+  var fromFoldable10 = /* @__PURE__ */ fromFoldable2(ordInt)(foldableArray);
+  var sortWith3 = /* @__PURE__ */ sortWith(ordNumber);
+  var foldl7 = /* @__PURE__ */ foldl(foldableArray);
+  var max1 = /* @__PURE__ */ max(ordInt);
+  var mod4 = /* @__PURE__ */ mod(euclideanRingInt);
+  var map112 = /* @__PURE__ */ map(functorMaybe);
+  var apply3 = /* @__PURE__ */ apply(applyMaybe);
+  var bind7 = /* @__PURE__ */ bind(bindMaybe);
+  var lookup8 = /* @__PURE__ */ lookup(ordInt);
+  var pure10 = /* @__PURE__ */ pure(applicativeMaybe);
+  var minimumBy2 = /* @__PURE__ */ minimumBy(foldableArray);
+  var comparing2 = /* @__PURE__ */ comparing(ordNumber);
+  var PackNode = /* @__PURE__ */ (function() {
+    function PackNode2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    PackNode2.create = function(value0) {
+      return new PackNode2(value0);
+    };
+    return PackNode2;
+  })();
+  var NoCollision = /* @__PURE__ */ (function() {
+    function NoCollision2() {
+    }
+    ;
+    NoCollision2.value = new NoCollision2();
+    return NoCollision2;
+  })();
+  var CollisionFromJ = /* @__PURE__ */ (function() {
+    function CollisionFromJ2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    CollisionFromJ2.create = function(value0) {
+      return new CollisionFromJ2(value0);
+    };
+    return CollisionFromJ2;
+  })();
+  var CollisionFromK = /* @__PURE__ */ (function() {
+    function CollisionFromK2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    CollisionFromK2.create = function(value0) {
+      return new CollisionFromK2(value0);
+    };
+    return CollisionFromK2;
+  })();
+  var shortenChainOnly = function(aId) {
+    return function(jId) {
+      return function(chain) {
+        var v = elemIndex2(jId)(chain);
+        var v1 = elemIndex2(aId)(chain);
+        if (v1 instanceof Just && v instanceof Just) {
+          var $135 = v.value0 > v1.value0;
+          if ($135) {
+            var before = take(v1.value0 + 1 | 0)(chain);
+            var after = drop(v.value0)(chain);
+            return append15(before)(after);
+          }
+          ;
+          var $136 = v.value0 < v1.value0;
+          if ($136) {
+            return slice(v.value0)(v1.value0 + 1 | 0)(chain);
+          }
+          ;
+          return chain;
+        }
+        ;
+        return chain;
+      };
+    };
+  };
+  var scaleToSize = function(config) {
+    return function(v) {
+      var scaleNode = function(scale) {
+        return function(parentX) {
+          return function(parentY) {
+            return function(v1) {
+              var scaledY = parentY + scale * v1.value0.y;
+              var scaledX = parentX + scale * v1.value0.x;
+              var scaledR = scale * v1.value0.r;
+              return new PackNode({
+                data_: v1.value0.data_,
+                depth: v1.value0.depth,
+                height: v1.value0.height,
+                value: v1.value0.value,
+                x: scaledX,
+                y: scaledY,
+                r: scaledR,
+                children: map27(scaleNode(scale)(scaledX)(scaledY))(v1.value0.children)
+              });
+            };
+          };
+        };
+      };
+      var k = min4(config.size.width)(config.size.height) / (2 * v.value0.r);
+      var scaledRootR = k * v.value0.r;
+      var centerY = config.size.height / 2;
+      var centerX = config.size.width / 2;
+      return new PackNode({
+        data_: v.value0.data_,
+        depth: v.value0.depth,
+        height: v.value0.height,
+        value: v.value0.value,
+        x: centerX,
+        y: centerY,
+        r: scaledRootR,
+        children: map27(scaleNode(k)(centerX)(centerY))(v.value0.children)
+      });
+    };
+  };
+  var place = function(b10) {
+    return function(a2) {
+      return function(c) {
+        var dy = b10.y - a2.y;
+        var dx = b10.x - a2.x;
+        var d22 = dx * dx + dy * dy;
+        var $147 = d22 !== 0;
+        if ($147) {
+          var b22 = (b10.r + c.r) * (b10.r + c.r);
+          var a22 = (a2.r + c.r) * (a2.r + c.r);
+          var $148 = a22 > b22;
+          if ($148) {
+            var x5 = (d22 + b22 - a22) / (2 * d22);
+            var y5 = sqrt3(max5(0)(b22 / d22 - x5 * x5));
+            return {
+              x: b10.x - x5 * dx - y5 * dy,
+              y: b10.y - x5 * dy + y5 * dx,
+              r: c.r
+            };
+          }
+          ;
+          var x5 = (d22 + a22 - b22) / (2 * d22);
+          var y5 = sqrt3(max5(0)(a22 / d22 - x5 * x5));
+          return {
+            x: a2.x + x5 * dx - y5 * dy,
+            y: a2.y + x5 * dy + y5 * dx,
+            r: c.r
+          };
+        }
+        ;
+        return {
+          x: a2.x + c.r,
+          y: a2.y,
+          r: c.r
+        };
+      };
+    };
+  };
+  var insertInChain = function(aId) {
+    return function(_bId) {
+      return function(newId2) {
+        return function(chain) {
+          var v = elemIndex2(aId)(chain);
+          if (v instanceof Nothing) {
+            return chain;
+          }
+          ;
+          if (v instanceof Just) {
+            return fromMaybe(chain)(insertAt(v.value0 + 1 | 0)(newId2)(chain));
+          }
+          ;
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 174, column 3 - line 178, column 62): " + [v.constructor.name]);
+        };
+      };
+    };
+  };
+  var insertBetween = function(aId) {
+    return function(bId) {
+      return function(newCircle) {
+        return function(state3) {
+          var newCircles = insert9(state3.nextId)(newCircle)(state3.circles);
+          var newChain = insertInChain(aId)(bId)(state3.nextId)(state3.frontChain);
+          return {
+            circles: newCircles,
+            frontChain: newChain,
+            nextId: state3.nextId + 1 | 0
+          };
+        };
+      };
+    };
+  };
+  var initState = function(c0) {
+    return function(c1) {
+      return function(c2) {
+        var c1$prime = {
+          r: c1.r,
+          x: c0.r,
+          y: 0
+        };
+        var c0$prime = {
+          r: c0.r,
+          x: -c1.r,
+          y: 0
+        };
+        var c2$prime = place(c1$prime)(c0$prime)(c2);
+        var circles = fromFoldable10([new Tuple(0, c0$prime), new Tuple(1, c1$prime), new Tuple(2, c2$prime)]);
+        return {
+          circles,
+          frontChain: [0, 2, 1],
+          nextId: 3
+        };
+      };
+    };
+  };
+  var hierarchy = function(v) {
+    var go2 = function(node) {
+      return function(depth) {
+        if (node.children instanceof Nothing) {
+          return new PackNode({
+            data_: node.data_,
+            depth,
+            height: 0,
+            value: fromMaybe(0)(node.value),
+            children: [],
+            x: 0,
+            y: 0,
+            r: 0
+          });
+        }
+        ;
+        if (node.children instanceof Just) {
+          var childNodes2 = map27(function(v1) {
+            return go2(v1)(depth + 1 | 0);
+          })(node.children.value0);
+          var sortedChildren = sortWith3(function(v1) {
+            return -v1.value0.value;
+          })(childNodes2);
+          var sumValue = foldl7(function(acc) {
+            return function(v1) {
+              return acc + v1.value0.value;
+            };
+          })(0)(sortedChildren);
+          var childHeights = map27(function(v1) {
+            return v1.value0.height;
+          })(sortedChildren);
+          var maxChildHeight = foldl7(max1)(0)(childHeights);
+          return new PackNode({
+            data_: node.data_,
+            depth,
+            height: maxChildHeight + 1 | 0,
+            value: sumValue,
+            children: sortedChildren,
+            x: 0,
+            y: 0,
+            r: 0
+          });
+        }
+        ;
+        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 685, column 5 - line 717, column 14): " + [node.children.constructor.name]);
+      };
+    };
+    return go2(v)(0);
+  };
+  var getPrevInChain = function(nodeId) {
+    return function(chain) {
+      var v = elemIndex2(nodeId)(chain);
+      if (v instanceof Nothing) {
+        return Nothing.value;
+      }
+      ;
+      if (v instanceof Just) {
+        var n = length(chain);
+        var prevIdx = mod4((v.value0 - 1 | 0) + n | 0)(n);
+        return index(chain)(prevIdx);
+      }
+      ;
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 241, column 3 - line 248, column 34): " + [v.constructor.name]);
+    };
+  };
+  var getNextInChain = function(nodeId) {
+    return function(chain) {
+      var v = elemIndex2(nodeId)(chain);
+      if (v instanceof Nothing) {
+        return Nothing.value;
+      }
+      ;
+      if (v instanceof Just) {
+        var nextIdx = mod4(v.value0 + 1 | 0)(length(chain));
+        return index(chain)(nextIdx);
+      }
+      ;
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 230, column 3 - line 236, column 34): " + [v.constructor.name]);
+    };
+  };
+  var getNextId = function(nodeId) {
+    return function(chain) {
+      var v = elemIndex2(nodeId)(chain);
+      if (v instanceof Nothing) {
+        return Nothing.value;
+      }
+      ;
+      if (v instanceof Just) {
+        var nextIdx = mod4(v.value0 + 1 | 0)(length(chain));
+        return index(chain)(nextIdx);
+      }
+      ;
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 138, column 3 - line 144, column 34): " + [v.constructor.name]);
+    };
+  };
+  var epsilon6 = 1e-6;
+  var intersects = function(a2) {
+    return function(b10) {
+      var dy = b10.y - a2.y;
+      var dx = b10.x - a2.x;
+      var dr = a2.r + b10.r - epsilon6;
+      return dr > 0 && dr * dr > dx * dx + dy * dy;
+    };
+  };
+  var epsilon = 1e-9;
+  var enclosesWeak = function(a2) {
+    return function(b10) {
+      var dy = b10.y - a2.y;
+      var dx = b10.x - a2.x;
+      var dr = a2.r - b10.r + max5(a2.r)(max5(b10.r)(1)) * epsilon;
+      return dr > 0 && dr * dr > dx * dx + dy * dy;
+    };
+  };
+  var enclosesWeakAll = function(a2) {
+    return function(bs) {
+      return all2(enclosesWeak(a2))(bs);
+    };
+  };
+  var enclosesNot = function(a2) {
+    return function(b10) {
+      var dy = b10.y - a2.y;
+      var dx = b10.x - a2.x;
+      var dr = a2.r - b10.r;
+      return dr < 0 || dr * dr < dx * dx + dy * dy;
+    };
+  };
+  var encloseBasis3 = function(a2) {
+    return function(b10) {
+      return function(c) {
+        var d1 = a2.x * a2.x + a2.y * a2.y - a2.r * a2.r;
+        var d22 = d1 - b10.x * b10.x - b10.y * b10.y + b10.r * b10.r;
+        var d3 = d1 - c.x * c.x - c.y * c.y + c.r * c.r;
+        var c3 = c.r - a2.r;
+        var c2 = b10.r - a2.r;
+        var b32 = a2.y - c.y;
+        var b22 = a2.y - b10.y;
+        var a3 = a2.x - c.x;
+        var a22 = a2.x - b10.x;
+        var ab = a3 * b22 - a22 * b32;
+        var xa = (b22 * d3 - b32 * d22) / (ab * 2) - a2.x;
+        var xb = (b32 * c2 - b22 * c3) / ab;
+        var ya = (a3 * d22 - a22 * d3) / (ab * 2) - a2.y;
+        var bigC = xa * xa + ya * ya - a2.r * a2.r;
+        var yb = (a22 * c3 - a3 * c2) / ab;
+        var bigA = xb * xb + yb * yb - 1;
+        var bigB = 2 * (a2.r + xa * xb + ya * yb);
+        var r = (function() {
+          var $182 = abs(bigA) > epsilon6;
+          if ($182) {
+            return -(bigB + sqrt3(bigB * bigB - 4 * bigA * bigC)) / (2 * bigA);
+          }
+          ;
+          return -bigC / bigB;
+        })();
+        return {
+          x: a2.x + xa + xb * r,
+          y: a2.y + ya + yb * r,
+          r
+        };
+      };
+    };
+  };
+  var encloseBasis2 = function(a2) {
+    return function(b10) {
+      var y21 = b10.y - a2.y;
+      var x21 = b10.x - a2.x;
+      var r21 = b10.r - a2.r;
+      var l = sqrt3(x21 * x21 + y21 * y21);
+      return {
+        x: (a2.x + b10.x + x21 / l * r21) / 2,
+        y: (a2.y + b10.y + y21 / l * r21) / 2,
+        r: (l + a2.r + b10.r) / 2
+      };
+    };
+  };
+  var extendBasis = function(basis2) {
+    return function(p2) {
+      if (enclosesWeakAll(p2)(basis2)) {
+        return [p2];
+      }
+      ;
+      if (otherwise) {
+        var n = length(basis2);
+        var findTwoCircleBasis = function($copy_i) {
+          var $tco_done = false;
+          var $tco_result;
+          function $tco_loop(i2) {
+            if (i2 >= n) {
+              $tco_done = true;
+              return Nothing.value;
+            }
+            ;
+            if (otherwise) {
+              var v2 = index(basis2)(i2);
+              if (v2 instanceof Just) {
+                var candidate = encloseBasis2(v2.value0)(p2);
+                var $187 = enclosesNot(p2)(v2.value0) && enclosesWeakAll(candidate)(basis2);
+                if ($187) {
+                  $tco_done = true;
+                  return new Just([v2.value0, p2]);
+                }
+                ;
+                $copy_i = i2 + 1 | 0;
+                return;
+              }
+              ;
+              if (v2 instanceof Nothing) {
+                $copy_i = i2 + 1 | 0;
+                return;
+              }
+              ;
+              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 559, column 13 - line 566, column 52): " + [v2.constructor.name]);
+            }
+            ;
+            throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 555, column 7 - line 555, column 56): " + [i2.constructor.name]);
+          }
+          ;
+          while (!$tco_done) {
+            $tco_result = $tco_loop($copy_i);
+          }
+          ;
+          return $tco_result;
+        };
+        var findInnerPair = function($copy_i) {
+          return function($copy_j) {
+            var $tco_var_i = $copy_i;
+            var $tco_done1 = false;
+            var $tco_result;
+            function $tco_loop(i2, j) {
+              if (j >= n) {
+                $tco_done1 = true;
+                return Nothing.value;
+              }
+              ;
+              if (otherwise) {
+                var v2 = index(basis2)(j);
+                var v12 = index(basis2)(i2);
+                if (v12 instanceof Just && v2 instanceof Just) {
+                  var cjp = encloseBasis2(v2.value0)(p2);
+                  var cip = encloseBasis2(v12.value0)(p2);
+                  var cij = encloseBasis2(v12.value0)(v2.value0);
+                  var candidate = encloseBasis3(v12.value0)(v2.value0)(p2);
+                  var $193 = enclosesNot(cij)(p2) && (enclosesNot(cip)(v2.value0) && (enclosesNot(cjp)(v12.value0) && enclosesWeakAll(candidate)(basis2)));
+                  if ($193) {
+                    $tco_done1 = true;
+                    return new Just([v12.value0, v2.value0, p2]);
+                  }
+                  ;
+                  $tco_var_i = i2;
+                  $copy_j = j + 1 | 0;
+                  return;
+                }
+                ;
+                $tco_var_i = i2;
+                $copy_j = j + 1 | 0;
+                return;
+              }
+              ;
+              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 576, column 7 - line 576, column 58): " + [i2.constructor.name, j.constructor.name]);
+            }
+            ;
+            while (!$tco_done1) {
+              $tco_result = $tco_loop($tco_var_i, $copy_j);
+            }
+            ;
+            return $tco_result;
+          };
+        };
+        var findThreeCircleBasis = function($copy_i) {
+          var $tco_done2 = false;
+          var $tco_result;
+          function $tco_loop(i2) {
+            if (i2 >= (n - 1 | 0)) {
+              $tco_done2 = true;
+              return Nothing.value;
+            }
+            ;
+            if (otherwise) {
+              var v2 = findInnerPair(i2)(i2 + 1 | 0);
+              if (v2 instanceof Just) {
+                $tco_done2 = true;
+                return new Just(v2.value0);
+              }
+              ;
+              if (v2 instanceof Nothing) {
+                $copy_i = i2 + 1 | 0;
+                return;
+              }
+              ;
+              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 572, column 13 - line 574, column 54): " + [v2.constructor.name]);
+            }
+            ;
+            throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 568, column 7 - line 568, column 58): " + [i2.constructor.name]);
+          }
+          ;
+          while (!$tco_done2) {
+            $tco_result = $tco_loop($copy_i);
+          }
+          ;
+          return $tco_result;
+        };
+        var v = findTwoCircleBasis(0);
+        if (v instanceof Just) {
+          return v.value0;
+        }
+        ;
+        if (v instanceof Nothing) {
+          var v1 = findThreeCircleBasis(0);
+          if (v1 instanceof Just) {
+            return v1.value0;
+          }
+          ;
+          if (v1 instanceof Nothing) {
+            return basis2;
+          }
+          ;
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 549, column 11 - line 551, column 29): " + [v1.constructor.name]);
+        }
+        ;
+        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 546, column 7 - line 551, column 29): " + [v.constructor.name]);
+      }
+      ;
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 542, column 1 - line 542, column 54): " + [basis2.constructor.name, p2.constructor.name]);
+    };
+  };
+  var encloseBasis1 = function(a2) {
+    return {
+      x: a2.x,
+      y: a2.y,
+      r: a2.r
+    };
+  };
+  var encloseBasis = function(basis2) {
+    var v = length(basis2);
+    if (v === 1) {
+      return fromMaybe({
+        x: 0,
+        y: 0,
+        r: 0
+      })(map112(encloseBasis1)(index(basis2)(0)));
+    }
+    ;
+    if (v === 2) {
+      return fromMaybe({
+        x: 0,
+        y: 0,
+        r: 0
+      })(apply3(map112(encloseBasis2)(index(basis2)(0)))(index(basis2)(1)));
+    }
+    ;
+    if (v === 3) {
+      return fromMaybe({
+        x: 0,
+        y: 0,
+        r: 0
+      })(apply3(apply3(map112(encloseBasis3)(index(basis2)(0)))(index(basis2)(1)))(index(basis2)(2)));
+    }
+    ;
+    return {
+      x: 0,
+      y: 0,
+      r: 0
+    };
+  };
+  var packEnclose = function(circles) {
+    var n = length(circles);
+    var go2 = function($copy_i) {
+      return function($copy_basis) {
+        return function($copy_maybeE) {
+          var $tco_var_i = $copy_i;
+          var $tco_var_basis = $copy_basis;
+          var $tco_done = false;
+          var $tco_result;
+          function $tco_loop(i2, basis2, maybeE) {
+            if (i2 >= n) {
+              if (maybeE instanceof Just) {
+                $tco_done = true;
+                return maybeE.value0;
+              }
+              ;
+              if (maybeE instanceof Nothing) {
+                $tco_done = true;
+                return {
+                  x: 0,
+                  y: 0,
+                  r: 0
+                };
+              }
+              ;
+              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 600, column 9 - line 602, column 48): " + [maybeE.constructor.name]);
+            }
+            ;
+            if (otherwise) {
+              var v = index(circles)(i2);
+              if (v instanceof Nothing) {
+                $tco_var_i = i2 + 1 | 0;
+                $tco_var_basis = basis2;
+                $copy_maybeE = maybeE;
+                return;
+              }
+              ;
+              if (v instanceof Just) {
+                if (maybeE instanceof Just && enclosesWeak(maybeE.value0)(v.value0)) {
+                  $tco_var_i = i2 + 1 | 0;
+                  $tco_var_basis = basis2;
+                  $copy_maybeE = maybeE;
+                  return;
+                }
+                ;
+                var newBasis = extendBasis(basis2)(v.value0);
+                var newE = encloseBasis(newBasis);
+                $tco_var_i = 0;
+                $tco_var_basis = newBasis;
+                $copy_maybeE = new Just(newE);
+                return;
+              }
+              ;
+              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 604, column 9 - line 615, column 44): " + [v.constructor.name]);
+            }
+            ;
+            throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 597, column 3 - line 597, column 54): " + [i2.constructor.name, basis2.constructor.name, maybeE.constructor.name]);
+          }
+          ;
+          while (!$tco_done) {
+            $tco_result = $tco_loop($tco_var_i, $tco_var_basis, $copy_maybeE);
+          }
+          ;
+          return $tco_result;
+        };
+      };
+    };
+    return go2(0)([])(Nothing.value);
+  };
+  var defaultPackConfig = /* @__PURE__ */ (function() {
+    return {
+      size: {
+        width: 1,
+        height: 1
+      },
+      padding: 0,
+      radius: Nothing.value
+    };
+  })();
+  var calculateScore = function(a2) {
+    return function(b10) {
+      var ab = a2.r + b10.r;
+      var dx = (a2.x * b10.r + b10.x * a2.r) / ab;
+      var dy = (a2.y * b10.r + b10.y * a2.r) / ab;
+      return dx * dx + dy * dy;
+    };
+  };
+  var scoreNode = function(nodeId) {
+    return function(state3) {
+      return bind7(lookup8(nodeId)(state3.circles))(function(node) {
+        return bind7(getNextId(nodeId)(state3.frontChain))(function(nextId) {
+          return bind7(lookup8(nextId)(state3.circles))(function(next) {
+            return pure10({
+              nodeId,
+              score: calculateScore(node)(next)
+            });
+          });
+        });
+      });
+    };
+  };
+  var findBestPair = function(state3) {
+    var scored = mapMaybe(function(nodeId) {
+      return scoreNode(nodeId)(state3);
+    })(state3.frontChain);
+    var bestNode = minimumBy2(comparing2(function(v) {
+      return v.score;
+    }))(scored);
+    if (bestNode instanceof Nothing) {
+      return Nothing.value;
+    }
+    ;
+    if (bestNode instanceof Just) {
+      return bind7(getNextId(bestNode.value0.nodeId)(state3.frontChain))(function(nextId) {
+        return pure10(new Tuple(bestNode.value0.nodeId, nextId));
+      });
+    }
+    ;
+    throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 165, column 5 - line 169, column 40): " + [bestNode.constructor.name]);
+  };
+  var bidirectionalCollisionSearch = function(aId) {
+    return function(bId) {
+      return function(newCircle) {
+        return function(state3) {
+          var doWhileStep = function($copy_j) {
+            return function($copy_k) {
+              return function($copy_sj) {
+                return function($copy_sk) {
+                  var $tco_var_j = $copy_j;
+                  var $tco_var_k = $copy_k;
+                  var $tco_var_sj = $copy_sj;
+                  var $tco_done = false;
+                  var $tco_result;
+                  function $tco_loop(j, k, sj, sk) {
+                    var $215 = sj <= sk;
+                    if ($215) {
+                      var v4 = lookup8(j)(state3.circles);
+                      if (v4 instanceof Just) {
+                        var $217 = intersects(v4.value0)(newCircle);
+                        if ($217) {
+                          $tco_done = true;
+                          return new CollisionFromJ(j);
+                        }
+                        ;
+                        var v12 = getNextInChain(j)(state3.frontChain);
+                        if (v12 instanceof Just) {
+                          var v22 = getNextInChain(k)(state3.frontChain);
+                          if (v22 instanceof Just && v12.value0 === v22.value0) {
+                            $tco_done = true;
+                            return NoCollision.value;
+                          }
+                          ;
+                          $tco_var_j = v12.value0;
+                          $tco_var_k = k;
+                          $tco_var_sj = sj + v4.value0.r;
+                          $copy_sk = sk;
+                          return;
+                        }
+                        ;
+                        if (v12 instanceof Nothing) {
+                          $tco_done = true;
+                          return NoCollision.value;
+                        }
+                        ;
+                        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 280, column 13 - line 286, column 37): " + [v12.constructor.name]);
+                      }
+                      ;
+                      if (v4 instanceof Nothing) {
+                        $tco_done = true;
+                        return NoCollision.value;
+                      }
+                      ;
+                      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 274, column 7 - line 287, column 31): " + [v4.constructor.name]);
+                    }
+                    ;
+                    var v4 = lookup8(k)(state3.circles);
+                    if (v4 instanceof Just) {
+                      var $224 = intersects(v4.value0)(newCircle);
+                      if ($224) {
+                        $tco_done = true;
+                        return new CollisionFromK(k);
+                      }
+                      ;
+                      var v12 = getPrevInChain(k)(state3.frontChain);
+                      if (v12 instanceof Just) {
+                        var v22 = getNextInChain(v12.value0)(state3.frontChain);
+                        if (v22 instanceof Just && j === v22.value0) {
+                          $tco_done = true;
+                          return NoCollision.value;
+                        }
+                        ;
+                        $tco_var_j = j;
+                        $tco_var_k = v12.value0;
+                        $tco_var_sj = sj;
+                        $copy_sk = sk + v4.value0.r;
+                        return;
+                      }
+                      ;
+                      if (v12 instanceof Nothing) {
+                        $tco_done = true;
+                        return NoCollision.value;
+                      }
+                      ;
+                      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 296, column 13 - line 302, column 37): " + [v12.constructor.name]);
+                    }
+                    ;
+                    if (v4 instanceof Nothing) {
+                      $tco_done = true;
+                      return NoCollision.value;
+                    }
+                    ;
+                    throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 290, column 7 - line 303, column 31): " + [v4.constructor.name]);
+                  }
+                  ;
+                  while (!$tco_done) {
+                    $tco_result = $tco_loop($tco_var_j, $tco_var_k, $tco_var_sj, $copy_sk);
+                  }
+                  ;
+                  return $tco_result;
+                };
+              };
+            };
+          };
+          var v = lookup8(bId)(state3.circles);
+          var v1 = lookup8(aId)(state3.circles);
+          if (v1 instanceof Just && v instanceof Just) {
+            var v2 = getPrevInChain(aId)(state3.frontChain);
+            var v3 = getNextInChain(bId)(state3.frontChain);
+            if (v3 instanceof Just && v2 instanceof Just) {
+              return doWhileStep(v3.value0)(v2.value0)(v.value0.r)(v1.value0.r);
+            }
+            ;
+            return NoCollision.value;
+          }
+          ;
+          return NoCollision.value;
+        };
+      };
+    };
+  };
+  var tryPlaceCircleWithLimit = function($copy_maxRetries) {
+    return function($copy_newCircle) {
+      return function($copy_aId) {
+        return function($copy_bId) {
+          return function($copy_state) {
+            var $tco_var_maxRetries = $copy_maxRetries;
+            var $tco_var_newCircle = $copy_newCircle;
+            var $tco_var_aId = $copy_aId;
+            var $tco_var_bId = $copy_bId;
+            var $tco_done = false;
+            var $tco_result;
+            function $tco_loop(maxRetries, newCircle, aId, bId, state3) {
+              if (maxRetries <= 0) {
+                $tco_done = true;
+                return insertBetween(aId)(bId)(newCircle)(state3);
+              }
+              ;
+              if (otherwise) {
+                var v = lookup8(bId)(state3.circles);
+                var v1 = lookup8(aId)(state3.circles);
+                if (v1 instanceof Just && v instanceof Just) {
+                  var positioned = place(v.value0)(v1.value0)(newCircle);
+                  var collisionResult = bidirectionalCollisionSearch(aId)(bId)(positioned)(state3);
+                  if (collisionResult instanceof NoCollision) {
+                    $tco_done = true;
+                    return insertBetween(aId)(bId)(positioned)(state3);
+                  }
+                  ;
+                  if (collisionResult instanceof CollisionFromJ) {
+                    var shortenedChain = shortenChainOnly(aId)(collisionResult.value0)(state3.frontChain);
+                    var stateWithShortenedChain = {
+                      circles: state3.circles,
+                      nextId: state3.nextId,
+                      frontChain: shortenedChain
+                    };
+                    $tco_var_maxRetries = maxRetries - 1 | 0;
+                    $tco_var_newCircle = newCircle;
+                    $tco_var_aId = aId;
+                    $tco_var_bId = collisionResult.value0;
+                    $copy_state = stateWithShortenedChain;
+                    return;
+                  }
+                  ;
+                  if (collisionResult instanceof CollisionFromK) {
+                    var shortenedChain = shortenChainOnly(collisionResult.value0)(bId)(state3.frontChain);
+                    var stateWithShortenedChain = {
+                      circles: state3.circles,
+                      nextId: state3.nextId,
+                      frontChain: shortenedChain
+                    };
+                    $tco_var_maxRetries = maxRetries - 1 | 0;
+                    $tco_var_newCircle = newCircle;
+                    $tco_var_aId = collisionResult.value0;
+                    $tco_var_bId = bId;
+                    $copy_state = stateWithShortenedChain;
+                    return;
+                  }
+                  ;
+                  throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 380, column 13 - line 396, column 101): " + [collisionResult.constructor.name]);
+                }
+                ;
+                $tco_done = true;
+                return state3;
+              }
+              ;
+              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 368, column 1 - line 368, column 91): " + [maxRetries.constructor.name, newCircle.constructor.name, aId.constructor.name, bId.constructor.name, state3.constructor.name]);
+            }
+            ;
+            while (!$tco_done) {
+              $tco_result = $tco_loop($tco_var_maxRetries, $tco_var_newCircle, $tco_var_aId, $tco_var_bId, $copy_state);
+            }
+            ;
+            return $tco_result;
+          };
+        };
+      };
+    };
+  };
+  var tryPlaceCircle = /* @__PURE__ */ tryPlaceCircleWithLimit(100);
+  var assignRadii = function(config) {
+    return function(v) {
+      if (v.value0.children.length === 0) {
+        var r = (function() {
+          if (config.radius instanceof Just) {
+            return config.radius.value0(v.value0.data_);
+          }
+          ;
+          if (config.radius instanceof Nothing) {
+            return sqrt3(v.value0.value);
+          }
+          ;
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 752, column 13 - line 754, column 37): " + [config.radius.constructor.name]);
+        })();
+        return new PackNode({
+          data_: v.value0.data_,
+          depth: v.value0.depth,
+          height: v.value0.height,
+          value: v.value0.value,
+          children: v.value0.children,
+          x: v.value0.x,
+          y: v.value0.y,
+          r: max5(0)(r)
+        });
+      }
+      ;
+      return new PackNode({
+        data_: v.value0.data_,
+        depth: v.value0.depth,
+        height: v.value0.height,
+        value: v.value0.value,
+        x: v.value0.x,
+        y: v.value0.y,
+        r: v.value0.r,
+        children: map27(assignRadii(config))(v.value0.children)
+      });
+    };
+  };
+  var addCircle = function(newCircle) {
+    return function(state3) {
+      var v = findBestPair(state3);
+      if (v instanceof Nothing) {
+        return state3;
+      }
+      ;
+      if (v instanceof Just) {
+        return tryPlaceCircle(newCircle)(v.value0.value0)(v.value0.value1)(state3);
+      }
+      ;
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 404, column 3 - line 406, column 67): " + [v.constructor.name]);
+    };
+  };
+  var packSiblingsMap = function(inputCircles) {
+    var n = length(inputCircles);
+    var $260 = n === 0;
+    if ($260) {
+      return {
+        circles: [],
+        radius: 0
+      };
+    }
+    ;
+    var $261 = n === 1;
+    if ($261) {
+      var v = index(inputCircles)(0);
+      if (v instanceof Just) {
+        return {
+          circles: [{
+            r: v.value0.r,
+            x: 0,
+            y: 0
+          }],
+          radius: v.value0.r
+        };
+      }
+      ;
+      if (v instanceof Nothing) {
+        return {
+          circles: [],
+          radius: 0
+        };
+      }
+      ;
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 415, column 7 - line 417, column 48): " + [v.constructor.name]);
+    }
+    ;
+    var $264 = n === 2;
+    if ($264) {
+      var v = index(inputCircles)(1);
+      var v1 = index(inputCircles)(0);
+      if (v1 instanceof Just && v instanceof Just) {
+        var c1$prime = {
+          r: v.value0.r,
+          x: v1.value0.r,
+          y: 0
+        };
+        var c0$prime = {
+          r: v1.value0.r,
+          x: -v.value0.r,
+          y: 0
+        };
+        return {
+          circles: [c0$prime, c1$prime],
+          radius: v1.value0.r + v.value0.r
+        };
+      }
+      ;
+      return {
+        circles: [],
+        radius: 0
+      };
+    }
+    ;
+    var v = index(inputCircles)(2);
+    var v1 = index(inputCircles)(1);
+    var v2 = index(inputCircles)(0);
+    if (v2 instanceof Just && (v1 instanceof Just && v instanceof Just)) {
+      var remaining = drop(3)(inputCircles);
+      var initialState2 = initState(v2.value0)(v1.value0)(v.value0);
+      var finalState = foldl7(flip(addCircle))(initialState2)(remaining);
+      var positioned = mapMaybe(function(i2) {
+        return lookup8(i2)(finalState.circles);
+      })(range2(0)(n - 1 | 0));
+      var enclosing = packEnclose(positioned);
+      var translated = map27(function(c) {
+        return {
+          r: c.r,
+          x: c.x - enclosing.x,
+          y: c.y - enclosing.y
+        };
+      })(positioned);
+      return {
+        circles: translated,
+        radius: enclosing.r
+      };
+    }
+    ;
+    return {
+      circles: [],
+      radius: 0
+    };
+  };
+  var packChildren = function(k) {
+    return function(config) {
+      return function(v) {
+        var updateNodePosition = function(v1) {
+          return function(c) {
+            return new PackNode({
+              data_: v1.value0.data_,
+              depth: v1.value0.depth,
+              height: v1.value0.height,
+              value: v1.value0.value,
+              children: v1.value0.children,
+              r: v1.value0.r,
+              x: c.x,
+              y: c.y
+            });
+          };
+        };
+        var removePadding = function(p2) {
+          return function(c) {
+            return {
+              x: c.x,
+              y: c.y,
+              r: c.r - p2
+            };
+          };
+        };
+        var nodeToCircle = function(v1) {
+          return {
+            x: v1.value0.x,
+            y: v1.value0.y,
+            r: v1.value0.r
+          };
+        };
+        var addPadding = function(p2) {
+          return function(c) {
+            return {
+              x: c.x,
+              y: c.y,
+              r: c.r + p2
+            };
+          };
+        };
+        if (v.value0.children.length === 0) {
+          return new PackNode(v.value0);
+        }
+        ;
+        var paddingScaled = config.padding * k;
+        var packedKids = map27(packChildren(k)(config))(v.value0.children);
+        var inputCircles = map27((function() {
+          var $287 = addPadding(paddingScaled);
+          return function($288) {
+            return $287(nodeToCircle($288));
+          };
+        })())(packedKids);
+        var packed = packSiblingsMap(inputCircles);
+        var circlesWithoutPadding = map27(removePadding(paddingScaled))(packed.circles);
+        var updatedKids = zipWith(updateNodePosition)(packedKids)(circlesWithoutPadding);
+        var nodeWithR = {
+          data_: v.value0.data_,
+          depth: v.value0.depth,
+          height: v.value0.height,
+          value: v.value0.value,
+          x: v.value0.x,
+          y: v.value0.y,
+          r: packed.radius + paddingScaled,
+          children: updatedKids
+        };
+        return new PackNode(nodeWithR);
+      };
+    };
+  };
+  var pack = function(config) {
+    return function(root2) {
+      var withRadii = assignRadii(config)(root2);
+      var firstPack = packChildren(1)({
+        size: config.size,
+        radius: config.radius,
+        padding: 0
+      })(withRadii);
+      var k = firstPack.value0.r / min4(config.size.width)(config.size.height);
+      var packed = packChildren(k)(config)(withRadii);
+      var scaled = scaleToSize(config)(packed);
+      return scaled;
+    };
+  };
+
+  // output/Engine.BubblePack/index.js
+  var pure11 = /* @__PURE__ */ pure(applicativeEffect);
+  var nub3 = /* @__PURE__ */ nub(ordString);
+  var map28 = /* @__PURE__ */ map(functorArray);
+  var sortWith4 = /* @__PURE__ */ sortWith(ordInt);
+  var bind8 = /* @__PURE__ */ bind(bindArray);
+  var append8 = /* @__PURE__ */ append(semigroupArray);
+  var log6 = /* @__PURE__ */ log5(monadEffectEffect);
+  var show4 = /* @__PURE__ */ show(showInt);
+  var renderReexportModule = function(node) {
+    return function(isReexport) {
+      return renderReexportModule_("#explorer-nodes")(node)(isReexport);
+    };
+  };
+  var packNodeToCircleWithCategory = function(v) {
+    return {
+      x: v.node.value0.x,
+      y: v.node.value0.y,
+      r: v.node.value0.r,
+      depth: v.node.value0.depth,
+      data_: v.node.value0.data_,
+      category: v.category
+    };
+  };
+  var highlightCallGraph = highlightCallGraph_;
+  var groupByKind = function(decls) {
+    var kinds = nub3(map28(function(v) {
+      return v.kind;
+    })(decls));
+    var groups = map28(function(k) {
+      return {
+        kind: k,
+        decls: filter(function(d3) {
+          return d3.kind === k;
+        })(decls)
+      };
+    })(kinds);
+    return sortWith4(function(g) {
+      return -length(g.decls) | 0;
+    })(filter(function(g) {
+      return !$$null(g.decls);
+    })(groups));
+  };
+  var getAllPackNodesWithCategory = function(v) {
+    return function(parentCategory) {
+      var thisCategory = (function() {
+        var $34 = v.value0.depth === 1;
+        if ($34) {
+          return v.value0.data_;
+        }
+        ;
+        return parentCategory;
+      })();
+      var childResults = bind8(v.value0.children)(function(child) {
+        return getAllPackNodesWithCategory(child)(thisCategory);
+      });
+      return append8([{
+        node: v,
+        category: thisCategory
+      }])(childResults);
+    };
+  };
+  var clearCallGraphHighlight = clearCallGraphHighlight_;
+  var categoryColorIntense = /* @__PURE__ */ (function() {
+    return getCategoryColor(DeclarationTypes.value);
+  })();
+  var categoryColor = /* @__PURE__ */ (function() {
+    return getCategoryColor(DeclarationTypes.value);
+  })();
+  var getPackFill = function(pc) {
+    if (pc.depth === 0) {
+      return "#333";
+    }
+    ;
+    if (pc.depth === 1) {
+      return categoryColor(pc.data_);
+    }
+    ;
+    return categoryColorIntense(pc.category);
+  };
+  var getPackFillEffect = function(pc) {
+    return pure11(getPackFill(pc));
+  };
+  var buildDeclaration = function(decl) {
+    return {
+      data_: decl.title,
+      value: new Just(1),
+      children: Nothing.value
+    };
+  };
+  var buildCategory = function(v) {
+    var $38 = $$null(v.decls);
+    if ($38) {
+      return Nothing.value;
+    }
+    ;
+    return new Just({
+      data_: v.kind,
+      value: Nothing.value,
+      children: new Just(map28(buildDeclaration)(v.decls))
+    });
+  };
+  var buildModuleHierarchy = function(moduleName) {
+    return function(decls) {
+      var grouped = groupByKind(decls);
+      var categoryChildren = mapMaybe(buildCategory)(grouped);
+      return {
+        data_: moduleName,
+        value: Nothing.value,
+        children: (function() {
+          var $41 = $$null(categoryChildren);
+          if ($41) {
+            return Nothing.value;
+          }
+          ;
+          return new Just(categoryChildren);
+        })()
+      };
+    };
+  };
+  var renderModulePackWithCallbacks = function(declarationsMap) {
+    return function(onDeclClick) {
+      return function(onDeclHover) {
+        return function(onDeclLeave) {
+          return function(node) {
+            var decls = fromMaybe([])(lookup3(node.name)(declarationsMap));
+            var $42 = $$null(decls);
+            if ($42) {
+              var isReexport = !$$null(node.targets);
+              return function __do8() {
+                (function() {
+                  if (isReexport) {
+                    return log6("[BubblePack] Re-export module: " + (node.name + (" (depends on " + (show4(length(node.targets)) + " modules)"))))();
+                  }
+                  ;
+                  return log6("[BubblePack] Empty module: " + node.name)();
+                })();
+                renderReexportModule(node)(isReexport)();
+                return node.r;
+              };
+            }
+            ;
+            return function __do8() {
+              log6("[BubblePack] Rendering " + (node.name + (" with " + (show4(length(decls)) + " declarations"))))();
+              var hierData = buildModuleHierarchy(node.name)(decls);
+              var packRoot = hierarchy(hierData);
+              var packSize = node.r * 3;
+              var config = {
+                radius: defaultPackConfig.radius,
+                size: {
+                  width: packSize,
+                  height: packSize
+                },
+                padding: 1
+              };
+              var packed = pack(config)(packRoot);
+              var allNodesWithCategory = getAllPackNodesWithCategory(packed)("");
+              var packCircles = map28(packNodeToCircleWithCategory)(allNodesWithCategory);
+              var centerOffset = packSize / 2;
+              renderBoundBubblePack_("#explorer-nodes")(node)(packCircles)(centerOffset)(getPackFillEffect)(onDeclClick)(onDeclHover)(onDeclLeave)();
+              return packed.value0.r;
+            };
+          };
+        };
+      };
+    };
+  };
+
+  // output/Engine.CallGraphPopup/foreign.js
+  var API_BASE = "http://localhost:8080";
+  var showCallGraphPopup_ = (moduleName) => (declarationName) => () => {
+    const popup = document.getElementById("call-graph-popup");
+    const title3 = document.getElementById("call-graph-title");
+    const callersList = document.getElementById("call-graph-callers-list");
+    const sourceCode = document.getElementById("call-graph-source-code");
+    const calleesList = document.getElementById("call-graph-callees-list");
+    if (!popup) {
+      console.error("[CallGraphPopup] Popup element not found");
+      return;
+    }
+    title3.textContent = `${declarationName} (${moduleName})`;
+    callersList.innerHTML = '<div class="call-graph-loading">Loading...</div>';
+    sourceCode.innerHTML = '<div class="call-graph-loading">Loading source code...</div>';
+    calleesList.innerHTML = '<div class="call-graph-loading">Loading...</div>';
+    popup.style.display = "flex";
+    fetchCallGraphData(moduleName, declarationName).then((data) => {
+      if (data.callers && data.callers.length > 0) {
+        callersList.innerHTML = data.callers.map((fn) => {
+          const displayName = typeof fn === "string" ? fn : fn.target || fn;
+          return `<div class="call-graph-list-item">${escapeHtml(displayName)}</div>`;
+        }).join("");
+      } else {
+        callersList.innerHTML = '<div class="call-graph-empty">No callers found</div>';
+      }
+      if (data.callees && data.callees.length > 0) {
+        calleesList.innerHTML = data.callees.map((fn) => {
+          const displayName = typeof fn === "string" ? fn : fn.target || fn;
+          return `<div class="call-graph-list-item">${escapeHtml(displayName)}</div>`;
+        }).join("");
+      } else {
+        calleesList.innerHTML = '<div class="call-graph-empty">No calls found</div>';
+      }
+      if (data.sourceCode) {
+        sourceCode.textContent = data.sourceCode;
+      } else {
+        sourceCode.innerHTML = '<div class="call-graph-empty">Source code not available</div>';
+      }
+    }).catch((error4) => {
+      console.error("[CallGraphPopup] Error fetching call graph data:", error4);
+      callersList.innerHTML = '<div class="call-graph-error">Error loading callers</div>';
+      sourceCode.innerHTML = '<div class="call-graph-error">Error loading source code</div>';
+      calleesList.innerHTML = '<div class="call-graph-error">Error loading callees</div>';
+    });
+  };
+  var hideCallGraphPopup_ = () => {
+    const popup = document.getElementById("call-graph-popup");
+    if (popup) {
+      popup.style.display = "none";
+    }
+  };
+  async function fetchCallGraphData(moduleName, declarationName) {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const snapshotId = urlParams.get("snapshot") || "1";
+      const callsResponse = await fetch(`${API_BASE}/api/module-function-calls/${encodeURIComponent(moduleName)}?snapshot=${snapshotId}`);
+      const callsData = await callsResponse.json();
+      const functionData = callsData.functions?.[declarationName];
+      if (!functionData) {
+        console.warn(`[CallGraphPopup] No data found for ${moduleName}.${declarationName}`);
+        return {
+          callers: [],
+          callees: [],
+          sourceCode: null
+        };
+      }
+      const declResponse = await fetch(`${API_BASE}/api/module-declarations/${encodeURIComponent(moduleName)}?snapshot=${snapshotId}`);
+      const declData = await declResponse.json();
+      const declaration = declData.declarations?.find((d3) => d3.title === declarationName);
+      const sourceInfo = declaration ? `${declaration.kind}: ${declaration.title}
+
+(Source code display coming soon)` : `${declarationName}
+
+(Source code display coming soon)`;
+      return {
+        callers: functionData.calledBy || [],
+        callees: functionData.calls || [],
+        sourceCode: sourceInfo
+      };
+    } catch (error4) {
+      console.error("[CallGraphPopup] Fetch error:", error4);
+      throw error4;
+    }
+  }
+  function escapeHtml(text6) {
+    const div4 = document.createElement("div");
+    div4.textContent = text6;
+    return div4.innerHTML;
+  }
+  if (typeof document !== "undefined") {
+    document.addEventListener("DOMContentLoaded", () => {
+      const closeBtn = document.getElementById("call-graph-close");
+      if (closeBtn) {
+        closeBtn.addEventListener("click", hideCallGraphPopup_);
+      }
+      const popup = document.getElementById("call-graph-popup");
+      if (popup) {
+        popup.addEventListener("click", (e) => {
+          if (e.target === popup) {
+            hideCallGraphPopup_();
+          }
+        });
+      }
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          const popup2 = document.getElementById("call-graph-popup");
+          if (popup2 && popup2.style.display !== "none") {
+            hideCallGraphPopup_();
+          }
+        }
+      });
+    });
+  }
+
+  // output/Engine.CallGraphPopup/index.js
+  var showCallGraphPopup = showCallGraphPopup_;
 
   // node_modules/d3-quadtree/src/add.js
   function add_default(d3) {
@@ -15108,19 +16655,19 @@
     }
     function initialize() {
       if (!nodes) return;
-      var i2, n = nodes.length, m2 = links.length, nodeById = new Map(nodes.map((d3, i3) => [id5(d3, i3, nodes), d3])), link3;
-      for (i2 = 0, count = new Array(n); i2 < m2; ++i2) {
+      var i2, n = nodes.length, m = links.length, nodeById = new Map(nodes.map((d3, i3) => [id5(d3, i3, nodes), d3])), link3;
+      for (i2 = 0, count = new Array(n); i2 < m; ++i2) {
         link3 = links[i2], link3.index = i2;
         if (typeof link3.source !== "object") link3.source = find4(nodeById, link3.source);
         if (typeof link3.target !== "object") link3.target = find4(nodeById, link3.target);
         count[link3.source.index] = (count[link3.source.index] || 0) + 1;
         count[link3.target.index] = (count[link3.target.index] || 0) + 1;
       }
-      for (i2 = 0, bias = new Array(m2); i2 < m2; ++i2) {
+      for (i2 = 0, bias = new Array(m); i2 < m; ++i2) {
         link3 = links[i2], bias[i2] = count[link3.source.index] / (count[link3.source.index] + count[link3.target.index]);
       }
-      strengths = new Array(m2), initializeStrength();
-      distances = new Array(m2), initializeDistance();
+      strengths = new Array(m), initializeStrength();
+      distances = new Array(m), initializeDistance();
     }
     function initializeStrength() {
       if (!nodes) return;
@@ -15209,9 +16756,9 @@
     }
   };
   function get5(type, name16) {
-    for (var i2 = 0, n = type.length, c2; i2 < n; ++i2) {
-      if ((c2 = type[i2]).name === name16) {
-        return c2.value;
+    for (var i2 = 0, n = type.length, c; i2 < n; ++i2) {
+      if ((c = type[i2]).name === name16) {
+        return c.value;
       }
     }
   }
@@ -15340,15 +16887,6 @@
     return t;
   }
 
-  // node_modules/d3-force/src/lcg.js
-  var a = 1664525;
-  var c = 1013904223;
-  var m = 4294967296;
-  function lcg_default() {
-    let s = 1;
-    return () => (s = (a * s + c) % m) / m;
-  }
-
   // node_modules/d3-force/src/simulation.js
   function x2(d3) {
     return d3.x;
@@ -15356,107 +16894,7 @@
   function y2(d3) {
     return d3.y;
   }
-  var initialRadius = 10;
   var initialAngle = Math.PI * (3 - Math.sqrt(5));
-  function simulation_default(nodes) {
-    var simulation, alpha = 1, alphaMin = 1e-3, alphaDecay = 1 - Math.pow(alphaMin, 1 / 300), alphaTarget = 0, velocityDecay = 0.6, forces = /* @__PURE__ */ new Map(), stepper = timer(step4), event = dispatch_default2("tick", "end"), random2 = lcg_default();
-    if (nodes == null) nodes = [];
-    function step4() {
-      tick2();
-      event.call("tick", simulation);
-      if (alpha < alphaMin) {
-        stepper.stop();
-        event.call("end", simulation);
-      }
-    }
-    function tick2(iterations) {
-      var i2, n = nodes.length, node;
-      if (iterations === void 0) iterations = 1;
-      for (var k = 0; k < iterations; ++k) {
-        alpha += (alphaTarget - alpha) * alphaDecay;
-        forces.forEach(function(force2) {
-          force2(alpha);
-        });
-        for (i2 = 0; i2 < n; ++i2) {
-          node = nodes[i2];
-          if (node.fx == null) node.x += node.vx *= velocityDecay;
-          else node.x = node.fx, node.vx = 0;
-          if (node.fy == null) node.y += node.vy *= velocityDecay;
-          else node.y = node.fy, node.vy = 0;
-        }
-      }
-      return simulation;
-    }
-    function initializeNodes2() {
-      for (var i2 = 0, n = nodes.length, node; i2 < n; ++i2) {
-        node = nodes[i2], node.index = i2;
-        if (node.fx != null) node.x = node.fx;
-        if (node.fy != null) node.y = node.fy;
-        if (isNaN(node.x) || isNaN(node.y)) {
-          var radius3 = initialRadius * Math.sqrt(0.5 + i2), angle = i2 * initialAngle;
-          node.x = radius3 * Math.cos(angle);
-          node.y = radius3 * Math.sin(angle);
-        }
-        if (isNaN(node.vx) || isNaN(node.vy)) {
-          node.vx = node.vy = 0;
-        }
-      }
-    }
-    function initializeForce2(force2) {
-      if (force2.initialize) force2.initialize(nodes, random2);
-      return force2;
-    }
-    initializeNodes2();
-    return simulation = {
-      tick: tick2,
-      restart: function() {
-        return stepper.restart(step4), simulation;
-      },
-      stop: function() {
-        return stepper.stop(), simulation;
-      },
-      nodes: function(_) {
-        return arguments.length ? (nodes = _, initializeNodes2(), forces.forEach(initializeForce2), simulation) : nodes;
-      },
-      alpha: function(_) {
-        return arguments.length ? (alpha = +_, simulation) : alpha;
-      },
-      alphaMin: function(_) {
-        return arguments.length ? (alphaMin = +_, simulation) : alphaMin;
-      },
-      alphaDecay: function(_) {
-        return arguments.length ? (alphaDecay = +_, simulation) : +alphaDecay;
-      },
-      alphaTarget: function(_) {
-        return arguments.length ? (alphaTarget = +_, simulation) : alphaTarget;
-      },
-      velocityDecay: function(_) {
-        return arguments.length ? (velocityDecay = 1 - _, simulation) : 1 - velocityDecay;
-      },
-      randomSource: function(_) {
-        return arguments.length ? (random2 = _, forces.forEach(initializeForce2), simulation) : random2;
-      },
-      force: function(name16, _) {
-        return arguments.length > 1 ? (_ == null ? forces.delete(name16) : forces.set(name16, initializeForce2(_)), simulation) : forces.get(name16);
-      },
-      find: function(x5, y5, radius3) {
-        var i2 = 0, n = nodes.length, dx, dy, d22, node, closest;
-        if (radius3 == null) radius3 = Infinity;
-        else radius3 *= radius3;
-        for (i2 = 0; i2 < n; ++i2) {
-          node = nodes[i2];
-          dx = x5 - node.x;
-          dy = y5 - node.y;
-          d22 = dx * dx + dy * dy;
-          if (d22 < radius3) closest = node, radius3 = d22;
-        }
-        return closest;
-      },
-      on: function(name16, _) {
-        return arguments.length > 1 ? (event.on(name16, _), simulation) : event.on(name16);
-      }
-    };
-  }
 
   // node_modules/d3-force/src/manyBody.js
   function manyBody_default() {
@@ -15472,11 +16910,11 @@
       for (i2 = 0; i2 < n; ++i2) node2 = nodes[i2], strengths[node2.index] = +strength(node2, i2, nodes);
     }
     function accumulate(quad) {
-      var strength2 = 0, q2, c2, weight = 0, x5, y5, i2;
+      var strength2 = 0, q2, c, weight = 0, x5, y5, i2;
       if (quad.length) {
         for (x5 = y5 = i2 = 0; i2 < 4; ++i2) {
-          if ((q2 = quad[i2]) && (c2 = Math.abs(q2.value))) {
-            strength2 += q2.value, weight += c2, x5 += c2 * q2.x, y5 += c2 * q2.y;
+          if ((q2 = quad[i2]) && (c = Math.abs(q2.value))) {
+            strength2 += q2.value, weight += c, x5 += c * q2.x, y5 += c * q2.y;
           }
         }
         quad.x = x5 / weight;
@@ -15717,9 +17155,9 @@
     }
     function touchstarted(event, d3) {
       if (!filter5.call(this, event, d3)) return;
-      var touches = event.changedTouches, c2 = container.call(this, event, d3), n = touches.length, i2, gesture;
+      var touches = event.changedTouches, c = container.call(this, event, d3), n = touches.length, i2, gesture;
       for (i2 = 0; i2 < n; ++i2) {
-        if (gesture = beforestart(this, c2, event, d3, touches[i2].identifier, touches[i2])) {
+        if (gesture = beforestart(this, c, event, d3, touches[i2].identifier, touches[i2])) {
           nopropagation(event);
           gesture("start", event, touches[i2]);
         }
@@ -15815,1633 +17253,6 @@
     };
     return drag2;
   }
-
-  // output/Engine.AtomicView/foreign.js
-  var moduleColorScale = ordinal(category10_default);
-  var activeSimulation = null;
-  var clearAtomicView_ = () => {
-    if (activeSimulation) {
-      activeSimulation.stop();
-      activeSimulation = null;
-    }
-    const existing = document.getElementById("atomic-view-panel");
-    if (existing) existing.remove();
-  };
-  var renderAtomicView_ = (declarationInfo) => () => {
-    clearAtomicView_();
-    const { module: moduleName, name: declName, calls, calledBy } = declarationInfo;
-    const panel = document.createElement("div");
-    panel.id = "atomic-view-panel";
-    panel.style.cssText = `
-    position: fixed;
-    top: 60px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 800px;
-    height: 500px;
-    background: rgba(20, 20, 30, 0.95);
-    border: 1px solid #444;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    z-index: 2000;
-    overflow: hidden;
-  `;
-    const header2 = document.createElement("div");
-    header2.style.cssText = `
-    padding: 12px 16px;
-    background: rgba(40, 40, 50, 0.9);
-    border-bottom: 1px solid #444;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  `;
-    const title3 = document.createElement("div");
-    title3.innerHTML = `
-    <span style="color: #888; font-size: 12px;">Function Call Graph</span><br/>
-    <span style="color: #fff; font-size: 16px; font-weight: 500;">${moduleName}.<span style="color: #7dd3fc;">${declName}</span></span>
-  `;
-    header2.appendChild(title3);
-    const closeBtn = document.createElement("button");
-    closeBtn.textContent = "\xD7";
-    closeBtn.style.cssText = `
-    background: none;
-    border: none;
-    color: #888;
-    font-size: 24px;
-    cursor: pointer;
-    padding: 0 8px;
-    line-height: 1;
-  `;
-    closeBtn.onclick = clearAtomicView_;
-    closeBtn.onmouseenter = () => closeBtn.style.color = "#fff";
-    closeBtn.onmouseleave = () => closeBtn.style.color = "#888";
-    header2.appendChild(closeBtn);
-    panel.appendChild(header2);
-    const statsBar = document.createElement("div");
-    statsBar.style.cssText = `
-    padding: 8px 16px;
-    background: rgba(30, 30, 40, 0.9);
-    border-bottom: 1px solid #333;
-    display: flex;
-    gap: 24px;
-    font-size: 12px;
-  `;
-    statsBar.innerHTML = `
-    <div><span style="color: #888;">Calls:</span> <span style="color: #4ade80;">${calls.length}</span></div>
-    <div><span style="color: #888;">Called by:</span> <span style="color: #f97316;">${calledBy.length}</span></div>
-    <div style="margin-left: auto; color: #666;">Drag nodes to rearrange \u2022 Click outside to close</div>
-  `;
-    panel.appendChild(statsBar);
-    const svgContainer = document.createElement("div");
-    svgContainer.id = "atomic-view-svg";
-    svgContainer.style.cssText = `
-    width: 100%;
-    height: calc(100% - 90px);
-  `;
-    panel.appendChild(svgContainer);
-    document.body.appendChild(panel);
-    const handleOutsideClick = (e) => {
-      if (!panel.contains(e.target)) {
-        clearAtomicView_();
-        document.removeEventListener("click", handleOutsideClick);
-      }
-    };
-    setTimeout(() => document.addEventListener("click", handleOutsideClick), 100);
-    const nodes = [];
-    const links = [];
-    const centerNode = {
-      id: `${moduleName}.${declName}`,
-      label: declName,
-      module: moduleName,
-      type: "center",
-      fx: 400,
-      // Fixed at center x
-      fy: 205
-      // Fixed at center y
-    };
-    nodes.push(centerNode);
-    const seenCalls = /* @__PURE__ */ new Set();
-    calls.forEach((call, i2) => {
-      const nodeId = `${call.targetModule}.${call.identifier}`;
-      if (!seenCalls.has(nodeId) && nodeId !== centerNode.id) {
-        seenCalls.add(nodeId);
-        nodes.push({
-          id: nodeId,
-          label: call.identifier,
-          module: call.targetModule,
-          type: "outgoing"
-        });
-        links.push({
-          source: centerNode.id,
-          target: nodeId,
-          type: "outgoing"
-        });
-      }
-    });
-    const seenCallers = /* @__PURE__ */ new Set();
-    calledBy.forEach((caller, i2) => {
-      if (!seenCallers.has(caller) && caller !== centerNode.id) {
-        seenCallers.add(caller);
-        const lastDot = caller.lastIndexOf(".");
-        const callerModule = lastDot > 0 ? caller.substring(0, lastDot) : "Unknown";
-        const callerName = lastDot > 0 ? caller.substring(lastDot + 1) : caller;
-        nodes.push({
-          id: caller,
-          label: callerName,
-          module: callerModule,
-          type: "incoming"
-        });
-        links.push({
-          source: caller,
-          target: centerNode.id,
-          type: "incoming"
-        });
-      }
-    });
-    const width10 = 800;
-    const height10 = 410;
-    const svg = select_default2("#atomic-view-svg").append("svg").attr("width", "100%").attr("height", "100%").attr("viewBox", `0 0 ${width10} ${height10}`);
-    const defs = svg.append("defs");
-    defs.append("marker").attr("id", "arrow-outgoing").attr("viewBox", "0 -5 10 10").attr("refX", 20).attr("refY", 0).attr("markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto").append("path").attr("fill", "#4ade80").attr("d", "M0,-5L10,0L0,5");
-    defs.append("marker").attr("id", "arrow-incoming").attr("viewBox", "0 -5 10 10").attr("refX", 20).attr("refY", 0).attr("markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto").append("path").attr("fill", "#f97316").attr("d", "M0,-5L10,0L0,5");
-    const linkGroup = svg.append("g").attr("class", "links");
-    const linkElements = linkGroup.selectAll("line").data(links).enter().append("line").attr("stroke", (d3) => d3.type === "outgoing" ? "#4ade80" : "#f97316").attr("stroke-width", 1.5).attr("stroke-opacity", 0.6).attr("marker-end", (d3) => d3.type === "outgoing" ? "url(#arrow-outgoing)" : "url(#arrow-incoming)");
-    const nodeGroup = svg.append("g").attr("class", "nodes");
-    const nodeElements = nodeGroup.selectAll("g").data(nodes).enter().append("g").attr("class", "node").style("cursor", "grab");
-    nodeElements.append("circle").attr("r", (d3) => d3.type === "center" ? 20 : 12).attr("fill", (d3) => {
-      if (d3.type === "center") return "#7dd3fc";
-      return moduleColorScale(d3.module);
-    }).attr("stroke", (d3) => d3.type === "center" ? "#fff" : "#333").attr("stroke-width", (d3) => d3.type === "center" ? 3 : 1);
-    nodeElements.append("text").text((d3) => d3.label).attr("dy", (d3) => d3.type === "center" ? 35 : 25).attr("text-anchor", "middle").attr("fill", "#fff").attr("font-size", (d3) => d3.type === "center" ? "14px" : "11px").attr("font-weight", (d3) => d3.type === "center" ? "bold" : "normal");
-    nodeElements.append("text").text((d3) => d3.module.split(".").pop()).attr("dy", (d3) => d3.type === "center" ? 50 : 38).attr("text-anchor", "middle").attr("fill", "#888").attr("font-size", "9px");
-    const simulation = simulation_default(nodes).force("link", link_default(links).id((d3) => d3.id).distance(120).strength(0.5)).force("charge", manyBody_default().strength(-300)).force("x", x_default2().x((d3) => {
-      if (d3.type === "center") return width10 / 2;
-      if (d3.type === "incoming") return width10 * 0.2;
-      return width10 * 0.8;
-    }).strength(0.3)).force("y", y_default2(height10 / 2).strength(0.1)).force("collide", collide_default().radius(40));
-    activeSimulation = simulation;
-    const dragBehavior = drag_default().on("start", (event, d3) => {
-      if (!event.active) simulation.alphaTarget(0.3).restart();
-      d3.fx = d3.x;
-      d3.fy = d3.y;
-    }).on("drag", (event, d3) => {
-      d3.fx = event.x;
-      d3.fy = event.y;
-    }).on("end", (event, d3) => {
-      if (!event.active) simulation.alphaTarget(0);
-      if (d3.type !== "center") {
-        d3.fx = null;
-        d3.fy = null;
-      }
-    });
-    nodeElements.call(dragBehavior);
-    simulation.on("tick", () => {
-      linkElements.attr("x1", (d3) => d3.source.x).attr("y1", (d3) => d3.source.y).attr("x2", (d3) => d3.target.x).attr("y2", (d3) => d3.target.y);
-      nodeElements.attr("transform", (d3) => `translate(${d3.x},${d3.y})`);
-    });
-  };
-
-  // output/Engine.AtomicView/index.js
-  var renderAtomicView = function(fnInfo) {
-    return renderAtomicView_({
-      module: fnInfo.module,
-      name: fnInfo.name,
-      calls: fnInfo.calls,
-      calledBy: fnInfo.calledBy
-    });
-  };
-
-  // psd3-selection/src/PSD3v2/Tooltip.js
-  var tooltip = null;
-  var tooltipConfig = null;
-  var ensureTooltip = () => {
-    if (!tooltip) {
-      tooltip = document.createElement("div");
-      tooltip.className = "psd3-tooltip";
-      tooltip.style.cssText = `
-      position: fixed;
-      display: none;
-      pointer-events: none;
-      z-index: 10000;
-    `;
-      document.body.appendChild(tooltip);
-      if (tooltipConfig) {
-        applyConfig(tooltipConfig);
-      }
-    }
-    return tooltip;
-  };
-  var applyConfig = (config) => {
-    const el = ensureTooltip();
-    if (config.background) el.style.background = config.background;
-    if (config.color) el.style.color = config.color;
-    if (config.padding) el.style.padding = config.padding;
-    if (config.borderRadius) el.style.borderRadius = config.borderRadius;
-    if (config.fontSize) el.style.fontSize = config.fontSize;
-    if (config.fontFamily) el.style.fontFamily = config.fontFamily;
-    if (config.border) el.style.border = config.border;
-    if (config.boxShadow) el.style.boxShadow = config.boxShadow;
-    if (config.maxWidth) el.style.maxWidth = config.maxWidth;
-    if (config.lineHeight) el.style.lineHeight = config.lineHeight;
-    if (config.backdropFilter) {
-      el.style.backdropFilter = config.backdropFilter;
-      el.style.webkitBackdropFilter = config.backdropFilter;
-    }
-  };
-  var showTooltip_ = (content3) => (x5) => (y5) => () => {
-    const el = ensureTooltip();
-    el.innerHTML = content3;
-    el.style.display = "block";
-    const rect = el.getBoundingClientRect();
-    const viewW = window.innerWidth;
-    const viewH = window.innerHeight;
-    let posX = x5 + 15;
-    let posY = y5 + 10;
-    if (posX + rect.width > viewW) posX = x5 - rect.width - 15;
-    if (posY + rect.height > viewH) posY = y5 - rect.height - 10;
-    el.style.left = posX + "px";
-    el.style.top = posY + "px";
-  };
-  var hideTooltip_ = () => {
-    ensureTooltip().style.display = "none";
-  };
-
-  // output/Engine.BubblePack/foreign.js
-  var renderReexportModule_ = (containerSelector) => (node) => (isReexport) => () => {
-    const container = select_default2(containerSelector);
-    const group4 = container.append("g").datum(node).attr("class", `module-pack pack-${node.id} ${isReexport ? "reexport-module" : "empty-module"}`).attr("transform", `translate(${node.x},${node.y})`);
-    if (isReexport) {
-      group4.append("circle").attr("cx", 0).attr("cy", 0).attr("r", node.r * 1.5).attr("fill", "none").attr("stroke", "#9467bd").attr("stroke-width", 3).attr("stroke-dasharray", "5,3").attr("class", "reexport-ring");
-      group4.append("circle").attr("cx", 0).attr("cy", 0).attr("r", 4).attr("fill", "#9467bd").attr("class", "reexport-center");
-    } else {
-      group4.append("circle").attr("cx", 0).attr("cy", 0).attr("r", node.r).attr("fill", "#ccc").attr("stroke", "#999").attr("stroke-width", 1).attr("class", "empty-module-circle");
-    }
-  };
-  var highlightCallGraph_ = (sourceModule) => (callerModules) => (calleeModules) => () => {
-    const callerSet = new Set(callerModules);
-    const calleeSet = new Set(calleeModules);
-    select_default2("#explorer-nodes").selectAll("g.module-pack").each(function() {
-      const group4 = select_default2(this);
-      const node = group4.datum();
-      if (!node) return;
-      const moduleName = node.name;
-      group4.classed("highlight-caller", false).classed("highlight-callee", false).classed("highlight-source", false).classed("highlight-dimmed", false);
-      if (moduleName === sourceModule) {
-        group4.classed("highlight-source", true);
-      } else if (callerSet.has(moduleName)) {
-        group4.classed("highlight-caller", true);
-      } else if (calleeSet.has(moduleName)) {
-        group4.classed("highlight-callee", true);
-      } else {
-        group4.classed("highlight-dimmed", true);
-      }
-    });
-    select_default2("#explorer-links").selectAll("line").each(function() {
-      const line = select_default2(this);
-      line.classed("highlight-dimmed", true);
-    });
-  };
-  var clearCallGraphHighlight_ = () => {
-    select_default2("#explorer-nodes").selectAll("g.module-pack").classed("highlight-caller", false).classed("highlight-callee", false).classed("highlight-source", false).classed("highlight-dimmed", false);
-    select_default2("#explorer-links").selectAll("line").classed("highlight-dimmed", false);
-  };
-  var renderBoundBubblePack_ = (containerSelector) => (node) => (packCircles) => (centerOffset) => (categoryColorFn) => (onDeclarationClick2) => (onDeclarationHover2) => (onDeclarationLeave2) => () => {
-    const container = select_default2(containerSelector);
-    const group4 = container.append("g").datum(node).attr("class", `module-pack pack-${node.id}`).attr("transform", `translate(${node.x},${node.y})`);
-    group4.selectAll("circle").data(packCircles).enter().append("circle").attr("cx", (d3) => d3.x - centerOffset).attr("cy", (d3) => d3.y - centerOffset).attr("r", (d3) => d3.r).attr("fill", (d3) => categoryColorFn(d3)()).attr("fill-opacity", (d3) => {
-      if (d3.depth === 0) return 0.3;
-      if (d3.depth === 1) return 0.6;
-      return 0.8;
-    }).attr("stroke", "#fff").attr("stroke-width", 0.5).attr("class", (d3) => {
-      if (d3.depth === 0) return "pack-module";
-      if (d3.depth === 1) return "pack-category";
-      return "pack-declaration";
-    }).style("cursor", (d3) => d3.depth === 2 ? "pointer" : "default").on("click", function(event, d3) {
-      if (d3.depth === 2) {
-        event.stopPropagation();
-        onDeclarationClick2(node.name)(d3.data_)(d3.category)();
-      }
-    }).on("mouseenter", function(event, d3) {
-      if (d3.depth === 2) {
-        select_default2(this).attr("stroke", "#000").attr("stroke-width", 2);
-        const tooltipContent = `
-          <div class="tooltip-header">${d3.data_}</div>
-          <div class="tooltip-package">${node.name}</div>
-          <div class="tooltip-metrics">
-            <div class="tooltip-metric">
-              <span class="metric-label">Type</span>
-              <span class="metric-value">${d3.category}</span>
-            </div>
-          </div>
-        `;
-        showTooltip_(tooltipContent)(event.pageX)(event.pageY)();
-        if (d3.category === "value") {
-          onDeclarationHover2(node.name)(d3.data_)(d3.category)();
-        }
-      }
-    }).on("mouseleave", function(event, d3) {
-      if (d3.depth === 2) {
-        select_default2(this).attr("stroke", "#fff").attr("stroke-width", 0.5);
-        hideTooltip_();
-        if (d3.category === "value") {
-          onDeclarationLeave2();
-        }
-      }
-    });
-  };
-
-  // output/DataViz.Layout.Hierarchy.Pack/index.js
-  var elemIndex2 = /* @__PURE__ */ elemIndex(eqInt);
-  var append15 = /* @__PURE__ */ append(semigroupArray);
-  var map27 = /* @__PURE__ */ map(functorArray);
-  var min4 = /* @__PURE__ */ min(ordNumber);
-  var max5 = /* @__PURE__ */ max(ordNumber);
-  var insert9 = /* @__PURE__ */ insert(ordInt);
-  var fromFoldable10 = /* @__PURE__ */ fromFoldable2(ordInt)(foldableArray);
-  var sortWith3 = /* @__PURE__ */ sortWith(ordNumber);
-  var foldl7 = /* @__PURE__ */ foldl(foldableArray);
-  var max1 = /* @__PURE__ */ max(ordInt);
-  var mod4 = /* @__PURE__ */ mod(euclideanRingInt);
-  var map112 = /* @__PURE__ */ map(functorMaybe);
-  var apply3 = /* @__PURE__ */ apply(applyMaybe);
-  var bind7 = /* @__PURE__ */ bind(bindMaybe);
-  var lookup8 = /* @__PURE__ */ lookup(ordInt);
-  var pure10 = /* @__PURE__ */ pure(applicativeMaybe);
-  var minimumBy2 = /* @__PURE__ */ minimumBy(foldableArray);
-  var comparing2 = /* @__PURE__ */ comparing(ordNumber);
-  var PackNode = /* @__PURE__ */ (function() {
-    function PackNode2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    PackNode2.create = function(value0) {
-      return new PackNode2(value0);
-    };
-    return PackNode2;
-  })();
-  var NoCollision = /* @__PURE__ */ (function() {
-    function NoCollision2() {
-    }
-    ;
-    NoCollision2.value = new NoCollision2();
-    return NoCollision2;
-  })();
-  var CollisionFromJ = /* @__PURE__ */ (function() {
-    function CollisionFromJ2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    CollisionFromJ2.create = function(value0) {
-      return new CollisionFromJ2(value0);
-    };
-    return CollisionFromJ2;
-  })();
-  var CollisionFromK = /* @__PURE__ */ (function() {
-    function CollisionFromK2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    CollisionFromK2.create = function(value0) {
-      return new CollisionFromK2(value0);
-    };
-    return CollisionFromK2;
-  })();
-  var shortenChainOnly = function(aId) {
-    return function(jId) {
-      return function(chain) {
-        var v = elemIndex2(jId)(chain);
-        var v1 = elemIndex2(aId)(chain);
-        if (v1 instanceof Just && v instanceof Just) {
-          var $135 = v.value0 > v1.value0;
-          if ($135) {
-            var before = take(v1.value0 + 1 | 0)(chain);
-            var after = drop(v.value0)(chain);
-            return append15(before)(after);
-          }
-          ;
-          var $136 = v.value0 < v1.value0;
-          if ($136) {
-            return slice(v.value0)(v1.value0 + 1 | 0)(chain);
-          }
-          ;
-          return chain;
-        }
-        ;
-        return chain;
-      };
-    };
-  };
-  var scaleToSize = function(config) {
-    return function(v) {
-      var scaleNode = function(scale) {
-        return function(parentX) {
-          return function(parentY) {
-            return function(v1) {
-              var scaledY = parentY + scale * v1.value0.y;
-              var scaledX = parentX + scale * v1.value0.x;
-              var scaledR = scale * v1.value0.r;
-              return new PackNode({
-                data_: v1.value0.data_,
-                depth: v1.value0.depth,
-                height: v1.value0.height,
-                value: v1.value0.value,
-                x: scaledX,
-                y: scaledY,
-                r: scaledR,
-                children: map27(scaleNode(scale)(scaledX)(scaledY))(v1.value0.children)
-              });
-            };
-          };
-        };
-      };
-      var k = min4(config.size.width)(config.size.height) / (2 * v.value0.r);
-      var scaledRootR = k * v.value0.r;
-      var centerY = config.size.height / 2;
-      var centerX = config.size.width / 2;
-      return new PackNode({
-        data_: v.value0.data_,
-        depth: v.value0.depth,
-        height: v.value0.height,
-        value: v.value0.value,
-        x: centerX,
-        y: centerY,
-        r: scaledRootR,
-        children: map27(scaleNode(k)(centerX)(centerY))(v.value0.children)
-      });
-    };
-  };
-  var place = function(b10) {
-    return function(a3) {
-      return function(c2) {
-        var dy = b10.y - a3.y;
-        var dx = b10.x - a3.x;
-        var d22 = dx * dx + dy * dy;
-        var $147 = d22 !== 0;
-        if ($147) {
-          var b22 = (b10.r + c2.r) * (b10.r + c2.r);
-          var a22 = (a3.r + c2.r) * (a3.r + c2.r);
-          var $148 = a22 > b22;
-          if ($148) {
-            var x5 = (d22 + b22 - a22) / (2 * d22);
-            var y5 = sqrt3(max5(0)(b22 / d22 - x5 * x5));
-            return {
-              x: b10.x - x5 * dx - y5 * dy,
-              y: b10.y - x5 * dy + y5 * dx,
-              r: c2.r
-            };
-          }
-          ;
-          var x5 = (d22 + a22 - b22) / (2 * d22);
-          var y5 = sqrt3(max5(0)(a22 / d22 - x5 * x5));
-          return {
-            x: a3.x + x5 * dx - y5 * dy,
-            y: a3.y + x5 * dy + y5 * dx,
-            r: c2.r
-          };
-        }
-        ;
-        return {
-          x: a3.x + c2.r,
-          y: a3.y,
-          r: c2.r
-        };
-      };
-    };
-  };
-  var insertInChain = function(aId) {
-    return function(_bId) {
-      return function(newId2) {
-        return function(chain) {
-          var v = elemIndex2(aId)(chain);
-          if (v instanceof Nothing) {
-            return chain;
-          }
-          ;
-          if (v instanceof Just) {
-            return fromMaybe(chain)(insertAt(v.value0 + 1 | 0)(newId2)(chain));
-          }
-          ;
-          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 174, column 3 - line 178, column 62): " + [v.constructor.name]);
-        };
-      };
-    };
-  };
-  var insertBetween = function(aId) {
-    return function(bId) {
-      return function(newCircle) {
-        return function(state3) {
-          var newCircles = insert9(state3.nextId)(newCircle)(state3.circles);
-          var newChain = insertInChain(aId)(bId)(state3.nextId)(state3.frontChain);
-          return {
-            circles: newCircles,
-            frontChain: newChain,
-            nextId: state3.nextId + 1 | 0
-          };
-        };
-      };
-    };
-  };
-  var initState = function(c0) {
-    return function(c1) {
-      return function(c2) {
-        var c1$prime = {
-          r: c1.r,
-          x: c0.r,
-          y: 0
-        };
-        var c0$prime = {
-          r: c0.r,
-          x: -c1.r,
-          y: 0
-        };
-        var c2$prime = place(c1$prime)(c0$prime)(c2);
-        var circles = fromFoldable10([new Tuple(0, c0$prime), new Tuple(1, c1$prime), new Tuple(2, c2$prime)]);
-        return {
-          circles,
-          frontChain: [0, 2, 1],
-          nextId: 3
-        };
-      };
-    };
-  };
-  var hierarchy = function(v) {
-    var go2 = function(node) {
-      return function(depth) {
-        if (node.children instanceof Nothing) {
-          return new PackNode({
-            data_: node.data_,
-            depth,
-            height: 0,
-            value: fromMaybe(0)(node.value),
-            children: [],
-            x: 0,
-            y: 0,
-            r: 0
-          });
-        }
-        ;
-        if (node.children instanceof Just) {
-          var childNodes2 = map27(function(v1) {
-            return go2(v1)(depth + 1 | 0);
-          })(node.children.value0);
-          var sortedChildren = sortWith3(function(v1) {
-            return -v1.value0.value;
-          })(childNodes2);
-          var sumValue = foldl7(function(acc) {
-            return function(v1) {
-              return acc + v1.value0.value;
-            };
-          })(0)(sortedChildren);
-          var childHeights = map27(function(v1) {
-            return v1.value0.height;
-          })(sortedChildren);
-          var maxChildHeight = foldl7(max1)(0)(childHeights);
-          return new PackNode({
-            data_: node.data_,
-            depth,
-            height: maxChildHeight + 1 | 0,
-            value: sumValue,
-            children: sortedChildren,
-            x: 0,
-            y: 0,
-            r: 0
-          });
-        }
-        ;
-        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 685, column 5 - line 717, column 14): " + [node.children.constructor.name]);
-      };
-    };
-    return go2(v)(0);
-  };
-  var getPrevInChain = function(nodeId) {
-    return function(chain) {
-      var v = elemIndex2(nodeId)(chain);
-      if (v instanceof Nothing) {
-        return Nothing.value;
-      }
-      ;
-      if (v instanceof Just) {
-        var n = length(chain);
-        var prevIdx = mod4((v.value0 - 1 | 0) + n | 0)(n);
-        return index(chain)(prevIdx);
-      }
-      ;
-      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 241, column 3 - line 248, column 34): " + [v.constructor.name]);
-    };
-  };
-  var getNextInChain = function(nodeId) {
-    return function(chain) {
-      var v = elemIndex2(nodeId)(chain);
-      if (v instanceof Nothing) {
-        return Nothing.value;
-      }
-      ;
-      if (v instanceof Just) {
-        var nextIdx = mod4(v.value0 + 1 | 0)(length(chain));
-        return index(chain)(nextIdx);
-      }
-      ;
-      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 230, column 3 - line 236, column 34): " + [v.constructor.name]);
-    };
-  };
-  var getNextId = function(nodeId) {
-    return function(chain) {
-      var v = elemIndex2(nodeId)(chain);
-      if (v instanceof Nothing) {
-        return Nothing.value;
-      }
-      ;
-      if (v instanceof Just) {
-        var nextIdx = mod4(v.value0 + 1 | 0)(length(chain));
-        return index(chain)(nextIdx);
-      }
-      ;
-      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 138, column 3 - line 144, column 34): " + [v.constructor.name]);
-    };
-  };
-  var epsilon6 = 1e-6;
-  var intersects = function(a3) {
-    return function(b10) {
-      var dy = b10.y - a3.y;
-      var dx = b10.x - a3.x;
-      var dr = a3.r + b10.r - epsilon6;
-      return dr > 0 && dr * dr > dx * dx + dy * dy;
-    };
-  };
-  var epsilon = 1e-9;
-  var enclosesWeak = function(a3) {
-    return function(b10) {
-      var dy = b10.y - a3.y;
-      var dx = b10.x - a3.x;
-      var dr = a3.r - b10.r + max5(a3.r)(max5(b10.r)(1)) * epsilon;
-      return dr > 0 && dr * dr > dx * dx + dy * dy;
-    };
-  };
-  var enclosesWeakAll = function(a3) {
-    return function(bs) {
-      return all2(enclosesWeak(a3))(bs);
-    };
-  };
-  var enclosesNot = function(a3) {
-    return function(b10) {
-      var dy = b10.y - a3.y;
-      var dx = b10.x - a3.x;
-      var dr = a3.r - b10.r;
-      return dr < 0 || dr * dr < dx * dx + dy * dy;
-    };
-  };
-  var encloseBasis3 = function(a3) {
-    return function(b10) {
-      return function(c2) {
-        var d1 = a3.x * a3.x + a3.y * a3.y - a3.r * a3.r;
-        var d22 = d1 - b10.x * b10.x - b10.y * b10.y + b10.r * b10.r;
-        var d3 = d1 - c2.x * c2.x - c2.y * c2.y + c2.r * c2.r;
-        var c3 = c2.r - a3.r;
-        var c22 = b10.r - a3.r;
-        var b32 = a3.y - c2.y;
-        var b22 = a3.y - b10.y;
-        var a32 = a3.x - c2.x;
-        var a22 = a3.x - b10.x;
-        var ab = a32 * b22 - a22 * b32;
-        var xa = (b22 * d3 - b32 * d22) / (ab * 2) - a3.x;
-        var xb = (b32 * c22 - b22 * c3) / ab;
-        var ya = (a32 * d22 - a22 * d3) / (ab * 2) - a3.y;
-        var bigC = xa * xa + ya * ya - a3.r * a3.r;
-        var yb = (a22 * c3 - a32 * c22) / ab;
-        var bigA = xb * xb + yb * yb - 1;
-        var bigB = 2 * (a3.r + xa * xb + ya * yb);
-        var r = (function() {
-          var $182 = abs(bigA) > epsilon6;
-          if ($182) {
-            return -(bigB + sqrt3(bigB * bigB - 4 * bigA * bigC)) / (2 * bigA);
-          }
-          ;
-          return -bigC / bigB;
-        })();
-        return {
-          x: a3.x + xa + xb * r,
-          y: a3.y + ya + yb * r,
-          r
-        };
-      };
-    };
-  };
-  var encloseBasis2 = function(a3) {
-    return function(b10) {
-      var y21 = b10.y - a3.y;
-      var x21 = b10.x - a3.x;
-      var r21 = b10.r - a3.r;
-      var l = sqrt3(x21 * x21 + y21 * y21);
-      return {
-        x: (a3.x + b10.x + x21 / l * r21) / 2,
-        y: (a3.y + b10.y + y21 / l * r21) / 2,
-        r: (l + a3.r + b10.r) / 2
-      };
-    };
-  };
-  var extendBasis = function(basis2) {
-    return function(p2) {
-      if (enclosesWeakAll(p2)(basis2)) {
-        return [p2];
-      }
-      ;
-      if (otherwise) {
-        var n = length(basis2);
-        var findTwoCircleBasis = function($copy_i) {
-          var $tco_done = false;
-          var $tco_result;
-          function $tco_loop(i2) {
-            if (i2 >= n) {
-              $tco_done = true;
-              return Nothing.value;
-            }
-            ;
-            if (otherwise) {
-              var v2 = index(basis2)(i2);
-              if (v2 instanceof Just) {
-                var candidate = encloseBasis2(v2.value0)(p2);
-                var $187 = enclosesNot(p2)(v2.value0) && enclosesWeakAll(candidate)(basis2);
-                if ($187) {
-                  $tco_done = true;
-                  return new Just([v2.value0, p2]);
-                }
-                ;
-                $copy_i = i2 + 1 | 0;
-                return;
-              }
-              ;
-              if (v2 instanceof Nothing) {
-                $copy_i = i2 + 1 | 0;
-                return;
-              }
-              ;
-              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 559, column 13 - line 566, column 52): " + [v2.constructor.name]);
-            }
-            ;
-            throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 555, column 7 - line 555, column 56): " + [i2.constructor.name]);
-          }
-          ;
-          while (!$tco_done) {
-            $tco_result = $tco_loop($copy_i);
-          }
-          ;
-          return $tco_result;
-        };
-        var findInnerPair = function($copy_i) {
-          return function($copy_j) {
-            var $tco_var_i = $copy_i;
-            var $tco_done1 = false;
-            var $tco_result;
-            function $tco_loop(i2, j) {
-              if (j >= n) {
-                $tco_done1 = true;
-                return Nothing.value;
-              }
-              ;
-              if (otherwise) {
-                var v2 = index(basis2)(j);
-                var v12 = index(basis2)(i2);
-                if (v12 instanceof Just && v2 instanceof Just) {
-                  var cjp = encloseBasis2(v2.value0)(p2);
-                  var cip = encloseBasis2(v12.value0)(p2);
-                  var cij = encloseBasis2(v12.value0)(v2.value0);
-                  var candidate = encloseBasis3(v12.value0)(v2.value0)(p2);
-                  var $193 = enclosesNot(cij)(p2) && (enclosesNot(cip)(v2.value0) && (enclosesNot(cjp)(v12.value0) && enclosesWeakAll(candidate)(basis2)));
-                  if ($193) {
-                    $tco_done1 = true;
-                    return new Just([v12.value0, v2.value0, p2]);
-                  }
-                  ;
-                  $tco_var_i = i2;
-                  $copy_j = j + 1 | 0;
-                  return;
-                }
-                ;
-                $tco_var_i = i2;
-                $copy_j = j + 1 | 0;
-                return;
-              }
-              ;
-              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 576, column 7 - line 576, column 58): " + [i2.constructor.name, j.constructor.name]);
-            }
-            ;
-            while (!$tco_done1) {
-              $tco_result = $tco_loop($tco_var_i, $copy_j);
-            }
-            ;
-            return $tco_result;
-          };
-        };
-        var findThreeCircleBasis = function($copy_i) {
-          var $tco_done2 = false;
-          var $tco_result;
-          function $tco_loop(i2) {
-            if (i2 >= (n - 1 | 0)) {
-              $tco_done2 = true;
-              return Nothing.value;
-            }
-            ;
-            if (otherwise) {
-              var v2 = findInnerPair(i2)(i2 + 1 | 0);
-              if (v2 instanceof Just) {
-                $tco_done2 = true;
-                return new Just(v2.value0);
-              }
-              ;
-              if (v2 instanceof Nothing) {
-                $copy_i = i2 + 1 | 0;
-                return;
-              }
-              ;
-              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 572, column 13 - line 574, column 54): " + [v2.constructor.name]);
-            }
-            ;
-            throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 568, column 7 - line 568, column 58): " + [i2.constructor.name]);
-          }
-          ;
-          while (!$tco_done2) {
-            $tco_result = $tco_loop($copy_i);
-          }
-          ;
-          return $tco_result;
-        };
-        var v = findTwoCircleBasis(0);
-        if (v instanceof Just) {
-          return v.value0;
-        }
-        ;
-        if (v instanceof Nothing) {
-          var v1 = findThreeCircleBasis(0);
-          if (v1 instanceof Just) {
-            return v1.value0;
-          }
-          ;
-          if (v1 instanceof Nothing) {
-            return basis2;
-          }
-          ;
-          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 549, column 11 - line 551, column 29): " + [v1.constructor.name]);
-        }
-        ;
-        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 546, column 7 - line 551, column 29): " + [v.constructor.name]);
-      }
-      ;
-      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 542, column 1 - line 542, column 54): " + [basis2.constructor.name, p2.constructor.name]);
-    };
-  };
-  var encloseBasis1 = function(a3) {
-    return {
-      x: a3.x,
-      y: a3.y,
-      r: a3.r
-    };
-  };
-  var encloseBasis = function(basis2) {
-    var v = length(basis2);
-    if (v === 1) {
-      return fromMaybe({
-        x: 0,
-        y: 0,
-        r: 0
-      })(map112(encloseBasis1)(index(basis2)(0)));
-    }
-    ;
-    if (v === 2) {
-      return fromMaybe({
-        x: 0,
-        y: 0,
-        r: 0
-      })(apply3(map112(encloseBasis2)(index(basis2)(0)))(index(basis2)(1)));
-    }
-    ;
-    if (v === 3) {
-      return fromMaybe({
-        x: 0,
-        y: 0,
-        r: 0
-      })(apply3(apply3(map112(encloseBasis3)(index(basis2)(0)))(index(basis2)(1)))(index(basis2)(2)));
-    }
-    ;
-    return {
-      x: 0,
-      y: 0,
-      r: 0
-    };
-  };
-  var packEnclose = function(circles) {
-    var n = length(circles);
-    var go2 = function($copy_i) {
-      return function($copy_basis) {
-        return function($copy_maybeE) {
-          var $tco_var_i = $copy_i;
-          var $tco_var_basis = $copy_basis;
-          var $tco_done = false;
-          var $tco_result;
-          function $tco_loop(i2, basis2, maybeE) {
-            if (i2 >= n) {
-              if (maybeE instanceof Just) {
-                $tco_done = true;
-                return maybeE.value0;
-              }
-              ;
-              if (maybeE instanceof Nothing) {
-                $tco_done = true;
-                return {
-                  x: 0,
-                  y: 0,
-                  r: 0
-                };
-              }
-              ;
-              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 600, column 9 - line 602, column 48): " + [maybeE.constructor.name]);
-            }
-            ;
-            if (otherwise) {
-              var v = index(circles)(i2);
-              if (v instanceof Nothing) {
-                $tco_var_i = i2 + 1 | 0;
-                $tco_var_basis = basis2;
-                $copy_maybeE = maybeE;
-                return;
-              }
-              ;
-              if (v instanceof Just) {
-                if (maybeE instanceof Just && enclosesWeak(maybeE.value0)(v.value0)) {
-                  $tco_var_i = i2 + 1 | 0;
-                  $tco_var_basis = basis2;
-                  $copy_maybeE = maybeE;
-                  return;
-                }
-                ;
-                var newBasis = extendBasis(basis2)(v.value0);
-                var newE = encloseBasis(newBasis);
-                $tco_var_i = 0;
-                $tco_var_basis = newBasis;
-                $copy_maybeE = new Just(newE);
-                return;
-              }
-              ;
-              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 604, column 9 - line 615, column 44): " + [v.constructor.name]);
-            }
-            ;
-            throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 597, column 3 - line 597, column 54): " + [i2.constructor.name, basis2.constructor.name, maybeE.constructor.name]);
-          }
-          ;
-          while (!$tco_done) {
-            $tco_result = $tco_loop($tco_var_i, $tco_var_basis, $copy_maybeE);
-          }
-          ;
-          return $tco_result;
-        };
-      };
-    };
-    return go2(0)([])(Nothing.value);
-  };
-  var defaultPackConfig = /* @__PURE__ */ (function() {
-    return {
-      size: {
-        width: 1,
-        height: 1
-      },
-      padding: 0,
-      radius: Nothing.value
-    };
-  })();
-  var calculateScore = function(a3) {
-    return function(b10) {
-      var ab = a3.r + b10.r;
-      var dx = (a3.x * b10.r + b10.x * a3.r) / ab;
-      var dy = (a3.y * b10.r + b10.y * a3.r) / ab;
-      return dx * dx + dy * dy;
-    };
-  };
-  var scoreNode = function(nodeId) {
-    return function(state3) {
-      return bind7(lookup8(nodeId)(state3.circles))(function(node) {
-        return bind7(getNextId(nodeId)(state3.frontChain))(function(nextId) {
-          return bind7(lookup8(nextId)(state3.circles))(function(next) {
-            return pure10({
-              nodeId,
-              score: calculateScore(node)(next)
-            });
-          });
-        });
-      });
-    };
-  };
-  var findBestPair = function(state3) {
-    var scored = mapMaybe(function(nodeId) {
-      return scoreNode(nodeId)(state3);
-    })(state3.frontChain);
-    var bestNode = minimumBy2(comparing2(function(v) {
-      return v.score;
-    }))(scored);
-    if (bestNode instanceof Nothing) {
-      return Nothing.value;
-    }
-    ;
-    if (bestNode instanceof Just) {
-      return bind7(getNextId(bestNode.value0.nodeId)(state3.frontChain))(function(nextId) {
-        return pure10(new Tuple(bestNode.value0.nodeId, nextId));
-      });
-    }
-    ;
-    throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 165, column 5 - line 169, column 40): " + [bestNode.constructor.name]);
-  };
-  var bidirectionalCollisionSearch = function(aId) {
-    return function(bId) {
-      return function(newCircle) {
-        return function(state3) {
-          var doWhileStep = function($copy_j) {
-            return function($copy_k) {
-              return function($copy_sj) {
-                return function($copy_sk) {
-                  var $tco_var_j = $copy_j;
-                  var $tco_var_k = $copy_k;
-                  var $tco_var_sj = $copy_sj;
-                  var $tco_done = false;
-                  var $tco_result;
-                  function $tco_loop(j, k, sj, sk) {
-                    var $215 = sj <= sk;
-                    if ($215) {
-                      var v4 = lookup8(j)(state3.circles);
-                      if (v4 instanceof Just) {
-                        var $217 = intersects(v4.value0)(newCircle);
-                        if ($217) {
-                          $tco_done = true;
-                          return new CollisionFromJ(j);
-                        }
-                        ;
-                        var v12 = getNextInChain(j)(state3.frontChain);
-                        if (v12 instanceof Just) {
-                          var v22 = getNextInChain(k)(state3.frontChain);
-                          if (v22 instanceof Just && v12.value0 === v22.value0) {
-                            $tco_done = true;
-                            return NoCollision.value;
-                          }
-                          ;
-                          $tco_var_j = v12.value0;
-                          $tco_var_k = k;
-                          $tco_var_sj = sj + v4.value0.r;
-                          $copy_sk = sk;
-                          return;
-                        }
-                        ;
-                        if (v12 instanceof Nothing) {
-                          $tco_done = true;
-                          return NoCollision.value;
-                        }
-                        ;
-                        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 280, column 13 - line 286, column 37): " + [v12.constructor.name]);
-                      }
-                      ;
-                      if (v4 instanceof Nothing) {
-                        $tco_done = true;
-                        return NoCollision.value;
-                      }
-                      ;
-                      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 274, column 7 - line 287, column 31): " + [v4.constructor.name]);
-                    }
-                    ;
-                    var v4 = lookup8(k)(state3.circles);
-                    if (v4 instanceof Just) {
-                      var $224 = intersects(v4.value0)(newCircle);
-                      if ($224) {
-                        $tco_done = true;
-                        return new CollisionFromK(k);
-                      }
-                      ;
-                      var v12 = getPrevInChain(k)(state3.frontChain);
-                      if (v12 instanceof Just) {
-                        var v22 = getNextInChain(v12.value0)(state3.frontChain);
-                        if (v22 instanceof Just && j === v22.value0) {
-                          $tco_done = true;
-                          return NoCollision.value;
-                        }
-                        ;
-                        $tco_var_j = j;
-                        $tco_var_k = v12.value0;
-                        $tco_var_sj = sj;
-                        $copy_sk = sk + v4.value0.r;
-                        return;
-                      }
-                      ;
-                      if (v12 instanceof Nothing) {
-                        $tco_done = true;
-                        return NoCollision.value;
-                      }
-                      ;
-                      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 296, column 13 - line 302, column 37): " + [v12.constructor.name]);
-                    }
-                    ;
-                    if (v4 instanceof Nothing) {
-                      $tco_done = true;
-                      return NoCollision.value;
-                    }
-                    ;
-                    throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 290, column 7 - line 303, column 31): " + [v4.constructor.name]);
-                  }
-                  ;
-                  while (!$tco_done) {
-                    $tco_result = $tco_loop($tco_var_j, $tco_var_k, $tco_var_sj, $copy_sk);
-                  }
-                  ;
-                  return $tco_result;
-                };
-              };
-            };
-          };
-          var v = lookup8(bId)(state3.circles);
-          var v1 = lookup8(aId)(state3.circles);
-          if (v1 instanceof Just && v instanceof Just) {
-            var v2 = getPrevInChain(aId)(state3.frontChain);
-            var v3 = getNextInChain(bId)(state3.frontChain);
-            if (v3 instanceof Just && v2 instanceof Just) {
-              return doWhileStep(v3.value0)(v2.value0)(v.value0.r)(v1.value0.r);
-            }
-            ;
-            return NoCollision.value;
-          }
-          ;
-          return NoCollision.value;
-        };
-      };
-    };
-  };
-  var tryPlaceCircleWithLimit = function($copy_maxRetries) {
-    return function($copy_newCircle) {
-      return function($copy_aId) {
-        return function($copy_bId) {
-          return function($copy_state) {
-            var $tco_var_maxRetries = $copy_maxRetries;
-            var $tco_var_newCircle = $copy_newCircle;
-            var $tco_var_aId = $copy_aId;
-            var $tco_var_bId = $copy_bId;
-            var $tco_done = false;
-            var $tco_result;
-            function $tco_loop(maxRetries, newCircle, aId, bId, state3) {
-              if (maxRetries <= 0) {
-                $tco_done = true;
-                return insertBetween(aId)(bId)(newCircle)(state3);
-              }
-              ;
-              if (otherwise) {
-                var v = lookup8(bId)(state3.circles);
-                var v1 = lookup8(aId)(state3.circles);
-                if (v1 instanceof Just && v instanceof Just) {
-                  var positioned = place(v.value0)(v1.value0)(newCircle);
-                  var collisionResult = bidirectionalCollisionSearch(aId)(bId)(positioned)(state3);
-                  if (collisionResult instanceof NoCollision) {
-                    $tco_done = true;
-                    return insertBetween(aId)(bId)(positioned)(state3);
-                  }
-                  ;
-                  if (collisionResult instanceof CollisionFromJ) {
-                    var shortenedChain = shortenChainOnly(aId)(collisionResult.value0)(state3.frontChain);
-                    var stateWithShortenedChain = {
-                      circles: state3.circles,
-                      nextId: state3.nextId,
-                      frontChain: shortenedChain
-                    };
-                    $tco_var_maxRetries = maxRetries - 1 | 0;
-                    $tco_var_newCircle = newCircle;
-                    $tco_var_aId = aId;
-                    $tco_var_bId = collisionResult.value0;
-                    $copy_state = stateWithShortenedChain;
-                    return;
-                  }
-                  ;
-                  if (collisionResult instanceof CollisionFromK) {
-                    var shortenedChain = shortenChainOnly(collisionResult.value0)(bId)(state3.frontChain);
-                    var stateWithShortenedChain = {
-                      circles: state3.circles,
-                      nextId: state3.nextId,
-                      frontChain: shortenedChain
-                    };
-                    $tco_var_maxRetries = maxRetries - 1 | 0;
-                    $tco_var_newCircle = newCircle;
-                    $tco_var_aId = collisionResult.value0;
-                    $tco_var_bId = bId;
-                    $copy_state = stateWithShortenedChain;
-                    return;
-                  }
-                  ;
-                  throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 380, column 13 - line 396, column 101): " + [collisionResult.constructor.name]);
-                }
-                ;
-                $tco_done = true;
-                return state3;
-              }
-              ;
-              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 368, column 1 - line 368, column 91): " + [maxRetries.constructor.name, newCircle.constructor.name, aId.constructor.name, bId.constructor.name, state3.constructor.name]);
-            }
-            ;
-            while (!$tco_done) {
-              $tco_result = $tco_loop($tco_var_maxRetries, $tco_var_newCircle, $tco_var_aId, $tco_var_bId, $copy_state);
-            }
-            ;
-            return $tco_result;
-          };
-        };
-      };
-    };
-  };
-  var tryPlaceCircle = /* @__PURE__ */ tryPlaceCircleWithLimit(100);
-  var assignRadii = function(config) {
-    return function(v) {
-      if (v.value0.children.length === 0) {
-        var r = (function() {
-          if (config.radius instanceof Just) {
-            return config.radius.value0(v.value0.data_);
-          }
-          ;
-          if (config.radius instanceof Nothing) {
-            return sqrt3(v.value0.value);
-          }
-          ;
-          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 752, column 13 - line 754, column 37): " + [config.radius.constructor.name]);
-        })();
-        return new PackNode({
-          data_: v.value0.data_,
-          depth: v.value0.depth,
-          height: v.value0.height,
-          value: v.value0.value,
-          children: v.value0.children,
-          x: v.value0.x,
-          y: v.value0.y,
-          r: max5(0)(r)
-        });
-      }
-      ;
-      return new PackNode({
-        data_: v.value0.data_,
-        depth: v.value0.depth,
-        height: v.value0.height,
-        value: v.value0.value,
-        x: v.value0.x,
-        y: v.value0.y,
-        r: v.value0.r,
-        children: map27(assignRadii(config))(v.value0.children)
-      });
-    };
-  };
-  var addCircle = function(newCircle) {
-    return function(state3) {
-      var v = findBestPair(state3);
-      if (v instanceof Nothing) {
-        return state3;
-      }
-      ;
-      if (v instanceof Just) {
-        return tryPlaceCircle(newCircle)(v.value0.value0)(v.value0.value1)(state3);
-      }
-      ;
-      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 404, column 3 - line 406, column 67): " + [v.constructor.name]);
-    };
-  };
-  var packSiblingsMap = function(inputCircles) {
-    var n = length(inputCircles);
-    var $260 = n === 0;
-    if ($260) {
-      return {
-        circles: [],
-        radius: 0
-      };
-    }
-    ;
-    var $261 = n === 1;
-    if ($261) {
-      var v = index(inputCircles)(0);
-      if (v instanceof Just) {
-        return {
-          circles: [{
-            r: v.value0.r,
-            x: 0,
-            y: 0
-          }],
-          radius: v.value0.r
-        };
-      }
-      ;
-      if (v instanceof Nothing) {
-        return {
-          circles: [],
-          radius: 0
-        };
-      }
-      ;
-      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 415, column 7 - line 417, column 48): " + [v.constructor.name]);
-    }
-    ;
-    var $264 = n === 2;
-    if ($264) {
-      var v = index(inputCircles)(1);
-      var v1 = index(inputCircles)(0);
-      if (v1 instanceof Just && v instanceof Just) {
-        var c1$prime = {
-          r: v.value0.r,
-          x: v1.value0.r,
-          y: 0
-        };
-        var c0$prime = {
-          r: v1.value0.r,
-          x: -v.value0.r,
-          y: 0
-        };
-        return {
-          circles: [c0$prime, c1$prime],
-          radius: v1.value0.r + v.value0.r
-        };
-      }
-      ;
-      return {
-        circles: [],
-        radius: 0
-      };
-    }
-    ;
-    var v = index(inputCircles)(2);
-    var v1 = index(inputCircles)(1);
-    var v2 = index(inputCircles)(0);
-    if (v2 instanceof Just && (v1 instanceof Just && v instanceof Just)) {
-      var remaining = drop(3)(inputCircles);
-      var initialState2 = initState(v2.value0)(v1.value0)(v.value0);
-      var finalState = foldl7(flip(addCircle))(initialState2)(remaining);
-      var positioned = mapMaybe(function(i2) {
-        return lookup8(i2)(finalState.circles);
-      })(range2(0)(n - 1 | 0));
-      var enclosing = packEnclose(positioned);
-      var translated = map27(function(c2) {
-        return {
-          r: c2.r,
-          x: c2.x - enclosing.x,
-          y: c2.y - enclosing.y
-        };
-      })(positioned);
-      return {
-        circles: translated,
-        radius: enclosing.r
-      };
-    }
-    ;
-    return {
-      circles: [],
-      radius: 0
-    };
-  };
-  var packChildren = function(k) {
-    return function(config) {
-      return function(v) {
-        var updateNodePosition = function(v1) {
-          return function(c2) {
-            return new PackNode({
-              data_: v1.value0.data_,
-              depth: v1.value0.depth,
-              height: v1.value0.height,
-              value: v1.value0.value,
-              children: v1.value0.children,
-              r: v1.value0.r,
-              x: c2.x,
-              y: c2.y
-            });
-          };
-        };
-        var removePadding = function(p2) {
-          return function(c2) {
-            return {
-              x: c2.x,
-              y: c2.y,
-              r: c2.r - p2
-            };
-          };
-        };
-        var nodeToCircle = function(v1) {
-          return {
-            x: v1.value0.x,
-            y: v1.value0.y,
-            r: v1.value0.r
-          };
-        };
-        var addPadding = function(p2) {
-          return function(c2) {
-            return {
-              x: c2.x,
-              y: c2.y,
-              r: c2.r + p2
-            };
-          };
-        };
-        if (v.value0.children.length === 0) {
-          return new PackNode(v.value0);
-        }
-        ;
-        var paddingScaled = config.padding * k;
-        var packedKids = map27(packChildren(k)(config))(v.value0.children);
-        var inputCircles = map27((function() {
-          var $287 = addPadding(paddingScaled);
-          return function($288) {
-            return $287(nodeToCircle($288));
-          };
-        })())(packedKids);
-        var packed = packSiblingsMap(inputCircles);
-        var circlesWithoutPadding = map27(removePadding(paddingScaled))(packed.circles);
-        var updatedKids = zipWith(updateNodePosition)(packedKids)(circlesWithoutPadding);
-        var nodeWithR = {
-          data_: v.value0.data_,
-          depth: v.value0.depth,
-          height: v.value0.height,
-          value: v.value0.value,
-          x: v.value0.x,
-          y: v.value0.y,
-          r: packed.radius + paddingScaled,
-          children: updatedKids
-        };
-        return new PackNode(nodeWithR);
-      };
-    };
-  };
-  var pack = function(config) {
-    return function(root2) {
-      var withRadii = assignRadii(config)(root2);
-      var firstPack = packChildren(1)({
-        size: config.size,
-        radius: config.radius,
-        padding: 0
-      })(withRadii);
-      var k = firstPack.value0.r / min4(config.size.width)(config.size.height);
-      var packed = packChildren(k)(config)(withRadii);
-      var scaled = scaleToSize(config)(packed);
-      return scaled;
-    };
-  };
-
-  // output/Engine.BubblePack/index.js
-  var pure11 = /* @__PURE__ */ pure(applicativeEffect);
-  var nub3 = /* @__PURE__ */ nub(ordString);
-  var map28 = /* @__PURE__ */ map(functorArray);
-  var sortWith4 = /* @__PURE__ */ sortWith(ordInt);
-  var bind8 = /* @__PURE__ */ bind(bindArray);
-  var append8 = /* @__PURE__ */ append(semigroupArray);
-  var log6 = /* @__PURE__ */ log5(monadEffectEffect);
-  var show4 = /* @__PURE__ */ show(showInt);
-  var renderReexportModule = function(node) {
-    return function(isReexport) {
-      return renderReexportModule_("#explorer-nodes")(node)(isReexport);
-    };
-  };
-  var packNodeToCircleWithCategory = function(v) {
-    return {
-      x: v.node.value0.x,
-      y: v.node.value0.y,
-      r: v.node.value0.r,
-      depth: v.node.value0.depth,
-      data_: v.node.value0.data_,
-      category: v.category
-    };
-  };
-  var highlightCallGraph = highlightCallGraph_;
-  var groupByKind = function(decls) {
-    var kinds = nub3(map28(function(v) {
-      return v.kind;
-    })(decls));
-    var groups = map28(function(k) {
-      return {
-        kind: k,
-        decls: filter(function(d3) {
-          return d3.kind === k;
-        })(decls)
-      };
-    })(kinds);
-    return sortWith4(function(g) {
-      return -length(g.decls) | 0;
-    })(filter(function(g) {
-      return !$$null(g.decls);
-    })(groups));
-  };
-  var getAllPackNodesWithCategory = function(v) {
-    return function(parentCategory) {
-      var thisCategory = (function() {
-        var $34 = v.value0.depth === 1;
-        if ($34) {
-          return v.value0.data_;
-        }
-        ;
-        return parentCategory;
-      })();
-      var childResults = bind8(v.value0.children)(function(child) {
-        return getAllPackNodesWithCategory(child)(thisCategory);
-      });
-      return append8([{
-        node: v,
-        category: thisCategory
-      }])(childResults);
-    };
-  };
-  var clearCallGraphHighlight = clearCallGraphHighlight_;
-  var categoryColorIntense = /* @__PURE__ */ (function() {
-    return getCategoryColor(DeclarationTypes.value);
-  })();
-  var categoryColor = /* @__PURE__ */ (function() {
-    return getCategoryColor(DeclarationTypes.value);
-  })();
-  var getPackFill = function(pc) {
-    if (pc.depth === 0) {
-      return "#333";
-    }
-    ;
-    if (pc.depth === 1) {
-      return categoryColor(pc.data_);
-    }
-    ;
-    return categoryColorIntense(pc.category);
-  };
-  var getPackFillEffect = function(pc) {
-    return pure11(getPackFill(pc));
-  };
-  var buildDeclaration = function(decl) {
-    return {
-      data_: decl.title,
-      value: new Just(1),
-      children: Nothing.value
-    };
-  };
-  var buildCategory = function(v) {
-    var $38 = $$null(v.decls);
-    if ($38) {
-      return Nothing.value;
-    }
-    ;
-    return new Just({
-      data_: v.kind,
-      value: Nothing.value,
-      children: new Just(map28(buildDeclaration)(v.decls))
-    });
-  };
-  var buildModuleHierarchy = function(moduleName) {
-    return function(decls) {
-      var grouped = groupByKind(decls);
-      var categoryChildren = mapMaybe(buildCategory)(grouped);
-      return {
-        data_: moduleName,
-        value: Nothing.value,
-        children: (function() {
-          var $41 = $$null(categoryChildren);
-          if ($41) {
-            return Nothing.value;
-          }
-          ;
-          return new Just(categoryChildren);
-        })()
-      };
-    };
-  };
-  var renderModulePackWithCallbacks = function(declarationsMap) {
-    return function(onDeclClick) {
-      return function(onDeclHover) {
-        return function(onDeclLeave) {
-          return function(node) {
-            var decls = fromMaybe([])(lookup3(node.name)(declarationsMap));
-            var $42 = $$null(decls);
-            if ($42) {
-              var isReexport = !$$null(node.targets);
-              return function __do8() {
-                (function() {
-                  if (isReexport) {
-                    return log6("[BubblePack] Re-export module: " + (node.name + (" (depends on " + (show4(length(node.targets)) + " modules)"))))();
-                  }
-                  ;
-                  return log6("[BubblePack] Empty module: " + node.name)();
-                })();
-                renderReexportModule(node)(isReexport)();
-                return node.r;
-              };
-            }
-            ;
-            return function __do8() {
-              log6("[BubblePack] Rendering " + (node.name + (" with " + (show4(length(decls)) + " declarations"))))();
-              var hierData = buildModuleHierarchy(node.name)(decls);
-              var packRoot = hierarchy(hierData);
-              var packSize = node.r * 3;
-              var config = {
-                radius: defaultPackConfig.radius,
-                size: {
-                  width: packSize,
-                  height: packSize
-                },
-                padding: 1
-              };
-              var packed = pack(config)(packRoot);
-              var allNodesWithCategory = getAllPackNodesWithCategory(packed)("");
-              var packCircles = map28(packNodeToCircleWithCategory)(allNodesWithCategory);
-              var centerOffset = packSize / 2;
-              renderBoundBubblePack_("#explorer-nodes")(node)(packCircles)(centerOffset)(getPackFillEffect)(onDeclClick)(onDeclHover)(onDeclLeave)();
-              return packed.value0.r;
-            };
-          };
-        };
-      };
-    };
-  };
 
   // output/PSD3.ForceEngine.Core/foreign.js
   function createManyBody_(config) {
@@ -20016,9 +19827,9 @@
   }
 
   // node_modules/d3-transition/src/transition/interpolate.js
-  function interpolate_default(a3, b10) {
-    var c2;
-    return (typeof b10 === "number" ? number_default : b10 instanceof color ? rgb_default : (c2 = color(b10)) ? (b10 = c2, rgb_default) : string_default)(a3, b10);
+  function interpolate_default(a2, b10) {
+    var c;
+    return (typeof b10 === "number" ? number_default : b10 instanceof color ? rgb_default : (c = color(b10)) ? (b10 = c, rgb_default) : string_default)(a2, b10);
   }
 
   // node_modules/d3-transition/src/transition/attr.js
@@ -20171,7 +19982,7 @@
   // node_modules/d3-transition/src/transition/filter.js
   function filter_default2(match) {
     if (typeof match !== "function") match = matcher_default(match);
-    for (var groups = this._groups, m2 = groups.length, subgroups = new Array(m2), j = 0; j < m2; ++j) {
+    for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {
       for (var group4 = groups[j], n = group4.length, subgroup = subgroups[j] = [], node, i2 = 0; i2 < n; ++i2) {
         if ((node = group4[i2]) && match.call(node, node.__data__, i2, group4)) {
           subgroup.push(node);
@@ -20184,7 +19995,7 @@
   // node_modules/d3-transition/src/transition/merge.js
   function merge_default2(transition2) {
     if (transition2._id !== this._id) throw new Error();
-    for (var groups0 = this._groups, groups1 = transition2._groups, m0 = groups0.length, m1 = groups1.length, m2 = Math.min(m0, m1), merges = new Array(m0), j = 0; j < m2; ++j) {
+    for (var groups0 = this._groups, groups1 = transition2._groups, m0 = groups0.length, m1 = groups1.length, m = Math.min(m0, m1), merges = new Array(m0), j = 0; j < m; ++j) {
       for (var group0 = groups0[j], group1 = groups1[j], n = group0.length, merge3 = merges[j] = new Array(n), node, i2 = 0; i2 < n; ++i2) {
         if (node = group0[i2] || group1[i2]) {
           merge3[i2] = node;
@@ -20234,7 +20045,7 @@
   function select_default3(select10) {
     var name16 = this._name, id5 = this._id;
     if (typeof select10 !== "function") select10 = selector_default(select10);
-    for (var groups = this._groups, m2 = groups.length, subgroups = new Array(m2), j = 0; j < m2; ++j) {
+    for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {
       for (var group4 = groups[j], n = group4.length, subgroup = subgroups[j] = new Array(n), node, subnode, i2 = 0; i2 < n; ++i2) {
         if ((node = group4[i2]) && (subnode = select10.call(node, node.__data__, i2, group4))) {
           if ("__data__" in node) subnode.__data__ = node.__data__;
@@ -20250,7 +20061,7 @@
   function selectAll_default2(select10) {
     var name16 = this._name, id5 = this._id;
     if (typeof select10 !== "function") select10 = selectorAll_default(select10);
-    for (var groups = this._groups, m2 = groups.length, subgroups = [], parents = [], j = 0; j < m2; ++j) {
+    for (var groups = this._groups, m = groups.length, subgroups = [], parents = [], j = 0; j < m; ++j) {
       for (var group4 = groups[j], n = group4.length, node, i2 = 0; i2 < n; ++i2) {
         if (node = group4[i2]) {
           for (var children3 = select10.call(node, node.__data__, i2, group4), child, inherit2 = get6(node, id5), k = 0, l = children3.length; k < l; ++k) {
@@ -20380,7 +20191,7 @@
   // node_modules/d3-transition/src/transition/transition.js
   function transition_default() {
     var name16 = this._name, id0 = this._id, id1 = newId();
-    for (var groups = this._groups, m2 = groups.length, j = 0; j < m2; ++j) {
+    for (var groups = this._groups, m = groups.length, j = 0; j < m; ++j) {
       for (var group4 = groups[j], n = group4.length, node, i2 = 0; i2 < n; ++i2) {
         if (node = group4[i2]) {
           var inherit2 = get6(node, id0);
@@ -20582,42 +20393,42 @@
   var tau = 2 * Math.PI;
   var amplitude = 1;
   var period = 0.3;
-  var elasticIn = (function custom4(a3, p2) {
-    var s = Math.asin(1 / (a3 = Math.max(1, a3))) * (p2 /= tau);
+  var elasticIn = (function custom4(a2, p2) {
+    var s = Math.asin(1 / (a2 = Math.max(1, a2))) * (p2 /= tau);
     function elasticIn2(t) {
-      return a3 * tpmt(- --t) * Math.sin((s - t) / p2);
+      return a2 * tpmt(- --t) * Math.sin((s - t) / p2);
     }
-    elasticIn2.amplitude = function(a4) {
-      return custom4(a4, p2 * tau);
+    elasticIn2.amplitude = function(a3) {
+      return custom4(a3, p2 * tau);
     };
     elasticIn2.period = function(p3) {
-      return custom4(a3, p3);
+      return custom4(a2, p3);
     };
     return elasticIn2;
   })(amplitude, period);
-  var elasticOut = (function custom5(a3, p2) {
-    var s = Math.asin(1 / (a3 = Math.max(1, a3))) * (p2 /= tau);
+  var elasticOut = (function custom5(a2, p2) {
+    var s = Math.asin(1 / (a2 = Math.max(1, a2))) * (p2 /= tau);
     function elasticOut2(t) {
-      return 1 - a3 * tpmt(t = +t) * Math.sin((t + s) / p2);
+      return 1 - a2 * tpmt(t = +t) * Math.sin((t + s) / p2);
     }
-    elasticOut2.amplitude = function(a4) {
-      return custom5(a4, p2 * tau);
+    elasticOut2.amplitude = function(a3) {
+      return custom5(a3, p2 * tau);
     };
     elasticOut2.period = function(p3) {
-      return custom5(a3, p3);
+      return custom5(a2, p3);
     };
     return elasticOut2;
   })(amplitude, period);
-  var elasticInOut = (function custom6(a3, p2) {
-    var s = Math.asin(1 / (a3 = Math.max(1, a3))) * (p2 /= tau);
+  var elasticInOut = (function custom6(a2, p2) {
+    var s = Math.asin(1 / (a2 = Math.max(1, a2))) * (p2 /= tau);
     function elasticInOut2(t) {
-      return ((t = t * 2 - 1) < 0 ? a3 * tpmt(-t) * Math.sin((s - t) / p2) : 2 - a3 * tpmt(t) * Math.sin((s + t) / p2)) / 2;
+      return ((t = t * 2 - 1) < 0 ? a2 * tpmt(-t) * Math.sin((s - t) / p2) : 2 - a2 * tpmt(t) * Math.sin((s + t) / p2)) / 2;
     }
-    elasticInOut2.amplitude = function(a4) {
-      return custom6(a4, p2 * tau);
+    elasticInOut2.amplitude = function(a3) {
+      return custom6(a3, p2 * tau);
     };
     elasticInOut2.period = function(p3) {
-      return custom6(a3, p3);
+      return custom6(a2, p3);
     };
     return elasticInOut2;
   })(amplitude, period);
@@ -20646,7 +20457,7 @@
     } else {
       id5 = newId(), (timing = defaultTiming).time = now(), name16 = name16 == null ? null : name16 + "";
     }
-    for (var groups = this._groups, m2 = groups.length, j = 0; j < m2; ++j) {
+    for (var groups = this._groups, m = groups.length, j = 0; j < m; ++j) {
       for (var group4 = groups[j], n = group4.length, node, i2 = 0; i2 < n; ++i2) {
         if (node = group4[i2]) {
           schedule_default(node, name16, id5, i2, group4, timing || inherit(node, id5));
@@ -20831,7 +20642,7 @@
       }).on("interrupt.zoom end.zoom", function() {
         gesture(this, arguments).event(event).end();
       }).tween("zoom", function() {
-        var that = this, args = arguments, g = gesture(that, args).event(event), e = extent.apply(that, args), p2 = point3 == null ? centroid(e) : typeof point3 === "function" ? point3.apply(that, args) : point3, w = Math.max(e[1][0] - e[0][0], e[1][1] - e[0][1]), a3 = that.__zoom, b10 = typeof transform4 === "function" ? transform4.apply(that, args) : transform4, i2 = interpolate(a3.invert(p2).concat(w / a3.k), b10.invert(p2).concat(w / b10.k));
+        var that = this, args = arguments, g = gesture(that, args).event(event), e = extent.apply(that, args), p2 = point3 == null ? centroid(e) : typeof point3 === "function" ? point3.apply(that, args) : point3, w = Math.max(e[1][0] - e[0][0], e[1][1] - e[0][1]), a2 = that.__zoom, b10 = typeof transform4 === "function" ? transform4.apply(that, args) : transform4, i2 = interpolate(a2.invert(p2).concat(w / a2.k), b10.invert(p2).concat(w / b10.k));
         return function(t) {
           if (t === 1) t = b10;
           else {
@@ -22697,9 +22508,9 @@
                     })(oldBindings);
                     var newDataArray = fromFoldable19(foldableData);
                     var joinSets = computeJoinWithKey2(newDataArray)(validOldBindings)(keyFn);
-                    var sortedEnter = sortBy(function(a3) {
+                    var sortedEnter = sortBy(function(a2) {
                       return function(b10) {
-                        return compare2(a3.newIndex)(b10.newIndex);
+                        return compare2(a2.newIndex)(b10.newIndex);
                       };
                     })(joinSets.enter);
                     var enterSelection = new PendingSelection({
@@ -22712,9 +22523,9 @@
                       })),
                       document: v1.document
                     });
-                    var sortedUpdate = sortBy(function(a3) {
+                    var sortedUpdate = sortBy(function(a2) {
                       return function(b10) {
-                        return compare2(a3.newIndex)(b10.newIndex);
+                        return compare2(a2.newIndex)(b10.newIndex);
                       };
                     })(joinSets.update);
                     var updateSelection = new BoundSelection({
@@ -22796,9 +22607,9 @@
                   })(oldBindings);
                   var newDataArray = fromFoldable19(foldableData);
                   var joinSets = computeJoin2(newDataArray)(validOldBindings);
-                  var sortedEnter = sortBy(function(a3) {
+                  var sortedEnter = sortBy(function(a2) {
                     return function(b10) {
-                      return compare2(a3.newIndex)(b10.newIndex);
+                      return compare2(a2.newIndex)(b10.newIndex);
                     };
                   })(joinSets.enter);
                   var enterSelection = new PendingSelection({
@@ -22811,9 +22622,9 @@
                     })),
                     document: v1.document
                   });
-                  var sortedUpdate = sortBy(function(a3) {
+                  var sortedUpdate = sortBy(function(a2) {
                     return function(b10) {
-                      return compare2(a3.newIndex)(b10.newIndex);
+                      return compare2(a2.newIndex)(b10.newIndex);
                     };
                   })(joinSets.update);
                   var updateSelection = new BoundSelection({
@@ -24935,8 +24746,8 @@
     };
   };
   var intMapLookup = function(key) {
-    return function(m2) {
-      var result = intMapLookup_(key)(m2);
+    return function(m) {
+      var result = intMapLookup_(key)(m);
       var $10 = isNull3(result);
       if ($10) {
         return Nothing.value;
@@ -25232,7 +25043,7 @@
       return "FunctionCalls (" + (v.value0 + ")");
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 829, column 1 - line 829, column 37): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 830, column 1 - line 830, column 37): " + [v.constructor.name]);
   };
   var setTreeSceneClass = function(shouldAdd) {
     return function __do8() {
@@ -25256,7 +25067,7 @@
         return log10("[Explorer] Could not find #explorer-nodes for CSS class")();
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 739, column 3 - line 745, column 77): " + [mElement.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 740, column 3 - line 746, column 77): " + [mElement.constructor.name]);
     };
   };
   var setNeighborhoodForces = function(nodes) {
@@ -25380,7 +25191,7 @@
         return Nothing.value;
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 365, column 21 - line 367, column 26): " + [n.nodeType.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 366, column 21 - line 368, column 26): " + [n.nodeType.constructor.name]);
     };
     var packagePositions = fromFoldable17(mapMaybe(getPackagePos)(nodes));
     var randomizeIfModule = function(n) {
@@ -25405,7 +25216,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at Engine.Explorer (line 375, column 32 - line 377, column 40): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at Engine.Explorer (line 376, column 32 - line 378, column 40): " + [v1.constructor.name]);
           })();
           var jitterX = (rx - 0.5) * 100;
           var jitterY = (ry - 0.5) * 100;
@@ -25434,11 +25245,21 @@
         };
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 369, column 25 - line 380, column 58): " + [n.nodeType.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 370, column 25 - line 381, column 58): " + [n.nodeType.constructor.name]);
     };
     return traverse4(randomizeIfModule)(nodes);
   };
   var onDeclarationLeave = clearCallGraphHighlight;
+  var onDeclarationClick = function(moduleName) {
+    return function(declarationName) {
+      return function(kind2) {
+        return function __do8() {
+          log10("[Explorer] Declaration clicked: " + (moduleName + ("." + (declarationName + (" (kind: " + (kind2 + ")"))))))();
+          return showCallGraphPopup(moduleName)(declarationName)();
+        };
+      };
+    };
+  };
   var nodesGroupId = "#explorer-nodes";
   var nodeFill = function(n) {
     if (n.nodeType instanceof PackageNode) {
@@ -25453,7 +25274,7 @@
       return "none";
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 578, column 14 - line 583, column 18): " + [n.nodeType.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 579, column 14 - line 584, column 18): " + [n.nodeType.constructor.name]);
   };
   var nodeColor = function(n) {
     if (n.nodeType instanceof PackageNode) {
@@ -25464,7 +25285,7 @@
       return "rgba(255, 255, 255, 0.9)";
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 572, column 15 - line 574, column 43): " + [n.nodeType.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 573, column 15 - line 575, column 43): " + [n.nodeType.constructor.name]);
   };
   var nodeClass = function(n) {
     if (n.nodeType instanceof PackageNode) {
@@ -25482,7 +25303,7 @@
       ;
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 590, column 15 - line 594, column 42): " + [n.nodeType.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 591, column 15 - line 595, column 42): " + [n.nodeType.constructor.name]);
   };
   var linkPathFn = function(nodeMap) {
     return function(link3) {
@@ -25569,33 +25390,6 @@
     };
   };
   var globalFunctionCallsRef = /* @__PURE__ */ unsafePerformEffect(/* @__PURE__ */ $$new(empty4));
-  var onDeclarationClick = function(moduleName) {
-    return function(declarationName) {
-      return function(kind2) {
-        return function __do8() {
-          log10("[Explorer] Declaration clicked: " + (moduleName + ("." + (declarationName + (" (kind: " + (kind2 + ")"))))))();
-          var $156 = kind2 !== "value";
-          if ($156) {
-            return log10("[Explorer] Skipping - " + (kind2 + " declarations don't have call data"))();
-          }
-          ;
-          var fnCalls = read(globalFunctionCallsRef)();
-          var key = moduleName + ("." + declarationName);
-          var v = lookup3(key)(fnCalls);
-          if (v instanceof Nothing) {
-            return log10("[Explorer] No function call data for: " + key)();
-          }
-          ;
-          if (v instanceof Just) {
-            log10("[Explorer] Found " + (show17(length(v.value0.calls)) + (" outgoing calls, " + (show17(length(v.value0.calledBy)) + " callers"))))();
-            return renderAtomicView(v.value0)();
-          }
-          ;
-          throw new Error("Failed pattern match at Engine.Explorer (line 1309, column 5 - line 1314, column 32): " + [v.constructor.name]);
-        };
-      };
-    };
-  };
   var globalFocusRef = /* @__PURE__ */ (function() {
     return unsafePerformEffect($$new({
       focusedNodeId: Nothing.value,
@@ -25613,7 +25407,7 @@
         return "Module";
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 498, column 3 - line 498, column 38): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 499, column 3 - line 499, column 38): " + [v.constructor.name]);
     };
     var metric = function(label5) {
       return function(value13) {
@@ -25653,7 +25447,7 @@
       return node;
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 355, column 27 - line 357, column 21): " + [node.nodeType.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 356, column 27 - line 358, column 21): " + [node.nodeType.constructor.name]);
   };
   var extractModuleName = function(fullName) {
     var findLastDot = function($copy_v) {
@@ -25667,8 +25461,8 @@
             return -1 | 0;
           }
           ;
-          var $163 = charAtFFI(v1)(v) === ".";
-          if ($163) {
+          var $159 = charAtFFI(v1)(v) === ".";
+          if ($159) {
             $tco_done = true;
             return v1;
           }
@@ -25715,8 +25509,8 @@
     var splitAtLastDot = function(s) {
       var len = stringLength(s);
       var lastDotIdx = findLastDot(s)(len - 1 | 0);
-      var $165 = lastDotIdx < 0;
-      if ($165) {
+      var $161 = lastDotIdx < 0;
+      if ($161) {
         return {
           module: "",
           name: s
@@ -25729,8 +25523,8 @@
       };
     };
     var parts = splitAtLastDot(fullName);
-    var $166 = parts.module === "";
-    if ($166) {
+    var $162 = parts.module === "";
+    if ($162) {
       return Nothing.value;
     }
     ;
@@ -25755,7 +25549,7 @@
             return highlightCallGraph(moduleName)(callerModules)(calleeModules)();
           }
           ;
-          throw new Error("Failed pattern match at Engine.Explorer (line 1323, column 3 - line 1330, column 64): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at Engine.Explorer (line 1313, column 3 - line 1320, column 64): " + [v.constructor.name]);
         };
       };
     };
@@ -25773,7 +25567,7 @@
           return unit;
         }
         ;
-        throw new Error("Failed pattern match at Engine.Explorer (line 726, column 5 - line 730, column 27): " + [mChild.constructor.name]);
+        throw new Error("Failed pattern match at Engine.Explorer (line 727, column 5 - line 731, column 27): " + [mChild.constructor.name]);
       };
     };
     return clearNode(toNode(element3));
@@ -25791,7 +25585,7 @@
       return log10("[Explorer] Could not find #explorer-nodes")();
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 1237, column 3 - line 1239, column 63): " + [mElement.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 1238, column 3 - line 1240, column 63): " + [mElement.constructor.name]);
   };
   var clearTreeLinks = function __do4() {
     var win = windowImpl();
@@ -25807,7 +25601,7 @@
       return log10("[Explorer] Could not find #explorer-links")();
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 711, column 3 - line 716, column 63): " + [mElement.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 712, column 3 - line 717, column 63): " + [mElement.constructor.name]);
   };
   var bubblePackTick = function __do5() {
     updateGroupPositions(nodesGroupId)();
@@ -25825,8 +25619,8 @@
         setNeighborhoodForces(liveNodes)(sim)();
         launchAff_((function() {
           var moduleNames = mapMaybe(function(n) {
-            var $175 = n.name !== "";
-            if ($175) {
+            var $171 = n.name !== "";
+            if ($171) {
               return new Just(n.name);
             }
             ;
@@ -25843,7 +25637,7 @@
                   return pure32(unit);
                 }
                 ;
-                throw new Error("Failed pattern match at Engine.Explorer (line 924, column 5 - line 926, column 27): " + [declResult.constructor.name]);
+                throw new Error("Failed pattern match at Engine.Explorer (line 925, column 5 - line 927, column 27): " + [declResult.constructor.name]);
               })())(function() {
                 var declarations = (function() {
                   if (declResult instanceof Right) {
@@ -25854,7 +25648,7 @@
                     return empty4;
                   }
                   ;
-                  throw new Error("Failed pattern match at Engine.Explorer (line 928, column 22 - line 930, column 31): " + [declResult.constructor.name]);
+                  throw new Error("Failed pattern match at Engine.Explorer (line 929, column 22 - line 931, column 31): " + [declResult.constructor.name]);
                 })();
                 return bind32(fetchBatchFunctionCalls(moduleNames))(function(fnCallResult) {
                   return discard22((function() {
@@ -25866,7 +25660,7 @@
                       return pure32(unit);
                     }
                     ;
-                    throw new Error("Failed pattern match at Engine.Explorer (line 934, column 5 - line 936, column 27): " + [fnCallResult.constructor.name]);
+                    throw new Error("Failed pattern match at Engine.Explorer (line 935, column 5 - line 937, column 27): " + [fnCallResult.constructor.name]);
                   })())(function() {
                     var functionCalls = (function() {
                       if (fnCallResult instanceof Right) {
@@ -25877,7 +25671,7 @@
                         return empty4;
                       }
                       ;
-                      throw new Error("Failed pattern match at Engine.Explorer (line 938, column 23 - line 940, column 31): " + [fnCallResult.constructor.name]);
+                      throw new Error("Failed pattern match at Engine.Explorer (line 939, column 23 - line 941, column 31): " + [fnCallResult.constructor.name]);
                     })();
                     return discard22(liftEffect4(write(functionCalls)(globalFunctionCallsRef)))(function() {
                       return discard22(liftEffect4(log10("[Explorer] Batch fetched: " + (show17(size(declarations)) + (" modules with declarations, " + (show17(size(functionCalls)) + " function entries"))))))(function() {
@@ -26041,7 +25835,7 @@
         return log10("[Explorer] Unknown scene: " + sceneName);
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 314, column 3 - line 345, column 63): " + [mScene.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 315, column 3 - line 346, column 63): " + [mScene.constructor.name]);
     };
   };
   var toggleFocus = function(clickedNode) {
@@ -26056,14 +25850,14 @@
         var state3 = read(mStateRef.value0)();
         if (focus3.focusedNodeId instanceof Just && focus3.focusedNodeId.value0 === clickedNode.id) {
           log10("[Explorer] Unfocusing from node " + (show17(clickedNode.id) + " (via navigateBack)"))();
-          $lazy_navigateBack(857)();
+          $lazy_navigateBack(858)();
           return unit;
         }
         ;
         var currentNodes = getNodes(state3.simulation)();
         var nodesToStore = (function() {
-          var $224 = $$null(focus3.fullNodes);
-          if ($224) {
+          var $220 = $$null(focus3.fullNodes);
+          if ($220) {
             return currentNodes;
           }
           ;
@@ -26085,7 +25879,7 @@
         return focusOnNeighborhood(neighborhoodNodes)(state3.simulation)();
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 848, column 3 - line 892, column 65): " + [mStateRef.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 849, column 3 - line 893, column 65): " + [mStateRef.constructor.name]);
     };
   };
   var restoreToView = function(targetView) {
@@ -26122,10 +25916,10 @@
           return write(targetView)(globalViewStateRef)();
         }
         ;
-        throw new Error("Failed pattern match at Engine.Explorer (line 1153, column 7 - line 1166, column 50): " + [targetView.constructor.name]);
+        throw new Error("Failed pattern match at Engine.Explorer (line 1154, column 7 - line 1167, column 50): " + [targetView.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 1148, column 3 - line 1166, column 50): " + [mStateRef.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 1149, column 3 - line 1167, column 50): " + [mStateRef.constructor.name]);
     };
   };
   var restoreFullView = function(fullNodes) {
@@ -26148,7 +25942,7 @@
               return unit;
             }
             ;
-            throw new Error("Failed pattern match at Engine.Explorer (line 1188, column 3 - line 1192, column 25): " + [mStateRef.constructor.name]);
+            throw new Error("Failed pattern match at Engine.Explorer (line 1189, column 3 - line 1193, column 25): " + [mStateRef.constructor.name]);
           })();
           write(targetView)(globalViewStateRef)();
           write({
@@ -26178,18 +25972,18 @@
               var targetSet = fromFoldable18(node.targets);
               var sourceSet = fromFoldable18(node.sources);
               return classifyElements("#explorer-nodes")("circle")(function(n) {
-                var $237 = n.id === node.id;
-                if ($237) {
+                var $233 = n.id === node.id;
+                if ($233) {
                   return "highlighted-source";
                 }
                 ;
-                var $238 = member5(n.id)(targetSet);
-                if ($238) {
+                var $234 = member5(n.id)(targetSet);
+                if ($234) {
                   return "highlighted-upstream";
                 }
                 ;
-                var $239 = member5(n.id)(sourceSet);
-                if ($239) {
+                var $235 = member5(n.id)(sourceSet);
+                if ($235) {
                   return "highlighted-downstream";
                 }
                 ;
@@ -26230,10 +26024,10 @@
         return true;
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 1130, column 3 - line 1140, column 16): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 1131, column 3 - line 1141, column 16): " + [v.constructor.name]);
     };
   });
-  var navigateBack = /* @__PURE__ */ $lazy_navigateBack(1127);
+  var navigateBack = /* @__PURE__ */ $lazy_navigateBack(1128);
   var renderSVG = function(containerSelector) {
     return function(nodes) {
       return bind22(select8(containerSelector))(function(container) {
@@ -26257,18 +26051,18 @@
                           var targetSet = fromFoldable18(node.targets);
                           var sourceSet = fromFoldable18(node.sources);
                           return classifyElements("#explorer-nodes")("circle")(function(n) {
-                            var $244 = n.id === node.id;
-                            if ($244) {
+                            var $240 = n.id === node.id;
+                            if ($240) {
                               return "highlighted-source";
                             }
                             ;
-                            var $245 = member5(n.id)(targetSet);
-                            if ($245) {
+                            var $241 = member5(n.id)(targetSet);
+                            if ($241) {
                               return "highlighted-upstream";
                             }
                             ;
-                            var $246 = member5(n.id)(sourceSet);
-                            if ($246) {
+                            var $242 = member5(n.id)(sourceSet);
+                            if ($242) {
                               return "highlighted-downstream";
                             }
                             ;
@@ -26362,7 +26156,7 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at Engine.Explorer (line 150, column 5 - line 162, column 95): " + [result.constructor.name]);
+            throw new Error("Failed pattern match at Engine.Explorer (line 151, column 5 - line 163, column 95): " + [result.constructor.name]);
           });
         });
       }))();
@@ -26436,7 +26230,7 @@
                         return liftEffect4(updateWithModel(result.value0)(mStateRef.value0));
                       }
                       ;
-                      throw new Error("Failed pattern match at Engine.Explorer (line 251, column 9 - line 258, column 56): " + [mStateRef.constructor.name]);
+                      throw new Error("Failed pattern match at Engine.Explorer (line 252, column 9 - line 259, column 56): " + [mStateRef.constructor.name]);
                     })())(function() {
                       return liftEffect4(log10("[Explorer] Project switch complete"));
                     });
@@ -26446,7 +26240,7 @@
             });
           }
           ;
-          throw new Error("Failed pattern match at Engine.Explorer (line 241, column 5 - line 260, column 62): " + [result.constructor.name]);
+          throw new Error("Failed pattern match at Engine.Explorer (line 242, column 5 - line 261, column 62): " + [result.constructor.name]);
         });
       }))();
     };
@@ -26721,9 +26515,9 @@
   var pollLoop = function(dictMonadAff) {
     var liftEffect10 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     var liftAff2 = liftAff(monadAffHalogenM(dictMonadAff));
-    var numMod = function(a3) {
+    var numMod = function(a2) {
       return function(b10) {
-        return a3 - b10 * toNumber(floor2(a3 / b10));
+        return a2 - b10 * toNumber(floor2(a2 / b10));
       };
     };
     var mkColorEntry = function(idx) {
@@ -27450,10 +27244,10 @@
         var runComponent = function(lchs) {
           return function(handler3) {
             return function(j) {
-              return unComponent(function(c2) {
+              return unComponent(function(c) {
                 return function __do8() {
                   var lchs$prime = newLifecycleHandlers();
-                  var $$var2 = initDriverState(c2)(j)(handler3)(lchs$prime)();
+                  var $$var2 = initDriverState(c)(j)(handler3)(lchs$prime)();
                   var pre2 = read(lchs)();
                   write({
                     initializers: Nil.value,

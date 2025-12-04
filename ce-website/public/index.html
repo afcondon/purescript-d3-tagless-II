@@ -10,6 +10,31 @@
 
 <body>
   <div id="app"></div>
+
+  <!-- Call Graph Popup (hidden by default) -->
+  <div id="call-graph-popup" class="call-graph-popup" style="display: none;">
+    <div class="call-graph-content">
+      <div class="call-graph-header">
+        <h3 id="call-graph-title">Function Call Graph</h3>
+        <button id="call-graph-close" class="call-graph-close">&times;</button>
+      </div>
+      <div class="call-graph-body">
+        <div class="call-graph-column call-graph-callers">
+          <h4>Called By</h4>
+          <div id="call-graph-callers-list" class="call-graph-list"></div>
+        </div>
+        <div class="call-graph-column call-graph-source">
+          <h4>Source Code</h4>
+          <div id="call-graph-source-code" class="call-graph-code"></div>
+        </div>
+        <div class="call-graph-column call-graph-callees">
+          <h4>Calls</h4>
+          <div id="call-graph-callees-list" class="call-graph-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="bundle.js"></script>
 </body>
 

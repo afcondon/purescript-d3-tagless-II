@@ -37,6 +37,7 @@ import Foreign.Object as Object
 import Data.Loader (loadModel, loadModelForProject, LoadedModel, DeclarationsMap, FunctionCallsMap, fetchBatchDeclarations, fetchBatchFunctionCalls)
 import Engine.AtomicView (renderAtomicView)
 import Engine.BubblePack (renderModulePackWithCallbacks, highlightCallGraph, clearCallGraphHighlight, DeclarationClickCallback, DeclarationHoverCallback)
+import Engine.CallGraphPopup (showCallGraphPopup)
 -- NarrativePanel is now a Halogen component (Component.NarrativePanel)
 -- It polls globalViewStateRef and globalModelInfoRef directly
 import Engine.ViewState (ViewState(..), ScopeFilter(..))
@@ -1293,25 +1294,14 @@ renderNodesOnly nodes = do
 -- =============================================================================
 
 -- | Handle click on a declaration circle
--- | Shows the function call graph centered on the clicked declaration
+-- | Shows the call graph popup with function call information and source code
 onDeclarationClick :: DeclarationClickCallback
 onDeclarationClick moduleName declarationName kind = do
   log $ "[Explorer] Declaration clicked: " <> moduleName <> "." <> declarationName <> " (kind: " <> kind <> ")"
 
-  -- Only look up function calls for values (functions)
-  -- Types, data, typeSynonyms etc. don't have runtime call data
-  if kind /= "value" then
-    log $ "[Explorer] Skipping - " <> kind <> " declarations don't have call data"
-  else do
-    -- Look up function calls for this declaration
-    fnCalls <- Ref.read globalFunctionCallsRef
-    let key = moduleName <> "." <> declarationName
-    case Object.lookup key fnCalls of
-      Nothing -> log $ "[Explorer] No function call data for: " <> key
-      Just fnInfo -> do
-        log $ "[Explorer] Found " <> show (Array.length fnInfo.calls) <> " outgoing calls, " <> show (Array.length fnInfo.calledBy) <> " callers"
-        -- Show atomic force tree visualization
-        renderAtomicView fnInfo
+  -- Show the call graph popup
+  -- The popup will fetch its own data from the API
+  showCallGraphPopup moduleName declarationName
 
 -- | Handle hover on a declaration circle
 -- | Highlights modules that contain callers/callees

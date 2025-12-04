@@ -849,3 +849,197 @@ line.highlight-dimmed {
   pointer-events: none;
   user-select: none;
 }
+/* =============================================================================
+   Call Graph Popup
+   ============================================================================= */
+
+/* Overlay background */
+.call-graph-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+}
+
+/* Popup content container */
+.call-graph-content {
+  background: var(--color-card);
+  border: 2px solid var(--color-line);
+  border-radius: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 1200px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-mono);
+}
+
+/* Header with title and close button */
+.call-graph-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  border-bottom: 2px solid var(--color-line);
+  background: var(--color-beige-base);
+}
+
+.call-graph-header h3 {
+  font-size: 0.875rem;
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-dark);
+  margin: 0;
+}
+
+.call-graph-close {
+  background: none;
+  border: 2px solid var(--color-line);
+  color: var(--color-text-dark);
+  font-size: 1.5rem;
+  font-weight: bold;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  line-height: 1;
+  padding: 0;
+}
+
+.call-graph-close:hover {
+  background: var(--color-beige-dark);
+  border-color: var(--color-text-dark);
+}
+
+/* Body with three columns */
+.call-graph-body {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.call-graph-column {
+  display: flex;
+  flex-direction: column;
+  border-right: 2px solid var(--color-line);
+  overflow: hidden;
+}
+
+.call-graph-column:last-child {
+  border-right: none;
+}
+
+.call-graph-column h4 {
+  font-size: 0.6875rem;
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-beige-light);
+}
+
+/* Scrollable lists */
+.call-graph-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-sm);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+
+.call-graph-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.call-graph-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.call-graph-list::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 4px;
+}
+
+.call-graph-list::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+.call-graph-list-item {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+  background: var(--color-beige-light);
+  border-left: 3px solid var(--color-line);
+  transition: var(--transition-fast);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.call-graph-list-item:hover {
+  background: var(--color-beige-base);
+  border-left-color: var(--color-red-accent);
+}
+
+/* Source code column - scrollable with monospace */
+.call-graph-code {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+  font-size: 0.6875rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  font-family: 'Courier New', Courier, monospace;
+  background: #fafafa;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+
+.call-graph-code::-webkit-scrollbar {
+  width: 8px;
+}
+
+.call-graph-code::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.call-graph-code::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 4px;
+}
+
+.call-graph-code::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* Loading and error states */
+.call-graph-loading,
+.call-graph-error,
+.call-graph-empty {
+  color: var(--color-text-muted);
+  font-style: italic;
+  padding: var(--spacing-md);
+  text-align: center;
+}
+
+.call-graph-error {
+  color: var(--color-red-accent);
+}
