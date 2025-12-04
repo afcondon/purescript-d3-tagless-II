@@ -30,6 +30,11 @@ data Route
   | ModuleMetricsJson
   | CommitTimelineJson
   | FunctionCallsJson
+  -- Project-specific data endpoints
+  | ProjectModulesJson Int
+  | ProjectPackagesJson Int
+  | ProjectLocJson Int
+  | ProjectDeclarationsSummaryJson Int
   -- Granular module endpoints (on-demand loading)
   | GetModuleDeclarations String
   | GetModuleFunctionCalls String
@@ -56,6 +61,11 @@ route = root $ sum
   , "ModuleMetricsJson": path "data/module-metrics.json" noArgs
   , "CommitTimelineJson": path "data/commit-timeline.json" noArgs
   , "FunctionCallsJson": path "data/function-calls.json" noArgs
+  -- Project-specific data endpoints (flat URLs: /api/project-modules/:id)
+  , "ProjectModulesJson": path "api/project-modules" (int segment)
+  , "ProjectPackagesJson": path "api/project-packages" (int segment)
+  , "ProjectLocJson": path "api/project-loc" (int segment)
+  , "ProjectDeclarationsSummaryJson": path "api/project-declarations-summary" (int segment)
   -- Granular module endpoints (flat URLs for routing-duplex compatibility)
   , "GetModuleDeclarations": path "api/module-declarations" segment
   , "GetModuleFunctionCalls": path "api/module-function-calls" segment
@@ -112,19 +122,24 @@ main = launchAff_ do
   where
   mkRouter db { route: r } = case r of
     -- Legacy endpoints - use latest snapshot
-    ModulesJson -> withLatestSnapshot db \sid -> Legacy.modulesJson db sid
-    PackagesJson -> withLatestSnapshot db \sid -> Legacy.packagesJson db sid
-    LocJson -> withLatestSnapshot db \sid -> Legacy.locJson db sid
-    DeclarationsSummaryJson -> withLatestSnapshot db \sid -> Legacy.declarationsSummaryJson db sid
-    ModuleMetricsJson -> withLatestSnapshot db \sid -> Legacy.moduleMetricsJson db sid
-    CommitTimelineJson -> withLatestSnapshot db \sid -> Legacy.commitTimelineJson db sid
-    FunctionCallsJson -> withLatestSnapshot db \sid -> Legacy.functionCallsJson db sid
+    ModulesJson -> withLatestSnapshot db Nothing \sid -> Legacy.modulesJson db sid
+    PackagesJson -> withLatestSnapshot db Nothing \sid -> Legacy.packagesJson db sid
+    LocJson -> withLatestSnapshot db Nothing \sid -> Legacy.locJson db sid
+    DeclarationsSummaryJson -> withLatestSnapshot db Nothing \sid -> Legacy.declarationsSummaryJson db sid
+    ModuleMetricsJson -> withLatestSnapshot db Nothing \sid -> Legacy.moduleMetricsJson db sid
+    CommitTimelineJson -> withLatestSnapshot db Nothing \sid -> Legacy.commitTimelineJson db sid
+    FunctionCallsJson -> withLatestSnapshot db Nothing \sid -> Legacy.functionCallsJson db sid
+    -- Project-specific data endpoints
+    ProjectModulesJson pid -> withLatestSnapshot db (Just pid) \sid -> Legacy.modulesJson db sid
+    ProjectPackagesJson pid -> withLatestSnapshot db (Just pid) \sid -> Legacy.packagesJson db sid
+    ProjectLocJson pid -> withLatestSnapshot db (Just pid) \sid -> Legacy.locJson db sid
+    ProjectDeclarationsSummaryJson pid -> withLatestSnapshot db (Just pid) \sid -> Legacy.declarationsSummaryJson db sid
     -- Granular module endpoints
-    GetModuleDeclarations modName -> withLatestSnapshot db \sid -> Legacy.moduleDeclarationsJson db sid modName
-    GetModuleFunctionCalls modName -> withLatestSnapshot db \sid -> Legacy.moduleFunctionCallsJson db sid modName
+    GetModuleDeclarations modName -> withLatestSnapshot db Nothing \sid -> Legacy.moduleDeclarationsJson db sid modName
+    GetModuleFunctionCalls modName -> withLatestSnapshot db Nothing \sid -> Legacy.moduleFunctionCallsJson db sid modName
     -- Batch endpoints (comma-separated module names)
-    GetBatchFunctionCalls modules -> withLatestSnapshot db \sid -> Legacy.batchFunctionCallsJson db sid modules
-    GetBatchDeclarations modules -> withLatestSnapshot db \sid -> Legacy.batchDeclarationsJson db sid modules
+    GetBatchFunctionCalls modules -> withLatestSnapshot db Nothing \sid -> Legacy.batchFunctionCallsJson db sid modules
+    GetBatchDeclarations modules -> withLatestSnapshot db Nothing \sid -> Legacy.batchDeclarationsJson db sid modules
     -- Project/Snapshot API
     ListProjects -> Projects.listProjects db
     GetProject pid -> Projects.getProject db pid
@@ -132,10 +147,10 @@ main = launchAff_ do
     -- Health
     Health -> ok "OK"
 
--- | Helper to get latest snapshot and run handler, or return 404
-withLatestSnapshot :: DB.Database -> (Int -> Aff _) -> Aff _
-withLatestSnapshot db handler = do
-  mSnapshotId <- Projects.getLatestSnapshotId db Nothing
+-- | Helper to get latest snapshot for a project and run handler, or return 404
+withLatestSnapshot :: DB.Database -> Maybe Int -> (Int -> Aff _) -> Aff _
+withLatestSnapshot db mProjectId handler = do
+  mSnapshotId <- Projects.getLatestSnapshotId db mProjectId
   case mSnapshotId of
     Nothing -> notFound
     Just sid -> handler sid

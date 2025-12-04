@@ -10,6 +10,7 @@
 module Data.Loader
   ( loadModel
   , loadModelForSnapshot
+  , loadModelForProject
   , fetchProjects
   , fetchProjectWithSnapshots
   , fetchFunctionCalls
@@ -357,6 +358,34 @@ loadModelForSnapshot _snapshotId = do
   -- For now, just use the same loadModel (legacy endpoints use latest snapshot)
   -- This will be enhanced when we add snapshot-specific data endpoints
   loadModel
+
+-- | Load model for a specific project ID
+-- | Uses project-specific endpoints to load data for the selected project
+loadModelForProject :: Int -> Aff (Either String LoadedModel)
+loadModelForProject projectId = do
+  let projectUrl = apiBaseUrl <> "/api/project-"
+  modulesResult <- fetchJson (projectUrl <> "modules/" <> show projectId)
+  packagesResult <- fetchJson (projectUrl <> "packages/" <> show projectId)
+  locResult <- fetchJson (projectUrl <> "loc/" <> show projectId)
+  declarationsResult <- fetchJson (projectUrl <> "declarations-summary/" <> show projectId)
+
+  pure $ do
+    modulesJson <- modulesResult
+    packagesJson <- packagesResult
+    locJson <- locResult
+    declarationsJson <- declarationsResult
+
+    -- Decode JSON
+    modules :: Object RawModule <- decodeJson modulesJson # mapLeft printJsonDecodeError
+    packages :: Object RawPackage <- decodeJson packagesJson # mapLeft printJsonDecodeError
+    locFile :: LocFile <- decodeJson locJson # mapLeft printJsonDecodeError
+    declarations :: DeclarationsMap <- decodeJson declarationsJson # mapLeft printJsonDecodeError
+
+    -- Build LOC map (path -> loc)
+    let locMap = buildLocMap locFile.loc
+
+    -- Transform to model
+    Right $ transformToModel modules packages locMap declarations
 
 -- =============================================================================
 -- Transformation

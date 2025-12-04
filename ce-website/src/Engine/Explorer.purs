@@ -5,10 +5,13 @@
 module Engine.Explorer
   ( initExplorer
   , goToScene
+  , reloadWithProject
   , globalStateRef
   , globalLinksRef
   , globalViewStateRef
   , globalModelInfoRef
+  , globalNavigationStackRef
+  , navigateBack
   ) where
 
 import Prelude
@@ -31,7 +34,7 @@ import Effect.Ref (Ref)
 import Effect.Ref as Ref
 import Effect.Unsafe (unsafePerformEffect)
 import Foreign.Object as Object
-import Data.Loader (loadModel, LoadedModel, DeclarationsMap, FunctionCallsMap, fetchBatchDeclarations, fetchBatchFunctionCalls)
+import Data.Loader (loadModel, loadModelForProject, LoadedModel, DeclarationsMap, FunctionCallsMap, fetchBatchDeclarations, fetchBatchFunctionCalls)
 import Engine.AtomicView (renderAtomicView)
 import Engine.BubblePack (renderModulePackWithCallbacks, highlightCallGraph, clearCallGraphHighlight, DeclarationClickCallback, DeclarationHoverCallback)
 -- NarrativePanel is now a Halogen component (Component.NarrativePanel)
@@ -99,6 +102,11 @@ globalModelInfoRef = unsafePerformEffect $ Ref.new { projectName: "", moduleCoun
 -- | Global ref for current view state
 globalViewStateRef :: Ref ViewState
 globalViewStateRef = unsafePerformEffect $ Ref.new (PackageGrid ProjectAndLibraries)
+
+-- | Navigation stack for zoom out (history of previous views)
+-- | Stack grows from left: newest at head, oldest at tail
+globalNavigationStackRef :: Ref (Array ViewState)
+globalNavigationStackRef = unsafePerformEffect $ Ref.new []
 
 -- | Focus state for neighborhood drill-down
 type FocusState =
@@ -200,6 +208,87 @@ initWithModel model containerSelector = do
 -- =============================================================================
 -- Public API
 -- =============================================================================
+
+-- | Reload the explorer with a different project's data
+-- | Clears existing visualization and loads new project data
+reloadWithProject :: Int -> Effect Unit
+reloadWithProject projectId = do
+  log $ "[Explorer] Reloading with project: " <> show projectId
+
+  -- Clear existing state
+  Ref.write [] globalLinksRef
+  Ref.write Object.empty globalDeclarationsRef
+  Ref.write Object.empty globalFunctionCallsRef
+  Ref.write [] globalNavigationStackRef
+  Ref.write { focusedNodeId: Nothing, fullNodes: [] } globalFocusRef
+
+  -- Clear tree links if any
+  clearTreeLinks
+  setTreeSceneClass false
+
+  -- Clear existing DOM elements
+  clearNodesGroup
+
+  -- Load new project data asynchronously
+  launchAff_ do
+    log $ "[Explorer] Loading data for project " <> show projectId <> "..."
+    result <- loadModelForProject projectId
+    case result of
+      Left err -> liftEffect $ log $ "[Explorer] Error loading project: " <> err
+      Right model -> do
+        liftEffect $ log $ "[Explorer] Loaded: " <> show model.moduleCount <> " modules, " <> show model.packageCount <> " packages"
+        -- Store new links and declarations
+        liftEffect $ Ref.write model.links globalLinksRef
+        liftEffect $ Ref.write model.declarations globalDeclarationsRef
+
+        -- Get existing stateRef and update with new data
+        mStateRef <- liftEffect $ Ref.read globalStateRef
+        case mStateRef of
+          Nothing -> do
+            -- Initialize fresh if no existing state
+            stateRef <- liftEffect $ initWithModel model "#viz"
+            liftEffect $ Ref.write (Just stateRef) globalStateRef
+          Just stateRef -> do
+            -- Update existing state with new model
+            liftEffect $ updateWithModel model stateRef
+
+        liftEffect $ log "[Explorer] Project switch complete"
+
+-- | Update existing state with a new model (for project switching)
+updateWithModel :: LoadedModel -> Ref Scene.SceneState -> Effect Unit
+updateWithModel model stateRef = do
+  log "[Explorer] Updating visualization with new model"
+
+  -- Update model info
+  Ref.write { projectName: "project", moduleCount: model.moduleCount, packageCount: model.packageCount } globalModelInfoRef
+
+  -- Recalculate grid positions
+  let gridNodes = GridLayout.recalculateGridPositions model.nodes model.packageCount
+
+  -- Randomize module starting positions
+  randomizedNodes <- randomizeModulePositions gridNodes
+  let nodesWithFix = map fixPackagePosition randomizedNodes
+
+  -- Get current state
+  state <- Ref.read stateRef
+
+  -- Update simulation with new nodes
+  Sim.setNodes nodesWithFix state.simulation
+
+  -- Reapply grid forces
+  addGridForces nodesWithFix state.simulation
+
+  -- Get updated nodes
+  simNodes <- Sim.getNodes state.simulation
+
+  -- Re-render nodes using existing renderNodesOnly
+  _ <- runD3v2M $ renderNodesOnly simNodes
+
+  -- Reset to GridRun scene
+  Ref.modify_ (_ { currentScene = Just Scenes.gridRunScene }) stateRef
+
+  -- Restart simulation
+  Sim.start state.simulation
 
 -- | Go to a named scene
 goToScene :: String -> Ref Scene.SceneState -> Effect Unit
@@ -638,18 +727,12 @@ setTreeSceneClass shouldAdd = do
 -- =============================================================================
 
 -- | Handle Back button click from narrative panel
+-- | Now delegates to navigateBack which uses the navigation stack
 handleBackButton :: Effect Unit
 handleBackButton = do
   log "[Explorer] Back button clicked"
-  focus <- Ref.read globalFocusRef
-  mStateRef <- Ref.read globalStateRef
-
-  case mStateRef, focus.focusedNodeId of
-    Just stateRef, Just _ -> do
-      state <- Ref.read stateRef
-      restoreFullView focus.fullNodes state.simulation
-      Ref.write { focusedNodeId: Nothing, fullNodes: [] } globalFocusRef
-    _, _ -> log "[Explorer] No focused state to go back from"
+  _ <- navigateBack
+  pure unit
 
 -- | Handle control change from TangleJS-style narrative panel
 -- | controlId: which control was changed (e.g., "layout", "scope")
@@ -738,11 +821,11 @@ toggleFocus clickedNode = do
       state <- Ref.read stateRef
 
       case focus.focusedNodeId of
-        -- Currently focused on this node - restore full view
+        -- Currently focused on this node - go back via navigation
         Just fid | fid == clickedNode.id -> do
-          log $ "[Explorer] Unfocusing from node " <> show clickedNode.id
-          restoreFullView focus.fullNodes state.simulation
-          Ref.write { focusedNodeId: Nothing, fullNodes: [] } globalFocusRef
+          log $ "[Explorer] Unfocusing from node " <> show clickedNode.id <> " (via navigateBack)"
+          _ <- navigateBack
+          pure unit
 
         -- Not focused, or focused on different node - focus on this neighborhood
         _ -> do
@@ -766,6 +849,10 @@ toggleFocus clickedNode = do
 
           -- Update focus state
           Ref.write { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore } globalFocusRef
+
+          -- Push current view to navigation stack before changing
+          currentView <- Ref.read globalViewStateRef
+          Ref.modify_ (Array.cons currentView) globalNavigationStackRef
 
           -- Update ViewState for neighborhood view (Halogen NarrativePanel polls this)
           let neighborhoodView = Neighborhood clickedNode.name
@@ -998,9 +1085,53 @@ renderNeighborhoodLinksD3 links = do
   getTargetY :: NeighborhoodLink -> Number
   getTargetY l = l.target.y
 
+-- =============================================================================
+-- Navigation
+-- =============================================================================
+
+-- | Navigate back to the previous view in the navigation stack
+-- | Returns true if navigation happened, false if stack was empty
+navigateBack :: Effect Boolean
+navigateBack = do
+  stack <- Ref.read globalNavigationStackRef
+  case Array.uncons stack of
+    Nothing -> do
+      log "[Explorer] Navigation stack empty, nothing to go back to"
+      pure false
+    Just { head: previousView, tail: remainingStack } -> do
+      log $ "[Explorer] Navigating back to: " <> showViewState previousView
+      -- Pop the stack
+      Ref.write remainingStack globalNavigationStackRef
+      -- Restore the previous view
+      restoreToView previousView
+      pure true
+
+-- | Restore to a specific view (used by navigateBack)
+restoreToView :: ViewState -> Effect Unit
+restoreToView targetView = do
+  focus <- Ref.read globalFocusRef
+  mStateRef <- Ref.read globalStateRef
+
+  case mStateRef of
+    Nothing -> log "[Explorer] No state ref to restore"
+    Just stateRef -> do
+      state <- Ref.read stateRef
+
+      case targetView of
+        PackageGrid _ -> restoreFullView focus.fullNodes targetView state.simulation
+        ModuleOrbit _ -> restoreFullView focus.fullNodes targetView state.simulation
+        DependencyTree _ -> restoreFullView focus.fullNodes targetView state.simulation
+        Neighborhood _ -> do
+          -- Re-entering a neighborhood - find the node and focus on it
+          -- For now, just update the view state (the DOM is already showing neighborhood)
+          Ref.write targetView globalViewStateRef
+        FunctionCalls _ -> do
+          -- Re-entering function calls view
+          Ref.write targetView globalViewStateRef
+
 -- | Restore full view
-restoreFullView :: Array SimNode -> Scene.CESimulation -> Effect Unit
-restoreFullView fullNodes sim = do
+restoreFullView :: Array SimNode -> ViewState -> Scene.CESimulation -> Effect Unit
+restoreFullView fullNodes targetView sim = do
   -- Update simulation with full nodes
   Sim.setNodes fullNodes sim
 
@@ -1024,9 +1155,11 @@ restoreFullView fullNodes sim = do
       Sim.onTick (Scene.onTick stateRef) sim
     Nothing -> pure unit
 
-  -- Restore full view (Halogen NarrativePanel polls globalViewStateRef)
-  let fullView = PackageGrid ProjectAndLibraries
-  Ref.write fullView globalViewStateRef
+  -- Update ViewState (Halogen NarrativePanel polls globalViewStateRef)
+  Ref.write targetView globalViewStateRef
+
+  -- Clear focus state
+  Ref.write { focusedNodeId: Nothing, fullNodes: [] } globalFocusRef
 
   Sim.reheat sim
   pure unit

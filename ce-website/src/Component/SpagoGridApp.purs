@@ -6,7 +6,9 @@ import Prelude
 
 import Component.NarrativePanel as NarrativePanel
 import Data.Array as Array
+import Data.Either (Either(..))
 import Data.Int (toNumber, floor)
+import Data.Loader as Loader
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Aff (Milliseconds(..), delay)
@@ -28,6 +30,9 @@ type State =
   , error :: Maybe String
   , viewState :: ViewState
   , packagePalette :: Array NarrativePanel.ColorEntry
+  , projectName :: String
+  , projectId :: Int
+  , projects :: Array NarrativePanel.ProjectInfo
   }
 
 -- | Child slots
@@ -41,6 +46,8 @@ data Action
   = Initialize
   | ViewStateChanged ViewState
   | PackagePaletteChanged (Array NarrativePanel.ColorEntry)
+  | ProjectsLoaded (Array NarrativePanel.ProjectInfo)
+  | SwitchProject Int String  -- Project ID and name
   | NarrativePanelOutput NarrativePanel.Output
 
 -- | Main app component
@@ -52,6 +59,9 @@ component =
         , error: Nothing
         , viewState: PackageGrid ProjectAndLibraries
         , packagePalette: []
+        , projectName: NarrativePanel.defaultProjectName
+        , projectId: 1  -- Default to first project (psd3)
+        , projects: []
         }
     , render
     , eval: H.mkEval $ H.defaultEval
@@ -69,6 +79,9 @@ render state =
       HH.slot _narrativePanel unit NarrativePanel.component
         { viewState: state.viewState
         , packagePalette: state.packagePalette
+        , projectName: state.projectName
+        , projectId: state.projectId
+        , projects: state.projects
         }
         NarrativePanelOutput
 
@@ -92,15 +105,27 @@ handleAction = case _ of
     liftEffect $ Explorer.initExplorer "#viz"
     H.modify_ _ { initialized = true }
 
+    -- Load projects list asynchronously
+    void $ H.fork do
+      projectsResult <- H.liftAff Loader.fetchProjects
+      case projectsResult of
+        Right projects -> do
+          let projectInfos = map (\p -> { id: p.id, name: p.name }) projects
+          log $ "[SpagoGridApp] Loaded " <> show (Array.length projects) <> " projects"
+          handleAction (ProjectsLoaded projectInfos)
+        Left err ->
+          log $ "[SpagoGridApp] Failed to load projects: " <> err
+
     -- Start polling loop for ViewState and palette changes
     void $ H.fork pollLoop
 
   ViewStateChanged newViewState -> do
     state <- H.get
     when (state.viewState /= newViewState) do
-      log $ "[SpagoGridApp] ViewState changed"
+      log $ "[SpagoGridApp] ViewState changed to: " <> showViewState newViewState
       H.modify_ _ { viewState = newViewState }
       -- Query the NarrativePanel to update
+      log $ "[SpagoGridApp] Sending SetViewState to NarrativePanel"
       void $ H.tell _narrativePanel unit (NarrativePanel.SetViewState newViewState)
 
   PackagePaletteChanged newPalette -> do
@@ -110,6 +135,23 @@ handleAction = case _ of
       H.modify_ _ { packagePalette = newPalette }
       -- Query the NarrativePanel to update
       void $ H.tell _narrativePanel unit (NarrativePanel.SetPackagePalette newPalette)
+
+  ProjectsLoaded projectInfos -> do
+    log $ "[SpagoGridApp] Setting projects in state"
+    H.modify_ _ { projects = projectInfos }
+
+  SwitchProject newProjectId newProjectName -> do
+    state <- H.get
+    when (state.projectId /= newProjectId) do
+      log $ "[SpagoGridApp] Switching to project: " <> newProjectName <> " (id: " <> show newProjectId <> ")"
+      -- Update state
+      H.modify_ _ { projectId = newProjectId, projectName = newProjectName, packagePalette = [] }
+      -- Reset ViewState to top level Grid
+      let resetViewState = PackageGrid ProjectAndLibraries
+      liftEffect $ Ref.write resetViewState Explorer.globalViewStateRef
+      H.modify_ _ { viewState = resetViewState }
+      -- Reload Explorer with new project data
+      liftEffect $ Explorer.reloadWithProject newProjectId
 
   NarrativePanelOutput output ->
     case output of
@@ -121,6 +163,14 @@ handleAction = case _ of
       NarrativePanel.BackClicked -> do
         log "[SpagoGridApp] Back button clicked"
         liftEffect handleBackFromPanel
+
+      NarrativePanel.ProjectSelected newProjectId -> do
+        log $ "[SpagoGridApp] Project selected: " <> show newProjectId
+        -- Look up project name from projects list
+        state <- H.get
+        case Array.find (\p -> p.id == newProjectId) state.projects of
+          Just project -> handleAction (SwitchProject newProjectId project.name)
+          Nothing -> log $ "[SpagoGridApp] Unknown project ID: " <> show newProjectId
 
 -- | Poll loop that checks for ViewState and palette changes
 pollLoop :: forall output m. MonadAff m => H.HalogenM State Action Slots output m Unit
@@ -198,12 +248,16 @@ applyControlChange "scope" newScope currentView =
 
 applyControlChange _ _ view = view
 
--- | Forward back button to Explorer
+-- | Forward back button to Explorer (uses navigation stack)
 handleBackFromPanel :: Effect Unit
 handleBackFromPanel = do
-  mStateRef <- Ref.read Explorer.globalStateRef
-  case mStateRef of
-    Just _stateRef -> do
-      -- Reset to full view
-      Ref.write (PackageGrid ProjectAndLibraries) Explorer.globalViewStateRef
-    Nothing -> pure unit
+  _ <- Explorer.navigateBack
+  pure unit
+
+-- | Helper to show ViewState for logging
+showViewState :: ViewState -> String
+showViewState (PackageGrid _) = "PackageGrid"
+showViewState (ModuleOrbit _) = "ModuleOrbit"
+showViewState (DependencyTree _) = "DependencyTree"
+showViewState (Neighborhood name) = "Neighborhood(" <> name <> ")"
+showViewState (FunctionCalls name) = "FunctionCalls(" <> name <> ")"
