@@ -23,7 +23,7 @@ import Data.Nullable as Nullable
 import Data.Traversable (traverse, for_)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
-import Effect.Aff (launchAff_, forkAff)
+import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Random (random)
@@ -31,7 +31,7 @@ import Effect.Ref (Ref)
 import Effect.Ref as Ref
 import Effect.Unsafe (unsafePerformEffect)
 import Foreign.Object as Object
-import Data.Loader (loadModel, LoadedModel, DeclarationsMap, FunctionCallsMap, fetchFunctionCalls, fetchBatchDeclarations, fetchBatchFunctionCalls)
+import Data.Loader (loadModel, LoadedModel, DeclarationsMap, FunctionCallsMap, fetchBatchDeclarations, fetchBatchFunctionCalls)
 import Engine.AtomicView (renderAtomicView)
 import Engine.BubblePack (renderModulePackWithCallbacks, highlightCallGraph, clearCallGraphHighlight, DeclarationClickCallback, DeclarationHoverCallback)
 -- NarrativePanel is now a Halogen component (Component.NarrativePanel)
@@ -145,21 +145,11 @@ initExplorer containerSelector = do
         liftEffect $ Ref.write model.links globalLinksRef
         liftEffect $ Ref.write model.declarations globalDeclarationsRef
 
-        -- Initialize visualization immediately (don't wait for function calls)
+        -- Initialize visualization immediately
+        -- Function calls are loaded on-demand when drilling into neighborhoods
         stateRef <- liftEffect $ initWithModel model containerSelector
         liftEffect $ Ref.write (Just stateRef) globalStateRef
-        liftEffect $ log "[Explorer] Ready - loading function calls in background..."
-
-        -- Load function calls data in a separate fiber (truly parallel)
-        -- This doesn't block the main visualization from rendering
-        _ <- forkAff do
-          fnCallsResult <- fetchFunctionCalls
-          case fnCallsResult of
-            Left err -> liftEffect $ log $ "[Explorer] Warning: Could not load function calls: " <> err
-            Right fnCalls -> do
-              liftEffect $ Ref.write fnCalls globalFunctionCallsRef
-              liftEffect $ log $ "[Explorer] Function calls loaded: " <> show (Object.size fnCalls) <> " functions"
-        pure unit
+        liftEffect $ log "[Explorer] Ready (function calls loaded on-demand per neighborhood)"
 
 -- | Initialize with loaded model
 initWithModel :: LoadedModel -> String -> Effect (Ref Scene.SceneState)
