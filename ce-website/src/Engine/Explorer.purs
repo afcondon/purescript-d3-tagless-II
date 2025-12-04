@@ -567,27 +567,18 @@ renderSVG containerSelector nodes = do
 
   pure { nodeSel }
 
--- | Sequential color scale for nodes spanning light to dark
--- | Maps cluster to color range for visual grouping
+-- | Blueprint theme: white/light colors for architectural drawing aesthetic
 nodeColor :: SimNode -> String
-nodeColor n =
-  let
-    -- Normalize cluster to 0-1 range using golden angle for even distribution
-    t = numMod (toNumber n.cluster * 0.618033988749895) 1.0
-  -- Blue range: very light blue (#eff3ff) to deep blue (#08519c)
-  -- Orange-red alternative: "#fff5eb" to "#d94801"
-  in
-    interpolateHsl "#eff3ff" "#08519c" t
+nodeColor _ = "rgba(255, 255, 255, 0.9)"  -- White with slight transparency
 
--- interpolateHsl "#fff5eb" "#d94801" t
-
--- | Fill color - hollow for unused modules, normal color for used modules
+-- | Fill color - hollow for unused modules, solid white for used modules
 nodeFill :: SimNode -> String
 nodeFill n = case n.nodeType of
-  PackageNode -> nodeColor n
+  PackageNode -> "rgba(255, 255, 255, 0.8)"  -- Slightly more transparent for packages
   ModuleNode ->
-    if n.isInTree then nodeColor n
-    else "none" -- Hollow for unused modules
+    if n.isInTree
+      then "rgba(255, 255, 255, 0.8)"  -- Solid white for used modules
+      else "none"  -- Hollow for unused modules (blueprint style)
 
 numMod :: Number -> Number -> Number
 numMod a b = a - b * toNumber (floor (a / b))

@@ -238,43 +238,43 @@ renderTreemapSVG packageNodes moduleNodes = do
     ]
     nodesGroup
 
-  -- Render package backgrounds (depth 1)
+  -- Render package backgrounds (depth 1) - Blueprint style: white lines, no fill
   _ <- appendData Rect packageNodes
     [ x (_.x0 :: TreemapLeaf -> Number)
     , y (_.y0 :: TreemapLeaf -> Number)
     , width ((\n -> n.x1 - n.x0) :: TreemapLeaf -> Number)
     , height ((\n -> n.y1 - n.y0) :: TreemapLeaf -> Number)
-    , fill (packageColor)
-    , stroke "#222"
-    , strokeWidth 0.3
+    , fill "none"  -- Blueprint: transparent
+    , stroke "rgba(255, 255, 255, 0.6)"  -- White stroke
+    , strokeWidth 1.5
     , opacity 1.0
     , class_ "treemap-package"
     ]
     treemapGroup
 
-  -- Render module rectangles (depth 2)
+  -- Render module rectangles (depth 2) - Blueprint style: white lines, no fill
   _ <- appendData Rect moduleNodes
     [ x (_.x0 :: TreemapLeaf -> Number)
     , y (_.y0 :: TreemapLeaf -> Number)
     , width ((\n -> n.x1 - n.x0) :: TreemapLeaf -> Number)
     , height ((\n -> n.y1 - n.y0) :: TreemapLeaf -> Number)
-    , fill (moduleColor)
-    , stroke "#333"
-    , strokeWidth 0.2
+    , fill "none"  -- Blueprint: transparent
+    , stroke "rgba(255, 255, 255, 0.4)"  -- White stroke, lighter than packages
+    , strokeWidth 0.5
     , class_ "treemap-module"
     ]
     treemapGroup
 
-  -- Render package labels (all packages, no filtering)
+  -- Render package labels - Blueprint style: white text
   log $ "[Treemap] Rendering labels for " <> show (Array.length packageNodes) <> " packages"
   _ <- appendData Text packageNodes
     [ x ((\n -> (n.x0 + n.x1) / 2.0) :: TreemapLeaf -> Number)
     , y ((\n -> n.y0 + 14.0) :: TreemapLeaf -> Number) -- Near top
     , textAnchor "middle"
-    , fill "#222"
+    , fill "rgba(255, 255, 255, 0.7)"  -- White text
     , fontFamily "Monaco, 'Courier New', monospace"
     , fontSize 10.0
-    , opacity 0.3  -- Semi-transparent by default
+    , opacity 1.0
     , class_ "treemap-package-label"
     , textContent (_.name :: TreemapLeaf -> String)
     ]
@@ -429,30 +429,30 @@ renderWatermarkSVG packageNodes = do
     ]
     watermarkGroup
 
-  -- Render package rectangles with muted styling
+  -- Render package rectangles - Blueprint watermark: very faded white lines
   _ <- appendData Rect packageNodes
     [ x (_.x0 :: TreemapLeaf -> Number)
     , y (_.y0 :: TreemapLeaf -> Number)
     , width ((\n -> n.x1 - n.x0) :: TreemapLeaf -> Number)
     , height ((\n -> n.y1 - n.y0) :: TreemapLeaf -> Number)
-    , fill (watermarkColor)
-    , stroke "#222"
-    , strokeWidth 0.3
-    , opacity 0.5
+    , fill "none"  -- Blueprint: transparent
+    , stroke "rgba(255, 255, 255, 0.15)"  -- Very faded white for watermark
+    , strokeWidth 1.0
+    , opacity 1.0
     , class_ "watermark-package"
     ]
     innerGroup
 
-  -- Render package labels
+  -- Render package labels - Blueprint watermark: very faded white text
   log $ "[Treemap] Rendering watermark labels for " <> show (Array.length packageNodes) <> " packages"
   _ <- appendData Text packageNodes
     [ x ((\n -> (n.x0 + n.x1) / 2.0) :: TreemapLeaf -> Number)
     , y ((\n -> n.y0 + 14.0) :: TreemapLeaf -> Number) -- Near top
     , textAnchor "middle"
-    , fill "#222"
+    , fill "rgba(255, 255, 255, 0.2)"  -- Very faded white text for watermark
     , fontFamily "Monaco, 'Courier New', monospace"
     , fontSize 10.0
-    , opacity 0.3  -- Semi-transparent by default, full opacity on hover
+    , opacity 1.0
     , class_ "watermark-package-label"
     , textContent (_.name :: TreemapLeaf -> String)
     ]

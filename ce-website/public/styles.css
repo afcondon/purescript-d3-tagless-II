@@ -10,7 +10,13 @@
    ============================================================================= */
 
 :root {
-  /* Editorial/Print Aesthetic Colors */
+  /* Blueprint Theme - Technical Drawing Aesthetic */
+  --color-blueprint-base: #0E4C8A;
+  --color-blueprint-light: rgba(255, 255, 255, 0.9);
+  --color-blueprint-white: #FFFFFF;
+  --color-blueprint-grid: rgba(255, 255, 255, 0.15);
+
+  /* Keep editorial colors for UI elements */
   --color-beige-base: #D4C9A8;
   --color-beige-light: #E8E0CC;
   --color-beige-dark: #C9B8A0;
@@ -21,7 +27,7 @@
   --color-line: #999999;
   --color-text-dark: #333333;
   --color-text-muted: #666666;
-  --color-canvas: #FAFAF8;
+  --color-canvas: #0E4C8A;  /* Blueprint background */
 
   /* Typography */
   --font-mono: 'Courier New', 'Courier', Monaco, monospace;
