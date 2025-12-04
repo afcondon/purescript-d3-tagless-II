@@ -14,6 +14,7 @@ module API.Legacy
   -- Granular module endpoints
   , moduleDeclarationsJson
   , moduleFunctionCallsJson
+  , moduleMetricsJsonSingle
   -- Batch endpoints
   , batchFunctionCallsJson
   , batchDeclarationsJson
@@ -305,3 +306,29 @@ batchDeclarationsJson db snapshotId modulesStr = do
 
 foreign import buildBatchDeclarationsJson :: Array Foreign -> String
 foreign import buildBatchDeclarationsQuery :: Int -> String -> String
+
+-- =============================================================================
+-- /api/module-metrics/:module (single module metrics)
+-- =============================================================================
+
+-- | Returns git metrics for a specific module
+moduleMetricsJsonSingle :: Database -> Int -> String -> Aff Response
+moduleMetricsJsonSingle db snapshotId moduleName = do
+  rows <- queryAllParams db """
+    SELECT
+      commit_count,
+      days_since_modified,
+      age_in_days,
+      author_count,
+      lines_changed,
+      recent_commits,
+      line_count,
+      authors
+    FROM module_metrics
+    WHERE snapshot_id = ? AND module = ?
+    LIMIT 1
+  """ [unsafeToForeign snapshotId, unsafeToForeign moduleName]
+  let json = buildModuleMetricsSingleJson rows
+  ok' jsonHeaders json
+
+foreign import buildModuleMetricsSingleJson :: Array Foreign -> String

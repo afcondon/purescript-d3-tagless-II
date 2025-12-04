@@ -999,6 +999,55 @@ line.highlight-dimmed {
   border-left-color: var(--color-red-accent);
 }
 
+/* Clickable links in caller/callee lists */
+.call-graph-link {
+  cursor: pointer;
+  color: var(--color-blue-link);
+  font-weight: 500;
+}
+
+.call-graph-link:hover {
+  background: var(--color-blue-light) !important;
+  border-left-color: var(--color-blue-link) !important;
+  text-decoration: underline;
+}
+
+/* Git metrics section */
+.call-graph-git-metrics {
+  background: var(--color-beige-light);
+  border: 1px solid var(--color-line);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.git-metric {
+  margin-bottom: var(--spacing-xs);
+}
+
+.git-metric:last-child {
+  margin-bottom: 0;
+}
+
+.git-metric strong {
+  color: var(--color-text-primary);
+  margin-right: var(--spacing-xs);
+}
+
+/* Source code with proper styling */
+.call-graph-source {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.6875rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  margin: 0;
+  padding: var(--spacing-sm);
+  background: #fafafa;
+  border-radius: var(--border-radius);
+}
+
 /* Source code column - scrollable with monospace */
 .call-graph-code {
   flex: 1;

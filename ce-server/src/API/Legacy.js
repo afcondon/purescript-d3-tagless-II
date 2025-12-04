@@ -262,6 +262,28 @@ export function buildBatchDeclarationsJson(rows) {
 }
 
 // =============================================================================
+// module metrics (single module)
+// =============================================================================
+
+export function buildModuleMetricsSingleJson(rows) {
+  if (rows.length === 0) {
+    return JSON.stringify(null);
+  }
+
+  const row = rows[0];
+  return JSON.stringify({
+    commit_count: row.commit_count,
+    days_since_modified: row.days_since_modified,
+    age_in_days: row.age_in_days,
+    author_count: row.author_count,
+    lines_changed: row.lines_changed,
+    recent_commits: row.recent_commits,
+    line_count: row.line_count,
+    authors: JSON.parse(row.authors || '[]')
+  });
+}
+
+// =============================================================================
 // Helper: split comma-separated modules string
 // =============================================================================
 

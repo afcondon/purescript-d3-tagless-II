@@ -38,6 +38,7 @@ data Route
   -- Granular module endpoints (on-demand loading)
   | GetModuleDeclarations String
   | GetModuleFunctionCalls String
+  | GetModuleMetrics String
   -- Batch endpoints (comma-separated module names)
   | GetBatchFunctionCalls String
   | GetBatchDeclarations String
@@ -69,6 +70,7 @@ route = root $ sum
   -- Granular module endpoints (flat URLs for routing-duplex compatibility)
   , "GetModuleDeclarations": path "api/module-declarations" segment
   , "GetModuleFunctionCalls": path "api/module-function-calls" segment
+  , "GetModuleMetrics": path "api/module-metrics" segment
   -- Batch endpoints (comma-separated module names in segment)
   , "GetBatchFunctionCalls": path "api/batch-function-calls" segment
   , "GetBatchDeclarations": path "api/batch-declarations" segment
@@ -137,6 +139,7 @@ main = launchAff_ do
     -- Granular module endpoints
     GetModuleDeclarations modName -> withLatestSnapshot db Nothing \sid -> Legacy.moduleDeclarationsJson db sid modName
     GetModuleFunctionCalls modName -> withLatestSnapshot db Nothing \sid -> Legacy.moduleFunctionCallsJson db sid modName
+    GetModuleMetrics modName -> withLatestSnapshot db Nothing \sid -> Legacy.moduleMetricsJsonSingle db sid modName
     -- Batch endpoints (comma-separated module names)
     GetBatchFunctionCalls modules -> withLatestSnapshot db Nothing \sid -> Legacy.batchFunctionCallsJson db sid modules
     GetBatchDeclarations modules -> withLatestSnapshot db Nothing \sid -> Legacy.batchDeclarationsJson db sid modules

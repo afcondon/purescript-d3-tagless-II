@@ -30,38 +30,81 @@ export const showCallGraphPopup_ = (moduleName) => (declarationName) => () => {
   // Fetch function call data
   fetchCallGraphData(moduleName, declarationName)
     .then(data => {
-      // Update callers
+      // Update callers with clickable links
       if (data.callers && data.callers.length > 0) {
         callersList.innerHTML = data.callers
           .map(fn => {
             // Handle both string format and object format
             const displayName = typeof fn === 'string' ? fn : fn.target || fn;
-            return `<div class="call-graph-list-item">${escapeHtml(displayName)}</div>`;
+            const targetModule = typeof fn === 'object' ? fn.targetModule : null;
+
+            // Make it clickable if we have module info
+            if (targetModule && displayName) {
+              return `<div class="call-graph-list-item call-graph-link" data-module="${escapeHtml(targetModule)}" data-function="${escapeHtml(displayName)}">${escapeHtml(displayName)}</div>`;
+            } else {
+              return `<div class="call-graph-list-item">${escapeHtml(displayName)}</div>`;
+            }
           })
           .join("");
       } else {
         callersList.innerHTML = '<div class="call-graph-empty">No callers found</div>';
       }
 
-      // Update callees
+      // Update callees with clickable links
       if (data.callees && data.callees.length > 0) {
         calleesList.innerHTML = data.callees
           .map(fn => {
             // Handle both string format and object format
             const displayName = typeof fn === 'string' ? fn : fn.target || fn;
-            return `<div class="call-graph-list-item">${escapeHtml(displayName)}</div>`;
+            const targetModule = typeof fn === 'object' ? fn.targetModule : null;
+
+            // Make it clickable if we have module info
+            if (targetModule && displayName) {
+              return `<div class="call-graph-list-item call-graph-link" data-module="${escapeHtml(targetModule)}" data-function="${escapeHtml(displayName)}">${escapeHtml(displayName)}</div>`;
+            } else {
+              return `<div class="call-graph-list-item">${escapeHtml(displayName)}</div>`;
+            }
           })
           .join("");
       } else {
         calleesList.innerHTML = '<div class="call-graph-empty">No calls found</div>';
       }
 
-      // Update source code
-      if (data.sourceCode) {
-        sourceCode.textContent = data.sourceCode;
-      } else {
-        sourceCode.innerHTML = '<div class="call-graph-empty">Source code not available</div>';
+      // Update source code with git metrics
+      let sourceHtml = '';
+
+      // Add git metrics section if available
+      if (data.gitMetrics) {
+        const m = data.gitMetrics;
+        sourceHtml += '<div class="call-graph-git-metrics">';
+        sourceHtml += `<div class="git-metric"><strong>Commits:</strong> ${m.commit_count || 0}</div>`;
+        sourceHtml += `<div class="git-metric"><strong>Last modified:</strong> ${m.days_since_modified || 0} days ago</div>`;
+        sourceHtml += `<div class="git-metric"><strong>Authors:</strong> ${m.author_count || 0}</div>`;
+        if (m.authors && m.authors.length > 0) {
+          sourceHtml += `<div class="git-metric"><strong>Contributors:</strong> ${m.authors.slice(0, 3).join(', ')}${m.authors.length > 3 ? '...' : ''}</div>`;
+        }
+        sourceHtml += '</div>';
       }
+
+      // Add source code
+      if (data.sourceCode) {
+        sourceHtml += `<pre class="call-graph-source">${escapeHtml(data.sourceCode)}</pre>`;
+      } else {
+        sourceHtml += '<div class="call-graph-empty">Source code not available</div>';
+      }
+
+      sourceCode.innerHTML = sourceHtml;
+
+      // Add click handlers to all links
+      document.querySelectorAll('.call-graph-link').forEach(link => {
+        link.addEventListener('click', () => {
+          const module = link.getAttribute('data-module');
+          const func = link.getAttribute('data-function');
+          if (module && func) {
+            showCallGraphPopup_(module)(func)();
+          }
+        });
+      });
     })
     .catch(error => {
       console.error("[CallGraphPopup] Error fetching call graph data:", error);
@@ -98,7 +141,8 @@ async function fetchCallGraphData(moduleName, declarationName) {
       return {
         callers: [],
         callees: [],
-        sourceCode: null
+        sourceCode: null,
+        gitMetrics: null
       };
     }
 
@@ -118,10 +162,22 @@ async function fetchCallGraphData(moduleName, declarationName) {
       sourceInfo = `${declarationName}\n\n(Declaration not found)`;
     }
 
+    // Fetch git metrics for the module
+    let gitMetrics = null;
+    try {
+      const metricsResponse = await fetch(`${API_BASE}/api/module-metrics/${encodeURIComponent(moduleName)}?snapshot=${snapshotId}`);
+      if (metricsResponse.ok) {
+        gitMetrics = await metricsResponse.json();
+      }
+    } catch (err) {
+      console.warn("[CallGraphPopup] Could not fetch git metrics:", err);
+    }
+
     return {
       callers: functionData.calledBy || [],
       callees: functionData.calls || [],
-      sourceCode: sourceInfo
+      sourceCode: sourceInfo,
+      gitMetrics: gitMetrics
     };
   } catch (error) {
     console.error("[CallGraphPopup] Fetch error:", error);
