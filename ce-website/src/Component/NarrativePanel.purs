@@ -17,6 +17,7 @@ module Component.NarrativePanel
 import Prelude
 
 import Data.Array as Array
+import Data.ColorPalette (PaletteType(..), PaletteConfig, LegendItem, getPalette)
 import Data.Maybe (Maybe(..))
 import Data.String.CodePoints as String
 import Data.String.Common (toLower)
@@ -37,7 +38,7 @@ import Engine.ViewState (ViewState(..), Control, describe)
 -- | A color entry for the package palette
 type ColorEntry = { name :: String, color :: String }
 
--- | Declaration kind with colors
+-- | Declaration kind with colors (DEPRECATED - use LegendItem from ColorPalette)
 type DeclarationKind =
   { label :: String
   , color :: String
@@ -101,15 +102,15 @@ data Output
 -- Declaration Types (for inner scene color key)
 -- =============================================================================
 
+-- | Get declaration types from ColorPalette module
 declarationKinds :: Array DeclarationKind
 declarationKinds =
-  [ { label: "Type Class", color: "#9467bd", intense: "#7b3fa9" }
-  , { label: "Data Type", color: "#2ca02c", intense: "#1a8a1a" }
-  , { label: "Type Synonym", color: "#17becf", intense: "#0d9fb0" }
-  , { label: "Extern Data", color: "#bcbd22", intense: "#9a9b0a" }
-  , { label: "Alias", color: "#7f7f7f", intense: "#5f5f5f" }
-  , { label: "Value", color: "#1f77b4", intense: "#0d5a91" }
-  ]
+  let
+    palette = getPalette DeclarationTypes
+    toLegacyKind :: LegendItem -> DeclarationKind
+    toLegacyKind item = { label: item.label, color: item.color, intense: item.color }
+  in
+    map toLegacyKind palette.legendItems
 
 -- =============================================================================
 -- Component

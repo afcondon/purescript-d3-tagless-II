@@ -1,27 +1,49 @@
 // PSD3 Tooltip - Library support for tooltips
 
 let tooltip = null;
+let tooltipConfig = null;
 
 const ensureTooltip = () => {
   if (!tooltip) {
     tooltip = document.createElement('div');
     tooltip.className = 'psd3-tooltip';
+    // Only set essential styles - positioning and display
+    // All visual styling should come from CSS or configureTooltip
     tooltip.style.cssText = `
       position: fixed;
       display: none;
-      background: rgba(20, 20, 30, 0.95);
-      color: #f0f0f0;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      max-width: 300px;
       pointer-events: none;
       z-index: 10000;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     `;
     document.body.appendChild(tooltip);
+
+    // Apply config if it was set before tooltip was created
+    if (tooltipConfig) {
+      applyConfig(tooltipConfig);
+    }
   }
   return tooltip;
+};
+
+// Apply configuration to tooltip element
+const applyConfig = (config) => {
+  const el = ensureTooltip();
+
+  // Apply CSS properties from config
+  if (config.background) el.style.background = config.background;
+  if (config.color) el.style.color = config.color;
+  if (config.padding) el.style.padding = config.padding;
+  if (config.borderRadius) el.style.borderRadius = config.borderRadius;
+  if (config.fontSize) el.style.fontSize = config.fontSize;
+  if (config.fontFamily) el.style.fontFamily = config.fontFamily;
+  if (config.border) el.style.border = config.border;
+  if (config.boxShadow) el.style.boxShadow = config.boxShadow;
+  if (config.maxWidth) el.style.maxWidth = config.maxWidth;
+  if (config.lineHeight) el.style.lineHeight = config.lineHeight;
+  if (config.backdropFilter) {
+    el.style.backdropFilter = config.backdropFilter;
+    el.style.webkitBackdropFilter = config.backdropFilter; // Safari
+  }
 };
 
 export const showTooltip_ = content => x => y => () => {
@@ -51,4 +73,10 @@ export const hideTooltip_ = () => {
 // Set custom CSS class for styling
 export const setTooltipClass_ = className => () => {
   ensureTooltip().className = className;
+};
+
+// Configure tooltip styles programmatically
+export const configureTooltip_ = config => () => {
+  tooltipConfig = config;
+  applyConfig(config);
 };

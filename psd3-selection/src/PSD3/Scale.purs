@@ -94,6 +94,8 @@ module PSD3.Scale
   -- * Color Schemes
   , schemeCategory10
   , schemeCategory10At
+  , schemeTableau10
+  , schemeTableau10At
   , schemePaired
   , schemePairedAt
   , schemeSet1
@@ -401,6 +403,18 @@ foreign import schemeCategory10 :: Array String
 -- | fill = schemeCategory10At node.group
 -- | ```
 foreign import schemeCategory10At :: Int -> String
+
+-- | Tableau10 color scheme (10 colors)
+-- | Modern, accessible categorical palette
+foreign import schemeTableau10 :: Array String
+
+-- | Get a Tableau10 color by index (wraps around modularly)
+-- | Useful for coloring categories in visualizations
+-- |
+-- | ```purescript
+-- | fill = schemeTableau10At categoryIndex
+-- | ```
+foreign import schemeTableau10At :: Int -> String
 
 -- | Paired color scheme (12 colors)
 foreign import schemePaired :: Array String

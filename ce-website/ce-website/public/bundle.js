@@ -25232,7 +25232,7 @@
       return "FunctionCalls (" + (v.value0 + ")");
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 829, column 1 - line 829, column 37): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 827, column 1 - line 827, column 37): " + [v.constructor.name]);
   };
   var setTreeSceneClass = function(shouldAdd) {
     return function __do8() {
@@ -25256,7 +25256,7 @@
         return log10("[Explorer] Could not find #explorer-nodes for CSS class")();
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 739, column 3 - line 745, column 77): " + [mElement.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 737, column 3 - line 743, column 77): " + [mElement.constructor.name]);
     };
   };
   var setNeighborhoodForces = function(nodes) {
@@ -25442,7 +25442,7 @@
   var nodesGroupId = "#explorer-nodes";
   var nodeFill = function(n) {
     if (n.nodeType instanceof PackageNode) {
-      return schemeTableau10At(n.cluster);
+      return "rgba(255, 255, 255, 0.8)";
     }
     ;
     if (n.nodeType instanceof ModuleNode) {
@@ -25453,18 +25453,10 @@
       return "none";
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 578, column 14 - line 583, column 18): " + [n.nodeType.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 576, column 14 - line 581, column 18): " + [n.nodeType.constructor.name]);
   };
-  var nodeColor = function(n) {
-    if (n.nodeType instanceof PackageNode) {
-      return schemeTableau10At(n.cluster);
-    }
-    ;
-    if (n.nodeType instanceof ModuleNode) {
-      return "rgba(255, 255, 255, 0.9)";
-    }
-    ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 572, column 15 - line 574, column 43): " + [n.nodeType.constructor.name]);
+  var nodeColor = function(v) {
+    return "rgba(255, 255, 255, 0.9)";
   };
   var nodeClass = function(n) {
     if (n.nodeType instanceof PackageNode) {
@@ -25482,7 +25474,7 @@
       ;
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 590, column 15 - line 594, column 42): " + [n.nodeType.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 588, column 15 - line 592, column 42): " + [n.nodeType.constructor.name]);
   };
   var linkPathFn = function(nodeMap) {
     return function(link3) {
@@ -25591,7 +25583,7 @@
             return renderAtomicView(v.value0)();
           }
           ;
-          throw new Error("Failed pattern match at Engine.Explorer (line 1309, column 5 - line 1314, column 32): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at Engine.Explorer (line 1307, column 5 - line 1312, column 32): " + [v.constructor.name]);
         };
       };
     };
@@ -25755,7 +25747,7 @@
             return highlightCallGraph(moduleName)(callerModules)(calleeModules)();
           }
           ;
-          throw new Error("Failed pattern match at Engine.Explorer (line 1323, column 3 - line 1330, column 64): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at Engine.Explorer (line 1321, column 3 - line 1328, column 64): " + [v.constructor.name]);
         };
       };
     };
@@ -25773,7 +25765,7 @@
           return unit;
         }
         ;
-        throw new Error("Failed pattern match at Engine.Explorer (line 726, column 5 - line 730, column 27): " + [mChild.constructor.name]);
+        throw new Error("Failed pattern match at Engine.Explorer (line 724, column 5 - line 728, column 27): " + [mChild.constructor.name]);
       };
     };
     return clearNode(toNode(element3));
@@ -25791,7 +25783,7 @@
       return log10("[Explorer] Could not find #explorer-nodes")();
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 1237, column 3 - line 1239, column 63): " + [mElement.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 1235, column 3 - line 1237, column 63): " + [mElement.constructor.name]);
   };
   var clearTreeLinks = function __do4() {
     var win = windowImpl();
@@ -25807,7 +25799,7 @@
       return log10("[Explorer] Could not find #explorer-links")();
     }
     ;
-    throw new Error("Failed pattern match at Engine.Explorer (line 711, column 3 - line 716, column 63): " + [mElement.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Explorer (line 709, column 3 - line 714, column 63): " + [mElement.constructor.name]);
   };
   var bubblePackTick = function __do5() {
     updateGroupPositions(nodesGroupId)();
@@ -25843,7 +25835,7 @@
                   return pure32(unit);
                 }
                 ;
-                throw new Error("Failed pattern match at Engine.Explorer (line 924, column 5 - line 926, column 27): " + [declResult.constructor.name]);
+                throw new Error("Failed pattern match at Engine.Explorer (line 922, column 5 - line 924, column 27): " + [declResult.constructor.name]);
               })())(function() {
                 var declarations = (function() {
                   if (declResult instanceof Right) {
@@ -25854,7 +25846,7 @@
                     return empty4;
                   }
                   ;
-                  throw new Error("Failed pattern match at Engine.Explorer (line 928, column 22 - line 930, column 31): " + [declResult.constructor.name]);
+                  throw new Error("Failed pattern match at Engine.Explorer (line 926, column 22 - line 928, column 31): " + [declResult.constructor.name]);
                 })();
                 return bind32(fetchBatchFunctionCalls(moduleNames))(function(fnCallResult) {
                   return discard22((function() {
@@ -25866,7 +25858,7 @@
                       return pure32(unit);
                     }
                     ;
-                    throw new Error("Failed pattern match at Engine.Explorer (line 934, column 5 - line 936, column 27): " + [fnCallResult.constructor.name]);
+                    throw new Error("Failed pattern match at Engine.Explorer (line 932, column 5 - line 934, column 27): " + [fnCallResult.constructor.name]);
                   })())(function() {
                     var functionCalls = (function() {
                       if (fnCallResult instanceof Right) {
@@ -25877,7 +25869,7 @@
                         return empty4;
                       }
                       ;
-                      throw new Error("Failed pattern match at Engine.Explorer (line 938, column 23 - line 940, column 31): " + [fnCallResult.constructor.name]);
+                      throw new Error("Failed pattern match at Engine.Explorer (line 936, column 23 - line 938, column 31): " + [fnCallResult.constructor.name]);
                     })();
                     return discard22(liftEffect4(write(functionCalls)(globalFunctionCallsRef)))(function() {
                       return discard22(liftEffect4(log10("[Explorer] Batch fetched: " + (show17(size(declarations)) + (" modules with declarations, " + (show17(size(functionCalls)) + " function entries"))))))(function() {
@@ -26056,7 +26048,7 @@
         var state3 = read(mStateRef.value0)();
         if (focus3.focusedNodeId instanceof Just && focus3.focusedNodeId.value0 === clickedNode.id) {
           log10("[Explorer] Unfocusing from node " + (show17(clickedNode.id) + " (via navigateBack)"))();
-          $lazy_navigateBack(857)();
+          $lazy_navigateBack(855)();
           return unit;
         }
         ;
@@ -26085,7 +26077,7 @@
         return focusOnNeighborhood(neighborhoodNodes)(state3.simulation)();
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 848, column 3 - line 892, column 65): " + [mStateRef.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 846, column 3 - line 890, column 65): " + [mStateRef.constructor.name]);
     };
   };
   var restoreToView = function(targetView) {
@@ -26122,10 +26114,10 @@
           return write(targetView)(globalViewStateRef)();
         }
         ;
-        throw new Error("Failed pattern match at Engine.Explorer (line 1153, column 7 - line 1166, column 50): " + [targetView.constructor.name]);
+        throw new Error("Failed pattern match at Engine.Explorer (line 1151, column 7 - line 1164, column 50): " + [targetView.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 1148, column 3 - line 1166, column 50): " + [mStateRef.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 1146, column 3 - line 1164, column 50): " + [mStateRef.constructor.name]);
     };
   };
   var restoreFullView = function(fullNodes) {
@@ -26148,7 +26140,7 @@
               return unit;
             }
             ;
-            throw new Error("Failed pattern match at Engine.Explorer (line 1188, column 3 - line 1192, column 25): " + [mStateRef.constructor.name]);
+            throw new Error("Failed pattern match at Engine.Explorer (line 1186, column 3 - line 1190, column 25): " + [mStateRef.constructor.name]);
           })();
           write(targetView)(globalViewStateRef)();
           write({
@@ -26230,10 +26222,10 @@
         return true;
       }
       ;
-      throw new Error("Failed pattern match at Engine.Explorer (line 1130, column 3 - line 1140, column 16): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Explorer (line 1128, column 3 - line 1138, column 16): " + [v.constructor.name]);
     };
   });
-  var navigateBack = /* @__PURE__ */ $lazy_navigateBack(1127);
+  var navigateBack = /* @__PURE__ */ $lazy_navigateBack(1125);
   var renderSVG = function(containerSelector) {
     return function(nodes) {
       return bind22(select8(containerSelector))(function(container) {

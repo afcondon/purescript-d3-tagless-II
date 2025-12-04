@@ -8,6 +8,7 @@ import Effect.Console (log)
 import Component.SpagoGridApp as SpagoGridApp
 import Halogen.Aff as HA
 import Halogen.VDom.Driver (runUI)
+import PSD3v2.Tooltip (configureTooltip, floatingPanelTheme)
 import Web.DOM.ParentNode (QuerySelector(..))
 import Data.Maybe (Maybe(..))
 
@@ -15,6 +16,11 @@ main :: Effect Unit
 main = do
   log "[Main] Starting with Halogen wrapper around SpagoGridTest..."
   log "[Main] IMPORTANT: Using selectElement to mount into #app (not body)"
+
+  -- Configure tooltip theme to match floating panels
+  configureTooltip floatingPanelTheme
+  log "[Main] Tooltip configured with floating panel theme"
+
   HA.runHalogenAff do
     -- Mount into #app, not body!
     mAppEl <- HA.selectElement (QuerySelector "#app")

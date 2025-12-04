@@ -28,6 +28,7 @@
   --color-text-dark: #333333;
   --color-text-muted: #666666;
   --color-canvas: #0E4C8A;  /* Blueprint background */
+  --color-card: #F5F2E8;  /* Light beige for cards and dropdowns */
 
   /* Typography */
   --font-mono: 'Courier New', 'Courier', Monaco, monospace;
@@ -405,37 +406,44 @@ circle.highlighted-downstream {
 }
 
 /* =============================================================================
-   Tooltip - Editorial Style
+   Tooltip - Matches Floating Panel Style (v2)
    ============================================================================= */
 
 .psd3-tooltip {
   position: fixed;
   z-index: 1000;
-  background: rgba(212, 201, 168, 0.98);
+  /* Match floating panel background and blur */
+  background-color: rgba(212, 201, 168, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px); /* Safari support */
   color: var(--color-text-dark);
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-md);
   border: 1px solid var(--color-line);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   font-family: var(--font-mono);
   font-size: var(--font-size-small);
   line-height: 1.6;
   max-width: 300px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   pointer-events: none;
 }
 
 .tooltip-header {
   font-weight: bold;
   font-size: var(--font-size-label);
-  letter-spacing: var(--letter-spacing-normal);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
   color: var(--color-text-dark);
-  margin-bottom: 4px;
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--color-line);
   word-break: break-all;
 }
 
 .tooltip-package {
   font-size: var(--font-size-tiny);
   color: var(--color-text-muted);
-  margin-bottom: var(--spacing-xs);
+  letter-spacing: var(--letter-spacing-normal);
+  margin-bottom: var(--spacing-sm);
   padding-bottom: var(--spacing-xs);
   border-bottom: 1px solid var(--color-line);
 }
@@ -449,10 +457,13 @@ circle.highlighted-downstream {
   justify-content: space-between;
   margin-bottom: 2px;
   font-size: var(--font-size-tiny);
+  letter-spacing: var(--letter-spacing-normal);
 }
 
 .metric-label {
   color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
 }
 
 .metric-value {

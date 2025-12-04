@@ -19,6 +19,7 @@ import Prelude
 import Data.Array as Array
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Loader (Declaration, DeclarationsMap)
+import Data.ColorPalette (PaletteType(..), getCategoryColor)
 import Effect (Effect)
 import Effect.Class.Console (log)
 import Foreign.Object as Object
@@ -83,25 +84,16 @@ type ModulePackData =
   , declarations :: Array Declaration
   }
 
--- | Category colors (mid-saturation for category circles)
+-- | Get color for a category using the current palette
+-- | For now, we use DeclarationTypes palette
+-- | TODO: Make this dynamic based on active palette selection
 categoryColor :: String -> String
-categoryColor "typeClass" = "#9467bd" -- purple
-categoryColor "data" = "#2ca02c" -- green
-categoryColor "typeSynonym" = "#17becf" -- cyan
-categoryColor "externData" = "#bcbd22" -- yellow-green
-categoryColor "alias" = "#7f7f7f" -- gray
-categoryColor "value" = "#1f77b4" -- blue
-categoryColor _ = "#cccccc"
+categoryColor = getCategoryColor DeclarationTypes
 
--- | Intense category colors (higher saturation for declaration circles)
+-- | Get intense color for a category (currently same as base color)
+-- | The Tableau10 palette already has good saturation
 categoryColorIntense :: String -> String
-categoryColorIntense "typeClass" = "#7b3fa9" -- deeper purple
-categoryColorIntense "data" = "#1a8a1a" -- deeper green
-categoryColorIntense "typeSynonym" = "#0d9fb0" -- deeper cyan
-categoryColorIntense "externData" = "#9a9b0a" -- deeper yellow-green
-categoryColorIntense "alias" = "#5f5f5f" -- darker gray
-categoryColorIntense "value" = "#0d5a91" -- deeper blue
-categoryColorIntense _ = "#999999"
+categoryColorIntense = getCategoryColor DeclarationTypes
 
 -- | Build HierarchyData from module declarations
 -- | Structure: Module -> [Category -> [Declaration]]

@@ -49,7 +49,7 @@ import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Links (swizzleLinks, swizzleLinksByIndex)
 import PSD3.ForceEngine.Render (GroupId(..), updateGroupPositions, updateLinkPositions)
 import PSD3.ForceEngine.Simulation as Sim
-import PSD3.Scale (interpolateHsl)
+import PSD3.Scale (interpolateHsl, schemeTableau10At)
 import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, radius, id_, class_, viewBox, d, opacity, x1, x2, y1, y2)
 import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom, onMouseEnter, onMouseLeave, onClickWithDatum)
 import PSD3v2.Capabilities.Selection (select, selectAll, appendChild, appendData, on)
@@ -567,14 +567,16 @@ renderSVG containerSelector nodes = do
 
   pure { nodeSel }
 
--- | Blueprint theme: white/light colors for architectural drawing aesthetic
+-- | Stroke color - packages use their cluster color, modules use white
 nodeColor :: SimNode -> String
-nodeColor _ = "rgba(255, 255, 255, 0.9)"  -- White with slight transparency
+nodeColor n = case n.nodeType of
+  PackageNode -> schemeTableau10At n.cluster  -- Package colors from palette
+  ModuleNode -> "rgba(255, 255, 255, 0.9)"   -- White for modules
 
--- | Fill color - hollow for unused modules, solid white for used modules
+-- | Fill color - packages use cluster colors, modules are white (hollow if unused)
 nodeFill :: SimNode -> String
 nodeFill n = case n.nodeType of
-  PackageNode -> "rgba(255, 255, 255, 0.8)"  -- Slightly more transparent for packages
+  PackageNode -> schemeTableau10At n.cluster  -- Solid package color
   ModuleNode ->
     if n.isInTree
       then "rgba(255, 255, 255, 0.8)"  -- Solid white for used modules
@@ -618,7 +620,7 @@ renderTreeLinksD3 nodeMap links = do
   _ <- appendData Path links
     [ d (linkPathFn nodeMap)
     , fill (\(_ :: SimLink) -> "none")
-    , stroke (\(_ :: SimLink) -> "#888")
+    , stroke (\(_ :: SimLink) -> "white")
     , strokeWidth (\(_ :: SimLink) -> 1.5)
     , opacity (\(_ :: SimLink) -> 0.5)
     , class_ (\(_ :: SimLink) -> "tree-link")
@@ -674,7 +676,7 @@ renderForceLinksD3 links = do
     , y1 getSourceY
     , x2 getTargetX
     , y2 getTargetY
-    , stroke (\(_ :: SwizzledLink) -> "#666")
+    , stroke (\(_ :: SwizzledLink) -> "white")
     , strokeWidth (\(_ :: SwizzledLink) -> 1.0)
     , opacity (\(_ :: SwizzledLink) -> 0.6)
     , class_ (\(_ :: SwizzledLink) -> "force-link")
@@ -1069,7 +1071,7 @@ renderStaticLinksD3 nodeMap links = do
     , y1 (_.y1 :: StaticLink -> Number)
     , x2 (_.x2 :: StaticLink -> Number)
     , y2 (_.y2 :: StaticLink -> Number)
-    , stroke (\(_ :: StaticLink) -> "#666")
+    , stroke (\(_ :: StaticLink) -> "white")
     , strokeWidth (\(_ :: StaticLink) -> 1.5)
     , opacity (\(_ :: StaticLink) -> 0.6)
     , class_ (\(_ :: StaticLink) -> "neighborhood-link")
@@ -1095,7 +1097,7 @@ renderNeighborhoodLinksD3 links = do
     , y1 getSourceY
     , x2 getTargetX
     , y2 getTargetY
-    , stroke (\(_ :: NeighborhoodLink) -> "#666")
+    , stroke (\(_ :: NeighborhoodLink) -> "white")
     , strokeWidth (\(_ :: NeighborhoodLink) -> 1.5)
     , opacity (\(_ :: NeighborhoodLink) -> 0.6)
     , class_ (\(_ :: NeighborhoodLink) -> "neighborhood-link")

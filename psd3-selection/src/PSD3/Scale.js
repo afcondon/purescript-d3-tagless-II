@@ -5,7 +5,7 @@ import {
   scaleOrdinal, scaleBand, scalePoint
 } from "d3-scale";
 import {
-  schemeCategory10, schemePaired, schemeSet1, schemeSet2, schemeSet3,
+  schemeCategory10, schemeTableau10, schemePaired, schemeSet1, schemeSet2, schemeSet3,
   interpolateViridis, interpolatePlasma, interpolateInferno, interpolateMagma,
   interpolateTurbo, interpolateWarm, interpolateCool, interpolateRainbow,
   interpolateRdYlGn, interpolateRdBu, interpolatePiYG, interpolateBrBG
@@ -200,11 +200,16 @@ export function interpolateHsl_(a) {
 // Re-exported directly from d3-scale-chromatic
 // ============================================================================
 
-export { schemeCategory10, schemePaired, schemeSet1, schemeSet2, schemeSet3 };
+export { schemeCategory10, schemeTableau10, schemePaired, schemeSet1, schemeSet2, schemeSet3 };
 
 // Indexed access to schemeCategory10 with modular wrapping
 export function schemeCategory10At(index) {
   return schemeCategory10[Math.abs(index) % 10];
+}
+
+// Indexed access to schemeTableau10 with modular wrapping
+export function schemeTableau10At(index) {
+  return schemeTableau10[Math.abs(index) % 10];
 }
 
 // Indexed access to schemePaired with modular wrapping

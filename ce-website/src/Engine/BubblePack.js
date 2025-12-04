@@ -2,6 +2,7 @@
 // Drag behavior is attached separately via library (Core.attachDragWithReheat)
 
 import { select } from "d3-selection";
+import { showTooltip_, hideTooltip_ } from "../../psd3-selection/src/PSD3v2/Tooltip.js";
 
 // Color legend is now handled by Halogen NarrativePanel component (Component.NarrativePanel)
 
@@ -157,7 +158,21 @@ export const renderBoundBubblePack_ = (containerSelector) => (node) => (packCirc
         select(this)
           .attr("stroke", "#000")
           .attr("stroke-width", 2);
-        // Call hover callback for value declarations
+
+        // Show tooltip for all declarations
+        const tooltipContent = `
+          <div class="tooltip-header">${d.data_}</div>
+          <div class="tooltip-package">${node.name}</div>
+          <div class="tooltip-metrics">
+            <div class="tooltip-metric">
+              <span class="metric-label">Type</span>
+              <span class="metric-value">${d.category}</span>
+            </div>
+          </div>
+        `;
+        showTooltip_(tooltipContent)(event.pageX)(event.pageY)();
+
+        // Call hover callback for value declarations (for call graph highlighting)
         if (d.category === "value") {
           onDeclarationHover(node.name)(d.data_)(d.category)();
         }
@@ -168,6 +183,10 @@ export const renderBoundBubblePack_ = (containerSelector) => (node) => (packCirc
         select(this)
           .attr("stroke", "#fff")
           .attr("stroke-width", 0.5);
+
+        // Hide tooltip
+        hideTooltip_();
+
         // Call leave callback
         if (d.category === "value") {
           onDeclarationLeave();
