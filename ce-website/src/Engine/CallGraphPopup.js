@@ -108,9 +108,15 @@ async function fetchCallGraphData(moduleName, declarationName) {
 
     // Find the specific declaration
     const declaration = declData.declarations?.find(d => d.title === declarationName);
-    const sourceInfo = declaration
-      ? `${declaration.kind}: ${declaration.title}\n\n(Source code display coming soon)`
-      : `${declarationName}\n\n(Source code display coming soon)`;
+
+    let sourceInfo;
+    if (declaration?.sourceCode) {
+      sourceInfo = declaration.sourceCode;
+    } else if (declaration) {
+      sourceInfo = `${declaration.kind}: ${declaration.title}\n\n(Source code not available)`;
+    } else {
+      sourceInfo = `${declarationName}\n\n(Declaration not found)`;
+    }
 
     return {
       callers: functionData.calledBy || [],

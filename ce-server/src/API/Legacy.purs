@@ -232,13 +232,14 @@ foreign import buildFunctionCallsJson :: Array Foreign -> String
 -- /api/modules/:name/declarations
 -- =============================================================================
 
--- | Returns declarations for a specific module: [{ kind: "", title: "" }]
+-- | Returns declarations for a specific module: [{ kind: "", title: "", sourceCode: "" }]
 moduleDeclarationsJson :: Database -> Int -> String -> Aff Response
 moduleDeclarationsJson db snapshotId moduleName = do
   rows <- queryAllParams db """
     SELECT
       kind,
-      title
+      title,
+      source_code
     FROM declarations
     WHERE snapshot_id = ? AND module = ?
     ORDER BY title

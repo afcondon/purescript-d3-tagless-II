@@ -188,10 +188,11 @@ export function buildFunctionCallsJson(rows) {
 // =============================================================================
 
 export function buildModuleDeclarationsJson(rows) {
-  // Simple array of declarations: [{ kind, title }]
+  // Simple array of declarations: [{ kind, title, sourceCode }]
   const declarations = rows.map(row => ({
     kind: row.kind,
-    title: row.title
+    title: row.title,
+    sourceCode: row.source_code || null
   }));
 
   return JSON.stringify({ declarations });

@@ -16194,11 +16194,18 @@
       const declResponse = await fetch(`${API_BASE}/api/module-declarations/${encodeURIComponent(moduleName)}?snapshot=${snapshotId}`);
       const declData = await declResponse.json();
       const declaration = declData.declarations?.find((d3) => d3.title === declarationName);
-      const sourceInfo = declaration ? `${declaration.kind}: ${declaration.title}
+      let sourceInfo;
+      if (declaration?.sourceCode) {
+        sourceInfo = declaration.sourceCode;
+      } else if (declaration) {
+        sourceInfo = `${declaration.kind}: ${declaration.title}
 
-(Source code display coming soon)` : `${declarationName}
+(Source code not available)`;
+      } else {
+        sourceInfo = `${declarationName}
 
-(Source code display coming soon)`;
+(Declaration not found)`;
+      }
       return {
         callers: functionData.calledBy || [],
         callees: functionData.calls || [],
