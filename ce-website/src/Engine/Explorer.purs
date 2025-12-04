@@ -49,14 +49,14 @@ import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Links (swizzleLinks, swizzleLinksByIndex)
 import PSD3.ForceEngine.Render (GroupId(..), updateGroupPositions, updateLinkPositions)
 import PSD3.ForceEngine.Simulation as Sim
-import PSD3.Scale (interpolateTurbo)
+import PSD3.Scale (interpolateHsl)
 import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, radius, id_, class_, viewBox, d, opacity, x1, x2, y1, y2)
 import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom, onMouseEnter, onMouseLeave, onClickWithDatum)
 import PSD3v2.Capabilities.Selection (select, selectAll, appendChild, appendData, on)
 import PSD3v2.Interpreter.D3v2 (getElementsD3v2) as D3v2
 import PSD3v2.Classify (classifyElements, clearClasses)
 import Data.Set as Set
-import PSD3v2.Tooltip (onTooltip, onTooltipHide)
+import PSD3v2.Tooltip (onTooltip)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SBoundOwns)
 import Types (SimNode, SimLink, NodeType(..), LinkType, isTreeLink)
@@ -515,7 +515,7 @@ renderSVG containerSelector nodes = do
     container
 
   zoomGroup <- appendChild Group [ id_ "explorer-zoom-group" ] svg
-  _ <- appendChild Group [ id_ "treemap-watermark", class_ "watermark" ] zoomGroup  -- Watermark first (behind)
+  _ <- appendChild Group [ id_ "treemap-watermark", class_ "watermark" ] zoomGroup -- Watermark first (behind)
   _ <- appendChild Group [ id_ "explorer-links" ] zoomGroup
   nodesGroup <- appendChild Group [ id_ "explorer-nodes" ] zoomGroup
 
@@ -523,9 +523,9 @@ renderSVG containerSelector nodes = do
     [ cx (_.x :: SimNode -> Number)
     , cy (_.y :: SimNode -> Number)
     , radius (_.r :: SimNode -> Number)
-    , fill (nodeColor :: SimNode -> String)
-    , stroke "#fff"
-    , strokeWidth 0.5
+    , fill (nodeFill :: SimNode -> String)
+    , stroke (nodeColor :: SimNode -> String) -- Use color for stroke
+    , strokeWidth 1.0 -- Slightly thicker stroke for visibility
     , class_ nodeClass -- CSS class for type-based styling/transitions
     ]
     nodesGroup
@@ -550,25 +550,44 @@ renderSVG containerSelector nodes = do
     )
     nodeSel
 
-  -- Add clear highlight on mouse leave
-  _ <- on (onMouseLeave \_ -> clearClasses "#explorer-nodes" "circle" highlightClasses) nodeSel
+  -- Add combined mouse leave handler (clear highlight AND hide tooltip)
+  -- Note: D3 replaces event handlers, so we must combine both actions into one handler
+  _ <- on
+    ( onMouseLeave \_ -> do
+        clearClasses "#explorer-nodes" "circle" highlightClasses
+        Tooltip.hideTooltip
+    )
+    nodeSel
 
   -- Add tooltip on hover
   _ <- on (onTooltip formatNodeTooltip) nodeSel
-  _ <- on onTooltipHide nodeSel
 
   -- Add click to focus on neighborhood
   _ <- on (onClickWithDatum toggleFocus) nodeSel
 
   pure { nodeSel }
 
--- | Color by package cluster
+-- | Sequential color scale for nodes spanning light to dark
+-- | Maps cluster to color range for visual grouping
 nodeColor :: SimNode -> String
 nodeColor n =
   let
+    -- Normalize cluster to 0-1 range using golden angle for even distribution
     t = numMod (toNumber n.cluster * 0.618033988749895) 1.0
+  -- Blue range: very light blue (#eff3ff) to deep blue (#08519c)
+  -- Orange-red alternative: "#fff5eb" to "#d94801"
   in
-    interpolateTurbo t
+    interpolateHsl "#eff3ff" "#08519c" t
+
+-- interpolateHsl "#fff5eb" "#d94801" t
+
+-- | Fill color - hollow for unused modules, normal color for used modules
+nodeFill :: SimNode -> String
+nodeFill n = case n.nodeType of
+  PackageNode -> nodeColor n
+  ModuleNode ->
+    if n.isInTree then nodeColor n
+    else "none" -- Hollow for unused modules
 
 numMod :: Number -> Number -> Number
 numMod a b = a - b * toNumber (floor (a / b))
@@ -798,18 +817,20 @@ applyControlChange "layout" newLayout currentView =
     "tree", PackageGrid scope -> DependencyTree scope
     "tree", ModuleOrbit scope -> DependencyTree scope
     "tree", DependencyTree scope -> DependencyTree scope
-    _, other -> other  -- No change for other views
+    _, other -> other -- No change for other views
 
 applyControlChange "scope" newScope currentView =
-  let scope = if newScope == "project" then ProjectOnly else ProjectAndLibraries
-  in case currentView of
-    ModuleTreemap _ -> ModuleTreemap scope
-    PackageGrid _ -> PackageGrid scope
-    ModuleOrbit _ -> ModuleOrbit scope
-    DependencyTree _ -> DependencyTree scope
-    other -> other  -- Neighborhood/FunctionCalls don't have scope control
+  let
+    scope = if newScope == "project" then ProjectOnly else ProjectAndLibraries
+  in
+    case currentView of
+      ModuleTreemap _ -> ModuleTreemap scope
+      PackageGrid _ -> PackageGrid scope
+      ModuleOrbit _ -> ModuleOrbit scope
+      DependencyTree _ -> DependencyTree scope
+      other -> other -- Neighborhood/FunctionCalls don't have scope control
 
-applyControlChange _ _ view = view  -- Unknown control, no change
+applyControlChange _ _ view = view -- Unknown control, no change
 
 -- | Show ViewState for logging
 showViewState :: ViewState -> String
@@ -910,25 +931,28 @@ focusOnNeighborhood nodes sim = do
     case declResult of
       Left err -> log $ "[Explorer] Batch declarations error: " <> err
       Right _ -> pure unit
-    let declarations = case declResult of
-          Right decls -> decls
-          Left _ -> Object.empty
+    let
+      declarations = case declResult of
+        Right decls -> decls
+        Left _ -> Object.empty
 
     -- Batch fetch function calls (single request)
     fnCallResult <- fetchBatchFunctionCalls moduleNames
     case fnCallResult of
       Left err -> log $ "[Explorer] Batch function calls error: " <> err
       Right _ -> pure unit
-    let functionCalls = case fnCallResult of
-          Right fnCalls -> fnCalls
-          Left _ -> Object.empty
+    let
+      functionCalls = case fnCallResult of
+        Right fnCalls -> fnCalls
+        Left _ -> Object.empty
 
     -- Update global function calls ref so click/hover handlers can use it
     liftEffect $ Ref.write functionCalls globalFunctionCallsRef
 
     -- Log fetch summary
     liftEffect $ log $ "[Explorer] Batch fetched: " <> show (Object.size declarations) <> " modules with declarations, "
-      <> show (Object.size functionCalls) <> " function entries"
+      <> show (Object.size functionCalls)
+      <> " function entries"
 
     -- Render bubble packs with fetched declarations
     liftEffect do
@@ -1226,19 +1250,19 @@ renderNodesOnly :: Array SimNode -> D3v2M Unit
 renderNodesOnly nodes = do
   nodesGroup <- select "#explorer-nodes"
 
-  _ <- appendData Circle nodes
+  -- Capture the selection returned by appendData (don't discard it!)
+  nodeSel <- appendData Circle nodes
     [ cx (_.x :: SimNode -> Number)
     , cy (_.y :: SimNode -> Number)
     , radius (_.r :: SimNode -> Number)
-    , fill (nodeColor :: SimNode -> String)
-    , stroke "#fff"
-    , strokeWidth 0.5
+    , fill (nodeFill :: SimNode -> String)
+    , stroke (nodeColor :: SimNode -> String) -- Use color for stroke
+    , strokeWidth 1.0 -- Slightly thicker stroke for visibility
     , class_ nodeClass
     ]
     nodesGroup
 
-  -- Re-attach behaviors to new circles
-  circlesSel <- select "#explorer-nodes circle"
+  log "[Explorer] Reattaching event handlers to circles"
 
   -- Re-attach highlight behavior
   let highlightClasses = [ "highlighted-source", "highlighted-upstream", "highlighted-downstream", "dimmed" ]
@@ -1253,15 +1277,21 @@ renderNodesOnly nodes = do
           else if Set.member n.id sourceSet then "highlighted-downstream"
           else "dimmed"
     )
-    circlesSel
-  _ <- on (onMouseLeave \_ -> clearClasses "#explorer-nodes" "circle" highlightClasses) circlesSel
+    nodeSel
+
+  -- Combined mouse leave handler (clear highlight AND hide tooltip)
+  _ <- on
+    ( onMouseLeave \_ -> do
+        clearClasses "#explorer-nodes" "circle" highlightClasses
+        Tooltip.hideTooltip
+    )
+    nodeSel
 
   -- Re-attach tooltip
-  _ <- on (onTooltip formatNodeTooltip) circlesSel
-  _ <- on onTooltipHide circlesSel
+  _ <- on (onTooltip formatNodeTooltip) nodeSel
 
   -- Re-attach click handler
-  _ <- on (onClickWithDatum toggleFocus) circlesSel
+  _ <- on (onClickWithDatum toggleFocus) nodeSel
 
   pure unit
 
@@ -1305,7 +1335,8 @@ onDeclarationHover moduleName declarationName _kind = do
       let callerModules = Array.nub $ Array.mapMaybe extractModuleName fnInfo.calledBy
       -- Highlight the modules
       highlightCallGraph moduleName callerModules calleeModules
-      -- Hover hint could be added via a globalHintRef if needed
+
+-- Hover hint could be added via a globalHintRef if needed
 
 -- | Handle mouse leave from a declaration
 onDeclarationLeave :: Effect Unit
@@ -1315,23 +1346,25 @@ onDeclarationLeave = do
 -- | Extract module name from "Module.name" string
 extractModuleName :: String -> Maybe String
 extractModuleName fullName =
-  let parts = splitAtLastDot fullName
-  in if parts.module == "" then Nothing else Just parts.module
+  let
+    parts = splitAtLastDot fullName
+  in
+    if parts.module == "" then Nothing else Just parts.module
   where
   -- Split "Foo.Bar.baz" into { module: "Foo.Bar", name: "baz" }
   splitAtLastDot :: String -> { module :: String, name :: String }
   splitAtLastDot s =
-    let len = stringLength s
-        lastDotIdx = findLastDot s (len - 1)
-    in if lastDotIdx < 0
-       then { module: "", name: s }
-       else { module: substring 0 lastDotIdx s, name: substring (lastDotIdx + 1) len s }
+    let
+      len = stringLength s
+      lastDotIdx = findLastDot s (len - 1)
+    in
+      if lastDotIdx < 0 then { module: "", name: s }
+      else { module: substring 0 lastDotIdx s, name: substring (lastDotIdx + 1) len s }
 
   findLastDot :: String -> Int -> Int
   findLastDot _ (-1) = -1
   findLastDot str idx =
-    if charAt idx str == "."
-    then idx
+    if charAt idx str == "." then idx
     else findLastDot str (idx - 1)
 
   stringLength :: String -> Int
