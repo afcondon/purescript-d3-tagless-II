@@ -19,7 +19,8 @@ import Prelude
 
 -- | What's being shown and how
 data ViewState
-  = PackageGrid ScopeFilter
+  = ModuleTreemap ScopeFilter  -- Static treemap (initial view)
+  | PackageGrid ScopeFilter
   | ModuleOrbit ScopeFilter
   | DependencyTree ScopeFilter
   | Neighborhood String  -- module name
@@ -49,10 +50,19 @@ derive instance eqLayoutStyle :: Eq LayoutStyle
 -- | Returns { text, controls } where controls are the interactive bits
 describe :: ViewState -> { text :: String, controls :: Array Control }
 describe vs = case vs of
+  ModuleTreemap scope ->
+    { text: "[" <> layoutName <> "] of [" <> scopeName scope <> "] modules, sized by lines of code"
+    , controls:
+        [ { id: "layout", current: "treemap", options: ["treemap", "grid", "orbit"] }
+        , { id: "scope", current: showScope scope, options: ["project", "all"] }
+        ]
+    }
+    where layoutName = "Treemap"
+
   PackageGrid scope ->
     { text: "[" <> layoutName <> "] of [" <> scopeName scope <> "] packages"
     , controls:
-        [ { id: "layout", current: "grid", options: ["grid", "orbit"] }
+        [ { id: "layout", current: "grid", options: ["treemap", "grid", "orbit"] }
         , { id: "scope", current: showScope scope, options: ["project", "all"] }
         ]
     }
@@ -61,7 +71,7 @@ describe vs = case vs of
   ModuleOrbit scope ->
     { text: "[" <> layoutName <> "] of [" <> scopeName scope <> "] modules, grouped by package"
     , controls:
-        [ { id: "layout", current: "orbit", options: ["grid", "orbit", "tree"] }
+        [ { id: "layout", current: "orbit", options: ["treemap", "grid", "orbit", "tree"] }
         , { id: "scope", current: showScope scope, options: ["project", "all"] }
         ]
     }
@@ -70,7 +80,7 @@ describe vs = case vs of
   DependencyTree scope ->
     { text: "[" <> layoutName <> "] of [" <> scopeName scope <> "] module dependencies"
     , controls:
-        [ { id: "layout", current: "tree", options: ["orbit", "tree"] }
+        [ { id: "layout", current: "tree", options: ["treemap", "orbit", "tree"] }
         , { id: "scope", current: showScope scope, options: ["project", "all"] }
         ]
     }
@@ -116,24 +126,33 @@ showScope ProjectAndLibraries = "all"
 -- | What views can we reach from here?
 availableTransitions :: ViewState -> Array ViewState
 availableTransitions vs = case vs of
+  ModuleTreemap scope ->
+    [ PackageGrid scope
+    , ModuleOrbit scope
+    ]
+
   PackageGrid scope ->
-    [ ModuleOrbit scope
+    [ ModuleTreemap scope
+    , ModuleOrbit scope
     , DependencyTree scope
     ]
 
   ModuleOrbit scope ->
-    [ PackageGrid scope
+    [ ModuleTreemap scope
+    , PackageGrid scope
     , DependencyTree scope
     ]
 
   DependencyTree scope ->
-    [ PackageGrid scope
+    [ ModuleTreemap scope
+    , PackageGrid scope
     , ModuleOrbit scope
     ]
 
   Neighborhood _ ->
     -- From neighborhood, can go back to full views
-    [ PackageGrid ProjectAndLibraries
+    [ ModuleTreemap ProjectAndLibraries
+    , PackageGrid ProjectAndLibraries
     , DependencyTree ProjectAndLibraries
     ]
 

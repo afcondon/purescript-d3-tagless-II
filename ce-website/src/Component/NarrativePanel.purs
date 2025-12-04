@@ -465,6 +465,7 @@ findBracketedText s =
 
 -- | Helper to show ViewState for logging
 showViewState :: ViewState -> String
+showViewState (ModuleTreemap _) = "ModuleTreemap"
 showViewState (PackageGrid _) = "PackageGrid"
 showViewState (ModuleOrbit _) = "ModuleOrbit"
 showViewState (DependencyTree _) = "DependencyTree"

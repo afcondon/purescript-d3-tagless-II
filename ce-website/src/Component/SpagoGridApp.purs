@@ -214,6 +214,8 @@ handleControlChangeFromPanel controlId newValue = do
   case mStateRef of
     Just stateRef -> do
       case controlId, newView of
+        "layout", ModuleTreemap _ ->
+          Explorer.goToScene "Treemap" stateRef
         "layout", PackageGrid _ ->
           Explorer.goToScene "GridRun" stateRef
         "layout", ModuleOrbit _ ->
@@ -226,27 +228,32 @@ handleControlChangeFromPanel controlId newValue = do
 -- | Apply control change to ViewState
 applyControlChange :: String -> String -> ViewState -> ViewState
 applyControlChange "layout" newLayout currentView =
-  case newLayout, currentView of
-    "grid", PackageGrid scope -> PackageGrid scope
-    "grid", ModuleOrbit scope -> PackageGrid scope
-    "grid", DependencyTree scope -> PackageGrid scope
-    "orbit", PackageGrid scope -> ModuleOrbit scope
-    "orbit", ModuleOrbit scope -> ModuleOrbit scope
-    "orbit", DependencyTree scope -> ModuleOrbit scope
-    "tree", PackageGrid scope -> DependencyTree scope
-    "tree", ModuleOrbit scope -> DependencyTree scope
-    "tree", DependencyTree scope -> DependencyTree scope
-    _, other -> other
+  let scope = getScopeFromView currentView
+  in case newLayout of
+    "treemap" -> ModuleTreemap scope
+    "grid" -> PackageGrid scope
+    "orbit" -> ModuleOrbit scope
+    "tree" -> DependencyTree scope
+    _ -> currentView
 
 applyControlChange "scope" newScope currentView =
   let scope = if newScope == "project" then ProjectOnly else ProjectAndLibraries
   in case currentView of
+    ModuleTreemap _ -> ModuleTreemap scope
     PackageGrid _ -> PackageGrid scope
     ModuleOrbit _ -> ModuleOrbit scope
     DependencyTree _ -> DependencyTree scope
     other -> other
 
 applyControlChange _ _ view = view
+
+-- | Extract scope from any ViewState
+getScopeFromView :: ViewState -> ScopeFilter
+getScopeFromView (ModuleTreemap scope) = scope
+getScopeFromView (PackageGrid scope) = scope
+getScopeFromView (ModuleOrbit scope) = scope
+getScopeFromView (DependencyTree scope) = scope
+getScopeFromView _ = ProjectAndLibraries
 
 -- | Forward back button to Explorer (uses navigation stack)
 handleBackFromPanel :: Effect Unit
@@ -256,6 +263,7 @@ handleBackFromPanel = do
 
 -- | Helper to show ViewState for logging
 showViewState :: ViewState -> String
+showViewState (ModuleTreemap _) = "ModuleTreemap"
 showViewState (PackageGrid _) = "PackageGrid"
 showViewState (ModuleOrbit _) = "ModuleOrbit"
 showViewState (DependencyTree _) = "DependencyTree"
