@@ -26,10 +26,6 @@ import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Number (sqrt, abs)
 import Data.Tuple (Tuple(..))
-import Effect (Effect)
-import Effect.Unsafe (unsafePerformEffect)
-import Effect.Console (log) as Console
-import Data.Traversable (traverse_) as Array
 
 -- | Circle ID for map-based storage
 type CircleId = Int
@@ -359,8 +355,6 @@ initState c0 c1 c2 =
       , Tuple 2 c2'
       ]
 
-    _ = unsafePerformEffect $ Console.log $
-      "   Initial positions: c0=(" <> show c0'.x <> "," <> show c0'.y <> ") c1=(" <> show c1'.x <> "," <> show c1'.y <> ") c2=(" <> show c2'.x <> "," <> show c2'.y <> ")"
   in
     { circles
     , frontChain: [ 0, 2, 1 ] -- D3 order: a -> c -> b -> a (counterclockwise around boundary)
@@ -374,51 +368,28 @@ initState c0 c1 c2 =
 tryPlaceCircleWithLimit :: Int -> Circle -> CircleId -> CircleId -> PackState -> PackState
 tryPlaceCircleWithLimit maxRetries newCircle aId bId state
   | maxRetries <= 0 =
-      -- CRITICAL: We've exhausted retries! This means our retry logic is broken.
-      let
-        _ = unsafePerformEffect $ Console.log $ "❌ RETRY LIMIT HIT! Failed to place circle r=" <> show newCircle.r
-      in
-        insertBetween aId bId newCircle state -- Insert anyway to avoid dropping it
+      -- CRITICAL: We've exhausted retries! Insert anyway to avoid dropping it
+      insertBetween aId bId newCircle state
   | otherwise =
       case Map.lookup aId state.circles, Map.lookup bId state.circles of
         Just a, Just b ->
           let
-            -- Place circle tangent to pair
             positioned = place b a newCircle
-
-            -- Log placement attempt (reduced verbosity)
-            _ = unsafePerformEffect $ Console.log $
-              "  Try r=" <> show newCircle.r <> " at (" <> show aId <> "," <> show bId <> ")"
-
-            -- D3-style bidirectional collision search
             collisionResult = bidirectionalCollisionSearch aId bId positioned state
           in
             case collisionResult of
               NoCollision ->
-                let
-                  _ = unsafePerformEffect $ Console.log $ "    ✅ Placed at (" <> show positioned.x <> ", " <> show positioned.y <> ")"
-                in
-                  insertBetween aId bId positioned state
+                insertBetween aId bId positioned state
 
               CollisionFromJ jId ->
-                -- Collision walking forward: b = j, retry with (a, j)
-                -- D3: a.next = b, b.previous = a (splice out nodes between old b and j)
                 let
-                  _ = unsafePerformEffect $ Console.log $
-                    "    ⚠️ Collision at j=" <> show jId <> " - b:=" <> show jId
-                  -- Shorten chain: keep a, skip to j
                   shortenedChain = shortenChainOnly aId jId state.frontChain
                   stateWithShortenedChain = state { frontChain = shortenedChain }
                 in
                   tryPlaceCircleWithLimit (maxRetries - 1) newCircle aId jId stateWithShortenedChain
 
               CollisionFromK kId ->
-                -- Collision walking backward: a = k, retry with (k, b)
-                -- D3: a.next = b, b.previous = a (splice out nodes between k and old a)
                 let
-                  _ = unsafePerformEffect $ Console.log $
-                    "    ⚠️ Collision at k=" <> show kId <> " - a:=" <> show kId
-                  -- Shorten chain: skip from k to b
                   shortenedChain = shortenChainOnly kId bId state.frontChain
                   stateWithShortenedChain = state { frontChain = shortenedChain }
                 in
@@ -430,34 +401,14 @@ tryPlaceCircle = tryPlaceCircleWithLimit 100 -- Allow up to 100 retries
 
 addCircle :: Circle -> PackState -> PackState
 addCircle newCircle state =
-  let
-    _ = unsafePerformEffect $ Console.log $
-      "\n➤ Adding circle r=" <> show newCircle.r
-        <> " (total circles so far: "
-        <> show (Map.size state.circles)
-        <> ")"
-    _ = unsafePerformEffect $ Console.log $
-      "  Current front chain: " <> show state.frontChain
-  in
-    case findBestPair state of
-      Nothing -> state -- No pairs available (shouldn't happen)
-      Just (Tuple aId bId) ->
-        let
-          _ = unsafePerformEffect $ Console.log $
-            "  Best pair: (" <> show aId <> "," <> show bId <> ")"
-          result = tryPlaceCircle newCircle aId bId state
-        in
-          result
+  case findBestPair state of
+    Nothing -> state
+    Just (Tuple aId bId) -> tryPlaceCircle newCircle aId bId state
 
 -- | Pack siblings using map-based front-chain algorithm
 packSiblingsMap :: Array Circle -> { circles :: Array Circle, radius :: Number }
 packSiblingsMap inputCircles =
-  let
-    n = Array.length inputCircles
-    _ = unsafePerformEffect $ Console.log $
-      "📦 packSiblingsMap called with " <> show n <> " circles"
-    _ = unsafePerformEffect $ Console.log $
-      "   Radii: " <> show (map _.r inputCircles)
+  let n = Array.length inputCircles
   in
     if n == 0 then { circles: [], radius: 0.0 }
     else if n == 1 then
@@ -497,54 +448,9 @@ packSiblingsMap inputCircles =
             -- Translate to center
             translated = map (\c -> c { x = c.x - enclosing.x, y = c.y - enclosing.y }) positioned
 
-            -- Detect and report overlaps
-            overlaps = detectOverlaps translated
-            _ =
-              if Array.length overlaps > 0 then unsafePerformEffect $ Console.log $
-                "⚠️ OVERLAPS DETECTED: " <> show (Array.length overlaps) <> " pairs"
-              else unit
-            _ = unsafePerformEffect $ reportOverlaps overlaps
           in
             { circles: translated, radius: enclosing.r }
         _, _, _ -> { circles: [], radius: 0.0 }
-
--- | Detect all pairwise overlaps in final positioned circles
-detectOverlaps :: Array Circle -> Array { i :: Int, j :: Int, overlap :: Number }
-detectOverlaps circles =
-  let
-    n = Array.length circles
-    pairs = do
-      i <- Array.range 0 (n - 2)
-      j <- Array.range (i + 1) (n - 1)
-      pure (Tuple i j)
-  in
-    Array.mapMaybe (checkPair circles) pairs
-  where
-  checkPair :: Array Circle -> Tuple Int Int -> Maybe { i :: Int, j :: Int, overlap :: Number }
-  checkPair cs (Tuple i j) = do
-    ci <- Array.index cs i
-    cj <- Array.index cs j
-    let
-      dx = cj.x - ci.x
-      dy = cj.y - ci.y
-      dist = sqrt (dx * dx + dy * dy)
-      minDist = ci.r + cj.r
-      overlap = minDist - dist
-    -- Report if overlap > small tolerance (not just touching)
-    if overlap > 0.1 then Just { i, j, overlap }
-    else Nothing
-
--- | Report overlaps to console
-reportOverlaps :: Array { i :: Int, j :: Int, overlap :: Number } -> Effect Unit
-reportOverlaps overlaps =
-  Array.traverse_
-    ( \o ->
-        Console.log $ "  Overlap: circles " <> show o.i <> " and " <> show o.j
-          <> " overlap by "
-          <> show o.overlap
-          <> " pixels"
-    )
-    overlaps
 
 -- ============================================================================
 -- ENCLOSING CIRCLE (from Pack.purs)
