@@ -53,16 +53,16 @@ describe vs = case vs of
   ModuleTreemap scope ->
     { text: "[" <> layoutName <> "] of [" <> scopeName scope <> "] modules, sized by lines of code"
     , controls:
-        [ { id: "layout", current: "treemap", options: ["treemap", "grid", "orbit"] }
+        [ { id: "layout", current: "grid", options: ["grid", "orbit"] }
         , { id: "scope", current: showScope scope, options: ["project", "all"] }
         ]
     }
-    where layoutName = "Treemap"
+    where layoutName = "Grid"
 
   PackageGrid scope ->
     { text: "[" <> layoutName <> "] of [" <> scopeName scope <> "] packages"
     , controls:
-        [ { id: "layout", current: "grid", options: ["treemap", "grid", "orbit"] }
+        [ { id: "layout", current: "grid", options: ["grid", "orbit"] }
         , { id: "scope", current: showScope scope, options: ["project", "all"] }
         ]
     }
@@ -71,7 +71,7 @@ describe vs = case vs of
   ModuleOrbit scope ->
     { text: "[" <> layoutName <> "] of [" <> scopeName scope <> "] modules, grouped by package"
     , controls:
-        [ { id: "layout", current: "orbit", options: ["treemap", "grid", "orbit", "tree"] }
+        [ { id: "layout", current: "orbit", options: ["grid", "orbit", "tree"] }
         , { id: "scope", current: showScope scope, options: ["project", "all"] }
         ]
     }
@@ -80,7 +80,7 @@ describe vs = case vs of
   DependencyTree scope ->
     { text: "[" <> layoutName <> "] of [" <> scopeName scope <> "] module dependencies"
     , controls:
-        [ { id: "layout", current: "tree", options: ["treemap", "orbit", "tree"] }
+        [ { id: "layout", current: "tree", options: ["grid", "orbit", "tree"] }
         , { id: "scope", current: showScope scope, options: ["project", "all"] }
         ]
     }

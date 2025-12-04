@@ -302,62 +302,47 @@ updateWithModel model stateRef = do
 -- | Go to a named scene
 goToScene :: String -> Ref Scene.SceneState -> Effect Unit
 goToScene sceneName stateRef = do
-  -- Handle Treemap specially - it's not a simulation scene
-  if sceneName == "Treemap" then do
-    log "[Explorer] Switching to Treemap view"
-    state <- Ref.read stateRef
-    nodes <- Sim.getNodes state.simulation
-    -- Stop simulation and render treemap
-    Sim.stop state.simulation
-    clearTreeLinks
-    setTreeSceneClass false
-    Treemap.renderTreemap nodes
-  else do
-    let
-      mScene = case sceneName of
-        "GridForm" -> Just Scenes.gridFormScene
-        "GridRun" -> Just Scenes.gridRunScene
-        "OrbitForm" -> Just Scenes.orbitFormScene
-        "OrbitRun" -> Just Scenes.orbitRunScene
-        "TreeForm" -> Just Scenes.treeFormScene
-        "TreeRun" -> Just Scenes.treeRunScene
-        _ -> Nothing
-    case mScene of
-      Just scene -> do
-        -- Handle TreeForm: render tree bezier links
-        when (sceneName == "TreeForm") do
-          state <- Ref.read stateRef
-          nodes <- Sim.getNodes state.simulation
-          clearTreeLinks -- Clear any existing links
-          renderTreeLinks nodes
-          setTreeSceneClass true
+  let
+    mScene = case sceneName of
+      "GridForm" -> Just Scenes.gridFormScene
+      "GridRun" -> Just Scenes.gridRunScene
+      "OrbitForm" -> Just Scenes.orbitFormScene
+      "OrbitRun" -> Just Scenes.orbitRunScene
+      "TreeForm" -> Just Scenes.treeFormScene
+      "TreeRun" -> Just Scenes.treeRunScene
+      _ -> Nothing
+  case mScene of
+    Just scene -> do
+      -- Handle TreeForm: render tree bezier links
+      when (sceneName == "TreeForm") do
+        state <- Ref.read stateRef
+        nodes <- Sim.getNodes state.simulation
+        clearTreeLinks -- Clear any existing links
+        renderTreeLinks nodes
+        setTreeSceneClass true
 
-        -- Handle TreeRun: force-directed tree with link forces
-        when (sceneName == "TreeRun") do
-          state <- Ref.read stateRef
-          nodes <- Sim.getNodes state.simulation
-          links <- Ref.read globalLinksRef
-          clearTreeLinks -- Remove any existing links
-          addTreeForces nodes links state.simulation
-          renderForceLinks nodes links -- Render straight line links
-          Scene.setLinksGroupId forceLinksGroupId stateRef -- Enable link updates
-          setTreeSceneClass true -- Keep packages/non-tree faded
+      -- Handle TreeRun: force-directed tree with link forces
+      when (sceneName == "TreeRun") do
+        state <- Ref.read stateRef
+        nodes <- Sim.getNodes state.simulation
+        links <- Ref.read globalLinksRef
+        clearTreeLinks -- Remove any existing links
+        addTreeForces nodes links state.simulation
+        renderForceLinks nodes links -- Render straight line links
+        Scene.setLinksGroupId forceLinksGroupId stateRef -- Enable link updates
+        setTreeSceneClass true -- Keep packages/non-tree faded
 
-        -- For Grid/Orbit scenes: restore grid forces, clear tree stuff, and re-render circles
-        when (isGridOrOrbitScene sceneName) do
-          state <- Ref.read stateRef
-          nodes <- Sim.getNodes state.simulation
-          restoreGridForces nodes state.simulation
-          clearTreeLinks -- Clear any force links
-          Scene.clearLinksGroupId stateRef -- Disable link updates
-          setTreeSceneClass false
-          -- Re-render circles (in case coming from treemap)
-          clearNodesGroup
-          _ <- runD3v2M $ renderNodesOnly nodes
-          pure unit
+      -- For Grid/Orbit scenes: restore grid forces, clear tree stuff, and re-render circles
+      when (isGridOrOrbitScene sceneName) do
+        state <- Ref.read stateRef
+        nodes <- Sim.getNodes state.simulation
+        restoreGridForces nodes state.simulation
+        clearTreeLinks -- Clear any force links
+        Scene.clearLinksGroupId stateRef -- Disable link updates
+        setTreeSceneClass false
 
-        Scene.transitionTo scene stateRef
-      Nothing -> log $ "[Explorer] Unknown scene: " <> sceneName
+      Scene.transitionTo scene stateRef
+    Nothing -> log $ "[Explorer] Unknown scene: " <> sceneName
   where
   isGridOrOrbitScene name = name == "GridForm" || name == "GridRun" || name == "OrbitForm" || name == "OrbitRun"
 
@@ -779,10 +764,6 @@ handleControlChange controlId newValue = do
     Just stateRef -> do
       -- Use Scene.transitionTo for proper DumbEngine → Physics handoff
       case controlId, newView of
-        "layout", ModuleTreemap _ -> do
-          log "[Explorer] Transitioning to treemap view"
-          goToScene "Treemap" stateRef
-
         "layout", PackageGrid _ -> do
           log "[Explorer] Transitioning to grid scene"
           Scene.transitionTo Scenes.gridRunScene stateRef
@@ -805,10 +786,6 @@ handleControlChange controlId newValue = do
 applyControlChange :: String -> String -> ViewState -> ViewState
 applyControlChange "layout" newLayout currentView =
   case newLayout, currentView of
-    "treemap", ModuleTreemap scope -> ModuleTreemap scope
-    "treemap", PackageGrid scope -> ModuleTreemap scope
-    "treemap", ModuleOrbit scope -> ModuleTreemap scope
-    "treemap", DependencyTree scope -> ModuleTreemap scope
     "grid", ModuleTreemap scope -> PackageGrid scope
     "grid", PackageGrid scope -> PackageGrid scope
     "grid", ModuleOrbit scope -> PackageGrid scope

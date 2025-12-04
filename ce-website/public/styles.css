@@ -788,3 +788,47 @@ line.highlight-dimmed {
 .tangle-dropdown-item--active::before {
   content: "• ";
 }
+
+/* =============================================================================
+   Treemap Styles
+   ============================================================================= */
+
+/* Package labels - semi-transparent by default */
+.treemap-package-label {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Show all labels fully on treemap hover */
+#treemap-group:hover .treemap-package-label {
+  opacity: 1.0 !important;
+  transition: opacity 0.2s ease;
+}
+
+/* Individual package rect hover effect */
+.treemap-package:hover {
+  stroke: #000;
+  stroke-width: 0.5;
+  transition: stroke 0.15s ease, stroke-width 0.15s ease;
+}
+
+.treemap-module:hover {
+  stroke: #111;
+  stroke-width: 0.3;
+  transition: stroke 0.15s ease, stroke-width 0.15s ease;
+}
+
+/* =============================================================================
+   Watermark Treemap Styles
+   ============================================================================= */
+
+/* Watermark package rects - enable hover interaction */
+.watermark-package {
+  cursor: pointer;
+}
+
+/* Watermark labels - semi-transparent by default, full opacity on hover via JS */
+.watermark-package-label {
+  pointer-events: none;
+  user-select: none;
+}

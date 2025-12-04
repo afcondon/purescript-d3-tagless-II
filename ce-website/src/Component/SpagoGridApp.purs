@@ -214,8 +214,6 @@ handleControlChangeFromPanel controlId newValue = do
   case mStateRef of
     Just stateRef -> do
       case controlId, newView of
-        "layout", ModuleTreemap _ ->
-          Explorer.goToScene "Treemap" stateRef
         "layout", PackageGrid _ ->
           Explorer.goToScene "GridRun" stateRef
         "layout", ModuleOrbit _ ->
@@ -230,7 +228,6 @@ applyControlChange :: String -> String -> ViewState -> ViewState
 applyControlChange "layout" newLayout currentView =
   let scope = getScopeFromView currentView
   in case newLayout of
-    "treemap" -> ModuleTreemap scope
     "grid" -> PackageGrid scope
     "orbit" -> ModuleOrbit scope
     "tree" -> DependencyTree scope

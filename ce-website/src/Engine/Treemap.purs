@@ -29,7 +29,7 @@ import PSD3.Scale (interpolateTurbo)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M)
 import PSD3v2.Capabilities.Selection (select, appendChild, appendData)
 import PSD3v2.Selection.Types (ElementType(..), SBoundOwns)
-import PSD3v2.Attribute.Types (id_, class_, fill, stroke, strokeWidth, opacity, x, y, width, height, transform)
+import PSD3v2.Attribute.Types (id_, class_, fill, stroke, strokeWidth, opacity, x, y, width, height, transform, fontFamily, fontSize, textAnchor, textContent)
 import Types (SimNode, NodeType(..))
 import Viz.SpagoGridTest.GridLayout as GridLayout
 import Web.DOM.Element (Element)
@@ -57,8 +57,8 @@ tmChildren (TMModule _) = Nothing
 
 -- | Get LOC value for a node (modules only)
 tmValue :: TreemapData -> Number
-tmValue (TMRoot _) = 0.0  -- Internal nodes get value from children
-tmValue (TMPackage _) = 0.0  -- Internal nodes get value from children
+tmValue (TMRoot _) = 0.0 -- Internal nodes get value from children
+tmValue (TMPackage _) = 0.0 -- Internal nodes get value from children
 tmValue (TMModule { loc }) = loc
 
 -- | Get package index for coloring
@@ -100,40 +100,44 @@ buildTreemapData nodes =
 
     -- Build package name -> index map for coloring
     packageIndexMap = Object.fromFoldable $ Array.mapWithIndex
-      (\idx pkg -> Tuple pkg.name idx) packages
+      (\idx pkg -> Tuple pkg.name idx)
+      packages
 
     -- Group modules by package
     modulesByPackage :: Object.Object (Array SimNode)
     modulesByPackage = foldl groupByPackage Object.empty modules
 
     groupByPackage acc mod =
-      let existing = case Object.lookup mod.package acc of
-            Just arr -> arr
-            Nothing -> []
-      in Object.insert mod.package (Array.snoc existing mod) acc
+      let
+        existing = case Object.lookup mod.package acc of
+          Just arr -> arr
+          Nothing -> []
+      in
+        Object.insert mod.package (Array.snoc existing mod) acc
 
     -- Convert to TreemapData structure
     packageNodes = Array.mapMaybe mkPackageNode packages
 
     mkPackageNode pkg =
       case Object.lookup pkg.name modulesByPackage of
-        Nothing -> Nothing  -- Skip packages with no modules
+        Nothing -> Nothing -- Skip packages with no modules
         Just mods ->
           let
             pkgIdx = case Object.lookup pkg.name packageIndexMap of
               Just i -> i
               Nothing -> 0
             moduleNodes = map (mkModuleNode pkgIdx) mods
-          in Just $ TMPackage
-            { name: pkg.name
-            , packageIndex: pkgIdx
-            , children: moduleNodes
-            }
+          in
+            Just $ TMPackage
+              { name: pkg.name
+              , packageIndex: pkgIdx
+              , children: moduleNodes
+              }
 
     mkModuleNode pkgIdx mod = TMModule
       { name: mod.name
       , packageIndex: pkgIdx
-      , loc: mod.r * mod.r  -- r is sqrt(LOC), so r^2 gives LOC
+      , loc: mod.r * mod.r -- r is sqrt(LOC), so r^2 gives LOC
       }
   in
     TMRoot { children: packageNodes }
@@ -146,10 +150,10 @@ buildTreemapData nodes =
 treemapConfig :: TreemapConfig TreemapData
 treemapConfig = defaultTreemapConfig
   { size = { width: GridLayout.viewBoxWidth, height: GridLayout.viewBoxHeight }
-  , tile = squarify 1.0  -- Golden ratio gives nice proportions
+  , tile = squarify 1.0 -- Golden ratio gives nice proportions
   , paddingInner = 2.0
   , paddingOuter = 4.0
-  , paddingTop = 20.0  -- Extra space at top for package labels
+  , paddingTop = 20.0 -- Extra space at top for package labels
   }
 
 -- | Compute treemap layout from data
@@ -225,12 +229,14 @@ renderTreemapSVG packageNodes moduleNodes = do
 
   -- Create treemap container group with transform to center in viewBox
   -- ViewBox is centered at origin, so translate by (-width/2, -height/2)
-  let translateX = (-GridLayout.viewBoxWidth) / 2.0
-      translateY = (-GridLayout.viewBoxHeight) / 2.0
+  let
+    translateX = (-GridLayout.viewBoxWidth) / 2.0
+    translateY = (-GridLayout.viewBoxHeight) / 2.0
   treemapGroup <- appendChild Group
     [ id_ "treemap-group"
     , transform ("translate(" <> show translateX <> "," <> show translateY <> ")")
-    ] nodesGroup
+    ]
+    nodesGroup
 
   -- Render package backgrounds (depth 1)
   _ <- appendData Rect packageNodes
@@ -239,11 +245,12 @@ renderTreemapSVG packageNodes moduleNodes = do
     , width ((\n -> n.x1 - n.x0) :: TreemapLeaf -> Number)
     , height ((\n -> n.y1 - n.y0) :: TreemapLeaf -> Number)
     , fill (packageColor)
-    , stroke "#fff"
-    , strokeWidth 1.0
-    , opacity 0.3
+    , stroke "#222"
+    , strokeWidth 0.3
+    , opacity 1.0
     , class_ "treemap-package"
-    ] treemapGroup
+    ]
+    treemapGroup
 
   -- Render module rectangles (depth 2)
   _ <- appendData Rect moduleNodes
@@ -252,22 +259,37 @@ renderTreemapSVG packageNodes moduleNodes = do
     , width ((\n -> n.x1 - n.x0) :: TreemapLeaf -> Number)
     , height ((\n -> n.y1 - n.y0) :: TreemapLeaf -> Number)
     , fill (moduleColor)
-    , stroke "#fff"
-    , strokeWidth 0.5
+    , stroke "#333"
+    , strokeWidth 0.2
     , class_ "treemap-module"
-    ] treemapGroup
+    ]
+    treemapGroup
+
+  -- Render package labels (all packages, no filtering)
+  log $ "[Treemap] Rendering labels for " <> show (Array.length packageNodes) <> " packages"
+  _ <- appendData Text packageNodes
+    [ x ((\n -> (n.x0 + n.x1) / 2.0) :: TreemapLeaf -> Number)
+    , y ((\n -> n.y0 + 14.0) :: TreemapLeaf -> Number) -- Near top
+    , textAnchor "middle"
+    , fill "#222"
+    , fontFamily "Monaco, 'Courier New', monospace"
+    , fontSize 10.0
+    , opacity 0.3  -- Semi-transparent by default
+    , class_ "treemap-package-label"
+    , textContent (_.name :: TreemapLeaf -> String)
+    ]
+    treemapGroup
+  log "[Treemap] Labels rendered"
 
   pure unit
 
--- | Color for package background
+-- | Color for package background (monochromatic - light gray)
 packageColor :: TreemapLeaf -> String
-packageColor leaf =
-  let t = numMod (toNumber leaf.packageIndex * 0.618033988749895) 1.0
-  in interpolateTurbo t
+packageColor _ = "#f8f8f8"
 
--- | Color for module rectangle (same as package but more saturated)
+-- | Color for module rectangle (monochromatic - slightly darker gray)
 moduleColor :: TreemapLeaf -> String
-moduleColor = packageColor  -- Use same color scheme
+moduleColor _ = "#ececec"
 
 -- | Helper for golden ratio distribution
 numMod :: Number -> Number -> Number
@@ -297,6 +319,9 @@ clearNodesGroup = do
 
 -- | Clear all children of an element
 foreign import clearElement :: Element -> Effect Unit
+
+-- | Set up hover interactions for watermark labels
+foreign import setupWatermarkHover :: Effect Unit
 
 -- =============================================================================
 -- Treemap-Anchored Positioning
@@ -381,6 +406,10 @@ renderWatermark nodes = do
 
   -- Render into watermark group
   _ <- runD3v2M $ renderWatermarkSVG packageNodes
+
+  -- Set up hover interactions (must be done after DOM is ready)
+  setupWatermarkHover
+
   log "[Treemap] Watermark render complete"
 
 -- | Render the watermark using D3
@@ -390,12 +419,15 @@ renderWatermarkSVG packageNodes = do
   watermarkGroup <- select "#treemap-watermark"
 
   -- Add transform to center in viewBox
-  let translateX = (-GridLayout.viewBoxWidth) / 2.0
-      translateY = (-GridLayout.viewBoxHeight) / 2.0
+  let
+    translateX = (-GridLayout.viewBoxWidth) / 2.0
+    translateY = (-GridLayout.viewBoxHeight) / 2.0
   -- Create inner group with transform (since we can't set attrs on selection directly)
   innerGroup <- appendChild Group
     [ transform ("translate(" <> show translateX <> "," <> show translateY <> ")")
-    ] watermarkGroup
+    , id_ "watermark-inner"
+    ]
+    watermarkGroup
 
   -- Render package rectangles with muted styling
   _ <- appendData Rect packageNodes
@@ -404,19 +436,34 @@ renderWatermarkSVG packageNodes = do
     , width ((\n -> n.x1 - n.x0) :: TreemapLeaf -> Number)
     , height ((\n -> n.y1 - n.y0) :: TreemapLeaf -> Number)
     , fill (watermarkColor)
-    , stroke "#333"
-    , strokeWidth 0.5
-    , opacity 0.15  -- Very subtle
+    , stroke "#222"
+    , strokeWidth 0.3
+    , opacity 0.5
     , class_ "watermark-package"
-    ] innerGroup
+    ]
+    innerGroup
+
+  -- Render package labels
+  log $ "[Treemap] Rendering watermark labels for " <> show (Array.length packageNodes) <> " packages"
+  _ <- appendData Text packageNodes
+    [ x ((\n -> (n.x0 + n.x1) / 2.0) :: TreemapLeaf -> Number)
+    , y ((\n -> n.y0 + 14.0) :: TreemapLeaf -> Number) -- Near top
+    , textAnchor "middle"
+    , fill "#222"
+    , fontFamily "Monaco, 'Courier New', monospace"
+    , fontSize 10.0
+    , opacity 0.3  -- Semi-transparent by default, full opacity on hover
+    , class_ "watermark-package-label"
+    , textContent (_.name :: TreemapLeaf -> String)
+    ]
+    innerGroup
+  log "[Treemap] Watermark labels rendered"
 
   pure unit
 
--- | Muted color for watermark packages
+-- | Muted color for watermark packages (monochromatic)
 watermarkColor :: TreemapLeaf -> String
-watermarkColor leaf =
-  let t = numMod (toNumber leaf.packageIndex * 0.618033988749895) 1.0
-  in interpolateTurbo t
+watermarkColor _ = "#f0f0f0"
 
 -- | Clear the watermark
 clearWatermark :: Effect Unit
@@ -427,4 +474,4 @@ clearWatermark = do
   mElement <- querySelector (QuerySelector "#treemap-watermark") parentNode
   case mElement of
     Just watermarkGroup -> clearElement watermarkGroup
-    Nothing -> pure unit  -- No watermark to clear
+    Nothing -> pure unit -- No watermark to clear
