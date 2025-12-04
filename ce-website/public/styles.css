@@ -626,6 +626,27 @@ line.highlight-dimmed {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  max-height: 200px; /* ~12 items comfortably */
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+
+.color-key-items::-webkit-scrollbar {
+  width: 6px;
+}
+
+.color-key-items::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.color-key-items::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 3px;
+}
+
+.color-key-items::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-light);
 }
 
 .color-key-item {
@@ -646,4 +667,57 @@ line.highlight-dimmed {
   font-size: 0.6875rem; /* 11px */
   color: var(--color-text-dark);
   letter-spacing: var(--letter-spacing-normal);
+}
+
+/* =============================================================================
+   TangleJS-style Interactive Controls
+   ============================================================================= */
+
+/* Clickable control - has options */
+.tangle-control {
+  color: var(--color-blue-accent, #2563eb);
+  cursor: pointer;
+  border-bottom: 1px dashed currentColor;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.tangle-control:hover {
+  color: var(--color-text-dark);
+  border-bottom-style: solid;
+}
+
+/* Non-interactive highlighted value */
+.tangle-value {
+  color: var(--color-text-dark);
+  font-weight: 500;
+}
+
+/* Dropdown for control options */
+.tangle-dropdown {
+  background: var(--color-beige, #f5f5dc);
+  border: 1px solid var(--color-line, #ccc);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 120px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.tangle-dropdown-item {
+  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.tangle-dropdown-item:hover {
+  background-color: var(--color-beige-dark, #e8e8d0);
+}
+
+.tangle-dropdown-item--active {
+  font-weight: bold;
+  color: var(--color-blue-accent, #2563eb);
+}
+
+.tangle-dropdown-item--active::before {
+  content: "• ";
 }

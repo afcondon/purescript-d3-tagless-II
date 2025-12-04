@@ -14,6 +14,9 @@ module API.Legacy
   -- Granular module endpoints
   , moduleDeclarationsJson
   , moduleFunctionCallsJson
+  -- Batch endpoints
+  , batchFunctionCallsJson
+  , batchDeclarationsJson
   ) where
 
 import Prelude
@@ -57,15 +60,16 @@ foreign import buildModulesJson :: Array Foreign -> String
 -- =============================================================================
 
 -- | Returns packages in format: { "package-name": { depends: [] } }
+-- | Derived from modules table to only include packages that have modules
 packagesJson :: Database -> Int -> Aff Response
 packagesJson db snapshotId = do
   rows <- queryAllParams db """
-    SELECT
-      name,
-      depends
-    FROM packages
-    WHERE snapshot_id = ?
-    ORDER BY name
+    SELECT DISTINCT
+      m.package as name,
+      '[]' as depends
+    FROM modules m
+    WHERE m.snapshot_id = ?
+    ORDER BY m.package
   """ [unsafeToForeign snapshotId]
   let json = buildPackagesJson rows
   ok' jsonHeaders json
@@ -264,3 +268,39 @@ moduleFunctionCallsJson db snapshotId moduleName = do
   ok' jsonHeaders json
 
 foreign import buildModuleFunctionCallsJson :: String -> Array Foreign -> String
+
+-- =============================================================================
+-- /api/batch-function-calls/:modules (comma-separated)
+-- =============================================================================
+
+-- | Returns function calls for multiple modules at once
+-- | Input: comma-separated module names like "Module.A,Module.B,Module.C"
+-- | Output: { "Module.A.func": {...}, "Module.B.func": {...} }
+batchFunctionCallsJson :: Database -> Int -> String -> Aff Response
+batchFunctionCallsJson db snapshotId modulesStr = do
+  -- Build query with IN clause (DuckDB doesn't support ANY with arrays)
+  let query = buildBatchFunctionCallsQuery snapshotId modulesStr
+  rows <- queryAll db query
+  let json = buildBatchFunctionCallsJson rows
+  ok' jsonHeaders json
+
+foreign import buildBatchFunctionCallsJson :: Array Foreign -> String
+foreign import buildBatchFunctionCallsQuery :: Int -> String -> String
+
+-- =============================================================================
+-- /api/batch-declarations/:modules (comma-separated)
+-- =============================================================================
+
+-- | Returns declarations for multiple modules at once
+-- | Input: comma-separated module names like "Module.A,Module.B,Module.C"
+-- | Output: { "Module.A": [{kind, title}], "Module.B": [{kind, title}] }
+batchDeclarationsJson :: Database -> Int -> String -> Aff Response
+batchDeclarationsJson db snapshotId modulesStr = do
+  -- Build query with IN clause (DuckDB doesn't support ANY with arrays)
+  let query = buildBatchDeclarationsQuery snapshotId modulesStr
+  rows <- queryAll db query
+  let json = buildBatchDeclarationsJson rows
+  ok' jsonHeaders json
+
+foreign import buildBatchDeclarationsJson :: Array Foreign -> String
+foreign import buildBatchDeclarationsQuery :: Int -> String -> String

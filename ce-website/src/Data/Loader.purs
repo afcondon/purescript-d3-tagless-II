@@ -18,6 +18,9 @@ module Data.Loader
   , fetchModuleFunctionCalls
   , ModuleDeclarationsResponse
   , ModuleFunctionCallsResponse
+  -- Batch fetchers (single request for multiple modules)
+  , fetchBatchDeclarations
+  , fetchBatchFunctionCalls
   -- Types
   , LoadedModel
   , Project
@@ -50,6 +53,7 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Number (pi, cos, sin, sqrt)
 import Data.Nullable (null)
 import Data.String.CodeUnits as SCU
+import Data.String.Common (joinWith)
 import Data.String.Pattern (Pattern(..))
 import Control.Comonad.Cofree (head, tail)
 import Data.Tree (Tree, mkTree)
@@ -316,6 +320,32 @@ fetchModuleFunctionCalls moduleName = do
   pure $ do
     json <- result
     response :: ModuleFunctionCallsResponse <- decodeJson json # mapLeft printJsonDecodeError
+    Right response.functions
+
+-- =============================================================================
+-- Batch Fetchers (single request for multiple modules)
+-- =============================================================================
+
+-- | Fetch declarations for multiple modules in a single request
+-- | Returns DeclarationsMap: { "ModuleName": [{ kind, title }] }
+fetchBatchDeclarations :: Array String -> Aff (Either String DeclarationsMap)
+fetchBatchDeclarations moduleNames = do
+  let modulesParam = joinWith "," moduleNames
+  result <- fetchJson (apiBaseUrl <> "/api/batch-declarations/" <> modulesParam)
+  pure $ do
+    json <- result
+    declarations :: DeclarationsMap <- decodeJson json # mapLeft printJsonDecodeError
+    Right declarations
+
+-- | Fetch function calls for multiple modules in a single request
+-- | Returns FunctionCallsMap: { "Module.func": { module, name, calls, calledBy } }
+fetchBatchFunctionCalls :: Array String -> Aff (Either String FunctionCallsMap)
+fetchBatchFunctionCalls moduleNames = do
+  let modulesParam = joinWith "," moduleNames
+  result <- fetchJson (apiBaseUrl <> "/api/batch-function-calls/" <> modulesParam)
+  pure $ do
+    json <- result
+    response :: FunctionCallsResponse <- decodeJson json # mapLeft printJsonDecodeError
     Right response.functions
 
 -- | Load model for a specific snapshot ID

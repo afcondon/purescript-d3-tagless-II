@@ -8,8 +8,6 @@ module Engine.BubblePack
   ( renderModulePack
   , renderModulePackWithCallbacks
   , ModulePackData
-  , renderColorLegend
-  , clearColorLegend
   , highlightCallGraph
   , clearCallGraphHighlight
   , DeclarationClickCallback
@@ -63,18 +61,6 @@ foreign import renderReexportModule_
   -> SimNode -- Node (bound to group as __data__)
   -> Boolean -- isReexport (true = re-export, false = empty)
   -> Effect Unit
-
--- | FFI for color legend
-foreign import renderColorLegend_ :: Effect Unit
-foreign import clearColorLegend_ :: Effect Unit
-
--- | Render the color legend (shows declaration types)
-renderColorLegend :: Effect Unit
-renderColorLegend = renderColorLegend_
-
--- | Clear the color legend
-clearColorLegend :: Effect Unit
-clearColorLegend = clearColorLegend_
 
 -- | Render a re-export or empty module
 renderReexportModule :: SimNode -> Boolean -> Effect Unit

@@ -218,3 +218,95 @@ export function buildModuleFunctionCallsJson(moduleName) {
     return JSON.stringify({ module: moduleName, functions });
   };
 }
+
+// =============================================================================
+// batch function-calls builder
+// =============================================================================
+
+export function buildBatchFunctionCallsJson(rows) {
+  // Build functions object: { "Module.func": { module, name, calls, calledBy } }
+  // Same format as full function-calls.json but filtered to requested modules
+  const functions = {};
+
+  for (const row of rows) {
+    const key = `${row.module}.${row.name}`;
+    functions[key] = {
+      module: row.module,
+      name: row.name,
+      calls: JSON.parse(row.calls || '[]'),
+      calledBy: JSON.parse(row.called_by || '[]')
+    };
+  }
+
+  return JSON.stringify({ functions });
+}
+
+// =============================================================================
+// batch declarations builder
+// =============================================================================
+
+export function buildBatchDeclarationsJson(rows) {
+  // Group by module: { "ModuleName": [{ kind, title }] }
+  const result = {};
+  for (const row of rows) {
+    if (!result[row.module]) {
+      result[row.module] = [];
+    }
+    result[row.module].push({
+      kind: row.kind,
+      title: row.title
+    });
+  }
+  return JSON.stringify(result);
+}
+
+// =============================================================================
+// Helper: split comma-separated modules string
+// =============================================================================
+
+export function splitModules(str) {
+  return str.split(',').map(s => s.trim()).filter(s => s.length > 0);
+}
+
+// =============================================================================
+// SQL query builders for batch endpoints (DuckDB compatible)
+// =============================================================================
+
+// Build SQL IN clause with proper escaping
+function buildInClause(values) {
+  return values.map(v => `'${v.replace(/'/g, "''")}'`).join(', ');
+}
+
+// Build batch function calls query
+export function buildBatchFunctionCallsQuery(snapshotId) {
+  return function(modulesStr) {
+    const modules = splitModules(modulesStr);
+    if (modules.length === 0) {
+      return `SELECT module, name, calls, called_by FROM function_calls WHERE 1=0`;
+    }
+    const inClause = buildInClause(modules);
+    return `
+      SELECT module, name, calls, called_by
+      FROM function_calls
+      WHERE snapshot_id = ${parseInt(snapshotId, 10)} AND module IN (${inClause})
+      ORDER BY module, name
+    `;
+  };
+}
+
+// Build batch declarations query
+export function buildBatchDeclarationsQuery(snapshotId) {
+  return function(modulesStr) {
+    const modules = splitModules(modulesStr);
+    if (modules.length === 0) {
+      return `SELECT module, kind, title FROM declarations WHERE 1=0`;
+    }
+    const inClause = buildInClause(modules);
+    return `
+      SELECT module, kind, title
+      FROM declarations
+      WHERE snapshot_id = ${parseInt(snapshotId, 10)} AND module IN (${inClause})
+      ORDER BY module, title
+    `;
+  };
+}

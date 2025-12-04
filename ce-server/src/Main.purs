@@ -33,6 +33,9 @@ data Route
   -- Granular module endpoints (on-demand loading)
   | GetModuleDeclarations String
   | GetModuleFunctionCalls String
+  -- Batch endpoints (comma-separated module names)
+  | GetBatchFunctionCalls String
+  | GetBatchDeclarations String
   -- Project/Snapshot API
   | ListProjects
   | GetProject Int
@@ -56,6 +59,9 @@ route = root $ sum
   -- Granular module endpoints (flat URLs for routing-duplex compatibility)
   , "GetModuleDeclarations": path "api/module-declarations" segment
   , "GetModuleFunctionCalls": path "api/module-function-calls" segment
+  -- Batch endpoints (comma-separated module names in segment)
+  , "GetBatchFunctionCalls": path "api/batch-function-calls" segment
+  , "GetBatchDeclarations": path "api/batch-declarations" segment
   -- Project/Snapshot API
   , "ListProjects": path "api/projects" noArgs
   , "GetProject": path "api/projects" (int segment)
@@ -116,6 +122,9 @@ main = launchAff_ do
     -- Granular module endpoints
     GetModuleDeclarations modName -> withLatestSnapshot db \sid -> Legacy.moduleDeclarationsJson db sid modName
     GetModuleFunctionCalls modName -> withLatestSnapshot db \sid -> Legacy.moduleFunctionCallsJson db sid modName
+    -- Batch endpoints (comma-separated module names)
+    GetBatchFunctionCalls modules -> withLatestSnapshot db \sid -> Legacy.batchFunctionCallsJson db sid modules
+    GetBatchDeclarations modules -> withLatestSnapshot db \sid -> Legacy.batchDeclarationsJson db sid modules
     -- Project/Snapshot API
     ListProjects -> Projects.listProjects db
     GetProject pid -> Projects.getProject db pid

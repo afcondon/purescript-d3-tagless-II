@@ -7,17 +7,20 @@ module Engine.Explorer
   , goToScene
   , globalStateRef
   , globalLinksRef
+  , globalViewStateRef
+  , globalModelInfoRef
   ) where
 
 import Prelude
 
 import Data.Array as Array
 import Data.Either (Either(..))
+import Data.Foldable (foldl)
 import Data.Int (toNumber, floor)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Nullable as Nullable
-import Data.Traversable (traverse)
+import Data.Traversable (traverse, for_)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (launchAff_, forkAff)
@@ -28,11 +31,12 @@ import Effect.Ref (Ref)
 import Effect.Ref as Ref
 import Effect.Unsafe (unsafePerformEffect)
 import Foreign.Object as Object
-import Data.Loader (loadModel, LoadedModel, DeclarationsMap, FunctionCallsMap, fetchFunctionCalls)
-import Data.Traversable (for_)
+import Data.Loader (loadModel, LoadedModel, DeclarationsMap, FunctionCallsMap, fetchFunctionCalls, fetchBatchDeclarations, fetchBatchFunctionCalls)
 import Engine.AtomicView (renderAtomicView)
-import Engine.BubblePack (renderModulePackWithCallbacks, renderColorLegend, clearColorLegend, highlightCallGraph, clearCallGraphHighlight, DeclarationClickCallback, DeclarationHoverCallback)
-import Engine.NarrativePanel as Narrative
+import Engine.BubblePack (renderModulePackWithCallbacks, highlightCallGraph, clearCallGraphHighlight, DeclarationClickCallback, DeclarationHoverCallback)
+-- NarrativePanel is now a Halogen component (Component.NarrativePanel)
+-- It polls globalViewStateRef and globalModelInfoRef directly
+import Engine.ViewState (ViewState(..), ScopeFilter(..))
 import PSD3v2.Tooltip (hideTooltip) as Tooltip
 import Engine.Scene as Scene
 import Engine.Scenes as Scenes
@@ -92,6 +96,10 @@ type ModelInfo =
 globalModelInfoRef :: Ref ModelInfo
 globalModelInfoRef = unsafePerformEffect $ Ref.new { projectName: "", moduleCount: 0, packageCount: 0 }
 
+-- | Global ref for current view state
+globalViewStateRef :: Ref ViewState
+globalViewStateRef = unsafePerformEffect $ Ref.new (PackageGrid ProjectAndLibraries)
+
 -- | Focus state for neighborhood drill-down
 type FocusState =
   { focusedNodeId :: Maybe Int -- Currently focused node (Nothing = full view)
@@ -118,33 +126,40 @@ forceLinksGroupId = GroupId "#explorer-links"
 
 -- | Initialize the explorer
 initExplorer :: String -> Effect Unit
-initExplorer containerSelector = launchAff_ do
-  log "[Explorer] BUILD: 2025-12-03 - Deferred function calls loading"
-  log "[Explorer] Loading data..."
-  result <- loadModel
-  case result of
-    Left err -> liftEffect $ log $ "[Explorer] Error: " <> err
-    Right model -> do
-      liftEffect $ log $ "[Explorer] Loaded: " <> show model.moduleCount <> " modules, " <> show model.packageCount <> " packages"
-      -- Store links and declarations for later use
-      liftEffect $ Ref.write model.links globalLinksRef
-      liftEffect $ Ref.write model.declarations globalDeclarationsRef
+initExplorer containerSelector = do
+  -- Initialize ViewState (Halogen NarrativePanel polls this)
+  let initialView = PackageGrid ProjectAndLibraries
+  Ref.write initialView globalViewStateRef
+  log "[Explorer] ViewState initialized (Halogen NarrativePanel polls this)"
 
-      -- Initialize visualization immediately (don't wait for function calls)
-      stateRef <- liftEffect $ initWithModel model containerSelector
-      liftEffect $ Ref.write (Just stateRef) globalStateRef
-      liftEffect $ log "[Explorer] Ready - loading function calls in background..."
+  -- Then load data asynchronously
+  launchAff_ do
+    log "[Explorer] BUILD: 2025-12-03 - Immediate TangleJS init"
+    log "[Explorer] Loading data..."
+    result <- loadModel
+    case result of
+      Left err -> liftEffect $ log $ "[Explorer] Error: " <> err
+      Right model -> do
+        liftEffect $ log $ "[Explorer] Loaded: " <> show model.moduleCount <> " modules, " <> show model.packageCount <> " packages"
+        -- Store links and declarations for later use
+        liftEffect $ Ref.write model.links globalLinksRef
+        liftEffect $ Ref.write model.declarations globalDeclarationsRef
 
-      -- Load function calls data in a separate fiber (truly parallel)
-      -- This doesn't block the main visualization from rendering
-      _ <- forkAff do
-        fnCallsResult <- fetchFunctionCalls
-        case fnCallsResult of
-          Left err -> liftEffect $ log $ "[Explorer] Warning: Could not load function calls: " <> err
-          Right fnCalls -> do
-            liftEffect $ Ref.write fnCalls globalFunctionCallsRef
-            liftEffect $ log $ "[Explorer] Function calls loaded: " <> show (Object.size fnCalls) <> " functions"
-      pure unit
+        -- Initialize visualization immediately (don't wait for function calls)
+        stateRef <- liftEffect $ initWithModel model containerSelector
+        liftEffect $ Ref.write (Just stateRef) globalStateRef
+        liftEffect $ log "[Explorer] Ready - loading function calls in background..."
+
+        -- Load function calls data in a separate fiber (truly parallel)
+        -- This doesn't block the main visualization from rendering
+        _ <- forkAff do
+          fnCallsResult <- fetchFunctionCalls
+          case fnCallsResult of
+            Left err -> liftEffect $ log $ "[Explorer] Warning: Could not load function calls: " <> err
+            Right fnCalls -> do
+              liftEffect $ Ref.write fnCalls globalFunctionCallsRef
+              liftEffect $ log $ "[Explorer] Function calls loaded: " <> show (Object.size fnCalls) <> " functions"
+        pure unit
 
 -- | Initialize with loaded model
 initWithModel :: LoadedModel -> String -> Effect (Ref Scene.SceneState)
@@ -154,15 +169,7 @@ initWithModel model containerSelector = do
   -- Store model info for narrative
   Ref.write { projectName: "purescript-d3-dataviz", moduleCount: model.moduleCount, packageCount: model.packageCount } globalModelInfoRef
 
-  -- Initialize narrative panel with Back button callback
-  Narrative.initNarrativePanel handleBackButton
-
-  -- Set color palette for the color key
-  let colorPalette = Array.mapWithIndex mkPackageColorEntry model.packages
-  Narrative.setColorPalette colorPalette
-
-  -- Set initial full view narrative
-  Narrative.setFullViewNarrative "purescript-d3-dataviz" model.moduleCount model.packageCount
+  -- Color palette is now generated by Halogen NarrativePanel based on packageCount
 
   -- Recalculate grid positions
   let gridNodes = GridLayout.recalculateGridPositions model.nodes model.packageCount
@@ -342,6 +349,35 @@ restoreGridForces nodes sim = do
   -- Add grid forces back
   addGridForces nodes sim
 
+-- | Add Orbit forces - free-floating with radial centering and repulsion
+-- | Modules cluster by package via many-body but no grid constraints
+addOrbitForces :: Array SimNode -> Scene.CESimulation -> Effect Unit
+addOrbitForces nodes sim = do
+  log "[Explorer] Setting up orbit forces"
+  -- Clear existing forces
+  Ref.write Map.empty sim.forces
+
+  -- Collision detection
+  let collideHandle = Core.createCollide { radius: 8.0, strength: 0.7, iterations: 1 }
+  _ <- Core.initializeForce collideHandle nodes
+  Ref.modify_ (Map.insert "collide" collideHandle) sim.forces
+
+  -- Many-body repulsion - keeps nodes spread out
+  let manyBodyHandle = Core.createManyBody { strength: -80.0, theta: 0.9, distanceMin: 1.0, distanceMax: 1.0e10 }
+  _ <- Core.initializeForce manyBodyHandle nodes
+  Ref.modify_ (Map.insert "charge" manyBodyHandle) sim.forces
+
+  -- Gentle centering force - keeps the cloud centered
+  let forceXHandle = Core.createForceX { x: 0.0, strength: 0.03 }
+  _ <- Core.initializeForce forceXHandle nodes
+  Ref.modify_ (Map.insert "x" forceXHandle) sim.forces
+
+  let forceYHandle = Core.createForceY { y: 0.0, strength: 0.03 }
+  _ <- Core.initializeForce forceYHandle nodes
+  Ref.modify_ (Map.insert "y" forceYHandle) sim.forces
+
+  log "[Explorer] Orbit forces added (collide, charge, x, y)"
+
 -- =============================================================================
 -- Tooltip Formatting
 -- =============================================================================
@@ -447,15 +483,6 @@ nodeColor n =
 
 numMod :: Number -> Number -> Number
 numMod a b = a - b * toNumber (floor (a / b))
-
--- | Create a color entry for a package (for the narrative color key)
-mkPackageColorEntry :: Int -> { name :: String, depends :: Array String, modules :: Array String } -> Narrative.ColorEntry
-mkPackageColorEntry idx pkg =
-  let
-    t = numMod (toNumber idx * 0.618033988749895) 1.0
-    color = interpolateTurbo t
-  in
-    { name: pkg.name, color }
 
 -- | CSS class based on node type for styling and transitions
 nodeClass :: SimNode -> String
@@ -634,6 +661,80 @@ handleBackButton = do
       Ref.write { focusedNodeId: Nothing, fullNodes: [] } globalFocusRef
     _, _ -> log "[Explorer] No focused state to go back from"
 
+-- | Handle control change from TangleJS-style narrative panel
+-- | controlId: which control was changed (e.g., "layout", "scope")
+-- | newValue: the new value selected (e.g., "orbit", "project")
+handleControlChange :: String -> String -> Effect Unit
+handleControlChange controlId newValue = do
+  log $ "[Explorer] Control changed: " <> controlId <> " -> " <> newValue
+  currentView <- Ref.read globalViewStateRef
+
+  -- Compute the new view based on control change
+  let newView = applyControlChange controlId newValue currentView
+
+  -- Update ViewState (Halogen NarrativePanel polls this)
+  Ref.write newView globalViewStateRef
+
+  -- Trigger scene transitions using proper two-phase engine
+  mStateRef <- Ref.read globalStateRef
+  case mStateRef of
+    Just stateRef -> do
+      -- Use Scene.transitionTo for proper DumbEngine → Physics handoff
+      case controlId, newView of
+        "layout", PackageGrid _ -> do
+          log "[Explorer] Transitioning to grid scene"
+          Scene.transitionTo Scenes.gridRunScene stateRef
+
+        "layout", ModuleOrbit _ -> do
+          log "[Explorer] Transitioning to orbit scene"
+          Scene.transitionTo Scenes.orbitRunScene stateRef
+
+        "layout", DependencyTree _ -> do
+          log "[Explorer] Transitioning to tree scene"
+          Scene.transitionTo Scenes.treeRunScene stateRef
+
+        _, _ -> pure unit -- Other controls don't trigger scene transitions
+
+    Nothing -> log "[Explorer] No scene state to update"
+
+  log $ "[Explorer] New view state: " <> showViewState newView
+
+-- | Apply a control change to compute the new ViewState
+applyControlChange :: String -> String -> ViewState -> ViewState
+applyControlChange "layout" newLayout currentView =
+  case newLayout, currentView of
+    "grid", PackageGrid scope -> PackageGrid scope
+    "grid", ModuleOrbit scope -> PackageGrid scope
+    "grid", DependencyTree scope -> PackageGrid scope
+    "orbit", PackageGrid scope -> ModuleOrbit scope
+    "orbit", ModuleOrbit scope -> ModuleOrbit scope
+    "orbit", DependencyTree scope -> ModuleOrbit scope
+    "tree", PackageGrid scope -> DependencyTree scope
+    "tree", ModuleOrbit scope -> DependencyTree scope
+    "tree", DependencyTree scope -> DependencyTree scope
+    _, other -> other  -- No change for other views
+
+applyControlChange "scope" newScope currentView =
+  let scope = if newScope == "project" then ProjectOnly else ProjectAndLibraries
+  in case currentView of
+    PackageGrid _ -> PackageGrid scope
+    ModuleOrbit _ -> ModuleOrbit scope
+    DependencyTree _ -> DependencyTree scope
+    other -> other  -- Neighborhood/FunctionCalls don't have scope control
+
+applyControlChange _ _ view = view  -- Unknown control, no change
+
+-- | Show ViewState for logging
+showViewState :: ViewState -> String
+showViewState (PackageGrid ProjectOnly) = "PackageGrid (project only)"
+showViewState (PackageGrid ProjectAndLibraries) = "PackageGrid (all)"
+showViewState (ModuleOrbit ProjectOnly) = "ModuleOrbit (project only)"
+showViewState (ModuleOrbit ProjectAndLibraries) = "ModuleOrbit (all)"
+showViewState (DependencyTree ProjectOnly) = "DependencyTree (project only)"
+showViewState (DependencyTree ProjectAndLibraries) = "DependencyTree (all)"
+showViewState (Neighborhood name) = "Neighborhood (" <> name <> ")"
+showViewState (FunctionCalls name) = "FunctionCalls (" <> name <> ")"
+
 -- | Toggle focus on a node's neighborhood
 -- | Click once to drill down to neighborhood, click again to restore full view
 toggleFocus :: SimNode -> Effect Unit
@@ -676,8 +777,9 @@ toggleFocus clickedNode = do
           -- Update focus state
           Ref.write { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore } globalFocusRef
 
-          -- Update narrative for neighborhood view
-          Narrative.setNeighborhoodNarrative clickedNode.name (Array.length clickedNode.targets) (Array.length clickedNode.sources)
+          -- Update ViewState for neighborhood view (Halogen NarrativePanel polls this)
+          let neighborhoodView = Neighborhood clickedNode.name
+          Ref.write neighborhoodView globalViewStateRef
 
           -- Update simulation and DOM
           focusOnNeighborhood neighborhoodNodes state.simulation
@@ -703,35 +805,66 @@ focusOnNeighborhood nodes sim = do
   -- Set up neighborhood forces
   setNeighborhoodForces liveNodes sim
 
-  -- Render bubble packs using FFI (binds SimNode to groups for tick updates)
-  declarations <- Ref.read globalDeclarationsRef
-  for_ liveNodes \node -> do
-    _ <- renderModulePackWithCallbacks declarations onDeclarationClick onDeclarationHover onDeclarationLeave node
-    pure unit
+  -- Fetch declarations and function calls via batch endpoints (single request each)
+  -- This replaces N individual requests with 2 batch requests
+  launchAff_ do
+    -- Extract module names from nodes (filter out packages which have empty names)
+    let moduleNames = Array.mapMaybe (\n -> if n.name /= "" then Just n.name else Nothing) liveNodes
+    log $ "[Explorer] Fetching batch data for " <> show (Array.length moduleNames) <> " modules"
 
-  -- Render color legend for bubble pack view
-  renderColorLegend
+    -- Batch fetch declarations (single request)
+    declResult <- fetchBatchDeclarations moduleNames
+    case declResult of
+      Left err -> log $ "[Explorer] Batch declarations error: " <> err
+      Right _ -> pure unit
+    let declarations = case declResult of
+          Right decls -> decls
+          Left _ -> Object.empty
 
-  -- Attach drag behavior using library API
-  -- Select all module-pack groups and get their DOM elements
-  packElements <- runD3v2M do
-    nodesContainer <- select "#explorer-nodes"
-    packGroups <- selectAll "g.module-pack" nodesContainer
-    pure $ D3v2.getElementsD3v2 packGroups
+    -- Batch fetch function calls (single request)
+    fnCallResult <- fetchBatchFunctionCalls moduleNames
+    case fnCallResult of
+      Left err -> log $ "[Explorer] Batch function calls error: " <> err
+      Right _ -> pure unit
+    let functionCalls = case fnCallResult of
+          Right fnCalls -> fnCalls
+          Left _ -> Object.empty
 
-  -- Attach group drag with reheat callback
-  -- Use #explorer-zoom-group as coordinate reference (handles viewBox transforms)
-  Core.attachGroupDragWithReheat packElements "#explorer-zoom-group" (Sim.reheat sim)
+    -- Update global function calls ref so click/hover handlers can use it
+    liftEffect $ Ref.write functionCalls globalFunctionCallsRef
 
-  -- Render links between neighborhood modules
-  renderNeighborhoodLinks liveNodes
+    -- Log fetch summary
+    liftEffect $ log $ "[Explorer] Batch fetched: " <> show (Object.size declarations) <> " modules with declarations, "
+      <> show (Object.size functionCalls) <> " function entries"
 
-  -- Set up custom tick callback for bubble pack mode
-  -- This updates group transforms and link positions
-  Sim.onTick (bubblePackTick) sim
+    -- Render bubble packs with fetched declarations
+    liftEffect do
+      for_ liveNodes \node -> do
+        _ <- renderModulePackWithCallbacks declarations onDeclarationClick onDeclarationHover onDeclarationLeave node
+        pure unit
 
-  -- Reheat simulation to animate
-  Sim.reheat sim
+      -- Color legend is now handled by Halogen NarrativePanel (switches to declaration types automatically)
+
+      -- Attach drag behavior using library API
+      -- Select all module-pack groups and get their DOM elements
+      packElements <- runD3v2M do
+        nodesContainer <- select "#explorer-nodes"
+        packGroups <- selectAll "g.module-pack" nodesContainer
+        pure $ D3v2.getElementsD3v2 packGroups
+
+      -- Attach group drag with reheat callback
+      -- Use #explorer-zoom-group as coordinate reference (handles viewBox transforms)
+      Core.attachGroupDragWithReheat packElements "#explorer-zoom-group" (Sim.reheat sim)
+
+      -- Render links between neighborhood modules
+      renderNeighborhoodLinks liveNodes
+
+      -- Set up custom tick callback for bubble pack mode
+      -- This updates group transforms and link positions
+      Sim.onTick (bubblePackTick) sim
+
+      -- Reheat simulation to animate
+      Sim.reheat sim
 
   pure unit
 
@@ -887,8 +1020,7 @@ restoreFullView fullNodes sim = do
   -- Clear neighborhood links and disable link updates
   clearTreeLinks
 
-  -- Clear color legend
-  clearColorLegend
+  -- Color legend is handled by Halogen NarrativePanel (switches back to packages automatically)
 
   -- Re-render DOM with circles
   clearNodesGroup
@@ -902,9 +1034,9 @@ restoreFullView fullNodes sim = do
       Sim.onTick (Scene.onTick stateRef) sim
     Nothing -> pure unit
 
-  -- Restore full view narrative
-  modelInfo <- Ref.read globalModelInfoRef
-  Narrative.setFullViewNarrative modelInfo.projectName modelInfo.moduleCount modelInfo.packageCount
+  -- Restore full view (Halogen NarrativePanel polls globalViewStateRef)
+  let fullView = PackageGrid ProjectAndLibraries
+  Ref.write fullView globalViewStateRef
 
   Sim.reheat sim
   pure unit
@@ -1031,14 +1163,12 @@ onDeclarationHover moduleName declarationName _kind = do
       let callerModules = Array.nub $ Array.mapMaybe extractModuleName fnInfo.calledBy
       -- Highlight the modules
       highlightCallGraph moduleName callerModules calleeModules
-      -- Update narrative hint
-      Narrative.setDeclarationHoverNarrative moduleName declarationName (Array.length fnInfo.calls) (Array.length fnInfo.calledBy)
+      -- Hover hint could be added via a globalHintRef if needed
 
 -- | Handle mouse leave from a declaration
 onDeclarationLeave :: Effect Unit
 onDeclarationLeave = do
   clearCallGraphHighlight
-  Narrative.clearDeclarationHoverNarrative
 
 -- | Extract module name from "Module.name" string
 extractModuleName :: String -> Maybe String

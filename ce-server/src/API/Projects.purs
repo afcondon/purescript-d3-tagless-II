@@ -76,7 +76,7 @@ getProject db projectId = do
           s.snapshot_at,
           s.created_at,
           (SELECT COUNT(*) FROM modules m WHERE m.snapshot_id = s.id) as module_count,
-          (SELECT COUNT(*) FROM packages p WHERE p.snapshot_id = s.id) as package_count,
+          (SELECT COUNT(DISTINCT m2.package) FROM modules m2 WHERE m2.snapshot_id = s.id) as package_count,
           (SELECT COUNT(*) FROM declarations d WHERE d.snapshot_id = s.id) as declaration_count
         FROM snapshots s
         WHERE s.project_id = ?
@@ -105,7 +105,7 @@ listSnapshots db projectId = do
       s.snapshot_at,
       s.created_at,
       (SELECT COUNT(*) FROM modules m WHERE m.snapshot_id = s.id) as module_count,
-      (SELECT COUNT(*) FROM packages p WHERE p.snapshot_id = s.id) as package_count,
+      (SELECT COUNT(DISTINCT m2.package) FROM modules m2 WHERE m2.snapshot_id = s.id) as package_count,
       (SELECT COUNT(*) FROM declarations d WHERE d.snapshot_id = s.id) as declaration_count
     FROM snapshots s
     WHERE s.project_id = ?
@@ -134,7 +134,7 @@ getSnapshot db snapshotId = do
       s.created_at,
       p.name as project_name,
       (SELECT COUNT(*) FROM modules m WHERE m.snapshot_id = s.id) as module_count,
-      (SELECT COUNT(*) FROM packages pkg WHERE pkg.snapshot_id = s.id) as package_count,
+      (SELECT COUNT(DISTINCT m2.package) FROM modules m2 WHERE m2.snapshot_id = s.id) as package_count,
       (SELECT COUNT(*) FROM declarations d WHERE d.snapshot_id = s.id) as declaration_count
     FROM snapshots s
     JOIN projects p ON s.project_id = p.id
