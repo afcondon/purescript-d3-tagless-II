@@ -8,16 +8,14 @@ module Component.NarrativePanel
   , Output(..)
   , Input
   , ColorEntry
-  , DeclarationKind
   , ProjectInfo
-  , declarationKinds
   , defaultProjectName
   ) where
 
 import Prelude
 
 import Data.Array as Array
-import Data.ColorPalette (PaletteType(..), PaletteConfig, LegendItem, getPalette)
+import Data.ColorPalette (LegendItem, PaletteType(..), getPalette)
 import Data.Maybe (Maybe(..))
 import Data.String.CodePoints as String
 import Data.String.Common (toLower)
@@ -37,13 +35,6 @@ import Engine.ViewState (ViewState(..), Control, describe)
 
 -- | A color entry for the package palette
 type ColorEntry = { name :: String, color :: String }
-
--- | Declaration kind with colors (DEPRECATED - use LegendItem from ColorPalette)
-type DeclarationKind =
-  { label :: String
-  , color :: String
-  , intense :: String
-  }
 
 -- | Project info for dropdown (subset of full Project type)
 type ProjectInfo =
@@ -97,20 +88,6 @@ data Output
   = ControlChanged String String -- controlId, newValue
   | BackClicked
   | ProjectSelected Int -- Project ID selected
-
--- =============================================================================
--- Declaration Types (for inner scene color key)
--- =============================================================================
-
--- | Get declaration types from ColorPalette module
-declarationKinds :: Array DeclarationKind
-declarationKinds =
-  let
-    palette = getPalette DeclarationTypes
-    toLegacyKind :: LegendItem -> DeclarationKind
-    toLegacyKind item = { label: item.label, color: item.color, intense: item.color }
-  in
-    map toLegacyKind palette.legendItems
 
 -- =============================================================================
 -- Component
@@ -288,15 +265,16 @@ renderPackageEntry { name, color } =
 -- | Render declaration types color key (for neighborhood/function views)
 renderDeclarationTypesKey :: forall m. H.ComponentHTML Action () m
 renderDeclarationTypesKey =
-  HH.div [ HP.class_ (HH.ClassName "narrative-color-key") ]
+  let palette = getPalette DeclarationTypes
+  in HH.div [ HP.class_ (HH.ClassName "narrative-color-key") ]
     [ HH.div [ HP.class_ (HH.ClassName "color-key-title") ]
         [ HH.text "Declaration Types" ]
     , HH.div [ HP.class_ (HH.ClassName "color-key-items") ]
-        (map renderDeclarationEntry declarationKinds)
+        (map renderLegendEntry palette.legendItems)
     ]
 
-renderDeclarationEntry :: forall m. DeclarationKind -> H.ComponentHTML Action () m
-renderDeclarationEntry { label, color, intense } =
+renderLegendEntry :: forall m. LegendItem -> H.ComponentHTML Action () m
+renderLegendEntry { label, color } =
   HH.div [ HP.class_ (HH.ClassName "color-key-item") ]
     [ -- SVG with nested circles showing category and declaration colors
       HH.elementNS svgNS (ElemName "svg")
@@ -304,7 +282,7 @@ renderDeclarationEntry { label, color, intense } =
         , HP.attr (HH.AttrName "height") "24"
         , HP.attr (HH.AttrName "class") "color-key-circles"
         ]
-        [ -- Outer circle (category color)
+        [ -- Outer circle (category color with low opacity)
           HH.elementNS svgNS (ElemName "circle")
             [ HP.attr (HH.AttrName "cx") "12"
             , HP.attr (HH.AttrName "cy") "12"
@@ -312,12 +290,12 @@ renderDeclarationEntry { label, color, intense } =
             , HP.style ("fill: " <> color <> "; fill-opacity: 0.6;")
             ]
             []
-        -- Inner circle (intense color)
+        -- Inner circle (same color with higher opacity)
         , HH.elementNS svgNS (ElemName "circle")
             [ HP.attr (HH.AttrName "cx") "12"
             , HP.attr (HH.AttrName "cy") "12"
             , HP.attr (HH.AttrName "r") "6"
-            , HP.style ("fill: " <> intense <> "; fill-opacity: 0.9;")
+            , HP.style ("fill: " <> color <> "; fill-opacity: 0.9;")
             ]
             []
         ]

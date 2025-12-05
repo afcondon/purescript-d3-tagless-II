@@ -14,9 +14,15 @@ specifically because the library doesn't provide proper alternatives.
 
 ---
 
-## Phase 1: Library Enhancements (psd3-simulation)
+## Phase 1: Library Enhancements (psd3-simulation) ✅ COMPLETE
 
-### 1.1 Simulation Event System
+All Phase 1 enhancements have been implemented in `psd3-simulation/src/PSD3/ForceEngine/`:
+- `Events.purs` - Simulation event types and callbacks
+- `Halogen.purs` - Halogen subscription integration
+- `Registry.purs` - Named simulation registry
+- `Simulation.purs` - First-class drag behavior (`attachDrag`, `attachGroupDrag`)
+
+### 1.1 Simulation Event System ✅
 
 **Problem:** ce-website uses global `Ref` state and polling because there's no way to
 get events from the simulation back to Halogen.
@@ -83,9 +89,11 @@ setCallbacks :: forall row linkRow.
 
 **Estimated effort:** Small (add callbacks plumbing, most logic exists)
 
+**Status:** ✅ Implemented in `Events.purs`
+
 ---
 
-### 1.2 First-Class Drag Behavior Integration
+### 1.2 First-Class Drag Behavior Integration ✅
 
 **Problem:** `SimulationDrag` in `Behavior.Types` stores only a `String` ID, but the
 `on` function in `Operations.purs` has no way to access actual simulation handles:
@@ -141,9 +149,11 @@ leaking into psd3-selection.
 
 **Estimated effort:** Small
 
+**Status:** ✅ Implemented in `Simulation.purs` (`attachDrag`, `attachGroupDrag`)
+
 ---
 
-### 1.3 Simulation Subscriptions for Halogen
+### 1.3 Simulation Subscriptions for Halogen ✅
 
 **Problem:** Halogen components need to receive simulation events as `Action`s, but
 the current callback-based API requires effectful setup.
@@ -184,9 +194,11 @@ handleAction Initialize = do
 
 **Estimated effort:** Medium (new integration layer)
 
+**Status:** ✅ Implemented in `Halogen.purs` (`subscribeToSimulation`)
+
 ---
 
-### 1.4 Multiple Named Simulations
+### 1.4 Multiple Named Simulations ✅
 
 **Problem:** ce-website creates separate simulations for main view and popup call graph,
 but there's no registry or naming convention.
@@ -212,13 +224,24 @@ stopAll :: Effect Unit
 
 **Estimated effort:** Small (convenience API, existing functionality)
 
+**Status:** ✅ Implemented in `Registry.purs` (`register`, `lookup`, `stopAll`, `debugRegistry`)
+
 ---
 
 ## Phase 2: Demo Refactoring (ce-website)
 
-### 2.1 Remove Global State Refs
+### 2.1 Remove Global State Refs 🚧 IN PROGRESS
 
-**Problem:** Seven `globalXxxRef` values created via `unsafePerformEffect`.
+**Problem:** Nine `globalXxxRef` values created via `unsafePerformEffect`:
+1. `globalStateRef` - Scene engine state
+2. `globalLinksRef` - Links data
+3. `globalDeclarationsRef` - Module declarations
+4. `globalFunctionCallsRef` - Function calls
+5. `globalModelInfoRef` - Project metadata
+6. `globalViewStateRef` - Current view state
+7. `globalNavigationStackRef` - Navigation history
+8. `globalFocusRef` - Neighborhood focus state
+9. `globalCallbacksRef` - Halogen callbacks
 
 **Solution:** Move all state into Halogen component state.
 
@@ -250,6 +273,13 @@ type State =
 2. Pass state down to Explorer functions as arguments
 3. Use Halogen subscriptions for simulation events
 4. Remove `unsafePerformEffect` refs one by one
+
+**Progress (Dec 2024):**
+- ✅ Modified `renderSVG` to take `ViewState` as parameter (removed global ref read)
+- ✅ Modified `renderNodesOnly` to take `ViewState` as parameter (removed global ref read)
+- ✅ Updated 4 call sites to pass ViewState explicitly
+- 🚧 Remaining: 3 reads of `globalViewStateRef` in state mutation code
+- 🚧 Remaining: 8 other global refs still in use
 
 **Files to modify:**
 - `ce-website/src/Component/SpagoGridApp.purs` - State restructure
@@ -295,11 +325,14 @@ handleAction (SimulationEvent event) = case event of
 
 ---
 
-### 2.3 Move API Communication from FFI to PureScript
+### 2.3 Move API Communication from FFI to PureScript ✅
 
 **Problem:** `CallGraphPopup.js` makes HTTP requests and handles JSON.
 
 **Solution:** Move all API calls to `Data/Loader.purs`, have JS only handle DOM.
+
+**Status:** ✅ CallGraphPopup is now a pure Halogen component (`Component.CallGraphPopup.purs`)
+that uses `Data.Loader` for API calls. The old JS FFI files were deleted.
 
 ```purescript
 -- In Data/Loader.purs (already has similar functions):
@@ -329,11 +362,14 @@ export const showCallGraphPopup_ = (data) => () => {
 
 ---
 
-### 2.4 Replace AtomicView.js Force Simulation
+### 2.4 Replace AtomicView.js Force Simulation ✅
 
 **Problem:** `AtomicView.js` creates a second D3 force simulation entirely in JavaScript.
 
 **Solution:** Use PSD3-simulation for the popup's force layout.
+
+**Status:** ✅ AtomicView.js was identified as dead code and deleted. The call graph
+functionality is now provided by the pure Halogen `CallGraphPopup` component.
 
 ```purescript
 -- New: ce-website/src/Engine/AtomicView.purs
@@ -380,61 +416,47 @@ showAtomicView details = do
 
 ---
 
-### 2.5 Consolidate Color Functions
+### 2.5 Consolidate Color Functions ✅
 
 **Problem:** Color logic duplicated across Explorer, ColorPalette, NarrativePanel.
 
 **Solution:** Single source of truth in `Data/ColorPalette.purs`.
 
-```purescript
--- In Data/ColorPalette.purs (expand existing):
-module Data.ColorPalette
-  ( PaletteType(..)
-  , getPalette
-  , getNodeColor
-  , getCategoryColor
-  , getPackageColor
-  ) where
+**Status:** ✅ Complete. ColorPalette.purs provides `getNodeStroke`, `getNodeFill`,
+`getClusterColor`, and `getPalette` for declaration types. NarrativePanel now uses
+`LegendItem` directly from ColorPalette instead of a deprecated local type.
 
--- | Get color for any node type
-getNodeColor :: PaletteType -> SimNode -> String
-getNodeColor palette node = case node.nodeType of
-  PackageNode -> getPackageColor palette node.name
-  ModuleNode -> getModuleColor palette node
-
--- Used everywhere instead of inline logic
-```
-
-**Files to modify:**
-- `ce-website/src/Data/ColorPalette.purs` - Expand API
-- `ce-website/src/Engine/Explorer.purs` - Remove `nodeColor`/`nodeFill`, use ColorPalette
-- `ce-website/src/Component/NarrativePanel.purs` - Remove `declarationKinds`, use ColorPalette
+**Files modified:**
+- `ce-website/src/Data/ColorPalette.purs` - Already well-organized
+- `ce-website/src/Component/NarrativePanel.purs` - Removed deprecated `DeclarationKind` type,
+  now uses `LegendItem` directly from ColorPalette
 
 **Estimated effort:** Small
 
 ---
 
-### 2.6 Remove Deprecated Code
+### 2.6 Remove Deprecated Code ✅
 
 **Problem:** `PackageGrid`, `ModuleOrbit`, `DependencyTree` ViewStates marked deprecated.
 
 **Solution:** Remove them entirely.
 
-**Files to modify:**
-- `ce-website/src/Engine/ViewState.purs` - Remove deprecated constructors
-- `ce-website/src/Component/SpagoGridApp.purs` - Remove handling
-- `ce-website/src/Component/NarrativePanel.purs` - Remove handling
-- `ce-website/src/Engine/Explorer.purs` - Remove handling
+**Status:** ✅ Already complete. ViewState.purs only has: `Treemap`, `TreeLayout`,
+`ForceLayout`, `Neighborhood`, `FunctionCalls`. The deprecated constructors were
+removed in a previous cleanup.
 
-**Estimated effort:** Small
+**Estimated effort:** Small (already done)
 
 ---
 
-### 2.7 Type-Safe Scene Selection
+### 2.7 Type-Safe Scene Selection ✅
 
 **Problem:** Scene selection uses strings instead of types.
 
 **Solution:** Use the existing `SceneConfig` type directly.
+
+**Status:** ✅ Already implemented. `Explorer.purs` has `data SceneId = GridForm | GridRun | OrbitForm | ...`
+and `goToScene :: SceneId -> Ref Scene.SceneState -> Effect Unit`.
 
 ```purescript
 -- Before:
@@ -467,23 +489,25 @@ sceneConfigFor = case _ of
 
 ## Execution Order
 
-### Week 1: Library Foundation
-1. **1.1** Simulation Event System
-2. **1.2** First-Class Drag Integration
+### ✅ Completed Tasks (as of Dec 2024)
 
-### Week 2: Halogen Integration
-3. **1.3** Simulation Subscriptions for Halogen
-4. **2.5** Consolidate Color Functions (easy win)
-5. **2.6** Remove Deprecated Code (easy win)
+**Phase 1 - All Complete:**
+- ✅ 1.1 Simulation Event System (`Events.purs`)
+- ✅ 1.2 First-Class Drag Integration (`Simulation.purs`)
+- ✅ 1.3 Simulation Subscriptions for Halogen (`Halogen.purs`)
+- ✅ 1.4 Multiple Named Simulations (`Registry.purs`)
 
-### Week 3: State Migration
-6. **2.1** Remove Global State Refs (major refactor)
-7. **2.2** Remove Polling Loop
+**Phase 2 - Partially Complete:**
+- ✅ 2.3 Move API Communication from FFI (CallGraphPopup is pure Halogen)
+- ✅ 2.4 Replace AtomicView.js (deleted as dead code)
+- ✅ 2.5 Consolidate Color Functions (NarrativePanel uses LegendItem from ColorPalette)
+- ✅ 2.6 Remove Deprecated Code (deprecated ViewState constructors already removed)
+- ✅ 2.7 Type-Safe Scene Selection (SceneId type exists)
 
-### Week 4: FFI Cleanup
-8. **2.3** Move API Communication from FFI
-9. **2.4** Replace AtomicView.js Force Simulation
-10. **2.7** Type-Safe Scene Selection
+### Remaining Tasks (Priority Order)
+
+1. **2.1** Remove Global State Refs (major refactor, in progress)
+2. **2.2** Remove Polling Loop (depends on 2.1)
 
 ---
 
