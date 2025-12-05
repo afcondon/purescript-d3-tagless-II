@@ -40,7 +40,7 @@ import Foreign.Object as Object
 import Data.Loader (loadModel, loadModelForProject, LoadedModel, DeclarationsMap, FunctionCallsMap, fetchBatchDeclarations, fetchBatchFunctionCalls)
 import Engine.AtomicView (renderAtomicView)
 import Engine.BubblePack (renderModulePackWithCallbacks, highlightCallGraph, clearCallGraphHighlight, DeclarationClickCallback, DeclarationHoverCallback)
-import Engine.CallGraphPopup (showCallGraphPopup)
+import Engine.CallGraphPopup (showCallGraphPopup, hideCallGraphPopup)
 -- NarrativePanel is now a Halogen component (Component.NarrativePanel)
 -- It polls globalViewStateRef and globalModelInfoRef directly
 import Engine.ViewState (ViewState(..), ScopeFilter(..))
@@ -655,6 +655,61 @@ nodeClass n = case n.nodeType of
     | otherwise -> "node non-tree-module"
 
 -- =============================================================================
+-- Link Interconnectivity Scoring
+-- =============================================================================
+
+-- | Calculate interconnectivity score for a link based on node degrees
+-- | Returns a normalized score between 0.0 and 1.0
+linkInterconnectivity :: SimNode -> SimNode -> Number
+linkInterconnectivity sourceNode targetNode =
+  let
+    -- Total connections for each node
+    sourceDegree = Array.length sourceNode.targets + Array.length sourceNode.sources
+    targetDegree = Array.length targetNode.targets + Array.length targetNode.sources
+
+    -- Combined degree (how "important" are both ends of this connection)
+    combinedDegree = toNumber (sourceDegree + targetDegree)
+
+    -- Normalize to 0-1 range (assuming max degree around 50 for typical modules)
+    maxExpectedDegree = 100.0
+    normalized = min 1.0 (combinedDegree / maxExpectedDegree)
+  in
+    normalized
+
+-- | Log connectivity statistics for a set of links
+logConnectivityStats :: String -> Array Number -> Effect Unit
+logConnectivityStats label scores =
+  case Array.uncons scores of
+    Nothing -> log $ "[" <> label <> "] No connectivity scores"
+    Just _ -> do
+      let sortedScores = Array.sort scores
+      let count = Array.length scores
+      let minScore = fromMaybe 0.0 (Array.head sortedScores)
+      let maxScore = fromMaybe 0.0 (Array.last sortedScores)
+      let avgScore = (foldl (+) 0.0 scores) / toNumber count
+      let medianScore = fromMaybe 0.0 (Array.index sortedScores (count / 2))
+      log $ "[" <> label <> "] Connectivity scores - count: " <> show count
+        <> ", min: " <> show minScore
+        <> ", max: " <> show maxScore
+        <> ", avg: " <> show avgScore
+        <> ", median: " <> show medianScore
+
+-- | Map interconnectivity score to stroke width
+-- | Returns width between 0.5 (weak connection) and 3.5 (strong connection)
+linkStrokeWidth :: Number -> Number
+linkStrokeWidth score = 0.5 + (score * 3.0)
+
+-- | Map interconnectivity score to color
+-- | Use white for now (color channel reserved for future use)
+linkStrokeColor :: Number -> String
+linkStrokeColor _score = "white"
+
+-- | Map interconnectivity score to opacity
+-- | More interconnected links are more opaque (visible)
+linkOpacity :: Number -> Number
+linkOpacity score = 0.3 + (score * 0.5)  -- Range: 0.3 to 0.8
+
+-- =============================================================================
 -- Tree Link Rendering
 -- =============================================================================
 
@@ -677,18 +732,54 @@ renderTreeLinksD3 :: Map.Map Int SimNode -> Array SimLink -> D3v2M Unit
 renderTreeLinksD3 nodeMap links = do
   linksGroup <- select "#explorer-links"
 
-  -- Append path elements for each tree link
+  -- Log connectivity statistics for debugging
+  let scores = Array.mapMaybe (computeLinkScore nodeMap) links
+  liftEffect $ logConnectivityStats "Tree links" scores
+
+  -- Append path elements for each tree link with dynamic attributes
   _ <- appendData Path links
     [ d (linkPathFn nodeMap)
     , fill (\(_ :: SimLink) -> "none")
-    , stroke (\(_ :: SimLink) -> "white")
-    , strokeWidth (\(_ :: SimLink) -> 1.5)
-    , opacity (\(_ :: SimLink) -> 0.5)
+    , stroke (linkStrokeFn nodeMap)
+    , strokeWidth (linkWidthFn nodeMap)
+    , opacity (linkOpacityFn nodeMap)
     , class_ (\(_ :: SimLink) -> "tree-link")
     ]
     linksGroup
 
   pure unit
+  where
+  computeLinkScore :: Map.Map Int SimNode -> SimLink -> Maybe Number
+  computeLinkScore nm link =
+    case Map.lookup link.source nm, Map.lookup link.target nm of
+      Just srcNode, Just tgtNode -> Just (linkInterconnectivity srcNode tgtNode)
+      _, _ -> Nothing
+  -- Compute stroke color based on interconnectivity
+  linkStrokeFn :: Map.Map Int SimNode -> SimLink -> String
+  linkStrokeFn nm link =
+    case Map.lookup link.source nm, Map.lookup link.target nm of
+      Just srcNode, Just tgtNode ->
+        let score = linkInterconnectivity srcNode tgtNode
+        in linkStrokeColor score
+      _, _ -> "white"  -- Fallback
+
+  -- Compute stroke width based on interconnectivity
+  linkWidthFn :: Map.Map Int SimNode -> SimLink -> Number
+  linkWidthFn nm link =
+    case Map.lookup link.source nm, Map.lookup link.target nm of
+      Just srcNode, Just tgtNode ->
+        let score = linkInterconnectivity srcNode tgtNode
+        in linkStrokeWidth score
+      _, _ -> 1.5  -- Fallback
+
+  -- Compute opacity based on interconnectivity
+  linkOpacityFn :: Map.Map Int SimNode -> SimLink -> Number
+  linkOpacityFn nm link =
+    case Map.lookup link.source nm, Map.lookup link.target nm of
+      Just srcNode, Just tgtNode ->
+        let score = linkInterconnectivity srcNode tgtNode
+        in linkOpacity score
+      _, _ -> 0.5  -- Fallback
 
 -- | Generate path string for a link (vertical tree layout)
 linkPathFn :: Map.Map Int SimNode -> SimLink -> String
@@ -731,15 +822,15 @@ renderForceLinksD3 :: Array SwizzledLink -> D3v2M Unit
 renderForceLinksD3 links = do
   linksGroup <- select "#explorer-links"
 
-  -- Append line elements for each link
+  -- Append line elements for each link with dynamic attributes
   _ <- appendData Line links
     [ x1 getSourceX
     , y1 getSourceY
     , x2 getTargetX
     , y2 getTargetY
-    , stroke (\(_ :: SwizzledLink) -> "white")
-    , strokeWidth (\(_ :: SwizzledLink) -> 1.0)
-    , opacity (\(_ :: SwizzledLink) -> 0.6)
+    , stroke forceStrokeFn
+    , strokeWidth forceWidthFn
+    , opacity forceOpacityFn
     , class_ (\(_ :: SwizzledLink) -> "force-link")
     ]
     linksGroup
@@ -757,6 +848,24 @@ renderForceLinksD3 links = do
 
   getTargetY :: SwizzledLink -> Number
   getTargetY l = l.target.y
+
+  -- Compute stroke color based on interconnectivity
+  forceStrokeFn :: SwizzledLink -> String
+  forceStrokeFn link =
+    let score = linkInterconnectivity link.source link.target
+    in linkStrokeColor score
+
+  -- Compute stroke width based on interconnectivity
+  forceWidthFn :: SwizzledLink -> Number
+  forceWidthFn link =
+    let score = linkInterconnectivity link.source link.target
+    in linkStrokeWidth score
+
+  -- Compute opacity based on interconnectivity
+  forceOpacityFn :: SwizzledLink -> Number
+  forceOpacityFn link =
+    let score = linkInterconnectivity link.source link.target
+    in linkOpacity score
 
 -- =============================================================================
 -- CSS Scene Class Management
@@ -823,6 +932,10 @@ handleBackButton = do
 handleControlChange :: String -> String -> Effect Unit
 handleControlChange controlId newValue = do
   log $ "[Explorer] Control changed: " <> controlId <> " -> " <> newValue
+
+  -- Hide call graph popup when view changes (Bug fix: popup wasn't disappearing)
+  hideCallGraphPopup
+
   currentView <- Ref.read globalViewStateRef
 
   -- Compute the new view based on control change
@@ -1200,14 +1313,18 @@ renderNeighborhoodLinksD3 :: Array NeighborhoodLink -> D3v2M Unit
 renderNeighborhoodLinksD3 links = do
   linksGroup <- select "#explorer-links"
 
+  -- Log connectivity statistics for debugging
+  let scores = map (\link -> linkInterconnectivity link.source link.target) links
+  liftEffect $ logConnectivityStats "Neighborhood links" scores
+
   _ <- appendData Line links
     [ x1 getSourceX
     , y1 getSourceY
     , x2 getTargetX
     , y2 getTargetY
-    , stroke (\(_ :: NeighborhoodLink) -> "white")
-    , strokeWidth (\(_ :: NeighborhoodLink) -> 1.5)
-    , opacity (\(_ :: NeighborhoodLink) -> 0.6)
+    , stroke neighborhoodStrokeFn
+    , strokeWidth neighborhoodWidthFn
+    , opacity neighborhoodOpacityFn
     , class_ (\(_ :: NeighborhoodLink) -> "neighborhood-link")
     ]
     linksGroup
@@ -1225,6 +1342,24 @@ renderNeighborhoodLinksD3 links = do
 
   getTargetY :: NeighborhoodLink -> Number
   getTargetY l = l.target.y
+
+  -- Compute stroke color based on interconnectivity
+  neighborhoodStrokeFn :: NeighborhoodLink -> String
+  neighborhoodStrokeFn link =
+    let score = linkInterconnectivity link.source link.target
+    in linkStrokeColor score
+
+  -- Compute stroke width based on interconnectivity
+  neighborhoodWidthFn :: NeighborhoodLink -> Number
+  neighborhoodWidthFn link =
+    let score = linkInterconnectivity link.source link.target
+    in linkStrokeWidth score
+
+  -- Compute opacity based on interconnectivity
+  neighborhoodOpacityFn :: NeighborhoodLink -> Number
+  neighborhoodOpacityFn link =
+    let score = linkInterconnectivity link.source link.target
+    in linkOpacity score
 
 -- =============================================================================
 -- Navigation
