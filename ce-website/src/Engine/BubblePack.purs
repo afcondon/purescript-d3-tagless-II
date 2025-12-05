@@ -215,11 +215,12 @@ renderModulePackWithCallbacks declarationsMap onDeclClick onDeclHover onDeclLeav
     let packRoot = hierarchy hierData
 
     -- Apply pack layout - size based on original node radius
-    let packSize = node.r * 3.0 -- Make pack bigger than original circle
+    -- Larger multiplier for neighborhood view where detail needs to be visible
+    let packSize = node.r * 5.0 -- Make pack significantly bigger for readability
     let
       config = defaultPackConfig
         { size = { width: packSize, height: packSize }
-        , padding = 1.0
+        , padding = 1.5  -- Slightly more padding between circles
         }
     let packed = pack config packRoot
 

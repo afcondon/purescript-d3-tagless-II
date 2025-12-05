@@ -1008,8 +1008,11 @@ focusOnNeighborhood nodes sim = do
   clearTreeLinks
   clearNodesGroup
 
-  -- Update simulation with neighborhood nodes
-  Sim.setNodes nodes sim
+  -- Unpin all nodes (clear fx/fy so simulation can position them)
+  let unpinnedNodes = map unpinNode nodes
+
+  -- Update simulation with unpinned neighborhood nodes
+  Sim.setNodes unpinnedNodes sim
 
   -- Get LIVE nodes from simulation (these are the objects D3 will mutate)
   liveNodes <- Sim.getNodes sim
@@ -1309,18 +1312,19 @@ restoreFullView fullNodes targetView sim = do
   pure unit
 
 -- | Set forces appropriate for neighborhood view (spread out, no grid)
+-- | Uses stronger forces than full graph view since neighborhood has fewer nodes
 setNeighborhoodForces :: Array SimNode -> Scene.CESimulation -> Effect Unit
 setNeighborhoodForces nodes sim = do
   -- Clear existing forces
   Ref.write Map.empty sim.forces
 
-  -- Many-body repulsion to spread nodes out
-  let manyBodyHandle = Core.createManyBody { strength: -200.0, theta: 0.9, distanceMin: 1.0, distanceMax: 1.0e10 }
+  -- Many-body repulsion to spread nodes out (stronger for small neighborhoods)
+  let manyBodyHandle = Core.createManyBody { strength: -400.0, theta: 0.9, distanceMin: 1.0, distanceMax: 1.0e10 }
   _ <- Core.initializeForce manyBodyHandle nodes
   Ref.modify_ (Map.insert "charge" manyBodyHandle) sim.forces
 
-  -- Collision to prevent overlap
-  let collideHandle = Core.createCollideGrid 10.0 0.7 1
+  -- Collision to prevent overlap (larger radius for bubble packs)
+  let collideHandle = Core.createCollideGrid 20.0 0.7 1
   _ <- Core.initializeForce collideHandle nodes
   Ref.modify_ (Map.insert "collide" collideHandle) sim.forces
 
@@ -1333,7 +1337,7 @@ setNeighborhoodForces nodes sim = do
   _ <- Core.initializeForce forceYHandle nodes
   Ref.modify_ (Map.insert "y" forceYHandle) sim.forces
 
-  log "[Explorer] Neighborhood forces set (charge, collide, center)"
+  log "[Explorer] Neighborhood forces set (stronger charge=-400, collide=20)"
 
 -- | Clear the nodes group (remove all circles)
 clearNodesGroup :: Effect Unit
