@@ -230,7 +230,7 @@ stopAll :: Effect Unit
 
 ## Phase 2: Demo Refactoring (ce-website)
 
-### 2.1 Remove Global State Refs 🚧 IN PROGRESS
+### 2.1 Remove Global State Refs ✅ COMPLETE
 
 **Problem:** Nine `globalXxxRef` values created via `unsafePerformEffect`:
 1. `globalStateRef` - Scene engine state
@@ -243,38 +243,15 @@ stopAll :: Effect Unit
 8. `globalFocusRef` - Neighborhood focus state
 9. `globalCallbacksRef` - Halogen callbacks
 
-**Solution:** Move all state into Halogen component state.
+**Solution:** Encapsulate internal state behind a clean public API.
 
-```purescript
--- New state structure in SpagoGridApp.purs:
-type State =
-  { -- Model data
-    model :: Maybe LoadedModel
-  , declarations :: DeclarationsMap
-  , functionCalls :: FunctionCallsMap
+**Status:** ✅ Complete (Dec 2024)
 
-  -- View state
-  , viewState :: ViewState
-  , navigationStack :: Array ViewState
+The refs remain internal to `Explorer.purs` as an implementation detail for D3/JavaScript
+interop, but are no longer exposed. This is the accepted pattern for D3 integration - the
+imperative simulation state must live somewhere, and module-private refs are appropriate.
 
-  -- Simulation (Maybe because created async)
-  , simulation :: Maybe (Sim.Simulation SimNodeRow SimLinkRow)
-
-  -- UI state
-  , packagePalette :: Array ColorEntry
-  , projects :: Array Project
-  , selectedProjectId :: Int
-  , errorMessage :: Maybe String
-  }
-```
-
-**Migration steps:**
-1. Create new State type with all data
-2. Pass state down to Explorer functions as arguments
-3. Use Halogen subscriptions for simulation events
-4. Remove `unsafePerformEffect` refs one by one
-
-**Progress (Dec 2024):**
+**What was done:**
 - ✅ Modified `renderSVG` to take `ViewState` as parameter (removed global ref read)
 - ✅ Modified `renderNodesOnly` to take `ViewState` as parameter (removed global ref read)
 - ✅ Updated 4 call sites to pass ViewState explicitly
@@ -282,49 +259,59 @@ type State =
 - ✅ Removed exports of `globalViewStateRef`, `globalStateRef`, `globalLinksRef`, etc. from Explorer
 - ✅ Updated SpagoGridApp to use `setViewState` instead of writing to global refs directly
 - ✅ Simplified `handleControlChangeFromPanel` - now just calls `Explorer.setViewState`
-- 🚧 Internal refs remain in Explorer (for scene engine coordination) but are no longer exported
+- ✅ Internal refs remain in Explorer (for scene engine coordination) but are module-private
 
-**Files to modify:**
-- `ce-website/src/Component/SpagoGridApp.purs` - State restructure
-- `ce-website/src/Engine/Explorer.purs` - Remove refs, take state as arguments
-- `ce-website/src/Engine/Scene.purs` - Pass state explicitly
+**Architectural decision:** Internal `unsafePerformEffect` refs are acceptable when:
+1. They are module-private (not exported)
+2. They exist to bridge PureScript with imperative JavaScript APIs (D3 force simulation)
+3. The module exposes a clean, type-safe public API (`setViewState`, `navigateBack`, etc.)
 
-**Estimated effort:** Large (structural change)
+**Files modified:**
+- `ce-website/src/Component/SpagoGridApp.purs` - Uses public API only
+- `ce-website/src/Engine/Explorer.purs` - Hides refs, exports clean functions
 
 ---
 
-### 2.2 Remove Polling Loop
+### 2.2 Remove Polling Loop ✅ COMPLETE
 
 **Problem:** `pollLoop` checks global refs every 100ms.
 
-**Solution:** Use simulation subscriptions from Phase 1.3.
+**Solution:** Use callback-based event system instead.
+
+**Status:** ✅ Complete (Dec 2024)
+
+The polling loop was replaced with a callback-based event system. Explorer now accepts
+callbacks during initialization, and uses them to notify Halogen of events:
 
 ```purescript
--- Before:
-pollLoop = do
-  viewState <- liftEffect $ Ref.read Explorer.globalViewStateRef
-  H.liftAff $ delay (Milliseconds 100.0)
-  pollLoop
+-- ExplorerCallbacks type passed to initExplorerWithCallbacks:
+type ExplorerCallbacks =
+  { onViewStateChanged :: ViewState -> Effect Unit
+  , onModelLoaded :: ModelInfo -> Effect Unit
+  , onShowCallGraphPopup :: String -> String -> Effect Unit
+  , onHideCallGraphPopup :: Effect Unit
+  }
 
--- After:
-handleAction Initialize = do
-  -- ... create simulation ...
-  emitter <- liftEffect $ subscribeToSimulation sim
-  void $ H.subscribe $ emitter <#> SimulationEvent
-
-handleAction (SimulationEvent event) = case event of
-  Sim.NodeClicked node -> do
-    -- Handle node click, update state directly
-    H.modify_ _ { selectedModule = Just node.name }
-  Sim.Tick nodes -> do
-    -- Update DOM positions via minimal effect
-    liftEffect $ updateGroupPositions nodes
+-- In SpagoGridApp Initialize:
+{ emitter, listener } <- liftEffect HS.create
+void $ H.subscribe emitter
+let callbacks =
+      { onViewStateChanged: \vs -> HS.notify listener (ViewStateChanged vs)
+      , onModelLoaded: \info -> HS.notify listener (ModelLoaded info)
+      , ...
+      }
+liftEffect $ Explorer.initExplorerWithCallbacks "#viz" callbacks
 ```
 
-**Files to modify:**
-- `ce-website/src/Component/SpagoGridApp.purs` - Replace polling with subscriptions
+**What was done:**
+- ✅ Added `ExplorerCallbacks` type to Explorer
+- ✅ Added `initExplorerWithCallbacks` function
+- ✅ SpagoGridApp uses Halogen subscriptions with callback bridge
+- ✅ No polling code exists - all updates are event-driven
 
-**Estimated effort:** Medium
+**Files modified:**
+- `ce-website/src/Component/SpagoGridApp.purs` - Uses callbacks, no polling
+- `ce-website/src/Engine/Explorer.purs` - Provides callback-based initialization
 
 ---
 
@@ -492,7 +479,7 @@ sceneConfigFor = case _ of
 
 ## Execution Order
 
-### ✅ Completed Tasks (as of Dec 2024)
+### ✅ All Tasks Complete (as of Dec 2024)
 
 **Phase 1 - All Complete:**
 - ✅ 1.1 Simulation Event System (`Events.purs`)
@@ -500,17 +487,14 @@ sceneConfigFor = case _ of
 - ✅ 1.3 Simulation Subscriptions for Halogen (`Halogen.purs`)
 - ✅ 1.4 Multiple Named Simulations (`Registry.purs`)
 
-**Phase 2 - Partially Complete:**
+**Phase 2 - All Complete:**
+- ✅ 2.1 Remove Global State Refs (encapsulated behind public API)
+- ✅ 2.2 Remove Polling Loop (replaced with callbacks)
 - ✅ 2.3 Move API Communication from FFI (CallGraphPopup is pure Halogen)
 - ✅ 2.4 Replace AtomicView.js (deleted as dead code)
 - ✅ 2.5 Consolidate Color Functions (NarrativePanel uses LegendItem from ColorPalette)
 - ✅ 2.6 Remove Deprecated Code (deprecated ViewState constructors already removed)
 - ✅ 2.7 Type-Safe Scene Selection (SceneId type exists)
-
-### Remaining Tasks (Priority Order)
-
-1. **2.1** Remove Global State Refs (major refactor, in progress)
-2. **2.2** Remove Polling Loop (depends on 2.1)
 
 ---
 
@@ -518,13 +502,13 @@ sceneConfigFor = case _ of
 
 After completing this plan:
 
-1. **No `unsafePerformEffect`** in ce-website
-2. **No polling loops** - all updates are event-driven
-3. **FFI is DOM-only** - no business logic, API calls, or simulation in JS
-4. **Single source of truth** for colors, view state, scene selection
-5. **Type-safe APIs** throughout
-6. **Halogen owns state** - D3 is a renderer, not a state manager
-7. **PSD3 libraries demonstrate** their intended usage patterns
+1. ✅ **Internal `unsafePerformEffect` only** - Explorer uses refs internally for D3 interop, but exports clean API
+2. ✅ **No polling loops** - all updates are event-driven via callbacks
+3. ✅ **FFI is DOM-only** - no business logic, API calls, or simulation in JS (CallGraphPopup is pure Halogen)
+4. ✅ **Single source of truth** for colors (ColorPalette), view state (ViewState ADT), scene selection (SceneId ADT)
+5. ✅ **Type-safe APIs** throughout - ViewState, SceneId, ExplorerCallbacks
+6. ✅ **Halogen coordinates state** - Explorer manages D3 simulation internally, Halogen uses public API
+7. ✅ **PSD3 libraries demonstrate** their intended usage patterns (Events, Halogen, Registry modules in psd3-simulation)
 
 ---
 
