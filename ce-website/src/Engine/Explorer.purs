@@ -40,7 +40,6 @@ import Effect.Ref as Ref
 import Effect.Unsafe (unsafePerformEffect)
 import Foreign.Object as Object
 import Data.Loader (loadModel, loadModelForProject, LoadedModel, DeclarationsMap, FunctionCallsMap, fetchBatchDeclarations, fetchBatchFunctionCalls)
-import Engine.AtomicView (renderAtomicView)
 import Engine.BubblePack (renderModulePackWithCallbacks, highlightCallGraph, clearCallGraphHighlight, DeclarationClickCallback, DeclarationHoverCallback)
 import Engine.CallGraphPopup (showCallGraphPopup, hideCallGraphPopup)
 -- NarrativePanel is now a Halogen component (Component.NarrativePanel)
