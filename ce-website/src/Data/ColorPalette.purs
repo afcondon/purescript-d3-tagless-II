@@ -2,22 +2,38 @@
 -- |
 -- | This module defines all color palettes used in visualizations and UI panels.
 -- | It provides a unified interface for palette selection and color mapping.
+-- |
+-- | The module provides two main APIs:
+-- | 1. Declaration type colors - for coloring by PureScript declaration kind
+-- | 2. Node colors - view-aware coloring for simulation nodes (packages/modules)
 module Data.ColorPalette
-  ( PaletteType(..)
+  ( -- * Palette Types
+    PaletteType(..)
   , PaletteConfig
   , LegendItem
   , ColorMapping
+    -- * Palette API
   , getPalette
   , getCategoryColor
   , getPaletteName
   , allPaletteTypes
+    -- * Node Coloring (View-Aware)
+  , getNodeStroke
+  , getNodeFill
+  , getClusterColor
+    -- * Color Utilities
+  , addOpacity
   ) where
 
 import Prelude
 
 import Data.Array as Array
+import Data.Int (hexadecimal, fromStringAs)
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.String as String
+import Engine.ViewState (ViewState(..))
 import PSD3.Scale (schemeTableau10At)
+import Types (SimNode, NodeType(..))
 
 -- =============================================================================
 -- Types
@@ -208,3 +224,78 @@ authorActivityPalette =
       "others" -> "#cccccc"
       _ -> "#cccccc"
   }
+
+-- =============================================================================
+-- View-Aware Node Coloring
+-- =============================================================================
+-- |
+-- | These functions provide view-aware coloring for simulation nodes.
+-- | Different visualizations have different color schemes:
+-- |
+-- | **Treemap view:**
+-- | - Packages: solid cluster color (stroke and fill)
+-- | - Modules: white stroke, white fill if used, "none" fill if unused
+-- |
+-- | **Tree/Force/Neighborhood views:**
+-- | - Packages: solid stroke, very faint (10%) fill
+-- | - Modules: cluster-colored stroke, 50% fill if in tree, 10% fill if not
+
+-- | Get the base color for a cluster index.
+-- | Uses Tableau10 color scheme.
+getClusterColor :: Int -> String
+getClusterColor = schemeTableau10At
+
+-- | Get stroke color for a node in a specific view.
+-- |
+-- | - Packages: always cluster color
+-- | - Modules in Treemap: white
+-- | - Modules elsewhere: cluster color
+getNodeStroke :: ViewState -> SimNode -> String
+getNodeStroke viewState n = case n.nodeType of
+  PackageNode -> schemeTableau10At n.cluster
+  ModuleNode -> case viewState of
+    Treemap _ -> "rgba(255, 255, 255, 0.9)"
+    _ -> schemeTableau10At n.cluster
+
+-- | Get fill color for a node in a specific view.
+-- |
+-- | - Packages in Treemap: solid cluster color
+-- | - Packages elsewhere: 10% opacity cluster color
+-- | - Modules in Treemap: white if has sources (used), "none" if unused
+-- | - Modules elsewhere: 50% opacity if in tree, 10% if not
+getNodeFill :: ViewState -> SimNode -> String
+getNodeFill viewState n = case n.nodeType of
+  PackageNode -> case viewState of
+    Treemap _ -> schemeTableau10At n.cluster
+    _ -> addOpacity (schemeTableau10At n.cluster) 0.1
+  ModuleNode -> case viewState of
+    Treemap _ ->
+      if Array.null n.sources
+        then "none"
+        else "rgba(255, 255, 255, 0.9)"
+    _ ->
+      if n.isInTree
+        then addOpacity (schemeTableau10At n.cluster) 0.5
+        else addOpacity (schemeTableau10At n.cluster) 0.1
+
+-- =============================================================================
+-- Color Utilities
+-- =============================================================================
+
+-- | Add opacity to a hex color string.
+-- | Converts #RRGGBB to rgba(r,g,b,a).
+addOpacity :: String -> Number -> String
+addOpacity hexColor opacity =
+  case String.stripPrefix (String.Pattern "#") hexColor of
+    Just hex ->
+      let
+        r = fromMaybe 0 $ hexToInt $ String.take 2 hex
+        g = fromMaybe 0 $ hexToInt $ String.take 2 $ String.drop 2 hex
+        b = fromMaybe 0 $ hexToInt $ String.take 2 $ String.drop 4 hex
+      in
+        "rgba(" <> show r <> "," <> show g <> "," <> show b <> "," <> show opacity <> ")"
+    Nothing -> hexColor
+
+-- | Convert hex string to integer
+hexToInt :: String -> Maybe Int
+hexToInt hex = fromStringAs hexadecimal hex

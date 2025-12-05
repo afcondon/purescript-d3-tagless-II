@@ -20,9 +20,7 @@ import Prelude
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (foldl)
-import Data.Int (toNumber, floor, fromStringAs, hexadecimal)
-import Data.String as String
-import Data.String (Pattern(..))
+import Data.Int (toNumber)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Nullable as Nullable
@@ -44,6 +42,7 @@ import Engine.CallGraphPopup (showCallGraphPopup, hideCallGraphPopup)
 -- NarrativePanel is now a Halogen component (Component.NarrativePanel)
 -- It polls globalViewStateRef and globalModelInfoRef directly
 import Engine.ViewState (ViewState(..), ScopeFilter(..))
+import Data.ColorPalette (getNodeStroke, getNodeFill) as ColorPalette
 import Engine.Treemap as Treemap
 import Engine.Treemap (recalculateTreemapPositions, renderWatermark, clearWatermark)
 import PSD3v2.Tooltip (hideTooltip) as Tooltip
@@ -53,7 +52,6 @@ import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Links (swizzleLinks, swizzleLinksByIndex)
 import PSD3.ForceEngine.Render (GroupId(..), updateGroupPositions, updateLinkPositions)
 import PSD3.ForceEngine.Simulation as Sim
-import PSD3.Scale (interpolateHsl, schemeTableau10At)
 import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, radius, id_, class_, viewBox, d, opacity, x1, x2, y1, y2)
 import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom, onMouseEnter, onMouseLeave, onClickWithDatum)
 import PSD3v2.Capabilities.Selection (select, selectAll, appendChild, appendData, on)
@@ -530,8 +528,8 @@ renderSVG containerSelector nodes = do
     [ cx (_.x :: SimNode -> Number)
     , cy (_.y :: SimNode -> Number)
     , radius (_.r :: SimNode -> Number)
-    , fill (nodeFill currentView :: SimNode -> String)
-    , stroke (nodeColor currentView :: SimNode -> String) -- Use color for stroke
+    , fill (ColorPalette.getNodeFill currentView :: SimNode -> String)
+    , stroke (ColorPalette.getNodeStroke currentView :: SimNode -> String)
     , strokeWidth 1.0 -- Slightly thicker stroke for visibility
     , class_ nodeClass -- CSS class for type-based styling/transitions
     ]
@@ -573,62 +571,6 @@ renderSVG containerSelector nodes = do
   _ <- on (onClickWithDatum toggleFocus) nodeSel
 
   pure { nodeSel }
-
--- | Stroke color - view-aware coloring based on ViewState
--- | Treemap: packages colored, used modules white, unused modules white
--- | Tree/Force: packages colored (faint via opacity), used modules colored, unused modules colored (faint via opacity)
-nodeColor :: ViewState -> SimNode -> String
-nodeColor viewState n = case n.nodeType of
-  PackageNode -> case viewState of
-    Treemap _ -> schemeTableau10At n.cluster  -- Treemap: solid package color
-    _ -> schemeTableau10At n.cluster          -- Tree/Force: solid package color (will be made faint via opacity)
-  ModuleNode -> case viewState of
-    Treemap _ ->
-      -- Treemap view: all modules white stroke (used and unused)
-      "rgba(255, 255, 255, 0.9)"
-    _ ->
-      -- Tree/Force views: package color stroke for used modules, faint for unused (via opacity)
-      schemeTableau10At n.cluster
-
--- | Fill color - view-aware coloring based on ViewState
--- | Treemap: packages colored, used modules white fill, unused modules no fill
--- | Tree/Force: packages faint, used modules colored 50% opacity, unused modules faint
-nodeFill :: ViewState -> SimNode -> String
-nodeFill viewState n = case n.nodeType of
-  PackageNode -> case viewState of
-    Treemap _ -> schemeTableau10At n.cluster  -- Treemap: solid package color
-    _ -> addOpacity (schemeTableau10At n.cluster) 0.1  -- Tree/Force: very faint (10% opacity)
-  ModuleNode -> case viewState of
-    Treemap _ ->
-      -- Treemap view: used modules get white fill, unused modules get no fill
-      if Array.null n.sources
-        then "none"  -- Unused: no fill (outline only)
-        else "rgba(255, 255, 255, 0.9)"  -- Used: solid white fill
-    _ ->
-      -- Tree/Force views: all modules colored, used modules 50% opacity, unused very faint
-      if n.isInTree
-        then addOpacity (schemeTableau10At n.cluster) 0.5  -- Used (in tree): 50% opacity
-        else addOpacity (schemeTableau10At n.cluster) 0.1  -- Unused (not in tree): 10% opacity
-
--- | Add opacity to a hex color string (converts #RRGGBB to rgba(r,g,b,a))
-addOpacity :: String -> Number -> String
-addOpacity hexColor opacity =
-  case String.stripPrefix (String.Pattern "#") hexColor of
-    Just hex ->
-      let
-        r = fromMaybe 0 $ hexToInt $ String.take 2 hex
-        g = fromMaybe 0 $ hexToInt $ String.take 2 $ String.drop 2 hex
-        b = fromMaybe 0 $ hexToInt $ String.take 2 $ String.drop 4 hex
-      in
-        "rgba(" <> show r <> "," <> show g <> "," <> show b <> "," <> show opacity <> ")"
-    Nothing -> hexColor  -- Return original if not a hex color
-
--- | Convert hex string to integer
-hexToInt :: String -> Maybe Int
-hexToInt hex = fromStringAs hexadecimal hex
-
-numMod :: Number -> Number -> Number
-numMod a b = a - b * toNumber (floor (a / b))
 
 -- | Update node colors based on current ViewState
 -- | This should be called whenever transitioning between views
@@ -1498,8 +1440,8 @@ renderNodesOnly nodes = do
     [ cx (_.x :: SimNode -> Number)
     , cy (_.y :: SimNode -> Number)
     , radius (_.r :: SimNode -> Number)
-    , fill (nodeFill currentView :: SimNode -> String)
-    , stroke (nodeColor currentView :: SimNode -> String) -- Use color for stroke
+    , fill (ColorPalette.getNodeFill currentView :: SimNode -> String)
+    , stroke (ColorPalette.getNodeStroke currentView :: SimNode -> String)
     , strokeWidth 1.0 -- Slightly thicker stroke for visibility
     , class_ nodeClass
     ]
