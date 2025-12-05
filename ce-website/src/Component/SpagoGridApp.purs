@@ -199,8 +199,13 @@ handleAction = case _ of
     case output of
       NarrativePanel.ControlChanged controlId newValue -> do
         log $ "[SpagoGridApp] Control changed: " <> controlId <> " -> " <> newValue
-        -- Forward to Explorer's handleControlChange
-        liftEffect $ handleControlChangeFromPanel controlId newValue
+        -- Get current view state from Halogen state and pass to handler
+        state <- H.get
+        let newView = applyControlChange controlId newValue state.viewState
+        -- Update Halogen state with new view
+        H.modify_ _ { viewState = newView }
+        -- Forward to Explorer's scene manager
+        liftEffect $ handleControlChangeFromPanel newView
 
       NarrativePanel.BackClicked -> do
         log "[SpagoGridApp] Back button clicked"
@@ -230,15 +235,11 @@ handleAction = case _ of
     log "[SpagoGridApp] Hiding call graph popup"
     void $ H.tell _callGraphPopup unit CallGraphPopup.HidePopup
 
--- | Forward control change to Explorer
--- | This is called when the user clicks a TangleJS-style control
-handleControlChangeFromPanel :: String -> String -> Effect Unit
-handleControlChangeFromPanel controlId newValue = do
-  -- Import and call Explorer's handleControlChange
-  -- Since we don't have direct access, we'll update the ViewState ref directly
-  -- and let Explorer's control callback handle the scene transition
-  currentView <- Ref.read Explorer.globalViewStateRef
-  let newView = applyControlChange controlId newValue currentView
+-- | Forward control change to Explorer's scene manager
+-- | Takes the new ViewState (already computed by caller from Halogen state)
+handleControlChangeFromPanel :: ViewState -> Effect Unit
+handleControlChangeFromPanel newView = do
+  -- Update the global ref (still needed for Explorer internals)
   Ref.write newView Explorer.globalViewStateRef
 
   -- Update node colors to match new view (must happen before scene transition)
@@ -248,14 +249,14 @@ handleControlChangeFromPanel controlId newValue = do
   mStateRef <- Ref.read Explorer.globalStateRef
   case mStateRef of
     Just stateRef -> do
-      case controlId, newView of
-        "layout", Treemap _ ->
+      case newView of
+        Treemap _ ->
           pure unit  -- Treemap is static, no scene transition
-        "layout", TreeLayout _ _ ->
+        TreeLayout _ _ ->
           Explorer.goToScene TreeForm stateRef
-        "layout", ForceLayout _ _ ->
+        ForceLayout _ _ ->
           Explorer.goToScene TreeRun stateRef
-        _, _ -> pure unit
+        _ -> pure unit
     Nothing -> pure unit
 
 -- | Apply control change to ViewState

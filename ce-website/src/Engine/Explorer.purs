@@ -190,14 +190,6 @@ notifyShowCallGraphPopup moduleName declarationName = do
     Just cbs -> cbs.onShowCallGraphPopup moduleName declarationName
     Nothing -> pure unit  -- No callbacks registered, silent no-op
 
--- | Notify hide call graph popup via callback (if set)
-notifyHideCallGraphPopup :: Effect Unit
-notifyHideCallGraphPopup = do
-  mCallbacks <- Ref.read globalCallbacksRef
-  case mCallbacks of
-    Just cbs -> cbs.onHideCallGraphPopup
-    Nothing -> pure unit  -- No callbacks registered, silent no-op
-
 -- =============================================================================
 -- Constants
 -- =============================================================================
@@ -304,8 +296,9 @@ initWithModel model containerSelector = do
   -- Get nodes from simulation for initial render
   simNodes <- Sim.getNodes sim
 
-  -- Render SVG structure first
-  _ <- runD3v2M $ renderSVG containerSelector simNodes
+  -- Render SVG structure first (initial view is Treemap)
+  let initialView = Treemap ProjectAndLibraries
+  _ <- runD3v2M $ renderSVG initialView containerSelector simNodes
 
   -- Render treemap watermark (behind nodes)
   renderWatermark model.nodes
@@ -403,7 +396,8 @@ updateWithModel model stateRef = do
   simNodes <- Sim.getNodes state.simulation
 
   -- Re-render nodes using existing renderNodesOnly
-  _ <- runD3v2M $ renderNodesOnly simNodes
+  currentView <- Ref.read globalViewStateRef
+  _ <- runD3v2M $ renderNodesOnly currentView simNodes
 
   -- Update watermark for new project
   clearWatermark
@@ -598,8 +592,8 @@ formatNodeTooltip node =
 -- Rendering
 -- =============================================================================
 
-renderSVG :: String -> Array SimNode -> D3v2M { nodeSel :: D3v2Selection_ SBoundOwns Element SimNode }
-renderSVG containerSelector nodes = do
+renderSVG :: ViewState -> String -> Array SimNode -> D3v2M { nodeSel :: D3v2Selection_ SBoundOwns Element SimNode }
+renderSVG currentView containerSelector nodes = do
   container <- select containerSelector
 
   svg <- appendChild SVG
@@ -614,8 +608,7 @@ renderSVG containerSelector nodes = do
   _ <- appendChild Group [ id_ "explorer-links" ] zoomGroup
   nodesGroup <- appendChild Group [ id_ "explorer-nodes" ] zoomGroup
 
-  -- Read current ViewState for color functions
-  currentView <- liftEffect $ Ref.read globalViewStateRef
+  -- ViewState now passed as parameter (no global ref read)
 
   nodeSel <- appendData Circle nodes
     [ cx (_.x :: SimNode -> Number)
@@ -669,7 +662,7 @@ renderSVG containerSelector nodes = do
 -- | This should be called whenever transitioning between views
 -- | Uses the library's principled approach: re-render nodes with new color functions
 updateNodeColors :: ViewState -> Effect Unit
-updateNodeColors _viewState = do
+updateNodeColors viewState = do
   -- Get current nodes from simulation
   mStateRef <- Ref.read globalStateRef
   case mStateRef of
@@ -678,7 +671,7 @@ updateNodeColors _viewState = do
       nodes <- Sim.getNodes sceneState.simulation
       -- Clear and re-render nodes with current ViewState's colors
       clearNodesGroup
-      void $ runD3v2M $ renderNodesOnly nodes
+      void $ runD3v2M $ renderNodesOnly viewState nodes
     Nothing -> log "[Explorer] No simulation state available for color update"
 
 -- | CSS class based on node type for styling and transitions
@@ -952,100 +945,6 @@ setTreeSceneClass shouldAdd = do
 -- =============================================================================
 -- Neighborhood Focus
 -- =============================================================================
-
--- | Handle Back button click from narrative panel
--- | Now delegates to navigateBack which uses the navigation stack
-handleBackButton :: Effect Unit
-handleBackButton = do
-  log "[Explorer] Back button clicked"
-  _ <- navigateBack
-  pure unit
-
--- | Handle control change from TangleJS-style narrative panel
--- | controlId: which control was changed (e.g., "layout", "scope")
--- | newValue: the new value selected (e.g., "orbit", "project")
-handleControlChange :: String -> String -> Effect Unit
-handleControlChange controlId newValue = do
-  log $ "[Explorer] Control changed: " <> controlId <> " -> " <> newValue
-
-  -- Hide call graph popup when view changes (Bug fix: popup wasn't disappearing)
-  notifyHideCallGraphPopup
-
-  currentView <- Ref.read globalViewStateRef
-
-  -- Compute the new view based on control change
-  let newView = applyControlChange controlId newValue currentView
-
-  -- Update ViewState and notify via callback
-  Ref.write newView globalViewStateRef
-  notifyViewStateChanged newView
-
-  -- Update node colors to match new view
-  updateNodeColors newView
-
-  -- Trigger scene transitions using proper two-phase engine
-  mStateRef <- Ref.read globalStateRef
-  case mStateRef of
-    Just stateRef -> do
-      -- Use Scene.transitionTo for proper DumbEngine → Physics handoff
-      case controlId, newView of
-        -- Treemap is static, no scene transition needed
-        "layout", Treemap _ -> do
-          log "[Explorer] Treemap is static layout, no scene transition needed"
-          pure unit
-
-        "layout", TreeLayout _ _ -> do
-          log "[Explorer] TreeLayout scene transition TODO"
-          -- TODO: implement tree scene transition
-          pure unit
-
-        "layout", ForceLayout _ _ -> do
-          log "[Explorer] ForceLayout scene transition TODO"
-          -- TODO: implement force layout scene transition
-          pure unit
-
-        _, _ -> pure unit -- Other controls don't trigger scene transitions
-
-    Nothing -> log "[Explorer] No scene state to update"
-
-  log $ "[Explorer] New view state: " <> showViewState newView
-
--- | Apply a control change to compute the new ViewState
-applyControlChange :: String -> String -> ViewState -> ViewState
-applyControlChange "layout" newLayout currentView =
-  case newLayout, currentView of
-    -- Navigation: treemap, tree, force
-    "treemap", Treemap scope -> Treemap scope
-    "treemap", TreeLayout scope _ -> Treemap scope
-    "treemap", ForceLayout scope _ -> Treemap scope
-    "tree", Treemap scope -> TreeLayout scope "PSD3.Main"
-    "tree", TreeLayout scope root -> TreeLayout scope root
-    "tree", ForceLayout scope root -> TreeLayout scope root
-    "force", Treemap scope -> ForceLayout scope "PSD3.Main"
-    "force", TreeLayout scope root -> ForceLayout scope root
-    "force", ForceLayout scope root -> ForceLayout scope root
-    _, other -> other -- No change for other views
-
-applyControlChange "scope" newScope currentView =
-  let
-    scope = case newScope of
-      "used" -> UsedOnly
-      "project" -> ProjectOnly
-      _ -> ProjectAndLibraries
-  in
-    case currentView of
-      Treemap _ -> Treemap scope
-      TreeLayout _ root -> TreeLayout scope root
-      ForceLayout _ root -> ForceLayout scope root
-      other -> other -- Neighborhood/FunctionCalls don't have scope control
-
-applyControlChange "root" newRoot currentView =
-  case currentView of
-    TreeLayout scope _ -> TreeLayout scope newRoot
-    ForceLayout scope _ -> ForceLayout scope newRoot
-    other -> other -- Only tree/force layouts have root control
-
-applyControlChange _ _ view = view -- Unknown control, no change
 
 -- | Show ViewState for logging
 showViewState :: ViewState -> String
@@ -1432,7 +1331,7 @@ restoreFullView fullNodes targetView sim = do
 
   -- Re-render DOM with circles
   clearNodesGroup
-  _ <- runD3v2M $ renderNodesOnly fullNodes
+  _ <- runD3v2M $ renderNodesOnly targetView fullNodes
 
   -- Restore the original Scene tick handler (uses circle positions)
   mStateRef <- Ref.read globalStateRef
@@ -1492,12 +1391,12 @@ clearNodesGroup = do
     Nothing -> log "[Explorer] Could not find #explorer-nodes"
 
 -- | Render nodes only (without full SVG setup)
-renderNodesOnly :: Array SimNode -> D3v2M Unit
-renderNodesOnly nodes = do
+-- | ViewState passed as parameter for color functions
+renderNodesOnly :: ViewState -> Array SimNode -> D3v2M Unit
+renderNodesOnly currentView nodes = do
   nodesGroup <- select "#explorer-nodes"
 
-  -- Read current ViewState for color functions
-  currentView <- liftEffect $ Ref.read globalViewStateRef
+  -- ViewState now passed as parameter (no global ref read)
 
   -- Capture the selection returned by appendData (don't discard it!)
   nodeSel <- appendData Circle nodes
