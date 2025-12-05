@@ -11,7 +11,6 @@ import Data.Int (toNumber, floor)
 import Data.Loader as Loader
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
-import Effect.Aff (Milliseconds(..), delay)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
@@ -22,6 +21,7 @@ import Engine.ViewState (ViewState(..), ScopeFilter(..))
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import Halogen.Subscription as HS
 import PSD3.Scale (interpolateTurbo)
 import Type.Proxy (Proxy(..))
 
@@ -46,6 +46,7 @@ _narrativePanel = Proxy
 data Action
   = Initialize
   | ViewStateChanged ViewState
+  | ModelLoaded Explorer.ModelInfo  -- New: callback from Explorer when model loads
   | PackagePaletteChanged (Array NarrativePanel.ColorEntry)
   | ProjectsLoaded (Array NarrativePanel.ProjectInfo)
   | SwitchProject Int String  -- Project ID and name
@@ -100,11 +101,25 @@ render state =
 handleAction :: forall output m. MonadAff m => Action -> H.HalogenM State Action Slots output m Unit
 handleAction = case _ of
   Initialize -> do
-    log "[SpagoGridApp] Initializing..."
+    log "[SpagoGridApp] Initializing with callback-based Explorer..."
 
-    -- Initialize the explorer (loads data via legacy endpoints)
-    liftEffect $ Explorer.initExplorer "#viz"
+    -- Create emitter/listener pair for Explorer callbacks
+    { emitter, listener } <- liftEffect HS.create
+
+    -- Subscribe to Explorer events - maps Action directly through the emitter
+    void $ H.subscribe emitter
+
+    -- Create callbacks that notify the listener
+    let callbacks :: Explorer.ExplorerCallbacks
+        callbacks =
+          { onViewStateChanged: \viewState -> HS.notify listener (ViewStateChanged viewState)
+          , onModelLoaded: \modelInfo -> HS.notify listener (ModelLoaded modelInfo)
+          }
+
+    -- Initialize Explorer with callbacks (replaces polling!)
+    liftEffect $ Explorer.initExplorerWithCallbacks "#viz" callbacks
     H.modify_ _ { initialized = true }
+    log "[SpagoGridApp] Explorer initialized with callbacks (no polling!)"
 
     -- Load projects list asynchronously
     void $ H.fork do
@@ -116,9 +131,6 @@ handleAction = case _ of
           handleAction (ProjectsLoaded projectInfos)
         Left err ->
           log $ "[SpagoGridApp] Failed to load projects: " <> err
-
-    -- Start polling loop for ViewState and palette changes
-    void $ H.fork pollLoop
 
   ViewStateChanged newViewState -> do
     state <- H.get
@@ -154,6 +166,20 @@ handleAction = case _ of
       -- Reload Explorer with new project data
       liftEffect $ Explorer.reloadWithProject newProjectId
 
+  ModelLoaded modelInfo -> do
+    -- Generate package palette from model info
+    state <- H.get
+    when (Array.null state.packagePalette && modelInfo.packageCount > 0) do
+      log $ "[SpagoGridApp] Model loaded with " <> show modelInfo.packageCount <> " packages"
+      let palette = Array.mapWithIndex mkColorEntry (Array.replicate modelInfo.packageCount unit)
+      H.modify_ _ { packagePalette = palette }
+      void $ H.tell _narrativePanel unit (NarrativePanel.SetPackagePalette palette)
+    where
+    mkColorEntry idx _ =
+      let t = numMod (toNumber idx * 0.618033988749895) 1.0
+      in { name: "Package " <> show (idx + 1), color: interpolateTurbo t }
+    numMod a b = a - b * toNumber (floor (a / b))
+
   NarrativePanelOutput output ->
     case output of
       NarrativePanel.ControlChanged controlId newValue -> do
@@ -172,33 +198,6 @@ handleAction = case _ of
         case Array.find (\p -> p.id == newProjectId) state.projects of
           Just project -> handleAction (SwitchProject newProjectId project.name)
           Nothing -> log $ "[SpagoGridApp] Unknown project ID: " <> show newProjectId
-
--- | Poll loop that checks for ViewState and palette changes
-pollLoop :: forall output m. MonadAff m => H.HalogenM State Action Slots output m Unit
-pollLoop = do
-  -- Read current state from Explorer's global refs
-  viewState <- liftEffect $ Ref.read Explorer.globalViewStateRef
-  modelInfo <- liftEffect $ Ref.read Explorer.globalModelInfoRef
-
-  -- Check if ViewState changed
-  state <- H.get
-  when (state.viewState /= viewState) do
-    handleAction (ViewStateChanged viewState)
-
-  -- Check if palette needs updating (only once when data loads)
-  when (Array.null state.packagePalette && modelInfo.packageCount > 0) do
-    let palette = Array.mapWithIndex mkColorEntry (Array.replicate modelInfo.packageCount unit)
-    handleAction (PackagePaletteChanged palette)
-
-  -- Continue polling
-  H.liftAff $ delay (Milliseconds 100.0)
-  pollLoop
-  where
-  mkColorEntry idx _ =
-    let t = numMod (toNumber idx * 0.618033988749895) 1.0
-    in { name: "Package " <> show (idx + 1), color: interpolateTurbo t }
-
-  numMod a b = a - b * toNumber (floor (a / b))
 
 -- | Forward control change to Explorer
 -- | This is called when the user clicks a TangleJS-style control

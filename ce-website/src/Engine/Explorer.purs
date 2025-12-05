@@ -4,6 +4,9 @@
 -- | Each scene is a self-contained config; transitions are handled by the Engine.
 module Engine.Explorer
   ( initExplorer
+  , initExplorerWithCallbacks
+  , ExplorerCallbacks
+  , ModelInfo
   , goToScene
   , SceneId(..)  -- Export ADT and constructors for type-safe scene selection
   , reloadWithProject
@@ -141,6 +144,42 @@ globalFocusRef :: Ref FocusState
 globalFocusRef = unsafePerformEffect $ Ref.new { focusedNodeId: Nothing, fullNodes: [] }
 
 -- =============================================================================
+-- Callback-Based Notification System
+-- =============================================================================
+
+-- | Callbacks for Explorer events
+-- | These allow the Halogen component to be notified of state changes
+-- | instead of polling global refs.
+type ExplorerCallbacks =
+  { onViewStateChanged :: ViewState -> Effect Unit
+      -- ^ Called when ViewState changes (navigation, drill-down, etc.)
+  , onModelLoaded :: ModelInfo -> Effect Unit
+      -- ^ Called when model data is loaded (provides package count for palette)
+  }
+
+-- | Global ref for callbacks (set by initExplorerWithCallbacks)
+-- | This pattern allows Explorer functions to invoke callbacks without
+-- | threading them through every function.
+globalCallbacksRef :: Ref (Maybe ExplorerCallbacks)
+globalCallbacksRef = unsafePerformEffect $ Ref.new Nothing
+
+-- | Notify ViewState change via callback (if set)
+notifyViewStateChanged :: ViewState -> Effect Unit
+notifyViewStateChanged newView = do
+  mCallbacks <- Ref.read globalCallbacksRef
+  case mCallbacks of
+    Just cbs -> cbs.onViewStateChanged newView
+    Nothing -> pure unit  -- No callbacks registered, silent no-op
+
+-- | Notify model loaded via callback (if set)
+notifyModelLoaded :: ModelInfo -> Effect Unit
+notifyModelLoaded modelInfo = do
+  mCallbacks <- Ref.read globalCallbacksRef
+  case mCallbacks of
+    Just cbs -> cbs.onModelLoaded modelInfo
+    Nothing -> pure unit  -- No callbacks registered, silent no-op
+
+-- =============================================================================
 -- Constants
 -- =============================================================================
 
@@ -180,6 +219,44 @@ initExplorer containerSelector = do
         stateRef <- liftEffect $ initWithModel model containerSelector
         liftEffect $ Ref.write (Just stateRef) globalStateRef
         liftEffect $ log "[Explorer] Ready (function calls loaded on-demand per neighborhood)"
+
+-- | Initialize the explorer with callbacks
+-- | This is the preferred API - callbacks notify the Halogen component of state changes
+-- | instead of requiring polling.
+initExplorerWithCallbacks :: String -> ExplorerCallbacks -> Effect Unit
+initExplorerWithCallbacks containerSelector callbacks = do
+  -- Store callbacks for use by other Explorer functions
+  Ref.write (Just callbacks) globalCallbacksRef
+
+  -- Initialize ViewState and notify via callback
+  let initialView = Treemap ProjectAndLibraries
+  Ref.write initialView globalViewStateRef
+  callbacks.onViewStateChanged initialView
+  log "[Explorer] ViewState initialized with callback notification"
+
+  -- Then load data asynchronously
+  launchAff_ do
+    log "[Explorer] BUILD: 2025-12-05 - Callback-based initialization"
+    log "[Explorer] Loading data..."
+    result <- loadModel
+    case result of
+      Left err -> liftEffect $ log $ "[Explorer] Error: " <> err
+      Right model -> do
+        liftEffect $ log $ "[Explorer] Loaded: " <> show model.moduleCount <> " modules, " <> show model.packageCount <> " packages"
+        -- Store links and declarations for later use
+        liftEffect $ Ref.write model.links globalLinksRef
+        liftEffect $ Ref.write model.declarations globalDeclarationsRef
+
+        -- Initialize visualization immediately
+        -- Function calls are loaded on-demand when drilling into neighborhoods
+        stateRef <- liftEffect $ initWithModel model containerSelector
+        liftEffect $ Ref.write (Just stateRef) globalStateRef
+
+        -- Notify model loaded via callback
+        let modelInfo = { projectName: "purescript-d3-dataviz", moduleCount: model.moduleCount, packageCount: model.packageCount }
+        liftEffect $ callbacks.onModelLoaded modelInfo
+
+        liftEffect $ log "[Explorer] Ready with callback notifications"
 
 -- | Initialize with loaded model
 initWithModel :: LoadedModel -> String -> Effect (Ref Scene.SceneState)
@@ -880,8 +957,9 @@ handleControlChange controlId newValue = do
   -- Compute the new view based on control change
   let newView = applyControlChange controlId newValue currentView
 
-  -- Update ViewState (Halogen NarrativePanel polls this)
+  -- Update ViewState and notify via callback
   Ref.write newView globalViewStateRef
+  notifyViewStateChanged newView
 
   -- Update node colors to match new view
   updateNodeColors newView
@@ -1010,9 +1088,10 @@ toggleFocus clickedNode = do
           currentView <- Ref.read globalViewStateRef
           Ref.modify_ (Array.cons currentView) globalNavigationStackRef
 
-          -- Update ViewState for neighborhood view (Halogen NarrativePanel polls this)
+          -- Update ViewState for neighborhood view and notify via callback
           let neighborhoodView = Neighborhood clickedNode.name
           Ref.write neighborhoodView globalViewStateRef
+          notifyViewStateChanged neighborhoodView
 
           -- Update simulation and DOM
           focusOnNeighborhood neighborhoodNodes state.simulation
@@ -1305,15 +1384,18 @@ restoreToView targetView = do
         Treemap _ -> do
           -- Re-entering treemap view (static, non-simulation)
           Ref.write targetView globalViewStateRef
+          notifyViewStateChanged targetView
         TreeLayout _ _ -> restoreFullView focus.fullNodes targetView state.simulation
         ForceLayout _ _ -> restoreFullView focus.fullNodes targetView state.simulation
         Neighborhood _ -> do
           -- Re-entering a neighborhood - find the node and focus on it
           -- For now, just update the view state (the DOM is already showing neighborhood)
           Ref.write targetView globalViewStateRef
+          notifyViewStateChanged targetView
         FunctionCalls _ -> do
           -- Re-entering function calls view
           Ref.write targetView globalViewStateRef
+          notifyViewStateChanged targetView
 
 -- | Restore full view
 restoreFullView :: Array SimNode -> ViewState -> Scene.CESimulation -> Effect Unit
@@ -1341,8 +1423,9 @@ restoreFullView fullNodes targetView sim = do
       Sim.onTick (Scene.onTick stateRef) sim
     Nothing -> pure unit
 
-  -- Update ViewState (Halogen NarrativePanel polls globalViewStateRef)
+  -- Update ViewState and notify via callback
   Ref.write targetView globalViewStateRef
+  notifyViewStateChanged targetView
 
   -- Clear focus state
   Ref.write { focusedNodeId: Nothing, fullNodes: [] } globalFocusRef
