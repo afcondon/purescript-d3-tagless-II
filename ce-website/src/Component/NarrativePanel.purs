@@ -17,9 +17,7 @@ import Prelude
 import Data.Array as Array
 import Data.ColorPalette (LegendItem, PaletteType(..), getPalette)
 import Data.Maybe (Maybe(..))
-import Data.String.CodePoints as String
-import Data.String.Common (toLower)
-import Data.String.Pattern (Pattern(..))
+import Data.Newtype (unwrap)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class.Console (log)
 import Halogen as H
@@ -27,7 +25,8 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Types (Namespace(..), ElemName(..))
-import Engine.ViewState (ViewState(..), Control, describe)
+import Engine.ViewState (ViewState(..), describeDoc)
+import Tangle.Core (TangleSegment(..), Control(..), cycleNext) as T
 
 -- =============================================================================
 -- Types
@@ -70,8 +69,8 @@ type State =
 -- | Actions
 data Action
   = HandleInput Input
-  | ClickControl String -- Control ID clicked
-  | SelectOption String String -- Control ID, selected value
+  | CycleControl String String -- Control ID, next value (click to cycle)
+  | ToggleControl String Boolean -- Control ID, new boolean value (click to toggle)
   | CloseDropdown
   | ClickBack
   | ToggleProjectDropdown
@@ -145,88 +144,72 @@ render state =
     ]
 
 -- | Render the main descriptive text with clickable controls
+-- | Now uses structured TangleDoc instead of string parsing
 renderHeroText :: forall m. State -> H.ComponentHTML Action () m
 renderHeroText state =
   let
-    { text, controls } = describe state.viewState
-    segments = parseTextWithControls text controls
+    doc = describeDoc state.viewState
+    segments = unwrap doc
   in
     HH.div [ HP.class_ (HH.ClassName "narrative-hero") ]
-      (map (renderSegment state controls) segments)
+      (map (renderTangleSegment state) segments)
 
--- | A segment is either plain text or a control
-data TextSegment
-  = PlainText String
-  | ControlText String Control -- display text, control
+-- | Render a TangleSegment from the structured document
+renderTangleSegment :: forall m. State -> T.TangleSegment -> H.ComponentHTML Action () m
+renderTangleSegment _state (T.TextSegment s) = HH.text s
+renderTangleSegment state (T.ControlSegment ctrl) = renderTangleControl state ctrl
 
--- | Parse text with [bracketed] controls
-parseTextWithControls :: String -> Array Control -> Array TextSegment
-parseTextWithControls text controls = go text []
-  where
-  go "" acc = Array.reverse acc
-  go s acc =
-    case findBracketedText s of
-      Nothing -> Array.reverse (Array.cons (PlainText s) acc)
-      Just { before, bracketed, after } ->
-        let
-          segment = case findControlForText bracketed controls of
-            Just ctrl -> ControlText bracketed ctrl
-            Nothing -> PlainText ("[" <> bracketed <> "]")
-        in
-          if before == "" then go after (Array.cons segment acc)
-          else go after (Array.cons segment (Array.cons (PlainText before) acc))
+-- | Render a Tangle control - click to cycle through options
+renderTangleControl :: forall m. State -> T.Control -> H.ComponentHTML Action () m
 
-  findControlForText :: String -> Array Control -> Maybe Control
-  findControlForText inner ctrls =
-    let lowerInner = toLower inner
-    in Array.find (\c ->
-         toLower c.current == lowerInner ||
-         Array.any (\opt -> toLower opt == lowerInner) c.options
-       ) ctrls
+-- Cycle control - click to advance to next option
+renderTangleControl _state (T.Cycle { id, current, options }) =
+  let
+    nextValue = T.cycleNext current options
+  in
+    HH.span
+      [ HP.class_ (HH.ClassName "tangle-control")
+      , HE.onClick \_ -> CycleControl id nextValue
+      ]
+      [ HH.text current ]
 
--- | Render a text segment
-renderSegment :: forall m. State -> Array Control -> TextSegment -> H.ComponentHTML Action () m
-renderSegment state _controls seg = case seg of
-  PlainText s -> HH.text s
-  ControlText display ctrl ->
-    if Array.null ctrl.options then
-      -- Non-interactive highlight
-      HH.span [ HP.class_ (HH.ClassName "tangle-value") ]
-        [ HH.text display ]
-    else
-      -- Interactive control
-      HH.span
-        [ HP.class_ (HH.ClassName "tangle-control")
-        , HE.onClick \_ -> ClickControl ctrl.id
-        ]
-        [ HH.text display
-        , if state.dropdownOpen == Just ctrl.id
-          then renderDropdown ctrl
-          else HH.text ""
-        ]
+-- Toggle control - click to flip boolean
+renderTangleControl _state (T.Toggle { id, current, trueLabel, falseLabel }) =
+  let
+    displayText = if current then trueLabel else falseLabel
+    newValue = not current
+  in
+    HH.span
+      [ HP.classes $ [ HH.ClassName "tangle-control" ] <>
+          if current then [ HH.ClassName "tangle-active" ] else []
+      , HE.onClick \_ -> ToggleControl id newValue
+      ]
+      [ HH.text displayText ]
 
--- | Render dropdown for a control
-renderDropdown :: forall m. Control -> H.ComponentHTML Action () m
-renderDropdown ctrl =
-  HH.div [ HP.class_ (HH.ClassName "tangle-dropdown") ]
-    ( map (\opt ->
-        HH.div
-          [ HP.classes $
-              [ HH.ClassName "tangle-dropdown-item" ] <>
-              (if opt == ctrl.current then [ HH.ClassName "tangle-dropdown-item--active" ] else [])
-          , HE.onClick \_ -> SelectOption ctrl.id opt
-          ]
-          [ HH.text opt ]
-      ) ctrl.options
-    )
+-- Adjust control - currently display only (drag TODO)
+renderTangleControl _state (T.Adjust { current, format }) =
+  HH.span
+    [ HP.class_ (HH.ClassName "tangle-control")
+    , HP.attr (HH.AttrName "data-adjustable") "true"
+    ]
+    [ HH.text (format current) ]
+
+-- Display control - non-interactive
+renderTangleControl _state (T.Display { value }) =
+  HH.span
+    [ HP.class_ (HH.ClassName "tangle-value") ]
+    [ HH.text value ]
 
 -- | Render hint text
 renderHintText :: forall m. Maybe String -> H.ComponentHTML Action () m
 renderHintText mHint =
   HH.div [ HP.class_ (HH.ClassName "narrative-hint") ]
-    [ HH.text (case mHint of
-        Just h -> h
-        Nothing -> hintForView) ]
+    [ HH.text
+        ( case mHint of
+            Just h -> h
+            Nothing -> hintForView
+        )
+    ]
   where
   hintForView = "Click any module to explore its neighborhood."
 
@@ -265,13 +248,15 @@ renderPackageEntry { name, color } =
 -- | Render declaration types color key (for neighborhood/function views)
 renderDeclarationTypesKey :: forall m. H.ComponentHTML Action () m
 renderDeclarationTypesKey =
-  let palette = getPalette DeclarationTypes
-  in HH.div [ HP.class_ (HH.ClassName "narrative-color-key") ]
-    [ HH.div [ HP.class_ (HH.ClassName "color-key-title") ]
-        [ HH.text "Declaration Types" ]
-    , HH.div [ HP.class_ (HH.ClassName "color-key-items") ]
-        (map renderLegendEntry palette.legendItems)
-    ]
+  let
+    palette = getPalette DeclarationTypes
+  in
+    HH.div [ HP.class_ (HH.ClassName "narrative-color-key") ]
+      [ HH.div [ HP.class_ (HH.ClassName "color-key-title") ]
+          [ HH.text "Declaration Types" ]
+      , HH.div [ HP.class_ (HH.ClassName "color-key-items") ]
+          (map renderLegendEntry palette.legendItems)
+      ]
 
 renderLegendEntry :: forall m. LegendItem -> H.ComponentHTML Action () m
 renderLegendEntry { label, color } =
@@ -347,24 +332,25 @@ renderProjectSelector state =
         , HE.onClick \_ -> ToggleProjectDropdown
         ]
         [ HH.text state.projectName ]
-    , if state.projectDropdownOpen
-        then renderProjectDropdown state
-        else HH.text ""
+    , if state.projectDropdownOpen then renderProjectDropdown state
+      else HH.text ""
     ]
 
 -- | Render project dropdown menu
 renderProjectDropdown :: forall m. State -> H.ComponentHTML Action () m
 renderProjectDropdown state =
   HH.div [ HP.class_ (HH.ClassName "project-dropdown") ]
-    ( map (\p ->
-        HH.div
-          [ HP.classes $
-              [ HH.ClassName "project-dropdown-item" ] <>
-              (if p.id == state.projectId then [ HH.ClassName "project-dropdown-item--active" ] else [])
-          , HE.onClick \_ -> SelectProject p.id
-          ]
-          [ HH.text p.name ]
-      ) state.projects
+    ( map
+        ( \p ->
+            HH.div
+              [ HP.classes $
+                  [ HH.ClassName "project-dropdown-item" ] <>
+                    (if p.id == state.projectId then [ HH.ClassName "project-dropdown-item--active" ] else [])
+              , HE.onClick \_ -> SelectProject p.id
+              ]
+              [ HH.text p.name ]
+        )
+        state.projects
     )
 
 -- =============================================================================
@@ -382,13 +368,14 @@ handleAction = case _ of
       , projects = input.projects
       }
 
-  ClickControl ctrlId -> do
-    state <- H.get
-    H.modify_ _ { dropdownOpen = if state.dropdownOpen == Just ctrlId then Nothing else Just ctrlId }
+  -- TangleJS-style: click to cycle through options (no dropdown)
+  CycleControl ctrlId newValue -> do
+    H.raise (ControlChanged ctrlId newValue)
 
-  SelectOption ctrlId value -> do
-    H.modify_ _ { dropdownOpen = Nothing }
-    H.raise (ControlChanged ctrlId value)
+  -- TangleJS-style: click to toggle boolean
+  ToggleControl ctrlId newValue -> do
+    let strValue = if newValue then "true" else "false"
+    H.raise (ControlChanged ctrlId strValue)
 
   CloseDropdown ->
     H.modify_ _ { dropdownOpen = Nothing, projectDropdownOpen = false }
@@ -422,25 +409,6 @@ handleQuery = case _ of
   SetPackagePalette palette a -> do
     H.modify_ _ { packagePalette = palette }
     pure (Just a)
-
--- =============================================================================
--- String Helpers (pure PureScript using Data.String.CodePoints)
--- =============================================================================
-
--- | Find bracketed text: "[foo]" -> { before, bracketed, after }
-findBracketedText :: String -> Maybe { before :: String, bracketed :: String, after :: String }
-findBracketedText s =
-  case String.indexOf (Pattern "[") s of
-    Nothing -> Nothing
-    Just startIdx ->
-      case String.indexOf' (Pattern "]") (startIdx + 1) s of
-        Nothing -> Nothing
-        Just endIdx ->
-          Just
-            { before: String.take startIdx s
-            , bracketed: String.take (endIdx - startIdx - 1) (String.drop (startIdx + 1) s)
-            , after: String.drop (endIdx + 1) s
-            }
 
 -- | Helper to show ViewState for logging
 showViewState :: ViewState -> String

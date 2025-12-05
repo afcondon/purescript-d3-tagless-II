@@ -2,16 +2,23 @@
 -- |
 -- | User-facing layer that hides scene/force mechanics.
 -- | Each ViewState generates natural language with interactive controls.
+-- |
+-- | Implements the Tangle typeclass for structured document generation.
 module Engine.ViewState
   ( ViewState(..)
   , ScopeFilter(..)
   , LayoutStyle(..)
   , Control
   , describe
+  , describeDoc
+  , applyViewControl
   , availableTransitions
   ) where
 
 import Prelude
+
+import Tangle.Core as Tangle
+import Tangle.Core (TangleDoc, (<+>))
 
 -- =============================================================================
 -- Core ADTs
@@ -145,3 +152,95 @@ availableTransitions vs = case vs of
     -- From function calls, go back to neighborhood
     [ Neighborhood modName
     ]
+
+-- =============================================================================
+-- Tangle Interface
+-- =============================================================================
+
+-- | Generate a structured TangleDoc for this ViewState
+-- | This is the preferred interface - controls are embedded in the document structure
+describeDoc :: ViewState -> TangleDoc
+describeDoc vs = case vs of
+  Treemap scope ->
+    Tangle.cycle "layout" "Treemap" ["Treemap", "Tree", "Force"]
+    <+> Tangle.text " showing "
+    <+> Tangle.cycle "scope" (scopeLabel scope) ["project", "all"]
+    <+> Tangle.text " packages and modules"
+
+  TreeLayout scope rootModule ->
+    Tangle.cycle "layout" "Tree" ["Treemap", "Tree", "Force"]
+    <+> Tangle.text " layout showing "
+    <+> Tangle.cycle "scope" (scopeLabel scope) ["project", "all"]
+    <+> Tangle.text " modules, rooted at "
+    <+> Tangle.display "root" rootModule
+
+  ForceLayout scope rootModule ->
+    Tangle.cycle "layout" "Force" ["Treemap", "Tree", "Force"]
+    <+> Tangle.text " layout showing "
+    <+> Tangle.cycle "scope" (scopeLabel scope) ["project", "all"]
+    <+> Tangle.text " modules, rooted at "
+    <+> Tangle.display "root" rootModule
+
+  Neighborhood modName ->
+    Tangle.text "Neighborhood of "
+    <+> Tangle.display "module" modName
+    <+> Tangle.text " — imports and dependents"
+
+  FunctionCalls modName ->
+    Tangle.text "Function calls in "
+    <+> Tangle.display "module" modName
+
+-- | Apply a control change to a ViewState
+-- | Returns the new ViewState after applying the change
+applyViewControl :: String -> String -> ViewState -> ViewState
+applyViewControl controlId newValue vs = case controlId of
+  "layout" -> applyLayoutChange newValue vs
+  "scope" -> applyScopeChange newValue vs
+  _ -> vs  -- Unknown control, no change
+
+-- | Apply layout change
+applyLayoutChange :: String -> ViewState -> ViewState
+applyLayoutChange newLayout vs =
+  let scope = extractScope vs
+      root = extractRoot vs
+  in case newLayout of
+    "Treemap" -> Treemap scope
+    "Tree" -> TreeLayout scope root
+    "Force" -> ForceLayout scope root
+    _ -> vs
+
+-- | Apply scope change
+applyScopeChange :: String -> ViewState -> ViewState
+applyScopeChange newScope vs =
+  let scope = parseScope newScope
+  in case vs of
+    Treemap _ -> Treemap scope
+    TreeLayout _ root -> TreeLayout scope root
+    ForceLayout _ root -> ForceLayout scope root
+    other -> other
+
+-- | Extract scope from ViewState
+extractScope :: ViewState -> ScopeFilter
+extractScope (Treemap s) = s
+extractScope (TreeLayout s _) = s
+extractScope (ForceLayout s _) = s
+extractScope _ = ProjectAndLibraries
+
+-- | Extract root module from ViewState (with default)
+extractRoot :: ViewState -> String
+extractRoot (TreeLayout _ root) = root
+extractRoot (ForceLayout _ root) = root
+extractRoot _ = "PSD3.Main"
+
+-- | Parse scope string to ScopeFilter
+parseScope :: String -> ScopeFilter
+parseScope "project" = ProjectOnly
+parseScope "all" = ProjectAndLibraries
+parseScope "used" = UsedOnly
+parseScope _ = ProjectAndLibraries
+
+-- | User-friendly scope label for display
+scopeLabel :: ScopeFilter -> String
+scopeLabel UsedOnly = "used"
+scopeLabel ProjectOnly = "project"
+scopeLabel ProjectAndLibraries = "all"

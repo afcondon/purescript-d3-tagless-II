@@ -16,7 +16,7 @@ import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Engine.Explorer as Explorer
-import Engine.ViewState (ViewState(..), ScopeFilter(..))
+import Engine.ViewState (ViewState(..), ScopeFilter(..), applyViewControl)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
@@ -197,12 +197,10 @@ handleAction = case _ of
     case output of
       NarrativePanel.ControlChanged controlId newValue -> do
         log $ "[SpagoGridApp] Control changed: " <> controlId <> " -> " <> newValue
-        -- Get current view state from Halogen state and pass to handler
+        -- Use applyViewControl from ViewState (keeps describe/apply together)
         state <- H.get
-        let newView = applyControlChange controlId newValue state.viewState
-        -- Update Halogen state with new view
+        let newView = applyViewControl controlId newValue state.viewState
         H.modify_ _ { viewState = newView }
-        -- Forward to Explorer's scene manager
         liftEffect $ handleControlChangeFromPanel newView
 
       NarrativePanel.BackClicked -> do
@@ -239,33 +237,6 @@ handleControlChangeFromPanel :: ViewState -> Effect Unit
 handleControlChangeFromPanel newView =
   -- Use Explorer's public API - handles ref update, colors, and scene transitions
   Explorer.setViewState newView
-
--- | Apply control change to ViewState
-applyControlChange :: String -> String -> ViewState -> ViewState
-applyControlChange "layout" newLayout currentView =
-  let scope = getScopeFromView currentView
-  in case newLayout of
-    "treemap" -> Treemap scope
-    "tree" -> TreeLayout scope "PSD3.Main"  -- Default root module
-    "force" -> ForceLayout scope "PSD3.Main"  -- Default root module
-    _ -> currentView
-
-applyControlChange "scope" newScope currentView =
-  let scope = if newScope == "project" then ProjectOnly else ProjectAndLibraries
-  in case currentView of
-    Treemap _ -> Treemap scope
-    TreeLayout _ root -> TreeLayout scope root
-    ForceLayout _ root -> ForceLayout scope root
-    other -> other
-
-applyControlChange _ _ view = view
-
--- | Extract scope from any ViewState
-getScopeFromView :: ViewState -> ScopeFilter
-getScopeFromView (Treemap scope) = scope
-getScopeFromView (TreeLayout scope _) = scope
-getScopeFromView (ForceLayout scope _) = scope
-getScopeFromView _ = ProjectAndLibraries
 
 -- | Forward back button to Explorer (uses navigation stack)
 handleBackFromPanel :: Effect Unit
