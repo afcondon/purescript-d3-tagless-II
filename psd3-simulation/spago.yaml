@@ -13,6 +13,7 @@ package:
     - effect
     - foldable-traversable
     - functions
+    - halogen-subscriptions
     - integers
     - maybe
     - newtype

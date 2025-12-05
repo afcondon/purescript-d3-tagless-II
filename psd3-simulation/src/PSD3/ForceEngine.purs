@@ -25,6 +25,12 @@ module PSD3.ForceEngine
     module Types
     -- * Re-exports from Simulation
   , module Simulation
+    -- * Re-exports from Events
+  , module Events
+    -- * Re-exports from Halogen
+  , module Halogen
+    -- * Re-exports from Registry
+  , module Registry
     -- * Re-exports from Core (low-level)
   , module Core
     -- * Re-exports from Links
@@ -57,6 +63,7 @@ import PSD3.ForceEngine.Simulation
   , SimConfig
   , defaultConfig
   , create
+  , createWithCallbacks
   , setNodes
   , setLinks
   , addForce
@@ -66,10 +73,24 @@ import PSD3.ForceEngine.Simulation
   , tick
   , reheat
   , onTick
+  , setCallbacks
+  , getCallbacks
   , isRunning
   , getAlpha
   , getNodes
+  , attachDrag
+  , attachGroupDrag
   ) as Simulation
+
+import PSD3.ForceEngine.Events
+  ( SimulationEvent(..)
+  , SimulationCallbacks
+  , defaultCallbacks
+  , onSimulationTick
+  , onSimulationStart
+  , onSimulationStop
+  , onAlphaDecay
+  ) as Events
 
 import PSD3.ForceEngine.Core
   ( ForceHandle
@@ -96,3 +117,19 @@ import PSD3.ForceEngine.Links
   , swizzleLinksByIndex
   , filterLinksToSubset
   ) as Links
+
+import PSD3.ForceEngine.Halogen
+  ( subscribeToSimulation
+  ) as Halogen
+
+import PSD3.ForceEngine.Registry
+  ( AnySimulation
+  , register
+  , unregister
+  , lookup
+  , listSimulations
+  , stopAll
+  , clearRegistry
+  , debugRegistry
+  , unsafeFromAny
+  ) as Registry

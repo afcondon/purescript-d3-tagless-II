@@ -27,6 +27,7 @@ module PSD3.ForceEngine.Simulation
   , defaultConfig
     -- * Lifecycle
   , create
+  , createWithCallbacks
   , setNodes
   , setLinks
   , addForce
@@ -36,8 +37,11 @@ module PSD3.ForceEngine.Simulation
   , stop
   , tick
   , reheat
-    -- * Callbacks
+    -- * Callbacks (legacy single-callback API)
   , onTick
+    -- * Callbacks (new multi-callback API)
+  , setCallbacks
+  , getCallbacks
     -- * Query
   , isRunning
   , getAlpha
@@ -49,6 +53,9 @@ module PSD3.ForceEngine.Simulation
   , pinNodesInPlace
   , unpinNodesInPlace
   , pinNodesAtPositions
+    -- * Drag Behavior
+  , attachDrag
+  , attachGroupDrag
   ) where
 
 import Prelude
@@ -57,6 +64,7 @@ import Data.Array as Array
 import Data.Foldable (for_)
 import Data.Map (Map)
 import Data.Map as Map
+import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Data.Nullable (Nullable)
 import Foreign.Object (Object)
@@ -66,6 +74,8 @@ import Effect.Ref (Ref)
 import Effect.Ref as Ref
 import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultSimParams)
+import PSD3.ForceEngine.Events (SimulationCallbacks)
+import Web.DOM.Element (Element)
 
 -- =============================================================================
 -- Types - Node
@@ -119,10 +129,12 @@ type Simulation row linkRow =
   , links :: Ref (Array { source :: Int, target :: Int | linkRow })
   , forces :: Ref (Map String Core.ForceHandle)
   , alpha :: Ref Number
+  , prevAlpha :: Ref Number  -- For alpha threshold detection
   , config :: SimConfig
   , running :: Ref Boolean
   , cancelAnimation :: Ref (Effect Unit)
-  , tickCallback :: Ref (Effect Unit)
+  , tickCallback :: Ref (Effect Unit)  -- Legacy single callback
+  , callbacks :: Maybe SimulationCallbacks  -- New multi-callback system
   }
 
 -- | Simulation configuration
@@ -146,13 +158,16 @@ defaultConfig =
 -- Lifecycle
 -- =============================================================================
 
--- | Create a new simulation
+-- | Create a new simulation (without callbacks)
+-- |
+-- | For the new callback-based API, use `createWithCallbacks` instead.
 create :: forall row linkRow. SimConfig -> Effect (Simulation row linkRow)
 create config = do
   nodesRef <- Ref.new []
   linksRef <- Ref.new []
   forcesRef <- Ref.new Map.empty
   alphaRef <- Ref.new 1.0
+  prevAlphaRef <- Ref.new 1.0
   runningRef <- Ref.new false
   cancelRef <- Ref.new (pure unit)
   tickRef <- Ref.new (pure unit)
@@ -161,10 +176,47 @@ create config = do
     , links: linksRef
     , forces: forcesRef
     , alpha: alphaRef
+    , prevAlpha: prevAlphaRef
     , config
     , running: runningRef
     , cancelAnimation: cancelRef
     , tickCallback: tickRef
+    , callbacks: Nothing
+    }
+
+-- | Create a new simulation with callback system
+-- |
+-- | Example:
+-- | ```purescript
+-- | callbacks <- defaultCallbacks
+-- | onSimulationTick updateDOM callbacks
+-- | onSimulationStop (log "Simulation settled") callbacks
+-- | sim <- createWithCallbacks config callbacks
+-- | ```
+createWithCallbacks :: forall row linkRow.
+  SimConfig
+  -> SimulationCallbacks
+  -> Effect (Simulation row linkRow)
+createWithCallbacks config cbs = do
+  nodesRef <- Ref.new []
+  linksRef <- Ref.new []
+  forcesRef <- Ref.new Map.empty
+  alphaRef <- Ref.new 1.0
+  prevAlphaRef <- Ref.new 1.0
+  runningRef <- Ref.new false
+  cancelRef <- Ref.new (pure unit)
+  tickRef <- Ref.new (pure unit)
+  pure
+    { nodes: nodesRef
+    , links: linksRef
+    , forces: forcesRef
+    , alpha: alphaRef
+    , prevAlpha: prevAlphaRef
+    , config
+    , running: runningRef
+    , cancelAnimation: cancelRef
+    , tickCallback: tickRef
+    , callbacks: Just cbs
     }
 
 -- | Set the nodes for the simulation
@@ -268,6 +320,9 @@ start sim = do
   unless alreadyRunning do
     Ref.write true sim.running
 
+    -- Fire onStart callback
+    invokeStartCallback sim
+
     -- Start animation loop
     cancel <- Core.startAnimation \_ -> do
       running <- Ref.read sim.running
@@ -278,6 +333,8 @@ start sim = do
           let shouldContinue = newAlpha > 0.0
           unless shouldContinue do
             Ref.write false sim.running
+            -- Fire onStop callback
+            invokeStopCallback sim
           pure shouldContinue
         else pure false
 
@@ -301,6 +358,7 @@ tick sim = do
   nodes <- Ref.read sim.nodes
   forces <- Ref.read sim.forces
   alpha <- Ref.read sim.alpha
+  prevAlpha <- Ref.read sim.prevAlpha
 
   -- Apply all forces
   let forceHandles = Array.fromFoldable $ Map.values forces
@@ -312,10 +370,17 @@ tick sim = do
   -- Decay alpha
   let newAlpha = Core.decayAlpha alpha sim.config.alphaMin sim.config.alphaDecay sim.config.alphaTarget
   Ref.write newAlpha sim.alpha
+  Ref.write alpha sim.prevAlpha  -- Store current as previous for next tick
 
-  -- Call tick callback
-  callback <- Ref.read sim.tickCallback
-  callback
+  -- Call legacy tick callback
+  legacyCallback <- Ref.read sim.tickCallback
+  legacyCallback
+
+  -- Call new tick callback (if callbacks are configured)
+  invokeTickCallback sim
+
+  -- Check for alpha threshold crossings
+  checkAlphaThresholds prevAlpha newAlpha sim
 
   pure newAlpha
 
@@ -333,7 +398,7 @@ reheat sim = do
 -- Callbacks
 -- =============================================================================
 
--- | Set the tick callback
+-- | Set the tick callback (legacy single-callback API)
 -- | This is called after each simulation tick
 onTick :: forall row linkRow.
   Effect Unit
@@ -341,6 +406,73 @@ onTick :: forall row linkRow.
   -> Effect Unit
 onTick callback sim = do
   Ref.write callback sim.tickCallback
+
+-- | Set the callbacks for a simulation (new multi-callback API)
+-- | Note: This replaces any callbacks passed to createWithCallbacks
+setCallbacks :: forall row linkRow.
+  SimulationCallbacks
+  -> Simulation row linkRow
+  -> Simulation row linkRow
+setCallbacks cbs sim = sim { callbacks = Just cbs }
+
+-- | Get the current callbacks (if any)
+getCallbacks :: forall row linkRow.
+  Simulation row linkRow
+  -> Maybe SimulationCallbacks
+getCallbacks sim = sim.callbacks
+
+-- =============================================================================
+-- Internal Callback Helpers
+-- =============================================================================
+
+-- | Invoke the onStart callback if present
+invokeStartCallback :: forall row linkRow.
+  Simulation row linkRow
+  -> Effect Unit
+invokeStartCallback sim = case sim.callbacks of
+  Nothing -> pure unit
+  Just cbs -> do
+    callback <- Ref.read cbs.onStart
+    callback
+
+-- | Invoke the onStop callback if present
+invokeStopCallback :: forall row linkRow.
+  Simulation row linkRow
+  -> Effect Unit
+invokeStopCallback sim = case sim.callbacks of
+  Nothing -> pure unit
+  Just cbs -> do
+    callback <- Ref.read cbs.onStop
+    callback
+
+-- | Invoke the onTick callback if present
+invokeTickCallback :: forall row linkRow.
+  Simulation row linkRow
+  -> Effect Unit
+invokeTickCallback sim = case sim.callbacks of
+  Nothing -> pure unit
+  Just cbs -> do
+    callback <- Ref.read cbs.onTick
+    callback
+
+-- | Check if alpha crossed any thresholds and invoke callback
+-- | Thresholds: 0.5, 0.1, 0.01
+checkAlphaThresholds :: forall row linkRow.
+  Number  -- ^ Previous alpha
+  -> Number  -- ^ New alpha
+  -> Simulation row linkRow
+  -> Effect Unit
+checkAlphaThresholds prevAlpha newAlpha sim = case sim.callbacks of
+  Nothing -> pure unit
+  Just cbs -> do
+    -- Check each threshold
+    for_ alphaThresholds \threshold ->
+      when (crossedThreshold prevAlpha newAlpha threshold) do
+        callback <- Ref.read cbs.onAlphaThreshold
+        callback newAlpha
+  where
+  alphaThresholds = [0.5, 0.1, 0.01]
+  crossedThreshold prev new thresh = prev > thresh && new <= thresh
 
 -- =============================================================================
 -- Query
@@ -429,3 +561,46 @@ pinNodesAtPositions :: forall row linkRow.
   -> Effect Unit
 pinNodesAtPositions positions sim =
   pinNodesAtPositions_ positions sim.nodes
+
+-- =============================================================================
+-- Drag Behavior
+-- =============================================================================
+
+-- | Attach simulation-aware drag behavior to node elements
+-- |
+-- | This sets up D3 drag handlers that:
+-- | 1. Reheat the simulation on drag start
+-- | 2. Update fx/fy (fixed position) during drag
+-- | 3. Clear fx/fy on drag end (release node)
+-- |
+-- | Example:
+-- | ```purescript
+-- | elements <- select ".node" >>= selectAll
+-- | attachDrag elements sim
+-- | ```
+attachDrag :: forall row linkRow.
+  Array Element
+  -> Simulation row linkRow
+  -> Effect Unit
+attachDrag elements sim =
+  Core.attachDragWithReheat elements (reheat sim)
+
+-- | Attach drag to transformed group elements (like bubble packs)
+-- |
+-- | Unlike `attachDrag`, this version takes a container selector to
+-- | get pointer coordinates in the correct coordinate space. Use this when
+-- | dragging `<g>` elements that have `transform` attributes.
+-- |
+-- | Example:
+-- | ```purescript
+-- | -- For bubble packs inside a zoom group
+-- | packElements <- select ".module-pack" >>= selectAll
+-- | attachGroupDrag packElements "#zoom-group" sim
+-- | ```
+attachGroupDrag :: forall row linkRow.
+  Array Element
+  -> String  -- ^ Container selector (e.g., "#zoom-group")
+  -> Simulation row linkRow
+  -> Effect Unit
+attachGroupDrag elements containerSelector sim =
+  Core.attachGroupDragWithReheat elements containerSelector (reheat sim)
