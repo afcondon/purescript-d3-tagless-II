@@ -16,7 +16,10 @@ module Data.Loader
   , fetchFunctionCalls
   -- Granular on-demand fetchers
   , fetchModuleDeclarations
+  , fetchModuleDeclarationsWithSource
   , fetchModuleFunctionCalls
+  , fetchModuleMetrics
+  , fetchCallGraphData
   , ModuleDeclarationsResponse
   , ModuleFunctionCallsResponse
   -- Batch fetchers (single request for multiple modules)
@@ -28,10 +31,13 @@ module Data.Loader
   , Snapshot
   , apiBaseUrl
   , Declaration
+  , DeclarationWithSource
   , DeclarationsMap
   , FunctionCallsMap
   , FunctionInfo
   , CallInfo
+  , CallGraphData
+  , GitMetrics
   , getDependencyTree
   ) where
 
@@ -103,6 +109,13 @@ type LocFile =
 type Declaration =
   { kind :: String -- "typeClass", "data", "typeSynonym", "externData", "alias", "value"
   , title :: String
+  }
+
+-- | Declaration with source code from module-declarations endpoint
+type DeclarationWithSource =
+  { kind :: String
+  , title :: String
+  , sourceCode :: Maybe String  -- Only present in per-module API response
   }
 
 -- | Module declarations map: module name -> array of declarations
@@ -294,9 +307,14 @@ fetchFunctionCalls = do
 -- Granular On-Demand Fetchers
 -- =============================================================================
 
--- | Response type for module declarations endpoint
+-- | Response type for module declarations endpoint (summary version)
 type ModuleDeclarationsResponse =
   { declarations :: Array Declaration
+  }
+
+-- | Response type for module declarations endpoint (with source code)
+type ModuleDeclarationsWithSourceResponse =
+  { declarations :: Array DeclarationWithSource
   }
 
 -- | Response type for module function-calls endpoint
@@ -305,13 +323,22 @@ type ModuleFunctionCallsResponse =
   , functions :: Object FunctionInfo
   }
 
--- | Fetch declarations for a specific module
+-- | Fetch declarations for a specific module (without source code)
 fetchModuleDeclarations :: String -> Aff (Either String (Array Declaration))
 fetchModuleDeclarations moduleName = do
   result <- fetchJson (apiBaseUrl <> "/api/module-declarations/" <> moduleName)
   pure $ do
     json <- result
     response :: ModuleDeclarationsResponse <- decodeJson json # mapLeft printJsonDecodeError
+    Right response.declarations
+
+-- | Fetch declarations for a specific module (with source code)
+fetchModuleDeclarationsWithSource :: String -> Aff (Either String (Array DeclarationWithSource))
+fetchModuleDeclarationsWithSource moduleName = do
+  result <- fetchJson (apiBaseUrl <> "/api/module-declarations/" <> moduleName)
+  pure $ do
+    json <- result
+    response :: ModuleDeclarationsWithSourceResponse <- decodeJson json # mapLeft printJsonDecodeError
     Right response.declarations
 
 -- | Fetch function calls for a specific module
@@ -322,6 +349,125 @@ fetchModuleFunctionCalls moduleName = do
     json <- result
     response :: ModuleFunctionCallsResponse <- decodeJson json # mapLeft printJsonDecodeError
     Right response.functions
+
+-- =============================================================================
+-- Call Graph Data (for popup)
+-- =============================================================================
+
+-- | Git metrics for a module
+type GitMetrics =
+  { commitCount :: Int
+  , daysSinceModified :: Int
+  , authorCount :: Int
+  , authors :: Array String
+  }
+
+-- | Combined data for call graph popup
+type CallGraphData =
+  { moduleName :: String
+  , declarationName :: String
+  , callers :: Array CallInfo  -- Functions that call this one
+  , callees :: Array CallInfo  -- Functions this one calls
+  , sourceCode :: Maybe String
+  , declarationKind :: Maybe String
+  , gitMetrics :: Maybe GitMetrics
+  }
+
+-- | Fetch all data needed for call graph popup
+-- | Combines module-function-calls, module-declarations, and module-metrics
+fetchCallGraphData :: String -> String -> Aff (Either String CallGraphData)
+fetchCallGraphData moduleName declarationName = do
+  -- Fetch all three endpoints in parallel
+  functionCallsResult <- fetchModuleFunctionCalls moduleName
+  declarationsResult <- fetchModuleDeclarationsWithSource moduleName
+  metricsResult <- fetchModuleMetrics moduleName
+
+  pure $ do
+    functionCalls <- functionCallsResult
+    declarations <- declarationsResult
+    -- Metrics are optional, don't fail if unavailable
+    let metrics = case metricsResult of
+          Right m -> Just m
+          Left _ -> Nothing
+
+    -- Find the specific function in the function calls map
+    let functionInfo = Object.lookup declarationName functionCalls
+
+    -- Find the declaration info
+    let declaration = Array.find (\d -> d.title == declarationName) declarations
+
+    -- Build callers from calledBy (convert "Module.func" strings to CallInfo)
+    let callers = case functionInfo of
+          Just fi -> map parseCallerString fi.calledBy
+          Nothing -> []
+
+    -- Build callees from calls
+    let callees = case functionInfo of
+          Just fi -> fi.calls
+          Nothing -> []
+
+    -- Get source code and kind from declaration
+    let sourceCode = declaration >>= _.sourceCode
+    let declarationKind = declaration <#> _.kind
+
+    Right
+      { moduleName
+      , declarationName
+      , callers
+      , callees
+      , sourceCode
+      , declarationKind
+      , gitMetrics: metrics
+      }
+  where
+  -- Parse "Module.funcName" string into CallInfo
+  parseCallerString :: String -> CallInfo
+  parseCallerString str =
+    case lastIndexOf "." str of
+      Just idx ->
+        { target: drop (idx + 1) str
+        , targetModule: take idx str
+        , identifier: str
+        , isCrossModule: true
+        }
+      Nothing ->
+        { target: str
+        , targetModule: moduleName -- Same module if no dot
+        , identifier: str
+        , isCrossModule: false
+        }
+
+  lastIndexOf :: String -> String -> Maybe Int
+  lastIndexOf needle haystack =
+    let chars = SCU.toCharArray haystack
+        needleChar = case SCU.toCharArray needle of
+          [c] -> Just c
+          _ -> Nothing
+    in case needleChar of
+      Just c -> Array.findLastIndex (\ch -> ch == c) chars
+      Nothing -> Nothing
+
+  take :: Int -> String -> String
+  take n s = SCU.take n s
+
+  drop :: Int -> String -> String
+  drop n s = SCU.drop n s
+
+-- | Fetch git metrics for a module (optional, may fail)
+fetchModuleMetrics :: String -> Aff (Either String GitMetrics)
+fetchModuleMetrics moduleName = do
+  result <- fetchJson (apiBaseUrl <> "/api/module-metrics/" <> moduleName)
+  pure $ do
+    json <- result
+    -- The API returns flat fields, we need to map them
+    raw :: { commit_count :: Maybe Int, days_since_modified :: Maybe Int, author_count :: Maybe Int, authors :: Maybe (Array String) }
+      <- decodeJson json # mapLeft printJsonDecodeError
+    Right
+      { commitCount: fromMaybe 0 raw.commit_count
+      , daysSinceModified: fromMaybe 0 raw.days_since_modified
+      , authorCount: fromMaybe 0 raw.author_count
+      , authors: fromMaybe [] raw.authors
+      }
 
 -- =============================================================================
 -- Batch Fetchers (single request for multiple modules)

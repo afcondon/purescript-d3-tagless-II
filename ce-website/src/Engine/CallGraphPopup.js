@@ -1,10 +1,12 @@
 // FFI for Call Graph Popup
-// Show/hide popup and fetch function call data
+// DOM-only operations - all data fetching is done in PureScript
 
-const API_BASE = "http://localhost:8080";
+// =============================================================================
+// Show Loading State
+// =============================================================================
 
-// Show the call graph popup with function call data
-export const showCallGraphPopup_ = (moduleName) => (declarationName) => () => {
+// Show the popup with loading indicators (called before data is fetched)
+export const showPopupLoading_ = (moduleName) => (declarationName) => () => {
   const popup = document.getElementById("call-graph-popup");
   const title = document.getElementById("call-graph-title");
   const callersList = document.getElementById("call-graph-callers-list");
@@ -26,95 +28,125 @@ export const showCallGraphPopup_ = (moduleName) => (declarationName) => () => {
 
   // Show popup
   popup.style.display = "flex";
-
-  // Fetch function call data
-  fetchCallGraphData(moduleName, declarationName)
-    .then(data => {
-      // Update callers with clickable links
-      if (data.callers && data.callers.length > 0) {
-        callersList.innerHTML = data.callers
-          .map(fn => {
-            // Handle both string format and object format
-            const displayName = typeof fn === 'string' ? fn : fn.target || fn;
-            const targetModule = typeof fn === 'object' ? fn.targetModule : null;
-
-            // Make it clickable if we have module info
-            if (targetModule && displayName) {
-              return `<div class="call-graph-list-item call-graph-link" data-module="${escapeHtml(targetModule)}" data-function="${escapeHtml(displayName)}">${escapeHtml(displayName)}</div>`;
-            } else {
-              return `<div class="call-graph-list-item">${escapeHtml(displayName)}</div>`;
-            }
-          })
-          .join("");
-      } else {
-        callersList.innerHTML = '<div class="call-graph-empty">No callers found</div>';
-      }
-
-      // Update callees with clickable links
-      if (data.callees && data.callees.length > 0) {
-        calleesList.innerHTML = data.callees
-          .map(fn => {
-            // Handle both string format and object format
-            const displayName = typeof fn === 'string' ? fn : fn.target || fn;
-            const targetModule = typeof fn === 'object' ? fn.targetModule : null;
-
-            // Make it clickable if we have module info
-            if (targetModule && displayName) {
-              return `<div class="call-graph-list-item call-graph-link" data-module="${escapeHtml(targetModule)}" data-function="${escapeHtml(displayName)}">${escapeHtml(displayName)}</div>`;
-            } else {
-              return `<div class="call-graph-list-item">${escapeHtml(displayName)}</div>`;
-            }
-          })
-          .join("");
-      } else {
-        calleesList.innerHTML = '<div class="call-graph-empty">No calls found</div>';
-      }
-
-      // Update source code with git metrics
-      let sourceHtml = '';
-
-      // Add git metrics section if available
-      if (data.gitMetrics) {
-        const m = data.gitMetrics;
-        sourceHtml += '<div class="call-graph-git-metrics">';
-        sourceHtml += `<div class="git-metric"><strong>Commits:</strong> ${m.commit_count || 0}</div>`;
-        sourceHtml += `<div class="git-metric"><strong>Last modified:</strong> ${m.days_since_modified || 0} days ago</div>`;
-        sourceHtml += `<div class="git-metric"><strong>Authors:</strong> ${m.author_count || 0}</div>`;
-        if (m.authors && m.authors.length > 0) {
-          sourceHtml += `<div class="git-metric"><strong>Contributors:</strong> ${m.authors.slice(0, 3).join(', ')}${m.authors.length > 3 ? '...' : ''}</div>`;
-        }
-        sourceHtml += '</div>';
-      }
-
-      // Add source code
-      if (data.sourceCode) {
-        sourceHtml += `<pre class="call-graph-source">${escapeHtml(data.sourceCode)}</pre>`;
-      } else {
-        sourceHtml += '<div class="call-graph-empty">Source code not available</div>';
-      }
-
-      sourceCode.innerHTML = sourceHtml;
-
-      // Add click handlers to all links
-      document.querySelectorAll('.call-graph-link').forEach(link => {
-        link.addEventListener('click', () => {
-          const module = link.getAttribute('data-module');
-          const func = link.getAttribute('data-function');
-          if (module && func) {
-            showCallGraphPopup_(module)(func)();
-          }
-        });
-      });
-    })
-    .catch(error => {
-      console.error("[CallGraphPopup] Error fetching call graph data:", error);
-      callersList.innerHTML = '<div class="call-graph-error">Error loading callers</div>';
-      sourceCode.innerHTML = '<div class="call-graph-error">Error loading source code</div>';
-      calleesList.innerHTML = '<div class="call-graph-error">Error loading callees</div>';
-    });
 };
 
-// Hide the call graph popup
+// =============================================================================
+// Render Popup Data
+// =============================================================================
+
+// Render the popup with fetched data from PureScript
+export const renderPopupData_ = (data) => () => {
+  const callersList = document.getElementById("call-graph-callers-list");
+  const sourceCode = document.getElementById("call-graph-source-code");
+  const calleesList = document.getElementById("call-graph-callees-list");
+
+  if (!callersList || !sourceCode || !calleesList) {
+    console.error("[CallGraphPopup] Popup elements not found");
+    return;
+  }
+
+  // Update callers with clickable links
+  if (data.callers && data.callers.length > 0) {
+    callersList.innerHTML = data.callers
+      .map(fn => {
+        const displayName = fn.target;
+        const targetModule = fn.targetModule;
+        if (targetModule && displayName) {
+          return `<div class="call-graph-list-item call-graph-link" data-module="${escapeHtml(targetModule)}" data-function="${escapeHtml(displayName)}">${escapeHtml(displayName)}</div>`;
+        } else {
+          return `<div class="call-graph-list-item">${escapeHtml(displayName)}</div>`;
+        }
+      })
+      .join("");
+  } else {
+    callersList.innerHTML = '<div class="call-graph-empty">No callers found</div>';
+  }
+
+  // Update callees with clickable links
+  if (data.callees && data.callees.length > 0) {
+    calleesList.innerHTML = data.callees
+      .map(fn => {
+        const displayName = fn.target;
+        const targetModule = fn.targetModule;
+        if (targetModule && displayName) {
+          return `<div class="call-graph-list-item call-graph-link" data-module="${escapeHtml(targetModule)}" data-function="${escapeHtml(displayName)}">${escapeHtml(displayName)}</div>`;
+        } else {
+          return `<div class="call-graph-list-item">${escapeHtml(displayName)}</div>`;
+        }
+      })
+      .join("");
+  } else {
+    calleesList.innerHTML = '<div class="call-graph-empty">No calls found</div>';
+  }
+
+  // Update source code with git metrics
+  let sourceHtml = '';
+
+  // Add git metrics section if available
+  if (data.hasGitMetrics) {
+    const m = data.gitMetrics;
+    sourceHtml += '<div class="call-graph-git-metrics">';
+    sourceHtml += `<div class="git-metric"><strong>Commits:</strong> ${m.commitCount || 0}</div>`;
+    sourceHtml += `<div class="git-metric"><strong>Last modified:</strong> ${m.daysSinceModified || 0} days ago</div>`;
+    sourceHtml += `<div class="git-metric"><strong>Authors:</strong> ${m.authorCount || 0}</div>`;
+    if (m.authors && m.authors.length > 0) {
+      sourceHtml += `<div class="git-metric"><strong>Contributors:</strong> ${m.authors.slice(0, 3).join(', ')}${m.authors.length > 3 ? '...' : ''}</div>`;
+    }
+    sourceHtml += '</div>';
+  }
+
+  // Add source code
+  if (data.sourceCode) {
+    sourceHtml += `<pre class="call-graph-source">${escapeHtml(data.sourceCode)}</pre>`;
+  } else {
+    const kindText = data.declarationKind || 'Declaration';
+    sourceHtml += `<div class="call-graph-empty">${kindText}: ${data.declarationName}<br><br>(Source code not available)</div>`;
+  }
+
+  sourceCode.innerHTML = sourceHtml;
+
+  // Add click handlers to all links (for navigation between functions)
+  document.querySelectorAll('.call-graph-link').forEach(link => {
+    link.addEventListener('click', () => {
+      const module = link.getAttribute('data-module');
+      const func = link.getAttribute('data-function');
+      if (module && func) {
+        // Call the PureScript showCallGraphPopup to navigate
+        // This is imported from the PureScript module
+        if (typeof window.showCallGraphPopup === 'function') {
+          window.showCallGraphPopup(module)(func)();
+        } else {
+          console.warn("[CallGraphPopup] showCallGraphPopup not available on window");
+        }
+      }
+    });
+  });
+};
+
+// =============================================================================
+// Show Error State
+// =============================================================================
+
+export const showPopupError_ = (errorMessage) => () => {
+  const callersList = document.getElementById("call-graph-callers-list");
+  const sourceCode = document.getElementById("call-graph-source-code");
+  const calleesList = document.getElementById("call-graph-callees-list");
+
+  if (callersList) {
+    callersList.innerHTML = '<div class="call-graph-error">Error loading callers</div>';
+  }
+  if (sourceCode) {
+    sourceCode.innerHTML = `<div class="call-graph-error">Error: ${escapeHtml(errorMessage)}</div>`;
+  }
+  if (calleesList) {
+    calleesList.innerHTML = '<div class="call-graph-error">Error loading callees</div>';
+  }
+};
+
+// =============================================================================
+// Hide Popup
+// =============================================================================
+
 export const hideCallGraphPopup_ = () => {
   const popup = document.getElementById("call-graph-popup");
   if (popup) {
@@ -122,77 +154,22 @@ export const hideCallGraphPopup_ = () => {
   }
 };
 
-// Fetch call graph data from API
-async function fetchCallGraphData(moduleName, declarationName) {
-  try {
-    // Get current snapshot ID from URL or use default
-    const urlParams = new URLSearchParams(window.location.search);
-    const snapshotId = urlParams.get('snapshot') || '1';
-
-    // Fetch function calls for the entire module
-    const callsResponse = await fetch(`${API_BASE}/api/module-function-calls/${encodeURIComponent(moduleName)}?snapshot=${snapshotId}`);
-    const callsData = await callsResponse.json();
-
-    // Extract data for the specific declaration
-    const functionData = callsData.functions?.[declarationName];
-
-    if (!functionData) {
-      console.warn(`[CallGraphPopup] No data found for ${moduleName}.${declarationName}`);
-      return {
-        callers: [],
-        callees: [],
-        sourceCode: null,
-        gitMetrics: null
-      };
-    }
-
-    // Fetch declaration info (comments) which may contain some code info
-    const declResponse = await fetch(`${API_BASE}/api/module-declarations/${encodeURIComponent(moduleName)}?snapshot=${snapshotId}`);
-    const declData = await declResponse.json();
-
-    // Find the specific declaration
-    const declaration = declData.declarations?.find(d => d.title === declarationName);
-
-    let sourceInfo;
-    if (declaration?.sourceCode) {
-      sourceInfo = declaration.sourceCode;
-    } else if (declaration) {
-      sourceInfo = `${declaration.kind}: ${declaration.title}\n\n(Source code not available)`;
-    } else {
-      sourceInfo = `${declarationName}\n\n(Declaration not found)`;
-    }
-
-    // Fetch git metrics for the module
-    let gitMetrics = null;
-    try {
-      const metricsResponse = await fetch(`${API_BASE}/api/module-metrics/${encodeURIComponent(moduleName)}?snapshot=${snapshotId}`);
-      if (metricsResponse.ok) {
-        gitMetrics = await metricsResponse.json();
-      }
-    } catch (err) {
-      console.warn("[CallGraphPopup] Could not fetch git metrics:", err);
-    }
-
-    return {
-      callers: functionData.calledBy || [],
-      callees: functionData.calls || [],
-      sourceCode: sourceInfo,
-      gitMetrics: gitMetrics
-    };
-  } catch (error) {
-    console.error("[CallGraphPopup] Fetch error:", error);
-    throw error;
-  }
-}
+// =============================================================================
+// Utilities
+// =============================================================================
 
 // Escape HTML to prevent XSS
 function escapeHtml(text) {
+  if (!text) return '';
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
 }
 
-// Initialize event listeners on page load
+// =============================================================================
+// Event Listeners (initialize once on page load)
+// =============================================================================
+
 if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', () => {
     // Close button
