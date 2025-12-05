@@ -57,7 +57,7 @@ component =
     { initialState: \_ ->
         { initialized: false
         , error: Nothing
-        , viewState: PackageGrid ProjectAndLibraries
+        , viewState: Treemap ProjectAndLibraries
         , packagePalette: []
         , projectName: NarrativePanel.defaultProjectName
         , projectId: 1  -- Default to first project (psd3)
@@ -146,8 +146,8 @@ handleAction = case _ of
       log $ "[SpagoGridApp] Switching to project: " <> newProjectName <> " (id: " <> show newProjectId <> ")"
       -- Update state
       H.modify_ _ { projectId = newProjectId, projectName = newProjectName, packagePalette = [] }
-      -- Reset ViewState to top level Grid
-      let resetViewState = PackageGrid ProjectAndLibraries
+      -- Reset ViewState to top level Treemap
+      let resetViewState = Treemap ProjectAndLibraries
       liftEffect $ Ref.write resetViewState Explorer.globalViewStateRef
       H.modify_ _ { viewState = resetViewState }
       -- Reload Explorer with new project data
@@ -224,12 +224,6 @@ handleControlChangeFromPanel controlId newValue = do
           Explorer.goToScene "TreeForm" stateRef
         "layout", ForceLayout _ _ ->
           Explorer.goToScene "TreeRun" stateRef
-        "layout", PackageGrid _ ->
-          Explorer.goToScene "GridRun" stateRef
-        "layout", ModuleOrbit _ ->
-          Explorer.goToScene "OrbitRun" stateRef
-        "layout", DependencyTree _ ->
-          Explorer.goToScene "TreeRun" stateRef
         _, _ -> pure unit
     Nothing -> pure unit
 
@@ -241,8 +235,6 @@ applyControlChange "layout" newLayout currentView =
     "treemap" -> Treemap scope
     "tree" -> TreeLayout scope "PSD3.Main"  -- Default root module
     "force" -> ForceLayout scope "PSD3.Main"  -- Default root module
-    "grid" -> PackageGrid scope  -- Deprecated
-    "orbit" -> ModuleOrbit scope  -- Deprecated
     _ -> currentView
 
 applyControlChange "scope" newScope currentView =
@@ -251,9 +243,6 @@ applyControlChange "scope" newScope currentView =
     Treemap _ -> Treemap scope
     TreeLayout _ root -> TreeLayout scope root
     ForceLayout _ root -> ForceLayout scope root
-    PackageGrid _ -> PackageGrid scope
-    ModuleOrbit _ -> ModuleOrbit scope
-    DependencyTree _ -> DependencyTree scope
     other -> other
 
 applyControlChange _ _ view = view
@@ -263,9 +252,6 @@ getScopeFromView :: ViewState -> ScopeFilter
 getScopeFromView (Treemap scope) = scope
 getScopeFromView (TreeLayout scope _) = scope
 getScopeFromView (ForceLayout scope _) = scope
-getScopeFromView (PackageGrid scope) = scope
-getScopeFromView (ModuleOrbit scope) = scope
-getScopeFromView (DependencyTree scope) = scope
 getScopeFromView _ = ProjectAndLibraries
 
 -- | Forward back button to Explorer (uses navigation stack)
@@ -279,8 +265,5 @@ showViewState :: ViewState -> String
 showViewState (Treemap _) = "Treemap"
 showViewState (TreeLayout _ _) = "TreeLayout"
 showViewState (ForceLayout _ _) = "ForceLayout"
-showViewState (PackageGrid _) = "PackageGrid"
-showViewState (ModuleOrbit _) = "ModuleOrbit"
-showViewState (DependencyTree _) = "DependencyTree"
 showViewState (Neighborhood name) = "Neighborhood(" <> name <> ")"
 showViewState (FunctionCalls name) = "FunctionCalls(" <> name <> ")"

@@ -22,9 +22,6 @@ data ViewState
   = Treemap ScopeFilter  -- Treemap of packages and modules (initial view)
   | TreeLayout ScopeFilter String  -- Tree layout with scope and root module
   | ForceLayout ScopeFilter String  -- Radial force layout with scope and root module
-  | PackageGrid ScopeFilter  -- DEPRECATED: kept for code compatibility
-  | ModuleOrbit ScopeFilter  -- DEPRECATED: kept for code compatibility
-  | DependencyTree ScopeFilter  -- DEPRECATED: kept for code compatibility
   | Neighborhood String  -- module name
   | FunctionCalls String -- module name
 
@@ -76,31 +73,6 @@ describe vs = case vs of
         [ { id: "layout", current: "force", options: ["treemap", "tree", "force"] }
         , { id: "scope", current: showScope scope, options: ["used", "project", "all"] }
         , { id: "root", current: rootModule, options: [] } -- options populated dynamically
-        ]
-    }
-
-  -- DEPRECATED views (kept for code compatibility)
-  PackageGrid scope ->
-    { text: "[Grid] of [" <> scopeName scope <> "] packages"
-    , controls:
-        [ { id: "layout", current: "grid", options: ["grid", "orbit"] }
-        , { id: "scope", current: showScope scope, options: ["used", "project", "all"] }
-        ]
-    }
-
-  ModuleOrbit scope ->
-    { text: "[Orbit] of [" <> scopeName scope <> "] modules, grouped by package"
-    , controls:
-        [ { id: "layout", current: "orbit", options: ["grid", "orbit", "tree"] }
-        , { id: "scope", current: showScope scope, options: ["used", "project", "all"] }
-        ]
-    }
-
-  DependencyTree scope ->
-    { text: "[Dependency tree] of [" <> scopeName scope <> "] module dependencies"
-    , controls:
-        [ { id: "layout", current: "tree", options: ["grid", "orbit", "tree"] }
-        , { id: "scope", current: showScope scope, options: ["used", "project", "all"] }
         ]
     }
 
@@ -163,16 +135,6 @@ availableTransitions vs = case vs of
     [ Treemap scope
     , TreeLayout scope rootModule
     ]
-
-  -- DEPRECATED views (kept for code compatibility but not reachable)
-  PackageGrid scope ->
-    [ Treemap scope ]
-
-  ModuleOrbit scope ->
-    [ Treemap scope ]
-
-  DependencyTree scope ->
-    [ Treemap scope ]
 
   Neighborhood _ ->
     -- From neighborhood, can go back to treemap

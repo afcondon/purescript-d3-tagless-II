@@ -62,7 +62,7 @@ import PSD3v2.Tooltip (onTooltip)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SBoundOwns)
 import Types (SimNode, SimLink, NodeType(..), LinkType, isTreeLink)
-import Viz.SpagoGridTest.GridLayout as GridLayout
+import Engine.ViewBox as ViewBox
 import Viz.SpagoGridTest.TreeLinks (verticalLinkPath)
 import Web.DOM.Element (Element, classList, toNode)
 import Web.DOM.Node as Node
@@ -207,8 +207,8 @@ initWithModel model containerSelector = do
   -- (no transition on startup - nodes start randomized, forces pull them in)
   Sim.start sim
 
-  -- Mark GridRun as current scene (we're already in Grid state with forces, just not via transition)
-  Ref.modify_ (_ { currentScene = Just Scenes.gridRunScene }) stateRef
+  -- Mark TreeForm as current scene (we start with treemap-based positions)
+  Ref.modify_ (_ { currentScene = Just Scenes.treeFormScene }) stateRef
 
   pure stateRef
 
@@ -295,8 +295,8 @@ updateWithModel model stateRef = do
   clearWatermark
   renderWatermark model.nodes
 
-  -- Reset to GridRun scene
-  Ref.modify_ (_ { currentScene = Just Scenes.gridRunScene }) stateRef
+  -- Reset to TreeForm scene
+  Ref.modify_ (_ { currentScene = Just Scenes.treeFormScene }) stateRef
 
   -- Restart simulation
   Sim.start state.simulation
@@ -306,10 +306,6 @@ goToScene :: String -> Ref Scene.SceneState -> Effect Unit
 goToScene sceneName stateRef = do
   let
     mScene = case sceneName of
-      "GridForm" -> Just Scenes.gridFormScene
-      "GridRun" -> Just Scenes.gridRunScene
-      "OrbitForm" -> Just Scenes.orbitFormScene
-      "OrbitRun" -> Just Scenes.orbitRunScene
       "TreeForm" -> Just Scenes.treeFormScene
       "TreeRun" -> Just Scenes.treeRunScene
       _ -> Nothing
@@ -334,19 +330,8 @@ goToScene sceneName stateRef = do
         Scene.setLinksGroupId forceLinksGroupId stateRef -- Enable link updates
         setTreeSceneClass true -- Keep packages/non-tree faded
 
-      -- For Grid/Orbit scenes: restore grid forces, clear tree stuff, and re-render circles
-      when (isGridOrOrbitScene sceneName) do
-        state <- Ref.read stateRef
-        nodes <- Sim.getNodes state.simulation
-        restoreGridForces nodes state.simulation
-        clearTreeLinks -- Clear any force links
-        Scene.clearLinksGroupId stateRef -- Disable link updates
-        setTreeSceneClass false
-
       Scene.transitionTo scene stateRef
     Nothing -> log $ "[Explorer] Unknown scene: " <> sceneName
-  where
-  isGridOrOrbitScene name = name == "GridForm" || name == "GridRun" || name == "OrbitForm" || name == "OrbitRun"
 
 -- =============================================================================
 -- Helpers
@@ -510,7 +495,7 @@ renderSVG containerSelector nodes = do
   container <- select containerSelector
 
   svg <- appendChild SVG
-    [ viewBox (show ((-GridLayout.viewBoxWidth) / 2.0) <> " " <> show ((-GridLayout.viewBoxHeight) / 2.0) <> " " <> show GridLayout.viewBoxWidth <> " " <> show GridLayout.viewBoxHeight)
+    [ viewBox (show ((-ViewBox.viewBoxWidth) / 2.0) <> " " <> show ((-ViewBox.viewBoxHeight) / 2.0) <> " " <> show ViewBox.viewBoxWidth <> " " <> show ViewBox.viewBoxHeight)
     , id_ "explorer-svg"
     , class_ "ce-viz"
     ]
@@ -895,7 +880,7 @@ handleControlChange controlId newValue = do
     Just stateRef -> do
       -- Use Scene.transitionTo for proper DumbEngine → Physics handoff
       case controlId, newView of
-        -- New layouts (Treemap is static, Tree/Force will need scene implementations)
+        -- Treemap is static, no scene transition needed
         "layout", Treemap _ -> do
           log "[Explorer] Treemap is static layout, no scene transition needed"
           pure unit
@@ -910,19 +895,6 @@ handleControlChange controlId newValue = do
           -- TODO: implement force layout scene transition
           pure unit
 
-        -- Deprecated layouts (kept for compatibility)
-        "layout", PackageGrid _ -> do
-          log "[Explorer] Transitioning to grid scene (deprecated)"
-          Scene.transitionTo Scenes.gridRunScene stateRef
-
-        "layout", ModuleOrbit _ -> do
-          log "[Explorer] Transitioning to orbit scene (deprecated)"
-          Scene.transitionTo Scenes.orbitRunScene stateRef
-
-        "layout", DependencyTree _ -> do
-          log "[Explorer] Transitioning to tree scene (deprecated)"
-          Scene.transitionTo Scenes.treeRunScene stateRef
-
         _, _ -> pure unit -- Other controls don't trigger scene transitions
 
     Nothing -> log "[Explorer] No scene state to update"
@@ -933,7 +905,7 @@ handleControlChange controlId newValue = do
 applyControlChange :: String -> String -> ViewState -> ViewState
 applyControlChange "layout" newLayout currentView =
   case newLayout, currentView of
-    -- New navigation: treemap, tree, force
+    -- Navigation: treemap, tree, force
     "treemap", Treemap scope -> Treemap scope
     "treemap", TreeLayout scope _ -> Treemap scope
     "treemap", ForceLayout scope _ -> Treemap scope
@@ -943,10 +915,6 @@ applyControlChange "layout" newLayout currentView =
     "force", Treemap scope -> ForceLayout scope "PSD3.Main"
     "force", TreeLayout scope root -> ForceLayout scope root
     "force", ForceLayout scope root -> ForceLayout scope root
-    -- Deprecated layouts (kept for compatibility)
-    "grid", PackageGrid scope -> PackageGrid scope
-    "orbit", ModuleOrbit scope -> ModuleOrbit scope
-    "tree", DependencyTree scope -> DependencyTree scope
     _, other -> other -- No change for other views
 
 applyControlChange "scope" newScope currentView =
@@ -960,10 +928,6 @@ applyControlChange "scope" newScope currentView =
       Treemap _ -> Treemap scope
       TreeLayout _ root -> TreeLayout scope root
       ForceLayout _ root -> ForceLayout scope root
-      -- Deprecated views
-      PackageGrid _ -> PackageGrid scope
-      ModuleOrbit _ -> ModuleOrbit scope
-      DependencyTree _ -> DependencyTree scope
       other -> other -- Neighborhood/FunctionCalls don't have scope control
 
 applyControlChange "root" newRoot currentView =
@@ -985,16 +949,6 @@ showViewState (TreeLayout ProjectAndLibraries root) = "TreeLayout (all, root: " 
 showViewState (ForceLayout UsedOnly root) = "ForceLayout (used, root: " <> root <> ")"
 showViewState (ForceLayout ProjectOnly root) = "ForceLayout (project, root: " <> root <> ")"
 showViewState (ForceLayout ProjectAndLibraries root) = "ForceLayout (all, root: " <> root <> ")"
--- Deprecated views
-showViewState (PackageGrid ProjectOnly) = "PackageGrid (project only)"
-showViewState (PackageGrid ProjectAndLibraries) = "PackageGrid (all)"
-showViewState (PackageGrid UsedOnly) = "PackageGrid (used)"
-showViewState (ModuleOrbit ProjectOnly) = "ModuleOrbit (project only)"
-showViewState (ModuleOrbit ProjectAndLibraries) = "ModuleOrbit (all)"
-showViewState (ModuleOrbit UsedOnly) = "ModuleOrbit (used)"
-showViewState (DependencyTree ProjectOnly) = "DependencyTree (project only)"
-showViewState (DependencyTree ProjectAndLibraries) = "DependencyTree (all)"
-showViewState (DependencyTree UsedOnly) = "DependencyTree (used)"
 showViewState (Neighborhood name) = "Neighborhood (" <> name <> ")"
 showViewState (FunctionCalls name) = "FunctionCalls (" <> name <> ")"
 
@@ -1341,10 +1295,6 @@ restoreToView targetView = do
           Ref.write targetView globalViewStateRef
         TreeLayout _ _ -> restoreFullView focus.fullNodes targetView state.simulation
         ForceLayout _ _ -> restoreFullView focus.fullNodes targetView state.simulation
-        -- Deprecated views
-        PackageGrid _ -> restoreFullView focus.fullNodes targetView state.simulation
-        ModuleOrbit _ -> restoreFullView focus.fullNodes targetView state.simulation
-        DependencyTree _ -> restoreFullView focus.fullNodes targetView state.simulation
         Neighborhood _ -> do
           -- Re-entering a neighborhood - find the node and focus on it
           -- For now, just update the view state (the DOM is already showing neighborhood)

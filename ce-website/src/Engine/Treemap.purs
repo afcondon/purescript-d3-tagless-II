@@ -31,7 +31,7 @@ import PSD3v2.Capabilities.Selection (select, appendChild, appendData)
 import PSD3v2.Selection.Types (ElementType(..), SBoundOwns)
 import PSD3v2.Attribute.Types (id_, class_, fill, stroke, strokeWidth, opacity, x, y, width, height, transform, fontFamily, fontSize, textAnchor, textContent)
 import Types (SimNode, NodeType(..))
-import Viz.SpagoGridTest.GridLayout as GridLayout
+import Engine.ViewBox as ViewBox
 import Web.DOM.Element (Element)
 import Web.DOM.ParentNode (querySelector, QuerySelector(..))
 import Web.HTML (window)
@@ -149,7 +149,7 @@ buildTreemapData nodes =
 -- | Treemap layout configuration
 treemapConfig :: TreemapConfig TreemapData
 treemapConfig = defaultTreemapConfig
-  { size = { width: GridLayout.viewBoxWidth, height: GridLayout.viewBoxHeight }
+  { size = { width: ViewBox.viewBoxWidth, height: ViewBox.viewBoxHeight }
   , tile = squarify 1.0 -- Golden ratio gives nice proportions
   , paddingInner = 2.0
   , paddingOuter = 4.0
@@ -230,8 +230,8 @@ renderTreemapSVG packageNodes moduleNodes = do
   -- Create treemap container group with transform to center in viewBox
   -- ViewBox is centered at origin, so translate by (-width/2, -height/2)
   let
-    translateX = (-GridLayout.viewBoxWidth) / 2.0
-    translateY = (-GridLayout.viewBoxHeight) / 2.0
+    translateX = (-ViewBox.viewBoxWidth) / 2.0
+    translateY = (-ViewBox.viewBoxHeight) / 2.0
   treemapGroup <- appendChild Group
     [ id_ "treemap-group"
     , transform ("translate(" <> show translateX <> "," <> show translateY <> ")")
@@ -374,8 +374,8 @@ computeTreemapPositions nodes =
 
     -- Convert to position map (centered coordinates)
     -- ViewBox is centered at origin, so offset by (-width/2, -height/2)
-    offsetX = (-GridLayout.viewBoxWidth) / 2.0
-    offsetY = (-GridLayout.viewBoxHeight) / 2.0
+    offsetX = (-ViewBox.viewBoxWidth) / 2.0
+    offsetY = (-ViewBox.viewBoxHeight) / 2.0
 
     toPositionEntry leaf =
       let
@@ -420,8 +420,8 @@ renderWatermarkSVG packageNodes = do
 
   -- Add transform to center in viewBox
   let
-    translateX = (-GridLayout.viewBoxWidth) / 2.0
-    translateY = (-GridLayout.viewBoxHeight) / 2.0
+    translateX = (-ViewBox.viewBoxWidth) / 2.0
+    translateY = (-ViewBox.viewBoxHeight) / 2.0
   -- Create inner group with transform (since we can't set attrs on selection directly)
   innerGroup <- appendChild Group
     [ transform ("translate(" <> show translateX <> "," <> show translateY <> ")")

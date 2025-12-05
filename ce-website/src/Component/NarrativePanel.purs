@@ -469,8 +469,5 @@ showViewState :: ViewState -> String
 showViewState (Treemap _) = "Treemap"
 showViewState (TreeLayout _ _) = "TreeLayout"
 showViewState (ForceLayout _ _) = "ForceLayout"
-showViewState (PackageGrid _) = "PackageGrid"
-showViewState (ModuleOrbit _) = "ModuleOrbit"
-showViewState (DependencyTree _) = "DependencyTree"
 showViewState (Neighborhood name) = "Neighborhood(" <> name <> ")"
 showViewState (FunctionCalls name) = "FunctionCalls(" <> name <> ")"
