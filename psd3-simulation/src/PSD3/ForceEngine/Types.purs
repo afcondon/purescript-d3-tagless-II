@@ -107,7 +107,7 @@ defaultSimParams ::
 defaultSimParams =
   { alpha: 1.0
   , alphaMin: 0.001
-  , alphaDecay: 0.0228  -- D3's default: 1 - pow(0.001, 1/300)
+  , alphaDecay: 0.01  -- Slower cooling than D3 default (0.0228) for better settling
   , alphaTarget: 0.0
   , velocityDecay: 0.4  -- D3's default
   }

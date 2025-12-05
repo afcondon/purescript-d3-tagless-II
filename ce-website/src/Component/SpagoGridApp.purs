@@ -209,11 +209,21 @@ handleControlChangeFromPanel controlId newValue = do
   currentView <- Ref.read Explorer.globalViewStateRef
   let newView = applyControlChange controlId newValue currentView
   Ref.write newView Explorer.globalViewStateRef
+
+  -- Update node colors to match new view (must happen before scene transition)
+  Explorer.updateNodeColors newView
+
   -- Trigger scene transition via global state ref
   mStateRef <- Ref.read Explorer.globalStateRef
   case mStateRef of
     Just stateRef -> do
       case controlId, newView of
+        "layout", Treemap _ ->
+          Explorer.goToScene "TreemapRun" stateRef
+        "layout", TreeLayout _ _ ->
+          Explorer.goToScene "TreeForm" stateRef
+        "layout", ForceLayout _ _ ->
+          Explorer.goToScene "TreeRun" stateRef
         "layout", PackageGrid _ ->
           Explorer.goToScene "GridRun" stateRef
         "layout", ModuleOrbit _ ->
@@ -228,15 +238,19 @@ applyControlChange :: String -> String -> ViewState -> ViewState
 applyControlChange "layout" newLayout currentView =
   let scope = getScopeFromView currentView
   in case newLayout of
-    "grid" -> PackageGrid scope
-    "orbit" -> ModuleOrbit scope
-    "tree" -> DependencyTree scope
+    "treemap" -> Treemap scope
+    "tree" -> TreeLayout scope "PSD3.Main"  -- Default root module
+    "force" -> ForceLayout scope "PSD3.Main"  -- Default root module
+    "grid" -> PackageGrid scope  -- Deprecated
+    "orbit" -> ModuleOrbit scope  -- Deprecated
     _ -> currentView
 
 applyControlChange "scope" newScope currentView =
   let scope = if newScope == "project" then ProjectOnly else ProjectAndLibraries
   in case currentView of
-    ModuleTreemap _ -> ModuleTreemap scope
+    Treemap _ -> Treemap scope
+    TreeLayout _ root -> TreeLayout scope root
+    ForceLayout _ root -> ForceLayout scope root
     PackageGrid _ -> PackageGrid scope
     ModuleOrbit _ -> ModuleOrbit scope
     DependencyTree _ -> DependencyTree scope
@@ -246,7 +260,9 @@ applyControlChange _ _ view = view
 
 -- | Extract scope from any ViewState
 getScopeFromView :: ViewState -> ScopeFilter
-getScopeFromView (ModuleTreemap scope) = scope
+getScopeFromView (Treemap scope) = scope
+getScopeFromView (TreeLayout scope _) = scope
+getScopeFromView (ForceLayout scope _) = scope
 getScopeFromView (PackageGrid scope) = scope
 getScopeFromView (ModuleOrbit scope) = scope
 getScopeFromView (DependencyTree scope) = scope
@@ -260,7 +276,9 @@ handleBackFromPanel = do
 
 -- | Helper to show ViewState for logging
 showViewState :: ViewState -> String
-showViewState (ModuleTreemap _) = "ModuleTreemap"
+showViewState (Treemap _) = "Treemap"
+showViewState (TreeLayout _ _) = "TreeLayout"
+showViewState (ForceLayout _ _) = "ForceLayout"
 showViewState (PackageGrid _) = "PackageGrid"
 showViewState (ModuleOrbit _) = "ModuleOrbit"
 showViewState (DependencyTree _) = "DependencyTree"

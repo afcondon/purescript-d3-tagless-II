@@ -153,6 +153,17 @@ The project aims to be both an impressive demonstration of functional visualizat
 
 This rule ensures demos accurately represent library capabilities and drives library improvements.
 
+## Code Explorer (ce-website) Rules
+
+**The Code Explorer is both a showcase AND a proof-of-concept for the library.** It must adhere to even stricter principles:
+
+1. **Never use FFI workarounds** - If the library doesn't support something, improve the library
+2. **Exemplary code clarity** - This code will be read by library users as reference implementation
+3. **Principled library usage** - Use the library's intended patterns (e.g., General Update Pattern for DOM updates)
+4. **If goals conflict, improve the library** - Code clarity and principled usage must never be at odds; if they are, it signals a library design problem
+
+See `demo-website/src/Viz/GUP.purs` and `demo-website/src/Viz/LesMisGUP.purs` for examples of proper update patterns with motion and transitions.
+
 ## Common PureScript Gotchas
 
 - **Math functions**: There is NO `Math` module in PureScript! Use `Data.Number` for floating-point math functions (sqrt, sin, cos, etc.) or `Data.Int` for integer operations. The module `Data.Math` is deprecated and should not be used.

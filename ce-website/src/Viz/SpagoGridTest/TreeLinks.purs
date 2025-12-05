@@ -1,9 +1,12 @@
 -- | Tree Link Rendering
 -- |
--- | Pure PureScript radial link path generation for tree visualization.
+-- | Pure PureScript link path generation for tree visualization.
+-- | Supports both radial and vertical link layouts.
 module Viz.SpagoGridTest.TreeLinks
   ( radialLinkPath
+  , verticalLinkPath
   , makeTreeLinkPathFromNodes
+  , makeVerticalTreeLinkPathFromNodes
   ) where
 
 import Prelude
@@ -45,6 +48,27 @@ radialLinkPath x1 y1 x2 y2 =
     " " <> show cp2x <> "," <> show cp2y <>
     " " <> show x2 <> "," <> show y2
 
+-- | Vertical link path generator for tidy tree layout
+-- | Creates cubic Bezier curves with vertical swoops (root at top)
+-- | Control points are placed at the midpoint vertically for smooth transitions
+verticalLinkPath :: Number -> Number -> Number -> Number -> String
+verticalLinkPath x1 y1 x2 y2 =
+  let
+    -- Control points for vertical tree:
+    -- CP1: parent's x, halfway to child's y
+    -- CP2: child's x, halfway to child's y
+    midY = (y1 + y2) / 2.0
+
+    cp1x = x1
+    cp1y = midY
+    cp2x = x2
+    cp2y = midY
+  in
+    "M" <> show x1 <> "," <> show y1 <>
+    "C" <> show cp1x <> "," <> show cp1y <>
+    " " <> show cp2x <> "," <> show cp2y <>
+    " " <> show x2 <> "," <> show y2
+
 -- | Generate a radial link path for a link using node map for position lookup
 -- | Uses treeX/treeY from nodes (Cartesian coordinates)
 makeTreeLinkPathFromNodes :: Map Int SimNode -> SimLink -> String
@@ -52,4 +76,13 @@ makeTreeLinkPathFromNodes nodeMap link =
   case Map.lookup link.source nodeMap, Map.lookup link.target nodeMap of
     Just sourceNode, Just targetNode ->
       radialLinkPath sourceNode.treeX sourceNode.treeY targetNode.treeX targetNode.treeY
+    _, _ -> ""
+
+-- | Generate a vertical link path for a link using node map for position lookup
+-- | Uses treeX/treeY from nodes (Cartesian coordinates)
+makeVerticalTreeLinkPathFromNodes :: Map Int SimNode -> SimLink -> String
+makeVerticalTreeLinkPathFromNodes nodeMap link =
+  case Map.lookup link.source nodeMap, Map.lookup link.target nodeMap of
+    Just sourceNode, Just targetNode ->
+      verticalLinkPath sourceNode.treeX sourceNode.treeY targetNode.treeX targetNode.treeY
     _, _ -> ""

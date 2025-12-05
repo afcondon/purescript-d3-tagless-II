@@ -469,8 +469,8 @@ transformToModel modulesObj packagesObj locMap declarations =
       (\nodeId -> { id: nodeId, x: 0.0, y: 0.0, depth: 0, height: 0 })
       idTree
 
-    -- Run tree layout with RECTANGULAR coordinates (like RadialTreeViz)
-    -- Then project to radial in updateNodeWithTreeData
+    -- Run tree layout with RECTANGULAR coordinates
+    -- Then project to vertical (root at top) in updateNodeWithTreeData
     treeLayoutSize = 1000.0
     treeConfig =
       { size: { width: treeLayoutSize, height: treeLayoutSize }
@@ -480,7 +480,7 @@ transformToModel modulesObj packagesObj locMap declarations =
       }
     laidOutTree = Tree.tree treeConfig dataTree
 
-    -- Flatten tree to map of rectangular positions (will be projected to radial)
+    -- Flatten tree to map of rectangular positions (will be projected to vertical)
     treePositionMap = flattenTreeToPositionMap treeLayoutSize laidOutTree
 
     -- Update nodes with tree positions AND isInTree flag
@@ -547,27 +547,28 @@ flattenTreeToPositionMap _ tree = go tree Map.empty
       foldl (\a child -> go child a) acc' children
 
 -- | Update node with tree position AND isInTree flag
--- | Uses RadialTreeViz approach:
+-- | Uses Vertical Tree projection:
 -- | - Tree produces rectangular coords (x in [0, width], y in [0, height])
--- | - Project to radial: x → angle, y → radius
+-- | - Project to vertical: center x horizontally, scale y vertically (root at top)
 updateNodeWithTreeData :: Map Int { x :: Number, y :: Number } -> Set Int -> SimNode -> SimNode
 updateNodeWithTreeData treePositions reachableIds node =
   let
     inTree = Set.member node.id reachableIds
     layoutSize = 1000.0 -- Must match treeLayoutSize
-    maxRadius = 500.0 -- Maximum tree radius (half of layoutSize * 0.85 like RadialTreeViz)
+
+    -- Vertical tree parameters
+    -- Scale to fit in viewbox: assuming viewbox is ~2400x1600 (GridLayout dimensions)
+    maxTreeWidth = 2000.0  -- Horizontal spread
+    maxTreeHeight = 1400.0 -- Vertical depth (root at top)
 
     withTreePos = case Map.lookup node.id treePositions of
       Just { x: treeX, y: treeY } ->
-        -- RadialTreeViz projection formula:
-        -- x → angle: map [0, layoutSize] to [0, 2π], offset by -π/2 to start at top
+        -- Vertical projection formula:
+        -- x: map [0, layoutSize] to [-maxTreeWidth/2, maxTreeWidth/2] (centered horizontally)
+        -- y: map [0, layoutSize] to [-maxTreeHeight/2, maxTreeHeight/2] (root at top, negative = up)
         let
-          angle = (treeX / layoutSize) * 2.0 * pi - (pi / 2.0)
-          -- y → radius: map [0, layoutSize] to [0, maxRadius]
-          radius = (treeY / layoutSize) * maxRadius
-          -- Convert polar to Cartesian
-          cartX = radius * cos angle
-          cartY = radius * sin angle
+          cartX = (treeX / layoutSize - 0.5) * maxTreeWidth
+          cartY = (treeY / layoutSize - 0.5) * maxTreeHeight
         in
           node { treeX = cartX, treeY = cartY }
       Nothing -> node -- Node not in tree (e.g., packages)

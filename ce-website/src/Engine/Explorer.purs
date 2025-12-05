@@ -12,6 +12,7 @@ module Engine.Explorer
   , globalModelInfoRef
   , globalNavigationStackRef
   , navigateBack
+  , updateNodeColors
   ) where
 
 import Prelude
@@ -19,9 +20,11 @@ import Prelude
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (foldl)
-import Data.Int (toNumber, floor)
+import Data.Int (toNumber, floor, fromStringAs, hexadecimal)
+import Data.String as String
+import Data.String (Pattern(..))
 import Data.Map as Map
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Nullable as Nullable
 import Data.Traversable (traverse, for_)
 import Data.Tuple (Tuple(..))
@@ -62,7 +65,7 @@ import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SBoundOwns)
 import Types (SimNode, SimLink, NodeType(..), LinkType, isTreeLink)
 import Viz.SpagoGridTest.GridLayout as GridLayout
-import Viz.SpagoGridTest.TreeLinks (radialLinkPath)
+import Viz.SpagoGridTest.TreeLinks (verticalLinkPath)
 import Web.DOM.Element (Element, classList, toNode)
 import Web.DOM.Node as Node
 import Web.DOM.DOMTokenList as DOMTokenList
@@ -104,7 +107,7 @@ globalModelInfoRef = unsafePerformEffect $ Ref.new { projectName: "", moduleCoun
 
 -- | Global ref for current view state
 globalViewStateRef :: Ref ViewState
-globalViewStateRef = unsafePerformEffect $ Ref.new (PackageGrid ProjectAndLibraries)
+globalViewStateRef = unsafePerformEffect $ Ref.new (Treemap ProjectAndLibraries)
 
 -- | Navigation stack for zoom out (history of previous views)
 -- | Stack grows from left: newest at head, oldest at tail
@@ -139,7 +142,7 @@ forceLinksGroupId = GroupId "#explorer-links"
 initExplorer :: String -> Effect Unit
 initExplorer containerSelector = do
   -- Initialize ViewState (Halogen NarrativePanel polls this)
-  let initialView = PackageGrid ProjectAndLibraries
+  let initialView = Treemap ProjectAndLibraries
   Ref.write initialView globalViewStateRef
   log "[Explorer] ViewState initialized (Halogen NarrativePanel polls this)"
 
@@ -179,7 +182,7 @@ initWithModel model containerSelector = do
   randomizedNodes <- randomizeModulePositions treemapNodes
   let nodesWithFix = map fixPackagePosition randomizedNodes
 
-  -- Create simulation
+  -- Create simulation with default config (faster cooling for Treemap)
   sim <- Sim.create Sim.defaultConfig
   Sim.setNodes nodesWithFix sim
 
@@ -408,13 +411,13 @@ addTreeForces nodes links sim = do
   -- Clear existing forces
   Ref.write Map.empty sim.forces
 
-  -- Link force - tight binding (distance=0, strength=1 like Observable)
-  let linkHandle = Core.createLink { distance: 0.0, strength: 1.0, iterations: 1 }
+  -- Link force - looser binding for more radial spread
+  let linkHandle = Core.createLink { distance: 30.0, strength: 0.7, iterations: 1 }
   _ <- Core.initializeLinkForce linkHandle nodes treeLinks
   Ref.modify_ (Map.insert "link" linkHandle) sim.forces
 
-  -- Many-body (charge) force - repulsion between all nodes
-  let manyBodyHandle = Core.createManyBody { strength: -50.0, theta: 0.9, distanceMin: 1.0, distanceMax: 1.0e10 }
+  -- Many-body (charge) force - stronger repulsion for better spacing
+  let manyBodyHandle = Core.createManyBody { strength: -100.0, theta: 0.9, distanceMin: 1.0, distanceMax: 1.0e10 }
   _ <- Core.initializeForce manyBodyHandle nodes
   Ref.modify_ (Map.insert "charge" manyBodyHandle) sim.forces
 
@@ -520,12 +523,15 @@ renderSVG containerSelector nodes = do
   _ <- appendChild Group [ id_ "explorer-links" ] zoomGroup
   nodesGroup <- appendChild Group [ id_ "explorer-nodes" ] zoomGroup
 
+  -- Read current ViewState for color functions
+  currentView <- liftEffect $ Ref.read globalViewStateRef
+
   nodeSel <- appendData Circle nodes
     [ cx (_.x :: SimNode -> Number)
     , cy (_.y :: SimNode -> Number)
     , radius (_.r :: SimNode -> Number)
-    , fill (nodeFill :: SimNode -> String)
-    , stroke (nodeColor :: SimNode -> String) -- Use color for stroke
+    , fill (nodeFill currentView :: SimNode -> String)
+    , stroke (nodeColor currentView :: SimNode -> String) -- Use color for stroke
     , strokeWidth 1.0 -- Slightly thicker stroke for visibility
     , class_ nodeClass -- CSS class for type-based styling/transitions
     ]
@@ -568,23 +574,77 @@ renderSVG containerSelector nodes = do
 
   pure { nodeSel }
 
--- | Stroke color - packages use their cluster color, modules use white
-nodeColor :: SimNode -> String
-nodeColor n = case n.nodeType of
-  PackageNode -> schemeTableau10At n.cluster  -- Package colors from palette
-  ModuleNode -> "rgba(255, 255, 255, 0.9)"   -- White for modules
+-- | Stroke color - view-aware coloring based on ViewState
+-- | Treemap: packages colored, used modules white, unused modules white
+-- | Tree/Force: packages colored (faint via opacity), used modules colored, unused modules colored (faint via opacity)
+nodeColor :: ViewState -> SimNode -> String
+nodeColor viewState n = case n.nodeType of
+  PackageNode -> case viewState of
+    Treemap _ -> schemeTableau10At n.cluster  -- Treemap: solid package color
+    _ -> schemeTableau10At n.cluster          -- Tree/Force: solid package color (will be made faint via opacity)
+  ModuleNode -> case viewState of
+    Treemap _ ->
+      -- Treemap view: all modules white stroke (used and unused)
+      "rgba(255, 255, 255, 0.9)"
+    _ ->
+      -- Tree/Force views: package color stroke for used modules, faint for unused (via opacity)
+      schemeTableau10At n.cluster
 
--- | Fill color - packages use cluster colors, modules are white (hollow if unused)
-nodeFill :: SimNode -> String
-nodeFill n = case n.nodeType of
-  PackageNode -> schemeTableau10At n.cluster  -- Solid package color
-  ModuleNode ->
-    if n.isInTree
-      then "rgba(255, 255, 255, 0.8)"  -- Solid white for used modules
-      else "none"  -- Hollow for unused modules (blueprint style)
+-- | Fill color - view-aware coloring based on ViewState
+-- | Treemap: packages colored, used modules white fill, unused modules no fill
+-- | Tree/Force: packages faint, used modules colored 50% opacity, unused modules faint
+nodeFill :: ViewState -> SimNode -> String
+nodeFill viewState n = case n.nodeType of
+  PackageNode -> case viewState of
+    Treemap _ -> schemeTableau10At n.cluster  -- Treemap: solid package color
+    _ -> addOpacity (schemeTableau10At n.cluster) 0.1  -- Tree/Force: very faint (10% opacity)
+  ModuleNode -> case viewState of
+    Treemap _ ->
+      -- Treemap view: used modules get white fill, unused modules get no fill
+      if Array.null n.sources
+        then "none"  -- Unused: no fill (outline only)
+        else "rgba(255, 255, 255, 0.9)"  -- Used: solid white fill
+    _ ->
+      -- Tree/Force views: all modules colored, used modules 50% opacity, unused very faint
+      if n.isInTree
+        then addOpacity (schemeTableau10At n.cluster) 0.5  -- Used (in tree): 50% opacity
+        else addOpacity (schemeTableau10At n.cluster) 0.1  -- Unused (not in tree): 10% opacity
+
+-- | Add opacity to a hex color string (converts #RRGGBB to rgba(r,g,b,a))
+addOpacity :: String -> Number -> String
+addOpacity hexColor opacity =
+  case String.stripPrefix (String.Pattern "#") hexColor of
+    Just hex ->
+      let
+        r = fromMaybe 0 $ hexToInt $ String.take 2 hex
+        g = fromMaybe 0 $ hexToInt $ String.take 2 $ String.drop 2 hex
+        b = fromMaybe 0 $ hexToInt $ String.take 2 $ String.drop 4 hex
+      in
+        "rgba(" <> show r <> "," <> show g <> "," <> show b <> "," <> show opacity <> ")"
+    Nothing -> hexColor  -- Return original if not a hex color
+
+-- | Convert hex string to integer
+hexToInt :: String -> Maybe Int
+hexToInt hex = fromStringAs hexadecimal hex
 
 numMod :: Number -> Number -> Number
 numMod a b = a - b * toNumber (floor (a / b))
+
+-- | Update node colors based on current ViewState
+-- | This should be called whenever transitioning between views
+-- | Uses the library's principled approach: re-render nodes with new color functions
+updateNodeColors :: ViewState -> Effect Unit
+updateNodeColors _viewState = do
+  -- Get current nodes from simulation
+  mStateRef <- Ref.read globalStateRef
+  case mStateRef of
+    Just stateRef -> do
+      sceneState <- Ref.read stateRef
+      nodes <- Sim.getNodes sceneState.simulation
+      -- Clear and re-render nodes with current ViewState's colors
+      clearNodesGroup
+      void $ runD3v2M $ renderNodesOnly nodes
+    Nothing -> log "[Explorer] No simulation state available for color update"
 
 -- | CSS class based on node type for styling and transitions
 nodeClass :: SimNode -> String
@@ -598,7 +658,7 @@ nodeClass n = case n.nodeType of
 -- Tree Link Rendering
 -- =============================================================================
 
--- | Render tree links as radial bezier paths
+-- | Render tree links as vertical bezier paths (root at top)
 renderTreeLinks :: Array SimNode -> Effect Unit
 renderTreeLinks nodes = do
   links <- Ref.read globalLinksRef
@@ -630,12 +690,12 @@ renderTreeLinksD3 nodeMap links = do
 
   pure unit
 
--- | Generate path string for a link
+-- | Generate path string for a link (vertical tree layout)
 linkPathFn :: Map.Map Int SimNode -> SimLink -> String
 linkPathFn nodeMap link =
   case Map.lookup link.source nodeMap, Map.lookup link.target nodeMap of
     Just sourceNode, Just targetNode ->
-      radialLinkPath sourceNode.treeX sourceNode.treeY targetNode.treeX targetNode.treeY
+      verticalLinkPath sourceNode.treeX sourceNode.treeY targetNode.treeX targetNode.treeY
     _, _ -> ""
 
 -- =============================================================================
@@ -771,22 +831,41 @@ handleControlChange controlId newValue = do
   -- Update ViewState (Halogen NarrativePanel polls this)
   Ref.write newView globalViewStateRef
 
+  -- Update node colors to match new view
+  updateNodeColors newView
+
   -- Trigger scene transitions using proper two-phase engine
   mStateRef <- Ref.read globalStateRef
   case mStateRef of
     Just stateRef -> do
       -- Use Scene.transitionTo for proper DumbEngine → Physics handoff
       case controlId, newView of
+        -- New layouts (Treemap is static, Tree/Force will need scene implementations)
+        "layout", Treemap _ -> do
+          log "[Explorer] Treemap is static layout, no scene transition needed"
+          pure unit
+
+        "layout", TreeLayout _ _ -> do
+          log "[Explorer] TreeLayout scene transition TODO"
+          -- TODO: implement tree scene transition
+          pure unit
+
+        "layout", ForceLayout _ _ -> do
+          log "[Explorer] ForceLayout scene transition TODO"
+          -- TODO: implement force layout scene transition
+          pure unit
+
+        -- Deprecated layouts (kept for compatibility)
         "layout", PackageGrid _ -> do
-          log "[Explorer] Transitioning to grid scene"
+          log "[Explorer] Transitioning to grid scene (deprecated)"
           Scene.transitionTo Scenes.gridRunScene stateRef
 
         "layout", ModuleOrbit _ -> do
-          log "[Explorer] Transitioning to orbit scene"
+          log "[Explorer] Transitioning to orbit scene (deprecated)"
           Scene.transitionTo Scenes.orbitRunScene stateRef
 
         "layout", DependencyTree _ -> do
-          log "[Explorer] Transitioning to tree scene"
+          log "[Explorer] Transitioning to tree scene (deprecated)"
           Scene.transitionTo Scenes.treeRunScene stateRef
 
         _, _ -> pure unit -- Other controls don't trigger scene transitions
@@ -799,43 +878,68 @@ handleControlChange controlId newValue = do
 applyControlChange :: String -> String -> ViewState -> ViewState
 applyControlChange "layout" newLayout currentView =
   case newLayout, currentView of
-    "grid", ModuleTreemap scope -> PackageGrid scope
+    -- New navigation: treemap, tree, force
+    "treemap", Treemap scope -> Treemap scope
+    "treemap", TreeLayout scope _ -> Treemap scope
+    "treemap", ForceLayout scope _ -> Treemap scope
+    "tree", Treemap scope -> TreeLayout scope "PSD3.Main"
+    "tree", TreeLayout scope root -> TreeLayout scope root
+    "tree", ForceLayout scope root -> TreeLayout scope root
+    "force", Treemap scope -> ForceLayout scope "PSD3.Main"
+    "force", TreeLayout scope root -> ForceLayout scope root
+    "force", ForceLayout scope root -> ForceLayout scope root
+    -- Deprecated layouts (kept for compatibility)
     "grid", PackageGrid scope -> PackageGrid scope
-    "grid", ModuleOrbit scope -> PackageGrid scope
-    "grid", DependencyTree scope -> PackageGrid scope
-    "orbit", ModuleTreemap scope -> ModuleOrbit scope
-    "orbit", PackageGrid scope -> ModuleOrbit scope
     "orbit", ModuleOrbit scope -> ModuleOrbit scope
-    "orbit", DependencyTree scope -> ModuleOrbit scope
-    "tree", ModuleTreemap scope -> DependencyTree scope
-    "tree", PackageGrid scope -> DependencyTree scope
-    "tree", ModuleOrbit scope -> DependencyTree scope
     "tree", DependencyTree scope -> DependencyTree scope
     _, other -> other -- No change for other views
 
 applyControlChange "scope" newScope currentView =
   let
-    scope = if newScope == "project" then ProjectOnly else ProjectAndLibraries
+    scope = case newScope of
+      "used" -> UsedOnly
+      "project" -> ProjectOnly
+      _ -> ProjectAndLibraries
   in
     case currentView of
-      ModuleTreemap _ -> ModuleTreemap scope
+      Treemap _ -> Treemap scope
+      TreeLayout _ root -> TreeLayout scope root
+      ForceLayout _ root -> ForceLayout scope root
+      -- Deprecated views
       PackageGrid _ -> PackageGrid scope
       ModuleOrbit _ -> ModuleOrbit scope
       DependencyTree _ -> DependencyTree scope
       other -> other -- Neighborhood/FunctionCalls don't have scope control
 
+applyControlChange "root" newRoot currentView =
+  case currentView of
+    TreeLayout scope _ -> TreeLayout scope newRoot
+    ForceLayout scope _ -> ForceLayout scope newRoot
+    other -> other -- Only tree/force layouts have root control
+
 applyControlChange _ _ view = view -- Unknown control, no change
 
 -- | Show ViewState for logging
 showViewState :: ViewState -> String
-showViewState (ModuleTreemap ProjectOnly) = "ModuleTreemap (project only)"
-showViewState (ModuleTreemap ProjectAndLibraries) = "ModuleTreemap (all)"
+showViewState (Treemap UsedOnly) = "Treemap (used)"
+showViewState (Treemap ProjectOnly) = "Treemap (project)"
+showViewState (Treemap ProjectAndLibraries) = "Treemap (all)"
+showViewState (TreeLayout UsedOnly root) = "TreeLayout (used, root: " <> root <> ")"
+showViewState (TreeLayout ProjectOnly root) = "TreeLayout (project, root: " <> root <> ")"
+showViewState (TreeLayout ProjectAndLibraries root) = "TreeLayout (all, root: " <> root <> ")"
+showViewState (ForceLayout UsedOnly root) = "ForceLayout (used, root: " <> root <> ")"
+showViewState (ForceLayout ProjectOnly root) = "ForceLayout (project, root: " <> root <> ")"
+showViewState (ForceLayout ProjectAndLibraries root) = "ForceLayout (all, root: " <> root <> ")"
+-- Deprecated views
 showViewState (PackageGrid ProjectOnly) = "PackageGrid (project only)"
 showViewState (PackageGrid ProjectAndLibraries) = "PackageGrid (all)"
+showViewState (PackageGrid UsedOnly) = "PackageGrid (used)"
 showViewState (ModuleOrbit ProjectOnly) = "ModuleOrbit (project only)"
 showViewState (ModuleOrbit ProjectAndLibraries) = "ModuleOrbit (all)"
+showViewState (ModuleOrbit UsedOnly) = "ModuleOrbit (used)"
 showViewState (DependencyTree ProjectOnly) = "DependencyTree (project only)"
 showViewState (DependencyTree ProjectAndLibraries) = "DependencyTree (all)"
+showViewState (DependencyTree UsedOnly) = "DependencyTree (used)"
 showViewState (Neighborhood name) = "Neighborhood (" <> name <> ")"
 showViewState (FunctionCalls name) = "FunctionCalls (" <> name <> ")"
 
@@ -1152,9 +1256,12 @@ restoreToView targetView = do
       state <- Ref.read stateRef
 
       case targetView of
-        ModuleTreemap _ -> do
+        Treemap _ -> do
           -- Re-entering treemap view (static, non-simulation)
           Ref.write targetView globalViewStateRef
+        TreeLayout _ _ -> restoreFullView focus.fullNodes targetView state.simulation
+        ForceLayout _ _ -> restoreFullView focus.fullNodes targetView state.simulation
+        -- Deprecated views
         PackageGrid _ -> restoreFullView focus.fullNodes targetView state.simulation
         ModuleOrbit _ -> restoreFullView focus.fullNodes targetView state.simulation
         DependencyTree _ -> restoreFullView focus.fullNodes targetView state.simulation
@@ -1244,13 +1351,16 @@ renderNodesOnly :: Array SimNode -> D3v2M Unit
 renderNodesOnly nodes = do
   nodesGroup <- select "#explorer-nodes"
 
+  -- Read current ViewState for color functions
+  currentView <- liftEffect $ Ref.read globalViewStateRef
+
   -- Capture the selection returned by appendData (don't discard it!)
   nodeSel <- appendData Circle nodes
     [ cx (_.x :: SimNode -> Number)
     , cy (_.y :: SimNode -> Number)
     , radius (_.r :: SimNode -> Number)
-    , fill (nodeFill :: SimNode -> String)
-    , stroke (nodeColor :: SimNode -> String) -- Use color for stroke
+    , fill (nodeFill currentView :: SimNode -> String)
+    , stroke (nodeColor currentView :: SimNode -> String) -- Use color for stroke
     , strokeWidth 1.0 -- Slightly thicker stroke for visibility
     , class_ nodeClass
     ]

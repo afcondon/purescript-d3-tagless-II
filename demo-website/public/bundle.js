@@ -33324,7 +33324,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var defaultSimParams = {
     alpha: 1,
     alphaMin: 1e-3,
-    alphaDecay: 0.0228,
+    alphaDecay: 0.01,
     alphaTarget: 0,
     velocityDecay: 0.4
   };
@@ -44859,6 +44859,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
 
   // output/PSD3v2.Tooltip/foreign.js
   var tooltip = null;
+  var tooltipConfig = null;
   var ensureTooltip = () => {
     if (!tooltip) {
       tooltip = document.createElement("div");
@@ -44866,19 +44867,32 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       tooltip.style.cssText = `
       position: fixed;
       display: none;
-      background: rgba(20, 20, 30, 0.95);
-      color: #f0f0f0;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      max-width: 300px;
       pointer-events: none;
       z-index: 10000;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     `;
       document.body.appendChild(tooltip);
+      if (tooltipConfig) {
+        applyConfig(tooltipConfig);
+      }
     }
     return tooltip;
+  };
+  var applyConfig = (config) => {
+    const el = ensureTooltip();
+    if (config.background) el.style.background = config.background;
+    if (config.color) el.style.color = config.color;
+    if (config.padding) el.style.padding = config.padding;
+    if (config.borderRadius) el.style.borderRadius = config.borderRadius;
+    if (config.fontSize) el.style.fontSize = config.fontSize;
+    if (config.fontFamily) el.style.fontFamily = config.fontFamily;
+    if (config.border) el.style.border = config.border;
+    if (config.boxShadow) el.style.boxShadow = config.boxShadow;
+    if (config.maxWidth) el.style.maxWidth = config.maxWidth;
+    if (config.lineHeight) el.style.lineHeight = config.lineHeight;
+    if (config.backdropFilter) {
+      el.style.backdropFilter = config.backdropFilter;
+      el.style.webkitBackdropFilter = config.backdropFilter;
+    }
   };
   var showTooltip_ = (content3) => (x41) => (y42) => () => {
     const el = ensureTooltip();

@@ -19,17 +19,20 @@ import Prelude
 
 -- | What's being shown and how
 data ViewState
-  = ModuleTreemap ScopeFilter  -- Static treemap (initial view)
-  | PackageGrid ScopeFilter
-  | ModuleOrbit ScopeFilter
-  | DependencyTree ScopeFilter
+  = Treemap ScopeFilter  -- Treemap of packages and modules (initial view)
+  | TreeLayout ScopeFilter String  -- Tree layout with scope and root module
+  | ForceLayout ScopeFilter String  -- Radial force layout with scope and root module
+  | PackageGrid ScopeFilter  -- DEPRECATED: kept for code compatibility
+  | ModuleOrbit ScopeFilter  -- DEPRECATED: kept for code compatibility
+  | DependencyTree ScopeFilter  -- DEPRECATED: kept for code compatibility
   | Neighborhood String  -- module name
   | FunctionCalls String -- module name
 
 -- | Scope of what to include
 data ScopeFilter
-  = ProjectOnly
-  | ProjectAndLibraries
+  = UsedOnly  -- Only modules that are actually used
+  | ProjectOnly  -- All modules in the project (used or not)
+  | ProjectAndLibraries  -- Everything including dependencies
 
 -- | Layout style (for future use)
 data LayoutStyle
@@ -50,41 +53,56 @@ derive instance eqLayoutStyle :: Eq LayoutStyle
 -- | Returns { text, controls } where controls are the interactive bits
 describe :: ViewState -> { text :: String, controls :: Array Control }
 describe vs = case vs of
-  ModuleTreemap scope ->
-    { text: "[" <> layoutName <> "] of [" <> scopeName scope <> "] modules, sized by lines of code"
+  Treemap scope ->
+    { text: "[Treemap] showing [" <> scopeName scope <> "] packages and [" <> scopeName scope <> "] modules"
     , controls:
-        [ { id: "layout", current: "grid", options: ["grid", "orbit"] }
-        , { id: "scope", current: showScope scope, options: ["project", "all"] }
+        [ { id: "layout", current: "treemap", options: ["treemap", "tree", "force"] }
+        , { id: "scope", current: showScope scope, options: ["used", "project", "all"] }
         ]
     }
-    where layoutName = "Grid"
 
-  PackageGrid scope ->
-    { text: "[" <> layoutName <> "] of [" <> scopeName scope <> "] packages"
+  TreeLayout scope rootModule ->
+    { text: "[Tree] layout showing [" <> scopeName scope <> "] modules, with [" <> rootModule <> "] as the root"
     , controls:
-        [ { id: "layout", current: "grid", options: ["grid", "orbit"] }
-        , { id: "scope", current: showScope scope, options: ["project", "all"] }
+        [ { id: "layout", current: "tree", options: ["treemap", "tree", "force"] }
+        , { id: "scope", current: showScope scope, options: ["used", "project", "all"] }
+        , { id: "root", current: rootModule, options: [] } -- options populated dynamically
         ]
     }
-    where layoutName = "Grid"
+
+  ForceLayout scope rootModule ->
+    { text: "[Force layout] showing [" <> scopeName scope <> "] modules, with [" <> rootModule <> "] as the root"
+    , controls:
+        [ { id: "layout", current: "force", options: ["treemap", "tree", "force"] }
+        , { id: "scope", current: showScope scope, options: ["used", "project", "all"] }
+        , { id: "root", current: rootModule, options: [] } -- options populated dynamically
+        ]
+    }
+
+  -- DEPRECATED views (kept for code compatibility)
+  PackageGrid scope ->
+    { text: "[Grid] of [" <> scopeName scope <> "] packages"
+    , controls:
+        [ { id: "layout", current: "grid", options: ["grid", "orbit"] }
+        , { id: "scope", current: showScope scope, options: ["used", "project", "all"] }
+        ]
+    }
 
   ModuleOrbit scope ->
-    { text: "[" <> layoutName <> "] of [" <> scopeName scope <> "] modules, grouped by package"
+    { text: "[Orbit] of [" <> scopeName scope <> "] modules, grouped by package"
     , controls:
         [ { id: "layout", current: "orbit", options: ["grid", "orbit", "tree"] }
-        , { id: "scope", current: showScope scope, options: ["project", "all"] }
+        , { id: "scope", current: showScope scope, options: ["used", "project", "all"] }
         ]
     }
-    where layoutName = "Orbit"
 
   DependencyTree scope ->
-    { text: "[" <> layoutName <> "] of [" <> scopeName scope <> "] module dependencies"
+    { text: "[Dependency tree] of [" <> scopeName scope <> "] module dependencies"
     , controls:
         [ { id: "layout", current: "tree", options: ["grid", "orbit", "tree"] }
-        , { id: "scope", current: showScope scope, options: ["project", "all"] }
+        , { id: "scope", current: showScope scope, options: ["used", "project", "all"] }
         ]
     }
-    where layoutName = "Dependency tree"
 
   Neighborhood modName ->
     { text: "Neighborhood of [" <> modName <> "] — imports and dependents"
@@ -112,10 +130,12 @@ type Control =
 -- =============================================================================
 
 scopeName :: ScopeFilter -> String
+scopeName UsedOnly = "used"
 scopeName ProjectOnly = "project"
 scopeName ProjectAndLibraries = "all"
 
 showScope :: ScopeFilter -> String
+showScope UsedOnly = "used"
 showScope ProjectOnly = "project"
 showScope ProjectAndLibraries = "all"
 
@@ -126,34 +146,37 @@ showScope ProjectAndLibraries = "all"
 -- | What views can we reach from here?
 availableTransitions :: ViewState -> Array ViewState
 availableTransitions vs = case vs of
-  ModuleTreemap scope ->
-    [ PackageGrid scope
-    , ModuleOrbit scope
+  Treemap scope ->
+    -- From treemap, can switch to tree or force layout
+    [ TreeLayout scope "PSD3.Main"
+    , ForceLayout scope "PSD3.Main"
     ]
 
-  PackageGrid scope ->
-    [ ModuleTreemap scope
-    , ModuleOrbit scope
-    , DependencyTree scope
+  TreeLayout scope rootModule ->
+    -- From tree, can switch back to treemap or to force
+    [ Treemap scope
+    , ForceLayout scope rootModule
     ]
+
+  ForceLayout scope rootModule ->
+    -- From force, can switch back to treemap or to tree
+    [ Treemap scope
+    , TreeLayout scope rootModule
+    ]
+
+  -- DEPRECATED views (kept for code compatibility but not reachable)
+  PackageGrid scope ->
+    [ Treemap scope ]
 
   ModuleOrbit scope ->
-    [ ModuleTreemap scope
-    , PackageGrid scope
-    , DependencyTree scope
-    ]
+    [ Treemap scope ]
 
   DependencyTree scope ->
-    [ ModuleTreemap scope
-    , PackageGrid scope
-    , ModuleOrbit scope
-    ]
+    [ Treemap scope ]
 
   Neighborhood _ ->
-    -- From neighborhood, can go back to full views
-    [ ModuleTreemap ProjectAndLibraries
-    , PackageGrid ProjectAndLibraries
-    , DependencyTree ProjectAndLibraries
+    -- From neighborhood, can go back to treemap
+    [ Treemap ProjectAndLibraries
     ]
 
   FunctionCalls modName ->

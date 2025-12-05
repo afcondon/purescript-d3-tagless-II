@@ -27,8 +27,10 @@
   --color-line: #999999;
   --color-text-dark: #333333;
   --color-text-muted: #666666;
-  --color-canvas: #0E4C8A;  /* Blueprint background */
-  --color-card: #F5F2E8;  /* Light beige for cards and dropdowns */
+  --color-canvas: #0E4C8A;
+  /* Blueprint background */
+  --color-card: #F5F2E8;
+  /* Light beige for cards and dropdowns */
 
   /* Typography */
   --font-mono: 'Courier New', 'Courier', Monaco, monospace;
@@ -59,7 +61,8 @@
   padding: 0;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -370,7 +373,7 @@ circle.highlighted-downstream {
 }
 
 .dimmed {
-  opacity: 0.12 !important;
+  opacity: 0.35 !important;
   transition: none !important;
 }
 
@@ -385,7 +388,7 @@ circle.highlighted-downstream {
 }
 
 .dimmed-link {
-  stroke-opacity: 0.08 !important;
+  stroke-opacity: 0.5 !important;
 }
 
 /* =============================================================================
@@ -415,7 +418,8 @@ circle.highlighted-downstream {
   /* Match floating panel background and blur */
   background-color: rgba(212, 201, 168, 0.95);
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px); /* Safari support */
+  -webkit-backdrop-filter: blur(12px);
+  /* Safari support */
   color: var(--color-text-dark);
   padding: var(--spacing-md);
   border: 1px solid var(--color-line);
@@ -547,14 +551,16 @@ line.highlight-dimmed {
 
 /* Larger title for narrative panel */
 .narrative-panel .panel-title {
-  font-size: 0.875rem; /* 14px */
+  font-size: 0.875rem;
+  /* 14px */
   letter-spacing: var(--letter-spacing-wide);
   margin-bottom: var(--spacing-lg);
 }
 
 .narrative-hero {
   font-family: var(--font-mono);
-  font-size: 0.875rem; /* 14px - body text */
+  font-size: 0.875rem;
+  /* 14px - body text */
   line-height: 1.7;
   color: var(--color-text-dark);
   margin-bottom: var(--spacing-md);
@@ -571,7 +577,8 @@ line.highlight-dimmed {
 }
 
 .narrative-path {
-  font-size: 0.75rem; /* 12px */
+  font-size: 0.75rem;
+  /* 12px */
   color: var(--color-text-muted);
 }
 
@@ -582,16 +589,19 @@ line.highlight-dimmed {
 }
 
 .narrative-stat.narrative-callee {
-  color: #16a34a; /* green-600 */
+  color: #16a34a;
+  /* green-600 */
 }
 
 .narrative-stat.narrative-caller {
-  color: #ea580c; /* orange-600 */
+  color: #ea580c;
+  /* orange-600 */
 }
 
 .narrative-hint {
   font-family: var(--font-mono);
-  font-size: 0.75rem; /* 12px - subtext */
+  font-size: 0.75rem;
+  /* 12px - subtext */
   line-height: 1.6;
   color: var(--color-text-muted);
   padding-top: var(--spacing-sm);
@@ -698,7 +708,8 @@ line.highlight-dimmed {
 
 .color-key-title {
   font-family: var(--font-mono);
-  font-size: 0.625rem; /* 10px */
+  font-size: 0.625rem;
+  /* 10px */
   font-weight: bold;
   letter-spacing: var(--letter-spacing-wide);
   text-transform: uppercase;
@@ -710,7 +721,8 @@ line.highlight-dimmed {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-height: 200px; /* ~12 items comfortably */
+  max-height: 200px;
+  /* ~12 items comfortably */
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--color-line) transparent;
@@ -748,7 +760,8 @@ line.highlight-dimmed {
 
 .color-key-label {
   font-family: var(--font-mono);
-  font-size: 0.6875rem; /* 11px */
+  font-size: 0.6875rem;
+  /* 11px */
   color: var(--color-text-dark);
   letter-spacing: var(--letter-spacing-normal);
 }
@@ -849,6 +862,7 @@ line.highlight-dimmed {
   pointer-events: none;
   user-select: none;
 }
+
 /* =============================================================================
    Call Graph Popup
    ============================================================================= */
