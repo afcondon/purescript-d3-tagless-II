@@ -4,6 +4,7 @@ module Component.SpagoGridApp where
 
 import Prelude
 
+import Component.CallGraphPopup as CallGraphPopup
 import Component.NarrativePanel as NarrativePanel
 import Data.Array as Array
 import Data.Either (Either(..))
@@ -37,10 +38,16 @@ type State =
   }
 
 -- | Child slots
-type Slots = ( narrativePanel :: H.Slot NarrativePanel.Query NarrativePanel.Output Unit )
+type Slots =
+  ( narrativePanel :: H.Slot NarrativePanel.Query NarrativePanel.Output Unit
+  , callGraphPopup :: H.Slot CallGraphPopup.Query CallGraphPopup.Output Unit
+  )
 
 _narrativePanel :: Proxy "narrativePanel"
 _narrativePanel = Proxy
+
+_callGraphPopup :: Proxy "callGraphPopup"
+_callGraphPopup = Proxy
 
 -- | Actions
 data Action
@@ -51,6 +58,9 @@ data Action
   | ProjectsLoaded (Array NarrativePanel.ProjectInfo)
   | SwitchProject Int String  -- Project ID and name
   | NarrativePanelOutput NarrativePanel.Output
+  | CallGraphPopupOutput CallGraphPopup.Output
+  | ShowCallGraphPopup String String  -- moduleName, declarationName
+  | HideCallGraphPopup
 
 -- | Main app component
 component :: forall query input output m. MonadAff m => H.Component query input output m
@@ -87,6 +97,9 @@ render state =
         }
         NarrativePanelOutput
 
+    -- Call Graph Popup component (modal overlay)
+    , HH.slot _callGraphPopup unit CallGraphPopup.component unit CallGraphPopupOutput
+
     -- Error message (bottom-right to avoid collision with narrative panel)
     , case state.error of
         Just err -> HH.div
@@ -114,6 +127,8 @@ handleAction = case _ of
         callbacks =
           { onViewStateChanged: \viewState -> HS.notify listener (ViewStateChanged viewState)
           , onModelLoaded: \modelInfo -> HS.notify listener (ModelLoaded modelInfo)
+          , onShowCallGraphPopup: \moduleName declarationName -> HS.notify listener (ShowCallGraphPopup moduleName declarationName)
+          , onHideCallGraphPopup: HS.notify listener HideCallGraphPopup
           }
 
     -- Initialize Explorer with callbacks (replaces polling!)
@@ -198,6 +213,22 @@ handleAction = case _ of
         case Array.find (\p -> p.id == newProjectId) state.projects of
           Just project -> handleAction (SwitchProject newProjectId project.name)
           Nothing -> log $ "[SpagoGridApp] Unknown project ID: " <> show newProjectId
+
+  CallGraphPopupOutput output ->
+    case output of
+      CallGraphPopup.PopupClosed ->
+        log "[SpagoGridApp] Call graph popup closed"
+      CallGraphPopup.NavigateToFunction moduleName declarationName -> do
+        log $ "[SpagoGridApp] Navigate to function: " <> moduleName <> "." <> declarationName
+        -- The popup handles navigation internally by reloading itself
+
+  ShowCallGraphPopup moduleName declarationName -> do
+    log $ "[SpagoGridApp] Showing call graph popup for: " <> moduleName <> "." <> declarationName
+    void $ H.tell _callGraphPopup unit (CallGraphPopup.ShowPopup moduleName declarationName)
+
+  HideCallGraphPopup -> do
+    log "[SpagoGridApp] Hiding call graph popup"
+    void $ H.tell _callGraphPopup unit CallGraphPopup.HidePopup
 
 -- | Forward control change to Explorer
 -- | This is called when the user clicks a TangleJS-style control

@@ -41,7 +41,7 @@ import Effect.Unsafe (unsafePerformEffect)
 import Foreign.Object as Object
 import Data.Loader (loadModel, loadModelForProject, LoadedModel, DeclarationsMap, FunctionCallsMap, fetchBatchDeclarations, fetchBatchFunctionCalls)
 import Engine.BubblePack (renderModulePackWithCallbacks, highlightCallGraph, clearCallGraphHighlight, DeclarationClickCallback, DeclarationHoverCallback)
-import Engine.CallGraphPopup (showCallGraphPopup, hideCallGraphPopup)
+-- CallGraphPopup is now a Halogen component (Component.CallGraphPopup)
 -- NarrativePanel is now a Halogen component (Component.NarrativePanel)
 -- It polls globalViewStateRef and globalModelInfoRef directly
 import Engine.ViewState (ViewState(..), ScopeFilter(..))
@@ -154,6 +154,10 @@ type ExplorerCallbacks =
       -- ^ Called when ViewState changes (navigation, drill-down, etc.)
   , onModelLoaded :: ModelInfo -> Effect Unit
       -- ^ Called when model data is loaded (provides package count for palette)
+  , onShowCallGraphPopup :: String -> String -> Effect Unit
+      -- ^ Called when a declaration is clicked (moduleName, declarationName)
+  , onHideCallGraphPopup :: Effect Unit
+      -- ^ Called when popup should be hidden (e.g., view change)
   }
 
 -- | Global ref for callbacks (set by initExplorerWithCallbacks)
@@ -176,6 +180,22 @@ notifyModelLoaded modelInfo = do
   mCallbacks <- Ref.read globalCallbacksRef
   case mCallbacks of
     Just cbs -> cbs.onModelLoaded modelInfo
+    Nothing -> pure unit  -- No callbacks registered, silent no-op
+
+-- | Notify show call graph popup via callback (if set)
+notifyShowCallGraphPopup :: String -> String -> Effect Unit
+notifyShowCallGraphPopup moduleName declarationName = do
+  mCallbacks <- Ref.read globalCallbacksRef
+  case mCallbacks of
+    Just cbs -> cbs.onShowCallGraphPopup moduleName declarationName
+    Nothing -> pure unit  -- No callbacks registered, silent no-op
+
+-- | Notify hide call graph popup via callback (if set)
+notifyHideCallGraphPopup :: Effect Unit
+notifyHideCallGraphPopup = do
+  mCallbacks <- Ref.read globalCallbacksRef
+  case mCallbacks of
+    Just cbs -> cbs.onHideCallGraphPopup
     Nothing -> pure unit  -- No callbacks registered, silent no-op
 
 -- =============================================================================
@@ -949,7 +969,7 @@ handleControlChange controlId newValue = do
   log $ "[Explorer] Control changed: " <> controlId <> " -> " <> newValue
 
   -- Hide call graph popup when view changes (Bug fix: popup wasn't disappearing)
-  hideCallGraphPopup
+  notifyHideCallGraphPopup
 
   currentView <- Ref.read globalViewStateRef
 
@@ -1534,9 +1554,9 @@ onDeclarationClick :: DeclarationClickCallback
 onDeclarationClick moduleName declarationName kind = do
   log $ "[Explorer] Declaration clicked: " <> moduleName <> "." <> declarationName <> " (kind: " <> kind <> ")"
 
-  -- Show the call graph popup
-  -- The popup will fetch its own data from the API
-  showCallGraphPopup moduleName declarationName
+  -- Notify the Halogen component to show the call graph popup
+  -- The popup component will fetch its own data from the API
+  notifyShowCallGraphPopup moduleName declarationName
 
 -- | Handle hover on a declaration circle
 -- | Highlights modules that contain callers/callees
