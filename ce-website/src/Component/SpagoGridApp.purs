@@ -15,9 +15,7 @@ import Effect (Effect)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
-import Effect.Ref as Ref
 import Engine.Explorer as Explorer
-import Engine.Explorer (SceneId(..))
 import Engine.ViewState (ViewState(..), ScopeFilter(..))
 import Halogen as H
 import Halogen.HTML as HH
@@ -176,7 +174,7 @@ handleAction = case _ of
       H.modify_ _ { projectId = newProjectId, projectName = newProjectName, packagePalette = [] }
       -- Reset ViewState to top level Treemap
       let resetViewState = Treemap ProjectAndLibraries
-      liftEffect $ Ref.write resetViewState Explorer.globalViewStateRef
+      liftEffect $ Explorer.setViewState resetViewState
       H.modify_ _ { viewState = resetViewState }
       -- Reload Explorer with new project data
       liftEffect $ Explorer.reloadWithProject newProjectId
@@ -238,26 +236,9 @@ handleAction = case _ of
 -- | Forward control change to Explorer's scene manager
 -- | Takes the new ViewState (already computed by caller from Halogen state)
 handleControlChangeFromPanel :: ViewState -> Effect Unit
-handleControlChangeFromPanel newView = do
-  -- Update the global ref (still needed for Explorer internals)
-  Ref.write newView Explorer.globalViewStateRef
-
-  -- Update node colors to match new view (must happen before scene transition)
-  Explorer.updateNodeColors newView
-
-  -- Trigger scene transition via global state ref
-  mStateRef <- Ref.read Explorer.globalStateRef
-  case mStateRef of
-    Just stateRef -> do
-      case newView of
-        Treemap _ ->
-          pure unit  -- Treemap is static, no scene transition
-        TreeLayout _ _ ->
-          Explorer.goToScene TreeForm stateRef
-        ForceLayout _ _ ->
-          Explorer.goToScene TreeRun stateRef
-        _ -> pure unit
-    Nothing -> pure unit
+handleControlChangeFromPanel newView =
+  -- Use Explorer's public API - handles ref update, colors, and scene transitions
+  Explorer.setViewState newView
 
 -- | Apply control change to ViewState
 applyControlChange :: String -> String -> ViewState -> ViewState

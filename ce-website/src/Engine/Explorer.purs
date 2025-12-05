@@ -10,11 +10,7 @@ module Engine.Explorer
   , goToScene
   , SceneId(..)  -- Export ADT and constructors for type-safe scene selection
   , reloadWithProject
-  , globalStateRef
-  , globalLinksRef
-  , globalViewStateRef
-  , globalModelInfoRef
-  , globalNavigationStackRef
+  , setViewState  -- Public API for changing view state
   , navigateBack
   , updateNodeColors
   ) where
@@ -91,6 +87,43 @@ derive instance eqSceneId :: Eq SceneId
 sceneConfigFor :: SceneId -> Scene.SceneConfig SimNode
 sceneConfigFor TreeForm = Scenes.treeFormScene
 sceneConfigFor TreeRun = Scenes.treeRunScene
+
+-- =============================================================================
+-- Public API: setViewState
+-- =============================================================================
+
+-- | Set the current view state and trigger appropriate scene transitions.
+-- | This is the public API for changing views - replaces direct Ref writes.
+-- |
+-- | Handles:
+-- | - Updating the internal view state ref
+-- | - Updating node colors to match the new view
+-- | - Triggering scene transitions (TreeForm/TreeRun)
+-- | - Notifying Halogen via callback
+setViewState :: ViewState -> Effect Unit
+setViewState newView = do
+  log $ "[Explorer] setViewState: " <> showViewState newView
+
+  -- Update internal state
+  Ref.write newView globalViewStateRef
+
+  -- Update node colors
+  updateNodeColors newView
+
+  -- Trigger scene transition if needed
+  mStateRef <- Ref.read globalStateRef
+  case mStateRef of
+    Just stateRef ->
+      case newView of
+        Treemap _ -> pure unit  -- Treemap is static, no scene transition
+        TreeLayout _ _ -> goToScene TreeForm stateRef
+        ForceLayout _ _ -> goToScene TreeRun stateRef
+        Neighborhood _ -> pure unit  -- Neighborhood handled separately
+        FunctionCalls _ -> pure unit  -- FunctionCalls handled separately
+    Nothing -> pure unit
+
+  -- Notify Halogen via callback
+  notifyViewStateChanged newView
 
 -- =============================================================================
 -- Global State

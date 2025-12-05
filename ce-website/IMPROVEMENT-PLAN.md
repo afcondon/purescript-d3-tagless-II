@@ -278,8 +278,11 @@ type State =
 - ✅ Modified `renderSVG` to take `ViewState` as parameter (removed global ref read)
 - ✅ Modified `renderNodesOnly` to take `ViewState` as parameter (removed global ref read)
 - ✅ Updated 4 call sites to pass ViewState explicitly
-- 🚧 Remaining: 3 reads of `globalViewStateRef` in state mutation code
-- 🚧 Remaining: 8 other global refs still in use
+- ✅ Added `setViewState :: ViewState -> Effect Unit` to Explorer - public API for view changes
+- ✅ Removed exports of `globalViewStateRef`, `globalStateRef`, `globalLinksRef`, etc. from Explorer
+- ✅ Updated SpagoGridApp to use `setViewState` instead of writing to global refs directly
+- ✅ Simplified `handleControlChangeFromPanel` - now just calls `Explorer.setViewState`
+- 🚧 Internal refs remain in Explorer (for scene engine coordination) but are no longer exported
 
 **Files to modify:**
 - `ce-website/src/Component/SpagoGridApp.purs` - State restructure
