@@ -26,6 +26,7 @@ module Tangle.Core
   , cycle
   , adjust
   , display
+  , action
   , (<+>)
   , concat
 
@@ -102,6 +103,11 @@ data Control
       { id :: String
       , value :: String  -- Non-interactive, just shows a value
       }
+  | Action
+      { id :: String
+      , label :: String       -- What to display
+      , actionValue :: String -- Value sent when clicked (one-way, doesn't cycle)
+      }
 
 -- Note: Control doesn't have Eq because Adjust contains a function (format)
 
@@ -165,6 +171,17 @@ display :: String -> String -> TangleDoc
 display id value =
   control $ Display { id, value }
 
+-- | Action control - clickable one-way trigger
+-- |
+-- | Unlike cycle/toggle which update state bidirectionally, an action fires
+-- | a fixed value when clicked. Useful for "escape hatch" navigation like
+-- | clicking "Neighborhood" to go back to overview.
+-- |
+-- | Example: "[Neighborhood] of Data.Array" where clicking "Neighborhood" sends "back"
+action :: String -> String -> String -> TangleDoc
+action id label actionValue =
+  control $ Action { id, label, actionValue }
+
 -- | Concatenate two documents
 infixr 5 append as <+>
 
@@ -225,6 +242,7 @@ toPlainText (TangleDoc segments) = Array.foldMap segmentText segments
   controlText (Cycle { current }) = current
   controlText (Adjust { current, format }) = format current
   controlText (Display { value }) = value
+  controlText (Action { label }) = label
 
 -- =============================================================================
 -- Control Helpers
@@ -237,6 +255,7 @@ controlDisplayText (Toggle { current, trueLabel, falseLabel }) =
 controlDisplayText (Cycle { current }) = current
 controlDisplayText (Adjust { current, format }) = format current
 controlDisplayText (Display { value }) = value
+controlDisplayText (Action { label }) = label
 
 -- | Get the ID of a control
 controlId :: Control -> String
@@ -244,6 +263,7 @@ controlId (Toggle { id }) = id
 controlId (Cycle { id }) = id
 controlId (Adjust { id }) = id
 controlId (Display { id }) = id
+controlId (Action { id }) = id
 
 -- | Check if a control is interactive
 isInteractive :: Control -> Boolean

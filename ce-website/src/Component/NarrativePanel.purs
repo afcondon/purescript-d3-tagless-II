@@ -71,6 +71,7 @@ data Action
   = HandleInput Input
   | CycleControl String String -- Control ID, next value (click to cycle)
   | ToggleControl String Boolean -- Control ID, new boolean value (click to toggle)
+  | ActionControl String String -- Control ID, action value (one-way trigger)
   | CloseDropdown
   | ClickBack
   | ToggleProjectDropdown
@@ -199,6 +200,14 @@ renderTangleControl _state (T.Display { value }) =
   HH.span
     [ HP.class_ (HH.ClassName "tangle-value") ]
     [ HH.text value ]
+
+-- Action control - one-way trigger (like a link)
+renderTangleControl _state (T.Action { id, label, actionValue }) =
+  HH.span
+    [ HP.classes [ HH.ClassName "tangle-control", HH.ClassName "tangle-action" ]
+    , HE.onClick \_ -> ActionControl id actionValue
+    ]
+    [ HH.text label ]
 
 -- | Render hint text
 renderHintText :: forall m. Maybe String -> H.ComponentHTML Action () m
@@ -376,6 +385,10 @@ handleAction = case _ of
   ToggleControl ctrlId newValue -> do
     let strValue = if newValue then "true" else "false"
     H.raise (ControlChanged ctrlId strValue)
+
+  -- Action control: one-way trigger (emits control change with fixed value)
+  ActionControl ctrlId actionValue -> do
+    H.raise (ControlChanged ctrlId actionValue)
 
   CloseDropdown ->
     H.modify_ _ { dropdownOpen = Nothing, projectDropdownOpen = false }

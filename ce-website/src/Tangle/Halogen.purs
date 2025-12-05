@@ -33,10 +33,12 @@ import Tangle.Core (TangleDoc(..), TangleSegment(..), Control(..), cycleNext)
 -- | - ToggleClicked: Boolean toggled (id, new value)
 -- | - CycleClicked: Advance to next option (id, new value)
 -- | - AdjustChanged: Numeric value changed via drag (id, new value)
+-- | - ActionClicked: One-way action triggered (id, action value)
 data ControlAction
   = ToggleClicked String Boolean      -- id, new value
   | CycleClicked String String        -- id, new value
   | AdjustChanged String Number       -- id, new value
+  | ActionClicked String String       -- id, action value
 
 -- | Style configuration for controls
 type ControlStyle =
@@ -139,3 +141,11 @@ renderControl style _toAction (Display { value }) =
   HH.span
     [ HP.class_ (HH.ClassName style.displayClass) ]
     [ HH.text value ]
+
+-- Action: one-way trigger (like a link)
+renderControl style toAction (Action { id, label, actionValue }) =
+  HH.span
+    [ HP.class_ (HH.ClassName style.controlClass)
+    , HE.onClick \_ -> toAction (ActionClicked id actionValue)
+    ]
+    [ HH.text label ]

@@ -182,12 +182,16 @@ describeDoc vs = case vs of
     <+> Tangle.display "root" rootModule
 
   Neighborhood modName ->
-    Tangle.text "Neighborhood of "
+    -- "Neighborhood" is an action control - clicking it navigates back to overview
+    Tangle.action "navigate" "Neighborhood" "overview"
+    <+> Tangle.text " of "
     <+> Tangle.display "module" modName
     <+> Tangle.text " — imports and dependents"
 
   FunctionCalls modName ->
-    Tangle.text "Function calls in "
+    -- "Function calls" navigates back to neighborhood
+    Tangle.action "navigate" "Function calls" "neighborhood"
+    <+> Tangle.text " in "
     <+> Tangle.display "module" modName
 
 -- | Apply a control change to a ViewState
@@ -196,6 +200,7 @@ applyViewControl :: String -> String -> ViewState -> ViewState
 applyViewControl controlId newValue vs = case controlId of
   "layout" -> applyLayoutChange newValue vs
   "scope" -> applyScopeChange newValue vs
+  "navigate" -> applyNavigate newValue vs
   _ -> vs  -- Unknown control, no change
 
 -- | Apply layout change
@@ -218,6 +223,15 @@ applyScopeChange newScope vs =
     TreeLayout _ root -> TreeLayout scope root
     ForceLayout _ root -> ForceLayout scope root
     other -> other
+
+-- | Apply navigation action (one-way escape hatches)
+applyNavigate :: String -> ViewState -> ViewState
+applyNavigate target vs = case target of
+  "overview" -> Treemap ProjectAndLibraries  -- Always go back to default treemap
+  "neighborhood" -> case vs of
+    FunctionCalls modName -> Neighborhood modName  -- Go back to neighborhood of same module
+    _ -> vs
+  _ -> vs
 
 -- | Extract scope from ViewState
 extractScope :: ViewState -> ScopeFilter

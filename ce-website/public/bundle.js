@@ -9448,14 +9448,14 @@
     return RefUpdate2;
   })();
   var Action = /* @__PURE__ */ (function() {
-    function Action3(value0) {
+    function Action4(value0) {
       this.value0 = value0;
     }
     ;
-    Action3.create = function(value0) {
-      return new Action3(value0);
+    Action4.create = function(value0) {
+      return new Action4(value0);
     };
-    return Action3;
+    return Action4;
   })();
 
   // output/Halogen.VDom.Machine/index.js
@@ -11030,17 +11030,17 @@
     return Receive2;
   })();
   var Action2 = /* @__PURE__ */ (function() {
-    function Action3(value0, value1) {
+    function Action4(value0, value1) {
       this.value0 = value0;
       this.value1 = value1;
     }
     ;
-    Action3.create = function(value0) {
+    Action4.create = function(value0) {
       return function(value1) {
-        return new Action3(value0, value1);
+        return new Action4(value0, value1);
       };
     };
-    return Action3;
+    return Action4;
   })();
   var Query = /* @__PURE__ */ (function() {
     function Query2(value0, value1) {
@@ -11787,6 +11787,16 @@
     };
     return Display2;
   })();
+  var Action3 = /* @__PURE__ */ (function() {
+    function Action4(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Action4.create = function(value0) {
+      return new Action4(value0);
+    };
+    return Action4;
+  })();
   var TextSegment = /* @__PURE__ */ (function() {
     function TextSegment2(value0) {
       this.value0 = value0;
@@ -11829,7 +11839,7 @@
             return v2.value0;
           }
           ;
-          throw new Error("Failed pattern match at Tangle.Core (line 262, column 19 - line 264, column 16): " + [v2.constructor.name]);
+          throw new Error("Failed pattern match at Tangle.Core (line 282, column 19 - line 284, column 16): " + [v2.constructor.name]);
         };
       };
       var v = findIndex(function(v1) {
@@ -11844,7 +11854,7 @@
         return fromMaybe2(current)(index(options2)(nextIdx));
       }
       ;
-      throw new Error("Failed pattern match at Tangle.Core (line 256, column 3 - line 260, column 57): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Tangle.Core (line 276, column 3 - line 280, column 57): " + [v.constructor.name]);
     };
   };
   var control = function(c) {
@@ -11867,6 +11877,17 @@
         id: id5,
         value: value13
       }));
+    };
+  };
+  var action = function(id5) {
+    return function(label5) {
+      return function(actionValue) {
+        return control(new Action3({
+          id: id5,
+          label: label5,
+          actionValue
+        }));
+      };
     };
   };
 
@@ -11962,7 +11983,7 @@
       return "all";
     }
     ;
-    throw new Error("Failed pattern match at Engine.ViewState (line 243, column 1 - line 243, column 36): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Engine.ViewState (line 257, column 1 - line 257, column 36): " + [v.constructor.name]);
   };
   var parseScope = function(v) {
     if (v === "project") {
@@ -12066,14 +12087,14 @@
     }
     ;
     if (vs instanceof Neighborhood) {
-      return append9(text2("Neighborhood of "))(append9(display("module")(vs.value0))(text2(" \u2014 imports and dependents")));
+      return append9(action("navigate")("Neighborhood")("overview"))(append9(text2(" of "))(append9(display("module")(vs.value0))(text2(" \u2014 imports and dependents"))));
     }
     ;
     if (vs instanceof FunctionCalls) {
-      return append9(text2("Function calls in "))(display("module")(vs.value0));
+      return append9(action("navigate")("Function calls")("neighborhood"))(append9(text2(" in "))(display("module")(vs.value0)));
     }
     ;
-    throw new Error("Failed pattern match at Engine.ViewState (line 163, column 18 - line 191, column 40): " + [vs.constructor.name]);
+    throw new Error("Failed pattern match at Engine.ViewState (line 163, column 18 - line 195, column 40): " + [vs.constructor.name]);
   };
   var applyScopeChange = function(newScope) {
     return function(vs) {
@@ -12088,6 +12109,23 @@
       ;
       if (vs instanceof ForceLayout) {
         return new ForceLayout(scope2, vs.value1);
+      }
+      ;
+      return vs;
+    };
+  };
+  var applyNavigate = function(target6) {
+    return function(vs) {
+      if (target6 === "overview") {
+        return new Treemap(ProjectAndLibraries.value);
+      }
+      ;
+      if (target6 === "neighborhood") {
+        if (vs instanceof FunctionCalls) {
+          return new Neighborhood(vs.value0);
+        }
+        ;
+        return vs;
       }
       ;
       return vs;
@@ -12121,6 +12159,10 @@
         ;
         if (controlId === "scope") {
           return applyScopeChange(newValue)(vs);
+        }
+        ;
+        if (controlId === "navigate") {
+          return applyNavigate(newValue)(vs);
         }
         ;
         return vs;
@@ -14209,6 +14251,19 @@
     };
     return ToggleControl2;
   })();
+  var ActionControl = /* @__PURE__ */ (function() {
+    function ActionControl2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    ActionControl2.create = function(value0) {
+      return function(value1) {
+        return new ActionControl2(value0, value1);
+      };
+    };
+    return ActionControl2;
+  })();
   var CloseDropdown = /* @__PURE__ */ (function() {
     function CloseDropdown2() {
     }
@@ -14262,7 +14317,7 @@
       return "FunctionCalls(" + (v.value0 + ")");
     }
     ;
-    throw new Error("Failed pattern match at Component.NarrativePanel (line 414, column 1 - line 414, column 37): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Component.NarrativePanel (line 427, column 1 - line 427, column 37): " + [v.constructor.name]);
   };
   var renderTangleControl = function(v) {
     return function(v1) {
@@ -14301,7 +14356,13 @@
         return span3([class_("tangle-value")])([text(v1.value0.value)]);
       }
       ;
-      throw new Error("Failed pattern match at Component.NarrativePanel (line 163, column 1 - line 163, column 83): " + [v.constructor.name, v1.constructor.name]);
+      if (v1 instanceof Action3) {
+        return span3([classes(["tangle-control", "tangle-action"]), onClick(function(v2) {
+          return new ActionControl(v1.value0.id, v1.value0.actionValue);
+        })])([text(v1.value0.label)]);
+      }
+      ;
+      throw new Error("Failed pattern match at Component.NarrativePanel (line 164, column 1 - line 164, column 83): " + [v.constructor.name, v1.constructor.name]);
     };
   };
   var renderTangleSegment = function(v) {
@@ -14314,14 +14375,14 @@
         return renderTangleControl(v)(v1.value0);
       }
       ;
-      throw new Error("Failed pattern match at Component.NarrativePanel (line 158, column 1 - line 158, column 89): " + [v.constructor.name, v1.constructor.name]);
+      throw new Error("Failed pattern match at Component.NarrativePanel (line 159, column 1 - line 159, column 89): " + [v.constructor.name, v1.constructor.name]);
     };
   };
   var renderProjectDropdown = function(state3) {
     return div3([class_("project-dropdown")])(map26(function(p2) {
       return div3([classes(append14(["project-dropdown-item"])((function() {
-        var $74 = p2.id === state3.projectId;
-        if ($74) {
+        var $79 = p2.id === state3.projectId;
+        if ($79) {
           return ["project-dropdown-item--active"];
         }
         ;
@@ -14346,8 +14407,8 @@
     return div3([class_("color-key-item")])([span3([class_("color-key-swatch"), style("background-color: " + v.color)])([]), span3([class_("color-key-label")])([text(v.name)])]);
   };
   var renderPackagesKey = function(palette) {
-    var $79 = $$null(palette);
-    if ($79) {
+    var $84 = $$null(palette);
+    if ($84) {
       return text("");
     }
     ;
@@ -14366,7 +14427,7 @@
         return "Click any module to explore its neighborhood.";
       }
       ;
-      throw new Error("Failed pattern match at Component.NarrativePanel (line 208, column 11 - line 210, column 35): " + [mHint.constructor.name]);
+      throw new Error("Failed pattern match at Component.NarrativePanel (line 217, column 11 - line 219, column 35): " + [mHint.constructor.name]);
     })())]);
   };
   var renderHeroText = function(state3) {
@@ -14428,16 +14489,16 @@
       if (v instanceof SetViewState) {
         return discard3(log11("[NarrativePanel] SetViewState received: " + showViewState(v.value0)))(function() {
           return discard3(modify_4(function(v1) {
-            var $92 = {};
-            for (var $93 in v1) {
-              if ({}.hasOwnProperty.call(v1, $93)) {
-                $92[$93] = v1[$93];
+            var $97 = {};
+            for (var $98 in v1) {
+              if ({}.hasOwnProperty.call(v1, $98)) {
+                $97[$98] = v1[$98];
               }
               ;
             }
             ;
-            $92.viewState = v.value0;
-            return $92;
+            $97.viewState = v.value0;
+            return $97;
           }))(function() {
             return pure10(new Just(v.value1));
           });
@@ -14445,23 +14506,6 @@
       }
       ;
       if (v instanceof SetHintText) {
-        return discard3(modify_4(function(v1) {
-          var $97 = {};
-          for (var $98 in v1) {
-            if ({}.hasOwnProperty.call(v1, $98)) {
-              $97[$98] = v1[$98];
-            }
-            ;
-          }
-          ;
-          $97.hintText = v.value0;
-          return $97;
-        }))(function() {
-          return pure10(new Just(v.value1));
-        });
-      }
-      ;
-      if (v instanceof SetPackagePalette) {
         return discard3(modify_4(function(v1) {
           var $102 = {};
           for (var $103 in v1) {
@@ -14471,34 +14515,51 @@
             ;
           }
           ;
-          $102.packagePalette = v.value0;
+          $102.hintText = v.value0;
           return $102;
         }))(function() {
           return pure10(new Just(v.value1));
         });
       }
       ;
-      throw new Error("Failed pattern match at Component.NarrativePanel (line 399, column 15 - line 411, column 18): " + [v.constructor.name]);
+      if (v instanceof SetPackagePalette) {
+        return discard3(modify_4(function(v1) {
+          var $107 = {};
+          for (var $108 in v1) {
+            if ({}.hasOwnProperty.call(v1, $108)) {
+              $107[$108] = v1[$108];
+            }
+            ;
+          }
+          ;
+          $107.packagePalette = v.value0;
+          return $107;
+        }))(function() {
+          return pure10(new Just(v.value1));
+        });
+      }
+      ;
+      throw new Error("Failed pattern match at Component.NarrativePanel (line 412, column 15 - line 424, column 18): " + [v.constructor.name]);
     };
   };
   var handleAction2 = function(dictMonadAff) {
     return function(v) {
       if (v instanceof HandleInput) {
         return modify_4(function(v1) {
-          var $108 = {};
-          for (var $109 in v1) {
-            if ({}.hasOwnProperty.call(v1, $109)) {
-              $108[$109] = v1[$109];
+          var $113 = {};
+          for (var $114 in v1) {
+            if ({}.hasOwnProperty.call(v1, $114)) {
+              $113[$114] = v1[$114];
             }
             ;
           }
           ;
-          $108.viewState = v.value0.viewState;
-          $108.packagePalette = v.value0.packagePalette;
-          $108.projectName = v.value0.projectName;
-          $108.projectId = v.value0.projectId;
-          $108.projects = v.value0.projects;
-          return $108;
+          $113.viewState = v.value0.viewState;
+          $113.packagePalette = v.value0.packagePalette;
+          $113.projectName = v.value0.projectName;
+          $113.projectId = v.value0.projectId;
+          $113.projects = v.value0.projects;
+          return $113;
         });
       }
       ;
@@ -14517,19 +14578,23 @@
         return raise(new ControlChanged(v.value0, strValue));
       }
       ;
+      if (v instanceof ActionControl) {
+        return raise(new ControlChanged(v.value0, v.value1));
+      }
+      ;
       if (v instanceof CloseDropdown) {
         return modify_4(function(v1) {
-          var $117 = {};
-          for (var $118 in v1) {
-            if ({}.hasOwnProperty.call(v1, $118)) {
-              $117[$118] = v1[$118];
+          var $124 = {};
+          for (var $125 in v1) {
+            if ({}.hasOwnProperty.call(v1, $125)) {
+              $124[$125] = v1[$125];
             }
             ;
           }
           ;
-          $117.dropdownOpen = Nothing.value;
-          $117.projectDropdownOpen = false;
-          return $117;
+          $124.dropdownOpen = Nothing.value;
+          $124.projectDropdownOpen = false;
+          return $124;
         });
       }
       ;
@@ -14540,38 +14605,38 @@
       if (v instanceof ToggleProjectDropdown) {
         return bind7(get4)(function(state3) {
           return modify_4(function(v1) {
-            var $120 = {};
-            for (var $121 in v1) {
-              if ({}.hasOwnProperty.call(v1, $121)) {
-                $120[$121] = v1[$121];
+            var $127 = {};
+            for (var $128 in v1) {
+              if ({}.hasOwnProperty.call(v1, $128)) {
+                $127[$128] = v1[$128];
               }
               ;
             }
             ;
-            $120.projectDropdownOpen = !state3.projectDropdownOpen;
-            return $120;
+            $127.projectDropdownOpen = !state3.projectDropdownOpen;
+            return $127;
           });
         });
       }
       ;
       if (v instanceof SelectProject) {
         return discard3(modify_4(function(v1) {
-          var $123 = {};
-          for (var $124 in v1) {
-            if ({}.hasOwnProperty.call(v1, $124)) {
-              $123[$124] = v1[$124];
+          var $130 = {};
+          for (var $131 in v1) {
+            if ({}.hasOwnProperty.call(v1, $131)) {
+              $130[$131] = v1[$131];
             }
             ;
           }
           ;
-          $123.projectDropdownOpen = false;
-          return $123;
+          $130.projectDropdownOpen = false;
+          return $130;
         }))(function() {
           return raise(new ProjectSelected(v.value0));
         });
       }
       ;
-      throw new Error("Failed pattern match at Component.NarrativePanel (line 361, column 16 - line 392, column 40): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Component.NarrativePanel (line 370, column 16 - line 405, column 40): " + [v.constructor.name]);
     };
   };
   var defaultProjectName = "psd3";
@@ -14584,8 +14649,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction2(dictMonadAff),
         handleQuery: handleQuery2(dictMonadAff),
-        receive: function($127) {
-          return Just.create(HandleInput.create($127));
+        receive: function($134) {
+          return Just.create(HandleInput.create($134));
         }
       })
     });
