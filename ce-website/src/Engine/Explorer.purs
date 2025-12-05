@@ -5,6 +5,7 @@
 module Engine.Explorer
   ( initExplorer
   , goToScene
+  , SceneId(..)  -- Export ADT and constructors for type-safe scene selection
   , reloadWithProject
   , globalStateRef
   , globalLinksRef
@@ -71,6 +72,23 @@ import Web.DOM.ParentNode (querySelector, QuerySelector(..))
 import Web.HTML (window)
 import Web.HTML.Window (document)
 import Web.HTML.HTMLDocument (toParentNode)
+
+-- =============================================================================
+-- Scene ID (Type-Safe Scene Selection)
+-- =============================================================================
+
+-- | Type-safe scene identifiers
+-- | Replaces string-based scene selection for compile-time safety
+data SceneId
+  = TreeForm     -- ^ Static tree layout (bezier links)
+  | TreeRun      -- ^ Force-directed tree (physics enabled)
+
+derive instance eqSceneId :: Eq SceneId
+
+-- | Get scene configuration for a SceneId
+sceneConfigFor :: SceneId -> Scene.SceneConfig SimNode
+sceneConfigFor TreeForm = Scenes.treeFormScene
+sceneConfigFor TreeRun = Scenes.treeRunScene
 
 -- =============================================================================
 -- Global State
@@ -301,37 +319,31 @@ updateWithModel model stateRef = do
   -- Restart simulation
   Sim.start state.simulation
 
--- | Go to a named scene
-goToScene :: String -> Ref Scene.SceneState -> Effect Unit
-goToScene sceneName stateRef = do
-  let
-    mScene = case sceneName of
-      "TreeForm" -> Just Scenes.treeFormScene
-      "TreeRun" -> Just Scenes.treeRunScene
-      _ -> Nothing
-  case mScene of
-    Just scene -> do
-      -- Handle TreeForm: render tree bezier links
-      when (sceneName == "TreeForm") do
-        state <- Ref.read stateRef
-        nodes <- Sim.getNodes state.simulation
-        clearTreeLinks -- Clear any existing links
-        renderTreeLinks nodes
-        setTreeSceneClass true
+-- | Go to a scene using type-safe scene ID
+goToScene :: SceneId -> Ref Scene.SceneState -> Effect Unit
+goToScene sceneId stateRef = do
+  let scene = sceneConfigFor sceneId
 
-      -- Handle TreeRun: force-directed tree with link forces
-      when (sceneName == "TreeRun") do
-        state <- Ref.read stateRef
-        nodes <- Sim.getNodes state.simulation
-        links <- Ref.read globalLinksRef
-        clearTreeLinks -- Remove any existing links
-        addTreeForces nodes links state.simulation
-        renderForceLinks nodes links -- Render straight line links
-        Scene.setLinksGroupId forceLinksGroupId stateRef -- Enable link updates
-        setTreeSceneClass true -- Keep packages/non-tree faded
+  -- Handle TreeForm: render tree bezier links
+  when (sceneId == TreeForm) do
+    state <- Ref.read stateRef
+    nodes <- Sim.getNodes state.simulation
+    clearTreeLinks -- Clear any existing links
+    renderTreeLinks nodes
+    setTreeSceneClass true
 
-      Scene.transitionTo scene stateRef
-    Nothing -> log $ "[Explorer] Unknown scene: " <> sceneName
+  -- Handle TreeRun: force-directed tree with link forces
+  when (sceneId == TreeRun) do
+    state <- Ref.read stateRef
+    nodes <- Sim.getNodes state.simulation
+    links <- Ref.read globalLinksRef
+    clearTreeLinks -- Remove any existing links
+    addTreeForces nodes links state.simulation
+    renderForceLinks nodes links -- Render straight line links
+    Scene.setLinksGroupId forceLinksGroupId stateRef -- Enable link updates
+    setTreeSceneClass true -- Keep packages/non-tree faded
+
+  Scene.transitionTo scene stateRef
 
 -- =============================================================================
 -- Helpers

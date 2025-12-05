@@ -17,6 +17,7 @@ import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Ref as Ref
 import Engine.Explorer as Explorer
+import Engine.Explorer (SceneId(..))
 import Engine.ViewState (ViewState(..), ScopeFilter(..))
 import Halogen as H
 import Halogen.HTML as HH
@@ -219,11 +220,11 @@ handleControlChangeFromPanel controlId newValue = do
     Just stateRef -> do
       case controlId, newView of
         "layout", Treemap _ ->
-          Explorer.goToScene "TreemapRun" stateRef
+          pure unit  -- Treemap is static, no scene transition
         "layout", TreeLayout _ _ ->
-          Explorer.goToScene "TreeForm" stateRef
+          Explorer.goToScene TreeForm stateRef
         "layout", ForceLayout _ _ ->
-          Explorer.goToScene "TreeRun" stateRef
+          Explorer.goToScene TreeRun stateRef
         _, _ -> pure unit
     Nothing -> pure unit
 
