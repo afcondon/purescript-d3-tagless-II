@@ -70,7 +70,9 @@ import Foreign.Object (Object)
 import Foreign.Object as Object
 import PSD3.Data.Graph as Graph
 import PSD3.Data.Graph.Algorithms as Algorithms
+import Data.Graph.Algorithms as TopoAlgorithms
 import DataViz.Layout.Hierarchy.Tree as Tree
+import Data.Foldable (maximum) as Foldable
 import Types (SimNode, SimLink, NodeType(..), LinkType(..), Package)
 
 -- | API base URL for ce-server
@@ -554,8 +556,59 @@ transformToModel modulesObj packagesObj locMap declarations =
     packageCount = Array.length packageNames
     moduleCount = Array.length moduleNames
 
+    -- =========================================================================
+    -- Compute topological layers for packages
+    -- =========================================================================
+
+    -- Derive package dependencies from module dependencies
+    -- For each module, look at its dependencies and find which packages they belong to
+    -- Package A depends on Package B if any module in A depends on any module in B
+    derivedPackageDeps :: Map String (Set String)
+    derivedPackageDeps = foldl addModuleDeps Map.empty (Object.toUnfoldable modulesObj :: Array (Tuple String RawModule))
+      where
+        addModuleDeps :: Map String (Set String) -> Tuple String RawModule -> Map String (Set String)
+        addModuleDeps acc (Tuple moduleName rawMod) =
+          let
+            thisPackage = rawMod.package
+            -- Find packages of all dependencies
+            depPackages = Set.fromFoldable $ Array.mapMaybe getPackageOfModule rawMod.depends
+            -- Remove self-dependency
+            externalDeps = Set.delete thisPackage depPackages
+            -- Add to existing deps for this package
+            existing = fromMaybe Set.empty (Map.lookup thisPackage acc)
+          in
+            Map.insert thisPackage (Set.union existing externalDeps) acc
+
+        getPackageOfModule :: String -> Maybe String
+        getPackageOfModule modName = Object.lookup modName modulesObj <#> _.package
+
+    -- Convert packages to TaskNodes for topo sort
+    packageTaskNodes :: Array (TopoAlgorithms.TaskNode String)
+    packageTaskNodes = packageNames <#> \name ->
+      { id: name
+      , depends: Array.fromFoldable $ fromMaybe Set.empty (Map.lookup name derivedPackageDeps)
+      }
+
+    -- Get layered packages (each has id, layer, depends)
+    layeredPackages = TopoAlgorithms.addLayers packageTaskNodes
+
+    -- Build a map from package name to layer
+    packageLayerMap :: Map String Int
+    packageLayerMap = Map.fromFoldable $ layeredPackages <#> \lp -> Tuple lp.id lp.layer
+
+    -- Find max layer for positioning
+    maxLayer = fromMaybe 0 $ Foldable.maximum (layeredPackages <#> _.layer)
+
+    -- Count packages per layer for x-positioning within layer
+    packagesByLayer :: Map Int (Array String)
+    packagesByLayer = foldl addToLayer Map.empty layeredPackages
+      where
+        addToLayer acc lp =
+          let existing = fromMaybe [] $ Map.lookup lp.layer acc
+          in Map.insert lp.layer (Array.snoc existing lp.id) acc
+
     -- Create package nodes (IDs 0 to packageCount-1)
-    packageNodes = Array.mapWithIndex (mkPackageNode packageNames packageCount packageLocMap) packageNames
+    packageNodes = Array.mapWithIndex (mkPackageNode packageNames packageCount packageLocMap packageLayerMap packagesByLayer maxLayer) packageNames
 
     -- Create name -> ID maps
     packageIdMap = Map.fromFoldable $ Array.mapWithIndex (\i n -> Tuple n i) packageNames
@@ -734,8 +787,8 @@ markLinkType spanningTreeEdges link =
 -- Node Creation
 -- =============================================================================
 
-mkPackageNode :: Array String -> Int -> Map String Int -> Int -> String -> SimNode
-mkPackageNode _allPackages totalPackages packageLocMap idx name =
+mkPackageNode :: Array String -> Int -> Map String Int -> Map String Int -> Map Int (Array String) -> Int -> Int -> String -> SimNode
+mkPackageNode _allPackages totalPackages packageLocMap packageLayerMap packagesByLayer maxLayer idx name =
   let
     -- Grid position (arrange in rows of ~8)
     gridCols = 8
@@ -751,6 +804,24 @@ mkPackageNode _allPackages totalPackages packageLocMap idx name =
     -- Package radius based on total LOC (sqrt scale, with minimum)
     totalLoc = fromMaybe 100 (Map.lookup name packageLocMap)
     r = max 8.0 (sqrt (toNumber totalLoc) * 0.5)
+
+    -- Topological position (DAG layout)
+    -- y = layer (top to bottom: layer 0 at top, max layer at bottom)
+    -- x = position within layer (centered)
+    layer = fromMaybe 0 (Map.lookup name packageLayerMap)
+    packagesInLayer = fromMaybe [] (Map.lookup layer packagesByLayer)
+    indexInLayer = fromMaybe 0 (Array.elemIndex name packagesInLayer)
+    countInLayer = Array.length packagesInLayer
+
+    -- Layout constants for topo view
+    topoLayerSpacing = 150.0  -- Vertical spacing between layers
+    topoNodeSpacing = 100.0   -- Horizontal spacing within layer
+
+    -- Y: layer 0 at top, higher layers below
+    ty = (toNumber layer - toNumber maxLayer / 2.0) * topoLayerSpacing
+
+    -- X: center nodes within their layer
+    tx = (toNumber indexInLayer - toNumber countInLayer / 2.0 + 0.5) * topoNodeSpacing
   in
     { id: idx
     , name
@@ -772,6 +843,9 @@ mkPackageNode _allPackages totalPackages packageLocMap idx name =
     , treeX: 0.0
     , treeY: 0.0
     , isInTree: false -- Packages are never in the tree
+    , topoX: tx
+    , topoY: ty
+    , topoLayer: layer
     }
 
 mkModuleNode
@@ -843,6 +917,9 @@ mkModuleNode name idx modulesObj locMap packageIdMap _moduleIdMap packageCount _
     , treeX: 0.0
     , treeY: 0.0
     , isInTree: false -- Will be set true by updateNodeWithTreeData if reachable
+    , topoX: 0.0
+    , topoY: 0.0
+    , topoLayer: 0  -- Modules don't use topo positioning
     }
 
 -- =============================================================================
@@ -977,7 +1054,26 @@ getDependencyTree = do
       targetsMap = buildTargetsMap modules moduleIdMap
       sourcesMap = buildSourcesMap targetsMap
       packageLocMap = buildPackageLocMap modules locMap
-      packageNodes = Array.mapWithIndex (mkPackageNode packageNames packageCount packageLocMap) packageNames
+
+      -- Build topo data (same as transformToModel)
+      packagesObj = packages
+      packageTaskNodes :: Array (TopoAlgorithms.TaskNode String)
+      packageTaskNodes = packageNames <#> \name ->
+        { id: name
+        , depends: fromMaybe [] $ Object.lookup name packagesObj <#> _.depends
+        }
+      layeredPackages = TopoAlgorithms.addLayers packageTaskNodes
+      packageLayerMap :: Map String Int
+      packageLayerMap = Map.fromFoldable $ layeredPackages <#> \lp -> Tuple lp.id lp.layer
+      maxLayer = fromMaybe 0 $ Foldable.maximum (layeredPackages <#> _.layer)
+      packagesByLayer :: Map Int (Array String)
+      packagesByLayer = foldl addToLayer Map.empty layeredPackages
+        where
+        addToLayer acc lp =
+          let existing = fromMaybe [] $ Map.lookup lp.layer acc
+          in Map.insert lp.layer (Array.snoc existing lp.id) acc
+
+      packageNodes = Array.mapWithIndex (mkPackageNode packageNames packageCount packageLocMap packageLayerMap packagesByLayer maxLayer) packageNames
       moduleNodes = Array.mapWithIndex
         (\i name -> mkModuleNode name i modules locMap packageIdMap moduleIdMap packageCount moduleCount packageNodes targetsMap sourcesMap)
         moduleNames

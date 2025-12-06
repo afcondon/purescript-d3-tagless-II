@@ -20,6 +20,7 @@ module Engine.Scene
   , mkSceneState
   , transitionTo
   , onTick
+  , onTickWithViewTransition
   , setLinksGroupId
   , clearLinksGroupId
   ) where
@@ -52,6 +53,8 @@ import PSD3.Simulation.Scene
   ) as SimScene
 import PSD3.Transition.Tick as Tick
 import Types (SimNode, NodeType, LinkType)
+import Engine.ViewState (ViewState)
+import Engine.ViewTransition as VT
 
 -- =============================================================================
 -- App-Specific Types
@@ -72,6 +75,9 @@ type NodeRow =
   , treeX :: Number
   , treeY :: Number
   , isInTree :: Boolean
+  , topoX :: Number
+  , topoY :: Number
+  , topoLayer :: Int
   )
 
 type LinkRow = (linkType :: LinkType)
@@ -288,3 +294,35 @@ runStableEngine state = case state.currentScene of
   Just scene -> case scene.stableMode of
     SimScene.Physics _ -> pure unit  -- Simulation is already running
     SimScene.Static -> pure unit     -- Nothing to do
+
+-- =============================================================================
+-- View Transition Integration
+-- =============================================================================
+
+-- | Tick handler that also advances view transitions (GUP-style enter/exit)
+-- | This combines Scene.onTick with VT.tickTransitionState
+-- | Takes ViewState ref and node selector for applying visual transitions
+onTickWithViewTransition
+  :: Ref SceneState
+  -> Ref VT.TransitionState
+  -> Ref ViewState
+  -> String           -- nodesGroupSelector for VT.applyViewTransition
+  -> Effect Unit
+onTickWithViewTransition sceneStateRef viewTransitionRef viewStateRef nodesSelector = do
+  -- Read current view state
+  viewState <- Ref.read viewStateRef
+
+  -- Advance view transition progress
+  viewTransition <- Ref.read viewTransitionRef
+  let newViewTransition = VT.tickTransitionState VT.defaultDelta viewTransition
+  Ref.write newViewTransition viewTransitionRef
+
+  -- Get current nodes from simulation
+  sceneState <- Ref.read sceneStateRef
+  allNodes <- Sim.getNodes sceneState.simulation
+
+  -- Apply view transition visual updates (opacity, radius, remove exited)
+  VT.applyViewTransition nodesSelector viewState allNodes newViewTransition
+
+  -- Run normal scene tick (position updates)
+  onTick sceneStateRef

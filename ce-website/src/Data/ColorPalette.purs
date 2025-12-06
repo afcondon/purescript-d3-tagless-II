@@ -31,7 +31,7 @@ import Data.Array as Array
 import Data.Int (hexadecimal, fromStringAs)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String as String
-import Engine.ViewState (ViewState(..))
+import Engine.ViewState (ViewState(..), OverviewView(..))
 import PSD3.Scale (schemeTableau10At)
 import Types (SimNode, NodeType(..))
 
@@ -230,15 +230,18 @@ authorActivityPalette =
 -- =============================================================================
 -- |
 -- | These functions provide view-aware coloring for simulation nodes.
--- | Different visualizations have different color schemes:
+-- | With the new four-view architecture, nodes not in a view are removed from DOM,
+-- | so coloring is simpler - we just need to style the nodes that ARE present.
 -- |
 -- | **Treemap view:**
--- | - Packages: solid cluster color (stroke and fill)
--- | - Modules: white stroke, white fill if used, "none" fill if unused
+-- | - Packages: solid cluster color
+-- | - Modules: white fill, white stroke
 -- |
--- | **Tree/Force/Neighborhood views:**
--- | - Packages: solid stroke, very faint (10%) fill
--- | - Modules: cluster-colored stroke, 50% fill if in tree, 10% fill if not
+-- | **Tree/Force views:**
+-- | - Modules only: cluster-colored stroke, semi-transparent fill
+-- |
+-- | **Topo view:**
+-- | - Packages only: solid cluster color
 
 -- | Get the base color for a cluster index.
 -- | Uses Tableau10 color scheme.
@@ -246,37 +249,23 @@ getClusterColor :: Int -> String
 getClusterColor = schemeTableau10At
 
 -- | Get stroke color for a node in a specific view.
--- |
--- | - Packages: always cluster color
--- | - Modules in Treemap: white
--- | - Modules elsewhere: cluster color
 getNodeStroke :: ViewState -> SimNode -> String
 getNodeStroke viewState n = case n.nodeType of
   PackageNode -> schemeTableau10At n.cluster
   ModuleNode -> case viewState of
-    Treemap _ -> "rgba(255, 255, 255, 0.9)"
+    Overview TreemapView -> "rgba(255, 255, 255, 0.9)"
     _ -> schemeTableau10At n.cluster
 
 -- | Get fill color for a node in a specific view.
--- |
--- | - Packages in Treemap: solid cluster color
--- | - Packages elsewhere: 10% opacity cluster color
--- | - Modules in Treemap: white if has sources (used), "none" if unused
--- | - Modules elsewhere: 50% opacity if in tree, 10% if not
 getNodeFill :: ViewState -> SimNode -> String
 getNodeFill viewState n = case n.nodeType of
-  PackageNode -> case viewState of
-    Treemap _ -> schemeTableau10At n.cluster
-    _ -> addOpacity (schemeTableau10At n.cluster) 0.1
+  PackageNode -> schemeTableau10At n.cluster  -- Always solid for packages
   ModuleNode -> case viewState of
-    Treemap _ ->
+    Overview TreemapView ->
       if Array.null n.sources
         then "none"
         else "rgba(255, 255, 255, 0.9)"
-    _ ->
-      if n.isInTree
-        then addOpacity (schemeTableau10At n.cluster) 0.5
-        else addOpacity (schemeTableau10At n.cluster) 0.1
+    _ -> addOpacity (schemeTableau10At n.cluster) 0.5  -- Semi-transparent for tree/force
 
 -- =============================================================================
 -- Color Utilities

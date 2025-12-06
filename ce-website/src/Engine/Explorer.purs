@@ -40,9 +40,9 @@ import Engine.BubblePack (renderModulePackWithCallbacks, highlightCallGraph, cle
 -- CallGraphPopup is now a Halogen component (Component.CallGraphPopup)
 -- NarrativePanel is now a Halogen component (Component.NarrativePanel)
 -- It polls globalViewStateRef and globalModelInfoRef directly
-import Engine.ViewState (ViewState(..), ScopeFilter(..))
+import Engine.ViewState (ViewState(..), OverviewView(..), DetailView(..))
+import Engine.ViewTransition as VT
 import Data.ColorPalette (getNodeStroke, getNodeFill) as ColorPalette
-import Engine.Treemap as Treemap
 import Engine.Treemap (recalculateTreemapPositions, renderWatermark, clearWatermark)
 import PSD3v2.Tooltip (hideTooltip) as Tooltip
 import Engine.Scene as Scene
@@ -78,15 +78,19 @@ import Web.HTML.HTMLDocument (toParentNode)
 -- | Type-safe scene identifiers
 -- | Replaces string-based scene selection for compile-time safety
 data SceneId
-  = TreeForm     -- ^ Static tree layout (bezier links)
+  = TreemapForm  -- ^ Static treemap/grid layout
+  | TreeForm     -- ^ Static tree layout (bezier links)
   | TreeRun      -- ^ Force-directed tree (physics enabled)
+  | TopoForm     -- ^ Package DAG with topological positions
 
 derive instance eqSceneId :: Eq SceneId
 
 -- | Get scene configuration for a SceneId
 sceneConfigFor :: SceneId -> Scene.SceneConfig SimNode
+sceneConfigFor TreemapForm = Scenes.treemapFormScene
 sceneConfigFor TreeForm = Scenes.treeFormScene
 sceneConfigFor TreeRun = Scenes.treeRunScene
+sceneConfigFor TopoForm = Scenes.topoFormScene
 
 -- =============================================================================
 -- Public API: setViewState
@@ -107,19 +111,36 @@ setViewState newView = do
   -- Update internal state
   Ref.write newView globalViewStateRef
 
+  -- Compute view transition (enter/exit/update sets)
+  mStateRef <- Ref.read globalStateRef
+  case mStateRef of
+    Just stateRef -> do
+      sceneState <- Ref.read stateRef
+      allNodes <- Sim.getNodes sceneState.simulation
+      currentTransition <- Ref.read globalTransitionRef
+      let newTransition = VT.computeTransition newView allNodes currentTransition
+      Ref.write newTransition globalTransitionRef
+      log $ "[Explorer] Transition computed - entering: " <>
+        show (Map.size newTransition.enteringProgress) <>
+        ", exiting: " <> show (Array.length newTransition.exitingNodes)
+    Nothing -> pure unit
+
   -- Update node colors
   updateNodeColors newView
 
   -- Trigger scene transition if needed
-  mStateRef <- Ref.read globalStateRef
   case mStateRef of
-    Just stateRef ->
+    Just stateRef -> do
       case newView of
-        Treemap _ -> pure unit  -- Treemap is static, no scene transition
-        TreeLayout _ _ -> goToScene TreeForm stateRef
-        ForceLayout _ _ -> goToScene TreeRun stateRef
-        Neighborhood _ -> pure unit  -- Neighborhood handled separately
-        FunctionCalls _ -> pure unit  -- FunctionCalls handled separately
+        Overview TreemapView -> goToScene TreemapForm stateRef
+        Overview TreeView -> goToScene TreeForm stateRef
+        Overview ForceView -> goToScene TreeRun stateRef
+        Overview TopoView -> goToScene TopoForm stateRef
+        Detail _ -> pure unit  -- Detail views handled separately
+      -- Always reheat simulation on view change to ensure ticks keep running
+      -- This is needed when returning from Static scenes (Tree, Treemap)
+      sceneState <- Ref.read stateRef
+      Sim.reheat sceneState.simulation
     Nothing -> pure unit
 
   -- Notify Halogen via callback
@@ -158,7 +179,7 @@ globalModelInfoRef = unsafePerformEffect $ Ref.new { projectName: "", moduleCoun
 
 -- | Global ref for current view state
 globalViewStateRef :: Ref ViewState
-globalViewStateRef = unsafePerformEffect $ Ref.new (Treemap ProjectAndLibraries)
+globalViewStateRef = unsafePerformEffect $ Ref.new (Overview TreemapView)
 
 -- | Navigation stack for zoom out (history of previous views)
 -- | Stack grows from left: newest at head, oldest at tail
@@ -174,6 +195,10 @@ type FocusState =
 -- | Global ref for focus state
 globalFocusRef :: Ref FocusState
 globalFocusRef = unsafePerformEffect $ Ref.new { focusedNodeId: Nothing, fullNodes: [] }
+
+-- | Global ref for view transition state (GUP-style enter/exit/update)
+globalTransitionRef :: Ref VT.TransitionState
+globalTransitionRef = unsafePerformEffect $ Ref.new (VT.mkTransitionState VT.AllNodes [])
 
 -- =============================================================================
 -- Callback-Based Notification System
@@ -241,7 +266,7 @@ forceLinksGroupId = GroupId "#explorer-links"
 initExplorer :: String -> Effect Unit
 initExplorer containerSelector = do
   -- Initialize ViewState (Halogen NarrativePanel polls this)
-  let initialView = Treemap ProjectAndLibraries
+  let initialView = Overview TreemapView
   Ref.write initialView globalViewStateRef
   log "[Explorer] ViewState initialized (Halogen NarrativePanel polls this)"
 
@@ -273,7 +298,7 @@ initExplorerWithCallbacks containerSelector callbacks = do
   Ref.write (Just callbacks) globalCallbacksRef
 
   -- Initialize ViewState and notify via callback
-  let initialView = Treemap ProjectAndLibraries
+  let initialView = Overview TreemapView
   Ref.write initialView globalViewStateRef
   callbacks.onViewStateChanged initialView
   log "[Explorer] ViewState initialized with callback notification"
@@ -329,8 +354,12 @@ initWithModel model containerSelector = do
   -- Get nodes from simulation for initial render
   simNodes <- Sim.getNodes sim
 
+  -- Initialize transition state with all nodes entering
+  let initialViewNodes = VT.getViewNodes (Overview TreemapView)
+  Ref.write (VT.mkTransitionState initialViewNodes simNodes) globalTransitionRef
+
   -- Render SVG structure first (initial view is Treemap)
-  let initialView = Treemap ProjectAndLibraries
+  let initialView = Overview TreemapView
   _ <- runD3v2M $ renderSVG initialView containerSelector simNodes
 
   -- Render treemap watermark (behind nodes)
@@ -340,8 +369,9 @@ initWithModel model containerSelector = do
   let sceneState = Scene.mkSceneState sim nodesGroupId
   stateRef <- Ref.new sceneState
 
-  -- Set up tick callback - the Engine handles everything
-  Sim.onTick (Scene.onTick stateRef) sim
+  -- Set up tick callback - includes view transition progress advancement and visual updates
+  let nodesSelector = "#explorer-nodes"  -- Selector for the nodes group
+  Sim.onTick (Scene.onTickWithViewTransition stateRef globalTransitionRef globalViewStateRef nodesSelector) sim
 
   -- Start simulation - let forces do the initial clustering animation
   -- (no transition on startup - nodes start randomized, forces pull them in)
@@ -447,6 +477,15 @@ goToScene :: SceneId -> Ref Scene.SceneState -> Effect Unit
 goToScene sceneId stateRef = do
   let scene = sceneConfigFor sceneId
 
+  -- Handle TreemapForm: clear links, restore grid forces, remove CSS class
+  when (sceneId == TreemapForm) do
+    state <- Ref.read stateRef
+    nodes <- Sim.getNodes state.simulation
+    clearTreeLinks -- Remove any tree/force links
+    restoreGridForces nodes state.simulation -- Restore grid forces
+    Scene.clearLinksGroupId stateRef -- Disable link updates
+    setTreeSceneClass false -- Show all nodes normally
+
   -- Handle TreeForm: render tree bezier links
   when (sceneId == TreeForm) do
     state <- Ref.read stateRef
@@ -465,6 +504,13 @@ goToScene sceneId stateRef = do
     renderForceLinks nodes links -- Render straight line links
     Scene.setLinksGroupId forceLinksGroupId stateRef -- Enable link updates
     setTreeSceneClass true -- Keep packages/non-tree faded
+
+  -- Handle TopoForm: package DAG with topological positions
+  -- TODO: Could add package dependency links here in future
+  when (sceneId == TopoForm) do
+    clearTreeLinks -- Remove any tree/force links
+    Scene.clearLinksGroupId stateRef -- Disable link updates
+    setTreeSceneClass false -- Show all nodes (packages prominent)
 
   Scene.transitionTo scene stateRef
 
@@ -981,17 +1027,12 @@ setTreeSceneClass shouldAdd = do
 
 -- | Show ViewState for logging
 showViewState :: ViewState -> String
-showViewState (Treemap UsedOnly) = "Treemap (used)"
-showViewState (Treemap ProjectOnly) = "Treemap (project)"
-showViewState (Treemap ProjectAndLibraries) = "Treemap (all)"
-showViewState (TreeLayout UsedOnly root) = "TreeLayout (used, root: " <> root <> ")"
-showViewState (TreeLayout ProjectOnly root) = "TreeLayout (project, root: " <> root <> ")"
-showViewState (TreeLayout ProjectAndLibraries root) = "TreeLayout (all, root: " <> root <> ")"
-showViewState (ForceLayout UsedOnly root) = "ForceLayout (used, root: " <> root <> ")"
-showViewState (ForceLayout ProjectOnly root) = "ForceLayout (project, root: " <> root <> ")"
-showViewState (ForceLayout ProjectAndLibraries root) = "ForceLayout (all, root: " <> root <> ")"
-showViewState (Neighborhood name) = "Neighborhood (" <> name <> ")"
-showViewState (FunctionCalls name) = "FunctionCalls (" <> name <> ")"
+showViewState (Overview TreemapView) = "Overview(Treemap)"
+showViewState (Overview TreeView) = "Overview(Tree)"
+showViewState (Overview ForceView) = "Overview(Force)"
+showViewState (Overview TopoView) = "Overview(Topo)"
+showViewState (Detail (NeighborhoodDetail name)) = "Detail(Neighborhood:" <> name <> ")"
+showViewState (Detail (FunctionCallsDetail name)) = "Detail(FunctionCalls:" <> name <> ")"
 
 -- | Toggle focus on a node's neighborhood
 -- | Click once to drill down to neighborhood, click again to restore full view
@@ -1040,7 +1081,7 @@ toggleFocus clickedNode = do
           Ref.modify_ (Array.cons currentView) globalNavigationStackRef
 
           -- Update ViewState for neighborhood view and notify via callback
-          let neighborhoodView = Neighborhood clickedNode.name
+          let neighborhoodView = Detail (NeighborhoodDetail clickedNode.name)
           Ref.write neighborhoodView globalViewStateRef
           notifyViewStateChanged neighborhoodView
 
@@ -1332,19 +1373,10 @@ restoreToView targetView = do
       state <- Ref.read stateRef
 
       case targetView of
-        Treemap _ -> do
-          -- Re-entering treemap view (static, non-simulation)
-          Ref.write targetView globalViewStateRef
-          notifyViewStateChanged targetView
-        TreeLayout _ _ -> restoreFullView focus.fullNodes targetView state.simulation
-        ForceLayout _ _ -> restoreFullView focus.fullNodes targetView state.simulation
-        Neighborhood _ -> do
-          -- Re-entering a neighborhood - find the node and focus on it
-          -- For now, just update the view state (the DOM is already showing neighborhood)
-          Ref.write targetView globalViewStateRef
-          notifyViewStateChanged targetView
-        FunctionCalls _ -> do
-          -- Re-entering function calls view
+        Overview _ -> restoreFullView focus.fullNodes targetView state.simulation
+        Detail _ -> do
+          -- Re-entering a detail view - just update the view state
+          -- (the DOM is already showing the detail)
           Ref.write targetView globalViewStateRef
           notifyViewStateChanged targetView
 
@@ -1377,6 +1409,10 @@ restoreFullView fullNodes targetView sim = do
   -- Update ViewState and notify via callback
   Ref.write targetView globalViewStateRef
   notifyViewStateChanged targetView
+
+  -- Ensure colors are correct for the restored view
+  -- (renderNodesOnly should set them, but this ensures they're applied)
+  updateNodeColors targetView
 
   -- Clear focus state
   Ref.write { focusedNodeId: Nothing, fullNodes: [] } globalFocusRef

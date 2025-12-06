@@ -164,6 +164,23 @@ function extractPackagesFromSpago(repoPath) {
   return JSON.parse(jsonStr);
 }
 
+function extractPackageGraphFromSpago(repoPath) {
+  // Run spago graph packages to get package dependencies
+  // Returns: { "pkgName": { depends: ["dep1", "dep2", ...] }, ... }
+  const output = execSync(`cd "${repoPath}" && spago graph packages --json 2>/dev/null`, {
+    encoding: 'utf8',
+    maxBuffer: 10 * 1024 * 1024
+  });
+
+  // Find the start of JSON (first '{')
+  const jsonStart = output.indexOf('{');
+  if (jsonStart === -1) {
+    throw new Error('No JSON found in spago graph packages output');
+  }
+  const jsonStr = output.slice(jsonStart);
+  return JSON.parse(jsonStr);
+}
+
 function countLinesInFile(filePath) {
   try {
     const content = fs.readFileSync(filePath, 'utf8');
@@ -337,24 +354,26 @@ async function createSnapshot(options) {
       console.log(`    Warning: Could not extract modules: ${e.message}`);
     }
 
-    // Load packages
+    // Load packages with dependencies
     console.log('  Loading packages...');
     try {
-      const packagesData = extractPackagesFromSpago(repoPath);
+      // Use spago graph packages to get dependencies
+      const packageGraphData = extractPackageGraphFromSpago(repoPath);
       let packageCount = 0;
       let maxPkgId = (await query(db, 'SELECT COALESCE(MAX(id), 0) as max_id FROM packages'))[0].max_id;
 
-      // packagesData is an object: { "pkg-name": { type: "registry", value: { version: "x.y.z" } } }
-      for (const [pkgName, pkgInfo] of Object.entries(packagesData)) {
+      // packageGraphData is: { "pkg-name": { depends: ["dep1", "dep2", ...] }, ... }
+      for (const [pkgName, pkgInfo] of Object.entries(packageGraphData)) {
         maxPkgId++;
+        const depends = pkgInfo.depends || [];
         await run(db,
           `INSERT INTO packages (id, snapshot_id, name, depends)
            VALUES (?, ?, ?, ?)`,
           maxPkgId, snapshotId, pkgName,
-          JSON.stringify([])); // spago ls packages doesn't include deps, would need spago.yaml parsing
+          JSON.stringify(depends));
         packageCount++;
       }
-      console.log(`    Loaded ${packageCount} packages`);
+      console.log(`    Loaded ${packageCount} packages with dependencies`);
     } catch (e) {
       console.log(`    Warning: Could not extract packages: ${e.message}`);
     }

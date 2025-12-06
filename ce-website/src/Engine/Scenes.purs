@@ -8,7 +8,9 @@
 -- | 3. finalRules: Applied after transition completes
 module Engine.Scenes
   ( -- Form scenes (transition to positions, then Static)
-    treeFormScene
+    treemapFormScene
+  , treeFormScene
+  , topoFormScene
   -- Run scenes (enable physics/forces)
   , treeRunScene
   -- Rule helpers
@@ -78,6 +80,40 @@ pinAllRule =
   }
 
 -- =============================================================================
+-- Treemap Scene
+-- =============================================================================
+
+-- | Form Treemap: Transition back to grid positions, then run physics
+-- | All nodes return to their treemap/grid positions (gridX, gridY)
+-- | Uses Physics mode so collide forces can spread modules apart
+treemapFormScene :: SceneConfig SimNode
+treemapFormScene =
+  { name: "TreemapForm"
+  , initRules: [ pinAllRule ]
+  , layout: treemapFormLayout
+  , finalRules: \_ ->
+      [ { name: "pinPackagesAtGrid"
+        , select: isPackage
+        , apply: \n -> n
+            { fx = Nullable.notNull n.gridX
+            , fy = Nullable.notNull n.gridY
+            }
+        }
+      , { name: "unpinModules"
+        , select: isModule
+        , apply: unpinNode
+        }
+      ]
+  , stableMode: Physics {}
+  , cssTransition: Nothing
+  }
+
+-- | Layout for Form Treemap: all nodes to their grid positions
+treemapFormLayout :: Array SimNode -> PositionMap
+treemapFormLayout nodes =
+  Object.fromFoldable $ map (\n -> Tuple (show n.id) { x: n.gridX, y: n.gridY }) nodes
+
+-- =============================================================================
 -- Tree Scenes (Form + Run)
 -- =============================================================================
 
@@ -140,3 +176,42 @@ treeFormLayout nodes =
 treeRunLayout :: Array SimNode -> PositionMap
 treeRunLayout nodes =
   Object.fromFoldable $ map (\n -> Tuple (show n.id) { x: n.x, y: n.y }) nodes
+
+-- =============================================================================
+-- Topo Scene (Package DAG)
+-- =============================================================================
+
+-- | Form Topo: Transition packages to topological positions
+-- | Packages go to topo positions (layer-based DAG), modules stay where they are
+-- | Uses Static mode since packages are pinned in final positions
+topoFormScene :: SceneConfig SimNode
+topoFormScene =
+  { name: "TopoForm"
+  , initRules: [ pinAllRule ]
+  , layout: topoFormLayout
+  , finalRules: \_ ->
+      [ { name: "pinPackagesAtTopo"
+        , select: isPackage
+        , apply: \n -> n
+            { fx = Nullable.notNull n.topoX
+            , fy = Nullable.notNull n.topoY
+            }
+        }
+      , { name: "pinModulesAtCurrent"
+        , select: isModule
+        , apply: pinAtCurrent
+        }
+      ]
+  , stableMode: Static
+  , cssTransition: Nothing
+  }
+
+-- | Layout for Form Topo: packages to topo positions, modules stay put
+topoFormLayout :: Array SimNode -> PositionMap
+topoFormLayout nodes =
+  Object.fromFoldable $ map getPosition nodes
+  where
+  getPosition node =
+    if isPackage node
+    then Tuple (show node.id) { x: node.topoX, y: node.topoY }
+    else Tuple (show node.id) { x: node.x, y: node.y }

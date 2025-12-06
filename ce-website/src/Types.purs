@@ -37,6 +37,9 @@ type SimNode = SimulationNode
   , treeX :: Number        -- Tree position (calculated from radial tree layout)
   , treeY :: Number
   , isInTree :: Boolean    -- True if node is reachable from root in spanning tree
+  , topoX :: Number        -- Topological position (for Topo scene, packages only)
+  , topoY :: Number
+  , topoLayer :: Int       -- Topological layer (0 = no dependencies)
   )
 
 -- | Node type discriminator

@@ -11,12 +11,11 @@ import Data.Either (Either(..))
 import Data.Int (toNumber, floor)
 import Data.Loader as Loader
 import Data.Maybe (Maybe(..))
-import Effect (Effect)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Engine.Explorer as Explorer
-import Engine.ViewState (ViewState(..), ScopeFilter(..), applyViewControl)
+import Engine.ViewState (ViewState(..), OverviewView(..), toOverview, viewDescription)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
@@ -51,13 +50,13 @@ _callGraphPopup = Proxy
 data Action
   = Initialize
   | ViewStateChanged ViewState
-  | ModelLoaded Explorer.ModelInfo  -- New: callback from Explorer when model loads
+  | ModelLoaded Explorer.ModelInfo
   | PackagePaletteChanged (Array NarrativePanel.ColorEntry)
   | ProjectsLoaded (Array NarrativePanel.ProjectInfo)
-  | SwitchProject Int String  -- Project ID and name
+  | SwitchProject Int String
   | NarrativePanelOutput NarrativePanel.Output
   | CallGraphPopupOutput CallGraphPopup.Output
-  | ShowCallGraphPopup String String  -- moduleName, declarationName
+  | ShowCallGraphPopup String String
   | HideCallGraphPopup
 
 -- | Main app component
@@ -67,10 +66,10 @@ component =
     { initialState: \_ ->
         { initialized: false
         , error: Nothing
-        , viewState: Treemap ProjectAndLibraries
+        , viewState: Overview TreemapView  -- Start with Treemap overview
         , packagePalette: []
         , projectName: NarrativePanel.defaultProjectName
-        , projectId: 1  -- Default to first project (psd3)
+        , projectId: 1
         , projects: []
         }
     , render
@@ -85,7 +84,6 @@ render state =
   HH.div
     [ HP.class_ (HH.ClassName "explorer-app") ]
     [ -- Narrative Panel component (top-left)
-      -- Scene-aware color key that switches based on ViewState
       HH.slot _narrativePanel unit NarrativePanel.component
         { viewState: state.viewState
         , packagePalette: state.packagePalette
@@ -98,7 +96,7 @@ render state =
     -- Call Graph Popup component (modal overlay)
     , HH.slot _callGraphPopup unit CallGraphPopup.component unit CallGraphPopupOutput
 
-    -- Error message (bottom-right to avoid collision with narrative panel)
+    -- Error message
     , case state.error of
         Just err -> HH.div
           [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--bottom-right", HH.ClassName "error-message" ] ]
@@ -117,7 +115,7 @@ handleAction = case _ of
     -- Create emitter/listener pair for Explorer callbacks
     { emitter, listener } <- liftEffect HS.create
 
-    -- Subscribe to Explorer events - maps Action directly through the emitter
+    -- Subscribe to Explorer events
     void $ H.subscribe emitter
 
     -- Create callbacks that notify the listener
@@ -129,10 +127,10 @@ handleAction = case _ of
           , onHideCallGraphPopup: HS.notify listener HideCallGraphPopup
           }
 
-    -- Initialize Explorer with callbacks (replaces polling!)
+    -- Initialize Explorer with callbacks
     liftEffect $ Explorer.initExplorerWithCallbacks "#viz" callbacks
     H.modify_ _ { initialized = true }
-    log "[SpagoGridApp] Explorer initialized with callbacks (no polling!)"
+    log "[SpagoGridApp] Explorer initialized with callbacks"
 
     -- Load projects list asynchronously
     void $ H.fork do
@@ -148,10 +146,8 @@ handleAction = case _ of
   ViewStateChanged newViewState -> do
     state <- H.get
     when (state.viewState /= newViewState) do
-      log $ "[SpagoGridApp] ViewState changed to: " <> showViewState newViewState
+      log $ "[SpagoGridApp] ViewState changed to: " <> viewDescription newViewState
       H.modify_ _ { viewState = newViewState }
-      -- Query the NarrativePanel to update
-      log $ "[SpagoGridApp] Sending SetViewState to NarrativePanel"
       void $ H.tell _narrativePanel unit (NarrativePanel.SetViewState newViewState)
 
   PackagePaletteChanged newPalette -> do
@@ -159,7 +155,6 @@ handleAction = case _ of
     when (state.packagePalette /= newPalette) do
       log $ "[SpagoGridApp] Package palette changed (" <> show (Array.length newPalette) <> " packages)"
       H.modify_ _ { packagePalette = newPalette }
-      -- Query the NarrativePanel to update
       void $ H.tell _narrativePanel unit (NarrativePanel.SetPackagePalette newPalette)
 
   ProjectsLoaded projectInfos -> do
@@ -169,18 +164,15 @@ handleAction = case _ of
   SwitchProject newProjectId newProjectName -> do
     state <- H.get
     when (state.projectId /= newProjectId) do
-      log $ "[SpagoGridApp] Switching to project: " <> newProjectName <> " (id: " <> show newProjectId <> ")"
-      -- Update state
+      log $ "[SpagoGridApp] Switching to project: " <> newProjectName
       H.modify_ _ { projectId = newProjectId, projectName = newProjectName, packagePalette = [] }
-      -- Reset ViewState to top level Treemap
-      let resetViewState = Treemap ProjectAndLibraries
+      -- Reset to Treemap overview
+      let resetViewState = Overview TreemapView
       liftEffect $ Explorer.setViewState resetViewState
       H.modify_ _ { viewState = resetViewState }
-      -- Reload Explorer with new project data
       liftEffect $ Explorer.reloadWithProject newProjectId
 
   ModelLoaded modelInfo -> do
-    -- Generate package palette from model info
     state <- H.get
     when (Array.null state.packagePalette && modelInfo.packageCount > 0) do
       log $ "[SpagoGridApp] Model loaded with " <> show modelInfo.packageCount <> " packages"
@@ -195,21 +187,15 @@ handleAction = case _ of
 
   NarrativePanelOutput output ->
     case output of
-      NarrativePanel.ControlChanged controlId newValue -> do
-        log $ "[SpagoGridApp] Control changed: " <> controlId <> " -> " <> newValue
-        -- Use applyViewControl from ViewState (keeps describe/apply together)
-        state <- H.get
-        let newView = applyViewControl controlId newValue state.viewState
-        H.modify_ _ { viewState = newView }
-        liftEffect $ handleControlChangeFromPanel newView
-
-      NarrativePanel.BackClicked -> do
-        log "[SpagoGridApp] Back button clicked"
-        liftEffect handleBackFromPanel
+      -- User clicked one of the four view icons
+      NarrativePanel.ViewSelected newOverview -> do
+        log $ "[SpagoGridApp] View selected: " <> show newOverview
+        let newViewState = toOverview newOverview
+        H.modify_ _ { viewState = newViewState }
+        liftEffect $ Explorer.setViewState newViewState
 
       NarrativePanel.ProjectSelected newProjectId -> do
         log $ "[SpagoGridApp] Project selected: " <> show newProjectId
-        -- Look up project name from projects list
         state <- H.get
         case Array.find (\p -> p.id == newProjectId) state.projects of
           Just project -> handleAction (SwitchProject newProjectId project.name)
@@ -221,7 +207,6 @@ handleAction = case _ of
         log "[SpagoGridApp] Call graph popup closed"
       CallGraphPopup.NavigateToFunction moduleName declarationName -> do
         log $ "[SpagoGridApp] Navigate to function: " <> moduleName <> "." <> declarationName
-        -- The popup handles navigation internally by reloading itself
 
   ShowCallGraphPopup moduleName declarationName -> do
     log $ "[SpagoGridApp] Showing call graph popup for: " <> moduleName <> "." <> declarationName
@@ -230,24 +215,3 @@ handleAction = case _ of
   HideCallGraphPopup -> do
     log "[SpagoGridApp] Hiding call graph popup"
     void $ H.tell _callGraphPopup unit CallGraphPopup.HidePopup
-
--- | Forward control change to Explorer's scene manager
--- | Takes the new ViewState (already computed by caller from Halogen state)
-handleControlChangeFromPanel :: ViewState -> Effect Unit
-handleControlChangeFromPanel newView =
-  -- Use Explorer's public API - handles ref update, colors, and scene transitions
-  Explorer.setViewState newView
-
--- | Forward back button to Explorer (uses navigation stack)
-handleBackFromPanel :: Effect Unit
-handleBackFromPanel = do
-  _ <- Explorer.navigateBack
-  pure unit
-
--- | Helper to show ViewState for logging
-showViewState :: ViewState -> String
-showViewState (Treemap _) = "Treemap"
-showViewState (TreeLayout _ _) = "TreeLayout"
-showViewState (ForceLayout _ _) = "ForceLayout"
-showViewState (Neighborhood name) = "Neighborhood(" <> name <> ")"
-showViewState (FunctionCalls name) = "FunctionCalls(" <> name <> ")"

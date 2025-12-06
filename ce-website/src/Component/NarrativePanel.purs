@@ -1,7 +1,7 @@
 -- | NarrativePanel - Halogen component for the "What Is Being Shown" panel
 -- |
--- | Scene-aware panel that updates its content based on ViewState.
--- | Color key switches between package colors (overview) and declaration types (neighborhood).
+-- | Four-icon navigation for overview views, with description text below.
+-- | Color key switches between package colors (overview) and declaration types (detail).
 module Component.NarrativePanel
   ( component
   , Query(..)
@@ -17,7 +17,6 @@ import Prelude
 import Data.Array as Array
 import Data.ColorPalette (LegendItem, PaletteType(..), getPalette)
 import Data.Maybe (Maybe(..))
-import Data.Newtype (unwrap)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class.Console (log)
 import Halogen as H
@@ -25,8 +24,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Types (Namespace(..), ElemName(..))
-import Engine.ViewState (ViewState(..), describeDoc)
-import Tangle.Core (TangleSegment(..), Control(..), cycleNext) as T
+import Engine.ViewState (ViewState(..), OverviewView(..), DetailView(..), viewLabel, viewDescription, getBaseOverview)
 
 -- =============================================================================
 -- Types
@@ -62,18 +60,13 @@ type State =
   , projectId :: Int
   , projects :: Array ProjectInfo
   , hintText :: Maybe String
-  , dropdownOpen :: Maybe String -- Which control ID has dropdown open
   , projectDropdownOpen :: Boolean
   }
 
 -- | Actions
 data Action
   = HandleInput Input
-  | CycleControl String String -- Control ID, next value (click to cycle)
-  | ToggleControl String Boolean -- Control ID, new boolean value (click to toggle)
-  | ActionControl String String -- Control ID, action value (one-way trigger)
-  | CloseDropdown
-  | ClickBack
+  | SelectView OverviewView  -- Click on an icon to change view
   | ToggleProjectDropdown
   | SelectProject Int -- Project ID selected
 
@@ -85,8 +78,7 @@ data Query a
 
 -- | Output messages to parent
 data Output
-  = ControlChanged String String -- controlId, newValue
-  | BackClicked
+  = ViewSelected OverviewView  -- User clicked an icon
   | ProjectSelected Int -- Project ID selected
 
 -- =============================================================================
@@ -113,7 +105,6 @@ initialState input =
   , projectId: input.projectId
   , projects: input.projects
   , hintText: Nothing
-  , dropdownOpen: Nothing
   , projectDropdownOpen: false
   }
 
@@ -131,106 +122,111 @@ render state =
       HH.div [ HP.class_ (HH.ClassName "panel-title") ]
         [ HH.text "What Is Being Shown" ]
 
-    -- Hero text with TangleJS-style controls
-    , renderHeroText state
+    -- Four view icons
+    , renderViewIcons state
+
+    -- Description text
+    , renderDescription state.viewState
 
     -- Hint text
-    , renderHintText state.hintText
+    , renderHintText state.hintText state.viewState
 
     -- Color key (scene-aware)
     , renderColorKey state
 
-    -- Navigation section (back button + project selector)
-    , renderNavigation state
+    -- Project selector
+    , renderProjectSelector state
     ]
 
--- | Render the main descriptive text with clickable controls
--- | Now uses structured TangleDoc instead of string parsing
-renderHeroText :: forall m. State -> H.ComponentHTML Action () m
-renderHeroText state =
+-- | Render the four view icons
+renderViewIcons :: forall m. State -> H.ComponentHTML Action () m
+renderViewIcons state =
   let
-    doc = describeDoc state.viewState
-    segments = unwrap doc
+    currentOverview = getBaseOverview state.viewState
+    allViews = [ TreemapView, TreeView, ForceView, TopoView ]
   in
-    HH.div [ HP.class_ (HH.ClassName "narrative-hero") ]
-      (map (renderTangleSegment state) segments)
+    HH.div [ HP.class_ (HH.ClassName "view-icons") ]
+      (map (renderViewIcon currentOverview) allViews)
 
--- | Render a TangleSegment from the structured document
-renderTangleSegment :: forall m. State -> T.TangleSegment -> H.ComponentHTML Action () m
-renderTangleSegment _state (T.TextSegment s) = HH.text s
-renderTangleSegment state (T.ControlSegment ctrl) = renderTangleControl state ctrl
-
--- | Render a Tangle control - click to cycle through options
-renderTangleControl :: forall m. State -> T.Control -> H.ComponentHTML Action () m
-
--- Cycle control - click to advance to next option
-renderTangleControl _state (T.Cycle { id, current, options }) =
+-- | Render a single view icon
+renderViewIcon :: forall m. OverviewView -> OverviewView -> H.ComponentHTML Action () m
+renderViewIcon currentView thisView =
   let
-    nextValue = T.cycleNext current options
+    isActive = currentView == thisView
+    label = viewLabel thisView
+    iconPath = case thisView of
+      TreemapView -> gridIcon
+      TreeView -> treeIcon
+      ForceView -> radialIcon
+      TopoView -> packagesIcon
   in
-    HH.span
-      [ HP.class_ (HH.ClassName "tangle-control")
-      , HE.onClick \_ -> CycleControl id nextValue
+    HH.button
+      [ HP.classes $ [ HH.ClassName "view-icon" ] <>
+          if isActive then [ HH.ClassName "view-icon--active" ] else []
+      , HP.title label
+      , HE.onClick \_ -> SelectView thisView
       ]
-      [ HH.text current ]
-
--- Toggle control - click to flip boolean
-renderTangleControl _state (T.Toggle { id, current, trueLabel, falseLabel }) =
-  let
-    displayText = if current then trueLabel else falseLabel
-    newValue = not current
-  in
-    HH.span
-      [ HP.classes $ [ HH.ClassName "tangle-control" ] <>
-          if current then [ HH.ClassName "tangle-active" ] else []
-      , HE.onClick \_ -> ToggleControl id newValue
+      [ HH.elementNS svgNS (ElemName "svg")
+          [ HP.attr (HH.AttrName "viewBox") "0 0 24 24"
+          , HP.attr (HH.AttrName "width") "24"
+          , HP.attr (HH.AttrName "height") "24"
+          ]
+          [ HH.elementNS svgNS (ElemName "path")
+              [ HP.attr (HH.AttrName "d") iconPath
+              , HP.attr (HH.AttrName "fill") "currentColor"
+              ]
+              []
+          ]
       ]
-      [ HH.text displayText ]
 
--- Adjust control - currently display only (drag TODO)
-renderTangleControl _state (T.Adjust { current, format }) =
-  HH.span
-    [ HP.class_ (HH.ClassName "tangle-control")
-    , HP.attr (HH.AttrName "data-adjustable") "true"
-    ]
-    [ HH.text (format current) ]
+-- | SVG path for grid/treemap icon
+gridIcon :: String
+gridIcon = "M3 3h8v8H3V3zm0 10h8v8H3v-8zm10-10h8v8h-8V3zm0 10h8v8h-8v-8z"
 
--- Display control - non-interactive
-renderTangleControl _state (T.Display { value }) =
-  HH.span
-    [ HP.class_ (HH.ClassName "tangle-value") ]
-    [ HH.text value ]
+-- | SVG path for tree icon
+treeIcon :: String
+treeIcon = "M12 2L4 7v3h3v12h10V10h3V7l-8-5zm0 2.5L17 8v1H7V8l5-3.5zM9 12h6v8H9v-8z"
 
--- Action control - one-way trigger (like a link)
-renderTangleControl _state (T.Action { id, label, actionValue }) =
-  HH.span
-    [ HP.classes [ HH.ClassName "tangle-control", HH.ClassName "tangle-action" ]
-    , HE.onClick \_ -> ActionControl id actionValue
-    ]
-    [ HH.text label ]
+-- | SVG path for radial icon
+radialIcon :: String
+radialIcon = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
+
+-- | SVG path for packages/topo icon
+packagesIcon :: String
+packagesIcon = "M20 3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H4V5h16v14zM6 7h5v5H6V7zm7 0h5v2h-5V7zm0 4h5v2h-5v-2zm0 4h5v2h-5v-2zm-7 0h5v2H6v-2z"
+
+-- | Render description text for current view
+renderDescription :: forall m. ViewState -> H.ComponentHTML Action () m
+renderDescription viewState =
+  HH.div [ HP.class_ (HH.ClassName "view-description") ]
+    [ HH.text (viewDescription viewState) ]
 
 -- | Render hint text
-renderHintText :: forall m. Maybe String -> H.ComponentHTML Action () m
-renderHintText mHint =
+renderHintText :: forall m. Maybe String -> ViewState -> H.ComponentHTML Action () m
+renderHintText mHint viewState =
   HH.div [ HP.class_ (HH.ClassName "narrative-hint") ]
-    [ HH.text
-        ( case mHint of
-            Just h -> h
-            Nothing -> hintForView
-        )
+    [ HH.text (case mHint of
+        Just h -> h
+        Nothing -> hintForView viewState)
     ]
-  where
-  hintForView = "Click any module to explore its neighborhood."
 
--- | Render the color key based on current scene
+-- | Default hint based on current view
+hintForView :: ViewState -> String
+hintForView (Overview TreemapView) = "Click any module to explore its neighborhood."
+hintForView (Overview TreeView) = "Showing import hierarchy from Main."
+hintForView (Overview ForceView) = "Drag nodes to rearrange. Click to explore."
+hintForView (Overview TopoView) = "Package dependencies in topological order."
+hintForView (Detail (NeighborhoodDetail _)) = "Click an icon above to return to overview."
+hintForView (Detail (FunctionCallsDetail _)) = "Click an icon above to return to overview."
+
+-- | Render the color key based on current view
 renderColorKey :: forall m. State -> H.ComponentHTML Action () m
 renderColorKey state =
   case state.viewState of
-    Neighborhood _ -> renderDeclarationTypesKey
-    FunctionCalls _ -> renderDeclarationTypesKey
+    Detail _ -> renderDeclarationTypesKey
     _ -> renderPackagesKey state.packagePalette
 
--- | Render package color key (for grid/orbit/tree views)
+-- | Render package color key (for overview views)
 renderPackagesKey :: forall m. Array ColorEntry -> H.ComponentHTML Action () m
 renderPackagesKey palette =
   if Array.null palette then HH.text ""
@@ -254,7 +250,7 @@ renderPackageEntry { name, color } =
         [ HH.text name ]
     ]
 
--- | Render declaration types color key (for neighborhood/function views)
+-- | Render declaration types color key (for detail views)
 renderDeclarationTypesKey :: forall m. H.ComponentHTML Action () m
 renderDeclarationTypesKey =
   let
@@ -270,21 +266,18 @@ renderDeclarationTypesKey =
 renderLegendEntry :: forall m. LegendItem -> H.ComponentHTML Action () m
 renderLegendEntry { label, color } =
   HH.div [ HP.class_ (HH.ClassName "color-key-item") ]
-    [ -- SVG with nested circles showing category and declaration colors
-      HH.elementNS svgNS (ElemName "svg")
+    [ HH.elementNS svgNS (ElemName "svg")
         [ HP.attr (HH.AttrName "width") "24"
         , HP.attr (HH.AttrName "height") "24"
         , HP.attr (HH.AttrName "class") "color-key-circles"
         ]
-        [ -- Outer circle (category color with low opacity)
-          HH.elementNS svgNS (ElemName "circle")
+        [ HH.elementNS svgNS (ElemName "circle")
             [ HP.attr (HH.AttrName "cx") "12"
             , HP.attr (HH.AttrName "cy") "12"
             , HP.attr (HH.AttrName "r") "10"
             , HP.style ("fill: " <> color <> "; fill-opacity: 0.6;")
             ]
             []
-        -- Inner circle (same color with higher opacity)
         , HH.elementNS svgNS (ElemName "circle")
             [ HP.attr (HH.AttrName "cx") "12"
             , HP.attr (HH.AttrName "cy") "12"
@@ -301,48 +294,20 @@ renderLegendEntry { label, color } =
 svgNS :: Namespace
 svgNS = Namespace "http://www.w3.org/2000/svg"
 
--- | Render navigation section (back button + project selector)
-renderNavigation :: forall m. State -> H.ComponentHTML Action () m
-renderNavigation state =
-  HH.div [ HP.class_ (HH.ClassName "narrative-nav") ]
-    [ renderBackButton state.viewState
-    , renderProjectSelector state
-    ]
-
--- | Render back button (always visible, disabled at top level)
-renderBackButton :: forall m. ViewState -> H.ComponentHTML Action () m
-renderBackButton vs = case vs of
-  Neighborhood _ ->
-    HH.button
-      [ HP.class_ (HH.ClassName "btn-editorial narrative-back")
-      , HE.onClick \_ -> ClickBack
-      ]
-      [ HH.text "← Back to overview" ]
-  FunctionCalls _ ->
-    HH.button
-      [ HP.class_ (HH.ClassName "btn-editorial narrative-back")
-      , HE.onClick \_ -> ClickBack
-      ]
-      [ HH.text "← Back to neighborhood" ]
-  _ ->
-    HH.button
-      [ HP.classes [ HH.ClassName "btn-editorial", HH.ClassName "narrative-back", HH.ClassName "narrative-back--disabled" ]
-      , HP.disabled true
-      ]
-      [ HH.text "At top level" ]
-
 -- | Render project selector with dropdown
 renderProjectSelector :: forall m. State -> H.ComponentHTML Action () m
 renderProjectSelector state =
-  HH.div
-    [ HP.class_ (HH.ClassName "narrative-project-wrapper") ]
-    [ HH.button
-        [ HP.class_ (HH.ClassName "btn-editorial narrative-project")
-        , HE.onClick \_ -> ToggleProjectDropdown
+  HH.div [ HP.class_ (HH.ClassName "narrative-nav") ]
+    [ HH.div
+        [ HP.class_ (HH.ClassName "narrative-project-wrapper") ]
+        [ HH.button
+            [ HP.class_ (HH.ClassName "btn-editorial narrative-project")
+            , HE.onClick \_ -> ToggleProjectDropdown
+            ]
+            [ HH.text state.projectName ]
+        , if state.projectDropdownOpen then renderProjectDropdown state
+          else HH.text ""
         ]
-        [ HH.text state.projectName ]
-    , if state.projectDropdownOpen then renderProjectDropdown state
-      else HH.text ""
     ]
 
 -- | Render project dropdown menu
@@ -377,24 +342,9 @@ handleAction = case _ of
       , projects = input.projects
       }
 
-  -- TangleJS-style: click to cycle through options (no dropdown)
-  CycleControl ctrlId newValue -> do
-    H.raise (ControlChanged ctrlId newValue)
-
-  -- TangleJS-style: click to toggle boolean
-  ToggleControl ctrlId newValue -> do
-    let strValue = if newValue then "true" else "false"
-    H.raise (ControlChanged ctrlId strValue)
-
-  -- Action control: one-way trigger (emits control change with fixed value)
-  ActionControl ctrlId actionValue -> do
-    H.raise (ControlChanged ctrlId actionValue)
-
-  CloseDropdown ->
-    H.modify_ _ { dropdownOpen = Nothing, projectDropdownOpen = false }
-
-  ClickBack ->
-    H.raise BackClicked
+  SelectView newView -> do
+    log $ "[NarrativePanel] View selected: " <> viewLabel newView
+    H.raise (ViewSelected newView)
 
   ToggleProjectDropdown -> do
     state <- H.get
@@ -425,8 +375,9 @@ handleQuery = case _ of
 
 -- | Helper to show ViewState for logging
 showViewState :: ViewState -> String
-showViewState (Treemap _) = "Treemap"
-showViewState (TreeLayout _ _) = "TreeLayout"
-showViewState (ForceLayout _ _) = "ForceLayout"
-showViewState (Neighborhood name) = "Neighborhood(" <> name <> ")"
-showViewState (FunctionCalls name) = "FunctionCalls(" <> name <> ")"
+showViewState (Overview TreemapView) = "Overview(Treemap)"
+showViewState (Overview TreeView) = "Overview(Tree)"
+showViewState (Overview ForceView) = "Overview(Force)"
+showViewState (Overview TopoView) = "Overview(Topo)"
+showViewState (Detail (NeighborhoodDetail name)) = "Detail(Neighborhood:" <> name <> ")"
+showViewState (Detail (FunctionCallsDetail name)) = "Detail(FunctionCalls:" <> name <> ")"
