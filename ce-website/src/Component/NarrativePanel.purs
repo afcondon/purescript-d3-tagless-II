@@ -24,7 +24,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Types (Namespace(..), ElemName(..))
-import Engine.ViewState (ViewState(..), OverviewView(..), DetailView(..), NeighborhoodViewType(..), viewLabel, viewDescription, getBaseOverview, neighborhoodViewLabel, getNeighborhoodViewType)
+import Engine.ViewState (ViewState(..), OverviewView(..), DetailView(..), NeighborhoodViewType(..), viewLabel, viewDescription, getBaseOverview, neighborhoodViewLabel)
 
 -- =============================================================================
 -- Types
@@ -176,10 +176,10 @@ renderViewTypeToggle currentViewType thisViewType =
   let
     isActive = currentViewType == thisViewType
     label = neighborhoodViewLabel thisViewType
-    iconPath = case thisViewType of
-      BubblePackView -> bubblePackIcon
-      ChordView -> chordIcon
-      MatrixView -> matrixIcon
+    iconSrc = case thisViewType of
+      BubblePackView -> "icons/Neighborhood.jpeg"
+      ChordView -> "icons/Chord.jpeg"
+      MatrixView -> "icons/Adjacency.jpeg"
   in
     HH.button
       [ HP.classes $ [ HH.ClassName "view-type-toggle" ] <>
@@ -187,30 +187,14 @@ renderViewTypeToggle currentViewType thisViewType =
       , HP.title label
       , HE.onClick \_ -> SelectNeighborhoodViewType thisViewType
       ]
-      [ HH.elementNS svgNS (ElemName "svg")
-          [ HP.attr (HH.AttrName "viewBox") "0 0 24 24"
-          , HP.attr (HH.AttrName "width") "20"
-          , HP.attr (HH.AttrName "height") "20"
-          ]
-          [ HH.elementNS svgNS (ElemName "path")
-              [ HP.attr (HH.AttrName "d") iconPath
-              , HP.attr (HH.AttrName "fill") "currentColor"
-              ]
-              []
+      [ HH.img
+          [ HP.src iconSrc
+          , HP.alt label
+          , HP.width 38
+          , HP.height 38
+          , HP.class_ (HH.ClassName "view-type-toggle-img")
           ]
       ]
-
--- | SVG path for bubble pack icon (circles)
-bubblePackIcon :: String
-bubblePackIcon = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-3-9c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3 6c2.21 0 4-1.79 4-4H8c0 2.21 1.79 4 4 4z"
-
--- | SVG path for chord diagram icon
-chordIcon :: String
-chordIcon = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 2c4.42 0 8 3.58 8 8 0 1.85-.63 3.55-1.69 4.9L7.1 5.69C8.45 4.63 10.15 4 12 4zm0 16c-4.42 0-8-3.58-8-8 0-1.85.63-3.55 1.69-4.9L16.9 18.31C15.55 19.37 13.85 20 12 20z"
-
--- | SVG path for matrix icon (grid)
-matrixIcon :: String
-matrixIcon = "M3 3h6v6H3V3zm2 2v2h2V5H5zm6-2h6v6h-6V3zm2 2v2h2V5h-2zM3 11h6v6H3v-6zm2 2v2h2v-2H5zm6-2h6v6h-6v-6zm2 2v2h2v-2h-2z"
 
 -- | Render back button for detail views
 renderBackButton :: forall m. Maybe OverviewView -> H.ComponentHTML Action () m
@@ -252,11 +236,11 @@ renderViewIcon currentView thisView =
   let
     isActive = currentView == thisView
     label = viewLabel thisView
-    iconPath = case thisView of
-      TreemapView -> gridIcon
-      TreeView -> treeIcon
-      ForceView -> radialIcon
-      TopoView -> packagesIcon
+    iconSrc = case thisView of
+      TreemapView -> "icons/Treemap.jpeg"
+      TreeView -> "icons/Tree.jpeg"
+      ForceView -> "icons/Force.jpeg"
+      TopoView -> "icons/Topograph.jpeg"
   in
     HH.button
       [ HP.classes $ [ HH.ClassName "view-icon" ] <>
@@ -264,34 +248,14 @@ renderViewIcon currentView thisView =
       , HP.title label
       , HE.onClick \_ -> SelectView thisView
       ]
-      [ HH.elementNS svgNS (ElemName "svg")
-          [ HP.attr (HH.AttrName "viewBox") "0 0 24 24"
-          , HP.attr (HH.AttrName "width") "24"
-          , HP.attr (HH.AttrName "height") "24"
-          ]
-          [ HH.elementNS svgNS (ElemName "path")
-              [ HP.attr (HH.AttrName "d") iconPath
-              , HP.attr (HH.AttrName "fill") "currentColor"
-              ]
-              []
+      [ HH.img
+          [ HP.src iconSrc
+          , HP.alt label
+          , HP.width 50
+          , HP.height 50
+          , HP.class_ (HH.ClassName "view-icon-img")
           ]
       ]
-
--- | SVG path for grid/treemap icon
-gridIcon :: String
-gridIcon = "M3 3h8v8H3V3zm0 10h8v8H3v-8zm10-10h8v8h-8V3zm0 10h8v8h-8v-8z"
-
--- | SVG path for tree icon
-treeIcon :: String
-treeIcon = "M12 2L4 7v3h3v12h10V10h3V7l-8-5zm0 2.5L17 8v1H7V8l5-3.5zM9 12h6v8H9v-8z"
-
--- | SVG path for radial icon
-radialIcon :: String
-radialIcon = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
-
--- | SVG path for packages/topo icon
-packagesIcon :: String
-packagesIcon = "M20 3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H4V5h16v14zM6 7h5v5H6V7zm7 0h5v2h-5V7zm0 4h5v2h-5v-2zm0 4h5v2h-5v-2zm-7 0h5v2H6v-2z"
 
 -- | Render description text for current view
 renderDescription :: forall m. ViewState -> H.ComponentHTML Action () m

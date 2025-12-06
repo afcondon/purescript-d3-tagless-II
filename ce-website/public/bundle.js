@@ -270,11 +270,11 @@
 
   // output/Data.Ord/foreign.js
   var unsafeCompareImpl = function(lt) {
-    return function(eq8) {
+    return function(eq9) {
       return function(gt) {
         return function(x6) {
           return function(y6) {
-            return x6 < y6 ? lt : x6 === y6 ? eq8 : gt;
+            return x6 < y6 ? lt : x6 === y6 ? eq9 : gt;
           };
         };
       };
@@ -900,13 +900,13 @@
     return v.value0;
   };
   var eqTuple = function(dictEq) {
-    var eq8 = eq(dictEq);
+    var eq9 = eq(dictEq);
     return function(dictEq1) {
       var eq16 = eq(dictEq1);
       return {
         eq: function(x6) {
           return function(y6) {
-            return eq8(x6.value0)(y6.value0) && eq16(x6.value1)(y6.value1);
+            return eq9(x6.value0)(y6.value0) && eq16(x6.value1)(y6.value1);
           };
         }
       };
@@ -2492,10 +2492,10 @@
   };
   var filter = /* @__PURE__ */ runFn2(filterImpl);
   var elemIndex = function(dictEq) {
-    var eq25 = eq(dictEq);
+    var eq24 = eq(dictEq);
     return function(x6) {
       return findIndex(function(v) {
-        return eq25(v)(x6);
+        return eq24(v)(x6);
       });
     };
   };
@@ -6676,7 +6676,7 @@
     };
   };
   var unsafeBalancedNode = /* @__PURE__ */ (function() {
-    var height10 = function(v) {
+    var height11 = function(v) {
       if (v instanceof Leaf) {
         return 0;
       }
@@ -6688,14 +6688,14 @@
       throw new Error("Failed pattern match at Data.Map.Internal (line 757, column 12 - line 759, column 26): " + [v.constructor.name]);
     };
     var rotateLeft = function(k, v, l, rk, rv, rl, rr) {
-      if (rl instanceof Node && rl.value0 > height10(rr)) {
+      if (rl instanceof Node && rl.value0 > height11(rr)) {
         return unsafeNode(rl.value2, rl.value3, unsafeNode(k, v, l, rl.value4), unsafeNode(rk, rv, rl.value5, rr));
       }
       ;
       return unsafeNode(rk, rv, unsafeNode(k, v, l, rl), rr);
     };
     var rotateRight = function(k, v, lk, lv, ll, lr, r) {
-      if (lr instanceof Node && height10(ll) <= lr.value0) {
+      if (lr instanceof Node && height11(ll) <= lr.value0) {
         return unsafeNode(lr.value2, lr.value3, unsafeNode(lk, lv, ll, lr.value4), unsafeNode(k, v, lr.value5, r));
       }
       ;
@@ -10780,6 +10780,7 @@
     throw new Error("Failed pattern match at Halogen.VDom.DOM.Prop (line 182, column 16 - line 187, column 16): " + [v.constructor.name]);
   };
   var propFromString = unsafeCoerce2;
+  var propFromInt = unsafeCoerce2;
   var buildProp = function(emit) {
     return function(el) {
       var removeProp = function(prevEvents) {
@@ -10953,6 +10954,9 @@
   };
   var isPropString = {
     toPropValue: propFromString
+  };
+  var isPropInt = {
+    toPropValue: propFromInt
   };
   var handler = /* @__PURE__ */ (function() {
     return Handler.create;
@@ -11693,6 +11697,9 @@
   })();
   var h2 = /* @__PURE__ */ element2("h2");
   var h3 = /* @__PURE__ */ element2("h3");
+  var img = function(props) {
+    return element2("img")(props)([]);
+  };
   var pre = /* @__PURE__ */ element2("pre");
   var span3 = /* @__PURE__ */ element2("span");
   var strong = /* @__PURE__ */ element2("strong");
@@ -11725,8 +11732,12 @@
     return prop(dictIsProp);
   };
   var prop22 = /* @__PURE__ */ prop2(isPropString);
+  var prop3 = /* @__PURE__ */ prop2(isPropInt);
+  var src2 = /* @__PURE__ */ prop22("src");
   var title = /* @__PURE__ */ prop22("title");
+  var width2 = /* @__PURE__ */ prop3("width");
   var id3 = /* @__PURE__ */ prop22("id");
+  var height2 = /* @__PURE__ */ prop3("height");
   var classes = /* @__PURE__ */ (function() {
     var $32 = prop22("className");
     var $33 = joinWith(" ");
@@ -11745,6 +11756,7 @@
     return attr(Nothing.value);
   })();
   var style = /* @__PURE__ */ attr2("style");
+  var alt4 = /* @__PURE__ */ prop22("alt");
 
   // output/Component.CallGraphPopup/index.js
   var intercalate4 = /* @__PURE__ */ intercalate2(monoidString);
@@ -13610,12 +13622,12 @@
 
   // node_modules/d3-format/src/formatGroup.js
   function formatGroup_default(grouping, thousands) {
-    return function(value13, width10) {
+    return function(value13, width11) {
       var i2 = value13.length, t = [], j = 0, g = grouping[0], length9 = 0;
       while (i2 > 0 && g > 0) {
-        if (length9 + g + 1 > width10) g = Math.max(1, width10 - length9);
+        if (length9 + g + 1 > width11) g = Math.max(1, width11 - length9);
         t.push(value13.substring(i2 -= g, i2 + g));
-        if ((length9 += g + 1) > width10) break;
+        if ((length9 += g + 1) > width11) break;
         g = grouping[j = (j + 1) % grouping.length];
       }
       return t.reverse().join(thousands);
@@ -13732,7 +13744,7 @@
     var group4 = locale2.grouping === void 0 || locale2.thousands === void 0 ? identity_default : formatGroup_default(map27.call(locale2.grouping, Number), locale2.thousands + ""), currencyPrefix = locale2.currency === void 0 ? "" : locale2.currency[0] + "", currencySuffix = locale2.currency === void 0 ? "" : locale2.currency[1] + "", decimal = locale2.decimal === void 0 ? "." : locale2.decimal + "", numerals = locale2.numerals === void 0 ? identity_default : formatNumerals_default(map27.call(locale2.numerals, String)), percent = locale2.percent === void 0 ? "%" : locale2.percent + "", minus = locale2.minus === void 0 ? "\u2212" : locale2.minus + "", nan2 = locale2.nan === void 0 ? "NaN" : locale2.nan + "";
     function newFormat(specifier) {
       specifier = formatSpecifier(specifier);
-      var fill4 = specifier.fill, align2 = specifier.align, sign2 = specifier.sign, symbol = specifier.symbol, zero4 = specifier.zero, width10 = specifier.width, comma = specifier.comma, precision = specifier.precision, trim2 = specifier.trim, type = specifier.type;
+      var fill4 = specifier.fill, align2 = specifier.align, sign2 = specifier.sign, symbol = specifier.symbol, zero4 = specifier.zero, width11 = specifier.width, comma = specifier.comma, precision = specifier.precision, trim2 = specifier.trim, type = specifier.type;
       if (type === "n") comma = true, type = "g";
       else if (!formatTypes_default[type]) precision === void 0 && (precision = 12), trim2 = true, type = "g";
       if (zero4 || fill4 === "0" && align2 === "=") zero4 = true, fill4 = "0", align2 = "=";
@@ -13764,8 +13776,8 @@
           }
         }
         if (comma && !zero4) value13 = group4(value13, Infinity);
-        var length9 = valuePrefix.length + value13.length + valueSuffix.length, padding2 = length9 < width10 ? new Array(width10 - length9 + 1).join(fill4) : "";
-        if (comma && zero4) value13 = group4(padding2 + value13, padding2.length ? width10 - valueSuffix.length : Infinity), padding2 = "";
+        var length9 = valuePrefix.length + value13.length + valueSuffix.length, padding2 = length9 < width11 ? new Array(width11 - length9 + 1).join(fill4) : "";
+        if (comma && zero4) value13 = group4(padding2 + value13, padding2.length ? width11 - valueSuffix.length : Infinity), padding2 = "";
         switch (align2) {
           case "<":
             value13 = valuePrefix + value13 + valueSuffix + padding2;
@@ -14484,15 +14496,15 @@
   };
 
   // output/Component.NarrativePanel/index.js
-  var map28 = /* @__PURE__ */ map(functorArray);
+  var eq5 = /* @__PURE__ */ eq(eqNeighborhoodViewType);
   var append14 = /* @__PURE__ */ append(semigroupArray);
+  var map28 = /* @__PURE__ */ map(functorArray);
+  var eq14 = /* @__PURE__ */ eq(eqOverviewView);
   var discard3 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_4 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var pure10 = /* @__PURE__ */ pure(applicativeHalogenM);
   var bind7 = /* @__PURE__ */ bind(bindHalogenM);
   var get4 = /* @__PURE__ */ get(monadStateHalogenM);
-  var eq14 = /* @__PURE__ */ eq(eqOverviewView);
-  var eq23 = /* @__PURE__ */ eq(eqNeighborhoodViewType);
   var ViewSelected = /* @__PURE__ */ (function() {
     function ViewSelected2(value0) {
       this.value0 = value0;
@@ -14636,7 +14648,6 @@
     };
     return SelectProject2;
   })();
-  var treeIcon = "M12 2L4 7v3h3v12h10V10h3V7l-8-5zm0 2.5L17 8v1H7V8l5-3.5zM9 12h6v8H9v-8z";
   var svgNS = "http://www.w3.org/2000/svg";
   var showViewState = function(v) {
     if (v instanceof Overview && v.value0 instanceof TreemapView) {
@@ -14663,13 +14674,80 @@
       return "Detail(FunctionCalls:" + (v.value0.value0 + ")");
     }
     ;
-    throw new Error("Failed pattern match at Component.NarrativePanel (line 488, column 1 - line 488, column 37): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Component.NarrativePanel (line 452, column 1 - line 452, column 37): " + [v.constructor.name]);
+  };
+  var renderViewTypeToggle = function(currentViewType) {
+    return function(thisViewType) {
+      var label5 = neighborhoodViewLabel(thisViewType);
+      var isActive = eq5(currentViewType)(thisViewType);
+      var iconSrc = (function() {
+        if (thisViewType instanceof BubblePackView) {
+          return "icons/Neighborhood.jpeg";
+        }
+        ;
+        if (thisViewType instanceof ChordView) {
+          return "icons/Chord.jpeg";
+        }
+        ;
+        if (thisViewType instanceof MatrixView) {
+          return "icons/Adjacency.jpeg";
+        }
+        ;
+        throw new Error("Failed pattern match at Component.NarrativePanel (line 179, column 15 - line 182, column 43): " + [thisViewType.constructor.name]);
+      })();
+      return button([classes(append14(["view-type-toggle"])((function() {
+        if (isActive) {
+          return ["view-type-toggle--active"];
+        }
+        ;
+        return [];
+      })())), title(label5), onClick(function(v) {
+        return new SelectNeighborhoodViewType(thisViewType);
+      })])([img([src2(iconSrc), alt4(label5), width2(38), height2(38), class_("view-type-toggle-img")])]);
+    };
+  };
+  var renderViewTypeToggles = function(currentViewType) {
+    return div3([class_("view-type-toggles")])(map28(renderViewTypeToggle(currentViewType))([BubblePackView.value, ChordView.value, MatrixView.value]));
+  };
+  var renderViewIcon = function(currentView) {
+    return function(thisView) {
+      var label5 = viewLabel(thisView);
+      var isActive = eq14(currentView)(thisView);
+      var iconSrc = (function() {
+        if (thisView instanceof TreemapView) {
+          return "icons/Treemap.jpeg";
+        }
+        ;
+        if (thisView instanceof TreeView) {
+          return "icons/Tree.jpeg";
+        }
+        ;
+        if (thisView instanceof ForceView) {
+          return "icons/Force.jpeg";
+        }
+        ;
+        if (thisView instanceof TopoView) {
+          return "icons/Topograph.jpeg";
+        }
+        ;
+        throw new Error("Failed pattern match at Component.NarrativePanel (line 239, column 15 - line 243, column 41): " + [thisView.constructor.name]);
+      })();
+      return button([classes(append14(["view-icon"])((function() {
+        if (isActive) {
+          return ["view-icon--active"];
+        }
+        ;
+        return [];
+      })())), title(label5), onClick(function(v) {
+        return new SelectView(thisView);
+      })])([img([src2(iconSrc), alt4(label5), width2(50), height2(50), class_("view-icon-img")])]);
+    };
   };
   var renderProjectDropdown = function(state3) {
     return div3([class_("project-dropdown")])(map28(function(p2) {
       return div3([classes(append14(["project-dropdown-item"])((function() {
-        var $54 = p2.id === state3.projectId;
-        if ($54) {
+        var $58 = p2.id === state3.projectId;
+        if ($58) {
           return ["project-dropdown-item--active"];
         }
         ;
@@ -14694,8 +14772,8 @@
     return div3([class_("color-key-item")])([span3([class_("color-key-swatch"), style("background-color: " + v.color)])([]), span3([class_("color-key-label")])([text(v.name)])]);
   };
   var renderPackagesKey = function(palette) {
-    var $59 = $$null(palette);
-    if ($59) {
+    var $63 = $$null(palette);
+    if ($63) {
       return text("");
     }
     ;
@@ -14718,9 +14796,6 @@
     ;
     return renderPackagesKey(state3.packagePalette);
   };
-  var radialIcon = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z";
-  var packagesIcon = "M20 3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H4V5h16v14zM6 7h5v5H6V7zm7 0h5v2h-5V7zm0 4h5v2h-5v-2zm0 4h5v2h-5v-2zm-7 0h5v2H6v-2z";
-  var matrixIcon = "M3 3h6v6H3V3zm2 2v2h2V5H5zm6-2h6v6h-6V3zm2 2v2h2V5h-2zM3 11h6v6H3v-6zm2 2v2h2v-2H5zm6-2h6v6h-6v-6zm2 2v2h2v-2h-2z";
   var initialState2 = function(input3) {
     return {
       viewState: input3.viewState,
@@ -14758,7 +14833,7 @@
       return "Click an icon above to return to overview.";
     }
     ;
-    throw new Error("Failed pattern match at Component.NarrativePanel (line 312, column 1 - line 312, column 35): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Component.NarrativePanel (line 276, column 1 - line 276, column 35): " + [v.constructor.name]);
   };
   var renderHintText = function(mHint) {
     return function(viewState) {
@@ -14771,7 +14846,7 @@
           return hintForView(viewState);
         }
         ;
-        throw new Error("Failed pattern match at Component.NarrativePanel (line 306, column 16 - line 308, column 41): " + [mHint.constructor.name]);
+        throw new Error("Failed pattern match at Component.NarrativePanel (line 270, column 16 - line 272, column 41): " + [mHint.constructor.name]);
       })())]);
     };
   };
@@ -14781,16 +14856,16 @@
       if (v instanceof SetViewState) {
         return discard3(log14("[NarrativePanel] SetViewState received: " + showViewState(v.value0)))(function() {
           return discard3(modify_4(function(v1) {
-            var $78 = {};
-            for (var $79 in v1) {
-              if ({}.hasOwnProperty.call(v1, $79)) {
-                $78[$79] = v1[$79];
+            var $82 = {};
+            for (var $83 in v1) {
+              if ({}.hasOwnProperty.call(v1, $83)) {
+                $82[$83] = v1[$83];
               }
               ;
             }
             ;
-            $78.viewState = v.value0;
-            return $78;
+            $82.viewState = v.value0;
+            return $82;
           }))(function() {
             return pure10(new Just(v.value1));
           });
@@ -14799,16 +14874,16 @@
       ;
       if (v instanceof SetHintText) {
         return discard3(modify_4(function(v1) {
-          var $83 = {};
-          for (var $84 in v1) {
-            if ({}.hasOwnProperty.call(v1, $84)) {
-              $83[$84] = v1[$84];
+          var $87 = {};
+          for (var $88 in v1) {
+            if ({}.hasOwnProperty.call(v1, $88)) {
+              $87[$88] = v1[$88];
             }
             ;
           }
           ;
-          $83.hintText = v.value0;
-          return $83;
+          $87.hintText = v.value0;
+          return $87;
         }))(function() {
           return pure10(new Just(v.value1));
         });
@@ -14816,16 +14891,16 @@
       ;
       if (v instanceof SetPackagePalette) {
         return discard3(modify_4(function(v1) {
-          var $88 = {};
-          for (var $89 in v1) {
-            if ({}.hasOwnProperty.call(v1, $89)) {
-              $88[$89] = v1[$89];
+          var $92 = {};
+          for (var $93 in v1) {
+            if ({}.hasOwnProperty.call(v1, $93)) {
+              $92[$93] = v1[$93];
             }
             ;
           }
           ;
-          $88.packagePalette = v.value0;
-          return $88;
+          $92.packagePalette = v.value0;
+          return $92;
         }))(function() {
           return pure10(new Just(v.value1));
         });
@@ -14834,23 +14909,23 @@
       if (v instanceof SetOriginView) {
         return discard3(log14("[NarrativePanel] SetOriginView: " + viewLabel(v.value0)))(function() {
           return discard3(modify_4(function(v1) {
-            var $93 = {};
-            for (var $94 in v1) {
-              if ({}.hasOwnProperty.call(v1, $94)) {
-                $93[$94] = v1[$94];
+            var $97 = {};
+            for (var $98 in v1) {
+              if ({}.hasOwnProperty.call(v1, $98)) {
+                $97[$98] = v1[$98];
               }
               ;
             }
             ;
-            $93.originView = new Just(v.value0);
-            return $93;
+            $97.originView = new Just(v.value0);
+            return $97;
           }))(function() {
             return pure10(new Just(v.value1));
           });
         });
       }
       ;
-      throw new Error("Failed pattern match at Component.NarrativePanel (line 468, column 15 - line 485, column 18): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Component.NarrativePanel (line 432, column 15 - line 449, column 18): " + [v.constructor.name]);
     };
   };
   var handleAction2 = function(dictMonadAff) {
@@ -14858,20 +14933,20 @@
     return function(v) {
       if (v instanceof HandleInput) {
         return modify_4(function(v1) {
-          var $99 = {};
-          for (var $100 in v1) {
-            if ({}.hasOwnProperty.call(v1, $100)) {
-              $99[$100] = v1[$100];
+          var $103 = {};
+          for (var $104 in v1) {
+            if ({}.hasOwnProperty.call(v1, $104)) {
+              $103[$104] = v1[$104];
             }
             ;
           }
           ;
-          $99.viewState = v.value0.viewState;
-          $99.packagePalette = v.value0.packagePalette;
-          $99.projectName = v.value0.projectName;
-          $99.projectId = v.value0.projectId;
-          $99.projects = v.value0.projects;
-          return $99;
+          $103.viewState = v.value0.viewState;
+          $103.packagePalette = v.value0.packagePalette;
+          $103.projectName = v.value0.projectName;
+          $103.projectId = v.value0.projectId;
+          $103.projects = v.value0.projects;
+          return $103;
         });
       }
       ;
@@ -14896,111 +14971,41 @@
       if (v instanceof ToggleProjectDropdown) {
         return bind7(get4)(function(state3) {
           return modify_4(function(v1) {
-            var $105 = {};
-            for (var $106 in v1) {
-              if ({}.hasOwnProperty.call(v1, $106)) {
-                $105[$106] = v1[$106];
+            var $109 = {};
+            for (var $110 in v1) {
+              if ({}.hasOwnProperty.call(v1, $110)) {
+                $109[$110] = v1[$110];
               }
               ;
             }
             ;
-            $105.projectDropdownOpen = !state3.projectDropdownOpen;
-            return $105;
+            $109.projectDropdownOpen = !state3.projectDropdownOpen;
+            return $109;
           });
         });
       }
       ;
       if (v instanceof SelectProject) {
         return discard3(modify_4(function(v1) {
-          var $108 = {};
-          for (var $109 in v1) {
-            if ({}.hasOwnProperty.call(v1, $109)) {
-              $108[$109] = v1[$109];
+          var $112 = {};
+          for (var $113 in v1) {
+            if ({}.hasOwnProperty.call(v1, $113)) {
+              $112[$113] = v1[$113];
             }
             ;
           }
           ;
-          $108.projectDropdownOpen = false;
-          return $108;
+          $112.projectDropdownOpen = false;
+          return $112;
         }))(function() {
           return raise(new ProjectSelected(v.value0));
         });
       }
       ;
-      throw new Error("Failed pattern match at Component.NarrativePanel (line 433, column 16 - line 461, column 40): " + [v.constructor.name]);
-    };
-  };
-  var gridIcon = "M3 3h8v8H3V3zm0 10h8v8H3v-8zm10-10h8v8h-8V3zm0 10h8v8h-8v-8z";
-  var renderViewIcon = function(currentView) {
-    return function(thisView) {
-      var label5 = viewLabel(thisView);
-      var isActive = eq14(currentView)(thisView);
-      var iconPath = (function() {
-        if (thisView instanceof TreemapView) {
-          return gridIcon;
-        }
-        ;
-        if (thisView instanceof TreeView) {
-          return treeIcon;
-        }
-        ;
-        if (thisView instanceof ForceView) {
-          return radialIcon;
-        }
-        ;
-        if (thisView instanceof TopoView) {
-          return packagesIcon;
-        }
-        ;
-        throw new Error("Failed pattern match at Component.NarrativePanel (line 255, column 16 - line 259, column 31): " + [thisView.constructor.name]);
-      })();
-      return button([classes(append14(["view-icon"])((function() {
-        if (isActive) {
-          return ["view-icon--active"];
-        }
-        ;
-        return [];
-      })())), title(label5), onClick(function(v) {
-        return new SelectView(thisView);
-      })])([elementNS(svgNS)("svg")([attr2("viewBox")("0 0 24 24"), attr2("width")("24"), attr2("height")("24")])([elementNS(svgNS)("path")([attr2("d")(iconPath), attr2("fill")("currentColor")])([])])]);
+      throw new Error("Failed pattern match at Component.NarrativePanel (line 397, column 16 - line 425, column 40): " + [v.constructor.name]);
     };
   };
   var defaultProjectName = "psd3";
-  var chordIcon = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 2c4.42 0 8 3.58 8 8 0 1.85-.63 3.55-1.69 4.9L7.1 5.69C8.45 4.63 10.15 4 12 4zm0 16c-4.42 0-8-3.58-8-8 0-1.85.63-3.55 1.69-4.9L16.9 18.31C15.55 19.37 13.85 20 12 20z";
-  var bubblePackIcon = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-3-9c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3 6c2.21 0 4-1.79 4-4H8c0 2.21 1.79 4 4 4z";
-  var renderViewTypeToggle = function(currentViewType) {
-    return function(thisViewType) {
-      var label5 = neighborhoodViewLabel(thisViewType);
-      var isActive = eq23(currentViewType)(thisViewType);
-      var iconPath = (function() {
-        if (thisViewType instanceof BubblePackView) {
-          return bubblePackIcon;
-        }
-        ;
-        if (thisViewType instanceof ChordView) {
-          return chordIcon;
-        }
-        ;
-        if (thisViewType instanceof MatrixView) {
-          return matrixIcon;
-        }
-        ;
-        throw new Error("Failed pattern match at Component.NarrativePanel (line 179, column 16 - line 182, column 31): " + [thisViewType.constructor.name]);
-      })();
-      return button([classes(append14(["view-type-toggle"])((function() {
-        if (isActive) {
-          return ["view-type-toggle--active"];
-        }
-        ;
-        return [];
-      })())), title(label5), onClick(function(v) {
-        return new SelectNeighborhoodViewType(thisViewType);
-      })])([elementNS(svgNS)("svg")([attr2("viewBox")("0 0 24 24"), attr2("width")("20"), attr2("height")("20")])([elementNS(svgNS)("path")([attr2("d")(iconPath), attr2("fill")("currentColor")])([])])]);
-    };
-  };
-  var renderViewTypeToggles = function(currentViewType) {
-    return div3([class_("view-type-toggles")])(map28(renderViewTypeToggle(currentViewType))([BubblePackView.value, ChordView.value, MatrixView.value]));
-  };
   var backArrowIcon = "M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z";
   var renderBackButton = function(mOrigin) {
     var originLabel = (function() {
@@ -15012,7 +15017,7 @@
         return "Back";
       }
       ;
-      throw new Error("Failed pattern match at Component.NarrativePanel (line 219, column 19 - line 221, column 24): " + [mOrigin.constructor.name]);
+      throw new Error("Failed pattern match at Component.NarrativePanel (line 203, column 19 - line 205, column 24): " + [mOrigin.constructor.name]);
     })();
     return div3([class_("view-icons view-icons--back")])([button([class_("back-button"), title("Back to " + originLabel), onClick(function(v) {
       return GoBack.value;
@@ -17842,7 +17847,7 @@
     select_default2("#chord-diagram-container").selectAll("*").remove();
   };
   var splitOnDotImpl = (str) => str.split(".");
-  var renderChordDiagram_ = (width10) => (height10) => (arcs) => (ribbons) => (labels9) => () => {
+  var renderChordDiagram_ = (width11) => (height11) => (arcs) => (ribbons) => (labels9) => () => {
     clearChordSvg_();
     let container = select_default2("#chord-diagram-container");
     if (container.empty()) {
@@ -21172,7 +21177,7 @@
   var tickProgressMap2 = /* @__PURE__ */ tickProgressMap(ordInt);
   var map34 = /* @__PURE__ */ map(functorArray);
   var startProgress2 = /* @__PURE__ */ startProgress(ordInt);
-  var eq5 = /* @__PURE__ */ eq(eqNodeType);
+  var eq6 = /* @__PURE__ */ eq(eqNodeType);
   var lookup11 = /* @__PURE__ */ lookup2(ordInt);
   var append17 = /* @__PURE__ */ append(semigroupArray);
   var fromFoldable19 = /* @__PURE__ */ fromFoldable6(foldableArray)(ordInt);
@@ -21281,13 +21286,13 @@
       ;
       if (v instanceof UsedModulesOnly) {
         return filter(function(n) {
-          return eq5(n.nodeType)(ModuleNode.value) && n.isInTree;
+          return eq6(n.nodeType)(ModuleNode.value) && n.isInTree;
         })(v1);
       }
       ;
       if (v instanceof PackagesOnly) {
         return filter(function(n) {
-          return eq5(n.nodeType)(PackageNode.value);
+          return eq6(n.nodeType)(PackageNode.value);
         })(v1);
       }
       ;
@@ -22249,7 +22254,7 @@
   var fromFoldable25 = /* @__PURE__ */ fromFoldable2(foldableArray);
   var map36 = /* @__PURE__ */ map(functorArray);
   var show11 = /* @__PURE__ */ show(showInt);
-  var eq6 = /* @__PURE__ */ eq(eqNodeType);
+  var eq7 = /* @__PURE__ */ eq(eqNodeType);
   var unpinNode = function(n) {
     return {
       id: n.id,
@@ -22330,7 +22335,7 @@
     apply: pinAtCurrent
   };
   var isTreeModule = function(n) {
-    return eq6(n.nodeType)(ModuleNode.value) && n.isInTree;
+    return eq7(n.nodeType)(ModuleNode.value) && n.isInTree;
   };
   var radialTreeFormLayout = function(nodes) {
     var getPosition = function(node) {
@@ -22489,7 +22494,7 @@
     };
   })();
   var isPackage = function(n) {
-    return eq6(n.nodeType)(PackageNode.value);
+    return eq7(n.nodeType)(PackageNode.value);
   };
   var topoFormLayout = function(nodes) {
     var getPosition = function(node) {
@@ -22509,7 +22514,7 @@
     return fromFoldable25(map36(getPosition)(nodes));
   };
   var isModule = function(n) {
-    return eq6(n.nodeType)(ModuleNode.value);
+    return eq7(n.nodeType)(ModuleNode.value);
   };
   var topoFormScene = /* @__PURE__ */ (function() {
     return {
@@ -22807,7 +22812,7 @@
             })();
             var positioned = foldl10(function(acc) {
               return function(child) {
-                var height10 = child.value0.value * k;
+                var height11 = child.value0.value * k;
                 var positionedChild = new TNode({
                   data_: child.value0.data_,
                   depth: child.value0.depth,
@@ -22817,11 +22822,11 @@
                   x0,
                   x1: x13,
                   y0: acc.y,
-                  y1: acc.y + height10
+                  y1: acc.y + height11
                 });
                 return {
                   children: snoc(acc.children)(positionedChild),
-                  y: acc.y + height10
+                  y: acc.y + height11
                 };
               };
             })({
@@ -23003,7 +23008,7 @@
             })();
             var positioned = foldl10(function(acc) {
               return function(child) {
-                var width10 = child.value0.value * k;
+                var width11 = child.value0.value * k;
                 var positionedChild = new TNode({
                   data_: child.value0.data_,
                   depth: child.value0.depth,
@@ -23011,13 +23016,13 @@
                   value: child.value0.value,
                   children: child.value0.children,
                   x0: acc.x,
-                  x1: acc.x + width10,
+                  x1: acc.x + width11,
                   y0,
                   y1: y13
                 });
                 return {
                   children: snoc(acc.children)(positionedChild),
-                  x: acc.x + width10
+                  x: acc.x + width11
                 };
               };
             })({
@@ -23449,7 +23454,7 @@
       return toAttr1(value13)("viewBox");
     };
   };
-  var width2 = function(dictToAttr) {
+  var width3 = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
     return function(value13) {
       return toAttr1(value13)("width");
@@ -23533,7 +23538,7 @@
       return toAttr1(value13)("id");
     };
   };
-  var height2 = function(dictToAttr) {
+  var height3 = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
     return function(value13) {
       return toAttr1(value13)("height");
@@ -23905,7 +23910,7 @@
   var unsafeIndex2 = /* @__PURE__ */ unsafeIndex();
   var foldlWithIndex2 = /* @__PURE__ */ foldlWithIndex(foldableWithIndexArray);
   var computeJoinWithKey = function(dictEq) {
-    var eq8 = eq(dictEq);
+    var eq9 = eq(dictEq);
     return function(newData) {
       return function(oldBindings) {
         return function(keyFn) {
@@ -23914,7 +23919,7 @@
               return function(datum2) {
                 var newKey = keyFn(datum2);
                 var v = findIndex(function(v1) {
-                  return eq8(keyFn(v1.datum))(newKey);
+                  return eq9(keyFn(v1.datum))(newKey);
                 })(state3.remainingOld);
                 if (v instanceof Nothing) {
                   var enterBinding = {
@@ -23966,14 +23971,14 @@
     };
   };
   var computeJoin = function(dictEq) {
-    var eq8 = eq(dictEq);
+    var eq9 = eq(dictEq);
     return function(newData) {
       return function(oldBindings) {
         var processNewDatum = function(newIndex) {
           return function(state3) {
             return function(datum2) {
               var v = findIndex(function(v1) {
-                return eq8(v1.datum)(datum2);
+                return eq9(v1.datum)(datum2);
               })(state3.remainingOld);
               if (v instanceof Nothing) {
                 var enterBinding = {
@@ -27080,8 +27085,8 @@
   var appendData4 = /* @__PURE__ */ appendData(selectionMD3v2Selection_D)(foldableArray);
   var x5 = /* @__PURE__ */ x4(toAttrNumberFunctionNumbe);
   var y5 = /* @__PURE__ */ y4(toAttrNumberFunctionNumbe);
-  var width9 = /* @__PURE__ */ width2(toAttrNumberFunctionNumbe);
-  var height9 = /* @__PURE__ */ height2(toAttrNumberFunctionNumbe);
+  var width10 = /* @__PURE__ */ width3(toAttrNumberFunctionNumbe);
+  var height10 = /* @__PURE__ */ height3(toAttrNumberFunctionNumbe);
   var fill2 = /* @__PURE__ */ fill(toAttrStringString);
   var stroke2 = /* @__PURE__ */ stroke(toAttrStringString);
   var strokeWidth2 = /* @__PURE__ */ strokeWidth(toAttrNumberNumber);
@@ -27097,7 +27102,7 @@
   var textContent3 = /* @__PURE__ */ textContent(toAttrStringFunctionStrin);
   var pure16 = /* @__PURE__ */ pure(applicativeD3v2M);
   var log1 = /* @__PURE__ */ log3(monadEffectEffect);
-  var eq7 = /* @__PURE__ */ eq(eqNodeType);
+  var eq8 = /* @__PURE__ */ eq(eqNodeType);
   var fromFoldable26 = /* @__PURE__ */ fromFoldable2(foldableArray);
   var foldl11 = /* @__PURE__ */ foldl(foldableArray);
   var map42 = /* @__PURE__ */ map(functorArray);
@@ -27216,9 +27221,9 @@
           return v.x0;
         }), y5(function(v) {
           return v.y0;
-        }), width9(function(n) {
+        }), width10(function(n) {
           return n.x1 - n.x0;
-        }), height9(function(n) {
+        }), height10(function(n) {
           return n.y1 - n.y0;
         }), fill2("none"), stroke2("rgba(255, 255, 255, 0.15)"), strokeWidth2(1), opacity2(1), class_3("watermark-package")])(innerGroup))(function() {
           return discard1(log11("[Treemap] Rendering watermark labels for " + (show18(length(packageNodes)) + " packages")))(function() {
@@ -27279,7 +27284,7 @@
   };
   var buildTreemapData = function(nodes) {
     var packages = filter(function(n) {
-      return eq7(n.nodeType)(PackageNode.value);
+      return eq8(n.nodeType)(PackageNode.value);
     })(nodes);
     var packageIndexMap = fromFoldable26(mapWithIndex2(function(idx) {
       return function(pkg) {
@@ -27287,7 +27292,7 @@
       };
     })(packages));
     var modules = filter(function(n) {
-      return eq7(n.nodeType)(ModuleNode.value);
+      return eq8(n.nodeType)(ModuleNode.value);
     })(nodes);
     var mkModuleNode2 = function(pkgIdx) {
       return function(mod6) {
@@ -27372,7 +27377,7 @@
   var recalculateTreemapPositions = function(nodes) {
     var posMap = computeTreemapPositions(nodes);
     var packages = filter(function(n) {
-      return eq7(n.nodeType)(PackageNode.value);
+      return eq8(n.nodeType)(PackageNode.value);
     })(nodes);
     var clusterMap = fromFoldable26(map42(function(p2) {
       return new Tuple(show18(p2.id), p2.name);
@@ -27521,8 +27526,8 @@
         var swizzle = function(i2) {
           return function(link4) {
             var tgt = unsafeArrayIndex(nodes)(link4.target);
-            var src9 = unsafeArrayIndex(nodes)(link4.source);
-            return transform4(src9)(tgt)(i2)(link4);
+            var src10 = unsafeArrayIndex(nodes)(link4.source);
+            return transform4(src10)(tgt)(i2)(link4);
           };
         };
         return mapWithIndex2(swizzle)(links);
@@ -28147,12 +28152,12 @@
       var treeLinks = filter(isTreeLink)(links);
       return function __do10() {
         log12("[Explorer] Rendering " + (show110(length(treeLinks)) + " force links"))();
-        var swizzled = swizzleLinks(nodes)(treeLinks)(function(src9) {
+        var swizzled = swizzleLinks(nodes)(treeLinks)(function(src10) {
           return function(tgt) {
             return function(_i) {
               return function(link4) {
                 return {
-                  source: src9,
+                  source: src10,
                   target: tgt,
                   linkType: link4.linkType
                 };
@@ -28308,12 +28313,12 @@
       log12("[Explorer] Rendering " + (show110(length(neighborhoodLinks)) + " neighborhood links"))();
       var swizzled = swizzleLinksByIndex(function(v) {
         return v.id;
-      })(nodes)(neighborhoodLinks)(function(src9) {
+      })(nodes)(neighborhoodLinks)(function(src10) {
         return function(tgt) {
           return function(_i) {
             return function(link4) {
               return {
-                source: src9,
+                source: src10,
                 target: tgt,
                 linkType: link4.linkType
               };
@@ -28512,7 +28517,7 @@
       };
     }
   };
-  var eq24 = /* @__PURE__ */ eq(eqSceneId);
+  var eq23 = /* @__PURE__ */ eq(eqSceneId);
   var clearElement2 = function(element3) {
     var clearNode = function(node) {
       return function __do10() {
@@ -28889,7 +28894,7 @@
     return function(stateRef) {
       var scene = sceneConfigFor(sceneId);
       return function __do10() {
-        when5(eq24(sceneId)(TreemapForm.value))(function __do11() {
+        when5(eq23(sceneId)(TreemapForm.value))(function __do11() {
           var state3 = read(stateRef)();
           var nodes = getNodes(state3.simulation)();
           clearTreeLinks();
@@ -28897,19 +28902,19 @@
           clearLinksGroupId(stateRef)();
           return setTreeSceneClass(false)();
         })();
-        when5(eq24(sceneId)(TreeForm.value))(function __do11() {
+        when5(eq23(sceneId)(TreeForm.value))(function __do11() {
           var state3 = read(stateRef)();
           var nodes = getNodes(state3.simulation)();
           clearTreeLinks();
           renderTreeLinks(nodes)();
           return setTreeSceneClass(true)();
         })();
-        when5(eq24(sceneId)(RadialTreeForm.value))(function __do11() {
+        when5(eq23(sceneId)(RadialTreeForm.value))(function __do11() {
           clearTreeLinks();
           clearLinksGroupId(stateRef)();
           return setTreeSceneClass(true)();
         })();
-        when5(eq24(sceneId)(TreeRun.value))(function __do11() {
+        when5(eq23(sceneId)(TreeRun.value))(function __do11() {
           var state3 = read(stateRef)();
           var nodes = getNodes(state3.simulation)();
           var links = read(globalLinksRef)();
@@ -28919,7 +28924,7 @@
           setLinksGroupId(forceLinksGroupId)(stateRef)();
           return setTreeSceneClass(true)();
         })();
-        when5(eq24(sceneId)(TopoForm.value))(function __do11() {
+        when5(eq23(sceneId)(TopoForm.value))(function __do11() {
           clearTreeLinks();
           clearLinksGroupId(stateRef)();
           return setTreeSceneClass(false)();

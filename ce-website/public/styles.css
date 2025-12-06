@@ -714,6 +714,45 @@ line.fn-highlight-dimmed {
   font-weight: normal;
 }
 
+/* =============================================================================
+   View Icons (Overview Navigation)
+   ============================================================================= */
+
+.view-icons {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.view-icon {
+  width: 54px;
+  height: 54px;
+  padding: 2px;
+  border: 1px solid var(--color-line);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.view-icon:hover {
+  background: var(--color-beige-light);
+  border-color: var(--color-text-dark);
+}
+
+.view-icon--active {
+  border-color: var(--color-teal);
+  border-width: 2px;
+}
+
+.view-icon-img {
+  display: block;
+  border-radius: 2px;
+  object-fit: cover;
+}
+
 .narrative-project-wrapper {
   position: relative;
   width: 100%;
@@ -1172,9 +1211,9 @@ line.fn-highlight-dimmed {
 }
 
 .view-type-toggle {
-  width: 32px;
-  height: 32px;
-  padding: 4px;
+  width: 42px;
+  height: 42px;
+  padding: 2px;
   border: 1px solid var(--color-line);
   background: transparent;
   cursor: pointer;
@@ -1214,6 +1253,17 @@ line.fn-highlight-dimmed {
   stroke: var(--color-text-dark);
   fill: none;
   stroke-width: 1.5;
+}
+
+/* Image-based toggle icons */
+.view-type-toggle-img {
+  display: block;
+  border-radius: 2px;
+  object-fit: cover;
+}
+
+.view-type-toggle--active .view-type-toggle-img {
+  box-shadow: 0 0 0 2px var(--color-teal);
 }
 
 /* =============================================================================
