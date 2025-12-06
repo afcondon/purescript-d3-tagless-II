@@ -10,8 +10,14 @@ module Engine.BubblePack
   , ModulePackData
   , highlightCallGraph
   , clearCallGraphHighlight
+  , drawFunctionEdges
+  , clearFunctionEdges
+  , drawModuleEdges
+  , highlightModuleCallGraph
+  , ModuleEdge
   , DeclarationClickCallback
   , DeclarationHoverCallback
+  , ModuleHoverCallback
   ) where
 
 import Prelude
@@ -34,6 +40,10 @@ type DeclarationClickCallback = String -> String -> String -> Effect Unit
 -- | Parameters: moduleName -> declarationName -> kind -> Effect Unit
 type DeclarationHoverCallback = String -> String -> String -> Effect Unit
 
+-- | Callback type for module (outer circle) hover
+-- | Parameters: moduleName -> Effect Unit
+type ModuleHoverCallback = String -> Effect Unit
+
 -- | FFI for rendering bubble pack with proper data binding
 foreign import renderBoundBubblePack_
   :: String -- Container selector
@@ -44,13 +54,43 @@ foreign import renderBoundBubblePack_
   -> DeclarationClickCallback -- On declaration click (module, declaration, kind) -> Effect Unit
   -> DeclarationHoverCallback -- On declaration hover (module, declaration, kind) -> Effect Unit
   -> Effect Unit -- On declaration leave -> Effect Unit
+  -> ModuleHoverCallback -- On module hover (moduleName) -> Effect Unit
   -> Effect Unit
 
--- | FFI for highlighting call graph modules
+-- | FFI for highlighting call graph at function level
+-- | Parameters are now full qualified names like "Module.funcName"
 foreign import highlightCallGraph_
-  :: String -- Source module
-  -> Array String -- Caller modules
-  -> Array String -- Callee modules
+  :: String -- Source function (e.g. "Module.func")
+  -> Array String -- Caller functions (e.g. ["Caller.fn1", "Caller.fn2"])
+  -> Array String -- Callee functions (e.g. ["Called.fn1"])
+  -> Effect Unit
+
+-- | FFI for drawing temporary edges between function circles
+foreign import drawFunctionEdges_
+  :: String -- Source function
+  -> Array String -- Caller functions
+  -> Array String -- Callee functions
+  -> Effect Unit
+
+-- | FFI for clearing function edges
+foreign import clearFunctionEdges_ :: Effect Unit
+
+-- | Edge type for module-level highlighting
+type ModuleEdge =
+  { source :: String     -- "Module.func"
+  , target :: String     -- "Module.func"
+  , isOutgoing :: Boolean -- true if source module calls target
+  }
+
+-- | FFI for drawing all edges from a module at once
+foreign import drawModuleEdges_ :: Array ModuleEdge -> Effect Unit
+
+-- | FFI for highlighting all functions in a module
+foreign import highlightModuleCallGraph_
+  :: String -- Module name
+  -> Array String -- Functions in the hovered module
+  -> Array String -- Caller functions (from other modules)
+  -> Array String -- Callee functions (in other modules)
   -> Effect Unit
 
 -- | FFI for clearing call graph highlights
@@ -168,9 +208,29 @@ noOpHoverCallback _ _ _ = pure unit
 noOpLeaveCallback :: Effect Unit
 noOpLeaveCallback = pure unit
 
--- | Highlight modules based on call graph relationships
+noOpModuleHoverCallback :: ModuleHoverCallback
+noOpModuleHoverCallback _ = pure unit
+
+-- | Highlight individual function circles based on call graph relationships
+-- | Takes full qualified names like "Module.funcName"
 highlightCallGraph :: String -> Array String -> Array String -> Effect Unit
 highlightCallGraph = highlightCallGraph_
+
+-- | Draw temporary edges between function circles
+drawFunctionEdges :: String -> Array String -> Array String -> Effect Unit
+drawFunctionEdges = drawFunctionEdges_
+
+-- | Clear function edges
+clearFunctionEdges :: Effect Unit
+clearFunctionEdges = clearFunctionEdges_
+
+-- | Draw all edges from a module at once
+drawModuleEdges :: Array ModuleEdge -> Effect Unit
+drawModuleEdges = drawModuleEdges_
+
+-- | Highlight all functions in a module and their connections
+highlightModuleCallGraph :: String -> Array String -> Array String -> Array String -> Effect Unit
+highlightModuleCallGraph = highlightModuleCallGraph_
 
 -- | Clear call graph highlighting
 clearCallGraphHighlight :: Effect Unit
@@ -180,7 +240,7 @@ clearCallGraphHighlight = clearCallGraphHighlight_
 -- | Returns the pack's radius for layout purposes
 renderModulePack :: DeclarationsMap -> SimNode -> Effect Number
 renderModulePack declarationsMap node =
-  renderModulePackWithCallbacks declarationsMap noOpClickCallback noOpHoverCallback noOpLeaveCallback node
+  renderModulePackWithCallbacks declarationsMap noOpClickCallback noOpHoverCallback noOpLeaveCallback noOpModuleHoverCallback node
 
 -- | Render a module as a bubble pack with click and hover handlers
 -- | Returns the pack's radius for layout purposes
@@ -189,9 +249,10 @@ renderModulePackWithCallbacks
   -> DeclarationClickCallback
   -> DeclarationHoverCallback
   -> Effect Unit -- onLeave callback
+  -> ModuleHoverCallback -- onModuleHover callback
   -> SimNode
   -> Effect Number
-renderModulePackWithCallbacks declarationsMap onDeclClick onDeclHover onDeclLeave node = do
+renderModulePackWithCallbacks declarationsMap onDeclClick onDeclHover onDeclLeave onModuleHover node = do
   let moduleName = node.name
   let decls = fromMaybe [] $ Object.lookup moduleName declarationsMap
 
@@ -231,8 +292,8 @@ renderModulePackWithCallbacks declarationsMap onDeclClick onDeclHover onDeclLeav
     -- Center offset for positioning circles relative to group origin
     let centerOffset = packSize / 2.0
 
-    -- Render using FFI with proper data binding, click, and hover callbacks
-    renderBoundBubblePack_ "#explorer-nodes" node packCircles centerOffset getPackFillEffect onDeclClick onDeclHover onDeclLeave
+    -- Render using FFI with proper data binding, click, hover, and module hover callbacks
+    renderBoundBubblePack_ "#explorer-nodes" node packCircles centerOffset getPackFillEffect onDeclClick onDeclHover onDeclLeave onModuleHover
 
     -- Return the pack's radius
     let PackNode rootData = packed

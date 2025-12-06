@@ -37,7 +37,7 @@ import Effect.Ref as Ref
 import Effect.Unsafe (unsafePerformEffect)
 import Foreign.Object as Object
 import Data.Loader (loadModel, loadModelForProject, LoadedModel, DeclarationsMap, FunctionCallsMap, fetchBatchDeclarations, fetchBatchFunctionCalls)
-import Engine.BubblePack (renderModulePackWithCallbacks, highlightCallGraph, clearCallGraphHighlight, DeclarationClickCallback, DeclarationHoverCallback)
+import Engine.BubblePack (renderModulePackWithCallbacks, highlightCallGraph, clearCallGraphHighlight, drawFunctionEdges, clearFunctionEdges, drawModuleEdges, highlightModuleCallGraph, ModuleEdge, DeclarationClickCallback, DeclarationHoverCallback)
 -- CallGraphPopup is now a Halogen component (Component.CallGraphPopup)
 -- NarrativePanel is now a Halogen component (Component.NarrativePanel)
 -- It polls globalViewStateRef and globalModelInfoRef directly
@@ -1237,7 +1237,7 @@ focusOnNeighborhood nodes sim = do
     -- Render bubble packs with fetched declarations
     liftEffect do
       for_ liveNodes \node -> do
-        _ <- renderModulePackWithCallbacks declarations onDeclarationClick onDeclarationHover onDeclarationLeave node
+        _ <- renderModulePackWithCallbacks declarations onDeclarationClick onDeclarationHover onDeclarationLeave onModuleHover node
         pure unit
 
       -- Color legend is now handled by Halogen NarrativePanel (switches to declaration types automatically)
@@ -1627,20 +1627,24 @@ onDeclarationClick moduleName declarationName kind = do
   notifyShowCallGraphPopup moduleName declarationName
 
 -- | Handle hover on a declaration circle
--- | Highlights modules that contain callers/callees
+-- | Highlights individual function circles based on call graph
 onDeclarationHover :: DeclarationHoverCallback
 onDeclarationHover moduleName declarationName _kind = do
   -- Look up function calls for this declaration
   fnCalls <- Ref.read globalFunctionCallsRef
-  let key = moduleName <> "." <> declarationName
-  case Object.lookup key fnCalls of
+  let sourceFunc = moduleName <> "." <> declarationName
+  case Object.lookup sourceFunc fnCalls of
     Nothing -> pure unit -- No call data, no highlighting
     Just fnInfo -> do
-      -- Extract unique module names from calls and calledBy
-      let calleeModules = Array.nub $ map _.targetModule fnInfo.calls
-      let callerModules = Array.nub $ Array.mapMaybe extractModuleName fnInfo.calledBy
-      -- Highlight the modules
-      highlightCallGraph moduleName callerModules calleeModules
+      -- Build full "Module.funcName" strings for callers and callees
+      -- fnInfo.calls contains { target, targetModule, ... } - build "targetModule.target"
+      let calleeFuncs = map (\c -> c.targetModule <> "." <> c.target) fnInfo.calls
+      -- fnInfo.calledBy is already in "Module.funcName" format
+      let callerFuncs = fnInfo.calledBy
+      -- Highlight individual function circles
+      highlightCallGraph sourceFunc callerFuncs calleeFuncs
+      -- Draw edges between function circles
+      drawFunctionEdges sourceFunc callerFuncs calleeFuncs
 
 -- Hover hint could be added via a globalHintRef if needed
 
@@ -1648,6 +1652,72 @@ onDeclarationHover moduleName declarationName _kind = do
 onDeclarationLeave :: Effect Unit
 onDeclarationLeave = do
   clearCallGraphHighlight
+  clearFunctionEdges
+
+-- | Handle hover on a module (the outer circle)
+-- | Shows all function-to-function edges for the entire module
+onModuleHover :: String -> Effect Unit
+onModuleHover moduleName = do
+  fnCalls <- Ref.read globalFunctionCallsRef
+  -- Find all functions in this module from the function calls map
+  let allFuncs = Object.keys fnCalls
+  let moduleFuncs = Array.filter (startsWith (moduleName <> ".")) allFuncs
+
+  -- Build edges and collect caller/callee info
+  let { edges, callerFuncs, calleeFuncs } = buildModuleEdgesAndFuncs moduleName moduleFuncs fnCalls
+
+  -- Apply highlighting
+  highlightModuleCallGraph moduleName moduleFuncs callerFuncs calleeFuncs
+  -- Draw all edges
+  drawModuleEdges edges
+
+-- | Build all edges for a module and collect callers/callees
+buildModuleEdgesAndFuncs
+  :: String
+  -> Array String
+  -> FunctionCallsMap
+  -> { edges :: Array ModuleEdge, callerFuncs :: Array String, calleeFuncs :: Array String }
+buildModuleEdgesAndFuncs moduleName moduleFuncs fnCalls =
+  let
+    -- Process each function in the module
+    processFunc :: String -> { edges :: Array ModuleEdge, callers :: Array String, callees :: Array String }
+    processFunc funcKey = case Object.lookup funcKey fnCalls of
+      Nothing -> { edges: [], callers: [], callees: [] }
+      Just fnInfo ->
+        let
+          -- Outgoing edges (this function calls others)
+          outEdges = map (\c ->
+            { source: funcKey
+            , target: c.targetModule <> "." <> c.target
+            , isOutgoing: true
+            }) fnInfo.calls
+          -- Incoming edges (others call this function)
+          inEdges = map (\caller ->
+            { source: caller
+            , target: funcKey
+            , isOutgoing: false
+            }) fnInfo.calledBy
+          -- Collect callee and caller function names
+          calleeNames = map (\c -> c.targetModule <> "." <> c.target) fnInfo.calls
+          callerNames = fnInfo.calledBy
+        in
+          { edges: outEdges <> inEdges, callers: callerNames, callees: calleeNames }
+
+    results = map processFunc moduleFuncs
+    allEdges = Array.concatMap _.edges results
+    allCallers = Array.nub $ Array.concatMap _.callers results
+    allCallees = Array.nub $ Array.concatMap _.callees results
+    -- Filter out self-module references for callers/callees (they're already in moduleFuncs)
+    externalCallers = Array.filter (not <<< startsWith (moduleName <> ".")) allCallers
+    externalCallees = Array.filter (not <<< startsWith (moduleName <> ".")) allCallees
+  in
+    { edges: allEdges, callerFuncs: externalCallers, calleeFuncs: externalCallees }
+
+-- | Helper: check if string starts with prefix
+startsWith :: String -> String -> Boolean
+startsWith prefix str = substringFFI 0 (stringLengthFFI prefix) str == prefix
+
+foreign import stringLengthFFI :: String -> Int
 
 -- | Extract module name from "Module.name" string
 extractModuleName :: String -> Maybe String

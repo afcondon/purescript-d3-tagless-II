@@ -7,3 +7,5 @@ export const charAtFFI = (idx) => (str) => {
 export const substringFFI = (start) => (end) => (str) => {
   return str.substring(start, end);
 };
+
+export const stringLengthFFI = (str) => str.length;
