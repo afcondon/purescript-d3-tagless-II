@@ -40,6 +40,7 @@ import Foreign.Object as Object
 import Data.Loader (loadModel, loadModelForProject, LoadedModel, DeclarationsMap, FunctionCallsMap, fetchBatchDeclarations, fetchBatchFunctionCalls)
 import Engine.BubblePack (renderModulePackWithCallbacks, highlightCallGraph, clearCallGraphHighlight, drawFunctionEdges, clearFunctionEdges, drawModuleEdges, highlightModuleCallGraph, ModuleEdge, DeclarationClickCallback, DeclarationHoverCallback, clearBubblePacks)
 import Engine.ChordDiagram (renderNeighborhoodChord, clearChordDiagram)
+import Engine.AdjacencyMatrix (renderNeighborhoodMatrix, clearAdjacencyMatrix)
 -- CallGraphPopup is now a Halogen component (Component.CallGraphPopup)
 -- NarrativePanel is now a Halogen component (Component.NarrativePanel)
 -- It polls globalViewStateRef and globalModelInfoRef directly
@@ -1788,6 +1789,7 @@ setNeighborhoodViewType newViewType = do
           -- Clear current view-specific elements
           clearBubblePacks
           clearChordDiagram
+          clearAdjacencyMatrix
           clearTreeLinks
 
           -- Update view state
@@ -1804,9 +1806,8 @@ setNeighborhoodViewType newViewType = do
               -- Render chord diagram
               renderNeighborhoodChord moduleName nodes ViewBox.viewBoxWidth ViewBox.viewBoxHeight
             MatrixView -> do
-              -- Matrix view will be implemented later
-              log "[Explorer] Matrix view not yet implemented"
-              pure unit
+              -- Render adjacency matrix
+              renderNeighborhoodMatrix moduleName nodes ViewBox.viewBoxWidth ViewBox.viewBoxHeight
 
 -- | Render bubble pack view for neighborhood
 -- | This is a simplified version of focusOnNeighborhood for view switching
