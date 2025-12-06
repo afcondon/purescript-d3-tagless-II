@@ -417,3 +417,8 @@ export const renderBoundBubblePack_ = (containerSelector) => (node) => (packCirc
       }
     });
 };
+
+// Clear all bubble packs (module-pack groups) from the DOM
+export const clearBubblePacks_ = () => {
+  select("#explorer-nodes").selectAll("g.module-pack").remove();
+};

@@ -11,6 +11,7 @@ module Engine.Explorer
   , SceneId(..)  -- Export ADT and constructors for type-safe scene selection
   , reloadWithProject
   , setViewState  -- Public API for changing view state
+  , setNeighborhoodViewType  -- Switch between Bubbles/Chord/Matrix in neighborhood view
   , navigateBack
   , getOriginView  -- Get the origin view for back navigation
   , updateNodeColors
@@ -37,11 +38,12 @@ import Effect.Ref as Ref
 import Effect.Unsafe (unsafePerformEffect)
 import Foreign.Object as Object
 import Data.Loader (loadModel, loadModelForProject, LoadedModel, DeclarationsMap, FunctionCallsMap, fetchBatchDeclarations, fetchBatchFunctionCalls)
-import Engine.BubblePack (renderModulePackWithCallbacks, highlightCallGraph, clearCallGraphHighlight, drawFunctionEdges, clearFunctionEdges, drawModuleEdges, highlightModuleCallGraph, ModuleEdge, DeclarationClickCallback, DeclarationHoverCallback)
+import Engine.BubblePack (renderModulePackWithCallbacks, highlightCallGraph, clearCallGraphHighlight, drawFunctionEdges, clearFunctionEdges, drawModuleEdges, highlightModuleCallGraph, ModuleEdge, DeclarationClickCallback, DeclarationHoverCallback, clearBubblePacks)
+import Engine.ChordDiagram (renderNeighborhoodChord, clearChordDiagram)
 -- CallGraphPopup is now a Halogen component (Component.CallGraphPopup)
 -- NarrativePanel is now a Halogen component (Component.NarrativePanel)
 -- It polls globalViewStateRef and globalModelInfoRef directly
-import Engine.ViewState (ViewState(..), OverviewView(..), DetailView(..))
+import Engine.ViewState (ViewState(..), OverviewView(..), DetailView(..), NeighborhoodViewType(..), getNeighborhoodModule, neighborhoodViewLabel)
 import Engine.ViewTransition as VT
 import Data.ColorPalette (getNodeStroke, getNodeFill) as ColorPalette
 import Engine.Treemap (recalculateTreemapPositions, renderWatermark, clearWatermark)
@@ -1113,7 +1115,7 @@ showViewState (Overview TreemapView) = "Overview(Treemap)"
 showViewState (Overview TreeView) = "Overview(Tree)"
 showViewState (Overview ForceView) = "Overview(Force)"
 showViewState (Overview TopoView) = "Overview(Topo)"
-showViewState (Detail (NeighborhoodDetail name)) = "Detail(Neighborhood:" <> name <> ")"
+showViewState (Detail (NeighborhoodDetail name _)) = "Detail(Neighborhood:" <> name <> ")"
 showViewState (Detail (FunctionCallsDetail name)) = "Detail(FunctionCalls:" <> name <> ")"
 
 -- | Toggle focus on a node's neighborhood
@@ -1168,7 +1170,7 @@ toggleFocus clickedNode = do
           Ref.modify_ (Array.cons currentView) globalNavigationStackRef
 
           -- Update ViewState for neighborhood view and notify via callback
-          let neighborhoodView = Detail (NeighborhoodDetail clickedNode.name)
+          let neighborhoodView = Detail (NeighborhoodDetail clickedNode.name BubblePackView)
           Ref.write neighborhoodView globalViewStateRef
           notifyViewStateChanged neighborhoodView
 
@@ -1758,3 +1760,75 @@ extractModuleName fullName =
 
 foreign import charAtFFI :: Int -> String -> String
 foreign import substringFFI :: Int -> Int -> String -> String
+
+-- =============================================================================
+-- Neighborhood View Type Switching
+-- =============================================================================
+
+-- | Switch between neighborhood view types (Bubbles, Chord, Matrix)
+-- | This only works when already in a NeighborhoodDetail view
+setNeighborhoodViewType :: NeighborhoodViewType -> Effect Unit
+setNeighborhoodViewType newViewType = do
+  currentView <- Ref.read globalViewStateRef
+  case getNeighborhoodModule currentView of
+    Nothing -> do
+      log "[Explorer] setNeighborhoodViewType called but not in neighborhood view"
+      pure unit
+    Just moduleName -> do
+      log $ "[Explorer] Switching neighborhood view to: " <> neighborhoodViewLabel newViewType
+
+      -- Get current nodes from simulation
+      mStateRef <- Ref.read globalStateRef
+      case mStateRef of
+        Nothing -> log "[Explorer] No state ref available"
+        Just stateRef -> do
+          state <- Ref.read stateRef
+          nodes <- Sim.getNodes state.simulation
+
+          -- Clear current view-specific elements
+          clearBubblePacks
+          clearChordDiagram
+          clearTreeLinks
+
+          -- Update view state
+          let newView = Detail (NeighborhoodDetail moduleName newViewType)
+          Ref.write newView globalViewStateRef
+          notifyViewStateChanged newView
+
+          -- Render the new view type
+          case newViewType of
+            BubblePackView -> do
+              -- Re-render bubble packs (similar to focusOnNeighborhood)
+              renderBubblePackView nodes
+            ChordView -> do
+              -- Render chord diagram
+              renderNeighborhoodChord moduleName nodes ViewBox.viewBoxWidth ViewBox.viewBoxHeight
+            MatrixView -> do
+              -- Matrix view will be implemented later
+              log "[Explorer] Matrix view not yet implemented"
+              pure unit
+
+-- | Render bubble pack view for neighborhood
+-- | This is a simplified version of focusOnNeighborhood for view switching
+renderBubblePackView :: Array SimNode -> Effect Unit
+renderBubblePackView nodes = do
+  declarations <- Ref.read globalDeclarationsRef
+  for_ nodes \node -> do
+    _ <- renderModulePackWithCallbacks declarations onDeclarationClick onDeclarationHover onDeclarationLeave onModuleHover node
+    pure unit
+
+  -- Attach drag behavior
+  packElements <- runD3v2M do
+    nodesContainer <- select "#explorer-nodes"
+    packGroups <- selectAll "g.module-pack" nodesContainer
+    pure $ D3v2.getElementsD3v2 packGroups
+
+  mStateRef <- Ref.read globalStateRef
+  case mStateRef of
+    Just stateRef -> do
+      state <- Ref.read stateRef
+      Core.attachGroupDragWithReheat packElements "#explorer-zoom-group" (Sim.reheat state.simulation)
+    Nothing -> pure unit
+
+  -- Render neighborhood links
+  renderNeighborhoodLinks nodes

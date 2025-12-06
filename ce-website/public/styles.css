@@ -1158,3 +1158,105 @@ line.fn-highlight-dimmed {
 .call-graph-error {
   color: var(--color-red-accent);
 }
+
+/* =============================================================================
+   Neighborhood View Type Toggles
+   ============================================================================= */
+
+.view-type-toggles {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-line);
+}
+
+.view-type-toggle {
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+  border: 1px solid var(--color-line);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.view-type-toggle:hover {
+  background: var(--color-beige-light);
+  border-color: var(--color-text-dark);
+}
+
+.view-type-toggle--active {
+  background: var(--color-teal);
+  border-color: var(--color-teal);
+}
+
+.view-type-toggle--active svg path,
+.view-type-toggle--active svg circle,
+.view-type-toggle--active svg line,
+.view-type-toggle--active svg rect {
+  stroke: white;
+  fill: none;
+}
+
+.view-type-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+.view-type-toggle svg path,
+.view-type-toggle svg circle,
+.view-type-toggle svg line,
+.view-type-toggle svg rect {
+  stroke: var(--color-text-dark);
+  fill: none;
+  stroke-width: 1.5;
+}
+
+/* =============================================================================
+   Chord Diagram Styles
+   ============================================================================= */
+
+#chord-diagram {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+#chord-diagram svg {
+  width: 100%;
+  height: 100%;
+}
+
+.chord-arc {
+  pointer-events: all;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.chord-arc:hover {
+  opacity: 0.8;
+}
+
+.chord-ribbon {
+  fill-opacity: 0.6;
+  stroke: none;
+  transition: fill-opacity var(--transition-fast);
+}
+
+.chord-ribbon:hover {
+  fill-opacity: 0.9;
+}
+
+.chord-label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  fill: var(--color-blueprint-light);
+  pointer-events: none;
+}

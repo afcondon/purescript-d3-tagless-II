@@ -216,6 +216,11 @@ handleAction = case _ of
           Just project -> handleAction (SwitchProject newProjectId project.name)
           Nothing -> log $ "[SpagoGridApp] Unknown project ID: " <> show newProjectId
 
+      -- User clicked a neighborhood view type toggle (Bubbles/Chord/Matrix)
+      NarrativePanel.NeighborhoodViewTypeSelected viewType -> do
+        log $ "[SpagoGridApp] Neighborhood view type selected: " <> show viewType
+        liftEffect $ Explorer.setNeighborhoodViewType viewType
+
   CallGraphPopupOutput output ->
     case output of
       CallGraphPopup.PopupClosed ->

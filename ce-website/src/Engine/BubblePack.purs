@@ -14,6 +14,7 @@ module Engine.BubblePack
   , clearFunctionEdges
   , drawModuleEdges
   , highlightModuleCallGraph
+  , clearBubblePacks
   , ModuleEdge
   , DeclarationClickCallback
   , DeclarationHoverCallback
@@ -107,6 +108,13 @@ foreign import renderReexportModule_
 renderReexportModule :: SimNode -> Boolean -> Effect Unit
 renderReexportModule node isReexport =
   renderReexportModule_ "#explorer-nodes" node isReexport
+
+-- | FFI for clearing all bubble packs
+foreign import clearBubblePacks_ :: Effect Unit
+
+-- | Clear all bubble packs from the DOM
+clearBubblePacks :: Effect Unit
+clearBubblePacks = clearBubblePacks_
 
 -- | Flat pack circle data for FFI
 type PackCircle =

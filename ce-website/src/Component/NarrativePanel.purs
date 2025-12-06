@@ -24,7 +24,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Types (Namespace(..), ElemName(..))
-import Engine.ViewState (ViewState(..), OverviewView(..), DetailView(..), viewLabel, viewDescription, getBaseOverview)
+import Engine.ViewState (ViewState(..), OverviewView(..), DetailView(..), NeighborhoodViewType(..), viewLabel, viewDescription, getBaseOverview, neighborhoodViewLabel, getNeighborhoodViewType)
 
 -- =============================================================================
 -- Types
@@ -68,6 +68,7 @@ type State =
 data Action
   = HandleInput Input
   | SelectView OverviewView  -- Click on an icon to change view
+  | SelectNeighborhoodViewType NeighborhoodViewType  -- Click on view type toggle in neighborhood
   | GoBack                   -- Click the back button in detail view
   | ToggleProjectDropdown
   | SelectProject Int -- Project ID selected
@@ -82,6 +83,7 @@ data Query a
 -- | Output messages to parent
 data Output
   = ViewSelected OverviewView  -- User clicked an icon
+  | NeighborhoodViewTypeSelected NeighborhoodViewType  -- User clicked view type toggle
   | BackRequested              -- User clicked the back button
   | ProjectSelected Int -- Project ID selected
 
@@ -143,10 +145,16 @@ render state =
     , renderProjectSelector state
     ]
 
--- | Render view icons OR back button depending on view state
+-- | Render view icons OR back button + view type toggles depending on view state
 renderViewIcons :: forall m. State -> H.ComponentHTML Action () m
 renderViewIcons state =
   case state.viewState of
+    Detail (NeighborhoodDetail _ viewType) ->
+      -- In neighborhood detail: show back button + view type toggles
+      HH.div [ HP.class_ (HH.ClassName "view-icons-container") ]
+        [ renderBackButton state.originView
+        , renderViewTypeToggles viewType
+        ]
     Detail _ -> renderBackButton state.originView
     _ ->
       let
@@ -155,6 +163,54 @@ renderViewIcons state =
       in
         HH.div [ HP.class_ (HH.ClassName "view-icons") ]
           (map (renderViewIcon currentOverview) allViews)
+
+-- | Render toggle icons for neighborhood view types (Bubbles, Chord, Matrix)
+renderViewTypeToggles :: forall m. NeighborhoodViewType -> H.ComponentHTML Action () m
+renderViewTypeToggles currentViewType =
+  HH.div [ HP.class_ (HH.ClassName "view-type-toggles") ]
+    (map (renderViewTypeToggle currentViewType) [ BubblePackView, ChordView, MatrixView ])
+
+-- | Render a single view type toggle icon
+renderViewTypeToggle :: forall m. NeighborhoodViewType -> NeighborhoodViewType -> H.ComponentHTML Action () m
+renderViewTypeToggle currentViewType thisViewType =
+  let
+    isActive = currentViewType == thisViewType
+    label = neighborhoodViewLabel thisViewType
+    iconPath = case thisViewType of
+      BubblePackView -> bubblePackIcon
+      ChordView -> chordIcon
+      MatrixView -> matrixIcon
+  in
+    HH.button
+      [ HP.classes $ [ HH.ClassName "view-type-toggle" ] <>
+          if isActive then [ HH.ClassName "view-type-toggle--active" ] else []
+      , HP.title label
+      , HE.onClick \_ -> SelectNeighborhoodViewType thisViewType
+      ]
+      [ HH.elementNS svgNS (ElemName "svg")
+          [ HP.attr (HH.AttrName "viewBox") "0 0 24 24"
+          , HP.attr (HH.AttrName "width") "20"
+          , HP.attr (HH.AttrName "height") "20"
+          ]
+          [ HH.elementNS svgNS (ElemName "path")
+              [ HP.attr (HH.AttrName "d") iconPath
+              , HP.attr (HH.AttrName "fill") "currentColor"
+              ]
+              []
+          ]
+      ]
+
+-- | SVG path for bubble pack icon (circles)
+bubblePackIcon :: String
+bubblePackIcon = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-3-9c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3 6c2.21 0 4-1.79 4-4H8c0 2.21 1.79 4 4 4z"
+
+-- | SVG path for chord diagram icon
+chordIcon :: String
+chordIcon = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 2c4.42 0 8 3.58 8 8 0 1.85-.63 3.55-1.69 4.9L7.1 5.69C8.45 4.63 10.15 4 12 4zm0 16c-4.42 0-8-3.58-8-8 0-1.85.63-3.55 1.69-4.9L16.9 18.31C15.55 19.37 13.85 20 12 20z"
+
+-- | SVG path for matrix icon (grid)
+matrixIcon :: String
+matrixIcon = "M3 3h6v6H3V3zm2 2v2h2V5H5zm6-2h6v6h-6V3zm2 2v2h2V5h-2zM3 11h6v6H3v-6zm2 2v2h2v-2H5zm6-2h6v6h-6v-6zm2 2v2h2v-2h-2z"
 
 -- | Render back button for detail views
 renderBackButton :: forall m. Maybe OverviewView -> H.ComponentHTML Action () m
@@ -258,7 +314,7 @@ hintForView (Overview TreemapView) = "Click any module to explore its neighborho
 hintForView (Overview TreeView) = "Showing import hierarchy from Main."
 hintForView (Overview ForceView) = "Drag nodes to rearrange. Click to explore."
 hintForView (Overview TopoView) = "Package dependencies in topological order."
-hintForView (Detail (NeighborhoodDetail _)) = "Click an icon above to return to overview."
+hintForView (Detail (NeighborhoodDetail _ _)) = "Click an icon above to return to overview."
 hintForView (Detail (FunctionCallsDetail _)) = "Click an icon above to return to overview."
 
 -- | Render the color key based on current view
@@ -388,6 +444,10 @@ handleAction = case _ of
     log $ "[NarrativePanel] View selected: " <> viewLabel newView
     H.raise (ViewSelected newView)
 
+  SelectNeighborhoodViewType viewType -> do
+    log $ "[NarrativePanel] Neighborhood view type selected: " <> neighborhoodViewLabel viewType
+    H.raise (NeighborhoodViewTypeSelected viewType)
+
   GoBack -> do
     log "[NarrativePanel] Back button clicked"
     H.raise BackRequested
@@ -430,5 +490,5 @@ showViewState (Overview TreemapView) = "Overview(Treemap)"
 showViewState (Overview TreeView) = "Overview(Tree)"
 showViewState (Overview ForceView) = "Overview(Force)"
 showViewState (Overview TopoView) = "Overview(Topo)"
-showViewState (Detail (NeighborhoodDetail name)) = "Detail(Neighborhood:" <> name <> ")"
+showViewState (Detail (NeighborhoodDetail name _)) = "Detail(Neighborhood:" <> name <> ")"
 showViewState (Detail (FunctionCallsDetail name)) = "Detail(FunctionCalls:" <> name <> ")"
