@@ -14,8 +14,9 @@ module DataViz.Layout.Sankey.Compute
 import Prelude
 
 import Control.Monad.State (State, execState, get, modify_)
-import Data.Array (catMaybes, filter, find, foldl, foldr, length, mapWithIndex, snoc, (!!))
+import Data.Array (catMaybes, filter, find, foldl, foldr, length, mapWithIndex, snoc, sortBy, (!!))
 import Data.Array as Array
+import Data.Tuple (Tuple(..))
 import Data.Foldable (for_)
 import Data.Int (toNumber)
 import Data.Map as M
@@ -503,9 +504,17 @@ alignNodeToLayer alignment node numLayers =
 
 -- | Step 6b: Initialize vertical (y) positions by stacking nodes in each layer
 -- | Takes pre-calculated adjustedPadding from caller
+-- | NEW: Pre-sorts nodes by "reachability signature" to group isolated subgraphs together
 initializeNodeBreadths :: Array SankeyNode -> Array SankeyLink -> SankeyConfig -> Number -> Number -> Number -> Array SankeyNode
-initializeNodeBreadths nodes links config padding y0 y1 =
+initializeNodeBreadths nodes _links _config padding y0 y1 =
   let
+    -- Step 1: Compute reachability - which terminal sinks can each node reach?
+    -- Terminal sinks are nodes with no outgoing links (empty sourceLinks)
+    terminalSinks = Set.fromFoldable $ map _.index $ filter (\n -> Set.isEmpty n.sourceLinks) nodes
+
+    -- Build reachability map for each node using BFS forward through the graph
+    reachability = computeReachability nodes terminalSinks
+
     -- Group nodes by layer
     maxLayer = foldl (\acc node -> max acc node.layer) 0 nodes
     layers = map
@@ -520,18 +529,106 @@ initializeNodeBreadths nodes links config padding y0 y1 =
 
     -- DEBUG: This will help us verify the new code is running
     _ = unsafePerformEffect $ log $ "DEBUG initializeNodeBreadths: totalHeight=" <> show totalHeight <> ", ky=" <> show ky <> ", numLayers=" <> show (Array.length layers) <> ", padding=" <> show padding
+    _ = unsafePerformEffect $ log $ "  Terminal sinks: " <> show (Set.size terminalSinks)
 
-    -- D3 doesn't sort initially - nodes stay in input order
-    -- Relaxation and collision resolution will establish the final order
+    -- NEW: Sort nodes within each layer by reachability signature
+    -- Nodes reaching the same set of sinks are grouped together
+    -- Within a reachability group, sort by total value (larger nodes first)
+    sortedLayers = map (sortLayerByReachability reachability) layers
 
     -- Position nodes in each layer vertically (using adjusted padding from caller)
-    positionedLayers = map (positionLayer ky padding y0) layers
+    positionedLayers = map (positionLayer ky padding y0) sortedLayers
 
     -- Flatten back to single array
     positioned = Array.concat positionedLayers
   in
     positioned
   where
+  -- Compute reachability for all nodes using iterative BFS
+  -- Returns a Map from NodeID to Set of reachable terminal sink NodeIDs
+  computeReachability :: Array SankeyNode -> Set.Set NodeID -> M.Map NodeID (Set.Set NodeID)
+  computeReachability allNodes sinks =
+    let
+      -- Start with terminal sinks - they reach themselves
+      initial = foldl
+        (\m nid -> M.insert nid (Set.singleton nid) m)
+        M.empty
+        (Set.toUnfoldable sinks :: Array NodeID)
+
+      -- Iterate backwards through layers (from sinks to sources)
+      -- Each node's reachability = union of all targets' reachability
+      maxLayer' = foldl (\acc node -> max acc node.layer) 0 allNodes
+
+      -- Process each layer from right to left
+      finalReachability = foldl
+        (\reachMap layerIdx ->
+          let
+            layerNodes = filter (\n -> n.layer == layerIdx) allNodes
+          in
+            foldl (updateNodeReachability allNodes) reachMap layerNodes
+        )
+        initial
+        (Array.reverse $ Array.range 0 maxLayer')
+    in
+      finalReachability
+
+  -- Update reachability for a single node based on its targets
+  updateNodeReachability :: Array SankeyNode -> M.Map NodeID (Set.Set NodeID) -> SankeyNode -> M.Map NodeID (Set.Set NodeID)
+  updateNodeReachability _allNodes reachMap node =
+    let
+      -- Get all target nodes (nodes this one points to)
+      targetIds = Set.toUnfoldable node.sourceLinks :: Array NodeID
+
+      -- Collect reachability from all targets
+      targetReach = foldl
+        (\acc tid ->
+          case M.lookup tid reachMap of
+            Just reach -> Set.union acc reach
+            Nothing -> acc
+        )
+        Set.empty
+        targetIds
+
+      -- If node is a terminal sink, it reaches itself
+      nodeReach = if Set.isEmpty node.sourceLinks
+                  then Set.singleton node.index
+                  else targetReach
+    in
+      M.insert node.index nodeReach reachMap
+
+  -- Sort nodes in a layer by their reachability signature
+  -- Nodes with the same reachability are grouped; within groups, sort by value (larger first)
+  sortLayerByReachability :: M.Map NodeID (Set.Set NodeID) -> Array SankeyNode -> Array SankeyNode
+  sortLayerByReachability reachMap layerNodes =
+    let
+      -- Create a sortable key for each node: (reachability signature string, -value, original index)
+      -- We negate value so larger nodes come first
+      nodeWithKey n =
+        let
+          reach = fromMaybe Set.empty $ M.lookup n.index reachMap
+          -- Convert Set to sorted array of ints for consistent string representation
+          reachSig = show $ Array.sort $ map (\(NodeID i) -> i) $ (Set.toUnfoldable reach :: Array NodeID)
+        in
+          Tuple reachSig n
+
+      nodesWithKeys = map nodeWithKey layerNodes
+
+      -- Sort by reachability signature, then by negative value (so larger nodes first within group)
+      sorted = sortBy
+        (\(Tuple sigA nodeA) (Tuple sigB nodeB) ->
+          case compare sigA sigB of
+            EQ -> compare nodeB.value nodeA.value -- Larger values first
+            other -> other
+        )
+        nodesWithKeys
+
+      _ = unsafePerformEffect $ do
+        log $ "  Layer sorting:"
+        for_ sorted $ \(Tuple sig n) ->
+          log $ "    " <> n.name <> " -> reaches: " <> sig <> " (value=" <> show n.value <> ")"
+    in
+      map (\(Tuple _ n) -> n) sorted
+
   -- Calculate the scale factor (ky) - how many pixels per unit of value
   calculateKy :: Array (Array SankeyNode) -> Number -> Number -> Number
   calculateKy layers height padding =
