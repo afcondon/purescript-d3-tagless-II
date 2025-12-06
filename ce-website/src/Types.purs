@@ -34,8 +34,10 @@ type SimNode = SimulationNode
   , gridX :: Number        -- Grid position (for Grid scene)
   , gridY :: Number
   , orbitAngle :: Number   -- Orbital angle (for Orbit scene, packages only)
-  , treeX :: Number        -- Tree position (calculated from radial tree layout)
+  , treeX :: Number        -- Tree position (vertical tree layout)
   , treeY :: Number
+  , radialX :: Number      -- Radial tree position (polar projection of tree layout)
+  , radialY :: Number
   , isInTree :: Boolean    -- True if node is reachable from root in spanning tree
   , topoX :: Number        -- Topological position (for Topo scene, packages only)
   , topoY :: Number

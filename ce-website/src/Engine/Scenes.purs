@@ -10,6 +10,7 @@ module Engine.Scenes
   ( -- Form scenes (transition to positions, then Static)
     treemapFormScene
   , treeFormScene
+  , radialTreeFormScene
   , topoFormScene
   -- Run scenes (enable physics/forces)
   , treeRunScene
@@ -176,6 +177,45 @@ treeFormLayout nodes =
 treeRunLayout :: Array SimNode -> PositionMap
 treeRunLayout nodes =
   Object.fromFoldable $ map (\n -> Tuple (show n.id) { x: n.x, y: n.y }) nodes
+
+-- =============================================================================
+-- Radial Tree Scene (waypoint before Force)
+-- =============================================================================
+
+-- | Form Radial Tree: Transition to radial tree positions, then stop (Static)
+-- | Used as a waypoint before entering Force view to prevent chaotic initial movement.
+-- | Tree modules go to radial positions, packages/non-tree stay where they are.
+radialTreeFormScene :: SceneConfig SimNode
+radialTreeFormScene =
+  { name: "RadialTreeForm"
+  , initRules: [ pinAllRule ]
+  , layout: radialTreeFormLayout
+  , finalRules: \_ ->
+      [ { name: "pinTreeModulesAtRadial"
+        , select: isTreeModule
+        , apply: \n -> n
+            { fx = Nullable.notNull n.radialX
+            , fy = Nullable.notNull n.radialY
+            }
+        }
+      , { name: "pinOthersAtCurrent"
+        , select: \n -> not (isTreeModule n)
+        , apply: pinAtCurrent
+        }
+      ]
+  , stableMode: Static
+  , cssTransition: Nothing
+  }
+
+-- | Layout for Radial Tree Form: tree modules to radial positions, others stay put
+radialTreeFormLayout :: Array SimNode -> PositionMap
+radialTreeFormLayout nodes =
+  Object.fromFoldable $ map getPosition nodes
+  where
+  getPosition node =
+    if isTreeModule node
+    then Tuple (show node.id) { x: node.radialX, y: node.radialY }
+    else Tuple (show node.id) { x: node.x, y: node.y }
 
 -- =============================================================================
 -- Topo Scene (Package DAG)

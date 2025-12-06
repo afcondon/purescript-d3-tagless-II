@@ -82,10 +82,11 @@ import Web.HTML.HTMLDocument (toParentNode)
 -- | Type-safe scene identifiers
 -- | Replaces string-based scene selection for compile-time safety
 data SceneId
-  = TreemapForm  -- ^ Static treemap/grid layout
-  | TreeForm     -- ^ Static tree layout (bezier links)
-  | TreeRun      -- ^ Force-directed tree (physics enabled)
-  | TopoForm     -- ^ Package DAG with topological positions
+  = TreemapForm      -- ^ Static treemap/grid layout
+  | TreeForm         -- ^ Static tree layout (bezier links)
+  | RadialTreeForm   -- ^ Static radial tree layout (waypoint before Force)
+  | TreeRun          -- ^ Force-directed tree (physics enabled)
+  | TopoForm         -- ^ Package DAG with topological positions
 
 derive instance eqSceneId :: Eq SceneId
 
@@ -93,6 +94,7 @@ derive instance eqSceneId :: Eq SceneId
 sceneConfigFor :: SceneId -> Scene.SceneConfig SimNode
 sceneConfigFor TreemapForm = Scenes.treemapFormScene
 sceneConfigFor TreeForm = Scenes.treeFormScene
+sceneConfigFor RadialTreeForm = Scenes.radialTreeFormScene
 sceneConfigFor TreeRun = Scenes.treeRunScene
 sceneConfigFor TopoForm = Scenes.topoFormScene
 
@@ -139,15 +141,46 @@ setViewState newView = do
       executeViewChange (Overview TreemapView)
 
     -- Topo → Tree/Force: go through Treemap (modules visible) first
+    -- If going to Force, we'll need another waypoint (Treemap → RadialTree → Force)
     Just TopoView, Just to | isModuleCentric to -> do
       log "[Explorer] Waypoint transition: Topo → Treemap → modules"
       Ref.write (Just newView) globalPendingViewRef
       executeViewChange (Overview TreemapView)
 
+    -- Non-Force → Force: go through RadialTree (radial positions) first
+    -- This prevents chaotic initial movement when enabling physics
+    -- The radial tree provides a good starting layout before forces take over
+    Just from, Just ForceView | from /= ForceView -> do
+      log "[Explorer] Waypoint transition: RadialTree → Force"
+      Ref.write (Just newView) globalPendingViewRef
+      -- Trigger radial tree scene directly (no OverviewView for it)
+      executeRadialTreeWaypoint
+
     -- Direct transition (no waypoint needed)
     _, _ -> do
       Ref.write Nothing globalPendingViewRef
       executeViewChange newView
+
+-- | Execute radial tree waypoint (internal scene, no ViewState change)
+-- | This is used as an intermediate step before transitioning to ForceView
+executeRadialTreeWaypoint :: Effect Unit
+executeRadialTreeWaypoint = do
+  log "[Explorer] executeRadialTreeWaypoint: transitioning to radial tree positions"
+
+  mStateRef <- Ref.read globalStateRef
+  case mStateRef of
+    Just stateRef -> do
+      -- Clear any existing links and set up for radial view
+      clearTreeLinks
+      setTreeSceneClass true  -- Fade packages/non-tree like TreeView
+
+      -- Trigger the radial tree scene transition
+      goToScene RadialTreeForm stateRef
+
+      -- Reheat simulation to drive the transition
+      sceneState <- Ref.read stateRef
+      Sim.reheat sceneState.simulation
+    Nothing -> pure unit
 
 -- | Execute the actual view change (called directly or after waypoint)
 executeViewChange :: ViewState -> Effect Unit
@@ -578,6 +611,13 @@ goToScene sceneId stateRef = do
     clearTreeLinks -- Clear any existing links
     renderTreeLinks nodes
     setTreeSceneClass true
+
+  -- Handle RadialTreeForm: waypoint to radial positions (no links)
+  -- Used as intermediate step before Force view
+  when (sceneId == RadialTreeForm) do
+    clearTreeLinks -- Remove any existing links
+    Scene.clearLinksGroupId stateRef -- Disable link updates
+    setTreeSceneClass true -- Keep packages/non-tree faded
 
   -- Handle TreeRun: force-directed tree with link forces
   when (sceneId == TreeRun) do

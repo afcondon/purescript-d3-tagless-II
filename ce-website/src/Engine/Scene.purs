@@ -74,6 +74,8 @@ type NodeRow =
   , orbitAngle :: Number
   , treeX :: Number
   , treeY :: Number
+  , radialX :: Number
+  , radialY :: Number
   , isInTree :: Boolean
   , topoX :: Number
   , topoY :: Number

@@ -749,6 +749,7 @@ flattenTreeToPositionMap _ tree = go tree Map.empty
 -- | Uses Vertical Tree projection:
 -- | - Tree produces rectangular coords (x in [0, width], y in [0, height])
 -- | - Project to vertical: center x horizontally, scale y vertically (root at top)
+-- | Also computes radial tree positions using polar projection.
 updateNodeWithTreeData :: Map Int { x :: Number, y :: Number } -> Set Int -> SimNode -> SimNode
 updateNodeWithTreeData treePositions reachableIds node =
   let
@@ -760,6 +761,9 @@ updateNodeWithTreeData treePositions reachableIds node =
     maxTreeWidth = 2000.0  -- Horizontal spread
     maxTreeHeight = 1400.0 -- Vertical depth (root at top)
 
+    -- Radial tree parameters
+    maxRadius = 700.0  -- Maximum radius for outermost nodes
+
     withTreePos = case Map.lookup node.id treePositions of
       Just { x: treeX, y: treeY } ->
         -- Vertical projection formula:
@@ -768,8 +772,18 @@ updateNodeWithTreeData treePositions reachableIds node =
         let
           cartX = (treeX / layoutSize - 0.5) * maxTreeWidth
           cartY = (treeY / layoutSize - 0.5) * maxTreeHeight
+
+          -- Radial projection formula (from RadialTreeViz.purs):
+          -- x maps to angle (breadth position around circle)
+          -- y maps to radius (depth from center)
+          -- Start at top (-π/2) so root is at top
+          angle = (treeX / layoutSize) * 2.0 * pi - (pi / 2.0)
+          -- Scale depth to radius - y=0 is root at center, y=max is outer edge
+          rad = (treeY / layoutSize) * maxRadius
+          radX = rad * cos angle
+          radY = rad * sin angle
         in
-          node { treeX = cartX, treeY = cartY }
+          node { treeX = cartX, treeY = cartY, radialX = radX, radialY = radY }
       Nothing -> node -- Node not in tree (e.g., packages)
   in
     withTreePos { isInTree = inTree }
@@ -843,6 +857,8 @@ mkPackageNode _allPackages totalPackages packageLocMap packageLayerMap packagesB
     , orbitAngle: angle
     , treeX: 0.0
     , treeY: 0.0
+    , radialX: 0.0
+    , radialY: 0.0
     , isInTree: false -- Packages are never in the tree
     , topoX: tx
     , topoY: ty
@@ -917,6 +933,8 @@ mkModuleNode name idx modulesObj locMap packageIdMap _moduleIdMap packageCount _
     , orbitAngle: 0.0 -- Modules don't have orbit angle
     , treeX: 0.0
     , treeY: 0.0
+    , radialX: 0.0
+    , radialY: 0.0
     , isInTree: false -- Will be set true by updateNodeWithTreeData if reachable
     , topoX: 0.0
     , topoY: 0.0
