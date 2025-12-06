@@ -813,15 +813,16 @@ mkPackageNode _allPackages totalPackages packageLocMap packageLayerMap packagesB
     indexInLayer = fromMaybe 0 (Array.elemIndex name packagesInLayer)
     countInLayer = Array.length packagesInLayer
 
-    -- Layout constants for topo view
-    topoLayerSpacing = 150.0  -- Vertical spacing between layers
-    topoNodeSpacing = 100.0   -- Horizontal spacing within layer
+    -- Layout constants for topo view (horizontal: right-to-left)
+    -- Project code (high layer) on left, base libs (low layer) on right
+    topoLayerSpacing = 150.0  -- Horizontal spacing between layers
+    topoNodeSpacing = 60.0    -- Vertical spacing within layer (tighter)
 
-    -- Y: layer 0 at top, higher layers below
-    ty = (toNumber layer - toNumber maxLayer / 2.0) * topoLayerSpacing
+    -- X: layer 0 (base libs) at right, higher layers (project code) at left
+    tx = (toNumber maxLayer / 2.0 - toNumber layer) * topoLayerSpacing
 
-    -- X: center nodes within their layer
-    tx = (toNumber indexInLayer - toNumber countInLayer / 2.0 + 0.5) * topoNodeSpacing
+    -- Y: center nodes within their layer
+    ty = (toNumber indexInLayer - toNumber countInLayer / 2.0 + 0.5) * topoNodeSpacing
   in
     { id: idx
     , name

@@ -96,17 +96,59 @@ sceneConfigFor TopoForm = Scenes.topoFormScene
 -- Public API: setViewState
 -- =============================================================================
 
+-- | Is this view module-centric (shows modules)?
+isModuleCentric :: OverviewView -> Boolean
+isModuleCentric TreeView = true
+isModuleCentric ForceView = true
+isModuleCentric _ = false
+
+-- | Is this view package-centric (Topo)?
+isPackageCentric :: OverviewView -> Boolean
+isPackageCentric TopoView = true
+isPackageCentric _ = false
+
+-- | Get the overview from a ViewState, if any
+getOverview :: ViewState -> Maybe OverviewView
+getOverview (Overview ov) = Just ov
+getOverview (Detail _) = Nothing
+
 -- | Set the current view state and trigger appropriate scene transitions.
 -- | This is the public API for changing views - replaces direct Ref writes.
 -- |
 -- | Handles:
+-- | - Multi-step waypoint transitions between module/package views
 -- | - Updating the internal view state ref
 -- | - Updating node colors to match the new view
 -- | - Triggering scene transitions (TreeForm/TreeRun)
 -- | - Notifying Halogen via callback
 setViewState :: ViewState -> Effect Unit
 setViewState newView = do
-  log $ "[Explorer] setViewState: " <> showViewState newView
+  currentView <- Ref.read globalViewStateRef
+  log $ "[Explorer] setViewState: " <> showViewState currentView <> " -> " <> showViewState newView
+
+  -- Check if we need a waypoint transition
+  case getOverview currentView, getOverview newView of
+    -- Tree/Force → Topo: go through Treemap (packages visible) first
+    Just from, Just TopoView | isModuleCentric from -> do
+      log "[Explorer] Waypoint transition: modules → Treemap → Topo"
+      Ref.write (Just newView) globalPendingViewRef
+      executeViewChange (Overview TreemapView)
+
+    -- Topo → Tree/Force: go through Treemap (modules visible) first
+    Just TopoView, Just to | isModuleCentric to -> do
+      log "[Explorer] Waypoint transition: Topo → Treemap → modules"
+      Ref.write (Just newView) globalPendingViewRef
+      executeViewChange (Overview TreemapView)
+
+    -- Direct transition (no waypoint needed)
+    _, _ -> do
+      Ref.write Nothing globalPendingViewRef
+      executeViewChange newView
+
+-- | Execute the actual view change (called directly or after waypoint)
+executeViewChange :: ViewState -> Effect Unit
+executeViewChange newView = do
+  log $ "[Explorer] executeViewChange: " <> showViewState newView
 
   -- Update internal state
   Ref.write newView globalViewStateRef
@@ -145,6 +187,37 @@ setViewState newView = do
 
   -- Notify Halogen via callback
   notifyViewStateChanged newView
+
+-- | Tick handler wrapper that checks for pending waypoint transitions
+-- | This wraps the normal Scene tick and, when a transition completes,
+-- | checks if there's a pending view to continue to.
+tickWithPendingViewCheck :: Ref Scene.SceneState -> String -> Effect Unit
+tickWithPendingViewCheck stateRef nodesSelector = do
+  -- Get state before tick to detect transition completion
+  stateBefore <- Ref.read stateRef
+  let wasTransitioning = case stateBefore.transition of
+        Just _ -> true
+        Nothing -> false
+
+  -- Run the normal tick
+  Scene.onTickWithViewTransition stateRef globalTransitionRef globalViewStateRef nodesSelector
+
+  -- Check if transition just completed
+  stateAfter <- Ref.read stateRef
+  let isTransitioning = case stateAfter.transition of
+        Just _ -> true
+        Nothing -> false
+
+  -- If transition just completed, check for pending view
+  when (wasTransitioning && not isTransitioning) do
+    pendingView <- Ref.read globalPendingViewRef
+    case pendingView of
+      Just view -> do
+        log $ "[Explorer] Waypoint complete, continuing to: " <> showViewState view
+        Ref.write Nothing globalPendingViewRef
+        -- Use executeViewChange directly since we've already done the waypoint
+        executeViewChange view
+      Nothing -> pure unit
 
 -- =============================================================================
 -- Global State
@@ -199,6 +272,12 @@ globalFocusRef = unsafePerformEffect $ Ref.new { focusedNodeId: Nothing, fullNod
 -- | Global ref for view transition state (GUP-style enter/exit/update)
 globalTransitionRef :: Ref VT.TransitionState
 globalTransitionRef = unsafePerformEffect $ Ref.new (VT.mkTransitionState VT.AllNodes [])
+
+-- | Pending view for multi-step transitions (waypoint navigation)
+-- | When transitioning between module-centric (Tree/Force) and package-centric (Topo),
+-- | we go through Treemap as a waypoint. This ref tracks the final destination.
+globalPendingViewRef :: Ref (Maybe ViewState)
+globalPendingViewRef = unsafePerformEffect $ Ref.new Nothing
 
 -- =============================================================================
 -- Callback-Based Notification System
@@ -371,7 +450,8 @@ initWithModel model containerSelector = do
 
   -- Set up tick callback - includes view transition progress advancement and visual updates
   let nodesSelector = "#explorer-nodes"  -- Selector for the nodes group
-  Sim.onTick (Scene.onTickWithViewTransition stateRef globalTransitionRef globalViewStateRef nodesSelector) sim
+  -- Wrap the scene tick to check for pending waypoint transitions
+  Sim.onTick (tickWithPendingViewCheck stateRef nodesSelector) sim
 
   -- Start simulation - let forces do the initial clustering animation
   -- (no transition on startup - nodes start randomized, forces pull them in)

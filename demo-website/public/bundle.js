@@ -33353,54 +33353,18 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
 
   // output/PSD3.ForceEngine.Simulation/index.js
-  var fromFoldable29 = /* @__PURE__ */ fromFoldable(foldableList);
-  var pure42 = /* @__PURE__ */ pure(applicativeEffect);
-  var unless4 = /* @__PURE__ */ unless(applicativeEffect);
   var for_4 = /* @__PURE__ */ for_(applicativeEffect)(foldableArray);
   var toUnfoldable6 = /* @__PURE__ */ toUnfoldable3(unfoldableArray);
+  var pure42 = /* @__PURE__ */ pure(applicativeEffect);
+  var when6 = /* @__PURE__ */ when(applicativeEffect);
+  var fromFoldable29 = /* @__PURE__ */ fromFoldable(foldableList);
+  var unless4 = /* @__PURE__ */ unless(applicativeEffect);
   var insert10 = /* @__PURE__ */ insert(ordString);
-  var tick = function(sim) {
-    return function __do8() {
-      var nodes3 = read(sim.nodes)();
-      var forces = read(sim.forces)();
-      var alpha = read(sim.alpha)();
-      var forceHandles = fromFoldable29(values(forces));
-      applyForces(forceHandles)(alpha)();
-      integratePositions(nodes3)(sim.config.velocityDecay)();
-      var newAlpha = decayAlpha(alpha)(sim.config.alphaMin)(sim.config.alphaDecay)(sim.config.alphaTarget);
-      write(newAlpha)(sim.alpha)();
-      var callback = read(sim.tickCallback)();
-      callback();
-      return newAlpha;
-    };
-  };
   var stop2 = function(sim) {
     return function __do8() {
       write(false)(sim.running)();
       var cancel = read(sim.cancelAnimation)();
       return cancel();
-    };
-  };
-  var start4 = function(sim) {
-    return function __do8() {
-      var alreadyRunning = read(sim.running)();
-      return unless4(alreadyRunning)(function __do9() {
-        write(true)(sim.running)();
-        var cancel = startAnimation(function(v) {
-          return function __do10() {
-            var running = read(sim.running)();
-            if (running) {
-              var newAlpha = tick(sim)();
-              var shouldContinue = newAlpha > 0;
-              unless4(shouldContinue)(write(false)(sim.running))();
-              return shouldContinue;
-            }
-            ;
-            return false;
-          };
-        })();
-        return write(cancel)(sim.cancelAnimation)();
-      })();
     };
   };
   var setNodes2 = function(nodes3) {
@@ -33423,17 +33387,52 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return write(links3)(sim.links);
     };
   };
-  var reheat2 = function(sim) {
-    return function __do8() {
-      write(1)(sim.alpha)();
-      var running = read(sim.running)();
-      return unless4(running)(start4(sim))();
-    };
-  };
   var onTick = function(callback) {
     return function(sim) {
       return write(callback)(sim.tickCallback);
     };
+  };
+  var invokeTickCallback = function(sim) {
+    if (sim.callbacks instanceof Nothing) {
+      return pure42(unit);
+    }
+    ;
+    if (sim.callbacks instanceof Just) {
+      return function __do8() {
+        var callback = read(sim.callbacks.value0.onTick)();
+        return callback();
+      };
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.ForceEngine.Simulation (line 452, column 26 - line 456, column 13): " + [sim.callbacks.constructor.name]);
+  };
+  var invokeStopCallback = function(sim) {
+    if (sim.callbacks instanceof Nothing) {
+      return pure42(unit);
+    }
+    ;
+    if (sim.callbacks instanceof Just) {
+      return function __do8() {
+        var callback = read(sim.callbacks.value0.onStop)();
+        return callback();
+      };
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.ForceEngine.Simulation (line 442, column 26 - line 446, column 13): " + [sim.callbacks.constructor.name]);
+  };
+  var invokeStartCallback = function(sim) {
+    if (sim.callbacks instanceof Nothing) {
+      return pure42(unit);
+    }
+    ;
+    if (sim.callbacks instanceof Just) {
+      return function __do8() {
+        var callback = read(sim.callbacks.value0.onStart)();
+        return callback();
+      };
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.ForceEngine.Simulation (line 432, column 27 - line 436, column 13): " + [sim.callbacks.constructor.name]);
   };
   var getNodes = function(sim) {
     return read(sim.nodes);
@@ -33452,6 +33451,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       var linksRef = $$new([])();
       var forcesRef = $$new(empty5)();
       var alphaRef = $$new(1)();
+      var prevAlphaRef = $$new(1)();
       var runningRef = $$new(false)();
       var cancelRef = $$new(pure42(unit))();
       var tickRef = $$new(pure42(unit))();
@@ -33460,11 +33460,93 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         links: linksRef,
         forces: forcesRef,
         alpha: alphaRef,
+        prevAlpha: prevAlphaRef,
         config,
         running: runningRef,
         cancelAnimation: cancelRef,
-        tickCallback: tickRef
+        tickCallback: tickRef,
+        callbacks: Nothing.value
       };
+    };
+  };
+  var checkAlphaThresholds = function(prevAlpha) {
+    return function(newAlpha) {
+      return function(sim) {
+        var crossedThreshold = function(prev) {
+          return function($$new2) {
+            return function(thresh) {
+              return prev > thresh && $$new2 <= thresh;
+            };
+          };
+        };
+        var alphaThresholds = [0.5, 0.1, 0.01];
+        if (sim.callbacks instanceof Nothing) {
+          return pure42(unit);
+        }
+        ;
+        if (sim.callbacks instanceof Just) {
+          return for_4(alphaThresholds)(function(threshold) {
+            return when6(crossedThreshold(prevAlpha)(newAlpha)(threshold))(function __do8() {
+              var callback = read(sim.callbacks.value0.onAlphaThreshold)();
+              return callback(newAlpha)();
+            });
+          });
+        }
+        ;
+        throw new Error("Failed pattern match at PSD3.ForceEngine.Simulation (line 465, column 47 - line 472, column 26): " + [sim.callbacks.constructor.name]);
+      };
+    };
+  };
+  var tick = function(sim) {
+    return function __do8() {
+      var nodes3 = read(sim.nodes)();
+      var forces = read(sim.forces)();
+      var alpha = read(sim.alpha)();
+      var prevAlpha = read(sim.prevAlpha)();
+      var forceHandles = fromFoldable29(values(forces));
+      applyForces(forceHandles)(alpha)();
+      integratePositions(nodes3)(sim.config.velocityDecay)();
+      var newAlpha = decayAlpha(alpha)(sim.config.alphaMin)(sim.config.alphaDecay)(sim.config.alphaTarget);
+      write(newAlpha)(sim.alpha)();
+      write(alpha)(sim.prevAlpha)();
+      var legacyCallback = read(sim.tickCallback)();
+      legacyCallback();
+      invokeTickCallback(sim)();
+      checkAlphaThresholds(prevAlpha)(newAlpha)(sim)();
+      return newAlpha;
+    };
+  };
+  var start4 = function(sim) {
+    return function __do8() {
+      var alreadyRunning = read(sim.running)();
+      return unless4(alreadyRunning)(function __do9() {
+        write(true)(sim.running)();
+        invokeStartCallback(sim)();
+        var cancel = startAnimation(function(v) {
+          return function __do10() {
+            var running = read(sim.running)();
+            if (running) {
+              var newAlpha = tick(sim)();
+              var shouldContinue = newAlpha > 0;
+              unless4(shouldContinue)(function __do11() {
+                write(false)(sim.running)();
+                return invokeStopCallback(sim)();
+              })();
+              return shouldContinue;
+            }
+            ;
+            return false;
+          };
+        })();
+        return write(cancel)(sim.cancelAnimation)();
+      })();
+    };
+  };
+  var reheat2 = function(sim) {
+    return function __do8() {
+      write(1)(sim.alpha)();
+      var running = read(sim.running)();
+      return unless4(running)(start4(sim))();
     };
   };
   var addForce2 = function(spec) {
@@ -33498,7 +33580,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return v.value0;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.ForceEngine.Simulation (line 240, column 15 - line 247, column 20): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.ForceEngine.Simulation (line 292, column 15 - line 299, column 20): " + [v.constructor.name]);
       };
       return function __do8() {
         var nodes3 = read(sim.nodes)();
@@ -33539,7 +33621,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return initializeForce(h)(nodes3)();
           }
           ;
-          throw new Error("Failed pattern match at PSD3.ForceEngine.Simulation (line 207, column 13 - line 234, column 35): " + [spec.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.ForceEngine.Simulation (line 259, column 13 - line 286, column 35): " + [spec.constructor.name]);
         })();
         var name16 = forceName(spec);
         return modify_(insert10(name16)(handle))(sim.forces)();
@@ -42846,7 +42928,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard44 = /* @__PURE__ */ discard(discardUnit)(/* @__PURE__ */ bindWriterT(semigroupString)(bindIdentity));
   var tell4 = /* @__PURE__ */ tell(/* @__PURE__ */ monadTellWriterT(monoidString)(monadIdentity));
   var applicativeWriterT2 = /* @__PURE__ */ applicativeWriterT(monoidString)(applicativeIdentity);
-  var when6 = /* @__PURE__ */ when(applicativeWriterT2);
+  var when7 = /* @__PURE__ */ when(applicativeWriterT2);
   var for_6 = /* @__PURE__ */ for_(applicativeWriterT2)(foldableArray);
   var show210 = /* @__PURE__ */ show(showInt);
   var showElemType = function(v) {
@@ -42966,12 +43048,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           ;
           throw new Error("Failed pattern match at PSD3v2.Interpreter.English (line 33, column 5 - line 35, column 77): " + [tree2.value0.name.constructor.name]);
         })())(function() {
-          return discard44(when6(!$$null(tree2.value0.attrs))(discard44(tell4(" with attributes:\n"))(function() {
+          return discard44(when7(!$$null(tree2.value0.attrs))(discard44(tell4(" with attributes:\n"))(function() {
             return for_6(tree2.value0.attrs)(function(attr3) {
               return tell4(indent(level + 1 | 0) + (describeAttribute(attr3) + "\n"));
             });
           })))(function() {
-            return when6(!$$null(tree2.value0.children))(discard44(tell4(indent(level) + ("Then add " + (show210(length(tree2.value0.children)) + " child element(s):\n"))))(function() {
+            return when7(!$$null(tree2.value0.children))(discard44(tell4(indent(level) + ("Then add " + (show210(length(tree2.value0.children)) + " child element(s):\n"))))(function() {
               return for_6(tree2.value0.children)(function(child) {
                 return describeTree(child)(level + 1 | 0);
               });
@@ -43004,9 +43086,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return discard44(tell4(indent(level) + ("For each of " + (show210(length(tree2.value0.joinData)) + " data items, "))))(function() {
           return discard44(tell4("create/update/remove " + (tree2.value0.key + (' (scene join named "' + (tree2.value0.name + '")')))))(function() {
             return discard44(tell4(" with General Update Pattern:\n"))(function() {
-              return discard44(when6(isJust(tree2.value0.enterBehavior))(tell4(indent(level + 1 | 0) + "- Enter: elements appear with initial attributes and transition\n")))(function() {
-                return discard44(when6(isJust(tree2.value0.updateBehavior))(tell4(indent(level + 1 | 0) + "- Update: elements transition to new state\n")))(function() {
-                  return discard44(when6(isJust(tree2.value0.exitBehavior))(tell4(indent(level + 1 | 0) + "- Exit: elements transition out then removed\n")))(function() {
+              return discard44(when7(isJust(tree2.value0.enterBehavior))(tell4(indent(level + 1 | 0) + "- Enter: elements appear with initial attributes and transition\n")))(function() {
+                return discard44(when7(isJust(tree2.value0.updateBehavior))(tell4(indent(level + 1 | 0) + "- Update: elements transition to new state\n")))(function() {
+                  return discard44(when7(isJust(tree2.value0.exitBehavior))(tell4(indent(level + 1 | 0) + "- Exit: elements transition out then removed\n")))(function() {
                     return tell4(indent(level + 1 | 0) + "(Template function defined for creating elements from data)\n");
                   });
                 });
@@ -43020,9 +43102,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return discard44(tell4(indent(level) + ("For each of " + (show210(length(tree2.value0.joinData)) + " nested data items, "))))(function() {
           return discard44(tell4("decompose and create/update/remove " + (tree2.value0.key + (' (scene nested join named "' + (tree2.value0.name + '")')))))(function() {
             return discard44(tell4(" with General Update Pattern:\n"))(function() {
-              return discard44(when6(isJust(tree2.value0.enterBehavior))(tell4(indent(level + 1 | 0) + "- Enter: elements appear with initial attributes and transition\n")))(function() {
-                return discard44(when6(isJust(tree2.value0.updateBehavior))(tell4(indent(level + 1 | 0) + "- Update: elements transition to new state\n")))(function() {
-                  return discard44(when6(isJust(tree2.value0.exitBehavior))(tell4(indent(level + 1 | 0) + "- Exit: elements transition out then removed\n")))(function() {
+              return discard44(when7(isJust(tree2.value0.enterBehavior))(tell4(indent(level + 1 | 0) + "- Enter: elements appear with initial attributes and transition\n")))(function() {
+                return discard44(when7(isJust(tree2.value0.updateBehavior))(tell4(indent(level + 1 | 0) + "- Update: elements transition to new state\n")))(function() {
+                  return discard44(when7(isJust(tree2.value0.exitBehavior))(tell4(indent(level + 1 | 0) + "- Exit: elements transition out then removed\n")))(function() {
                     return tell4(indent(level + 1 | 0) + "(Decompose and template functions defined)\n");
                   });
                 });
@@ -46335,7 +46417,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var pure72 = /* @__PURE__ */ pure(applicativeHalogenM);
   var modify_14 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var get14 = /* @__PURE__ */ get(monadStateHalogenM);
-  var when7 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when8 = /* @__PURE__ */ when(applicativeHalogenM);
   var $$void12 = /* @__PURE__ */ $$void(functorHalogenM);
   var forever4 = /* @__PURE__ */ forever(monadRecAff);
   var discard211 = /* @__PURE__ */ discard52(bindAff);
@@ -46462,7 +46544,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               $70.playing = newPlaying;
               return $70;
             }))(function() {
-              return discard118(when7(newPlaying)((function() {
+              return discard118(when8(newPlaying)((function() {
                 var intervalMs = 1e3 / state3.animationSpeed;
                 return bind75(liftEffect121(create4))(function(v1) {
                   return bind75(subscribe2(v1.emitter))(function(subscriptionId) {
@@ -46485,7 +46567,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   });
                 });
               })()))(function() {
-                return when7(!newPlaying)(bind75(get14)(function(state$prime) {
+                return when8(!newPlaying)(bind75(get14)(function(state$prime) {
                   if (state$prime.animationSubscriptionId instanceof Nothing) {
                     return pure72(unit);
                   }
@@ -47800,7 +47882,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var pure76 = /* @__PURE__ */ pure(applicativeEffect);
   var map88 = /* @__PURE__ */ map(functorEffect);
   var pure122 = /* @__PURE__ */ pure(applicativeAff);
-  var when8 = /* @__PURE__ */ when(applicativeEffect);
+  var when9 = /* @__PURE__ */ when(applicativeEffect);
   var renderStateX2 = /* @__PURE__ */ renderStateX(functorEffect);
   var $$void14 = /* @__PURE__ */ $$void(functorAff);
   var foreachSlot2 = /* @__PURE__ */ foreachSlot(applicativeEffect);
@@ -47929,7 +48011,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     var isDuplicate = map88(function($69) {
                       return isJust(slot3.get($69));
                     })(read(childrenOutRef))();
-                    when8(isDuplicate)(warn("Halogen: Duplicate slot address was detected during rendering, unexpected results may occur"))();
+                    when9(isDuplicate)(warn("Halogen: Duplicate slot address was detected during rendering, unexpected results may occur"))();
                     modify_(slot3.set($$var2))(childrenOutRef)();
                     return bind77(read($$var2))(renderStateX2(function(v) {
                       if (v instanceof Nothing) {
@@ -47953,7 +48035,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return function __do8() {
               var v = read($$var2)();
               var shouldProcessHandlers = map88(isNothing)(read(v.pendingHandlers))();
-              when8(shouldProcessHandlers)(write(new Just(Nil.value))(v.pendingHandlers))();
+              when9(shouldProcessHandlers)(write(new Just(Nil.value))(v.pendingHandlers))();
               write(empty7)(v.childrenOut)();
               write(v.children)(v.childrenIn)();
               var handler3 = (function() {
@@ -48001,7 +48083,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   children: children3
                 };
               }))();
-              return when8(shouldProcessHandlers)(flip(tailRecM3)(unit)(function(v1) {
+              return when9(shouldProcessHandlers)(flip(tailRecM3)(unit)(function(v1) {
                 return function __do9() {
                   var handlers = read(v.pendingHandlers)();
                   write(new Just(Nil.value))(v.pendingHandlers)();
@@ -48118,7 +48200,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var pure77 = /* @__PURE__ */ pure(applicativeEffect);
   var traverse_9 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
   var unwrap7 = /* @__PURE__ */ unwrap();
-  var when9 = /* @__PURE__ */ when(applicativeEffect);
+  var when10 = /* @__PURE__ */ when(applicativeEffect);
   var not3 = /* @__PURE__ */ not(/* @__PURE__ */ heytingAlgebraFunction(/* @__PURE__ */ heytingAlgebraFunction(heytingAlgebraBoolean)));
   var identity17 = /* @__PURE__ */ identity(categoryFn);
   var bind134 = /* @__PURE__ */ bind(bindAff);
@@ -48246,7 +48328,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   var nextSib = nextSibling(v1.value0.node)();
                   var machine$prime = step2(v1.value0.machine, v);
                   var newNode = extract2(machine$prime);
-                  when9(not3(unsafeRefEq)(v1.value0.node)(newNode))(substInParent(newNode)(nextSib)(parent2))();
+                  when10(not3(unsafeRefEq)(v1.value0.node)(newNode))(substInParent(newNode)(nextSib)(parent2))();
                   return {
                     machine: machine$prime,
                     node: newNode,
@@ -49093,7 +49175,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var get15 = /* @__PURE__ */ get(monadStateHalogenM);
   var discard60 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var pure123 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var when10 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when11 = /* @__PURE__ */ when(applicativeHalogenM);
   var ChooseDataset = /* @__PURE__ */ (function() {
     function ChooseDataset2() {
     }
@@ -49715,7 +49797,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       ;
       if (v instanceof GoToStep) {
         return bind135(get15)(function(state3) {
-          return when10(canGoToStep(state3)(v.value0))(modify_16(function(v1) {
+          return when11(canGoToStep(state3)(v.value0))(modify_16(function(v1) {
             var $138 = {};
             for (var $139 in v1) {
               if ({}.hasOwnProperty.call(v1, $139)) {
@@ -49941,7 +50023,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var bind82 = /* @__PURE__ */ bind(bindHalogenM);
   var liftEffect43 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var discard62 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var when11 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when12 = /* @__PURE__ */ when(applicativeHalogenM);
   var pure85 = /* @__PURE__ */ pure(applicativeHalogenM);
   var spy3 = /* @__PURE__ */ spy();
   var modify_17 = /* @__PURE__ */ modify_2(monadStateHalogenM);
@@ -50235,7 +50317,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         var loc = location(w)();
         return hash(loc)();
       }))(function(currentHash) {
-        return discard62(when11(currentHash === "" || (currentHash === "#" || currentHash === "#/"))(liftEffect43(setHash2(routeToPath(Home.value)))))(function() {
+        return discard62(when12(currentHash === "" || (currentHash === "#" || currentHash === "#/"))(liftEffect43(setHash2(routeToPath(Home.value)))))(function() {
           return bind82(subscribe2(makeEmitter(function(push2) {
             return matches2(routing)(function(v12) {
               return function(newRoute) {
