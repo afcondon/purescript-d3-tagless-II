@@ -52,7 +52,7 @@ import PSD3v2.Tooltip (hideTooltip) as Tooltip
 import Engine.Scene as Scene
 import Engine.Scenes as Scenes
 import PSD3.ForceEngine.Core as Core
-import PSD3.ForceEngine.Links (swizzleLinks, swizzleLinksByIndex)
+import PSD3.ForceEngine.Links (swizzleLinks)
 import PSD3.ForceEngine.Render (GroupId(..), updateGroupPositions, updateLinkPositions)
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, radius, id_, class_, viewBox, d, opacity, x1, x2, y1, y2)
@@ -1333,7 +1333,16 @@ type NeighborhoodLink =
   , linkType :: LinkType
   }
 
+-- | Directional link for colored bidirectional rendering
+-- | Each link direction is rendered separately with offset
+type DirectionalLink =
+  { source :: SimNode
+  , target :: SimNode
+  , isOutgoing :: Boolean  -- True = green (imports), False = orange (imported by)
+  }
+
 -- | Render links between neighborhood nodes (full graph edges, not tree)
+-- | Now renders bidirectional colored links (green for outgoing, orange for incoming)
 renderNeighborhoodLinks :: Array SimNode -> Effect Unit
 renderNeighborhoodLinks nodes = do
   allLinks <- Ref.read globalLinksRef
@@ -1341,22 +1350,41 @@ renderNeighborhoodLinks nodes = do
   -- Build set of node IDs in neighborhood
   let nodeIdSet = Set.fromFoldable $ map _.id nodes
 
+  -- Build map from ID to SimNode for swizzling
+  let nodeMap = Map.fromFoldable $ map (\n -> Tuple n.id n) nodes
+
   -- Filter to links where BOTH source and target are in neighborhood
   let
     neighborhoodLinks = Array.filter
       (\link -> Set.member link.source nodeIdSet && Set.member link.target nodeIdSet)
       allLinks
 
-  log $ "[Explorer] Rendering " <> show (Array.length neighborhoodLinks) <> " neighborhood links"
+  log $ "[Explorer] Rendering " <> show (Array.length neighborhoodLinks) <> " neighborhood links as bidirectional"
 
-  -- Swizzle: convert IDs to node references (by node.id lookup, not array index)
+  -- Convert SimLinks to DirectionalLinks
+  -- Each SimLink becomes one directional link (source imports target = outgoing)
+  -- We also need to check for reverse links and create inbound markers
   let
-    swizzled = swizzleLinksByIndex _.id nodes neighborhoodLinks \src tgt _i link ->
-      { source: src, target: tgt, linkType: link.linkType }
+    -- Build a set of (source, target) pairs for quick lookup
+    linkPairSet = Set.fromFoldable $ map (\l -> Tuple l.source l.target) neighborhoodLinks
 
-  -- Render as straight lines
-  _ <- runD3v2M $ renderNeighborhoodLinksD3 swizzled
+    -- Create directional links from the raw links
+    directionalLinks = Array.mapMaybe (toDirectionalLink nodeMap linkPairSet) neighborhoodLinks
+
+  log $ "[Explorer] Created " <> show (Array.length directionalLinks) <> " directional links"
+
+  -- Render as colored offset lines
+  _ <- runD3v2M $ renderDirectionalLinksD3 directionalLinks
   pure unit
+
+-- | Convert a SimLink to DirectionalLink, marking direction based on link orientation
+toDirectionalLink :: Map.Map Int SimNode -> Set.Set (Tuple Int Int) -> SimLink -> Maybe DirectionalLink
+toDirectionalLink nodeMap _linkPairSet link = do
+  srcNode <- Map.lookup link.source nodeMap
+  tgtNode <- Map.lookup link.target nodeMap
+  -- Each link represents source importing target (outgoing)
+  -- All neighborhood links are green (outgoing direction)
+  pure { source: srcNode, target: tgtNode, isOutgoing: true }
 
 -- | Render static links for bubble pack view (no simulation updates)
 -- | Uses node x/y directly to create line coordinates
@@ -1470,6 +1498,57 @@ renderNeighborhoodLinksD3 links = do
     let score = linkInterconnectivity link.source link.target
     in linkOpacity score
 
+-- | D3 rendering for directional links with bidirectional coloring
+-- | Green = outgoing (source imports target), Orange = incoming (the reverse link)
+renderDirectionalLinksD3 :: Array DirectionalLink -> D3v2M Unit
+renderDirectionalLinksD3 links = do
+  linksGroup <- select "#explorer-links"
+
+  -- Each link is rendered with its directional color
+  -- Green (#4ade80) for outgoing, matching the adjacency matrix
+  _ <- appendData Line links
+    [ x1 getSourceX
+    , y1 getSourceY
+    , x2 getTargetX
+    , y2 getTargetY
+    , stroke directionalStrokeFn
+    , strokeWidth directionalWidthFn
+    , opacity (\(_ :: DirectionalLink) -> 0.7)
+    , class_ directionalClassFn
+    ]
+    linksGroup
+
+  pure unit
+  where
+  getSourceX :: DirectionalLink -> Number
+  getSourceX l = l.source.x
+
+  getSourceY :: DirectionalLink -> Number
+  getSourceY l = l.source.y
+
+  getTargetX :: DirectionalLink -> Number
+  getTargetX l = l.target.x
+
+  getTargetY :: DirectionalLink -> Number
+  getTargetY l = l.target.y
+
+  -- Green for outgoing (imports), matching adjacency matrix
+  directionalStrokeFn :: DirectionalLink -> String
+  directionalStrokeFn l =
+    if l.isOutgoing then "#4ade80"  -- Green for outgoing
+    else "#f97316"                   -- Orange for incoming
+
+  -- Width based on connectivity
+  directionalWidthFn :: DirectionalLink -> Number
+  directionalWidthFn l =
+    let score = linkInterconnectivity l.source l.target
+    in linkStrokeWidth score
+
+  directionalClassFn :: DirectionalLink -> String
+  directionalClassFn l =
+    if l.isOutgoing then "neighborhood-link outgoing-link"
+    else "neighborhood-link incoming-link"
+
 -- =============================================================================
 -- Navigation
 -- =============================================================================
@@ -1523,8 +1602,11 @@ restoreFullView fullNodes targetView sim = do
   -- Update simulation with full nodes
   Sim.setNodes fullNodes sim
 
-  -- Clear neighborhood links and disable link updates
+  -- Clear neighborhood-specific visualizations
   clearTreeLinks
+  clearChordDiagram
+  clearAdjacencyMatrix
+  clearBubblePacks
 
   -- Color legend is handled by Halogen NarrativePanel (switches back to packages automatically)
 

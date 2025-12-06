@@ -1,10 +1,13 @@
 // FFI for AdjacencyMatrix
 import { select } from "d3-selection";
+import { scaleLinear } from "d3-scale";
+import { interpolateGreens, interpolateOranges } from "d3-scale-chromatic";
 import { showTooltip_, hideTooltip_ } from "../../psd3-selection/src/PSD3v2/Tooltip.js";
 
 // Color constants
-const noConnectionColor = "#f7fafc";
-const connectionColor = "#4a5568";
+const noConnectionColor = "#1a202c";  // Dark background for empty cells
+const outboundBaseColor = "#48bb78";  // Green for outbound (imports)
+const inboundBaseColor = "#ed8936";   // Orange for inbound (imported by)
 
 // Clear any existing matrix SVG
 export const clearMatrixSvg_ = () => {
@@ -14,9 +17,31 @@ export const clearMatrixSvg_ = () => {
 // Split string on dots
 export const splitOnDotImpl = (str) => str.split(".");
 
+// Helper to create triangle path for upper-left half of cell
+const upperLeftTriangle = (x, y, w, h) =>
+  `M${x},${y} L${x + w},${y} L${x},${y + h} Z`;
+
+// Helper to create triangle path for lower-right half of cell
+const lowerRightTriangle = (x, y, w, h) =>
+  `M${x + w},${y} L${x + w},${y + h} L${x},${y + h} Z`;
+
+// Get color with intensity based on value (0-1 scale)
+const getOutboundColor = (intensity) => {
+  if (intensity === 0) return noConnectionColor;
+  // Use a green scale: darker = more connections
+  return interpolateGreens(0.3 + intensity * 0.7);
+};
+
+const getInboundColor = (intensity) => {
+  if (intensity === 0) return noConnectionColor;
+  // Use an orange scale: darker = more connections
+  return interpolateOranges(0.3 + intensity * 0.7);
+};
+
 // Render the complete adjacency matrix
 // layout: { cells, rowLabels, colLabels, gridWidth, gridHeight, totalWidth, totalHeight }
-export const renderAdjacencyMatrix_ = (layout) => (centralName) => (importNames) => (dependentNames) => () => {
+// Now expects cells to have outbound and inbound fields
+export const renderAdjacencyMatrix_ = (layout) => (centralName) => (importNames) => (dependentNames) => (maxConnections) => () => {
   // Clear existing
   clearMatrixSvg_();
 
@@ -37,27 +62,63 @@ export const renderAdjacencyMatrix_ = (layout) => (centralName) => (importNames)
     .attr("class", "adjacency-matrix")
     .attr("transform", `translate(${offsetX},${offsetY})`);
 
-  // Draw cells
+  // Draw cells as split triangles
   const cellsGroup = svg.append("g")
     .attr("class", "matrix-cells");
 
-  cellsGroup.selectAll("rect.matrix-cell")
+  // Normalize values for color intensity (use maxConnections for scaling)
+  const normalizeValue = (val) => maxConnections > 0 ? Math.min(val / maxConnections, 1) : 0;
+
+  // For each cell, draw background rect + two triangles
+  const cellGroups = cellsGroup.selectAll("g.matrix-cell")
     .data(layout.cells)
     .enter()
-    .append("rect")
+    .append("g")
     .attr("class", "matrix-cell")
+    .style("cursor", d => (d.outbound > 0 || d.inbound > 0) ? "pointer" : "default");
+
+  // Background rectangle (for empty cells and border)
+  cellGroups.append("rect")
+    .attr("class", "cell-bg")
     .attr("x", d => d.position.x)
     .attr("y", d => d.position.y)
     .attr("width", d => d.position.width)
     .attr("height", d => d.position.height)
-    .attr("fill", d => d.value > 0 ? connectionColor : noConnectionColor)
-    .attr("stroke", "#e2e8f0")
-    .attr("stroke-width", 0.5)
-    .style("cursor", d => d.value > 0 ? "pointer" : "default")
+    .attr("fill", noConnectionColor)
+    .attr("stroke", "#2d3748")
+    .attr("stroke-width", 0.5);
+
+  // Upper-left triangle (outbound: row imports col)
+  cellGroups.append("path")
+    .attr("class", "cell-outbound")
+    .attr("d", d => upperLeftTriangle(d.position.x, d.position.y, d.position.width, d.position.height))
+    .attr("fill", d => getOutboundColor(normalizeValue(d.outbound)))
+    .attr("stroke", "none");
+
+  // Lower-right triangle (inbound: col imports row)
+  cellGroups.append("path")
+    .attr("class", "cell-inbound")
+    .attr("d", d => lowerRightTriangle(d.position.x, d.position.y, d.position.width, d.position.height))
+    .attr("fill", d => getInboundColor(normalizeValue(d.inbound)))
+    .attr("stroke", "none");
+
+  // Diagonal line separating triangles (only when there's data)
+  cellGroups.filter(d => d.outbound > 0 || d.inbound > 0)
+    .append("line")
+    .attr("class", "cell-divider")
+    .attr("x1", d => d.position.x + d.position.width)
+    .attr("y1", d => d.position.y)
+    .attr("x2", d => d.position.x)
+    .attr("y2", d => d.position.y + d.position.height)
+    .attr("stroke", "#4a5568")
+    .attr("stroke-width", 0.5);
+
+  // Interaction handlers on the cell group
+  cellGroups
     .on("mouseenter", function(event, d) {
-      if (d.value > 0) {
-        select(this)
-          .attr("stroke", "#2d3748")
+      if (d.outbound > 0 || d.inbound > 0) {
+        select(this).select(".cell-bg")
+          .attr("stroke", "#ffffff")
           .attr("stroke-width", 2);
 
         // Highlight corresponding row and column labels
@@ -68,17 +129,20 @@ export const renderAdjacencyMatrix_ = (layout) => (centralName) => (importNames)
           .attr("font-weight", l => l.index === d.col ? "bold" : "normal")
           .attr("fill", l => l.index === d.col ? "#ffffff" : "#e2e8f0");
 
-        // Show tooltip
-        const tooltipContent = `
-          <div class="tooltip-header">${d.rowName}</div>
-          <div class="tooltip-package">imports ${d.colName}</div>
-        `;
-        showTooltip_(tooltipContent)(event.pageX)(event.pageY)();
+        // Build tooltip content
+        let tooltipLines = [`<div class="tooltip-header">${d.rowName} ↔ ${d.colName}</div>`];
+        if (d.outbound > 0) {
+          tooltipLines.push(`<div class="tooltip-package" style="color: ${outboundBaseColor}">→ imports: ${d.outbound}</div>`);
+        }
+        if (d.inbound > 0) {
+          tooltipLines.push(`<div class="tooltip-package" style="color: ${inboundBaseColor}">← imported by: ${d.inbound}</div>`);
+        }
+        showTooltip_(tooltipLines.join(''))(event.pageX)(event.pageY)();
       }
     })
     .on("mouseleave", function(event, d) {
-      select(this)
-        .attr("stroke", "#e2e8f0")
+      select(this).select(".cell-bg")
+        .attr("stroke", "#2d3748")
         .attr("stroke-width", 0.5);
 
       // Reset label styles
