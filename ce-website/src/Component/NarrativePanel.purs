@@ -61,12 +61,14 @@ type State =
   , projects :: Array ProjectInfo
   , hintText :: Maybe String
   , projectDropdownOpen :: Boolean
+  , originView :: Maybe OverviewView  -- Where we came from (for back button label)
   }
 
 -- | Actions
 data Action
   = HandleInput Input
   | SelectView OverviewView  -- Click on an icon to change view
+  | GoBack                   -- Click the back button in detail view
   | ToggleProjectDropdown
   | SelectProject Int -- Project ID selected
 
@@ -75,10 +77,12 @@ data Query a
   = SetViewState ViewState a
   | SetHintText (Maybe String) a
   | SetPackagePalette (Array ColorEntry) a
+  | SetOriginView OverviewView a  -- Set the origin view for back button label
 
 -- | Output messages to parent
 data Output
   = ViewSelected OverviewView  -- User clicked an icon
+  | BackRequested              -- User clicked the back button
   | ProjectSelected Int -- Project ID selected
 
 -- =============================================================================
@@ -106,6 +110,7 @@ initialState input =
   , projects: input.projects
   , hintText: Nothing
   , projectDropdownOpen: false
+  , originView: Nothing
   }
 
 -- =============================================================================
@@ -138,15 +143,52 @@ render state =
     , renderProjectSelector state
     ]
 
--- | Render the four view icons
+-- | Render view icons OR back button depending on view state
 renderViewIcons :: forall m. State -> H.ComponentHTML Action () m
 renderViewIcons state =
+  case state.viewState of
+    Detail _ -> renderBackButton state.originView
+    _ ->
+      let
+        currentOverview = getBaseOverview state.viewState
+        allViews = [ TreemapView, TreeView, ForceView, TopoView ]
+      in
+        HH.div [ HP.class_ (HH.ClassName "view-icons") ]
+          (map (renderViewIcon currentOverview) allViews)
+
+-- | Render back button for detail views
+renderBackButton :: forall m. Maybe OverviewView -> H.ComponentHTML Action () m
+renderBackButton mOrigin =
   let
-    currentOverview = getBaseOverview state.viewState
-    allViews = [ TreemapView, TreeView, ForceView, TopoView ]
+    originLabel = case mOrigin of
+      Just ov -> viewLabel ov
+      Nothing -> "Back"
   in
-    HH.div [ HP.class_ (HH.ClassName "view-icons") ]
-      (map (renderViewIcon currentOverview) allViews)
+    HH.div [ HP.class_ (HH.ClassName "view-icons view-icons--back") ]
+      [ HH.button
+          [ HP.class_ (HH.ClassName "back-button")
+          , HP.title ("Back to " <> originLabel)
+          , HE.onClick \_ -> GoBack
+          ]
+          [ HH.elementNS svgNS (ElemName "svg")
+              [ HP.attr (HH.AttrName "viewBox") "0 0 24 24"
+              , HP.attr (HH.AttrName "width") "20"
+              , HP.attr (HH.AttrName "height") "20"
+              ]
+              [ HH.elementNS svgNS (ElemName "path")
+                  [ HP.attr (HH.AttrName "d") backArrowIcon
+                  , HP.attr (HH.AttrName "fill") "currentColor"
+                  ]
+                  []
+              ]
+          , HH.span [ HP.class_ (HH.ClassName "back-label") ]
+              [ HH.text ("← " <> originLabel) ]
+          ]
+      ]
+
+-- | SVG path for back arrow icon
+backArrowIcon :: String
+backArrowIcon = "M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"
 
 -- | Render a single view icon
 renderViewIcon :: forall m. OverviewView -> OverviewView -> H.ComponentHTML Action () m
@@ -346,6 +388,10 @@ handleAction = case _ of
     log $ "[NarrativePanel] View selected: " <> viewLabel newView
     H.raise (ViewSelected newView)
 
+  GoBack -> do
+    log "[NarrativePanel] Back button clicked"
+    H.raise BackRequested
+
   ToggleProjectDropdown -> do
     state <- H.get
     H.modify_ _ { projectDropdownOpen = not state.projectDropdownOpen }
@@ -371,6 +417,11 @@ handleQuery = case _ of
 
   SetPackagePalette palette a -> do
     H.modify_ _ { packagePalette = palette }
+    pure (Just a)
+
+  SetOriginView ov a -> do
+    log $ "[NarrativePanel] SetOriginView: " <> viewLabel ov
+    H.modify_ _ { originView = Just ov }
     pure (Just a)
 
 -- | Helper to show ViewState for logging

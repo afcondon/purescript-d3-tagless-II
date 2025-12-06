@@ -12,6 +12,7 @@ module Engine.Explorer
   , reloadWithProject
   , setViewState  -- Public API for changing view state
   , navigateBack
+  , getOriginView  -- Get the origin view for back navigation
   , updateNodeColors
   ) where
 
@@ -263,11 +264,12 @@ globalNavigationStackRef = unsafePerformEffect $ Ref.new []
 type FocusState =
   { focusedNodeId :: Maybe Int -- Currently focused node (Nothing = full view)
   , fullNodes :: Array SimNode -- Original full node set for restoration
+  , originView :: Maybe OverviewView -- The view we came from (Tree or Force)
   }
 
 -- | Global ref for focus state
 globalFocusRef :: Ref FocusState
-globalFocusRef = unsafePerformEffect $ Ref.new { focusedNodeId: Nothing, fullNodes: [] }
+globalFocusRef = unsafePerformEffect $ Ref.new { focusedNodeId: Nothing, fullNodes: [], originView: Nothing }
 
 -- | Global ref for view transition state (GUP-style enter/exit/update)
 globalTransitionRef :: Ref VT.TransitionState
@@ -477,7 +479,7 @@ reloadWithProject projectId = do
   Ref.write Object.empty globalDeclarationsRef
   Ref.write Object.empty globalFunctionCallsRef
   Ref.write [] globalNavigationStackRef
-  Ref.write { focusedNodeId: Nothing, fullNodes: [] } globalFocusRef
+  Ref.write { focusedNodeId: Nothing, fullNodes: [], originView: Nothing } globalFocusRef
 
   -- Clear tree links if any
   clearTreeLinks
@@ -1153,11 +1155,16 @@ toggleFocus clickedNode = do
             <> show (Array.length neighborhoodNodes)
             <> " nodes)"
 
-          -- Update focus state
-          Ref.write { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore } globalFocusRef
+          -- Record the origin view (must be done before view change)
+          currentView <- Ref.read globalViewStateRef
+          let origin = case currentView of
+                Overview ov -> Just ov
+                Detail _ -> focus.originView -- Keep existing origin if already in detail
+
+          -- Update focus state with origin
+          Ref.write { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore, originView: origin } globalFocusRef
 
           -- Push current view to navigation stack before changing
-          currentView <- Ref.read globalViewStateRef
           Ref.modify_ (Array.cons currentView) globalNavigationStackRef
 
           -- Update ViewState for neighborhood view and notify via callback
@@ -1424,6 +1431,13 @@ renderNeighborhoodLinksD3 links = do
 -- Navigation
 -- =============================================================================
 
+-- | Get the origin view (where the user came from before entering Detail view)
+-- | Returns the overview view they were on, or TreemapView as fallback
+getOriginView :: Effect OverviewView
+getOriginView = do
+  focus <- Ref.read globalFocusRef
+  pure $ fromMaybe TreemapView focus.originView
+
 -- | Navigate back to the previous view in the navigation stack
 -- | Returns true if navigation happened, false if stack was empty
 navigateBack :: Effect Boolean
@@ -1466,9 +1480,6 @@ restoreFullView fullNodes targetView sim = do
   -- Update simulation with full nodes
   Sim.setNodes fullNodes sim
 
-  -- Restore grid forces
-  restoreGridForces fullNodes sim
-
   -- Clear neighborhood links and disable link updates
   clearTreeLinks
 
@@ -1478,12 +1489,21 @@ restoreFullView fullNodes targetView sim = do
   clearNodesGroup
   _ <- runD3v2M $ renderNodesOnly targetView fullNodes
 
-  -- Restore the original Scene tick handler (uses circle positions)
+  -- Restore the original Scene tick handler and trigger appropriate scene
   mStateRef <- Ref.read globalStateRef
   case mStateRef of
     Just stateRef -> do
       Scene.clearLinksGroupId stateRef
-      Sim.onTick (Scene.onTick stateRef) sim
+      -- Restore tick handler with view transition support
+      let nodesSelector = "#explorer-nodes"
+      Sim.onTick (tickWithPendingViewCheck stateRef nodesSelector) sim
+      -- Trigger appropriate scene based on target view
+      case targetView of
+        Overview TreemapView -> goToScene TreemapForm stateRef
+        Overview TreeView -> goToScene TreeForm stateRef
+        Overview ForceView -> goToScene TreeRun stateRef
+        Overview TopoView -> goToScene TopoForm stateRef
+        Detail _ -> pure unit  -- Detail views shouldn't reach this path
     Nothing -> pure unit
 
   -- Update ViewState and notify via callback
@@ -1495,7 +1515,7 @@ restoreFullView fullNodes targetView sim = do
   updateNodeColors targetView
 
   -- Clear focus state
-  Ref.write { focusedNodeId: Nothing, fullNodes: [] } globalFocusRef
+  Ref.write { focusedNodeId: Nothing, fullNodes: [], originView: Nothing } globalFocusRef
 
   Sim.reheat sim
   pure unit

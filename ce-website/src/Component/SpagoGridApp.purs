@@ -15,7 +15,7 @@ import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Engine.Explorer as Explorer
-import Engine.ViewState (ViewState(..), OverviewView(..), toOverview, viewDescription)
+import Engine.ViewState (ViewState(..), OverviewView(..), toOverview, viewDescription, isDetail)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
@@ -149,6 +149,11 @@ handleAction = case _ of
       log $ "[SpagoGridApp] ViewState changed to: " <> viewDescription newViewState
       H.modify_ _ { viewState = newViewState }
       void $ H.tell _narrativePanel unit (NarrativePanel.SetViewState newViewState)
+      -- When entering a Detail view, get and send the origin view to NarrativePanel
+      when (isDetail newViewState) do
+        originView <- liftEffect $ Explorer.getOriginView
+        log $ "[SpagoGridApp] Entering detail view, origin: " <> show originView
+        void $ H.tell _narrativePanel unit (NarrativePanel.SetOriginView originView)
 
   PackagePaletteChanged newPalette -> do
     state <- H.get
@@ -193,6 +198,16 @@ handleAction = case _ of
         let newViewState = toOverview newOverview
         H.modify_ _ { viewState = newViewState }
         liftEffect $ Explorer.setViewState newViewState
+
+      -- User clicked the back button in detail view
+      NarrativePanel.BackRequested -> do
+        log "[SpagoGridApp] Back requested from detail view"
+        success <- liftEffect $ Explorer.navigateBack
+        when (not success) do
+          log "[SpagoGridApp] Navigation stack was empty, falling back to Treemap"
+          let fallbackView = Overview TreemapView
+          H.modify_ _ { viewState = fallbackView }
+          liftEffect $ Explorer.setViewState fallbackView
 
       NarrativePanel.ProjectSelected newProjectId -> do
         log $ "[SpagoGridApp] Project selected: " <> show newProjectId
