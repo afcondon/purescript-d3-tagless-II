@@ -322,6 +322,7 @@ hintForView (Overview TreeView) = "Showing import hierarchy from Main."
 hintForView (Overview ForceView) = "Drag nodes to rearrange. Click to explore."
 hintForView (Overview TopoView) = "Package dependencies in topological order."
 hintForView (Detail (NeighborhoodDetail _ _)) = "Click an icon above to return to overview."
+hintForView (Detail (PackageNeighborhoodDetail _)) = "Click an icon above to return to overview."
 hintForView (Detail (FunctionCallsDetail _)) = "Click an icon above to return to overview."
 
 -- | Render the color key based on current view
@@ -581,4 +582,5 @@ showViewState (Overview TreeView) = "Overview(Tree)"
 showViewState (Overview ForceView) = "Overview(Force)"
 showViewState (Overview TopoView) = "Overview(Topo)"
 showViewState (Detail (NeighborhoodDetail name _)) = "Detail(Neighborhood:" <> name <> ")"
+showViewState (Detail (PackageNeighborhoodDetail name)) = "Detail(PackageNeighborhood:" <> name <> ")"
 showViewState (Detail (FunctionCallsDetail name)) = "Detail(FunctionCalls:" <> name <> ")"

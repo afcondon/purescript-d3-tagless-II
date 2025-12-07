@@ -43,6 +43,7 @@ data NeighborhoodViewType
 -- | Detail views are overlays on top of the current overview
 data DetailView
   = NeighborhoodDetail String NeighborhoodViewType  -- Module name + view type
+  | PackageNeighborhoodDetail String  -- Package name - shows modules in package + their deps
   | FunctionCallsDetail String -- Module name - shows call graph
 
 -- | Combined view state
@@ -93,6 +94,8 @@ viewDescription (Overview ForceView) = "Radial import layout"
 viewDescription (Overview TopoView) = "Package dependencies"
 viewDescription (Detail (NeighborhoodDetail modName viewType)) =
   "Neighborhood of " <> modName <> " (" <> neighborhoodViewLabel viewType <> ")"
+viewDescription (Detail (PackageNeighborhoodDetail pkgName)) =
+  "Modules in " <> pkgName
 viewDescription (Detail (FunctionCallsDetail modName)) = "Function calls in " <> modName
 
 -- =============================================================================

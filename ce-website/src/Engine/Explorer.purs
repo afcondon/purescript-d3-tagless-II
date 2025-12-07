@@ -23,10 +23,11 @@ import Prelude
 
 import Data.Array as Array
 import Data.Either (Either(..))
-import Data.Foldable (foldl)
+import Data.Foldable (foldl, minimum, maximum)
 import Data.Int (toNumber)
 import Data.Map as Map
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.Ord (comparing)
 import Data.Nullable as Nullable
 import Data.Traversable (traverse, for_)
 import Data.Tuple (Tuple(..))
@@ -1176,6 +1177,7 @@ showViewState (Overview TreeView) = "Overview(Tree)"
 showViewState (Overview ForceView) = "Overview(Force)"
 showViewState (Overview TopoView) = "Overview(Topo)"
 showViewState (Detail (NeighborhoodDetail name _)) = "Detail(Neighborhood:" <> name <> ")"
+showViewState (Detail (PackageNeighborhoodDetail name)) = "Detail(PackageNeighborhood:" <> name <> ")"
 showViewState (Detail (FunctionCallsDetail name)) = "Detail(FunctionCalls:" <> name <> ")"
 
 -- | Toggle focus on a node's neighborhood
@@ -1205,37 +1207,93 @@ toggleFocus clickedNode = do
           -- Store full nodes if not already stored
           let nodesToStore = if Array.null focus.fullNodes then currentNodes else focus.fullNodes
 
-          -- Build neighborhood: clicked node + its targets + its sources
-          let
-            neighborhoodIds = Set.fromFoldable $
-              [ clickedNode.id ] <> clickedNode.targets <> clickedNode.sources
+          -- Build neighborhood based on node type
+          case clickedNode.nodeType of
+            PackageNode -> do
+              -- Package click: show packages in adjacent topological layers
+              -- This shows the clicked package's layer ±1 (three layers total, or fewer at edges)
+              let packageName = clickedNode.name
+              let clickedLayer = clickedNode.topoLayer
 
-          let neighborhoodNodes = Array.filter (\n -> Set.member n.id neighborhoodIds) currentNodes
+              -- Find all packages (to determine min/max layer)
+              let allPackages = Array.filter (\n -> n.nodeType == PackageNode) nodesToStore
+              let minLayer = fromMaybe 0 $ minimum (map _.topoLayer allPackages)
+              let maxLayer = fromMaybe 0 $ maximum (map _.topoLayer allPackages)
 
-          log $ "[Explorer] Focusing on node " <> show clickedNode.id
-            <> " (neighborhood: "
-            <> show (Array.length neighborhoodNodes)
-            <> " nodes)"
+              -- Build neighborhood: packages within ±1 layer of clicked package
+              -- At edges (minLayer or maxLayer), only show 2 layers instead of 3
+              let neighborhoodNodes = Array.filter (\n ->
+                    n.nodeType == PackageNode &&
+                    n.topoLayer >= (clickedLayer - 1) &&
+                    n.topoLayer <= (clickedLayer + 1)
+                  ) nodesToStore
 
-          -- Record the origin view (must be done before view change)
-          currentView <- Ref.read globalViewStateRef
-          let origin = case currentView of
-                Overview ov -> Just ov
-                Detail _ -> focus.originView -- Keep existing origin if already in detail
+              log $ "[Explorer] Focusing on package " <> packageName
+                <> " (layer " <> show clickedLayer <> ", range " <> show minLayer <> "-" <> show maxLayer
+                <> ", neighborhood: " <> show (Array.length neighborhoodNodes) <> " packages)"
 
-          -- Update focus state with origin
-          Ref.write { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore, originView: origin } globalFocusRef
+              -- Record the origin view (must be done before view change)
+              currentView <- Ref.read globalViewStateRef
+              let origin = case currentView of
+                    Overview ov -> Just ov
+                    Detail _ -> focus.originView
 
-          -- Push current view to navigation stack before changing
-          Ref.modify_ (Array.cons currentView) globalNavigationStackRef
+              -- Update focus state with origin
+              Ref.write { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore, originView: origin } globalFocusRef
 
-          -- Update ViewState for neighborhood view and notify via callback
-          let neighborhoodView = Detail (NeighborhoodDetail clickedNode.name BubblePackView)
-          Ref.write neighborhoodView globalViewStateRef
-          notifyViewStateChanged neighborhoodView
+              -- Push current view to navigation stack before changing
+              Ref.modify_ (Array.cons currentView) globalNavigationStackRef
 
-          -- Update simulation and DOM
-          focusOnNeighborhood neighborhoodNodes state.simulation
+              -- Update ViewState for package neighborhood view
+              let packageView = Detail (PackageNeighborhoodDetail packageName)
+              Ref.write packageView globalViewStateRef
+              notifyViewStateChanged packageView
+
+              -- Update simulation and DOM with package-specific rendering
+              focusOnPackageNeighborhood packageName neighborhoodNodes state.simulation
+
+              -- EXPERIMENTAL: Module-level package view (commented out - too dense for large packages)
+              -- This shows all modules in a package + their external module dependencies
+              -- Could be useful with additional work (filtering, clustering, etc.)
+              --
+              -- let modulesInPackage = Array.filter (\n -> n.nodeType == ModuleNode && n.package == packageName) nodesToStore
+              -- let moduleIds = Set.fromFoldable $ map _.id modulesInPackage
+              -- let externalDepIds = Set.fromFoldable $ Array.concatMap (\m -> m.targets <> m.sources) modulesInPackage
+              -- let neighborhoodIds = Set.union moduleIds externalDepIds
+              -- let neighborhoodNodes = Array.filter (\n -> n.nodeType == ModuleNode && Set.member n.id neighborhoodIds) nodesToStore
+
+            ModuleNode -> do
+              -- Module click: show this module + its direct dependencies
+              let
+                neighborhoodIds = Set.fromFoldable $
+                  [ clickedNode.id ] <> clickedNode.targets <> clickedNode.sources
+
+              let neighborhoodNodes = Array.filter (\n -> Set.member n.id neighborhoodIds) currentNodes
+
+              log $ "[Explorer] Focusing on node " <> show clickedNode.id
+                <> " (neighborhood: "
+                <> show (Array.length neighborhoodNodes)
+                <> " nodes)"
+
+              -- Record the origin view (must be done before view change)
+              currentView <- Ref.read globalViewStateRef
+              let origin = case currentView of
+                    Overview ov -> Just ov
+                    Detail _ -> focus.originView -- Keep existing origin if already in detail
+
+              -- Update focus state with origin
+              Ref.write { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore, originView: origin } globalFocusRef
+
+              -- Push current view to navigation stack before changing
+              Ref.modify_ (Array.cons currentView) globalNavigationStackRef
+
+              -- Update ViewState for neighborhood view and notify via callback
+              let neighborhoodView = Detail (NeighborhoodDetail clickedNode.name BubblePackView)
+              Ref.write neighborhoodView globalViewStateRef
+              notifyViewStateChanged neighborhoodView
+
+              -- Update simulation and DOM
+              focusOnNeighborhood neighborhoodNodes state.simulation
 
 -- | Focus on a subset of nodes
 focusOnNeighborhood :: Array SimNode -> Scene.CESimulation -> Effect Unit
@@ -1326,6 +1384,97 @@ focusOnNeighborhood nodes sim = do
       Sim.reheat sim
 
   pure unit
+
+-- | Focus on a package neighborhood (packages in adjacent topo layers)
+-- | Unlike focusOnNeighborhood, this renders packages as simple circles with labels
+-- | positioned by their topological layer
+focusOnPackageNeighborhood :: String -> Array SimNode -> Scene.CESimulation -> Effect Unit
+focusOnPackageNeighborhood clickedPackageName nodes sim = do
+  log $ "[Explorer] Focusing on package neighborhood: " <> clickedPackageName
+    <> " with " <> show (Array.length nodes) <> " packages"
+
+  -- Hide any existing tooltip
+  Tooltip.hideTooltip
+
+  -- Clear any existing DOM elements
+  clearTreeLinks
+  clearNodesGroup
+
+  -- Find the clicked package's layer and the min/max layers in neighborhood
+  let clickedNode = Array.find (\n -> n.name == clickedPackageName) nodes
+  let clickedLayer = maybe 0 _.topoLayer clickedNode
+  let allLayers = map _.topoLayer nodes
+  let minLayer = fromMaybe 0 $ minimum allLayers
+  let maxLayer = fromMaybe 0 $ maximum allLayers
+
+  -- Calculate layered positions (x spread within layer, y by layer)
+  -- Group packages by layer for horizontal distribution
+  let layerGroups = Array.groupBy (\a b -> a.topoLayer == b.topoLayer) $
+                    Array.sortBy (comparing _.topoLayer) nodes
+
+  -- Viewport dimensions - viewBox is centered at origin (-1200 -800 2400 1600)
+  let viewWidth = ViewBox.viewBoxWidth
+  let viewHeight = ViewBox.viewBoxHeight
+  let centerX = 0.0  -- Origin is center
+  let centerY = 0.0
+
+  -- Calculate layer spacing (use ~half viewport height for compact layout)
+  let numLayers = maxLayer - minLayer + 1
+  let totalLayerSpan = viewHeight / 2.0  -- Half the viewport height
+  let layerHeight = if numLayers > 1
+                    then totalLayerSpan / toNumber (numLayers - 1)
+                    else 0.0
+
+  -- Position nodes by layer (top = high layer, bottom = low layer)
+  let positionedNodes = Array.concat $ Array.mapWithIndex (\_ group ->
+        let groupArray = Array.fromFoldable group
+            layerNum = maybe minLayer _.topoLayer (Array.head groupArray)
+            -- Y position: higher layer = higher on screen (lower Y)
+            yPos = centerY - (toNumber (layerNum - clickedLayer)) * layerHeight
+            -- X positions: centered, spread evenly
+            numInLayer = Array.length groupArray
+            nodeSpacing = 120.0  -- Space between nodes
+            rowWidth = toNumber (numInLayer - 1) * nodeSpacing
+            xStart = centerX - rowWidth / 2.0  -- Center the row
+        in Array.mapWithIndex (\nodeIdx node ->
+             let xPos = xStart + toNumber nodeIdx * nodeSpacing
+             in node { x = xPos, y = yPos, fx = Nullable.notNull xPos, fy = Nullable.notNull yPos }
+           ) groupArray
+      ) layerGroups
+
+  -- Update simulation with positioned nodes (pinned so they don't move)
+  Sim.setNodes positionedNodes sim
+
+  -- Get LIVE nodes from simulation
+  liveNodes <- Sim.getNodes sim
+
+  -- Render package circles with labels
+  renderPackageNeighborhoodNodes clickedPackageName liveNodes clickedLayer
+
+  -- No simulation needed - nodes are pinned in place
+  pure unit
+
+-- | Render package nodes for the neighborhood view
+-- | Packages are rendered as circles with labels, highlighted if clicked
+-- | Uses FFI for direct DOM manipulation since PSD3v2 doesn't have simple append
+renderPackageNeighborhoodNodes :: String -> Array SimNode -> Int -> Effect Unit
+renderPackageNeighborhoodNodes clickedPkg nodes clickedLayer = do
+  for_ nodes \node -> do
+    let isClicked = node.name == clickedPkg
+    let isClickedLayer = node.topoLayer == clickedLayer
+    let r = if isClicked then 35.0 else 25.0
+    let fillColor = if isClicked
+                    then "#fbbf24"  -- Amber for clicked
+                    else if isClickedLayer
+                    then "#60a5fa"  -- Blue for same layer
+                    else "#94a3b8"  -- Gray for other layers
+    let strokeColor = if isClicked then "#f59e0b" else "#475569"
+    let sw = if isClicked then "3" else "2"
+    let fw = if isClicked then "600" else "400"
+    renderPackageNodeFFI node.x node.y node.name node.topoLayer r fillColor strokeColor sw fw
+
+-- | FFI for rendering a package node with circle and labels
+foreign import renderPackageNodeFFI :: Number -> Number -> String -> Int -> Number -> String -> String -> String -> String -> Effect Unit
 
 -- | Tick callback for bubble pack mode
 -- | Updates group transforms and link positions

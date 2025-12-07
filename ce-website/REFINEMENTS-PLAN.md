@@ -133,7 +133,37 @@ Phase 2 complete!
 - [x] Tree animation (nodes + links together - grow from root with synchronized bezier curve links)
 
 Phase 3 in progress:
-- [ ] Package click → neighborhood
+- [x] Package click → neighborhood (shows packages in adjacent topo layers)
+  - TODO: Add labels to package nodes
+  - TODO: Order packages by layer (layered layout)
+  - TODO: Highlight clicked package
+  - TODO: Size nodes by module count
 - [x] Module search (fuzzy substring matching, click to navigate)
   - TODO: Add arrow key navigation in dropdown
 - [ ] Simultaneous views
+
+---
+
+## Future Ideas
+
+### 9. Sankey TopoGraph
+A new overview view showing module flow through the dependency graph as a Sankey diagram.
+
+**Concept:**
+- Packages as vertical bands/nodes arranged by topological layer
+- Module imports as flows between packages
+- Flow thickness proportional to number of module-level imports
+- Could distinguish used vs unused modules with color/opacity
+- Shows how dependencies "flow" from leaf packages up through Main
+
+**Features:**
+- Visual representation of coupling strength between packages
+- Identify bottleneck packages (lots of flow through)
+- See which packages are heavily interconnected
+- Could filter to show only used modules or all modules
+
+**Implementation:**
+- Use d3-sankey layout
+- Build link data from module import relationships
+- Aggregate by package for cleaner visualization
+- May need to handle cycles (could use dashed lines or separate treatment)
