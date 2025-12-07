@@ -42,8 +42,17 @@ const getInboundColor = (intensity) => {
 // layout: { cells, rowLabels, colLabels, gridWidth, gridHeight, totalWidth, totalHeight }
 // Now expects cells to have outbound and inbound fields
 export const renderAdjacencyMatrix_ = (layout) => (centralName) => (importNames) => (dependentNames) => (maxConnections) => () => {
-  // Clear existing
-  clearMatrixSvg_();
+  renderAdjacencyMatrixWithOffset_(layout)(centralName)(importNames)(dependentNames)(maxConnections)(0)(0)(1.0)();
+};
+
+// Render adjacency matrix at a specific offset (for triptych view)
+// panelOffsetX, panelOffsetY: position offset from center (before centering the matrix)
+// scale: scale factor (e.g., 0.33 for triptych)
+export const renderAdjacencyMatrixWithOffset_ = (layout) => (centralName) => (importNames) => (dependentNames) => (maxConnections) => (panelOffsetX) => (panelOffsetY) => (scale) => () => {
+  // Clear existing (only if rendering at origin - triptych handles its own clearing)
+  if (panelOffsetX === 0 && panelOffsetY === 0) {
+    clearMatrixSvg_();
+  }
 
   // Get or create container
   let container = select("#adjacency-matrix-container");
@@ -53,14 +62,14 @@ export const renderAdjacencyMatrix_ = (layout) => (centralName) => (importNames)
       .attr("id", "adjacency-matrix-container");
   }
 
-  // Center the matrix in the viewport
+  // Center the matrix in its panel
   // The SVG viewBox is centered at (0,0) with negative offsets
-  const offsetX = -layout.totalWidth / 2;
-  const offsetY = -layout.totalHeight / 2;
+  const matrixCenterX = -layout.totalWidth / 2;
+  const matrixCenterY = -layout.totalHeight / 2;
 
   const svg = container.append("g")
     .attr("class", "adjacency-matrix")
-    .attr("transform", `translate(${offsetX},${offsetY})`);
+    .attr("transform", `translate(${panelOffsetX},${panelOffsetY}) scale(${scale}) translate(${matrixCenterX},${matrixCenterY})`);
 
   // Draw cells as split triangles
   const cellsGroup = svg.append("g")

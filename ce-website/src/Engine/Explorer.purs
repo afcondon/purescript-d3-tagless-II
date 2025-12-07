@@ -1288,13 +1288,16 @@ toggleFocus clickedNode = do
               -- Push current view to navigation stack before changing
               Ref.modify_ (Array.cons currentView) globalNavigationStackRef
 
-              -- Update ViewState for neighborhood view and notify via callback
-              let neighborhoodView = Detail (NeighborhoodDetail clickedNode.name BubblePackView)
+              -- Update ViewState for neighborhood view (always triptych now)
+              let neighborhoodView = Detail (NeighborhoodDetail clickedNode.name TriptychView)
               Ref.write neighborhoodView globalViewStateRef
               notifyViewStateChanged neighborhoodView
 
-              -- Update simulation and DOM
+              -- Update simulation and DOM (renders bubble packs)
               focusOnNeighborhood neighborhoodNodes state.simulation
+
+              -- Wrap with triptych layout (adds chord + matrix panels)
+              renderTriptychWithDeclarations clickedNode.name neighborhoodNodes
 
 -- | Focus on a subset of nodes
 focusOnNeighborhood :: Array SimNode -> Scene.CESimulation -> Effect Unit
@@ -1787,13 +1790,16 @@ navigateToModuleByName moduleName = do
           -- Push current view to navigation stack before changing
           Ref.modify_ (Array.cons currentView) globalNavigationStackRef
 
-          -- Update ViewState for neighborhood view and notify via callback
-          let neighborhoodView = Detail (NeighborhoodDetail targetNode.name BubblePackView)
+          -- Update ViewState for neighborhood view (always triptych now)
+          let neighborhoodView = Detail (NeighborhoodDetail targetNode.name TriptychView)
           Ref.write neighborhoodView globalViewStateRef
           notifyViewStateChanged neighborhoodView
 
-          -- Update simulation and DOM
+          -- Update simulation and DOM (renders bubble packs)
           focusOnNeighborhood neighborhoodNodes state.simulation
+
+          -- Wrap with triptych layout (adds chord + matrix panels)
+          renderTriptychWithDeclarations targetNode.name neighborhoodNodes
 
           pure true
 

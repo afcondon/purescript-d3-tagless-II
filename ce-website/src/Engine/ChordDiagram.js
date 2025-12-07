@@ -15,8 +15,17 @@ export const splitOnDotImpl = (str) => str.split(".");
 // ribbons: Array of { path, color, sourceModule, targetModule, sourceIndex, targetIndex }
 // labels: Array of { text, x, y, anchor, rotation, index }
 export const renderChordDiagram_ = (width) => (height) => (arcs) => (ribbons) => (labels) => () => {
-  // Clear existing
-  clearChordSvg_();
+  renderChordDiagramWithOffset_(width)(height)(arcs)(ribbons)(labels)(0)(0)(1.0)();
+};
+
+// Render chord diagram at a specific offset (for triptych view)
+// offsetX, offsetY: position offset from center
+// scale: scale factor (e.g., 0.33 for triptych)
+export const renderChordDiagramWithOffset_ = (width) => (height) => (arcs) => (ribbons) => (labels) => (offsetX) => (offsetY) => (scale) => () => {
+  // Clear existing (only if rendering at origin - triptych handles its own clearing)
+  if (offsetX === 0 && offsetY === 0) {
+    clearChordSvg_();
+  }
 
   // Get or create container
   let container = select("#chord-diagram-container");
@@ -27,9 +36,10 @@ export const renderChordDiagram_ = (width) => (height) => (arcs) => (ribbons) =>
   }
 
   // The SVG viewBox is centered at (0,0) with negative offsets, so (0,0) is the center
-  // Create SVG structure - no translation needed since viewBox centers at origin
+  // Create SVG structure with offset and scale for triptych layout
   const svg = container.append("g")
-    .attr("class", "chord-diagram");
+    .attr("class", "chord-diagram")
+    .attr("transform", `translate(${offsetX},${offsetY}) scale(${scale})`);
 
   // Ribbons (rendered first so arcs appear on top)
   const ribbonsGroup = svg.append("g")

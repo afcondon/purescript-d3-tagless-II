@@ -197,16 +197,11 @@ renderModuleSearch state =
       ]
       [ HH.text moduleName ]
 
--- | Render view icons OR back button + view type toggles depending on view state
+-- | Render view icons OR back button depending on view state
+-- | Neighborhood detail now uses triptych view only, so no view type toggles needed
 renderViewIcons :: forall m. State -> H.ComponentHTML Action () m
 renderViewIcons state =
   case state.viewState of
-    Detail (NeighborhoodDetail _ viewType) ->
-      -- In neighborhood detail: show back button + view type toggles
-      HH.div [ HP.class_ (HH.ClassName "view-icons-container") ]
-        [ renderBackButton state.originView
-        , renderViewTypeToggles viewType
-        ]
     Detail _ -> renderBackButton state.originView
     _ ->
       let
@@ -215,39 +210,6 @@ renderViewIcons state =
       in
         HH.div [ HP.class_ (HH.ClassName "view-icons") ]
           (map (renderViewIcon currentOverview) allViews)
-
--- | Render toggle icons for neighborhood view types (Bubbles, Chord, Matrix)
-renderViewTypeToggles :: forall m. NeighborhoodViewType -> H.ComponentHTML Action () m
-renderViewTypeToggles currentViewType =
-  HH.div [ HP.class_ (HH.ClassName "view-type-toggles") ]
-    (map (renderViewTypeToggle currentViewType) [ BubblePackView, ChordView, MatrixView, TriptychView ])
-
--- | Render a single view type toggle icon
-renderViewTypeToggle :: forall m. NeighborhoodViewType -> NeighborhoodViewType -> H.ComponentHTML Action () m
-renderViewTypeToggle currentViewType thisViewType =
-  let
-    isActive = currentViewType == thisViewType
-    label = neighborhoodViewLabel thisViewType
-    iconSrc = case thisViewType of
-      BubblePackView -> "icons/Neighborhood.jpeg"
-      ChordView -> "icons/Chord.jpeg"
-      MatrixView -> "icons/Adjacency.jpeg"
-      TriptychView -> "icons/Adjacency.jpeg"  -- Placeholder until dedicated icon
-  in
-    HH.button
-      [ HP.classes $ [ HH.ClassName "view-type-toggle" ] <>
-          if isActive then [ HH.ClassName "view-type-toggle--active" ] else []
-      , HP.title label
-      , HE.onClick \_ -> SelectNeighborhoodViewType thisViewType
-      ]
-      [ HH.img
-          [ HP.src iconSrc
-          , HP.alt label
-          , HP.width 38
-          , HP.height 38
-          , HP.class_ (HH.ClassName "view-type-toggle-img")
-          ]
-      ]
 
 -- | Render back button for detail views
 renderBackButton :: forall m. Maybe OverviewView -> H.ComponentHTML Action () m
