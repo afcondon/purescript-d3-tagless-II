@@ -13,6 +13,8 @@ module Engine.Explorer
   , setViewState  -- Public API for changing view state
   , setNeighborhoodViewType  -- Switch between Bubbles/Chord/Matrix in neighborhood view
   , navigateBack
+  , navigateToModuleByName  -- Navigate to module neighborhood by name (for search)
+  , getModuleNames  -- Get all module names for search
   , getOriginView  -- Get the origin view for back navigation
   , updateNodeColors
   ) where
@@ -1576,6 +1578,74 @@ getOriginView :: Effect OverviewView
 getOriginView = do
   focus <- Ref.read globalFocusRef
   pure $ fromMaybe TreemapView focus.originView
+
+-- | Get all module names for search functionality
+getModuleNames :: Effect (Array String)
+getModuleNames = do
+  mStateRef <- Ref.read globalStateRef
+  case mStateRef of
+    Nothing -> pure []
+    Just stateRef -> do
+      state <- Ref.read stateRef
+      nodes <- Sim.getNodes state.simulation
+      let moduleNames = Array.mapMaybe (\n -> if n.nodeType == ModuleNode && n.name /= "" then Just n.name else Nothing) nodes
+      pure $ Array.sort moduleNames
+
+-- | Navigate to a module neighborhood by name (for search)
+-- | Returns true if module was found and navigation happened
+navigateToModuleByName :: String -> Effect Boolean
+navigateToModuleByName moduleName = do
+  mStateRef <- Ref.read globalStateRef
+  case mStateRef of
+    Nothing -> do
+      log $ "[Explorer] Cannot navigate - no state ref"
+      pure false
+    Just stateRef -> do
+      state <- Ref.read stateRef
+      focus <- Ref.read globalFocusRef
+
+      -- Get current nodes
+      currentNodes <- Sim.getNodes state.simulation
+      -- Use fullNodes if available (may be in a detail view already)
+      let nodesPool = if Array.null focus.fullNodes then currentNodes else focus.fullNodes
+
+      -- Find the module by name
+      case Array.find (\n -> n.name == moduleName && n.nodeType == ModuleNode) nodesPool of
+        Nothing -> do
+          log $ "[Explorer] Module not found: " <> moduleName
+          pure false
+        Just targetNode -> do
+          log $ "[Explorer] Navigating to module: " <> moduleName
+
+          -- Build neighborhood: target node + its targets + its sources
+          let
+            neighborhoodIds = Set.fromFoldable $
+              [ targetNode.id ] <> targetNode.targets <> targetNode.sources
+            neighborhoodNodes = Array.filter (\n -> Set.member n.id neighborhoodIds) nodesPool
+
+          log $ "[Explorer] Found " <> show (Array.length neighborhoodNodes) <> " nodes in neighborhood"
+
+          -- Record the origin view (must be done before view change)
+          currentView <- Ref.read globalViewStateRef
+          let origin = case currentView of
+                Overview ov -> Just ov
+                Detail _ -> focus.originView -- Keep existing origin if already in detail
+
+          -- Update focus state with origin
+          Ref.write { focusedNodeId: Just targetNode.id, fullNodes: nodesPool, originView: origin } globalFocusRef
+
+          -- Push current view to navigation stack before changing
+          Ref.modify_ (Array.cons currentView) globalNavigationStackRef
+
+          -- Update ViewState for neighborhood view and notify via callback
+          let neighborhoodView = Detail (NeighborhoodDetail targetNode.name BubblePackView)
+          Ref.write neighborhoodView globalViewStateRef
+          notifyViewStateChanged neighborhoodView
+
+          -- Update simulation and DOM
+          focusOnNeighborhood neighborhoodNodes state.simulation
+
+          pure true
 
 -- | Navigate back to the previous view in the navigation stack
 -- | Returns true if navigation happened, false if stack was empty

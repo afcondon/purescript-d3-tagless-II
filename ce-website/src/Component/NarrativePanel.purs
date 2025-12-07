@@ -17,6 +17,8 @@ import Prelude
 import Data.Array as Array
 import Data.ColorPalette (LegendItem, PaletteType(..), getPalette)
 import Data.Maybe (Maybe(..))
+import Data.String as String
+import Data.String.Pattern (Pattern(..))
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class.Console (log)
 import Halogen as H
@@ -50,6 +52,7 @@ type Input =
   , projectName :: String
   , projectId :: Int
   , projects :: Array ProjectInfo
+  , moduleNames :: Array String  -- All module names for search
   }
 
 -- | State
@@ -59,9 +62,13 @@ type State =
   , projectName :: String
   , projectId :: Int
   , projects :: Array ProjectInfo
+  , moduleNames :: Array String      -- All module names for search
   , hintText :: Maybe String
   , projectDropdownOpen :: Boolean
   , originView :: Maybe OverviewView  -- Where we came from (for back button label)
+  , searchQuery :: String             -- Current search input
+  , searchResults :: Array String     -- Filtered results
+  , searchOpen :: Boolean             -- Whether dropdown is shown
   }
 
 -- | Actions
@@ -72,6 +79,9 @@ data Action
   | GoBack                   -- Click the back button in detail view
   | ToggleProjectDropdown
   | SelectProject Int -- Project ID selected
+  | SearchInput String       -- User typed in search box
+  | SelectSearchResult String -- User clicked a search result
+  | CloseSearch              -- Close search dropdown
 
 -- | Queries from parent
 data Query a
@@ -86,6 +96,7 @@ data Output
   | NeighborhoodViewTypeSelected NeighborhoodViewType  -- User clicked view type toggle
   | BackRequested              -- User clicked the back button
   | ProjectSelected Int -- Project ID selected
+  | ModuleSearchSelected String -- User selected a module from search
 
 -- =============================================================================
 -- Component
@@ -110,9 +121,13 @@ initialState input =
   , projectName: input.projectName
   , projectId: input.projectId
   , projects: input.projects
+  , moduleNames: input.moduleNames
   , hintText: Nothing
   , projectDropdownOpen: false
   , originView: Nothing
+  , searchQuery: ""
+  , searchResults: []
+  , searchOpen: false
   }
 
 -- =============================================================================
@@ -132,6 +147,9 @@ render state =
     -- Four view icons
     , renderViewIcons state
 
+    -- Module search
+    , renderModuleSearch state
+
     -- Description text
     , renderDescription state.viewState
 
@@ -144,6 +162,31 @@ render state =
     -- Project selector
     , renderProjectSelector state
     ]
+
+-- | Render module search input with dropdown
+renderModuleSearch :: forall m. State -> H.ComponentHTML Action () m
+renderModuleSearch state =
+  HH.div [ HP.class_ (HH.ClassName "module-search-wrapper") ]
+    [ HH.input
+        [ HP.type_ HP.InputText
+        , HP.class_ (HH.ClassName "module-search-input")
+        , HP.placeholder "Search modules..."
+        , HP.value state.searchQuery
+        , HE.onValueInput SearchInput
+        ]
+    , if state.searchOpen && not (Array.null state.searchResults) then
+        HH.div [ HP.class_ (HH.ClassName "module-search-dropdown") ]
+          (Array.take 10 state.searchResults # map renderSearchResult)
+      else
+        HH.text ""
+    ]
+  where
+  renderSearchResult moduleName =
+    HH.div
+      [ HP.class_ (HH.ClassName "module-search-result")
+      , HE.onClick \_ -> SelectSearchResult moduleName
+      ]
+      [ HH.text moduleName ]
 
 -- | Render view icons OR back button + view type toggles depending on view state
 renderViewIcons :: forall m. State -> H.ComponentHTML Action () m
@@ -463,6 +506,7 @@ handleAction = case _ of
       , projectName = input.projectName
       , projectId = input.projectId
       , projects = input.projects
+      , moduleNames = input.moduleNames
       }
 
   SelectView newView -> do
@@ -484,6 +528,27 @@ handleAction = case _ of
   SelectProject projectId -> do
     H.modify_ _ { projectDropdownOpen = false }
     H.raise (ProjectSelected projectId)
+
+  SearchInput query -> do
+    state <- H.get
+    let results = fuzzyMatch query state.moduleNames
+    H.modify_ _ { searchQuery = query, searchResults = results, searchOpen = query /= "" }
+
+  SelectSearchResult moduleName -> do
+    log $ "[NarrativePanel] Module search selected: " <> moduleName
+    H.modify_ _ { searchQuery = "", searchResults = [], searchOpen = false }
+    H.raise (ModuleSearchSelected moduleName)
+
+  CloseSearch -> do
+    H.modify_ _ { searchQuery = "", searchResults = [], searchOpen = false }
+
+-- | Fuzzy match: case-insensitive substring match
+fuzzyMatch :: String -> Array String -> Array String
+fuzzyMatch query names =
+  if query == "" then []
+  else Array.filter (matchesQuery (String.toLower query)) names
+  where
+  matchesQuery q name = String.contains (Pattern q) (String.toLower name)
 
 -- =============================================================================
 -- Queries

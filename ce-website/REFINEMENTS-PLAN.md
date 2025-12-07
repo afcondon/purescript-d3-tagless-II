@@ -130,4 +130,10 @@ Phase 2 complete!
 - [x] Package names in TopoGraph (text labels below circles, cleared on view switch)
 - [x] Palette/key improvements (view-specific legends: Treemap shows packages+modules, Tree/Force shows inheritance, Topo shows dependency order)
 - [x] Treemap hover sync (watermark rects have transparent fill for hover detection, show 15% white fill on hover)
-- [ ] Tree animation (nodes + links together)
+- [x] Tree animation (nodes + links together - grow from root with synchronized bezier curve links)
+
+Phase 3 in progress:
+- [ ] Package click → neighborhood
+- [x] Module search (fuzzy substring matching, click to navigate)
+  - TODO: Add arrow key navigation in dropdown
+- [ ] Simultaneous views

@@ -32,6 +32,7 @@ type State =
   , projectName :: String
   , projectId :: Int
   , projects :: Array NarrativePanel.ProjectInfo
+  , moduleNames :: Array String  -- All module names for search
   }
 
 -- | Child slots
@@ -71,6 +72,7 @@ component =
         , projectName: NarrativePanel.defaultProjectName
         , projectId: 1
         , projects: []
+        , moduleNames: []
         }
     , render
     , eval: H.mkEval $ H.defaultEval
@@ -90,6 +92,7 @@ render state =
         , projectName: state.projectName
         , projectId: state.projectId
         , projects: state.projects
+        , moduleNames: state.moduleNames
         }
         NarrativePanelOutput
 
@@ -184,6 +187,10 @@ handleAction = case _ of
       let palette = Array.mapWithIndex mkColorEntry (Array.replicate modelInfo.packageCount unit)
       H.modify_ _ { packagePalette = palette }
       void $ H.tell _narrativePanel unit (NarrativePanel.SetPackagePalette palette)
+    -- Fetch module names for search
+    moduleNames <- liftEffect $ Explorer.getModuleNames
+    log $ "[SpagoGridApp] Loaded " <> show (Array.length moduleNames) <> " module names for search"
+    H.modify_ _ { moduleNames = moduleNames }
     where
     mkColorEntry idx _ =
       let t = numMod (toNumber idx * 0.618033988749895) 1.0
@@ -220,6 +227,13 @@ handleAction = case _ of
       NarrativePanel.NeighborhoodViewTypeSelected viewType -> do
         log $ "[SpagoGridApp] Neighborhood view type selected: " <> show viewType
         liftEffect $ Explorer.setNeighborhoodViewType viewType
+
+      -- User selected a module from search
+      NarrativePanel.ModuleSearchSelected moduleName -> do
+        log $ "[SpagoGridApp] Module search selected: " <> moduleName
+        success <- liftEffect $ Explorer.navigateToModuleByName moduleName
+        when (not success) do
+          log $ "[SpagoGridApp] Module not found: " <> moduleName
 
   CallGraphPopupOutput output ->
     case output of
