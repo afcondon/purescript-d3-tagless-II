@@ -286,31 +286,92 @@ renderColorKey :: forall m. State -> H.ComponentHTML Action () m
 renderColorKey state =
   case state.viewState of
     Detail _ -> renderDeclarationTypesKey
-    _ -> renderPackagesKey state.packagePalette
+    Overview TreemapView -> renderTreemapKey state.packagePalette
+    Overview TreeView -> renderTreeForceKey state.packagePalette
+    Overview ForceView -> renderTreeForceKey state.packagePalette
+    Overview TopoView -> renderTopoKey state.packagePalette
 
--- | Render package color key (for overview views)
-renderPackagesKey :: forall m. Array ColorEntry -> H.ComponentHTML Action () m
-renderPackagesKey palette =
-  if Array.null palette then HH.text ""
-  else
-    HH.div [ HP.class_ (HH.ClassName "narrative-color-key") ]
-      [ HH.div [ HP.class_ (HH.ClassName "color-key-title") ]
-          [ HH.text "Packages" ]
-      , HH.div [ HP.class_ (HH.ClassName "color-key-items") ]
-          (map renderPackageEntry palette)
-      ]
+-- | Render color key for Treemap view (packages colored, modules white)
+renderTreemapKey :: forall m. Array ColorEntry -> H.ComponentHTML Action () m
+renderTreemapKey palette =
+  HH.div [ HP.class_ (HH.ClassName "narrative-color-key") ]
+    [ HH.div [ HP.class_ (HH.ClassName "color-key-title") ]
+        [ HH.text "Color Key" ]
+    , HH.div [ HP.class_ (HH.ClassName "color-key-concept") ]
+        [ renderConceptItem "Packages" (Array.take 4 palette)
+        , renderConceptSwatch "Modules" "#ffffff" -- white
+        ]
+    ]
 
-renderPackageEntry :: forall m. ColorEntry -> H.ComponentHTML Action () m
-renderPackageEntry { name, color } =
-  HH.div [ HP.class_ (HH.ClassName "color-key-item") ]
-    [ HH.span
-        [ HP.class_ (HH.ClassName "color-key-swatch")
-        , HP.style ("background-color: " <> color)
+-- | Render color key for Tree/Force views (modules inherit package color)
+renderTreeForceKey :: forall m. Array ColorEntry -> H.ComponentHTML Action () m
+renderTreeForceKey palette =
+  HH.div [ HP.class_ (HH.ClassName "narrative-color-key") ]
+    [ HH.div [ HP.class_ (HH.ClassName "color-key-title") ]
+        [ HH.text "Color Key" ]
+    , HH.div [ HP.class_ (HH.ClassName "color-key-concept") ]
+        [ HH.div [ HP.class_ (HH.ClassName "color-key-concept-row") ]
+            [ HH.span [ HP.class_ (HH.ClassName "color-key-concept-label") ]
+                [ HH.text "Modules inherit package color" ]
+            ]
+        , renderPackageSamples (Array.take 5 palette)
+        ]
+    ]
+
+-- | Render color key for TopoGraph view (packages by topological layer)
+renderTopoKey :: forall m. Array ColorEntry -> H.ComponentHTML Action () m
+renderTopoKey _palette =
+  HH.div [ HP.class_ (HH.ClassName "narrative-color-key") ]
+    [ HH.div [ HP.class_ (HH.ClassName "color-key-title") ]
+        [ HH.text "Color Key" ]
+    , HH.div [ HP.class_ (HH.ClassName "color-key-concept") ]
+        [ HH.div [ HP.class_ (HH.ClassName "color-key-concept-row") ]
+            [ HH.span [ HP.class_ (HH.ClassName "color-key-concept-label") ]
+                [ HH.text "Packages sorted by dependencies" ]
+            ]
+        , HH.div [ HP.class_ (HH.ClassName "color-key-concept-row") ]
+            [ HH.span [ HP.class_ (HH.ClassName "color-key-concept-sublabel") ]
+                [ HH.text "Left: no dependencies → Right: most dependencies" ]
+            ]
+        ]
+    ]
+
+-- | Render a concept item with label and sample swatches
+renderConceptItem :: forall m. String -> Array ColorEntry -> H.ComponentHTML Action () m
+renderConceptItem label samplePalette =
+  HH.div [ HP.class_ (HH.ClassName "color-key-concept-row") ]
+    [ HH.span [ HP.class_ (HH.ClassName "color-key-concept-label") ]
+        [ HH.text label ]
+    , HH.div [ HP.class_ (HH.ClassName "color-key-swatches") ]
+        (map (\e -> HH.span
+          [ HP.class_ (HH.ClassName "color-key-mini-swatch")
+          , HP.style ("background-color: " <> e.color)
+          , HP.title e.name
+          ] []) samplePalette)
+    ]
+
+-- | Render a simple concept swatch with label
+renderConceptSwatch :: forall m. String -> String -> H.ComponentHTML Action () m
+renderConceptSwatch label color =
+  HH.div [ HP.class_ (HH.ClassName "color-key-concept-row") ]
+    [ HH.span [ HP.class_ (HH.ClassName "color-key-concept-label") ]
+        [ HH.text label ]
+    , HH.span
+        [ HP.class_ (HH.ClassName "color-key-mini-swatch")
+        , HP.style ("background-color: " <> color <> "; border: 1px solid #666;")
         ]
         []
-    , HH.span [ HP.class_ (HH.ClassName "color-key-label") ]
-        [ HH.text name ]
     ]
+
+-- | Render sample package swatches in a row
+renderPackageSamples :: forall m. Array ColorEntry -> H.ComponentHTML Action () m
+renderPackageSamples samples =
+  HH.div [ HP.class_ (HH.ClassName "color-key-samples") ]
+    (map (\e -> HH.span
+      [ HP.class_ (HH.ClassName "color-key-sample")
+      , HP.style ("background-color: " <> e.color)
+      , HP.title e.name
+      ] []) samples)
 
 -- | Render declaration types color key (for detail views)
 renderDeclarationTypesKey :: forall m. H.ComponentHTML Action () m

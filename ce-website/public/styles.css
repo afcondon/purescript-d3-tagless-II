@@ -857,6 +857,59 @@ line.fn-highlight-dimmed {
   letter-spacing: var(--letter-spacing-normal);
 }
 
+/* Simplified color key for concept-based legends */
+.color-key-concept {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.color-key-concept-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-key-concept-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--color-text-dark);
+}
+
+.color-key-concept-sublabel {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--color-text-light);
+  font-style: italic;
+}
+
+.color-key-swatches {
+  display: flex;
+  gap: 3px;
+}
+
+.color-key-mini-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.color-key-samples {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.color-key-sample {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
 /* =============================================================================
    TangleJS-style Interactive Controls
    ============================================================================= */

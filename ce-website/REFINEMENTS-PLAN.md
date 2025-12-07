@@ -125,6 +125,9 @@ Show all three views side-by-side:
 ---
 
 ## Current Task
-Phase 1 Complete! Moving to Phase 2: Polish
+Phase 2 complete!
 - [x] Chord diagram label size (14px, font-weight 500, #e2e8f0 fill)
 - [x] Package names in TopoGraph (text labels below circles, cleared on view switch)
+- [x] Palette/key improvements (view-specific legends: Treemap shows packages+modules, Tree/Force shows inheritance, Topo shows dependency order)
+- [x] Treemap hover sync (watermark rects have transparent fill for hover detection, show 15% white fill on hover)
+- [ ] Tree animation (nodes + links together)

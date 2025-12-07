@@ -7,6 +7,7 @@ module Viz.SpagoGridTest.TreeLinks
   , verticalLinkPath
   , makeTreeLinkPathFromNodes
   , makeVerticalTreeLinkPathFromNodes
+  , makeVerticalLinkPathFromCurrentPositions
   ) where
 
 import Prelude
@@ -85,4 +86,13 @@ makeVerticalTreeLinkPathFromNodes nodeMap link =
   case Map.lookup link.source nodeMap, Map.lookup link.target nodeMap of
     Just sourceNode, Just targetNode ->
       verticalLinkPath sourceNode.treeX sourceNode.treeY targetNode.treeX targetNode.treeY
+    _, _ -> ""
+
+-- | Generate a vertical link path using current animated positions (x, y)
+-- | Used for tick-based animation where nodes are interpolating toward tree positions
+makeVerticalLinkPathFromCurrentPositions :: Map Int SimNode -> SimLink -> String
+makeVerticalLinkPathFromCurrentPositions nodeMap link =
+  case Map.lookup link.source nodeMap, Map.lookup link.target nodeMap of
+    Just sourceNode, Just targetNode ->
+      verticalLinkPath sourceNode.x sourceNode.y targetNode.x targetNode.y
     _, _ -> ""

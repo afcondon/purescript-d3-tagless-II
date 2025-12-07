@@ -29,6 +29,7 @@ module PSD3.ForceEngine.Render
   , updateCirclePositions
   , updateLinkPositions
   , updateGroupPositions
+  , updateTreeLinkPaths
     -- * Custom Position Updates
   , updatePositions
   ) where
@@ -71,6 +72,7 @@ derive newtype instance Show GroupId
 foreign import updateCirclePositions_ :: String -> Effect Unit
 foreign import updateLinkPositions_ :: String -> Effect Unit
 foreign import updateGroupPositions_ :: String -> Effect Unit
+foreign import updateTreeLinkPaths_ :: String -> Effect Unit
 foreign import updatePositions_ :: forall a. String -> (a -> Effect Unit) -> Effect Unit
 
 -- =============================================================================
@@ -125,6 +127,25 @@ updateLinkPositions gid = updateLinkPositions_ (unwrap gid)
 -- | ```
 updateGroupPositions :: GroupId -> Effect Unit
 updateGroupPositions gid = updateGroupPositions_ (unwrap gid)
+
+-- | Update tree link paths (d attribute) from bound data's source/target nodes.
+-- |
+-- | Expects data bound to path elements has:
+-- | - `source :: Int` (node ID)
+-- | - `target :: Int` (node ID)
+-- |
+-- | This function looks up node positions from the DOM (circles) and computes
+-- | vertical bezier paths. Used for animating tree links during transitions.
+-- |
+-- | Example:
+-- | ```purescript
+-- | linksGroup :: GroupId
+-- | linksGroup = GroupId "#explorer-links"
+-- |
+-- | updateTreeLinkPaths linksGroup
+-- | ```
+updateTreeLinkPaths :: GroupId -> Effect Unit
+updateTreeLinkPaths gid = updateTreeLinkPaths_ (unwrap gid)
 
 -- | Generic position update with custom attribute setter.
 -- |

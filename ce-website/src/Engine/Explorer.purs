@@ -375,6 +375,10 @@ nodesGroupId = GroupId "#explorer-nodes"
 forceLinksGroupId :: GroupId
 forceLinksGroupId = GroupId "#explorer-links"
 
+-- | Tree links group ID (same group, but for path elements with bezier curves)
+treeLinksGroupId :: GroupId
+treeLinksGroupId = GroupId "#explorer-links"
+
 -- =============================================================================
 -- Initialization
 -- =============================================================================
@@ -602,6 +606,7 @@ goToScene sceneId stateRef = do
     clearTreeLinks -- Remove any tree/force links
     restoreGridForces nodes state.simulation -- Restore grid forces
     Scene.clearLinksGroupId stateRef -- Disable link updates
+    Scene.clearTreeLinksGroupId stateRef -- Disable tree link updates
     setTreeSceneClass false -- Show all nodes normally
     VT.clearPackageLabels -- Remove TopoGraph package labels if present
 
@@ -611,6 +616,7 @@ goToScene sceneId stateRef = do
     nodes <- Sim.getNodes state.simulation
     clearTreeLinks -- Clear any existing links
     renderTreeLinks nodes
+    Scene.setTreeLinksGroupId treeLinksGroupId stateRef -- Enable tree link updates during transition
     setTreeSceneClass true
     VT.clearPackageLabels -- Remove TopoGraph package labels if present
 
@@ -619,6 +625,7 @@ goToScene sceneId stateRef = do
   when (sceneId == RadialTreeForm) do
     clearTreeLinks -- Remove any existing links
     Scene.clearLinksGroupId stateRef -- Disable link updates
+    Scene.clearTreeLinksGroupId stateRef -- Disable tree link updates
     setTreeSceneClass true -- Keep packages/non-tree faded
     VT.clearPackageLabels -- Remove TopoGraph package labels if present
 
@@ -631,6 +638,7 @@ goToScene sceneId stateRef = do
     addTreeForces nodes links state.simulation
     renderForceLinks nodes links -- Render straight line links
     Scene.setLinksGroupId forceLinksGroupId stateRef -- Enable link updates
+    Scene.clearTreeLinksGroupId stateRef -- Disable tree link updates (using force links now)
     setTreeSceneClass true -- Keep packages/non-tree faded
     VT.clearPackageLabels -- Remove TopoGraph package labels if present
 
@@ -642,6 +650,7 @@ goToScene sceneId stateRef = do
     let packages = Array.filter (\n -> n.nodeType == PackageNode) nodes
     clearTreeLinks -- Remove any tree/force links
     Scene.clearLinksGroupId stateRef -- Disable link updates
+    Scene.clearTreeLinksGroupId stateRef -- Disable tree link updates
     setTreeSceneClass false -- Show all nodes (packages prominent)
     VT.renderPackageLabels packages -- Add package name labels
 

@@ -11,6 +11,9 @@ module Engine.Treemap
   , buildTreemapData
   , computeTreemapPositions
   , recalculateTreemapPositions
+    -- * Hover sync
+  , highlightWatermarkPackage
+  , clearWatermarkHighlight
   ) where
 
 import Prelude
@@ -435,7 +438,7 @@ renderWatermarkSVG packageNodes = do
     , y (_.y0 :: TreemapLeaf -> Number)
     , width ((\n -> n.x1 - n.x0) :: TreemapLeaf -> Number)
     , height ((\n -> n.y1 - n.y0) :: TreemapLeaf -> Number)
-    , fill "none"  -- Blueprint: transparent
+    , fill "rgba(255, 255, 255, 0)"  -- Invisible but hoverable
     , stroke "rgba(255, 255, 255, 0.15)"  -- Very faded white for watermark
     , strokeWidth 1.0
     , opacity 1.0
@@ -475,3 +478,21 @@ clearWatermark = do
   case mElement of
     Just watermarkGroup -> clearElement watermarkGroup
     Nothing -> pure unit -- No watermark to clear
+
+-- =============================================================================
+-- Hover Sync
+-- =============================================================================
+
+-- | Highlight a package in the treemap watermark
+foreign import highlightWatermarkPackage_ :: String -> Effect Unit
+
+-- | Clear all watermark highlights
+foreign import clearWatermarkHighlight_ :: Effect Unit
+
+-- | Wrapped version for export
+highlightWatermarkPackage :: String -> Effect Unit
+highlightWatermarkPackage = highlightWatermarkPackage_
+
+-- | Wrapped version for export
+clearWatermarkHighlight :: Effect Unit
+clearWatermarkHighlight = clearWatermarkHighlight_

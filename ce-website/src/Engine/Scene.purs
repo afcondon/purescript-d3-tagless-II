@@ -23,6 +23,8 @@ module Engine.Scene
   , onTickWithViewTransition
   , setLinksGroupId
   , clearLinksGroupId
+  , setTreeLinksGroupId
+  , clearTreeLinksGroupId
   ) where
 
 import Prelude
@@ -39,7 +41,7 @@ import Effect.Class.Console (log)
 import Foreign.Object as Object
 import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Simulation as Sim
-import PSD3.ForceEngine.Render (GroupId, updateCirclePositions, updateLinkPositions)
+import PSD3.ForceEngine.Render (GroupId, updateCirclePositions, updateLinkPositions, updateTreeLinkPaths)
 import PSD3.Simulation.Scene
   ( NodeRule
   , SceneConfig
@@ -94,7 +96,8 @@ type SceneState =
   , currentScene :: Maybe (SimScene.SceneConfig SimNode)
   , transition :: Maybe (SimScene.TransitionState SimNode)
   , nodesGroupId :: GroupId
-  , linksGroupId :: Maybe GroupId  -- Set when force links should be updated
+  , linksGroupId :: Maybe GroupId      -- Set when force links should be updated
+  , treeLinksGroupId :: Maybe GroupId  -- Set when tree link paths should be updated during transition
   }
 
 -- =============================================================================
@@ -134,6 +137,7 @@ mkSceneState sim groupId =
   , transition: Nothing
   , nodesGroupId: groupId
   , linksGroupId: Nothing
+  , treeLinksGroupId: Nothing
   }
 
 -- | Set the links group ID to enable force link updates
@@ -145,6 +149,16 @@ setLinksGroupId gid stateRef =
 clearLinksGroupId :: Ref SceneState -> Effect Unit
 clearLinksGroupId stateRef =
   Ref.modify_ (_ { linksGroupId = Nothing }) stateRef
+
+-- | Set the tree links group ID to enable tree link path updates during transition
+setTreeLinksGroupId :: GroupId -> Ref SceneState -> Effect Unit
+setTreeLinksGroupId gid stateRef =
+  Ref.modify_ (_ { treeLinksGroupId = Just gid }) stateRef
+
+-- | Clear the tree links group ID to disable tree link path updates
+clearTreeLinksGroupId :: Ref SceneState -> Effect Unit
+clearTreeLinksGroupId stateRef =
+  Ref.modify_ (_ { treeLinksGroupId = Nothing }) stateRef
 
 -- =============================================================================
 -- Transitions
@@ -168,15 +182,15 @@ transitionTo targetScene stateRef = do
     Nothing -> do
       log $ "[Scene] Starting transition to: " <> targetScene.name
 
-      -- Get current positions
-      nodes <- Sim.getNodes state.simulation
-      let startPositions = capturePositions nodes
-
-      -- Phase 1: Apply init rules in place (e.g., pin all nodes)
+      -- Phase 1: Apply init rules in place FIRST
+      -- This may move nodes to starting positions (e.g., tree root for "grow from root")
       applyRulesInPlace targetScene.initRules state.simulation
 
-      -- Calculate target positions for transition (read nodes again after mutation)
+      -- Capture start positions AFTER init rules (so nodes start from where rules put them)
       nodesAfterInit <- Sim.getNodes state.simulation
+      let startPositions = capturePositions nodesAfterInit
+
+      -- Calculate target positions for transition
       let targetPositions = targetScene.layout nodesAfterInit
 
       -- Start CSS transition if configured
@@ -230,6 +244,11 @@ onTick stateRef = do
   -- Update force links if active
   case state.linksGroupId of
     Just linksGid -> updateLinkPositions linksGid
+    Nothing -> pure unit
+
+  -- Update tree link paths if active (during TreeForm transition)
+  case state.treeLinksGroupId of
+    Just treeLinksGid -> updateTreeLinkPaths treeLinksGid
     Nothing -> pure unit
 
 -- | DumbEngine: Interpolate positions toward target

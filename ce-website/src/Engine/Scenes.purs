@@ -81,6 +81,28 @@ pinAllRule =
   }
 
 -- =============================================================================
+-- Tree Root Position (for "grow from root" animation)
+-- =============================================================================
+
+-- | Root position for vertical tree layout
+-- | This matches the calculation in Data/Loader.purs:
+-- | Root at treeY=0 maps to: (0 / 1000 - 0.5) * 1400 = -700
+treeRootX :: Number
+treeRootX = 0.0
+
+treeRootY :: Number
+treeRootY = -700.0
+
+-- | Move a tree module to the root position (for "grow from root" animation)
+moveToTreeRoot :: SimNode -> SimNode
+moveToTreeRoot n = n
+  { x = treeRootX
+  , y = treeRootY
+  , fx = Nullable.notNull treeRootX
+  , fy = Nullable.notNull treeRootY
+  }
+
+-- =============================================================================
 -- Treemap Scene
 -- =============================================================================
 
@@ -119,11 +141,21 @@ treemapFormLayout nodes =
 -- =============================================================================
 
 -- | Form Tree: Transition to tree positions, then stop (Static)
--- | Tree modules go to tree positions, packages/non-tree stay where they are
+-- | Tree modules start at root and animate outward ("grow from root")
+-- | Packages/non-tree stay where they are
 treeFormScene :: SceneConfig SimNode
 treeFormScene =
   { name: "TreeForm"
-  , initRules: [ pinAllRule ]
+  , initRules:
+      [ { name: "moveTreeModulesToRoot"
+        , select: isTreeModule
+        , apply: moveToTreeRoot
+        }
+      , { name: "pinOthersAtCurrent"
+        , select: \n -> not (isTreeModule n)
+        , apply: pinAtCurrent
+        }
+      ]
   , layout: treeFormLayout
   , finalRules: \_ ->
       [ { name: "pinTreeModulesAtTree"
