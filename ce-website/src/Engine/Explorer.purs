@@ -44,6 +44,7 @@ import Data.Loader (loadModel, loadModelForProject, LoadedModel, DeclarationsMap
 import Engine.BubblePack (renderModulePackWithCallbacks, highlightCallGraph, clearCallGraphHighlight, drawFunctionEdges, clearFunctionEdges, drawModuleEdges, highlightModuleCallGraph, ModuleEdge, DeclarationClickCallback, DeclarationHoverCallback, clearBubblePacks)
 import Engine.ChordDiagram (renderNeighborhoodChord, clearChordDiagram)
 import Engine.AdjacencyMatrix (renderNeighborhoodMatrix, clearAdjacencyMatrix)
+import Engine.TriptychView (renderTriptychWithDeclarations, clearTriptych)
 -- CallGraphPopup is now a Halogen component (Component.CallGraphPopup)
 -- NarrativePanel is now a Halogen component (Component.NarrativePanel)
 -- It polls globalViewStateRef and globalModelInfoRef directly
@@ -1843,6 +1844,7 @@ restoreFullView fullNodes targetView sim = do
   clearChordDiagram
   clearAdjacencyMatrix
   clearBubblePacks
+  clearTriptych
 
   -- Color legend is handled by Halogen NarrativePanel (switches back to packages automatically)
 
@@ -2148,6 +2150,7 @@ setNeighborhoodViewType newViewType = do
           clearBubblePacks
           clearChordDiagram
           clearAdjacencyMatrix
+          clearTriptych
           clearTreeLinks
 
           -- Update view state
@@ -2166,6 +2169,11 @@ setNeighborhoodViewType newViewType = do
             MatrixView -> do
               -- Render adjacency matrix
               renderNeighborhoodMatrix moduleName nodes ViewBox.viewBoxWidth ViewBox.viewBoxHeight
+            TriptychView -> do
+              -- First render bubble packs normally
+              renderBubblePackView nodes
+              -- Then wrap them with triptych layout and add chord + matrix panels
+              renderTriptychWithDeclarations moduleName nodes
 
 -- | Render bubble pack view for neighborhood
 -- | This is a simplified version of focusOnNeighborhood for view switching

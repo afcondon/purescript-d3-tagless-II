@@ -220,7 +220,7 @@ renderViewIcons state =
 renderViewTypeToggles :: forall m. NeighborhoodViewType -> H.ComponentHTML Action () m
 renderViewTypeToggles currentViewType =
   HH.div [ HP.class_ (HH.ClassName "view-type-toggles") ]
-    (map (renderViewTypeToggle currentViewType) [ BubblePackView, ChordView, MatrixView ])
+    (map (renderViewTypeToggle currentViewType) [ BubblePackView, ChordView, MatrixView, TriptychView ])
 
 -- | Render a single view type toggle icon
 renderViewTypeToggle :: forall m. NeighborhoodViewType -> NeighborhoodViewType -> H.ComponentHTML Action () m
@@ -232,6 +232,7 @@ renderViewTypeToggle currentViewType thisViewType =
       BubblePackView -> "icons/Neighborhood.jpeg"
       ChordView -> "icons/Chord.jpeg"
       MatrixView -> "icons/Adjacency.jpeg"
+      TriptychView -> "icons/Adjacency.jpeg"  -- Placeholder until dedicated icon
   in
     HH.button
       [ HP.classes $ [ HH.ClassName "view-type-toggle" ] <>

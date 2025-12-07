@@ -39,6 +39,7 @@ data NeighborhoodViewType
   = BubblePackView  -- Default: bubble pack with function circles
   | ChordView       -- Chord diagram showing all connections
   | MatrixView      -- Adjacency matrix
+  | TriptychView    -- All three views side-by-side
 
 -- | Detail views are overlays on top of the current overview
 data DetailView
@@ -68,6 +69,7 @@ instance showNeighborhoodViewType :: Show NeighborhoodViewType where
   show BubblePackView = "BubblePackView"
   show ChordView = "ChordView"
   show MatrixView = "MatrixView"
+  show TriptychView = "TriptychView"
 
 -- =============================================================================
 -- View Metadata
@@ -85,6 +87,7 @@ neighborhoodViewLabel :: NeighborhoodViewType -> String
 neighborhoodViewLabel BubblePackView = "Bubbles"
 neighborhoodViewLabel ChordView = "Chord"
 neighborhoodViewLabel MatrixView = "Matrix"
+neighborhoodViewLabel TriptychView = "All"
 
 -- | Longer description for the narrative panel
 viewDescription :: ViewState -> String
