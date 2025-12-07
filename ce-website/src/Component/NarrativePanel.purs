@@ -26,6 +26,8 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Types (Namespace(..), ElemName(..))
+import Web.UIEvent.KeyboardEvent (KeyboardEvent)
+import Web.UIEvent.KeyboardEvent as KE
 import Engine.ViewState (ViewState(..), OverviewView(..), DetailView(..), NeighborhoodViewType(..), viewLabel, viewDescription, getBaseOverview, neighborhoodViewLabel)
 
 -- =============================================================================
@@ -69,6 +71,7 @@ type State =
   , searchQuery :: String             -- Current search input
   , searchResults :: Array String     -- Filtered results
   , searchOpen :: Boolean             -- Whether dropdown is shown
+  , searchSelectedIndex :: Int        -- Currently highlighted result (-1 = none)
   }
 
 -- | Actions
@@ -80,6 +83,7 @@ data Action
   | ToggleProjectDropdown
   | SelectProject Int -- Project ID selected
   | SearchInput String       -- User typed in search box
+  | SearchKeyDown KeyboardEvent  -- User pressed a key in search box
   | SelectSearchResult String -- User clicked a search result
   | CloseSearch              -- Close search dropdown
 
@@ -128,6 +132,7 @@ initialState input =
   , searchQuery: ""
   , searchResults: []
   , searchOpen: false
+  , searchSelectedIndex: -1
   }
 
 -- =============================================================================
@@ -164,6 +169,7 @@ render state =
     ]
 
 -- | Render module search input with dropdown
+-- | Supports keyboard navigation: ArrowUp/ArrowDown to navigate, Enter to select, Escape to close
 renderModuleSearch :: forall m. State -> H.ComponentHTML Action () m
 renderModuleSearch state =
   HH.div [ HP.class_ (HH.ClassName "module-search-wrapper") ]
@@ -173,17 +179,20 @@ renderModuleSearch state =
         , HP.placeholder "Search modules..."
         , HP.value state.searchQuery
         , HE.onValueInput SearchInput
+        , HE.onKeyDown SearchKeyDown
         ]
     , if state.searchOpen && not (Array.null state.searchResults) then
         HH.div [ HP.class_ (HH.ClassName "module-search-dropdown") ]
-          (Array.take 10 state.searchResults # map renderSearchResult)
+          (Array.take 10 state.searchResults # Array.mapWithIndex renderSearchResult)
       else
         HH.text ""
     ]
   where
-  renderSearchResult moduleName =
-    HH.div
-      [ HP.class_ (HH.ClassName "module-search-result")
+  renderSearchResult idx moduleName =
+    let isSelected = idx == state.searchSelectedIndex
+    in HH.div
+      [ HP.classes $ [ HH.ClassName "module-search-result" ] <>
+          if isSelected then [ HH.ClassName "module-search-result--selected" ] else []
       , HE.onClick \_ -> SelectSearchResult moduleName
       ]
       [ HH.text moduleName ]
@@ -533,15 +542,46 @@ handleAction = case _ of
   SearchInput query -> do
     state <- H.get
     let results = fuzzyMatch query state.moduleNames
-    H.modify_ _ { searchQuery = query, searchResults = results, searchOpen = query /= "" }
+    -- Reset selection when query changes
+    H.modify_ _ { searchQuery = query, searchResults = results, searchOpen = query /= "", searchSelectedIndex = -1 }
+
+  SearchKeyDown event -> do
+    state <- H.get
+    let keyName = KE.key event
+    let visibleResults = Array.take 10 state.searchResults
+    let maxIndex = Array.length visibleResults - 1
+    case keyName of
+      -- ArrowDown: Move selection down (wrap to -1 for no selection)
+      "ArrowDown" -> do
+        let newIndex = if state.searchSelectedIndex < maxIndex
+                       then state.searchSelectedIndex + 1
+                       else -1  -- Wrap to no selection
+        H.modify_ _ { searchSelectedIndex = newIndex }
+      -- ArrowUp: Move selection up (wrap to bottom)
+      "ArrowUp" -> do
+        let newIndex = if state.searchSelectedIndex > -1
+                       then state.searchSelectedIndex - 1
+                       else maxIndex  -- Wrap to bottom
+        H.modify_ _ { searchSelectedIndex = newIndex }
+      -- Enter: Select the highlighted item
+      "Enter" -> do
+        when (state.searchSelectedIndex >= 0) do
+          case Array.index visibleResults state.searchSelectedIndex of
+            Just moduleName -> handleAction (SelectSearchResult moduleName)
+            Nothing -> pure unit
+      -- Escape: Close the dropdown
+      "Escape" -> do
+        H.modify_ _ { searchOpen = false, searchSelectedIndex = -1 }
+      -- Other keys: let them through for normal input handling
+      _ -> pure unit
 
   SelectSearchResult moduleName -> do
     log $ "[NarrativePanel] Module search selected: " <> moduleName
-    H.modify_ _ { searchQuery = "", searchResults = [], searchOpen = false }
+    H.modify_ _ { searchQuery = "", searchResults = [], searchOpen = false, searchSelectedIndex = -1 }
     H.raise (ModuleSearchSelected moduleName)
 
   CloseSearch -> do
-    H.modify_ _ { searchQuery = "", searchResults = [], searchOpen = false }
+    H.modify_ _ { searchQuery = "", searchResults = [], searchOpen = false, searchSelectedIndex = -1 }
 
 -- | Fuzzy match: case-insensitive substring match
 fuzzyMatch :: String -> Array String -> Array String

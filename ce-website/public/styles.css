@@ -852,6 +852,17 @@ line.fn-highlight-dimmed {
   background-color: var(--color-beige-base);
 }
 
+/* Keyboard-selected state (takes precedence over hover) */
+.module-search-result--selected {
+  background-color: var(--color-beige-light);
+  outline: 2px solid var(--color-olive);
+  outline-offset: -2px;
+}
+
+.module-search-result--selected:hover {
+  background-color: var(--color-beige-light);
+}
+
 /* =============================================================================
    Narrative Color Key
    ============================================================================= */

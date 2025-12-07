@@ -333,9 +333,9 @@
     return function(value15) {
       return function(rec) {
         var copy4 = {};
-        for (var key in rec) {
-          if ({}.hasOwnProperty.call(rec, key)) {
-            copy4[key] = rec[key];
+        for (var key2 in rec) {
+          if ({}.hasOwnProperty.call(rec, key2)) {
+            copy4[key2] = rec[key2];
           }
         }
         copy4[label5] = value15;
@@ -407,8 +407,8 @@
               return function(ra) {
                 return function(rb) {
                   var tail3 = eqRecord1($$Proxy.value)(ra)(rb);
-                  var key = reflectSymbol2($$Proxy.value);
-                  var get8 = unsafeGet(key);
+                  var key2 = reflectSymbol2($$Proxy.value);
+                  var get8 = unsafeGet(key2);
                   return eq34(get8(ra))(get8(rb)) && tail3;
                 };
               };
@@ -3708,9 +3708,9 @@
       }
       ;
       if (v.value1 instanceof Just) {
-        return apply2(map8(function(key) {
+        return apply2(map8(function(key2) {
           return function(val) {
-            return key + ("=" + val);
+            return key2 + ("=" + val);
           };
         })(encodeFormURLComponent(v.value0)))(encodeFormURLComponent(v.value1.value0));
       }
@@ -10024,9 +10024,9 @@
       return function(dictOrd) {
         var mkOrdBox2 = mkOrdBox(dictOrd);
         return function(sym) {
-          return function(key) {
+          return function(key2) {
             return function(v) {
-              return pop1(new Tuple(reflectSymbol2(sym), mkOrdBox2(key)))(v);
+              return pop1(new Tuple(reflectSymbol2(sym), mkOrdBox2(key2)))(v);
             };
           };
         };
@@ -10039,9 +10039,9 @@
       return function(dictOrd) {
         var mkOrdBox2 = mkOrdBox(dictOrd);
         return function(sym) {
-          return function(key) {
+          return function(key2) {
             return function(v) {
-              return lookup12(new Tuple(reflectSymbol2(sym), mkOrdBox2(key)))(v);
+              return lookup12(new Tuple(reflectSymbol2(sym), mkOrdBox2(key2)))(v);
             };
           };
         };
@@ -10054,10 +10054,10 @@
       return function(dictOrd) {
         var mkOrdBox2 = mkOrdBox(dictOrd);
         return function(sym) {
-          return function(key) {
+          return function(key2) {
             return function(val) {
               return function(v) {
-                return insert12(new Tuple(reflectSymbol2(sym), mkOrdBox2(key)))(val)(v);
+                return insert12(new Tuple(reflectSymbol2(sym), mkOrdBox2(key2)))(val)(v);
               };
             };
           };
@@ -10516,14 +10516,14 @@
   });
 
   // output/Halogen.VDom.Util/foreign.js
-  function unsafeGetAny(key, obj) {
-    return obj[key];
+  function unsafeGetAny(key2, obj) {
+    return obj[key2];
   }
-  function unsafeHasAny(key, obj) {
-    return obj.hasOwnProperty(key);
+  function unsafeHasAny(key2, obj) {
+    return obj.hasOwnProperty(key2);
   }
-  function unsafeSetAny(key, val, obj) {
-    obj[key] = val;
+  function unsafeSetAny(key2, val, obj) {
+    obj[key2] = val;
   }
   function forE2(a2, f) {
     var b10 = [];
@@ -11147,26 +11147,26 @@
   })();
   var unsafeGetProperty = unsafeGetAny;
   var setProperty = unsafeSetAny;
-  var removeProperty = function(key, el) {
-    var v = hasAttribute(nullImpl, key, el);
+  var removeProperty = function(key2, el) {
+    var v = hasAttribute(nullImpl, key2, el);
     if (v) {
-      return removeAttribute(nullImpl, key, el);
+      return removeAttribute(nullImpl, key2, el);
     }
     ;
-    var v1 = typeOf(unsafeGetAny(key, el));
+    var v1 = typeOf(unsafeGetAny(key2, el));
     if (v1 === "string") {
-      return unsafeSetAny(key, "", el);
+      return unsafeSetAny(key2, "", el);
     }
     ;
-    if (key === "rowSpan") {
-      return unsafeSetAny(key, 1, el);
+    if (key2 === "rowSpan") {
+      return unsafeSetAny(key2, 1, el);
     }
     ;
-    if (key === "colSpan") {
-      return unsafeSetAny(key, 1, el);
+    if (key2 === "colSpan") {
+      return unsafeSetAny(key2, 1, el);
     }
     ;
-    return unsafeSetAny(key, jsUndefined, el);
+    return unsafeSetAny(key2, jsUndefined, el);
   };
   var propToStrKey = function(v) {
     if (v instanceof Attribute && v.value0 instanceof Just) {
@@ -12128,8 +12128,8 @@
   var button = /* @__PURE__ */ element2("button");
 
   // output/Foreign.Index/foreign.js
-  function unsafeReadPropImpl(f, s, key, value15) {
-    return value15 == null ? f : s(value15[key]);
+  function unsafeReadPropImpl(f, s, key2, value15) {
+    return value15 == null ? f : s(value15[key2]);
   }
 
   // output/Foreign.Index/index.js
@@ -12159,6 +12159,9 @@
   // output/Web.HTML.Event.EventTypes/index.js
   var input2 = "input";
 
+  // output/Web.UIEvent.KeyboardEvent.EventTypes/index.js
+  var keydown = "keydown";
+
   // output/Web.UIEvent.MouseEvent.EventTypes/index.js
   var click = "click";
 
@@ -12169,6 +12172,7 @@
   var readProp2 = /* @__PURE__ */ readProp(monadIdentity);
   var readString2 = /* @__PURE__ */ readString(monadIdentity);
   var mouseHandler = unsafeCoerce2;
+  var keyHandler = unsafeCoerce2;
   var handler$prime = function(et) {
     return function(f) {
       return handler(et)(function(ev) {
@@ -12189,14 +12193,20 @@
       return $15(mouseHandler($16));
     };
   })();
-  var addForeignPropHandler = function(key) {
+  var onKeyDown = /* @__PURE__ */ (function() {
+    var $23 = handler2(keydown);
+    return function($24) {
+      return $23(keyHandler($24));
+    };
+  })();
+  var addForeignPropHandler = function(key2) {
     return function(prop4) {
       return function(reader) {
         return function(f) {
           var go2 = function(a2) {
             return composeKleisliFlipped4(reader)(readProp2(prop4))(unsafeToForeign(a2));
           };
-          return handler$prime(key)(composeKleisli2(currentTarget)(function(e) {
+          return handler$prime(key2)(composeKleisli2(currentTarget)(function(e) {
             return either($$const(Nothing.value))(function($85) {
               return Just.create(f($85));
             })(runExcept(go2(e)));
@@ -13110,39 +13120,39 @@
 
   // node_modules/internmap/src/index.js
   var InternMap = class extends Map {
-    constructor(entries, key = keyof) {
+    constructor(entries, key2 = keyof) {
       super();
-      Object.defineProperties(this, { _intern: { value: /* @__PURE__ */ new Map() }, _key: { value: key } });
-      if (entries != null) for (const [key2, value15] of entries) this.set(key2, value15);
+      Object.defineProperties(this, { _intern: { value: /* @__PURE__ */ new Map() }, _key: { value: key2 } });
+      if (entries != null) for (const [key3, value15] of entries) this.set(key3, value15);
     }
-    get(key) {
-      return super.get(intern_get(this, key));
+    get(key2) {
+      return super.get(intern_get(this, key2));
     }
-    has(key) {
-      return super.has(intern_get(this, key));
+    has(key2) {
+      return super.has(intern_get(this, key2));
     }
-    set(key, value15) {
-      return super.set(intern_set(this, key), value15);
+    set(key2, value15) {
+      return super.set(intern_set(this, key2), value15);
     }
-    delete(key) {
-      return super.delete(intern_delete(this, key));
+    delete(key2) {
+      return super.delete(intern_delete(this, key2));
     }
   };
   function intern_get({ _intern, _key }, value15) {
-    const key = _key(value15);
-    return _intern.has(key) ? _intern.get(key) : value15;
+    const key2 = _key(value15);
+    return _intern.has(key2) ? _intern.get(key2) : value15;
   }
   function intern_set({ _intern, _key }, value15) {
-    const key = _key(value15);
-    if (_intern.has(key)) return _intern.get(key);
-    _intern.set(key, value15);
+    const key2 = _key(value15);
+    if (_intern.has(key2)) return _intern.get(key2);
+    _intern.set(key2, value15);
     return value15;
   }
   function intern_delete({ _intern, _key }, value15) {
-    const key = _key(value15);
-    if (_intern.has(key)) {
-      value15 = _intern.get(key);
-      _intern.delete(key);
+    const key2 = _key(value15);
+    if (_intern.has(key2)) {
+      value15 = _intern.get(key2);
+      _intern.delete(key2);
     }
     return value15;
   }
@@ -13331,7 +13341,7 @@
   }
   function extend2(parent2, definition) {
     var prototype = Object.create(parent2.prototype);
-    for (var key in definition) prototype[key] = definition[key];
+    for (var key2 in definition) prototype[key2] = definition[key2];
     return prototype;
   }
 
@@ -15028,6 +15038,11 @@
     };
   };
 
+  // output/Web.UIEvent.KeyboardEvent/foreign.js
+  function key(e) {
+    return e.key;
+  }
+
   // output/Component.NarrativePanel/index.js
   var eq5 = /* @__PURE__ */ eq(eqNeighborhoodViewType);
   var append14 = /* @__PURE__ */ append(semigroupArray);
@@ -15040,6 +15055,7 @@
   var pure10 = /* @__PURE__ */ pure(applicativeHalogenM);
   var bind7 = /* @__PURE__ */ bind(bindHalogenM);
   var get4 = /* @__PURE__ */ get(monadStateHalogenM);
+  var when3 = /* @__PURE__ */ when(applicativeHalogenM);
   var ViewSelected = /* @__PURE__ */ (function() {
     function ViewSelected2(value0) {
       this.value0 = value0;
@@ -15203,6 +15219,16 @@
     };
     return SearchInput2;
   })();
+  var SearchKeyDown = /* @__PURE__ */ (function() {
+    function SearchKeyDown2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    SearchKeyDown2.create = function(value0) {
+      return new SearchKeyDown2(value0);
+    };
+    return SearchKeyDown2;
+  })();
   var SelectSearchResult = /* @__PURE__ */ (function() {
     function SelectSearchResult2(value0) {
       this.value0 = value0;
@@ -15250,7 +15276,7 @@
       return "Detail(FunctionCalls:" + (v.value0.value0 + ")");
     }
     ;
-    throw new Error("Failed pattern match at Component.NarrativePanel (line 579, column 1 - line 579, column 37): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Component.NarrativePanel (line 619, column 1 - line 619, column 37): " + [v.constructor.name]);
   };
   var renderViewTypeToggle = function(currentViewType) {
     return function(thisViewType) {
@@ -15269,7 +15295,7 @@
           return "icons/Adjacency.jpeg";
         }
         ;
-        throw new Error("Failed pattern match at Component.NarrativePanel (line 222, column 15 - line 225, column 43): " + [thisViewType.constructor.name]);
+        throw new Error("Failed pattern match at Component.NarrativePanel (line 231, column 15 - line 234, column 43): " + [thisViewType.constructor.name]);
       })();
       return button([classes(append14(["view-type-toggle"])((function() {
         if (isActive) {
@@ -15306,7 +15332,7 @@
           return "icons/Topograph.jpeg";
         }
         ;
-        throw new Error("Failed pattern match at Component.NarrativePanel (line 282, column 15 - line 286, column 41): " + [thisView.constructor.name]);
+        throw new Error("Failed pattern match at Component.NarrativePanel (line 291, column 15 - line 295, column 41): " + [thisView.constructor.name]);
       })();
       return button([classes(append14(["view-icon"])((function() {
         if (isActive) {
@@ -15325,8 +15351,8 @@
   var renderProjectDropdown = function(state3) {
     return div3([class_("project-dropdown")])(map30(function(p2) {
       return div3([classes(append14(["project-dropdown-item"])((function() {
-        var $68 = p2.id === state3.projectId;
-        if ($68) {
+        var $79 = p2.id === state3.projectId;
+        if ($79) {
           return ["project-dropdown-item--active"];
         }
         ;
@@ -15356,15 +15382,24 @@
     return div3([class_("narrative-color-key")])([div3([class_("color-key-title")])([text("Color Key")]), div3([class_("color-key-concept")])([div3([class_("color-key-concept-row")])([span3([class_("color-key-concept-label")])([text("Modules inherit package color")])]), renderPackageSamples(take(5)(palette))])]);
   };
   var renderModuleSearch = function(state3) {
-    var renderSearchResult = function(moduleName) {
-      return div3([class_("module-search-result"), onClick(function(v) {
-        return new SelectSearchResult(moduleName);
-      })])([text(moduleName)]);
+    var renderSearchResult = function(idx) {
+      return function(moduleName) {
+        var isSelected = idx === state3.searchSelectedIndex;
+        return div3([classes(append14(["module-search-result"])((function() {
+          if (isSelected) {
+            return ["module-search-result--selected"];
+          }
+          ;
+          return [];
+        })())), onClick(function(v) {
+          return new SelectSearchResult(moduleName);
+        })])([text(moduleName)]);
+      };
     };
-    return div3([class_("module-search-wrapper")])([input([type_4(InputText.value), class_("module-search-input"), placeholder2("Search modules..."), value4(state3.searchQuery), onValueInput(SearchInput.create)]), (function() {
-      var $70 = state3.searchOpen && !$$null(state3.searchResults);
-      if ($70) {
-        return div3([class_("module-search-dropdown")])(map30(renderSearchResult)(take(10)(state3.searchResults)));
+    return div3([class_("module-search-wrapper")])([input([type_4(InputText.value), class_("module-search-input"), placeholder2("Search modules..."), value4(state3.searchQuery), onValueInput(SearchInput.create), onKeyDown(SearchKeyDown.create)]), (function() {
+      var $82 = state3.searchOpen && !$$null(state3.searchResults);
+      if ($82) {
+        return div3([class_("module-search-dropdown")])(mapWithIndex2(renderSearchResult)(take(10)(state3.searchResults)));
       }
       ;
       return text("");
@@ -15416,7 +15451,7 @@
       return renderTopoKey(state3.packagePalette);
     }
     ;
-    throw new Error("Failed pattern match at Component.NarrativePanel (line 331, column 3 - line 336, column 60): " + [state3.viewState.constructor.name]);
+    throw new Error("Failed pattern match at Component.NarrativePanel (line 340, column 3 - line 345, column 60): " + [state3.viewState.constructor.name]);
   };
   var initialState2 = function(input3) {
     return {
@@ -15431,7 +15466,8 @@
       originView: Nothing.value,
       searchQuery: "",
       searchResults: [],
-      searchOpen: false
+      searchOpen: false,
+      searchSelectedIndex: -1 | 0
     };
   };
   var hintForView = function(v) {
@@ -15463,7 +15499,7 @@
       return "Click an icon above to return to overview.";
     }
     ;
-    throw new Error("Failed pattern match at Component.NarrativePanel (line 319, column 1 - line 319, column 35): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Component.NarrativePanel (line 328, column 1 - line 328, column 35): " + [v.constructor.name]);
   };
   var renderHintText = function(mHint) {
     return function(viewState) {
@@ -15476,7 +15512,7 @@
           return hintForView(viewState);
         }
         ;
-        throw new Error("Failed pattern match at Component.NarrativePanel (line 313, column 16 - line 315, column 41): " + [mHint.constructor.name]);
+        throw new Error("Failed pattern match at Component.NarrativePanel (line 322, column 16 - line 324, column 41): " + [mHint.constructor.name]);
       })())]);
     };
   };
@@ -15486,16 +15522,16 @@
       if (v instanceof SetViewState) {
         return discard3(log14("[NarrativePanel] SetViewState received: " + showViewState(v.value0)))(function() {
           return discard3(modify_4(function(v1) {
-            var $95 = {};
-            for (var $96 in v1) {
-              if ({}.hasOwnProperty.call(v1, $96)) {
-                $95[$96] = v1[$96];
+            var $107 = {};
+            for (var $108 in v1) {
+              if ({}.hasOwnProperty.call(v1, $108)) {
+                $107[$108] = v1[$108];
               }
               ;
             }
             ;
-            $95.viewState = v.value0;
-            return $95;
+            $107.viewState = v.value0;
+            return $107;
           }))(function() {
             return pure10(new Just(v.value1));
           });
@@ -15504,16 +15540,16 @@
       ;
       if (v instanceof SetHintText) {
         return discard3(modify_4(function(v1) {
-          var $100 = {};
-          for (var $101 in v1) {
-            if ({}.hasOwnProperty.call(v1, $101)) {
-              $100[$101] = v1[$101];
+          var $112 = {};
+          for (var $113 in v1) {
+            if ({}.hasOwnProperty.call(v1, $113)) {
+              $112[$113] = v1[$113];
             }
             ;
           }
           ;
-          $100.hintText = v.value0;
-          return $100;
+          $112.hintText = v.value0;
+          return $112;
         }))(function() {
           return pure10(new Just(v.value1));
         });
@@ -15521,16 +15557,16 @@
       ;
       if (v instanceof SetPackagePalette) {
         return discard3(modify_4(function(v1) {
-          var $105 = {};
-          for (var $106 in v1) {
-            if ({}.hasOwnProperty.call(v1, $106)) {
-              $105[$106] = v1[$106];
+          var $117 = {};
+          for (var $118 in v1) {
+            if ({}.hasOwnProperty.call(v1, $118)) {
+              $117[$118] = v1[$118];
             }
             ;
           }
           ;
-          $105.packagePalette = v.value0;
-          return $105;
+          $117.packagePalette = v.value0;
+          return $117;
         }))(function() {
           return pure10(new Just(v.value1));
         });
@@ -15539,23 +15575,23 @@
       if (v instanceof SetOriginView) {
         return discard3(log14("[NarrativePanel] SetOriginView: " + viewLabel(v.value0)))(function() {
           return discard3(modify_4(function(v1) {
-            var $110 = {};
-            for (var $111 in v1) {
-              if ({}.hasOwnProperty.call(v1, $111)) {
-                $110[$111] = v1[$111];
+            var $122 = {};
+            for (var $123 in v1) {
+              if ({}.hasOwnProperty.call(v1, $123)) {
+                $122[$123] = v1[$123];
               }
               ;
             }
             ;
-            $110.originView = new Just(v.value0);
-            return $110;
+            $122.originView = new Just(v.value0);
+            return $122;
           }))(function() {
             return pure10(new Just(v.value1));
           });
         });
       }
       ;
-      throw new Error("Failed pattern match at Component.NarrativePanel (line 559, column 15 - line 576, column 18): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Component.NarrativePanel (line 599, column 15 - line 616, column 18): " + [v.constructor.name]);
     };
   };
   var fuzzyMatch = function(query3) {
@@ -15565,8 +15601,8 @@
           return contains(q2)(toLower(name16));
         };
       };
-      var $115 = query3 === "";
-      if ($115) {
+      var $127 = query3 === "";
+      if ($127) {
         return [];
       }
       ;
@@ -15578,21 +15614,21 @@
     return function(v) {
       if (v instanceof HandleInput) {
         return modify_4(function(v1) {
-          var $117 = {};
-          for (var $118 in v1) {
-            if ({}.hasOwnProperty.call(v1, $118)) {
-              $117[$118] = v1[$118];
+          var $129 = {};
+          for (var $130 in v1) {
+            if ({}.hasOwnProperty.call(v1, $130)) {
+              $129[$130] = v1[$130];
             }
             ;
           }
           ;
-          $117.viewState = v.value0.viewState;
-          $117.packagePalette = v.value0.packagePalette;
-          $117.projectName = v.value0.projectName;
-          $117.projectId = v.value0.projectId;
-          $117.projects = v.value0.projects;
-          $117.moduleNames = v.value0.moduleNames;
-          return $117;
+          $129.viewState = v.value0.viewState;
+          $129.packagePalette = v.value0.packagePalette;
+          $129.projectName = v.value0.projectName;
+          $129.projectId = v.value0.projectId;
+          $129.projects = v.value0.projects;
+          $129.moduleNames = v.value0.moduleNames;
+          return $129;
         });
       }
       ;
@@ -15617,32 +15653,32 @@
       if (v instanceof ToggleProjectDropdown) {
         return bind7(get4)(function(state3) {
           return modify_4(function(v1) {
-            var $123 = {};
-            for (var $124 in v1) {
-              if ({}.hasOwnProperty.call(v1, $124)) {
-                $123[$124] = v1[$124];
+            var $135 = {};
+            for (var $136 in v1) {
+              if ({}.hasOwnProperty.call(v1, $136)) {
+                $135[$136] = v1[$136];
               }
               ;
             }
             ;
-            $123.projectDropdownOpen = !state3.projectDropdownOpen;
-            return $123;
+            $135.projectDropdownOpen = !state3.projectDropdownOpen;
+            return $135;
           });
         });
       }
       ;
       if (v instanceof SelectProject) {
         return discard3(modify_4(function(v1) {
-          var $126 = {};
-          for (var $127 in v1) {
-            if ({}.hasOwnProperty.call(v1, $127)) {
-              $126[$127] = v1[$127];
+          var $138 = {};
+          for (var $139 in v1) {
+            if ({}.hasOwnProperty.call(v1, $139)) {
+              $138[$139] = v1[$139];
             }
             ;
           }
           ;
-          $126.projectDropdownOpen = false;
-          return $126;
+          $138.projectDropdownOpen = false;
+          return $138;
         }))(function() {
           return raise(new ProjectSelected(v.value0));
         });
@@ -15652,37 +15688,125 @@
         return bind7(get4)(function(state3) {
           var results = fuzzyMatch(v.value0)(state3.moduleNames);
           return modify_4(function(v1) {
-            var $130 = {};
-            for (var $131 in v1) {
-              if ({}.hasOwnProperty.call(v1, $131)) {
-                $130[$131] = v1[$131];
+            var $142 = {};
+            for (var $143 in v1) {
+              if ({}.hasOwnProperty.call(v1, $143)) {
+                $142[$143] = v1[$143];
               }
               ;
             }
             ;
-            $130.searchQuery = v.value0;
-            $130.searchResults = results;
-            $130.searchOpen = v.value0 !== "";
-            return $130;
+            $142.searchQuery = v.value0;
+            $142.searchResults = results;
+            $142.searchOpen = v.value0 !== "";
+            $142.searchSelectedIndex = -1 | 0;
+            return $142;
           });
+        });
+      }
+      ;
+      if (v instanceof SearchKeyDown) {
+        return bind7(get4)(function(state3) {
+          var keyName = key(v.value0);
+          var visibleResults = take(10)(state3.searchResults);
+          var maxIndex = length(visibleResults) - 1 | 0;
+          if (keyName === "ArrowDown") {
+            var newIndex = (function() {
+              var $147 = state3.searchSelectedIndex < maxIndex;
+              if ($147) {
+                return state3.searchSelectedIndex + 1 | 0;
+              }
+              ;
+              return -1 | 0;
+            })();
+            return modify_4(function(v1) {
+              var $148 = {};
+              for (var $149 in v1) {
+                if ({}.hasOwnProperty.call(v1, $149)) {
+                  $148[$149] = v1[$149];
+                }
+                ;
+              }
+              ;
+              $148.searchSelectedIndex = newIndex;
+              return $148;
+            });
+          }
+          ;
+          if (keyName === "ArrowUp") {
+            var newIndex = (function() {
+              var $151 = state3.searchSelectedIndex > (-1 | 0);
+              if ($151) {
+                return state3.searchSelectedIndex - 1 | 0;
+              }
+              ;
+              return maxIndex;
+            })();
+            return modify_4(function(v1) {
+              var $152 = {};
+              for (var $153 in v1) {
+                if ({}.hasOwnProperty.call(v1, $153)) {
+                  $152[$153] = v1[$153];
+                }
+                ;
+              }
+              ;
+              $152.searchSelectedIndex = newIndex;
+              return $152;
+            });
+          }
+          ;
+          if (keyName === "Enter") {
+            return when3(state3.searchSelectedIndex >= 0)((function() {
+              var v1 = index(visibleResults)(state3.searchSelectedIndex);
+              if (v1 instanceof Just) {
+                return handleAction2(dictMonadAff)(new SelectSearchResult(v1.value0));
+              }
+              ;
+              if (v1 instanceof Nothing) {
+                return pure10(unit);
+              }
+              ;
+              throw new Error("Failed pattern match at Component.NarrativePanel (line 569, column 11 - line 571, column 33): " + [v1.constructor.name]);
+            })());
+          }
+          ;
+          if (keyName === "Escape") {
+            return modify_4(function(v1) {
+              var $157 = {};
+              for (var $158 in v1) {
+                if ({}.hasOwnProperty.call(v1, $158)) {
+                  $157[$158] = v1[$158];
+                }
+                ;
+              }
+              ;
+              $157.searchOpen = false;
+              $157.searchSelectedIndex = -1 | 0;
+              return $157;
+            });
+          }
+          ;
+          return pure10(unit);
         });
       }
       ;
       if (v instanceof SelectSearchResult) {
         return discard3(log14("[NarrativePanel] Module search selected: " + v.value0))(function() {
           return discard3(modify_4(function(v1) {
-            var $134 = {};
-            for (var $135 in v1) {
-              if ({}.hasOwnProperty.call(v1, $135)) {
-                $134[$135] = v1[$135];
+            var $161 = {};
+            for (var $162 in v1) {
+              if ({}.hasOwnProperty.call(v1, $162)) {
+                $161[$162] = v1[$162];
               }
               ;
             }
             ;
-            $134.searchQuery = "";
-            $134.searchResults = [];
-            $134.searchOpen = false;
-            return $134;
+            $161.searchQuery = "";
+            $161.searchResults = [];
+            $161.searchOpen = false;
+            $161.searchSelectedIndex = -1 | 0;
+            return $161;
           }))(function() {
             return raise(new ModuleSearchSelected(v.value0));
           });
@@ -15691,22 +15815,23 @@
       ;
       if (v instanceof CloseSearch) {
         return modify_4(function(v1) {
-          var $138 = {};
-          for (var $139 in v1) {
-            if ({}.hasOwnProperty.call(v1, $139)) {
-              $138[$139] = v1[$139];
+          var $165 = {};
+          for (var $166 in v1) {
+            if ({}.hasOwnProperty.call(v1, $166)) {
+              $165[$166] = v1[$166];
             }
             ;
           }
           ;
-          $138.searchQuery = "";
-          $138.searchResults = [];
-          $138.searchOpen = false;
-          return $138;
+          $165.searchQuery = "";
+          $165.searchResults = [];
+          $165.searchOpen = false;
+          $165.searchSelectedIndex = -1 | 0;
+          return $165;
         });
       }
       ;
-      throw new Error("Failed pattern match at Component.NarrativePanel (line 502, column 16 - line 544, column 77): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Component.NarrativePanel (line 511, column 16 - line 584, column 103): " + [v.constructor.name]);
     };
   };
   var defaultProjectName = "psd3";
@@ -15721,7 +15846,7 @@
         return "Back";
       }
       ;
-      throw new Error("Failed pattern match at Component.NarrativePanel (line 246, column 19 - line 248, column 24): " + [mOrigin.constructor.name]);
+      throw new Error("Failed pattern match at Component.NarrativePanel (line 255, column 19 - line 257, column 24): " + [mOrigin.constructor.name]);
     })();
     return div3([class_("view-icons view-icons--back")])([button([class_("back-button"), title("Back to " + originLabel), onClick(function(v) {
       return GoBack.value;
@@ -15752,8 +15877,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction2(dictMonadAff),
         handleQuery: handleQuery2(dictMonadAff),
-        receive: function($148) {
-          return Just.create(HandleInput.create($148));
+        receive: function($175) {
+          return Just.create(HandleInput.create($175));
         }
       })
     });
@@ -15999,11 +16124,11 @@
       }
     }
   }
-  function bindKey(parent2, group4, enter, update2, exit, data, key) {
+  function bindKey(parent2, group4, enter, update2, exit, data, key2) {
     var i2, node, nodeByKeyValue = /* @__PURE__ */ new Map(), groupLength = group4.length, dataLength = data.length, keyValues = new Array(groupLength), keyValue;
     for (i2 = 0; i2 < groupLength; ++i2) {
       if (node = group4[i2]) {
-        keyValues[i2] = keyValue = key.call(node, node.__data__, i2, group4) + "";
+        keyValues[i2] = keyValue = key2.call(node, node.__data__, i2, group4) + "";
         if (nodeByKeyValue.has(keyValue)) {
           exit[i2] = node;
         } else {
@@ -16012,7 +16137,7 @@
       }
     }
     for (i2 = 0; i2 < dataLength; ++i2) {
-      keyValue = key.call(parent2, data[i2], i2, data) + "";
+      keyValue = key2.call(parent2, data[i2], i2, data) + "";
       if (node = nodeByKeyValue.get(keyValue)) {
         update2[i2] = node;
         node.__data__ = data[i2];
@@ -16030,13 +16155,13 @@
   function datum(node) {
     return node.__data__;
   }
-  function data_default(value15, key) {
+  function data_default(value15, key2) {
     if (!arguments.length) return Array.from(this, datum);
-    var bind21 = key ? bindKey : bindIndex, parents = this._parents, groups = this._groups;
+    var bind21 = key2 ? bindKey : bindIndex, parents = this._parents, groups = this._groups;
     if (typeof value15 !== "function") value15 = constant_default2(value15);
     for (var m = groups.length, update2 = new Array(m), enter = new Array(m), exit = new Array(m), j = 0; j < m; ++j) {
       var parent2 = parents[j], group4 = groups[j], groupLength = group4.length, data = arraylike(value15.call(parent2, parent2 && parent2.__data__, j, parents)), dataLength = data.length, enterGroup = enter[j] = new Array(dataLength), updateGroup = update2[j] = new Array(dataLength), exitGroup = exit[j] = new Array(groupLength);
-      bind21(parent2, group4, enterGroup, updateGroup, exitGroup, data, key);
+      bind21(parent2, group4, enterGroup, updateGroup, exitGroup, data, key2);
       for (var i0 = 0, i1 = 0, previous, next2; i0 < dataLength; ++i0) {
         if (previous = enterGroup[i0]) {
           if (i0 >= i1) i1 = i0 + 1;
@@ -20539,12 +20664,12 @@
     return tween;
   }
   function attrTween_default(name16, value15) {
-    var key = "attr." + name16;
-    if (arguments.length < 2) return (key = this.tween(key)) && key._value;
-    if (value15 == null) return this.tween(key, null);
+    var key2 = "attr." + name16;
+    if (arguments.length < 2) return (key2 = this.tween(key2)) && key2._value;
+    if (value15 == null) return this.tween(key2, null);
     if (typeof value15 !== "function") throw new Error();
     var fullname = namespace_default(name16);
-    return this.tween(key, (fullname.local ? attrTweenNS : attrTween)(fullname, value15));
+    return this.tween(key2, (fullname.local ? attrTweenNS : attrTween)(fullname, value15));
   }
 
   // node_modules/d3-transition/src/transition/delay.js
@@ -20737,9 +20862,9 @@
     };
   }
   function styleMaybeRemove(id5, name16) {
-    var on0, on1, listener0, key = "style." + name16, event = "end." + key, remove5;
+    var on0, on1, listener0, key2 = "style." + name16, event = "end." + key2, remove5;
     return function() {
-      var schedule = set2(this, id5), on5 = schedule.on, listener = schedule.value[key] == null ? remove5 || (remove5 = styleRemove2(name16)) : void 0;
+      var schedule = set2(this, id5), on5 = schedule.on, listener = schedule.value[key2] == null ? remove5 || (remove5 = styleRemove2(name16)) : void 0;
       if (on5 !== on0 || listener0 !== listener) (on1 = (on0 = on5).copy()).on(event, listener0 = listener);
       schedule.on = on1;
     };
@@ -20766,11 +20891,11 @@
     return tween;
   }
   function styleTween_default(name16, value15, priority) {
-    var key = "style." + (name16 += "");
-    if (arguments.length < 2) return (key = this.tween(key)) && key._value;
-    if (value15 == null) return this.tween(key, null);
+    var key2 = "style." + (name16 += "");
+    if (arguments.length < 2) return (key2 = this.tween(key2)) && key2._value;
+    if (value15 == null) return this.tween(key2, null);
     if (typeof value15 !== "function") throw new Error();
-    return this.tween(key, styleTween(name16, value15, priority == null ? "" : priority));
+    return this.tween(key2, styleTween(name16, value15, priority == null ? "" : priority));
   }
 
   // node_modules/d3-transition/src/transition/text.js
@@ -20806,11 +20931,11 @@
     return tween;
   }
   function textTween_default(value15) {
-    var key = "text";
-    if (arguments.length < 1) return (key = this.tween(key)) && key._value;
-    if (value15 == null) return this.tween(key, null);
+    var key2 = "text";
+    if (arguments.length < 1) return (key2 = this.tween(key2)) && key2._value;
+    if (value15 == null) return this.tween(key2, null);
     if (typeof value15 !== "function") throw new Error();
-    return this.tween(key, textTween(value15));
+    return this.tween(key2, textTween(value15));
   }
 
   // node_modules/d3-transition/src/transition/transition.js
@@ -21301,10 +21426,10 @@
         }
         return this;
       },
-      zoom: function(key, transform4) {
-        if (this.mouse && key !== "mouse") this.mouse[1] = transform4.invert(this.mouse[0]);
-        if (this.touch0 && key !== "touch") this.touch0[1] = transform4.invert(this.touch0[0]);
-        if (this.touch1 && key !== "touch") this.touch1[1] = transform4.invert(this.touch1[0]);
+      zoom: function(key2, transform4) {
+        if (this.mouse && key2 !== "mouse") this.mouse[1] = transform4.invert(this.mouse[0]);
+        if (this.touch0 && key2 !== "touch") this.touch0[1] = transform4.invert(this.touch0[0]);
+        if (this.touch1 && key2 !== "touch") this.touch1[1] = transform4.invert(this.touch1[0]);
         this.that.__zoom = transform4;
         this.emit("zoom");
         return this;
@@ -22454,7 +22579,7 @@
 
   // output/PSD3.ForceEngine.Core/index.js
   var bind11 = /* @__PURE__ */ bind(bindEffect);
-  var when3 = /* @__PURE__ */ when(applicativeEffect);
+  var when4 = /* @__PURE__ */ when(applicativeEffect);
   var identity16 = /* @__PURE__ */ identity(categoryFn);
   var for_2 = /* @__PURE__ */ for_(applicativeEffect)(foldableArray);
   var startAnimation = function(onFrame) {
@@ -22463,7 +22588,7 @@
       var loop2 = function(timestamp) {
         return function __do12() {
           var $$continue = onFrame(timestamp)();
-          return when3($$continue)(function __do13() {
+          return when4($$continue)(function __do13() {
             var cancel2 = requestAnimationFrame_(loop2)();
             return setCancelRef(cancelRef)(cancel2)();
           })();
@@ -22561,9 +22686,9 @@
             const nodes = nodesRef.value;
             for (let i2 = 0; i2 < nodes.length; i2++) {
               const node = nodes[i2];
-              const key = String(node.id);
-              const start4 = startPositions[key];
-              const target6 = targetPositions[key];
+              const key2 = String(node.id);
+              const start4 = startPositions[key2];
+              const target6 = targetPositions[key2];
               if (start4 && target6) {
                 node.x = start4.x + (target6.x - start4.x) * progress2;
                 node.y = start4.y + (target6.y - start4.y) * progress2;
@@ -22588,7 +22713,7 @@
   var for_3 = /* @__PURE__ */ for_(applicativeEffect)(foldableArray);
   var toUnfoldable9 = /* @__PURE__ */ toUnfoldable4(unfoldableArray);
   var pure13 = /* @__PURE__ */ pure(applicativeEffect);
-  var when4 = /* @__PURE__ */ when(applicativeEffect);
+  var when5 = /* @__PURE__ */ when(applicativeEffect);
   var fromFoldable20 = /* @__PURE__ */ fromFoldable(foldableList);
   var unless2 = /* @__PURE__ */ unless(applicativeEffect);
   var updatePositionsInPlace = function(positions) {
@@ -22719,7 +22844,7 @@
         ;
         if (sim.callbacks instanceof Just) {
           return for_3(alphaThresholds)(function(threshold) {
-            return when4(crossedThreshold(prevAlpha)(newAlpha)(threshold))(function __do11() {
+            return when5(crossedThreshold(prevAlpha)(newAlpha)(threshold))(function __do11() {
               var callback = read(sim.callbacks.value0.onAlphaThreshold)();
               return callback(newAlpha)();
             });
@@ -28639,7 +28764,7 @@
   var bind32 = /* @__PURE__ */ bind(bindAff);
   var pure32 = /* @__PURE__ */ pure(applicativeAff);
   var liftEffect1 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var when5 = /* @__PURE__ */ when(applicativeEffect);
+  var when6 = /* @__PURE__ */ when(applicativeEffect);
   var $$void9 = /* @__PURE__ */ $$void(functorEffect);
   var cx2 = /* @__PURE__ */ cx(toAttrNumberFunctionNumbe);
   var cy2 = /* @__PURE__ */ cy(toAttrNumberFunctionNumbe);
@@ -29995,7 +30120,7 @@
     return function(stateRef) {
       var scene = sceneConfigFor(sceneId);
       return function __do11() {
-        when5(eq33(sceneId)(TreemapForm.value))(function __do12() {
+        when6(eq33(sceneId)(TreemapForm.value))(function __do12() {
           var state3 = read(stateRef)();
           var nodes = getNodes(state3.simulation)();
           clearTreeLinks();
@@ -30005,7 +30130,7 @@
           setTreeSceneClass(false)();
           return clearPackageLabels();
         })();
-        when5(eq33(sceneId)(TreeForm.value))(function __do12() {
+        when6(eq33(sceneId)(TreeForm.value))(function __do12() {
           var state3 = read(stateRef)();
           var nodes = getNodes(state3.simulation)();
           clearTreeLinks();
@@ -30014,14 +30139,14 @@
           setTreeSceneClass(true)();
           return clearPackageLabels();
         })();
-        when5(eq33(sceneId)(RadialTreeForm.value))(function __do12() {
+        when6(eq33(sceneId)(RadialTreeForm.value))(function __do12() {
           clearTreeLinks();
           clearLinksGroupId(stateRef)();
           clearTreeLinksGroupId(stateRef)();
           setTreeSceneClass(true)();
           return clearPackageLabels();
         })();
-        when5(eq33(sceneId)(TreeRun.value))(function __do12() {
+        when6(eq33(sceneId)(TreeRun.value))(function __do12() {
           var state3 = read(stateRef)();
           var nodes = getNodes(state3.simulation)();
           var links = read(globalLinksRef)();
@@ -30033,7 +30158,7 @@
           setTreeSceneClass(true)();
           return clearPackageLabels();
         })();
-        when5(eq33(sceneId)(TopoForm.value))(function __do12() {
+        when6(eq33(sceneId)(TopoForm.value))(function __do12() {
           var state3 = read(stateRef)();
           var nodes = getNodes(state3.simulation)();
           var packages = filter(function(n) {
@@ -30210,7 +30335,7 @@
           ;
           throw new Error("Failed pattern match at Engine.Explorer (line 247, column 25 - line 249, column 25): " + [stateAfter.transition.constructor.name]);
         })();
-        return when5(wasTransitioning && !isTransitioning)(function __do12() {
+        return when6(wasTransitioning && !isTransitioning)(function __do12() {
           var pendingView = read(globalPendingViewRef)();
           if (pendingView instanceof Just) {
             log12("[Explorer] Waypoint complete, continuing to: " + showViewState2(pendingView.value0))();
@@ -30763,7 +30888,7 @@
   var map47 = /* @__PURE__ */ map(functorArray);
   var show25 = /* @__PURE__ */ show(showInt);
   var get7 = /* @__PURE__ */ get(monadStateHalogenM);
-  var when6 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when7 = /* @__PURE__ */ when(applicativeHalogenM);
   var notEq3 = /* @__PURE__ */ notEq(eqViewState);
   var tell3 = /* @__PURE__ */ tell2();
   var narrativePanelIsSymbol = {
@@ -30965,7 +31090,7 @@
       ;
       if (v instanceof ViewStateChanged) {
         return bind16(get7)(function(state3) {
-          return when6(notEq3(state3.viewState)(v.value0))(discard7(log14("[SpagoGridApp] ViewState changed to: " + viewDescription(v.value0)))(function() {
+          return when7(notEq3(state3.viewState)(v.value0))(discard7(log14("[SpagoGridApp] ViewState changed to: " + viewDescription(v.value0)))(function() {
             return discard7(modify_5(function(v1) {
               var $87 = {};
               for (var $88 in v1) {
@@ -30979,7 +31104,7 @@
               return $87;
             }))(function() {
               return discard7($$void11(tell1(_narrativePanel)(unit)(SetViewState.create(v.value0))))(function() {
-                return when6(isDetail(v.value0))(bind16(liftEffect10(getOriginView))(function(originView) {
+                return when7(isDetail(v.value0))(bind16(liftEffect10(getOriginView))(function(originView) {
                   return discard7(log14("[SpagoGridApp] Entering detail view, origin: " + show111(originView)))(function() {
                     return $$void11(tell1(_narrativePanel)(unit)(SetOriginView.create(originView)));
                   });
@@ -30992,7 +31117,7 @@
       ;
       if (v instanceof PackagePaletteChanged) {
         return bind16(get7)(function(state3) {
-          return when6(notEq12(state3.packagePalette)(v.value0))(discard7(log14("[SpagoGridApp] Package palette changed (" + (show25(length(v.value0)) + " packages)")))(function() {
+          return when7(notEq12(state3.packagePalette)(v.value0))(discard7(log14("[SpagoGridApp] Package palette changed (" + (show25(length(v.value0)) + " packages)")))(function() {
             return discard7(modify_5(function(v1) {
               var $91 = {};
               for (var $92 in v1) {
@@ -31030,7 +31155,7 @@
       ;
       if (v instanceof SwitchProject) {
         return bind16(get7)(function(state3) {
-          return when6(state3.projectId !== v.value0)(discard7(log14("[SpagoGridApp] Switching to project: " + v.value1))(function() {
+          return when7(state3.projectId !== v.value0)(discard7(log14("[SpagoGridApp] Switching to project: " + v.value1))(function() {
             return discard7(modify_5(function(v1) {
               var $99 = {};
               for (var $100 in v1) {
@@ -31083,7 +31208,7 @@
           };
         };
         return bind16(get7)(function(state3) {
-          return discard7(when6($$null(state3.packagePalette) && v.value0.packageCount > 0)(discard7(log14("[SpagoGridApp] Model loaded with " + (show25(v.value0.packageCount) + " packages")))(function() {
+          return discard7(when7($$null(state3.packagePalette) && v.value0.packageCount > 0)(discard7(log14("[SpagoGridApp] Model loaded with " + (show25(v.value0.packageCount) + " packages")))(function() {
             var palette = mapWithIndex2(mkColorEntry)(replicate(v.value0.packageCount)(unit));
             return discard7(modify_5(function(v1) {
               var $107 = {};
@@ -31144,7 +31269,7 @@
         if (v.value0 instanceof BackRequested) {
           return discard7(log14("[SpagoGridApp] Back requested from detail view"))(function() {
             return bind16(liftEffect10(navigateBack))(function(success) {
-              return when6(!success)(discard7(log14("[SpagoGridApp] Navigation stack was empty, falling back to Treemap"))(function() {
+              return when7(!success)(discard7(log14("[SpagoGridApp] Navigation stack was empty, falling back to Treemap"))(function() {
                 var fallbackView = new Overview(TreemapView.value);
                 return discard7(modify_5(function(v1) {
                   var $119 = {};
@@ -31193,7 +31318,7 @@
         if (v.value0 instanceof ModuleSearchSelected) {
           return discard7(log14("[SpagoGridApp] Module search selected: " + v.value0.value0))(function() {
             return bind16(liftEffect10(navigateToModuleByName(v.value0.value0)))(function(success) {
-              return when6(!success)(log14("[SpagoGridApp] Module not found: " + v.value0.value0));
+              return when7(!success)(log14("[SpagoGridApp] Module not found: " + v.value0.value0));
             });
           });
         }
@@ -31678,7 +31803,7 @@
   var pure21 = /* @__PURE__ */ pure(applicativeEffect);
   var map49 = /* @__PURE__ */ map(functorEffect);
   var pure111 = /* @__PURE__ */ pure(applicativeAff);
-  var when7 = /* @__PURE__ */ when(applicativeEffect);
+  var when8 = /* @__PURE__ */ when(applicativeEffect);
   var renderStateX2 = /* @__PURE__ */ renderStateX(functorEffect);
   var $$void12 = /* @__PURE__ */ $$void(functorAff);
   var foreachSlot2 = /* @__PURE__ */ foreachSlot(applicativeEffect);
@@ -31807,7 +31932,7 @@
                     var isDuplicate = map49(function($69) {
                       return isJust(slot3.get($69));
                     })(read(childrenOutRef))();
-                    when7(isDuplicate)(warn("Halogen: Duplicate slot address was detected during rendering, unexpected results may occur"))();
+                    when8(isDuplicate)(warn("Halogen: Duplicate slot address was detected during rendering, unexpected results may occur"))();
                     modify_2(slot3.set($$var2))(childrenOutRef)();
                     return bind19(read($$var2))(renderStateX2(function(v) {
                       if (v instanceof Nothing) {
@@ -31831,7 +31956,7 @@
             return function __do11() {
               var v = read($$var2)();
               var shouldProcessHandlers = map49(isNothing)(read(v.pendingHandlers))();
-              when7(shouldProcessHandlers)(write(new Just(Nil.value))(v.pendingHandlers))();
+              when8(shouldProcessHandlers)(write(new Just(Nil.value))(v.pendingHandlers))();
               write(empty7)(v.childrenOut)();
               write(v.children)(v.childrenIn)();
               var handler3 = (function() {
@@ -31879,7 +32004,7 @@
                   children: children3
                 };
               }))();
-              return when7(shouldProcessHandlers)(flip(tailRecM3)(unit)(function(v1) {
+              return when8(shouldProcessHandlers)(flip(tailRecM3)(unit)(function(v1) {
                 return function __do12() {
                   var handlers = read(v.pendingHandlers)();
                   write(new Just(Nil.value))(v.pendingHandlers)();
@@ -31996,7 +32121,7 @@
   var pure24 = /* @__PURE__ */ pure(applicativeEffect);
   var traverse_7 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
   var unwrap6 = /* @__PURE__ */ unwrap();
-  var when8 = /* @__PURE__ */ when(applicativeEffect);
+  var when9 = /* @__PURE__ */ when(applicativeEffect);
   var not3 = /* @__PURE__ */ not(/* @__PURE__ */ heytingAlgebraFunction(/* @__PURE__ */ heytingAlgebraFunction(heytingAlgebraBoolean)));
   var identity17 = /* @__PURE__ */ identity(categoryFn);
   var bind111 = /* @__PURE__ */ bind(bindAff);
@@ -32124,7 +32249,7 @@
                   var nextSib = nextSibling(v1.value0.node)();
                   var machine$prime = step(v1.value0.machine, v);
                   var newNode = extract2(machine$prime);
-                  when8(not3(unsafeRefEq)(v1.value0.node)(newNode))(substInParent(newNode)(nextSib)(parent2))();
+                  when9(not3(unsafeRefEq)(v1.value0.node)(newNode))(substInParent(newNode)(nextSib)(parent2))();
                   return {
                     machine: machine$prime,
                     node: newNode,

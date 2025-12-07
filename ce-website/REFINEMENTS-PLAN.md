@@ -139,7 +139,7 @@ Phase 3 in progress:
   - TODO: Highlight clicked package
   - TODO: Size nodes by module count
 - [x] Module search (fuzzy substring matching, click to navigate)
-  - TODO: Add arrow key navigation in dropdown
+  - [x] Arrow key navigation in dropdown (ArrowUp/Down to navigate, Enter to select, Escape to close)
 - [ ] Simultaneous views
 
 ---
