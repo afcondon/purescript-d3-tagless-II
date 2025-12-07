@@ -29,6 +29,9 @@ module Engine.ViewTransition
   , removeCompletedExits
   , addEnteringNodes
   , applyViewTransition
+    -- * Package labels for TopoGraph
+  , renderPackageLabels
+  , clearPackageLabels
   ) where
 
 import Prelude
@@ -302,3 +305,21 @@ buildTransitionMap renderNodes =
         Nothing -> false
     in
       Tuple (show rn.node.id) { opacity, radius, exitComplete }
+
+-- =============================================================================
+-- Package Labels for TopoGraph
+-- =============================================================================
+
+-- | Render package labels in TopoGraph view
+foreign import renderPackageLabels_ :: Array SimNode -> Effect Unit
+
+-- | Clear package labels
+foreign import clearPackageLabels_ :: Effect Unit
+
+-- | Render package labels for TopoGraph view
+renderPackageLabels :: Array SimNode -> Effect Unit
+renderPackageLabels = renderPackageLabels_
+
+-- | Clear package labels when leaving TopoGraph
+clearPackageLabels :: Effect Unit
+clearPackageLabels = clearPackageLabels_

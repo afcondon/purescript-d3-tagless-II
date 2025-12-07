@@ -1306,7 +1306,7 @@ line.fn-highlight-dimmed {
 
 .chord-label {
   font-family: var(--font-mono);
-  font-size: var(--font-size-small);
+  /* font-size: var(--font-size-small); */
   fill: var(--color-blueprint-light);
   pointer-events: none;
 }

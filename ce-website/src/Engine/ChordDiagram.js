@@ -126,8 +126,9 @@ export const renderChordDiagram_ = (width) => (height) => (arcs) => (ribbons) =>
     .attr("y", d => d.y)
     .attr("text-anchor", d => d.anchor)
     .attr("dominant-baseline", "middle")
-    .attr("font-size", "11px")
-    .attr("fill", "#333")
+    .attr("font-size", "14px")
+    .attr("font-weight", "500")
+    .attr("fill", "#e2e8f0")
     .attr("transform", d => {
       // Rotate text to follow the circle
       const angle = d.rotation;

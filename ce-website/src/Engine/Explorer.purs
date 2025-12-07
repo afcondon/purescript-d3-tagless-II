@@ -603,6 +603,7 @@ goToScene sceneId stateRef = do
     restoreGridForces nodes state.simulation -- Restore grid forces
     Scene.clearLinksGroupId stateRef -- Disable link updates
     setTreeSceneClass false -- Show all nodes normally
+    VT.clearPackageLabels -- Remove TopoGraph package labels if present
 
   -- Handle TreeForm: render tree bezier links
   when (sceneId == TreeForm) do
@@ -611,6 +612,7 @@ goToScene sceneId stateRef = do
     clearTreeLinks -- Clear any existing links
     renderTreeLinks nodes
     setTreeSceneClass true
+    VT.clearPackageLabels -- Remove TopoGraph package labels if present
 
   -- Handle RadialTreeForm: waypoint to radial positions (no links)
   -- Used as intermediate step before Force view
@@ -618,6 +620,7 @@ goToScene sceneId stateRef = do
     clearTreeLinks -- Remove any existing links
     Scene.clearLinksGroupId stateRef -- Disable link updates
     setTreeSceneClass true -- Keep packages/non-tree faded
+    VT.clearPackageLabels -- Remove TopoGraph package labels if present
 
   -- Handle TreeRun: force-directed tree with link forces
   when (sceneId == TreeRun) do
@@ -629,13 +632,18 @@ goToScene sceneId stateRef = do
     renderForceLinks nodes links -- Render straight line links
     Scene.setLinksGroupId forceLinksGroupId stateRef -- Enable link updates
     setTreeSceneClass true -- Keep packages/non-tree faded
+    VT.clearPackageLabels -- Remove TopoGraph package labels if present
 
   -- Handle TopoForm: package DAG with topological positions
   -- TODO: Could add package dependency links here in future
   when (sceneId == TopoForm) do
+    state <- Ref.read stateRef
+    nodes <- Sim.getNodes state.simulation
+    let packages = Array.filter (\n -> n.nodeType == PackageNode) nodes
     clearTreeLinks -- Remove any tree/force links
     Scene.clearLinksGroupId stateRef -- Disable link updates
     setTreeSceneClass false -- Show all nodes (packages prominent)
+    VT.renderPackageLabels packages -- Add package name labels
 
   Scene.transitionTo scene stateRef
 

@@ -62,3 +62,53 @@ export const updateNodeTransitionState_ = (selector) => (transitionMap) => () =>
       }
     });
 };
+
+// =============================================================================
+// Package Labels for TopoGraph View
+// =============================================================================
+
+// Render package labels for TopoGraph view
+// Takes array of package nodes (with name, topoX, topoY, r)
+export const renderPackageLabels_ = (packages) => () => {
+  // Clear any existing labels
+  clearPackageLabels_()();
+
+  const container = select("#explorer-nodes");
+  if (container.empty()) return;
+
+  // Create a group for package labels
+  const labelsGroup = container.append("g")
+    .attr("class", "package-labels");
+
+  // Add text labels for each package
+  labelsGroup.selectAll("text.package-label")
+    .data(packages)
+    .enter()
+    .append("text")
+    .attr("class", "package-label")
+    .attr("x", d => d.topoX)
+    .attr("y", d => d.topoY + d.r + 14)  // Position below the circle
+    .attr("text-anchor", "middle")
+    .attr("dominant-baseline", "hanging")
+    .attr("font-size", "12px")
+    .attr("font-weight", "500")
+    .attr("fill", "#e2e8f0")
+    .attr("pointer-events", "none")
+    .text(d => d.name);
+};
+
+// Clear package labels
+export const clearPackageLabels_ = () => () => {
+  select("#explorer-nodes").selectAll("g.package-labels").remove();
+};
+
+// Update package label positions (for animation/transition)
+export const updatePackageLabelPositions_ = () => () => {
+  select("#explorer-nodes").selectAll("text.package-label")
+    .each(function(d) {
+      // Update position from bound data (which is updated by simulation)
+      select(this)
+        .attr("x", d.x || d.topoX)
+        .attr("y", (d.y || d.topoY) + d.r + 14);
+    });
+};
