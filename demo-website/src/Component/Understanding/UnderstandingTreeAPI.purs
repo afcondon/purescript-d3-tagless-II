@@ -4,12 +4,10 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
-import Effect.Class (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.RoutingDSL (routeToPath)
-import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3.Shared.SiteNav as SiteNav
 import PSD3.Website.Types (Route(..))
 
@@ -32,93 +30,16 @@ component = H.mkComponent
 
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
-  Initialize -> liftEffect triggerMermaidRendering
+  Initialize -> pure unit
 
--- | Layer cake diagram showing API architecture
-layerCakeDiagram :: String
-layerCakeDiagram = """
-graph TB
-    subgraph "High-Level APIs"
-        TreeAPI["TreeAPI<br/><i>Declarative tree structures</i>"]
-        SimAPI["Simulation API<br/><i>Force-directed layouts</i>"]
-    end
-
-    subgraph "Core Layer"
-        SelectionM["SelectionM<br/><i>Type-safe selections</i>"]
-    end
-
-    subgraph "Interpreters"
-        D3v2["D3v2 Interpreter<br/><i>DOM manipulation</i>"]
-        Mermaid["Mermaid Interpreter<br/><i>Diagram generation</i>"]
-        String["String Interpreter<br/><i>Debug output</i>"]
-    end
-
-    TreeAPI --> SelectionM
-    SimAPI --> SelectionM
-    SelectionM --> D3v2
-    SelectionM --> Mermaid
-    SelectionM --> String
-
-    style TreeAPI fill:#c4e8d3,stroke:#558b73,stroke-width:2px
-    style SimAPI fill:#c4e8d3,stroke:#558b73,stroke-width:2px
-    style SelectionM fill:#d4d8e8,stroke:#555b8b,stroke-width:2px
-    style D3v2 fill:#f5e6d3,stroke:#8b7355,stroke-width:2px
-    style Mermaid fill:#f5e6d3,stroke:#8b7355,stroke-width:2px
-    style String fill:#f5e6d3,stroke:#8b7355,stroke-width:2px
-"""
-
--- | Tree structure diagram
-treeStructureDiagram :: String
-treeStructureDiagram = """
-graph TD
-    subgraph "Tree datum"
-        Node["Node<br/><i>Static element</i>"]
-        Join["Join<br/><i>Data-driven N elements</i>"]
-        NestedJoin["NestedJoin<br/><i>Type decomposition</i>"]
-        SceneJoin["SceneJoin<br/><i>GUP behaviors</i>"]
-    end
-
-    Node --> Children["children: Array Tree"]
-    Join --> Template["template: datum -> Tree"]
-    NestedJoin --> Decompose["decompose + template"]
-    SceneJoin --> Behaviors["enter/update/exit"]
-
-    style Node fill:#f5e6d3,stroke:#8b7355,stroke-width:2px
-    style Join fill:#e8dcc6,stroke:#8b7355,stroke-width:2px
-    style NestedJoin fill:#d4c4b0,stroke:#8b7355,stroke-width:2px
-    style SceneJoin fill:#c4e8d3,stroke:#558b73,stroke-width:2px
-"""
-
--- | Comparison diagram
-comparisonDiagram :: String
-comparisonDiagram = """
-graph LR
-    subgraph "Imperative Style"
-        Imp1["select"]
-        Imp2["appendChild"]
-        Imp3["appendChild"]
-        Imp4["joinData"]
-        Imp5["append"]
-        Imp6["setAttrs"]
-    end
-
-    subgraph "Declarative Style"
-        Dec1["renderTree"]
-        Dec2["Tree structure"]
-    end
-
-    Imp1 --> Imp2
-    Imp2 --> Imp3
-    Imp3 --> Imp4
-    Imp4 --> Imp5
-    Imp5 --> Imp6
-
-    Dec1 --> Dec2
-
-    style Imp1 fill:#f8d7da,stroke:#721c24,stroke-width:1px
-    style Dec1 fill:#d4edda,stroke:#155724,stroke-width:1px
-    style Dec2 fill:#d4edda,stroke:#155724,stroke-width:1px
-"""
+-- | Helper to render an SVG diagram from assets
+svgDiagram :: forall w i. String -> String -> HH.HTML w i
+svgDiagram src alt =
+  HH.img
+    [ HP.src $ "assets/diagrams/" <> src
+    , HP.alt alt
+    , HP.style "max-width: 100%; height: auto;"
+    ]
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render _ =
@@ -165,7 +86,7 @@ render _ =
 
             , HH.div
                 [ HP.classes [ HH.ClassName "diagram-container" ] ]
-                [ mermaidDiagram layerCakeDiagram (Just "layer-cake-diagram") ]
+                [ svgDiagram "layer-cake.svg" "PSD3 architecture layer cake diagram" ]
 
             , HH.p_
                 [ HH.text "Key points:" ]
@@ -202,7 +123,7 @@ render _ =
 
             , HH.div
                 [ HP.classes [ HH.ClassName "diagram-container" ] ]
-                [ mermaidDiagram treeStructureDiagram (Just "tree-structure-diagram") ]
+                [ svgDiagram "tree-variants.svg" "Tree API variants diagram" ]
 
             , HH.table
                 [ HP.classes [ HH.ClassName "tutorial-table" ] ]
@@ -260,7 +181,7 @@ render _ =
 
             , HH.div
                 [ HP.classes [ HH.ClassName "diagram-container" ] ]
-                [ mermaidDiagram comparisonDiagram (Just "comparison-diagram") ]
+                [ svgDiagram "imperative-vs-declarative.svg" "Imperative vs declarative comparison" ]
 
             , HH.p_
                 [ HH.text "For updating visualizations, use "

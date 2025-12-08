@@ -1593,12 +1593,12 @@
   };
   var ap = function(dictMonad) {
     var bind87 = bind(dictMonad.Bind1());
-    var pure91 = pure(dictMonad.Applicative0());
+    var pure96 = pure(dictMonad.Applicative0());
     return function(f) {
       return function(a2) {
         return bind87(f)(function(f$prime) {
           return bind87(a2)(function(a$prime) {
-            return pure91(f$prime(a$prime));
+            return pure96(f$prime(a$prime));
           });
         });
       };
@@ -1735,10 +1735,10 @@
     var catchError1 = catchError(dictMonadError);
     var Monad0 = dictMonadError.MonadThrow0().Monad0();
     var map100 = map(Monad0.Bind1().Apply0().Functor0());
-    var pure91 = pure(Monad0.Applicative0());
+    var pure96 = pure(Monad0.Applicative0());
     return function(a2) {
       return catchError1(map100(Right.create)(a2))(function($52) {
-        return pure91(Left.create($52));
+        return pure96(Left.create($52));
       });
     };
   };
@@ -2246,12 +2246,12 @@
   };
   var bindExceptT = function(dictMonad) {
     var bind87 = bind(dictMonad.Bind1());
-    var pure91 = pure(dictMonad.Applicative0());
+    var pure96 = pure(dictMonad.Applicative0());
     return {
       bind: function(v) {
         return function(k) {
           return bind87(v)(either(function($193) {
-            return pure91(Left.create($193));
+            return pure96(Left.create($193));
           })(function(a2) {
             var v1 = k(a2);
             return v1;
@@ -2304,24 +2304,24 @@
     return function(dictMonad) {
       var Bind1 = dictMonad.Bind1();
       var bind87 = bind(Bind1);
-      var pure91 = pure(dictMonad.Applicative0());
+      var pure96 = pure(dictMonad.Applicative0());
       var functorExceptT1 = functorExceptT(Bind1.Apply0().Functor0());
       return {
         alt: function(v) {
           return function(v1) {
             return bind87(v)(function(rm) {
               if (rm instanceof Right) {
-                return pure91(new Right(rm.value0));
+                return pure96(new Right(rm.value0));
               }
               ;
               if (rm instanceof Left) {
                 return bind87(v1)(function(rn) {
                   if (rn instanceof Right) {
-                    return pure91(new Right(rn.value0));
+                    return pure96(new Right(rn.value0));
                   }
                   ;
                   if (rn instanceof Left) {
-                    return pure91(new Left(append39(rm.value0)(rn.value0)));
+                    return pure96(new Left(append39(rm.value0)(rn.value0)));
                   }
                   ;
                   throw new Error("Failed pattern match at Control.Monad.Except.Trans (line 87, column 9 - line 89, column 49): " + [rn.constructor.name]);
@@ -2769,13 +2769,13 @@
   };
   var traverse_ = function(dictApplicative) {
     var applySecond3 = applySecond(dictApplicative.Apply0());
-    var pure91 = pure(dictApplicative);
+    var pure96 = pure(dictApplicative);
     return function(dictFoldable) {
       var foldr22 = foldr(dictFoldable);
       return function(f) {
         return foldr22(function($454) {
           return applySecond3(f($454));
-        })(pure91(unit));
+        })(pure96(unit));
       };
     };
   };
@@ -3138,13 +3138,13 @@
     }
     return function(apply8) {
       return function(map100) {
-        return function(pure91) {
+        return function(pure96) {
           return function(f) {
             return function(array4) {
               function go2(bot, top3) {
                 switch (top3 - bot) {
                   case 0:
-                    return pure91([]);
+                    return pure96([]);
                   case 1:
                     return map100(array1)(f(array4[bot]));
                   case 2:
@@ -3657,7 +3657,7 @@
   };
   var traverseWithIndex_ = function(dictApplicative) {
     var applySecond3 = applySecond(dictApplicative.Apply0());
-    var pure91 = pure(dictApplicative);
+    var pure96 = pure(dictApplicative);
     return function(dictFoldableWithIndex) {
       var foldrWithIndex1 = foldrWithIndex(dictFoldableWithIndex);
       return function(f) {
@@ -3666,7 +3666,7 @@
           return function($290) {
             return applySecond3($289($290));
           };
-        })(pure91(unit));
+        })(pure96(unit));
       };
     };
   };
@@ -5582,11 +5582,11 @@
     var mempty3 = mempty(dictMonoid);
     var applyWriterT1 = applyWriterT(dictMonoid.Semigroup0());
     return function(dictApplicative) {
-      var pure91 = pure(dictApplicative);
+      var pure96 = pure(dictApplicative);
       var applyWriterT2 = applyWriterT1(dictApplicative.Apply0());
       return {
         pure: function(a2) {
-          return pure91(new Tuple(a2, mempty3));
+          return pure96(new Tuple(a2, mempty3));
         },
         Apply0: function() {
           return applyWriterT2;
@@ -6943,11 +6943,11 @@
     };
   };
   var applicativeStateT = function(dictMonad) {
-    var pure91 = pure(dictMonad.Applicative0());
+    var pure96 = pure(dictMonad.Applicative0());
     return {
       pure: function(a2) {
         return function(s) {
-          return pure91(new Tuple(a2, s));
+          return pure96(new Tuple(a2, s));
         };
       },
       Apply0: function() {
@@ -6956,12 +6956,12 @@
     };
   };
   var monadStateStateT = function(dictMonad) {
-    var pure91 = pure(dictMonad.Applicative0());
+    var pure96 = pure(dictMonad.Applicative0());
     var monadStateT1 = monadStateT(dictMonad);
     return {
       state: function(f) {
         return function($206) {
-          return pure91(f($206));
+          return pure96(f($206));
         };
       },
       Monad0: function() {
@@ -13888,11 +13888,11 @@
 
   // output/Control.Alternative/index.js
   var guard = function(dictAlternative) {
-    var pure91 = pure(dictAlternative.Applicative0());
+    var pure96 = pure(dictAlternative.Applicative0());
     var empty9 = empty2(dictAlternative.Plus1());
     return function(v) {
       if (v) {
-        return pure91(unit);
+        return pure96(unit);
       }
       ;
       if (!v) {
@@ -18237,7 +18237,7 @@
     return Lift.create;
   })();
   var goLeft = function(dictApplicative) {
-    var pure91 = pure(dictApplicative);
+    var pure96 = pure(dictApplicative);
     return function(fStack) {
       return function(valStack) {
         return function(nat) {
@@ -18245,7 +18245,7 @@
             return function(count) {
               if (func instanceof Pure) {
                 return new Tuple(new Cons({
-                  func: pure91(func.value0),
+                  func: pure96(func.value0),
                   count
                 }, fStack), valStack);
               }
@@ -18316,7 +18316,7 @@
   };
   var foldFreeAp = function(dictApplicative) {
     var goApply1 = goApply(dictApplicative);
-    var pure91 = pure(dictApplicative);
+    var pure96 = pure(dictApplicative);
     var goLeft1 = goLeft(dictApplicative);
     return function(nat) {
       return function(z) {
@@ -18325,7 +18325,7 @@
           var $tco_result;
           function $tco_loop(v) {
             if (v.value1.value0 instanceof Pure) {
-              var v1 = goApply1(v.value0)(v.value1.value1)(pure91(v.value1.value0.value0));
+              var v1 = goApply1(v.value0)(v.value1.value1)(pure96(v.value1.value0.value0));
               if (v1 instanceof Left) {
                 $tco_done = true;
                 return v1.value0;
@@ -19001,10 +19001,10 @@
   // output/Foreign.Index/index.js
   var unsafeReadProp = function(dictMonad) {
     var fail3 = fail(dictMonad);
-    var pure91 = pure(applicativeExceptT(dictMonad));
+    var pure96 = pure(applicativeExceptT(dictMonad));
     return function(k) {
       return function(value19) {
-        return unsafeReadPropImpl(fail3(new TypeMismatch("object", typeOf(value19))), pure91, k, value19);
+        return unsafeReadPropImpl(fail3(new TypeMismatch("object", typeOf(value19))), pure96, k, value19);
       };
     };
   };
@@ -44255,7 +44255,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var renderExample = function(dictMonadAff) {
     var monadEffectHalogenM2 = monadEffectHalogenM(dictMonadAff.MonadEffect0());
     var liftEffect45 = liftEffect(monadEffectHalogenM2);
-    var triggerMermaidRendering8 = triggerMermaidRendering(monadEffectHalogenM2);
+    var triggerMermaidRendering3 = triggerMermaidRendering(monadEffectHalogenM2);
     return function(selection2) {
       var tree2 = getExampleTree(selection2);
       return discard46(liftEffect45(runD3v2M(bind69(select37("#d3-output"))(function(container) {
@@ -44287,7 +44287,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               $99.astCode = astPretty;
               return $99;
             }))(function() {
-              return discard46(triggerMermaidRendering8)(function() {
+              return discard46(triggerMermaidRendering3)(function() {
                 return pure116(unit);
               });
             });
@@ -49220,7 +49220,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
 
   // output/Component.Understanding.UnderstandingAttributes/index.js
-  var triggerMermaidRendering2 = /* @__PURE__ */ triggerMermaidRendering(monadEffectEffect);
+  var pure79 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize37 = /* @__PURE__ */ (function() {
     function Initialize49() {
     }
@@ -49228,6 +49228,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     Initialize49.value = new Initialize49();
     return Initialize49;
   })();
+  var svgDiagram = function(src10) {
+    return function(alt10) {
+      return img([src9("assets/diagrams/" + src10), alt6(alt10), style("max-width: 100%; height: auto;")]);
+    };
+  };
   var renderNavCard = function(title4) {
     return function(href5) {
       return function(description) {
@@ -49235,21 +49240,18 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       };
     };
   };
-  var handleAction36 = function(dictMonadAff) {
-    var liftEffect45 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
-    return function(v) {
-      return liftEffect45(triggerMermaidRendering2);
-    };
-  };
-  var contravariantDiagram = '\ngraph LR\n    subgraph "Contravariant Pattern"\n        Attr["Attribute datum"]\n        CMap["cmap f attr"]\n        AttrNew["Attribute newDatum"]\n    end\n\n    Attr --> CMap\n    CMap --> AttrNew\n\n    note["f :: newDatum -> datum<br/>Transforms data BEFORE attribute sees it"]\n\n    style Attr fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n    style CMap fill:#d4d8e8,stroke:#555b8b,stroke-width:2px\n    style AttrNew fill:#c4e8d3,stroke:#558b73,stroke-width:2px\n';
-  var attributeTypeDiagram = '\ngraph TD\n    subgraph "Attribute Values"\n        Static["Static Value<br/><code>cx 100.0</code>"]\n        Datum["Datum Function<br/><code>cx (\\\\d -> d.x)</code>"]\n        DatumIdx["Datum+Index<br/><code>cx (\\\\d i -> d.x + i*10)</code>"]\n    end\n\n    subgraph "Type Resolution"\n        IsAttr[IsAttribute typeclass]\n        Resolve[Resolved at compile time]\n    end\n\n    Static --> IsAttr\n    Datum --> IsAttr\n    DatumIdx --> IsAttr\n    IsAttr --> Resolve\n\n    style Static fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style Datum fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n    style DatumIdx fill:#d4c4b0,stroke:#8b7355,stroke-width:2px\n';
   var render41 = function(v) {
     return div2([classes(["tutorial-page"])])([render6({
       logoSize: Large.value,
       quadrant: QuadUnderstanding.value,
       prevNext: Nothing.value,
       pageTitle: Nothing.value
-    }), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Type-Safe Attribute System")]), p_([text5("A key innovation of D3 is the natural way to go from static to data-driven attributes. PSD3v2 preserves this flexibility while adding compile-time type safety through typeclasses and phantom types.")]), div2([classes(["section-nav-cards"])])([renderNavCard("Attribute Variants")("#attribute-variants")("Static, datum, and indexed"), renderNavCard("Contravariant Pattern")("#contravariant")("Transform data before attributes"), renderNavCard("Type Safety")("#type-safety")("Compile-time guarantees"), renderNavCard("Common Attributes")("#common-attributes")("SVG and HTML attributes")])]), section([classes(["tutorial-section"]), id4("attribute-variants")])([h2([classes(["tutorial-section-title"])])([text5("Attribute Variants")]), p_([text5("Attributes in PSD3v2 can take three forms, all with the same clean syntax:")]), div2([classes(["diagram-container"])])([mermaidDiagram(attributeTypeDiagram)(new Just("attribute-type-diagram"))]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("Form")]), th_([text5("Example")]), th_([text5("Use Case")])])]), tbody_([tr_([td_([strong_([text5("Static")])]), td_([code_([text5("radius 10.0")])]), td_([text5("Same value for all elements")])]), tr_([td_([strong_([text5("Datum Function")])]), td_([code_([text5("cx (\\d -> d.x)")])]), td_([text5("Value depends on bound data")])]), tr_([td_([strong_([text5("Datum + Index")])]), td_([code_([text5("x (\\d i -> 50.0 + i * 100.0)")])]), td_([text5("Value depends on data and position")])])])]), p([classes(["code-highlight"])])([text5("Key: "), text5("The "), code_([text5("IsAttribute")]), text5(" typeclass resolves all three forms at compile time.")])]), section([classes(["tutorial-section"]), id4("contravariant")])([h2([classes(["tutorial-section-title"])])([text5("The Contravariant Pattern")]), p_([text5("Attributes form a "), em_([text5("Contravariant Functor")]), text5(". This means you can transform the input data type before the attribute sees it.")]), div2([classes(["diagram-container"])])([mermaidDiagram(contravariantDiagram)(new Just("contravariant-diagram"))]), p_([text5("Why contravariant? Regular functors transform "), em_([text5("outputs")]), text5(". Attributes transform "), em_([text5("inputs")]), text5(" (the datum they receive).")]), p([classes(["code-highlight"])])([text5("Example: "), code_([text5("cmap _.name (textContent identity)")]), text5(" extracts the name field before setting text content.")])]), section([classes(["tutorial-section"]), id4("type-safety")])([h2([classes(["tutorial-section-title"])])([text5("Type Safety Guarantees")]), p_([text5("The attribute system provides several compile-time guarantees:")]), ul_([li_([strong_([text5("Datum type matching")]), text5(" - Attributes must match the selection's datum type")]), li_([strong_([text5("Attribute value types")]), text5(" - "), code_([text5("radius")]), text5(" requires Number, "), code_([text5("fill")]), text5(" requires String")]), li_([strong_([text5("No missing attributes")]), text5(" - Arrays of attributes are explicit and type-checked")])]), p_([text5("Common compile-time errors:")]), ul_([li_([code_([text5('radius "10"')]), text5(" - Type error: expected Number, got String")]), li_([code_([text5("cx (\\d -> d.x)")]), text5(" on wrong datum type - Type error: field 'x' not found")])]), p([classes(["code-highlight"])])([text5("Philosophy: "), text5("Runtime errors in D3 become compile-time errors in PSD3v2.")])]), section([classes(["tutorial-section"]), id4("common-attributes")])([h2([classes(["tutorial-section-title"])])([text5("Common Attributes")]), p_([text5("PSD3v2 provides typed wrappers for all common SVG and HTML attributes:")]), h3_([text5("Positioning")]), p_([code_([text5("cx, cy, x, y, x1, y1, x2, y2")]), text5(" - coordinate positions")]), h3_([text5("Dimensions")]), p_([code_([text5("width, height, radius, rx, ry")]), text5(" - size attributes")]), h3_([text5("Styling")]), p_([code_([text5("fill, stroke, strokeWidth, fillOpacity, strokeOpacity")]), text5(" - colors and strokes")]), h3_([text5("Text")]), p_([code_([text5("textContent, textAnchor, fontSize, fontWeight")]), text5(" - text styling")]), h3_([text5("Transforms")]), p_([code_([text5("transform, translate, rotate, scale")]), text5(" - geometric transforms")]), h3_([text5("General")]), p_([code_([text5("class_, id_, d (for paths), viewBox")]), text5(" - common utilities")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Summary")]), p_([text5("PSD3v2's attribute system:")]), ul_([li_([text5("Three forms: static, datum function, datum+index")]), li_([text5("Resolved at compile time via IsAttribute typeclass")]), li_([text5("Contravariant functor for data transformation")]), li_([text5("Type-safe: datum types, value types, completeness")]), li_([text5("Comprehensive coverage of SVG and HTML attributes")])])])])]);
+    }), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Type-Safe Attribute System")]), p_([text5("A key innovation of D3 is the natural way to go from static to data-driven attributes. PSD3v2 preserves this flexibility while adding compile-time type safety through typeclasses and phantom types.")]), div2([classes(["section-nav-cards"])])([renderNavCard("Attribute Variants")("#attribute-variants")("Static, datum, and indexed"), renderNavCard("Contravariant Pattern")("#contravariant")("Transform data before attributes"), renderNavCard("Type Safety")("#type-safety")("Compile-time guarantees"), renderNavCard("Common Attributes")("#common-attributes")("SVG and HTML attributes")])]), section([classes(["tutorial-section"]), id4("attribute-variants")])([h2([classes(["tutorial-section-title"])])([text5("Attribute Variants")]), p_([text5("Attributes in PSD3v2 can take three forms, all with the same clean syntax:")]), div2([classes(["diagram-container"])])([svgDiagram("attribute-resolution.svg")("Attribute type resolution diagram")]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("Form")]), th_([text5("Example")]), th_([text5("Use Case")])])]), tbody_([tr_([td_([strong_([text5("Static")])]), td_([code_([text5("radius 10.0")])]), td_([text5("Same value for all elements")])]), tr_([td_([strong_([text5("Datum Function")])]), td_([code_([text5("cx (\\d -> d.x)")])]), td_([text5("Value depends on bound data")])]), tr_([td_([strong_([text5("Datum + Index")])]), td_([code_([text5("x (\\d i -> 50.0 + i * 100.0)")])]), td_([text5("Value depends on data and position")])])])]), p([classes(["code-highlight"])])([text5("Key: "), text5("The "), code_([text5("IsAttribute")]), text5(" typeclass resolves all three forms at compile time.")])]), section([classes(["tutorial-section"]), id4("contravariant")])([h2([classes(["tutorial-section-title"])])([text5("The Contravariant Pattern")]), p_([text5("Attributes form a "), em_([text5("Contravariant Functor")]), text5(". This means you can transform the input data type before the attribute sees it.")]), p_([text5("Why contravariant? Regular functors transform "), em_([text5("outputs")]), text5(". Attributes transform "), em_([text5("inputs")]), text5(" (the datum they receive).")]), p([classes(["code-highlight"])])([text5("Example: "), code_([text5("cmap _.name (textContent identity)")]), text5(" extracts the name field before setting text content.")])]), section([classes(["tutorial-section"]), id4("type-safety")])([h2([classes(["tutorial-section-title"])])([text5("Type Safety Guarantees")]), p_([text5("The attribute system provides several compile-time guarantees:")]), ul_([li_([strong_([text5("Datum type matching")]), text5(" - Attributes must match the selection's datum type")]), li_([strong_([text5("Attribute value types")]), text5(" - "), code_([text5("radius")]), text5(" requires Number, "), code_([text5("fill")]), text5(" requires String")]), li_([strong_([text5("No missing attributes")]), text5(" - Arrays of attributes are explicit and type-checked")])]), p_([text5("Common compile-time errors:")]), ul_([li_([code_([text5('radius "10"')]), text5(" - Type error: expected Number, got String")]), li_([code_([text5("cx (\\d -> d.x)")]), text5(" on wrong datum type - Type error: field 'x' not found")])]), p([classes(["code-highlight"])])([text5("Philosophy: "), text5("Runtime errors in D3 become compile-time errors in PSD3v2.")])]), section([classes(["tutorial-section"]), id4("common-attributes")])([h2([classes(["tutorial-section-title"])])([text5("Common Attributes")]), p_([text5("PSD3v2 provides typed wrappers for all common SVG and HTML attributes:")]), h3_([text5("Positioning")]), p_([code_([text5("cx, cy, x, y, x1, y1, x2, y2")]), text5(" - coordinate positions")]), h3_([text5("Dimensions")]), p_([code_([text5("width, height, radius, rx, ry")]), text5(" - size attributes")]), h3_([text5("Styling")]), p_([code_([text5("fill, stroke, strokeWidth, fillOpacity, strokeOpacity")]), text5(" - colors and strokes")]), h3_([text5("Text")]), p_([code_([text5("textContent, textAnchor, fontSize, fontWeight")]), text5(" - text styling")]), h3_([text5("Transforms")]), p_([code_([text5("transform, translate, rotate, scale")]), text5(" - geometric transforms")]), h3_([text5("General")]), p_([code_([text5("class_, id_, d (for paths), viewBox")]), text5(" - common utilities")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Summary")]), p_([text5("PSD3v2's attribute system:")]), ul_([li_([text5("Three forms: static, datum function, datum+index")]), li_([text5("Resolved at compile time via IsAttribute typeclass")]), li_([text5("Contravariant functor for data transformation")]), li_([text5("Type-safe: datum types, value types, completeness")]), li_([text5("Comprehensive coverage of SVG and HTML attributes")])])])])]);
+  };
+  var handleAction36 = function(dictMonadAff) {
+    return function(v) {
+      return pure79(unit);
+    };
   };
   var component37 = function(dictMonadAff) {
     return mkComponent({
@@ -49268,7 +49270,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
 
   // output/Component.Understanding.UnderstandingGrammar/index.js
-  var triggerMermaidRendering3 = /* @__PURE__ */ triggerMermaidRendering(monadEffectEffect);
+  var pure80 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize38 = /* @__PURE__ */ (function() {
     function Initialize49() {
     }
@@ -49276,9 +49278,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     Initialize49.value = new Initialize49();
     return Initialize49;
   })();
-  var treeAPIDiagram = '\ngraph TD\n    subgraph "TreeAPI - Declarative Structure"\n        A[renderTree] --> B[Tree datum]\n        B --> C[Node]\n        B --> D[Join]\n        B --> E[SceneJoin]\n        C --> F[name, elemType, attrs, children]\n        D --> G[template: datum -> Tree]\n        E --> H[enter/update/exit behaviors]\n    end\n\n    style A fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style B fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n    style C fill:#d4c4b0,stroke:#8b7355,stroke-width:2px\n    style D fill:#c4e8d3,stroke:#558b73,stroke-width:2px\n    style E fill:#d4d8e8,stroke:#555b8b,stroke-width:2px\n';
-  var staticVizDiagram = '\ngraph TD\n    subgraph "Static Visualization"\n        A[select container] --> B[appendChild SVG]\n        B --> C[appendData Circle]\n        C --> D[setAttrs]\n    end\n\n    style A fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style B fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n    style C fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n    style D fill:#d4c4b0,stroke:#8b7355,stroke-width:2px\n';
-  var selectionStateDiagram = "\nstateDiagram-v2\n    [*] --> SEmpty: select\n    SEmpty --> SBoundOwns: appendData/renderData\n    SEmpty --> JoinResult: joinData\n\n    JoinResult --> SPending: .enter\n    JoinResult --> SBoundOwns: .update\n    JoinResult --> SExiting: .exit\n\n    SPending --> SBoundOwns: append\n    SBoundOwns --> SBoundOwns: setAttrs\n    SBoundOwns --> SBoundInherits: appendChildInheriting\n    SExiting --> [*]: remove\n\n    note right of SEmpty: No data bound yet\n    note right of SPending: Data waiting for elements\n    note right of SBoundOwns: Elements with data\n    note right of SExiting: Elements to remove\n";
+  var svgDiagram2 = function(src10) {
+    return function(alt10) {
+      return img([src9("assets/diagrams/" + src10), alt6(alt10), style("max-width: 100%; height: auto;")]);
+    };
+  };
   var renderNavCard2 = function(title4) {
     return function(href5) {
       return function(description) {
@@ -49286,20 +49290,18 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       };
     };
   };
-  var handleAction37 = function(dictMonadAff) {
-    var liftEffect45 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
-    return function(v) {
-      return liftEffect45(triggerMermaidRendering3);
-    };
-  };
-  var gupFlowDiagram = '\ngraph TD\n    subgraph "General Update Pattern"\n        A[openSelection/selectAll] --> B[joinData]\n        B --> C{JoinResult}\n        C --> D[enter: append]\n        C --> E[update: setAttrs]\n        C --> F[exit: remove]\n        D --> G[merge]\n        E --> G\n    end\n\n    style A fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style B fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n    style C fill:#d4c4b0,stroke:#8b7355,stroke-width:2px\n    style D fill:#c4e8d3,stroke:#558b73,stroke-width:2px\n    style E fill:#d4d8e8,stroke:#555b8b,stroke-width:2px\n    style F fill:#e8d4d4,stroke:#8b5555,stroke-width:2px\n';
   var render42 = function(v) {
     return div2([classes(["tutorial-page"])])([render6({
       logoSize: Large.value,
       quadrant: QuadUnderstanding.value,
       prevNext: Nothing.value,
       pageTitle: Nothing.value
-    }), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("The Grammar of D3")]), p_([text5("D3 can be understood as an embedded Domain Specific Language for data visualization. While the full API has a large surface area, the essential grammar is remarkably small. PSD3v2 captures this grammar in a type-safe, composable way.")]), div2([classes(["section-nav-cards"])])([renderNavCard2("Core Primitives")("#core-primitives")("The four essential operations"), renderNavCard2("Selection States")("#selection-states")("Phantom types for safety"), renderNavCard2("Static vs GUP")("#static-vs-gup")("One-time vs updating"), renderNavCard2("TreeAPI")("#tree-api")("Declarative alternative")])]), section([classes(["tutorial-section"]), id4("core-primitives")])([h2([classes(["tutorial-section-title"])])([text5("Core Primitives")]), p_([text5("The grammar of D3 visualizations consists of four essential primitives. Everything else is built from these:")]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("Primitive")]), th_([text5("Function")]), th_([text5("PSD3v2 API")])])]), tbody_([tr_([td_([em_([text5("select")])]), td_([text5("Find an entry point in the DOM")]), td_([code_([text5("select")]), text5(", "), code_([text5("selectAll")])])]), tr_([td_([em_([text5("append")])]), td_([text5("Add a DOM element to a selection")]), td_([code_([text5("appendChild")]), text5(", "), code_([text5("append")])])]), tr_([td_([em_([text5("join")])]), td_([text5("For each datum "), strong_([text5("d")]), text5(", create an element "), strong_([text5("e")])]), td_([code_([text5("appendData")]), text5(", "), code_([text5("joinData")]), text5(", "), code_([text5("renderData")])])]), tr_([td_([em_([text5("attr")])]), td_([text5("Apply attributes to current elements")]), td_([code_([text5("setAttrs")]), text5(" (array of Attribute)")])])])]), p([classes(["code-highlight"])])([text5("Key insight: "), text5("Attributes can be static values or functions of the datum, enabling Data Driven Documents.")])]), section([classes(["tutorial-section"]), id4("selection-states")])([h2([classes(["tutorial-section-title"])])([text5("Selection States (Phantom Types)")]), p_([text5("PSD3v2 uses phantom types to track what operations are legal on a selection. This catches errors at compile time that D3 would only catch at runtime:")]), div2([classes(["diagram-container"])])([mermaidDiagram(selectionStateDiagram)(new Just("selection-state-diagram"))]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("State")]), th_([text5("Meaning")]), th_([text5("Legal Operations")])])]), tbody_([tr_([td_([code_([text5("SEmpty")])]), td_([text5("Selection has elements but no data")]), td_([text5("appendChild, appendData, joinData")])]), tr_([td_([code_([text5("SPending")])]), td_([text5("Data waiting for elements (enter)")]), td_([text5("append")])]), tr_([td_([code_([text5("SBoundOwns")])]), td_([text5("Elements with bound data")]), td_([text5("setAttrs, appendChildInheriting, merge")])]), tr_([td_([code_([text5("SExiting")])]), td_([text5("Elements to be removed (exit)")]), td_([text5("setAttrsExit, remove")])])])]), p([classes(["code-highlight"])])([text5("Type safety: "), text5("Trying to call "), code_([text5("setAttrs")]), text5(" on an "), code_([text5("SEmpty")]), text5(" selection is a compile error, not a runtime bug.")])]), section([classes(["tutorial-section"]), id4("static-vs-gup")])([h2([classes(["tutorial-section-title"])])([text5("Static Visualizations vs General Update Pattern")]), p_([text5("There are two fundamental patterns for D3 visualizations:")]), h3_([text5("Static: One-time render")]), div2([classes(["diagram-container"])])([mermaidDiagram(staticVizDiagram)(new Just("static-viz-diagram"))]), p_([text5("Use "), code_([text5("appendData")]), text5(" for simple visualizations that render once with fixed data. This is perfect for charts, static hierarchies, and basic data displays.")]), h3_([text5("GUP: Dynamic updates")]), div2([classes(["diagram-container"])])([mermaidDiagram(gupFlowDiagram)(new Just("gup-flow-diagram"))]), p_([text5("Use "), code_([text5("joinData")]), text5(" when data changes over time. The join splits data into three disjoint sets:")]), ul_([li_([strong_([text5("Enter")]), text5(" - new data items that need elements created")]), li_([strong_([text5("Update")]), text5(" - existing elements that should be updated")]), li_([strong_([text5("Exit")]), text5(" - old elements that should be removed")])]), p([classes(["code-highlight"])])([text5("GUP enables: "), text5("Animated transitions, live data feeds, user interactions, and smooth state changes.")])]), section([classes(["tutorial-section"]), id4("tree-api")])([h2([classes(["tutorial-section-title"])])([text5("TreeAPI: Declarative Alternative")]), p_([text5("For static visualizations, the TreeAPI provides a more declarative, succinct syntax. Instead of imperative method chaining, you declare the desired tree structure:")]), div2([classes(["diagram-container"])])([mermaidDiagram(treeAPIDiagram)(new Just("tree-api-diagram"))]), p_([text5("TreeAPI variants handle different use cases:")]), ul_([li_([code_([text5("Node")]), text5(" - static elements with children")]), li_([code_([text5("Join")]), text5(" - data-driven element creation (N elements from N data)")]), li_([code_([text5("NestedJoin")]), text5(" - nested data with type decomposition")]), li_([code_([text5("SceneJoin")]), text5(" - declarative GUP with enter/update/exit behaviors")])]), p([classes(["code-highlight"])])([text5("Note: "), text5("TreeAPI excels at static visualizations. For complex interactive visualizations with simulations, the underlying Selection API provides more control.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Summary")]), p_([text5("The D3 grammar in PSD3v2:")]), ul_([li_([text5("Four primitives: select, append, join, attr")]), li_([text5("Phantom types enforce correct operation ordering")]), li_([text5("Static visualizations use appendData or TreeAPI")]), li_([text5("Dynamic visualizations use joinData with GUP")]), li_([text5("TreeAPI provides declarative syntax for tree structures")])])])])]);
+    }), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("The Grammar of D3")]), p_([text5("D3 can be understood as an embedded Domain Specific Language for data visualization. While the full API has a large surface area, the essential grammar is remarkably small. PSD3v2 captures this grammar in a type-safe, composable way.")]), div2([classes(["section-nav-cards"])])([renderNavCard2("Core Primitives")("#core-primitives")("The four essential operations"), renderNavCard2("Selection States")("#selection-states")("Phantom types for safety"), renderNavCard2("Static vs GUP")("#static-vs-gup")("One-time vs updating"), renderNavCard2("TreeAPI")("#tree-api")("Declarative alternative")])]), section([classes(["tutorial-section"]), id4("core-primitives")])([h2([classes(["tutorial-section-title"])])([text5("Core Primitives")]), p_([text5("The grammar of D3 visualizations consists of four essential primitives. Everything else is built from these:")]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("Primitive")]), th_([text5("Function")]), th_([text5("PSD3v2 API")])])]), tbody_([tr_([td_([em_([text5("select")])]), td_([text5("Find an entry point in the DOM")]), td_([code_([text5("select")]), text5(", "), code_([text5("selectAll")])])]), tr_([td_([em_([text5("append")])]), td_([text5("Add a DOM element to a selection")]), td_([code_([text5("appendChild")]), text5(", "), code_([text5("append")])])]), tr_([td_([em_([text5("join")])]), td_([text5("For each datum "), strong_([text5("d")]), text5(", create an element "), strong_([text5("e")])]), td_([code_([text5("appendData")]), text5(", "), code_([text5("joinData")]), text5(", "), code_([text5("renderData")])])]), tr_([td_([em_([text5("attr")])]), td_([text5("Apply attributes to current elements")]), td_([code_([text5("setAttrs")]), text5(" (array of Attribute)")])])])]), p([classes(["code-highlight"])])([text5("Key insight: "), text5("Attributes can be static values or functions of the datum, enabling Data Driven Documents.")])]), section([classes(["tutorial-section"]), id4("selection-states")])([h2([classes(["tutorial-section-title"])])([text5("Selection States (Phantom Types)")]), p_([text5("PSD3v2 uses phantom types to track what operations are legal on a selection. This catches errors at compile time that D3 would only catch at runtime:")]), div2([classes(["diagram-container"])])([svgDiagram2("selection-state-machine.svg")("Selection state machine diagram")]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("State")]), th_([text5("Meaning")]), th_([text5("Legal Operations")])])]), tbody_([tr_([td_([code_([text5("SEmpty")])]), td_([text5("Selection has elements but no data")]), td_([text5("appendChild, appendData, joinData")])]), tr_([td_([code_([text5("SPending")])]), td_([text5("Data waiting for elements (enter)")]), td_([text5("append")])]), tr_([td_([code_([text5("SBoundOwns")])]), td_([text5("Elements with bound data")]), td_([text5("setAttrs, appendChildInheriting, merge")])]), tr_([td_([code_([text5("SExiting")])]), td_([text5("Elements to be removed (exit)")]), td_([text5("setAttrsExit, remove")])])])]), p([classes(["code-highlight"])])([text5("Type safety: "), text5("Trying to call "), code_([text5("setAttrs")]), text5(" on an "), code_([text5("SEmpty")]), text5(" selection is a compile error, not a runtime bug.")])]), section([classes(["tutorial-section"]), id4("static-vs-gup")])([h2([classes(["tutorial-section-title"])])([text5("Static Visualizations vs General Update Pattern")]), p_([text5("There are two fundamental patterns for D3 visualizations:")]), h3_([text5("Static: One-time render")]), p_([text5("Use "), code_([text5("appendData")]), text5(" for simple visualizations that render once with fixed data. This is perfect for charts, static hierarchies, and basic data displays.")]), h3_([text5("GUP: Dynamic updates")]), div2([classes(["diagram-container"])])([svgDiagram2("gup-flow.svg")("General Update Pattern flow diagram")]), p_([text5("Use "), code_([text5("joinData")]), text5(" when data changes over time. The join splits data into three disjoint sets:")]), ul_([li_([strong_([text5("Enter")]), text5(" - new data items that need elements created")]), li_([strong_([text5("Update")]), text5(" - existing elements that should be updated")]), li_([strong_([text5("Exit")]), text5(" - old elements that should be removed")])]), p([classes(["code-highlight"])])([text5("GUP enables: "), text5("Animated transitions, live data feeds, user interactions, and smooth state changes.")])]), section([classes(["tutorial-section"]), id4("tree-api")])([h2([classes(["tutorial-section-title"])])([text5("TreeAPI: Declarative Alternative")]), p_([text5("For static visualizations, the TreeAPI provides a more declarative, succinct syntax. Instead of imperative method chaining, you declare the desired tree structure.")]), p_([text5("TreeAPI variants handle different use cases:")]), ul_([li_([code_([text5("Node")]), text5(" - static elements with children")]), li_([code_([text5("Join")]), text5(" - data-driven element creation (N elements from N data)")]), li_([code_([text5("NestedJoin")]), text5(" - nested data with type decomposition")]), li_([code_([text5("SceneJoin")]), text5(" - declarative GUP with enter/update/exit behaviors")])]), p([classes(["code-highlight"])])([text5("Note: "), text5("TreeAPI excels at static visualizations. For complex interactive visualizations with simulations, the underlying Selection API provides more control.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Summary")]), p_([text5("The D3 grammar in PSD3v2:")]), ul_([li_([text5("Four primitives: select, append, join, attr")]), li_([text5("Phantom types enforce correct operation ordering")]), li_([text5("Static visualizations use appendData or TreeAPI")]), li_([text5("Dynamic visualizations use joinData with GUP")]), li_([text5("TreeAPI provides declarative syntax for tree structures")])])])])]);
+  };
+  var handleAction37 = function(dictMonadAff) {
+    return function(v) {
+      return pure80(unit);
+    };
   };
   var component38 = function(dictMonadAff) {
     return mkComponent({
@@ -49318,7 +49320,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
 
   // output/Component.Understanding.UnderstandingScenes/index.js
-  var triggerMermaidRendering4 = /* @__PURE__ */ triggerMermaidRendering(monadEffectEffect);
+  var pure81 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize39 = /* @__PURE__ */ (function() {
     function Initialize49() {
     }
@@ -49326,8 +49328,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     Initialize49.value = new Initialize49();
     return Initialize49;
   })();
-  var transitionMatrixDiagram = '\ngraph LR\n    subgraph "State Transition Matrix"\n        S1["Scene A"]\n        S2["Scene B"]\n        S3["Scene C"]\n    end\n\n    S1 -->|"transition AB"| S2\n    S2 -->|"transition BC"| S3\n    S3 -->|"transition CA"| S1\n\n    note["Each transition defines:<br/>- Data changes<br/>- Element changes<br/>- Animation timing"]\n\n    style S1 fill:#c4e8d3,stroke:#558b73,stroke-width:2px\n    style S2 fill:#d4d8e8,stroke:#555b8b,stroke-width:2px\n    style S3 fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n';
-  var sceneStructureDiagram = '\ngraph TD\n    subgraph "Scene Data Structure"\n        Scene["Scene"]\n        Data["Visualization Data"]\n        Config["Configuration"]\n        Behaviors["Enter/Update/Exit"]\n    end\n\n    Scene --> Data\n    Scene --> Config\n    Scene --> Behaviors\n\n    Behaviors --> Enter["Enter Behavior<br/><i>initialAttrs, transition</i>"]\n    Behaviors --> Update["Update Behavior<br/><i>attrs, transition</i>"]\n    Behaviors --> Exit["Exit Behavior<br/><i>attrs, transition</i>"]\n\n    style Scene fill:#d4d8e8,stroke:#555b8b,stroke-width:2px\n    style Data fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style Config fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style Enter fill:#c4e8d3,stroke:#558b73,stroke-width:2px\n    style Update fill:#d4d8e8,stroke:#555b8b,stroke-width:2px\n    style Exit fill:#f8d7da,stroke:#721c24,stroke-width:2px\n';
+  var svgDiagram3 = function(src10) {
+    return function(alt10) {
+      return img([src9("assets/diagrams/" + src10), alt6(alt10), style("max-width: 100%; height: auto;")]);
+    };
+  };
   var renderNavCard3 = function(title4) {
     return function(href5) {
       return function(description) {
@@ -49335,21 +49340,18 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       };
     };
   };
-  var handleAction38 = function(dictMonadAff) {
-    var liftEffect45 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
-    return function(v) {
-      return liftEffect45(triggerMermaidRendering4);
-    };
-  };
-  var declarativeVsDiagram = '\ngraph TB\n    subgraph "Imperative (D3)"\n        Imp1["Check current state"]\n        Imp2["Calculate diff"]\n        Imp3["Apply changes"]\n        Imp4["Manage transitions"]\n        Imp5["Handle cleanup"]\n    end\n\n    subgraph "Declarative (PSD3v2)"\n        Dec1["Declare desired state"]\n        Dec2["Framework handles rest"]\n    end\n\n    Imp1 --> Imp2\n    Imp2 --> Imp3\n    Imp3 --> Imp4\n    Imp4 --> Imp5\n\n    Dec1 --> Dec2\n\n    style Imp1 fill:#f8d7da,stroke:#721c24,stroke-width:1px\n    style Dec1 fill:#d4edda,stroke:#155724,stroke-width:1px\n    style Dec2 fill:#d4edda,stroke:#155724,stroke-width:1px\n';
-  var complexityDiagram = '\ngraph TB\n    subgraph "Interactive Visualization Complexity"\n        User["User Actions"]\n        State["Application State"]\n        Sim["Simulation Physics"]\n        Trans["Transitions"]\n        DOM["DOM Updates"]\n    end\n\n    User --> State\n    State --> Sim\n    Sim --> Trans\n    Trans --> DOM\n    State --> DOM\n\n    style User fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style State fill:#d4d8e8,stroke:#555b8b,stroke-width:2px\n    style Sim fill:#c4e8d3,stroke:#558b73,stroke-width:2px\n    style Trans fill:#e8d3f5,stroke:#735b8b,stroke-width:2px\n    style DOM fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n';
   var render43 = function(v) {
     return div2([classes(["tutorial-page"])])([render6({
       logoSize: Large.value,
       quadrant: QuadUnderstanding.value,
       prevNext: Nothing.value,
       pageTitle: Nothing.value
-    }), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Scene Structures & Transitions")]), p_([text5("Complex interactive visualizations like force-directed graphs involve managing multiple concerns: user input, simulation physics, state transitions, and DOM updates. PSD3v2's Scene structures make this complexity declarative.")]), div2([classes(["section-nav-cards"])])([renderNavCard3("The Challenge")("#challenge")("Why interactive viz is hard"), renderNavCard3("Scene Structures")("#scene-structures")("Declarative state management"), renderNavCard3("Transitions")("#transitions")("Smooth state changes"), renderNavCard3("Code Explorer")("#code-explorer")("Flagship example")])]), section([classes(["tutorial-section"]), id4("challenge")])([h2([classes(["tutorial-section-title"])])([text5("The Challenge of Interactive Visualizations")]), p_([text5("Interactive, updating visualizations with simulations are among the most complex frontend code to write correctly. They involve:")]), div2([classes(["diagram-container"])])([mermaidDiagram(complexityDiagram)(new Just("complexity-diagram"))]), ul_([li_([strong_([text5("User actions")]), text5(" - clicks, drags, hovers that trigger state changes")]), li_([strong_([text5("State management")]), text5(" - tracking what's visible, selected, filtered")]), li_([strong_([text5("Simulation physics")]), text5(" - continuous force calculations and position updates")]), li_([strong_([text5("Transitions")]), text5(" - smooth animations between states")]), li_([strong_([text5("DOM synchronization")]), text5(" - keeping the view in sync with the model")])]), p([classes(["code-highlight"])])([text5("Problem: "), text5("Imperative D3 code becomes tangled, hard to reason about, and prone to subtle bugs.")])]), section([classes(["tutorial-section"]), id4("scene-structures")])([h2([classes(["tutorial-section-title"])])([text5("Scene Structures")]), p_([text5("A Scene bundles together all the data needed to render a visualization state:")]), div2([classes(["diagram-container"])])([mermaidDiagram(sceneStructureDiagram)(new Just("scene-structure-diagram"))]), p_([text5("Each scene contains:")]), ul_([li_([strong_([text5("Data")]), text5(" - the nodes, links, or other data to visualize")]), li_([strong_([text5("Configuration")]), text5(" - layout parameters, force strengths, etc.")]), li_([strong_([text5("Behaviors")]), text5(" - how elements enter, update, and exit")])]), p_([text5("When the scene changes, PSD3v2 automatically:")]), ul_([li_([text5("Calculates the diff between old and new data")]), li_([text5("Creates enter selections for new data")]), li_([text5("Updates existing elements")]), li_([text5("Removes exiting elements with transitions")])])]), section([classes(["tutorial-section"]), id4("transitions")])([h2([classes(["tutorial-section-title"])])([text5("Transition Matrix")]), p_([text5("Complex applications have multiple scenes (states) with transitions between them:")]), div2([classes(["diagram-container"])])([mermaidDiagram(transitionMatrixDiagram)(new Just("transition-matrix-diagram"))]), p_([text5("Each transition defines:")]), ul_([li_([strong_([text5("TransitionConfig")]), text5(" - duration, easing, delay")]), li_([strong_([text5("Initial attributes")]), text5(" - starting state for entering elements")]), li_([strong_([text5("Target attributes")]), text5(" - ending state to animate toward")])]), p_([text5("This declarative approach makes complex multi-state visualizations much easier to reason about:")]), div2([classes(["diagram-container"])])([mermaidDiagram(declarativeVsDiagram)(new Just("declarative-vs-diagram"))])]), section([classes(["tutorial-section"]), id4("code-explorer")])([h2([classes(["tutorial-section-title"])])([text5("Flagship Example: Code Explorer")]), p_([text5("The Code Explorer demonstrates Scene structures in action. It's an interactive force-directed graph of PureScript module dependencies with:")]), ul_([li_([strong_([text5("Multiple scenes")]), text5(" - different views of the module graph")]), li_([strong_([text5("Smooth transitions")]), text5(" - animated changes between states")]), li_([strong_([text5("User interactions")]), text5(" - click, drag, zoom, expand/collapse")]), li_([strong_([text5("Force simulation")]), text5(" - physics-based layout")])]), p_([text5("Despite this complexity, the core update logic is declarative - you specify the target scene and PSD3v2 handles the rest.")]), p([classes(["code-highlight"])])([text5("Key insight: "), text5('Think in terms of "what state do I want?" not "what updates do I need to apply?"')])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Summary")]), p_([text5("Scene structures enable:")]), ul_([li_([text5("Declarative state management for complex visualizations")]), li_([text5("Automatic diff calculation and DOM updates")]), li_([text5("Transition matrix for multi-state applications")]), li_([text5("Clean separation of data, configuration, and behavior")]), li_([text5("Easier reasoning about complex interactive visualizations")])])])])]);
+    }), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Scene Structures & Transitions")]), p_([text5("Complex interactive visualizations like force-directed graphs involve managing multiple concerns: user input, simulation physics, state transitions, and DOM updates. PSD3v2's Scene structures make this complexity declarative.")]), div2([classes(["section-nav-cards"])])([renderNavCard3("The Challenge")("#challenge")("Why interactive viz is hard"), renderNavCard3("Scene Structures")("#scene-structures")("Declarative state management"), renderNavCard3("Transitions")("#transitions")("Smooth state changes"), renderNavCard3("Code Explorer")("#code-explorer")("Flagship example")])]), section([classes(["tutorial-section"]), id4("challenge")])([h2([classes(["tutorial-section-title"])])([text5("The Challenge of Interactive Visualizations")]), p_([text5("Interactive, updating visualizations with simulations are among the most complex frontend code to write correctly. They involve:")]), ul_([li_([strong_([text5("User actions")]), text5(" - clicks, drags, hovers that trigger state changes")]), li_([strong_([text5("State management")]), text5(" - tracking what's visible, selected, filtered")]), li_([strong_([text5("Simulation physics")]), text5(" - continuous force calculations and position updates")]), li_([strong_([text5("Transitions")]), text5(" - smooth animations between states")]), li_([strong_([text5("DOM synchronization")]), text5(" - keeping the view in sync with the model")])]), p([classes(["code-highlight"])])([text5("Problem: "), text5("Imperative D3 code becomes tangled, hard to reason about, and prone to subtle bugs.")])]), section([classes(["tutorial-section"]), id4("scene-structures")])([h2([classes(["tutorial-section-title"])])([text5("Scene Structures")]), p_([text5("A Scene bundles together all the data needed to render a visualization state:")]), div2([classes(["diagram-container"])])([svgDiagram3("scene-lifecycle.svg")("Scene lifecycle diagram")]), p_([text5("Each scene contains:")]), ul_([li_([strong_([text5("Data")]), text5(" - the nodes, links, or other data to visualize")]), li_([strong_([text5("Configuration")]), text5(" - layout parameters, force strengths, etc.")]), li_([strong_([text5("Behaviors")]), text5(" - how elements enter, update, and exit")])]), p_([text5("When the scene changes, PSD3v2 automatically:")]), ul_([li_([text5("Calculates the diff between old and new data")]), li_([text5("Creates enter selections for new data")]), li_([text5("Updates existing elements")]), li_([text5("Removes exiting elements with transitions")])])]), section([classes(["tutorial-section"]), id4("transitions")])([h2([classes(["tutorial-section-title"])])([text5("Transition Matrix")]), p_([text5("Complex applications have multiple scenes (states) with transitions between them:")]), div2([classes(["diagram-container"])])([svgDiagram3("engines-comparison.svg")("Engine comparison: Interpolation vs Physics")]), p_([text5("Each transition defines:")]), ul_([li_([strong_([text5("TransitionConfig")]), text5(" - duration, easing, delay")]), li_([strong_([text5("Initial attributes")]), text5(" - starting state for entering elements")]), li_([strong_([text5("Target attributes")]), text5(" - ending state to animate toward")])]), p_([text5("This declarative approach makes complex multi-state visualizations much easier to reason about:")]), div2([classes(["diagram-container"])])([svgDiagram3("imperative-vs-declarative.svg")("Imperative vs declarative comparison")])]), section([classes(["tutorial-section"]), id4("code-explorer")])([h2([classes(["tutorial-section-title"])])([text5("Flagship Example: Code Explorer")]), p_([text5("The Code Explorer demonstrates Scene structures in action. It's an interactive force-directed graph of PureScript module dependencies with:")]), ul_([li_([strong_([text5("Multiple scenes")]), text5(" - different views of the module graph")]), li_([strong_([text5("Smooth transitions")]), text5(" - animated changes between states")]), li_([strong_([text5("User interactions")]), text5(" - click, drag, zoom, expand/collapse")]), li_([strong_([text5("Force simulation")]), text5(" - physics-based layout")])]), p_([text5("Despite this complexity, the core update logic is declarative - you specify the target scene and PSD3v2 handles the rest.")]), p([classes(["code-highlight"])])([text5("Key insight: "), text5('Think in terms of "what state do I want?" not "what updates do I need to apply?"')])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Summary")]), p_([text5("Scene structures enable:")]), ul_([li_([text5("Declarative state management for complex visualizations")]), li_([text5("Automatic diff calculation and DOM updates")]), li_([text5("Transition matrix for multi-state applications")]), li_([text5("Clean separation of data, configuration, and behavior")]), li_([text5("Easier reasoning about complex interactive visualizations")])])])])]);
+  };
+  var handleAction38 = function(dictMonadAff) {
+    return function(v) {
+      return pure81(unit);
+    };
   };
   var component39 = function(dictMonadAff) {
     return mkComponent({
@@ -49368,7 +49370,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
 
   // output/Component.Understanding.UnderstandingSelections/index.js
-  var triggerMermaidRendering5 = /* @__PURE__ */ triggerMermaidRendering(monadEffectEffect);
+  var pure82 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize40 = /* @__PURE__ */ (function() {
     function Initialize49() {
     }
@@ -49376,8 +49378,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     Initialize49.value = new Initialize49();
     return Initialize49;
   })();
-  var typeSafetyDiagram = '\ngraph LR\n    subgraph "Compile-Time Errors"\n        Bad1["setAttrs on SEmpty"]\n        Bad2["append on SBoundOwns"]\n        Bad3["remove on SPending"]\n    end\n\n    Bad1 --> Error[Type Error!]\n    Bad2 --> Error\n    Bad3 --> Error\n\n    style Bad1 fill:#f8d7da,stroke:#721c24,stroke-width:2px\n    style Bad2 fill:#f8d7da,stroke:#721c24,stroke-width:2px\n    style Bad3 fill:#f8d7da,stroke:#721c24,stroke-width:2px\n    style Error fill:#dc3545,stroke:#721c24,stroke-width:2px,color:#fff\n';
-  var stateMachineDiagram = "\nstateDiagram-v2\n    [*] --> SEmpty: select/selectAll\n    SEmpty --> SBoundOwns: appendData\n    SEmpty --> JoinResult: joinData\n\n    state JoinResult {\n        [*] --> fork\n        fork --> SPending: .enter\n        fork --> SBoundOwns: .update\n        fork --> SExiting: .exit\n    }\n\n    SPending --> SBoundOwns: append\n    SBoundOwns --> SBoundOwns: setAttrs\n    SBoundOwns --> SBoundInherits: appendChildInheriting\n    SBoundOwns --> SBoundOwns: merge\n    SExiting --> [*]: remove\n";
+  var svgDiagram4 = function(src10) {
+    return function(alt10) {
+      return img([src9("assets/diagrams/" + src10), alt6(alt10), style("max-width: 100%; height: auto;")]);
+    };
+  };
   var renderNavCard4 = function(title4) {
     return function(href5) {
       return function(description) {
@@ -49385,19 +49390,17 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       };
     };
   };
-  var indexedMonadDiagram = '\ngraph TB\n    subgraph "Indexed Monad Pattern"\n        M1["m (sel s1 elem datum)<br/><i>Operation in state s1</i>"]\n        M2["m (sel s2 elem datum)<br/><i>Returns new state s2</i>"]\n        Bind[ibind]\n    end\n\n    M1 --> Bind\n    Bind --> M2\n\n    note["State transitions encoded in types<br/>Compiler enforces valid sequences"]\n\n    style M1 fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style Bind fill:#d4d8e8,stroke:#555b8b,stroke-width:2px\n    style M2 fill:#c4e8d3,stroke:#558b73,stroke-width:2px\n';
   var render44 = function(v) {
     return div2([classes(["tutorial-page"])])([render6({
       logoSize: Large.value,
       quadrant: QuadUnderstanding.value,
       prevNext: Nothing.value,
       pageTitle: Nothing.value
-    }), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Selection Phantom Types")]), p_([text5("PSD3v2 uses phantom types to encode the state machine of D3 selections. This is similar to the Indexed Monad pattern - operations are only allowed when the selection is in the correct state, and this is enforced at compile time.")]), div2([classes(["section-nav-cards"])])([renderNavCard4("Selection States")("#selection-states")("Five phantom type states"), renderNavCard4("State Machine")("#state-machine")("Valid state transitions"), renderNavCard4("Indexed Monad")("#indexed-monad")("Why this pattern works"), renderNavCard4("Type Safety")("#type-safety")("Errors at compile time")])]), section([classes(["tutorial-section"]), id4("selection-states")])([h2([classes(["tutorial-section-title"])])([text5("The Five Selection States")]), p_([text5("A selection in PSD3v2 carries a phantom type parameter indicating its current state:")]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("State")]), th_([text5("Meaning")]), th_([text5("Valid Operations")])])]), tbody_([tr_([td_([code_([text5("SEmpty")])]), td_([text5("Has parent elements, no data bound")]), td_([text5("appendChild, appendData, joinData")])]), tr_([td_([code_([text5("SPending")])]), td_([text5("Has data, needs elements (enter)")]), td_([text5("append")])]), tr_([td_([code_([text5("SBoundOwns")])]), td_([text5("Elements with bound data")]), td_([text5("setAttrs, appendChildInheriting, merge")])]), tr_([td_([code_([text5("SBoundInherits")])]), td_([text5("Child elements inheriting parent data")]), td_([text5("setAttrs")])]), tr_([td_([code_([text5("SExiting")])]), td_([text5("Elements to be removed (exit)")]), td_([text5("setAttrsExit, remove")])])])]), p([classes(["code-highlight"])])([text5("Note: "), text5("These types are 'phantom' - they exist only at compile time and carry no runtime data.")])]), section([classes(["tutorial-section"]), id4("state-machine")])([h2([classes(["tutorial-section-title"])])([text5("The Selection State Machine")]), p_([text5("Operations transition selections between states. The type system ensures only valid transitions are allowed:")]), div2([classes(["diagram-container"])])([mermaidDiagram(stateMachineDiagram)(new Just("state-machine-diagram"))]), p_([text5("Key transitions:")]), ul_([li_([code_([text5("select")]), text5(" \u2192 SEmpty (entry point)")]), li_([code_([text5("joinData")]), text5(" \u2192 JoinResult with enter/update/exit")]), li_([code_([text5("append")]), text5(" \u2192 SPending to SBoundOwns (creates elements)")]), li_([code_([text5("remove")]), text5(" \u2192 SExiting to done (deletes elements)")])])]), section([classes(["tutorial-section"]), id4("indexed-monad")])([h2([classes(["tutorial-section-title"])])([text5("The Indexed Monad Pattern")]), p_([text5("This design is inspired by Indexed Monads (also called Parameterized Monads). Unlike regular monads where bind has type:")]), p([classes(["code-highlight"])])([code_([text5("bind :: m a -> (a -> m b) -> m b")])]), p_([text5("Indexed monads carry additional type parameters for pre/post state:")]), p([classes(["code-highlight"])])([code_([text5("ibind :: m i j a -> (a -> m j k b) -> m i k b")])]), div2([classes(["diagram-container"])])([mermaidDiagram(indexedMonadDiagram)(new Just("indexed-monad-diagram"))]), p_([text5("In PSD3v2, each selection operation is typed with its input and output states:")]), ul_([li_([code_([text5("select :: m (sel SEmpty ...)")])]), li_([code_([text5("append :: sel SPending ... -> m (sel SBoundOwns ...)")])])]), p_([text5("Sequencing operations chains their states - the output of one becomes input to the next.")])]), section([classes(["tutorial-section"]), id4("type-safety")])([h2([classes(["tutorial-section-title"])])([text5("Type Safety in Practice")]), p_([text5("Invalid operations are compile-time errors, not runtime bugs:")]), div2([classes(["diagram-container"])])([mermaidDiagram(typeSafetyDiagram)(new Just("type-safety-diagram"))]), p_([text5("Examples of errors caught at compile time:")]), ul_([li_([code_([text5("setAttrs attrs emptySel")]), text5(" - Can't set attrs on SEmpty")]), li_([code_([text5("append Circle boundSel")]), text5(" - Can't append to SBoundOwns")]), li_([code_([text5("remove pendingSel")]), text5(" - Can't remove SPending (has no elements)")])]), p_([text5("Compare to D3.js where these errors would fail silently or cause confusing runtime behavior.")]), p([classes(["code-highlight"])])([text5("Benefit: "), text5("The compiler guides you through the correct sequence of operations.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Summary")]), p_([text5("Selection phantom types provide:")]), ul_([li_([text5("Five states: SEmpty, SPending, SBoundOwns, SBoundInherits, SExiting")]), li_([text5("State machine enforced by types")]), li_([text5("Indexed Monad pattern for state transitions")]), li_([text5("Invalid operation sequences caught at compile time")]), li_([text5("No more silent failures or undefined behavior")])])])])]);
+    }), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Selection Phantom Types")]), p_([text5("PSD3v2 uses phantom types to encode the state machine of D3 selections. This is similar to the Indexed Monad pattern - operations are only allowed when the selection is in the correct state, and this is enforced at compile time.")]), div2([classes(["section-nav-cards"])])([renderNavCard4("Selection States")("#selection-states")("Five phantom type states"), renderNavCard4("State Machine")("#state-machine")("Valid state transitions"), renderNavCard4("Indexed Monad")("#indexed-monad")("Why this pattern works"), renderNavCard4("Type Safety")("#type-safety")("Errors at compile time")])]), section([classes(["tutorial-section"]), id4("selection-states")])([h2([classes(["tutorial-section-title"])])([text5("The Five Selection States")]), p_([text5("A selection in PSD3v2 carries a phantom type parameter indicating its current state:")]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("State")]), th_([text5("Meaning")]), th_([text5("Valid Operations")])])]), tbody_([tr_([td_([code_([text5("SEmpty")])]), td_([text5("Has parent elements, no data bound")]), td_([text5("appendChild, appendData, joinData")])]), tr_([td_([code_([text5("SPending")])]), td_([text5("Has data, needs elements (enter)")]), td_([text5("append")])]), tr_([td_([code_([text5("SBoundOwns")])]), td_([text5("Elements with bound data")]), td_([text5("setAttrs, appendChildInheriting, merge")])]), tr_([td_([code_([text5("SBoundInherits")])]), td_([text5("Child elements inheriting parent data")]), td_([text5("setAttrs")])]), tr_([td_([code_([text5("SExiting")])]), td_([text5("Elements to be removed (exit)")]), td_([text5("setAttrsExit, remove")])])])]), p([classes(["code-highlight"])])([text5("Note: "), text5("These types are 'phantom' - they exist only at compile time and carry no runtime data.")])]), section([classes(["tutorial-section"]), id4("state-machine")])([h2([classes(["tutorial-section-title"])])([text5("The Selection State Machine")]), p_([text5("Operations transition selections between states. The type system ensures only valid transitions are allowed:")]), div2([classes(["diagram-container"])])([svgDiagram4("selection-state-machine.svg")("Selection state machine diagram")]), p_([text5("Key transitions:")]), ul_([li_([code_([text5("select")]), text5(" \u2192 SEmpty (entry point)")]), li_([code_([text5("joinData")]), text5(" \u2192 JoinResult with enter/update/exit")]), li_([code_([text5("append")]), text5(" \u2192 SPending to SBoundOwns (creates elements)")]), li_([code_([text5("remove")]), text5(" \u2192 SExiting to done (deletes elements)")])])]), section([classes(["tutorial-section"]), id4("indexed-monad")])([h2([classes(["tutorial-section-title"])])([text5("The Indexed Monad Pattern")]), p_([text5("This design is inspired by Indexed Monads (also called Parameterized Monads). Unlike regular monads where bind has type:")]), p([classes(["code-highlight"])])([code_([text5("bind :: m a -> (a -> m b) -> m b")])]), p_([text5("Indexed monads carry additional type parameters for pre/post state:")]), p([classes(["code-highlight"])])([code_([text5("ibind :: m i j a -> (a -> m j k b) -> m i k b")])]), p_([text5("In PSD3v2, each selection operation is typed with its input and output states:")]), ul_([li_([code_([text5("select :: m (sel SEmpty ...)")])]), li_([code_([text5("append :: sel SPending ... -> m (sel SBoundOwns ...)")])])]), p_([text5("Sequencing operations chains their states - the output of one becomes input to the next.")])]), section([classes(["tutorial-section"]), id4("type-safety")])([h2([classes(["tutorial-section-title"])])([text5("Type Safety in Practice")]), p_([text5("Invalid operations are compile-time errors, not runtime bugs:")]), div2([classes(["diagram-container"])])([svgDiagram4("type-safety-errors.svg")("Type safety errors caught at compile time")]), p_([text5("Examples of errors caught at compile time:")]), ul_([li_([code_([text5("setAttrs attrs emptySel")]), text5(" - Can't set attrs on SEmpty")]), li_([code_([text5("append Circle boundSel")]), text5(" - Can't append to SBoundOwns")]), li_([code_([text5("remove pendingSel")]), text5(" - Can't remove SPending (has no elements)")])]), p_([text5("Compare to D3.js where these errors would fail silently or cause confusing runtime behavior.")]), p([classes(["code-highlight"])])([text5("Benefit: "), text5("The compiler guides you through the correct sequence of operations.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Summary")]), p_([text5("Selection phantom types provide:")]), ul_([li_([text5("Five states: SEmpty, SPending, SBoundOwns, SBoundInherits, SExiting")]), li_([text5("State machine enforced by types")]), li_([text5("Indexed Monad pattern for state transitions")]), li_([text5("Invalid operation sequences caught at compile time")]), li_([text5("No more silent failures or undefined behavior")])])])])]);
   };
   var handleAction39 = function(dictMonadAff) {
-    var liftEffect45 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
-      return liftEffect45(triggerMermaidRendering5);
+      return pure82(unit);
     };
   };
   var component40 = function(dictMonadAff) {
@@ -49417,7 +49420,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
 
   // output/Component.Understanding.UnderstandingTreeAPI/index.js
-  var triggerMermaidRendering6 = /* @__PURE__ */ triggerMermaidRendering(monadEffectEffect);
+  var pure83 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize41 = /* @__PURE__ */ (function() {
     function Initialize49() {
     }
@@ -49425,7 +49428,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     Initialize49.value = new Initialize49();
     return Initialize49;
   })();
-  var treeStructureDiagram = '\ngraph TD\n    subgraph "Tree datum"\n        Node["Node<br/><i>Static element</i>"]\n        Join["Join<br/><i>Data-driven N elements</i>"]\n        NestedJoin["NestedJoin<br/><i>Type decomposition</i>"]\n        SceneJoin["SceneJoin<br/><i>GUP behaviors</i>"]\n    end\n\n    Node --> Children["children: Array Tree"]\n    Join --> Template["template: datum -> Tree"]\n    NestedJoin --> Decompose["decompose + template"]\n    SceneJoin --> Behaviors["enter/update/exit"]\n\n    style Node fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style Join fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n    style NestedJoin fill:#d4c4b0,stroke:#8b7355,stroke-width:2px\n    style SceneJoin fill:#c4e8d3,stroke:#558b73,stroke-width:2px\n';
+  var svgDiagram5 = function(src10) {
+    return function(alt10) {
+      return img([src9("assets/diagrams/" + src10), alt6(alt10), style("max-width: 100%; height: auto;")]);
+    };
+  };
   var renderNavCard5 = function(title4) {
     return function(href5) {
       return function(description) {
@@ -49433,21 +49440,18 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       };
     };
   };
-  var layerCakeDiagram = '\ngraph TB\n    subgraph "High-Level APIs"\n        TreeAPI["TreeAPI<br/><i>Declarative tree structures</i>"]\n        SimAPI["Simulation API<br/><i>Force-directed layouts</i>"]\n    end\n\n    subgraph "Core Layer"\n        SelectionM["SelectionM<br/><i>Type-safe selections</i>"]\n    end\n\n    subgraph "Interpreters"\n        D3v2["D3v2 Interpreter<br/><i>DOM manipulation</i>"]\n        Mermaid["Mermaid Interpreter<br/><i>Diagram generation</i>"]\n        String["String Interpreter<br/><i>Debug output</i>"]\n    end\n\n    TreeAPI --> SelectionM\n    SimAPI --> SelectionM\n    SelectionM --> D3v2\n    SelectionM --> Mermaid\n    SelectionM --> String\n\n    style TreeAPI fill:#c4e8d3,stroke:#558b73,stroke-width:2px\n    style SimAPI fill:#c4e8d3,stroke:#558b73,stroke-width:2px\n    style SelectionM fill:#d4d8e8,stroke:#555b8b,stroke-width:2px\n    style D3v2 fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style Mermaid fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style String fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n';
-  var handleAction40 = function(dictMonadAff) {
-    var liftEffect45 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
-    return function(v) {
-      return liftEffect45(triggerMermaidRendering6);
-    };
-  };
-  var comparisonDiagram = '\ngraph LR\n    subgraph "Imperative Style"\n        Imp1["select"]\n        Imp2["appendChild"]\n        Imp3["appendChild"]\n        Imp4["joinData"]\n        Imp5["append"]\n        Imp6["setAttrs"]\n    end\n\n    subgraph "Declarative Style"\n        Dec1["renderTree"]\n        Dec2["Tree structure"]\n    end\n\n    Imp1 --> Imp2\n    Imp2 --> Imp3\n    Imp3 --> Imp4\n    Imp4 --> Imp5\n    Imp5 --> Imp6\n\n    Dec1 --> Dec2\n\n    style Imp1 fill:#f8d7da,stroke:#721c24,stroke-width:1px\n    style Dec1 fill:#d4edda,stroke:#155724,stroke-width:1px\n    style Dec2 fill:#d4edda,stroke:#155724,stroke-width:1px\n';
   var render45 = function(v) {
     return div2([classes(["tutorial-page"])])([render6({
       logoSize: Large.value,
       quadrant: QuadUnderstanding.value,
       prevNext: Nothing.value,
       pageTitle: Nothing.value
-    }), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("TreeAPI: Declarative Visualization")]), p_([text5("TreeAPI provides a declarative way to build visualization structures. Instead of imperative method chains, you declare the tree structure you want and PSD3v2 renders it. This makes static visualizations extremely succinct while maintaining full type safety.")]), div2([classes(["section-nav-cards"])])([renderNavCard5("Architecture")("#architecture")("API layer cake"), renderNavCard5("Tree Variants")("#tree-variants")("Node, Join, SceneJoin"), renderNavCard5("Static vs GUP")("#static-vs-gup")("When to use what"), renderNavCard5("Limitations")("#limitations")("When to use Selection API")])]), section([classes(["tutorial-section"]), id4("architecture")])([h2([classes(["tutorial-section-title"])])([text5("Architecture: The Layer Cake")]), p_([text5("PSD3v2 is organized in layers. TreeAPI and Simulation API are high-level, declarative APIs that sit on top of the core SelectionM layer:")]), div2([classes(["diagram-container"])])([mermaidDiagram(layerCakeDiagram)(new Just("layer-cake-diagram"))]), p_([text5("Key points:")]), ul_([li_([strong_([text5("TreeAPI")]), text5(" - Declarative tree structures for static visualizations")]), li_([strong_([text5("Simulation API")]), text5(" - Force-directed layouts with physics")]), li_([strong_([text5("SelectionM")]), text5(" - Core selection operations with phantom types")]), li_([strong_([text5("Interpreters")]), text5(" - Multiple backends via Finally Tagless")])])]), section([classes(["tutorial-section"]), id4("tree-variants")])([h2([classes(["tutorial-section-title"])])([text5("Tree Variants")]), p_([text5("TreeAPI provides different tree node types for different use cases:")]), div2([classes(["diagram-container"])])([mermaidDiagram(treeStructureDiagram)(new Just("tree-structure-diagram"))]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("Variant")]), th_([text5("Use Case")]), th_([text5("Smart Constructor")])])]), tbody_([tr_([td_([code_([text5("Node")])]), td_([text5("Static elements with children")]), td_([code_([text5("named, elem")])])]), tr_([td_([code_([text5("Join")])]), td_([text5("N elements from N data items")]), td_([code_([text5("joinData")])])]), tr_([td_([code_([text5("NestedJoin")])]), td_([text5("Nested data with type decomposition")]), td_([code_([text5("nestedJoin")])])]), tr_([td_([code_([text5("SceneJoin")])]), td_([text5("GUP with enter/update/exit behaviors")]), td_([code_([text5("sceneJoin, sceneNestedJoin")])])])])]), p([classes(["code-highlight"])])([text5("Composition: "), code_([text5("withChild")]), text5(" and "), code_([text5("withChildren")]), text5(" build up tree structures.")])]), section([classes(["tutorial-section"]), id4("static-vs-gup")])([h2([classes(["tutorial-section-title"])])([text5("Static vs General Update Pattern")]), p_([text5("TreeAPI shines for static visualizations with its succinct, declarative syntax:")]), div2([classes(["diagram-container"])])([mermaidDiagram(comparisonDiagram)(new Just("comparison-diagram"))]), p_([text5("For updating visualizations, use "), code_([text5("SceneJoin")]), text5(" which declaratively specifies enter/update/exit behaviors:")]), ul_([li_([strong_([text5("Enter")]), text5(" - Initial attributes and optional transition for new elements")]), li_([strong_([text5("Update")]), text5(" - Attributes and transition for existing elements")]), li_([strong_([text5("Exit")]), text5(" - Attributes and transition before removal")])]), p([classes(["code-highlight"])])([text5("SceneNestedJoin: "), text5("Combines type decomposition with GUP - the most powerful variant.")])]), section([classes(["tutorial-section"]), id4("limitations")])([h2([classes(["tutorial-section-title"])])([text5("When to Use the Selection API")]), p_([text5("TreeAPI is excellent for many use cases, but the underlying Selection API provides more control for:")]), ul_([li_([strong_([text5("Complex interactions")]), text5(" - Fine-grained control over event handlers")]), li_([strong_([text5("Dynamic structures")]), text5(" - Tree shape that changes based on data")]), li_([strong_([text5("Custom transitions")]), text5(" - Coordinated animations across elements")]), li_([strong_([text5("Force simulations")]), text5(" - Physics-based layouts with tick functions")])]), p_([text5("The good news: both APIs work with the same SelectionM foundation, so you can mix them as needed. Use TreeAPI for structure, Selection API for behavior.")]), p([classes(["code-highlight"])])([text5("Tip: "), text5("Start with TreeAPI. Drop to Selection API when you need more control.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Summary")]), p_([text5("TreeAPI provides:")]), ul_([li_([text5("Declarative tree structures instead of imperative chains")]), li_([text5("Four variants: Node, Join, NestedJoin, SceneJoin")]), li_([text5("Succinct static visualizations")]), li_([text5("SceneJoin for declarative GUP with transitions")]), li_([text5("Compatible with underlying Selection API")])])])])]);
+    }), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("TreeAPI: Declarative Visualization")]), p_([text5("TreeAPI provides a declarative way to build visualization structures. Instead of imperative method chains, you declare the tree structure you want and PSD3v2 renders it. This makes static visualizations extremely succinct while maintaining full type safety.")]), div2([classes(["section-nav-cards"])])([renderNavCard5("Architecture")("#architecture")("API layer cake"), renderNavCard5("Tree Variants")("#tree-variants")("Node, Join, SceneJoin"), renderNavCard5("Static vs GUP")("#static-vs-gup")("When to use what"), renderNavCard5("Limitations")("#limitations")("When to use Selection API")])]), section([classes(["tutorial-section"]), id4("architecture")])([h2([classes(["tutorial-section-title"])])([text5("Architecture: The Layer Cake")]), p_([text5("PSD3v2 is organized in layers. TreeAPI and Simulation API are high-level, declarative APIs that sit on top of the core SelectionM layer:")]), div2([classes(["diagram-container"])])([svgDiagram5("layer-cake.svg")("PSD3 architecture layer cake diagram")]), p_([text5("Key points:")]), ul_([li_([strong_([text5("TreeAPI")]), text5(" - Declarative tree structures for static visualizations")]), li_([strong_([text5("Simulation API")]), text5(" - Force-directed layouts with physics")]), li_([strong_([text5("SelectionM")]), text5(" - Core selection operations with phantom types")]), li_([strong_([text5("Interpreters")]), text5(" - Multiple backends via Finally Tagless")])])]), section([classes(["tutorial-section"]), id4("tree-variants")])([h2([classes(["tutorial-section-title"])])([text5("Tree Variants")]), p_([text5("TreeAPI provides different tree node types for different use cases:")]), div2([classes(["diagram-container"])])([svgDiagram5("tree-variants.svg")("Tree API variants diagram")]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("Variant")]), th_([text5("Use Case")]), th_([text5("Smart Constructor")])])]), tbody_([tr_([td_([code_([text5("Node")])]), td_([text5("Static elements with children")]), td_([code_([text5("named, elem")])])]), tr_([td_([code_([text5("Join")])]), td_([text5("N elements from N data items")]), td_([code_([text5("joinData")])])]), tr_([td_([code_([text5("NestedJoin")])]), td_([text5("Nested data with type decomposition")]), td_([code_([text5("nestedJoin")])])]), tr_([td_([code_([text5("SceneJoin")])]), td_([text5("GUP with enter/update/exit behaviors")]), td_([code_([text5("sceneJoin, sceneNestedJoin")])])])])]), p([classes(["code-highlight"])])([text5("Composition: "), code_([text5("withChild")]), text5(" and "), code_([text5("withChildren")]), text5(" build up tree structures.")])]), section([classes(["tutorial-section"]), id4("static-vs-gup")])([h2([classes(["tutorial-section-title"])])([text5("Static vs General Update Pattern")]), p_([text5("TreeAPI shines for static visualizations with its succinct, declarative syntax:")]), div2([classes(["diagram-container"])])([svgDiagram5("imperative-vs-declarative.svg")("Imperative vs declarative comparison")]), p_([text5("For updating visualizations, use "), code_([text5("SceneJoin")]), text5(" which declaratively specifies enter/update/exit behaviors:")]), ul_([li_([strong_([text5("Enter")]), text5(" - Initial attributes and optional transition for new elements")]), li_([strong_([text5("Update")]), text5(" - Attributes and transition for existing elements")]), li_([strong_([text5("Exit")]), text5(" - Attributes and transition before removal")])]), p([classes(["code-highlight"])])([text5("SceneNestedJoin: "), text5("Combines type decomposition with GUP - the most powerful variant.")])]), section([classes(["tutorial-section"]), id4("limitations")])([h2([classes(["tutorial-section-title"])])([text5("When to Use the Selection API")]), p_([text5("TreeAPI is excellent for many use cases, but the underlying Selection API provides more control for:")]), ul_([li_([strong_([text5("Complex interactions")]), text5(" - Fine-grained control over event handlers")]), li_([strong_([text5("Dynamic structures")]), text5(" - Tree shape that changes based on data")]), li_([strong_([text5("Custom transitions")]), text5(" - Coordinated animations across elements")]), li_([strong_([text5("Force simulations")]), text5(" - Physics-based layouts with tick functions")])]), p_([text5("The good news: both APIs work with the same SelectionM foundation, so you can mix them as needed. Use TreeAPI for structure, Selection API for behavior.")]), p([classes(["code-highlight"])])([text5("Tip: "), text5("Start with TreeAPI. Drop to Selection API when you need more control.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Summary")]), p_([text5("TreeAPI provides:")]), ul_([li_([text5("Declarative tree structures instead of imperative chains")]), li_([text5("Four variants: Node, Join, NestedJoin, SceneJoin")]), li_([text5("Succinct static visualizations")]), li_([text5("SceneJoin for declarative GUP with transitions")]), li_([text5("Compatible with underlying Selection API")])])])])]);
+  };
+  var handleAction40 = function(dictMonadAff) {
+    return function(v) {
+      return pure83(unit);
+    };
   };
   var component41 = function(dictMonadAff) {
     return mkComponent({
@@ -49470,7 +49474,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var liftEffect39 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var bindFlipped5 = /* @__PURE__ */ bindFlipped(bindEffect);
   var composeKleisliFlipped4 = /* @__PURE__ */ composeKleisliFlipped(bindEffect);
-  var pure79 = /* @__PURE__ */ pure(applicativeAff);
+  var pure84 = /* @__PURE__ */ pure(applicativeAff);
   var bindFlipped1 = /* @__PURE__ */ bindFlipped(bindMaybe);
   var pure121 = /* @__PURE__ */ pure(applicativeEffect);
   var map90 = /* @__PURE__ */ map(functorEffect);
@@ -49483,7 +49487,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return $16(toParentNode2($17));
       };
     })())(document2))(windowImpl)))(function(mel) {
-      return pure79(bindFlipped1(fromElement)(mel));
+      return pure84(bindFlipped1(fromElement)(mel));
     });
   };
   var runHalogenAff = /* @__PURE__ */ runAff_(/* @__PURE__ */ either(throwException)(/* @__PURE__ */ $$const(/* @__PURE__ */ pure121(unit))));
@@ -49505,7 +49509,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   });
   var awaitBody = /* @__PURE__ */ discard59(bindAff)(awaitLoad)(function() {
     return bind80(selectElement("body"))(function(body2) {
-      return maybe(throwError2(error("Could not find body")))(pure79)(body2);
+      return maybe(throwError2(error("Could not find body")))(pure84)(body2);
     });
   });
 
@@ -49603,7 +49607,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var traverse_22 = /* @__PURE__ */ traverse_12(foldableList);
   var fork3 = /* @__PURE__ */ fork2(monadForkAff);
   var parSequence_2 = /* @__PURE__ */ parSequence_(parallelAff)(applicativeParAff)(foldableList);
-  var pure80 = /* @__PURE__ */ pure(applicativeAff);
+  var pure85 = /* @__PURE__ */ pure(applicativeAff);
   var map91 = /* @__PURE__ */ map(functorCoyoneda);
   var parallel3 = /* @__PURE__ */ parallel(parallelAff);
   var map121 = /* @__PURE__ */ map(functorAff);
@@ -49653,7 +49657,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return bind132(liftEffect40(read(lchs)))(function(v) {
             return discard120(traverse_22(fork3)(v.finalizers))(function() {
               return discard120(parSequence_2(v.initializers))(function() {
-                return pure80(result);
+                return pure85(result);
               });
             });
           });
@@ -49708,7 +49712,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return bind132(liftEffect40(read(ref2)))(function(v2) {
                 var v3 = v1.value0(v2.state);
                 if (unsafeRefEq(v2.state)(v3.value1)) {
-                  return pure80(v3.value0);
+                  return pure85(v3.value0);
                 }
                 ;
                 if (otherwise) {
@@ -49731,7 +49735,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     state: v3.value1
                   })(ref2)))(function() {
                     return discard120(handleLifecycle(v2.lifecycleHandlers)(render55(v2.lifecycleHandlers)(ref2)))(function() {
-                      return pure80(v3.value0);
+                      return pure85(v3.value0);
                     });
                   });
                 }
@@ -49747,7 +49751,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 })))(function(finalize) {
                   return bind132(liftEffect40(read(ref2)))(function(v2) {
                     return discard120(liftEffect40(modify_(map210(insert17(sid)(finalize)))(v2.subscriptions)))(function() {
-                      return pure80(v1.value1(sid));
+                      return pure85(v1.value1(sid));
                     });
                   });
                 });
@@ -49756,7 +49760,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             ;
             if (v1 instanceof Unsubscribe) {
               return discard120(liftEffect40(unsubscribe3(v1.value0)(ref2)))(function() {
-                return pure80(v1.value1);
+                return pure85(v1.value1);
               });
             }
             ;
@@ -49772,7 +49776,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return bind132(liftEffect40(read(ref2)))(function(v2) {
                 return bind132(liftEffect40(read(v2.handlerRef)))(function(handler3) {
                   return discard120(queueOrRun(v2.pendingOuts)(handler3(v1.value0)))(function() {
-                    return pure80(v1.value1);
+                    return pure85(v1.value1);
                   });
                 });
               });
@@ -49796,7 +49800,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                       return write(true)(doneRef)();
                     }))(evalM(render55)(ref2)(v1.value0))))(function(fiber) {
                       return discard120(liftEffect40(unlessM2(read(doneRef))(modify_(insert18(fid)(fiber))(v2.forks))))(function() {
-                        return pure80(v1.value1(fid));
+                        return pure85(v1.value1(fid));
                       });
                     });
                   });
@@ -49808,7 +49812,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return bind132(liftEffect40(read(ref2)))(function(v2) {
                 return bind132(liftEffect40(read(v2.forks)))(function(forkMap) {
                   return discard120(traverse_32(joinFiber)(lookup111(v1.value0)(forkMap)))(function() {
-                    return pure80(v1.value1);
+                    return pure85(v1.value1);
                   });
                 });
               });
@@ -49818,7 +49822,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return bind132(liftEffect40(read(ref2)))(function(v2) {
                 return bind132(liftEffect40(read(v2.forks)))(function(forkMap) {
                   return discard120(traverse_32(killFiber(error("Cancelled")))(lookup111(v1.value0)(forkMap)))(function() {
-                    return pure80(v1.value1);
+                    return pure85(v1.value1);
                   });
                 });
               });
@@ -49826,7 +49830,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             ;
             if (v1 instanceof GetRef) {
               return bind132(liftEffect40(read(ref2)))(function(v2) {
-                return pure80(v1.value1(lookup210(v1.value0)(v2.refs)));
+                return pure85(v1.value1(lookup210(v1.value0)(v2.refs)));
               });
             }
             ;
@@ -49887,7 +49891,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard214 = /* @__PURE__ */ discard61(bindAff);
   var parSequence_3 = /* @__PURE__ */ parSequence_(parallelAff)(applicativeParAff)(foldableList);
   var liftEffect41 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var pure81 = /* @__PURE__ */ pure(applicativeEffect);
+  var pure86 = /* @__PURE__ */ pure(applicativeEffect);
   var map92 = /* @__PURE__ */ map(functorEffect);
   var pure122 = /* @__PURE__ */ pure(applicativeAff);
   var when11 = /* @__PURE__ */ when(applicativeEffect);
@@ -50027,7 +50031,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                       }
                       ;
                       if (v instanceof Just) {
-                        return pure81(renderSpec2.renderChild(v.value0));
+                        return pure86(renderSpec2.renderChild(v.value0));
                       }
                       ;
                       throw new Error("Failed pattern match at Halogen.Aff.Driver (line 227, column 37 - line 229, column 50): " + [v.constructor.name]);
@@ -50178,7 +50182,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 };
               })())(i2)(component51))();
               return unDriverStateX(function(st) {
-                return pure81({
+                return pure86({
                   query: evalDriver(disposed)(st.selfRef),
                   messages: sio.emitter,
                   dispose: dispose(disposed)(lchs)(dsx)
@@ -50205,7 +50209,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
   var $$void17 = /* @__PURE__ */ $$void(functorEffect);
-  var pure82 = /* @__PURE__ */ pure(applicativeEffect);
+  var pure87 = /* @__PURE__ */ pure(applicativeEffect);
   var traverse_9 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
   var unwrap7 = /* @__PURE__ */ unwrap();
   var when12 = /* @__PURE__ */ when(applicativeEffect);
@@ -50226,7 +50230,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return $$void17(appendChild2(v)(v2.value0));
         }
         ;
-        return pure82(unit);
+        return pure87(unit);
       };
     };
   };
@@ -50376,7 +50380,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/PSD3.Acknowledgements/index.js
   var discard62 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var bind82 = /* @__PURE__ */ bind(bindHalogenM);
-  var pure83 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var pure88 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize42 = /* @__PURE__ */ (function() {
     function Initialize49() {
     }
@@ -50395,7 +50399,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return bind82(liftAff2(get3(string)("/data/d3-library-deps.csv")))(function(libraryResult) {
           return discard62((function() {
             if (libraryResult instanceof Left) {
-              return pure83(unit);
+              return pure88(unit);
             }
             ;
             if (libraryResult instanceof Right) {
@@ -50406,7 +50410,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           })())(function() {
             return bind82(liftAff2(get3(string)("/data/d3-website-deps.csv")))(function(websiteResult) {
               if (websiteResult instanceof Left) {
-                return pure83(unit);
+                return pure88(unit);
               }
               ;
               if (websiteResult instanceof Right) {
@@ -50437,7 +50441,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
 
   // output/PSD3.Home/index.js
-  var pure84 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var pure89 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize43 = /* @__PURE__ */ (function() {
     function Initialize49() {
     }
@@ -50467,7 +50471,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
   var handleAction42 = function(v) {
-    return pure84(unit);
+    return pure89(unit);
   };
   var getBookmarkImage = function(v) {
     if (v === "Getting Started") {
@@ -50520,7 +50524,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   })();
 
   // output/PSD3.HowTo.HowtoIndex/index.js
-  var pure85 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var pure90 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize44 = /* @__PURE__ */ (function() {
     function Initialize49() {
     }
@@ -50544,7 +50548,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }), section([classes(["docs-hero"])])([div2([classes(["docs-hero-content"])])([h1([classes(["docs-hero-title"])])([text5("How-to Guides")]), p([classes(["docs-hero-description"])])([text5("Practical guides for accomplishing specific tasks with PureScript D3. Each topic includes bullet points of what will be covered.")])])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text5("Core Techniques")]), div2([classes(["howto-card-grid"])])([renderHowtoCard(HowtoTransitions.value)("Creating Animated Transitions")("Smooth, animated transitions between visualization states."), renderHowtoCard(HowtoEvents.value)("Responding to User Events")("Click, hover, drag, and zoom interactions."), renderHowtoCard(HowtoTooltips.value)("Adding Tooltips")("Informative tooltips that appear on hover.")])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text5("Data & Scales")]), div2([classes(["howto-card-grid"])])([renderHowtoCard(HowtoLoadingData.value)("Loading External Data")("Fetch and parse JSON/CSV with Affjax."), renderHowtoCard(HowtoAxesScales.value)("Creating Axes and Scales")("Color interpolation and D3 scale/axis FFI.")])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text5("Layouts")]), div2([classes(["howto-card-grid"])])([renderHowtoCard(HowtoForceGraphs.value)("Building Force-Directed Graphs")("SimulationM for interactive network visualizations."), renderHowtoCard(HowtoHierarchical.value)("Working with Hierarchical Data")("Tree, cluster, and treemap layouts."), renderHowtoCard(HowtoTreeAPI.value)("Using the TreeAPI")("Declarative trees with multiple interpreters.")])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text5("Development")]), div2([classes(["howto-card-grid"])])([renderHowtoCard(HowtoDebugging.value)("Debugging Visualizations")("Console logging, DevTools, Mermaid diagrams."), renderHowtoCard(HowtoPerformance.value)("Performance Optimization")("DOM optimization, tick efficiency, CSS transitions.")])])]);
   };
   var handleAction43 = function(v) {
-    return pure85(unit);
+    return pure90(unit);
   };
   var component44 = /* @__PURE__ */ (function() {
     return mkComponent({
@@ -50563,7 +50567,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   })();
 
   // output/PSD3.Reference.Reference/index.js
-  var pure86 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var pure91 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize45 = /* @__PURE__ */ (function() {
     function Initialize49() {
     }
@@ -50585,7 +50589,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }), section([classes(["docs-hero"])])([div2([classes(["docs-hero-content"])])([h1([classes(["docs-hero-title"])])([text5("API Reference")]), p([classes(["docs-hero-description"])])([text5("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Comprehensive documentation for all PSD3 modules, types, and functions.")])])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text5("Browse Documentation")]), div2([classes(["howto-card-grid"])])([renderApiCard("Core Selection API")("Lorem ipsum dolor sit amet, consectetur adipiscing elit. SelectionM monad and phantom type system."), renderApiCard("Simulation & Forces")("Sed do eiusmod tempor incididunt ut labore. Force-directed layouts and physics configuration."), renderApiCard("TreeAPI & Declarative")("Ut enim ad minim veniam, quis nostrud exercitation. Declarative tree structures and interpreters."), renderApiCard("Data Utilities")("Duis aute irure dolor in reprehenderit in voluptate. Hierarchical data, scales, and transformations.")])])]);
   };
   var handleAction44 = function(v) {
-    return pure86(unit);
+    return pure91(unit);
   };
   var component45 = /* @__PURE__ */ (function() {
     return mkComponent({
@@ -50604,7 +50608,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   })();
 
   // output/PSD3.Tutorial.GettingStarted/index.js
-  var triggerMermaidRendering7 = /* @__PURE__ */ triggerMermaidRendering(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
+  var triggerMermaidRendering2 = /* @__PURE__ */ triggerMermaidRendering(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize46 = /* @__PURE__ */ (function() {
     function Initialize49() {
     }
@@ -50622,7 +50626,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }), section([classes(["docs-hero"])])([div2([classes(["docs-hero-content"])])([h1([classes(["docs-hero-title"])])([text5("Getting Started")]), p([classes(["docs-hero-description"])])([text5("To get a feel for writing with this DSL we provide a command-line wizard bundled with the repo, a web-based wizard that you can run right here and you can also find instructions here to write your own visualizations from scratch.")])])]), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Getting Started with PS<$>D3")]), p_([text5("Welcome! This guide will help you install PSD3, set up your first project, and create your first data visualization using our scaffold wizard. By the end, you'll have a working visualization that you can view in your browser.")]), div2([classes(["tutorial-callout"])])([h3_([text5("\u{1F680} Try the Interactive Wizard")]), p_([text5("Want to skip the command line? Use our interactive web wizard to generate a complete visualization project right in your browser:")]), p_([a([href4("#/wizard"), classes(["tutorial-button tutorial-button--primary"])])([text5("Launch Interactive Wizard \u2192")])])])]), section([classes(["tutorial-section"]), id4("installation")])([h2([classes(["tutorial-section-title"])])([text5("Installation")]), p_([text5("Before we begin, ensure you have the following installed on your system:")]), h3([id4("prerequisites")])([text5("Prerequisites")]), ul_([li_([text5("Node.js (version 18 or higher)")]), li_([text5("npm or yarn package manager")]), li_([text5("PureScript compiler (purs)")]), li_([text5("Spago (PureScript package manager and build tool)")])]), p_([text5("If you don't have PureScript and Spago installed, you can install them globally:")]), pre_([code_([text5("npm install -g purescript spago")])])]), section([classes(["tutorial-section"]), id4("setup")])([h2([classes(["tutorial-section-title"])])([text5("Project Setup")]), p_([text5("Clone the PSD3 repository which includes the visualization wizard:")]), pre_([code_([text5("# Clone the PSD3 repository\ngit clone https://github.com/afcondon/PureScript-Tagless-D3.git\ncd PureScript-Tagless-D3\n\n# Install dependencies\nnpm install\nspago build")])]), p_([text5("The wizard is located in ")]), code_([text5("scripts/init-psd3-viz.js")]), text5(" and will generate all the files you need to get started.")]), section([classes(["tutorial-section"]), id4("wizard")])([h2([classes(["tutorial-section-title"])])([text5("Using the Wizard")]), p_([text5("PSD3 provides two ways to generate a visualization scaffold:")]), div2([classes(["diagram-container"])])([mermaidDiagram(wizardWorkflowDiagram)(new Just("wizard-workflow-diagram"))]), h3_([text5("Option 1: Interactive Web Wizard (Recommended)")]), p_([text5("The easiest way to get started is with our "), a([href4("#/wizard")])([text5("interactive web wizard")]), text5(". It provides:")]), ul_([li_([text5("Choose from pre-configured example datasets (Anscombe's Quartet, scatter plots, sine waves, etc.)")]), li_([text5("Educational tips and explanations at each step")]), li_([text5("Preview generated files before downloading")]), li_([text5("Download as a .zip file or copy to clipboard")])]), p_([a([href4("#/wizard"), classes(["tutorial-button tutorial-button--primary"])])([text5("Launch Interactive Wizard \u2192")])]), h3_([text5("Option 2: Command-Line Wizard")]), p_([text5("If you prefer working from the command line, use the CLI wizard. Run it from the project root:")]), pre_([code_([text5("node scripts/init-psd3-viz.js")])]), p_([text5("You'll be prompted for:")]), ul_([li_([strong_([text5("Visualization module name")]), text5(" - e.g., "), code_([text5("MyFirstChart")])]), li_([strong_([text5("Data record fields")]), text5(" - e.g., "), code_([text5("x:Number,y:Number,label:String")])]), li_([strong_([text5("Output directory")]), text5(" - default: "), code_([text5("src/viz/YourModuleName")])]), li_([strong_([text5("Generate Main.purs?")]), text5(" - Entry point for standalone viewing (y/n, default: y)")]), li_([strong_([text5("Generate index.html?")]), text5(" - (y/n, default: y)")])]), h3_([text5("Example Session")]), pre_([code_([text5("Visualization module name: ParabolaChart\nData record fields: x:Number,y:Number\nOutput directory: src/viz/ParabolaChart\nGenerate Main.purs? (y/n): y\nGenerate index.html? (y/n): y\n\n\u2713 Created src/viz/ParabolaChart/Unsafe.purs\n\u2713 Created src/viz/ParabolaChart/Model.purs\n\u2713 Created src/viz/ParabolaChart/Draw.purs\n\u2713 Created src/viz/ParabolaChart/Main.purs\n\u2713 Created src/viz/ParabolaChart/index.html\n\u2713 Created src/viz/ParabolaChart/README.md")])]), h3_([text5("Build and View")]), p_([text5("Now build and bundle your visualization:")]), pre_([code_([text5("# Compile the PureScript\nspago build\n\n# Bundle for the browser\nspago bundle --module Main --outfile src/viz/ParabolaChart/bundle.js\n\n# Open in browser\nopen src/viz/ParabolaChart/index.html")])])]), section([classes(["tutorial-section"]), id4("understanding")])([h2([classes(["tutorial-section-title"])])([text5("Understanding the Generated Code")]), p_([text5("The wizard generates several files following PSD3 best practices:")]), ul_([li_([strong_([text5("Unsafe.purs")]), text5(" - Contains type coercion functions that bridge PureScript's type system with D3's untyped JavaScript data")]), li_([strong_([text5("Model.purs")]), text5(" - Defines your data type and provides a placeholder for example data")]), li_([strong_([text5("Draw.purs")]), text5(" - Contains the visualization code with the "), code_([text5("datum_")]), text5(" accessor pattern")]), li_([strong_([text5("index.html")]), text5(" - Pre-configured HTML with D3.js loaded from CDN and the correct "), code_([text5("#chart")]), text5(" div")]), li_([strong_([text5("README.md")]), text5(" - Quick reference specific to your visualization")])]), h3([id4("datum-pattern")])([text5("The Datum_ Pattern")]), p_([text5("D3.js works with untyped JavaScript data, but PureScript is strongly typed. The "), code_([text5("datum_")]), text5(" accessor pattern solves this by isolating type coercion in the "), code_([text5("Unsafe.purs")]), text5(" module while providing typed accessors everywhere else.")]), p_([text5("In your "), code_([text5("Draw.purs")]), text5(", you'll use type-annotated lambdas to work with your data:")]), pre_([code_([text5('-- Use data in attributes\nA.cx (\\\\(d :: Datum_) _ -> datum_.x d)\n\n-- Use both data and index\nA.fill (\\\\(d :: Datum_) (i :: Index_) ->\n  if datum_.index i > 5 then "red" else "blue")\n\n-- Scale by data value\nA.radius (\\\\(d :: Datum_) _ -> datum_.y d * 2.0)')])]), p_([text5("The type annotations "), code_([text5("(d :: Datum_)")]), text5(" and "), code_([text5("(i :: Index_)")]), text5(" are required to help PureScript's type checker find the correct "), code_([text5("ToAttr")]), text5(" instance.")])]), render46]);
   };
   var handleAction45 = function(v) {
-    return triggerMermaidRendering7;
+    return triggerMermaidRendering2;
   };
   var component46 = /* @__PURE__ */ (function() {
     return mkComponent({
@@ -50641,7 +50645,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   })();
 
   // output/PSD3.Understanding/index.js
-  var pure87 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var pure92 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize47 = /* @__PURE__ */ (function() {
     function Initialize49() {
     }
@@ -50665,7 +50669,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }), section([classes(["docs-hero"])])([div2([classes(["docs-hero-content"])])([h1([classes(["docs-hero-title"])])([text5("Understanding")]), p([classes(["docs-hero-description"])])([text5("Deep dives into the core concepts and patterns that make PSD3 a type-safe, composable framework for D3 visualizations.")])])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text5("Core Concepts")]), div2([classes(["howto-card-grid"])])([renderCard3(UnderstandingGrammar.value)("The Grammar of D3")("Four essential primitives: select, append, join, attr. Everything else builds from these."), renderCard3(UnderstandingAttributes.value)("Type-Safe Attributes")("Static values, datum functions, contravariant pattern. Compile-time type safety."), renderCard3(UnderstandingSelections.value)("Selection Phantom Types")("Five states: SEmpty, SPending, SBoundOwns, SBoundInherits, SExiting. Indexed Monad pattern.")])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text5("Architecture")]), div2([classes(["howto-card-grid"])])([renderCard3(UnderstandingTreeAPI.value)("TreeAPI")("Declarative tree structures. Layer cake architecture with TreeAPI and Simulation API on SelectionM."), renderCard3(UnderstandingScenes.value)("Scene Structures & Transitions")("Declarative state management for complex interactive visualizations with transition matrices.")])])]);
   };
   var handleAction46 = function(v) {
-    return pure87(unit);
+    return pure92(unit);
   };
   var component47 = /* @__PURE__ */ (function() {
     return mkComponent({
@@ -51175,7 +51179,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var eq24 = /* @__PURE__ */ eq(eqDifficulty);
   var eq32 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqDifficulty));
   var bind84 = /* @__PURE__ */ bind(bindMaybe);
-  var pure88 = /* @__PURE__ */ pure(applicativeMaybe);
+  var pure93 = /* @__PURE__ */ pure(applicativeMaybe);
   var type_23 = /* @__PURE__ */ type_18(isPropInputType);
   var value18 = /* @__PURE__ */ value13(isPropString);
   var modify_17 = /* @__PURE__ */ modify_2(monadStateHalogenM);
@@ -51440,7 +51444,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }
     ;
     return fromMaybe(false)(bind84(head(chars))(function(first) {
-      return pure88(isUpperCase(first) && all4(isAlphaNum)(chars));
+      return pure93(isUpperCase(first) && all4(isAlphaNum)(chars));
     }));
   };
   var renderNameModule = function(state3) {
@@ -51973,7 +51977,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var bindFlipped9 = /* @__PURE__ */ bindFlipped(bindEffect);
   var join4 = /* @__PURE__ */ join(bindEffect);
   var apply7 = /* @__PURE__ */ apply(applyEffect);
-  var pure89 = /* @__PURE__ */ pure(applicativeEffect);
+  var pure94 = /* @__PURE__ */ pure(applicativeEffect);
   var voidRight3 = /* @__PURE__ */ voidRight(functorEffect);
   var setHash2 = function(h) {
     return bind85(bind85(windowImpl)(location))(setHash(h));
@@ -52008,7 +52012,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return function(parser) {
       return function(cb) {
         var go2 = function(a2) {
-          var $21 = maybe(pure89(a2))(function(b10) {
+          var $21 = maybe(pure94(a2))(function(b10) {
             return voidRight3(new Just(b10))(cb(a2)(b10));
           });
           var $22 = indexl2(0);
@@ -52032,7 +52036,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var liftEffect44 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var discard66 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var when14 = /* @__PURE__ */ when(applicativeHalogenM);
-  var pure90 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var pure95 = /* @__PURE__ */ pure(applicativeHalogenM);
   var spy3 = /* @__PURE__ */ spy();
   var modify_18 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var slot_4 = /* @__PURE__ */ slot_();
@@ -52339,7 +52343,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               };
             });
           })))(function() {
-            return pure90(unit);
+            return pure95(unit);
           });
         });
       });

@@ -4,12 +4,10 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
-import Effect.Class (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.RoutingDSL (routeToPath)
-import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3.Shared.SiteNav as SiteNav
 import PSD3.Website.Types (Route(..))
 
@@ -32,70 +30,16 @@ component = H.mkComponent
 
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
-  Initialize -> liftEffect triggerMermaidRendering
+  Initialize -> pure unit
 
--- | Mermaid diagram showing attribute type system
-attributeTypeDiagram :: String
-attributeTypeDiagram = """
-graph TD
-    subgraph "Attribute Values"
-        Static["Static Value<br/><code>cx 100.0</code>"]
-        Datum["Datum Function<br/><code>cx (\\d -> d.x)</code>"]
-        DatumIdx["Datum+Index<br/><code>cx (\\d i -> d.x + i*10)</code>"]
-    end
-
-    subgraph "Type Resolution"
-        IsAttr[IsAttribute typeclass]
-        Resolve[Resolved at compile time]
-    end
-
-    Static --> IsAttr
-    Datum --> IsAttr
-    DatumIdx --> IsAttr
-    IsAttr --> Resolve
-
-    style Static fill:#f5e6d3,stroke:#8b7355,stroke-width:2px
-    style Datum fill:#e8dcc6,stroke:#8b7355,stroke-width:2px
-    style DatumIdx fill:#d4c4b0,stroke:#8b7355,stroke-width:2px
-"""
-
--- | Mermaid diagram showing Contravariant attribute pattern
-contravariantDiagram :: String
-contravariantDiagram = """
-graph LR
-    subgraph "Contravariant Pattern"
-        Attr["Attribute datum"]
-        CMap["cmap f attr"]
-        AttrNew["Attribute newDatum"]
-    end
-
-    Attr --> CMap
-    CMap --> AttrNew
-
-    note["f :: newDatum -> datum<br/>Transforms data BEFORE attribute sees it"]
-
-    style Attr fill:#e8dcc6,stroke:#8b7355,stroke-width:2px
-    style CMap fill:#d4d8e8,stroke:#555b8b,stroke-width:2px
-    style AttrNew fill:#c4e8d3,stroke:#558b73,stroke-width:2px
-"""
-
--- | Mermaid diagram showing attribute composition
-compositionDiagram :: String
-compositionDiagram = """
-graph TB
-    subgraph "Attribute Composition"
-        A[Array of Attribute datum]
-        B[Apply to Selection]
-        C[Type-safe styling]
-    end
-
-    A --> B
-    B --> C
-
-    style A fill:#f5e6d3,stroke:#8b7355,stroke-width:2px
-    style B fill:#e8dcc6,stroke:#8b7355,stroke-width:2px
-    style C fill:#d4c4b0,stroke:#8b7355,stroke-width:2px
-"""
+-- | Helper to render an SVG diagram from assets
+svgDiagram :: forall w i. String -> String -> HH.HTML w i
+svgDiagram src alt =
+  HH.img
+    [ HP.src $ "assets/diagrams/" <> src
+    , HP.alt alt
+    , HP.style "max-width: 100%; height: auto;"
+    ]
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render _ =
@@ -142,7 +86,7 @@ render _ =
 
             , HH.div
                 [ HP.classes [ HH.ClassName "diagram-container" ] ]
-                [ mermaidDiagram attributeTypeDiagram (Just "attribute-type-diagram") ]
+                [ svgDiagram "attribute-resolution.svg" "Attribute type resolution diagram" ]
 
             , HH.table
                 [ HP.classes [ HH.ClassName "tutorial-table" ] ]
@@ -195,9 +139,7 @@ render _ =
                 , HH.text ". This means you can transform the input data type before the attribute sees it."
                 ]
 
-            , HH.div
-                [ HP.classes [ HH.ClassName "diagram-container" ] ]
-                [ mermaidDiagram contravariantDiagram (Just "contravariant-diagram") ]
+            -- Contravariant pattern is explained textually - no diagram available
 
             , HH.p_
                 [ HH.text "Why contravariant? Regular functors transform "

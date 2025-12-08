@@ -4,12 +4,10 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
-import Effect.Class (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.RoutingDSL (routeToPath)
-import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3.Shared.SiteNav as SiteNav
 import PSD3.Website.Types (Route(..))
 
@@ -32,69 +30,16 @@ component = H.mkComponent
 
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
-  Initialize -> liftEffect triggerMermaidRendering
+  Initialize -> pure unit
 
--- | Mermaid state machine diagram
-stateMachineDiagram :: String
-stateMachineDiagram = """
-stateDiagram-v2
-    [*] --> SEmpty: select/selectAll
-    SEmpty --> SBoundOwns: appendData
-    SEmpty --> JoinResult: joinData
-
-    state JoinResult {
-        [*] --> fork
-        fork --> SPending: .enter
-        fork --> SBoundOwns: .update
-        fork --> SExiting: .exit
-    }
-
-    SPending --> SBoundOwns: append
-    SBoundOwns --> SBoundOwns: setAttrs
-    SBoundOwns --> SBoundInherits: appendChildInheriting
-    SBoundOwns --> SBoundOwns: merge
-    SExiting --> [*]: remove
-"""
-
--- | Mermaid diagram showing indexed monad pattern
-indexedMonadDiagram :: String
-indexedMonadDiagram = """
-graph TB
-    subgraph "Indexed Monad Pattern"
-        M1["m (sel s1 elem datum)<br/><i>Operation in state s1</i>"]
-        M2["m (sel s2 elem datum)<br/><i>Returns new state s2</i>"]
-        Bind[ibind]
-    end
-
-    M1 --> Bind
-    Bind --> M2
-
-    note["State transitions encoded in types<br/>Compiler enforces valid sequences"]
-
-    style M1 fill:#f5e6d3,stroke:#8b7355,stroke-width:2px
-    style Bind fill:#d4d8e8,stroke:#555b8b,stroke-width:2px
-    style M2 fill:#c4e8d3,stroke:#558b73,stroke-width:2px
-"""
-
--- | Mermaid diagram showing type safety
-typeSafetyDiagram :: String
-typeSafetyDiagram = """
-graph LR
-    subgraph "Compile-Time Errors"
-        Bad1["setAttrs on SEmpty"]
-        Bad2["append on SBoundOwns"]
-        Bad3["remove on SPending"]
-    end
-
-    Bad1 --> Error[Type Error!]
-    Bad2 --> Error
-    Bad3 --> Error
-
-    style Bad1 fill:#f8d7da,stroke:#721c24,stroke-width:2px
-    style Bad2 fill:#f8d7da,stroke:#721c24,stroke-width:2px
-    style Bad3 fill:#f8d7da,stroke:#721c24,stroke-width:2px
-    style Error fill:#dc3545,stroke:#721c24,stroke-width:2px,color:#fff
-"""
+-- | Helper to render an SVG diagram from assets
+svgDiagram :: forall w i. String -> String -> HH.HTML w i
+svgDiagram src alt =
+  HH.img
+    [ HP.src $ "assets/diagrams/" <> src
+    , HP.alt alt
+    , HP.style "max-width: 100%; height: auto;"
+    ]
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render _ =
@@ -197,7 +142,7 @@ render _ =
 
             , HH.div
                 [ HP.classes [ HH.ClassName "diagram-container" ] ]
-                [ mermaidDiagram stateMachineDiagram (Just "state-machine-diagram") ]
+                [ svgDiagram "selection-state-machine.svg" "Selection state machine diagram" ]
 
             , HH.p_
                 [ HH.text "Key transitions:" ]
@@ -247,9 +192,7 @@ render _ =
                 [ HH.code_ [ HH.text "ibind :: m i j a -> (a -> m j k b) -> m i k b" ]
                 ]
 
-            , HH.div
-                [ HP.classes [ HH.ClassName "diagram-container" ] ]
-                [ mermaidDiagram indexedMonadDiagram (Just "indexed-monad-diagram") ]
+            -- Note: Indexed monad concept is explained textually, no diagram needed
 
             , HH.p_
                 [ HH.text "In PSD3v2, each selection operation is typed with its input and output states:" ]
@@ -280,7 +223,7 @@ render _ =
 
             , HH.div
                 [ HP.classes [ HH.ClassName "diagram-container" ] ]
-                [ mermaidDiagram typeSafetyDiagram (Just "type-safety-diagram") ]
+                [ svgDiagram "type-safety-errors.svg" "Type safety errors caught at compile time" ]
 
             , HH.p_
                 [ HH.text "Examples of errors caught at compile time:" ]

@@ -4,12 +4,10 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
-import Effect.Class (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.RoutingDSL (routeToPath)
-import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3.Shared.SiteNav as SiteNav
 import PSD3.Website.Types (Route(..))
 
@@ -32,89 +30,16 @@ component = H.mkComponent
 
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
-  Initialize -> liftEffect triggerMermaidRendering
+  Initialize -> pure unit
 
--- | Mermaid diagram showing static visualization structure
-staticVizDiagram :: String
-staticVizDiagram = """
-graph TD
-    subgraph "Static Visualization"
-        A[select container] --> B[appendChild SVG]
-        B --> C[appendData Circle]
-        C --> D[setAttrs]
-    end
-
-    style A fill:#f5e6d3,stroke:#8b7355,stroke-width:2px
-    style B fill:#e8dcc6,stroke:#8b7355,stroke-width:2px
-    style C fill:#e8dcc6,stroke:#8b7355,stroke-width:2px
-    style D fill:#d4c4b0,stroke:#8b7355,stroke-width:2px
-"""
-
--- | Mermaid diagram showing GUP flow
-gupFlowDiagram :: String
-gupFlowDiagram = """
-graph TD
-    subgraph "General Update Pattern"
-        A[openSelection/selectAll] --> B[joinData]
-        B --> C{JoinResult}
-        C --> D[enter: append]
-        C --> E[update: setAttrs]
-        C --> F[exit: remove]
-        D --> G[merge]
-        E --> G
-    end
-
-    style A fill:#f5e6d3,stroke:#8b7355,stroke-width:2px
-    style B fill:#e8dcc6,stroke:#8b7355,stroke-width:2px
-    style C fill:#d4c4b0,stroke:#8b7355,stroke-width:2px
-    style D fill:#c4e8d3,stroke:#558b73,stroke-width:2px
-    style E fill:#d4d8e8,stroke:#555b8b,stroke-width:2px
-    style F fill:#e8d4d4,stroke:#8b5555,stroke-width:2px
-"""
-
--- | Mermaid diagram showing TreeAPI
-treeAPIDiagram :: String
-treeAPIDiagram = """
-graph TD
-    subgraph "TreeAPI - Declarative Structure"
-        A[renderTree] --> B[Tree datum]
-        B --> C[Node]
-        B --> D[Join]
-        B --> E[SceneJoin]
-        C --> F[name, elemType, attrs, children]
-        D --> G[template: datum -> Tree]
-        E --> H[enter/update/exit behaviors]
-    end
-
-    style A fill:#f5e6d3,stroke:#8b7355,stroke-width:2px
-    style B fill:#e8dcc6,stroke:#8b7355,stroke-width:2px
-    style C fill:#d4c4b0,stroke:#8b7355,stroke-width:2px
-    style D fill:#c4e8d3,stroke:#558b73,stroke-width:2px
-    style E fill:#d4d8e8,stroke:#555b8b,stroke-width:2px
-"""
-
--- | Mermaid diagram showing selection state machine
-selectionStateDiagram :: String
-selectionStateDiagram = """
-stateDiagram-v2
-    [*] --> SEmpty: select
-    SEmpty --> SBoundOwns: appendData/renderData
-    SEmpty --> JoinResult: joinData
-
-    JoinResult --> SPending: .enter
-    JoinResult --> SBoundOwns: .update
-    JoinResult --> SExiting: .exit
-
-    SPending --> SBoundOwns: append
-    SBoundOwns --> SBoundOwns: setAttrs
-    SBoundOwns --> SBoundInherits: appendChildInheriting
-    SExiting --> [*]: remove
-
-    note right of SEmpty: No data bound yet
-    note right of SPending: Data waiting for elements
-    note right of SBoundOwns: Elements with data
-    note right of SExiting: Elements to remove
-"""
+-- | Helper to render an SVG diagram from assets
+svgDiagram :: forall w i. String -> String -> HH.HTML w i
+svgDiagram src alt =
+  HH.img
+    [ HP.src $ "assets/diagrams/" <> src
+    , HP.alt alt
+    , HP.style "max-width: 100%; height: auto;"
+    ]
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render _ =
@@ -234,7 +159,7 @@ render _ =
 
             , HH.div
                 [ HP.classes [ HH.ClassName "diagram-container" ] ]
-                [ mermaidDiagram selectionStateDiagram (Just "selection-state-diagram") ]
+                [ svgDiagram "selection-state-machine.svg" "Selection state machine diagram" ]
 
             , HH.table
                 [ HP.classes [ HH.ClassName "tutorial-table" ] ]
@@ -292,9 +217,7 @@ render _ =
                 [ HH.text "There are two fundamental patterns for D3 visualizations:" ]
 
             , HH.h3_ [ HH.text "Static: One-time render" ]
-            , HH.div
-                [ HP.classes [ HH.ClassName "diagram-container" ] ]
-                [ mermaidDiagram staticVizDiagram (Just "static-viz-diagram") ]
+            -- Static pattern is simple enough to explain textually
 
             , HH.p_
                 [ HH.text "Use "
@@ -305,7 +228,7 @@ render _ =
             , HH.h3_ [ HH.text "GUP: Dynamic updates" ]
             , HH.div
                 [ HP.classes [ HH.ClassName "diagram-container" ] ]
-                [ mermaidDiagram gupFlowDiagram (Just "gup-flow-diagram") ]
+                [ svgDiagram "gup-flow.svg" "General Update Pattern flow diagram" ]
 
             , HH.p_
                 [ HH.text "Use "
@@ -343,11 +266,7 @@ render _ =
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
                 [ HH.text "TreeAPI: Declarative Alternative" ]
             , HH.p_
-                [ HH.text "For static visualizations, the TreeAPI provides a more declarative, succinct syntax. Instead of imperative method chaining, you declare the desired tree structure:" ]
-
-            , HH.div
-                [ HP.classes [ HH.ClassName "diagram-container" ] ]
-                [ mermaidDiagram treeAPIDiagram (Just "tree-api-diagram") ]
+                [ HH.text "For static visualizations, the TreeAPI provides a more declarative, succinct syntax. Instead of imperative method chaining, you declare the desired tree structure." ]
 
             , HH.p_
                 [ HH.text "TreeAPI variants handle different use cases:" ]
