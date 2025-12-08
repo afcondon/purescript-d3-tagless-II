@@ -211,10 +211,15 @@ layoutTree layout size tree = go 0 0.0 1.0 tree
         childCount = List.length children
 
         -- Position this node at center of its allocated space
-        x = (xMin + xMax) / 2.0
+        -- xMin/xMax are fractions [0,1], scale to actual width
+        xFraction = (xMin + xMax) / 2.0
+        x = case layout of
+          Vertical -> xFraction * size.width
+          Horizontal -> (toNumber depth) * (size.width / toNumber (maxDepth tree + 1))
+          Radial -> xFraction * size.width  -- Simplified radial
         y = case layout of
           Vertical -> (toNumber depth) * (size.height / toNumber (maxDepth tree + 1))
-          Horizontal -> (toNumber depth) * (size.width / toNumber (maxDepth tree + 1))
+          Horizontal -> xFraction * size.height
           Radial -> (toNumber depth) * 50.0  -- Simplified radial
 
         positioned = { datum, x, y, depth }

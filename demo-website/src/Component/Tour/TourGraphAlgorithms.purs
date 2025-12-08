@@ -15,6 +15,7 @@ import PSD3.Website.Types (Route(..))
 import D3.Viz.FPFTW.TopologicalSort as TopoSort
 import D3.Viz.FPFTW.TransitiveReduction as TransReduction
 import D3.Viz.FPFTW.KoenigsbergBridges as Koenigsberg
+import D3.Viz.FPFTW.DAGTreeExample as DAGTree
 
 -- | Tour page state
 type State = Unit
@@ -47,6 +48,9 @@ handleAction = case _ of
 
     -- Render Königsberg bridges
     _ <- liftEffect $ Koenigsberg.drawKoenigsbergBridges "#koenigsberg-bridges"
+
+    -- Render DAG tree example
+    liftEffect $ DAGTree.drawDAGTreeExample "#dag-tree-example"
 
     pure unit
 
@@ -259,6 +263,73 @@ transitiveReduction graph =
                 ]
             , HH.p_
                 [ HH.text "This tiny graph—just 4 nodes and 7 edges—launched an entire field of mathematics. Today we use Eulerian paths for DNA sequencing, circuit board routing, and garbage truck routes."
+                ]
+            ]
+
+        -- Section 4: DAG Tree
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ]
+            , HP.id "dag-tree-section"
+            ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "4. DAG Tree: Trees with Extra Links" ]
+            , HH.p_
+                [ HH.text "Many real-world structures are "
+                , HH.em_ [ HH.text "\"mostly hierarchical\"" ]
+                , HH.text " with some extra non-tree connections. Git commit graphs have merge links. State machines have back-edges. The D3 Update Pattern has merge points."
+                ]
+            , HH.p_
+                [ HH.text "The "
+                , HH.strong_ [ HH.text "DAG Tree" ]
+                , HH.text " library feature handles this elegantly: standard tree layout positions nodes, then extra links are overlaid. Tree edges are shown in "
+                , HH.span [ HP.style "color: #708090;" ] [ HH.text "gray" ]
+                , HH.text ", extra links in "
+                , HH.span [ HP.style "color: #F4A460;" ] [ HH.text "orange" ]
+                , HH.text ":"
+                ]
+            , HH.div
+                [ HP.id "dag-tree-example"
+                , HP.classes [ HH.ClassName "viz-container" ]
+                , HP.style "margin: 20px 0; text-align: center;"
+                ]
+                []
+            , HH.p_
+                [ HH.text "Notice how the orange extra links "
+                , HH.strong_ [ HH.text "leap across layers" ]
+                , HH.text ": A→E skips a level, C→G crosses branches and skips a level, B→F crosses branches at the same depth. This is perfect for visualizing:"
+                ]
+            , HH.ul_
+                [ HH.li_ [ HH.strong_ [ HH.text "Git history: " ], HH.text "Tree follows first-parent, merge commits add extra links" ]
+                , HH.li_ [ HH.strong_ [ HH.text "State machines: " ], HH.text "Tree of states, back-edges for loops" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Data flows: " ], HH.text "Tree structure with join/merge points" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Dependency graphs: " ], HH.text "Primary hierarchy with cross-dependencies" ]
+                ]
+            , HH.h3_ [ HH.text "Clean Separation of Concerns" ]
+            , HH.p_
+                [ HH.text "The DAG Tree API keeps tree layout and extra links separate:" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-block" ]
+                , HP.style "background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto;"
+                ]
+                [ HH.code_
+                    [ HH.text """-- Build DAG from tree + extra links
+dag = dagTree myTree _.id
+    # addLinks
+        [ { source: "A", target: "E", linkType: "skip" }
+        , { source: "C", target: "G", linkType: "cross" }
+        ]
+
+-- Layout returns positioned nodes + resolved links
+positioned = layoutDAGTree Vertical size dag
+
+-- positioned.nodes      -- Array of nodes with x, y coords
+-- positioned.treeLinks  -- Parent→child links
+-- positioned.extraLinks -- Extra links with source/target coords"""
+                    ]
+                ]
+            , HH.p_
+                [ HH.text "Tree algorithms handle positioning. Extra links are resolved by ID lookup. Rendering is trivial—just map over each array."
                 ]
             ]
 
