@@ -97,3 +97,56 @@ export function pinNodesAtPositions_(positions) {
     };
   };
 }
+
+// =============================================================================
+// Grid Position Updates (for ForceXGrid/ForceYGrid forces)
+// =============================================================================
+
+// Update node gridX/gridY positions in place from a positions map
+// This is used to change force targets before reheating
+// positions: Object keyed by node.id (as string) -> { x, y }
+// nodesRef: PureScript Ref containing Array of nodes
+export function updateGridPositionsInPlace_(positions) {
+  return function(nodesRef) {
+    return function() {
+      const nodes = nodesRef.value;
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        const pos = positions[node.id];
+        if (pos) {
+          node.gridX = pos.x;
+          node.gridY = pos.y;
+        }
+      }
+    };
+  };
+}
+
+// Update only gridX for all nodes using a function
+// Useful for toggle animations where only X changes
+// xFn: (node) -> Number (the new gridX value)
+export function updateGridXWithFn_(xFn) {
+  return function(nodesRef) {
+    return function() {
+      const nodes = nodesRef.value;
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        node.gridX = xFn(node);
+      }
+    };
+  };
+}
+
+// Update only gridY for all nodes using a function
+// yFn: (node) -> Number (the new gridY value)
+export function updateGridYWithFn_(yFn) {
+  return function(nodesRef) {
+    return function() {
+      const nodes = nodesRef.value;
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        node.gridY = yFn(node);
+      }
+    };
+  };
+}

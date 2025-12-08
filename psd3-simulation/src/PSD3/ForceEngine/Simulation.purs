@@ -10,6 +10,38 @@
 -- | - When forces are applied
 -- | - How alpha decays
 -- | - When to render
+-- |
+-- | == IMPORTANT: Force Target Caching
+-- |
+-- | D3's forceX/forceY forces **cache** their target values at initialization time.
+-- | This is a significant gotcha when animating between different target positions.
+-- |
+-- | **The Problem:**
+-- |
+-- | If you update `node.gridX` and call `reheat`, the force will still use the
+-- | old cached values. The simulation appears to run but nodes won't move to
+-- | new positions.
+-- |
+-- | **Wrong approach:**
+-- | ```purescript
+-- | updateGridXWithFn newXFn sim
+-- | reheat sim  -- Nodes don't move!
+-- | ```
+-- |
+-- | **Correct approach:**
+-- | ```purescript
+-- | -- Use the helper that handles re-initialization:
+-- | updateGridXYAndReinit (Just newXFn) Nothing forceXHandle Nothing sim
+-- |
+-- | -- Or manually re-initialize the force:
+-- | updateGridXWithFn newXFn sim
+-- | currentNodes <- getNodes sim
+-- | _ <- Core.initializeForce forceXHandle currentNodes
+-- | reheat sim
+-- | ```
+-- |
+-- | The `updateGridXYAndReinit` function is the recommended way to animate
+-- | force-directed transitions as it handles this caching issue automatically.
 module PSD3.ForceEngine.Simulation
   ( -- * Node Types
     SimulationNode
@@ -53,6 +85,11 @@ module PSD3.ForceEngine.Simulation
   , pinNodesInPlace
   , unpinNodesInPlace
   , pinNodesAtPositions
+    -- * Grid Position Updates (for ForceXGrid/ForceYGrid)
+  , updateGridPositionsInPlace
+  , updateGridXWithFn
+  , updateGridYWithFn
+  , updateGridXYAndReinit
     -- * Drag Behavior
   , attachDrag
   , attachGroupDrag
@@ -561,6 +598,109 @@ pinNodesAtPositions :: forall row linkRow.
   -> Effect Unit
 pinNodesAtPositions positions sim =
   pinNodesAtPositions_ positions sim.nodes
+
+-- =============================================================================
+-- Grid Position Updates (for ForceXGrid/ForceYGrid forces)
+-- =============================================================================
+
+-- FFI for grid position updates
+foreign import updateGridPositionsInPlace_
+  :: forall row. PositionMap -> Ref (Array (SimulationNode row)) -> Effect Unit
+
+foreign import updateGridXWithFn_
+  :: forall row. (SimulationNode row -> Number) -> Ref (Array (SimulationNode row)) -> Effect Unit
+
+foreign import updateGridYWithFn_
+  :: forall row. (SimulationNode row -> Number) -> Ref (Array (SimulationNode row)) -> Effect Unit
+
+-- | Update node gridX/gridY positions in place from a positions map
+-- | Used to change force targets before reheating the simulation
+-- | The positions map is keyed by node.id (as string) -> { x, y }
+-- | where x becomes gridX and y becomes gridY
+updateGridPositionsInPlace :: forall row linkRow.
+  PositionMap
+  -> Simulation row linkRow
+  -> Effect Unit
+updateGridPositionsInPlace positions sim =
+  updateGridPositionsInPlace_ positions sim.nodes
+
+-- | Update gridX for all nodes using a function
+-- | Useful for toggle animations where only the X target changes
+-- | Example: toggle between combined (all same X) and separated (X by department)
+updateGridXWithFn :: forall row linkRow.
+  (SimulationNode row -> Number)
+  -> Simulation row linkRow
+  -> Effect Unit
+updateGridXWithFn fn sim =
+  updateGridXWithFn_ fn sim.nodes
+
+-- | Update gridY for all nodes using a function
+-- | Useful for toggle animations where only the Y target changes
+updateGridYWithFn :: forall row linkRow.
+  (SimulationNode row -> Number)
+  -> Simulation row linkRow
+  -> Effect Unit
+updateGridYWithFn fn sim =
+  updateGridYWithFn_ fn sim.nodes
+
+-- | Update gridX and/or gridY for all nodes and re-initialize the forces
+-- |
+-- | This is the recommended way to animate force-directed transitions.
+-- | It handles the D3 force caching issue automatically by:
+-- | 1. Updating gridX/gridY values on nodes
+-- | 2. Re-initializing the ForceXGrid/ForceYGrid forces (so they pick up new targets)
+-- | 3. Reheating the simulation
+-- |
+-- | IMPORTANT: D3's forceX/forceY cache target values at initialization time.
+-- | Simply updating node.gridX/gridY won't make the force see new values.
+-- | This function handles that by re-initializing the forces after updating.
+-- |
+-- | Example:
+-- | ```purescript
+-- | -- Move nodes to new X positions (Y unchanged)
+-- | updateGridXYAndReinit
+-- |   (Just (\node -> departmentX node.department))
+-- |   Nothing
+-- |   forceXHandle
+-- |   Nothing
+-- |   sim
+-- |
+-- | -- Move nodes to new X and Y positions
+-- | updateGridXYAndReinit
+-- |   (Just xFn)
+-- |   (Just yFn)
+-- |   forceXHandle
+-- |   (Just forceYHandle)
+-- |   sim
+-- | ```
+updateGridXYAndReinit :: forall row linkRow.
+  Maybe (SimulationNode row -> Number)  -- ^ gridX update function (Nothing = don't update X)
+  -> Maybe (SimulationNode row -> Number)  -- ^ gridY update function (Nothing = don't update Y)
+  -> Core.ForceHandle  -- ^ ForceXGrid handle (needed if updating X)
+  -> Maybe Core.ForceHandle  -- ^ ForceYGrid handle (needed if updating Y)
+  -> Simulation row linkRow
+  -> Effect Unit
+updateGridXYAndReinit mXFn mYFn forceXHandle mForceYHandle sim = do
+  -- Update gridX if function provided
+  for_ mXFn \xFn ->
+    updateGridXWithFn_ xFn sim.nodes
+
+  -- Update gridY if function provided
+  for_ mYFn \yFn ->
+    updateGridYWithFn_ yFn sim.nodes
+
+  -- Re-initialize forces so they pick up new gridX/gridY values
+  currentNodes <- Ref.read sim.nodes
+
+  -- Always re-initialize X force (even if no X update, it's cheap)
+  _ <- Core.initializeForce forceXHandle currentNodes
+
+  -- Re-initialize Y force if handle provided
+  for_ mForceYHandle \forceYHandle ->
+    void $ Core.initializeForce forceYHandle currentNodes
+
+  -- Reheat to start the animation
+  reheat sim
 
 -- =============================================================================
 -- Drag Behavior

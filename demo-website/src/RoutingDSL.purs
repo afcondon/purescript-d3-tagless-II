@@ -51,6 +51,7 @@ routes =
   <|> tourGraphAlgorithms
   <|> tourLesMisGUP
   <|> tourShowcase
+  <|> tourSimpsons
   <|> tourIndex
   <|> showcase
   <|> gallery
@@ -217,6 +218,10 @@ tourLesMisGUP = TourLesMisGUP <$ lit "tour" <* lit "lesmis-gup" <* end
 tourShowcase :: Match Route
 tourShowcase = TourShowcase <$ lit "tour" <* lit "showcase" <* end
 
+-- | Match: /tour/simpsons
+tourSimpsons :: Match Route
+tourSimpsons = TourSimpsons <$ lit "tour" <* lit "simpsons" <* end
+
 -- | Match: /tour (index page - must come after specific tour routes)
 tourIndex :: Match Route
 tourIndex = TourIndex <$ lit "tour" <* end
@@ -352,6 +357,7 @@ routeToPath TourFPFTW = "/tour/fpftw"
 routeToPath TourGraphAlgorithms = "/tour/graph-algorithms"
 routeToPath TourLesMisGUP = "/tour/lesmis-gup"
 routeToPath TourShowcase = "/tour/showcase"
+routeToPath TourSimpsons = "/tour/simpsons"
 routeToPath Showcase = "/showcase"
 routeToPath Gallery = "/gallery"
 routeToPath (Example exampleId) = "/example/" <> exampleId

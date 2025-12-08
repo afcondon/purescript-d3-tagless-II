@@ -53,6 +53,7 @@ import Component.Tour.TourInterpreters as TourInterpreters
 import Component.Tour.TourFPFTW as TourFPFTW
 import Component.Tour.TourGraphAlgorithms as TourGraphAlgorithms
 import Component.Tour.TourShowcase as TourShowcase
+import Component.Tour.TourSimpsons as TourSimpsons
 
 -- Showcase
 import Component.Showcase.ShowcaseIndex as ShowcaseIndex
@@ -120,6 +121,7 @@ type Slots =
   , tourFPFTW :: forall q. H.Slot q Void Unit
   , tourGraphAlgorithms :: forall q. H.Slot q Void Unit
   , tourShowcase :: forall q. H.Slot q Void Unit
+  , tourSimpsons :: forall q. H.Slot q Void Unit
   , showcase :: forall q. H.Slot q Void Unit
   , gallery :: forall q. H.Slot q Void Unit
   , example :: forall q. H.Slot q Void Unit
@@ -168,6 +170,7 @@ _tourInterpreters = Proxy :: Proxy "tourInterpreters"
 _tourFPFTW = Proxy :: Proxy "tourFPFTW"
 _tourGraphAlgorithms = Proxy :: Proxy "tourGraphAlgorithms"
 _tourShowcase = Proxy :: Proxy "tourShowcase"
+_tourSimpsons = Proxy :: Proxy "tourSimpsons"
 _showcase = Proxy :: Proxy "showcase"
 _gallery = Proxy :: Proxy "gallery"
 _example = Proxy :: Proxy "example"
@@ -315,6 +318,9 @@ renderPage route = case spy "Route is" route of
 
   TourShowcase ->
     HH.slot_ _tourShowcase unit TourShowcase.component unit
+
+  TourSimpsons ->
+    HH.slot_ _tourSimpsons unit TourSimpsons.component unit
 
   -- Showcase
   Showcase ->
