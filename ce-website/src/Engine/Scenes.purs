@@ -127,7 +127,7 @@ treemapFormScene =
         , apply: unpinNode
         }
       ]
-  , stableMode: Physics {}
+  , stableMode: Physics
   , cssTransition: Nothing
   }
 
@@ -191,7 +191,7 @@ treeRunScene =
         , apply: pinAtCurrent
         }
       ]
-  , stableMode: Physics {}
+  , stableMode: Physics
   , cssTransition: Nothing
   }
 

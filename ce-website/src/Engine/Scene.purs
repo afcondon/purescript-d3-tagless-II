@@ -47,7 +47,6 @@ import PSD3.Simulation.Scene
   , SceneConfig
   , TransitionState
   , EngineMode(..)
-  , ForceConfig
   , CSSConfig
   , PositionMap
   , applyRules
@@ -295,7 +294,7 @@ completeTransition t stateRef state = do
 
   -- Enter stable mode
   case t.targetScene.stableMode of
-    SimScene.Physics _ -> do
+    SimScene.Physics -> do
       log "[Scene] Entering Physics mode"
       Sim.reheat state.simulation
     SimScene.Static -> do
@@ -313,8 +312,8 @@ runStableEngine :: SceneState -> Effect Unit
 runStableEngine state = case state.currentScene of
   Nothing -> pure unit  -- No scene yet
   Just scene -> case scene.stableMode of
-    SimScene.Physics _ -> pure unit  -- Simulation is already running
-    SimScene.Static -> pure unit     -- Nothing to do
+    SimScene.Physics -> pure unit  -- Simulation is already running
+    SimScene.Static -> pure unit   -- Nothing to do
 
 -- =============================================================================
 -- View Transition Integration
