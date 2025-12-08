@@ -123,6 +123,8 @@ import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, ScaleExtent(..)) as X
 -- Shared data types
 import PSD3.Data.Node (SimulationNode) as X
 import PSD3.Internal.Types (D3Simulation_, Datum_, Index_, Selector) as X
+import PSD3.Data.Tree (TreeLayout(..)) as X
+import PSD3.Data.DAGTree (DAGTree, DAGLink, PositionedDAGTree, PositionedNode, dagTree, addLink, addLinks, layoutDAGTree, getNodePosition, getExtraLinkPositions) as X
 
 -- Scales
 import PSD3.Scale (Scale, ContinuousScale, BandScale, OrdinalScale, Continuous, Ordinal, Band, linear, log, pow, sqrt, symlog, ordinal, band, point, domain, range, clamp, nice, padding, applyScale, ticks, invert, schemeCategory10, schemeCategory10At, schemePaired, schemePairedAt, interpolateViridis, interpolatePlasma, interpolateInferno, interpolateRdYlGn, interpolateTurbo) as X
