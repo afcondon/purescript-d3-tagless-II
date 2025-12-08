@@ -9,10 +9,11 @@ module Engine.ChordDiagram
 
 import Prelude
 
-import Data.Array (length, (!!), mapWithIndex, findIndex, filter, nub)
+import Data.Array (length, (!!), nub)
 import Data.Array as Array
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Neighborhood (getNeighborhoodInfo, shortenModuleName)
 import Data.Number (pi, cos, sin)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
@@ -79,12 +80,6 @@ getModuleColor moduleName centralName importNames dependentNames
   | Array.elem moduleName dependentNames = neighborDependentColor
   | otherwise = "#a0aec0"  -- Gray fallback
 
--- | Convert IDs to names using a node list
-idsToNames :: Array Int -> Array SimNode -> Array String
-idsToNames ids nodes =
-  let idToName = Map.fromFoldable $ map (\n -> Tuple n.id n.name) nodes
-  in Array.mapMaybe (\id -> Map.lookup id idToName) ids
-
 -- | Accessor helpers for chord data
 getSourceIndex :: Datum_ -> Int
 getSourceIndex d = (unsafeCoerce d).source.index
@@ -108,7 +103,7 @@ buildNeighborhoodMatrix centralName nodes =
     allNames = nub $ [centralName] <> map _.name nodes
 
     -- Build a map from name to matrix index
-    nameToIdx = Map.fromFoldable $ mapWithIndex (\i n -> Tuple n i) allNames
+    nameToIdx = Map.fromFoldable $ Array.mapWithIndex (\i n -> Tuple n i) allNames
 
     -- Build a map from node ID to node name (for looking up targets/sources)
     idToName = Map.fromFoldable $ map (\n -> Tuple n.id n.name) nodes
@@ -176,17 +171,10 @@ renderNeighborhoodChord centralName nodes containerWidth containerHeight = do
   -- Clear any existing diagram
   clearChordSvg_
 
-  -- Find the central node to get its imports/dependents (as IDs)
-  let mCentralNode = Array.find (\n -> n.name == centralName) nodes
-  let importIds = case mCentralNode of
-                    Just cn -> cn.targets
-                    Nothing -> []
-  let dependentIds = case mCentralNode of
-                       Just cn -> cn.sources
-                       Nothing -> []
-  -- Convert IDs to names for color lookups
-  let imports = idsToNames importIds nodes
-  let dependents = idsToNames dependentIds nodes
+  -- Get neighborhood info using shared utility
+  let info = getNeighborhoodInfo centralName nodes
+  let imports = info.importNames
+  let dependents = info.dependentNames
 
   -- Build adjacency matrix
   let { matrix, names } = buildNeighborhoodMatrix centralName nodes
@@ -216,7 +204,7 @@ renderNeighborhoodChord centralName nodes containerWidth containerHeight = do
     let arcGen = setArcOuterRadius_ (setArcInnerRadius_ (arcGenerator_ unit) innerR) outerR
 
     -- Build arc data
-    let arcs = mapWithIndex (\i groupDatum ->
+    let arcs = map (\groupDatum ->
           let
             idx = getGroupIndex groupDatum
             moduleName = fromMaybe "" (names !! idx)
@@ -229,7 +217,7 @@ renderNeighborhoodChord centralName nodes containerWidth containerHeight = do
             }) groups
 
     -- Build ribbon data - color by source module
-    let ribbons = mapWithIndex (\i chordDatum ->
+    let ribbons = map (\chordDatum ->
           let
             srcIdx = getSourceIndex chordDatum
             tgtIdx = getTargetIndex chordDatum
@@ -246,7 +234,7 @@ renderNeighborhoodChord centralName nodes containerWidth containerHeight = do
             }) chords
 
     -- Build label data
-    let labels = mapWithIndex (\i groupDatum ->
+    let labels = map (\groupDatum ->
           let
             idx = getGroupIndex groupDatum
             moduleName = fromMaybe "" (names !! idx)
@@ -272,20 +260,6 @@ renderNeighborhoodChord centralName nodes containerWidth containerHeight = do
     renderChordDiagram_ w h arcs ribbons labels
 
     log "[ChordDiagram] Chord diagram rendered"
-
--- | Shorten module name for display
-shortenModuleName :: String -> String
-shortenModuleName name =
-  let parts = splitOnDot name
-  in case Array.last parts of
-       Just lastPart -> lastPart
-       Nothing -> name
-
--- | Split string on dots
-splitOnDot :: String -> Array String
-splitOnDot = splitOnDotImpl
-
-foreign import splitOnDotImpl :: String -> Array String
 
 -- | Clear the chord diagram
 clearChordDiagram :: Effect Unit

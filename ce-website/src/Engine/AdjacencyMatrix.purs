@@ -19,6 +19,7 @@ import Data.Foldable (maximum)
 import Data.Int (toNumber)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Neighborhood (getNeighborhoodInfo)
 import Data.Tuple (Tuple(..))
 import DataViz.Layout.Adjacency (layoutWithConfig, defaultConfig)
 import Effect (Effect)
@@ -57,13 +58,6 @@ foreign import renderAdjacencyMatrix_
   -> Array String  -- dependent names (orange)
   -> Number  -- max connections for normalization
   -> Effect Unit
-foreign import splitOnDotImpl :: String -> Array String
-
--- | Convert IDs to names using a node list
-idsToNames :: Array Int -> Array SimNode -> Array String
-idsToNames ids nodes =
-  let idToName = Map.fromFoldable $ map (\n -> Tuple n.id n.name) nodes
-  in Array.mapMaybe (\id -> Map.lookup id idToName) ids
 
 -- | Cell with separate outbound and inbound counts
 type DirectionalCell = { outbound :: Number, inbound :: Number }
@@ -145,16 +139,10 @@ renderNeighborhoodMatrix centralName nodes containerWidth containerHeight = do
   -- Clear any existing matrix
   clearMatrixSvg_
 
-  -- Find the central node to get its imports/dependents
-  let mCentralNode = Array.find (\n -> n.name == centralName) nodes
-  let importIds = case mCentralNode of
-                    Just cn -> cn.targets
-                    Nothing -> []
-  let dependentIds = case mCentralNode of
-                       Just cn -> cn.sources
-                       Nothing -> []
-  let imports = idsToNames importIds nodes
-  let dependents = idsToNames dependentIds nodes
+  -- Get neighborhood info using shared utility
+  let info = getNeighborhoodInfo centralName nodes
+  let imports = info.importNames
+  let dependents = info.dependentNames
 
   -- Build bidirectional adjacency matrices
   let { outboundMatrix, inboundMatrix, names } = buildBidirectionalMatrix centralName nodes

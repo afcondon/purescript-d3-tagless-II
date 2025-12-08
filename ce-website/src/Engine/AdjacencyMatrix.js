@@ -14,9 +14,6 @@ export const clearMatrixSvg_ = () => {
   select("#adjacency-matrix-container").selectAll("*").remove();
 };
 
-// Split string on dots
-export const splitOnDotImpl = (str) => str.split(".");
-
 // Helper to create triangle path for upper-left half of cell
 const upperLeftTriangle = (x, y, w, h) =>
   `M${x},${y} L${x + w},${y} L${x},${y + h} Z`;

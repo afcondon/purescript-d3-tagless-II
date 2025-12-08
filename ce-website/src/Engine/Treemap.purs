@@ -20,7 +20,7 @@ import Prelude
 
 import Data.Array as Array
 import Data.Foldable (foldl)
-import Data.Int (toNumber)
+import Data.Int (floor, toNumber)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
@@ -296,10 +296,7 @@ moduleColor _ = "#ececec"
 
 -- | Helper for golden ratio distribution
 numMod :: Number -> Number -> Number
-numMod a b = a - b * toNumber (unsafeFloor (a / b))
-
--- FFI for floor
-foreign import unsafeFloor :: Number -> Int
+numMod a b = a - b * toNumber (floor (a / b))
 
 -- =============================================================================
 -- Cleanup

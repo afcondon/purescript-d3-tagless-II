@@ -7,9 +7,6 @@ export const clearChordSvg_ = () => {
   select("#chord-diagram-container").selectAll("*").remove();
 };
 
-// Split string on dots
-export const splitOnDotImpl = (str) => str.split(".");
-
 // Render the complete chord diagram
 // arcs: Array of { path, color, moduleName, index }
 // ribbons: Array of { path, color, sourceModule, targetModule, sourceIndex, targetIndex }

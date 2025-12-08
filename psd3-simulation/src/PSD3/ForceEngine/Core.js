@@ -241,9 +241,9 @@ export function applyForce_(force) {
       const start = performance.now();
       force(alpha);
       const elapsed = performance.now() - start;
-      if (elapsed > 5) {
-        console.log(`[Force] ${force.name || 'unknown'} took ${elapsed.toFixed(1)}ms`);
-      }
+      // if (elapsed > 5) {
+      //   console.log(`[Force] ${force.name || 'unknown'} took ${elapsed.toFixed(1)}ms`);
+      // }
     };
   };
 }

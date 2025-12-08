@@ -1,14 +1,4 @@
-// FFI for Explorer - string manipulation utilities
-
-export const charAtFFI = (idx) => (str) => {
-  return idx < str.length ? str.charAt(idx) : "";
-};
-
-export const substringFFI = (start) => (end) => (str) => {
-  return str.substring(start, end);
-};
-
-export const stringLengthFFI = (str) => str.length;
+// FFI for Explorer - DOM rendering utilities
 
 // Render a package node in the package neighborhood view
 // Creates a group with circle + layer indicator + label

@@ -24,7 +24,7 @@ module Engine.BubblePack
 import Prelude
 
 import Data.Array as Array
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Loader (Declaration, DeclarationsMap)
 import Data.ColorPalette (PaletteType(..), getCategoryColor)
 import Effect (Effect)
@@ -162,19 +162,21 @@ buildModuleHierarchy moduleName decls =
           else Just categoryChildren
       }
 
--- | Group declarations by kind
+-- | Group declarations by kind (single-pass O(n) algorithm using Object)
 groupByKind :: Array Declaration -> Array { kind :: String, decls :: Array Declaration }
 groupByKind decls =
   let
-    -- Get unique kinds
-    kinds = Array.nub $ map _.kind decls
+    -- Build kind -> declarations map in single pass
+    addToGroup :: Object.Object (Array Declaration) -> Declaration -> Object.Object (Array Declaration)
+    addToGroup m d = Object.alter (Just <<< maybe [d] (_ `Array.snoc` d)) d.kind m
 
-    -- Group by each kind
-    groups = map (\k -> { kind: k, decls: Array.filter (\d -> d.kind == k) decls }) kinds
+    kindMap = Array.foldl addToGroup Object.empty decls
+
+    -- Convert to array of records
+    groups = Object.foldMap (\k ds -> [{ kind: k, decls: ds }]) kindMap
   in
-    -- Filter out empty groups and sort by count (descending)
-    Array.sortWith (\g -> negate $ Array.length g.decls) $
-      Array.filter (\g -> not $ Array.null g.decls) groups
+    -- Sort by count (descending)
+    Array.sortWith (\g -> negate $ Array.length g.decls) groups
 
 -- | Build a category node with declaration children
 buildCategory :: { kind :: String, decls :: Array Declaration } -> Maybe (HierarchyData String)
