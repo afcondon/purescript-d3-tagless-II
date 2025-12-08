@@ -29,3 +29,4 @@
 index.js
 debug-d3-hierarchy/node_modules/
 *.log
+/simpsons

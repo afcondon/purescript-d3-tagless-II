@@ -146,6 +146,25 @@ Phase 3 in progress:
 
 ## Future Ideas
 
+### 10. Keyboard Shortcuts
+Global keyboard shortcuts for power-user navigation:
+
+**Module-on-hover shortcuts:**
+- **B** while hovering module → open BubblePack view
+- **C** while hovering module → open Chord diagram
+- **M** while hovering module → open Matrix view
+
+**Global shortcuts:**
+- **Escape** → go back to previous view
+- **1/2/3/4** → switch between the four overview views
+- **/** or **Cmd+K** → focus the search box
+
+**Implementation:**
+- Attach `onKeyDown` to SVG container or document
+- Track hovered module in state
+- Pattern match on `KE.key` for key names
+- Consider modifier keys for advanced users (Shift, Cmd/Ctrl)
+
 ### 9. Sankey TopoGraph
 A new overview view showing module flow through the dependency graph as a Sankey diagram.
 
