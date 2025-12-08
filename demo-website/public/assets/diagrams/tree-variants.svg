@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 420" width="520" height="420">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="520" height="420" fill="#FAFAFA"/>
+
+  <!-- Title -->
+  <text x="260" y="30" text-anchor="middle" fill="#2F4F4F" font-family="system-ui, sans-serif" font-size="16" font-weight="600">Tree API Variants</text>
+
+  <!-- Card 1: Node -->
+  <g transform="translate(20, 50)">
+    <rect x="0" y="0" width="230" height="160" rx="10" fill="white" stroke="#E0E0E0" stroke-width="1" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="230" height="40" rx="10" fill="#4A90A4"/>
+    <rect x="0" y="30" width="230" height="10" fill="#4A90A4"/>
+    <text x="115" y="26" text-anchor="middle" fill="white" font-family="monospace" font-size="14" font-weight="600">Node</text>
+
+    <!-- Visual representation -->
+    <g transform="translate(80, 60)">
+      <rect x="0" y="0" width="70" height="50" rx="6" fill="#4A90A4" opacity="0.2" stroke="#4A90A4" stroke-width="2"/>
+      <text x="35" y="30" text-anchor="middle" fill="#4A90A4" font-family="monospace" font-size="12">svg</text>
+    </g>
+
+    <!-- Description -->
+    <text x="115" y="135" text-anchor="middle" fill="#708090" font-family="system-ui, sans-serif" font-size="12">Static element</text>
+    <text x="115" y="150" text-anchor="middle" fill="#708090" font-family="system-ui, sans-serif" font-size="10" font-style="italic">no data binding</text>
+  </g>
+
+  <!-- Card 2: Join -->
+  <g transform="translate(270, 50)">
+    <rect x="0" y="0" width="230" height="160" rx="10" fill="white" stroke="#E0E0E0" stroke-width="1" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="230" height="40" rx="10" fill="#50C878"/>
+    <rect x="0" y="30" width="230" height="10" fill="#50C878"/>
+    <text x="115" y="26" text-anchor="middle" fill="white" font-family="monospace" font-size="14" font-weight="600">Join</text>
+
+    <!-- Visual representation -->
+    <g transform="translate(30, 60)">
+      <rect x="0" y="0" width="40" height="50" rx="4" fill="#50C878" opacity="0.3" stroke="#50C878" stroke-width="2"/>
+      <text x="20" y="30" text-anchor="middle" fill="#50C878" font-family="system-ui, sans-serif" font-size="11">A</text>
+    </g>
+    <g transform="translate(80, 60)">
+      <rect x="0" y="0" width="40" height="50" rx="4" fill="#50C878" opacity="0.3" stroke="#50C878" stroke-width="2"/>
+      <text x="20" y="30" text-anchor="middle" fill="#50C878" font-family="system-ui, sans-serif" font-size="11">B</text>
+    </g>
+    <g transform="translate(130, 60)">
+      <rect x="0" y="0" width="40" height="50" rx="4" fill="#50C878" opacity="0.3" stroke="#50C878" stroke-width="2"/>
+      <text x="20" y="30" text-anchor="middle" fill="#50C878" font-family="system-ui, sans-serif" font-size="11">C</text>
+    </g>
+    <text x="185" y="90" fill="#50C878" font-family="system-ui, sans-serif" font-size="16">...</text>
+
+    <!-- Description -->
+    <text x="115" y="135" text-anchor="middle" fill="#708090" font-family="system-ui, sans-serif" font-size="12">Data-driven</text>
+    <text x="115" y="150" text-anchor="middle" fill="#708090" font-family="system-ui, sans-serif" font-size="10" font-style="italic">one element per datum</text>
+  </g>
+
+  <!-- Card 3: NestedJoin -->
+  <g transform="translate(20, 230)">
+    <rect x="0" y="0" width="230" height="160" rx="10" fill="white" stroke="#E0E0E0" stroke-width="1" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="230" height="40" rx="10" fill="#7B68EE"/>
+    <rect x="0" y="30" width="230" height="10" fill="#7B68EE"/>
+    <text x="115" y="26" text-anchor="middle" fill="white" font-family="monospace" font-size="14" font-weight="600">NestedJoin</text>
+
+    <!-- Visual representation -->
+    <g transform="translate(50, 55)">
+      <rect x="0" y="0" width="130" height="60" rx="6" fill="#7B68EE" opacity="0.2" stroke="#7B68EE" stroke-width="2"/>
+      <text x="25" y="20" fill="#7B68EE" font-family="system-ui, sans-serif" font-size="11">Group</text>
+      <!-- Nested items -->
+      <rect x="10" y="30" width="30" height="22" rx="3" fill="#7B68EE" opacity="0.5"/>
+      <rect x="50" y="30" width="30" height="22" rx="3" fill="#7B68EE" opacity="0.5"/>
+      <rect x="90" y="30" width="30" height="22" rx="3" fill="#7B68EE" opacity="0.5"/>
+    </g>
+
+    <!-- Description -->
+    <text x="115" y="135" text-anchor="middle" fill="#708090" font-family="system-ui, sans-serif" font-size="12">Hierarchical</text>
+    <text x="115" y="150" text-anchor="middle" fill="#708090" font-family="system-ui, sans-serif" font-size="10" font-style="italic">parent + children arrays</text>
+  </g>
+
+  <!-- Card 4: SceneJoin -->
+  <g transform="translate(270, 230)">
+    <rect x="0" y="0" width="230" height="160" rx="10" fill="white" stroke="#E0E0E0" stroke-width="1" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="230" height="40" rx="10" fill="#F4A460"/>
+    <rect x="0" y="30" width="230" height="10" fill="#F4A460"/>
+    <text x="115" y="26" text-anchor="middle" fill="white" font-family="monospace" font-size="14" font-weight="600">SceneJoin</text>
+
+    <!-- Visual representation - enter/update/exit -->
+    <g transform="translate(35, 55)">
+      <rect x="0" y="0" width="45" height="30" rx="4" fill="#50C878" opacity="0.8"/>
+      <text x="22" y="12" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="10">+</text>
+      <text x="22" y="24" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="8">enter</text>
+    </g>
+    <g transform="translate(90, 55)">
+      <rect x="0" y="0" width="45" height="30" rx="4" fill="#4A90A4" opacity="0.8"/>
+      <text x="22" y="12" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="10">~</text>
+      <text x="22" y="24" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="8">update</text>
+    </g>
+    <g transform="translate(145, 55)">
+      <rect x="0" y="0" width="45" height="30" rx="4" fill="#CD5C5C" opacity="0.8"/>
+      <text x="22" y="12" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="10">-</text>
+      <text x="22" y="24" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="8">exit</text>
+    </g>
+
+    <!-- Description -->
+    <text x="115" y="115" text-anchor="middle" fill="#708090" font-family="system-ui, sans-serif" font-size="12">GUP aware</text>
+    <text x="115" y="130" text-anchor="middle" fill="#708090" font-family="system-ui, sans-serif" font-size="10" font-style="italic">handles transitions</text>
+    <text x="115" y="150" text-anchor="middle" fill="#708090" font-family="system-ui, sans-serif" font-size="10" font-style="italic">enter/update/exit</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="260" y="405" text-anchor="middle" fill="#708090" font-family="system-ui, sans-serif" font-size="10" font-style="italic">Choose based on your data binding needs</text>
+</svg>

@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 380" width="700" height="380">
+  <defs>
+    <!-- Arrow marker -->
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2F4F4F"/>
+    </marker>
+    <!-- Rounded rect filter for subtle shadow -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="1" dy="1" stdDeviation="2" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="700" height="380" fill="#FAFAFA"/>
+
+  <!-- State: SEmpty -->
+  <g transform="translate(80, 60)">
+    <rect x="0" y="0" width="100" height="50" rx="8" fill="#708090" filter="url(#shadow)"/>
+    <text x="50" y="30" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="14" font-weight="500">SEmpty</text>
+  </g>
+
+  <!-- State: SPending -->
+  <g transform="translate(300, 60)">
+    <rect x="0" y="0" width="100" height="50" rx="8" fill="#F4A460" filter="url(#shadow)"/>
+    <text x="50" y="30" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="14" font-weight="500">SPending</text>
+  </g>
+
+  <!-- State: SBoundOwns -->
+  <g transform="translate(520, 60)">
+    <rect x="0" y="0" width="120" height="50" rx="8" fill="#50C878" filter="url(#shadow)"/>
+    <text x="60" y="30" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="14" font-weight="500">SBoundOwns</text>
+  </g>
+
+  <!-- State: SBoundInherits -->
+  <g transform="translate(520, 170)">
+    <rect x="0" y="0" width="130" height="50" rx="8" fill="#50C878" filter="url(#shadow)"/>
+    <text x="65" y="30" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="14" font-weight="500">SBoundInherits</text>
+  </g>
+
+  <!-- State: SExiting -->
+  <g transform="translate(300, 290)">
+    <rect x="0" y="0" width="100" height="50" rx="8" fill="#CD5C5C" filter="url(#shadow)"/>
+    <text x="50" y="30" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="14" font-weight="500">SExiting</text>
+  </g>
+
+  <!-- JoinResult box -->
+  <g transform="translate(210, 160)">
+    <rect x="0" y="0" width="180" height="110" rx="10" fill="none" stroke="#7B68EE" stroke-width="2" stroke-dasharray="5,3"/>
+    <text x="90" y="20" text-anchor="middle" fill="#7B68EE" font-family="system-ui, sans-serif" font-size="12" font-weight="600">JoinResult</text>
+
+    <!-- Fork point -->
+    <circle cx="90" cy="55" r="8" fill="#7B68EE"/>
+
+    <!-- Labels inside box -->
+    <text x="30" y="95" text-anchor="middle" fill="#2F4F4F" font-family="system-ui, sans-serif" font-size="11">.enter</text>
+    <text x="90" y="95" text-anchor="middle" fill="#2F4F4F" font-family="system-ui, sans-serif" font-size="11">.update</text>
+    <text x="150" y="95" text-anchor="middle" fill="#2F4F4F" font-family="system-ui, sans-serif" font-size="11">.exit</text>
+  </g>
+
+  <!-- Arrow: SEmpty -> SPending (appendData) -->
+  <path d="M 180 85 L 295 85" stroke="#2F4F4F" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)"/>
+  <text x="235" y="75" text-anchor="middle" fill="#2F4F4F" font-family="monospace" font-size="10">appendData</text>
+
+  <!-- Arrow: SPending -> SBoundOwns (append) -->
+  <path d="M 400 85 L 515 85" stroke="#2F4F4F" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)"/>
+  <text x="455" y="75" text-anchor="middle" fill="#2F4F4F" font-family="monospace" font-size="10">append</text>
+
+  <!-- Arrow: SEmpty -> JoinResult (joinData) -->
+  <path d="M 130 110 L 130 160 L 210 200" stroke="#2F4F4F" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)"/>
+  <text x="145" y="145" fill="#2F4F4F" font-family="monospace" font-size="10">joinData</text>
+
+  <!-- Arrow: JoinResult fork -> SPending (.enter) -->
+  <path d="M 240 215 L 240 250 L 345 250 L 345 85 L 300 85" stroke="#F4A460" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="4,2"/>
+
+  <!-- Arrow: JoinResult fork -> SBoundOwns (.update) -->
+  <path d="M 300 215 L 300 245 L 460 245 L 460 85 L 520 85" stroke="#50C878" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="4,2"/>
+
+  <!-- Arrow: JoinResult fork -> SExiting (.exit) -->
+  <path d="M 360 215 L 360 315" stroke="#CD5C5C" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="4,2"/>
+
+  <!-- Arrow: SBoundOwns -> SBoundInherits (appendChildInheriting) -->
+  <path d="M 580 110 L 580 165" stroke="#2F4F4F" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)"/>
+  <text x="590" y="145" fill="#2F4F4F" font-family="monospace" font-size="9">appendChild</text>
+  <text x="590" y="155" fill="#2F4F4F" font-family="monospace" font-size="9">Inheriting</text>
+
+  <!-- Self-loop: SBoundOwns -> SBoundOwns (setAttrs) -->
+  <path d="M 570 60 C 570 30, 610 30, 610 60" stroke="#2F4F4F" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)"/>
+  <text x="590" y="22" text-anchor="middle" fill="#2F4F4F" font-family="monospace" font-size="10">setAttrs</text>
+
+  <!-- Arrow: SExiting -> removed -->
+  <path d="M 350 340 L 350 365" stroke="#CD5C5C" stroke-width="1.5" fill="none" marker-end="url(#arrowhead)"/>
+  <text x="370" y="360" fill="#CD5C5C" font-family="monospace" font-size="10">remove</text>
+
+  <!-- Legend -->
+  <g transform="translate(20, 330)">
+    <rect x="0" y="0" width="12" height="12" rx="2" fill="#708090"/>
+    <text x="18" y="10" fill="#2F4F4F" font-family="system-ui, sans-serif" font-size="10">Empty</text>
+
+    <rect x="60" y="0" width="12" height="12" rx="2" fill="#F4A460"/>
+    <text x="78" y="10" fill="#2F4F4F" font-family="system-ui, sans-serif" font-size="10">Pending</text>
+
+    <rect x="130" y="0" width="12" height="12" rx="2" fill="#50C878"/>
+    <text x="148" y="10" fill="#2F4F4F" font-family="system-ui, sans-serif" font-size="10">Bound</text>
+
+    <rect x="190" y="0" width="12" height="12" rx="2" fill="#CD5C5C"/>
+    <text x="208" y="10" fill="#2F4F4F" font-family="system-ui, sans-serif" font-size="10">Exiting</text>
+  </g>
+</svg>

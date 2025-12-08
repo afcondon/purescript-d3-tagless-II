@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 520" width="400" height="520">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2F4F4F"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#50C878"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4A90A4"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#CD5C5C"/>
+    </marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="1" dy="1" stdDeviation="2" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="520" fill="#FAFAFA"/>
+
+  <!-- Title -->
+  <text x="200" y="30" text-anchor="middle" fill="#2F4F4F" font-family="system-ui, sans-serif" font-size="16" font-weight="600">General Update Pattern</text>
+
+  <!-- selectAll -->
+  <g transform="translate(140, 50)">
+    <rect x="0" y="0" width="120" height="40" rx="6" fill="#708090" filter="url(#shadow)"/>
+    <text x="60" y="25" text-anchor="middle" fill="white" font-family="monospace" font-size="13">selectAll</text>
+  </g>
+
+  <!-- Arrow down -->
+  <path d="M 200 90 L 200 115" stroke="#2F4F4F" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- joinData -->
+  <g transform="translate(140, 120)">
+    <rect x="0" y="0" width="120" height="40" rx="6" fill="#7B68EE" filter="url(#shadow)"/>
+    <text x="60" y="25" text-anchor="middle" fill="white" font-family="monospace" font-size="13">joinData</text>
+  </g>
+
+  <!-- Three-way split -->
+  <path d="M 200 160 L 200 180" stroke="#2F4F4F" stroke-width="1.5" fill="none"/>
+  <circle cx="200" cy="185" r="5" fill="#7B68EE"/>
+
+  <!-- Fork lines -->
+  <path d="M 200 185 L 70 185 L 70 215" stroke="#50C878" stroke-width="1.5" fill="none" marker-end="url(#arrow-green)"/>
+  <path d="M 200 185 L 200 215" stroke="#4A90A4" stroke-width="1.5" fill="none" marker-end="url(#arrow-blue)"/>
+  <path d="M 200 185 L 330 185 L 330 215" stroke="#CD5C5C" stroke-width="1.5" fill="none" marker-end="url(#arrow-red)"/>
+
+  <!-- enter -->
+  <g transform="translate(20, 220)">
+    <rect x="0" y="0" width="100" height="40" rx="6" fill="#50C878" filter="url(#shadow)"/>
+    <text x="50" y="25" text-anchor="middle" fill="white" font-family="monospace" font-size="13">enter</text>
+  </g>
+
+  <!-- update -->
+  <g transform="translate(150, 220)">
+    <rect x="0" y="0" width="100" height="40" rx="6" fill="#4A90A4" filter="url(#shadow)"/>
+    <text x="50" y="25" text-anchor="middle" fill="white" font-family="monospace" font-size="13">update</text>
+  </g>
+
+  <!-- exit -->
+  <g transform="translate(280, 220)">
+    <rect x="0" y="0" width="100" height="40" rx="6" fill="#CD5C5C" filter="url(#shadow)"/>
+    <text x="50" y="25" text-anchor="middle" fill="white" font-family="monospace" font-size="13">exit</text>
+  </g>
+
+  <!-- Labels under boxes -->
+  <text x="70" y="275" text-anchor="middle" fill="#50C878" font-family="system-ui, sans-serif" font-size="10" font-style="italic">new data</text>
+  <text x="200" y="275" text-anchor="middle" fill="#4A90A4" font-family="system-ui, sans-serif" font-size="10" font-style="italic">existing</text>
+  <text x="330" y="275" text-anchor="middle" fill="#CD5C5C" font-family="system-ui, sans-serif" font-size="10" font-style="italic">removed</text>
+
+  <!-- Arrow from enter to merge -->
+  <path d="M 70 260 L 70 300 L 140 315" stroke="#50C878" stroke-width="1.5" fill="none" marker-end="url(#arrow-green)"/>
+
+  <!-- Arrow from update to merge -->
+  <path d="M 200 260 L 200 315" stroke="#4A90A4" stroke-width="1.5" fill="none" marker-end="url(#arrow-blue)"/>
+
+  <!-- merge -->
+  <g transform="translate(145, 320)">
+    <rect x="0" y="0" width="110" height="40" rx="6" fill="#7B68EE" filter="url(#shadow)"/>
+    <text x="55" y="25" text-anchor="middle" fill="white" font-family="monospace" font-size="13">merge</text>
+  </g>
+
+  <!-- Arrow down from merge -->
+  <path d="M 200 360 L 200 385" stroke="#2F4F4F" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- setAttrs -->
+  <g transform="translate(140, 390)">
+    <rect x="0" y="0" width="120" height="40" rx="6" fill="#708090" filter="url(#shadow)"/>
+    <text x="60" y="25" text-anchor="middle" fill="white" font-family="monospace" font-size="13">setAttrs</text>
+  </g>
+
+  <!-- Arrow from exit to remove -->
+  <path d="M 330 260 L 330 460 L 310 460" stroke="#CD5C5C" stroke-width="1.5" fill="none" marker-end="url(#arrow-red)"/>
+
+  <!-- remove -->
+  <g transform="translate(200, 440)">
+    <rect x="0" y="0" width="110" height="40" rx="6" fill="#CD5C5C" filter="url(#shadow)"/>
+    <text x="55" y="25" text-anchor="middle" fill="white" font-family="monospace" font-size="13">remove</text>
+  </g>
+
+  <!-- Annotations -->
+  <text x="85" y="310" fill="#2F4F4F" font-family="system-ui, sans-serif" font-size="9" font-style="italic">append</text>
+</svg>

@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 280" width="720" height="280">
+  <defs>
+    <marker id="arrow-r" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2F4F4F"/>
+    </marker>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="720" height="280" fill="#FAFAFA"/>
+
+  <!-- Title -->
+  <text x="360" y="28" text-anchor="middle" fill="#2F4F4F" font-family="system-ui, sans-serif" font-size="16" font-weight="600">Scene Lifecycle</text>
+
+  <!-- Timeline bar background -->
+  <rect x="30" y="50" width="660" height="180" rx="10" fill="#F5F5F5" stroke="#E0E0E0" stroke-width="1"/>
+
+  <!-- Phase 1: INIT -->
+  <g transform="translate(30, 50)">
+    <rect x="0" y="0" width="200" height="180" rx="10" fill="#F4A460" opacity="0.2"/>
+    <rect x="0" y="0" width="200" height="35" rx="10" fill="#F4A460"/>
+    <text x="100" y="23" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="13" font-weight="600">INITIALIZE</text>
+
+    <!-- Content -->
+    <text x="100" y="60" text-anchor="middle" fill="#2F4F4F" font-family="monospace" font-size="11">initRules applied</text>
+
+    <!-- Pin icon representation -->
+    <g transform="translate(60, 80)">
+      <circle cx="20" cy="20" r="12" fill="#F4A460" opacity="0.8"/>
+      <text x="20" y="24" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="10" font-weight="bold">pin</text>
+    </g>
+    <g transform="translate(100, 80)">
+      <circle cx="20" cy="20" r="12" fill="#F4A460" opacity="0.8"/>
+      <text x="20" y="24" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="10" font-weight="bold">pin</text>
+    </g>
+
+    <!-- Time marker -->
+    <text x="100" y="170" text-anchor="middle" fill="#708090" font-family="system-ui, sans-serif" font-size="10" font-style="italic">t = 0</text>
+  </g>
+
+  <!-- Arrow: INIT -> TRANSITION -->
+  <path d="M 230 140 L 250 140" stroke="#2F4F4F" stroke-width="2" fill="none" marker-end="url(#arrow-r)"/>
+
+  <!-- Phase 2: TRANSITION -->
+  <g transform="translate(250, 50)">
+    <rect x="0" y="0" width="220" height="180" rx="10" fill="#4A90A4" opacity="0.2"/>
+    <rect x="0" y="0" width="220" height="35" rx="10" fill="#4A90A4"/>
+    <text x="110" y="23" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="13" font-weight="600">TRANSITION</text>
+
+    <!-- Content -->
+    <text x="110" y="60" text-anchor="middle" fill="#2F4F4F" font-family="monospace" font-size="11">interpolatePositions</text>
+
+    <!-- Motion illustration -->
+    <g transform="translate(30, 80)">
+      <circle cx="10" cy="20" r="10" fill="#4A90A4" opacity="0.5"/>
+      <circle cx="50" cy="20" r="10" fill="#4A90A4" opacity="0.7"/>
+      <circle cx="90" cy="20" r="10" fill="#4A90A4"/>
+      <path d="M 20 20 L 80 20" stroke="#4A90A4" stroke-width="2" stroke-dasharray="4,3"/>
+    </g>
+    <g transform="translate(30, 110)">
+      <circle cx="30" cy="10" r="10" fill="#4A90A4" opacity="0.5"/>
+      <circle cx="70" cy="10" r="10" fill="#4A90A4" opacity="0.7"/>
+      <circle cx="110" cy="10" r="10" fill="#4A90A4"/>
+      <path d="M 40 10 L 100 10" stroke="#4A90A4" stroke-width="2" stroke-dasharray="4,3"/>
+    </g>
+
+    <!-- Easing curve mini-graphic -->
+    <path d="M 160 90 Q 170 90, 180 100 Q 190 115, 200 120" stroke="#4A90A4" stroke-width="2" fill="none"/>
+    <text x="180" y="140" text-anchor="middle" fill="#4A90A4" font-family="system-ui, sans-serif" font-size="9">easing</text>
+
+    <!-- Time marker -->
+    <text x="110" y="170" text-anchor="middle" fill="#708090" font-family="system-ui, sans-serif" font-size="10" font-style="italic">0 &lt; t &lt; 1</text>
+  </g>
+
+  <!-- Arrow: TRANSITION -> STABLE -->
+  <path d="M 470 140 L 490 140" stroke="#2F4F4F" stroke-width="2" fill="none" marker-end="url(#arrow-r)"/>
+
+  <!-- Phase 3: STABLE -->
+  <g transform="translate(490, 50)">
+    <rect x="0" y="0" width="200" height="180" rx="10" fill="#50C878" opacity="0.2"/>
+    <rect x="0" y="0" width="200" height="35" rx="10" fill="#50C878"/>
+    <text x="100" y="23" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="13" font-weight="600">STABLE</text>
+
+    <!-- Content -->
+    <text x="100" y="60" text-anchor="middle" fill="#2F4F4F" font-family="monospace" font-size="11">finalRules applied</text>
+
+    <!-- Mode options -->
+    <g transform="translate(25, 75)">
+      <rect x="0" y="0" width="70" height="30" rx="5" fill="#50C878" opacity="0.8"/>
+      <text x="35" y="20" text-anchor="middle" fill="white" font-family="monospace" font-size="10">Physics</text>
+    </g>
+    <g transform="translate(105, 75)">
+      <rect x="0" y="0" width="70" height="30" rx="5" fill="#708090" opacity="0.8"/>
+      <text x="35" y="20" text-anchor="middle" fill="white" font-family="monospace" font-size="10">Static</text>
+    </g>
+
+    <!-- Unpin icon -->
+    <g transform="translate(60, 120)">
+      <circle cx="20" cy="15" r="12" fill="#50C878" opacity="0.8" stroke="#50C878" stroke-width="2" stroke-dasharray="3,2"/>
+      <text x="20" y="19" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="8" font-weight="bold">free</text>
+    </g>
+    <g transform="translate(100, 120)">
+      <circle cx="20" cy="15" r="12" fill="#50C878" opacity="0.8" stroke="#50C878" stroke-width="2" stroke-dasharray="3,2"/>
+      <text x="20" y="19" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="8" font-weight="bold">free</text>
+    </g>
+
+    <!-- Time marker -->
+    <text x="100" y="170" text-anchor="middle" fill="#708090" font-family="system-ui, sans-serif" font-size="10" font-style="italic">t = complete</text>
+  </g>
+
+  <!-- Bottom annotation -->
+  <text x="360" y="260" text-anchor="middle" fill="#708090" font-family="system-ui, sans-serif" font-size="11" font-style="italic">transitionTo(scene) triggers this lifecycle automatically</text>
+</svg>

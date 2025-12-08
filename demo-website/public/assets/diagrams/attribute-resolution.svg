@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 380" width="480" height="380">
+  <defs>
+    <marker id="arrow-d" markerWidth="10" markerHeight="7" refX="5" refY="0" orient="auto">
+      <polygon points="0 0, 10 0, 5 7" fill="#2F4F4F"/>
+    </marker>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="480" height="380" fill="#FAFAFA"/>
+
+  <!-- Title -->
+  <text x="240" y="28" text-anchor="middle" fill="#2F4F4F" font-family="system-ui, sans-serif" font-size="16" font-weight="600">Attribute Type Resolution</text>
+
+  <!-- Three input types -->
+  <!-- Static -->
+  <g transform="translate(30, 50)">
+    <rect x="0" y="0" width="120" height="80" rx="8" fill="#4A90A4" filter="url(#shadow)"/>
+    <text x="60" y="25" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="12" font-weight="600">Static</text>
+    <rect x="10" y="35" width="100" height="35" rx="4" fill="white" opacity="0.9"/>
+    <text x="60" y="58" text-anchor="middle" fill="#4A90A4" font-family="monospace" font-size="11">cx 100.0</text>
+  </g>
+
+  <!-- Datum -->
+  <g transform="translate(180, 50)">
+    <rect x="0" y="0" width="120" height="80" rx="8" fill="#50C878" filter="url(#shadow)"/>
+    <text x="60" y="25" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="12" font-weight="600">Datum</text>
+    <rect x="10" y="35" width="100" height="35" rx="4" fill="white" opacity="0.9"/>
+    <text x="60" y="58" text-anchor="middle" fill="#50C878" font-family="monospace" font-size="11">cx (_.x)</text>
+  </g>
+
+  <!-- Datum + Index -->
+  <g transform="translate(330, 50)">
+    <rect x="0" y="0" width="120" height="80" rx="8" fill="#7B68EE" filter="url(#shadow)"/>
+    <text x="60" y="25" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="12" font-weight="600">Datum+Index</text>
+    <rect x="10" y="35" width="100" height="35" rx="4" fill="white" opacity="0.9"/>
+    <text x="60" y="55" text-anchor="middle" fill="#7B68EE" font-family="monospace" font-size="10">cx \d i -></text>
+    <text x="60" y="68" text-anchor="middle" fill="#7B68EE" font-family="monospace" font-size="10">d.x + i</text>
+  </g>
+
+  <!-- Converging arrows -->
+  <path d="M 90 130 L 90 165 L 200 175" stroke="#2F4F4F" stroke-width="1.5" fill="none"/>
+  <path d="M 240 130 L 240 175" stroke="#2F4F4F" stroke-width="1.5" fill="none"/>
+  <path d="M 390 130 L 390 165 L 280 175" stroke="#2F4F4F" stroke-width="1.5" fill="none"/>
+
+  <!-- Funnel/typeclass box -->
+  <g transform="translate(140, 180)">
+    <rect x="0" y="0" width="200" height="60" rx="10" fill="#F4A460" filter="url(#shadow)"/>
+    <text x="100" y="25" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="13" font-weight="600">IsAttribute</text>
+    <text x="100" y="45" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="11" opacity="0.9">typeclass</text>
+  </g>
+
+  <!-- Arrow down -->
+  <path d="M 240 240 L 240 270" stroke="#2F4F4F" stroke-width="2" fill="none" marker-end="url(#arrow-d)"/>
+
+  <!-- Compile-time resolution box -->
+  <g transform="translate(115, 275)">
+    <rect x="0" y="0" width="250" height="55" rx="10" fill="#708090" filter="url(#shadow)"/>
+    <text x="125" y="25" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="13" font-weight="600">Compile-time Resolution</text>
+    <text x="125" y="45" text-anchor="middle" fill="white" font-family="system-ui, sans-serif" font-size="10" opacity="0.9">No runtime type checks</text>
+  </g>
+
+  <!-- Footer annotation -->
+  <text x="240" y="360" text-anchor="middle" fill="#708090" font-family="system-ui, sans-serif" font-size="10" font-style="italic">All three styles unify at compile time via the IsAttribute typeclass</text>
+</svg>
