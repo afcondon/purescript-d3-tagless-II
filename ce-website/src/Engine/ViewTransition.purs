@@ -32,6 +32,7 @@ module Engine.ViewTransition
     -- * Package labels for TopoGraph
   , renderPackageLabels
   , clearPackageLabels
+  , updatePackageLabelPositions
   ) where
 
 import Prelude
@@ -316,6 +317,9 @@ foreign import renderPackageLabels_ :: Array SimNode -> Effect Unit
 -- | Clear package labels
 foreign import clearPackageLabels_ :: Effect Unit
 
+-- | Update package label positions during animation
+foreign import updatePackageLabelPositions_ :: Effect Unit
+
 -- | Render package labels for TopoGraph view
 renderPackageLabels :: Array SimNode -> Effect Unit
 renderPackageLabels = renderPackageLabels_
@@ -323,3 +327,7 @@ renderPackageLabels = renderPackageLabels_
 -- | Clear package labels when leaving TopoGraph
 clearPackageLabels :: Effect Unit
 clearPackageLabels = clearPackageLabels_
+
+-- | Update package label positions (call on each tick during TopoForm transition)
+updatePackageLabelPositions :: Effect Unit
+updatePackageLabelPositions = updatePackageLabelPositions_

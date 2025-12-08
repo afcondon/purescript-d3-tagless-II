@@ -69,6 +69,7 @@ export const updateNodeTransitionState_ = (selector) => (transitionMap) => () =>
 
 // Render package labels for TopoGraph view
 // Takes array of package nodes (with name, topoX, topoY, r)
+// Labels start at current node positions with opacity 0 and fade in
 export const renderPackageLabels_ = (packages) => () => {
   // Clear any existing labels
   clearPackageLabels_()();
@@ -81,20 +82,25 @@ export const renderPackageLabels_ = (packages) => () => {
     .attr("class", "package-labels");
 
   // Add text labels for each package
+  // Start at current x/y position (where nodes are now) with opacity 0
   labelsGroup.selectAll("text.package-label")
     .data(packages)
     .enter()
     .append("text")
     .attr("class", "package-label")
-    .attr("x", d => d.topoX)
-    .attr("y", d => d.topoY + d.r + 14)  // Position below the circle
+    .attr("x", d => d.x)  // Start at current position
+    .attr("y", d => d.y + d.r + 14)  // Position below the circle
     .attr("text-anchor", "middle")
     .attr("dominant-baseline", "hanging")
     .attr("font-size", "12px")
     .attr("font-weight", "500")
     .attr("fill", "#e2e8f0")
     .attr("pointer-events", "none")
-    .text(d => d.name);
+    .attr("opacity", 0)  // Start invisible
+    .text(d => d.name)
+    .transition()
+    .duration(2000)  // Match transition duration
+    .attr("opacity", 1);  // Fade in
 };
 
 // Clear package labels
@@ -103,12 +109,9 @@ export const clearPackageLabels_ = () => () => {
 };
 
 // Update package label positions (for animation/transition)
+// Called on each tick to keep labels aligned with their package circles
 export const updatePackageLabelPositions_ = () => () => {
   select("#explorer-nodes").selectAll("text.package-label")
-    .each(function(d) {
-      // Update position from bound data (which is updated by simulation)
-      select(this)
-        .attr("x", d.x || d.topoX)
-        .attr("y", (d.y || d.topoY) + d.r + 14);
-    });
+    .attr("x", d => d.x)
+    .attr("y", d => d.y + d.r + 14);
 };

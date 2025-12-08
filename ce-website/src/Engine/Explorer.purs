@@ -25,9 +25,11 @@ import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (foldl, minimum, maximum)
 import Data.Int (toNumber)
+import Data.String as String
+import Data.String.CodeUnits as SCU
+import Data.String.Pattern (Pattern(..))
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
-import Data.Ord (comparing)
 import Data.Nullable as Nullable
 import Data.Traversable (traverse, for_)
 import Data.Tuple (Tuple(..))
@@ -242,6 +244,9 @@ tickWithPendingViewCheck stateRef nodesSelector = do
 
   -- Run the normal tick
   Scene.onTickWithViewTransition stateRef globalTransitionRef globalViewStateRef nodesSelector
+
+  -- Update package label positions if any exist (for TopoForm transition)
+  VT.updatePackageLabelPositions
 
   -- Check if transition just completed
   stateAfter <- Ref.read stateRef
@@ -2084,49 +2089,15 @@ buildModuleEdgesAndFuncs moduleName moduleFuncs fnCalls =
 
 -- | Helper: check if string starts with prefix
 startsWith :: String -> String -> Boolean
-startsWith prefix str = substringFFI 0 (stringLengthFFI prefix) str == prefix
-
-foreign import stringLengthFFI :: String -> Int
+startsWith prefix str = SCU.take (SCU.length prefix) str == prefix
 
 -- | Extract module name from "Module.name" string
+-- | Splits "Foo.Bar.baz" into Just "Foo.Bar" (module part)
 extractModuleName :: String -> Maybe String
-extractModuleName fullName =
-  let
-    parts = splitAtLastDot fullName
-  in
-    if parts.module == "" then Nothing else Just parts.module
-  where
-  -- Split "Foo.Bar.baz" into { module: "Foo.Bar", name: "baz" }
-  splitAtLastDot :: String -> { module :: String, name :: String }
-  splitAtLastDot s =
-    let
-      len = stringLength s
-      lastDotIdx = findLastDot s (len - 1)
-    in
-      if lastDotIdx < 0 then { module: "", name: s }
-      else { module: substring 0 lastDotIdx s, name: substring (lastDotIdx + 1) len s }
-
-  findLastDot :: String -> Int -> Int
-  findLastDot _ (-1) = -1
-  findLastDot str idx =
-    if charAt idx str == "." then idx
-    else findLastDot str (idx - 1)
-
-  stringLength :: String -> Int
-  stringLength = go 0
-    where
-    go n str = case charAt n str of
-      "" -> n
-      _ -> go (n + 1) str
-
-  charAt :: Int -> String -> String
-  charAt = charAtFFI
-
-  substring :: Int -> Int -> String -> String
-  substring = substringFFI
-
-foreign import charAtFFI :: Int -> String -> String
-foreign import substringFFI :: Int -> Int -> String -> String
+extractModuleName fullName = do
+  lastDotIdx <- String.lastIndexOf (Pattern ".") fullName
+  let modulePart = SCU.take lastDotIdx fullName
+  if modulePart == "" then Nothing else Just modulePart
 
 -- =============================================================================
 -- Neighborhood View Type Switching
