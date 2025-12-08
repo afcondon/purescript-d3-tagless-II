@@ -16,13 +16,18 @@ package:
     - foreign
     - foreign-object
     - integers
+    - linalg
     - lists
     - maybe
     - numbers
     - ordered-collections
     - prelude
     - psd3-tree
+    - random
     - strings
     - transformers
     - tuples
     - unsafe-coerce
+  test:
+    main: Test.Main
+    dependencies: []

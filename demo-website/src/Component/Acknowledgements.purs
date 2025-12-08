@@ -13,7 +13,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.Footer as Footer
-import D3.Viz.TreeAPI.SankeyDiagram (drawSankey)
+import D3.Viz.TreeAPI.SankeyDiagram (drawSankey, drawSankeyMarkovChain)
 
 -- | Acknowledgements page state
 type State = Unit
@@ -59,20 +59,55 @@ render _ =
             , HH.p_
                 [ HH.text "This diagram shows how D3 modules flow into our library packages. Note D3's own internal dependencies on the left - modules like d3-zoom depend on d3-transition, d3-drag, etc. Unused D3 modules are tree-shaken from the bundle."
                 ]
-            , HH.div
-                [ HP.id "d3-library-sankey"
-                , HP.style "margin: 20px 0; background: #fafafa; border-radius: 8px; padding: 10px;"
+            , HH.p_
+                [ HH.text "We show two versions: the D3-style heuristic (left) and our new Markov Chain ordering (right) which reduces edge crossings by ~67%."
                 ]
-                []
+            , HH.div
+                [ HP.style "display: flex; gap: 20px; flex-wrap: wrap;" ]
+                [ HH.div
+                    [ HP.style "flex: 1; min-width: 400px;" ]
+                    [ HH.h4_ [ HH.text "D3-style Heuristic" ]
+                    , HH.div
+                        [ HP.id "d3-library-sankey"
+                        , HP.style "background: #fafafa; border-radius: 8px; padding: 10px;"
+                        ]
+                        []
+                    ]
+                , HH.div
+                    [ HP.style "flex: 1; min-width: 400px;" ]
+                    [ HH.h4_ [ HH.text "Markov Chain Ordering" ]
+                    , HH.div
+                        [ HP.id "d3-library-sankey-markov"
+                        , HP.style "background: #f0fff0; border-radius: 8px; padding: 10px;"
+                        ]
+                        []
+                    ]
+                ]
             , HH.h3_ [ HH.text "Website Dependencies" ]
             , HH.p_
                 [ HH.text "This diagram shows how the demo website depends on our libraries. The SimulationManager represents temporary FFI code that will eventually move into psd3-simulation."
                 ]
             , HH.div
-                [ HP.id "d3-website-sankey"
-                , HP.style "margin: 20px 0; background: #fafafa; border-radius: 8px; padding: 10px;"
+                [ HP.style "display: flex; gap: 20px; flex-wrap: wrap;" ]
+                [ HH.div
+                    [ HP.style "flex: 1; min-width: 280px;" ]
+                    [ HH.h4_ [ HH.text "D3-style Heuristic" ]
+                    , HH.div
+                        [ HP.id "d3-website-sankey"
+                        , HP.style "background: #fafafa; border-radius: 8px; padding: 10px;"
+                        ]
+                        []
+                    ]
+                , HH.div
+                    [ HP.style "flex: 1; min-width: 280px;" ]
+                    [ HH.h4_ [ HH.text "Markov Chain Ordering" ]
+                    , HH.div
+                        [ HP.id "d3-website-sankey-markov"
+                        , HP.style "background: #f0fff0; border-radius: 8px; padding: 10px;"
+                        ]
+                        []
+                    ]
                 ]
-                []
             ]
 
         , HH.section
@@ -150,13 +185,21 @@ handleAction = case _ of
   Initialize -> do
     -- Small delay to ensure DOM is ready
     liftAff $ delay (Milliseconds 100.0)
-    -- Load and draw Library Dependencies Sankey
+    -- Load and draw Library Dependencies Sankey (both versions)
     libraryResult <- liftAff $ AX.get ResponseFormat.string "/data/d3-library-deps.csv"
     case libraryResult of
       Left _ -> pure unit
-      Right response -> liftEffect $ drawSankey response.body "#d3-library-sankey" 900.0 800.0
-    -- Load and draw Website Dependencies Sankey
+      Right response -> do
+        -- Draw D3-style heuristic version
+        liftEffect $ drawSankey response.body "#d3-library-sankey" 450.0 600.0
+        -- Draw Markov Chain version
+        liftEffect $ drawSankeyMarkovChain response.body "#d3-library-sankey-markov" 450.0 600.0
+    -- Load and draw Website Dependencies Sankey (both versions)
     websiteResult <- liftAff $ AX.get ResponseFormat.string "/data/d3-website-deps.csv"
     case websiteResult of
       Left _ -> pure unit
-      Right response -> liftEffect $ drawSankey response.body "#d3-website-sankey" 600.0 300.0
+      Right response -> do
+        -- Draw D3-style heuristic version
+        liftEffect $ drawSankey response.body "#d3-website-sankey" 300.0 250.0
+        -- Draw Markov Chain version
+        liftEffect $ drawSankeyMarkovChain response.body "#d3-website-sankey-markov" 300.0 250.0

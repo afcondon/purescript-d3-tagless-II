@@ -11,8 +11,9 @@ import Effect.Class (liftEffect)
 import Effect.Console as Console
 import DataViz.Layout.Sankey.CSV (parseSankeyCSV)
 import DataViz.Layout.Sankey.Compute (computeLayout)
+import DataViz.Layout.Sankey.MarkovChainIntegration (computeLayoutWithMarkovChain)
 import DataViz.Layout.Sankey.Path (generateLinkPath)
-import DataViz.Layout.Sankey.Types (SankeyLink, SankeyNode)
+import DataViz.Layout.Sankey.Types (SankeyLayoutResult, SankeyLink, SankeyNode)
 import PSD3v2.Attribute.Types (class_, d, fill, fillOpacity, height, id_, stroke, strokeOpacity, strokeWidth, textAnchor, textContent, viewBox, width, x, y)
 import PSD3v2.Capabilities.Selection (renderTree, select)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, reselectD3v2)
@@ -148,6 +149,119 @@ drawSankey csvData containerSelector w h = runD3v2M do
   _ <- renderTree labelsGroupSel labelsTree
 
   liftEffect $ Console.log "Sankey diagram rendered with TreeAPI"
+
+  pure unit
+
+-- | Draw Sankey diagram using Markov Chain ordering for better crossing reduction
+drawSankeyMarkovChain
+  :: String
+  -> String
+  -> Number
+  -> Number
+  -> Effect Unit
+drawSankeyMarkovChain csvData containerSelector w h = runD3v2M do
+  liftEffect $ Console.log "=== Drawing Sankey with Markov Chain Ordering ==="
+
+  -- Select container
+  container <- select containerSelector :: _ (D3v2Selection_ SEmpty Element Unit)
+
+  -- Parse CSV and compute layout with Markov Chain ordering
+  let linkInputs = parseSankeyCSV csvData
+  liftEffect $ Console.log $ "Parsed " <> show (Array.length linkInputs) <> " links from CSV"
+
+  let layoutResult = computeLayoutWithMarkovChain linkInputs w h
+  liftEffect $ Console.log $ "Markov Chain layout computed: " <> show (Array.length layoutResult.nodes) <> " nodes, "
+    <> show (Array.length layoutResult.links)
+    <> " links"
+
+  -- Wrap nodes and links with indices for unique keys
+  let indexedNodes = Array.mapWithIndex (\i node -> IndexedNode { index: i, node }) layoutResult.nodes
+  let indexedLinks = Array.mapWithIndex (\i link -> IndexedLink { index: i, link }) layoutResult.links
+
+  -- Declarative tree structure (SVG groups only, no data)
+  let
+    sankeyTree :: T.Tree Unit
+    sankeyTree =
+      T.named SVG "svg"
+        [ width w
+        , height h
+        , viewBox ("0 0 " <> show w <> " " <> show h)
+        , id_ "sankey-svg-markov"
+        , class_ "sankey"
+        ]
+        `T.withChildren`
+          [ T.named Group "linksGroup" [ class_ "links" ]
+          , T.named Group "nodesGroup" [ class_ "nodes" ]
+          , T.named Group "labelsGroup" [ class_ "labels" ]
+          ]
+
+  -- Render structure
+  selections <- renderTree container sankeyTree
+
+  -- Reselect groups for data rendering
+  linksGroupSel <- liftEffect $ reselectD3v2 "linksGroup" selections
+  nodesGroupSel <- liftEffect $ reselectD3v2 "nodesGroup" selections
+  labelsGroupSel <- liftEffect $ reselectD3v2 "labelsGroup" selections
+
+  -- Render links (filled paths - ribbons)
+  let
+    linksTree :: T.Tree IndexedLink
+    linksTree =
+      T.joinData "linkElements" "path" indexedLinks $ \(IndexedLink il) ->
+        let
+          link = il.link
+        in
+          T.elem Path
+            [ class_ "sankey-link"
+            , d ((\_ -> generateLinkPath layoutResult.nodes link) :: IndexedLink -> String)
+            , fill ((\_ -> link.color) :: IndexedLink -> String)
+            , fillOpacity 0.5
+            ]
+
+  _ <- renderTree linksGroupSel linksTree
+
+  -- Render nodes (rectangles)
+  let
+    nodesTree :: T.Tree IndexedNode
+    nodesTree =
+      T.joinData "nodeElements" "rect" indexedNodes $ \(IndexedNode in_) ->
+        let
+          node = in_.node
+        in
+          T.elem Rect
+            [ class_ "sankey-node"
+            , x node.x0
+            , y node.y0
+            , width (node.x1 - node.x0)
+            , height (node.y1 - node.y0)
+            , fill node.color
+            , stroke "#000"
+            , strokeWidth 1.0
+            , strokeOpacity 0.3
+            ]
+
+  _ <- renderTree nodesGroupSel nodesTree
+
+  -- Render labels (text positioned by node layer)
+  let
+    labelsTree :: T.Tree IndexedNode
+    labelsTree =
+      T.joinData "labelElements" "text" indexedNodes $ \(IndexedNode in_) ->
+        let
+          node = in_.node
+        in
+          T.elem Text
+            [ class_ "sankey-label"
+            , x (if node.x0 < w / 2.0 then node.x1 + 6.0 else node.x0 - 6.0)
+            , y ((node.y0 + node.y1) / 2.0)
+            , textAnchor ((\_ -> if node.x0 < w / 2.0 then "start" else "end") :: IndexedNode -> String)
+            , fill "#000"
+            , textContent node.name
+            ]
+
+  _ <- renderTree labelsGroupSel labelsTree
+
+  liftEffect $ Console.log "Sankey diagram rendered with Markov Chain ordering"
 
   pure unit
 
