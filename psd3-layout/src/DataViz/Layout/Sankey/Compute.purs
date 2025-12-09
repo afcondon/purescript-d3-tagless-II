@@ -504,18 +504,11 @@ alignNodeToLayer alignment node numLayers =
 
 -- | Step 6b: Initialize vertical (y) positions by stacking nodes in each layer
 -- | Takes pre-calculated adjustedPadding from caller
--- | NEW: Pre-sorts nodes by "reachability signature" to group isolated subgraphs together
+-- | D3 behavior: uses input order (no sorting) unless a custom sort is specified
 initializeNodeBreadths :: Array SankeyNode -> Array SankeyLink -> SankeyConfig -> Number -> Number -> Number -> Array SankeyNode
 initializeNodeBreadths nodes _links _config padding y0 y1 =
   let
-    -- Step 1: Compute reachability - which terminal sinks can each node reach?
-    -- Terminal sinks are nodes with no outgoing links (empty sourceLinks)
-    terminalSinks = Set.fromFoldable $ map _.index $ filter (\n -> Set.isEmpty n.sourceLinks) nodes
-
-    -- Build reachability map for each node using BFS forward through the graph
-    reachability = computeReachability nodes terminalSinks
-
-    -- Group nodes by layer
+    -- Group nodes by layer (preserving input order within each layer)
     maxLayer = foldl (\acc node -> max acc node.layer) 0 nodes
     layers = map
       ( \layerIdx ->
@@ -527,108 +520,15 @@ initializeNodeBreadths nodes _links _config padding y0 y1 =
     totalHeight = y1 - y0
     ky = calculateKy layers totalHeight padding
 
-    -- DEBUG: This will help us verify the new code is running
-    _ = unsafePerformEffect $ log $ "DEBUG initializeNodeBreadths: totalHeight=" <> show totalHeight <> ", ky=" <> show ky <> ", numLayers=" <> show (Array.length layers) <> ", padding=" <> show padding
-    _ = unsafePerformEffect $ log $ "  Terminal sinks: " <> show (Set.size terminalSinks)
-
-    -- NEW: Sort nodes within each layer by reachability signature
-    -- Nodes reaching the same set of sinks are grouped together
-    -- Within a reachability group, sort by total value (larger nodes first)
-    sortedLayers = map (sortLayerByReachability reachability) layers
-
     -- Position nodes in each layer vertically (using adjusted padding from caller)
-    positionedLayers = map (positionLayer ky padding y0) sortedLayers
+    -- D3 uses input order - no sorting here
+    positionedLayers = map (positionLayer ky padding y0) layers
 
     -- Flatten back to single array
     positioned = Array.concat positionedLayers
   in
     positioned
   where
-  -- Compute reachability for all nodes using iterative BFS
-  -- Returns a Map from NodeID to Set of reachable terminal sink NodeIDs
-  computeReachability :: Array SankeyNode -> Set.Set NodeID -> M.Map NodeID (Set.Set NodeID)
-  computeReachability allNodes sinks =
-    let
-      -- Start with terminal sinks - they reach themselves
-      initial = foldl
-        (\m nid -> M.insert nid (Set.singleton nid) m)
-        M.empty
-        (Set.toUnfoldable sinks :: Array NodeID)
-
-      -- Iterate backwards through layers (from sinks to sources)
-      -- Each node's reachability = union of all targets' reachability
-      maxLayer' = foldl (\acc node -> max acc node.layer) 0 allNodes
-
-      -- Process each layer from right to left
-      finalReachability = foldl
-        (\reachMap layerIdx ->
-          let
-            layerNodes = filter (\n -> n.layer == layerIdx) allNodes
-          in
-            foldl (updateNodeReachability allNodes) reachMap layerNodes
-        )
-        initial
-        (Array.reverse $ Array.range 0 maxLayer')
-    in
-      finalReachability
-
-  -- Update reachability for a single node based on its targets
-  updateNodeReachability :: Array SankeyNode -> M.Map NodeID (Set.Set NodeID) -> SankeyNode -> M.Map NodeID (Set.Set NodeID)
-  updateNodeReachability _allNodes reachMap node =
-    let
-      -- Get all target nodes (nodes this one points to)
-      targetIds = Set.toUnfoldable node.sourceLinks :: Array NodeID
-
-      -- Collect reachability from all targets
-      targetReach = foldl
-        (\acc tid ->
-          case M.lookup tid reachMap of
-            Just reach -> Set.union acc reach
-            Nothing -> acc
-        )
-        Set.empty
-        targetIds
-
-      -- If node is a terminal sink, it reaches itself
-      nodeReach = if Set.isEmpty node.sourceLinks
-                  then Set.singleton node.index
-                  else targetReach
-    in
-      M.insert node.index nodeReach reachMap
-
-  -- Sort nodes in a layer by their reachability signature
-  -- Nodes with the same reachability are grouped; within groups, sort by value (larger first)
-  sortLayerByReachability :: M.Map NodeID (Set.Set NodeID) -> Array SankeyNode -> Array SankeyNode
-  sortLayerByReachability reachMap layerNodes =
-    let
-      -- Create a sortable key for each node: (reachability signature string, -value, original index)
-      -- We negate value so larger nodes come first
-      nodeWithKey n =
-        let
-          reach = fromMaybe Set.empty $ M.lookup n.index reachMap
-          -- Convert Set to sorted array of ints for consistent string representation
-          reachSig = show $ Array.sort $ map (\(NodeID i) -> i) $ (Set.toUnfoldable reach :: Array NodeID)
-        in
-          Tuple reachSig n
-
-      nodesWithKeys = map nodeWithKey layerNodes
-
-      -- Sort by reachability signature, then by negative value (so larger nodes first within group)
-      sorted = sortBy
-        (\(Tuple sigA nodeA) (Tuple sigB nodeB) ->
-          case compare sigA sigB of
-            EQ -> compare nodeB.value nodeA.value -- Larger values first
-            other -> other
-        )
-        nodesWithKeys
-
-      _ = unsafePerformEffect $ do
-        log $ "  Layer sorting:"
-        for_ sorted $ \(Tuple sig n) ->
-          log $ "    " <> n.name <> " -> reaches: " <> sig <> " (value=" <> show n.value <> ")"
-    in
-      map (\(Tuple _ n) -> n) sorted
-
   -- Calculate the scale factor (ky) - how many pixels per unit of value
   calculateKy :: Array (Array SankeyNode) -> Number -> Number -> Number
   calculateKy layers height padding =
@@ -639,20 +539,15 @@ initializeNodeBreadths nodes _links _config padding y0 y1 =
           totalValue = foldl (\sum node -> sum + node.value) 0.0 layerNodes
           numNodes = toNumber (length layerNodes)
           availableHeight = height - (numNodes - 1.0) * padding
-          scale = if totalValue > 0.0 then availableHeight / totalValue else 1.0
-          _ = unsafePerformEffect $ log $ "  Layer: " <> show (length layerNodes) <> " nodes, totalValue=" <> show totalValue <> ", availableHeight=" <> show availableHeight <> ", scale=" <> show scale
         in
-          scale
+          if totalValue > 0.0 then availableHeight / totalValue else 1.0
 
-      _ = unsafePerformEffect $ log $ "calculateKy: height=" <> show height <> ", padding=" <> show padding
       scales = map scaleForLayer layers
       nonEmptyScales = filter (\s -> s > 0.0) scales
-      result = case Array.head nonEmptyScales of
+    in
+      case Array.head nonEmptyScales of
         Just firstScale -> foldl min firstScale nonEmptyScales
         Nothing -> 1.0
-      _ = unsafePerformEffect $ log $ "calculateKy result (min of all scales): " <> show result
-    in
-      result
 
   -- Position all nodes in a single layer
   positionLayer :: Number -> Number -> Number -> Array SankeyNode -> Array SankeyNode
@@ -668,18 +563,15 @@ initializeNodeBreadths nodes _links _config padding y0 y1 =
             in
               { nodes: Array.snoc acc.nodes positioned
               , y: currentY + nodeHeight + padding
-              , finalY: acc.finalY -- Pass through
               }
         )
-        { nodes: [], y: yStart, finalY: y1 }
+        { nodes: [], y: yStart }
         layerNodes
 
       -- Phase 2: Add extra spacing adjustment (D3 sankey.js:223-228)
       -- This distributes unused vertical space evenly across nodes
       lastY = stacked.y
       extraSpacing = (y1 - lastY + padding) / (toNumber (length layerNodes) + 1.0)
-
-      _ = unsafePerformEffect $ log $ "  Layer extra spacing: " <> show extraSpacing <> " (lastY=" <> show lastY <> ", y1=" <> show y1 <> ")"
 
       adjusted = mapWithIndex
         ( \i node ->
@@ -712,13 +604,6 @@ relaxation nodes links config padding y0 y1 =
             rtl = relaxByLayer currentNodes links padding false alpha beta
             -- Then left to right (by increasing layer)
             ltr = relaxByLayer rtl links padding true alpha beta
-            -- Log after each iteration (only for first 6 iterations to match D3 debug)
-            _ = unsafePerformEffect $
-              if i < 6 then do
-                log $ "\n=== After iteration " <> show i <> " (alpha=" <> show alpha <> ", beta=" <> show beta <> ") ==="
-                for_ (Array.sortBy (\a b -> compare a.layer b.layer) ltr) $ \n ->
-                  log $ "  " <> n.name <> " | layer=" <> show n.layer <> " | y0=" <> show n.y0 <> " | y1=" <> show n.y1
-              else pure unit
           in
             ltr
       )
@@ -728,13 +613,15 @@ relaxation nodes links config padding y0 y1 =
     relaxed
   where
   -- Relax all nodes layer by layer, with alpha controlling adjustment strength
+  -- D3 skips: layer 0 in left-to-right pass, last layer in right-to-left pass
   relaxByLayer :: Array SankeyNode -> Array SankeyLink -> Number -> Boolean -> Number -> Number -> Array SankeyNode
   relaxByLayer currentNodes allLinks padding ascending alpha beta =
     let
       maxLayer = foldl (\acc node -> max acc node.layer) 0 currentNodes
+      -- D3 skips first layer in left-to-right, last layer in right-to-left
       layerIndices =
-        if ascending then Array.range 0 maxLayer
-        else Array.reverse (Array.range 0 maxLayer)
+        if ascending then Array.range 1 maxLayer  -- Skip layer 0
+        else Array.reverse (Array.range 0 (maxLayer - 1))  -- Skip last layer
 
       -- Process each layer in order
       relaxed = foldl
@@ -796,7 +683,7 @@ relaxation nodes links config padding y0 y1 =
       updateNodes nodesAfterRelax resolved
 
   -- Calculate weighted y-position based on OUTGOING links (targets)
-  -- Used in relaxRightToLeft - D3 uses sourceTop for this pass
+  -- Used in relaxRightToLeft - D3 uses targetTop for this pass
   -- D3 sankey.js:268-289
   calculateWeightedFromTargets :: SankeyNode -> Array SankeyNode -> Array SankeyLink -> Number -> Number
   calculateWeightedFromTargets node allNodes allLinks padding =
@@ -811,18 +698,18 @@ relaxation nodes links config padding y0 y1 =
         )
         outgoingLinks
 
-      -- Calculate weighted sum using sourceTop positioning
+      -- Calculate weighted sum using targetTop positioning
       -- For each outgoing link, calculate ideal position based on where target is
       result = foldl
         ( \acc link ->
             case find (\n -> n.index == link.targetIndex) allNodes of
               Just targetNode ->
                 let
-                  -- D3's sourceTop: where should source be based on target position
+                  -- D3's targetTop: where should source be based on target position
                   layerDist = toNumber (targetNode.layer - node.layer)
                   v = link.value * max 1.0 layerDist
-                  -- sourceTop(source, target) - calculate ideal y for source based on target
-                  idealY = sourceTop node targetNode sortedLinks allNodes allLinks padding
+                  -- targetTop(source, target) - calculate ideal y for source based on target
+                  idealY = targetTop node targetNode sortedLinks allNodes allLinks padding
                 in
                   { sum: acc.sum + idealY * v, totalWeight: acc.totalWeight + v }
               Nothing -> acc
@@ -834,7 +721,7 @@ relaxation nodes links config padding y0 y1 =
       else node.y0
 
   -- Calculate weighted y-position based on INCOMING links (sources)
-  -- Used in relaxLeftToRight - D3 uses targetTop for this pass
+  -- Used in relaxLeftToRight - D3 uses sourceTop for this pass
   -- D3 sankey.js:245-266
   calculateWeightedFromSources :: SankeyNode -> Array SankeyNode -> Array SankeyLink -> Number -> Number
   calculateWeightedFromSources node allNodes allLinks padding =
@@ -849,7 +736,7 @@ relaxation nodes links config padding y0 y1 =
         )
         incomingLinks
 
-      -- Calculate weighted sum using targetTop positioning
+      -- Calculate weighted sum using sourceTop positioning
       -- For each incoming link, calculate ideal position based on where source is
       result = foldl
         ( \acc link ->
@@ -858,8 +745,8 @@ relaxation nodes links config padding y0 y1 =
                 let
                   layerDist = toNumber (node.layer - sourceNode.layer)
                   v = link.value * max 1.0 layerDist
-                  -- targetTop(source, target) - calculate ideal y for target based on source
-                  idealY = targetTop sourceNode node sortedLinks allNodes allLinks padding
+                  -- sourceTop(source, target) - calculate ideal y for target based on source
+                  idealY = sourceTop sourceNode node sortedLinks allNodes allLinks padding
                 in
                   { sum: acc.sum + idealY * v, totalWeight: acc.totalWeight + v }
               Nothing -> acc
@@ -870,59 +757,11 @@ relaxation nodes links config padding y0 y1 =
       if result.totalWeight > 0.0 then result.sum / result.totalWeight
       else node.y0
 
-  -- D3's targetTop: Returns the target.y0 that would produce an ideal link from source to target
-  -- Accounts for link stacking order at both source and target nodes
+  -- D3's targetTop: Calculate ideal source.y0 based on target position
+  -- Used in relaxRightToLeft: sources are positioned based on their targets
+  -- D3 formula: starts from target.y0, adjusts for link stacking at both ends
   targetTop :: SankeyNode -> SankeyNode -> Array SankeyLink -> Array SankeyNode -> Array SankeyLink -> Number -> Number
   targetTop source target _sortedSourceLinks allNodes allLinks py =
-    let
-      -- Get all outgoing links from source, sorted by target y (with tie-breaker by link index)
-      sourceOutgoing = Array.sortBy
-        ( \a b ->
-            case find (\n -> n.index == a.targetIndex) allNodes, find (\n -> n.index == b.targetIndex) allNodes of
-              Just na, Just nb -> compare na.y0 nb.y0 <> compare a.index b.index
-              _, _ -> compare a.index b.index
-        )
-        (filter (\l -> l.sourceIndex == source.index) allLinks)
-
-      -- Get all incoming links to target, sorted by source y (with tie-breaker by link index)
-      targetIncoming = Array.sortBy
-        ( \a b ->
-            case find (\n -> n.index == a.sourceIndex) allNodes, find (\n -> n.index == b.sourceIndex) allNodes of
-              Just na, Just nb -> compare na.y0 nb.y0 <> compare a.index b.index
-              _, _ -> compare a.index b.index
-        )
-        (filter (\l -> l.targetIndex == target.index) allLinks)
-
-      numSourceLinks = toNumber (Array.length sourceOutgoing)
-
-      -- Start position: source.y0 offset for centering links
-      startY = source.y0 - (numSourceLinks - 1.0) * py / 2.0
-
-      -- Sum widths of links before this one at source
-      yAtSource = foldl
-        ( \acc link ->
-            if acc.found then acc -- Already found target, skip remaining
-            else if link.targetIndex == target.index then acc { found = true } -- Found it, mark and stop
-            else { y: acc.y + link.width + py, found: false } -- Not found yet, keep adding
-        )
-        { y: startY, found: false }
-        sourceOutgoing
-
-      -- Subtract widths of links before this one at target
-      yFinal = foldl
-        ( \acc link ->
-            if acc.found then acc -- Already found source, skip remaining
-            else if link.sourceIndex == source.index then acc { found = true } -- Found it, mark and stop
-            else { y: acc.y - link.width, found: false } -- Not found yet, keep subtracting
-        )
-        { y: yAtSource.y, found: false }
-        targetIncoming
-    in
-      yFinal.y
-
-  -- D3's sourceTop: Returns the source.y0 that would produce an ideal link from source to target
-  sourceTop :: SankeyNode -> SankeyNode -> Array SankeyLink -> Array SankeyNode -> Array SankeyLink -> Number -> Number
-  sourceTop source target _sortedTargetLinks allNodes allLinks py =
     let
       -- Get all incoming links to target, sorted by source y (with tie-breaker by link index)
       targetIncoming = Array.sortBy
@@ -944,28 +783,79 @@ relaxation nodes links config padding y0 y1 =
 
       numTargetLinks = toNumber (Array.length targetIncoming)
 
-      -- Start position: target.y0 offset for centering links
+      -- Start position: target.y0 offset for centering links at target
       startY = target.y0 - (numTargetLinks - 1.0) * py / 2.0
 
-      -- Sum widths of links before this one at target
+      -- Sum widths of links before this source-target link at target
       yAtTarget = foldl
         ( \acc link ->
-            if acc.found then acc -- Already found source, skip remaining
-            else if link.sourceIndex == source.index then acc { found = true } -- Found it, mark and stop
-            else { y: acc.y + link.width + py, found: false } -- Not found yet, keep adding
+            if acc.found then acc
+            else if link.sourceIndex == source.index then acc { found = true }
+            else { y: acc.y + link.width + py, found: false }
         )
         { y: startY, found: false }
         targetIncoming
 
-      -- Subtract widths of links before this one at source
+      -- Subtract widths of links before this source-target link at source
       yFinal = foldl
         ( \acc link ->
-            if acc.found then acc -- Already found target, skip remaining
-            else if link.targetIndex == target.index then acc { found = true } -- Found it, mark and stop
-            else { y: acc.y - link.width, found: false } -- Not found yet, keep subtracting
+            if acc.found then acc
+            else if link.targetIndex == target.index then acc { found = true }
+            else { y: acc.y - link.width, found: false }
         )
         { y: yAtTarget.y, found: false }
         sourceOutgoing
+    in
+      yFinal.y
+
+  -- D3's sourceTop: Calculate ideal target.y0 based on source position
+  -- Used in relaxLeftToRight: targets are positioned based on their sources
+  -- D3 formula: starts from source.y0, adjusts for link stacking at both ends
+  sourceTop :: SankeyNode -> SankeyNode -> Array SankeyLink -> Array SankeyNode -> Array SankeyLink -> Number -> Number
+  sourceTop source target _sortedTargetLinks allNodes allLinks py =
+    let
+      -- Get all outgoing links from source, sorted by target y (with tie-breaker by link index)
+      sourceOutgoing = Array.sortBy
+        ( \a b ->
+            case find (\n -> n.index == a.targetIndex) allNodes, find (\n -> n.index == b.targetIndex) allNodes of
+              Just na, Just nb -> compare na.y0 nb.y0 <> compare a.index b.index
+              _, _ -> compare a.index b.index
+        )
+        (filter (\l -> l.sourceIndex == source.index) allLinks)
+
+      -- Get all incoming links to target, sorted by source y (with tie-breaker by link index)
+      targetIncoming = Array.sortBy
+        ( \a b ->
+            case find (\n -> n.index == a.sourceIndex) allNodes, find (\n -> n.index == b.sourceIndex) allNodes of
+              Just na, Just nb -> compare na.y0 nb.y0 <> compare a.index b.index
+              _, _ -> compare a.index b.index
+        )
+        (filter (\l -> l.targetIndex == target.index) allLinks)
+
+      numSourceLinks = toNumber (Array.length sourceOutgoing)
+
+      -- Start position: source.y0 offset for centering links at source
+      startY = source.y0 - (numSourceLinks - 1.0) * py / 2.0
+
+      -- Sum widths of links before this source-target link at source
+      yAtSource = foldl
+        ( \acc link ->
+            if acc.found then acc
+            else if link.targetIndex == target.index then acc { found = true }
+            else { y: acc.y + link.width + py, found: false }
+        )
+        { y: startY, found: false }
+        sourceOutgoing
+
+      -- Subtract widths of links before this source-target link at target
+      yFinal = foldl
+        ( \acc link ->
+            if acc.found then acc
+            else if link.sourceIndex == source.index then acc { found = true }
+            else { y: acc.y - link.width, found: false }
+        )
+        { y: yAtSource.y, found: false }
+        targetIncoming
     in
       yFinal.y
 

@@ -47,8 +47,8 @@ type State =
   , selectedIteration :: Int
   , maxIterations :: Int
   , d3Steps :: Array D3SankeyStep
-  , psSteps :: Array SankeyStep  -- Our PureScript steps (from Types)
-  , markovSteps :: Array SankeyStep  -- Markov chain steps
+  , psSteps :: Array SankeyStep -- Our PureScript steps (from Types)
+  , markovSteps :: Array SankeyStep -- Markov chain steps
   , svgWidth :: Number
   , svgHeight :: Number
   }
@@ -109,6 +109,7 @@ render state =
                 ]
                 [ HH.option [ HP.value "/data/d3-library-deps.csv" ] [ HH.text "D3 Library Dependencies" ]
                 , HH.option [ HP.value "/data/d3-website-deps.csv" ] [ HH.text "Website Dependencies" ]
+                , HH.option [ HP.value "/data/energy.csv" ] [ HH.text "Energy flow" ]
                 ]
             ]
 
@@ -213,14 +214,16 @@ renderD3SankeySVG nodes links w h accentColor =
 
 renderD3Link :: forall w i. Array D3Node -> D3Link -> HH.HTML w i
 renderD3Link nodes link =
-  let pathD = sankeyLinkPath_ link nodes
-  in SE.path
-    [ HP.attr (AttrName "d") pathD
-    , HP.attr (AttrName "fill") "none"
-    , HP.attr (AttrName "stroke") "#666"
-    , HP.attr (AttrName "stroke-width") (show link.width)
-    , HP.attr (AttrName "stroke-opacity") "0.4"
-    ]
+  let
+    pathD = sankeyLinkPath_ link nodes
+  in
+    SE.path
+      [ HP.attr (AttrName "d") pathD
+      , HP.attr (AttrName "fill") "none"
+      , HP.attr (AttrName "stroke") "#666"
+      , HP.attr (AttrName "stroke-width") (show link.width)
+      , HP.attr (AttrName "stroke-opacity") "0.4"
+      ]
 
 renderD3Node :: forall w i. String -> D3Node -> HH.HTML w i
 renderD3Node color node =
@@ -239,13 +242,14 @@ renderD3Label svgWidth node =
     isLeftSide = node.x0 < svgWidth / 2.0
     labelX = if isLeftSide then node.x1 + 4.0 else node.x0 - 4.0
     anchor = if isLeftSide then "start" else "end"
-  in SE.text
-    [ SA.x labelX
-    , SA.y ((node.y0 + node.y1) / 2.0 + 3.0)
-    , HP.attr (AttrName "fill") "#ccc"
-    , HP.style $ "font-size: 9px; text-anchor: " <> anchor <> ";"
-    ]
-    [ HH.text node.name ]
+  in
+    SE.text
+      [ SA.x labelX
+      , SA.y ((node.y0 + node.y1) / 2.0 + 3.0)
+      , HP.attr (AttrName "fill") "#ccc"
+      , HP.style $ "font-size: 9px; text-anchor: " <> anchor <> ";"
+      ]
+      [ HH.text node.name ]
 
 -- | Render PureScript Sankey as SVG
 renderPSSankeySVG :: forall w i. Array SankeyNode -> Array SankeyLink -> Number -> Number -> String -> HH.HTML w i
@@ -270,23 +274,34 @@ renderPSLink nodes link =
   let
     maybeSource = Array.find (\n -> n.index == link.sourceIndex) nodes
     maybeTarget = Array.find (\n -> n.index == link.targetIndex) nodes
-  in case maybeSource, maybeTarget of
-    Just source, Just target ->
-      let
-        x0 = source.x1
-        x1 = target.x0
-        pathD = "M" <> show x0 <> "," <> show link.y0
-              <> "C" <> show ((x0 + x1) / 2.0) <> "," <> show link.y0
-              <> " " <> show ((x0 + x1) / 2.0) <> "," <> show link.y1
-              <> " " <> show x1 <> "," <> show link.y1
-      in SE.path
-        [ HP.attr (AttrName "d") pathD
-        , HP.attr (AttrName "fill") "none"
-        , HP.attr (AttrName "stroke") "#666"
-        , HP.attr (AttrName "stroke-width") (show link.width)
-        , HP.attr (AttrName "stroke-opacity") "0.4"
-        ]
-    _, _ -> SE.g [] []
+  in
+    case maybeSource, maybeTarget of
+      Just source, Just target ->
+        let
+          x0 = source.x1
+          x1 = target.x0
+          pathD = "M" <> show x0 <> "," <> show link.y0
+            <> "C"
+            <> show ((x0 + x1) / 2.0)
+            <> ","
+            <> show link.y0
+            <> " "
+            <> show ((x0 + x1) / 2.0)
+            <> ","
+            <> show link.y1
+            <> " "
+            <> show x1
+            <> ","
+            <> show link.y1
+        in
+          SE.path
+            [ HP.attr (AttrName "d") pathD
+            , HP.attr (AttrName "fill") "none"
+            , HP.attr (AttrName "stroke") "#666"
+            , HP.attr (AttrName "stroke-width") (show link.width)
+            , HP.attr (AttrName "stroke-opacity") "0.4"
+            ]
+      _, _ -> SE.g [] []
 
 renderPSNode :: forall w i. String -> SankeyNode -> HH.HTML w i
 renderPSNode color node =
@@ -305,13 +320,14 @@ renderPSLabel svgWidth node =
     isLeftSide = node.x0 < svgWidth / 2.0
     labelX = if isLeftSide then node.x1 + 4.0 else node.x0 - 4.0
     anchor = if isLeftSide then "start" else "end"
-  in SE.text
-    [ SA.x labelX
-    , SA.y ((node.y0 + node.y1) / 2.0 + 3.0)
-    , HP.attr (AttrName "fill") "#ccc"
-    , HP.style $ "font-size: 9px; text-anchor: " <> anchor <> ";"
-    ]
-    [ HH.text node.name ]
+  in
+    SE.text
+      [ SA.x labelX
+      , SA.y ((node.y0 + node.y1) / 2.0 + 3.0)
+      , HP.attr (AttrName "fill") "#ccc"
+      , HP.style $ "font-size: 9px; text-anchor: " <> anchor <> ";"
+      ]
+      [ HH.text node.name ]
 
 -- | Node statistics
 renderNodeStats :: forall w i. Array D3Node -> HH.HTML w i
@@ -319,18 +335,20 @@ renderNodeStats nodes =
   let
     maxLayer = foldl (\acc n -> max acc n.layer) 0 nodes
     layerCounts = map (\l -> length (filter (\n -> n.layer == l) nodes)) (0 .. maxLayer)
-  in HH.div
-    [ HP.style "margin-top: 10px; font-size: 11px; color: #888;" ]
-    [ HH.text $ show (length nodes) <> " nodes, layers: " <> show layerCounts ]
+  in
+    HH.div
+      [ HP.style "margin-top: 10px; font-size: 11px; color: #888;" ]
+      [ HH.text $ show (length nodes) <> " nodes, layers: " <> show layerCounts ]
 
 renderPSNodeStats :: forall w i. Array SankeyNode -> HH.HTML w i
 renderPSNodeStats nodes =
   let
     maxLayer = foldl (\acc n -> max acc n.layer) 0 nodes
     layerCounts = map (\l -> length (filter (\n -> n.layer == l) nodes)) (0 .. maxLayer)
-  in HH.div
-    [ HP.style "margin-top: 10px; font-size: 11px; color: #888;" ]
-    [ HH.text $ show (length nodes) <> " nodes, layers: " <> show layerCounts ]
+  in
+    HH.div
+      [ HP.style "margin-top: 10px; font-size: 11px; color: #888;" ]
+      [ HH.text $ show (length nodes) <> " nodes, layers: " <> show layerCounts ]
 
 -- | Summary comparison
 renderSummary :: forall w i. State -> HH.HTML w i
@@ -403,13 +421,16 @@ handleAction = case _ of
 
 -- | Compute all algorithm steps
 computeAllSteps
-  :: String -> Number -> Number -> Int
+  :: String
+  -> Number
+  -> Number
+  -> Int
   -> { d3Steps :: Array D3SankeyStep, psSteps :: Array SankeyStep, markovSteps :: Array SankeyStep }
 computeAllSteps csvData width height maxIterations =
   let
     -- Parse CSV to get unique nodes and links
     linkInputs = parseSankeyCSV csvData
-    nodeNames = nub $ Array.concat $ map (\l -> [l.s, l.t]) linkInputs
+    nodeNames = nub $ Array.concat $ map (\l -> [ l.s, l.t ]) linkInputs
 
     -- Convert to D3 format
     d3Nodes :: Array D3NodeInput
@@ -428,7 +449,8 @@ computeAllSteps csvData width height maxIterations =
     -- Compute Markov Chain steps using the spectral ordering algorithm
     markovSteps = computeMarkovLayoutWithSteps linkInputs width height maxIterations
 
-  in { d3Steps, psSteps, markovSteps }
+  in
+    { d3Steps, psSteps, markovSteps }
 
 -- Helper
 parseInt :: String -> Maybe Int

@@ -140,6 +140,8 @@ computeMarkovChainOrdering config nodes links =
 
 -- | Apply a computed ordering to reorder nodes within each layer
 -- | This updates the y0, y1 positions based on the new ordering
+-- | IMPORTANT: All nodes must be preserved - any nodes not in the ordering
+-- | are appended at the end of their layer
 applyOrderingToNodes
   :: OrderingResult
   -> Array SankeyNode
@@ -152,25 +154,45 @@ applyOrderingToNodes orderingResult nodes y0 y1 padding =
     -- Calculate ky (scale factor) based on most constrained layer
     ky = calculateKy nodes y0 y1 padding
 
-    -- Process each layer with its ordering
-    updatedNodesByLayer = mapWithIndex (\layerIdx ordering ->
+    -- Find the maximum layer
+    maxLayer = foldl (\acc n -> max acc n.layer) 0 nodes
+
+    -- Process each layer (not just those with orderings)
+    updatedNodesByLayer = map (\layerIdx ->
       let
-        -- Get nodes in this layer
+        -- Get ALL nodes in this layer
         layerNodes = filter (\n -> n.layer == layerIdx) nodes
+
+        -- Get the ordering for this layer (if any)
+        maybeOrdering = orderingResult.orderings !! layerIdx
 
         -- Get the NodeIDs in the new order
         localToNode = fromMaybe [] (orderingResult.localToNodeIndex !! layerIdx)
-        orderedNodeIds = Array.mapMaybe (\localIdx -> localToNode !! localIdx) ordering
 
         -- Reorder the layer nodes according to the ordering
-        orderedNodes = Array.mapMaybe (\nodeId ->
-          Array.find (\n -> n.index == nodeId) layerNodes
-        ) orderedNodeIds
+        -- Nodes not in the ordering are appended at the end
+        orderedNodes = case maybeOrdering of
+          Just ordering ->
+            let
+              -- Get nodes that ARE in the ordering
+              orderedNodeIds = Array.mapMaybe (\localIdx -> localToNode !! localIdx) ordering
+              nodesInOrder = Array.mapMaybe (\nodeId ->
+                Array.find (\n -> n.index == nodeId) layerNodes
+              ) orderedNodeIds
+
+              -- Get nodes that are NOT in the ordering (missing from orderedNodeIds)
+              nodesInOrderSet = map _.index nodesInOrder
+              nodesNotInOrder = filter (\n -> not (Array.elem n.index nodesInOrderSet)) layerNodes
+            in
+              nodesInOrder <> nodesNotInOrder
+          Nothing ->
+            -- No ordering for this layer, keep original order
+            layerNodes
 
         -- Stack nodes vertically with justification
         positioned = positionNodesInLayer orderedNodes ky padding y0 y1
       in positioned
-    ) orderingResult.orderings
+    ) (0 .. maxLayer)
 
   in Array.concat updatedNodesByLayer
 
