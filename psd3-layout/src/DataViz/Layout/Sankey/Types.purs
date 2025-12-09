@@ -17,6 +17,7 @@ module DataViz.Layout.Sankey.Types
   , initialiseSankeyLink
   , SankeyLayoutResult
   , SankeyConfig
+  , SankeyStep
   , Alignment(..)
   , LinkColorMode(..)
   , defaultSankeyConfig
@@ -174,6 +175,14 @@ defaultSankeyConfig width height =
 withConfig :: forall r. { | r } -> SankeyConfig -> SankeyConfig
 withConfig overrides base = base -- TODO: implement record merge
 
+-- | A captured step for debugging/visualization
+type SankeyStep =
+  { iteration :: Int
+  , label :: String
+  , nodes :: Array SankeyNode
+  , links :: Array SankeyLink
+  }
+
 -- | Graph model for State monad - contains all intermediate computation state
 -- | SankeyGraphModel is created by folding rows of CSV
 type SankeyGraphModel =
@@ -187,6 +196,7 @@ type SankeyGraphModel =
   , sankeyNodes :: Array SankeyNode
   , sankeyLinks :: Array SankeyLink
   , config :: SankeyConfig
+  , capturedSteps :: Array SankeyStep -- For debugging: intermediate states
   }
 
 -- Initial empty graph model
@@ -202,6 +212,7 @@ initialSankeyGraphModel config =
   , sankeyNodes: []
   , sankeyLinks: []
   , config
+  , capturedSteps: []
   }
 
 initialiseSankeyNode :: SankeyGraphModel -> NodeID -> Maybe SankeyNode

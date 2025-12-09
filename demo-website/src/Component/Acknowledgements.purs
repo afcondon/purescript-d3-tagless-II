@@ -83,9 +83,42 @@ render _ =
                         []
                     ]
                 ]
-            , HH.h3_ [ HH.text "Website Dependencies" ]
-            , HH.p_
-                [ HH.text "This diagram shows how the demo website depends on our libraries. The SimulationManager represents temporary FFI code that will eventually move into psd3-simulation."
+            , HH.div
+                [ HP.style "display: flex; gap: 20px; flex-wrap: wrap;" ]
+                [ HH.div
+                    [ HP.style "flex: 1; min-width: 400px;" ]
+                    [ HH.h4_ [ HH.text "D3-style Heuristic" ]
+                    , HH.div
+                        [ HP.id "d3-energy-sankey"
+                        , HP.style "background: #fafafa; border-radius: 8px; padding: 10px;"
+                        ]
+                        []
+                    ]
+                , HH.div
+                    [ HP.style "flex: 1; min-width: 400px;" ]
+                    [ HH.h4_ [ HH.text "Markov Chain Ordering" ]
+                    , HH.div
+                        [ HP.id "d3-energy-sankey-markov"
+                        , HP.style "background: #f0fff0; border-radius: 8px; padding: 10px;"
+                        ]
+                        []
+                    ]
+                ]
+            ]
+        , HH.h3_ [ HH.text "Website Dependencies" ]
+        , HH.p_
+            [ HH.text "This diagram shows how the demo website depends on our libraries. The SimulationManager represents temporary FFI code that will eventually move into psd3-simulation."
+            ]
+        , HH.div
+            [ HP.style "display: flex; gap: 20px; flex-wrap: wrap;" ]
+            [ HH.div
+                [ HP.style "flex: 1; min-width: 280px;" ]
+                [ HH.h4_ [ HH.text "D3-style Heuristic" ]
+                , HH.div
+                    [ HP.id "d3-website-sankey"
+                    , HP.style "background: #fafafa; border-radius: 8px; padding: 10px;"
+                    ]
+                    []
                 ]
             , HH.div
                 [ HP.style "display: flex; gap: 20px; flex-wrap: wrap;" ]
@@ -191,15 +224,24 @@ handleAction = case _ of
       Left _ -> pure unit
       Right response -> do
         -- Draw D3-style heuristic version
-        liftEffect $ drawSankey response.body "#d3-library-sankey" 450.0 600.0
+        liftEffect $ drawSankey response.body "#d3-library-sankey" 740.0 500.0
         -- Draw Markov Chain version
-        liftEffect $ drawSankeyMarkovChain response.body "#d3-library-sankey-markov" 450.0 600.0
+        liftEffect $ drawSankeyMarkovChain response.body "#d3-library-sankey-markov" 740.0 500.0
     -- Load and draw Website Dependencies Sankey (both versions)
     websiteResult <- liftAff $ AX.get ResponseFormat.string "/data/d3-website-deps.csv"
     case websiteResult of
       Left _ -> pure unit
       Right response -> do
         -- Draw D3-style heuristic version
-        liftEffect $ drawSankey response.body "#d3-website-sankey" 300.0 250.0
+        liftEffect $ drawSankey response.body "#d3-website-sankey" 700.0 220.0
         -- Draw Markov Chain version
-        liftEffect $ drawSankeyMarkovChain response.body "#d3-website-sankey-markov" 300.0 250.0
+        liftEffect $ drawSankeyMarkovChain response.body "#d3-website-sankey-markov" 700.0 220.0
+    energyResult <- liftAff $ AX.get ResponseFormat.string "/data/energy.csv"
+    case energyResult of
+      Left _ -> pure unit
+      Right response -> do
+        -- Draw D3-style heuristic version
+        liftEffect $ drawSankey response.body "#d3-energy-sankey" 740.0 500.0
+        -- Draw Markov Chain version
+        liftEffect $ drawSankeyMarkovChain response.body "#d3-energy-sankey-markov" 740.0 500.0
+-- Load and draw Website Dependencies Sankey (both versions)

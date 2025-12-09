@@ -167,8 +167,8 @@ applyOrderingToNodes orderingResult nodes y0 y1 padding =
           Array.find (\n -> n.index == nodeId) layerNodes
         ) orderedNodeIds
 
-        -- Stack nodes vertically with the new ordering
-        positioned = positionNodesInLayer orderedNodes ky padding y0
+        -- Stack nodes vertically with justification
+        positioned = positionNodesInLayer orderedNodes ky padding y0 y1
       in positioned
     ) orderingResult.orderings
 
@@ -196,16 +196,18 @@ calculateKy nodes y0 y1 padding =
       Just firstScale -> foldl min firstScale nonEmptyScales
       Nothing -> 1.0
 
--- | Position nodes in a single layer vertically
+-- | Position nodes in a single layer vertically with justification
 positionNodesInLayer
   :: Array SankeyNode
   -> Number              -- ^ ky (scale factor)
   -> Number              -- ^ padding
-  -> Number              -- ^ starting y position
+  -> Number              -- ^ starting y position (y0)
+  -> Number              -- ^ ending y position (y1)
   -> Array SankeyNode
-positionNodesInLayer layerNodes ky padding startY =
+positionNodesInLayer layerNodes ky padding startY endY =
   let
-    result = foldl
+    -- Phase 1: Stack nodes from the top
+    stacked = foldl
       (\acc node ->
         let
           nodeHeight = node.value * ky
@@ -217,7 +219,23 @@ positionNodesInLayer layerNodes ky padding startY =
       )
       { y: startY, nodes: [] }
       layerNodes
-  in result.nodes
+
+    -- Phase 2: Distribute extra space evenly (D3-style justification)
+    lastY = stacked.y
+    numNodes = length layerNodes
+    extraSpacing = if numNodes > 0
+      then (endY - lastY + padding) / (toNumber numNodes + 1.0)
+      else 0.0
+
+    justified = mapWithIndex
+      (\i node ->
+        let
+          shift = extraSpacing * (toNumber (i + 1))
+        in
+          node { y0 = node.y0 + shift, y1 = node.y1 + shift }
+      )
+      stacked.nodes
+  in justified
 
 -- | Run multiple trials and return the best ordering
 -- | This implements the "best-in-N" approach from the paper

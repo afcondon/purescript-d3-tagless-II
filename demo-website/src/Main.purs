@@ -68,6 +68,7 @@ import Component.MermaidTreeDemo as MermaidTreeDemo
 import Component.SceneJoinDemo as SceneJoinDemo
 import Component.SimpleForceGraph as SimpleForceGraph
 import Component.CodeExplorerV3 as CodeExplorerV3
+import Component.SankeyDebug as SankeyDebug
 
 -- Routing
 import PSD3.RoutingDSL (routing, routeToPath)
@@ -134,6 +135,7 @@ type Slots =
   , forceConfigV2Test :: forall q. H.Slot q Void Unit
   , simpleForceGraph :: forall q. H.Slot q Void Unit
   , codeExplorerV3 :: forall q. H.Slot q Void Unit
+  , sankeyDebug :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
 
@@ -183,6 +185,7 @@ _forceConfigPOC = Proxy :: Proxy "forceConfigPOC"
 _forceConfigV2Test = Proxy :: Proxy "forceConfigV2Test"
 _simpleForceGraph = Proxy :: Proxy "simpleForceGraph"
 _codeExplorerV3 = Proxy :: Proxy "codeExplorerV3"
+_sankeyDebug = Proxy :: Proxy "sankeyDebug"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
 -- | Main application component
@@ -397,6 +400,9 @@ renderPage route = case spy "Route is" route of
 
   CodeExplorerV3 ->
     HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
+
+  SankeyDebug ->
+    HH.slot_ _sankeyDebug unit SankeyDebug.component unit
 
   Acknowledgements ->
     HH.slot_ _acknowledgements unit Acknowledgements.component unit

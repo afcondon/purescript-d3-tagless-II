@@ -308,24 +308,37 @@ markovChainOrdering config layers edgesByLayer =
   toEdgeRecord e = { from: e.fromLocal, to: e.toLocal, weight: e.weight }
 
 -- | Propagate position values from layer 1 through all layers
+-- | Now also propagates BACKWARD to layer 0 using the first right transition matrix
 propagatePositions :: Array Number -> Array (M.Matrix Number) -> Array (Array Number)
 propagatePositions layer1Pos leftMats =
   let
     -- Start with layer 1 positions
-    initial = { positions: [layer1Pos], currentPos: V.fromArray layer1Pos }
+    layer1Vec = V.fromArray layer1Pos
 
-    -- Apply each left transition matrix to get next layer's positions
-    result = foldl
+    -- Propagate FORWARD: layer 1 -> 2 -> 3 -> ... using left matrices
+    forwardResult = foldl
       (\acc leftMat ->
         let nextPos = M.mult' leftMat acc.currentPos
         in { positions: Array.snoc acc.positions (V.toArray nextPos)
            , currentPos: nextPos
            }
       )
-      initial
+      { positions: [layer1Pos], currentPos: layer1Vec }
       leftMats
 
-  in result.positions
+    -- For layer 0, we need to propagate backward
+    -- The simplest approach: use uniform distribution for layer 0 based on
+    -- the number of nodes (which equals length of first left matrix's columns)
+    layer0Size = case Array.head leftMats of
+      Just firstL -> M.ncols firstL  -- Layer 0 has ncols nodes (L goes from layer 0 to 1)
+      Nothing -> 0
+
+    -- Generate positions for layer 0: evenly spaced
+    layer0Positions = if layer0Size > 0
+      then map (\i -> toNumber (layer0Size - i) / toNumber layer0Size) (0 .. (layer0Size - 1))
+      else []
+
+  in [layer0Positions] <> forwardResult.positions
 
 -- | Convert position values to an ordering (indices sorted by position)
 positionsToOrdering :: Array Number -> LayerOrdering

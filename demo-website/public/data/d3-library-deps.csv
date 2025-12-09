@@ -20,6 +20,7 @@ d3-path,d3-shape,2
 d3-quadtree,d3-force,3
 d3-selection,d3-drag,2
 d3-selection,d3-zoom,2
+d3-selection,d3-force,2
 d3-shape,d3-sankey,3
 d3-time,d3-scale,3
 d3-time,d3-time-format,2
@@ -63,5 +64,6 @@ PSD3.Hierarchy,psd3-selection,15
 PSD3.Layout.Sankey,psd3-selection,12
 Internal.Scales,psd3-selection,8
 Internal.Generators,psd3-selection,8
+psd3-selection, psd3-simulation, 100
 ForceEngine.Core,psd3-simulation,23
 Not used,Excluded,144
