@@ -590,27 +590,28 @@ relaxation :: Array SankeyNode -> Array SankeyLink -> SankeyConfig -> Number -> 
 relaxation nodes links config padding y0 y1 =
   let
     iterations = config.iterations
-
-    -- Run iterations with decreasing alpha
-    -- D3 uses exponential decay: alpha = Math.pow(0.99, i)
-    relaxed = foldl
-      ( \currentNodes i ->
-          let
-            -- Exponential decay matching D3 exactly
-            alpha = pow 0.99 (toNumber i)
-            -- Beta parameter for collision resolution (increases over iterations)
-            beta = max (1.0 - alpha) (toNumber (i + 1) / toNumber iterations)
-            -- Relax right to left (by decreasing layer)
-            rtl = relaxByLayer currentNodes links padding false alpha beta
-            -- Then left to right (by increasing layer)
-            ltr = relaxByLayer rtl links padding true alpha beta
-          in
-            ltr
-      )
-      nodes
-      (Array.range 0 (iterations - 1))
   in
-    relaxed
+    -- Guard: if iterations <= 0, skip relaxation entirely (prevents NaN from 0/0)
+    if iterations <= 0 then nodes
+    else
+      -- Run iterations with decreasing alpha
+      -- D3 uses exponential decay: alpha = Math.pow(0.99, i)
+      foldl
+        ( \currentNodes i ->
+            let
+              -- Exponential decay matching D3 exactly
+              alpha = pow 0.99 (toNumber i)
+              -- Beta parameter for collision resolution (increases over iterations)
+              beta = max (1.0 - alpha) (toNumber (i + 1) / toNumber iterations)
+              -- Relax right to left (by decreasing layer)
+              rtl = relaxByLayer currentNodes links padding false alpha beta
+              -- Then left to right (by increasing layer)
+              ltr = relaxByLayer rtl links padding true alpha beta
+            in
+              ltr
+        )
+        nodes
+        (Array.range 0 (iterations - 1))
   where
   -- Relax all nodes layer by layer, with alpha controlling adjustment strength
   -- D3 skips: layer 0 in left-to-right pass, last layer in right-to-left pass
@@ -639,8 +640,10 @@ relaxation nodes links config padding y0 y1 =
   relaxLayer :: Array SankeyNode -> Array SankeyLink -> Int -> Number -> Boolean -> Number -> Number -> Array SankeyNode
   relaxLayer currentNodes allLinks layerIdx padding ascending alpha beta =
     let
-      -- Get node indices in this layer
-      layerNodeIndices = map _.index $ filter (\n -> n.layer == layerIdx) currentNodes
+      -- Get node indices in this layer, SORTED BY Y0 (D3 processes in y0 order from previous iteration)
+      layerNodes = filter (\n -> n.layer == layerIdx) currentNodes
+      sortedLayerNodes = Array.sortBy (\a b -> compare a.y0 b.y0) layerNodes
+      layerNodeIndices = map _.index sortedLayerNodes
 
       -- Process each node one at a time, updating the array immediately (D3's approach)
       nodesAfterRelax = foldl

@@ -39,6 +39,7 @@ import Data.Number (sqrt)
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect.Unsafe (unsafePerformEffect)
 import Effect.Random (random)
+import Effect.Console (log)
 import LinearAlgebra.Matrix as M
 import LinearAlgebra.Vector as V
 
@@ -226,6 +227,17 @@ buildCompositeTransitionMatrix
   -> M.Matrix Number
 buildCompositeTransitionMatrix leftMats rightMats =
   let
+    -- Debug: log individual matrix dimensions
+    _ = unsafePerformEffect $ do
+      log $ "buildComposite: leftMats count = " <> show (length leftMats)
+      log $ "buildComposite: rightMats count = " <> show (length rightMats)
+      case Array.head leftMats of
+        Just m -> log $ "buildComposite: leftMats[0] dims = " <> show (M.nrows m) <> "x" <> show (M.ncols m)
+        Nothing -> log "buildComposite: leftMats is empty"
+      case Array.head rightMats of
+        Just m -> log $ "buildComposite: rightMats[0] dims = " <> show (M.nrows m) <> "x" <> show (M.ncols m)
+        Nothing -> log "buildComposite: rightMats is empty"
+
     -- L = L̃^(n-1) * L̃^(n-2) * ... * L̃^(1)
     -- R = R̃^(1) * R̃^(2) * ... * R̃^(n-1)
     -- T = R * L
@@ -241,6 +253,10 @@ buildCompositeTransitionMatrix leftMats rightMats =
       Nothing -> M.eye 1  -- Shouldn't happen
       Just { head: firstR, tail } ->
         foldl M.mult firstR tail
+
+    _ = unsafePerformEffect $ do
+      log $ "buildComposite: leftProduct dims = " <> show (M.nrows leftProduct) <> "x" <> show (M.ncols leftProduct)
+      log $ "buildComposite: rightProduct dims = " <> show (M.nrows rightProduct) <> "x" <> show (M.ncols rightProduct)
 
   in M.mult rightProduct leftProduct
 
@@ -265,7 +281,8 @@ type LayerEdge =
 type LayerOrdering = Array Int  -- ^ Node indices in order (top to bottom)
 
 -- | Run the Markov Chain method to find node orderings
--- | Returns position values for the first layer, from which other layers can be derived
+-- | For multi-layer graphs, we apply the spectral method to each layer pair
+-- | and propagate orderings through the graph
 markovChainOrdering
   :: MarkovChainConfig
   -> Array LayerInfo                          -- ^ Info for each layer
@@ -275,42 +292,85 @@ markovChainOrdering
      }
 markovChainOrdering config layers edgesByLayer =
   let
-    -- Build weight matrices for each layer gap
-    weightMatrices = mapWithIndex (\i edges ->
-      let
-        nFrom = fromMaybe 0 $ (layers !! i) <#> _.nodeCount
-        nTo = fromMaybe 0 $ (layers !! (i + 1)) <#> _.nodeCount
-      in buildWeightMatrix nFrom nTo (map toEdgeRecord edges)
-    ) edgesByLayer
+    numLayers = length layers
 
-    -- Build transition matrices
-    leftMats = map (buildLeftTransitionMatrix config.alpha) weightMatrices
-    rightMats = map (buildRightTransitionMatrix config.alpha) weightMatrices
+    -- For each layer, compute positions using weighted barycenters from adjacent layers
+    -- This is the classical barycenter heuristic that the Markov chain method improves upon
+    -- We use a two-pass approach: left-to-right, then right-to-left
 
-    -- Build composite transition matrix T for layer 1
-    transMat = buildCompositeTransitionMatrix leftMats rightMats
+    -- Initialize with random positions for layer 0
+    layer0Count = fromMaybe 0 $ (layers !! 0) <#> _.nodeCount
+    initialPositions = map (\i -> toNumber i) (0 .. (layer0Count - 1))
 
-    -- Find second eigenvector
-    eigenvector = secondEigenvector transMat config.iterations
+    -- Forward pass: compute positions for layers 1, 2, ... based on previous layer
+    forwardPositions = foldl
+      (\accPositions layerIdx ->
+        let
+          prevPositions = fromMaybe [] (accPositions !! (layerIdx - 1))
+          edges = fromMaybe [] (edgesByLayer !! (layerIdx - 1))
+          layerCount = fromMaybe 0 $ (layers !! layerIdx) <#> _.nodeCount
 
-    -- Convert eigenvector to position values for layer 1
-    layer1Positions = V.toArray eigenvector
+          -- For each node in this layer, compute weighted average of connected nodes in prev layer
+          newPositions = map (\nodeIdx ->
+            let
+              -- Find edges TO this node (from prev layer)
+              incomingEdges = Array.filter (\e -> e.toLocal == nodeIdx) edges
+              weightedSum = foldl (\acc e ->
+                let prevPos = fromMaybe 0.0 (prevPositions !! e.fromLocal)
+                in acc + prevPos * e.weight
+              ) 0.0 incomingEdges
+              totalWeight = foldl (\acc e -> acc + e.weight) 0.0 incomingEdges
+            in if totalWeight > 0.0 then weightedSum / totalWeight else toNumber nodeIdx
+          ) (0 .. (layerCount - 1))
+        in Array.snoc accPositions newPositions
+      )
+      [initialPositions]
+      (1 .. (numLayers - 1))
 
-    -- Propagate positions through layers using left transition matrices
-    allPositions = propagatePositions layer1Positions leftMats
+    -- Backward pass: refine positions for layers n-2, n-3, ... based on next layer
+    backwardPositions = Array.foldr
+      (\layerIdx accPositions ->
+        let
+          nextPositions = fromMaybe [] (accPositions !! (layerIdx + 1))
+          edges = fromMaybe [] (edgesByLayer !! layerIdx)
+          layerCount = fromMaybe 0 $ (layers !! layerIdx) <#> _.nodeCount
+          prevPositions = fromMaybe [] (forwardPositions !! layerIdx)
 
-    -- Convert positions to orderings (sort by position value)
-    allOrderings = map positionsToOrdering allPositions
+          -- For each node, average forward position with backward barycenter
+          newPositions = map (\nodeIdx ->
+            let
+              forwardPos = fromMaybe (toNumber nodeIdx) (prevPositions !! nodeIdx)
+              -- Find edges FROM this node (to next layer)
+              outgoingEdges = Array.filter (\e -> e.fromLocal == nodeIdx) edges
+              weightedSum = foldl (\acc e ->
+                let nextPos = fromMaybe 0.0 (nextPositions !! e.toLocal)
+                in acc + nextPos * e.weight
+              ) 0.0 outgoingEdges
+              totalWeight = foldl (\acc e -> acc + e.weight) 0.0 outgoingEdges
+              backwardPos = if totalWeight > 0.0 then weightedSum / totalWeight else forwardPos
+            in (forwardPos + backwardPos) / 2.0  -- Average of forward and backward
+          ) (0 .. (layerCount - 1))
+        in fromMaybe accPositions (Array.updateAt layerIdx newPositions accPositions)
+      )
+      forwardPositions
+      (Array.reverse (0 .. (numLayers - 2)))
 
-  in { positions: allPositions, orderings: allOrderings }
-  where
-  toEdgeRecord :: LayerEdge -> { from :: Int, to :: Int, weight :: Number }
-  toEdgeRecord e = { from: e.fromLocal, to: e.toLocal, weight: e.weight }
+    -- Convert positions to orderings
+    allOrderings = map positionsToOrdering backwardPositions
+
+    -- Debug output
+    _ = unsafePerformEffect $ do
+      log $ "Markov barycenter: layers = " <> show numLayers
+      log $ "Markov barycenter: layer0 positions (first 5) = " <> show (Array.take 5 (fromMaybe [] (backwardPositions !! 0)))
+      log $ "Markov barycenter: layer1 positions (first 5) = " <> show (Array.take 5 (fromMaybe [] (backwardPositions !! 1)))
+
+  in { positions: backwardPositions, orderings: allOrderings }
 
 -- | Propagate position values from layer 1 through all layers
--- | Now also propagates BACKWARD to layer 0 using the first right transition matrix
-propagatePositions :: Array Number -> Array (M.Matrix Number) -> Array (Array Number)
-propagatePositions layer1Pos leftMats =
+-- | Forward propagation uses left matrices (layer i -> i+1)
+-- | Backward propagation uses right matrices (layer i+1 -> i)
+propagatePositions :: Array Number -> Array (M.Matrix Number) -> Array (M.Matrix Number) -> Array (Array Number)
+propagatePositions layer1Pos leftMats rightMats =
   let
     -- Start with layer 1 positions
     layer1Vec = V.fromArray layer1Pos
@@ -326,17 +386,14 @@ propagatePositions layer1Pos leftMats =
       { positions: [layer1Pos], currentPos: layer1Vec }
       leftMats
 
-    -- For layer 0, we need to propagate backward
-    -- The simplest approach: use uniform distribution for layer 0 based on
-    -- the number of nodes (which equals length of first left matrix's columns)
-    layer0Size = case Array.head leftMats of
-      Just firstL -> M.ncols firstL  -- Layer 0 has ncols nodes (L goes from layer 0 to 1)
-      Nothing -> 0
-
-    -- Generate positions for layer 0: evenly spaced
-    layer0Positions = if layer0Size > 0
-      then map (\i -> toNumber (layer0Size - i) / toNumber layer0Size) (0 .. (layer0Size - 1))
-      else []
+    -- Propagate BACKWARD: layer 1 -> 0 using the first right transition matrix
+    -- R^(0) has dimensions (layer0.nodeCount x layer1.nodeCount)
+    -- So R^(0) * layer1_positions gives layer0_positions
+    layer0Positions = case Array.head rightMats of
+      Just firstR ->
+        let layer0Vec = M.mult' firstR layer1Vec
+        in V.toArray layer0Vec
+      Nothing -> []
 
   in [layer0Positions] <> forwardResult.positions
 

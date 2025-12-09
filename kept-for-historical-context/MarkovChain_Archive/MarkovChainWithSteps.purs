@@ -13,12 +13,14 @@ module DataViz.Layout.Sankey.MarkovChainWithSteps
 
 import Prelude
 
-import Data.Array (filter, find, foldl, sortBy, (..))
+import Data.Array (filter, find, foldl, sortBy, (!!), (..))
 import Data.Array as Array
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import DataViz.Layout.Sankey.Compute (computeLayoutWithConfig)
 import DataViz.Layout.Sankey.MarkovChain (defaultMarkovChainConfig)
-import DataViz.Layout.Sankey.MarkovChainIntegration (computeMarkovChainOrdering, applyOrderingToNodes, sankeyToLayerData)
+import DataViz.Layout.Sankey.MarkovChainIntegration (bestInNOrdering, applyOrderingToNodes, sankeyToLayerData)
+import Effect.Unsafe (unsafePerformEffect)
+import Effect.Console (log)
 import DataViz.Layout.Sankey.PartitionRefinement (defaultPartitionRefinementConfig, refineOrdering)
 import DataViz.Layout.Sankey.Types (LinkCSVRow, SankeyLink, SankeyNode, SankeyStep, defaultSankeyConfig)
 
@@ -34,18 +36,31 @@ computeMarkovLayoutWithSteps linkInputs width height maxIterations =
     config = defaultSankeyConfig width height
     extent = config.extent
 
-    -- Step 0: Initial D3-style layout
-    initialResult = computeLayoutWithConfig linkInputs config
+    -- Step 0: Initial layout BEFORE any algorithm (no relaxation)
+    -- Use iterations=0 to get the raw stacked layout
+    initialConfig = config { iterations = 0 }
+    initialResult = computeLayoutWithConfig linkInputs initialConfig
     step0 =
       { iteration: 0
-      , label: "Initial (D3-style layout)"
+      , label: "Initial (no relaxation)"
       , nodes: initialResult.nodes
       , links: initialResult.links
       }
 
-    -- Compute the Markov Chain ordering
-    markovResult = computeMarkovChainOrdering defaultMarkovChainConfig
+    -- Compute the Markov Chain ordering using best-in-N trials
+    -- The algorithm has random components, so multiple trials help find better solutions
+    numTrials = defaultMarkovChainConfig.numTrials  -- 100 trials by default
+    markovResult = bestInNOrdering numTrials defaultMarkovChainConfig
       initialResult.nodes initialResult.links
+
+    -- Log the weighted crossing for debugging
+    _ = unsafePerformEffect $ log $ "Markov Chain: best weighted crossing after "
+      <> show numTrials <> " trials = " <> show markovResult.weightedCrossing
+
+    -- Log the position values to see if they're meaningful
+    _ = unsafePerformEffect $ do
+      log $ "Layer 0 positions (first 5): " <> show (Array.take 5 (fromMaybe [] (markovResult.positions !! 0)))
+      log $ "Layer 1 positions (first 5): " <> show (Array.take 5 (fromMaybe [] (markovResult.positions !! 1)))
 
     -- Apply the Markov ordering to nodes
     markovNodes = applyOrderingToNodes
@@ -68,6 +83,19 @@ computeMarkovLayoutWithSteps linkInputs width height maxIterations =
     { edgesByLayer } = sankeyToLayerData initialResult.nodes initialResult.links
     refinedResult = refineOrdering defaultPartitionRefinementConfig
       markovResult.orderings edgesByLayer
+
+    -- Log partition refinement results
+    _ = unsafePerformEffect $ log $ "Partition Refinement: iterations=" <> show refinedResult.iterations
+      <> ", best weighted crossing=" <> show refinedResult.bestWeightedCrossing
+
+    -- Check if orderings changed at all
+    orderingsChanged = markovResult.orderings /= refinedResult.bestOrderings
+    _ = unsafePerformEffect $ log $ "Orderings changed after refinement: " <> show orderingsChanged
+
+    -- Log sample orderings for first few layers
+    _ = unsafePerformEffect $ do
+      log $ "Layer 0 ordering (first 5): " <> show (Array.take 5 (fromMaybe [] (markovResult.orderings !! 0)))
+      log $ "Layer 1 ordering (first 5): " <> show (Array.take 5 (fromMaybe [] (markovResult.orderings !! 1)))
 
     -- Apply the refined ordering
     refinedNodes = applyOrderingToNodes

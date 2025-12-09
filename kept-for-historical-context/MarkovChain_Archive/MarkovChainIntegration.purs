@@ -20,6 +20,9 @@ import Data.Int (toNumber)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
+import Control.Monad (when)
+import Effect.Console (log)
+import Effect.Unsafe (unsafePerformEffect)
 import DataViz.Layout.Sankey.Compute (computeLayoutWithConfig)
 import DataViz.Layout.Sankey.MarkovChain (LayerEdge, LayerInfo, LayerOrdering, MarkovChainConfig, calculateWeightedCrossing, defaultMarkovChainConfig, markovChainOrdering)
 import DataViz.Layout.Sankey.PartitionRefinement (defaultPartitionRefinementConfig, refineOrdering)
@@ -157,6 +160,18 @@ applyOrderingToNodes orderingResult nodes y0 y1 padding =
     -- Find the maximum layer
     maxLayer = foldl (\acc n -> max acc n.layer) 0 nodes
 
+    -- Debug: log ordering info
+    _ = unsafePerformEffect $ do
+      log $ "applyOrdering: maxLayer = " <> show maxLayer
+      log $ "applyOrdering: orderings count = " <> show (length orderingResult.orderings)
+      log $ "applyOrdering: localToNodeIndex count = " <> show (length orderingResult.localToNodeIndex)
+      case orderingResult.orderings !! 0 of
+        Just o -> log $ "applyOrdering: layer 0 ordering (first 5) = " <> show (Array.take 5 o)
+        Nothing -> log "applyOrdering: no layer 0 ordering"
+      case orderingResult.localToNodeIndex !! 0 of
+        Just l -> log $ "applyOrdering: layer 0 localToNode (first 5) = " <> show (Array.take 5 l)
+        Nothing -> log "applyOrdering: no layer 0 localToNode"
+
     -- Process each layer (not just those with orderings)
     updatedNodesByLayer = map (\layerIdx ->
       let
@@ -179,6 +194,14 @@ applyOrderingToNodes orderingResult nodes y0 y1 padding =
               nodesInOrder = Array.mapMaybe (\nodeId ->
                 Array.find (\n -> n.index == nodeId) layerNodes
               ) orderedNodeIds
+
+              -- Debug: log for layer 0
+              _ = unsafePerformEffect $ when (layerIdx == 0) $ do
+                    log $ "applyOrdering layer 0: ordering length = " <> show (length ordering)
+                    log $ "applyOrdering layer 0: localToNode length = " <> show (length localToNode)
+                    log $ "applyOrdering layer 0: orderedNodeIds length = " <> show (length orderedNodeIds)
+                    log $ "applyOrdering layer 0: nodesInOrder length = " <> show (length nodesInOrder)
+                    log $ "applyOrdering layer 0: layerNodes length = " <> show (length layerNodes)
 
               -- Get nodes that are NOT in the ordering (missing from orderedNodeIds)
               nodesInOrderSet = map _.index nodesInOrder

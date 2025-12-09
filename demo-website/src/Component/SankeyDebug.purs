@@ -1,12 +1,14 @@
 module Component.SankeyDebug where
 
 -- | Sankey Debug Testbed
--- | Shows three columns of actual SVG diagrams at each phase of the algorithm:
+-- | Shows two columns of actual SVG diagrams at each phase of the algorithm:
 -- | 1. D3-sankey (actual JavaScript library)
 -- | 2. Our PureScript implementation
--- | 3. Markov Chain ordering (new algorithm)
 -- |
 -- | Each column shows the progression through relaxation iterations.
+-- |
+-- | Note: Markov Chain ordering was removed (archived in kept-for-historical-context/MarkovChain_Archive)
+-- | as it didn't produce better results than the D3-style relaxation heuristic.
 
 import Prelude
 
@@ -38,7 +40,6 @@ import Component.SankeyDebug.FFI (D3Node, D3Link, D3NodeInput, D3LinkInput, D3Sa
 import DataViz.Layout.Sankey.CSV (parseSankeyCSV)
 import DataViz.Layout.Sankey.Types (SankeyNode, SankeyLink, SankeyStep)
 import DataViz.Layout.Sankey.ComputeWithSteps (computeLayoutWithSteps)
-import DataViz.Layout.Sankey.MarkovChainWithSteps (computeMarkovLayoutWithSteps)
 
 -- | State for the debug component
 type State =
@@ -48,7 +49,6 @@ type State =
   , maxIterations :: Int
   , d3Steps :: Array D3SankeyStep
   , psSteps :: Array SankeyStep -- Our PureScript steps (from Types)
-  , markovSteps :: Array SankeyStep -- Markov chain steps
   , svgWidth :: Number
   , svgHeight :: Number
   }
@@ -69,7 +69,6 @@ component = H.mkComponent
       , maxIterations: 6
       , d3Steps: []
       , psSteps: []
-      , markovSteps: []
       , svgWidth: 350.0
       , svgHeight: 400.0
       }
@@ -94,7 +93,7 @@ render state =
             [ HH.text "Sankey Layout Algorithm Comparison" ]
         , HH.p
             [ HP.style "color: #aaa; margin: 0; font-size: 14px;" ]
-            [ HH.text "Visual comparison of D3-sankey (JS), our PureScript port, and Markov Chain ordering" ]
+            [ HH.text "Visual comparison of D3-sankey (JS) and our PureScript port" ]
         ]
 
     -- Controls
@@ -129,7 +128,7 @@ render state =
             ]
         ]
 
-    -- Three-column comparison
+    -- Two-column comparison
     , HH.div
         [ HP.style "display: flex; gap: 15px; flex-wrap: wrap;" ]
         [ -- Column 1: D3-sankey (JavaScript)
@@ -137,9 +136,6 @@ render state =
 
         -- Column 2: PureScript implementation
         , renderColumnPS "PureScript" "#00ff88" state.psSteps state.selectedIteration state.svgWidth state.svgHeight
-
-        -- Column 3: Markov Chain
-        , renderColumnPS "Markov Chain" "#ff6b6b" state.markovSteps state.selectedIteration state.svgWidth state.svgHeight
         ]
 
     -- Summary stats
@@ -359,10 +355,9 @@ renderSummary state =
         [ HP.style "color: #fff; margin: 0 0 10px 0; font-size: 16px;" ]
         [ HH.text $ "Comparison at iteration " <> show state.selectedIteration ]
     , HH.div
-        [ HP.style "display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; font-size: 12px;" ]
+        [ HP.style "display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; font-size: 12px;" ]
         [ renderSummaryColumn "D3-sankey" "#4a9eff" (state.d3Steps Array.!! state.selectedIteration)
         , renderSummaryColumnPS "PureScript" "#00ff88" (state.psSteps Array.!! state.selectedIteration)
-        , renderSummaryColumnPS "Markov" "#ff6b6b" (state.markovSteps Array.!! state.selectedIteration)
         ]
     ]
 
@@ -397,7 +392,7 @@ renderSummaryColumnPS title color maybeStep =
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
-    handleAction (LoadDataset "/data/d3-library-deps.csv")
+    handleAction (LoadDataset "/data/energy.csv")
 
   LoadDataset path -> do
     H.modify_ _ { selectedDataset = path }
@@ -416,8 +411,8 @@ handleAction = case _ of
     case state.csvData of
       Nothing -> pure unit
       Just csv -> do
-        let { d3Steps, psSteps, markovSteps } = computeAllSteps csv state.svgWidth state.svgHeight state.maxIterations
-        H.modify_ _ { d3Steps = d3Steps, psSteps = psSteps, markovSteps = markovSteps }
+        let { d3Steps, psSteps } = computeAllSteps csv state.svgWidth state.svgHeight state.maxIterations
+        H.modify_ _ { d3Steps = d3Steps, psSteps = psSteps }
 
 -- | Compute all algorithm steps
 computeAllSteps
@@ -425,7 +420,7 @@ computeAllSteps
   -> Number
   -> Number
   -> Int
-  -> { d3Steps :: Array D3SankeyStep, psSteps :: Array SankeyStep, markovSteps :: Array SankeyStep }
+  -> { d3Steps :: Array D3SankeyStep, psSteps :: Array SankeyStep }
 computeAllSteps csvData width height maxIterations =
   let
     -- Parse CSV to get unique nodes and links
@@ -446,11 +441,8 @@ computeAllSteps csvData width height maxIterations =
     -- Compute PureScript steps using our implementation
     psSteps = computeLayoutWithSteps linkInputs width height maxIterations
 
-    -- Compute Markov Chain steps using the spectral ordering algorithm
-    markovSteps = computeMarkovLayoutWithSteps linkInputs width height maxIterations
-
   in
-    { d3Steps, psSteps, markovSteps }
+    { d3Steps, psSteps }
 
 -- Helper
 parseInt :: String -> Maybe Int
