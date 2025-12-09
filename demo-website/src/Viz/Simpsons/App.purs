@@ -9,11 +9,13 @@ module D3.Viz.Simpsons.App
 
 import Prelude
 
+import D3.Viz.Simpsons.DataTable as DataTable
 import D3.Viz.Simpsons.DonutChart as Donut
 import D3.Viz.Simpsons.ForceViz as ForceViz
 import D3.Viz.Simpsons.LineChart as Line
 import D3.Viz.Simpsons.ScatterChart as Scatter
 import D3.Viz.Simpsons.Types (DerivedData, Proportions, defaultProportions, deriveData, green, overallAcceptanceRates, purple)
+import Data.Array (mapWithIndex) as Array
 import Data.Int (round) as Int
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Number (fromString) as Number
@@ -235,63 +237,143 @@ renderSlider label value color action =
     , HH.span_ [ HH.text (show (Int.round (value * 100.0)) <> "%") ]
     ]
 
--- | Data table showing current statistics
+-- | Data table showing current statistics with bar charts and donuts
 renderDataTable :: forall w i. State -> DerivedData -> HH.HTML w i
 renderDataTable _state derived =
-  HH.section
-    [ HP.classes [ HH.ClassName "simpsons-table" ] ]
-    [ HH.h2_ [ HH.text "Admission Statistics" ]
-    , HH.table_
-        [ HH.thead_
-            [ HH.tr_
-                [ HH.th_ [ HH.text "" ]
-                , HH.th
-                    [ HP.style ("color: " <> green) ]
-                    [ HH.text "Women" ]
-                , HH.th
-                    [ HP.style ("color: " <> purple) ]
-                    [ HH.text "Men" ]
-                ]
-            ]
-        , HH.tbody_
-            [ -- Easy department row
-              HH.tr_
-                [ HH.td_ [ HH.text "Easy Department" ]
-                , HH.td_
-                    [ HH.text $ show (Int.round derived.departments.easy.female.applied) <> " applied, "
-                        <> show (Int.round derived.departments.easy.female.admitted) <> " admitted"
-                    ]
-                , HH.td_
-                    [ HH.text $ show (Int.round derived.departments.easy.male.applied) <> " applied, "
-                        <> show (Int.round derived.departments.easy.male.admitted) <> " admitted"
-                    ]
-                ]
-            , -- Hard department row
-              HH.tr_
-                [ HH.td_ [ HH.text "Hard Department" ]
-                , HH.td_
-                    [ HH.text $ show (Int.round derived.departments.hard.female.applied) <> " applied, "
-                        <> show (Int.round derived.departments.hard.female.admitted) <> " admitted"
-                    ]
-                , HH.td_
-                    [ HH.text $ show (Int.round derived.departments.hard.male.applied) <> " applied, "
-                        <> show (Int.round derived.departments.hard.male.admitted) <> " admitted"
-                    ]
-                ]
-            , -- Overall rate row
-              HH.tr
-                [ HP.classes [ HH.ClassName "simpsons-table-total" ] ]
-                [ HH.td_ [ HH.text "Overall Rate" ]
-                , HH.td
-                    [ HP.style ("color: " <> green) ]
-                    [ HH.text $ show (Int.round (derived.combined.female * 100.0)) <> "%" ]
-                , HH.td
-                    [ HP.style ("color: " <> purple) ]
-                    [ HH.text $ show (Int.round (derived.combined.male * 100.0)) <> "%" ]
-                ]
-            ]
-        ]
-    ]
+  let
+    rows = DataTable.buildRowData derived
+  in
+    HH.section
+      [ HP.classes [ HH.ClassName "simpsons-table" ] ]
+      [ HH.h2_ [ HH.text "Illustration" ]
+      , HH.p
+          [ HP.classes [ HH.ClassName "simpsons-table-description" ] ]
+          [ HH.text "Suppose there are two departments: one easy, one hard ('hard' as in 'hard to get into'). The sliders below set what percentage each gender applies to the easy department. Both departments prefer women, but if too many women apply to the hard one, their acceptance rate drops below the men's." ]
+      , HH.table
+          [ HP.classes [ HH.ClassName "simpsons-data-table" ] ]
+          [ HH.thead_
+              [ HH.tr_
+                  [ HH.th_ [ HH.text "departments" ]
+                  , HH.th
+                      [ HP.colSpan 2 ]
+                      [ HH.text "# applied" ]
+                  , HH.th
+                      [ HP.colSpan 2 ]
+                      [ HH.text "# admitted" ]
+                  , HH.th
+                      [ HP.colSpan 2 ]
+                      [ HH.text "% admitted" ]
+                  ]
+              , HH.tr
+                  [ HP.classes [ HH.ClassName "simpsons-subheader" ] ]
+                  [ HH.th_ []
+                  , HH.th
+                      [ HP.style ("color: " <> purple) ]
+                      [ HH.text "men" ]
+                  , HH.th
+                      [ HP.style ("color: " <> green) ]
+                      [ HH.text "women" ]
+                  , HH.th
+                      [ HP.style ("color: " <> purple) ]
+                      [ HH.text "men" ]
+                  , HH.th
+                      [ HP.style ("color: " <> green) ]
+                      [ HH.text "women" ]
+                  , HH.th
+                      [ HP.style ("color: " <> purple) ]
+                      [ HH.text "men" ]
+                  , HH.th
+                      [ HP.style ("color: " <> green) ]
+                      [ HH.text "women" ]
+                  ]
+              ]
+          , HH.tbody_
+              ( rows # Array.mapWithIndex \idx row ->
+                  let
+                    prefix = "row-" <> show idx
+                  in
+                    HH.tr_
+                      [ -- Department name
+                        HH.td
+                          [ HP.classes [ HH.ClassName "simpsons-dept-name" ] ]
+                          [ HH.text row.department ]
+                      , -- Men applied
+                        HH.td
+                          [ HP.classes [ HH.ClassName "simpsons-data-cell" ] ]
+                          [ HH.span_ [ HH.text (formatNumber row.maleApplied) ]
+                          , HH.div
+                              [ HP.id (prefix <> "-male-applied")
+                              , HP.classes [ HH.ClassName "bar-container" ]
+                              ]
+                              []
+                          ]
+                      , -- Women applied
+                        HH.td
+                          [ HP.classes [ HH.ClassName "simpsons-data-cell" ] ]
+                          [ HH.span_ [ HH.text (formatNumber row.femaleApplied) ]
+                          , HH.div
+                              [ HP.id (prefix <> "-female-applied")
+                              , HP.classes [ HH.ClassName "bar-container" ]
+                              ]
+                              []
+                          ]
+                      , -- Men admitted
+                        HH.td
+                          [ HP.classes [ HH.ClassName "simpsons-data-cell" ] ]
+                          [ HH.span_ [ HH.text (formatNumber row.maleAdmitted) ]
+                          , HH.div
+                              [ HP.id (prefix <> "-male-admitted")
+                              , HP.classes [ HH.ClassName "bar-container" ]
+                              ]
+                              []
+                          ]
+                      , -- Women admitted
+                        HH.td
+                          [ HP.classes [ HH.ClassName "simpsons-data-cell" ] ]
+                          [ HH.span_ [ HH.text (formatNumber row.femaleAdmitted) ]
+                          , HH.div
+                              [ HP.id (prefix <> "-female-admitted")
+                              , HP.classes [ HH.ClassName "bar-container" ]
+                              ]
+                              []
+                          ]
+                      , -- Men rate donut
+                        HH.td
+                          [ HP.classes [ HH.ClassName "simpsons-donut-cell" ] ]
+                          [ HH.div
+                              [ HP.id (prefix <> "-male-rate")
+                              , HP.classes [ HH.ClassName "donut-container" ]
+                              ]
+                              []
+                          ]
+                      , -- Women rate donut
+                        HH.td
+                          [ HP.classes [ HH.ClassName "simpsons-donut-cell" ] ]
+                          [ HH.div
+                              [ HP.id (prefix <> "-female-rate")
+                              , HP.classes [ HH.ClassName "donut-container" ]
+                              ]
+                              []
+                          ]
+                      ]
+              )
+          ]
+      , HH.div
+          [ HP.classes
+              [ HH.ClassName "simpsons-paradox-result"
+              , HH.ClassName if derived.isParadox then "is-paradox" else "no-paradox"
+              ]
+          ]
+          [ HH.strong_ [ HH.text "Simpson's paradox? " ]
+          , HH.span_ [ HH.text if derived.isParadox then "yes" else "no" ]
+          ]
+      ]
+
+-- | Format a number with commas for display
+formatNumber :: Number -> String
+formatNumber n = formatWithCommas (show (Int.round n))
+
+foreign import formatWithCommas :: String -> String
 
 -- | Force-directed visualization section
 renderForceSection :: forall m. State -> H.ComponentHTML Action () m
@@ -346,7 +428,9 @@ handleAction = case _ of
     H.liftAff $ Aff.delay (Milliseconds 100.0)
 
     -- Initialize all charts
-    liftEffect initializeCharts
+    state <- H.get
+    let derived = deriveData state.proportions
+    liftEffect $ initializeCharts derived
     H.modify_ _ { initialized = true }
 
     -- Initial render
@@ -372,15 +456,18 @@ handleAction = case _ of
   Render -> do
     state <- H.get
     when state.initialized do
-      liftEffect $ updateLineChart state.proportions
+      let derived = deriveData state.proportions
+      liftEffect do
+        updateLineChart state.proportions
+        DataTable.updateDataTable derived
 
 -- =============================================================================
 -- Chart Initialization
 -- =============================================================================
 
 -- | Initialize all static charts
-initializeCharts :: Effect Unit
-initializeCharts = do
+initializeCharts :: DerivedData -> Effect Unit
+initializeCharts derived = do
   -- Initialize static Tree-based charts
   runD3v2M do
     initDonutCharts
@@ -388,6 +475,8 @@ initializeCharts = do
     initLineChart
   -- Initialize force visualization (uses its own Effect-based API)
   initForceViz
+  -- Initialize the data table with D3 visualizations
+  DataTable.initDataTable derived
 
 -- | Initialize donut charts
 initDonutCharts :: D3v2M Unit

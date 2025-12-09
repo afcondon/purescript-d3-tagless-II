@@ -1,0 +1,436 @@
+/* Simpson's Paradox Visualization Styles */
+
+/* =============================================================================
+   Main Container
+   ============================================================================= */
+
+.simpsons-paradox {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: var(--font-body);
+  color: #2C3E50;
+  background-color: #ffffff;
+}
+
+/* =============================================================================
+   Header
+   ============================================================================= */
+
+.simpsons-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #ecf0f1;
+}
+
+.simpsons-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: #2C3E50;
+}
+
+.simpsons-header p {
+  font-size: 1.1rem;
+  color: #7f8c8d;
+  margin: 0;
+}
+
+/* =============================================================================
+   Donut Charts Section
+   ============================================================================= */
+
+.simpsons-donuts {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.simpsons-donuts h2 {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.simpsons-donuts p {
+  margin-bottom: 1rem;
+}
+
+.simpsons-donuts-container {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin: 1.5rem 0;
+}
+
+.donut-chart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.simpsons-paradox-note {
+  font-size: 1rem;
+  color: #2C3E50;
+  max-width: 600px;
+  margin: 1rem auto;
+  line-height: 1.6;
+}
+
+/* =============================================================================
+   Scatter Chart Section
+   ============================================================================= */
+
+.simpsons-scatter {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.simpsons-scatter h2 {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.scatter-chart {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+/* =============================================================================
+   Interactive Section (Sliders + Line Chart)
+   ============================================================================= */
+
+.simpsons-interactive {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.simpsons-interactive h2 {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.simpsons-sliders {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+}
+
+.simpsons-slider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.simpsons-slider label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.simpsons-slider input[type="range"] {
+  width: 200px;
+  height: 8px;
+  cursor: pointer;
+}
+
+.simpsons-slider span {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  min-width: 40px;
+  text-align: center;
+}
+
+.line-chart {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.simpsons-paradox-indicator {
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem auto;
+  max-width: 600px;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.simpsons-paradox-indicator.is-paradox {
+  background-color: #fdf2f2;
+  border: 1px solid #E74C3C;
+  color: #E74C3C;
+}
+
+.simpsons-paradox-indicator.no-paradox {
+  background-color: #f0fdf4;
+  border: 1px solid #1abc9c;
+  color: #1abc9c;
+}
+
+/* =============================================================================
+   Data Table Section
+   ============================================================================= */
+
+.simpsons-table {
+  margin-bottom: 2rem;
+}
+
+.simpsons-table h2 {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.simpsons-table-description {
+  font-size: 0.95rem;
+  color: #5a5a5a;
+  max-width: 700px;
+  margin: 0 auto 1.5rem;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.simpsons-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin: 0 auto;
+  background-color: #ffffff;
+}
+
+.simpsons-data-table thead {
+  background-color: #f8f9fa;
+}
+
+.simpsons-data-table th {
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  font-weight: 600;
+  border-bottom: 2px solid #dee2e6;
+  color: #2C3E50;
+}
+
+.simpsons-data-table .simpsons-subheader th {
+  padding: 0.5rem;
+  font-weight: 500;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.simpsons-data-table td {
+  padding: 0.5rem;
+  text-align: center;
+  vertical-align: middle;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.simpsons-data-table tbody tr:last-child td {
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 600;
+}
+
+.simpsons-dept-name {
+  font-weight: 500;
+  text-align: left !important;
+  padding-left: 1rem !important;
+  white-space: nowrap;
+}
+
+/* Data cells with number + bar chart */
+.simpsons-data-cell {
+  min-width: 80px;
+}
+
+.simpsons-data-cell span {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+  color: #2C3E50;
+}
+
+.bar-container {
+  display: flex;
+  justify-content: center;
+}
+
+.bar-container svg {
+  display: block;
+}
+
+/* Donut cells with mini donut charts */
+.simpsons-donut-cell {
+  min-width: 90px;
+  padding: 0.25rem !important;
+}
+
+.donut-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.donut-container svg {
+  display: block;
+}
+
+/* Paradox result indicator */
+.simpsons-paradox-result {
+  text-align: center;
+  padding: 1rem;
+  margin-top: 1rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+}
+
+.simpsons-paradox-result strong {
+  margin-right: 0.5rem;
+}
+
+.simpsons-paradox-result.is-paradox {
+  background-color: #fdf2f2;
+  border: 2px solid #E74C3C;
+  color: #E74C3C;
+}
+
+.simpsons-paradox-result.is-paradox span {
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.simpsons-paradox-result.no-paradox {
+  background-color: #f0fdf4;
+  border: 2px solid #1abc9c;
+  color: #1abc9c;
+}
+
+.simpsons-paradox-result.no-paradox span {
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* =============================================================================
+   Force Visualization Section
+   ============================================================================= */
+
+.simpsons-force {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.simpsons-force h2 {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.force-viz {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+  min-height: 400px;
+}
+
+.simpsons-toggle {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #ffffff;
+  background-color: #3498DB;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-bottom: 1rem;
+}
+
+.simpsons-toggle:hover {
+  background-color: #2980b9;
+}
+
+.simpsons-toggle:active {
+  background-color: #2471a3;
+}
+
+/* =============================================================================
+   Credits Section
+   ============================================================================= */
+
+.simpsons-credits {
+  text-align: center;
+  padding-top: 2rem;
+  border-top: 1px solid #ecf0f1;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+.simpsons-credits a {
+  color: #3498DB;
+  text-decoration: none;
+}
+
+.simpsons-credits a:hover {
+  text-decoration: underline;
+}
+
+/* =============================================================================
+   Responsive Adjustments
+   ============================================================================= */
+
+@media (max-width: 768px) {
+  .simpsons-paradox {
+    padding: 1rem;
+  }
+
+  .simpsons-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .simpsons-donuts-container {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .simpsons-sliders {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .simpsons-slider input[type="range"] {
+    width: 180px;
+  }
+
+  .simpsons-data-table {
+    font-size: 0.8rem;
+  }
+
+  .simpsons-data-cell {
+    min-width: 60px;
+  }
+
+  .simpsons-donut-cell {
+    min-width: 70px;
+  }
+
+  .bar-container svg {
+    transform: scale(0.8);
+  }
+
+  .donut-container svg {
+    transform: scale(0.85);
+  }
+}
+
+@media (max-width: 480px) {
+  .simpsons-data-table {
+    font-size: 0.75rem;
+  }
+
+  .simpsons-data-cell span {
+    font-size: 0.75rem;
+  }
+
+  .simpsons-dept-name {
+    font-size: 0.75rem;
+  }
+}
