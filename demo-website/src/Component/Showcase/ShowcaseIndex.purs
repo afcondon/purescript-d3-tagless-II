@@ -66,6 +66,9 @@ render _ =
             [ renderCard ForcePlayground "Force Playground"
                 "Interactive force simulation with multiple datasets. Toggle forces, filter categories, and watch animated enter/exit transitions."
 
+            , renderCard TreeBuilder "Tree Builder"
+                "Visual tool for building D3 visualizations. Drag elements, configure attributes, and see live preview with sample data."
+
             , renderCard CodeExplorer "Code Explorer"
                 "Interactive force-directed graph of PureScript module dependencies. Zoom, pan, expand, and explore the codebase."
 

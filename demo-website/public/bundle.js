@@ -129,10 +129,10 @@
     return dict.map;
   };
   var mapFlipped = function(dictFunctor) {
-    var map124 = map(dictFunctor);
+    var map125 = map(dictFunctor);
     return function(fa) {
       return function(f) {
-        return map124(f)(fa);
+        return map125(f)(fa);
       };
     };
   };
@@ -140,17 +140,17 @@
     return map(dictFunctor)($$const(unit));
   };
   var voidLeft = function(dictFunctor) {
-    var map124 = map(dictFunctor);
+    var map125 = map(dictFunctor);
     return function(f) {
       return function(x47) {
-        return map124($$const(x47))(f);
+        return map125($$const(x47))(f);
       };
     };
   };
   var voidRight = function(dictFunctor) {
-    var map124 = map(dictFunctor);
+    var map125 = map(dictFunctor);
     return function(x47) {
-      return map124($$const(x47));
+      return map125($$const(x47));
     };
   };
   var functorArray = {
@@ -247,29 +247,29 @@
   };
   var applyFirst = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map107 = map(dictApply.Functor0());
+    var map109 = map(dictApply.Functor0());
     return function(a3) {
       return function(b10) {
-        return apply1(map107($$const)(a3))(b10);
+        return apply1(map109($$const)(a3))(b10);
       };
     };
   };
   var applySecond = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map107 = map(dictApply.Functor0());
+    var map109 = map(dictApply.Functor0());
     return function(a3) {
       return function(b10) {
-        return apply1(map107($$const(identity2))(a3))(b10);
+        return apply1(map109($$const(identity2))(a3))(b10);
       };
     };
   };
   var lift2 = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map107 = map(dictApply.Functor0());
+    var map109 = map(dictApply.Functor0());
     return function(f) {
       return function(a3) {
         return function(b10) {
-          return apply1(map107(f)(a3))(b10);
+          return apply1(map109(f)(a3))(b10);
         };
       };
     };
@@ -460,15 +460,15 @@
       return function(dictIsSymbol) {
         var reflectSymbol2 = reflectSymbol(dictIsSymbol);
         return function(dictEq) {
-          var eq33 = eq(dictEq);
+          var eq34 = eq(dictEq);
           return {
             eqRecord: function(v2) {
               return function(ra) {
                 return function(rb) {
                   var tail3 = eqRecord1($$Proxy.value)(ra)(rb);
                   var key = reflectSymbol2($$Proxy.value);
-                  var get19 = unsafeGet(key);
-                  return eq33(get19(ra))(get19(rb)) && tail3;
+                  var get20 = unsafeGet(key);
+                  return eq34(get20(ra))(get20(rb)) && tail3;
                 };
               };
             }
@@ -478,10 +478,10 @@
     };
   };
   var notEq = function(dictEq) {
-    var eq33 = eq(dictEq);
+    var eq34 = eq(dictEq);
     return function(x47) {
       return function(y48) {
-        return eq2(eq33(x47)(y48))(false);
+        return eq2(eq34(x47)(y48))(false);
       };
     };
   };
@@ -1581,24 +1581,24 @@
 
   // output/Control.Monad/index.js
   var unlessM = function(dictMonad) {
-    var bind92 = bind(dictMonad.Bind1());
+    var bind93 = bind(dictMonad.Bind1());
     var unless5 = unless(dictMonad.Applicative0());
     return function(mb) {
       return function(m2) {
-        return bind92(mb)(function(b10) {
+        return bind93(mb)(function(b10) {
           return unless5(b10)(m2);
         });
       };
     };
   };
   var ap = function(dictMonad) {
-    var bind92 = bind(dictMonad.Bind1());
-    var pure103 = pure(dictMonad.Applicative0());
+    var bind93 = bind(dictMonad.Bind1());
+    var pure104 = pure(dictMonad.Applicative0());
     return function(f) {
       return function(a3) {
-        return bind92(f)(function(f$prime) {
-          return bind92(a3)(function(a$prime) {
-            return pure103(f$prime(a$prime));
+        return bind93(f)(function(f$prime) {
+          return bind93(a3)(function(a$prime) {
+            return pure104(f$prime(a$prime));
           });
         });
       };
@@ -1734,11 +1734,11 @@
   var $$try = function(dictMonadError) {
     var catchError1 = catchError(dictMonadError);
     var Monad0 = dictMonadError.MonadThrow0().Monad0();
-    var map107 = map(Monad0.Bind1().Apply0().Functor0());
-    var pure103 = pure(Monad0.Applicative0());
+    var map109 = map(Monad0.Bind1().Apply0().Functor0());
+    var pure104 = pure(Monad0.Applicative0());
     return function(a3) {
-      return catchError1(map107(Right.create)(a3))(function($52) {
-        return pure103(Left.create($52));
+      return catchError1(map109(Right.create)(a3))(function($52) {
+        return pure104(Left.create($52));
       });
     };
   };
@@ -2227,10 +2227,10 @@
     };
   };
   var functorExceptT = function(dictFunctor) {
-    var map124 = map(dictFunctor);
+    var map125 = map(dictFunctor);
     return {
       map: function(f) {
-        return mapExceptT(map124(map5(f)));
+        return mapExceptT(map125(map5(f)));
       }
     };
   };
@@ -2245,13 +2245,13 @@
     };
   };
   var bindExceptT = function(dictMonad) {
-    var bind92 = bind(dictMonad.Bind1());
-    var pure103 = pure(dictMonad.Applicative0());
+    var bind93 = bind(dictMonad.Bind1());
+    var pure104 = pure(dictMonad.Applicative0());
     return {
       bind: function(v2) {
         return function(k) {
-          return bind92(v2)(either(function($193) {
-            return pure103(Left.create($193));
+          return bind93(v2)(either(function($193) {
+            return pure104(Left.create($193));
           })(function(a3) {
             var v1 = k(a3);
             return v1;
@@ -2303,25 +2303,25 @@
     var append40 = append(dictSemigroup);
     return function(dictMonad) {
       var Bind1 = dictMonad.Bind1();
-      var bind92 = bind(Bind1);
-      var pure103 = pure(dictMonad.Applicative0());
+      var bind93 = bind(Bind1);
+      var pure104 = pure(dictMonad.Applicative0());
       var functorExceptT1 = functorExceptT(Bind1.Apply0().Functor0());
       return {
         alt: function(v2) {
           return function(v1) {
-            return bind92(v2)(function(rm) {
+            return bind93(v2)(function(rm) {
               if (rm instanceof Right) {
-                return pure103(new Right(rm.value0));
+                return pure104(new Right(rm.value0));
               }
               ;
               if (rm instanceof Left) {
-                return bind92(v1)(function(rn) {
+                return bind93(v1)(function(rn) {
                   if (rn instanceof Right) {
-                    return pure103(new Right(rn.value0));
+                    return pure104(new Right(rn.value0));
                   }
                   ;
                   if (rn instanceof Left) {
-                    return pure103(new Left(append40(rm.value0)(rn.value0)));
+                    return pure104(new Left(append40(rm.value0)(rn.value0)));
                   }
                   ;
                   throw new Error("Failed pattern match at Control.Monad.Except.Trans (line 87, column 9 - line 89, column 49): " + [rn.constructor.name]);
@@ -2387,18 +2387,18 @@
     result[n] = i2;
     return result;
   };
-  var replicateFill = function(count, value22) {
+  var replicateFill = function(count, value23) {
     if (count < 1) {
       return [];
     }
     var result = new Array(count);
-    return result.fill(value22);
+    return result.fill(value23);
   };
-  var replicatePolyfill = function(count, value22) {
+  var replicatePolyfill = function(count, value23) {
     var result = [];
     var n = 0;
     for (var i2 = 0; i2 < count; i2++) {
-      result[n++] = value22;
+      result[n++] = value23;
     }
     return result;
   };
@@ -2769,13 +2769,13 @@
   };
   var traverse_ = function(dictApplicative) {
     var applySecond3 = applySecond(dictApplicative.Apply0());
-    var pure103 = pure(dictApplicative);
+    var pure104 = pure(dictApplicative);
     return function(dictFoldable) {
       var foldr22 = foldr(dictFoldable);
       return function(f) {
         return foldr22(function($454) {
           return applySecond3(f($454));
-        })(pure103(unit));
+        })(pure104(unit));
       };
     };
   };
@@ -3137,23 +3137,23 @@
       };
     }
     return function(apply8) {
-      return function(map107) {
-        return function(pure103) {
+      return function(map109) {
+        return function(pure104) {
           return function(f) {
             return function(array4) {
               function go2(bot, top3) {
                 switch (top3 - bot) {
                   case 0:
-                    return pure103([]);
+                    return pure104([]);
                   case 1:
-                    return map107(array1)(f(array4[bot]));
+                    return map109(array1)(f(array4[bot]));
                   case 2:
-                    return apply8(map107(array2)(f(array4[bot])))(f(array4[bot + 1]));
+                    return apply8(map109(array2)(f(array4[bot])))(f(array4[bot + 1]));
                   case 3:
-                    return apply8(apply8(map107(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
+                    return apply8(apply8(map109(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
                   default:
                     var pivot = bot + Math.floor((top3 - bot) / 4) * 2;
-                    return apply8(map107(concat2)(go2(bot, pivot)))(go2(pivot, top3));
+                    return apply8(map109(concat2)(go2(bot, pivot)))(go2(pivot, top3));
                 }
               }
               return go2(0, array4.length);
@@ -3282,13 +3282,13 @@
           return function(f) {
             return function(b10) {
               var result = [];
-              var value22 = b10;
+              var value23 = b10;
               while (true) {
-                var maybe2 = f(value22);
+                var maybe2 = f(value23);
                 if (isNothing2(maybe2)) return result;
                 var tuple = fromJust7(maybe2);
                 result.push(fst2(tuple));
-                value22 = snd2(tuple);
+                value23 = snd2(tuple);
               }
             };
           };
@@ -3305,13 +3305,13 @@
           return function(f) {
             return function(b10) {
               var result = [];
-              var value22 = b10;
+              var value23 = b10;
               while (true) {
-                var tuple = f(value22);
+                var tuple = f(value23);
                 result.push(fst2(tuple));
                 var maybe2 = snd2(tuple);
                 if (isNothing2(maybe2)) return result;
-                value22 = fromJust7(maybe2);
+                value23 = fromJust7(maybe2);
               }
             };
           };
@@ -3595,10 +3595,10 @@
   };
   var filter = /* @__PURE__ */ runFn2(filterImpl);
   var elemIndex = function(dictEq) {
-    var eq25 = eq(dictEq);
+    var eq26 = eq(dictEq);
     return function(x47) {
       return findIndex(function(v2) {
-        return eq25(v2)(x47);
+        return eq26(v2)(x47);
       });
     };
   };
@@ -3674,7 +3674,7 @@
   };
   var traverseWithIndex_ = function(dictApplicative) {
     var applySecond3 = applySecond(dictApplicative.Apply0());
-    var pure103 = pure(dictApplicative);
+    var pure104 = pure(dictApplicative);
     return function(dictFoldableWithIndex) {
       var foldrWithIndex1 = foldrWithIndex(dictFoldableWithIndex);
       return function(f) {
@@ -3683,7 +3683,7 @@
           return function($290) {
             return applySecond3($289($290));
           };
-        })(pure103(unit));
+        })(pure104(unit));
       };
     };
   };
@@ -4296,11 +4296,11 @@
   var traversableList = {
     traverse: function(dictApplicative) {
       var Apply0 = dictApplicative.Apply0();
-      var map124 = map(Apply0.Functor0());
+      var map125 = map(Apply0.Functor0());
       var lift22 = lift2(Apply0);
       var pure125 = pure(dictApplicative);
       return function(f) {
-        var $301 = map124(foldl3(flip(Cons.create))(Nil.value));
+        var $301 = map125(foldl3(flip(Cons.create))(Nil.value));
         var $302 = foldl3(function(acc) {
           var $304 = lift22(flip(Cons.create))(acc);
           return function($305) {
@@ -5029,17 +5029,17 @@
           }
         }
       }
-      function onComplete(join6) {
+      function onComplete(join7) {
         return function() {
           if (status === COMPLETED) {
-            rethrow = rethrow && join6.rethrow;
-            join6.handler(step5)();
+            rethrow = rethrow && join7.rethrow;
+            join7.handler(step5)();
             return function() {
             };
           }
           var jid = joinId++;
           joins = joins || {};
-          joins[jid] = join6;
+          joins[jid] = join7;
           return function() {
             if (joins !== null) {
               delete joins[jid];
@@ -5094,7 +5094,7 @@
           return canceler;
         };
       }
-      function join5(cb) {
+      function join6(cb) {
         return function() {
           var canceler = onComplete({
             rethrow: false,
@@ -5108,7 +5108,7 @@
       }
       return {
         kill: kill2,
-        join: join5,
+        join: join6,
         onComplete,
         isSuspended: function() {
           return status === SUSPENDED;
@@ -5191,7 +5191,7 @@
         }
         return kills2;
       }
-      function join5(result, head6, tail3) {
+      function join6(result, head6, tail3) {
         var fail3, step5, lhs, rhs, tmp, kid;
         if (util2.isLeft(result)) {
           fail3 = result;
@@ -5237,9 +5237,9 @@
                     if (tmp) {
                       tmp = false;
                     } else if (tail3 === null) {
-                      join5(fail3, null, null);
+                      join6(fail3, null, null);
                     } else {
-                      join5(fail3, tail3._1, tail3._2);
+                      join6(fail3, tail3._1, tail3._2);
                     }
                   };
                 });
@@ -5274,9 +5274,9 @@
                     if (tmp) {
                       tmp = false;
                     } else if (tail3 === null) {
-                      join5(step5, null, null);
+                      join6(step5, null, null);
                     } else {
-                      join5(step5, tail3._1, tail3._2);
+                      join6(step5, tail3._1, tail3._2);
                     }
                   };
                 });
@@ -5300,7 +5300,7 @@
           return function() {
             delete fibers[fiber._1];
             fiber._3 = result;
-            join5(result, fiber._2._1, fiber._2._2);
+            join6(result, fiber._2._1, fiber._2._2);
           };
         };
       }
@@ -5454,8 +5454,8 @@
       if (aff.tag === Aff.Pure.tag) {
         return Aff.Pure(f(aff._1));
       } else {
-        return Aff.Bind(aff, function(value22) {
-          return Aff.Pure(f(value22));
+        return Aff.Bind(aff, function(value23) {
+          return Aff.Pure(f(value23));
         });
       }
     };
@@ -5537,10 +5537,10 @@
     };
   };
   var functorWriterT = function(dictFunctor) {
-    var map107 = map(dictFunctor);
+    var map109 = map(dictFunctor);
     return {
       map: function(f) {
-        return mapWriterT(map107(function(v2) {
+        return mapWriterT(map109(function(v2) {
           return new Tuple(f(v2.value0), v2.value1);
         }));
       }
@@ -5551,7 +5551,7 @@
     return function(dictApply) {
       var apply8 = apply(dictApply);
       var Functor0 = dictApply.Functor0();
-      var map107 = map(Functor0);
+      var map109 = map(Functor0);
       var functorWriterT1 = functorWriterT(Functor0);
       return {
         apply: function(v2) {
@@ -5561,7 +5561,7 @@
                 return new Tuple(v3.value0(v4.value0), append40(v3.value1)(v4.value1));
               };
             };
-            return apply8(map107(k)(v2))(v1);
+            return apply8(map109(k)(v2))(v1);
           };
         },
         Functor0: function() {
@@ -5574,16 +5574,16 @@
     var append40 = append(dictSemigroup);
     var applyWriterT1 = applyWriterT(dictSemigroup);
     return function(dictBind) {
-      var bind92 = bind(dictBind);
+      var bind93 = bind(dictBind);
       var Apply0 = dictBind.Apply0();
-      var map107 = map(Apply0.Functor0());
+      var map109 = map(Apply0.Functor0());
       var applyWriterT2 = applyWriterT1(Apply0);
       return {
         bind: function(v2) {
           return function(k) {
-            return bind92(v2)(function(v1) {
+            return bind93(v2)(function(v1) {
               var v22 = k(v1.value0);
-              return map107(function(v3) {
+              return map109(function(v3) {
                 return new Tuple(v3.value0, append40(v1.value1)(v3.value1));
               })(v22);
             });
@@ -5599,11 +5599,11 @@
     var mempty3 = mempty(dictMonoid);
     var applyWriterT1 = applyWriterT(dictMonoid.Semigroup0());
     return function(dictApplicative) {
-      var pure103 = pure(dictApplicative);
+      var pure104 = pure(dictApplicative);
       var applyWriterT2 = applyWriterT1(dictApplicative.Apply0());
       return {
         pure: function(a3) {
-          return pure103(new Tuple(a3, mempty3));
+          return pure104(new Tuple(a3, mempty3));
         },
         Apply0: function() {
           return applyWriterT2;
@@ -5959,14 +5959,14 @@
   };
 
   // output/Foreign/foreign.js
-  function typeOf(value22) {
-    return typeof value22;
+  function typeOf(value23) {
+    return typeof value23;
   }
-  function tagOf(value22) {
-    return Object.prototype.toString.call(value22).slice(8, -1);
+  function tagOf(value23) {
+    return Object.prototype.toString.call(value23).slice(8, -1);
   }
-  var isArray = Array.isArray || function(value22) {
-    return Object.prototype.toString.call(value22) === "[object Array]";
+  var isArray = Array.isArray || function(value23) {
+    return Object.prototype.toString.call(value23) === "[object Array]";
   };
 
   // output/Data.Int/foreign.js
@@ -6200,16 +6200,16 @@
     var pure125 = pure(applicativeExceptT(dictMonad));
     var fail1 = fail(dictMonad);
     return function(tag) {
-      return function(value22) {
-        if (tagOf(value22) === tag) {
-          return pure125(unsafeFromForeign(value22));
+      return function(value23) {
+        if (tagOf(value23) === tag) {
+          return pure125(unsafeFromForeign(value23));
         }
         ;
         if (otherwise) {
-          return fail1(new TypeMismatch(tag, tagOf(value22)));
+          return fail1(new TypeMismatch(tag, tagOf(value23)));
         }
         ;
-        throw new Error("Failed pattern match at Foreign (line 123, column 1 - line 123, column 104): " + [tag.constructor.name, value22.constructor.name]);
+        throw new Error("Failed pattern match at Foreign (line 123, column 1 - line 123, column 104): " + [tag.constructor.name, value23.constructor.name]);
       };
     };
   };
@@ -6882,18 +6882,18 @@
   };
   var foldFree = function(dictMonadRec) {
     var Monad0 = dictMonadRec.Monad0();
-    var map124 = map(Monad0.Bind1().Apply0().Functor0());
+    var map125 = map(Monad0.Bind1().Apply0().Functor0());
     var pure125 = pure(Monad0.Applicative0());
     var tailRecM4 = tailRecM(dictMonadRec);
     return function(k) {
       var go2 = function(f) {
         var v2 = toView(f);
         if (v2 instanceof Return) {
-          return map124(Done.create)(pure125(v2.value0));
+          return map125(Done.create)(pure125(v2.value0));
         }
         ;
         if (v2 instanceof Bind) {
-          return map124(function($199) {
+          return map125(function($199) {
             return Loop.create(v2.value1($199));
           })(k(v2.value0));
         }
@@ -6909,12 +6909,12 @@
     return v2;
   };
   var functorStateT = function(dictFunctor) {
-    var map107 = map(dictFunctor);
+    var map109 = map(dictFunctor);
     return {
       map: function(f) {
         return function(v2) {
           return function(s2) {
-            return map107(function(v1) {
+            return map109(function(v1) {
               return new Tuple(f(v1.value0), v1.value1);
             })(v2(s2));
           };
@@ -6933,12 +6933,12 @@
     };
   };
   var bindStateT = function(dictMonad) {
-    var bind92 = bind(dictMonad.Bind1());
+    var bind93 = bind(dictMonad.Bind1());
     return {
       bind: function(v2) {
         return function(f) {
           return function(s2) {
-            return bind92(v2(s2))(function(v1) {
+            return bind93(v2(s2))(function(v1) {
               var v3 = f(v1.value0);
               return v3(v1.value1);
             });
@@ -6960,11 +6960,11 @@
     };
   };
   var applicativeStateT = function(dictMonad) {
-    var pure103 = pure(dictMonad.Applicative0());
+    var pure104 = pure(dictMonad.Applicative0());
     return {
       pure: function(a3) {
         return function(s2) {
-          return pure103(new Tuple(a3, s2));
+          return pure104(new Tuple(a3, s2));
         };
       },
       Apply0: function() {
@@ -6973,12 +6973,12 @@
     };
   };
   var monadStateStateT = function(dictMonad) {
-    var pure103 = pure(dictMonad.Applicative0());
+    var pure104 = pure(dictMonad.Applicative0());
     var monadStateT1 = monadStateT(dictMonad);
     return {
       state: function(f) {
         return function($206) {
-          return pure103(f($206));
+          return pure104(f($206));
         };
       },
       Monad0: function() {
@@ -7995,9 +7995,9 @@
     return IndexedAttr2;
   })();
   var toAttrStringString = {
-    toAttr: function(value22) {
+    toAttr: function(value23) {
       return function(name16) {
-        return new StaticAttr(name16, new StringValue(value22));
+        return new StaticAttr(name16, new StringValue(value23));
       };
     }
   };
@@ -8011,9 +8011,9 @@
     }
   };
   var toAttrNumberNumber = {
-    toAttr: function(value22) {
+    toAttr: function(value23) {
       return function(name16) {
-        return new StaticAttr(name16, new NumberValue(value22));
+        return new StaticAttr(name16, new NumberValue(value23));
       };
     }
   };
@@ -8042,158 +8042,158 @@
   };
   var transform = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("transform");
+    return function(value23) {
+      return toAttr1(value23)("transform");
     };
   };
   var viewBox = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("viewBox");
+    return function(value23) {
+      return toAttr1(value23)("viewBox");
     };
   };
   var width = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("width");
+    return function(value23) {
+      return toAttr1(value23)("width");
     };
   };
   var x = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("x");
+    return function(value23) {
+      return toAttr1(value23)("x");
     };
   };
   var x1 = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("x1");
+    return function(value23) {
+      return toAttr1(value23)("x1");
     };
   };
   var x2 = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("x2");
+    return function(value23) {
+      return toAttr1(value23)("x2");
     };
   };
   var y = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("y");
+    return function(value23) {
+      return toAttr1(value23)("y");
     };
   };
   var y1 = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("y1");
+    return function(value23) {
+      return toAttr1(value23)("y1");
     };
   };
   var y2 = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("y2");
+    return function(value23) {
+      return toAttr1(value23)("y2");
     };
   };
   var textContent = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("textContent");
+    return function(value23) {
+      return toAttr1(value23)("textContent");
     };
   };
   var textAnchor = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("text-anchor");
+    return function(value23) {
+      return toAttr1(value23)("text-anchor");
     };
   };
   var strokeWidth = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("stroke-width");
+    return function(value23) {
+      return toAttr1(value23)("stroke-width");
     };
   };
   var strokeOpacity = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("stroke-opacity");
+    return function(value23) {
+      return toAttr1(value23)("stroke-opacity");
     };
   };
   var stroke = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("stroke");
+    return function(value23) {
+      return toAttr1(value23)("stroke");
     };
   };
   var radius = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("r");
+    return function(value23) {
+      return toAttr1(value23)("r");
     };
   };
   var opacity = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("opacity");
+    return function(value23) {
+      return toAttr1(value23)("opacity");
     };
   };
   var id_ = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("id");
+    return function(value23) {
+      return toAttr1(value23)("id");
     };
   };
   var height = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("height");
+    return function(value23) {
+      return toAttr1(value23)("height");
     };
   };
   var fontSize = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("font-size");
+    return function(value23) {
+      return toAttr1(value23)("font-size");
     };
   };
   var fillOpacity = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("fill-opacity");
+    return function(value23) {
+      return toAttr1(value23)("fill-opacity");
     };
   };
   var fill = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("fill");
+    return function(value23) {
+      return toAttr1(value23)("fill");
     };
   };
   var dy = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("dy");
+    return function(value23) {
+      return toAttr1(value23)("dy");
     };
   };
   var d = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("d");
+    return function(value23) {
+      return toAttr1(value23)("d");
     };
   };
   var cy = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("cy");
+    return function(value23) {
+      return toAttr1(value23)("cy");
     };
   };
   var cx = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("cx");
+    return function(value23) {
+      return toAttr1(value23)("cx");
     };
   };
   var class_ = function(dictToAttr) {
     var toAttr1 = toAttr(dictToAttr);
-    return function(value22) {
-      return toAttr1(value22)("class");
+    return function(value23) {
+      return toAttr1(value23)("class");
     };
   };
 
@@ -8281,10 +8281,10 @@
     return Leaf2;
   })();
   var Node = /* @__PURE__ */ (function() {
-    function Node3(value0, value1, value22, value32, value42, value52) {
+    function Node3(value0, value1, value23, value32, value42, value52) {
       this.value0 = value0;
       this.value1 = value1;
-      this.value2 = value22;
+      this.value2 = value23;
       this.value3 = value32;
       this.value4 = value42;
       this.value5 = value52;
@@ -8292,11 +8292,11 @@
     ;
     Node3.create = function(value0) {
       return function(value1) {
-        return function(value22) {
+        return function(value23) {
           return function(value32) {
             return function(value42) {
               return function(value52) {
-                return new Node3(value0, value1, value22, value32, value42, value52);
+                return new Node3(value0, value1, value23, value32, value42, value52);
               };
             };
           };
@@ -8313,16 +8313,16 @@
     return IterLeaf2;
   })();
   var IterEmit = /* @__PURE__ */ (function() {
-    function IterEmit2(value0, value1, value22) {
+    function IterEmit2(value0, value1, value23) {
       this.value0 = value0;
       this.value1 = value1;
-      this.value2 = value22;
+      this.value2 = value23;
     }
     ;
     IterEmit2.create = function(value0) {
       return function(value1) {
-        return function(value22) {
-          return new IterEmit2(value0, value1, value22);
+        return function(value23) {
+          return new IterEmit2(value0, value1, value23);
         };
       };
     };
@@ -8349,48 +8349,48 @@
     return IterDone2;
   })();
   var IterNext = /* @__PURE__ */ (function() {
-    function IterNext2(value0, value1, value22) {
+    function IterNext2(value0, value1, value23) {
       this.value0 = value0;
       this.value1 = value1;
-      this.value2 = value22;
+      this.value2 = value23;
     }
     ;
     IterNext2.create = function(value0) {
       return function(value1) {
-        return function(value22) {
-          return new IterNext2(value0, value1, value22);
+        return function(value23) {
+          return new IterNext2(value0, value1, value23);
         };
       };
     };
     return IterNext2;
   })();
   var Split = /* @__PURE__ */ (function() {
-    function Split2(value0, value1, value22) {
+    function Split2(value0, value1, value23) {
       this.value0 = value0;
       this.value1 = value1;
-      this.value2 = value22;
+      this.value2 = value23;
     }
     ;
     Split2.create = function(value0) {
       return function(value1) {
-        return function(value22) {
-          return new Split2(value0, value1, value22);
+        return function(value23) {
+          return new Split2(value0, value1, value23);
         };
       };
     };
     return Split2;
   })();
   var SplitLast = /* @__PURE__ */ (function() {
-    function SplitLast2(value0, value1, value22) {
+    function SplitLast2(value0, value1, value23) {
       this.value0 = value0;
       this.value1 = value1;
-      this.value2 = value22;
+      this.value2 = value23;
     }
     ;
     SplitLast2.create = function(value0) {
       return function(value1) {
-        return function(value22) {
-          return new SplitLast2(value0, value1, value22);
+        return function(value23) {
+          return new SplitLast2(value0, value1, value23);
         };
       };
     };
@@ -8837,7 +8837,7 @@
   var eqMapIter = function(dictEq) {
     var eq110 = eq(dictEq);
     return function(dictEq1) {
-      var eq25 = eq(dictEq1);
+      var eq26 = eq(dictEq1);
       return {
         eq: /* @__PURE__ */ (function() {
           var go2 = function($copy_a) {
@@ -8849,7 +8849,7 @@
                 var v2 = stepAsc(a3);
                 if (v2 instanceof IterNext) {
                   var v22 = stepAsc(b10);
-                  if (v22 instanceof IterNext && (eq110(v2.value0)(v22.value0) && eq25(v2.value1)(v22.value1))) {
+                  if (v22 instanceof IterNext && (eq110(v2.value0)(v22.value0) && eq26(v2.value1)(v22.value1))) {
                     $tco_var_a = v2.value2;
                     $copy_b = v22.value2;
                     return;
@@ -9040,7 +9040,7 @@
     },
     foldMap: function(dictMonoid) {
       var mempty3 = mempty(dictMonoid);
-      var append131 = append(dictMonoid.Semigroup0());
+      var append132 = append(dictMonoid.Semigroup0());
       return function(f) {
         var go2 = function(v2) {
           if (v2 instanceof Leaf) {
@@ -9048,7 +9048,7 @@
           }
           ;
           if (v2 instanceof Node) {
-            return append131(go2(v2.value4))(append131(f(v2.value3))(go2(v2.value5)));
+            return append132(go2(v2.value4))(append132(f(v2.value3))(go2(v2.value5)));
           }
           ;
           throw new Error("Failed pattern match at Data.Map.Internal (line 181, column 10 - line 184, column 28): " + [v2.constructor.name]);
@@ -9102,7 +9102,7 @@
     },
     foldMapWithIndex: function(dictMonoid) {
       var mempty3 = mempty(dictMonoid);
-      var append131 = append(dictMonoid.Semigroup0());
+      var append132 = append(dictMonoid.Semigroup0());
       return function(f) {
         var go2 = function(v2) {
           if (v2 instanceof Leaf) {
@@ -9110,7 +9110,7 @@
           }
           ;
           if (v2 instanceof Node) {
-            return append131(go2(v2.value4))(append131(f(v2.value2)(v2.value3))(go2(v2.value5)));
+            return append132(go2(v2.value4))(append132(f(v2.value2)(v2.value3))(go2(v2.value5)));
           }
           ;
           throw new Error("Failed pattern match at Data.Map.Internal (line 201, column 10 - line 204, column 30): " + [v2.constructor.name]);
@@ -9366,8 +9366,8 @@
       }
     };
   }
-  function jsonStringify_(value22) {
-    return JSON.stringify(value22);
+  function jsonStringify_(value23) {
+    return JSON.stringify(value23);
   }
 
   // output/Effect.Console/foreign.js
@@ -9622,13 +9622,13 @@
   function datum(node) {
     return node.__data__;
   }
-  function data_default(value22, key) {
+  function data_default(value23, key) {
     if (!arguments.length) return Array.from(this, datum);
-    var bind92 = key ? bindKey : bindIndex, parents = this._parents, groups = this._groups;
-    if (typeof value22 !== "function") value22 = constant_default(value22);
+    var bind93 = key ? bindKey : bindIndex, parents = this._parents, groups = this._groups;
+    if (typeof value23 !== "function") value23 = constant_default(value23);
     for (var m2 = groups.length, update2 = new Array(m2), enter = new Array(m2), exit = new Array(m2), j = 0; j < m2; ++j) {
-      var parent2 = parents[j], group4 = groups[j], groupLength = group4.length, data = arraylike(value22.call(parent2, parent2 && parent2.__data__, j, parents)), dataLength = data.length, enterGroup = enter[j] = new Array(dataLength), updateGroup = update2[j] = new Array(dataLength), exitGroup = exit[j] = new Array(groupLength);
-      bind92(parent2, group4, enterGroup, updateGroup, exitGroup, data, key);
+      var parent2 = parents[j], group4 = groups[j], groupLength = group4.length, data = arraylike(value23.call(parent2, parent2 && parent2.__data__, j, parents)), dataLength = data.length, enterGroup = enter[j] = new Array(dataLength), updateGroup = update2[j] = new Array(dataLength), exitGroup = exit[j] = new Array(groupLength);
+      bind93(parent2, group4, enterGroup, updateGroup, exitGroup, data, key);
       for (var i0 = 0, i1 = 0, previous, next2; i0 < dataLength; ++i0) {
         if (previous = enterGroup[i0]) {
           if (i0 >= i1) i1 = i0 + 1;
@@ -9775,37 +9775,37 @@
       this.removeAttributeNS(fullname.space, fullname.local);
     };
   }
-  function attrConstant(name16, value22) {
+  function attrConstant(name16, value23) {
     return function() {
-      this.setAttribute(name16, value22);
+      this.setAttribute(name16, value23);
     };
   }
-  function attrConstantNS(fullname, value22) {
+  function attrConstantNS(fullname, value23) {
     return function() {
-      this.setAttributeNS(fullname.space, fullname.local, value22);
+      this.setAttributeNS(fullname.space, fullname.local, value23);
     };
   }
-  function attrFunction(name16, value22) {
+  function attrFunction(name16, value23) {
     return function() {
-      var v2 = value22.apply(this, arguments);
+      var v2 = value23.apply(this, arguments);
       if (v2 == null) this.removeAttribute(name16);
       else this.setAttribute(name16, v2);
     };
   }
-  function attrFunctionNS(fullname, value22) {
+  function attrFunctionNS(fullname, value23) {
     return function() {
-      var v2 = value22.apply(this, arguments);
+      var v2 = value23.apply(this, arguments);
       if (v2 == null) this.removeAttributeNS(fullname.space, fullname.local);
       else this.setAttributeNS(fullname.space, fullname.local, v2);
     };
   }
-  function attr_default(name16, value22) {
+  function attr_default(name16, value23) {
     var fullname = namespace_default(name16);
     if (arguments.length < 2) {
       var node = this.node();
       return fullname.local ? node.getAttributeNS(fullname.space, fullname.local) : node.getAttribute(fullname);
     }
-    return this.each((value22 == null ? fullname.local ? attrRemoveNS : attrRemove : typeof value22 === "function" ? fullname.local ? attrFunctionNS : attrFunction : fullname.local ? attrConstantNS : attrConstant)(fullname, value22));
+    return this.each((value23 == null ? fullname.local ? attrRemoveNS : attrRemove : typeof value23 === "function" ? fullname.local ? attrFunctionNS : attrFunction : fullname.local ? attrConstantNS : attrConstant)(fullname, value23));
   }
 
   // node_modules/d3-selection/src/window.js
@@ -9819,20 +9819,20 @@
       this.style.removeProperty(name16);
     };
   }
-  function styleConstant(name16, value22, priority) {
+  function styleConstant(name16, value23, priority) {
     return function() {
-      this.style.setProperty(name16, value22, priority);
+      this.style.setProperty(name16, value23, priority);
     };
   }
-  function styleFunction(name16, value22, priority) {
+  function styleFunction(name16, value23, priority) {
     return function() {
-      var v2 = value22.apply(this, arguments);
+      var v2 = value23.apply(this, arguments);
       if (v2 == null) this.style.removeProperty(name16);
       else this.style.setProperty(name16, v2, priority);
     };
   }
-  function style_default(name16, value22, priority) {
-    return arguments.length > 1 ? this.each((value22 == null ? styleRemove : typeof value22 === "function" ? styleFunction : styleConstant)(name16, value22, priority == null ? "" : priority)) : styleValue(this.node(), name16);
+  function style_default(name16, value23, priority) {
+    return arguments.length > 1 ? this.each((value23 == null ? styleRemove : typeof value23 === "function" ? styleFunction : styleConstant)(name16, value23, priority == null ? "" : priority)) : styleValue(this.node(), name16);
   }
   function styleValue(node, name16) {
     return node.style.getPropertyValue(name16) || window_default(node).getComputedStyle(node, null).getPropertyValue(name16);
@@ -9844,20 +9844,20 @@
       delete this[name16];
     };
   }
-  function propertyConstant(name16, value22) {
+  function propertyConstant(name16, value23) {
     return function() {
-      this[name16] = value22;
+      this[name16] = value23;
     };
   }
-  function propertyFunction(name16, value22) {
+  function propertyFunction(name16, value23) {
     return function() {
-      var v2 = value22.apply(this, arguments);
+      var v2 = value23.apply(this, arguments);
       if (v2 == null) delete this[name16];
       else this[name16] = v2;
     };
   }
-  function property_default(name16, value22) {
-    return arguments.length > 1 ? this.each((value22 == null ? propertyRemove : typeof value22 === "function" ? propertyFunction : propertyConstant)(name16, value22)) : this.node()[name16];
+  function property_default(name16, value23) {
+    return arguments.length > 1 ? this.each((value23 == null ? propertyRemove : typeof value23 === "function" ? propertyFunction : propertyConstant)(name16, value23)) : this.node()[name16];
   }
 
   // node_modules/d3-selection/src/selection/classed.js
@@ -9908,57 +9908,57 @@
       classedRemove(this, names);
     };
   }
-  function classedFunction(names, value22) {
+  function classedFunction(names, value23) {
     return function() {
-      (value22.apply(this, arguments) ? classedAdd : classedRemove)(this, names);
+      (value23.apply(this, arguments) ? classedAdd : classedRemove)(this, names);
     };
   }
-  function classed_default(name16, value22) {
+  function classed_default(name16, value23) {
     var names = classArray(name16 + "");
     if (arguments.length < 2) {
       var list = classList(this.node()), i2 = -1, n = names.length;
       while (++i2 < n) if (!list.contains(names[i2])) return false;
       return true;
     }
-    return this.each((typeof value22 === "function" ? classedFunction : value22 ? classedTrue : classedFalse)(names, value22));
+    return this.each((typeof value23 === "function" ? classedFunction : value23 ? classedTrue : classedFalse)(names, value23));
   }
 
   // node_modules/d3-selection/src/selection/text.js
   function textRemove() {
     this.textContent = "";
   }
-  function textConstant(value22) {
+  function textConstant(value23) {
     return function() {
-      this.textContent = value22;
+      this.textContent = value23;
     };
   }
-  function textFunction(value22) {
+  function textFunction(value23) {
     return function() {
-      var v2 = value22.apply(this, arguments);
+      var v2 = value23.apply(this, arguments);
       this.textContent = v2 == null ? "" : v2;
     };
   }
-  function text_default(value22) {
-    return arguments.length ? this.each(value22 == null ? textRemove : (typeof value22 === "function" ? textFunction : textConstant)(value22)) : this.node().textContent;
+  function text_default(value23) {
+    return arguments.length ? this.each(value23 == null ? textRemove : (typeof value23 === "function" ? textFunction : textConstant)(value23)) : this.node().textContent;
   }
 
   // node_modules/d3-selection/src/selection/html.js
   function htmlRemove() {
     this.innerHTML = "";
   }
-  function htmlConstant(value22) {
+  function htmlConstant(value23) {
     return function() {
-      this.innerHTML = value22;
+      this.innerHTML = value23;
     };
   }
-  function htmlFunction(value22) {
+  function htmlFunction(value23) {
     return function() {
-      var v2 = value22.apply(this, arguments);
+      var v2 = value23.apply(this, arguments);
       this.innerHTML = v2 == null ? "" : v2;
     };
   }
-  function html_default(value22) {
-    return arguments.length ? this.each(value22 == null ? htmlRemove : (typeof value22 === "function" ? htmlFunction : htmlConstant)(value22)) : this.node().innerHTML;
+  function html_default(value23) {
+    return arguments.length ? this.each(value23 == null ? htmlRemove : (typeof value23 === "function" ? htmlFunction : htmlConstant)(value23)) : this.node().innerHTML;
   }
 
   // node_modules/d3-selection/src/selection/raise.js
@@ -10019,8 +10019,8 @@
   }
 
   // node_modules/d3-selection/src/selection/datum.js
-  function datum_default(value22) {
-    return arguments.length ? this.property("__data__", value22) : this.node().__data__;
+  function datum_default(value23) {
+    return arguments.length ? this.property("__data__", value23) : this.node().__data__;
   }
 
   // node_modules/d3-selection/src/selection/on.js
@@ -10051,24 +10051,24 @@
       else delete this.__on;
     };
   }
-  function onAdd(typename, value22, options2) {
+  function onAdd(typename, value23, options2) {
     return function() {
-      var on10 = this.__on, o, listener = contextListener(value22);
+      var on10 = this.__on, o, listener = contextListener(value23);
       if (on10) for (var j = 0, m2 = on10.length; j < m2; ++j) {
         if ((o = on10[j]).type === typename.type && o.name === typename.name) {
           this.removeEventListener(o.type, o.listener, o.options);
           this.addEventListener(o.type, o.listener = listener, o.options = options2);
-          o.value = value22;
+          o.value = value23;
           return;
         }
       }
       this.addEventListener(typename.type, listener, options2);
-      o = { type: typename.type, name: typename.name, value: value22, listener, options: options2 };
+      o = { type: typename.type, name: typename.name, value: value23, listener, options: options2 };
       if (!on10) this.__on = [o];
       else on10.push(o);
     };
   }
-  function on_default(typename, value22, options2) {
+  function on_default(typename, value23, options2) {
     var typenames = parseTypenames(typename + ""), i2, n = typenames.length, t2;
     if (arguments.length < 2) {
       var on10 = this.node().__on;
@@ -10081,8 +10081,8 @@
       }
       return;
     }
-    on10 = value22 ? onAdd : onRemove;
-    for (i2 = 0; i2 < n; ++i2) this.each(on10(typenames[i2], value22, options2));
+    on10 = value23 ? onAdd : onRemove;
+    for (i2 = 0; i2 < n; ++i2) this.each(on10(typenames[i2], value23, options2));
     return this;
   }
 
@@ -10343,8 +10343,8 @@
     });
   }
   DragEvent.prototype.on = function() {
-    var value22 = this._.on.apply(this._, arguments);
-    return value22 === this._ ? this : value22;
+    var value23 = this._.on.apply(this._, arguments);
+    return value23 === this._ ? this : value23;
   };
 
   // node_modules/d3-drag/src/drag.js
@@ -10483,8 +10483,8 @@
       return arguments.length ? (touchable = typeof _ === "function" ? _ : constant_default2(!!_), drag2) : touchable;
     };
     drag2.on = function() {
-      var value22 = listeners.on.apply(listeners, arguments);
-      return value22 === listeners ? drag2 : value22;
+      var value23 = listeners.on.apply(listeners, arguments);
+      return value23 === listeners ? drag2 : value23;
     };
     drag2.clickDistance = function(_) {
       return arguments.length ? (clickDistance2 = (_ = +_) * _, drag2) : Math.sqrt(clickDistance2);
@@ -10760,12 +10760,12 @@
   function clampa(opacity7) {
     return isNaN(opacity7) ? 1 : Math.max(0, Math.min(1, opacity7));
   }
-  function clampi(value22) {
-    return Math.max(0, Math.min(255, Math.round(value22) || 0));
+  function clampi(value23) {
+    return Math.max(0, Math.min(255, Math.round(value23) || 0));
   }
-  function hex(value22) {
-    value22 = clampi(value22);
-    return (value22 < 16 ? "0" : "") + value22.toString(16);
+  function hex(value23) {
+    value23 = clampi(value23);
+    return (value23 < 16 ? "0" : "") + value23.toString(16);
   }
   function hsla(h7, s2, l2, a3) {
     if (a3 <= 0) h7 = s2 = l2 = NaN;
@@ -10829,12 +10829,12 @@
       return `${a3 === 1 ? "hsl(" : "hsla("}${clamph(this.h)}, ${clampt(this.s) * 100}%, ${clampt(this.l) * 100}%${a3 === 1 ? ")" : `, ${a3})`}`;
     }
   }));
-  function clamph(value22) {
-    value22 = (value22 || 0) % 360;
-    return value22 < 0 ? value22 + 360 : value22;
+  function clamph(value23) {
+    value23 = (value23 || 0) % 360;
+    return value23 < 0 ? value23 + 360 : value23;
   }
-  function clampt(value22) {
-    return Math.max(0, Math.min(1, value22 || 0));
+  function clampt(value23) {
+    return Math.max(0, Math.min(1, value23 || 0));
   }
   function hsl2rgb(h7, m1, m2) {
     return (h7 < 60 ? m1 + (m2 - m1) * h7 / 60 : h7 < 180 ? m2 : h7 < 240 ? m1 + (m2 - m1) * (240 - h7) / 60 : m1) * 255;
@@ -11066,17 +11066,17 @@
 
   // node_modules/d3-interpolate/src/transform/parse.js
   var svgNode;
-  function parseCss(value22) {
-    const m2 = new (typeof DOMMatrix === "function" ? DOMMatrix : WebKitCSSMatrix)(value22 + "");
+  function parseCss(value23) {
+    const m2 = new (typeof DOMMatrix === "function" ? DOMMatrix : WebKitCSSMatrix)(value23 + "");
     return m2.isIdentity ? identity9 : decompose_default(m2.a, m2.b, m2.c, m2.d, m2.e, m2.f);
   }
-  function parseSvg(value22) {
-    if (value22 == null) return identity9;
+  function parseSvg(value23) {
+    if (value23 == null) return identity9;
     if (!svgNode) svgNode = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    svgNode.setAttribute("transform", value22);
-    if (!(value22 = svgNode.transform.baseVal.consolidate())) return identity9;
-    value22 = value22.matrix;
-    return decompose_default(value22.a, value22.b, value22.c, value22.d, value22.e, value22.f);
+    svgNode.setAttribute("transform", value23);
+    if (!(value23 = svgNode.transform.baseVal.consolidate())) return identity9;
+    value23 = value23.matrix;
+    return decompose_default(value23.a, value23.b, value23.c, value23.d, value23.e, value23.f);
   }
 
   // node_modules/d3-interpolate/src/transform/index.js
@@ -11447,14 +11447,14 @@
       schedule.tween = tween1;
     };
   }
-  function tweenFunction(id5, name16, value22) {
+  function tweenFunction(id5, name16, value23) {
     var tween0, tween1;
-    if (typeof value22 !== "function") throw new Error();
+    if (typeof value23 !== "function") throw new Error();
     return function() {
       var schedule = set2(this, id5), tween = schedule.tween;
       if (tween !== tween0) {
         tween1 = (tween0 = tween).slice();
-        for (var t2 = { name: name16, value: value22 }, i2 = 0, n = tween1.length; i2 < n; ++i2) {
+        for (var t2 = { name: name16, value: value23 }, i2 = 0, n = tween1.length; i2 < n; ++i2) {
           if (tween1[i2].name === name16) {
             tween1[i2] = t2;
             break;
@@ -11465,7 +11465,7 @@
       schedule.tween = tween1;
     };
   }
-  function tween_default(name16, value22) {
+  function tween_default(name16, value23) {
     var id5 = this._id;
     name16 += "";
     if (arguments.length < 2) {
@@ -11477,13 +11477,13 @@
       }
       return null;
     }
-    return this.each((value22 == null ? tweenRemove : tweenFunction)(id5, name16, value22));
+    return this.each((value23 == null ? tweenRemove : tweenFunction)(id5, name16, value23));
   }
-  function tweenValue(transition3, name16, value22) {
+  function tweenValue(transition3, name16, value23) {
     var id5 = transition3._id;
     transition3.each(function() {
       var schedule = set2(this, id5);
-      (schedule.value || (schedule.value = {}))[name16] = value22.apply(this, arguments);
+      (schedule.value || (schedule.value = {}))[name16] = value23.apply(this, arguments);
     });
     return function(node) {
       return get5(node, id5).value[name16];
@@ -11521,29 +11521,29 @@
       return string0 === string1 ? null : string0 === string00 ? interpolate0 : interpolate0 = interpolate(string00 = string0, value1);
     };
   }
-  function attrFunction2(name16, interpolate, value22) {
+  function attrFunction2(name16, interpolate, value23) {
     var string00, string10, interpolate0;
     return function() {
-      var string0, value1 = value22(this), string1;
+      var string0, value1 = value23(this), string1;
       if (value1 == null) return void this.removeAttribute(name16);
       string0 = this.getAttribute(name16);
       string1 = value1 + "";
       return string0 === string1 ? null : string0 === string00 && string1 === string10 ? interpolate0 : (string10 = string1, interpolate0 = interpolate(string00 = string0, value1));
     };
   }
-  function attrFunctionNS2(fullname, interpolate, value22) {
+  function attrFunctionNS2(fullname, interpolate, value23) {
     var string00, string10, interpolate0;
     return function() {
-      var string0, value1 = value22(this), string1;
+      var string0, value1 = value23(this), string1;
       if (value1 == null) return void this.removeAttributeNS(fullname.space, fullname.local);
       string0 = this.getAttributeNS(fullname.space, fullname.local);
       string1 = value1 + "";
       return string0 === string1 ? null : string0 === string00 && string1 === string10 ? interpolate0 : (string10 = string1, interpolate0 = interpolate(string00 = string0, value1));
     };
   }
-  function attr_default2(name16, value22) {
+  function attr_default2(name16, value23) {
     var fullname = namespace_default(name16), i2 = fullname === "transform" ? interpolateTransformSvg : interpolate_default;
-    return this.attrTween(name16, typeof value22 === "function" ? (fullname.local ? attrFunctionNS2 : attrFunction2)(fullname, i2, tweenValue(this, "attr." + name16, value22)) : value22 == null ? (fullname.local ? attrRemoveNS2 : attrRemove2)(fullname) : (fullname.local ? attrConstantNS2 : attrConstant2)(fullname, i2, value22));
+    return this.attrTween(name16, typeof value23 === "function" ? (fullname.local ? attrFunctionNS2 : attrFunction2)(fullname, i2, tweenValue(this, "attr." + name16, value23)) : value23 == null ? (fullname.local ? attrRemoveNS2 : attrRemove2)(fullname) : (fullname.local ? attrConstantNS2 : attrConstant2)(fullname, i2, value23));
   }
 
   // node_modules/d3-transition/src/transition/attrTween.js
@@ -11557,90 +11557,90 @@
       this.setAttributeNS(fullname.space, fullname.local, i2.call(this, t2));
     };
   }
-  function attrTweenNS(fullname, value22) {
+  function attrTweenNS(fullname, value23) {
     var t0, i0;
     function tween() {
-      var i2 = value22.apply(this, arguments);
+      var i2 = value23.apply(this, arguments);
       if (i2 !== i0) t0 = (i0 = i2) && attrInterpolateNS(fullname, i2);
       return t0;
     }
-    tween._value = value22;
+    tween._value = value23;
     return tween;
   }
-  function attrTween(name16, value22) {
+  function attrTween(name16, value23) {
     var t0, i0;
     function tween() {
-      var i2 = value22.apply(this, arguments);
+      var i2 = value23.apply(this, arguments);
       if (i2 !== i0) t0 = (i0 = i2) && attrInterpolate(name16, i2);
       return t0;
     }
-    tween._value = value22;
+    tween._value = value23;
     return tween;
   }
-  function attrTween_default(name16, value22) {
+  function attrTween_default(name16, value23) {
     var key = "attr." + name16;
     if (arguments.length < 2) return (key = this.tween(key)) && key._value;
-    if (value22 == null) return this.tween(key, null);
-    if (typeof value22 !== "function") throw new Error();
+    if (value23 == null) return this.tween(key, null);
+    if (typeof value23 !== "function") throw new Error();
     var fullname = namespace_default(name16);
-    return this.tween(key, (fullname.local ? attrTweenNS : attrTween)(fullname, value22));
+    return this.tween(key, (fullname.local ? attrTweenNS : attrTween)(fullname, value23));
   }
 
   // node_modules/d3-transition/src/transition/delay.js
-  function delayFunction(id5, value22) {
+  function delayFunction(id5, value23) {
     return function() {
-      init2(this, id5).delay = +value22.apply(this, arguments);
+      init2(this, id5).delay = +value23.apply(this, arguments);
     };
   }
-  function delayConstant(id5, value22) {
-    return value22 = +value22, function() {
-      init2(this, id5).delay = value22;
+  function delayConstant(id5, value23) {
+    return value23 = +value23, function() {
+      init2(this, id5).delay = value23;
     };
   }
-  function delay_default(value22) {
+  function delay_default(value23) {
     var id5 = this._id;
-    return arguments.length ? this.each((typeof value22 === "function" ? delayFunction : delayConstant)(id5, value22)) : get5(this.node(), id5).delay;
+    return arguments.length ? this.each((typeof value23 === "function" ? delayFunction : delayConstant)(id5, value23)) : get5(this.node(), id5).delay;
   }
 
   // node_modules/d3-transition/src/transition/duration.js
-  function durationFunction(id5, value22) {
+  function durationFunction(id5, value23) {
     return function() {
-      set2(this, id5).duration = +value22.apply(this, arguments);
+      set2(this, id5).duration = +value23.apply(this, arguments);
     };
   }
-  function durationConstant(id5, value22) {
-    return value22 = +value22, function() {
-      set2(this, id5).duration = value22;
+  function durationConstant(id5, value23) {
+    return value23 = +value23, function() {
+      set2(this, id5).duration = value23;
     };
   }
-  function duration_default(value22) {
+  function duration_default(value23) {
     var id5 = this._id;
-    return arguments.length ? this.each((typeof value22 === "function" ? durationFunction : durationConstant)(id5, value22)) : get5(this.node(), id5).duration;
+    return arguments.length ? this.each((typeof value23 === "function" ? durationFunction : durationConstant)(id5, value23)) : get5(this.node(), id5).duration;
   }
 
   // node_modules/d3-transition/src/transition/ease.js
-  function easeConstant(id5, value22) {
-    if (typeof value22 !== "function") throw new Error();
+  function easeConstant(id5, value23) {
+    if (typeof value23 !== "function") throw new Error();
     return function() {
-      set2(this, id5).ease = value22;
+      set2(this, id5).ease = value23;
     };
   }
-  function ease_default(value22) {
+  function ease_default(value23) {
     var id5 = this._id;
-    return arguments.length ? this.each(easeConstant(id5, value22)) : get5(this.node(), id5).ease;
+    return arguments.length ? this.each(easeConstant(id5, value23)) : get5(this.node(), id5).ease;
   }
 
   // node_modules/d3-transition/src/transition/easeVarying.js
-  function easeVarying(id5, value22) {
+  function easeVarying(id5, value23) {
     return function() {
-      var v2 = value22.apply(this, arguments);
+      var v2 = value23.apply(this, arguments);
       if (typeof v2 !== "function") throw new Error();
       set2(this, id5).ease = v2;
     };
   }
-  function easeVarying_default(value22) {
-    if (typeof value22 !== "function") throw new Error();
-    return this.each(easeVarying(this._id, value22));
+  function easeVarying_default(value23) {
+    if (typeof value23 !== "function") throw new Error();
+    return this.each(easeVarying(this._id, value23));
   }
 
   // node_modules/d3-transition/src/transition/filter.js
@@ -11767,10 +11767,10 @@
       return string0 === string1 ? null : string0 === string00 ? interpolate0 : interpolate0 = interpolate(string00 = string0, value1);
     };
   }
-  function styleFunction2(name16, interpolate, value22) {
+  function styleFunction2(name16, interpolate, value23) {
     var string00, string10, interpolate0;
     return function() {
-      var string0 = styleValue(this, name16), value1 = value22(this), string1 = value1 + "";
+      var string0 = styleValue(this, name16), value1 = value23(this), string1 = value1 + "";
       if (value1 == null) string1 = value1 = (this.style.removeProperty(name16), styleValue(this, name16));
       return string0 === string1 ? null : string0 === string00 && string1 === string10 ? interpolate0 : (string10 = string1, interpolate0 = interpolate(string00 = string0, value1));
     };
@@ -11783,9 +11783,9 @@
       schedule.on = on1;
     };
   }
-  function style_default2(name16, value22, priority) {
+  function style_default2(name16, value23, priority) {
     var i2 = (name16 += "") === "transform" ? interpolateTransformCss : interpolate_default;
-    return value22 == null ? this.styleTween(name16, styleNull(name16, i2)).on("end.style." + name16, styleRemove2(name16)) : typeof value22 === "function" ? this.styleTween(name16, styleFunction2(name16, i2, tweenValue(this, "style." + name16, value22))).each(styleMaybeRemove(this._id, name16)) : this.styleTween(name16, styleConstant2(name16, i2, value22), priority).on("end.style." + name16, null);
+    return value23 == null ? this.styleTween(name16, styleNull(name16, i2)).on("end.style." + name16, styleRemove2(name16)) : typeof value23 === "function" ? this.styleTween(name16, styleFunction2(name16, i2, tweenValue(this, "style." + name16, value23))).each(styleMaybeRemove(this._id, name16)) : this.styleTween(name16, styleConstant2(name16, i2, value23), priority).on("end.style." + name16, null);
   }
 
   // node_modules/d3-transition/src/transition/styleTween.js
@@ -11794,38 +11794,38 @@
       this.style.setProperty(name16, i2.call(this, t2), priority);
     };
   }
-  function styleTween(name16, value22, priority) {
+  function styleTween(name16, value23, priority) {
     var t2, i0;
     function tween() {
-      var i2 = value22.apply(this, arguments);
+      var i2 = value23.apply(this, arguments);
       if (i2 !== i0) t2 = (i0 = i2) && styleInterpolate(name16, i2, priority);
       return t2;
     }
-    tween._value = value22;
+    tween._value = value23;
     return tween;
   }
-  function styleTween_default(name16, value22, priority) {
+  function styleTween_default(name16, value23, priority) {
     var key = "style." + (name16 += "");
     if (arguments.length < 2) return (key = this.tween(key)) && key._value;
-    if (value22 == null) return this.tween(key, null);
-    if (typeof value22 !== "function") throw new Error();
-    return this.tween(key, styleTween(name16, value22, priority == null ? "" : priority));
+    if (value23 == null) return this.tween(key, null);
+    if (typeof value23 !== "function") throw new Error();
+    return this.tween(key, styleTween(name16, value23, priority == null ? "" : priority));
   }
 
   // node_modules/d3-transition/src/transition/text.js
-  function textConstant2(value22) {
+  function textConstant2(value23) {
     return function() {
-      this.textContent = value22;
+      this.textContent = value23;
     };
   }
-  function textFunction2(value22) {
+  function textFunction2(value23) {
     return function() {
-      var value1 = value22(this);
+      var value1 = value23(this);
       this.textContent = value1 == null ? "" : value1;
     };
   }
-  function text_default2(value22) {
-    return this.tween("text", typeof value22 === "function" ? textFunction2(tweenValue(this, "text", value22)) : textConstant2(value22 == null ? "" : value22 + ""));
+  function text_default2(value23) {
+    return this.tween("text", typeof value23 === "function" ? textFunction2(tweenValue(this, "text", value23)) : textConstant2(value23 == null ? "" : value23 + ""));
   }
 
   // node_modules/d3-transition/src/transition/textTween.js
@@ -11834,22 +11834,22 @@
       this.textContent = i2.call(this, t2);
     };
   }
-  function textTween(value22) {
+  function textTween(value23) {
     var t0, i0;
     function tween() {
-      var i2 = value22.apply(this, arguments);
+      var i2 = value23.apply(this, arguments);
       if (i2 !== i0) t0 = (i0 = i2) && textInterpolate(i2);
       return t0;
     }
-    tween._value = value22;
+    tween._value = value23;
     return tween;
   }
-  function textTween_default(value22) {
+  function textTween_default(value23) {
     var key = "text";
     if (arguments.length < 1) return (key = this.tween(key)) && key._value;
-    if (value22 == null) return this.tween(key, null);
-    if (typeof value22 !== "function") throw new Error();
-    return this.tween(key, textTween(value22));
+    if (value23 == null) return this.tween(key, null);
+    if (typeof value23 !== "function") throw new Error();
+    return this.tween(key, textTween(value23));
   }
 
   // node_modules/d3-transition/src/transition/transition.js
@@ -12515,8 +12515,8 @@
       return arguments.length ? (interpolate = _, zoom) : interpolate;
     };
     zoom.on = function() {
-      var value22 = listeners.on.apply(listeners, arguments);
-      return value22 === listeners ? zoom : value22;
+      var value23 = listeners.on.apply(listeners, arguments);
+      return value23 === listeners ? zoom : value23;
     };
     zoom.clickDistance = function(_) {
       return arguments.length ? (clickDistance2 = (_ = +_) * _, zoom) : Math.sqrt(clickDistance2);
@@ -13172,10 +13172,10 @@
     };
   }
   function transitionSetAttribute_(name16) {
-    return function(value22) {
+    return function(value23) {
       return function(transition3) {
         return function() {
-          transition3.attr(name16, value22);
+          transition3.attr(name16, value23);
         };
       };
     };
@@ -13859,19 +13859,19 @@
   }
 
   // output/Web.Internal.FFI/foreign.js
-  function _unsafeReadProtoTagged(nothing, just, name16, value22) {
+  function _unsafeReadProtoTagged(nothing, just, name16, value23) {
     if (typeof window !== "undefined") {
       var ty = window[name16];
-      if (ty != null && value22 instanceof ty) {
-        return just(value22);
+      if (ty != null && value23 instanceof ty) {
+        return just(value23);
       }
     }
-    var obj = value22;
+    var obj = value23;
     while (obj != null) {
       var proto = Object.getPrototypeOf(obj);
       var constructorName = proto.constructor.name;
       if (constructorName === name16) {
-        return just(value22);
+        return just(value23);
       } else if (constructorName === "Object") {
         return nothing;
       }
@@ -13882,8 +13882,8 @@
 
   // output/Web.Internal.FFI/index.js
   var unsafeReadProtoTagged = function(name16) {
-    return function(value22) {
-      return _unsafeReadProtoTagged(Nothing.value, Just.create, name16, value22);
+    return function(value23) {
+      return _unsafeReadProtoTagged(Nothing.value, Just.create, name16, value23);
     };
   };
 
@@ -13904,10 +13904,10 @@
   var localName = getProp("localName");
   var tagName = getProp("tagName");
   function setAttribute(name16) {
-    return function(value22) {
+    return function(value23) {
       return function(element4) {
         return function() {
-          element4.setAttribute(name16, value22);
+          element4.setAttribute(name16, value23);
         };
       };
     };
@@ -13974,10 +13974,10 @@
   var _nextSibling = getEffProp3("nextSibling");
   var _nodeValue = getEffProp3("nodeValue");
   var textContent2 = getEffProp3("textContent");
-  function setTextContent(value22) {
+  function setTextContent(value23) {
     return function(node) {
       return function() {
-        node.textContent = value22;
+        node.textContent = value23;
       };
     };
   }
@@ -14015,11 +14015,11 @@
 
   // output/Control.Alternative/index.js
   var guard = function(dictAlternative) {
-    var pure103 = pure(dictAlternative.Applicative0());
+    var pure104 = pure(dictAlternative.Applicative0());
     var empty9 = empty2(dictAlternative.Plus1());
     return function(v2) {
       if (v2) {
-        return pure103(unit);
+        return pure104(unit);
       }
       ;
       if (!v2) {
@@ -14193,10 +14193,10 @@
   };
 
   // output/Web.HTML.HTMLElement/foreign.js
-  function _read(nothing, just, value22) {
-    var tag = Object.prototype.toString.call(value22);
+  function _read(nothing, just, value23) {
+    var tag = Object.prototype.toString.call(value23);
     if (tag.indexOf("[object HTML") === 0 && tag.indexOf("Element]") === tag.length - 8) {
-      return just(value22);
+      return just(value23);
     } else {
       return nothing;
     }
@@ -16756,7 +16756,7 @@
     return link5.source.name + ("->" + link5.target.name);
   };
   var hierDataToTree = function(hierData) {
-    var value22 = getValue(hierData);
+    var value23 = getValue(hierData);
     var name16 = getName(hierData);
     var childrenMaybe = getChildren(hierData);
     var childrenList = (function() {
@@ -16772,7 +16772,7 @@
     })();
     return mkTree({
       name: name16,
-      value: value22,
+      value: value23,
       x: 0,
       y: 0,
       depth: 0,
@@ -16938,16 +16938,16 @@
 
   // output/Halogen.Data.OrdBox/index.js
   var OrdBox = /* @__PURE__ */ (function() {
-    function OrdBox2(value0, value1, value22) {
+    function OrdBox2(value0, value1, value23) {
       this.value0 = value0;
       this.value1 = value1;
-      this.value2 = value22;
+      this.value2 = value23;
     }
     ;
     OrdBox2.create = function(value0) {
       return function(value1) {
-        return function(value22) {
-          return new OrdBox2(value0, value1, value22);
+        return function(value23) {
+          return new OrdBox2(value0, value1, value23);
         };
       };
     };
@@ -17343,18 +17343,18 @@
 
   // output/Halogen.VDom.Machine/index.js
   var Step2 = /* @__PURE__ */ (function() {
-    function Step3(value0, value1, value22, value32) {
+    function Step3(value0, value1, value23, value32) {
       this.value0 = value0;
       this.value1 = value1;
-      this.value2 = value22;
+      this.value2 = value23;
       this.value3 = value32;
     }
     ;
     Step3.create = function(value0) {
       return function(value1) {
-        return function(value22) {
+        return function(value23) {
           return function(value32) {
-            return new Step3(value0, value1, value22, value32);
+            return new Step3(value0, value1, value23, value32);
           };
         };
       };
@@ -17387,18 +17387,18 @@
     return Text3;
   })();
   var Elem = /* @__PURE__ */ (function() {
-    function Elem2(value0, value1, value22, value32) {
+    function Elem2(value0, value1, value23, value32) {
       this.value0 = value0;
       this.value1 = value1;
-      this.value2 = value22;
+      this.value2 = value23;
       this.value3 = value32;
     }
     ;
     Elem2.create = function(value0) {
       return function(value1) {
-        return function(value22) {
+        return function(value23) {
           return function(value32) {
-            return new Elem2(value0, value1, value22, value32);
+            return new Elem2(value0, value1, value23, value32);
           };
         };
       };
@@ -17406,18 +17406,18 @@
     return Elem2;
   })();
   var Keyed = /* @__PURE__ */ (function() {
-    function Keyed2(value0, value1, value22, value32) {
+    function Keyed2(value0, value1, value23, value32) {
       this.value0 = value0;
       this.value1 = value1;
-      this.value2 = value22;
+      this.value2 = value23;
       this.value3 = value32;
     }
     ;
     Keyed2.create = function(value0) {
       return function(value1) {
-        return function(value22) {
+        return function(value23) {
           return function(value32) {
-            return new Keyed2(value0, value1, value22, value32);
+            return new Keyed2(value0, value1, value23, value32);
           };
         };
       };
@@ -17445,16 +17445,16 @@
     return Grafted2;
   })();
   var Graft = /* @__PURE__ */ (function() {
-    function Graft2(value0, value1, value22) {
+    function Graft2(value0, value1, value23) {
       this.value0 = value0;
       this.value1 = value1;
-      this.value2 = value22;
+      this.value2 = value23;
     }
     ;
     Graft2.create = function(value0) {
       return function(value1) {
-        return function(value22) {
-          return new Graft2(value0, value1, value22);
+        return function(value23) {
+          return new Graft2(value0, value1, value23);
         };
       };
     };
@@ -18012,16 +18012,16 @@
     return Removed2;
   })();
   var Attribute = /* @__PURE__ */ (function() {
-    function Attribute2(value0, value1, value22) {
+    function Attribute2(value0, value1, value23) {
       this.value0 = value0;
       this.value1 = value1;
-      this.value2 = value22;
+      this.value2 = value23;
     }
     ;
     Attribute2.create = function(value0) {
       return function(value1) {
-        return function(value22) {
-          return new Attribute2(value0, value1, value22);
+        return function(value23) {
+          return new Attribute2(value0, value1, value23);
         };
       };
     };
@@ -18368,7 +18368,7 @@
     return Lift.create;
   })();
   var goLeft = function(dictApplicative) {
-    var pure103 = pure(dictApplicative);
+    var pure104 = pure(dictApplicative);
     return function(fStack) {
       return function(valStack) {
         return function(nat) {
@@ -18376,7 +18376,7 @@
             return function(count) {
               if (func instanceof Pure) {
                 return new Tuple(new Cons({
-                  func: pure103(func.value0),
+                  func: pure104(func.value0),
                   count
                 }, fStack), valStack);
               }
@@ -18447,7 +18447,7 @@
   };
   var foldFreeAp = function(dictApplicative) {
     var goApply1 = goApply(dictApplicative);
-    var pure103 = pure(dictApplicative);
+    var pure104 = pure(dictApplicative);
     var goLeft1 = goLeft(dictApplicative);
     return function(nat) {
       return function(z2) {
@@ -18456,7 +18456,7 @@
           var $tco_result;
           function $tco_loop(v2) {
             if (v2.value1.value0 instanceof Pure) {
-              var v1 = goApply1(v2.value0)(v2.value1.value1)(pure103(v2.value1.value0.value0));
+              var v1 = goApply1(v2.value0)(v2.value1.value1)(pure104(v2.value1.value0.value0));
               if (v1 instanceof Left) {
                 $tco_done = true;
                 return v1.value0;
@@ -18534,16 +18534,16 @@
 
   // output/Halogen.Query.ChildQuery/index.js
   var ChildQuery = /* @__PURE__ */ (function() {
-    function ChildQuery3(value0, value1, value22) {
+    function ChildQuery3(value0, value1, value23) {
       this.value0 = value0;
       this.value1 = value1;
-      this.value2 = value22;
+      this.value2 = value23;
     }
     ;
     ChildQuery3.create = function(value0) {
       return function(value1) {
-        return function(value22) {
-          return new ChildQuery3(value0, value1, value22);
+        return function(value23) {
+          return new ChildQuery3(value0, value1, value23);
         };
       };
     };
@@ -18841,14 +18841,14 @@
 
   // output/Halogen.Query.HalogenQ/index.js
   var Initialize = /* @__PURE__ */ (function() {
-    function Initialize51(value0) {
+    function Initialize52(value0) {
       this.value0 = value0;
     }
     ;
-    Initialize51.create = function(value0) {
-      return new Initialize51(value0);
+    Initialize52.create = function(value0) {
+      return new Initialize52(value0);
     };
-    return Initialize51;
+    return Initialize52;
   })();
   var Finalize = /* @__PURE__ */ (function() {
     function Finalize4(value0) {
@@ -19126,17 +19126,17 @@
   var a = /* @__PURE__ */ element2("a");
 
   // output/Foreign.Index/foreign.js
-  function unsafeReadPropImpl(f, s2, key, value22) {
-    return value22 == null ? f : s2(value22[key]);
+  function unsafeReadPropImpl(f, s2, key, value23) {
+    return value23 == null ? f : s2(value23[key]);
   }
 
   // output/Foreign.Index/index.js
   var unsafeReadProp = function(dictMonad) {
     var fail3 = fail(dictMonad);
-    var pure103 = pure(applicativeExceptT(dictMonad));
+    var pure104 = pure(applicativeExceptT(dictMonad));
     return function(k) {
-      return function(value22) {
-        return unsafeReadPropImpl(fail3(new TypeMismatch("object", typeOf(value22))), pure103, k, value22);
+      return function(value23) {
+        return unsafeReadPropImpl(fail3(new TypeMismatch("object", typeOf(value23))), pure104, k, value23);
       };
     };
   };
@@ -19266,11 +19266,11 @@
   var modify_3 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var get6 = /* @__PURE__ */ get(monadStateHalogenM);
   var Initialize2 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var ToggleLayout = /* @__PURE__ */ (function() {
     function ToggleLayout2() {
@@ -20735,7 +20735,7 @@
     constructor(entries, key = keyof) {
       super();
       Object.defineProperties(this, { _intern: { value: /* @__PURE__ */ new Map() }, _key: { value: key } });
-      if (entries != null) for (const [key2, value22] of entries) this.set(key2, value22);
+      if (entries != null) for (const [key2, value23] of entries) this.set(key2, value23);
     }
     get(key) {
       return super.get(intern_get(this, key));
@@ -20743,33 +20743,33 @@
     has(key) {
       return super.has(intern_get(this, key));
     }
-    set(key, value22) {
-      return super.set(intern_set(this, key), value22);
+    set(key, value23) {
+      return super.set(intern_set(this, key), value23);
     }
     delete(key) {
       return super.delete(intern_delete(this, key));
     }
   };
-  function intern_get({ _intern, _key }, value22) {
-    const key = _key(value22);
-    return _intern.has(key) ? _intern.get(key) : value22;
+  function intern_get({ _intern, _key }, value23) {
+    const key = _key(value23);
+    return _intern.has(key) ? _intern.get(key) : value23;
   }
-  function intern_set({ _intern, _key }, value22) {
-    const key = _key(value22);
+  function intern_set({ _intern, _key }, value23) {
+    const key = _key(value23);
     if (_intern.has(key)) return _intern.get(key);
-    _intern.set(key, value22);
-    return value22;
+    _intern.set(key, value23);
+    return value23;
   }
-  function intern_delete({ _intern, _key }, value22) {
-    const key = _key(value22);
+  function intern_delete({ _intern, _key }, value23) {
+    const key = _key(value23);
     if (_intern.has(key)) {
-      value22 = _intern.get(key);
+      value23 = _intern.get(key);
       _intern.delete(key);
     }
-    return value22;
+    return value23;
   }
-  function keyof(value22) {
-    return value22 !== null && typeof value22 === "object" ? value22.valueOf() : value22;
+  function keyof(value23) {
+    return value23 !== null && typeof value23 === "object" ? value23.valueOf() : value23;
   }
 
   // node_modules/d3-array/src/ticks.js
@@ -20862,9 +20862,9 @@
     scale.domain = function(_) {
       if (!arguments.length) return domain2.slice();
       domain2 = [], index5 = new InternMap();
-      for (const value22 of _) {
-        if (index5.has(value22)) continue;
-        index5.set(value22, domain2.push(value22) - 1);
+      for (const value23 of _) {
+        if (index5.has(value23)) continue;
+        index5.set(value23, domain2.push(value23) - 1);
       }
       return scale;
     };
@@ -21063,11 +21063,11 @@
 
   // node_modules/d3-format/src/formatGroup.js
   function formatGroup_default(grouping, thousands) {
-    return function(value22, width56) {
-      var i2 = value22.length, t2 = [], j = 0, g2 = grouping[0], length10 = 0;
+    return function(value23, width56) {
+      var i2 = value23.length, t2 = [], j = 0, g2 = grouping[0], length10 = 0;
       while (i2 > 0 && g2 > 0) {
         if (length10 + g2 + 1 > width56) g2 = Math.max(1, width56 - length10);
-        t2.push(value22.substring(i2 -= g2, i2 + g2));
+        t2.push(value23.substring(i2 -= g2, i2 + g2));
         if ((length10 += g2 + 1) > width56) break;
         g2 = grouping[j = (j + 1) % grouping.length];
       }
@@ -21077,8 +21077,8 @@
 
   // node_modules/d3-format/src/formatNumerals.js
   function formatNumerals_default(numerals) {
-    return function(value22) {
-      return value22.replace(/[0-9]/g, function(i2) {
+    return function(value23) {
+      return value23.replace(/[0-9]/g, function(i2) {
         return numerals[+i2];
       });
     };
@@ -21192,58 +21192,58 @@
       var prefix = symbol === "$" ? currencyPrefix : symbol === "#" && /[boxX]/.test(type) ? "0" + type.toLowerCase() : "", suffix = symbol === "$" ? currencySuffix : /[%p]/.test(type) ? percent : "";
       var formatType = formatTypes_default[type], maybeSuffix = /[defgprs%]/.test(type);
       precision = precision === void 0 ? 6 : /[gprs]/.test(type) ? Math.max(1, Math.min(21, precision)) : Math.max(0, Math.min(20, precision));
-      function format2(value22) {
+      function format2(value23) {
         var valuePrefix = prefix, valueSuffix = suffix, i2, n, c2;
         if (type === "c") {
-          valueSuffix = formatType(value22) + valueSuffix;
-          value22 = "";
+          valueSuffix = formatType(value23) + valueSuffix;
+          value23 = "";
         } else {
-          value22 = +value22;
-          var valueNegative = value22 < 0 || 1 / value22 < 0;
-          value22 = isNaN(value22) ? nan2 : formatType(Math.abs(value22), precision);
-          if (trim2) value22 = formatTrim_default(value22);
-          if (valueNegative && +value22 === 0 && sign2 !== "+") valueNegative = false;
+          value23 = +value23;
+          var valueNegative = value23 < 0 || 1 / value23 < 0;
+          value23 = isNaN(value23) ? nan2 : formatType(Math.abs(value23), precision);
+          if (trim2) value23 = formatTrim_default(value23);
+          if (valueNegative && +value23 === 0 && sign2 !== "+") valueNegative = false;
           valuePrefix = (valueNegative ? sign2 === "(" ? sign2 : minus : sign2 === "-" || sign2 === "(" ? "" : sign2) + valuePrefix;
           valueSuffix = (type === "s" ? prefixes[8 + prefixExponent / 3] : "") + valueSuffix + (valueNegative && sign2 === "(" ? ")" : "");
           if (maybeSuffix) {
-            i2 = -1, n = value22.length;
+            i2 = -1, n = value23.length;
             while (++i2 < n) {
-              if (c2 = value22.charCodeAt(i2), 48 > c2 || c2 > 57) {
-                valueSuffix = (c2 === 46 ? decimal + value22.slice(i2 + 1) : value22.slice(i2)) + valueSuffix;
-                value22 = value22.slice(0, i2);
+              if (c2 = value23.charCodeAt(i2), 48 > c2 || c2 > 57) {
+                valueSuffix = (c2 === 46 ? decimal + value23.slice(i2 + 1) : value23.slice(i2)) + valueSuffix;
+                value23 = value23.slice(0, i2);
                 break;
               }
             }
           }
         }
-        if (comma && !zero4) value22 = group4(value22, Infinity);
-        var length10 = valuePrefix.length + value22.length + valueSuffix.length, padding2 = length10 < width56 ? new Array(width56 - length10 + 1).join(fill53) : "";
-        if (comma && zero4) value22 = group4(padding2 + value22, padding2.length ? width56 - valueSuffix.length : Infinity), padding2 = "";
+        if (comma && !zero4) value23 = group4(value23, Infinity);
+        var length10 = valuePrefix.length + value23.length + valueSuffix.length, padding2 = length10 < width56 ? new Array(width56 - length10 + 1).join(fill53) : "";
+        if (comma && zero4) value23 = group4(padding2 + value23, padding2.length ? width56 - valueSuffix.length : Infinity), padding2 = "";
         switch (align2) {
           case "<":
-            value22 = valuePrefix + value22 + valueSuffix + padding2;
+            value23 = valuePrefix + value23 + valueSuffix + padding2;
             break;
           case "=":
-            value22 = valuePrefix + padding2 + value22 + valueSuffix;
+            value23 = valuePrefix + padding2 + value23 + valueSuffix;
             break;
           case "^":
-            value22 = padding2.slice(0, length10 = padding2.length >> 1) + valuePrefix + value22 + valueSuffix + padding2.slice(length10);
+            value23 = padding2.slice(0, length10 = padding2.length >> 1) + valuePrefix + value23 + valueSuffix + padding2.slice(length10);
             break;
           default:
-            value22 = padding2 + valuePrefix + value22 + valueSuffix;
+            value23 = padding2 + valuePrefix + value23 + valueSuffix;
             break;
         }
-        return numerals(value22);
+        return numerals(value23);
       }
       format2.toString = function() {
         return specifier + "";
       };
       return format2;
     }
-    function formatPrefix2(specifier, value22) {
-      var f = newFormat((specifier = formatSpecifier(specifier), specifier.type = "f", specifier)), e = Math.max(-8, Math.min(8, Math.floor(exponent_default(value22) / 3))) * 3, k = Math.pow(10, -e), prefix = prefixes[8 + e / 3];
-      return function(value23) {
-        return f(k * value23) + prefix;
+    function formatPrefix2(specifier, value23) {
+      var f = newFormat((specifier = formatSpecifier(specifier), specifier.type = "f", specifier)), e = Math.max(-8, Math.min(8, Math.floor(exponent_default(value23) / 3))) * 3, k = Math.pow(10, -e), prefix = prefixes[8 + e / 3];
+      return function(value24) {
+        return f(k * value24) + prefix;
       };
     }
     return {
@@ -21274,8 +21274,8 @@
   }
 
   // node_modules/d3-format/src/precisionPrefix.js
-  function precisionPrefix_default(step5, value22) {
-    return Math.max(0, Math.max(-8, Math.min(8, Math.floor(exponent_default(value22) / 3))) * 3 - exponent_default(Math.abs(step5)));
+  function precisionPrefix_default(step5, value23) {
+    return Math.max(0, Math.max(-8, Math.min(8, Math.floor(exponent_default(value23) / 3))) * 3 - exponent_default(Math.abs(step5)));
   }
 
   // node_modules/d3-format/src/precisionRound.js
@@ -21290,9 +21290,9 @@
     specifier = formatSpecifier(specifier == null ? ",f" : specifier);
     switch (specifier.type) {
       case "s": {
-        var value22 = Math.max(Math.abs(start5), Math.abs(stop3));
-        if (specifier.precision == null && !isNaN(precision = precisionPrefix_default(step5, value22))) specifier.precision = precision;
-        return formatPrefix(specifier, value22);
+        var value23 = Math.max(Math.abs(start5), Math.abs(stop3));
+        if (specifier.precision == null && !isNaN(precision = precisionPrefix_default(step5, value23))) specifier.precision = precision;
+        return formatPrefix(specifier, value23);
       }
       case "":
       case "e":
@@ -22848,7 +22848,7 @@
           return $tco_result;
         };
       };
-      var initialState5 = {
+      var initialState6 = {
         unvisited: v2,
         result: Nil.value
       };
@@ -22876,7 +22876,7 @@
         ;
         return $tco_result;
       };
-      return go2(initialState5);
+      return go2(initialState6);
     };
   };
   var fromMap = Graph;
@@ -24034,7 +24034,7 @@
   }
   function updateForceParam_(forceName) {
     return function(paramName) {
-      return function(value22) {
+      return function(value23) {
         return function() {
           const forces = window._psd3_forces_v2 || {};
           const force2 = forces[forceName];
@@ -24043,8 +24043,8 @@
             return;
           }
           if (typeof force2[paramName] === "function") {
-            force2[paramName](value22);
-            console.log(`[V2] Set ${forceName}.${paramName} = ${value22}`);
+            force2[paramName](value23);
+            console.log(`[V2] Set ${forceName}.${paramName} = ${value23}`);
             const ref2 = window._psd3_simulation_v2;
             if (ref2 && ref2.value) {
               ref2.value.alpha = Math.max(ref2.value.alpha, 0.3);
@@ -24236,11 +24236,11 @@ ${name16}:
     return Refresh2;
   })();
   var Initialize3 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var RefreshForces = /* @__PURE__ */ (function() {
     function RefreshForces2() {
@@ -24280,16 +24280,16 @@ ${name16}:
     return CollapseForce2;
   })();
   var SetParam = /* @__PURE__ */ (function() {
-    function SetParam2(value0, value1, value22) {
+    function SetParam2(value0, value1, value23) {
       this.value0 = value0;
       this.value1 = value1;
-      this.value2 = value22;
+      this.value2 = value23;
     }
     ;
     SetParam2.create = function(value0) {
       return function(value1) {
-        return function(value22) {
-          return new SetParam2(value0, value1, value22);
+        return function(value23) {
+          return new SetParam2(value0, value1, value23);
         };
       };
     };
@@ -24977,14 +24977,14 @@ ${name16}:
           ;
           return $tco_result;
         };
-        var initialState5 = {
+        var initialState6 = {
           nodes: empty8,
           spanningTree: [],
           redundantEdges: [],
           paths: [],
           openPaths: [[rootId]]
         };
-        var finalState = go2(initialState5);
+        var finalState = go2(initialState6);
         return {
           nodes: finalState.nodes,
           spanningTree: finalState.spanningTree,
@@ -25222,9 +25222,9 @@ ${name16}:
         var componentSlot22 = componentSlot1(dictOrd);
         return function(label5) {
           return function(p2) {
-            return function(component53) {
+            return function(component54) {
               return function(input3) {
-                return widget(new ComponentSlot(componentSlot22(label5)(p2)(component53)(input3)($$const(Nothing.value))));
+                return widget(new ComponentSlot(componentSlot22(label5)(p2)(component54)(input3)($$const(Nothing.value))));
               };
             };
           };
@@ -25239,10 +25239,10 @@ ${name16}:
         var componentSlot22 = componentSlot1(dictOrd);
         return function(label5) {
           return function(p2) {
-            return function(component53) {
+            return function(component54) {
               return function(input3) {
                 return function(outputQuery) {
-                  return widget(new ComponentSlot(componentSlot22(label5)(p2)(component53)(input3)(function($11) {
+                  return widget(new ComponentSlot(componentSlot22(label5)(p2)(component54)(input3)(function($11) {
                     return Just.create(outputQuery($11));
                   })));
                 };
@@ -25286,11 +25286,11 @@ ${name16}:
   var pure16 = /* @__PURE__ */ pure(applicativeHalogenM);
   var slot2 = /* @__PURE__ */ slot()(forcePanelIsSymbol)(ordUnit);
   var Initialize4 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var GoToOrbit = /* @__PURE__ */ (function() {
     function GoToOrbit2() {
@@ -25780,10 +25780,10 @@ ${name16}:
     };
   };
   var applyScale = function(scale) {
-    return function(value22) {
+    return function(value23) {
       var rangeSpan = scale.range.max - scale.range.min;
       var domainSpan = scale.domain.max - scale.domain.min;
-      var normalized = (value22 - scale.domain.min) / domainSpan;
+      var normalized = (value23 - scale.domain.min) / domainSpan;
       return scale.range.min + normalized * rangeSpan;
     };
   };
@@ -26385,11 +26385,11 @@ ${name16}:
       return bind16(index(fields)(0))(function(origin3) {
         return bind16(index(fields)(1))(function(destination) {
           return bind16(index(fields)(2))(function(valueStr) {
-            return bind16(fromString(trim(valueStr)))(function(value22) {
+            return bind16(fromString(trim(valueStr)))(function(value23) {
               return pure17({
                 origin: trim(origin3),
                 destination: trim(destination),
-                value: value22
+                value: value23
               });
             });
           });
@@ -26483,7 +26483,7 @@ ${name16}:
     return toMaybe(getChildren_2($125));
   };
   var hierDataToTree2 = function(hierData) {
-    var value22 = getValue2(hierData);
+    var value23 = getValue2(hierData);
     var name16 = getName2(hierData);
     var childrenMaybe = getChildren2(hierData);
     var childrenList = (function() {
@@ -26499,7 +26499,7 @@ ${name16}:
     })();
     return mkTree({
       name: name16,
-      value: value22,
+      value: value23,
       x: 0,
       y: 0,
       depth: 0,
@@ -28256,6 +28256,13 @@ ${name16}:
     ForcePlayground2.value = new ForcePlayground2();
     return ForcePlayground2;
   })();
+  var TreeBuilder = /* @__PURE__ */ (function() {
+    function TreeBuilder2() {
+    }
+    ;
+    TreeBuilder2.value = new TreeBuilder2();
+    return TreeBuilder2;
+  })();
   var Acknowledgements = /* @__PURE__ */ (function() {
     function Acknowledgements2() {
     }
@@ -28508,6 +28515,10 @@ ${name16}:
         return "Force Playground";
       }
       ;
+      if (v2 instanceof TreeBuilder) {
+        return "Tree Builder";
+      }
+      ;
       if (v2 instanceof Acknowledgements) {
         return "Acknowledgements";
       }
@@ -28516,7 +28527,7 @@ ${name16}:
         return "Not Found";
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Website.Types (line 153, column 1 - line 214, column 30): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Website.Types (line 154, column 1 - line 216, column 30): " + [v2.constructor.name]);
     }
   };
   var eqRoute = {
@@ -28755,6 +28766,10 @@ ${name16}:
         }
         ;
         if (x47 instanceof ForcePlayground && y48 instanceof ForcePlayground) {
+          return true;
+        }
+        ;
+        if (x47 instanceof TreeBuilder && y48 instanceof TreeBuilder) {
           return true;
         }
         ;
@@ -29176,6 +29191,9 @@ ${name16}:
   var understanding = /* @__PURE__ */ (function() {
     return applyFirst2(voidRight2(Understanding.value)(lit("understanding")))(end);
   })();
+  var treeBuilder = /* @__PURE__ */ (function() {
+    return applyFirst2(voidRight2(TreeBuilder.value)(lit("tree-builder")))(end);
+  })();
   var treeAPI = /* @__PURE__ */ (function() {
     return applyFirst2(voidRight2(TreeAPI.value)(lit("tree-api")))(end);
   })();
@@ -29467,6 +29485,10 @@ ${name16}:
       return "/force-playground";
     }
     ;
+    if (v2 instanceof TreeBuilder) {
+      return "/tree-builder";
+    }
+    ;
     if (v2 instanceof Acknowledgements) {
       return "/acknowledgements";
     }
@@ -29475,7 +29497,7 @@ ${name16}:
       return "/not-found";
     }
     ;
-    throw new Error("Failed pattern match at PSD3.RoutingDSL (line 334, column 1 - line 334, column 31): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.RoutingDSL (line 339, column 1 - line 339, column 31): " + [v2.constructor.name]);
   };
   var rootRedirect = /* @__PURE__ */ (function() {
     return voidRight2(Home.value)(end);
@@ -29588,7 +29610,7 @@ ${name16}:
   var acknowledgements = /* @__PURE__ */ (function() {
     return applyFirst2(voidRight2(Acknowledgements.value)(lit("acknowledgements")))(end);
   })();
-  var routes = /* @__PURE__ */ alt8(home)(/* @__PURE__ */ alt8(gettingStarted)(/* @__PURE__ */ alt8(wizard)(/* @__PURE__ */ alt8(howtoIndex)(/* @__PURE__ */ alt8(howtoTransitions)(/* @__PURE__ */ alt8(howtoForceGraphs)(/* @__PURE__ */ alt8(howtoHierarchical)(/* @__PURE__ */ alt8(howtoEvents)(/* @__PURE__ */ alt8(howtoTreeAPI)(/* @__PURE__ */ alt8(howtoLoadingData)(/* @__PURE__ */ alt8(howtoAxesScales)(/* @__PURE__ */ alt8(howtoTooltips)(/* @__PURE__ */ alt8(howtoDebugging)(/* @__PURE__ */ alt8(howtoPerformance)(/* @__PURE__ */ alt8(howtoTreeExplorer)(/* @__PURE__ */ alt8(understandingGrammar)(/* @__PURE__ */ alt8(understandingAttributes)(/* @__PURE__ */ alt8(understandingSelections)(/* @__PURE__ */ alt8(understandingTreeAPI)(/* @__PURE__ */ alt8(understandingScenes)(/* @__PURE__ */ alt8(understanding)(/* @__PURE__ */ alt8(referenceModule)(/* @__PURE__ */ alt8(reference)(/* @__PURE__ */ alt8(tourFoundations)(/* @__PURE__ */ alt8(tourProfessional)(/* @__PURE__ */ alt8(tourFlow)(/* @__PURE__ */ alt8(tourHierarchies)(/* @__PURE__ */ alt8(tourMotion)(/* @__PURE__ */ alt8(tourWealthHealth)(/* @__PURE__ */ alt8(tourInterpreters)(/* @__PURE__ */ alt8(tourFPFTW)(/* @__PURE__ */ alt8(tourGraphAlgorithms)(/* @__PURE__ */ alt8(tourLesMisGUP)(/* @__PURE__ */ alt8(tourShowcase)(/* @__PURE__ */ alt8(tourSimpsons)(/* @__PURE__ */ alt8(tourIndex)(/* @__PURE__ */ alt8(showcase)(/* @__PURE__ */ alt8(gallery)(/* @__PURE__ */ alt8(examplePage)(/* @__PURE__ */ alt8(treeAPI)(/* @__PURE__ */ alt8(animatedTreeCluster)(/* @__PURE__ */ alt8(generalUpdatePattern)(/* @__PURE__ */ alt8(lesMisGUPTree)(/* @__PURE__ */ alt8(lesMisGUP)(/* @__PURE__ */ alt8(lesMisGUPSimple)(/* @__PURE__ */ alt8(lesMisGUPTreeAPI)(/* @__PURE__ */ alt8(lesMisGUPClean)(/* @__PURE__ */ alt8(lesMisQueryDemo)(/* @__PURE__ */ alt8(moduleGraph)(/* @__PURE__ */ alt8(mermaidTreeDemo)(/* @__PURE__ */ alt8(sceneJoinDemo)(/* @__PURE__ */ alt8(forceConfigPOC)(/* @__PURE__ */ alt8(forceConfigV2Test)(/* @__PURE__ */ alt8(simpleForceGraphRoute)(/* @__PURE__ */ alt8(codeExplorer)(/* @__PURE__ */ alt8(codeExplorerV2)(/* @__PURE__ */ alt8(codeExplorerV3)(/* @__PURE__ */ alt8(sankeyDebug)(/* @__PURE__ */ alt8(forcePlayground)(/* @__PURE__ */ alt8(acknowledgements)(/* @__PURE__ */ alt8(rootRedirect)(notFound)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))));
+  var routes = /* @__PURE__ */ alt8(home)(/* @__PURE__ */ alt8(gettingStarted)(/* @__PURE__ */ alt8(wizard)(/* @__PURE__ */ alt8(howtoIndex)(/* @__PURE__ */ alt8(howtoTransitions)(/* @__PURE__ */ alt8(howtoForceGraphs)(/* @__PURE__ */ alt8(howtoHierarchical)(/* @__PURE__ */ alt8(howtoEvents)(/* @__PURE__ */ alt8(howtoTreeAPI)(/* @__PURE__ */ alt8(howtoLoadingData)(/* @__PURE__ */ alt8(howtoAxesScales)(/* @__PURE__ */ alt8(howtoTooltips)(/* @__PURE__ */ alt8(howtoDebugging)(/* @__PURE__ */ alt8(howtoPerformance)(/* @__PURE__ */ alt8(howtoTreeExplorer)(/* @__PURE__ */ alt8(understandingGrammar)(/* @__PURE__ */ alt8(understandingAttributes)(/* @__PURE__ */ alt8(understandingSelections)(/* @__PURE__ */ alt8(understandingTreeAPI)(/* @__PURE__ */ alt8(understandingScenes)(/* @__PURE__ */ alt8(understanding)(/* @__PURE__ */ alt8(referenceModule)(/* @__PURE__ */ alt8(reference)(/* @__PURE__ */ alt8(tourFoundations)(/* @__PURE__ */ alt8(tourProfessional)(/* @__PURE__ */ alt8(tourFlow)(/* @__PURE__ */ alt8(tourHierarchies)(/* @__PURE__ */ alt8(tourMotion)(/* @__PURE__ */ alt8(tourWealthHealth)(/* @__PURE__ */ alt8(tourInterpreters)(/* @__PURE__ */ alt8(tourFPFTW)(/* @__PURE__ */ alt8(tourGraphAlgorithms)(/* @__PURE__ */ alt8(tourLesMisGUP)(/* @__PURE__ */ alt8(tourShowcase)(/* @__PURE__ */ alt8(tourSimpsons)(/* @__PURE__ */ alt8(tourIndex)(/* @__PURE__ */ alt8(showcase)(/* @__PURE__ */ alt8(gallery)(/* @__PURE__ */ alt8(examplePage)(/* @__PURE__ */ alt8(treeAPI)(/* @__PURE__ */ alt8(animatedTreeCluster)(/* @__PURE__ */ alt8(generalUpdatePattern)(/* @__PURE__ */ alt8(lesMisGUPTree)(/* @__PURE__ */ alt8(lesMisGUP)(/* @__PURE__ */ alt8(lesMisGUPSimple)(/* @__PURE__ */ alt8(lesMisGUPTreeAPI)(/* @__PURE__ */ alt8(lesMisGUPClean)(/* @__PURE__ */ alt8(lesMisQueryDemo)(/* @__PURE__ */ alt8(moduleGraph)(/* @__PURE__ */ alt8(mermaidTreeDemo)(/* @__PURE__ */ alt8(sceneJoinDemo)(/* @__PURE__ */ alt8(forceConfigPOC)(/* @__PURE__ */ alt8(forceConfigV2Test)(/* @__PURE__ */ alt8(simpleForceGraphRoute)(/* @__PURE__ */ alt8(codeExplorer)(/* @__PURE__ */ alt8(codeExplorerV2)(/* @__PURE__ */ alt8(codeExplorerV3)(/* @__PURE__ */ alt8(sankeyDebug)(/* @__PURE__ */ alt8(forcePlayground)(/* @__PURE__ */ alt8(treeBuilder)(/* @__PURE__ */ alt8(acknowledgements)(/* @__PURE__ */ alt8(rootRedirect)(notFound))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))));
   var routing = /* @__PURE__ */ applySecond2(root2)(routes);
 
   // output/PSD3.Shared.SiteNav/index.js
@@ -29792,8 +29814,8 @@ ${name16}:
   function getAttributes(node) {
     var entries = [];
     for (var i2 = 0; i2 < node.attributes.length; i2++) {
-      let { name: name16, value: value22 } = node.attributes.item(i2);
-      entries.push([name16, value22]);
+      let { name: name16, value: value23 } = node.attributes.item(i2);
+      entries.push([name16, value23]);
     }
     return entries;
   }
@@ -29989,11 +30011,11 @@ ${name16}:
   var when4 = /* @__PURE__ */ when(applicativeHalogenM);
   var modify_6 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var Initialize5 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var Receive2 = /* @__PURE__ */ (function() {
     function Receive3(value0) {
@@ -31318,13 +31340,13 @@ ${name16}:
   var buildIntSet = (arr) => new Set(arr);
   var intSetMember = (key) => (set3) => set3.has(key);
   var buildIntMap_ = (pairs) => {
-    const map107 = /* @__PURE__ */ new Map();
+    const map109 = /* @__PURE__ */ new Map();
     for (let i2 = 0; i2 < pairs.length; i2++) {
-      map107.set(pairs[i2].key, pairs[i2].value);
+      map109.set(pairs[i2].key, pairs[i2].value);
     }
-    return map107;
+    return map109;
   };
-  var intMapLookup_ = (key) => (map107) => map107.get(key);
+  var intMapLookup_ = (key) => (map109) => map109.get(key);
   var isNull2 = (x47) => x47 == null;
 
   // output/PSD3.ForceEngine.Links/index.js
@@ -32979,11 +33001,11 @@ ${name16}:
     return CElegansFrontal2;
   })();
   var Initialize6 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var SelectDataset = /* @__PURE__ */ (function() {
     function SelectDataset3(value0) {
@@ -33733,11 +33755,11 @@ ${name16}:
     return Paused2;
   })();
   var Initialize7 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var ToggleStatus = /* @__PURE__ */ (function() {
     function ToggleStatus2() {
@@ -34035,8 +34057,8 @@ ${name16}:
     };
   }
   function applyScale2(scale) {
-    return function(value22) {
-      return scale(value22);
+    return function(value23) {
+      return scale(value23);
     };
   }
   function schemeCategory10At(index5) {
@@ -34101,11 +34123,11 @@ ${name16}:
   var discard18 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var pure34 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize8 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var render12 = function(v2) {
     return div2([classes(["tutorial-page"])])([render6({
@@ -34147,11 +34169,11 @@ ${name16}:
   // output/Component.HowTo.HowtoDebugging/index.js
   var pure35 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize9 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var render13 = function(v2) {
     return div2([classes(["tutorial-page"])])([render6({
@@ -34185,11 +34207,11 @@ ${name16}:
   // output/Component.HowTo.HowtoEvents/index.js
   var pure36 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize10 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var render14 = function(v2) {
     return div2([classes(["tutorial-page"])])([render6({
@@ -34223,11 +34245,11 @@ ${name16}:
   // output/Component.HowTo.HowtoForceGraphs/index.js
   var pure37 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize11 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var render15 = function(v2) {
     return div2([classes(["tutorial-page"])])([render6({
@@ -34261,11 +34283,11 @@ ${name16}:
   // output/Component.HowTo.HowtoHierarchical/index.js
   var pure38 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize12 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var render16 = function(v2) {
     return div2([classes(["tutorial-page"])])([render6({
@@ -34299,11 +34321,11 @@ ${name16}:
   // output/Component.HowTo.HowtoLoadingData/index.js
   var pure39 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize13 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var render17 = function(v2) {
     return div2([classes(["tutorial-page"])])([render6({
@@ -34337,11 +34359,11 @@ ${name16}:
   // output/Component.HowTo.HowtoPerformance/index.js
   var pure40 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize14 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var render18 = function(v2) {
     return div2([classes(["tutorial-page"])])([render6({
@@ -34378,11 +34400,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.HowTo.HowtoTooltips/index.js
   var pure41 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize15 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var render19 = function(v2) {
     return div2([classes(["tutorial-page"])])([render6({
@@ -34416,11 +34438,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.HowTo.HowtoTransitions/index.js
   var pure42 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize16 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var render20 = function(v2) {
     return div2([classes(["tutorial-page"])])([render6({
@@ -34454,11 +34476,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.HowTo.HowtoTreeAPI/index.js
   var pure43 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize17 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var render21 = function(v2) {
     return div2([classes(["tutorial-page"])])([render6({
@@ -34790,11 +34812,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return Custom2;
   })();
   var Initialize18 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var SetMinSeparation = /* @__PURE__ */ (function() {
     function SetMinSeparation2(value0) {
@@ -35722,13 +35744,13 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
   var runMermaidTree = function(tree2) {
-    var initialState5 = {
+    var initialState6 = {
       nodeCounter: 0,
       mermaidCode: ""
     };
     var v2 = renderTree18(tree2)(Nothing.value);
     return function __do10() {
-      var v1 = runStateT(v2)(initialState5)();
+      var v1 = runStateT(v2)(initialState6)();
       return "%%{init: {'theme':'base', 'themeVariables': {'fontFamily':'monospace'}, 'look':'handDrawn', 'flowchart':{'curve':'basis'}}}%%\n" + ("graph TD\n" + (v1.value1.mermaidCode + generateStyleDefinitions));
     };
   };
@@ -35739,11 +35761,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard21 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_11 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var Initialize19 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var GenerateSimpleTree = /* @__PURE__ */ (function() {
     function GenerateSimpleTree2() {
@@ -35760,8 +35782,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return GenerateJoinTree2;
   })();
   var staticAttr = function(name16) {
-    return function(value22) {
-      return new StaticAttr(name16, new StringValue(value22));
+    return function(value23) {
+      return new StaticAttr(name16, new StringValue(value23));
     };
   };
   var render23 = function(state3) {
@@ -35868,16 +35890,16 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   function max11(values2, valueof) {
     let max22;
     if (valueof === void 0) {
-      for (const value22 of values2) {
-        if (value22 != null && (max22 < value22 || max22 === void 0 && value22 >= value22)) {
-          max22 = value22;
+      for (const value23 of values2) {
+        if (value23 != null && (max22 < value23 || max22 === void 0 && value23 >= value23)) {
+          max22 = value23;
         }
       }
     } else {
       let index5 = -1;
-      for (let value22 of values2) {
-        if ((value22 = valueof(value22, ++index5, values2)) != null && (max22 < value22 || max22 === void 0 && value22 >= value22)) {
-          max22 = value22;
+      for (let value23 of values2) {
+        if ((value23 = valueof(value23, ++index5, values2)) != null && (max22 < value23 || max22 === void 0 && value23 >= value23)) {
+          max22 = value23;
         }
       }
     }
@@ -35888,16 +35910,16 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   function min9(values2, valueof) {
     let min14;
     if (valueof === void 0) {
-      for (const value22 of values2) {
-        if (value22 != null && (min14 > value22 || min14 === void 0 && value22 >= value22)) {
-          min14 = value22;
+      for (const value23 of values2) {
+        if (value23 != null && (min14 > value23 || min14 === void 0 && value23 >= value23)) {
+          min14 = value23;
         }
       }
     } else {
       let index5 = -1;
-      for (let value22 of values2) {
-        if ((value22 = valueof(value22, ++index5, values2)) != null && (min14 > value22 || min14 === void 0 && value22 >= value22)) {
-          min14 = value22;
+      for (let value23 of values2) {
+        if ((value23 = valueof(value23, ++index5, values2)) != null && (min14 > value23 || min14 === void 0 && value23 >= value23)) {
+          min14 = value23;
         }
       }
     }
@@ -35908,16 +35930,16 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   function sum3(values2, valueof) {
     let sum7 = 0;
     if (valueof === void 0) {
-      for (let value22 of values2) {
-        if (value22 = +value22) {
-          sum7 += value22;
+      for (let value23 of values2) {
+        if (value23 = +value23) {
+          sum7 += value23;
         }
       }
     } else {
       let index5 = -1;
-      for (let value22 of values2) {
-        if (value22 = +valueof(value22, ++index5, values2)) {
-          sum7 += value22;
+      for (let value23 of values2) {
+        if (value23 = +valueof(value23, ++index5, values2)) {
+          sum7 += value23;
         }
       }
     }
@@ -36151,8 +36173,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         for (const target7 of column) {
           let y48 = 0;
           let w = 0;
-          for (const { source: source2, value: value22 } of target7.targetLinks) {
-            let v2 = value22 * (target7.layer - source2.layer);
+          for (const { source: source2, value: value23 } of target7.targetLinks) {
+            let v2 = value23 * (target7.layer - source2.layer);
             y48 += targetTop(source2, target7) * v2;
             w += v2;
           }
@@ -36172,8 +36194,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         for (const source2 of column) {
           let y48 = 0;
           let w = 0;
-          for (const { target: target7, value: value22 } of source2.sourceLinks) {
-            let v2 = value22 * (target7.layer - source2.layer);
+          for (const { target: target7, value: value23 } of source2.sourceLinks) {
+            let v2 = value23 * (target7.layer - source2.layer);
             y48 += sourceTop(source2, target7) * v2;
             w += v2;
           }
@@ -38545,34 +38567,34 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var show40 = /* @__PURE__ */ show(showInt);
   var show117 = /* @__PURE__ */ show(showNumber);
   var RGB = /* @__PURE__ */ (function() {
-    function RGB2(value0, value1, value22) {
+    function RGB2(value0, value1, value23) {
       this.value0 = value0;
       this.value1 = value1;
-      this.value2 = value22;
+      this.value2 = value23;
     }
     ;
     RGB2.create = function(value0) {
       return function(value1) {
-        return function(value22) {
-          return new RGB2(value0, value1, value22);
+        return function(value23) {
+          return new RGB2(value0, value1, value23);
         };
       };
     };
     return RGB2;
   })();
   var RGBA = /* @__PURE__ */ (function() {
-    function RGBA2(value0, value1, value22, value32) {
+    function RGBA2(value0, value1, value23, value32) {
       this.value0 = value0;
       this.value1 = value1;
-      this.value2 = value22;
+      this.value2 = value23;
       this.value3 = value32;
     }
     ;
     RGBA2.create = function(value0) {
       return function(value1) {
-        return function(value22) {
+        return function(value23) {
           return function(value32) {
-            return new RGBA2(value0, value1, value22, value32);
+            return new RGBA2(value0, value1, value23, value32);
           };
         };
       };
@@ -38694,11 +38716,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var get14 = /* @__PURE__ */ get(monadStateHalogenM);
   var pure48 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize20 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var LoadDataset2 = /* @__PURE__ */ (function() {
     function LoadDataset3(value0) {
@@ -39292,11 +39314,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
 
   // output/Component.SceneJoinDemo/index.js
   var Initialize21 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var ShowInitial = /* @__PURE__ */ (function() {
     function ShowInitial2() {
@@ -39369,11 +39391,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.Showcase.ShowcaseIndex/index.js
   var pure50 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize22 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var renderCard = function(route) {
     return function(title4) {
@@ -39388,7 +39410,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       quadrant: NoQuadrant.value,
       prevNext: Nothing.value,
       pageTitle: Nothing.value
-    }), section([classes(["docs-hero"])])([div2([classes(["docs-hero-content"])])([h1([classes(["docs-hero-title"])])([text5("Showcase")]), p([classes(["docs-hero-description"])])([text5("Complex, app-like visualizations that demonstrate PSD3's full capabilities. These examples benefit from full-screen treatment.")])])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text5("Interactive Visualizations")]), div2([classes(["howto-card-grid"])])([renderCard(ForcePlayground.value)("Force Playground")("Interactive force simulation with multiple datasets. Toggle forces, filter categories, and watch animated enter/exit transitions."), renderCard(CodeExplorer.value)("Code Explorer")("Interactive force-directed graph of PureScript module dependencies. Zoom, pan, expand, and explore the codebase."), renderCard(TourWealthHealth.value)("Wealth & Health of Nations")("Animated bubble chart showing GDP vs life expectancy over time. A classic visualization recreated in PSD3."), renderCard(TourShowcase.value)("Flagship Demos")("Collection of complex visualizations demonstrating advanced PSD3 patterns and capabilities.")])])]);
+    }), section([classes(["docs-hero"])])([div2([classes(["docs-hero-content"])])([h1([classes(["docs-hero-title"])])([text5("Showcase")]), p([classes(["docs-hero-description"])])([text5("Complex, app-like visualizations that demonstrate PSD3's full capabilities. These examples benefit from full-screen treatment.")])])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text5("Interactive Visualizations")]), div2([classes(["howto-card-grid"])])([renderCard(ForcePlayground.value)("Force Playground")("Interactive force simulation with multiple datasets. Toggle forces, filter categories, and watch animated enter/exit transitions."), renderCard(TreeBuilder.value)("Tree Builder")("Visual tool for building D3 visualizations. Drag elements, configure attributes, and see live preview with sample data."), renderCard(CodeExplorer.value)("Code Explorer")("Interactive force-directed graph of PureScript module dependencies. Zoom, pan, expand, and explore the codebase."), renderCard(TourWealthHealth.value)("Wealth & Health of Nations")("Animated bubble chart showing GDP vs life expectancy over time. A classic visualization recreated in PSD3."), renderCard(TourShowcase.value)("Flagship Demos")("Collection of complex visualizations demonstrating advanced PSD3 patterns and capabilities.")])])]);
   };
   var handleAction21 = function(v2) {
     return pure50(unit);
@@ -39594,11 +39616,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var bind47 = /* @__PURE__ */ bind(bindHalogenM);
   var pure52 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize23 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var render27 = function(v2) {
     return div_([h1_([text5("Simple Force Graph")]), p_([text5("A minimal 5-node force-directed graph with hardcoded data.")]), p_([text5("Drag nodes to interact. Zoom with scroll wheel.")]), div2([attr2("id")("simple-force-graph"), attr2("class")("svg-container")])([])]);
@@ -40029,11 +40051,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard29 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var pure55 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize24 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var render28 = function(v2) {
     return div2([classes(["tutorial-page"])])([renderHeader3(TourFPFTW.value), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Functional Programming For The Win")]), p_([text5("PureScript's powerful type system and functional programming features unlock visualization capabilities that are difficult or impossible in JavaScript. This page showcases how Maps, Sets, Foldable types, and contravariant functors make data visualization more flexible and type-safe.")]), p_([text5('These examples demonstrate the "FP For The Win" philosophy: using advanced functional programming techniques to create more composable, reusable, and maintainable visualization code.')])]), section([classes(["tutorial-section"]), id4("anscombe")])([h2([classes(["tutorial-section-title"])])([text5("1. Anscombe's Quartet: The Power of Map")]), p_([text5("Anscombe's Quartet is a famous dataset demonstrating why visualization matters. All four datasets have "), strong_([text5("identical statistical properties")]), text5(" (mean, variance, correlation \u2248 0.816), but "), strong_([text5("completely different distributions")]), text5(". Statistics can lie; plots don't!")]), p_([text5("This example showcases functional programming's "), em_([text5("map")]), text5(" pattern: we define "), strong_([text5("one scatterplot component")]), text5(" and "), strong_([text5("map it over four datasets")]), text5(". Same code, different data, four visualizations. This is composability in action:")]), pre([classes(["code-block"]), style("background: #f5f5f5; padding: 15px; border-radius: 5px; color: #333; overflow-x: auto;")])([code_([text5("-- One component definition\nscatterplot :: String -> Array Point -> Tree\nscatterplot name points = ...\n\n-- Map over all four datasets!\nmap (\\{ name, points } -> scatterplot name points) anscombeData")])]), div2([id4("anscombe-quartet"), classes(["viz-container"]), style("margin: 20px 0; text-align: center;")])([]), p_([text5("Notice how:")]), ul_([li_([strong_([text5("Dataset I")]), text5(": Linear relationship with some scatter")]), li_([strong_([text5("Dataset II")]), text5(": Perfect quadratic curve")]), li_([strong_([text5("Dataset III")]), text5(": Linear with one outlier skewing statistics")]), li_([strong_([text5("Dataset IV")]), text5(": No relationship except one influential point")])]), p_([text5("The FP win: We wrote the visualization component once and reused it four times. In imperative code, you'd repeat yourself or write complex loops. With "), code_([text5("map")]), text5(", composition is natural and type-safe.")])]), section([classes(["tutorial-section"]), id4("sets")])([h2([classes(["tutorial-section-title"])])([text5("2. Set Operations: Map + Foldable + Phylotaxis")]), p_([text5("Sets are unordered, unique collections. This example demonstrates "), strong_([text5("three FP wins at once")]), text5(":")]), ul_([li_([strong_([text5("Map pattern: ")]), text5("One visualizer component, mapped over four different sets (A, B, A \u222A B, A \u2229 B)")]), li_([strong_([text5("Foldable abstraction: ")]), text5("We iterate over a Set, not an Array! The visualization works with any Foldable type.")]), li_([strong_([text5("Code reuse: ")]), text5("Uses the same phylotaxis (sunflower spiral) layout from our network simulations.")])]), p_([text5("Each set is visualized as colored circles arranged in a phylotaxis pattern (the mathematical arrangement of seeds in a sunflower). Watch how union combines elements and intersection shows only shared elements:")]), div2([id4("set-operations"), classes(["viz-container"]), style("margin: 20px 0; text-align: center;")])([]), p_([text5("The FP win: This visualization demonstrates that PureScript's type classes let you write generic, reusable code. The same phylotaxis layout function works in network graphs "), em_([text5("and")]), text5(" set visualizations. In JavaScript, you'd rewrite it each time.")])]), section([classes(["tutorial-section"]), id4("tree-api-power")])([h2([classes(["tutorial-section-title"])])([text5("3. TreeAPI: A Composable DSL")]), p_([text5("The TreeAPI demonstrates functional programming principles in action. It's a deeply embedded DSL (Domain-Specific Language) that leverages PureScript's type system to provide:")]), ul_([li_([strong_([text5("Composability: ")]), text5("Build complex visualizations from simple, reusable pieces. Trees compose with attributes, which compose with scales and axes.")]), li_([strong_([text5("Type Safety: ")]), text5("The compiler ensures you can't attach circle attributes to rect elements, or pass the wrong data type to a layout.")]), li_([strong_([text5("Multiple Interpretations: ")]), text5("The same TreeAPI code can be interpreted as SVG, Mermaid diagrams, or even generated JavaScript.")]), li_([strong_([text5("Referential Transparency: ")]), text5("Tree descriptions are pure values that can be tested, transformed, and reasoned about before rendering.")])]), p_([text5("For examples of TreeAPI in action, see the "), a([href4("#" + routeToPath(TreeAPI.value))])([text5("Tree API Examples")]), text5(" page, or explore the "), a([href4("#" + routeToPath(AnimatedTreeCluster.value))])([text5("Animated Tree \u2194 Cluster")]), text5(" demonstration which shows how the same tree structure can smoothly transition between different layout algorithms.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Why Functional Programming Wins")]), p_([text5("These techniques might seem abstract, but they solve real problems:")]), ul_([li_([strong_([text5("Maintainability: ")]), text5("Type-safe code means fewer runtime errors and easier refactoring.")]), li_([strong_([text5("Reusability: ")]), text5("Contravariant functors and type classes let you write code once and use it with many data types.")]), li_([strong_([text5("Correctness: ")]), text5("The compiler catches bugs that would only appear at runtime in JavaScript.")]), li_([strong_([text5("Expressiveness: ")]), text5("Foldable, Functor, and other abstractions let you express complex data transformations concisely.")])]), p_([text5(`This is why we say "Functional Programming For The Win" - not because it's academically interesting, but because it produces better visualization code that's easier to write, test, and maintain.`)])])])]);
@@ -40461,11 +40483,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var bind52 = /* @__PURE__ */ bind(bindHalogenM);
   var pure58 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize25 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var render29 = function(v2) {
     return div2([classes(["tutorial-page"])])([renderHeader3(TourFlow.value), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("3. Data Flow")]), p_([text5("Chord and Sankey diagrams are specialized visualizations for showing relationships and flows between entities. Both use visual metaphors - ribbons and flows - to make complex interconnections immediately comprehensible.")]), p_([text5("These visualization types excel at revealing patterns in network data, resource flows, and dependencies that would be difficult to understand in tabular form.")])]), section([classes(["tutorial-section"]), id4("chord")])([h2([classes(["tutorial-section-title"])])([text5("1. Chord Diagram: Traffic Flow Analysis")]), p_([text5("Chord diagrams show bidirectional relationships and flows between entities in a circular layout. They're particularly effective for displaying interconnected systems where flow goes in both directions between pairs.")]), p_([text5("This example shows traffic flow between 11 regions in Baton Rouge, Louisiana, supporting analysis for a new bridge location. Each arc represents a region, and the ribbons show the volume of trips between region pairs. Ribbons are colored by their origin region, making it easy to trace outbound traffic from each area.")]), div2([id4("chord-container"), classes(["viz-container"])])([]), p_([text5("Inspired by "), a([href4("https://www.streetlightdata.com/planning-bridges-louisiana/"), target6("_blank")])([text5("StreetLight Data's bridge planning analysis")]), text5(". The circular layout reveals dominant traffic patterns - notice how West Baton Rouge (WBR, in red) and East Baton Rouge Main (EBR-M, in teal) serve as major hubs with thick ribbons to multiple regions.")])]), section([classes(["tutorial-section"]), id4("sankey")])([h2([classes(["tutorial-section-title"])])([text5("2. Sankey Diagram: Flow Visualization")]), p_([text5("Sankey diagrams visualize the flow of resources, energy, costs, or other quantities through a system. The width of each connection is proportional to the flow quantity, making it easy to identify dominant flows and inefficiencies.")]), p_([text5("This diagram shows energy flows in the UK energy system, from primary energy sources through transformation and distribution to final consumption. The Sankey layout uses a pure PureScript algorithm (not D3 FFI) that automatically positions nodes and creates smooth flow paths.")]), div2([id4("sankey-container"), classes(["viz-container"])])([]), p_([text5("The width of each flow represents the quantity of energy. Notice how the diagram reveals energy losses in transformation processes and highlights which sources contribute most to final consumption.")])])])]);
@@ -40743,10 +40765,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           max: 0
         }
       };
-      var scaleY3 = function(value22) {
+      var scaleY3 = function(value23) {
         var rangeSpan = yScale.range.max - yScale.range.min;
         var domainSpan = yScale.domain.max - yScale.domain.min;
-        var normalized = (value22 - yScale.domain.min) / domainSpan;
+        var normalized = (value23 - yScale.domain.min) / domainSpan;
         return yScale.range.min + normalized * rangeSpan;
       };
       var plotWidth = 140 - margin.left - margin.right;
@@ -40760,10 +40782,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           max: plotWidth
         }
       };
-      var scaleX3 = function(value22) {
+      var scaleX3 = function(value23) {
         var rangeSpan = xScale.range.max - xScale.range.min;
         var domainSpan = xScale.domain.max - xScale.domain.min;
-        var normalized = (value22 - xScale.domain.min) / domainSpan;
+        var normalized = (value23 - xScale.domain.min) / domainSpan;
         return xScale.range.min + normalized * rangeSpan;
       };
       var getPlotX = function(idx) {
@@ -40963,10 +40985,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           max: 0
         }
       };
-      var scaleY3 = function(value22) {
+      var scaleY3 = function(value23) {
         var rangeSpan = yScale.range.max - yScale.range.min;
         var domainSpan = yScale.domain.max - yScale.domain.min;
-        var normalized = (value22 - yScale.domain.min) / domainSpan;
+        var normalized = (value23 - yScale.domain.min) / domainSpan;
         return yScale.range.min + normalized * rangeSpan;
       };
       var plotWidth = 400 - margin.left - margin.right;
@@ -40980,10 +41002,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           max: plotWidth
         }
       };
-      var scaleX3 = function(value22) {
+      var scaleX3 = function(value23) {
         var rangeSpan = xScale.range.max - xScale.range.min;
         var domainSpan = xScale.domain.max - xScale.domain.min;
-        var normalized = (value22 - xScale.domain.min) / domainSpan;
+        var normalized = (value23 - xScale.domain.min) / domainSpan;
         return xScale.range.min + normalized * rangeSpan;
       };
       var tree2 = withChild(named2(SVG.value)("svg")([width29(400), height29(200), viewBox24("0 0 " + (show50(400) + (" " + show50(200)))), id_12("parabola-with-axes-svg"), class_24("tree-api-example")]))(withChildren(named2(Group.value)("plot-area")([transform13("translate(" + (show50(margin.left) + ("," + (show50(margin.top) + ")")))), class_24("plot-area")]))([withChild(named2(Group.value)("x-axis")([transform13("translate(0," + (show50(plotHeight) + ")")), class_24("x-axis")]))(renderAxis(axisBottom(xScale))), withChild(named2(Group.value)("y-axis")([class_24("y-axis")]))(renderAxis(axisLeft(yScale))), joinData("circles")("circle")(parabolaData2)(function(d21) {
@@ -41161,11 +41183,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard34 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var pure59 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize26 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var renderDatasetTable = function(name16) {
     return function(points) {
@@ -42549,11 +42571,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var bind63 = /* @__PURE__ */ bind(bindHalogenM);
   var pure65 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize27 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var render31 = function(v2) {
     return div2([classes(["tutorial-page"])])([renderHeader3(TourGraphAlgorithms.value), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Graph Algorithms: FP Wizardry")]), p_([text5("Graphs are everywhere in software: dependency trees, build systems, task schedulers, network routing, code analysis. This page demonstrates how "), strong_([text5("pure functional graph algorithms")]), text5(" combined with "), strong_([text5("declarative visualization")]), text5(" create powerful, elegant solutions to real-world problems.")]), p_([text5("We'll explore two classic algorithms that solve practical problems: topological sort (ordering tasks with dependencies) and transitive reduction (removing redundant edges). Both showcase the FP advantage: immutable transformations, pure functions, and easy-to-test logic.")])]), section([classes(["tutorial-section"]), id4("topological-sort-section")])([h2([classes(["tutorial-section-title"])])([text5("1. Topological Sort: Ordering Dependencies")]), p_([text5("Topological sort solves a fundamental problem: "), em_([text5('"In what order should I execute tasks that depend on each other?"')]), text5(" It's used in build systems (compile before link), package managers (install dependencies first), and task schedulers.")]), p_([text5("The algorithm takes a "), strong_([text5("directed acyclic graph (DAG)")]), text5(" and produces a "), strong_([text5("linear ordering")]), text5(" where every task comes after its dependencies. Below is a build pipeline with 7 tasks:")]), div2([id4("topological-sort"), classes(["viz-container"]), style("margin: 20px 0; text-align: center;")])([]), p_([text5("Notice how tasks are arranged in "), strong_([text5("layers")]), text5(" (L0, L1, L2, etc.). Each layer can execute in parallel since tasks in the same layer don't depend on each other. This is exactly what CI/CD systems do!")]), h3_([text5("The FP Win: Pure Graph Transformation")]), p_([text5("The topological sort implementation uses PureScript's "), code_([text5("Data.Graph")]), text5(" library with a purely functional algorithm:")]), pre([classes(["code-block"]), style("background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto;")])([code_([text5("-- Build a Graph from tasks\nbuildTaskGraph :: Array Task -> Graph String Task\nbuildTaskGraph tasks = fromMap graphMap\n  where\n    graphMap = foldl addTask Map.empty tasks\n    addTask acc task =\n      Map.insert task.id\n        (Tuple task (List.fromFoldable task.depends))\n        acc\n\n-- Pure topological sort (from Data.Graph)\ngetTopologicalOrder :: Array Task -> List String\ngetTopologicalOrder tasks =\n  topologicalSort (buildTaskGraph tasks)\n\n-- Compute layers: tasks with no deps at layer 0,\n-- tasks depending on layer 0 at layer 1, etc.\ncomputeLayers :: Array Task -> Map String Int\ncomputeLayers tasks = foldl processTask Map.empty sortedIds\n  where\n    sortedIds = List.reverse $ getTopologicalOrder tasks")])]), p_([text5("Key advantages:")]), ul_([li_([strong_([text5("Immutable: ")]), text5("Graph transformations return new graphs, never mutate")]), li_([strong_([text5("Pure: ")]), text5("Same input always produces same output, easy to test")]), li_([strong_([text5("Composable: ")]), text5("Topological sort \u2192 layer computation \u2192 visualization pipeline")]), li_([strong_([text5("Type-safe: ")]), text5("Compiler ensures graph structure is valid")])])]), section([classes(["tutorial-section"]), id4("transitive-reduction-section")])([h2([classes(["tutorial-section-title"])])([text5("2. Transitive Reduction: Removing Redundant Edges")]), p_([text5("Transitive reduction solves another practical problem: "), em_([text5('"Which dependencies are redundant?"')]), text5(" In dependency graphs, some edges are "), strong_([text5("implied by transitivity")]), text5(". For example, if A depends on B, and B depends on C, then we don't need to explicitly state that A depends on C.")]), p_([text5("Removing transitive edges simplifies graphs, making them easier to understand and maintain. This is crucial for build systems, package managers, and code dependency analysis.")]), div2([id4("transitive-reduction"), classes(["viz-container"]), style("margin: 20px 0; text-align: center;")])([]), p_([text5("The visualization shows "), strong_([text5("before and after")]), text5(". Redundant edges are highlighted in "), span4([style("color: #E74C3C;")])([text5("red")]), text5(" on the left, and removed on the right. Notice how the reduced graph preserves all reachability (A can still reach E through C \u2192 E) but with fewer explicit edges.")]), h3_([text5("The Algorithm: Reachability Analysis")]), p_([text5("The transitive reduction algorithm checks each edge: if the target is reachable through an "), em_([text5("alternate path")]), text5(", the edge is redundant:")]), pre([classes(["code-block"]), style("background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto;")])([code_([text5("-- Compute all nodes reachable from a given node\nreachableFrom :: String -> Graph -> Set String\nreachableFrom start graph = go Set.empty (Set.singleton start)\n  where\n    go visited frontier\n      | Set.isEmpty frontier = visited\n      | otherwise =\n          let neighbors = getNeighbors frontier\n              newNodes = Set.difference neighbors visited\n          in go (Set.union visited frontier) newNodes\n\n-- Remove transitive edges\ntransitiveReduction :: Graph -> Graph\ntransitiveReduction graph =\n  { nodes: graph.nodes\n  , edges: Map.mapWithKey reduceNode graph.edges\n  }\n  where\n    reduceNode source targets =\n      Set.filter (not <<< isTransitive source) targets\n\n    isTransitive source target =\n      -- Is target reachable through intermediate nodes?\n      let intermediates = Set.delete target targets\n      in Array.any (\\\\i -> Set.member target (reachableFrom i graph))\n           (Set.toUnfoldable intermediates)")])]), p_([text5("Key FP advantages:")]), ul_([li_([strong_([text5("Graph as value: ")]), text5("Original and reduced graphs coexist, easy to compare")]), li_([strong_([text5("Recursive traversal: ")]), text5("Reachability computed via tail-recursive function")]), li_([strong_([text5("Set operations: ")]), text5("Union, difference, membership checks are declarative and clear")]), li_([strong_([text5("Visualization-friendly: ")]), text5("Easy to highlight removed edges for before/after comparison")])])]), section([classes(["tutorial-section"]), id4("koenigsberg-section")])([h2([classes(["tutorial-section-title"])])([text5("3. K\xF6nigsberg Bridges: The Birth of Graph Theory")]), p_([text5("In 1736, Euler solved the famous "), em_([text5('"Seven Bridges of K\xF6nigsberg"')]), text5(" problem and invented graph theory in the process. The city had four land masses connected by seven bridges. The question: "), strong_([text5("Can you walk through the city crossing each bridge exactly once?")])]), div2([id4("koenigsberg-bridges"), classes(["viz-container"]), style("margin: 20px 0; text-align: center;")])([]), p_([text5("Euler proved it's "), strong_([text5("impossible")]), text5(". His insight: a walk crossing each edge exactly once ("), em_([text5("Eulerian path")]), text5(") exists only if at most 2 nodes have odd degree. Here, "), strong_([text5("all 4 nodes have odd degree")]), text5(" (the Island has degree 5, all others have degree 3).")]), p_([text5("This tiny graph\u2014just 4 nodes and 7 edges\u2014launched an entire field of mathematics. Today we use Eulerian paths for DNA sequencing, circuit board routing, and garbage truck routes.")])]), section([classes(["tutorial-section"]), id4("dag-tree-section")])([h2([classes(["tutorial-section-title"])])([text5("4. DAG Tree: Trees with Extra Links")]), p_([text5("Many real-world structures are "), em_([text5('"mostly hierarchical"')]), text5(" with some extra non-tree connections. Git commit graphs have merge links. State machines have back-edges. The D3 Update Pattern has merge points.")]), p_([text5("The "), strong_([text5("DAG Tree")]), text5(" library feature handles this elegantly: standard tree layout positions nodes, then extra links are overlaid. Tree edges are shown in "), span4([style("color: #708090;")])([text5("gray")]), text5(", extra links in "), span4([style("color: #F4A460;")])([text5("orange")]), text5(":")]), div2([id4("dag-tree-example"), classes(["viz-container"]), style("margin: 20px 0; text-align: center;")])([]), p_([text5("Notice how the orange extra links "), strong_([text5("leap across layers")]), text5(": A\u2192E skips a level, C\u2192G crosses branches and skips a level, B\u2192F crosses branches at the same depth. This is perfect for visualizing:")]), ul_([li_([strong_([text5("Git history: ")]), text5("Tree follows first-parent, merge commits add extra links")]), li_([strong_([text5("State machines: ")]), text5("Tree of states, back-edges for loops")]), li_([strong_([text5("Data flows: ")]), text5("Tree structure with join/merge points")]), li_([strong_([text5("Dependency graphs: ")]), text5("Primary hierarchy with cross-dependencies")])]), h3_([text5("Clean Separation of Concerns")]), p_([text5("The DAG Tree API keeps tree layout and extra links separate:")]), pre([classes(["code-block"]), style("background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto;")])([code_([text5('-- Build DAG from tree + extra links\ndag = dagTree myTree _.id\n    # addLinks\n        [ { source: "A", target: "E", linkType: "skip" }\n        , { source: "C", target: "G", linkType: "cross" }\n        ]\n\n-- Layout returns positioned nodes + resolved links\npositioned = layoutDAGTree Vertical size dag\n\n-- positioned.nodes      -- Array of nodes with x, y coords\n-- positioned.treeLinks  -- Parent\u2192child links\n-- positioned.extraLinks -- Extra links with source/target coords')])]), p_([text5("Tree algorithms handle positioning. Extra links are resolved by ID lookup. Rendering is trivial\u2014just map over each array.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Why FP Wins for Graph Algorithms")]), p_([text5("These examples demonstrate fundamental advantages of functional programming for graph algorithms:")]), ul_([li_([strong_([text5("Immutability enables comparison: ")]), text5("We can keep the original graph and the transformed graph, making before/after visualizations trivial.")]), li_([strong_([text5("Purity enables testing: ")]), text5("No hidden state, no side effects. Feed in a graph, get back a result. Test with edge cases, verify correctness.")]), li_([strong_([text5("Composition enables pipelines: ")]), text5("Topological sort \u2192 layer computation \u2192 layout \u2192 visualization. Each step is a pure function.")]), li_([strong_([text5("Types prevent bugs: ")]), text5("The compiler ensures you don't create cycles in a DAG, or reference non-existent nodes.")])]), p_([text5("Real-world applications:")]), ul_([li_([text5("Build systems: Bazel, Buck, Gradle all use topological sort for parallelization")]), li_([text5("Package managers: npm, cargo, pip use dependency resolution with cycle detection")]), li_([text5("Task schedulers: Apache Airflow, Luigi, Prefect order DAG execution")]), li_([text5("Code analysis: Import graphs, call graphs, module dependencies")])]), p_([text5("This is "), strong_([text5("functional programming wizardry")]), text5(": elegant algorithms solving hard problems, with visualization making the solutions immediately obvious.")])])]), footer([classes(["tutorial-footer"])])([p_([text5("Want more FP demonstrations? Check out "), a([href4("#" + routeToPath(TourFPFTW.value))])([text5("FP For The Win")]), text5(" for examples with Maps, Sets, and functional patterns.")])])]);
@@ -44179,11 +44201,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
   var eqPackNode = function(dictEq) {
-    var eq25 = eq(dictEq);
+    var eq26 = eq(dictEq);
     return {
       eq: function(x47) {
         return function(y48) {
-          return eq(eqArray(eqPackNode(dictEq)))(x47.value0.children)(y48.value0.children) && eq25(x47.value0.data_)(y48.value0.data_) && x47.value0.depth === y48.value0.depth && x47.value0.height === y48.value0.height && x47.value0.r === y48.value0.r && x47.value0.value === y48.value0.value && x47.value0.x === y48.value0.x && x47.value0.y === y48.value0.y;
+          return eq(eqArray(eqPackNode(dictEq)))(x47.value0.children)(y48.value0.children) && eq26(x47.value0.data_)(y48.value0.data_) && x47.value0.depth === y48.value0.depth && x47.value0.height === y48.value0.height && x47.value0.r === y48.value0.r && x47.value0.value === y48.value0.value && x47.value0.x === y48.value0.x && x47.value0.y === y48.value0.y;
         };
       }
     };
@@ -44971,8 +44993,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     var v22 = index(inputCircles)(0);
     if (v22 instanceof Just && (v1 instanceof Just && v2 instanceof Just)) {
       var remaining = drop(3)(inputCircles);
-      var initialState5 = initState(v22.value0)(v1.value0)(v2.value0);
-      var finalState = foldl17(flip(addCircle))(initialState5)(remaining);
+      var initialState6 = initState(v22.value0)(v1.value0)(v2.value0);
+      var finalState = foldl17(flip(addCircle))(initialState6)(remaining);
       var positioned = mapMaybe(function(i2) {
         return lookup34(i2)(finalState.circles);
       })(range2(0)(n - 1 | 0));
@@ -45220,11 +45242,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return PartNode2;
   })();
   var eqPartitionNode = function(dictEq) {
-    var eq25 = eq(dictEq);
+    var eq26 = eq(dictEq);
     return {
       eq: function(x47) {
         return function(y48) {
-          return eq(eqArray(eqPartitionNode(dictEq)))(x47.value0.children)(y48.value0.children) && eq25(x47.value0.data_)(y48.value0.data_) && x47.value0.depth === y48.value0.depth && x47.value0.height === y48.value0.height && x47.value0.value === y48.value0.value && x47.value0.x0 === y48.value0.x0 && x47.value0.x1 === y48.value0.x1 && x47.value0.y0 === y48.value0.y0 && x47.value0.y1 === y48.value0.y1;
+          return eq(eqArray(eqPartitionNode(dictEq)))(x47.value0.children)(y48.value0.children) && eq26(x47.value0.data_)(y48.value0.data_) && x47.value0.depth === y48.value0.depth && x47.value0.height === y48.value0.height && x47.value0.value === y48.value0.value && x47.value0.x0 === y48.value0.x0 && x47.value0.x1 === y48.value0.x1 && x47.value0.y0 === y48.value0.y0 && x47.value0.y1 === y48.value0.y1;
         };
       }
     };
@@ -46351,11 +46373,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return (1 + sqrt(5)) / 2;
   })();
   var eqTreemapNode = function(dictEq) {
-    var eq25 = eq(dictEq);
+    var eq26 = eq(dictEq);
     return {
       eq: function(x47) {
         return function(y48) {
-          return eq(eqArray(eqTreemapNode(dictEq)))(x47.value0.children)(y48.value0.children) && eq25(x47.value0.data_)(y48.value0.data_) && x47.value0.depth === y48.value0.depth && x47.value0.height === y48.value0.height && x47.value0.value === y48.value0.value && x47.value0.x0 === y48.value0.x0 && x47.value0.x1 === y48.value0.x1 && x47.value0.y0 === y48.value0.y0 && x47.value0.y1 === y48.value0.y1;
+          return eq(eqArray(eqTreemapNode(dictEq)))(x47.value0.children)(y48.value0.children) && eq26(x47.value0.data_)(y48.value0.data_) && x47.value0.depth === y48.value0.depth && x47.value0.height === y48.value0.height && x47.value0.value === y48.value0.value && x47.value0.x0 === y48.value0.x0 && x47.value0.x1 === y48.value0.x1 && x47.value0.y0 === y48.value0.y0 && x47.value0.y1 === y48.value0.y1;
         };
       }
     };
@@ -46903,11 +46925,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard45 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var pure67 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize28 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var render32 = function(v2) {
     return div2([classes(["tutorial-page"])])([renderHeader3(TourHierarchies.value), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("3. Hierarchical Layouts")]), p_([text5("Hierarchical data structures are everywhere in computing: file systems, organizational charts, taxonomies, JSON documents, and abstract syntax trees. Different visualization layouts reveal different aspects of the same hierarchical data.")]), p_([text5("This page demonstrates different ways to visualize hierarchical datasets. Use the links below to explore each layout type and see how each representation emphasizes different relationships in the data.")])]), section([classes(["tutorial-section"]), id4("node-link")])([h2([classes(["tutorial-section-title"])])([text5("1. Node-Link Diagrams (Trees and Dendrograms)")]), p_([text5("Node-link diagrams show hierarchies as connected nodes, with parent-child relationships represented by links. These layouts can be oriented horizontally, vertically, or radially.")]), h3_([text5("Vertical Tidy Tree")]), p_([text5("Root at the top, grows downward. Compact tidy tree layout using the Reingold-Tilford algorithm. Common in organizational charts.")]), div2([id4("tree-viz"), classes(["viz-container"])])([]), h3_([text5("Horizontal Tidy Tree")]), p_([text5("Root on the left, grows to the right. Efficient use of horizontal space.")]), div2([id4("horizontal-tree-viz"), classes(["viz-container"])])([]), h3_([text5("Radial Tidy Tree")]), p_([text5("Emanates from center in a circular layout. Space-efficient for large hierarchies.")]), div2([id4("radial-tree-viz"), classes(["viz-container"])])([]), h3_([text5("Dendrograms (Cluster Diagrams)")]), p_([text5("Dendrogram layouts place all leaf nodes at the same level, creating a uniform appearance useful for comparing leaf nodes.")]), div2([id4("cluster-viz"), classes(["viz-container"])])([]), p_([text5("We also have an interactive demo showing "), a([href4("#" + routeToPath(AnimatedTreeCluster.value))])([text5("animated transitions between Tree and Cluster layouts")]), text5(" that demonstrates how the same data looks different with these two algorithms.")])]), section([classes(["tutorial-section"]), id4("adjacency")])([h2([classes(["tutorial-section-title"])])([text5("2. Adjacency Diagrams (Icicle/Sunburst)")]), p_([text5("Adjacency diagrams show hierarchy through relative placement of rectangles or arcs. They're space-efficient and can encode quantitative values through area.")]), h3_([text5("Icicle Diagram (Partition)")]), p_([text5("Rectangular subdivisions showing hierarchy through relative placement. Each level of the hierarchy is a horizontal band, with children subdividing their parent's width. Area encodes quantitative values.")]), div2([id4("partition-viz"), classes(["viz-container"])])([]), h3_([text5("Sunburst Diagram")]), p_([text5("The radial equivalent of icicle diagrams. The root is at the center, and each ring represents a level of the hierarchy. Angular width represents quantitative value or number of children.")]), div2([id4("sunburst-viz"), classes(["viz-container"])])([])]), section([classes(["tutorial-section"]), id4("enclosure")])([h2([classes(["tutorial-section-title"])])([text5("3. Enclosure Diagrams (Treemap and Circle Packing)")]), p_([text5("Enclosure diagrams show hierarchy through containment, where parent elements completely enclose their children. These layouts efficiently use space and make quantitative comparisons easy.")]), h3_([text5("Treemap")]), p_([text5("Space-efficient rectangular subdivisions where area is proportional to value. Treemaps show hierarchy through nesting and excel at displaying large amounts of hierarchical data in a compact space. The recursive subdivision algorithm creates rectangles whose area represents quantitative values.")]), div2([id4("treemap-viz"), classes(["viz-container"])])([]), h3_([text5("Circle Packing")]), p_([text5("Tightly nested circles showing hierarchy through containment. Area encodes values, and the circular layout readily shows topology. The packing algorithm positions circles to minimize wasted space while maintaining clear hierarchical relationships.")]), div2([id4("pack-viz"), classes(["viz-container"])])([])]), section([classes(["tutorial-section"]), id4("edge-bundling")])([h2([classes(["tutorial-section-title"])])([text5("4. Hierarchical Edge Bundling")]), p_([text5("Edge bundling is a technique for reducing visual clutter in graphs with many edges. Edges are bundled together along the hierarchical structure, creating visually appealing flow patterns that reveal high-level connectivity patterns.")]), p_([text5("This technique is particularly effective for visualizing dependencies, relationships, or flows in large hierarchical datasets like software dependencies, communication networks, or biological pathways.")]), h3_([text5("Flare Class Dependencies")]), p_([text5("This diagram shows the import relationships between 252 classes in the Flare ActionScript visualization library. Each class is positioned around the circle based on its package hierarchy, and edges are bundled together based on shared ancestry. The bundling reveals which packages are tightly coupled.")]), div2([id4("edge-bundle-viz"), classes(["viz-container"])])([])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Interactive Exploration")]), p_([text5("To see a working example of hierarchical layouts with interactive switching between tree and cluster algorithms, visit the "), a([href4("#" + routeToPath(AnimatedTreeCluster.value))])([text5("Animated Tree \u2194 Cluster demo")]), text5(" which shows smooth transitions between different layouts of the same hierarchical data.")]), p_([text5("More hierarchical layout examples will be added to the "), a([href4("#" + routeToPath(Gallery.value))])([text5("Examples Gallery")]), text5(" as they are implemented in TreeAPI.")])])])]);
@@ -46955,11 +46977,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.Tour.TourIndex/index.js
   var pure68 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize29 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var renderCard2 = function(route) {
     return function(title4) {
@@ -47635,11 +47657,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return ExNestedStructure2;
   })();
   var Initialize30 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var SelectExample = /* @__PURE__ */ (function() {
     function SelectExample3(value0) {
@@ -48658,11 +48680,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var pure119 = /* @__PURE__ */ pure(applicativeHalogenM);
   var get15 = /* @__PURE__ */ get(monadStateHalogenM);
   var Initialize31 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var Finalize3 = /* @__PURE__ */ (function() {
     function Finalize4() {
@@ -49248,9 +49270,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             var idx = fromMaybe(0)(findIndex(function(d1) {
               return d1 === date;
             })(allDates));
-            var value22 = toNumber(idx);
+            var value23 = toNumber(idx);
             var domainSpan = xScale.domain.max - xScale.domain.min;
-            var normalized = (value22 - xScale.domain.min) / domainSpan;
+            var normalized = (value23 - xScale.domain.min) / domainSpan;
             return xScale.range.min + normalized * rangeSpan;
           };
           var linePath = function(points) {
@@ -49633,9 +49655,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         var radiusScale = function(v2) {
           return 80 + v2 / maxTotal * radiusRange;
         };
-        var makeGridLine = function(value22) {
-          var gridRadius = radiusScale(value22);
-          return [elem3(Circle.value)([radius33(gridRadius), stroke32("#000000"), strokeOpacity6(0.5), fill46("none"), class_43("grid-circle")]), elem3(Text.value)([y44(-gridRadius), dy3(5.6), textContent27(formatSI(value22)), stroke32("#ffffff"), strokeWidth31(5), fill46("none"), class_43("grid-label-bg")]), elem3(Text.value)([y44(-gridRadius), dy3(5.6), textContent27(formatSI(value22)), fill46("#000000"), class_43("grid-label")])];
+        var makeGridLine = function(value23) {
+          var gridRadius = radiusScale(value23);
+          return [elem3(Circle.value)([radius33(gridRadius), stroke32("#000000"), strokeOpacity6(0.5), fill46("none"), class_43("grid-circle")]), elem3(Text.value)([y44(-gridRadius), dy3(5.6), textContent27(formatSI(value23)), stroke32("#ffffff"), strokeWidth31(5), fill46("none"), class_43("grid-label-bg")]), elem3(Text.value)([y44(-gridRadius), dy3(5.6), textContent27(formatSI(value23)), fill46("#000000"), class_43("grid-label")])];
         };
         var ageGroups = ["<10", "10-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79", "\u226580"];
         var makeLegendItem = function(idx) {
@@ -49685,11 +49707,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard53 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var pure76 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize32 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var render36 = function(v2) {
     return div2([classes(["tutorial-page"])])([renderHeader3(TourProfessional.value), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("2. Typical Charts")]), p_([text5("Real-world examples of common chart types showing state-level US population data and economic indicators. These are the kinds of charts you'd typically create for data analysis and reporting - more complex than the foundations, but without hierarchies, animations, transitions, or physical simulations.")]), p_([text5("Each example demonstrates best practices for scales, axes, legends, and color coding to create clear and informative visualizations.")])]), section([classes(["tutorial-section"]), id4("grouped-bar")])([h2([classes(["tutorial-section-title"])])([text5("1. Grouped Bar Chart")]), p_([text5("US population by state and age group. This grouped bar chart shows population distribution across 6 states (CA, TX, FL, NY, PA, IL) broken down into 9 age groups. Each state has its own cluster of bars, with colors representing different age groups.")]), div2([classes(["tutorial-viz-container"])])([div2([id4("grouped-bar-viz"), classes(["grouped-bar-viz"])])([])]), p_([text5("The chart uses nested band scales: an outer scale positions each state cluster, and an inner scale positions individual bars within each cluster. The population values are scaled linearly to bar heights, with colors from the Spectral color scheme to distinguish age groups.")]), p_([text5("View this example "), a([href4("#" + routeToPath(new Example("grouped-bar-chart")))])([text5("with full source code")]), text5(".")])]), section([classes(["tutorial-section"]), id4("multi-line")])([h2([classes(["tutorial-section-title"])])([text5("2. Multi-Line Chart")]), p_([text5("Unemployment rates over time for 42 US metro areas from 2000 to 2013. This chart shows how unemployment fluctuated across the country, clearly illustrating the impact of the 2008 financial crisis and subsequent recovery. With so many overlapping lines, the data would be impossible to read without interaction.")]), div2([classes(["tutorial-viz-container"])])([div2([id4("multi-line-viz"), classes(["multi-line-viz"])])([])]), p_([text5("All lines are drawn in light gray using SVG path elements. The chart uses linear scales for time (x-axis) and unemployment percentage (y-axis), with axis labels for context.")]), p_([strong_([text5("Try hovering over the lines! ")]), text5("This is the key feature: when you hover over any line, it darkens while the others remain light gray, making it easy to trace that individual metro area through the tangle of overlapping data. This demonstrates a fundamental advantage of web-based visualization over print: interactivity makes complex, dense datasets readable. In a static image, these 42 overlapping lines would be nearly impossible to interpret.")])]), section([classes(["tutorial-section"]), id4("radial-stacked")])([h2([classes(["tutorial-section-title"])])([text5("3. Radial Stacked Bar Chart")]), p_([text5('The same US state population data as the grouped bar chart, but visualized in polar coordinates. Each state gets a wedge around the circle, with age groups stacked radially from the center outward. This "sunburst-like" layout efficiently uses space and creates an aesthetically pleasing circular composition.')]), div2([classes(["tutorial-viz-container"])])([div2([id4("radial-stacked-viz"), classes(["radial-stacked-viz"])])([])]), p_([text5("Radial charts work best for cyclical or seasonal data, but we're using the same state population data here to demonstrate how the same dataset can be visualized in multiple ways. The chart uses polar coordinates with an angular scale (\u03B8) dividing the circle by states and a radial scale (r) for population. Arc paths are generated for each segment, with the same Spectral color scheme as the grouped bar chart. State labels are positioned around the perimeter.")])])])]);
@@ -49725,11 +49747,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.Tour.TourShowcase/index.js
   var pure77 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize33 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var render37 = function(v2) {
     return div2([classes(["tutorial-page"])])([renderHeader3(TourShowcase.value), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Showcase: Flagship Demonstrations")]), p_([text5("This page highlights the most impressive and complete demonstrations of the PS<$>D3 library. These examples combine multiple techniques from the tour to create sophisticated, production-ready visualizations.")]), p_([text5("Each showcase example demonstrates the full power of combining PureScript's type safety with D3's visualization capabilities, showing what's possible when you bring together advanced programming language features and data visualization.")])]), section([classes(["tutorial-section"]), id4("animated-tree-cluster")])([h2([classes(["tutorial-section-title"])])([text5("Animated Tree \u2194 Cluster Transitions")]), p_([text5("This flagship demonstration shows smooth, bidirectional animations between Tree and Cluster layouts. It visualizes 252 nodes from the Flare visualization toolkit, demonstrating:")]), ul_([li_([text5("Smooth transitions using D3's data join with identity-based keys")]), li_([text5("Height-based child sorting to eliminate crossovers during animation")]), li_([text5("Extent-based centering for balanced layout")]), li_([text5("Complex hierarchical data with 252 nodes transitioning smoothly")])]), p_([a([href4("#" + routeToPath(AnimatedTreeCluster.value))])([text5("View the Animated Tree \u2194 Cluster demonstration \u2192")])]), p_([text5("This example showcases the TreeAPI's capability to handle complex layout transitions with proper enter/update/exit patterns, ensuring every node maintains its identity across layout changes for smooth, comprehensible animations.")])]), section([classes(["tutorial-section"]), id4("lesmis-gup-tree")])([h2([classes(["tutorial-section-title"])])([text5("Les Mis\xE9rables with General Update Pattern")]), p_([text5("A proof-of-concept combining the General Update Pattern (GUP) with Tree API and dynamic layouts. This demonstration shows character relationships from Victor Hugo's Les Mis\xE9rables with dynamic updates and transitions.")]), p_([a([href4("#" + routeToPath(LesMisGUPTree.value))])([text5("View the Les Mis\xE9rables GUP demonstration \u2192")])]), p_([text5("This example demonstrates how the library can combine multiple advanced techniques: hierarchical layouts, force-directed positioning, and the General Update Pattern for smooth enter/update/exit transitions.")])]), section([classes(["tutorial-section"]), id4("module-graph")])([h2([classes(["tutorial-section-title"])])([text5("Module Dependency Graph (Dogfooding)")]), p_([text5('A self-referential visualization showing the module dependencies of the PS<$>D3 library itself. This is "dogfooding" - using our library to visualize its own structure.')]), p_([a([href4("#" + routeToPath(ModuleGraph.value))])([text5("View the Module Dependency Graph \u2192")])]), p_([text5("This example shows:")]), ul_([li_([text5("How the library can visualize its own architecture")]), li_([text5("Hierarchical relationships between modules")]), li_([text5("The power of tree layouts for understanding code structure")]), li_([text5("Self-hosting capabilities of the visualization system")])])]), section([classes(["tutorial-section"]), id4("gallery")])([h2([classes(["tutorial-section-title"])])([text5("Full Examples Gallery")]), p_([text5("For a complete collection of all working examples with source code, visit the "), a([href4("#" + routeToPath(Gallery.value))])([text5("Examples Gallery")]), text5(". The gallery provides a comprehensive view of all TreeAPI examples, organized by category and difficulty level.")]), p_([text5("Each example in the gallery includes:")]), ul_([li_([text5("Full source code with syntax highlighting")]), li_([text5("Interactive demonstrations")]), li_([text5("Detailed explanations of techniques used")]), li_([text5("Links to relevant API documentation")])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Coming Soon")]), p_([text5("As more sophisticated examples are implemented in TreeAPI, they will be featured here in the showcase. Future additions may include:")]), ul_([li_([text5("Interactive chord diagrams with relationship filtering")]), li_([text5("Animated Sankey diagrams showing flow changes over time")]), li_([text5("Force-directed graphs with custom physics simulations")]), li_([text5("Multi-view coordinated visualizations")]), li_([text5("Real-time data streaming visualizations")]), li_([text5("Complex interactive dashboards combining multiple visualization types")])]), p_([text5("The goal is to demonstrate that PureScript + D3 can handle any visualization challenge, with better type safety, composability, and maintainability than pure JavaScript solutions.")])])])]);
@@ -49788,11 +49810,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         })();
         var accumulate = function(acc) {
           return function(item) {
-            var value22 = getValue4(item);
+            var value23 = getValue4(item);
             var proportion = (function() {
               var $7 = total > 0;
               if ($7) {
-                return value22 / total;
+                return value23 / total;
               }
               ;
               return 0;
@@ -49800,7 +49822,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             var arcAngle = proportion * tau6;
             var slice7 = {
               datum: item,
-              value: value22,
+              value: value23,
               startAngle: acc.angle,
               endAngle: acc.angle + arcAngle,
               padAngle: 0
@@ -50091,7 +50113,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }];
   };
   var barChart2 = function(config) {
-    return function(value22) {
+    return function(value23) {
       return function(gender) {
         var fillColor = (function() {
           if (gender instanceof Male) {
@@ -50104,16 +50126,16 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           ;
           throw new Error("Failed pattern match at D3.Viz.Simpsons.DataTable (line 96, column 17 - line 98, column 22): " + [gender.constructor.name]);
         })();
-        var barWidth = value22 / config.maxValue * config.width;
+        var barWidth = value23 / config.maxValue * config.width;
         return withChildren(elem3(SVG.value)([width51(config.width), height51(config.height), viewBox45("0 0 " + (show70(config.width) + (" " + show70(config.height)))), class_44("bar-chart-svg")]))([elem3(Rect.value)([width51(config.width), height51(config.height), fill47("none"), stroke33(gray), strokeWidth32(2)]), elem3(Rect.value)([width51(barWidth), height51(config.height), fill47(fillColor)])]);
       };
     };
   };
   var renderBar = function(containerId) {
-    return function(value22) {
+    return function(value23) {
       return function(gender) {
         return bind132(select44(containerId))(function(container) {
-          return bind132(renderTree52(container)(barChart2(defaultBarConfig)(value22)(gender)))(function() {
+          return bind132(renderTree52(container)(barChart2(defaultBarConfig)(value23)(gender)))(function() {
             return pure78(unit);
           });
         });
@@ -51050,11 +51072,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var modify_16 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var when11 = /* @__PURE__ */ when(applicativeHalogenM);
   var Initialize34 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var SetMaleProportion = /* @__PURE__ */ (function() {
     function SetMaleProportion2(value0) {
@@ -51404,11 +51426,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }
   })(ordUnit);
   var Initialize35 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var handleAction34 = function(dictMonadAff) {
     var liftAff2 = liftAff(monadAffHalogenM(dictMonadAff));
@@ -51563,11 +51585,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
 
   // output/Component.WealthHealth.Actions/index.js
   var Initialize36 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var DataLoaded = /* @__PURE__ */ (function() {
     function DataLoaded2(value0) {
@@ -52124,16 +52146,16 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     ;
     throw new Error("Failed pattern match at D3.Viz.TreeAPI.WealthHealthDraw (line 313, column 1 - line 313, column 37): " + [n.constructor.name]);
   };
-  var formatIncome = function(value22) {
-    if (value22 >= 1e3) {
-      return "$" + (show77(floor2(value22 / 1e3)) + "k");
+  var formatIncome = function(value23) {
+    if (value23 >= 1e3) {
+      return "$" + (show77(floor2(value23 / 1e3)) + "k");
     }
     ;
     if (otherwise) {
-      return "$" + show77(floor2(value22));
+      return "$" + show77(floor2(value23));
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.TreeAPI.WealthHealthDraw (line 85, column 1 - line 85, column 33): " + [value22.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.TreeAPI.WealthHealthDraw (line 85, column 1 - line 85, column 33): " + [value23.constructor.name]);
   };
   var xAxisTick = function(config) {
     return function(tickValue) {
@@ -52607,11 +52629,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }
   })(ordUnit);
   var Initialize37 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var handleAction36 = function(dictMonadAff) {
     var liftAff2 = liftAff(monadAffHalogenM(dictMonadAff));
@@ -52734,11 +52756,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return ThreeDimensions2;
   })();
   var Initialize38 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var SelectExample2 = /* @__PURE__ */ (function() {
     function SelectExample3(value0) {
@@ -52995,11 +53017,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.Understanding.UnderstandingAttributes/index.js
   var pure86 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize39 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var svgDiagram = function(src10) {
     return function(alt10) {
@@ -53045,11 +53067,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.Understanding.UnderstandingGrammar/index.js
   var pure87 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize40 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var svgDiagram2 = function(src10) {
     return function(alt10) {
@@ -53095,11 +53117,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.Understanding.UnderstandingScenes/index.js
   var pure88 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize41 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var svgDiagram3 = function(src10) {
     return function(alt10) {
@@ -53145,11 +53167,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.Understanding.UnderstandingSelections/index.js
   var pure89 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize42 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var svgDiagram4 = function(src10) {
     return function(alt10) {
@@ -53195,11 +53217,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.Understanding.UnderstandingTreeAPI/index.js
   var pure90 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize43 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var svgDiagram5 = function(src10) {
     return function(alt10) {
@@ -53327,7 +53349,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return f(v2);
     };
   };
-  var initDriverState = function(component53) {
+  var initDriverState = function(component54) {
     return function(input3) {
       return function(handler3) {
         return function(lchs) {
@@ -53343,8 +53365,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             var subscriptions = $$new(new Just(empty5))();
             var forks = $$new(empty5)();
             var ds = {
-              component: component53,
-              state: component53.initialState(input3),
+              component: component54,
+              state: component54.initialState(input3),
               refs: empty5,
               children: empty7,
               childrenIn,
@@ -53451,16 +53473,16 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       });
     };
   };
-  var evalQ = function(render57) {
+  var evalQ = function(render58) {
     return function(ref2) {
       return function(q3) {
         return bind135(liftEffect40(read(ref2)))(function(v2) {
-          return evalM(render57)(ref2)(v2["component"]["eval"](new Query(map98(Just.create)(liftCoyoneda(q3)), $$const(Nothing.value))));
+          return evalM(render58)(ref2)(v2["component"]["eval"](new Query(map98(Just.create)(liftCoyoneda(q3)), $$const(Nothing.value))));
         });
       };
     };
   };
-  var evalM = function(render57) {
+  var evalM = function(render58) {
     return function(initRef) {
       return function(v2) {
         var evalChildQuery = function(ref2) {
@@ -53470,7 +53492,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 var evalChild = function(v3) {
                   return parallel3(bind135(liftEffect40(read(v3)))(function(dsx) {
                     return unDriverStateX(function(ds) {
-                      return evalQ(render57)(ds.selfRef)(v22.value1);
+                      return evalQ(render58)(ds.selfRef)(v22.value1);
                     })(dsx);
                   }));
                 };
@@ -53507,7 +53529,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     lifecycleHandlers: v22.lifecycleHandlers,
                     state: v3.value1
                   })(ref2)))(function() {
-                    return discard119(handleLifecycle(v22.lifecycleHandlers)(render57(v22.lifecycleHandlers)(ref2)))(function() {
+                    return discard119(handleLifecycle(v22.lifecycleHandlers)(render58(v22.lifecycleHandlers)(ref2)))(function() {
                       return pure92(v3.value0);
                     });
                   });
@@ -53520,7 +53542,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             if (v1 instanceof Subscribe) {
               return bind135(fresh(SubscriptionId)(ref2))(function(sid) {
                 return bind135(liftEffect40(subscribe(v1.value0(sid))(function(act) {
-                  return handleAff(evalF(render57)(ref2)(new Action(act)));
+                  return handleAff(evalF(render58)(ref2)(new Action(act)));
                 })))(function(finalize) {
                   return bind135(liftEffect40(read(ref2)))(function(v22) {
                     return discard119(liftEffect40(modify_(map210(insert20(sid)(finalize)))(v22.subscriptions)))(function() {
@@ -53557,7 +53579,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             ;
             if (v1 instanceof Par) {
               return sequential2(retractFreeAp2(hoistFreeAp((function() {
-                var $119 = evalM(render57)(ref2);
+                var $119 = evalM(render58)(ref2);
                 return function($120) {
                   return parallel3($119($120));
                 };
@@ -53571,7 +53593,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     return bind135(fork3($$finally(liftEffect40(function __do10() {
                       modify_($$delete11(fid))(v22.forks)();
                       return write(true)(doneRef)();
-                    }))(evalM(render57)(ref2)(v1.value0))))(function(fiber) {
+                    }))(evalM(render58)(ref2)(v1.value0))))(function(fiber) {
                       return discard119(liftEffect40(unlessM2(read(doneRef))(modify_(insert110(fid)(fiber))(v22.forks))))(function() {
                         return pure92(v1.value1(fid));
                       });
@@ -53614,7 +53636,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       };
     };
   };
-  var evalF = function(render57) {
+  var evalF = function(render58) {
     return function(ref2) {
       return function(v2) {
         if (v2 instanceof RefUpdate) {
@@ -53642,7 +53664,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         ;
         if (v2 instanceof Action) {
           return bind135(liftEffect40(read(ref2)))(function(v1) {
-            return evalM(render57)(ref2)(v1["component"]["eval"](new Action2(v2.value0, unit)));
+            return evalM(render58)(ref2)(v1["component"]["eval"](new Action2(v2.value0, unit)));
           });
         }
         ;
@@ -53708,12 +53730,12 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   };
   var runUI = function(renderSpec2) {
-    return function(component53) {
+    return function(component54) {
       return function(i2) {
         var squashChildInitializers = function(lchs) {
           return function(preInits) {
             return unDriverStateX(function(st) {
-              var parentInitializer = evalM(render57)(st.selfRef)(st["component"]["eval"](new Initialize(unit)));
+              var parentInitializer = evalM(render58)(st.selfRef)(st["component"]["eval"](new Initialize(unit)));
               return modify_(function(handlers) {
                 return {
                   initializers: new Cons(discard215(parSequence_3(reverse2(handlers.initializers)))(function() {
@@ -53743,7 +53765,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     finalizers: pre2.finalizers
                   })(lchs)();
                   bindFlipped7(unDriverStateX((function() {
-                    var $63 = render57(lchs);
+                    var $63 = render58(lchs);
                     return function($64) {
                       return $63((function(v2) {
                         return v2.selfRef;
@@ -53776,7 +53798,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                                 return $65(slot3.output($66));
                               };
                             })())();
-                            return handleAff(evalM(render57)(st.selfRef)(st["component"]["eval"](new Receive(slot3.input, unit))))();
+                            return handleAff(evalM(render58)(st.selfRef)(st["component"]["eval"](new Receive(slot3.input, unit))))();
                           };
                         })(dsx)();
                         return childrenIn.value0.value0;
@@ -53815,7 +53837,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             };
           };
         };
-        var render57 = function(lchs) {
+        var render58 = function(lchs) {
           return function($$var2) {
             return function __do10() {
               var v2 = read($$var2)();
@@ -53825,7 +53847,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               write(v2.children)(v2.childrenIn)();
               var handler3 = (function() {
                 var $70 = queueOrRun(v2.pendingHandlers);
-                var $71 = evalF(render57)(v2.selfRef);
+                var $71 = evalF(render58)(v2.selfRef);
                 return function($72) {
                   return $70($$void16($71($72)));
                 };
@@ -53894,7 +53916,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return unDriverStateX(function(st) {
             return function __do10() {
               cleanupSubscriptionsAndForks(st)();
-              var f = evalM(render57)(st.selfRef)(st["component"]["eval"](new Finalize(unit)));
+              var f = evalM(render58)(st.selfRef)(st["component"]["eval"](new Finalize(unit)));
               modify_(function(handlers) {
                 return {
                   initializers: handlers.initializers,
@@ -53918,7 +53940,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   return pure123(Nothing.value);
                 }
                 ;
-                return evalQ(render57)(ref2)(q3);
+                return evalQ(render58)(ref2)(q3);
               });
             };
           };
@@ -53953,7 +53975,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return function($79) {
                   return liftEffect41($78($79));
                 };
-              })())(i2)(component53))();
+              })())(i2)(component54))();
               return unDriverStateX(function(st) {
                 return pure93({
                   query: evalDriver(disposed)(st.selfRef),
@@ -54072,9 +54094,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             };
           });
           var patch2 = $lazy_patch(91);
-          var render57 = $lazy_render(82);
+          var render58 = $lazy_render(82);
           var renderComponentSlot = $lazy_renderComponentSlot(109);
-          return render57;
+          return render58;
         };
         var buildAttributes = buildProp(handler3);
         return {
@@ -54087,7 +54109,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
   var renderSpec = function(document3) {
     return function(container) {
-      var render57 = function(handler3) {
+      var render58 = function(handler3) {
         return function(child) {
           return function(v2) {
             return function(v1) {
@@ -54128,18 +54150,18 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         };
       };
       return {
-        render: render57,
+        render: render58,
         renderChild: identity17,
         removeChild: removeChild3,
         dispose: removeChild3
       };
     };
   };
-  var runUI2 = function(component53) {
+  var runUI2 = function(component54) {
     return function(i2) {
       return function(element4) {
         return bind137(liftEffect42(map100(toDocument)(bindFlipped8(document2)(windowImpl))))(function(document3) {
-          return runUI(renderSpec(document3)(element4))(component53)(i2);
+          return runUI(renderSpec(document3)(element4))(component54)(i2);
         });
       };
     };
@@ -54155,11 +54177,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var bind87 = /* @__PURE__ */ bind(bindHalogenM);
   var pure95 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize44 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var render49 = function(v2) {
     return div2([classes(["acknowledgements-page"])])([div2([classes(["acknowledgements-content"])])([h1([classes(["acknowledgements-title"])])([text5("Acknowledgements")]), section([classes(["acknowledgements-section"])])([h2_([text5("D3.js and Data Visualization")]), p_([text5("This project would not exist without "), a([href4("https://d3js.org/")])([text5("D3.js")]), text5(", created by "), a([href4("https://bost.ocks.org/mike/")])([text5("Mike Bostock")]), text5(". D3 revolutionized web-based data visualization and established patterns that have become fundamental to the field. Many of the examples in PS<$>D3 are adapted from Mike's extensive collection of examples and tutorials.")]), p_([text5("Thanks so much to Mike for creating D3, for his clear documentation and examples, and for making the library open source. His work on Observable and continued contributions to visualization continue to inspire.")]), h3_([text5("Library Dependencies")]), p_([text5("This diagram shows how D3 modules flow into our library packages. Note D3's own internal dependencies on the left - modules like d3-zoom depend on d3-transition, d3-drag, etc. Unused D3 modules are tree-shaken from the bundle.")]), div2([id4("d3-library-sankey"), style("background: #fafafa; border-radius: 8px; padding: 10px;")])([])]), section([classes(["acknowledgements-section"])])([h2_([text5("Website Dependencies")]), p_([text5("This diagram shows how the demo website depends on our libraries. The SimulationManager represents temporary FFI code that will eventually move into psd3-simulation.")]), div2([id4("d3-website-sankey"), style("background: #fafafa; border-radius: 8px; padding: 10px;")])([])]), section([classes(["acknowledgements-section"])])([h2_([text5("Observable Examples (ISC License)")]), p_([text5("Several chart examples in PS<$>D3 are based on visualizations from "), a([href4("https://observablehq.com/")])([text5("Observable")]), text5(", licensed under the ISC License. These include:")]), ul_([li_([a([href4("https://observablehq.com/@d3/grouped-bar-chart/2")])([text5("Grouped Bar Chart")]), text5(" (Copyright 2018\u20132020 Observable, Inc.)")]), li_([a([href4("https://observablehq.com/@d3/multi-line-chart/2")])([text5("Multi-Line Chart")]), text5(" (Copyright 2018\u20132023 Observable, Inc.)")]), li_([a([href4("https://observablehq.com/@d3/radial-stacked-bar-chart/2")])([text5("Radial Stacked Bar Chart")]), text5(" (Copyright 2019\u20132023 Observable, Inc., created by Mike Bostock)")])]), p_([text5("These examples have been reimplemented in PureScript to demonstrate the PS<$>D3 library's capabilities while faithfully reproducing the original visualizations' dimensions, scales, and styling.")])]), section([classes(["acknowledgements-section"])])([h2_([text5("Data Visualization Pioneers")]), p_([a([href4("https://www.edwardtufte.com/")])([text5("Edward Tufte")]), text5("'s work on information design and visual communication established many of the principles we follow today. His books remain essential reading for anyone interested in effective data presentation.")]), p_([a([href4("https://www.gapminder.org/about/hans-rosling/")])([text5("Hans Rosling")]), text5("'s passionate advocacy for data literacy and his innovative animated visualizations (particularly the Gapminder World visualization) showed how data can tell compelling stories. The Wealth & Health example in this project is inspired by his work.")])]), section([classes(["acknowledgements-section"])])([h2_([text5("PureScript and Functional Programming")]), p_([a([href4("http://functorial.com/")])([text5("Phil Freeman")]), text5(", for his presentation and example of finally tagless encodings in PureScript which provided the spark for this library's architecture.")]), p_([text5("Ian Ross, for his solution to the polymorphic attribute architecture with typeclasses, so neat.")]), p_([text5("The PureScript Core Team members, past, present and future and the wider PureScript community for building this incredibly nice language and ecosystem. I'd particularly like to single out Mike Solomon, Jordan Martinez, Thomas Honeyman, Fabrizio Ferrai who listened to me drone on about this on conference calls.")])]), section([classes(["acknowledgements-section"])])([h2_([text5("About This Project")]), p_([text5("PS<$>D3 is an experimental exploration of what data visualization APIs might look like in a strongly-typed functional programming language. It aims to preserve D3's flexibility while adding type safety and composability.")]), p_([text5("This project is open source and available on GitHub. Contributions, feedback, and suggestions are always welcome.")])])]), render48]);
@@ -54216,11 +54238,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/PSD3.Home/index.js
   var pure96 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize45 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var renderTutorialLink = function(title4) {
     return function(description) {
@@ -54299,11 +54321,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/PSD3.HowTo.HowtoIndex/index.js
   var pure97 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize46 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var renderHowtoCard = function(route) {
     return function(title4) {
@@ -54342,11 +54364,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/PSD3.Reference.Reference/index.js
   var pure98 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize47 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var renderApiCard = function(title4) {
     return function(description) {
@@ -54383,11 +54405,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/PSD3.Tutorial.GettingStarted/index.js
   var triggerMermaidRendering2 = /* @__PURE__ */ triggerMermaidRendering(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize48 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var wizardWorkflowDiagram = "\nflowchart TD\n    Start([Start Wizard]) --> Choice{Choose Method}\n\n    Choice -->|Web| WebWizard[Web-based Wizard]\n    Choice -->|CLI| CLIWizard[CLI Wizard]\n\n    WebWizard --> WebOptions{Select Options}\n    WebOptions --> Dataset[Choose Dataset<br/>\u2022 Anscombe's Quartet<br/>\u2022 Scatter Plot<br/>\u2022 Sine Wave]\n    Dataset --> WebPreview[Preview Files]\n    WebPreview --> WebDownload[Download .zip]\n\n    CLIWizard --> CLIRun[Run: node scripts/init-psd3-viz.js]\n    CLIRun --> CLIOptions{Configure}\n    CLIOptions --> VizName[Enter Visualization Name]\n    VizName --> VizType[Select Type<br/>\u2022 Static<br/>\u2022 Interactive]\n    VizType --> DataChoice[Choose Data<br/>\u2022 Example<br/>\u2022 Custom JSON]\n    DataChoice --> CLIGenerate[Generate Files]\n\n    WebDownload --> Extract[Extract Files]\n    CLIGenerate --> Build[Build & Run]\n    Extract --> Build\n    Build --> Success([Visualization Ready!])\n\n    style Start fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style Success fill:#d4c4b0,stroke:#8b7355,stroke-width:2px\n    style WebWizard fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n    style CLIWizard fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n";
   var render53 = function(v2) {
@@ -54420,11 +54442,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/PSD3.Understanding/index.js
   var pure99 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize49 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var renderCard3 = function(route) {
     return function(title4) {
@@ -55102,7 +55124,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return fromCharArray($151(toCharArray($152)));
       };
     })();
-    var intercalate8 = function(sep) {
+    var intercalate9 = function(sep) {
       return function(arr) {
         return maybe("")(function(v2) {
           var $75 = eq19(v2.tail)([]);
@@ -55110,7 +55132,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return v2.head;
           }
           ;
-          return v2.head + (sep + intercalate8(sep)(v2.tail));
+          return v2.head + (sep + intercalate9(sep)(v2.tail));
         })(uncons(arr));
       };
     };
@@ -55135,7 +55157,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       })();
       return div2([classes([cardClass]), onClick(function(v2) {
         return new SelectDataset2(dataset);
-      })])([div2([classes(["dataset-card__header"])])([h3_([text5(dataset.name)]), span4([classes(["difficulty-badge difficulty-badge--" + toLowerCase(show78(dataset.difficulty))])])([text5(show78(dataset.difficulty))])]), p([classes(["dataset-card__description"])])([text5(dataset.description)]), div2([classes(["dataset-card__info"])])([strong_([text5("Fields: ")]), text5(intercalate8(", ")(map104(function(f) {
+      })])([div2([classes(["dataset-card__header"])])([h3_([text5(dataset.name)]), span4([classes(["difficulty-badge difficulty-badge--" + toLowerCase(show78(dataset.difficulty))])])([text5(show78(dataset.difficulty))])]), p([classes(["dataset-card__description"])])([text5(dataset.description)]), div2([classes(["dataset-card__info"])])([strong_([text5("Fields: ")]), text5(intercalate9(", ")(map104(function(f) {
         return f.name + (": " + f.fieldType);
       })(dataset.fields)))]), div2([classes(["dataset-card__viz"])])([strong_([text5("Suggested: ")]), text5(dataset.suggestedViz)]), div2([classes(["dataset-card__note"])])([text5(dataset.educationalNote)])]);
     };
@@ -55804,14 +55826,1509 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
   })();
 
-  // output/PSD3.Main/index.js
+  // output/TreeBuilder.App/foreign.js
+  var clearPreviewContainer = (selector) => () => {
+    const container = document.querySelector(selector);
+    if (container) {
+      container.innerHTML = "";
+    }
+  };
+
+  // output/TreeBuilder.Interpreter/foreign.js
+  var SVG_NS = "http://www.w3.org/2000/svg";
+  var SVG_ELEMENTS = /* @__PURE__ */ new Set(["svg", "circle", "rect", "line", "path", "text", "g", "group"]);
+  var renderPreviewFFI = (containerSelector) => (instructions) => () => {
+    const container = select_default2(containerSelector);
+    container.selectAll("*").remove();
+    instructions.forEach((instr) => {
+      renderInstruction(container.node(), instr);
+    });
+  };
+  function renderInstruction(parent2, instruction) {
+    const elemType = normalizeElementType(instruction.elemType);
+    let elem10;
+    if (SVG_ELEMENTS.has(elemType)) {
+      elem10 = document.createElementNS(SVG_NS, elemType);
+    } else {
+      elem10 = document.createElement(elemType);
+    }
+    instruction.attrs.forEach((attr3) => {
+      if (attr3.name === "text") {
+        elem10.textContent = attr3.value;
+      } else {
+        elem10.setAttribute(attr3.name, attr3.value);
+      }
+    });
+    parent2.appendChild(elem10);
+    instruction.children.forEach((child) => {
+      renderInstruction(elem10, child);
+    });
+    return elem10;
+  }
+  function normalizeElementType(type) {
+    switch (type) {
+      case "group":
+        return "g";
+      default:
+        return type;
+    }
+  }
+
+  // output/TreeBuilder.Types/index.js
+  var elem9 = /* @__PURE__ */ elem2(eqString);
+  var FromField = /* @__PURE__ */ (function() {
+    function FromField2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    FromField2.create = function(value0) {
+      return new FromField2(value0);
+    };
+    return FromField2;
+  })();
+  var ConstantNumber = /* @__PURE__ */ (function() {
+    function ConstantNumber2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ConstantNumber2.create = function(value0) {
+      return new ConstantNumber2(value0);
+    };
+    return ConstantNumber2;
+  })();
+  var ConstantString = /* @__PURE__ */ (function() {
+    function ConstantString2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ConstantString2.create = function(value0) {
+      return new ConstantString2(value0);
+    };
+    return ConstantString2;
+  })();
+  var IndexBased = /* @__PURE__ */ (function() {
+    function IndexBased2() {
+    }
+    ;
+    IndexBased2.value = new IndexBased2();
+    return IndexBased2;
+  })();
+  var Computed = /* @__PURE__ */ (function() {
+    function Computed2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Computed2.create = function(value0) {
+      return new Computed2(value0);
+    };
+    return Computed2;
+  })();
+  var BNode = /* @__PURE__ */ (function() {
+    function BNode2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    BNode2.create = function(value0) {
+      return function(value1) {
+        return new BNode2(value0, value1);
+      };
+    };
+    return BNode2;
+  })();
+  var BDataJoin = /* @__PURE__ */ (function() {
+    function BDataJoin2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    BDataJoin2.create = function(value0) {
+      return new BDataJoin2(value0);
+    };
+    return BDataJoin2;
+  })();
+  var eqAttributeChoice = {
+    eq: function(x47) {
+      return function(y48) {
+        if (x47 instanceof FromField && y48 instanceof FromField) {
+          return x47.value0 === y48.value0;
+        }
+        ;
+        if (x47 instanceof ConstantNumber && y48 instanceof ConstantNumber) {
+          return x47.value0 === y48.value0;
+        }
+        ;
+        if (x47 instanceof ConstantString && y48 instanceof ConstantString) {
+          return x47.value0 === y48.value0;
+        }
+        ;
+        if (x47 instanceof IndexBased && y48 instanceof IndexBased) {
+          return true;
+        }
+        ;
+        if (x47 instanceof Computed && y48 instanceof Computed) {
+          return x47.value0 === y48.value0;
+        }
+        ;
+        return false;
+      };
+    }
+  };
+  var defaultSampleData = [{
+    x: 50,
+    y: 50,
+    radius: 15,
+    width: 40,
+    height: 30,
+    color: "#1f77b4",
+    label: "Alpha",
+    name: "A",
+    value: 10,
+    index: 0
+  }, {
+    x: 150,
+    y: 80,
+    radius: 20,
+    width: 50,
+    height: 40,
+    color: "#ff7f0e",
+    label: "Beta",
+    name: "B",
+    value: 25,
+    index: 1
+  }, {
+    x: 100,
+    y: 150,
+    radius: 12,
+    width: 35,
+    height: 25,
+    color: "#2ca02c",
+    label: "Gamma",
+    name: "C",
+    value: 15,
+    index: 2
+  }, {
+    x: 200,
+    y: 120,
+    radius: 18,
+    width: 45,
+    height: 35,
+    color: "#d62728",
+    label: "Delta",
+    name: "D",
+    value: 30,
+    index: 3
+  }];
+  var defaultAttributesFor = function(v2) {
+    if (v2 === "circle") {
+      return [{
+        attrName: "cx",
+        choice: new FromField("x")
+      }, {
+        attrName: "cy",
+        choice: new FromField("y")
+      }, {
+        attrName: "r",
+        choice: new FromField("radius")
+      }, {
+        attrName: "fill",
+        choice: new FromField("color")
+      }];
+    }
+    ;
+    if (v2 === "rect") {
+      return [{
+        attrName: "x",
+        choice: new FromField("x")
+      }, {
+        attrName: "y",
+        choice: new FromField("y")
+      }, {
+        attrName: "width",
+        choice: new FromField("width")
+      }, {
+        attrName: "height",
+        choice: new FromField("height")
+      }, {
+        attrName: "fill",
+        choice: new FromField("color")
+      }];
+    }
+    ;
+    if (v2 === "text") {
+      return [{
+        attrName: "x",
+        choice: new FromField("x")
+      }, {
+        attrName: "y",
+        choice: new FromField("y")
+      }, {
+        attrName: "text",
+        choice: new FromField("label")
+      }, {
+        attrName: "fill",
+        choice: new ConstantString("#333")
+      }];
+    }
+    ;
+    if (v2 === "line") {
+      return [{
+        attrName: "x1",
+        choice: new ConstantNumber(0)
+      }, {
+        attrName: "y1",
+        choice: new ConstantNumber(0)
+      }, {
+        attrName: "x2",
+        choice: new FromField("x")
+      }, {
+        attrName: "y2",
+        choice: new FromField("y")
+      }, {
+        attrName: "stroke",
+        choice: new FromField("color")
+      }];
+    }
+    ;
+    if (v2 === "group") {
+      return [];
+    }
+    ;
+    if (v2 === "svg") {
+      return [{
+        attrName: "width",
+        choice: new ConstantNumber(400)
+      }, {
+        attrName: "height",
+        choice: new ConstantNumber(300)
+      }];
+    }
+    ;
+    return [];
+  };
+  var emptyNode = function(nid) {
+    return function(elemType) {
+      return {
+        id: nid,
+        elementType: elemType,
+        name: Nothing.value,
+        attributes: defaultAttributesFor(elemType),
+        expanded: true
+      };
+    };
+  };
+  var availableElements = [{
+    id: "svg",
+    label: "SVG",
+    category: "Container",
+    description: "Root SVG container"
+  }, {
+    id: "group",
+    label: "Group",
+    category: "Container",
+    description: "Group element (g) for nesting"
+  }, {
+    id: "circle",
+    label: "Circle",
+    category: "Shape",
+    description: "Circle with cx, cy, r"
+  }, {
+    id: "rect",
+    label: "Rect",
+    category: "Shape",
+    description: "Rectangle with x, y, width, height"
+  }, {
+    id: "line",
+    label: "Line",
+    category: "Shape",
+    description: "Line from x1,y1 to x2,y2"
+  }, {
+    id: "text",
+    label: "Text",
+    category: "Text",
+    description: "Text element with x, y position"
+  }];
+  var availableAttributes = [{
+    name: "cx",
+    label: "Center X",
+    valueType: "number",
+    description: "Circle center X coordinate"
+  }, {
+    name: "cy",
+    label: "Center Y",
+    valueType: "number",
+    description: "Circle center Y coordinate"
+  }, {
+    name: "x",
+    label: "X",
+    valueType: "number",
+    description: "X coordinate"
+  }, {
+    name: "y",
+    label: "Y",
+    valueType: "number",
+    description: "Y coordinate"
+  }, {
+    name: "x1",
+    label: "X1",
+    valueType: "number",
+    description: "Line start X"
+  }, {
+    name: "y1",
+    label: "Y1",
+    valueType: "number",
+    description: "Line start Y"
+  }, {
+    name: "x2",
+    label: "X2",
+    valueType: "number",
+    description: "Line end X"
+  }, {
+    name: "y2",
+    label: "Y2",
+    valueType: "number",
+    description: "Line end Y"
+  }, {
+    name: "r",
+    label: "Radius",
+    valueType: "number",
+    description: "Circle radius"
+  }, {
+    name: "width",
+    label: "Width",
+    valueType: "number",
+    description: "Element width"
+  }, {
+    name: "height",
+    label: "Height",
+    valueType: "number",
+    description: "Element height"
+  }, {
+    name: "fill",
+    label: "Fill",
+    valueType: "color",
+    description: "Fill color"
+  }, {
+    name: "stroke",
+    label: "Stroke",
+    valueType: "color",
+    description: "Stroke color"
+  }, {
+    name: "stroke-width",
+    label: "Stroke Width",
+    valueType: "number",
+    description: "Stroke thickness"
+  }, {
+    name: "opacity",
+    label: "Opacity",
+    valueType: "number",
+    description: "Transparency (0-1)"
+  }, {
+    name: "text",
+    label: "Text Content",
+    valueType: "string",
+    description: "Text to display"
+  }, {
+    name: "font-size",
+    label: "Font Size",
+    valueType: "number",
+    description: "Text size in pixels"
+  }];
+  var attributeOptionsFor = function(v2) {
+    if (v2 === "circle") {
+      return filter(function(a3) {
+        return elem9(a3.name)(["cx", "cy", "r", "fill", "stroke", "stroke-width", "opacity"]);
+      })(availableAttributes);
+    }
+    ;
+    if (v2 === "rect") {
+      return filter(function(a3) {
+        return elem9(a3.name)(["x", "y", "width", "height", "fill", "stroke", "stroke-width", "opacity"]);
+      })(availableAttributes);
+    }
+    ;
+    if (v2 === "line") {
+      return filter(function(a3) {
+        return elem9(a3.name)(["x1", "y1", "x2", "y2", "stroke", "stroke-width", "opacity"]);
+      })(availableAttributes);
+    }
+    ;
+    if (v2 === "text") {
+      return filter(function(a3) {
+        return elem9(a3.name)(["x", "y", "text", "fill", "font-size", "opacity"]);
+      })(availableAttributes);
+    }
+    ;
+    if (v2 === "group") {
+      return filter(function(a3) {
+        return elem9(a3.name)(["opacity"]);
+      })(availableAttributes);
+    }
+    ;
+    if (v2 === "svg") {
+      return filter(function(a3) {
+        return elem9(a3.name)(["width", "height"]);
+      })(availableAttributes);
+    }
+    ;
+    return availableAttributes;
+  };
+
+  // output/TreeBuilder.Interpreter/index.js
+  var show79 = /* @__PURE__ */ show(showNumber);
+  var show140 = /* @__PURE__ */ show(showInt);
+  var map107 = /* @__PURE__ */ map(functorArray);
+  var getFieldValue = function(field) {
+    return function(datum2) {
+      if (field === "x") {
+        return show79(datum2.x);
+      }
+      ;
+      if (field === "y") {
+        return show79(datum2.y);
+      }
+      ;
+      if (field === "radius") {
+        return show79(datum2.radius);
+      }
+      ;
+      if (field === "width") {
+        return show79(datum2.width);
+      }
+      ;
+      if (field === "height") {
+        return show79(datum2.height);
+      }
+      ;
+      if (field === "color") {
+        return datum2.color;
+      }
+      ;
+      if (field === "label") {
+        return datum2.label;
+      }
+      ;
+      if (field === "name") {
+        return datum2.name;
+      }
+      ;
+      if (field === "value") {
+        return show79(datum2.value);
+      }
+      ;
+      if (field === "index") {
+        return show140(datum2.index);
+      }
+      ;
+      return "";
+    };
+  };
+  var resolveAttributeChoice = function(choice) {
+    return function(datum2) {
+      if (choice instanceof FromField) {
+        return getFieldValue(choice.value0)(datum2);
+      }
+      ;
+      if (choice instanceof ConstantNumber) {
+        return show79(choice.value0);
+      }
+      ;
+      if (choice instanceof ConstantString) {
+        return choice.value0;
+      }
+      ;
+      if (choice instanceof IndexBased) {
+        return show140(datum2.index);
+      }
+      ;
+      if (choice instanceof Computed) {
+        return "computed";
+      }
+      ;
+      throw new Error("Failed pattern match at TreeBuilder.Interpreter (line 78, column 39 - line 83, column 27): " + [choice.constructor.name]);
+    };
+  };
+  var defaultDatum = {
+    x: 0,
+    y: 0,
+    radius: 10,
+    width: 50,
+    height: 30,
+    color: "#999",
+    label: "",
+    name: "",
+    value: 0,
+    index: 0
+  };
+  var bindingToAttr = function(datum2) {
+    return function(binding) {
+      return {
+        name: binding.attrName,
+        value: resolveAttributeChoice(binding.choice)(datum2)
+      };
+    };
+  };
+  var nodeToInstruction = function(node) {
+    return function(datum2) {
+      return function(children3) {
+        return {
+          elemType: node.elementType,
+          attrs: map107(bindingToAttr(datum2))(node.attributes),
+          children: children3
+        };
+      };
+    };
+  };
+  var treeToInstructions = function(tree2) {
+    return function(sampleData2) {
+      if (tree2 instanceof BNode) {
+        var datum2 = fromMaybe(defaultDatum)(head(sampleData2));
+        var childInstructions = concat(map107(function(c2) {
+          return treeToInstructions(c2)(sampleData2);
+        })(tree2.value1));
+        return [nodeToInstruction(tree2.value0)(datum2)(childInstructions)];
+      }
+      ;
+      if (tree2 instanceof BDataJoin) {
+        return map107(function(d21) {
+          return nodeToInstruction(tree2.value0.template)(d21)([]);
+        })(sampleData2);
+      }
+      ;
+      throw new Error("Failed pattern match at TreeBuilder.Interpreter (line 49, column 38 - line 58, column 64): " + [tree2.constructor.name]);
+    };
+  };
+  var renderPreview = function(containerSelector) {
+    return function(tree2) {
+      return function(sampleData2) {
+        var instructions = treeToInstructions(tree2)(sampleData2);
+        return renderPreviewFFI(containerSelector)(instructions);
+      };
+    };
+  };
+
+  // output/TreeBuilder.App/index.js
+  var map108 = /* @__PURE__ */ map(functorArray);
+  var show80 = /* @__PURE__ */ show(showInt);
+  var append131 = /* @__PURE__ */ append(semigroupArray);
+  var eq25 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqInt));
+  var value22 = /* @__PURE__ */ value13(isPropString);
+  var eq33 = /* @__PURE__ */ eq(eqAttributeChoice);
+  var show141 = /* @__PURE__ */ show(showNumber);
+  var intercalate8 = /* @__PURE__ */ intercalate2(monoidString);
+  var bindFlipped10 = /* @__PURE__ */ bindFlipped(bindMaybe);
   var bind91 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftEffect44 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
+  var get19 = /* @__PURE__ */ get(monadStateHalogenM);
   var discard69 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var modify_20 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var map124 = /* @__PURE__ */ map(functorMaybe);
+  var join5 = /* @__PURE__ */ join(bindMaybe);
   var when16 = /* @__PURE__ */ when(applicativeHalogenM);
   var pure102 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var Initialize50 = /* @__PURE__ */ (function() {
+    function Initialize52() {
+    }
+    ;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
+  })();
+  var AddRootElement = /* @__PURE__ */ (function() {
+    function AddRootElement2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    AddRootElement2.create = function(value0) {
+      return new AddRootElement2(value0);
+    };
+    return AddRootElement2;
+  })();
+  var AddChildElement = /* @__PURE__ */ (function() {
+    function AddChildElement2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    AddChildElement2.create = function(value0) {
+      return function(value1) {
+        return new AddChildElement2(value0, value1);
+      };
+    };
+    return AddChildElement2;
+  })();
+  var SelectNode = /* @__PURE__ */ (function() {
+    function SelectNode2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    SelectNode2.create = function(value0) {
+      return new SelectNode2(value0);
+    };
+    return SelectNode2;
+  })();
+  var RemoveNode = /* @__PURE__ */ (function() {
+    function RemoveNode2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    RemoveNode2.create = function(value0) {
+      return new RemoveNode2(value0);
+    };
+    return RemoveNode2;
+  })();
+  var ToggleNodeExpand = /* @__PURE__ */ (function() {
+    function ToggleNodeExpand2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ToggleNodeExpand2.create = function(value0) {
+      return new ToggleNodeExpand2(value0);
+    };
+    return ToggleNodeExpand2;
+  })();
+  var UpdateAttribute = /* @__PURE__ */ (function() {
+    function UpdateAttribute2(value0, value1, value23) {
+      this.value0 = value0;
+      this.value1 = value1;
+      this.value2 = value23;
+    }
+    ;
+    UpdateAttribute2.create = function(value0) {
+      return function(value1) {
+        return function(value23) {
+          return new UpdateAttribute2(value0, value1, value23);
+        };
+      };
+    };
+    return UpdateAttribute2;
+  })();
+  var AddAttribute = /* @__PURE__ */ (function() {
+    function AddAttribute2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    AddAttribute2.create = function(value0) {
+      return function(value1) {
+        return new AddAttribute2(value0, value1);
+      };
+    };
+    return AddAttribute2;
+  })();
+  var RemoveAttribute = /* @__PURE__ */ (function() {
+    function RemoveAttribute2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    RemoveAttribute2.create = function(value0) {
+      return function(value1) {
+        return new RemoveAttribute2(value0, value1);
+      };
+    };
+    return RemoveAttribute2;
+  })();
+  var UpdateSampleData = /* @__PURE__ */ (function() {
+    function UpdateSampleData2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    UpdateSampleData2.create = function(value0) {
+      return new UpdateSampleData2(value0);
+    };
+    return UpdateSampleData2;
+  })();
+  var LoadPreset = /* @__PURE__ */ (function() {
+    function LoadPreset2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    LoadPreset2.create = function(value0) {
+      return new LoadPreset2(value0);
+    };
+    return LoadPreset2;
+  })();
+  var RefreshPreview = /* @__PURE__ */ (function() {
+    function RefreshPreview2() {
+    }
+    ;
+    RefreshPreview2.value = new RefreshPreview2();
+    return RefreshPreview2;
+  })();
+  var updateNodeAttribute = function(targetId) {
+    return function(attrName) {
+      return function(choice) {
+        return function(tree2) {
+          var updateAttr = function(attrs) {
+            return map108(function(a3) {
+              var $62 = a3.attrName === attrName;
+              if ($62) {
+                return {
+                  attrName: a3.attrName,
+                  choice
+                };
+              }
+              ;
+              return a3;
+            })(attrs);
+          };
+          if (tree2 instanceof BNode) {
+            var $64 = tree2.value0.id === targetId;
+            if ($64) {
+              return new BNode({
+                id: tree2.value0.id,
+                elementType: tree2.value0.elementType,
+                name: tree2.value0.name,
+                expanded: tree2.value0.expanded,
+                attributes: updateAttr(tree2.value0.attributes)
+              }, tree2.value1);
+            }
+            ;
+            return new BNode(tree2.value0, map108(updateNodeAttribute(targetId)(attrName)(choice))(tree2.value1));
+          }
+          ;
+          return tree2;
+        };
+      };
+    };
+  };
+  var toggleExpand = function(targetId) {
+    return function(tree2) {
+      if (tree2 instanceof BNode) {
+        var $68 = tree2.value0.id === targetId;
+        if ($68) {
+          return new BNode({
+            id: tree2.value0.id,
+            elementType: tree2.value0.elementType,
+            name: tree2.value0.name,
+            attributes: tree2.value0.attributes,
+            expanded: !tree2.value0.expanded
+          }, tree2.value1);
+        }
+        ;
+        return new BNode(tree2.value0, map108(toggleExpand(targetId))(tree2.value1));
+      }
+      ;
+      return tree2;
+    };
+  };
+  var scatterPreset = /* @__PURE__ */ (function() {
+    return {
+      tree: new BNode({
+        id: 1,
+        elementType: "svg",
+        name: new Just("root"),
+        attributes: [{
+          attrName: "width",
+          choice: new ConstantNumber(400)
+        }, {
+          attrName: "height",
+          choice: new ConstantNumber(300)
+        }],
+        expanded: true
+      }, [new BDataJoin({
+        id: 2,
+        name: "points",
+        elementType: "group",
+        template: {
+          id: 3,
+          elementType: "group",
+          name: Nothing.value,
+          attributes: [],
+          expanded: true
+        },
+        expanded: true
+      })]),
+      data_: defaultSampleData,
+      nextId: 10
+    };
+  })();
+  var renderTreeNode = function(state3) {
+    return function(tree2) {
+      return function(depth) {
+        if (tree2 instanceof BNode) {
+          return div2([classes(["tree-node"]), style("margin-left: " + (show80(depth * 20 | 0) + "px"))])([div2([classes(append131(["node-header"])((function() {
+            var $72 = eq25(state3.selectedNodeId)(new Just(tree2.value0.id));
+            if ($72) {
+              return ["node-header--selected"];
+            }
+            ;
+            return [];
+          })())), onClick(function(v2) {
+            return new SelectNode(tree2.value0.id);
+          })])([(function() {
+            var $73 = length(tree2.value1) > 0;
+            if ($73) {
+              return span4([classes(["expand-toggle"]), onClick(function(v2) {
+                return new ToggleNodeExpand(tree2.value0.id);
+              })])([text5((function() {
+                if (tree2.value0.expanded) {
+                  return "\u25BC";
+                }
+                ;
+                return "\u25B6";
+              })())]);
+            }
+            ;
+            return span4([classes(["expand-placeholder"])])([text5("\u2022")]);
+          })(), span4([classes(["element-badge", "element-badge--" + tree2.value0.elementType])])([text5(tree2.value0.elementType)]), (function() {
+            if (tree2.value0.name instanceof Just) {
+              return span4([classes(["node-name"])])([text5('"' + (tree2.value0.name.value0 + '"'))]);
+            }
+            ;
+            if (tree2.value0.name instanceof Nothing) {
+              return text5("");
+            }
+            ;
+            throw new Error("Failed pattern match at TreeBuilder.App (line 188, column 13 - line 190, column 36): " + [tree2.value0.name.constructor.name]);
+          })(), span4([classes(["attr-count"])])([text5("(" + (show80(length(tree2.value0.attributes)) + " attrs)"))]), button2([classes(["remove-btn"]), onClick(function(v2) {
+            return new RemoveNode(tree2.value0.id);
+          })])([text5("\xD7")])]), (function() {
+            if (tree2.value0.expanded) {
+              return div2([classes(["node-children"])])(map108(function(child) {
+                return renderTreeNode(state3)(child)(depth + 1 | 0);
+              })(tree2.value1));
+            }
+            ;
+            return text5("");
+          })()]);
+        }
+        ;
+        if (tree2 instanceof BDataJoin) {
+          return div2([classes(["tree-node", "tree-node--join"]), style("margin-left: " + (show80(depth * 20 | 0) + "px"))])([div2([classes(["node-header"]), onClick(function(v2) {
+            return new SelectNode(tree2.value0.id);
+          })])([span4([classes(["join-badge"])])([text5("\u27F3 join")]), span4([classes(["element-badge"])])([text5(tree2.value0.elementType)]), span4([classes(["node-name"])])([text5('"' + (tree2.value0.name + '"'))])])]);
+        }
+        ;
+        throw new Error("Failed pattern match at TreeBuilder.App (line 160, column 35 - line 223, column 8): " + [tree2.constructor.name]);
+      };
+    };
+  };
+  var renderPaletteButton = function(state3) {
+    return function(elem10) {
+      var action2 = (function() {
+        if (state3.selectedNodeId instanceof Just) {
+          return new AddChildElement(state3.selectedNodeId.value0, elem10.id);
+        }
+        ;
+        if (state3.selectedNodeId instanceof Nothing) {
+          return new AddRootElement(elem10.id);
+        }
+        ;
+        throw new Error("Failed pattern match at TreeBuilder.App (line 330, column 14 - line 332, column 40): " + [state3.selectedNodeId.constructor.name]);
+      })();
+      return button2([classes(["palette-btn", "palette-btn--" + elem10.category]), title2(elem10.description), onClick(function(v2) {
+        return action2;
+      })])([text5(elem10.label)]);
+    };
+  };
+  var renderElementPalette = function(state3) {
+    return div2([classes(["element-palette"])])([span4([classes(["palette-label"])])([text5("Add Element:")]), div2([classes(["palette-buttons"])])(map108(renderPaletteButton(state3))(availableElements))]);
+  };
+  var removeNodeById = function(targetId) {
+    return function(tree2) {
+      if (tree2 instanceof BNode) {
+        var $84 = tree2.value0.id === targetId;
+        if ($84) {
+          return Nothing.value;
+        }
+        ;
+        return new Just(new BNode(tree2.value0, mapMaybe(removeNodeById(targetId))(tree2.value1)));
+      }
+      ;
+      return new Just(tree2);
+    };
+  };
+  var removeNodeAttribute = function(targetId) {
+    return function(attrName) {
+      return function(tree2) {
+        if (tree2 instanceof BNode) {
+          var $88 = tree2.value0.id === targetId;
+          if ($88) {
+            return new BNode({
+              id: tree2.value0.id,
+              elementType: tree2.value0.elementType,
+              name: tree2.value0.name,
+              expanded: tree2.value0.expanded,
+              attributes: filter(function(a3) {
+                return a3.attrName !== attrName;
+              })(tree2.value0.attributes)
+            }, tree2.value1);
+          }
+          ;
+          return new BNode(tree2.value0, map108(removeNodeAttribute(targetId)(attrName))(tree2.value1));
+        }
+        ;
+        return tree2;
+      };
+    };
+  };
+  var parseChoice = function(v2) {
+    if (v2 === "index") {
+      return IndexBased.value;
+    }
+    ;
+    return new FromField(v2);
+  };
+  var renderAttributeRow = function(nodeId) {
+    return function(binding) {
+      return div2([classes(["attr-row"])])([span4([classes(["attr-name"])])([text5(binding.attrName)]), span4([classes(["attr-arrow"])])([text5("\u2190")]), select7([classes(["attr-choice"]), onValueChange(function(v2) {
+        return new UpdateAttribute(nodeId, binding.attrName, parseChoice(v2));
+      })])([option([value22("x"), selected2(eq33(binding.choice)(new FromField("x")))])([text5("_.x")]), option([value22("y"), selected2(eq33(binding.choice)(new FromField("y")))])([text5("_.y")]), option([value22("radius"), selected2(eq33(binding.choice)(new FromField("radius")))])([text5("_.radius")]), option([value22("width"), selected2(eq33(binding.choice)(new FromField("width")))])([text5("_.width")]), option([value22("height"), selected2(eq33(binding.choice)(new FromField("height")))])([text5("_.height")]), option([value22("color"), selected2(eq33(binding.choice)(new FromField("color")))])([text5("_.color")]), option([value22("label"), selected2(eq33(binding.choice)(new FromField("label")))])([text5("_.label")]), option([value22("value"), selected2(eq33(binding.choice)(new FromField("value")))])([text5("_.value")]), option([value22("index"), selected2(eq33(binding.choice)(IndexBased.value))])([text5("_.index")])]), button2([classes(["remove-attr-btn"]), onClick(function(v2) {
+        return new RemoveAttribute(nodeId, binding.attrName);
+      })])([text5("\xD7")])]);
+    };
+  };
+  var initialState5 = /* @__PURE__ */ (function() {
+    return {
+      tree: Nothing.value,
+      sampleData: defaultSampleData,
+      selectedNodeId: Nothing.value,
+      nextNodeId: 1,
+      previewError: Nothing.value
+    };
+  })();
+  var formatSampleData = function(data_2) {
+    var formatDatum = function(d21) {
+      return "  { x: " + (show141(d21.x) + (", y: " + (show141(d21.y) + (", radius: " + (show141(d21.radius) + (', color: "' + (d21.color + ('", label: "' + (d21.label + '" }')))))))));
+    };
+    return "[\n" + (intercalate8(",\n")(map108(formatDatum)(data_2)) + "\n]");
+  };
+  var renderPreviewPanel = function(state3) {
+    return div2([classes(["preview-panel"])])([h2([classes(["panel-title"])])([text5("Live Preview")]), div2([id4("tree-builder-preview"), classes(["preview-container"])])([]), div2([classes(["sample-data-panel"])])([h3_([text5("Sample Data")]), pre([classes(["sample-data-json"])])([text5(formatSampleData(state3.sampleData))])]), (function() {
+      if (state3.previewError instanceof Just) {
+        return div2([classes(["preview-error"])])([text5(state3.previewError.value0)]);
+      }
+      ;
+      if (state3.previewError instanceof Nothing) {
+        return text5("");
+      }
+      ;
+      throw new Error("Failed pattern match at TreeBuilder.App (line 307, column 7 - line 312, column 30): " + [state3.previewError.constructor.name]);
+    })()]);
+  };
+  var findNode3 = function(targetId) {
+    return function(tree2) {
+      if (tree2 instanceof BNode) {
+        var $95 = tree2.value0.id === targetId;
+        if ($95) {
+          return new Just(tree2.value0);
+        }
+        ;
+        return findMap(findNode3(targetId))(tree2.value1);
+      }
+      ;
+      if (tree2 instanceof BDataJoin) {
+        var $98 = tree2.value0.id === targetId;
+        if ($98) {
+          return new Just(tree2.value0.template);
+        }
+        ;
+        return Nothing.value;
+      }
+      ;
+      throw new Error("Failed pattern match at TreeBuilder.App (line 436, column 26 - line 444, column 19): " + [tree2.constructor.name]);
+    };
+  };
+  var renderAttributeEditor = function(state3) {
+    return function(nodeId) {
+      var mNode = bindFlipped10(findNode3(nodeId))(state3.tree);
+      if (mNode instanceof Nothing) {
+        return text5("");
+      }
+      ;
+      if (mNode instanceof Just) {
+        return div2([classes(["attribute-editor"])])([h3_([text5("Attributes: " + mNode.value0.elementType)]), div2([classes(["attr-list"])])(map108(renderAttributeRow(nodeId))(mNode.value0.attributes)), div2([classes(["add-attr-row"])])([select7([classes(["add-attr-select"]), onValueChange(function(v2) {
+          return new AddAttribute(nodeId, v2);
+        })])(append131([option([value22("")])([text5("Add attribute...")])])(map108(function(opt) {
+          return option([value22(opt.name)])([text5(opt.label)]);
+        })(attributeOptionsFor(mNode.value0.elementType))))])]);
+      }
+      ;
+      throw new Error("Failed pattern match at TreeBuilder.App (line 230, column 6 - line 250, column 10): " + [mNode.constructor.name]);
+    };
+  };
+  var renderEditorPanel = function(state3) {
+    return div2([classes(["editor-panel"])])([h2([classes(["panel-title"])])([text5("Tree Structure")]), div2([classes(["presets-row"])])([span4([classes(["presets-label"])])([text5("Presets:")]), button2([classes(["preset-button"]), onClick(function(v2) {
+      return new LoadPreset("circles");
+    })])([text5("Circles")]), button2([classes(["preset-button"]), onClick(function(v2) {
+      return new LoadPreset("bars");
+    })])([text5("Bar Chart")]), button2([classes(["preset-button"]), onClick(function(v2) {
+      return new LoadPreset("scatter");
+    })])([text5("Scatter")])]), div2([classes(["tree-view"])])([(function() {
+      if (state3.tree instanceof Nothing) {
+        return div2([classes(["empty-tree"])])([p_([text5("No tree yet. Add an element from the palette below.")]), p_([text5("Or load a preset to get started.")])]);
+      }
+      ;
+      if (state3.tree instanceof Just) {
+        return renderTreeNode(state3)(state3.tree.value0)(0);
+      }
+      ;
+      throw new Error("Failed pattern match at TreeBuilder.App (line 140, column 11 - line 148, column 42): " + [state3.tree.constructor.name]);
+    })()]), (function() {
+      if (state3.selectedNodeId instanceof Nothing) {
+        return text5("");
+      }
+      ;
+      if (state3.selectedNodeId instanceof Just) {
+        return renderAttributeEditor(state3)(state3.selectedNodeId.value0);
+      }
+      ;
+      throw new Error("Failed pattern match at TreeBuilder.App (line 152, column 7 - line 155, column 45): " + [state3.selectedNodeId.constructor.name]);
+    })()]);
+  };
+  var render56 = function(state3) {
+    return div2([classes(["tree-builder-page"])])([render6({
+      logoSize: Normal.value,
+      quadrant: NoQuadrant.value,
+      prevNext: Nothing.value,
+      pageTitle: new Just("Tree Builder")
+    }), div2([classes(["tree-builder-layout"])])([div2([classes(["tree-builder-editor"])])([renderEditorPanel(state3)]), div2([classes(["tree-builder-preview"])])([renderPreviewPanel(state3)])]), renderElementPalette(state3)]);
+  };
+  var circlesPreset = /* @__PURE__ */ (function() {
+    return {
+      tree: new BNode({
+        id: 1,
+        elementType: "svg",
+        name: new Just("root"),
+        attributes: [{
+          attrName: "width",
+          choice: new ConstantNumber(400)
+        }, {
+          attrName: "height",
+          choice: new ConstantNumber(300)
+        }],
+        expanded: true
+      }, [new BDataJoin({
+        id: 2,
+        name: "circles",
+        elementType: "circle",
+        template: {
+          id: 3,
+          elementType: "circle",
+          name: Nothing.value,
+          attributes: [{
+            attrName: "cx",
+            choice: new FromField("x")
+          }, {
+            attrName: "cy",
+            choice: new FromField("y")
+          }, {
+            attrName: "r",
+            choice: new FromField("radius")
+          }, {
+            attrName: "fill",
+            choice: new FromField("color")
+          }],
+          expanded: true
+        },
+        expanded: true
+      })]),
+      data_: defaultSampleData,
+      nextId: 10
+    };
+  })();
+  var barsPreset = /* @__PURE__ */ (function() {
+    return {
+      tree: new BNode({
+        id: 1,
+        elementType: "svg",
+        name: new Just("root"),
+        attributes: [{
+          attrName: "width",
+          choice: new ConstantNumber(400)
+        }, {
+          attrName: "height",
+          choice: new ConstantNumber(300)
+        }],
+        expanded: true
+      }, [new BDataJoin({
+        id: 2,
+        name: "bars",
+        elementType: "rect",
+        template: {
+          id: 3,
+          elementType: "rect",
+          name: Nothing.value,
+          attributes: [{
+            attrName: "x",
+            choice: new FromField("x")
+          }, {
+            attrName: "y",
+            choice: new FromField("y")
+          }, {
+            attrName: "width",
+            choice: new FromField("width")
+          }, {
+            attrName: "height",
+            choice: new FromField("height")
+          }, {
+            attrName: "fill",
+            choice: new FromField("color")
+          }],
+          expanded: true
+        },
+        expanded: true
+      })]),
+      data_: [{
+        x: 20,
+        y: 50,
+        radius: 0,
+        width: 60,
+        height: 80,
+        color: "#1f77b4",
+        label: "A",
+        name: "A",
+        value: 80,
+        index: 0
+      }, {
+        x: 100,
+        y: 90,
+        radius: 0,
+        width: 60,
+        height: 120,
+        color: "#ff7f0e",
+        label: "B",
+        name: "B",
+        value: 120,
+        index: 1
+      }, {
+        x: 180,
+        y: 30,
+        radius: 0,
+        width: 60,
+        height: 60,
+        color: "#2ca02c",
+        label: "C",
+        name: "C",
+        value: 60,
+        index: 2
+      }, {
+        x: 260,
+        y: 10,
+        radius: 0,
+        width: 60,
+        height: 150,
+        color: "#d62728",
+        label: "D",
+        name: "D",
+        value: 150,
+        index: 3
+      }],
+      nextId: 10
+    };
+  })();
+  var getPreset = function(v2) {
+    if (v2 === "circles") {
+      return circlesPreset;
+    }
+    ;
+    if (v2 === "bars") {
+      return barsPreset;
+    }
+    ;
+    if (v2 === "scatter") {
+      return scatterPreset;
+    }
+    ;
+    return circlesPreset;
+  };
+  var addNodeAttribute = function(targetId) {
+    return function(binding) {
+      return function(tree2) {
+        if (tree2 instanceof BNode) {
+          var $108 = tree2.value0.id === targetId;
+          if ($108) {
+            return new BNode({
+              id: tree2.value0.id,
+              elementType: tree2.value0.elementType,
+              name: tree2.value0.name,
+              expanded: tree2.value0.expanded,
+              attributes: snoc(tree2.value0.attributes)(binding)
+            }, tree2.value1);
+          }
+          ;
+          return new BNode(tree2.value0, map108(addNodeAttribute(targetId)(binding))(tree2.value1));
+        }
+        ;
+        return tree2;
+      };
+    };
+  };
+  var addChildToNode = function(parentId) {
+    return function(newChild) {
+      return function(tree2) {
+        if (tree2 instanceof BNode) {
+          var $112 = tree2.value0.id === parentId;
+          if ($112) {
+            return new BNode(tree2.value0, snoc(tree2.value1)(newChild));
+          }
+          ;
+          return new BNode(tree2.value0, map108(addChildToNode(parentId)(newChild))(tree2.value1));
+        }
+        ;
+        return tree2;
+      };
+    };
+  };
+  var handleAction50 = function(dictMonadAff) {
+    var liftEffect45 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    return function(v2) {
+      if (v2 instanceof Initialize50) {
+        return handleAction50(dictMonadAff)(new LoadPreset("circles"));
+      }
+      ;
+      if (v2 instanceof AddRootElement) {
+        return bind91(get19)(function(state3) {
+          var newNode = emptyNode(state3.nextNodeId)(v2.value0);
+          var newTree = new BNode(newNode, []);
+          return discard69(modify_20(function(v1) {
+            var $116 = {};
+            for (var $117 in v1) {
+              if ({}.hasOwnProperty.call(v1, $117)) {
+                $116[$117] = v1[$117];
+              }
+              ;
+            }
+            ;
+            $116.tree = new Just(newTree);
+            $116.nextNodeId = state3.nextNodeId + 1 | 0;
+            $116.selectedNodeId = new Just(newNode.id);
+            return $116;
+          }))(function() {
+            return handleAction50(dictMonadAff)(RefreshPreview.value);
+          });
+        });
+      }
+      ;
+      if (v2 instanceof AddChildElement) {
+        return bind91(get19)(function(state3) {
+          var newNode = emptyNode(state3.nextNodeId)(v2.value1);
+          var updatedTree = map124(addChildToNode(v2.value0)(new BNode(newNode, [])))(state3.tree);
+          return discard69(modify_20(function(v1) {
+            var $120 = {};
+            for (var $121 in v1) {
+              if ({}.hasOwnProperty.call(v1, $121)) {
+                $120[$121] = v1[$121];
+              }
+              ;
+            }
+            ;
+            $120.tree = updatedTree;
+            $120.nextNodeId = state3.nextNodeId + 1 | 0;
+            $120.selectedNodeId = new Just(newNode.id);
+            return $120;
+          }))(function() {
+            return handleAction50(dictMonadAff)(RefreshPreview.value);
+          });
+        });
+      }
+      ;
+      if (v2 instanceof SelectNode) {
+        return modify_20(function(v1) {
+          var $125 = {};
+          for (var $126 in v1) {
+            if ({}.hasOwnProperty.call(v1, $126)) {
+              $125[$126] = v1[$126];
+            }
+            ;
+          }
+          ;
+          $125.selectedNodeId = new Just(v2.value0);
+          return $125;
+        });
+      }
+      ;
+      if (v2 instanceof RemoveNode) {
+        return bind91(get19)(function(state3) {
+          var updatedTree = join5(map124(removeNodeById(v2.value0))(state3.tree));
+          var newSelected = (function() {
+            var $129 = eq25(state3.selectedNodeId)(new Just(v2.value0));
+            if ($129) {
+              return Nothing.value;
+            }
+            ;
+            return state3.selectedNodeId;
+          })();
+          return discard69(modify_20(function(v1) {
+            var $130 = {};
+            for (var $131 in v1) {
+              if ({}.hasOwnProperty.call(v1, $131)) {
+                $130[$131] = v1[$131];
+              }
+              ;
+            }
+            ;
+            $130.tree = updatedTree;
+            $130.selectedNodeId = newSelected;
+            return $130;
+          }))(function() {
+            return handleAction50(dictMonadAff)(RefreshPreview.value);
+          });
+        });
+      }
+      ;
+      if (v2 instanceof ToggleNodeExpand) {
+        return bind91(get19)(function(state3) {
+          var updatedTree = map124(toggleExpand(v2.value0))(state3.tree);
+          return modify_20(function(v1) {
+            var $134 = {};
+            for (var $135 in v1) {
+              if ({}.hasOwnProperty.call(v1, $135)) {
+                $134[$135] = v1[$135];
+              }
+              ;
+            }
+            ;
+            $134.tree = updatedTree;
+            return $134;
+          });
+        });
+      }
+      ;
+      if (v2 instanceof UpdateAttribute) {
+        return bind91(get19)(function(state3) {
+          var updatedTree = map124(updateNodeAttribute(v2.value0)(v2.value1)(v2.value2))(state3.tree);
+          return discard69(modify_20(function(v1) {
+            var $138 = {};
+            for (var $139 in v1) {
+              if ({}.hasOwnProperty.call(v1, $139)) {
+                $138[$139] = v1[$139];
+              }
+              ;
+            }
+            ;
+            $138.tree = updatedTree;
+            return $138;
+          }))(function() {
+            return handleAction50(dictMonadAff)(RefreshPreview.value);
+          });
+        });
+      }
+      ;
+      if (v2 instanceof AddAttribute) {
+        return when16(v2.value1 !== "")(bind91(get19)(function(state3) {
+          var newBinding = {
+            attrName: v2.value1,
+            choice: new FromField("x")
+          };
+          var updatedTree = map124(addNodeAttribute(v2.value0)(newBinding))(state3.tree);
+          return discard69(modify_20(function(v1) {
+            var $144 = {};
+            for (var $145 in v1) {
+              if ({}.hasOwnProperty.call(v1, $145)) {
+                $144[$145] = v1[$145];
+              }
+              ;
+            }
+            ;
+            $144.tree = updatedTree;
+            return $144;
+          }))(function() {
+            return handleAction50(dictMonadAff)(RefreshPreview.value);
+          });
+        }));
+      }
+      ;
+      if (v2 instanceof RemoveAttribute) {
+        return bind91(get19)(function(state3) {
+          var updatedTree = map124(removeNodeAttribute(v2.value0)(v2.value1))(state3.tree);
+          return discard69(modify_20(function(v1) {
+            var $149 = {};
+            for (var $150 in v1) {
+              if ({}.hasOwnProperty.call(v1, $150)) {
+                $149[$150] = v1[$150];
+              }
+              ;
+            }
+            ;
+            $149.tree = updatedTree;
+            return $149;
+          }))(function() {
+            return handleAction50(dictMonadAff)(RefreshPreview.value);
+          });
+        });
+      }
+      ;
+      if (v2 instanceof UpdateSampleData) {
+        return discard69(modify_20(function(v1) {
+          var $154 = {};
+          for (var $155 in v1) {
+            if ({}.hasOwnProperty.call(v1, $155)) {
+              $154[$155] = v1[$155];
+            }
+            ;
+          }
+          ;
+          $154.sampleData = v2.value0;
+          return $154;
+        }))(function() {
+          return handleAction50(dictMonadAff)(RefreshPreview.value);
+        });
+      }
+      ;
+      if (v2 instanceof LoadPreset) {
+        var preset = getPreset(v2.value0);
+        return discard69(modify_20(function(v1) {
+          var $158 = {};
+          for (var $159 in v1) {
+            if ({}.hasOwnProperty.call(v1, $159)) {
+              $158[$159] = v1[$159];
+            }
+            ;
+          }
+          ;
+          $158.tree = new Just(preset.tree);
+          $158.sampleData = preset.data_;
+          $158.nextNodeId = preset.nextId;
+          $158.selectedNodeId = Nothing.value;
+          return $158;
+        }))(function() {
+          return handleAction50(dictMonadAff)(RefreshPreview.value);
+        });
+      }
+      ;
+      if (v2 instanceof RefreshPreview) {
+        return bind91(get19)(function(state3) {
+          if (state3.tree instanceof Nothing) {
+            return pure102(unit);
+          }
+          ;
+          if (state3.tree instanceof Just) {
+            return discard69(liftEffect45(clearPreviewContainer("#tree-builder-preview")))(function() {
+              return liftEffect45(renderPreview("#tree-builder-preview")(state3.tree.value0)(state3.sampleData));
+            });
+          }
+          ;
+          throw new Error("Failed pattern match at TreeBuilder.App (line 421, column 5 - line 425, column 81): " + [state3.tree.constructor.name]);
+        });
+      }
+      ;
+      throw new Error("Failed pattern match at TreeBuilder.App (line 355, column 16 - line 425, column 81): " + [v2.constructor.name]);
+    };
+  };
+  var component51 = function(dictMonadAff) {
+    return mkComponent({
+      initialState: function(v2) {
+        return initialState5;
+      },
+      render: render56,
+      "eval": mkEval({
+        handleQuery: defaultEval.handleQuery,
+        receive: defaultEval.receive,
+        finalize: defaultEval.finalize,
+        handleAction: handleAction50(dictMonadAff),
+        initialize: new Just(Initialize50.value)
+      })
+    });
+  };
+
+  // output/PSD3.Main/index.js
+  var bind92 = /* @__PURE__ */ bind(bindHalogenM);
+  var liftEffect44 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
+  var discard70 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var when17 = /* @__PURE__ */ when(applicativeHalogenM);
+  var pure103 = /* @__PURE__ */ pure(applicativeHalogenM);
   var spy3 = /* @__PURE__ */ spy();
-  var modify_20 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var modify_21 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var slot_4 = /* @__PURE__ */ slot_();
   var slot_1 = /* @__PURE__ */ slot_4({
     reflectSymbol: function() {
@@ -56082,16 +57599,22 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var component372 = /* @__PURE__ */ component6(monadAffAff);
   var slot_47 = /* @__PURE__ */ slot_4({
     reflectSymbol: function() {
+      return "treeBuilder";
+    }
+  })(ordUnit);
+  var component382 = /* @__PURE__ */ component51(monadAffAff);
+  var slot_48 = /* @__PURE__ */ slot_4({
+    reflectSymbol: function() {
       return "acknowledgements";
     }
   })(ordUnit);
-  var component382 = /* @__PURE__ */ component44(monadAffAff);
-  var Initialize50 = /* @__PURE__ */ (function() {
-    function Initialize51() {
+  var component392 = /* @__PURE__ */ component44(monadAffAff);
+  var Initialize51 = /* @__PURE__ */ (function() {
+    function Initialize52() {
     }
     ;
-    Initialize51.value = new Initialize51();
-    return Initialize51;
+    Initialize52.value = new Initialize52();
+    return Initialize52;
   })();
   var Navigate = /* @__PURE__ */ (function() {
     function Navigate2(value0) {
@@ -56113,22 +57636,22 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     };
     return RouteChanged2;
   })();
-  var handleAction50 = function(v2) {
-    if (v2 instanceof Initialize50) {
-      return bind91(liftEffect44(function __do10() {
+  var handleAction51 = function(v2) {
+    if (v2 instanceof Initialize51) {
+      return bind92(liftEffect44(function __do10() {
         var w = windowImpl();
         var loc = location(w)();
         return hash(loc)();
       }))(function(currentHash) {
-        return discard69(when16(currentHash === "" || (currentHash === "#" || currentHash === "#/"))(liftEffect44(setHash2(routeToPath(Home.value)))))(function() {
-          return bind91(subscribe2(makeEmitter(function(push2) {
+        return discard70(when17(currentHash === "" || (currentHash === "#" || currentHash === "#/"))(liftEffect44(setHash2(routeToPath(Home.value)))))(function() {
+          return bind92(subscribe2(makeEmitter(function(push2) {
             return matches2(routing)(function(v12) {
               return function(newRoute) {
                 return push2(new RouteChanged(new Just(newRoute)));
               };
             });
           })))(function() {
-            return pure102(unit);
+            return pure103(unit);
           });
         });
       });
@@ -56140,39 +57663,39 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     ;
     if (v2 instanceof RouteChanged) {
       var v1 = spy3("RouteChanged")(v2.value0);
-      return discard69((function() {
+      return discard70((function() {
         if (v2.value0 instanceof Just) {
           var v22 = spy3("Updating currentRoute to")(v2.value0.value0);
-          return modify_20(function(v3) {
-            var $206 = {};
-            for (var $207 in v3) {
-              if ({}.hasOwnProperty.call(v3, $207)) {
-                $206[$207] = v3[$207];
-              }
-              ;
-            }
-            ;
-            $206.currentRoute = v2.value0.value0;
-            return $206;
-          });
-        }
-        ;
-        if (v2.value0 instanceof Nothing) {
-          return modify_20(function(v23) {
+          return modify_21(function(v3) {
             var $210 = {};
-            for (var $211 in v23) {
-              if ({}.hasOwnProperty.call(v23, $211)) {
-                $210[$211] = v23[$211];
+            for (var $211 in v3) {
+              if ({}.hasOwnProperty.call(v3, $211)) {
+                $210[$211] = v3[$211];
               }
               ;
             }
             ;
-            $210.currentRoute = NotFound.value;
+            $210.currentRoute = v2.value0.value0;
             return $210;
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Main (line 452, column 5 - line 456, column 57): " + [v2.value0.constructor.name]);
+        if (v2.value0 instanceof Nothing) {
+          return modify_21(function(v23) {
+            var $214 = {};
+            for (var $215 in v23) {
+              if ({}.hasOwnProperty.call(v23, $215)) {
+                $214[$215] = v23[$215];
+              }
+              ;
+            }
+            ;
+            $214.currentRoute = NotFound.value;
+            return $214;
+          });
+        }
+        ;
+        throw new Error("Failed pattern match at PSD3.Main (line 458, column 5 - line 462, column 57): " + [v2.value0.constructor.name]);
       })())(function() {
         return liftEffect44(function __do10() {
           var w = windowImpl();
@@ -56181,7 +57704,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       });
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Main (line 427, column 16 - line 460, column 19): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Main (line 433, column 16 - line 466, column 19): " + [v2.constructor.name]);
   };
   var _wizard = /* @__PURE__ */ (function() {
     return $$Proxy.value;
@@ -56202,6 +57725,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return $$Proxy.value;
   })();
   var _understanding = /* @__PURE__ */ (function() {
+    return $$Proxy.value;
+  })();
+  var _treeBuilder = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
   var _treeAPI = /* @__PURE__ */ (function() {
@@ -56562,38 +58088,42 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return slot_46(_forcePlayground)(unit)(component372)(unit);
     }
     ;
+    if (v2 instanceof TreeBuilder) {
+      return slot_47(_treeBuilder)(unit)(component382)(unit);
+    }
+    ;
     if (v2 instanceof Acknowledgements) {
-      return slot_47(_acknowledgements)(unit)(component382)(unit);
+      return slot_48(_acknowledgements)(unit)(component392)(unit);
     }
     ;
     if (v2 instanceof NotFound) {
       return div2([classes(["not-found"])])([h1_([text5("404 - Page Not Found")]), p_([text5("The page you're looking for doesn't exist.")]), a([href4("#" + routeToPath(Home.value))])([text5("Go to Home")])]);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Main (line 217, column 20 - line 424, column 8): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Main (line 220, column 20 - line 430, column 8): " + [v2.constructor.name]);
   };
-  var render56 = function(state3) {
+  var render57 = function(state3) {
     return div2([classes(["app"])])([main([classes(["app__main"])])([renderPage(state3.currentRoute)])]);
   };
-  var component51 = /* @__PURE__ */ (function() {
+  var component53 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v2) {
         return {
           currentRoute: Home.value
         };
       },
-      render: render56,
+      render: render57,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
         finalize: defaultEval.finalize,
-        handleAction: handleAction50,
-        initialize: new Just(Initialize50.value)
+        handleAction: handleAction51,
+        initialize: new Just(Initialize51.value)
       })
     });
   })();
   var main2 = /* @__PURE__ */ runHalogenAff(/* @__PURE__ */ bind(bindAff)(awaitBody)(function(body2) {
-    return runUI2(component51)(unit)(body2);
+    return runUI2(component53)(unit)(body2);
   }));
 
   // <stdin>

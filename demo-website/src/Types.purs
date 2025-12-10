@@ -144,6 +144,7 @@ data Route
   | CodeExplorerV3  -- Code Explorer using our own force engine (no D3 simulation)
   | SankeyDebug     -- Debug testbed for Sankey layout algorithms
   | ForcePlayground -- Force simulation playground with network datasets
+  | TreeBuilder    -- Interactive tree builder for Tree API visualization
   -- Meta
   | Acknowledgements -- Credits and acknowledgements
   | NotFound
@@ -210,5 +211,6 @@ instance showRoute :: Show Route where
   show CodeExplorerV3 = "Code Explorer V3"
   show SankeyDebug = "Sankey Debug"
   show ForcePlayground = "Force Playground"
+  show TreeBuilder = "Tree Builder"
   show Acknowledgements = "Acknowledgements"
   show NotFound = "Not Found"

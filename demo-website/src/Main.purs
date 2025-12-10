@@ -70,6 +70,7 @@ import Component.SimpleForceGraph as SimpleForceGraph
 import Component.CodeExplorerV3 as CodeExplorerV3
 import Component.SankeyDebug as SankeyDebug
 import Component.ForcePlayground as ForcePlayground
+import TreeBuilder.App as TreeBuilder
 
 -- Routing
 import PSD3.RoutingDSL (routing, routeToPath)
@@ -138,6 +139,7 @@ type Slots =
   , codeExplorerV3 :: forall q. H.Slot q Void Unit
   , sankeyDebug :: forall q. H.Slot q Void Unit
   , forcePlayground :: forall q. H.Slot q Void Unit
+  , treeBuilder :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
 
@@ -189,6 +191,7 @@ _simpleForceGraph = Proxy :: Proxy "simpleForceGraph"
 _codeExplorerV3 = Proxy :: Proxy "codeExplorerV3"
 _sankeyDebug = Proxy :: Proxy "sankeyDebug"
 _forcePlayground = Proxy :: Proxy "forcePlayground"
+_treeBuilder = Proxy :: Proxy "treeBuilder"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
 -- | Main application component
@@ -409,6 +412,9 @@ renderPage route = case spy "Route is" route of
 
   ForcePlayground ->
     HH.slot_ _forcePlayground unit ForcePlayground.component unit
+
+  TreeBuilder ->
+    HH.slot_ _treeBuilder unit TreeBuilder.component unit
 
   Acknowledgements ->
     HH.slot_ _acknowledgements unit Acknowledgements.component unit
