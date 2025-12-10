@@ -145,6 +145,7 @@ data Route
   | SankeyDebug     -- Debug testbed for Sankey layout algorithms
   | ForcePlayground -- Force simulation playground with network datasets
   | TreeBuilder    -- Interactive tree builder for Tree API visualization
+  | SPLOM          -- Brushable Scatterplot Matrix (Palmer Penguins)
   -- Meta
   | Acknowledgements -- Credits and acknowledgements
   | NotFound
@@ -212,5 +213,6 @@ instance showRoute :: Show Route where
   show SankeyDebug = "Sankey Debug"
   show ForcePlayground = "Force Playground"
   show TreeBuilder = "Tree Builder"
+  show SPLOM = "Brushable SPLOM"
   show Acknowledgements = "Acknowledgements"
   show NotFound = "Not Found"

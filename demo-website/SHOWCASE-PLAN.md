@@ -11,10 +11,10 @@ Showcase examples to demonstrate PSD3's capabilities.
 | Code Explorer | In Progress | Neighborhood view, triptych, search working |
 | Simpson's Paradox | In Progress | Force viz with multi-phase animation done, needs polish |
 | WealthHealth | In Progress | Gapminder-style, partially complete |
-| Force Playground | Planned | This document |
-| Brushable SPLOM | Planned | This document |
+| Force Playground | ✅ Done | Fullscreen showcase with floating control panel |
+| Brushable SPLOM | ✅ Done | Palmer Penguins with d3-brush cross-filtering |
 | Wizard (v2) | Planned | This document |
-| Interactive Tree Builder | Planned | This document |
+| Interactive Tree Builder | ✅ Done | CodePen-style 4-column layout, Stringify interpreter |
 
 ---
 
@@ -277,6 +277,8 @@ demo-website/src/Wizard/
 - **No compilation** - Generated code is plain text for copy/paste
 - **Minimal customization** - Pick a skeleton, get working code
 - **Self-documenting** - Generated code has explanatory comments
+- **Reuse Stringify** - The Tree Builder's `Stringify.purs` interpreter already generates
+  compilable PureScript Tree API code. Could potentially reuse/adapt it for skeleton generation.
 
 ---
 
@@ -422,6 +424,7 @@ demo-website/src/TreeBuilder/
 1. Define skeleton templates
 2. Wizard UI flow
 3. Code generation and preview
+4. **Note**: Consider reusing Tree Builder's Stringify interpreter for code generation
 
 ### Phase 6: Interactive Tree Builder
 1. Tree editor UI with element palette

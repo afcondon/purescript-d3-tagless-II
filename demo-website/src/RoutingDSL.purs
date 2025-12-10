@@ -77,6 +77,7 @@ routes =
   <|> sankeyDebug
   <|> forcePlayground
   <|> treeBuilder
+  <|> splom
   <|> acknowledgements
   <|> rootRedirect
   <|> notFound
@@ -325,6 +326,10 @@ forcePlayground = ForcePlayground <$ lit "force-playground" <* end
 treeBuilder :: Match Route
 treeBuilder = TreeBuilder <$ lit "tree-builder" <* end
 
+-- | Match: /splom
+splom :: Match Route
+splom = SPLOM <$ lit "splom" <* end
+
 -- | Match: /acknowledgements
 acknowledgements :: Match Route
 acknowledgements = Acknowledgements <$ lit "acknowledgements" <* end
@@ -397,5 +402,6 @@ routeToPath CodeExplorerV3 = "/code-explorer-v3"
 routeToPath SankeyDebug = "/sankey-debug"
 routeToPath ForcePlayground = "/force-playground"
 routeToPath TreeBuilder = "/tree-builder"
+routeToPath SPLOM = "/splom"
 routeToPath Acknowledgements = "/acknowledgements"
 routeToPath NotFound = "/not-found"
