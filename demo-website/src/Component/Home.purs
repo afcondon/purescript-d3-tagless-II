@@ -139,7 +139,7 @@ render _ =
                 (routeToPath TourFPFTW)
             , renderTutorialLink "8. Showcase"
                 "Flagship demonstrations combining multiple techniques"
-                (routeToPath TourShowcase)
+                (routeToPath Showcase)
             ]
         ]
 

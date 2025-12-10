@@ -52,7 +52,6 @@ import Component.Tour.TourWealthHealth as TourWealthHealth
 import Component.Tour.TourInterpreters as TourInterpreters
 import Component.Tour.TourFPFTW as TourFPFTW
 import Component.Tour.TourGraphAlgorithms as TourGraphAlgorithms
-import Component.Tour.TourShowcase as TourShowcase
 import Component.Tour.TourSimpsons as TourSimpsons
 
 -- Showcase
@@ -124,7 +123,6 @@ type Slots =
   , tourInterpreters :: forall q. H.Slot q Void Unit
   , tourFPFTW :: forall q. H.Slot q Void Unit
   , tourGraphAlgorithms :: forall q. H.Slot q Void Unit
-  , tourShowcase :: forall q. H.Slot q Void Unit
   , tourSimpsons :: forall q. H.Slot q Void Unit
   , showcase :: forall q. H.Slot q Void Unit
   , gallery :: forall q. H.Slot q Void Unit
@@ -177,7 +175,6 @@ _tourWealthHealth = Proxy :: Proxy "tourWealthHealth"
 _tourInterpreters = Proxy :: Proxy "tourInterpreters"
 _tourFPFTW = Proxy :: Proxy "tourFPFTW"
 _tourGraphAlgorithms = Proxy :: Proxy "tourGraphAlgorithms"
-_tourShowcase = Proxy :: Proxy "tourShowcase"
 _tourSimpsons = Proxy :: Proxy "tourSimpsons"
 _showcase = Proxy :: Proxy "showcase"
 _gallery = Proxy :: Proxy "gallery"
@@ -327,9 +324,6 @@ renderPage route = case spy "Route is" route of
   TourLesMisGUP ->
     -- Archived, redirect to CodeExplorerV3
     HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
-
-  TourShowcase ->
-    HH.slot_ _tourShowcase unit TourShowcase.component unit
 
   TourSimpsons ->
     HH.slot_ _tourSimpsons unit TourSimpsons.component unit

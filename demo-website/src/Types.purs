@@ -117,7 +117,6 @@ data Route
   | TourFPFTW            -- Tour 7: Functional Programming For The Win (Maps, Sets, contravariant attributes)
   | TourGraphAlgorithms  -- Tour 8: Graph Algorithms (topological sort, transitive reduction)
   | TourLesMisGUP        -- Tour 9: General Update Pattern with dynamic graphs
-  | TourShowcase         -- Tour 10: Flagship demo visualizations
   | TourSimpsons         -- Tour: Simpson's Paradox visualization (classic setosa.io port)
   -- Showcase (complex app-like visualizations)
   | Showcase             -- Showcase: index page with hero and cards
@@ -187,7 +186,6 @@ instance showRoute :: Show Route where
   show TourFPFTW = "Tour: FP For The Win"
   show TourGraphAlgorithms = "Tour: Graph Algorithms"
   show TourLesMisGUP = "Tour: General Update Pattern"
-  show TourShowcase = "Tour: Showcase"
   show TourSimpsons = "Tour: Simpson's Paradox"
   show Showcase = "Showcase"
   show Gallery = "Examples Gallery"

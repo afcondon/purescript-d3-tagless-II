@@ -75,8 +75,11 @@ render _ =
             , renderCard TourWealthHealth "Wealth & Health of Nations"
                 "Animated bubble chart showing GDP vs life expectancy over time. A classic visualization recreated in PSD3."
 
-            , renderCard TourShowcase "Flagship Demos"
-                "Collection of complex visualizations demonstrating advanced PSD3 patterns and capabilities."
+            , renderCard SPLOM "Brushable SPLOM"
+                "Scatterplot matrix of Palmer Penguins with linked brushing. Select points in any cell to highlight across all views."
+
+            , renderCard TourSimpsons "Simpson's Paradox"
+                "Interactive exploration of Simpson's Paradox with animated transitions. A classic setosa.io visualization ported to PSD3."
             ]
         ]
     ]
