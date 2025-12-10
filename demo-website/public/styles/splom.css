@@ -160,6 +160,33 @@
   color: var(--color-red-accent);
 }
 
+/* Credits */
+.splom-credits {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-line);
+}
+
+.splom-credits p {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.splom-credits a {
+  color: var(--color-teal);
+  text-decoration: none;
+}
+
+.splom-credits a:hover {
+  text-decoration: underline;
+}
+
+.splom-source {
+  font-style: italic;
+}
+
 /* =============================================================================
    VISUALIZATION AREA (Right)
    ============================================================================= */

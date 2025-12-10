@@ -1,15 +1,17 @@
 // SPLOM Rendering FFI
 // Brushable Scatterplot Matrix using d3-brush
-import { select, selectAll } from "d3-selection";
+import { select } from "d3-selection";
 import { scaleLinear } from "d3-scale";
 import { brush } from "d3-brush";
 import { extent } from "d3-array";
+import { line } from "d3-shape";
 
 // Configuration
 const CELL_SIZE = 120;
-const CELL_PADDING = 10;
-const POINT_RADIUS = 3;
-const MATRIX_PADDING = 40;
+const CELL_PADDING = 12;
+const POINT_RADIUS = 2.5;
+const MATRIX_PADDING = 50;  // Space for axis labels
+const TICK_COUNT = 5;
 
 // Species colors
 const speciesColors = {
@@ -58,7 +60,8 @@ export function renderSPLOM_(selector) {
       .attr("height", height)
       .attr("viewBox", `0 0 ${width} ${height}`)
       .style("max-width", "100%")
-      .style("height", "auto");
+      .style("height", "auto")
+      .style("font", "10px sans-serif");
 
     // Background
     svg.append("rect")
@@ -93,27 +96,97 @@ export function renderSPLOM_(selector) {
         `translate(${MATRIX_PADDING + d.col * size},${MATRIX_PADDING + d.row * size})`
       );
 
-    // Cell backgrounds
+    // Cell backgrounds with frame
     cellGroups.append("rect")
-      .attr("class", "cell-bg")
+      .attr("class", "cell-frame")
       .attr("width", size)
       .attr("height", size)
-      .attr("fill", d => d.row === d.col ? "#f5f2e8" : "white")
-      .attr("stroke", "#ccc")
+      .attr("fill", "none")
+      .attr("stroke", "#aaa")
       .attr("stroke-width", 0.5);
 
-    // Diagonal labels
-    cellGroups.filter(d => d.row === d.col)
-      .append("text")
-      .attr("class", "cell-label")
-      .attr("x", size / 2)
-      .attr("y", size / 2)
-      .attr("text-anchor", "middle")
-      .attr("dominant-baseline", "middle")
-      .attr("font-size", "10px")
-      .attr("font-family", "monospace")
-      .attr("fill", "#333")
-      .text(d => d.dimX.label.replace(" (mm)", "").replace(" (g)", ""));
+    // Add grid lines to each cell
+    cellGroups.each(function(cell) {
+      const g = select(this);
+      const xScale = scales[cell.dimX.key];
+      const yScale = scales[cell.dimY.key];
+      const xTicks = xScale.ticks(TICK_COUNT);
+      const yTicks = yScale.ticks(TICK_COUNT);
+
+      // Vertical grid lines
+      g.selectAll(".grid-v")
+        .data(xTicks)
+        .enter()
+        .append("line")
+        .attr("class", "grid-v")
+        .attr("x1", d => xScale(d))
+        .attr("x2", d => xScale(d))
+        .attr("y1", padding)
+        .attr("y2", size - padding)
+        .attr("stroke", "#eee")
+        .attr("stroke-width", 0.5);
+
+      // Horizontal grid lines
+      g.selectAll(".grid-h")
+        .data(yTicks)
+        .enter()
+        .append("line")
+        .attr("class", "grid-h")
+        .attr("x1", padding)
+        .attr("x2", size - padding)
+        .attr("y1", d => yScale(d))
+        .attr("y2", d => yScale(d))
+        .attr("stroke", "#eee")
+        .attr("stroke-width", 0.5);
+    });
+
+    // Diagonal cells: label + identity scatter line (SW-NE orientation)
+    const diagonalCells = cellGroups.filter(d => d.row === d.col);
+
+    diagonalCells.each(function(cell) {
+      const g = select(this);
+      const scale = scales[cell.dimX.key];
+      const domain = scale.domain();
+
+      // For SW-NE diagonal: X increases left-to-right, Y increases bottom-to-top
+      // So we need an inverted Y scale for the diagonal
+      const yScaleInverted = scaleLinear()
+        .domain(domain)
+        .range([size - padding, padding]);  // Inverted: high values at top
+
+      // Add label text
+      g.append("text")
+        .attr("class", "cell-label")
+        .attr("x", padding + 4)
+        .attr("y", padding + 12)
+        .attr("font-size", "11px")
+        .attr("font-weight", "bold")
+        .attr("fill", "#333")
+        .text(cell.dimX.label.replace(" (mm)", "").replace(" (g)", ""));
+
+      // Add identity line (dotted diagonal SW-NE)
+      g.append("line")
+        .attr("class", "identity-line")
+        .attr("x1", scale(domain[0]))
+        .attr("y1", yScaleInverted(domain[0]))  // Bottom-left
+        .attr("x2", scale(domain[1]))
+        .attr("y2", yScaleInverted(domain[1]))  // Top-right
+        .attr("stroke", "#333")
+        .attr("stroke-width", 1)
+        .attr("stroke-dasharray", "2,2");
+
+      // Add small scatter points on the identity line (colored by species)
+      g.selectAll(".diag-point")
+        .data(validData)
+        .enter()
+        .append("circle")
+        .attr("class", "diag-point")
+        .attr("cx", d => scale(d[cell.dimX.key]))
+        .attr("cy", d => yScaleInverted(d[cell.dimX.key]))
+        .attr("r", 1.5)
+        .attr("fill", d => speciesColors[d.species] || "#999")
+        .attr("fill-opacity", 0.7);
+    });
 
     // Off-diagonal: scatter points
     const offDiagonalCells = cellGroups.filter(d => d.row !== d.col);
@@ -137,6 +210,46 @@ export function renderSPLOM_(selector) {
         .attr("stroke", "none");
     });
 
+    // Add axis labels on edges
+    // Bottom axis labels (X)
+    dimensions.forEach((dim, i) => {
+      const scale = scales[dim.key];
+      const ticks = scale.ticks(TICK_COUNT);
+      const g = svg.append("g")
+        .attr("class", "axis-bottom")
+        .attr("transform", `translate(${MATRIX_PADDING + i * size}, ${MATRIX_PADDING + n * size})`);
+
+      ticks.forEach(tick => {
+        g.append("text")
+          .attr("x", scale(tick))
+          .attr("y", 12)
+          .attr("text-anchor", "middle")
+          .attr("font-size", "8px")
+          .attr("fill", "#666")
+          .text(formatTick(tick));
+      });
+    });
+
+    // Left axis labels (Y)
+    dimensions.forEach((dim, i) => {
+      const scale = scales[dim.key];
+      const ticks = scale.ticks(TICK_COUNT);
+      const g = svg.append("g")
+        .attr("class", "axis-left")
+        .attr("transform", `translate(${MATRIX_PADDING}, ${MATRIX_PADDING + i * size})`);
+
+      ticks.forEach(tick => {
+        g.append("text")
+          .attr("x", -4)
+          .attr("y", scale(tick))
+          .attr("text-anchor", "end")
+          .attr("dominant-baseline", "middle")
+          .attr("font-size", "8px")
+          .attr("fill", "#666")
+          .text(formatTick(tick));
+      });
+    });
+
     // Create brush behavior
     const brushBehavior = brush()
       .extent([[padding, padding], [size - padding, size - padding]])
@@ -149,41 +262,51 @@ export function renderSPLOM_(selector) {
       .attr("class", "brush")
       .call(brushBehavior);
 
-    function brushstarted(event, cell) {
-      // Clear brush in other cells
+    // Helper to get cell data from brush event context
+    function getCellData(element, datum) {
+      if (datum && datum.dimX && datum.dimY) return datum;
+      if (element && element.__data__) return element.__data__;
+      if (element && element.parentNode && element.parentNode.__data__) {
+        return element.parentNode.__data__;
+      }
+      return null;
+    }
+
+    function brushstarted(event, datum) {
       if (brushCell !== this) {
         select(brushCell).call(brushBehavior.move, null);
         brushCell = this;
       }
     }
 
-    function brushed(event, cell) {
+    function brushed(event, datum) {
+      const cell = getCellData(this, datum);
+
       if (!event.selection) {
         brushSelection = null;
         updatePointOpacity();
         return;
       }
 
+      if (!cell || !cell.dimX || !cell.dimY) return;
+
       const [[x0, y0], [x1, y1]] = event.selection;
       const xScale = scales[cell.dimX.key];
       const yScale = scales[cell.dimY.key];
 
-      // Invert scales to get data range
-      const xMin = xScale.invert(x0);
-      const xMax = xScale.invert(x1);
-      const yMin = yScale.invert(y1); // y is inverted
-      const yMax = yScale.invert(y0);
-
       brushSelection = {
         dimX: cell.dimX.key,
         dimY: cell.dimY.key,
-        xMin, xMax, yMin, yMax
+        xMin: xScale.invert(x0),
+        xMax: xScale.invert(x1),
+        yMin: yScale.invert(y0),
+        yMax: yScale.invert(y1)
       };
 
       updatePointOpacity();
     }
 
-    function brushended(event, cell) {
+    function brushended(event, datum) {
       if (!event.selection) {
         brushSelection = null;
         updatePointOpacity();
@@ -192,12 +315,10 @@ export function renderSPLOM_(selector) {
 
     function updatePointOpacity() {
       if (!brushSelection) {
-        // No selection - show all points
         svg.selectAll(".point")
           .attr("fill-opacity", 0.7)
           .attr("r", POINT_RADIUS);
       } else {
-        // Filter points based on brush selection
         svg.selectAll(".point")
           .attr("fill-opacity", d => isSelected(d) ? 0.9 : 0.1)
           .attr("r", d => isSelected(d) ? POINT_RADIUS : 1.5);
@@ -214,31 +335,36 @@ export function renderSPLOM_(selector) {
              yVal <= brushSelection.yMax;
     }
 
-    // Add legend
-    const legend = svg.append("g")
-      .attr("class", "legend")
-      .attr("transform", `translate(${width - 100}, 10)`);
+    function formatTick(value) {
+      if (value >= 1000) return (value / 1000).toFixed(1) + "k";
+      if (Number.isInteger(value)) return value.toString();
+      return value.toFixed(1);
+    }
 
-    const species = ["Adelie", "Gentoo", "Chinstrap"];
-    species.forEach((sp, i) => {
-      const g = legend.append("g")
-        .attr("transform", `translate(0, ${i * 18})`);
+    // Selection change callback (set by caller)
+    let onSelectionChange = null;
 
-      g.append("circle")
-        .attr("cx", 6)
-        .attr("cy", 6)
-        .attr("r", 5)
-        .attr("fill", speciesColors[sp])
-        .attr("fill-opacity", 0.7);
+    function notifySelectionChange() {
+      if (onSelectionChange) {
+        const count = brushSelection ? validData.filter(isSelected).length : validData.length;
+        onSelectionChange(count);
+      }
+    }
 
-      g.append("text")
-        .attr("x", 16)
-        .attr("y", 10)
-        .attr("font-size", "11px")
-        .attr("font-family", "monospace")
-        .attr("fill", "#333")
-        .text(sp);
-    });
+    // Update updatePointOpacity to notify on change
+    const originalUpdatePointOpacity = updatePointOpacity;
+    updatePointOpacity = function() {
+      if (!brushSelection) {
+        svg.selectAll(".point")
+          .attr("fill-opacity", 0.7)
+          .attr("r", POINT_RADIUS);
+      } else {
+        svg.selectAll(".point")
+          .attr("fill-opacity", d => isSelected(d) ? 0.9 : 0.1)
+          .attr("r", d => isSelected(d) ? POINT_RADIUS : 1.5);
+      }
+      notifySelectionChange();
+    };
 
     // Return handle
     return {
@@ -251,7 +377,10 @@ export function renderSPLOM_(selector) {
         if (!brushSelection) return validData.length;
         return validData.filter(isSelected).length;
       },
-      getTotalCount: () => validData.length
+      getTotalCount: () => validData.length,
+      setOnSelectionChange: (callback) => {
+        onSelectionChange = callback;
+      }
     };
   };
 }
@@ -277,4 +406,13 @@ export function getSelectedCount_(handle) {
  */
 export function getTotalCount_(handle) {
   return () => handle.getTotalCount();
+}
+
+/**
+ * Set selection change callback
+ */
+export function setOnSelectionChange_(handle) {
+  return callback => () => {
+    handle.setOnSelectionChange(count => callback(count)());
+  };
 }

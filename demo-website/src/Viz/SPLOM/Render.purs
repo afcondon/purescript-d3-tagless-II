@@ -6,13 +6,13 @@ module D3.Viz.SPLOM.Render
   , clearSPLOMBrush
   , getSelectedCount
   , getTotalCount
+  , setOnSelectionChange
   , SPLOMHandle
   , DimensionSpec
   ) where
 
 import Prelude
 
-import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable, toNullable)
 import Effect (Effect)
 import D3.Viz.SPLOM.Types (Penguin, NumericDimension, dimensionKey, dimensionLabel)
@@ -71,6 +71,12 @@ getSelectedCount = getSelectedCount_
 -- | Get total count
 getTotalCount :: SPLOMHandle -> Effect Int
 getTotalCount = getTotalCount_
+
+-- | Set callback for selection changes
+foreign import setOnSelectionChange_ :: SPLOMHandle -> (Int -> Effect Unit) -> Effect Unit
+
+setOnSelectionChange :: SPLOMHandle -> (Int -> Effect Unit) -> Effect Unit
+setOnSelectionChange = setOnSelectionChange_
 
 -- | FFI-friendly penguin format (nullables become JS nulls)
 type FFIPenguin =

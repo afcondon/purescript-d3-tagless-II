@@ -16,10 +16,11 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Halogen.Subscription as HS
 import PSD3.Shared.SiteNav as SiteNav
 import D3.Viz.SPLOM.Data (loadPenguins)
-import D3.Viz.SPLOM.Types (Penguin, NumericDimension(..), allDimensions)
-import D3.Viz.SPLOM.Render (renderSPLOM, clearSPLOMBrush, getSelectedCount, getTotalCount, SPLOMHandle)
+import D3.Viz.SPLOM.Types (Penguin, allDimensions)
+import D3.Viz.SPLOM.Render (renderSPLOM, clearSPLOMBrush, getSelectedCount, getTotalCount, setOnSelectionChange, SPLOMHandle)
 
 -- | Component state
 type State =
@@ -36,6 +37,7 @@ data Action
   = Initialize
   | ClearBrush
   | UpdateCounts
+  | SelectionChanged Int
 
 -- | Component definition
 component :: forall q i o m. MonadAff m => H.Component q i o m
@@ -121,6 +123,32 @@ render state =
                     , HH.li_ [ HH.text "Click elsewhere to clear" ]
                     ]
                 ]
+
+            -- Credits
+            , HH.div
+                [ HP.classes [ HH.ClassName "splom-credits" ] ]
+                [ HH.p_
+                    [ HH.text "The scatterplot matrix (SPLOM) shows pairwise correlations for multi-dimensional data; "
+                    , HH.text "each cell is a scatterplot where x encodes the column's dimension and y encodes the row's dimension. "
+                    , HH.text "This matrix shows "
+                    , HH.a
+                        [ HP.href "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0090081"
+                        , HP.target "_blank"
+                        ]
+                        [ HH.text "Kristen Gorman's data" ]
+                    , HH.text " on penguins near Palmer Station in Antarctica."
+                    ]
+                , HH.p
+                    [ HP.classes [ HH.ClassName "splom-source" ] ]
+                    [ HH.text "Based on "
+                    , HH.a
+                        [ HP.href "https://observablehq.com/@d3/brushable-scatterplot-matrix"
+                        , HP.target "_blank"
+                        ]
+                        [ HH.text "Observable's Brushable Scatterplot Matrix" ]
+                    , HH.text " by Mike Bostock."
+                    ]
+                ]
             ]
 
         -- Visualization
@@ -174,6 +202,10 @@ handleAction = case _ of
         total <- liftEffect $ getTotalCount handle
         H.modify_ _ { splomHandle = Just handle, totalCount = total, selectedCount = total }
 
+        -- Set up selection change callback
+        -- We need to use a subscription to get events from JS into Halogen
+        void $ H.subscribe =<< selectionEmitter handle
+
   ClearBrush -> do
     state <- H.get
     case state.splomHandle of
@@ -189,3 +221,14 @@ handleAction = case _ of
       Just handle -> do
         count <- liftEffect $ getSelectedCount handle
         H.modify_ _ { selectedCount = count }
+
+  SelectionChanged count -> do
+    H.modify_ _ { selectedCount = count }
+
+-- | Create an emitter that listens for selection changes from the SPLOM
+selectionEmitter :: forall o m. MonadAff m => SPLOMHandle -> H.HalogenM State Action () o m (HS.Emitter Action)
+selectionEmitter handle = do
+  { emitter, listener } <- liftEffect HS.create
+  liftEffect $ setOnSelectionChange handle \count -> do
+    HS.notify listener (SelectionChanged count)
+  pure emitter

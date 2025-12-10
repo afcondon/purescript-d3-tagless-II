@@ -36549,9 +36549,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
 
   // output/D3.Viz.SPLOM.Render/foreign.js
   var CELL_SIZE = 120;
-  var CELL_PADDING = 10;
-  var POINT_RADIUS = 3;
-  var MATRIX_PADDING = 40;
+  var CELL_PADDING = 12;
+  var POINT_RADIUS = 2.5;
+  var MATRIX_PADDING = 50;
+  var TICK_COUNT = 5;
   var speciesColors = {
     "Adelie": "#1f77b4",
     "Gentoo": "#ff7f0e",
@@ -36574,7 +36575,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         const values2 = validData.map((d21) => d21[dim.key]);
         scales[dim.key] = linear3().domain(extent(values2)).range([padding2, size6 - padding2]).nice();
       });
-      const svg4 = container.append("svg").attr("width", width56).attr("height", height56).attr("viewBox", `0 0 ${width56} ${height56}`).style("max-width", "100%").style("height", "auto");
+      const svg4 = container.append("svg").attr("width", width56).attr("height", height56).attr("viewBox", `0 0 ${width56} ${height56}`).style("max-width", "100%").style("height", "auto").style("font", "10px sans-serif");
       svg4.append("rect").attr("width", width56).attr("height", height56).attr("fill", "white");
       let brushCell = null;
       let brushSelection2 = null;
@@ -36593,8 +36594,26 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         "transform",
         (d21) => `translate(${MATRIX_PADDING + d21.col * size6},${MATRIX_PADDING + d21.row * size6})`
       );
-      cellGroups.append("rect").attr("class", "cell-bg").attr("width", size6).attr("height", size6).attr("fill", (d21) => d21.row === d21.col ? "#f5f2e8" : "white").attr("stroke", "#ccc").attr("stroke-width", 0.5);
-      cellGroups.filter((d21) => d21.row === d21.col).append("text").attr("class", "cell-label").attr("x", size6 / 2).attr("y", size6 / 2).attr("text-anchor", "middle").attr("dominant-baseline", "middle").attr("font-size", "10px").attr("font-family", "monospace").attr("fill", "#333").text((d21) => d21.dimX.label.replace(" (mm)", "").replace(" (g)", ""));
+      cellGroups.append("rect").attr("class", "cell-frame").attr("width", size6).attr("height", size6).attr("fill", "none").attr("stroke", "#aaa").attr("stroke-width", 0.5);
+      cellGroups.each(function(cell) {
+        const g2 = select_default2(this);
+        const xScale = scales[cell.dimX.key];
+        const yScale = scales[cell.dimY.key];
+        const xTicks2 = xScale.ticks(TICK_COUNT);
+        const yTicks2 = yScale.ticks(TICK_COUNT);
+        g2.selectAll(".grid-v").data(xTicks2).enter().append("line").attr("class", "grid-v").attr("x1", (d21) => xScale(d21)).attr("x2", (d21) => xScale(d21)).attr("y1", padding2).attr("y2", size6 - padding2).attr("stroke", "#eee").attr("stroke-width", 0.5);
+        g2.selectAll(".grid-h").data(yTicks2).enter().append("line").attr("class", "grid-h").attr("x1", padding2).attr("x2", size6 - padding2).attr("y1", (d21) => yScale(d21)).attr("y2", (d21) => yScale(d21)).attr("stroke", "#eee").attr("stroke-width", 0.5);
+      });
+      const diagonalCells = cellGroups.filter((d21) => d21.row === d21.col);
+      diagonalCells.each(function(cell) {
+        const g2 = select_default2(this);
+        const scale = scales[cell.dimX.key];
+        const domain2 = scale.domain();
+        const yScaleInverted = linear3().domain(domain2).range([size6 - padding2, padding2]);
+        g2.append("text").attr("class", "cell-label").attr("x", padding2 + 4).attr("y", padding2 + 12).attr("font-size", "11px").attr("font-weight", "bold").attr("fill", "#333").text(cell.dimX.label.replace(" (mm)", "").replace(" (g)", ""));
+        g2.append("line").attr("class", "identity-line").attr("x1", scale(domain2[0])).attr("y1", yScaleInverted(domain2[0])).attr("x2", scale(domain2[1])).attr("y2", yScaleInverted(domain2[1])).attr("stroke", "#333").attr("stroke-width", 1).attr("stroke-dasharray", "2,2");
+        g2.selectAll(".diag-point").data(validData).enter().append("circle").attr("class", "diag-point").attr("cx", (d21) => scale(d21[cell.dimX.key])).attr("cy", (d21) => yScaleInverted(d21[cell.dimX.key])).attr("r", 1.5).attr("fill", (d21) => speciesColors[d21.species] || "#999").attr("fill-opacity", 0.7);
+      });
       const offDiagonalCells = cellGroups.filter((d21) => d21.row !== d21.col);
       offDiagonalCells.each(function(cell) {
         const g2 = select_default2(this);
@@ -36602,38 +36621,60 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         const yScale = scales[cell.dimY.key];
         g2.selectAll(".point").data(validData).enter().append("circle").attr("class", "point").attr("cx", (d21) => xScale(d21[cell.dimX.key])).attr("cy", (d21) => yScale(d21[cell.dimY.key])).attr("r", POINT_RADIUS).attr("fill", (d21) => speciesColors[d21.species] || "#999").attr("fill-opacity", 0.7).attr("stroke", "none");
       });
+      dimensions.forEach((dim, i2) => {
+        const scale = scales[dim.key];
+        const ticks3 = scale.ticks(TICK_COUNT);
+        const g2 = svg4.append("g").attr("class", "axis-bottom").attr("transform", `translate(${MATRIX_PADDING + i2 * size6}, ${MATRIX_PADDING + n * size6})`);
+        ticks3.forEach((tick2) => {
+          g2.append("text").attr("x", scale(tick2)).attr("y", 12).attr("text-anchor", "middle").attr("font-size", "8px").attr("fill", "#666").text(formatTick(tick2));
+        });
+      });
+      dimensions.forEach((dim, i2) => {
+        const scale = scales[dim.key];
+        const ticks3 = scale.ticks(TICK_COUNT);
+        const g2 = svg4.append("g").attr("class", "axis-left").attr("transform", `translate(${MATRIX_PADDING}, ${MATRIX_PADDING + i2 * size6})`);
+        ticks3.forEach((tick2) => {
+          g2.append("text").attr("x", -4).attr("y", scale(tick2)).attr("text-anchor", "end").attr("dominant-baseline", "middle").attr("font-size", "8px").attr("fill", "#666").text(formatTick(tick2));
+        });
+      });
       const brushBehavior = brush_default().extent([[padding2, padding2], [size6 - padding2, size6 - padding2]]).on("start", brushstarted).on("brush", brushed).on("end", brushended);
       offDiagonalCells.append("g").attr("class", "brush").call(brushBehavior);
-      function brushstarted(event, cell) {
+      function getCellData(element4, datum2) {
+        if (datum2 && datum2.dimX && datum2.dimY) return datum2;
+        if (element4 && element4.__data__) return element4.__data__;
+        if (element4 && element4.parentNode && element4.parentNode.__data__) {
+          return element4.parentNode.__data__;
+        }
+        return null;
+      }
+      function brushstarted(event, datum2) {
         if (brushCell !== this) {
           select_default2(brushCell).call(brushBehavior.move, null);
           brushCell = this;
         }
       }
-      function brushed(event, cell) {
+      function brushed(event, datum2) {
+        const cell = getCellData(this, datum2);
         if (!event.selection) {
           brushSelection2 = null;
           updatePointOpacity();
           return;
         }
+        if (!cell || !cell.dimX || !cell.dimY) return;
         const [[x0, y0], [x120, y120]] = event.selection;
         const xScale = scales[cell.dimX.key];
         const yScale = scales[cell.dimY.key];
-        const xMin = xScale.invert(x0);
-        const xMax = xScale.invert(x120);
-        const yMin = yScale.invert(y120);
-        const yMax = yScale.invert(y0);
         brushSelection2 = {
           dimX: cell.dimX.key,
           dimY: cell.dimY.key,
-          xMin,
-          xMax,
-          yMin,
-          yMax
+          xMin: xScale.invert(x0),
+          xMax: xScale.invert(x120),
+          yMin: yScale.invert(y0),
+          yMax: yScale.invert(y120)
         };
         updatePointOpacity();
       }
-      function brushended(event, cell) {
+      function brushended(event, datum2) {
         if (!event.selection) {
           brushSelection2 = null;
           updatePointOpacity();
@@ -36652,13 +36693,27 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         const yVal = d21[brushSelection2.dimY];
         return xVal >= brushSelection2.xMin && xVal <= brushSelection2.xMax && yVal >= brushSelection2.yMin && yVal <= brushSelection2.yMax;
       }
-      const legend2 = svg4.append("g").attr("class", "legend").attr("transform", `translate(${width56 - 100}, 10)`);
-      const species = ["Adelie", "Gentoo", "Chinstrap"];
-      species.forEach((sp, i2) => {
-        const g2 = legend2.append("g").attr("transform", `translate(0, ${i2 * 18})`);
-        g2.append("circle").attr("cx", 6).attr("cy", 6).attr("r", 5).attr("fill", speciesColors[sp]).attr("fill-opacity", 0.7);
-        g2.append("text").attr("x", 16).attr("y", 10).attr("font-size", "11px").attr("font-family", "monospace").attr("fill", "#333").text(sp);
-      });
+      function formatTick(value23) {
+        if (value23 >= 1e3) return (value23 / 1e3).toFixed(1) + "k";
+        if (Number.isInteger(value23)) return value23.toString();
+        return value23.toFixed(1);
+      }
+      let onSelectionChange = null;
+      function notifySelectionChange() {
+        if (onSelectionChange) {
+          const count = brushSelection2 ? validData.filter(isSelected).length : validData.length;
+          onSelectionChange(count);
+        }
+      }
+      const originalUpdatePointOpacity = updatePointOpacity;
+      updatePointOpacity = function() {
+        if (!brushSelection2) {
+          svg4.selectAll(".point").attr("fill-opacity", 0.7).attr("r", POINT_RADIUS);
+        } else {
+          svg4.selectAll(".point").attr("fill-opacity", (d21) => isSelected(d21) ? 0.9 : 0.1).attr("r", (d21) => isSelected(d21) ? POINT_RADIUS : 1.5);
+        }
+        notifySelectionChange();
+      };
       return {
         clearBrush: () => {
           brushSelection2 = null;
@@ -36669,7 +36724,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           if (!brushSelection2) return validData.length;
           return validData.filter(isSelected).length;
         },
-        getTotalCount: () => validData.length
+        getTotalCount: () => validData.length,
+        setOnSelectionChange: (callback) => {
+          onSelectionChange = callback;
+        }
       };
     };
   }
@@ -36683,6 +36741,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   }
   function getTotalCount_(handle) {
     return () => handle.getTotalCount();
+  }
+  function setOnSelectionChange_(handle) {
+    return (callback) => () => {
+      handle.setOnSelectionChange((count) => callback(count)());
+    };
   }
 
   // output/D3.Viz.SPLOM.Types/index.js
@@ -36777,6 +36840,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       label: dimensionLabel(dim)
     };
   };
+  var setOnSelectionChange = setOnSelectionChange_;
   var renderSPLOM = function(selector) {
     return function(data_2) {
       return function(dimensions) {
@@ -36789,12 +36853,14 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var clearSPLOMBrush = clearSPLOMBrush_;
 
   // output/Component.SPLOM/index.js
-  var show38 = /* @__PURE__ */ show(showInt);
-  var discard25 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var bind42 = /* @__PURE__ */ bind(bindHalogenM);
-  var modify_12 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var get13 = /* @__PURE__ */ get(monadStateHalogenM);
+  var discard25 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var pure47 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var show38 = /* @__PURE__ */ show(showInt);
+  var modify_12 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var $$void13 = /* @__PURE__ */ $$void(functorHalogenM);
+  var bindFlipped5 = /* @__PURE__ */ bindFlipped(bindHalogenM);
+  var get13 = /* @__PURE__ */ get(monadStateHalogenM);
   var Initialize20 = /* @__PURE__ */ (function() {
     function Initialize53() {
     }
@@ -36816,6 +36882,28 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     UpdateCounts2.value = new UpdateCounts2();
     return UpdateCounts2;
   })();
+  var SelectionChanged = /* @__PURE__ */ (function() {
+    function SelectionChanged2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    SelectionChanged2.create = function(value0) {
+      return new SelectionChanged2(value0);
+    };
+    return SelectionChanged2;
+  })();
+  var selectionEmitter = function(dictMonadAff) {
+    var liftEffect45 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    return function(handle) {
+      return bind42(liftEffect45(create4))(function(v2) {
+        return discard25(liftEffect45(setOnSelectionChange(handle)(function(count) {
+          return notify(v2.listener)(new SelectionChanged(count));
+        })))(function() {
+          return pure47(v2.emitter);
+        });
+      });
+    };
+  };
   var render24 = function(state3) {
     return div2([classes(["splom-page"])])([render6({
       logoSize: Normal.value,
@@ -36823,11 +36911,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       prevNext: Nothing.value,
       pageTitle: new Just("Brushable SPLOM")
     }), div2([classes(["splom-layout"])])([div2([classes(["splom-panel"])])([h2_([text5("Palmer Penguins")]), p([classes(["splom-description"])])([text5("Explore relationships between penguin measurements using a scatterplot matrix. "), text5("Click and drag to brush-select points in any cell. Selected points highlight across all views.")]), (function() {
-      var $27 = state3.totalCount > 0;
-      if ($27) {
+      var $39 = state3.totalCount > 0;
+      if ($39) {
         return div2([classes(["splom-stats"])])([span_([text5(show38(state3.selectedCount) + (" / " + (show38(state3.totalCount) + " penguins")))]), (function() {
-          var $28 = state3.selectedCount < state3.totalCount;
-          if ($28) {
+          var $40 = state3.selectedCount < state3.totalCount;
+          if ($40) {
             return button2([classes(["splom-clear-btn"]), onClick(function(v2) {
               return ClearBrush.value;
             })])([text5("Clear Selection")]);
@@ -36838,7 +36926,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       }
       ;
       return text5("");
-    })(), div2([classes(["splom-legend-info"])])([h4_([text5("Species")]), ul_([li_([span4([style("color: #1f77b4")])([text5("\u25CF")]), text5(" Ad\xE9lie")]), li_([span4([style("color: #ff7f0e")])([text5("\u25CF")]), text5(" Gentoo")]), li_([span4([style("color: #2ca02c")])([text5("\u25CF")]), text5(" Chinstrap")])])]), div2([classes(["splom-instructions"])])([h4_([text5("How to Use")]), ul_([li_([text5("Drag to create a brush selection")]), li_([text5("Points outside selection fade")]), li_([text5("Diagonal shows dimension labels")]), li_([text5("Click elsewhere to clear")])])])]), div2([classes(["splom-viz"])])([(function() {
+    })(), div2([classes(["splom-legend-info"])])([h4_([text5("Species")]), ul_([li_([span4([style("color: #1f77b4")])([text5("\u25CF")]), text5(" Ad\xE9lie")]), li_([span4([style("color: #ff7f0e")])([text5("\u25CF")]), text5(" Gentoo")]), li_([span4([style("color: #2ca02c")])([text5("\u25CF")]), text5(" Chinstrap")])])]), div2([classes(["splom-instructions"])])([h4_([text5("How to Use")]), ul_([li_([text5("Drag to create a brush selection")]), li_([text5("Points outside selection fade")]), li_([text5("Diagonal shows dimension labels")]), li_([text5("Click elsewhere to clear")])])]), div2([classes(["splom-credits"])])([p_([text5("The scatterplot matrix (SPLOM) shows pairwise correlations for multi-dimensional data; "), text5("each cell is a scatterplot where x encodes the column's dimension and y encodes the row's dimension. "), text5("This matrix shows "), a([href4("https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0090081"), target6("_blank")])([text5("Kristen Gorman's data")]), text5(" on penguins near Palmer Station in Antarctica.")]), p([classes(["splom-source"])])([text5("Based on "), a([href4("https://observablehq.com/@d3/brushable-scatterplot-matrix"), target6("_blank")])([text5("Observable's Brushable Scatterplot Matrix")]), text5(" by Mike Bostock.")])])]), div2([classes(["splom-viz"])])([(function() {
       if (state3.loading) {
         return div2([classes(["splom-loading"])])([text5("Loading penguins...")]);
       }
@@ -36853,12 +36941,13 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return text5("");
       }
       ;
-      throw new Error("Failed pattern match at Component.SPLOM (line 137, column 15 - line 141, column 38): " + [state3.error.constructor.name]);
+      throw new Error("Failed pattern match at Component.SPLOM (line 165, column 15 - line 169, column 38): " + [state3.error.constructor.name]);
     })(), div2([id4("splom-container"), classes(["splom-svg-container"])])([])])])]);
   };
   var handleAction19 = function(dictMonadAff) {
     var liftEffect45 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     var liftAff2 = liftAff(monadAffHalogenM(dictMonadAff));
+    var selectionEmitter1 = selectionEmitter(dictMonadAff);
     return function(v2) {
       if (v2 instanceof Initialize20) {
         return discard25(liftEffect45(log2("Loading penguins...")))(function() {
@@ -36866,17 +36955,17 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             if (result instanceof Left) {
               return discard25(liftEffect45(log2("Failed to load penguins: " + result.value0)))(function() {
                 return modify_12(function(v1) {
-                  var $34 = {};
-                  for (var $35 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $35)) {
-                      $34[$35] = v1[$35];
+                  var $46 = {};
+                  for (var $47 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $47)) {
+                      $46[$47] = v1[$47];
                     }
                     ;
                   }
                   ;
-                  $34.loading = false;
-                  $34.error = new Just(result.value0);
-                  return $34;
+                  $46.loading = false;
+                  $46.error = new Just(result.value0);
+                  return $46;
                 });
               });
             }
@@ -36884,33 +36973,35 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             if (result instanceof Right) {
               return discard25(liftEffect45(log2("Loaded " + (show38(length(result.value0)) + " penguins"))))(function() {
                 return discard25(modify_12(function(v1) {
-                  var $38 = {};
-                  for (var $39 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $39)) {
-                      $38[$39] = v1[$39];
+                  var $50 = {};
+                  for (var $51 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $51)) {
+                      $50[$51] = v1[$51];
                     }
                     ;
                   }
                   ;
-                  $38.penguins = result.value0;
-                  $38.loading = false;
-                  return $38;
+                  $50.penguins = result.value0;
+                  $50.loading = false;
+                  return $50;
                 }))(function() {
                   return bind42(liftEffect45(renderSPLOM("#splom-container")(result.value0)(allDimensions)))(function(handle) {
                     return bind42(liftEffect45(getTotalCount(handle)))(function(total) {
-                      return modify_12(function(v1) {
-                        var $41 = {};
-                        for (var $42 in v1) {
-                          if ({}.hasOwnProperty.call(v1, $42)) {
-                            $41[$42] = v1[$42];
+                      return discard25(modify_12(function(v1) {
+                        var $53 = {};
+                        for (var $54 in v1) {
+                          if ({}.hasOwnProperty.call(v1, $54)) {
+                            $53[$54] = v1[$54];
                           }
                           ;
                         }
                         ;
-                        $41.splomHandle = new Just(handle);
-                        $41.totalCount = total;
-                        $41.selectedCount = total;
-                        return $41;
+                        $53.splomHandle = new Just(handle);
+                        $53.totalCount = total;
+                        $53.selectedCount = total;
+                        return $53;
+                      }))(function() {
+                        return $$void13(bindFlipped5(subscribe2)(selectionEmitter1(handle)));
                       });
                     });
                   });
@@ -36918,7 +37009,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               });
             }
             ;
-            throw new Error("Failed pattern match at Component.SPLOM (line 163, column 5 - line 175, column 93): " + [result.constructor.name]);
+            throw new Error("Failed pattern match at Component.SPLOM (line 191, column 5 - line 207, column 55): " + [result.constructor.name]);
           });
         });
       }
@@ -36932,21 +37023,21 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           if (state3.splomHandle instanceof Just) {
             return discard25(liftEffect45(clearSPLOMBrush(state3.splomHandle.value0)))(function() {
               return modify_12(function(v1) {
-                var $46 = {};
-                for (var $47 in v1) {
-                  if ({}.hasOwnProperty.call(v1, $47)) {
-                    $46[$47] = v1[$47];
+                var $58 = {};
+                for (var $59 in v1) {
+                  if ({}.hasOwnProperty.call(v1, $59)) {
+                    $58[$59] = v1[$59];
                   }
                   ;
                 }
                 ;
-                $46.selectedCount = state3.totalCount;
-                return $46;
+                $58.selectedCount = state3.totalCount;
+                return $58;
               });
             });
           }
           ;
-          throw new Error("Failed pattern match at Component.SPLOM (line 179, column 5 - line 183, column 57): " + [state3.splomHandle.constructor.name]);
+          throw new Error("Failed pattern match at Component.SPLOM (line 211, column 5 - line 215, column 57): " + [state3.splomHandle.constructor.name]);
         });
       }
       ;
@@ -36959,25 +37050,40 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           if (state3.splomHandle instanceof Just) {
             return bind42(liftEffect45(getSelectedCount(state3.splomHandle.value0)))(function(count) {
               return modify_12(function(v1) {
-                var $51 = {};
-                for (var $52 in v1) {
-                  if ({}.hasOwnProperty.call(v1, $52)) {
-                    $51[$52] = v1[$52];
+                var $63 = {};
+                for (var $64 in v1) {
+                  if ({}.hasOwnProperty.call(v1, $64)) {
+                    $63[$64] = v1[$64];
                   }
                   ;
                 }
                 ;
-                $51.selectedCount = count;
-                return $51;
+                $63.selectedCount = count;
+                return $63;
               });
             });
           }
           ;
-          throw new Error("Failed pattern match at Component.SPLOM (line 187, column 5 - line 191, column 46): " + [state3.splomHandle.constructor.name]);
+          throw new Error("Failed pattern match at Component.SPLOM (line 219, column 5 - line 223, column 46): " + [state3.splomHandle.constructor.name]);
         });
       }
       ;
-      throw new Error("Failed pattern match at Component.SPLOM (line 158, column 16 - line 191, column 46): " + [v2.constructor.name]);
+      if (v2 instanceof SelectionChanged) {
+        return modify_12(function(v1) {
+          var $67 = {};
+          for (var $68 in v1) {
+            if ({}.hasOwnProperty.call(v1, $68)) {
+              $67[$68] = v1[$68];
+            }
+            ;
+          }
+          ;
+          $67.selectedCount = v2.value0;
+          return $67;
+        });
+      }
+      ;
+      throw new Error("Failed pattern match at Component.SPLOM (line 186, column 16 - line 226, column 42): " + [v2.constructor.name]);
     };
   };
   var component20 = function(dictMonadAff) {
@@ -42727,7 +42833,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
 
   // output/D3.Viz.FPFTW.DAGTreeExample/index.js
   var fromFoldable35 = /* @__PURE__ */ fromFoldable2(foldableArray);
-  var $$void13 = /* @__PURE__ */ $$void(functorEffect);
+  var $$void14 = /* @__PURE__ */ $$void(functorEffect);
   var discard36 = /* @__PURE__ */ discard(discardUnit)(bindD3v2M);
   var clear5 = /* @__PURE__ */ clear(selectionMD3v2Selection_D);
   var bind60 = /* @__PURE__ */ bind(bindD3v2M);
@@ -42813,7 +42919,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     linkType: "cross"
   }];
   var drawDAGTreeExample = function(selector) {
-    return $$void13(runD3v2M(discard36(clear5(selector))(function() {
+    return $$void14(runD3v2M(discard36(clear5(selector))(function() {
       return bind60(select26(selector))(function(container) {
         var size6 = {
           width: 500,
@@ -53341,7 +53447,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var modify_18 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var get18 = /* @__PURE__ */ get(monadStateHalogenM);
   var when12 = /* @__PURE__ */ when(applicativeHalogenM);
-  var $$void14 = /* @__PURE__ */ $$void(functorHalogenM);
+  var $$void15 = /* @__PURE__ */ $$void(functorHalogenM);
   var forever4 = /* @__PURE__ */ forever(monadRecAff);
   var discard214 = /* @__PURE__ */ discard60(bindAff);
   var liftEffect38 = /* @__PURE__ */ liftEffect(monadEffectAff);
@@ -53483,7 +53589,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                       $74.animationSubscriptionId = new Just(subscriptionId);
                       return $74;
                     }))(function() {
-                      return $$void14(liftAff2(forkAff(forever4(discard214(delay(intervalMs))(function() {
+                      return $$void15(liftAff2(forkAff(forever4(discard214(delay(intervalMs))(function() {
                         return liftEffect38(notify(v1.listener)(Tick.value));
                       })))));
                     });
@@ -53804,7 +53910,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.TreeAPI/index.js
   var discard62 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_19 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var $$void15 = /* @__PURE__ */ $$void(functorEffect);
+  var $$void16 = /* @__PURE__ */ $$void(functorEffect);
   var ThreeCircles = /* @__PURE__ */ (function() {
     function ThreeCircles2() {
     }
@@ -53918,7 +54024,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             }
             ;
             if (v2.value0 instanceof ThreeCirclesTransition) {
-              return liftEffect45($$void15(threeLittleCirclesTransition("#viz")));
+              return liftEffect45($$void16(threeLittleCirclesTransition("#viz")));
             }
             ;
             if (v2.value0 instanceof SimpleTree) {
@@ -54387,7 +54493,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Halogen.Aff.Util/index.js
   var bind86 = /* @__PURE__ */ bind(bindAff);
   var liftEffect39 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var bindFlipped5 = /* @__PURE__ */ bindFlipped(bindEffect);
+  var bindFlipped6 = /* @__PURE__ */ bindFlipped(bindEffect);
   var composeKleisliFlipped4 = /* @__PURE__ */ composeKleisliFlipped(bindEffect);
   var pure93 = /* @__PURE__ */ pure(applicativeAff);
   var bindFlipped1 = /* @__PURE__ */ bindFlipped(bindMaybe);
@@ -54396,7 +54502,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var discard63 = /* @__PURE__ */ discard(discardUnit);
   var throwError2 = /* @__PURE__ */ throwError(monadThrowAff);
   var selectElement = function(query3) {
-    return bind86(liftEffect39(bindFlipped5(composeKleisliFlipped4((function() {
+    return bind86(liftEffect39(bindFlipped6(composeKleisliFlipped4((function() {
       var $16 = querySelector(query3);
       return function($17) {
         return $16(toParentNode3($17));
@@ -54408,7 +54514,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var runHalogenAff = /* @__PURE__ */ runAff_(/* @__PURE__ */ either(throwException)(/* @__PURE__ */ $$const(/* @__PURE__ */ pure122(unit))));
   var awaitLoad = /* @__PURE__ */ makeAff(function(callback) {
     return function __do10() {
-      var rs = bindFlipped5(readyState)(bindFlipped5(document2)(windowImpl))();
+      var rs = bindFlipped6(readyState)(bindFlipped6(document2)(windowImpl))();
       if (rs instanceof Loading) {
         var et = map98(toEventTarget)(windowImpl)();
         var listener = eventListener(function(v2) {
@@ -54512,7 +54618,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
 
   // output/Halogen.Aff.Driver.Eval/index.js
   var traverse_7 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
-  var bindFlipped6 = /* @__PURE__ */ bindFlipped(bindMaybe);
+  var bindFlipped7 = /* @__PURE__ */ bindFlipped(bindMaybe);
   var lookup39 = /* @__PURE__ */ lookup2(ordSubscriptionId);
   var bind135 = /* @__PURE__ */ bind(bindAff);
   var liftEffect40 = /* @__PURE__ */ liftEffect(monadEffectAff);
@@ -54543,7 +54649,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return function __do10() {
         var v2 = read(ref2)();
         var subs = read(v2.subscriptions)();
-        return traverse_7(unsubscribe)(bindFlipped6(lookup39(sid))(subs))();
+        return traverse_7(unsubscribe)(bindFlipped7(lookup39(sid))(subs))();
       };
     };
   };
@@ -54799,7 +54905,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var for_9 = /* @__PURE__ */ for_(applicativeEffect)(foldableMaybe);
   var traverse_8 = /* @__PURE__ */ traverse_(applicativeAff)(foldableList);
   var fork4 = /* @__PURE__ */ fork2(monadForkAff);
-  var bindFlipped7 = /* @__PURE__ */ bindFlipped(bindEffect);
+  var bindFlipped8 = /* @__PURE__ */ bindFlipped(bindEffect);
   var traverse_13 = /* @__PURE__ */ traverse_(applicativeEffect);
   var traverse_23 = /* @__PURE__ */ traverse_13(foldableMaybe);
   var traverse_33 = /* @__PURE__ */ traverse_13(foldableMap);
@@ -54811,7 +54917,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var pure123 = /* @__PURE__ */ pure(applicativeAff);
   var when13 = /* @__PURE__ */ when(applicativeEffect);
   var renderStateX2 = /* @__PURE__ */ renderStateX(functorEffect);
-  var $$void16 = /* @__PURE__ */ $$void(functorAff);
+  var $$void17 = /* @__PURE__ */ $$void(functorAff);
   var foreachSlot2 = /* @__PURE__ */ foreachSlot(applicativeEffect);
   var renderStateX_2 = /* @__PURE__ */ renderStateX_(applicativeEffect);
   var tailRecM3 = /* @__PURE__ */ tailRecM(monadRecEffect);
@@ -54838,9 +54944,9 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
   var cleanupSubscriptionsAndForks = function(v2) {
     return function __do10() {
-      bindFlipped7(traverse_23(traverse_33(unsubscribe)))(read(v2.subscriptions))();
+      bindFlipped8(traverse_23(traverse_33(unsubscribe)))(read(v2.subscriptions))();
       write(Nothing.value)(v2.subscriptions)();
-      bindFlipped7(traverse_33((function() {
+      bindFlipped8(traverse_33((function() {
         var $61 = killFiber(error("finalized"));
         return function($62) {
           return handleAff($61($62));
@@ -54884,7 +54990,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                     initializers: Nil.value,
                     finalizers: pre2.finalizers
                   })(lchs)();
-                  bindFlipped7(unDriverStateX((function() {
+                  bindFlipped8(unDriverStateX((function() {
                     var $63 = render59(lchs);
                     return function($64) {
                       return $63((function(v2) {
@@ -54892,7 +54998,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                       })($64));
                     };
                   })()))(read($$var2))();
-                  bindFlipped7(squashChildInitializers(lchs)(pre2.initializers))(read($$var2))();
+                  bindFlipped8(squashChildInitializers(lchs)(pre2.initializers))(read($$var2))();
                   return $$var2;
                 };
               });
@@ -54969,7 +55075,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 var $70 = queueOrRun(v2.pendingHandlers);
                 var $71 = evalF(render59)(v2.selfRef);
                 return function($72) {
-                  return $70($$void16($71($72)));
+                  return $70($$void17($71($72)));
                 };
               })();
               var childHandler = (function() {
@@ -55090,7 +55196,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
           return bind136(liftEffect41($$new(false)))(function(disposed) {
             return handleLifecycle(lchs)(function __do10() {
               var sio = create4();
-              var dsx = bindFlipped7(read)(runComponent(lchs)((function() {
+              var dsx = bindFlipped8(read)(runComponent(lchs)((function() {
                 var $78 = notify(sio.listener);
                 return function($79) {
                   return liftEffect41($78($79));
@@ -55123,7 +55229,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return val;
     };
   };
-  var $$void17 = /* @__PURE__ */ $$void(functorEffect);
+  var $$void18 = /* @__PURE__ */ $$void(functorEffect);
   var pure96 = /* @__PURE__ */ pure(applicativeEffect);
   var traverse_9 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
   var unwrap7 = /* @__PURE__ */ unwrap();
@@ -55133,16 +55239,16 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var bind137 = /* @__PURE__ */ bind(bindAff);
   var liftEffect42 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var map101 = /* @__PURE__ */ map(functorEffect);
-  var bindFlipped8 = /* @__PURE__ */ bindFlipped(bindEffect);
+  var bindFlipped9 = /* @__PURE__ */ bindFlipped(bindEffect);
   var substInParent = function(v2) {
     return function(v1) {
       return function(v22) {
         if (v1 instanceof Just && v22 instanceof Just) {
-          return $$void17(insertBefore(v2)(v1.value0)(v22.value0));
+          return $$void18(insertBefore(v2)(v1.value0)(v22.value0));
         }
         ;
         if (v1 instanceof Nothing && v22 instanceof Just) {
-          return $$void17(appendChild2(v2)(v22.value0));
+          return $$void18(appendChild2(v2)(v22.value0));
         }
         ;
         return pure96(unit);
@@ -55239,7 +55345,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   var spec = mkSpec(handler3)(renderChildRef)(document3);
                   var machine = buildVDom(spec)(v2);
                   var node = extract2(machine);
-                  $$void17(appendChild2(node)(toNode2(container)))();
+                  $$void18(appendChild2(node)(toNode2(container)))();
                   return {
                     machine,
                     node,
@@ -55280,7 +55386,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var runUI2 = function(component55) {
     return function(i2) {
       return function(element4) {
-        return bind137(liftEffect42(map101(toDocument)(bindFlipped8(document2)(windowImpl))))(function(document3) {
+        return bind137(liftEffect42(map101(toDocument)(bindFlipped9(document2)(windowImpl))))(function(document3) {
           return runUI(renderSpec(document3)(element4))(component55)(i2);
         });
       };
@@ -56889,7 +56995,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Routing.Hash/index.js
   var bind91 = /* @__PURE__ */ bind(bindEffect);
   var map107 = /* @__PURE__ */ map(functorEffect);
-  var bindFlipped9 = /* @__PURE__ */ bindFlipped(bindEffect);
+  var bindFlipped10 = /* @__PURE__ */ bindFlipped(bindEffect);
   var join4 = /* @__PURE__ */ join(bindEffect);
   var apply7 = /* @__PURE__ */ apply(applyEffect);
   var pure103 = /* @__PURE__ */ pure(applicativeEffect);
@@ -56912,10 +57018,10 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var foldHashes = function(cb) {
     return function(init4) {
       return function __do10() {
-        var ref2 = bindFlipped9($$new)(bindFlipped9(init4)(getHash))();
+        var ref2 = bindFlipped10($$new)(bindFlipped10(init4)(getHash))();
         var win = map107(toEventTarget)(windowImpl)();
         var listener = eventListener(function(v2) {
-          return bindFlipped9(flip(write)(ref2))(join4(apply7(map107(cb)(read(ref2)))(getHash)));
+          return bindFlipped10(flip(write)(ref2))(join4(apply7(map107(cb)(read(ref2)))(getHash)));
         })();
         addEventListener2(hashchange)(listener)(false)(win)();
         return removeEventListener2(hashchange)(listener)(false)(win);
@@ -58058,7 +58164,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var eq33 = /* @__PURE__ */ eq(eqAttributeChoice);
   var show141 = /* @__PURE__ */ show(showNumber);
   var intercalate8 = /* @__PURE__ */ intercalate2(monoidString);
-  var bindFlipped10 = /* @__PURE__ */ bindFlipped(bindMaybe);
+  var bindFlipped11 = /* @__PURE__ */ bindFlipped(bindMaybe);
   var bind93 = /* @__PURE__ */ bind(bindHalogenM);
   var get20 = /* @__PURE__ */ get(monadStateHalogenM);
   var discard70 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
@@ -58694,7 +58800,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
   var renderAttributeEditor = function(state3) {
     return function(nodeId) {
-      var mNode = bindFlipped10(findNode3(nodeId))(state3.tree);
+      var mNode = bindFlipped11(findNode3(nodeId))(state3.tree);
       if (mNode instanceof Nothing) {
         return text5("");
       }
