@@ -36024,7 +36024,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     ;
     return new Left("No valid penguin records found");
   };
-  var loadPenguins = /* @__PURE__ */ bind(bindAff)(/* @__PURE__ */ get3(string)("/data/penguins.csv"))(function(result) {
+  var loadPenguins = /* @__PURE__ */ bind(bindAff)(/* @__PURE__ */ get3(string)("./data/penguins.csv"))(function(result) {
     return pure46((function() {
       if (result instanceof Left) {
         return new Left(printError(result.value0));

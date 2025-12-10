@@ -21,7 +21,7 @@ import D3.Viz.SPLOM.Types (Penguin)
 -- | Load and parse penguins from CSV
 loadPenguins :: Aff (Either String (Array Penguin))
 loadPenguins = do
-  result <- AJAX.get ResponseFormat.string "/data/penguins.csv"
+  result <- AJAX.get ResponseFormat.string "./data/penguins.csv"
   pure $ case result of
     Left err -> Left (AJAX.printError err)
     Right response -> parseCSV response.body
