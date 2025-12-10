@@ -135,6 +135,20 @@ render _ =
 
         , HH.section
             [ HP.classes [ HH.ClassName "acknowledgements-section" ] ]
+            [ HH.h2_ [ HH.text "AI Collaboration" ]
+            , HH.p_
+                [ HH.text "The 2024-2025 iteration of this project was developed in collaboration with Claude (Anthropic). This represents a significant experiment in human-AI pair programming on a complex, long-running project."
+                ]
+            , HH.p_
+                [ HH.text "The intellectual foundations of PS<$>D3 were developed over several years: the initial PureScript D3 bindings (2019), the finally tagless encoding inspired by Phil Freeman's work, and the Attr typeclass pattern adapted from Ian Ross's Haskell code. Claude contributed substantially to the 2024-2025 implementation: the Tree API design, phantom type refinements, extensive refactoring, documentation, and tens of thousands of lines of code."
+                ]
+            , HH.p_
+                [ HH.text "We believe transparency about AI involvement is important. This collaboration demonstrates both the potential and the nature of human-AI development: the human brings domain expertise, architectural vision, and quality judgment; the AI brings rapid implementation, pattern recognition across large codebases, and tireless iteration. Neither could have produced this result alone."
+                ]
+            ]
+
+        , HH.section
+            [ HP.classes [ HH.ClassName "acknowledgements-section" ] ]
             [ HH.h2_ [ HH.text "About This Project" ]
             , HH.p_
                 [ HH.text "PS<$>D3 is an experimental exploration of what data visualization APIs might look like in a strongly-typed functional programming language. It aims to preserve D3's flexibility while adding type safety and composability."
