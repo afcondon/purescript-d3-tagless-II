@@ -16,7 +16,6 @@ package:
     - foreign
     - foreign-object
     - integers
-    - linalg
     - lists
     - maybe
     - numbers

@@ -1593,12 +1593,12 @@
   };
   var ap = function(dictMonad) {
     var bind96 = bind(dictMonad.Bind1());
-    var pure107 = pure(dictMonad.Applicative0());
+    var pure108 = pure(dictMonad.Applicative0());
     return function(f) {
       return function(a3) {
         return bind96(f)(function(f$prime) {
           return bind96(a3)(function(a$prime) {
-            return pure107(f$prime(a$prime));
+            return pure108(f$prime(a$prime));
           });
         });
       };
@@ -1735,10 +1735,10 @@
     var catchError1 = catchError(dictMonadError);
     var Monad0 = dictMonadError.MonadThrow0().Monad0();
     var map127 = map(Monad0.Bind1().Apply0().Functor0());
-    var pure107 = pure(Monad0.Applicative0());
+    var pure108 = pure(Monad0.Applicative0());
     return function(a3) {
       return catchError1(map127(Right.create)(a3))(function($52) {
-        return pure107(Left.create($52));
+        return pure108(Left.create($52));
       });
     };
   };
@@ -2246,12 +2246,12 @@
   };
   var bindExceptT = function(dictMonad) {
     var bind96 = bind(dictMonad.Bind1());
-    var pure107 = pure(dictMonad.Applicative0());
+    var pure108 = pure(dictMonad.Applicative0());
     return {
       bind: function(v2) {
         return function(k) {
           return bind96(v2)(either(function($193) {
-            return pure107(Left.create($193));
+            return pure108(Left.create($193));
           })(function(a3) {
             var v1 = k(a3);
             return v1;
@@ -2304,24 +2304,24 @@
     return function(dictMonad) {
       var Bind1 = dictMonad.Bind1();
       var bind96 = bind(Bind1);
-      var pure107 = pure(dictMonad.Applicative0());
+      var pure108 = pure(dictMonad.Applicative0());
       var functorExceptT1 = functorExceptT(Bind1.Apply0().Functor0());
       return {
         alt: function(v2) {
           return function(v1) {
             return bind96(v2)(function(rm) {
               if (rm instanceof Right) {
-                return pure107(new Right(rm.value0));
+                return pure108(new Right(rm.value0));
               }
               ;
               if (rm instanceof Left) {
                 return bind96(v1)(function(rn) {
                   if (rn instanceof Right) {
-                    return pure107(new Right(rn.value0));
+                    return pure108(new Right(rn.value0));
                   }
                   ;
                   if (rn instanceof Left) {
-                    return pure107(new Left(append42(rm.value0)(rn.value0)));
+                    return pure108(new Left(append42(rm.value0)(rn.value0)));
                   }
                   ;
                   throw new Error("Failed pattern match at Control.Monad.Except.Trans (line 87, column 9 - line 89, column 49): " + [rn.constructor.name]);
@@ -2769,13 +2769,13 @@
   };
   var traverse_ = function(dictApplicative) {
     var applySecond3 = applySecond(dictApplicative.Apply0());
-    var pure107 = pure(dictApplicative);
+    var pure108 = pure(dictApplicative);
     return function(dictFoldable) {
       var foldr22 = foldr(dictFoldable);
       return function(f) {
         return foldr22(function($454) {
           return applySecond3(f($454));
-        })(pure107(unit));
+        })(pure108(unit));
       };
     };
   };
@@ -3138,13 +3138,13 @@
     }
     return function(apply8) {
       return function(map127) {
-        return function(pure107) {
+        return function(pure108) {
           return function(f) {
             return function(array4) {
               function go2(bot, top3) {
                 switch (top3 - bot) {
                   case 0:
-                    return pure107([]);
+                    return pure108([]);
                   case 1:
                     return map127(array1)(f(array4[bot]));
                   case 2:
@@ -3679,7 +3679,7 @@
   };
   var traverseWithIndex_ = function(dictApplicative) {
     var applySecond3 = applySecond(dictApplicative.Apply0());
-    var pure107 = pure(dictApplicative);
+    var pure108 = pure(dictApplicative);
     return function(dictFoldableWithIndex) {
       var foldrWithIndex1 = foldrWithIndex(dictFoldableWithIndex);
       return function(f) {
@@ -3688,7 +3688,7 @@
           return function($290) {
             return applySecond3($289($290));
           };
-        })(pure107(unit));
+        })(pure108(unit));
       };
     };
   };
@@ -5604,11 +5604,11 @@
     var mempty3 = mempty(dictMonoid);
     var applyWriterT1 = applyWriterT(dictMonoid.Semigroup0());
     return function(dictApplicative) {
-      var pure107 = pure(dictApplicative);
+      var pure108 = pure(dictApplicative);
       var applyWriterT2 = applyWriterT1(dictApplicative.Apply0());
       return {
         pure: function(a3) {
-          return pure107(new Tuple(a3, mempty3));
+          return pure108(new Tuple(a3, mempty3));
         },
         Apply0: function() {
           return applyWriterT2;
@@ -6992,11 +6992,11 @@
     };
   };
   var applicativeStateT = function(dictMonad) {
-    var pure107 = pure(dictMonad.Applicative0());
+    var pure108 = pure(dictMonad.Applicative0());
     return {
       pure: function(a3) {
         return function(s2) {
-          return pure107(new Tuple(a3, s2));
+          return pure108(new Tuple(a3, s2));
         };
       },
       Apply0: function() {
@@ -7005,12 +7005,12 @@
     };
   };
   var monadStateStateT = function(dictMonad) {
-    var pure107 = pure(dictMonad.Applicative0());
+    var pure108 = pure(dictMonad.Applicative0());
     var monadStateT1 = monadStateT(dictMonad);
     return {
       state: function(f) {
         return function($206) {
-          return pure107(f($206));
+          return pure108(f($206));
         };
       },
       Monad0: function() {
@@ -14065,11 +14065,11 @@
 
   // output/Control.Alternative/index.js
   var guard = function(dictAlternative) {
-    var pure107 = pure(dictAlternative.Applicative0());
+    var pure108 = pure(dictAlternative.Applicative0());
     var empty10 = empty2(dictAlternative.Plus1());
     return function(v2) {
       if (v2) {
-        return pure107(unit);
+        return pure108(unit);
       }
       ;
       if (!v2) {
@@ -18418,7 +18418,7 @@
     return Lift.create;
   })();
   var goLeft = function(dictApplicative) {
-    var pure107 = pure(dictApplicative);
+    var pure108 = pure(dictApplicative);
     return function(fStack) {
       return function(valStack) {
         return function(nat) {
@@ -18426,7 +18426,7 @@
             return function(count) {
               if (func instanceof Pure) {
                 return new Tuple(new Cons({
-                  func: pure107(func.value0),
+                  func: pure108(func.value0),
                   count
                 }, fStack), valStack);
               }
@@ -18497,7 +18497,7 @@
   };
   var foldFreeAp = function(dictApplicative) {
     var goApply1 = goApply(dictApplicative);
-    var pure107 = pure(dictApplicative);
+    var pure108 = pure(dictApplicative);
     var goLeft1 = goLeft(dictApplicative);
     return function(nat) {
       return function(z2) {
@@ -18506,7 +18506,7 @@
           var $tco_result;
           function $tco_loop(v2) {
             if (v2.value1.value0 instanceof Pure) {
-              var v1 = goApply1(v2.value0)(v2.value1.value1)(pure107(v2.value1.value0.value0));
+              var v1 = goApply1(v2.value0)(v2.value1.value1)(pure108(v2.value1.value0.value0));
               if (v1 instanceof Left) {
                 $tco_done = true;
                 return v1.value0;
@@ -19183,10 +19183,10 @@
   // output/Foreign.Index/index.js
   var unsafeReadProp = function(dictMonad) {
     var fail3 = fail(dictMonad);
-    var pure107 = pure(applicativeExceptT(dictMonad));
+    var pure108 = pure(applicativeExceptT(dictMonad));
     return function(k) {
       return function(value23) {
-        return unsafeReadPropImpl(fail3(new TypeMismatch("object", typeOf(value23))), pure107, k, value23);
+        return unsafeReadPropImpl(fail3(new TypeMismatch("object", typeOf(value23))), pure108, k, value23);
       };
     };
   };
@@ -49645,7 +49645,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var renderExample = function(dictMonadAff) {
     var monadEffectHalogenM2 = monadEffectHalogenM(dictMonadAff.MonadEffect0());
     var liftEffect45 = liftEffect(monadEffectHalogenM2);
-    var triggerMermaidRendering3 = triggerMermaidRendering(monadEffectHalogenM2);
+    var triggerMermaidRendering2 = triggerMermaidRendering(monadEffectHalogenM2);
     return function(selection2) {
       var tree2 = getExampleTree(selection2);
       return discard50(liftEffect45(runD3v2M(bind75(select39("#d3-output"))(function(container) {
@@ -49677,7 +49677,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               $99.astCode = astPretty;
               return $99;
             }))(function() {
-              return discard50(triggerMermaidRendering3)(function() {
+              return discard50(triggerMermaidRendering2)(function() {
                 return pure117(unit);
               });
             });
@@ -56183,7 +56183,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   })();
 
   // output/PSD3.Tutorial.GettingStarted/index.js
-  var triggerMermaidRendering2 = /* @__PURE__ */ triggerMermaidRendering(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
+  var pure102 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize48 = /* @__PURE__ */ (function() {
     function Initialize52() {
     }
@@ -56191,17 +56191,22 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     Initialize52.value = new Initialize52();
     return Initialize52;
   })();
-  var wizardWorkflowDiagram = "\nflowchart TD\n    Start([Start Wizard]) --> Choice{Choose Method}\n\n    Choice -->|Web| WebWizard[Web-based Wizard]\n    Choice -->|CLI| CLIWizard[CLI Wizard]\n\n    WebWizard --> WebOptions{Select Options}\n    WebOptions --> Dataset[Choose Dataset<br/>\u2022 Anscombe's Quartet<br/>\u2022 Scatter Plot<br/>\u2022 Sine Wave]\n    Dataset --> WebPreview[Preview Files]\n    WebPreview --> WebDownload[Download .zip]\n\n    CLIWizard --> CLIRun[Run: node scripts/init-psd3-viz.js]\n    CLIRun --> CLIOptions{Configure}\n    CLIOptions --> VizName[Enter Visualization Name]\n    VizName --> VizType[Select Type<br/>\u2022 Static<br/>\u2022 Interactive]\n    VizType --> DataChoice[Choose Data<br/>\u2022 Example<br/>\u2022 Custom JSON]\n    DataChoice --> CLIGenerate[Generate Files]\n\n    WebDownload --> Extract[Extract Files]\n    CLIGenerate --> Build[Build & Run]\n    Extract --> Build\n    Build --> Success([Visualization Ready!])\n\n    style Start fill:#f5e6d3,stroke:#8b7355,stroke-width:2px\n    style Success fill:#d4c4b0,stroke:#8b7355,stroke-width:2px\n    style WebWizard fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n    style CLIWizard fill:#e8dcc6,stroke:#8b7355,stroke-width:2px\n";
   var render53 = function(v2) {
     return div2([classes(["docs-page"])])([render6({
       logoSize: Large.value,
       quadrant: QuadGettingStarted.value,
       prevNext: Nothing.value,
       pageTitle: Nothing.value
-    }), section([classes(["docs-hero"])])([div2([classes(["docs-hero-content"])])([h1([classes(["docs-hero-title"])])([text5("Getting Started")]), p([classes(["docs-hero-description"])])([text5("To get a feel for writing with this DSL we provide a command-line wizard bundled with the repo, a web-based wizard that you can run right here and you can also find instructions here to write your own visualizations from scratch.")])])]), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Getting Started with PS<$>D3")]), p_([text5("Welcome! This guide will help you install PSD3, set up your first project, and create your first data visualization using our scaffold wizard. By the end, you'll have a working visualization that you can view in your browser.")]), div2([classes(["tutorial-callout"])])([h3_([text5("\u{1F680} Try the Interactive Wizard")]), p_([text5("Want to skip the command line? Use our interactive web wizard to generate a complete visualization project right in your browser:")]), p_([a([href4("#/wizard"), classes(["tutorial-button tutorial-button--primary"])])([text5("Launch Interactive Wizard \u2192")])])])]), section([classes(["tutorial-section"]), id4("installation")])([h2([classes(["tutorial-section-title"])])([text5("Installation")]), p_([text5("Before we begin, ensure you have the following installed on your system:")]), h3([id4("prerequisites")])([text5("Prerequisites")]), ul_([li_([text5("Node.js (version 18 or higher)")]), li_([text5("npm or yarn package manager")]), li_([text5("PureScript compiler (purs)")]), li_([text5("Spago (PureScript package manager and build tool)")])]), p_([text5("If you don't have PureScript and Spago installed, you can install them globally:")]), pre_([code_([text5("npm install -g purescript spago")])])]), section([classes(["tutorial-section"]), id4("setup")])([h2([classes(["tutorial-section-title"])])([text5("Project Setup")]), p_([text5("Clone the PSD3 repository which includes the visualization wizard:")]), pre_([code_([text5("# Clone the PSD3 repository\ngit clone https://github.com/afcondon/PureScript-Tagless-D3.git\ncd PureScript-Tagless-D3\n\n# Install dependencies\nnpm install\nspago build")])]), p_([text5("The wizard is located in ")]), code_([text5("scripts/init-psd3-viz.js")]), text5(" and will generate all the files you need to get started.")]), section([classes(["tutorial-section"]), id4("wizard")])([h2([classes(["tutorial-section-title"])])([text5("Using the Wizard")]), p_([text5("PSD3 provides two ways to generate a visualization scaffold:")]), div2([classes(["diagram-container"])])([mermaidDiagram(wizardWorkflowDiagram)(new Just("wizard-workflow-diagram"))]), h3_([text5("Option 1: Interactive Web Wizard (Recommended)")]), p_([text5("The easiest way to get started is with our "), a([href4("#/wizard")])([text5("interactive web wizard")]), text5(". It provides:")]), ul_([li_([text5("Choose from pre-configured example datasets (Anscombe's Quartet, scatter plots, sine waves, etc.)")]), li_([text5("Educational tips and explanations at each step")]), li_([text5("Preview generated files before downloading")]), li_([text5("Download as a .zip file or copy to clipboard")])]), p_([a([href4("#/wizard"), classes(["tutorial-button tutorial-button--primary"])])([text5("Launch Interactive Wizard \u2192")])]), h3_([text5("Option 2: Command-Line Wizard")]), p_([text5("If you prefer working from the command line, use the CLI wizard. Run it from the project root:")]), pre_([code_([text5("node scripts/init-psd3-viz.js")])]), p_([text5("You'll be prompted for:")]), ul_([li_([strong_([text5("Visualization module name")]), text5(" - e.g., "), code_([text5("MyFirstChart")])]), li_([strong_([text5("Data record fields")]), text5(" - e.g., "), code_([text5("x:Number,y:Number,label:String")])]), li_([strong_([text5("Output directory")]), text5(" - default: "), code_([text5("src/viz/YourModuleName")])]), li_([strong_([text5("Generate Main.purs?")]), text5(" - Entry point for standalone viewing (y/n, default: y)")]), li_([strong_([text5("Generate index.html?")]), text5(" - (y/n, default: y)")])]), h3_([text5("Example Session")]), pre_([code_([text5("Visualization module name: ParabolaChart\nData record fields: x:Number,y:Number\nOutput directory: src/viz/ParabolaChart\nGenerate Main.purs? (y/n): y\nGenerate index.html? (y/n): y\n\n\u2713 Created src/viz/ParabolaChart/Unsafe.purs\n\u2713 Created src/viz/ParabolaChart/Model.purs\n\u2713 Created src/viz/ParabolaChart/Draw.purs\n\u2713 Created src/viz/ParabolaChart/Main.purs\n\u2713 Created src/viz/ParabolaChart/index.html\n\u2713 Created src/viz/ParabolaChart/README.md")])]), h3_([text5("Build and View")]), p_([text5("Now build and bundle your visualization:")]), pre_([code_([text5("# Compile the PureScript\nspago build\n\n# Bundle for the browser\nspago bundle --module Main --outfile src/viz/ParabolaChart/bundle.js\n\n# Open in browser\nopen src/viz/ParabolaChart/index.html")])])]), section([classes(["tutorial-section"]), id4("understanding")])([h2([classes(["tutorial-section-title"])])([text5("Understanding the Generated Code")]), p_([text5("The wizard generates several files following PSD3 best practices:")]), ul_([li_([strong_([text5("Unsafe.purs")]), text5(" - Contains type coercion functions that bridge PureScript's type system with D3's untyped JavaScript data")]), li_([strong_([text5("Model.purs")]), text5(" - Defines your data type and provides a placeholder for example data")]), li_([strong_([text5("Draw.purs")]), text5(" - Contains the visualization code with the "), code_([text5("datum_")]), text5(" accessor pattern")]), li_([strong_([text5("index.html")]), text5(" - Pre-configured HTML with D3.js loaded from CDN and the correct "), code_([text5("#chart")]), text5(" div")]), li_([strong_([text5("README.md")]), text5(" - Quick reference specific to your visualization")])]), h3([id4("datum-pattern")])([text5("The Datum_ Pattern")]), p_([text5("D3.js works with untyped JavaScript data, but PureScript is strongly typed. The "), code_([text5("datum_")]), text5(" accessor pattern solves this by isolating type coercion in the "), code_([text5("Unsafe.purs")]), text5(" module while providing typed accessors everywhere else.")]), p_([text5("In your "), code_([text5("Draw.purs")]), text5(", you'll use type-annotated lambdas to work with your data:")]), pre_([code_([text5('-- Use data in attributes\nA.cx (\\\\(d :: Datum_) _ -> datum_.x d)\n\n-- Use both data and index\nA.fill (\\\\(d :: Datum_) (i :: Index_) ->\n  if datum_.index i > 5 then "red" else "blue")\n\n-- Scale by data value\nA.radius (\\\\(d :: Datum_) _ -> datum_.y d * 2.0)')])]), p_([text5("The type annotations "), code_([text5("(d :: Datum_)")]), text5(" and "), code_([text5("(i :: Index_)")]), text5(" are required to help PureScript's type checker find the correct "), code_([text5("ToAttr")]), text5(" instance.")])]), render48]);
+    }), section([classes(["docs-hero"])])([div2([classes(["docs-hero-content"])])([h1([classes(["docs-hero-title"])])([text5("Getting Started")]), p([classes(["docs-hero-description"])])([text5("Build type-safe, declarative D3 visualizations in PureScript. This guide will have you rendering your first chart in minutes.")])])]), section([classes(["tutorial-section"]), id4("quickstart")])([h2([classes(["tutorial-section-title"])])([text5("Quick Start")]), h3([id4("prerequisites")])([text5("Prerequisites")]), p_([text5("You'll need:")]), ul_([li_([text5("Node.js 18+")]), li_([text5("PureScript compiler and Spago")])]), pre_([code_([text5("npm install -g purescript spago")])]), h3([id4("installation")])([text5("Installation")]), p_([text5("Add the PSD3 packages to your project:")]), pre_([code_([text5("spago install psd3-selection psd3-layout")])]), p_([text5("For force-directed graphs and simulations (which use the lower-level PSD3 API), also add:")]), pre_([code_([text5("spago install psd3-simulation")])])]), section([classes(["tutorial-section"]), id4("first-viz")])([h2([classes(["tutorial-section-title"])])([text5("Your First Visualization")]), p_([text5("PSD3 uses a declarative Tree API. You describe what you want, and the library renders it to D3. Here's a complete example:")]), pre_([code_([text5('module Main where\n\nimport Prelude\nimport Effect (Effect)\nimport PSD3v2.Tree as T\nimport PSD3v2.Tree (Tree)\nimport PSD3v2.Attribute (class_, cx, cy, r, fill)\nimport PSD3v2.Interpreter.D3v2 (render)\n\n-- Your data\ntype Point = { x :: Number, y :: Number, color :: String }\n\nmyData :: Array Point\nmyData =\n  [ { x: 100.0, y: 100.0, color: "steelblue" }\n  , { x: 200.0, y: 150.0, color: "coral" }\n  , { x: 300.0, y: 100.0, color: "seagreen" }\n  ]\n\n-- The visualization\nchart :: Tree Point\nchart =\n  T.named Svg "svg"\n    [ T.width 400.0, T.height 200.0 ]\n    `T.withChildren`\n      [ T.joined "circles" Circle myData identity $ \\\\point ->\n          [ cx point.x\n          , cy point.y\n          , r 20.0\n          , fill point.color\n          ]\n      ]\n\n-- Render to the DOM\nmain :: Effect Unit\nmain = render "#chart" chart')])]), h3_([text5("What's happening here?")]), ul_([li_([code_([text5('T.named Svg "svg"')]), text5(" - Creates a named SVG element (the name helps with transitions)")]), li_([code_([text5('T.joined "circles" Circle myData identity')]), text5(" - Data joins your array to Circle elements. Each point becomes a circle.")]), li_([text5("The lambda "), code_([text5("\\point -> [...]")]), text5(" receives each data item with full type safety - no coercion needed")]), li_([code_([text5('render "#chart" chart')]), text5(" - Renders the tree to a DOM element with selector "), code_([text5("#chart")])])])]), section([classes(["tutorial-section"]), id4("html-setup")])([h2([classes(["tutorial-section-title"])])([text5("HTML Setup")]), p_([text5("Your HTML needs D3.js and a container element:")]), pre_([code_([text5('<!DOCTYPE html>\n<html>\n<head>\n  <script src="https://d3js.org/d3.v7.min.js"><\/script>\n</head>\n<body>\n  <div id="chart"></div>\n  <script src="bundle.js"><\/script>\n</body>\n</html>')])]), p_([text5("Bundle your PureScript:")]), pre_([code_([text5("spago bundle --module Main --outfile bundle.js")])])]), section([classes(["tutorial-section"]), id4("concepts")])([h2([classes(["tutorial-section-title"])])([text5("Key Concepts")]), h3_([text5("The Tree API")]), p_([text5("PSD3's Tree API is declarative - you describe the structure of your visualization as a tree of elements. The key building blocks:")]), ul_([li_([code_([text5("T.elem")]), text5(" - A single element with static attributes")]), li_([code_([text5("T.joined")]), text5(" - Data-driven elements (D3's data join)")]), li_([code_([text5("T.named")]), text5(" - Named container for identity-preserving updates")]), li_([code_([text5("T.withChild / T.withChildren")]), text5(" - Nest elements hierarchically")])]), h3_([text5("Type-Safe Attributes")]), p_([text5("Attributes are functions from your data to values. The compiler ensures you can't use attributes on wrong element types:")]), pre_([code_([text5(`-- This works: cx is valid for Circle
+T.joined "dots" Circle data identity $ \\\\d ->
+  [ cx d.x, cy d.y, r 5.0 ]
+
+-- This won't compile: cx isn't valid for Rect
+T.joined "bars" Rect data identity $ \\\\d ->
+  [ cx d.x ]  -- Compile error!`)])]), h3_([text5("Interpreters")]), p_([text5("The same Tree can be rendered different ways:")]), ul_([li_([code_([text5("D3v2.render")]), text5(" - Renders to the DOM via D3")]), li_([code_([text5("MermaidTree.interpret")]), text5(" - Generates a Mermaid diagram of the tree structure")]), li_([code_([text5("English.interpret")]), text5(" - Produces English description (debugging)")])]), h3_([text5("Two APIs")]), p_([text5("PSD3 offers two levels of abstraction:")]), ul_([li_([strong_([text5("Tree API")]), text5(" - Declarative, ideal for static charts and layouts (bar charts, trees, Sankey diagrams). This is what we've shown above.")]), li_([strong_([text5("PSD3 API")]), text5(" - Lower-level but equally type-safe. Required for force simulations and highly interactive visualizations. See the "), a([href4("#/showcase")])([text5("Code Explorer")]), text5(" for an example.")])]), p_([text5("Both APIs share the same type-safe foundation. The Tree API builds on top of the PSD3 API, so you can mix them when needed.")])]), section([classes(["tutorial-section"]), id4("next")])([h2([classes(["tutorial-section-title"])])([text5("Next Steps")]), ul_([li_([a([href4("#/tour")])([text5("Take the Tour")]), text5(" - See what's possible with PSD3")]), li_([a([href4("#/showcase")])([text5("Explore the Showcase")]), text5(" - Interactive examples like the Code Explorer and SPLOM")]), li_([a([href4("#/gallery")])([text5("Browse the Gallery")]), text5(" - All examples organized by category")]), li_([a([href4("#/understanding")])([text5("Understanding PSD3")]), text5(" - Deep dive into the architecture")])])]), render48]);
   };
   var handleAction47 = function(v2) {
-    return triggerMermaidRendering2;
+    return pure102(unit);
   };
   var component48 = /* @__PURE__ */ (function() {
     return mkComponent({
@@ -56220,7 +56225,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   })();
 
   // output/PSD3.Understanding/index.js
-  var pure102 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var pure103 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize49 = /* @__PURE__ */ (function() {
     function Initialize52() {
     }
@@ -56244,7 +56249,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }), section([classes(["docs-hero"])])([div2([classes(["docs-hero-content"])])([h1([classes(["docs-hero-title"])])([text5("Understanding")]), p([classes(["docs-hero-description"])])([text5("Deep dives into the core concepts and patterns that make PSD3 a type-safe, composable framework for D3 visualizations.")])])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text5("Core Concepts")]), div2([classes(["howto-card-grid"])])([renderCard3(UnderstandingGrammar.value)("The Grammar of D3")("Four essential primitives: select, append, join, attr. Everything else builds from these."), renderCard3(UnderstandingAttributes.value)("Type-Safe Attributes")("Static values, datum functions, contravariant pattern. Compile-time type safety."), renderCard3(UnderstandingSelections.value)("Selection Phantom Types")("Five states: SEmpty, SPending, SBoundOwns, SBoundInherits, SExiting. Indexed Monad pattern.")])]), section([classes(["docs-section"])])([h2([classes(["docs-section-title"])])([text5("Architecture")]), div2([classes(["howto-card-grid"])])([renderCard3(UnderstandingTreeAPI.value)("TreeAPI")("Declarative tree structures. Layer cake architecture with TreeAPI and Simulation API on SelectionM."), renderCard3(UnderstandingScenes.value)("Scene Structures & Transitions")("Declarative state management for complex interactive visualizations with transition matrices.")])])]);
   };
   var handleAction48 = function(v2) {
-    return pure102(unit);
+    return pure103(unit);
   };
   var component49 = /* @__PURE__ */ (function() {
     return mkComponent({
@@ -56754,7 +56759,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var eq25 = /* @__PURE__ */ eq(eqDifficulty);
   var eq32 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqDifficulty));
   var bind91 = /* @__PURE__ */ bind(bindMaybe);
-  var pure103 = /* @__PURE__ */ pure(applicativeMaybe);
+  var pure104 = /* @__PURE__ */ pure(applicativeMaybe);
   var type_25 = /* @__PURE__ */ type_18(isPropInputType);
   var value21 = /* @__PURE__ */ value13(isPropString);
   var modify_20 = /* @__PURE__ */ modify_2(monadStateHalogenM);
@@ -57019,7 +57024,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     }
     ;
     return fromMaybe(false)(bind91(head(chars))(function(first) {
-      return pure103(isUpperCase(first) && all4(isAlphaNum)(chars));
+      return pure104(isUpperCase(first) && all4(isAlphaNum)(chars));
     }));
   };
   var renderNameModule = function(state3) {
@@ -57552,7 +57557,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var bindFlipped9 = /* @__PURE__ */ bindFlipped(bindEffect);
   var join4 = /* @__PURE__ */ join(bindEffect);
   var apply7 = /* @__PURE__ */ apply(applyEffect);
-  var pure104 = /* @__PURE__ */ pure(applicativeEffect);
+  var pure105 = /* @__PURE__ */ pure(applicativeEffect);
   var voidRight3 = /* @__PURE__ */ voidRight(functorEffect);
   var setHash2 = function(h7) {
     return bind92(bind92(windowImpl)(location))(setHash(h7));
@@ -57587,7 +57592,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return function(parser) {
       return function(cb) {
         var go2 = function(a3) {
-          var $21 = maybe(pure104(a3))(function(b10) {
+          var $21 = maybe(pure105(a3))(function(b10) {
             return voidRight3(new Just(b10))(cb(a3)(b10));
           });
           var $22 = indexl2(0);
@@ -58726,7 +58731,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var map126 = /* @__PURE__ */ map(functorMaybe);
   var join5 = /* @__PURE__ */ join(bindMaybe);
   var when16 = /* @__PURE__ */ when(applicativeHalogenM);
-  var pure105 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var pure106 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize50 = /* @__PURE__ */ (function() {
     function Initialize52() {
     }
@@ -59759,7 +59764,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       if (v2 instanceof RefreshPreview) {
         return bind94(get20)(function(state3) {
           if (state3.tree instanceof Nothing) {
-            return pure105(unit);
+            return pure106(unit);
           }
           ;
           if (state3.tree instanceof Just) {
@@ -59796,7 +59801,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var liftEffect44 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var discard72 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var when17 = /* @__PURE__ */ when(applicativeHalogenM);
-  var pure106 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var pure107 = /* @__PURE__ */ pure(applicativeHalogenM);
   var spy3 = /* @__PURE__ */ spy();
   var modify_22 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var slot_4 = /* @__PURE__ */ slot_();
@@ -60121,7 +60126,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               };
             });
           })))(function() {
-            return pure106(unit);
+            return pure107(unit);
           });
         });
       });

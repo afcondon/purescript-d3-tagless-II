@@ -1,4 +1,4 @@
-module PSD3.Tutorial.GettingStarted where -- Tutorial
+module PSD3.Tutorial.GettingStarted where
 
 import Prelude
 
@@ -8,7 +8,6 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.Footer as Footer
-import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3.Shared.SiteNav as SiteNav
 import Type.Proxy (Proxy(..))
 
@@ -25,39 +24,6 @@ type Slots =
 
 _sectionNav = Proxy :: Proxy "sectionNav"
 
--- | Mermaid diagram for the wizard workflow decision tree
-wizardWorkflowDiagram :: String
-wizardWorkflowDiagram =
-  """
-flowchart TD
-    Start([Start Wizard]) --> Choice{Choose Method}
-
-    Choice -->|Web| WebWizard[Web-based Wizard]
-    Choice -->|CLI| CLIWizard[CLI Wizard]
-
-    WebWizard --> WebOptions{Select Options}
-    WebOptions --> Dataset[Choose Dataset<br/>• Anscombe's Quartet<br/>• Scatter Plot<br/>• Sine Wave]
-    Dataset --> WebPreview[Preview Files]
-    WebPreview --> WebDownload[Download .zip]
-
-    CLIWizard --> CLIRun[Run: node scripts/init-psd3-viz.js]
-    CLIRun --> CLIOptions{Configure}
-    CLIOptions --> VizName[Enter Visualization Name]
-    VizName --> VizType[Select Type<br/>• Static<br/>• Interactive]
-    VizType --> DataChoice[Choose Data<br/>• Example<br/>• Custom JSON]
-    DataChoice --> CLIGenerate[Generate Files]
-
-    WebDownload --> Extract[Extract Files]
-    CLIGenerate --> Build[Build & Run]
-    Extract --> Build
-    Build --> Success([Visualization Ready!])
-
-    style Start fill:#f5e6d3,stroke:#8b7355,stroke-width:2px
-    style Success fill:#d4c4b0,stroke:#8b7355,stroke-width:2px
-    style WebWizard fill:#e8dcc6,stroke:#8b7355,stroke-width:2px
-    style CLIWizard fill:#e8dcc6,stroke:#8b7355,stroke-width:2px
-"""
-
 -- | Getting Started page component
 component :: forall q i o. H.Component q i o Aff
 component = H.mkComponent
@@ -73,7 +39,7 @@ render :: State -> H.ComponentHTML Action Slots Aff
 render _ =
   HH.div
     [ HP.classes [ HH.ClassName "docs-page" ] ]
-    [ -- Site Navigation with GettingStarted quadrant highlighted
+    [ -- Site Navigation
       SiteNav.render
         { logoSize: SiteNav.Large
         , quadrant: SiteNav.QuadGettingStarted
@@ -91,269 +57,262 @@ render _ =
                 [ HH.text "Getting Started" ]
             , HH.p
                 [ HP.classes [ HH.ClassName "docs-hero-description" ] ]
-                [ HH.text "To get a feel for writing with this DSL we provide a command-line wizard bundled with the repo, a web-based wizard that you can run right here and you can also find instructions here to write your own visualizations from scratch." ]
+                [ HH.text "Build type-safe, declarative D3 visualizations in PureScript. This guide will have you rendering your first chart in minutes." ]
             ]
         ]
 
-    -- Page introduction
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
-        [ HH.h1
-            [ HP.classes [ HH.ClassName "tutorial-title" ] ]
-            [ HH.text "Getting Started with PS<$>D3" ]
-        , HH.p_
-            [ HH.text "Welcome! This guide will help you install PSD3, set up your first project, and create your first data visualization using our scaffold wizard. By the end, you'll have a working visualization that you can view in your browser." ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "tutorial-callout" ] ]
-            [ HH.h3_ [ HH.text "🚀 Try the Interactive Wizard" ]
-            , HH.p_
-                [ HH.text "Want to skip the command line? Use our interactive web wizard to generate a complete visualization project right in your browser:" ]
-            , HH.p_
-                [ HH.a
-                    [ HP.href "#/wizard"
-                    , HP.classes [ HH.ClassName "tutorial-button tutorial-button--primary" ]
-                    ]
-                    [ HH.text "Launch Interactive Wizard →" ]
-                ]
-            ]
-        ]
-
-    -- Installation section
+    -- Quick Start section
     , HH.section
         [ HP.classes [ HH.ClassName "tutorial-section" ]
-        , HP.id "installation"
+        , HP.id "quickstart"
         ]
         [ HH.h2
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "Installation" ]
-        , HH.p_
-            [ HH.text "Before we begin, ensure you have the following installed on your system:" ]
+            [ HH.text "Quick Start" ]
 
         , HH.h3
             [ HP.id "prerequisites" ]
             [ HH.text "Prerequisites" ]
-        , HH.ul_
-            [ HH.li_ [ HH.text "Node.js (version 18 or higher)" ]
-            , HH.li_ [ HH.text "npm or yarn package manager" ]
-            , HH.li_ [ HH.text "PureScript compiler (purs)" ]
-            , HH.li_ [ HH.text "Spago (PureScript package manager and build tool)" ]
-            ]
-
         , HH.p_
-            [ HH.text "If you don't have PureScript and Spago installed, you can install them globally:" ]
+            [ HH.text "You'll need:" ]
+        , HH.ul_
+            [ HH.li_ [ HH.text "Node.js 18+" ]
+            , HH.li_ [ HH.text "PureScript compiler and Spago" ]
+            ]
         , HH.pre_
             [ HH.code_
                 [ HH.text "npm install -g purescript spago" ]
             ]
-        ]
-
-    -- Project Setup section
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section" ]
-        , HP.id "setup"
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "Project Setup" ]
-        , HH.p_
-            [ HH.text "Clone the PSD3 repository which includes the visualization wizard:" ]
-        , HH.pre_
-            [ HH.code_
-                [ HH.text
-                    """# Clone the PSD3 repository
-git clone https://github.com/afcondon/PureScript-Tagless-D3.git
-cd PureScript-Tagless-D3
-
-# Install dependencies
-npm install
-spago build"""
-                ]
-            ]
-        , HH.p_
-            [ HH.text "The wizard is located in " ]
-        , HH.code_ [ HH.text "scripts/init-psd3-viz.js" ]
-        , HH.text " and will generate all the files you need to get started."
-        ]
-
-    -- Using the Wizard section
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section" ]
-        , HP.id "wizard"
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "Using the Wizard" ]
-        , HH.p_
-            [ HH.text "PSD3 provides two ways to generate a visualization scaffold:" ]
-
-        -- Wizard Workflow Decision Tree Diagram
-        , HH.div
-            [ HP.classes [ HH.ClassName "diagram-container" ] ]
-            [ mermaidDiagram wizardWorkflowDiagram (Just "wizard-workflow-diagram") ]
-
-        , HH.h3_ [ HH.text "Option 1: Interactive Web Wizard (Recommended)" ]
-        , HH.p_
-            [ HH.text "The easiest way to get started is with our "
-            , HH.a [ HP.href "#/wizard" ] [ HH.text "interactive web wizard" ]
-            , HH.text ". It provides:"
-            ]
-        , HH.ul_
-            [ HH.li_ [ HH.text "Choose from pre-configured example datasets (Anscombe's Quartet, scatter plots, sine waves, etc.)" ]
-            , HH.li_ [ HH.text "Educational tips and explanations at each step" ]
-            , HH.li_ [ HH.text "Preview generated files before downloading" ]
-            , HH.li_ [ HH.text "Download as a .zip file or copy to clipboard" ]
-            ]
-        , HH.p_
-            [ HH.a
-                [ HP.href "#/wizard"
-                , HP.classes [ HH.ClassName "tutorial-button tutorial-button--primary" ]
-                ]
-                [ HH.text "Launch Interactive Wizard →" ]
-            ]
-        , HH.h3_ [ HH.text "Option 2: Command-Line Wizard" ]
-        , HH.p_
-            [ HH.text "If you prefer working from the command line, use the CLI wizard. Run it from the project root:" ]
-        , HH.pre_
-            [ HH.code_
-                [ HH.text "node scripts/init-psd3-viz.js" ]
-            ]
-        , HH.p_
-            [ HH.text "You'll be prompted for:" ]
-        , HH.ul_
-            [ HH.li_
-                [ HH.strong_ [ HH.text "Visualization module name" ]
-                , HH.text " - e.g., "
-                , HH.code_ [ HH.text "MyFirstChart" ]
-                ]
-            , HH.li_
-                [ HH.strong_ [ HH.text "Data record fields" ]
-                , HH.text " - e.g., "
-                , HH.code_ [ HH.text "x:Number,y:Number,label:String" ]
-                ]
-            , HH.li_
-                [ HH.strong_ [ HH.text "Output directory" ]
-                , HH.text " - default: "
-                , HH.code_ [ HH.text "src/viz/YourModuleName" ]
-                ]
-            , HH.li_
-                [ HH.strong_ [ HH.text "Generate Main.purs?" ]
-                , HH.text " - Entry point for standalone viewing (y/n, default: y)"
-                ]
-            , HH.li_
-                [ HH.strong_ [ HH.text "Generate index.html?" ]
-                , HH.text " - (y/n, default: y)"
-                ]
-            ]
-        , HH.h3_ [ HH.text "Example Session" ]
-        , HH.pre_
-            [ HH.code_
-                [ HH.text
-                    """Visualization module name: ParabolaChart
-Data record fields: x:Number,y:Number
-Output directory: src/viz/ParabolaChart
-Generate Main.purs? (y/n): y
-Generate index.html? (y/n): y
-
-✓ Created src/viz/ParabolaChart/Unsafe.purs
-✓ Created src/viz/ParabolaChart/Model.purs
-✓ Created src/viz/ParabolaChart/Draw.purs
-✓ Created src/viz/ParabolaChart/Main.purs
-✓ Created src/viz/ParabolaChart/index.html
-✓ Created src/viz/ParabolaChart/README.md"""
-                ]
-            ]
-        , HH.h3_ [ HH.text "Build and View" ]
-        , HH.p_
-            [ HH.text "Now build and bundle your visualization:" ]
-        , HH.pre_
-            [ HH.code_
-                [ HH.text
-                    """# Compile the PureScript
-spago build
-
-# Bundle for the browser
-spago bundle --module Main --outfile src/viz/ParabolaChart/bundle.js
-
-# Open in browser
-open src/viz/ParabolaChart/index.html"""
-                ]
-            ]
-        ]
-
-    -- Understanding the Code section
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section" ]
-        , HP.id "understanding"
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "Understanding the Generated Code" ]
-        , HH.p_
-            [ HH.text "The wizard generates several files following PSD3 best practices:" ]
-        , HH.ul_
-            [ HH.li_
-                [ HH.strong_ [ HH.text "Unsafe.purs" ]
-                , HH.text " - Contains type coercion functions that bridge PureScript's type system with D3's untyped JavaScript data"
-                ]
-            , HH.li_
-                [ HH.strong_ [ HH.text "Model.purs" ]
-                , HH.text " - Defines your data type and provides a placeholder for example data"
-                ]
-            , HH.li_
-                [ HH.strong_ [ HH.text "Draw.purs" ]
-                , HH.text " - Contains the visualization code with the "
-                , HH.code_ [ HH.text "datum_" ]
-                , HH.text " accessor pattern"
-                ]
-            , HH.li_
-                [ HH.strong_ [ HH.text "index.html" ]
-                , HH.text " - Pre-configured HTML with D3.js loaded from CDN and the correct "
-                , HH.code_ [ HH.text "#chart" ]
-                , HH.text " div"
-                ]
-            , HH.li_
-                [ HH.strong_ [ HH.text "README.md" ]
-                , HH.text " - Quick reference specific to your visualization"
-                ]
-            ]
 
         , HH.h3
-            [ HP.id "datum-pattern" ]
-            [ HH.text "The Datum_ Pattern" ]
+            [ HP.id "installation" ]
+            [ HH.text "Installation" ]
         , HH.p_
-            [ HH.text "D3.js works with untyped JavaScript data, but PureScript is strongly typed. The "
-            , HH.code_ [ HH.text "datum_" ]
-            , HH.text " accessor pattern solves this by isolating type coercion in the "
-            , HH.code_ [ HH.text "Unsafe.purs" ]
-            , HH.text " module while providing typed accessors everywhere else."
-            ]
-        , HH.p_
-            [ HH.text "In your "
-            , HH.code_ [ HH.text "Draw.purs" ]
-            , HH.text ", you'll use type-annotated lambdas to work with your data:"
-            ]
+            [ HH.text "Add the PSD3 packages to your project:" ]
         , HH.pre_
             [ HH.code_
-                [ HH.text
-                    """-- Use data in attributes
-A.cx (\\(d :: Datum_) _ -> datum_.x d)
+                [ HH.text """spago install psd3-selection psd3-layout""" ]
+            ]
+        , HH.p_
+            [ HH.text "For force-directed graphs and simulations (which use the lower-level PSD3 API), also add:" ]
+        , HH.pre_
+            [ HH.code_
+                [ HH.text "spago install psd3-simulation" ]
+            ]
+        ]
 
--- Use both data and index
-A.fill (\\(d :: Datum_) (i :: Index_) ->
-  if datum_.index i > 5 then "red" else "blue")
+    -- First Visualization section
+    , HH.section
+        [ HP.classes [ HH.ClassName "tutorial-section" ]
+        , HP.id "first-viz"
+        ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+            [ HH.text "Your First Visualization" ]
+        , HH.p_
+            [ HH.text "PSD3 uses a declarative Tree API. You describe what you want, and the library renders it to D3. Here's a complete example:" ]
 
--- Scale by data value
-A.radius (\\(d :: Datum_) _ -> datum_.y d * 2.0)"""
+        , HH.pre_
+            [ HH.code_
+                [ HH.text """module Main where
+
+import Prelude
+import Effect (Effect)
+import PSD3v2.Tree as T
+import PSD3v2.Tree (Tree)
+import PSD3v2.Attribute (class_, cx, cy, r, fill)
+import PSD3v2.Interpreter.D3v2 (render)
+
+-- Your data
+type Point = { x :: Number, y :: Number, color :: String }
+
+myData :: Array Point
+myData =
+  [ { x: 100.0, y: 100.0, color: "steelblue" }
+  , { x: 200.0, y: 150.0, color: "coral" }
+  , { x: 300.0, y: 100.0, color: "seagreen" }
+  ]
+
+-- The visualization
+chart :: Tree Point
+chart =
+  T.named Svg "svg"
+    [ T.width 400.0, T.height 200.0 ]
+    `T.withChildren`
+      [ T.joined "circles" Circle myData identity $ \\point ->
+          [ cx point.x
+          , cy point.y
+          , r 20.0
+          , fill point.color
+          ]
+      ]
+
+-- Render to the DOM
+main :: Effect Unit
+main = render "#chart" chart""" ]
+            ]
+
+        , HH.h3_ [ HH.text "What's happening here?" ]
+        , HH.ul_
+            [ HH.li_
+                [ HH.code_ [ HH.text "T.named Svg \"svg\"" ]
+                , HH.text " - Creates a named SVG element (the name helps with transitions)"
+                ]
+            , HH.li_
+                [ HH.code_ [ HH.text "T.joined \"circles\" Circle myData identity" ]
+                , HH.text " - Data joins your array to Circle elements. Each point becomes a circle."
+                ]
+            , HH.li_
+                [ HH.text "The lambda "
+                , HH.code_ [ HH.text "\\point -> [...]" ]
+                , HH.text " receives each data item with full type safety - no coercion needed"
+                ]
+            , HH.li_
+                [ HH.code_ [ HH.text "render \"#chart\" chart" ]
+                , HH.text " - Renders the tree to a DOM element with selector "
+                , HH.code_ [ HH.text "#chart" ]
+                ]
+            ]
+        ]
+
+    -- HTML Setup section
+    , HH.section
+        [ HP.classes [ HH.ClassName "tutorial-section" ]
+        , HP.id "html-setup"
+        ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+            [ HH.text "HTML Setup" ]
+        , HH.p_
+            [ HH.text "Your HTML needs D3.js and a container element:" ]
+        , HH.pre_
+            [ HH.code_
+                [ HH.text """<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+  <div id="chart"></div>
+  <script src="bundle.js"></script>
+</body>
+</html>""" ]
+            ]
+        , HH.p_
+            [ HH.text "Bundle your PureScript:" ]
+        , HH.pre_
+            [ HH.code_
+                [ HH.text "spago bundle --module Main --outfile bundle.js" ]
+            ]
+        ]
+
+    -- Key Concepts section
+    , HH.section
+        [ HP.classes [ HH.ClassName "tutorial-section" ]
+        , HP.id "concepts"
+        ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+            [ HH.text "Key Concepts" ]
+
+        , HH.h3_ [ HH.text "The Tree API" ]
+        , HH.p_
+            [ HH.text "PSD3's Tree API is declarative - you describe the structure of your visualization as a tree of elements. The key building blocks:" ]
+        , HH.ul_
+            [ HH.li_
+                [ HH.code_ [ HH.text "T.elem" ]
+                , HH.text " - A single element with static attributes"
+                ]
+            , HH.li_
+                [ HH.code_ [ HH.text "T.joined" ]
+                , HH.text " - Data-driven elements (D3's data join)"
+                ]
+            , HH.li_
+                [ HH.code_ [ HH.text "T.named" ]
+                , HH.text " - Named container for identity-preserving updates"
+                ]
+            , HH.li_
+                [ HH.code_ [ HH.text "T.withChild / T.withChildren" ]
+                , HH.text " - Nest elements hierarchically"
+                ]
+            ]
+
+        , HH.h3_ [ HH.text "Type-Safe Attributes" ]
+        , HH.p_
+            [ HH.text "Attributes are functions from your data to values. The compiler ensures you can't use attributes on wrong element types:" ]
+        , HH.pre_
+            [ HH.code_
+                [ HH.text """-- This works: cx is valid for Circle
+T.joined "dots" Circle data identity $ \\d ->
+  [ cx d.x, cy d.y, r 5.0 ]
+
+-- This won't compile: cx isn't valid for Rect
+T.joined "bars" Rect data identity $ \\d ->
+  [ cx d.x ]  -- Compile error!""" ]
+            ]
+
+        , HH.h3_ [ HH.text "Interpreters" ]
+        , HH.p_
+            [ HH.text "The same Tree can be rendered different ways:" ]
+        , HH.ul_
+            [ HH.li_
+                [ HH.code_ [ HH.text "D3v2.render" ]
+                , HH.text " - Renders to the DOM via D3"
+                ]
+            , HH.li_
+                [ HH.code_ [ HH.text "MermaidTree.interpret" ]
+                , HH.text " - Generates a Mermaid diagram of the tree structure"
+                ]
+            , HH.li_
+                [ HH.code_ [ HH.text "English.interpret" ]
+                , HH.text " - Produces English description (debugging)"
+                ]
+            ]
+
+        , HH.h3_ [ HH.text "Two APIs" ]
+        , HH.p_
+            [ HH.text "PSD3 offers two levels of abstraction:" ]
+        , HH.ul_
+            [ HH.li_
+                [ HH.strong_ [ HH.text "Tree API" ]
+                , HH.text " - Declarative, ideal for static charts and layouts (bar charts, trees, Sankey diagrams). This is what we've shown above."
+                ]
+            , HH.li_
+                [ HH.strong_ [ HH.text "PSD3 API" ]
+                , HH.text " - Lower-level but equally type-safe. Required for force simulations and highly interactive visualizations. See the "
+                , HH.a [ HP.href "#/showcase" ] [ HH.text "Code Explorer" ]
+                , HH.text " for an example."
                 ]
             ]
         , HH.p_
-            [ HH.text "The type annotations "
-            , HH.code_ [ HH.text "(d :: Datum_)" ]
-            , HH.text " and "
-            , HH.code_ [ HH.text "(i :: Index_)" ]
-            , HH.text " are required to help PureScript's type checker find the correct "
-            , HH.code_ [ HH.text "ToAttr" ]
-            , HH.text " instance."
+            [ HH.text "Both APIs share the same type-safe foundation. The Tree API builds on top of the PSD3 API, so you can mix them when needed." ]
+        ]
+
+    -- Next Steps section
+    , HH.section
+        [ HP.classes [ HH.ClassName "tutorial-section" ]
+        , HP.id "next"
+        ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+            [ HH.text "Next Steps" ]
+        , HH.ul_
+            [ HH.li_
+                [ HH.a [ HP.href "#/tour" ] [ HH.text "Take the Tour" ]
+                , HH.text " - See what's possible with PSD3"
+                ]
+            , HH.li_
+                [ HH.a [ HP.href "#/showcase" ] [ HH.text "Explore the Showcase" ]
+                , HH.text " - Interactive examples like the Code Explorer and SPLOM"
+                ]
+            , HH.li_
+                [ HH.a [ HP.href "#/gallery" ] [ HH.text "Browse the Gallery" ]
+                , HH.text " - All examples organized by category"
+                ]
+            , HH.li_
+                [ HH.a [ HP.href "#/understanding" ] [ HH.text "Understanding PSD3" ]
+                , HH.text " - Deep dive into the architecture"
+                ]
             ]
         ]
 
@@ -363,4 +322,4 @@ A.radius (\\(d :: Datum_) _ -> datum_.y d * 2.0)"""
 
 handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
 handleAction = case _ of
-  Initialize -> triggerMermaidRendering
+  Initialize -> pure unit

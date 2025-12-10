@@ -273,7 +273,6 @@
             "js-promise",
             "js-uri",
             "lazy",
-            "linalg",
             "lists",
             "maybe",
             "media-types",
@@ -433,7 +432,6 @@
             "js-promise",
             "js-uri",
             "lazy",
-            "linalg",
             "lists",
             "maybe",
             "media-types",
@@ -503,7 +501,6 @@
             "foreign",
             "foreign-object",
             "integers",
-            "linalg",
             "lists",
             "maybe",
             "numbers",
@@ -541,7 +538,6 @@
             "integers",
             "invariant",
             "lazy",
-            "linalg",
             "lists",
             "maybe",
             "newtype",
@@ -2142,19 +2138,6 @@
         "partial",
         "prelude",
         "random"
-      ]
-    },
-    "linalg": {
-      "type": "registry",
-      "version": "6.0.0",
-      "integrity": "sha256-ygvpDcjEjkCGzUGtYeN1V6i9KiirHd7NbOYlF5bDyI8=",
-      "dependencies": [
-        "arrays",
-        "foldable-traversable",
-        "functions",
-        "maybe",
-        "prelude",
-        "tuples"
       ]
     },
     "lists": {
