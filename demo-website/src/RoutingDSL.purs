@@ -75,6 +75,7 @@ routes =
   <|> codeExplorerV2
   <|> codeExplorerV3
   <|> sankeyDebug
+  <|> forcePlayground
   <|> acknowledgements
   <|> rootRedirect
   <|> notFound
@@ -315,6 +316,10 @@ codeExplorerV3 = CodeExplorerV3 <$ lit "code-explorer-v3" <* end
 sankeyDebug :: Match Route
 sankeyDebug = SankeyDebug <$ lit "sankey-debug" <* end
 
+-- | Match: /force-playground
+forcePlayground :: Match Route
+forcePlayground = ForcePlayground <$ lit "force-playground" <* end
+
 -- | Match: /acknowledgements
 acknowledgements :: Match Route
 acknowledgements = Acknowledgements <$ lit "acknowledgements" <* end
@@ -385,5 +390,6 @@ routeToPath CodeExplorer = "/code-explorer"
 routeToPath CodeExplorerV2 = "/code-explorer-v2"
 routeToPath CodeExplorerV3 = "/code-explorer-v3"
 routeToPath SankeyDebug = "/sankey-debug"
+routeToPath ForcePlayground = "/force-playground"
 routeToPath Acknowledgements = "/acknowledgements"
 routeToPath NotFound = "/not-found"

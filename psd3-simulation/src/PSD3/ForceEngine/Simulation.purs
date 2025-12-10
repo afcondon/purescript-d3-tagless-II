@@ -63,6 +63,7 @@ module PSD3.ForceEngine.Simulation
   , setNodes
   , setLinks
   , addForce
+  , addForceHandle
   , removeForce
     -- * Running
   , start
@@ -93,6 +94,9 @@ module PSD3.ForceEngine.Simulation
     -- * Drag Behavior
   , attachDrag
   , attachGroupDrag
+  , attachPinningDrag
+    -- * DOM Utilities
+  , querySelectorElements
   ) where
 
 import Prelude
@@ -334,6 +338,17 @@ addForce spec sim = do
     PositionX n _ -> n
     PositionY n _ -> n
     Radial n _ -> n
+
+-- | Add a pre-initialized force handle to the simulation
+-- | Use this when you've created and initialized a force handle manually
+-- | (e.g., for dynamic forces not covered by ForceSpec)
+addForceHandle :: forall row linkRow.
+  String                     -- Force name (used for later removal)
+  -> Core.ForceHandle        -- Pre-initialized force handle
+  -> Simulation row linkRow
+  -> Effect Unit
+addForceHandle name handle sim = do
+  Ref.modify_ (Map.insert name handle) sim.forces
 
 -- | Remove a force from the simulation
 removeForce :: forall row linkRow.
@@ -744,3 +759,40 @@ attachGroupDrag :: forall row linkRow.
   -> Effect Unit
 attachGroupDrag elements containerSelector sim =
   Core.attachGroupDragWithReheat elements containerSelector (reheat sim)
+
+-- | Attach drag with toggle-pinning behavior
+-- |
+-- | Unlike `attachDrag`, this version keeps nodes pinned after drag ends.
+-- | - First drag: pins the node where you drop it
+-- | - Subsequent drags: if you barely move (< 3px), unpins the node
+-- |
+-- | This is useful for force playgrounds and exploration where users want
+-- | to "fix" certain nodes in place while letting others float freely.
+-- |
+-- | Example:
+-- | ```purescript
+-- | nodeElements <- select ".node" >>= selectAll
+-- | attachPinningDrag nodeElements sim
+-- | ```
+attachPinningDrag :: forall row linkRow.
+  Array Element
+  -> Simulation row linkRow
+  -> Effect Unit
+attachPinningDrag elements sim =
+  Core.attachPinningDrag elements (reheat sim)
+
+-- =============================================================================
+-- DOM Utilities
+-- =============================================================================
+
+-- | Query DOM elements by CSS selector
+-- |
+-- | Convenience re-export from Core for getting element references.
+-- |
+-- | Example:
+-- | ```purescript
+-- | nodeCircles <- querySelectorElements "#my-graph circle"
+-- | attachPinningDrag nodeCircles sim
+-- | ```
+querySelectorElements :: String -> Effect (Array Element)
+querySelectorElements = Core.querySelectorElements

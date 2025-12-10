@@ -59,6 +59,18 @@ export function createLink_(config) {
   return force;
 }
 
+// Create a link force with dynamic strength per-link
+// strengthAccessor is called for each link to get strength (typically from link.weight)
+export function createLinkDynamic_(config) {
+  const force = forceLink()
+    .distance(config.distance)
+    .strength(function(link) {
+      return config.strengthAccessor(link);
+    })
+    .iterations(config.iterations);
+  return force;
+}
+
 // Create a center force
 export function createCenter_(config) {
   const force = forceCenter(config.x, config.y)
@@ -608,6 +620,78 @@ export function attachGroupDragWithReheat_(elements) {
         });
       };
     };
+  };
+}
+
+// Attach drag with toggle-pinning behavior
+// First drag pins the node where you drop it, second drag unpins it
+// The node stays pinned between drags (fx/fy remain set)
+export function attachPinningDrag_(elements) {
+  return function(reheatCallback) {
+    return function() {
+      function dragstarted(event) {
+        // Reheat the simulation
+        reheatCallback();
+        // Set fixed position to current location
+        event.subject.fx = event.subject.x;
+        event.subject.fy = event.subject.y;
+      }
+
+      function dragged(event) {
+        // Update fixed position to follow mouse
+        event.subject.fx = event.x;
+        event.subject.fy = event.y;
+      }
+
+      function dragended(event) {
+        // Check if we moved significantly - if not, treat as "unpin" click
+        const dx = event.subject.fx - event.subject.x;
+        const dy = event.subject.fy - event.subject.y;
+        const distMoved = Math.sqrt(dx * dx + dy * dy);
+
+        // If node was already pinned and barely moved, unpin it
+        // We detect "was pinned" by checking if x/y matched fx/fy at drag start
+        // For simplicity: if moved less than 3px total, toggle pin state
+        if (distMoved < 3) {
+          // Toggle: if was at exact pinned position, unpin
+          if (event.subject._wasPinned) {
+            event.subject.fx = null;
+            event.subject.fy = null;
+            delete event.subject._wasPinned;
+          }
+        }
+        // Otherwise keep it pinned where we dropped it
+        // Mark as pinned for next drag detection
+        if (event.subject.fx != null) {
+          event.subject._wasPinned = true;
+        }
+      }
+
+      const dragBehavior = drag()
+        .on('start', dragstarted)
+        .on('drag', dragged)
+        .on('end', dragended);
+
+      // Apply drag to each element
+      elements.forEach(function(el) {
+        select(el)
+          .call(dragBehavior)
+          .style('cursor', 'grab');
+      });
+    };
+  };
+}
+
+// =============================================================================
+// DOM Utilities
+// =============================================================================
+
+// Query elements by CSS selector
+// Returns an array of Element (Web.DOM.Element compatible)
+export function querySelectorElements_(selector) {
+  return function() {
+    const nodeList = document.querySelectorAll(selector);
+    return Array.from(nodeList);
   };
 }
 

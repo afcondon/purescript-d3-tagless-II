@@ -22,6 +22,7 @@ module PSD3.ForceEngine.Core
   , createCollideDynamic
   , createForceXDynamic
   , createForceYDynamic
+  , createLinkDynamic
     -- * Optimized Grid Forces (no FFI callbacks)
   , createForceXGrid
   , createForceYGrid
@@ -43,6 +44,9 @@ module PSD3.ForceEngine.Core
     -- * Drag Behavior
   , attachDragWithReheat
   , attachGroupDragWithReheat
+  , attachPinningDrag
+    -- * DOM Utilities
+  , querySelectorElements
     -- * Debug
   , logNodes
   ) where
@@ -51,7 +55,7 @@ import Prelude
 
 import Data.Traversable (for_)
 import Effect (Effect)
-import PSD3.ForceEngine.Types (ManyBodyConfig, CollideConfig, LinkConfig, CenterConfig, ForceXConfig, ForceYConfig, RadialConfig, ManyBodyFilteredConfig, RadialFilteredConfig, CollideDynamicConfig, ForceXDynamicConfig, ForceYDynamicConfig)
+import PSD3.ForceEngine.Types (ManyBodyConfig, CollideConfig, LinkConfig, CenterConfig, ForceXConfig, ForceYConfig, RadialConfig, ManyBodyFilteredConfig, RadialFilteredConfig, CollideDynamicConfig, ForceXDynamicConfig, ForceYDynamicConfig, LinkDynamicConfig)
 import Web.DOM.Element (Element)
 
 -- =============================================================================
@@ -76,6 +80,7 @@ foreign import createRadialFiltered_ :: forall node. RadialFilteredConfig node -
 foreign import createCollideDynamic_ :: forall node. CollideDynamicConfig node -> ForceHandle
 foreign import createForceXDynamic_ :: forall node. ForceXDynamicConfig node -> ForceHandle
 foreign import createForceYDynamic_ :: forall node. ForceYDynamicConfig node -> ForceHandle
+foreign import createLinkDynamic_ :: forall link. LinkDynamicConfig link -> ForceHandle
 
 -- Optimized Grid force creation (no PureScript callbacks - reads node properties directly)
 foreign import createForceXGrid_ :: Number -> ForceHandle
@@ -162,6 +167,13 @@ createForceXDynamic = createForceXDynamic_
 -- | Create a Y positioning force with dynamic target per-node
 createForceYDynamic :: forall node. ForceYDynamicConfig node -> ForceHandle
 createForceYDynamic = createForceYDynamic_
+
+-- | Create a link force with dynamic strength per-link
+-- | The strengthAccessor function is called for each link to determine strength
+-- | Useful for encoding link weight as force strength
+-- | Example: `{ distance: 30.0, strengthAccessor: \link -> link.weight, iterations: 1 }`
+createLinkDynamic :: forall link. LinkDynamicConfig link -> ForceHandle
+createLinkDynamic = createLinkDynamic_
 
 -- =============================================================================
 -- Optimized Grid Forces (no FFI callbacks)
@@ -321,6 +333,46 @@ foreign import attachGroupDragWithReheat_ :: Array Element -> String -> Effect U
 -- | ```
 attachGroupDragWithReheat :: Array Element -> String -> Effect Unit -> Effect Unit
 attachGroupDragWithReheat = attachGroupDragWithReheat_
+
+-- | FFI for pinning drag (toggle pin/unpin on drag)
+foreign import attachPinningDrag_ :: Array Element -> Effect Unit -> Effect Unit
+
+-- | Attach drag with toggle-pinning behavior
+-- |
+-- | Unlike `attachDragWithReheat`, this version keeps nodes pinned after drag ends.
+-- | - First drag: pins the node where you drop it
+-- | - Subsequent drags: if you barely move (< 3px), unpins the node
+-- |
+-- | This is useful for allowing users to "fix" certain nodes in place while
+-- | letting others float freely in the simulation.
+-- |
+-- | Example:
+-- | ```purescript
+-- | nodeElements <- getElementsByClassName "node"
+-- | attachPinningDrag nodeElements (Sim.reheat sim)
+-- | ```
+attachPinningDrag :: Array Element -> Effect Unit -> Effect Unit
+attachPinningDrag = attachPinningDrag_
+
+-- =============================================================================
+-- DOM Utilities
+-- =============================================================================
+
+-- | Foreign import for querySelectorAll
+foreign import querySelectorElements_ :: String -> Effect (Array Element)
+
+-- | Query DOM elements by CSS selector
+-- |
+-- | Returns all elements matching the given CSS selector.
+-- | Useful for getting element references for drag behavior attachment.
+-- |
+-- | Example:
+-- | ```purescript
+-- | nodeCircles <- querySelectorElements "#my-graph circle.node"
+-- | attachPinningDrag nodeCircles (Sim.reheat sim)
+-- | ```
+querySelectorElements :: String -> Effect (Array Element)
+querySelectorElements = querySelectorElements_
 
 -- =============================================================================
 -- Debug

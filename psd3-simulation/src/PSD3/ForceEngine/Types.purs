@@ -32,6 +32,7 @@ module PSD3.ForceEngine.Types
   , CollideDynamicConfig
   , ForceXDynamicConfig
   , ForceYDynamicConfig
+  , LinkDynamicConfig
     -- * Force Specification
   , ForceSpec(..)
   , forceName
@@ -240,6 +241,14 @@ type ForceXDynamicConfig node =
 type ForceYDynamicConfig node =
   { yAccessor :: node -> Number  -- Get target Y from node
   , strength :: Number
+  }
+
+-- | Configuration for link force with dynamic strength per-link
+-- | Strength is computed per-link via accessor function
+type LinkDynamicConfig link =
+  { distance :: Number              -- Desired link length
+  , strengthAccessor :: link -> Number  -- Get strength from link (e.g., link.weight)
+  , iterations :: Int
   }
 
 -- =============================================================================

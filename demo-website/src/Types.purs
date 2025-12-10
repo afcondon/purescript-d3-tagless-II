@@ -143,6 +143,7 @@ data Route
   | CodeExplorerV2  -- Rebuilt Code Explorer using LesMisGUP patterns
   | CodeExplorerV3  -- Code Explorer using our own force engine (no D3 simulation)
   | SankeyDebug     -- Debug testbed for Sankey layout algorithms
+  | ForcePlayground -- Force simulation playground with network datasets
   -- Meta
   | Acknowledgements -- Credits and acknowledgements
   | NotFound
@@ -208,5 +209,6 @@ instance showRoute :: Show Route where
   show CodeExplorerV2 = "Code Explorer V2"
   show CodeExplorerV3 = "Code Explorer V3"
   show SankeyDebug = "Sankey Debug"
+  show ForcePlayground = "Force Playground"
   show Acknowledgements = "Acknowledgements"
   show NotFound = "Not Found"

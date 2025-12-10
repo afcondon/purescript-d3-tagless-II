@@ -69,6 +69,7 @@ import Component.SceneJoinDemo as SceneJoinDemo
 import Component.SimpleForceGraph as SimpleForceGraph
 import Component.CodeExplorerV3 as CodeExplorerV3
 import Component.SankeyDebug as SankeyDebug
+import Component.ForcePlayground as ForcePlayground
 
 -- Routing
 import PSD3.RoutingDSL (routing, routeToPath)
@@ -136,6 +137,7 @@ type Slots =
   , simpleForceGraph :: forall q. H.Slot q Void Unit
   , codeExplorerV3 :: forall q. H.Slot q Void Unit
   , sankeyDebug :: forall q. H.Slot q Void Unit
+  , forcePlayground :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
 
@@ -186,6 +188,7 @@ _forceConfigV2Test = Proxy :: Proxy "forceConfigV2Test"
 _simpleForceGraph = Proxy :: Proxy "simpleForceGraph"
 _codeExplorerV3 = Proxy :: Proxy "codeExplorerV3"
 _sankeyDebug = Proxy :: Proxy "sankeyDebug"
+_forcePlayground = Proxy :: Proxy "forcePlayground"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
 -- | Main application component
@@ -403,6 +406,9 @@ renderPage route = case spy "Route is" route of
 
   SankeyDebug ->
     HH.slot_ _sankeyDebug unit SankeyDebug.component unit
+
+  ForcePlayground ->
+    HH.slot_ _forcePlayground unit ForcePlayground.component unit
 
   Acknowledgements ->
     HH.slot_ _acknowledgements unit Acknowledgements.component unit
