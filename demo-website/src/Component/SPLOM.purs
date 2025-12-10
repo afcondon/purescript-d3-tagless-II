@@ -2,11 +2,18 @@
 -- |
 -- | Brushable Scatterplot Matrix visualization for the Palmer Penguins dataset.
 -- | Demonstrates d3-brush for interactive cross-filtering across multiple views.
+-- |
+-- | This component uses the pure PureScript SPLOM implementation which demonstrates:
+-- | - PSD3.Scale for scales
+-- | - PSD3v2.Brush for brush interaction
+-- | - Tree API for declarative rendering
+-- |
+-- | State is managed by Halogen, not by Effect.Ref.
 module Component.SPLOM where
 
 import Prelude
 
-import Data.Array (length)
+import Data.Array (length, find)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff, liftAff)
@@ -17,27 +24,27 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
+import PSD3.Scale (ContinuousScale, invert)
 import PSD3.Shared.SiteNav as SiteNav
+import PSD3v2.Brush (BrushSelection(..))
 import D3.Viz.SPLOM.Data (loadPenguins)
-import D3.Viz.SPLOM.Types (Penguin, allDimensions)
-import D3.Viz.SPLOM.Render (renderSPLOM, clearSPLOMBrush, getSelectedCount, getTotalCount, setOnSelectionChange, SPLOMHandle)
+import D3.Viz.SPLOM.Types (Penguin, NumericDimension)
+import D3.Viz.SPLOM.SPLOM as SPLOM
 
--- | Component state
+-- | Component state - SPLOM state is stored directly here
 type State =
   { penguins :: Array Penguin
   , loading :: Boolean
   , error :: Maybe String
-  , splomHandle :: Maybe SPLOMHandle
-  , selectedCount :: Int
-  , totalCount :: Int
+  , splomState :: Maybe SPLOM.SPLOMState
   }
 
 -- | Component actions
 data Action
   = Initialize
   | ClearBrush
-  | UpdateCounts
-  | SelectionChanged Int
+  | BrushMove BrushSelection SPLOM.Cell
+  | BrushEnd BrushSelection SPLOM.Cell
 
 -- | Component definition
 component :: forall q i o m. MonadAff m => H.Component q i o m
@@ -46,9 +53,7 @@ component = H.mkComponent
       { penguins: []
       , loading: true
       , error: Nothing
-      , splomHandle: Nothing
-      , selectedCount: 0
-      , totalCount: 0
+      , splomState: Nothing
       }
   , render
   , eval: H.mkEval H.defaultEval
@@ -87,19 +92,24 @@ render state =
                 ]
 
             -- Selection info
-            , if state.totalCount > 0
-                then HH.div
-                  [ HP.classes [ HH.ClassName "splom-stats" ] ]
-                  [ HH.span_ [ HH.text $ show state.selectedCount <> " / " <> show state.totalCount <> " penguins" ]
-                  , if state.selectedCount < state.totalCount
-                      then HH.button
-                        [ HP.classes [ HH.ClassName "splom-clear-btn" ]
-                        , HE.onClick \_ -> ClearBrush
-                        ]
-                        [ HH.text "Clear Selection" ]
-                      else HH.text ""
-                  ]
-                else HH.text ""
+            , case state.splomState of
+                Just splomSt ->
+                  let
+                    selectedCount = SPLOM.getSelectedCount splomSt
+                    totalCount = SPLOM.getTotalCount splomSt
+                  in
+                    HH.div
+                      [ HP.classes [ HH.ClassName "splom-stats" ] ]
+                      [ HH.span_ [ HH.text $ show selectedCount <> " / " <> show totalCount <> " penguins" ]
+                      , if selectedCount < totalCount
+                          then HH.button
+                            [ HP.classes [ HH.ClassName "splom-clear-btn" ]
+                            , HE.onClick \_ -> ClearBrush
+                            ]
+                            [ HH.text "Clear Selection" ]
+                          else HH.text ""
+                      ]
+                Nothing -> HH.text ""
 
             -- Legend description
             , HH.div
@@ -195,40 +205,91 @@ handleAction = case _ of
 
       Right penguins -> do
         liftEffect $ Console.log $ "Loaded " <> show (length penguins) <> " penguins"
-        H.modify_ _ { penguins = penguins, loading = false }
 
-        -- Render SPLOM
-        handle <- liftEffect $ renderSPLOM "#splom-container" penguins allDimensions
-        total <- liftEffect $ getTotalCount handle
-        H.modify_ _ { splomHandle = Just handle, totalCount = total, selectedCount = total }
+        -- Create initial SPLOM state (pure function)
+        let splomState = SPLOM.initialState "#splom-container" penguins
 
-        -- Set up selection change callback
-        -- We need to use a subscription to get events from JS into Halogen
-        void $ H.subscribe =<< selectionEmitter handle
+        H.modify_ _ { penguins = penguins, loading = false, splomState = Just splomState }
+
+        -- Render the visualization
+        liftEffect $ SPLOM.renderSPLOM splomState
+
+        -- Set up brush callbacks using Halogen subscriptions
+        emitter <- setupBrushCallbacks splomState
+        void $ H.subscribe emitter
 
   ClearBrush -> do
     state <- H.get
-    case state.splomHandle of
+    case state.splomState of
       Nothing -> pure unit
-      Just handle -> do
-        liftEffect $ clearSPLOMBrush handle
-        H.modify_ _ { selectedCount = state.totalCount }
+      Just splomSt -> do
+        -- Clear the visual brush selection (the D3 brush rect)
+        liftEffect $ SPLOM.clearBrushSelection splomSt.brushHandles
 
-  UpdateCounts -> do
+        -- Update state to clear selection
+        let newSplomState = splomSt { selection = Nothing, activeBrushCell = Nothing }
+        H.modify_ _ { splomState = Just newSplomState }
+
+        -- Update point visibility (don't re-render, preserves brushes)
+        liftEffect $ SPLOM.updatePointVisibility newSplomState
+
+  BrushMove selection cell -> do
     state <- H.get
-    case state.splomHandle of
+    case state.splomState of
       Nothing -> pure unit
-      Just handle -> do
-        count <- liftEffect $ getSelectedCount handle
-        H.modify_ _ { selectedCount = count }
+      Just splomSt -> do
+        -- Convert pixel selection to data bounds
+        let newSelection = case selection of
+              Selection2D sel -> do
+                xScale <- findScaleForDim cell.dimX splomSt.scales
+                yScale <- findScaleForDim cell.dimY splomSt.scales
+                xMin <- invert xScale sel.x0
+                xMax <- invert xScale sel.x1
+                yMin <- invert yScale sel.y0
+                yMax <- invert yScale sel.y1
+                Just { dimX: cell.dimX, dimY: cell.dimY, xMin, xMax, yMin, yMax }
+              NoSelection -> Nothing
+              _ -> splomSt.selection
 
-  SelectionChanged count -> do
-    H.modify_ _ { selectedCount = count }
+        -- Update state (don't clear other brushes - causes event cascade)
+        let newSplomState = splomSt { selection = newSelection, activeBrushCell = Just cell }
+        H.modify_ _ { splomState = Just newSplomState }
 
--- | Create an emitter that listens for selection changes from the SPLOM
-selectionEmitter :: forall o m. MonadAff m => SPLOMHandle -> H.HalogenM State Action () o m (HS.Emitter Action)
-selectionEmitter handle = do
+        -- Update point visibility (fast, preserves brushes)
+        liftEffect $ SPLOM.updatePointVisibility newSplomState
+
+  BrushEnd selection _cell -> do
+    case selection of
+      NoSelection -> do
+        -- Brush was cleared - update point visibility
+        state <- H.get
+        case state.splomState of
+          Nothing -> pure unit
+          Just splomSt -> do
+            let newSplomState = splomSt { selection = Nothing, activeBrushCell = Nothing }
+            H.modify_ _ { splomState = Just newSplomState }
+            liftEffect $ SPLOM.updatePointVisibility newSplomState
+      _ -> pure unit  -- Selection active, already handled in BrushMove
+
+-- | Set up brush callbacks that dispatch Halogen actions
+setupBrushCallbacks :: forall o m. MonadAff m => SPLOM.SPLOMState -> H.HalogenM State Action () o m (HS.Emitter Action)
+setupBrushCallbacks splomState = do
   { emitter, listener } <- liftEffect HS.create
-  liftEffect $ setOnSelectionChange handle \count -> do
-    HS.notify listener (SelectionChanged count)
+
+  -- Attach brushes with callbacks
+  handles <- liftEffect $ SPLOM.attachBrushes
+    splomState
+    (\selection cell -> HS.notify listener (BrushMove selection cell))
+    (\selection cell -> HS.notify listener (BrushEnd selection cell))
+
+  -- Update state with brush handles
+  H.modify_ \s -> case s.splomState of
+    Nothing -> s
+    Just st -> s { splomState = Just (st { brushHandles = handles }) }
+
   pure emitter
+
+-- | Helper to find scale for a dimension
+findScaleForDim :: NumericDimension -> Array SPLOM.DimensionScale -> Maybe ContinuousScale
+findScaleForDim dim scales =
+  map _.scale $ find (\s -> s.dimension == dim) scales

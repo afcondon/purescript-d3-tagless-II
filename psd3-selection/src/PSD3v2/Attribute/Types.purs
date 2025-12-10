@@ -10,6 +10,7 @@ module PSD3v2.Attribute.Types
   , stroke
   , strokeWidth
   , strokeOpacity
+  , strokeDasharray
   , opacity
   , cx
   , cy
@@ -29,7 +30,9 @@ module PSD3v2.Attribute.Types
   , viewBox
   , fontSize
   , fontFamily
+  , fontWeight
   , textAnchor
+  , dominantBaseline
   , dy
   , dx
   , textContent
@@ -302,3 +305,19 @@ dx value = toAttr value (AttributeName "dx")
 -- | by the interpreter to set element.textContent rather than an attribute.
 textContent :: forall datum a. ToAttr String a datum => a -> Attribute datum
 textContent value = toAttr value (AttributeName "textContent")
+
+-- | Font weight (normal, bold, 100-900)
+fontWeight :: forall datum a. ToAttr String a datum => a -> Attribute datum
+fontWeight value = toAttr value (AttributeName "font-weight")
+
+-- | Dominant baseline alignment for text
+-- |
+-- | Values: auto, middle, central, text-before-edge, text-after-edge, alphabetic, etc.
+dominantBaseline :: forall datum a. ToAttr String a datum => a -> Attribute datum
+dominantBaseline value = toAttr value (AttributeName "dominant-baseline")
+
+-- | Stroke dash pattern
+-- |
+-- | Examples: "5,5" for dashed, "2,2" for dotted
+strokeDasharray :: forall datum a. ToAttr String a datum => a -> Attribute datum
+strokeDasharray value = toAttr value (AttributeName "stroke-dasharray")

@@ -123,6 +123,7 @@ module PSD3.Scale
 import Prelude
 
 import Data.Maybe (Maybe)
+import Data.Nullable (Nullable, toMaybe)
 
 -- ============================================================================
 -- SCALE TYPES
@@ -304,7 +305,10 @@ foreign import applyScale :: forall d r k. Scale d r k -> d -> r
 -- | scale = linear # domain [0.0, 100.0] # range [0.0, 500.0]
 -- | invert scale 250.0  -- Returns Just 50.0
 -- | ```
-foreign import invert :: forall r. Scale Number r Continuous -> r -> Maybe Number
+invert :: forall r. Scale Number r Continuous -> r -> Maybe Number
+invert scale value = toMaybe (invertImpl scale value)
+
+foreign import invertImpl :: forall r. Scale Number r Continuous -> r -> Nullable Number
 
 -- | Generate tick values for a continuous scale
 -- |

@@ -127,16 +127,16 @@ export function applyScale(scale) {
   };
 }
 
-export function invert(scale) {
+export function invertImpl(scale) {
   return function(value) {
     if (typeof scale.invert === 'function') {
       const result = scale.invert(value);
-      // Return Maybe (Just/Nothing)
+      // Return null for invalid results, let PureScript handle Maybe conversion
       if (result !== undefined && !isNaN(result)) {
-        return { tag: "Just", value: result };
+        return result;
       }
     }
-    return { tag: "Nothing" };
+    return null;
   };
 }
 
