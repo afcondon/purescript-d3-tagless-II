@@ -8,10 +8,11 @@ module TreeBuilder.Types
   , BuilderNode
   , NodeId
   , AttributeChoice(..)
-  , AttributeBinding(..)
+  , AttributeBinding
     -- * Sample Data
   , SampleDatum
   , defaultSampleData
+  , sudokuSampleData
     -- * Element Types for UI
   , ElementOption
   , availableElements
@@ -72,6 +73,24 @@ defaultSampleData =
   , { x: 150.0, y: 80.0, radius: 20.0, width: 50.0, height: 40.0, color: "#ff7f0e", label: "Beta", name: "B", value: 25.0, index: 1 }
   , { x: 100.0, y: 150.0, radius: 12.0, width: 35.0, height: 25.0, color: "#2ca02c", label: "Gamma", name: "C", value: 15.0, index: 2 }
   , { x: 200.0, y: 120.0, radius: 18.0, width: 45.0, height: 35.0, color: "#d62728", label: "Delta", name: "D", value: 30.0, index: 3 }
+  ]
+
+-- | Sudoku-style sample data: 3x3 grid of cells with values
+-- | Each datum represents a cell in the grid (scaled up for visibility)
+sudokuSampleData :: Array SampleDatum
+sudokuSampleData =
+  -- Row 0
+  [ { x: 20.0, y: 20.0, radius: 0.0, width: 80.0, height: 80.0, color: "#f5f2e8", label: "5", name: "cell", value: 5.0, index: 0 }
+  , { x: 100.0, y: 20.0, radius: 0.0, width: 80.0, height: 80.0, color: "#e8e0cc", label: "3", name: "cell", value: 3.0, index: 1 }
+  , { x: 180.0, y: 20.0, radius: 0.0, width: 80.0, height: 80.0, color: "#f5f2e8", label: "", name: "cell", value: 0.0, index: 2 }
+  -- Row 1
+  , { x: 20.0, y: 100.0, radius: 0.0, width: 80.0, height: 80.0, color: "#e8e0cc", label: "6", name: "cell", value: 6.0, index: 3 }
+  , { x: 100.0, y: 100.0, radius: 0.0, width: 80.0, height: 80.0, color: "#f5f2e8", label: "", name: "cell", value: 0.0, index: 4 }
+  , { x: 180.0, y: 100.0, radius: 0.0, width: 80.0, height: 80.0, color: "#e8e0cc", label: "9", name: "cell", value: 9.0, index: 5 }
+  -- Row 2
+  , { x: 20.0, y: 180.0, radius: 0.0, width: 80.0, height: 80.0, color: "#f5f2e8", label: "", name: "cell", value: 0.0, index: 6 }
+  , { x: 100.0, y: 180.0, radius: 0.0, width: 80.0, height: 80.0, color: "#e8e0cc", label: "8", name: "cell", value: 8.0, index: 7 }
+  , { x: 180.0, y: 180.0, radius: 0.0, width: 80.0, height: 80.0, color: "#f5f2e8", label: "1", name: "cell", value: 1.0, index: 8 }
   ]
 
 -- =============================================================================

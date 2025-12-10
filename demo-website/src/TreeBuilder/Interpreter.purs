@@ -9,8 +9,10 @@ module TreeBuilder.Interpreter
 import Prelude
 
 import Data.Array as Array
+import Data.Int (toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Traversable (for_)
+import Data.Number as Number
+import Data.String as String
 import Effect (Effect)
 import TreeBuilder.Types (BuilderTree(..), BuilderNode, SampleDatum, AttributeChoice(..), AttributeBinding)
 
@@ -31,8 +33,6 @@ newtype RenderInstruction = RenderInstruction
   , children :: Array RenderInstruction
   }
 
-unwrapInstruction :: RenderInstruction -> { elemType :: String, attrs :: Array { name :: String, value :: String }, children :: Array RenderInstruction }
-unwrapInstruction (RenderInstruction r) = r
 
 -- =============================================================================
 -- Preview Rendering
@@ -80,7 +80,7 @@ resolveAttributeChoice choice datum = case choice of
   ConstantNumber n -> show n
   ConstantString s -> s
   IndexBased -> show datum.index
-  Computed _ -> "computed"
+  Computed expr -> evalSimpleExpr expr datum
 
 -- | Get a field value from a SampleDatum as a string
 getFieldValue :: String -> SampleDatum -> String
@@ -111,3 +111,66 @@ defaultDatum =
   , value: 0.0
   , index: 0
   }
+
+-- | Evaluate a simple expression like "d.x + 40.0"
+-- | Supports: d.field, d.field + N, d.field - N, d.field * N
+evalSimpleExpr :: String -> SampleDatum -> String
+evalSimpleExpr expr datum =
+  -- Handle "d.field + N" pattern
+  case parseAddExpr expr of
+    Just { field, offset } ->
+      let fieldVal = getNumericField field datum
+      in show (fieldVal + offset)
+    Nothing ->
+      -- Handle "d.field - N" pattern
+      case parseSubExpr expr of
+        Just { field, offset } ->
+          let fieldVal = getNumericField field datum
+          in show (fieldVal - offset)
+        Nothing ->
+          -- Just a field reference
+          case parseFieldRef expr of
+            Just field -> getFieldValue field datum
+            Nothing -> expr
+  where
+  -- Parse "d.field + N"
+  parseAddExpr :: String -> Maybe { field :: String, offset :: Number }
+  parseAddExpr s =
+    let parts = String.split (String.Pattern " + ") s
+    in case Array.length parts of
+      2 -> do
+        fieldPart <- Array.head parts
+        offsetPart <- Array.last parts
+        field <- String.stripPrefix (String.Pattern "d.") fieldPart
+        offset <- Number.fromString offsetPart
+        Just { field, offset }
+      _ -> Nothing
+
+  -- Parse "d.field - N"
+  parseSubExpr :: String -> Maybe { field :: String, offset :: Number }
+  parseSubExpr s =
+    let parts = String.split (String.Pattern " - ") s
+    in case Array.length parts of
+      2 -> do
+        fieldPart <- Array.head parts
+        offsetPart <- Array.last parts
+        field <- String.stripPrefix (String.Pattern "d.") fieldPart
+        offset <- Number.fromString offsetPart
+        Just { field, offset }
+      _ -> Nothing
+
+  -- Parse "d.field"
+  parseFieldRef :: String -> Maybe String
+  parseFieldRef s = String.stripPrefix (String.Pattern "d.") s
+
+-- | Get a numeric field value from a SampleDatum
+getNumericField :: String -> SampleDatum -> Number
+getNumericField field datum = case field of
+  "x" -> datum.x
+  "y" -> datum.y
+  "radius" -> datum.radius
+  "width" -> datum.width
+  "height" -> datum.height
+  "value" -> datum.value
+  "index" -> toNumber datum.index
+  _ -> 0.0
