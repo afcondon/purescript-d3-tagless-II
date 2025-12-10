@@ -20,8 +20,8 @@
     "upgrade-set": "spago upgrade-set",
     "convert-about": "node scripts/convert-about.js",
     "generate-spago-data": "node scripts/generate-spago-data.js",
-    "copy-sources": "mkdir -p demo-website/public/sources && cp -r psd3-selection/src/PSD3 demo-website/public/sources/",
-    "bundle": "spago bundle -p demo-website --module PSD3.Main --outfile public/bundle.js",
+    "copy-sources": "mkdir -p docs/sources && cp -r psd3-selection/src/PSD3 docs/sources/",
+    "bundle": "spago bundle -p demo-website --module PSD3.Main --outfile ../docs/bundle.js",
     "docs:api": "spago docs --format html && node scripts/filter-api-docs.js",
     "docs:api:commit": "npm run docs:api && git add docs/api/ && echo 'API docs regenerated. Commit when library API changes significantly.'",
     "docs:api:open": "spago docs --format html --open",
@@ -31,7 +31,7 @@
     "graph-topo": "spago graph modules --topo",
     "versions": "spago --version && npm --version",
     "dev": "npm run build && npm run bundle",
-    "serve": "npx http-server demo-website/public -p 1234"
+    "serve": "npx http-server docs -p 1234"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
