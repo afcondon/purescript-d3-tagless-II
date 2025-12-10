@@ -63,7 +63,10 @@ render _ =
 
         , HH.div
             [ HP.classes [ HH.ClassName "howto-card-grid" ] ]
-            [ renderCard CodeExplorer "Code Explorer"
+            [ renderCard ForcePlayground "Force Playground"
+                "Interactive force simulation with multiple datasets. Toggle forces, filter categories, and watch animated enter/exit transitions."
+
+            , renderCard CodeExplorer "Code Explorer"
                 "Interactive force-directed graph of PureScript module dependencies. Zoom, pan, expand, and explore the codebase."
 
             , renderCard TourWealthHealth "Wealth & Health of Nations"

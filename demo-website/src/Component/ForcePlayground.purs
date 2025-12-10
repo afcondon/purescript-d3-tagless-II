@@ -3,6 +3,8 @@
 -- | Interactive force-directed graph visualization for exploring
 -- | network datasets. Features both real-world datasets and
 -- | procedurally generated graphs with rich attributes.
+-- |
+-- | Styled as a fullscreen showcase with floating control panel.
 module Component.ForcePlayground where
 
 import Prelude
@@ -22,6 +24,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.DataLoader (loadJSON, defaultConfig)
+import PSD3.Shared.SiteNav as SiteNav
 import D3.Viz.ForcePlayground.Model (NetworkRawModel, processRawModel, fromGeneratedGraph)
 import D3.Viz.ForcePlayground.Simple (initSimpleForce, SimpleForceState, ForceId(..), toggleForce, setForcesEnabled, setUseLinkWeights, filterByCategory, showAllNodes)
 import D3.Viz.ForcePlayground.Generator as Gen
@@ -65,19 +68,19 @@ derive instance eqDataset :: Eq Dataset
 
 datasetLabel :: Dataset -> String
 datasetLabel = case _ of
-  GeneratedGraph -> "Generated Network (random)"
-  KarateClub -> "Zachary's Karate Club (34 nodes)"
-  EcoStMarks -> "St. Marks Food Web (54 nodes)"
-  EcoEverglades -> "Everglades Food Web (69 nodes)"
-  CElegansFrontal -> "C. elegans Neural Network (131 nodes)"
+  GeneratedGraph -> "Generated Network"
+  KarateClub -> "Karate Club (34)"
+  EcoStMarks -> "St. Marks (54)"
+  EcoEverglades -> "Everglades (69)"
+  CElegansFrontal -> "C. elegans (131)"
 
 datasetDescription :: Dataset -> String
 datasetDescription = case _ of
-  GeneratedGraph -> "Procedurally generated network with 20-30 clusters, some connected. Node size/color varies by category and importance."
-  KarateClub -> "Classic social network - friendships between members of a karate club that split into two factions (blue/orange)"
-  EcoStMarks -> "Predator-prey relationships in St. Marks National Wildlife Refuge, Florida"
-  EcoEverglades -> "Food web from the Florida Everglades ecosystem"
-  CElegansFrontal -> "Synaptic connections between neurons in the frontal region of C. elegans"
+  GeneratedGraph -> "Procedurally generated network with 20-30 clusters. Node size/color varies by category and importance."
+  KarateClub -> "Classic social network - friendships between karate club members that split into two factions."
+  EcoStMarks -> "Predator-prey relationships in St. Marks National Wildlife Refuge, Florida."
+  EcoEverglades -> "Food web from the Florida Everglades ecosystem."
+  CElegansFrontal -> "Synaptic connections between neurons in the frontal region of C. elegans."
 
 -- | All forces enabled by default
 allForces :: Set ForceId
@@ -131,175 +134,173 @@ component = H.mkComponent
       }
   }
 
+-- =============================================================================
+-- Render - Fullscreen Layout with Floating Panel
+-- =============================================================================
+
 render :: forall w. State -> HH.HTML w Action
 render state =
   HH.div
-    [ HP.classes [ HH.ClassName "force-playground-page" ]
-    , HP.style pageStyle
-    ]
-    [ -- Header
-      HH.div
-        [ HP.style "margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px;" ]
-        [ HH.h1
-            [ HP.style "color: #69b3a2; margin: 0 0 10px 0; font-size: 24px;" ]
-            [ HH.text "Force Simulation Playground" ]
-        , HH.p
-            [ HP.style "color: #aaa; margin: 0; font-size: 14px;" ]
-            [ HH.text "Explore network datasets with force-directed graph visualization" ]
+    [ HP.classes [ HH.ClassName "force-playground-page" ] ]
+    [ -- Site Navigation (top)
+      SiteNav.render
+        { logoSize: SiteNav.Normal
+        , quadrant: SiteNav.NoQuadrant
+        , prevNext: Nothing
+        , pageTitle: Just "Force Playground"
+        }
+
+    -- Fullscreen visualization container
+    , HH.div
+        [ HP.classes [ HH.ClassName "fullscreen-container", HH.ClassName "force-playground-viz" ] ]
+        [ -- Main viz area
+          HH.div
+            [ HP.id "force-playground-container"
+            , HP.classes [ HH.ClassName "fullscreen-viz", HH.ClassName "svg-container" ]
+            ]
+            []
+
+        -- Floating control panel (top-right)
+        , renderControlPanel state
         ]
 
-    -- Controls row
+    -- Loading overlay
+    , if state.loading
+        then HH.div
+          [ HP.classes [ HH.ClassName "loading-overlay" ] ]
+          [ HH.text "Loading..." ]
+        else HH.text ""
+
+    -- Error message
+    , case state.error of
+        Just err -> HH.div
+          [ HP.classes [ HH.ClassName "error-toast" ] ]
+          [ HH.text $ "Error: " <> err ]
+        Nothing -> HH.text ""
+    ]
+
+-- | Floating control panel
+renderControlPanel :: forall w. State -> HH.HTML w Action
+renderControlPanel state =
+  HH.div
+    [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-right", HH.ClassName "floating-panel--medium", HH.ClassName "force-playground-panel" ] ]
+    [ -- Panel title
+      HH.h2
+        [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
+        [ HH.text "Controls" ]
+
+    -- Dataset selector
     , HH.div
-        [ HP.style "margin-bottom: 20px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap;" ]
-        [ -- Dataset selector
-          HH.div_
-            [ HH.label [ HP.style "color: #888; margin-right: 8px;" ] [ HH.text "Dataset:" ]
-            , HH.select
-                [ HP.style selectStyle
-                , HE.onValueChange (\v -> SelectDataset (parseDataset v))
-                ]
-                [ HH.option
-                    [ HP.value "generated"
-                    , HP.selected (state.selectedDataset == GeneratedGraph)
-                    ]
-                    [ HH.text (datasetLabel GeneratedGraph) ]
-                , HH.option
-                    [ HP.value "karate-club"
-                    , HP.selected (state.selectedDataset == KarateClub)
-                    ]
-                    [ HH.text (datasetLabel KarateClub) ]
-                , HH.option
-                    [ HP.value "eco-stmarks"
-                    , HP.selected (state.selectedDataset == EcoStMarks)
-                    ]
-                    [ HH.text (datasetLabel EcoStMarks) ]
-                , HH.option
-                    [ HP.value "eco-everglades"
-                    , HP.selected (state.selectedDataset == EcoEverglades)
-                    ]
-                    [ HH.text (datasetLabel EcoEverglades) ]
-                , HH.option
-                    [ HP.value "c-elegans"
-                    , HP.selected (state.selectedDataset == CElegansFrontal)
-                    ]
-                    [ HH.text (datasetLabel CElegansFrontal) ]
-                ]
+        [ HP.classes [ HH.ClassName "control-group" ] ]
+        [ HH.h4_ [ HH.text "Dataset" ]
+        , HH.select
+            [ HP.classes [ HH.ClassName "control-select" ]
+            , HE.onValueChange (\v -> SelectDataset (parseDataset v))
             ]
+            [ HH.option [ HP.value "generated", HP.selected (state.selectedDataset == GeneratedGraph) ] [ HH.text (datasetLabel GeneratedGraph) ]
+            , HH.option [ HP.value "karate-club", HP.selected (state.selectedDataset == KarateClub) ] [ HH.text (datasetLabel KarateClub) ]
+            , HH.option [ HP.value "eco-stmarks", HP.selected (state.selectedDataset == EcoStMarks) ] [ HH.text (datasetLabel EcoStMarks) ]
+            , HH.option [ HP.value "eco-everglades", HP.selected (state.selectedDataset == EcoEverglades) ] [ HH.text (datasetLabel EcoEverglades) ]
+            , HH.option [ HP.value "c-elegans", HP.selected (state.selectedDataset == CElegansFrontal) ] [ HH.text (datasetLabel CElegansFrontal) ]
+            ]
+        , HH.p
+            [ HP.classes [ HH.ClassName "control-description" ] ]
+            [ HH.text (datasetDescription state.selectedDataset) ]
         -- Regenerate button (only for generated graphs)
         , if state.selectedDataset == GeneratedGraph
             then HH.button
-              [ HP.style buttonStyle
+              [ HP.classes [ HH.ClassName "control-button", HH.ClassName "control-button--secondary" ]
               , HE.onClick \_ -> RegenerateGraph
               ]
               [ HH.text "Regenerate" ]
             else HH.text ""
         ]
 
-    -- Force presets
+    -- Force Presets
     , HH.div
-        [ HP.style "margin-bottom: 15px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;" ]
-        [ HH.span [ HP.style "color: #888; font-size: 13px;" ] [ HH.text "Presets:" ]
-        , presetButton state PresetStandard
-        , presetButton state PresetClustered
-        , presetButton state PresetMinimal
+        [ HP.classes [ HH.ClassName "control-group" ] ]
+        [ HH.h4_ [ HH.text "Presets" ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "button-row" ] ]
+            [ presetButton state PresetStandard
+            , presetButton state PresetClustered
+            , presetButton state PresetMinimal
+            ]
         ]
 
-    -- Force toggles
+    -- Force Toggles
     , HH.div
-        [ HP.style "margin-bottom: 15px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;" ]
-        [ HH.span [ HP.style "color: #888; font-size: 13px;" ] [ HH.text "Forces:" ]
-        , forceToggle state ForceCharge "Charge" "Nodes repel each other"
-        , forceToggle state ForceCollide "Collide" "Prevents node overlap"
-        , forceToggle state ForceLink "Links" "Connected nodes attract"
-        , forceToggle state ForceX "X Center" "Pull toward center X"
-        , forceToggle state ForceY "Y Center" "Pull toward center Y"
+        [ HP.classes [ HH.ClassName "control-group" ] ]
+        [ HH.h4_ [ HH.text "Forces" ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "toggle-grid" ] ]
+            [ forceToggle state ForceCharge "Charge"
+            , forceToggle state ForceCollide "Collide"
+            , forceToggle state ForceLink "Links"
+            , forceToggle state ForceX "X Center"
+            , forceToggle state ForceY "Y Center"
+            ]
         ]
 
-    -- Link weights toggle (separate for visibility)
+    -- Options
     , HH.div
-        [ HP.style "margin-bottom: 15px; display: flex; gap: 15px; align-items: center;" ]
-        [ HH.span [ HP.style "color: #888; font-size: 13px;" ] [ HH.text "Options:" ]
+        [ HP.classes [ HH.ClassName "control-group" ] ]
+        [ HH.h4_ [ HH.text "Options" ]
         , linkWeightsToggle state
         ]
 
-    -- Category filters (only for generated graphs)
+    -- Category Filters (only for generated graphs)
     , if state.selectedDataset == GeneratedGraph
         then HH.div
-          [ HP.style "margin-bottom: 15px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;" ]
-          [ HH.span [ HP.style "color: #888; font-size: 13px;" ] [ HH.text "Filter:" ]
-          , categoryToggle state 0 "Research" "#1f77b4"
-          , categoryToggle state 1 "Industry" "#ff7f0e"
-          , categoryToggle state 2 "Government" "#2ca02c"
-          , categoryToggle state 3 "Community" "#d62728"
-          , showAllButton state
+          [ HP.classes [ HH.ClassName "control-group" ] ]
+          [ HH.h4_ [ HH.text "Filter Categories" ]
+          , HH.div
+              [ HP.classes [ HH.ClassName "category-filters" ] ]
+              [ categoryToggle state 0 "Research" "#1f77b4"
+              , categoryToggle state 1 "Industry" "#ff7f0e"
+              , categoryToggle state 2 "Government" "#2ca02c"
+              , categoryToggle state 3 "Community" "#d62728"
+              ]
+          , if state.shownCategories /= allCategories
+              then HH.button
+                [ HP.classes [ HH.ClassName "control-button", HH.ClassName "control-button--link" ]
+                , HE.onClick \_ -> ShowAllCategories
+                ]
+                [ HH.text "Show All" ]
+              else HH.text ""
           ]
         else HH.text ""
 
-    -- Dataset description
-    , HH.p
-        [ HP.style "color: #888; font-size: 13px; margin-bottom: 15px; font-style: italic;" ]
-        [ HH.text (datasetDescription state.selectedDataset) ]
-
-    -- Legend (for generated graphs)
-    , if state.selectedDataset == GeneratedGraph
-        then renderLegend
-        else HH.text ""
-
-    -- Loading indicator
-    , if state.loading
-        then HH.div
-          [ HP.style "color: #69b3a2; padding: 20px;" ]
-          [ HH.text "Loading dataset..." ]
-        else HH.text ""
-
-    -- Error message
-    , case state.error of
-        Just err -> HH.div
-          [ HP.style "color: #ff6b6b; padding: 10px; background: #2a2a4e; border-radius: 4px; margin-bottom: 15px;" ]
-          [ HH.text $ "Error: " <> err ]
-        Nothing -> HH.text ""
-
-    -- Visualization container
-    , HH.div
-        [ HP.id "force-playground-container"
-        , HP.style "background: #1e1e3a; border-radius: 8px; min-height: 600px;"
-        ]
-        []
-
     -- Instructions
     , HH.div
-        [ HP.style "margin-top: 15px; color: #666; font-size: 12px;" ]
-        [ HH.text "Scroll to zoom, drag to pan. Toggle forces above to see how they affect the layout." ]
+        [ HP.classes [ HH.ClassName "panel-info-box" ] ]
+        [ HH.p_ [ HH.text "Scroll to zoom, drag to pan." ]
+        , HH.p_ [ HH.text "Click-drag nodes to pin them." ]
+        , HH.p_ [ HH.text "Tiny drag to unpin." ]
+        ]
     ]
 
 -- | Render a preset button
 presetButton :: forall w. State -> ForcePreset -> HH.HTML w Action
 presetButton state preset =
-  let
-    isActive = state.activePreset == Just preset
-    style = if isActive
-      then presetActiveStyle
-      else presetInactiveStyle
-  in
-    HH.button
-      [ HP.style style
+  let isActive = state.activePreset == Just preset
+  in HH.button
+      [ HP.classes $
+          [ HH.ClassName "control-button" ] <>
+          if isActive then [ HH.ClassName "control-button--active" ] else []
       , HP.title (presetTooltip preset)
       , HE.onClick \_ -> ApplyPreset preset
       ]
       [ HH.text (presetLabel preset) ]
 
 -- | Render a force toggle button
-forceToggle :: forall w. State -> ForceId -> String -> String -> HH.HTML w Action
-forceToggle state forceId label tooltip =
-  let
-    isEnabled = Set.member forceId state.enabledForces
-    style = if isEnabled
-      then toggleOnStyle
-      else toggleOffStyle
-  in
-    HH.button
-      [ HP.style style
-      , HP.title tooltip
+forceToggle :: forall w. State -> ForceId -> String -> HH.HTML w Action
+forceToggle state forceId label =
+  let isEnabled = Set.member forceId state.enabledForces
+  in HH.button
+      [ HP.classes $
+          [ HH.ClassName "toggle-button" ] <>
+          if isEnabled then [ HH.ClassName "toggle-button--on" ] else [ HH.ClassName "toggle-button--off" ]
       , HE.onClick \_ -> ToggleForce forceId
       ]
       [ HH.text label ]
@@ -307,108 +308,29 @@ forceToggle state forceId label tooltip =
 -- | Render link weights toggle
 linkWeightsToggle :: forall w. State -> HH.HTML w Action
 linkWeightsToggle state =
-  let
-    style = if state.useLinkWeights
-      then optionOnStyle
-      else optionOffStyle
-  in
-    HH.button
-      [ HP.style style
-      , HP.title "When enabled, links with higher weight pull more strongly"
-      , HE.onClick \_ -> ToggleLinkWeights
-      ]
-      [ HH.text (if state.useLinkWeights then "Weighted Links: ON" else "Weighted Links: OFF") ]
+  HH.label
+    [ HP.classes [ HH.ClassName "checkbox-label" ] ]
+    [ HH.input
+        [ HP.type_ HP.InputCheckbox
+        , HP.checked state.useLinkWeights
+        , HE.onChecked \_ -> ToggleLinkWeights
+        ]
+    , HH.text "Weighted Links"
+    ]
 
 -- | Render a category filter toggle with color indicator
 categoryToggle :: forall w. State -> Int -> String -> String -> HH.HTML w Action
 categoryToggle state catId label color =
-  let
-    isVisible = Set.member catId state.shownCategories
-    bgStyle = if isVisible
-      then "background: " <> color <> "; color: #fff; border: 2px solid " <> color <> ";"
-      else "background: #333; color: #666; border: 2px solid #555;"
-  in
-    HH.button
-      [ HP.style $ "padding: 6px 12px; font-size: 12px; border-radius: 4px; cursor: pointer; " <> bgStyle
+  let isVisible = Set.member catId state.shownCategories
+  in HH.button
+      [ HP.classes $
+          [ HH.ClassName "category-button" ] <>
+          if isVisible then [ HH.ClassName "category-button--active" ] else [ HH.ClassName "category-button--inactive" ]
+      , HP.style $ "border-color: " <> color <> "; " <> if isVisible then "background-color: " <> color <> ";" else ""
       , HP.title $ "Toggle " <> label <> " nodes"
       , HE.onClick \_ -> ToggleCategory catId
       ]
       [ HH.text label ]
-
--- | Render "Show All" button
-showAllButton :: forall w. State -> HH.HTML w Action
-showAllButton state =
-  let
-    allShown = state.shownCategories == allCategories
-    style = if allShown
-      then "padding: 6px 12px; font-size: 12px; background: #555; color: #888; border: 2px solid #555; border-radius: 4px; cursor: default;"
-      else "padding: 6px 12px; font-size: 12px; background: #69b3a2; color: #fff; border: 2px solid #69b3a2; border-radius: 4px; cursor: pointer;"
-  in
-    HH.button
-      [ HP.style style
-      , HP.title "Show all categories"
-      , HE.onClick \_ -> ShowAllCategories
-      ]
-      [ HH.text "Show All" ]
-
--- | Render legend for generated graphs
-renderLegend :: forall w i. HH.HTML w i
-renderLegend =
-  HH.div
-    [ HP.style "display: flex; gap: 30px; margin-bottom: 15px; flex-wrap: wrap;" ]
-    [ -- Node categories
-      HH.div_
-        [ HH.span [ HP.style "color: #888; font-size: 12px; margin-right: 10px;" ] [ HH.text "Categories:" ]
-        , legendItem "#1f77b4" "Research"
-        , legendItem "#ff7f0e" "Industry"
-        , legendItem "#2ca02c" "Government"
-        , legendItem "#d62728" "Community"
-        ]
-    -- Link types
-    , HH.div_
-        [ HH.span [ HP.style "color: #888; font-size: 12px; margin-right: 10px;" ] [ HH.text "Links:" ]
-        , legendItem "#6baed6" "Collaboration"
-        , legendItem "#fd8d3c" "Citation"
-        , legendItem "#74c476" "Funding"
-        , legendItem "#e377c2" "Communication"
-        ]
-    ]
-  where
-  legendItem color label =
-    HH.span
-      [ HP.style "margin-right: 12px; font-size: 11px;" ]
-      [ HH.span
-          [ HP.style $ "display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: " <> color <> "; margin-right: 4px;" ]
-          []
-      , HH.span [ HP.style "color: #aaa;" ] [ HH.text label ]
-      ]
-
-pageStyle :: String
-pageStyle = "padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh;"
-
-selectStyle :: String
-selectStyle = "padding: 8px 12px; font-size: 14px; background: #2a2a4e; color: #fff; border: 1px solid #444; border-radius: 4px;"
-
-buttonStyle :: String
-buttonStyle = "padding: 8px 16px; font-size: 14px; background: #69b3a2; color: #fff; border: none; border-radius: 4px; cursor: pointer;"
-
-toggleOnStyle :: String
-toggleOnStyle = "padding: 6px 12px; font-size: 12px; background: #69b3a2; color: #fff; border: none; border-radius: 4px; cursor: pointer;"
-
-toggleOffStyle :: String
-toggleOffStyle = "padding: 6px 12px; font-size: 12px; background: #444; color: #888; border: none; border-radius: 4px; cursor: pointer;"
-
-presetActiveStyle :: String
-presetActiveStyle = "padding: 6px 14px; font-size: 12px; background: #5a7; color: #fff; border: 2px solid #7c9; border-radius: 4px; cursor: pointer; font-weight: bold;"
-
-presetInactiveStyle :: String
-presetInactiveStyle = "padding: 6px 14px; font-size: 12px; background: #3a3a5e; color: #aaa; border: 2px solid #555; border-radius: 4px; cursor: pointer;"
-
-optionOnStyle :: String
-optionOnStyle = "padding: 6px 14px; font-size: 12px; background: #7b6; color: #fff; border: 2px solid #9d8; border-radius: 4px; cursor: pointer; font-weight: bold;"
-
-optionOffStyle :: String
-optionOffStyle = "padding: 6px 14px; font-size: 12px; background: #444; color: #888; border: 2px solid #555; border-radius: 4px; cursor: pointer;"
 
 parseDataset :: String -> Dataset
 parseDataset = case _ of
@@ -417,6 +339,10 @@ parseDataset = case _ of
   "eco-everglades" -> EcoEverglades
   "c-elegans" -> CElegansFrontal
   _ -> EcoStMarks
+
+-- =============================================================================
+-- Action Handlers
+-- =============================================================================
 
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
@@ -436,11 +362,9 @@ handleAction = case _ of
       Nothing -> pure unit
       Just ref -> do
         newEnabled <- liftEffect $ toggleForce forceId ref
-        -- Update local state for UI
         let newForces = if newEnabled
               then Set.insert forceId state.enabledForces
               else Set.delete forceId state.enabledForces
-        -- Clear active preset since user manually toggled
         H.modify_ _ { enabledForces = newForces, activePreset = Nothing }
 
   ApplyPreset preset -> do
@@ -470,7 +394,6 @@ handleAction = case _ of
         let newShown = if isCurrentlyShown
               then Set.delete catId state.shownCategories
               else Set.insert catId state.shownCategories
-        -- Apply filter - convert Set to Array
         liftEffect $ filterByCategory (Set.toUnfoldable newShown) ref
         H.modify_ _ { shownCategories = newShown }
 
@@ -486,12 +409,10 @@ handleAction = case _ of
     state <- H.get
     H.modify_ _ { loading = true, error = Nothing }
 
-    -- Clear existing visualization
     liftEffect $ clearContainer "#force-playground-container"
 
     model <- case state.selectedDataset of
       GeneratedGraph -> do
-        -- Generate a new random graph
         liftEffect $ Console.log "Generating random network..."
         generated <- liftEffect $ Gen.generateGraph Gen.defaultConfig
         let m = fromGeneratedGraph generated
@@ -499,7 +420,6 @@ handleAction = case _ of
         pure m
 
       _ -> do
-        -- Load from JSON file
         let path = datasetPath state.selectedDataset
         result <- liftAff $ loadJSON defaultConfig path
 
@@ -507,7 +427,6 @@ handleAction = case _ of
           Left err -> do
             liftEffect $ Console.log $ "Failed to load: " <> show err
             H.modify_ _ { loading = false, error = Just (show err) }
-            -- Return empty model on error
             pure { nodes: [], links: [] }
 
           Right json -> do
@@ -517,16 +436,14 @@ handleAction = case _ of
             liftEffect $ Console.log $ "Processed: " <> show (length m.nodes) <> " nodes, " <> show (length m.links) <> " links"
             pure m
 
-    -- Only initialize if we have nodes
     when (length model.nodes > 0) do
       forceRef <- liftEffect $ initSimpleForce model "#force-playground-container"
-      -- Reset all forces to enabled for new graph (Standard preset, no weighted links, all categories)
       H.modify_ _ { loading = false, forceState = Just forceRef, enabledForces = allForces, activePreset = Just PresetStandard, useLinkWeights = false, shownCategories = allCategories }
 
 -- | Get path for JSON datasets
 datasetPath :: Dataset -> String
 datasetPath = case _ of
-  GeneratedGraph -> ""  -- Not used
+  GeneratedGraph -> ""
   KarateClub -> "/data/karate-club.json"
   EcoStMarks -> "/data/eco-stmarks.json"
   EcoEverglades -> "/data/eco-everglades.json"
