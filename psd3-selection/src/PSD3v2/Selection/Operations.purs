@@ -1158,17 +1158,13 @@ renderNodeHelper parentSel (Join joinSpec) = do
   let enterElements = map fst enterElementsAndMaps
   let enterChildMaps = map snd enterElementsAndMaps
 
-  -- 4. Handle UPDATE: re-render existing elements with new template
-  -- For update elements, we need to update their attributes based on the template
-  updateElementsAndMaps <- renderTemplatesForBoundSelection joinSpec.template updateSel
-
-  let updateElements = map fst updateElementsAndMaps
-  let updateChildMaps = map snd updateElementsAndMaps
+  -- 4. Handle UPDATE: update existing element attributes (children not tracked)
+  updateElements <- renderTemplatesForBoundSelection joinSpec.template updateSel
 
   -- 5. Combine enter and update elements
+  -- Note: Only ENTER elements contribute child selections (UPDATE only updates root attrs)
   let allElements = enterElements <> updateElements
-  let allChildMaps = enterChildMaps <> updateChildMaps
-  let combinedChildMap = Array.foldl Map.union Map.empty allChildMaps
+  let combinedChildMap = Array.foldl Map.union Map.empty enterChildMaps
 
   -- 6. Get data array and document (from enter or update)
   let Selection enterImpl = enterSel
@@ -1351,8 +1347,8 @@ renderNodeHelper parentSel (SceneJoin joinSpec) = do
   let enterElements = map fst enterElementsAndMaps
   let enterChildMaps = map snd enterElementsAndMaps
 
-  -- 4. Handle UPDATE with behavior
-  updateElementsAndMaps <- case joinSpec.updateBehavior of
+  -- 4. Handle UPDATE with behavior (children not tracked, only root attrs updated)
+  updateElements <- case joinSpec.updateBehavior of
     Just updateBehavior -> do
       -- Check for transition
       case updateBehavior.transition of
@@ -1371,13 +1367,10 @@ renderNodeHelper parentSel (SceneJoin joinSpec) = do
       -- No update behavior, just re-render with template
       renderTemplatesForBoundSelection joinSpec.template updateSel
 
-  let updateElements = map fst updateElementsAndMaps
-  let updateChildMaps = map snd updateElementsAndMaps
-
   -- 5. Combine enter and update elements (same as Join)
+  -- Note: Only ENTER elements contribute child selections (UPDATE only updates root attrs)
   let allElements = enterElements <> updateElements
-  let allChildMaps = enterChildMaps <> updateChildMaps
-  let combinedChildMap = Array.foldl Map.union Map.empty allChildMaps
+  let combinedChildMap = Array.foldl Map.union Map.empty enterChildMaps
 
   -- 6. Get data array and document
   let Selection enterImpl = enterSel
@@ -1524,8 +1517,8 @@ renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
       pure rendered
     Nothing -> renderTemplatesForPendingSelection (unsafeCoerce joinSpec.template) enterSel
 
-  -- 5. Handle UPDATE with behavior
-  updateElementsAndMaps <- case joinSpec.updateBehavior of
+  -- 5. Handle UPDATE with behavior (children not tracked, only root attrs updated)
+  updateElements <- case joinSpec.updateBehavior of
     Just updateBehavior -> do
       -- Check for transition
       case (unsafeCoerce updateBehavior).transition of
@@ -1542,16 +1535,14 @@ renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
     Nothing -> renderTemplatesForBoundSelection (unsafeCoerce joinSpec.template) updateSel
 
   -- 6-9. Combine results (same as SceneJoin)
+  -- Note: Only ENTER elements contribute child selections (UPDATE only updates root attrs)
   let
     enterElements = map fst enterElementsAndMaps
-    updateElements = map fst updateElementsAndMaps
     allElements = enterElements <> updateElements
 
   let
     enterChildMaps = map snd enterElementsAndMaps
-    updateChildMaps = map snd updateElementsAndMaps
-    allChildMaps = enterChildMaps <> updateChildMaps
-    combinedChildMap = Array.foldl Map.union Map.empty allChildMaps
+    combinedChildMap = Array.foldl Map.union Map.empty enterChildMaps
 
   -- Get document from selections
   let Selection enterImpl = unsafeCoerce enterSel
@@ -1690,14 +1681,18 @@ renderTemplatesForPendingSelection templateFn pendingSel = do
 -- |
 -- | For UPDATE phase of data join:
 -- | 1. Extract elements and data from bound selection
--- | 2. For each element, apply template to update attributes
--- | 3. Return elements with updated attributes
+-- | 2. For each element, apply template to update root element attributes
+-- | 3. Return the elements (children are NOT updated - use merge for combined selections)
+-- |
+-- | Note: This only updates root element attributes. Child elements within the template
+-- | are not recursively updated. For working with all elements after a data join,
+-- | use `merge enterSelection updateSelection` to get a combined selection.
 renderTemplatesForBoundSelection
   :: forall datum parent
    . Ord datum
   => (datum -> Tree datum) -- Template function
   -> Selection SBoundOwns parent datum -- Bound selection from join (update set)
-  -> Effect (Array (Tuple Element (Map String (Selection SBoundOwns Element datum))))
+  -> Effect (Array Element)
 renderTemplatesForBoundSelection templateFn boundSel = do
   -- Extract elements and data from the bound selection
   let Selection impl = boundSel
@@ -1714,25 +1709,10 @@ renderTemplatesForBoundSelection templateFn boundSel = do
             -- Build the template tree for this datum
             let tree = templateFn datum
 
-            -- Apply template attributes to existing element
-            -- For now, we re-render the tree structure (this updates attributes)
-            -- TODO: optimize to only update attributes without recreating structure
-
-            -- Create a selection containing just this element
-            let
-              elementSel = Selection $ BoundSelection
-                { elements: [ element ]
-                , data: [ datum ]
-                , indices: Just [ idx ]
-                , document: doc
-                }
-
-            -- For UPDATE, we need to update the element's attributes based on the template
-            -- The template is a Tree, so we extract attribute updates from it
+            -- Update the element's attributes based on the template
             _ <- updateElementFromTree element datum idx tree doc
 
-            -- Return the element (unchanged) and empty child map for now
-            pure $ Tuple element Map.empty
+            pure element
     )
     dataArray
 
