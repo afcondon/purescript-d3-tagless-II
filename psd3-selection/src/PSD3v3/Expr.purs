@@ -1,0 +1,60 @@
+-- | PSD3v3 Core Expression DSL
+-- |
+-- | Finally tagless encoding for attribute expressions.
+-- | Enables multiple interpreters: Eval (D3), CodeGen, SVG, English, etc.
+module PSD3v3.Expr
+  ( class NumExpr
+  , lit
+  , add
+  , sub
+  , mul
+  , div
+  , negate
+  , class StringExpr
+  , str
+  , concat
+  , class BoolExpr
+  , bool
+  , and
+  , or
+  , not
+  , ifThenElse
+  , class CompareExpr
+  , lt
+  , lte
+  , gt
+  , gte
+  , eq
+  ) where
+
+import Prelude hiding (add, sub, mul, div, negate, not)
+
+-- | Numeric expressions
+class NumExpr repr where
+  lit :: Number -> repr Number
+  add :: repr Number -> repr Number -> repr Number
+  sub :: repr Number -> repr Number -> repr Number
+  mul :: repr Number -> repr Number -> repr Number
+  div :: repr Number -> repr Number -> repr Number
+  negate :: repr Number -> repr Number
+
+-- | String expressions
+class StringExpr repr where
+  str :: String -> repr String
+  concat :: repr String -> repr String -> repr String
+
+-- | Boolean expressions
+class BoolExpr repr where
+  bool :: Boolean -> repr Boolean
+  and :: repr Boolean -> repr Boolean -> repr Boolean
+  or :: repr Boolean -> repr Boolean -> repr Boolean
+  not :: repr Boolean -> repr Boolean
+  ifThenElse :: forall a. repr Boolean -> repr a -> repr a -> repr a
+
+-- | Comparison expressions (produce Boolean from Numbers)
+class CompareExpr repr where
+  lt :: repr Number -> repr Number -> repr Boolean
+  lte :: repr Number -> repr Number -> repr Boolean
+  gt :: repr Number -> repr Number -> repr Boolean
+  gte :: repr Number -> repr Number -> repr Boolean
+  eq :: repr Number -> repr Number -> repr Boolean

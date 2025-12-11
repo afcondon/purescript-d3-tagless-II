@@ -163,9 +163,210 @@ This is a significant architectural change worth exploring for a future major ve
 
 Could prototype in a separate branch to evaluate real-world usability before committing.
 
+## The Hard Problem: Typed Field Access
+
+This is the critical challenge that could make or break the ergonomics.
+
+### The Problem
+
+We want `field "x"` to:
+1. Know that datum has an `x` field (compile-time safety)
+2. Know the type of `x` (Number, String, etc.)
+3. Generate correct code (`d.x`)
+4. Evaluate correctly at runtime
+
+But `field :: String -> repr Number` has no connection to the datum type.
+
+### Option 1: Stringly Typed (Easy, Unsafe)
+
+```purescript
+field :: String -> repr Number
+field "x"  -- No compile-time check that datum has x
+```
+
+Pros: Simple, familiar
+Cons: Runtime errors, no autocomplete, loses PSD3's type safety promise
+
+### Option 2: Symbol + Row Polymorphism (The PureScript Way)
+
+```purescript
+field :: forall datum r a sym
+       . IsSymbol sym
+      => Row.Cons sym a r datum
+      => Proxy sym
+      -> repr a
+
+-- Usage:
+field (Proxy :: Proxy "x")
+
+-- Or with visible type applications (if available):
+field @"x"
+```
+
+Pros: Full type safety, compiler verifies field exists and has correct type
+Cons: Verbose syntax, Proxy boilerplate
+
+### Option 3: Record Syntax with Custom Accessor
+
+```purescript
+-- Define a "liftable" record accessor
+class FieldAccess datum repr where
+  (.) :: repr datum -> (forall r. { x :: a | r } -> a) -> repr a
+
+-- Usage becomes:
+d . _.x
+
+-- Where d :: repr datum, and _.x is the record accessor
+```
+
+This piggybacks on PureScript's record accessor syntax.
+
+Pros: Looks almost like `d.x`
+Cons: Requires `d` to be in scope as `repr datum`, not actual datum
+
+### Option 4: Typed Datum DSL
+
+```purescript
+-- Datum is also part of the DSL
+class DatumDSL repr datum where
+  self :: repr datum
+
+class HasField datum (field :: Symbol) a | datum field -> a where
+  getField :: Proxy field -> repr datum -> repr a
+
+-- Usage:
+getField @"x" self
+```
+
+### Option 5: Code Generation / TH-style
+
+Pre-generate field accessors for known datum types:
+
+```purescript
+-- Generated for type ParabolaPoint = { x :: Number, y :: Number }
+parabolaX :: forall repr. NumExpr repr => repr ParabolaPoint -> repr Number
+parabolaY :: forall repr. NumExpr repr => repr ParabolaPoint -> repr Number
+```
+
+Pros: Perfect type safety, nice syntax
+Cons: Requires code generation step, less flexible
+
+### Recommended Approach for Prototype
+
+Start with **Option 2** (Symbol + Row) for type safety, but wrap it:
+
+```purescript
+-- Internal: fully typed
+fieldSym :: forall datum r a sym repr
+          . IsSymbol sym
+         => Row.Cons sym a r datum
+         => NumExpr repr
+         => Proxy sym
+         -> repr datum
+         -> repr a
+
+-- User-facing: convenient wrapper for common case
+-- In a module specific to their datum type:
+x :: forall repr. NumExpr repr => repr ParabolaPoint -> repr Number
+x = fieldSym (Proxy :: Proxy "x")
+
+y :: forall repr. NumExpr repr => repr ParabolaPoint -> repr Number
+y = fieldSym (Proxy :: Proxy "y")
+
+-- Usage becomes:
+cx (scale scaleX (x self))
+```
+
+Users define short accessors for their datum fields once, then use them naturally.
+
+## Getting Started: Minimal Prototype
+
+### Phase 1: Core DSL (1-2 hours)
+
+Start with just numbers and one attribute:
+
+```purescript
+-- src/PSD3v3/Expr.purs
+module PSD3v3.Expr where
+
+class NumExpr repr where
+  lit :: Number -> repr Number
+  add :: repr Number -> repr Number -> repr Number
+  mul :: repr Number -> repr Number -> repr Number
+
+class AttrExpr repr where
+  cx :: repr Number -> repr Attr
+```
+
+### Phase 2: Two Interpreters (1-2 hours)
+
+```purescript
+-- D3 Interpreter
+newtype Eval a = Eval a
+
+runEval :: forall a. Eval a -> a
+runEval (Eval a) = a
+
+instance numExprEval :: NumExpr Eval where
+  lit n = Eval n
+  add (Eval a) (Eval b) = Eval (a + b)
+  mul (Eval a) (Eval b) = Eval (a * b)
+
+-- CodeGen Interpreter
+newtype CodeGen a = CodeGen String
+
+runCodeGen :: forall a. CodeGen a -> String
+runCodeGen (CodeGen s) = s
+
+instance numExprCodeGen :: NumExpr CodeGen where
+  lit n = CodeGen (show n)
+  add (CodeGen a) (CodeGen b) = CodeGen ("(" <> a <> " + " <> b <> ")")
+  mul (CodeGen a) (CodeGen b) = CodeGen ("(" <> a <> " * " <> b <> ")")
+```
+
+### Phase 3: Datum Access (The Hard Part)
+
+```purescript
+-- Add datum threading
+class NumExpr repr => DatumExpr repr datum where
+  field :: forall a sym r
+         . IsSymbol sym
+        => Row.Cons sym a r datum
+        => Proxy sym
+        -> repr a
+
+-- D3 needs datum in scope
+newtype EvalD datum a = EvalD (datum -> a)
+
+-- CodeGen just generates string
+instance datumExprCodeGen :: DatumExpr CodeGen datum where
+  field proxy = CodeGen ("d." <> reflectSymbol proxy)
+```
+
+### Phase 4: Integration Test
+
+Write the parabola example in v3 style and verify:
+1. D3 interpreter produces working visualization
+2. CodeGen interpreter produces compilable PureScript
+
+### Success Criteria
+
+If you can write:
+```purescript
+myAttr :: forall repr. (NumExpr repr, DatumExpr repr Point) => repr Attr
+myAttr = cx (mul (lit 2.0) (field @"x"))
+```
+
+And get both:
+- Working D3 rendering
+- Generated code: `cx (2.0 * d.x)`
+
+Then the approach is viable.
+
 ## Related Work
 
 - Oleg Kiselyov's finally tagless papers
 - Phil Freeman's PureScript finally tagless examples
 - Typed Template Haskell for code generation
 - F# type providers for typed field access
+- PureScript Record library for row polymorphism
