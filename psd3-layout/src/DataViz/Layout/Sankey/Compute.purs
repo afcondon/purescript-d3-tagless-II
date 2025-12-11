@@ -376,87 +376,6 @@ computeNodeBreadths = do
   -- Store both nodes AND links (with widths) so computeLinkBreadths can use them
   modify_ _ { sankeyNodes = relaxedNodes, sankeyLinks = linksWithWidth }
 
--- | Pre-sort nodes by topology to establish initial order before relaxation
--- | Sorts nodes within each layer by weighted average of their target y-positions
-reorderNodesByTopology :: Array SankeyNode -> Array SankeyLink -> Number -> Number -> Array SankeyNode -- TODO not used?
-reorderNodesByTopology nodes links padding yStart =
-  let
-    maxLayer = foldl (\acc node -> max acc node.layer) 0 nodes
-
-    -- Group nodes by layer
-    layers = map
-      ( \layerIdx ->
-          filter (\n -> n.layer == layerIdx) nodes
-      )
-      (Array.range 0 maxLayer)
-
-    -- Sort each layer by weighted y-position of targets
-    sortedLayers = map (sortLayerByTargets nodes links) layers
-
-    -- Re-position nodes vertically with new order
-    repositionedLayers = map (repositionLayer padding yStart) sortedLayers
-
-    repositioned = Array.concat repositionedLayers
-  in
-    repositioned
-  where
-
-  -- Sort nodes in a layer by weighted average of target y-positions
-  sortLayerByTargets :: Array SankeyNode -> Array SankeyLink -> Array SankeyNode -> Array SankeyNode
-  sortLayerByTargets allNodes allLinks layerNodes =
-    Array.sortBy
-      ( \a b ->
-          let
-            aCenter = weightedTargetCenter a allNodes allLinks
-            bCenter = weightedTargetCenter b allNodes allLinks
-          in
-            compare aCenter bCenter
-      )
-      layerNodes
-
-  -- Calculate weighted center of target nodes (for sorting)
-  weightedTargetCenter :: SankeyNode -> Array SankeyNode -> Array SankeyLink -> Number
-  weightedTargetCenter node allNodes allLinks =
-    let
-      -- Find outgoing links and weight by value
-      targetSum = foldl
-        ( \acc link ->
-            if link.sourceIndex == node.index then
-              case find (\n -> n.index == link.targetIndex) allNodes of
-                Just targetNode ->
-                  let
-                    center = (targetNode.y0 + targetNode.y1) / 2.0
-                  in
-                    { sum: acc.sum + center * link.value, weight: acc.weight + link.value }
-                Nothing -> acc
-            else acc
-        )
-        { sum: 0.0, weight: 0.0 }
-        allLinks
-    in
-      -- For source nodes (no targets), use current position
-      if targetSum.weight > 0.0 then targetSum.sum / targetSum.weight
-      else (node.y0 + node.y1) / 2.0
-
-  -- Re-position nodes in layer after sorting
-  repositionLayer :: Number -> Number -> Array SankeyNode -> Array SankeyNode
-  repositionLayer padding' yStart' layerNodes =
-    let
-      positioned = foldl
-        ( \acc node ->
-            let
-              height = node.y1 - node.y0
-              newNode = node { y0 = acc.y, y1 = acc.y + height }
-            in
-              { y: acc.y + height + padding'
-              , nodes: Array.snoc acc.nodes newNode
-              }
-        )
-        { y: yStart', nodes: [] }
-        layerNodes
-    in
-      positioned.nodes
-
 -- | Step 6a: Compute node layers and x positions based on alignment strategy
 computeNodeLayers :: Array SankeyNode -> SankeyConfig -> Number -> Number -> Array SankeyNode
 computeNodeLayers nodes config x0 x1 =
@@ -621,8 +540,8 @@ relaxation nodes links config padding y0 y1 =
       maxLayer = foldl (\acc node -> max acc node.layer) 0 currentNodes
       -- D3 skips first layer in left-to-right, last layer in right-to-left
       layerIndices =
-        if ascending then Array.range 1 maxLayer  -- Skip layer 0
-        else Array.reverse (Array.range 0 (maxLayer - 1))  -- Skip last layer
+        if ascending then Array.range 1 maxLayer -- Skip layer 0
+        else Array.reverse (Array.range 0 (maxLayer - 1)) -- Skip last layer
 
       -- Process each layer in order
       relaxed = foldl

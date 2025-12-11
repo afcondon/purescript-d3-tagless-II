@@ -320,20 +320,6 @@ insertBetween aId bId newCircle state =
       , nextId = newId + 1
       }
 
--- | Insert circle with shortcut (collision found at jId)
--- insertWithShortcut :: CircleId -> CircleId -> Circle -> PackState -> PackState -- TODO not used
--- insertWithShortcut aId jId newCircle state =
---   let
---     newId = state.nextId
---     newCircles = Map.insert newId newCircle state.circles
---     newChain = shortenChain aId jId newId state.frontChain
---   in
---     state
---       { circles = newCircles
---       , frontChain = newChain
---       , nextId = newId + 1
---       }
-
 -- ============================================================================
 -- MAIN ALGORITHM
 -- ============================================================================
@@ -408,7 +394,8 @@ addCircle newCircle state =
 -- | Pack siblings using map-based front-chain algorithm
 packSiblingsMap :: Array Circle -> { circles :: Array Circle, radius :: Number }
 packSiblingsMap inputCircles =
-  let n = Array.length inputCircles
+  let
+    n = Array.length inputCircles
   in
     if n == 0 then { circles: [], radius: 0.0 }
     else if n == 1 then
