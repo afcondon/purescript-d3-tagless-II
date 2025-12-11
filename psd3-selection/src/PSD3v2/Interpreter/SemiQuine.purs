@@ -5,6 +5,11 @@
 -- |
 -- | Named "SemiQuine" because it generates PureScript code from a data structure
 -- | that represents PureScript code - a quine-ish concept, but not a true quine.
+-- |
+-- | Two variants:
+-- | - `treeToCode` (this module): works on BuilderTree (fully inspectable)
+-- | - `TreeToCode.treeToCode`: works on actual Tree datum (evaluates functions)
+-- |   Import separately: `import PSD3v2.Interpreter.SemiQuine.TreeToCode`
 module PSD3v2.Interpreter.SemiQuine
   ( treeToCode
   , module PSD3v2.Interpreter.SemiQuine.Types

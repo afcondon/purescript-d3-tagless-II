@@ -41,3 +41,7 @@ package:
     - web-events
     - web-html
     - web-uievents
+  test:
+    main: Test.Main
+    dependencies:
+      - assert

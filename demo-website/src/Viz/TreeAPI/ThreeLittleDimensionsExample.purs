@@ -20,7 +20,7 @@ type Matrix = Array (Array Int)
 
 -- | Sample 3x3 matrix
 matrixData :: Matrix
-matrixData = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+matrixData = [ [ 1, 2, 3 ], [ 4, 5, 6 ], [ 7, 8, 9 ] ]
 
 -- | Three Little Dimensions using declarative tree API
 -- | This demonstrates nested data joins: outer array → rows, inner arrays → cells
@@ -35,20 +35,21 @@ threeLittleDimensions = runD3v2M do
   -- Approach: Use nestedJoin to handle datum type decomposition
   -- Outer type: Array Int (a row)
   -- Inner type: Int (a cell value)
-  let tree :: T.Tree (Array Int)
-      tree =
-        T.named Table "table"
-          [ class_ "nested-data-table" ]
-          `T.withChild`
-            -- nestedJoin handles the type change from Array Int → Int
-            -- identity is the decomposer: it just returns the row data as-is
-            (T.nestedJoin "rows" "tr" matrixData identity $ \cellValue ->
+  let
+    tree :: T.Tree (Array Int)
+    tree =
+      T.named Table "table"
+        [ class_ "nested-data-table" ]
+        `T.withChild`
+          -- nestedJoin handles the type change from Array Int → Int
+          -- identity is the decomposer: it just returns the row data as-is
+          ( T.nestedJoin "rows" "tr" matrixData identity $ \cellValue ->
               -- cellValue :: Int (decomposed from Array Int)
               T.elem Td
                 [ class_ "table-cell"
                 , textContent (show cellValue)
                 ]
-            )
+          )
 
   -- Render the tree
   selections <- renderTree container tree
@@ -67,8 +68,10 @@ threeLittleDimensions = runD3v2M do
 
     case Map.lookup "cells" selections of
       Just _ ->
-        let totalCells = Array.foldl (\acc row -> acc + Array.length row) 0 matrixData
-        in Console.log $ "✓ Cells created (" <> show totalCells <> " total)"
+        let
+          totalCells = Array.foldl (\acc row -> acc + Array.length row) 0 matrixData
+        in
+          Console.log $ "✓ Cells created (" <> show totalCells <> " total)"
       Nothing -> Console.log "✗ Missing cells"
 
     Console.log ""

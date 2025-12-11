@@ -21779,7 +21779,7 @@
             return log2("\u2717 Missing table")();
           }
           ;
-          throw new Error("Failed pattern match at D3.Viz.TreeAPI.ThreeLittleDimensionsExample (line 60, column 5 - line 62, column 47): " + [v2.constructor.name]);
+          throw new Error("Failed pattern match at D3.Viz.TreeAPI.ThreeLittleDimensionsExample (line 61, column 5 - line 63, column 47): " + [v2.constructor.name]);
         })();
         (function() {
           var v2 = lookup15("rows")(selections);
@@ -21791,7 +21791,7 @@
             return log2("\u2717 Missing rows")();
           }
           ;
-          throw new Error("Failed pattern match at D3.Viz.TreeAPI.ThreeLittleDimensionsExample (line 64, column 5 - line 66, column 46): " + [v2.constructor.name]);
+          throw new Error("Failed pattern match at D3.Viz.TreeAPI.ThreeLittleDimensionsExample (line 65, column 5 - line 67, column 46): " + [v2.constructor.name]);
         })();
         (function() {
           var v2 = lookup15("cells")(selections);
@@ -21808,7 +21808,7 @@
             return log2("\u2717 Missing cells")();
           }
           ;
-          throw new Error("Failed pattern match at D3.Viz.TreeAPI.ThreeLittleDimensionsExample (line 68, column 5 - line 72, column 47): " + [v2.constructor.name]);
+          throw new Error("Failed pattern match at D3.Viz.TreeAPI.ThreeLittleDimensionsExample (line 69, column 5 - line 75, column 47): " + [v2.constructor.name]);
         })();
         log2("")();
         return log2("Expected: 3x3 table with numbers 1-9")();
@@ -55468,7 +55468,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
       return v2.value0;
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Interpreter.SemiQuine (line 209, column 25 - line 214, column 24): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Interpreter.SemiQuine (line 214, column 25 - line 219, column 24): " + [v2.constructor.name]);
   };
   var spaces = function(n) {
     return joinWith("")(replicate(n)(" "));
@@ -55535,7 +55535,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
       return v2.value0;
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Interpreter.SemiQuine (line 200, column 17 - line 205, column 24): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Interpreter.SemiQuine (line 205, column 17 - line 210, column 24): " + [v2.constructor.name]);
   };
   var attrImportName = function(binding) {
     if (binding.attrName === "cx") {
@@ -55617,7 +55617,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
       return map101(attrImportName)(v2.value0.template.attributes);
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Interpreter.SemiQuine (line 48, column 16 - line 53, column 48): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Interpreter.SemiQuine (line 53, column 16 - line 58, column 48): " + [v2.constructor.name]);
   };
   var attributeImports = function(tree2) {
     var attrs = collectAttrs(tree2);
@@ -55738,14 +55738,14 @@ T.joined "bars" Rect data identity $ \\\\d ->
         return elemBranchCode(v2.value0)(v2.value1);
       }
       ;
-      throw new Error("Failed pattern match at PSD3v2.Interpreter.SemiQuine (line 80, column 5 - line 90, column 44): " + [v2.value0.name.constructor.name]);
+      throw new Error("Failed pattern match at PSD3v2.Interpreter.SemiQuine (line 85, column 5 - line 95, column 44): " + [v2.value0.name.constructor.name]);
     }
     ;
     if (v2 instanceof BDataJoin) {
       return joinCode(v2.value0);
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Interpreter.SemiQuine (line 78, column 14 - line 93, column 18): " + [v2.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Interpreter.SemiQuine (line 83, column 14 - line 98, column 18): " + [v2.constructor.name]);
   };
   var namedBranchCode = function(node) {
     return function(name16) {
@@ -55771,7 +55771,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
         return [];
       }
       ;
-      throw new Error("Failed pattern match at PSD3v2.Interpreter.SemiQuine (line 127, column 10 - line 131, column 20): " + [v1.constructor.name]);
+      throw new Error("Failed pattern match at PSD3v2.Interpreter.SemiQuine (line 132, column 10 - line 136, column 20): " + [v1.constructor.name]);
     }
     ;
     return append38(["  `T.withChildren`"])(["    [ " + (joinWith("\n    , ")(map101((function() {

@@ -674,8 +674,15 @@
           ]
         },
         "test": {
-          "dependencies": [],
-          "build_plan": []
+          "dependencies": [
+            "assert"
+          ],
+          "build_plan": [
+            "assert",
+            "console",
+            "effect",
+            "prelude"
+          ]
         }
       },
       "psd3-simulation": {
