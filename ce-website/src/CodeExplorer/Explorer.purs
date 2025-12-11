@@ -238,11 +238,7 @@ executeViewChange newView = do
 tickWithPendingViewCheck :: Ref Scene.SceneState -> String -> Effect Unit
 tickWithPendingViewCheck stateRef nodesSelector = do
   -- Get state before tick to detect transition completion
-  stateBefore <- Ref.read stateRef
-  let
-    wasTransitioning = case stateBefore.transition of
-      Just _ -> true
-      Nothing -> false
+  wasTransitioning <- Scene.isTransitioning stateRef
 
   -- Run the normal tick
   Scene.onTickWithViewTransition stateRef globalTransitionRef globalViewStateRef nodesSelector
@@ -251,14 +247,10 @@ tickWithPendingViewCheck stateRef nodesSelector = do
   VT.updatePackageLabelPositions
 
   -- Check if transition just completed
-  stateAfter <- Ref.read stateRef
-  let
-    isTransitioning = case stateAfter.transition of
-      Just _ -> true
-      Nothing -> false
+  stillTransitioning <- Scene.isTransitioning stateRef
 
   -- If transition just completed, check for pending view
-  when (wasTransitioning && not isTransitioning) do
+  when (wasTransitioning && not stillTransitioning) do
     pendingView <- Ref.read globalPendingViewRef
     case pendingView of
       Just view -> do
@@ -499,7 +491,7 @@ initWithModel model containerSelector = do
   renderWatermark model.nodes
 
   -- Create scene state
-  let sceneState = Scene.mkSceneState sim nodesGroupId
+  sceneState <- Scene.mkSceneState sim nodesGroupId
   stateRef <- Ref.new sceneState
 
   -- Set up tick callback - includes view transition progress advancement and visual updates
@@ -512,7 +504,7 @@ initWithModel model containerSelector = do
   Sim.start sim
 
   -- Mark TreeForm as current scene (we start with treemap-based positions)
-  Ref.modify_ (_ { currentScene = Just Scenes.treeFormScene }) stateRef
+  Scene.setCurrentScene Scenes.treeFormScene stateRef
 
   pure stateRef
 
@@ -601,7 +593,7 @@ updateWithModel model stateRef = do
   renderWatermark model.nodes
 
   -- Reset to TreeForm scene
-  Ref.modify_ (_ { currentScene = Just Scenes.treeFormScene }) stateRef
+  Scene.setCurrentScene Scenes.treeFormScene stateRef
 
   -- Restart simulation
   Sim.start state.simulation

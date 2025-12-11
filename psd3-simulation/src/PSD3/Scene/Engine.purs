@@ -38,6 +38,8 @@ module PSD3.Scene.Engine
   , getCurrentScene
   , isTransitioning
   , getTransitionProgress
+  -- * Direct State Manipulation
+  , setCurrentScene
   -- * Configuration
   , defaultTransitionDelta
   -- * Re-exports
@@ -334,3 +336,19 @@ getTransitionProgress
 getTransitionProgress engineRef = do
   state <- Ref.read engineRef
   pure $ map _.progress state.transition
+
+-- =============================================================================
+-- Direct State Manipulation
+-- =============================================================================
+
+-- | Set the current scene directly (without transition).
+-- |
+-- | Use this when the visualization is already in the target state
+-- | (e.g., after initial rendering with pre-computed positions).
+setCurrentScene
+  :: forall node
+   . Types.SceneConfig node
+  -> SceneEngine node
+  -> Effect Unit
+setCurrentScene scene engineRef =
+  Ref.modify_ (_ { currentScene = Just scene }) engineRef

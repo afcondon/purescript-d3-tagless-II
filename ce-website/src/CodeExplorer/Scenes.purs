@@ -4,7 +4,7 @@
 -- |
 -- | Each scene has three phases:
 -- | 1. initRules: Applied before transition starts
--- | 2. layout: Where DumbEngine moves nodes
+-- | 2. layout: Where InterpolationEngine moves nodes
 -- | 3. finalRules: Applied after transition completes
 module CodeExplorer.Scenes
   ( -- Form scenes (transition to positions, then Static)

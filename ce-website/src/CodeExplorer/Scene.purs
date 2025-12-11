@@ -1,12 +1,15 @@
 -- | Scene Engine
 -- |
--- | Compositional scene management with swappable tick engines.
+-- | App-specific wrapper around the library's generic scene engine.
 -- |
--- | Two tick engines:
--- | - DumbEngine: Interpolates positions toward predetermined targets (transitions)
--- | - PhysicsEngine: D3 force simulation (stable states with dynamics)
+-- | This module:
+-- | - Creates an adapter for CESimulation to use with the library engine
+-- | - Adds DOM update logic (updateCirclePositions, updateLinkPositions, etc.)
+-- | - Adds ViewTransition integration
+-- | - Tracks GroupIds for selective link updates
 -- |
--- | CSS transitions can run in parallel with either engine for opacity/color changes.
+-- | The core transition logic (interpolation, rules, stable modes) is handled
+-- | by PSD3.Scene.Engine in the library.
 module CodeExplorer.Scene
   ( -- Re-exported from library
     module SimScene
@@ -25,11 +28,12 @@ module CodeExplorer.Scene
   , clearLinksGroupId
   , setTreeLinksGroupId
   , clearTreeLinksGroupId
+  , isTransitioning
+  , setCurrentScene
   ) where
 
 import Prelude
 
-import Data.Array as Array
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Traversable (for_)
@@ -42,15 +46,14 @@ import Foreign.Object as Object
 import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Render (GroupId, updateCirclePositions, updateLinkPositions, updateTreeLinkPaths)
+import PSD3.Scene.Engine as Engine
 import PSD3.Simulation.Scene
   ( NodeRule
   , SceneConfig
-  , TransitionState
   , EngineMode(..)
   , PositionMap
   , applyRulesInPlace_
   ) as SimScene
-import PSD3.Transition.Tick as Tick
 import Types (SimNode, NodeType, LinkType)
 import CodeExplorer.ViewState (ViewState)
 import CodeExplorer.ViewTransition as VT
@@ -87,15 +90,44 @@ type LinkRow = (linkType :: LinkType)
 type CESimulation = Sim.Simulation NodeRow LinkRow
 
 -- | Main scene state
--- | Uses SimNode specifically as this is the app's concrete state type
+-- |
+-- | Wraps the library's SceneEngine with app-specific concerns:
+-- | - simulation: The D3 force simulation
+-- | - engine: The library's generic scene engine
+-- | - GroupId tracking for selective DOM updates
 type SceneState =
   { simulation :: CESimulation
-  , currentScene :: Maybe (SimScene.SceneConfig SimNode)
-  , transition :: Maybe (SimScene.TransitionState SimNode)
+  , engine :: Engine.SceneEngine SimNode
   , nodesGroupId :: GroupId
-  , linksGroupId :: Maybe GroupId -- Set when force links should be updated
-  , treeLinksGroupId :: Maybe GroupId -- Set when tree link paths should be updated during transition
+  , linksGroupId :: Maybe GroupId
+  , treeLinksGroupId :: Maybe GroupId
   }
+
+-- =============================================================================
+-- Adapter for Library Engine
+-- =============================================================================
+
+-- | Create an engine adapter for CESimulation.
+-- |
+-- | This is the bridge between the generic library engine and our specific
+-- | simulation type. See PSD3.Scene.Engine for the adapter interface.
+mkAdapter :: CESimulation -> Engine.EngineAdapter SimNode
+mkAdapter sim =
+  { getNodes: Sim.getNodes sim
+  , capturePositions: capturePositions
+  , interpolatePositions: \start target progress ->
+      Sim.interpolatePositionsInPlace start target progress sim
+  , updatePositions: \positions ->
+      Sim.updatePositionsInPlace positions sim
+  , applyRulesInPlace: \rules -> applyRulesInPlace rules sim
+  , reinitializeForces: reinitializeForces sim
+  , reheat: Sim.reheat sim
+  }
+
+-- | Capture current positions from nodes
+capturePositions :: Array SimNode -> SimScene.PositionMap
+capturePositions nodes =
+  Object.fromFoldable $ map (\n -> Tuple (show n.id) { x: n.x, y: n.y }) nodes
 
 -- =============================================================================
 -- App-Specific Functions
@@ -127,15 +159,16 @@ reinitializeForces sim = do
 mkSceneState
   :: CESimulation
   -> GroupId
-  -> SceneState
-mkSceneState sim groupId =
-  { simulation: sim
-  , currentScene: Nothing
-  , transition: Nothing
-  , nodesGroupId: groupId
-  , linksGroupId: Nothing
-  , treeLinksGroupId: Nothing
-  }
+  -> Effect SceneState
+mkSceneState sim groupId = do
+  engine <- Engine.createEngine (mkAdapter sim)
+  pure
+    { simulation: sim
+    , engine
+    , nodesGroupId: groupId
+    , linksGroupId: Nothing
+    , treeLinksGroupId: Nothing
+    }
 
 -- | Set the links group ID to enable force link updates
 setLinksGroupId :: GroupId -> Ref SceneState -> Effect Unit
@@ -158,75 +191,56 @@ clearTreeLinksGroupId stateRef =
   Ref.modify_ (_ { treeLinksGroupId = Nothing }) stateRef
 
 -- =============================================================================
--- Transitions
+-- Transitions (delegated to library engine)
 -- =============================================================================
 
--- | Transition delta: ~2 seconds at 60fps
-transitionDelta :: Tick.TickDelta
-transitionDelta = Tick.ticksForDuration 2000
-
 -- | Start transition to a new scene
+-- |
+-- | Delegates to the library engine which handles:
+-- | - Init rules
+-- | - Position interpolation
+-- | - Final rules
+-- | - Stable mode entry
 transitionTo
   :: SimScene.SceneConfig SimNode
   -> Ref SceneState
   -> Effect Unit
 transitionTo targetScene stateRef = do
   state <- Ref.read stateRef
+  Engine.transitionTo targetScene state.engine
 
-  -- Don't transition if already transitioning
-  case state.transition of
-    Just _ -> log "[Scene] Already transitioning, ignoring"
-    Nothing -> do
-      log $ "[Scene] Starting transition to: " <> targetScene.name
+-- | Check if a transition is currently in progress
+isTransitioning :: Ref SceneState -> Effect Boolean
+isTransitioning stateRef = do
+  state <- Ref.read stateRef
+  Engine.isTransitioning state.engine
 
-      -- Phase 1: Apply init rules in place FIRST
-      -- This may move nodes to starting positions (e.g., tree root for "grow from root")
-      applyRulesInPlace targetScene.initRules state.simulation
-
-      -- Capture start positions AFTER init rules (so nodes start from where rules put them)
-      nodesAfterInit <- Sim.getNodes state.simulation
-      let startPositions = capturePositions nodesAfterInit
-
-      -- Calculate target positions for transition
-      let targetPositions = targetScene.layout nodesAfterInit
-
-      -- Set transition state
-      Ref.write
-        ( state
-            { transition = Just
-                { targetScene
-                , startPositions
-                , targetPositions
-                , progress: 0.0
-                }
-            }
-        )
-        stateRef
-
-      -- Keep simulation ticking
-      Sim.reheat state.simulation
-
--- | Capture current positions from nodes
-capturePositions :: Array SimNode -> SimScene.PositionMap
-capturePositions nodes =
-  Object.fromFoldable $ map (\n -> Tuple (show n.id) { x: n.x, y: n.y }) nodes
+-- | Set the current scene directly (without transition).
+-- |
+-- | Use this when the visualization is already in the target state
+-- | (e.g., after initial rendering with pre-computed positions).
+setCurrentScene :: SimScene.SceneConfig SimNode -> Ref SceneState -> Effect Unit
+setCurrentScene scene stateRef = do
+  state <- Ref.read stateRef
+  Engine.setCurrentScene scene state.engine
 
 -- =============================================================================
 -- Tick Handler
 -- =============================================================================
 
--- | Main tick handler - routes to appropriate engine
+-- | Main tick handler
+-- |
+-- | Delegates interpolation to library engine, then handles app-specific DOM updates.
 onTick
   :: Ref SceneState
   -> Effect Unit
 onTick stateRef = do
   state <- Ref.read stateRef
 
-  case state.transition of
-    Just t -> runDumbEngine t stateRef state
-    Nothing -> runStableEngine state
+  -- Delegate to library engine (handles interpolation + rules)
+  _ <- Engine.tick state.engine
 
-  -- Always update DOM
+  -- App-specific: Update DOM
   updateCirclePositions state.nodesGroupId
 
   -- Update force links if active
@@ -238,73 +252,6 @@ onTick stateRef = do
   case state.treeLinksGroupId of
     Just treeLinksGid -> updateTreeLinkPaths treeLinksGid
     Nothing -> pure unit
-
--- | DumbEngine: Interpolate positions toward target
-runDumbEngine
-  :: SimScene.TransitionState SimNode
-  -> Ref SceneState
-  -> SceneState
-  -> Effect Unit
-runDumbEngine t stateRef state = do
-  let newProgress = min 1.0 (t.progress + transitionDelta)
-
-  if newProgress >= 1.0 then completeTransition t stateRef state
-  else do
-    -- Interpolate positions
-    let easedProgress = Tick.easeInOutCubic newProgress
-    Sim.interpolatePositionsInPlace t.startPositions t.targetPositions easedProgress state.simulation
-
-    -- Update progress
-    Ref.write (state { transition = Just (t { progress = newProgress }) }) stateRef
-
--- | Complete a transition - enter the target scene's stable mode
-completeTransition
-  :: SimScene.TransitionState SimNode
-  -> Ref SceneState
-  -> SceneState
-  -> Effect Unit
-completeTransition t stateRef state = do
-  log $ "[Scene] Transition complete: " <> t.targetScene.name
-
-  -- Set final positions
-  Sim.updatePositionsInPlace t.targetPositions state.simulation
-
-  -- Phase 3: Apply final rules in place (unpin, set gridXY, etc.)
-  nodes <- Sim.getNodes state.simulation
-  let rules = t.targetScene.finalRules nodes -- Build rules with context
-  applyRulesInPlace rules state.simulation
-
-  -- Log rule applications for debugging
-  log $ "[Scene] Applied " <> show (Array.length rules) <> " final rules"
-
-  -- Re-initialize forces to pick up new gridX/gridY values
-  reinitializeForces state.simulation
-
-  -- Enter stable mode
-  case t.targetScene.stableMode of
-    SimScene.Physics -> do
-      log "[Scene] Entering Physics mode"
-      Sim.reheat state.simulation
-    SimScene.Static -> do
-      log "[Scene] Entering Static mode"
-      pure unit
-
-  -- Update state
-  Ref.write
-    ( state
-        { currentScene = Just t.targetScene
-        , transition = Nothing
-        }
-    )
-    stateRef
-
--- | Run stable engine based on current scene mode
-runStableEngine :: SceneState -> Effect Unit
-runStableEngine state = case state.currentScene of
-  Nothing -> pure unit -- No scene yet
-  Just scene -> case scene.stableMode of
-    SimScene.Physics -> pure unit -- Simulation is already running
-    SimScene.Static -> pure unit -- Nothing to do
 
 -- =============================================================================
 -- View Transition Integration
