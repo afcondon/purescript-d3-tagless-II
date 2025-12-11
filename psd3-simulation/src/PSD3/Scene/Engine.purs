@@ -1,48 +1,45 @@
 -- | Scene Engine
 -- |
--- | The orchestrator for scene transitions and stable states.
+-- | Tick-based scene orchestration with adapter pattern.
 -- |
--- | Two modes of operation:
--- | - **Interpolation Engine**: During transitions, smoothly moves nodes
--- |   from start to target positions with configurable easing.
--- | - **Physics Engine**: After transitions complete (in Physics mode),
--- |   delegates to the D3 force simulation.
+-- | The engine manages transitions between scenes using a three-phase lifecycle:
+-- | 1. Initialize: Apply init rules to prepare starting state
+-- | 2. Transition: Interpolate positions from start to target
+-- | 3. Finalize: Apply final rules and enter stable mode
 -- |
--- | The engine is generic over both node type and simulation type.
--- | Apps provide adapter functions so the engine doesn't need to know
--- | about simulation internals.
+-- | The engine is generic over the node type. Apps provide an adapter
+-- | record with functions that interact with their specific simulation.
 -- |
 -- | Example usage:
 -- | ```purescript
--- | engine <- createEngine
--- |   { getNodes: Sim.getNodes mySimulation
--- |   , setNodes: \nodes -> Sim.setNodes nodes mySimulation
--- |   , interpolatePositions: \start target progress ->
--- |       Sim.interpolatePositionsInPlace start target progress mySimulation
--- |   , updatePositions: \positions ->
--- |       Sim.updatePositionsInPlace positions mySimulation
--- |   , applyRulesInPlace: \rules ->
--- |       Sim.applyRulesInPlace rules mySimulation
--- |   , reinitializeForces: reinitMyForces
--- |   , reheat: Sim.reheat mySimulation
--- |   }
+-- | -- Create adapter for your simulation
+-- | adapter = mkAdapter mySimulation
 -- |
--- | transitionTo treeFormScene engine
+-- | -- Create engine
+-- | engineRef <- createEngine adapter
+-- |
+-- | -- Transition to a scene
+-- | transitionTo treeFormScene engineRef
+-- |
+-- | -- Call tick from your simulation's tick handler
+-- | Sim.onTick (\_ -> tick engineRef) mySimulation
 -- | ```
 module PSD3.Scene.Engine
-  ( -- * Engine Type
+  ( -- * Engine Types
     SceneEngine
+  , EngineState  -- Required for type synonym
   , EngineAdapter
   -- * Creation
   , createEngine
   -- * Operations
   , transitionTo
   , tick
-  , tickWithDelta
   -- * Queries
   , getCurrentScene
   , isTransitioning
   , getTransitionProgress
+  -- * Configuration
+  , defaultTransitionDelta
   -- * Re-exports
   , module Types
   ) where
@@ -53,15 +50,14 @@ import Data.Maybe (Maybe(..), isJust)
 import Effect (Effect)
 import Effect.Ref (Ref)
 import Effect.Ref as Ref
-import PSD3.Scene.Transition (calculateProgress, isComplete)
 import PSD3.Scene.Types
   ( SceneConfig
-  , TransitionConfig
   , TransitionState
   , EngineMode(..)
   , PositionMap
   , NodeRule
   ) as Types
+import PSD3.Transition.Tick as Tick
 
 -- =============================================================================
 -- Engine Adapter
@@ -72,8 +68,23 @@ import PSD3.Scene.Types
 -- | The engine is generic - it doesn't know about `Sim.Simulation` directly.
 -- | Instead, you provide these adapter functions that do the actual work.
 -- |
--- | This keeps the engine decoupled and theoretically usable with
--- | non-D3 simulations.
+-- | Example adapter for ce-website:
+-- | ```purescript
+-- | mkAdapter :: CESimulation -> EngineAdapter SimNode
+-- | mkAdapter sim =
+-- |   { getNodes: Sim.getNodes sim
+-- |   , capturePositions: \nodes -> Object.fromFoldable $
+-- |       map (\n -> Tuple (show n.id) { x: n.x, y: n.y }) nodes
+-- |   , interpolatePositions: \start target progress ->
+-- |       Sim.interpolatePositionsInPlace start target progress sim
+-- |   , updatePositions: \positions ->
+-- |       Sim.updatePositionsInPlace positions sim
+-- |   , applyRulesInPlace: \rules ->
+-- |       applyRulesInPlace_ rules sim.nodes
+-- |   , reinitializeForces: reinitForcesFor sim
+-- |   , reheat: Sim.reheat sim
+-- |   }
+-- | ```
 type EngineAdapter node =
   { -- | Get current nodes from simulation
     getNodes :: Effect (Array node)
@@ -106,28 +117,22 @@ type EngineAdapter node =
 
 -- | Internal engine state
 type EngineState node =
-  { currentScene :: Maybe (Types.SceneConfig node)
-  , transition :: Maybe (Types.TransitionState node)
-  }
-
--- | Initial (empty) engine state
-initialState :: forall node. EngineState node
-initialState =
-  { currentScene: Nothing
-  , transition: Nothing
-  }
-
--- =============================================================================
--- Scene Engine
--- =============================================================================
-
--- | Opaque handle to the scene engine.
--- |
--- | Create with `createEngine`, then use `transitionTo` and `tick`.
-newtype SceneEngine node = SceneEngine
   { adapter :: EngineAdapter node
-  , stateRef :: Ref (EngineState node) -- see note in footer about use of Ref
+  , currentScene :: Maybe (Types.SceneConfig node)
+  , transition :: Maybe (Types.TransitionState node)
+  , transitionDelta :: Tick.TickDelta  -- Progress increment per tick
   }
+
+-- | The scene engine, stored in a Ref for mutation across tick callbacks
+type SceneEngine node = Ref (EngineState node)
+
+-- =============================================================================
+-- Configuration
+-- =============================================================================
+
+-- | Default transition delta: ~2 seconds at 60fps
+defaultTransitionDelta :: Tick.TickDelta
+defaultTransitionDelta = Tick.ticksForDuration 2000
 
 -- =============================================================================
 -- Creation
@@ -137,13 +142,18 @@ newtype SceneEngine node = SceneEngine
 -- |
 -- | The engine starts with no active scene. Call `transitionTo` to
 -- | begin your first scene transition.
+-- |
+-- | Uses default transition duration of ~2 seconds.
 createEngine
   :: forall node
    . EngineAdapter node
   -> Effect (SceneEngine node)
-createEngine adapter = do
-  stateRef <- Ref.new initialState
-  pure $ SceneEngine { adapter, stateRef }
+createEngine adapter = Ref.new
+  { adapter
+  , currentScene: Nothing
+  , transition: Nothing
+  , transitionDelta: defaultTransitionDelta
+  }
 
 -- =============================================================================
 -- Operations
@@ -152,86 +162,69 @@ createEngine adapter = do
 -- | Start a transition to a new scene.
 -- |
 -- | If a transition is already in progress, this is ignored.
--- | (Consider: should we allow interrupting transitions?)
 -- |
 -- | The transition lifecycle:
 -- | 1. Apply scene's `initRules` to prepare starting state
 -- | 2. Capture current positions as start positions
 -- | 3. Calculate target positions via scene's `layout` function
 -- | 4. Begin interpolation (handled by `tick`)
--- |
--- | Note: The node type must have `id`, `x`, `y` fields for position capture.
--- | This is enforced at the call site when constructing the EngineAdapter.
 transitionTo
   :: forall node
    . Types.SceneConfig node
   -> SceneEngine node
   -> Effect Unit
-transitionTo targetScene (SceneEngine { adapter, stateRef }) = do
-  state <- Ref.read stateRef
+transitionTo targetScene engineRef = do
+  state <- Ref.read engineRef
 
   -- Don't transition if already transitioning
   case state.transition of
     Just _ -> pure unit -- Already transitioning, ignore
     Nothing -> do
       -- Phase 1: Apply init rules
-      adapter.applyRulesInPlace targetScene.initRules
+      state.adapter.applyRulesInPlace targetScene.initRules
 
       -- Capture positions AFTER init rules (nodes may have moved)
-      nodesAfterInit <- adapter.getNodes
-      let startPositions = adapter.capturePositions nodesAfterInit
+      nodesAfterInit <- state.adapter.getNodes
+      let startPositions = state.adapter.capturePositions nodesAfterInit
 
       -- Calculate target positions
       let targetPositions = targetScene.layout nodesAfterInit
 
       -- Set transition state
       Ref.write
-        { currentScene: state.currentScene
-        , transition: Just
-            { targetScene
-            , startPositions
-            , targetPositions
-            , progress: 0.0
-            , elapsed: 0.0
+        ( state
+            { transition = Just
+                { targetScene
+                , startPositions
+                , targetPositions
+                , progress: 0.0
+                }
             }
-        }
-        stateRef
+        )
+        engineRef
 
       -- Start/continue the simulation tick loop
-      adapter.reheat
+      state.adapter.reheat
 
 -- | Advance the engine by one tick.
 -- |
 -- | Call this from your simulation's tick handler.
--- | Uses a default delta of ~16ms (60fps).
 -- |
 -- | Returns `true` if a transition is in progress, `false` if stable.
 tick
   :: forall node
    . SceneEngine node
   -> Effect Boolean
-tick = tickWithDelta 16.67 -- ~60fps
-
--- | Advance the engine by a specified time delta.
--- |
--- | Use this if you have actual frame timing available.
--- |
--- | Returns `true` if a transition is in progress, `false` if stable.
-tickWithDelta
-  :: forall node
-   . Number -- ^ Delta time in milliseconds
-  -> SceneEngine node
-  -> Effect Boolean
-tickWithDelta deltaMs (SceneEngine { adapter, stateRef }) = do
-  state <- Ref.read stateRef
+tick engineRef = do
+  state <- Ref.read engineRef
 
   case state.transition of
     Just t -> do
-      runInterpolationEngine deltaMs t adapter stateRef state
+      runInterpolationEngine t engineRef state
       pure true
 
     Nothing -> do
-      runPhysicsEngine state
+      runStableEngine state
       pure false
 
 -- =============================================================================
@@ -241,74 +234,73 @@ tickWithDelta deltaMs (SceneEngine { adapter, stateRef }) = do
 -- | Run the interpolation engine for one tick.
 runInterpolationEngine
   :: forall node
-   . Number -- ^ Delta time
-  -> Types.TransitionState node
-  -> EngineAdapter node
-  -> Ref (EngineState node)
+   . Types.TransitionState node
+  -> SceneEngine node
   -> EngineState node
   -> Effect Unit
-runInterpolationEngine deltaMs t adapter stateRef state = do
-  let newElapsed = t.elapsed + deltaMs
-  let config = t.targetScene.transition
+runInterpolationEngine t engineRef state = do
+  let newProgress = min 1.0 (t.progress + state.transitionDelta)
 
-  if isComplete config newElapsed then completeTransition t adapter stateRef state
-  else do
-    -- Calculate eased progress
-    let easedProgress = calculateProgress config newElapsed
+  if newProgress >= 1.0
+    then completeTransition t engineRef state
+    else do
+      -- Calculate eased progress
+      let easedProgress = Tick.easeInOutCubic newProgress
 
-    -- Interpolate positions
-    adapter.interpolatePositions t.startPositions t.targetPositions easedProgress
+      -- Interpolate positions
+      state.adapter.interpolatePositions t.startPositions t.targetPositions easedProgress
 
-    -- Update state with new elapsed time
-    Ref.write
-      (state { transition = Just (t { elapsed = newElapsed, progress = easedProgress }) })
-      stateRef
+      -- Update state with new progress
+      Ref.write
+        (state { transition = Just (t { progress = newProgress }) })
+        engineRef
 
 -- | Complete a transition and enter stable mode.
 completeTransition
   :: forall node
    . Types.TransitionState node
-  -> EngineAdapter node
-  -> Ref (EngineState node)
+  -> SceneEngine node
   -> EngineState node
   -> Effect Unit
-completeTransition t adapter stateRef _state = do
+completeTransition t engineRef state = do
   -- Set final positions
-  adapter.updatePositions t.targetPositions
+  state.adapter.updatePositions t.targetPositions
 
   -- Phase 3: Apply final rules
-  nodes <- adapter.getNodes
+  nodes <- state.adapter.getNodes
   let rules = t.targetScene.finalRules nodes
-  adapter.applyRulesInPlace rules
+  state.adapter.applyRulesInPlace rules
 
   -- Re-initialize forces (they cache values)
-  adapter.reinitializeForces
+  state.adapter.reinitializeForces
 
   -- Enter stable mode
   case t.targetScene.stableMode of
-    Types.Physics -> adapter.reheat
+    Types.Physics -> state.adapter.reheat
     Types.Static -> pure unit
 
   -- Update state: transition complete, scene is current
   Ref.write
-    { currentScene: Just t.targetScene
-    , transition: Nothing
-    }
-    stateRef
+    ( state
+        { currentScene = Just t.targetScene
+        , transition = Nothing
+        }
+    )
+    engineRef
 
 -- =============================================================================
--- Physics Engine (stable state)
+-- Stable Engine (after transitions)
 -- =============================================================================
 
--- | Run the physics engine (stable state).
+-- | Run the stable engine (no-op currently).
 -- |
--- | Currently a no-op - the D3 simulation runs itself.
--- | This function exists as a hook for future extensions.
-runPhysicsEngine
+-- | In Physics mode, D3 runs the simulation.
+-- | In Static mode, nothing needs to happen.
+runStableEngine
   :: forall node
    . EngineState node
   -> Effect Unit
-runPhysicsEngine _state = pure unit
+runStableEngine _state = pure unit
 
 -- =============================================================================
 -- Queries
@@ -319,8 +311,8 @@ getCurrentScene
   :: forall node
    . SceneEngine node
   -> Effect (Maybe (Types.SceneConfig node))
-getCurrentScene (SceneEngine { stateRef }) = do
-  state <- Ref.read stateRef
+getCurrentScene engineRef = do
+  state <- Ref.read engineRef
   pure state.currentScene
 
 -- | Check if a transition is in progress.
@@ -328,8 +320,8 @@ isTransitioning
   :: forall node
    . SceneEngine node
   -> Effect Boolean
-isTransitioning (SceneEngine { stateRef }) = do
-  state <- Ref.read stateRef
+isTransitioning engineRef = do
+  state <- Ref.read engineRef
   pure $ isJust state.transition
 
 -- | Get the current transition progress (0.0 to 1.0).
@@ -339,43 +331,6 @@ getTransitionProgress
   :: forall node
    . SceneEngine node
   -> Effect (Maybe Number)
-getTransitionProgress (SceneEngine { stateRef }) = do
-  state <- Ref.read stateRef
+getTransitionProgress engineRef = do
+  state <- Ref.read engineRef
   pure $ map _.progress state.transition
-
--- | Footer note about Ref
---| Why Ref Instead of State Monad?
-
---| The Ref is justified here. Looking at the tick function signature:
-
---| tick :: forall node. SceneEngine node -> Effect Boolean
-
---| The key constraint is that ticks are invoked by D3's internal timer (requestAnimationFrame), not by
---|  your code in a continuous monadic computation. The engine state must persist across:
-
---| 1. Multiple separate Effect invocations - each tick is its own Effect call
---| 2. External timing - D3 controls when ticks happen, not you
---| 3. Adapter functions in Effect - getNodes, interpolatePositions etc. are all effectful
-
---| Alternative Design (State Monad)
-
---| -- Would require:
---| tick :: EngineState node -> Effect (Tuple Boolean (EngineState node))
-
---| Problems with this:
---| 1. Caller must thread state through every tick callback manually
---| 2. No encapsulation - state management leaks to every call site
---| 3. Risk of desync - caller might forget to use updated state
---| 4. No actual purity gain - still mutable state, just externalized
-
---| The Ref Advantage
-
---| The Ref encapsulates mutable state within the engine handle:
---| - Clean API: just call tick engine
---| - Engine manages its own transition progress
---| - Caller doesn't need to know about internal state shape
---| - Mirrors D3's own design (simulation objects are mutable)
-
---| Bottom line: Ref is the right choice when state must persist across multiple effectful callbacks
---| driven by external timing (like requestAnimationFrame loops). State/StateT is better when you
---| control the entire computation sequence in a single monadic run.

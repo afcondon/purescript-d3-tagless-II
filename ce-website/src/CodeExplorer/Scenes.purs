@@ -128,7 +128,6 @@ treemapFormScene =
         }
       ]
   , stableMode: Physics
-  , cssTransition: Nothing
   }
 
 -- | Layout for Form Treemap: all nodes to their grid positions
@@ -171,7 +170,6 @@ treeFormScene =
         }
       ]
   , stableMode: Static
-  , cssTransition: Nothing
   }
 
 -- | Tree Run: Force-directed tree with link forces
@@ -192,7 +190,6 @@ treeRunScene =
         }
       ]
   , stableMode: Physics
-  , cssTransition: Nothing
   }
 
 -- | Layout for Form Tree: tree modules to tree positions, others stay put
@@ -235,7 +232,6 @@ radialTreeFormScene =
         }
       ]
   , stableMode: Static
-  , cssTransition: Nothing
   }
 
 -- | Layout for Radial Tree Form: tree modules to radial positions, others stay put
@@ -273,7 +269,6 @@ topoFormScene =
         }
       ]
   , stableMode: Static
-  , cssTransition: Nothing
   }
 
 -- | Layout for Form Topo: packages to topo positions, modules stay put

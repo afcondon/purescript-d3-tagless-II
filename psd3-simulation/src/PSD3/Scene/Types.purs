@@ -8,11 +8,10 @@
 -- | - A stable mode (physics simulation or static)
 -- |
 -- | The scene system supports smooth transitions between states
--- | using an interpolation engine for position animation.
+-- | using a tick-based interpolation engine for position animation.
 module PSD3.Scene.Types
   ( -- * Core Types
     SceneConfig
-  , TransitionConfig
   , TransitionState
   , EngineMode(..)
     -- * Position Types
@@ -20,8 +19,6 @@ module PSD3.Scene.Types
   , Position
     -- * Rule Types
   , NodeRule
-    -- * Defaults
-  , defaultTransition
   ) where
 
 import Prelude
@@ -83,25 +80,6 @@ instance showEngineMode :: Show EngineMode where
   show Static = "Static"
 
 -- =============================================================================
--- Transition Configuration
--- =============================================================================
-
--- | Configuration for position transitions.
--- |
--- | Controls the duration and easing of the interpolation engine.
-type TransitionConfig =
-  { duration :: Number              -- Duration in milliseconds
-  , easing :: Number -> Number      -- Easing function (0→1 input, 0→1 output)
-  }
-
--- | Default transition: 2 seconds with ease-in-out-cubic
-defaultTransition :: TransitionConfig
-defaultTransition =
-  { duration: 2000.0
-  , easing: Tick.easeInOutCubic
-  }
-
--- =============================================================================
 -- Scene Configuration
 -- =============================================================================
 
@@ -128,7 +106,6 @@ defaultTransition =
 -- |   , layout: \nodes -> computeTreePositions nodes
 -- |   , finalRules: \_ -> [ pinAtTreePositionsRule ]
 -- |   , stableMode: Static
--- |   , transition: defaultTransition
 -- |   }
 -- | ```
 type SceneConfig node =
@@ -146,7 +123,6 @@ type SceneConfig node =
 
   -- Stable state configuration
   , stableMode :: EngineMode
-  , transition :: TransitionConfig
   }
 
 -- =============================================================================
@@ -157,10 +133,10 @@ type SceneConfig node =
 -- |
 -- | Tracks the target scene, start/end positions, and current progress.
 -- | The interpolation engine updates progress each tick until complete.
+-- | Uses tick-based progress (0.0 to 1.0) rather than time-based elapsed.
 type TransitionState node =
   { targetScene :: SceneConfig node
   , startPositions :: PositionMap
   , targetPositions :: PositionMap
   , progress :: Tick.Progress        -- 0.0 to 1.0
-  , elapsed :: Number                -- Milliseconds elapsed
   }

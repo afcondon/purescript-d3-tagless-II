@@ -47,9 +47,7 @@ import PSD3.Simulation.Scene
   , SceneConfig
   , TransitionState
   , EngineMode(..)
-  , CSSConfig
   , PositionMap
-  , applyRules
   , applyRulesInPlace_
   ) as SimScene
 import PSD3.Transition.Tick as Tick
