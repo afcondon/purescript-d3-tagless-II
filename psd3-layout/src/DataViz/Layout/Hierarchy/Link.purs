@@ -5,13 +5,14 @@ module DataViz.Layout.Hierarchy.Link
   , linkBezierVertical
   , linkBezierHorizontal
   , linkBezierRadial
+  , linkBezierRadialCartesian
   , linkDiagonal
   , linkGenerator
   ) where
 
 import Prelude
 
-import Data.Number (cos, sin, pi)
+import Data.Number (atan2, cos, sin, sqrt, pi)
 
 -- | Link style for hierarchical layouts
 data LinkStyle
@@ -143,6 +144,44 @@ linkBezierRadial x1 y1 x2 y2 =
       <> show tx
       <> ","
       <> show ty
+
+-- | Generate SVG path for radial bezier link from Cartesian coordinates
+-- | Takes Cartesian (x, y) coordinates and converts to polar internally
+-- | to calculate proper radial control points.
+-- | Complements `linkBezierRadial` which takes angle/radius coordinates.
+linkBezierRadialCartesian :: Number -> Number -> Number -> Number -> String
+linkBezierRadialCartesian x1 y1 x2 y2 =
+  let
+    -- Convert cartesian back to polar to calculate proper radial control points
+    angle1 = atan2 y1 x1
+    radius1 = sqrt (x1 * x1 + y1 * y1)
+    angle2 = atan2 y2 x2
+    radius2 = sqrt (x2 * x2 + y2 * y2)
+
+    -- Control points in polar coordinates:
+    -- CP1: parent's angle, halfway to child's radius
+    -- CP2: child's angle, halfway to child's radius
+    midRadius = (radius1 + radius2) / 2.0
+
+    -- Convert control points back to cartesian
+    cp1x = midRadius * cos angle1
+    cp1y = midRadius * sin angle1
+    cp2x = midRadius * cos angle2
+    cp2y = midRadius * sin angle2
+  in
+    "M" <> show x1 <> "," <> show y1
+      <> "C"
+      <> show cp1x
+      <> ","
+      <> show cp1y
+      <> " "
+      <> show cp2x
+      <> ","
+      <> show cp2y
+      <> " "
+      <> show x2
+      <> ","
+      <> show y2
 
 -- | Generate SVG path for diagonal link (straight line)
 linkDiagonal :: Number -> Number -> Number -> Number -> String

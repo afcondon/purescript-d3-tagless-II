@@ -95,8 +95,8 @@ type SceneState =
   , currentScene :: Maybe (SimScene.SceneConfig SimNode)
   , transition :: Maybe (SimScene.TransitionState SimNode)
   , nodesGroupId :: GroupId
-  , linksGroupId :: Maybe GroupId      -- Set when force links should be updated
-  , treeLinksGroupId :: Maybe GroupId  -- Set when tree link paths should be updated during transition
+  , linksGroupId :: Maybe GroupId -- Set when force links should be updated
+  , treeLinksGroupId :: Maybe GroupId -- Set when tree link paths should be updated during transition
   }
 
 -- =============================================================================
@@ -192,20 +192,18 @@ transitionTo targetScene stateRef = do
       -- Calculate target positions for transition
       let targetPositions = targetScene.layout nodesAfterInit
 
-      -- Start CSS transition if configured
-      case targetScene.cssTransition of
-        Just css -> startCSSTransition css
-        Nothing -> pure unit
-
       -- Set transition state
-      Ref.write (state
-        { transition = Just
-            { targetScene
-            , startPositions
-            , targetPositions
-            , progress: 0.0
+      Ref.write
+        ( state
+            { transition = Just
+                { targetScene
+                , startPositions
+                , targetPositions
+                , progress: 0.0
+                }
             }
-        }) stateRef
+        )
+        stateRef
 
       -- Keep simulation ticking
       Sim.reheat state.simulation
@@ -214,13 +212,6 @@ transitionTo targetScene stateRef = do
 capturePositions :: Array SimNode -> SimScene.PositionMap
 capturePositions nodes =
   Object.fromFoldable $ map (\n -> Tuple (show n.id) { x: n.x, y: n.y }) nodes
-
--- | Start a CSS transition (sets CSS custom properties or classes)
-startCSSTransition :: SimScene.CSSConfig -> Effect Unit
-startCSSTransition css = do
-  log $ "[Scene] Starting CSS transition: " <> css.property <> " -> " <> css.targetValue
-  -- TODO: Implement via FFI - set transition property and target value
-  pure unit
 
 -- =============================================================================
 -- Tick Handler
@@ -259,15 +250,14 @@ runDumbEngine
 runDumbEngine t stateRef state = do
   let newProgress = min 1.0 (t.progress + transitionDelta)
 
-  if newProgress >= 1.0
-    then completeTransition t stateRef state
-    else do
-      -- Interpolate positions
-      let easedProgress = Tick.easeInOutCubic newProgress
-      Sim.interpolatePositionsInPlace t.startPositions t.targetPositions easedProgress state.simulation
+  if newProgress >= 1.0 then completeTransition t stateRef state
+  else do
+    -- Interpolate positions
+    let easedProgress = Tick.easeInOutCubic newProgress
+    Sim.interpolatePositionsInPlace t.startPositions t.targetPositions easedProgress state.simulation
 
-      -- Update progress
-      Ref.write (state { transition = Just (t { progress = newProgress }) }) stateRef
+    -- Update progress
+    Ref.write (state { transition = Just (t { progress = newProgress }) }) stateRef
 
 -- | Complete a transition - enter the target scene's stable mode
 completeTransition
@@ -283,7 +273,7 @@ completeTransition t stateRef state = do
 
   -- Phase 3: Apply final rules in place (unpin, set gridXY, etc.)
   nodes <- Sim.getNodes state.simulation
-  let rules = t.targetScene.finalRules nodes  -- Build rules with context
+  let rules = t.targetScene.finalRules nodes -- Build rules with context
   applyRulesInPlace rules state.simulation
 
   -- Log rule applications for debugging
@@ -302,18 +292,21 @@ completeTransition t stateRef state = do
       pure unit
 
   -- Update state
-  Ref.write (state
-    { currentScene = Just t.targetScene
-    , transition = Nothing
-    }) stateRef
+  Ref.write
+    ( state
+        { currentScene = Just t.targetScene
+        , transition = Nothing
+        }
+    )
+    stateRef
 
 -- | Run stable engine based on current scene mode
 runStableEngine :: SceneState -> Effect Unit
 runStableEngine state = case state.currentScene of
-  Nothing -> pure unit  -- No scene yet
+  Nothing -> pure unit -- No scene yet
   Just scene -> case scene.stableMode of
-    SimScene.Physics -> pure unit  -- Simulation is already running
-    SimScene.Static -> pure unit   -- Nothing to do
+    SimScene.Physics -> pure unit -- Simulation is already running
+    SimScene.Static -> pure unit -- Nothing to do
 
 -- =============================================================================
 -- View Transition Integration
@@ -326,7 +319,7 @@ onTickWithViewTransition
   :: Ref SceneState
   -> Ref VT.TransitionState
   -> Ref ViewState
-  -> String           -- nodesGroupSelector for VT.applyViewTransition
+  -> String -- nodesGroupSelector for VT.applyViewTransition
   -> Effect Unit
 onTickWithViewTransition sceneStateRef viewTransitionRef viewStateRef nodesSelector = do
   -- Read current view state

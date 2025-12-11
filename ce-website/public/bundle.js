@@ -136,20 +136,20 @@
   };
   var applySecond = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map52 = map(dictApply.Functor0());
+    var map53 = map(dictApply.Functor0());
     return function(a2) {
       return function(b10) {
-        return apply1(map52($$const(identity2))(a2))(b10);
+        return apply1(map53($$const(identity2))(a2))(b10);
       };
     };
   };
   var lift2 = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map52 = map(dictApply.Functor0());
+    var map53 = map(dictApply.Functor0());
     return function(f) {
       return function(a2) {
         return function(b10) {
-          return apply1(map52(f)(a2))(b10);
+          return apply1(map53(f)(a2))(b10);
         };
       };
     };
@@ -2255,7 +2255,7 @@
       };
     }
     return function(apply4) {
-      return function(map52) {
+      return function(map53) {
         return function(pure26) {
           return function(f) {
             return function(array4) {
@@ -2264,14 +2264,14 @@
                   case 0:
                     return pure26([]);
                   case 1:
-                    return map52(array1)(f(array4[bot]));
+                    return map53(array1)(f(array4[bot]));
                   case 2:
-                    return apply4(map52(array2)(f(array4[bot])))(f(array4[bot + 1]));
+                    return apply4(map53(array2)(f(array4[bot])))(f(array4[bot + 1]));
                   case 3:
-                    return apply4(apply4(map52(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
+                    return apply4(apply4(map53(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
                   default:
                     var pivot = bot + Math.floor((top3 - bot) / 4) * 2;
-                    return apply4(map52(concat2)(go2(bot, pivot)))(go2(pivot, top3));
+                    return apply4(map53(concat2)(go2(bot, pivot)))(go2(pivot, top3));
                 }
               }
               return go2(0, array4.length);
@@ -3054,10 +3054,10 @@
   var $$try = function(dictMonadError) {
     var catchError1 = catchError(dictMonadError);
     var Monad0 = dictMonadError.MonadThrow0().Monad0();
-    var map52 = map(Monad0.Bind1().Apply0().Functor0());
+    var map53 = map(Monad0.Bind1().Apply0().Functor0());
     var pure26 = pure(Monad0.Applicative0());
     return function(a2) {
-      return catchError1(map52(Right.create)(a2))(function($52) {
+      return catchError1(map53(Right.create)(a2))(function($52) {
         return pure26(Left.create($52));
       });
     };
@@ -3559,14 +3559,14 @@
     traverseWithIndex: function(dictApplicative) {
       var Apply0 = dictApplicative.Apply0();
       var apply4 = apply(Apply0);
-      var map52 = map(Apply0.Functor0());
+      var map53 = map(Apply0.Functor0());
       var pure112 = pure(dictApplicative);
       return function(f) {
         return function(ms) {
           return fold2(function(acc) {
             return function(k) {
               return function(v) {
-                return apply4(map52(flip(insert(k)))(acc))(f(k)(v));
+                return apply4(map53(flip(insert(k)))(acc))(f(k)(v));
               };
             };
           })(pure112(empty2))(ms);
@@ -4684,7 +4684,7 @@
                   break;
                 case SEQ:
                   status = CONTINUE;
-                  step4 = sequential3(util, supervisor, step4._1);
+                  step4 = sequential4(util, supervisor, step4._1);
                   break;
               }
               break;
@@ -5182,7 +5182,7 @@
         });
       };
     }
-    function sequential3(util, supervisor, par) {
+    function sequential4(util, supervisor, par) {
       return new Aff2(ASYNC, function(cb) {
         return function() {
           return runPar(util, supervisor, par, cb);
@@ -5273,7 +5273,7 @@
   // output/Control.Parallel/index.js
   var identity10 = /* @__PURE__ */ identity(categoryFn);
   var parTraverse_ = function(dictParallel) {
-    var sequential3 = sequential(dictParallel);
+    var sequential4 = sequential(dictParallel);
     var parallel4 = parallel(dictParallel);
     return function(dictApplicative) {
       var traverse_8 = traverse_(dictApplicative);
@@ -5284,7 +5284,7 @@
             return parallel4(f($53));
           });
           return function($52) {
-            return sequential3($51($52));
+            return sequential4($51($52));
           };
         };
       };
@@ -13262,6 +13262,15 @@
     return (reverse3 ? -1 : 1) * (inc < 0 ? 1 / -inc : inc);
   }
 
+  // node_modules/d3-array/src/quantile.js
+  function quantileSorted(values3, p2, valueof = number) {
+    if (!(n = values3.length) || isNaN(p2 = +p2)) return;
+    if (p2 <= 0 || n < 2) return +valueof(values3[0], 0, values3);
+    if (p2 >= 1) return +valueof(values3[n - 1], n - 1, values3);
+    var n, i2 = (n - 1) * p2, i0 = Math.floor(i2), value0 = +valueof(values3[i0], i0, values3), value1 = +valueof(values3[i0 + 1], i0 + 1, values3);
+    return value0 + (value1 - value0) * (i2 - i0);
+  }
+
   // node_modules/d3-array/src/range.js
   function range3(start4, stop, step4) {
     start4 = +start4, stop = +stop, step4 = (n = arguments.length) < 2 ? (stop = start4, start4 = 0, 1) : n < 3 ? 1 : +step4;
@@ -13735,9 +13744,9 @@
   }
 
   // node_modules/d3-interpolate/src/basis.js
-  function basis(t1, v0, v1, v2, v3) {
-    var t2 = t1 * t1, t3 = t2 * t1;
-    return ((1 - 3 * t1 + 3 * t2 - t3) * v0 + (4 - 6 * t2 + 3 * t3) * v1 + (1 + 3 * t1 + 3 * t2 - 3 * t3) * v2 + t3 * v3) / 6;
+  function basis(t12, v0, v1, v2, v3) {
+    var t2 = t12 * t12, t3 = t2 * t12;
+    return ((1 - 3 * t12 + 3 * t2 - t3) * v0 + (4 - 6 * t2 + 3 * t3) * v1 + (1 + 3 * t12 + 3 * t2 - 3 * t3) * v2 + t3 * v3) / 6;
   }
   function basis_default(values3) {
     var n = values3.length - 1;
@@ -14308,8 +14317,8 @@
   // node_modules/d3-format/src/locale.js
   var map29 = Array.prototype.map;
   var prefixes = ["y", "z", "a", "f", "p", "n", "\xB5", "m", "", "k", "M", "G", "T", "P", "E", "Z", "Y"];
-  function locale_default(locale2) {
-    var group4 = locale2.grouping === void 0 || locale2.thousands === void 0 ? identity_default : formatGroup_default(map29.call(locale2.grouping, Number), locale2.thousands + ""), currencyPrefix = locale2.currency === void 0 ? "" : locale2.currency[0] + "", currencySuffix = locale2.currency === void 0 ? "" : locale2.currency[1] + "", decimal = locale2.decimal === void 0 ? "." : locale2.decimal + "", numerals = locale2.numerals === void 0 ? identity_default : formatNumerals_default(map29.call(locale2.numerals, String)), percent = locale2.percent === void 0 ? "%" : locale2.percent + "", minus = locale2.minus === void 0 ? "\u2212" : locale2.minus + "", nan2 = locale2.nan === void 0 ? "NaN" : locale2.nan + "";
+  function locale_default(locale3) {
+    var group4 = locale3.grouping === void 0 || locale3.thousands === void 0 ? identity_default : formatGroup_default(map29.call(locale3.grouping, Number), locale3.thousands + ""), currencyPrefix = locale3.currency === void 0 ? "" : locale3.currency[0] + "", currencySuffix = locale3.currency === void 0 ? "" : locale3.currency[1] + "", decimal = locale3.decimal === void 0 ? "." : locale3.decimal + "", numerals = locale3.numerals === void 0 ? identity_default : formatNumerals_default(map29.call(locale3.numerals, String)), percent = locale3.percent === void 0 ? "%" : locale3.percent + "", minus = locale3.minus === void 0 ? "\u2212" : locale3.minus + "", nan2 = locale3.nan === void 0 ? "NaN" : locale3.nan + "";
     function newFormat(specifier) {
       specifier = formatSpecifier(specifier);
       var fill4 = specifier.fill, align2 = specifier.align, sign2 = specifier.sign, symbol = specifier.symbol, zero4 = specifier.zero, width11 = specifier.width, comma = specifier.comma, precision = specifier.precision, trim2 = specifier.trim, type = specifier.type;
@@ -14679,6 +14688,1043 @@
     return pow3.apply(null, arguments).exponent(0.5);
   }
 
+  // node_modules/d3-scale/src/quantile.js
+  function quantile2() {
+    var domain2 = [], range6 = [], thresholds = [], unknown;
+    function rescale() {
+      var i2 = 0, n = Math.max(1, range6.length);
+      thresholds = new Array(n - 1);
+      while (++i2 < n) thresholds[i2 - 1] = quantileSorted(domain2, i2 / n);
+      return scale;
+    }
+    function scale(x6) {
+      return x6 == null || isNaN(x6 = +x6) ? unknown : range6[bisect_default(thresholds, x6)];
+    }
+    scale.invertExtent = function(y6) {
+      var i2 = range6.indexOf(y6);
+      return i2 < 0 ? [NaN, NaN] : [
+        i2 > 0 ? thresholds[i2 - 1] : domain2[0],
+        i2 < thresholds.length ? thresholds[i2] : domain2[domain2.length - 1]
+      ];
+    };
+    scale.domain = function(_) {
+      if (!arguments.length) return domain2.slice();
+      domain2 = [];
+      for (let d3 of _) if (d3 != null && !isNaN(d3 = +d3)) domain2.push(d3);
+      domain2.sort(ascending);
+      return rescale();
+    };
+    scale.range = function(_) {
+      return arguments.length ? (range6 = Array.from(_), rescale()) : range6.slice();
+    };
+    scale.unknown = function(_) {
+      return arguments.length ? (unknown = _, scale) : unknown;
+    };
+    scale.quantiles = function() {
+      return thresholds.slice();
+    };
+    scale.copy = function() {
+      return quantile2().domain(domain2).range(range6).unknown(unknown);
+    };
+    return initRange.apply(scale, arguments);
+  }
+
+  // node_modules/d3-scale/src/quantize.js
+  function quantize() {
+    var x0 = 0, x13 = 1, n = 1, domain2 = [0.5], range6 = [0, 1], unknown;
+    function scale(x6) {
+      return x6 != null && x6 <= x6 ? range6[bisect_default(domain2, x6, 0, n)] : unknown;
+    }
+    function rescale() {
+      var i2 = -1;
+      domain2 = new Array(n);
+      while (++i2 < n) domain2[i2] = ((i2 + 1) * x13 - (i2 - n) * x0) / (n + 1);
+      return scale;
+    }
+    scale.domain = function(_) {
+      return arguments.length ? ([x0, x13] = _, x0 = +x0, x13 = +x13, rescale()) : [x0, x13];
+    };
+    scale.range = function(_) {
+      return arguments.length ? (n = (range6 = Array.from(_)).length - 1, rescale()) : range6.slice();
+    };
+    scale.invertExtent = function(y6) {
+      var i2 = range6.indexOf(y6);
+      return i2 < 0 ? [NaN, NaN] : i2 < 1 ? [x0, domain2[0]] : i2 >= n ? [domain2[n - 1], x13] : [domain2[i2 - 1], domain2[i2]];
+    };
+    scale.unknown = function(_) {
+      return arguments.length ? (unknown = _, scale) : scale;
+    };
+    scale.thresholds = function() {
+      return domain2.slice();
+    };
+    scale.copy = function() {
+      return quantize().domain([x0, x13]).range(range6).unknown(unknown);
+    };
+    return initRange.apply(linearish(scale), arguments);
+  }
+
+  // node_modules/d3-time/src/interval.js
+  var t0 = /* @__PURE__ */ new Date();
+  var t1 = /* @__PURE__ */ new Date();
+  function newInterval(floori, offseti, count, field) {
+    function interval2(date2) {
+      return floori(date2 = arguments.length === 0 ? /* @__PURE__ */ new Date() : /* @__PURE__ */ new Date(+date2)), date2;
+    }
+    interval2.floor = function(date2) {
+      return floori(date2 = /* @__PURE__ */ new Date(+date2)), date2;
+    };
+    interval2.ceil = function(date2) {
+      return floori(date2 = new Date(date2 - 1)), offseti(date2, 1), floori(date2), date2;
+    };
+    interval2.round = function(date2) {
+      var d0 = interval2(date2), d1 = interval2.ceil(date2);
+      return date2 - d0 < d1 - date2 ? d0 : d1;
+    };
+    interval2.offset = function(date2, step4) {
+      return offseti(date2 = /* @__PURE__ */ new Date(+date2), step4 == null ? 1 : Math.floor(step4)), date2;
+    };
+    interval2.range = function(start4, stop, step4) {
+      var range6 = [], previous;
+      start4 = interval2.ceil(start4);
+      step4 = step4 == null ? 1 : Math.floor(step4);
+      if (!(start4 < stop) || !(step4 > 0)) return range6;
+      do
+        range6.push(previous = /* @__PURE__ */ new Date(+start4)), offseti(start4, step4), floori(start4);
+      while (previous < start4 && start4 < stop);
+      return range6;
+    };
+    interval2.filter = function(test) {
+      return newInterval(function(date2) {
+        if (date2 >= date2) while (floori(date2), !test(date2)) date2.setTime(date2 - 1);
+      }, function(date2, step4) {
+        if (date2 >= date2) {
+          if (step4 < 0) while (++step4 <= 0) {
+            while (offseti(date2, -1), !test(date2)) {
+            }
+          }
+          else while (--step4 >= 0) {
+            while (offseti(date2, 1), !test(date2)) {
+            }
+          }
+        }
+      });
+    };
+    if (count) {
+      interval2.count = function(start4, end) {
+        t0.setTime(+start4), t1.setTime(+end);
+        floori(t0), floori(t1);
+        return Math.floor(count(t0, t1));
+      };
+      interval2.every = function(step4) {
+        step4 = Math.floor(step4);
+        return !isFinite(step4) || !(step4 > 0) ? null : !(step4 > 1) ? interval2 : interval2.filter(field ? function(d3) {
+          return field(d3) % step4 === 0;
+        } : function(d3) {
+          return interval2.count(0, d3) % step4 === 0;
+        });
+      };
+    }
+    return interval2;
+  }
+
+  // node_modules/d3-time/src/millisecond.js
+  var millisecond = newInterval(function() {
+  }, function(date2, step4) {
+    date2.setTime(+date2 + step4);
+  }, function(start4, end) {
+    return end - start4;
+  });
+  millisecond.every = function(k) {
+    k = Math.floor(k);
+    if (!isFinite(k) || !(k > 0)) return null;
+    if (!(k > 1)) return millisecond;
+    return newInterval(function(date2) {
+      date2.setTime(Math.floor(date2 / k) * k);
+    }, function(date2, step4) {
+      date2.setTime(+date2 + step4 * k);
+    }, function(start4, end) {
+      return (end - start4) / k;
+    });
+  };
+  var millisecond_default = millisecond;
+  var milliseconds = millisecond.range;
+
+  // node_modules/d3-time/src/duration.js
+  var durationSecond = 1e3;
+  var durationMinute = durationSecond * 60;
+  var durationHour = durationMinute * 60;
+  var durationDay = durationHour * 24;
+  var durationWeek = durationDay * 7;
+  var durationMonth = durationDay * 30;
+  var durationYear = durationDay * 365;
+
+  // node_modules/d3-time/src/second.js
+  var second = newInterval(function(date2) {
+    date2.setTime(date2 - date2.getMilliseconds());
+  }, function(date2, step4) {
+    date2.setTime(+date2 + step4 * durationSecond);
+  }, function(start4, end) {
+    return (end - start4) / durationSecond;
+  }, function(date2) {
+    return date2.getUTCSeconds();
+  });
+  var second_default = second;
+  var seconds = second.range;
+
+  // node_modules/d3-time/src/minute.js
+  var minute = newInterval(function(date2) {
+    date2.setTime(date2 - date2.getMilliseconds() - date2.getSeconds() * durationSecond);
+  }, function(date2, step4) {
+    date2.setTime(+date2 + step4 * durationMinute);
+  }, function(start4, end) {
+    return (end - start4) / durationMinute;
+  }, function(date2) {
+    return date2.getMinutes();
+  });
+  var minute_default = minute;
+  var minutes = minute.range;
+
+  // node_modules/d3-time/src/hour.js
+  var hour = newInterval(function(date2) {
+    date2.setTime(date2 - date2.getMilliseconds() - date2.getSeconds() * durationSecond - date2.getMinutes() * durationMinute);
+  }, function(date2, step4) {
+    date2.setTime(+date2 + step4 * durationHour);
+  }, function(start4, end) {
+    return (end - start4) / durationHour;
+  }, function(date2) {
+    return date2.getHours();
+  });
+  var hour_default = hour;
+  var hours = hour.range;
+
+  // node_modules/d3-time/src/day.js
+  var day = newInterval(
+    (date2) => date2.setHours(0, 0, 0, 0),
+    (date2, step4) => date2.setDate(date2.getDate() + step4),
+    (start4, end) => (end - start4 - (end.getTimezoneOffset() - start4.getTimezoneOffset()) * durationMinute) / durationDay,
+    (date2) => date2.getDate() - 1
+  );
+  var day_default = day;
+  var days = day.range;
+
+  // node_modules/d3-time/src/week.js
+  function weekday(i2) {
+    return newInterval(function(date2) {
+      date2.setDate(date2.getDate() - (date2.getDay() + 7 - i2) % 7);
+      date2.setHours(0, 0, 0, 0);
+    }, function(date2, step4) {
+      date2.setDate(date2.getDate() + step4 * 7);
+    }, function(start4, end) {
+      return (end - start4 - (end.getTimezoneOffset() - start4.getTimezoneOffset()) * durationMinute) / durationWeek;
+    });
+  }
+  var sunday = weekday(0);
+  var monday = weekday(1);
+  var tuesday = weekday(2);
+  var wednesday = weekday(3);
+  var thursday = weekday(4);
+  var friday = weekday(5);
+  var saturday = weekday(6);
+  var sundays = sunday.range;
+  var mondays = monday.range;
+  var tuesdays = tuesday.range;
+  var wednesdays = wednesday.range;
+  var thursdays = thursday.range;
+  var fridays = friday.range;
+  var saturdays = saturday.range;
+
+  // node_modules/d3-time/src/month.js
+  var month = newInterval(function(date2) {
+    date2.setDate(1);
+    date2.setHours(0, 0, 0, 0);
+  }, function(date2, step4) {
+    date2.setMonth(date2.getMonth() + step4);
+  }, function(start4, end) {
+    return end.getMonth() - start4.getMonth() + (end.getFullYear() - start4.getFullYear()) * 12;
+  }, function(date2) {
+    return date2.getMonth();
+  });
+  var month_default = month;
+  var months = month.range;
+
+  // node_modules/d3-time/src/year.js
+  var year = newInterval(function(date2) {
+    date2.setMonth(0, 1);
+    date2.setHours(0, 0, 0, 0);
+  }, function(date2, step4) {
+    date2.setFullYear(date2.getFullYear() + step4);
+  }, function(start4, end) {
+    return end.getFullYear() - start4.getFullYear();
+  }, function(date2) {
+    return date2.getFullYear();
+  });
+  year.every = function(k) {
+    return !isFinite(k = Math.floor(k)) || !(k > 0) ? null : newInterval(function(date2) {
+      date2.setFullYear(Math.floor(date2.getFullYear() / k) * k);
+      date2.setMonth(0, 1);
+      date2.setHours(0, 0, 0, 0);
+    }, function(date2, step4) {
+      date2.setFullYear(date2.getFullYear() + step4 * k);
+    });
+  };
+  var year_default = year;
+  var years = year.range;
+
+  // node_modules/d3-time/src/utcMinute.js
+  var utcMinute = newInterval(function(date2) {
+    date2.setUTCSeconds(0, 0);
+  }, function(date2, step4) {
+    date2.setTime(+date2 + step4 * durationMinute);
+  }, function(start4, end) {
+    return (end - start4) / durationMinute;
+  }, function(date2) {
+    return date2.getUTCMinutes();
+  });
+  var utcMinute_default = utcMinute;
+  var utcMinutes = utcMinute.range;
+
+  // node_modules/d3-time/src/utcHour.js
+  var utcHour = newInterval(function(date2) {
+    date2.setUTCMinutes(0, 0, 0);
+  }, function(date2, step4) {
+    date2.setTime(+date2 + step4 * durationHour);
+  }, function(start4, end) {
+    return (end - start4) / durationHour;
+  }, function(date2) {
+    return date2.getUTCHours();
+  });
+  var utcHour_default = utcHour;
+  var utcHours = utcHour.range;
+
+  // node_modules/d3-time/src/utcDay.js
+  var utcDay = newInterval(function(date2) {
+    date2.setUTCHours(0, 0, 0, 0);
+  }, function(date2, step4) {
+    date2.setUTCDate(date2.getUTCDate() + step4);
+  }, function(start4, end) {
+    return (end - start4) / durationDay;
+  }, function(date2) {
+    return date2.getUTCDate() - 1;
+  });
+  var utcDay_default = utcDay;
+  var utcDays = utcDay.range;
+
+  // node_modules/d3-time/src/utcWeek.js
+  function utcWeekday(i2) {
+    return newInterval(function(date2) {
+      date2.setUTCDate(date2.getUTCDate() - (date2.getUTCDay() + 7 - i2) % 7);
+      date2.setUTCHours(0, 0, 0, 0);
+    }, function(date2, step4) {
+      date2.setUTCDate(date2.getUTCDate() + step4 * 7);
+    }, function(start4, end) {
+      return (end - start4) / durationWeek;
+    });
+  }
+  var utcSunday = utcWeekday(0);
+  var utcMonday = utcWeekday(1);
+  var utcTuesday = utcWeekday(2);
+  var utcWednesday = utcWeekday(3);
+  var utcThursday = utcWeekday(4);
+  var utcFriday = utcWeekday(5);
+  var utcSaturday = utcWeekday(6);
+  var utcSundays = utcSunday.range;
+  var utcMondays = utcMonday.range;
+  var utcTuesdays = utcTuesday.range;
+  var utcWednesdays = utcWednesday.range;
+  var utcThursdays = utcThursday.range;
+  var utcFridays = utcFriday.range;
+  var utcSaturdays = utcSaturday.range;
+
+  // node_modules/d3-time/src/utcMonth.js
+  var utcMonth = newInterval(function(date2) {
+    date2.setUTCDate(1);
+    date2.setUTCHours(0, 0, 0, 0);
+  }, function(date2, step4) {
+    date2.setUTCMonth(date2.getUTCMonth() + step4);
+  }, function(start4, end) {
+    return end.getUTCMonth() - start4.getUTCMonth() + (end.getUTCFullYear() - start4.getUTCFullYear()) * 12;
+  }, function(date2) {
+    return date2.getUTCMonth();
+  });
+  var utcMonth_default = utcMonth;
+  var utcMonths = utcMonth.range;
+
+  // node_modules/d3-time/src/utcYear.js
+  var utcYear = newInterval(function(date2) {
+    date2.setUTCMonth(0, 1);
+    date2.setUTCHours(0, 0, 0, 0);
+  }, function(date2, step4) {
+    date2.setUTCFullYear(date2.getUTCFullYear() + step4);
+  }, function(start4, end) {
+    return end.getUTCFullYear() - start4.getUTCFullYear();
+  }, function(date2) {
+    return date2.getUTCFullYear();
+  });
+  utcYear.every = function(k) {
+    return !isFinite(k = Math.floor(k)) || !(k > 0) ? null : newInterval(function(date2) {
+      date2.setUTCFullYear(Math.floor(date2.getUTCFullYear() / k) * k);
+      date2.setUTCMonth(0, 1);
+      date2.setUTCHours(0, 0, 0, 0);
+    }, function(date2, step4) {
+      date2.setUTCFullYear(date2.getUTCFullYear() + step4 * k);
+    });
+  };
+  var utcYear_default = utcYear;
+  var utcYears = utcYear.range;
+
+  // node_modules/d3-time/src/ticks.js
+  function ticker(year2, month2, week, day2, hour2, minute2) {
+    const tickIntervals = [
+      [second_default, 1, durationSecond],
+      [second_default, 5, 5 * durationSecond],
+      [second_default, 15, 15 * durationSecond],
+      [second_default, 30, 30 * durationSecond],
+      [minute2, 1, durationMinute],
+      [minute2, 5, 5 * durationMinute],
+      [minute2, 15, 15 * durationMinute],
+      [minute2, 30, 30 * durationMinute],
+      [hour2, 1, durationHour],
+      [hour2, 3, 3 * durationHour],
+      [hour2, 6, 6 * durationHour],
+      [hour2, 12, 12 * durationHour],
+      [day2, 1, durationDay],
+      [day2, 2, 2 * durationDay],
+      [week, 1, durationWeek],
+      [month2, 1, durationMonth],
+      [month2, 3, 3 * durationMonth],
+      [year2, 1, durationYear]
+    ];
+    function ticks3(start4, stop, count) {
+      const reverse3 = stop < start4;
+      if (reverse3) [start4, stop] = [stop, start4];
+      const interval2 = count && typeof count.range === "function" ? count : tickInterval(start4, stop, count);
+      const ticks4 = interval2 ? interval2.range(start4, +stop + 1) : [];
+      return reverse3 ? ticks4.reverse() : ticks4;
+    }
+    function tickInterval(start4, stop, count) {
+      const target6 = Math.abs(stop - start4) / count;
+      const i2 = bisector(([, , step5]) => step5).right(tickIntervals, target6);
+      if (i2 === tickIntervals.length) return year2.every(tickStep(start4 / durationYear, stop / durationYear, count));
+      if (i2 === 0) return millisecond_default.every(Math.max(tickStep(start4, stop, count), 1));
+      const [t, step4] = tickIntervals[target6 / tickIntervals[i2 - 1][2] < tickIntervals[i2][2] / target6 ? i2 - 1 : i2];
+      return t.every(step4);
+    }
+    return [ticks3, tickInterval];
+  }
+  var [utcTicks, utcTickInterval] = ticker(utcYear_default, utcMonth_default, utcSunday, utcDay_default, utcHour_default, utcMinute_default);
+  var [timeTicks, timeTickInterval] = ticker(year_default, month_default, sunday, day_default, hour_default, minute_default);
+
+  // node_modules/d3-time-format/src/locale.js
+  function localDate(d3) {
+    if (0 <= d3.y && d3.y < 100) {
+      var date2 = new Date(-1, d3.m, d3.d, d3.H, d3.M, d3.S, d3.L);
+      date2.setFullYear(d3.y);
+      return date2;
+    }
+    return new Date(d3.y, d3.m, d3.d, d3.H, d3.M, d3.S, d3.L);
+  }
+  function utcDate(d3) {
+    if (0 <= d3.y && d3.y < 100) {
+      var date2 = new Date(Date.UTC(-1, d3.m, d3.d, d3.H, d3.M, d3.S, d3.L));
+      date2.setUTCFullYear(d3.y);
+      return date2;
+    }
+    return new Date(Date.UTC(d3.y, d3.m, d3.d, d3.H, d3.M, d3.S, d3.L));
+  }
+  function newDate(y6, m, d3) {
+    return { y: y6, m, d: d3, H: 0, M: 0, S: 0, L: 0 };
+  }
+  function formatLocale(locale3) {
+    var locale_dateTime = locale3.dateTime, locale_date = locale3.date, locale_time = locale3.time, locale_periods = locale3.periods, locale_weekdays = locale3.days, locale_shortWeekdays = locale3.shortDays, locale_months = locale3.months, locale_shortMonths = locale3.shortMonths;
+    var periodRe = formatRe(locale_periods), periodLookup = formatLookup(locale_periods), weekdayRe = formatRe(locale_weekdays), weekdayLookup = formatLookup(locale_weekdays), shortWeekdayRe = formatRe(locale_shortWeekdays), shortWeekdayLookup = formatLookup(locale_shortWeekdays), monthRe = formatRe(locale_months), monthLookup = formatLookup(locale_months), shortMonthRe = formatRe(locale_shortMonths), shortMonthLookup = formatLookup(locale_shortMonths);
+    var formats = {
+      "a": formatShortWeekday,
+      "A": formatWeekday,
+      "b": formatShortMonth,
+      "B": formatMonth,
+      "c": null,
+      "d": formatDayOfMonth,
+      "e": formatDayOfMonth,
+      "f": formatMicroseconds,
+      "g": formatYearISO,
+      "G": formatFullYearISO,
+      "H": formatHour24,
+      "I": formatHour12,
+      "j": formatDayOfYear,
+      "L": formatMilliseconds,
+      "m": formatMonthNumber,
+      "M": formatMinutes,
+      "p": formatPeriod,
+      "q": formatQuarter,
+      "Q": formatUnixTimestamp,
+      "s": formatUnixTimestampSeconds,
+      "S": formatSeconds,
+      "u": formatWeekdayNumberMonday,
+      "U": formatWeekNumberSunday,
+      "V": formatWeekNumberISO,
+      "w": formatWeekdayNumberSunday,
+      "W": formatWeekNumberMonday,
+      "x": null,
+      "X": null,
+      "y": formatYear,
+      "Y": formatFullYear,
+      "Z": formatZone,
+      "%": formatLiteralPercent
+    };
+    var utcFormats = {
+      "a": formatUTCShortWeekday,
+      "A": formatUTCWeekday,
+      "b": formatUTCShortMonth,
+      "B": formatUTCMonth,
+      "c": null,
+      "d": formatUTCDayOfMonth,
+      "e": formatUTCDayOfMonth,
+      "f": formatUTCMicroseconds,
+      "g": formatUTCYearISO,
+      "G": formatUTCFullYearISO,
+      "H": formatUTCHour24,
+      "I": formatUTCHour12,
+      "j": formatUTCDayOfYear,
+      "L": formatUTCMilliseconds,
+      "m": formatUTCMonthNumber,
+      "M": formatUTCMinutes,
+      "p": formatUTCPeriod,
+      "q": formatUTCQuarter,
+      "Q": formatUnixTimestamp,
+      "s": formatUnixTimestampSeconds,
+      "S": formatUTCSeconds,
+      "u": formatUTCWeekdayNumberMonday,
+      "U": formatUTCWeekNumberSunday,
+      "V": formatUTCWeekNumberISO,
+      "w": formatUTCWeekdayNumberSunday,
+      "W": formatUTCWeekNumberMonday,
+      "x": null,
+      "X": null,
+      "y": formatUTCYear,
+      "Y": formatUTCFullYear,
+      "Z": formatUTCZone,
+      "%": formatLiteralPercent
+    };
+    var parses = {
+      "a": parseShortWeekday,
+      "A": parseWeekday,
+      "b": parseShortMonth,
+      "B": parseMonth,
+      "c": parseLocaleDateTime,
+      "d": parseDayOfMonth,
+      "e": parseDayOfMonth,
+      "f": parseMicroseconds,
+      "g": parseYear,
+      "G": parseFullYear,
+      "H": parseHour24,
+      "I": parseHour24,
+      "j": parseDayOfYear,
+      "L": parseMilliseconds,
+      "m": parseMonthNumber,
+      "M": parseMinutes,
+      "p": parsePeriod,
+      "q": parseQuarter,
+      "Q": parseUnixTimestamp,
+      "s": parseUnixTimestampSeconds,
+      "S": parseSeconds,
+      "u": parseWeekdayNumberMonday,
+      "U": parseWeekNumberSunday,
+      "V": parseWeekNumberISO,
+      "w": parseWeekdayNumberSunday,
+      "W": parseWeekNumberMonday,
+      "x": parseLocaleDate,
+      "X": parseLocaleTime,
+      "y": parseYear,
+      "Y": parseFullYear,
+      "Z": parseZone,
+      "%": parseLiteralPercent
+    };
+    formats.x = newFormat(locale_date, formats);
+    formats.X = newFormat(locale_time, formats);
+    formats.c = newFormat(locale_dateTime, formats);
+    utcFormats.x = newFormat(locale_date, utcFormats);
+    utcFormats.X = newFormat(locale_time, utcFormats);
+    utcFormats.c = newFormat(locale_dateTime, utcFormats);
+    function newFormat(specifier, formats2) {
+      return function(date2) {
+        var string = [], i2 = -1, j = 0, n = specifier.length, c, pad2, format2;
+        if (!(date2 instanceof Date)) date2 = /* @__PURE__ */ new Date(+date2);
+        while (++i2 < n) {
+          if (specifier.charCodeAt(i2) === 37) {
+            string.push(specifier.slice(j, i2));
+            if ((pad2 = pads[c = specifier.charAt(++i2)]) != null) c = specifier.charAt(++i2);
+            else pad2 = c === "e" ? " " : "0";
+            if (format2 = formats2[c]) c = format2(date2, pad2);
+            string.push(c);
+            j = i2 + 1;
+          }
+        }
+        string.push(specifier.slice(j, i2));
+        return string.join("");
+      };
+    }
+    function newParse(specifier, Z) {
+      return function(string) {
+        var d3 = newDate(1900, void 0, 1), i2 = parseSpecifier(d3, specifier, string += "", 0), week, day2;
+        if (i2 != string.length) return null;
+        if ("Q" in d3) return new Date(d3.Q);
+        if ("s" in d3) return new Date(d3.s * 1e3 + ("L" in d3 ? d3.L : 0));
+        if (Z && !("Z" in d3)) d3.Z = 0;
+        if ("p" in d3) d3.H = d3.H % 12 + d3.p * 12;
+        if (d3.m === void 0) d3.m = "q" in d3 ? d3.q : 0;
+        if ("V" in d3) {
+          if (d3.V < 1 || d3.V > 53) return null;
+          if (!("w" in d3)) d3.w = 1;
+          if ("Z" in d3) {
+            week = utcDate(newDate(d3.y, 0, 1)), day2 = week.getUTCDay();
+            week = day2 > 4 || day2 === 0 ? utcMonday.ceil(week) : utcMonday(week);
+            week = utcDay_default.offset(week, (d3.V - 1) * 7);
+            d3.y = week.getUTCFullYear();
+            d3.m = week.getUTCMonth();
+            d3.d = week.getUTCDate() + (d3.w + 6) % 7;
+          } else {
+            week = localDate(newDate(d3.y, 0, 1)), day2 = week.getDay();
+            week = day2 > 4 || day2 === 0 ? monday.ceil(week) : monday(week);
+            week = day_default.offset(week, (d3.V - 1) * 7);
+            d3.y = week.getFullYear();
+            d3.m = week.getMonth();
+            d3.d = week.getDate() + (d3.w + 6) % 7;
+          }
+        } else if ("W" in d3 || "U" in d3) {
+          if (!("w" in d3)) d3.w = "u" in d3 ? d3.u % 7 : "W" in d3 ? 1 : 0;
+          day2 = "Z" in d3 ? utcDate(newDate(d3.y, 0, 1)).getUTCDay() : localDate(newDate(d3.y, 0, 1)).getDay();
+          d3.m = 0;
+          d3.d = "W" in d3 ? (d3.w + 6) % 7 + d3.W * 7 - (day2 + 5) % 7 : d3.w + d3.U * 7 - (day2 + 6) % 7;
+        }
+        if ("Z" in d3) {
+          d3.H += d3.Z / 100 | 0;
+          d3.M += d3.Z % 100;
+          return utcDate(d3);
+        }
+        return localDate(d3);
+      };
+    }
+    function parseSpecifier(d3, specifier, string, j) {
+      var i2 = 0, n = specifier.length, m = string.length, c, parse7;
+      while (i2 < n) {
+        if (j >= m) return -1;
+        c = specifier.charCodeAt(i2++);
+        if (c === 37) {
+          c = specifier.charAt(i2++);
+          parse7 = parses[c in pads ? specifier.charAt(i2++) : c];
+          if (!parse7 || (j = parse7(d3, string, j)) < 0) return -1;
+        } else if (c != string.charCodeAt(j++)) {
+          return -1;
+        }
+      }
+      return j;
+    }
+    function parsePeriod(d3, string, i2) {
+      var n = periodRe.exec(string.slice(i2));
+      return n ? (d3.p = periodLookup.get(n[0].toLowerCase()), i2 + n[0].length) : -1;
+    }
+    function parseShortWeekday(d3, string, i2) {
+      var n = shortWeekdayRe.exec(string.slice(i2));
+      return n ? (d3.w = shortWeekdayLookup.get(n[0].toLowerCase()), i2 + n[0].length) : -1;
+    }
+    function parseWeekday(d3, string, i2) {
+      var n = weekdayRe.exec(string.slice(i2));
+      return n ? (d3.w = weekdayLookup.get(n[0].toLowerCase()), i2 + n[0].length) : -1;
+    }
+    function parseShortMonth(d3, string, i2) {
+      var n = shortMonthRe.exec(string.slice(i2));
+      return n ? (d3.m = shortMonthLookup.get(n[0].toLowerCase()), i2 + n[0].length) : -1;
+    }
+    function parseMonth(d3, string, i2) {
+      var n = monthRe.exec(string.slice(i2));
+      return n ? (d3.m = monthLookup.get(n[0].toLowerCase()), i2 + n[0].length) : -1;
+    }
+    function parseLocaleDateTime(d3, string, i2) {
+      return parseSpecifier(d3, locale_dateTime, string, i2);
+    }
+    function parseLocaleDate(d3, string, i2) {
+      return parseSpecifier(d3, locale_date, string, i2);
+    }
+    function parseLocaleTime(d3, string, i2) {
+      return parseSpecifier(d3, locale_time, string, i2);
+    }
+    function formatShortWeekday(d3) {
+      return locale_shortWeekdays[d3.getDay()];
+    }
+    function formatWeekday(d3) {
+      return locale_weekdays[d3.getDay()];
+    }
+    function formatShortMonth(d3) {
+      return locale_shortMonths[d3.getMonth()];
+    }
+    function formatMonth(d3) {
+      return locale_months[d3.getMonth()];
+    }
+    function formatPeriod(d3) {
+      return locale_periods[+(d3.getHours() >= 12)];
+    }
+    function formatQuarter(d3) {
+      return 1 + ~~(d3.getMonth() / 3);
+    }
+    function formatUTCShortWeekday(d3) {
+      return locale_shortWeekdays[d3.getUTCDay()];
+    }
+    function formatUTCWeekday(d3) {
+      return locale_weekdays[d3.getUTCDay()];
+    }
+    function formatUTCShortMonth(d3) {
+      return locale_shortMonths[d3.getUTCMonth()];
+    }
+    function formatUTCMonth(d3) {
+      return locale_months[d3.getUTCMonth()];
+    }
+    function formatUTCPeriod(d3) {
+      return locale_periods[+(d3.getUTCHours() >= 12)];
+    }
+    function formatUTCQuarter(d3) {
+      return 1 + ~~(d3.getUTCMonth() / 3);
+    }
+    return {
+      format: function(specifier) {
+        var f = newFormat(specifier += "", formats);
+        f.toString = function() {
+          return specifier;
+        };
+        return f;
+      },
+      parse: function(specifier) {
+        var p2 = newParse(specifier += "", false);
+        p2.toString = function() {
+          return specifier;
+        };
+        return p2;
+      },
+      utcFormat: function(specifier) {
+        var f = newFormat(specifier += "", utcFormats);
+        f.toString = function() {
+          return specifier;
+        };
+        return f;
+      },
+      utcParse: function(specifier) {
+        var p2 = newParse(specifier += "", true);
+        p2.toString = function() {
+          return specifier;
+        };
+        return p2;
+      }
+    };
+  }
+  var pads = { "-": "", "_": " ", "0": "0" };
+  var numberRe = /^\s*\d+/;
+  var percentRe = /^%/;
+  var requoteRe = /[\\^$*+?|[\]().{}]/g;
+  function pad(value15, fill4, width11) {
+    var sign2 = value15 < 0 ? "-" : "", string = (sign2 ? -value15 : value15) + "", length9 = string.length;
+    return sign2 + (length9 < width11 ? new Array(width11 - length9 + 1).join(fill4) + string : string);
+  }
+  function requote(s) {
+    return s.replace(requoteRe, "\\$&");
+  }
+  function formatRe(names) {
+    return new RegExp("^(?:" + names.map(requote).join("|") + ")", "i");
+  }
+  function formatLookup(names) {
+    return new Map(names.map((name16, i2) => [name16.toLowerCase(), i2]));
+  }
+  function parseWeekdayNumberSunday(d3, string, i2) {
+    var n = numberRe.exec(string.slice(i2, i2 + 1));
+    return n ? (d3.w = +n[0], i2 + n[0].length) : -1;
+  }
+  function parseWeekdayNumberMonday(d3, string, i2) {
+    var n = numberRe.exec(string.slice(i2, i2 + 1));
+    return n ? (d3.u = +n[0], i2 + n[0].length) : -1;
+  }
+  function parseWeekNumberSunday(d3, string, i2) {
+    var n = numberRe.exec(string.slice(i2, i2 + 2));
+    return n ? (d3.U = +n[0], i2 + n[0].length) : -1;
+  }
+  function parseWeekNumberISO(d3, string, i2) {
+    var n = numberRe.exec(string.slice(i2, i2 + 2));
+    return n ? (d3.V = +n[0], i2 + n[0].length) : -1;
+  }
+  function parseWeekNumberMonday(d3, string, i2) {
+    var n = numberRe.exec(string.slice(i2, i2 + 2));
+    return n ? (d3.W = +n[0], i2 + n[0].length) : -1;
+  }
+  function parseFullYear(d3, string, i2) {
+    var n = numberRe.exec(string.slice(i2, i2 + 4));
+    return n ? (d3.y = +n[0], i2 + n[0].length) : -1;
+  }
+  function parseYear(d3, string, i2) {
+    var n = numberRe.exec(string.slice(i2, i2 + 2));
+    return n ? (d3.y = +n[0] + (+n[0] > 68 ? 1900 : 2e3), i2 + n[0].length) : -1;
+  }
+  function parseZone(d3, string, i2) {
+    var n = /^(Z)|([+-]\d\d)(?::?(\d\d))?/.exec(string.slice(i2, i2 + 6));
+    return n ? (d3.Z = n[1] ? 0 : -(n[2] + (n[3] || "00")), i2 + n[0].length) : -1;
+  }
+  function parseQuarter(d3, string, i2) {
+    var n = numberRe.exec(string.slice(i2, i2 + 1));
+    return n ? (d3.q = n[0] * 3 - 3, i2 + n[0].length) : -1;
+  }
+  function parseMonthNumber(d3, string, i2) {
+    var n = numberRe.exec(string.slice(i2, i2 + 2));
+    return n ? (d3.m = n[0] - 1, i2 + n[0].length) : -1;
+  }
+  function parseDayOfMonth(d3, string, i2) {
+    var n = numberRe.exec(string.slice(i2, i2 + 2));
+    return n ? (d3.d = +n[0], i2 + n[0].length) : -1;
+  }
+  function parseDayOfYear(d3, string, i2) {
+    var n = numberRe.exec(string.slice(i2, i2 + 3));
+    return n ? (d3.m = 0, d3.d = +n[0], i2 + n[0].length) : -1;
+  }
+  function parseHour24(d3, string, i2) {
+    var n = numberRe.exec(string.slice(i2, i2 + 2));
+    return n ? (d3.H = +n[0], i2 + n[0].length) : -1;
+  }
+  function parseMinutes(d3, string, i2) {
+    var n = numberRe.exec(string.slice(i2, i2 + 2));
+    return n ? (d3.M = +n[0], i2 + n[0].length) : -1;
+  }
+  function parseSeconds(d3, string, i2) {
+    var n = numberRe.exec(string.slice(i2, i2 + 2));
+    return n ? (d3.S = +n[0], i2 + n[0].length) : -1;
+  }
+  function parseMilliseconds(d3, string, i2) {
+    var n = numberRe.exec(string.slice(i2, i2 + 3));
+    return n ? (d3.L = +n[0], i2 + n[0].length) : -1;
+  }
+  function parseMicroseconds(d3, string, i2) {
+    var n = numberRe.exec(string.slice(i2, i2 + 6));
+    return n ? (d3.L = Math.floor(n[0] / 1e3), i2 + n[0].length) : -1;
+  }
+  function parseLiteralPercent(d3, string, i2) {
+    var n = percentRe.exec(string.slice(i2, i2 + 1));
+    return n ? i2 + n[0].length : -1;
+  }
+  function parseUnixTimestamp(d3, string, i2) {
+    var n = numberRe.exec(string.slice(i2));
+    return n ? (d3.Q = +n[0], i2 + n[0].length) : -1;
+  }
+  function parseUnixTimestampSeconds(d3, string, i2) {
+    var n = numberRe.exec(string.slice(i2));
+    return n ? (d3.s = +n[0], i2 + n[0].length) : -1;
+  }
+  function formatDayOfMonth(d3, p2) {
+    return pad(d3.getDate(), p2, 2);
+  }
+  function formatHour24(d3, p2) {
+    return pad(d3.getHours(), p2, 2);
+  }
+  function formatHour12(d3, p2) {
+    return pad(d3.getHours() % 12 || 12, p2, 2);
+  }
+  function formatDayOfYear(d3, p2) {
+    return pad(1 + day_default.count(year_default(d3), d3), p2, 3);
+  }
+  function formatMilliseconds(d3, p2) {
+    return pad(d3.getMilliseconds(), p2, 3);
+  }
+  function formatMicroseconds(d3, p2) {
+    return formatMilliseconds(d3, p2) + "000";
+  }
+  function formatMonthNumber(d3, p2) {
+    return pad(d3.getMonth() + 1, p2, 2);
+  }
+  function formatMinutes(d3, p2) {
+    return pad(d3.getMinutes(), p2, 2);
+  }
+  function formatSeconds(d3, p2) {
+    return pad(d3.getSeconds(), p2, 2);
+  }
+  function formatWeekdayNumberMonday(d3) {
+    var day2 = d3.getDay();
+    return day2 === 0 ? 7 : day2;
+  }
+  function formatWeekNumberSunday(d3, p2) {
+    return pad(sunday.count(year_default(d3) - 1, d3), p2, 2);
+  }
+  function dISO(d3) {
+    var day2 = d3.getDay();
+    return day2 >= 4 || day2 === 0 ? thursday(d3) : thursday.ceil(d3);
+  }
+  function formatWeekNumberISO(d3, p2) {
+    d3 = dISO(d3);
+    return pad(thursday.count(year_default(d3), d3) + (year_default(d3).getDay() === 4), p2, 2);
+  }
+  function formatWeekdayNumberSunday(d3) {
+    return d3.getDay();
+  }
+  function formatWeekNumberMonday(d3, p2) {
+    return pad(monday.count(year_default(d3) - 1, d3), p2, 2);
+  }
+  function formatYear(d3, p2) {
+    return pad(d3.getFullYear() % 100, p2, 2);
+  }
+  function formatYearISO(d3, p2) {
+    d3 = dISO(d3);
+    return pad(d3.getFullYear() % 100, p2, 2);
+  }
+  function formatFullYear(d3, p2) {
+    return pad(d3.getFullYear() % 1e4, p2, 4);
+  }
+  function formatFullYearISO(d3, p2) {
+    var day2 = d3.getDay();
+    d3 = day2 >= 4 || day2 === 0 ? thursday(d3) : thursday.ceil(d3);
+    return pad(d3.getFullYear() % 1e4, p2, 4);
+  }
+  function formatZone(d3) {
+    var z = d3.getTimezoneOffset();
+    return (z > 0 ? "-" : (z *= -1, "+")) + pad(z / 60 | 0, "0", 2) + pad(z % 60, "0", 2);
+  }
+  function formatUTCDayOfMonth(d3, p2) {
+    return pad(d3.getUTCDate(), p2, 2);
+  }
+  function formatUTCHour24(d3, p2) {
+    return pad(d3.getUTCHours(), p2, 2);
+  }
+  function formatUTCHour12(d3, p2) {
+    return pad(d3.getUTCHours() % 12 || 12, p2, 2);
+  }
+  function formatUTCDayOfYear(d3, p2) {
+    return pad(1 + utcDay_default.count(utcYear_default(d3), d3), p2, 3);
+  }
+  function formatUTCMilliseconds(d3, p2) {
+    return pad(d3.getUTCMilliseconds(), p2, 3);
+  }
+  function formatUTCMicroseconds(d3, p2) {
+    return formatUTCMilliseconds(d3, p2) + "000";
+  }
+  function formatUTCMonthNumber(d3, p2) {
+    return pad(d3.getUTCMonth() + 1, p2, 2);
+  }
+  function formatUTCMinutes(d3, p2) {
+    return pad(d3.getUTCMinutes(), p2, 2);
+  }
+  function formatUTCSeconds(d3, p2) {
+    return pad(d3.getUTCSeconds(), p2, 2);
+  }
+  function formatUTCWeekdayNumberMonday(d3) {
+    var dow = d3.getUTCDay();
+    return dow === 0 ? 7 : dow;
+  }
+  function formatUTCWeekNumberSunday(d3, p2) {
+    return pad(utcSunday.count(utcYear_default(d3) - 1, d3), p2, 2);
+  }
+  function UTCdISO(d3) {
+    var day2 = d3.getUTCDay();
+    return day2 >= 4 || day2 === 0 ? utcThursday(d3) : utcThursday.ceil(d3);
+  }
+  function formatUTCWeekNumberISO(d3, p2) {
+    d3 = UTCdISO(d3);
+    return pad(utcThursday.count(utcYear_default(d3), d3) + (utcYear_default(d3).getUTCDay() === 4), p2, 2);
+  }
+  function formatUTCWeekdayNumberSunday(d3) {
+    return d3.getUTCDay();
+  }
+  function formatUTCWeekNumberMonday(d3, p2) {
+    return pad(utcMonday.count(utcYear_default(d3) - 1, d3), p2, 2);
+  }
+  function formatUTCYear(d3, p2) {
+    return pad(d3.getUTCFullYear() % 100, p2, 2);
+  }
+  function formatUTCYearISO(d3, p2) {
+    d3 = UTCdISO(d3);
+    return pad(d3.getUTCFullYear() % 100, p2, 2);
+  }
+  function formatUTCFullYear(d3, p2) {
+    return pad(d3.getUTCFullYear() % 1e4, p2, 4);
+  }
+  function formatUTCFullYearISO(d3, p2) {
+    var day2 = d3.getUTCDay();
+    d3 = day2 >= 4 || day2 === 0 ? utcThursday(d3) : utcThursday.ceil(d3);
+    return pad(d3.getUTCFullYear() % 1e4, p2, 4);
+  }
+  function formatUTCZone() {
+    return "+0000";
+  }
+  function formatLiteralPercent() {
+    return "%";
+  }
+  function formatUnixTimestamp(d3) {
+    return +d3;
+  }
+  function formatUnixTimestampSeconds(d3) {
+    return Math.floor(+d3 / 1e3);
+  }
+
+  // node_modules/d3-time-format/src/defaultLocale.js
+  var locale2;
+  var timeFormat;
+  var timeParse;
+  var utcFormat;
+  var utcParse;
+  defaultLocale2({
+    dateTime: "%x, %X",
+    date: "%-m/%-d/%Y",
+    time: "%-I:%M:%S %p",
+    periods: ["AM", "PM"],
+    days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+    shortDays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    shortMonths: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  });
+  function defaultLocale2(definition) {
+    locale2 = formatLocale(definition);
+    timeFormat = locale2.format;
+    timeParse = locale2.parse;
+    utcFormat = locale2.utcFormat;
+    utcParse = locale2.utcParse;
+    return locale2;
+  }
+
+  // node_modules/d3-scale/src/time.js
+  function date(t) {
+    return new Date(t);
+  }
+  function number3(t) {
+    return t instanceof Date ? +t : +/* @__PURE__ */ new Date(+t);
+  }
+  function calendar(ticks3, tickInterval, year2, month2, week, day2, hour2, minute2, second2, format2) {
+    var scale = continuous(), invert = scale.invert, domain2 = scale.domain;
+    var formatMillisecond = format2(".%L"), formatSecond = format2(":%S"), formatMinute = format2("%I:%M"), formatHour = format2("%I %p"), formatDay = format2("%a %d"), formatWeek = format2("%b %d"), formatMonth = format2("%B"), formatYear2 = format2("%Y");
+    function tickFormat3(date2) {
+      return (second2(date2) < date2 ? formatMillisecond : minute2(date2) < date2 ? formatSecond : hour2(date2) < date2 ? formatMinute : day2(date2) < date2 ? formatHour : month2(date2) < date2 ? week(date2) < date2 ? formatDay : formatWeek : year2(date2) < date2 ? formatMonth : formatYear2)(date2);
+    }
+    scale.invert = function(y6) {
+      return new Date(invert(y6));
+    };
+    scale.domain = function(_) {
+      return arguments.length ? domain2(Array.from(_, number3)) : domain2().map(date);
+    };
+    scale.ticks = function(interval2) {
+      var d3 = domain2();
+      return ticks3(d3[0], d3[d3.length - 1], interval2 == null ? 10 : interval2);
+    };
+    scale.tickFormat = function(count, specifier) {
+      return specifier == null ? tickFormat3 : format2(specifier);
+    };
+    scale.nice = function(interval2) {
+      var d3 = domain2();
+      if (!interval2 || typeof interval2.range !== "function") interval2 = tickInterval(d3[0], d3[d3.length - 1], interval2 == null ? 10 : interval2);
+      return interval2 ? domain2(nice(d3, interval2)) : scale;
+    };
+    scale.copy = function() {
+      return copy2(scale, calendar(ticks3, tickInterval, year2, month2, week, day2, hour2, minute2, second2, format2));
+    };
+    return scale;
+  }
+  function time2() {
+    return initRange.apply(calendar(timeTicks, timeTickInterval, year_default, month_default, sunday, day_default, hour_default, minute_default, second_default, timeFormat).domain([new Date(2e3, 0, 1), new Date(2e3, 0, 2)]), arguments);
+  }
+
+  // node_modules/d3-scale/src/utcTime.js
+  function utcTime() {
+    return initRange.apply(calendar(utcTicks, utcTickInterval, utcYear_default, utcMonth_default, utcSunday, utcDay_default, utcHour_default, utcMinute_default, second_default, utcFormat).domain([Date.UTC(2e3, 0, 1), Date.UTC(2e3, 0, 2)]), arguments);
+  }
+
   // node_modules/d3-scale-chromatic/src/colors.js
   function colors_default(specifier) {
     var n = specifier.length / 6 | 0, colors = new Array(n), i2 = 0;
@@ -14728,6 +15774,10 @@
   var pow4 = pow3();
   var sqrt3 = sqrt2();
   var symlog2 = symlog();
+  var scaleTime_ = time2();
+  var scaleUtc_ = utcTime();
+  var scaleQuantize = quantize();
+  var scaleQuantile = quantile2();
   var ordinal2 = ordinal();
   var band2 = band();
   var point2 = point();
@@ -17741,7 +18791,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 685, column 5 - line 717, column 14): " + [node.children.constructor.name]);
+        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 672, column 5 - line 704, column 14): " + [node.children.constructor.name]);
       };
     };
     return go2(v)(0);
@@ -17908,10 +18958,10 @@
                 return;
               }
               ;
-              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 559, column 13 - line 566, column 52): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 546, column 13 - line 553, column 52): " + [v2.constructor.name]);
             }
             ;
-            throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 555, column 7 - line 555, column 56): " + [i2.constructor.name]);
+            throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 542, column 7 - line 542, column 56): " + [i2.constructor.name]);
           }
           ;
           while (!$tco_done) {
@@ -17955,7 +19005,7 @@
                 return;
               }
               ;
-              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 576, column 7 - line 576, column 58): " + [i2.constructor.name, j.constructor.name]);
+              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 563, column 7 - line 563, column 58): " + [i2.constructor.name, j.constructor.name]);
             }
             ;
             while (!$tco_done1) {
@@ -17986,10 +19036,10 @@
                 return;
               }
               ;
-              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 572, column 13 - line 574, column 54): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 559, column 13 - line 561, column 54): " + [v2.constructor.name]);
             }
             ;
-            throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 568, column 7 - line 568, column 58): " + [i2.constructor.name]);
+            throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 555, column 7 - line 555, column 58): " + [i2.constructor.name]);
           }
           ;
           while (!$tco_done2) {
@@ -18013,13 +19063,13 @@
             return basis2;
           }
           ;
-          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 549, column 11 - line 551, column 29): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 536, column 11 - line 538, column 29): " + [v1.constructor.name]);
         }
         ;
-        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 546, column 7 - line 551, column 29): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 533, column 7 - line 538, column 29): " + [v.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 542, column 1 - line 542, column 54): " + [basis2.constructor.name, p2.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 529, column 1 - line 529, column 54): " + [basis2.constructor.name, p2.constructor.name]);
     };
   };
   var encloseBasis1 = function(a2) {
@@ -18086,7 +19136,7 @@
                 };
               }
               ;
-              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 600, column 9 - line 602, column 48): " + [maybeE.constructor.name]);
+              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 587, column 9 - line 589, column 48): " + [maybeE.constructor.name]);
             }
             ;
             if (otherwise) {
@@ -18114,10 +19164,10 @@
                 return;
               }
               ;
-              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 604, column 9 - line 615, column 44): " + [v.constructor.name]);
+              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 591, column 9 - line 602, column 44): " + [v.constructor.name]);
             }
             ;
-            throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 597, column 3 - line 597, column 54): " + [i2.constructor.name, basis2.constructor.name, maybeE.constructor.name]);
+            throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 584, column 3 - line 584, column 54): " + [i2.constructor.name, basis2.constructor.name, maybeE.constructor.name]);
           }
           ;
           while (!$tco_done) {
@@ -18359,14 +19409,14 @@
                     return;
                   }
                   ;
-                  throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 380, column 13 - line 396, column 101): " + [collisionResult.constructor.name]);
+                  throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 366, column 13 - line 382, column 101): " + [collisionResult.constructor.name]);
                 }
                 ;
                 $tco_done = true;
                 return state3;
               }
               ;
-              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 368, column 1 - line 368, column 91): " + [maxRetries.constructor.name, newCircle.constructor.name, aId.constructor.name, bId.constructor.name, state3.constructor.name]);
+              throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 354, column 1 - line 354, column 91): " + [maxRetries.constructor.name, newCircle.constructor.name, aId.constructor.name, bId.constructor.name, state3.constructor.name]);
             }
             ;
             while (!$tco_done) {
@@ -18392,7 +19442,7 @@
             return sqrt(v.value0.value);
           }
           ;
-          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 752, column 13 - line 754, column 37): " + [config.radius.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 739, column 13 - line 741, column 37): " + [config.radius.constructor.name]);
         })();
         return new PackNode({
           data_: v.value0.data_,
@@ -18429,7 +19479,7 @@
         return tryPlaceCircle(newCircle)(v.value0.value0)(v.value0.value1)(state3);
       }
       ;
-      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 404, column 3 - line 406, column 67): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 390, column 3 - line 392, column 67): " + [v.constructor.name]);
     };
   };
   var packSiblingsMap = function(inputCircles) {
@@ -18463,7 +19513,7 @@
         };
       }
       ;
-      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 415, column 7 - line 417, column 48): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Pack (line 402, column 7 - line 404, column 48): " + [v.constructor.name]);
     }
     ;
     var $264 = n === 2;
@@ -19619,16 +20669,16 @@
   }
   Timer.prototype = timer.prototype = {
     constructor: Timer,
-    restart: function(callback, delay, time3) {
+    restart: function(callback, delay, time4) {
       if (typeof callback !== "function") throw new TypeError("callback is not a function");
-      time3 = (time3 == null ? now() : +time3) + (delay == null ? 0 : +delay);
+      time4 = (time4 == null ? now() : +time4) + (delay == null ? 0 : +delay);
       if (!this._next && taskTail !== this) {
         if (taskTail) taskTail._next = this;
         else taskHead = this;
         taskTail = this;
       }
       this._call = callback;
-      this._time = time3;
+      this._time = time4;
       sleep();
     },
     stop: function() {
@@ -19639,9 +20689,9 @@
       }
     }
   };
-  function timer(callback, delay, time3) {
+  function timer(callback, delay, time4) {
     var t = new Timer();
-    t.restart(callback, delay, time3);
+    t.restart(callback, delay, time4);
     return t;
   }
   function timerFlush() {
@@ -19670,25 +20720,25 @@
     if (delay > pokeDelay) clockSkew -= delay, clockLast = now2;
   }
   function nap() {
-    var t0, t1 = taskHead, t2, time3 = Infinity;
-    while (t1) {
-      if (t1._call) {
-        if (time3 > t1._time) time3 = t1._time;
-        t0 = t1, t1 = t1._next;
+    var t02, t12 = taskHead, t2, time4 = Infinity;
+    while (t12) {
+      if (t12._call) {
+        if (time4 > t12._time) time4 = t12._time;
+        t02 = t12, t12 = t12._next;
       } else {
-        t2 = t1._next, t1._next = null;
-        t1 = t0 ? t0._next = t2 : taskHead = t2;
+        t2 = t12._next, t12._next = null;
+        t12 = t02 ? t02._next = t2 : taskHead = t2;
       }
     }
-    taskTail = t0;
-    sleep(time3);
+    taskTail = t02;
+    sleep(time4);
   }
-  function sleep(time3) {
+  function sleep(time4) {
     if (frame) return;
     if (timeout) timeout = clearTimeout(timeout);
-    var delay = time3 - clockNow;
+    var delay = time4 - clockNow;
     if (delay > 24) {
-      if (time3 < Infinity) timeout = setTimeout(wake, time3 - clock.now() - clockSkew);
+      if (time4 < Infinity) timeout = setTimeout(wake, time4 - clock.now() - clockSkew);
       if (interval) interval = clearInterval(interval);
     } else {
       if (!interval) clockLast = clock.now(), interval = setInterval(poke3, pokeDelay);
@@ -19697,13 +20747,13 @@
   }
 
   // node_modules/d3-timer/src/timeout.js
-  function timeout_default(callback, delay, time3) {
+  function timeout_default(callback, delay, time4) {
     var t = new Timer();
     delay = delay == null ? 0 : +delay;
     t.restart((elapsed) => {
       t.stop();
       callback(elapsed + delay);
-    }, delay, time3);
+    }, delay, time4);
     return t;
   }
 
@@ -20043,7 +21093,7 @@
           context.arc(0, 0, r0, a1, a0, cw);
         }
       } else {
-        var a01 = a0, a11 = a1, a00 = a0, a10 = a1, da0 = da, da1 = da, ap2 = padAngle.apply(this, arguments) / 2, rp2 = ap2 > epsilon3 && (padRadius ? +padRadius.apply(this, arguments) : sqrt4(r0 * r0 + r1 * r1)), rc = min6(abs3(r1 - r0) / 2, +cornerRadius.apply(this, arguments)), rc0 = rc, rc1 = rc, t0, t1;
+        var a01 = a0, a11 = a1, a00 = a0, a10 = a1, da0 = da, da1 = da, ap2 = padAngle.apply(this, arguments) / 2, rp2 = ap2 > epsilon3 && (padRadius ? +padRadius.apply(this, arguments) : sqrt4(r0 * r0 + r1 * r1)), rc = min6(abs3(r1 - r0) / 2, +cornerRadius.apply(this, arguments)), rc0 = rc, rc1 = rc, t02, t12;
         if (rp2 > epsilon3) {
           var p0 = asin2(rp2 / r0 * sin2(ap2)), p1 = asin2(rp2 / r1 * sin2(ap2));
           if ((da0 -= p0 * 2) > epsilon3) p0 *= cw ? 1 : -1, a00 += p0, a10 -= p0;
@@ -20066,26 +21116,26 @@
         }
         if (!(da1 > epsilon3)) context.moveTo(x01, y01);
         else if (rc1 > epsilon3) {
-          t0 = cornerTangents(x00, y00, x01, y01, r1, rc1, cw);
-          t1 = cornerTangents(x11, y11, x10, y10, r1, rc1, cw);
-          context.moveTo(t0.cx + t0.x01, t0.cy + t0.y01);
-          if (rc1 < rc) context.arc(t0.cx, t0.cy, rc1, atan22(t0.y01, t0.x01), atan22(t1.y01, t1.x01), !cw);
+          t02 = cornerTangents(x00, y00, x01, y01, r1, rc1, cw);
+          t12 = cornerTangents(x11, y11, x10, y10, r1, rc1, cw);
+          context.moveTo(t02.cx + t02.x01, t02.cy + t02.y01);
+          if (rc1 < rc) context.arc(t02.cx, t02.cy, rc1, atan22(t02.y01, t02.x01), atan22(t12.y01, t12.x01), !cw);
           else {
-            context.arc(t0.cx, t0.cy, rc1, atan22(t0.y01, t0.x01), atan22(t0.y11, t0.x11), !cw);
-            context.arc(0, 0, r1, atan22(t0.cy + t0.y11, t0.cx + t0.x11), atan22(t1.cy + t1.y11, t1.cx + t1.x11), !cw);
-            context.arc(t1.cx, t1.cy, rc1, atan22(t1.y11, t1.x11), atan22(t1.y01, t1.x01), !cw);
+            context.arc(t02.cx, t02.cy, rc1, atan22(t02.y01, t02.x01), atan22(t02.y11, t02.x11), !cw);
+            context.arc(0, 0, r1, atan22(t02.cy + t02.y11, t02.cx + t02.x11), atan22(t12.cy + t12.y11, t12.cx + t12.x11), !cw);
+            context.arc(t12.cx, t12.cy, rc1, atan22(t12.y11, t12.x11), atan22(t12.y01, t12.x01), !cw);
           }
         } else context.moveTo(x01, y01), context.arc(0, 0, r1, a01, a11, !cw);
         if (!(r0 > epsilon3) || !(da0 > epsilon3)) context.lineTo(x10, y10);
         else if (rc0 > epsilon3) {
-          t0 = cornerTangents(x10, y10, x11, y11, r0, -rc0, cw);
-          t1 = cornerTangents(x01, y01, x00, y00, r0, -rc0, cw);
-          context.lineTo(t0.cx + t0.x01, t0.cy + t0.y01);
-          if (rc0 < rc) context.arc(t0.cx, t0.cy, rc0, atan22(t0.y01, t0.x01), atan22(t1.y01, t1.x01), !cw);
+          t02 = cornerTangents(x10, y10, x11, y11, r0, -rc0, cw);
+          t12 = cornerTangents(x01, y01, x00, y00, r0, -rc0, cw);
+          context.lineTo(t02.cx + t02.x01, t02.cy + t02.y01);
+          if (rc0 < rc) context.arc(t02.cx, t02.cy, rc0, atan22(t02.y01, t02.x01), atan22(t12.y01, t12.x01), !cw);
           else {
-            context.arc(t0.cx, t0.cy, rc0, atan22(t0.y01, t0.x01), atan22(t0.y11, t0.x11), !cw);
-            context.arc(0, 0, r0, atan22(t0.cy + t0.y11, t0.cx + t0.x11), atan22(t1.cy + t1.y11, t1.cx + t1.x11), cw);
-            context.arc(t1.cx, t1.cy, rc0, atan22(t1.y11, t1.x11), atan22(t1.y01, t1.x01), !cw);
+            context.arc(t02.cx, t02.cy, rc0, atan22(t02.y01, t02.x01), atan22(t02.y11, t02.x11), !cw);
+            context.arc(0, 0, r0, atan22(t02.cy + t02.y11, t02.cx + t02.x11), atan22(t12.cy + t12.y11, t12.cx + t12.x11), cw);
+            context.arc(t12.cx, t12.cy, rc0, atan22(t12.y11, t12.x11), atan22(t12.y01, t12.x01), !cw);
           }
         } else context.arc(0, 0, r0, a10, a00, cw);
       }
@@ -20683,21 +21733,21 @@
     };
   }
   function attrTweenNS(fullname, value15) {
-    var t0, i0;
+    var t02, i0;
     function tween() {
       var i2 = value15.apply(this, arguments);
-      if (i2 !== i0) t0 = (i0 = i2) && attrInterpolateNS(fullname, i2);
-      return t0;
+      if (i2 !== i0) t02 = (i0 = i2) && attrInterpolateNS(fullname, i2);
+      return t02;
     }
     tween._value = value15;
     return tween;
   }
   function attrTween(name16, value15) {
-    var t0, i0;
+    var t02, i0;
     function tween() {
       var i2 = value15.apply(this, arguments);
-      if (i2 !== i0) t0 = (i0 = i2) && attrInterpolate(name16, i2);
-      return t0;
+      if (i2 !== i0) t02 = (i0 = i2) && attrInterpolate(name16, i2);
+      return t02;
     }
     tween._value = value15;
     return tween;
@@ -20960,11 +22010,11 @@
     };
   }
   function textTween(value15) {
-    var t0, i0;
+    var t02, i0;
     function tween() {
       var i2 = value15.apply(this, arguments);
-      if (i2 !== i0) t0 = (i0 = i2) && textInterpolate(i2);
-      return t0;
+      if (i2 !== i0) t02 = (i0 = i2) && textInterpolate(i2);
+      return t02;
     }
     tween._value = value15;
     return tween;
@@ -21393,8 +22443,8 @@
     };
     zoom.scaleTo = function(selection2, k, p2, event) {
       zoom.transform(selection2, function() {
-        var e = extent.apply(this, arguments), t0 = this.__zoom, p0 = p2 == null ? centroid(e) : typeof p2 === "function" ? p2.apply(this, arguments) : p2, p1 = t0.invert(p0), k1 = typeof k === "function" ? k.apply(this, arguments) : k;
-        return constrain(translate(scale(t0, k1), p0, p1), e, translateExtent);
+        var e = extent.apply(this, arguments), t02 = this.__zoom, p0 = p2 == null ? centroid(e) : typeof p2 === "function" ? p2.apply(this, arguments) : p2, p1 = t02.invert(p0), k1 = typeof k === "function" ? k.apply(this, arguments) : k;
+        return constrain(translate(scale(t02, k1), p0, p1), e, translateExtent);
       }, p2, event);
     };
     zoom.translateBy = function(selection2, x6, y6, event) {
@@ -21543,10 +22593,10 @@
     }
     function dblclicked(event, ...args) {
       if (!filter6.apply(this, arguments)) return;
-      var t0 = this.__zoom, p0 = pointer_default(event.changedTouches ? event.changedTouches[0] : event, this), p1 = t0.invert(p0), k1 = t0.k * (event.shiftKey ? 0.5 : 2), t1 = constrain(translate(scale(t0, k1), p0, p1), extent.apply(this, args), translateExtent);
+      var t02 = this.__zoom, p0 = pointer_default(event.changedTouches ? event.changedTouches[0] : event, this), p1 = t02.invert(p0), k1 = t02.k * (event.shiftKey ? 0.5 : 2), t12 = constrain(translate(scale(t02, k1), p0, p1), extent.apply(this, args), translateExtent);
       noevent_default2(event);
-      if (duration2 > 0) select_default2(this).transition().duration(duration2).call(schedule, t1, p0, event);
-      else select_default2(this).call(zoom.transform, t1, p0, event);
+      if (duration2 > 0) select_default2(this).transition().duration(duration2).call(schedule, t12, p0, event);
+      else select_default2(this).call(zoom.transform, t12, p0, event);
     }
     function touchstarted(event, ...args) {
       if (!filter6.apply(this, arguments)) return;
@@ -21995,8 +23045,8 @@
   var min8 = /* @__PURE__ */ min(ordNumber);
   var map113 = /* @__PURE__ */ map(functorMap);
   var toUnfoldable7 = /* @__PURE__ */ toUnfoldable5(unfoldableArray);
-  var ticksForDuration = function(milliseconds) {
-    var ticks3 = toNumber(milliseconds) / 16.67;
+  var ticksForDuration = function(milliseconds2) {
+    var ticks3 = toNumber(milliseconds2) / 16.67;
     return 1 / ticks3;
   };
   var tickTransitions = function(delta) {
@@ -22738,7 +23788,7 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at PSD3.ForceEngine.Simulation (line 489, column 26 - line 493, column 13): " + [sim.callbacks.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.ForceEngine.Simulation (line 504, column 26 - line 508, column 13): " + [sim.callbacks.constructor.name]);
   };
   var invokeStopCallback = function(sim) {
     if (sim.callbacks instanceof Nothing) {
@@ -22752,7 +23802,7 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at PSD3.ForceEngine.Simulation (line 479, column 26 - line 483, column 13): " + [sim.callbacks.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.ForceEngine.Simulation (line 494, column 26 - line 498, column 13): " + [sim.callbacks.constructor.name]);
   };
   var invokeStartCallback = function(sim) {
     if (sim.callbacks instanceof Nothing) {
@@ -22766,7 +23816,7 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at PSD3.ForceEngine.Simulation (line 469, column 27 - line 473, column 13): " + [sim.callbacks.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.ForceEngine.Simulation (line 484, column 27 - line 488, column 13): " + [sim.callbacks.constructor.name]);
   };
   var interpolatePositionsInPlace = function(startPos) {
     return function(targetPos) {
@@ -22836,7 +23886,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3.ForceEngine.Simulation (line 502, column 47 - line 509, column 26): " + [sim.callbacks.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.ForceEngine.Simulation (line 517, column 47 - line 524, column 26): " + [sim.callbacks.constructor.name]);
       };
     };
   };
@@ -22928,21 +23978,15 @@
   }
 
   // output/Engine.Scene/index.js
-  var log9 = /* @__PURE__ */ log3(monadEffectEffect);
   var pure14 = /* @__PURE__ */ pure(applicativeEffect);
   var for_4 = /* @__PURE__ */ for_(applicativeEffect)(foldableArray);
   var toUnfoldable10 = /* @__PURE__ */ toUnfoldable4(unfoldableArray);
+  var log9 = /* @__PURE__ */ log3(monadEffectEffect);
   var fromFoldable25 = /* @__PURE__ */ fromFoldable2(foldableArray);
   var map38 = /* @__PURE__ */ map(functorArray);
   var show10 = /* @__PURE__ */ show(showInt);
   var min9 = /* @__PURE__ */ min(ordNumber);
   var transitionDelta = /* @__PURE__ */ ticksForDuration(2e3);
-  var startCSSTransition = function(css) {
-    return function __do12() {
-      log9("[Scene] Starting CSS transition: " + (css.property + (" -> " + css.targetValue)))();
-      return unit;
-    };
-  };
   var setTreeLinksGroupId = function(gid) {
     return function(stateRef) {
       return modify_2(function(v) {
@@ -22985,10 +24029,10 @@
         return pure14(unit);
       }
       ;
-      throw new Error("Failed pattern match at Engine.Scene (line 314, column 17 - line 316, column 33): " + [state3.currentScene.value0.stableMode.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Scene (line 307, column 17 - line 309, column 33): " + [state3.currentScene.value0.stableMode.constructor.name]);
     }
     ;
-    throw new Error("Failed pattern match at Engine.Scene (line 312, column 25 - line 316, column 33): " + [state3.currentScene.constructor.name]);
+    throw new Error("Failed pattern match at Engine.Scene (line 305, column 25 - line 309, column 33): " + [state3.currentScene.constructor.name]);
   };
   var reinitializeForces = function(sim) {
     return function __do12() {
@@ -23074,7 +24118,7 @@
               return unit;
             }
             ;
-            throw new Error("Failed pattern match at Engine.Scene (line 296, column 3 - line 302, column 16): " + [t.targetScene.stableMode.constructor.name]);
+            throw new Error("Failed pattern match at Engine.Scene (line 286, column 3 - line 292, column 16): " + [t.targetScene.stableMode.constructor.name]);
           })();
           return write({
             linksGroupId: state3.linksGroupId,
@@ -23129,7 +24173,7 @@
           return runStableEngine(state3)();
         }
         ;
-        throw new Error("Failed pattern match at Engine.Scene (line 236, column 3 - line 238, column 37): " + [state3.transition.constructor.name]);
+        throw new Error("Failed pattern match at Engine.Scene (line 227, column 3 - line 229, column 37): " + [state3.transition.constructor.name]);
       })();
       updateCirclePositions(state3.nodesGroupId)();
       (function() {
@@ -23141,7 +24185,7 @@
           return unit;
         }
         ;
-        throw new Error("Failed pattern match at Engine.Scene (line 244, column 3 - line 246, column 25): " + [state3.linksGroupId.constructor.name]);
+        throw new Error("Failed pattern match at Engine.Scene (line 235, column 3 - line 237, column 25): " + [state3.linksGroupId.constructor.name]);
       })();
       if (state3.treeLinksGroupId instanceof Just) {
         return updateTreeLinkPaths(state3.treeLinksGroupId.value0)();
@@ -23151,7 +24195,7 @@
         return unit;
       }
       ;
-      throw new Error("Failed pattern match at Engine.Scene (line 249, column 3 - line 251, column 25): " + [state3.treeLinksGroupId.constructor.name]);
+      throw new Error("Failed pattern match at Engine.Scene (line 240, column 3 - line 242, column 25): " + [state3.treeLinksGroupId.constructor.name]);
     };
   };
   var onTickWithViewTransition = function(sceneStateRef) {
@@ -23186,17 +24230,6 @@
           var nodesAfterInit = getNodes(state3.simulation)();
           var startPositions = capturePositions(nodesAfterInit);
           var targetPositions = targetScene.layout(nodesAfterInit);
-          (function() {
-            if (targetScene.cssTransition instanceof Just) {
-              return startCSSTransition(targetScene.cssTransition.value0)();
-            }
-            ;
-            if (targetScene.cssTransition instanceof Nothing) {
-              return unit;
-            }
-            ;
-            throw new Error("Failed pattern match at Engine.Scene (line 196, column 7 - line 198, column 29): " + [targetScene.cssTransition.constructor.name]);
-          })();
           write({
             currentScene: state3.currentScene,
             linksGroupId: state3.linksGroupId,
@@ -23213,7 +24246,7 @@
           return reheat(state3.simulation)();
         }
         ;
-        throw new Error("Failed pattern match at Engine.Scene (line 179, column 3 - line 211, column 34): " + [state3.transition.constructor.name]);
+        throw new Error("Failed pattern match at Engine.Scene (line 179, column 3 - line 209, column 34): " + [state3.transition.constructor.name]);
       };
     };
   };
@@ -24438,8 +25471,8 @@
   var toAttrStringFunctionStrin = {
     toAttr: function(fn) {
       return function(name16) {
-        return new DataAttr(name16, function($158) {
-          return StringValue.create(fn($158));
+        return new DataAttr(name16, function($170) {
+          return StringValue.create(fn($170));
         });
       };
     }
@@ -24454,8 +25487,8 @@
   var toAttrNumberFunctionNumbe = {
     toAttr: function(fn) {
       return function(name16) {
-        return new DataAttr(name16, function($159) {
-          return NumberValue.create(fn($159));
+        return new DataAttr(name16, function($171) {
+          return NumberValue.create(fn($171));
         });
       };
     }
@@ -25164,6 +26197,27 @@
     SVG2.value = new SVG2();
     return SVG2;
   })();
+  var Defs = /* @__PURE__ */ (function() {
+    function Defs2() {
+    }
+    ;
+    Defs2.value = new Defs2();
+    return Defs2;
+  })();
+  var LinearGradient = /* @__PURE__ */ (function() {
+    function LinearGradient2() {
+    }
+    ;
+    LinearGradient2.value = new LinearGradient2();
+    return LinearGradient2;
+  })();
+  var Stop = /* @__PURE__ */ (function() {
+    function Stop2() {
+    }
+    ;
+    Stop2.value = new Stop2();
+    return Stop2;
+  })();
   var Div = /* @__PURE__ */ (function() {
     function Div2() {
     }
@@ -25249,6 +26303,18 @@
       return SVGContext.value;
     }
     ;
+    if (v instanceof Defs) {
+      return SVGContext.value;
+    }
+    ;
+    if (v instanceof LinearGradient) {
+      return SVGContext.value;
+    }
+    ;
+    if (v instanceof Stop) {
+      return SVGContext.value;
+    }
+    ;
     if (v instanceof Div) {
       return HTMLContext.value;
     }
@@ -25281,7 +26347,7 @@
       return HTMLContext.value;
     }
     ;
-    throw new Error("Failed pattern match at PSD3v2.Selection.Types (line 201, column 1 - line 201, column 47): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3v2.Selection.Types (line 204, column 1 - line 204, column 47): " + [v.constructor.name]);
   };
 
   // output/PSD3v2.Transition.FFI/foreign.js
@@ -25739,32 +26805,19 @@
   };
 
   // output/PSD3v2.Transition.FFI/index.js
-  var show15 = /* @__PURE__ */ show(showEasing);
-  var maybeMillisecondsToNullable = function(v) {
-    if (v instanceof Nothing) {
-      return toNullable(Nothing.value);
-    }
-    ;
-    if (v instanceof Just) {
-      return toNullable(new Just(v.value0));
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3v2.Transition.FFI (line 53, column 1 - line 53, column 69): " + [v.constructor.name]);
-  };
-  var easingToD3Name = function(easing) {
-    return show15(easing);
-  };
-  var maybeEasingToNullable = function(v) {
-    if (v instanceof Nothing) {
-      return toNullable(Nothing.value);
-    }
-    ;
-    if (v instanceof Just) {
-      return toNullable(new Just(easingToD3Name(v.value0)));
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3v2.Transition.FFI (line 58, column 1 - line 58, column 57): " + [v.constructor.name]);
-  };
+  var map42 = /* @__PURE__ */ map(functorMaybe);
+  var maybeMillisecondsToNullable = /* @__PURE__ */ (function() {
+    var $4 = map42(unwrap());
+    return function($5) {
+      return toNullable($4($5));
+    };
+  })();
+  var maybeEasingToNullable = /* @__PURE__ */ (function() {
+    var $6 = map42(show(showEasing));
+    return function($7) {
+      return toNullable($6($7));
+    };
+  })();
 
   // output/PSD3v2.VizTree.Tree/index.js
   var Node2 = /* @__PURE__ */ (function() {
@@ -25899,21 +26952,21 @@
   }
 
   // output/Web.DOM.Node/index.js
-  var map42 = /* @__PURE__ */ map(functorEffect);
+  var map43 = /* @__PURE__ */ map(functorEffect);
   var parentNode2 = /* @__PURE__ */ (function() {
-    var $6 = map42(toMaybe);
+    var $6 = map43(toMaybe);
     return function($7) {
       return $6(_parentNode($7));
     };
   })();
   var nextSibling = /* @__PURE__ */ (function() {
-    var $15 = map42(toMaybe);
+    var $15 = map43(toMaybe);
     return function($16) {
       return $15(_nextSibling($16));
     };
   })();
   var firstChild = /* @__PURE__ */ (function() {
-    var $25 = map42(toMaybe);
+    var $25 = map43(toMaybe);
     return function($26) {
       return $25(_firstChild($26));
     };
@@ -25982,18 +27035,18 @@
   var append19 = /* @__PURE__ */ append(semigroupArray);
   var liftEffect3 = /* @__PURE__ */ liftEffect(monadEffectEffect);
   var log10 = /* @__PURE__ */ log3(monadEffectEffect);
-  var show16 = /* @__PURE__ */ show(showInt);
+  var show15 = /* @__PURE__ */ show(showInt);
   var mapFlipped12 = /* @__PURE__ */ mapFlipped(functorMaybe);
   var compare2 = /* @__PURE__ */ compare(ordInt);
   var mapFlipped22 = /* @__PURE__ */ mapFlipped(functorArray);
-  var show17 = /* @__PURE__ */ show(showNumber);
+  var show16 = /* @__PURE__ */ show(showNumber);
   var show22 = /* @__PURE__ */ show(showBoolean);
   var traverseWithIndex_2 = /* @__PURE__ */ traverseWithIndex_(applicativeEffect)(foldableWithIndexArray);
   var unsafeIndex3 = /* @__PURE__ */ unsafeIndex();
   var traverseWithIndex3 = /* @__PURE__ */ traverseWithIndex(traversableWithIndexArray)(applicativeEffect);
   var mod5 = /* @__PURE__ */ mod(euclideanRingInt);
   var union5 = /* @__PURE__ */ union2(ordString);
-  var map43 = /* @__PURE__ */ map(functorArray);
+  var map44 = /* @__PURE__ */ map(functorArray);
   var insert10 = /* @__PURE__ */ insert3(ordString);
   var join2 = /* @__PURE__ */ join(bindArray);
   var stringToElementType = function(v) {
@@ -26023,6 +27076,18 @@
     ;
     if (v === "svg") {
       return SVG.value;
+    }
+    ;
+    if (v === "defs") {
+      return Defs.value;
+    }
+    ;
+    if (v === "linearGradient") {
+      return LinearGradient.value;
+    }
+    ;
+    if (v === "stop") {
+      return Stop.value;
     }
     ;
     if (v === "div") {
@@ -26294,8 +27359,8 @@
                         };
                       };
                     })(existingElements)();
-                    liftEffect3(log10("joinDataWithKey: found " + (show16(length(existingElements)) + (" existing elements with selector '" + (selector + "'")))))();
-                    liftEffect3(log10("joinDataWithKey: " + (show16(length(mapMaybe(function(v2) {
+                    liftEffect3(log10("joinDataWithKey: found " + (show15(length(existingElements)) + (" existing elements with selector '" + (selector + "'")))))();
+                    liftEffect3(log10("joinDataWithKey: " + (show15(length(mapMaybe(function(v2) {
                       return v2.datum;
                     })(oldBindings))) + " of those have data bound")))();
                     var validOldBindings = mapMaybe(function(v2) {
@@ -26393,8 +27458,8 @@
                       };
                     };
                   })(existingElements)();
-                  liftEffect3(log10("joinData: found " + (show16(length(existingElements)) + (" existing elements with selector '" + (selector + "'")))))();
-                  liftEffect3(log10("joinData: " + (show16(length(mapMaybe(function(v2) {
+                  liftEffect3(log10("joinData: found " + (show15(length(existingElements)) + (" existing elements with selector '" + (selector + "'")))))();
+                  liftEffect3(log10("joinData: " + (show15(length(mapMaybe(function(v2) {
                     return v2.datum;
                   })(oldBindings))) + " of those have data bound")))();
                   var validOldBindings = mapMaybe(function(v2) {
@@ -26468,7 +27533,7 @@
         return v.value0;
       }
       ;
-      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1071, column 52 - line 1072, column 30): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1077, column 52 - line 1078, column 30): " + [v.constructor.name]);
     })();
     return zipWith(Tuple.create)(v1.elements)(v1.data);
   };
@@ -26580,7 +27645,7 @@
         return v.value0;
       }
       ;
-      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1083, column 52 - line 1084, column 28): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1089, column 52 - line 1090, column 28): " + [v.constructor.name]);
     })();
     return zipWith(Tuple.create)(v1.elements)(v1.data);
   };
@@ -26611,6 +27676,18 @@
     ;
     if (v instanceof SVG) {
       return "svg";
+    }
+    ;
+    if (v instanceof Defs) {
+      return "defs";
+    }
+    ;
+    if (v instanceof LinearGradient) {
+      return "linearGradient";
+    }
+    ;
+    if (v instanceof Stop) {
+      return "stop";
     }
     ;
     if (v instanceof Div) {
@@ -26673,7 +27750,7 @@
     }
     ;
     if (v instanceof NumberValue) {
-      return show17(v.value0);
+      return show16(v.value0);
     }
     ;
     if (v instanceof BooleanValue) {
@@ -26704,7 +27781,7 @@
                   return transitionSetAttribute_(attr3.value0)(attributeValueToString(attr3.value1(v.value1)(index5)))(transition2);
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1023, column 32 - line 1031, column 103): " + [attr3.constructor.name]);
+                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1029, column 32 - line 1037, column 103): " + [attr3.constructor.name]);
               })(attrs)();
             };
           };
@@ -26734,7 +27811,7 @@
                   return transitionSetAttribute_(attr3.value0)(attributeValueToString(attr3.value1(v.value1)(index5)))(transition2);
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1051, column 32 - line 1059, column 103): " + [attr3.constructor.name]);
+                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1057, column 32 - line 1065, column 103): " + [attr3.constructor.name]);
               })(attrs)();
               return transitionRemove_(transition2)();
             };
@@ -26904,7 +27981,7 @@
             return boundSel.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1705, column 66 - line 1706, column 32): " + [boundSel.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1706, column 66 - line 1707, column 32): " + [boundSel.constructor.name]);
         })();
         return traverseWithIndex3(function(idx) {
           return function(datum2) {
@@ -26915,19 +27992,13 @@
             ;
             if (v1 instanceof Just) {
               var tree2 = templateFn(datum2);
-              var elementSel = new BoundSelection({
-                elements: [v1.value0],
-                data: [datum2],
-                indices: new Just([idx]),
-                document: v.document
-              });
               return function __do12() {
                 updateElementFromTree(v1.value0)(datum2)(idx)(tree2)(v.document)();
-                return new Tuple(v1.value0, empty5);
+                return v1.value0;
               };
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1711, column 9 - line 1735, column 43): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1712, column 9 - line 1721, column 25): " + [v1.constructor.name]);
           };
         })(v.data);
       };
@@ -27015,7 +28086,7 @@
             return pendingSel.value0;
           }
           ;
-          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1656, column 68 - line 1657, column 34): " + [pendingSel.constructor.name]);
+          throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1653, column 68 - line 1654, column 34): " + [pendingSel.constructor.name]);
         })();
         return traverseWithIndex3(function(idx) {
           return function(datum2) {
@@ -27038,7 +28109,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1665, column 9 - line 1685, column 49): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1662, column 9 - line 1682, column 49): " + [v1.constructor.name]);
           };
         })(v.pendingData);
       };
@@ -27063,13 +28134,13 @@
                   return unsafeCrashWith("renderTree: appendChild returned empty selection");
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1108, column 29 - line 1110, column 102): " + [v2.constructor.name]);
+                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1114, column 29 - line 1116, column 102): " + [v2.constructor.name]);
               }
               ;
               return unsafeCrashWith("renderTree: appendChild should return EmptySelection");
             })();
             var childMaps = traverse3(renderNodeHelper(dictOrd)(childSel))(v1.value0.children)();
-            var combinedChildMap = foldl2(union5)(empty5)(map43(snd)(childMaps));
+            var combinedChildMap = foldl2(union5)(empty5)(map44(snd)(childMaps));
             var selectionsMap = (function() {
               if (v1.value0.name instanceof Just) {
                 return insert10(v1.value0.name.value0)(childSel)(combinedChildMap);
@@ -27079,7 +28150,7 @@
                 return combinedChildMap;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1119, column 21 - line 1121, column 34): " + [v1.value0.name.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1125, column 21 - line 1127, column 34): " + [v1.value0.name.constructor.name]);
             })();
             return new Tuple(element3, selectionsMap);
           };
@@ -27114,18 +28185,15 @@
                 ;
                 return 0;
               })();
-              return log10("Tree API Join '" + (v1.value0.name + ("': enter=" + (show16(enterCount) + (", update=" + (show16(updateCount) + (", exit=" + show16(exitCount))))))));
+              return log10("Tree API Join '" + (v1.value0.name + ("': enter=" + (show15(enterCount) + (", update=" + (show15(updateCount) + (", exit=" + show15(exitCount))))))));
             })())();
             remove1(v2.value0.exit)();
             var enterElementsAndMaps = renderTemplatesForPendingSelection(dictOrd)(v1.value0.template)(v2.value0.enter)();
-            var enterElements = map43(fst)(enterElementsAndMaps);
-            var enterChildMaps = map43(snd)(enterElementsAndMaps);
-            var updateElementsAndMaps = renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
-            var updateElements = map43(fst)(updateElementsAndMaps);
-            var updateChildMaps = map43(snd)(updateElementsAndMaps);
+            var enterElements = map44(fst)(enterElementsAndMaps);
+            var enterChildMaps = map44(snd)(enterElementsAndMaps);
+            var updateElements = renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
             var allElements = append19(enterElements)(updateElements);
-            var allChildMaps = append19(enterChildMaps)(updateChildMaps);
-            var combinedChildMap = foldl2(union5)(empty5)(allChildMaps);
+            var combinedChildMap = foldl2(union5)(empty5)(enterChildMaps);
             var doc = (function() {
               if (v2.value0.enter instanceof PendingSelection) {
                 return v2.value0.enter.value0.document;
@@ -27135,7 +28203,7 @@
                 return v2.value0.update.value0.document;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1181, column 12 - line 1182, column 43): " + [v2.value0.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1183, column 12 - line 1184, column 43): " + [v2.value0.update.constructor.name]);
             })();
             var allData = (function() {
               if (v2.value0.enter instanceof PendingSelection) {
@@ -27168,7 +28236,7 @@
                 return unsafeCrashWith("renderTree Join: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1208, column 20 - line 1210, column 88): " + [v3.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1210, column 20 - line 1212, column 88): " + [v3.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
@@ -27178,15 +28246,15 @@
           return function __do12() {
             var v2 = joinData22(v1.value0.joinData)(v1.value0.key)(v)();
             var elementsAndMaps = renderNestedTemplatesForPendingSelection(dictOrd)(v1.value0.decompose)(v1.value0.template)(stringToElementType(v1.value0.key))(v2.value0.enter)();
-            var elements = map43(fst)(elementsAndMaps);
-            var childMaps = map43(snd)(elementsAndMaps);
+            var elements = map44(fst)(elementsAndMaps);
+            var childMaps = map44(snd)(elementsAndMaps);
             var combinedChildMap = foldl2(union5)(empty5)(childMaps);
             var v3 = (function() {
               if (v2.value0.enter instanceof PendingSelection) {
                 return v2.value0.enter.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1234, column 52 - line 1235, column 34): " + [v2.value0.enter.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1236, column 52 - line 1237, column 34): " + [v2.value0.enter.constructor.name]);
             })();
             var boundSel = new BoundSelection({
               elements,
@@ -27205,7 +28273,7 @@
                 return unsafeCrashWith("renderTree NestedJoin: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1251, column 20 - line 1253, column 94): " + [v4.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1253, column 20 - line 1255, column 94): " + [v4.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
@@ -27240,7 +28308,7 @@
                 ;
                 return 0;
               })();
-              return log10("Tree API SceneJoin '" + (v1.value0.name + ("': enter=" + (show16(enterCount) + (", update=" + (show16(updateCount) + (", exit=" + show16(exitCount))))))));
+              return log10("Tree API SceneJoin '" + (v1.value0.name + ("': enter=" + (show15(enterCount) + (", update=" + (show15(updateCount) + (", exit=" + show15(exitCount))))))));
             })())();
             (function() {
               if (v1.value0.exitBehavior instanceof Just) {
@@ -27255,7 +28323,7 @@
                   return unit;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1293, column 7 - line 1301, column 20): " + [v1.value0.exitBehavior.value0.transition.constructor.name]);
+                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1295, column 7 - line 1303, column 20): " + [v1.value0.exitBehavior.value0.transition.constructor.name]);
               }
               ;
               if (v1.value0.exitBehavior instanceof Nothing) {
@@ -27263,7 +28331,7 @@
                 return unit;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1291, column 3 - line 1305, column 16): " + [v1.value0.exitBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1293, column 3 - line 1307, column 16): " + [v1.value0.exitBehavior.constructor.name]);
             })();
             var enterElementsAndMaps = (function() {
               if (v1.value0.enterBehavior instanceof Just) {
@@ -27283,13 +28351,13 @@
                 var rendered = renderTemplatesForPendingSelection(dictOrd)(modifiedTemplate)(v2.value0.enter)();
                 (function() {
                   if (v1.value0.enterBehavior.value0.transition instanceof Just) {
-                    var enterElements2 = map43(fst)(rendered);
+                    var enterElements2 = map44(fst)(rendered);
                     var pendingData = (function() {
                       if (v2.value0.enter instanceof PendingSelection) {
                         return v2.value0.enter.value0.pendingData;
                       }
                       ;
-                      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1334, column 41 - line 1335, column 54): " + [v2.value0.enter.constructor.name]);
+                      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1336, column 41 - line 1337, column 54): " + [v2.value0.enter.constructor.name]);
                     })();
                     var pairs = zipWith(Tuple.create)(enterElements2)(pendingData);
                     return liftEffect3(traverse_4(function(v3) {
@@ -27309,7 +28377,7 @@
                     return unit;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1329, column 7 - line 1344, column 29): " + [v1.value0.enterBehavior.value0.transition.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1331, column 7 - line 1346, column 29): " + [v1.value0.enterBehavior.value0.transition.constructor.name]);
                 })();
                 return rendered;
               }
@@ -27318,11 +28386,11 @@
                 return renderTemplatesForPendingSelection(dictOrd)(v1.value0.template)(v2.value0.enter)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1316, column 27 - line 1349, column 68): " + [v1.value0.enterBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1318, column 27 - line 1351, column 68): " + [v1.value0.enterBehavior.constructor.name]);
             })();
-            var enterElements = map43(fst)(enterElementsAndMaps);
-            var enterChildMaps = map43(snd)(enterElementsAndMaps);
-            var updateElementsAndMaps = (function() {
+            var enterElements = map44(fst)(enterElementsAndMaps);
+            var enterChildMaps = map44(snd)(enterElementsAndMaps);
+            var updateElements = (function() {
               if (v1.value0.updateBehavior instanceof Just) {
                 (function() {
                   if (v1.value0.updateBehavior.value0.transition instanceof Just) {
@@ -27335,7 +28403,7 @@
                     return unit;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1358, column 7 - line 1366, column 20): " + [v1.value0.updateBehavior.value0.transition.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1360, column 7 - line 1368, column 20): " + [v1.value0.updateBehavior.value0.transition.constructor.name]);
                 })();
                 return renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
               }
@@ -27344,13 +28412,10 @@
                 return renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1355, column 28 - line 1372, column 67): " + [v1.value0.updateBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1357, column 21 - line 1374, column 67): " + [v1.value0.updateBehavior.constructor.name]);
             })();
-            var updateElements = map43(fst)(updateElementsAndMaps);
-            var updateChildMaps = map43(snd)(updateElementsAndMaps);
             var allElements = append19(enterElements)(updateElements);
-            var allChildMaps = append19(enterChildMaps)(updateChildMaps);
-            var combinedChildMap = foldl2(union5)(empty5)(allChildMaps);
+            var combinedChildMap = foldl2(union5)(empty5)(enterChildMaps);
             var doc = (function() {
               if (v2.value0.enter instanceof PendingSelection) {
                 return v2.value0.enter.value0.document;
@@ -27360,7 +28425,7 @@
                 return v2.value0.update.value0.document;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1389, column 12 - line 1390, column 43): " + [v2.value0.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1388, column 12 - line 1389, column 43): " + [v2.value0.update.constructor.name]);
             })();
             var allData = (function() {
               if (v2.value0.enter instanceof PendingSelection) {
@@ -27393,14 +28458,14 @@
                 return unsafeCrashWith("renderTree SceneJoin: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1415, column 20 - line 1417, column 93): " + [v3.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1414, column 20 - line 1416, column 93): " + [v3.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
         }
         ;
         if (v1 instanceof SceneNestedJoin) {
-          var innerData = join2(map43(v1.value0.decompose)(v1.value0.joinData));
+          var innerData = join2(map44(v1.value0.decompose)(v1.value0.joinData));
           return function __do12() {
             var v2 = joinDataWithKey1(innerData)(jsonStringify_)(v1.value0.key)(v)();
             liftEffect3((function() {
@@ -27429,7 +28494,7 @@
                 ;
                 return 0;
               })();
-              return log10("Tree API SceneNestedJoin '" + (v1.value0.name + ("': enter=" + (show16(enterCount) + (", update=" + (show16(updateCount) + (", exit=" + show16(exitCount))))))));
+              return log10("Tree API SceneNestedJoin '" + (v1.value0.name + ("': enter=" + (show15(enterCount) + (", update=" + (show15(updateCount) + (", exit=" + show15(exitCount))))))));
             })())();
             (function() {
               if (v1.value0.exitBehavior instanceof Just) {
@@ -27444,7 +28509,7 @@
                   return unit;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1468, column 7 - line 1476, column 20): " + [v1.value0.exitBehavior.value0.transition.constructor.name]);
+                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1467, column 7 - line 1475, column 20): " + [v1.value0.exitBehavior.value0.transition.constructor.name]);
               }
               ;
               if (v1.value0.exitBehavior instanceof Nothing) {
@@ -27452,7 +28517,7 @@
                 return unit;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1466, column 3 - line 1479, column 16): " + [v1.value0.exitBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1465, column 3 - line 1478, column 16): " + [v1.value0.exitBehavior.constructor.name]);
             })();
             var enterElementsAndMaps = (function() {
               if (v1.value0.enterBehavior instanceof Just) {
@@ -27472,13 +28537,13 @@
                 var rendered = renderTemplatesForPendingSelection(dictOrd)(modifiedTemplate)(v2.value0.enter)();
                 (function() {
                   if (v1.value0.enterBehavior.value0.transition instanceof Just) {
-                    var enterElements2 = map43(fst)(rendered);
+                    var enterElements2 = map44(fst)(rendered);
                     var pendingData = (function() {
                       if (v2.value0.enter instanceof PendingSelection) {
                         return v2.value0.enter.value0.pendingData;
                       }
                       ;
-                      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1512, column 41 - line 1513, column 54): " + [v2.value0.enter.constructor.name]);
+                      throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1511, column 41 - line 1512, column 54): " + [v2.value0.enter.constructor.name]);
                     })();
                     var pairs = zipWith(Tuple.create)(enterElements2)(pendingData);
                     return liftEffect3(traverse_4(function(v4) {
@@ -27498,7 +28563,7 @@
                     return unit;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1507, column 7 - line 1522, column 29): " + [v1.value0.enterBehavior.value0.transition.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1506, column 7 - line 1521, column 29): " + [v1.value0.enterBehavior.value0.transition.constructor.name]);
                 })();
                 return rendered;
               }
@@ -27507,9 +28572,9 @@
                 return renderTemplatesForPendingSelection(dictOrd)(v1.value0.template)(v2.value0.enter)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1496, column 27 - line 1525, column 92): " + [v1.value0.enterBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1495, column 27 - line 1524, column 92): " + [v1.value0.enterBehavior.constructor.name]);
             })();
-            var updateElementsAndMaps = (function() {
+            var updateElements = (function() {
               if (v1.value0.updateBehavior instanceof Just) {
                 (function() {
                   if (v1.value0.updateBehavior.value0.transition instanceof Just) {
@@ -27522,7 +28587,7 @@
                     return unit;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1531, column 7 - line 1539, column 20): " + [v1.value0.updateBehavior.value0.transition.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1530, column 7 - line 1538, column 20): " + [v1.value0.updateBehavior.value0.transition.constructor.name]);
                 })();
                 return renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
               }
@@ -27531,15 +28596,12 @@
                 return renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1528, column 28 - line 1542, column 91): " + [v1.value0.updateBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1527, column 21 - line 1541, column 91): " + [v1.value0.updateBehavior.constructor.name]);
             })();
-            var updateElements = map43(fst)(updateElementsAndMaps);
-            var enterElements = map43(fst)(enterElementsAndMaps);
+            var enterElements = map44(fst)(enterElementsAndMaps);
             var allElements = append19(enterElements)(updateElements);
-            var updateChildMaps = map43(snd)(updateElementsAndMaps);
-            var enterChildMaps = map43(snd)(enterElementsAndMaps);
-            var allChildMaps = append19(enterChildMaps)(updateChildMaps);
-            var combinedChildMap = foldl2(union5)(empty5)(allChildMaps);
+            var enterChildMaps = map44(snd)(enterElementsAndMaps);
+            var combinedChildMap = foldl2(union5)(empty5)(enterChildMaps);
             var doc = (function() {
               if (v2.value0.enter instanceof PendingSelection) {
                 return v2.value0.enter.value0.document;
@@ -27549,7 +28611,7 @@
                 return v2.value0.update.value0.document;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1563, column 12 - line 1564, column 43): " + [v2.value0.update.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1560, column 12 - line 1561, column 43): " + [v2.value0.update.constructor.name]);
             })();
             var boundSel = new BoundSelection({
               elements: allElements,
@@ -27568,13 +28630,13 @@
                 return unsafeCrashWith("renderTree SceneNestedJoin: no elements created");
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1578, column 20 - line 1580, column 99): " + [v5.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1575, column 20 - line 1577, column 99): " + [v5.constructor.name]);
             })();
             return new Tuple(firstElement, selectionsMap);
           };
         }
         ;
-        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1094, column 1 - line 1099, column 74): " + [v.constructor.name, v1.constructor.name]);
+        throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1100, column 1 - line 1105, column 74): " + [v.constructor.name, v1.constructor.name]);
       };
     };
   };
@@ -27588,7 +28650,7 @@
                 return pendingSel.value0;
               }
               ;
-              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1601, column 68 - line 1602, column 34): " + [pendingSel.constructor.name]);
+              throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1598, column 68 - line 1599, column 34): " + [pendingSel.constructor.name]);
             })();
             return traverseWithIndex3(function(idx) {
               return function(outerDatum) {
@@ -27621,7 +28683,7 @@
                   };
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1607, column 9 - line 1636, column 57): " + [v1.constructor.name]);
+                throw new Error("Failed pattern match at PSD3v2.Selection.Operations (line 1604, column 9 - line 1633, column 57): " + [v1.constructor.name]);
               };
             })(v.pendingData);
           };
@@ -27862,7 +28924,7 @@
   var merge2 = /* @__PURE__ */ merge(monadEffectEffect);
   var appendChild4 = /* @__PURE__ */ appendChild3(monadEffectEffect);
   var appendChildInheriting2 = /* @__PURE__ */ appendChildInheriting(monadEffectEffect);
-  var map44 = /* @__PURE__ */ map(functorMap);
+  var map45 = /* @__PURE__ */ map(functorMap);
   var D3v2Selection_ = function(x6) {
     return x6;
   };
@@ -28078,7 +29140,7 @@
         return function(tree2) {
           return function __do12() {
             var selectionsMap = renderTree2(v)(tree2)();
-            return map44(D3v2Selection_)(selectionsMap);
+            return map45(D3v2Selection_)(selectionsMap);
           };
         };
       };
@@ -28101,7 +29163,7 @@
   var select7 = /* @__PURE__ */ select3(selectionMD3v2Selection_D);
   var appendChild5 = /* @__PURE__ */ appendChild(selectionMD3v2Selection_D);
   var transform3 = /* @__PURE__ */ transform2(toAttrStringString);
-  var show18 = /* @__PURE__ */ show(showNumber);
+  var show17 = /* @__PURE__ */ show(showNumber);
   var id_2 = /* @__PURE__ */ id_(toAttrStringString);
   var appendData4 = /* @__PURE__ */ appendData(selectionMD3v2Selection_D)(foldableArray);
   var x5 = /* @__PURE__ */ x4(toAttrNumberFunctionNumbe);
@@ -28116,7 +29178,7 @@
   var discard5 = /* @__PURE__ */ discard(discardUnit);
   var discard1 = /* @__PURE__ */ discard5(bindD3v2M);
   var log11 = /* @__PURE__ */ log3(monadEffectD3v2M);
-  var show19 = /* @__PURE__ */ show(showInt);
+  var show18 = /* @__PURE__ */ show(showInt);
   var textAnchor2 = /* @__PURE__ */ textAnchor(toAttrStringString);
   var fontFamily2 = /* @__PURE__ */ fontFamily(toAttrStringString);
   var fontSize2 = /* @__PURE__ */ fontSize(toAttrNumberNumber);
@@ -28126,7 +29188,7 @@
   var eq8 = /* @__PURE__ */ eq(eqNodeType);
   var fromFoldable27 = /* @__PURE__ */ fromFoldable2(foldableArray);
   var foldl11 = /* @__PURE__ */ foldl(foldableArray);
-  var map45 = /* @__PURE__ */ map(functorArray);
+  var map46 = /* @__PURE__ */ map(functorArray);
   var TMRoot = /* @__PURE__ */ (function() {
     function TMRoot2(value0) {
       this.value0 = value0;
@@ -28237,7 +29299,7 @@
     return bind14(select7("#treemap-watermark"))(function(watermarkGroup) {
       var translateY = -viewBoxHeight / 2;
       var translateX = -viewBoxWidth / 2;
-      return bind14(appendChild5(Group.value)([transform3("translate(" + (show18(translateX) + ("," + (show18(translateY) + ")")))), id_2("watermark-inner")])(watermarkGroup))(function(innerGroup) {
+      return bind14(appendChild5(Group.value)([transform3("translate(" + (show17(translateX) + ("," + (show17(translateY) + ")")))), id_2("watermark-inner")])(watermarkGroup))(function(innerGroup) {
         return bind14(appendData4(Rect.value)(packageNodes)([x5(function(v) {
           return v.x0;
         }), y5(function(v) {
@@ -28247,7 +29309,7 @@
         }), height10(function(n) {
           return n.y1 - n.y0;
         }), fill2("rgba(255, 255, 255, 0)"), stroke2("rgba(255, 255, 255, 0.15)"), strokeWidth2(1), opacity2(1), class_3("watermark-package")])(innerGroup))(function() {
-          return discard1(log11("[Treemap] Rendering watermark labels for " + (show19(length(packageNodes)) + " packages")))(function() {
+          return discard1(log11("[Treemap] Rendering watermark labels for " + (show18(length(packageNodes)) + " packages")))(function() {
             return bind14(appendData4(Text2.value)(packageNodes)([x5(function(n) {
               return (n.x0 + n.x1) / 2;
             }), y5(function(n) {
@@ -28361,7 +29423,7 @@
           ;
           throw new Error("Failed pattern match at Engine.Treemap (line 129, column 22 - line 131, column 27): " + [v1.constructor.name]);
         })();
-        var moduleNodes = map45(mkModuleNode2(pkgIdx))(v.value0);
+        var moduleNodes = map46(mkModuleNode2(pkgIdx))(v.value0);
         return new Just(new TMPackage({
           name: pkg.name,
           packageIndex: pkgIdx,
@@ -28393,15 +29455,15 @@
     var packageNodes = filter(function(n) {
       return n.depth === 1;
     })(allNodes);
-    return fromFoldable27(map45(toPositionEntry)(packageNodes));
+    return fromFoldable27(map46(toPositionEntry)(packageNodes));
   };
   var recalculateTreemapPositions = function(nodes) {
     var posMap = computeTreemapPositions(nodes);
     var packages = filter(function(n) {
       return eq8(n.nodeType)(PackageNode.value);
     })(nodes);
-    var clusterMap = fromFoldable27(map45(function(p2) {
-      return new Tuple(show19(p2.id), p2.name);
+    var clusterMap = fromFoldable27(map46(function(p2) {
+      return new Tuple(show18(p2.id), p2.name);
     })(packages));
     var updateNode = function(node) {
       if (node.nodeType instanceof PackageNode) {
@@ -28444,7 +29506,7 @@
       }
       ;
       if (node.nodeType instanceof ModuleNode) {
-        var v = lookup(show19(node.cluster))(clusterMap);
+        var v = lookup(show18(node.cluster))(clusterMap);
         if (v instanceof Just) {
           var v1 = lookup(v.value0)(posMap);
           if (v1 instanceof Just) {
@@ -28493,7 +29555,7 @@
       ;
       throw new Error("Failed pattern match at Engine.Treemap (line 346, column 7 - line 358, column 28): " + [node.nodeType.constructor.name]);
     };
-    return map45(updateNode)(nodes);
+    return map46(updateNode)(nodes);
   };
   var renderWatermark = function(nodes) {
     return function __do12() {
@@ -28504,7 +29566,7 @@
       var packageNodes = filter(function(n) {
         return n.depth === 1;
       })(allNodes);
-      log1("[Treemap] Watermark: " + (show19(length(packageNodes)) + " packages"))();
+      log1("[Treemap] Watermark: " + (show18(length(packageNodes)) + " packages"))();
       runD3v2M(renderWatermarkSVG(packageNodes))();
       setupWatermarkHover();
       return log1("[Treemap] Watermark render complete")();
@@ -28831,11 +29893,11 @@
 
   // output/Engine.TriptychView/index.js
   var log12 = /* @__PURE__ */ log3(monadEffectEffect);
-  var show20 = /* @__PURE__ */ show(showInt);
+  var show19 = /* @__PURE__ */ show(showInt);
   var renderTriptychWithDeclarations = function(moduleName) {
     return function(nodes) {
       return function __do12() {
-        log12("[TriptychView] Rendering triptych for " + (moduleName + (" with " + (show20(length(nodes)) + " nodes"))))();
+        log12("[TriptychView] Rendering triptych for " + (moduleName + (" with " + (show19(length(nodes)) + " nodes"))))();
         clearTriptych_();
         clearChordDiagram();
         clearAdjacencyMatrix();
@@ -28855,7 +29917,7 @@
   };
 
   // output/PSD3.ForceEngine.Links/index.js
-  var show21 = /* @__PURE__ */ show(showInt);
+  var show20 = /* @__PURE__ */ show(showInt);
   var unsafeArrayIndex = function(arr) {
     return function(i2) {
       var v = index(arr)(i2);
@@ -28864,7 +29926,7 @@
       }
       ;
       if (v instanceof Nothing) {
-        return unsafeCrashWith("swizzleLinks: Array index out of bounds: " + show21(i2));
+        return unsafeCrashWith("swizzleLinks: Array index out of bounds: " + show20(i2));
       }
       ;
       throw new Error("Failed pattern match at PSD3.ForceEngine.Links (line 115, column 26 - line 117, column 85): " + [v.constructor.name]);
@@ -29009,18 +30071,21 @@
   })();
   var configureTooltip = configureTooltip_;
 
-  // output/Viz.SpagoGridTest.TreeLinks/index.js
-  var show23 = /* @__PURE__ */ show(showNumber);
-  var verticalLinkPath = function(x13) {
+  // output/DataViz.Layout.Hierarchy.Link/index.js
+  var show21 = /* @__PURE__ */ show(showNumber);
+  var linkBezierVertical = function(x13) {
     return function(y13) {
       return function(x24) {
         return function(y24) {
           var midY = (y13 + y24) / 2;
-          return "M" + (show23(x13) + ("," + (show23(y13) + ("C" + (show23(x13) + ("," + (show23(midY) + (" " + (show23(x24) + ("," + (show23(midY) + (" " + (show23(x24) + ("," + show23(y24)))))))))))))));
+          return "M" + (show21(x13) + ("," + (show21(y13) + ("C" + (show21(x13) + ("," + (show21(midY) + (" " + (show21(x24) + ("," + (show21(midY) + (" " + (show21(x24) + ("," + show21(y24)))))))))))))));
         };
       };
     };
   };
+
+  // output/Viz.SpagoGridTest.TreeLinks/index.js
+  var verticalLinkPath = linkBezierVertical;
 
   // output/Engine.Explorer/index.js
   var $runtime_lazy9 = function(name16, moduleName, init4) {
@@ -29040,7 +30105,7 @@
   var pure17 = /* @__PURE__ */ pure(applicativeMaybe);
   var discard6 = /* @__PURE__ */ discard(discardUnit);
   var log13 = /* @__PURE__ */ log3(monadEffectEffect);
-  var show24 = /* @__PURE__ */ show(showBoolean);
+  var show23 = /* @__PURE__ */ show(showBoolean);
   var insert11 = /* @__PURE__ */ insert3(ordString);
   var bind23 = /* @__PURE__ */ bind(bindD3v2M);
   var select8 = /* @__PURE__ */ select3(selectionMD3v2Selection_D);
@@ -29063,9 +30128,9 @@
   var sort2 = /* @__PURE__ */ sort(ordNumber);
   var foldl13 = /* @__PURE__ */ foldl(foldableArray);
   var div12 = /* @__PURE__ */ div(euclideanRingInt);
-  var show25 = /* @__PURE__ */ show(showNumber);
+  var show24 = /* @__PURE__ */ show(showNumber);
   var min12 = /* @__PURE__ */ min(ordNumber);
-  var map46 = /* @__PURE__ */ map(functorArray);
+  var map47 = /* @__PURE__ */ map(functorArray);
   var discard22 = /* @__PURE__ */ discard6(bindD3v2M);
   var liftEffect4 = /* @__PURE__ */ liftEffect(monadEffectD3v2M);
   var d2 = /* @__PURE__ */ d(toAttrStringFunctionStrin);
@@ -29233,7 +30298,7 @@
           ;
           return remove3(classes2)("tree-scene")();
         })();
-        return log13("[Explorer] Set tree-scene class: " + show24(shouldAdd))();
+        return log13("[Explorer] Set tree-scene class: " + show23(shouldAdd))();
       }
       ;
       if (mElement instanceof Nothing) {
@@ -29460,7 +30525,7 @@
         var maxScore = fromMaybe(0)(last(sortedScores));
         var avgScore = foldl13(add6)(0)(scores) / toNumber(count);
         var medianScore = fromMaybe(0)(index(sortedScores)(div12(count)(2)));
-        return log13("[" + (label5 + ("] Connectivity scores - count: " + (show110(count) + (", min: " + (show25(minScore) + (", max: " + (show25(maxScore) + (", avg: " + (show25(avgScore) + (", median: " + show25(medianScore))))))))))));
+        return log13("[" + (label5 + ("] Connectivity scores - count: " + (show110(count) + (", min: " + (show24(minScore) + (", max: " + (show24(maxScore) + (", avg: " + (show24(avgScore) + (", median: " + show24(medianScore))))))))))));
       }
       ;
       throw new Error("Failed pattern match at Engine.Explorer (line 940, column 3 - line 953, column 44): " + [v.constructor.name]);
@@ -29686,17 +30751,17 @@
   var renderNeighborhoodLinks = function(nodes) {
     return function __do12() {
       var allLinks = read(globalLinksRef)();
-      var nodeIdSet = fromFoldable29(map46(function(v) {
+      var nodeIdSet = fromFoldable29(map47(function(v) {
         return v.id;
       })(nodes));
-      var nodeMap = fromFoldable33(map46(function(n) {
+      var nodeMap = fromFoldable33(map47(function(n) {
         return new Tuple(n.id, n);
       })(nodes));
       var neighborhoodLinks = filter(function(link4) {
         return member6(link4.source)(nodeIdSet) && member6(link4.target)(nodeIdSet);
       })(allLinks);
       log13("[Explorer] Rendering " + (show110(length(neighborhoodLinks)) + " neighborhood links as bidirectional"))();
-      var linkPairSet = fromFoldable43(map46(function(l) {
+      var linkPairSet = fromFoldable43(map47(function(l) {
         return new Tuple(l.source, l.target);
       })(neighborhoodLinks));
       var directionalLinks = mapMaybe(toDirectionalLink(nodeMap)(linkPairSet))(neighborhoodLinks);
@@ -29710,7 +30775,7 @@
       var links = read(globalLinksRef)();
       var treeLinks = filter(isTreeLink)(links);
       log13("[Explorer] Rendering " + (show110(length(treeLinks)) + " tree links"))();
-      var nodeMap = fromFoldable33(map46(function(n) {
+      var nodeMap = fromFoldable33(map47(function(n) {
         return new Tuple(n.id, n);
       })(nodes));
       runD3v2M(renderTreeLinksD3(nodeMap)(treeLinks))();
@@ -29730,7 +30795,7 @@
           }
           ;
           if (v instanceof Just) {
-            var calleeFuncs = map46(function(c) {
+            var calleeFuncs = map47(function(c) {
               return c.targetModule + ("." + c.target);
             })(v.value0.calls);
             highlightCallGraph(sourceFunc)(v.value0.calledBy)(calleeFuncs)();
@@ -29978,7 +31043,7 @@
           var clickedLayer = maybe(0)(function(v) {
             return v.topoLayer;
           })(clickedNode);
-          var allLayers = map46(function(v) {
+          var allLayers = map47(function(v) {
             return v.topoLayer;
           })(nodes);
           var minLayer = fromMaybe(0)(minimum3(allLayers));
@@ -30066,21 +31131,21 @@
           }
           ;
           if (v instanceof Just) {
-            var outEdges = map46(function(c) {
+            var outEdges = map47(function(c) {
               return {
                 source: funcKey,
                 target: c.targetModule + ("." + c.target),
                 isOutgoing: true
               };
             })(v.value0.calls);
-            var inEdges = map46(function(caller) {
+            var inEdges = map47(function(caller) {
               return {
                 source: caller,
                 target: funcKey,
                 isOutgoing: false
               };
             })(v.value0.calledBy);
-            var calleeNames = map46(function(c) {
+            var calleeNames = map47(function(c) {
               return c.targetModule + ("." + c.target);
             })(v.value0.calls);
             return {
@@ -30092,7 +31157,7 @@
           ;
           throw new Error("Failed pattern match at Engine.Explorer (line 2058, column 27 - line 2078, column 85): " + [v.constructor.name]);
         };
-        var results = map46(processFunc)(moduleFuncs);
+        var results = map47(processFunc)(moduleFuncs);
         var allEdges = concatMap(function(v) {
           return v.edges;
         })(results);
@@ -30226,7 +31291,7 @@
         hideTooltip();
         clearTreeLinks();
         clearNodesGroup();
-        var unpinnedNodes = map46(unpinNode2)(nodes);
+        var unpinnedNodes = map47(unpinNode2)(nodes);
         setNodes(unpinnedNodes)(sim)();
         var liveNodes = getNodes(sim)();
         setNeighborhoodForces(liveNodes)(sim)();
@@ -30569,10 +31634,10 @@
           var allPackages = filter(function(n) {
             return eq23(n.nodeType)(PackageNode.value);
           })(nodesToStore);
-          var minLayer = fromMaybe(0)(minimum3(map46(function(v) {
+          var minLayer = fromMaybe(0)(minimum3(map47(function(v) {
             return v.topoLayer;
           })(allPackages)));
-          var maxLayer = fromMaybe(0)(maximum7(map46(function(v) {
+          var maxLayer = fromMaybe(0)(maximum7(map47(function(v) {
             return v.topoLayer;
           })(allPackages)));
           var neighborhoodNodes = filter(function(n) {
@@ -30938,7 +32003,7 @@
     return function(containerSelector) {
       return function(nodes) {
         return bind23(select8(containerSelector))(function(container) {
-          return bind23(appendChild6(SVG.value)([viewBox2(show25(-viewBoxWidth / 2) + (" " + (show25(-viewBoxHeight / 2) + (" " + (show25(viewBoxWidth) + (" " + show25(viewBoxHeight))))))), id_3("explorer-svg"), class_1("ce-viz")])(container))(function(svg) {
+          return bind23(appendChild6(SVG.value)([viewBox2(show24(-viewBoxWidth / 2) + (" " + (show24(-viewBoxHeight / 2) + (" " + (show24(viewBoxWidth) + (" " + show24(viewBoxHeight))))))), id_3("explorer-svg"), class_1("ce-viz")])(container))(function(svg) {
             return bind23(appendChild6(Group.value)([id_3("explorer-zoom-group")])(svg))(function(zoomGroup) {
               return bind23(appendChild6(Group.value)([id_3("treemap-watermark"), class_1("watermark")])(zoomGroup))(function() {
                 return bind23(appendChild6(Group.value)([id_3("explorer-links")])(zoomGroup))(function() {
@@ -31014,7 +32079,7 @@
         })(globalModelInfoRef)();
         var treemapNodes = recalculateTreemapPositions(model.nodes);
         var randomizedNodes = randomizeModulePositions(treemapNodes)();
-        var nodesWithFix = map46(fixPackagePosition)(randomizedNodes);
+        var nodesWithFix = map47(fixPackagePosition)(randomizedNodes);
         var sim = create3(defaultConfig2)();
         setNodes(nodesWithFix)(sim)();
         addGridForces(nodesWithFix)(sim)();
@@ -31096,7 +32161,7 @@
         })(globalModelInfoRef)();
         var treemapNodes = recalculateTreemapPositions(model.nodes);
         var randomizedNodes = randomizeModulePositions(treemapNodes)();
-        var nodesWithFix = map46(fixPackagePosition)(randomizedNodes);
+        var nodesWithFix = map47(fixPackagePosition)(randomizedNodes);
         var state3 = read(stateRef)();
         setNodes(nodesWithFix)(state3.simulation)();
         addGridForces(nodesWithFix)(state3.simulation)();
@@ -31220,8 +32285,8 @@
   var bind16 = /* @__PURE__ */ bind(bindHalogenM);
   var $$void11 = /* @__PURE__ */ $$void(functorHalogenM);
   var modify_5 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var map48 = /* @__PURE__ */ map(functorArray);
-  var show26 = /* @__PURE__ */ show(showInt);
+  var map49 = /* @__PURE__ */ map(functorArray);
+  var show25 = /* @__PURE__ */ show(showInt);
   var get7 = /* @__PURE__ */ get(monadStateHalogenM);
   var when7 = /* @__PURE__ */ when(applicativeHalogenM);
   var notEq3 = /* @__PURE__ */ notEq(eqViewState);
@@ -31242,7 +32307,7 @@
       return "color";
     }
   })(eqString))));
-  var show27 = /* @__PURE__ */ show(showNeighborhoodViewType);
+  var show26 = /* @__PURE__ */ show(showNeighborhoodViewType);
   var callGraphPopupIsSymbol = {
     reflectSymbol: function() {
       return "callGraphPopup";
@@ -31398,13 +32463,13 @@
                   return discard7(log15("[SpagoGridApp] Explorer initialized with callbacks"))(function() {
                     return $$void11(fork(bind16(liftAff2(fetchProjects))(function(projectsResult) {
                       if (projectsResult instanceof Right) {
-                        var projectInfos = map48(function(p2) {
+                        var projectInfos = map49(function(p2) {
                           return {
                             id: p2.id,
                             name: p2.name
                           };
                         })(projectsResult.value0);
-                        return discard7(log15("[SpagoGridApp] Loaded " + (show26(length(projectsResult.value0)) + " projects")))(function() {
+                        return discard7(log15("[SpagoGridApp] Loaded " + (show25(length(projectsResult.value0)) + " projects")))(function() {
                           return handleAction3(dictMonadAff)(new ProjectsLoaded(projectInfos));
                         });
                       }
@@ -31452,7 +32517,7 @@
       ;
       if (v instanceof PackagePaletteChanged) {
         return bind16(get7)(function(state3) {
-          return when7(notEq12(state3.packagePalette)(v.value0))(discard7(log15("[SpagoGridApp] Package palette changed (" + (show26(length(v.value0)) + " packages)")))(function() {
+          return when7(notEq12(state3.packagePalette)(v.value0))(discard7(log15("[SpagoGridApp] Package palette changed (" + (show25(length(v.value0)) + " packages)")))(function() {
             return discard7(modify_5(function(v1) {
               var $91 = {};
               for (var $92 in v1) {
@@ -31537,13 +32602,13 @@
           return function(v1) {
             var t = numMod(toNumber(idx) * 0.618033988749895)(1);
             return {
-              name: "Package " + show26(idx + 1 | 0),
+              name: "Package " + show25(idx + 1 | 0),
               color: turbo_default(t)
             };
           };
         };
         return bind16(get7)(function(state3) {
-          return discard7(when7($$null(state3.packagePalette) && v.value0.packageCount > 0)(discard7(log15("[SpagoGridApp] Model loaded with " + (show26(v.value0.packageCount) + " packages")))(function() {
+          return discard7(when7($$null(state3.packagePalette) && v.value0.packageCount > 0)(discard7(log15("[SpagoGridApp] Model loaded with " + (show25(v.value0.packageCount) + " packages")))(function() {
             var palette = mapWithIndex2(mkColorEntry)(replicate(v.value0.packageCount)(unit));
             return discard7(modify_5(function(v1) {
               var $107 = {};
@@ -31561,7 +32626,7 @@
             });
           })))(function() {
             return bind16(liftEffect10(getModuleNames))(function(moduleNames) {
-              return discard7(log15("[SpagoGridApp] Loaded " + (show26(length(moduleNames)) + " module names for search")))(function() {
+              return discard7(log15("[SpagoGridApp] Loaded " + (show25(length(moduleNames)) + " module names for search")))(function() {
                 return modify_5(function(v1) {
                   var $110 = {};
                   for (var $111 in v1) {
@@ -31626,7 +32691,7 @@
         }
         ;
         if (v.value0 instanceof ProjectSelected) {
-          return discard7(log15("[SpagoGridApp] Project selected: " + show26(v.value0.value0)))(function() {
+          return discard7(log15("[SpagoGridApp] Project selected: " + show25(v.value0.value0)))(function() {
             return bind16(get7)(function(state3) {
               var v1 = find2(function(p2) {
                 return p2.id === v.value0.value0;
@@ -31636,7 +32701,7 @@
               }
               ;
               if (v1 instanceof Nothing) {
-                return log15("[SpagoGridApp] Unknown project ID: " + show26(v.value0.value0));
+                return log15("[SpagoGridApp] Unknown project ID: " + show25(v.value0.value0));
               }
               ;
               throw new Error("Failed pattern match at Component.SpagoGridApp (line 222, column 9 - line 224, column 86): " + [v1.constructor.name]);
@@ -31645,7 +32710,7 @@
         }
         ;
         if (v.value0 instanceof NeighborhoodViewTypeSelected) {
-          return discard7(log15("[SpagoGridApp] Neighborhood view type selected: " + show27(v.value0.value0)))(function() {
+          return discard7(log15("[SpagoGridApp] Neighborhood view type selected: " + show26(v.value0.value0)))(function() {
             return liftEffect10(setNeighborhoodViewType(v.value0.value0));
           });
         }
@@ -31852,10 +32917,10 @@
   var fork3 = /* @__PURE__ */ fork2(monadForkAff);
   var parSequence_2 = /* @__PURE__ */ parSequence_(parallelAff)(applicativeParAff)(foldableList);
   var pure20 = /* @__PURE__ */ pure(applicativeAff);
-  var map49 = /* @__PURE__ */ map(functorCoyoneda);
+  var map50 = /* @__PURE__ */ map(functorCoyoneda);
   var parallel3 = /* @__PURE__ */ parallel(parallelAff);
   var map114 = /* @__PURE__ */ map(functorAff);
-  var sequential2 = /* @__PURE__ */ sequential(parallelAff);
+  var sequential3 = /* @__PURE__ */ sequential(parallelAff);
   var map210 = /* @__PURE__ */ map(functorMaybe);
   var insert13 = /* @__PURE__ */ insert3(ordSubscriptionId);
   var retractFreeAp2 = /* @__PURE__ */ retractFreeAp(applicativeParAff);
@@ -31926,7 +32991,7 @@
     return function(ref2) {
       return function(q2) {
         return bind18(liftEffect6(read(ref2)))(function(v) {
-          return evalM(render5)(ref2)(v["component"]["eval"](new Query(map49(Just.create)(liftCoyoneda(q2)), $$const(Nothing.value))));
+          return evalM(render5)(ref2)(v["component"]["eval"](new Query(map50(Just.create)(liftCoyoneda(q2)), $$const(Nothing.value))));
         });
       };
     };
@@ -31945,7 +33010,7 @@
                     })(dsx);
                   }));
                 };
-                return map114(v2.value2)(sequential2(v2.value0(applicativeParAff)(evalChild)(v1.children)));
+                return map114(v2.value2)(sequential3(v2.value0(applicativeParAff)(evalChild)(v1.children)));
               })(cqb);
             });
           };
@@ -32027,7 +33092,7 @@
             }
             ;
             if (v1 instanceof Par) {
-              return sequential2(retractFreeAp2(hoistFreeAp((function() {
+              return sequential3(retractFreeAp2(hoistFreeAp((function() {
                 var $119 = evalM(render5)(ref2);
                 return function($120) {
                   return parallel3($119($120));
@@ -32136,7 +33201,7 @@
   var parSequence_3 = /* @__PURE__ */ parSequence_(parallelAff)(applicativeParAff)(foldableList);
   var liftEffect7 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var pure21 = /* @__PURE__ */ pure(applicativeEffect);
-  var map50 = /* @__PURE__ */ map(functorEffect);
+  var map51 = /* @__PURE__ */ map(functorEffect);
   var pure111 = /* @__PURE__ */ pure(applicativeAff);
   var when8 = /* @__PURE__ */ when(applicativeEffect);
   var renderStateX2 = /* @__PURE__ */ renderStateX(functorEffect);
@@ -32234,7 +33299,7 @@
               return function(childrenOutRef) {
                 return unComponentSlot(function(slot3) {
                   return function __do12() {
-                    var childrenIn = map50(slot3.pop)(read(childrenInRef))();
+                    var childrenIn = map51(slot3.pop)(read(childrenInRef))();
                     var $$var2 = (function() {
                       if (childrenIn instanceof Just) {
                         write(childrenIn.value0.value1)(childrenInRef)();
@@ -32264,7 +33329,7 @@
                       ;
                       throw new Error("Failed pattern match at Halogen.Aff.Driver (line 213, column 14 - line 222, column 98): " + [childrenIn.constructor.name]);
                     })();
-                    var isDuplicate = map50(function($69) {
+                    var isDuplicate = map51(function($69) {
                       return isJust(slot3.get($69));
                     })(read(childrenOutRef))();
                     when8(isDuplicate)(warn("Halogen: Duplicate slot address was detected during rendering, unexpected results may occur"))();
@@ -32290,7 +33355,7 @@
           return function($$var2) {
             return function __do12() {
               var v = read($$var2)();
-              var shouldProcessHandlers = map50(isNothing)(read(v.pendingHandlers))();
+              var shouldProcessHandlers = map51(isNothing)(read(v.pendingHandlers))();
               when8(shouldProcessHandlers)(write(new Just(Nil.value))(v.pendingHandlers))();
               write(empty7)(v.childrenOut)();
               write(v.children)(v.childrenIn)();
@@ -32461,7 +33526,7 @@
   var identity17 = /* @__PURE__ */ identity(categoryFn);
   var bind111 = /* @__PURE__ */ bind(bindAff);
   var liftEffect8 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var map51 = /* @__PURE__ */ map(functorEffect);
+  var map52 = /* @__PURE__ */ map(functorEffect);
   var bindFlipped8 = /* @__PURE__ */ bindFlipped(bindEffect);
   var substInParent = function(v) {
     return function(v1) {
@@ -32609,7 +33674,7 @@
   var runUI2 = function(component5) {
     return function(i2) {
       return function(element3) {
-        return bind111(liftEffect8(map51(toDocument)(bindFlipped8(document2)(windowImpl))))(function(document3) {
+        return bind111(liftEffect8(map52(toDocument)(bindFlipped8(document2)(windowImpl))))(function(document3) {
           return runUI(renderSpec(document3)(element3))(component5)(i2);
         });
       };

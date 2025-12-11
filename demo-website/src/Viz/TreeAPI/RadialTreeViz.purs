@@ -5,7 +5,8 @@ import Prelude
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.List (List(..))
-import Data.Number (pi, cos, sin, atan2, sqrt)
+import Data.Number (pi, cos, sin)
+import DataViz.Layout.Hierarchy.Link (linkBezierRadialCartesian)
 import Control.Comonad.Cofree (head, tail)
 import Data.Tree (Tree, mkTree)
 import Effect (Effect)
@@ -74,41 +75,9 @@ makeLinks tree' = Array.fromFoldable $ makeLinksList tree'
     in
       childLinks <> grandchildLinks
 
--- | Radial link path generator
--- | Creates cubic Bezier curves that follow the radial structure
+-- | Radial link path generator (re-export from library)
 radialLinkPath :: Number -> Number -> Number -> Number -> String
-radialLinkPath x1 y1 x2 y2 =
-  let
-    -- Convert cartesian back to polar to calculate proper radial control points
-    angle1 = atan2 y1 x1
-    radius1 = sqrt (x1 * x1 + y1 * y1)
-    angle2 = atan2 y2 x2
-    radius2 = sqrt (x2 * x2 + y2 * y2)
-
-    -- Control points in polar coordinates:
-    -- CP1: parent's angle, halfway to child's radius
-    -- CP2: child's angle, halfway to child's radius
-    midRadius = (radius1 + radius2) / 2.0
-
-    -- Convert control points back to cartesian
-    cp1x = midRadius * cos angle1
-    cp1y = midRadius * sin angle1
-    cp2x = midRadius * cos angle2
-    cp2y = midRadius * sin angle2
-  in
-    "M" <> show x1 <> "," <> show y1
-      <> "C"
-      <> show cp1x
-      <> ","
-      <> show cp1y
-      <> " "
-      <> show cp2x
-      <> ","
-      <> show cp2y
-      <> " "
-      <> show x2
-      <> ","
-      <> show y2
+radialLinkPath = linkBezierRadialCartesian
 
 -- | Draw radial tree hierarchy with loaded data
 drawRadialTree :: String -> Tree HierNode -> Effect Unit

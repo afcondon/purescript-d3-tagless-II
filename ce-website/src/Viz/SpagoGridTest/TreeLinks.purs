@@ -10,65 +10,19 @@ module Viz.SpagoGridTest.TreeLinks
   , makeVerticalLinkPathFromCurrentPositions
   ) where
 
-import Prelude
-
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
-import Data.Number (atan2, cos, sin, sqrt)
+import DataViz.Layout.Hierarchy.Link (linkBezierRadialCartesian, linkBezierVertical)
 import Types (SimNode, SimLink)
 
--- | Radial link path generator
--- | Creates cubic Bezier curves that follow the radial structure.
--- | Takes Cartesian coordinates and converts back to polar for proper radial control points.
--- |
--- | TODO: Promote to D3.Layout.Hierarchy.Link as `linkBezierRadialCartesian`
--- | (complements existing `linkBezierRadial` which takes angle/radius coords)
+-- | Radial link path generator (re-export from library)
 radialLinkPath :: Number -> Number -> Number -> Number -> String
-radialLinkPath x1 y1 x2 y2 =
-  let
-    -- Convert cartesian back to polar to calculate proper radial control points
-    angle1 = atan2 y1 x1
-    radius1 = sqrt (x1 * x1 + y1 * y1)
-    angle2 = atan2 y2 x2
-    radius2 = sqrt (x2 * x2 + y2 * y2)
+radialLinkPath = linkBezierRadialCartesian
 
-    -- Control points in polar coordinates:
-    -- CP1: parent's angle, halfway to child's radius
-    -- CP2: child's angle, halfway to child's radius
-    midRadius = (radius1 + radius2) / 2.0
-
-    -- Convert control points back to cartesian
-    cp1x = midRadius * cos angle1
-    cp1y = midRadius * sin angle1
-    cp2x = midRadius * cos angle2
-    cp2y = midRadius * sin angle2
-  in
-    "M" <> show x1 <> "," <> show y1 <>
-    "C" <> show cp1x <> "," <> show cp1y <>
-    " " <> show cp2x <> "," <> show cp2y <>
-    " " <> show x2 <> "," <> show y2
-
--- | Vertical link path generator for tidy tree layout
--- | Creates cubic Bezier curves with vertical swoops (root at top)
--- | Control points are placed at the midpoint vertically for smooth transitions
+-- | Vertical link path generator (re-export from library)
 verticalLinkPath :: Number -> Number -> Number -> Number -> String
-verticalLinkPath x1 y1 x2 y2 =
-  let
-    -- Control points for vertical tree:
-    -- CP1: parent's x, halfway to child's y
-    -- CP2: child's x, halfway to child's y
-    midY = (y1 + y2) / 2.0
-
-    cp1x = x1
-    cp1y = midY
-    cp2x = x2
-    cp2y = midY
-  in
-    "M" <> show x1 <> "," <> show y1 <>
-    "C" <> show cp1x <> "," <> show cp1y <>
-    " " <> show cp2x <> "," <> show cp2y <>
-    " " <> show x2 <> "," <> show y2
+verticalLinkPath = linkBezierVertical
 
 -- | Generate a radial link path for a link using node map for position lookup
 -- | Uses treeX/treeY from nodes (Cartesian coordinates)
