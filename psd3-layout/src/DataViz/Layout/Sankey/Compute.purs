@@ -1083,7 +1083,8 @@ assignColors = do
           in
             link { color = maybe "#999" (\n -> n.color) targetNode }
         SourceTargetGradient ->
-          link { color = "#999" } -- TODO: Could implement gradient IDs for SVG
+          let (LinkID idx) = link.index
+          in link { color = "url(#sankey-gradient-" <> show idx <> ")" }
         StaticColor c ->
           link { color = c }
 

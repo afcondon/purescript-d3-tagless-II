@@ -36,6 +36,10 @@ module PSD3v2.Attribute.Types
   , dy
   , dx
   , textContent
+  -- Gradient attributes
+  , offset
+  , stopColor
+  , gradientUnits
   ) where
 
 import Prelude
@@ -321,3 +325,21 @@ dominantBaseline value = toAttr value (AttributeName "dominant-baseline")
 -- | Examples: "5,5" for dashed, "2,2" for dotted
 strokeDasharray :: forall datum a. ToAttr String a datum => a -> Attribute datum
 strokeDasharray value = toAttr value (AttributeName "stroke-dasharray")
+
+-- ============================================================================
+-- Gradient Attributes
+-- ============================================================================
+
+-- | Gradient stop offset (0% to 100%, or 0.0 to 1.0)
+offset :: forall datum a. ToAttr String a datum => a -> Attribute datum
+offset value = toAttr value (AttributeName "offset")
+
+-- | Gradient stop color
+stopColor :: forall datum a. ToAttr String a datum => a -> Attribute datum
+stopColor value = toAttr value (AttributeName "stop-color")
+
+-- | Gradient coordinate system
+-- |
+-- | Values: "userSpaceOnUse" or "objectBoundingBox"
+gradientUnits :: forall datum a. ToAttr String a datum => a -> Attribute datum
+gradientUnits value = toAttr value (AttributeName "gradientUnits")

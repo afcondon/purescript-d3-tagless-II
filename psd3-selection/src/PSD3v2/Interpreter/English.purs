@@ -105,6 +105,9 @@ showElemType Thead = "table head"
 showElemType Tr = "table row"
 showElemType Td = "table cell"
 showElemType Th = "table header"
+showElemType Defs = "definitions"
+showElemType LinearGradient = "linear gradient"
+showElemType Stop = "gradient stop"
 
 -- | Show attribute name
 showAttrName :: AttributeName -> String

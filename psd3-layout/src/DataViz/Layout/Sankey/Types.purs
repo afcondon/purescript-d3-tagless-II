@@ -157,7 +157,7 @@ instance showLinkColorMode :: Show LinkColorMode where
 defaultSankeyConfig :: Number -> Number -> SankeyConfig
 defaultSankeyConfig width height =
   { alignment: Justify -- Justify spreads nodes: sources left, sinks right
-  , linkColorMode: SourceColor
+  , linkColorMode: SourceTargetGradient  -- Gradient from source to target node colors
   , nodeWidth: 15.0 -- Match D3 default
   , nodePadding: 10.0 -- Match D3 default
   , iterations: 6 -- Must match D3's default for correct beta ramp-up

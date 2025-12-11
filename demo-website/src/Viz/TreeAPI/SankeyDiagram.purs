@@ -6,14 +6,17 @@ module D3.Viz.TreeAPI.SankeyDiagram where
 import Prelude
 
 import Data.Array as Array
+import Data.Maybe (Maybe(..))
+import Data.String.CodeUnits (indexOf)
+import Data.String.Pattern (Pattern(..))
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import DataViz.Layout.Sankey.CSV (parseSankeyCSV)
 import DataViz.Layout.Sankey.Compute (computeLayout)
 import DataViz.Layout.Sankey.Path (generateLinkPath)
-import DataViz.Layout.Sankey.Types (SankeyLink, SankeyNode)
-import PSD3v2.Attribute.Types (class_, d, fill, fillOpacity, height, id_, stroke, strokeOpacity, strokeWidth, textAnchor, textContent, viewBox, width, x, y)
+import DataViz.Layout.Sankey.Types (SankeyLink, SankeyNode, NodeID(..), LinkID(..))
+import PSD3v2.Attribute.Types (class_, d, fill, fillOpacity, gradientUnits, height, id_, offset, stopColor, stroke, strokeOpacity, strokeWidth, textAnchor, textContent, viewBox, width, x, x1, x2, y, y1, y2)
 import PSD3v2.Capabilities.Selection (renderTree, select)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, reselectD3v2)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
@@ -37,6 +40,44 @@ instance Eq IndexedNode where
 
 instance Ord IndexedNode where
   compare (IndexedNode a) (IndexedNode b) = compare a.index b.index
+
+-- | Check if a color string is a gradient URL reference
+isGradientColor :: String -> Boolean
+isGradientColor color = case indexOf (Pattern "url(#sankey-gradient-") color of
+  Just _ -> true
+  Nothing -> false
+
+-- | Newtype for gradient data
+newtype GradientSpec = GradientSpec
+  { id :: String
+  , sourceColor :: String
+  , targetColor :: String
+  , sourceX :: Number
+  , targetX :: Number
+  }
+
+-- | Look up node by ID
+findNodeById :: Array SankeyNode -> NodeID -> Maybe SankeyNode
+findNodeById nodes nodeId = Array.find (\n -> n.index == nodeId) nodes
+
+-- | Create gradient specs for links that need gradients
+createGradientSpecs :: Array SankeyNode -> Array SankeyLink -> Array GradientSpec
+createGradientSpecs nodes links = Array.mapMaybe mkGradientSpec links
+  where
+    mkGradientSpec :: SankeyLink -> Maybe GradientSpec
+    mkGradientSpec link =
+      if isGradientColor link.color then do
+        sourceNode <- findNodeById nodes link.sourceIndex
+        targetNode <- findNodeById nodes link.targetIndex
+        let (LinkID idx) = link.index
+        pure $ GradientSpec
+          { id: "sankey-gradient-" <> show idx
+          , sourceColor: sourceNode.color
+          , targetColor: targetNode.color
+          , sourceX: sourceNode.x1  -- Right edge of source
+          , targetX: targetNode.x0  -- Left edge of target
+          }
+      else Nothing
 
 -- | Draw Sankey diagram with TreeAPI
 drawSankey
@@ -64,6 +105,31 @@ drawSankey csvData containerSelector w h = runD3v2M do
   let indexedNodes = Array.mapWithIndex (\i node -> IndexedNode { index: i, node }) layoutResult.nodes
   let indexedLinks = Array.mapWithIndex (\i link -> IndexedLink { index: i, link }) layoutResult.links
 
+  -- Create gradient definitions for links that use SourceTargetGradient
+  let gradientSpecs = createGradientSpecs layoutResult.nodes layoutResult.links
+  liftEffect $ Console.log $ "Created " <> show (Array.length gradientSpecs) <> " gradient definitions"
+
+  -- Build gradient trees (each gradient is a linearGradient element with two stops)
+  let
+    mkGradientTree :: GradientSpec -> T.Tree Unit
+    mkGradientTree (GradientSpec spec) =
+      T.named LinearGradient spec.id
+        [ id_ spec.id
+        , gradientUnits "userSpaceOnUse"  -- Use absolute pixel coordinates
+        , x1 spec.sourceX
+        , x2 spec.targetX
+        , y1 0.0  -- Horizontal gradient
+        , y2 0.0
+        ]
+        `T.withChildren`
+          [ T.elem Stop [ offset "0%", stopColor spec.sourceColor ]
+          , T.elem Stop [ offset "100%", stopColor spec.targetColor ]
+          ]
+
+    -- Build defs children (empty if no gradients needed)
+    defsChildren :: Array (T.Tree Unit)
+    defsChildren = map mkGradientTree gradientSpecs
+
   -- Declarative tree structure (SVG groups only, no data)
   let
     sankeyTree :: T.Tree Unit
@@ -76,10 +142,12 @@ drawSankey csvData containerSelector w h = runD3v2M do
         , class_ "sankey"
         ]
         `T.withChildren`
-          [ T.named Group "linksGroup" [ class_ "links" ]
-          , T.named Group "nodesGroup" [ class_ "nodes" ]
-          , T.named Group "labelsGroup" [ class_ "labels" ]
-          ]
+          ( [ T.named Defs "defs" [] `T.withChildren` defsChildren
+            , T.named Group "linksGroup" [ class_ "links" ]
+            , T.named Group "nodesGroup" [ class_ "nodes" ]
+            , T.named Group "labelsGroup" [ class_ "labels" ]
+            ]
+          )
 
   -- Render structure
   selections <- renderTree container sankeyTree

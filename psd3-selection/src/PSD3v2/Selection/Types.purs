@@ -181,6 +181,9 @@ data ElementType
   | Text
   | Group
   | SVG
+  | Defs
+  | LinearGradient
+  | Stop
   -- HTML elements (use default namespace)
   | Div
   | Span
@@ -206,6 +209,9 @@ elementContext Line = SVGContext
 elementContext Text = SVGContext
 elementContext Group = SVGContext
 elementContext SVG = SVGContext
+elementContext Defs = SVGContext
+elementContext LinearGradient = SVGContext
+elementContext Stop = SVGContext
 elementContext Div = HTMLContext
 elementContext Span = HTMLContext
 elementContext Table = HTMLContext
