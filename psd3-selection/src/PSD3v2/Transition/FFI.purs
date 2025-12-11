@@ -9,9 +9,10 @@ module PSD3v2.Transition.FFI
 
 import Prelude
 
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe)
+import Data.Newtype (unwrap)
 import Data.Nullable (Nullable, toNullable)
-import Data.Time.Duration (Milliseconds(..))
+import Data.Time.Duration (Milliseconds)
 import Effect (Effect)
 import PSD3v2.Transition.Types (Easing)
 import Web.DOM.Element (Element)
@@ -27,7 +28,7 @@ foreign import data D3Transition :: Type
 foreign import createTransition_
   :: Number                -- duration in milliseconds
   -> Nullable Number       -- optional delay in milliseconds
-  -> Nullable String       -- optional easing function name
+  -> Nullable String       -- optional easing function name (from Easing's Show instance)
   -> Element               -- element to transition
   -> Effect D3Transition   -- resulting transition
 
@@ -49,20 +50,12 @@ foreign import transitionRemove_
   :: D3Transition   -- transition
   -> Effect Unit
 
--- Helper to convert Maybe Milliseconds to Nullable Number
+-- | Convert Maybe Milliseconds to Nullable Number for FFI
 maybeMillisecondsToNullable :: Maybe Milliseconds -> Nullable Number
-maybeMillisecondsToNullable Nothing = toNullable Nothing
-maybeMillisecondsToNullable (Just (Milliseconds ms)) = toNullable (Just ms)
+maybeMillisecondsToNullable = toNullable <<< map unwrap
 
--- Helper to convert Maybe Easing to Nullable String
+-- | Convert Maybe Easing to Nullable String for FFI
+-- | Uses the Show instance which produces D3-compatible easing names
+-- | (e.g., "linear", "cubicInOut", "elasticOut")
 maybeEasingToNullable :: Maybe Easing -> Nullable String
-maybeEasingToNullable Nothing = toNullable Nothing
-maybeEasingToNullable (Just easing) = toNullable (Just (easingToD3Name easing))
-
--- Convert our Easing type to D3 easing function names
-easingToD3Name :: Easing -> String
-easingToD3Name easing = case easing of
-  -- Map to d3-ease function names
-  -- See: https://d3js.org/d3-ease
-  _ -> show easing  -- For now, rely on Show instance matching D3 names
-  -- TODO: Verify these match D3's actual function names
+maybeEasingToNullable = toNullable <<< map show
