@@ -66,7 +66,6 @@ import Component.GeneralUpdatePattern as GeneralUpdatePattern
 import Component.MermaidTreeDemo as MermaidTreeDemo
 import Component.SceneJoinDemo as SceneJoinDemo
 import Component.SimpleForceGraph as SimpleForceGraph
-import Component.CodeExplorerV3 as CodeExplorerV3
 import Component.SankeyDebug as SankeyDebug
 import Component.ForcePlayground as ForcePlayground
 import TreeBuilder.App as TreeBuilder
@@ -135,7 +134,6 @@ type Slots =
   , forceConfigPOC :: forall q. H.Slot q Void Unit
   , forceConfigV2Test :: forall q. H.Slot q Void Unit
   , simpleForceGraph :: forall q. H.Slot q Void Unit
-  , codeExplorerV3 :: forall q. H.Slot q Void Unit
   , sankeyDebug :: forall q. H.Slot q Void Unit
   , forcePlayground :: forall q. H.Slot q Void Unit
   , treeBuilder :: forall q. H.Slot q Void Unit
@@ -187,7 +185,6 @@ _sceneJoinDemo = Proxy :: Proxy "sceneJoinDemo"
 _forceConfigPOC = Proxy :: Proxy "forceConfigPOC"
 _forceConfigV2Test = Proxy :: Proxy "forceConfigV2Test"
 _simpleForceGraph = Proxy :: Proxy "simpleForceGraph"
-_codeExplorerV3 = Proxy :: Proxy "codeExplorerV3"
 _sankeyDebug = Proxy :: Proxy "sankeyDebug"
 _forcePlayground = Proxy :: Proxy "forcePlayground"
 _treeBuilder = Proxy :: Proxy "treeBuilder"
@@ -322,8 +319,8 @@ renderPage route = case spy "Route is" route of
     HH.slot_ _tourGraphAlgorithms unit TourGraphAlgorithms.component unit
 
   TourLesMisGUP ->
-    -- Archived, redirect to CodeExplorerV3
-    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
+    -- Archived, redirect to Home
+    HH.slot_ _home unit Home.component unit
 
   TourSimpsons ->
     HH.slot_ _tourSimpsons unit TourSimpsons.component unit
@@ -350,31 +347,31 @@ renderPage route = case spy "Route is" route of
 
   LesMisGUPTree ->
     -- Archived, redirect to V3
-    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
+    HH.slot_ _home unit Home.component unit
 
   LesMisGUP ->
     -- Archived, redirect to V3
-    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
+    HH.slot_ _home unit Home.component unit
 
   LesMisGUPSimple ->
     -- Archived, redirect to V3
-    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
+    HH.slot_ _home unit Home.component unit
 
   LesMisGUPTreeAPI ->
     -- Archived, redirect to V3
-    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
+    HH.slot_ _home unit Home.component unit
 
   LesMisGUPClean ->
     -- Archived, redirect to V3
-    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
+    HH.slot_ _home unit Home.component unit
 
   LesMisQueryDemo ->
     -- Archived, redirect to V3
-    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
+    HH.slot_ _home unit Home.component unit
 
   ModuleGraph ->
     -- Archived, redirect to V3
-    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
+    HH.slot_ _home unit Home.component unit
 
   MermaidTreeDemo ->
     HH.slot_ _mermaidTreeDemo unit MermaidTreeDemo.component unit
@@ -392,17 +389,6 @@ renderPage route = case spy "Route is" route of
 
   SimpleForceGraph ->
     HH.slot_ _simpleForceGraph unit SimpleForceGraph.component unit
-
-  CodeExplorer ->
-    -- V1 archived, redirect to V3
-    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
-
-  CodeExplorerV2 ->
-    -- V2 archived, redirect to V3
-    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
-
-  CodeExplorerV3 ->
-    HH.slot_ _codeExplorerV3 unit CodeExplorerV3.component unit
 
   SankeyDebug ->
     HH.slot_ _sankeyDebug unit SankeyDebug.component unit

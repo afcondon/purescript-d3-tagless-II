@@ -2,8 +2,9 @@ module PSD3.Acknowledgements where
 
 import Prelude
 
-import Affjax.Web as AX
 import Affjax.ResponseFormat as ResponseFormat
+import Affjax.Web as AX
+import D3.Viz.TreeAPI.SankeyDiagram (drawSankey)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Milliseconds(..), delay)
@@ -13,7 +14,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.Footer as Footer
-import D3.Viz.TreeAPI.SankeyDiagram (drawSankey)
+import PSD3.Shared.SiteNav as SiteNav
 
 -- | Acknowledgements page state
 type State = Unit
@@ -36,7 +37,14 @@ render :: forall w. State -> HH.HTML w Action
 render _ =
   HH.div
     [ HP.classes [ HH.ClassName "acknowledgements-page" ] ]
-    [ HH.div
+    [ -- Header with logo and navigation
+      SiteNav.render
+        { logoSize: SiteNav.Large
+        , quadrant: SiteNav.NoQuadrant
+        , prevNext: Nothing
+        , pageTitle: Nothing
+        }
+    , HH.div
         [ HP.classes [ HH.ClassName "acknowledgements-content" ] ]
         [ HH.h1
             [ HP.classes [ HH.ClassName "acknowledgements-title" ] ]

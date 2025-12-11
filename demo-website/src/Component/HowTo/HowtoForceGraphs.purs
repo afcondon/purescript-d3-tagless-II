@@ -49,12 +49,12 @@ render _ =
                 [ HH.text "Building Force-Directed Graphs" ]
             , HH.p_
                 [ HH.strong_ [ HH.text "Recommended: " ]
-                , HH.text "Use the new V3 approach with SimulationManager and SceneConfigs. See "
-                , HH.a [ HP.href "#/code-explorer-v3" ] [ HH.text "CodeExplorerV3" ]
-                , HH.text " for a complete example."
+                , HH.text "Use the SimulationManager pattern. See "
+                , HH.a [ HP.href "#/force-playground" ] [ HH.text "Force Playground" ]
+                , HH.text " for an interactive example."
                 ]
             , HH.p_
-                [ HH.text "The documentation below covers the older type-class based API (SimulationM/SimulationM2) which is still available but deprecated." ]
+                [ HH.text "The documentation below covers the type-class based API (SimulationM/SimulationM2) which is still available." ]
             ]
 
         -- Initialize Simulation
@@ -193,24 +193,16 @@ _ <- on (Drag (simulationDrag "my-simulation-id")) nodeCircles""" ]
             [ HP.classes [ HH.ClassName "tutorial-section" ] ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "Real Example (V3 Recommended)" ]
+                [ HH.text "Real Examples" ]
             , HH.p_ [ HH.text "See force simulation in action:" ]
             , HH.ul_
                 [ HH.li_
-                    [ HH.a [ HP.href "#/code-explorer-v3" ] [ HH.text "CodeExplorerV3" ]
-                    , HH.text " - Full force graph with multiple scenes"
+                    [ HH.a [ HP.href "#/force-playground" ] [ HH.text "Force Playground" ]
+                    , HH.text " - Interactive force simulation with multiple datasets"
                     ]
                 , HH.li_
-                    [ HH.code_ [ HH.text "src/website/Component/CodeExplorerV2/SimulationManager.purs" ]
-                    , HH.text " - Owns the force loop (recommended approach)"
-                    ]
-                , HH.li_
-                    [ HH.code_ [ HH.text "src/website/Component/CodeExplorerV2/SceneConfigs.purs" ]
-                    , HH.text " - Declarative force configurations per scene"
-                    ]
-                , HH.li_
-                    [ HH.code_ [ HH.text "src/website/Component/CodeExplorerV2/OrchestrationV2.purs" ]
-                    , HH.text " - Scene transitions and rendering"
+                    [ HH.a [ HP.href "#/simple-force-graph" ] [ HH.text "Simple Force Graph" ]
+                    , HH.text " - Minimal force-directed graph example"
                     ]
                 ]
             ]

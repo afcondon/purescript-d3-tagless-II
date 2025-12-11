@@ -109,8 +109,6 @@ render _ =
             , renderCard TourGraphAlgorithms "Graph Algorithms"
                 "Topological sort, transitive reduction. Graph theory in action."
 
-            , renderCard TourLesMisGUP "General Update Pattern"
-                "Dynamic data updates with smooth transitions. The heart of D3."
             ]
         ]
     ]

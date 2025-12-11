@@ -70,9 +70,6 @@ routes =
   <|> forceConfigPOC
   <|> forceConfigV2Test
   <|> simpleForceGraphRoute
-  <|> codeExplorer
-  <|> codeExplorerV2
-  <|> codeExplorerV3
   <|> sankeyDebug
   <|> forcePlayground
   <|> treeBuilder
@@ -297,18 +294,6 @@ forceConfigV2Test = ForceConfigV2Test <$ lit "force-config-v2-test" <* end
 simpleForceGraphRoute :: Match Route
 simpleForceGraphRoute = SimpleForceGraph <$ lit "simple-force-graph" <* end
 
--- | Match: /code-explorer
-codeExplorer :: Match Route
-codeExplorer = CodeExplorer <$ lit "code-explorer" <* end
-
--- | Match: /code-explorer-v2
-codeExplorerV2 :: Match Route
-codeExplorerV2 = CodeExplorerV2 <$ lit "code-explorer-v2" <* end
-
--- | Match: /code-explorer-v3
-codeExplorerV3 :: Match Route
-codeExplorerV3 = CodeExplorerV3 <$ lit "code-explorer-v3" <* end
-
 -- | Match: /sankey-debug
 sankeyDebug :: Match Route
 sankeyDebug = SankeyDebug <$ lit "sankey-debug" <* end
@@ -390,9 +375,6 @@ routeToPath SceneJoinDemo = "/scene-join-demo"
 routeToPath ForceConfigPOC = "/force-config-poc"
 routeToPath ForceConfigV2Test = "/force-config-v2-test"
 routeToPath SimpleForceGraph = "/simple-force-graph"
-routeToPath CodeExplorer = "/code-explorer"
-routeToPath CodeExplorerV2 = "/code-explorer-v2"
-routeToPath CodeExplorerV3 = "/code-explorer-v3"
 routeToPath SankeyDebug = "/sankey-debug"
 routeToPath ForcePlayground = "/force-playground"
 routeToPath TreeBuilder = "/tree-builder"

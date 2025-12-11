@@ -186,8 +186,8 @@ render state
                     , HH.text " - Full DataLoader module"
                     ]
                 , HH.li_
-                    [ HH.code_ [ HH.text "src/website/Component/CodeExplorer/Data.purs" ]
-                    , HH.text " - Loading Spago graph data"
+                    [ HH.code_ [ HH.text "src/website/Component/Showcase/ForcePlayground.purs" ]
+                    , HH.text " - Loading network dataset JSON files"
                     ]
                 ]
             ]

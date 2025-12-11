@@ -156,15 +156,15 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
                 [ HH.text "Real Example" ]
-            , HH.p_ [ HH.text "The Code Explorer handles 1400+ nodes smoothly:" ]
+            , HH.p_ [ HH.text "See performance optimization in action:" ]
             , HH.ul_
                 [ HH.li_
-                    [ HH.code_ [ HH.text "src/website/Component/CodeExplorer" ]
-                    , HH.text " - Force graph with many nodes"
+                    [ HH.a [ HP.href "#/force-playground" ] [ HH.text "Force Playground" ]
+                    , HH.text " - Force graph with efficient DOM updates"
                     ]
                 , HH.li_
-                    [ HH.code_ [ HH.text "src/website/Viz/Spago/Render.purs" ]
-                    , HH.text " - Efficient render callbacks"
+                    [ HH.code_ [ HH.text "src/website/Component/Showcase/ForcePlayground.purs" ]
+                    , HH.text " - Example component with efficient render callbacks"
                     ]
                 ]
             ]

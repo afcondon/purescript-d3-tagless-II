@@ -69,9 +69,6 @@ render _ =
             , renderCard TreeBuilder "Tree Builder"
                 "Visual tool for building D3 visualizations. Drag elements, configure attributes, and see live preview with sample data."
 
-            , renderCard CodeExplorer "Code Explorer"
-                "Interactive force-directed graph of PureScript module dependencies. Zoom, pan, expand, and explore the codebase."
-
             , renderCard TourWealthHealth "Wealth & Health of Nations"
                 "Animated bubble chart showing GDP vs life expectancy over time. A classic visualization recreated in PSD3."
 

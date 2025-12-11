@@ -24,7 +24,6 @@ allTutorialRoutes =
   , TourInterpreters
   , TourFPFTW
   , TourGraphAlgorithms
-  , TourLesMisGUP
   ]
 
 -- | Get the next tutorial in the sequence

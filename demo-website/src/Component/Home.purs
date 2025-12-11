@@ -54,18 +54,18 @@ render _ =
             , HH.div
                 [ HP.classes [ HH.ClassName "home-hero-image" ] ]
                 [ HH.img
-                    [ HP.src "assets/example-thumbnails/code-explorer.png"
-                    , HP.alt "Interactive code explorer"
+                    [ HP.src "assets/example-thumbnails/force-playground.png"
+                    , HP.alt "Force Playground visualization"
                     , HP.classes [ HH.ClassName "home-hero-img" ]
                     ]
                 , HH.p
                     [ HP.classes [ HH.ClassName "home-hero-caption" ] ]
-                    [ HH.text "Explore the "
+                    [ HH.text "Try the "
                     , HH.a
-                        [ HP.href $ "#" <> routeToPath CodeExplorer
+                        [ HP.href $ "#" <> routeToPath ForcePlayground
                         , HP.classes [ HH.ClassName "home-hero-link" ]
                         ]
-                        [ HH.text "interactive code explorer" ]
+                        [ HH.text "Force Playground" ]
                     ]
                 ]
             ]
@@ -97,97 +97,6 @@ render _ =
                 "Understanding"
                 "Conceptual overview of the project"
                 (routeToPath Understanding)
-            ]
-        ]
-
-    -- Tutorials section (examples in context)
-    , HH.section
-        [ HP.id "tutorials"
-        , HP.classes [ HH.ClassName "home-tutorials" ]
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "home-section-title" ] ]
-            [ HH.text "Take the Tour" ]
-        , HH.p
-            [ HP.classes [ HH.ClassName "home-section-description" ] ]
-            [ HH.text "A progressive tour of the library's capabilities, from basic visualizations to advanced techniques:" ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "home-tutorials-grid" ] ]
-            [ renderTutorialLink "1. Foundations"
-                "Three circles, nested data, bar charts - the building blocks of visualization"
-                (routeToPath TourFoundations)
-            , renderTutorialLink "2. Typical Charts"
-                "Grouped bars, multi-line, radial stacked - production-ready visualizations"
-                (routeToPath TourProfessional)
-            , renderTutorialLink "3. Data Flow"
-                "Chord and Sankey diagrams for relationships and flows"
-                (routeToPath TourFlow)
-            , renderTutorialLink "4. Hierarchies"
-                "Trees, dendrograms, treemaps, circle packing - all hierarchy layouts"
-                (routeToPath TourHierarchies)
-            , renderTutorialLink "5. Motion & Transitions"
-                "Animations, General Update Pattern, force-directed graphs"
-                (routeToPath TourMotion)
-            , renderTutorialLink "5b. Wealth & Health"
-                "Animated bubble chart - Hans Rosling's famous visualization"
-                (routeToPath TourWealthHealth)
-            , renderTutorialLink "6. Alternative Interpreters"
-                "Mermaid diagrams, code generation - the power of Finally Tagless"
-                (routeToPath TourInterpreters)
-            , renderTutorialLink "7. FP For The Win"
-                "Maps, Sets, contravariant functors - functional programming superpowers"
-                (routeToPath TourFPFTW)
-            , renderTutorialLink "8. Showcase"
-                "Flagship demonstrations combining multiple techniques"
-                (routeToPath Showcase)
-            ]
-        ]
-
-    -- Examples section - ALL examples organized by category
-    , HH.section
-        [ HP.id "examples"
-        , HP.classes [ HH.ClassName "home-examples" ]
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "home-section-title" ] ]
-            [ HH.text "Examples Gallery" ]
-        , HH.p
-            [ HP.classes [ HH.ClassName "home-section-description" ] ]
-            [ HH.text "Browse all TreeAPI examples organized by category, from basic data joins to advanced simulations." ]
-
-        -- Basic Examples
-        , renderExampleCategory "Basic Examples"
-            [ renderExampleCard "Three Little Circles" "Data join basics - bind data to DOM elements" "assets/example-thumbnails/three-little-circles.png" (Example "three-little-circles")
-            , renderExampleCard "Circles Transition" "Animated transitions with easing and delays" "assets/example-thumbnails/three-little-circles.png" (Example "three-circles-transition")
-            , renderExampleCard "Simple Tree" "Basic nesting with named selections" "assets/example-thumbnails/simple-tree.png" (Example "simple-tree")
-            , renderExampleCard "Nested Elements" "Multi-level nesting (Group → Circle + Text)" "assets/example-thumbnails/nested-elements.png" (Example "nested-elements")
-            , renderExampleCard "Three Little Dimensions" "Nested data joins (2D array → table)" "assets/example-thumbnails/nested-data.png" (Example "three-little-dimensions")
-            ]
-
-        -- Chart Examples
-        , renderExampleCategory "Chart Examples"
-            [ renderExampleCard "Bar Chart" "Data-driven bars with scaling" "assets/example-thumbnails/simple-bar-chart.png" (Example "bar-chart")
-            , renderExampleCard "Scatter Plot" "Points positioned by data coordinates" "assets/example-thumbnails/anscombes-quartet.png" (Example "scatter-plot")
-            , renderExampleCard "Line Chart" "Path element generated from data" "assets/example-thumbnails/simple-line-chart.png" (Example "line-chart")
-            , renderExampleCard "Grouped Bar Chart" "Nested joins with multiple series" "assets/example-thumbnails/grouped-bar-chart.png" (Example "grouped-bar-chart")
-            ]
-
-        -- Hierarchies & Simulations
-        , renderExampleCategory "Hierarchies & Simulations"
-            [ renderExampleCard "Tree Layout" "Hierarchical node-link diagram (pure PureScript)" "assets/example-thumbnails/tree-purescript.png" (Example "simple-hierarchy")
-            , renderExampleCard "Les Misérables Network" "Force-directed graph with simulation" "assets/example-thumbnails/les-miserables.png" (Example "lesmis-force")
-            ]
-
-        -- Advanced Examples
-        , renderExampleCategory "Advanced Examples"
-            [ renderExampleCard "Animated Tree ↔ Cluster" "Smooth transitions between pure PureScript layouts" "assets/example-thumbnails/tree-purescript.png" AnimatedTreeCluster
-            , renderExampleCard "Les Misérables GUP" "Force layout + dynamic layouts with General Update Pattern" "assets/example-thumbnails/les-miserables-gup.png" LesMisGUPTree
-            , renderExampleCard "Module Graph" "Visualize this codebase's own module dependencies" "assets/example-thumbnails/module-graph.png" ModuleGraph
-            ]
-
-        -- Alternative Interpreters
-        , renderExampleCategory "Alternative Interpreters"
-            [ renderExampleCard "Mermaid Tree Visualizer" "Visualize Tree API structure as Mermaid diagrams" "assets/example-thumbnails/mermaid-diagram.png" MermaidTreeDemo
             ]
         ]
 

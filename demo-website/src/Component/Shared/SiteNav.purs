@@ -38,15 +38,6 @@ type SiteNavConfig =
   , pageTitle :: Maybe String
   }
 
--- | Default configuration for most pages
-defaultConfig :: SiteNavConfig
-defaultConfig =
-  { logoSize: Normal
-  , quadrant: NoQuadrant
-  , prevNext: Nothing
-  , pageTitle: Nothing
-  }
-
 -- | Halogen component wrapper (for slot usage)
 component :: forall q o m. H.Component q SiteNavConfig o m
 component = H.mkComponent
@@ -124,6 +115,11 @@ render config =
                     , HP.classes [ HH.ClassName "site-nav-link" ]
                     ]
                     [ HH.text "Showcase" ]
+                , HH.a
+                    [ HP.href $ "#" <> routeToPath Acknowledgements
+                    , HP.classes [ HH.ClassName "site-nav-link" ]
+                    ]
+                    [ HH.text "ACK" ]
                 ]
             -- Prev/Next buttons (if provided)
             , case config.prevNext of
@@ -167,8 +163,8 @@ renderQuadrantBox target current =
     [ HP.href $ quadrantRoute target
     , HP.classes
         [ HH.ClassName "site-nav-quadrant-box"
-        , HH.ClassName $ if target == current
-            then "site-nav-quadrant-box--active"
+        , HH.ClassName $
+            if target == current then "site-nav-quadrant-box--active"
             else "site-nav-quadrant-box--inactive"
         ]
     , HP.attr (HH.AttrName "data-tooltip") (quadrantTitle target)

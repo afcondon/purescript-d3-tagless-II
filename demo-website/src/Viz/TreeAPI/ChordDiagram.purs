@@ -78,8 +78,7 @@ getRegionColor labels idx = case index labels idx of
     Nothing -> "#999999" -- Default gray for unknown regions
   Nothing -> "#999999"
 
--- | Sample traffic matrix (placeholder - to be filled with estimated values)
--- | TODO: Fill with estimated values from the image
+-- | Sample traffic matrix (values guesstimated from image, original data not available)
 batonRougeTraffic :: TrafficMatrix
 batonRougeTraffic =
   [ [ 0.0, 10.0, 5.0, 80.0, 20.0, 15.0, 8.0, 12.0, 6.0, 4.0, 3.0 ] -- WBR
