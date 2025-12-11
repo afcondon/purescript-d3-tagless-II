@@ -2,13 +2,31 @@
 // D3 dependencies: d3-scale, d3-scale-chromatic, d3-interpolate
 import {
   scaleLinear, scaleLog, scalePow, scaleSqrt, scaleSymlog,
+  scaleTime, scaleUtc,
+  scaleSequential, scaleSequentialLog, scaleSequentialSqrt, scaleSequentialSymlog,
+  scaleDiverging, scaleDivergingLog, scaleDivergingSqrt, scaleDivergingSymlog,
+  scaleQuantize as d3ScaleQuantize, scaleQuantile as d3ScaleQuantile,
   scaleOrdinal, scaleBand, scalePoint
 } from "d3-scale";
 import {
+  // Categorical schemes
   schemeCategory10, schemeTableau10, schemePaired, schemeSet1, schemeSet2, schemeSet3,
+  schemeAccent, schemeDark2, schemePastel1, schemePastel2,
+  // Sequential single-hue
+  interpolateBlues, interpolateGreens, interpolateGreys, interpolateOranges,
+  interpolatePurples, interpolateReds,
+  // Sequential multi-hue
   interpolateViridis, interpolatePlasma, interpolateInferno, interpolateMagma,
   interpolateTurbo, interpolateWarm, interpolateCool, interpolateRainbow,
-  interpolateRdYlGn, interpolateRdBu, interpolatePiYG, interpolateBrBG
+  interpolateCividis, interpolateCubehelixDefault,
+  interpolateBuGn, interpolateBuPu, interpolateGnBu, interpolateOrRd,
+  interpolatePuBuGn, interpolatePuBu, interpolatePuRd, interpolateRdPu,
+  interpolateYlGnBu, interpolateYlGn, interpolateYlOrBr, interpolateYlOrRd,
+  // Diverging
+  interpolateRdYlGn, interpolateRdBu, interpolatePiYG, interpolateBrBG,
+  interpolatePRGn, interpolateSpectral, interpolateRdGy, interpolateRdYlBu,
+  // Cyclical
+  interpolateSinebow
 } from "d3-scale-chromatic";
 import { interpolateRgb, interpolateHsl } from "d3-interpolate";
 
@@ -25,6 +43,34 @@ export const pow = scalePow();
 export const sqrt = scaleSqrt();
 
 export const symlog = scaleSymlog();
+
+// ============================================================================
+// TIME SCALE CONSTRUCTORS
+// ============================================================================
+
+export const scaleTime_ = scaleTime();
+export const scaleUtc_ = scaleUtc();
+
+// ============================================================================
+// SEQUENTIAL/DIVERGING SCALE CONSTRUCTORS
+// ============================================================================
+
+export const sequential_ = (interpolator) => scaleSequential(interpolator);
+export const sequentialLog_ = (interpolator) => scaleSequentialLog(interpolator);
+export const sequentialSqrt_ = (interpolator) => scaleSequentialSqrt(interpolator);
+export const sequentialSymlog_ = (interpolator) => scaleSequentialSymlog(interpolator);
+
+export const diverging_ = (interpolator) => scaleDiverging(interpolator);
+export const divergingLog_ = (interpolator) => scaleDivergingLog(interpolator);
+export const divergingSqrt_ = (interpolator) => scaleDivergingSqrt(interpolator);
+export const divergingSymlog_ = (interpolator) => scaleDivergingSymlog(interpolator);
+
+// ============================================================================
+// QUANTIZE/QUANTILE SCALE CONSTRUCTORS
+// ============================================================================
+
+export const scaleQuantize = d3ScaleQuantize();
+export const scaleQuantile = d3ScaleQuantile();
 
 // ============================================================================
 // ORDINAL SCALE CONSTRUCTORS
@@ -201,6 +247,7 @@ export function interpolateHsl_(a) {
 // ============================================================================
 
 export { schemeCategory10, schemeTableau10, schemePaired, schemeSet1, schemeSet2, schemeSet3 };
+export { schemeAccent, schemeDark2, schemePastel1, schemePastel2 };
 
 // Indexed access to schemeCategory10 with modular wrapping
 export function schemeCategory10At(index) {
@@ -218,13 +265,30 @@ export function schemePairedAt(index) {
 }
 
 // ============================================================================
-// SEQUENTIAL INTERPOLATORS
+// SEQUENTIAL INTERPOLATORS (Single-Hue)
+// Re-exported directly from d3-scale-chromatic
+// ============================================================================
+
+export {
+  interpolateBlues, interpolateGreens, interpolateGreys, interpolateOranges,
+  interpolatePurples, interpolateReds
+};
+
+// ============================================================================
+// SEQUENTIAL INTERPOLATORS (Multi-Hue)
 // Re-exported directly from d3-scale-chromatic
 // ============================================================================
 
 export {
   interpolateViridis, interpolatePlasma, interpolateInferno, interpolateMagma,
-  interpolateTurbo, interpolateWarm, interpolateCool, interpolateRainbow
+  interpolateTurbo, interpolateWarm, interpolateCool, interpolateRainbow,
+  interpolateCividis, interpolateCubehelixDefault
+};
+
+export {
+  interpolateBuGn, interpolateBuPu, interpolateGnBu, interpolateOrRd,
+  interpolatePuBuGn, interpolatePuBu, interpolatePuRd, interpolateRdPu,
+  interpolateYlGnBu, interpolateYlGn, interpolateYlOrBr, interpolateYlOrRd
 };
 
 // ============================================================================
@@ -232,4 +296,14 @@ export {
 // Re-exported directly from d3-scale-chromatic
 // ============================================================================
 
-export { interpolateRdYlGn, interpolateRdBu, interpolatePiYG, interpolateBrBG };
+export {
+  interpolateRdYlGn, interpolateRdBu, interpolatePiYG, interpolateBrBG,
+  interpolatePRGn, interpolateSpectral, interpolateRdGy, interpolateRdYlBu
+};
+
+// ============================================================================
+// CYCLICAL INTERPOLATORS
+// Re-exported directly from d3-scale-chromatic
+// ============================================================================
+
+export { interpolateSinebow };

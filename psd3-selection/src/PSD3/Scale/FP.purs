@@ -84,7 +84,10 @@ module PSD3.Scale.FP
 import Prelude hiding (clamp)
 
 import Data.Array as Array
-import Data.Maybe (Maybe(..))
+import Data.Array.NonEmpty (NonEmptyArray)
+import Data.Array.NonEmpty as NEA
+import Data.Int as Int
+import Data.Maybe (fromMaybe)
 import Data.Tuple (Tuple(..))
 import PSD3.Scale (Scale, Continuous, ContinuousScale, Interpolator)
 import PSD3.Scale (applyScale, clamp, domain, nice, range, round, tickFormat, ticks) as Scale
@@ -133,8 +136,8 @@ combineModifiers mods = \scale -> Array.foldl (\s m -> m s) scale mods
 sample :: forall r. Int -> Scale Number r Continuous -> Array r
 sample n scale =
   let
-    step = if n <= 1 then 0.0 else 1.0 / (toNumber (n - 1))
-    ts = Array.range 0 (n - 1) <#> \i -> toNumber i * step
+    step = if n <= 1 then 0.0 else 1.0 / Int.toNumber (n - 1)
+    ts = Array.range 0 (n - 1) <#> \i -> Int.toNumber i * step
   in
     ts <#> Scale.applyScale scale
 
@@ -147,8 +150,8 @@ sample n scale =
 sampleRange :: forall r. Int -> Number -> Number -> Scale Number r Continuous -> Array r
 sampleRange n start end scale =
   let
-    step = if n <= 1 then 0.0 else (end - start) / (toNumber (n - 1))
-    ts = Array.range 0 (n - 1) <#> \i -> start + toNumber i * step
+    step = if n <= 1 then 0.0 else (end - start) / Int.toNumber (n - 1)
+    ts = Array.range 0 (n - 1) <#> \i -> start + Int.toNumber i * step
   in
     ts <#> Scale.applyScale scale
 
@@ -161,8 +164,8 @@ sampleRange n start end scale =
 sampleWithDomain :: forall r. Int -> Scale Number r Continuous -> Array (Tuple Number r)
 sampleWithDomain n scale =
   let
-    step = if n <= 1 then 0.0 else 1.0 / (toNumber (n - 1))
-    ts = Array.range 0 (n - 1) <#> \i -> toNumber i * step
+    step = if n <= 1 then 0.0 else 1.0 / Int.toNumber (n - 1)
+    ts = Array.range 0 (n - 1) <#> \i -> Int.toNumber i * step
   in
     ts <#> \t -> Tuple t (Scale.applyScale scale t)
 
@@ -234,7 +237,7 @@ clampInterpolator interp = \t -> interp (max 0.0 (min 1.0 t))
 -- | Make an interpolator cycle (values outside [0,1] wrap)
 cycleInterpolator :: forall a. Interpolator a -> Interpolator a
 cycleInterpolator interp = \t ->
-  let t' = t - toNumber (floor t)
+  let t' = t - Int.toNumber (Int.floor t)
   in interp (if t' < 0.0 then t' + 1.0 else t')
 
 -- ============================================================================
@@ -254,39 +257,33 @@ normalize minVal maxVal =
 -- | Create a quantizing scale (continuous → discrete buckets)
 -- |
 -- | ```purescript
--- | colorBuckets = quantize ["low", "medium", "high"]
+-- | colorBuckets = quantize (NEA.cons' "low" ["medium", "high"])
 -- | colorBuckets 0.0 100.0 33.0  -- Returns "low"
 -- | colorBuckets 0.0 100.0 66.0  -- Returns "medium"
 -- | ```
-quantize :: forall a. Array a -> Number -> Number -> Number -> a
+quantize :: forall a. NonEmptyArray a -> Number -> Number -> Number -> a
 quantize buckets minVal maxVal value =
   let
-    n = Array.length buckets
+    arr = NEA.toArray buckets
+    n = Array.length arr
     normalized = (value - minVal) / (maxVal - minVal)
-    idx = min (n - 1) (max 0 (floor (normalized * toNumber n)))
+    idx = min (n - 1) (max 0 (Int.floor (normalized * Int.toNumber n)))
   in
-    case Array.index buckets idx of
-      Just b -> b
-      Nothing -> case Array.head buckets of
-        Just b -> b
-        Nothing -> unsafeCoerce unit  -- Should never happen if buckets is non-empty
+    fromMaybe (NEA.head buckets) (Array.index arr idx)
 
 -- | Create a threshold scale with custom breakpoints
 -- |
 -- | ```purescript
--- | rating = threshold [0.0, 60.0, 80.0, 90.0] ["F", "D", "C", "B", "A"]
+-- | rating = threshold [0.0, 60.0, 80.0, 90.0] (NEA.cons' "F" ["D", "C", "B", "A"])
 -- | rating 75.0  -- Returns "C"
 -- | ```
-threshold :: forall a. Array Number -> Array a -> Number -> a
+threshold :: forall a. Array Number -> NonEmptyArray a -> Number -> a
 threshold thresholds values value =
   let
+    arr = NEA.toArray values
     idx = Array.length (Array.filter (_ <= value) thresholds)
   in
-    case Array.index values (min idx (Array.length values - 1)) of
-      Just v -> v
-      Nothing -> case Array.head values of
-        Just v -> v
-        Nothing -> unsafeCoerce unit
+    fromMaybe (NEA.head values) (Array.index arr (min idx (Array.length arr - 1)))
 
 -- ============================================================================
 -- USEFUL COMBINATORS
@@ -318,15 +315,3 @@ scaleInRange scale value =
 -- ============================================================================
 
 foreign import createLinear :: ContinuousScale
-
-foreign import unsafeCoerceScale :: forall a b c d e f. Scale a b c -> Scale d e f
-
-toNumber :: Int -> Number
-toNumber = unsafeCoerce
-
-floor :: Number -> Int
-floor = unsafeCoerce <<< floorImpl
-
-foreign import floorImpl :: Number -> Number
-
-foreign import unsafeCoerce :: forall a b. a -> b

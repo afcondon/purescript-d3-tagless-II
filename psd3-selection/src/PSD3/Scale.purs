@@ -50,6 +50,33 @@ module PSD3.Scale
   , sqrt
   , symlog
 
+  -- * Time Scale Constructors
+  , JSDate
+  , scaleTime
+  , scaleUtc
+
+  -- * Sequential/Diverging Scale Constructors
+  , Sequential
+  , Diverging
+  , SequentialScale
+  , DivergingScale
+  , sequential
+  , sequentialLog
+  , sequentialSqrt
+  , sequentialSymlog
+  , diverging
+  , divergingLog
+  , divergingSqrt
+  , divergingSymlog
+
+  -- * Quantize/Quantile Scale Constructors
+  , Quantize
+  , Quantile
+  , QuantizeScale
+  , QuantileScale
+  , scaleQuantize
+  , scaleQuantile
+
   -- * Ordinal Scale Constructors
   , ordinal
   , band
@@ -91,7 +118,7 @@ module PSD3.Scale
   , interpolateRgb
   , interpolateHsl
 
-  -- * Color Schemes
+  -- * Color Schemes (Categorical)
   , schemeCategory10
   , schemeCategory10At
   , schemeTableau10
@@ -101,8 +128,20 @@ module PSD3.Scale
   , schemeSet1
   , schemeSet2
   , schemeSet3
+  , schemeAccent
+  , schemeDark2
+  , schemePastel1
+  , schemePastel2
 
-  -- * Sequential Interpolators
+  -- * Sequential Interpolators (Single-Hue)
+  , interpolateBlues
+  , interpolateGreens
+  , interpolateGreys
+  , interpolateOranges
+  , interpolatePurples
+  , interpolateReds
+
+  -- * Sequential Interpolators (Multi-Hue)
   , interpolateViridis
   , interpolatePlasma
   , interpolateInferno
@@ -111,12 +150,33 @@ module PSD3.Scale
   , interpolateWarm
   , interpolateCool
   , interpolateRainbow
+  , interpolateCividis
+  , interpolateCubehelixDefault
+  , interpolateBuGn
+  , interpolateBuPu
+  , interpolateGnBu
+  , interpolateOrRd
+  , interpolatePuBuGn
+  , interpolatePuBu
+  , interpolatePuRd
+  , interpolateRdPu
+  , interpolateYlGnBu
+  , interpolateYlGn
+  , interpolateYlOrBr
+  , interpolateYlOrRd
 
   -- * Diverging Interpolators
   , interpolateRdYlGn
   , interpolateRdBu
   , interpolatePiYG
   , interpolateBrBG
+  , interpolatePRGn
+  , interpolateSpectral
+  , interpolateRdGy
+  , interpolateRdYlBu
+
+  -- * Cyclical Interpolators
+  , interpolateSinebow
 
   ) where
 
@@ -151,11 +211,31 @@ data Point
 -- | Phantom type for time scales
 data Time
 
+-- | Phantom type for sequential scales (color gradients)
+data Sequential
+
+-- | Phantom type for diverging scales (two-directional color gradients)
+data Diverging
+
+-- | Phantom type for quantize scales (continuous → discrete buckets)
+data Quantize
+
+-- | Phantom type for quantile scales (continuous → discrete based on quantiles)
+data Quantile
+
 -- | Convenient type aliases
 type ContinuousScale = Scale Number Number Continuous
 type OrdinalScale domain range = Scale domain range Ordinal
 type BandScale domain = Scale domain Number Band
-type TimeScale = Scale Number Number Time -- TODO: proper Date type
+type TimeScale = Scale JSDate Number Time
+type SequentialScale = Scale Number String Sequential
+type DivergingScale = Scale Number String Diverging
+type QuantizeScale r = Scale Number r Quantize
+type QuantileScale r = Scale Number r Quantile
+
+-- | JavaScript Date object for time scales
+-- | Compatible with native JS Date, can be created via FFI or js-date library
+foreign import data JSDate :: Type
 
 -- ============================================================================
 -- CONTINUOUS SCALE CONSTRUCTORS
@@ -201,6 +281,126 @@ foreign import sqrt :: ContinuousScale
 -- | scale = symlog # constant 1.0 # domain [-100.0, 100.0] # range [0.0, 500.0]
 -- | ```
 foreign import symlog :: ContinuousScale
+
+-- ============================================================================
+-- TIME SCALE CONSTRUCTORS
+-- ============================================================================
+
+-- | Create a time scale for local time
+-- | Like linear but domain is Date objects with time-appropriate ticks
+-- |
+-- | ```purescript
+-- | timeScale = scaleTime
+-- |   # domain [startDate, endDate]
+-- |   # range [0.0, width]
+-- | ```
+foreign import scaleTime_ :: TimeScale
+
+-- | Create a time scale for local time
+scaleTime :: TimeScale
+scaleTime = scaleTime_
+
+-- | Create a UTC time scale
+-- | Like scaleTime but uses UTC for formatting
+-- |
+-- | ```purescript
+-- | utcScale = scaleUtc
+-- |   # domain [startDate, endDate]
+-- |   # range [0.0, width]
+-- | ```
+foreign import scaleUtc_ :: TimeScale
+
+-- | Create a UTC time scale
+scaleUtc :: TimeScale
+scaleUtc = scaleUtc_
+
+-- ============================================================================
+-- SEQUENTIAL/DIVERGING SCALE CONSTRUCTORS
+-- ============================================================================
+
+-- | Create a sequential scale with an interpolator
+-- | Maps domain [0, 1] to colors via the interpolator
+-- |
+-- | ```purescript
+-- | colorScale = sequential interpolateViridis
+-- |   # domain [0.0, 100.0]
+-- | ```
+foreign import sequential_ :: Interpolator String -> SequentialScale
+
+sequential :: Interpolator String -> SequentialScale
+sequential = sequential_
+
+-- | Sequential scale with logarithmic transform
+foreign import sequentialLog_ :: Interpolator String -> SequentialScale
+
+sequentialLog :: Interpolator String -> SequentialScale
+sequentialLog = sequentialLog_
+
+-- | Sequential scale with square root transform
+foreign import sequentialSqrt_ :: Interpolator String -> SequentialScale
+
+sequentialSqrt :: Interpolator String -> SequentialScale
+sequentialSqrt = sequentialSqrt_
+
+-- | Sequential scale with symlog transform
+foreign import sequentialSymlog_ :: Interpolator String -> SequentialScale
+
+sequentialSymlog :: Interpolator String -> SequentialScale
+sequentialSymlog = sequentialSymlog_
+
+-- | Create a diverging scale with an interpolator
+-- | Maps domain with midpoint to colors via the interpolator
+-- |
+-- | ```purescript
+-- | colorScale = diverging interpolateRdBu
+-- |   # domain [-1.0, 0.0, 1.0]
+-- | ```
+foreign import diverging_ :: Interpolator String -> DivergingScale
+
+diverging :: Interpolator String -> DivergingScale
+diverging = diverging_
+
+-- | Diverging scale with logarithmic transform
+foreign import divergingLog_ :: Interpolator String -> DivergingScale
+
+divergingLog :: Interpolator String -> DivergingScale
+divergingLog = divergingLog_
+
+-- | Diverging scale with square root transform
+foreign import divergingSqrt_ :: Interpolator String -> DivergingScale
+
+divergingSqrt :: Interpolator String -> DivergingScale
+divergingSqrt = divergingSqrt_
+
+-- | Diverging scale with symlog transform
+foreign import divergingSymlog_ :: Interpolator String -> DivergingScale
+
+divergingSymlog :: Interpolator String -> DivergingScale
+divergingSymlog = divergingSymlog_
+
+-- ============================================================================
+-- QUANTIZE/QUANTILE SCALE CONSTRUCTORS
+-- ============================================================================
+
+-- | Create a quantize scale
+-- | Maps continuous domain to discrete range (uniform intervals)
+-- |
+-- | ```purescript
+-- | colorScale = scaleQuantize
+-- |   # domain [0.0, 100.0]
+-- |   # range ["low", "medium", "high"]
+-- | ```
+foreign import scaleQuantize :: forall r. QuantizeScale r
+
+-- | Create a quantile scale
+-- | Maps continuous domain to discrete range based on quantiles
+-- |
+-- | ```purescript
+-- | colorScale = scaleQuantile
+-- |   # domain [0.0, 25.0, 50.0, 75.0, 100.0]
+-- |   # range ["Q1", "Q2", "Q3", "Q4"]
+-- | ```
+foreign import scaleQuantile :: forall r. QuantileScale r
 
 -- ============================================================================
 -- ORDINAL SCALE CONSTRUCTORS
@@ -435,8 +635,42 @@ foreign import schemeSet2 :: Array String
 -- | Set3 color scheme (12 colors)
 foreign import schemeSet3 :: Array String
 
+-- | Accent color scheme (8 colors)
+foreign import schemeAccent :: Array String
+
+-- | Dark2 color scheme (8 colors)
+foreign import schemeDark2 :: Array String
+
+-- | Pastel1 color scheme (9 colors)
+foreign import schemePastel1 :: Array String
+
+-- | Pastel2 color scheme (8 colors)
+foreign import schemePastel2 :: Array String
+
 -- ============================================================================
--- SEQUENTIAL INTERPOLATORS
+-- SEQUENTIAL INTERPOLATORS (Single-Hue)
+-- ============================================================================
+
+-- | Blues single-hue sequential
+foreign import interpolateBlues :: Interpolator String
+
+-- | Greens single-hue sequential
+foreign import interpolateGreens :: Interpolator String
+
+-- | Greys single-hue sequential
+foreign import interpolateGreys :: Interpolator String
+
+-- | Oranges single-hue sequential
+foreign import interpolateOranges :: Interpolator String
+
+-- | Purples single-hue sequential
+foreign import interpolatePurples :: Interpolator String
+
+-- | Reds single-hue sequential
+foreign import interpolateReds :: Interpolator String
+
+-- ============================================================================
+-- SEQUENTIAL INTERPOLATORS (Multi-Hue)
 -- ============================================================================
 
 -- | Viridis perceptually-uniform colormap
@@ -463,6 +697,48 @@ foreign import interpolateCool :: Interpolator String
 -- | Rainbow colormap
 foreign import interpolateRainbow :: Interpolator String
 
+-- | Cividis colormap (colorblind-friendly)
+foreign import interpolateCividis :: Interpolator String
+
+-- | Cubehelix default colormap
+foreign import interpolateCubehelixDefault :: Interpolator String
+
+-- | Blue-Green sequential
+foreign import interpolateBuGn :: Interpolator String
+
+-- | Blue-Purple sequential
+foreign import interpolateBuPu :: Interpolator String
+
+-- | Green-Blue sequential
+foreign import interpolateGnBu :: Interpolator String
+
+-- | Orange-Red sequential
+foreign import interpolateOrRd :: Interpolator String
+
+-- | Purple-Blue-Green sequential
+foreign import interpolatePuBuGn :: Interpolator String
+
+-- | Purple-Blue sequential
+foreign import interpolatePuBu :: Interpolator String
+
+-- | Purple-Red sequential
+foreign import interpolatePuRd :: Interpolator String
+
+-- | Red-Purple sequential
+foreign import interpolateRdPu :: Interpolator String
+
+-- | Yellow-Green-Blue sequential
+foreign import interpolateYlGnBu :: Interpolator String
+
+-- | Yellow-Green sequential
+foreign import interpolateYlGn :: Interpolator String
+
+-- | Yellow-Orange-Brown sequential
+foreign import interpolateYlOrBr :: Interpolator String
+
+-- | Yellow-Orange-Red sequential
+foreign import interpolateYlOrRd :: Interpolator String
+
 -- ============================================================================
 -- DIVERGING INTERPOLATORS
 -- ============================================================================
@@ -478,3 +754,22 @@ foreign import interpolatePiYG :: Interpolator String
 
 -- | Brown-Blue-Green diverging
 foreign import interpolateBrBG :: Interpolator String
+
+-- | Purple-Red-Green diverging
+foreign import interpolatePRGn :: Interpolator String
+
+-- | Spectral diverging
+foreign import interpolateSpectral :: Interpolator String
+
+-- | Red-Grey diverging
+foreign import interpolateRdGy :: Interpolator String
+
+-- | Red-Yellow-Blue diverging
+foreign import interpolateRdYlBu :: Interpolator String
+
+-- ============================================================================
+-- CYCLICAL INTERPOLATORS
+-- ============================================================================
+
+-- | Sinebow cyclical colormap
+foreign import interpolateSinebow :: Interpolator String
