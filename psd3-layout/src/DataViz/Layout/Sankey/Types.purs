@@ -21,7 +21,6 @@ module DataViz.Layout.Sankey.Types
   , Alignment(..)
   , LinkColorMode(..)
   , defaultSankeyConfig
-  , withConfig
   , SankeyGraphModel
   , initialSankeyGraphModel
   , initialiseSankeyNode
@@ -170,10 +169,6 @@ defaultSankeyConfig width height =
       , y1: height - 5.0
       }
   }
-
--- | Create config from user overrides
-withConfig :: forall r. { | r } -> SankeyConfig -> SankeyConfig
-withConfig overrides base = base -- TODO: implement record merge
 
 -- | A captured step for debugging/visualization
 type SankeyStep =
