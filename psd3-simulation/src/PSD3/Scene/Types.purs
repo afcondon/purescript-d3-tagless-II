@@ -20,15 +20,12 @@ module PSD3.Scene.Types
   , Position
     -- * Rule Types
   , NodeRule
-    -- * CSS Transition (placeholder)
-  , CSSConfig
     -- * Defaults
   , defaultTransition
   ) where
 
 import Prelude
 
-import Data.Maybe (Maybe)
 import Foreign.Object (Object)
 import PSD3.Transition.Tick as Tick
 
@@ -86,21 +83,6 @@ instance showEngineMode :: Show EngineMode where
   show Static = "Static"
 
 -- =============================================================================
--- CSS Transition (placeholder for follow-on work)
--- =============================================================================
-
--- | Configuration for CSS transitions that run in parallel with position transitions.
--- |
--- | This allows opacity, color, and other CSS properties to animate
--- | alongside the position interpolation.
-type CSSConfig =
-  { selector :: String      -- CSS selector for target elements
-  , property :: String      -- CSS property to transition (e.g., "opacity")
-  , targetValue :: String   -- Target value (e.g., "0")
-  , duration :: Number      -- Duration in milliseconds
-  }
-
--- =============================================================================
 -- Transition Configuration
 -- =============================================================================
 
@@ -147,7 +129,6 @@ defaultTransition =
 -- |   , finalRules: \_ -> [ pinAtTreePositionsRule ]
 -- |   , stableMode: Static
 -- |   , transition: defaultTransition
--- |   , cssTransition: Nothing
 -- |   }
 -- | ```
 type SceneConfig node =
@@ -166,7 +147,6 @@ type SceneConfig node =
   -- Stable state configuration
   , stableMode :: EngineMode
   , transition :: TransitionConfig
-  , cssTransition :: Maybe CSSConfig
   }
 
 -- =============================================================================

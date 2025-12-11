@@ -21,7 +21,6 @@
 -- |   , finalRules: \_ -> [ rule "unpinModules" isModule unpin ]
 -- |   , stableMode: Static
 -- |   , transition: defaultTransition
--- |   , cssTransition: Nothing
 -- |   }
 -- | ```
 -- |
@@ -115,6 +114,5 @@ import PSD3.Scene.Types
   , PositionMap
   , Position
   , NodeRule
-  , CSSConfig
   , defaultTransition
   ) as Types

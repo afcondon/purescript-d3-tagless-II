@@ -33,17 +33,17 @@ module PSD3.Scene.Engine
   ( -- * Engine Type
     SceneEngine
   , EngineAdapter
-    -- * Creation
+  -- * Creation
   , createEngine
-    -- * Operations
+  -- * Operations
   , transitionTo
   , tick
   , tickWithDelta
-    -- * Queries
+  -- * Queries
   , getCurrentScene
   , isTransitioning
   , getTransitionProgress
-    -- * Re-exports
+  -- * Re-exports
   , module Types
   ) where
 
@@ -78,25 +78,25 @@ type EngineAdapter node =
   { -- | Get current nodes from simulation
     getNodes :: Effect (Array node)
 
-    -- | Capture positions from nodes as a PositionMap
-    -- | The adapter knows how to extract id, x, y from your node type
+  -- | Capture positions from nodes as a PositionMap
+  -- | The adapter knows how to extract id, x, y from your node type
   , capturePositions :: Array node -> Types.PositionMap
 
-    -- | Interpolate positions between start and target
-    -- | Parameters: startPositions, targetPositions, progress (0-1)
+  -- | Interpolate positions between start and target
+  -- | Parameters: startPositions, targetPositions, progress (0-1)
   , interpolatePositions :: Types.PositionMap -> Types.PositionMap -> Number -> Effect Unit
 
-    -- | Set positions directly (used when transition completes)
+  -- | Set positions directly (used when transition completes)
   , updatePositions :: Types.PositionMap -> Effect Unit
 
-    -- | Apply rules to nodes in place
+  -- | Apply rules to nodes in place
   , applyRulesInPlace :: Array (Types.NodeRule node) -> Effect Unit
 
-    -- | Re-initialize forces after node data changes
-    -- | D3 forces cache values, so we need to tell them to re-read
+  -- | Re-initialize forces after node data changes
+  -- | D3 forces cache values, so we need to tell them to re-read
   , reinitializeForces :: Effect Unit
 
-    -- | Reheat the simulation (restart force calculations)
+  -- | Reheat the simulation (restart force calculations)
   , reheat :: Effect Unit
   }
 
@@ -126,7 +126,7 @@ initialState =
 -- | Create with `createEngine`, then use `transitionTo` and `tick`.
 newtype SceneEngine node = SceneEngine
   { adapter :: EngineAdapter node
-  , stateRef :: Ref (EngineState node)
+  , stateRef :: Ref (EngineState node) -- see note in footer about use of Ref
   }
 
 -- =============================================================================
@@ -172,7 +172,7 @@ transitionTo targetScene (SceneEngine { adapter, stateRef }) = do
 
   -- Don't transition if already transitioning
   case state.transition of
-    Just _ -> pure unit  -- Already transitioning, ignore
+    Just _ -> pure unit -- Already transitioning, ignore
     Nothing -> do
       -- Phase 1: Apply init rules
       adapter.applyRulesInPlace targetScene.initRules
@@ -183,12 +183,6 @@ transitionTo targetScene (SceneEngine { adapter, stateRef }) = do
 
       -- Calculate target positions
       let targetPositions = targetScene.layout nodesAfterInit
-
-      -- Start CSS transition if configured
-      -- (TODO: implement CSS transition support)
-      -- case targetScene.cssTransition of
-      --   Just css -> startCSSTransition css
-      --   Nothing -> pure unit
 
       -- Set transition state
       Ref.write
@@ -216,7 +210,7 @@ tick
   :: forall node
    . SceneEngine node
   -> Effect Boolean
-tick = tickWithDelta 16.67  -- ~60fps
+tick = tickWithDelta 16.67 -- ~60fps
 
 -- | Advance the engine by a specified time delta.
 -- |
@@ -225,7 +219,7 @@ tick = tickWithDelta 16.67  -- ~60fps
 -- | Returns `true` if a transition is in progress, `false` if stable.
 tickWithDelta
   :: forall node
-   . Number                  -- ^ Delta time in milliseconds
+   . Number -- ^ Delta time in milliseconds
   -> SceneEngine node
   -> Effect Boolean
 tickWithDelta deltaMs (SceneEngine { adapter, stateRef }) = do
@@ -247,7 +241,7 @@ tickWithDelta deltaMs (SceneEngine { adapter, stateRef }) = do
 -- | Run the interpolation engine for one tick.
 runInterpolationEngine
   :: forall node
-   . Number                  -- ^ Delta time
+   . Number -- ^ Delta time
   -> Types.TransitionState node
   -> EngineAdapter node
   -> Ref (EngineState node)
@@ -257,19 +251,18 @@ runInterpolationEngine deltaMs t adapter stateRef state = do
   let newElapsed = t.elapsed + deltaMs
   let config = t.targetScene.transition
 
-  if isComplete config newElapsed
-    then completeTransition t adapter stateRef state
-    else do
-      -- Calculate eased progress
-      let easedProgress = calculateProgress config newElapsed
+  if isComplete config newElapsed then completeTransition t adapter stateRef state
+  else do
+    -- Calculate eased progress
+    let easedProgress = calculateProgress config newElapsed
 
-      -- Interpolate positions
-      adapter.interpolatePositions t.startPositions t.targetPositions easedProgress
+    -- Interpolate positions
+    adapter.interpolatePositions t.startPositions t.targetPositions easedProgress
 
-      -- Update state with new elapsed time
-      Ref.write
-        (state { transition = Just (t { elapsed = newElapsed, progress = easedProgress }) })
-        stateRef
+    -- Update state with new elapsed time
+    Ref.write
+      (state { transition = Just (t { elapsed = newElapsed, progress = easedProgress }) })
+      stateRef
 
 -- | Complete a transition and enter stable mode.
 completeTransition
@@ -349,3 +342,40 @@ getTransitionProgress
 getTransitionProgress (SceneEngine { stateRef }) = do
   state <- Ref.read stateRef
   pure $ map _.progress state.transition
+
+-- | Footer note about Ref
+--| Why Ref Instead of State Monad?
+
+--| The Ref is justified here. Looking at the tick function signature:
+
+--| tick :: forall node. SceneEngine node -> Effect Boolean
+
+--| The key constraint is that ticks are invoked by D3's internal timer (requestAnimationFrame), not by
+--|  your code in a continuous monadic computation. The engine state must persist across:
+
+--| 1. Multiple separate Effect invocations - each tick is its own Effect call
+--| 2. External timing - D3 controls when ticks happen, not you
+--| 3. Adapter functions in Effect - getNodes, interpolatePositions etc. are all effectful
+
+--| Alternative Design (State Monad)
+
+--| -- Would require:
+--| tick :: EngineState node -> Effect (Tuple Boolean (EngineState node))
+
+--| Problems with this:
+--| 1. Caller must thread state through every tick callback manually
+--| 2. No encapsulation - state management leaks to every call site
+--| 3. Risk of desync - caller might forget to use updated state
+--| 4. No actual purity gain - still mutable state, just externalized
+
+--| The Ref Advantage
+
+--| The Ref encapsulates mutable state within the engine handle:
+--| - Clean API: just call tick engine
+--| - Engine manages its own transition progress
+--| - Caller doesn't need to know about internal state shape
+--| - Mirrors D3's own design (simulation objects are mutable)
+
+--| Bottom line: Ref is the right choice when state must persist across multiple effectful callbacks
+--| driven by external timing (like requestAnimationFrame loops). State/StateT is better when you
+--| control the entire computation sequence in a single monadic run.
