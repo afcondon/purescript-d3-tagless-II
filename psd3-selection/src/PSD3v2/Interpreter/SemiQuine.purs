@@ -1,9 +1,13 @@
--- | Tree Builder Stringify Interpreter
+-- | SemiQuine Interpreter
 -- |
 -- | Converts a BuilderTree to compilable PureScript code using the Tree API.
 -- | Generates code that uses T.named, T.elem, T.withChild, and T.joinData.
-module TreeBuilder.Stringify
+-- |
+-- | Named "SemiQuine" because it generates PureScript code from a data structure
+-- | that represents PureScript code - a quine-ish concept, but not a true quine.
+module PSD3v2.Interpreter.SemiQuine
   ( treeToCode
+  , module PSD3v2.Interpreter.SemiQuine.Types
   ) where
 
 import Prelude
@@ -11,7 +15,10 @@ import Prelude
 import Data.Array as Array
 import Data.Maybe (Maybe(..))
 import Data.String as String
-import TreeBuilder.Types (BuilderTree(..), BuilderNode, AttributeChoice(..), AttributeBinding)
+import PSD3v2.Interpreter.SemiQuine.Types (AttributeBinding, AttributeChoice(..), BuilderNode, BuilderTree(..), NodeId)
+
+-- Re-export types
+import PSD3v2.Interpreter.SemiQuine.Types (BuilderTree(..), BuilderNode, NodeId, AttributeChoice(..), AttributeBinding, emptyNode, defaultAttributesFor) as PSD3v2.Interpreter.SemiQuine.Types
 
 -- =============================================================================
 -- Code Generation

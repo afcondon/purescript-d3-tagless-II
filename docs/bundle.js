@@ -55231,48 +55231,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
     }
   };
 
-  // output/TreeBuilder.Interpreter/foreign.js
-  var SVG_NS = "http://www.w3.org/2000/svg";
-  var SVG_ELEMENTS = /* @__PURE__ */ new Set(["svg", "circle", "rect", "line", "path", "text", "g", "group"]);
-  var renderPreviewFFI = (containerSelector) => (instructions) => () => {
-    const container = select_default2(containerSelector);
-    container.selectAll("*").remove();
-    instructions.forEach((instr) => {
-      renderInstruction(container.node(), instr);
-    });
-  };
-  function renderInstruction(parent2, instruction) {
-    const elemType = normalizeElementType(instruction.elemType);
-    let elem9;
-    if (SVG_ELEMENTS.has(elemType)) {
-      elem9 = document.createElementNS(SVG_NS, elemType);
-    } else {
-      elem9 = document.createElement(elemType);
-    }
-    instruction.attrs.forEach((attr3) => {
-      if (attr3.name === "text") {
-        elem9.textContent = attr3.value;
-      } else {
-        elem9.setAttribute(attr3.name, attr3.value);
-      }
-    });
-    parent2.appendChild(elem9);
-    instruction.children.forEach((child) => {
-      renderInstruction(elem9, child);
-    });
-    return elem9;
-  }
-  function normalizeElementType(type2) {
-    switch (type2) {
-      case "group":
-        return "g";
-      default:
-        return type2;
-    }
-  }
-
-  // output/TreeBuilder.Types/index.js
-  var elem8 = /* @__PURE__ */ elem2(eqString);
+  // output/PSD3v2.Interpreter.SemiQuine.Types/index.js
   var FromField = /* @__PURE__ */ (function() {
     function FromField2(value0) {
       this.value0 = value0;
@@ -55343,106 +55302,6 @@ T.joined "bars" Rect data identity $ \\\\d ->
     };
     return BDataJoin2;
   })();
-  var sudokuSampleData = [{
-    x: 20,
-    y: 20,
-    radius: 0,
-    width: 80,
-    height: 80,
-    color: "#f5f2e8",
-    label: "5",
-    name: "cell",
-    value: 5,
-    index: 0
-  }, {
-    x: 100,
-    y: 20,
-    radius: 0,
-    width: 80,
-    height: 80,
-    color: "#e8e0cc",
-    label: "3",
-    name: "cell",
-    value: 3,
-    index: 1
-  }, {
-    x: 180,
-    y: 20,
-    radius: 0,
-    width: 80,
-    height: 80,
-    color: "#f5f2e8",
-    label: "",
-    name: "cell",
-    value: 0,
-    index: 2
-  }, {
-    x: 20,
-    y: 100,
-    radius: 0,
-    width: 80,
-    height: 80,
-    color: "#e8e0cc",
-    label: "6",
-    name: "cell",
-    value: 6,
-    index: 3
-  }, {
-    x: 100,
-    y: 100,
-    radius: 0,
-    width: 80,
-    height: 80,
-    color: "#f5f2e8",
-    label: "",
-    name: "cell",
-    value: 0,
-    index: 4
-  }, {
-    x: 180,
-    y: 100,
-    radius: 0,
-    width: 80,
-    height: 80,
-    color: "#e8e0cc",
-    label: "9",
-    name: "cell",
-    value: 9,
-    index: 5
-  }, {
-    x: 20,
-    y: 180,
-    radius: 0,
-    width: 80,
-    height: 80,
-    color: "#f5f2e8",
-    label: "",
-    name: "cell",
-    value: 0,
-    index: 6
-  }, {
-    x: 100,
-    y: 180,
-    radius: 0,
-    width: 80,
-    height: 80,
-    color: "#e8e0cc",
-    label: "8",
-    name: "cell",
-    value: 8,
-    index: 7
-  }, {
-    x: 180,
-    y: 180,
-    radius: 0,
-    width: 80,
-    height: 80,
-    color: "#f5f2e8",
-    label: "1",
-    name: "cell",
-    value: 1,
-    index: 8
-  }];
   var eqAttributeChoice = {
     eq: function(x48) {
       return function(y49) {
@@ -55568,6 +55427,750 @@ T.joined "bars" Rect data identity $ \\\\d ->
       };
     };
   };
+
+  // output/PSD3v2.Interpreter.SemiQuine/index.js
+  var append38 = /* @__PURE__ */ append(semigroupArray);
+  var show80 = /* @__PURE__ */ show(showNumber);
+  var map101 = /* @__PURE__ */ map(functorArray);
+  var nub7 = /* @__PURE__ */ nub(ordString);
+  var wrapInParens = function(lines) {
+    var v2 = length3(lines);
+    if (v2 === 1) {
+      return lines;
+    }
+    ;
+    var v1 = last(lines);
+    var v22 = head2(lines);
+    if (v22 instanceof Just && v1 instanceof Just) {
+      return append38(["(" + v22.value0])(append38(drop(1)(dropEnd(1)(lines)))([v1.value0 + ")"]));
+    }
+    ;
+    return lines;
+  };
+  var templateChoiceToValue = function(v2) {
+    if (v2 instanceof ConstantNumber) {
+      return show80(v2.value0);
+    }
+    ;
+    if (v2 instanceof ConstantString) {
+      return '"' + (v2.value0 + '"');
+    }
+    ;
+    if (v2 instanceof FromField) {
+      return "d." + v2.value0;
+    }
+    ;
+    if (v2 instanceof IndexBased) {
+      return "d.index";
+    }
+    ;
+    if (v2 instanceof Computed) {
+      return v2.value0;
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3v2.Interpreter.SemiQuine (line 209, column 25 - line 214, column 24): " + [v2.constructor.name]);
+  };
+  var spaces = function(n) {
+    return joinWith("")(replicate(n)(" "));
+  };
+  var indentLines = function(n) {
+    return map101(function(line) {
+      var $27 = $$null4(line);
+      if ($27) {
+        return "";
+      }
+      ;
+      return spaces(n) + line;
+    });
+  };
+  var elementType = function(v2) {
+    if (v2 === "svg") {
+      return "SVG";
+    }
+    ;
+    if (v2 === "group") {
+      return "Group";
+    }
+    ;
+    if (v2 === "circle") {
+      return "Circle";
+    }
+    ;
+    if (v2 === "rect") {
+      return "Rect";
+    }
+    ;
+    if (v2 === "line") {
+      return "Line";
+    }
+    ;
+    if (v2 === "text") {
+      return "Text";
+    }
+    ;
+    if (v2 === "path") {
+      return "Path";
+    }
+    ;
+    return v2;
+  };
+  var choiceToValue = function(v2) {
+    if (v2 instanceof ConstantNumber) {
+      return show80(v2.value0);
+    }
+    ;
+    if (v2 instanceof ConstantString) {
+      return '"' + (v2.value0 + '"');
+    }
+    ;
+    if (v2 instanceof FromField) {
+      return "d." + v2.value0;
+    }
+    ;
+    if (v2 instanceof IndexBased) {
+      return "d.index";
+    }
+    ;
+    if (v2 instanceof Computed) {
+      return v2.value0;
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3v2.Interpreter.SemiQuine (line 200, column 17 - line 205, column 24): " + [v2.constructor.name]);
+  };
+  var attrImportName = function(binding) {
+    if (binding.attrName === "cx") {
+      return "cx";
+    }
+    ;
+    if (binding.attrName === "cy") {
+      return "cy";
+    }
+    ;
+    if (binding.attrName === "r") {
+      return "radius";
+    }
+    ;
+    if (binding.attrName === "x") {
+      return "x";
+    }
+    ;
+    if (binding.attrName === "y") {
+      return "y";
+    }
+    ;
+    if (binding.attrName === "x1") {
+      return "x1";
+    }
+    ;
+    if (binding.attrName === "y1") {
+      return "y1";
+    }
+    ;
+    if (binding.attrName === "x2") {
+      return "x2";
+    }
+    ;
+    if (binding.attrName === "y2") {
+      return "y2";
+    }
+    ;
+    if (binding.attrName === "width") {
+      return "width";
+    }
+    ;
+    if (binding.attrName === "height") {
+      return "height";
+    }
+    ;
+    if (binding.attrName === "fill") {
+      return "fill";
+    }
+    ;
+    if (binding.attrName === "stroke") {
+      return "stroke";
+    }
+    ;
+    if (binding.attrName === "stroke-width") {
+      return "strokeWidth";
+    }
+    ;
+    if (binding.attrName === "opacity") {
+      return "opacity";
+    }
+    ;
+    if (binding.attrName === "text") {
+      return "textContent";
+    }
+    ;
+    if (binding.attrName === "font-size") {
+      return "fontSize";
+    }
+    ;
+    return binding.attrName;
+  };
+  var collectAttrs = function(v2) {
+    if (v2 instanceof BNode) {
+      return append38(map101(attrImportName)(v2.value0.attributes))(concat(map101(collectAttrs)(v2.value1)));
+    }
+    ;
+    if (v2 instanceof BDataJoin) {
+      return map101(attrImportName)(v2.value0.template.attributes);
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3v2.Interpreter.SemiQuine (line 48, column 16 - line 53, column 48): " + [v2.constructor.name]);
+  };
+  var attributeImports = function(tree2) {
+    var attrs = collectAttrs(tree2);
+    var unique = nub7(attrs);
+    return joinWith(", ")(unique);
+  };
+  var attrFn = function(v2) {
+    if (v2 === "cx") {
+      return "cx";
+    }
+    ;
+    if (v2 === "cy") {
+      return "cy";
+    }
+    ;
+    if (v2 === "r") {
+      return "radius";
+    }
+    ;
+    if (v2 === "x") {
+      return "x";
+    }
+    ;
+    if (v2 === "y") {
+      return "y";
+    }
+    ;
+    if (v2 === "x1") {
+      return "x1";
+    }
+    ;
+    if (v2 === "y1") {
+      return "y1";
+    }
+    ;
+    if (v2 === "x2") {
+      return "x2";
+    }
+    ;
+    if (v2 === "y2") {
+      return "y2";
+    }
+    ;
+    if (v2 === "width") {
+      return "width";
+    }
+    ;
+    if (v2 === "height") {
+      return "height";
+    }
+    ;
+    if (v2 === "fill") {
+      return "fill";
+    }
+    ;
+    if (v2 === "stroke") {
+      return "stroke";
+    }
+    ;
+    if (v2 === "stroke-width") {
+      return "strokeWidth";
+    }
+    ;
+    if (v2 === "opacity") {
+      return "opacity";
+    }
+    ;
+    if (v2 === "text") {
+      return "textContent";
+    }
+    ;
+    if (v2 === "font-size") {
+      return "fontSize";
+    }
+    ;
+    return v2;
+  };
+  var templateAttrCode = function(binding) {
+    return attrFn(binding.attrName) + (" " + templateChoiceToValue(binding.choice));
+  };
+  var templateAttrsArray = function(attrs) {
+    return "[ " + (joinWith(", ")(map101(templateAttrCode)(attrs)) + " ]");
+  };
+  var joinCode = function(join6) {
+    return ['T.joinData "' + (join6.name + ('" "' + (join6.elementType + '" data_ $ \\d ->'))), "  T.elem " + elementType(join6.elementType), "    " + templateAttrsArray(join6.template.attributes)];
+  };
+  var attrCode = function(binding) {
+    return attrFn(binding.attrName) + (" " + choiceToValue(binding.choice));
+  };
+  var attrsArray = function(attrs) {
+    return "[ " + (joinWith(", ")(map101(attrCode)(attrs)) + " ]");
+  };
+  var elemLeafCode = function(node) {
+    return ["T.elem " + elementType(node.elementType), "  " + attrsArray(node.attributes)];
+  };
+  var namedLeafCode = function(node) {
+    return function(name16) {
+      return ["T.named " + (elementType(node.elementType) + (' "' + (name16 + '"'))), "  " + attrsArray(node.attributes)];
+    };
+  };
+  var nodeToCode = function(v2) {
+    if (v2 instanceof BNode) {
+      if (v2.value0.name instanceof Just) {
+        var $42 = $$null3(v2.value1);
+        if ($42) {
+          return namedLeafCode(v2.value0)(v2.value0.name.value0);
+        }
+        ;
+        return namedBranchCode(v2.value0)(v2.value0.name.value0)(v2.value1);
+      }
+      ;
+      if (v2.value0.name instanceof Nothing) {
+        var $44 = $$null3(v2.value1);
+        if ($44) {
+          return elemLeafCode(v2.value0);
+        }
+        ;
+        return elemBranchCode(v2.value0)(v2.value1);
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3v2.Interpreter.SemiQuine (line 80, column 5 - line 90, column 44): " + [v2.value0.name.constructor.name]);
+    }
+    ;
+    if (v2 instanceof BDataJoin) {
+      return joinCode(v2.value0);
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3v2.Interpreter.SemiQuine (line 78, column 14 - line 93, column 18): " + [v2.constructor.name]);
+  };
+  var namedBranchCode = function(node) {
+    return function(name16) {
+      return function(children3) {
+        return append38(["T.named " + (elementType(node.elementType) + (' "' + (name16 + '"'))), "  " + attrsArray(node.attributes)])(childrenCode(children3));
+      };
+    };
+  };
+  var elemBranchCode = function(node) {
+    return function(children3) {
+      return append38(["T.elem " + elementType(node.elementType), "  " + attrsArray(node.attributes)])(childrenCode(children3));
+    };
+  };
+  var childrenCode = function(children3) {
+    var v2 = length3(children3);
+    if (v2 === 1) {
+      var v1 = head2(children3);
+      if (v1 instanceof Just) {
+        return append38(["  `T.withChild`"])(indentLines(4)(wrapInParens(nodeToCode(v1.value0))));
+      }
+      ;
+      if (v1 instanceof Nothing) {
+        return [];
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3v2.Interpreter.SemiQuine (line 127, column 10 - line 131, column 20): " + [v1.constructor.name]);
+    }
+    ;
+    return append38(["  `T.withChildren`"])(["    [ " + (joinWith("\n    , ")(map101((function() {
+      var $51 = joinWith(" ");
+      return function($52) {
+        return $51(nodeToCode($52));
+      };
+    })())(children3)) + "\n    ]")]);
+  };
+  var treeToCode = function(tree2) {
+    return joinWith("\n")(append38(["-- Generated Tree API code", "", "import PSD3v2.VizTree.Tree as T", "import PSD3v2.Selection.Types (ElementType(..))", "import PSD3v2.Attribute.Types (" + (attributeImports(tree2) + ")"), "", "tree :: T.Tree Datum", "tree ="])(indentLines(2)(nodeToCode(tree2))));
+  };
+
+  // output/TreeBuilder.Interpreter/foreign.js
+  var SVG_NS = "http://www.w3.org/2000/svg";
+  var SVG_ELEMENTS = /* @__PURE__ */ new Set(["svg", "circle", "rect", "line", "path", "text", "g", "group"]);
+  var renderPreviewFFI = (containerSelector) => (instructions) => () => {
+    const container = select_default2(containerSelector);
+    container.selectAll("*").remove();
+    instructions.forEach((instr) => {
+      renderInstruction(container.node(), instr);
+    });
+  };
+  function renderInstruction(parent2, instruction) {
+    const elemType = normalizeElementType(instruction.elemType);
+    let elem9;
+    if (SVG_ELEMENTS.has(elemType)) {
+      elem9 = document.createElementNS(SVG_NS, elemType);
+    } else {
+      elem9 = document.createElement(elemType);
+    }
+    instruction.attrs.forEach((attr3) => {
+      if (attr3.name === "text") {
+        elem9.textContent = attr3.value;
+      } else {
+        elem9.setAttribute(attr3.name, attr3.value);
+      }
+    });
+    parent2.appendChild(elem9);
+    instruction.children.forEach((child) => {
+      renderInstruction(elem9, child);
+    });
+    return elem9;
+  }
+  function normalizeElementType(type2) {
+    switch (type2) {
+      case "group":
+        return "g";
+      default:
+        return type2;
+    }
+  }
+
+  // output/TreeBuilder.Interpreter/index.js
+  var show81 = /* @__PURE__ */ show(showNumber);
+  var show139 = /* @__PURE__ */ show(showInt);
+  var bind87 = /* @__PURE__ */ bind(bindMaybe);
+  var map102 = /* @__PURE__ */ map(functorArray);
+  var getNumericField = function(field) {
+    return function(datum2) {
+      if (field === "x") {
+        return datum2.x;
+      }
+      ;
+      if (field === "y") {
+        return datum2.y;
+      }
+      ;
+      if (field === "radius") {
+        return datum2.radius;
+      }
+      ;
+      if (field === "width") {
+        return datum2.width;
+      }
+      ;
+      if (field === "height") {
+        return datum2.height;
+      }
+      ;
+      if (field === "value") {
+        return datum2.value;
+      }
+      ;
+      if (field === "index") {
+        return toNumber(datum2.index);
+      }
+      ;
+      return 0;
+    };
+  };
+  var getFieldValue = function(field) {
+    return function(datum2) {
+      if (field === "x") {
+        return show81(datum2.x);
+      }
+      ;
+      if (field === "y") {
+        return show81(datum2.y);
+      }
+      ;
+      if (field === "radius") {
+        return show81(datum2.radius);
+      }
+      ;
+      if (field === "width") {
+        return show81(datum2.width);
+      }
+      ;
+      if (field === "height") {
+        return show81(datum2.height);
+      }
+      ;
+      if (field === "color") {
+        return datum2.color;
+      }
+      ;
+      if (field === "label") {
+        return datum2.label;
+      }
+      ;
+      if (field === "name") {
+        return datum2.name;
+      }
+      ;
+      if (field === "value") {
+        return show81(datum2.value);
+      }
+      ;
+      if (field === "index") {
+        return show139(datum2.index);
+      }
+      ;
+      return "";
+    };
+  };
+  var evalSimpleExpr = function(expr) {
+    return function(datum2) {
+      var parseSubExpr = function(s2) {
+        var parts = split(" - ")(s2);
+        var v3 = length3(parts);
+        if (v3 === 2) {
+          return bind87(head2(parts))(function(fieldPart) {
+            return bind87(last(parts))(function(offsetPart) {
+              return bind87(stripPrefix("d.")(fieldPart))(function(field) {
+                return bind87(fromString(offsetPart))(function(offset3) {
+                  return new Just({
+                    field,
+                    offset: offset3
+                  });
+                });
+              });
+            });
+          });
+        }
+        ;
+        return Nothing.value;
+      };
+      var parseFieldRef = function(s2) {
+        return stripPrefix("d.")(s2);
+      };
+      var parseAddExpr = function(s2) {
+        var parts = split(" + ")(s2);
+        var v3 = length3(parts);
+        if (v3 === 2) {
+          return bind87(head2(parts))(function(fieldPart) {
+            return bind87(last(parts))(function(offsetPart) {
+              return bind87(stripPrefix("d.")(fieldPart))(function(field) {
+                return bind87(fromString(offsetPart))(function(offset3) {
+                  return new Just({
+                    field,
+                    offset: offset3
+                  });
+                });
+              });
+            });
+          });
+        }
+        ;
+        return Nothing.value;
+      };
+      var v2 = parseAddExpr(expr);
+      if (v2 instanceof Just) {
+        var fieldVal = getNumericField(v2.value0.field)(datum2);
+        return show81(fieldVal + v2.value0.offset);
+      }
+      ;
+      if (v2 instanceof Nothing) {
+        var v1 = parseSubExpr(expr);
+        if (v1 instanceof Just) {
+          var fieldVal = getNumericField(v1.value0.field)(datum2);
+          return show81(fieldVal - v1.value0.offset);
+        }
+        ;
+        if (v1 instanceof Nothing) {
+          var v22 = parseFieldRef(expr);
+          if (v22 instanceof Just) {
+            return getFieldValue(v22.value0)(datum2);
+          }
+          ;
+          if (v22 instanceof Nothing) {
+            return expr;
+          }
+          ;
+          throw new Error("Failed pattern match at TreeBuilder.Interpreter (line 132, column 11 - line 134, column 28): " + [v22.constructor.name]);
+        }
+        ;
+        throw new Error("Failed pattern match at TreeBuilder.Interpreter (line 126, column 7 - line 134, column 28): " + [v1.constructor.name]);
+      }
+      ;
+      throw new Error("Failed pattern match at TreeBuilder.Interpreter (line 120, column 3 - line 134, column 28): " + [v2.constructor.name]);
+    };
+  };
+  var resolveAttributeChoice = function(choice) {
+    return function(datum2) {
+      if (choice instanceof FromField) {
+        return getFieldValue(choice.value0)(datum2);
+      }
+      ;
+      if (choice instanceof ConstantNumber) {
+        return show81(choice.value0);
+      }
+      ;
+      if (choice instanceof ConstantString) {
+        return choice.value0;
+      }
+      ;
+      if (choice instanceof IndexBased) {
+        return show139(datum2.index);
+      }
+      ;
+      if (choice instanceof Computed) {
+        return evalSimpleExpr(choice.value0)(datum2);
+      }
+      ;
+      throw new Error("Failed pattern match at TreeBuilder.Interpreter (line 78, column 39 - line 83, column 45): " + [choice.constructor.name]);
+    };
+  };
+  var defaultDatum = {
+    x: 0,
+    y: 0,
+    radius: 10,
+    width: 50,
+    height: 30,
+    color: "#999",
+    label: "",
+    name: "",
+    value: 0,
+    index: 0
+  };
+  var bindingToAttr = function(datum2) {
+    return function(binding) {
+      return {
+        name: binding.attrName,
+        value: resolveAttributeChoice(binding.choice)(datum2)
+      };
+    };
+  };
+  var nodeToInstruction = function(node) {
+    return function(datum2) {
+      return function(children3) {
+        return {
+          elemType: node.elementType,
+          attrs: map102(bindingToAttr(datum2))(node.attributes),
+          children: children3
+        };
+      };
+    };
+  };
+  var treeToInstructions = function(tree2) {
+    return function(sampleData2) {
+      if (tree2 instanceof BNode) {
+        var datum2 = fromMaybe(defaultDatum)(head2(sampleData2));
+        var childInstructions = concat(map102(function(c2) {
+          return treeToInstructions(c2)(sampleData2);
+        })(tree2.value1));
+        return [nodeToInstruction(tree2.value0)(datum2)(childInstructions)];
+      }
+      ;
+      if (tree2 instanceof BDataJoin) {
+        return map102(function(d20) {
+          return nodeToInstruction(tree2.value0.template)(d20)([]);
+        })(sampleData2);
+      }
+      ;
+      throw new Error("Failed pattern match at TreeBuilder.Interpreter (line 49, column 38 - line 58, column 64): " + [tree2.constructor.name]);
+    };
+  };
+  var renderPreview = function(containerSelector) {
+    return function(tree2) {
+      return function(sampleData2) {
+        var instructions = treeToInstructions(tree2)(sampleData2);
+        return renderPreviewFFI(containerSelector)(instructions);
+      };
+    };
+  };
+
+  // output/TreeBuilder.Types/index.js
+  var elem8 = /* @__PURE__ */ elem2(eqString);
+  var sudokuSampleData = [{
+    x: 20,
+    y: 20,
+    radius: 0,
+    width: 80,
+    height: 80,
+    color: "#f5f2e8",
+    label: "5",
+    name: "cell",
+    value: 5,
+    index: 0
+  }, {
+    x: 100,
+    y: 20,
+    radius: 0,
+    width: 80,
+    height: 80,
+    color: "#e8e0cc",
+    label: "3",
+    name: "cell",
+    value: 3,
+    index: 1
+  }, {
+    x: 180,
+    y: 20,
+    radius: 0,
+    width: 80,
+    height: 80,
+    color: "#f5f2e8",
+    label: "",
+    name: "cell",
+    value: 0,
+    index: 2
+  }, {
+    x: 20,
+    y: 100,
+    radius: 0,
+    width: 80,
+    height: 80,
+    color: "#e8e0cc",
+    label: "6",
+    name: "cell",
+    value: 6,
+    index: 3
+  }, {
+    x: 100,
+    y: 100,
+    radius: 0,
+    width: 80,
+    height: 80,
+    color: "#f5f2e8",
+    label: "",
+    name: "cell",
+    value: 0,
+    index: 4
+  }, {
+    x: 180,
+    y: 100,
+    radius: 0,
+    width: 80,
+    height: 80,
+    color: "#e8e0cc",
+    label: "9",
+    name: "cell",
+    value: 9,
+    index: 5
+  }, {
+    x: 20,
+    y: 180,
+    radius: 0,
+    width: 80,
+    height: 80,
+    color: "#f5f2e8",
+    label: "",
+    name: "cell",
+    value: 0,
+    index: 6
+  }, {
+    x: 100,
+    y: 180,
+    radius: 0,
+    width: 80,
+    height: 80,
+    color: "#e8e0cc",
+    label: "8",
+    name: "cell",
+    value: 8,
+    index: 7
+  }, {
+    x: 180,
+    y: 180,
+    radius: 0,
+    width: 80,
+    height: 80,
+    color: "#f5f2e8",
+    label: "1",
+    name: "cell",
+    value: 1,
+    index: 8
+  }];
   var availableElements = [{
     id: "svg",
     label: "SVG",
@@ -55723,607 +56326,6 @@ T.joined "bars" Rect data identity $ \\\\d ->
     }
     ;
     return availableAttributes;
-  };
-
-  // output/TreeBuilder.Interpreter/index.js
-  var show80 = /* @__PURE__ */ show(showNumber);
-  var show139 = /* @__PURE__ */ show(showInt);
-  var bind87 = /* @__PURE__ */ bind(bindMaybe);
-  var map101 = /* @__PURE__ */ map(functorArray);
-  var getNumericField = function(field) {
-    return function(datum2) {
-      if (field === "x") {
-        return datum2.x;
-      }
-      ;
-      if (field === "y") {
-        return datum2.y;
-      }
-      ;
-      if (field === "radius") {
-        return datum2.radius;
-      }
-      ;
-      if (field === "width") {
-        return datum2.width;
-      }
-      ;
-      if (field === "height") {
-        return datum2.height;
-      }
-      ;
-      if (field === "value") {
-        return datum2.value;
-      }
-      ;
-      if (field === "index") {
-        return toNumber(datum2.index);
-      }
-      ;
-      return 0;
-    };
-  };
-  var getFieldValue = function(field) {
-    return function(datum2) {
-      if (field === "x") {
-        return show80(datum2.x);
-      }
-      ;
-      if (field === "y") {
-        return show80(datum2.y);
-      }
-      ;
-      if (field === "radius") {
-        return show80(datum2.radius);
-      }
-      ;
-      if (field === "width") {
-        return show80(datum2.width);
-      }
-      ;
-      if (field === "height") {
-        return show80(datum2.height);
-      }
-      ;
-      if (field === "color") {
-        return datum2.color;
-      }
-      ;
-      if (field === "label") {
-        return datum2.label;
-      }
-      ;
-      if (field === "name") {
-        return datum2.name;
-      }
-      ;
-      if (field === "value") {
-        return show80(datum2.value);
-      }
-      ;
-      if (field === "index") {
-        return show139(datum2.index);
-      }
-      ;
-      return "";
-    };
-  };
-  var evalSimpleExpr = function(expr) {
-    return function(datum2) {
-      var parseSubExpr = function(s2) {
-        var parts = split(" - ")(s2);
-        var v3 = length3(parts);
-        if (v3 === 2) {
-          return bind87(head2(parts))(function(fieldPart) {
-            return bind87(last(parts))(function(offsetPart) {
-              return bind87(stripPrefix("d.")(fieldPart))(function(field) {
-                return bind87(fromString(offsetPart))(function(offset3) {
-                  return new Just({
-                    field,
-                    offset: offset3
-                  });
-                });
-              });
-            });
-          });
-        }
-        ;
-        return Nothing.value;
-      };
-      var parseFieldRef = function(s2) {
-        return stripPrefix("d.")(s2);
-      };
-      var parseAddExpr = function(s2) {
-        var parts = split(" + ")(s2);
-        var v3 = length3(parts);
-        if (v3 === 2) {
-          return bind87(head2(parts))(function(fieldPart) {
-            return bind87(last(parts))(function(offsetPart) {
-              return bind87(stripPrefix("d.")(fieldPart))(function(field) {
-                return bind87(fromString(offsetPart))(function(offset3) {
-                  return new Just({
-                    field,
-                    offset: offset3
-                  });
-                });
-              });
-            });
-          });
-        }
-        ;
-        return Nothing.value;
-      };
-      var v2 = parseAddExpr(expr);
-      if (v2 instanceof Just) {
-        var fieldVal = getNumericField(v2.value0.field)(datum2);
-        return show80(fieldVal + v2.value0.offset);
-      }
-      ;
-      if (v2 instanceof Nothing) {
-        var v1 = parseSubExpr(expr);
-        if (v1 instanceof Just) {
-          var fieldVal = getNumericField(v1.value0.field)(datum2);
-          return show80(fieldVal - v1.value0.offset);
-        }
-        ;
-        if (v1 instanceof Nothing) {
-          var v22 = parseFieldRef(expr);
-          if (v22 instanceof Just) {
-            return getFieldValue(v22.value0)(datum2);
-          }
-          ;
-          if (v22 instanceof Nothing) {
-            return expr;
-          }
-          ;
-          throw new Error("Failed pattern match at TreeBuilder.Interpreter (line 132, column 11 - line 134, column 28): " + [v22.constructor.name]);
-        }
-        ;
-        throw new Error("Failed pattern match at TreeBuilder.Interpreter (line 126, column 7 - line 134, column 28): " + [v1.constructor.name]);
-      }
-      ;
-      throw new Error("Failed pattern match at TreeBuilder.Interpreter (line 120, column 3 - line 134, column 28): " + [v2.constructor.name]);
-    };
-  };
-  var resolveAttributeChoice = function(choice) {
-    return function(datum2) {
-      if (choice instanceof FromField) {
-        return getFieldValue(choice.value0)(datum2);
-      }
-      ;
-      if (choice instanceof ConstantNumber) {
-        return show80(choice.value0);
-      }
-      ;
-      if (choice instanceof ConstantString) {
-        return choice.value0;
-      }
-      ;
-      if (choice instanceof IndexBased) {
-        return show139(datum2.index);
-      }
-      ;
-      if (choice instanceof Computed) {
-        return evalSimpleExpr(choice.value0)(datum2);
-      }
-      ;
-      throw new Error("Failed pattern match at TreeBuilder.Interpreter (line 78, column 39 - line 83, column 45): " + [choice.constructor.name]);
-    };
-  };
-  var defaultDatum = {
-    x: 0,
-    y: 0,
-    radius: 10,
-    width: 50,
-    height: 30,
-    color: "#999",
-    label: "",
-    name: "",
-    value: 0,
-    index: 0
-  };
-  var bindingToAttr = function(datum2) {
-    return function(binding) {
-      return {
-        name: binding.attrName,
-        value: resolveAttributeChoice(binding.choice)(datum2)
-      };
-    };
-  };
-  var nodeToInstruction = function(node) {
-    return function(datum2) {
-      return function(children3) {
-        return {
-          elemType: node.elementType,
-          attrs: map101(bindingToAttr(datum2))(node.attributes),
-          children: children3
-        };
-      };
-    };
-  };
-  var treeToInstructions = function(tree2) {
-    return function(sampleData2) {
-      if (tree2 instanceof BNode) {
-        var datum2 = fromMaybe(defaultDatum)(head2(sampleData2));
-        var childInstructions = concat(map101(function(c2) {
-          return treeToInstructions(c2)(sampleData2);
-        })(tree2.value1));
-        return [nodeToInstruction(tree2.value0)(datum2)(childInstructions)];
-      }
-      ;
-      if (tree2 instanceof BDataJoin) {
-        return map101(function(d20) {
-          return nodeToInstruction(tree2.value0.template)(d20)([]);
-        })(sampleData2);
-      }
-      ;
-      throw new Error("Failed pattern match at TreeBuilder.Interpreter (line 49, column 38 - line 58, column 64): " + [tree2.constructor.name]);
-    };
-  };
-  var renderPreview = function(containerSelector) {
-    return function(tree2) {
-      return function(sampleData2) {
-        var instructions = treeToInstructions(tree2)(sampleData2);
-        return renderPreviewFFI(containerSelector)(instructions);
-      };
-    };
-  };
-
-  // output/TreeBuilder.Stringify/index.js
-  var append38 = /* @__PURE__ */ append(semigroupArray);
-  var show81 = /* @__PURE__ */ show(showNumber);
-  var map102 = /* @__PURE__ */ map(functorArray);
-  var nub7 = /* @__PURE__ */ nub(ordString);
-  var wrapInParens = function(lines) {
-    var v2 = length3(lines);
-    if (v2 === 1) {
-      return lines;
-    }
-    ;
-    var v1 = last(lines);
-    var v22 = head2(lines);
-    if (v22 instanceof Just && v1 instanceof Just) {
-      return append38(["(" + v22.value0])(append38(drop(1)(dropEnd(1)(lines)))([v1.value0 + ")"]));
-    }
-    ;
-    return lines;
-  };
-  var templateChoiceToValue = function(v2) {
-    if (v2 instanceof ConstantNumber) {
-      return show81(v2.value0);
-    }
-    ;
-    if (v2 instanceof ConstantString) {
-      return '"' + (v2.value0 + '"');
-    }
-    ;
-    if (v2 instanceof FromField) {
-      return "d." + v2.value0;
-    }
-    ;
-    if (v2 instanceof IndexBased) {
-      return "d.index";
-    }
-    ;
-    if (v2 instanceof Computed) {
-      return v2.value0;
-    }
-    ;
-    throw new Error("Failed pattern match at TreeBuilder.Stringify (line 202, column 25 - line 207, column 24): " + [v2.constructor.name]);
-  };
-  var spaces = function(n) {
-    return joinWith("")(replicate(n)(" "));
-  };
-  var indentLines = function(n) {
-    return map102(function(line) {
-      var $27 = $$null4(line);
-      if ($27) {
-        return "";
-      }
-      ;
-      return spaces(n) + line;
-    });
-  };
-  var elementType = function(v2) {
-    if (v2 === "svg") {
-      return "SVG";
-    }
-    ;
-    if (v2 === "group") {
-      return "Group";
-    }
-    ;
-    if (v2 === "circle") {
-      return "Circle";
-    }
-    ;
-    if (v2 === "rect") {
-      return "Rect";
-    }
-    ;
-    if (v2 === "line") {
-      return "Line";
-    }
-    ;
-    if (v2 === "text") {
-      return "Text";
-    }
-    ;
-    if (v2 === "path") {
-      return "Path";
-    }
-    ;
-    return v2;
-  };
-  var choiceToValue = function(v2) {
-    if (v2 instanceof ConstantNumber) {
-      return show81(v2.value0);
-    }
-    ;
-    if (v2 instanceof ConstantString) {
-      return '"' + (v2.value0 + '"');
-    }
-    ;
-    if (v2 instanceof FromField) {
-      return "d." + v2.value0;
-    }
-    ;
-    if (v2 instanceof IndexBased) {
-      return "d.index";
-    }
-    ;
-    if (v2 instanceof Computed) {
-      return v2.value0;
-    }
-    ;
-    throw new Error("Failed pattern match at TreeBuilder.Stringify (line 193, column 17 - line 198, column 24): " + [v2.constructor.name]);
-  };
-  var attrImportName = function(binding) {
-    if (binding.attrName === "cx") {
-      return "cx";
-    }
-    ;
-    if (binding.attrName === "cy") {
-      return "cy";
-    }
-    ;
-    if (binding.attrName === "r") {
-      return "radius";
-    }
-    ;
-    if (binding.attrName === "x") {
-      return "x";
-    }
-    ;
-    if (binding.attrName === "y") {
-      return "y";
-    }
-    ;
-    if (binding.attrName === "x1") {
-      return "x1";
-    }
-    ;
-    if (binding.attrName === "y1") {
-      return "y1";
-    }
-    ;
-    if (binding.attrName === "x2") {
-      return "x2";
-    }
-    ;
-    if (binding.attrName === "y2") {
-      return "y2";
-    }
-    ;
-    if (binding.attrName === "width") {
-      return "width";
-    }
-    ;
-    if (binding.attrName === "height") {
-      return "height";
-    }
-    ;
-    if (binding.attrName === "fill") {
-      return "fill";
-    }
-    ;
-    if (binding.attrName === "stroke") {
-      return "stroke";
-    }
-    ;
-    if (binding.attrName === "stroke-width") {
-      return "strokeWidth";
-    }
-    ;
-    if (binding.attrName === "opacity") {
-      return "opacity";
-    }
-    ;
-    if (binding.attrName === "text") {
-      return "textContent";
-    }
-    ;
-    if (binding.attrName === "font-size") {
-      return "fontSize";
-    }
-    ;
-    return binding.attrName;
-  };
-  var collectAttrs = function(v2) {
-    if (v2 instanceof BNode) {
-      return append38(map102(attrImportName)(v2.value0.attributes))(concat(map102(collectAttrs)(v2.value1)));
-    }
-    ;
-    if (v2 instanceof BDataJoin) {
-      return map102(attrImportName)(v2.value0.template.attributes);
-    }
-    ;
-    throw new Error("Failed pattern match at TreeBuilder.Stringify (line 41, column 16 - line 46, column 48): " + [v2.constructor.name]);
-  };
-  var attributeImports = function(tree2) {
-    var attrs = collectAttrs(tree2);
-    var unique = nub7(attrs);
-    return joinWith(", ")(unique);
-  };
-  var attrFn = function(v2) {
-    if (v2 === "cx") {
-      return "cx";
-    }
-    ;
-    if (v2 === "cy") {
-      return "cy";
-    }
-    ;
-    if (v2 === "r") {
-      return "radius";
-    }
-    ;
-    if (v2 === "x") {
-      return "x";
-    }
-    ;
-    if (v2 === "y") {
-      return "y";
-    }
-    ;
-    if (v2 === "x1") {
-      return "x1";
-    }
-    ;
-    if (v2 === "y1") {
-      return "y1";
-    }
-    ;
-    if (v2 === "x2") {
-      return "x2";
-    }
-    ;
-    if (v2 === "y2") {
-      return "y2";
-    }
-    ;
-    if (v2 === "width") {
-      return "width";
-    }
-    ;
-    if (v2 === "height") {
-      return "height";
-    }
-    ;
-    if (v2 === "fill") {
-      return "fill";
-    }
-    ;
-    if (v2 === "stroke") {
-      return "stroke";
-    }
-    ;
-    if (v2 === "stroke-width") {
-      return "strokeWidth";
-    }
-    ;
-    if (v2 === "opacity") {
-      return "opacity";
-    }
-    ;
-    if (v2 === "text") {
-      return "textContent";
-    }
-    ;
-    if (v2 === "font-size") {
-      return "fontSize";
-    }
-    ;
-    return v2;
-  };
-  var templateAttrCode = function(binding) {
-    return attrFn(binding.attrName) + (" " + templateChoiceToValue(binding.choice));
-  };
-  var templateAttrsArray = function(attrs) {
-    return "[ " + (joinWith(", ")(map102(templateAttrCode)(attrs)) + " ]");
-  };
-  var joinCode = function(join6) {
-    return ['T.joinData "' + (join6.name + ('" "' + (join6.elementType + '" data_ $ \\d ->'))), "  T.elem " + elementType(join6.elementType), "    " + templateAttrsArray(join6.template.attributes)];
-  };
-  var attrCode = function(binding) {
-    return attrFn(binding.attrName) + (" " + choiceToValue(binding.choice));
-  };
-  var attrsArray = function(attrs) {
-    return "[ " + (joinWith(", ")(map102(attrCode)(attrs)) + " ]");
-  };
-  var elemLeafCode = function(node) {
-    return ["T.elem " + elementType(node.elementType), "  " + attrsArray(node.attributes)];
-  };
-  var namedLeafCode = function(node) {
-    return function(name16) {
-      return ["T.named " + (elementType(node.elementType) + (' "' + (name16 + '"'))), "  " + attrsArray(node.attributes)];
-    };
-  };
-  var nodeToCode = function(v2) {
-    if (v2 instanceof BNode) {
-      if (v2.value0.name instanceof Just) {
-        var $42 = $$null3(v2.value1);
-        if ($42) {
-          return namedLeafCode(v2.value0)(v2.value0.name.value0);
-        }
-        ;
-        return namedBranchCode(v2.value0)(v2.value0.name.value0)(v2.value1);
-      }
-      ;
-      if (v2.value0.name instanceof Nothing) {
-        var $44 = $$null3(v2.value1);
-        if ($44) {
-          return elemLeafCode(v2.value0);
-        }
-        ;
-        return elemBranchCode(v2.value0)(v2.value1);
-      }
-      ;
-      throw new Error("Failed pattern match at TreeBuilder.Stringify (line 73, column 5 - line 83, column 44): " + [v2.value0.name.constructor.name]);
-    }
-    ;
-    if (v2 instanceof BDataJoin) {
-      return joinCode(v2.value0);
-    }
-    ;
-    throw new Error("Failed pattern match at TreeBuilder.Stringify (line 71, column 14 - line 86, column 18): " + [v2.constructor.name]);
-  };
-  var namedBranchCode = function(node) {
-    return function(name16) {
-      return function(children3) {
-        return append38(["T.named " + (elementType(node.elementType) + (' "' + (name16 + '"'))), "  " + attrsArray(node.attributes)])(childrenCode(children3));
-      };
-    };
-  };
-  var elemBranchCode = function(node) {
-    return function(children3) {
-      return append38(["T.elem " + elementType(node.elementType), "  " + attrsArray(node.attributes)])(childrenCode(children3));
-    };
-  };
-  var childrenCode = function(children3) {
-    var v2 = length3(children3);
-    if (v2 === 1) {
-      var v1 = head2(children3);
-      if (v1 instanceof Just) {
-        return append38(["  `T.withChild`"])(indentLines(4)(wrapInParens(nodeToCode(v1.value0))));
-      }
-      ;
-      if (v1 instanceof Nothing) {
-        return [];
-      }
-      ;
-      throw new Error("Failed pattern match at TreeBuilder.Stringify (line 120, column 10 - line 124, column 20): " + [v1.constructor.name]);
-    }
-    ;
-    return append38(["  `T.withChildren`"])(["    [ " + (joinWith("\n    , ")(map102((function() {
-      var $51 = joinWith(" ");
-      return function($52) {
-        return $51(nodeToCode($52));
-      };
-    })())(children3)) + "\n    ]")]);
-  };
-  var treeToCode = function(tree2) {
-    return joinWith("\n")(append38(["-- Generated Tree API code", "", "import PSD3v2.VizTree.Tree as T", "import PSD3v2.Selection.Types (ElementType(..))", "import PSD3v2.Attribute.Types (" + (attributeImports(tree2) + ")"), "", "tree :: T.Tree Datum", "tree ="])(indentLines(2)(nodeToCode(tree2))));
   };
 
   // output/TreeBuilder.App/index.js

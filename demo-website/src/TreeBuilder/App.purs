@@ -25,7 +25,7 @@ import Halogen.HTML.Properties as HP
 import PSD3.Shared.SiteNav as SiteNav
 import TreeBuilder.Types (BuilderTree(..), BuilderNode, NodeId, AttributeChoice(..), AttributeBinding, SampleDatum, ElementOption, availableElements, attributeOptionsFor, emptyNode, sudokuSampleData)
 import TreeBuilder.Interpreter (renderPreview)
-import TreeBuilder.Stringify (treeToCode)
+import PSD3v2.Interpreter.SemiQuine (treeToCode)
 
 -- =============================================================================
 -- Component Types
