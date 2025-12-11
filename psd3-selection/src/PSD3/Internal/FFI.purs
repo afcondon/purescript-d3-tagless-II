@@ -117,16 +117,6 @@ module PSD3.Internal.FFI
   , applyFixForceInSimulationX_
   , applyFixForceInSimulationY_
   , setAsNullForceInSimulation_
-  -- Hierarchy FFI
-  , RecursiveD3TreeNode_
-  , cloneTreeJson_
-  , linkHorizontal_
-  , linkHorizontal2_
-  , linkVertical_
-  , linkClusterHorizontal_
-  , linkClusterVertical_
-  , linkRadial_
-  , autoBox_
   -- Chord FFI
   , ChordLayout_
   , ChordGenerator_
@@ -143,17 +133,6 @@ module PSD3.Internal.FFI
   , setRibbonRadius_
   , setArcInnerRadius_
   , setArcOuterRadius_
-  -- Details Panel FFI
-  , showDetailsPanel_
-  , hideDetailsPanel_
-  , setDetailsModuleName_
-  , populateDetailsList_
-  , showModuleLabels_
-  , hideModuleLabels_
-  , switchToSpotlightForces_
-  , switchToCompactForces_
-  , resetNodeFilter_
-  , restoreAllNodes_
   ) where
 
 -- brings together ALL of the wrapped D3js functions and FFI / native types
@@ -161,7 +140,6 @@ module PSD3.Internal.FFI
 
 import PSD3.Data.Node
 
-import PSD3.Data.Tree (TreeJson_)
 import PSD3.Internal.Types (D3Selection_, D3Simulation_, Datum_, Index_, PointXY, Selector)
 import Data.Nullable (Nullable)
 import Effect (Effect)
@@ -372,24 +350,6 @@ foreign import applyFixForceInSimulationXY_ :: D3Simulation_ -> String -> (Datum
 foreign import applyFixForceInSimulationX_  :: D3Simulation_ -> String -> (Datum_ -> Index_ -> { x :: Number})  -> (Datum_ -> Boolean) -> D3Simulation_ 
 foreign import applyFixForceInSimulationY_  :: D3Simulation_ -> String -> (Datum_ -> Index_ -> { y :: Number})  -> (Datum_ -> Boolean) -> D3Simulation_ 
 foreign import setAsNullForceInSimulation_  :: D3Simulation_ -> String -> D3Simulation_
--- | *********************************************************************************************************************
--- | ***************************   FFI signatures for D3js Hierarchy module  *********************************************
--- | *********************************************************************************************************************
-
--- Opaque type for D3 hierarchy nodes
-foreign import data RecursiveD3TreeNode_ :: Type
-
--- Tree JSON cloning for creating copies of tree data
-foreign import cloneTreeJson_           :: TreeJson_ -> TreeJson_
-
--- Link generators for rendering connections
-foreign import linkHorizontal_        :: (Datum_ -> String)
-foreign import linkHorizontal2_       :: (Datum_ -> String)
-foreign import linkVertical_          :: (Datum_ -> String)
-foreign import linkClusterHorizontal_ :: Number -> (Datum_ -> String)
-foreign import linkClusterVertical_   :: Number -> (Datum_ -> String)
-foreign import linkRadial_            :: (Datum_ -> Number) -> (Datum_ -> Number) -> (Datum_ -> String)
-foreign import autoBox_               :: Datum_ -> Array Number
 
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for D3js Chord module          *********************************************
@@ -410,17 +370,3 @@ foreign import arcPath_                :: ArcGenerator_ -> Datum_ -> String
 foreign import setRibbonRadius_        :: RibbonGenerator_ -> Number -> RibbonGenerator_
 foreign import setArcInnerRadius_      :: ArcGenerator_ -> Number -> ArcGenerator_
 foreign import setArcOuterRadius_      :: ArcGenerator_ -> Number -> ArcGenerator_
-
--- | *********************************************************************************************************************
--- | ***************************   FFI signatures for Details Panel manipulation  *************************************
--- | *********************************************************************************************************************
-foreign import showDetailsPanel_ :: forall d. D3Selection_ d -> Effect Unit
-foreign import hideDetailsPanel_ :: forall d. D3Selection_ d -> Effect Unit
-foreign import setDetailsModuleName_ :: forall d. D3Selection_ d -> String -> Effect Unit
-foreign import populateDetailsList_ :: forall d. D3Selection_ d -> Array String -> Effect Unit
-foreign import showModuleLabels_ :: forall d. D3Selection_ d -> Effect Unit
-foreign import hideModuleLabels_ :: forall d. D3Selection_ d -> Effect Unit
-foreign import switchToSpotlightForces_ :: D3Simulation_ -> Effect Unit
-foreign import switchToCompactForces_ :: D3Simulation_ -> Effect Unit
-foreign import resetNodeFilter_ :: D3Simulation_ -> Effect Unit
-foreign import restoreAllNodes_ :: forall d1 d2 nodeData linkData key. D3Simulation_ -> D3Selection_ d1 -> D3Selection_ d2 -> Array nodeData -> Array linkData -> (Boolean -> Int -> Number) -> (nodeData -> key) -> Effect Unit
