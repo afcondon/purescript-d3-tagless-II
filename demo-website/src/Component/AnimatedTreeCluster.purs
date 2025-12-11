@@ -2,7 +2,6 @@ module Component.AnimatedTreeCluster where
 
 import Prelude
 
-import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
 import Effect.Aff (Milliseconds(..), delay)
@@ -12,8 +11,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Affjax.Web as AJAX
-import Affjax.ResponseFormat as ResponseFormat
+import PSD3.Shared.DataLoader (simpleLoadJSON)
 import PSD3.Shared.FlareData (HierData)
 import Unsafe.Coerce (unsafeCoerce)
 import D3.Viz.AnimatedTreeClusterv2 as AnimatedTree
@@ -78,30 +76,25 @@ handleAction = case _ of
     -- Small delay to ensure DOM is ready
     H.liftAff $ delay (Milliseconds 100.0)
 
-    -- Load Flare data using AJAX.get to get JSON directly
-    flareResult <- H.liftAff $ AJAX.get ResponseFormat.json "./data/flare-2.json"
-    case flareResult of
-      Left err -> log $ "Failed to load Flare data: " <> AJAX.printError err
-      Right response -> do
-        -- Extract JSON body (unsafeCoerce since we trust flare-2.json format)
-        let
-          flareData :: HierData
-          flareData = unsafeCoerce response.body
+    -- Load Flare data using DataLoader
+    flareJson <- H.liftAff $ simpleLoadJSON "./data/flare-2.json"
+    let flareData :: HierData
+        flareData = unsafeCoerce flareJson
 
-        -- Initialize visualization (v2 returns Effect directly)
-        vizState <- liftEffect $ AnimatedTree.draw flareData "#animated-tree-cluster"
-        H.modify_ _ { vizState = Just vizState }
+    -- Initialize visualization (v2 returns Effect directly)
+    vizState <- liftEffect $ AnimatedTree.draw flareData "#animated-tree-cluster"
+    H.modify_ _ { vizState = Just vizState }
 
-        -- Perform initial layout with Tree
-        liftEffect $ AnimatedTree.animationStep
-          vizState.dataTree
-          vizState.linksGroup
-          vizState.nodesGroup
-          vizState.chartWidth
-          vizState.chartHeight
-          TreeLayout
+    -- Perform initial layout with Tree
+    liftEffect $ AnimatedTree.animationStep
+      vizState.dataTree
+      vizState.linksGroup
+      vizState.nodesGroup
+      vizState.chartWidth
+      vizState.chartHeight
+      TreeLayout
 
-        log "AnimatedTreeCluster: Initialized"
+    log "AnimatedTreeCluster: Initialized"
 
   ToggleLayout -> do
     state <- H.get

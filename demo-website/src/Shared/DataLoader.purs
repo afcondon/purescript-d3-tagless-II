@@ -199,3 +199,68 @@ simpleLoadJSON path =
 simpleLoadCSV :: String -> Aff (Array Foreign)
 simpleLoadCSV path =
   loadCSVWithFallback defaultConfig path
+
+-- ============================================================================
+-- Raw Text Loading (for CSV files that need d3 parsing, etc.)
+-- ============================================================================
+
+-- | Load raw text from local bundled file
+loadLocalText :: String -> Aff (Either LoadError String)
+loadLocalText path = do
+  result <- AJAX.get ResponseFormat.string path
+  pure $ case result of
+    Left err ->
+      Left $ NetworkError $ "Failed to load local text from " <> path <> ": " <> AJAX.printError err
+    Right response ->
+      Right response.body
+
+-- | Load raw text from remote server
+loadRemoteText :: String -> String -> Aff (Either LoadError String)
+loadRemoteText baseUrl path = do
+  let fullUrl = baseUrl <> "/" <> path
+  result <- AJAX.get ResponseFormat.string fullUrl
+  pure $ case result of
+    Left err ->
+      Left $ NetworkError $ "Failed to load remote text from " <> fullUrl <> ": " <> AJAX.printError err
+    Right response ->
+      Right response.body
+
+-- | Load raw text with configurable strategy
+loadText :: LoadConfig -> String -> Aff (Either LoadError String)
+loadText config path = case config.strategy of
+  LocalOnly ->
+    loadLocalText path
+
+  RemoteOnly -> case config.baseUrl of
+    Nothing -> pure $ Left $ ConfigError "RemoteOnly strategy requires baseUrl"
+    Just url -> loadRemoteText url path
+
+  LocalFirst -> case config.baseUrl of
+    Nothing -> loadLocalText path
+    Just url -> do
+      localResult <- loadLocalText path
+      case localResult of
+        Right text -> pure $ Right text
+        Left _ -> loadRemoteText url path
+
+  RemoteFirst -> case config.baseUrl of
+    Nothing -> loadLocalText path
+    Just url -> do
+      remoteResult <- loadRemoteText url path
+      case remoteResult of
+        Right text -> pure $ Right text
+        Left _ -> loadLocalText path
+
+-- | Load raw text with empty string fallback on error
+loadTextWithFallback :: LoadConfig -> String -> Aff String
+loadTextWithFallback config path = do
+  result <- loadText config path
+  pure $ case result of
+    Right text -> text
+    Left _ -> ""
+
+-- | Simple local text loader
+-- | Returns empty string on error
+simpleLoadText :: String -> Aff String
+simpleLoadText path =
+  loadTextWithFallback defaultConfig path

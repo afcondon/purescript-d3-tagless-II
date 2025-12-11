@@ -7,8 +7,6 @@ module D3.Viz.SPLOM.Data
 
 import Prelude
 
-import Affjax.ResponseFormat as ResponseFormat
-import Affjax.Web as AJAX
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Int as Int
@@ -16,15 +14,16 @@ import Data.Maybe (Maybe(..))
 import Data.Number as Number
 import Data.String (split, trim, Pattern(..))
 import Effect.Aff (Aff)
+import PSD3.Shared.DataLoader (loadLocalText)
 import D3.Viz.SPLOM.Types (Penguin)
 
 -- | Load and parse penguins from CSV
 loadPenguins :: Aff (Either String (Array Penguin))
 loadPenguins = do
-  result <- AJAX.get ResponseFormat.string "./data/penguins.csv"
+  result <- loadLocalText "./data/penguins.csv"
   pure $ case result of
-    Left err -> Left (AJAX.printError err)
-    Right response -> parseCSV response.body
+    Left err -> Left (show err)
+    Right text -> parseCSV text
 
 -- | Parse CSV text into penguin records
 parseCSV :: String -> Either String (Array Penguin)

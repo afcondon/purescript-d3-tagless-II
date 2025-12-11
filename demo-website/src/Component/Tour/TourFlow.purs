@@ -11,9 +11,7 @@ import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
 import Effect.Class (liftEffect)
 import Effect.Aff (Milliseconds(..), delay)
-import Affjax.Web as AJAX
-import Affjax.ResponseFormat as ResponseFormat
-import Data.Either (Either(..))
+import PSD3.Shared.DataLoader (simpleLoadText)
 import D3.Viz.TreeAPI.SankeyDiagram as SankeyDiagram
 import D3.Viz.TreeAPI.ChordDiagram as ChordDiagram
 
@@ -41,16 +39,11 @@ handleAction = case _ of
     H.liftAff $ delay (Milliseconds 100.0)
 
     -- Load and render Sankey
-    sankeyResult <- H.liftAff $ AJAX.get ResponseFormat.string "./data/energy.csv"
-    case sankeyResult of
-      Left err -> pure unit  -- Silently fail for now
-      Right response -> do
-        liftEffect $ SankeyDiagram.startSankey response.body "#sankey-container"
+    csvText <- H.liftAff $ simpleLoadText "./data/energy.csv"
+    liftEffect $ SankeyDiagram.startSankey csvText "#sankey-container"
 
     -- Render Chord diagram (Baton Rouge traffic data)
     liftEffect $ ChordDiagram.startChord "#chord-container"
-
-    pure unit
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render _ =

@@ -13,9 +13,7 @@ import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
 import Effect.Class (liftEffect)
 import Effect.Aff (Milliseconds(..), delay)
-import Affjax.Web as AJAX
-import Affjax.ResponseFormat as ResponseFormat
-import Data.Either (Either(..))
+import PSD3.Shared.DataLoader (simpleLoadJSON)
 import Unsafe.Coerce (unsafeCoerce)
 import D3.Viz.TreeAPI.ThreeLittleCirclesTransition as ThreeLittleCirclesTransition
 import Effect.Ref as Ref
@@ -92,29 +90,21 @@ handleAction = case _ of
     H.modify_ _ { gupFiber = Just forkId }
 
     -- Render Section 3: Animated Tree (load flare data and start loop)
-    flareResult <- H.liftAff $ AJAX.get ResponseFormat.json "./data/flare-2.json"
-    case flareResult of
-      Left err -> pure unit  -- Silently fail for now
-      Right response -> do
-        let flareData = unsafeCoerce response.body
-        liftEffect $ AnimatedTreeLoop.startAnimatedTreeClusterLoop flareData "#animated-tree-container"
+    flareJson <- H.liftAff $ simpleLoadJSON "./data/flare-2.json"
+    let flareData = unsafeCoerce flareJson
+    liftEffect $ AnimatedTreeLoop.startAnimatedTreeClusterLoop flareData "#animated-tree-container"
 
     -- Render Section 5: Les Misérables Force-Directed Graph (V3 architecture)
-    lesMisResult <- H.liftAff $ AJAX.get ResponseFormat.json "./data/miserables.json"
-    case lesMisResult of
-      Left err -> pure unit  -- Silently fail for now
-      Right response -> do
-        let rawModel :: LesMisModel.LesMisRawModel
-            rawModel = unsafeCoerce response.body
-            model = LesMisModel.processRawModel rawModel
-        cleanup <- liftEffect $ LesMisDraw.startLesMis model "#lesmis-container"
-        H.modify_ _ { lesMisCleanup = Just cleanup }
+    lesMisJson <- H.liftAff $ simpleLoadJSON "./data/miserables.json"
+    let rawModel :: LesMisModel.LesMisRawModel
+        rawModel = unsafeCoerce lesMisJson
+        model = LesMisModel.processRawModel rawModel
+    cleanup <- liftEffect $ LesMisDraw.startLesMis model "#lesmis-container"
+    H.modify_ _ { lesMisCleanup = Just cleanup }
 
-        -- Render Section 6: Les Misérables with GUP (reuse same model)
-        gupState <- liftEffect $ GUPDemo.initGUPDemo model "#lesmis-gup-container"
-        H.modify_ _ { lesMisGUPState = Just gupState }
-
-    pure unit
+    -- Render Section 6: Les Misérables with GUP (reuse same model)
+    gupState <- liftEffect $ GUPDemo.initGUPDemo model "#lesmis-gup-container"
+    H.modify_ _ { lesMisGUPState = Just gupState }
 
   Finalize -> do
     state <- H.get
