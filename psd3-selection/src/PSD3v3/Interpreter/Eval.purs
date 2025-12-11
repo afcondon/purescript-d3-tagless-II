@@ -20,6 +20,8 @@ import Unsafe.Coerce (unsafeCoerce)
 import PSD3v3.Expr (class NumExpr, class StringExpr, class BoolExpr, class CompareExpr)
 import PSD3v3.Units (class UnitExpr, class UnitArith)
 import PSD3v3.Datum (class DatumExpr)
+import PSD3v3.Path (class PathExpr)
+import PSD3v3.Path.Generators as Gen
 
 -- =============================================================================
 -- Simple Eval (no datum access)
@@ -78,6 +80,26 @@ instance unitArithEval :: UnitArith Eval where
 unsafeToNum :: forall a. a -> Number
 unsafeToNum = unsafeCoerce
 
+-- | Path expressions - compute actual SVG path strings
+instance pathExprEval :: PathExpr Eval where
+  linePath (Eval x1) (Eval y1) (Eval x2) (Eval y2) =
+    Eval (Gen.genLinePath x1 y1 x2 y2)
+  polylinePath (Eval points) =
+    Eval (Gen.genPolylinePath points)
+  linkHorizontal (Eval x1) (Eval y1) (Eval x2) (Eval y2) =
+    Eval (Gen.genLinkHorizontal x1 y1 x2 y2)
+  linkVertical (Eval x1) (Eval y1) (Eval x2) (Eval y2) =
+    Eval (Gen.genLinkVertical x1 y1 x2 y2)
+  linkRadial (Eval a1) (Eval r1) (Eval a2) (Eval r2) =
+    Eval (Gen.genLinkRadial a1 r1 a2 r2)
+  sankeyLink (Eval sx) (Eval sy0) (Eval sy1) (Eval tx) (Eval ty0) (Eval ty1) =
+    Eval (Gen.genSankeyLink sx sy0 sy1 tx ty0 ty1)
+  ribbon (Eval sa0) (Eval sa1) (Eval ta0) (Eval ta1) (Eval ir) (Eval or) =
+    Eval (Gen.genRibbon sa0 sa1 ta0 ta1 ir or)
+  arc (Eval start) (Eval end) (Eval inner) (Eval outer) =
+    Eval (Gen.genArc start end inner outer)
+  closePath (Eval p) = Eval (p <> " Z")
+
 -- =============================================================================
 -- EvalD (with datum access)
 -- =============================================================================
@@ -131,6 +153,25 @@ instance unitArithEvalD :: UnitArith (EvalD datum) where
     unsafeCoerce (unsafeToNum (a d i) - unsafeToNum (b d i)))
   scaleU (EvalD a) n = EvalD (\d i ->
     unsafeCoerce (unsafeToNum (a d i) * n))
+
+instance pathExprEvalD :: PathExpr (EvalD datum) where
+  linePath (EvalD x1) (EvalD y1) (EvalD x2) (EvalD y2) = EvalD (\d i ->
+    Gen.genLinePath (x1 d i) (y1 d i) (x2 d i) (y2 d i))
+  polylinePath (EvalD points) = EvalD (\d i ->
+    Gen.genPolylinePath (points d i))
+  linkHorizontal (EvalD x1) (EvalD y1) (EvalD x2) (EvalD y2) = EvalD (\d i ->
+    Gen.genLinkHorizontal (x1 d i) (y1 d i) (x2 d i) (y2 d i))
+  linkVertical (EvalD x1) (EvalD y1) (EvalD x2) (EvalD y2) = EvalD (\d i ->
+    Gen.genLinkVertical (x1 d i) (y1 d i) (x2 d i) (y2 d i))
+  linkRadial (EvalD a1) (EvalD r1) (EvalD a2) (EvalD r2) = EvalD (\d i ->
+    Gen.genLinkRadial (a1 d i) (r1 d i) (a2 d i) (r2 d i))
+  sankeyLink (EvalD sx) (EvalD sy0) (EvalD sy1) (EvalD tx) (EvalD ty0) (EvalD ty1) = EvalD (\d i ->
+    Gen.genSankeyLink (sx d i) (sy0 d i) (sy1 d i) (tx d i) (ty0 d i) (ty1 d i))
+  ribbon (EvalD sa0) (EvalD sa1) (EvalD ta0) (EvalD ta1) (EvalD ir) (EvalD or) = EvalD (\d i ->
+    Gen.genRibbon (sa0 d i) (sa1 d i) (ta0 d i) (ta1 d i) (ir d i) (or d i))
+  arc (EvalD start) (EvalD end) (EvalD inner) (EvalD outer) = EvalD (\d i ->
+    Gen.genArc (start d i) (end d i) (inner d i) (outer d i))
+  closePath (EvalD p) = EvalD (\d i -> p d i <> " Z")
 
 -- | Datum field access - looks up field from datum at runtime
 -- | The `datumRow` is a Row kind, and we work with `Record datumRow`

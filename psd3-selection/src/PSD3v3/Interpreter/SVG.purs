@@ -20,6 +20,8 @@ import Unsafe.Coerce (unsafeCoerce)
 import PSD3v3.Expr (class NumExpr, class StringExpr, class BoolExpr, class CompareExpr)
 import PSD3v3.Units (class UnitExpr, class UnitArith)
 import PSD3v3.Datum (class DatumExpr)
+import PSD3v3.Path (class PathExpr)
+import PSD3v3.Path.Generators as Gen
 
 -- =============================================================================
 -- Simple SVG (no datum - for static visualizations)
@@ -57,6 +59,26 @@ instance compareExprSVG :: CompareExpr SVG where
   gt (SVG a) (SVG b) = SVG (show (unsafeParseNum a > unsafeParseNum b))
   gte (SVG a) (SVG b) = SVG (show (unsafeParseNum a >= unsafeParseNum b))
   eq (SVG a) (SVG b) = SVG (show (unsafeParseNum a == unsafeParseNum b))
+
+-- | Path expressions for SVG - compute actual path strings
+instance pathExprSVG :: PathExpr SVG where
+  linePath (SVG x1) (SVG y1) (SVG x2) (SVG y2) =
+    SVG (Gen.genLinePath (unsafeParseNum x1) (unsafeParseNum y1) (unsafeParseNum x2) (unsafeParseNum y2))
+  polylinePath (SVG _) =
+    SVG "" -- Would need to parse array from string - not practical for SVG interpreter
+  linkHorizontal (SVG x1) (SVG y1) (SVG x2) (SVG y2) =
+    SVG (Gen.genLinkHorizontal (unsafeParseNum x1) (unsafeParseNum y1) (unsafeParseNum x2) (unsafeParseNum y2))
+  linkVertical (SVG x1) (SVG y1) (SVG x2) (SVG y2) =
+    SVG (Gen.genLinkVertical (unsafeParseNum x1) (unsafeParseNum y1) (unsafeParseNum x2) (unsafeParseNum y2))
+  linkRadial (SVG a1) (SVG r1) (SVG a2) (SVG r2) =
+    SVG (Gen.genLinkRadial (unsafeParseNum a1) (unsafeParseNum r1) (unsafeParseNum a2) (unsafeParseNum r2))
+  sankeyLink (SVG sx) (SVG sy0) (SVG sy1) (SVG tx) (SVG ty0) (SVG ty1) =
+    SVG (Gen.genSankeyLink (unsafeParseNum sx) (unsafeParseNum sy0) (unsafeParseNum sy1) (unsafeParseNum tx) (unsafeParseNum ty0) (unsafeParseNum ty1))
+  ribbon (SVG sa0) (SVG sa1) (SVG ta0) (SVG ta1) (SVG ir) (SVG or) =
+    SVG (Gen.genRibbon (unsafeParseNum sa0) (unsafeParseNum sa1) (unsafeParseNum ta0) (unsafeParseNum ta1) (unsafeParseNum ir) (unsafeParseNum or))
+  arc (SVG start) (SVG end) (SVG inner) (SVG outer) =
+    SVG (Gen.genArc (unsafeParseNum start) (unsafeParseNum end) (unsafeParseNum inner) (unsafeParseNum outer))
+  closePath (SVG p) = SVG (p <> " Z")
 
 -- | Units render with their suffix for CSS, or just number for SVG
 -- | This is where the magic happens - same expression, different output format!
@@ -137,6 +159,24 @@ instance unitArithSVGD :: UnitArith (SVGD datum) where
   addU (SVGD a) (SVGD b) = SVGD (\d i -> "calc(" <> a d i <> " + " <> b d i <> ")")
   subU (SVGD a) (SVGD b) = SVGD (\d i -> "calc(" <> a d i <> " - " <> b d i <> ")")
   scaleU (SVGD a) n = SVGD (\d i -> "calc(" <> a d i <> " * " <> show n <> ")")
+
+instance pathExprSVGD :: PathExpr (SVGD datum) where
+  linePath (SVGD x1) (SVGD y1) (SVGD x2) (SVGD y2) = SVGD (\d i ->
+    Gen.genLinePath (unsafeParseNum (x1 d i)) (unsafeParseNum (y1 d i)) (unsafeParseNum (x2 d i)) (unsafeParseNum (y2 d i)))
+  polylinePath (SVGD _) = SVGD (\_ _ -> "") -- Not practical
+  linkHorizontal (SVGD x1) (SVGD y1) (SVGD x2) (SVGD y2) = SVGD (\d i ->
+    Gen.genLinkHorizontal (unsafeParseNum (x1 d i)) (unsafeParseNum (y1 d i)) (unsafeParseNum (x2 d i)) (unsafeParseNum (y2 d i)))
+  linkVertical (SVGD x1) (SVGD y1) (SVGD x2) (SVGD y2) = SVGD (\d i ->
+    Gen.genLinkVertical (unsafeParseNum (x1 d i)) (unsafeParseNum (y1 d i)) (unsafeParseNum (x2 d i)) (unsafeParseNum (y2 d i)))
+  linkRadial (SVGD a1) (SVGD r1) (SVGD a2) (SVGD r2) = SVGD (\d i ->
+    Gen.genLinkRadial (unsafeParseNum (a1 d i)) (unsafeParseNum (r1 d i)) (unsafeParseNum (a2 d i)) (unsafeParseNum (r2 d i)))
+  sankeyLink (SVGD sx) (SVGD sy0) (SVGD sy1) (SVGD tx) (SVGD ty0) (SVGD ty1) = SVGD (\d i ->
+    Gen.genSankeyLink (unsafeParseNum (sx d i)) (unsafeParseNum (sy0 d i)) (unsafeParseNum (sy1 d i)) (unsafeParseNum (tx d i)) (unsafeParseNum (ty0 d i)) (unsafeParseNum (ty1 d i)))
+  ribbon (SVGD sa0) (SVGD sa1) (SVGD ta0) (SVGD ta1) (SVGD ir) (SVGD or) = SVGD (\d i ->
+    Gen.genRibbon (unsafeParseNum (sa0 d i)) (unsafeParseNum (sa1 d i)) (unsafeParseNum (ta0 d i)) (unsafeParseNum (ta1 d i)) (unsafeParseNum (ir d i)) (unsafeParseNum (or d i)))
+  arc (SVGD start) (SVGD end) (SVGD inner) (SVGD outer) = SVGD (\d i ->
+    Gen.genArc (unsafeParseNum (start d i)) (unsafeParseNum (end d i)) (unsafeParseNum (inner d i)) (unsafeParseNum (outer d i)))
+  closePath (SVGD p) = SVGD (\d i -> p d i <> " Z")
 
 -- | Datum field access
 instance datumExprSVGD :: DatumExpr (SVGD (Record datumRow)) datumRow where

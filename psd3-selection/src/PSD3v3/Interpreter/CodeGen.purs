@@ -16,6 +16,7 @@ import Type.Proxy (Proxy)
 import PSD3v3.Expr (class NumExpr, class StringExpr, class BoolExpr, class CompareExpr)
 import PSD3v3.Units (class UnitExpr, class UnitArith)
 import PSD3v3.Datum (class DatumExpr)
+import PSD3v3.Path (class PathExpr)
 
 -- | CodeGen produces PureScript source code as a String
 -- | The phantom type tracks what type the generated code produces
@@ -100,3 +101,35 @@ instance datumExprCodeGen :: DatumExpr CodeGen datumRow where
   field proxy = CodeGen ("d." <> reflectSymbol proxy)
 
   index = CodeGen "i"
+
+-- =============================================================================
+-- PathExpr - generates path function calls
+-- =============================================================================
+
+instance pathExprCodeGen :: PathExpr CodeGen where
+  linePath (CodeGen x1) (CodeGen y1) (CodeGen x2) (CodeGen y2) =
+    CodeGen ("(linePath " <> x1 <> " " <> y1 <> " " <> x2 <> " " <> y2 <> ")")
+
+  polylinePath (CodeGen points) =
+    CodeGen ("(polylinePath " <> points <> ")")
+
+  linkHorizontal (CodeGen x1) (CodeGen y1) (CodeGen x2) (CodeGen y2) =
+    CodeGen ("(linkHorizontal " <> x1 <> " " <> y1 <> " " <> x2 <> " " <> y2 <> ")")
+
+  linkVertical (CodeGen x1) (CodeGen y1) (CodeGen x2) (CodeGen y2) =
+    CodeGen ("(linkVertical " <> x1 <> " " <> y1 <> " " <> x2 <> " " <> y2 <> ")")
+
+  linkRadial (CodeGen a1) (CodeGen r1) (CodeGen a2) (CodeGen r2) =
+    CodeGen ("(linkRadial " <> a1 <> " " <> r1 <> " " <> a2 <> " " <> r2 <> ")")
+
+  sankeyLink (CodeGen sx) (CodeGen sy0) (CodeGen sy1) (CodeGen tx) (CodeGen ty0) (CodeGen ty1) =
+    CodeGen ("(sankeyLink " <> sx <> " " <> sy0 <> " " <> sy1 <> " " <> tx <> " " <> ty0 <> " " <> ty1 <> ")")
+
+  ribbon (CodeGen sa0) (CodeGen sa1) (CodeGen ta0) (CodeGen ta1) (CodeGen ir) (CodeGen or) =
+    CodeGen ("(ribbon " <> sa0 <> " " <> sa1 <> " " <> ta0 <> " " <> ta1 <> " " <> ir <> " " <> or <> ")")
+
+  arc (CodeGen start) (CodeGen end) (CodeGen inner) (CodeGen outer) =
+    CodeGen ("(arc " <> start <> " " <> end <> " " <> inner <> " " <> outer <> ")")
+
+  closePath (CodeGen p) =
+    CodeGen ("(closePath " <> p <> ")")
