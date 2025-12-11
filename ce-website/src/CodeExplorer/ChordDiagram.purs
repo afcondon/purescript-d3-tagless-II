@@ -2,7 +2,7 @@
 -- |
 -- | Shows import/dependency relationships between a central module
 -- | and its neighbors as a circular chord diagram.
-module Engine.ChordDiagram
+module CodeExplorer.ChordDiagram
   ( renderNeighborhoodChord
   , clearChordDiagram
   ) where
@@ -26,11 +26,11 @@ import Unsafe.Coerce (unsafeCoerce)
 -- | FFI imports for D3 selection operations
 foreign import clearChordSvg_ :: Effect Unit
 foreign import renderChordDiagram_
-  :: Number  -- width
-  -> Number  -- height
-  -> Array ChordArc  -- arcs
-  -> Array ChordRibbon  -- ribbons
-  -> Array ChordLabel  -- labels
+  :: Number -- width
+  -> Number -- height
+  -> Array ChordArc -- arcs
+  -> Array ChordRibbon -- ribbons
+  -> Array ChordLabel -- labels
   -> Effect Unit
 
 -- | Data for a chord arc (outer segment)
@@ -63,13 +63,13 @@ type ChordLabel =
 
 -- | Color palette for modules - distinguishing central vs neighbors
 centralModuleColor :: String
-centralModuleColor = "#4299e1"  -- Blue for central module
+centralModuleColor = "#4299e1" -- Blue for central module
 
 neighborImportColor :: String
-neighborImportColor = "#48bb78"  -- Green for modules we import
+neighborImportColor = "#48bb78" -- Green for modules we import
 
 neighborDependentColor :: String
-neighborDependentColor = "#ed8936"  -- Orange for modules that depend on us
+neighborDependentColor = "#ed8936" -- Orange for modules that depend on us
 
 -- | Get color for a module based on its relationship to the central module
 -- | importNames and dependentNames are module names resolved from IDs
@@ -78,7 +78,7 @@ getModuleColor moduleName centralName importNames dependentNames
   | moduleName == centralName = centralModuleColor
   | Array.elem moduleName importNames = neighborImportColor
   | Array.elem moduleName dependentNames = neighborDependentColor
-  | otherwise = "#a0aec0"  -- Gray fallback
+  | otherwise = "#a0aec0" -- Gray fallback
 
 -- | Accessor helpers for chord data
 getSourceIndex :: Datum_ -> Int
@@ -100,7 +100,7 @@ buildNeighborhoodMatrix :: String -> Array SimNode -> { matrix :: Array (Array N
 buildNeighborhoodMatrix centralName nodes =
   let
     -- Get all unique module names, putting central module first
-    allNames = nub $ [centralName] <> map _.name nodes
+    allNames = nub $ [ centralName ] <> map _.name nodes
 
     -- Build a map from name to matrix index
     nameToIdx = Map.fromFoldable $ Array.mapWithIndex (\i n -> Tuple n i) allNames
@@ -153,8 +153,10 @@ buildNeighborhoodMatrix centralName nodes =
     setMatrixValue m row col val =
       case m !! row of
         Just rowArr ->
-          let newRow = fromMaybe rowArr $ Array.updateAt col val rowArr
-          in fromMaybe m $ Array.updateAt row newRow m
+          let
+            newRow = fromMaybe rowArr $ Array.updateAt col val rowArr
+          in
+            fromMaybe m $ Array.updateAt row newRow m
         Nothing -> m
 
     -- Start with zero matrix and add all connections
@@ -196,7 +198,7 @@ renderNeighborhoodChord centralName nodes containerWidth containerHeight = do
     -- Dimensions - use container size
     let w = containerWidth
     let h = containerHeight
-    let outerR = (min w h) / 2.0 - 60.0  -- Leave room for labels
+    let outerR = (min w h) / 2.0 - 60.0 -- Leave room for labels
     let innerR = outerR - 12.0
 
     -- Create generators
@@ -204,57 +206,69 @@ renderNeighborhoodChord centralName nodes containerWidth containerHeight = do
     let arcGen = setArcOuterRadius_ (setArcInnerRadius_ (arcGenerator_ unit) innerR) outerR
 
     -- Build arc data
-    let arcs = map (\groupDatum ->
-          let
-            idx = getGroupIndex groupDatum
-            moduleName = fromMaybe "" (names !! idx)
-            color = getModuleColor moduleName centralName imports dependents
-          in
-            { path: arcPath_ arcGen groupDatum
-            , color
-            , moduleName
-            , index: idx
-            }) groups
+    let
+      arcs = map
+        ( \groupDatum ->
+            let
+              idx = getGroupIndex groupDatum
+              moduleName = fromMaybe "" (names !! idx)
+              color = getModuleColor moduleName centralName imports dependents
+            in
+              { path: arcPath_ arcGen groupDatum
+              , color
+              , moduleName
+              , index: idx
+              }
+        )
+        groups
 
     -- Build ribbon data - color by source module
-    let ribbons = map (\chordDatum ->
-          let
-            srcIdx = getSourceIndex chordDatum
-            tgtIdx = getTargetIndex chordDatum
-            srcName = fromMaybe "" (names !! srcIdx)
-            tgtName = fromMaybe "" (names !! tgtIdx)
-            color = getModuleColor srcName centralName imports dependents
-          in
-            { path: ribbonPath_ ribbonGen chordDatum
-            , color
-            , sourceModule: srcName
-            , targetModule: tgtName
-            , sourceIndex: srcIdx
-            , targetIndex: tgtIdx
-            }) chords
+    let
+      ribbons = map
+        ( \chordDatum ->
+            let
+              srcIdx = getSourceIndex chordDatum
+              tgtIdx = getTargetIndex chordDatum
+              srcName = fromMaybe "" (names !! srcIdx)
+              tgtName = fromMaybe "" (names !! tgtIdx)
+              color = getModuleColor srcName centralName imports dependents
+            in
+              { path: ribbonPath_ ribbonGen chordDatum
+              , color
+              , sourceModule: srcName
+              , targetModule: tgtName
+              , sourceIndex: srcIdx
+              , targetIndex: tgtIdx
+              }
+        )
+        chords
 
     -- Build label data
-    let labels = map (\groupDatum ->
-          let
-            idx = getGroupIndex groupDatum
-            moduleName = fromMaybe "" (names !! idx)
-            angles = getGroupAngles groupDatum
-            angle = (angles.startAngle + angles.endAngle) / 2.0
-            labelR = outerR + 10.0
-            labelX = labelR * cos (angle - pi / 2.0)
-            labelY = labelR * sin (angle - pi / 2.0)
-            -- Text anchor based on position
-            anchor = if angle > pi then "end" else "start"
-            -- Rotation for readability
-            rotation = (angle * 180.0 / pi) - 90.0
-          in
-            { text: shortenModuleName moduleName
-            , x: labelX
-            , y: labelY
-            , anchor
-            , rotation
-            , index: idx
-            }) groups
+    let
+      labels = map
+        ( \groupDatum ->
+            let
+              idx = getGroupIndex groupDatum
+              moduleName = fromMaybe "" (names !! idx)
+              angles = getGroupAngles groupDatum
+              angle = (angles.startAngle + angles.endAngle) / 2.0
+              labelR = outerR + 10.0
+              labelX = labelR * cos (angle - pi / 2.0)
+              labelY = labelR * sin (angle - pi / 2.0)
+              -- Text anchor based on position
+              anchor = if angle > pi then "end" else "start"
+              -- Rotation for readability
+              rotation = (angle * 180.0 / pi) - 90.0
+            in
+              { text: shortenModuleName moduleName
+              , x: labelX
+              , y: labelY
+              , anchor
+              , rotation
+              , index: idx
+              }
+        )
+        groups
 
     -- Render via FFI
     renderChordDiagram_ w h arcs ribbons labels

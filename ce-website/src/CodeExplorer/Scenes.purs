@@ -6,7 +6,7 @@
 -- | 1. initRules: Applied before transition starts
 -- | 2. layout: Where DumbEngine moves nodes
 -- | 3. finalRules: Applied after transition completes
-module Engine.Scenes
+module CodeExplorer.Scenes
   ( -- Form scenes (transition to positions, then Static)
     treemapFormScene
   , treeFormScene
@@ -29,7 +29,7 @@ import Data.Maybe (Maybe(..))
 import Data.Nullable as Nullable
 import Data.Tuple (Tuple(..))
 import Foreign.Object as Object
-import Engine.Scene (SceneConfig, EngineMode(..), NodeRule, PositionMap)
+import CodeExplorer.Scene (SceneConfig, EngineMode(..), NodeRule, PositionMap)
 import Types (SimNode, NodeType(..))
 
 -- =============================================================================
@@ -201,8 +201,7 @@ treeFormLayout nodes =
   Object.fromFoldable $ map getPosition nodes
   where
   getPosition node =
-    if isTreeModule node
-    then Tuple (show node.id) { x: node.treeX, y: node.treeY }
+    if isTreeModule node then Tuple (show node.id) { x: node.treeX, y: node.treeY }
     else Tuple (show node.id) { x: node.x, y: node.y }
 
 -- | Layout for Tree Run: keep current positions (forces will arrange)
@@ -245,8 +244,7 @@ radialTreeFormLayout nodes =
   Object.fromFoldable $ map getPosition nodes
   where
   getPosition node =
-    if isTreeModule node
-    then Tuple (show node.id) { x: node.radialX, y: node.radialY }
+    if isTreeModule node then Tuple (show node.id) { x: node.radialX, y: node.radialY }
     else Tuple (show node.id) { x: node.x, y: node.y }
 
 -- =============================================================================
@@ -284,6 +282,5 @@ topoFormLayout nodes =
   Object.fromFoldable $ map getPosition nodes
   where
   getPosition node =
-    if isPackage node
-    then Tuple (show node.id) { x: node.topoX, y: node.topoY }
+    if isPackage node then Tuple (show node.id) { x: node.topoX, y: node.topoY }
     else Tuple (show node.id) { x: node.x, y: node.y }

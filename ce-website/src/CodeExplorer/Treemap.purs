@@ -2,7 +2,7 @@
 -- |
 -- | Treemap visualization for Code Explorer.
 -- | Static layout showing modules grouped by package, sized by LOC.
-module Engine.Treemap
+module CodeExplorer.Treemap
   ( renderTreemap
   , renderWatermark
   , clearTreemap
@@ -11,7 +11,7 @@ module Engine.Treemap
   , buildTreemapData
   , computeTreemapPositions
   , recalculateTreemapPositions
-    -- * Hover sync
+  -- * Hover sync
   , highlightWatermarkPackage
   , clearWatermarkHighlight
   ) where
@@ -34,7 +34,7 @@ import PSD3v2.Capabilities.Selection (select, appendChild, appendData)
 import PSD3v2.Selection.Types (ElementType(..), SBoundOwns)
 import PSD3v2.Attribute.Types (id_, class_, fill, stroke, strokeWidth, opacity, x, y, width, height, transform, fontFamily, fontSize, textAnchor, textContent)
 import Types (SimNode, NodeType(..))
-import Engine.ViewBox as ViewBox
+import CodeExplorer.ViewBox as ViewBox
 import Web.DOM.Element (Element)
 import Web.DOM.ParentNode (querySelector, QuerySelector(..))
 import Web.HTML (window)
@@ -247,8 +247,8 @@ renderTreemapSVG packageNodes moduleNodes = do
     , y (_.y0 :: TreemapLeaf -> Number)
     , width ((\n -> n.x1 - n.x0) :: TreemapLeaf -> Number)
     , height ((\n -> n.y1 - n.y0) :: TreemapLeaf -> Number)
-    , fill "none"  -- Blueprint: transparent
-    , stroke "rgba(255, 255, 255, 0.6)"  -- White stroke
+    , fill "none" -- Blueprint: transparent
+    , stroke "rgba(255, 255, 255, 0.6)" -- White stroke
     , strokeWidth 1.5
     , opacity 1.0
     , class_ "treemap-package"
@@ -261,8 +261,8 @@ renderTreemapSVG packageNodes moduleNodes = do
     , y (_.y0 :: TreemapLeaf -> Number)
     , width ((\n -> n.x1 - n.x0) :: TreemapLeaf -> Number)
     , height ((\n -> n.y1 - n.y0) :: TreemapLeaf -> Number)
-    , fill "none"  -- Blueprint: transparent
-    , stroke "rgba(255, 255, 255, 0.4)"  -- White stroke, lighter than packages
+    , fill "none" -- Blueprint: transparent
+    , stroke "rgba(255, 255, 255, 0.4)" -- White stroke, lighter than packages
     , strokeWidth 0.5
     , class_ "treemap-module"
     ]
@@ -274,7 +274,7 @@ renderTreemapSVG packageNodes moduleNodes = do
     [ x ((\n -> (n.x0 + n.x1) / 2.0) :: TreemapLeaf -> Number)
     , y ((\n -> n.y0 + 14.0) :: TreemapLeaf -> Number) -- Near top
     , textAnchor "middle"
-    , fill "rgba(255, 255, 255, 0.7)"  -- White text
+    , fill "rgba(255, 255, 255, 0.7)" -- White text
     , fontFamily "Monaco, 'Courier New', monospace"
     , fontSize 10.0
     , opacity 1.0
@@ -435,8 +435,8 @@ renderWatermarkSVG packageNodes = do
     , y (_.y0 :: TreemapLeaf -> Number)
     , width ((\n -> n.x1 - n.x0) :: TreemapLeaf -> Number)
     , height ((\n -> n.y1 - n.y0) :: TreemapLeaf -> Number)
-    , fill "rgba(255, 255, 255, 0)"  -- Invisible but hoverable
-    , stroke "rgba(255, 255, 255, 0.15)"  -- Very faded white for watermark
+    , fill "rgba(255, 255, 255, 0)" -- Invisible but hoverable
+    , stroke "rgba(255, 255, 255, 0.15)" -- Very faded white for watermark
     , strokeWidth 1.0
     , opacity 1.0
     , class_ "watermark-package"
@@ -449,7 +449,7 @@ renderWatermarkSVG packageNodes = do
     [ x ((\n -> (n.x0 + n.x1) / 2.0) :: TreemapLeaf -> Number)
     , y ((\n -> n.y0 + 14.0) :: TreemapLeaf -> Number) -- Near top
     , textAnchor "middle"
-    , fill "rgba(255, 255, 255, 0.2)"  -- Very faded white text for watermark
+    , fill "rgba(255, 255, 255, 0.2)" -- Very faded white text for watermark
     , fontFamily "Monaco, 'Courier New', monospace"
     , fontSize 10.0
     , opacity 1.0

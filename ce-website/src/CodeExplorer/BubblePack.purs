@@ -4,7 +4,7 @@
 -- | - Outer circle: Module
 -- | - Middle circles: Categories (typeClass, data, typeSynonym, externData, alias, value)
 -- | - Inner circles: Individual declarations
-module Engine.BubblePack
+module CodeExplorer.BubblePack
   ( renderModulePack
   , renderModulePackWithCallbacks
   , ModulePackData
@@ -78,8 +78,8 @@ foreign import clearFunctionEdges_ :: Effect Unit
 
 -- | Edge type for module-level highlighting
 type ModuleEdge =
-  { source :: String     -- "Module.func"
-  , target :: String     -- "Module.func"
+  { source :: String -- "Module.func"
+  , target :: String -- "Module.func"
   , isOutgoing :: Boolean -- true if source module calls target
   }
 
@@ -168,12 +168,12 @@ groupByKind decls =
   let
     -- Build kind -> declarations map in single pass
     addToGroup :: Object.Object (Array Declaration) -> Declaration -> Object.Object (Array Declaration)
-    addToGroup m d = Object.alter (Just <<< maybe [d] (_ `Array.snoc` d)) d.kind m
+    addToGroup m d = Object.alter (Just <<< maybe [ d ] (_ `Array.snoc` d)) d.kind m
 
     kindMap = Array.foldl addToGroup Object.empty decls
 
     -- Convert to array of records
-    groups = Object.foldMap (\k ds -> [{ kind: k, decls: ds }]) kindMap
+    groups = Object.foldMap (\k ds -> [ { kind: k, decls: ds } ]) kindMap
   in
     -- Sort by count (descending)
     Array.sortWith (\g -> negate $ Array.length g.decls) groups
@@ -291,7 +291,7 @@ renderModulePackWithCallbacks declarationsMap onDeclClick onDeclHover onDeclLeav
     let
       config = defaultPackConfig
         { size = { width: packSize, height: packSize }
-        , padding = 1.5  -- Slightly more padding between circles
+        , padding = 1.5 -- Slightly more padding between circles
         }
     let packed = pack config packRoot
 

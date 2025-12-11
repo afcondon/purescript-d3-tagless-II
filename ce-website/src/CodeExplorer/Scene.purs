@@ -7,7 +7,7 @@
 -- | - PhysicsEngine: D3 force simulation (stable states with dynamics)
 -- |
 -- | CSS transitions can run in parallel with either engine for opacity/color changes.
-module Engine.Scene
+module CodeExplorer.Scene
   ( -- Re-exported from library
     module SimScene
   -- App-specific types
@@ -54,8 +54,8 @@ import PSD3.Simulation.Scene
   ) as SimScene
 import PSD3.Transition.Tick as Tick
 import Types (SimNode, NodeType, LinkType)
-import Engine.ViewState (ViewState)
-import Engine.ViewTransition as VT
+import CodeExplorer.ViewState (ViewState)
+import CodeExplorer.ViewTransition as VT
 
 -- =============================================================================
 -- App-Specific Types

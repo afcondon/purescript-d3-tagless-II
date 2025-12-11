@@ -2,7 +2,7 @@
 -- |
 -- | Pure PureScript link path generation for tree visualization.
 -- | Supports both radial and vertical link layouts.
-module Viz.SpagoGridTest.TreeLinks
+module Viz.CodeExplorer.TreeLinks
   ( radialLinkPath
   , verticalLinkPath
   , makeTreeLinkPathFromNodes

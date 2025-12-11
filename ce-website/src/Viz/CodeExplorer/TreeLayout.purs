@@ -3,7 +3,7 @@
 -- | Returns pre-computed radial tree positions from the model.
 -- | Tree positions are calculated during data loading using the
 -- | Reingold-Tilford algorithm via D3.Layout.Hierarchy.Tree.
-module Viz.SpagoGridTest.TreeLayout
+module Viz.CodeExplorer.TreeLayout
   ( calculateTreePositions
   ) where
 

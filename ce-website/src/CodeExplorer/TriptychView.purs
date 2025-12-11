@@ -7,7 +7,7 @@
 -- |
 -- | All rendering goes into explorer-zoom-group for pan/zoom support
 -- | Bubble packs are rendered into #explorer-nodes, then wrapped with a transform
-module Engine.TriptychView
+module CodeExplorer.TriptychView
   ( renderTriptychWithDeclarations
   , clearTriptych
   ) where
@@ -18,10 +18,10 @@ import Data.Array as Array
 import Effect (Effect)
 import Effect.Class.Console (log)
 import Types (SimNode)
-import Engine.ViewBox as ViewBox
-import Engine.BubblePack (clearBubblePacks)
-import Engine.ChordDiagram (clearChordDiagram)
-import Engine.AdjacencyMatrix (clearAdjacencyMatrix)
+import CodeExplorer.ViewBox as ViewBox
+import CodeExplorer.BubblePack (clearBubblePacks)
+import CodeExplorer.ChordDiagram (clearChordDiagram)
+import CodeExplorer.AdjacencyMatrix (clearAdjacencyMatrix)
 
 -- | FFI imports
 foreign import clearTriptych_ :: Effect Unit
@@ -33,8 +33,8 @@ foreign import wrapExplorerNodesForTriptych_ :: Array SimNode -> Effect Unit
 -- | Render triptych view - called AFTER bubble packs are already rendered
 -- | This wraps the existing bubble packs with a transform and adds chord + matrix panels
 renderTriptychWithDeclarations
-  :: String  -- Central module name
-  -> Array SimNode  -- Neighborhood nodes
+  :: String -- Central module name
+  -> Array SimNode -- Neighborhood nodes
   -> Effect Unit
 renderTriptychWithDeclarations moduleName nodes = do
   log $ "[TriptychView] Rendering triptych for " <> moduleName <> " with " <> show (Array.length nodes) <> " nodes"

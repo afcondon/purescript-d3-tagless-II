@@ -28,7 +28,7 @@ import Halogen.HTML.Properties as HP
 import Halogen.VDom.Types (Namespace(..), ElemName(..))
 import Web.UIEvent.KeyboardEvent (KeyboardEvent)
 import Web.UIEvent.KeyboardEvent as KE
-import Engine.ViewState (ViewState(..), OverviewView(..), DetailView(..), NeighborhoodViewType(..), viewLabel, viewDescription, getBaseOverview, neighborhoodViewLabel)
+import CodeExplorer.ViewState (ViewState(..), OverviewView(..), DetailView(..), NeighborhoodViewType(..), viewLabel, viewDescription, getBaseOverview, neighborhoodViewLabel)
 
 -- =============================================================================
 -- Types
@@ -54,7 +54,7 @@ type Input =
   , projectName :: String
   , projectId :: Int
   , projects :: Array ProjectInfo
-  , moduleNames :: Array String  -- All module names for search
+  , moduleNames :: Array String -- All module names for search
   }
 
 -- | State
@@ -64,41 +64,41 @@ type State =
   , projectName :: String
   , projectId :: Int
   , projects :: Array ProjectInfo
-  , moduleNames :: Array String      -- All module names for search
+  , moduleNames :: Array String -- All module names for search
   , hintText :: Maybe String
   , projectDropdownOpen :: Boolean
-  , originView :: Maybe OverviewView  -- Where we came from (for back button label)
-  , searchQuery :: String             -- Current search input
-  , searchResults :: Array String     -- Filtered results
-  , searchOpen :: Boolean             -- Whether dropdown is shown
-  , searchSelectedIndex :: Int        -- Currently highlighted result (-1 = none)
+  , originView :: Maybe OverviewView -- Where we came from (for back button label)
+  , searchQuery :: String -- Current search input
+  , searchResults :: Array String -- Filtered results
+  , searchOpen :: Boolean -- Whether dropdown is shown
+  , searchSelectedIndex :: Int -- Currently highlighted result (-1 = none)
   }
 
 -- | Actions
 data Action
   = HandleInput Input
-  | SelectView OverviewView  -- Click on an icon to change view
-  | SelectNeighborhoodViewType NeighborhoodViewType  -- Click on view type toggle in neighborhood
-  | GoBack                   -- Click the back button in detail view
+  | SelectView OverviewView -- Click on an icon to change view
+  | SelectNeighborhoodViewType NeighborhoodViewType -- Click on view type toggle in neighborhood
+  | GoBack -- Click the back button in detail view
   | ToggleProjectDropdown
   | SelectProject Int -- Project ID selected
-  | SearchInput String       -- User typed in search box
-  | SearchKeyDown KeyboardEvent  -- User pressed a key in search box
+  | SearchInput String -- User typed in search box
+  | SearchKeyDown KeyboardEvent -- User pressed a key in search box
   | SelectSearchResult String -- User clicked a search result
-  | CloseSearch              -- Close search dropdown
+  | CloseSearch -- Close search dropdown
 
 -- | Queries from parent
 data Query a
   = SetViewState ViewState a
   | SetHintText (Maybe String) a
   | SetPackagePalette (Array ColorEntry) a
-  | SetOriginView OverviewView a  -- Set the origin view for back button label
+  | SetOriginView OverviewView a -- Set the origin view for back button label
 
 -- | Output messages to parent
 data Output
-  = ViewSelected OverviewView  -- User clicked an icon
-  | NeighborhoodViewTypeSelected NeighborhoodViewType  -- User clicked view type toggle
-  | BackRequested              -- User clicked the back button
+  = ViewSelected OverviewView -- User clicked an icon
+  | NeighborhoodViewTypeSelected NeighborhoodViewType -- User clicked view type toggle
+  | BackRequested -- User clicked the back button
   | ProjectSelected Int -- Project ID selected
   | ModuleSearchSelected String -- User selected a module from search
 
@@ -189,13 +189,15 @@ renderModuleSearch state =
     ]
   where
   renderSearchResult idx moduleName =
-    let isSelected = idx == state.searchSelectedIndex
-    in HH.div
-      [ HP.classes $ [ HH.ClassName "module-search-result" ] <>
-          if isSelected then [ HH.ClassName "module-search-result--selected" ] else []
-      , HE.onClick \_ -> SelectSearchResult moduleName
-      ]
-      [ HH.text moduleName ]
+    let
+      isSelected = idx == state.searchSelectedIndex
+    in
+      HH.div
+        [ HP.classes $ [ HH.ClassName "module-search-result" ] <>
+            if isSelected then [ HH.ClassName "module-search-result--selected" ] else []
+        , HE.onClick \_ -> SelectSearchResult moduleName
+        ]
+        [ HH.text moduleName ]
 
 -- | Render view icons OR back button depending on view state
 -- | Neighborhood detail now uses triptych view only, so no view type toggles needed
@@ -282,9 +284,11 @@ renderDescription viewState =
 renderHintText :: forall m. Maybe String -> ViewState -> H.ComponentHTML Action () m
 renderHintText mHint viewState =
   HH.div [ HP.class_ (HH.ClassName "narrative-hint") ]
-    [ HH.text (case mHint of
-        Just h -> h
-        Nothing -> hintForView viewState)
+    [ HH.text
+        ( case mHint of
+            Just h -> h
+            Nothing -> hintForView viewState
+        )
     ]
 
 -- | Default hint based on current view
@@ -359,11 +363,16 @@ renderConceptItem label samplePalette =
     [ HH.span [ HP.class_ (HH.ClassName "color-key-concept-label") ]
         [ HH.text label ]
     , HH.div [ HP.class_ (HH.ClassName "color-key-swatches") ]
-        (map (\e -> HH.span
-          [ HP.class_ (HH.ClassName "color-key-mini-swatch")
-          , HP.style ("background-color: " <> e.color)
-          , HP.title e.name
-          ] []) samplePalette)
+        ( map
+            ( \e -> HH.span
+                [ HP.class_ (HH.ClassName "color-key-mini-swatch")
+                , HP.style ("background-color: " <> e.color)
+                , HP.title e.name
+                ]
+                []
+            )
+            samplePalette
+        )
     ]
 
 -- | Render a simple concept swatch with label
@@ -383,11 +392,16 @@ renderConceptSwatch label color =
 renderPackageSamples :: forall m. Array ColorEntry -> H.ComponentHTML Action () m
 renderPackageSamples samples =
   HH.div [ HP.class_ (HH.ClassName "color-key-samples") ]
-    (map (\e -> HH.span
-      [ HP.class_ (HH.ClassName "color-key-sample")
-      , HP.style ("background-color: " <> e.color)
-      , HP.title e.name
-      ] []) samples)
+    ( map
+        ( \e -> HH.span
+            [ HP.class_ (HH.ClassName "color-key-sample")
+            , HP.style ("background-color: " <> e.color)
+            , HP.title e.name
+            ]
+            []
+        )
+        samples
+    )
 
 -- | Render declaration types color key (for detail views)
 renderDeclarationTypesKey :: forall m. H.ComponentHTML Action () m
@@ -516,15 +530,17 @@ handleAction = case _ of
     case keyName of
       -- ArrowDown: Move selection down (wrap to -1 for no selection)
       "ArrowDown" -> do
-        let newIndex = if state.searchSelectedIndex < maxIndex
-                       then state.searchSelectedIndex + 1
-                       else -1  -- Wrap to no selection
+        let
+          newIndex =
+            if state.searchSelectedIndex < maxIndex then state.searchSelectedIndex + 1
+            else -1 -- Wrap to no selection
         H.modify_ _ { searchSelectedIndex = newIndex }
       -- ArrowUp: Move selection up (wrap to bottom)
       "ArrowUp" -> do
-        let newIndex = if state.searchSelectedIndex > -1
-                       then state.searchSelectedIndex - 1
-                       else maxIndex  -- Wrap to bottom
+        let
+          newIndex =
+            if state.searchSelectedIndex > -1 then state.searchSelectedIndex - 1
+            else maxIndex -- Wrap to bottom
         H.modify_ _ { searchSelectedIndex = newIndex }
       -- Enter: Select the highlighted item
       "Enter" -> do

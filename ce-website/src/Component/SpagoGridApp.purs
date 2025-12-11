@@ -14,8 +14,8 @@ import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
-import Engine.Explorer as Explorer
-import Engine.ViewState (ViewState(..), OverviewView(..), toOverview, viewDescription, isDetail)
+import CodeExplorer.Explorer as Explorer
+import CodeExplorer.ViewState (ViewState(..), OverviewView(..), toOverview, viewDescription, isDetail)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
@@ -32,7 +32,7 @@ type State =
   , projectName :: String
   , projectId :: Int
   , projects :: Array NarrativePanel.ProjectInfo
-  , moduleNames :: Array String  -- All module names for search
+  , moduleNames :: Array String -- All module names for search
   }
 
 -- | Child slots
@@ -67,7 +67,7 @@ component =
     { initialState: \_ ->
         { initialized: false
         , error: Nothing
-        , viewState: Overview TreemapView  -- Start with Treemap overview
+        , viewState: Overview TreemapView -- Start with Treemap overview
         , packagePalette: []
         , projectName: NarrativePanel.defaultProjectName
         , projectId: 1
@@ -122,13 +122,14 @@ handleAction = case _ of
     void $ H.subscribe emitter
 
     -- Create callbacks that notify the listener
-    let callbacks :: Explorer.ExplorerCallbacks
-        callbacks =
-          { onViewStateChanged: \viewState -> HS.notify listener (ViewStateChanged viewState)
-          , onModelLoaded: \modelInfo -> HS.notify listener (ModelLoaded modelInfo)
-          , onShowCallGraphPopup: \moduleName declarationName -> HS.notify listener (ShowCallGraphPopup moduleName declarationName)
-          , onHideCallGraphPopup: HS.notify listener HideCallGraphPopup
-          }
+    let
+      callbacks :: Explorer.ExplorerCallbacks
+      callbacks =
+        { onViewStateChanged: \viewState -> HS.notify listener (ViewStateChanged viewState)
+        , onModelLoaded: \modelInfo -> HS.notify listener (ModelLoaded modelInfo)
+        , onShowCallGraphPopup: \moduleName declarationName -> HS.notify listener (ShowCallGraphPopup moduleName declarationName)
+        , onHideCallGraphPopup: HS.notify listener HideCallGraphPopup
+        }
 
     -- Initialize Explorer with callbacks
     liftEffect $ Explorer.initExplorerWithCallbacks "#viz" callbacks
@@ -193,8 +194,10 @@ handleAction = case _ of
     H.modify_ _ { moduleNames = moduleNames }
     where
     mkColorEntry idx _ =
-      let t = numMod (toNumber idx * 0.618033988749895) 1.0
-      in { name: "Package " <> show (idx + 1), color: interpolateTurbo t }
+      let
+        t = numMod (toNumber idx * 0.618033988749895) 1.0
+      in
+        { name: "Package " <> show (idx + 1), color: interpolateTurbo t }
     numMod a b = a - b * toNumber (floor (a / b))
 
   NarrativePanelOutput output ->

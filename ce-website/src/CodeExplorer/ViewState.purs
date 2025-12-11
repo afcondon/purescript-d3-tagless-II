@@ -3,7 +3,7 @@
 -- | Simplified architecture: four icon-selectable overview views,
 -- | with Neighborhood/FunctionCalls as modal overlays.
 -- | Detail views can be exited by clicking any overview icon.
-module Engine.ViewState
+module CodeExplorer.ViewState
   ( ViewState(..)
   , OverviewView(..)
   , DetailView(..)
@@ -29,22 +29,22 @@ import Data.Maybe (Maybe(..))
 
 -- | The four canonical overview layouts
 data OverviewView
-  = TreemapView   -- All packages + all modules, clustered by package
-  | TreeView      -- Used modules only, vertical tree from Main
-  | ForceView     -- Used modules only, radial force layout from Main
-  | TopoView      -- Packages only, topologically sorted DAG
+  = TreemapView -- All packages + all modules, clustered by package
+  | TreeView -- Used modules only, vertical tree from Main
+  | ForceView -- Used modules only, radial force layout from Main
+  | TopoView -- Packages only, topologically sorted DAG
 
 -- | Sub-view types for neighborhood detail
 data NeighborhoodViewType
-  = BubblePackView  -- Default: bubble pack with function circles
-  | ChordView       -- Chord diagram showing all connections
-  | MatrixView      -- Adjacency matrix
-  | TriptychView    -- All three views side-by-side
+  = BubblePackView -- Default: bubble pack with function circles
+  | ChordView -- Chord diagram showing all connections
+  | MatrixView -- Adjacency matrix
+  | TriptychView -- All three views side-by-side
 
 -- | Detail views are overlays on top of the current overview
 data DetailView
-  = NeighborhoodDetail String NeighborhoodViewType  -- Module name + view type
-  | PackageNeighborhoodDetail String  -- Package name - shows modules in package + their deps
+  = NeighborhoodDetail String NeighborhoodViewType -- Module name + view type
+  | PackageNeighborhoodDetail String -- Package name - shows modules in package + their deps
   | FunctionCallsDetail String -- Module name - shows call graph
 
 -- | Combined view state
@@ -122,7 +122,7 @@ toOverview = Overview
 -- | Detail views return a default overview (TreemapView)
 getBaseOverview :: ViewState -> OverviewView
 getBaseOverview (Overview ov) = ov
-getBaseOverview (Detail _) = TreemapView  -- Detail views exit to Treemap by default
+getBaseOverview (Detail _) = TreemapView -- Detail views exit to Treemap by default
 
 -- | Get the module name from a neighborhood detail view
 getNeighborhoodModule :: ViewState -> Maybe String

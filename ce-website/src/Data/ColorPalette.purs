@@ -12,16 +12,16 @@ module Data.ColorPalette
   , PaletteConfig
   , LegendItem
   , ColorMapping
-    -- * Palette API
+  -- * Palette API
   , getPalette
   , getCategoryColor
   , getPaletteName
   , allPaletteTypes
-    -- * Node Coloring (View-Aware)
+  -- * Node Coloring (View-Aware)
   , getNodeStroke
   , getNodeFill
   , getClusterColor
-    -- * Color Utilities
+  -- * Color Utilities
   , addOpacity
   ) where
 
@@ -31,7 +31,7 @@ import Data.Array as Array
 import Data.Int (hexadecimal, fromStringAs)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String as String
-import Engine.ViewState (ViewState(..), OverviewView(..))
+import CodeExplorer.ViewState (ViewState(..), OverviewView(..))
 import PSD3.Scale (schemeTableau10At)
 import Types (SimNode, NodeType(..))
 
@@ -41,10 +41,10 @@ import Types (SimNode, NodeType(..))
 
 -- | Available palette types for different data dimensions
 data PaletteType
-  = DeclarationTypes    -- Color by PureScript declaration kind
-  | GitActivity         -- Color by git commit activity (future)
-  | IssueInvolvement    -- Color by issue involvement (future)
-  | AuthorActivity      -- Color by author/contributor (future)
+  = DeclarationTypes -- Color by PureScript declaration kind
+  | GitActivity -- Color by git commit activity (future)
+  | IssueInvolvement -- Color by issue involvement (future)
+  | AuthorActivity -- Color by author/contributor (future)
 
 derive instance eqPaletteType :: Eq PaletteType
 
@@ -73,7 +73,7 @@ type ColorMapping = String -> String
 
 -- | Get all available palette types (for UI selection)
 allPaletteTypes :: Array PaletteType
-allPaletteTypes = [ DeclarationTypes ]  -- Will add more as implemented
+allPaletteTypes = [ DeclarationTypes ] -- Will add more as implemented
 
 -- | Get the display name of a palette
 getPaletteName :: PaletteType -> String
@@ -92,8 +92,10 @@ getPalette AuthorActivity = authorActivityPalette
 -- | Get color for a category using the palette's color mapping
 getCategoryColor :: PaletteType -> String -> String
 getCategoryColor paletteType category =
-  let config = getPalette paletteType
-  in config.colorMapping category
+  let
+    config = getPalette paletteType
+  in
+    config.colorMapping category
 
 -- =============================================================================
 -- Declaration Types Palette (Tableau10-based)
@@ -158,7 +160,7 @@ declarationTypesColorMapping category = case category of
   "value" -> schemeTableau10At 5
   "typeClassInstance" -> schemeTableau10At 6
   "externValue" -> schemeTableau10At 7
-  _ -> schemeTableau10At 8  -- fallback for unknown types
+  _ -> schemeTableau10At 8 -- fallback for unknown types
 
 -- =============================================================================
 -- Future Palettes (Placeholder Implementations)
@@ -259,13 +261,12 @@ getNodeStroke viewState n = case n.nodeType of
 -- | Get fill color for a node in a specific view.
 getNodeFill :: ViewState -> SimNode -> String
 getNodeFill viewState n = case n.nodeType of
-  PackageNode -> schemeTableau10At n.cluster  -- Always solid for packages
+  PackageNode -> schemeTableau10At n.cluster -- Always solid for packages
   ModuleNode -> case viewState of
     Overview TreemapView ->
-      if Array.null n.sources
-        then "none"
-        else "rgba(255, 255, 255, 0.9)"
-    _ -> addOpacity (schemeTableau10At n.cluster) 0.5  -- Semi-transparent for tree/force
+      if Array.null n.sources then "none"
+      else "rgba(255, 255, 255, 0.9)"
+    _ -> addOpacity (schemeTableau10At n.cluster) 0.5 -- Semi-transparent for tree/force
 
 -- =============================================================================
 -- Color Utilities

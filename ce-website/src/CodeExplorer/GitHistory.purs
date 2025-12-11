@@ -10,16 +10,16 @@
 -- |
 -- | Phase 1: Uses sample/mock data for visualization testing.
 -- | Phase 2 (TODO): Connect to ce-server API for real git history.
-module Engine.GitHistory
+module CodeExplorer.GitHistory
   ( -- * Types
     GitCommit
   , GitHistory
   , GitDAG
-    -- * Sample Data
+  -- * Sample Data
   , sampleGitHistory
-    -- * DAG Construction
+  -- * DAG Construction
   , buildGitDAG
-    -- * Rendering
+  -- * Rendering
   , renderGitHistory
   ) where
 
@@ -44,13 +44,13 @@ import PSD3v2.Selection.Types (ElementType(..))
 
 -- | A git commit with relevant metadata
 type GitCommit =
-  { sha :: String           -- ^ Short SHA (7 chars)
-  , message :: String       -- ^ Commit message (first line)
-  , author :: String        -- ^ Author name
-  , date :: String          -- ^ ISO date string
-  , parentShas :: Array String  -- ^ Parent commit SHAs (1 for normal, 2+ for merges)
-  , isMerge :: Boolean      -- ^ True if this is a merge commit
-  , branch :: Maybe String  -- ^ Branch name if this is a branch head
+  { sha :: String -- ^ Short SHA (7 chars)
+  , message :: String -- ^ Commit message (first line)
+  , author :: String -- ^ Author name
+  , date :: String -- ^ ISO date string
+  , parentShas :: Array String -- ^ Parent commit SHAs (1 for normal, 2+ for merges)
+  , isMerge :: Boolean -- ^ True if this is a merge commit
+  , branch :: Maybe String -- ^ Branch name if this is a branch head
   }
 
 -- | Git history as an array of commits (newest first)
@@ -83,9 +83,8 @@ commitLabel n = n.datum.sha <> " " <> truncateMessage 30 n.datum.message
 -- | Truncate message to max length with ellipsis
 truncateMessage :: Int -> String -> String
 truncateMessage maxLen msg =
-  if String.length msg > maxLen
-    then String.take (maxLen - 3) msg <> "..."
-    else msg
+  if String.length msg > maxLen then String.take (maxLen - 3) msg <> "..."
+  else msg
 
 -- =============================================================================
 -- Sample Data
@@ -105,7 +104,7 @@ sampleGitHistory =
     , message: "Update docs for release"
     , author: "Alice"
     , date: "2024-01-15"
-    , parentShas: ["f4e5f6g"]
+    , parentShas: [ "f4e5f6g" ]
     , isMerge: false
     , branch: Just "main"
     }
@@ -113,7 +112,7 @@ sampleGitHistory =
     , message: "Merge feature into main"
     , author: "Bob"
     , date: "2024-01-14"
-    , parentShas: ["c1d2e3f", "e3d4e5f"]  -- merge commit
+    , parentShas: [ "c1d2e3f", "e3d4e5f" ] -- merge commit
     , isMerge: true
     , branch: Nothing
     }
@@ -121,7 +120,7 @@ sampleGitHistory =
     , message: "Complete feature implementation"
     , author: "Charlie"
     , date: "2024-01-13"
-    , parentShas: ["d2c3d4e"]
+    , parentShas: [ "d2c3d4e" ]
     , isMerge: false
     , branch: Just "feature"
     }
@@ -129,7 +128,7 @@ sampleGitHistory =
     , message: "Start feature work"
     , author: "Charlie"
     , date: "2024-01-12"
-    , parentShas: ["a1b2c3d"]
+    , parentShas: [ "a1b2c3d" ]
     , isMerge: false
     , branch: Nothing
     }
@@ -137,7 +136,7 @@ sampleGitHistory =
     , message: "Fix bug in core module"
     , author: "Alice"
     , date: "2024-01-11"
-    , parentShas: ["b0a1b2c"]
+    , parentShas: [ "b0a1b2c" ]
     , isMerge: false
     , branch: Nothing
     }
@@ -145,7 +144,7 @@ sampleGitHistory =
     , message: "Add new API endpoint"
     , author: "Bob"
     , date: "2024-01-10"
-    , parentShas: ["a1b2c3d"]
+    , parentShas: [ "a1b2c3d" ]
     , isMerge: false
     , branch: Nothing
     }
@@ -179,9 +178,9 @@ buildGitDAG history =
       let
         -- Find commits whose first parent is this commit
         children = Array.filter
-          (\c -> case Array.head c.parentShas of
-            Just parentSha -> parentSha == commit.sha
-            Nothing -> false
+          ( \c -> case Array.head c.parentShas of
+              Just parentSha -> parentSha == commit.sha
+              Nothing -> false
           )
           history
         childTrees = map buildTree children
@@ -194,17 +193,18 @@ buildGitDAG history =
 
     extractMergeLinks :: GitCommit -> Array (DAGLink String)
     extractMergeLinks commit =
-      if commit.isMerge
-        then case Array.tail commit.parentShas of
-          Just secondaryParents ->
-            map (\parentSha ->
-              { source: commit.sha
-              , target: parentSha
-              , linkType: "merge"
-              }
-            ) secondaryParents
-          Nothing -> []
-        else []
+      if commit.isMerge then case Array.tail commit.parentShas of
+        Just secondaryParents ->
+          map
+            ( \parentSha ->
+                { source: commit.sha
+                , target: parentSha
+                , linkType: "merge"
+                }
+            )
+            secondaryParents
+        Nothing -> []
+      else []
 
     tree = case rootCommit of
       Just root -> buildTree root
@@ -233,7 +233,7 @@ buildGitDAG history =
 -- | - Dashed lines for merge links
 -- | - Labels with SHA and message
 renderGitHistory
-  :: String                 -- ^ Selector for container element
+  :: String -- ^ Selector for container element
   -> { width :: Number, height :: Number }
   -> GitHistory
   -> Effect Unit

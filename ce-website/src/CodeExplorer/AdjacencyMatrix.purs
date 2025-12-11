@@ -6,7 +6,7 @@
 -- | Each cell is split diagonally to show bidirectional connections:
 -- | - Upper-left triangle (green): outbound - row imports col
 -- | - Lower-right triangle (orange): inbound - col imports row
-module Engine.AdjacencyMatrix
+module CodeExplorer.AdjacencyMatrix
   ( renderNeighborhoodMatrix
   , clearAdjacencyMatrix
   ) where
@@ -30,9 +30,9 @@ import Types (SimNode)
 type BidirectionalCell =
   { row :: Int
   , col :: Int
-  , outbound :: Number    -- row → col (row imports col)
-  , inbound :: Number     -- col → row (col imports row)
-  , value :: Number       -- for layout compatibility (outbound + inbound)
+  , outbound :: Number -- row → col (row imports col)
+  , inbound :: Number -- col → row (col imports row)
+  , value :: Number -- for layout compatibility (outbound + inbound)
   , rowName :: String
   , colName :: String
   , position :: { x :: Number, y :: Number, width :: Number, height :: Number }
@@ -53,10 +53,10 @@ type BidirectionalLayout =
 foreign import clearMatrixSvg_ :: Effect Unit
 foreign import renderAdjacencyMatrix_
   :: BidirectionalLayout
-  -> String  -- central module name
-  -> Array String  -- import names (green)
-  -> Array String  -- dependent names (orange)
-  -> Number  -- max connections for normalization
+  -> String -- central module name
+  -> Array String -- import names (green)
+  -> Array String -- dependent names (orange)
+  -> Number -- max connections for normalization
   -> Effect Unit
 
 -- | Cell with separate outbound and inbound counts
@@ -64,7 +64,9 @@ type DirectionalCell = { outbound :: Number, inbound :: Number }
 
 -- | Build bidirectional adjacency matrix from neighborhood nodes
 -- | Returns matrix with separate outbound/inbound counts per cell
-buildBidirectionalMatrix :: String -> Array SimNode
+buildBidirectionalMatrix
+  :: String
+  -> Array SimNode
   -> { outboundMatrix :: Array (Array Number)
      , inboundMatrix :: Array (Array Number)
      , names :: Array String
@@ -72,7 +74,7 @@ buildBidirectionalMatrix :: String -> Array SimNode
 buildBidirectionalMatrix centralName nodes =
   let
     -- Get all unique module names, putting central module first
-    allNames = nub $ [centralName] <> map _.name nodes
+    allNames = nub $ [ centralName ] <> map _.name nodes
 
     -- Build a map from name to matrix index
     nameToIdx = Map.fromFoldable $ mapWithIndex (\i n -> Tuple n i) allNames
@@ -86,9 +88,10 @@ buildBidirectionalMatrix centralName nodes =
     -- For each node, add its connections to the matrices
     -- outbound[i][j] = 1 if node i imports node j (i.e., j is in i's targets)
     -- inbound[i][j] = 1 if node j imports node i (i.e., i is in j's targets, or j is in i's sources)
-    addConnections :: { out :: Array (Array Number), in_ :: Array (Array Number) }
-                   -> SimNode
-                   -> { out :: Array (Array Number), in_ :: Array (Array Number) }
+    addConnections
+      :: { out :: Array (Array Number), in_ :: Array (Array Number) }
+      -> SimNode
+      -> { out :: Array (Array Number), in_ :: Array (Array Number) }
     addConnections { out, in_ } node =
       let
         nodeIdx = fromMaybe 0 $ Map.lookup node.name nameToIdx
@@ -113,7 +116,7 @@ buildBidirectionalMatrix centralName nodes =
       case Map.lookup sourceId idToName of
         Just sourceName ->
           case Map.lookup sourceName nameToIdx of
-            Just fromIdx -> setMatrixValue m toIdx fromIdx 1.0  -- Note: reversed for inbound
+            Just fromIdx -> setMatrixValue m toIdx fromIdx 1.0 -- Note: reversed for inbound
             Nothing -> m
         Nothing -> m
 
@@ -121,8 +124,10 @@ buildBidirectionalMatrix centralName nodes =
     setMatrixValue m row col val =
       case m !! row of
         Just rowArr ->
-          let newRow = fromMaybe rowArr $ Array.updateAt col val rowArr
-          in fromMaybe m $ Array.updateAt row newRow m
+          let
+            newRow = fromMaybe rowArr $ Array.updateAt col val rowArr
+          in
+            fromMaybe m $ Array.updateAt row newRow m
         Nothing -> m
 
     initialOut = map (const zeroRow) allNames
@@ -157,7 +162,7 @@ renderNeighborhoodMatrix centralName nodes containerWidth containerHeight = do
     -- Compute layout using library function (using outbound matrix for positioning)
     -- Adjust cell size based on number of nodes and available space
     let n = length names
-    let maxCellSize = min containerWidth containerHeight / (toNumber n + 6.0)  -- Leave room for labels
+    let maxCellSize = min containerWidth containerHeight / (toNumber n + 6.0) -- Leave room for labels
     let cellSize = min 25.0 maxCellSize
     let config = defaultConfig { cellSize = cellSize, labelWidth = 100.0, labelHeight = 100.0 }
 
@@ -166,39 +171,43 @@ renderNeighborhoodMatrix centralName nodes containerWidth containerHeight = do
     let baseLayout = layoutWithConfig config { matrix: combinedMatrix, names }
 
     -- Build bidirectional cells with outbound and inbound values
-    let bidirectionalCells = mapWithIndex (\_ cell ->
-          let
-            rowIdx = cell.row
-            colIdx = cell.col
-            outVal = fromMaybe 0.0 $ (outboundMatrix !! rowIdx) >>= (_ !! colIdx)
-            inVal = fromMaybe 0.0 $ (inboundMatrix !! rowIdx) >>= (_ !! colIdx)
-          in
-            { row: cell.row
-            , col: cell.col
-            , outbound: outVal
-            , inbound: inVal
-            , value: outVal + inVal
-            , rowName: cell.rowName
-            , colName: cell.colName
-            , position: cell.position
-            }
-        ) baseLayout.cells
+    let
+      bidirectionalCells = mapWithIndex
+        ( \_ cell ->
+            let
+              rowIdx = cell.row
+              colIdx = cell.col
+              outVal = fromMaybe 0.0 $ (outboundMatrix !! rowIdx) >>= (_ !! colIdx)
+              inVal = fromMaybe 0.0 $ (inboundMatrix !! rowIdx) >>= (_ !! colIdx)
+            in
+              { row: cell.row
+              , col: cell.col
+              , outbound: outVal
+              , inbound: inVal
+              , value: outVal + inVal
+              , rowName: cell.rowName
+              , colName: cell.colName
+              , position: cell.position
+              }
+        )
+        baseLayout.cells
 
     -- Calculate max connections for color normalization
     let allOutbound = map _.outbound bidirectionalCells
     let allInbound = map _.inbound bidirectionalCells
     let maxConnections = fromMaybe 1.0 $ maximum (allOutbound <> allInbound)
 
-    let bidirectionalLayout :: BidirectionalLayout
-        bidirectionalLayout =
-          { cells: bidirectionalCells
-          , rowLabels: baseLayout.rowLabels
-          , colLabels: baseLayout.colLabels
-          , gridWidth: baseLayout.gridWidth
-          , gridHeight: baseLayout.gridHeight
-          , totalWidth: baseLayout.totalWidth
-          , totalHeight: baseLayout.totalHeight
-          }
+    let
+      bidirectionalLayout :: BidirectionalLayout
+      bidirectionalLayout =
+        { cells: bidirectionalCells
+        , rowLabels: baseLayout.rowLabels
+        , colLabels: baseLayout.colLabels
+        , gridWidth: baseLayout.gridWidth
+        , gridHeight: baseLayout.gridHeight
+        , totalWidth: baseLayout.totalWidth
+        , totalHeight: baseLayout.totalHeight
+        }
 
     log $ "[AdjacencyMatrix] Layout computed with " <> show (length bidirectionalCells) <> " cells, max connections: " <> show maxConnections
 

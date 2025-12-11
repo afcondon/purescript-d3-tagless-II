@@ -1,7 +1,7 @@
 -- | ViewBox Constants
 -- |
 -- | Standard SVG viewbox dimensions used across the visualization.
-module Engine.ViewBox
+module CodeExplorer.ViewBox
   ( viewBoxWidth
   , viewBoxHeight
   ) where

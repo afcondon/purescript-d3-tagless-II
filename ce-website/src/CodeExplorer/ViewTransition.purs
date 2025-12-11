@@ -5,31 +5,31 @@
 -- |
 -- | Key insight: Simulation tick drives EVERYTHING - positions AND transitions.
 -- | No CSS transitions needed. All visual properties interpolated in PureScript.
-module Engine.ViewTransition
+module CodeExplorer.ViewTransition
   ( -- * Types
     ViewNodes(..)
   , TransitionState
   , RenderNode
   , TransitionDelta
   , defaultDelta
-    -- * State management
+  -- * State management
   , mkTransitionState
   , computeTransition
   , tickTransitionState
-    -- * Node filtering
+  -- * Node filtering
   , getViewNodes
   , getNodesForView
   , viewNeedsPackages
   , viewNeedsModules
-    -- * Visual interpolation
+  -- * Visual interpolation
   , nodeOpacity
   , nodeRadius
-    -- * FFI for DOM updates
+  -- * FFI for DOM updates
   , updateCircleTransitions
   , removeCompletedExits
   , addEnteringNodes
   , applyViewTransition
-    -- * Package labels for TopoGraph
+  -- * Package labels for TopoGraph
   , renderPackageLabels
   , clearPackageLabels
   , updatePackageLabelPositions
@@ -44,7 +44,7 @@ import Data.Maybe (Maybe(..))
 import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
-import Engine.ViewState (ViewState(..), OverviewView(..))
+import CodeExplorer.ViewState (ViewState(..), OverviewView(..))
 import Foreign.Object (Object)
 import Foreign.Object as Object
 import PSD3.Transition.Tick as Tick
@@ -56,9 +56,9 @@ import Types (SimNode, NodeType(..))
 
 -- | Which nodes a view needs in the DOM
 data ViewNodes
-  = AllNodes          -- ^ Treemap: packages + all modules
-  | UsedModulesOnly   -- ^ Tree, Force: modules in spanning tree only
-  | PackagesOnly      -- ^ Topo: just packages
+  = AllNodes -- ^ Treemap: packages + all modules
+  | UsedModulesOnly -- ^ Tree, Force: modules in spanning tree only
+  | PackagesOnly -- ^ Topo: just packages
 
 derive instance eqViewNodes :: Eq ViewNodes
 
@@ -71,16 +71,16 @@ defaultDelta = 0.04
 
 -- | State for tracking node transitions
 type TransitionState =
-  { enteringProgress :: Map Int Tick.Progress   -- nodeId -> progress (0->1)
-  , exitingNodes :: Array (Tick.Transitioning SimNode)  -- nodes being animated out
-  , currentViewNodes :: ViewNodes               -- what the current view expects
+  { enteringProgress :: Map Int Tick.Progress -- nodeId -> progress (0->1)
+  , exitingNodes :: Array (Tick.Transitioning SimNode) -- nodes being animated out
+  , currentViewNodes :: ViewNodes -- what the current view expects
   }
 
 -- | Node ready for rendering with computed visual state
 type RenderNode =
   { node :: SimNode
-  , enterProgress :: Maybe Number  -- Just 0.0-1.0 if entering
-  , exitProgress :: Maybe Number   -- Just 0.0-1.0 if exiting
+  , enterProgress :: Maybe Number -- Just 0.0-1.0 if entering
+  , exitProgress :: Maybe Number -- Just 0.0-1.0 if exiting
   }
 
 -- =============================================================================
@@ -103,7 +103,7 @@ mkTransitionState viewNodes nodes =
 -- | Returns new state with enter/exit sets populated
 computeTransition
   :: ViewState
-  -> Array SimNode  -- All available nodes
+  -> Array SimNode -- All available nodes
   -> TransitionState
   -> TransitionState
 computeTransition targetView allNodes state =
@@ -111,8 +111,8 @@ computeTransition targetView allNodes state =
     targetViewNodes = getViewNodes targetView
 
     -- Skip if view type unchanged
-    _ = if targetViewNodes == state.currentViewNodes
-      then state
+    _ =
+      if targetViewNodes == state.currentViewNodes then state
       else state
 
     -- Get which nodes should be visible in target vs current view
@@ -133,7 +133,7 @@ computeTransition targetView allNodes state =
     -- Remove any nodes that are now entering from the exiting list
     -- (in case of rapid view switches)
     filteredExiting = Array.filter (\t -> not (Set.member t.item.id enteringIds))
-                        (state.exitingNodes <> newExiting)
+      (state.exitingNodes <> newExiting)
   in
     { enteringProgress: newEnteringProgress
     , exitingNodes: filteredExiting
@@ -163,7 +163,7 @@ getViewNodes (Overview TreemapView) = AllNodes
 getViewNodes (Overview TreeView) = UsedModulesOnly
 getViewNodes (Overview ForceView) = UsedModulesOnly
 getViewNodes (Overview TopoView) = PackagesOnly
-getViewNodes (Detail _) = UsedModulesOnly  -- Detail views show used modules
+getViewNodes (Detail _) = UsedModulesOnly -- Detail views show used modules
 
 -- | Filter nodes based on view type
 filterNodesForViewType :: ViewNodes -> Array SimNode -> Array SimNode
@@ -182,18 +182,24 @@ getNodesForView viewState allNodes state =
     visibleNodes = filterNodesForViewType viewNodes allNodes
 
     -- Build render nodes for visible nodes (may be entering)
-    renderVisible = map (\n ->
-      { node: n
-      , enterProgress: Map.lookup n.id state.enteringProgress
-      , exitProgress: Nothing
-      }) visibleNodes
+    renderVisible = map
+      ( \n ->
+          { node: n
+          , enterProgress: Map.lookup n.id state.enteringProgress
+          , exitProgress: Nothing
+          }
+      )
+      visibleNodes
 
     -- Add exiting nodes with exit progress
-    renderExiting = map (\t ->
-      { node: t.item
-      , enterProgress: Nothing
-      , exitProgress: Just t.progress
-      }) state.exitingNodes
+    renderExiting = map
+      ( \t ->
+          { node: t.item
+          , enterProgress: Nothing
+          , exitProgress: Just t.progress
+          }
+      )
+      state.exitingNodes
   in
     renderVisible <> renderExiting
 
@@ -222,8 +228,8 @@ viewNeedsModules (Detail _) = true
 nodeOpacity :: RenderNode -> Number
 nodeOpacity { enterProgress, exitProgress } =
   case enterProgress, exitProgress of
-    Just p, _ -> Tick.lerp 0.0 1.0 (Tick.easeOut p)  -- Fade in
-    _, Just p -> Tick.lerp 1.0 0.0 (Tick.easeOut p)  -- Fade out
+    Just p, _ -> Tick.lerp 0.0 1.0 (Tick.easeOut p) -- Fade in
+    _, Just p -> Tick.lerp 1.0 0.0 (Tick.easeOut p) -- Fade out
     _, _ -> 1.0
 
 -- | Get radius multiplier for a node based on transition state
@@ -233,8 +239,8 @@ nodeOpacity { enterProgress, exitProgress } =
 nodeRadius :: RenderNode -> Number -> Number
 nodeRadius { enterProgress, exitProgress } baseRadius =
   case enterProgress, exitProgress of
-    Just p, _ -> Tick.lerp 0.0 baseRadius (Tick.easeOut p)  -- Grow in
-    _, Just p -> Tick.lerp baseRadius 0.0 (Tick.easeIn p)   -- Shrink out
+    Just p, _ -> Tick.lerp 0.0 baseRadius (Tick.easeOut p) -- Grow in
+    _, Just p -> Tick.lerp baseRadius 0.0 (Tick.easeIn p) -- Shrink out
     _, _ -> baseRadius
 
 -- =============================================================================

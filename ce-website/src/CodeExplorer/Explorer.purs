@@ -2,20 +2,20 @@
 -- |
 -- | Clean implementation using the compositional scene architecture.
 -- | Each scene is a self-contained config; transitions are handled by the Engine.
-module Engine.Explorer
+module CodeExplorer.Explorer
   ( initExplorer
   , initExplorerWithCallbacks
   , ExplorerCallbacks
   , ModelInfo
   , goToScene
-  , SceneId(..)  -- Export ADT and constructors for type-safe scene selection
+  , SceneId(..) -- Export ADT and constructors for type-safe scene selection
   , reloadWithProject
-  , setViewState  -- Public API for changing view state
-  , setNeighborhoodViewType  -- Switch between Bubbles/Chord/Matrix in neighborhood view
+  , setViewState -- Public API for changing view state
+  , setNeighborhoodViewType -- Switch between Bubbles/Chord/Matrix in neighborhood view
   , navigateBack
-  , navigateToModuleByName  -- Navigate to module neighborhood by name (for search)
-  , getModuleNames  -- Get all module names for search
-  , getOriginView  -- Get the origin view for back navigation
+  , navigateToModuleByName -- Navigate to module neighborhood by name (for search)
+  , getModuleNames -- Get all module names for search
+  , getOriginView -- Get the origin view for back navigation
   , updateNodeColors
   ) where
 
@@ -43,20 +43,20 @@ import Effect.Ref as Ref
 import Effect.Unsafe (unsafePerformEffect)
 import Foreign.Object as Object
 import Data.Loader (loadModel, loadModelForProject, LoadedModel, DeclarationsMap, FunctionCallsMap, fetchBatchDeclarations, fetchBatchFunctionCalls)
-import Engine.BubblePack (renderModulePackWithCallbacks, highlightCallGraph, clearCallGraphHighlight, drawFunctionEdges, clearFunctionEdges, drawModuleEdges, highlightModuleCallGraph, ModuleEdge, DeclarationClickCallback, DeclarationHoverCallback, clearBubblePacks)
-import Engine.ChordDiagram (renderNeighborhoodChord, clearChordDiagram)
-import Engine.AdjacencyMatrix (renderNeighborhoodMatrix, clearAdjacencyMatrix)
-import Engine.TriptychView (renderTriptychWithDeclarations, clearTriptych)
+import CodeExplorer.BubblePack (renderModulePackWithCallbacks, highlightCallGraph, clearCallGraphHighlight, drawFunctionEdges, clearFunctionEdges, drawModuleEdges, highlightModuleCallGraph, ModuleEdge, DeclarationClickCallback, DeclarationHoverCallback, clearBubblePacks)
+import CodeExplorer.ChordDiagram (renderNeighborhoodChord, clearChordDiagram)
+import CodeExplorer.AdjacencyMatrix (renderNeighborhoodMatrix, clearAdjacencyMatrix)
+import CodeExplorer.TriptychView (renderTriptychWithDeclarations, clearTriptych)
 -- CallGraphPopup is now a Halogen component (Component.CallGraphPopup)
 -- NarrativePanel is now a Halogen component (Component.NarrativePanel)
 -- It polls globalViewStateRef and globalModelInfoRef directly
-import Engine.ViewState (ViewState(..), OverviewView(..), DetailView(..), NeighborhoodViewType(..), getNeighborhoodModule, neighborhoodViewLabel)
-import Engine.ViewTransition as VT
+import CodeExplorer.ViewState (ViewState(..), OverviewView(..), DetailView(..), NeighborhoodViewType(..), getNeighborhoodModule, neighborhoodViewLabel)
+import CodeExplorer.ViewTransition as VT
 import Data.ColorPalette (getNodeStroke, getNodeFill) as ColorPalette
-import Engine.Treemap (recalculateTreemapPositions, renderWatermark, clearWatermark)
+import CodeExplorer.Treemap (recalculateTreemapPositions, renderWatermark, clearWatermark)
 import PSD3v2.Tooltip (hideTooltip) as Tooltip
-import Engine.Scene as Scene
-import Engine.Scenes as Scenes
+import CodeExplorer.Scene as Scene
+import CodeExplorer.Scenes as Scenes
 import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Links (swizzleLinks)
 import PSD3.ForceEngine.Render (GroupId(..), updateGroupPositions, updateLinkPositions)
@@ -71,8 +71,8 @@ import PSD3v2.Tooltip (onTooltip)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SBoundOwns)
 import Types (SimNode, SimLink, NodeType(..), LinkType, isTreeLink)
-import Engine.ViewBox as ViewBox
-import Viz.SpagoGridTest.TreeLinks (verticalLinkPath)
+import CodeExplorer.ViewBox as ViewBox
+import Viz.CodeExplorer.TreeLinks (verticalLinkPath)
 import Web.DOM.Element (Element, classList, toNode)
 import Web.DOM.Node as Node
 import Web.DOM.DOMTokenList as DOMTokenList
@@ -88,11 +88,11 @@ import Web.HTML.HTMLDocument (toParentNode)
 -- | Type-safe scene identifiers
 -- | Replaces string-based scene selection for compile-time safety
 data SceneId
-  = TreemapForm      -- ^ Static treemap/grid layout
-  | TreeForm         -- ^ Static tree layout (bezier links)
-  | RadialTreeForm   -- ^ Static radial tree layout (waypoint before Force)
-  | TreeRun          -- ^ Force-directed tree (physics enabled)
-  | TopoForm         -- ^ Package DAG with topological positions
+  = TreemapForm -- ^ Static treemap/grid layout
+  | TreeForm -- ^ Static tree layout (bezier links)
+  | RadialTreeForm -- ^ Static radial tree layout (waypoint before Force)
+  | TreeRun -- ^ Force-directed tree (physics enabled)
+  | TopoForm -- ^ Package DAG with topological positions
 
 derive instance eqSceneId :: Eq SceneId
 
@@ -178,7 +178,7 @@ executeRadialTreeWaypoint = do
     Just stateRef -> do
       -- Clear any existing links and set up for radial view
       clearTreeLinks
-      setTreeSceneClass true  -- Fade packages/non-tree like TreeView
+      setTreeSceneClass true -- Fade packages/non-tree like TreeView
 
       -- Trigger the radial tree scene transition
       goToScene RadialTreeForm stateRef
@@ -205,9 +205,10 @@ executeViewChange newView = do
       currentTransition <- Ref.read globalTransitionRef
       let newTransition = VT.computeTransition newView allNodes currentTransition
       Ref.write newTransition globalTransitionRef
-      log $ "[Explorer] Transition computed - entering: " <>
-        show (Map.size newTransition.enteringProgress) <>
-        ", exiting: " <> show (Array.length newTransition.exitingNodes)
+      log $ "[Explorer] Transition computed - entering: "
+        <> show (Map.size newTransition.enteringProgress)
+        <> ", exiting: "
+        <> show (Array.length newTransition.exitingNodes)
     Nothing -> pure unit
 
   -- Update node colors
@@ -221,7 +222,7 @@ executeViewChange newView = do
         Overview TreeView -> goToScene TreeForm stateRef
         Overview ForceView -> goToScene TreeRun stateRef
         Overview TopoView -> goToScene TopoForm stateRef
-        Detail _ -> pure unit  -- Detail views handled separately
+        Detail _ -> pure unit -- Detail views handled separately
       -- Always reheat simulation on view change to ensure ticks keep running
       -- This is needed when returning from Static scenes (Tree, Treemap)
       sceneState <- Ref.read stateRef
@@ -238,9 +239,10 @@ tickWithPendingViewCheck :: Ref Scene.SceneState -> String -> Effect Unit
 tickWithPendingViewCheck stateRef nodesSelector = do
   -- Get state before tick to detect transition completion
   stateBefore <- Ref.read stateRef
-  let wasTransitioning = case stateBefore.transition of
-        Just _ -> true
-        Nothing -> false
+  let
+    wasTransitioning = case stateBefore.transition of
+      Just _ -> true
+      Nothing -> false
 
   -- Run the normal tick
   Scene.onTickWithViewTransition stateRef globalTransitionRef globalViewStateRef nodesSelector
@@ -250,9 +252,10 @@ tickWithPendingViewCheck stateRef nodesSelector = do
 
   -- Check if transition just completed
   stateAfter <- Ref.read stateRef
-  let isTransitioning = case stateAfter.transition of
-        Just _ -> true
-        Nothing -> false
+  let
+    isTransitioning = case stateAfter.transition of
+      Just _ -> true
+      Nothing -> false
 
   -- If transition just completed, check for pending view
   when (wasTransitioning && not isTransitioning) do
@@ -335,13 +338,13 @@ globalPendingViewRef = unsafePerformEffect $ Ref.new Nothing
 -- | instead of polling global refs.
 type ExplorerCallbacks =
   { onViewStateChanged :: ViewState -> Effect Unit
-      -- ^ Called when ViewState changes (navigation, drill-down, etc.)
+  -- ^ Called when ViewState changes (navigation, drill-down, etc.)
   , onModelLoaded :: ModelInfo -> Effect Unit
-      -- ^ Called when model data is loaded (provides package count for palette)
+  -- ^ Called when model data is loaded (provides package count for palette)
   , onShowCallGraphPopup :: String -> String -> Effect Unit
-      -- ^ Called when a declaration is clicked (moduleName, declarationName)
+  -- ^ Called when a declaration is clicked (moduleName, declarationName)
   , onHideCallGraphPopup :: Effect Unit
-      -- ^ Called when popup should be hidden (e.g., view change)
+  -- ^ Called when popup should be hidden (e.g., view change)
   }
 
 -- | Global ref for callbacks (set by initExplorerWithCallbacks)
@@ -356,7 +359,7 @@ notifyViewStateChanged newView = do
   mCallbacks <- Ref.read globalCallbacksRef
   case mCallbacks of
     Just cbs -> cbs.onViewStateChanged newView
-    Nothing -> pure unit  -- No callbacks registered, silent no-op
+    Nothing -> pure unit -- No callbacks registered, silent no-op
 
 -- | Notify model loaded via callback (if set)
 notifyModelLoaded :: ModelInfo -> Effect Unit
@@ -364,7 +367,7 @@ notifyModelLoaded modelInfo = do
   mCallbacks <- Ref.read globalCallbacksRef
   case mCallbacks of
     Just cbs -> cbs.onModelLoaded modelInfo
-    Nothing -> pure unit  -- No callbacks registered, silent no-op
+    Nothing -> pure unit -- No callbacks registered, silent no-op
 
 -- | Notify show call graph popup via callback (if set)
 notifyShowCallGraphPopup :: String -> String -> Effect Unit
@@ -372,7 +375,7 @@ notifyShowCallGraphPopup moduleName declarationName = do
   mCallbacks <- Ref.read globalCallbacksRef
   case mCallbacks of
     Just cbs -> cbs.onShowCallGraphPopup moduleName declarationName
-    Nothing -> pure unit  -- No callbacks registered, silent no-op
+    Nothing -> pure unit -- No callbacks registered, silent no-op
 
 -- =============================================================================
 -- Constants
@@ -500,7 +503,7 @@ initWithModel model containerSelector = do
   stateRef <- Ref.new sceneState
 
   -- Set up tick callback - includes view transition progress advancement and visual updates
-  let nodesSelector = "#explorer-nodes"  -- Selector for the nodes group
+  let nodesSelector = "#explorer-nodes" -- Selector for the nodes group
   -- Wrap the scene tick to check for pending waypoint transitions
   Sim.onTick (tickWithPendingViewCheck stateRef nodesSelector) sim
 
@@ -947,10 +950,14 @@ logConnectivityStats label scores =
       let avgScore = (foldl (+) 0.0 scores) / toNumber count
       let medianScore = fromMaybe 0.0 (Array.index sortedScores (count / 2))
       log $ "[" <> label <> "] Connectivity scores - count: " <> show count
-        <> ", min: " <> show minScore
-        <> ", max: " <> show maxScore
-        <> ", avg: " <> show avgScore
-        <> ", median: " <> show medianScore
+        <> ", min: "
+        <> show minScore
+        <> ", max: "
+        <> show maxScore
+        <> ", avg: "
+        <> show avgScore
+        <> ", median: "
+        <> show medianScore
 
 -- | Map interconnectivity score to stroke width
 -- | Returns width between 0.5 (weak connection) and 3.5 (strong connection)
@@ -965,7 +972,7 @@ linkStrokeColor _score = "white"
 -- | Map interconnectivity score to opacity
 -- | More interconnected links are more opaque (visible)
 linkOpacity :: Number -> Number
-linkOpacity score = 0.3 + (score * 0.5)  -- Range: 0.3 to 0.8
+linkOpacity score = 0.3 + (score * 0.5) -- Range: 0.3 to 0.8
 
 -- =============================================================================
 -- Tree Link Rendering
@@ -1012,32 +1019,39 @@ renderTreeLinksD3 nodeMap links = do
     case Map.lookup link.source nm, Map.lookup link.target nm of
       Just srcNode, Just tgtNode -> Just (linkInterconnectivity srcNode tgtNode)
       _, _ -> Nothing
+
   -- Compute stroke color based on interconnectivity
   linkStrokeFn :: Map.Map Int SimNode -> SimLink -> String
   linkStrokeFn nm link =
     case Map.lookup link.source nm, Map.lookup link.target nm of
       Just srcNode, Just tgtNode ->
-        let score = linkInterconnectivity srcNode tgtNode
-        in linkStrokeColor score
-      _, _ -> "white"  -- Fallback
+        let
+          score = linkInterconnectivity srcNode tgtNode
+        in
+          linkStrokeColor score
+      _, _ -> "white" -- Fallback
 
   -- Compute stroke width based on interconnectivity
   linkWidthFn :: Map.Map Int SimNode -> SimLink -> Number
   linkWidthFn nm link =
     case Map.lookup link.source nm, Map.lookup link.target nm of
       Just srcNode, Just tgtNode ->
-        let score = linkInterconnectivity srcNode tgtNode
-        in linkStrokeWidth score
-      _, _ -> 1.5  -- Fallback
+        let
+          score = linkInterconnectivity srcNode tgtNode
+        in
+          linkStrokeWidth score
+      _, _ -> 1.5 -- Fallback
 
   -- Compute opacity based on interconnectivity
   linkOpacityFn :: Map.Map Int SimNode -> SimLink -> Number
   linkOpacityFn nm link =
     case Map.lookup link.source nm, Map.lookup link.target nm of
       Just srcNode, Just tgtNode ->
-        let score = linkInterconnectivity srcNode tgtNode
-        in linkOpacity score
-      _, _ -> 0.5  -- Fallback
+        let
+          score = linkInterconnectivity srcNode tgtNode
+        in
+          linkOpacity score
+      _, _ -> 0.5 -- Fallback
 
 -- | Generate path string for a link (vertical tree layout)
 linkPathFn :: Map.Map Int SimNode -> SimLink -> String
@@ -1110,20 +1124,26 @@ renderForceLinksD3 links = do
   -- Compute stroke color based on interconnectivity
   forceStrokeFn :: SwizzledLink -> String
   forceStrokeFn link =
-    let score = linkInterconnectivity link.source link.target
-    in linkStrokeColor score
+    let
+      score = linkInterconnectivity link.source link.target
+    in
+      linkStrokeColor score
 
   -- Compute stroke width based on interconnectivity
   forceWidthFn :: SwizzledLink -> Number
   forceWidthFn link =
-    let score = linkInterconnectivity link.source link.target
-    in linkStrokeWidth score
+    let
+      score = linkInterconnectivity link.source link.target
+    in
+      linkStrokeWidth score
 
   -- Compute opacity based on interconnectivity
   forceOpacityFn :: SwizzledLink -> Number
   forceOpacityFn link =
-    let score = linkInterconnectivity link.source link.target
-    in linkOpacity score
+    let
+      score = linkInterconnectivity link.source link.target
+    in
+      linkOpacity score
 
 -- =============================================================================
 -- CSS Scene Class Management
@@ -1228,21 +1248,33 @@ toggleFocus clickedNode = do
 
               -- Build neighborhood: packages within ±1 layer of clicked package
               -- At edges (minLayer or maxLayer), only show 2 layers instead of 3
-              let neighborhoodNodes = Array.filter (\n ->
-                    n.nodeType == PackageNode &&
-                    n.topoLayer >= (clickedLayer - 1) &&
-                    n.topoLayer <= (clickedLayer + 1)
-                  ) nodesToStore
+              let
+                neighborhoodNodes = Array.filter
+                  ( \n ->
+                      n.nodeType == PackageNode
+                        && n.topoLayer >= (clickedLayer - 1)
+                        &&
+                          n.topoLayer <= (clickedLayer + 1)
+                  )
+                  nodesToStore
 
               log $ "[Explorer] Focusing on package " <> packageName
-                <> " (layer " <> show clickedLayer <> ", range " <> show minLayer <> "-" <> show maxLayer
-                <> ", neighborhood: " <> show (Array.length neighborhoodNodes) <> " packages)"
+                <> " (layer "
+                <> show clickedLayer
+                <> ", range "
+                <> show minLayer
+                <> "-"
+                <> show maxLayer
+                <> ", neighborhood: "
+                <> show (Array.length neighborhoodNodes)
+                <> " packages)"
 
               -- Record the origin view (must be done before view change)
               currentView <- Ref.read globalViewStateRef
-              let origin = case currentView of
-                    Overview ov -> Just ov
-                    Detail _ -> focus.originView
+              let
+                origin = case currentView of
+                  Overview ov -> Just ov
+                  Detail _ -> focus.originView
 
               -- Update focus state with origin
               Ref.write { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore, originView: origin } globalFocusRef
@@ -1258,15 +1290,15 @@ toggleFocus clickedNode = do
               -- Update simulation and DOM with package-specific rendering
               focusOnPackageNeighborhood packageName neighborhoodNodes state.simulation
 
-              -- EXPERIMENTAL: Module-level package view (commented out - too dense for large packages)
-              -- This shows all modules in a package + their external module dependencies
-              -- Could be useful with additional work (filtering, clustering, etc.)
-              --
-              -- let modulesInPackage = Array.filter (\n -> n.nodeType == ModuleNode && n.package == packageName) nodesToStore
-              -- let moduleIds = Set.fromFoldable $ map _.id modulesInPackage
-              -- let externalDepIds = Set.fromFoldable $ Array.concatMap (\m -> m.targets <> m.sources) modulesInPackage
-              -- let neighborhoodIds = Set.union moduleIds externalDepIds
-              -- let neighborhoodNodes = Array.filter (\n -> n.nodeType == ModuleNode && Set.member n.id neighborhoodIds) nodesToStore
+            -- EXPERIMENTAL: Module-level package view (commented out - too dense for large packages)
+            -- This shows all modules in a package + their external module dependencies
+            -- Could be useful with additional work (filtering, clustering, etc.)
+            --
+            -- let modulesInPackage = Array.filter (\n -> n.nodeType == ModuleNode && n.package == packageName) nodesToStore
+            -- let moduleIds = Set.fromFoldable $ map _.id modulesInPackage
+            -- let externalDepIds = Set.fromFoldable $ Array.concatMap (\m -> m.targets <> m.sources) modulesInPackage
+            -- let neighborhoodIds = Set.union moduleIds externalDepIds
+            -- let neighborhoodNodes = Array.filter (\n -> n.nodeType == ModuleNode && Set.member n.id neighborhoodIds) nodesToStore
 
             ModuleNode -> do
               -- Module click: show this module + its direct dependencies
@@ -1283,9 +1315,10 @@ toggleFocus clickedNode = do
 
               -- Record the origin view (must be done before view change)
               currentView <- Ref.read globalViewStateRef
-              let origin = case currentView of
-                    Overview ov -> Just ov
-                    Detail _ -> focus.originView -- Keep existing origin if already in detail
+              let
+                origin = case currentView of
+                  Overview ov -> Just ov
+                  Detail _ -> focus.originView -- Keep existing origin if already in detail
 
               -- Update focus state with origin
               Ref.write { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore, originView: origin } globalFocusRef
@@ -1400,7 +1433,9 @@ focusOnNeighborhood nodes sim = do
 focusOnPackageNeighborhood :: String -> Array SimNode -> Scene.CESimulation -> Effect Unit
 focusOnPackageNeighborhood clickedPackageName nodes sim = do
   log $ "[Explorer] Focusing on package neighborhood: " <> clickedPackageName
-    <> " with " <> show (Array.length nodes) <> " packages"
+    <> " with "
+    <> show (Array.length nodes)
+    <> " packages"
 
   -- Hide any existing tooltip
   Tooltip.hideTooltip
@@ -1418,38 +1453,49 @@ focusOnPackageNeighborhood clickedPackageName nodes sim = do
 
   -- Calculate layered positions (x spread within layer, y by layer)
   -- Group packages by layer for horizontal distribution
-  let layerGroups = Array.groupBy (\a b -> a.topoLayer == b.topoLayer) $
-                    Array.sortBy (comparing _.topoLayer) nodes
+  let
+    layerGroups = Array.groupBy (\a b -> a.topoLayer == b.topoLayer) $
+      Array.sortBy (comparing _.topoLayer) nodes
 
   -- Viewport dimensions - viewBox is centered at origin (-1200 -800 2400 1600)
   let viewWidth = ViewBox.viewBoxWidth
   let viewHeight = ViewBox.viewBoxHeight
-  let centerX = 0.0  -- Origin is center
+  let centerX = 0.0 -- Origin is center
   let centerY = 0.0
 
   -- Calculate layer spacing (use ~half viewport height for compact layout)
   let numLayers = maxLayer - minLayer + 1
-  let totalLayerSpan = viewHeight / 2.0  -- Half the viewport height
-  let layerHeight = if numLayers > 1
-                    then totalLayerSpan / toNumber (numLayers - 1)
-                    else 0.0
+  let totalLayerSpan = viewHeight / 2.0 -- Half the viewport height
+  let
+    layerHeight =
+      if numLayers > 1 then totalLayerSpan / toNumber (numLayers - 1)
+      else 0.0
 
   -- Position nodes by layer (top = high layer, bottom = low layer)
-  let positionedNodes = Array.concat $ Array.mapWithIndex (\_ group ->
-        let groupArray = Array.fromFoldable group
+  let
+    positionedNodes = Array.concat $ Array.mapWithIndex
+      ( \_ group ->
+          let
+            groupArray = Array.fromFoldable group
             layerNum = maybe minLayer _.topoLayer (Array.head groupArray)
             -- Y position: higher layer = higher on screen (lower Y)
             yPos = centerY - (toNumber (layerNum - clickedLayer)) * layerHeight
             -- X positions: centered, spread evenly
             numInLayer = Array.length groupArray
-            nodeSpacing = 120.0  -- Space between nodes
+            nodeSpacing = 120.0 -- Space between nodes
             rowWidth = toNumber (numInLayer - 1) * nodeSpacing
-            xStart = centerX - rowWidth / 2.0  -- Center the row
-        in Array.mapWithIndex (\nodeIdx node ->
-             let xPos = xStart + toNumber nodeIdx * nodeSpacing
-             in node { x = xPos, y = yPos, fx = Nullable.notNull xPos, fy = Nullable.notNull yPos }
-           ) groupArray
-      ) layerGroups
+            xStart = centerX - rowWidth / 2.0 -- Center the row
+          in
+            Array.mapWithIndex
+              ( \nodeIdx node ->
+                  let
+                    xPos = xStart + toNumber nodeIdx * nodeSpacing
+                  in
+                    node { x = xPos, y = yPos, fx = Nullable.notNull xPos, fy = Nullable.notNull yPos }
+              )
+              groupArray
+      )
+      layerGroups
 
   -- Update simulation with positioned nodes (pinned so they don't move)
   Sim.setNodes positionedNodes sim
@@ -1472,11 +1518,11 @@ renderPackageNeighborhoodNodes clickedPkg nodes clickedLayer = do
     let isClicked = node.name == clickedPkg
     let isClickedLayer = node.topoLayer == clickedLayer
     let r = if isClicked then 35.0 else 25.0
-    let fillColor = if isClicked
-                    then "#fbbf24"  -- Amber for clicked
-                    else if isClickedLayer
-                    then "#60a5fa"  -- Blue for same layer
-                    else "#94a3b8"  -- Gray for other layers
+    let
+      fillColor =
+        if isClicked then "#fbbf24" -- Amber for clicked
+        else if isClickedLayer then "#60a5fa" -- Blue for same layer
+        else "#94a3b8" -- Gray for other layers
     let strokeColor = if isClicked then "#f59e0b" else "#475569"
     let sw = if isClicked then "3" else "2"
     let fw = if isClicked then "600" else "400"
@@ -1515,7 +1561,7 @@ type NeighborhoodLink =
 type DirectionalLink =
   { source :: SimNode
   , target :: SimNode
-  , isOutgoing :: Boolean  -- True = green (imports), False = orange (imported by)
+  , isOutgoing :: Boolean -- True = green (imports), False = orange (imported by)
   }
 
 -- | Render links between neighborhood nodes (full graph edges, not tree)
@@ -1660,20 +1706,26 @@ renderNeighborhoodLinksD3 links = do
   -- Compute stroke color based on interconnectivity
   neighborhoodStrokeFn :: NeighborhoodLink -> String
   neighborhoodStrokeFn link =
-    let score = linkInterconnectivity link.source link.target
-    in linkStrokeColor score
+    let
+      score = linkInterconnectivity link.source link.target
+    in
+      linkStrokeColor score
 
   -- Compute stroke width based on interconnectivity
   neighborhoodWidthFn :: NeighborhoodLink -> Number
   neighborhoodWidthFn link =
-    let score = linkInterconnectivity link.source link.target
-    in linkStrokeWidth score
+    let
+      score = linkInterconnectivity link.source link.target
+    in
+      linkStrokeWidth score
 
   -- Compute opacity based on interconnectivity
   neighborhoodOpacityFn :: NeighborhoodLink -> Number
   neighborhoodOpacityFn link =
-    let score = linkInterconnectivity link.source link.target
-    in linkOpacity score
+    let
+      score = linkInterconnectivity link.source link.target
+    in
+      linkOpacity score
 
 -- | D3 rendering for directional links with bidirectional coloring
 -- | Green = outgoing (source imports target), Orange = incoming (the reverse link)
@@ -1712,14 +1764,16 @@ renderDirectionalLinksD3 links = do
   -- Green for outgoing (imports), matching adjacency matrix
   directionalStrokeFn :: DirectionalLink -> String
   directionalStrokeFn l =
-    if l.isOutgoing then "#4ade80"  -- Green for outgoing
-    else "#f97316"                   -- Orange for incoming
+    if l.isOutgoing then "#4ade80" -- Green for outgoing
+    else "#f97316" -- Orange for incoming
 
   -- Width based on connectivity
   directionalWidthFn :: DirectionalLink -> Number
   directionalWidthFn l =
-    let score = linkInterconnectivity l.source l.target
-    in linkStrokeWidth score
+    let
+      score = linkInterconnectivity l.source l.target
+    in
+      linkStrokeWidth score
 
   directionalClassFn :: DirectionalLink -> String
   directionalClassFn l =
@@ -1785,9 +1839,10 @@ navigateToModuleByName moduleName = do
 
           -- Record the origin view (must be done before view change)
           currentView <- Ref.read globalViewStateRef
-          let origin = case currentView of
-                Overview ov -> Just ov
-                Detail _ -> focus.originView -- Keep existing origin if already in detail
+          let
+            origin = case currentView of
+              Overview ov -> Just ov
+              Detail _ -> focus.originView -- Keep existing origin if already in detail
 
           -- Update focus state with origin
           Ref.write { focusedNodeId: Just targetNode.id, fullNodes: nodesPool, originView: origin } globalFocusRef
@@ -1877,7 +1932,7 @@ restoreFullView fullNodes targetView sim = do
         Overview TreeView -> goToScene TreeForm stateRef
         Overview ForceView -> goToScene TreeRun stateRef
         Overview TopoView -> goToScene TopoForm stateRef
-        Detail _ -> pure unit  -- Detail views shouldn't reach this path
+        Detail _ -> pure unit -- Detail views shouldn't reach this path
     Nothing -> pure unit
 
   -- Update ViewState and notify via callback
@@ -2060,17 +2115,23 @@ buildModuleEdgesAndFuncs moduleName moduleFuncs fnCalls =
       Just fnInfo ->
         let
           -- Outgoing edges (this function calls others)
-          outEdges = map (\c ->
-            { source: funcKey
-            , target: c.targetModule <> "." <> c.target
-            , isOutgoing: true
-            }) fnInfo.calls
+          outEdges = map
+            ( \c ->
+                { source: funcKey
+                , target: c.targetModule <> "." <> c.target
+                , isOutgoing: true
+                }
+            )
+            fnInfo.calls
           -- Incoming edges (others call this function)
-          inEdges = map (\caller ->
-            { source: caller
-            , target: funcKey
-            , isOutgoing: false
-            }) fnInfo.calledBy
+          inEdges = map
+            ( \caller ->
+                { source: caller
+                , target: funcKey
+                , isOutgoing: false
+                }
+            )
+            fnInfo.calledBy
           -- Collect callee and caller function names
           calleeNames = map (\c -> c.targetModule <> "." <> c.target) fnInfo.calls
           callerNames = fnInfo.calledBy

@@ -14,7 +14,7 @@ import Data.Maybe (Maybe(..))
 
 main :: Effect Unit
 main = do
-  log "[Main] Starting with Halogen wrapper around SpagoGridTest..."
+  log "[Main] Starting with Halogen wrapper around CodeExplorer..."
   log "[Main] IMPORTANT: Using selectElement to mount into #app (not body)"
 
   -- Configure tooltip theme to match floating panels
