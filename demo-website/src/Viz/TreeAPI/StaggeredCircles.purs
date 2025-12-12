@@ -86,7 +86,8 @@ staggeredCircles selector = do
           let
             config = transitionWith
               { duration: Milliseconds 500.0
-              , delay: Nothing -- Ignored when using staggered
+              , delay: Nothing
+              , staggerDelay: Nothing -- Using withTransitionStaggered instead
               , easing: Nothing
               }
           withTransitionStaggered config (staggerByIndex 100.0) circlesSel
@@ -102,6 +103,7 @@ staggeredCircles selector = do
           config = transitionWith
             { duration: Milliseconds 300.0
             , delay: Nothing
+            , staggerDelay: Nothing
             , easing: Nothing
             }
         withTransition config circlesSel

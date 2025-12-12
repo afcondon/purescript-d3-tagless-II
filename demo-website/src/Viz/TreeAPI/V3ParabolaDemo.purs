@@ -1,0 +1,155 @@
+-- | PSD3v3 Parabola Demo - Live Browser Rendering
+-- |
+-- | This demonstrates the v3 "Finally Tagless" DSL rendering to actual DOM via D3.
+-- |
+-- | The same polymorphic expressions produce:
+-- |   - Runtime values for D3 (EvalD)
+-- |   - Source code for display (CodeGen)
+-- |   - SVG strings for server-side (SVGD) - not shown here
+-- |
+-- | This is the "money shot" - same expression, three different outputs!
+module D3.Viz.TreeAPI.V3ParabolaDemo where
+
+import Prelude hiding (add)
+
+import Data.Map as Map
+import Data.Maybe (Maybe(..))
+import Effect (Effect)
+import Effect.Class (liftEffect)
+import Effect.Console as Console
+import Type.Proxy (Proxy(..))
+
+-- v2 infrastructure for D3 rendering
+import PSD3v2.Attribute.Types (width, height, viewBox, id_, class_, fill, stroke, strokeWidth, cx, cy, radius)
+import PSD3v2.Capabilities.Selection (select, renderTree)
+import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
+import PSD3v2.Selection.Types (ElementType(..), SEmpty)
+import PSD3v2.VizTree.Tree (Tree)
+import PSD3v2.VizTree.Tree as T
+import Web.DOM.Element (Element)
+
+-- v3 DSL imports
+import PSD3v3.Expr (class NumExpr, lit, add)
+import PSD3v3.Datum (class DatumExpr, field)
+import PSD3v3.Sugar ((*:), (+:))
+import PSD3v3.Interpreter.CodeGen (CodeGen, runCodeGen)
+import PSD3v3.Interpreter.Eval (EvalD, runEvalD)
+
+-- =============================================================================
+-- Data Type
+-- =============================================================================
+
+type ParabolaPoint = { x :: Number, y :: Number }
+
+type ParabolaRow = ( x :: Number, y :: Number )
+
+-- Sample data: y = x²
+parabolaData :: Array ParabolaPoint
+parabolaData =
+  [ { x: -10.0, y: 100.0 }
+  , { x: -7.5, y: 56.25 }
+  , { x: -5.0, y: 25.0 }
+  , { x: -2.5, y: 6.25 }
+  , { x: 0.0, y: 0.0 }
+  , { x: 2.5, y: 6.25 }
+  , { x: 5.0, y: 25.0 }
+  , { x: 7.5, y: 56.25 }
+  , { x: 10.0, y: 100.0 }
+  ]
+
+-- =============================================================================
+-- v3 Expressions (Polymorphic!)
+-- =============================================================================
+
+-- | Scale X coordinate: (x + 5) * 30 + 50
+-- |
+-- | This expression is polymorphic over ANY repr that implements the typeclasses.
+-- | It can produce: Number (EvalD), String (CodeGen), String (SVGD)
+scaleX :: forall repr. NumExpr repr => DatumExpr repr ParabolaRow => repr Number
+scaleX = (xField +: 5.0) *: 30.0 +: 50.0
+  where
+    xField = field (Proxy :: Proxy "x")
+
+-- | Scale Y coordinate: 200 - (y * 1.8)
+scaleY :: forall repr. NumExpr repr => DatumExpr repr ParabolaRow => repr Number
+scaleY = add (lit 200.0) (yField *: (-1.8))
+  where
+    yField = field (Proxy :: Proxy "y")
+
+-- | Point radius based on distance from origin
+-- | Larger radius for points near the vertex
+pointRadius :: forall repr. NumExpr repr => DatumExpr repr ParabolaRow => repr Number
+pointRadius = add (lit 6.0) (yField *: (-0.05))
+  where
+    yField = field (Proxy :: Proxy "y")
+
+-- =============================================================================
+-- v3→v2 Integration: Evaluate expressions with datum
+-- =============================================================================
+
+-- | Evaluate a v3 expression with a datum to get a concrete value
+-- | This bridges v3 polymorphic expressions → v2 static attributes
+evalExpr :: forall a. EvalD ParabolaPoint a -> ParabolaPoint -> a
+evalExpr expr datum = runEvalD expr datum 0
+
+-- =============================================================================
+-- Browser Demo
+-- =============================================================================
+
+v3ParabolaDemo :: Effect Unit
+v3ParabolaDemo = runD3v2M do
+  container <- select "#viz" :: _ (D3v2Selection_ SEmpty Element Unit)
+
+  -- Define the visualization tree using v3 expressions
+  -- The template callback receives each datum, we evaluate v3 expressions with it
+  let tree :: Tree ParabolaPoint
+      tree =
+        T.named SVG "svg"
+          [ width 400.0
+          , height 250.0
+          , viewBox "0 0 400 250"
+          , id_ "v3-parabola-svg"
+          , class_ "v3-demo"
+          ]
+          `T.withChild`
+            (T.joinData "points" "circle" parabolaData $ \d ->
+              -- v3 expressions are evaluated with datum → static v2 attributes
+              T.elem Circle
+                [ cx (evalExpr scaleX d)       -- v3 expression evaluated!
+                , cy (evalExpr scaleY d)       -- v3 expression evaluated!
+                , radius (evalExpr pointRadius d)  -- v3 expression evaluated!
+                , fill "#3498db"
+                , stroke "white"
+                , strokeWidth 2.0
+                ])
+
+  -- Render to DOM via D3!
+  selections <- renderTree container tree
+
+  -- Log the "money shot" - same expressions, different outputs
+  liftEffect do
+    Console.log "=== PSD3v3 Parabola Demo: Live D3 Rendering ==="
+    Console.log ""
+    Console.log "v3 Expressions (polymorphic definitions):"
+    Console.log "  scaleX = (x + 5) * 30 + 50"
+    Console.log "  scaleY = 200 + (y * -1.8)"
+    Console.log ""
+    Console.log "CodeGen output (PureScript source):"
+    Console.log $ "  scaleX → " <> runCodeGen (scaleX :: CodeGen Number)
+    Console.log $ "  scaleY → " <> runCodeGen (scaleY :: CodeGen Number)
+    Console.log ""
+    Console.log "EvalD output (D3 runtime values for sample point):"
+    let pt = { x: -10.0, y: 100.0 }  -- Sample point
+    let cxVal = runEvalD scaleX pt 0
+    let cyVal = runEvalD scaleY pt 0
+    Console.log $ "  { x: " <> show pt.x <> ", y: " <> show pt.y <> " } → cx=" <> show cxVal <> ", cy=" <> show cyVal
+    Console.log ""
+    Console.log "Same expression, three outputs:"
+    Console.log "  • CodeGen: produces PureScript source code"
+    Console.log "  • EvalD: produces runtime Number values for D3"
+    Console.log "  • SVGD: produces SVG attribute strings (server-side)"
+    Console.log ""
+
+    case Map.lookup "points" selections of
+      Just _ -> Console.log "✓ Points rendered to DOM via D3 (check browser!)"
+      Nothing -> Console.log "✗ No points selection found"

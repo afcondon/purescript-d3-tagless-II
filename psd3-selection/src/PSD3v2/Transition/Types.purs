@@ -2,6 +2,7 @@ module PSD3v2.Transition.Types
   ( TransitionConfig
   , Easing(..)
   , transition
+  , staggeredTransition
   , transitionWith
   , defaultTransition
   ) where
@@ -16,18 +17,29 @@ import Data.Time.Duration (Milliseconds(..))
 -- | Specifies timing and easing for animated attribute changes.
 -- | All times are in milliseconds.
 -- |
+-- | For staggered transitions, use `staggerDelay` to add incremental delay
+-- | per element: element i gets delay = baseDelay + (i * staggerDelay)
+-- |
 -- | Example:
 -- | ```purescript
 -- | config = transition (Milliseconds 1500.0)
 -- | configWithDelay = transitionWith
 -- |   { duration: Milliseconds 1500.0
 -- |   , delay: Just (Milliseconds 500.0)
+-- |   , staggerDelay: Nothing
 -- |   , easing: Just Linear
+-- |   }
+-- | staggeredConfig = transitionWith
+-- |   { duration: Milliseconds 600.0
+-- |   , delay: Nothing
+-- |   , staggerDelay: Just 100.0  -- 100ms between each element
+-- |   , easing: Nothing
 -- |   }
 -- | ```
 type TransitionConfig =
   { duration :: Milliseconds
   , delay :: Maybe Milliseconds
+  , staggerDelay :: Maybe Number  -- Milliseconds added per element index
   , easing :: Maybe Easing
   }
 
@@ -123,7 +135,25 @@ transition :: Milliseconds -> TransitionConfig
 transition duration =
   { duration
   , delay: Nothing
+  , staggerDelay: Nothing
   , easing: Nothing  -- Will use D3's default (cubic)
+  }
+
+-- | Create a staggered transition where each element delays incrementally
+-- |
+-- | Element i gets delay = i * staggerMs
+-- |
+-- | Example:
+-- | ```purescript
+-- | config = staggeredTransition (Milliseconds 600.0) 100.0
+-- | -- Element 0: 0ms delay, Element 1: 100ms delay, Element 2: 200ms delay...
+-- | ```
+staggeredTransition :: Milliseconds -> Number -> TransitionConfig
+staggeredTransition duration staggerMs =
+  { duration
+  , delay: Nothing
+  , staggerDelay: Just staggerMs
+  , easing: Nothing
   }
 
 -- | Create a transition with full configuration

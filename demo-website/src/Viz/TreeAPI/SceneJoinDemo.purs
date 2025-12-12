@@ -119,6 +119,7 @@ createCirclesTree scene =
         , transition: Just
             { duration: Milliseconds 600.0
             , delay: Nothing
+            , staggerDelay: Nothing
             , easing: Just CubicInOut
             }
         }
@@ -134,6 +135,7 @@ createCirclesTree scene =
         , transition: Just
             { duration: Milliseconds 400.0
             , delay: Nothing
+            , staggerDelay: Nothing
             , easing: Just CubicInOut
             }
         }
@@ -144,6 +146,7 @@ createCirclesTree scene =
         , transition: Just
             { duration: Milliseconds 300.0
             , delay: Nothing
+            , staggerDelay: Nothing
             , easing: Just CubicIn
             }
         }

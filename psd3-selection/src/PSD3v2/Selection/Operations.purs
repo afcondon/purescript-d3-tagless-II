@@ -29,8 +29,9 @@ import Data.FoldableWithIndex (traverseWithIndex_)
 import Data.Int (toNumber)
 import Data.Map (Map)
 import Data.Map as Map
-import Data.Maybe (Maybe(..))
-import Data.Nullable (Nullable, toMaybe)
+import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.Newtype (unwrap)
+import Data.Nullable (Nullable, toMaybe, toNullable)
 import Data.Time.Duration (Milliseconds(..))
 import Data.Traversable (traverse)
 import Data.TraversableWithIndex (traverseWithIndex)
@@ -1010,6 +1011,9 @@ foreign import setTextContent_ :: String -> Element -> Effect Unit
 
 -- | Apply a transition with attributes to an array of elements
 -- | Used for enter/update phases - elements are animated but not removed
+-- |
+-- | Supports staggered delays: if config.staggerDelay is set, each element's
+-- | delay is: baseDelay + (index * staggerDelay)
 applyTransitionToElements
   :: forall datum
    . TransitionConfig
@@ -1018,10 +1022,15 @@ applyTransitionToElements
   -> Effect Unit
 applyTransitionToElements config elementDatumPairs attrs = do
   let Milliseconds duration = config.duration
-  let delayNullable = TransitionFFI.maybeMillisecondsToNullable config.delay
+  let baseDelay = maybe 0.0 unwrap config.delay
+  let stagger = fromMaybe 0.0 config.staggerDelay
   let easingNullable = TransitionFFI.maybeEasingToNullable config.easing
 
   elementDatumPairs # traverseWithIndex_ \index (Tuple element datum) -> do
+    -- Calculate effective delay: baseDelay + (index * staggerDelay)
+    let effectiveDelay = baseDelay + (toNumber index * stagger)
+    let delayNullable = toNullable (Just effectiveDelay)
+
     -- Create transition for this element
     transition <- TransitionFFI.createTransition_ duration delayNullable easingNullable element
 
@@ -1036,8 +1045,43 @@ applyTransitionToElements config elementDatumPairs attrs = do
       IndexedAttr (AttributeName name) f ->
         TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum index)) transition
 
+-- | Apply a transition to a single element with an explicit index
+-- | Used when elements need per-element attrs but shared stagger timing
+applyTransitionToSingleElement
+  :: forall datum
+   . TransitionConfig
+  -> Int                    -- Explicit index for stagger calculation
+  -> Element
+  -> datum
+  -> Array (Attribute datum)
+  -> Effect Unit
+applyTransitionToSingleElement config index element datum attrs = do
+  let Milliseconds duration = config.duration
+  let baseDelay = maybe 0.0 unwrap config.delay
+  let stagger = fromMaybe 0.0 config.staggerDelay
+  let effectiveDelay = baseDelay + (toNumber index * stagger)
+  let delayNullable = toNullable (Just effectiveDelay)
+  let easingNullable = TransitionFFI.maybeEasingToNullable config.easing
+
+  -- Create transition for this element
+  transition <- TransitionFFI.createTransition_ duration delayNullable easingNullable element
+
+  -- Apply each attribute to the transition
+  attrs # traverse_ \attr -> case attr of
+    StaticAttr (AttributeName name) value ->
+      TransitionFFI.transitionSetAttribute_ name (attributeValueToString value) transition
+
+    DataAttr (AttributeName name) f ->
+      TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum)) transition
+
+    IndexedAttr (AttributeName name) f ->
+      TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum index)) transition
+
 -- | Apply a transition with removal to an array of elements
 -- | Used for exit phase - elements animate out then are removed from DOM
+-- |
+-- | Supports staggered delays: if config.staggerDelay is set, each element's
+-- | delay is: baseDelay + (index * staggerDelay)
 applyExitTransitionToElements
   :: forall datum
    . TransitionConfig
@@ -1046,10 +1090,15 @@ applyExitTransitionToElements
   -> Effect Unit
 applyExitTransitionToElements config elementDatumPairs attrs = do
   let Milliseconds duration = config.duration
-  let delayNullable = TransitionFFI.maybeMillisecondsToNullable config.delay
+  let baseDelay = maybe 0.0 unwrap config.delay
+  let stagger = fromMaybe 0.0 config.staggerDelay
   let easingNullable = TransitionFFI.maybeEasingToNullable config.easing
 
   elementDatumPairs # traverseWithIndex_ \index (Tuple element datum) -> do
+    -- Calculate effective delay: baseDelay + (index * staggerDelay)
+    let effectiveDelay = baseDelay + (toNumber index * stagger)
+    let delayNullable = toNullable (Just effectiveDelay)
+
     -- Create transition for this element
     transition <- TransitionFFI.createTransition_ duration delayNullable easingNullable element
 
@@ -1090,6 +1139,15 @@ getBoundElementDatumPairs (Selection impl) =
       BoundSelection r -> r
   in
     Array.zipWith Tuple elements datumArray
+
+-- | Extract just the elements from a bound selection
+getElementsFromBoundSelection
+  :: forall datum
+   . Selection SBoundOwns Element datum
+  -> Array Element
+getElementsFromBoundSelection (Selection impl) =
+  unsafePartial case impl of
+    BoundSelection r -> r.elements
 
 -- ============================================================================
 -- Declarative Tree Rendering
@@ -1260,7 +1318,11 @@ renderNodeHelper parentSel (NestedJoin joinSpec) = do
 -- This implements enter/update/exit with behavior specs
 renderNodeHelper parentSel (SceneJoin joinSpec) = do
   -- 1. Perform data join (enter/update/exit)
-  JoinResult { enter: enterSel, update: updateSel, exit: exitSel } <- joinData joinSpec.joinData joinSpec.key parentSel
+  -- Use key function if provided, otherwise fall back to Eq-based join
+  JoinResult { enter: enterSel, update: updateSel, exit: exitSel } <-
+    case joinSpec.keyFn of
+      Just keyFn -> joinDataWithKey joinSpec.joinData keyFn joinSpec.key parentSel
+      Nothing -> joinData joinSpec.joinData joinSpec.key parentSel
 
   -- Log join results
   let Selection enterImpl = enterSel
@@ -1337,12 +1399,13 @@ renderNodeHelper parentSel (SceneJoin joinSpec) = do
               PendingSelection rec -> rec.pendingData
           let pairs = Array.zipWith Tuple enterElements pendingData
           -- For each element, extract final attrs from original template and animate to them
-          liftEffect $ pairs # traverse_ \(Tuple element datum) -> do
+          -- Use traverseWithIndex_ to get proper stagger index across all elements
+          liftEffect $ pairs # traverseWithIndex_ \index (Tuple element datum) -> do
             let
               finalAttrs = case joinSpec.template datum of
                 Node nodeSpec -> nodeSpec.attrs
                 _ -> [] -- Non-Node templates don't have attrs
-            applyTransitionToElements transConfig [ Tuple element datum ] finalAttrs
+            applyTransitionToSingleElement transConfig index element datum finalAttrs
         Nothing -> pure unit
 
       pure rendered
@@ -1360,15 +1423,20 @@ renderNodeHelper parentSel (SceneJoin joinSpec) = do
       case updateBehavior.transition of
         Just transConfig -> do
           -- Apply attributes via transition (animated)
+          -- IMPORTANT: When transitioning, we must NOT call renderTemplatesForBoundSelection
+          -- because that would immediately set attrs, overwriting the transition's start values.
+          -- Instead, we only animate to the updateBehavior.attrs, which should be the target.
           let pairs = getBoundElementDatumPairs updateSel
-          liftEffect $ applyTransitionToElements transConfig pairs updateBehavior.attrs
+          -- Use traverseWithIndex_ to get proper stagger index
+          liftEffect $ pairs # traverseWithIndex_ \index (Tuple element datum) ->
+            applyTransitionToSingleElement transConfig index element datum updateBehavior.attrs
+          -- Just return the existing elements - don't re-render and overwrite
+          pure $ getElementsFromBoundSelection updateSel
         Nothing -> do
           -- No transition, apply attributes immediately
           _ <- setAttrs updateBehavior.attrs updateSel
-          pure unit
-
-      -- Then render with template to update structure
-      renderTemplatesForBoundSelection joinSpec.template updateSel
+          -- Then render with template to update structure
+          renderTemplatesForBoundSelection joinSpec.template updateSel
     Nothing ->
       -- No update behavior, just re-render with template
       renderTemplatesForBoundSelection joinSpec.template updateSel
@@ -1512,12 +1580,13 @@ renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
               PendingSelection rec -> rec.pendingData
           let pairs = Array.zipWith Tuple enterElements pendingData
           -- For each element, extract final attrs from original template and animate to them
-          liftEffect $ pairs # traverse_ \(Tuple element datum) -> do
+          -- Use traverseWithIndex_ to get proper stagger index across all elements
+          liftEffect $ pairs # traverseWithIndex_ \index (Tuple element datum) -> do
             let
               finalAttrs = case (unsafeCoerce joinSpec.template) datum of
                 Node nodeSpec -> nodeSpec.attrs
                 _ -> []
-            applyTransitionToElements transConfig [ Tuple element datum ] finalAttrs
+            applyTransitionToSingleElement transConfig index element datum finalAttrs
         Nothing -> pure unit
 
       pure rendered
@@ -1530,14 +1599,17 @@ renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
       case (unsafeCoerce updateBehavior).transition of
         Just transConfig -> do
           -- Apply attributes via transition (animated)
+          -- IMPORTANT: When transitioning, we must NOT call renderTemplatesForBoundSelection
+          -- because that would immediately set attrs, overwriting the transition's start values.
           let pairs = getBoundElementDatumPairs updateSel
-          liftEffect $ applyTransitionToElements transConfig pairs (unsafeCoerce updateBehavior.attrs)
+          liftEffect $ pairs # traverseWithIndex_ \index (Tuple element datum) ->
+            applyTransitionToSingleElement transConfig index element datum (unsafeCoerce updateBehavior.attrs)
+          -- Just return the existing elements - don't re-render and overwrite
+          pure $ getElementsFromBoundSelection updateSel
         Nothing -> do
           -- No transition, apply attributes immediately
           _ <- setAttrs (unsafeCoerce updateBehavior.attrs) updateSel
-          pure unit
-
-      renderTemplatesForBoundSelection (unsafeCoerce joinSpec.template) updateSel
+          renderTemplatesForBoundSelection (unsafeCoerce joinSpec.template) updateSel
     Nothing -> renderTemplatesForBoundSelection (unsafeCoerce joinSpec.template) updateSel
 
   -- 6-9. Combine results (same as SceneJoin)

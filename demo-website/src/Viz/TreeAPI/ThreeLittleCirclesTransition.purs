@@ -53,6 +53,7 @@ transitionToState circlesSel state = runD3v2M do
     transitionConfig = transitionWith
       { duration: Milliseconds 1000.0
       , delay: Nothing
+      , staggerDelay: Nothing
       , easing: Nothing
       }
 

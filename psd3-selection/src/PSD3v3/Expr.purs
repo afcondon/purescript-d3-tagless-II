@@ -25,6 +25,9 @@ module PSD3v3.Expr
   , gt
   , gte
   , eq
+  , class StringCompareExpr
+  , strEq
+  , strNeq
   ) where
 
 import Prelude hiding (add, sub, mul, div, negate, not)
@@ -58,3 +61,9 @@ class CompareExpr repr where
   gt :: repr Number -> repr Number -> repr Boolean
   gte :: repr Number -> repr Number -> repr Boolean
   eq :: repr Number -> repr Number -> repr Boolean
+
+-- | String comparison expressions
+-- | Separate from CompareExpr to keep numeric and string comparisons distinct
+class StringCompareExpr repr where
+  strEq :: repr String -> repr String -> repr Boolean
+  strNeq :: repr String -> repr String -> repr Boolean

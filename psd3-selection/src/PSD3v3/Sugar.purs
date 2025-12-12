@@ -24,12 +24,15 @@ module PSD3v3.Sugar
   , (*~), scaleUnitOp
     -- String operators
   , (<+>), concatOp
-    -- Comparison operators
+    -- Comparison operators (numeric)
   , (<.), ltOp
   , (<=.), lteOp
   , (>.), gtOp
   , (>=.), gteOp
   , (==.), eqOp
+    -- String comparison operators
+  , (===), strEqOp
+  , (/==), strNeqOp
     -- Helpers
   , n
   , s
@@ -37,7 +40,7 @@ module PSD3v3.Sugar
 
 import Prelude hiding (add, sub, mul, div, negate, not)
 
-import PSD3v3.Expr (class NumExpr, class StringExpr, class CompareExpr)
+import PSD3v3.Expr (class NumExpr, class StringExpr, class CompareExpr, class StringCompareExpr)
 import PSD3v3.Expr as E
 import PSD3v3.Units (class UnitArith)
 import PSD3v3.Units as U
@@ -139,6 +142,19 @@ gteOp = E.gte
 
 eqOp :: forall repr. CompareExpr repr => repr Number -> repr Number -> repr Boolean
 eqOp = E.eq
+
+-- =============================================================================
+-- String Comparison Operators (repr String -> repr String -> repr Boolean)
+-- =============================================================================
+
+infix 4 strEqOp as ===
+infix 4 strNeqOp as /==
+
+strEqOp :: forall repr. StringCompareExpr repr => repr String -> repr String -> repr Boolean
+strEqOp = E.strEq
+
+strNeqOp :: forall repr. StringCompareExpr repr => repr String -> repr String -> repr Boolean
+strNeqOp = E.strNeq
 
 -- =============================================================================
 -- Short Helpers

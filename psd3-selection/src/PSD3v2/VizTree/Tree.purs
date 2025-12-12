@@ -93,6 +93,7 @@ data Tree datum
       , key :: String                          -- Element type (e.g., "circle", "g")
       , joinData :: Array datum                -- Data to join
       , template :: datum -> Tree datum        -- Base template (used for all phases)
+      , keyFn :: Maybe (datum -> String)       -- Optional key function for identity matching
       , enterBehavior :: Maybe (EnterBehavior datum)
       , updateBehavior :: Maybe (UpdateBehavior datum)
       , exitBehavior :: Maybe (ExitBehavior datum)
@@ -276,6 +277,7 @@ sceneJoin
   -> { enterBehavior :: Maybe (EnterBehavior datum)
      , updateBehavior :: Maybe (UpdateBehavior datum)
      , exitBehavior :: Maybe (ExitBehavior datum)
+     , keyFn :: Maybe (datum -> String)          -- Optional: identity function for matching
      }
   -> Tree datum
 sceneJoin name key data' template behaviors =
@@ -284,6 +286,7 @@ sceneJoin name key data' template behaviors =
     , key
     , joinData: data'
     , template
+    , keyFn: behaviors.keyFn
     , enterBehavior: behaviors.enterBehavior
     , updateBehavior: behaviors.updateBehavior
     , exitBehavior: behaviors.exitBehavior

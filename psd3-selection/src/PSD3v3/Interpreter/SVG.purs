@@ -17,7 +17,7 @@ import Prim.Row as Row
 import Type.Proxy (Proxy)
 import Unsafe.Coerce (unsafeCoerce)
 
-import PSD3v3.Expr (class NumExpr, class StringExpr, class BoolExpr, class CompareExpr)
+import PSD3v3.Expr (class NumExpr, class StringExpr, class BoolExpr, class CompareExpr, class StringCompareExpr)
 import PSD3v3.Units (class UnitExpr, class UnitArith)
 import PSD3v3.Datum (class DatumExpr)
 import PSD3v3.Path (class PathExpr)
@@ -59,6 +59,10 @@ instance compareExprSVG :: CompareExpr SVG where
   gt (SVG a) (SVG b) = SVG (show (unsafeParseNum a > unsafeParseNum b))
   gte (SVG a) (SVG b) = SVG (show (unsafeParseNum a >= unsafeParseNum b))
   eq (SVG a) (SVG b) = SVG (show (unsafeParseNum a == unsafeParseNum b))
+
+instance stringCompareExprSVG :: StringCompareExpr SVG where
+  strEq (SVG a) (SVG b) = SVG (show (a == b))
+  strNeq (SVG a) (SVG b) = SVG (show (a /= b))
 
 -- | Path expressions for SVG - compute actual path strings
 instance pathExprSVG :: PathExpr SVG where
@@ -145,6 +149,10 @@ instance compareExprSVGD :: CompareExpr (SVGD datum) where
     show (unsafeParseNum (a d i) >= unsafeParseNum (b d i)))
   eq (SVGD a) (SVGD b) = SVGD (\d i ->
     show (unsafeParseNum (a d i) == unsafeParseNum (b d i)))
+
+instance stringCompareExprSVGD :: StringCompareExpr (SVGD datum) where
+  strEq (SVGD a) (SVGD b) = SVGD (\d i -> show (a d i == b d i))
+  strNeq (SVGD a) (SVGD b) = SVGD (\d i -> show (a d i /= b d i))
 
 instance unitExprSVGD :: UnitExpr (SVGD datum) where
   px n = SVGD (\_ _ -> show n <> "px")

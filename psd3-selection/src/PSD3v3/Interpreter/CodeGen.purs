@@ -13,7 +13,7 @@ import Data.Symbol (class IsSymbol, reflectSymbol)
 import Prim.Row as Row
 import Type.Proxy (Proxy)
 
-import PSD3v3.Expr (class NumExpr, class StringExpr, class BoolExpr, class CompareExpr)
+import PSD3v3.Expr (class NumExpr, class StringExpr, class BoolExpr, class CompareExpr, class StringCompareExpr)
 import PSD3v3.Units (class UnitExpr, class UnitArith)
 import PSD3v3.Datum (class DatumExpr)
 import PSD3v3.Path (class PathExpr)
@@ -67,6 +67,14 @@ instance compareExprCodeGen :: CompareExpr CodeGen where
   gt (CodeGen a) (CodeGen b) = CodeGen ("(" <> a <> " > " <> b <> ")")
   gte (CodeGen a) (CodeGen b) = CodeGen ("(" <> a <> " >= " <> b <> ")")
   eq (CodeGen a) (CodeGen b) = CodeGen ("(" <> a <> " == " <> b <> ")")
+
+-- =============================================================================
+-- StringCompareExpr - generates string comparison expressions
+-- =============================================================================
+
+instance stringCompareExprCodeGen :: StringCompareExpr CodeGen where
+  strEq (CodeGen a) (CodeGen b) = CodeGen ("(" <> a <> " == " <> b <> ")")
+  strNeq (CodeGen a) (CodeGen b) = CodeGen ("(" <> a <> " /= " <> b <> ")")
 
 -- =============================================================================
 -- UnitExpr - generates unit constructors

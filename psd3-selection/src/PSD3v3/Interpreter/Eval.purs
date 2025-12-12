@@ -17,7 +17,7 @@ import Prim.Row as Row
 import Type.Proxy (Proxy)
 import Unsafe.Coerce (unsafeCoerce)
 
-import PSD3v3.Expr (class NumExpr, class StringExpr, class BoolExpr, class CompareExpr)
+import PSD3v3.Expr (class NumExpr, class StringExpr, class BoolExpr, class CompareExpr, class StringCompareExpr)
 import PSD3v3.Units (class UnitExpr, class UnitArith)
 import PSD3v3.Datum (class DatumExpr)
 import PSD3v3.Path (class PathExpr)
@@ -58,6 +58,10 @@ instance compareExprEval :: CompareExpr Eval where
   gt (Eval a) (Eval b) = Eval (a > b)
   gte (Eval a) (Eval b) = Eval (a >= b)
   eq (Eval a) (Eval b) = Eval (a == b)
+
+instance stringCompareExprEval :: StringCompareExpr Eval where
+  strEq (Eval a) (Eval b) = Eval (a == b)
+  strNeq (Eval a) (Eval b) = Eval (a /= b)
 
 -- | Unit expressions evaluate to the underlying number
 -- | (SVG uses unitless numbers, CSS would preserve units)
@@ -136,6 +140,10 @@ instance compareExprEvalD :: CompareExpr (EvalD datum) where
   gt (EvalD a) (EvalD b) = EvalD (\d i -> a d i > b d i)
   gte (EvalD a) (EvalD b) = EvalD (\d i -> a d i >= b d i)
   eq (EvalD a) (EvalD b) = EvalD (\d i -> a d i == b d i)
+
+instance stringCompareExprEvalD :: StringCompareExpr (EvalD datum) where
+  strEq (EvalD a) (EvalD b) = EvalD (\d i -> a d i == b d i)
+  strNeq (EvalD a) (EvalD b) = EvalD (\d i -> a d i /= b d i)
 
 instance unitExprEvalD :: UnitExpr (EvalD datum) where
   px n = EvalD (\_ _ -> unsafeCoerce n)

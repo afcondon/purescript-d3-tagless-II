@@ -3,9 +3,16 @@ module Component.Example where
 import Prelude
 
 import CodeSnippets (getSnippet)
+import Control.Monad.Rec.Class (forever)
+import Data.Array (catMaybes)
 import Data.Maybe (Maybe(..))
+import Data.String.CodeUnits as SCU
+import Data.Traversable (sequence)
+import Effect (Effect)
+import Effect.Aff (Milliseconds(..), delay)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
+import Effect.Random (random)
 import PSD3v2.Selection.Operations (clear) as Ops
 import Halogen as H
 import Halogen.HTML as HH
@@ -37,10 +44,14 @@ import D3.Viz.TreeAPI.LineChartExample as LineChartExample
 import D3.Viz.TreeAPI.TreeViz as TreeViz
 import D3.Viz.TreeAPI.ThreeLittleDimensionsExample as ThreeLittleDimensionsExample
 import D3.Viz.TreeAPI.GroupedBarChartExample as GroupedBarChartExample
+import D3.Viz.TreeAPI.V3ParabolaDemo as V3ParabolaDemo
+import D3.Viz.TreeAPI.V3TransitionDemo as V3TransitionDemo
+import D3.Viz.TreeAPI.V3GUPDemo as V3GUPDemo
 
 -- | Component state
 type State =
   { exampleId :: String
+  , gupFiber :: Maybe H.ForkId
   }
 
 data Action
@@ -50,7 +61,7 @@ data Action
 -- | Example page component
 component :: forall q o m. MonadAff m => H.Component q String o m
 component = H.mkComponent
-  { initialState: \exampleId -> { exampleId }
+  { initialState: \exampleId -> { exampleId, gupFiber: Nothing }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -63,10 +74,36 @@ component = H.mkComponent
 clearVizContainer :: forall o m. MonadAff m => H.HalogenM State Action () o m Unit
 clearVizContainer = Ops.clear "#viz"
 
+-- | Kill the GUP fiber if running
+killGupFiber :: forall o m. MonadAff m => H.HalogenM State Action () o m Unit
+killGupFiber = do
+  state <- H.get
+  case state.gupFiber of
+    Just fid -> H.kill fid
+    Nothing -> pure unit
+  H.modify_ _ { gupFiber = Nothing }
+
+-- | Generate random letters for GUP demo
+-- | Returns a sorted subset of the alphabet with no duplicates
+-- | Each letter has ~40% chance of being selected
+getRandomLetters :: Effect String
+getRandomLetters = do
+  let
+    alphabet = SCU.toCharArray "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    coinToss :: Char -> Effect (Maybe Char)
+    coinToss c = do
+      n <- random
+      pure $ if n > 0.6 then Just c else Nothing
+
+  choices <- sequence $ coinToss <$> alphabet
+  pure $ SCU.fromCharArray $ catMaybes choices
+
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
-    -- Clear any existing visualization first
+    -- Kill any existing GUP fiber first
+    killGupFiber
+    -- Clear any existing visualization
     clearVizContainer
     state <- H.get
     case state.exampleId of
@@ -90,6 +127,19 @@ handleAction = case _ of
         liftEffect $ TreeViz.treeViz "#viz"
       "three-little-dimensions" ->
         liftEffect ThreeLittleDimensionsExample.threeLittleDimensions
+      "v3-parabola" ->
+        liftEffect V3ParabolaDemo.v3ParabolaDemo
+      "v3-transition" ->
+        liftEffect V3TransitionDemo.v3TransitionDemo
+      "v3-gup" -> do
+        -- Initial render
+        liftEffect V3GUPDemo.v3GUPDemo
+        -- Fork the update loop
+        forkId <- H.fork $ forever do
+          H.liftAff $ delay (Milliseconds 2500.0)
+          letters <- liftEffect getRandomLetters
+          liftEffect $ V3GUPDemo.updateWithLetters letters
+        H.modify_ _ { gupFiber = Just forkId }
       _ -> pure unit
     -- Highlight code blocks with Prism
     liftEffect Prism.highlightAll
@@ -98,6 +148,8 @@ handleAction = case _ of
     state <- H.get
     -- Only re-initialize if the example ID has changed
     when (state.exampleId /= newExampleId) do
+      -- Kill GUP fiber when navigating away
+      killGupFiber
       H.modify_ _ { exampleId = newExampleId }
       handleAction Initialize
 
@@ -132,6 +184,12 @@ getExampleMeta id = case id of
     { id, name: "Tree Layout", description: "Hierarchical node-link diagram (pure PureScript)", category: "Hierarchies & Simulations" }
   "three-little-dimensions" -> Just
     { id, name: "Three Little Dimensions", description: "Nested data joins (2D array → table)", category: "Basic Examples" }
+  "v3-parabola" -> Just
+    { id, name: "v3 Parabola", description: "Finally Tagless DSL - polymorphic expressions rendered via D3", category: "v3 DSL Examples" }
+  "v3-transition" -> Just
+    { id, name: "v3 Transition", description: "v3 expressions as animated transition targets", category: "v3 DSL Examples" }
+  "v3-gup" -> Just
+    { id, name: "v3 GUP", description: "General Update Pattern with v3 expressions and staggered transitions", category: "v3 DSL Examples" }
   _ -> Nothing
 
 -- | Get next example ID in the list
@@ -146,7 +204,10 @@ getNextExampleId currentId = case currentId of
   "scatter-plot" -> Just "line-chart"
   "line-chart" -> Just "grouped-bar-chart"
   "grouped-bar-chart" -> Just "simple-hierarchy"
-  "simple-hierarchy" -> Nothing
+  "simple-hierarchy" -> Just "v3-parabola"
+  "v3-parabola" -> Just "v3-transition"
+  "v3-transition" -> Just "v3-gup"
+  "v3-gup" -> Nothing
   _ -> Nothing
 
 -- | Get previous example ID in the list
@@ -162,6 +223,9 @@ getPrevExampleId currentId = case currentId of
   "line-chart" -> Just "scatter-plot"
   "grouped-bar-chart" -> Just "line-chart"
   "simple-hierarchy" -> Just "grouped-bar-chart"
+  "v3-parabola" -> Just "simple-hierarchy"
+  "v3-transition" -> Just "v3-parabola"
+  "v3-gup" -> Just "v3-transition"
   _ -> Nothing
 
 render :: forall m. State -> H.ComponentHTML Action () m
