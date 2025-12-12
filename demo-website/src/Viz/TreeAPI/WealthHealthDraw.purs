@@ -1,17 +1,16 @@
 module D3.Viz.TreeAPI.WealthHealthDraw where
 
-import Prelude hiding (append)
+import Prelude
 
 import Data.Int (floor)
 import Data.Number (log, sqrt)
 import Effect (Effect)
-import PSD3v2.Attribute.Types (Attribute)
-import PSD3v2.Capabilities.Selection (select, renderTree, on, joinDataWithKey, append, setAttrs, remove, merge)
+import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
-import PSD3v2.Selection.Types (ElementType(..), SEmpty, JoinResult(..))
+import PSD3v2.Selection.Types (ElementType(..), SEmpty)
 import PSD3v2.VizTree.Tree (Tree)
 import PSD3v2.VizTree.Tree as T
-import PSD3v2.Behavior.Types (onMouseEnterWithInfo, onMouseLeaveWithInfo, MouseEventInfo)
+import PSD3v2.Behavior.Types (Behavior(..), MouseEventInfo)
 import PSD3v2.Tooltip (showTooltip, hideTooltip)
 import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
 import PSD3v3.Expr (lit, str)
@@ -251,63 +250,51 @@ initWealthHealth selector = runD3v2M do
   -- Render the static structure
   _ <- renderTree container staticTree
 
-  -- Return the update function
+  -- Return the update function using declarative TreeAPI
   pure $ \nations -> runD3v2M do
     -- Select the nations container
     nationsContainer <- select "#wealth-health-viz .nations" :: _ (D3v2Selection_ SEmpty Element Unit)
 
-    -- Data join using Selection API with nation name as key
-    JoinResult { enter, update: updateSel, exit } <- joinDataWithKey nations (_.name) "circle" nationsContainer
-
-    -- Attributes for circles (using datum-only functions with explicit types)
+    -- Build nations tree with declarative data join and behaviors
+    -- TreeAPI handles enter/update/exit automatically
     let
-      circleAttrs :: Array (Attribute NationPoint)
-      circleAttrs =
-        [ v3AttrFn "cx" ((\n -> scaleX config n.income) :: NationPoint -> Number)
-        , v3AttrFn "cy" ((\n -> scaleY config n.lifeExpectancy) :: NationPoint -> Number)
-        , v3AttrFn "r" ((\n -> scaleRadius n.population) :: NationPoint -> Number)
-        , v3AttrFnStr "fill" ((_.regionColor) :: NationPoint -> String)
-        , v3Attr "fill-opacity" (lit 0.7)
-        , v3AttrStr "stroke" (str "#333")
-        , v3Attr "stroke-width" (lit 0.5)
-        , v3AttrStr "class" (str "nation-circle")
-        ]
+      nationsTree :: Tree NationPoint
+      nationsTree =
+        T.joinData "nations" "circle" nations $ \_ ->
+          T.elem Circle
+            [ v3AttrFn "cx" ((\n -> scaleX config n.income) :: NationPoint -> Number)
+            , v3AttrFn "cy" ((\n -> scaleY config n.lifeExpectancy) :: NationPoint -> Number)
+            , v3AttrFn "r" ((\n -> scaleRadius n.population) :: NationPoint -> Number)
+            , v3AttrFnStr "fill" ((_.regionColor) :: NationPoint -> String)
+            , v3Attr "fill-opacity" (lit 0.7)
+            , v3AttrStr "stroke" (str "#333")
+            , v3Attr "stroke-width" (lit 0.5)
+            , v3AttrStr "class" (str "nation-circle")
+            ]
+            `T.withBehaviors`
+              [ -- Tooltip on mouse enter
+                MouseEnterWithInfo \(info :: MouseEventInfo NationPoint) -> do
+                  let nation = info.datum
+                  let
+                    content = "<strong>" <> nation.name <> "</strong><br/>"
+                      <> "Region: "
+                      <> nation.region
+                      <> "<br/>"
+                      <> "Income: $"
+                      <> show (floor nation.income)
+                      <> "<br/>"
+                      <> "Life Expectancy: "
+                      <> show (floor nation.lifeExpectancy)
+                      <> " years<br/>"
+                      <> "Population: "
+                      <> formatPopulation nation.population
+                  showTooltip content info.clientX info.clientY
+              , -- Hide tooltip on mouse leave
+                MouseLeaveWithInfo \(_ :: MouseEventInfo NationPoint) -> hideTooltip
+              ]
 
-    -- Handle enter: create new circles
-    enterCircles <- append Circle circleAttrs enter
-
-    -- Handle update: update existing circles
-    _ <- setAttrs circleAttrs updateSel
-
-    -- Handle exit: remove old circles
-    remove exit
-
-    -- Merge enter and update for tooltips
-    merged <- merge enterCircles updateSel
-
-    -- Add tooltips to all circles
-    _ <- on
-      ( onMouseEnterWithInfo \(info :: MouseEventInfo NationPoint) -> do
-          let nation = info.datum
-          let
-            content = "<strong>" <> nation.name <> "</strong><br/>"
-              <> "Region: "
-              <> nation.region
-              <> "<br/>"
-              <> "Income: $"
-              <> show (floor nation.income)
-              <> "<br/>"
-              <> "Life Expectancy: "
-              <> show (floor nation.lifeExpectancy)
-              <> " years<br/>"
-              <> "Population: "
-              <> formatPopulation nation.population
-          showTooltip content info.clientX info.clientY
-      )
-      merged
-
-    -- Hide tooltip on leave
-    _ <- on (onMouseLeaveWithInfo \(_ :: MouseEventInfo NationPoint) -> hideTooltip) merged
+    -- Render the tree (handles enter/update/exit internally)
+    _ <- renderTree nationsContainer nationsTree
 
     pure unit
 

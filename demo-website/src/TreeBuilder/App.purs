@@ -552,7 +552,8 @@ getPreset = case _ of
   "bars" -> barsPreset
   _ -> sudokuPreset
 
--- | Sudoku preset: SVG with grid cells (rects) and number labels (text)
+-- | Sudoku preset: SVG with 9x9 grid cells (rects) and number labels (text)
+-- | Grid: 9 cells × (28px + 2px gap) + margins = ~290px
 sudokuPreset :: Preset
 sudokuPreset =
   { tree: BNode
@@ -560,8 +561,8 @@ sudokuPreset =
       , elementType: "svg"
       , name: Just "sudoku"
       , attributes:
-          [ { attrName: "width", choice: ConstantNumber 280.0 }
-          , { attrName: "height", choice: ConstantNumber 280.0 }
+          [ { attrName: "width", choice: ConstantNumber 290.0 }
+          , { attrName: "height", choice: ConstantNumber 290.0 }
           ]
       , expanded: true
       }
@@ -573,14 +574,14 @@ sudokuPreset =
           , attributes:
               [ { attrName: "x", choice: ConstantNumber 0.0 }
               , { attrName: "y", choice: ConstantNumber 0.0 }
-              , { attrName: "width", choice: ConstantNumber 280.0 }
-              , { attrName: "height", choice: ConstantNumber 280.0 }
+              , { attrName: "width", choice: ConstantNumber 290.0 }
+              , { attrName: "height", choice: ConstantNumber 290.0 }
               , { attrName: "fill", choice: ConstantString "#333" }
               ]
           , expanded: true
           }
           []
-      , -- Cells (join)
+      , -- Cells (join) - 81 cells for 9x9 grid
         BDataJoin
           { id: 3
           , name: "cells"
@@ -600,7 +601,7 @@ sudokuPreset =
               }
           , expanded: true
           }
-      , -- Labels (join)
+      , -- Labels (join) - numbers centered in each cell
         BDataJoin
           { id: 5
           , name: "labels"
@@ -610,11 +611,11 @@ sudokuPreset =
               , elementType: "text"
               , name: Nothing
               , attributes:
-                  [ { attrName: "x", choice: Computed "d.x + 40.0" }
-                  , { attrName: "y", choice: Computed "d.y + 52.0" }
+                  [ { attrName: "x", choice: Computed "d.x + 14.0" }  -- center of 28px cell
+                  , { attrName: "y", choice: Computed "d.y + 20.0" }  -- vertically centered
                   , { attrName: "text", choice: FromField "label" }
                   , { attrName: "fill", choice: ConstantString "#333" }
-                  , { attrName: "font-size", choice: ConstantNumber 32.0 }
+                  , { attrName: "font-size", choice: ConstantNumber 18.0 }  -- smaller for 9x9
                   , { attrName: "text-anchor", choice: ConstantString "middle" }
                   ]
               , expanded: true

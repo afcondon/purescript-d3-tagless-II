@@ -30,53 +30,21 @@ import PSD3v2.Interpreter.SemiQuine.Types (BuilderTree(..), BuilderNode, NodeId,
 -- =============================================================================
 
 -- | Convert a BuilderTree to compilable PureScript code
+-- | Now generates v3Attr syntax for true round-trip capability
 treeToCode :: BuilderTree -> String
 treeToCode tree = String.joinWith "\n" $
-  [ "-- Generated Tree API code"
+  [ "-- Generated Tree API code (v3Attr)"
   , ""
   , "import PSD3v2.VizTree.Tree as T"
   , "import PSD3v2.Selection.Types (ElementType(..))"
-  , "import PSD3v2.Attribute.Types (" <> attributeImports tree <> ")"
+  , "import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)"
+  , "import PSD3v3.Expr (lit, str)"
   , ""
   , "tree :: T.Tree Datum"
   , "tree ="
   ] <> indentLines 2 (nodeToCode tree)
 
--- | Collect all unique attribute names used in the tree for imports
-attributeImports :: BuilderTree -> String
-attributeImports tree =
-  let attrs = collectAttrs tree
-      unique = Array.nub attrs
-  in String.joinWith ", " unique
-
-collectAttrs :: BuilderTree -> Array String
-collectAttrs = case _ of
-  BNode node children ->
-    map attrImportName node.attributes <>
-    Array.concat (map collectAttrs children)
-  BDataJoin join ->
-    map attrImportName join.template.attributes
-
-attrImportName :: AttributeBinding -> String
-attrImportName binding = case binding.attrName of
-  "cx" -> "cx"
-  "cy" -> "cy"
-  "r" -> "radius"
-  "x" -> "x"
-  "y" -> "y"
-  "x1" -> "x1"
-  "y1" -> "y1"
-  "x2" -> "x2"
-  "y2" -> "y2"
-  "width" -> "width"
-  "height" -> "height"
-  "fill" -> "fill"
-  "stroke" -> "stroke"
-  "stroke-width" -> "strokeWidth"
-  "opacity" -> "opacity"
-  "text" -> "textContent"
-  "font-size" -> "fontSize"
-  name -> name
+-- Note: v3Attr imports are fixed (no per-attribute imports needed)
 
 -- | Convert a tree node to code lines
 nodeToCode :: BuilderTree -> Array String
@@ -168,55 +136,63 @@ templateAttrsArray :: Array AttributeBinding -> String
 templateAttrsArray attrs =
   "[ " <> String.joinWith ", " (map templateAttrCode attrs) <> " ]"
 
--- | Generate a single attribute
+-- | Generate a single attribute using v3Attr syntax
 attrCode :: AttributeBinding -> String
-attrCode binding =
-  attrFn binding.attrName <> " " <> choiceToValue binding.choice
+attrCode binding = choiceToV3Attr binding.attrName binding.choice
 
 -- | Generate template attribute (for data joins, using datum accessors)
 templateAttrCode :: AttributeBinding -> String
-templateAttrCode binding =
-  attrFn binding.attrName <> " " <> templateChoiceToValue binding.choice
+templateAttrCode binding = templateChoiceToV3Attr binding.attrName binding.choice
 
--- | Map attribute names to PureScript attribute functions
-attrFn :: String -> String
-attrFn = case _ of
-  "cx" -> "cx"
-  "cy" -> "cy"
-  "r" -> "radius"
-  "x" -> "x"
-  "y" -> "y"
-  "x1" -> "x1"
-  "y1" -> "y1"
-  "x2" -> "x2"
-  "y2" -> "y2"
-  "width" -> "width"
-  "height" -> "height"
-  "fill" -> "fill"
-  "stroke" -> "stroke"
-  "stroke-width" -> "strokeWidth"
-  "opacity" -> "opacity"
-  "text" -> "textContent"
-  "font-size" -> "fontSize"
-  name -> name
+-- | Determine if an attribute is string-typed (for choosing v3AttrStr vs v3Attr)
+isStringAttr :: String -> Boolean
+isStringAttr = case _ of
+  "fill" -> true
+  "stroke" -> true
+  "text" -> true
+  "textContent" -> true
+  "class" -> true
+  "id" -> true
+  "text-anchor" -> true
+  "font-family" -> true
+  _ -> false
 
--- | Convert an AttributeChoice to a value expression (for static nodes)
-choiceToValue :: AttributeChoice -> String
-choiceToValue = case _ of
-  ConstantNumber n -> show n
-  ConstantString s -> "\"" <> s <> "\""
-  FromField field -> "d." <> field  -- Will need data in scope
-  IndexBased -> "d.index"
-  Computed name -> name
+-- | Convert an AttributeChoice to v3Attr expression (for static nodes)
+choiceToV3Attr :: String -> AttributeChoice -> String
+choiceToV3Attr attrName = case _ of
+  ConstantNumber n ->
+    "v3Attr \"" <> attrName <> "\" (lit " <> show n <> ")"
+  ConstantString s ->
+    "v3AttrStr \"" <> attrName <> "\" (str \"" <> s <> "\")"
+  FromField field ->
+    if isStringAttr attrName
+      then "v3AttrFnStr \"" <> attrName <> "\" (_." <> field <> " :: Datum -> String)"
+      else "v3AttrFn \"" <> attrName <> "\" (_." <> field <> " :: Datum -> Number)"
+  IndexBased ->
+    "v3AttrFn \"" <> attrName <> "\" (\\d -> toNumber d.index)"
+  Computed expr ->
+    -- For computed expressions, wrap in v3Attr with the expression
+    if isStringAttr attrName
+      then "v3AttrStr \"" <> attrName <> "\" (str (" <> expr <> "))"
+      else "v3Attr \"" <> attrName <> "\" (lit (" <> expr <> "))"
 
--- | Convert an AttributeChoice for template (datum accessor)
-templateChoiceToValue :: AttributeChoice -> String
-templateChoiceToValue = case _ of
-  ConstantNumber n -> show n
-  ConstantString s -> "\"" <> s <> "\""
-  FromField field -> "d." <> field
-  IndexBased -> "d.index"
-  Computed name -> name
+-- | Convert an AttributeChoice for template (datum accessor) using v3Attr
+templateChoiceToV3Attr :: String -> AttributeChoice -> String
+templateChoiceToV3Attr attrName = case _ of
+  ConstantNumber n ->
+    "v3Attr \"" <> attrName <> "\" (lit " <> show n <> ")"
+  ConstantString s ->
+    "v3AttrStr \"" <> attrName <> "\" (str \"" <> s <> "\")"
+  FromField field ->
+    if isStringAttr attrName
+      then "v3AttrFnStr \"" <> attrName <> "\" (_." <> field <> " :: Datum -> String)"
+      else "v3AttrFn \"" <> attrName <> "\" (_." <> field <> " :: Datum -> Number)"
+  IndexBased ->
+    "v3AttrFn \"" <> attrName <> "\" (\\d -> toNumber d.index)"
+  Computed expr ->
+    if isStringAttr attrName
+      then "v3AttrFnStr \"" <> attrName <> "\" (\\d -> " <> expr <> ")"
+      else "v3AttrFn \"" <> attrName <> "\" (\\d -> " <> expr <> ")"
 
 -- =============================================================================
 -- Helpers

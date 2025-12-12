@@ -23,7 +23,10 @@ module TreeBuilder.Types
   , generateNodeId
   ) where
 
+import Prelude
+
 import Data.Array as Array
+import Data.Int as Int
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Random (randomInt)
@@ -65,22 +68,52 @@ defaultSampleData =
   , { x: 200.0, y: 120.0, radius: 18.0, width: 45.0, height: 35.0, color: "#d62728", label: "Delta", name: "D", value: 30.0, index: 3 }
   ]
 
--- | Sudoku-style sample data: 3x3 grid of cells with values
+-- | Sudoku-style sample data: full 9x9 grid (81 cells)
+-- | Classic sudoku puzzle with given clues and empty cells
 sudokuSampleData :: Array SampleDatum
-sudokuSampleData =
-  -- Row 0
-  [ { x: 20.0, y: 20.0, radius: 0.0, width: 80.0, height: 80.0, color: "#f5f2e8", label: "5", name: "cell", value: 5.0, index: 0 }
-  , { x: 100.0, y: 20.0, radius: 0.0, width: 80.0, height: 80.0, color: "#e8e0cc", label: "3", name: "cell", value: 3.0, index: 1 }
-  , { x: 180.0, y: 20.0, radius: 0.0, width: 80.0, height: 80.0, color: "#f5f2e8", label: "", name: "cell", value: 0.0, index: 2 }
-  -- Row 1
-  , { x: 20.0, y: 100.0, radius: 0.0, width: 80.0, height: 80.0, color: "#e8e0cc", label: "6", name: "cell", value: 6.0, index: 3 }
-  , { x: 100.0, y: 100.0, radius: 0.0, width: 80.0, height: 80.0, color: "#f5f2e8", label: "", name: "cell", value: 0.0, index: 4 }
-  , { x: 180.0, y: 100.0, radius: 0.0, width: 80.0, height: 80.0, color: "#e8e0cc", label: "9", name: "cell", value: 9.0, index: 5 }
-  -- Row 2
-  , { x: 20.0, y: 180.0, radius: 0.0, width: 80.0, height: 80.0, color: "#f5f2e8", label: "", name: "cell", value: 0.0, index: 6 }
-  , { x: 100.0, y: 180.0, radius: 0.0, width: 80.0, height: 80.0, color: "#e8e0cc", label: "8", name: "cell", value: 8.0, index: 7 }
-  , { x: 180.0, y: 180.0, radius: 0.0, width: 80.0, height: 80.0, color: "#f5f2e8", label: "1", name: "cell", value: 1.0, index: 8 }
+sudokuSampleData = Array.concat
+  [ sudokuRow 0 [5,3,0, 0,7,0, 0,0,0]
+  , sudokuRow 1 [6,0,0, 1,9,5, 0,0,0]
+  , sudokuRow 2 [0,9,8, 0,0,0, 0,6,0]
+  , sudokuRow 3 [8,0,0, 0,6,0, 0,0,3]
+  , sudokuRow 4 [4,0,0, 8,0,3, 0,0,1]
+  , sudokuRow 5 [7,0,0, 0,2,0, 0,0,6]
+  , sudokuRow 6 [0,6,0, 0,0,0, 2,8,0]
+  , sudokuRow 7 [0,0,0, 4,1,9, 0,0,5]
+  , sudokuRow 8 [0,0,0, 0,8,0, 0,7,9]
   ]
+  where
+  cellSize = 28.0
+  gap = 2.0
+  margin = 10.0
+
+  -- Color based on 3x3 box (alternating for visual distinction)
+  boxColor :: Int -> Int -> String
+  boxColor row col =
+    let boxRow = row `div` 3
+        boxCol = col `div` 3
+        isLightBox = (boxRow + boxCol) `mod` 2 == 0
+    in if isLightBox then "#f5f2e8" else "#e8e0cc"
+
+  sudokuRow :: Int -> Array Int -> Array SampleDatum
+  sudokuRow row vals = Array.mapWithIndex (mkCell row) vals
+
+  mkCell :: Int -> Int -> Int -> SampleDatum
+  mkCell row col val =
+    { x: margin + (toNumber col) * (cellSize + gap)
+    , y: margin + (toNumber row) * (cellSize + gap)
+    , radius: 0.0
+    , width: cellSize
+    , height: cellSize
+    , color: boxColor row col
+    , label: if val == 0 then "" else show val
+    , name: "cell"
+    , value: toNumber val
+    , index: row * 9 + col
+    }
+
+  toNumber :: Int -> Number
+  toNumber = Int.toNumber
 
 -- =============================================================================
 -- Element Options for UI
