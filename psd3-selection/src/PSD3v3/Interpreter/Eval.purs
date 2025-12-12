@@ -17,7 +17,8 @@ import Prim.Row as Row
 import Type.Proxy (Proxy)
 import Unsafe.Coerce (unsafeCoerce)
 
-import PSD3v3.Expr (class NumExpr, class StringExpr, class BoolExpr, class CompareExpr, class StringCompareExpr)
+import PSD3v3.Expr (class NumExpr, class StringExpr, class BoolExpr, class CompareExpr, class StringCompareExpr, class TrigExpr)
+import Data.Number as Math
 import PSD3v3.Units (class UnitExpr, class UnitArith)
 import PSD3v3.Datum (class DatumExpr)
 import PSD3v3.Path (class PathExpr)
@@ -62,6 +63,16 @@ instance compareExprEval :: CompareExpr Eval where
 instance stringCompareExprEval :: StringCompareExpr Eval where
   strEq (Eval a) (Eval b) = Eval (a == b)
   strNeq (Eval a) (Eval b) = Eval (a /= b)
+
+instance trigExprEval :: TrigExpr Eval where
+  sin (Eval a) = Eval (Math.sin a)
+  cos (Eval a) = Eval (Math.cos a)
+  tan (Eval a) = Eval (Math.tan a)
+  asin (Eval a) = Eval (Math.asin a)
+  acos (Eval a) = Eval (Math.acos a)
+  atan (Eval a) = Eval (Math.atan a)
+  atan2 (Eval y) (Eval x) = Eval (Math.atan2 y x)
+  pi = Eval Math.pi
 
 -- | Unit expressions evaluate to the underlying number
 -- | (SVG uses unitless numbers, CSS would preserve units)
@@ -144,6 +155,16 @@ instance compareExprEvalD :: CompareExpr (EvalD datum) where
 instance stringCompareExprEvalD :: StringCompareExpr (EvalD datum) where
   strEq (EvalD a) (EvalD b) = EvalD (\d i -> a d i == b d i)
   strNeq (EvalD a) (EvalD b) = EvalD (\d i -> a d i /= b d i)
+
+instance trigExprEvalD :: TrigExpr (EvalD datum) where
+  sin (EvalD a) = EvalD (\d i -> Math.sin (a d i))
+  cos (EvalD a) = EvalD (\d i -> Math.cos (a d i))
+  tan (EvalD a) = EvalD (\d i -> Math.tan (a d i))
+  asin (EvalD a) = EvalD (\d i -> Math.asin (a d i))
+  acos (EvalD a) = EvalD (\d i -> Math.acos (a d i))
+  atan (EvalD a) = EvalD (\d i -> Math.atan (a d i))
+  atan2 (EvalD y) (EvalD x) = EvalD (\d i -> Math.atan2 (y d i) (x d i))
+  pi = EvalD (\_ _ -> Math.pi)
 
 instance unitExprEvalD :: UnitExpr (EvalD datum) where
   px n = EvalD (\_ _ -> unsafeCoerce n)

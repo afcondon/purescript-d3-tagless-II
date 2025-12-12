@@ -17,7 +17,8 @@ import Prim.Row as Row
 import Type.Proxy (Proxy)
 import Unsafe.Coerce (unsafeCoerce)
 
-import PSD3v3.Expr (class NumExpr, class StringExpr, class BoolExpr, class CompareExpr, class StringCompareExpr)
+import PSD3v3.Expr (class NumExpr, class StringExpr, class BoolExpr, class CompareExpr, class StringCompareExpr, class TrigExpr)
+import Data.Number as Math
 import PSD3v3.Units (class UnitExpr, class UnitArith)
 import PSD3v3.Datum (class DatumExpr)
 import PSD3v3.Path (class PathExpr)
@@ -63,6 +64,16 @@ instance compareExprSVG :: CompareExpr SVG where
 instance stringCompareExprSVG :: StringCompareExpr SVG where
   strEq (SVG a) (SVG b) = SVG (show (a == b))
   strNeq (SVG a) (SVG b) = SVG (show (a /= b))
+
+instance trigExprSVG :: TrigExpr SVG where
+  sin (SVG a) = SVG (show (Math.sin (unsafeParseNum a)))
+  cos (SVG a) = SVG (show (Math.cos (unsafeParseNum a)))
+  tan (SVG a) = SVG (show (Math.tan (unsafeParseNum a)))
+  asin (SVG a) = SVG (show (Math.asin (unsafeParseNum a)))
+  acos (SVG a) = SVG (show (Math.acos (unsafeParseNum a)))
+  atan (SVG a) = SVG (show (Math.atan (unsafeParseNum a)))
+  atan2 (SVG y) (SVG x) = SVG (show (Math.atan2 (unsafeParseNum y) (unsafeParseNum x)))
+  pi = SVG (show Math.pi)
 
 -- | Path expressions for SVG - compute actual path strings
 instance pathExprSVG :: PathExpr SVG where
@@ -153,6 +164,16 @@ instance compareExprSVGD :: CompareExpr (SVGD datum) where
 instance stringCompareExprSVGD :: StringCompareExpr (SVGD datum) where
   strEq (SVGD a) (SVGD b) = SVGD (\d i -> show (a d i == b d i))
   strNeq (SVGD a) (SVGD b) = SVGD (\d i -> show (a d i /= b d i))
+
+instance trigExprSVGD :: TrigExpr (SVGD datum) where
+  sin (SVGD a) = SVGD (\d i -> show (Math.sin (unsafeParseNum (a d i))))
+  cos (SVGD a) = SVGD (\d i -> show (Math.cos (unsafeParseNum (a d i))))
+  tan (SVGD a) = SVGD (\d i -> show (Math.tan (unsafeParseNum (a d i))))
+  asin (SVGD a) = SVGD (\d i -> show (Math.asin (unsafeParseNum (a d i))))
+  acos (SVGD a) = SVGD (\d i -> show (Math.acos (unsafeParseNum (a d i))))
+  atan (SVGD a) = SVGD (\d i -> show (Math.atan (unsafeParseNum (a d i))))
+  atan2 (SVGD y) (SVGD x) = SVGD (\d i -> show (Math.atan2 (unsafeParseNum (y d i)) (unsafeParseNum (x d i))))
+  pi = SVGD (\_ _ -> show Math.pi)
 
 instance unitExprSVGD :: UnitExpr (SVGD datum) where
   px n = SVGD (\_ _ -> show n <> "px")

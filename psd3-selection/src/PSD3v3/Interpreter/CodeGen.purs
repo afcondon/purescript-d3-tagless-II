@@ -13,7 +13,7 @@ import Data.Symbol (class IsSymbol, reflectSymbol)
 import Prim.Row as Row
 import Type.Proxy (Proxy)
 
-import PSD3v3.Expr (class NumExpr, class StringExpr, class BoolExpr, class CompareExpr, class StringCompareExpr)
+import PSD3v3.Expr (class NumExpr, class StringExpr, class BoolExpr, class CompareExpr, class StringCompareExpr, class TrigExpr)
 import PSD3v3.Units (class UnitExpr, class UnitArith)
 import PSD3v3.Datum (class DatumExpr)
 import PSD3v3.Path (class PathExpr)
@@ -75,6 +75,20 @@ instance compareExprCodeGen :: CompareExpr CodeGen where
 instance stringCompareExprCodeGen :: StringCompareExpr CodeGen where
   strEq (CodeGen a) (CodeGen b) = CodeGen ("(" <> a <> " == " <> b <> ")")
   strNeq (CodeGen a) (CodeGen b) = CodeGen ("(" <> a <> " /= " <> b <> ")")
+
+-- =============================================================================
+-- TrigExpr - generates trigonometric expressions
+-- =============================================================================
+
+instance trigExprCodeGen :: TrigExpr CodeGen where
+  sin (CodeGen a) = CodeGen ("(sin " <> a <> ")")
+  cos (CodeGen a) = CodeGen ("(cos " <> a <> ")")
+  tan (CodeGen a) = CodeGen ("(tan " <> a <> ")")
+  asin (CodeGen a) = CodeGen ("(asin " <> a <> ")")
+  acos (CodeGen a) = CodeGen ("(acos " <> a <> ")")
+  atan (CodeGen a) = CodeGen ("(atan " <> a <> ")")
+  atan2 (CodeGen y) (CodeGen x) = CodeGen ("(atan2 " <> y <> " " <> x <> ")")
+  pi = CodeGen "pi"
 
 -- =============================================================================
 -- UnitExpr - generates unit constructors

@@ -12,10 +12,11 @@ import Type.Proxy (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- DSL imports
-import PSD3v3.Expr (class NumExpr, lit, add, mul)
+import PSD3v3.Expr (class NumExpr, lit, add, mul, class TrigExpr, sin, cos, pi)
 import PSD3v3.Units (class UnitExpr, class UnitArith, Pixels, Em, px, em, addU, scaleU)
 import PSD3v3.Datum (class DatumExpr, field)
 import PSD3v3.Sugar ((*:), (+:), (-:), (*~), (+~), n)
+import Data.Number (pi) as Math
 
 -- Interpreter imports
 import PSD3v3.Interpreter.Eval (Eval, runEval, EvalD, runEvalD)
@@ -69,6 +70,9 @@ runTests = do
   testDatumCodeGen
   testDatumSVG
 
+  log "\n--- PSD3v3 Trig Expression Tests ---"
+  testTrigExpr
+
   log "\n--- PSD3v3 Unit Tests ---"
   demonstrateUnits
 
@@ -110,6 +114,75 @@ testDatumEval = do
   -- x * 20 + 200 = 5 * 20 + 200 = 300
   assert' ("Expected 300.0, got " <> show result) (result == 300.0)
   log "  ✓ EvalD: scaleX {x:5} = 300.0"
+
+-- =============================================================================
+-- Trig Expression Tests
+-- =============================================================================
+
+-- | A polymorphic trig expression: cos(pi) should be -1
+cosOfPi :: forall repr. NumExpr repr => TrigExpr repr => repr Number
+cosOfPi = cos pi
+
+-- | A more complex trig expression: sin(pi/2) + cos(0)
+-- | sin(π/2) = 1, cos(0) = 1, so result = 2
+trigCombo :: forall repr. NumExpr repr => TrigExpr repr => repr Number
+trigCombo = add (sin (mul pi (lit 0.5))) (cos (lit 0.0))
+
+-- | Polar to Cartesian X: r * cos(angle)
+-- | For r=1, angle=0: x = 1
+polarX :: forall repr. NumExpr repr => TrigExpr repr => DatumExpr repr ParabolaRow => repr Number
+polarX = mul xField (cos yField)  -- treating x as r, y as angle
+
+testTrigExpr :: Effect Unit
+testTrigExpr = do
+  -- Test cos(pi) = -1
+  let evalCos = runEval (cosOfPi :: Eval Number)
+  assert' ("Expected -1.0 for cos(pi), got " <> show evalCos) (evalCos == -1.0)
+  log "  ✓ Eval: cos(pi) = -1.0"
+
+  -- Test CodeGen produces readable output
+  let codeCos = runCodeGen (cosOfPi :: CodeGen Number)
+  assert' ("Expected (cos pi), got " <> codeCos) (codeCos == "(cos pi)")
+  log $ "  ✓ CodeGen: cos(pi) → " <> codeCos
+
+  -- Test trig combo
+  let evalCombo = runEval (trigCombo :: Eval Number)
+  -- sin(π/2) ≈ 1, cos(0) = 1, total ≈ 2
+  assert' ("Expected ~2.0 for sin(pi/2)+cos(0), got " <> show evalCombo)
+    (evalCombo > 1.99 && evalCombo < 2.01)
+  log "  ✓ Eval: sin(pi/2) + cos(0) ≈ 2.0"
+
+  -- Test CodeGen for combo
+  let codeCombo = runCodeGen (trigCombo :: CodeGen Number)
+  log $ "  ✓ CodeGen: trigCombo → " <> codeCombo
+
+  -- Test datum-dependent trig (polar to cartesian)
+  let
+    point :: ParabolaPoint
+    point = { x: 1.0, y: 0.0 }  -- r=1, angle=0
+    result = runEvalD (polarX :: EvalD ParabolaPoint Number) point 0
+  -- cos(0) = 1, so 1 * 1 = 1
+  assert' ("Expected 1.0 for polarX at angle=0, got " <> show result) (result == 1.0)
+  log "  ✓ EvalD: polarX {r:1, angle:0} = 1.0"
+
+  -- Show the code generation for polar
+  let codePolar = runCodeGen (polarX :: CodeGen Number)
+  log $ "  ✓ CodeGen: polarX → " <> codePolar
+
+  -- Test at angle=π (should give -1)
+  let
+    pointPi :: ParabolaPoint
+    pointPi = { x: 1.0, y: Math.pi }
+    resultPi = runEvalD (polarX :: EvalD ParabolaPoint Number) pointPi 0
+  assert' ("Expected -1.0 for polarX at angle=pi, got " <> show resultPi)
+    (resultPi > -1.01 && resultPi < -0.99)
+  log "  ✓ EvalD: polarX {r:1, angle:π} ≈ -1.0"
+
+  log ""
+  log "  TrigExpr demonstrates Expression Problem solution:"
+  log "  - Added sin, cos, tan, asin, acos, atan, atan2, pi"
+  log "  - All interpreters (Eval, EvalD, CodeGen, SVG, SVGD) updated"
+  log "  - Expressions using trig are still polymorphic!"
 
 -- | Test: CodeGen generates datum-accessing code
 testDatumCodeGen :: Effect Unit

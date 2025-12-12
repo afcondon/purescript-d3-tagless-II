@@ -33,6 +33,8 @@ module PSD3v3.Sugar
     -- String comparison operators
   , (===), strEqOp
   , (/==), strNeqOp
+    -- Trig (re-exported from Expr)
+  , module TrigExports
     -- Helpers
   , n
   , s
@@ -41,6 +43,7 @@ module PSD3v3.Sugar
 import Prelude hiding (add, sub, mul, div, negate, not)
 
 import PSD3v3.Expr (class NumExpr, class StringExpr, class CompareExpr, class StringCompareExpr)
+import PSD3v3.Expr (class TrigExpr, sin, cos, tan, asin, acos, atan, atan2, pi) as TrigExports
 import PSD3v3.Expr as E
 import PSD3v3.Units (class UnitArith)
 import PSD3v3.Units as U

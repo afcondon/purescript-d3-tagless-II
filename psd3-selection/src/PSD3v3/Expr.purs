@@ -28,6 +28,15 @@ module PSD3v3.Expr
   , class StringCompareExpr
   , strEq
   , strNeq
+  , class TrigExpr
+  , sin
+  , cos
+  , tan
+  , asin
+  , acos
+  , atan
+  , atan2
+  , pi
   ) where
 
 import Prelude hiding (add, sub, mul, div, negate, not)
@@ -67,3 +76,15 @@ class CompareExpr repr where
 class StringCompareExpr repr where
   strEq :: repr String -> repr String -> repr Boolean
   strNeq :: repr String -> repr String -> repr Boolean
+
+-- | Trigonometric expressions
+-- | Essential for polar/radial visualizations (chord diagrams, radial trees, etc.)
+class TrigExpr repr where
+  sin :: repr Number -> repr Number
+  cos :: repr Number -> repr Number
+  tan :: repr Number -> repr Number
+  asin :: repr Number -> repr Number
+  acos :: repr Number -> repr Number
+  atan :: repr Number -> repr Number
+  atan2 :: repr Number -> repr Number -> repr Number  -- atan2(y, x)
+  pi :: repr Number
