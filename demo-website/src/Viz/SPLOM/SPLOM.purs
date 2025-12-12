@@ -45,10 +45,9 @@ import Effect (Effect)
 import Effect.Console as Console
 import PSD3.Scale as Scale
 import PSD3.Scale (ContinuousScale, applyScale, ticks, nice)
-import PSD3v2.Attribute.Types (Attribute, AttributeName(..), AttributeValue(..))
-import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v2.Attribute.Types (Attribute)
+import PSD3v3.Integration (v3Attr, v3AttrStr)
 import PSD3v3.Expr (lit, str)
-import PSD3v2.Attribute.Types as Attr
 import PSD3v2.Brush (attachBrush, clearBrush, BrushHandle, BrushSelection, BrushConfig)
 import PSD3v2.Capabilities.Selection (select, renderTree, clear)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M)
@@ -613,7 +612,7 @@ clearBrushSelection handles =
 
 -- | Create a data-* attribute for storing values on DOM elements
 dataAttr :: forall datum. String -> Number -> Attribute datum
-dataAttr name value = Attr.StaticAttr (AttributeName ("data-" <> name)) (NumberValue value)
+dataAttr name value = v3Attr ("data-" <> name) (lit value)
 
 -- | Format tick value for display
 formatTick :: Number -> String

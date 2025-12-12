@@ -29,12 +29,12 @@ import Effect.Console as Console
 import Type.Proxy (Proxy(..))
 
 -- v2 infrastructure
-import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..))
-import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v2.Attribute.Types (Attribute)
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
-import PSD3v2.Transition.Types (Easing(..), staggeredTransition, transitionWith)
+import PSD3v2.Transition.Types (Easing(..), transitionWith)
 import PSD3v2.VizTree.Tree (Tree)
 import PSD3v2.VizTree.Tree as T
 import Web.DOM.Element (Element)
@@ -122,10 +122,10 @@ createLettersTree letters =
     , updateBehavior: Just
         { attrs:
             -- Update attributes (slide to new position)
-            [ DataAttr (AttributeName "x") (\d' -> NumberValue (evalExpr letterX d'))
-            , StaticAttr (AttributeName "y") (NumberValue letterY)
-            , StaticAttr (AttributeName "fill") (StringValue "#2c3e50")  -- Dark for stable
-            , StaticAttr (AttributeName "opacity") (NumberValue 1.0)
+            [ v3AttrFn "x" (\d' -> evalExpr letterX d')
+            , v3Attr "y" (lit letterY)
+            , v3AttrStr "fill" (str "#2c3e50")  -- Dark for stable
+            , v3Attr "opacity" (lit 1.0)
             ]
         , transition: Just $ transitionWith
             { duration: Milliseconds 500.0
@@ -151,7 +151,7 @@ createLettersTree letters =
 
 -- | Helper: text content attribute (special handling for text elements)
 textContent :: String -> Attribute LetterDatum
-textContent content = StaticAttr (AttributeName "textContent") (StringValue content)
+textContent content = v3AttrStr "textContent" (str content)
 
 -- =============================================================================
 -- Public API

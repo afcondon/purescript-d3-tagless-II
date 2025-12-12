@@ -10,7 +10,6 @@ import Data.Maybe (Maybe(Just, Nothing))
 import Data.Time.Duration (Milliseconds(..))
 import Effect (Effect)
 import Effect.Class (liftEffect)
-import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..))
 import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
 import PSD3v3.Expr (lit, str)
 import PSD3v2.Capabilities.Selection (renderTree, select)
@@ -127,12 +126,12 @@ createCirclesTree scene =
         }
     , updateBehavior: Just  -- Elements transition to new positions
         { attrs:
-            [ DataAttr (AttributeName "cx") (\p -> NumberValue p.x)
-            , DataAttr (AttributeName "cy") (\p -> NumberValue p.y)
-            , DataAttr (AttributeName "r") (\_ -> NumberValue 20.0)
-            , DataAttr (AttributeName "fill") (\p -> StringValue p.color)
-            , DataAttr (AttributeName "stroke") (\_ -> StringValue "#000")
-            , DataAttr (AttributeName "stroke-width") (\_ -> NumberValue 2.0)
+            [ v3AttrFn "cx" (_.x)
+            , v3AttrFn "cy" (_.y)
+            , v3Attr "r" (lit 20.0)
+            , v3AttrFnStr "fill" (_.color)
+            , v3AttrStr "stroke" (str "#000")
+            , v3Attr "stroke-width" (lit 2.0)
             ]
         , transition: Just
             { duration: Milliseconds 400.0
