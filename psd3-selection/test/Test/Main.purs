@@ -8,6 +8,7 @@ import Test.SemiQuine.TreeToCodeSpec as TreeToCodeSpec
 import Test.PSD3v3.ExprSpec as ExprSpec
 import Test.PSD3v3.PathSpec as PathSpec
 import Test.PSD3v3.ParabolaExample as ParabolaExample
+import Test.PSD3v3.SankeyExample as SankeyExample
 
 main :: Effect Unit
 main = do
@@ -21,5 +22,7 @@ main = do
   PathSpec.runTests
 
   ParabolaExample.runExample
+
+  SankeyExample.runExample
 
   log "\n=== All tests passed! ==="
