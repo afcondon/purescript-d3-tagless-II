@@ -13,14 +13,17 @@ import Prelude
 import Data.Int (toNumber)
 import Data.Nullable (null)
 import Effect (Effect)
+import Effect.Class (liftEffect)
+import Effect.Ref as Ref
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Simulation (SimulationNode, SwizzledLink)
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultCenter, defaultLink)
 import PSD3.ForceEngine.Links (swizzleLinks)
-import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, x1, x2, y1, y2, radius, viewBox, width, height, x, y, textContent, textAnchor, fontSize)
-import PSD3v2.Capabilities.Selection (select, appendChild, appendData, setAttrs)
+import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, x1, x2, y1, y2, radius, viewBox, width, height, x, y, textContent, textAnchor, fontSize, id_)
+import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
-import PSD3v2.Selection.Types (ElementType(..), SEmpty, SBoundOwns)
+import PSD3v2.Selection.Types (ElementType(..), SEmpty)
+import PSD3v2.VizTree.Tree as T
 import Web.DOM.Element (Element)
 
 -- =============================================================================
@@ -85,81 +88,76 @@ drawKoenigsbergBridges selector = do
   Sim.addForce (Center "center" defaultCenter) sim
   Sim.addForce (Link "links" defaultLink { distance = 80.0 }) sim
 
-  -- Render DOM using SelectionM primitives
-  { nodeSel, linkSel, labelSel } <- runD3v2M do
+  -- State ref for tick updates
+  stateRef <- Ref.new { nodes, swizzled }
+
+  -- Render initial DOM using TreeAPI
+  runD3v2M do
     container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
-
-    svg <- appendChild SVG
-      [ width 400.0
-      , height 300.0
-      , viewBox "-200 -150 400 300"
-      ]
-      container
-    g <- appendChild Group [] svg
-
-    linksGroup <- appendChild Group [] g
-    nodesGroup <- appendChild Group [] g
-    labelsGroup <- appendChild Group [] g
-
-    -- Links (bridges) - offset duplicate links slightly
-    linkSel <- appendData Line swizzled
-      [ x1 (_.source.x :: SLink -> Number)
-      , y1 (_.source.y :: SLink -> Number)
-      , x2 (_.target.x :: SLink -> Number)
-      , y2 (_.target.y :: SLink -> Number)
-      , stroke "#8B4513" -- Brown for bridges
-      , strokeWidth 4.0
-      ]
-      linksGroup
-
-    -- Nodes (land masses) - size by degree
-    nodeSel <- appendData Circle nodes
-      [ cx (_.x :: Node -> Number)
-      , cy (_.y :: Node -> Number)
-      , radius ((\n -> 12.0 + toNumber n.degree * 3.0) :: Node -> Number)
-      , fill "#4a7c59" -- Green for land
-      , stroke "#2d4f35"
-      , strokeWidth 2.0
-      ]
-      nodesGroup
-
-    -- Labels
-    labelSel <- appendData Text nodes
-      [ x (_.x :: Node -> Number)
-      , y ((_.y >>> (_ + 4.0)) :: Node -> Number)
-      , textContent (_.name :: Node -> String)
-      , textAnchor "middle"
-      , fill "#fff"
-      , fontSize 10.0
-      ]
-      labelsGroup
-
-    pure { nodeSel, linkSel, labelSel }
+    let containerTree :: T.Tree Unit
+        containerTree =
+          T.named SVG "svg"
+            [ width 400.0, height 300.0, viewBox "-200 -150 400 300" ]
+            `T.withChildren`
+              [ T.elem Group []
+                  `T.withChildren`
+                    [ T.named Group "links" [ id_ "koenigsberg-links" ]
+                    , T.named Group "nodes" [ id_ "koenigsberg-nodes" ]
+                    , T.named Group "labels" [ id_ "koenigsberg-labels" ]
+                    ]
+              ]
+    _ <- renderTree container containerTree
+    pure unit
 
   -- Tick handler
-  Sim.onTick (tick nodeSel linkSel labelSel) sim
+  Sim.onTick (tick stateRef) sim
   Sim.start sim
   pure (Sim.stop sim)
 
-  where
+-- | Tick handler - renders with current positions
+tick :: Ref.Ref { nodes :: Array Node, swizzled :: Array SLink } -> Effect Unit
+tick stateRef = runD3v2M do
+  state <- liftEffect $ Ref.read stateRef
 
-  tick
-    :: D3v2Selection_ SBoundOwns Element Node
-    -> D3v2Selection_ SBoundOwns Element SLink
-    -> D3v2Selection_ SBoundOwns Element Node
-    -> Effect Unit
-  tick nodeSel linkSel labelSel = runD3v2M do
-    _ <- setAttrs [ cx (_.x :: Node -> Number), cy (_.y :: Node -> Number) ] nodeSel
-    _ <- setAttrs
-      [ x1 (_.source.x :: SLink -> Number)
-      , y1 (_.source.y :: SLink -> Number)
-      , x2 (_.target.x :: SLink -> Number)
-      , y2 (_.target.y :: SLink -> Number)
-      ]
-      linkSel
-    _ <- setAttrs
-      [ x (_.x :: Node -> Number)
-      , y ((_.y >>> (_ + 4.0)) :: Node -> Number)
-      ]
-      labelSel
-    pure unit
+  -- Select groups
+  linksGroup <- select "#koenigsberg-links" :: _ (D3v2Selection_ SEmpty Element Unit)
+  nodesGroup <- select "#koenigsberg-nodes" :: _ (D3v2Selection_ SEmpty Element Unit)
+  labelsGroup <- select "#koenigsberg-labels" :: _ (D3v2Selection_ SEmpty Element Unit)
+
+  -- Render links (bridges)
+  let linksTree = T.joinData "links" "line" state.swizzled $ \_ ->
+        T.elem Line
+          [ x1 (_.source.x :: SLink -> Number)
+          , y1 (_.source.y :: SLink -> Number)
+          , x2 (_.target.x :: SLink -> Number)
+          , y2 (_.target.y :: SLink -> Number)
+          , stroke "#8B4513" -- Brown for bridges
+          , strokeWidth 4.0
+          ]
+  _ <- renderTree linksGroup linksTree
+
+  -- Render nodes (land masses) - size by degree
+  let nodesTree = T.joinData "nodes" "circle" state.nodes $ \_ ->
+        T.elem Circle
+          [ cx (_.x :: Node -> Number)
+          , cy (_.y :: Node -> Number)
+          , radius ((\n -> 12.0 + toNumber n.degree * 3.0) :: Node -> Number)
+          , fill "#4a7c59" -- Green for land
+          , stroke "#2d4f35"
+          , strokeWidth 2.0
+          ]
+  _ <- renderTree nodesGroup nodesTree
+
+  -- Render labels
+  let labelsTree = T.joinData "labels" "text" state.nodes $ \_ ->
+        T.elem Text
+          [ x (_.x :: Node -> Number)
+          , y ((_.y >>> (_ + 4.0)) :: Node -> Number)
+          , textContent (_.name :: Node -> String)
+          , textAnchor "middle"
+          , fill "#fff"
+          , fontSize 10.0
+          ]
+  _ <- renderTree labelsGroup labelsTree
+
+  pure unit
