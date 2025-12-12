@@ -12,6 +12,7 @@
 module D3.Viz.TreeAPI.V3GUPDemo
   ( v3GUPDemo
   , updateWithLetters
+  , initV3GUP
   , LetterDatum
   ) where
 
@@ -216,3 +217,54 @@ updateWithLetters letterString = runD3v2M do
     Console.log "  - New letters entered (green, bounced in from above)"
     Console.log "  - Existing letters updated (slid to new positions)"
     Console.log "  - Removed letters exited (red, faded and dropped)"
+
+-- | Initialize the V3 GUP demo in a given container
+-- | Returns an update function that accepts an array of characters
+-- | Compatible with the GUPv2 API for drop-in replacement
+initV3GUP :: String -> Effect (Array Char -> Effect Unit)
+initV3GUP containerSelector = do
+  -- Create unique SVG ID based on selector
+  let svgId = "v3-gup-svg-" <> filterAlphaNum containerSelector
+      svgSelector = "#" <> svgId
+
+  -- Create the SVG container
+  runD3v2M do
+    container <- select containerSelector :: _ (D3v2Selection_ SEmpty Element Unit)
+    let svgTree :: Tree Unit
+        svgTree =
+          T.named SVG "svg"
+            [ width 800.0
+            , height 500.0
+            , viewBox "0 -50 800 500"
+            , id_ svgId
+            , class_ "v3-gup-demo d3svg gup"
+            ]
+            `T.withChild`
+              T.elem Group []  -- Empty group placeholder
+    _ <- renderTree container svgTree
+    pure unit
+
+  -- Return update function
+  pure \letters -> runD3v2M do
+    svg <- select svgSelector :: _ (D3v2Selection_ SEmpty Element Unit)
+
+    -- Convert Char array to LetterDatum array with indices
+    let letterData = Array.mapWithIndex
+          (\i c -> { letter: SCU.singleton c, index: toNumber i })
+          letters
+
+    -- Render the letters tree
+    let tree :: Tree LetterDatum
+        tree = createLettersTree letterData
+
+    _ <- renderTree svg tree
+    pure unit
+
+-- | Filter string to alphanumeric characters only (for ID generation)
+filterAlphaNum :: String -> String
+filterAlphaNum s = SCU.fromCharArray $ Array.filter isAlphaNum (SCU.toCharArray s)
+  where
+    isAlphaNum c =
+      (c >= 'a' && c <= 'z') ||
+      (c >= 'A' && c <= 'Z') ||
+      (c >= '0' && c <= '9')

@@ -17,7 +17,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import D3.Viz.GUPv2 as GUP
+import D3.Viz.TreeAPI.V3GUPDemo as GUP
 
 type State =
   { status :: Status
@@ -101,8 +101,8 @@ setAttributes newlyEntered [classed "enter", ...]""" ]
 
 runGeneralUpdatePattern :: forall m. Bind m => MonadAff m => m (Array Char -> Aff Unit)
 runGeneralUpdatePattern = do
-  log "General Update Pattern example"
-  update <- liftEffect $ GUP.initGUP "div.svg-container"
+  log "General Update Pattern example (v3 TreeAPI)"
+  update <- liftEffect $ GUP.initV3GUP "div.svg-container"
   pure (\letters -> liftEffect $ update letters)
 
 -- | Choose a string of random letters (no duplicates), ordered alphabetically
