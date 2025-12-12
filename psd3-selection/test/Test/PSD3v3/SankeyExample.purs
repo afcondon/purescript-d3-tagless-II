@@ -60,20 +60,26 @@ type SankeyLinkRow = (sourceX :: Number, sourceY0 :: Number, sourceY1 :: Number,
 -- Sample Data
 -- =============================================================================
 
+-- Energy flow: Coal/Gas → Power → Industry/Residential
+-- Node heights represent capacity, link heights represent flow volume
+
 sampleNodes :: Array SankeyNode
 sampleNodes =
-  [ { name: "Coal", x0: 0.0, x1: 20.0, y0: 0.0, y1: 150.0, color: "#555" }
-  , { name: "Gas", x0: 0.0, x1: 20.0, y0: 170.0, y1: 280.0, color: "#777" }
-  , { name: "Power", x0: 200.0, x1: 220.0, y0: 50.0, y1: 250.0, color: "#c66" }
-  , { name: "Industry", x0: 400.0, x1: 420.0, y0: 0.0, y1: 120.0, color: "#6c6" }
-  , { name: "Residential", x0: 400.0, x1: 420.0, y0: 140.0, y1: 220.0, color: "#66c" }
+  [ { name: "Coal", x0: 0.0, x1: 20.0, y0: 0.0, y1: 120.0, color: "#555" }
+  , { name: "Gas", x0: 0.0, x1: 20.0, y0: 140.0, y1: 220.0, color: "#777" }
+  , { name: "Power", x0: 200.0, x1: 220.0, y0: 20.0, y1: 220.0, color: "#c66" }
+  , { name: "Industry", x0: 400.0, x1: 420.0, y0: 0.0, y1: 100.0, color: "#6c6" }
+  , { name: "Residential", x0: 400.0, x1: 420.0, y0: 120.0, y1: 220.0, color: "#66c" }
   ]
 
 sampleLinks :: Array SankeyLink
 sampleLinks =
-  [ { sourceX: 20.0, sourceY0: 0.0, sourceY1: 100.0, targetX: 200.0, targetY0: 50.0, targetY1: 150.0, color: "#a55" }
-  , { sourceX: 20.0, sourceY0: 100.0, sourceY1: 150.0, targetX: 200.0, targetY0: 150.0, targetY1: 200.0, color: "#a77" }
-  , { sourceX: 20.0, sourceY0: 170.0, sourceY1: 280.0, targetX: 200.0, targetY0: 200.0, targetY1: 250.0, color: "#a99" }
+  -- Stage 1: Sources → Power
+  [ { sourceX: 20.0, sourceY0: 0.0, sourceY1: 120.0, targetX: 200.0, targetY0: 20.0, targetY1: 140.0, color: "#a55" }   -- Coal → Power
+  , { sourceX: 20.0, sourceY0: 140.0, sourceY1: 220.0, targetX: 200.0, targetY0: 140.0, targetY1: 220.0, color: "#a77" } -- Gas → Power
+  -- Stage 2: Power → Destinations
+  , { sourceX: 220.0, sourceY0: 20.0, sourceY1: 120.0, targetX: 400.0, targetY0: 0.0, targetY1: 100.0, color: "#5a5" }   -- Power → Industry
+  , { sourceX: 220.0, sourceY0: 120.0, sourceY1: 220.0, targetX: 400.0, targetY0: 120.0, targetY1: 220.0, color: "#55a" } -- Power → Residential
   ]
 
 -- Width for conditional positioning

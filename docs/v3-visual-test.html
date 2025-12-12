@@ -187,39 +187,42 @@
   </g>
 </svg>`;
 
-    // Sankey
+    // Sankey - proper two-stage flow: Coal/Gas → Power → Industry/Residential
     document.getElementById('sankey').innerHTML = `
-<svg width="450" height="300" xmlns="http://www.w3.org/2000/svg">
+<svg width="450" height="260" xmlns="http://www.w3.org/2000/svg">
   <style>
     .sankey-node rect { stroke: #333; }
     .sankey-node text { font: 11px sans-serif; }
     .sankey-link { fill-opacity: 0.5; stroke: none; }
   </style>
   <g class="sankey-links">
-    <path class="sankey-link" fill="#a55" d="M 20.0,0.0 C 110.0,0.0 110.0,50.0 200.0,50.0 L 200.0,150.0 C 110.0,150.0 110.0,100.0 20.0,100.0 Z" />
-    <path class="sankey-link" fill="#a77" d="M 20.0,100.0 C 110.0,100.0 110.0,150.0 200.0,150.0 L 200.0,200.0 C 110.0,200.0 110.0,150.0 20.0,150.0 Z" />
-    <path class="sankey-link" fill="#a99" d="M 20.0,170.0 C 110.0,170.0 110.0,200.0 200.0,200.0 L 200.0,250.0 C 110.0,250.0 110.0,280.0 20.0,280.0 Z" />
+    <!-- Stage 1: Sources → Power -->
+    <path class="sankey-link" fill="#a55" d="M 20.0,0.0 C 110.0,0.0 110.0,20.0 200.0,20.0 L 200.0,140.0 C 110.0,140.0 110.0,120.0 20.0,120.0 Z" />
+    <path class="sankey-link" fill="#a77" d="M 20.0,140.0 C 110.0,140.0 110.0,140.0 200.0,140.0 L 200.0,220.0 C 110.0,220.0 110.0,220.0 20.0,220.0 Z" />
+    <!-- Stage 2: Power → Destinations -->
+    <path class="sankey-link" fill="#5a5" d="M 220.0,20.0 C 310.0,20.0 310.0,0.0 400.0,0.0 L 400.0,100.0 C 310.0,100.0 310.0,120.0 220.0,120.0 Z" />
+    <path class="sankey-link" fill="#55a" d="M 220.0,120.0 C 310.0,120.0 310.0,120.0 400.0,120.0 L 400.0,220.0 C 310.0,220.0 310.0,220.0 220.0,220.0 Z" />
   </g>
   <g class="sankey-nodes">
     <g class="sankey-node" transform="translate(0,0)">
-      <rect width="20" height="150" fill="#555" />
-      <text x="26" y="75" dy=".35em" text-anchor="start">Coal</text>
+      <rect width="20" height="120" fill="#555" />
+      <text x="26" y="60" dy=".35em" text-anchor="start">Coal</text>
     </g>
-    <g class="sankey-node" transform="translate(0,170)">
-      <rect width="20" height="110" fill="#777" />
-      <text x="26" y="55" dy=".35em" text-anchor="start">Gas</text>
+    <g class="sankey-node" transform="translate(0,140)">
+      <rect width="20" height="80" fill="#777" />
+      <text x="26" y="40" dy=".35em" text-anchor="start">Gas</text>
     </g>
-    <g class="sankey-node" transform="translate(200,50)">
+    <g class="sankey-node" transform="translate(200,20)">
       <rect width="20" height="200" fill="#c66" />
       <text x="26" y="100" dy=".35em" text-anchor="start">Power</text>
     </g>
     <g class="sankey-node" transform="translate(400,0)">
-      <rect width="20" height="120" fill="#6c6" />
-      <text x="-6" y="60" dy=".35em" text-anchor="end">Industry</text>
+      <rect width="20" height="100" fill="#6c6" />
+      <text x="-6" y="50" dy=".35em" text-anchor="end">Industry</text>
     </g>
-    <g class="sankey-node" transform="translate(400,140)">
-      <rect width="20" height="80" fill="#66c" />
-      <text x="-6" y="40" dy=".35em" text-anchor="end">Residential</text>
+    <g class="sankey-node" transform="translate(400,120)">
+      <rect width="20" height="100" fill="#66c" />
+      <text x="-6" y="50" dy=".35em" text-anchor="end">Residential</text>
     </g>
   </g>
 </svg>`;
