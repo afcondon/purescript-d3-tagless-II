@@ -19,7 +19,7 @@ import Effect.Console as Console
 import Type.Proxy (Proxy(..))
 
 -- v2 infrastructure
-import PSD3v2.Attribute.Types (width, height, viewBox, id_, class_, fill, stroke, strokeWidth, cx, cy, radius)
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
@@ -29,7 +29,7 @@ import PSD3v2.VizTree.Tree as T
 import Web.DOM.Element (Element)
 
 -- v3 DSL
-import PSD3v3.Expr (class NumExpr)
+import PSD3v3.Expr (class NumExpr, lit, str)
 import PSD3v3.Datum (class DatumExpr, field)
 import PSD3v3.Sugar ((*:), (+:))
 import PSD3v3.Interpreter.CodeGen (CodeGen, runCodeGen)
@@ -99,32 +99,32 @@ v3TransitionDemo = runD3v2M do
     tree :: Tree CircleData
     tree =
       T.named SVG "svg"
-        [ width 500.0
-        , height 300.0
-        , viewBox "0 0 500 300"
-        , id_ "v3-transition-svg"
-        , class_ "v3-demo"
+        [ v3Attr "width" (lit 500.0)
+        , v3Attr "height" (lit 300.0)
+        , v3AttrStr "viewBox" (str "0 0 500 300")
+        , v3AttrStr "id" (str "v3-transition-svg")
+        , v3AttrStr "class" (str "v3-demo")
         ]
         `T.withChild`
           -- sceneJoin: template = final state, enterBehavior = initial state + transition
           ( T.sceneJoin "circles" "circle" circleData
               -- Template defines FINAL state (where elements end up)
               ( \d -> T.elem Circle
-                  [ cx (evalExpr posX d) -- v3: final X position
-                  , cy (evalExpr posY d) -- v3: final Y position
-                  , radius (evalExpr circleRadius d) -- v3: radius from value
-                  , fill "#e67e22" -- final color (orange)
-                  , stroke "white"
-                  , strokeWidth 2.0
+                  [ v3Attr "cx" (lit (evalExpr posX d)) -- v3: final X position
+                  , v3Attr "cy" (lit (evalExpr posY d)) -- v3: final Y position
+                  , v3Attr "r" (lit (evalExpr circleRadius d)) -- v3: radius from value
+                  , v3AttrStr "fill" (str "#e67e22") -- final color (orange)
+                  , v3AttrStr "stroke" (str "white")
+                  , v3Attr "stroke-width" (lit 2.0)
                   ]
               )
               -- Behaviors: enter starts at center, transitions to final with stagger
               { keyFn: Nothing  -- No updates in this demo
               , enterBehavior: Just
                   { initialAttrs:
-                      [ cx 250.0 -- start at center X
-                      , cy 150.0 -- start at center Y
-                      , fill "#3498db" -- start color (blue)
+                      [ v3Attr "cx" (lit 250.0) -- start at center X
+                      , v3Attr "cy" (lit 150.0) -- start at center Y
+                      , v3AttrStr "fill" (str "#3498db") -- start color (blue)
                       ]
                   , transition: Just (staggeredTransition (Milliseconds 600.0) 100.0)
                   -- Each element delays 100ms more than previous

@@ -13,11 +13,12 @@ import Data.Number as Number
 import Data.Set (Set)
 import Data.Set as Set
 import Effect (Effect)
-import PSD3v2.Attribute.Types (class_, cx, cy, fill, fillOpacity, height, radius, stroke, strokeWidth, textAnchor, textContent, transform, viewBox, width, x, y)
 import PSD3v2.Capabilities.Selection (renderTree, select)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_, runD3v2M)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
 import PSD3v2.VizTree.Tree as T
+import PSD3v3.Expr (lit, str)
+import PSD3v3.Integration (v3Attr, v3AttrStr)
 import Web.DOM.Element (Element)
 
 -- | Phylotaxis layout constants (sunflower spiral pattern)
@@ -84,35 +85,35 @@ getColorHex colorName =
 visualizeSet :: String -> Set String -> String -> T.Tree Unit
 visualizeSet setName elements borderColor =
   T.named Group ("set-" <> setName)
-    [ class_ "set-visualization" ]
+    [ v3AttrStr "class" (str "set-visualization") ]
     `T.withChildren`
       ([ -- Container circle
          T.elem Circle
-           [ cx 0.0
-           , cy 0.0
-           , radius 120.0
-           , fill "none"
-           , stroke borderColor
-           , strokeWidth 3.0
-           , class_ "set-boundary"
+           [ v3Attr "cx" (lit 0.0)
+           , v3Attr "cy" (lit 0.0)
+           , v3Attr "r" (lit 120.0)
+           , v3AttrStr "fill" (str "none")
+           , v3AttrStr "stroke" (str borderColor)
+           , v3Attr "stroke-width" (lit 3.0)
+           , v3AttrStr "class" (str "set-boundary")
            ]
        -- Title
        , T.elem Text
-           [ x 0.0
-           , y (-135.0)
-           , textContent setName
-           , textAnchor "middle"
-           , fill "#333"
-           , class_ "set-title"
+           [ v3Attr "x" (lit 0.0)
+           , v3Attr "y" (lit (-135.0))
+           , v3AttrStr "text-content" (str setName)
+           , v3AttrStr "text-anchor" (str "middle")
+           , v3AttrStr "fill" (str "#333")
+           , v3AttrStr "class" (str "set-title")
            ]
        -- Count label
        , T.elem Text
-           [ x 0.0
-           , y 145.0
-           , textContent ("(" <> show (Set.size elements) <> " colors)")
-           , textAnchor "middle"
-           , fill "#666"
-           , class_ "set-count"
+           [ v3Attr "x" (lit 0.0)
+           , v3Attr "y" (lit 145.0)
+           , v3AttrStr "text-content" (str ("(" <> show (Set.size elements) <> " colors)"))
+           , v3AttrStr "text-anchor" (str "middle")
+           , v3AttrStr "fill" (str "#666")
+           , v3AttrStr "class" (str "set-count")
            ]
        ] <>
        -- Elements as colored circles in phylotaxis layout
@@ -123,14 +124,14 @@ visualizeSet setName elements borderColor =
              let pos = phylotaxisPosition index
                  colorHex = getColorHex colorName
              in T.elem Circle
-                  [ cx pos.x
-                  , cy pos.y
-                  , radius 12.0  -- Larger to show colors better
-                  , fill colorHex  -- Use the actual color!
-                  , fillOpacity 0.9
-                  , stroke "#fff"
-                  , strokeWidth 2.0
-                  , class_ "set-element"
+                  [ v3Attr "cx" (lit pos.x)
+                  , v3Attr "cy" (lit pos.y)
+                  , v3Attr "r" (lit 12.0)  -- Larger to show colors better
+                  , v3AttrStr "fill" (str colorHex)  -- Use the actual color!
+                  , v3Attr "fill-opacity" (lit 0.9)
+                  , v3AttrStr "stroke" (str "#fff")
+                  , v3Attr "stroke-width" (lit 2.0)
+                  , v3AttrStr "class" (str "set-element")
                   ]
            )
        ))
@@ -144,10 +145,10 @@ drawSetOperations containerSelector = runD3v2M do
   -- Create the main SVG with 2x2 grid layout
   let setsTree =
         T.named SVG "svg"
-          [ width 1000.0
-          , height 700.0
-          , viewBox "0 0 1000 700"
-          , class_ "set-operations"
+          [ v3Attr "width" (lit 1000.0)
+          , v3Attr "height" (lit 700.0)
+          , v3AttrStr "viewBox" (str "0 0 1000 700")
+          , v3AttrStr "class" (str "set-operations")
           ]
           `T.withChildren`
             -- Map the visualizeSet component over all four sets!
@@ -158,7 +159,7 @@ drawSetOperations containerSelector = runD3v2M do
                   xOffset = toNumber col * 500.0 + 250.0
                   yOffset = toNumber row * 350.0 + 200.0
               in T.named Group ("group-" <> name)
-                   [ transform ("translate(" <> show xOffset <> "," <> show yOffset <> ")") ]
+                   [ v3AttrStr "transform" (str ("translate(" <> show xOffset <> "," <> show yOffset <> ")")) ]
                    `T.withChild` visualizeSet name set borderColor
             ) setsToVisualize)
 

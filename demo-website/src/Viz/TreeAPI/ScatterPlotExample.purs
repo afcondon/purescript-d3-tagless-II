@@ -9,7 +9,8 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
-import PSD3v2.Attribute.Types (width, height, viewBox, class_, cx, cy, radius, fill, opacity, transform)
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v3.Expr (lit, str)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
@@ -86,26 +87,26 @@ scatterPlot = runD3v2M do
   let tree :: Tree Point
       tree =
         T.named SVG "svg"
-          [ width dims.width
-          , height dims.height
-          , viewBox ("0 0 " <> show dims.width <> " " <> show dims.height)
-          , class_ "scatter-plot-tree"
+          [ v3Attr "width" (lit dims.width)
+          , v3Attr "height" (lit dims.height)
+          , v3AttrStr "viewBox" (str ("0 0 " <> show dims.width <> " " <> show dims.height))
+          , v3AttrStr "class" (str "scatter-plot-tree")
           ]
           `T.withChild`
             (T.named Group "chartGroup"
-              [ class_ "chart-content"
-              , transform ("translate(" <> show dims.marginLeft <> "," <> show dims.marginTop <> ")")
+              [ v3AttrStr "class" (str "chart-content")
+              , v3AttrStr "transform" (str ("translate(" <> show dims.marginLeft <> "," <> show dims.marginTop <> ")"))
               ]
               `T.withChild`
                 -- Data join for points
                 (joinData "points" "circle" scatterData $ \point ->
                   T.elem Circle
-                    [ cx (xScale point.x)
-                    , cy (yScale point.y)
-                    , radius 6.0
-                    , fill "#e74c3c"
-                    , opacity 0.7
-                    , class_ "point"
+                    [ v3Attr "cx" (lit (xScale point.x))
+                    , v3Attr "cy" (lit (yScale point.y))
+                    , v3Attr "r" (lit 6.0)
+                    , v3AttrStr "fill" (str "#e74c3c")
+                    , v3Attr "opacity" (lit 0.7)
+                    , v3AttrStr "class" (str "point")
                     ]
                 ))
 

@@ -33,7 +33,8 @@ import Data.Tree (Tree, mkTree)
 import Effect (Effect)
 import PSD3.Data.DAGTree (DAGTree, DAGLink, dagTree, addLinks, layoutDAGTree)
 import PSD3.Data.Tree (TreeLayout(..))
-import PSD3v2.Attribute.Types (cx, cy, radius, fill, stroke, strokeWidth, textContent, x, y, x1, x2, y1, y2, class_, fontSize, width, height) as Attr
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v3.Expr (lit, str)
 import PSD3v2.Capabilities.Selection (select, appendChild, appendData)
 import PSD3v2.Interpreter.D3v2 (runD3v2M)
 import PSD3v2.Selection.Types (ElementType(..))
@@ -247,58 +248,58 @@ renderGitHistory selector size history = void $ runD3v2M do
 
   -- Create SVG
   svg <- appendChild SVG
-    [ Attr.width size.width
-    , Attr.height size.height
-    , Attr.class_ "git-history"
+    [ v3Attr "width" (lit size.width)
+    , v3Attr "height" (lit size.height)
+    , v3AttrStr "class" (str "git-history")
     ]
     container
 
   -- Render tree links (parent -> child)
-  linksGroup <- appendChild Group [ Attr.class_ "tree-links" ] svg
+  linksGroup <- appendChild Group [ v3AttrStr "class" (str "tree-links") ] svg
   _ <- appendData Line positioned.treeLinks
-    [ Attr.x1 (_.source.x :: TreeLink -> Number)
-    , Attr.y1 (_.source.y :: TreeLink -> Number)
-    , Attr.x2 (_.target.x :: TreeLink -> Number)
-    , Attr.y2 (_.target.y :: TreeLink -> Number)
-    , Attr.stroke "#708090"
-    , Attr.strokeWidth 2.0
+    [ v3AttrFn "x1" (_.source.x :: TreeLink -> Number)
+    , v3AttrFn "y1" (_.source.y :: TreeLink -> Number)
+    , v3AttrFn "x2" (_.target.x :: TreeLink -> Number)
+    , v3AttrFn "y2" (_.target.y :: TreeLink -> Number)
+    , v3AttrStr "stroke" (str "#708090")
+    , v3Attr "stroke-width" (lit 2.0)
     ]
     linksGroup
 
   -- Render extra links (merge commits)
-  mergeGroup <- appendChild Group [ Attr.class_ "merge-links" ] svg
+  mergeGroup <- appendChild Group [ v3AttrStr "class" (str "merge-links") ] svg
   _ <- appendData Line positioned.extraLinks
-    [ Attr.x1 (_.source.x :: ExtraLink -> Number)
-    , Attr.y1 (_.source.y :: ExtraLink -> Number)
-    , Attr.x2 (_.target.x :: ExtraLink -> Number)
-    , Attr.y2 (_.target.y :: ExtraLink -> Number)
-    , Attr.stroke "#7B68EE"
-    , Attr.strokeWidth 2.0
-    , Attr.class_ "merge-link"
+    [ v3AttrFn "x1" (_.source.x :: ExtraLink -> Number)
+    , v3AttrFn "y1" (_.source.y :: ExtraLink -> Number)
+    , v3AttrFn "x2" (_.target.x :: ExtraLink -> Number)
+    , v3AttrFn "y2" (_.target.y :: ExtraLink -> Number)
+    , v3AttrStr "stroke" (str "#7B68EE")
+    , v3Attr "stroke-width" (lit 2.0)
+    , v3AttrStr "class" (str "merge-link")
     -- Note: stroke-dasharray would need to be added as a custom attribute
     ]
     mergeGroup
 
   -- Render commit nodes
-  nodesGroup <- appendChild Group [ Attr.class_ "commits" ] svg
+  nodesGroup <- appendChild Group [ v3AttrStr "class" (str "commits") ] svg
   _ <- appendData Circle positioned.nodes
-    [ Attr.cx (_.x :: PositionedCommit -> Number)
-    , Attr.cy (_.y :: PositionedCommit -> Number)
-    , Attr.radius (commitRadius :: PositionedCommit -> Number)
-    , Attr.fill (commitFill :: PositionedCommit -> String)
-    , Attr.stroke "#fff"
-    , Attr.strokeWidth 2.0
+    [ v3AttrFn "cx" (_.x :: PositionedCommit -> Number)
+    , v3AttrFn "cy" (_.y :: PositionedCommit -> Number)
+    , v3AttrFn "r" (commitRadius :: PositionedCommit -> Number)
+    , v3AttrFnStr "fill" (commitFill :: PositionedCommit -> String)
+    , v3AttrStr "stroke" (str "#fff")
+    , v3Attr "stroke-width" (lit 2.0)
     ]
     nodesGroup
 
   -- Render commit labels
-  labelsGroup <- appendChild Group [ Attr.class_ "labels" ] svg
+  labelsGroup <- appendChild Group [ v3AttrStr "class" (str "labels") ] svg
   _ <- appendData Text positioned.nodes
-    [ Attr.x ((\n -> n.x + 15.0) :: PositionedCommit -> Number)
-    , Attr.y ((\n -> n.y + 4.0) :: PositionedCommit -> Number)
-    , Attr.textContent (commitLabel :: PositionedCommit -> String)
-    , Attr.fontSize 11.0
-    , Attr.fill "#2F4F4F"
+    [ v3AttrFn "x" ((\n -> n.x + 15.0) :: PositionedCommit -> Number)
+    , v3AttrFn "y" ((\n -> n.y + 4.0) :: PositionedCommit -> Number)
+    , v3AttrFnStr "textContent" (commitLabel :: PositionedCommit -> String)
+    , v3Attr "font-size" (lit 11.0)
+    , v3AttrStr "fill" (str "#2F4F4F")
     ]
     labelsGroup
 

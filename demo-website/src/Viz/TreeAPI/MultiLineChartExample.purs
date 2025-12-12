@@ -17,7 +17,9 @@ import Effect.Aff (Aff, launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import PSD3.Shared.Data (DataFile(..), loadDataFile, parseCSVRow)
-import PSD3v2.Attribute.Types (width, height, viewBox, class_, x, y, fill, transform, stroke, strokeWidth, d, textContent, textAnchor, fontSize)
+-- v3 Integration: all attributes via v3Attr/v3AttrStr (no ToAttr typeclass)
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFnStr)
+import PSD3v3.Expr (lit, str)
 import PSD3v2.Axis.Axis (axisBottom, axisLeft, renderAxis, Scale)
 import PSD3v2.Capabilities.Selection (select, renderTree, on)
 import PSD3v2.Behavior.Types (onMouseLeaveWithInfo, onMouseMoveWithInfo, MouseEventInfo)
@@ -146,50 +148,50 @@ drawMultiLineChart selector unemploymentData = runD3v2M do
       -- Group data by division
       series = groupByDivision unemploymentData
 
-  -- Build the tree
+  -- Build the tree using v3 attributes exclusively
   let tree :: Tree Series
       tree =
         T.named SVG "svg"
-          [ width svgWidth
-          , height svgHeight
-          , viewBox ("0 0 " <> show svgWidth <> " " <> show svgHeight)
-          , class_ "multi-line-chart"  -- This class enables hover CSS
+          [ v3Attr "width" (lit svgWidth)
+          , v3Attr "height" (lit svgHeight)
+          , v3AttrStr "viewBox" (str $ "0 0 " <> show svgWidth <> " " <> show svgHeight)
+          , v3AttrStr "class" (str "multi-line-chart")  -- This class enables hover CSS
           ]
           `T.withChild`
             (T.named Group "plot-area"
-              [ transform ("translate(" <> show margin.left <> "," <> show margin.top <> ")") ]
+              [ v3AttrStr "transform" (str $ "translate(" <> show margin.left <> "," <> show margin.top <> ")") ]
               `T.withChildren`
                 [ -- X-axis
                   T.named Group "x-axis"
-                    [ transform ("translate(0," <> show plotHeight <> ")")
-                    , class_ "x-axis"
+                    [ v3AttrStr "transform" (str $ "translate(0," <> show plotHeight <> ")")
+                    , v3AttrStr "class" (str "x-axis")
                     ]
                     `T.withChild` renderAxis (axisBottom xScale)
 
                 , -- Y-axis
                   T.named Group "y-axis"
-                    [ class_ "y-axis" ]
+                    [ v3AttrStr "class" (str "y-axis") ]
                     `T.withChild` renderAxis (axisLeft yScale)
 
                 , -- Y-axis label
                   T.elem Text
-                    [ transform "rotate(-90)"
-                    , x (-(plotHeight / 2.0))
-                    , y (-40.0)
-                    , textAnchor "middle"
-                    , fontSize 12.0
-                    , textContent "Unemployment Rate (%)"
+                    [ v3AttrStr "transform" (str "rotate(-90)")
+                    , v3Attr "x" (lit (-(plotHeight / 2.0)))
+                    , v3Attr "y" (lit (-40.0))
+                    , v3AttrStr "text-anchor" (str "middle")
+                    , v3Attr "font-size" (lit 12.0)
+                    , v3AttrStr "textContent" (str "Unemployment Rate (%)")
                     ]
 
                 , -- Lines with hover interaction (CSS: .multi-line-chart .line:hover)
                   -- All lines are light gray (#ddd), dark gray (#333) on hover
-                  joinData "lines" "path" series $ \s ->
+                  joinData "lines" "path" series $ \_ ->
                     T.elem Path
-                      [ d (linePath s.points)
-                      , fill "none"
-                      , stroke "#ddd"  -- Light gray for all lines
-                      , strokeWidth 1.5
-                      , class_ "line"  -- CSS uses .multi-line-chart .line for hover
+                      [ v3AttrFnStr "d" (\s -> linePath s.points)
+                      , v3AttrStr "fill" (str "none")
+                      , v3AttrStr "stroke" (str "#ddd")  -- Light gray for all lines
+                      , v3Attr "stroke-width" (lit 1.5)
+                      , v3AttrStr "class" (str "line")  -- CSS uses .multi-line-chart .line for hover
                       ]
                 ])
 

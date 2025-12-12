@@ -15,11 +15,12 @@ import Data.Map as Map
 import Data.Maybe (Maybe, fromMaybe)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
-import PSD3v2.Attribute.Types (class_, cx, cy, fill, height, radius, stroke, strokeWidth, textAnchor, textContent, viewBox, width, x, x1, x2, y, y1, y2)
 import PSD3v2.Capabilities.Selection (renderTree, select)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_, runD3v2M)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
 import PSD3v2.VizTree.Tree as T
+import PSD3v3.Expr (lit, str)
+import PSD3v3.Integration (v3Attr, v3AttrStr)
 import Web.DOM.Element (Element)
 
 -- | Task with display name
@@ -77,22 +78,22 @@ visualizeTask totalWidth totalHeight layerHeight tasksInLayerCount indexInLayer 
   in
     [ -- Circle for task
       T.elem Circle
-        [ cx xPos
-        , cy yPos
-        , radius 25.0
-        , fill "#4CAF50"
-        , stroke "#2E7D32"
-        , strokeWidth 2.0
-        , class_ "task-node"
+        [ v3Attr "cx" (lit xPos)
+        , v3Attr "cy" (lit yPos)
+        , v3Attr "r" (lit 25.0)
+        , v3AttrStr "fill" (str "#4CAF50")
+        , v3AttrStr "stroke" (str "#2E7D32")
+        , v3Attr "stroke-width" (lit 2.0)
+        , v3AttrStr "class" (str "task-node")
         ]
     -- Task name label
     , T.elem Text
-        [ x xPos
-        , y (yPos + 5.0)
-        , textContent task.name
-        , textAnchor "middle"
-        , fill "#fff"
-        , class_ "task-label"
+        [ v3Attr "x" (lit xPos)
+        , v3Attr "y" (lit (yPos + 5.0))
+        , v3AttrStr "text-content" (str task.name)
+        , v3AttrStr "text-anchor" (str "middle")
+        , v3AttrStr "fill" (str "#fff")
+        , v3AttrStr "class" (str "task-label")
         ]
     ]
 
@@ -123,13 +124,13 @@ visualizeDependencyLink totalWidth totalHeight layerHeight allTasks task depId =
     targetY = (toNumber depTask.layer * layerHeight) + 50.0
 
   pure $ T.elem Line
-    [ x1 targetX
-    , y1 targetY
-    , x2 sourceX
-    , y2 sourceY
-    , stroke "#bbb"
-    , strokeWidth 2.0
-    , class_ "dependency-link"
+    [ v3Attr "x1" (lit targetX)
+    , v3Attr "y1" (lit targetY)
+    , v3Attr "x2" (lit sourceX)
+    , v3Attr "y2" (lit sourceY)
+    , v3AttrStr "stroke" (str "#bbb")
+    , v3Attr "stroke-width" (lit 2.0)
+    , v3AttrStr "class" (str "dependency-link")
     ]
 
 -- | Draw topological sort visualization
@@ -171,21 +172,21 @@ drawTopologicalSort containerSelector = runD3v2M do
     layerLabels :: Array (T.Tree Unit)
     layerLabels = range 0 maxLayer <#> \layer ->
       T.elem Text
-        [ x 20.0
-        , y ((toNumber layer * layerHeight) + 55.0)
-        , textContent ("L" <> show layer)
-        , textAnchor "start"
-        , fill "#666"
-        , class_ "layer-label"
+        [ v3Attr "x" (lit 20.0)
+        , v3Attr "y" (lit ((toNumber layer * layerHeight) + 55.0))
+        , v3AttrStr "text-content" (str ("L" <> show layer))
+        , v3AttrStr "text-anchor" (str "start")
+        , v3AttrStr "fill" (str "#666")
+        , v3AttrStr "class" (str "layer-label")
         ]
 
     -- Main SVG tree
     vizTree =
       T.named SVG "svg"
-        [ width totalWidth
-        , height totalHeight
-        , viewBox "0 0 800 500"
-        , class_ "topological-sort"
+        [ v3Attr "width" (lit totalWidth)
+        , v3Attr "height" (lit totalHeight)
+        , v3AttrStr "viewBox" (str "0 0 800 500")
+        , v3AttrStr "class" (str "topological-sort")
         ]
         `T.withChildren`
           (allLinks <> allNodes <> layerLabels)

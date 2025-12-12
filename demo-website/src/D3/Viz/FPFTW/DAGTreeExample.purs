@@ -13,10 +13,14 @@ import Data.Tree (Tree, mkTree)
 import Effect (Effect)
 import PSD3.Data.DAGTree (DAGLink, dagTree, addLinks, layoutDAGTree)
 import PSD3.Data.Tree (TreeLayout(..))
-import PSD3v2.Attribute.Types (cx, cy, radius, fill, stroke, strokeWidth, textContent, x, y, x1, x2, y1, y2, class_, fontSize, opacity, width, height) as Attr
-import PSD3v2.Capabilities.Selection (select, appendChild, appendData, clear)
-import PSD3v2.Interpreter.D3v2 (runD3v2M)
-import PSD3v2.Selection.Types (ElementType(..))
+-- v3 Integration: all attributes via v3Attr/v3AttrStr (no ToAttr typeclass)
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v3.Expr (lit, str)
+import PSD3v2.Capabilities.Selection (select, renderTree)
+import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
+import PSD3v2.Selection.Types (ElementType(..), SEmpty)
+import PSD3v2.VizTree.Tree as T
+import Web.DOM.Element (Element)
 
 -- =============================================================================
 -- Types
@@ -88,16 +92,14 @@ extraLinks =
 -- | Draw the DAG tree example
 drawDAGTreeExample :: String -> Effect Unit
 drawDAGTreeExample selector = void $ runD3v2M do
-  -- Clear any existing content
-  clear selector
-
-  container <- select selector
+  container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
 
   let
     size = { width: 500.0, height: 350.0 }
     padding = { top: 40.0, bottom: 20.0, left: 50.0, right: 50.0 }
     innerWidth = size.width - padding.left - padding.right
     innerHeight = size.height - padding.top - padding.bottom
+    legendY = size.height - 15.0
 
     -- Build the DAG tree
     dag = dagTree sampleTree _.id # addLinks extraLinks
@@ -121,116 +123,120 @@ drawDAGTreeExample selector = void $ runD3v2M do
     treeLinks = map offsetTreeLink positioned.treeLinks
     extraLinksPositioned = map offsetExtraLink positioned.extraLinks
 
-  -- Create SVG
-  svg <- appendChild SVG
-    [ Attr.width size.width
-    , Attr.height size.height
-    , Attr.class_ "dag-tree-example"
-    ]
-    container
+    -- Build the static structure (groups and legend)
+    staticTree :: T.Tree Unit
+    staticTree =
+      T.named SVG "svg"
+        [ v3Attr "width" (lit size.width)
+        , v3Attr "height" (lit size.height)
+        , v3AttrStr "class" (str "dag-tree-example")
+        ]
+        `T.withChildren`
+          [ -- Title
+            T.elem Text
+              [ v3Attr "x" (lit (size.width / 2.0))
+              , v3Attr "y" (lit 20.0)
+              , v3AttrStr "textContent" (str "DAG Tree: Tree + Extra Links")
+              , v3Attr "font-size" (lit 14.0)
+              , v3AttrStr "fill" (str "#2F4F4F")
+              , v3AttrStr "text-anchor" (str "middle")
+              , v3AttrStr "class" (str "diagram-title")
+              ]
 
-  -- Title
-  _ <- appendChild Text
-    [ Attr.x (size.width / 2.0)
-    , Attr.y 20.0
-    , Attr.textContent "DAG Tree: Tree + Extra Links"
-    , Attr.fontSize 14.0
-    , Attr.fill "#2F4F4F"
-    , Attr.class_ "diagram-title"
-    ]
-    svg
+          -- Empty groups for data-bound elements
+          , T.named Group "tree-links" [ v3AttrStr "class" (str "tree-links") ]
+          , T.named Group "extra-links" [ v3AttrStr "class" (str "extra-links") ]
+          , T.named Group "nodes" [ v3AttrStr "class" (str "nodes") ]
+          , T.named Group "labels" [ v3AttrStr "class" (str "labels") ]
 
-  -- Render tree links (gray, behind everything)
-  linksGroup <- appendChild Group [ Attr.class_ "tree-links" ] svg
-  _ <- appendData Line treeLinks
-    [ Attr.x1 (_.source.x :: TreeLink -> Number)
-    , Attr.y1 (_.source.y :: TreeLink -> Number)
-    , Attr.x2 (_.target.x :: TreeLink -> Number)
-    , Attr.y2 (_.target.y :: TreeLink -> Number)
-    , Attr.stroke "#708090"
-    , Attr.strokeWidth 2.0
-    , Attr.opacity 0.6
-    ]
-    linksGroup
+          -- Legend: Tree edge
+          , T.elem Line
+              [ v3Attr "x1" (lit (size.width - 200.0))
+              , v3Attr "y1" (lit legendY)
+              , v3Attr "x2" (lit (size.width - 170.0))
+              , v3Attr "y2" (lit legendY)
+              , v3AttrStr "stroke" (str "#708090")
+              , v3Attr "stroke-width" (lit 2.0)
+              ]
+          , T.elem Text
+              [ v3Attr "x" (lit (size.width - 165.0))
+              , v3Attr "y" (lit (legendY + 4.0))
+              , v3AttrStr "textContent" (str "Tree edge")
+              , v3Attr "font-size" (lit 11.0)
+              , v3AttrStr "fill" (str "#708090")
+              ]
 
-  -- Render extra links (orange, dashed effect via class)
-  extraGroup <- appendChild Group [ Attr.class_ "extra-links" ] svg
-  _ <- appendData Line extraLinksPositioned
-    [ Attr.x1 (_.source.x :: ExtraLink -> Number)
-    , Attr.y1 (_.source.y :: ExtraLink -> Number)
-    , Attr.x2 (_.target.x :: ExtraLink -> Number)
-    , Attr.y2 (_.target.y :: ExtraLink -> Number)
-    , Attr.stroke "#F4A460"  -- Sandy orange
-    , Attr.strokeWidth 2.5
-    , Attr.class_ "extra-link"
-    ]
-    extraGroup
+          -- Legend: Extra link
+          , T.elem Line
+              [ v3Attr "x1" (lit (size.width - 90.0))
+              , v3Attr "y1" (lit legendY)
+              , v3Attr "x2" (lit (size.width - 60.0))
+              , v3Attr "y2" (lit legendY)
+              , v3AttrStr "stroke" (str "#F4A460")
+              , v3Attr "stroke-width" (lit 2.5)
+              ]
+          , T.elem Text
+              [ v3Attr "x" (lit (size.width - 55.0))
+              , v3Attr "y" (lit (legendY + 4.0))
+              , v3AttrStr "textContent" (str "Extra link")
+              , v3Attr "font-size" (lit 11.0)
+              , v3AttrStr "fill" (str "#F4A460")
+              ]
+          ]
 
-  -- Render nodes (circles)
-  nodesGroup <- appendChild Group [ Attr.class_ "nodes" ] svg
-  _ <- appendData Circle nodes
-    [ Attr.cx (_.x :: PositionedNode -> Number)
-    , Attr.cy (_.y :: PositionedNode -> Number)
-    , Attr.radius 18.0
-    , Attr.fill "#4A90A4"
-    , Attr.stroke "#fff"
-    , Attr.strokeWidth 2.0
-    ]
-    nodesGroup
+  -- Render the static structure
+  _ <- renderTree container staticTree
 
-  -- Render node labels
-  labelsGroup <- appendChild Group [ Attr.class_ "labels" ] svg
-  _ <- appendData Text nodes
-    [ Attr.x (_.x :: PositionedNode -> Number)
-    , Attr.y ((\n -> n.y + 5.0) :: PositionedNode -> Number)
-    , Attr.textContent (_.datum.label :: PositionedNode -> String)
-    , Attr.fontSize 14.0
-    , Attr.fill "#fff"
-    , Attr.class_ "node-label"
-    ]
-    labelsGroup
+  -- Select groups and render data-bound elements
+  treeLinksGroup <- select ".dag-tree-example .tree-links" :: _ (D3v2Selection_ SEmpty Element Unit)
+  let treeLinksTree = T.joinData "links" "line" treeLinks $ \_ ->
+        T.elem Line
+          [ v3AttrFn "x1" (_.source.x :: TreeLink -> Number)
+          , v3AttrFn "y1" (_.source.y :: TreeLink -> Number)
+          , v3AttrFn "x2" (_.target.x :: TreeLink -> Number)
+          , v3AttrFn "y2" (_.target.y :: TreeLink -> Number)
+          , v3AttrStr "stroke" (str "#708090")
+          , v3Attr "stroke-width" (lit 2.0)
+          , v3Attr "opacity" (lit 0.6)
+          ]
+  _ <- renderTree treeLinksGroup treeLinksTree
 
-  -- Legend
-  let legendY = size.height - 15.0
+  extraLinksGroup <- select ".dag-tree-example .extra-links" :: _ (D3v2Selection_ SEmpty Element Unit)
+  let extraLinksTree = T.joinData "extra" "line" extraLinksPositioned $ \_ ->
+        T.elem Line
+          [ v3AttrFn "x1" (_.source.x :: ExtraLink -> Number)
+          , v3AttrFn "y1" (_.source.y :: ExtraLink -> Number)
+          , v3AttrFn "x2" (_.target.x :: ExtraLink -> Number)
+          , v3AttrFn "y2" (_.target.y :: ExtraLink -> Number)
+          , v3AttrStr "stroke" (str "#F4A460")  -- Sandy orange
+          , v3Attr "stroke-width" (lit 2.5)
+          , v3AttrStr "class" (str "extra-link")
+          ]
+  _ <- renderTree extraLinksGroup extraLinksTree
 
-  -- Tree link legend
-  _ <- appendChild Line
-    [ Attr.x1 (size.width - 200.0)
-    , Attr.y1 legendY
-    , Attr.x2 (size.width - 170.0)
-    , Attr.y2 legendY
-    , Attr.stroke "#708090"
-    , Attr.strokeWidth 2.0
-    ]
-    svg
+  nodesGroup <- select ".dag-tree-example .nodes" :: _ (D3v2Selection_ SEmpty Element Unit)
+  let nodesTree = T.joinData "nodes" "circle" nodes $ \_ ->
+        T.elem Circle
+          [ v3AttrFn "cx" (_.x :: PositionedNode -> Number)
+          , v3AttrFn "cy" (_.y :: PositionedNode -> Number)
+          , v3Attr "r" (lit 18.0)
+          , v3AttrStr "fill" (str "#4A90A4")
+          , v3AttrStr "stroke" (str "#fff")
+          , v3Attr "stroke-width" (lit 2.0)
+          ]
+  _ <- renderTree nodesGroup nodesTree
 
-  _ <- appendChild Text
-    [ Attr.x (size.width - 165.0)
-    , Attr.y (legendY + 4.0)
-    , Attr.textContent "Tree edge"
-    , Attr.fontSize 11.0
-    , Attr.fill "#708090"
-    ]
-    svg
-
-  -- Extra link legend
-  _ <- appendChild Line
-    [ Attr.x1 (size.width - 90.0)
-    , Attr.y1 legendY
-    , Attr.x2 (size.width - 60.0)
-    , Attr.y2 legendY
-    , Attr.stroke "#F4A460"
-    , Attr.strokeWidth 2.5
-    ]
-    svg
-
-  _ <- appendChild Text
-    [ Attr.x (size.width - 55.0)
-    , Attr.y (legendY + 4.0)
-    , Attr.textContent "Extra link"
-    , Attr.fontSize 11.0
-    , Attr.fill "#F4A460"
-    ]
-    svg
+  labelsGroup <- select ".dag-tree-example .labels" :: _ (D3v2Selection_ SEmpty Element Unit)
+  let labelsTree = T.joinData "labels" "text" nodes $ \_ ->
+        T.elem Text
+          [ v3AttrFn "x" (_.x :: PositionedNode -> Number)
+          , v3AttrFn "y" ((\n -> n.y + 5.0) :: PositionedNode -> Number)
+          , v3AttrFnStr "textContent" (_.datum.label :: PositionedNode -> String)
+          , v3Attr "font-size" (lit 14.0)
+          , v3AttrStr "fill" (str "#fff")
+          , v3AttrStr "text-anchor" (str "middle")
+          , v3AttrStr "class" (str "node-label")
+          ]
+  _ <- renderTree labelsGroup labelsTree
 
   pure unit

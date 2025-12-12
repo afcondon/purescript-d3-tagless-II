@@ -45,9 +45,10 @@ import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, d
 import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Links (swizzleLinksByIndex, filterLinksToSubset)
 import PSD3.Transition.Tick as Tick
-import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, x1, x2, y1, y2, radius, id_, class_, width, height, viewBox, opacity)
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v3.Expr (lit, str)
 import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom)
-import PSD3v2.Capabilities.Selection (select, appendChild, on, renderTree)
+import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M)
 import PSD3v2.Selection.Types (ElementType(..)) as ET
 import PSD3v2.VizTree.Tree as T
@@ -254,22 +255,24 @@ renderSVGContainer :: String -> D3v2M Unit
 renderSVGContainer containerSelector = do
   container <- select containerSelector
 
-  svg <- appendChild ET.SVG
-    [ width svgWidth
-    , height svgHeight
-    , viewBox (show ((-svgWidth) / 2.0) <> " " <> show ((-svgHeight) / 2.0) <> " " <> show svgWidth <> " " <> show svgHeight)
-    , id_ "network-force-svg"
-    , class_ "network-force"
-    ]
-    container
+  let containerTree :: T.Tree Unit
+      containerTree =
+        T.named ET.SVG "svg"
+          [ v3Attr "width" (lit svgWidth)
+          , v3Attr "height" (lit svgHeight)
+          , v3AttrStr "viewBox" (str (show ((-svgWidth) / 2.0) <> " " <> show ((-svgHeight) / 2.0) <> " " <> show svgWidth <> " " <> show svgHeight))
+          , v3AttrStr "id" (str "network-force-svg")
+          , v3AttrStr "class" (str "network-force")
+          ]
+          `T.withBehaviors` [ Zoom $ defaultZoom (ScaleExtent 0.1 10.0) "#network-zoom-group" ]
+          `T.withChild`
+            T.named ET.Group "zoom-group" [ v3AttrStr "id" (str "network-zoom-group"), v3AttrStr "class" (str "zoom-group") ]
+              `T.withChildren`
+                [ T.named ET.Group "links" [ v3AttrStr "id" (str "network-links"), v3AttrStr "class" (str "links") ]
+                , T.named ET.Group "nodes" [ v3AttrStr "id" (str "network-nodes"), v3AttrStr "class" (str "nodes") ]
+                ]
 
-  zoomGroup <- appendChild ET.Group [ id_ "network-zoom-group", class_ "zoom-group" ] svg
-  _ <- appendChild ET.Group [ id_ "network-links", class_ "links" ] zoomGroup
-  _ <- appendChild ET.Group [ id_ "network-nodes", class_ "nodes" ] zoomGroup
-
-  -- Attach zoom behavior
-  _ <- on (Zoom $ defaultZoom (ScaleExtent 0.1 10.0) "#network-zoom-group") svg
-
+  _ <- renderTree container containerTree
   pure unit
 
 -- | Called on each simulation tick
@@ -359,13 +362,13 @@ createNodesTree scene =
     [ scene ]
     (_.nodes)
     ( \rn -> T.elem ET.Circle
-        [ cx rn.node.x
-        , cy rn.node.y
-        , radius (radiusForRenderNode rn)
-        , fill (fillForRenderNode rn)
-        , stroke (strokeForRenderNode rn)
-        , strokeWidth (strokeWidthForRenderNode rn)
-        , opacity (opacityForRenderNode rn)
+        [ v3Attr "cx" (lit rn.node.x)
+        , v3Attr "cy" (lit rn.node.y)
+        , v3Attr "r" (lit (radiusForRenderNode rn))
+        , v3AttrStr "fill" (str (fillForRenderNode rn))
+        , v3AttrStr "stroke" (str (strokeForRenderNode rn))
+        , v3Attr "stroke-width" (lit (strokeWidthForRenderNode rn))
+        , v3Attr "opacity" (lit (opacityForRenderNode rn))
         ]
     )
     { enterBehavior: Nothing
@@ -428,13 +431,13 @@ createLinksTree scene =
     [ scene ]
     (_.links)
     ( \link -> T.elem ET.Line
-        [ x1 link.source.x
-        , y1 link.source.y
-        , x2 link.target.x
-        , y2 link.target.y
-        , strokeWidth (0.5 + link.weight * 2.0)  -- 0.5-2.5 based on weight
-        , stroke (linkTypeColor link.linkType)
-        , opacity (0.3 + link.weight * 0.4)      -- 0.3-0.7 based on weight
+        [ v3Attr "x1" (lit link.source.x)
+        , v3Attr "y1" (lit link.source.y)
+        , v3Attr "x2" (lit link.target.x)
+        , v3Attr "y2" (lit link.target.y)
+        , v3Attr "stroke-width" (lit (0.5 + link.weight * 2.0))  -- 0.5-2.5 based on weight
+        , v3AttrStr "stroke" (str (linkTypeColor link.linkType))
+        , v3Attr "opacity" (lit (0.3 + link.weight * 0.4))      -- 0.3-0.7 based on weight
         ]
     )
     { enterBehavior: Nothing

@@ -10,7 +10,8 @@ import Data.Time.Duration (Milliseconds(..))
 import Effect (Effect)
 import Effect.Ref as Ref
 import Partial.Unsafe (unsafePartial, unsafeCrashWith)
-import PSD3v2.Attribute.Types (cx, cy, fill, radius, width, height, viewBox, id_, class_)
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v3.Expr (lit, str)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Capabilities.Transition (withTransition, withTransitionStaggered, staggerByIndex)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
@@ -45,20 +46,20 @@ staggeredCircles selector = do
       tree :: T.Tree CircleData
       tree =
         T.named SVG "staggered-svg"
-          [ width 650.0
-          , height 200.0
-          , viewBox "0 0 650 200"
-          , id_ "staggered-svg"
-          , class_ "staggered-circles"
+          [ v3Attr "width" (lit 650.0)
+          , v3Attr "height" (lit 200.0)
+          , v3AttrStr "viewBox" (str "0 0 650 200")
+          , v3AttrStr "id" (str "staggered-svg")
+          , v3AttrStr "class" (str "staggered-circles")
           ]
           `T.withChild`
             T.joinData "circles" "circle" circleData
               ( \d ->
                   T.elem Circle
-                    [ cx d.x
-                    , cy d.y
-                    , radius 20.0
-                    , fill "#4a90d9"
+                    [ v3Attr "cx" (lit d.x)
+                    , v3Attr "cy" (lit d.y)
+                    , v3Attr "r" (lit 20.0)
+                    , v3AttrStr "fill" (str "#4a90d9")
                     ]
               )
 
@@ -91,9 +92,9 @@ staggeredCircles selector = do
               , easing: Nothing
               }
           withTransitionStaggered config (staggerByIndex 100.0) circlesSel
-            [ cy 50.0 -- Move up
-            , fill "#e74c3c" -- Change to red
-            , radius 25.0 -- Grow slightly
+            [ v3Attr "cy" (lit 50.0) -- Move up
+            , v3AttrStr "fill" (str "#e74c3c") -- Change to red
+            , v3Attr "r" (lit 25.0) -- Grow slightly
             ]
 
     reset = do
@@ -107,9 +108,9 @@ staggeredCircles selector = do
             , easing: Nothing
             }
         withTransition config circlesSel
-          [ cy 100.0
-          , fill "#4a90d9"
-          , radius 20.0
+          [ v3Attr "cy" (lit 100.0)
+          , v3AttrStr "fill" (str "#4a90d9")
+          , v3Attr "r" (lit 20.0)
           ]
 
   pure { trigger, reset }

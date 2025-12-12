@@ -29,7 +29,8 @@ import Web.HTML (window)
 import Web.HTML.HTMLDocument (toDocument)
 import Web.HTML.Window (document)
 import PSD3.Internal.Types (Datum_)
-import PSD3v2.Attribute.Types (class_, cx, cy, d, fill, fontSize, height, radius, stroke, strokeOpacity, strokeWidth, textAnchor, textContent, transform, viewBox, width, x, y)
+import PSD3v3.Integration (v3Attr, v3AttrStr)
+import PSD3v3.Expr (lit, str)
 import PSD3v2.Capabilities.Selection (renderTree, select)
 import PSD3v2.Interpreter.D3v2 (D3v2M, D3v2Selection_, runD3v2M)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
@@ -98,23 +99,23 @@ barChart config value gender =
       Female -> green
   in
     T.elem SVG
-      [ width config.width
-      , height config.height
-      , viewBox ("0 0 " <> show config.width <> " " <> show config.height)
-      , class_ "bar-chart-svg"
+      [ v3Attr "width" (lit config.width)
+      , v3Attr "height" (lit config.height)
+      , v3AttrStr "viewBox" (str ("0 0 " <> show config.width <> " " <> show config.height))
+      , v3AttrStr "class" (str "bar-chart-svg")
       ]
       `T.withChildren`
         [ T.elem Rect
-            [ width config.width
-            , height config.height
-            , fill "none"
-            , stroke gray
-            , strokeWidth 2.0
+            [ v3Attr "width" (lit config.width)
+            , v3Attr "height" (lit config.height)
+            , v3AttrStr "fill" (str "none")
+            , v3AttrStr "stroke" (str gray)
+            , v3Attr "stroke-width" (lit 2.0)
             ]
         , T.elem Rect
-            [ width barWidth
-            , height config.height
-            , fill fillColor
+            [ v3Attr "width" (lit barWidth)
+            , v3Attr "height" (lit config.height)
+            , v3AttrStr "fill" (str fillColor)
             ]
         ]
 
@@ -174,42 +175,42 @@ miniDonutChart config acceptedPercent isWinner =
       let
         centroid = arcCentroid config.innerRadius config.outerRadius slice
       in
-        T.elem Group [ class_ "arc" ]
+        T.elem Group [ v3AttrStr "class" (str "arc") ]
           `T.withChildren`
             [ T.elem Path
-                [ d (arcPath_ arcGen (sliceToDatum slice))
-                , fill (sliceColor slice.datum.label)
-                , stroke "#2C3E50"
-                , strokeWidth 1.0
+                [ v3AttrStr "d" (str (arcPath_ arcGen (sliceToDatum slice)))
+                , v3AttrStr "fill" (str (sliceColor slice.datum.label))
+                , v3AttrStr "stroke" (str "#2C3E50")
+                , v3Attr "stroke-width" (lit 1.0)
                 ]
             , T.elem Text
-                [ x centroid.x
-                , y centroid.y
-                , textAnchor "middle"
-                , fontSize config.labelSize
-                , fill "#34495e"
-                , textContent (show (Int.round slice.datum.percent) <> "%")
+                [ v3Attr "x" (lit centroid.x)
+                , v3Attr "y" (lit centroid.y)
+                , v3AttrStr "text-anchor" (str "middle")
+                , v3Attr "font-size" (lit config.labelSize)
+                , v3AttrStr "fill" (str "#34495e")
+                , v3AttrStr "textContent" (str (show (Int.round slice.datum.percent) <> "%"))
                 ]
             ]
   in
     T.elem SVG
-      [ width config.size
-      , height config.size
-      , viewBox ("0 0 " <> show config.size <> " " <> show config.size)
-      , class_ "mini-donut-svg"
+      [ v3Attr "width" (lit config.size)
+      , v3Attr "height" (lit config.size)
+      , v3AttrStr "viewBox" (str ("0 0 " <> show config.size <> " " <> show config.size))
+      , v3AttrStr "class" (str "mini-donut-svg")
       ]
       `T.withChildren`
         [ T.elem Group
-            [ transform ("translate(" <> show centerX <> "," <> show centerY <> ")") ]
+            [ v3AttrStr "transform" (str ("translate(" <> show centerX <> "," <> show centerY <> ")")) ]
             `T.withChildren`
               ( [ T.elem Circle
-                    [ cx 0.0
-                    , cy 0.0
-                    , radius config.highlightRadius
-                    , fill "none"
-                    , stroke "#333"
-                    , strokeWidth 4.0
-                    , strokeOpacity highlightOpacity
+                    [ v3Attr "cx" (lit 0.0)
+                    , v3Attr "cy" (lit 0.0)
+                    , v3Attr "r" (lit config.highlightRadius)
+                    , v3AttrStr "fill" (str "none")
+                    , v3AttrStr "stroke" (str "#333")
+                    , v3Attr "stroke-width" (lit 4.0)
+                    , v3Attr "stroke-opacity" (lit highlightOpacity)
                     ]
                 ]
                   <> map mkArcElem indexedSlices

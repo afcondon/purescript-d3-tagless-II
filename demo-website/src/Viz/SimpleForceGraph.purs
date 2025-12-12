@@ -16,7 +16,8 @@ import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Simulation (SimulationNode, SwizzledLink)
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultCenter, defaultLink)
 import PSD3.ForceEngine.Links (swizzleLinks)
-import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, x1, x2, y1, y2, radius, viewBox, width, height, id_)
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v3.Expr (lit, str)
 import PSD3v2.Behavior.Types (Behavior(..), DragConfig(..), ScaleExtent(..), defaultZoom)
 import PSD3v2.Behavior.FFI as BehaviorFFI
 import PSD3v2.Capabilities.Selection (select, renderTree)
@@ -89,13 +90,13 @@ simpleForceGraph selector = do
     let containerTree :: T.Tree Unit
         containerTree =
           T.named SVG "svg"
-            [ width 400.0, height 300.0, viewBox "-200 -150 400 300", id_ "simple-force-svg" ]
+            [ v3Attr "width" (lit 400.0), v3Attr "height" (lit 300.0), v3AttrStr "viewBox" (str "-200 -150 400 300"), v3AttrStr "id" (str "simple-force-svg") ]
             `T.withBehaviors` [ Zoom $ defaultZoom (ScaleExtent 0.5 4.0) "#simple-force-zoom-group" ]
             `T.withChildren`
-              [ T.named Group "zoom-group" [ id_ "simple-force-zoom-group" ]
+              [ T.named Group "zoom-group" [ v3AttrStr "id" (str "simple-force-zoom-group") ]
                   `T.withChildren`
-                    [ T.named Group "links-group" [ id_ "simple-force-links" ]
-                    , T.named Group "nodes-group" [ id_ "simple-force-nodes" ]
+                    [ T.named Group "links-group" [ v3AttrStr "id" (str "simple-force-links") ]
+                    , T.named Group "nodes-group" [ v3AttrStr "id" (str "simple-force-nodes") ]
                     ]
               ]
     _ <- renderTree container containerTree
@@ -122,17 +123,17 @@ tick stateRef _selector = runD3v2M do
   -- Render links
   let linksTree = T.joinData "links" "line" state.swizzled $ \_ ->
         T.elem Line
-          [ x1 (_.source.x :: SLink -> Number), y1 (_.source.y :: SLink -> Number)
-          , x2 (_.target.x :: SLink -> Number), y2 (_.target.y :: SLink -> Number)
-          , stroke "#999", strokeWidth 2.0
+          [ v3AttrFn "x1" (_.source.x :: SLink -> Number), v3AttrFn "y1" (_.source.y :: SLink -> Number)
+          , v3AttrFn "x2" (_.target.x :: SLink -> Number), v3AttrFn "y2" (_.target.y :: SLink -> Number)
+          , v3AttrStr "stroke" (str "#999"), v3Attr "stroke-width" (lit 2.0)
           ]
   _ <- renderTree linksGroup linksTree
 
   -- Render nodes with drag behavior
   let nodesTree = T.joinData "nodes" "circle" state.nodes $ \_ ->
         T.elem Circle
-          [ cx (_.x :: Node -> Number), cy (_.y :: Node -> Number), radius 10.0
-          , fill "#69b3a2", stroke "#fff", strokeWidth 2.0
+          [ v3AttrFn "cx" (_.x :: Node -> Number), v3AttrFn "cy" (_.y :: Node -> Number), v3Attr "r" (lit 10.0)
+          , v3AttrStr "fill" (str "#69b3a2"), v3AttrStr "stroke" (str "#fff"), v3Attr "stroke-width" (lit 2.0)
           ]
           `T.withBehaviors` [ Drag (SimulationDrag simulationId) ]
   _ <- renderTree nodesGroup nodesTree

@@ -30,11 +30,12 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import PSD3v2.Attribute.Types (class_, height, transform, viewBox, width)
 import PSD3v2.Capabilities.Selection (renderTree, select)
 import PSD3v2.Interpreter.D3v2 (D3v2M, runD3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
 import PSD3v2.VizTree.Tree as T
+import PSD3v3.Expr (lit, str)
+import PSD3v3.Integration (v3Attr, v3AttrStr)
 import Web.DOM.Element (Element)
 
 -- =============================================================================
@@ -490,13 +491,13 @@ initDonutCharts = do
     menTree :: T.Tree Unit
     menTree =
       T.elem SVG
-        [ width (donutConfig.centerX * 2.0)
-        , height ((donutConfig.centerY + donutConfig.outerRadius + 30.0))
-        , viewBox ("0 0 " <> show (donutConfig.centerX * 2.0) <> " " <> show (donutConfig.centerY + donutConfig.outerRadius + 30.0))
-        , class_ "donut-svg"
+        [ v3Attr "width" (lit (donutConfig.centerX * 2.0))
+        , v3Attr "height" (lit (donutConfig.centerY + donutConfig.outerRadius + 30.0))
+        , v3AttrStr "viewBox" (str ("0 0 " <> show (donutConfig.centerX * 2.0) <> " " <> show (donutConfig.centerY + donutConfig.outerRadius + 30.0)))
+        , v3AttrStr "class" (str "donut-svg")
         ]
         `T.withChildren`
-          [ T.elem Group [ transform menDonut.centerTransform ]
+          [ T.elem Group [ v3AttrStr "transform" (str menDonut.centerTransform) ]
               `T.withChildren`
                 [ menDonut.label ]
           ]
@@ -506,7 +507,7 @@ initDonutCharts = do
   menArcsContainer <- select "#donut-men svg" :: _ (D3v2Selection_ SEmpty Element Unit)
   let
     menArcsGroup :: T.Tree Unit
-    menArcsGroup = T.elem Group [ transform menDonut.centerTransform, class_ "arcs" ]
+    menArcsGroup = T.elem Group [ v3AttrStr "transform" (str menDonut.centerTransform), v3AttrStr "class" (str "arcs") ]
   _ <- renderTree menArcsContainer menArcsGroup
 
   menArcsInner <- select "#donut-men svg .arcs" :: _ (D3v2Selection_ SEmpty Element Donut.IndexedSlice)
@@ -519,13 +520,13 @@ initDonutCharts = do
     womenTree :: T.Tree Unit
     womenTree =
       T.elem SVG
-        [ width (donutConfig.centerX * 2.0)
-        , height ((donutConfig.centerY + donutConfig.outerRadius + 30.0))
-        , viewBox ("0 0 " <> show (donutConfig.centerX * 2.0) <> " " <> show (donutConfig.centerY + donutConfig.outerRadius + 30.0))
-        , class_ "donut-svg"
+        [ v3Attr "width" (lit (donutConfig.centerX * 2.0))
+        , v3Attr "height" (lit (donutConfig.centerY + donutConfig.outerRadius + 30.0))
+        , v3AttrStr "viewBox" (str ("0 0 " <> show (donutConfig.centerX * 2.0) <> " " <> show (donutConfig.centerY + donutConfig.outerRadius + 30.0)))
+        , v3AttrStr "class" (str "donut-svg")
         ]
         `T.withChildren`
-          [ T.elem Group [ transform womenDonut.centerTransform ]
+          [ T.elem Group [ v3AttrStr "transform" (str womenDonut.centerTransform) ]
               `T.withChildren`
                 [ womenDonut.label ]
           ]
@@ -534,7 +535,7 @@ initDonutCharts = do
   womenArcsContainer <- select "#donut-women svg" :: _ (D3v2Selection_ SEmpty Element Unit)
   let
     womenArcsGroup :: T.Tree Unit
-    womenArcsGroup = T.elem Group [ transform womenDonut.centerTransform, class_ "arcs" ]
+    womenArcsGroup = T.elem Group [ v3AttrStr "transform" (str womenDonut.centerTransform), v3AttrStr "class" (str "arcs") ]
   _ <- renderTree womenArcsContainer womenArcsGroup
 
   womenArcsInner <- select "#donut-women svg .arcs" :: _ (D3v2Selection_ SEmpty Element Donut.IndexedSlice)
@@ -554,7 +555,7 @@ initScatterChart = do
   let svgTree =
         T.elem SVG chart.containerAttrs
           `T.withChildren`
-            [ T.elem Group [ transform ("translate(" <> show config.marginLeft <> "," <> show config.marginTop <> ")") ]
+            [ T.elem Group [ v3AttrStr "transform" (str ("translate(" <> show config.marginLeft <> "," <> show config.marginTop <> ")")) ]
                 `T.withChildren`
                   [ chart.static ]
             ]
@@ -565,8 +566,8 @@ initScatterChart = do
   let
     pointsGroup :: T.Tree Unit
     pointsGroup = T.elem Group
-      [ transform ("translate(" <> show config.marginLeft <> "," <> show config.marginTop <> ")")
-      , class_ "points"
+      [ v3AttrStr "transform" (str ("translate(" <> show config.marginLeft <> "," <> show config.marginTop <> ")"))
+      , v3AttrStr "class" (str "points")
       ]
   _ <- renderTree pointsContainer pointsGroup
 
@@ -585,20 +586,20 @@ initLineChart = do
   -- Create SVG with static content
   let svgTree =
         T.elem SVG
-          [ width config.width
-          , height config.height
-          , viewBox ("0 0 " <> show config.width <> " " <> show config.height)
-          , class_ "line-chart-svg"
+          [ v3Attr "width" (lit config.width)
+          , v3Attr "height" (lit config.height)
+          , v3AttrStr "viewBox" (str ("0 0 " <> show config.width <> " " <> show config.height))
+          , v3AttrStr "class" (str "line-chart-svg")
           ]
           `T.withChildren`
             [ T.elem Group
-                [ transform ("translate(" <> show config.marginLeft <> "," <> show config.marginTop <> ")") ]
+                [ v3AttrStr "transform" (str ("translate(" <> show config.marginLeft <> "," <> show config.marginTop <> ")")) ]
                 `T.withChildren`
                   [ Line.lineChartStatic config ]
             , -- Points group (will be updated)
               T.elem Group
-                [ transform ("translate(" <> show config.marginLeft <> "," <> show config.marginTop <> ")")
-                , class_ "rate-points-group"
+                [ v3AttrStr "transform" (str ("translate(" <> show config.marginLeft <> "," <> show config.marginTop <> ")"))
+                , v3AttrStr "class" (str "rate-points-group")
                 ]
             ]
   _ <- renderTree container svgTree

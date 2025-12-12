@@ -20,7 +20,8 @@ import PSD3v2.Interpreter.English (runEnglish)
 import PSD3v2.Interpreter.MetaAST (toAST, prettyPrintAST, TreeAST(..))
 import PSD3v2.Interpreter.MermaidTree (runMermaidTree)
 import PSD3v2.Selection.Types (SEmpty, ElementType(..))
-import PSD3v2.Attribute.Types (width, height, viewBox, transform, fill, stroke, strokeWidth, textContent, textAnchor, x, y, cx, cy, radius, x1, y1, x2, y2)
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v3.Expr (lit, str)
 import PSD3v2.VizTree.Tree as T
 import D3.Viz.TreeAPI.InterpreterDemo as Demo
 import Web.DOM.Element (Element)
@@ -64,13 +65,13 @@ component = H.mkComponent
 astToTreeVisualization :: TreeAST -> T.Tree Unit
 astToTreeVisualization ast =
   T.named SVG "svg"
-    [ width 600.0
-    , height 400.0
-    , viewBox "0 0 600 400"
+    [ v3Attr "width" (lit 600.0)
+    , v3Attr "height" (lit 400.0)
+    , v3AttrStr "viewBox" (str "0 0 600 400")
     ]
     `T.withChild`
       (T.named Group "ast-tree"
-        [ transform "translate(300, 50)" ]  -- Increased from 30 to 50 for better vertical centering
+        [ v3AttrStr "transform" (str "translate(300, 50)") ]  -- Increased from 30 to 50 for better vertical centering
         `T.withChild` renderASTNode ast 0.0 0)
   where
     renderASTNode :: TreeAST -> Number -> Int -> T.Tree Unit
@@ -87,28 +88,28 @@ astToTreeVisualization ast =
             `T.withChildren`
               ([ -- Node circle
                  T.elem Circle
-                   [ cx xPos
-                   , cy (toNumber level * 80.0)
-                   , radius 30.0
-                   , fill "#4A90E2"
-                   , stroke "#2E5C8A"
-                   , strokeWidth 2.0
+                   [ v3Attr "cx" (lit xPos)
+                   , v3Attr "cy" (lit (toNumber level * 80.0))
+                   , v3Attr "r" (lit 30.0)
+                   , v3AttrStr "fill" (str "#4A90E2")
+                   , v3AttrStr "stroke" (str "#2E5C8A")
+                   , v3Attr "stroke-width" (lit 2.0)
                    ]
                -- Node label
                , T.elem Text
-                   [ x xPos
-                   , y (toNumber level * 80.0 + 5.0)
-                   , textContent label
-                   , textAnchor "middle"
-                   , fill "white"
+                   [ v3Attr "x" (lit xPos)
+                   , v3Attr "y" (lit (toNumber level * 80.0 + 5.0))
+                   , v3AttrStr "text-content" (str label)
+                   , v3AttrStr "text-anchor" (str "middle")
+                   , v3AttrStr "fill" (str "white")
                    ]
                -- Attribute count badge
                , T.elem Text
-                   [ x xPos
-                   , y (toNumber level * 80.0 + 45.0)
-                   , textContent ("attrs: " <> show attrCount)
-                   , textAnchor "middle"
-                   , fill "#666"
+                   [ v3Attr "x" (lit xPos)
+                   , v3Attr "y" (lit (toNumber level * 80.0 + 45.0))
+                   , v3AttrStr "text-content" (str ("attrs: " <> show attrCount))
+                   , v3AttrStr "text-anchor" (str "middle")
+                   , v3AttrStr "fill" (str "#666")
                    ]
                ] <>
                -- Lines to children
@@ -116,12 +117,12 @@ astToTreeVisualization ast =
                  let childX = startX + (toNumber i * childSpacing)
                      childY = (toNumber (level + 1)) * 80.0
                  in T.elem Line
-                      [ x1 xPos
-                      , y1 (toNumber level * 80.0 + 30.0)
-                      , x2 childX
-                      , y2 (childY - 30.0)
-                      , stroke "#999"
-                      , strokeWidth 1.5
+                      [ v3Attr "x1" (lit xPos)
+                      , v3Attr "y1" (lit (toNumber level * 80.0 + 30.0))
+                      , v3Attr "x2" (lit childX)
+                      , v3Attr "y2" (lit (childY - 30.0))
+                      , v3AttrStr "stroke" (str "#999")
+                      , v3Attr "stroke-width" (lit 1.5)
                       ]
                ) children) <>
                -- Child nodes
@@ -135,26 +136,26 @@ astToTreeVisualization ast =
           []
           `T.withChildren`
             [ T.elem Circle
-                [ cx xPos
-                , cy (toNumber level * 80.0)
-                , radius 30.0
-                , fill "#E27A4A"
-                , stroke "#8A472E"
-                , strokeWidth 2.0
+                [ v3Attr "cx" (lit xPos)
+                , v3Attr "cy" (lit (toNumber level * 80.0))
+                , v3Attr "r" (lit 30.0)
+                , v3AttrStr "fill" (str "#E27A4A")
+                , v3AttrStr "stroke" (str "#8A472E")
+                , v3Attr "stroke-width" (lit 2.0)
                 ]
             , T.elem Text
-                [ x xPos
-                , y (toNumber level * 80.0 + 5.0)
-                , textContent ("Join: " <> name)
-                , textAnchor "middle"
-                , fill "white"
+                [ v3Attr "x" (lit xPos)
+                , v3Attr "y" (lit (toNumber level * 80.0 + 5.0))
+                , v3AttrStr "text-content" (str ("Join: " <> name))
+                , v3AttrStr "text-anchor" (str "middle")
+                , v3AttrStr "fill" (str "white")
                 ]
             , T.elem Text
-                [ x xPos
-                , y (toNumber level * 80.0 + 45.0)
-                , textContent ("data: " <> show dataCount)
-                , textAnchor "middle"
-                , fill "#666"
+                [ v3Attr "x" (lit xPos)
+                , v3Attr "y" (lit (toNumber level * 80.0 + 45.0))
+                , v3AttrStr "text-content" (str ("data: " <> show dataCount))
+                , v3AttrStr "text-anchor" (str "middle")
+                , v3AttrStr "fill" (str "#666")
                 ]
             ]
 
@@ -163,26 +164,26 @@ astToTreeVisualization ast =
           []
           `T.withChildren`
             [ T.elem Circle
-                [ cx xPos
-                , cy (toNumber level * 80.0)
-                , radius 30.0
-                , fill "#9B4AE2"
-                , stroke "#5C2E8A"
-                , strokeWidth 2.0
+                [ v3Attr "cx" (lit xPos)
+                , v3Attr "cy" (lit (toNumber level * 80.0))
+                , v3Attr "r" (lit 30.0)
+                , v3AttrStr "fill" (str "#9B4AE2")
+                , v3AttrStr "stroke" (str "#5C2E8A")
+                , v3Attr "stroke-width" (lit 2.0)
                 ]
             , T.elem Text
-                [ x xPos
-                , y (toNumber level * 80.0 + 5.0)
-                , textContent ("NestedJoin: " <> name)
-                , textAnchor "middle"
-                , fill "white"
+                [ v3Attr "x" (lit xPos)
+                , v3Attr "y" (lit (toNumber level * 80.0 + 5.0))
+                , v3AttrStr "text-content" (str ("NestedJoin: " <> name))
+                , v3AttrStr "text-anchor" (str "middle")
+                , v3AttrStr "fill" (str "white")
                 ]
             , T.elem Text
-                [ x xPos
-                , y (toNumber level * 80.0 + 45.0)
-                , textContent ("data: " <> show dataCount)
-                , textAnchor "middle"
-                , fill "#666"
+                [ v3Attr "x" (lit xPos)
+                , v3Attr "y" (lit (toNumber level * 80.0 + 45.0))
+                , v3AttrStr "text-content" (str ("data: " <> show dataCount))
+                , v3AttrStr "text-anchor" (str "middle")
+                , v3AttrStr "fill" (str "#666")
                 ]
             ]
 
@@ -191,29 +192,29 @@ astToTreeVisualization ast =
           []
           `T.withChildren`
             [ T.elem Circle
-                [ cx xPos
-                , cy (toNumber level * 80.0)
-                , radius 30.0
-                , fill "#4AE2A4"
-                , stroke "#2E8A5C"
-                , strokeWidth 2.0
+                [ v3Attr "cx" (lit xPos)
+                , v3Attr "cy" (lit (toNumber level * 80.0))
+                , v3Attr "r" (lit 30.0)
+                , v3AttrStr "fill" (str "#4AE2A4")
+                , v3AttrStr "stroke" (str "#2E8A5C")
+                , v3Attr "stroke-width" (lit 2.0)
                 ]
             , T.elem Text
-                [ x xPos
-                , y (toNumber level * 80.0 + 5.0)
-                , textContent ("SceneJoin: " <> name)
-                , textAnchor "middle"
-                , fill "white"
+                [ v3Attr "x" (lit xPos)
+                , v3Attr "y" (lit (toNumber level * 80.0 + 5.0))
+                , v3AttrStr "text-content" (str ("SceneJoin: " <> name))
+                , v3AttrStr "text-anchor" (str "middle")
+                , v3AttrStr "fill" (str "white")
                 ]
             , T.elem Text
-                [ x xPos
-                , y (toNumber level * 80.0 + 45.0)
-                , textContent ("data: " <> show dataCount <> " {" <>
+                [ v3Attr "x" (lit xPos)
+                , v3Attr "y" (lit (toNumber level * 80.0 + 45.0))
+                , v3AttrStr "text-content" (str ("data: " <> show dataCount <> " {" <>
                               (if hasEnter then "E" else "") <>
                               (if hasUpdate then "U" else "") <>
-                              (if hasExit then "X" else "") <> "}")
-                , textAnchor "middle"
-                , fill "#666"
+                              (if hasExit then "X" else "") <> "}"))
+                , v3AttrStr "text-anchor" (str "middle")
+                , v3AttrStr "fill" (str "#666")
                 ]
             ]
 
@@ -222,29 +223,29 @@ astToTreeVisualization ast =
           []
           `T.withChildren`
             [ T.elem Circle
-                [ cx xPos
-                , cy (toNumber level * 80.0)
-                , radius 30.0
-                , fill "#E2A44A"
-                , stroke "#8A5C2E"
-                , strokeWidth 2.0
+                [ v3Attr "cx" (lit xPos)
+                , v3Attr "cy" (lit (toNumber level * 80.0))
+                , v3Attr "r" (lit 30.0)
+                , v3AttrStr "fill" (str "#E2A44A")
+                , v3AttrStr "stroke" (str "#8A5C2E")
+                , v3Attr "stroke-width" (lit 2.0)
                 ]
             , T.elem Text
-                [ x xPos
-                , y (toNumber level * 80.0 + 5.0)
-                , textContent ("SceneNestedJoin: " <> name)
-                , textAnchor "middle"
-                , fill "white"
+                [ v3Attr "x" (lit xPos)
+                , v3Attr "y" (lit (toNumber level * 80.0 + 5.0))
+                , v3AttrStr "text-content" (str ("SceneNestedJoin: " <> name))
+                , v3AttrStr "text-anchor" (str "middle")
+                , v3AttrStr "fill" (str "white")
                 ]
             , T.elem Text
-                [ x xPos
-                , y (toNumber level * 80.0 + 45.0)
-                , textContent ("data: " <> show dataCount <> " {" <>
+                [ v3Attr "x" (lit xPos)
+                , v3Attr "y" (lit (toNumber level * 80.0 + 45.0))
+                , v3AttrStr "text-content" (str ("data: " <> show dataCount <> " {" <>
                               (if hasEnter then "E" else "") <>
                               (if hasUpdate then "U" else "") <>
-                              (if hasExit then "X" else "") <> "}")
-                , textAnchor "middle"
-                , fill "#666"
+                              (if hasExit then "X" else "") <> "}"))
+                , v3AttrStr "text-anchor" (str "middle")
+                , v3AttrStr "fill" (str "#666")
                 ]
             ]
 

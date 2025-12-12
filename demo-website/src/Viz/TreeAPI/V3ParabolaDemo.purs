@@ -20,7 +20,7 @@ import Effect.Console as Console
 import Type.Proxy (Proxy(..))
 
 -- v2 infrastructure for D3 rendering
-import PSD3v2.Attribute.Types (width, height, viewBox, id_, class_, fill, stroke, strokeWidth, cx, cy, radius)
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
@@ -29,7 +29,7 @@ import PSD3v2.VizTree.Tree as T
 import Web.DOM.Element (Element)
 
 -- v3 DSL imports
-import PSD3v3.Expr (class NumExpr, lit, add)
+import PSD3v3.Expr (class NumExpr, lit, add, str)
 import PSD3v3.Datum (class DatumExpr, field)
 import PSD3v3.Sugar ((*:), (+:))
 import PSD3v3.Interpreter.CodeGen (CodeGen, runCodeGen)
@@ -105,22 +105,22 @@ v3ParabolaDemo = runD3v2M do
   let tree :: Tree ParabolaPoint
       tree =
         T.named SVG "svg"
-          [ width 400.0
-          , height 250.0
-          , viewBox "0 0 400 250"
-          , id_ "v3-parabola-svg"
-          , class_ "v3-demo"
+          [ v3Attr "width" (lit 400.0)
+          , v3Attr "height" (lit 250.0)
+          , v3AttrStr "viewBox" (str "0 0 400 250")
+          , v3AttrStr "id" (str "v3-parabola-svg")
+          , v3AttrStr "class" (str "v3-demo")
           ]
           `T.withChild`
             (T.joinData "points" "circle" parabolaData $ \d ->
               -- v3 expressions are evaluated with datum → static v2 attributes
               T.elem Circle
-                [ cx (evalExpr scaleX d)       -- v3 expression evaluated!
-                , cy (evalExpr scaleY d)       -- v3 expression evaluated!
-                , radius (evalExpr pointRadius d)  -- v3 expression evaluated!
-                , fill "#3498db"
-                , stroke "white"
-                , strokeWidth 2.0
+                [ v3Attr "cx" (lit (evalExpr scaleX d))       -- v3 expression evaluated!
+                , v3Attr "cy" (lit (evalExpr scaleY d))       -- v3 expression evaluated!
+                , v3Attr "r" (lit (evalExpr pointRadius d))  -- v3 expression evaluated!
+                , v3AttrStr "fill" (str "#3498db")
+                , v3AttrStr "stroke" (str "white")
+                , v3Attr "stroke-width" (lit 2.0)
                 ])
 
   -- Render to DOM via D3!

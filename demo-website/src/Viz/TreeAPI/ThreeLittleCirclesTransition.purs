@@ -19,7 +19,8 @@ import Data.Time.Duration (Milliseconds(..))
 import Effect (Effect)
 import Effect.Console (log)
 import Effect.Ref as Ref
-import PSD3v2.Attribute.Types (width, height, viewBox, id_, fill, cx, cy, radius, fillOpacity)
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v3.Expr (lit, str)
 import PSD3v2.Capabilities.Selection (renderTree, select)
 import PSD3v2.Capabilities.Transition (withTransition)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
@@ -61,19 +62,19 @@ transitionToState circlesSel state = runD3v2M do
     StateGreen ->
       -- Three green circles in a row
       withTransition transitionConfig circlesSel
-        [ fill colorFnGreen
-        , cx cxFnGreen
-        , cy cyFnGreen
-        , radius 40.0
-        , fillOpacity 1.0 -- Fully opaque
+        [ v3AttrFnStr "fill" colorFnGreen
+        , v3AttrFn "cx" cxFnGreen
+        , v3AttrFn "cy" cyFnGreen
+        , v3Attr "r" (lit 40.0)
+        , v3Attr "fill-opacity" (lit 1.0) -- Fully opaque
         ]
     StateRGB ->
       withTransition transitionConfig circlesSel
-        [ fill colorFnRGB
-        , cx cxFnRGB
-        , cy cyFnRGB
-        , radius 60.0 -- Increased from 30 to 60 for proper overlap and color mixing
-        , fillOpacity 0.5 -- Semi-transparent for color mixing
+        [ v3AttrFnStr "fill" colorFnRGB
+        , v3AttrFn "cx" cxFnRGB
+        , v3AttrFn "cy" cyFnRGB
+        , v3Attr "r" (lit 60.0) -- Increased from 30 to 60 for proper overlap and color mixing
+        , v3Attr "fill-opacity" (lit 0.5) -- Semi-transparent for color mixing
         ]
 
   pure unit
@@ -123,19 +124,19 @@ threeLittleCirclesTransition selector = do
       initialTree :: T.Tree CircleData
       initialTree =
         T.named SVG "svg"
-          [ width 400.0
-          , height 250.0
-          , viewBox "0 0 400 250"
-          , id_ "three-circles-transition-tree"
+          [ v3Attr "width" (lit 400.0)
+          , v3Attr "height" (lit 250.0)
+          , v3AttrStr "viewBox" (str "0 0 400 250")
+          , v3AttrStr "id" (str "three-circles-transition-tree")
           ]
           `T.withChild`
             ( T.joinData "circles" "circle" [ 0, 1, 2 ] $ \d ->
                 T.elem Circle
-                  [ fill "#00ff00" -- Start green
-                  , cx (100.0 + toNumber d * 100.0) -- Three in a row
-                  , cy 125.0
-                  , radius 40.0
-                  , fillOpacity 1.0
+                  [ v3AttrStr "fill" (str "#00ff00") -- Start green
+                  , v3Attr "cx" (lit (100.0 + toNumber d * 100.0)) -- Three in a row
+                  , v3Attr "cy" (lit 125.0)
+                  , v3Attr "r" (lit 40.0)
+                  , v3Attr "fill-opacity" (lit 1.0)
                   ]
             )
 

@@ -28,10 +28,13 @@ import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Simulation (SimulationNode)
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultCollide)
-import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, radius, viewBox, width, height, class_, textAnchor, textContent, fontSize, x, y)
-import PSD3v2.Capabilities.Selection (select, appendChild, appendData, setAttrs)
-import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, D3v2M)
-import PSD3v2.Selection.Types (ElementType(..), SEmpty, SBoundOwns)
+-- v3 Integration: all attributes via v3Attr/v3AttrStr (no ToAttr typeclass)
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v3.Expr (lit, str)
+import PSD3v2.Capabilities.Selection (select, renderTree)
+import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
+import PSD3v2.Selection.Types (ElementType(..), SEmpty)
+import PSD3v2.VizTree.Tree as T
 import Web.DOM.Element (Element)
 
 -- =============================================================================
@@ -71,6 +74,9 @@ initForceViz selector = do
   -- State: is combined mode?
   isCombinedRef <- Ref.new false
 
+  -- State ref for tick updates
+  stateRef <- Ref.new { nodes, config }
+
   -- Create simulation
   sim <- Sim.create Sim.defaultConfig
   Sim.setNodes nodes sim
@@ -89,52 +95,38 @@ initForceViz selector = do
   -- Collision prevents overlap (using standard collide)
   Sim.addForce (Collide "collide" defaultCollide { radius = config.nodeRadius + 0.5, strength = 0.7, iterations = 2 }) sim
 
-  -- Render DOM structure
-  nodeSel <- runD3v2M do
+  -- Render initial DOM structure using TreeAPI
+  runD3v2M do
     container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
+    let containerTree :: T.Tree Unit
+        containerTree =
+          T.named SVG "svg"
+            [ v3Attr "width" (lit config.width)
+            , v3Attr "height" (lit config.height)
+            , v3AttrStr "viewBox" (str ("0 0 " <> show config.width <> " " <> show config.height))
+            , v3AttrStr "class" (str "force-viz-svg")
+            ]
+            `T.withChildren`
+              [ T.elem Group []
+                  `T.withChildren`
+                    [ T.named Group "dept-labels" [ v3AttrStr "class" (str "dept-labels"), v3AttrStr "id" (str "force-viz-dept-labels") ]
+                    , T.named Group "gender-labels" [ v3AttrStr "class" (str "gender-labels"), v3AttrStr "id" (str "force-viz-gender-labels") ]
+                    , T.named Group "applicants" [ v3AttrStr "class" (str "applicants"), v3AttrStr "id" (str "force-viz-applicants") ]
+                    ]
+              ]
+    _ <- renderTree container containerTree
+    pure unit
 
-    -- Create SVG
-    svg <- appendChild SVG
-      [ width config.width
-      , height config.height
-      , viewBox ("0 0 " <> show config.width <> " " <> show config.height)
-      , class_ "force-viz-svg"
-      ] container
+  -- Render initial labels and nodes
+  runD3v2M do
+    deptLabelsParent <- select "#force-viz-dept-labels" :: _ (D3v2Selection_ SEmpty Element Unit)
+    liftEffect $ renderDepartmentLabels config deptLabelsParent
 
-    -- Create main group
-    g <- appendChild Group [] svg
+    genderLabelsParent <- select "#force-viz-gender-labels" :: _ (D3v2Selection_ SEmpty Element Unit)
+    liftEffect $ renderGenderLabels config genderLabelsParent
 
-    -- Add department labels group
-    _ <- appendChild Group [ class_ "dept-labels" ] g
-    deptLabelsParent <- select ".force-viz-svg .dept-labels" :: _ (D3v2Selection_ SEmpty Element Unit)
-    renderDepartmentLabels config deptLabelsParent
-
-    -- Add gender labels group
-    _ <- appendChild Group [ class_ "gender-labels" ] g
-    genderLabelsParent <- select ".force-viz-svg .gender-labels" :: _ (D3v2Selection_ SEmpty Element Unit)
-    renderGenderLabels config genderLabelsParent
-
-    -- Create nodes group
-    _ <- appendChild Group [ class_ "applicants" ] g
-    nodesGroup <- select ".force-viz-svg .applicants" :: _ (D3v2Selection_ SEmpty Element Unit)
-
-    -- Get nodes from simulation for rendering
-    currentNodes <- liftEffect $ Sim.getNodes sim
-
-    -- Render applicant circles
-    nodeSel <- appendData Circle currentNodes
-      [ cx (_.x :: ApplicantNode -> Number)
-      , cy (_.y :: ApplicantNode -> Number)
-      , radius config.nodeRadius
-      , fill nodeColor
-      , stroke "white"
-      , strokeWidth 0.5
-      ] nodesGroup
-
-    pure nodeSel
-
-  -- Tick handler - update circle positions
-  Sim.onTick (tick nodeSel) sim
+  -- Tick handler - update circle positions using TreeAPI
+  Sim.onTick (tick stateRef) sim
   Sim.start sim
 
   -- Toggle function with multi-phase animation
@@ -207,19 +199,30 @@ initForceViz selector = do
     , isCombined: Ref.read isCombinedRef
     }
 
+-- | Tick handler - renders with current positions using TreeAPI
+tick :: Ref.Ref { nodes :: Array ApplicantNode, config :: ForceConfig } -> Effect Unit
+tick stateRef = runD3v2M do
+  state <- liftEffect $ Ref.read stateRef
+
+  -- Select applicants group
+  nodesGroup <- select "#force-viz-applicants" :: _ (D3v2Selection_ SEmpty Element Unit)
+
+  -- Render applicant circles
+  let nodesTree = T.joinData "applicants" "circle" state.nodes $ \_ ->
+        T.elem Circle
+          [ v3AttrFn "cx" (_.x :: ApplicantNode -> Number)
+          , v3AttrFn "cy" (_.y :: ApplicantNode -> Number)
+          , v3Attr "r" (lit state.config.nodeRadius)
+          , v3AttrFnStr "fill" nodeColor
+          , v3AttrStr "stroke" (str "white")
+          , v3Attr "stroke-width" (lit 0.5)
+          ]
+  _ <- renderTree nodesGroup nodesTree
+  pure unit
+
   where
-  -- Get fill color from node
   nodeColor :: ApplicantNode -> String
   nodeColor node = if node.accepted then blue else red
-
-  -- Update tick handler
-  tick :: D3v2Selection_ SBoundOwns Element ApplicantNode -> Effect Unit
-  tick nodeSel = runD3v2M do
-    _ <- setAttrs
-      [ cx (_.x :: ApplicantNode -> Number)
-      , cy (_.y :: ApplicantNode -> Number)
-      ] nodeSel
-    pure unit
 
 -- | Create applicant nodes from data with jitter
 createApplicantNodes :: ForceConfig -> Effect (Array ApplicantNode)
@@ -250,37 +253,43 @@ createApplicantNodes config = do
 -- | Department label datum type
 type DeptLabel = { idx :: Int, name :: String }
 
--- | Render department labels (A-F)
-renderDepartmentLabels :: ForceConfig -> D3v2Selection_ SEmpty Element Unit -> D3v2M Unit
-renderDepartmentLabels config parent = do
+-- | Render department labels (A-F) using TreeAPI
+renderDepartmentLabels :: ForceConfig -> D3v2Selection_ SEmpty Element Unit -> Effect Unit
+renderDepartmentLabels config parent = runD3v2M do
   let
     deptNames = ["A", "B", "C", "D", "E", "F"]
     labelData = mapWithIndex (\i name -> { idx: i, name }) deptNames
-  _ <- appendData Text labelData
-    [ x (\(d :: DeptLabel) -> departmentX config d.idx)
-    , y (config.marginTop - 10.0)
-    , textAnchor "middle"
-    , fontSize 12.0
-    , fill black
-    , textContent (_.name :: DeptLabel -> String)
-    ] parent
+
+  let labelsTree = T.joinData "dept-labels" "text" labelData $ \_ ->
+        T.elem Text
+          [ v3AttrFn "x" (\(d :: DeptLabel) -> departmentX config d.idx)
+          , v3Attr "y" (lit (config.marginTop - 10.0))
+          , v3AttrStr "text-anchor" (str "middle")
+          , v3Attr "font-size" (lit 12.0)
+          , v3AttrStr "fill" (str black)
+          , v3AttrFnStr "textContent" (_.name :: DeptLabel -> String)
+          ]
+  _ <- renderTree parent labelsTree
   pure unit
 
 -- | Gender label datum type
 type GenderLabel = { gender :: Gender, label :: String }
 
--- | Render gender labels
-renderGenderLabels :: ForceConfig -> D3v2Selection_ SEmpty Element Unit -> D3v2M Unit
-renderGenderLabels config parent = do
+-- | Render gender labels using TreeAPI
+renderGenderLabels :: ForceConfig -> D3v2Selection_ SEmpty Element Unit -> Effect Unit
+renderGenderLabels config parent = runD3v2M do
   let genders = [{ gender: Female, label: "Women" }, { gender: Male, label: "Men" }]
-  _ <- appendData Text genders
-    [ x 15.0
-    , y (\(d :: GenderLabel) -> genderY config d.gender)
-    , textAnchor "start"
-    , fontSize 14.0
-    , fill (\(d :: GenderLabel) -> if d.gender == Female then green else purple)
-    , textContent (_.label :: GenderLabel -> String)
-    ] parent
+
+  let labelsTree = T.joinData "gender-labels" "text" genders $ \_ ->
+        T.elem Text
+          [ v3Attr "x" (lit 15.0)
+          , v3AttrFn "y" (\(d :: GenderLabel) -> genderY config d.gender)
+          , v3AttrStr "text-anchor" (str "start")
+          , v3Attr "font-size" (lit 14.0)
+          , v3AttrFnStr "fill" (\(d :: GenderLabel) -> if d.gender == Female then green else purple)
+          , v3AttrFnStr "textContent" (_.label :: GenderLabel -> String)
+          ]
+  _ <- renderTree parent labelsTree
   pure unit
 
 -- =============================================================================

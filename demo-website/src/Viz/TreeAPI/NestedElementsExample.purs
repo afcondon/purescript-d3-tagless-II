@@ -7,12 +7,13 @@ import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
-import PSD3v2.Attribute.Types (width, height, viewBox, id_, class_, cx, cy, radius, fill, stroke, strokeWidth, textContent, textAnchor, x, y, fontSize, transform)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
 import PSD3v2.VizTree.Tree (Tree)
 import PSD3v2.VizTree.Tree as T
+import PSD3v3.Integration (v3Attr, v3AttrStr)
+import PSD3v3.Expr (lit, str)
 import Web.DOM.Element (Element)
 
 -- | Test: Multi-level nested elements (Group → Circle + Text)
@@ -31,75 +32,75 @@ testNestedElements = runD3v2M do
   let tree :: Tree Unit
       tree =
         T.named SVG "svg"
-          [ width 600.0
-          , height 400.0
-          , viewBox "0 0 600 400"
-          , id_ "nested-example-svg"
+          [ v3Attr "width" (lit 600.0)
+          , v3Attr "height" (lit 400.0)
+          , v3AttrStr "viewBox" (str "0 0 600 400")
+          , v3AttrStr "id" (str "nested-example-svg")
           ]
           `T.withChild`
-            (T.named Group "mainGroup" [class_ "main-group"]
+            (T.named Group "mainGroup" [v3AttrStr "class" (str "main-group")]
               `T.withChildren`
                 -- Multiple node groups, each with Circle + Text
                 [ -- Node 1
                   T.named Group "node1"
-                    [ class_ "node"
-                    , transform "translate(100, 100)"
+                    [ v3AttrStr "class" (str "node")
+                    , v3AttrStr "transform" (str "translate(100, 100)")
                     ]
                     `T.withChildren`
                       [ T.named Circle "node1Circle"
-                          [ cx 0.0, cy 0.0
-                          , radius 25.0
-                          , fill "steelblue"
-                          , stroke "white"
-                          , strokeWidth 2.0
+                          [ v3Attr "cx" (lit 0.0), v3Attr "cy" (lit 0.0)
+                          , v3Attr "r" (lit 25.0)
+                          , v3AttrStr "fill" (str "steelblue")
+                          , v3AttrStr "stroke" (str "white")
+                          , v3Attr "stroke-width" (lit 2.0)
                           ]
                       , T.named Text "node1Label"
-                          [ x 0.0, y 40.0
-                          , textContent "Node A"
-                          , textAnchor "middle"
-                          , fontSize 14.0
+                          [ v3Attr "x" (lit 0.0), v3Attr "y" (lit 40.0)
+                          , v3AttrStr "textContent" (str "Node A")
+                          , v3AttrStr "text-anchor" (str "middle")
+                          , v3Attr "font-size" (lit 14.0)
                           ]
                       ]
 
                 , -- Node 2
                   T.named Group "node2"
-                    [ class_ "node"
-                    , transform "translate(300, 150)"
+                    [ v3AttrStr "class" (str "node")
+                    , v3AttrStr "transform" (str "translate(300, 150)")
                     ]
                     `T.withChildren`
                       [ T.named Circle "node2Circle"
-                          [ cx 0.0, cy 0.0
-                          , radius 20.0
-                          , fill "orange"
-                          , stroke "white"
-                          , strokeWidth 2.0
+                          [ v3Attr "cx" (lit 0.0), v3Attr "cy" (lit 0.0)
+                          , v3Attr "r" (lit 20.0)
+                          , v3AttrStr "fill" (str "orange")
+                          , v3AttrStr "stroke" (str "white")
+                          , v3Attr "stroke-width" (lit 2.0)
                           ]
                       , T.named Text "node2Label"
-                          [ x 0.0, y 35.0
-                          , textContent "Node B"
-                          , textAnchor "middle"
-                          , fontSize 14.0
+                          [ v3Attr "x" (lit 0.0), v3Attr "y" (lit 35.0)
+                          , v3AttrStr "textContent" (str "Node B")
+                          , v3AttrStr "text-anchor" (str "middle")
+                          , v3Attr "font-size" (lit 14.0)
                           ]
                       ]
 
                 , -- Node 3
                   T.named Group "node3"
-                    [ class_ "node"
-                    , transform "translate(500, 100)"
+                    [ v3AttrStr "class" (str "node")
+                    , v3AttrStr "transform" (str "translate(500, 100)")
                     ]
                     `T.withChildren`
                       [ T.named Circle "node3Circle"
-                          [ cx 0.0, cy 0.0
-                          , radius 30.0
-                          , fill "green"
-                          , stroke "white"
-                          , strokeWidth 2.0
+                          [ v3Attr "cx" (lit 0.0), v3Attr "cy" (lit 0.0)
+                          , v3Attr "r" (lit 30.0)
+                          , v3AttrStr "fill" (str "green")
+                          , v3AttrStr "stroke" (str "white")
+                          , v3Attr "stroke-width" (lit 2.0)
                           ]
                       , T.named Text "node3Label"
-                          [ x 0.0, y 45.0
-                          , textContent "Node C"
-                          , textAnchor "middle"
-                          , fontSize 14.0
+                          [ v3Attr "x" (lit 0.0), v3Attr "y" (lit 45.0)
+                          , v3AttrStr "textContent" (str "Node C")
+                          , v3AttrStr "text-anchor" (str "middle")
+                          , v3Attr "font-size" (lit 14.0)
                           ]
                       ]
                 ])

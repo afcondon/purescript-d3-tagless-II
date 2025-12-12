@@ -19,7 +19,9 @@ import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Simulation (SimulationNode, SwizzledLink)
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultCenter, defaultLink)
 import PSD3.ForceEngine.Links (swizzleLinks)
-import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, x1, x2, y1, y2, radius, viewBox, width, height, x, y, textContent, textAnchor, fontSize, id_)
+-- v3 Integration: all attributes via v3Attr/v3AttrStr (no ToAttr typeclass)
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v3.Expr (lit, str)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
@@ -97,13 +99,13 @@ drawKoenigsbergBridges selector = do
     let containerTree :: T.Tree Unit
         containerTree =
           T.named SVG "svg"
-            [ width 400.0, height 300.0, viewBox "-200 -150 400 300" ]
+            [ v3Attr "width" (lit 400.0), v3Attr "height" (lit 300.0), v3AttrStr "viewBox" (str "-200 -150 400 300") ]
             `T.withChildren`
               [ T.elem Group []
                   `T.withChildren`
-                    [ T.named Group "links" [ id_ "koenigsberg-links" ]
-                    , T.named Group "nodes" [ id_ "koenigsberg-nodes" ]
-                    , T.named Group "labels" [ id_ "koenigsberg-labels" ]
+                    [ T.named Group "links" [ v3AttrStr "id" (str "koenigsberg-links") ]
+                    , T.named Group "nodes" [ v3AttrStr "id" (str "koenigsberg-nodes") ]
+                    , T.named Group "labels" [ v3AttrStr "id" (str "koenigsberg-labels") ]
                     ]
               ]
     _ <- renderTree container containerTree
@@ -127,36 +129,36 @@ tick stateRef = runD3v2M do
   -- Render links (bridges)
   let linksTree = T.joinData "links" "line" state.swizzled $ \_ ->
         T.elem Line
-          [ x1 (_.source.x :: SLink -> Number)
-          , y1 (_.source.y :: SLink -> Number)
-          , x2 (_.target.x :: SLink -> Number)
-          , y2 (_.target.y :: SLink -> Number)
-          , stroke "#8B4513" -- Brown for bridges
-          , strokeWidth 4.0
+          [ v3AttrFn "x1" (_.source.x :: SLink -> Number)
+          , v3AttrFn "y1" (_.source.y :: SLink -> Number)
+          , v3AttrFn "x2" (_.target.x :: SLink -> Number)
+          , v3AttrFn "y2" (_.target.y :: SLink -> Number)
+          , v3AttrStr "stroke" (str "#8B4513") -- Brown for bridges
+          , v3Attr "stroke-width" (lit 4.0)
           ]
   _ <- renderTree linksGroup linksTree
 
   -- Render nodes (land masses) - size by degree
   let nodesTree = T.joinData "nodes" "circle" state.nodes $ \_ ->
         T.elem Circle
-          [ cx (_.x :: Node -> Number)
-          , cy (_.y :: Node -> Number)
-          , radius ((\n -> 12.0 + toNumber n.degree * 3.0) :: Node -> Number)
-          , fill "#4a7c59" -- Green for land
-          , stroke "#2d4f35"
-          , strokeWidth 2.0
+          [ v3AttrFn "cx" (_.x :: Node -> Number)
+          , v3AttrFn "cy" (_.y :: Node -> Number)
+          , v3AttrFn "r" ((\n -> 12.0 + toNumber n.degree * 3.0) :: Node -> Number)
+          , v3AttrStr "fill" (str "#4a7c59") -- Green for land
+          , v3AttrStr "stroke" (str "#2d4f35")
+          , v3Attr "stroke-width" (lit 2.0)
           ]
   _ <- renderTree nodesGroup nodesTree
 
   -- Render labels
   let labelsTree = T.joinData "labels" "text" state.nodes $ \_ ->
         T.elem Text
-          [ x (_.x :: Node -> Number)
-          , y ((_.y >>> (_ + 4.0)) :: Node -> Number)
-          , textContent (_.name :: Node -> String)
-          , textAnchor "middle"
-          , fill "#fff"
-          , fontSize 10.0
+          [ v3AttrFn "x" (_.x :: Node -> Number)
+          , v3AttrFn "y" ((_.y >>> (_ + 4.0)) :: Node -> Number)
+          , v3AttrFnStr "textContent" (_.name :: Node -> String)
+          , v3AttrStr "text-anchor" (str "middle")
+          , v3AttrStr "fill" (str "#fff")
+          , v3Attr "font-size" (lit 10.0)
           ]
   _ <- renderTree labelsGroup labelsTree
 

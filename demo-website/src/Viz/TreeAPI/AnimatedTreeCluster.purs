@@ -16,7 +16,6 @@ import Effect.Class (liftEffect)
 import Effect.Console as Console
 import Type.Proxy (Proxy(..))
 import PSD3.Shared.FlareData (HierData, getName, getValue, getChildren)
-import PSD3v2.Attribute.Types (class_, cx, cy, d, fill, radius, stroke, strokeWidth, viewBox, width, height)
 import PSD3v2.Capabilities.Selection (renderTree, select)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, reselectD3v2)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
@@ -27,10 +26,11 @@ import DataViz.Layout.Hierarchy.Tree (treeWithSorting, defaultTreeConfig)
 import Web.DOM.Element (Element)
 
 -- v3 DSL imports
-import PSD3v3.Expr (class NumExpr)
+import PSD3v3.Expr (class NumExpr, lit, str)
 import PSD3v3.Datum (class DatumExpr, field)
 import PSD3v3.Path (linkVertical)
 import PSD3v3.Interpreter.Eval (EvalD, runEvalD)
+import PSD3v3.Integration (v3Attr, v3AttrStr)
 
 -- | Layout type
 data LayoutType = TreeLayout | ClusterLayout
@@ -194,14 +194,14 @@ draw flareData selector currentLayout = runD3v2M do
     structureTree :: T.Tree Unit
     structureTree =
       T.named SVG "svg"
-        [ viewBox ("0 0 " <> show chartWidth <> " " <> show chartHeight)
-        , class_ "animated-tree-cluster"
-        , width chartWidth
-        , height chartHeight
+        [ v3AttrStr "viewBox" (str ("0 0 " <> show chartWidth <> " " <> show chartHeight))
+        , v3AttrStr "class" (str "animated-tree-cluster")
+        , v3Attr "width" (lit chartWidth)
+        , v3Attr "height" (lit chartHeight)
         ]
         `T.withChildren`
-          [ T.named Group "linksGroup" [ class_ "links" ]
-          , T.named Group "nodesGroup" [ class_ "nodes" ]
+          [ T.named Group "linksGroup" [ v3AttrStr "class" (str "links") ]
+          , T.named Group "nodesGroup" [ v3AttrStr "class" (str "nodes") ]
           ]
 
   -- Render structure
@@ -217,11 +217,11 @@ draw flareData selector currentLayout = runD3v2M do
     linksTree =
       T.sceneJoin "linkElements" "path" links
         (\link -> T.elem Path
-          [ class_ "link"
-          , d (verticalLinkPathV3 link)
-          , fill "none"
-          , stroke "#555"
-          , strokeWidth 1.5
+          [ v3AttrStr "class" (str "link")
+          , v3AttrStr "d" (str (verticalLinkPathV3 link))
+          , v3AttrStr "fill" (str "none")
+          , v3AttrStr "stroke" (str "#555")
+          , v3Attr "stroke-width" (lit 1.5)
           ])
         { keyFn: Just linkKey
         , enterBehavior: Just
@@ -246,13 +246,13 @@ draw flareData selector currentLayout = runD3v2M do
     nodesTree =
       T.sceneJoin "nodeElements" "circle" nodes
         (\node -> T.elem Circle
-          [ class_ "node"
-          , cx (evalNode nodeX node)  -- v3: node.x
-          , cy (evalNode nodeY node)  -- v3: node.y
-          , radius 4.0
-          , fill "#999"
-          , stroke "#555"
-          , strokeWidth 1.5
+          [ v3AttrStr "class" (str "node")
+          , v3Attr "cx" (lit (evalNode nodeX node))  -- v3: node.x
+          , v3Attr "cy" (lit (evalNode nodeY node))  -- v3: node.y
+          , v3Attr "r" (lit 4.0)
+          , v3AttrStr "fill" (str "#999")
+          , v3AttrStr "stroke" (str "#555")
+          , v3Attr "stroke-width" (lit 1.5)
           ])
         { keyFn: Just nodeKey
         , enterBehavior: Just
@@ -304,11 +304,11 @@ update dataTree selector chartWidth chartHeight currentLayout = runD3v2M do
     linksTree =
       T.sceneJoin "linkElements" "path" links
         (\link -> T.elem Path
-          [ class_ "link"
-          , d (verticalLinkPathV3 link)
-          , fill "none"
-          , stroke "#555"
-          , strokeWidth 1.5
+          [ v3AttrStr "class" (str "link")
+          , v3AttrStr "d" (str (verticalLinkPathV3 link))
+          , v3AttrStr "fill" (str "none")
+          , v3AttrStr "stroke" (str "#555")
+          , v3Attr "stroke-width" (lit 1.5)
           ])
         { keyFn: Just linkKey
         , enterBehavior: Nothing
@@ -327,13 +327,13 @@ update dataTree selector chartWidth chartHeight currentLayout = runD3v2M do
     nodesTree =
       T.sceneJoin "nodeElements" "circle" nodes
         (\node -> T.elem Circle
-          [ class_ "node"
-          , cx (evalNode nodeX node)
-          , cy (evalNode nodeY node)
-          , radius 4.0
-          , fill "#999"
-          , stroke "#555"
-          , strokeWidth 1.5
+          [ v3AttrStr "class" (str "node")
+          , v3Attr "cx" (lit (evalNode nodeX node))
+          , v3Attr "cy" (lit (evalNode nodeY node))
+          , v3Attr "r" (lit 4.0)
+          , v3AttrStr "fill" (str "#999")
+          , v3AttrStr "stroke" (str "#555")
+          , v3Attr "stroke-width" (lit 1.5)
           ])
         { keyFn: Just nodeKey
         , enterBehavior: Nothing

@@ -61,7 +61,8 @@ import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Links (swizzleLinks)
 import PSD3.ForceEngine.Render (GroupId(..), updateGroupPositions, updateLinkPositions)
 import PSD3.ForceEngine.Simulation as Sim
-import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, radius, id_, class_, viewBox, d, opacity, x1, x2, y1, y2)
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v3.Expr (lit, str)
 import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom, onMouseEnter, onMouseLeave, onClickWithDatum)
 import PSD3v2.Capabilities.Selection (select, selectAll, appendChild, appendData, on)
 import PSD3v2.Interpreter.D3v2 (getElementsD3v2) as D3v2
@@ -822,27 +823,27 @@ renderSVG currentView containerSelector nodes = do
   container <- select containerSelector
 
   svg <- appendChild SVG
-    [ viewBox (show ((-ViewBox.viewBoxWidth) / 2.0) <> " " <> show ((-ViewBox.viewBoxHeight) / 2.0) <> " " <> show ViewBox.viewBoxWidth <> " " <> show ViewBox.viewBoxHeight)
-    , id_ "explorer-svg"
-    , class_ "ce-viz"
+    [ v3AttrStr "viewBox" (str (show ((-ViewBox.viewBoxWidth) / 2.0) <> " " <> show ((-ViewBox.viewBoxHeight) / 2.0) <> " " <> show ViewBox.viewBoxWidth <> " " <> show ViewBox.viewBoxHeight))
+    , v3AttrStr "id" (str "explorer-svg")
+    , v3AttrStr "class" (str "ce-viz")
     ]
     container
 
-  zoomGroup <- appendChild Group [ id_ "explorer-zoom-group" ] svg
-  _ <- appendChild Group [ id_ "treemap-watermark", class_ "watermark" ] zoomGroup -- Watermark first (behind)
-  _ <- appendChild Group [ id_ "explorer-links" ] zoomGroup
-  nodesGroup <- appendChild Group [ id_ "explorer-nodes" ] zoomGroup
+  zoomGroup <- appendChild Group [ v3AttrStr "id" (str "explorer-zoom-group") ] svg
+  _ <- appendChild Group [ v3AttrStr "id" (str "treemap-watermark"), v3AttrStr "class" (str "watermark") ] zoomGroup -- Watermark first (behind)
+  _ <- appendChild Group [ v3AttrStr "id" (str "explorer-links") ] zoomGroup
+  nodesGroup <- appendChild Group [ v3AttrStr "id" (str "explorer-nodes") ] zoomGroup
 
   -- ViewState now passed as parameter (no global ref read)
 
   nodeSel <- appendData Circle nodes
-    [ cx (_.x :: SimNode -> Number)
-    , cy (_.y :: SimNode -> Number)
-    , radius (_.r :: SimNode -> Number)
-    , fill (ColorPalette.getNodeFill currentView :: SimNode -> String)
-    , stroke (ColorPalette.getNodeStroke currentView :: SimNode -> String)
-    , strokeWidth 1.0 -- Slightly thicker stroke for visibility
-    , class_ nodeClass -- CSS class for type-based styling/transitions
+    [ v3AttrFn "cx" (_.x :: SimNode -> Number)
+    , v3AttrFn "cy" (_.y :: SimNode -> Number)
+    , v3AttrFn "r" (_.r :: SimNode -> Number)
+    , v3AttrFnStr "fill" (ColorPalette.getNodeFill currentView :: SimNode -> String)
+    , v3AttrFnStr "stroke" (ColorPalette.getNodeStroke currentView :: SimNode -> String)
+    , v3Attr "stroke-width" (lit 1.0) -- Slightly thicker stroke for visibility
+    , v3AttrFnStr "class" (nodeClass :: SimNode -> String) -- CSS class for type-based styling/transitions
     ]
     nodesGroup
 
@@ -995,12 +996,12 @@ renderTreeLinksD3 nodeMap links = do
 
   -- Append path elements for each tree link with dynamic attributes
   _ <- appendData Path links
-    [ d (linkPathFn nodeMap)
-    , fill (\(_ :: SimLink) -> "none")
-    , stroke (linkStrokeFn nodeMap)
-    , strokeWidth (linkWidthFn nodeMap)
-    , opacity (linkOpacityFn nodeMap)
-    , class_ (\(_ :: SimLink) -> "tree-link")
+    [ v3AttrFnStr "d" (linkPathFn nodeMap)
+    , v3AttrStr "fill" (str "none")
+    , v3AttrFnStr "stroke" (linkStrokeFn nodeMap)
+    , v3AttrFn "stroke-width" (linkWidthFn nodeMap)
+    , v3AttrFn "opacity" (linkOpacityFn nodeMap)
+    , v3AttrStr "class" (str "tree-link")
     ]
     linksGroup
 
@@ -1088,14 +1089,14 @@ renderForceLinksD3 links = do
 
   -- Append line elements for each link with dynamic attributes
   _ <- appendData Line links
-    [ x1 getSourceX
-    , y1 getSourceY
-    , x2 getTargetX
-    , y2 getTargetY
-    , stroke forceStrokeFn
-    , strokeWidth forceWidthFn
-    , opacity forceOpacityFn
-    , class_ (\(_ :: SwizzledLink) -> "force-link")
+    [ v3AttrFn "x1" getSourceX
+    , v3AttrFn "y1" getSourceY
+    , v3AttrFn "x2" getTargetX
+    , v3AttrFn "y2" getTargetY
+    , v3AttrFnStr "stroke" forceStrokeFn
+    , v3AttrFn "stroke-width" forceWidthFn
+    , v3AttrFn "opacity" forceOpacityFn
+    , v3AttrStr "class" (str "force-link")
     ]
     linksGroup
 
@@ -1640,14 +1641,14 @@ renderStaticLinksD3 nodeMap links = do
   let staticLinks = Array.mapMaybe (toStaticLink nodeMap) links
 
   _ <- appendData Line staticLinks
-    [ x1 (_.x1 :: StaticLink -> Number)
-    , y1 (_.y1 :: StaticLink -> Number)
-    , x2 (_.x2 :: StaticLink -> Number)
-    , y2 (_.y2 :: StaticLink -> Number)
-    , stroke (\(_ :: StaticLink) -> "white")
-    , strokeWidth (\(_ :: StaticLink) -> 1.5)
-    , opacity (\(_ :: StaticLink) -> 0.6)
-    , class_ (\(_ :: StaticLink) -> "neighborhood-link")
+    [ v3AttrFn "x1" (_.x1 :: StaticLink -> Number)
+    , v3AttrFn "y1" (_.y1 :: StaticLink -> Number)
+    , v3AttrFn "x2" (_.x2 :: StaticLink -> Number)
+    , v3AttrFn "y2" (_.y2 :: StaticLink -> Number)
+    , v3AttrStr "stroke" (str "white")
+    , v3Attr "stroke-width" (lit 1.5)
+    , v3Attr "opacity" (lit 0.6)
+    , v3AttrStr "class" (str "neighborhood-link")
     ]
     linksGroup
 
@@ -1670,14 +1671,14 @@ renderNeighborhoodLinksD3 links = do
   liftEffect $ logConnectivityStats "Neighborhood links" scores
 
   _ <- appendData Line links
-    [ x1 getSourceX
-    , y1 getSourceY
-    , x2 getTargetX
-    , y2 getTargetY
-    , stroke neighborhoodStrokeFn
-    , strokeWidth neighborhoodWidthFn
-    , opacity neighborhoodOpacityFn
-    , class_ (\(_ :: NeighborhoodLink) -> "neighborhood-link")
+    [ v3AttrFn "x1" getSourceX
+    , v3AttrFn "y1" getSourceY
+    , v3AttrFn "x2" getTargetX
+    , v3AttrFn "y2" getTargetY
+    , v3AttrFnStr "stroke" neighborhoodStrokeFn
+    , v3AttrFn "stroke-width" neighborhoodWidthFn
+    , v3AttrFn "opacity" neighborhoodOpacityFn
+    , v3AttrStr "class" (str "neighborhood-link")
     ]
     linksGroup
 
@@ -1728,14 +1729,14 @@ renderDirectionalLinksD3 links = do
   -- Each link is rendered with its directional color
   -- Green (#4ade80) for outgoing, matching the adjacency matrix
   _ <- appendData Line links
-    [ x1 getSourceX
-    , y1 getSourceY
-    , x2 getTargetX
-    , y2 getTargetY
-    , stroke directionalStrokeFn
-    , strokeWidth directionalWidthFn
-    , opacity (\(_ :: DirectionalLink) -> 0.7)
-    , class_ directionalClassFn
+    [ v3AttrFn "x1" getSourceX
+    , v3AttrFn "y1" getSourceY
+    , v3AttrFn "x2" getTargetX
+    , v3AttrFn "y2" getTargetY
+    , v3AttrFnStr "stroke" directionalStrokeFn
+    , v3AttrFn "stroke-width" directionalWidthFn
+    , v3Attr "opacity" (lit 0.7)
+    , v3AttrFnStr "class" directionalClassFn
     ]
     linksGroup
 
@@ -1990,13 +1991,13 @@ renderNodesOnly currentView nodes = do
 
   -- Capture the selection returned by appendData (don't discard it!)
   nodeSel <- appendData Circle nodes
-    [ cx (_.x :: SimNode -> Number)
-    , cy (_.y :: SimNode -> Number)
-    , radius (_.r :: SimNode -> Number)
-    , fill (ColorPalette.getNodeFill currentView :: SimNode -> String)
-    , stroke (ColorPalette.getNodeStroke currentView :: SimNode -> String)
-    , strokeWidth 1.0 -- Slightly thicker stroke for visibility
-    , class_ nodeClass
+    [ v3AttrFn "cx" (_.x :: SimNode -> Number)
+    , v3AttrFn "cy" (_.y :: SimNode -> Number)
+    , v3AttrFn "r" (_.r :: SimNode -> Number)
+    , v3AttrFnStr "fill" (ColorPalette.getNodeFill currentView :: SimNode -> String)
+    , v3AttrFnStr "stroke" (ColorPalette.getNodeStroke currentView :: SimNode -> String)
+    , v3Attr "stroke-width" (lit 1.0) -- Slightly thicker stroke for visibility
+    , v3AttrFnStr "class" nodeClass
     ]
     nodesGroup
 

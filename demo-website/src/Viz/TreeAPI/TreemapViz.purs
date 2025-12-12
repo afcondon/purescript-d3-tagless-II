@@ -13,7 +13,8 @@ import PSD3.Shared.Data (HierData, getName, getValue, getChildren, loadDataFile,
 import DataViz.Layout.Hierarchy.Core (hierarchy, sum) as H
 import DataViz.Layout.Hierarchy.Types (ValuedNode(..))
 import DataViz.Layout.Hierarchy.Treemap (TreemapNode(..), defaultTreemapConfig, treemap, squarify, phi)
-import PSD3v2.Attribute.Types (width, height, viewBox, class_, fill, fillOpacity, stroke, strokeWidth, textContent, textAnchor, x, y, fontSize)
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v3.Expr (lit, str)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
@@ -79,33 +80,33 @@ drawTreemap selector flareData = runD3v2M do
     tree :: T.Tree (TreemapNode String)
     tree =
       T.named SVG "svg"
-        [ width chartWidth
-        , height chartHeight
-        , viewBox ("0 0 " <> show chartWidth <> " " <> show chartHeight)
-        , class_ "treemap-viz"
+        [ v3Attr "width" (lit chartWidth)
+        , v3Attr "height" (lit chartHeight)
+        , v3AttrStr "viewBox" (str ("0 0 " <> show chartWidth <> " " <> show chartHeight))
+        , v3AttrStr "class" (str "treemap-viz")
         ]
         `T.withChild`
           ( T.joinData "rects" "g" leaves $ \(TNode node) ->
               T.named Group ("rect-" <> node.data_)
-                [ class_ "node" ]
+                [ v3AttrStr "class" (str "node") ]
                 `T.withChildren`
                   [ T.elem Rect
-                      [ x node.x0
-                      , y node.y0
-                      , width (node.x1 - node.x0)
-                      , height (node.y1 - node.y0)
-                      , fill (getColor node.depth)
-                      , fillOpacity 0.6
-                      , stroke "#fff"
-                      , strokeWidth 1.0
+                      [ v3Attr "x" (lit node.x0)
+                      , v3Attr "y" (lit node.y0)
+                      , v3Attr "width" (lit (node.x1 - node.x0))
+                      , v3Attr "height" (lit (node.y1 - node.y0))
+                      , v3AttrStr "fill" (str (getColor node.depth))
+                      , v3Attr "fill-opacity" (lit 0.6)
+                      , v3AttrStr "stroke" (str "#fff")
+                      , v3Attr "stroke-width" (lit 1.0)
                       ]
                   , T.elem Text
-                      [ x ((node.x0 + node.x1) / 2.0)
-                      , y ((node.y0 + node.y1) / 2.0)
-                      , textContent node.data_
-                      , textAnchor "middle"
-                      , fontSize 9.0
-                      , fillOpacity (if (node.x1 - node.x0) > 30.0 && (node.y1 - node.y0) > 15.0 then 1.0 else 0.0)
+                      [ v3Attr "x" (lit ((node.x0 + node.x1) / 2.0))
+                      , v3Attr "y" (lit ((node.y0 + node.y1) / 2.0))
+                      , v3AttrStr "textContent" (str node.data_)
+                      , v3AttrStr "text-anchor" (str "middle")
+                      , v3Attr "font-size" (lit 9.0)
+                      , v3Attr "fill-opacity" (lit (if (node.x1 - node.x0) > 30.0 && (node.y1 - node.y0) > 15.0 then 1.0 else 0.0))
                       ]
                   ]
           )

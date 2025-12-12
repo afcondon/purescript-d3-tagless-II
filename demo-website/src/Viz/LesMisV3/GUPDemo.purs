@@ -43,7 +43,8 @@ import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultLink, defaultCenter)
 import PSD3.ForceEngine.Links (filterLinksToSubset, swizzleLinksByIndex)
 import PSD3.Transition.Tick as Tick
-import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, x1, x2, y1, y2, radius, id_, class_, width, height, viewBox, opacity)
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v3.Expr (lit, str)
 import PSD3v2.Behavior.FFI as BehaviorFFI
 import PSD3v2.Behavior.Types (Behavior(..), DragConfig(..), ScaleExtent(..), defaultZoom)
 import PSD3v2.Capabilities.Selection (select, renderTree)
@@ -444,20 +445,20 @@ renderSVGContainer containerSelector = do
     containerTree :: T.Tree Unit
     containerTree =
       T.named ET.SVG "svg"
-        [ width svgWidth
-        , height svgHeight
-        , viewBox (show ((-svgWidth) / 2.0) <> " " <> show ((-svgHeight) / 2.0) <> " " <> show svgWidth <> " " <> show svgHeight)
-        , id_ "lesmis-gup-svg"
-        , class_ "lesmis-gup"
+        [ v3Attr "width" (lit svgWidth)
+        , v3Attr "height" (lit svgHeight)
+        , v3AttrStr "viewBox" (str (show ((-svgWidth) / 2.0) <> " " <> show ((-svgHeight) / 2.0) <> " " <> show svgWidth <> " " <> show svgHeight))
+        , v3AttrStr "id" (str "lesmis-gup-svg")
+        , v3AttrStr "class" (str "lesmis-gup")
         ]
         `T.withBehaviors`
           [ Zoom $ defaultZoom (ScaleExtent 0.1 10.0) "#lesmis-gup-zoom-group" ]
         `T.withChildren`
           [ T.named ET.Group "zoomGroup"
-              [ id_ "lesmis-gup-zoom-group", class_ "zoom-group" ]
+              [ v3AttrStr "id" (str "lesmis-gup-zoom-group"), v3AttrStr "class" (str "zoom-group") ]
               `T.withChildren`
-                [ T.named ET.Group "linksGroup" [ id_ "lesmis-gup-links", class_ "links" ]
-                , T.named ET.Group "nodesGroup" [ id_ "lesmis-gup-nodes", class_ "nodes" ]
+                [ T.named ET.Group "linksGroup" [ v3AttrStr "id" (str "lesmis-gup-links"), v3AttrStr "class" (str "links") ]
+                , T.named ET.Group "nodesGroup" [ v3AttrStr "id" (str "lesmis-gup-nodes"), v3AttrStr "class" (str "nodes") ]
                 ]
           ]
 
@@ -538,13 +539,13 @@ createNodesTree scene =
       -- v3 expressions compute visual properties from datum fields
       -- withBehaviors adds simulation-aware drag (nested variant for RenderNode.node)
       T.elem ET.Circle
-        [ cx (evalNodeNum nodeX datum)           -- v3: d.x
-        , cy (evalNodeNum nodeY datum)           -- v3: d.y
-        , radius (evalNodeNum nodeRadiusExpr datum)  -- v3: conditional lerp based on progress
-        , fill (evalNodeStr nodeFillExpr datum)      -- v3: conditional color
-        , opacity (evalNodeNum nodeOpacityExpr datum) -- v3: 1.0 or fade out
-        , stroke "#fff"
-        , strokeWidth 1.5
+        [ v3Attr "cx" (lit (evalNodeNum nodeX datum))           -- v3: d.x
+        , v3Attr "cy" (lit (evalNodeNum nodeY datum))           -- v3: d.y
+        , v3Attr "r" (lit (evalNodeNum nodeRadiusExpr datum))  -- v3: conditional lerp based on progress
+        , v3AttrStr "fill" (str (evalNodeStr nodeFillExpr datum))      -- v3: conditional color
+        , v3Attr "opacity" (lit (evalNodeNum nodeOpacityExpr datum)) -- v3: 1.0 or fade out
+        , v3AttrStr "stroke" (str "#fff")
+        , v3Attr "stroke-width" (lit 1.5)
         ]
         `T.withBehaviors`
           [ Drag (SimulationDragNested simulationId) ]
@@ -560,13 +561,13 @@ createLinksTree scene =
     T.joinData "links" "line" linkDatums $ \datum ->
       -- v3 expressions compute link endpoints from datum fields
       T.elem ET.Line
-        [ x1 (evalLinkNum linkSourceX datum)  -- v3: d.sourceX
-        , y1 (evalLinkNum linkSourceY datum)  -- v3: d.sourceY
-        , x2 (evalLinkNum linkTargetX datum)  -- v3: d.targetX
-        , y2 (evalLinkNum linkTargetY datum)  -- v3: d.targetY
-        , strokeWidth (sqrt (evalLinkNum linkValue datum))  -- v3: sqrt(d.value)
-        , stroke "#999"
-        , opacity 0.6
+        [ v3Attr "x1" (lit (evalLinkNum linkSourceX datum))  -- v3: d.sourceX
+        , v3Attr "y1" (lit (evalLinkNum linkSourceY datum))  -- v3: d.sourceY
+        , v3Attr "x2" (lit (evalLinkNum linkTargetX datum))  -- v3: d.targetX
+        , v3Attr "y2" (lit (evalLinkNum linkTargetY datum))  -- v3: d.targetY
+        , v3Attr "stroke-width" (lit (sqrt (evalLinkNum linkValue datum)))  -- v3: sqrt(d.value)
+        , v3AttrStr "stroke" (str "#999")
+        , v3Attr "opacity" (lit 0.6)
         ]
 
 -- =============================================================================

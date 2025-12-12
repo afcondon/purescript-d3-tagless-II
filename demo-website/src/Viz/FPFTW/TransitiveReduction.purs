@@ -14,11 +14,12 @@ import Data.Maybe (Maybe(..))
 import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
-import PSD3v2.Attribute.Types (class_, cx, cy, fill, height, radius, stroke, strokeOpacity, strokeWidth, textAnchor, textContent, viewBox, width, x, x1, x2, y, y1, y2)
 import PSD3v2.Capabilities.Selection (renderTree, select)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_, runD3v2M)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
 import PSD3v2.VizTree.Tree as T
+import PSD3v3.Expr (lit, str)
+import PSD3v3.Integration (v3Attr, v3AttrStr)
 import Web.DOM.Element (Element)
 
 -- | Use library's SimpleGraph for String nodes
@@ -106,14 +107,14 @@ visualizeGraph title graph centerX centerY circleRadius highlightRemoved removed
       targetPos <- getPos target
       let isRemoved = highlightRemoved && elem (Tuple source target) removedEdges
       pure $ T.elem Line
-        [ x1 sourcePos.x
-        , y1 sourcePos.y
-        , x2 targetPos.x
-        , y2 targetPos.y
-        , stroke if isRemoved then "#E74C3C" else "#999"
-        , strokeWidth if isRemoved then 3.0 else 2.0
-        , strokeOpacity if isRemoved then 0.7 else 1.0
-        , class_ if isRemoved then "edge removed-edge" else "edge"
+        [ v3Attr "x1" (lit sourcePos.x)
+        , v3Attr "y1" (lit sourcePos.y)
+        , v3Attr "x2" (lit targetPos.x)
+        , v3Attr "y2" (lit targetPos.y)
+        , v3AttrStr "stroke" (str if isRemoved then "#E74C3C" else "#999")
+        , v3Attr "stroke-width" (lit if isRemoved then 3.0 else 2.0)
+        , v3Attr "stroke-opacity" (lit if isRemoved then 0.7 else 1.0)
+        , v3AttrStr "class" (str if isRemoved then "edge removed-edge" else "edge")
         ]
 
     -- Render nodes
@@ -122,32 +123,32 @@ visualizeGraph title graph centerX centerY circleRadius highlightRemoved removed
         []
         `T.withChildren`
           [ T.elem Circle
-              [ cx pos.x
-              , cy pos.y
-              , radius 20.0
-              , fill "#4A90E2"
-              , stroke "#2E5C8A"
-              , strokeWidth 2.0
-              , class_ "graph-node"
+              [ v3Attr "cx" (lit pos.x)
+              , v3Attr "cy" (lit pos.y)
+              , v3Attr "r" (lit 20.0)
+              , v3AttrStr "fill" (str "#4A90E2")
+              , v3AttrStr "stroke" (str "#2E5C8A")
+              , v3Attr "stroke-width" (lit 2.0)
+              , v3AttrStr "class" (str "graph-node")
               ]
           , T.elem Text
-              [ x pos.x
-              , y (pos.y + 5.0)
-              , textContent pos.id
-              , textAnchor "middle"
-              , fill "#fff"
-              , class_ "node-label"
+              [ v3Attr "x" (lit pos.x)
+              , v3Attr "y" (lit (pos.y + 5.0))
+              , v3AttrStr "text-content" (str pos.id)
+              , v3AttrStr "text-anchor" (str "middle")
+              , v3AttrStr "fill" (str "#fff")
+              , v3AttrStr "class" (str "node-label")
               ]
           ]
 
     -- Title
     titleElement = T.elem Text
-      [ x centerX
-      , y (centerY - circleRadius - 30.0)
-      , textContent title
-      , textAnchor "middle"
-      , fill "#333"
-      , class_ "graph-title"
+      [ v3Attr "x" (lit centerX)
+      , v3Attr "y" (lit (centerY - circleRadius - 30.0))
+      , v3AttrStr "text-content" (str title)
+      , v3AttrStr "text-anchor" (str "middle")
+      , v3AttrStr "fill" (str "#333")
+      , v3AttrStr "class" (str "graph-title")
       ]
   in
     T.named Group ("graph-" <> title)
@@ -174,10 +175,10 @@ drawTransitiveReduction containerSelector = runD3v2M do
     -- Create side-by-side visualization
     vizTree =
       T.named SVG "svg"
-        [ width totalWidth
-        , height totalHeight
-        , viewBox "0 0 1000 400"
-        , class_ "transitive-reduction"
+        [ v3Attr "width" (lit totalWidth)
+        , v3Attr "height" (lit totalHeight)
+        , v3AttrStr "viewBox" (str "0 0 1000 400")
+        , v3AttrStr "class" (str "transitive-reduction")
         ]
         `T.withChildren`
           [ -- Original graph (left)
@@ -200,12 +201,12 @@ drawTransitiveReduction containerSelector = runD3v2M do
               []
           , -- Arrow indicating transformation
             T.elem Text
-              [ x 500.0
-              , y 200.0
-              , textContent "→"
-              , textAnchor "middle"
-              , fill "#666"
-              , class_ "transformation-arrow"
+              [ v3Attr "x" (lit 500.0)
+              , v3Attr "y" (lit 200.0)
+              , v3AttrStr "text-content" (str "→")
+              , v3AttrStr "text-anchor" (str "middle")
+              , v3AttrStr "fill" (str "#666")
+              , v3AttrStr "class" (str "transformation-arrow")
               ]
           ]
 

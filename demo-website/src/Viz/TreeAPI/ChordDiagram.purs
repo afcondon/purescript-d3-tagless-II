@@ -20,7 +20,8 @@ import Type.Proxy (Proxy(..))
 import PSD3.Shared.Data (loadBridgesData)
 import PSD3.Internal.FFI (arcGenerator_, arcPath_, chordArray_, chordGroups_, chordLayoutWithPadAngle_, ribbonGenerator_, ribbonPath_, setArcInnerRadius_, setArcOuterRadius_, setRibbonRadius_)
 import PSD3.Internal.Types (Datum_)
-import PSD3v2.Attribute.Types (class_, d, fill, fillOpacity, fontSize, height, id_, stroke, strokeWidth, textAnchor, textContent, transform, viewBox, width, x, y)
+import PSD3v3.Integration (v3Attr, v3AttrStr)
+import PSD3v3.Expr (lit, str)
 import PSD3v2.Capabilities.Selection (renderTree, select)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_, reselectD3v2, runD3v2M)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
@@ -261,21 +262,21 @@ drawChord matrix labels containerSelector w h = runD3v2M do
     chordTree :: T.Tree Unit
     chordTree =
       T.named SVG "svg"
-        [ width w
-        , height h
-        , viewBox ("0 0 " <> show w <> " " <> show h)
-        , id_ "chord-svg"
-        , class_ "chord-diagram"
+        [ v3Attr "width" (lit w)
+        , v3Attr "height" (lit h)
+        , v3AttrStr "viewBox" (str ("0 0 " <> show w <> " " <> show h))
+        , v3AttrStr "id" (str "chord-svg")
+        , v3AttrStr "class" (str "chord-diagram")
         ]
         `T.withChild`
           ( T.named Group "centerGroup"
-              [ transform ("translate(" <> show centerX <> "," <> show centerY <> ")")
-              , class_ "chord-group"
+              [ v3AttrStr "transform" (str ("translate(" <> show centerX <> "," <> show centerY <> ")"))
+              , v3AttrStr "class" (str "chord-group")
               ]
               `T.withChildren`
-                [ T.named Group "ribbonsGroup" [ class_ "ribbons" ]
-                , T.named Group "arcsGroup" [ class_ "arcs" ]
-                , T.named Group "labelsGroup" [ class_ "labels" ]
+                [ T.named Group "ribbonsGroup" [ v3AttrStr "class" (str "ribbons") ]
+                , T.named Group "arcsGroup" [ v3AttrStr "class" (str "arcs") ]
+                , T.named Group "labelsGroup" [ v3AttrStr "class" (str "labels") ]
                 ]
           )
 
@@ -297,12 +298,12 @@ drawChord matrix labels containerSelector w h = runD3v2M do
           color = getRegionColor labels dominantIdx
         in
           T.elem Path
-            [ class_ "ribbon"
-            , d (ribbonPath_ ribbonGen ir.datum)
-            , fill color
-            , fillOpacity 0.67
-            , stroke "#000000"
-            , strokeWidth 0.5
+            [ v3AttrStr "class" (str "ribbon")
+            , v3AttrStr "d" (str (ribbonPath_ ribbonGen ir.datum))
+            , v3AttrStr "fill" (str color)
+            , v3Attr "fill-opacity" (lit 0.67)
+            , v3AttrStr "stroke" (str "#000000")
+            , v3Attr "stroke-width" (lit 0.5)
             ]
 
   _ <- renderTree ribbonsGroupSel ribbonsTree
@@ -317,11 +318,11 @@ drawChord matrix labels containerSelector w h = runD3v2M do
           color = getRegionColor labels idx
         in
           T.elem Path
-            [ class_ "arc"
-            , d (arcPath_ arcGen ia.datum)
-            , fill color
-            , stroke "#ffffff"
-            , strokeWidth 2.0
+            [ v3AttrStr "class" (str "arc")
+            , v3AttrStr "d" (str (arcPath_ arcGen ia.datum))
+            , v3AttrStr "fill" (str color)
+            , v3AttrStr "stroke" (str "#ffffff")
+            , v3Attr "stroke-width" (lit 2.0)
             ]
 
   _ <- renderTree arcsGroupSel arcsTree
@@ -336,13 +337,13 @@ drawChord matrix labels containerSelector w h = runD3v2M do
       T.joinData "labelElements" "text" chordLabelData $ \datum ->
         -- v3 expressions with TrigExpr calculate polar coordinates
         T.elem Text
-          [ class_ "chord-label"
-          , x (evalChordNum chordLabelX datum)      -- v3: labelRadius * cos(midAngle - π/2)
-          , y (evalChordNum chordLabelY datum)      -- v3: labelRadius * sin(midAngle - π/2)
-          , textAnchor (evalChordStr chordLabelAnchor datum)  -- v3: if midAngle > π then "end" else "start"
-          , fill "#000"
-          , textContent datum.label
-          , fontSize 10.0
+          [ v3AttrStr "class" (str "chord-label")
+          , v3Attr "x" (lit (evalChordNum chordLabelX datum))      -- v3: labelRadius * cos(midAngle - π/2)
+          , v3Attr "y" (lit (evalChordNum chordLabelY datum))      -- v3: labelRadius * sin(midAngle - π/2)
+          , v3AttrStr "text-anchor" (str (evalChordStr chordLabelAnchor datum))  -- v3: if midAngle > π then "end" else "start"
+          , v3AttrStr "fill" (str "#000")
+          , v3AttrStr "text-content" (str datum.label)
+          , v3Attr "font-size" (lit 10.0)
           ]
 
   _ <- renderTree labelsGroupSel labelsTree

@@ -11,11 +11,11 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import PSD3v2.Attribute.Types (AttributeName(..), AttributeValue(..))
 import PSD3v2.Interpreter.MermaidTree (runMermaidTree)
 import PSD3v2.Selection.Types (ElementType(..))
 import PSD3v2.VizTree.Tree as T
-import PSD3v2.Attribute.Types (Attribute(..)) as Attr
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v3.Expr (lit, str)
 
 -- FFI
 foreign import runMermaid :: Effect Unit
@@ -81,10 +81,10 @@ handleAction = case _ of
 
   GenerateSimpleTree -> do
     let
-      tree = T.named SVG "svg" [ staticAttr "width" "800", staticAttr "height" "600" ] `T.withChildren`
-        [ T.elem Group [ staticAttr "class" "container" ] `T.withChild`
-            T.elem Circle [ staticAttr "r" "50", staticAttr "fill" "blue" ]
-        , T.elem Text [ staticAttr "x" "100", staticAttr "y" "100" ]
+      tree = T.named SVG "svg" [ v3AttrStr "width" (str "800"), v3AttrStr "height" (str "600") ] `T.withChildren`
+        [ T.elem Group [ v3AttrStr "class" (str "container") ] `T.withChild`
+            T.elem Circle [ v3AttrStr "r" (str "50"), v3AttrStr "fill" (str "blue") ]
+        , T.elem Text [ v3AttrStr "x" (str "100"), v3AttrStr "y" (str "100") ]
         ]
     code <- liftEffect $ runMermaidTree tree
     H.modify_ _ { mermaidCode = Just code }
@@ -94,24 +94,16 @@ handleAction = case _ of
   GenerateJoinTree -> do
     let
       sampleData = [ 1, 2, 3, 4, 5 ]
-      tree = T.named SVG "svg" [ staticAttr "width" "800" ] `T.withChild`
-        ( T.joinData "circles" "circle" sampleData $ \_ ->
+      tree = T.named SVG "svg" [ v3AttrStr "width" (str "800") ] `T.withChild`
+        ( T.joinData "circles" "circle" sampleData $ \d ->
             T.elem Circle
-              [ dataAttr "cx" (\d -> NumberValue (toNumber d * 50.0))
-              , dataAttr "cy" (\_ -> NumberValue 100.0)
-              , staticAttr "r" "20"
-              , staticAttr "fill" "steelblue"
+              [ v3AttrFn "cx" (\datum -> toNumber datum * 50.0)
+              , v3Attr "cy" (lit 100.0)
+              , v3AttrStr "r" (str "20")
+              , v3AttrStr "fill" (str "steelblue")
               ]
         )
     code <- liftEffect $ runMermaidTree tree
     H.modify_ _ { mermaidCode = Just code }
     -- Trigger Mermaid rendering after DOM update
     liftEffect runMermaid
-
--- Helper to create static attributes
-staticAttr :: forall d. String -> String -> Attr.Attribute d
-staticAttr name value = Attr.StaticAttr (AttributeName name) (StringValue value)
-
--- Helper to create data-driven attributes
-dataAttr :: forall d. String -> (d -> AttributeValue) -> Attr.Attribute d
-dataAttr name fn = Attr.DataAttr (AttributeName name) fn

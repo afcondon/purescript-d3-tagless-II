@@ -1,3 +1,24 @@
+/* PSD3 tooltip styles - used by showTooltip/hideTooltip */
+
+.psd3-tooltip {
+  position: fixed;
+  z-index: 10000;
+  background: rgba(20, 20, 30, 0.95);
+  color: #f0f0f0;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+  max-width: 300px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+.psd3-tooltip strong {
+  color: #fff;
+  font-weight: 600;
+}
+
 /* Node tooltip styles for Code Explorer */
 
 .node-tooltip {

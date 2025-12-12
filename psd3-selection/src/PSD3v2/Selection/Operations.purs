@@ -418,6 +418,41 @@ appendChild elemType attrs (Selection impl) = liftEffect do
     , document: doc
     }
 
+-- | Append child elements with an optional explicit datum for attribute functions
+-- | When datumOpt is Nothing, uses a dummy datum (like appendChild)
+-- | When datumOpt is Just d, uses d for all datum-dependent attributes
+appendChildWithDatum
+  :: forall parent datum datumOut m
+   . MonadEffect m
+  => ElementType
+  -> Array (Attribute datumOut)
+  -> Maybe datumOut -- Optional datum for attribute functions
+  -> Selection SEmpty parent datum
+  -> m (Selection SEmpty Element datumOut)
+appendChildWithDatum elemType attrs datumOpt (Selection impl) = liftEffect do
+  let
+    { parentElements, document: doc } = unsafePartial case impl of
+      EmptySelection r -> r
+
+  -- Create one element for each parent
+  elements <- parentElements # traverse \parent -> do
+    element <- createElementWithNS elemType doc
+    -- Apply attributes with the provided datum or a dummy if none
+    let datum = case datumOpt of
+          Just d -> d
+          Nothing -> unsafeCoerce unit :: datumOut
+    applyAttributes element datum 0 attrs
+    -- Append to parent
+    let elementNode = toNode element
+    let parentNode = toNode parent
+    Node.appendChild elementNode parentNode
+    pure element
+
+  pure $ Selection $ EmptySelection
+    { parentElements: elements
+    , document: doc
+    }
+
 -- | Append child elements to a data-bound selection, inheriting parent's data
 -- |
 -- | This is the key function for creating nested SVG structures where children
@@ -1156,17 +1191,18 @@ getElementsFromBoundSelection (Selection impl) =
 -- Declarative Tree Rendering
 -- ============================================================================
 
--- | Helper: Render a single node and its children
--- | Returns the created element and accumulated selections map
-renderNodeHelper
+-- | Helper: Render a single node with an explicit datum for attribute application
+-- | When datumOpt is Just, uses that datum for attribute functions instead of a dummy
+renderNodeHelperWithDatum
   :: forall p pd d
    . Ord d -- Needed for joinData
   => Selection SEmpty p pd
   -> Tree d
+  -> Maybe d -- Optional datum to use for attribute functions
   -> Effect (Tuple Element (Map String (Selection SBoundOwns Element d)))
-renderNodeHelper parentSel (Node node) = do
-  -- Create this element
-  childSel <- appendChild node.elemType node.attrs parentSel
+renderNodeHelperWithDatum parentSel (Node node) datumOpt = do
+  -- Create this element with proper datum for attributes
+  childSel <- appendChildWithDatum node.elemType node.attrs datumOpt parentSel
 
   -- Get the first element from the created selection
   let Selection impl = childSel
@@ -1180,8 +1216,8 @@ renderNodeHelper parentSel (Node node) = do
   -- Attach behaviors to this element
   traverse_ (\behavior -> applyBehaviorToElement behavior element) node.behaviors
 
-  -- Recursively render children
-  childMaps <- traverse (renderNodeHelper childSel) node.children
+  -- Recursively render children, passing datum through
+  childMaps <- traverse (\child -> renderNodeHelperWithDatum childSel child datumOpt) node.children
   let combinedChildMap = Array.foldl Map.union Map.empty (map snd childMaps)
 
   -- Add this node to the map if it has a name
@@ -1191,6 +1227,24 @@ renderNodeHelper parentSel (Node node) = do
       Nothing -> combinedChildMap
 
   pure $ Tuple element selectionsMap
+
+-- For non-Node cases called via renderNodeHelperWithDatum, delegate to renderNodeHelper
+-- (Join cases manage their own data through the join logic, no datum passing needed)
+renderNodeHelperWithDatum parentSel tree@(Join _) _ = renderNodeHelper parentSel tree
+renderNodeHelperWithDatum parentSel tree@(NestedJoin _) _ = renderNodeHelper parentSel tree
+renderNodeHelperWithDatum parentSel tree@(SceneJoin _) _ = renderNodeHelper parentSel tree
+renderNodeHelperWithDatum parentSel tree@(SceneNestedJoin _) _ = renderNodeHelper parentSel tree
+
+-- | Helper: Render a single node and its children (no explicit datum)
+-- | Returns the created element and accumulated selections map
+renderNodeHelper
+  :: forall p pd d
+   . Ord d -- Needed for joinData
+  => Selection SEmpty p pd
+  -> Tree d
+  -> Effect (Tuple Element (Map String (Selection SBoundOwns Element d)))
+-- For Node, delegate to renderNodeHelperWithDatum with Nothing (no datum passed)
+renderNodeHelper parentSel (Node node) = renderNodeHelperWithDatum parentSel (Node node) Nothing
 
 -- Render a data join
 -- This is where the magic happens: we create N copies of the template,
@@ -1269,11 +1323,10 @@ renderNodeHelper parentSel (Join joinSpec) = do
   -- 8. Add the join's collection to the selections map
   let selectionsMap = Map.insert joinSpec.name (unsafeCoerce boundSel) combinedChildMap
 
-  -- 9. Get first element for return value
-  let
-    firstElement = case Array.head allElements of
-      Just el -> el
-      Nothing -> unsafePartial $ unsafeCrashWith "renderTree Join: no elements created"
+  -- 9. Get first element for return value (or dummy if DOM was removed during navigation)
+  firstElement <- case Array.head allElements of
+    Just el -> pure el
+    Nothing -> createElementWithNS Group doc  -- Dummy element, not attached to DOM
 
   pure $ Tuple firstElement selectionsMap
 
@@ -1312,11 +1365,10 @@ renderNodeHelper parentSel (NestedJoin joinSpec) = do
   -- 5. Add the join's collection to the selections map
   let selectionsMap = Map.insert joinSpec.name (unsafeCoerce boundSel) combinedChildMap
 
-  -- 6. Get first element for return value
-  let
-    firstElement = case Array.head elements of
-      Just el -> el
-      Nothing -> unsafePartial $ unsafeCrashWith "renderTree NestedJoin: no elements created"
+  -- 6. Get first element for return value (or dummy if DOM was removed during navigation)
+  firstElement <- case Array.head elements of
+    Just el -> pure el
+    Nothing -> createElementWithNS Group doc  -- Dummy element, not attached to DOM
 
   pure $ Tuple firstElement selectionsMap
 
@@ -1483,11 +1535,10 @@ renderNodeHelper parentSel (SceneJoin joinSpec) = do
   -- 8. Add the join's collection to the selections map
   let selectionsMap = Map.insert joinSpec.name (unsafeCoerce boundSel) combinedChildMap
 
-  -- 9. Get first element for return value
-  let
-    firstElement = case Array.head allElements of
-      Just el -> el
-      Nothing -> unsafePartial $ unsafeCrashWith "renderTree SceneJoin: no elements created"
+  -- 9. Get first element for return value (or dummy if DOM was removed during navigation)
+  firstElement <- case Array.head allElements of
+    Just el -> pure el
+    Nothing -> createElementWithNS Group doc  -- Dummy element, not attached to DOM
 
   pure $ Tuple firstElement selectionsMap
 
@@ -1649,10 +1700,10 @@ renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
 
   let selectionsMap = Map.insert joinSpec.name (unsafeCoerce boundSel) combinedChildMap
 
-  let
-    firstElement = case Array.head allElements of
-      Just el -> el
-      Nothing -> unsafePartial $ unsafeCrashWith "renderTree SceneNestedJoin: no elements created"
+  -- Get first element for return value (or dummy if DOM was removed during navigation)
+  firstElement <- case Array.head allElements of
+    Just el -> pure el
+    Nothing -> createElementWithNS Group doc  -- Dummy element, not attached to DOM
 
   pure $ Tuple firstElement selectionsMap
 
@@ -1692,9 +1743,11 @@ renderNestedTemplatesForPendingSelection decomposer templateFn wrapperType pendi
             let innerDataArray = decomposer outerDatum
 
             -- Render template for each inner datum
+            -- Type erasure: innerDataArray has Array outerDatum, but contains actual inner data at runtime
             innerMaps <- traverse
-              ( \innerDatum -> do
-                  let tree = unsafeCoerce templateFn innerDatum :: Tree innerDatum
+              ( \innerDatumErased -> do
+                  let innerDatum = unsafeCoerce innerDatumErased :: innerDatum
+                  let tree = unsafeCoerce templateFn innerDatumErased :: Tree innerDatum
 
                   let
                     singleParentSel = Selection $ EmptySelection
@@ -1702,7 +1755,8 @@ renderNestedTemplatesForPendingSelection decomposer templateFn wrapperType pendi
                       , document: doc
                       }
 
-                  Tuple _ childSelections <- renderNodeHelper singleParentSel tree
+                  -- Pass the inner datum for attribute functions
+                  Tuple _ childSelections <- renderNodeHelperWithDatum singleParentSel tree (Just innerDatum)
                   pure childSelections
               )
               innerDataArray
@@ -1731,35 +1785,39 @@ renderTemplatesForPendingSelection templateFn pendingSel = do
     { parentElements, pendingData, document: doc } = unsafePartial case impl of
       PendingSelection rec -> rec
 
-  -- For each (parent, datum) pair, render the template
-  traverseWithIndex
-    ( \idx datum -> do
-        -- Get the parent element for this datum
-        -- Distribute data across parents cyclically if there are more data than parents
-        let parentIdx = idx `mod` Array.length parentElements
-        case Array.index parentElements parentIdx of
-          Nothing -> unsafeCrashWith "renderTemplatesForPendingSelection: no parent elements"
-          Just parent -> do
-            -- Build the template tree for this datum
-            let tree = templateFn datum
+  -- Guard: if no parent elements (e.g., DOM removed during navigation), return empty
+  -- This prevents crashes when simulations try to render after their container is gone
+  if Array.null parentElements then pure []
+  else
+    -- For each (parent, datum) pair, render the template
+    traverseWithIndex
+      ( \idx datum -> do
+          -- Get the parent element for this datum
+          -- Distribute data across parents cyclically if there are more data than parents
+          let parentIdx = idx `mod` Array.length parentElements
+          case Array.index parentElements parentIdx of
+            Nothing -> unsafeCrashWith "renderTemplatesForPendingSelection: no parent elements"
+            Just parent -> do
+              -- Build the template tree for this datum
+              let tree = templateFn datum
 
-            -- Create an empty selection for this single parent
-            let
-              singleParentSel = Selection $ EmptySelection
-                { parentElements: [ parent ]
-                , document: doc
-                }
+              -- Create an empty selection for this single parent
+              let
+                singleParentSel = Selection $ EmptySelection
+                  { parentElements: [ parent ]
+                  , document: doc
+                  }
 
-            -- Render the tree
-            Tuple element childSelections <- renderNodeHelper singleParentSel tree
+              -- Render the tree with the datum for attribute functions
+              Tuple element childSelections <- renderNodeHelperWithDatum singleParentSel tree (Just datum)
 
-            -- CRITICAL: Bind the datum to the root element created by the template
-            -- This allows future joins to match this element with updated data
-            setElementData_ (unsafeCoerce datum) element
+              -- CRITICAL: Bind the datum to the root element created by the template
+              -- This allows future joins to match this element with updated data
+              setElementData_ (unsafeCoerce datum) element
 
-            pure $ Tuple element childSelections
-    )
-    pendingData
+              pure $ Tuple element childSelections
+      )
+      pendingData
 
 -- | Helper: Update existing elements from a template function for each datum in a bound selection
 -- |
@@ -1849,8 +1907,8 @@ appendChildrenFromTemplate templateFn boundSel = do
                 , document: doc
                 }
 
-            -- Render the child tree
-            Tuple _ childSelections <- renderNodeHelper singleParentSel childTree
+            -- Render the child tree with datum for attribute functions
+            Tuple _ childSelections <- renderNodeHelperWithDatum singleParentSel childTree (Just datum)
             pure childSelections
     )
     dataArray
@@ -1903,8 +1961,8 @@ appendChildrenFromNestedTemplate decomposer templateFn boundSel = do
                       , document: doc
                       }
 
-                  -- Render the child tree
-                  Tuple _ childSelections <- renderNodeHelper singleParentSel childTree
+                  -- Render the child tree with datum for attribute functions
+                  Tuple _ childSelections <- renderNodeHelperWithDatum singleParentSel childTree (Just innerDatum)
                   pure childSelections
               )
               innerDataArray

@@ -11,7 +11,8 @@ import Data.String (joinWith)
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
-import PSD3v2.Attribute.Types (width, height, viewBox, class_, d, fill, stroke, strokeWidth, transform)
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v3.Expr (lit, str)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
@@ -96,24 +97,24 @@ lineChart = runD3v2M do
   let tree :: Tree Unit
       tree =
         T.named SVG "svg"
-          [ width dims.width
-          , height dims.height
-          , viewBox ("0 0 " <> show dims.width <> " " <> show dims.height)
-          , class_ "line-chart-tree"
+          [ v3Attr "width" (lit dims.width)
+          , v3Attr "height" (lit dims.height)
+          , v3AttrStr "viewBox" (str ("0 0 " <> show dims.width <> " " <> show dims.height))
+          , v3AttrStr "class" (str "line-chart-tree")
           ]
           `T.withChild`
             (T.named Group "chartGroup"
-              [ class_ "chart-content"
-              , transform ("translate(" <> show dims.marginLeft <> "," <> show dims.marginTop <> ")")
+              [ v3AttrStr "class" (str "chart-content")
+              , v3AttrStr "transform" (str ("translate(" <> show dims.marginLeft <> "," <> show dims.marginTop <> ")"))
               ]
               `T.withChild`
                 -- Single path element for the line
                 (T.named Path "line"
-                  [ d pathData
-                  , fill "none"
-                  , stroke "#2ecc71"
-                  , strokeWidth 2.0
-                  , class_ "line"
+                  [ v3AttrStr "d" (str pathData)
+                  , v3AttrStr "fill" (str "none")
+                  , v3AttrStr "stroke" (str "#2ecc71")
+                  , v3Attr "stroke-width" (lit 2.0)
+                  , v3AttrStr "class" (str "line")
                   ]
                 ))
 

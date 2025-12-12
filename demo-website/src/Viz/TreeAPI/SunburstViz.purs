@@ -12,7 +12,8 @@ import Effect.Class (liftEffect)
 import Effect.Console as Console
 import PSD3.Shared.Data (HierData, getName, getValue, getChildren, loadDataFile, DataFile(..), parseFlareJson)
 import DataViz.Layout.Hierarchy.Partition (HierarchyData(..), PartitionNode(..), defaultPartitionConfig, hierarchy, partition)
-import PSD3v2.Attribute.Types (width, height, viewBox, class_, fill, fillOpacity, stroke, strokeWidth, d)
+import PSD3v3.Integration (v3Attr, v3AttrStr)
+import PSD3v3.Expr (lit, str)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
@@ -141,22 +142,22 @@ drawSunburst selector flareData = runD3v2M do
     tree :: T.Tree (PartitionNode String)
     tree =
       T.named SVG "svg"
-        [ width chartSize
-        , height chartSize
-        , viewBox (show (-radius) <> " " <> show (-radius) <> " " <> show chartSize <> " " <> show chartSize)
-        , class_ "sunburst-viz"
+        [ v3Attr "width" (lit chartSize)
+        , v3Attr "height" (lit chartSize)
+        , v3AttrStr "viewBox" (str (show (-radius) <> " " <> show (-radius) <> " " <> show chartSize <> " " <> show chartSize))
+        , v3AttrStr "class" (str "sunburst-viz")
         ]
         `T.withChild`
           ( T.joinData "arcs" "g" nodes $ \(PartNode node) ->
               T.named Group ("arc-" <> node.data_)
-                [ class_ "node" ]
+                [ v3AttrStr "class" (str "node") ]
                 `T.withChild`
                   ( T.elem Path
-                      [ d (arcPath node.x0 node.y0 node.x1 node.y1 radius)
-                      , fill (getColor node.depth)
-                      , fillOpacity 0.7
-                      , stroke "#fff"
-                      , strokeWidth 1.0
+                      [ v3AttrStr "d" (str (arcPath node.x0 node.y0 node.x1 node.y1 radius))
+                      , v3AttrStr "fill" (str (getColor node.depth))
+                      , v3Attr "fill-opacity" (lit 0.7)
+                      , v3AttrStr "stroke" (str "#fff")
+                      , v3Attr "stroke-width" (lit 1.0)
                       ]
                   )
           )

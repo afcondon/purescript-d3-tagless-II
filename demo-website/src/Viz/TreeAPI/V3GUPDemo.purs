@@ -29,7 +29,8 @@ import Effect.Console as Console
 import Type.Proxy (Proxy(..))
 
 -- v2 infrastructure
-import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..), width, height, viewBox, id_, class_, fill, stroke, strokeWidth, x, y, fontSize, textAnchor, dominantBaseline, opacity)
+import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..))
+import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
@@ -39,7 +40,7 @@ import PSD3v2.VizTree.Tree as T
 import Web.DOM.Element (Element)
 
 -- v3 DSL
-import PSD3v3.Expr (class NumExpr)
+import PSD3v3.Expr (class NumExpr, lit, str)
 import PSD3v3.Datum (class DatumExpr, field)
 import PSD3v3.Sugar ((*:), (+:))
 import PSD3v3.Interpreter.CodeGen (CodeGen, runCodeGen)
@@ -93,13 +94,13 @@ createLettersTree letters =
   T.sceneJoin "letters" "text" letters
     -- Template: FINAL state for each letter (where they end up after enter/update)
     (\d -> T.elem Text
-      [ x (evalExpr letterX d)   -- v3: computed X position
-      , y letterY                -- Final Y position
-      , fontSize 32.0
-      , textAnchor "middle"
-      , dominantBaseline "middle"
-      , fill "#2c3e50"
-      , opacity 1.0
+      [ v3Attr "x" (lit (evalExpr letterX d))   -- v3: computed X position
+      , v3Attr "y" (lit letterY)                -- Final Y position
+      , v3Attr "font-size" (lit 32.0)
+      , v3AttrStr "text-anchor" (str "middle")
+      , v3AttrStr "dominant-baseline" (str "middle")
+      , v3AttrStr "fill" (str "#2c3e50")
+      , v3Attr "opacity" (lit 1.0)
       -- The text content is set via a special TextContent attribute
       , textContent d.letter
       ])
@@ -107,9 +108,9 @@ createLettersTree letters =
     { keyFn: Just _.letter       -- Identity by letter, not by index!
     , enterBehavior: Just
         { initialAttrs:
-            [ y 20.0              -- Start above
-            , opacity 0.0         -- Start invisible
-            , fill "#27ae60"      -- Green for entering
+            [ v3Attr "y" (lit 20.0)              -- Start above
+            , v3Attr "opacity" (lit 0.0)         -- Start invisible
+            , v3AttrStr "fill" (str "#27ae60")      -- Green for entering
             ]
         , transition: Just $ transitionWith
             { duration: Milliseconds 750.0
@@ -135,9 +136,9 @@ createLettersTree letters =
         }
     , exitBehavior: Just
         { attrs:
-            [ y 180.0             -- Drop below
-            , opacity 0.0         -- Fade out
-            , fill "#e74c3c"      -- Red for exiting
+            [ v3Attr "y" (lit 180.0)             -- Drop below
+            , v3Attr "opacity" (lit 0.0)         -- Fade out
+            , v3AttrStr "fill" (str "#e74c3c")      -- Red for exiting
             ]
         , transition: Just $ transitionWith
             { duration: Milliseconds 500.0
@@ -173,11 +174,11 @@ v3GUPDemo = do
     let svgTree :: Tree Unit
         svgTree =
           T.named SVG "svg"
-            [ width 600.0
-            , height 200.0
-            , viewBox "0 0 600 200"
-            , id_ "v3-gup-svg"
-            , class_ "v3-gup-demo"
+            [ v3Attr "width" (lit 600.0)
+            , v3Attr "height" (lit 200.0)
+            , v3AttrStr "viewBox" (str "0 0 600 200")
+            , v3AttrStr "id" (str "v3-gup-svg")
+            , v3AttrStr "class" (str "v3-gup-demo")
             ]
             `T.withChild`
               T.elem Group []  -- Empty group placeholder
@@ -233,11 +234,11 @@ initV3GUP containerSelector = do
     let svgTree :: Tree Unit
         svgTree =
           T.named SVG "svg"
-            [ width 800.0
-            , height 500.0
-            , viewBox "0 -50 800 500"
-            , id_ svgId
-            , class_ "v3-gup-demo d3svg gup"
+            [ v3Attr "width" (lit 800.0)
+            , v3Attr "height" (lit 500.0)
+            , v3AttrStr "viewBox" (str "0 -50 800 500")
+            , v3AttrStr "id" (str svgId)
+            , v3AttrStr "class" (str "v3-gup-demo d3svg gup")
             ]
             `T.withChild`
               T.elem Group []  -- Empty group placeholder

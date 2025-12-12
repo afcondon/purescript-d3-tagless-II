@@ -18,7 +18,8 @@ import Effect.Aff (Aff, launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import PSD3.Shared.Data (DataFile(..), loadDataFile, parseCSVRow)
-import PSD3v2.Attribute.Types (width, height, viewBox, class_, fill, d, textContent, textAnchor, transform, x, y, fontSize, radius, stroke, strokeOpacity, strokeWidth, dy)
+import PSD3v3.Integration (v3Attr, v3AttrStr)
+import PSD3v3.Expr (lit, str)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
@@ -272,27 +273,27 @@ drawRadialStackedBar selector populationData = runD3v2M do
         gridRadius = radiusScale value
       in
         [ T.elem Circle
-            [ radius gridRadius
-            , stroke "#000000"
-            , strokeOpacity 0.5
-            , fill "none"
-            , class_ "grid-circle"
+            [ v3Attr "r" (lit gridRadius)
+            , v3AttrStr "stroke" (str "#000000")
+            , v3Attr "stroke-opacity" (lit 0.5)
+            , v3AttrStr "fill" (str "none")
+            , v3AttrStr "class" (str "grid-circle")
             ]
         , T.elem Text
-            [ y (-gridRadius)
-            , dy 5.6
-            , textContent (formatSI value)
-            , stroke "#ffffff"
-            , strokeWidth 5.0
-            , fill "none"
-            , class_ "grid-label-bg"
+            [ v3Attr "y" (lit (-gridRadius))
+            , v3Attr "dy" (lit 5.6)
+            , v3AttrStr "text-content" (str (formatSI value))
+            , v3AttrStr "stroke" (str "#ffffff")
+            , v3Attr "stroke-width" (lit 5.0)
+            , v3AttrStr "fill" (str "none")
+            , v3AttrStr "class" (str "grid-label-bg")
             ]
         , T.elem Text
-            [ y (-gridRadius)
-            , dy 5.6
-            , textContent (formatSI value)
-            , fill "#000000"
-            , class_ "grid-label"
+            [ v3Attr "y" (lit (-gridRadius))
+            , v3Attr "dy" (lit 5.6)
+            , v3AttrStr "text-content" (str (formatSI value))
+            , v3AttrStr "fill" (str "#000000")
+            , v3AttrStr "class" (str "grid-label")
             ]
         ]
 
@@ -304,21 +305,21 @@ drawRadialStackedBar selector populationData = runD3v2M do
         yOffset = (toNumber ageCount / 2.0 - toNumber idx - 1.0) * 20.0
       in
         T.named Group ("legend-" <> age)
-          [ transform ("translate(-40," <> show yOffset <> ")")
-          , class_ "legend-item"
+          [ v3AttrStr "transform" (str ("translate(-40," <> show yOffset <> ")"))
+          , v3AttrStr "class" (str "legend-item")
           ]
           `T.withChildren`
             [ T.elem Rect
-                [ width 18.0
-                , height 18.0
-                , fill (getAgeColorByName age)
+                [ v3Attr "width" (lit 18.0)
+                , v3Attr "height" (lit 18.0)
+                , v3AttrStr "fill" (str (getAgeColorByName age))
                 ]
             , T.elem Text
-                [ x 24.0
-                , y 9.0
-                , dy 5.6
-                , textContent age
-                , class_ "legend-label"
+                [ v3Attr "x" (lit 24.0)
+                , v3Attr "y" (lit 9.0)
+                , v3Attr "dy" (lit 5.6)
+                , v3AttrStr "text-content" (str age)
+                , v3AttrStr "class" (str "legend-label")
                 ]
             ]
 
@@ -328,23 +329,23 @@ drawRadialStackedBar selector populationData = runD3v2M do
     tree :: Tree Unit
     tree =
       T.named SVG "svg"
-        [ width svgSize
-        , height svgSize
-        , viewBox ("0 0 " <> show svgSize <> " " <> show svgSize)
-        , class_ "radial-stacked-bar"
+        [ v3Attr "width" (lit svgSize)
+        , v3Attr "height" (lit svgSize)
+        , v3AttrStr "viewBox" (str ("0 0 " <> show svgSize <> " " <> show svgSize))
+        , v3AttrStr "class" (str "radial-stacked-bar")
         ]
         `T.withChild`
           ( T.named Group "plot-area"
-              [ transform ("translate(" <> show centerX <> "," <> show centerY <> ")") ]
+              [ v3AttrStr "transform" (str ("translate(" <> show centerX <> "," <> show centerY <> ")")) ]
               `T.withChildren`
                 [ -- Circular grid lines
-                  T.named Group "y-axis" [ textAnchor "middle" ]
+                  T.named Group "y-axis" [ v3AttrStr "text-anchor" (str "middle") ]
                     `T.withChildren`
                       ( [ T.elem Text
-                            [ y (-(outerRadius + 10.0))
-                            , fontSize 12.0
-                            , textContent "Population"
-                            , class_ "axis-label"
+                            [ v3Attr "y" (lit (-(outerRadius + 10.0)))
+                            , v3Attr "font-size" (lit 12.0)
+                            , v3AttrStr "text-content" (str "Population")
+                            , v3AttrStr "class" (str "axis-label")
                             ]
                         ] <> Array.concatMap makeGridLine gridValues
                       )
@@ -371,9 +372,9 @@ drawRadialStackedBar selector populationData = runD3v2M do
               endAngle = startAngle + anglePerState
             in
               T.elem Path
-                [ d (arcPath startAngle endAngle segment.innerRadius segment.outerRadius)
-                , fill (getAgeColor ageIdx)
-                , class_ "age-arc"
+                [ v3AttrStr "d" (str (arcPath startAngle endAngle segment.innerRadius segment.outerRadius))
+                , v3AttrStr "fill" (str (getAgeColor ageIdx))
+                , v3AttrStr "class" (str "age-arc")
                 ]
         )
         stateData.ageSegments
@@ -391,13 +392,13 @@ drawRadialStackedBar selector populationData = runD3v2M do
         rotation = (labelAngle * 180.0 / pi) + 90.0
       in
         T.elem Text
-          [ x labelX
-          , y labelY
-          , textAnchor "middle"
-          , fontSize 10.0
-          , transform ("rotate(" <> show rotation <> " " <> show labelX <> " " <> show labelY <> ")")
-          , textContent stateData.state
-          , class_ "state-label"
+          [ v3Attr "x" (lit labelX)
+          , v3Attr "y" (lit labelY)
+          , v3AttrStr "text-anchor" (str "middle")
+          , v3Attr "font-size" (lit 10.0)
+          , v3AttrStr "transform" (str ("rotate(" <> show rotation <> " " <> show labelX <> " " <> show labelY <> ")"))
+          , v3AttrStr "text-content" (str stateData.state)
+          , v3AttrStr "class" (str "state-label")
           ]
 
   -- Render
