@@ -98,7 +98,18 @@
     </div>
   </div>
 
-  <h2>4. Path Generators</h2>
+  <h2>4. Update Pattern (Enter/Update/Exit)</h2>
+  <div class="viz-grid">
+    <div class="viz-card" style="grid-column: span 2;">
+      <h3>Bar Chart with Data Updates</h3>
+      <div class="subtitle">
+        barFill = if value &lt; 50 then blue else (if value &lt; 75 then green else red)
+      </div>
+      <div class="viz-container" id="update-pattern"></div>
+    </div>
+  </div>
+
+  <h2>5. Path Generators</h2>
   <div class="viz-grid">
     <div class="viz-card">
       <h3>Link Types</h3>
@@ -210,6 +221,50 @@
       <rect width="20" height="80" fill="#66c" />
       <text x="-6" y="40" dy=".35em" text-anchor="end">Residential</text>
     </g>
+  </g>
+</svg>`;
+
+    // Update Pattern
+    document.getElementById('update-pattern').innerHTML = `
+<svg width="850" height="250" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    text { font: 11px sans-serif; }
+    .title { font-weight: bold; }
+  </style>
+
+  <!-- Dataset 1 -->
+  <g transform="translate(20, 30)">
+    <text class="title" x="0" y="-10">Dataset 1 (Initial)</text>
+    <rect x="0.0" y="140.0" width="76.0" height="60.0" fill="#3498db" />
+    <text x="38.0" y="215.0" text-anchor="middle">A</text>
+    <rect x="80.0" y="40.0" width="76.0" height="160.0" fill="#e74c3c" />
+    <text x="118.0" y="215.0" text-anchor="middle">B</text>
+    <rect x="160.0" y="110.0" width="76.0" height="90.0" fill="#3498db" />
+    <text x="198.0" y="215.0" text-anchor="middle">C</text>
+    <rect x="240.0" y="80.0" width="76.0" height="120.0" fill="#2ecc71" />
+    <text x="278.0" y="215.0" text-anchor="middle">D</text>
+  </g>
+
+  <!-- Dataset 2 -->
+  <g transform="translate(450, 30)">
+    <text class="title" x="0" y="-10">Dataset 2 (After Update)</text>
+    <rect x="0.0" y="140.0" width="76.0" height="60.0" fill="#3498db" stroke="none" stroke-width="1" />
+    <text x="38.0" y="215.0" text-anchor="middle">A</text>
+    <rect x="80.0" y="10.0" width="76.0" height="190.0" fill="#e74c3c" stroke="#f39c12" stroke-width="2" />
+    <text x="118.0" y="215.0" text-anchor="middle">B</text>
+    <rect x="160.0" y="80.0" width="76.0" height="120.0" fill="#2ecc71" stroke="none" stroke-width="1" />
+    <text x="198.0" y="215.0" text-anchor="middle">D</text>
+    <rect x="240.0" y="60.0" width="76.0" height="140.0" fill="#2ecc71" stroke="#2ecc71" stroke-width="3" />
+    <text x="278.0" y="215.0" text-anchor="middle">E</text>
+  </g>
+
+  <!-- Legend -->
+  <g transform="translate(20, 240)">
+    <rect x="0" y="-8" width="12" height="12" fill="none" stroke="#2ecc71" stroke-width="2" />
+    <text x="18" y="0">Enter (new)</text>
+    <rect x="100" y="-8" width="12" height="12" fill="none" stroke="#f39c12" stroke-width="2" />
+    <text x="118" y="0">Update (changed)</text>
+    <text x="230" y="0" fill="#95a5a6">C was removed (exit)</text>
   </g>
 </svg>`;
 

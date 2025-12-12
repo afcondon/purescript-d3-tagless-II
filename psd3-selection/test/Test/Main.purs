@@ -10,6 +10,7 @@ import Test.PSD3v3.PathSpec as PathSpec
 import Test.PSD3v3.ParabolaExample as ParabolaExample
 import Test.PSD3v3.SankeyExample as SankeyExample
 import Test.PSD3v3.TreeExample as TreeExample
+import Test.PSD3v3.UpdatePatternExample as UpdatePatternExample
 
 main :: Effect Unit
 main = do
@@ -27,5 +28,7 @@ main = do
   SankeyExample.runExample
 
   TreeExample.runExample
+
+  UpdatePatternExample.runExample
 
   log "\n=== All tests passed! ==="
