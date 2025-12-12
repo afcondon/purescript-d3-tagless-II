@@ -9,6 +9,7 @@ module PSD3v2.VizTree.Tree
   , elem
   , withChild
   , withChildren
+  , withBehaviors
   -- Data joins
   , joinData
   , nestedJoin
@@ -25,6 +26,7 @@ module PSD3v2.VizTree.Tree
 import Prelude
 
 import PSD3v2.Attribute.Types (Attribute)
+import PSD3v2.Behavior.Types (Behavior)
 import PSD3v2.Selection.Types (ElementType)
 import PSD3v2.Transition.Types (TransitionConfig)
 import Data.Maybe (Maybe(..))
@@ -39,11 +41,13 @@ import Unsafe.Coerce (unsafeCoerce)
 -- | - name: Optional name to retrieve this selection later (Nothing = anonymous)
 -- | - elemType: What kind of element (SVG, Group, Circle, etc.)
 -- | - attrs: Attributes to set on this element
+-- | - behaviors: Behaviors to attach (zoom, drag, click handlers, etc.)
 -- | - children: Child nodes
 type TreeNode datum =
   { name :: Maybe String
   , elemType :: ElementType
   , attrs :: Array (Attribute datum)
+  , behaviors :: Array (Behavior datum)
   , children :: Array (Tree datum)
   }
 
@@ -153,14 +157,14 @@ type ExitBehavior datum =
 -- | Usage: named SVG "svg" [width 800, height 600]
 named :: forall datum. ElementType -> String -> Array (Attribute datum) -> Tree datum
 named elemType name attrs =
-  Node { name: Just name, elemType, attrs, children: [] }
+  Node { name: Just name, elemType, attrs, behaviors: [], children: [] }
 
 -- | Create an anonymous element (won't be in the returned selections)
 -- |
 -- | Usage: elem Group [class_ "container"]
 elem :: forall datum. ElementType -> Array (Attribute datum) -> Tree datum
 elem elemType attrs =
-  Node { name: Nothing, elemType, attrs, children: [] }
+  Node { name: Nothing, elemType, attrs, behaviors: [], children: [] }
 
 -- | Add a single child to a tree node
 -- |
@@ -180,6 +184,31 @@ withChildren :: forall datum. Tree datum -> Array (Tree datum) -> Tree datum
 withChildren parent newChildren = case parent of
   Node node -> Node node { children = node.children <> newChildren }
   Join j -> Join j
+  NestedJoin nj -> NestedJoin nj
+  SceneJoin sj -> SceneJoin sj
+  SceneNestedJoin snj -> SceneNestedJoin snj
+
+-- | Add behaviors to a tree node
+-- |
+-- | Behaviors are attached to the element after creation.
+-- | This enables declarative specification of zoom, drag, click handlers, etc.
+-- |
+-- | Usage:
+-- | ```purescript
+-- | named SVG "svg" [width 800, height 600]
+-- |   `withBehaviors` [Zoom $ defaultZoom (ScaleExtent 0.1 10.0) ".zoom-group"]
+-- |   `withChildren` [...]
+-- | ```
+-- |
+-- | Multiple behaviors can be attached:
+-- | ```purescript
+-- | elem Circle [radius 5.0]
+-- |   `withBehaviors` [Drag SimpleDrag, onClickWithDatum \d -> log d.name]
+-- | ```
+withBehaviors :: forall datum. Tree datum -> Array (Behavior datum) -> Tree datum
+withBehaviors tree newBehaviors = case tree of
+  Node node -> Node node { behaviors = node.behaviors <> newBehaviors }
+  Join j -> Join j  -- Joins apply behaviors via template
   NestedJoin nj -> NestedJoin nj
   SceneJoin sj -> SceneJoin sj
   SceneNestedJoin snj -> SceneNestedJoin snj

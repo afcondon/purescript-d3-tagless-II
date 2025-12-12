@@ -22,6 +22,7 @@ import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, d
 import PSD3.ForceEngine.Links (swizzleLinks)
 import PSD3.Scale (schemeCategory10At)
 import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, x1, x2, y1, y2, radius, id_, class_, width, height, viewBox, opacity)
+import PSD3v2.Behavior.FFI as BehaviorFFI
 import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom)
 import PSD3v2.Capabilities.Selection (select, appendChild, appendData, setAttrs, on)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, getElementsD3v2)
@@ -56,22 +57,38 @@ svgWidth = 900.0
 svgHeight :: Number
 svgHeight = 600.0
 
+-- | Simulation ID for the registry
+-- | Separate from GUPDemo to avoid interference
+simulationId :: String
+simulationId = "lesmis-main"
+
 -- =============================================================================
 -- Entry Point
 -- =============================================================================
+
+-- | Clone a node to create an independent copy
+-- | This prevents mutations (like fx/fy from drag) from affecting other simulations
+cloneNode :: LesMisNode -> LesMisNode
+cloneNode n = { id: n.id, name: n.name, group: n.group, x: n.x, y: n.y, vx: n.vx, vy: n.vy, fx: n.fx, fy: n.fy }
 
 -- | Start the Les Misérables force-directed graph
 -- | Returns a cleanup function to stop the simulation
 startLesMis :: LesMisModel -> String -> Effect (Effect Unit)
 startLesMis model containerSelector = do
-  -- Swizzle links (replace indices with node references)
-  let swizzledLinks = swizzleLinks model.nodes model.links \src tgt i link ->
+  -- Clone nodes to have independent data from other visualizations
+  let clonedNodes = map cloneNode model.nodes
+
+  -- Swizzle links using cloned nodes
+  let swizzledLinks = swizzleLinks clonedNodes model.links \src tgt i link ->
         { source: src, target: tgt, index: i, value: link.value }
 
   -- Create simulation using library API
   sim <- Sim.create Sim.defaultConfig
-  Sim.setNodes model.nodes sim
+  Sim.setNodes clonedNodes sim
   Sim.setLinks model.links sim
+
+  -- Register simulation for potential declarative drag (though we use direct attach here)
+  BehaviorFFI.registerSimulation_ simulationId (Sim.reheat sim)
 
   -- Add forces using declarative ForceSpec
   Sim.addForce (ManyBody "charge" defaultManyBody { strength = -100.0, distanceMax = 500.0 }) sim
@@ -80,7 +97,7 @@ startLesMis model containerSelector = do
   Sim.addForce (Link "links" defaultLink { distance = 30.0, strength = 0.5, iterations = 1 }) sim
 
   -- Render initial DOM and get selections for updates
-  vizStateRef <- renderInitialDOM containerSelector model.nodes swizzledLinks
+  vizStateRef <- renderInitialDOM containerSelector clonedNodes swizzledLinks
 
   -- Attach drag behavior to nodes with simulation reheat
   state <- Ref.read vizStateRef
@@ -92,8 +109,10 @@ startLesMis model containerSelector = do
   -- Start simulation
   Sim.start sim
 
-  -- Return cleanup function
-  pure (Sim.stop sim)
+  -- Return cleanup function (also unregisters simulation)
+  pure do
+    Sim.stop sim
+    BehaviorFFI.unregisterSimulation_ simulationId
 
 -- =============================================================================
 -- DOM Rendering (using direct SelectionM - no TreeAPI)

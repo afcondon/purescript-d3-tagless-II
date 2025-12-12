@@ -845,6 +845,65 @@ querySelectorAllElements selector parents = do
   -- Flatten the array of arrays
   pure $ Array.concat nodeArrays
 
+-- | Apply a behavior to a single DOM element
+-- |
+-- | This is the core function that attaches D3 behaviors to elements.
+-- | Used by both `on` (for Selection-based API) and `renderTree` (for TreeAPI).
+applyBehaviorToElement :: forall datum. Behavior datum -> Element -> Effect Unit
+applyBehaviorToElement (Zoom (ZoomConfig { scaleExtent: ScaleExtent scaleMin scaleMax, targetSelector })) element =
+  void $ BehaviorFFI.attachZoom_ element scaleMin scaleMax targetSelector
+applyBehaviorToElement (Drag SimpleDrag) element =
+  void $ BehaviorFFI.attachSimpleDrag_ element unit
+applyBehaviorToElement (Drag (SimulationDrag simId)) element =
+  -- Look up simulation by ID in the global registry
+  void $ BehaviorFFI.attachSimulationDragById_ element simId
+applyBehaviorToElement (Drag (SimulationDragNested simId)) element =
+  -- For nested datum structure (datum.node is the simulation node)
+  void $ BehaviorFFI.attachSimulationDragNestedById_ element simId
+applyBehaviorToElement (Click handler) element =
+  void $ BehaviorFFI.attachClick_ element handler
+applyBehaviorToElement (ClickWithDatum handler) element =
+  void $ BehaviorFFI.attachClickWithDatum_ element handler
+applyBehaviorToElement (MouseEnter handler) element =
+  void $ BehaviorFFI.attachMouseEnter_ element handler
+applyBehaviorToElement (MouseLeave handler) element =
+  void $ BehaviorFFI.attachMouseLeave_ element handler
+applyBehaviorToElement (Highlight { enter, leave }) element =
+  void $ BehaviorFFI.attachHighlight_ element enter leave
+applyBehaviorToElement (MouseMoveWithInfo handler) element =
+  void $ BehaviorFFI.attachMouseMoveWithEvent_ element $ mkEffectFn2 \d evt ->
+    handler
+      { datum: d
+      , clientX: toNumber $ clientX evt
+      , clientY: toNumber $ clientY evt
+      , pageX: toNumber $ pageX evt
+      , pageY: toNumber $ pageY evt
+      , offsetX: offsetX evt
+      , offsetY: offsetY evt
+      }
+applyBehaviorToElement (MouseEnterWithInfo handler) element =
+  void $ BehaviorFFI.attachMouseEnterWithEvent_ element $ mkEffectFn2 \d evt ->
+    handler
+      { datum: d
+      , clientX: toNumber $ clientX evt
+      , clientY: toNumber $ clientY evt
+      , pageX: toNumber $ pageX evt
+      , pageY: toNumber $ pageY evt
+      , offsetX: offsetX evt
+      , offsetY: offsetY evt
+      }
+applyBehaviorToElement (MouseLeaveWithInfo handler) element =
+  void $ BehaviorFFI.attachMouseLeaveWithEvent_ element $ mkEffectFn2 \d evt ->
+    handler
+      { datum: d
+      , clientX: toNumber $ clientX evt
+      , clientY: toNumber $ clientY evt
+      , pageX: toNumber $ pageX evt
+      , pageY: toNumber $ pageY evt
+      , offsetX: offsetX evt
+      , offsetY: offsetY evt
+      }
+
 -- | Attach a behavior (zoom, drag, etc.) to a selection
 -- |
 -- | Works with any selection type - extracts elements and applies D3 behavior.
@@ -862,8 +921,8 @@ on behavior selection@(Selection impl) = do
   -- Extract elements from the selection
   let elements = getElements impl
 
-  -- Apply the behavior to each element
-  traverse_ (applyBehavior behavior) elements
+  -- Apply the behavior to each element using the top-level helper
+  traverse_ (applyBehaviorToElement behavior) elements
 
   -- Return selection unchanged
   pure selection
@@ -874,62 +933,6 @@ on behavior selection@(Selection impl) = do
   getElements (BoundSelection { elements: els }) = els
   getElements (PendingSelection { parentElements }) = parentElements
   getElements (ExitingSelection { elements: els }) = els
-
-  -- Apply behavior to a single element
-  applyBehavior :: Behavior datum -> Element -> Effect Unit
-  applyBehavior (Zoom (ZoomConfig { scaleExtent: ScaleExtent scaleMin scaleMax, targetSelector })) element =
-    void $ BehaviorFFI.attachZoom_ element scaleMin scaleMax targetSelector
-  applyBehavior (Drag SimpleDrag) element =
-    void $ BehaviorFFI.attachSimpleDrag_ element unit
-  applyBehavior (Drag (SimulationDrag _)) _ =
-    -- Simulation drag requires simulation handle, which is only available in D3v2SimM
-    -- This case should not be reached when calling from D3v2M
-    pure unit
-  applyBehavior (Click handler) element =
-    void $ BehaviorFFI.attachClick_ element handler
-  applyBehavior (ClickWithDatum handler) element =
-    void $ BehaviorFFI.attachClickWithDatum_ element handler
-  applyBehavior (MouseEnter handler) element =
-    void $ BehaviorFFI.attachMouseEnter_ element handler
-  applyBehavior (MouseLeave handler) element =
-    void $ BehaviorFFI.attachMouseLeave_ element handler
-  applyBehavior (Highlight { enter, leave }) element =
-    void $ BehaviorFFI.attachHighlight_ element enter leave
-  -- Pure web-events versions - use MouseEvent accessors directly
-  -- Note: MouseEvent coords are Int, but MouseEventInfo uses Number for flexibility
-  applyBehavior (MouseMoveWithInfo handler) element =
-    void $ BehaviorFFI.attachMouseMoveWithEvent_ element $ mkEffectFn2 \d evt ->
-      handler
-        { datum: d
-        , clientX: toNumber $ clientX evt
-        , clientY: toNumber $ clientY evt
-        , pageX: toNumber $ pageX evt
-        , pageY: toNumber $ pageY evt
-        , offsetX: offsetX evt
-        , offsetY: offsetY evt
-        }
-  applyBehavior (MouseEnterWithInfo handler) element =
-    void $ BehaviorFFI.attachMouseEnterWithEvent_ element $ mkEffectFn2 \d evt ->
-      handler
-        { datum: d
-        , clientX: toNumber $ clientX evt
-        , clientY: toNumber $ clientY evt
-        , pageX: toNumber $ pageX evt
-        , pageY: toNumber $ pageY evt
-        , offsetX: offsetX evt
-        , offsetY: offsetY evt
-        }
-  applyBehavior (MouseLeaveWithInfo handler) element =
-    void $ BehaviorFFI.attachMouseLeaveWithEvent_ element $ mkEffectFn2 \d evt ->
-      handler
-        { datum: d
-        , clientX: toNumber $ clientX evt
-        , clientY: toNumber $ clientY evt
-        , pageX: toNumber $ pageX evt
-        , pageY: toNumber $ pageY evt
-        , offsetX: offsetX evt
-        , offsetY: offsetY evt
-        }
 
 -- | Attach a behavior with simulation access (for SimulationDrag)
 -- |
@@ -1173,6 +1176,9 @@ renderNodeHelper parentSel (Node node) = do
         Just el -> el
         Nothing -> unsafePartial $ unsafeCrashWith "renderTree: appendChild returned empty selection"
       _ -> unsafePartial $ unsafeCrashWith "renderTree: appendChild should return EmptySelection"
+
+  -- Attach behaviors to this element
+  traverse_ (\behavior -> applyBehaviorToElement behavior element) node.behaviors
 
   -- Recursively render children
   childMaps <- traverse (renderNodeHelper childSel) node.children

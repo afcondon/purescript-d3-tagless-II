@@ -2,11 +2,16 @@ module PSD3v2.Behavior.FFI
   ( attachZoom_
   , attachSimpleDrag_
   , attachSimulationDrag_
+  , attachSimulationDragById_
+  , attachSimulationDragNestedById_
   , attachClick_
   , attachClickWithDatum_
   , attachMouseEnter_
   , attachMouseLeave_
   , attachHighlight_
+  -- Simulation registry
+  , registerSimulation_
+  , unregisterSimulation_
   -- Pure web-events versions (preferred)
   , attachMouseMoveWithEvent_
   , attachMouseEnterWithEvent_
@@ -187,4 +192,55 @@ foreign import attachMouseLeaveWithInfo_
   :: forall datum
    . Element
   -> (datum -> MouseEventInfoJS -> Effect Unit)
+  -> Effect Element
+
+-- =============================================================================
+-- Simulation Registry
+-- =============================================================================
+
+-- | Register a simulation with the global registry
+-- |
+-- | This enables SimulationDrag to look up simulations by ID.
+-- | The reheat function is called when dragging starts.
+-- |
+-- | Usage:
+-- | ```purescript
+-- | registerSimulation_ "my-viz" (Sim.reheat sim)
+-- | ```
+foreign import registerSimulation_
+  :: String         -- Simulation ID
+  -> Effect Unit    -- Reheat function
+  -> Effect Unit
+
+-- | Unregister a simulation from the global registry
+-- |
+-- | Should be called when the visualization is destroyed.
+foreign import unregisterSimulation_
+  :: String
+  -> Effect Unit
+
+-- | Attach simulation-aware drag using the simulation registry
+-- |
+-- | Looks up the simulation by ID and calls its reheat function on drag start.
+-- | This enables declarative SimulationDrag in TreeAPI.
+-- |
+-- | When dragging:
+-- | - Dragstart: Sets fx/fy, calls registered reheat function
+-- | - Drag: Updates fx/fy to follow mouse
+-- | - Dragend: Clears fx/fy
+foreign import attachSimulationDragById_
+  :: Element
+  -> String     -- Simulation ID to look up in registry
+  -> Effect Element
+
+-- | Attach simulation-aware drag for nested datum structure
+-- |
+-- | Like attachSimulationDragById_, but for datums that have a `.node` field
+-- | containing the actual simulation node. Used when the bound datum is a
+-- | wrapper (like RenderNode) that contains the simulation node.
+-- |
+-- | Sets `event.subject.node.fx/fy` instead of `event.subject.fx/fy`
+foreign import attachSimulationDragNestedById_
+  :: Element
+  -> String     -- Simulation ID to look up in registry
   -> Effect Element

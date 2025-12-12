@@ -3,6 +3,7 @@ module PSD3v2.Behavior.Types
   , ZoomConfig(..)
   , DragConfig(..)
   , ScaleExtent(..)
+  , simulationDragNested
   , defaultDrag
   , simulationDrag
   , defaultZoom
@@ -97,10 +98,12 @@ instance Show ZoomConfig where
 -- | Drag behavior configuration
 -- |
 -- | - `SimpleDrag`: Basic dragging with transform
--- | - `SimulationDrag`: Drag with force simulation reheat (for force-directed graphs)
+-- | - `SimulationDrag`: Drag with force simulation reheat (datum IS the simulation node)
+-- | - `SimulationDragNested`: Drag where datum has a `.node` field containing the simulation node
 data DragConfig
   = SimpleDrag
-  | SimulationDrag String  -- Simulation ID for accessing D3SimulationState_
+  | SimulationDrag String  -- Simulation ID, datum IS the node
+  | SimulationDragNested String  -- Simulation ID, datum.node IS the node
 
 derive instance Eq DragConfig
 derive instance Ord DragConfig
@@ -108,6 +111,7 @@ derive instance Ord DragConfig
 instance Show DragConfig where
   show SimpleDrag = "SimpleDrag"
   show (SimulationDrag id) = "SimulationDrag " <> show id
+  show (SimulationDragNested id) = "SimulationDragNested " <> show id
 
 -- | Behaviors that can be attached to selections
 -- |
@@ -164,6 +168,22 @@ defaultDrag = SimpleDrag
 -- | ```
 simulationDrag :: String -> DragConfig
 simulationDrag = SimulationDrag
+
+-- | Simulation-aware drag for nested datum structures
+-- |
+-- | Like simulationDrag, but for when the bound datum has a `.node` field
+-- | containing the actual simulation node. This is useful when you're binding
+-- | a wrapper type (like RenderNode) that contains the simulation node.
+-- |
+-- | The drag behavior will set `datum.node.fx/fy` instead of `datum.fx/fy`.
+-- |
+-- | Example:
+-- | ```purescript
+-- | -- RenderNode has { node :: SimulationNode, ... }
+-- | _ <- on (Drag $ simulationDragNested "lesmis-gup") nodeCircles
+-- | ```
+simulationDragNested :: String -> DragConfig
+simulationDragNested = SimulationDragNested
 
 -- | Default zoom configuration
 -- |

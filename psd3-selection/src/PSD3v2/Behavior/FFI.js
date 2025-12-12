@@ -4,6 +4,152 @@ import { select, selectAll, pointer } from "d3-selection";
 import { zoom } from "d3-zoom";
 import { drag } from "d3-drag";
 
+// =============================================================================
+// Simulation Registry
+// =============================================================================
+// Global registry for named simulations, enabling declarative SimulationDrag
+// Each entry maps simulationId -> { reheat: Effect Unit }
+
+const simulationRegistry = new Map();
+
+/**
+ * Register a simulation by ID
+ * @param {string} simId - Unique identifier for the simulation
+ * @param {Function} reheatFn - PureScript Effect Unit function to reheat the simulation
+ */
+export function registerSimulation_(simId) {
+  return reheatFn => () => {
+    simulationRegistry.set(simId, { reheat: reheatFn });
+    console.log(`[SimRegistry] Registered simulation: ${simId}`);
+  };
+}
+
+/**
+ * Unregister a simulation by ID
+ * @param {string} simId - The simulation ID to remove
+ */
+export function unregisterSimulation_(simId) {
+  return () => {
+    simulationRegistry.delete(simId);
+    console.log(`[SimRegistry] Unregistered simulation: ${simId}`);
+  };
+}
+
+/**
+ * Check if a simulation is registered
+ * @param {string} simId - The simulation ID to check
+ * @returns {boolean}
+ */
+export function isSimulationRegistered_(simId) {
+  return () => simulationRegistry.has(simId);
+}
+
+// Internal helper to get simulation's reheat function
+function getSimulationReheat(simId) {
+  const sim = simulationRegistry.get(simId);
+  return sim ? sim.reheat : null;
+}
+
+/**
+ * Attach simulation-aware drag behavior using the registry
+ * Looks up the simulation by ID and calls its reheat function on drag start
+ * @param {Element} element - The DOM element to attach drag to
+ * @param {string} simId - The registered simulation ID
+ * @returns {Element} The element (for chaining)
+ */
+export function attachSimulationDragById_(element) {
+  return simId => () => {
+    const selection = select(element);
+
+    function dragstarted(event) {
+      // Look up and call the registered reheat function
+      const reheat = getSimulationReheat(simId);
+      if (reheat) {
+        reheat();  // Call PureScript Effect Unit
+      } else {
+        console.warn(`[SimulationDrag] No simulation registered with ID: ${simId}`);
+      }
+      // Set fixed position
+      event.subject.fx = event.subject.x;
+      event.subject.fy = event.subject.y;
+    }
+
+    function dragged(event) {
+      event.subject.fx = event.x;
+      event.subject.fy = event.y;
+    }
+
+    function dragended(event) {
+      // Release fixed position
+      event.subject.fx = null;
+      event.subject.fy = null;
+    }
+
+    const dragBehavior = drag()
+      .on('start', dragstarted)
+      .on('drag', dragged)
+      .on('end', dragended);
+
+    selection
+      .call(dragBehavior)
+      .style('cursor', 'grab');
+
+    return element;
+  };
+}
+
+/**
+ * Attach simulation-aware drag for nested datum structure
+ * Like attachSimulationDragById_ but accesses .node field for fx/fy
+ * Used when datum is a wrapper containing the actual simulation node
+ * @param {Element} element - The DOM element to attach drag to
+ * @param {string} simId - The registered simulation ID
+ * @returns {Element} The element (for chaining)
+ */
+export function attachSimulationDragNestedById_(element) {
+  return simId => () => {
+    const selection = select(element);
+
+    function dragstarted(event) {
+      // Look up and call the registered reheat function
+      const reheat = getSimulationReheat(simId);
+      if (reheat) {
+        reheat();  // Call PureScript Effect Unit
+      } else {
+        console.warn(`[SimulationDragNested] No simulation registered with ID: ${simId}`);
+      }
+      // Set fixed position on the nested node
+      const node = event.subject.node;
+      node.fx = node.x;
+      node.fy = node.y;
+    }
+
+    function dragged(event) {
+      const node = event.subject.node;
+      node.fx = event.x;
+      node.fy = event.y;
+    }
+
+    function dragended(event) {
+      // Release fixed position
+      const node = event.subject.node;
+      node.fx = null;
+      node.fy = null;
+    }
+
+    const dragBehavior = drag()
+      .on('start', dragstarted)
+      .on('drag', dragged)
+      .on('end', dragended);
+
+    selection
+      .call(dragBehavior)
+      .style('cursor', 'grab');
+
+    return element;
+  };
+}
+
 /**
  * Attach zoom behavior to an element
  * @param {Element} element - The DOM element to attach zoom to (typically SVG)
@@ -17,10 +163,10 @@ export function attachZoom_(element) {
     // Create D3 selection from element
     const selection = select(element);
 
-    // Find the target element to transform
-    const target = selection.select(targetSelector);
-
+    // Query target lazily on each zoom event (not eagerly at setup time)
+    // This allows behaviors to be attached before children are rendered
     function zoomed(event) {
+      const target = selection.select(targetSelector);
       target.attr('transform', event.transform);
     }
 

@@ -3,19 +3,20 @@ module D3.Viz.TreeAPI.ChordDiagram where
 -- | Chord diagram visualization using TreeAPI
 -- | Based on Baton Rouge bridge traffic analysis example
 -- | Inspired by: https://www.streetlightdata.com/planning-bridges-louisiana/
+-- | Uses v3 expressions for label positioning with trig functions
 
-import Prelude
+import Prelude hiding (add, sub, mul)
 
 import Data.Array (index, length, mapWithIndex, (!!))
 import Data.Either (Either(..))
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
-import Data.Number (pi, cos, sin)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
+import Type.Proxy (Proxy(..))
 import PSD3.Shared.Data (loadBridgesData)
 import PSD3.Internal.FFI (arcGenerator_, arcPath_, chordArray_, chordGroups_, chordLayoutWithPadAngle_, ribbonGenerator_, ribbonPath_, setArcInnerRadius_, setArcOuterRadius_, setRibbonRadius_)
 import PSD3.Internal.Types (Datum_)
@@ -26,6 +27,13 @@ import PSD3v2.Selection.Types (ElementType(..), SEmpty)
 import PSD3v2.VizTree.Tree as T
 import Unsafe.Coerce (unsafeCoerce)
 import Web.DOM.Element (Element)
+
+-- v3 DSL imports
+import PSD3v3.Expr (class NumExpr, class BoolExpr, class CompareExpr, class StringExpr, class TrigExpr, ifThenElse, add, sub, mul)
+import PSD3v3.Expr (pi, cos, sin) as V3
+import PSD3v3.Datum (class DatumExpr, field)
+import PSD3v3.Sugar ((/:), (>.), s)
+import PSD3v3.Interpreter.Eval (EvalD, runEvalD)
 
 -- | Traffic flow matrix (11 regions of Baton Rouge)
 type TrafficMatrix = Array (Array Number)
@@ -139,6 +147,76 @@ instance Eq IndexedRibbon where
 instance Ord IndexedRibbon where
   compare (IndexedRibbon a) (IndexedRibbon b) = compare a.index b.index
 
+-- =============================================================================
+-- v3 Expressions for Chord Label Positioning
+-- =============================================================================
+
+-- | Flattened label data for v3 expression access
+-- | Contains the angle (midpoint of arc) and radius for positioning
+type ChordLabelDatum =
+  { label :: String
+  , startAngle :: Number
+  , endAngle :: Number
+  , labelRadius :: Number  -- outerR + offset
+  }
+
+-- Row type for v3 DatumExpr
+type ChordLabelRow = (label :: String, startAngle :: Number, endAngle :: Number, labelRadius :: Number)
+
+-- Field accessors
+chordStartAngle :: forall repr. DatumExpr repr ChordLabelRow => repr Number
+chordStartAngle = field (Proxy :: Proxy "startAngle")
+
+chordEndAngle :: forall repr. DatumExpr repr ChordLabelRow => repr Number
+chordEndAngle = field (Proxy :: Proxy "endAngle")
+
+chordLabelRadius :: forall repr. DatumExpr repr ChordLabelRow => repr Number
+chordLabelRadius = field (Proxy :: Proxy "labelRadius")
+
+-- | v3 expression: Angle at midpoint of arc
+chordMidAngle :: forall repr. NumExpr repr => DatumExpr repr ChordLabelRow => repr Number
+chordMidAngle = add chordStartAngle chordEndAngle /: 2.0
+
+-- | v3 expression: Label X position using trig
+-- | X = labelRadius * cos(angle - π/2)
+-- | The -π/2 rotates from D3's "12 o'clock = 0" to standard "3 o'clock = 0"
+chordLabelX :: forall repr. NumExpr repr => TrigExpr repr => DatumExpr repr ChordLabelRow => repr Number
+chordLabelX = mul chordLabelRadius (V3.cos (sub chordMidAngle (V3.pi /: 2.0)))
+
+-- | v3 expression: Label Y position using trig
+-- | Y = labelRadius * sin(angle - π/2)
+chordLabelY :: forall repr. NumExpr repr => TrigExpr repr => DatumExpr repr ChordLabelRow => repr Number
+chordLabelY = mul chordLabelRadius (V3.sin (sub chordMidAngle (V3.pi /: 2.0)))
+
+-- | v3 expression: Text anchor based on angle
+-- | Right side (angle < π): "start", Left side (angle > π): "end"
+chordLabelAnchor :: forall repr. NumExpr repr => BoolExpr repr => CompareExpr repr => StringExpr repr => TrigExpr repr => DatumExpr repr ChordLabelRow => repr String
+chordLabelAnchor = ifThenElse
+  (chordMidAngle >. V3.pi)
+  (s "end")
+  (s "start")
+
+-- | Evaluate v3 expressions
+evalChordNum :: EvalD ChordLabelDatum Number -> ChordLabelDatum -> Number
+evalChordNum expr datum = runEvalD expr datum 0
+
+evalChordStr :: EvalD ChordLabelDatum String -> ChordLabelDatum -> String
+evalChordStr expr datum = runEvalD expr datum 0
+
+-- | Convert IndexedArc to ChordLabelDatum for v3 expression evaluation
+toChordLabelDatum :: RegionLabels -> Number -> IndexedArc -> ChordLabelDatum
+toChordLabelDatum labels outerR (IndexedArc ia) =
+  let
+    idx = getGroupIndex ia.datum
+    label = fromMaybe "" (labels !! idx)
+    groupData = unsafeCoerce ia.datum :: { startAngle :: Number, endAngle :: Number }
+  in
+    { label
+    , startAngle: groupData.startAngle
+    , endAngle: groupData.endAngle
+    , labelRadius: outerR + 8.0  -- Close to the arc
+    }
+
 -- | Draw Chord diagram with TreeAPI
 drawChord
   :: TrafficMatrix
@@ -248,32 +326,24 @@ drawChord matrix labels containerSelector w h = runD3v2M do
 
   _ <- renderTree arcsGroupSel arcsTree
 
-  -- Render labels (positioned around the circle)
+  -- Render labels using v3 expressions for polar positioning
+  -- Convert arcs to ChordLabelDatum with labelRadius baked in
+  let chordLabelData = map (toChordLabelDatum labels outerR) indexedGroups
+
   let
-    labelsTree :: T.Tree IndexedArc
+    labelsTree :: T.Tree ChordLabelDatum
     labelsTree =
-      T.joinData "labelElements" "text" indexedGroups $ \(IndexedArc ia) ->
-        let
-          idx = getGroupIndex ia.datum
-          label = fromMaybe "" (labels !! idx)
-          -- Calculate angle for label positioning
-          groupData = unsafeCoerce ia.datum :: { startAngle :: Number, endAngle :: Number }
-          angle = (groupData.startAngle + groupData.endAngle) / 2.0
-          labelR = outerR + 8.0 -- Close to the arc
-          labelX = labelR * cos (angle - pi / 2.0)
-          labelY = labelR * sin (angle - pi / 2.0)
-          -- Anchor based on which side of the circle
-          anchor = if angle > pi then "end" else "start"
-        in
-          T.elem Text
-            [ class_ "chord-label"
-            , x labelX
-            , y labelY
-            , textAnchor anchor
-            , fill "#000"
-            , textContent label
-            , fontSize 10.0 -- Smaller font size
-            ]
+      T.joinData "labelElements" "text" chordLabelData $ \datum ->
+        -- v3 expressions with TrigExpr calculate polar coordinates
+        T.elem Text
+          [ class_ "chord-label"
+          , x (evalChordNum chordLabelX datum)      -- v3: labelRadius * cos(midAngle - π/2)
+          , y (evalChordNum chordLabelY datum)      -- v3: labelRadius * sin(midAngle - π/2)
+          , textAnchor (evalChordStr chordLabelAnchor datum)  -- v3: if midAngle > π then "end" else "start"
+          , fill "#000"
+          , textContent datum.label
+          , fontSize 10.0
+          ]
 
   _ <- renderTree labelsGroupSel labelsTree
 

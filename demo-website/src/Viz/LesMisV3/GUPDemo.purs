@@ -3,9 +3,15 @@
 -- | Combines:
 -- | - Force simulation for continuous position updates
 -- | - Tick-driven transitions for enter/exit animations
+-- | - v3 Finally Tagless expressions for computed attributes
 -- |
 -- | KEY INSIGHT: Simulation tick drives EVERYTHING - positions AND transitions.
 -- | No CSS transitions needed. All visual properties interpolated in PureScript.
+-- |
+-- | v3 EXPRESSIONS: Polymorphic attribute expressions that can be:
+-- | - Evaluated at runtime (Eval interpreter)
+-- | - Generated as source code (CodeGen interpreter)
+-- | - Rendered as SVG strings (SVG interpreter)
 -- |
 -- | NO FFI - uses only library functionality.
 module D3.Viz.LesMisV3.GUPDemo
@@ -27,7 +33,6 @@ import Data.Array (filter, length, (!!))
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
-import Data.Nullable (Nullable)
 import Data.Number (sqrt)
 import Effect (Effect)
 import Effect.Random (randomInt)
@@ -39,11 +44,19 @@ import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, d
 import PSD3.ForceEngine.Links (filterLinksToSubset, swizzleLinksByIndex)
 import PSD3.Transition.Tick as Tick
 import PSD3v2.Attribute.Types (cx, cy, fill, stroke, strokeWidth, x1, x2, y1, y2, radius, id_, class_, width, height, viewBox, opacity)
-import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom)
-import PSD3v2.Capabilities.Selection (select, appendChild, on, renderTree)
+import PSD3v2.Behavior.FFI as BehaviorFFI
+import PSD3v2.Behavior.Types (Behavior(..), DragConfig(..), ScaleExtent(..), defaultZoom)
+import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M)
 import PSD3v2.Selection.Types (ElementType(..)) as ET
 import PSD3v2.VizTree.Tree as T
+import Type.Proxy (Proxy(..))
+
+-- v3 DSL imports
+import PSD3v3.Expr (class NumExpr, class BoolExpr, class CompareExpr, class StringExpr, ifThenElse, lit)
+import PSD3v3.Datum (class DatumExpr, field)
+import PSD3v3.Sugar ((*:), (+.), (-.), (>.), s)
+import PSD3v3.Interpreter.Eval (EvalD, runEvalD)
 
 -- =============================================================================
 -- Types
@@ -64,6 +77,53 @@ type RenderNode =
   { node :: LesMisNode
   , enterProgress :: Maybe Number -- Just 0.0-1.0 if entering, Nothing if not
   , exitProgress :: Maybe Number -- Just 0.0-1.0 if exiting, Nothing if not
+  }
+
+-- | Flattened node datum for v3 expressions
+-- | We flatten the nested structure so v3 can access fields directly
+type NodeDatum =
+  { x :: Number
+  , y :: Number
+  , enterProgress :: Number  -- -1.0 means not entering, 0.0-1.0 means entering
+  , exitProgress :: Number   -- -1.0 means not exiting, 0.0-1.0 means exiting
+  }
+
+-- | Row type for v3 DatumExpr
+type NodeDatumRow = (x :: Number, y :: Number, enterProgress :: Number, exitProgress :: Number)
+
+-- | Convert RenderNode to NodeDatum for v3 expressions
+toNodeDatum :: RenderNode -> NodeDatum
+toNodeDatum rn =
+  { x: rn.node.x
+  , y: rn.node.y
+  , enterProgress: case rn.enterProgress of
+      Just p -> p
+      Nothing -> -1.0  -- Sentinel: not entering
+  , exitProgress: case rn.exitProgress of
+      Just p -> p
+      Nothing -> -1.0  -- Sentinel: not exiting
+  }
+
+-- | Flattened link datum for v3 expressions
+type LinkDatum =
+  { sourceX :: Number
+  , sourceY :: Number
+  , targetX :: Number
+  , targetY :: Number
+  , value :: Number
+  }
+
+-- | Row type for v3 DatumExpr (links)
+type LinkDatumRow = (sourceX :: Number, sourceY :: Number, targetX :: Number, targetY :: Number, value :: Number)
+
+-- | Convert SwizzledLink to LinkDatum for v3 expressions
+toLinkDatum :: SwizzledLink -> LinkDatum
+toLinkDatum link =
+  { sourceX: link.source.x
+  , sourceY: link.source.y
+  , targetX: link.target.x
+  , targetY: link.target.y
+  , value: link.value
   }
 
 -- | Swizzled link for rendering (node references instead of indices)
@@ -93,6 +153,97 @@ type LesMisGUPState =
   }
 
 -- =============================================================================
+-- v3 Field Accessors
+-- =============================================================================
+
+-- Node fields
+nodeX :: forall repr. DatumExpr repr NodeDatumRow => repr Number
+nodeX = field (Proxy :: Proxy "x")
+
+nodeY :: forall repr. DatumExpr repr NodeDatumRow => repr Number
+nodeY = field (Proxy :: Proxy "y")
+
+nodeEnterProgress :: forall repr. DatumExpr repr NodeDatumRow => repr Number
+nodeEnterProgress = field (Proxy :: Proxy "enterProgress")
+
+nodeExitProgress :: forall repr. DatumExpr repr NodeDatumRow => repr Number
+nodeExitProgress = field (Proxy :: Proxy "exitProgress")
+
+-- Link fields
+linkSourceX :: forall repr. DatumExpr repr LinkDatumRow => repr Number
+linkSourceX = field (Proxy :: Proxy "sourceX")
+
+linkSourceY :: forall repr. DatumExpr repr LinkDatumRow => repr Number
+linkSourceY = field (Proxy :: Proxy "sourceY")
+
+linkTargetX :: forall repr. DatumExpr repr LinkDatumRow => repr Number
+linkTargetX = field (Proxy :: Proxy "targetX")
+
+linkTargetY :: forall repr. DatumExpr repr LinkDatumRow => repr Number
+linkTargetY = field (Proxy :: Proxy "targetY")
+
+linkValue :: forall repr. DatumExpr repr LinkDatumRow => repr Number
+linkValue = field (Proxy :: Proxy "value")
+
+-- =============================================================================
+-- v3 Expressions for Node Visual Properties
+-- =============================================================================
+
+-- | v3 expression: Node radius
+-- | if entering (progress >= 0): lerp 20.0 5.0 progress
+-- | else if exiting (progress >= 0): lerp 5.0 20.0 progress
+-- | else: 5.0
+nodeRadiusExpr :: forall repr. NumExpr repr => BoolExpr repr => CompareExpr repr => DatumExpr repr NodeDatumRow => repr Number
+nodeRadiusExpr = ifThenElse
+  (nodeEnterProgress >. lit (-0.5))  -- Is entering? (progress >= 0)
+  -- Entering: 20 - 15 * progress = start large, shrink to 5
+  (lit 20.0 -. (nodeEnterProgress *: 15.0))  -- Use -. for expr-expr subtraction
+  (ifThenElse
+    (nodeExitProgress >. lit (-0.5))  -- Is exiting?
+    -- Exiting: 5 + 15 * progress = start small, grow to 20
+    (lit 5.0 +. (nodeExitProgress *: 15.0))  -- Use +. for expr-expr addition
+    -- Normal: 5
+    (lit 5.0)
+  )
+
+-- | v3 expression: Node fill color
+-- | Entering: green, Exiting: brown, Normal: gray
+nodeFillExpr :: forall repr. NumExpr repr => BoolExpr repr => CompareExpr repr => StringExpr repr => DatumExpr repr NodeDatumRow => repr String
+nodeFillExpr = ifThenElse
+  (nodeEnterProgress >. lit (-0.5))
+  (s "#2ca02c")  -- Green for entering
+  (ifThenElse
+    (nodeExitProgress >. lit (-0.5))
+    (s "#8c564b")  -- Brown for exiting
+    (s "#7f7f7f")  -- Gray for normal
+  )
+
+-- | v3 expression: Node opacity
+-- | Exiting: fades from 1 → 0
+-- | Otherwise: 1.0
+nodeOpacityExpr :: forall repr. NumExpr repr => BoolExpr repr => CompareExpr repr => DatumExpr repr NodeDatumRow => repr Number
+nodeOpacityExpr = ifThenElse
+  (nodeExitProgress >. lit (-0.5))
+  -- Exiting: 1.0 - progress (fade out)
+  (lit 1.0 -. nodeExitProgress)  -- Use -. for expr-expr subtraction
+  (lit 1.0)
+
+-- =============================================================================
+-- v3 Expression Evaluators
+-- =============================================================================
+
+-- | Evaluate node expressions
+evalNodeNum :: EvalD NodeDatum Number -> NodeDatum -> Number
+evalNodeNum expr datum = runEvalD expr datum 0
+
+evalNodeStr :: EvalD NodeDatum String -> NodeDatum -> String
+evalNodeStr expr datum = runEvalD expr datum 0
+
+-- | Evaluate link expressions
+evalLinkNum :: EvalD LinkDatum Number -> LinkDatum -> Number
+evalLinkNum expr datum = runEvalD expr datum 0
+
+-- =============================================================================
 -- Constants
 -- =============================================================================
 
@@ -111,18 +262,35 @@ transitionDelta = 0.025
 -- Initialization
 -- =============================================================================
 
+-- | Simulation ID for the registry
+-- | This enables declarative SimulationDrag to find and reheat this simulation
+simulationId :: String
+simulationId = "lesmis-gup"
+
+-- | Clone a node to create an independent copy
+-- | This prevents mutations (like fx/fy from drag) from affecting other simulations
+cloneNode :: LesMisNode -> LesMisNode
+cloneNode n = { id: n.id, name: n.name, group: n.group, x: n.x, y: n.y, vx: n.vx, vy: n.vy, fx: n.fx, fy: n.fy }
+
 -- | Initialize the GUP demo
 -- | Returns a state ref for controlling the visualization
 initGUPDemo :: LesMisModel -> String -> Effect (Ref LesMisGUPState)
 initGUPDemo model containerSelector = do
+  -- Clone nodes to have independent data from other visualizations
+  let clonedNodes = map cloneNode model.nodes
+  let clonedModel = model { nodes = clonedNodes }
+
   -- Start with all nodes visible, all entering
-  let allNodeIds = map _.name model.nodes
+  let allNodeIds = map _.name clonedNodes
   let initialEntering = Tick.startProgress allNodeIds Map.empty
 
   -- Create simulation
   sim <- Sim.create Sim.defaultConfig
-  Sim.setNodes model.nodes sim
+  Sim.setNodes clonedNodes sim
   Sim.setLinks model.links sim
+
+  -- Register simulation for declarative drag behaviors
+  BehaviorFFI.registerSimulation_ simulationId (Sim.reheat sim)
 
   -- Add forces
   Sim.addForce (ManyBody "charge" defaultManyBody { strength = -100.0, distanceMax = 500.0 }) sim
@@ -132,7 +300,7 @@ initGUPDemo model containerSelector = do
 
   -- Create state ref
   stateRef <- Ref.new
-    { fullModel: model
+    { fullModel: clonedModel
     , visibleNodeIds: allNodeIds
     , enteringProgress: initialEntering
     , exitingNodes: []
@@ -265,26 +433,36 @@ onSimulationTick stateRef = do
 -- Rendering
 -- =============================================================================
 
--- | Create the SVG container structure
+-- | Create the SVG container structure using TreeAPI
+-- | Zoom behavior is now declarative via withBehaviors
 renderSVGContainer :: String -> D3v2M Unit
 renderSVGContainer containerSelector = do
   container <- select containerSelector
 
-  svg <- appendChild ET.SVG
-    [ width svgWidth
-    , height svgHeight
-    , viewBox (show ((-svgWidth) / 2.0) <> " " <> show ((-svgHeight) / 2.0) <> " " <> show svgWidth <> " " <> show svgHeight)
-    , id_ "lesmis-gup-svg"
-    , class_ "lesmis-gup"
-    ]
-    container
+  -- Declarative structure tree with zoom behavior attached to SVG
+  let
+    containerTree :: T.Tree Unit
+    containerTree =
+      T.named ET.SVG "svg"
+        [ width svgWidth
+        , height svgHeight
+        , viewBox (show ((-svgWidth) / 2.0) <> " " <> show ((-svgHeight) / 2.0) <> " " <> show svgWidth <> " " <> show svgHeight)
+        , id_ "lesmis-gup-svg"
+        , class_ "lesmis-gup"
+        ]
+        `T.withBehaviors`
+          [ Zoom $ defaultZoom (ScaleExtent 0.1 10.0) "#lesmis-gup-zoom-group" ]
+        `T.withChildren`
+          [ T.named ET.Group "zoomGroup"
+              [ id_ "lesmis-gup-zoom-group", class_ "zoom-group" ]
+              `T.withChildren`
+                [ T.named ET.Group "linksGroup" [ id_ "lesmis-gup-links", class_ "links" ]
+                , T.named ET.Group "nodesGroup" [ id_ "lesmis-gup-nodes", class_ "nodes" ]
+                ]
+          ]
 
-  zoomGroup <- appendChild ET.Group [ id_ "lesmis-gup-zoom-group", class_ "zoom-group" ] svg
-  _ <- appendChild ET.Group [ id_ "lesmis-gup-links", class_ "links" ] zoomGroup
-  _ <- appendChild ET.Group [ id_ "lesmis-gup-nodes", class_ "nodes" ] zoomGroup
-
-  -- Attach zoom behavior
-  _ <- on (Zoom $ defaultZoom (ScaleExtent 0.1 10.0) "#lesmis-gup-zoom-group") svg
+  -- Render structure (behaviors are attached automatically)
+  _ <- renderTree container containerTree
 
   pure unit
 
@@ -349,78 +527,47 @@ renderGUPScene scene = do
 
   pure unit
 
--- | Create nodes tree with tick-driven visual properties
-createNodesTree :: SceneData -> T.Tree SceneData
+-- | Create nodes tree with v3 expressions for visual properties
+-- | Binds RenderNode (which contains node :: LesMisNode) so drag can access the simulation node
+-- | Uses SimulationDragNested which sets event.subject.node.fx/fy
+createNodesTree :: SceneData -> T.Tree RenderNode
 createNodesTree scene =
-  T.sceneNestedJoin "nodes" "circle"
-    [ scene ]
-    (_.nodes)
-    ( \rn -> T.elem ET.Circle
-        [ cx rn.node.x
-        , cy rn.node.y
-        , radius (radiusForNode rn)
-        , fill (fillForNode rn)
-        , opacity (opacityForNode rn)
+    T.joinData "nodes" "circle" scene.nodes $ \renderNode ->
+      -- Convert RenderNode to NodeDatum for v3 expression evaluation
+      let datum = toNodeDatum renderNode in
+      -- v3 expressions compute visual properties from datum fields
+      -- withBehaviors adds simulation-aware drag (nested variant for RenderNode.node)
+      T.elem ET.Circle
+        [ cx (evalNodeNum nodeX datum)           -- v3: d.x
+        , cy (evalNodeNum nodeY datum)           -- v3: d.y
+        , radius (evalNodeNum nodeRadiusExpr datum)  -- v3: conditional lerp based on progress
+        , fill (evalNodeStr nodeFillExpr datum)      -- v3: conditional color
+        , opacity (evalNodeNum nodeOpacityExpr datum) -- v3: 1.0 or fade out
         , stroke "#fff"
         , strokeWidth 1.5
         ]
-    )
-    { enterBehavior: Nothing
-    , updateBehavior: Nothing
-    , exitBehavior: Nothing
-    }
+        `T.withBehaviors`
+          [ Drag (SimulationDragNested simulationId) ]
 
--- =============================================================================
--- Visual Property Interpolation (Tick-Driven)
--- =============================================================================
-
--- | Get radius for a node based on transition state
--- | Entering: starts large (20), shrinks to normal (5)
--- | Exiting: starts normal (5), grows large (20) before disappearing
--- | Normal: 5
-radiusForNode :: RenderNode -> Number
-radiusForNode { enterProgress, exitProgress } =
-  case enterProgress, exitProgress of
-    Just p, _ -> Tick.lerp 20.0 5.0 p -- Entering: large → normal
-    _, Just p -> Tick.lerp 5.0 20.0 p -- Exiting: normal → large (pop)
-    _, _ -> 5.0 -- Normal
-
--- | Get fill color for a node based on transition state
-fillForNode :: RenderNode -> String
-fillForNode { enterProgress, exitProgress } =
-  case enterProgress, exitProgress of
-    Just _, _ -> "#2ca02c" -- Green for entering
-    _, Just _ -> "#8c564b" -- Brown for exiting
-    _, _ -> "#7f7f7f" -- Gray for normal
-
--- | Get opacity for a node based on transition state
--- | Exiting: fades from 1 → 0
-opacityForNode :: RenderNode -> Number
-opacityForNode { exitProgress } =
-  case exitProgress of
-    Just p -> Tick.lerp 1.0 0.0 p -- Fade out
-    _ -> 1.0
-
--- | Create links tree
-createLinksTree :: SceneData -> T.Tree SceneData
+-- | Create links tree with v3 expressions
+-- | Converts SwizzledLinks to LinkDatum for v3 expression evaluation
+createLinksTree :: SceneData -> T.Tree LinkDatum
 createLinksTree scene =
-  T.sceneNestedJoin "links" "line"
-    [ scene ]
-    (_.links)
-    ( \link -> T.elem ET.Line
-        [ x1 link.source.x
-        , y1 link.source.y
-        , x2 link.target.x
-        , y2 link.target.y
-        , strokeWidth (sqrt link.value)
+  let
+    -- Convert SwizzledLinks to flattened LinkDatum for v3 expressions
+    linkDatums = map toLinkDatum scene.links
+  in
+    T.joinData "links" "line" linkDatums $ \datum ->
+      -- v3 expressions compute link endpoints from datum fields
+      T.elem ET.Line
+        [ x1 (evalLinkNum linkSourceX datum)  -- v3: d.sourceX
+        , y1 (evalLinkNum linkSourceY datum)  -- v3: d.sourceY
+        , x2 (evalLinkNum linkTargetX datum)  -- v3: d.targetX
+        , y2 (evalLinkNum linkTargetY datum)  -- v3: d.targetY
+        , strokeWidth (sqrt (evalLinkNum linkValue datum))  -- v3: sqrt(d.value)
         , stroke "#999"
         , opacity 0.6
         ]
-    )
-    { enterBehavior: Nothing
-    , updateBehavior: Nothing
-    , exitBehavior: Nothing
-    }
 
 -- =============================================================================
 -- Helpers

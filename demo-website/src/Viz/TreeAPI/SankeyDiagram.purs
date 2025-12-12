@@ -2,6 +2,7 @@ module D3.Viz.TreeAPI.SankeyDiagram where
 
 -- | Sankey diagram visualization using TreeAPI
 -- | Pure PureScript layout with declarative TreeAPI rendering
+-- | Uses v3 expressions for computed attributes
 
 import Prelude
 
@@ -12,6 +13,7 @@ import Data.String.Pattern (Pattern(..))
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
+import Type.Proxy (Proxy(..))
 import DataViz.Layout.Sankey.CSV (parseSankeyCSV)
 import DataViz.Layout.Sankey.Compute (computeLayout)
 import DataViz.Layout.Sankey.Path (generateLinkPath)
@@ -22,6 +24,12 @@ import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, reselectD3v2)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
 import PSD3v2.VizTree.Tree as T
 import Web.DOM.Element (Element)
+
+-- v3 DSL imports
+import PSD3v3.Expr (class NumExpr, class BoolExpr, class CompareExpr, class StringExpr, ifThenElse, add)
+import PSD3v3.Datum (class DatumExpr, field)
+import PSD3v3.Sugar ((+:), (-:), (/:), (<.), s)
+import PSD3v3.Interpreter.Eval (EvalD, runEvalD)
 
 -- | Indexed link for data join (ensures unique keys)
 newtype IndexedLink = IndexedLink { index :: Int, link :: SankeyLink }
@@ -40,6 +48,79 @@ instance Eq IndexedNode where
 
 instance Ord IndexedNode where
   compare (IndexedNode a) (IndexedNode b) = compare a.index b.index
+
+-- =============================================================================
+-- v3 Expressions for Label Positioning
+-- =============================================================================
+
+-- | Flattened node data for v3 expression access
+-- | We add chartWidth to the datum so conditional positioning works
+type LabelDatum =
+  { name :: String
+  , x0 :: Number
+  , x1 :: Number
+  , y0 :: Number
+  , y1 :: Number
+  , color :: String
+  , chartWidth :: Number  -- Baked in for conditional positioning
+  }
+
+-- Row type for v3 DatumExpr
+type LabelRow = (name :: String, x0 :: Number, x1 :: Number, y0 :: Number, y1 :: Number, color :: String, chartWidth :: Number)
+
+-- | Convert SankeyNode to LabelDatum with chart width
+toLabelDatum :: Number -> SankeyNode -> LabelDatum
+toLabelDatum chartWidth node =
+  { name: node.name
+  , x0: node.x0
+  , x1: node.x1
+  , y0: node.y0
+  , y1: node.y1
+  , color: node.color
+  , chartWidth
+  }
+
+-- Field accessors for v3
+labelX0 :: forall repr. DatumExpr repr LabelRow => repr Number
+labelX0 = field (Proxy :: Proxy "x0")
+
+labelX1 :: forall repr. DatumExpr repr LabelRow => repr Number
+labelX1 = field (Proxy :: Proxy "x1")
+
+labelY0 :: forall repr. DatumExpr repr LabelRow => repr Number
+labelY0 = field (Proxy :: Proxy "y0")
+
+labelY1 :: forall repr. DatumExpr repr LabelRow => repr Number
+labelY1 = field (Proxy :: Proxy "y1")
+
+labelChartWidth :: forall repr. DatumExpr repr LabelRow => repr Number
+labelChartWidth = field (Proxy :: Proxy "chartWidth")
+
+-- | v3 expression: Label X position
+-- | If node is on left half, position right of node; otherwise left
+labelXExpr :: forall repr. NumExpr repr => BoolExpr repr => CompareExpr repr => DatumExpr repr LabelRow => repr Number
+labelXExpr = ifThenElse
+  (labelX0 <. (labelChartWidth /: 2.0))  -- If on left half of chart
+  (labelX1 +: 6.0)                        -- Position to the right of node
+  (labelX0 -: 6.0)                        -- Position to the left of node
+
+-- | v3 expression: Label Y position (vertically centered on node)
+labelYExpr :: forall repr. NumExpr repr => DatumExpr repr LabelRow => repr Number
+labelYExpr = add labelY0 labelY1 /: 2.0
+
+-- | v3 expression: Text anchor based on node position
+labelAnchorExpr :: forall repr. NumExpr repr => BoolExpr repr => CompareExpr repr => StringExpr repr => DatumExpr repr LabelRow => repr String
+labelAnchorExpr = ifThenElse
+  (labelX0 <. (labelChartWidth /: 2.0))
+  (s "start")
+  (s "end")
+
+-- | Evaluate v3 expression for label datum
+evalLabelNum :: EvalD LabelDatum Number -> LabelDatum -> Number
+evalLabelNum expr datum = runEvalD expr datum 0
+
+evalLabelStr :: EvalD LabelDatum String -> LabelDatum -> String
+evalLabelStr expr datum = runEvalD expr datum 0
 
 -- | Check if a color string is a gradient URL reference
 isGradientColor :: String -> Boolean
@@ -196,22 +277,23 @@ drawSankey csvData containerSelector w h = runD3v2M do
 
   _ <- renderTree nodesGroupSel nodesTree
 
-  -- Render labels (text positioned by node layer)
+  -- Render labels using v3 expressions for conditional positioning
+  -- Convert nodes to LabelDatum with chartWidth baked in
+  let labelData = map (\(IndexedNode in_) -> toLabelDatum w in_.node) indexedNodes
+
   let
-    labelsTree :: T.Tree IndexedNode
+    labelsTree :: T.Tree LabelDatum
     labelsTree =
-      T.joinData "labelElements" "text" indexedNodes $ \(IndexedNode in_) ->
-        let
-          node = in_.node
-        in
-          T.elem Text
-            [ class_ "sankey-label"
-            , x (if node.x0 < w / 2.0 then node.x1 + 6.0 else node.x0 - 6.0)
-            , y ((node.y0 + node.y1) / 2.0)
-            , textAnchor ((\_ -> if node.x0 < w / 2.0 then "start" else "end") :: IndexedNode -> String)
-            , fill "#000"
-            , textContent node.name
-            ]
+      T.joinData "labelElements" "text" labelData $ \datum ->
+        -- v3 expressions evaluate the conditional positioning logic
+        T.elem Text
+          [ class_ "sankey-label"
+          , x (evalLabelNum labelXExpr datum)      -- v3: if x0 < w/2 then x1+6 else x0-6
+          , y (evalLabelNum labelYExpr datum)      -- v3: (y0 + y1) / 2
+          , textAnchor (evalLabelStr labelAnchorExpr datum)  -- v3: if x0 < w/2 then "start" else "end"
+          , fill "#000"
+          , textContent datum.name
+          ]
 
   _ <- renderTree labelsGroupSel labelsTree
 
