@@ -23,7 +23,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.SiteNav as SiteNav
-import TreeBuilder.Types (BuilderTree(..), BuilderNode, NodeId, AttributeChoice(..), AttributeBinding, SampleDatum, ElementOption, availableElements, attributeOptionsFor, emptyNode, sudokuSampleData)
+import TreeBuilder.Types (BuilderTree(..), BuilderNode, NodeId, AttributeChoice(..), AttributeBinding, SampleDatum, ElementOption, availableElements, attributeOptionsFor, emptyNode, sudokuSampleData, chessSampleData, goSampleData)
 import TreeBuilder.Interpreter (renderPreview)
 import PSD3v2.Interpreter.SemiQuine (treeToCode)
 
@@ -37,7 +37,8 @@ type State =
   , selectedNodeId :: Maybe NodeId
   , nextNodeId :: NodeId
   , previewError :: Maybe String
-  , currentPreset :: String
+  , currentTreeType :: String   -- "grid" | "radial" | "strip"
+  , currentDataSet :: String    -- "sudoku" | "chess" | "go"
   }
 
 data Action
@@ -50,7 +51,8 @@ data Action
   | UpdateAttribute NodeId String AttributeChoice
   | AddAttribute NodeId String
   | RemoveAttribute NodeId String
-  | LoadPreset String
+  | SelectTreeType String    -- "grid" | "radial" | "strip"
+  | SelectDataSet String     -- "sudoku" | "chess" | "go"
   | RefreshPreview
 
 -- =============================================================================
@@ -74,7 +76,8 @@ initialState =
   , selectedNodeId: Nothing
   , nextNodeId: 1
   , previewError: Nothing
-  , currentPreset: "sudoku"
+  , currentTreeType: "grid"
+  , currentDataSet: "sudoku"
   }
 
 -- =============================================================================
@@ -93,29 +96,44 @@ render state =
         , pageTitle: Just "Tree Builder"
         }
 
-    -- Main layout
+    -- Main layout: Left (editors + viz) | Right (code panel)
     , HH.div
         [ HP.classes [ HH.ClassName "tree-builder-layout" ] ]
-        [ -- Top: 4 columns
+        [ -- Left side: Tree/Data editors + visualization
           HH.div
-            [ HP.classes [ HH.ClassName "tree-builder-columns" ] ]
-            [ renderTreeColumn state
-            , renderAttributesColumn state
-            , renderDataColumn state
-            , renderCodeColumn state
+            [ HP.classes [ HH.ClassName "tree-builder-left" ] ]
+            [ -- Top: Tree and Data editors side by side
+              HH.div
+                [ HP.classes [ HH.ClassName "tree-builder-editors" ] ]
+                [ renderTreeColumn state
+                , renderDataColumn state
+                ]
+
+            -- Bottom: Large visualization with Sankey watermark
+            , HH.div
+                [ HP.classes [ HH.ClassName "tree-builder-viz" ] ]
+                [ renderSankeyWatermark
+                , HH.div
+                    [ HP.id "tree-builder-preview"
+                    , HP.classes [ HH.ClassName "viz-container" ]
+                    ]
+                    []
+                ]
             ]
 
-        -- Bottom: Visualization
-        , HH.div
-            [ HP.classes [ HH.ClassName "tree-builder-viz" ] ]
-            [ HH.div
-                [ HP.id "tree-builder-preview"
-                , HP.classes [ HH.ClassName "viz-container" ]
-                ]
-                []
-            ]
+        -- Right side: Full-height code panel
+        , renderCodePanel state
         ]
     ]
+
+-- | Sankey watermark container - SVG rendered via FFI
+renderSankeyWatermark :: forall m. H.ComponentHTML Action () m
+renderSankeyWatermark =
+  HH.div
+    [ HP.classes [ HH.ClassName "sankey-watermark" ]
+    , HP.id "sankey-watermark-container"
+    ]
+    []
 
 -- =============================================================================
 -- Column 1: Tree Structure
@@ -125,15 +143,15 @@ renderTreeColumn :: forall m. State -> H.ComponentHTML Action () m
 renderTreeColumn state =
   HH.div
     [ HP.classes [ HH.ClassName "tb-column" ] ]
-    [ -- Header with presets
+    [ -- Header with tree type selector only
       HH.div
         [ HP.classes [ HH.ClassName "tb-column-header" ] ]
         [ HH.h3 [ HP.classes [ HH.ClassName "tb-column-title" ] ] [ HH.text "Tree" ]
         , HH.div
             [ HP.classes [ HH.ClassName "preset-buttons" ] ]
-            [ presetButton state "sudoku" "Sudoku"
-            , presetButton state "scatter" "Scatter"
-            , presetButton state "bars" "Bars"
+            [ treeButton state "grid" "Grid"
+            , treeButton state "radial" "Radial"
+            , treeButton state "strip" "Strip"
             ]
         ]
     -- Content
@@ -158,12 +176,21 @@ renderTreeColumn state =
         ]
     ]
 
-presetButton :: forall m. State -> String -> String -> H.ComponentHTML Action () m
-presetButton state presetId label =
+treeButton :: forall m. State -> String -> String -> H.ComponentHTML Action () m
+treeButton state treeId label =
   HH.button
     [ HP.classes $ [ HH.ClassName "preset-btn" ] <>
-        if state.currentPreset == presetId then [ HH.ClassName "preset-btn--active" ] else []
-    , HE.onClick \_ -> LoadPreset presetId
+        if state.currentTreeType == treeId then [ HH.ClassName "preset-btn--active" ] else []
+    , HE.onClick \_ -> SelectTreeType treeId
+    ]
+    [ HH.text label ]
+
+dataButton :: forall m. State -> String -> String -> H.ComponentHTML Action () m
+dataButton state dataId label =
+  HH.button
+    [ HP.classes $ [ HH.ClassName "preset-btn" ] <>
+        if state.currentDataSet == dataId then [ HH.ClassName "preset-btn--active" ] else []
+    , HE.onClick \_ -> SelectDataSet dataId
     ]
     [ HH.text label ]
 
@@ -181,19 +208,18 @@ renderPaletteBtn state elem =
       ]
       [ HH.text elem.label ]
 
--- | Render a tree node recursively
+-- | Render a tree node recursively with inline attribute editing
 renderTreeNode :: forall m. State -> BuilderTree -> H.ComponentHTML Action () m
 renderTreeNode state tree = case tree of
   BNode node children ->
-    HH.div
+    let isSelected = state.selectedNodeId == Just node.id
+    in HH.div
       [ HP.classes [ HH.ClassName "tree-node" ] ]
       [ -- Node header
         HH.div
           [ HP.classes $
               [ HH.ClassName "node-header" ] <>
-              if state.selectedNodeId == Just node.id
-                then [ HH.ClassName "node-header--selected" ]
-                else []
+              if isSelected then [ HH.ClassName "node-header--selected" ] else []
           , HE.onClick \_ -> SelectNode node.id
           ]
           [ -- Expand/collapse
@@ -212,10 +238,6 @@ renderTreeNode state tree = case tree of
           , case node.name of
               Just n -> HH.span [ HP.classes [ HH.ClassName "node-name" ] ] [ HH.text n ]
               Nothing -> HH.text ""
-          -- Attr count
-          , HH.span
-              [ HP.classes [ HH.ClassName "attr-count" ] ]
-              [ HH.text $ show (Array.length node.attributes) ]
           -- Remove
           , HH.button
               [ HP.classes [ HH.ClassName "remove-btn" ]
@@ -223,6 +245,10 @@ renderTreeNode state tree = case tree of
               ]
               [ HH.text "×" ]
           ]
+      -- Inline attributes (always shown when expanded)
+      , if node.expanded
+          then renderInlineAttrs node.id node.elementType node.attributes
+          else HH.text ""
       -- Children
       , if node.expanded && Array.length children > 0
           then HH.div
@@ -232,14 +258,13 @@ renderTreeNode state tree = case tree of
       ]
 
   BDataJoin join ->
-    HH.div
+    let isSelected = state.selectedNodeId == Just join.id
+    in HH.div
       [ HP.classes [ HH.ClassName "tree-node" ] ]
       [ HH.div
           [ HP.classes $
               [ HH.ClassName "node-header" ] <>
-              if state.selectedNodeId == Just join.id
-                then [ HH.ClassName "node-header--selected" ]
-                else []
+              if isSelected then [ HH.ClassName "node-header--selected" ] else []
           , HE.onClick \_ -> SelectNode join.id
           ]
           [ HH.span [ HP.classes [ HH.ClassName "join-badge" ] ] [ HH.text "join" ]
@@ -247,95 +272,86 @@ renderTreeNode state tree = case tree of
               [ HP.classes [ HH.ClassName "element-badge", HH.ClassName $ "element-badge--" <> join.elementType ] ]
               [ HH.text join.elementType ]
           , HH.span [ HP.classes [ HH.ClassName "node-name" ] ] [ HH.text join.name ]
-          , HH.span
-              [ HP.classes [ HH.ClassName "attr-count" ] ]
-              [ HH.text $ show (Array.length join.template.attributes) ]
           ]
+      -- Inline attributes for join template (always shown when expanded)
+      , if join.expanded
+          then renderInlineAttrs join.id join.template.elementType join.template.attributes
+          else HH.text ""
       ]
 
--- =============================================================================
--- Column 2: Attributes
--- =============================================================================
-
-renderAttributesColumn :: forall m. State -> H.ComponentHTML Action () m
-renderAttributesColumn state =
+-- | Render inline attributes with compact editing
+renderInlineAttrs :: forall m. NodeId -> String -> Array AttributeBinding -> H.ComponentHTML Action () m
+renderInlineAttrs nodeId elemType attrs =
   HH.div
-    [ HP.classes [ HH.ClassName "tb-column" ] ]
+    [ HP.classes [ HH.ClassName "inline-attrs" ] ]
     [ HH.div
-        [ HP.classes [ HH.ClassName "tb-column-header" ] ]
-        [ HH.h3 [ HP.classes [ HH.ClassName "tb-column-title" ] ] [ HH.text "Attributes" ] ]
+        [ HP.classes [ HH.ClassName "inline-attrs-list" ] ]
+        (map (renderInlineAttr nodeId) attrs)
     , HH.div
-        [ HP.classes [ HH.ClassName "tb-column-content" ] ]
-        [ case state.selectedNodeId of
-            Nothing ->
-              HH.div
-                [ HP.classes [ HH.ClassName "attr-editor-empty" ] ]
-                [ HH.text "Select a node to edit attributes" ]
-            Just nodeId ->
-              renderAttributeEditor state nodeId
-        ]
+        [ HP.classes [ HH.ClassName "inline-add-attr" ] ]
+        (map (renderAddAttrBtn nodeId) (missingAttrs elemType attrs))
     ]
 
-renderAttributeEditor :: forall m. State -> NodeId -> H.ComponentHTML Action () m
-renderAttributeEditor state nodeId =
-  let
-    mNode = findNode nodeId =<< state.tree
-  in case mNode of
-    Nothing -> HH.text ""
-    Just node ->
-      HH.div_
-        [ HH.div
-            [ HP.classes [ HH.ClassName "attr-editor-header" ] ]
-            [ HH.text $ node.elementType <> " attributes" ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "attr-list" ] ]
-            (map (renderAttributeRow nodeId) node.attributes)
-        , HH.div
-            [ HP.classes [ HH.ClassName "add-attr-row" ] ]
-            [ HH.select
-                [ HP.classes [ HH.ClassName "add-attr-select" ]
-                , HE.onValueChange \v -> AddAttribute nodeId v
-                ]
-                ([ HH.option [ HP.value "" ] [ HH.text "+ add attribute" ] ] <>
-                  map (\opt -> HH.option [ HP.value opt.name ] [ HH.text opt.label ])
-                    (attributeOptionsFor node.elementType))
-            ]
-        ]
+-- | Get attributes not yet added
+missingAttrs :: String -> Array AttributeBinding -> Array { name :: String, label :: String }
+missingAttrs elemType current =
+  let currentNames = map _.attrName current
+      available = attributeOptionsFor elemType
+  in Array.filter (\opt -> not (Array.elem opt.name currentNames))
+       (map (\o -> { name: o.name, label: o.label }) available)
 
-renderAttributeRow :: forall m. NodeId -> AttributeBinding -> H.ComponentHTML Action () m
-renderAttributeRow nodeId binding =
+-- | Button to add a missing attribute
+renderAddAttrBtn :: forall m. NodeId -> { name :: String, label :: String } -> H.ComponentHTML Action () m
+renderAddAttrBtn nodeId attr =
+  HH.button
+    [ HP.classes [ HH.ClassName "add-attr-btn" ]
+    , HP.title $ "Add " <> attr.label
+    , HE.onClick \_ -> AddAttribute nodeId attr.name
+    ]
+    [ HH.text $ "+" <> attr.label ]
+
+-- | Render a single inline attribute with value selector
+renderInlineAttr :: forall m. NodeId -> AttributeBinding -> H.ComponentHTML Action () m
+renderInlineAttr nodeId binding =
   HH.div
-    [ HP.classes [ HH.ClassName "attr-row" ] ]
-    [ HH.span [ HP.classes [ HH.ClassName "attr-name" ] ] [ HH.text binding.attrName ]
-    , HH.span [ HP.classes [ HH.ClassName "attr-arrow" ] ] [ HH.text "←" ]
-    , HH.select
-        [ HP.classes [ HH.ClassName "attr-choice" ]
-        , HE.onValueChange \v -> UpdateAttribute nodeId binding.attrName (parseChoice v)
-        ]
-        [ HH.option [ HP.value "x", HP.selected (binding.choice == FromField "x") ] [ HH.text "_.x" ]
-        , HH.option [ HP.value "y", HP.selected (binding.choice == FromField "y") ] [ HH.text "_.y" ]
-        , HH.option [ HP.value "radius", HP.selected (binding.choice == FromField "radius") ] [ HH.text "_.radius" ]
-        , HH.option [ HP.value "width", HP.selected (binding.choice == FromField "width") ] [ HH.text "_.width" ]
-        , HH.option [ HP.value "height", HP.selected (binding.choice == FromField "height") ] [ HH.text "_.height" ]
-        , HH.option [ HP.value "color", HP.selected (binding.choice == FromField "color") ] [ HH.text "_.color" ]
-        , HH.option [ HP.value "label", HP.selected (binding.choice == FromField "label") ] [ HH.text "_.label" ]
-        , HH.option [ HP.value "value", HP.selected (binding.choice == FromField "value") ] [ HH.text "_.value" ]
-        , HH.option [ HP.value "index", HP.selected (binding.choice == IndexBased) ] [ HH.text "_.index" ]
-        ]
+    [ HP.classes [ HH.ClassName "inline-attr" ] ]
+    [ HH.span [ HP.classes [ HH.ClassName "inline-attr-name" ] ] [ HH.text binding.attrName ]
+    , HH.span [ HP.classes [ HH.ClassName "inline-attr-arrow" ] ] [ HH.text "←" ]
+    , renderChoiceButtons nodeId binding
     , HH.button
-        [ HP.classes [ HH.ClassName "remove-attr-btn" ]
+        [ HP.classes [ HH.ClassName "inline-attr-remove" ]
         , HE.onClick \_ -> RemoveAttribute nodeId binding.attrName
         ]
         [ HH.text "×" ]
     ]
 
-parseChoice :: String -> AttributeChoice
-parseChoice = case _ of
-  "index" -> IndexBased
-  field -> FromField field
+-- | Render choice as clickable buttons instead of dropdown
+renderChoiceButtons :: forall m. NodeId -> AttributeBinding -> H.ComponentHTML Action () m
+renderChoiceButtons nodeId binding =
+  HH.span [ HP.classes [ HH.ClassName "choice-buttons" ] ]
+    [ choiceBtn "x" (FromField "x")
+    , choiceBtn "y" (FromField "y")
+    , choiceBtn "w" (FromField "width")
+    , choiceBtn "h" (FromField "height")
+    , choiceBtn "r" (FromField "radius")
+    , choiceBtn "color" (FromField "color")
+    , choiceBtn "label" (FromField "label")
+    , choiceBtn "val" (FromField "value")
+    ]
+  where
+  choiceBtn label choice =
+    HH.button
+      [ HP.classes $
+          [ HH.ClassName "choice-btn" ] <>
+          if binding.choice == choice then [ HH.ClassName "choice-btn--active" ] else []
+      , HE.onClick \_ -> UpdateAttribute nodeId binding.attrName choice
+      ]
+      [ HH.text label ]
+
+-- Note: Attributes are now edited inline in tree nodes (renderInlineAttrs)
 
 -- =============================================================================
--- Column 3: Data
+-- Column 2: Data (with data selector)
 -- =============================================================================
 
 renderDataColumn :: forall m. State -> H.ComponentHTML Action () m
@@ -345,9 +361,12 @@ renderDataColumn state =
     [ HH.div
         [ HP.classes [ HH.ClassName "tb-column-header" ] ]
         [ HH.h3 [ HP.classes [ HH.ClassName "tb-column-title" ] ] [ HH.text "Data" ]
-        , HH.span
-            [ HP.style "font-size: 9px; color: #666;" ]
-            [ HH.text $ show (Array.length state.sampleData) <> " items" ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "preset-buttons" ] ]
+            [ dataButton state "sudoku" "9×9"
+            , dataButton state "chess" "8×8"
+            , dataButton state "go" "19×19"
+            ]
         ]
     , HH.div
         [ HP.classes [ HH.ClassName "tb-column-content" ] ]
@@ -370,13 +389,13 @@ formatSampleData data_ =
     "\", label: \"" <> d.label <> "\" }"
 
 -- =============================================================================
--- Column 4: Code
+-- Right Panel: Full-height Code
 -- =============================================================================
 
-renderCodeColumn :: forall m. State -> H.ComponentHTML Action () m
-renderCodeColumn state =
+renderCodePanel :: forall m. State -> H.ComponentHTML Action () m
+renderCodePanel state =
   HH.div
-    [ HP.classes [ HH.ClassName "tb-column" ] ]
+    [ HP.classes [ HH.ClassName "code-panel" ] ]
     [ HH.div
         [ HP.classes [ HH.ClassName "tb-column-header" ] ]
         [ HH.h3 [ HP.classes [ HH.ClassName "tb-column-title" ] ] [ HH.text "PureScript" ] ]
@@ -398,7 +417,11 @@ renderCodeColumn state =
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
-    handleAction (LoadPreset "sudoku")
+    -- Render the Sankey watermark showing data flow architecture
+    liftEffect $ renderSankeyWatermarkImpl "#sankey-watermark-container"
+    -- Load initial tree and data
+    handleAction (SelectTreeType "grid")
+    handleAction (SelectDataSet "sudoku")
 
   AddRootElement elemType -> do
     state <- H.get
@@ -449,9 +472,15 @@ handleAction = case _ of
     H.modify_ _ { tree = updatedTree }
     handleAction RefreshPreview
 
-  LoadPreset presetName -> do
-    let preset = getPreset presetName
-    H.modify_ _ { tree = Just preset.tree, sampleData = preset.data_, nextNodeId = preset.nextId, selectedNodeId = Nothing, currentPreset = presetName }
+  SelectTreeType treeType -> do
+    state <- H.get
+    let tree = getTreeForType treeType
+    H.modify_ _ { tree = Just tree, currentTreeType = treeType, selectedNodeId = Nothing }
+    handleAction RefreshPreview
+
+  SelectDataSet dataSet -> do
+    let data_ = getDataSet dataSet
+    H.modify_ _ { sampleData = data_, currentDataSet = dataSet }
     handleAction RefreshPreview
 
   RefreshPreview -> do
@@ -464,6 +493,9 @@ handleAction = case _ of
 
 -- | Clear preview container (FFI)
 foreign import clearPreviewContainer :: String -> Effect Unit
+
+-- | Render Sankey watermark SVG (FFI)
+foreign import renderSankeyWatermarkImpl :: String -> Effect Unit
 
 -- =============================================================================
 -- Tree Manipulation Helpers
@@ -540,170 +572,172 @@ removeNodeAttribute targetId attrName tree = case tree of
       else tree
 
 -- =============================================================================
--- Presets
+-- Tree Types and Data Sets
 -- =============================================================================
 
-type Preset = { tree :: BuilderTree, data_ :: Array SampleDatum, nextId :: NodeId }
+-- | Get tree structure for a tree type
+getTreeForType :: String -> BuilderTree
+getTreeForType = case _ of
+  "grid" -> gridTree
+  "radial" -> radialTree
+  "strip" -> stripTree
+  _ -> gridTree
 
-getPreset :: String -> Preset
-getPreset = case _ of
-  "sudoku" -> sudokuPreset
-  "scatter" -> scatterPreset
-  "bars" -> barsPreset
-  _ -> sudokuPreset
+-- | Get data set by name
+getDataSet :: String -> Array SampleDatum
+getDataSet = case _ of
+  "sudoku" -> sudokuSampleData
+  "chess" -> chessSampleData
+  "go" -> goSampleData
+  _ -> sudokuSampleData
 
--- | Sudoku preset: SVG with 9x9 grid cells (rects) and number labels (text)
--- | Grid: 9 cells × (28px + 2px gap) + margins = ~290px
-sudokuPreset :: Preset
-sudokuPreset =
-  { tree: BNode
-      { id: 1
-      , elementType: "svg"
-      , name: Just "sudoku"
-      , attributes:
-          [ { attrName: "width", choice: ConstantNumber 290.0 }
-          , { attrName: "height", choice: ConstantNumber 290.0 }
-          ]
-      , expanded: true
-      }
-      [ -- Background
-        BNode
-          { id: 2
+-- | Grid tree: renders data as square grid using x, y coordinates
+-- | Rects for cells + text for labels
+gridTree :: BuilderTree
+gridTree = BNode
+  { id: 1
+  , elementType: "svg"
+  , name: Just "grid"
+  , attributes:
+      [ { attrName: "width", choice: ConstantNumber 300.0 }
+      , { attrName: "height", choice: ConstantNumber 300.0 }
+      , { attrName: "viewBox", choice: ConstantString "0 0 300 300" }
+      ]
+  , expanded: true
+  }
+  [ -- Cells (join) - rects positioned by x, y
+    BDataJoin
+      { id: 2
+      , name: "cells"
+      , elementType: "rect"
+      , template:
+          { id: 3
           , elementType: "rect"
-          , name: Just "bg"
+          , name: Nothing
           , attributes:
-              [ { attrName: "x", choice: ConstantNumber 0.0 }
-              , { attrName: "y", choice: ConstantNumber 0.0 }
-              , { attrName: "width", choice: ConstantNumber 290.0 }
-              , { attrName: "height", choice: ConstantNumber 290.0 }
-              , { attrName: "fill", choice: ConstantString "#333" }
+              [ { attrName: "x", choice: FromField "x" }
+              , { attrName: "y", choice: FromField "y" }
+              , { attrName: "width", choice: FromField "width" }
+              , { attrName: "height", choice: FromField "height" }
+              , { attrName: "fill", choice: FromField "color" }
               ]
           , expanded: true
           }
-          []
-      , -- Cells (join) - 81 cells for 9x9 grid
-        BDataJoin
-          { id: 3
-          , name: "cells"
-          , elementType: "rect"
-          , template:
-              { id: 4
-              , elementType: "rect"
-              , name: Nothing
-              , attributes:
-                  [ { attrName: "x", choice: FromField "x" }
-                  , { attrName: "y", choice: FromField "y" }
-                  , { attrName: "width", choice: FromField "width" }
-                  , { attrName: "height", choice: FromField "height" }
-                  , { attrName: "fill", choice: FromField "color" }
-                  ]
-              , expanded: true
-              }
-          , expanded: true
-          }
-      , -- Labels (join) - numbers centered in each cell
-        BDataJoin
+      , expanded: true
+      }
+  , -- Labels (join) - text centered in cells
+    BDataJoin
+      { id: 4
+      , name: "labels"
+      , elementType: "text"
+      , template:
           { id: 5
-          , name: "labels"
           , elementType: "text"
-          , template:
-              { id: 6
-              , elementType: "text"
-              , name: Nothing
-              , attributes:
-                  [ { attrName: "x", choice: Computed "d.x + 14.0" }  -- center of 28px cell
-                  , { attrName: "y", choice: Computed "d.y + 20.0" }  -- vertically centered
-                  , { attrName: "text", choice: FromField "label" }
-                  , { attrName: "fill", choice: ConstantString "#333" }
-                  , { attrName: "font-size", choice: ConstantNumber 18.0 }  -- smaller for 9x9
-                  , { attrName: "text-anchor", choice: ConstantString "middle" }
-                  ]
-              , expanded: true
-              }
+          , name: Nothing
+          , attributes:
+              [ { attrName: "x", choice: FromField "cx" }
+              , { attrName: "y", choice: FromField "cy" }
+              , { attrName: "text", choice: FromField "label" }
+              , { attrName: "fill", choice: ConstantString "#333" }
+              , { attrName: "font-size", choice: ConstantNumber 16.0 }
+              , { attrName: "text-anchor", choice: ConstantString "middle" }
+              ]
           , expanded: true
           }
-      ]
-  , data_: sudokuSampleData
-  , nextId: 10
-  }
-
-scatterPreset :: Preset
-scatterPreset =
-  { tree: BNode
-      { id: 1
-      , elementType: "svg"
-      , name: Just "scatter"
-      , attributes:
-          [ { attrName: "width", choice: ConstantNumber 200.0 }
-          , { attrName: "height", choice: ConstantNumber 150.0 }
-          ]
       , expanded: true
       }
-      [ BDataJoin
-          { id: 2
-          , name: "points"
+  ]
+
+-- | Radial tree: renders data as polar arrangement using rx, ry coordinates
+-- | Circles positioned in concentric rings
+radialTree :: BuilderTree
+radialTree = BNode
+  { id: 1
+  , elementType: "svg"
+  , name: Just "radial"
+  , attributes:
+      [ { attrName: "width", choice: ConstantNumber 300.0 }
+      , { attrName: "height", choice: ConstantNumber 300.0 }
+      , { attrName: "viewBox", choice: ConstantString "0 0 300 300" }
+      ]
+  , expanded: true
+  }
+  [ -- Dots (join) - circles positioned by rx, ry (polar coordinates)
+    BDataJoin
+      { id: 2
+      , name: "dots"
+      , elementType: "circle"
+      , template:
+          { id: 3
           , elementType: "circle"
-          , template:
-              { id: 3
-              , elementType: "circle"
-              , name: Nothing
-              , attributes:
-                  [ { attrName: "cx", choice: FromField "x" }
-                  , { attrName: "cy", choice: FromField "y" }
-                  , { attrName: "r", choice: FromField "radius" }
-                  , { attrName: "fill", choice: FromField "color" }
-                  ]
-              , expanded: true
-              }
+          , name: Nothing
+          , attributes:
+              [ { attrName: "cx", choice: FromField "rx" }
+              , { attrName: "cy", choice: FromField "ry" }
+              , { attrName: "r", choice: FromField "radius" }
+              , { attrName: "fill", choice: FromField "color" }
+              , { attrName: "stroke", choice: ConstantString "#333" }
+              , { attrName: "stroke-width", choice: ConstantNumber 0.5 }
+              ]
           , expanded: true
           }
-      ]
-  , data_:
-      [ { x: 30.0, y: 40.0, radius: 12.0, width: 0.0, height: 0.0, color: "#E63946", label: "A", name: "A", value: 10.0, index: 0 }
-      , { x: 80.0, y: 100.0, radius: 18.0, width: 0.0, height: 0.0, color: "#5A8A8A", label: "B", name: "B", value: 25.0, index: 1 }
-      , { x: 140.0, y: 60.0, radius: 14.0, width: 0.0, height: 0.0, color: "#D4C9A8", label: "C", name: "C", value: 15.0, index: 2 }
-      , { x: 170.0, y: 120.0, radius: 10.0, width: 0.0, height: 0.0, color: "#E63946", label: "D", name: "D", value: 30.0, index: 3 }
-      ]
-  , nextId: 10
-  }
-
-barsPreset :: Preset
-barsPreset =
-  { tree: BNode
-      { id: 1
-      , elementType: "svg"
-      , name: Just "bars"
-      , attributes:
-          [ { attrName: "width", choice: ConstantNumber 200.0 }
-          , { attrName: "height", choice: ConstantNumber 150.0 }
-          ]
       , expanded: true
       }
-      [ BDataJoin
-          { id: 2
-          , name: "bars"
-          , elementType: "rect"
-          , template:
-              { id: 3
-              , elementType: "rect"
-              , name: Nothing
-              , attributes:
-                  [ { attrName: "x", choice: FromField "x" }
-                  , { attrName: "y", choice: FromField "y" }
-                  , { attrName: "width", choice: FromField "width" }
-                  , { attrName: "height", choice: FromField "height" }
-                  , { attrName: "fill", choice: FromField "color" }
-                  ]
-              , expanded: true
-              }
+  , -- Labels (join) - text at radial positions
+    BDataJoin
+      { id: 4
+      , name: "labels"
+      , elementType: "text"
+      , template:
+          { id: 5
+          , elementType: "text"
+          , name: Nothing
+          , attributes:
+              [ { attrName: "x", choice: FromField "rx" }
+              , { attrName: "y", choice: FromField "ry" }
+              , { attrName: "text", choice: FromField "label" }
+              , { attrName: "fill", choice: ConstantString "#333" }
+              , { attrName: "font-size", choice: ConstantNumber 8.0 }
+              , { attrName: "text-anchor", choice: ConstantString "middle" }
+              ]
           , expanded: true
           }
+      , expanded: true
+      }
+  ]
+
+-- | Strip tree: renders data as horizontal strip using sx, sy coordinates
+-- | All cells in one long row - like a barcode or DNA sequence
+stripTree :: BuilderTree
+stripTree = BNode
+  { id: 1
+  , elementType: "svg"
+  , name: Just "strip"
+  , attributes:
+      [ { attrName: "width", choice: ConstantNumber 300.0 }
+      , { attrName: "height", choice: ConstantNumber 60.0 }
+      , { attrName: "viewBox", choice: ConstantString "0 0 300 60" }
       ]
-  , data_:
-      [ { x: 10.0, y: 80.0, radius: 0.0, width: 35.0, height: 60.0, color: "#E63946", label: "A", name: "A", value: 60.0, index: 0 }
-      , { x: 55.0, y: 40.0, radius: 0.0, width: 35.0, height: 100.0, color: "#5A8A8A", label: "B", name: "B", value: 100.0, index: 1 }
-      , { x: 100.0, y: 100.0, radius: 0.0, width: 35.0, height: 40.0, color: "#D4C9A8", label: "C", name: "C", value: 40.0, index: 2 }
-      , { x: 145.0, y: 60.0, radius: 0.0, width: 35.0, height: 80.0, color: "#E63946", label: "D", name: "D", value: 80.0, index: 3 }
-      ]
-  , nextId: 10
+  , expanded: true
   }
+  [ -- Bars (join) - thin vertical bars
+    BDataJoin
+      { id: 2
+      , name: "bars"
+      , elementType: "rect"
+      , template:
+          { id: 3
+          , elementType: "rect"
+          , name: Nothing
+          , attributes:
+              [ { attrName: "x", choice: FromField "sx" }
+              , { attrName: "y", choice: ConstantNumber 5.0 }
+              , { attrName: "width", choice: ConstantNumber 3.0 }
+              , { attrName: "height", choice: ConstantNumber 50.0 }
+              , { attrName: "fill", choice: FromField "color" }
+              ]
+          , expanded: true
+          }
+      , expanded: true
+      }
+  ]

@@ -41,7 +41,7 @@
 }
 
 /* =============================================================================
-   CODEPEN-STYLE LAYOUT
+   CODEPEN-STYLE LAYOUT - NEW: Code panel on right, viz large
    ============================================================================= */
 
 /* Main container below nav */
@@ -51,11 +51,30 @@
   left: 0;
   right: 0;
   bottom: 0;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 320px;  /* Left content + fixed-width code panel */
+  grid-template-rows: 1fr;
 }
 
-/* Top row: 4 columns - outer columns wider, middle columns narrower */
+/* Left area: editors + visualization */
+.tree-builder-left {
+  display: flex;
+  flex-direction: column;
+  border-right: 2px solid var(--color-line);
+  overflow: hidden;
+}
+
+/* Editors row: Tree and Data side by side */
+.tree-builder-editors {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  height: auto;
+  max-height: 220px;
+  min-height: 180px;
+  border-bottom: 2px solid var(--color-line);
+}
+
+/* Top row: columns layout (deprecated but kept for compatibility) */
 .tree-builder-columns {
   display: grid;
   grid-template-columns: 1.4fr 0.8fr 0.8fr 1.4fr;
@@ -63,6 +82,11 @@
   min-height: 280px;
   max-height: 320px;
   border-bottom: 2px solid var(--color-line);
+}
+
+/* 3-column layout (deprecated) */
+.tree-builder-columns.three-col {
+  grid-template-columns: 1.5fr 0.8fr 1.2fr;
 }
 
 /* Each column panel */
@@ -98,6 +122,26 @@
   margin: 0;
 }
 
+/* Selector rows for Tree/Data selection */
+.selector-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.selector-label {
+  font-size: var(--font-size-tiny);
+  color: var(--color-text-muted);
+  font-weight: bold;
+}
+
+/* Stack selectors vertically in header */
+.tb-column-header {
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
 /* Column content area */
 .tb-column-content {
   flex: 1;
@@ -121,12 +165,12 @@
 }
 
 /* =============================================================================
-   VISUALIZATION PANEL (Bottom)
+   VISUALIZATION PANEL (Bottom - takes ~2/3 of vertical space)
    ============================================================================= */
 
 .tree-builder-viz {
   flex: 1;
-  min-height: 200px;
+  min-height: 400px;
   background-color: var(--color-beige-light);
   display: flex;
   align-items: center;
@@ -138,6 +182,20 @@
   background-color: white;
   border: 1px solid var(--color-line);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  /* Scale the visualization to use more space */
+  width: auto;
+  height: auto;
+  max-width: 90%;
+  max-height: 90%;
+}
+
+/* Make the SVG inside scale up nicely */
+.viz-container svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 400px;
+  min-height: 400px;
 }
 
 /* =============================================================================
@@ -374,14 +432,32 @@
 }
 
 /* =============================================================================
-   CODE VIEW (Column 4)
+   CODE PANEL (Full-height right panel)
    ============================================================================= */
+
+/* Full-height code panel */
+.code-panel {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-beige-card);
+  overflow: hidden;
+}
+
+.code-panel .tb-column-header {
+  flex-shrink: 0;
+}
+
+.code-panel .tb-column-content {
+  flex: 1;
+  overflow-y: auto;
+}
 
 .code-view {
   font-family: var(--font-mono);
   font-size: var(--font-size-tiny);
-  line-height: 1.6;
-  white-space: pre;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
   color: var(--color-text-dark);
   margin: 0;
   padding: 0;
@@ -511,4 +587,150 @@
     border-bottom: 1px solid var(--color-line);
     max-height: 200px;
   }
+}
+
+/* =============================================================================
+   INLINE ATTRIBUTES (within tree nodes)
+   ============================================================================= */
+
+.inline-attrs {
+  margin-left: 16px;
+  margin-top: 2px;
+  padding: 4px 6px;
+  background-color: white;
+  border: 1px solid var(--color-line);
+  border-left: 2px solid var(--color-teal);
+}
+
+.inline-attrs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.inline-attr {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-tiny);
+  padding: 2px 0;
+}
+
+.inline-attr-name {
+  font-weight: bold;
+  color: var(--color-teal);
+  min-width: 40px;
+}
+
+.inline-attr-arrow {
+  color: var(--color-line);
+  font-size: 10px;
+}
+
+.inline-attr-remove {
+  margin-left: auto;
+  padding: 0 2px;
+  border: none;
+  background: transparent;
+  color: var(--color-line);
+  cursor: pointer;
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.inline-attr:hover .inline-attr-remove {
+  opacity: 1;
+}
+
+.inline-attr-remove:hover {
+  color: var(--color-red-accent);
+}
+
+/* Choice buttons for attribute values */
+.choice-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.choice-btn {
+  padding: 1px 4px;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  border: 1px solid var(--color-line);
+  background-color: var(--color-beige-card);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.choice-btn:hover {
+  background-color: var(--color-beige-base);
+  border-color: var(--color-text-dark);
+}
+
+.choice-btn--active {
+  background-color: var(--color-teal);
+  border-color: var(--color-teal);
+  color: white;
+}
+
+/* Add attribute row */
+.inline-add-attr {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px dashed var(--color-line);
+}
+
+.add-attr-btn {
+  padding: 2px 6px;
+  font-size: var(--font-size-tiny);
+  font-family: var(--font-mono);
+  border: 1px dashed var(--color-line);
+  background-color: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.add-attr-btn:hover {
+  background-color: var(--color-beige-light);
+  border-style: solid;
+}
+
+/* =============================================================================
+   SANKEY WATERMARK
+   ============================================================================= */
+
+.sankey-watermark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sankey-watermark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Make viz area position:relative for watermark positioning */
+.tree-builder-viz {
+  position: relative;
+}
+
+/* Ensure viz container is above the watermark */
+.viz-container {
+  position: relative;
+  z-index: 1;
 }

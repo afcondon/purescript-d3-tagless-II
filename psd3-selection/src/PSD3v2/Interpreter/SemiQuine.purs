@@ -126,15 +126,19 @@ elementType = case _ of
   "path" -> "Path"
   t -> t
 
--- | Generate attributes array
+-- | Generate attributes array (with line breaks for readability)
 attrsArray :: Array AttributeBinding -> String
 attrsArray attrs =
-  "[ " <> String.joinWith ", " (map attrCode attrs) <> " ]"
+  if Array.length attrs <= 2
+    then "[ " <> String.joinWith ", " (map attrCode attrs) <> " ]"
+    else "[ " <> String.joinWith "\n  , " (map attrCode attrs) <> "\n  ]"
 
--- | Generate template attributes (with datum accessors)
+-- | Generate template attributes (with datum accessors, line breaks)
 templateAttrsArray :: Array AttributeBinding -> String
 templateAttrsArray attrs =
-  "[ " <> String.joinWith ", " (map templateAttrCode attrs) <> " ]"
+  if Array.length attrs <= 2
+    then "[ " <> String.joinWith ", " (map templateAttrCode attrs) <> " ]"
+    else "[ " <> String.joinWith "\n    , " (map templateAttrCode attrs) <> "\n    ]"
 
 -- | Generate a single attribute using v3Attr syntax
 attrCode :: AttributeBinding -> String

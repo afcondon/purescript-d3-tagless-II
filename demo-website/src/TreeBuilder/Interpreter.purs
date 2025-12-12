@@ -87,6 +87,12 @@ getFieldValue :: String -> SampleDatum -> String
 getFieldValue field datum = case field of
   "x" -> show datum.x
   "y" -> show datum.y
+  "cx" -> show datum.cx
+  "cy" -> show datum.cy
+  "rx" -> show datum.rx
+  "ry" -> show datum.ry
+  "sx" -> show datum.sx
+  "sy" -> show datum.sy
   "radius" -> show datum.radius
   "width" -> show datum.width
   "height" -> show datum.height
@@ -102,6 +108,12 @@ defaultDatum :: SampleDatum
 defaultDatum =
   { x: 0.0
   , y: 0.0
+  , cx: 25.0
+  , cy: 21.0
+  , rx: 0.0
+  , ry: 0.0
+  , sx: 0.0
+  , sy: 0.0
   , radius: 10.0
   , width: 50.0
   , height: 30.0
@@ -113,26 +125,52 @@ defaultDatum =
   }
 
 -- | Evaluate a simple expression like "d.x + 40.0"
--- | Supports: d.field, d.field + N, d.field - N, d.field * N
+-- | Supports: d.field, d.field + N, d.field - N, d.field * N, d.field / N
+-- | Also: d.field1 + d.field2, d.field1 * d.field2
 evalSimpleExpr :: String -> SampleDatum -> String
 evalSimpleExpr expr datum =
-  -- Handle "d.field + N" pattern
-  case parseAddExpr expr of
-    Just { field, offset } ->
-      let fieldVal = getNumericField field datum
-      in show (fieldVal + offset)
+  -- Handle "d.field1 + d.field2" pattern (field + field)
+  case parseFieldAddField expr of
+    Just { field1, field2 } ->
+      show (getNumericField field1 datum + getNumericField field2 datum)
     Nothing ->
-      -- Handle "d.field - N" pattern
-      case parseSubExpr expr of
+      -- Handle "d.field + N" pattern
+      case parseAddExpr expr of
         Just { field, offset } ->
-          let fieldVal = getNumericField field datum
-          in show (fieldVal - offset)
+          show (getNumericField field datum + offset)
         Nothing ->
-          -- Just a field reference
-          case parseFieldRef expr of
-            Just field -> getFieldValue field datum
-            Nothing -> expr
+          -- Handle "d.field - N" pattern
+          case parseSubExpr expr of
+            Just { field, offset } ->
+              show (getNumericField field datum - offset)
+            Nothing ->
+              -- Handle "d.field * N" or "d.field1 * d.field2"
+              case parseMulExpr expr of
+                Just result -> show result
+                Nothing ->
+                  -- Handle "d.field / N"
+                  case parseDivExpr expr of
+                    Just { field, divisor } ->
+                      show (getNumericField field datum / divisor)
+                    Nothing ->
+                      -- Just a field reference
+                      case parseFieldRef expr of
+                        Just field -> getFieldValue field datum
+                        Nothing -> expr
   where
+  -- Parse "d.field1 + d.field2"
+  parseFieldAddField :: String -> Maybe { field1 :: String, field2 :: String }
+  parseFieldAddField s =
+    let parts = String.split (String.Pattern " + ") s
+    in case Array.length parts of
+      2 -> do
+        part1 <- Array.head parts
+        part2 <- Array.last parts
+        field1 <- String.stripPrefix (String.Pattern "d.") part1
+        field2 <- String.stripPrefix (String.Pattern "d.") part2
+        Just { field1, field2 }
+      _ -> Nothing
+
   -- Parse "d.field + N"
   parseAddExpr :: String -> Maybe { field :: String, offset :: Number }
   parseAddExpr s =
@@ -159,6 +197,37 @@ evalSimpleExpr expr datum =
         Just { field, offset }
       _ -> Nothing
 
+  -- Parse "d.field * N" or "d.field1 * d.field2"
+  parseMulExpr :: String -> Maybe Number
+  parseMulExpr s =
+    let parts = String.split (String.Pattern " * ") s
+    in case Array.length parts of
+      2 -> do
+        part1 <- Array.head parts
+        part2 <- Array.last parts
+        field1 <- String.stripPrefix (String.Pattern "d.") part1
+        -- Try as field * number first
+        case Number.fromString part2 of
+          Just n -> Just (getNumericField field1 datum * n)
+          Nothing -> do
+            -- Try as field * field
+            field2 <- String.stripPrefix (String.Pattern "d.") part2
+            Just (getNumericField field1 datum * getNumericField field2 datum)
+      _ -> Nothing
+
+  -- Parse "d.field / N"
+  parseDivExpr :: String -> Maybe { field :: String, divisor :: Number }
+  parseDivExpr s =
+    let parts = String.split (String.Pattern " / ") s
+    in case Array.length parts of
+      2 -> do
+        fieldPart <- Array.head parts
+        divisorPart <- Array.last parts
+        field <- String.stripPrefix (String.Pattern "d.") fieldPart
+        divisor <- Number.fromString divisorPart
+        Just { field, divisor }
+      _ -> Nothing
+
   -- Parse "d.field"
   parseFieldRef :: String -> Maybe String
   parseFieldRef s = String.stripPrefix (String.Pattern "d.") s
@@ -168,6 +237,12 @@ getNumericField :: String -> SampleDatum -> Number
 getNumericField field datum = case field of
   "x" -> datum.x
   "y" -> datum.y
+  "cx" -> datum.cx
+  "cy" -> datum.cy
+  "rx" -> datum.rx
+  "ry" -> datum.ry
+  "sx" -> datum.sx
+  "sy" -> datum.sy
   "radius" -> datum.radius
   "width" -> datum.width
   "height" -> datum.height
