@@ -14,6 +14,7 @@ import Effect.Aff (Milliseconds(..), delay)
 import PSD3.Shared.DataLoader (simpleLoadText)
 import D3.Viz.TreeAPI.SankeyDiagram as SankeyDiagram
 import D3.Viz.TreeAPI.ChordDiagram as ChordDiagram
+import D3.Viz.TreeAPI.StateMachineDiagram as StateMachineDiagram
 
 -- | Tour page state
 type State = Unit
@@ -44,6 +45,9 @@ handleAction = case _ of
 
     -- Render Chord diagram (Baton Rouge traffic data)
     liftEffect $ ChordDiagram.startChord "#chord-container"
+
+    -- Render State Machine diagram
+    liftEffect $ StateMachineDiagram.startStateMachine "#statemachine-container"
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render _ =
@@ -110,6 +114,37 @@ render _ =
                 []
             , HH.p_
                 [ HH.text "The width of each flow represents the quantity of energy. Notice how the diagram reveals energy losses in transformation processes and highlights which sources contribute most to final consumption." ]
+            ]
+
+        -- Section 3: State Machine Diagram
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ]
+            , HP.id "statemachine"
+            ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "3. State Machine: Type-Safe Transitions" ]
+            , HH.p_
+                [ HH.text "State machine diagrams visualize the valid states and transitions in a system. This example shows the phantom type state machine that underlies PSD3's Selection API - demonstrating how the library ensures type-safe D3 operations at compile time." ]
+            , HH.p_
+                [ HH.text "Each state represents a configuration of phantom type parameters. Transitions are the API operations that move between states. The type system prevents invalid transitions - you can't call "
+                , HH.code_ [ HH.text "enter" ]
+                , HH.text " before "
+                , HH.code_ [ HH.text "bindData" ]
+                , HH.text ", because the phantom types won't unify."
+                ]
+            , HH.div
+                [ HP.id "statemachine-container"
+                , HP.classes [ HH.ClassName "viz-container" ]
+                ]
+                []
+            , HH.p_
+                [ HH.text "This state machine layout is computed purely in PureScript using the new "
+                , HH.code_ [ HH.text "DataViz.Layout.StateMachine" ]
+                , HH.text " module. States are arranged in a circular layout with curved arrow paths for transitions. Self-loops (like "
+                , HH.code_ [ HH.text "attr" ]
+                , HH.text " on the Entered state) use bezier curves."
+                ]
             ]
         ]
     ]

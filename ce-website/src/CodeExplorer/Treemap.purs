@@ -29,11 +29,13 @@ import Foreign.Object as Object
 import DataViz.Layout.Hierarchy.Core as H
 import DataViz.Layout.Hierarchy.Treemap (TreemapNode(..), TreemapConfig, treemap, squarify, defaultTreemapConfig)
 import PSD3.Scale (interpolateTurbo)
-import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M)
-import PSD3v2.Capabilities.Selection (select, appendChild, appendData)
-import PSD3v2.Selection.Types (ElementType(..), SBoundOwns)
-import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M, D3v2Selection_, reselectD3v2)
+import PSD3v2.Capabilities.Selection (select, renderTree)
+import PSD3v2.Selection.Types (ElementType(..), SEmpty)
+import PSD3v2.VizTree.Tree as T
+import PSD3v3.Integration (v3Attr, v3AttrStr)
 import PSD3v3.Expr (lit, str)
+import Effect.Class (liftEffect)
 import Types (SimNode, NodeType(..))
 import CodeExplorer.ViewBox as ViewBox
 import Web.DOM.Element (Element)
@@ -226,64 +228,87 @@ renderTreemap nodes = do
   _ <- runD3v2M $ renderTreemapSVG packageNodes moduleNodes
   log "[Treemap] Render complete"
 
--- | Render the treemap using D3
+-- | Render the treemap using TreeAPI
 renderTreemapSVG :: Array TreemapLeaf -> Array TreemapLeaf -> D3v2M Unit
 renderTreemapSVG packageNodes moduleNodes = do
-  nodesGroup <- select "#explorer-nodes"
+  nodesGroup <- select "#explorer-nodes" :: _ (D3v2Selection_ SEmpty Element Unit)
 
-  -- Create treemap container group with transform to center in viewBox
-  -- ViewBox is centered at origin, so translate by (-width/2, -height/2)
+  -- Create treemap container structure
   let
     translateX = (-ViewBox.viewBoxWidth) / 2.0
     translateY = (-ViewBox.viewBoxHeight) / 2.0
-  treemapGroup <- appendChild Group
-    [ v3AttrStr "id" (str "treemap-group")
-    , v3AttrStr "transform" (str ("translate(" <> show translateX <> "," <> show translateY <> ")"))
-    ]
-    nodesGroup
+
+    structureTree :: T.Tree Unit
+    structureTree =
+      T.named Group "treemap-group"
+        [ v3AttrStr "id" (str "treemap-group")
+        , v3AttrStr "transform" (str ("translate(" <> show translateX <> "," <> show translateY <> ")"))
+        ]
+        `T.withChildren`
+          [ T.named Group "treemap-packages" []
+          , T.named Group "treemap-modules" []
+          , T.named Group "treemap-labels" []
+          ]
+
+  -- Render structure
+  selections <- renderTree nodesGroup structureTree
+
+  -- Reselect groups
+  packagesGroup <- liftEffect $ reselectD3v2 "treemap-packages" selections
+  modulesGroup <- liftEffect $ reselectD3v2 "treemap-modules" selections
+  labelsGroup <- liftEffect $ reselectD3v2 "treemap-labels" selections
 
   -- Render package backgrounds (depth 1) - Blueprint style: white lines, no fill
-  _ <- appendData Rect packageNodes
-    [ v3AttrFn "x" (_.x0 :: TreemapLeaf -> Number)
-    , v3AttrFn "y" (_.y0 :: TreemapLeaf -> Number)
-    , v3AttrFn "width" ((\n -> n.x1 - n.x0) :: TreemapLeaf -> Number)
-    , v3AttrFn "height" ((\n -> n.y1 - n.y0) :: TreemapLeaf -> Number)
-    , v3AttrStr "fill" (str "none") -- Blueprint: transparent
-    , v3AttrStr "stroke" (str "rgba(255, 255, 255, 0.6)") -- White stroke
-    , v3Attr "stroke-width" (lit 1.5)
-    , v3Attr "opacity" (lit 1.0)
-    , v3AttrStr "class" (str "treemap-package")
-    ]
-    treemapGroup
+  let packagesTree :: T.Tree TreemapLeaf
+      packagesTree =
+        T.joinData "package-rects" "rect" packageNodes $ \n ->
+          T.elem Rect
+            [ v3Attr "x" (lit n.x0)
+            , v3Attr "y" (lit n.y0)
+            , v3Attr "width" (lit (n.x1 - n.x0))
+            , v3Attr "height" (lit (n.y1 - n.y0))
+            , v3AttrStr "fill" (str "none")
+            , v3AttrStr "stroke" (str "rgba(255, 255, 255, 0.6)")
+            , v3Attr "stroke-width" (lit 1.5)
+            , v3Attr "opacity" (lit 1.0)
+            , v3AttrStr "class" (str "treemap-package")
+            ]
+  _ <- renderTree packagesGroup packagesTree
 
   -- Render module rectangles (depth 2) - Blueprint style: white lines, no fill
-  _ <- appendData Rect moduleNodes
-    [ v3AttrFn "x" (_.x0 :: TreemapLeaf -> Number)
-    , v3AttrFn "y" (_.y0 :: TreemapLeaf -> Number)
-    , v3AttrFn "width" ((\n -> n.x1 - n.x0) :: TreemapLeaf -> Number)
-    , v3AttrFn "height" ((\n -> n.y1 - n.y0) :: TreemapLeaf -> Number)
-    , v3AttrStr "fill" (str "none") -- Blueprint: transparent
-    , v3AttrStr "stroke" (str "rgba(255, 255, 255, 0.4)") -- White stroke, lighter than packages
-    , v3Attr "stroke-width" (lit 0.5)
-    , v3AttrStr "class" (str "treemap-module")
-    ]
-    treemapGroup
+  let modulesTree :: T.Tree TreemapLeaf
+      modulesTree =
+        T.joinData "module-rects" "rect" moduleNodes $ \n ->
+          T.elem Rect
+            [ v3Attr "x" (lit n.x0)
+            , v3Attr "y" (lit n.y0)
+            , v3Attr "width" (lit (n.x1 - n.x0))
+            , v3Attr "height" (lit (n.y1 - n.y0))
+            , v3AttrStr "fill" (str "none")
+            , v3AttrStr "stroke" (str "rgba(255, 255, 255, 0.4)")
+            , v3Attr "stroke-width" (lit 0.5)
+            , v3AttrStr "class" (str "treemap-module")
+            ]
+  _ <- renderTree modulesGroup modulesTree
 
   -- Render package labels - Blueprint style: white text
-  log $ "[Treemap] Rendering labels for " <> show (Array.length packageNodes) <> " packages"
-  _ <- appendData Text packageNodes
-    [ v3AttrFn "x" ((\n -> (n.x0 + n.x1) / 2.0) :: TreemapLeaf -> Number)
-    , v3AttrFn "y" ((\n -> n.y0 + 14.0) :: TreemapLeaf -> Number) -- Near top
-    , v3AttrStr "text-anchor" (str "middle")
-    , v3AttrStr "fill" (str "rgba(255, 255, 255, 0.7)") -- White text
-    , v3AttrStr "font-family" (str "Monaco, 'Courier New', monospace")
-    , v3Attr "font-size" (lit 10.0)
-    , v3Attr "opacity" (lit 1.0)
-    , v3AttrStr "class" (str "treemap-package-label")
-    , v3AttrFnStr "textContent" (_.name :: TreemapLeaf -> String)
-    ]
-    treemapGroup
-  log "[Treemap] Labels rendered"
+  liftEffect $ log $ "[Treemap] Rendering labels for " <> show (Array.length packageNodes) <> " packages"
+  let labelsTree :: T.Tree TreemapLeaf
+      labelsTree =
+        T.joinData "package-labels" "text" packageNodes $ \n ->
+          T.elem Text
+            [ v3Attr "x" (lit ((n.x0 + n.x1) / 2.0))
+            , v3Attr "y" (lit (n.y0 + 14.0))
+            , v3AttrStr "text-anchor" (str "middle")
+            , v3AttrStr "fill" (str "rgba(255, 255, 255, 0.7)")
+            , v3AttrStr "font-family" (str "Monaco, 'Courier New', monospace")
+            , v3Attr "font-size" (lit 10.0)
+            , v3Attr "opacity" (lit 1.0)
+            , v3AttrStr "class" (str "treemap-package-label")
+            , v3AttrStr "textContent" (str n.name)
+            ]
+  _ <- renderTree labelsGroup labelsTree
+  liftEffect $ log "[Treemap] Labels rendered"
 
   pure unit
 
@@ -413,52 +438,70 @@ renderWatermark nodes = do
 
   log "[Treemap] Watermark render complete"
 
--- | Render the watermark using D3
+-- | Render the watermark using TreeAPI
 renderWatermarkSVG :: Array TreemapLeaf -> D3v2M Unit
 renderWatermarkSVG packageNodes = do
   -- Select existing watermark group (created during SVG setup)
-  watermarkGroup <- select "#treemap-watermark"
+  watermarkGroup <- select "#treemap-watermark" :: _ (D3v2Selection_ SEmpty Element Unit)
 
-  -- Add transform to center in viewBox
+  -- Create structure
   let
     translateX = (-ViewBox.viewBoxWidth) / 2.0
     translateY = (-ViewBox.viewBoxHeight) / 2.0
-  -- Create inner group with transform (since we can't set attrs on selection directly)
-  innerGroup <- appendChild Group
-    [ v3AttrStr "transform" (str ("translate(" <> show translateX <> "," <> show translateY <> ")"))
-    , v3AttrStr "id" (str "watermark-inner")
-    ]
-    watermarkGroup
+
+    structureTree :: T.Tree Unit
+    structureTree =
+      T.named Group "watermark-inner"
+        [ v3AttrStr "transform" (str ("translate(" <> show translateX <> "," <> show translateY <> ")"))
+        , v3AttrStr "id" (str "watermark-inner")
+        ]
+        `T.withChildren`
+          [ T.named Group "watermark-rects" []
+          , T.named Group "watermark-labels" []
+          ]
+
+  -- Render structure
+  selections <- renderTree watermarkGroup structureTree
+
+  -- Reselect groups
+  rectsGroup <- liftEffect $ reselectD3v2 "watermark-rects" selections
+  labelsGroup <- liftEffect $ reselectD3v2 "watermark-labels" selections
 
   -- Render package rectangles - Blueprint watermark: very faded white lines
-  _ <- appendData Rect packageNodes
-    [ v3AttrFn "x" (_.x0 :: TreemapLeaf -> Number)
-    , v3AttrFn "y" (_.y0 :: TreemapLeaf -> Number)
-    , v3AttrFn "width" ((\n -> n.x1 - n.x0) :: TreemapLeaf -> Number)
-    , v3AttrFn "height" ((\n -> n.y1 - n.y0) :: TreemapLeaf -> Number)
-    , v3AttrStr "fill" (str "rgba(255, 255, 255, 0)") -- Invisible but hoverable
-    , v3AttrStr "stroke" (str "rgba(255, 255, 255, 0.15)") -- Very faded white for watermark
-    , v3Attr "stroke-width" (lit 1.0)
-    , v3Attr "opacity" (lit 1.0)
-    , v3AttrStr "class" (str "watermark-package")
-    ]
-    innerGroup
+  let rectsTree :: T.Tree TreemapLeaf
+      rectsTree =
+        T.joinData "watermark-package-rects" "rect" packageNodes $ \n ->
+          T.elem Rect
+            [ v3Attr "x" (lit n.x0)
+            , v3Attr "y" (lit n.y0)
+            , v3Attr "width" (lit (n.x1 - n.x0))
+            , v3Attr "height" (lit (n.y1 - n.y0))
+            , v3AttrStr "fill" (str "rgba(255, 255, 255, 0)")
+            , v3AttrStr "stroke" (str "rgba(255, 255, 255, 0.15)")
+            , v3Attr "stroke-width" (lit 1.0)
+            , v3Attr "opacity" (lit 1.0)
+            , v3AttrStr "class" (str "watermark-package")
+            ]
+  _ <- renderTree rectsGroup rectsTree
 
   -- Render package labels - Blueprint watermark: very faded white text
-  log $ "[Treemap] Rendering watermark labels for " <> show (Array.length packageNodes) <> " packages"
-  _ <- appendData Text packageNodes
-    [ v3AttrFn "x" ((\n -> (n.x0 + n.x1) / 2.0) :: TreemapLeaf -> Number)
-    , v3AttrFn "y" ((\n -> n.y0 + 14.0) :: TreemapLeaf -> Number) -- Near top
-    , v3AttrStr "text-anchor" (str "middle")
-    , v3AttrStr "fill" (str "rgba(255, 255, 255, 0.2)") -- Very faded white text for watermark
-    , v3AttrStr "font-family" (str "Monaco, 'Courier New', monospace")
-    , v3Attr "font-size" (lit 10.0)
-    , v3Attr "opacity" (lit 1.0)
-    , v3AttrStr "class" (str "watermark-package-label")
-    , v3AttrFnStr "textContent" (_.name :: TreemapLeaf -> String)
-    ]
-    innerGroup
-  log "[Treemap] Watermark labels rendered"
+  liftEffect $ log $ "[Treemap] Rendering watermark labels for " <> show (Array.length packageNodes) <> " packages"
+  let labelsTree :: T.Tree TreemapLeaf
+      labelsTree =
+        T.joinData "watermark-package-labels" "text" packageNodes $ \n ->
+          T.elem Text
+            [ v3Attr "x" (lit ((n.x0 + n.x1) / 2.0))
+            , v3Attr "y" (lit (n.y0 + 14.0))
+            , v3AttrStr "text-anchor" (str "middle")
+            , v3AttrStr "fill" (str "rgba(255, 255, 255, 0.2)")
+            , v3AttrStr "font-family" (str "Monaco, 'Courier New', monospace")
+            , v3Attr "font-size" (lit 10.0)
+            , v3Attr "opacity" (lit 1.0)
+            , v3AttrStr "class" (str "watermark-package-label")
+            , v3AttrStr "textContent" (str n.name)
+            ]
+  _ <- renderTree labelsGroup labelsTree
+  liftEffect $ log "[Treemap] Watermark labels rendered"
 
   pure unit
 

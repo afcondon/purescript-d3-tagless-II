@@ -68,6 +68,7 @@ data LinkType
   | M2P            -- Module to package (containment)
 
 derive instance eqLinkType :: Eq LinkType
+derive instance ordLinkType :: Ord LinkType
 
 instance showLinkType :: Show LinkType where
   show M2M_Tree = "M2M-Tree"

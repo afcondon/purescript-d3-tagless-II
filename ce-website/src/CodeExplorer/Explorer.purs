@@ -64,13 +64,14 @@ import PSD3.ForceEngine.Simulation as Sim
 import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
 import PSD3v3.Expr (lit, str)
 import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom, onMouseEnter, onMouseLeave, onClickWithDatum)
-import PSD3v2.Capabilities.Selection (select, selectAll, appendChild, appendData, on)
+import PSD3v2.Capabilities.Selection (select, selectAll, on, renderTree)
+import PSD3v2.VizTree.Tree as T
 import PSD3v2.Interpreter.D3v2 (getElementsD3v2) as D3v2
 import PSD3v2.Classify (classifyElements, clearClasses)
 import Data.Set as Set
 import PSD3v2.Tooltip (onTooltip)
-import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M, D3v2Selection_)
-import PSD3v2.Selection.Types (ElementType(..), SBoundOwns)
+import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M, D3v2Selection_, reselectD3v2)
+import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, SEmpty)
 import Types (SimNode, SimLink, NodeType(..), LinkType, isTreeLink)
 import CodeExplorer.ViewBox as ViewBox
 import Viz.CodeExplorer.TreeLinks (verticalLinkPath)
@@ -81,6 +82,7 @@ import Web.DOM.ParentNode (querySelector, QuerySelector(..))
 import Web.HTML (window)
 import Web.HTML.Window (document)
 import Web.HTML.HTMLDocument (toParentNode)
+import Unsafe.Coerce (unsafeCoerce)
 
 -- =============================================================================
 -- Scene ID (Type-Safe Scene Selection)
@@ -820,69 +822,88 @@ formatNodeTooltip node =
 
 renderSVG :: ViewState -> String -> Array SimNode -> D3v2M { nodeSel :: D3v2Selection_ SBoundOwns Element SimNode }
 renderSVG currentView containerSelector nodes = do
-  container <- select containerSelector
+  container <- select containerSelector :: _ (D3v2Selection_ SEmpty Element Unit)
 
-  svg <- appendChild SVG
-    [ v3AttrStr "viewBox" (str (show ((-ViewBox.viewBoxWidth) / 2.0) <> " " <> show ((-ViewBox.viewBoxHeight) / 2.0) <> " " <> show ViewBox.viewBoxWidth <> " " <> show ViewBox.viewBoxHeight))
-    , v3AttrStr "id" (str "explorer-svg")
-    , v3AttrStr "class" (str "ce-viz")
-    ]
-    container
+  -- Build the structure tree
+  let structureTree :: T.Tree Unit
+      structureTree =
+        T.named SVG "explorer-svg"
+          [ v3AttrStr "viewBox" (str (show ((-ViewBox.viewBoxWidth) / 2.0) <> " " <> show ((-ViewBox.viewBoxHeight) / 2.0) <> " " <> show ViewBox.viewBoxWidth <> " " <> show ViewBox.viewBoxHeight))
+          , v3AttrStr "id" (str "explorer-svg")
+          , v3AttrStr "class" (str "ce-viz")
+          ]
+          `T.withChildren`
+            [ T.named Group "explorer-zoom-group"
+                [ v3AttrStr "id" (str "explorer-zoom-group") ]
+                `T.withChildren`
+                  [ T.named Group "treemap-watermark" [ v3AttrStr "id" (str "treemap-watermark"), v3AttrStr "class" (str "watermark") ]
+                  , T.named Group "explorer-links" [ v3AttrStr "id" (str "explorer-links") ]
+                  , T.named Group "explorer-nodes" [ v3AttrStr "id" (str "explorer-nodes") ]
+                  ]
+            ]
 
-  zoomGroup <- appendChild Group [ v3AttrStr "id" (str "explorer-zoom-group") ] svg
-  _ <- appendChild Group [ v3AttrStr "id" (str "treemap-watermark"), v3AttrStr "class" (str "watermark") ] zoomGroup -- Watermark first (behind)
-  _ <- appendChild Group [ v3AttrStr "id" (str "explorer-links") ] zoomGroup
-  nodesGroup <- appendChild Group [ v3AttrStr "id" (str "explorer-nodes") ] zoomGroup
+  -- Render the structure
+  selections <- renderTree container structureTree
 
-  -- ViewState now passed as parameter (no global ref read)
+  -- Reselect groups for data binding and behaviors
+  svg <- liftEffect $ reselectD3v2 "explorer-svg" selections
+  nodesGroup <- liftEffect $ reselectD3v2 "explorer-nodes" selections
 
-  nodeSel <- appendData Circle nodes
-    [ v3AttrFn "cx" (_.x :: SimNode -> Number)
-    , v3AttrFn "cy" (_.y :: SimNode -> Number)
-    , v3AttrFn "r" (_.r :: SimNode -> Number)
-    , v3AttrFnStr "fill" (ColorPalette.getNodeFill currentView :: SimNode -> String)
-    , v3AttrFnStr "stroke" (ColorPalette.getNodeStroke currentView :: SimNode -> String)
-    , v3Attr "stroke-width" (lit 1.0) -- Slightly thicker stroke for visibility
-    , v3AttrFnStr "class" (nodeClass :: SimNode -> String) -- CSS class for type-based styling/transitions
-    ]
-    nodesGroup
+  -- Render nodes with data binding
+  let nodesTree :: T.Tree SimNode
+      nodesTree =
+        T.joinData "nodes-data" "circle" nodes $ \node ->
+          T.elem Circle
+            [ v3Attr "cx" (lit node.x)
+            , v3Attr "cy" (lit node.y)
+            , v3Attr "r" (lit node.r)
+            , v3AttrStr "fill" (str (ColorPalette.getNodeFill currentView node))
+            , v3AttrStr "stroke" (str (ColorPalette.getNodeStroke currentView node))
+            , v3Attr "stroke-width" (lit 1.0) -- Slightly thicker stroke for visibility
+            , v3AttrStr "class" (str (nodeClass node)) -- CSS class for type-based styling/transitions
+            ]
 
-  -- Add zoom behavior
-  _ <- on (Zoom $ defaultZoom (ScaleExtent 0.1 10.0) "#explorer-zoom-group") svg
+  nodeSelections <- renderTree nodesGroup nodesTree
+  -- Get the nodes selection from the map (already has data bound as SBoundOwns)
+  case Map.lookup "nodes-data" nodeSelections of
+    Nothing -> pure { nodeSel: unsafeCoerce unit } -- Should never happen
+    Just nodeSel -> do
+      -- Add zoom behavior
+      _ <- on (Zoom $ defaultZoom (ScaleExtent 0.1 10.0) "#explorer-zoom-group") svg
 
-  -- Add highlight on hover (mouse enter highlights connected nodes)
-  let highlightClasses = [ "highlighted-source", "highlighted-upstream", "highlighted-downstream", "dimmed" ]
-  _ <- on
-    ( onMouseEnter \node -> do
-        -- Clear previous highlight classes first
-        clearClasses "#explorer-nodes" "circle" highlightClasses
-        -- Then apply new classification
-        let targetSet = Set.fromFoldable node.targets
-        let sourceSet = Set.fromFoldable node.sources
-        classifyElements "#explorer-nodes" "circle" \n ->
-          if n.id == node.id then "highlighted-source"
-          else if Set.member n.id targetSet then "highlighted-upstream"
-          else if Set.member n.id sourceSet then "highlighted-downstream"
-          else "dimmed"
-    )
-    nodeSel
+      -- Add highlight on hover (mouse enter highlights connected nodes)
+      let highlightClasses = [ "highlighted-source", "highlighted-upstream", "highlighted-downstream", "dimmed" ]
+      _ <- on
+        ( onMouseEnter \node -> do
+            -- Clear previous highlight classes first
+            clearClasses "#explorer-nodes" "circle" highlightClasses
+            -- Then apply new classification
+            let targetSet = Set.fromFoldable node.targets
+            let sourceSet = Set.fromFoldable node.sources
+            classifyElements "#explorer-nodes" "circle" \n ->
+              if n.id == node.id then "highlighted-source"
+              else if Set.member n.id targetSet then "highlighted-upstream"
+              else if Set.member n.id sourceSet then "highlighted-downstream"
+              else "dimmed"
+        )
+        nodeSel
 
-  -- Add combined mouse leave handler (clear highlight AND hide tooltip)
-  -- Note: D3 replaces event handlers, so we must combine both actions into one handler
-  _ <- on
-    ( onMouseLeave \_ -> do
-        clearClasses "#explorer-nodes" "circle" highlightClasses
-        Tooltip.hideTooltip
-    )
-    nodeSel
+      -- Add combined mouse leave handler (clear highlight AND hide tooltip)
+      -- Note: D3 replaces event handlers, so we must combine both actions into one handler
+      _ <- on
+        ( onMouseLeave \_ -> do
+            clearClasses "#explorer-nodes" "circle" highlightClasses
+            Tooltip.hideTooltip
+        )
+        nodeSel
 
-  -- Add tooltip on hover
-  _ <- on (onTooltip formatNodeTooltip) nodeSel
+      -- Add tooltip on hover
+      _ <- on (onTooltip formatNodeTooltip) nodeSel
 
-  -- Add click to focus on neighborhood
-  _ <- on (onClickWithDatum toggleFocus) nodeSel
+      -- Add click to focus on neighborhood
+      _ <- on (onClickWithDatum toggleFocus) nodeSel
 
-  pure { nodeSel }
+      pure { nodeSel }
 
 -- | Update node colors based on current ViewState
 -- | This should be called whenever transitioning between views
@@ -988,23 +1009,32 @@ renderTreeLinks nodes = do
 -- | Render tree links using D3 selection
 renderTreeLinksD3 :: Map.Map Int SimNode -> Array SimLink -> D3v2M Unit
 renderTreeLinksD3 nodeMap links = do
-  linksGroup <- select "#explorer-links"
+  linksGroup <- select "#explorer-links" :: _ (D3v2Selection_ SEmpty Element Unit)
 
   -- Log connectivity statistics for debugging
   let scores = Array.mapMaybe (computeLinkScore nodeMap) links
   liftEffect $ logConnectivityStats "Tree links" scores
 
-  -- Append path elements for each tree link with dynamic attributes
-  _ <- appendData Path links
-    [ v3AttrFnStr "d" (linkPathFn nodeMap)
-    , v3AttrStr "fill" (str "none")
-    , v3AttrFnStr "stroke" (linkStrokeFn nodeMap)
-    , v3AttrFn "stroke-width" (linkWidthFn nodeMap)
-    , v3AttrFn "opacity" (linkOpacityFn nodeMap)
-    , v3AttrStr "class" (str "tree-link")
-    ]
-    linksGroup
+  -- Build tree of path elements for each tree link with dynamic attributes
+  let linksTree :: T.Tree SimLink
+      linksTree =
+        T.joinData "tree-links-data" "path" links $ \link ->
+          let
+            d = linkPathFn nodeMap link
+            strokeColor = linkStrokeFn nodeMap link
+            strokeW = linkWidthFn nodeMap link
+            opac = linkOpacityFn nodeMap link
+          in
+            T.elem Path
+              [ v3AttrStr "d" (str d)
+              , v3AttrStr "fill" (str "none")
+              , v3AttrStr "stroke" (str strokeColor)
+              , v3Attr "stroke-width" (lit strokeW)
+              , v3Attr "opacity" (lit opac)
+              , v3AttrStr "class" (str "tree-link")
+              ]
 
+  _ <- renderTree linksGroup linksTree
   pure unit
   where
   computeLinkScore :: Map.Map Int SimNode -> SimLink -> Maybe Number
@@ -1085,58 +1115,28 @@ renderForceLinks nodes links = do
 -- | D3 rendering for force links
 renderForceLinksD3 :: Array SwizzledLink -> D3v2M Unit
 renderForceLinksD3 links = do
-  linksGroup <- select "#explorer-links"
+  linksGroup <- select "#explorer-links" :: _ (D3v2Selection_ SEmpty Element Unit)
 
-  -- Append line elements for each link with dynamic attributes
-  _ <- appendData Line links
-    [ v3AttrFn "x1" getSourceX
-    , v3AttrFn "y1" getSourceY
-    , v3AttrFn "x2" getTargetX
-    , v3AttrFn "y2" getTargetY
-    , v3AttrFnStr "stroke" forceStrokeFn
-    , v3AttrFn "stroke-width" forceWidthFn
-    , v3AttrFn "opacity" forceOpacityFn
-    , v3AttrStr "class" (str "force-link")
-    ]
-    linksGroup
+  -- Build tree of line elements for each link with dynamic attributes
+  let linksTree :: T.Tree SwizzledLink
+      linksTree =
+        T.joinData "force-links-data" "line" links $ \link ->
+          let
+            score = linkInterconnectivity link.source link.target
+          in
+            T.elem Line
+              [ v3Attr "x1" (lit link.source.x)
+              , v3Attr "y1" (lit link.source.y)
+              , v3Attr "x2" (lit link.target.x)
+              , v3Attr "y2" (lit link.target.y)
+              , v3AttrStr "stroke" (str (linkStrokeColor score))
+              , v3Attr "stroke-width" (lit (linkStrokeWidth score))
+              , v3Attr "opacity" (lit (linkOpacity score))
+              , v3AttrStr "class" (str "force-link")
+              ]
 
+  _ <- renderTree linksGroup linksTree
   pure unit
-  where
-  getSourceX :: SwizzledLink -> Number
-  getSourceX l = l.source.x
-
-  getSourceY :: SwizzledLink -> Number
-  getSourceY l = l.source.y
-
-  getTargetX :: SwizzledLink -> Number
-  getTargetX l = l.target.x
-
-  getTargetY :: SwizzledLink -> Number
-  getTargetY l = l.target.y
-
-  -- Compute stroke color based on interconnectivity
-  forceStrokeFn :: SwizzledLink -> String
-  forceStrokeFn link =
-    let
-      score = linkInterconnectivity link.source link.target
-    in
-      linkStrokeColor score
-
-  -- Compute stroke width based on interconnectivity
-  forceWidthFn :: SwizzledLink -> Number
-  forceWidthFn link =
-    let
-      score = linkInterconnectivity link.source link.target
-    in
-      linkStrokeWidth score
-
-  -- Compute opacity based on interconnectivity
-  forceOpacityFn :: SwizzledLink -> Number
-  forceOpacityFn link =
-    let
-      score = linkInterconnectivity link.source link.target
-    in
-      linkOpacity score
 
 -- =============================================================================
 -- CSS Scene Class Management
@@ -1635,23 +1635,26 @@ type StaticLink =
 -- | D3 rendering for static links
 renderStaticLinksD3 :: Map.Map Int SimNode -> Array SimLink -> D3v2M Unit
 renderStaticLinksD3 nodeMap links = do
-  linksGroup <- select "#explorer-links"
+  linksGroup <- select "#explorer-links" :: _ (D3v2Selection_ SEmpty Element Unit)
 
   -- Convert links to static coordinates
   let staticLinks = Array.mapMaybe (toStaticLink nodeMap) links
 
-  _ <- appendData Line staticLinks
-    [ v3AttrFn "x1" (_.x1 :: StaticLink -> Number)
-    , v3AttrFn "y1" (_.y1 :: StaticLink -> Number)
-    , v3AttrFn "x2" (_.x2 :: StaticLink -> Number)
-    , v3AttrFn "y2" (_.y2 :: StaticLink -> Number)
-    , v3AttrStr "stroke" (str "white")
-    , v3Attr "stroke-width" (lit 1.5)
-    , v3Attr "opacity" (lit 0.6)
-    , v3AttrStr "class" (str "neighborhood-link")
-    ]
-    linksGroup
+  let linksTree :: T.Tree StaticLink
+      linksTree =
+        T.joinData "static-links-data" "line" staticLinks $ \link ->
+          T.elem Line
+            [ v3Attr "x1" (lit link.x1)
+            , v3Attr "y1" (lit link.y1)
+            , v3Attr "x2" (lit link.x2)
+            , v3Attr "y2" (lit link.y2)
+            , v3AttrStr "stroke" (str "white")
+            , v3Attr "stroke-width" (lit 1.5)
+            , v3Attr "opacity" (lit 0.6)
+            , v3AttrStr "class" (str "neighborhood-link")
+            ]
 
+  _ <- renderTree linksGroup linksTree
   pure unit
 
 -- | Convert a SimLink to StaticLink using node positions
@@ -1664,114 +1667,61 @@ toStaticLink nodeMap link = do
 -- | D3 rendering for neighborhood links
 renderNeighborhoodLinksD3 :: Array NeighborhoodLink -> D3v2M Unit
 renderNeighborhoodLinksD3 links = do
-  linksGroup <- select "#explorer-links"
+  linksGroup <- select "#explorer-links" :: _ (D3v2Selection_ SEmpty Element Unit)
 
   -- Log connectivity statistics for debugging
   let scores = map (\link -> linkInterconnectivity link.source link.target) links
   liftEffect $ logConnectivityStats "Neighborhood links" scores
 
-  _ <- appendData Line links
-    [ v3AttrFn "x1" getSourceX
-    , v3AttrFn "y1" getSourceY
-    , v3AttrFn "x2" getTargetX
-    , v3AttrFn "y2" getTargetY
-    , v3AttrFnStr "stroke" neighborhoodStrokeFn
-    , v3AttrFn "stroke-width" neighborhoodWidthFn
-    , v3AttrFn "opacity" neighborhoodOpacityFn
-    , v3AttrStr "class" (str "neighborhood-link")
-    ]
-    linksGroup
+  let linksTree :: T.Tree NeighborhoodLink
+      linksTree =
+        T.joinData "neighborhood-links-data" "line" links $ \link ->
+          let
+            score = linkInterconnectivity link.source link.target
+          in
+            T.elem Line
+              [ v3Attr "x1" (lit link.source.x)
+              , v3Attr "y1" (lit link.source.y)
+              , v3Attr "x2" (lit link.target.x)
+              , v3Attr "y2" (lit link.target.y)
+              , v3AttrStr "stroke" (str (linkStrokeColor score))
+              , v3Attr "stroke-width" (lit (linkStrokeWidth score))
+              , v3Attr "opacity" (lit (linkOpacity score))
+              , v3AttrStr "class" (str "neighborhood-link")
+              ]
 
+  _ <- renderTree linksGroup linksTree
   pure unit
-  where
-  getSourceX :: NeighborhoodLink -> Number
-  getSourceX l = l.source.x
-
-  getSourceY :: NeighborhoodLink -> Number
-  getSourceY l = l.source.y
-
-  getTargetX :: NeighborhoodLink -> Number
-  getTargetX l = l.target.x
-
-  getTargetY :: NeighborhoodLink -> Number
-  getTargetY l = l.target.y
-
-  -- Compute stroke color based on interconnectivity
-  neighborhoodStrokeFn :: NeighborhoodLink -> String
-  neighborhoodStrokeFn link =
-    let
-      score = linkInterconnectivity link.source link.target
-    in
-      linkStrokeColor score
-
-  -- Compute stroke width based on interconnectivity
-  neighborhoodWidthFn :: NeighborhoodLink -> Number
-  neighborhoodWidthFn link =
-    let
-      score = linkInterconnectivity link.source link.target
-    in
-      linkStrokeWidth score
-
-  -- Compute opacity based on interconnectivity
-  neighborhoodOpacityFn :: NeighborhoodLink -> Number
-  neighborhoodOpacityFn link =
-    let
-      score = linkInterconnectivity link.source link.target
-    in
-      linkOpacity score
 
 -- | D3 rendering for directional links with bidirectional coloring
 -- | Green = outgoing (source imports target), Orange = incoming (the reverse link)
 renderDirectionalLinksD3 :: Array DirectionalLink -> D3v2M Unit
 renderDirectionalLinksD3 links = do
-  linksGroup <- select "#explorer-links"
+  linksGroup <- select "#explorer-links" :: _ (D3v2Selection_ SEmpty Element Unit)
 
   -- Each link is rendered with its directional color
   -- Green (#4ade80) for outgoing, matching the adjacency matrix
-  _ <- appendData Line links
-    [ v3AttrFn "x1" getSourceX
-    , v3AttrFn "y1" getSourceY
-    , v3AttrFn "x2" getTargetX
-    , v3AttrFn "y2" getTargetY
-    , v3AttrFnStr "stroke" directionalStrokeFn
-    , v3AttrFn "stroke-width" directionalWidthFn
-    , v3Attr "opacity" (lit 0.7)
-    , v3AttrFnStr "class" directionalClassFn
-    ]
-    linksGroup
+  let linksTree :: T.Tree DirectionalLink
+      linksTree =
+        T.joinData "directional-links-data" "line" links $ \link ->
+          let
+            score = linkInterconnectivity link.source link.target
+            strokeColor = if link.isOutgoing then "#4ade80" else "#f97316"
+            className = if link.isOutgoing then "neighborhood-link outgoing-link" else "neighborhood-link incoming-link"
+          in
+            T.elem Line
+              [ v3Attr "x1" (lit link.source.x)
+              , v3Attr "y1" (lit link.source.y)
+              , v3Attr "x2" (lit link.target.x)
+              , v3Attr "y2" (lit link.target.y)
+              , v3AttrStr "stroke" (str strokeColor)
+              , v3Attr "stroke-width" (lit (linkStrokeWidth score))
+              , v3Attr "opacity" (lit 0.7)
+              , v3AttrStr "class" (str className)
+              ]
 
+  _ <- renderTree linksGroup linksTree
   pure unit
-  where
-  getSourceX :: DirectionalLink -> Number
-  getSourceX l = l.source.x
-
-  getSourceY :: DirectionalLink -> Number
-  getSourceY l = l.source.y
-
-  getTargetX :: DirectionalLink -> Number
-  getTargetX l = l.target.x
-
-  getTargetY :: DirectionalLink -> Number
-  getTargetY l = l.target.y
-
-  -- Green for outgoing (imports), matching adjacency matrix
-  directionalStrokeFn :: DirectionalLink -> String
-  directionalStrokeFn l =
-    if l.isOutgoing then "#4ade80" -- Green for outgoing
-    else "#f97316" -- Orange for incoming
-
-  -- Width based on connectivity
-  directionalWidthFn :: DirectionalLink -> Number
-  directionalWidthFn l =
-    let
-      score = linkInterconnectivity l.source l.target
-    in
-      linkStrokeWidth score
-
-  directionalClassFn :: DirectionalLink -> String
-  directionalClassFn l =
-    if l.isOutgoing then "neighborhood-link outgoing-link"
-    else "neighborhood-link incoming-link"
 
 -- =============================================================================
 -- Navigation
@@ -1985,54 +1935,61 @@ clearNodesGroup = do
 -- | ViewState passed as parameter for color functions
 renderNodesOnly :: ViewState -> Array SimNode -> D3v2M Unit
 renderNodesOnly currentView nodes = do
-  nodesGroup <- select "#explorer-nodes"
+  nodesGroup <- select "#explorer-nodes" :: _ (D3v2Selection_ SEmpty Element Unit)
 
   -- ViewState now passed as parameter (no global ref read)
 
-  -- Capture the selection returned by appendData (don't discard it!)
-  nodeSel <- appendData Circle nodes
-    [ v3AttrFn "cx" (_.x :: SimNode -> Number)
-    , v3AttrFn "cy" (_.y :: SimNode -> Number)
-    , v3AttrFn "r" (_.r :: SimNode -> Number)
-    , v3AttrFnStr "fill" (ColorPalette.getNodeFill currentView :: SimNode -> String)
-    , v3AttrFnStr "stroke" (ColorPalette.getNodeStroke currentView :: SimNode -> String)
-    , v3Attr "stroke-width" (lit 1.0) -- Slightly thicker stroke for visibility
-    , v3AttrFnStr "class" nodeClass
-    ]
-    nodesGroup
+  -- Render nodes with data binding
+  let nodesTree :: T.Tree SimNode
+      nodesTree =
+        T.joinData "nodes-data" "circle" nodes $ \node ->
+          T.elem Circle
+            [ v3Attr "cx" (lit node.x)
+            , v3Attr "cy" (lit node.y)
+            , v3Attr "r" (lit node.r)
+            , v3AttrStr "fill" (str (ColorPalette.getNodeFill currentView node))
+            , v3AttrStr "stroke" (str (ColorPalette.getNodeStroke currentView node))
+            , v3Attr "stroke-width" (lit 1.0) -- Slightly thicker stroke for visibility
+            , v3AttrStr "class" (str (nodeClass node))
+            ]
 
-  log "[Explorer] Reattaching event handlers to circles"
+  nodeSelections <- renderTree nodesGroup nodesTree
+  -- Get the nodes selection from the map (already has data bound as SBoundOwns)
+  case Map.lookup "nodes-data" nodeSelections of
+    Nothing -> pure unit -- Should never happen
+    Just nodeSel -> do
+      log "[Explorer] Reattaching event handlers to circles"
 
-  -- Re-attach highlight behavior
-  let highlightClasses = [ "highlighted-source", "highlighted-upstream", "highlighted-downstream", "dimmed" ]
-  _ <- on
-    ( onMouseEnter \node -> do
-        clearClasses "#explorer-nodes" "circle" highlightClasses
-        let targetSet = Set.fromFoldable node.targets
-        let sourceSet = Set.fromFoldable node.sources
-        classifyElements "#explorer-nodes" "circle" \n ->
-          if n.id == node.id then "highlighted-source"
-          else if Set.member n.id targetSet then "highlighted-upstream"
-          else if Set.member n.id sourceSet then "highlighted-downstream"
-          else "dimmed"
-    )
-    nodeSel
+      -- Re-attach highlight behavior
+      let highlightClasses = [ "highlighted-source", "highlighted-upstream", "highlighted-downstream", "dimmed" ]
+      _ <- on
+        ( onMouseEnter \node -> do
+            clearClasses "#explorer-nodes" "circle" highlightClasses
+            let targetSet = Set.fromFoldable node.targets
+            let sourceSet = Set.fromFoldable node.sources
+            classifyElements "#explorer-nodes" "circle" \n ->
+              if n.id == node.id then "highlighted-source"
+              else if Set.member n.id targetSet then "highlighted-upstream"
+              else if Set.member n.id sourceSet then "highlighted-downstream"
+              else "dimmed"
+        )
+        nodeSel
 
-  -- Combined mouse leave handler (clear highlight AND hide tooltip)
-  _ <- on
-    ( onMouseLeave \_ -> do
-        clearClasses "#explorer-nodes" "circle" highlightClasses
-        Tooltip.hideTooltip
-    )
-    nodeSel
+      -- Combined mouse leave handler (clear highlight AND hide tooltip)
+      _ <- on
+        ( onMouseLeave \_ -> do
+            clearClasses "#explorer-nodes" "circle" highlightClasses
+            Tooltip.hideTooltip
+        )
+        nodeSel
 
-  -- Re-attach tooltip
-  _ <- on (onTooltip formatNodeTooltip) nodeSel
+      -- Re-attach tooltip
+      _ <- on (onTooltip formatNodeTooltip) nodeSel
 
-  -- Re-attach click handler
-  _ <- on (onClickWithDatum toggleFocus) nodeSel
+      -- Re-attach click handler
+      _ <- on (onClickWithDatum toggleFocus) nodeSel
 
-  pure unit
+      pure unit
 
 -- =============================================================================
 -- Declaration Click Handler

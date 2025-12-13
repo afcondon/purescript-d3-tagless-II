@@ -33,11 +33,14 @@ import Data.Tree (Tree, mkTree)
 import Effect (Effect)
 import PSD3.Data.DAGTree (DAGTree, DAGLink, dagTree, addLinks, layoutDAGTree)
 import PSD3.Data.Tree (TreeLayout(..))
-import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v3.Integration (v3Attr, v3AttrStr)
 import PSD3v3.Expr (lit, str)
-import PSD3v2.Capabilities.Selection (select, appendChild, appendData)
-import PSD3v2.Interpreter.D3v2 (runD3v2M)
-import PSD3v2.Selection.Types (ElementType(..))
+import PSD3v2.Capabilities.Selection (select, renderTree)
+import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, reselectD3v2)
+import PSD3v2.Selection.Types (ElementType(..), SEmpty)
+import PSD3v2.VizTree.Tree as T
+import Web.DOM.Element (Element)
+import Effect.Class (liftEffect)
 
 -- =============================================================================
 -- Types
@@ -239,68 +242,91 @@ renderGitHistory
   -> GitHistory
   -> Effect Unit
 renderGitHistory selector size history = void $ runD3v2M do
-  container <- select selector
+  container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
 
   -- Build and layout the DAG
   let
     dag = buildGitDAG history
     positioned = layoutDAGTree Vertical size dag
 
-  -- Create SVG
-  svg <- appendChild SVG
-    [ v3Attr "width" (lit size.width)
-    , v3Attr "height" (lit size.height)
-    , v3AttrStr "class" (str "git-history")
-    ]
-    container
+  -- Build the structure tree (empty groups to be filled later)
+  let structureTree :: T.Tree Unit
+      structureTree =
+        T.named SVG "svg"
+          [ v3Attr "width" (lit size.width)
+          , v3Attr "height" (lit size.height)
+          , v3AttrStr "class" (str "git-history")
+          ]
+          `T.withChildren`
+            [ T.named Group "tree-links" [ v3AttrStr "class" (str "tree-links") ]
+            , T.named Group "merge-links" [ v3AttrStr "class" (str "merge-links") ]
+            , T.named Group "commits" [ v3AttrStr "class" (str "commits") ]
+            , T.named Group "labels" [ v3AttrStr "class" (str "labels") ]
+            ]
 
-  -- Render tree links (parent -> child)
-  linksGroup <- appendChild Group [ v3AttrStr "class" (str "tree-links") ] svg
-  _ <- appendData Line positioned.treeLinks
-    [ v3AttrFn "x1" (_.source.x :: TreeLink -> Number)
-    , v3AttrFn "y1" (_.source.y :: TreeLink -> Number)
-    , v3AttrFn "x2" (_.target.x :: TreeLink -> Number)
-    , v3AttrFn "y2" (_.target.y :: TreeLink -> Number)
-    , v3AttrStr "stroke" (str "#708090")
-    , v3Attr "stroke-width" (lit 2.0)
-    ]
-    linksGroup
+  -- Render structure
+  selections <- renderTree container structureTree
 
-  -- Render extra links (merge commits)
-  mergeGroup <- appendChild Group [ v3AttrStr "class" (str "merge-links") ] svg
-  _ <- appendData Line positioned.extraLinks
-    [ v3AttrFn "x1" (_.source.x :: ExtraLink -> Number)
-    , v3AttrFn "y1" (_.source.y :: ExtraLink -> Number)
-    , v3AttrFn "x2" (_.target.x :: ExtraLink -> Number)
-    , v3AttrFn "y2" (_.target.y :: ExtraLink -> Number)
-    , v3AttrStr "stroke" (str "#7B68EE")
-    , v3Attr "stroke-width" (lit 2.0)
-    , v3AttrStr "class" (str "merge-link")
-    -- Note: stroke-dasharray would need to be added as a custom attribute
-    ]
-    mergeGroup
+  -- Reselect groups for data rendering
+  treeLinksGroup <- liftEffect $ reselectD3v2 "tree-links" selections
+  mergeLinksGroup <- liftEffect $ reselectD3v2 "merge-links" selections
+  commitsGroup <- liftEffect $ reselectD3v2 "commits" selections
+  labelsGroup <- liftEffect $ reselectD3v2 "labels" selections
+
+  -- Render tree links
+  let treeLinksTree :: T.Tree TreeLink
+      treeLinksTree =
+        T.joinData "tree-links-data" "line" positioned.treeLinks $ \link ->
+          T.elem Line
+            [ v3Attr "x1" (lit link.source.x)
+            , v3Attr "y1" (lit link.source.y)
+            , v3Attr "x2" (lit link.target.x)
+            , v3Attr "y2" (lit link.target.y)
+            , v3AttrStr "stroke" (str "#708090")
+            , v3Attr "stroke-width" (lit 2.0)
+            ]
+  _ <- renderTree treeLinksGroup treeLinksTree
+
+  -- Render merge links
+  let mergeLinksTree :: T.Tree ExtraLink
+      mergeLinksTree =
+        T.joinData "merge-links-data" "line" positioned.extraLinks $ \link ->
+          T.elem Line
+            [ v3Attr "x1" (lit link.source.x)
+            , v3Attr "y1" (lit link.source.y)
+            , v3Attr "x2" (lit link.target.x)
+            , v3Attr "y2" (lit link.target.y)
+            , v3AttrStr "stroke" (str "#7B68EE")
+            , v3Attr "stroke-width" (lit 2.0)
+            , v3AttrStr "class" (str "merge-link")
+            ]
+  _ <- renderTree mergeLinksGroup mergeLinksTree
 
   -- Render commit nodes
-  nodesGroup <- appendChild Group [ v3AttrStr "class" (str "commits") ] svg
-  _ <- appendData Circle positioned.nodes
-    [ v3AttrFn "cx" (_.x :: PositionedCommit -> Number)
-    , v3AttrFn "cy" (_.y :: PositionedCommit -> Number)
-    , v3AttrFn "r" (commitRadius :: PositionedCommit -> Number)
-    , v3AttrFnStr "fill" (commitFill :: PositionedCommit -> String)
-    , v3AttrStr "stroke" (str "#fff")
-    , v3Attr "stroke-width" (lit 2.0)
-    ]
-    nodesGroup
+  let nodesTree :: T.Tree PositionedCommit
+      nodesTree =
+        T.joinData "commits-data" "circle" positioned.nodes $ \node ->
+          T.elem Circle
+            [ v3Attr "cx" (lit node.x)
+            , v3Attr "cy" (lit node.y)
+            , v3Attr "r" (lit (commitRadius node))
+            , v3AttrStr "fill" (str (commitFill node))
+            , v3AttrStr "stroke" (str "#fff")
+            , v3Attr "stroke-width" (lit 2.0)
+            ]
+  _ <- renderTree commitsGroup nodesTree
 
   -- Render commit labels
-  labelsGroup <- appendChild Group [ v3AttrStr "class" (str "labels") ] svg
-  _ <- appendData Text positioned.nodes
-    [ v3AttrFn "x" ((\n -> n.x + 15.0) :: PositionedCommit -> Number)
-    , v3AttrFn "y" ((\n -> n.y + 4.0) :: PositionedCommit -> Number)
-    , v3AttrFnStr "textContent" (commitLabel :: PositionedCommit -> String)
-    , v3Attr "font-size" (lit 11.0)
-    , v3AttrStr "fill" (str "#2F4F4F")
-    ]
-    labelsGroup
+  let labelsTree :: T.Tree PositionedCommit
+      labelsTree =
+        T.joinData "labels-data" "text" positioned.nodes $ \node ->
+          T.elem Text
+            [ v3Attr "x" (lit (node.x + 15.0))
+            , v3Attr "y" (lit (node.y + 4.0))
+            , v3AttrStr "textContent" (str (commitLabel node))
+            , v3Attr "font-size" (lit 11.0)
+            , v3AttrStr "fill" (str "#2F4F4F")
+            ]
+  _ <- renderTree labelsGroup labelsTree
 
   pure unit
