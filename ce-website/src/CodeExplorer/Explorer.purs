@@ -5,9 +5,6 @@
 module CodeExplorer.Explorer
   ( initExplorer
   , initExplorerWithCallbacks
-  , ExplorerCallbacks
-  , FocusInfo  -- For Halogen to track focus state
-  , ModelInfo
   , goToScene
   , SceneId(..) -- Export ADT and constructors for type-safe scene selection
   , reloadWithProject
@@ -20,6 +17,8 @@ module CodeExplorer.Explorer
   , getModuleNames -- Get all module names for search
   , getOriginView -- Get the origin view for back navigation
   , updateNodeColors
+    -- Re-exports from State
+  , module State
   ) where
 
 import Prelude
@@ -43,16 +42,16 @@ import Effect.Class.Console (log)
 import Effect.Random (random)
 import Effect.Ref (Ref)
 import Effect.Ref as Ref
-import Effect.Unsafe (unsafePerformEffect)
 import Foreign.Object as Object
 import Data.Loader (loadModel, loadModelForProject, LoadedModel, DeclarationsMap, FunctionCallsMap, fetchBatchDeclarations, fetchBatchFunctionCalls)
+import CodeExplorer.State as State
 import CodeExplorer.BubblePack (renderModulePackWithCallbacks, highlightCallGraph, clearCallGraphHighlight, drawFunctionEdges, clearFunctionEdges, drawModuleEdges, highlightModuleCallGraph, ModuleEdge, DeclarationClickCallback, DeclarationHoverCallback, clearBubblePacks)
 import CodeExplorer.ChordDiagram (renderNeighborhoodChord, clearChordDiagram)
 import CodeExplorer.AdjacencyMatrix (renderNeighborhoodMatrix, clearAdjacencyMatrix)
 import CodeExplorer.TriptychView (renderTriptychWithDeclarations, clearTriptych)
 -- CallGraphPopup is now a Halogen component (Component.CallGraphPopup)
 -- NarrativePanel is now a Halogen component (Component.NarrativePanel)
--- It polls globalViewStateRef and globalModelInfoRef directly
+-- It polls State.globalViewStateRef and State.globalModelInfoRef directly
 import CodeExplorer.ViewState (ViewState(..), OverviewView(..), DetailView(..), NeighborhoodViewType(..), getNeighborhoodModule, neighborhoodViewLabel)
 import CodeExplorer.ViewTransition as VT
 import Data.ColorPalette (getNodeStroke, getNodeFill) as ColorPalette
@@ -146,7 +145,7 @@ getOverview (Detail _) = Nothing
 -- | - Notifying Halogen via callback
 setViewState :: ViewState -> Effect Unit
 setViewState newView = do
-  currentView <- Ref.read globalViewStateRef
+  currentView <- Ref.read State.globalViewStateRef
   log $ "[Explorer] setViewState: " <> showViewState currentView <> " -> " <> showViewState newView
   executeViewChange newView
 
@@ -157,7 +156,7 @@ executeRadialTreeWaypoint :: Effect Unit
 executeRadialTreeWaypoint = do
   log "[Explorer] executeRadialTreeWaypoint: transitioning to radial tree positions"
 
-  mStateRef <- Ref.read globalStateRef
+  mStateRef <- Ref.read State.globalStateRef
   case mStateRef of
     Just stateRef -> do
       -- Clear any existing links and set up for radial view
@@ -178,17 +177,17 @@ executeViewChange newView = do
   log $ "[Explorer] executeViewChange: " <> showViewState newView
 
   -- Update internal state
-  Ref.write newView globalViewStateRef
+  Ref.write newView State.globalViewStateRef
 
   -- Compute view transition (enter/exit/update sets)
-  mStateRef <- Ref.read globalStateRef
+  mStateRef <- Ref.read State.globalStateRef
   case mStateRef of
     Just stateRef -> do
       sceneState <- Ref.read stateRef
       allNodes <- Sim.getNodes sceneState.simulation
-      currentTransition <- Ref.read globalTransitionRef
+      currentTransition <- Ref.read State.globalTransitionRef
       let newTransition = VT.computeTransition newView allNodes currentTransition
-      Ref.write newTransition globalTransitionRef
+      Ref.write newTransition State.globalTransitionRef
       log $ "[Explorer] Transition computed - entering: "
         <> show (Map.size newTransition.enteringProgress)
         <> ", exiting: "
@@ -214,7 +213,7 @@ executeViewChange newView = do
     Nothing -> pure unit
 
   -- Notify Halogen via callback
-  notifyViewStateChanged newView
+  State.notifyViewStateChanged newView
 
 -- | Tick handler wrapper that notifies Halogen on transition completion
 -- | This wraps the normal Scene tick and, when a transition completes,
@@ -225,7 +224,7 @@ tickWithTransitionCallback stateRef nodesSelector = do
   wasTransitioning <- Scene.isTransitioning stateRef
 
   -- Run the normal tick
-  Scene.onTickWithViewTransition stateRef globalTransitionRef globalViewStateRef nodesSelector
+  Scene.onTickWithViewTransition stateRef State.globalTransitionRef State.globalViewStateRef nodesSelector
 
   -- Update package label positions if any exist (for TopoForm transition)
   VT.updatePackageLabelPositions
@@ -236,164 +235,7 @@ tickWithTransitionCallback stateRef nodesSelector = do
   -- If transition just completed, notify Halogen via callback
   -- Halogen handles waypoint logic (checking for pending target view)
   when (wasTransitioning && not stillTransitioning) do
-    notifyTransitionComplete
-
--- =============================================================================
--- Global State
--- =============================================================================
-
--- | Global ref for external access (UI buttons, etc.)
-globalStateRef :: Ref (Maybe (Ref Scene.SceneState))
-globalStateRef = unsafePerformEffect $ Ref.new Nothing
-
--- | Global ref for links data
-globalLinksRef :: Ref (Array SimLink)
-globalLinksRef = unsafePerformEffect $ Ref.new []
-
--- | Global ref for declarations (for bubble packs)
-globalDeclarationsRef :: Ref DeclarationsMap
-globalDeclarationsRef = unsafePerformEffect $ Ref.new Object.empty
-
--- | Global ref for function calls (for atomic view)
-globalFunctionCallsRef :: Ref FunctionCallsMap
-globalFunctionCallsRef = unsafePerformEffect $ Ref.new Object.empty
-
--- | Model info for narrative panel
-type ModelInfo =
-  { projectName :: String
-  , moduleCount :: Int
-  , packageCount :: Int
-  }
-
--- | Global ref for model info (for narrative)
-globalModelInfoRef :: Ref ModelInfo
-globalModelInfoRef = unsafePerformEffect $ Ref.new { projectName: "", moduleCount: 0, packageCount: 0 }
-
--- | Global ref for current view state
-globalViewStateRef :: Ref ViewState
-globalViewStateRef = unsafePerformEffect $ Ref.new (Overview TreemapView)
-
--- | Navigation stack for zoom out (history of previous views)
--- | Stack grows from left: newest at head, oldest at tail
-globalNavigationStackRef :: Ref (Array ViewState)
-globalNavigationStackRef = unsafePerformEffect $ Ref.new []
-
--- | Focus state for neighborhood drill-down
-type FocusState =
-  { focusedNodeId :: Maybe Int -- Currently focused node (Nothing = full view)
-  , fullNodes :: Array SimNode -- Original full node set for restoration
-  , originView :: Maybe OverviewView -- The view we came from (Tree or Force)
-  }
-
--- | Global ref for focus state
-globalFocusRef :: Ref FocusState
-globalFocusRef = unsafePerformEffect $ Ref.new { focusedNodeId: Nothing, fullNodes: [], originView: Nothing }
-
--- | Global ref for view transition state (GUP-style enter/exit/update)
-globalTransitionRef :: Ref VT.TransitionState
-globalTransitionRef = unsafePerformEffect $ Ref.new (VT.mkTransitionState VT.AllNodes [])
-
--- NOTE: globalPendingViewRef has been moved to Halogen state (SpagoGridApp.pendingView)
--- Waypoint transition logic is now handled in Component.SpagoGridApp.TransitionComplete
-
--- =============================================================================
--- Callback-Based Notification System
--- =============================================================================
-
--- | Focus state for neighborhood drill-down (exported for Halogen)
-type FocusInfo =
-  { focusedNodeId :: Maybe Int  -- Currently focused node (Nothing = full view)
-  , fullNodes :: Array SimNode  -- Original full node set for restoration
-  , originView :: Maybe OverviewView  -- The view we came from (Tree or Force)
-  }
-
--- | Callbacks for Explorer events
--- | These allow the Halogen component to be notified of state changes
--- | instead of polling global refs.
-type ExplorerCallbacks =
-  { onViewStateChanged :: ViewState -> Effect Unit
-  -- ^ Called when ViewState changes (navigation, drill-down, etc.)
-  , onModelLoaded :: ModelInfo -> Effect Unit
-  -- ^ Called when model data is loaded (provides package count for palette)
-  , onShowCallGraphPopup :: String -> String -> Effect Unit
-  -- ^ Called when a declaration is clicked (moduleName, declarationName)
-  , onHideCallGraphPopup :: Effect Unit
-  -- ^ Called when popup should be hidden (e.g., view change)
-  , onTransitionComplete :: Effect Unit
-  -- ^ Called when a scene transition completes (for waypoint chaining)
-  , onFocusChanged :: FocusInfo -> Effect Unit
-  -- ^ Called when focus state changes (entering/exiting neighborhood)
-  , onNavigationPush :: ViewState -> Effect Unit
-  -- ^ Called to push current view to navigation stack before drilling down
-  }
-
--- | Global ref for callbacks (set by initExplorerWithCallbacks)
--- | This pattern allows Explorer functions to invoke callbacks without
--- | threading them through every function.
-globalCallbacksRef :: Ref (Maybe ExplorerCallbacks)
-globalCallbacksRef = unsafePerformEffect $ Ref.new Nothing
-
--- | Notify ViewState change via callback (if set)
-notifyViewStateChanged :: ViewState -> Effect Unit
-notifyViewStateChanged newView = do
-  mCallbacks <- Ref.read globalCallbacksRef
-  case mCallbacks of
-    Just cbs -> cbs.onViewStateChanged newView
-    Nothing -> pure unit -- No callbacks registered, silent no-op
-
--- | Notify model loaded via callback (if set)
-notifyModelLoaded :: ModelInfo -> Effect Unit
-notifyModelLoaded modelInfo = do
-  mCallbacks <- Ref.read globalCallbacksRef
-  case mCallbacks of
-    Just cbs -> cbs.onModelLoaded modelInfo
-    Nothing -> pure unit -- No callbacks registered, silent no-op
-
--- | Notify show call graph popup via callback (if set)
-notifyShowCallGraphPopup :: String -> String -> Effect Unit
-notifyShowCallGraphPopup moduleName declarationName = do
-  mCallbacks <- Ref.read globalCallbacksRef
-  case mCallbacks of
-    Just cbs -> cbs.onShowCallGraphPopup moduleName declarationName
-    Nothing -> pure unit -- No callbacks registered, silent no-op
-
--- | Notify transition complete via callback (if set)
-notifyTransitionComplete :: Effect Unit
-notifyTransitionComplete = do
-  mCallbacks <- Ref.read globalCallbacksRef
-  case mCallbacks of
-    Just cbs -> cbs.onTransitionComplete
-    Nothing -> pure unit -- No callbacks registered, silent no-op
-
--- | Notify focus changed via callback (if set)
-notifyFocusChanged :: FocusInfo -> Effect Unit
-notifyFocusChanged focusInfo = do
-  mCallbacks <- Ref.read globalCallbacksRef
-  case mCallbacks of
-    Just cbs -> cbs.onFocusChanged focusInfo
-    Nothing -> pure unit -- No callbacks registered, silent no-op
-
--- | Notify navigation push via callback (if set)
-notifyNavigationPush :: ViewState -> Effect Unit
-notifyNavigationPush viewState = do
-  mCallbacks <- Ref.read globalCallbacksRef
-  case mCallbacks of
-    Just cbs -> cbs.onNavigationPush viewState
-    Nothing -> pure unit -- No callbacks registered, silent no-op
-
--- =============================================================================
--- Constants
--- =============================================================================
-
-nodesGroupId :: GroupId
-nodesGroupId = GroupId "#explorer-nodes"
-
-forceLinksGroupId :: GroupId
-forceLinksGroupId = GroupId "#explorer-links"
-
--- | Tree links group ID (same group, but for path elements with bezier curves)
-treeLinksGroupId :: GroupId
-treeLinksGroupId = GroupId "#explorer-links"
+    State.notifyTransitionComplete
 
 -- =============================================================================
 -- Initialization
@@ -404,7 +246,7 @@ initExplorer :: String -> Effect Unit
 initExplorer containerSelector = do
   -- Initialize ViewState (Halogen NarrativePanel polls this)
   let initialView = Overview TreemapView
-  Ref.write initialView globalViewStateRef
+  Ref.write initialView State.globalViewStateRef
   log "[Explorer] ViewState initialized (Halogen NarrativePanel polls this)"
 
   -- Then load data asynchronously
@@ -417,26 +259,26 @@ initExplorer containerSelector = do
       Right model -> do
         liftEffect $ log $ "[Explorer] Loaded: " <> show model.moduleCount <> " modules, " <> show model.packageCount <> " packages"
         -- Store links and declarations for later use
-        liftEffect $ Ref.write model.links globalLinksRef
-        liftEffect $ Ref.write model.declarations globalDeclarationsRef
+        liftEffect $ Ref.write model.links State.globalLinksRef
+        liftEffect $ Ref.write model.declarations State.globalDeclarationsRef
 
         -- Initialize visualization immediately
         -- Function calls are loaded on-demand when drilling into neighborhoods
         stateRef <- liftEffect $ initWithModel model containerSelector
-        liftEffect $ Ref.write (Just stateRef) globalStateRef
+        liftEffect $ Ref.write (Just stateRef) State.globalStateRef
         liftEffect $ log "[Explorer] Ready (function calls loaded on-demand per neighborhood)"
 
 -- | Initialize the explorer with callbacks
 -- | This is the preferred API - callbacks notify the Halogen component of state changes
 -- | instead of requiring polling.
-initExplorerWithCallbacks :: String -> ExplorerCallbacks -> Effect Unit
+initExplorerWithCallbacks :: String -> State.ExplorerCallbacks -> Effect Unit
 initExplorerWithCallbacks containerSelector callbacks = do
   -- Store callbacks for use by other Explorer functions
-  Ref.write (Just callbacks) globalCallbacksRef
+  Ref.write (Just callbacks) State.globalCallbacksRef
 
   -- Initialize ViewState and notify via callback
   let initialView = Overview TreemapView
-  Ref.write initialView globalViewStateRef
+  Ref.write initialView State.globalViewStateRef
   callbacks.onViewStateChanged initialView
   log "[Explorer] ViewState initialized with callback notification"
 
@@ -450,13 +292,13 @@ initExplorerWithCallbacks containerSelector callbacks = do
       Right model -> do
         liftEffect $ log $ "[Explorer] Loaded: " <> show model.moduleCount <> " modules, " <> show model.packageCount <> " packages"
         -- Store links and declarations for later use
-        liftEffect $ Ref.write model.links globalLinksRef
-        liftEffect $ Ref.write model.declarations globalDeclarationsRef
+        liftEffect $ Ref.write model.links State.globalLinksRef
+        liftEffect $ Ref.write model.declarations State.globalDeclarationsRef
 
         -- Initialize visualization immediately
         -- Function calls are loaded on-demand when drilling into neighborhoods
         stateRef <- liftEffect $ initWithModel model containerSelector
-        liftEffect $ Ref.write (Just stateRef) globalStateRef
+        liftEffect $ Ref.write (Just stateRef) State.globalStateRef
 
         -- Notify model loaded via callback
         let modelInfo = { projectName: "purescript-d3-dataviz", moduleCount: model.moduleCount, packageCount: model.packageCount }
@@ -470,7 +312,7 @@ initWithModel model containerSelector = do
   log "[Explorer] Initializing with new Scene Engine"
 
   -- Store model info for narrative
-  Ref.write { projectName: "purescript-d3-dataviz", moduleCount: model.moduleCount, packageCount: model.packageCount } globalModelInfoRef
+  Ref.write { projectName: "purescript-d3-dataviz", moduleCount: model.moduleCount, packageCount: model.packageCount } State.globalModelInfoRef
 
   -- Color palette is now generated by Halogen NarrativePanel based on packageCount
 
@@ -493,7 +335,7 @@ initWithModel model containerSelector = do
 
   -- Initialize transition state with all nodes entering
   let initialViewNodes = VT.getViewNodes (Overview TreemapView)
-  Ref.write (VT.mkTransitionState initialViewNodes simNodes) globalTransitionRef
+  Ref.write (VT.mkTransitionState initialViewNodes simNodes) State.globalTransitionRef
 
   -- Render SVG structure first (initial view is Treemap)
   let initialView = Overview TreemapView
@@ -503,7 +345,7 @@ initWithModel model containerSelector = do
   renderWatermark model.nodes
 
   -- Create scene state
-  sceneState <- Scene.mkSceneState sim nodesGroupId
+  sceneState <- Scene.mkSceneState sim State.nodesGroupId
   stateRef <- Ref.new sceneState
 
   -- Set up tick callback - includes view transition progress advancement and visual updates
@@ -531,11 +373,11 @@ reloadWithProject projectId = do
   log $ "[Explorer] Reloading with project: " <> show projectId
 
   -- Clear existing state
-  Ref.write [] globalLinksRef
-  Ref.write Object.empty globalDeclarationsRef
-  Ref.write Object.empty globalFunctionCallsRef
-  Ref.write [] globalNavigationStackRef
-  Ref.write { focusedNodeId: Nothing, fullNodes: [], originView: Nothing } globalFocusRef
+  Ref.write [] State.globalLinksRef
+  Ref.write Object.empty State.globalDeclarationsRef
+  Ref.write Object.empty State.globalFunctionCallsRef
+  Ref.write [] State.globalNavigationStackRef
+  Ref.write { focusedNodeId: Nothing, fullNodes: [], originView: Nothing } State.globalFocusRef
 
   -- Clear tree links if any
   clearTreeLinks
@@ -553,16 +395,16 @@ reloadWithProject projectId = do
       Right model -> do
         liftEffect $ log $ "[Explorer] Loaded: " <> show model.moduleCount <> " modules, " <> show model.packageCount <> " packages"
         -- Store new links and declarations
-        liftEffect $ Ref.write model.links globalLinksRef
-        liftEffect $ Ref.write model.declarations globalDeclarationsRef
+        liftEffect $ Ref.write model.links State.globalLinksRef
+        liftEffect $ Ref.write model.declarations State.globalDeclarationsRef
 
         -- Get existing stateRef and update with new data
-        mStateRef <- liftEffect $ Ref.read globalStateRef
+        mStateRef <- liftEffect $ Ref.read State.globalStateRef
         case mStateRef of
           Nothing -> do
             -- Initialize fresh if no existing state
             stateRef <- liftEffect $ initWithModel model "#viz"
-            liftEffect $ Ref.write (Just stateRef) globalStateRef
+            liftEffect $ Ref.write (Just stateRef) State.globalStateRef
           Just stateRef -> do
             -- Update existing state with new model
             liftEffect $ updateWithModel model stateRef
@@ -575,7 +417,7 @@ updateWithModel model stateRef = do
   log "[Explorer] Updating visualization with new model"
 
   -- Update model info
-  Ref.write { projectName: "project", moduleCount: model.moduleCount, packageCount: model.packageCount } globalModelInfoRef
+  Ref.write { projectName: "project", moduleCount: model.moduleCount, packageCount: model.packageCount } State.globalModelInfoRef
 
   -- Calculate treemap-based positions (replaces grid layout)
   let treemapNodes = recalculateTreemapPositions model.nodes
@@ -597,7 +439,7 @@ updateWithModel model stateRef = do
   simNodes <- Sim.getNodes state.simulation
 
   -- Re-render nodes using existing renderNodesOnly
-  currentView <- Ref.read globalViewStateRef
+  currentView <- Ref.read State.globalViewStateRef
   _ <- runD3v2M $ renderNodesOnly currentView simNodes
 
   -- Update watermark for new project
@@ -632,7 +474,7 @@ goToScene sceneId stateRef = do
     nodes <- Sim.getNodes state.simulation
     clearTreeLinks -- Clear any existing links
     renderTreeLinks nodes
-    Scene.setTreeLinksGroupId treeLinksGroupId stateRef -- Enable tree link updates during transition
+    Scene.setTreeLinksGroupId State.treeLinksGroupId stateRef -- Enable tree link updates during transition
     setTreeSceneClass true
     VT.clearPackageLabels -- Remove TopoGraph package labels if present
 
@@ -649,11 +491,11 @@ goToScene sceneId stateRef = do
   when (sceneId == TreeRun) do
     state <- Ref.read stateRef
     nodes <- Sim.getNodes state.simulation
-    links <- Ref.read globalLinksRef
+    links <- Ref.read State.globalLinksRef
     clearTreeLinks -- Remove any existing links
     addTreeForces nodes links state.simulation
     renderForceLinks nodes links -- Render straight line links
-    Scene.setLinksGroupId forceLinksGroupId stateRef -- Enable link updates
+    Scene.setLinksGroupId State.forceLinksGroupId stateRef -- Enable link updates
     Scene.clearTreeLinksGroupId stateRef -- Disable tree link updates (using force links now)
     setTreeSceneClass true -- Keep packages/non-tree faded
     VT.clearPackageLabels -- Remove TopoGraph package labels if present
@@ -920,7 +762,7 @@ renderSVG currentView containerSelector nodes = do
 updateNodeColors :: ViewState -> Effect Unit
 updateNodeColors viewState = do
   -- Get current nodes from simulation
-  mStateRef <- Ref.read globalStateRef
+  mStateRef <- Ref.read State.globalStateRef
   case mStateRef of
     Just stateRef -> do
       sceneState <- Ref.read stateRef
@@ -1004,7 +846,7 @@ linkOpacity score = 0.3 + (score * 0.5) -- Range: 0.3 to 0.8
 -- | Render tree links as vertical bezier paths (root at top)
 renderTreeLinks :: Array SimNode -> Effect Unit
 renderTreeLinks nodes = do
-  links <- Ref.read globalLinksRef
+  links <- Ref.read State.globalLinksRef
   let treeLinks = Array.filter isTreeLink links
   log $ "[Explorer] Rendering " <> show (Array.length treeLinks) <> " tree links"
 
@@ -1212,8 +1054,8 @@ showViewState (Detail (FunctionCallsDetail name)) = "Detail(FunctionCalls:" <> n
 -- | Click once to drill down to neighborhood, click again to restore full view
 toggleFocus :: SimNode -> Effect Unit
 toggleFocus clickedNode = do
-  focus <- Ref.read globalFocusRef
-  mStateRef <- Ref.read globalStateRef
+  focus <- Ref.read State.globalFocusRef
+  mStateRef <- Ref.read State.globalStateRef
 
   case mStateRef of
     Nothing -> log "[Explorer] No state ref available"
@@ -1272,7 +1114,7 @@ toggleFocus clickedNode = do
                 <> " packages)"
 
               -- Record the origin view (must be done before view change)
-              currentView <- Ref.read globalViewStateRef
+              currentView <- Ref.read State.globalViewStateRef
               let
                 origin = case currentView of
                   Overview ov -> Just ov
@@ -1280,19 +1122,19 @@ toggleFocus clickedNode = do
 
               -- Notify Halogen of focus state change
               let focusInfo = { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore, originView: origin }
-              notifyFocusChanged focusInfo
+              State.notifyFocusChanged focusInfo
               -- Also update local ref (will be removed once Halogen fully owns this)
-              Ref.write focusInfo globalFocusRef
+              Ref.write focusInfo State.globalFocusRef
 
               -- Notify Halogen to push current view to navigation stack
-              notifyNavigationPush currentView
+              State.notifyNavigationPush currentView
               -- Also update local ref (will be removed once Halogen fully owns this)
-              Ref.modify_ (Array.cons currentView) globalNavigationStackRef
+              Ref.modify_ (Array.cons currentView) State.globalNavigationStackRef
 
               -- Update ViewState for package neighborhood view
               let packageView = Detail (PackageNeighborhoodDetail packageName)
-              Ref.write packageView globalViewStateRef
-              notifyViewStateChanged packageView
+              Ref.write packageView State.globalViewStateRef
+              State.notifyViewStateChanged packageView
 
               -- Update simulation and DOM with package-specific rendering
               focusOnPackageNeighborhood packageName neighborhoodNodes state.simulation
@@ -1321,7 +1163,7 @@ toggleFocus clickedNode = do
                 <> " nodes)"
 
               -- Record the origin view (must be done before view change)
-              currentView <- Ref.read globalViewStateRef
+              currentView <- Ref.read State.globalViewStateRef
               let
                 origin = case currentView of
                   Overview ov -> Just ov
@@ -1329,19 +1171,19 @@ toggleFocus clickedNode = do
 
               -- Notify Halogen of focus state change
               let focusInfo = { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore, originView: origin }
-              notifyFocusChanged focusInfo
+              State.notifyFocusChanged focusInfo
               -- Also update local ref (will be removed once Halogen fully owns this)
-              Ref.write focusInfo globalFocusRef
+              Ref.write focusInfo State.globalFocusRef
 
               -- Notify Halogen to push current view to navigation stack
-              notifyNavigationPush currentView
+              State.notifyNavigationPush currentView
               -- Also update local ref (will be removed once Halogen fully owns this)
-              Ref.modify_ (Array.cons currentView) globalNavigationStackRef
+              Ref.modify_ (Array.cons currentView) State.globalNavigationStackRef
 
               -- Update ViewState for neighborhood view (always triptych now)
               let neighborhoodView = Detail (NeighborhoodDetail clickedNode.name TriptychView)
-              Ref.write neighborhoodView globalViewStateRef
-              notifyViewStateChanged neighborhoodView
+              Ref.write neighborhoodView State.globalViewStateRef
+              State.notifyViewStateChanged neighborhoodView
 
               -- Update simulation and DOM (renders bubble packs)
               focusOnNeighborhood neighborhoodNodes state.simulation
@@ -1401,7 +1243,7 @@ focusOnNeighborhood nodes sim = do
         Left _ -> Object.empty
 
     -- Update global function calls ref so click/hover handlers can use it
-    liftEffect $ Ref.write functionCalls globalFunctionCallsRef
+    liftEffect $ Ref.write functionCalls State.globalFunctionCallsRef
 
     -- Log fetch summary
     liftEffect $ log $ "[Explorer] Batch fetched: " <> show (Object.size declarations) <> " modules with declarations, "
@@ -1548,10 +1390,10 @@ foreign import renderPackageNodeFFI :: Number -> Number -> String -> Int -> Numb
 bubblePackTick :: Effect Unit
 bubblePackTick = do
   -- Update bubble pack group positions
-  updateGroupPositions nodesGroupId
+  updateGroupPositions State.nodesGroupId
 
   -- Update link positions
-  updateLinkPositions forceLinksGroupId
+  updateLinkPositions State.forceLinksGroupId
 
 -- | Pin a node at its current position (set fx/fy to current x/y)
 pinNodeAtCurrent :: SimNode -> SimNode
@@ -1580,7 +1422,7 @@ type DirectionalLink =
 -- | Now renders bidirectional colored links (green for outgoing, orange for incoming)
 renderNeighborhoodLinks :: Array SimNode -> Effect Unit
 renderNeighborhoodLinks nodes = do
-  allLinks <- Ref.read globalLinksRef
+  allLinks <- Ref.read State.globalLinksRef
 
   -- Build set of node IDs in neighborhood
   let nodeIdSet = Set.fromFoldable $ map _.id nodes
@@ -1625,7 +1467,7 @@ toDirectionalLink nodeMap _linkPairSet link = do
 -- | Uses node x/y directly to create line coordinates
 renderStaticNeighborhoodLinks :: Array SimNode -> Effect Unit
 renderStaticNeighborhoodLinks nodes = do
-  allLinks <- Ref.read globalLinksRef
+  allLinks <- Ref.read State.globalLinksRef
 
   -- Build map of node ID -> node for position lookup
   let nodeMap = Map.fromFoldable $ map (\n -> Tuple n.id n) nodes
@@ -1750,13 +1592,13 @@ renderDirectionalLinksD3 links = do
 -- | Returns the overview view they were on, or TreemapView as fallback
 getOriginView :: Effect OverviewView
 getOriginView = do
-  focus <- Ref.read globalFocusRef
+  focus <- Ref.read State.globalFocusRef
   pure $ fromMaybe TreemapView focus.originView
 
 -- | Get all module names for search functionality
 getModuleNames :: Effect (Array String)
 getModuleNames = do
-  mStateRef <- Ref.read globalStateRef
+  mStateRef <- Ref.read State.globalStateRef
   case mStateRef of
     Nothing -> pure []
     Just stateRef -> do
@@ -1769,14 +1611,14 @@ getModuleNames = do
 -- | Returns true if module was found and navigation happened
 navigateToModuleByName :: String -> Effect Boolean
 navigateToModuleByName moduleName = do
-  mStateRef <- Ref.read globalStateRef
+  mStateRef <- Ref.read State.globalStateRef
   case mStateRef of
     Nothing -> do
       log $ "[Explorer] Cannot navigate - no state ref"
       pure false
     Just stateRef -> do
       state <- Ref.read stateRef
-      focus <- Ref.read globalFocusRef
+      focus <- Ref.read State.globalFocusRef
 
       -- Get current nodes
       currentNodes <- Sim.getNodes state.simulation
@@ -1800,7 +1642,7 @@ navigateToModuleByName moduleName = do
           log $ "[Explorer] Found " <> show (Array.length neighborhoodNodes) <> " nodes in neighborhood"
 
           -- Record the origin view (must be done before view change)
-          currentView <- Ref.read globalViewStateRef
+          currentView <- Ref.read State.globalViewStateRef
           let
             origin = case currentView of
               Overview ov -> Just ov
@@ -1808,19 +1650,19 @@ navigateToModuleByName moduleName = do
 
           -- Notify Halogen of focus state change
           let focusInfo = { focusedNodeId: Just targetNode.id, fullNodes: nodesPool, originView: origin }
-          notifyFocusChanged focusInfo
+          State.notifyFocusChanged focusInfo
           -- Also update local ref (will be removed once Halogen fully owns this)
-          Ref.write focusInfo globalFocusRef
+          Ref.write focusInfo State.globalFocusRef
 
           -- Notify Halogen to push current view to navigation stack
-          notifyNavigationPush currentView
+          State.notifyNavigationPush currentView
           -- Also update local ref (will be removed once Halogen fully owns this)
-          Ref.modify_ (Array.cons currentView) globalNavigationStackRef
+          Ref.modify_ (Array.cons currentView) State.globalNavigationStackRef
 
           -- Update ViewState for neighborhood view (always triptych now)
           let neighborhoodView = Detail (NeighborhoodDetail targetNode.name TriptychView)
-          Ref.write neighborhoodView globalViewStateRef
-          notifyViewStateChanged neighborhoodView
+          Ref.write neighborhoodView State.globalViewStateRef
+          State.notifyViewStateChanged neighborhoodView
 
           -- Update simulation and DOM (renders bubble packs)
           focusOnNeighborhood neighborhoodNodes state.simulation
@@ -1834,7 +1676,7 @@ navigateToModuleByName moduleName = do
 -- | Returns true if navigation happened, false if stack was empty
 navigateBack :: Effect Boolean
 navigateBack = do
-  stack <- Ref.read globalNavigationStackRef
+  stack <- Ref.read State.globalNavigationStackRef
   case Array.uncons stack of
     Nothing -> do
       log "[Explorer] Navigation stack empty, nothing to go back to"
@@ -1842,7 +1684,7 @@ navigateBack = do
     Just { head: previousView, tail: remainingStack } -> do
       log $ "[Explorer] Navigating back to: " <> showViewState previousView
       -- Pop the stack
-      Ref.write remainingStack globalNavigationStackRef
+      Ref.write remainingStack State.globalNavigationStackRef
       -- Restore the previous view
       restoreToView previousView
       pure true
@@ -1850,8 +1692,8 @@ navigateBack = do
 -- | Restore to a specific view (used by navigateBack)
 restoreToView :: ViewState -> Effect Unit
 restoreToView targetView = do
-  focus <- Ref.read globalFocusRef
-  mStateRef <- Ref.read globalStateRef
+  focus <- Ref.read State.globalFocusRef
+  mStateRef <- Ref.read State.globalStateRef
 
   case mStateRef of
     Nothing -> log "[Explorer] No state ref to restore"
@@ -1863,8 +1705,8 @@ restoreToView targetView = do
         Detail _ -> do
           -- Re-entering a detail view - just update the view state
           -- (the DOM is already showing the detail)
-          Ref.write targetView globalViewStateRef
-          notifyViewStateChanged targetView
+          Ref.write targetView State.globalViewStateRef
+          State.notifyViewStateChanged targetView
 
 -- | Restore full view
 restoreFullView :: Array SimNode -> ViewState -> Scene.CESimulation -> Effect Unit
@@ -1886,7 +1728,7 @@ restoreFullView fullNodes targetView sim = do
   _ <- runD3v2M $ renderNodesOnly targetView fullNodes
 
   -- Restore the original Scene tick handler and trigger appropriate scene
-  mStateRef <- Ref.read globalStateRef
+  mStateRef <- Ref.read State.globalStateRef
   case mStateRef of
     Just stateRef -> do
       Scene.clearLinksGroupId stateRef
@@ -1903,24 +1745,24 @@ restoreFullView fullNodes targetView sim = do
     Nothing -> pure unit
 
   -- Update ViewState and notify via callback
-  Ref.write targetView globalViewStateRef
-  notifyViewStateChanged targetView
+  Ref.write targetView State.globalViewStateRef
+  State.notifyViewStateChanged targetView
 
   -- Ensure colors are correct for the restored view
   -- (renderNodesOnly should set them, but this ensures they're applied)
   updateNodeColors targetView
 
   -- Clear focus state (local ref - Halogen clears its own)
-  Ref.write { focusedNodeId: Nothing, fullNodes: [], originView: Nothing } globalFocusRef
+  Ref.write { focusedNodeId: Nothing, fullNodes: [], originView: Nothing } State.globalFocusRef
 
   Sim.reheat sim
   pure unit
 
 -- | Restore from Halogen-owned focus state
 -- | Called by Halogen when navigating back - takes focus info from Halogen state
-restoreFromFocus :: FocusInfo -> ViewState -> Effect Unit
+restoreFromFocus :: State.FocusInfo -> ViewState -> Effect Unit
 restoreFromFocus focusInfo targetView = do
-  mStateRef <- Ref.read globalStateRef
+  mStateRef <- Ref.read State.globalStateRef
   case mStateRef of
     Nothing -> log "[Explorer] No state ref to restore"
     Just stateRef -> do
@@ -1929,8 +1771,8 @@ restoreFromFocus focusInfo targetView = do
         Overview _ -> restoreFullView focusInfo.fullNodes targetView state.simulation
         Detail _ -> do
           -- Re-entering a detail view - just update the view state
-          Ref.write targetView globalViewStateRef
-          notifyViewStateChanged targetView
+          Ref.write targetView State.globalViewStateRef
+          State.notifyViewStateChanged targetView
 
 -- | Set forces appropriate for neighborhood view (spread out, no grid)
 -- | Uses stronger forces than full graph view since neighborhood has fewer nodes
@@ -2043,14 +1885,14 @@ onDeclarationClick moduleName declarationName kind = do
 
   -- Notify the Halogen component to show the call graph popup
   -- The popup component will fetch its own data from the API
-  notifyShowCallGraphPopup moduleName declarationName
+  State.notifyShowCallGraphPopup moduleName declarationName
 
 -- | Handle hover on a declaration circle
 -- | Highlights individual function circles based on call graph
 onDeclarationHover :: DeclarationHoverCallback
 onDeclarationHover moduleName declarationName _kind = do
   -- Look up function calls for this declaration
-  fnCalls <- Ref.read globalFunctionCallsRef
+  fnCalls <- Ref.read State.globalFunctionCallsRef
   let sourceFunc = moduleName <> "." <> declarationName
   case Object.lookup sourceFunc fnCalls of
     Nothing -> pure unit -- No call data, no highlighting
@@ -2077,7 +1919,7 @@ onDeclarationLeave = do
 -- | Shows all function-to-function edges for the entire module
 onModuleHover :: String -> Effect Unit
 onModuleHover moduleName = do
-  fnCalls <- Ref.read globalFunctionCallsRef
+  fnCalls <- Ref.read State.globalFunctionCallsRef
   -- Find all functions in this module from the function calls map
   let allFuncs = Object.keys fnCalls
   let moduleFuncs = Array.filter (startsWith (moduleName <> ".")) allFuncs
@@ -2158,7 +2000,7 @@ extractModuleName fullName = do
 -- | This only works when already in a NeighborhoodDetail view
 setNeighborhoodViewType :: NeighborhoodViewType -> Effect Unit
 setNeighborhoodViewType newViewType = do
-  currentView <- Ref.read globalViewStateRef
+  currentView <- Ref.read State.globalViewStateRef
   case getNeighborhoodModule currentView of
     Nothing -> do
       log "[Explorer] setNeighborhoodViewType called but not in neighborhood view"
@@ -2167,7 +2009,7 @@ setNeighborhoodViewType newViewType = do
       log $ "[Explorer] Switching neighborhood view to: " <> neighborhoodViewLabel newViewType
 
       -- Get current nodes from simulation
-      mStateRef <- Ref.read globalStateRef
+      mStateRef <- Ref.read State.globalStateRef
       case mStateRef of
         Nothing -> log "[Explorer] No state ref available"
         Just stateRef -> do
@@ -2183,8 +2025,8 @@ setNeighborhoodViewType newViewType = do
 
           -- Update view state
           let newView = Detail (NeighborhoodDetail moduleName newViewType)
-          Ref.write newView globalViewStateRef
-          notifyViewStateChanged newView
+          Ref.write newView State.globalViewStateRef
+          State.notifyViewStateChanged newView
 
           -- Render the new view type
           case newViewType of
@@ -2207,7 +2049,7 @@ setNeighborhoodViewType newViewType = do
 -- | This is a simplified version of focusOnNeighborhood for view switching
 renderBubblePackView :: Array SimNode -> Effect Unit
 renderBubblePackView nodes = do
-  declarations <- Ref.read globalDeclarationsRef
+  declarations <- Ref.read State.globalDeclarationsRef
   for_ nodes \node -> do
     _ <- renderModulePackWithCallbacks declarations onDeclarationClick onDeclarationHover onDeclarationLeave onModuleHover node
     pure unit
@@ -2218,7 +2060,7 @@ renderBubblePackView nodes = do
     packGroups <- selectAll "g.module-pack" nodesContainer
     pure $ D3v2.getElementsD3v2 packGroups
 
-  mStateRef <- Ref.read globalStateRef
+  mStateRef <- Ref.read State.globalStateRef
   case mStateRef of
     Just stateRef -> do
       state <- Ref.read stateRef
