@@ -145,8 +145,13 @@ getOverview (Detail _) = Nothing
 -- | - Notifying Halogen via callback
 setViewState :: ViewState -> Effect Unit
 setViewState newView = do
-  currentView <- Ref.read State.globalViewStateRef
-  log $ "[Explorer] setViewState: " <> showViewState currentView <> " -> " <> showViewState newView
+  -- Get current view from SceneState for logging
+  mStateRef <- Ref.read State.globalStateRef
+  case mStateRef of
+    Just stateRef -> do
+      currentView <- Scene.getViewState stateRef
+      log $ "[Explorer] setViewState: " <> showViewState currentView <> " -> " <> showViewState newView
+    Nothing -> log $ "[Explorer] setViewState: (no state) -> " <> showViewState newView
   executeViewChange newView
 
 -- | Execute radial tree waypoint (internal scene, no ViewState change)
@@ -176,36 +181,31 @@ executeViewChange :: ViewState -> Effect Unit
 executeViewChange newView = do
   log $ "[Explorer] executeViewChange: " <> showViewState newView
 
-  -- Update internal state
-  Ref.write newView State.globalViewStateRef
-
-  -- Compute view transition (enter/exit/update sets)
   mStateRef <- Ref.read State.globalStateRef
   case mStateRef of
     Just stateRef -> do
-      sceneState <- Ref.read stateRef
-      allNodes <- Sim.getNodes sceneState.simulation
-      currentTransition <- Ref.read State.globalTransitionRef
-      let newTransition = VT.computeTransition newView allNodes currentTransition
-      Ref.write newTransition State.globalTransitionRef
+      -- Update ViewState and TransitionState in SceneState
+      -- (setSceneViewState computes the new transition internally)
+      Scene.setSceneViewState newView stateRef
+
+      -- Log transition info for debugging
+      newTransition <- Scene.getTransitionState stateRef
       log $ "[Explorer] Transition computed - entering: "
         <> show (Map.size newTransition.enteringProgress)
         <> ", exiting: "
         <> show (Array.length newTransition.exitingNodes)
-    Nothing -> pure unit
 
-  -- Update node colors
-  updateNodeColors newView
+      -- Update node colors
+      updateNodeColors newView
 
-  -- Trigger scene transition if needed
-  case mStateRef of
-    Just stateRef -> do
+      -- Trigger scene transition if needed
       case newView of
         Overview TreemapView -> goToScene TreemapForm stateRef
         Overview TreeView -> goToScene TreeForm stateRef
         Overview ForceView -> goToScene TreeRun stateRef
         Overview TopoView -> goToScene TopoForm stateRef
         Detail _ -> pure unit -- Detail views handled separately
+
       -- Always reheat simulation on view change to ensure ticks keep running
       -- This is needed when returning from Static scenes (Tree, Treemap)
       sceneState <- Ref.read stateRef
@@ -223,8 +223,8 @@ tickWithTransitionCallback stateRef nodesSelector = do
   -- Get state before tick to detect transition completion
   wasTransitioning <- Scene.isTransitioning stateRef
 
-  -- Run the normal tick
-  Scene.onTickWithViewTransition stateRef State.globalTransitionRef State.globalViewStateRef nodesSelector
+  -- Run the normal tick (ViewState and TransitionState now stored in SceneState)
+  Scene.onTickWithViewTransition stateRef nodesSelector
 
   -- Update package label positions if any exist (for TopoForm transition)
   VT.updatePackageLabelPositions
@@ -244,10 +244,9 @@ tickWithTransitionCallback stateRef nodesSelector = do
 -- | Initialize the explorer
 initExplorer :: String -> Effect Unit
 initExplorer containerSelector = do
-  -- Initialize ViewState (Halogen NarrativePanel polls this)
+  -- Note: ViewState is initialized inside initWithModel when SceneState is created
   let initialView = Overview TreemapView
-  Ref.write initialView State.globalViewStateRef
-  log "[Explorer] ViewState initialized (Halogen NarrativePanel polls this)"
+  log $ "[Explorer] Initializing with view: " <> showViewState initialView
 
   -- Then load data asynchronously
   launchAff_ do
@@ -276,11 +275,11 @@ initExplorerWithCallbacks containerSelector callbacks = do
   -- Store callbacks for use by other Explorer functions
   Ref.write (Just callbacks) State.globalCallbacksRef
 
-  -- Initialize ViewState and notify via callback
+  -- Note: ViewState is initialized inside initWithModel when SceneState is created
+  -- Notify Halogen of initial view now so it can display immediately
   let initialView = Overview TreemapView
-  Ref.write initialView State.globalViewStateRef
   callbacks.onViewStateChanged initialView
-  log "[Explorer] ViewState initialized with callback notification"
+  log "[Explorer] Initializing with callback notification"
 
   -- Then load data asynchronously
   launchAff_ do
@@ -333,19 +332,17 @@ initWithModel model containerSelector = do
   -- Get nodes from simulation for initial render
   simNodes <- Sim.getNodes sim
 
-  -- Initialize transition state with all nodes entering
-  let initialViewNodes = VT.getViewNodes (Overview TreemapView)
-  Ref.write (VT.mkTransitionState initialViewNodes simNodes) State.globalTransitionRef
-
-  -- Render SVG structure first (initial view is Treemap)
+  -- Initial view is Treemap
   let initialView = Overview TreemapView
+
+  -- Render SVG structure first
   _ <- runD3v2M $ renderSVG initialView containerSelector simNodes
 
   -- Render treemap watermark (behind nodes)
   renderWatermark model.nodes
 
-  -- Create scene state
-  sceneState <- Scene.mkSceneState sim State.nodesGroupId
+  -- Create scene state (includes ViewState and TransitionState)
+  sceneState <- Scene.mkSceneState sim State.nodesGroupId initialView simNodes
   stateRef <- Ref.new sceneState
 
   -- Set up tick callback - includes view transition progress advancement and visual updates

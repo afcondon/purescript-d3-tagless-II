@@ -30,6 +30,10 @@ module CodeExplorer.Scene
   , clearTreeLinksGroupId
   , isTransitioning
   , setCurrentScene
+  -- ViewState management (stored in SceneState)
+  , getViewState
+  , setSceneViewState
+  , getTransitionState
   ) where
 
 import Prelude
@@ -95,12 +99,16 @@ type CESimulation = Sim.Simulation NodeRow LinkRow
 -- | - simulation: The D3 force simulation
 -- | - engine: The library's generic scene engine
 -- | - GroupId tracking for selective DOM updates
+-- | - viewState: Current view for rendering (owned by Scene, synced from Halogen)
+-- | - transitionState: GUP-style enter/exit progress (internal to Scene)
 type SceneState =
   { simulation :: CESimulation
   , engine :: Engine.SceneEngine SimNode
   , nodesGroupId :: GroupId
   , linksGroupId :: Maybe GroupId
   , treeLinksGroupId :: Maybe GroupId
+  , viewState :: ViewState
+  , transitionState :: VT.TransitionState
   }
 
 -- =============================================================================
@@ -156,18 +164,26 @@ reinitializeForces sim = do
 -- =============================================================================
 
 -- | Create initial scene state
+-- | ViewState and initial nodes needed to set up transition state
 mkSceneState
   :: CESimulation
   -> GroupId
+  -> ViewState
+  -> Array SimNode  -- Initial nodes for transition state
   -> Effect SceneState
-mkSceneState sim groupId = do
+mkSceneState sim groupId initialView initialNodes = do
   engine <- Engine.createEngine (mkAdapter sim)
+  -- Initialize transition state with all nodes entering
+  let initialViewNodes = VT.getViewNodes initialView
+  let initialTransition = VT.mkTransitionState initialViewNodes initialNodes
   pure
     { simulation: sim
     , engine
     , nodesGroupId: groupId
     , linksGroupId: Nothing
     , treeLinksGroupId: Nothing
+    , viewState: initialView
+    , transitionState: initialTransition
     }
 
 -- | Set the links group ID to enable force link updates
@@ -189,6 +205,27 @@ setTreeLinksGroupId gid stateRef =
 clearTreeLinksGroupId :: Ref SceneState -> Effect Unit
 clearTreeLinksGroupId stateRef =
   Ref.modify_ (_ { treeLinksGroupId = Nothing }) stateRef
+
+-- | Get the current view state from scene state
+getViewState :: Ref SceneState -> Effect ViewState
+getViewState stateRef = do
+  state <- Ref.read stateRef
+  pure state.viewState
+
+-- | Set the view state and compute new transition state
+-- | This updates the internal state - the tick handler will apply transitions
+setSceneViewState :: ViewState -> Ref SceneState -> Effect Unit
+setSceneViewState newView stateRef = do
+  state <- Ref.read stateRef
+  allNodes <- Sim.getNodes state.simulation
+  let newTransition = VT.computeTransition newView allNodes state.transitionState
+  Ref.modify_ (_ { viewState = newView, transitionState = newTransition }) stateRef
+
+-- | Get the current transition state (mainly for debugging/testing)
+getTransitionState :: Ref SceneState -> Effect VT.TransitionState
+getTransitionState stateRef = do
+  state <- Ref.read stateRef
+  pure state.transitionState
 
 -- =============================================================================
 -- Transitions (delegated to library engine)
@@ -259,25 +296,22 @@ onTick stateRef = do
 
 -- | Tick handler that also advances view transitions (GUP-style enter/exit)
 -- | This combines Scene.onTick with VT.tickTransitionState
--- | Takes ViewState ref and node selector for applying visual transitions
+-- | ViewState and TransitionState are now stored in SceneState
 onTickWithViewTransition
   :: Ref SceneState
-  -> Ref VT.TransitionState
-  -> Ref ViewState
   -> String -- nodesGroupSelector for VT.applyViewTransition
   -> Effect Unit
-onTickWithViewTransition sceneStateRef viewTransitionRef viewStateRef nodesSelector = do
-  -- Read current view state
-  viewState <- Ref.read viewStateRef
+onTickWithViewTransition sceneStateRef nodesSelector = do
+  -- Read state (viewState and transitionState are now in SceneState)
+  state <- Ref.read sceneStateRef
+  let viewState = state.viewState
 
   -- Advance view transition progress
-  viewTransition <- Ref.read viewTransitionRef
-  let newViewTransition = VT.tickTransitionState VT.defaultDelta viewTransition
-  Ref.write newViewTransition viewTransitionRef
+  let newViewTransition = VT.tickTransitionState VT.defaultDelta state.transitionState
+  Ref.modify_ (_ { transitionState = newViewTransition }) sceneStateRef
 
   -- Get current nodes from simulation
-  sceneState <- Ref.read sceneStateRef
-  allNodes <- Sim.getNodes sceneState.simulation
+  allNodes <- Sim.getNodes state.simulation
 
   -- Apply view transition visual updates (opacity, radius, remove exited)
   VT.applyViewTransition nodesSelector viewState allNodes newViewTransition
