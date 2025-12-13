@@ -28,6 +28,9 @@ type State =
   { initialized :: Boolean
   , error :: Maybe String
   , viewState :: ViewState
+  , pendingView :: Maybe ViewState  -- For waypoint transitions
+  , navigationStack :: Array ViewState  -- History for back navigation
+  , focusInfo :: Explorer.FocusInfo  -- Focus state for neighborhood views
   , packagePalette :: Array NarrativePanel.ColorEntry
   , projectName :: String
   , projectId :: Int
@@ -51,6 +54,9 @@ _callGraphPopup = Proxy
 data Action
   = Initialize
   | ViewStateChanged ViewState
+  | TransitionComplete  -- Scene transition finished (for waypoint chaining)
+  | FocusChanged Explorer.FocusInfo  -- Focus state changed (entering neighborhood)
+  | NavigationPush ViewState  -- Push view to navigation stack
   | ModelLoaded Explorer.ModelInfo
   | PackagePaletteChanged (Array NarrativePanel.ColorEntry)
   | ProjectsLoaded (Array NarrativePanel.ProjectInfo)
@@ -68,6 +74,9 @@ component =
         { initialized: false
         , error: Nothing
         , viewState: Overview TreemapView -- Start with Treemap overview
+        , pendingView: Nothing  -- No pending waypoint transition
+        , navigationStack: []  -- Empty history
+        , focusInfo: { focusedNodeId: Nothing, fullNodes: [], originView: Nothing }
         , packagePalette: []
         , projectName: NarrativePanel.defaultProjectName
         , projectId: 1
@@ -129,6 +138,9 @@ handleAction = case _ of
         , onModelLoaded: \modelInfo -> HS.notify listener (ModelLoaded modelInfo)
         , onShowCallGraphPopup: \moduleName declarationName -> HS.notify listener (ShowCallGraphPopup moduleName declarationName)
         , onHideCallGraphPopup: HS.notify listener HideCallGraphPopup
+        , onTransitionComplete: HS.notify listener TransitionComplete
+        , onFocusChanged: \focusInfo -> HS.notify listener (FocusChanged focusInfo)
+        , onNavigationPush: \viewState -> HS.notify listener (NavigationPush viewState)
         }
 
     -- Initialize Explorer with callbacks
@@ -203,21 +215,66 @@ handleAction = case _ of
   NarrativePanelOutput output ->
     case output of
       -- User clicked one of the four view icons
+      -- Implements waypoint logic: some transitions need intermediate steps
       NarrativePanel.ViewSelected newOverview -> do
-        log $ "[SpagoGridApp] View selected: " <> show newOverview
+        state <- H.get
+        log $ "[SpagoGridApp] View selected: " <> show newOverview <> " (from: " <> viewDescription state.viewState <> ")"
         let newViewState = toOverview newOverview
-        H.modify_ _ { viewState = newViewState }
-        liftEffect $ Explorer.setViewState newViewState
+
+        -- Determine current overview (if any)
+        let currentOverview = case state.viewState of
+              Overview ov -> Just ov
+              Detail _ -> Nothing
+
+        -- Check if waypoint transition is needed
+        case currentOverview, newOverview of
+          -- Tree/Force → Topo: go through Treemap first
+          Just from, TopoView | isModuleCentric from -> do
+            log "[SpagoGridApp] Waypoint: modules → Treemap → Topo"
+            H.modify_ _ { viewState = Overview TreemapView, pendingView = Just newViewState }
+            liftEffect $ Explorer.setViewState (Overview TreemapView)
+
+          -- Topo → Tree/Force: go through Treemap first
+          Just TopoView, to | isModuleCentric to -> do
+            log "[SpagoGridApp] Waypoint: Topo → Treemap → modules"
+            H.modify_ _ { viewState = Overview TreemapView, pendingView = Just newViewState }
+            liftEffect $ Explorer.setViewState (Overview TreemapView)
+
+          -- Any → Force: go through RadialTree first
+          Just from, ForceView | from /= ForceView -> do
+            log "[SpagoGridApp] Waypoint: RadialTree → Force"
+            H.modify_ _ { pendingView = Just newViewState }
+            liftEffect $ Explorer.executeRadialTreeWaypoint
+
+          -- Direct transition (no waypoint needed)
+          _, _ -> do
+            H.modify_ _ { viewState = newViewState, pendingView = Nothing }
+            liftEffect $ Explorer.setViewState newViewState
+        where
+        -- Is this view module-centric (shows modules)?
+        isModuleCentric TreeView = true
+        isModuleCentric ForceView = true
+        isModuleCentric _ = false
 
       -- User clicked the back button in detail view
       NarrativePanel.BackRequested -> do
         log "[SpagoGridApp] Back requested from detail view"
-        success <- liftEffect $ Explorer.navigateBack
-        when (not success) do
-          log "[SpagoGridApp] Navigation stack was empty, falling back to Treemap"
-          let fallbackView = Overview TreemapView
-          H.modify_ _ { viewState = fallbackView }
-          liftEffect $ Explorer.setViewState fallbackView
+        state <- H.get
+        case Array.uncons state.navigationStack of
+          Nothing -> do
+            log "[SpagoGridApp] Navigation stack was empty, falling back to Treemap"
+            let fallbackView = Overview TreemapView
+            H.modify_ _ { viewState = fallbackView, focusInfo = { focusedNodeId: Nothing, fullNodes: [], originView: Nothing } }
+            liftEffect $ Explorer.setViewState fallbackView
+          Just { head: previousView, tail: remainingStack } -> do
+            log $ "[SpagoGridApp] Navigating back to: " <> viewDescription previousView
+            H.modify_ _ { navigationStack = remainingStack, viewState = previousView }
+            -- Restore using focus info from Halogen state
+            liftEffect $ Explorer.restoreFromFocus state.focusInfo previousView
+            -- Clear focus info if returning to overview
+            case previousView of
+              Overview _ -> H.modify_ _ { focusInfo = { focusedNodeId: Nothing, fullNodes: [], originView: Nothing } }
+              Detail _ -> pure unit
 
       NarrativePanel.ProjectSelected newProjectId -> do
         log $ "[SpagoGridApp] Project selected: " <> show newProjectId
@@ -252,3 +309,24 @@ handleAction = case _ of
   HideCallGraphPopup -> do
     log "[SpagoGridApp] Hiding call graph popup"
     void $ H.tell _callGraphPopup unit CallGraphPopup.HidePopup
+
+  TransitionComplete -> do
+    -- Scene transition completed, check if there's a pending waypoint target
+    state <- H.get
+    case state.pendingView of
+      Just targetView -> do
+        log $ "[SpagoGridApp] Waypoint complete, continuing to: " <> viewDescription targetView
+        H.modify_ _ { pendingView = Nothing, viewState = targetView }
+        -- Now execute the target view (all waypoints already done)
+        liftEffect $ Explorer.setViewState targetView
+      Nothing ->
+        -- No pending view, transition complete normally
+        pure unit
+
+  FocusChanged newFocusInfo -> do
+    log $ "[SpagoGridApp] Focus changed, focusedNodeId: " <> show newFocusInfo.focusedNodeId
+    H.modify_ _ { focusInfo = newFocusInfo }
+
+  NavigationPush viewToPush -> do
+    log $ "[SpagoGridApp] Navigation push: " <> viewDescription viewToPush
+    H.modify_ \s -> s { navigationStack = Array.cons viewToPush s.navigationStack }

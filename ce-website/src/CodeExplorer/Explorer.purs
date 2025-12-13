@@ -6,13 +6,16 @@ module CodeExplorer.Explorer
   ( initExplorer
   , initExplorerWithCallbacks
   , ExplorerCallbacks
+  , FocusInfo  -- For Halogen to track focus state
   , ModelInfo
   , goToScene
   , SceneId(..) -- Export ADT and constructors for type-safe scene selection
   , reloadWithProject
   , setViewState -- Public API for changing view state
+  , executeRadialTreeWaypoint -- Waypoint for Force view (Halogen calls this)
   , setNeighborhoodViewType -- Switch between Bubbles/Chord/Matrix in neighborhood view
   , navigateBack
+  , restoreFromFocus -- Restore full view from Halogen-owned focus state
   , navigateToModuleByName -- Navigate to module neighborhood by name (for search)
   , getModuleNames -- Get all module names for search
   , getOriginView -- Get the origin view for back navigation
@@ -128,50 +131,28 @@ getOverview (Overview ov) = Just ov
 getOverview (Detail _) = Nothing
 
 -- | Set the current view state and trigger appropriate scene transitions.
--- | This is the public API for changing views - replaces direct Ref writes.
+-- | This is the public API for changing views - Halogen calls this.
 -- |
--- | Handles:
--- | - Multi-step waypoint transitions between module/package views
--- | - Updating the internal view state ref
+-- | Waypoint logic has been moved to Halogen - this function does direct transitions only.
+-- | Halogen is responsible for:
+-- | - Detecting when waypoints are needed (e.g., Tree→Topo needs Treemap first)
+-- | - Storing the pending target view
+-- | - Calling setViewState again on transition completion
+-- |
+-- | This function handles:
+-- | - Updating the internal view state ref (will be removed once Halogen owns all state)
 -- | - Updating node colors to match the new view
--- | - Triggering scene transitions (TreeForm/TreeRun)
+-- | - Triggering scene transitions (TreemapForm/TreeForm/TreeRun/TopoForm)
 -- | - Notifying Halogen via callback
 setViewState :: ViewState -> Effect Unit
 setViewState newView = do
   currentView <- Ref.read globalViewStateRef
   log $ "[Explorer] setViewState: " <> showViewState currentView <> " -> " <> showViewState newView
-
-  -- Check if we need a waypoint transition
-  case getOverview currentView, getOverview newView of
-    -- Tree/Force → Topo: go through Treemap (packages visible) first
-    Just from, Just TopoView | isModuleCentric from -> do
-      log "[Explorer] Waypoint transition: modules → Treemap → Topo"
-      Ref.write (Just newView) globalPendingViewRef
-      executeViewChange (Overview TreemapView)
-
-    -- Topo → Tree/Force: go through Treemap (modules visible) first
-    -- If going to Force, we'll need another waypoint (Treemap → RadialTree → Force)
-    Just TopoView, Just to | isModuleCentric to -> do
-      log "[Explorer] Waypoint transition: Topo → Treemap → modules"
-      Ref.write (Just newView) globalPendingViewRef
-      executeViewChange (Overview TreemapView)
-
-    -- Non-Force → Force: go through RadialTree (radial positions) first
-    -- This prevents chaotic initial movement when enabling physics
-    -- The radial tree provides a good starting layout before forces take over
-    Just from, Just ForceView | from /= ForceView -> do
-      log "[Explorer] Waypoint transition: RadialTree → Force"
-      Ref.write (Just newView) globalPendingViewRef
-      -- Trigger radial tree scene directly (no OverviewView for it)
-      executeRadialTreeWaypoint
-
-    -- Direct transition (no waypoint needed)
-    _, _ -> do
-      Ref.write Nothing globalPendingViewRef
-      executeViewChange newView
+  executeViewChange newView
 
 -- | Execute radial tree waypoint (internal scene, no ViewState change)
 -- | This is used as an intermediate step before transitioning to ForceView
+-- | Called by Halogen when it determines a waypoint is needed
 executeRadialTreeWaypoint :: Effect Unit
 executeRadialTreeWaypoint = do
   log "[Explorer] executeRadialTreeWaypoint: transitioning to radial tree positions"
@@ -235,11 +216,11 @@ executeViewChange newView = do
   -- Notify Halogen via callback
   notifyViewStateChanged newView
 
--- | Tick handler wrapper that checks for pending waypoint transitions
+-- | Tick handler wrapper that notifies Halogen on transition completion
 -- | This wraps the normal Scene tick and, when a transition completes,
--- | checks if there's a pending view to continue to.
-tickWithPendingViewCheck :: Ref Scene.SceneState -> String -> Effect Unit
-tickWithPendingViewCheck stateRef nodesSelector = do
+-- | calls the onTransitionComplete callback so Halogen can handle waypoints.
+tickWithTransitionCallback :: Ref Scene.SceneState -> String -> Effect Unit
+tickWithTransitionCallback stateRef nodesSelector = do
   -- Get state before tick to detect transition completion
   wasTransitioning <- Scene.isTransitioning stateRef
 
@@ -252,16 +233,10 @@ tickWithPendingViewCheck stateRef nodesSelector = do
   -- Check if transition just completed
   stillTransitioning <- Scene.isTransitioning stateRef
 
-  -- If transition just completed, check for pending view
+  -- If transition just completed, notify Halogen via callback
+  -- Halogen handles waypoint logic (checking for pending target view)
   when (wasTransitioning && not stillTransitioning) do
-    pendingView <- Ref.read globalPendingViewRef
-    case pendingView of
-      Just view -> do
-        log $ "[Explorer] Waypoint complete, continuing to: " <> showViewState view
-        Ref.write Nothing globalPendingViewRef
-        -- Use executeViewChange directly since we've already done the waypoint
-        executeViewChange view
-      Nothing -> pure unit
+    notifyTransitionComplete
 
 -- =============================================================================
 -- Global State
@@ -318,15 +293,19 @@ globalFocusRef = unsafePerformEffect $ Ref.new { focusedNodeId: Nothing, fullNod
 globalTransitionRef :: Ref VT.TransitionState
 globalTransitionRef = unsafePerformEffect $ Ref.new (VT.mkTransitionState VT.AllNodes [])
 
--- | Pending view for multi-step transitions (waypoint navigation)
--- | When transitioning between module-centric (Tree/Force) and package-centric (Topo),
--- | we go through Treemap as a waypoint. This ref tracks the final destination.
-globalPendingViewRef :: Ref (Maybe ViewState)
-globalPendingViewRef = unsafePerformEffect $ Ref.new Nothing
+-- NOTE: globalPendingViewRef has been moved to Halogen state (SpagoGridApp.pendingView)
+-- Waypoint transition logic is now handled in Component.SpagoGridApp.TransitionComplete
 
 -- =============================================================================
 -- Callback-Based Notification System
 -- =============================================================================
+
+-- | Focus state for neighborhood drill-down (exported for Halogen)
+type FocusInfo =
+  { focusedNodeId :: Maybe Int  -- Currently focused node (Nothing = full view)
+  , fullNodes :: Array SimNode  -- Original full node set for restoration
+  , originView :: Maybe OverviewView  -- The view we came from (Tree or Force)
+  }
 
 -- | Callbacks for Explorer events
 -- | These allow the Halogen component to be notified of state changes
@@ -340,6 +319,12 @@ type ExplorerCallbacks =
   -- ^ Called when a declaration is clicked (moduleName, declarationName)
   , onHideCallGraphPopup :: Effect Unit
   -- ^ Called when popup should be hidden (e.g., view change)
+  , onTransitionComplete :: Effect Unit
+  -- ^ Called when a scene transition completes (for waypoint chaining)
+  , onFocusChanged :: FocusInfo -> Effect Unit
+  -- ^ Called when focus state changes (entering/exiting neighborhood)
+  , onNavigationPush :: ViewState -> Effect Unit
+  -- ^ Called to push current view to navigation stack before drilling down
   }
 
 -- | Global ref for callbacks (set by initExplorerWithCallbacks)
@@ -370,6 +355,30 @@ notifyShowCallGraphPopup moduleName declarationName = do
   mCallbacks <- Ref.read globalCallbacksRef
   case mCallbacks of
     Just cbs -> cbs.onShowCallGraphPopup moduleName declarationName
+    Nothing -> pure unit -- No callbacks registered, silent no-op
+
+-- | Notify transition complete via callback (if set)
+notifyTransitionComplete :: Effect Unit
+notifyTransitionComplete = do
+  mCallbacks <- Ref.read globalCallbacksRef
+  case mCallbacks of
+    Just cbs -> cbs.onTransitionComplete
+    Nothing -> pure unit -- No callbacks registered, silent no-op
+
+-- | Notify focus changed via callback (if set)
+notifyFocusChanged :: FocusInfo -> Effect Unit
+notifyFocusChanged focusInfo = do
+  mCallbacks <- Ref.read globalCallbacksRef
+  case mCallbacks of
+    Just cbs -> cbs.onFocusChanged focusInfo
+    Nothing -> pure unit -- No callbacks registered, silent no-op
+
+-- | Notify navigation push via callback (if set)
+notifyNavigationPush :: ViewState -> Effect Unit
+notifyNavigationPush viewState = do
+  mCallbacks <- Ref.read globalCallbacksRef
+  case mCallbacks of
+    Just cbs -> cbs.onNavigationPush viewState
     Nothing -> pure unit -- No callbacks registered, silent no-op
 
 -- =============================================================================
@@ -499,8 +508,8 @@ initWithModel model containerSelector = do
 
   -- Set up tick callback - includes view transition progress advancement and visual updates
   let nodesSelector = "#explorer-nodes" -- Selector for the nodes group
-  -- Wrap the scene tick to check for pending waypoint transitions
-  Sim.onTick (tickWithPendingViewCheck stateRef nodesSelector) sim
+  -- Wrap the scene tick to notify Halogen on transition completion
+  Sim.onTick (tickWithTransitionCallback stateRef nodesSelector) sim
 
   -- Start simulation - let forces do the initial clustering animation
   -- (no transition on startup - nodes start randomized, forces pull them in)
@@ -1269,10 +1278,15 @@ toggleFocus clickedNode = do
                   Overview ov -> Just ov
                   Detail _ -> focus.originView
 
-              -- Update focus state with origin
-              Ref.write { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore, originView: origin } globalFocusRef
+              -- Notify Halogen of focus state change
+              let focusInfo = { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore, originView: origin }
+              notifyFocusChanged focusInfo
+              -- Also update local ref (will be removed once Halogen fully owns this)
+              Ref.write focusInfo globalFocusRef
 
-              -- Push current view to navigation stack before changing
+              -- Notify Halogen to push current view to navigation stack
+              notifyNavigationPush currentView
+              -- Also update local ref (will be removed once Halogen fully owns this)
               Ref.modify_ (Array.cons currentView) globalNavigationStackRef
 
               -- Update ViewState for package neighborhood view
@@ -1313,10 +1327,15 @@ toggleFocus clickedNode = do
                   Overview ov -> Just ov
                   Detail _ -> focus.originView -- Keep existing origin if already in detail
 
-              -- Update focus state with origin
-              Ref.write { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore, originView: origin } globalFocusRef
+              -- Notify Halogen of focus state change
+              let focusInfo = { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore, originView: origin }
+              notifyFocusChanged focusInfo
+              -- Also update local ref (will be removed once Halogen fully owns this)
+              Ref.write focusInfo globalFocusRef
 
-              -- Push current view to navigation stack before changing
+              -- Notify Halogen to push current view to navigation stack
+              notifyNavigationPush currentView
+              -- Also update local ref (will be removed once Halogen fully owns this)
               Ref.modify_ (Array.cons currentView) globalNavigationStackRef
 
               -- Update ViewState for neighborhood view (always triptych now)
@@ -1787,10 +1806,15 @@ navigateToModuleByName moduleName = do
               Overview ov -> Just ov
               Detail _ -> focus.originView -- Keep existing origin if already in detail
 
-          -- Update focus state with origin
-          Ref.write { focusedNodeId: Just targetNode.id, fullNodes: nodesPool, originView: origin } globalFocusRef
+          -- Notify Halogen of focus state change
+          let focusInfo = { focusedNodeId: Just targetNode.id, fullNodes: nodesPool, originView: origin }
+          notifyFocusChanged focusInfo
+          -- Also update local ref (will be removed once Halogen fully owns this)
+          Ref.write focusInfo globalFocusRef
 
-          -- Push current view to navigation stack before changing
+          -- Notify Halogen to push current view to navigation stack
+          notifyNavigationPush currentView
+          -- Also update local ref (will be removed once Halogen fully owns this)
           Ref.modify_ (Array.cons currentView) globalNavigationStackRef
 
           -- Update ViewState for neighborhood view (always triptych now)
@@ -1868,7 +1892,7 @@ restoreFullView fullNodes targetView sim = do
       Scene.clearLinksGroupId stateRef
       -- Restore tick handler with view transition support
       let nodesSelector = "#explorer-nodes"
-      Sim.onTick (tickWithPendingViewCheck stateRef nodesSelector) sim
+      Sim.onTick (tickWithTransitionCallback stateRef nodesSelector) sim
       -- Trigger appropriate scene based on target view
       case targetView of
         Overview TreemapView -> goToScene TreemapForm stateRef
@@ -1886,11 +1910,27 @@ restoreFullView fullNodes targetView sim = do
   -- (renderNodesOnly should set them, but this ensures they're applied)
   updateNodeColors targetView
 
-  -- Clear focus state
+  -- Clear focus state (local ref - Halogen clears its own)
   Ref.write { focusedNodeId: Nothing, fullNodes: [], originView: Nothing } globalFocusRef
 
   Sim.reheat sim
   pure unit
+
+-- | Restore from Halogen-owned focus state
+-- | Called by Halogen when navigating back - takes focus info from Halogen state
+restoreFromFocus :: FocusInfo -> ViewState -> Effect Unit
+restoreFromFocus focusInfo targetView = do
+  mStateRef <- Ref.read globalStateRef
+  case mStateRef of
+    Nothing -> log "[Explorer] No state ref to restore"
+    Just stateRef -> do
+      state <- Ref.read stateRef
+      case targetView of
+        Overview _ -> restoreFullView focusInfo.fullNodes targetView state.simulation
+        Detail _ -> do
+          -- Re-entering a detail view - just update the view state
+          Ref.write targetView globalViewStateRef
+          notifyViewStateChanged targetView
 
 -- | Set forces appropriate for neighborhood view (spread out, no grid)
 -- | Uses stronger forces than full graph view since neighborhood has fewer nodes
