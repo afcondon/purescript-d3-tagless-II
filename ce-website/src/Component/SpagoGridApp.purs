@@ -10,18 +10,20 @@ import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Int (toNumber, floor)
 import Data.Loader as Loader
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import CodeExplorer.Explorer as Explorer
-import CodeExplorer.ViewState (ViewState(..), OverviewView(..), toOverview, viewDescription, isDetail)
+import CodeExplorer.State as State
+import CodeExplorer.ViewState (ViewState(..), OverviewView(..), DetailView(..), NeighborhoodViewType(..), toOverview, viewDescription, isDetail)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
 import PSD3.Scale (interpolateTurbo)
 import Type.Proxy (Proxy(..))
+import Types (NodeType(..))
 
 -- | Component state
 type State =
@@ -65,6 +67,7 @@ data Action
   | CallGraphPopupOutput CallGraphPopup.Output
   | ShowCallGraphPopup String String
   | HideCallGraphPopup
+  | NodeClicked State.NodeClickEvent  -- Node was clicked, Halogen decides what to do
 
 -- | Main app component
 component :: forall query input output m. MonadAff m => H.Component query input output m
@@ -141,6 +144,7 @@ handleAction = case _ of
         , onTransitionComplete: HS.notify listener TransitionComplete
         , onFocusChanged: \focusInfo -> HS.notify listener (FocusChanged focusInfo)
         , onNavigationPush: \viewState -> HS.notify listener (NavigationPush viewState)
+        , onNodeClicked: \event -> HS.notify listener (NodeClicked event)
         }
 
     -- Initialize Explorer with callbacks
@@ -165,9 +169,11 @@ handleAction = case _ of
       log $ "[SpagoGridApp] ViewState changed to: " <> viewDescription newViewState
       H.modify_ _ { viewState = newViewState }
       void $ H.tell _narrativePanel unit (NarrativePanel.SetViewState newViewState)
-      -- When entering a Detail view, get and send the origin view to NarrativePanel
+      -- When entering a Detail view, send the origin view to NarrativePanel
+      -- (originView is now owned by Halogen in focusInfo)
       when (isDetail newViewState) do
-        originView <- liftEffect $ Explorer.getOriginView
+        updatedState <- H.get
+        let originView = fromMaybe TreemapView updatedState.focusInfo.originView
         log $ "[SpagoGridApp] Entering detail view, origin: " <> show originView
         void $ H.tell _narrativePanel unit (NarrativePanel.SetOriginView originView)
 
@@ -330,3 +336,43 @@ handleAction = case _ of
   NavigationPush viewToPush -> do
     log $ "[SpagoGridApp] Navigation push: " <> viewDescription viewToPush
     H.modify_ \s -> s { navigationStack = Array.cons viewToPush s.navigationStack }
+
+  -- Halogen-first: D3 emits a simple "node was clicked", Halogen decides what to do
+  NodeClicked event -> do
+    state <- H.get
+    log $ "[SpagoGridApp] Node clicked: " <> event.nodeName <> " (id=" <> show event.nodeId <> ")"
+
+    -- Is this node currently focused? (clicking same node = unfocus/back)
+    let isCurrentlyFocused = state.focusInfo.focusedNodeId == Just event.nodeId
+
+    if isCurrentlyFocused then do
+      -- User clicked the already-focused node: navigate back
+      log "[SpagoGridApp] Unfocusing (back navigation)"
+      handleAction (NarrativePanelOutput NarrativePanel.BackRequested)
+    else do
+      -- Drill down to neighborhood view
+      -- Build the appropriate detail view based on node type
+      let
+        newViewState = case event.nodeType of
+          PackageNode -> Detail (PackageNeighborhoodDetail event.nodeName)
+          ModuleNode -> Detail (NeighborhoodDetail event.nodeName TriptychView)
+
+      log $ "[SpagoGridApp] Drilling down to: " <> viewDescription newViewState
+
+      -- Push current view to navigation stack
+      H.modify_ \s -> s { navigationStack = Array.cons s.viewState s.navigationStack }
+
+      -- Update focus info
+      -- Note: fullNodes will be populated by Explorer when it renders
+      let
+        originView = case state.viewState of
+          Overview ov -> Just ov
+          Detail _ -> state.focusInfo.originView -- Keep existing origin
+      H.modify_ _ { focusInfo = state.focusInfo { focusedNodeId = Just event.nodeId, originView = originView } }
+
+      -- Update view state
+      H.modify_ _ { viewState = newViewState }
+
+      -- Tell Explorer to render this neighborhood
+      -- Explorer will compute the actual neighborhood nodes based on the clicked node
+      liftEffect $ Explorer.renderNeighborhoodForNode event.nodeId event.nodeType event.nodeName

@@ -17,6 +17,7 @@ module CodeExplorer.Explorer
   , getModuleNames -- Get all module names for search
   , getOriginView -- Get the origin view for back navigation
   , updateNodeColors
+  , renderNeighborhoodForNode -- Halogen-first: render neighborhood for a clicked node
     -- Re-exports from State
   , module State
   ) where
@@ -1048,99 +1049,66 @@ showViewState (Detail (PackageNeighborhoodDetail name)) = "Detail(PackageNeighbo
 showViewState (Detail (FunctionCallsDetail name)) = "Detail(FunctionCalls:" <> name <> ")"
 
 -- | Toggle focus on a node's neighborhood
--- | Click once to drill down to neighborhood, click again to restore full view
+-- | Now uses Halogen-first architecture: just emit the click event,
+-- | let Halogen decide what to do (drill down or navigate back)
 toggleFocus :: SimNode -> Effect Unit
 toggleFocus clickedNode = do
-  focus <- Ref.read State.globalFocusRef
-  mStateRef <- Ref.read State.globalStateRef
+  log $ "[Explorer] Node clicked: " <> clickedNode.name <> " (id=" <> show clickedNode.id <> ")"
+  -- Emit the event to Halogen - it will decide what to do
+  State.notifyNodeClicked
+    { nodeId: clickedNode.id
+    , nodeName: clickedNode.name
+    , nodeType: clickedNode.nodeType
+    , topoLayer: clickedNode.topoLayer
+    }
 
+-- | Render neighborhood for a clicked node
+-- | Halogen-first architecture: Halogen calls this after deciding to drill down
+-- | Explorer finds the node, computes neighborhood, and renders it
+renderNeighborhoodForNode :: Int -> NodeType -> String -> Effect Unit
+renderNeighborhoodForNode nodeId nodeType nodeName = do
+  log $ "[Explorer] renderNeighborhoodForNode called: " <> nodeName <> " (id=" <> show nodeId <> ")"
+
+  mStateRef <- Ref.read State.globalStateRef
   case mStateRef of
     Nothing -> log "[Explorer] No state ref available"
     Just stateRef -> do
       state <- Ref.read stateRef
 
-      case focus.focusedNodeId of
-        -- Currently focused on this node - go back via navigation
-        Just fid | fid == clickedNode.id -> do
-          log $ "[Explorer] Unfocusing from node " <> show clickedNode.id <> " (via navigateBack)"
-          _ <- navigateBack
-          pure unit
+      -- Get current nodes from simulation
+      currentNodes <- Sim.getNodes state.simulation
 
-        -- Not focused, or focused on different node - focus on this neighborhood
-        _ -> do
-          -- Get current nodes before filtering
-          currentNodes <- Sim.getNodes state.simulation
+      -- Find the clicked node
+      let mClickedNode = Array.find (\n -> n.id == nodeId) currentNodes
 
-          -- Store full nodes if not already stored
-          let nodesToStore = if Array.null focus.fullNodes then currentNodes else focus.fullNodes
-
-          -- Build neighborhood based on node type
-          case clickedNode.nodeType of
+      case mClickedNode of
+        Nothing -> log $ "[Explorer] Node not found: " <> show nodeId
+        Just clickedNode -> do
+          case nodeType of
             PackageNode -> do
               -- Package click: show packages in adjacent topological layers
-              -- This shows the clicked package's layer ±1 (three layers total, or fewer at edges)
-              let packageName = clickedNode.name
               let clickedLayer = clickedNode.topoLayer
 
-              -- Find all packages (to determine min/max layer)
-              let allPackages = Array.filter (\n -> n.nodeType == PackageNode) nodesToStore
-              let minLayer = fromMaybe 0 $ minimum (map _.topoLayer allPackages)
-              let maxLayer = fromMaybe 0 $ maximum (map _.topoLayer allPackages)
-
-              -- Build neighborhood: packages within ±1 layer of clicked package
-              -- At edges (minLayer or maxLayer), only show 2 layers instead of 3
+              -- Build neighborhood: packages within ±1 layer
               let
                 neighborhoodNodes = Array.filter
                   ( \n ->
                       n.nodeType == PackageNode
                         && n.topoLayer >= (clickedLayer - 1)
-                        &&
-                          n.topoLayer <= (clickedLayer + 1)
+                        && n.topoLayer <= (clickedLayer + 1)
                   )
-                  nodesToStore
+                  currentNodes
 
-              log $ "[Explorer] Focusing on package " <> packageName
-                <> " (layer "
-                <> show clickedLayer
-                <> ", range "
-                <> show minLayer
-                <> "-"
-                <> show maxLayer
-                <> ", neighborhood: "
-                <> show (Array.length neighborhoodNodes)
-                <> " packages)"
+              log $ "[Explorer] Rendering package neighborhood: " <> nodeName
+                <> " (layer " <> show clickedLayer
+                <> ", " <> show (Array.length neighborhoodNodes) <> " packages)"
 
-              -- Record the origin view (must be done before view change)
-              currentView <- Scene.getViewState stateRef
-              let
-                origin = case currentView of
-                  Overview ov -> Just ov
-                  Detail _ -> focus.originView
-
-              -- Notify Halogen of focus state change
-              let focusInfo = { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore, originView: origin }
-              State.notifyFocusChanged focusInfo
-
-              -- Notify Halogen to push current view to navigation stack
-              State.notifyNavigationPush currentView
-
-              -- Update ViewState in SceneState and notify Halogen
-              let packageView = Detail (PackageNeighborhoodDetail packageName)
+              -- Update ViewState in SceneState
+              let packageView = Detail (PackageNeighborhoodDetail nodeName)
               Scene.setSceneViewState packageView stateRef
-              State.notifyViewStateChanged packageView
 
               -- Update simulation and DOM with package-specific rendering
-              focusOnPackageNeighborhood packageName neighborhoodNodes state.simulation
-
-            -- EXPERIMENTAL: Module-level package view (commented out - too dense for large packages)
-            -- This shows all modules in a package + their external module dependencies
-            -- Could be useful with additional work (filtering, clustering, etc.)
-            --
-            -- let modulesInPackage = Array.filter (\n -> n.nodeType == ModuleNode && n.package == packageName) nodesToStore
-            -- let moduleIds = Set.fromFoldable $ map _.id modulesInPackage
-            -- let externalDepIds = Set.fromFoldable $ Array.concatMap (\m -> m.targets <> m.sources) modulesInPackage
-            -- let neighborhoodIds = Set.union moduleIds externalDepIds
-            -- let neighborhoodNodes = Array.filter (\n -> n.nodeType == ModuleNode && Set.member n.id neighborhoodIds) nodesToStore
+              focusOnPackageNeighborhood nodeName neighborhoodNodes state.simulation
 
             ModuleNode -> do
               -- Module click: show this module + its direct dependencies
@@ -1150,35 +1118,18 @@ toggleFocus clickedNode = do
 
               let neighborhoodNodes = Array.filter (\n -> Set.member n.id neighborhoodIds) currentNodes
 
-              log $ "[Explorer] Focusing on node " <> show clickedNode.id
-                <> " (neighborhood: "
-                <> show (Array.length neighborhoodNodes)
-                <> " nodes)"
+              log $ "[Explorer] Rendering module neighborhood: " <> nodeName
+                <> " (" <> show (Array.length neighborhoodNodes) <> " nodes)"
 
-              -- Record the origin view (must be done before view change)
-              currentView <- Scene.getViewState stateRef
-              let
-                origin = case currentView of
-                  Overview ov -> Just ov
-                  Detail _ -> focus.originView -- Keep existing origin if already in detail
-
-              -- Notify Halogen of focus state change
-              let focusInfo = { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore, originView: origin }
-              State.notifyFocusChanged focusInfo
-
-              -- Notify Halogen to push current view to navigation stack
-              State.notifyNavigationPush currentView
-
-              -- Update ViewState in SceneState and notify Halogen
-              let neighborhoodView = Detail (NeighborhoodDetail clickedNode.name TriptychView)
+              -- Update ViewState in SceneState
+              let neighborhoodView = Detail (NeighborhoodDetail nodeName TriptychView)
               Scene.setSceneViewState neighborhoodView stateRef
-              State.notifyViewStateChanged neighborhoodView
 
               -- Update simulation and DOM (renders bubble packs)
               focusOnNeighborhood neighborhoodNodes state.simulation
 
               -- Wrap with triptych layout (adds chord + matrix panels)
-              renderTriptychWithDeclarations clickedNode.name neighborhoodNodes
+              renderTriptychWithDeclarations nodeName neighborhoodNodes
 
 -- | Focus on a subset of nodes
 focusOnNeighborhood :: Array SimNode -> Scene.CESimulation -> Effect Unit
@@ -1577,12 +1528,10 @@ renderDirectionalLinksD3 links = do
 -- Navigation
 -- =============================================================================
 
--- | Get the origin view (where the user came from before entering Detail view)
--- | Returns the overview view they were on, or TreemapView as fallback
+-- | DEPRECATED: Halogen now owns origin view in its focusInfo state
+-- | Use state.focusInfo.originView directly in Halogen components
 getOriginView :: Effect OverviewView
-getOriginView = do
-  focus <- Ref.read State.globalFocusRef
-  pure $ fromMaybe TreemapView focus.originView
+getOriginView = pure TreemapView -- Always returns default - Halogen should use its own state
 
 -- | Get all module names for search functionality
 getModuleNames :: Effect (Array String)
@@ -1597,6 +1546,7 @@ getModuleNames = do
       pure $ Array.sort moduleNames
 
 -- | Navigate to a module neighborhood by name (for search)
+-- | Halogen-first: just renders the neighborhood, Halogen manages state
 -- | Returns true if module was found and navigation happened
 navigateToModuleByName :: String -> Effect Boolean
 navigateToModuleByName moduleName = do
@@ -1607,91 +1557,33 @@ navigateToModuleByName moduleName = do
       pure false
     Just stateRef -> do
       state <- Ref.read stateRef
-      focus <- Ref.read State.globalFocusRef
 
-      -- Get current nodes
+      -- Get current nodes from simulation
       currentNodes <- Sim.getNodes state.simulation
-      -- Use fullNodes if available (may be in a detail view already)
-      let nodesPool = if Array.null focus.fullNodes then currentNodes else focus.fullNodes
 
       -- Find the module by name
-      case Array.find (\n -> n.name == moduleName && n.nodeType == ModuleNode) nodesPool of
+      case Array.find (\n -> n.name == moduleName && n.nodeType == ModuleNode) currentNodes of
         Nothing -> do
           log $ "[Explorer] Module not found: " <> moduleName
           pure false
         Just targetNode -> do
           log $ "[Explorer] Navigating to module: " <> moduleName
 
-          -- Build neighborhood: target node + its targets + its sources
-          let
-            neighborhoodIds = Set.fromFoldable $
-              [ targetNode.id ] <> targetNode.targets <> targetNode.sources
-            neighborhoodNodes = Array.filter (\n -> Set.member n.id neighborhoodIds) nodesPool
-
-          log $ "[Explorer] Found " <> show (Array.length neighborhoodNodes) <> " nodes in neighborhood"
-
-          -- Record the origin view (must be done before view change)
-          currentView <- Scene.getViewState stateRef
-          let
-            origin = case currentView of
-              Overview ov -> Just ov
-              Detail _ -> focus.originView -- Keep existing origin if already in detail
-
-          -- Notify Halogen of focus state change
-          let focusInfo = { focusedNodeId: Just targetNode.id, fullNodes: nodesPool, originView: origin }
-          State.notifyFocusChanged focusInfo
-
-          -- Notify Halogen to push current view to navigation stack
-          State.notifyNavigationPush currentView
-
-          -- Update ViewState in SceneState and notify Halogen
-          let neighborhoodView = Detail (NeighborhoodDetail targetNode.name TriptychView)
-          Scene.setSceneViewState neighborhoodView stateRef
-          State.notifyViewStateChanged neighborhoodView
-
-          -- Update simulation and DOM (renders bubble packs)
-          focusOnNeighborhood neighborhoodNodes state.simulation
-
-          -- Wrap with triptych layout (adds chord + matrix panels)
-          renderTriptychWithDeclarations targetNode.name neighborhoodNodes
-
+          -- Just render the neighborhood - Halogen handles state management
+          renderNeighborhoodForNode targetNode.id ModuleNode targetNode.name
           pure true
 
--- | Navigate back to the previous view in the navigation stack
--- | Returns true if navigation happened, false if stack was empty
+-- | DEPRECATED: Halogen now owns the navigation stack
+-- | Use restoreFromFocus instead, which takes focus info from Halogen
 navigateBack :: Effect Boolean
 navigateBack = do
-  stack <- Ref.read State.globalNavigationStackRef
-  case Array.uncons stack of
-    Nothing -> do
-      log "[Explorer] Navigation stack empty, nothing to go back to"
-      pure false
-    Just { head: previousView, tail: remainingStack } -> do
-      log $ "[Explorer] Navigating back to: " <> showViewState previousView
-      -- Pop the stack
-      Ref.write remainingStack State.globalNavigationStackRef
-      -- Restore the previous view
-      restoreToView previousView
-      pure true
+  log "[Explorer] DEPRECATED: navigateBack called - Halogen should manage navigation"
+  pure false
 
--- | Restore to a specific view (used by navigateBack)
+-- | DEPRECATED: Internal function, use restoreFromFocus instead
 restoreToView :: ViewState -> Effect Unit
-restoreToView targetView = do
-  focus <- Ref.read State.globalFocusRef
-  mStateRef <- Ref.read State.globalStateRef
-
-  case mStateRef of
-    Nothing -> log "[Explorer] No state ref to restore"
-    Just stateRef -> do
-      state <- Ref.read stateRef
-
-      case targetView of
-        Overview _ -> restoreFullView focus.fullNodes targetView state.simulation
-        Detail _ -> do
-          -- Re-entering a detail view - just update the view state
-          -- (the DOM is already showing the detail)
-          Scene.setSceneViewState targetView stateRef
-          State.notifyViewStateChanged targetView
+restoreToView _ = do
+  log "[Explorer] DEPRECATED: restoreToView called - use restoreFromFocus"
 
 -- | Restore full view
 restoreFullView :: Array SimNode -> ViewState -> Scene.CESimulation -> Effect Unit

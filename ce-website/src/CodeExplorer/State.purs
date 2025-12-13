@@ -21,6 +21,7 @@ module CodeExplorer.State
   , FocusInfo
   , ModelInfo
   , ExplorerCallbacks
+  , NodeClickEvent
 
     -- * Constants
   , nodesGroupId
@@ -34,6 +35,7 @@ module CodeExplorer.State
   , notifyTransitionComplete
   , notifyFocusChanged
   , notifyNavigationPush
+  , notifyNodeClicked
   ) where
 
 import Prelude
@@ -49,7 +51,7 @@ import CodeExplorer.ViewState (ViewState(..), OverviewView(..))
 import CodeExplorer.ViewTransition as VT
 import Data.Loader (DeclarationsMap, FunctionCallsMap)
 import PSD3.ForceEngine.Render (GroupId(..))
-import Types (SimNode, SimLink)
+import Types (SimNode, SimLink, NodeType)
 
 -- =============================================================================
 -- Global State
@@ -117,6 +119,14 @@ type FocusInfo =
   , originView :: Maybe OverviewView  -- The view we came from (Tree or Force)
   }
 
+-- | Node click event data - what D3 emits when a node is clicked
+type NodeClickEvent =
+  { nodeId :: Int
+  , nodeName :: String
+  , nodeType :: NodeType
+  , topoLayer :: Int  -- For package neighborhood calculations
+  }
+
 -- | Callbacks for Explorer events
 -- | These allow the Halogen component to be notified of state changes
 -- | instead of polling global refs.
@@ -135,6 +145,8 @@ type ExplorerCallbacks =
   -- ^ Called when focus state changes (entering/exiting neighborhood)
   , onNavigationPush :: ViewState -> Effect Unit
   -- ^ Called to push current view to navigation stack before drilling down
+  , onNodeClicked :: NodeClickEvent -> Effect Unit
+  -- ^ Called when a node is clicked - Halogen decides what to do
   }
 
 -- | Global ref for callbacks (set by initExplorerWithCallbacks)
@@ -189,6 +201,15 @@ notifyNavigationPush viewState = do
   mCallbacks <- Ref.read globalCallbacksRef
   case mCallbacks of
     Just cbs -> cbs.onNavigationPush viewState
+    Nothing -> pure unit -- No callbacks registered, silent no-op
+
+-- | Notify node clicked via callback (if set)
+-- | Halogen will decide what to do (drill down, unfocus, etc.)
+notifyNodeClicked :: NodeClickEvent -> Effect Unit
+notifyNodeClicked event = do
+  mCallbacks <- Ref.read globalCallbacksRef
+  case mCallbacks of
+    Just cbs -> cbs.onNodeClicked event
     Nothing -> pure unit -- No callbacks registered, silent no-op
 
 -- =============================================================================
