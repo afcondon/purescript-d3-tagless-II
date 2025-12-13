@@ -51,7 +51,7 @@ import CodeExplorer.AdjacencyMatrix (renderNeighborhoodMatrix, clearAdjacencyMat
 import CodeExplorer.TriptychView (renderTriptychWithDeclarations, clearTriptych)
 -- CallGraphPopup is now a Halogen component (Component.CallGraphPopup)
 -- NarrativePanel is now a Halogen component (Component.NarrativePanel)
--- It polls State.globalViewStateRef and State.globalModelInfoRef directly
+-- ViewState is stored in SceneState and synced via callbacks to Halogen
 import CodeExplorer.ViewState (ViewState(..), OverviewView(..), DetailView(..), NeighborhoodViewType(..), getNeighborhoodModule, neighborhoodViewLabel)
 import CodeExplorer.ViewTransition as VT
 import Data.ColorPalette (getNodeStroke, getNodeFill) as ColorPalette
@@ -436,7 +436,7 @@ updateWithModel model stateRef = do
   simNodes <- Sim.getNodes state.simulation
 
   -- Re-render nodes using existing renderNodesOnly
-  currentView <- Ref.read State.globalViewStateRef
+  currentView <- Scene.getViewState stateRef
   _ <- runD3v2M $ renderNodesOnly currentView simNodes
 
   -- Update watermark for new project
@@ -1111,7 +1111,7 @@ toggleFocus clickedNode = do
                 <> " packages)"
 
               -- Record the origin view (must be done before view change)
-              currentView <- Ref.read State.globalViewStateRef
+              currentView <- Scene.getViewState stateRef
               let
                 origin = case currentView of
                   Overview ov -> Just ov
@@ -1120,17 +1120,13 @@ toggleFocus clickedNode = do
               -- Notify Halogen of focus state change
               let focusInfo = { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore, originView: origin }
               State.notifyFocusChanged focusInfo
-              -- Also update local ref (will be removed once Halogen fully owns this)
-              Ref.write focusInfo State.globalFocusRef
 
               -- Notify Halogen to push current view to navigation stack
               State.notifyNavigationPush currentView
-              -- Also update local ref (will be removed once Halogen fully owns this)
-              Ref.modify_ (Array.cons currentView) State.globalNavigationStackRef
 
-              -- Update ViewState for package neighborhood view
+              -- Update ViewState in SceneState and notify Halogen
               let packageView = Detail (PackageNeighborhoodDetail packageName)
-              Ref.write packageView State.globalViewStateRef
+              Scene.setSceneViewState packageView stateRef
               State.notifyViewStateChanged packageView
 
               -- Update simulation and DOM with package-specific rendering
@@ -1160,7 +1156,7 @@ toggleFocus clickedNode = do
                 <> " nodes)"
 
               -- Record the origin view (must be done before view change)
-              currentView <- Ref.read State.globalViewStateRef
+              currentView <- Scene.getViewState stateRef
               let
                 origin = case currentView of
                   Overview ov -> Just ov
@@ -1169,17 +1165,13 @@ toggleFocus clickedNode = do
               -- Notify Halogen of focus state change
               let focusInfo = { focusedNodeId: Just clickedNode.id, fullNodes: nodesToStore, originView: origin }
               State.notifyFocusChanged focusInfo
-              -- Also update local ref (will be removed once Halogen fully owns this)
-              Ref.write focusInfo State.globalFocusRef
 
               -- Notify Halogen to push current view to navigation stack
               State.notifyNavigationPush currentView
-              -- Also update local ref (will be removed once Halogen fully owns this)
-              Ref.modify_ (Array.cons currentView) State.globalNavigationStackRef
 
-              -- Update ViewState for neighborhood view (always triptych now)
+              -- Update ViewState in SceneState and notify Halogen
               let neighborhoodView = Detail (NeighborhoodDetail clickedNode.name TriptychView)
-              Ref.write neighborhoodView State.globalViewStateRef
+              Scene.setSceneViewState neighborhoodView stateRef
               State.notifyViewStateChanged neighborhoodView
 
               -- Update simulation and DOM (renders bubble packs)
@@ -1639,7 +1631,7 @@ navigateToModuleByName moduleName = do
           log $ "[Explorer] Found " <> show (Array.length neighborhoodNodes) <> " nodes in neighborhood"
 
           -- Record the origin view (must be done before view change)
-          currentView <- Ref.read State.globalViewStateRef
+          currentView <- Scene.getViewState stateRef
           let
             origin = case currentView of
               Overview ov -> Just ov
@@ -1648,17 +1640,13 @@ navigateToModuleByName moduleName = do
           -- Notify Halogen of focus state change
           let focusInfo = { focusedNodeId: Just targetNode.id, fullNodes: nodesPool, originView: origin }
           State.notifyFocusChanged focusInfo
-          -- Also update local ref (will be removed once Halogen fully owns this)
-          Ref.write focusInfo State.globalFocusRef
 
           -- Notify Halogen to push current view to navigation stack
           State.notifyNavigationPush currentView
-          -- Also update local ref (will be removed once Halogen fully owns this)
-          Ref.modify_ (Array.cons currentView) State.globalNavigationStackRef
 
-          -- Update ViewState for neighborhood view (always triptych now)
+          -- Update ViewState in SceneState and notify Halogen
           let neighborhoodView = Detail (NeighborhoodDetail targetNode.name TriptychView)
-          Ref.write neighborhoodView State.globalViewStateRef
+          Scene.setSceneViewState neighborhoodView stateRef
           State.notifyViewStateChanged neighborhoodView
 
           -- Update simulation and DOM (renders bubble packs)
@@ -1702,7 +1690,7 @@ restoreToView targetView = do
         Detail _ -> do
           -- Re-entering a detail view - just update the view state
           -- (the DOM is already showing the detail)
-          Ref.write targetView State.globalViewStateRef
+          Scene.setSceneViewState targetView stateRef
           State.notifyViewStateChanged targetView
 
 -- | Restore full view
@@ -1732,6 +1720,8 @@ restoreFullView fullNodes targetView sim = do
       -- Restore tick handler with view transition support
       let nodesSelector = "#explorer-nodes"
       Sim.onTick (tickWithTransitionCallback stateRef nodesSelector) sim
+      -- Update ViewState in SceneState
+      Scene.setSceneViewState targetView stateRef
       -- Trigger appropriate scene based on target view
       case targetView of
         Overview TreemapView -> goToScene TreemapForm stateRef
@@ -1741,8 +1731,7 @@ restoreFullView fullNodes targetView sim = do
         Detail _ -> pure unit -- Detail views shouldn't reach this path
     Nothing -> pure unit
 
-  -- Update ViewState and notify via callback
-  Ref.write targetView State.globalViewStateRef
+  -- Notify Halogen via callback
   State.notifyViewStateChanged targetView
 
   -- Ensure colors are correct for the restored view
@@ -1768,7 +1757,7 @@ restoreFromFocus focusInfo targetView = do
         Overview _ -> restoreFullView focusInfo.fullNodes targetView state.simulation
         Detail _ -> do
           -- Re-entering a detail view - just update the view state
-          Ref.write targetView State.globalViewStateRef
+          Scene.setSceneViewState targetView stateRef
           State.notifyViewStateChanged targetView
 
 -- | Set forces appropriate for neighborhood view (spread out, no grid)
@@ -1997,19 +1986,19 @@ extractModuleName fullName = do
 -- | This only works when already in a NeighborhoodDetail view
 setNeighborhoodViewType :: NeighborhoodViewType -> Effect Unit
 setNeighborhoodViewType newViewType = do
-  currentView <- Ref.read State.globalViewStateRef
-  case getNeighborhoodModule currentView of
-    Nothing -> do
-      log "[Explorer] setNeighborhoodViewType called but not in neighborhood view"
-      pure unit
-    Just moduleName -> do
-      log $ "[Explorer] Switching neighborhood view to: " <> neighborhoodViewLabel newViewType
+  mStateRef <- Ref.read State.globalStateRef
+  case mStateRef of
+    Nothing -> log "[Explorer] No state ref available"
+    Just stateRef -> do
+      currentView <- Scene.getViewState stateRef
+      case getNeighborhoodModule currentView of
+        Nothing -> do
+          log "[Explorer] setNeighborhoodViewType called but not in neighborhood view"
+          pure unit
+        Just moduleName -> do
+          log $ "[Explorer] Switching neighborhood view to: " <> neighborhoodViewLabel newViewType
 
-      -- Get current nodes from simulation
-      mStateRef <- Ref.read State.globalStateRef
-      case mStateRef of
-        Nothing -> log "[Explorer] No state ref available"
-        Just stateRef -> do
+          -- Get current nodes from simulation
           state <- Ref.read stateRef
           nodes <- Sim.getNodes state.simulation
 
@@ -2020,9 +2009,9 @@ setNeighborhoodViewType newViewType = do
           clearTriptych
           clearTreeLinks
 
-          -- Update view state
+          -- Update view state in SceneState and notify Halogen
           let newView = Detail (NeighborhoodDetail moduleName newViewType)
-          Ref.write newView State.globalViewStateRef
+          Scene.setSceneViewState newView stateRef
           State.notifyViewStateChanged newView
 
           -- Render the new view type
