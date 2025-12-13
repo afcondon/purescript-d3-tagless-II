@@ -342,8 +342,9 @@ initWithModel model containerSelector = do
   -- Render treemap watermark (behind nodes)
   renderWatermark model.nodes
 
-  -- Create scene state (includes ViewState and TransitionState)
-  sceneState <- Scene.mkSceneState sim State.nodesGroupId initialView simNodes
+  -- Create scene state (includes ViewState, TransitionState, and model data)
+  let modelData = { links: model.links, declarations: model.declarations }
+  sceneState <- Scene.mkSceneState sim State.nodesGroupId initialView simNodes modelData
   stateRef <- Ref.new sceneState
 
   -- Set up tick callback - includes view transition progress advancement and visual updates
@@ -471,7 +472,7 @@ goToScene sceneId stateRef = do
     state <- Ref.read stateRef
     nodes <- Sim.getNodes state.simulation
     clearTreeLinks -- Clear any existing links
-    renderTreeLinks nodes
+    renderTreeLinks stateRef nodes
     Scene.setTreeLinksGroupId State.treeLinksGroupId stateRef -- Enable tree link updates during transition
     setTreeSceneClass true
     VT.clearPackageLabels -- Remove TopoGraph package labels if present
@@ -489,7 +490,7 @@ goToScene sceneId stateRef = do
   when (sceneId == TreeRun) do
     state <- Ref.read stateRef
     nodes <- Sim.getNodes state.simulation
-    links <- Ref.read State.globalLinksRef
+    links <- Scene.getLinks stateRef
     clearTreeLinks -- Remove any existing links
     addTreeForces nodes links state.simulation
     renderForceLinks nodes links -- Render straight line links
@@ -842,9 +843,9 @@ linkOpacity score = 0.3 + (score * 0.5) -- Range: 0.3 to 0.8
 -- =============================================================================
 
 -- | Render tree links as vertical bezier paths (root at top)
-renderTreeLinks :: Array SimNode -> Effect Unit
-renderTreeLinks nodes = do
-  links <- Ref.read State.globalLinksRef
+renderTreeLinks :: Ref Scene.SceneState -> Array SimNode -> Effect Unit
+renderTreeLinks stateRef nodes = do
+  links <- Scene.getLinks stateRef
   let treeLinks = Array.filter isTreeLink links
   log $ "[Explorer] Rendering " <> show (Array.length treeLinks) <> " tree links"
 
@@ -1126,14 +1127,14 @@ renderNeighborhoodForNode nodeId nodeType nodeName = do
               Scene.setSceneViewState neighborhoodView stateRef
 
               -- Update simulation and DOM (renders bubble packs)
-              focusOnNeighborhood neighborhoodNodes state.simulation
+              focusOnNeighborhood stateRef neighborhoodNodes state.simulation
 
               -- Wrap with triptych layout (adds chord + matrix panels)
               renderTriptychWithDeclarations nodeName neighborhoodNodes
 
 -- | Focus on a subset of nodes
-focusOnNeighborhood :: Array SimNode -> Scene.CESimulation -> Effect Unit
-focusOnNeighborhood nodes sim = do
+focusOnNeighborhood :: Ref Scene.SceneState -> Array SimNode -> Scene.CESimulation -> Effect Unit
+focusOnNeighborhood stateRef nodes sim = do
   log $ "[Explorer] Focusing on neighborhood with " <> show (Array.length nodes) <> " nodes"
 
   -- Hide any existing tooltip
@@ -1210,7 +1211,7 @@ focusOnNeighborhood nodes sim = do
       Core.attachGroupDragWithReheat packElements "#explorer-zoom-group" (Sim.reheat sim)
 
       -- Render links between neighborhood modules
-      renderNeighborhoodLinks liveNodes
+      renderNeighborhoodLinks stateRef liveNodes
 
       -- Set up custom tick callback for bubble pack mode
       -- This updates group transforms and link positions
@@ -1360,9 +1361,9 @@ type DirectionalLink =
 
 -- | Render links between neighborhood nodes (full graph edges, not tree)
 -- | Now renders bidirectional colored links (green for outgoing, orange for incoming)
-renderNeighborhoodLinks :: Array SimNode -> Effect Unit
-renderNeighborhoodLinks nodes = do
-  allLinks <- Ref.read State.globalLinksRef
+renderNeighborhoodLinks :: Ref Scene.SceneState -> Array SimNode -> Effect Unit
+renderNeighborhoodLinks stateRef nodes = do
+  allLinks <- Scene.getLinks stateRef
 
   -- Build set of node IDs in neighborhood
   let nodeIdSet = Set.fromFoldable $ map _.id nodes
@@ -1943,7 +1944,6 @@ renderBubblePackView nodes = do
     Just stateRef -> do
       state <- Ref.read stateRef
       Core.attachGroupDragWithReheat packElements "#explorer-zoom-group" (Sim.reheat state.simulation)
+      -- Render neighborhood links
+      renderNeighborhoodLinks stateRef nodes
     Nothing -> pure unit
-
-  -- Render neighborhood links
-  renderNeighborhoodLinks nodes

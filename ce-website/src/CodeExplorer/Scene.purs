@@ -18,6 +18,7 @@ module CodeExplorer.Scene
   , CESimulation
   , NodeRow
   , LinkRow
+  , ModelData
   -- App-specific functions
   , applyRulesInPlace
   , mkSceneState
@@ -34,6 +35,11 @@ module CodeExplorer.Scene
   , getViewState
   , setSceneViewState
   , getTransitionState
+  -- Model data access (stored in SceneState)
+  , getLinks
+  , getDeclarations
+  , getFunctionCalls
+  , setFunctionCalls
   ) where
 
 import Prelude
@@ -58,9 +64,10 @@ import PSD3.Simulation.Scene
   , PositionMap
   , applyRulesInPlace_
   ) as SimScene
-import Types (SimNode, NodeType, LinkType)
+import Types (SimNode, SimLink, NodeType, LinkType)
 import CodeExplorer.ViewState (ViewState)
 import CodeExplorer.ViewTransition as VT
+import Data.Loader (DeclarationsMap, FunctionCallsMap)
 
 -- =============================================================================
 -- App-Specific Types
@@ -101,6 +108,7 @@ type CESimulation = Sim.Simulation NodeRow LinkRow
 -- | - GroupId tracking for selective DOM updates
 -- | - viewState: Current view for rendering (owned by Scene, synced from Halogen)
 -- | - transitionState: GUP-style enter/exit progress (internal to Scene)
+-- | - Model data (links, declarations, functionCalls) - immutable after load
 type SceneState =
   { simulation :: CESimulation
   , engine :: Engine.SceneEngine SimNode
@@ -109,6 +117,10 @@ type SceneState =
   , treeLinksGroupId :: Maybe GroupId
   , viewState :: ViewState
   , transitionState :: VT.TransitionState
+  -- Model data (immutable after load)
+  , links :: Array SimLink
+  , declarations :: DeclarationsMap
+  , functionCalls :: FunctionCallsMap
   }
 
 -- =============================================================================
@@ -163,6 +175,12 @@ reinitializeForces sim = do
 -- State Management
 -- =============================================================================
 
+-- | Model data record for creating scene state
+type ModelData =
+  { links :: Array SimLink
+  , declarations :: DeclarationsMap
+  }
+
 -- | Create initial scene state
 -- | ViewState and initial nodes needed to set up transition state
 mkSceneState
@@ -170,8 +188,9 @@ mkSceneState
   -> GroupId
   -> ViewState
   -> Array SimNode  -- Initial nodes for transition state
+  -> ModelData      -- Links and declarations from loaded model
   -> Effect SceneState
-mkSceneState sim groupId initialView initialNodes = do
+mkSceneState sim groupId initialView initialNodes modelData = do
   engine <- Engine.createEngine (mkAdapter sim)
   -- Initialize transition state with all nodes entering
   let initialViewNodes = VT.getViewNodes initialView
@@ -184,6 +203,9 @@ mkSceneState sim groupId initialView initialNodes = do
     , treeLinksGroupId: Nothing
     , viewState: initialView
     , transitionState: initialTransition
+    , links: modelData.links
+    , declarations: modelData.declarations
+    , functionCalls: Object.empty  -- Populated lazily when entering neighborhood view
     }
 
 -- | Set the links group ID to enable force link updates
@@ -226,6 +248,33 @@ getTransitionState :: Ref SceneState -> Effect VT.TransitionState
 getTransitionState stateRef = do
   state <- Ref.read stateRef
   pure state.transitionState
+
+-- =============================================================================
+-- Model Data Access
+-- =============================================================================
+
+-- | Get links from scene state
+getLinks :: Ref SceneState -> Effect (Array SimLink)
+getLinks stateRef = do
+  state <- Ref.read stateRef
+  pure state.links
+
+-- | Get declarations from scene state
+getDeclarations :: Ref SceneState -> Effect DeclarationsMap
+getDeclarations stateRef = do
+  state <- Ref.read stateRef
+  pure state.declarations
+
+-- | Get function calls from scene state
+getFunctionCalls :: Ref SceneState -> Effect FunctionCallsMap
+getFunctionCalls stateRef = do
+  state <- Ref.read stateRef
+  pure state.functionCalls
+
+-- | Set function calls (called after lazy fetch in neighborhood view)
+setFunctionCalls :: FunctionCallsMap -> Ref SceneState -> Effect Unit
+setFunctionCalls fnCalls stateRef =
+  Ref.modify_ (_ { functionCalls = fnCalls }) stateRef
 
 -- =============================================================================
 -- Transitions (delegated to library engine)
