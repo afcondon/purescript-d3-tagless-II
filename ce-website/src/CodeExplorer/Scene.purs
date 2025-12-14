@@ -13,6 +13,11 @@
 module CodeExplorer.Scene
   ( -- Re-exported from library
     module SimScene
+  -- Callback types (for Halogen integration)
+  , ModelInfo
+  , FocusInfo
+  , NodeClickEvent
+  , ExplorerCallbacks
   -- App-specific types
   , SceneState
   , CESimulation
@@ -40,6 +45,16 @@ module CodeExplorer.Scene
   , getDeclarations
   , getFunctionCalls
   , setFunctionCalls
+  , setLinks
+  , setDeclarations
+  -- Callback notifications (take Ref SceneState)
+  , notifyViewStateChanged
+  , notifyModelLoaded
+  , notifyShowCallGraphPopup
+  , notifyTransitionComplete
+  , notifyFocusChanged
+  , notifyNavigationPush
+  , notifyNodeClicked
   ) where
 
 import Prelude
@@ -65,9 +80,57 @@ import PSD3.Simulation.Scene
   , applyRulesInPlace_
   ) as SimScene
 import Types (SimNode, SimLink, NodeType, LinkType)
-import CodeExplorer.ViewState (ViewState)
+import CodeExplorer.ViewState (ViewState, OverviewView)
 import CodeExplorer.ViewTransition as VT
 import Data.Loader (DeclarationsMap, FunctionCallsMap)
+
+-- =============================================================================
+-- Callback Types (for Halogen integration)
+-- =============================================================================
+
+-- | Model info for narrative panel
+type ModelInfo =
+  { projectName :: String
+  , moduleCount :: Int
+  , packageCount :: Int
+  }
+
+-- | Focus state for neighborhood drill-down (exported for Halogen)
+type FocusInfo =
+  { focusedNodeId :: Maybe Int  -- Currently focused node (Nothing = full view)
+  , fullNodes :: Array SimNode  -- Original full node set for restoration
+  , originView :: Maybe OverviewView  -- The view we came from (Tree or Force)
+  }
+
+-- | Node click event data - what D3 emits when a node is clicked
+type NodeClickEvent =
+  { nodeId :: Int
+  , nodeName :: String
+  , nodeType :: NodeType
+  , topoLayer :: Int  -- For package neighborhood calculations
+  }
+
+-- | Callbacks for Explorer events
+-- | These allow the Halogen component to be notified of state changes
+-- | instead of polling global refs.
+type ExplorerCallbacks =
+  { onViewStateChanged :: ViewState -> Effect Unit
+  -- ^ Called when ViewState changes (navigation, drill-down, etc.)
+  , onModelLoaded :: ModelInfo -> Effect Unit
+  -- ^ Called when model data is loaded (provides package count for palette)
+  , onShowCallGraphPopup :: String -> String -> Effect Unit
+  -- ^ Called when a declaration is clicked (moduleName, declarationName)
+  , onHideCallGraphPopup :: Effect Unit
+  -- ^ Called when popup should be hidden (e.g., view change)
+  , onTransitionComplete :: Effect Unit
+  -- ^ Called when a scene transition completes (for waypoint chaining)
+  , onFocusChanged :: FocusInfo -> Effect Unit
+  -- ^ Called when focus state changes (entering/exiting neighborhood)
+  , onNavigationPush :: ViewState -> Effect Unit
+  -- ^ Called to push current view to navigation stack before drilling down
+  , onNodeClicked :: NodeClickEvent -> Effect Unit
+  -- ^ Called when a node is clicked - Halogen decides what to do
+  }
 
 -- =============================================================================
 -- App-Specific Types
@@ -109,6 +172,7 @@ type CESimulation = Sim.Simulation NodeRow LinkRow
 -- | - viewState: Current view for rendering (owned by Scene, synced from Halogen)
 -- | - transitionState: GUP-style enter/exit progress (internal to Scene)
 -- | - Model data (links, declarations, functionCalls) - immutable after load
+-- | - callbacks: Halogen callbacks for event notifications
 type SceneState =
   { simulation :: CESimulation
   , engine :: Engine.SceneEngine SimNode
@@ -121,6 +185,8 @@ type SceneState =
   , links :: Array SimLink
   , declarations :: DeclarationsMap
   , functionCalls :: FunctionCallsMap
+  -- Halogen callbacks
+  , callbacks :: ExplorerCallbacks
   }
 
 -- =============================================================================
@@ -189,8 +255,9 @@ mkSceneState
   -> ViewState
   -> Array SimNode  -- Initial nodes for transition state
   -> ModelData      -- Links and declarations from loaded model
+  -> ExplorerCallbacks  -- Halogen callbacks for event notifications
   -> Effect SceneState
-mkSceneState sim groupId initialView initialNodes modelData = do
+mkSceneState sim groupId initialView initialNodes modelData cbs = do
   engine <- Engine.createEngine (mkAdapter sim)
   -- Initialize transition state with all nodes entering
   let initialViewNodes = VT.getViewNodes initialView
@@ -206,6 +273,7 @@ mkSceneState sim groupId initialView initialNodes modelData = do
     , links: modelData.links
     , declarations: modelData.declarations
     , functionCalls: Object.empty  -- Populated lazily when entering neighborhood view
+    , callbacks: cbs
     }
 
 -- | Set the links group ID to enable force link updates
@@ -275,6 +343,16 @@ getFunctionCalls stateRef = do
 setFunctionCalls :: FunctionCallsMap -> Ref SceneState -> Effect Unit
 setFunctionCalls fnCalls stateRef =
   Ref.modify_ (_ { functionCalls = fnCalls }) stateRef
+
+-- | Set links (called during project reload)
+setLinks :: Array SimLink -> Ref SceneState -> Effect Unit
+setLinks newLinks stateRef =
+  Ref.modify_ (_ { links = newLinks }) stateRef
+
+-- | Set declarations (called during project reload)
+setDeclarations :: DeclarationsMap -> Ref SceneState -> Effect Unit
+setDeclarations newDeclarations stateRef =
+  Ref.modify_ (_ { declarations = newDeclarations }) stateRef
 
 -- =============================================================================
 -- Transitions (delegated to library engine)
@@ -367,3 +445,50 @@ onTickWithViewTransition sceneStateRef nodesSelector = do
 
   -- Run normal scene tick (position updates)
   onTick sceneStateRef
+
+-- =============================================================================
+-- Callback Notifications
+-- =============================================================================
+
+-- | Notify ViewState change via callback
+notifyViewStateChanged :: ViewState -> Ref SceneState -> Effect Unit
+notifyViewStateChanged newView stateRef = do
+  state <- Ref.read stateRef
+  state.callbacks.onViewStateChanged newView
+
+-- | Notify model loaded via callback
+notifyModelLoaded :: ModelInfo -> Ref SceneState -> Effect Unit
+notifyModelLoaded modelInfo stateRef = do
+  state <- Ref.read stateRef
+  state.callbacks.onModelLoaded modelInfo
+
+-- | Notify show call graph popup via callback
+notifyShowCallGraphPopup :: String -> String -> Ref SceneState -> Effect Unit
+notifyShowCallGraphPopup moduleName declarationName stateRef = do
+  state <- Ref.read stateRef
+  state.callbacks.onShowCallGraphPopup moduleName declarationName
+
+-- | Notify transition complete via callback
+notifyTransitionComplete :: Ref SceneState -> Effect Unit
+notifyTransitionComplete stateRef = do
+  state <- Ref.read stateRef
+  state.callbacks.onTransitionComplete
+
+-- | Notify focus changed via callback
+notifyFocusChanged :: FocusInfo -> Ref SceneState -> Effect Unit
+notifyFocusChanged focusInfo stateRef = do
+  state <- Ref.read stateRef
+  state.callbacks.onFocusChanged focusInfo
+
+-- | Notify navigation push via callback
+notifyNavigationPush :: ViewState -> Ref SceneState -> Effect Unit
+notifyNavigationPush viewState stateRef = do
+  state <- Ref.read stateRef
+  state.callbacks.onNavigationPush viewState
+
+-- | Notify node clicked via callback
+-- | Halogen will decide what to do (drill down, unfocus, etc.)
+notifyNodeClicked :: NodeClickEvent -> Ref SceneState -> Effect Unit
+notifyNodeClicked event stateRef = do
+  state <- Ref.read stateRef
+  state.callbacks.onNodeClicked event

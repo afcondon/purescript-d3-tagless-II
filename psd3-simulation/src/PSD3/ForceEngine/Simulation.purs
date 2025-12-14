@@ -65,6 +65,7 @@ module PSD3.ForceEngine.Simulation
   , addForce
   , addForceHandle
   , removeForce
+  , clearForces
     -- * Running
   , start
   , stop
@@ -357,6 +358,14 @@ removeForce :: forall row linkRow.
   -> Effect Unit
 removeForce name sim = do
   Ref.modify_ (Map.delete name) sim.forces
+
+-- | Clear all forces from the simulation
+-- | Used when switching between force configurations (e.g., grid vs tree vs orbit)
+clearForces :: forall row linkRow.
+  Simulation row linkRow
+  -> Effect Unit
+clearForces sim = do
+  Ref.write Map.empty sim.forces
 
 -- =============================================================================
 -- Running

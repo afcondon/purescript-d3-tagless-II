@@ -11,12 +11,16 @@
 -- | - Unused modules stay in their treemap positions (low-key in blueprint)
 module Viz.TreeView
   ( renderAnimated
+  , resetToTreemap
   , AnimationState
   , initAnimation
   , tickAnimation
   , isAnimating
   , Config
+  , module TreeLayout
   ) where
+
+import DataViz.Layout.Hierarchy.TreeStyle (TreeStyle)
 
 import Prelude
 
@@ -30,15 +34,16 @@ import Effect (Effect)
 import Effect.Class.Console (log)
 import Types (SimNode, SimLink, NodeType(..))
 import Data.TreeLayout as TreeLayout
+import Data.TreeLayout (TreeOrientation(..))
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M)
-import PSD3v2.Transform (transformCircles, transformPaths, clearContainer)
+import PSD3v2.Transform (transformCircles, transformPaths, removeElement)
+import PSD3v2.Classify (classifyElements, clearClasses)
 import PSD3v2.VizTree.Tree as T
 import PSD3v2.Selection.Types (ElementType(..))
 import PSD3v3.Integration (v3AttrFn, v3AttrFnStr, v3AttrStr)
 import PSD3v3.Expr (str)
 import PSD3.Transition.Tick as Tick
-import DataViz.Layout.Hierarchy.Link (linkBezierVertical)
 
 -- =============================================================================
 -- Types
@@ -47,6 +52,8 @@ import DataViz.Layout.Hierarchy.Link (linkBezierVertical)
 -- | Rendering configuration
 type Config =
   { containerSelector :: String
+  , style :: TreeStyle              -- Bundles orientation with matching link path
+  , rootId :: Int                   -- Which node to use as tree root
   }
 
 -- | Animation state for tree growth
@@ -121,10 +128,9 @@ renderAnimated config animState nodes links = do
       pure l
     Nothing -> do
       log "[TreeView] Computing tree layout..."
-      -- Compute tree layout from raw nodes/links
-      let rootId = TreeLayout.findRootModule nodes
-      log $ "[TreeView] Found root: " <> show rootId
-      let result = TreeLayout.computeTreeLayout rootId nodes links
+      -- Compute tree layout using config's rootId and style
+      log $ "[TreeView] Using root: " <> show config.rootId
+      let result = TreeLayout.computeTreeLayout config.style config.rootId nodes links
       log $ "[TreeView] Layout computed: root=" <> show result.rootId
           <> " at (" <> show result.rootX <> ", " <> show result.rootY <> ")"
           <> ", " <> show (Array.length result.treeNodes) <> " nodes"
@@ -154,17 +160,30 @@ addTreeLinks config layout rootX rootY = do
   let nodeMap = buildTreeNodeMap layout.treeNodes
   let linkElements = Array.mapMaybe (buildLinkElement nodeMap rootX rootY) (Set.toUnfoldable layout.treeEdges)
 
-  log $ "[TreeView] Adding " <> show (Array.length linkElements) <> " tree links as bezier paths"
+  log $ "[TreeView] Adding " <> show (Array.length linkElements) <> " tree links"
 
   -- First remove any existing tree-links group (in case we're re-entering tree view)
-  clearContainer (config.containerSelector <> " g.tree-links-group")
+  removeElement (config.containerSelector <> " g.tree-links-group")
 
-  -- Add link elements to SVG
+  -- Add link elements to SVG, using the style's bundled link path generator
   _ <- runD3v2M do
     svg <- select (config.containerSelector <> " svg")
-    renderTree svg (buildLinksVizTree linkElements rootX rootY)
+    renderTree svg (buildLinksVizTree config.style.linkPath linkElements rootX rootY)
 
   pure unit
+
+-- | Reset all circles to their treemap positions and clear tree links
+-- | Call this before starting a new tree animation
+resetToTreemap :: String -> Effect Unit
+resetToTreemap containerSelector = do
+  log "[TreeView] Resetting to treemap positions"
+  -- Remove tree links group entirely
+  removeElement (containerSelector <> " g.tree-links-group")
+  -- Reset circles to treemap positions (using their bound data)
+  transformCircles containerSelector \rect ->
+    { cx: rect.x + rect.width / 2.0
+    , cy: rect.y + rect.height / 2.0
+    }
 
 -- | Update positions on existing elements (for animation ticks)
 -- | Moves "used" circles from root to tree positions
@@ -201,7 +220,7 @@ updatePositions config animState layout = do
         , cy: rect.y + rect.height / 2.0
         }
 
-  -- Update tree links (bezier paths)
+  -- Update tree links using the style's bundled link path generator
   transformPaths (config.containerSelector <> " g.tree-links-group") \el ->
     let
       srcX = Tick.lerp rootX el.sourceTreeX easedProgress
@@ -209,7 +228,18 @@ updatePositions config animState layout = do
       tgtX = Tick.lerp rootX el.targetTreeX easedProgress
       tgtY = Tick.lerp rootY el.targetTreeY easedProgress
     in
-      linkBezierVertical srcX srcY tgtX tgtY
+      config.style.linkPath srcX srcY tgtX tgtY
+
+  -- Build set of in-tree node IDs for quick lookup
+  let inTreeIds = Set.fromFoldable $ Array.mapMaybe
+        (\tn -> if tn.isInTree then Just tn.id else Nothing)
+        layout.treeNodes
+
+  -- Classify circles: "in-tree" or "dimmed"
+  classifyElements config.containerSelector "circle" \rect ->
+    case rect.simNode of
+      Just sn | Set.member sn.id inTreeIds -> "in-tree"
+      _ -> "dimmed"
 
 -- =============================================================================
 -- Helpers
@@ -238,20 +268,24 @@ buildLinkElement nodeMap rootX rootY (Tuple srcId tgtId) = do
 -- VizTree for Links
 -- =============================================================================
 
+-- | Type alias for link path generator
+type LinkPathFn = Number -> Number -> Number -> Number -> String
+
 -- | Build VizTree for tree links only (appended to existing SVG)
-buildLinksVizTree :: Array LinkElement -> Number -> Number -> T.Tree LinkElement
-buildLinksVizTree linkElements rootX rootY =
+buildLinksVizTree :: LinkPathFn -> Array LinkElement -> Number -> Number -> T.Tree LinkElement
+buildLinksVizTree linkPathFn linkElements rootX rootY =
   T.named Group "tree-links-group"
     [ v3AttrFnStr "class" (\_ -> "tree-links-group")
     ]
   `T.withChild`
-    T.joinData "tree-links" "path" linkElements (linkTemplate rootX rootY)
+    T.joinData "tree-links" "path" linkElements (linkTemplate linkPathFn rootX rootY)
 
--- | Template for tree link path (bezier curve, starts at root position)
-linkTemplate :: Number -> Number -> LinkElement -> T.Tree LinkElement
-linkTemplate rootX rootY _el =
+-- | Template for tree link path (starts at root position)
+-- | Uses the provided link path generator for the correct bezier type
+linkTemplate :: LinkPathFn -> Number -> Number -> LinkElement -> T.Tree LinkElement
+linkTemplate linkPathFn rootX rootY _el =
   T.elem Path
-    [ v3AttrFnStr "d" (\_ -> linkBezierVertical rootX rootY rootX rootY)
+    [ v3AttrFnStr "d" (\_ -> linkPathFn rootX rootY rootX rootY)
     , v3AttrStr "fill" (str "none")
     , v3AttrStr "stroke" (str "rgba(255, 255, 255, 0.5)")
     , v3AttrFn "stroke-width" (\_ -> 1.5)

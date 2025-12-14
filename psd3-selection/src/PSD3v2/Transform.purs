@@ -24,6 +24,7 @@ module PSD3v2.Transform
   , transformLines
   , transformPaths
   , clearContainer
+  , removeElement
   , CirclePosition
   , LinePosition
   ) where
@@ -115,3 +116,10 @@ foreign import clearContainer_ :: String -> Effect Unit
 -- | Clear all child elements from a container
 clearContainer :: String -> Effect Unit
 clearContainer = clearContainer_
+
+-- | Remove an element from the DOM entirely
+foreign import removeElement_ :: String -> Effect Unit
+
+-- | Remove an element from the DOM entirely
+removeElement :: String -> Effect Unit
+removeElement = removeElement_

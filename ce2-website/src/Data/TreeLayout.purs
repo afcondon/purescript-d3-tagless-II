@@ -16,7 +16,10 @@ module Data.TreeLayout
   , findRootModule
   , TreeLayoutResult
   , TreeNode
+  , module TreeStyle
   ) where
+
+import DataViz.Layout.Hierarchy.TreeStyle (TreeStyle, TreeOrientation(..), linkPath, orientation) as TreeStyle
 
 import Prelude
 
@@ -72,14 +75,15 @@ type TreeLayoutResult =
 -- | Given a root node ID, computes:
 -- | - Spanning tree from root following dependency edges
 -- | - Tree positions for all reachable nodes
--- | - Both cartesian (vertical tree) and radial projections
+-- | - Both cartesian (vertical/horizontal tree) and radial projections
 -- |
 -- | Parameters:
+-- | - style: TreeStyle (bundles orientation with matching link path generator)
 -- | - rootId: The node to use as tree root
 -- | - nodes: All SimNodes (will filter to modules)
 -- | - links: All SimLinks (will filter to module-to-module)
-computeTreeLayout :: Int -> Array SimNode -> Array SimLink -> TreeLayoutResult
-computeTreeLayout rootId nodes links =
+computeTreeLayout :: TreeStyle.TreeStyle -> Int -> Array SimNode -> Array SimLink -> TreeLayoutResult
+computeTreeLayout style rootId nodes links =
   let
     -- Filter to modules only (packages don't participate in tree)
     moduleNodes = Array.filter (\n -> n.nodeType == ModuleNode) nodes
@@ -131,7 +135,7 @@ computeTreeLayout rootId nodes links =
     treeNodes = moduleNodes <#> \node ->
       let
         inTree = Set.member node.id reachableNodeIds
-        pos = projectToCartesian treeLayoutSize (Map.lookup node.id treePositionMap)
+        pos = projectToCartesian (TreeStyle.orientation style) treeLayoutSize (Map.lookup node.id treePositionMap)
       in
         { id: node.id
         , name: node.name
@@ -229,17 +233,18 @@ flattenTreeToPositionMap tree = go tree Map.empty
 -- | Project layout coordinates to cartesian and radial
 -- |
 -- | Vertical tree: center horizontally, root at top
+-- | Horizontal tree: center vertically, root at left
 -- | Radial tree: polar projection, root at center
 -- |
 -- | IMPORTANT: Must match treemap viewBox dimensions!
 -- | Treemap viewBox: -950 -570 1900 1140 (centered at origin)
-projectToCartesian :: Number -> Maybe { x :: Number, y :: Number } -> { cartX :: Number, cartY :: Number, radialX :: Number, radialY :: Number }
-projectToCartesian layoutSize mPos =
+projectToCartesian :: TreeStyle.TreeOrientation -> Number -> Maybe { x :: Number, y :: Number } -> { cartX :: Number, cartY :: Number, radialX :: Number, radialY :: Number }
+projectToCartesian orient layoutSize mPos =
   case mPos of
     Nothing -> { cartX: 0.0, cartY: 0.0, radialX: 0.0, radialY: 0.0 }
     Just { x: treeX, y: treeY } ->
       let
-        -- Vertical tree parameters - MUST match treemap viewBox!
+        -- Tree parameters - MUST match treemap viewBox!
         -- viewBox is -950 -570 1900 1140, so:
         -- width = 1900 (from -950 to +950)
         -- height = 1140 (from -570 to +570)
@@ -250,13 +255,32 @@ projectToCartesian layoutSize mPos =
         -- Radial tree parameters
         maxRadius = 500.0  -- fit within viewBox
 
-        -- Cartesian projection (vertical tree, root at top)
-        -- treeX/layoutSize goes 0->1, map to centered horizontal
-        -- treeY/layoutSize goes 0->1, map to top-to-bottom (root at top)
-        cartX = (treeX / layoutSize - 0.5) * maxTreeWidth
-        cartY = (treeY / layoutSize - 0.5) * maxTreeHeight
+        -- Cartesian projection depends on orientation
+        -- treeX/layoutSize goes 0->1, treeY/layoutSize goes 0->1
+        { cartX, cartY } = case orient of
+          TreeStyle.Vertical ->
+            -- Root at top, tree grows downward
+            { cartX: (treeX / layoutSize - 0.5) * maxTreeWidth
+            , cartY: (treeY / layoutSize - 0.5) * maxTreeHeight
+            }
+          TreeStyle.Horizontal ->
+            -- Root at left, tree grows rightward
+            -- Swap X and Y: treeY becomes cartX, treeX becomes cartY
+            { cartX: (treeY / layoutSize - 0.5) * maxTreeWidth
+            , cartY: (treeX / layoutSize - 0.5) * maxTreeHeight
+            }
+          TreeStyle.Radial ->
+            -- Radial projection (polar, root at center)
+            let angle = (treeX / layoutSize) * 2.0 * pi - (pi / 2.0)
+                rad = (treeY / layoutSize) * maxRadius
+            in { cartX: rad * cos angle, cartY: rad * sin angle }
+          TreeStyle.Custom ->
+            -- Default to vertical for custom
+            { cartX: (treeX / layoutSize - 0.5) * maxTreeWidth
+            , cartY: (treeY / layoutSize - 0.5) * maxTreeHeight
+            }
 
-        -- Radial projection (polar, root at center)
+        -- Radial projection (polar, root at center) - kept for backward compat
         angle = (treeX / layoutSize) * 2.0 * pi - (pi / 2.0)
         rad = (treeY / layoutSize) * maxRadius
         radialX = rad * cos angle

@@ -44,7 +44,7 @@ import Effect.Random (random)
 import Effect.Ref (Ref)
 import Effect.Ref as Ref
 import Foreign.Object as Object
-import Data.Loader (loadModel, loadModelForProject, LoadedModel, DeclarationsMap, FunctionCallsMap, fetchBatchDeclarations, fetchBatchFunctionCalls)
+import Data.Loader (loadModel, loadModelForProject, LoadedModel, FunctionCallsMap, fetchBatchDeclarations, fetchBatchFunctionCalls)
 import CodeExplorer.State as State
 import CodeExplorer.BubblePack (renderModulePackWithCallbacks, highlightCallGraph, clearCallGraphHighlight, drawFunctionEdges, clearFunctionEdges, drawModuleEdges, highlightModuleCallGraph, ModuleEdge, DeclarationClickCallback, DeclarationHoverCallback, clearBubblePacks)
 import CodeExplorer.ChordDiagram (renderNeighborhoodChord, clearChordDiagram)
@@ -62,9 +62,9 @@ import CodeExplorer.Scene as Scene
 import CodeExplorer.Scenes as Scenes
 import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Links (swizzleLinks)
-import PSD3.ForceEngine.Render (GroupId(..), updateGroupPositions, updateLinkPositions)
+import PSD3.ForceEngine.Render (updateGroupPositions, updateLinkPositions)
 import PSD3.ForceEngine.Simulation as Sim
-import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v3.Integration (v3Attr, v3AttrStr)
 import PSD3v3.Expr (lit, str)
 import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom, onMouseEnter, onMouseLeave, onClickWithDatum)
 import PSD3v2.Capabilities.Selection (select, selectAll, on, renderTree)
@@ -211,10 +211,10 @@ executeViewChange newView = do
       -- This is needed when returning from Static scenes (Tree, Treemap)
       sceneState <- Ref.read stateRef
       Sim.reheat sceneState.simulation
-    Nothing -> pure unit
 
-  -- Notify Halogen via callback
-  State.notifyViewStateChanged newView
+      -- Notify Halogen via callback
+      Scene.notifyViewStateChanged newView stateRef
+    Nothing -> pure unit
 
 -- | Tick handler wrapper that notifies Halogen on transition completion
 -- | This wraps the normal Scene tick and, when a transition completes,
@@ -236,46 +236,34 @@ tickWithTransitionCallback stateRef nodesSelector = do
   -- If transition just completed, notify Halogen via callback
   -- Halogen handles waypoint logic (checking for pending target view)
   when (wasTransitioning && not stillTransitioning) do
-    State.notifyTransitionComplete
+    Scene.notifyTransitionComplete stateRef
 
 -- =============================================================================
 -- Initialization
 -- =============================================================================
 
--- | Initialize the explorer
+-- | Initialize the explorer (DEPRECATED - use initExplorerWithCallbacks)
+-- | This version uses no-op callbacks for backwards compatibility
 initExplorer :: String -> Effect Unit
 initExplorer containerSelector = do
-  -- Note: ViewState is initialized inside initWithModel when SceneState is created
-  let initialView = Overview TreemapView
-  log $ "[Explorer] Initializing with view: " <> showViewState initialView
-
-  -- Then load data asynchronously
-  launchAff_ do
-    log "[Explorer] BUILD: 2025-12-03 - Immediate TangleJS init"
-    log "[Explorer] Loading data..."
-    result <- loadModel
-    case result of
-      Left err -> liftEffect $ log $ "[Explorer] Error: " <> err
-      Right model -> do
-        liftEffect $ log $ "[Explorer] Loaded: " <> show model.moduleCount <> " modules, " <> show model.packageCount <> " packages"
-        -- Store links and declarations for later use
-        liftEffect $ Ref.write model.links State.globalLinksRef
-        liftEffect $ Ref.write model.declarations State.globalDeclarationsRef
-
-        -- Initialize visualization immediately
-        -- Function calls are loaded on-demand when drilling into neighborhoods
-        stateRef <- liftEffect $ initWithModel model containerSelector
-        liftEffect $ Ref.write (Just stateRef) State.globalStateRef
-        liftEffect $ log "[Explorer] Ready (function calls loaded on-demand per neighborhood)"
+  let noOpCallbacks :: Scene.ExplorerCallbacks
+      noOpCallbacks =
+        { onViewStateChanged: \_ -> pure unit
+        , onModelLoaded: \_ -> pure unit
+        , onShowCallGraphPopup: \_ _ -> pure unit
+        , onHideCallGraphPopup: pure unit
+        , onTransitionComplete: pure unit
+        , onFocusChanged: \_ -> pure unit
+        , onNavigationPush: \_ -> pure unit
+        , onNodeClicked: \_ -> pure unit
+        }
+  initExplorerWithCallbacks containerSelector noOpCallbacks
 
 -- | Initialize the explorer with callbacks
 -- | This is the preferred API - callbacks notify the Halogen component of state changes
 -- | instead of requiring polling.
-initExplorerWithCallbacks :: String -> State.ExplorerCallbacks -> Effect Unit
+initExplorerWithCallbacks :: String -> Scene.ExplorerCallbacks -> Effect Unit
 initExplorerWithCallbacks containerSelector callbacks = do
-  -- Store callbacks for use by other Explorer functions
-  Ref.write (Just callbacks) State.globalCallbacksRef
-
   -- Note: ViewState is initialized inside initWithModel when SceneState is created
   -- Notify Halogen of initial view now so it can display immediately
   let initialView = Overview TreemapView
@@ -284,37 +272,33 @@ initExplorerWithCallbacks containerSelector callbacks = do
 
   -- Then load data asynchronously
   launchAff_ do
-    log "[Explorer] BUILD: 2025-12-05 - Callback-based initialization"
+    log "[Explorer] BUILD: 2025-12-13 - Callbacks stored in SceneState"
     log "[Explorer] Loading data..."
     result <- loadModel
     case result of
       Left err -> liftEffect $ log $ "[Explorer] Error: " <> err
       Right model -> do
         liftEffect $ log $ "[Explorer] Loaded: " <> show model.moduleCount <> " modules, " <> show model.packageCount <> " packages"
-        -- Store links and declarations for later use
-        liftEffect $ Ref.write model.links State.globalLinksRef
-        liftEffect $ Ref.write model.declarations State.globalDeclarationsRef
 
-        -- Initialize visualization immediately
+        -- Initialize visualization immediately (callbacks passed to SceneState)
+        -- Links/declarations are now stored in SceneState via initWithModel
         -- Function calls are loaded on-demand when drilling into neighborhoods
-        stateRef <- liftEffect $ initWithModel model containerSelector
+        stateRef <- liftEffect $ initWithModel model containerSelector callbacks
         liftEffect $ Ref.write (Just stateRef) State.globalStateRef
 
         -- Notify model loaded via callback
         let modelInfo = { projectName: "purescript-d3-dataviz", moduleCount: model.moduleCount, packageCount: model.packageCount }
-        liftEffect $ callbacks.onModelLoaded modelInfo
+        liftEffect $ Scene.notifyModelLoaded modelInfo stateRef
 
         liftEffect $ log "[Explorer] Ready with callback notifications"
 
 -- | Initialize with loaded model
-initWithModel :: LoadedModel -> String -> Effect (Ref Scene.SceneState)
-initWithModel model containerSelector = do
+initWithModel :: LoadedModel -> String -> Scene.ExplorerCallbacks -> Effect (Ref Scene.SceneState)
+initWithModel model containerSelector callbacks = do
   log "[Explorer] Initializing with new Scene Engine"
 
-  -- Store model info for narrative
-  Ref.write { projectName: "purescript-d3-dataviz", moduleCount: model.moduleCount, packageCount: model.packageCount } State.globalModelInfoRef
-
-  -- Color palette is now generated by Halogen NarrativePanel based on packageCount
+  -- Model info is sent to Halogen via callbacks.onModelLoaded (not stored in ref)
+  -- Color palette is generated by Halogen NarrativePanel based on packageCount
 
   -- Calculate treemap-based positions (replaces grid layout)
   let treemapNodes = recalculateTreemapPositions model.nodes
@@ -342,9 +326,9 @@ initWithModel model containerSelector = do
   -- Render treemap watermark (behind nodes)
   renderWatermark model.nodes
 
-  -- Create scene state (includes ViewState, TransitionState, and model data)
+  -- Create scene state (includes ViewState, TransitionState, model data, and callbacks)
   let modelData = { links: model.links, declarations: model.declarations }
-  sceneState <- Scene.mkSceneState sim State.nodesGroupId initialView simNodes modelData
+  sceneState <- Scene.mkSceneState sim State.nodesGroupId initialView simNodes modelData callbacks
   stateRef <- Ref.new sceneState
 
   -- Set up tick callback - includes view transition progress advancement and visual updates
@@ -371,12 +355,7 @@ reloadWithProject :: Int -> Effect Unit
 reloadWithProject projectId = do
   log $ "[Explorer] Reloading with project: " <> show projectId
 
-  -- Clear existing state
-  Ref.write [] State.globalLinksRef
-  Ref.write Object.empty State.globalDeclarationsRef
-  Ref.write Object.empty State.globalFunctionCallsRef
-  Ref.write [] State.globalNavigationStackRef
-  Ref.write { focusedNodeId: Nothing, fullNodes: [], originView: Nothing } State.globalFocusRef
+  -- UI state (navigation/focus) is owned by Halogen - it clears its own state on project switch
 
   -- Clear tree links if any
   clearTreeLinks
@@ -393,17 +372,14 @@ reloadWithProject projectId = do
       Left err -> liftEffect $ log $ "[Explorer] Error loading project: " <> err
       Right model -> do
         liftEffect $ log $ "[Explorer] Loaded: " <> show model.moduleCount <> " modules, " <> show model.packageCount <> " packages"
-        -- Store new links and declarations
-        liftEffect $ Ref.write model.links State.globalLinksRef
-        liftEffect $ Ref.write model.declarations State.globalDeclarationsRef
 
         -- Get existing stateRef and update with new data
+        -- Links/declarations are stored in SceneState via updateWithModel
         mStateRef <- liftEffect $ Ref.read State.globalStateRef
         case mStateRef of
           Nothing -> do
-            -- Initialize fresh if no existing state
-            stateRef <- liftEffect $ initWithModel model "#viz"
-            liftEffect $ Ref.write (Just stateRef) State.globalStateRef
+            -- This shouldn't happen - Halogen should have called initExplorerWithCallbacks
+            liftEffect $ log "[Explorer] ERROR: No state ref available for project reload. Callbacks are required."
           Just stateRef -> do
             -- Update existing state with new model
             liftEffect $ updateWithModel model stateRef
@@ -415,8 +391,12 @@ updateWithModel :: LoadedModel -> Ref Scene.SceneState -> Effect Unit
 updateWithModel model stateRef = do
   log "[Explorer] Updating visualization with new model"
 
-  -- Update model info
-  Ref.write { projectName: "project", moduleCount: model.moduleCount, packageCount: model.packageCount } State.globalModelInfoRef
+  -- Model info is sent to Halogen via callbacks.onModelLoaded (not stored in ref)
+
+  -- Update links and declarations in SceneState
+  Scene.setLinks model.links stateRef
+  Scene.setDeclarations model.declarations stateRef
+  Scene.setFunctionCalls Object.empty stateRef  -- Clear function calls (will be refetched on neighborhood drill-down)
 
   -- Calculate treemap-based positions (replaces grid layout)
   let treemapNodes = recalculateTreemapPositions model.nodes
@@ -551,15 +531,15 @@ addGridForces :: Array SimNode -> Scene.CESimulation -> Effect Unit
 addGridForces nodes sim = do
   let collideHandle = Core.createCollideGrid 5.0 0.7 1
   _ <- Core.initializeForce collideHandle nodes
-  Ref.modify_ (Map.insert "collide" collideHandle) sim.forces
+  Sim.addForceHandle "collide" collideHandle sim
 
   let forceXHandle = Core.createForceXGrid 0.5
   _ <- Core.initializeForce forceXHandle nodes
-  Ref.modify_ (Map.insert "gridX" forceXHandle) sim.forces
+  Sim.addForceHandle "gridX" forceXHandle sim
 
   let forceYHandle = Core.createForceYGrid 0.5
   _ <- Core.initializeForce forceYHandle nodes
-  Ref.modify_ (Map.insert "gridY" forceYHandle) sim.forces
+  Sim.addForceHandle "gridY" forceYHandle sim
 
   log "[Explorer] Grid forces added"
 
@@ -572,26 +552,26 @@ addTreeForces nodes links sim = do
   log $ "[Explorer] Setting up force-directed tree with " <> show (Array.length treeLinks) <> " links"
 
   -- Clear existing forces
-  Ref.write Map.empty sim.forces
+  Sim.clearForces sim
 
   -- Link force - looser binding for more radial spread
   let linkHandle = Core.createLink { distance: 30.0, strength: 0.7, iterations: 1 }
   _ <- Core.initializeLinkForce linkHandle nodes treeLinks
-  Ref.modify_ (Map.insert "link" linkHandle) sim.forces
+  Sim.addForceHandle "link" linkHandle sim
 
   -- Many-body (charge) force - stronger repulsion for better spacing
   let manyBodyHandle = Core.createManyBody { strength: -100.0, theta: 0.9, distanceMin: 1.0, distanceMax: 1.0e10 }
   _ <- Core.initializeForce manyBodyHandle nodes
-  Ref.modify_ (Map.insert "charge" manyBodyHandle) sim.forces
+  Sim.addForceHandle "charge" manyBodyHandle sim
 
   -- X/Y positioning forces (like Observable's forceX/forceY for centering)
   let forceXHandle = Core.createForceX { x: 0.0, strength: 0.1 }
   _ <- Core.initializeForce forceXHandle nodes
-  Ref.modify_ (Map.insert "x" forceXHandle) sim.forces
+  Sim.addForceHandle "x" forceXHandle sim
 
   let forceYHandle = Core.createForceY { y: 0.0, strength: 0.1 }
   _ <- Core.initializeForce forceYHandle nodes
-  Ref.modify_ (Map.insert "y" forceYHandle) sim.forces
+  Sim.addForceHandle "y" forceYHandle sim
 
   log "[Explorer] Tree forces added (link, charge, x, y)"
 
@@ -600,7 +580,7 @@ restoreGridForces :: Array SimNode -> Scene.CESimulation -> Effect Unit
 restoreGridForces nodes sim = do
   log "[Explorer] Restoring grid forces"
   -- Clear existing forces
-  Ref.write Map.empty sim.forces
+  Sim.clearForces sim
   -- Add grid forces back
   addGridForces nodes sim
 
@@ -610,26 +590,26 @@ addOrbitForces :: Array SimNode -> Scene.CESimulation -> Effect Unit
 addOrbitForces nodes sim = do
   log "[Explorer] Setting up orbit forces"
   -- Clear existing forces
-  Ref.write Map.empty sim.forces
+  Sim.clearForces sim
 
   -- Collision detection
   let collideHandle = Core.createCollide { radius: 8.0, strength: 0.7, iterations: 1 }
   _ <- Core.initializeForce collideHandle nodes
-  Ref.modify_ (Map.insert "collide" collideHandle) sim.forces
+  Sim.addForceHandle "collide" collideHandle sim
 
   -- Many-body repulsion - keeps nodes spread out
   let manyBodyHandle = Core.createManyBody { strength: -80.0, theta: 0.9, distanceMin: 1.0, distanceMax: 1.0e10 }
   _ <- Core.initializeForce manyBodyHandle nodes
-  Ref.modify_ (Map.insert "charge" manyBodyHandle) sim.forces
+  Sim.addForceHandle "charge" manyBodyHandle sim
 
   -- Gentle centering force - keeps the cloud centered
   let forceXHandle = Core.createForceX { x: 0.0, strength: 0.03 }
   _ <- Core.initializeForce forceXHandle nodes
-  Ref.modify_ (Map.insert "x" forceXHandle) sim.forces
+  Sim.addForceHandle "x" forceXHandle sim
 
   let forceYHandle = Core.createForceY { y: 0.0, strength: 0.03 }
   _ <- Core.initializeForce forceYHandle nodes
-  Ref.modify_ (Map.insert "y" forceYHandle) sim.forces
+  Sim.addForceHandle "y" forceYHandle sim
 
   log "[Explorer] Orbit forces added (collide, charge, x, y)"
 
@@ -1056,12 +1036,17 @@ toggleFocus :: SimNode -> Effect Unit
 toggleFocus clickedNode = do
   log $ "[Explorer] Node clicked: " <> clickedNode.name <> " (id=" <> show clickedNode.id <> ")"
   -- Emit the event to Halogen - it will decide what to do
-  State.notifyNodeClicked
-    { nodeId: clickedNode.id
-    , nodeName: clickedNode.name
-    , nodeType: clickedNode.nodeType
-    , topoLayer: clickedNode.topoLayer
-    }
+  mStateRef <- Ref.read State.globalStateRef
+  case mStateRef of
+    Nothing -> log "[Explorer] No state ref available for node click"
+    Just stateRef ->
+      Scene.notifyNodeClicked
+        { nodeId: clickedNode.id
+        , nodeName: clickedNode.name
+        , nodeType: clickedNode.nodeType
+        , topoLayer: clickedNode.topoLayer
+        }
+        stateRef
 
 -- | Render neighborhood for a clicked node
 -- | Halogen-first architecture: Halogen calls this after deciding to drill down
@@ -1183,18 +1168,22 @@ focusOnNeighborhood stateRef nodes sim = do
         Right fnCalls -> fnCalls
         Left _ -> Object.empty
 
-    -- Update global function calls ref so click/hover handlers can use it
-    liftEffect $ Ref.write functionCalls State.globalFunctionCallsRef
+    -- Store function calls in SceneState for later use (e.g., view switching)
+    liftEffect $ Scene.setFunctionCalls functionCalls stateRef
 
     -- Log fetch summary
     liftEffect $ log $ "[Explorer] Batch fetched: " <> show (Object.size declarations) <> " modules with declarations, "
       <> show (Object.size functionCalls)
       <> " function entries"
 
+    -- Create hover callbacks with function calls data baked in (no global ref reads)
+    let declHover = mkDeclarationHover functionCalls
+    let moduleHover = mkModuleHover functionCalls
+
     -- Render bubble packs with fetched declarations
     liftEffect do
       for_ liveNodes \node -> do
-        _ <- renderModulePackWithCallbacks declarations onDeclarationClick onDeclarationHover onDeclarationLeave onModuleHover node
+        _ <- renderModulePackWithCallbacks declarations onDeclarationClick declHover onDeclarationLeave moduleHover node
         pure unit
 
       -- Color legend is now handled by Halogen NarrativePanel (switches to declaration types automatically)
@@ -1404,68 +1393,6 @@ toDirectionalLink nodeMap _linkPairSet link = do
   -- All neighborhood links are green (outgoing direction)
   pure { source: srcNode, target: tgtNode, isOutgoing: true }
 
--- | Render static links for bubble pack view (no simulation updates)
--- | Uses node x/y directly to create line coordinates
-renderStaticNeighborhoodLinks :: Array SimNode -> Effect Unit
-renderStaticNeighborhoodLinks nodes = do
-  allLinks <- Ref.read State.globalLinksRef
-
-  -- Build map of node ID -> node for position lookup
-  let nodeMap = Map.fromFoldable $ map (\n -> Tuple n.id n) nodes
-  let nodeIdSet = Set.fromFoldable $ map _.id nodes
-
-  -- Filter to links where BOTH source and target are in neighborhood
-  let
-    neighborhoodLinks = Array.filter
-      (\link -> Set.member link.source nodeIdSet && Set.member link.target nodeIdSet)
-      allLinks
-
-  log $ "[Explorer] Rendering " <> show (Array.length neighborhoodLinks) <> " static neighborhood links"
-
-  -- Render as straight lines using node positions
-  _ <- runD3v2M $ renderStaticLinksD3 nodeMap neighborhoodLinks
-  pure unit
-
--- | Static link type with pre-computed coordinates
-type StaticLink =
-  { x1 :: Number
-  , y1 :: Number
-  , x2 :: Number
-  , y2 :: Number
-  }
-
--- | D3 rendering for static links
-renderStaticLinksD3 :: Map.Map Int SimNode -> Array SimLink -> D3v2M Unit
-renderStaticLinksD3 nodeMap links = do
-  linksGroup <- select "#explorer-links" :: _ (D3v2Selection_ SEmpty Element Unit)
-
-  -- Convert links to static coordinates
-  let staticLinks = Array.mapMaybe (toStaticLink nodeMap) links
-
-  let linksTree :: T.Tree StaticLink
-      linksTree =
-        T.joinData "static-links-data" "line" staticLinks $ \link ->
-          T.elem Line
-            [ v3Attr "x1" (lit link.x1)
-            , v3Attr "y1" (lit link.y1)
-            , v3Attr "x2" (lit link.x2)
-            , v3Attr "y2" (lit link.y2)
-            , v3AttrStr "stroke" (str "white")
-            , v3Attr "stroke-width" (lit 1.5)
-            , v3Attr "opacity" (lit 0.6)
-            , v3AttrStr "class" (str "neighborhood-link")
-            ]
-
-  _ <- renderTree linksGroup linksTree
-  pure unit
-
--- | Convert a SimLink to StaticLink using node positions
-toStaticLink :: Map.Map Int SimNode -> SimLink -> Maybe StaticLink
-toStaticLink nodeMap link = do
-  srcNode <- Map.lookup link.source nodeMap
-  tgtNode <- Map.lookup link.target nodeMap
-  pure { x1: srcNode.x, y1: srcNode.y, x2: tgtNode.x, y2: tgtNode.y }
-
 -- | D3 rendering for neighborhood links
 renderNeighborhoodLinksD3 :: Array NeighborhoodLink -> D3v2M Unit
 renderNeighborhoodLinksD3 links = do
@@ -1622,17 +1549,15 @@ restoreFullView fullNodes targetView sim = do
         Overview ForceView -> goToScene TreeRun stateRef
         Overview TopoView -> goToScene TopoForm stateRef
         Detail _ -> pure unit -- Detail views shouldn't reach this path
+      -- Notify Halogen via callback
+      Scene.notifyViewStateChanged targetView stateRef
     Nothing -> pure unit
-
-  -- Notify Halogen via callback
-  State.notifyViewStateChanged targetView
 
   -- Ensure colors are correct for the restored view
   -- (renderNodesOnly should set them, but this ensures they're applied)
   updateNodeColors targetView
 
-  -- Clear focus state (local ref - Halogen clears its own)
-  Ref.write { focusedNodeId: Nothing, fullNodes: [], originView: Nothing } State.globalFocusRef
+  -- Focus state is owned by Halogen - it manages clearing on back navigation
 
   Sim.reheat sim
   pure unit
@@ -1651,33 +1576,33 @@ restoreFromFocus focusInfo targetView = do
         Detail _ -> do
           -- Re-entering a detail view - just update the view state
           Scene.setSceneViewState targetView stateRef
-          State.notifyViewStateChanged targetView
+          Scene.notifyViewStateChanged targetView stateRef
 
 -- | Set forces appropriate for neighborhood view (spread out, no grid)
 -- | Uses stronger forces than full graph view since neighborhood has fewer nodes
 setNeighborhoodForces :: Array SimNode -> Scene.CESimulation -> Effect Unit
 setNeighborhoodForces nodes sim = do
   -- Clear existing forces
-  Ref.write Map.empty sim.forces
+  Sim.clearForces sim
 
   -- Many-body repulsion to spread nodes out (stronger for small neighborhoods)
   let manyBodyHandle = Core.createManyBody { strength: -400.0, theta: 0.9, distanceMin: 1.0, distanceMax: 1.0e10 }
   _ <- Core.initializeForce manyBodyHandle nodes
-  Ref.modify_ (Map.insert "charge" manyBodyHandle) sim.forces
+  Sim.addForceHandle "charge" manyBodyHandle sim
 
   -- Collision to prevent overlap (larger radius for bubble packs)
   let collideHandle = Core.createCollideGrid 20.0 0.7 1
   _ <- Core.initializeForce collideHandle nodes
-  Ref.modify_ (Map.insert "collide" collideHandle) sim.forces
+  Sim.addForceHandle "collide" collideHandle sim
 
   -- Centering force to keep neighborhood on screen
   let forceXHandle = Core.createForceX { x: 0.0, strength: 0.05 }
   _ <- Core.initializeForce forceXHandle nodes
-  Ref.modify_ (Map.insert "x" forceXHandle) sim.forces
+  Sim.addForceHandle "x" forceXHandle sim
 
   let forceYHandle = Core.createForceY { y: 0.0, strength: 0.05 }
   _ <- Core.initializeForce forceYHandle nodes
-  Ref.modify_ (Map.insert "y" forceYHandle) sim.forces
+  Sim.addForceHandle "y" forceYHandle sim
 
   log "[Explorer] Neighborhood forces set (stronger charge=-400, collide=20)"
 
@@ -1764,14 +1689,15 @@ onDeclarationClick moduleName declarationName kind = do
 
   -- Notify the Halogen component to show the call graph popup
   -- The popup component will fetch its own data from the API
-  State.notifyShowCallGraphPopup moduleName declarationName
+  mStateRef <- Ref.read State.globalStateRef
+  case mStateRef of
+    Just stateRef -> Scene.notifyShowCallGraphPopup moduleName declarationName stateRef
+    Nothing -> pure unit
 
--- | Handle hover on a declaration circle
--- | Highlights individual function circles based on call graph
-onDeclarationHover :: DeclarationHoverCallback
-onDeclarationHover moduleName declarationName _kind = do
-  -- Look up function calls for this declaration
-  fnCalls <- Ref.read State.globalFunctionCallsRef
+-- | Create a declaration hover callback that captures function calls data
+-- | This avoids reading from global refs - the data is baked into the closure
+mkDeclarationHover :: FunctionCallsMap -> DeclarationHoverCallback
+mkDeclarationHover fnCalls moduleName declarationName _kind = do
   let sourceFunc = moduleName <> "." <> declarationName
   case Object.lookup sourceFunc fnCalls of
     Nothing -> pure unit -- No call data, no highlighting
@@ -1786,19 +1712,16 @@ onDeclarationHover moduleName declarationName _kind = do
       -- Draw edges between function circles
       drawFunctionEdges sourceFunc callerFuncs calleeFuncs
 
--- Hover hint could be added via a globalHintRef if needed
-
 -- | Handle mouse leave from a declaration
 onDeclarationLeave :: Effect Unit
 onDeclarationLeave = do
   clearCallGraphHighlight
   clearFunctionEdges
 
--- | Handle hover on a module (the outer circle)
+-- | Create a module hover callback that captures function calls data
 -- | Shows all function-to-function edges for the entire module
-onModuleHover :: String -> Effect Unit
-onModuleHover moduleName = do
-  fnCalls <- Ref.read State.globalFunctionCallsRef
+mkModuleHover :: FunctionCallsMap -> String -> Effect Unit
+mkModuleHover fnCalls moduleName = do
   -- Find all functions in this module from the function calls map
   let allFuncs = Object.keys fnCalls
   let moduleFuncs = Array.filter (startsWith (moduleName <> ".")) allFuncs
@@ -1905,13 +1828,13 @@ setNeighborhoodViewType newViewType = do
           -- Update view state in SceneState and notify Halogen
           let newView = Detail (NeighborhoodDetail moduleName newViewType)
           Scene.setSceneViewState newView stateRef
-          State.notifyViewStateChanged newView
+          Scene.notifyViewStateChanged newView stateRef
 
           -- Render the new view type
           case newViewType of
             BubblePackView -> do
               -- Re-render bubble packs (similar to focusOnNeighborhood)
-              renderBubblePackView nodes
+              renderBubblePackView stateRef nodes
             ChordView -> do
               -- Render chord diagram
               renderNeighborhoodChord moduleName nodes ViewBox.viewBoxWidth ViewBox.viewBoxHeight
@@ -1920,17 +1843,25 @@ setNeighborhoodViewType newViewType = do
               renderNeighborhoodMatrix moduleName nodes ViewBox.viewBoxWidth ViewBox.viewBoxHeight
             TriptychView -> do
               -- First render bubble packs normally
-              renderBubblePackView nodes
+              renderBubblePackView stateRef nodes
               -- Then wrap them with triptych layout and add chord + matrix panels
               renderTriptychWithDeclarations moduleName nodes
 
 -- | Render bubble pack view for neighborhood
 -- | This is a simplified version of focusOnNeighborhood for view switching
-renderBubblePackView :: Array SimNode -> Effect Unit
-renderBubblePackView nodes = do
-  declarations <- Ref.read State.globalDeclarationsRef
+renderBubblePackView :: Ref Scene.SceneState -> Array SimNode -> Effect Unit
+renderBubblePackView stateRef nodes = do
+  -- Get declarations and function calls from SceneState (not global refs)
+  declarations <- Scene.getDeclarations stateRef
+  functionCalls <- Scene.getFunctionCalls stateRef
+  state <- Ref.read stateRef
+
+  -- Create hover callbacks with function calls data baked in
+  let declHover = mkDeclarationHover functionCalls
+  let moduleHover = mkModuleHover functionCalls
+
   for_ nodes \node -> do
-    _ <- renderModulePackWithCallbacks declarations onDeclarationClick onDeclarationHover onDeclarationLeave onModuleHover node
+    _ <- renderModulePackWithCallbacks declarations onDeclarationClick declHover onDeclarationLeave moduleHover node
     pure unit
 
   -- Attach drag behavior
@@ -1939,11 +1870,6 @@ renderBubblePackView nodes = do
     packGroups <- selectAll "g.module-pack" nodesContainer
     pure $ D3v2.getElementsD3v2 packGroups
 
-  mStateRef <- Ref.read State.globalStateRef
-  case mStateRef of
-    Just stateRef -> do
-      state <- Ref.read stateRef
-      Core.attachGroupDragWithReheat packElements "#explorer-zoom-group" (Sim.reheat state.simulation)
-      -- Render neighborhood links
-      renderNeighborhoodLinks stateRef nodes
-    Nothing -> pure unit
+  Core.attachGroupDragWithReheat packElements "#explorer-zoom-group" (Sim.reheat state.simulation)
+  -- Render neighborhood links
+  renderNeighborhoodLinks stateRef nodes

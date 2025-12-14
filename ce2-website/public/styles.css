@@ -1564,3 +1564,19 @@ line.fn-highlight-dimmed {
 .tree-link {
   pointer-events: none;
 }
+
+/* Tree view node states */
+/* In-tree nodes: solid white at 0.5 opacity */
+.module-node.in-tree {
+  fill: rgba(255, 255, 255, 0.5) !important;
+  stroke: rgba(255, 255, 255, 0.8) !important;
+  stroke-width: 1.5px !important;
+}
+
+/* Dimmed nodes: faded but still visible */
+.module-node.dimmed {
+  stroke: rgba(255, 255, 255, 0.15) !important;
+  stroke-width: 0.5px !important;
+  fill: rgba(14, 76, 138, 0.3) !important;
+  opacity: 0.4;
+}

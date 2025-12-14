@@ -32,7 +32,7 @@ import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Classify (classifyElements, clearClasses)
 import PSD3v2.Interpreter.D3v2 (runD3v2M)
 import PSD3v2.VizTree.Tree as T
-import PSD3v2.Behavior.Types (onMouseEnter, onMouseLeave)
+import PSD3v2.Behavior.Types (onMouseEnter, onMouseLeave, onClickWithDatum)
 import PSD3v2.Selection.Types (ElementType(..))
 import PSD3v3.Integration (v3AttrFn, v3AttrFnStr, v3AttrStr)
 import PSD3v3.Expr (str)
@@ -377,6 +377,9 @@ moduleCircleTemplate callbacks _node =
   `T.withBehaviors`
     [ onMouseEnter (\r -> callbacks.onNodeHover r.simNode)
     , onMouseLeave (\_ -> callbacks.onNodeHover Nothing)
+    , onClickWithDatum (\r -> case r.simNode of
+        Just sn -> callbacks.onNodeClick sn
+        Nothing -> pure unit)
     ]
 
 -- =============================================================================

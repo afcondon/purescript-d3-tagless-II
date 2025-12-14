@@ -23,13 +23,24 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
+import Types (SimNode)
 import Viz.Treemap as Treemap
 import Viz.TreeView as TreeView
+import Viz.ForceGraph as ForceGraph
+import Data.TreeLayout (findRootModule)
+import DataViz.Layout.Hierarchy.TreeStyle as TreeStyle
 import PSD3.Transition.Tick as Tick
 
 -- =============================================================================
 -- Types
 -- =============================================================================
+
+-- | Highlight state - single source of truth for what's highlighted and why
+data HighlightState
+  = NoHighlight
+  | HoverHighlight Int    -- Hovering over a node (by ID)
+
+derive instance eqHighlightState :: Eq HighlightState
 
 -- | Application state - ALL state lives here, Explorer is stateless
 type State =
@@ -45,11 +56,23 @@ type State =
   , focusedNodeId :: Maybe Int
   , originView :: Maybe OverviewView
 
+    -- Highlight state - unified across all views
+  , highlightState :: HighlightState
+
     -- Model data (loaded from API)
   , modelData :: Maybe ModelData
 
     -- Animation state
   , treeAnimation :: Maybe TreeView.AnimationState
+  , treeRootId :: Maybe Int              -- Current tree root (Nothing = use main module)
+  , treeStyle :: TreeStyle.TreeStyle     -- Bundles orientation + matching link path
+
+    -- Force view state
+  , forceAnimation :: Maybe ForceGraph.AnimationState
+  , forceHandle :: Maybe ForceGraph.SimulationHandle
+
+    -- Callback ref for D3 event -> Halogen action bridge
+  , clickEmitter :: Maybe (HS.Listener Action)
 
     -- UI state
   , packageCount :: Int  -- For color palette
@@ -76,7 +99,11 @@ data Action
   | DataFailed String
   | SwitchToTreemap
   | SwitchToTree
+  | SwitchToForce
+  | FocusSubtree Int  -- Click on a module to show its subtree (horizontal)
+  | HandleHover (Maybe SimNode)  -- Hover events routed through Halogen
   | AnimationTick
+  | ForceAnimationTick  -- Separate tick for force animation
 
 -- =============================================================================
 -- Component
@@ -101,8 +128,14 @@ initialState _ =
   , pendingView: Nothing
   , focusedNodeId: Nothing
   , originView: Nothing
+  , highlightState: NoHighlight
   , modelData: Nothing
   , treeAnimation: Nothing
+  , treeRootId: Nothing
+  , treeStyle: TreeStyle.verticalTree
+  , forceAnimation: Nothing
+  , forceHandle: Nothing
+  , clickEmitter: Nothing
   , packageCount: 0
   , projectId: 1
   , projectName: "Loading..."
@@ -141,6 +174,11 @@ render state =
                 , HP.class_ (HH.ClassName $ if isTreeView state.viewState then "active" else "")
                 ]
                 [ HH.text "Tree" ]
+            , HH.button
+                [ HE.onClick \_ -> SwitchToForce
+                , HP.class_ (HH.ClassName $ if isForceView state.viewState then "active" else "")
+                ]
+                [ HH.text "Force" ]
             ]
         ]
 
@@ -161,6 +199,10 @@ isTreeView :: ViewState -> Boolean
 isTreeView (Overview TreeView) = true
 isTreeView _ = false
 
+isForceView :: ViewState -> Boolean
+isForceView (Overview ForceView) = true
+isForceView _ = false
+
 -- =============================================================================
 -- Action Handlers
 -- =============================================================================
@@ -169,6 +211,11 @@ handleAction :: forall output m. MonadAff m => Action -> H.HalogenM State Action
 handleAction = case _ of
   Initialize -> do
     log "[App] Initializing..."
+
+    -- Set up subscription for D3 click events -> Halogen actions
+    { emitter, listener } <- liftEffect HS.create
+    void $ H.subscribe emitter
+    H.modify_ _ { clickEmitter = Just listener }
 
     -- Load model data
     void $ H.fork do
@@ -195,13 +242,8 @@ handleAction = case _ of
           , packages: model.packages
           }
 
-        callbacks :: Treemap.Callbacks
-        callbacks =
-          { onNodeClick: \_ -> pure unit  -- TODO: handle clicks
-          , onNodeHover: \mNode -> case mNode of
-              Nothing -> Treemap.clearHighlight "#viz"
-              Just n -> Treemap.highlightDependencies "#viz" n
-          }
+    -- Build callbacks with emitter for click -> action bridge
+    let callbacks = makeTreemapCallbacks state.clickEmitter
 
     liftEffect $ Treemap.render config callbacks model.nodes
     log "[App] Treemap rendered"
@@ -213,10 +255,15 @@ handleAction = case _ of
   SwitchToTreemap -> do
     log "[App] Switching to Treemap view"
     state <- H.get
+    -- Clean up any existing force simulation
+    case state.forceHandle of
+      Just handle -> liftEffect handle.cleanup
+      Nothing -> pure unit
+
     case state.modelData of
       Nothing -> pure unit
       Just model -> do
-        H.modify_ _ { viewState = Overview TreemapView, treeAnimation = Nothing }
+        H.modify_ _ { viewState = Overview TreemapView, treeAnimation = Nothing, treeRootId = Nothing, forceHandle = Nothing }
 
         let config :: Treemap.Config
             config =
@@ -226,13 +273,7 @@ handleAction = case _ of
               , packages: model.packages
               }
 
-            callbacks :: Treemap.Callbacks
-            callbacks =
-              { onNodeClick: \_ -> pure unit
-              , onNodeHover: \mNode -> case mNode of
-                  Nothing -> Treemap.clearHighlight "#viz"
-                  Just n -> Treemap.highlightDependencies "#viz" n
-              }
+        let callbacks = makeTreemapCallbacks state.clickEmitter
 
         liftEffect $ Treemap.render config callbacks model.nodes
         log "[App] Treemap rendered"
@@ -240,29 +281,82 @@ handleAction = case _ of
   SwitchToTree -> do
     log "[App] SwitchToTree clicked"
     state <- H.get
+    -- Clean up any existing force simulation
+    case state.forceHandle of
+      Just handle -> liftEffect handle.cleanup
+      Nothing -> pure unit
+
     case state.modelData of
       Nothing -> log "[App] No model data, skipping"
-      Just _model -> do
+      Just model -> do
         log "[App] Initializing animation state"
-        -- Initialize animation and update state
+        -- Use main module as root, vertical style (default tree view)
+        let rootId = findRootModule model.nodes
         H.modify_ _
           { viewState = Overview TreeView
           , treeAnimation = Just TreeView.initAnimation
+          , treeRootId = Just rootId
+          , treeStyle = TreeStyle.verticalTree  -- Bundled with matching bezier
+          , forceHandle = Nothing
           }
 
         log "[App] Starting animation loop"
-        -- Start animation loop
+        startAnimationLoop
+
+  SwitchToForce -> do
+    log "[App] SwitchToForce clicked"
+    state <- H.get
+    -- Clean up any existing force simulation
+    case state.forceHandle of
+      Just handle -> liftEffect handle.cleanup
+      Nothing -> pure unit
+
+    case state.modelData of
+      Nothing -> log "[App] No model data, skipping"
+      Just _model -> do
+        log "[App] Starting force animation (radial tree growth)"
+        H.modify_ _
+          { viewState = Overview ForceView
+          , treeAnimation = Nothing
+          , treeRootId = Nothing
+          , forceAnimation = Just ForceGraph.initAnimation
+          , forceHandle = Nothing
+          }
+
+        log "[App] Starting force animation loop"
+        startForceAnimationLoop
+
+  FocusSubtree nodeId -> do
+    log $ "[App] FocusSubtree on node " <> show nodeId
+    state <- H.get
+    case state.modelData of
+      Nothing -> pure unit
+      Just _model -> do
+        -- Reset to treemap positions first (fixes additive tree bug)
+        liftEffect $ TreeView.resetToTreemap "#viz"
+
+        -- Switch to horizontal tree with clicked node as root
+        H.modify_ _
+          { viewState = Overview TreeView
+          , treeAnimation = Just TreeView.initAnimation
+          , treeRootId = Just nodeId
+          , treeStyle = TreeStyle.horizontalTree  -- Bundled with matching bezier
+          }
+
+        log "[App] Starting horizontal subtree animation"
         startAnimationLoop
 
   AnimationTick -> do
     state <- H.get
-    case state.treeAnimation, state.modelData of
-      Just anim, Just model | TreeView.isAnimating anim -> do
+    case state.treeAnimation, state.modelData, state.treeRootId of
+      Just anim, Just model, Just rootId | TreeView.isAnimating anim -> do
         -- Render FIRST with current animation state (before ticking)
-        -- This ensures isFirstFrame is true on the first call
-        -- renderAnimated returns updated state with cached tree layout
         let config :: TreeView.Config
-            config = { containerSelector: "#viz" }
+            config =
+              { containerSelector: "#viz"
+              , style: state.treeStyle  -- Bundled orientation + link path
+              , rootId: rootId
+              }
 
         animWithLayout <- liftEffect $ TreeView.renderAnimated config anim model.nodes model.links
 
@@ -274,7 +368,69 @@ handleAction = case _ of
         when (TreeView.isAnimating newAnim) do
           startAnimationLoop
 
+      _, _, _ -> pure unit
+
+  ForceAnimationTick -> do
+    state <- H.get
+    case state.forceAnimation, state.modelData of
+      Just anim, Just model | ForceGraph.isAnimating anim -> do
+        -- Find root for config
+        let rootId = findRootModule model.nodes
+        let config :: ForceGraph.Config
+            config =
+              { containerSelector: "#viz"
+              , packageCount: model.packageCount
+              , rootId: rootId
+              }
+
+        -- Render current frame
+        result <- liftEffect $ ForceGraph.renderAnimated config anim model.nodes model.links
+
+        -- Advance animation for next frame
+        let newAnim = ForceGraph.tickAnimation animationDelta result.animState
+        H.modify_ _ { forceAnimation = Just newAnim }
+
+        -- Check if we got a simulation handle (phase 3 started)
+        case result.simHandle of
+          Just handle -> do
+            log "[App] Force simulation started, storing handle"
+            H.modify_ _ { forceHandle = Just handle }
+          Nothing -> pure unit
+
+        -- Continue loop if still animating
+        when (ForceGraph.isAnimating newAnim) do
+          startForceAnimationLoop
+
       _, _ -> pure unit
+
+  HandleHover mNode -> do
+    state <- H.get
+    -- Decide whether to apply highlighting based on current view
+    case state.viewState of
+      Overview TreeView ->
+        -- In tree view: ignore hover highlighting (tree classification takes priority)
+        pure unit
+      Overview ForceView ->
+        -- In force view: ignore hover highlighting for now
+        pure unit
+      Overview TreemapView ->
+        -- In treemap view: apply hover highlighting
+        case mNode of
+          Just n -> do
+            H.modify_ _ { highlightState = HoverHighlight n.id }
+            liftEffect $ Treemap.highlightDependencies "#viz" n
+          Nothing -> do
+            H.modify_ _ { highlightState = NoHighlight }
+            liftEffect $ Treemap.clearHighlight "#viz"
+      _ ->
+        -- Other views: default behavior (apply highlighting)
+        case mNode of
+          Just n -> do
+            H.modify_ _ { highlightState = HoverHighlight n.id }
+            liftEffect $ Treemap.highlightDependencies "#viz" n
+          Nothing -> do
+            H.modify_ _ { highlightState = NoHighlight }
+            liftEffect $ Treemap.clearHighlight "#viz"
 
 -- | Animation speed (progress per tick)
 -- | At ~60fps with 16ms delay: 0.02 = 50 ticks = ~0.8 seconds
@@ -288,3 +444,22 @@ startAnimationLoop = do
   void $ H.fork do
     H.liftAff $ Aff.delay (Milliseconds 16.0)
     handleAction AnimationTick
+
+-- | Start the force animation loop
+startForceAnimationLoop :: forall output m. MonadAff m => H.HalogenM State Action () output m Unit
+startForceAnimationLoop = do
+  void $ H.fork do
+    H.liftAff $ Aff.delay (Milliseconds 16.0)
+    handleAction ForceAnimationTick
+
+-- | Build treemap callbacks with click/hover -> action bridge
+-- | Uses the subscription listener to emit actions to Halogen
+makeTreemapCallbacks :: Maybe (HS.Listener Action) -> Treemap.Callbacks
+makeTreemapCallbacks mListener =
+  { onNodeClick: \node -> case mListener of
+      Just listener -> HS.notify listener (FocusSubtree node.id)
+      Nothing -> pure unit
+  , onNodeHover: \mNode -> case mListener of
+      Just listener -> HS.notify listener (HandleHover mNode)
+      Nothing -> pure unit
+  }

@@ -73,3 +73,13 @@ export function clearContainer_(selector) {
     }
   };
 }
+
+// Remove an element from the DOM entirely
+export function removeElement_(selector) {
+  return function() {
+    const element = document.querySelector(selector);
+    if (element) {
+      element.remove();
+    }
+  };
+}
