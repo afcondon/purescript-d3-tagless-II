@@ -1,0 +1,10 @@
+{
+  "name": "ce2-website",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "spago build",
+    "bundle": "spago bundle --outfile public/app.js",
+    "dev": "npm run bundle && npx serve public -p 3002",
+    "watch": "spago build --watch"
+  }
+}

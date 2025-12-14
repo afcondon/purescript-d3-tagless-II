@@ -1,0 +1,1566 @@
+/* =============================================================================
+   Code Explorer - Editorial Data Viz Theme
+
+   "Data viz, not SaaS" - Minimalist print-inspired design with warm beige
+   palette, monospace typography, and clean visual hierarchy.
+   ============================================================================= */
+
+/* =============================================================================
+   CSS Variables - Editorial Palette
+   ============================================================================= */
+
+:root {
+  /* Blueprint Theme - Technical Drawing Aesthetic */
+  --color-blueprint-base: #0E4C8A;
+  --color-blueprint-light: rgba(255, 255, 255, 0.9);
+  --color-blueprint-white: #FFFFFF;
+  --color-blueprint-grid: rgba(255, 255, 255, 0.15);
+
+  /* Keep editorial colors for UI elements */
+  --color-beige-base: #D4C9A8;
+  --color-beige-light: #E8E0CC;
+  --color-beige-dark: #C9B8A0;
+  --color-red-accent: #E63946;
+  --color-coral: #D97560;
+  --color-peach: #E8B8A0;
+  --color-teal: #5A8A8A;
+  --color-line: #999999;
+  --color-text-dark: #333333;
+  --color-text-muted: #666666;
+  --color-canvas: #0E4C8A;
+  /* Blueprint background */
+  --color-card: #F5F2E8;
+  /* Light beige for cards and dropdowns */
+
+  /* Typography */
+  --font-mono: 'Courier New', 'Courier', Monaco, monospace;
+  --font-size-tiny: 0.5rem;
+  --font-size-small: 0.5625rem;
+  --font-size-label: 0.6875rem;
+  --font-size-body: 0.75rem;
+  --letter-spacing-wide: 0.125rem;
+  --letter-spacing-normal: 0.0625rem;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+}
+
+/* =============================================================================
+   Reset & Base
+   ============================================================================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  background: var(--color-canvas);
+  color: var(--color-text-dark);
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+}
+
+/* =============================================================================
+   Full-Screen Visualization Canvas
+   ============================================================================= */
+
+.explorer-app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--color-canvas);
+}
+
+#viz {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+#viz svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* =============================================================================
+   Status Panel (Temporary - will be replaced by NarrativePanel)
+   ============================================================================= */
+
+.status-panel {
+  position: fixed;
+  top: var(--spacing-md);
+  left: var(--spacing-md);
+  background-color: rgba(212, 201, 168, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-line);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  padding: var(--spacing-md);
+  z-index: 100;
+  font-family: var(--font-mono);
+  max-width: 300px;
+}
+
+.status-panel h2 {
+  font-size: var(--font-size-label);
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-dark);
+  margin: 0 0 var(--spacing-sm) 0;
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.status-panel p {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  margin: var(--spacing-xs) 0;
+}
+
+/* =============================================================================
+   Floating Control Panel - Editorial Style
+   ============================================================================= */
+
+.floating-panel {
+  position: fixed;
+  background-color: rgba(212, 201, 168, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-line);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  padding: var(--spacing-md);
+  z-index: 100;
+  font-family: var(--font-mono);
+}
+
+.floating-panel--top-left {
+  top: var(--spacing-md);
+  left: var(--spacing-md);
+}
+
+.floating-panel--top-right {
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+}
+
+.floating-panel--bottom-left {
+  bottom: var(--spacing-md);
+  left: var(--spacing-md);
+}
+
+.floating-panel--bottom-right {
+  bottom: var(--spacing-md);
+  right: var(--spacing-md);
+}
+
+/* Panel Title */
+.panel-title {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-dark);
+  margin: 0 0 var(--spacing-md) 0;
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--color-line);
+}
+
+/* Section Headers */
+.section-label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: var(--spacing-md) 0 var(--spacing-xs) 0;
+}
+
+/* =============================================================================
+   Editorial Buttons
+   ============================================================================= */
+
+.btn-editorial {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-line);
+  background-color: transparent;
+  color: var(--color-text-dark);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-editorial:hover {
+  background-color: var(--color-beige-light);
+  border-color: var(--color-text-dark);
+}
+
+.btn-editorial--active,
+.btn-editorial:active {
+  background-color: var(--color-red-accent);
+  border-color: var(--color-red-accent);
+  color: white;
+}
+
+/* Button Group - connected buttons */
+.btn-group {
+  display: flex;
+}
+
+.btn-group .btn-editorial {
+  margin: 0;
+}
+
+.btn-group .btn-editorial:not(:first-child) {
+  border-left: none;
+}
+
+.btn-group .btn-editorial:first-child {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.btn-group .btn-editorial:last-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* =============================================================================
+   Editorial Select Dropdowns
+   ============================================================================= */
+
+.select-editorial {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  letter-spacing: var(--letter-spacing-normal);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--color-line);
+  background-color: transparent;
+  color: var(--color-text-dark);
+  cursor: pointer;
+  min-width: 140px;
+}
+
+.select-editorial:focus {
+  outline: none;
+  border-color: var(--color-text-dark);
+}
+
+/* =============================================================================
+   Control Groups
+   ============================================================================= */
+
+.control-row {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-sm);
+}
+
+.control-section {
+  margin-bottom: var(--spacing-md);
+}
+
+/* Divider */
+.divider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--color-line);
+  margin: 0 var(--spacing-xs);
+}
+
+/* =============================================================================
+   Info Text
+   ============================================================================= */
+
+.info-text {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-tiny);
+  letter-spacing: var(--letter-spacing-normal);
+  line-height: 1.8;
+  color: var(--color-text-muted);
+}
+
+/* Error message */
+.error-message {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  color: var(--color-red-accent);
+  padding: var(--spacing-sm);
+  background: rgba(230, 57, 70, 0.1);
+  border: 1px solid var(--color-red-accent);
+}
+
+/* =============================================================================
+   Color Key / Legend Panel
+   ============================================================================= */
+
+.legend-panel {
+  min-width: 160px;
+}
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.legend-color {
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--color-line);
+  flex-shrink: 0;
+}
+
+.legend-label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-tiny);
+  color: var(--color-text-dark);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+/* =============================================================================
+   Node Styles (Visualization)
+   ============================================================================= */
+
+.node circle {
+  cursor: pointer;
+}
+
+.node text {
+  pointer-events: none;
+  fill: var(--color-text-dark);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.node:hover text {
+  opacity: 1;
+}
+
+/* =============================================================================
+   Link Styles
+   ============================================================================= */
+
+.link {
+  fill: none;
+  stroke: var(--color-teal);
+  stroke-opacity: 0.5;
+  stroke-width: 1;
+  transition: stroke 0.15s, stroke-opacity 0.15s, stroke-width 0.15s;
+}
+
+/* =============================================================================
+   Highlight States
+   ============================================================================= */
+
+circle.highlighted-source {
+  stroke: var(--color-red-accent) !important;
+  stroke-width: 4px !important;
+  filter: drop-shadow(0 0 6px rgba(230, 57, 70, 0.6));
+}
+
+circle.highlighted-upstream {
+  stroke: var(--color-teal) !important;
+  stroke-width: 3px !important;
+  filter: drop-shadow(0 0 5px rgba(90, 138, 138, 0.6));
+}
+
+circle.highlighted-downstream {
+  stroke: var(--color-coral) !important;
+  stroke-width: 3px !important;
+  filter: drop-shadow(0 0 5px rgba(217, 117, 96, 0.6));
+}
+
+.dimmed {
+  opacity: 0.35 !important;
+  transition: none !important;
+}
+
+.dimmed circle {
+  filter: none !important;
+}
+
+.highlighted-link {
+  stroke: var(--color-red-accent) !important;
+  stroke-width: 2px !important;
+  stroke-opacity: 0.8 !important;
+}
+
+.dimmed-link {
+  stroke-opacity: 0.5 !important;
+}
+
+/* =============================================================================
+   Scene-Specific Styles
+   ============================================================================= */
+
+.node {
+  transition: none;
+}
+
+.tree-scene .package-node,
+.tree-scene .non-tree-module {
+  opacity: 0.06;
+}
+
+.tree-link {
+  transition: opacity 0.5s ease-in-out;
+}
+
+/* =============================================================================
+   Tooltip - Matches Floating Panel Style (v2)
+   ============================================================================= */
+
+.psd3-tooltip {
+  position: fixed;
+  z-index: 1000;
+  /* Match floating panel background and blur */
+  background-color: rgba(212, 201, 168, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  /* Safari support */
+  color: var(--color-text-dark);
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-line);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  line-height: 1.6;
+  max-width: 300px;
+  pointer-events: none;
+}
+
+.tooltip-header {
+  font-weight: bold;
+  font-size: var(--font-size-label);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-dark);
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--color-line);
+  word-break: break-all;
+}
+
+.tooltip-package {
+  font-size: var(--font-size-tiny);
+  color: var(--color-text-muted);
+  letter-spacing: var(--letter-spacing-normal);
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.tooltip-metrics {
+  margin-top: var(--spacing-xs);
+}
+
+.tooltip-metric {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2px;
+  font-size: var(--font-size-tiny);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+.metric-label {
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.metric-value {
+  color: var(--color-text-dark);
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+}
+
+/* =============================================================================
+   Loading State
+   ============================================================================= */
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* =============================================================================
+   Call Graph Highlighting (Declaration Hover)
+   ============================================================================= */
+
+/* Source module - the module containing the hovered declaration (cyan) */
+g.module-pack.highlight-source {
+  filter: drop-shadow(0 0 12px rgba(125, 211, 252, 0.8));
+}
+
+g.module-pack.highlight-source circle {
+  stroke: #7dd3fc !important;
+  stroke-width: 3px !important;
+}
+
+/* Caller modules - modules that call this function (orange) */
+g.module-pack.highlight-caller {
+  filter: drop-shadow(0 0 10px rgba(249, 115, 22, 0.7));
+}
+
+g.module-pack.highlight-caller circle {
+  stroke: #f97316 !important;
+  stroke-width: 2.5px !important;
+}
+
+/* Callee modules - modules this function calls (green) */
+g.module-pack.highlight-callee {
+  filter: drop-shadow(0 0 10px rgba(74, 222, 128, 0.7));
+}
+
+g.module-pack.highlight-callee circle {
+  stroke: #4ade80 !important;
+  stroke-width: 2.5px !important;
+}
+
+/* Dimmed modules - unrelated during call graph highlight */
+g.module-pack.highlight-dimmed {
+  opacity: 0.15;
+}
+
+g.module-pack.highlight-dimmed circle {
+  filter: none !important;
+}
+
+/* Dimmed links during call graph highlight */
+line.highlight-dimmed {
+  opacity: 0.1 !important;
+}
+
+/* =============================================================================
+   Function-Level Call Graph Highlighting
+   ============================================================================= */
+
+/* Source function - the hovered declaration (cyan glow) */
+circle.fn-highlight-source {
+  stroke: #7dd3fc !important;
+  stroke-width: 3px !important;
+  filter: drop-shadow(0 0 8px rgba(125, 211, 252, 0.9));
+}
+
+/* Caller functions - functions that call the source (orange) */
+circle.fn-highlight-caller {
+  stroke: #f97316 !important;
+  stroke-width: 2.5px !important;
+  filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.8));
+}
+
+/* Callee functions - functions the source calls (green) */
+circle.fn-highlight-callee {
+  stroke: #4ade80 !important;
+  stroke-width: 2.5px !important;
+  filter: drop-shadow(0 0 6px rgba(74, 222, 128, 0.8));
+}
+
+/* Dimmed circles and links - unrelated during function highlight */
+circle.fn-highlight-dimmed {
+  opacity: 0.2 !important;
+  filter: none !important;
+}
+
+line.fn-highlight-dimmed {
+  opacity: 0.08 !important;
+}
+
+/* Function edge lines - connecting source to callers/callees */
+.fn-edge {
+  pointer-events: none;
+}
+
+.fn-edge-caller {
+  stroke: #f97316;
+  stroke-width: 2px;
+  stroke-opacity: 0.7;
+}
+
+.fn-edge-callee {
+  stroke: #4ade80;
+  stroke-width: 2px;
+  stroke-opacity: 0.7;
+}
+
+/* =============================================================================
+   Narrative Panel - "What Is Being Shown"
+   ============================================================================= */
+
+.narrative-panel {
+  max-width: 320px;
+  min-width: 280px;
+}
+
+/* Larger title for narrative panel */
+.narrative-panel .panel-title {
+  font-size: 0.875rem;
+  /* 14px */
+  letter-spacing: var(--letter-spacing-wide);
+  margin-bottom: var(--spacing-lg);
+}
+
+.narrative-hero {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  /* 14px - body text */
+  line-height: 1.7;
+  color: var(--color-text-dark);
+  margin-bottom: var(--spacing-md);
+}
+
+.narrative-hero strong {
+  color: var(--color-text-dark);
+  font-weight: bold;
+}
+
+.narrative-module {
+  color: var(--color-teal);
+  font-weight: bold;
+}
+
+.narrative-path {
+  font-size: 0.75rem;
+  /* 12px */
+  color: var(--color-text-muted);
+}
+
+.narrative-stat {
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+  padding: 0 2px;
+}
+
+.narrative-stat.narrative-callee {
+  color: #16a34a;
+  /* green-600 */
+}
+
+.narrative-stat.narrative-caller {
+  color: #ea580c;
+  /* orange-600 */
+}
+
+.narrative-hint {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  /* 12px - subtext */
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-line);
+}
+
+.narrative-hint em {
+  font-style: normal;
+  color: var(--color-text-dark);
+  font-weight: bold;
+}
+
+.narrative-hint strong {
+  color: var(--color-teal);
+}
+
+.narrative-nav {
+  margin-top: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.narrative-back {
+  width: 100%;
+  font-size: 0.75rem;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.narrative-back:hover:not(:disabled) {
+  background-color: var(--color-beige-dark);
+}
+
+.narrative-back--disabled {
+  opacity: 0.5;
+  cursor: default;
+  color: var(--color-text-muted);
+}
+
+.narrative-back--disabled:hover {
+  background-color: transparent;
+}
+
+.narrative-project {
+  width: 100%;
+  font-size: 0.75rem;
+  padding: var(--spacing-sm) var(--spacing-md);
+  text-align: left;
+}
+
+.narrative-project:hover {
+  background-color: var(--color-beige-dark);
+}
+
+.narrative-project::before {
+  content: "Project: ";
+  color: var(--color-text-muted);
+  font-weight: normal;
+}
+
+/* =============================================================================
+   View Icons (Overview Navigation)
+   ============================================================================= */
+
+.view-icons {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.view-icon {
+  width: 54px;
+  height: 54px;
+  padding: 2px;
+  border: 1px solid var(--color-line);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.view-icon:hover {
+  background: var(--color-beige-light);
+  border-color: var(--color-text-dark);
+}
+
+.view-icon--active {
+  border-color: var(--color-teal);
+  border-width: 2px;
+}
+
+.view-icon-img {
+  display: block;
+  border-radius: 2px;
+  object-fit: cover;
+}
+
+.narrative-project-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.project-dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  margin-top: var(--spacing-xs);
+}
+
+.project-dropdown-item {
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.project-dropdown-item:hover {
+  background-color: var(--color-beige);
+}
+
+.project-dropdown-item--active {
+  background-color: var(--color-beige-dark);
+  font-weight: 600;
+}
+
+/* =============================================================================
+   Module Search
+   ============================================================================= */
+
+.module-search-wrapper {
+  position: relative;
+  margin-top: var(--spacing-sm);
+}
+
+.module-search-input {
+  width: 100%;
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-body);
+  background-color: var(--color-beige-light);
+  border: 1px solid var(--color-line);
+  border-radius: 3px;
+  color: var(--color-text-dark);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.module-search-input::placeholder {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.module-search-input:focus {
+  border-color: var(--color-teal);
+  box-shadow: 0 0 0 2px rgba(90, 138, 138, 0.2);
+}
+
+.module-search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--color-card);
+  border: 1px solid var(--color-line);
+  border-top: none;
+  border-radius: 0 0 3px 3px;
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.module-search-result {
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-body);
+  color: var(--color-text-dark);
+  cursor: pointer;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  transition: background-color var(--transition-fast);
+}
+
+.module-search-result:last-child {
+  border-bottom: none;
+}
+
+.module-search-result:hover {
+  background-color: var(--color-beige-base);
+}
+
+/* Keyboard-selected state (takes precedence over hover) */
+.module-search-result--selected {
+  background-color: var(--color-beige-light);
+  outline: 2px solid var(--color-olive);
+  outline-offset: -2px;
+}
+
+.module-search-result--selected:hover {
+  background-color: var(--color-beige-light);
+}
+
+/* =============================================================================
+   Narrative Color Key
+   ============================================================================= */
+
+.narrative-color-key {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-line);
+}
+
+.color-key-title {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  /* 10px */
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-sm);
+}
+
+.color-key-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 200px;
+  /* ~12 items comfortably */
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+
+.color-key-items::-webkit-scrollbar {
+  width: 6px;
+}
+
+.color-key-items::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.color-key-items::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 3px;
+}
+
+.color-key-items::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-light);
+}
+
+.color-key-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.color-key-swatch {
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--color-line);
+  flex-shrink: 0;
+}
+
+.color-key-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  /* 11px */
+  color: var(--color-text-dark);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+/* Simplified color key for concept-based legends */
+.color-key-concept {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.color-key-concept-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-key-concept-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--color-text-dark);
+}
+
+.color-key-concept-sublabel {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  color: var(--color-text-light);
+  font-style: italic;
+}
+
+.color-key-swatches {
+  display: flex;
+  gap: 3px;
+}
+
+.color-key-mini-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.color-key-samples {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.color-key-sample {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* =============================================================================
+   TangleJS-style Interactive Controls
+   ============================================================================= */
+
+/* Clickable control - has options */
+.tangle-control {
+  color: var(--color-blue-accent, #2563eb);
+  cursor: pointer;
+  border-bottom: 1px dashed currentColor;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.tangle-control:hover {
+  color: var(--color-text-dark);
+  border-bottom-style: solid;
+}
+
+/* Non-interactive highlighted value */
+.tangle-value {
+  color: var(--color-text-dark);
+  font-weight: 500;
+}
+
+/* Dropdown for control options */
+.tangle-dropdown {
+  background: var(--color-beige, #f5f5dc);
+  border: 1px solid var(--color-line, #ccc);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 120px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.tangle-dropdown-item {
+  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.tangle-dropdown-item:hover {
+  background-color: var(--color-beige-dark, #e8e8d0);
+}
+
+.tangle-dropdown-item--active {
+  font-weight: bold;
+  color: var(--color-blue-accent, #2563eb);
+}
+
+.tangle-dropdown-item--active::before {
+  content: "• ";
+}
+
+/* =============================================================================
+   Treemap Styles
+   ============================================================================= */
+
+/* Package labels - semi-transparent by default */
+.treemap-package-label {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Show all labels fully on treemap hover */
+#treemap-group:hover .treemap-package-label {
+  opacity: 1.0 !important;
+  transition: opacity 0.2s ease;
+}
+
+/* Individual package rect hover effect */
+.treemap-package:hover {
+  stroke: #000;
+  stroke-width: 0.5;
+  transition: stroke 0.15s ease, stroke-width 0.15s ease;
+}
+
+.treemap-module:hover {
+  stroke: #111;
+  stroke-width: 0.3;
+  transition: stroke 0.15s ease, stroke-width 0.15s ease;
+}
+
+/* =============================================================================
+   Watermark Treemap Styles
+   ============================================================================= */
+
+/* Watermark package rects - enable hover interaction */
+.watermark-package {
+  cursor: pointer;
+}
+
+/* Watermark labels - semi-transparent by default, full opacity on hover via JS */
+.watermark-package-label {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* =============================================================================
+   Call Graph Popup
+   ============================================================================= */
+
+/* Overlay background */
+.call-graph-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+}
+
+/* Popup content container */
+.call-graph-content {
+  background: var(--color-card);
+  border: 2px solid var(--color-line);
+  border-radius: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 1200px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-mono);
+}
+
+/* Header with title and close button */
+.call-graph-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  border-bottom: 2px solid var(--color-line);
+  background: var(--color-beige-base);
+}
+
+.call-graph-header h3 {
+  font-size: 0.875rem;
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-dark);
+  margin: 0;
+}
+
+.call-graph-close {
+  background: none;
+  border: 2px solid var(--color-line);
+  color: var(--color-text-dark);
+  font-size: 1.5rem;
+  font-weight: bold;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  line-height: 1;
+  padding: 0;
+}
+
+.call-graph-close:hover {
+  background: var(--color-beige-dark);
+  border-color: var(--color-text-dark);
+}
+
+/* Body with three columns */
+.call-graph-body {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.call-graph-column {
+  display: flex;
+  flex-direction: column;
+  border-right: 2px solid var(--color-line);
+  overflow: hidden;
+}
+
+.call-graph-column:last-child {
+  border-right: none;
+}
+
+.call-graph-column h4 {
+  font-size: 0.6875rem;
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-beige-light);
+}
+
+/* Scrollable lists */
+.call-graph-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-sm);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+
+.call-graph-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.call-graph-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.call-graph-list::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 4px;
+}
+
+.call-graph-list::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+.call-graph-list-item {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+  background: var(--color-beige-light);
+  border-left: 3px solid var(--color-line);
+  transition: var(--transition-fast);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.call-graph-list-item:hover {
+  background: var(--color-beige-base);
+  border-left-color: var(--color-red-accent);
+}
+
+/* Clickable links in caller/callee lists */
+.call-graph-link {
+  cursor: pointer;
+  color: var(--color-blue-link);
+  font-weight: 500;
+}
+
+.call-graph-link:hover {
+  background: var(--color-blue-light) !important;
+  border-left-color: var(--color-blue-link) !important;
+  text-decoration: underline;
+}
+
+/* Git metrics section */
+.call-graph-git-metrics {
+  background: var(--color-beige-light);
+  border: 1px solid var(--color-line);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.git-metric {
+  margin-bottom: var(--spacing-xs);
+}
+
+.git-metric:last-child {
+  margin-bottom: 0;
+}
+
+.git-metric strong {
+  color: var(--color-text-primary);
+  margin-right: var(--spacing-xs);
+}
+
+/* Source code with proper styling */
+.call-graph-source {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.6875rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  margin: 0;
+  padding: var(--spacing-sm);
+  background: #fafafa;
+  border-radius: var(--border-radius);
+}
+
+/* Source code column - scrollable with monospace */
+.call-graph-code {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+  font-size: 0.6875rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  font-family: 'Courier New', Courier, monospace;
+  background: #fafafa;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+
+.call-graph-code::-webkit-scrollbar {
+  width: 8px;
+}
+
+.call-graph-code::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.call-graph-code::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 4px;
+}
+
+.call-graph-code::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* Loading and error states */
+.call-graph-loading,
+.call-graph-error,
+.call-graph-empty {
+  color: var(--color-text-muted);
+  font-style: italic;
+  padding: var(--spacing-md);
+  text-align: center;
+}
+
+.call-graph-error {
+  color: var(--color-red-accent);
+}
+
+/* =============================================================================
+   Neighborhood View Type Toggles
+   ============================================================================= */
+
+.view-type-toggles {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-line);
+}
+
+.view-type-toggle {
+  width: 42px;
+  height: 42px;
+  padding: 2px;
+  border: 1px solid var(--color-line);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.view-type-toggle:hover {
+  background: var(--color-beige-light);
+  border-color: var(--color-text-dark);
+}
+
+.view-type-toggle--active {
+  background: var(--color-teal);
+  border-color: var(--color-teal);
+}
+
+.view-type-toggle--active svg path,
+.view-type-toggle--active svg circle,
+.view-type-toggle--active svg line,
+.view-type-toggle--active svg rect {
+  stroke: white;
+  fill: none;
+}
+
+.view-type-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+.view-type-toggle svg path,
+.view-type-toggle svg circle,
+.view-type-toggle svg line,
+.view-type-toggle svg rect {
+  stroke: var(--color-text-dark);
+  fill: none;
+  stroke-width: 1.5;
+}
+
+/* Image-based toggle icons */
+.view-type-toggle-img {
+  display: block;
+  border-radius: 2px;
+  object-fit: cover;
+}
+
+.view-type-toggle--active .view-type-toggle-img {
+  box-shadow: 0 0 0 2px var(--color-teal);
+}
+
+/* =============================================================================
+   Chord Diagram Styles
+   ============================================================================= */
+
+#chord-diagram {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+#chord-diagram svg {
+  width: 100%;
+  height: 100%;
+}
+
+.chord-arc {
+  pointer-events: all;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.chord-arc:hover {
+  opacity: 0.8;
+}
+
+.chord-ribbon {
+  fill-opacity: 0.6;
+  stroke: none;
+  transition: fill-opacity var(--transition-fast);
+}
+
+.chord-ribbon:hover {
+  fill-opacity: 0.9;
+}
+
+.chord-label {
+  font-family: var(--font-mono);
+  /* font-size: var(--font-size-small); */
+  fill: var(--color-blueprint-light);
+  pointer-events: none;
+}
+
+/* =============================================================================
+   Treemap Highlight Styles
+   ============================================================================= */
+
+/* The hovered node - bright and prominent */
+.module-node.highlighted {
+  stroke: white !important;
+  stroke-width: 3px !important;
+  fill: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Nodes this module depends on (imports) - green tint */
+.module-node.is-target {
+  stroke: #4ade80 !important;
+  stroke-width: 2px !important;
+  fill: rgba(74, 222, 128, 0.15) !important;
+}
+
+/* Nodes that depend on this module (importers) - orange tint */
+.module-node.is-source {
+  stroke: #fb923c !important;
+  stroke-width: 2px !important;
+  fill: rgba(251, 146, 60, 0.15) !important;
+}
+
+/* All other nodes - dimmed (optional, currently unused) */
+.module-node.dimmed {
+  stroke: rgba(255, 255, 255, 0.15) !important;
+  stroke-width: 0.5px !important;
+  fill: rgba(14, 76, 138, 0.5) !important;
+}
+
+/* Package rect highlighting */
+.package-rect.highlighted {
+  stroke: white !important;
+  stroke-width: 2px !important;
+}
+
+.package-rect.is-target {
+  stroke: #4ade80 !important;
+  stroke-width: 2px !important;
+}
+
+.package-rect.is-source {
+  stroke: #fb923c !important;
+  stroke-width: 2px !important;
+}
+
+/* =============================================================================
+   View Switcher Buttons
+   ============================================================================= */
+
+.view-switcher {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+.view-switcher button {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-beige-light);
+  border: 1px solid var(--color-line);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.view-switcher button:hover {
+  background: var(--color-beige-dark);
+}
+
+.view-switcher button.active {
+  background: var(--color-text-dark);
+  color: var(--color-beige-light);
+  border-color: var(--color-text-dark);
+}
+
+/* =============================================================================
+   Tree View Elements
+   ============================================================================= */
+
+.tree-node {
+  cursor: pointer;
+}
+
+.tree-link {
+  pointer-events: none;
+}
