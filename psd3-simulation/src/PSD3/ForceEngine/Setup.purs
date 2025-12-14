@@ -76,6 +76,11 @@ module PSD3.ForceEngine.Setup
     -- * Apply to Simulation (the key function)
   , applySetup
 
+    -- * Apply with Data (GUP semantics)
+  , GUPResult
+  , GUPLinkResult
+  , applySetupWithData
+
     -- * Incremental Operations
   , addForceToSim
   , removeForceFromSim
@@ -88,10 +93,11 @@ import Data.Foldable (for_)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Set as Set
+import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Ref as Ref
 import PSD3.ForceEngine.Core as Core
-import PSD3.ForceEngine.Simulation (Simulation, SimulationNode)
+import PSD3.ForceEngine.Simulation (Simulation, SimulationNode, NodeID)
 
 -- =============================================================================
 -- Value Type (static or per-node dynamic)
@@ -531,3 +537,204 @@ removeForceFromSim
   -> Effect Unit
 removeForceFromSim name sim = do
   Ref.modify_ (Map.delete name) sim.forces
+
+-- =============================================================================
+-- GUP (General Update Pattern) Types
+-- =============================================================================
+
+-- | Result of a node data update with enter/update/exit categorization
+-- |
+-- | - entered: Nodes newly added to simulation (use for enter animations)
+-- | - updated: Existing nodes that were modified (simulation state preserved)
+-- | - exited: Nodes removed from simulation (use for exit animations)
+type GUPResult node =
+  { entered :: Array node
+  , updated :: Array node
+  , exited :: Array node
+  }
+
+-- | Result of a link data update with enter/update/exit categorization
+-- | Links are keyed by (source, target) pair
+type GUPLinkResult linkRow =
+  { entered :: Array { source :: NodeID, target :: NodeID | linkRow }
+  , updated :: Array { source :: NodeID, target :: NodeID | linkRow }
+  , exited :: Array { source :: NodeID, target :: NodeID | linkRow }
+  }
+
+-- =============================================================================
+-- Apply Setup with Data (GUP semantics)
+-- =============================================================================
+
+-- | Apply setup with new nodes and links, using GUP (General Update Pattern) semantics.
+-- |
+-- | This function handles three concerns:
+-- | 1. Force configuration (same as applySetup)
+-- | 2. Node GUP: diff desired nodes vs current, merge simulation state for updates
+-- | 3. Link GUP: diff desired links vs current
+-- |
+-- | Simulation state preservation (for updated nodes):
+-- | - x, y: Current position (preserved)
+-- | - vx, vy: Current velocity (preserved)
+-- | - fx, fy: Pinned position (preserved)
+-- | - All other fields: Taken from desired nodes
+-- |
+-- | Example usage:
+-- | ```purescript
+-- | -- Stop simulation before transition
+-- | Sim.stop sim
+-- |
+-- | -- Apply new configuration and data
+-- | result <- applySetupWithData mySetup newNodes newLinks sim
+-- |
+-- | -- Use result for animations
+-- | animateEnter result.nodes.entered
+-- | animateExit result.nodes.exited
+-- |
+-- | -- Restart simulation
+-- | Sim.reheat sim
+-- | ```
+applySetupWithData
+  :: forall row linkRow
+   . Setup (SimulationNode row)
+  -> Array (SimulationNode row)
+  -> Array { source :: NodeID, target :: NodeID | linkRow }
+  -> Simulation row linkRow
+  -> Effect { nodes :: GUPResult (SimulationNode row), links :: GUPLinkResult linkRow }
+applySetupWithData setupConfig desiredNodes desiredLinks sim = do
+  -- Get current state
+  currentNodes <- Ref.read sim.nodes
+  currentLinks <- Ref.read sim.links
+
+  -- Compute node GUP
+  let nodeResult = computeNodeGUP currentNodes desiredNodes
+
+  -- Write merged nodes to simulation
+  Ref.write nodeResult.merged sim.nodes
+
+  -- Compute link GUP
+  let linkResult = computeLinkGUP currentLinks desiredLinks
+
+  -- Write desired links to simulation (links don't have simulation state to preserve)
+  Ref.write desiredLinks sim.links
+
+  -- Now apply force configuration (uses the new nodes/links)
+  applySetup setupConfig sim
+
+  -- Return GUP results for animation
+  pure
+    { nodes:
+        { entered: nodeResult.entered
+        , updated: nodeResult.updated
+        , exited: nodeResult.exited
+        }
+    , links:
+        { entered: linkResult.entered
+        , updated: linkResult.updated
+        , exited: linkResult.exited
+        }
+    }
+
+-- =============================================================================
+-- Node GUP Helpers
+-- =============================================================================
+
+-- | Internal result type that includes the merged array
+type NodeGUPInternal node =
+  { entered :: Array node
+  , updated :: Array node
+  , exited :: Array node
+  , merged :: Array node  -- The actual array to write to simulation
+  }
+
+-- | Compute node GUP: which nodes are entering, updating, exiting
+-- | For updates, merge simulation state (x, y, vx, vy, fx, fy) from current into desired
+computeNodeGUP
+  :: forall row
+   . Array (SimulationNode row)
+  -> Array (SimulationNode row)
+  -> NodeGUPInternal (SimulationNode row)
+computeNodeGUP currentNodes desiredNodes =
+  let
+    -- Build lookup map for current nodes by id
+    currentById :: Map.Map NodeID (SimulationNode row)
+    currentById = Map.fromFoldable $ map (\n -> Tuple n.id n) currentNodes
+
+    -- Build set of desired ids (for computing exits)
+    desiredIds = Set.fromFoldable $ map _.id desiredNodes
+
+    -- Categorize and merge desired nodes
+    processDesired :: SimulationNode row -> { node :: SimulationNode row, isEnter :: Boolean }
+    processDesired desired =
+      case Map.lookup desired.id currentById of
+        Nothing ->
+          -- Enter: use desired as-is
+          { node: desired, isEnter: true }
+        Just current ->
+          -- Update: merge simulation state from current into desired
+          { node: mergeSimulationState current desired, isEnter: false }
+
+    processed = map processDesired desiredNodes
+
+    -- Separate entered and updated
+    entered = map _.node $ Array.filter _.isEnter processed
+    updated = map _.node $ Array.filter (not <<< _.isEnter) processed
+
+    -- Exited nodes (from current, not in desired)
+    exited = Array.filter (\n -> not (Set.member n.id desiredIds)) currentNodes
+
+    -- Merged array is all processed nodes (entered + updated, in desired order)
+    merged = map _.node processed
+  in
+    { entered, updated, exited, merged }
+
+-- | Merge simulation-managed state from current node into desired node
+-- |
+-- | Preserves: x, y, vx, vy, fx, fy (simulation-managed)
+-- | Takes from desired: everything else (application data)
+mergeSimulationState
+  :: forall row
+   . SimulationNode row
+  -> SimulationNode row
+  -> SimulationNode row
+mergeSimulationState current desired =
+  desired
+    { x = current.x
+    , y = current.y
+    , vx = current.vx
+    , vy = current.vy
+    , fx = current.fx
+    , fy = current.fy
+    }
+
+-- =============================================================================
+-- Link GUP Helpers
+-- =============================================================================
+
+-- | Compute link GUP: which links are entering, updating, exiting
+-- | Links are keyed by (source, target) pair
+computeLinkGUP
+  :: forall linkRow
+   . Array { source :: NodeID, target :: NodeID | linkRow }
+  -> Array { source :: NodeID, target :: NodeID | linkRow }
+  -> GUPLinkResult linkRow
+computeLinkGUP currentLinks desiredLinks =
+  let
+    -- Build key for a link
+    linkKey :: { source :: NodeID, target :: NodeID | linkRow } -> Tuple NodeID NodeID
+    linkKey l = Tuple l.source l.target
+
+    -- Build sets of link keys
+    currentKeys = Set.fromFoldable $ map linkKey currentLinks
+    desiredKeys = Set.fromFoldable $ map linkKey desiredLinks
+
+    -- Compute enter/update/exit key sets
+    enterKeys = Set.difference desiredKeys currentKeys
+    updateKeys = Set.intersection desiredKeys currentKeys
+    exitKeys = Set.difference currentKeys desiredKeys
+
+    -- Categorize
+    entered = Array.filter (\l -> Set.member (linkKey l) enterKeys) desiredLinks
+    updated = Array.filter (\l -> Set.member (linkKey l) updateKeys) desiredLinks
+    exited = Array.filter (\l -> Set.member (linkKey l) exitKeys) currentLinks
+  in
+    { entered, updated, exited }
