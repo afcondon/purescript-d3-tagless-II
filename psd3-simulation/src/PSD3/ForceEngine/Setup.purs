@@ -413,15 +413,28 @@ applySetup setupConfig sim = do
   -- which is immutable after creation. For now we just update alpha.
 
 -- | Create a D3 force handle from our config
--- | Uses the Dynamic variants from Core when dynamic values are specified
+-- | Uses Dynamic variants when dynamic values are specified
+-- | Uses Filtered variants when a filter predicate is specified (for ManyBody, Radial)
+-- |
+-- | Note: Filters are only supported for ManyBody and Radial forces, which have
+-- | dedicated FFI implementations. For other force types, the filter is ignored
+-- | (consider using dynamic strength that returns 0.0 for filtered nodes).
 createForceHandle
   :: forall node
    . ForceConfig node
   -> Effect Core.ForceHandle
 createForceHandle fc = pure $ case fc.forceType of
-  ForceManyBody ->
-    -- ManyBody doesn't have a dynamic strength variant yet, use static
-    Core.createManyBody
+  ForceManyBody -> case fc.filter of
+    -- Filtered variant - only applies to matching nodes
+    Just predicate -> Core.createManyBodyFiltered
+      { strength: valueToNumber fc.strength
+      , theta: fc.theta
+      , distanceMin: fc.distanceMin
+      , distanceMax: fc.distanceMax
+      , filter: predicate
+      }
+    -- Standard variant
+    Nothing -> Core.createManyBody
       { strength: valueToNumber fc.strength
       , theta: fc.theta
       , distanceMin: fc.distanceMin
@@ -474,9 +487,17 @@ createForceHandle fc = pure $ case fc.forceType of
       , strength: valueToNumber fc.strength
       }
 
-  ForceRadial ->
-    -- Radial doesn't have a dynamic variant, use static
-    Core.createRadial
+  ForceRadial -> case fc.filter of
+    -- Filtered variant - only applies to matching nodes
+    Just predicate -> Core.createRadialFiltered
+      { radius: valueToNumber fc.radius
+      , x: valueToNumber fc.x
+      , y: valueToNumber fc.y
+      , strength: valueToNumber fc.strength
+      , filter: predicate
+      }
+    -- Standard variant
+    Nothing -> Core.createRadial
       { radius: valueToNumber fc.radius
       , x: valueToNumber fc.x
       , y: valueToNumber fc.y
