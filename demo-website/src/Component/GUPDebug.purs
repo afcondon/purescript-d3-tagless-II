@@ -14,17 +14,28 @@
 -- | - subscribeToTick: Sets up tick callback
 -- | - buildSceneData: Pure function combining nodes + transitions
 -- | - renderScene: Renders scene to DOM
+-- |
+-- | TODO: Consider the interaction between visual interpolation and physics.
+-- | Currently, visual property transitions (radius, color, opacity) run
+-- | concurrently with the physics simulation. This works well for GUP where
+-- | we only interpolate visuals, not positions. However, if position
+-- | interpolation were needed (like in SceneEngine), the simulation would
+-- | overwrite interpolated positions. For library users, this could lead to
+-- | confusing bugs. Consider:
+-- | - Documenting this behavior clearly
+-- | - Providing a mode that pauses physics during transitions
+-- | - Or making the interpolation/physics relationship more explicit in the API
 module Component.GUPDebug where
 
 import Prelude
 
+import Control.Monad (void)
 import Data.Array as Array
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Set (Set)
 import Data.Set as Set
-import Effect (Effect)
 import Effect.Aff (Milliseconds(..), delay)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
@@ -37,6 +48,8 @@ import PSD3.Shared.DataLoader (simpleLoadJSON)
 import PSD3.Transition.Tick as Tick
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Setup as Setup
+import PSD3.ForceEngine.Events (SimulationEvent(..), defaultCallbacks)
+import PSD3.ForceEngine.Halogen (subscribeToSimulation)
 import Unsafe.Coerce (unsafeCoerce)
 import D3.Viz.LesMisV3.Model as LesMisModel
 import D3.Viz.LesMisV3.Model (LesMisModel)
@@ -60,6 +73,7 @@ type State =
 data Action
   = Initialize
   | Finalize
+  | SimTick                     -- Simulation tick event from D3
   | AddNodes
   | RemoveNodes
   | ResetFull
@@ -104,13 +118,19 @@ handleAction = case _ of
     -- Initialize all nodes as visible
     let allNodeIds = Set.fromFoldable $ map _.name model.nodes
 
-    -- Create simulation and render SVG container
-    simulation <- liftEffect $ GUPDemo.createSimulation model
+    -- Create callbacks for Halogen subscription
+    callbacks <- liftEffect defaultCallbacks
+
+    -- Create simulation with callbacks
+    simulation <- liftEffect $ GUPDemo.createSimulationWithCallbacks callbacks model
     liftEffect $ GUPDemo.renderSVGContainer "#gup-viz-container"
 
-    -- Subscribe to tick - D3's simulation tick drives position updates
-    -- The tickHandler runs in Effect-land and renders positions
-    liftEffect $ GUPDemo.subscribeToTick (tickHandler simulation) simulation
+    -- Subscribe to simulation events via Halogen subscription
+    -- This allows tick events to flow through Halogen, enabling state access
+    emitter <- liftEffect $ subscribeToSimulation simulation
+    void $ H.subscribe $ emitter <#> \event -> case event of
+      Tick -> SimTick
+      _ -> SimTick  -- Ignore other events, just render
 
     -- Store state
     H.modify_ _
@@ -127,6 +147,39 @@ handleAction = case _ of
   Finalize -> do
     -- Cleanup if needed (simulation will stop on its own)
     pure unit
+
+  SimTick -> do
+    -- On each tick from the simulation:
+    -- 1. Advance transition progress for entering/exiting nodes
+    -- 2. Remove completed transitions
+    -- 3. Render scene with current state
+    state <- H.get
+    case state.simulation of
+      Nothing -> pure unit
+      Just sim -> do
+        -- Advance entering progress (0.0 → 1.0)
+        let delta = GUPDemo.transitionDelta
+            { active: stillEntering } = Tick.tickProgressMap delta state.enteringProgress
+
+        -- Advance exiting transitions (0.0 → 1.0)
+        let { active: stillExiting } = Tick.tickTransitions delta state.exitingNodes
+
+        -- Update state with advanced progress
+        H.modify_ _
+          { enteringProgress = stillEntering
+          , exitingNodes = stillExiting
+          }
+
+        -- Build scene with current Halogen state and render
+        liftEffect do
+          currentNodes <- Sim.getNodes sim
+          currentLinks <- Sim.getLinks sim
+          let scene = GUPDemo.buildSceneData
+                currentNodes
+                stillEntering    -- Use current transition state
+                stillExiting     -- Use current exiting state
+                currentLinks
+          GUPDemo.renderScene scene
 
   AddNodes -> do
     state <- H.get
@@ -222,49 +275,34 @@ handleAction = case _ of
       _, _ -> pure unit
 
 -- =============================================================================
--- Tick Handling
+-- Rendering Helpers
 -- =============================================================================
 
--- | Effect callback for simulation tick - runs outside Halogen
--- | This is called by D3's simulation on each tick
-tickHandler :: LesMisSimulation -> Effect Unit
-tickHandler sim = do
-  -- Get current nodes and links from simulation
-  currentNodes <- Sim.getNodes sim
-  currentLinks <- Sim.getLinks sim
-
-  -- Build scene for position updates
-  -- Note: We can't access Halogen state from here, so we build
-  -- a "position-only" scene without transition state (entering/exiting)
-  let scene = GUPDemo.buildSceneData currentNodes Map.empty [] currentLinks
-
-  -- Render with current positions
-  GUPDemo.renderScene scene
-
--- | Internal: Render current state to DOM
+-- | Internal: Render current state to DOM (used for initial render)
 doRender :: forall o m. MonadAff m => H.HalogenM State Action () o m Unit
 doRender = do
   state <- H.get
-  case state.fullModel, state.simulation of
-    Just model, Just sim -> liftEffect do
-      -- Get current node positions from simulation
+  case state.simulation of
+    Just sim -> liftEffect do
+      -- Get current nodes and links from simulation
       currentNodes <- Sim.getNodes sim
+      currentLinks <- Sim.getLinks sim
 
       -- Build scene data combining:
       -- - Current nodes with positions
       -- - Entering progress map
       -- - Exiting nodes with frozen positions
-      -- - Links filtered to visible nodes
+      -- - Current links
       let scene = GUPDemo.buildSceneData
             currentNodes
             state.enteringProgress
             state.exitingNodes
-            model.links
+            currentLinks
 
       -- Render to DOM (stateless)
       GUPDemo.renderScene scene
 
-    _, _ -> pure unit
+    _ -> pure unit
 
 -- =============================================================================
 -- Render

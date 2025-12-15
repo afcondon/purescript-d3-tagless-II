@@ -132,7 +132,7 @@ handleAction = case _ of
     let allNodeIds = Set.fromFoldable $ map _.name model.nodes
     simulation <- liftEffect $ GUPDemo.createSimulation model
     liftEffect $ GUPDemo.renderSVGContainer "#lesmis-gup-container"
-    liftEffect $ GUPDemo.subscribeToTick (tickHandler simulation) simulation
+    liftEffect $ Sim.onTick (tickHandler simulation) simulation
 
     H.modify_ _
       { lesMisGUPModel = Just model

@@ -24,7 +24,7 @@ module D3.Viz.LesMisV3.GUPDemo
   , ExitingNode
   -- Simulation lifecycle
   , createSimulation
-  , subscribeToTick
+  , createSimulationWithCallbacks
   -- Rendering (stateless)
   , renderSVGContainer
   , renderScene
@@ -51,6 +51,7 @@ import Effect.Random (randomInt)
 import D3.Viz.LesMisV3.Model (LesMisModel, LesMisNode, LesMisLink)
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Setup as Setup
+import PSD3.ForceEngine.Events (SimulationCallbacks)
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultLink, defaultCenter)
 import PSD3.ForceEngine.Links (filterLinksToSubset, swizzleLinksByIndex)
 import PSD3.Transition.Tick as Tick
@@ -319,10 +320,31 @@ createSimulation model = do
 
   pure sim
 
--- | Subscribe to simulation tick events
--- | The callback will be called on each simulation tick
-subscribeToTick :: Effect Unit -> LesMisSimulation -> Effect Unit
-subscribeToTick callback sim = Sim.onTick callback sim
+-- | Create a simulation with callbacks (for Halogen subscription pattern)
+-- | This enables using subscribeToSimulation from PSD3.ForceEngine.Halogen
+createSimulationWithCallbacks :: SimulationCallbacks -> LesMisModel -> Effect LesMisSimulation
+createSimulationWithCallbacks callbacks model = do
+  -- Clone nodes to have independent data from other visualizations
+  let clonedNodes = map cloneNode model.nodes
+
+  -- Create simulation with callbacks
+  sim <- Sim.createWithCallbacks Sim.defaultConfig callbacks
+  Sim.setNodes clonedNodes sim
+  Sim.setLinks model.links sim
+
+  -- Register simulation for declarative drag behaviors
+  BehaviorFFI.registerSimulation_ simulationId (Sim.reheat sim)
+
+  -- Add forces
+  Sim.addForce (ManyBody "charge" defaultManyBody { strength = -100.0, distanceMax = 500.0 }) sim
+  Sim.addForce (Collide "collision" defaultCollide { radius = 5.0, strength = 1.0, iterations = 1 }) sim
+  Sim.addForce (Center "center" defaultCenter { x = 0.0, y = 0.0, strength = 0.1 }) sim
+  Sim.addForce (Link "links" defaultLink { distance = 30.0, strength = 0.5, iterations = 1 }) sim
+
+  -- Start simulation
+  Sim.start sim
+
+  pure sim
 
 -- =============================================================================
 -- Scene Building (Pure except for reading simulation positions)
