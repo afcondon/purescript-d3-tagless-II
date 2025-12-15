@@ -1,30 +1,57 @@
--- | Force-Directed Graph View
+-- | Force-Directed Graph View - STATELESS ARCHITECTURE
 -- |
 -- | Shows modules in a force-directed layout with three animation phases:
 -- | 1. Grow radial tree from center (nodes move from center to tree positions)
 -- | 2. Morph bezier links to straight lines
 -- | 3. Engage force simulation (unpin nodes, let forces settle)
 -- |
--- | Architecture:
--- | - Uses tick-based animation like TreeView for phases 1-2
--- | - Phase 3 hands off to D3 force simulation
--- | - Cleanup properly stops simulation when switching views
+-- | ALL STATE LIVES IN HALOGEN (App.purs):
+-- | - forcePhase :: ForcePhase (TreeGrowth | LinkMorph | ForceActive)
+-- | - forceProgress :: Progress (0.0 to 1.0 within current phase)
+-- | - forceLayout :: Maybe TreeLayoutResult
+-- | - simulation :: Maybe ForceSimulation
+-- |
+-- | This module provides STATELESS functions:
+-- | - createSimulationWithCallbacks: Creates simulation, returns handle
+-- | - computeLayout: Pure layout computation
+-- | - renderTreeGrowthPhase: Renders phase 1
+-- | - renderLinkMorphPhase: Renders phase 2
+-- | - renderForcePhase: Renders phase 3 (simulation active)
+-- | - buildSceneData: Pure function to build render data
+-- | - renderScene: Renders scene to DOM
 module Viz.ForceGraph
-  ( render
-  , renderAnimated
+  ( -- Simulation creation
+    createSimulationWithCallbacks
+  , ForceSimulation
+  , SimNodeRow
+  , SimulationConfig
+  , defaultSimulationConfig
+    -- Layout computation
+  , computeLayout
+    -- Force setup (declarative)
+  , forceSetup
+    -- Phase rendering
+  , renderTreeGrowthPhase
+  , renderLinkMorphPhase
+  , renderForcePhase
+    -- Scene data
+  , SceneData
+  , RenderNode
+  , SwizzledLink
+  , buildSceneData
+  , renderScene
+    -- DOM setup
+  , addTreeLinks
+    -- Cleanup
   , resetToTreemap
-  , cleanup
-  , Config
-  , SimulationHandle
-  , AnimationState
-  , ForcePhase(..)
-  , initAnimation
-  , tickAnimation
-  , isAnimating
+  , cleanupSimulation
+    -- Constants
+  , simulationId
   ) where
 
 import Prelude
 
+import Control.Monad (when)
 import Data.Array as Array
 import Data.Map (Map)
 import Data.Map as Map
@@ -33,62 +60,72 @@ import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Class.Console (log)
-import Effect.Ref as Ref
 import Types (SimNode, SimLink, NodeType(..))
 import Data.TreeLayout as TreeLayout
 import DataViz.Layout.Hierarchy.TreeStyle as TreeStyle
-import PSD3.ForceEngine as FE
 import PSD3.ForceEngine.Simulation as Sim
+import PSD3.ForceEngine.Setup as Setup
+import PSD3.ForceEngine.Events (SimulationCallbacks)
 import PSD3.ForceEngine.Links (swizzleLinksByIndex, filterLinksToSubset)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M)
-import Effect.Class (liftEffect)
 import PSD3v2.Transform (transformCircles, transformPaths, removeElement)
 import PSD3v2.Classify (classifyElements)
 import PSD3v2.Selection.Types (ElementType(..))
 import PSD3v2.VizTree.Tree as T
 import PSD3v2.Behavior.Types (Behavior(..), DragConfig(..), ScaleExtent(..), defaultZoom)
 import PSD3v2.Behavior.FFI as BehaviorFFI
-import PSD3v3.Integration (v3AttrFn, v3AttrFnStr, v3AttrStr)
-import PSD3v3.Expr (str)
+import PSD3v3.Integration (v3Attr, v3AttrFn, v3AttrFnStr, v3AttrStr)
+import PSD3v3.Expr (lit, str)
 import PSD3.Transition.Tick as Tick
 
 -- =============================================================================
 -- Types
 -- =============================================================================
 
--- | Rendering configuration
-type Config =
+-- | Row types for the simulation
+type SimNodeRow =
+  ( name :: String
+  , nodeType :: NodeType
+  , package :: String
+  , r :: Number
+  , cluster :: Int
+  , targets :: Array Int
+  , sources :: Array Int
+  , gridX :: Number
+  , gridY :: Number
+  , orbitAngle :: Number
+  , treeX :: Number
+  , treeY :: Number
+  , radialX :: Number
+  , radialY :: Number
+  , isInTree :: Boolean
+  , topoX :: Number
+  , topoY :: Number
+  , topoLayer :: Int
+  )
+
+-- | Concrete simulation type (links only have source/target for the force engine)
+type ForceSimulation = Sim.Simulation SimNodeRow ()
+
+-- | Configuration for simulation creation
+type SimulationConfig =
   { containerSelector :: String
-  , packageCount :: Int
-  , rootId :: Int           -- Which node to use as tree root (for radial tree phase)
+  , rootId :: Int
   }
 
--- | Handle to the simulation for cleanup
-type SimulationHandle =
-  { cleanup :: Effect Unit
+-- | Default configuration
+defaultSimulationConfig :: SimulationConfig
+defaultSimulationConfig =
+  { containerSelector: "#viz"
+  , rootId: 0
   }
 
--- | The three phases of force view animation
-data ForcePhase
-  = TreeGrowth       -- Phase 1: Grow radial tree from center
-  | LinkMorph        -- Phase 2: Morph bezier links to straight lines
-  | ForceActive      -- Phase 3: Force simulation running
-
-derive instance eqForcePhase :: Eq ForcePhase
-
-instance showForcePhase :: Show ForcePhase where
-  show TreeGrowth = "TreeGrowth"
-  show LinkMorph = "LinkMorph"
-  show ForceActive = "ForceActive"
-
--- | Animation state for force view
-type AnimationState =
-  { phase :: ForcePhase
-  , progress :: Tick.Progress    -- 0.0 to 1.0 within current phase
-  , isComplete :: Boolean
-  , isFirstFrame :: Boolean
-  , treeLayout :: Maybe TreeLayout.TreeLayoutResult
+-- | Node ready for rendering with position
+type RenderNode =
+  { node :: SimNode
+  , cx :: Number
+  , cy :: Number
   }
 
 -- | Swizzled link with source/target as full nodes
@@ -98,9 +135,12 @@ type SwizzledLink =
   , index :: Int
   }
 
--- | Link element for visualization
+-- | Link element for tree visualization (during phases 1-2)
+-- | Includes node IDs so we can look up live positions during phase 3
 type LinkElement =
-  { sourceTreeX :: Number
+  { sourceId :: Int
+  , targetId :: Int
+  , sourceTreeX :: Number
   , sourceTreeY :: Number
   , targetTreeX :: Number
   , targetTreeY :: Number
@@ -108,173 +148,331 @@ type LinkElement =
   , rootY :: Number
   }
 
+-- | Scene data for force phase rendering - pure data structure
+type SceneData =
+  { nodes :: Array RenderNode
+  , links :: Array SwizzledLink
+  }
+
 -- =============================================================================
 -- Constants
 -- =============================================================================
 
+-- | Simulation ID for drag registry
 simulationId :: String
 simulationId = "code-explorer-force"
 
 -- =============================================================================
--- Animation State Management
+-- Force Setup (Declarative Configuration)
 -- =============================================================================
 
--- | Initialize animation state
-initAnimation :: AnimationState
-initAnimation =
-  { phase: TreeGrowth
-  , progress: 0.0
-  , isComplete: false
-  , isFirstFrame: true
-  , treeLayout: Nothing
-  }
-
--- | Advance animation by one tick
--- | Returns updated state, potentially transitioning between phases
-tickAnimation :: Tick.TickDelta -> AnimationState -> AnimationState
-tickAnimation delta state =
-  if state.isComplete then state
-  else
-    let newProgress = min 1.0 (state.progress + delta)
-    in
-      if newProgress >= 1.0 then
-        -- Phase complete - advance to next phase
-        case state.phase of
-          TreeGrowth ->
-            state
-              { phase = LinkMorph
-              , progress = 0.0
-              , isFirstFrame = false
-              }
-          LinkMorph ->
-            -- Transition to ForceActive but don't mark complete yet
-            -- Need one more render call to actually start the simulation
-            state
-              { phase = ForceActive
-              , progress = 0.0
-              , isComplete = false  -- Will be set after simulation starts
-              , isFirstFrame = true -- Signal that we need to start simulation
-              }
-          ForceActive ->
-            -- After simulation is started, mark complete
-            state { isComplete = true, isFirstFrame = false }
-      else
-        state
-          { progress = newProgress
-          , isFirstFrame = false
-          }
-
--- | Check if animation is still running (phases 1 or 2)
-isAnimating :: AnimationState -> Boolean
-isAnimating state = not state.isComplete
+-- | Force setup for the code explorer
+-- | Based on Observable's force layout tree:
+-- | https://observablehq.com/@d3/force-directed-tree
+-- | Plus collide force to handle our larger nodes
+forceSetup :: Setup.Setup SimNode
+forceSetup = Setup.setup "code-explorer"
+  [ Setup.link "links"
+      # Setup.withDistance (Setup.static 0.0)   -- Zero distance - nodes want to overlap
+      # Setup.withStrength (Setup.static 1.0)   -- Full strength links
+  , Setup.manyBody "charge"
+      # Setup.withStrength (Setup.static (-50.0))  -- Weaker repulsion than before
+  , Setup.collide "collide"
+      # Setup.withRadius (Setup.dynamic _.r)   -- Use node's actual radius
+  , Setup.positionX "forceX"
+      # Setup.withStrength (Setup.static 0.1)   -- Default d3.forceX() strength
+  , Setup.positionY "forceY"
+      # Setup.withStrength (Setup.static 0.1)   -- Default d3.forceY() strength
+  ]
 
 -- =============================================================================
--- Rendering (Simple - jumps straight to force simulation)
+-- Simulation Creation (with Halogen Callbacks)
 -- =============================================================================
 
--- | Simple render that jumps straight to force simulation
--- | Use renderAnimated for the full phased animation
-render :: Config -> Array SimNode -> Array SimLink -> Effect SimulationHandle
-render config nodes links = do
-  log $ "[ForceGraph] Simple render - " <> show (Array.length nodes) <> " nodes"
+-- | Create a simulation with callbacks for Halogen subscription pattern
+-- | The simulation is created but NOT started - Halogen controls lifecycle
+createSimulationWithCallbacks
+  :: SimulationCallbacks
+  -> TreeLayout.TreeLayoutResult  -- Pre-computed layout for initial positions
+  -> Array SimNode
+  -> Array SimLink
+  -> Effect ForceSimulation
+createSimulationWithCallbacks callbacks layout nodes links = do
+  log "[ForceGraph] Creating simulation with callbacks"
 
   -- Filter to modules only
   let moduleNodes = Array.filter (\n -> n.nodeType == ModuleNode) nodes
-  let moduleLinks = Array.filter (\l -> isModuleLink nodes l) links
 
-  -- Swizzle links (use ById since link.source/target are node IDs, not array indices)
-  let rawLinks = moduleLinks <#> \l -> { source: l.source, target: l.target }
-  let swizzled = swizzleLinksByIndex _.id moduleNodes rawLinks \src tgt i _ ->
-        { source: src, target: tgt, index: i }
+  -- Build map from tree layout
+  let treeNodeMap = Map.fromFoldable $ layout.treeNodes <#> \tn -> Tuple tn.id tn
 
-  -- Create simulation
-  sim <- Sim.create Sim.defaultConfig
-  Sim.setNodes moduleNodes sim
-  Sim.setLinks rawLinks sim
+  -- Only include nodes that are IN THE TREE - non-tree nodes would have
+  -- grid positions that cause chaos when mixed with radial positions
+  let positionedNodes = Array.mapMaybe (\n ->
+        case Map.lookup n.id treeNodeMap of
+          Just tn | tn.isInTree -> Just (n { x = tn.radialX, y = tn.radialY })
+          _ -> Nothing  -- Exclude non-tree nodes from simulation
+        ) moduleNodes
 
-  -- Add forces
-  Sim.addForce (FE.ManyBody "charge" FE.defaultManyBody { strength = -100.0 }) sim
-  Sim.addForce (FE.Collide "collide" FE.defaultCollide { radius = 15.0 }) sim
-  Sim.addForce (FE.Center "center" FE.defaultCenter) sim
-  Sim.addForce (FE.Link "links" FE.defaultLink { distance = 40.0 }) sim
+  -- Use tree edges from layout (not linkType which isn't set properly)
+  -- Convert Set of edge tuples to Array of link records
+  let treeEdgeArray = Set.toUnfoldable layout.treeEdges :: Array (Tuple Int Int)
+  let treeLinks = treeEdgeArray <#> \(Tuple src tgt) -> { source: src, target: tgt }
+
+  log $ "[ForceGraph] Tree edges from layout: " <> show (Array.length treeLinks)
+
+  -- Build set of positioned node IDs for efficient lookup
+  let positionedNodeIds = Set.fromFoldable $ positionedNodes <#> _.id
+
+  -- Check each tree edge to see if both endpoints are in positioned nodes
+  let checkEdge (Tuple src tgt) =
+        let srcIn = Set.member src positionedNodeIds
+            tgtIn = Set.member tgt positionedNodeIds
+        in { src, tgt, srcIn, tgtIn, bothIn: srcIn && tgtIn }
+  let edgeStatus = treeEdgeArray <#> checkEdge
+  let missingEdges = Array.filter (not <<< _.bothIn) edgeStatus
+
+  log $ "[ForceGraph] Edges with missing endpoints: " <> show (Array.length missingEdges)
+  when (Array.length missingEdges > 0) do
+    log $ "[ForceGraph] First 5 missing edges:"
+    _ <- Array.foldM (\_ e -> log $ "  " <> show e.src <> " -> " <> show e.tgt <> " (srcIn=" <> show e.srcIn <> ", tgtIn=" <> show e.tgtIn <> ")") unit (Array.take 5 missingEdges)
+    pure unit
+
+  -- Filter to only links between nodes in the simulation
+  let filteredLinks = filterLinksToSubset _.id positionedNodes treeLinks
+
+  log $ "[ForceGraph] After filterLinksToSubset: " <> show (Array.length filteredLinks) <> " links"
+  log $ "[ForceGraph] Simulation includes " <> show (Array.length positionedNodes) <> " in-tree nodes, "
+      <> show (Array.length filteredLinks) <> " links"
+
+  -- Log a sample of positions
+  case Array.take 3 positionedNodes of
+    sample -> do
+      log $ "[ForceGraph] Sample positions:"
+      _ <- Array.foldM (\_ n -> log $ "  Node " <> show n.id <> ": x=" <> show n.x <> ", y=" <> show n.y) unit sample
+      pure unit
+
+  -- Create simulation with callbacks
+  sim <- Sim.createWithCallbacks Sim.defaultConfig callbacks
+  Sim.setNodes positionedNodes sim
+  Sim.setLinks filteredLinks sim
+
+  log $ "[ForceGraph] Set " <> show (Array.length filteredLinks) <> " links in simulation"
+
+  -- Apply declarative force setup
+  Setup.applySetup forceSetup sim
+
+  -- Verify links were set
+  simLinks <- Sim.getLinks sim
+  log $ "[ForceGraph] After applySetup, sim has " <> show (Array.length simLinks) <> " links"
 
   -- Register for drag
   BehaviorFFI.registerSimulation_ simulationId (Sim.reheat sim)
 
-  -- State ref
-  stateRef <- Ref.new { nodes: moduleNodes, swizzled }
-
-  -- Render DOM
-  _ <- runD3v2M do
-    container <- select config.containerSelector
-    renderTree container (buildForceSvgTree config)
-
-  -- Set up tick handler
-  Sim.onTick (tickForce stateRef config) sim
-  Sim.start sim
-
-  pure
-    { cleanup: do
-        log "[ForceGraph] Cleaning up"
-        Sim.stop sim
-        BehaviorFFI.unregisterSimulation_ simulationId
-    }
+  -- Do NOT start yet - Halogen will start when ready (after phases 1-2)
+  pure sim
 
 -- =============================================================================
--- Animated Rendering (Three Phases)
+-- Layout Computation (Pure)
 -- =============================================================================
 
--- | Render with phased animation
--- | Phase 1: Grow radial tree from center
--- | Phase 2: Morph bezier links to straight lines
--- | Phase 3: Engage force simulation (returns SimulationHandle)
-renderAnimated :: Config
-               -> AnimationState
-               -> Array SimNode
-               -> Array SimLink
-               -> Effect { animState :: AnimationState, simHandle :: Maybe SimulationHandle }
-renderAnimated config animState nodes links = do
-  log $ "[ForceGraph] renderAnimated phase=" <> show animState.phase
-      <> " progress=" <> show animState.progress
+-- | Compute tree layout for the radial tree animation
+-- | This is a pure computation that can be called once and reused
+computeLayout :: Int -> Array SimNode -> Array SimLink -> TreeLayout.TreeLayoutResult
+computeLayout rootId nodes links =
+  TreeLayout.computeTreeLayout TreeStyle.radialTree rootId nodes links
 
-  -- Get or compute tree layout (same as TreeView, but with radial style)
-  layout <- case animState.treeLayout of
-    Just l -> pure l
-    Nothing -> do
-      log "[ForceGraph] Computing radial tree layout..."
-      let result = TreeLayout.computeTreeLayout TreeStyle.radialTree config.rootId nodes links
-      log $ "[ForceGraph] Layout computed: " <> show (Array.length result.treeNodes) <> " nodes"
-      pure result
+-- =============================================================================
+-- Phase 1: Tree Growth Rendering
+-- =============================================================================
 
-  let rootX = 0.0  -- Radial tree is centered at origin
+-- | Render tree growth phase (nodes move from center to radial positions)
+-- | This is called on each animation tick during phase 1
+renderTreeGrowthPhase
+  :: String                          -- Container selector
+  -> TreeLayout.TreeLayoutResult     -- Pre-computed layout
+  -> Tick.Progress                   -- 0.0 to 1.0
+  -> Effect Unit
+renderTreeGrowthPhase containerSelector layout progress = do
+  let easedProgress = Tick.easeOutCubic progress
+  let treeNodeMap = Map.fromFoldable $ layout.treeNodes <#> \tn -> Tuple tn.id tn
+  let rootX = 0.0
   let rootY = 0.0
 
-  -- First frame: set up DOM structure
-  if animState.isFirstFrame then do
-    log "[ForceGraph] First frame - adding tree links"
-    addTreeLinks config layout rootX rootY
-  else
-    pure unit
+  -- Move circles from center to radial tree positions
+  transformCircles containerSelector \rect ->
+    case rect.simNode of
+      Just sn ->
+        case Map.lookup sn.id treeNodeMap of
+          Just tn | tn.isInTree ->
+            { cx: Tick.lerp rootX tn.radialX easedProgress
+            , cy: Tick.lerp rootY tn.radialY easedProgress
+            }
+          _ ->
+            { cx: rect.x + rect.width / 2.0
+            , cy: rect.y + rect.height / 2.0
+            }
+      Nothing ->
+        { cx: rect.x + rect.width / 2.0
+        , cy: rect.y + rect.height / 2.0
+        }
 
-  -- Handle current phase
-  case animState.phase of
-    TreeGrowth -> do
-      -- Animate circles from center to radial tree positions
-      updateTreeGrowthPositions config animState layout rootX rootY
-      pure { animState: animState { treeLayout = Just layout }, simHandle: Nothing }
+  -- Update bezier links (from root outward)
+  transformPaths (containerSelector <> " g.force-links-group") \el ->
+    let
+      srcX = Tick.lerp rootX el.sourceTreeX easedProgress
+      srcY = Tick.lerp rootY el.sourceTreeY easedProgress
+      tgtX = Tick.lerp rootX el.targetTreeX easedProgress
+      tgtY = Tick.lerp rootY el.targetTreeY easedProgress
+    in
+      TreeStyle.radialTree.linkPath srcX srcY tgtX tgtY
 
-    LinkMorph -> do
-      -- Keep nodes at tree positions, morph links from bezier to straight
-      updateLinkMorphPositions config animState layout
-      pure { animState: animState { treeLayout = Just layout }, simHandle: Nothing }
+  -- Classify circles (in-tree vs dimmed)
+  let inTreeIds = Set.fromFoldable $ Array.mapMaybe
+        (\tn -> if tn.isInTree then Just tn.id else Nothing)
+        layout.treeNodes
 
-    ForceActive -> do
-      -- Phase 3: Start force simulation
-      log "[ForceGraph] Entering ForceActive phase - starting simulation"
-      handle <- startForceSimulation config layout nodes links
-      pure { animState: animState { treeLayout = Just layout }, simHandle: Just handle }
+  classifyElements containerSelector "circle" \rect ->
+    case rect.simNode of
+      Just sn | Set.member sn.id inTreeIds -> "in-tree"
+      _ -> "dimmed"
 
--- | Reset to treemap positions
+-- =============================================================================
+-- Phase 2: Link Morph Rendering
+-- =============================================================================
+
+-- | Render link morph phase (bezier curves become straight lines)
+-- | Nodes stay at their radial tree positions
+renderLinkMorphPhase
+  :: String                          -- Container selector
+  -> TreeLayout.TreeLayoutResult     -- Pre-computed layout
+  -> Tick.Progress                   -- 0.0 to 1.0
+  -> Effect Unit
+renderLinkMorphPhase containerSelector _layout progress = do
+  let easedProgress = Tick.easeInOutCubic progress
+
+  -- Morph links from bezier to straight line
+  transformPaths (containerSelector <> " g.force-links-group") \el ->
+    let
+      bezierPath = TreeStyle.radialTree.linkPath el.sourceTreeX el.sourceTreeY el.targetTreeX el.targetTreeY
+      straightPath = "M" <> show el.sourceTreeX <> "," <> show el.sourceTreeY
+                  <> "L" <> show el.targetTreeX <> "," <> show el.targetTreeY
+    in
+      -- Switch at 50% progress (true morphing would need path interpolation)
+      if easedProgress < 0.5 then bezierPath else straightPath
+
+-- =============================================================================
+-- Phase 3: Force Simulation Rendering
+-- =============================================================================
+
+-- | Render force phase using live node positions from simulation
+-- | Called on each tick from the D3 simulation
+renderForcePhase
+  :: String              -- Container selector
+  -> Array SimNode       -- Current nodes with live positions
+  -> Effect Unit
+renderForcePhase containerSelector currentNodes = do
+  let nodeMap = Map.fromFoldable $ currentNodes <#> \n -> Tuple n.id n
+
+  -- Update circle positions using live simulation data
+  transformCircles containerSelector \rect ->
+    case rect.simNode of
+      Just sn ->
+        case Map.lookup sn.id nodeMap of
+          Just n -> { cx: n.x, cy: n.y }
+          Nothing -> { cx: rect.x + rect.width / 2.0, cy: rect.y + rect.height / 2.0 }
+      Nothing -> { cx: rect.x + rect.width / 2.0, cy: rect.y + rect.height / 2.0 }
+
+  -- Update links to follow node positions
+  -- LinkElements have sourceId/targetId, use nodeMap to look up current positions
+  transformPaths (containerSelector <> " g.force-links-group") \el ->
+    let
+      -- Look up current positions from simulation nodes
+      srcPos = case Map.lookup el.sourceId nodeMap of
+        Just n -> { x: n.x, y: n.y }
+        Nothing -> { x: el.sourceTreeX, y: el.sourceTreeY }
+      tgtPos = case Map.lookup el.targetId nodeMap of
+        Just n -> { x: n.x, y: n.y }
+        Nothing -> { x: el.targetTreeX, y: el.targetTreeY }
+    in
+      "M" <> show srcPos.x <> "," <> show srcPos.y
+        <> "L" <> show tgtPos.x <> "," <> show tgtPos.y
+
+-- =============================================================================
+-- Scene Data Construction (Pure)
+-- =============================================================================
+
+-- | Build scene data from current simulation state
+-- | This is a PURE function - all state comes from parameters
+buildSceneData
+  :: Array SimNode       -- Current nodes from simulation (with positions)
+  -> Array SimLink       -- Links from model
+  -> SceneData
+buildSceneData currentNodes links =
+  let
+    -- Filter to modules only
+    moduleNodes = Array.filter (\n -> n.nodeType == ModuleNode) currentNodes
+
+    -- Build render nodes with current positions
+    renderNodes = moduleNodes <#> \n ->
+      { node: n
+      , cx: n.x
+      , cy: n.y
+      }
+
+    -- Filter links to module-to-module only
+    rawLinks = links <#> \l -> { source: l.source, target: l.target }
+    filteredLinks = filterLinksToSubset _.id moduleNodes rawLinks
+    swizzledLinks = swizzleLinksByIndex _.id moduleNodes filteredLinks \src tgt i _ ->
+      { source: src, target: tgt, index: i }
+  in
+    { nodes: renderNodes, links: swizzledLinks }
+
+-- | Render scene to DOM (stateless, side-effecting)
+renderScene :: String -> SceneData -> Effect Unit
+renderScene containerSelector scene = runD3v2M do
+  nodesGroup <- select (containerSelector <> " #force-zoom-group .force-nodes-group")
+  let nodesTree = createNodesTree scene
+  _ <- renderTree nodesGroup nodesTree
+
+  linksGroup <- select (containerSelector <> " #force-zoom-group .force-links-group")
+  let linksTree = createLinksTree scene
+  _ <- renderTree linksGroup linksTree
+
+  pure unit
+
+-- =============================================================================
+-- DOM Setup
+-- =============================================================================
+
+-- | Add tree links (bezier curves) to the SVG for phases 1-2
+addTreeLinks
+  :: String                          -- Container selector
+  -> TreeLayout.TreeLayoutResult     -- Pre-computed layout
+  -> Effect Unit
+addTreeLinks containerSelector layout = do
+  let nodeMap = buildTreeNodeMap layout.treeNodes
+  let rootX = 0.0
+  let rootY = 0.0
+  let linkElements = Array.mapMaybe (buildLinkElement nodeMap rootX rootY) (Set.toUnfoldable layout.treeEdges)
+
+  log $ "[ForceGraph] Adding " <> show (Array.length linkElements) <> " tree links"
+
+  -- Remove any existing links group
+  removeElement (containerSelector <> " g.force-links-group")
+
+  -- Add links to SVG
+  _ <- runD3v2M do
+    svg <- select (containerSelector <> " svg")
+    renderTree svg (buildLinksVizTree linkElements rootX rootY)
+
+  pure unit
+
+-- =============================================================================
+-- Cleanup
+-- =============================================================================
+
+-- | Reset circles to treemap positions
 resetToTreemap :: String -> Effect Unit
 resetToTreemap containerSelector = do
   log "[ForceGraph] Resetting to treemap positions"
@@ -285,214 +483,84 @@ resetToTreemap containerSelector = do
     , cy: rect.y + rect.height / 2.0
     }
 
--- =============================================================================
--- Phase 1: Tree Growth Animation
--- =============================================================================
-
--- | Update positions during tree growth phase
-updateTreeGrowthPositions :: Config -> AnimationState -> TreeLayout.TreeLayoutResult -> Number -> Number -> Effect Unit
-updateTreeGrowthPositions config animState layout rootX rootY = do
-  let easedProgress = Tick.easeOutCubic animState.progress
-  let treeNodeMap = Map.fromFoldable $ layout.treeNodes <#> \tn -> Tuple tn.id tn
-
-  -- Move circles from center to radial tree positions
-  transformCircles config.containerSelector \rect ->
-    case rect.simNode of
-      Just sn ->
-        case Map.lookup sn.id treeNodeMap of
-          Just tn | tn.isInTree ->
-            -- Interpolate from center to radial position
-            { cx: Tick.lerp rootX tn.radialX easedProgress
-            , cy: Tick.lerp rootY tn.radialY easedProgress
-            }
-          _ ->
-            -- Not in tree - stay at treemap position
-            { cx: rect.x + rect.width / 2.0
-            , cy: rect.y + rect.height / 2.0
-            }
-      Nothing ->
-        { cx: rect.x + rect.width / 2.0
-        , cy: rect.y + rect.height / 2.0
-        }
-
-  -- Update bezier links (from root outward)
-  transformPaths (config.containerSelector <> " g.force-links-group") \el ->
-    let
-      srcX = Tick.lerp rootX el.sourceTreeX easedProgress
-      srcY = Tick.lerp rootY el.sourceTreeY easedProgress
-      tgtX = Tick.lerp rootX el.targetTreeX easedProgress
-      tgtY = Tick.lerp rootY el.targetTreeY easedProgress
-    in
-      -- Use radial bezier during tree growth
-      TreeStyle.radialTree.linkPath srcX srcY tgtX tgtY
-
-  -- Classify circles
-  let inTreeIds = Set.fromFoldable $ Array.mapMaybe
-        (\tn -> if tn.isInTree then Just tn.id else Nothing)
-        layout.treeNodes
-
-  classifyElements config.containerSelector "circle" \rect ->
-    case rect.simNode of
-      Just sn | Set.member sn.id inTreeIds -> "in-tree"
-      _ -> "dimmed"
+-- | Cleanup simulation when switching views
+cleanupSimulation :: ForceSimulation -> Effect Unit
+cleanupSimulation sim = do
+  log "[ForceGraph] Cleaning up simulation"
+  Sim.stop sim
+  BehaviorFFI.unregisterSimulation_ simulationId
 
 -- =============================================================================
--- Phase 2: Link Morphing
+-- Tree Construction for Rendering
 -- =============================================================================
 
--- | Update during link morph phase (bezier -> straight)
-updateLinkMorphPositions :: Config -> AnimationState -> TreeLayout.TreeLayoutResult -> Effect Unit
-updateLinkMorphPositions config animState _layout = do
-  let easedProgress = Tick.easeInOutCubic animState.progress
+-- | Create nodes tree for scene rendering
+createNodesTree :: SceneData -> T.Tree SceneData
+createNodesTree scene =
+  T.sceneNestedJoin "nodes" "circle"
+    [ scene ]
+    (_.nodes)
+    ( \rn -> T.elem Circle
+        [ v3Attr "cx" (lit rn.cx)
+        , v3Attr "cy" (lit rn.cy)
+        , v3Attr "r" (lit (max 5.0 (rn.node.r * 0.5)))
+        , v3AttrStr "fill" (str "rgba(255, 255, 255, 0.5)")
+        , v3AttrStr "stroke" (str "rgba(255, 255, 255, 0.8)")
+        , v3Attr "stroke-width" (lit 1.5)
+        , v3AttrStr "class" (str "force-node module-node")
+        ]
+        `T.withBehaviors` [ Drag (SimulationDrag simulationId) ]
+    )
+    { enterBehavior: Nothing
+    , updateBehavior: Nothing
+    , exitBehavior: Nothing
+    }
 
-  -- Nodes stay at their tree positions (no movement this phase)
-  -- Links morph from bezier to straight line
-  transformPaths (config.containerSelector <> " g.force-links-group") \el ->
-    let
-      -- Start: bezier path
-      bezierPath = TreeStyle.radialTree.linkPath el.sourceTreeX el.sourceTreeY el.targetTreeX el.targetTreeY
-      -- End: straight line
-      straightPath = "M" <> show el.sourceTreeX <> "," <> show el.sourceTreeY
-                  <> "L" <> show el.targetTreeX <> "," <> show el.targetTreeY
-    in
-      -- For now, just switch at 50% progress (true morphing would need path interpolation)
-      if easedProgress < 0.5 then bezierPath else straightPath
-
--- =============================================================================
--- Phase 3: Force Simulation
--- =============================================================================
-
--- | Start force simulation after animation phases complete
-startForceSimulation :: Config -> TreeLayout.TreeLayoutResult -> Array SimNode -> Array SimLink -> Effect SimulationHandle
-startForceSimulation config layout nodes links = do
-  log "[ForceGraph] Starting force simulation"
-
-  let moduleNodes = Array.filter (\n -> n.nodeType == ModuleNode) nodes
-
-  -- Initialize node positions from tree layout
-  let treeNodeMap = Map.fromFoldable $ layout.treeNodes <#> \tn -> Tuple tn.id tn
-  let positionedNodes = moduleNodes <#> \n ->
-        case Map.lookup n.id treeNodeMap of
-          Just tn | tn.isInTree -> n { x = tn.radialX, y = tn.radialY }
-          _ -> n
-
-  -- IMPORTANT: Filter links to ONLY those where both endpoints are in positionedNodes
-  -- This prevents "node not found" errors when D3's link force tries to swizzle
-  let rawLinks = links <#> \l -> { source: l.source, target: l.target }
-  let filteredLinks = filterLinksToSubset _.id positionedNodes rawLinks
-
-  log $ "[ForceGraph] Positioned " <> show (Array.length positionedNodes) <> " nodes, "
-      <> show (Array.length filteredLinks) <> " links (filtered from " <> show (Array.length rawLinks) <> ")"
-
-  -- Create simulation with positioned nodes
-  sim <- Sim.create Sim.defaultConfig
-  Sim.setNodes positionedNodes sim
-  Sim.setLinks filteredLinks sim
-
-  -- Add forces (gentler than simple render since nodes are already positioned)
-  Sim.addForce (FE.ManyBody "charge" FE.defaultManyBody { strength = -50.0 }) sim
-  Sim.addForce (FE.Collide "collide" FE.defaultCollide { radius = 10.0 }) sim
-  Sim.addForce (FE.Link "links" FE.defaultLink { distance = 30.0 }) sim
-  -- No Center force - let nodes drift from tree positions
-
-  -- Register for drag
-  BehaviorFFI.registerSimulation_ simulationId (Sim.reheat sim)
-
-  -- Swizzle for tick rendering (use ById since link.source/target are node IDs)
-  let swizzled = swizzleLinksByIndex _.id positionedNodes filteredLinks \src tgt i _ ->
-        { source: src, target: tgt, index: i }
-  stateRef <- Ref.new { nodes: positionedNodes, swizzled }
-
-  -- Set up tick handler (updates both nodes AND links)
-  Sim.onTick (tickForceWithStraightLinks stateRef config) sim
-  Sim.start sim
-
-  pure
-    { cleanup: do
-        log "[ForceGraph] Cleanup"
-        Sim.stop sim
-        BehaviorFFI.unregisterSimulation_ simulationId
+-- | Create links tree for scene rendering
+createLinksTree :: SceneData -> T.Tree SceneData
+createLinksTree scene =
+  T.sceneNestedJoin "links" "line"
+    [ scene ]
+    (_.links)
+    ( \link -> T.elem Line
+        [ v3Attr "x1" (lit link.source.x)
+        , v3Attr "y1" (lit link.source.y)
+        , v3Attr "x2" (lit link.target.x)
+        , v3Attr "y2" (lit link.target.y)
+        , v3AttrStr "stroke" (str "rgba(255, 255, 255, 0.3)")
+        , v3Attr "stroke-width" (lit 1.0)
+        , v3AttrStr "class" (str "force-link")
+        ]
+    )
+    { enterBehavior: Nothing
+    , updateBehavior: Nothing
+    , exitBehavior: Nothing
     }
 
 -- =============================================================================
--- Tick Handlers
+-- Helper Functions
 -- =============================================================================
 
--- | Tick handler for simple force render
-tickForce :: Ref.Ref { nodes :: Array SimNode, swizzled :: Array SwizzledLink }
-          -> Config
-          -> Effect Unit
-tickForce stateRef _config = runD3v2M do
-  state <- liftEffect $ Ref.read stateRef
+-- | Build map from node ID to TreeNode
+buildTreeNodeMap :: Array TreeLayout.TreeNode -> Map Int TreeLayout.TreeNode
+buildTreeNodeMap nodes = Map.fromFoldable $ nodes <#> \n -> Tuple n.id n
 
-  linksGroup <- select "#force-zoom-group .force-links-group"
-  nodesGroup <- select "#force-zoom-group .force-nodes-group"
+-- | Build link element from tree edge
+buildLinkElement :: Map Int TreeLayout.TreeNode -> Number -> Number -> Tuple Int Int -> Maybe LinkElement
+buildLinkElement nodeMap rootX rootY (Tuple srcId tgtId) = do
+  sourceNode <- Map.lookup srcId nodeMap
+  targetNode <- Map.lookup tgtId nodeMap
 
-  _ <- renderTree linksGroup (T.joinData "force-links" "line" state.swizzled linkLineTemplate)
-  _ <- renderTree nodesGroup (T.joinData "force-nodes" "circle" state.nodes nodeTemplate)
-
-  pure unit
-
--- | Tick handler for force with straight lines (phase 3)
-tickForceWithStraightLinks :: Ref.Ref { nodes :: Array SimNode, swizzled :: Array SwizzledLink }
-                           -> Config
-                           -> Effect Unit
-tickForceWithStraightLinks stateRef config = do
-  state <- Ref.read stateRef
-
-  -- Update circle positions
-  transformCircles config.containerSelector \rect ->
-    case rect.simNode of
-      Just sn ->
-        case Array.find (\n -> n.id == sn.id) state.nodes of
-          Just n -> { cx: n.x, cy: n.y }
-          Nothing -> { cx: rect.x + rect.width / 2.0, cy: rect.y + rect.height / 2.0 }
-      Nothing -> { cx: rect.x + rect.width / 2.0, cy: rect.y + rect.height / 2.0 }
-
-  -- Update straight line links
-  -- For now, just keep them at last positions (would need link data binding for proper update)
-  pure unit
-
--- =============================================================================
--- DOM Structure Builders
--- =============================================================================
-
--- | Build SVG structure for force view
-buildForceSvgTree :: Config -> T.Tree Unit
-buildForceSvgTree _config =
-  T.named SVG "svg"
-    [ v3AttrStr "viewBox" (str "-950 -570 1900 1140")
-    , v3AttrStr "class" (str "force-svg")
-    ]
-    `T.withBehaviors` [ Zoom $ defaultZoom (ScaleExtent 0.5 4.0) "#force-zoom-group" ]
-    `T.withChildren`
-      [ T.named Group "zoom-group"
-          [ v3AttrStr "id" (str "force-zoom-group") ]
-          `T.withChildren`
-            [ T.named Group "links-group"
-                [ v3AttrStr "class" (str "force-links-group") ]
-            , T.named Group "nodes-group"
-                [ v3AttrStr "class" (str "force-nodes-group") ]
-            ]
-      ]
-
--- | Add tree links (bezier curves) to the SVG
-addTreeLinks :: Config -> TreeLayout.TreeLayoutResult -> Number -> Number -> Effect Unit
-addTreeLinks config layout rootX rootY = do
-  let nodeMap = buildTreeNodeMap layout.treeNodes
-  let linkElements = Array.mapMaybe (buildLinkElement nodeMap rootX rootY) (Set.toUnfoldable layout.treeEdges)
-
-  log $ "[ForceGraph] Adding " <> show (Array.length linkElements) <> " tree links"
-
-  -- Remove any existing links group
-  removeElement (config.containerSelector <> " g.force-links-group")
-
-  -- Add links to SVG
-  _ <- runD3v2M do
-    svg <- select (config.containerSelector <> " svg")
-    renderTree svg (buildLinksVizTree linkElements rootX rootY)
-
-  pure unit
+  pure
+    { sourceId: srcId
+    , targetId: tgtId
+    , sourceTreeX: sourceNode.radialX
+    , sourceTreeY: sourceNode.radialY
+    , targetTreeX: targetNode.radialX
+    , targetTreeY: targetNode.radialY
+    , rootX
+    , rootY
+    }
 
 -- | Build VizTree for tree links
 buildLinksVizTree :: Array LinkElement -> Number -> Number -> T.Tree LinkElement
@@ -513,70 +581,3 @@ linkTemplate rootX rootY _el =
     , v3AttrFn "stroke-width" (\_ -> 1.5)
     , v3AttrFnStr "class" (\_ -> "force-link")
     ]
-
--- | Template for link as a line (for simple force render)
-linkLineTemplate :: SwizzledLink -> T.Tree SwizzledLink
-linkLineTemplate _link =
-  T.elem Line
-    [ v3AttrFn "x1" (_.source.x :: SwizzledLink -> Number)
-    , v3AttrFn "y1" (_.source.y :: SwizzledLink -> Number)
-    , v3AttrFn "x2" (_.target.x :: SwizzledLink -> Number)
-    , v3AttrFn "y2" (_.target.y :: SwizzledLink -> Number)
-    , v3AttrStr "stroke" (str "rgba(255, 255, 255, 0.3)")
-    , v3AttrFn "stroke-width" (\_ -> 1.0)
-    , v3AttrStr "class" (str "force-link")
-    ]
-
--- | Template for node circle
-nodeTemplate :: SimNode -> T.Tree SimNode
-nodeTemplate _node =
-  T.elem Circle
-    [ v3AttrFn "cx" (_.x :: SimNode -> Number)
-    , v3AttrFn "cy" (_.y :: SimNode -> Number)
-    , v3AttrFn "r" (\n -> max 5.0 (n.r * 0.5))
-    , v3AttrStr "fill" (str "rgba(255, 255, 255, 0.5)")
-    , v3AttrStr "stroke" (str "rgba(255, 255, 255, 0.8)")
-    , v3AttrFn "stroke-width" (\_ -> 1.5)
-    , v3AttrStr "class" (str "force-node module-node")
-    ]
-    `T.withBehaviors` [ Drag (SimulationDrag simulationId) ]
-
--- | Cleanup function
-cleanup :: Effect Unit
-cleanup = do
-  log "[ForceGraph] Cleanup called"
-  pure unit
-
--- =============================================================================
--- Helpers
--- =============================================================================
-
--- | Check if both ends of a link are modules
-isModuleLink :: Array SimNode -> SimLink -> Boolean
-isModuleLink nodes link =
-  let
-    srcNode = Array.find (\n -> n.id == link.source) nodes
-    tgtNode = Array.find (\n -> n.id == link.target) nodes
-  in
-    case srcNode, tgtNode of
-      Just s, Just t -> s.nodeType == ModuleNode && t.nodeType == ModuleNode
-      _, _ -> false
-
--- | Build map from node ID to TreeNode
-buildTreeNodeMap :: Array TreeLayout.TreeNode -> Map Int TreeLayout.TreeNode
-buildTreeNodeMap nodes = Map.fromFoldable $ nodes <#> \n -> Tuple n.id n
-
--- | Build link element from tree edge
-buildLinkElement :: Map Int TreeLayout.TreeNode -> Number -> Number -> Tuple Int Int -> Maybe LinkElement
-buildLinkElement nodeMap rootX rootY (Tuple srcId tgtId) = do
-  sourceNode <- Map.lookup srcId nodeMap
-  targetNode <- Map.lookup tgtId nodeMap
-
-  pure
-    { sourceTreeX: sourceNode.radialX  -- Use radial positions
-    , sourceTreeY: sourceNode.radialY
-    , targetTreeX: targetNode.radialX
-    , targetTreeY: targetNode.radialY
-    , rootX
-    , rootY
-    }

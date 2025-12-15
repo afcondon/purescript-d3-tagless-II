@@ -1,14 +1,21 @@
 -- | Code Explorer v2 - Main Application Component
 -- |
--- | Architecture:
--- | - Halogen owns ALL application state (view, navigation, focus, etc.)
--- | - Explorer is stateless - just renders what Halogen tells it to
+-- | Halogen-First Architecture:
+-- | - ALL state lives here in Halogen
+-- | - Visualization modules (Treemap, TreeView, ForceGraph) are STATELESS
 -- | - D3 mutable data is managed by library code (opaque types)
--- | - All callbacks flow through Halogen (except drag/zoom which are D3 internal)
+-- | - Simulation ticks flow through Halogen subscriptions
+-- |
+-- | Force View Animation Phases:
+-- | 1. TreeGrowth: Nodes animate from center to radial tree positions
+-- | 2. LinkMorph: Bezier curves morph into straight lines
+-- | 3. ForceActive: Force simulation takes over, positions updated via ticks
 module Component.App where
 
 import Prelude
 
+import Control.Monad (void, when)
+import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Milliseconds(..))
@@ -17,6 +24,8 @@ import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Data.Loader as Loader
+import Data.TreeLayout as TreeLayout
+import Data.TreeLayout (findRootModule)
 import ViewState (ViewState(..), OverviewView(..), viewDescription)
 import Halogen as H
 import Halogen.HTML as HH
@@ -27,13 +36,28 @@ import Types (SimNode)
 import Viz.Treemap as Treemap
 import Viz.TreeView as TreeView
 import Viz.ForceGraph as ForceGraph
-import Data.TreeLayout (findRootModule)
 import DataViz.Layout.Hierarchy.TreeStyle as TreeStyle
 import PSD3.Transition.Tick as Tick
+import PSD3.ForceEngine.Simulation as Sim
+import PSD3.ForceEngine.Events (SimulationEvent(..), defaultCallbacks)
+import PSD3.ForceEngine.Halogen (subscribeToSimulation)
 
 -- =============================================================================
 -- Types
 -- =============================================================================
+
+-- | The three phases of force view animation
+data ForcePhase
+  = TreeGrowth       -- Phase 1: Grow radial tree from center
+  | LinkMorph        -- Phase 2: Morph bezier links to straight lines
+  | ForceActive      -- Phase 3: Force simulation running
+
+derive instance eqForcePhase :: Eq ForcePhase
+
+instance showForcePhase :: Show ForcePhase where
+  show TreeGrowth = "TreeGrowth"
+  show LinkMorph = "LinkMorph"
+  show ForceActive = "ForceActive"
 
 -- | Highlight state - single source of truth for what's highlighted and why
 data HighlightState
@@ -42,7 +66,7 @@ data HighlightState
 
 derive instance eqHighlightState :: Eq HighlightState
 
--- | Application state - ALL state lives here, Explorer is stateless
+-- | Application state - ALL state lives here
 type State =
   { -- Lifecycle
     phase :: AppPhase
@@ -62,14 +86,17 @@ type State =
     -- Model data (loaded from API)
   , modelData :: Maybe ModelData
 
-    -- Animation state
+    -- Tree animation state
   , treeAnimation :: Maybe TreeView.AnimationState
   , treeRootId :: Maybe Int              -- Current tree root (Nothing = use main module)
   , treeStyle :: TreeStyle.TreeStyle     -- Bundles orientation + matching link path
 
-    -- Force view state
-  , forceAnimation :: Maybe ForceGraph.AnimationState
-  , forceHandle :: Maybe ForceGraph.SimulationHandle
+    -- Force view state (Halogen-owned)
+  , forcePhase :: Maybe ForcePhase          -- Current phase (Nothing = not in force view)
+  , forceProgress :: Tick.Progress          -- 0.0 to 1.0 within current phase
+  , forceLayout :: Maybe TreeLayout.TreeLayoutResult  -- Computed once, reused
+  , simulation :: Maybe ForceGraph.ForceSimulation    -- Opaque handle to D3 simulation
+  , forceShowProjectOnly :: Boolean         -- Toggle: show only "my-project" modules
 
     -- Callback ref for D3 event -> Halogen action bridge
   , clickEmitter :: Maybe (HS.Listener Action)
@@ -89,7 +116,6 @@ data AppPhase
 derive instance eqAppPhase :: Eq AppPhase
 
 -- | Loaded model data (immutable after load)
--- | We store the full LoadedModel from the Loader
 type ModelData = Loader.LoadedModel
 
 -- | Actions
@@ -100,10 +126,12 @@ data Action
   | SwitchToTreemap
   | SwitchToTree
   | SwitchToForce
-  | FocusSubtree Int  -- Click on a module to show its subtree (horizontal)
+  | FocusSubtree Int          -- Click on a module to show its subtree (horizontal)
   | HandleHover (Maybe SimNode)  -- Hover events routed through Halogen
-  | AnimationTick
-  | ForceAnimationTick  -- Separate tick for force animation
+  | AnimationTick             -- Tree animation tick
+  | ForceAnimationTick        -- Force phases 1-2 animation tick (Halogen-driven)
+  | ForceSimTick              -- Force phase 3 tick (D3 simulation-driven)
+  | ToggleForceProjectOnly    -- Toggle between all modules and project-only
 
 -- =============================================================================
 -- Component
@@ -133,8 +161,11 @@ initialState _ =
   , treeAnimation: Nothing
   , treeRootId: Nothing
   , treeStyle: TreeStyle.verticalTree
-  , forceAnimation: Nothing
-  , forceHandle: Nothing
+  , forcePhase: Nothing
+  , forceProgress: 0.0
+  , forceLayout: Nothing
+  , simulation: Nothing
+  , forceShowProjectOnly: false
   , clickEmitter: Nothing
   , packageCount: 0
   , projectId: 1
@@ -155,6 +186,9 @@ render state =
         [ HH.h2_ [ HH.text "Code Explorer v2" ]
         , HH.p_ [ HH.text $ "Phase: " <> showPhase state.phase ]
         , HH.p_ [ HH.text $ "View: " <> viewDescription state.viewState ]
+        , case state.forcePhase of
+            Just fp -> HH.p_ [ HH.text $ "Force phase: " <> show fp ]
+            Nothing -> HH.text ""
         , case state.modelData of
             Nothing -> HH.p_ [ HH.text "No data loaded" ]
             Just model -> HH.p_
@@ -180,6 +214,22 @@ render state =
                 ]
                 [ HH.text "Force" ]
             ]
+        -- Force view filter toggle (only shown when in force view, same row as view switcher)
+        , if isForceView state.viewState
+            then HH.div
+              [ HP.class_ (HH.ClassName "view-switcher") ]
+              [ HH.button
+                  [ HE.onClick \_ -> ToggleForceProjectOnly
+                  , HP.class_ (HH.ClassName $ if not state.forceShowProjectOnly then "active" else "")
+                  ]
+                  [ HH.text "All" ]
+              , HH.button
+                  [ HE.onClick \_ -> ToggleForceProjectOnly
+                  , HP.class_ (HH.ClassName $ if state.forceShowProjectOnly then "active" else "")
+                  ]
+                  [ HH.text "Project" ]
+              ]
+            else HH.text ""
         ]
 
     -- Visualization container (D3 will render into this)
@@ -256,14 +306,19 @@ handleAction = case _ of
     log "[App] Switching to Treemap view"
     state <- H.get
     -- Clean up any existing force simulation
-    case state.forceHandle of
-      Just handle -> liftEffect handle.cleanup
-      Nothing -> pure unit
+    cleanupForceSimulation
 
     case state.modelData of
       Nothing -> pure unit
       Just model -> do
-        H.modify_ _ { viewState = Overview TreemapView, treeAnimation = Nothing, treeRootId = Nothing, forceHandle = Nothing }
+        H.modify_ _
+          { viewState = Overview TreemapView
+          , treeAnimation = Nothing
+          , treeRootId = Nothing
+          , forcePhase = Nothing
+          , forceLayout = Nothing
+          , simulation = Nothing
+          }
 
         let config :: Treemap.Config
             config =
@@ -282,9 +337,7 @@ handleAction = case _ of
     log "[App] SwitchToTree clicked"
     state <- H.get
     -- Clean up any existing force simulation
-    case state.forceHandle of
-      Just handle -> liftEffect handle.cleanup
-      Nothing -> pure unit
+    cleanupForceSimulation
 
     case state.modelData of
       Nothing -> log "[App] No model data, skipping"
@@ -296,8 +349,10 @@ handleAction = case _ of
           { viewState = Overview TreeView
           , treeAnimation = Just TreeView.initAnimation
           , treeRootId = Just rootId
-          , treeStyle = TreeStyle.verticalTree  -- Bundled with matching bezier
-          , forceHandle = Nothing
+          , treeStyle = TreeStyle.verticalTree
+          , forcePhase = Nothing
+          , forceLayout = Nothing
+          , simulation = Nothing
           }
 
         log "[App] Starting animation loop"
@@ -307,28 +362,42 @@ handleAction = case _ of
     log "[App] SwitchToForce clicked"
     state <- H.get
     -- Clean up any existing force simulation
-    case state.forceHandle of
-      Just handle -> liftEffect handle.cleanup
-      Nothing -> pure unit
+    cleanupForceSimulation
 
     case state.modelData of
       Nothing -> log "[App] No model data, skipping"
-      Just _model -> do
+      Just model -> do
         log "[App] Starting force animation (radial tree growth)"
+
+        -- Compute layout once (will be reused through all phases)
+        let rootId = findRootModule model.nodes
+        let layout = ForceGraph.computeLayout rootId model.nodes model.links
+        log $ "[App] Layout computed: " <> show (length layout.treeNodes) <> " nodes in tree"
+
+        -- Add tree links to DOM
+        liftEffect $ ForceGraph.addTreeLinks "#viz" layout
+
         H.modify_ _
           { viewState = Overview ForceView
           , treeAnimation = Nothing
           , treeRootId = Nothing
-          , forceAnimation = Just ForceGraph.initAnimation
-          , forceHandle = Nothing
+          , forcePhase = Just TreeGrowth
+          , forceProgress = 0.0
+          , forceLayout = Just layout
+          , simulation = Nothing
           }
 
-        log "[App] Starting force animation loop"
+        log "[App] Starting force animation loop (phase 1: TreeGrowth)"
         startForceAnimationLoop
+    where
+      length = Array.length
 
   FocusSubtree nodeId -> do
     log $ "[App] FocusSubtree on node " <> show nodeId
     state <- H.get
+    -- Clean up any existing force simulation
+    cleanupForceSimulation
+
     case state.modelData of
       Nothing -> pure unit
       Just _model -> do
@@ -340,7 +409,10 @@ handleAction = case _ of
           { viewState = Overview TreeView
           , treeAnimation = Just TreeView.initAnimation
           , treeRootId = Just nodeId
-          , treeStyle = TreeStyle.horizontalTree  -- Bundled with matching bezier
+          , treeStyle = TreeStyle.horizontalTree
+          , forcePhase = Nothing
+          , forceLayout = Nothing
+          , simulation = Nothing
           }
 
         log "[App] Starting horizontal subtree animation"
@@ -354,7 +426,7 @@ handleAction = case _ of
         let config :: TreeView.Config
             config =
               { containerSelector: "#viz"
-              , style: state.treeStyle  -- Bundled orientation + link path
+              , style: state.treeStyle
               , rootId: rootId
               }
 
@@ -372,36 +444,114 @@ handleAction = case _ of
 
   ForceAnimationTick -> do
     state <- H.get
-    case state.forceAnimation, state.modelData of
-      Just anim, Just model | ForceGraph.isAnimating anim -> do
-        -- Find root for config
-        let rootId = findRootModule model.nodes
-        let config :: ForceGraph.Config
-            config =
-              { containerSelector: "#viz"
-              , packageCount: model.packageCount
-              , rootId: rootId
-              }
+    case state.forcePhase, state.forceLayout, state.modelData of
+      Just phase, Just layout, Just model -> do
+        -- Advance progress
+        let newProgress = min 1.0 (state.forceProgress + animationDelta)
 
-        -- Render current frame
-        result <- liftEffect $ ForceGraph.renderAnimated config anim model.nodes model.links
+        case phase of
+          TreeGrowth -> do
+            -- Render tree growth animation
+            liftEffect $ ForceGraph.renderTreeGrowthPhase "#viz" layout state.forceProgress
 
-        -- Advance animation for next frame
-        let newAnim = ForceGraph.tickAnimation animationDelta result.animState
-        H.modify_ _ { forceAnimation = Just newAnim }
+            if newProgress >= 1.0
+              then do
+                -- Transition to LinkMorph
+                log "[App] Phase 1 complete, transitioning to LinkMorph"
+                H.modify_ _ { forcePhase = Just LinkMorph, forceProgress = 0.0 }
+                startForceAnimationLoop
+              else do
+                H.modify_ _ { forceProgress = newProgress }
+                startForceAnimationLoop
 
-        -- Check if we got a simulation handle (phase 3 started)
-        case result.simHandle of
-          Just handle -> do
-            log "[App] Force simulation started, storing handle"
-            H.modify_ _ { forceHandle = Just handle }
-          Nothing -> pure unit
+          LinkMorph -> do
+            -- Render link morph animation
+            liftEffect $ ForceGraph.renderLinkMorphPhase "#viz" layout state.forceProgress
 
-        -- Continue loop if still animating
-        when (ForceGraph.isAnimating newAnim) do
-          startForceAnimationLoop
+            if newProgress >= 1.0
+              then do
+                -- Transition to ForceActive - create and start simulation
+                log "[App] Phase 2 complete, transitioning to ForceActive"
+                startForceSimulation layout model
+              else do
+                H.modify_ _ { forceProgress = newProgress }
+                startForceAnimationLoop
+
+          ForceActive ->
+            -- This shouldn't happen - ForceActive uses SimTick, not AnimationTick
+            pure unit
+
+      _, _, _ -> pure unit
+
+  ForceSimTick -> do
+    -- Tick from D3 simulation - update positions
+    state <- H.get
+    case state.simulation, state.forcePhase of
+      Just sim, Just ForceActive -> do
+        -- Get LIVE nodes from simulation
+        currentNodes <- liftEffect $ Sim.getNodes sim
+
+        -- Render using live positions
+        liftEffect $ ForceGraph.renderForcePhase "#viz" currentNodes
 
       _, _ -> pure unit
+
+  ToggleForceProjectOnly -> do
+    log "[App] Toggling force project-only filter"
+    state <- H.get
+    case state.simulation, state.modelData, state.forceLayout of
+      Just sim, Just model, Just layout -> do
+        let newProjectOnly = not state.forceShowProjectOnly
+
+        -- Filter nodes based on toggle
+        -- Use the root module's package as the "project" package
+        let rootId = TreeLayout.findRootModule model.nodes
+            rootPackage = findPackageOfNode rootId model.nodes
+        let filteredNodes = if newProjectOnly
+              then Array.filter (\n -> n.package == rootPackage) model.nodes
+              else model.nodes
+
+        -- Filter links to only those between filtered nodes
+        let nodeIds = Array.fromFoldable $ map _.id filteredNodes
+            filteredLinks = Array.filter
+              (\l -> Array.elem l.source nodeIds && Array.elem l.target nodeIds)
+              model.links
+
+        log $ "[App] Project-only: " <> show newProjectOnly
+            <> " -> " <> show (Array.length filteredNodes) <> " nodes, "
+            <> show (Array.length filteredLinks) <> " links"
+
+        -- Recompute layout for filtered nodes
+        let rootId = TreeLayout.findRootModule filteredNodes
+            newLayout = ForceGraph.computeLayout rootId filteredNodes filteredLinks
+
+        -- Add new tree links to DOM
+        liftEffect $ ForceGraph.addTreeLinks "#viz" newLayout
+
+        -- Create new simulation with filtered data
+        callbacks <- liftEffect defaultCallbacks
+        newSim <- liftEffect $ ForceGraph.createSimulationWithCallbacks
+          callbacks newLayout filteredNodes filteredLinks
+
+        -- Subscribe to new simulation
+        emitter <- liftEffect $ subscribeToSimulation newSim
+        void $ H.subscribe $ emitter <#> \event -> case event of
+          Tick -> ForceSimTick
+          _ -> ForceSimTick
+
+        -- Start the new simulation
+        liftEffect $ Sim.start newSim
+
+        -- Cleanup old simulation
+        liftEffect $ ForceGraph.cleanupSimulation sim
+
+        H.modify_ _
+          { forceShowProjectOnly = newProjectOnly
+          , forceLayout = Just newLayout
+          , simulation = Just newSim
+          }
+
+      _, _, _ -> pure unit
 
   HandleHover mNode -> do
     state <- H.get
@@ -432,28 +582,84 @@ handleAction = case _ of
             H.modify_ _ { highlightState = NoHighlight }
             liftEffect $ Treemap.clearHighlight "#viz"
 
+-- =============================================================================
+-- Force Simulation Helpers
+-- =============================================================================
+
+-- | Start the force simulation (phase 3)
+-- | Creates simulation with callbacks and subscribes to ticks
+startForceSimulation
+  :: forall output m. MonadAff m
+  => TreeLayout.TreeLayoutResult
+  -> ModelData
+  -> H.HalogenM State Action () output m Unit
+startForceSimulation layout model = do
+  log "[App] Creating force simulation with Halogen callbacks"
+
+  -- Create callbacks for Halogen subscription
+  callbacks <- liftEffect defaultCallbacks
+
+  -- Create simulation (nodes positioned from layout)
+  sim <- liftEffect $ ForceGraph.createSimulationWithCallbacks callbacks layout model.nodes model.links
+
+  -- Subscribe to simulation events via Halogen subscription
+  emitter <- liftEffect $ subscribeToSimulation sim
+  void $ H.subscribe $ emitter <#> \event -> case event of
+    Tick -> ForceSimTick
+    _ -> ForceSimTick  -- Map all events to tick for now
+
+  -- Start the simulation
+  liftEffect $ Sim.start sim
+
+  -- Update state
+  H.modify_ _
+    { forcePhase = Just ForceActive
+    , forceProgress = 0.0
+    , simulation = Just sim
+    }
+
+  log "[App] Force simulation started and subscribed"
+
+-- | Clean up any existing force simulation
+cleanupForceSimulation
+  :: forall output m. MonadAff m
+  => H.HalogenM State Action () output m Unit
+cleanupForceSimulation = do
+  state <- H.get
+  case state.simulation of
+    Just sim -> do
+      liftEffect $ ForceGraph.cleanupSimulation sim
+      log "[App] Force simulation cleaned up"
+    Nothing -> pure unit
+
+-- =============================================================================
+-- Animation Helpers
+-- =============================================================================
+
 -- | Animation speed (progress per tick)
 -- | At ~60fps with 16ms delay: 0.02 = 50 ticks = ~0.8 seconds
 animationDelta :: Tick.TickDelta
 animationDelta = 0.02
 
--- | Start the animation loop by forking an action after a short delay
+-- | Start the tree animation loop by forking an action after a short delay
 startAnimationLoop :: forall output m. MonadAff m => H.HalogenM State Action () output m Unit
 startAnimationLoop = do
-  -- Use a simple fork with delay to simulate requestAnimationFrame
   void $ H.fork do
     H.liftAff $ Aff.delay (Milliseconds 16.0)
     handleAction AnimationTick
 
--- | Start the force animation loop
+-- | Start the force animation loop (phases 1-2, Halogen-driven)
 startForceAnimationLoop :: forall output m. MonadAff m => H.HalogenM State Action () output m Unit
 startForceAnimationLoop = do
   void $ H.fork do
     H.liftAff $ Aff.delay (Milliseconds 16.0)
     handleAction ForceAnimationTick
 
+-- =============================================================================
+-- Callback Helpers
+-- =============================================================================
+
 -- | Build treemap callbacks with click/hover -> action bridge
--- | Uses the subscription listener to emit actions to Halogen
 makeTreemapCallbacks :: Maybe (HS.Listener Action) -> Treemap.Callbacks
 makeTreemapCallbacks mListener =
   { onNodeClick: \node -> case mListener of
@@ -463,3 +669,10 @@ makeTreemapCallbacks mListener =
       Just listener -> HS.notify listener (HandleHover mNode)
       Nothing -> pure unit
   }
+
+-- | Find the package of a node by ID
+findPackageOfNode :: Int -> Array SimNode -> String
+findPackageOfNode nodeId nodes =
+  case Array.find (\n -> n.id == nodeId) nodes of
+    Just node -> node.package
+    Nothing -> "unknown"
