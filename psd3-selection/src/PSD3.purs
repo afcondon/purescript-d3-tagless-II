@@ -7,8 +7,8 @@
 -- |
 -- | ```purescript
 -- | import PSD3.AST as A
+-- | import PSD3.Attr (width, height, cx, cy, radius, fill)
 -- | import PSD3.Render (runD3, select, renderTree)
--- | import PSD3v2.Attribute.Types (width, height, cx, cy, radius, fill)
 -- |
 -- | main :: Effect Unit
 -- | main = void $ runD3 do
@@ -52,8 +52,8 @@
 -- |
 -- | **Core Modules**:
 -- | - `PSD3.AST` - Declarative visualization AST (element types, data joins)
+-- | - `PSD3.Attr` - All attributes (width, height, cx, cy, fill, stroke, etc.)
 -- | - `PSD3.Render` - D3 DOM rendering (runD3, select, renderTree)
--- | - `PSD3v2.Attribute.Types` - All attributes (width, height, cx, cy, etc.)
 -- | - `PSD3v2.Behavior.Types` - Behaviors (drag, zoom)
 -- |
 -- | **Interpreters** (for debugging):
@@ -72,8 +72,8 @@
 -- | **Basic visualization**:
 -- | ```purescript
 -- | import PSD3.AST as A
+-- | import PSD3.Attr (width, height, cx, cy, radius, fill, stroke)
 -- | import PSD3.Render (runD3, select, renderTree)
--- | import PSD3v2.Attribute.Types (width, height, cx, cy, radius, fill, stroke)
 -- | ```
 -- |
 -- | **With behaviors**:
@@ -90,6 +90,7 @@ module PSD3 (module X) where
 
 -- Clean Public API
 import PSD3.AST (AST, ASTNode, ElementType(..), elem, joinData, withChild, withChildren, named, nestedJoin, sceneJoin, sceneNestedJoin, withBehaviors, beside, siblings, (>:), (+:)) as X
+import PSD3.Attr (Attribute, cx, cy, x, y, x1, y1, x2, y2, width, height, radius, fill, stroke, strokeWidth, opacity, transform, viewBox, id_, class_) as X
 import PSD3.Render (runD3, D3M, D3Selection) as X
 
 -- Selection & Transition Capabilities
@@ -99,9 +100,8 @@ import PSD3v2.Capabilities.Transition (class TransitionM, withTransition, withTr
 -- Legacy type names (keep for backwards compatibility, prefer D3M/D3Selection)
 import PSD3v2.Interpreter.D3v2 (D3v2M, D3v2Selection_, runD3v2M, reselectD3v2) as X
 
--- Types
+-- Internal Types (for advanced use)
 import PSD3v2.Selection.Types (SEmpty, SBoundOwns, SBoundInherits, SPending, SExiting, Selection(..)) as X
-import PSD3v2.Attribute.Types (Attribute, cx, cy, x, y, x1, y1, x2, y2, width, height, radius, fill, stroke, strokeWidth, opacity, transform, viewBox, id_, class_) as X
 import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, ScaleExtent(..)) as X
 
 -- Shared data types
