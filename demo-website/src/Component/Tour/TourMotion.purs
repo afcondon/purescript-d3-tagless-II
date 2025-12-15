@@ -54,6 +54,7 @@ data Action
   | AddGUPNodes
   | RemoveGUPNodes
   | ResetGUP
+  | TestGUPAPI
 
 -- | Tour page component
 component :: forall q i o m. MonadAff m => H.Component q i o m
@@ -153,6 +154,12 @@ handleAction = case _ of
     case state.lesMisGUPState of
       Nothing -> pure unit
       Just stateRef -> liftEffect $ GUPDemo.resetToFull stateRef
+
+  TestGUPAPI -> do
+    state <- H.get
+    case state.lesMisGUPState of
+      Nothing -> pure unit
+      Just stateRef -> liftEffect $ GUPDemo.testGUPAPI stateRef
 
 -- | Choose a string of random letters (no duplicates), ordered alphabetically
 getLetters :: Effect (Array Char)
@@ -340,6 +347,11 @@ render _ =
                     , HE.onClick \_ -> ResetGUP
                     ]
                     [ HH.text "Reset All" ]
+                , HH.button
+                    [ HP.classes [ HH.ClassName "transition-button", HH.ClassName "secondary" ]
+                    , HE.onClick \_ -> TestGUPAPI
+                    ]
+                    [ HH.text "Test GUP API (console)" ]
                 ]
             ]
         ]

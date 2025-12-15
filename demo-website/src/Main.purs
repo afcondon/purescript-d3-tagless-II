@@ -70,6 +70,7 @@ import Component.SankeyDebug as SankeyDebug
 import Component.ForcePlayground as ForcePlayground
 import TreeBuilder.App as TreeBuilder
 import Component.SPLOM as SPLOM
+import Component.GUPDebug as GUPDebug
 
 -- Routing
 import PSD3.RoutingDSL (routing, routeToPath)
@@ -138,6 +139,7 @@ type Slots =
   , forcePlayground :: forall q. H.Slot q Void Unit
   , treeBuilder :: forall q. H.Slot q Void Unit
   , splom :: forall q. H.Slot q Void Unit
+  , gupDebug :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
 
@@ -189,6 +191,7 @@ _sankeyDebug = Proxy :: Proxy "sankeyDebug"
 _forcePlayground = Proxy :: Proxy "forcePlayground"
 _treeBuilder = Proxy :: Proxy "treeBuilder"
 _splom = Proxy :: Proxy "splom"
+_gupDebug = Proxy :: Proxy "gupDebug"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
 -- | Main application component
@@ -401,6 +404,9 @@ renderPage route = case spy "Route is" route of
 
   SPLOM ->
     HH.slot_ _splom unit SPLOM.component unit
+
+  GUPDebug ->
+    HH.slot_ _gupDebug unit GUPDebug.component unit
 
   Acknowledgements ->
     HH.slot_ _acknowledgements unit Acknowledgements.component unit

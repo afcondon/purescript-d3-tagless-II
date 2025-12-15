@@ -438,9 +438,10 @@ appendChildWithDatum elemType attrs datumOpt (Selection impl) = liftEffect do
   elements <- parentElements # traverse \parent -> do
     element <- createElementWithNS elemType doc
     -- Apply attributes with the provided datum or a dummy if none
-    let datum = case datumOpt of
-          Just d -> d
-          Nothing -> unsafeCoerce unit :: datumOut
+    let
+      datum = case datumOpt of
+        Just d -> d
+        Nothing -> unsafeCoerce unit :: datumOut
     applyAttributes element datum 0 attrs
     -- Append to parent
     let elementNode = toNode element
@@ -582,8 +583,8 @@ joinData foldableData selector (Selection impl) = liftEffect do
     pure $ { element, datum: maybeDatum }
 
   -- Log what data we found on existing elements
-  liftEffect $ log $ "joinData: found " <> show (Array.length existingElements) <> " existing elements with selector '" <> selector <> "'"
-  liftEffect $ log $ "joinData: " <> show (Array.length (Array.mapMaybe _.datum oldBindings)) <> " of those have data bound"
+  -- liftEffect $ log $ "joinData: found " <> show (Array.length existingElements) <> " existing elements with selector '" <> selector <> "'"
+  -- liftEffect $ log $ "joinData: " <> show (Array.length (Array.mapMaybe _.datum oldBindings)) <> " of those have data bound"
 
   -- Filter to only elements that have data bound
   let
@@ -1088,7 +1089,7 @@ applyTransitionToElements config elementDatumPairs attrs = do
 applyTransitionToSingleElement
   :: forall datum
    . TransitionConfig
-  -> Int                    -- Explicit index for stagger calculation
+  -> Int -- Explicit index for stagger calculation
   -> Element
   -> datum
   -> Array (Attribute datum)
@@ -1257,21 +1258,21 @@ renderNodeHelper parentSel (Join joinSpec) = do
   let Selection enterImpl = enterSel
   let Selection updateImpl = updateSel
   let Selection exitImpl = exitSel
-  liftEffect $ do
-    let
-      enterCount = case enterImpl of
-        PendingSelection rec -> Array.length rec.pendingData
-        _ -> 0
-    let
-      updateCount = case updateImpl of
-        BoundSelection rec -> Array.length rec.data
-        _ -> 0
-    let
-      exitCount = case exitImpl of
-        BoundSelection rec -> Array.length rec.data
-        ExitingSelection rec -> Array.length rec.data
-        _ -> 0
-    log $ "Tree API Join '" <> joinSpec.name <> "': enter=" <> show enterCount <> ", update=" <> show updateCount <> ", exit=" <> show exitCount
+  -- liftEffect $ do
+  --   let
+  --     enterCount = case enterImpl of
+  --       PendingSelection rec -> Array.length rec.pendingData
+  --       _ -> 0
+  --   let
+  --     updateCount = case updateImpl of
+  --       BoundSelection rec -> Array.length rec.data
+  --       _ -> 0
+  --   let
+  --     exitCount = case exitImpl of
+  --       BoundSelection rec -> Array.length rec.data
+  --       ExitingSelection rec -> Array.length rec.data
+  --       _ -> 0
+  -- log $ "Tree API Join '" <> joinSpec.name <> "': enter=" <> show enterCount <> ", update=" <> show updateCount <> ", exit=" <> show exitCount
 
   -- 2. Handle EXIT: remove exiting elements
   _ <- remove exitSel
@@ -1326,7 +1327,7 @@ renderNodeHelper parentSel (Join joinSpec) = do
   -- 9. Get first element for return value (or dummy if DOM was removed during navigation)
   firstElement <- case Array.head allElements of
     Just el -> pure el
-    Nothing -> createElementWithNS Group doc  -- Dummy element, not attached to DOM
+    Nothing -> createElementWithNS Group doc -- Dummy element, not attached to DOM
 
   pure $ Tuple firstElement selectionsMap
 
@@ -1368,7 +1369,7 @@ renderNodeHelper parentSel (NestedJoin joinSpec) = do
   -- 6. Get first element for return value (or dummy if DOM was removed during navigation)
   firstElement <- case Array.head elements of
     Just el -> pure el
-    Nothing -> createElementWithNS Group doc  -- Dummy element, not attached to DOM
+    Nothing -> createElementWithNS Group doc -- Dummy element, not attached to DOM
 
   pure $ Tuple firstElement selectionsMap
 
@@ -1538,7 +1539,7 @@ renderNodeHelper parentSel (SceneJoin joinSpec) = do
   -- 9. Get first element for return value (or dummy if DOM was removed during navigation)
   firstElement <- case Array.head allElements of
     Just el -> pure el
-    Nothing -> createElementWithNS Group doc  -- Dummy element, not attached to DOM
+    Nothing -> createElementWithNS Group doc -- Dummy element, not attached to DOM
 
   pure $ Tuple firstElement selectionsMap
 
@@ -1703,7 +1704,7 @@ renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
   -- Get first element for return value (or dummy if DOM was removed during navigation)
   firstElement <- case Array.head allElements of
     Just el -> pure el
-    Nothing -> createElementWithNS Group doc  -- Dummy element, not attached to DOM
+    Nothing -> createElementWithNS Group doc -- Dummy element, not attached to DOM
 
   pure $ Tuple firstElement selectionsMap
 

@@ -74,6 +74,7 @@ routes =
   <|> forcePlayground
   <|> treeBuilder
   <|> splom
+  <|> gupDebug
   <|> acknowledgements
   <|> rootRedirect
   <|> notFound
@@ -310,6 +311,10 @@ treeBuilder = TreeBuilder <$ lit "tree-builder" <* end
 splom :: Match Route
 splom = SPLOM <$ lit "splom" <* end
 
+-- | Match: /gup-debug
+gupDebug :: Match Route
+gupDebug = GUPDebug <$ lit "gup-debug" <* end
+
 -- | Match: /acknowledgements
 acknowledgements :: Match Route
 acknowledgements = Acknowledgements <$ lit "acknowledgements" <* end
@@ -379,5 +384,6 @@ routeToPath SankeyDebug = "/sankey-debug"
 routeToPath ForcePlayground = "/force-playground"
 routeToPath TreeBuilder = "/tree-builder"
 routeToPath SPLOM = "/splom"
+routeToPath GUPDebug = "/gup-debug"
 routeToPath Acknowledgements = "/acknowledgements"
 routeToPath NotFound = "/not-found"

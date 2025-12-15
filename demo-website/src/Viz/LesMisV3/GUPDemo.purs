@@ -24,6 +24,8 @@ module D3.Viz.LesMisV3.GUPDemo
   , addRandomNodes
   , removeRandomNodes
   , resetToFull
+  -- New API demo
+  , testGUPAPI
   ) where
 
 import Prelude
@@ -35,11 +37,13 @@ import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Number (sqrt)
 import Effect (Effect)
+import Effect.Class.Console (log)
 import Effect.Random (randomInt)
 import Effect.Ref (Ref)
 import Effect.Ref as Ref
 import D3.Viz.LesMisV3.Model (LesMisModel, LesMisNode)
 import PSD3.ForceEngine.Simulation as Sim
+import PSD3.ForceEngine.Setup as Setup
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultLink, defaultCenter)
 import PSD3.ForceEngine.Links (filterLinksToSubset, swizzleLinksByIndex)
 import PSD3.Transition.Tick as Tick
@@ -259,6 +263,25 @@ svgHeight = 600.0
 transitionDelta :: Tick.TickDelta
 transitionDelta = 0.025
 
+-- | Shared force setup for Les Misérables demo
+-- | Used by all GUP operations to ensure forces are preserved
+lesMisSetup :: Setup.Setup LesMisNode
+lesMisSetup = Setup.setup "lesmis"
+  [ Setup.manyBody "charge"
+      # Setup.withStrength (Setup.static (-100.0))
+      # Setup.withDistanceMax 500.0
+  , Setup.collide "collision"
+      # Setup.withRadius (Setup.static 5.0)
+      # Setup.withStrength (Setup.static 1.0)
+  , Setup.center "center"
+      # Setup.withX (Setup.static 0.0)
+      # Setup.withY (Setup.static 0.0)
+      # Setup.withStrength (Setup.static 0.1)
+  , Setup.link "links"
+      # Setup.withDistance (Setup.static 30.0)
+      # Setup.withStrength (Setup.static 0.5)
+  ]
+
 -- =============================================================================
 -- Initialization
 -- =============================================================================
@@ -325,20 +348,34 @@ initGUPDemo model containerSelector = do
 -- =============================================================================
 
 -- | Add N random nodes that aren't currently visible
+-- | Uses applySetupWithData for true GUP semantics
 addRandomNodes :: Int -> Ref LesMisGUPState -> Effect Unit
 addRandomNodes count stateRef = do
   state <- Ref.read stateRef
 
-  let
-    hiddenIds = filter (\id -> not (Array.elem id state.visibleNodeIds))
-      (map _.name state.fullModel.nodes)
+  -- Get current nodes from simulation (these have positions)
+  currentNodes <- Sim.getNodes state.simulation
+
+  -- Find nodes from fullModel that aren't in the simulation
+  let currentIds = map _.name currentNodes
+  let hiddenNodes = filter (\n -> not (Array.elem n.name currentIds)) state.fullModel.nodes
 
   -- Pick random hidden nodes to add
-  nodesToAdd <- pickRandom count hiddenIds
-  let newVisible = state.visibleNodeIds <> nodesToAdd
+  nodesToAdd <- pickRandom count hiddenNodes
 
-  -- Add entering transitions for new nodes (start at progress 0)
-  let newEntering = Tick.startProgress nodesToAdd state.enteringProgress
+  -- Compute desired state: current nodes + new nodes
+  let desiredNodes = currentNodes <> nodesToAdd
+  let desiredLinks = filterLinksToSubset _.id desiredNodes state.fullModel.links
+
+  -- Apply with GUP semantics
+  result <- Setup.applySetupWithData lesMisSetup desiredNodes desiredLinks state.simulation
+
+  -- Use GUP result to drive entering transitions
+  let enteredNames = map _.name result.nodes.entered
+  let newEntering = Tick.startProgress enteredNames state.enteringProgress
+
+  -- Update visibleNodeIds to match new reality
+  let newVisible = map _.name desiredNodes
 
   -- Update state
   Ref.write
@@ -353,21 +390,35 @@ addRandomNodes count stateRef = do
   Sim.reheat state.simulation
 
 -- | Remove N random visible nodes
+-- | Uses applySetupWithData for true GUP semantics
 removeRandomNodes :: Int -> Ref LesMisGUPState -> Effect Unit
 removeRandomNodes count stateRef = do
   state <- Ref.read stateRef
 
-  -- Pick random visible nodes to remove
-  nodesToRemove <- pickRandom count state.visibleNodeIds
-  let newVisible = filter (\id -> not (Array.elem id nodesToRemove)) state.visibleNodeIds
-
-  -- Get the actual node data for exiting nodes (freeze their positions)
+  -- Get current nodes from simulation
   currentNodes <- Sim.getNodes state.simulation
-  let exitingNodeData = filter (\n -> Array.elem n.name nodesToRemove) currentNodes
-  let newExiting = Tick.startTransitions exitingNodeData
 
-  -- Remove from entering if they were still entering
-  let newEntering = Array.foldl (\m id -> Map.delete id m) state.enteringProgress nodesToRemove
+  -- Pick random nodes to remove
+  nodesToRemove <- pickRandom count currentNodes
+
+  -- Compute desired state: current - removed
+  let removeNames = map _.name nodesToRemove
+  let desiredNodes = filter (\n -> not (Array.elem n.name removeNames)) currentNodes
+  let desiredLinks = filterLinksToSubset _.id desiredNodes state.fullModel.links
+
+  -- Apply with GUP semantics
+  result <- Setup.applySetupWithData lesMisSetup desiredNodes desiredLinks state.simulation
+
+  -- Use GUP result to drive exiting transitions
+  -- The exited nodes have their positions frozen for the exit animation
+  let newExiting = Tick.startTransitions result.nodes.exited
+
+  -- Remove exiting nodes from entering if they were still entering
+  let exitedNames = map _.name result.nodes.exited
+  let newEntering = Array.foldl (\m id -> Map.delete id m) state.enteringProgress exitedNames
+
+  -- Update visibleNodeIds to match new reality
+  let newVisible = map _.name desiredNodes
 
   -- Update state
   Ref.write
@@ -383,21 +434,31 @@ removeRandomNodes count stateRef = do
   Sim.reheat state.simulation
 
 -- | Reset to full dataset
+-- | Uses applySetupWithData for true GUP semantics
 resetToFull :: Ref LesMisGUPState -> Effect Unit
 resetToFull stateRef = do
   state <- Ref.read stateRef
-  let allIds = map _.name state.fullModel.nodes
 
-  -- Find newly visible nodes (were hidden, now visible)
-  let currentlyHidden = filter (\id -> not (Array.elem id state.visibleNodeIds)) allIds
-  let newEntering = Tick.startProgress currentlyHidden state.enteringProgress
+  -- Full dataset is the desired state
+  let allNodes = state.fullModel.nodes
+  let allLinks = state.fullModel.links
+
+  -- Apply with GUP semantics
+  result <- Setup.applySetupWithData lesMisSetup allNodes allLinks state.simulation
+
+  -- Use GUP result to drive entering transitions for newly added nodes
+  let enteredNames = map _.name result.nodes.entered
+  let newEntering = Tick.startProgress enteredNames state.enteringProgress
+
+  -- Update visibleNodeIds to match new reality
+  let allIds = map _.name allNodes
 
   -- Clear exiting nodes and set all as visible
   Ref.write
     ( state
         { visibleNodeIds = allIds
         , enteringProgress = newEntering
-        , exitingNodes = []
+        , exitingNodes = []  -- Clear any pending exits
         }
     )
     stateRef
@@ -589,3 +650,105 @@ pickRandomIndices n maxIdx acc = do
   idx <- randomInt 0 (maxIdx - 1)
   if Array.elem idx acc then pickRandomIndices n maxIdx acc -- Try again
   else pickRandomIndices (n - 1) maxIdx (acc <> [ idx ])
+
+-- =============================================================================
+-- New GUP API Demo
+-- =============================================================================
+
+-- | Test the new Setup.applySetupWithData API
+-- |
+-- | This demonstrates the "data-change" approach where we actually modify
+-- | what's in the simulation (vs the filter-render approach used above).
+-- |
+-- | The test:
+-- | 1. Creates a simulation with all nodes
+-- | 2. Applies applySetupWithData with a subset (remove some nodes)
+-- | 3. Logs the enter/update/exit categorization
+-- | 4. Applies again with a different subset (add some back, remove others)
+-- | 5. Logs the categorization again to show position preservation
+testGUPAPI :: Ref LesMisGUPState -> Effect Unit
+testGUPAPI stateRef = do
+  state <- Ref.read stateRef
+  let allNodes = state.fullModel.nodes
+  let allLinks = state.fullModel.links
+
+  log "=== Testing Setup.applySetupWithData API ==="
+  log $ "Total nodes: " <> show (length allNodes)
+  log $ "Total links: " <> show (length allLinks)
+
+  -- Get current nodes from simulation (they have x,y positions from simulation)
+  currentNodes <- Sim.getNodes state.simulation
+
+  log "\n--- Step 1: Current simulation state ---"
+  log $ "Current nodes in simulation: " <> show (length currentNodes)
+
+  -- Create a subset: keep only nodes with id < 30
+  let subset1Nodes = filter (\n -> n.id < 30) currentNodes
+  let subset1Links = filterLinksToSubset _.id subset1Nodes allLinks
+
+  log "\n--- Step 2: Apply subset (nodes with id < 30) ---"
+  log $ "Desired nodes: " <> show (length subset1Nodes)
+  log $ "Desired links: " <> show (length subset1Links)
+
+  -- Build a complete setup matching initGUPDemo forces
+  -- IMPORTANT: applySetup removes any forces not in the setup, so we must include ALL forces
+  let setup1 :: Setup.Setup LesMisNode
+      setup1 = Setup.setup "test"
+        [ Setup.manyBody "charge"
+            # Setup.withStrength (Setup.static (-100.0))
+            # Setup.withDistanceMax 500.0
+        , Setup.collide "collision"
+            # Setup.withRadius (Setup.static 5.0)
+            # Setup.withStrength (Setup.static 1.0)
+        , Setup.center "center"
+            # Setup.withX (Setup.static 0.0)
+            # Setup.withY (Setup.static 0.0)
+            # Setup.withStrength (Setup.static 0.1)
+        , Setup.link "links"
+            # Setup.withDistance (Setup.static 30.0)
+            # Setup.withStrength (Setup.static 0.5)
+        ]
+
+  -- Apply with GUP semantics
+  result1 <- Setup.applySetupWithData setup1 subset1Nodes subset1Links state.simulation
+
+  log "\n--- GUP Result (step 2) ---"
+  log $ "Entered nodes: " <> show (length result1.nodes.entered) <> " (should be 0 - filtering down)"
+  log $ "Updated nodes: " <> show (length result1.nodes.updated) <> " (should be ~30)"
+  log $ "Exited nodes: " <> show (length result1.nodes.exited) <> " (nodes removed)"
+  log $ "Entered links: " <> show (length result1.links.entered)
+  log $ "Updated links: " <> show (length result1.links.updated)
+  log $ "Exited links: " <> show (length result1.links.exited)
+
+  -- Show sample exited node names
+  let exitedNames = map _.name (Array.take 5 result1.nodes.exited)
+  log $ "Sample exited node names: " <> show exitedNames
+
+  -- Now apply a second subset: nodes 10-50 (overlapping, some new, some removed)
+  let subset2Nodes = filter (\n -> n.id >= 10 && n.id < 50) allNodes
+  let subset2Links = filterLinksToSubset _.id subset2Nodes allLinks
+
+  log "\n--- Step 3: Apply subset (nodes 10-50) ---"
+  log $ "Desired nodes: " <> show (length subset2Nodes)
+
+  result2 <- Setup.applySetupWithData setup1 subset2Nodes subset2Links state.simulation
+
+  log "\n--- GUP Result (step 3) ---"
+  log $ "Entered nodes: " <> show (length result2.nodes.entered) <> " (nodes 30-49, newly added)"
+  log $ "Updated nodes: " <> show (length result2.nodes.updated) <> " (nodes 10-29, positions preserved)"
+  log $ "Exited nodes: " <> show (length result2.nodes.exited) <> " (nodes 0-9, removed)"
+
+  -- Verify position preservation: sample an updated node
+  case Array.head result2.nodes.updated of
+    Nothing -> log "No updated nodes to check"
+    Just n -> do
+      log $ "\nSample updated node: " <> n.name <> " (id=" <> show n.id <> ")"
+      log $ "  Position: (" <> show n.x <> ", " <> show n.y <> ")"
+      log $ "  Velocity: (" <> show n.vx <> ", " <> show n.vy <> ")"
+      log "  (These should be preserved from simulation, not reset)"
+
+  log "\n=== GUP API Test Complete ==="
+
+  -- Restore full dataset
+  _ <- Setup.applySetupWithData setup1 allNodes allLinks state.simulation
+  Sim.reheat state.simulation
