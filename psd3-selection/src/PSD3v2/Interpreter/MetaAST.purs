@@ -15,7 +15,7 @@ import Data.Array (length, intercalate)
 import Data.Maybe (Maybe(..))
 import Data.Generic.Rep (class Generic)
 import PSD3v2.Selection.Types (ElementType(..))
-import PSD3v2.VizTree.Tree (Tree(..))
+import PSD3.AST (Tree(..))
 
 -- | AST representation of a tree (simplified for display)
 data TreeAST

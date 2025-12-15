@@ -20,7 +20,7 @@ import Data.Maybe (Maybe(..), isJust)
 import Data.Tuple (snd)
 import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..))
 import PSD3v2.Selection.Types (ElementType(..))
-import PSD3v2.VizTree.Tree (Tree(..))
+import PSD3.AST (Tree(..))
 
 -- | Run the English interpreter on a tree
 runEnglish :: forall datum. Tree datum -> String

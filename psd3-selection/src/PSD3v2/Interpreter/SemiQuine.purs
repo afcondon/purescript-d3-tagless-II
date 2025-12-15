@@ -35,7 +35,7 @@ treeToCode :: BuilderTree -> String
 treeToCode tree = String.joinWith "\n" $
   [ "-- Generated Tree API code (v3Attr)"
   , ""
-  , "import PSD3v2.VizTree.Tree as T"
+  , "import PSD3.AST as T"
   , "import PSD3v2.Selection.Types (ElementType(..))"
   , "import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)"
   , "import PSD3v3.Expr (lit, str)"

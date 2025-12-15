@@ -31,7 +31,7 @@ import Data.Maybe (Maybe)
 import PSD3v2.Attribute.Types (Attribute)
 import PSD3v2.Behavior.Types (Behavior)
 import PSD3v2.Selection.Types (ElementType, JoinResult, SBoundOwns, SBoundInherits, SEmpty, SExiting, SPending)
-import PSD3v2.VizTree.Tree (Tree)
+import PSD3.AST (Tree)
 import Unsafe.Coerce (unsafeCoerce)
 import Web.DOM.Element (Element)
 
@@ -358,7 +358,7 @@ class Monad m <= SelectionM sel m | m -> sel where
   -- |
   -- | Example:
   -- | ```purescript
-  -- | import PSD3v2.VizTree.Tree as T
+  -- | import PSD3.AST as T
   -- |
   -- | tree =
   -- |   T.named "svg" SVG [width 800] `T.withChildren`

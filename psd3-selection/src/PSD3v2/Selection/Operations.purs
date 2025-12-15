@@ -47,7 +47,7 @@ import PSD3v2.Selection.Join as Join
 import PSD3v2.Selection.Types (ElementType(..), JoinResult(..), RenderContext(..), SBoundInherits, SBoundOwns, SEmpty, SExiting, SPending, Selection(..), SelectionImpl(..), elementContext)
 import PSD3v2.Transition.FFI as TransitionFFI
 import PSD3v2.Transition.Types (TransitionConfig)
-import PSD3v2.VizTree.Tree (Tree(..))
+import PSD3.AST (Tree(..))
 import Partial.Unsafe (unsafePartial, unsafeCrashWith)
 import Unsafe.Coerce (unsafeCoerce)
 import Web.DOM.Document (Document)

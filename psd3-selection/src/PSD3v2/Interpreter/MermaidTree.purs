@@ -25,7 +25,7 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..))
 import PSD3v2.Selection.Types (ElementType(..))
-import PSD3v2.VizTree.Tree (Tree(..))
+import PSD3.AST (Tree(..))
 
 -- | Node ID for tracking connections in Mermaid diagram
 type NodeID = Int

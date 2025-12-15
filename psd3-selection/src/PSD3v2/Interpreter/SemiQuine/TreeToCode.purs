@@ -20,7 +20,7 @@ import Data.Maybe (Maybe(..))
 import Data.String (joinWith) as String
 import PSD3v2.Attribute.Types (Attribute(..), AttributeName(..), AttributeValue(..))
 import PSD3v2.Selection.Types (ElementType(..))
-import PSD3v2.VizTree.Tree (Tree(..))
+import PSD3.AST (Tree(..))
 
 -- | Convert a Tree to PureScript code (no sample data - dynamic attrs shown as placeholders)
 treeToCode :: forall datum. Tree datum -> String
