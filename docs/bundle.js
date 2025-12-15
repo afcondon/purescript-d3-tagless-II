@@ -30223,38 +30223,6 @@
       fy: n.fy
     };
   };
-  var createSimulation = function(model) {
-    var clonedNodes = map46(cloneNode)(model.nodes);
-    return function __do6() {
-      var sim = create5(defaultConfig3)();
-      setNodes(clonedNodes)(sim)();
-      setLinks(model.links)(sim)();
-      registerSimulation_(simulationId)(reheat(sim))();
-      addForce(new ManyBody("charge", {
-        theta: defaultManyBody.theta,
-        distanceMin: defaultManyBody.distanceMin,
-        strength: -100,
-        distanceMax: 500
-      }))(sim)();
-      addForce(new Collide("collision", {
-        radius: 5,
-        strength: 1,
-        iterations: 1
-      }))(sim)();
-      addForce(new Center("center", {
-        x: 0,
-        y: 0,
-        strength: 0.1
-      }))(sim)();
-      addForce(new Link("links", {
-        distance: 30,
-        strength: 0.5,
-        iterations: 1
-      }))(sim)();
-      start3(sim)();
-      return sim;
-    };
-  };
   var createSimulationWithCallbacks = function(callbacks) {
     return function(model) {
       var clonedNodes = map46(cloneNode)(model.nodes);
@@ -30634,7 +30602,7 @@
             });
           }
           ;
-          throw new Error("Failed pattern match at Component.GUPDebug (line 146, column 5 - line 171, column 36): " + [state3.simulation.constructor.name]);
+          throw new Error("Failed pattern match at Component.GUPDebug (line 157, column 5 - line 182, column 36): " + [state3.simulation.constructor.name]);
         });
       }
       ;
@@ -30764,7 +30732,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Component.GUPDebug (line 96, column 16 - line 264, column 24): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at Component.GUPDebug (line 107, column 16 - line 275, column 24): " + [v2.constructor.name]);
     };
   };
   var component5 = function(dictMonadAff) {
@@ -50525,8 +50493,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var modify_15 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var forever4 = /* @__PURE__ */ forever(monadRecHalogenM);
   var fromFoldable39 = /* @__PURE__ */ fromFoldable16(foldableArray)(ordString);
+  var $$void13 = /* @__PURE__ */ $$void(functorHalogenM);
+  var mapFlipped15 = /* @__PURE__ */ mapFlipped(functorEmitter);
   var get16 = /* @__PURE__ */ get(monadStateHalogenM);
   var pure119 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var tickProgressMap4 = /* @__PURE__ */ tickProgressMap(ordString);
   var member8 = /* @__PURE__ */ member2(ordString);
   var append122 = /* @__PURE__ */ append(/* @__PURE__ */ semigroupSet(ordString));
   var startProgress4 = /* @__PURE__ */ startProgress(ordString);
@@ -50568,6 +50539,13 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     ResetStaggered2.value = new ResetStaggered2();
     return ResetStaggered2;
   })();
+  var LesMisGUPTick = /* @__PURE__ */ (function() {
+    function LesMisGUPTick2() {
+    }
+    ;
+    LesMisGUPTick2.value = new LesMisGUPTick2();
+    return LesMisGUPTick2;
+  })();
   var AddGUPNodes = /* @__PURE__ */ (function() {
     function AddGUPNodes2() {
     }
@@ -50589,14 +50567,6 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     ResetGUP2.value = new ResetGUP2();
     return ResetGUP2;
   })();
-  var tickHandler = function(sim) {
-    return function __do6() {
-      var currentNodes = getNodes(sim)();
-      var currentLinks = getLinks(sim)();
-      var scene = buildSceneData(currentNodes)(empty4)([])(currentLinks);
-      return renderScene2(scene)();
-    };
-  };
   var render35 = function(v2) {
     return div2([classes(["tutorial-page"])])([renderHeader2(TourMotion.value), main_([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("5. Movement & Transition")]), p_([text5("This page explores transitions and movement in D3 visualizations, from simple color and position changes to complex physics simulations with the General Update Pattern.")])]), section([classes(["tutorial-section"]), id3("section-1")])([h2([classes(["tutorial-section-title"])])([text5("1. Basic Transitions: Color Mixing")]), p_([text5("Transitions allow smooth animated changes to visual properties. This simple example shows three circles transitioning from green to RGB primary colors (red, green, blue) with 50% opacity. The circles reposition to overlap, demonstrating additive color mixing where overlapping colors create secondary colors: cyan (green + blue), magenta (red + blue), and yellow (red + green).")]), div2([id3("viz"), classes(["viz-container"])])([]), button2([classes(["transition-button"]), onClick(function(v1) {
       return TriggerColorMixing.value;
@@ -50617,8 +50587,8 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     var coinToss = function(c2) {
       return function __do6() {
         var n = random();
-        var $60 = n > 0.6;
-        if ($60) {
+        var $66 = n > 0.6;
+        if ($66) {
           return new Just(c2);
         }
         ;
@@ -50640,29 +50610,29 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         return discard52(liftAff2(delay(100)))(function() {
           return bind130(liftEffect49(threeLittleCirclesTransition("#viz")))(function(trigger) {
             return discard52(modify_15(function(v1) {
-              var $62 = {};
-              for (var $63 in v1) {
-                if ({}.hasOwnProperty.call(v1, $63)) {
-                  $62[$63] = v1[$63];
+              var $68 = {};
+              for (var $69 in v1) {
+                if ({}.hasOwnProperty.call(v1, $69)) {
+                  $68[$69] = v1[$69];
                 }
                 ;
               }
               ;
-              $62.colorMixingTrigger = new Just(trigger);
-              return $62;
+              $68.colorMixingTrigger = new Just(trigger);
+              return $68;
             }))(function() {
               return bind130(liftEffect49(staggeredCircles("#staggered-container")))(function(staggered) {
                 return discard52(modify_15(function(v1) {
-                  var $65 = {};
-                  for (var $66 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $66)) {
-                      $65[$66] = v1[$66];
+                  var $71 = {};
+                  for (var $72 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $72)) {
+                      $71[$72] = v1[$72];
                     }
                     ;
                   }
                   ;
-                  $65.staggeredTrigger = new Just(staggered);
-                  return $65;
+                  $71.staggeredTrigger = new Just(staggered);
+                  return $71;
                 }))(function() {
                   return bind130(liftEffect49(initV3GUP("#gup-container")))(function(update2) {
                     return bind130(fork(forever4(bind130(liftEffect49(getLetters2))(function(letters) {
@@ -50671,16 +50641,16 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                       });
                     }))))(function(forkId) {
                       return discard52(modify_15(function(v1) {
-                        var $68 = {};
-                        for (var $69 in v1) {
-                          if ({}.hasOwnProperty.call(v1, $69)) {
-                            $68[$69] = v1[$69];
+                        var $74 = {};
+                        for (var $75 in v1) {
+                          if ({}.hasOwnProperty.call(v1, $75)) {
+                            $74[$75] = v1[$75];
                           }
                           ;
                         }
                         ;
-                        $68.gupFiber = new Just(forkId);
-                        return $68;
+                        $74.gupFiber = new Just(forkId);
+                        return $74;
                       }))(function() {
                         return bind130(liftAff2(simpleLoadJSON("./data/flare-2.json")))(function(flareJson) {
                           return discard52(liftEffect49(startAnimatedTreeClusterLoop(flareJson)("#animated-tree-container")))(function() {
@@ -50688,38 +50658,48 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                               var model = processRawModel2(lesMisJson);
                               return bind130(liftEffect49(startLesMis(model)("#lesmis-container")))(function(cleanup) {
                                 return discard52(modify_15(function(v1) {
-                                  var $71 = {};
-                                  for (var $72 in v1) {
-                                    if ({}.hasOwnProperty.call(v1, $72)) {
-                                      $71[$72] = v1[$72];
+                                  var $77 = {};
+                                  for (var $78 in v1) {
+                                    if ({}.hasOwnProperty.call(v1, $78)) {
+                                      $77[$78] = v1[$78];
                                     }
                                     ;
                                   }
                                   ;
-                                  $71.lesMisCleanup = new Just(cleanup);
-                                  return $71;
+                                  $77.lesMisCleanup = new Just(cleanup);
+                                  return $77;
                                 }))(function() {
                                   var allNodeIds = fromFoldable39(map87(function(v1) {
                                     return v1.name;
                                   })(model.nodes));
-                                  return bind130(liftEffect49(createSimulation(model)))(function(simulation) {
-                                    return discard52(liftEffect49(renderSVGContainer2("#lesmis-gup-container")))(function() {
-                                      return discard52(liftEffect49(onTick(tickHandler(simulation))(simulation)))(function() {
-                                        return modify_15(function(v1) {
-                                          var $74 = {};
-                                          for (var $75 in v1) {
-                                            if ({}.hasOwnProperty.call(v1, $75)) {
-                                              $74[$75] = v1[$75];
+                                  return bind130(liftEffect49(defaultCallbacks))(function(callbacks) {
+                                    return bind130(liftEffect49(createSimulationWithCallbacks(callbacks)(model)))(function(simulation) {
+                                      return discard52(liftEffect49(renderSVGContainer2("#lesmis-gup-container")))(function() {
+                                        return bind130(liftEffect49(subscribeToSimulation(simulation)))(function(emitter) {
+                                          return discard52($$void13(subscribe2(mapFlipped15(emitter)(function(event) {
+                                            if (event instanceof Tick) {
+                                              return LesMisGUPTick.value;
                                             }
                                             ;
-                                          }
-                                          ;
-                                          $74.lesMisGUPModel = new Just(model);
-                                          $74.lesMisGUPVisibleIds = allNodeIds;
-                                          $74.lesMisGUPEntering = empty4;
-                                          $74.lesMisGUPExiting = [];
-                                          $74.lesMisGUPSimulation = new Just(simulation);
-                                          return $74;
+                                            return LesMisGUPTick.value;
+                                          }))))(function() {
+                                            return modify_15(function(v1) {
+                                              var $81 = {};
+                                              for (var $82 in v1) {
+                                                if ({}.hasOwnProperty.call(v1, $82)) {
+                                                  $81[$82] = v1[$82];
+                                                }
+                                                ;
+                                              }
+                                              ;
+                                              $81.lesMisGUPModel = new Just(model);
+                                              $81.lesMisGUPVisibleIds = allNodeIds;
+                                              $81.lesMisGUPEntering = empty4;
+                                              $81.lesMisGUPExiting = [];
+                                              $81.lesMisGUPSimulation = new Just(simulation);
+                                              return $81;
+                                            });
+                                          });
                                         });
                                       });
                                     });
@@ -50750,7 +50730,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               return kill(state3.gupFiber.value0);
             }
             ;
-            throw new Error("Failed pattern match at Component.Tour.TourMotion (line 148, column 5 - line 150, column 35): " + [state3.gupFiber.constructor.name]);
+            throw new Error("Failed pattern match at Component.Tour.TourMotion (line 159, column 5 - line 161, column 35): " + [state3.gupFiber.constructor.name]);
           })())(function() {
             return discard52((function() {
               if (state3.lesMisCleanup instanceof Nothing) {
@@ -50761,20 +50741,20 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 return liftEffect49(state3.lesMisCleanup.value0);
               }
               ;
-              throw new Error("Failed pattern match at Component.Tour.TourMotion (line 152, column 5 - line 154, column 41): " + [state3.lesMisCleanup.constructor.name]);
+              throw new Error("Failed pattern match at Component.Tour.TourMotion (line 163, column 5 - line 165, column 41): " + [state3.lesMisCleanup.constructor.name]);
             })())(function() {
               return modify_15(function(v1) {
-                var $81 = {};
-                for (var $82 in v1) {
-                  if ({}.hasOwnProperty.call(v1, $82)) {
-                    $81[$82] = v1[$82];
+                var $88 = {};
+                for (var $89 in v1) {
+                  if ({}.hasOwnProperty.call(v1, $89)) {
+                    $88[$89] = v1[$89];
                   }
                   ;
                 }
                 ;
-                $81.gupFiber = Nothing.value;
-                $81.lesMisCleanup = Nothing.value;
-                return $81;
+                $88.gupFiber = Nothing.value;
+                $88.lesMisCleanup = Nothing.value;
+                return $88;
               });
             });
           });
@@ -50791,7 +50771,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return liftEffect49(createTransitionTrigger(state3.colorMixingTrigger.value0));
           }
           ;
-          throw new Error("Failed pattern match at Component.Tour.TourMotion (line 159, column 5 - line 161, column 96): " + [state3.colorMixingTrigger.constructor.name]);
+          throw new Error("Failed pattern match at Component.Tour.TourMotion (line 170, column 5 - line 172, column 96): " + [state3.colorMixingTrigger.constructor.name]);
         });
       }
       ;
@@ -50805,7 +50785,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return liftEffect49(state3.staggeredTrigger.value0.trigger);
           }
           ;
-          throw new Error("Failed pattern match at Component.Tour.TourMotion (line 165, column 5 - line 167, column 45): " + [state3.staggeredTrigger.constructor.name]);
+          throw new Error("Failed pattern match at Component.Tour.TourMotion (line 176, column 5 - line 178, column 45): " + [state3.staggeredTrigger.constructor.name]);
         });
       }
       ;
@@ -50819,7 +50799,42 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             return liftEffect49(state3.staggeredTrigger.value0.reset);
           }
           ;
-          throw new Error("Failed pattern match at Component.Tour.TourMotion (line 171, column 5 - line 173, column 41): " + [state3.staggeredTrigger.constructor.name]);
+          throw new Error("Failed pattern match at Component.Tour.TourMotion (line 182, column 5 - line 184, column 41): " + [state3.staggeredTrigger.constructor.name]);
+        });
+      }
+      ;
+      if (v2 instanceof LesMisGUPTick) {
+        return bind130(get16)(function(state3) {
+          if (state3.lesMisGUPSimulation instanceof Nothing) {
+            return pure119(unit);
+          }
+          ;
+          if (state3.lesMisGUPSimulation instanceof Just) {
+            var v1 = tickProgressMap4(transitionDelta2)(state3.lesMisGUPEntering);
+            var v22 = tickTransitions(transitionDelta2)(state3.lesMisGUPExiting);
+            return discard52(modify_15(function(v3) {
+              var $102 = {};
+              for (var $103 in v3) {
+                if ({}.hasOwnProperty.call(v3, $103)) {
+                  $102[$103] = v3[$103];
+                }
+                ;
+              }
+              ;
+              $102.lesMisGUPEntering = v1.active;
+              $102.lesMisGUPExiting = v22.active;
+              return $102;
+            }))(function() {
+              return liftEffect49(function __do6() {
+                var currentNodes = getNodes(state3.lesMisGUPSimulation.value0)();
+                var currentLinks = getLinks(state3.lesMisGUPSimulation.value0)();
+                var scene = buildSceneData(currentNodes)(v1.active)(v22.active)(currentLinks);
+                return renderScene2(scene)();
+              });
+            });
+          }
+          ;
+          throw new Error("Failed pattern match at Component.Tour.TourMotion (line 191, column 5 - line 216, column 36): " + [state3.lesMisGUPSimulation.constructor.name]);
         });
       }
       ;
@@ -50846,17 +50861,17 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 var newEntering = startProgress4(enteringNames)(state3.lesMisGUPEntering);
                 return discard52(liftEffect49(reheat(state3.lesMisGUPSimulation.value0)))(function() {
                   return discard52(modify_15(function(v1) {
-                    var $94 = {};
-                    for (var $95 in v1) {
-                      if ({}.hasOwnProperty.call(v1, $95)) {
-                        $94[$95] = v1[$95];
+                    var $110 = {};
+                    for (var $111 in v1) {
+                      if ({}.hasOwnProperty.call(v1, $111)) {
+                        $110[$111] = v1[$111];
                       }
                       ;
                     }
                     ;
-                    $94.lesMisGUPVisibleIds = newVisibleIds;
-                    $94.lesMisGUPEntering = newEntering;
-                    return $94;
+                    $110.lesMisGUPVisibleIds = newVisibleIds;
+                    $110.lesMisGUPEntering = newEntering;
+                    return $110;
                   }))(function() {
                     return log8("Added " + (show75(length3(nodesToAdd)) + " nodes"));
                   });
@@ -50890,17 +50905,17 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 var newExiting = startTransitions(result.nodes.exited);
                 return discard52(liftEffect49(reheat(state3.lesMisGUPSimulation.value0)))(function() {
                   return discard52(modify_15(function(v1) {
-                    var $101 = {};
-                    for (var $102 in v1) {
-                      if ({}.hasOwnProperty.call(v1, $102)) {
-                        $101[$102] = v1[$102];
+                    var $117 = {};
+                    for (var $118 in v1) {
+                      if ({}.hasOwnProperty.call(v1, $118)) {
+                        $117[$118] = v1[$118];
                       }
                       ;
                     }
                     ;
-                    $101.lesMisGUPVisibleIds = newVisibleIds;
-                    $101.lesMisGUPExiting = append210(state3.lesMisGUPExiting)(newExiting);
-                    return $101;
+                    $117.lesMisGUPVisibleIds = newVisibleIds;
+                    $117.lesMisGUPExiting = append210(state3.lesMisGUPExiting)(newExiting);
+                    return $117;
                   }))(function() {
                     return log8("Removed " + (show75(length3(nodesToRemove)) + " nodes"));
                   });
@@ -50926,18 +50941,18 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
               var newEntering = startProgress4(enteringNames)(empty4);
               return discard52(liftEffect49(reheat(state3.lesMisGUPSimulation.value0)))(function() {
                 return discard52(modify_15(function(v1) {
-                  var $108 = {};
-                  for (var $109 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $109)) {
-                      $108[$109] = v1[$109];
+                  var $124 = {};
+                  for (var $125 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $125)) {
+                      $124[$125] = v1[$125];
                     }
                     ;
                   }
                   ;
-                  $108.lesMisGUPVisibleIds = allNodeIds;
-                  $108.lesMisGUPEntering = newEntering;
-                  $108.lesMisGUPExiting = [];
-                  return $108;
+                  $124.lesMisGUPVisibleIds = allNodeIds;
+                  $124.lesMisGUPEntering = newEntering;
+                  $124.lesMisGUPExiting = [];
+                  return $124;
                 }))(function() {
                   return log8("Reset to full dataset");
                 });
@@ -50949,7 +50964,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
         });
       }
       ;
-      throw new Error("Failed pattern match at Component.Tour.TourMotion (line 97, column 16 - line 263, column 24): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at Component.Tour.TourMotion (line 101, column 16 - line 306, column 24): " + [v2.constructor.name]);
     };
   };
   var component31 = function(dictMonadAff) {
@@ -51899,7 +51914,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
 
   // output/D3.Viz.Simpsons.DataTable/index.js
   var bind80 = /* @__PURE__ */ bind(bindEffect);
-  var mapFlipped15 = /* @__PURE__ */ mapFlipped(functorEffect);
+  var mapFlipped16 = /* @__PURE__ */ mapFlipped(functorEffect);
   var for_9 = /* @__PURE__ */ for_(applicativeEffect);
   var for_13 = /* @__PURE__ */ for_9(foldableMaybe);
   var v3Attr50 = /* @__PURE__ */ v3Attr(showNumber);
@@ -51957,7 +51972,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   };
   var clearContainer3 = function(selector) {
     return function __do6() {
-      var doc = mapFlipped15(bind80(windowImpl)(document2))(toDocument)();
+      var doc = mapFlipped16(bind80(windowImpl)(document2))(toDocument)();
       var parentNode3 = toParentNode(doc);
       var maybeEl = querySelector(selector)(parentNode3)();
       return for_13(maybeEl)(function(el) {
@@ -54126,7 +54141,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var modify_17 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var get18 = /* @__PURE__ */ get(monadStateHalogenM);
   var when11 = /* @__PURE__ */ when(applicativeHalogenM);
-  var $$void13 = /* @__PURE__ */ $$void(functorHalogenM);
+  var $$void14 = /* @__PURE__ */ $$void(functorHalogenM);
   var forever5 = /* @__PURE__ */ forever(monadRecAff);
   var discard215 = /* @__PURE__ */ discard60(bindAff);
   var liftEffect42 = /* @__PURE__ */ liftEffect(monadEffectAff);
@@ -54268,7 +54283,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                       $74.animationSubscriptionId = new Just(subscriptionId);
                       return $74;
                     }))(function() {
-                      return $$void13(liftAff2(forkAff(forever5(discard215(delay(intervalMs))(function() {
+                      return $$void14(liftAff2(forkAff(forever5(discard215(delay(intervalMs))(function() {
                         return liftEffect42(notify(v1.listener)(Tick2.value));
                       })))));
                     });
@@ -54589,7 +54604,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   // output/Component.TreeAPI/index.js
   var discard62 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_18 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var $$void14 = /* @__PURE__ */ $$void(functorEffect);
+  var $$void15 = /* @__PURE__ */ $$void(functorEffect);
   var ThreeCircles = /* @__PURE__ */ (function() {
     function ThreeCircles2() {
     }
@@ -54703,7 +54718,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
             }
             ;
             if (v2.value0 instanceof ThreeCirclesTransition) {
-              return liftEffect49($$void14(threeLittleCirclesTransition("#viz")));
+              return liftEffect49($$void15(threeLittleCirclesTransition("#viz")));
             }
             ;
             if (v2.value0 instanceof SimpleTree) {
@@ -55637,7 +55652,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
   var pure123 = /* @__PURE__ */ pure(applicativeAff);
   var when12 = /* @__PURE__ */ when(applicativeEffect);
   var renderStateX2 = /* @__PURE__ */ renderStateX(functorEffect);
-  var $$void15 = /* @__PURE__ */ $$void(functorAff);
+  var $$void16 = /* @__PURE__ */ $$void(functorAff);
   var foreachSlot2 = /* @__PURE__ */ foreachSlot(applicativeEffect);
   var renderStateX_2 = /* @__PURE__ */ renderStateX_(applicativeEffect);
   var tailRecM3 = /* @__PURE__ */ tailRecM(monadRecEffect);
@@ -55795,7 +55810,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                 var $70 = queueOrRun(v2.pendingHandlers);
                 var $71 = evalF(render57)(v2.selfRef);
                 return function($72) {
-                  return $70($$void15($71($72)));
+                  return $70($$void16($71($72)));
                 };
               })();
               var childHandler = (function() {
@@ -55949,7 +55964,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
       return val;
     };
   };
-  var $$void16 = /* @__PURE__ */ $$void(functorEffect);
+  var $$void17 = /* @__PURE__ */ $$void(functorEffect);
   var pure94 = /* @__PURE__ */ pure(applicativeEffect);
   var traverse_9 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
   var unwrap8 = /* @__PURE__ */ unwrap();
@@ -55964,11 +55979,11 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
     return function(v1) {
       return function(v22) {
         if (v1 instanceof Just && v22 instanceof Just) {
-          return $$void16(insertBefore(v2)(v1.value0)(v22.value0));
+          return $$void17(insertBefore(v2)(v1.value0)(v22.value0));
         }
         ;
         if (v1 instanceof Nothing && v22 instanceof Just) {
-          return $$void16(appendChild2(v2)(v22.value0));
+          return $$void17(appendChild2(v2)(v22.value0));
         }
         ;
         return pure94(unit);
@@ -56065,7 +56080,7 @@ addTickFunction "nodes" $ Step circles [cx (_.x), cy (_.y)]
                   var spec = mkSpec(handler3)(renderChildRef)(document3);
                   var machine = buildVDom(spec)(v2);
                   var node = extract2(machine);
-                  $$void16(appendChild2(node)(toNode2(container)))();
+                  $$void17(appendChild2(node)(toNode2(container)))();
                   return {
                     machine,
                     node,

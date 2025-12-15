@@ -38,6 +38,9 @@ import PSD3.Transition.Tick as Tick
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Setup as Setup
 import PSD3.ForceEngine.Links (filterLinksToSubset)
+import PSD3.ForceEngine.Events (SimulationEvent(..), defaultCallbacks)
+import PSD3.ForceEngine.Halogen (subscribeToSimulation)
+import Control.Monad (void)
 import Data.Array (catMaybes)
 import Data.String.CodeUnits (toCharArray)
 import Data.Traversable (sequence)
@@ -67,6 +70,7 @@ data Action
   | TriggerColorMixing
   | TriggerStaggered
   | ResetStaggered
+  | LesMisGUPTick       -- Simulation tick for Les Mis GUP section
   | AddGUPNodes
   | RemoveGUPNodes
   | ResetGUP
@@ -129,10 +133,17 @@ handleAction = case _ of
     H.modify_ _ { lesMisCleanup = Just cleanup }
 
     -- Render Section 6: Les Misérables with GUP (Halogen-first architecture)
+    -- Uses Halogen subscriptions so tick events flow through Halogen actions
     let allNodeIds = Set.fromFoldable $ map _.name model.nodes
-    simulation <- liftEffect $ GUPDemo.createSimulation model
+    callbacks <- liftEffect defaultCallbacks
+    simulation <- liftEffect $ GUPDemo.createSimulationWithCallbacks callbacks model
     liftEffect $ GUPDemo.renderSVGContainer "#lesmis-gup-container"
-    liftEffect $ Sim.onTick (tickHandler simulation) simulation
+
+    -- Subscribe to simulation events via Halogen subscription
+    emitter <- liftEffect $ subscribeToSimulation simulation
+    void $ H.subscribe $ emitter <#> \event -> case event of
+      Tick -> LesMisGUPTick
+      _ -> LesMisGUPTick  -- Ignore other events, just render
 
     H.modify_ _
       { lesMisGUPModel = Just model
@@ -171,6 +182,38 @@ handleAction = case _ of
     case state.staggeredTrigger of
       Nothing -> pure unit
       Just { reset } -> liftEffect reset
+
+  LesMisGUPTick -> do
+    -- On each tick from the Les Mis GUP simulation:
+    -- 1. Advance transition progress for entering/exiting nodes
+    -- 2. Render scene with current state
+    state <- H.get
+    case state.lesMisGUPSimulation of
+      Nothing -> pure unit
+      Just sim -> do
+        -- Advance entering progress (0.0 → 1.0)
+        let delta = GUPDemo.transitionDelta
+            { active: stillEntering } = Tick.tickProgressMap delta state.lesMisGUPEntering
+
+        -- Advance exiting transitions (0.0 → 1.0)
+        let { active: stillExiting } = Tick.tickTransitions delta state.lesMisGUPExiting
+
+        -- Update state with advanced progress
+        H.modify_ _
+          { lesMisGUPEntering = stillEntering
+          , lesMisGUPExiting = stillExiting
+          }
+
+        -- Build scene with current Halogen state and render
+        liftEffect do
+          currentNodes <- Sim.getNodes sim
+          currentLinks <- Sim.getLinks sim
+          let scene = GUPDemo.buildSceneData
+                currentNodes
+                stillEntering
+                stillExiting
+                currentLinks
+          GUPDemo.renderScene scene
 
   AddGUPNodes -> do
     state <- H.get
@@ -261,14 +304,6 @@ handleAction = case _ of
         Console.log "Reset to full dataset"
 
       _, _ -> pure unit
-
--- | Tick handler for Les Mis GUP - position-only rendering
-tickHandler :: LesMisSimulation -> Effect Unit
-tickHandler sim = do
-  currentNodes <- Sim.getNodes sim
-  currentLinks <- Sim.getLinks sim
-  let scene = GUPDemo.buildSceneData currentNodes Map.empty [] currentLinks
-  GUPDemo.renderScene scene
 
 -- | Choose a string of random letters (no duplicates), ordered alphabetically
 getLetters :: Effect (Array Char)
