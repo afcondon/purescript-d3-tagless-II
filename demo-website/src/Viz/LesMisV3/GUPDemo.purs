@@ -62,7 +62,7 @@ import PSD3v2.Behavior.Types (Behavior(..), DragConfig(..), ScaleExtent(..), def
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M)
 import PSD3v2.Selection.Types (ElementType(..)) as ET
-import PSD3v2.VizTree.Tree as T
+import PSD3.AST as T
 import Type.Proxy (Proxy(..))
 
 -- v3 DSL imports

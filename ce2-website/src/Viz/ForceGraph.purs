@@ -72,7 +72,7 @@ import PSD3v2.Interpreter.D3v2 (runD3v2M)
 import PSD3v2.Transform (transformCircles, transformPaths, removeElement)
 import PSD3v2.Classify (classifyElements)
 import PSD3v2.Selection.Types (ElementType(..))
-import PSD3v2.VizTree.Tree as T
+import PSD3.AST as T
 import PSD3v2.Behavior.Types (Behavior(..), DragConfig(..), ScaleExtent(..), defaultZoom)
 import PSD3v2.Behavior.FFI as BehaviorFFI
 import PSD3v3.Integration (v3Attr, v3AttrFn, v3AttrFnStr, v3AttrStr)

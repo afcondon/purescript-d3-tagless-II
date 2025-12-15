@@ -66,7 +66,7 @@ import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M)
 import PSD3v2.Selection.Types (ElementType(..)) as ET
-import PSD3v2.VizTree.Tree as T
+import PSD3.AST as T
 
 -- =============================================================================
 -- Type Definitions

@@ -22,7 +22,7 @@ import PSD3v2.Interpreter.MermaidTree (runMermaidTree)
 import PSD3v2.Selection.Types (SEmpty, ElementType(..))
 import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
 import PSD3v3.Expr (lit, str)
-import PSD3v2.VizTree.Tree as T
+import PSD3.AST as T
 import D3.Viz.TreeAPI.InterpreterDemo as Demo
 import Web.DOM.Element (Element)
 import Data.Array (length, mapWithIndex)

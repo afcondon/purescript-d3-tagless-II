@@ -16,7 +16,7 @@ import Effect (Effect)
 import PSD3v2.Capabilities.Selection (renderTree, select)
 import PSD3v2.Interpreter.D3v2 (D3v2Selection_, runD3v2M)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
-import PSD3v2.VizTree.Tree as T
+import PSD3.AST as T
 import PSD3v3.Expr (lit, str)
 import PSD3v3.Integration (v3Attr, v3AttrStr)
 import Web.DOM.Element (Element)

@@ -26,8 +26,8 @@ import PSD3v2.Behavior.Types (onMouseLeaveWithInfo, onMouseMoveWithInfo, MouseEv
 import Data.Map as Map
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
-import PSD3v2.VizTree.Tree (Tree, joinData)
-import PSD3v2.VizTree.Tree as T
+import PSD3.AST (Tree, joinData)
+import PSD3.AST as T
 import PSD3v2.Tooltip (showTooltip, hideTooltip)
 import Web.DOM.Element (Element)
 import Effect.Ref as Ref

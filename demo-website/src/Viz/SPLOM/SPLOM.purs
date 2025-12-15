@@ -52,8 +52,8 @@ import PSD3v2.Brush (attachBrush, clearBrush, BrushHandle, BrushSelection, Brush
 import PSD3v2.Capabilities.Selection (select, renderTree, clear)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M)
 import PSD3v2.Selection.Types (ElementType(..)) as ET
-import PSD3v2.VizTree.Tree (Tree)
-import PSD3v2.VizTree.Tree as T
+import PSD3.AST (Tree)
+import PSD3.AST as T
 import D3.Viz.SPLOM.Types (Penguin, NumericDimension, dimensionLabel, dimensionKey, getDimensionValue, speciesColor, allDimensions)
 import Web.DOM.ParentNode (querySelector, QuerySelector(..))
 import Web.HTML (window)

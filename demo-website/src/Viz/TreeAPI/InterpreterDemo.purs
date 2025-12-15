@@ -8,7 +8,7 @@ import Data.Int (toNumber)
 import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr, v3AttrFnI)
 import PSD3v3.Expr (lit, str)
 import PSD3v2.Selection.Types (ElementType(..))
-import PSD3v2.VizTree.Tree as T
+import PSD3.AST as T
 
 -- | Three Little Circles - simple and familiar
 threeLittleCircles :: T.Tree Unit

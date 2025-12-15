@@ -34,8 +34,8 @@ import PSD3v3.Expr (lit, str)
 import PSD3v2.Capabilities.Selection (renderTree, select)
 import PSD3v2.Interpreter.D3v2 (D3v2M, D3v2Selection_, runD3v2M)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
-import PSD3v2.VizTree.Tree (Tree)
-import PSD3v2.VizTree.Tree as T
+import PSD3.AST (Tree)
+import PSD3.AST as T
 import Unsafe.Coerce (unsafeCoerce)
 import Web.DOM.Element (Element)
 

@@ -15,8 +15,8 @@ import PSD3v2.Axis.Axis (axisBottom, axisLeft, renderAxis)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
-import PSD3v2.VizTree.Tree (Tree, joinData)
-import PSD3v2.VizTree.Tree as T
+import PSD3.AST (Tree, joinData)
+import PSD3.AST as T
 import Web.DOM.Element (Element)
 
 -- | Parabola (With Axes) - Introducing scales and axes

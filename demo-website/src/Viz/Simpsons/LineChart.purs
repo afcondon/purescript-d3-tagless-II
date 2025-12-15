@@ -21,8 +21,8 @@ import PSD3v3.Integration (v3Attr, v3AttrStr)
 import PSD3v3.Expr (lit, str)
 import PSD3v2.Axis.Axis (axisBottom, axisLeft, renderAxis, Scale)
 import PSD3v2.Selection.Types (ElementType(..))
-import PSD3v2.VizTree.Tree (Tree)
-import PSD3v2.VizTree.Tree as T
+import PSD3.AST (Tree)
+import PSD3.AST as T
 import Data.Maybe (Maybe(..))
 import Data.Array (uncons)
 

@@ -16,7 +16,7 @@ import PSD3v2.Capabilities.Selection (renderTree, select)
 import PSD3v2.Interpreter.D3v2 (D3v2M)
 import PSD3v2.Selection.Types (ElementType(..))
 import PSD3v2.Transition.Types (Easing(CubicIn, CubicInOut))
-import PSD3v2.VizTree.Tree as T
+import PSD3.AST as T
 
 -- | Simple data point
 type DataPoint = { x :: Number, y :: Number, color :: String }

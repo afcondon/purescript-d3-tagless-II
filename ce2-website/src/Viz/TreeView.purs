@@ -39,7 +39,7 @@ import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Interpreter.D3v2 (runD3v2M)
 import PSD3v2.Transform (transformCircles, transformPaths, removeElement)
 import PSD3v2.Classify (classifyElements, clearClasses)
-import PSD3v2.VizTree.Tree as T
+import PSD3.AST as T
 import PSD3v2.Selection.Types (ElementType(..))
 import PSD3v3.Integration (v3AttrFn, v3AttrFnStr, v3AttrStr)
 import PSD3v3.Expr (str)

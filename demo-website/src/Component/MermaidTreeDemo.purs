@@ -13,7 +13,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import PSD3v2.Interpreter.MermaidTree (runMermaidTree)
 import PSD3v2.Selection.Types (ElementType(..))
-import PSD3v2.VizTree.Tree as T
+import PSD3.AST as T
 import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
 import PSD3v3.Expr (lit, str)
 
