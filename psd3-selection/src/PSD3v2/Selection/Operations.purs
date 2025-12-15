@@ -672,8 +672,8 @@ joinDataWithKey foldableData keyFn selector (Selection impl) = liftEffect do
     pure $ { element, datum: maybeDatum }
 
   -- Log what data we found on existing elements
-  liftEffect $ log $ "joinDataWithKey: found " <> show (Array.length existingElements) <> " existing elements with selector '" <> selector <> "'"
-  liftEffect $ log $ "joinDataWithKey: " <> show (Array.length (Array.mapMaybe _.datum oldBindings)) <> " of those have data bound"
+  -- liftEffect $ log $ "joinDataWithKey: found " <> show (Array.length existingElements) <> " existing elements with selector '" <> selector <> "'"
+  -- liftEffect $ log $ "joinDataWithKey: " <> show (Array.length (Array.mapMaybe _.datum oldBindings)) <> " of those have data bound"
 
   -- Filter to only elements that have data bound
   let
@@ -1561,24 +1561,24 @@ renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
     joinDataWithKey innerData jsonStringify_ joinSpec.key parentSel
 
   -- Log join results (extract counts from selection implementations)
-  liftEffect $ do
-    let Selection enterImpl = unsafeCoerce enterSel
-    let
-      enterCount = case enterImpl of
-        PendingSelection rec -> Array.length rec.pendingData
-        _ -> 0
-    let Selection updateImpl = unsafeCoerce updateSel
-    let
-      updateCount = case updateImpl of
-        BoundSelection rec -> Array.length rec.data
-        _ -> 0
-    let Selection exitImpl = unsafeCoerce exitSel
-    let
-      exitCount = case exitImpl of
-        BoundSelection rec -> Array.length rec.data
-        ExitingSelection rec -> Array.length rec.data
-        _ -> 0
-    log $ "Tree API SceneNestedJoin '" <> joinSpec.name <> "': enter=" <> show enterCount <> ", update=" <> show updateCount <> ", exit=" <> show exitCount
+  -- liftEffect $ do
+  --   let Selection enterImpl = unsafeCoerce enterSel
+  --   let
+  --     enterCount = case enterImpl of
+  --       PendingSelection rec -> Array.length rec.pendingData
+  --       _ -> 0
+  --   let Selection updateImpl = unsafeCoerce updateSel
+  --   let
+  --     updateCount = case updateImpl of
+  --       BoundSelection rec -> Array.length rec.data
+  --       _ -> 0
+  --   let Selection exitImpl = unsafeCoerce exitSel
+  --   let
+  --     exitCount = case exitImpl of
+  --       BoundSelection rec -> Array.length rec.data
+  --       ExitingSelection rec -> Array.length rec.data
+  --       _ -> 0
+  --   log $ "Tree API SceneNestedJoin '" <> joinSpec.name <> "': enter=" <> show enterCount <> ", update=" <> show updateCount <> ", exit=" <> show exitCount
 
   -- 3. Handle EXIT with behavior
   --
