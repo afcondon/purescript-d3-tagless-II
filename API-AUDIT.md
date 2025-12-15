@@ -1,13 +1,14 @@
 # API Generation Audit
 
-## Status: Phase 1 Complete
+## Status: Phase 3 Complete (Full Migration)
 
 ### Completed Actions
-- [x] Created `PSD3.AST` - Clean facade for `PSD3v2.VizTree.Tree` (renamed "TreeAPI" to "AST")
+- [x] Created `PSD3.AST` - Canonical source for visualization AST (renamed "TreeAPI" to "AST")
 - [x] Created `PSD3.Render` - Clean facade for D3 rendering (`runD3`, `select`, `renderTree`)
 - [x] Updated `PSD3` umbrella module with clean exports and updated documentation
 - [x] Migrated all demo-website, ce2-website, ce-website imports from `PSD3v2.VizTree.Tree` to `PSD3.AST`
-- [x] Added `ElementType(..)` to `PSD3.AST` exports
+- [x] Migrated all internal imports to use `PSD3.AST`
+- [x] **Deleted `PSD3v2.VizTree.Tree`** - code moved into `PSD3.AST`
 - [x] All packages build successfully
 
 ---
@@ -22,7 +23,7 @@
 | `PSD3` | Umbrella re-exports | Updated with clean exports |
 | `PSD3.AST` | Declarative DOM AST (was "TreeAPI") | **NEW** - Public API |
 | `PSD3.Render` | D3 rendering facade | **NEW** - Public API |
-| `PSD3v2.VizTree.Tree` | Legacy "TreeAPI" | **Deprecated** - use `PSD3.AST` |
+| `PSD3v2.VizTree.Tree` | Legacy "TreeAPI" | **DELETED** - code moved to `PSD3.AST` |
 | `PSD3v2.Selection.*` | Selection system (lower-level) | Keep but hide |
 | `PSD3v2.Interpreter.*` | D3, Mermaid, English interpreters | Keep |
 | `PSD3v2.Attribute.Types` | Type-safe attributes | Keep |
