@@ -1,34 +1,50 @@
--- | Force Playground Component
+-- | Force Playground Component - Halogen-First Architecture
 -- |
--- | Interactive force-directed graph visualization for exploring
--- | network datasets. Features both real-world datasets and
--- | procedurally generated graphs with rich attributes.
+-- | Interactive force-directed graph visualization using procedurally
+-- | generated networks with rich attributes.
+-- |
+-- | ALL STATE LIVES IN HALOGEN:
+-- | - model: The generated dataset
+-- | - visibleNodeIds: IDs of visible nodes (for category filtering)
+-- | - enabledForces: Set of currently enabled forces
+-- | - enteringProgress: Map of node ID -> progress for entering nodes
+-- | - exitingNodes: Array of nodes with frozen positions, animating out
+-- | - simulation: The D3 force simulation handle (opaque)
+-- |
+-- | Simple provides STATELESS functions:
+-- | - createSimulationWithCallbacks: Creates simulation, returns handle
+-- | - buildSceneData: Pure function combining nodes + transitions
+-- | - renderScene: Renders scene to DOM
 -- |
 -- | Styled as a fullscreen showcase with floating control panel.
 module Component.ForcePlayground where
 
 import Prelude
 
-import Data.Array (length)
-import Data.Either (Either(..))
+import Data.Array (filter, length)
+import Data.Array as Array
+import Data.Map (Map)
+import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Set (Set)
 import Data.Set as Set
 import Effect (Effect)
-import Effect.Aff.Class (class MonadAff, liftAff)
+import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
-import Effect.Ref (Ref)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import PSD3.Shared.DataLoader (loadJSON, defaultConfig)
 import PSD3.Shared.SiteNav as SiteNav
-import D3.Viz.ForcePlayground.Model (NetworkRawModel, processRawModel, fromGeneratedGraph)
-import D3.Viz.ForcePlayground.Simple (initSimpleForce, SimpleForceState, ForceId(..), toggleForce, setForcesEnabled, setUseLinkWeights, filterByCategory, showAllNodes)
+import PSD3.ForceEngine.Simulation as Sim
+import PSD3.ForceEngine.Events (SimulationEvent(..), defaultCallbacks)
+import PSD3.ForceEngine.Halogen (subscribeToSimulation)
+import PSD3.Transition.Tick as Tick
+import D3.Viz.ForcePlayground.Model (NetworkModel, fromGeneratedGraph)
+import D3.Viz.ForcePlayground.Simple as Simple
+import D3.Viz.ForcePlayground.Simple (ForceId(..), NetworkSimulation, ExitingNode)
 import D3.Viz.ForcePlayground.Generator as Gen
-import Unsafe.Coerce (unsafeCoerce)
 
 -- | Force presets - pre-configured combinations
 data ForcePreset
@@ -52,65 +68,34 @@ presetTooltip = case _ of
 
 presetForces :: ForcePreset -> Set ForceId
 presetForces = case _ of
-  PresetStandard -> Set.fromFoldable [ForceX, ForceY, ForceCharge, ForceCollide, ForceLink]
+  PresetStandard -> Simple.allForces
   PresetClustered -> Set.fromFoldable [ForceCharge, ForceCollide, ForceLink]
   PresetMinimal -> Set.fromFoldable [ForceCollide, ForceLink]
-
--- | Available datasets
-data Dataset
-  = GeneratedGraph    -- Procedurally generated with rich attributes
-  | KarateClub        -- Zachary's Karate Club (34 nodes, 2 groups)
-  | EcoStMarks        -- St. Marks food web (54 nodes)
-  | EcoEverglades     -- Everglades food web (69 nodes)
-  | CElegansFrontal   -- C. elegans neural network (131 nodes)
-
-derive instance eqDataset :: Eq Dataset
-
-datasetLabel :: Dataset -> String
-datasetLabel = case _ of
-  GeneratedGraph -> "Generated Network"
-  KarateClub -> "Karate Club (34)"
-  EcoStMarks -> "St. Marks (54)"
-  EcoEverglades -> "Everglades (69)"
-  CElegansFrontal -> "C. elegans (131)"
-
-datasetDescription :: Dataset -> String
-datasetDescription = case _ of
-  GeneratedGraph -> "Procedurally generated network with 20-30 clusters. Node size/color varies by category and importance."
-  KarateClub -> "Classic social network - friendships between karate club members that split into two factions."
-  EcoStMarks -> "Predator-prey relationships in St. Marks National Wildlife Refuge, Florida."
-  EcoEverglades -> "Food web from the Florida Everglades ecosystem."
-  CElegansFrontal -> "Synaptic connections between neurons in the frontal region of C. elegans."
-
--- | All forces enabled by default
-allForces :: Set ForceId
-allForces = Set.fromFoldable [ForceX, ForceY, ForceCharge, ForceCollide, ForceLink]
-
--- | Component state
-type State =
-  { selectedDataset :: Dataset
-  , forceState :: Maybe (Ref SimpleForceState)
-  , loading :: Boolean
-  , error :: Maybe String
-  , enabledForces :: Set ForceId  -- Track for UI rendering
-  , activePreset :: Maybe ForcePreset  -- Track current preset (Nothing if custom)
-  , useLinkWeights :: Boolean  -- Whether link strength uses data weights
-  , shownCategories :: Set Int  -- Which node categories are visible (0-3)
-  }
 
 -- | All categories visible by default
 allCategories :: Set Int
 allCategories = Set.fromFoldable [0, 1, 2, 3]
 
+-- | Component state - ALL STATE LIVES HERE
+type State =
+  { model :: Maybe NetworkModel           -- The generated dataset
+  , simulation :: Maybe NetworkSimulation -- D3 force simulation handle
+  , enabledForces :: Set ForceId          -- Track for UI rendering
+  , activePreset :: Maybe ForcePreset     -- Track current preset (Nothing if custom)
+  , shownCategories :: Set Int            -- Which node categories are visible (0-3)
+  , visibleNodeIds :: Set Int             -- IDs of visible nodes (for filtering)
+  , enteringProgress :: Map Int Tick.Progress  -- Nodes animating in
+  , exitingNodes :: Array ExitingNode     -- Nodes animating out with frozen positions
+  }
+
 -- | Component actions
 data Action
   = Initialize
-  | SelectDataset Dataset
-  | LoadDataset
+  | Finalize
+  | SimTick                     -- Simulation tick event from D3
   | RegenerateGraph
   | ToggleForce ForceId
   | ApplyPreset ForcePreset
-  | ToggleLinkWeights
   | ToggleCategory Int
   | ShowAllCategories
 
@@ -118,19 +103,20 @@ data Action
 component :: forall q i o m. MonadAff m => H.Component q i o m
 component = H.mkComponent
   { initialState: \_ ->
-      { selectedDataset: GeneratedGraph
-      , forceState: Nothing
-      , loading: false
-      , error: Nothing
-      , enabledForces: allForces
+      { model: Nothing
+      , simulation: Nothing
+      , enabledForces: Simple.allForces
       , activePreset: Just PresetStandard
-      , useLinkWeights: false
       , shownCategories: allCategories
+      , visibleNodeIds: Set.empty
+      , enteringProgress: Map.empty
+      , exitingNodes: []
       }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
       , initialize = Just Initialize
+      , finalize = Just Finalize
       }
   }
 
@@ -163,20 +149,6 @@ render state =
         -- Floating control panel (top-right)
         , renderControlPanel state
         ]
-
-    -- Loading overlay
-    , if state.loading
-        then HH.div
-          [ HP.classes [ HH.ClassName "loading-overlay" ] ]
-          [ HH.text "Loading..." ]
-        else HH.text ""
-
-    -- Error message
-    , case state.error of
-        Just err -> HH.div
-          [ HP.classes [ HH.ClassName "error-toast" ] ]
-          [ HH.text $ "Error: " <> err ]
-        Nothing -> HH.text ""
     ]
 
 -- | Floating control panel
@@ -189,31 +161,18 @@ renderControlPanel state =
         [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
         [ HH.text "Controls" ]
 
-    -- Dataset selector
+    -- Regenerate button
     , HH.div
         [ HP.classes [ HH.ClassName "control-group" ] ]
-        [ HH.h4_ [ HH.text "Dataset" ]
-        , HH.select
-            [ HP.classes [ HH.ClassName "control-select" ]
-            , HE.onValueChange (\v -> SelectDataset (parseDataset v))
+        [ HH.h4_ [ HH.text "Network" ]
+        , HH.button
+            [ HP.classes [ HH.ClassName "control-button", HH.ClassName "control-button--secondary" ]
+            , HE.onClick \_ -> RegenerateGraph
             ]
-            [ HH.option [ HP.value "generated", HP.selected (state.selectedDataset == GeneratedGraph) ] [ HH.text (datasetLabel GeneratedGraph) ]
-            , HH.option [ HP.value "karate-club", HP.selected (state.selectedDataset == KarateClub) ] [ HH.text (datasetLabel KarateClub) ]
-            , HH.option [ HP.value "eco-stmarks", HP.selected (state.selectedDataset == EcoStMarks) ] [ HH.text (datasetLabel EcoStMarks) ]
-            , HH.option [ HP.value "eco-everglades", HP.selected (state.selectedDataset == EcoEverglades) ] [ HH.text (datasetLabel EcoEverglades) ]
-            , HH.option [ HP.value "c-elegans", HP.selected (state.selectedDataset == CElegansFrontal) ] [ HH.text (datasetLabel CElegansFrontal) ]
-            ]
+            [ HH.text "Regenerate" ]
         , HH.p
             [ HP.classes [ HH.ClassName "control-description" ] ]
-            [ HH.text (datasetDescription state.selectedDataset) ]
-        -- Regenerate button (only for generated graphs)
-        , if state.selectedDataset == GeneratedGraph
-            then HH.button
-              [ HP.classes [ HH.ClassName "control-button", HH.ClassName "control-button--secondary" ]
-              , HE.onClick \_ -> RegenerateGraph
-              ]
-              [ HH.text "Regenerate" ]
-            else HH.text ""
+            [ HH.text "Generate a new random network with clusters" ]
         ]
 
     -- Force Presets
@@ -242,34 +201,25 @@ renderControlPanel state =
             ]
         ]
 
-    -- Options
+    -- Category Filters
     , HH.div
         [ HP.classes [ HH.ClassName "control-group" ] ]
-        [ HH.h4_ [ HH.text "Options" ]
-        , linkWeightsToggle state
-        ]
-
-    -- Category Filters (only for generated graphs)
-    , if state.selectedDataset == GeneratedGraph
-        then HH.div
-          [ HP.classes [ HH.ClassName "control-group" ] ]
-          [ HH.h4_ [ HH.text "Filter Categories" ]
-          , HH.div
-              [ HP.classes [ HH.ClassName "category-filters" ] ]
-              [ categoryToggle state 0 "Research" "#1f77b4"
-              , categoryToggle state 1 "Industry" "#ff7f0e"
-              , categoryToggle state 2 "Government" "#2ca02c"
-              , categoryToggle state 3 "Community" "#d62728"
+        [ HH.h4_ [ HH.text "Filter Categories" ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "category-filters" ] ]
+            [ categoryToggle state 0 "Research" "#1f77b4"
+            , categoryToggle state 1 "Industry" "#ff7f0e"
+            , categoryToggle state 2 "Government" "#2ca02c"
+            , categoryToggle state 3 "Community" "#d62728"
+            ]
+        , if state.shownCategories /= allCategories
+            then HH.button
+              [ HP.classes [ HH.ClassName "control-button", HH.ClassName "control-button--link" ]
+              , HE.onClick \_ -> ShowAllCategories
               ]
-          , if state.shownCategories /= allCategories
-              then HH.button
-                [ HP.classes [ HH.ClassName "control-button", HH.ClassName "control-button--link" ]
-                , HE.onClick \_ -> ShowAllCategories
-                ]
-                [ HH.text "Show All" ]
-              else HH.text ""
-          ]
-        else HH.text ""
+              [ HH.text "Show All" ]
+            else HH.text ""
+        ]
 
     -- Instructions
     , HH.div
@@ -305,19 +255,6 @@ forceToggle state forceId label =
       ]
       [ HH.text label ]
 
--- | Render link weights toggle
-linkWeightsToggle :: forall w. State -> HH.HTML w Action
-linkWeightsToggle state =
-  HH.label
-    [ HP.classes [ HH.ClassName "checkbox-label" ] ]
-    [ HH.input
-        [ HP.type_ HP.InputCheckbox
-        , HP.checked state.useLinkWeights
-        , HE.onChecked \_ -> ToggleLinkWeights
-        ]
-    , HH.text "Weighted Links"
-    ]
-
 -- | Render a category filter toggle with color indicator
 categoryToggle :: forall w. State -> Int -> String -> String -> HH.HTML w Action
 categoryToggle state catId label color =
@@ -332,14 +269,6 @@ categoryToggle state catId label color =
       ]
       [ HH.text label ]
 
-parseDataset :: String -> Dataset
-parseDataset = case _ of
-  "generated" -> GeneratedGraph
-  "karate-club" -> KarateClub
-  "eco-everglades" -> EcoEverglades
-  "c-elegans" -> CElegansFrontal
-  _ -> EcoStMarks
-
 -- =============================================================================
 -- Action Handlers
 -- =============================================================================
@@ -347,107 +276,193 @@ parseDataset = case _ of
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
-    handleAction LoadDataset
+    handleAction RegenerateGraph
 
-  SelectDataset dataset -> do
-    H.modify_ _ { selectedDataset = dataset }
-    handleAction LoadDataset
+  Finalize -> do
+    pure unit
+
+  SimTick -> do
+    state <- H.get
+    case state.simulation, state.model of
+      Just sim, Just model -> do
+        -- Advance entering progress (0.0 -> 1.0)
+        let delta = Simple.transitionDelta
+            { active: stillEntering } = Tick.tickProgressMap delta state.enteringProgress
+
+        -- Advance exiting transitions (0.0 -> 1.0)
+        let { active: stillExiting } = Tick.tickTransitions delta state.exitingNodes
+
+        -- Update state with advanced progress
+        H.modify_ _
+          { enteringProgress = stillEntering
+          , exitingNodes = stillExiting
+          }
+
+        -- Build scene with current Halogen state and render
+        liftEffect do
+          currentNodes <- Sim.getNodes sim
+          let visibleIds = Array.fromFoldable state.visibleNodeIds
+              scene = Simple.buildSceneData
+                currentNodes
+                visibleIds
+                stillEntering
+                stillExiting
+                model.links
+          Simple.renderScene scene
+
+      _, _ -> pure unit
 
   RegenerateGraph -> do
-    handleAction LoadDataset
+    liftEffect $ clearContainer "#force-playground-container"
+
+    -- Generate new network
+    liftEffect $ Console.log "Generating random network..."
+    generated <- liftEffect $ Gen.generateGraph Gen.defaultConfig
+    let model = fromGeneratedGraph generated
+    liftEffect $ Console.log $ "Generated: " <> show (length model.nodes) <> " nodes, " <> show (length model.links) <> " links"
+
+    -- Create callbacks for Halogen subscription
+    callbacks <- liftEffect defaultCallbacks
+
+    -- Create simulation with callbacks (Halogen-first pattern)
+    simulation <- liftEffect $ Simple.createSimulationWithCallbacks callbacks model
+
+    -- Render SVG container
+    liftEffect $ Simple.renderSVGContainer "#force-playground-container"
+
+    -- Subscribe to simulation events via Halogen subscription
+    emitter <- liftEffect $ subscribeToSimulation simulation
+    void $ H.subscribe $ emitter <#> \event -> case event of
+      Tick -> SimTick
+      _ -> SimTick
+
+    -- All nodes visible initially
+    let allNodeIds = Set.fromFoldable $ map _.id model.nodes
+
+    H.modify_ _
+      { model = Just model
+      , simulation = Just simulation
+      , enabledForces = Simple.allForces
+      , activePreset = Just PresetStandard
+      , shownCategories = allCategories
+      , visibleNodeIds = allNodeIds
+      , enteringProgress = Map.empty
+      , exitingNodes = []
+      }
+
+    -- Do initial render
+    doRender
 
   ToggleForce forceId -> do
     state <- H.get
-    case state.forceState of
+    case state.simulation of
       Nothing -> pure unit
-      Just ref -> do
-        newEnabled <- liftEffect $ toggleForce forceId ref
-        let newForces = if newEnabled
-              then Set.insert forceId state.enabledForces
-              else Set.delete forceId state.enabledForces
-        H.modify_ _ { enabledForces = newForces, activePreset = Nothing }
+      Just sim -> do
+        let isEnabled = Set.member forceId state.enabledForces
+        if isEnabled
+          then do
+            liftEffect $ Sim.removeForce (Simple.forceIdName forceId) sim
+            H.modify_ _ { enabledForces = Set.delete forceId state.enabledForces, activePreset = Nothing }
+          else do
+            liftEffect $ Sim.addForce (Simple.forceIdSpec forceId) sim
+            H.modify_ _ { enabledForces = Set.insert forceId state.enabledForces, activePreset = Nothing }
+        liftEffect $ Sim.reheat sim
 
   ApplyPreset preset -> do
     state <- H.get
-    case state.forceState of
+    case state.simulation of
       Nothing -> pure unit
-      Just ref -> do
+      Just sim -> do
         let targetForces = presetForces preset
-        newForces <- liftEffect $ setForcesEnabled targetForces ref
-        H.modify_ _ { enabledForces = newForces, activePreset = Just preset }
 
-  ToggleLinkWeights -> do
-    state <- H.get
-    case state.forceState of
-      Nothing -> pure unit
-      Just ref -> do
-        let newValue = not state.useLinkWeights
-        liftEffect $ setUseLinkWeights newValue ref
-        H.modify_ _ { useLinkWeights = newValue }
+        -- Remove forces not in preset
+        let toRemove = Set.difference state.enabledForces targetForces
+        liftEffect $ traverse_ (\f -> Sim.removeForce (Simple.forceIdName f) sim) (Set.toUnfoldable toRemove :: Array ForceId)
+
+        -- Add forces in preset but not currently enabled
+        let toAdd = Set.difference targetForces state.enabledForces
+        liftEffect $ traverse_ (\f -> Sim.addForce (Simple.forceIdSpec f) sim) (Set.toUnfoldable toAdd :: Array ForceId)
+
+        liftEffect $ Sim.reheat sim
+
+        H.modify_ _ { enabledForces = targetForces, activePreset = Just preset }
+    where
+      traverse_ :: forall a. (a -> Effect Unit) -> Array a -> Effect Unit
+      traverse_ f = void <<< Array.foldM (\_ a -> f a $> unit) unit
 
   ToggleCategory catId -> do
     state <- H.get
-    case state.forceState of
-      Nothing -> pure unit
-      Just ref -> do
+    case state.simulation, state.model of
+      Just sim, Just model -> do
         let isCurrentlyShown = Set.member catId state.shownCategories
-        let newShown = if isCurrentlyShown
+            newShownCategories = if isCurrentlyShown
               then Set.delete catId state.shownCategories
               else Set.insert catId state.shownCategories
-        liftEffect $ filterByCategory (Set.toUnfoldable newShown) ref
-        H.modify_ _ { shownCategories = newShown }
+
+        -- Calculate new visible node IDs based on category filter
+        let newVisibleIds = Set.fromFoldable $ map _.id $
+              filter (\n -> Set.member n.group newShownCategories) model.nodes
+
+        -- Find nodes being removed (start exit transitions)
+        let removedIds = Set.difference state.visibleNodeIds newVisibleIds
+
+        -- Get current positions for exiting nodes
+        currentNodes <- liftEffect $ Sim.getNodes sim
+        let removedNodes = filter (\n -> Set.member n.id removedIds) currentNodes
+            newExiting = Tick.startTransitions removedNodes
+
+        -- Find nodes being added (start enter transitions)
+        let addedIds = Set.difference newVisibleIds state.visibleNodeIds
+            newEntering = Tick.startProgress (Array.fromFoldable addedIds) state.enteringProgress
+
+        liftEffect $ Sim.reheat sim
+
+        H.modify_ _
+          { shownCategories = newShownCategories
+          , visibleNodeIds = newVisibleIds
+          , enteringProgress = newEntering
+          , exitingNodes = state.exitingNodes <> newExiting
+          }
+
+      _, _ -> pure unit
 
   ShowAllCategories -> do
     state <- H.get
-    case state.forceState of
-      Nothing -> pure unit
-      Just ref -> do
-        liftEffect $ showAllNodes ref
-        H.modify_ _ { shownCategories = allCategories }
+    case state.simulation, state.model of
+      Just sim, Just model -> do
+        let allNodeIds = Set.fromFoldable $ map _.id model.nodes
+            addedIds = Set.difference allNodeIds state.visibleNodeIds
+            newEntering = Tick.startProgress (Array.fromFoldable addedIds) state.enteringProgress
 
-  LoadDataset -> do
-    state <- H.get
-    H.modify_ _ { loading = true, error = Nothing }
+        liftEffect $ Sim.reheat sim
 
-    liftEffect $ clearContainer "#force-playground-container"
+        H.modify_ _
+          { shownCategories = allCategories
+          , visibleNodeIds = allNodeIds
+          , enteringProgress = newEntering
+          }
 
-    model <- case state.selectedDataset of
-      GeneratedGraph -> do
-        liftEffect $ Console.log "Generating random network..."
-        generated <- liftEffect $ Gen.generateGraph Gen.defaultConfig
-        let m = fromGeneratedGraph generated
-        liftEffect $ Console.log $ "Generated: " <> show (length m.nodes) <> " nodes, " <> show (length m.links) <> " links"
-        pure m
+      _, _ -> pure unit
 
-      _ -> do
-        let path = datasetPath state.selectedDataset
-        result <- liftAff $ loadJSON defaultConfig path
+-- =============================================================================
+-- Rendering Helpers
+-- =============================================================================
 
-        case result of
-          Left err -> do
-            liftEffect $ Console.log $ "Failed to load: " <> show err
-            H.modify_ _ { loading = false, error = Just (show err) }
-            pure { nodes: [], links: [] }
+doRender :: forall o m. MonadAff m => H.HalogenM State Action () o m Unit
+doRender = do
+  state <- H.get
+  case state.simulation, state.model of
+    Just sim, Just model -> liftEffect do
+      currentNodes <- Sim.getNodes sim
+      let visibleIds = Array.fromFoldable state.visibleNodeIds
+          scene = Simple.buildSceneData
+            currentNodes
+            visibleIds
+            state.enteringProgress
+            state.exitingNodes
+            model.links
+      Simple.renderScene scene
 
-          Right json -> do
-            liftEffect $ Console.log $ "Loaded dataset from " <> path
-            let rawModel = unsafeCoerce json :: NetworkRawModel
-            let m = processRawModel rawModel
-            liftEffect $ Console.log $ "Processed: " <> show (length m.nodes) <> " nodes, " <> show (length m.links) <> " links"
-            pure m
+    _, _ -> pure unit
 
-    when (length model.nodes > 0) do
-      forceRef <- liftEffect $ initSimpleForce model "#force-playground-container"
-      H.modify_ _ { loading = false, forceState = Just forceRef, enabledForces = allForces, activePreset = Just PresetStandard, useLinkWeights = false, shownCategories = allCategories }
-
--- | Get path for JSON datasets
-datasetPath :: Dataset -> String
-datasetPath = case _ of
-  GeneratedGraph -> ""
-  KarateClub -> "/data/karate-club.json"
-  EcoStMarks -> "/data/eco-stmarks.json"
-  EcoEverglades -> "/data/eco-everglades.json"
-  CElegansFrontal -> "/data/c-elegans-frontal.json"
-
--- | Clear the container (remove existing SVG)
 foreign import clearContainer :: String -> Effect Unit

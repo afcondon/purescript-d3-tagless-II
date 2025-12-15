@@ -1,57 +1,76 @@
--- | Simple Force Layout for Network Datasets
+-- | Simple Force Layout for Network Datasets - STATELESS ARCHITECTURE
 -- |
--- | A minimal force-directed graph visualization for exploring
--- | network datasets. Supports rich node/link attributes for
--- | visual encoding (size, color, opacity) and filtering.
+-- | This module provides stateless functions for force-directed graph visualization.
+-- | All state lives in Halogen; this module only provides:
+-- | - Simulation creation
+-- | - Scene data construction
+-- | - Rendering
+-- | - Force configuration helpers
+-- |
+-- | The Halogen component owns:
+-- | - The model (nodes/links data)
+-- | - The simulation handle (opaque)
+-- | - Enabled forces set
+-- | - Link weight toggle
+-- | - Visible node IDs
+-- | - Enter/exit transition state
 module D3.Viz.ForcePlayground.Simple
-  ( initSimpleForce
-  , SimpleForceState
-  , ExitingNode
+  ( -- Simulation creation
+    createSimulation
+  , createSimulationWithCallbacks
   , NetworkSimulation
   , NetworkNodeRow
   , NetworkLinkRow
-  -- Force control
+  -- Scene data
+  , SceneData
+  , RenderNode
+  , SwizzledLink
+  , ExitingNode
+  , buildSceneData
+  -- Rendering
+  , renderSVGContainer
+  , renderScene
+  -- Force configuration
   , ForceId(..)
-  , toggleForce
-  , isForceEnabled
-  , setForcesEnabled
-  , reheatSimulation
-  -- Link weight toggle
-  , setUseLinkWeights
-  , getUseLinkWeights
-  -- Node filtering with transitions
-  , filterByCategory
-  , showAllNodes
-  , getVisibleCount
-  , getTotalCount
+  , forceIdName
+  , forceIdSpec
+  , allForces
+  -- Visual helpers (exported for use in expressions if needed)
+  , nodeRadius
+  , categoryColor
+  , linkTypeColor
+  -- Transition timing
+  , transitionDelta
+  -- Re-export for Halogen component
+  , scheduleAfterRender
   ) where
 
 import Prelude
 
-import Data.Array (filter, length, elem, index)
-import Data.Array as Array
-import Data.Foldable (for_)
+import Data.Array (filter, elem, index)
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set (Set)
 import Data.Set as Set
 import Effect (Effect)
-import Effect.Ref (Ref)
-import Effect.Ref as Ref
 import D3.Viz.ForcePlayground.Model (NetworkModel, NetworkNode)
 import PSD3.ForceEngine.Simulation as Sim
-import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultLink, ForceXConfig, ForceYConfig, LinkDynamicConfig)
-import PSD3.ForceEngine.Core as Core
+import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultLink, ForceXConfig, ForceYConfig)
 import PSD3.ForceEngine.Links (swizzleLinksByIndex, filterLinksToSubset)
+import PSD3.ForceEngine.Events (SimulationCallbacks)
 import PSD3.Transition.Tick as Tick
-import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3v3.Integration (v3Attr, v3AttrStr)
 import PSD3v3.Expr (lit, str)
 import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom)
 import PSD3v2.Capabilities.Selection (select, renderTree)
-import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M)
+import PSD3v2.Interpreter.D3v2 (runD3v2M)
 import PSD3v2.Selection.Types (ElementType(..)) as ET
 import PSD3v2.VizTree.Tree as T
+
+-- =============================================================================
+-- Type Definitions
+-- =============================================================================
 
 -- | Row types for the simulation (must match extra fields in NetworkNode/NetworkLink)
 type NetworkNodeRow = (name :: String, group :: Int, sizeClass :: Int, importance :: Number, subgraph :: Int)
@@ -79,11 +98,15 @@ type SwizzledLink =
   , index :: Int
   }
 
--- | Scene data for rendering
+-- | Scene data for rendering - pure data structure
 type SceneData =
   { nodes :: Array RenderNode
   , links :: Array SwizzledLink
   }
+
+-- =============================================================================
+-- Force Configuration
+-- =============================================================================
 
 -- | Identifiers for the forces we use
 data ForceId
@@ -105,6 +128,14 @@ forceIdName = case _ of
   ForceX -> "forceX"
   ForceY -> "forceY"
 
+-- | Default forceX config (weak pull toward center)
+defaultForceX :: ForceXConfig
+defaultForceX = { x: 0.0, strength: 0.1 }
+
+-- | Default forceY config (weak pull toward center)
+defaultForceY :: ForceYConfig
+defaultForceY = { y: 0.0, strength: 0.1 }
+
 -- | Get the ForceSpec for a force
 forceIdSpec :: ForceId -> ForceSpec
 forceIdSpec = case _ of
@@ -114,18 +145,13 @@ forceIdSpec = case _ of
   ForceX -> PositionX "forceX" defaultForceX
   ForceY -> PositionY "forceY" defaultForceY
 
--- | State for the simple force layout
-type SimpleForceState =
-  { model :: NetworkModel
-  , simulation :: NetworkSimulation
-  , containerSelector :: String
-  , enabledForces :: Set ForceId  -- Track which forces are active
-  , useLinkWeights :: Boolean     -- Whether link strength is from data
-  -- Filtering state with transitions
-  , visibleNodeIds :: Array Int       -- IDs of currently visible nodes
-  , enteringProgress :: Map Int Tick.Progress  -- nodeId → progress (0→1)
-  , exitingNodes :: Array ExitingNode -- Nodes being animated out
-  }
+-- | All forces enabled by default
+allForces :: Set ForceId
+allForces = Set.fromFoldable [ForceX, ForceY, ForceCharge, ForceCollide, ForceLink]
+
+-- =============================================================================
+-- Constants
+-- =============================================================================
 
 -- | SVG dimensions
 svgWidth :: Number
@@ -138,6 +164,139 @@ svgHeight = 600.0
 -- | At 60fps, 0.03 ≈ 33 ticks ≈ 0.55 seconds (snappy)
 transitionDelta :: Tick.TickDelta
 transitionDelta = 0.03
+
+-- =============================================================================
+-- Simulation Creation
+-- =============================================================================
+
+-- | Create a simulation without callbacks (for simple usage)
+createSimulation :: NetworkModel -> Effect NetworkSimulation
+createSimulation model = do
+  sim <- Sim.create Sim.defaultConfig
+  Sim.setNodes model.nodes sim
+  Sim.setLinks model.links sim
+
+  -- Add all forces initially
+  Sim.addForce (forceIdSpec ForceX) sim
+  Sim.addForce (forceIdSpec ForceY) sim
+  Sim.addForce (forceIdSpec ForceCharge) sim
+  Sim.addForce (forceIdSpec ForceCollide) sim
+  Sim.addForce (forceIdSpec ForceLink) sim
+
+  Sim.start sim
+  pure sim
+
+-- | Create a simulation with callbacks (for Halogen subscription pattern)
+createSimulationWithCallbacks :: SimulationCallbacks -> NetworkModel -> Effect NetworkSimulation
+createSimulationWithCallbacks callbacks model = do
+  sim <- Sim.createWithCallbacks Sim.defaultConfig callbacks
+  Sim.setNodes model.nodes sim
+  Sim.setLinks model.links sim
+
+  -- Add all forces initially
+  Sim.addForce (forceIdSpec ForceX) sim
+  Sim.addForce (forceIdSpec ForceY) sim
+  Sim.addForce (forceIdSpec ForceCharge) sim
+  Sim.addForce (forceIdSpec ForceCollide) sim
+  Sim.addForce (forceIdSpec ForceLink) sim
+
+  Sim.start sim
+  pure sim
+
+-- =============================================================================
+-- Scene Data Construction (Pure)
+-- =============================================================================
+
+-- | Build scene data from current simulation state and transition maps
+-- | This is a PURE function - all state comes from parameters
+buildSceneData
+  :: Array NetworkNode           -- Current nodes from simulation (with positions)
+  -> Array Int                   -- Visible node IDs
+  -> Map Int Tick.Progress       -- Entering progress by node ID
+  -> Array ExitingNode           -- Exiting nodes with frozen positions
+  -> Array { source :: Int, target :: Int, weight :: Number, linkType :: Int, distance :: Number }  -- Links from model
+  -> SceneData
+buildSceneData currentNodes visibleIds enteringProgress exitingNodes modelLinks =
+  let
+    -- Filter to visible nodes only
+    visibleNodes = filter (\n -> elem n.id visibleIds) currentNodes
+
+    -- Build render nodes with transition state
+    renderNodes = map
+      (\n ->
+        { node: n
+        , enterProgress: Map.lookup n.id enteringProgress
+        , exitProgress: Nothing
+        }
+      )
+      visibleNodes
+
+    -- Add exiting nodes (with frozen positions and exit progress)
+    exitingRenderNodes = map
+      (\e ->
+        { node: e.item
+        , enterProgress: Nothing
+        , exitProgress: Just e.progress
+        }
+      )
+      exitingNodes
+
+    allRenderNodes = renderNodes <> exitingRenderNodes
+
+    -- Create links only between visible nodes (not exiting)
+    visibleLinks = filterLinksToSubset _.id visibleNodes modelLinks
+    swizzledLinks = swizzleLinksByIndex _.id visibleNodes visibleLinks \src tgt i link ->
+      { source: src, target: tgt, weight: link.weight, linkType: link.linkType, index: i }
+  in
+    { nodes: allRenderNodes, links: swizzledLinks }
+
+-- =============================================================================
+-- Rendering (Side-effecting but stateless)
+-- =============================================================================
+
+-- | Render the SVG container structure
+renderSVGContainer :: String -> Effect Unit
+renderSVGContainer containerSelector = runD3v2M do
+  container <- select containerSelector
+
+  let containerTree :: T.Tree Unit
+      containerTree =
+        T.named ET.SVG "svg"
+          [ v3Attr "width" (lit svgWidth)
+          , v3Attr "height" (lit svgHeight)
+          , v3AttrStr "viewBox" (str (show ((-svgWidth) / 2.0) <> " " <> show ((-svgHeight) / 2.0) <> " " <> show svgWidth <> " " <> show svgHeight))
+          , v3AttrStr "id" (str "network-force-svg")
+          , v3AttrStr "class" (str "network-force")
+          ]
+          `T.withBehaviors` [ Zoom $ defaultZoom (ScaleExtent 0.1 10.0) "#network-zoom-group" ]
+          `T.withChild`
+            T.named ET.Group "zoom-group" [ v3AttrStr "id" (str "network-zoom-group"), v3AttrStr "class" (str "zoom-group") ]
+              `T.withChildren`
+                [ T.named ET.Group "links" [ v3AttrStr "id" (str "network-links"), v3AttrStr "class" (str "links") ]
+                , T.named ET.Group "nodes" [ v3AttrStr "id" (str "network-nodes"), v3AttrStr "class" (str "nodes") ]
+                ]
+
+  _ <- renderTree container containerTree
+  pure unit
+
+-- | Render the scene (nodes and links)
+renderScene :: SceneData -> Effect Unit
+renderScene scene = runD3v2M do
+  -- Render links
+  linksGroup <- select "#network-links"
+  let linksTree = createLinksTree scene
+  _ <- renderTree linksGroup linksTree
+
+  -- Render nodes
+  nodesGroup <- select "#network-nodes"
+  let nodesTree = createNodesTree scene
+  _ <- renderTree nodesGroup nodesTree
+
+  pure unit
+
+-- =============================================================================
+-- Visual Property Helpers
+-- =============================================================================
 
 -- | Color palette for node categories (D3 category10)
 categoryColors :: Array String
@@ -184,176 +343,9 @@ nodeRadius node =
   in
     baseSize + importanceBonus
 
--- | Default forceX config (weak pull toward center)
-defaultForceX :: ForceXConfig
-defaultForceX = { x: 0.0, strength: 0.1 }
-
--- | Default forceY config (weak pull toward center)
-defaultForceY :: ForceYConfig
-defaultForceY = { y: 0.0, strength: 0.1 }
-
--- | All forces enabled by default
-allForces :: Set ForceId
-allForces = Set.fromFoldable [ForceX, ForceY, ForceCharge, ForceCollide, ForceLink]
-
--- | Initialize the simple force layout
-initSimpleForce :: NetworkModel -> String -> Effect (Ref SimpleForceState)
-initSimpleForce model containerSelector = do
-  -- Create simulation
-  sim <- Sim.create Sim.defaultConfig
-  Sim.setNodes model.nodes sim
-  Sim.setLinks model.links sim
-
-  -- Add all forces initially
-  Sim.addForce (forceIdSpec ForceX) sim
-  Sim.addForce (forceIdSpec ForceY) sim
-  Sim.addForce (forceIdSpec ForceCharge) sim
-  Sim.addForce (forceIdSpec ForceCollide) sim
-  Sim.addForce (forceIdSpec ForceLink) sim
-
-  -- Start with all nodes visible, all entering
-  let allNodeIds = map _.id model.nodes
-  let initialEntering = Tick.startProgress allNodeIds Map.empty
-
-  -- Create state ref
-  stateRef <- Ref.new
-    { model
-    , simulation: sim
-    , containerSelector
-    , enabledForces: allForces
-    , useLinkWeights: false
-    , visibleNodeIds: allNodeIds
-    , enteringProgress: initialEntering
-    , exitingNodes: []
-    }
-
-  -- Render initial SVG structure
-  runD3v2M $ renderSVGContainer containerSelector
-
-  -- Set up tick callback
-  Sim.onTick (onSimulationTick stateRef) sim
-
-  -- Start simulation
-  Sim.start sim
-
-  -- Attach pinning drag after first tick renders nodes
-  -- We use a small delay to ensure DOM is ready
-  _ <- scheduleAttachPinningDrag sim
-
-  pure stateRef
-
--- | Schedule drag attachment after a short delay (to ensure DOM is ready)
-foreign import scheduleAfterRender :: Effect Unit -> Effect Unit
-
-scheduleAttachPinningDrag :: NetworkSimulation -> Effect Unit
-scheduleAttachPinningDrag sim = scheduleAfterRender do
-  nodeCircles <- Sim.querySelectorElements "#network-nodes circle"
-  Sim.attachPinningDrag nodeCircles sim
-
--- | Create the SVG container structure
-renderSVGContainer :: String -> D3v2M Unit
-renderSVGContainer containerSelector = do
-  container <- select containerSelector
-
-  let containerTree :: T.Tree Unit
-      containerTree =
-        T.named ET.SVG "svg"
-          [ v3Attr "width" (lit svgWidth)
-          , v3Attr "height" (lit svgHeight)
-          , v3AttrStr "viewBox" (str (show ((-svgWidth) / 2.0) <> " " <> show ((-svgHeight) / 2.0) <> " " <> show svgWidth <> " " <> show svgHeight))
-          , v3AttrStr "id" (str "network-force-svg")
-          , v3AttrStr "class" (str "network-force")
-          ]
-          `T.withBehaviors` [ Zoom $ defaultZoom (ScaleExtent 0.1 10.0) "#network-zoom-group" ]
-          `T.withChild`
-            T.named ET.Group "zoom-group" [ v3AttrStr "id" (str "network-zoom-group"), v3AttrStr "class" (str "zoom-group") ]
-              `T.withChildren`
-                [ T.named ET.Group "links" [ v3AttrStr "id" (str "network-links"), v3AttrStr "class" (str "links") ]
-                , T.named ET.Group "nodes" [ v3AttrStr "id" (str "network-nodes"), v3AttrStr "class" (str "nodes") ]
-                ]
-
-  _ <- renderTree container containerTree
-  pure unit
-
--- | Called on each simulation tick
--- | Advances transition progress AND re-renders
-onSimulationTick :: Ref SimpleForceState -> Effect Unit
-onSimulationTick stateRef = do
-  state <- Ref.read stateRef
-
-  -- Advance and filter transitions using library functions
-  let { active: stillEntering } = Tick.tickProgressMap transitionDelta state.enteringProgress
-  let { active: stillExiting } = Tick.tickTransitions transitionDelta state.exitingNodes
-
-  -- Update state with advanced transitions
-  Ref.write
-    ( state
-        { enteringProgress = stillEntering
-        , exitingNodes = stillExiting
-        }
-    )
-    stateRef
-
-  -- Render with current state
-  renderVisualization stateRef
-
--- | Render visualization with current state
-renderVisualization :: Ref SimpleForceState -> Effect Unit
-renderVisualization stateRef = do
-  state <- Ref.read stateRef
-
-  -- Get current node positions from simulation
-  currentNodes <- Sim.getNodes state.simulation
-
-  -- Build render nodes: only visible nodes, with transition state
-  let visibleNodes = filter (\n -> elem n.id state.visibleNodeIds) currentNodes
-
-  let renderNodes = map
-        (\n ->
-          { node: n
-          , enterProgress: Map.lookup n.id state.enteringProgress
-          , exitProgress: Nothing
-          }
-        )
-        visibleNodes
-
-  -- Add exiting nodes (with frozen positions and exit progress)
-  let exitingRenderNodes = map
-        (\e ->
-          { node: e.item
-          , enterProgress: Nothing
-          , exitProgress: Just e.progress
-          }
-        )
-        state.exitingNodes
-
-  let allRenderNodes = renderNodes <> exitingRenderNodes
-
-  -- Create links only between visible nodes (not exiting)
-  let visibleLinks = filterLinksToSubset _.id visibleNodes state.model.links
-  let swizzledLinks = swizzleLinksByIndex _.id visibleNodes visibleLinks \src tgt i link ->
-        { source: src, target: tgt, weight: link.weight, linkType: link.linkType, index: i }
-
-  -- Create scene data
-  let scene = { nodes: allRenderNodes, links: swizzledLinks }
-
-  -- Render
-  runD3v2M $ renderScene scene
-
--- | Render the scene
-renderScene :: SceneData -> D3v2M Unit
-renderScene scene = do
-  -- Render links
-  linksGroup <- select "#network-links"
-  let linksTree = createLinksTree scene
-  _ <- renderTree linksGroup linksTree
-
-  -- Render nodes
-  nodesGroup <- select "#network-nodes"
-  let nodesTree = createNodesTree scene
-  _ <- renderTree nodesGroup nodesTree
-
-  pure unit
+-- =============================================================================
+-- Tree Construction for Rendering
+-- =============================================================================
 
 -- | Create nodes tree with transition-aware visual properties
 createNodesTree :: SceneData -> T.Tree SceneData
@@ -376,13 +368,32 @@ createNodesTree scene =
     , exitBehavior: Nothing
     }
 
+-- | Create links tree with rich visual encoding
+createLinksTree :: SceneData -> T.Tree SceneData
+createLinksTree scene =
+  T.sceneNestedJoin "links" "line"
+    [ scene ]
+    (_.links)
+    ( \link -> T.elem ET.Line
+        [ v3Attr "x1" (lit link.source.x)
+        , v3Attr "y1" (lit link.source.y)
+        , v3Attr "x2" (lit link.target.x)
+        , v3Attr "y2" (lit link.target.y)
+        , v3Attr "stroke-width" (lit (0.5 + link.weight * 2.0))  -- 0.5-2.5 based on weight
+        , v3AttrStr "stroke" (str (linkTypeColor link.linkType))
+        , v3Attr "opacity" (lit (0.3 + link.weight * 0.4))      -- 0.3-0.7 based on weight
+        ]
+    )
+    { enterBehavior: Nothing
+    , updateBehavior: Nothing
+    , exitBehavior: Nothing
+    }
+
 -- =============================================================================
 -- Visual Property Interpolation (Tick-Driven)
 -- =============================================================================
 
 -- | Get radius for a node based on transition state
--- | Entering: starts large (20), shrinks to normal
--- | Exiting: starts normal, grows large (20) before disappearing
 radiusForRenderNode :: RenderNode -> Number
 radiusForRenderNode rn =
   let baseRadius = nodeRadius rn.node
@@ -416,7 +427,6 @@ strokeWidthForRenderNode rn =
     _, _ -> 1.5
 
 -- | Get opacity for a node based on transition state
--- | Exiting: fades from 1 → 0
 opacityForRenderNode :: RenderNode -> Number
 opacityForRenderNode rn =
   let baseOpacity = 0.7 + rn.node.importance * 0.3
@@ -424,208 +434,9 @@ opacityForRenderNode rn =
     Just p -> Tick.lerp baseOpacity 0.0 p  -- Fade out
     _ -> baseOpacity
 
--- | Create links tree with rich visual encoding
-createLinksTree :: SceneData -> T.Tree SceneData
-createLinksTree scene =
-  T.sceneNestedJoin "links" "line"
-    [ scene ]
-    (_.links)
-    ( \link -> T.elem ET.Line
-        [ v3Attr "x1" (lit link.source.x)
-        , v3Attr "y1" (lit link.source.y)
-        , v3Attr "x2" (lit link.target.x)
-        , v3Attr "y2" (lit link.target.y)
-        , v3Attr "stroke-width" (lit (0.5 + link.weight * 2.0))  -- 0.5-2.5 based on weight
-        , v3AttrStr "stroke" (str (linkTypeColor link.linkType))
-        , v3Attr "opacity" (lit (0.3 + link.weight * 0.4))      -- 0.3-0.7 based on weight
-        ]
-    )
-    { enterBehavior: Nothing
-    , updateBehavior: Nothing
-    , exitBehavior: Nothing
-    }
-
 -- =============================================================================
--- Force Controls
+-- FFI for scheduling
 -- =============================================================================
 
--- | Check if a force is currently enabled
-isForceEnabled :: ForceId -> Ref SimpleForceState -> Effect Boolean
-isForceEnabled forceId stateRef = do
-  state <- Ref.read stateRef
-  pure $ Set.member forceId state.enabledForces
-
--- | Toggle a force on/off, returns new enabled state
-toggleForce :: ForceId -> Ref SimpleForceState -> Effect Boolean
-toggleForce forceId stateRef = do
-  state <- Ref.read stateRef
-  let wasEnabled = Set.member forceId state.enabledForces
-
-  if wasEnabled
-    then do
-      -- Remove the force
-      Sim.removeForce (forceIdName forceId) state.simulation
-      Ref.modify_ (_ { enabledForces = Set.delete forceId state.enabledForces }) stateRef
-      -- Reheat to show effect
-      Sim.reheat state.simulation
-      pure false
-    else do
-      -- Add the force back
-      Sim.addForce (forceIdSpec forceId) state.simulation
-      Ref.modify_ (_ { enabledForces = Set.insert forceId state.enabledForces }) stateRef
-      -- Reheat to show effect
-      Sim.reheat state.simulation
-      pure true
-
--- | Set which forces are enabled (for presets)
--- | Returns the new set of enabled forces
-setForcesEnabled :: Set ForceId -> Ref SimpleForceState -> Effect (Set ForceId)
-setForcesEnabled targetForces stateRef = do
-  state <- Ref.read stateRef
-
-  -- Calculate changes
-  let currentForces = state.enabledForces
-  let toRemove = Set.difference currentForces targetForces
-  let toAdd = Set.difference targetForces currentForces
-
-  -- Remove forces that shouldn't be enabled
-  for_ (Set.toUnfoldable toRemove :: Array ForceId) \forceId ->
-    Sim.removeForce (forceIdName forceId) state.simulation
-
-  -- Add forces that should be enabled
-  for_ (Set.toUnfoldable toAdd :: Array ForceId) \forceId ->
-    Sim.addForce (forceIdSpec forceId) state.simulation
-
-  -- Update state
-  Ref.modify_ (_ { enabledForces = targetForces }) stateRef
-
-  -- Reheat to show effect
-  Sim.reheat state.simulation
-
-  pure targetForces
-
--- | Reheat the simulation (restart animation)
-reheatSimulation :: Ref SimpleForceState -> Effect Unit
-reheatSimulation stateRef = do
-  state <- Ref.read stateRef
-  Sim.reheat state.simulation
-
--- =============================================================================
--- Link Weight Toggle
--- =============================================================================
-
--- | Get whether link weights are being used for force strength
-getUseLinkWeights :: Ref SimpleForceState -> Effect Boolean
-getUseLinkWeights stateRef = do
-  state <- Ref.read stateRef
-  pure state.useLinkWeights
-
--- | Set whether link force strength should come from link weight data
--- | When true: links with higher weight pull more strongly
--- | When false: all links have same strength (0.4)
-setUseLinkWeights :: Boolean -> Ref SimpleForceState -> Effect Unit
-setUseLinkWeights useWeights stateRef = do
-  state <- Ref.read stateRef
-
-  -- Only do something if the Link force is enabled
-  when (Set.member ForceLink state.enabledForces) do
-    -- Remove current link force
-    Sim.removeForce (forceIdName ForceLink) state.simulation
-
-    if useWeights
-      then do
-        -- Add dynamic link force that uses link.weight
-        let dynamicConfig :: LinkDynamicConfig _
-            dynamicConfig =
-              { distance: 40.0
-              , strengthAccessor: \link -> link.weight  -- Read weight from link data
-              , iterations: 1
-              }
-        let forceHandle = Core.createLinkDynamic dynamicConfig
-        _ <- Core.initializeLinkForce forceHandle state.model.nodes state.model.links
-        -- The simulation needs to track this force - we use the same name
-        Sim.addForceHandle "links" forceHandle state.simulation
-      else do
-        -- Add standard link force
-        Sim.addForce (forceIdSpec ForceLink) state.simulation
-
-  -- Update state
-  Ref.modify_ (_ { useLinkWeights = useWeights }) stateRef
-
-  -- Reheat to show effect
-  Sim.reheat state.simulation
-
--- =============================================================================
--- Node Filtering with Transitions
--- =============================================================================
-
--- | Filter nodes to show only specified categories (0=Research, 1=Industry, 2=Government, 3=Community)
--- | Nodes not in the filter will animate out; newly visible nodes will animate in
-filterByCategory :: Array Int -> Ref SimpleForceState -> Effect Unit
-filterByCategory categories stateRef = do
-  state <- Ref.read stateRef
-
-  -- Calculate new visible IDs based on category filter
-  let newVisibleIds = map _.id $ filter (\n -> elem n.group categories) state.model.nodes
-
-  -- Find nodes to remove and add
-  let toRemove = filter (\id -> not (elem id newVisibleIds)) state.visibleNodeIds
-  let toAdd = filter (\id -> not (elem id state.visibleNodeIds)) newVisibleIds
-
-  -- Get current node positions for exiting animation (freeze their positions)
-  currentNodes <- Sim.getNodes state.simulation
-  let exitingNodeData = filter (\n -> elem n.id toRemove) currentNodes
-  let newExiting = Tick.startTransitions exitingNodeData
-
-  -- Remove from entering if they were still entering
-  let cleanedEntering = Array.foldl (\m id -> Map.delete id m) state.enteringProgress toRemove
-
-  -- Add entering transitions for new nodes (start at progress 0)
-  let newEntering = Tick.startProgress toAdd cleanedEntering
-
-  -- Update state
-  Ref.write
-    ( state
-        { visibleNodeIds = newVisibleIds
-        , enteringProgress = newEntering
-        , exitingNodes = state.exitingNodes <> newExiting
-        }
-    )
-    stateRef
-
-  -- Reheat simulation so remaining nodes settle
-  Sim.reheat state.simulation
-
--- | Show all nodes (reset filter)
-showAllNodes :: Ref SimpleForceState -> Effect Unit
-showAllNodes stateRef = do
-  state <- Ref.read stateRef
-  let allIds = map _.id state.model.nodes
-
-  -- Find newly visible nodes (were hidden, now visible)
-  let currentlyHidden = filter (\id -> not (elem id state.visibleNodeIds)) allIds
-  let newEntering = Tick.startProgress currentlyHidden state.enteringProgress
-
-  -- Clear exiting nodes and set all as visible
-  Ref.write
-    ( state
-        { visibleNodeIds = allIds
-        , enteringProgress = newEntering
-        , exitingNodes = []
-        }
-    )
-    stateRef
-
-  Sim.reheat state.simulation
-
--- | Get count of currently visible nodes
-getVisibleCount :: Ref SimpleForceState -> Effect Int
-getVisibleCount stateRef = do
-  state <- Ref.read stateRef
-  pure $ length state.visibleNodeIds
-
--- | Get total count of nodes
-getTotalCount :: Ref SimpleForceState -> Effect Int
-getTotalCount stateRef = do
-  state <- Ref.read stateRef
-  pure $ length state.model.nodes
+-- | Schedule a callback after render (used for drag attachment)
+foreign import scheduleAfterRender :: Effect Unit -> Effect Unit
