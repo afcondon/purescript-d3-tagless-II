@@ -2,7 +2,12 @@ module Component.Tour.TourMotion where
 
 import Prelude
 
+import Data.Array as Array
+import Data.Map (Map)
+import Data.Map as Map
 import Data.Maybe (Maybe(..))
+import Data.Set (Set)
+import Data.Set as Set
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.HTML as HH
@@ -12,6 +17,7 @@ import PSD3.RoutingDSL (routeToPath)
 import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
 import Effect.Class (liftEffect)
+import Effect.Class.Console as Console
 import Effect.Aff (Milliseconds(..), delay)
 import PSD3.Shared.DataLoader (simpleLoadJSON)
 import Unsafe.Coerce (unsafeCoerce)
@@ -24,9 +30,14 @@ import D3.Viz.TreeAPI.V3GUPDemo as GUP
 import D3.Viz.AnimatedTreeClusterLoop as AnimatedTreeLoop
 import D3.Viz.TreeAPI.StaggeredCircles as StaggeredCircles
 import D3.Viz.LesMisV3.Model as LesMisModel
+import D3.Viz.LesMisV3.Model (LesMisModel)
 import D3.Viz.LesMisV3.Draw as LesMisDraw
 import D3.Viz.LesMisV3.GUPDemo as GUPDemo
-import Effect.Ref (Ref)
+import D3.Viz.LesMisV3.GUPDemo (ExitingNode, LesMisSimulation)
+import PSD3.Transition.Tick as Tick
+import PSD3.ForceEngine.Simulation as Sim
+import PSD3.ForceEngine.Setup as Setup
+import PSD3.ForceEngine.Links (filterLinksToSubset)
 import Data.Array (catMaybes)
 import Data.String.CodeUnits (toCharArray)
 import Data.Traversable (sequence)
@@ -41,7 +52,12 @@ type State =
                                  , circlesSel :: D3v2Selection_ SBoundOwns Element ThreeLittleCirclesTransition.CircleData }
   , staggeredTrigger :: Maybe { trigger :: Effect Unit, reset :: Effect Unit }
   , lesMisCleanup :: Maybe (Effect Unit)
-  , lesMisGUPState :: Maybe (Ref GUPDemo.LesMisGUPState)
+  -- Halogen-first state for Les Mis GUP section
+  , lesMisGUPModel :: Maybe LesMisModel
+  , lesMisGUPVisibleIds :: Set String
+  , lesMisGUPEntering :: Map String Tick.Progress
+  , lesMisGUPExiting :: Array ExitingNode
+  , lesMisGUPSimulation :: Maybe LesMisSimulation
   }
 
 -- | Tour page actions
@@ -54,12 +70,21 @@ data Action
   | AddGUPNodes
   | RemoveGUPNodes
   | ResetGUP
-  | TestGUPAPI
 
 -- | Tour page component
 component :: forall q i o m. MonadAff m => H.Component q i o m
 component = H.mkComponent
-  { initialState: \_ -> { gupFiber: Nothing, colorMixingTrigger: Nothing, staggeredTrigger: Nothing, lesMisCleanup: Nothing, lesMisGUPState: Nothing }
+  { initialState: \_ ->
+      { gupFiber: Nothing
+      , colorMixingTrigger: Nothing
+      , staggeredTrigger: Nothing
+      , lesMisCleanup: Nothing
+      , lesMisGUPModel: Nothing
+      , lesMisGUPVisibleIds: Set.empty
+      , lesMisGUPEntering: Map.empty
+      , lesMisGUPExiting: []
+      , lesMisGUPSimulation: Nothing
+      }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -103,9 +128,19 @@ handleAction = case _ of
     cleanup <- liftEffect $ LesMisDraw.startLesMis model "#lesmis-container"
     H.modify_ _ { lesMisCleanup = Just cleanup }
 
-    -- Render Section 6: Les Misérables with GUP (reuse same model)
-    gupState <- liftEffect $ GUPDemo.initGUPDemo model "#lesmis-gup-container"
-    H.modify_ _ { lesMisGUPState = Just gupState }
+    -- Render Section 6: Les Misérables with GUP (Halogen-first architecture)
+    let allNodeIds = Set.fromFoldable $ map _.name model.nodes
+    simulation <- liftEffect $ GUPDemo.createSimulation model
+    liftEffect $ GUPDemo.renderSVGContainer "#lesmis-gup-container"
+    liftEffect $ GUPDemo.subscribeToTick (tickHandler simulation) simulation
+
+    H.modify_ _
+      { lesMisGUPModel = Just model
+      , lesMisGUPVisibleIds = allNodeIds
+      , lesMisGUPEntering = Map.empty
+      , lesMisGUPExiting = []
+      , lesMisGUPSimulation = Just simulation
+      }
 
   Finalize -> do
     state <- H.get
@@ -139,27 +174,101 @@ handleAction = case _ of
 
   AddGUPNodes -> do
     state <- H.get
-    case state.lesMisGUPState of
-      Nothing -> pure unit
-      Just stateRef -> liftEffect $ GUPDemo.addRandomNodes 5 stateRef
+    case state.lesMisGUPModel, state.lesMisGUPSimulation of
+      Just model, Just sim -> do
+        -- Pick 5 random nodes from hidden nodes to add
+        let hiddenNodes = Array.filter (\n -> not (Set.member n.name state.lesMisGUPVisibleIds)) model.nodes
+        nodesToAdd <- liftEffect $ GUPDemo.pickRandom 5 hiddenNodes
+        let newVisibleIds = state.lesMisGUPVisibleIds <> (Set.fromFoldable $ map _.name nodesToAdd)
+
+        -- Build desired state
+        let desiredNodes = Array.filter (\n -> Set.member n.name newVisibleIds) model.nodes
+            desiredLinks = filterLinksToSubset _.id desiredNodes model.links
+
+        -- Apply GUP
+        result <- liftEffect $ Setup.applySetupWithData GUPDemo.lesMisSetup desiredNodes desiredLinks sim
+
+        -- Start entering transitions
+        let enteringNames = map _.name result.nodes.entered
+            newEntering = Tick.startProgress enteringNames state.lesMisGUPEntering
+
+        -- Reheat simulation
+        liftEffect $ Sim.reheat sim
+
+        H.modify_ _
+          { lesMisGUPVisibleIds = newVisibleIds
+          , lesMisGUPEntering = newEntering
+          }
+
+        Console.log $ "Added " <> show (Array.length nodesToAdd) <> " nodes"
+
+      _, _ -> pure unit
 
   RemoveGUPNodes -> do
     state <- H.get
-    case state.lesMisGUPState of
-      Nothing -> pure unit
-      Just stateRef -> liftEffect $ GUPDemo.removeRandomNodes 5 stateRef
+    case state.lesMisGUPModel, state.lesMisGUPSimulation of
+      Just model, Just sim -> do
+        -- Pick 5 random visible nodes to remove
+        let visibleNodes = Array.filter (\n -> Set.member n.name state.lesMisGUPVisibleIds) model.nodes
+        nodesToRemove <- liftEffect $ GUPDemo.pickRandom 5 visibleNodes
+        let nodesToRemoveIds = Set.fromFoldable $ map _.name nodesToRemove
+            newVisibleIds = Set.difference state.lesMisGUPVisibleIds nodesToRemoveIds
+
+        -- Build desired state
+        let desiredNodes = Array.filter (\n -> Set.member n.name newVisibleIds) model.nodes
+            desiredLinks = filterLinksToSubset _.id desiredNodes model.links
+
+        -- Apply GUP
+        result <- liftEffect $ Setup.applySetupWithData GUPDemo.lesMisSetup desiredNodes desiredLinks sim
+
+        -- Start exiting transitions
+        let newExiting = Tick.startTransitions result.nodes.exited
+
+        -- Reheat simulation
+        liftEffect $ Sim.reheat sim
+
+        H.modify_ _
+          { lesMisGUPVisibleIds = newVisibleIds
+          , lesMisGUPExiting = state.lesMisGUPExiting <> newExiting
+          }
+
+        Console.log $ "Removed " <> show (Array.length nodesToRemove) <> " nodes"
+
+      _, _ -> pure unit
 
   ResetGUP -> do
     state <- H.get
-    case state.lesMisGUPState of
-      Nothing -> pure unit
-      Just stateRef -> liftEffect $ GUPDemo.resetToFull stateRef
+    case state.lesMisGUPModel, state.lesMisGUPSimulation of
+      Just model, Just sim -> do
+        let allNodeIds = Set.fromFoldable $ map _.name model.nodes
 
-  TestGUPAPI -> do
-    state <- H.get
-    case state.lesMisGUPState of
-      Nothing -> pure unit
-      Just stateRef -> liftEffect $ GUPDemo.testGUPAPI stateRef
+        -- Apply GUP with full data
+        result <- liftEffect $ Setup.applySetupWithData GUPDemo.lesMisSetup model.nodes model.links sim
+
+        -- Start entering transitions for newly visible nodes
+        let enteringNames = map _.name result.nodes.entered
+            newEntering = Tick.startProgress enteringNames Map.empty
+
+        -- Reheat simulation
+        liftEffect $ Sim.reheat sim
+
+        H.modify_ _
+          { lesMisGUPVisibleIds = allNodeIds
+          , lesMisGUPEntering = newEntering
+          , lesMisGUPExiting = []
+          }
+
+        Console.log "Reset to full dataset"
+
+      _, _ -> pure unit
+
+-- | Tick handler for Les Mis GUP - position-only rendering
+tickHandler :: LesMisSimulation -> Effect Unit
+tickHandler sim = do
+  currentNodes <- Sim.getNodes sim
+  currentLinks <- Sim.getLinks sim
+  let scene = GUPDemo.buildSceneData currentNodes Map.empty [] currentLinks
+  GUPDemo.renderScene scene
 
 -- | Choose a string of random letters (no duplicates), ordered alphabetically
 getLetters :: Effect (Array Char)
@@ -299,11 +408,11 @@ render _ =
             ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-                [ HH.text "5. Force-Directed Graph: Les Misérables" ]
+                [ HH.text "5. Force-Directed Graph: Les Miserables" ]
             , HH.p_
                 [ HH.text "Force-directed graphs use physics simulation to position nodes and links. Nodes repel each other like charged particles, while links act as springs pulling connected nodes together. The simulation finds an equilibrium that naturally reveals the structure of the network." ]
             , HH.p_
-                [ HH.text "This graph shows character co-occurrence in Victor Hugo's Les Misérables. The simulation applies multiple forces: charge (nodes repel), center (prevents drift), collision (prevents overlap), and link (pulls connected nodes together). You can zoom and pan using the mouse wheel and drag gestures."
+                [ HH.text "This graph shows character co-occurrence in Victor Hugo's Les Miserables. The simulation applies multiple forces: charge (nodes repel), center (prevents drift), collision (prevents overlap), and link (pulls connected nodes together). You can zoom and pan using the mouse wheel and drag gestures."
                 ]
             , HH.div
                 [ HP.id "lesmis-container"
@@ -347,11 +456,6 @@ render _ =
                     , HE.onClick \_ -> ResetGUP
                     ]
                     [ HH.text "Reset All" ]
-                , HH.button
-                    [ HP.classes [ HH.ClassName "transition-button", HH.ClassName "secondary" ]
-                    , HE.onClick \_ -> TestGUPAPI
-                    ]
-                    [ HH.text "Test GUP API (console)" ]
                 ]
             ]
         ]

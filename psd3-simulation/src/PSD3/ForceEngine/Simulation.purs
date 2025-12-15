@@ -80,6 +80,7 @@ module PSD3.ForceEngine.Simulation
   , isRunning
   , getAlpha
   , getNodes
+  , getLinks
     -- * Position Updates (for transitions)
   , PositionMap
   , updatePositionsInPlace
@@ -556,6 +557,14 @@ getNodes :: forall row linkRow.
   Simulation row linkRow
   -> Effect (Array (SimulationNode row))
 getNodes sim = Ref.read sim.nodes
+
+-- | Get the current links from the simulation
+-- | Note: These are the raw links with source/target as Int IDs.
+-- | For swizzled links (with node references), use swizzleLinksByIndex from Links module.
+getLinks :: forall row linkRow.
+  Simulation row linkRow
+  -> Effect (Array { source :: Int, target :: Int | linkRow })
+getLinks sim = Ref.read sim.links
 
 -- =============================================================================
 -- Position Updates (for tick-driven transitions)

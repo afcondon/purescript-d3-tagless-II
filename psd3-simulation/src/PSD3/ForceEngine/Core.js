@@ -51,8 +51,12 @@ export function createCollideWithRadius_(radiusFn) {
 }
 
 // Create a link force
+// IMPORTANT: Uses .id(d => d.id) so that link source/target values are matched
+// against node.id, not array index. This is essential for GUP (General Update Pattern)
+// where nodes are filtered and array indices change.
 export function createLink_(config) {
   const force = forceLink()
+    .id(d => d.id)  // Use node.id for lookup, not array index
     .distance(config.distance)
     .strength(config.strength)
     .iterations(config.iterations);
@@ -61,8 +65,10 @@ export function createLink_(config) {
 
 // Create a link force with dynamic strength per-link
 // strengthAccessor is called for each link to get strength (typically from link.weight)
+// Uses .id(d => d.id) for same reason as createLink_
 export function createLinkDynamic_(config) {
   const force = forceLink()
+    .id(d => d.id)  // Use node.id for lookup, not array index
     .distance(config.distance)
     .strength(function(link) {
       return config.strengthAccessor(link);
