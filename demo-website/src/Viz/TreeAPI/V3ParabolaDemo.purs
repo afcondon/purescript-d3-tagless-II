@@ -1,4 +1,4 @@
--- | PSD3v3 Parabola Demo - Live Browser Rendering
+-- | Expression DSL Parabola Demo - Live Browser Rendering
 -- |
 -- | This demonstrates the v3 "Finally Tagless" DSL rendering to actual DOM via D3.
 -- |
@@ -128,7 +128,7 @@ v3ParabolaDemo = runD3v2M do
 
   -- Log the "money shot" - same expressions, different outputs
   liftEffect do
-    Console.log "=== PSD3v3 Parabola Demo: Live D3 Rendering ==="
+    Console.log "=== Expression DSL Parabola Demo: Live D3 Rendering ==="
     Console.log ""
     Console.log "v3 Expressions (polymorphic definitions):"
     Console.log "  scaleX = (x + 5) * 30 + 50"

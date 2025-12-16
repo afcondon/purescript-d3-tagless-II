@@ -61,7 +61,7 @@ render _ =
                 [ HP.classes [ HH.ClassName "tutorial-title" ] ]
                 [ HH.text "Selection Phantom Types" ]
             , HH.p_
-                [ HH.text "PSD3v2 uses phantom types to encode the state machine of D3 selections. This is similar to the Indexed Monad pattern - operations are only allowed when the selection is in the correct state, and this is enforced at compile time." ]
+                [ HH.text "PSD3 uses phantom types to encode the state machine of D3 selections. This is similar to the Indexed Monad pattern - operations are only allowed when the selection is in the correct state, and this is enforced at compile time." ]
 
             -- Section navigation cards
             , HH.div
@@ -82,7 +82,7 @@ render _ =
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
                 [ HH.text "The Five Selection States" ]
             , HH.p_
-                [ HH.text "A selection in PSD3v2 carries a phantom type parameter indicating its current state:" ]
+                [ HH.text "A selection in PSD3 carries a phantom type parameter indicating its current state:" ]
 
             , HH.table
                 [ HP.classes [ HH.ClassName "tutorial-table" ] ]
@@ -195,7 +195,7 @@ render _ =
             -- Note: Indexed monad concept is explained textually, no diagram needed
 
             , HH.p_
-                [ HH.text "In PSD3v2, each selection operation is typed with its input and output states:" ]
+                [ HH.text "In PSD3, each selection operation is typed with its input and output states:" ]
             , HH.ul_
                 [ HH.li_
                     [ HH.code_ [ HH.text "select :: m (sel SEmpty ...)" ]

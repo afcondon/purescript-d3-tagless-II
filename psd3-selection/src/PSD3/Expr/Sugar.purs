@@ -1,4 +1,4 @@
--- | PSD3v3 Syntactic Sugar
+-- | Syntactic Sugar
 -- |
 -- | Operators and helpers to make expressions more readable.
 -- |

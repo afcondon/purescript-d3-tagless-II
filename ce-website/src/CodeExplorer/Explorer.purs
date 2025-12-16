@@ -57,24 +57,24 @@ import CodeExplorer.ViewState (ViewState(..), OverviewView(..), DetailView(..), 
 import CodeExplorer.ViewTransition as VT
 import Data.ColorPalette (getNodeStroke, getNodeFill) as ColorPalette
 import CodeExplorer.Treemap (recalculateTreemapPositions, renderWatermark, clearWatermark)
-import PSD3v2.Tooltip (hideTooltip) as Tooltip
+import PSD3.Tooltip (hideTooltip) as Tooltip
 import CodeExplorer.Scene as Scene
 import CodeExplorer.Scenes as Scenes
 import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Links (swizzleLinks)
 import PSD3.ForceEngine.Render (updateGroupPositions, updateLinkPositions)
 import PSD3.ForceEngine.Simulation as Sim
-import PSD3v3.Integration (v3Attr, v3AttrStr)
-import PSD3v3.Expr (lit, str)
-import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom, onMouseEnter, onMouseLeave, onClickWithDatum)
-import PSD3v2.Capabilities.Selection (select, selectAll, on, renderTree)
+import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Expr (lit, str)
+import PSD3.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom, onMouseEnter, onMouseLeave, onClickWithDatum)
+import PSD3.Capabilities.Selection (select, selectAll, on, renderTree)
 import PSD3.AST as T
 import PSD3.Interpreter.D3 (getElementsD3v2) as D3v2
-import PSD3v2.Classify (classifyElements, clearClasses)
+import PSD3.Classify (classifyElements, clearClasses)
 import Data.Set as Set
-import PSD3v2.Tooltip (onTooltip)
+import PSD3.Tooltip (onTooltip)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2M, D3v2Selection_, reselectD3v2)
-import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, SEmpty)
+import PSD3.Selection.Types (ElementType(..), SBoundOwns, SEmpty)
 import Types (SimNode, SimLink, NodeType(..), LinkType, isTreeLink)
 import CodeExplorer.ViewBox as ViewBox
 import Viz.CodeExplorer.TreeLinks (verticalLinkPath)
@@ -1295,7 +1295,7 @@ focusOnPackageNeighborhood clickedPackageName nodes sim = do
 
 -- | Render package nodes for the neighborhood view
 -- | Packages are rendered as circles with labels, highlighted if clicked
--- | Uses FFI for direct DOM manipulation since PSD3v2 doesn't have simple append
+-- | Uses FFI for direct DOM manipulation since PSD3 doesn't have simple append
 renderPackageNeighborhoodNodes :: String -> Array SimNode -> Int -> Effect Unit
 renderPackageNeighborhoodNodes clickedPkg nodes clickedLayer = do
   for_ nodes \node -> do

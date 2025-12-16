@@ -172,7 +172,7 @@ draw dataPoints selector = do
   pure unit
 
 -- | Entry point
--- TODO: Update to use PSD3v2 when wizard is overhauled
+-- TODO: Update to use PSD3 when wizard is overhauled
 -- run :: Array """
       <> dataTypeName
       <>

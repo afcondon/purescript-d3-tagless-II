@@ -1,4 +1,4 @@
--- | PSD3v3 Path Generators
+-- | Path Generators
 -- |
 -- | Pure functions that generate SVG path strings.
 -- | Used by interpreters to compute actual path data.

@@ -65,7 +65,7 @@ render state =
 
     , HH.div [ HP.class_ (HH.ClassName "description") ]
         [ HH.p_
-            [ HH.text "This page demonstrates the new declarative tree API for PSD3v2. "
+            [ HH.text "This page demonstrates the new declarative tree API for PSD3. "
             , HH.text "Instead of imperative "
             , HH.code_ [ HH.text "appendChild" ]
             , HH.text " chains, you define the entire DOM structure as a tree, "

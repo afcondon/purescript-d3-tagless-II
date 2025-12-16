@@ -1,4 +1,4 @@
--- | PSD3v3 Transition Demo - Declarative Transitions with v3 Expressions
+-- | Expression Transition Demo - Declarative Transitions with v3 Expressions
 -- |
 -- | This demonstrates the fully declarative approach to transitions:
 -- | - sceneJoin defines enter behavior with initial state + transition
@@ -136,7 +136,7 @@ v3TransitionDemo = runD3v2M do
 
   -- Log what we're demonstrating
   liftEffect do
-    Console.log "=== PSD3v3 Declarative Staggered Transition Demo ==="
+    Console.log "=== Expression Declarative Staggered Transition Demo ==="
     Console.log ""
     Console.log "v3 Expressions (final positions):"
     Console.log $ "  posX         → " <> runCodeGen (posX :: CodeGen Number)

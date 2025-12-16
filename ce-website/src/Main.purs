@@ -8,7 +8,7 @@ import Effect.Console (log)
 import Component.SpagoGridApp as SpagoGridApp
 import Halogen.Aff as HA
 import Halogen.VDom.Driver (runUI)
-import PSD3v2.Tooltip (configureTooltip, floatingPanelTheme)
+import PSD3.Tooltip (configureTooltip, floatingPanelTheme)
 import Web.DOM.ParentNode (QuerySelector(..))
 import Data.Maybe (Maybe(..))
 

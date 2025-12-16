@@ -185,7 +185,7 @@ _ <- on (Zoom (defaultZoom (ScaleExtent 0.5 4.0) ".zoom-group")) svg""" ]
                     , HH.text " - Drag, click, hover behaviors"
                     ]
                 , HH.li_
-                    [ HH.code_ [ HH.text "src/lib/PSD3v2/Behavior/Types.purs" ]
+                    [ HH.code_ [ HH.text "src/lib/PSD3/Behavior/Types.purs" ]
                     , HH.text " - All behavior types with docs"
                     ]
                 ]

@@ -1,4 +1,4 @@
--- | PSD3v3 Type-Safe CSS Units
+-- | Type-Safe CSS Units
 -- |
 -- | Phantom types for CSS units, enabling type-safe unit handling
 -- | while allowing interpreters to render appropriately.

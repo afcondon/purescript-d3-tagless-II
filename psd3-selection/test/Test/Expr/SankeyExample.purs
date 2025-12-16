@@ -1,11 +1,11 @@
--- | PSD3v3 Sankey Example
+-- | Sankey Example
 -- |
 -- | Demonstrates how the v3 DSL handles real Sankey diagram patterns:
 -- | - Static attributes
 -- | - Data-driven attributes with field access
 -- | - Computed attributes (path generation)
 -- | - Conditional attributes (text anchor based on position)
-module Test.PSD3.Expr.SankeyExample where
+module Test.Expr.SankeyExample where
 
 import Prelude hiding (add)
 
@@ -180,7 +180,7 @@ linkPath = sankeyLink linkSourceX linkSourceY0 linkSourceY1 linkTargetX linkTarg
 
 runExample :: Effect Unit
 runExample = do
-  log "\n=== PSD3v3 Sankey Example ==="
+  log "\n=== Expression Sankey Example ==="
 
   log "\n--- Node Attribute Expressions ---"
   log "nodeRectWidth = nodeX1 - nodeX0"

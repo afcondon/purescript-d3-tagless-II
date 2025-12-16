@@ -79,7 +79,7 @@ render _ =
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3v2.Tree.Types (Tree(..), Element(..), Child(..))
+                    [ HH.text """import PSD3.Tree.Types (Tree(..), Element(..), Child(..))
 
 myTree :: Tree Unit
 myTree =
@@ -102,7 +102,7 @@ myTree =
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3v2.Tree.Types (Join(..))
+                    [ HH.text """import PSD3.Tree.Types (Join(..))
 
 myTree :: Array BarData -> Tree Unit
 myTree barData =
@@ -166,7 +166,7 @@ let htmlString = runStringInterpreter myTree""" ]
                     , HH.text " - TreeAPI visualization"
                     ]
                 , HH.li_
-                    [ HH.code_ [ HH.text "src/lib/PSD3v2/Tree/Types.purs" ]
+                    [ HH.code_ [ HH.text "src/lib/PSD3/Tree/Types.purs" ]
                     , HH.text " - Tree type definitions"
                     ]
                 ]

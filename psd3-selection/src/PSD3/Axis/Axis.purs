@@ -1,4 +1,4 @@
-module PSD3v2.Axis.Axis
+module PSD3.Axis.Axis
   ( Axis
   , Orientation(..)
   , AxisConfig

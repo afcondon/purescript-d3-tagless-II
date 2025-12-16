@@ -1,4 +1,4 @@
--- | PSD3v3 Datum Field Access
+-- | Datum Field Access
 -- |
 -- | Type-safe field access using row polymorphism.
 -- | Compile-time verification that fields exist on the datum type.

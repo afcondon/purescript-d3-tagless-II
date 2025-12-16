@@ -118,9 +118,9 @@ render _ =
 
 import Prelude
 import Effect (Effect)
-import PSD3v2.Tree as T
-import PSD3v2.Tree (Tree)
-import PSD3v2.Attribute (class_, cx, cy, r, fill)
+import PSD3.Tree as T
+import PSD3.Tree (Tree)
+import PSD3.Attribute (class_, cx, cy, r, fill)
 import PSD3.Interpreter.D3 (render)
 
 -- Your data

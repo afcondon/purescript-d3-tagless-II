@@ -29,7 +29,7 @@ import Types (SimNode, NodeType(..), Package)
 import ViewState (ViewState)
 import Data.Set as Set
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
-import PSD3v2.Classify (classifyElements, clearClasses)
+import PSD3.Classify (classifyElements, clearClasses)
 import PSD3.Interpreter.D3 (runD3v2M)
 import PSD3.AST as T
 import PSD3.Internal.Behavior.Types (onMouseEnter, onMouseLeave, onClickWithDatum)

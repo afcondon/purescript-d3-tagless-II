@@ -1,4 +1,4 @@
--- | PSD3v3 Path DSL
+-- | Path DSL
 -- |
 -- | Pre-canned path generators for common visualization patterns.
 -- | These cover 90%+ of data visualization path needs:

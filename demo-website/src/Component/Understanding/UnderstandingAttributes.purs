@@ -61,7 +61,7 @@ render _ =
                 [ HP.classes [ HH.ClassName "tutorial-title" ] ]
                 [ HH.text "Type-Safe Attribute System" ]
             , HH.p_
-                [ HH.text "A key innovation of D3 is the natural way to go from static to data-driven attributes. PSD3v2 preserves this flexibility while adding compile-time type safety through typeclasses and phantom types." ]
+                [ HH.text "A key innovation of D3 is the natural way to go from static to data-driven attributes. PSD3 preserves this flexibility while adding compile-time type safety through typeclasses and phantom types." ]
 
             -- Section navigation cards
             , HH.div
@@ -82,7 +82,7 @@ render _ =
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
                 [ HH.text "Attribute Variants" ]
             , HH.p_
-                [ HH.text "Attributes in PSD3v2 can take three forms, all with the same clean syntax:" ]
+                [ HH.text "Attributes in PSD3 can take three forms, all with the same clean syntax:" ]
 
             , HH.div
                 [ HP.classes [ HH.ClassName "diagram-container" ] ]
@@ -204,7 +204,7 @@ render _ =
             , HH.p
                 [ HP.classes [ HH.ClassName "code-highlight" ] ]
                 [ HH.text "Philosophy: "
-                , HH.text "Runtime errors in D3 become compile-time errors in PSD3v2."
+                , HH.text "Runtime errors in D3 become compile-time errors in PSD3."
                 ]
             ]
 
@@ -217,7 +217,7 @@ render _ =
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
                 [ HH.text "Common Attributes" ]
             , HH.p_
-                [ HH.text "PSD3v2 provides typed wrappers for all common SVG and HTML attributes:" ]
+                [ HH.text "PSD3 provides typed wrappers for all common SVG and HTML attributes:" ]
 
             , HH.h3_ [ HH.text "Positioning" ]
             , HH.p_
@@ -263,7 +263,7 @@ render _ =
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
                 [ HH.text "Summary" ]
             , HH.p_
-                [ HH.text "PSD3v2's attribute system:" ]
+                [ HH.text "PSD3's attribute system:" ]
             , HH.ul_
                 [ HH.li_ [ HH.text "Three forms: static, datum function, datum+index" ]
                 , HH.li_ [ HH.text "Resolved at compile time via IsAttribute typeclass" ]

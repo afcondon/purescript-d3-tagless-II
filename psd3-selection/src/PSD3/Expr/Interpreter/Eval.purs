@@ -1,4 +1,4 @@
--- | PSD3v3 Eval Interpreter
+-- | Eval Interpreter
 -- |
 -- | Evaluates expressions to concrete values.
 -- | This is what runs at D3 render time - datum -> value.

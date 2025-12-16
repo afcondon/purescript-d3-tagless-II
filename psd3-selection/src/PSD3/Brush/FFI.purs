@@ -1,4 +1,4 @@
-module PSD3v2.Brush.FFI
+module PSD3.Brush.FFI
   ( attachBrush_
   , attachBrushX_
   , attachBrushY_

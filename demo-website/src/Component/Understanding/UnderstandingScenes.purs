@@ -61,7 +61,7 @@ render _ =
                 [ HP.classes [ HH.ClassName "tutorial-title" ] ]
                 [ HH.text "Scene Structures & Transitions" ]
             , HH.p_
-                [ HH.text "Complex interactive visualizations like force-directed graphs involve managing multiple concerns: user input, simulation physics, state transitions, and DOM updates. PSD3v2's Scene structures make this complexity declarative." ]
+                [ HH.text "Complex interactive visualizations like force-directed graphs involve managing multiple concerns: user input, simulation physics, state transitions, and DOM updates. PSD3's Scene structures make this complexity declarative." ]
 
             -- Section navigation cards
             , HH.div
@@ -149,7 +149,7 @@ render _ =
                 ]
 
             , HH.p_
-                [ HH.text "When the scene changes, PSD3v2 automatically:" ]
+                [ HH.text "When the scene changes, PSD3 automatically:" ]
             , HH.ul_
                 [ HH.li_ [ HH.text "Calculates the diff between old and new data" ]
                 , HH.li_ [ HH.text "Creates enter selections for new data" ]
@@ -229,7 +229,7 @@ render _ =
                 ]
 
             , HH.p_
-                [ HH.text "Despite this complexity, the core update logic is declarative - you specify the target scene and PSD3v2 handles the rest."
+                [ HH.text "Despite this complexity, the core update logic is declarative - you specify the target scene and PSD3 handles the rest."
                 ]
 
             , HH.p

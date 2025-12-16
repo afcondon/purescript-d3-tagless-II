@@ -1,4 +1,4 @@
--- | PSD3v3 Integration with v2 Selection System
+-- | Integration with Selection System
 -- |
 -- | This module bridges the v3 "finally tagless" attribute DSL with the
 -- | v2 selection/update pattern. v3 expressions compile to v2 attributes,

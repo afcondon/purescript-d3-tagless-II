@@ -61,7 +61,7 @@ render _ =
                 [ HP.classes [ HH.ClassName "tutorial-title" ] ]
                 [ HH.text "TreeAPI: Declarative Visualization" ]
             , HH.p_
-                [ HH.text "TreeAPI provides a declarative way to build visualization structures. Instead of imperative method chains, you declare the tree structure you want and PSD3v2 renders it. This makes static visualizations extremely succinct while maintaining full type safety." ]
+                [ HH.text "TreeAPI provides a declarative way to build visualization structures. Instead of imperative method chains, you declare the tree structure you want and PSD3 renders it. This makes static visualizations extremely succinct while maintaining full type safety." ]
 
             -- Section navigation cards
             , HH.div
@@ -82,7 +82,7 @@ render _ =
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
                 [ HH.text "Architecture: The Layer Cake" ]
             , HH.p_
-                [ HH.text "PSD3v2 is organized in layers. TreeAPI and Simulation API are high-level, declarative APIs that sit on top of the core SelectionM layer:" ]
+                [ HH.text "PSD3 is organized in layers. TreeAPI and Simulation API are high-level, declarative APIs that sit on top of the core SelectionM layer:" ]
 
             , HH.div
                 [ HP.classes [ HH.ClassName "diagram-container" ] ]

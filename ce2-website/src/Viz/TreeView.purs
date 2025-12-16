@@ -37,8 +37,8 @@ import Data.TreeLayout as TreeLayout
 import Data.TreeLayout (TreeOrientation(..))
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M)
-import PSD3v2.Transform (transformCircles, transformPaths, removeElement)
-import PSD3v2.Classify (classifyElements, clearClasses)
+import PSD3.Transform (transformCircles, transformPaths, removeElement)
+import PSD3.Classify (classifyElements, clearClasses)
 import PSD3.AST as T
 import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.Expr.Integration (v3AttrFn, v3AttrFnStr, v3AttrStr)

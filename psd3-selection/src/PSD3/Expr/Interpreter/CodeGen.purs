@@ -1,4 +1,4 @@
--- | PSD3v3 CodeGen Interpreter
+-- | CodeGen Interpreter
 -- |
 -- | Generates PureScript source code from expressions.
 -- | This enables true round-tripping: visualization -> code -> visualization.

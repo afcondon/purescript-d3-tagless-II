@@ -1,4 +1,4 @@
-module PSD3v2.Tooltip
+module PSD3.Tooltip
   ( -- * Core API
     showTooltip
   , hideTooltip

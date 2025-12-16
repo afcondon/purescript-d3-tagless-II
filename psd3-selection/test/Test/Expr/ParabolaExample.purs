@@ -1,8 +1,8 @@
--- | PSD3v3 Parabola Example
+-- | Parabola Example
 -- |
 -- | A complete example showing the v3 DSL for a real visualization.
 -- | Demonstrates how the same definitions work across all interpreters.
-module Test.PSD3.Expr.ParabolaExample where
+module Test.Expr.ParabolaExample where
 
 import Prelude hiding (add, sub, mul, div)
 
@@ -168,7 +168,7 @@ pureSVGParabola points =
 
 runExample :: Effect Unit
 runExample = do
-  log "\n=== PSD3v3 Parabola Example ==="
+  log "\n=== Expression Parabola Example ==="
 
   log "\n--- Scale Functions (polymorphic definitions) ---"
   log "scaleX = (xVal +: 10.0) *: 15.0 +: 50.0"

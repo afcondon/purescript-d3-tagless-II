@@ -61,7 +61,7 @@ render _ =
                 [ HP.classes [ HH.ClassName "tutorial-title" ] ]
                 [ HH.text "The Grammar of D3" ]
             , HH.p_
-                [ HH.text "D3 can be understood as an embedded Domain Specific Language for data visualization. While the full API has a large surface area, the essential grammar is remarkably small. PSD3v2 captures this grammar in a type-safe, composable way." ]
+                [ HH.text "D3 can be understood as an embedded Domain Specific Language for data visualization. While the full API has a large surface area, the essential grammar is remarkably small. PSD3 captures this grammar in a type-safe, composable way." ]
 
             -- Section navigation cards
             , HH.div
@@ -90,7 +90,7 @@ render _ =
                     [ HH.tr_
                         [ HH.th_ [ HH.text "Primitive" ]
                         , HH.th_ [ HH.text "Function" ]
-                        , HH.th_ [ HH.text "PSD3v2 API" ]
+                        , HH.th_ [ HH.text "PSD3 API" ]
                         ]
                     ]
                 , HH.tbody_
@@ -155,7 +155,7 @@ render _ =
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
                 [ HH.text "Selection States (Phantom Types)" ]
             , HH.p_
-                [ HH.text "PSD3v2 uses phantom types to track what operations are legal on a selection. This catches errors at compile time that D3 would only catch at runtime:" ]
+                [ HH.text "PSD3 uses phantom types to track what operations are legal on a selection. This catches errors at compile time that D3 would only catch at runtime:" ]
 
             , HH.div
                 [ HP.classes [ HH.ClassName "diagram-container" ] ]
@@ -303,7 +303,7 @@ render _ =
                 [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
                 [ HH.text "Summary" ]
             , HH.p_
-                [ HH.text "The D3 grammar in PSD3v2:" ]
+                [ HH.text "The D3 grammar in PSD3:" ]
             , HH.ul_
                 [ HH.li_ [ HH.text "Four primitives: select, append, join, attr" ]
                 , HH.li_ [ HH.text "Phantom types enforce correct operation ordering" ]

@@ -1,6 +1,6 @@
 // FFI for ChordDiagram
 import { select } from "d3-selection";
-import { showTooltip_, hideTooltip_ } from "../../psd3-selection/src/PSD3v2/Tooltip.js";
+import { showTooltip_, hideTooltip_ } from "../../psd3-selection/src/PSD3/Tooltip.js";
 
 // Clear any existing chord diagram SVG
 export const clearChordSvg_ = () => {

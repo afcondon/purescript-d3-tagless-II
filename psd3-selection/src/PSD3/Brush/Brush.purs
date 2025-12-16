@@ -6,7 +6,7 @@
 -- | ## Basic Usage
 -- |
 -- | ```purescript
--- | import PSD3v2.Brush (attachBrush, BrushSelection(..))
+-- | import PSD3.Brush (attachBrush, BrushSelection(..))
 -- |
 -- | -- Attach a 2D brush to a <g> element
 -- | brushHandle <- attachBrush brushGroup
@@ -36,7 +36,7 @@
 -- |     -- Brush cleared, show all points
 -- |     resetPointOpacity
 -- | ```
-module PSD3v2.Brush
+module PSD3.Brush
   ( -- * Brush Attachment
     attachBrush
   , attachBrushX
@@ -46,7 +46,7 @@ module PSD3v2.Brush
   , moveBrush
   , getBrushSelection
     -- * Types (re-exported)
-  , module PSD3v2.Brush.Types
+  , module PSD3.Brush.Types
   , module ReExportHandle
   ) where
 
@@ -55,10 +55,10 @@ import Prelude
 import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable, toMaybe, toNullable)
 import Effect (Effect)
-import PSD3v2.Brush.FFI (BrushHandle) as ReExportHandle
-import PSD3v2.Brush.FFI (BrushHandle)
-import PSD3v2.Brush.FFI as FFI
-import PSD3v2.Brush.Types (BrushConfig, BrushEvent, BrushExtent, BrushSelection(..), defaultBrushConfig, isInSelection, selectionHeight, selectionWidth)
+import PSD3.Brush.FFI (BrushHandle) as ReExportHandle
+import PSD3.Brush.FFI (BrushHandle)
+import PSD3.Brush.FFI as FFI
+import PSD3.Brush.Types (BrushConfig, BrushEvent, BrushExtent, BrushSelection(..), defaultBrushConfig, isInSelection, selectionHeight, selectionWidth)
 import Web.DOM.Element (Element)
 
 -- | Attach a 2D brush to an element

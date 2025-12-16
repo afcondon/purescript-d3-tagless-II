@@ -1,6 +1,6 @@
 -- | General Update Pattern - V2 Implementation
 -- |
--- | The classic D3 enter/update/exit pattern using PSD3v2 primitives.
+-- | The classic D3 enter/update/exit pattern using PSD3 primitives.
 -- | Letters appear (green, fall in), update (gray, slide), exit (brown, fall out).
 module D3.Viz.GUPv2 where
 

@@ -1,10 +1,10 @@
--- | PSD3v3 Tree Example
+-- | Tree Example
 -- |
 -- | Demonstrates how the v3 DSL handles tree layout patterns:
 -- | - Node positioning from layout coordinates
 -- | - Link paths connecting parent to child
 -- | - Conditional styling based on depth/leaf status
-module Test.PSD3.Expr.TreeExample where
+module Test.Expr.TreeExample where
 
 import Prelude hiding (add)
 
@@ -150,7 +150,7 @@ treeLinkPath = linkVertical linkSourceX linkSourceY linkTargetX linkTargetY
 
 runExample :: Effect Unit
 runExample = do
-  log "\n=== PSD3v3 Tree Example ==="
+  log "\n=== Expression Tree Example ==="
 
   log "\n--- Node Attribute Expressions ---"
   log "nodeRadius = if hasChildren then 8 else 5"

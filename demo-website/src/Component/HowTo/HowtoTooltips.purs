@@ -62,7 +62,7 @@ render _ =
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3v2.Tooltip (onTooltip, onTooltipHide)
+                    [ HH.text """import PSD3.Tooltip (onTooltip, onTooltipHide)
 
 -- In your render callback, attach to elements:
 _ <- on (onTooltip \\d -> d.name <> ": " <> show d.value) circles
@@ -92,7 +92,7 @@ _ <- on onTooltipHide circles""" ]
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3v2.Tooltip (setTooltipClass)
+                    [ HH.text """import PSD3.Tooltip (setTooltipClass)
 
 -- In initialization:
 liftEffect $ setTooltipClass "my-custom-tooltip\"""" ]
@@ -112,7 +112,7 @@ liftEffect $ setTooltipClass "my-custom-tooltip\"""" ]
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3v2.Tooltip (onTooltip, hideTooltip)
+                    [ HH.text """import PSD3.Tooltip (onTooltip, hideTooltip)
 
 foreign import highlightConnected_ :: MyNode -> Effect Unit
 foreign import clearHighlights_ :: Effect Unit

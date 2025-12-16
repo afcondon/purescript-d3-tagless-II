@@ -19,7 +19,7 @@
 -- |   , y2: lerp 0.0 link.targetY progress
 -- |   }
 -- | ```
-module PSD3v2.Transform
+module PSD3.Transform
   ( transformCircles
   , transformLines
   , transformPaths

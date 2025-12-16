@@ -2,7 +2,7 @@ module D3.Viz.AnimatedTreeClusterLoop where
 
 -- | Auto-looping animated transition between Tree and Cluster layouts
 -- | For Tour Motion page - no manual controls, just automatic cycling
--- | V2 implementation using PSD3v2 primitives
+-- | V2 implementation using PSD3 primitives
 
 import Prelude
 

@@ -5,22 +5,22 @@ import Prelude
 import Effect (Effect)
 import Effect.Console (log)
 import Test.SemiQuine.TreeToCodeSpec as TreeToCodeSpec
-import Test.PSD3.Expr.ExprSpec as ExprSpec
-import Test.PSD3.Expr.PathSpec as PathSpec
-import Test.PSD3.Expr.ParabolaExample as ParabolaExample
-import Test.PSD3.Expr.SankeyExample as SankeyExample
-import Test.PSD3.Expr.TreeExample as TreeExample
-import Test.PSD3.Expr.UpdatePatternExample as UpdatePatternExample
+import Test.Expr.ExprSpec as ExprSpec
+import Test.Expr.PathSpec as PathSpec
+import Test.Expr.ParabolaExample as ParabolaExample
+import Test.Expr.SankeyExample as SankeyExample
+import Test.Expr.TreeExample as TreeExample
+import Test.Expr.UpdatePatternExample as UpdatePatternExample
 
 main :: Effect Unit
 main = do
   log "=== SemiQuine TreeToCode Tests ==="
   TreeToCodeSpec.runTests
 
-  log "\n=== PSD3v3 Expression DSL Tests ==="
+  log "\n=== Expression DSL Tests ==="
   ExprSpec.runTests
 
-  log "\n=== PSD3v3 Path DSL Tests ==="
+  log "\n=== Path DSL Tests ==="
   PathSpec.runTests
 
   ParabolaExample.runExample

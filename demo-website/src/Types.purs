@@ -98,7 +98,7 @@ data Route
   | HowtoTreeExplorer     -- Interactive tree layout explorer
   | Understanding   -- Conceptual overview: index page
   -- Understanding sub-pages
-  | UnderstandingGrammar       -- Grammar of D3 in PSD3v2
+  | UnderstandingGrammar       -- Grammar of D3 in PSD3
   | UnderstandingAttributes    -- Type-safe attribute system with phantom types
   | UnderstandingSelections    -- Selection phantom types (Indexed Monad pattern)
   | UnderstandingTreeAPI       -- TreeAPI declarative layer
@@ -127,7 +127,7 @@ data Route
   | AnimatedTreeCluster  -- Animated Tree ↔ Cluster transitions (flagship example from yesterday)
   | GeneralUpdatePattern  -- Classic GUP with animated letters (v1 restored)
   | LesMisGUPTree   -- Les Mis with Tree API + GUP + Dynamic Layouts (proof-of-concept)
-  | LesMisGUP       -- Les Mis with declarative scene-based PSD3v2 + GUP (clean example)
+  | LesMisGUP       -- Les Mis with declarative scene-based PSD3 + GUP (clean example)
   | LesMisGUPSimple -- Les Mis minimal GUP with SceneNestedJoin (12-line update function!)
   | LesMisGUPTreeAPI -- Les Mis testing renderTreeWithSimulation pattern
   | LesMisGUPClean  -- Les Mis GUP with existing primitives (no wrappers!)
@@ -192,7 +192,7 @@ instance showRoute :: Show Route where
   show AnimatedTreeCluster = "Animated Tree ↔ Cluster"
   show GeneralUpdatePattern = "General Update Pattern (Letters)"
   show LesMisGUPTree = "Les Misérables GUP (Tree API)"
-  show LesMisGUP = "Les Misérables GUP (PSD3v2)"
+  show LesMisGUP = "Les Misérables GUP (PSD3)"
   show LesMisGUPSimple = "Les Misérables GUP (Simple)"
   show LesMisGUPTreeAPI = "Les Misérables GUP (TreeAPI)"
   show LesMisGUPClean = "Les Misérables GUP (Clean)"

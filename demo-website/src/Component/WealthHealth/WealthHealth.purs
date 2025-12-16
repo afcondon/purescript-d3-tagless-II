@@ -76,7 +76,7 @@ render state =
                                 OnHoverOnly -> ""
                             ]
                         ]
-                        []  -- PSD3v2 will render SVG here
+                        []  -- PSD3 will render SVG here
                     , renderTooltip state
                     ]
             ]

@@ -23,7 +23,7 @@ module PSD3.Internal.Transition.Scene
 -- |
 -- | This module provides general-purpose transition types that can be used
 -- | for any visualization, not just simulations. For simulation-specific
--- | scene configuration, see PSD3v2.Simulation.Scene.
+-- | scene configuration, see PSD3.Simulation.Scene.
 
 -- | How nodes should appear when they enter the visualization
 data EnterBehavior

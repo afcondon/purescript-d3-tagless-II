@@ -21,7 +21,7 @@ import PSD3.Internal.Attribute (Attribute)
 -- v3 Integration: all attributes via v3Attr/v3AttrStr (no ToAttr typeclass)
 import PSD3.Expr.Integration (v3Attr, v3AttrStr)
 import PSD3.Expr.Expr (lit, str)
-import PSD3v2.Axis.Axis (axisBottom, axisLeft, renderAxis, Scale)
+import PSD3.Axis.Axis (axisBottom, axisLeft, renderAxis, Scale)
 import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.AST (Tree)
 import PSD3.AST as T

@@ -174,11 +174,11 @@ withTransitionExit (transition (Milliseconds 500.0)) exitSelection
             , HH.p_ [ HH.text "See these files for transition usage:" ]
             , HH.ul_
                 [ HH.li_
-                    [ HH.code_ [ HH.text "src/lib/PSD3v2/Transition/Types.purs" ]
+                    [ HH.code_ [ HH.text "src/lib/PSD3/Transition/Types.purs" ]
                     , HH.text " - All easing options"
                     ]
                 , HH.li_
-                    [ HH.code_ [ HH.text "src/lib/PSD3v2/Capabilities/Transition.purs" ]
+                    [ HH.code_ [ HH.text "src/lib/PSD3/Capabilities/Transition.purs" ]
                     , HH.text " - TransitionM type class"
                     ]
                 ]

@@ -11,7 +11,7 @@ import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
 import PSD3.AST (Tree)
 import PSD3.AST as T
 import PSD3.Internal.Behavior.Types (Behavior(..), MouseEventInfo)
-import PSD3v2.Tooltip (showTooltip, hideTooltip)
+import PSD3.Tooltip (showTooltip, hideTooltip)
 import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
 import PSD3.Expr.Expr (lit, str)
 import Web.DOM.Element (Element)

@@ -2,7 +2,7 @@
 import { select } from "d3-selection";
 import { scaleLinear } from "d3-scale";
 import { interpolateGreens, interpolateOranges } from "d3-scale-chromatic";
-import { showTooltip_, hideTooltip_ } from "../../psd3-selection/src/PSD3v2/Tooltip.js";
+import { showTooltip_, hideTooltip_ } from "../../psd3-selection/src/PSD3/Tooltip.js";
 
 // Color constants
 const noConnectionColor = "#1a202c";  // Dark background for empty cells

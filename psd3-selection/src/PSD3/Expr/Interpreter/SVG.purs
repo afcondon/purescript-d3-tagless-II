@@ -1,4 +1,4 @@
--- | PSD3v3 SVG Interpreter
+-- | SVG Interpreter
 -- |
 -- | Generates SVG attribute strings from expressions.
 -- | Enables server-side SVG generation - zero client JS needed!

@@ -1,9 +1,9 @@
--- | PSD3v3 Update Pattern Example
+-- | Update Pattern Example
 -- |
 -- | Demonstrates integration of v3 attribute DSL with the v2 selection
 -- | system's enter/update/exit pattern. Shows how polymorphic expressions
 -- | compile to runtime attributes for DOM manipulation.
-module Test.PSD3.Expr.UpdatePatternExample where
+module Test.Expr.UpdatePatternExample where
 
 import Prelude hiding (add)
 
@@ -133,7 +133,7 @@ exitFill = s "#95a5a6"
 
 runExample :: Effect Unit
 runExample = do
-  log "\n=== PSD3v3 Update Pattern Example ==="
+  log "\n=== Expression Update Pattern Example ==="
 
   log "\n--- v3 Attribute Expressions ---"
   log "barX = index * barWidth"

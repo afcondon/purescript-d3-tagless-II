@@ -1,4 +1,4 @@
--- | PSD3v3 Core Expression DSL
+-- | Core Expression DSL
 -- |
 -- | Finally tagless encoding for attribute expressions.
 -- | Enables multiple interpreters: Eval (D3), CodeGen, SVG, English, etc.

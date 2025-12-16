@@ -20,7 +20,7 @@ import PSD3.Shared.Data (DataFile(..), loadDataFile, parseCSVRow)
 -- v3 Integration: all attributes via v3Attr/v3AttrStr (no ToAttr typeclass)
 import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFnStr)
 import PSD3.Expr.Expr (lit, str)
-import PSD3v2.Axis.Axis (axisBottom, axisLeft, renderAxis, Scale)
+import PSD3.Axis.Axis (axisBottom, axisLeft, renderAxis, Scale)
 import PSD3.Internal.Capabilities.Selection (select, renderTree, on)
 import PSD3.Internal.Behavior.Types (onMouseLeaveWithInfo, onMouseMoveWithInfo, MouseEventInfo)
 import Data.Map as Map
@@ -28,7 +28,7 @@ import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
 import PSD3.AST (Tree, joinData)
 import PSD3.AST as T
-import PSD3v2.Tooltip (showTooltip, hideTooltip)
+import PSD3.Tooltip (showTooltip, hideTooltip)
 import Web.DOM.Element (Element)
 import Effect.Ref as Ref
 import Data.Maybe (Maybe(..)) as Maybe

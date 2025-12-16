@@ -1,7 +1,7 @@
--- | Tests for PSD3v3 Path DSL
+-- | Tests for Path DSL
 -- |
 -- | Demonstrates path generation for trees, Sankey, and chord diagrams
-module Test.PSD3.Expr.PathSpec where
+module Test.Expr.PathSpec where
 
 import Prelude
 

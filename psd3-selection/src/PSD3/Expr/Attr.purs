@@ -1,4 +1,4 @@
--- | PSD3v3 Attribute DSL
+-- | Attribute DSL
 -- |
 -- | Finally tagless encoding for SVG/HTML attributes.
 -- | Each attribute function takes a repr value and produces repr Attr.

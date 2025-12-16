@@ -1,4 +1,4 @@
--- | PSD3v3 General Update Pattern Demo
+-- | Expression DSL General Update Pattern Demo
 -- |
 -- | The classic D3 "letters" example reimagined with:
 -- | - v3 polymorphic expressions for computed attributes
@@ -160,7 +160,7 @@ textContent content = v3AttrStr "textContent" (str content)
 -- | Initialize the GUP demo - creates SVG container and renders initial letters
 v3GUPDemo :: Effect Unit
 v3GUPDemo = do
-  Console.log "=== PSD3v3 General Update Pattern Demo ==="
+  Console.log "=== Expression DSL General Update Pattern Demo ==="
   Console.log ""
   Console.log "v3 Expression for X position:"
   Console.log $ "  letterX = " <> runCodeGen (letterX :: CodeGen Number)

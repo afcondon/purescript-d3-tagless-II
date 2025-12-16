@@ -1,7 +1,7 @@
 module D3.Viz.AnimatedTreeClusterv2 where
 
 -- | Animated transition between Tree (Reingold-Tilford) and Cluster (dendrogram) layouts
--- | V2 implementation using PSD3v2 primitives
+-- | V2 implementation using PSD3 primitives
 
 import Prelude hiding (append)
 

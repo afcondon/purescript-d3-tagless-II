@@ -3,8 +3,8 @@
 -- | Brushable Scatterplot Matrix using PSD3 library APIs.
 -- | Demonstrates:
 -- | - PSD3.Scale for scales (linear, domain, range, ticks, invert, nice)
--- | - PSD3v2.Brush for brush interaction
--- | - PSD3v2 Tree API for declarative rendering
+-- | - PSD3.Brush for brush interaction
+-- | - PSD3 Tree API for declarative rendering
 -- |
 -- | This is a pure PureScript implementation with no local FFI.
 -- | State is managed externally (e.g., by a Halogen component).
@@ -48,7 +48,7 @@ import PSD3.Scale (ContinuousScale, applyScale, ticks, nice)
 import PSD3.Internal.Attribute (Attribute)
 import PSD3.Expr.Integration (v3Attr, v3AttrStr)
 import PSD3.Expr.Expr (lit, str)
-import PSD3v2.Brush (attachBrush, clearBrush, BrushHandle, BrushSelection, BrushConfig)
+import PSD3.Brush (attachBrush, clearBrush, BrushHandle, BrushSelection, BrushConfig)
 import PSD3.Internal.Capabilities.Selection (select, renderTree, clear)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2M)
 import PSD3.Internal.Selection.Types (ElementType(..)) as ET

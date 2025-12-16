@@ -10,7 +10,7 @@ import Data.Number (pow, sqrt)
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
-import PSD3v2.Axis.Axis (axisBottom, axisLeft, renderAxis)
+import PSD3.Axis.Axis (axisBottom, axisLeft, renderAxis)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)

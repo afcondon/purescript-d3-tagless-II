@@ -1,7 +1,7 @@
 -- | D3 Brush Types
 -- |
 -- | Types for brush selection and configuration.
-module PSD3v2.Brush.Types
+module PSD3.Brush.Types
   ( BrushSelection(..)
   , BrushExtent
   , BrushConfig

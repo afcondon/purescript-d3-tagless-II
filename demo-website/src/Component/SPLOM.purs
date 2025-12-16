@@ -5,7 +5,7 @@
 -- |
 -- | This component uses the pure PureScript SPLOM implementation which demonstrates:
 -- | - PSD3.Scale for scales
--- | - PSD3v2.Brush for brush interaction
+-- | - PSD3.Brush for brush interaction
 -- | - Tree API for declarative rendering
 -- |
 -- | State is managed by Halogen, not by Effect.Ref.
@@ -26,7 +26,7 @@ import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
 import PSD3.Scale (ContinuousScale, invert)
 import PSD3.Shared.SiteNav as SiteNav
-import PSD3v2.Brush (BrushSelection(..))
+import PSD3.Brush (BrushSelection(..))
 import D3.Viz.SPLOM.Data (loadPenguins)
 import D3.Viz.SPLOM.Types (Penguin, NumericDimension)
 import D3.Viz.SPLOM.SPLOM as SPLOM

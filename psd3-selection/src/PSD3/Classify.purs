@@ -19,7 +19,7 @@
 -- | clearClasses "#nodes" "circle"
 -- |   ["highlighted-source", "highlighted-upstream", "highlighted-downstream", "dimmed"]
 -- | ```
-module PSD3v2.Classify
+module PSD3.Classify
   ( classifyElements
   , clearClasses
   ) where

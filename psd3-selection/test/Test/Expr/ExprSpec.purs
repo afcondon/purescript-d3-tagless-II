@@ -1,7 +1,7 @@
--- | Tests for PSD3v3 Expression DSL
+-- | Tests for Expression DSL
 -- |
 -- | Demonstrates the key benefit: one expression, multiple interpretations
-module Test.PSD3.Expr.ExprSpec where
+module Test.Expr.ExprSpec where
 
 import Prelude hiding (add, sub, mul, div)
 
@@ -60,23 +60,23 @@ scaleY = add (lit 300.0) (mul yField (lit (-2.5)))
 
 runTests :: Effect Unit
 runTests = do
-  log "\n--- PSD3v3 Static Expression Tests ---"
+  log "\n--- Expression Static Expression Tests ---"
   testStaticEval
   testStaticCodeGen
   testStaticSVG
 
-  log "\n--- PSD3v3 Datum Expression Tests ---"
+  log "\n--- Expression Datum Expression Tests ---"
   testDatumEval
   testDatumCodeGen
   testDatumSVG
 
-  log "\n--- PSD3v3 Trig Expression Tests ---"
+  log "\n--- Expression Trig Expression Tests ---"
   testTrigExpr
 
-  log "\n--- PSD3v3 Unit Tests ---"
+  log "\n--- Expression Unit Tests ---"
   demonstrateUnits
 
-  log "\n--- PSD3v3 Sugar Syntax ---"
+  log "\n--- Expression Sugar Syntax ---"
   demonstrateSugar
 
   log "\n--- The Money Shot: Same Expression, Three Outputs ---"

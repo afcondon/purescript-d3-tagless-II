@@ -1,4 +1,4 @@
--- | PSD3v3 Pure SVG Interpreter
+-- | Pure SVG Interpreter
 -- |
 -- | Generates complete SVG documents without any D3 dependency.
 -- | Use cases:
