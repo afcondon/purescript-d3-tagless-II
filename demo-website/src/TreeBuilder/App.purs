@@ -18,7 +18,7 @@ module TreeBuilder.App
 import Prelude
 
 import Data.Array as Array
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
@@ -35,8 +35,13 @@ import TreeBuilder.Types (BuilderTree(..), BuilderNode, NodeId, AttributeChoice(
 import TreeBuilder.ToTree (builderToTreeWithData)
 
 -- INTERPRETERS - all work on Tree SampleDatum
-import PSD3.Interpreter.MetaAST (toAST, TreeAST(..))
-import PSD3.Interpreter.SemiQuine.TreeToCode (treeToCodeWithSample)
+import PSD3.Interpreter.MetaAST (TreeAST(..), toAST)
+
+-- Code generation from BuilderTree (preserves AttributeChoice info)
+import TreeBuilder.BuilderToCode (builderToCode)
+
+-- Note: BuilderToAST not used - we interpret the actual Tree AST to be honest
+-- about what MetaAST can extract from opaque attribute functions
 
 -- D3 rendering for AST visualization
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
@@ -259,7 +264,7 @@ renderQ2MetaAST _ =
     ]
 
 -- | Convert TreeAST to a visual tree diagram using D3
--- | This visualizes the AST structure with nodes and connecting lines
+-- | This visualizes the actual AST structure from the MetaAST interpreter
 astToTreeVisualization :: TreeAST -> T.Tree Unit
 astToTreeVisualization ast =
   T.named SVG "ast-svg"
@@ -298,7 +303,7 @@ astToTreeVisualization ast =
                , T.elem Text
                    [ v3Attr "x" (lit xPos)
                    , v3Attr "y" (lit (toNumber level * 70.0 + 4.0))
-                   , v3AttrStr "text-content" (str label)
+                   , v3AttrStr "textContent" (str label)
                    , v3AttrStr "text-anchor" (str "middle")
                    , v3AttrStr "fill" (str "white")
                    , v3AttrStr "font-size" (str "10px")
@@ -308,7 +313,7 @@ astToTreeVisualization ast =
                , T.elem Text
                    [ v3Attr "x" (lit xPos)
                    , v3Attr "y" (lit (toNumber level * 70.0 + 38.0))
-                   , v3AttrStr "text-content" (str ("attrs: " <> show attrCount))
+                   , v3AttrStr "textContent" (str ("attrs: " <> show attrCount))
                    , v3AttrStr "text-anchor" (str "middle")
                    , v3AttrStr "fill" (str "#666")
                    , v3AttrStr "font-size" (str "9px")
@@ -349,7 +354,7 @@ astToTreeVisualization ast =
             , T.elem Text
                 [ v3Attr "x" (lit xPos)
                 , v3Attr "y" (lit (toNumber level * 70.0 + 4.0))
-                , v3AttrStr "text-content" (str ("Join: " <> name))
+                , v3AttrStr "textContent" (str ("Join: " <> name))
                 , v3AttrStr "text-anchor" (str "middle")
                 , v3AttrStr "fill" (str "white")
                 , v3AttrStr "font-size" (str "9px")
@@ -357,7 +362,7 @@ astToTreeVisualization ast =
             , T.elem Text
                 [ v3Attr "x" (lit xPos)
                 , v3Attr "y" (lit (toNumber level * 70.0 + 38.0))
-                , v3AttrStr "text-content" (str ("data: " <> show dataCount))
+                , v3AttrStr "textContent" (str ("data: " <> show dataCount))
                 , v3AttrStr "text-anchor" (str "middle")
                 , v3AttrStr "fill" (str "#666")
                 , v3AttrStr "font-size" (str "9px")
@@ -380,7 +385,7 @@ astToTreeVisualization ast =
             , T.elem Text
                 [ v3Attr "x" (lit xPos)
                 , v3Attr "y" (lit (toNumber level * 70.0 + 4.0))
-                , v3AttrStr "text-content" (str ("Nested: " <> name))
+                , v3AttrStr "textContent" (str ("Nested: " <> name))
                 , v3AttrStr "text-anchor" (str "middle")
                 , v3AttrStr "fill" (str "white")
                 , v3AttrStr "font-size" (str "9px")
@@ -388,7 +393,7 @@ astToTreeVisualization ast =
             , T.elem Text
                 [ v3Attr "x" (lit xPos)
                 , v3Attr "y" (lit (toNumber level * 70.0 + 38.0))
-                , v3AttrStr "text-content" (str ("data: " <> show dataCount))
+                , v3AttrStr "textContent" (str ("data: " <> show dataCount))
                 , v3AttrStr "text-anchor" (str "middle")
                 , v3AttrStr "fill" (str "#666")
                 , v3AttrStr "font-size" (str "9px")
@@ -411,7 +416,7 @@ astToTreeVisualization ast =
             , T.elem Text
                 [ v3Attr "x" (lit xPos)
                 , v3Attr "y" (lit (toNumber level * 70.0 + 4.0))
-                , v3AttrStr "text-content" (str ("Scene: " <> name))
+                , v3AttrStr "textContent" (str ("Scene: " <> name))
                 , v3AttrStr "text-anchor" (str "middle")
                 , v3AttrStr "fill" (str "white")
                 , v3AttrStr "font-size" (str "9px")
@@ -419,7 +424,7 @@ astToTreeVisualization ast =
             , T.elem Text
                 [ v3Attr "x" (lit xPos)
                 , v3Attr "y" (lit (toNumber level * 70.0 + 38.0))
-                , v3AttrStr "text-content" (str ("data: " <> show dataCount <> " {" <>
+                , v3AttrStr "textContent" (str ("data: " <> show dataCount <> " {" <>
                               (if hasEnter then "E" else "") <>
                               (if hasUpdate then "U" else "") <>
                               (if hasExit then "X" else "") <> "}"))
@@ -445,7 +450,7 @@ astToTreeVisualization ast =
             , T.elem Text
                 [ v3Attr "x" (lit xPos)
                 , v3Attr "y" (lit (toNumber level * 70.0 + 4.0))
-                , v3AttrStr "text-content" (str ("SceneNested: " <> name))
+                , v3AttrStr "textContent" (str ("SceneNested: " <> name))
                 , v3AttrStr "text-anchor" (str "middle")
                 , v3AttrStr "fill" (str "white")
                 , v3AttrStr "font-size" (str "8px")
@@ -453,7 +458,7 @@ astToTreeVisualization ast =
             , T.elem Text
                 [ v3Attr "x" (lit xPos)
                 , v3Attr "y" (lit (toNumber level * 70.0 + 38.0))
-                , v3AttrStr "text-content" (str ("data: " <> show dataCount <> " {" <>
+                , v3AttrStr "textContent" (str ("data: " <> show dataCount <> " {" <>
                               (if hasEnter then "E" else "") <>
                               (if hasUpdate then "U" else "") <>
                               (if hasExit then "X" else "") <> "}"))
@@ -488,24 +493,11 @@ renderQ3SemiQuine state =
 
 getSemiQuineOutput :: State -> String
 getSemiQuineOutput state = case state.tree of
-  Nothing -> "-- No tree defined"
+  Nothing -> "-- No tree defined\n-- Select a preset to start"
   Just builderTree ->
-    let
-      -- Convert BuilderTree → Tree SampleDatum
-      tree = builderToTreeWithData builderTree state.sampleData
-      -- Get first datum for evaluation
-      firstDatum = fromMaybe defaultDatum (Array.head state.sampleData)
-    in
-      -- Use TreeToCode on the actual Tree (evaluates dynamic attrs)
-      treeToCodeWithSample firstDatum tree
-
--- Default datum for when array is empty
-defaultDatum :: SampleDatum
-defaultDatum =
-  { x: 0.0, y: 0.0, cx: 0.0, cy: 0.0, rx: 0.0, ry: 0.0, sx: 0.0, sy: 0.0
-  , radius: 10.0, width: 50.0, height: 30.0, color: "#999"
-  , label: "", name: "", value: 0.0, index: 0
-  }
+    -- Use BuilderToCode directly on BuilderTree (preserves AttributeChoice info)
+    -- This generates proper DSL syntax: v3Attr, v3AttrStr, v3AttrFn, etc.
+    builderToCode builderTree
 
 -- =============================================================================
 -- Q4: D3 Preview
@@ -784,13 +776,13 @@ handleAction = case _ of
         liftEffect $ renderPreview "#tree-builder-preview" builderTree state.sampleData
 
         -- Render AST visualization (Q2)
-        -- 1. Convert BuilderTree → Tree SampleDatum
+        -- THE KEY: Convert BuilderTree → Tree SampleDatum (the ONE AST)
         let actualTree = builderToTreeWithData builderTree state.sampleData
-        -- 2. Run MetaAST interpreter to get TreeAST
-        let ast = toAST actualTree
-        -- 3. Convert TreeAST → visual Tree for D3 rendering
-        let astVizTree = astToTreeVisualization ast
-        -- 4. Render with D3
+        -- Run MetaAST interpreter on the REAL Tree to get TreeAST
+        let treeAST = toAST actualTree
+        -- Convert TreeAST → visual Tree for D3 rendering
+        let astVizTree = astToTreeVisualization treeAST
+        -- Render with D3
         liftEffect $ runD3v2M do
           astContainer <- select "#ast-viz-output" :: _ (D3v2Selection_ SEmpty Element Unit)
           _ <- renderTree astContainer astVizTree

@@ -3994,6 +3994,13 @@
       };
     });
   })();
+  var tail2 = /* @__PURE__ */ (function() {
+    return runFn3(unconsImpl)($$const(Nothing.value))(function(v2) {
+      return function(xs) {
+        return new Just(xs);
+      };
+    });
+  })();
   var sortBy = function(comp) {
     return runFn3(sortByImpl)(comp)(function(v2) {
       if (v2 instanceof GT) {
@@ -21720,11 +21727,11 @@ clusterViz selector = launchAff_ do
     };
   };
   var from3 = function(dictShow) {
-    var show139 = show(dictShow);
+    var show138 = show(dictShow);
     return function(name16) {
       return function(f) {
         return new DataAttr(name16, function(d) {
-          return new StringValue(show139(f(d)));
+          return new StringValue(show138(f(d)));
         });
       };
     };
@@ -59507,372 +59514,6 @@ T.joined "bars" Rect data identity $ \\\\d ->
     }
   };
 
-  // output/PSD3.Interpreter.SemiQuine.TreeToCode/index.js
-  var show82 = /* @__PURE__ */ show(showNumber);
-  var show136 = /* @__PURE__ */ show(showBoolean);
-  var map124 = /* @__PURE__ */ map(functorArray);
-  var append126 = /* @__PURE__ */ append(semigroupArray);
-  var showElemType3 = function(v2) {
-    if (v2 instanceof SVG) {
-      return "SVG";
-    }
-    ;
-    if (v2 instanceof Group) {
-      return "Group";
-    }
-    ;
-    if (v2 instanceof Circle) {
-      return "Circle";
-    }
-    ;
-    if (v2 instanceof Rect) {
-      return "Rect";
-    }
-    ;
-    if (v2 instanceof Path) {
-      return "Path";
-    }
-    ;
-    if (v2 instanceof Line) {
-      return "Line";
-    }
-    ;
-    if (v2 instanceof Text) {
-      return "Text";
-    }
-    ;
-    if (v2 instanceof Div) {
-      return "Div";
-    }
-    ;
-    if (v2 instanceof Span) {
-      return "Span";
-    }
-    ;
-    if (v2 instanceof Table) {
-      return "Table";
-    }
-    ;
-    if (v2 instanceof Tbody) {
-      return "Tbody";
-    }
-    ;
-    if (v2 instanceof Thead) {
-      return "Thead";
-    }
-    ;
-    if (v2 instanceof Tr) {
-      return "Tr";
-    }
-    ;
-    if (v2 instanceof Td) {
-      return "Td";
-    }
-    ;
-    if (v2 instanceof Th) {
-      return "Th";
-    }
-    ;
-    if (v2 instanceof Defs) {
-      return "Defs";
-    }
-    ;
-    if (v2 instanceof LinearGradient) {
-      return "LinearGradient";
-    }
-    ;
-    if (v2 instanceof Stop) {
-      return "Stop";
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 177, column 16 - line 195, column 17): " + [v2.constructor.name]);
-  };
-  var showAttrValue2 = function(v2) {
-    if (v2 instanceof StringValue) {
-      return '"' + (v2.value0 + '"');
-    }
-    ;
-    if (v2 instanceof NumberValue) {
-      return show82(v2.value0);
-    }
-    ;
-    if (v2 instanceof BooleanValue) {
-      return show136(v2.value0);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 199, column 17 - line 202, column 27): " + [v2.constructor.name]);
-  };
-  var indent2 = function(n) {
-    return joinWith("")(replicate(n)("  "));
-  };
-  var attrFnName = function(v2) {
-    if (v2 === "r") {
-      return "radius";
-    }
-    ;
-    if (v2 === "stroke-width") {
-      return "strokeWidth";
-    }
-    ;
-    if (v2 === "fill-opacity") {
-      return "fillOpacity";
-    }
-    ;
-    if (v2 === "stroke-opacity") {
-      return "strokeOpacity";
-    }
-    ;
-    if (v2 === "stroke-dasharray") {
-      return "strokeDasharray";
-    }
-    ;
-    if (v2 === "font-size") {
-      return "fontSize";
-    }
-    ;
-    if (v2 === "font-family") {
-      return "fontFamily";
-    }
-    ;
-    if (v2 === "font-weight") {
-      return "fontWeight";
-    }
-    ;
-    if (v2 === "text-anchor") {
-      return "textAnchor";
-    }
-    ;
-    if (v2 === "dominant-baseline") {
-      return "dominantBaseline";
-    }
-    ;
-    if (v2 === "stop-color") {
-      return "stopColor";
-    }
-    ;
-    if (v2 === "gradientUnits") {
-      return "gradientUnits";
-    }
-    ;
-    return v2;
-  };
-  var attrToCode = function(maybeSample) {
-    return function(attr46) {
-      if (attr46 instanceof StaticAttr) {
-        return attrFnName(attr46.value0) + (" " + showAttrValue2(attr46.value1));
-      }
-      ;
-      if (attr46 instanceof DataAttr) {
-        if (maybeSample instanceof Just) {
-          var evaluated = attr46.value1(maybeSample.value0);
-          return attrFnName(attr46.value0) + (" d.<?> {- \u2192 " + (showAttrValue2(evaluated) + " -}"));
-        }
-        ;
-        if (maybeSample instanceof Nothing) {
-          return attrFnName(attr46.value0) + " d.<?>";
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 143, column 5 - line 148, column 36): " + [maybeSample.constructor.name]);
-      }
-      ;
-      if (attr46 instanceof IndexedAttr) {
-        if (maybeSample instanceof Just) {
-          var evaluated = attr46.value1(maybeSample.value0)(0);
-          return attrFnName(attr46.value0) + (" (\\d i -> <?>) {- \u2192 " + (showAttrValue2(evaluated) + " -}"));
-        }
-        ;
-        if (maybeSample instanceof Nothing) {
-          return attrFnName(attr46.value0) + " (\\d i -> <?>)";
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 151, column 5 - line 156, column 45): " + [maybeSample.constructor.name]);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 138, column 31 - line 156, column 45): " + [attr46.constructor.name]);
-    };
-  };
-  var attrsToCode = function(maybeSample) {
-    return function(attrs) {
-      var $32 = $$null3(attrs);
-      if ($32) {
-        return "[]";
-      }
-      ;
-      return "[ " + (joinWith(", ")(map124(attrToCode(maybeSample))(attrs)) + " ]");
-    };
-  };
-  var treeLines = function(maybeSample) {
-    return function(tree2) {
-      return function(indentLevel) {
-        var hasUpdate = function(spec) {
-          if (spec.updateBehavior instanceof Just) {
-            return true;
-          }
-          ;
-          if (spec.updateBehavior instanceof Nothing) {
-            return false;
-          }
-          ;
-          throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 122, column 22 - line 124, column 23): " + [spec.updateBehavior.constructor.name]);
-        };
-        var hasExit = function(spec) {
-          if (spec.exitBehavior instanceof Just) {
-            return true;
-          }
-          ;
-          if (spec.exitBehavior instanceof Nothing) {
-            return false;
-          }
-          ;
-          throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 125, column 20 - line 127, column 23): " + [spec.exitBehavior.constructor.name]);
-        };
-        var hasEnter = function(spec) {
-          if (spec.enterBehavior instanceof Just) {
-            return true;
-          }
-          ;
-          if (spec.enterBehavior instanceof Nothing) {
-            return false;
-          }
-          ;
-          throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 119, column 21 - line 121, column 23): " + [spec.enterBehavior.constructor.name]);
-        };
-        if (tree2 instanceof Node2) {
-          var elemCode = (function() {
-            if (tree2.value0.name instanceof Just) {
-              return "T.named " + (showElemType3(tree2.value0.elemType) + (' "' + (tree2.value0.name.value0 + '"')));
-            }
-            ;
-            if (tree2.value0.name instanceof Nothing) {
-              return "T.elem " + showElemType3(tree2.value0.elemType);
-            }
-            ;
-            throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 39, column 18 - line 41, column 59): " + [tree2.value0.name.constructor.name]);
-          })();
-          var childrenCode = (function() {
-            var v2 = length3(tree2.value0.children);
-            if (v2 === 0) {
-              return [];
-            }
-            ;
-            if (v2 === 1) {
-              var v1 = head2(tree2.value0.children);
-              if (v1 instanceof Just) {
-                return append126([indent2(indentLevel) + "  `T.withChild`"])(treeLines(maybeSample)(v1.value0)(indentLevel + 2 | 0));
-              }
-              ;
-              if (v1 instanceof Nothing) {
-                return [];
-              }
-              ;
-              throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 47, column 14 - line 51, column 24): " + [v1.constructor.name]);
-            }
-            ;
-            return [indent2(indentLevel) + "  `T.withChildren`", indent2(indentLevel) + ("    [ " + joinWith("\n" + (indent2(indentLevel) + "    , "))(map124(function(c2) {
-              return joinWith(" ")(treeLines(maybeSample)(c2)(0));
-            })(tree2.value0.children))), indent2(indentLevel) + "    ]"];
-          })();
-          var attrsCode = attrsToCode(maybeSample)(tree2.value0.attrs);
-          return append126([indent2(indentLevel) + elemCode, indent2(indentLevel) + ("  " + attrsCode)])(childrenCode);
-        }
-        ;
-        if (tree2 instanceof Join) {
-          var templateCode = (function() {
-            var v2 = head2(tree2.value0.joinData);
-            if (v2 instanceof Just) {
-              var templateTree = tree2.value0.template(v2.value0);
-              return treeLines(new Just(v2.value0))(templateTree)(indentLevel + 1 | 0);
-            }
-            ;
-            if (v2 instanceof Nothing) {
-              return [indent2(indentLevel + 1 | 0) + "-- (no data to evaluate template)"];
-            }
-            ;
-            throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 66, column 22 - line 71, column 78): " + [v2.constructor.name]);
-          })();
-          return append126([indent2(indentLevel) + ('T.joinData "' + (tree2.value0.name + ('" "' + (tree2.value0.key + '" data_ $ \\d ->'))))])(templateCode);
-        }
-        ;
-        if (tree2 instanceof NestedJoin) {
-          var templateCode = (function() {
-            var v2 = head2(tree2.value0.joinData);
-            if (v2 instanceof Just) {
-              var innerData = tree2.value0.decompose(v2.value0);
-              var v1 = head2(innerData);
-              if (v1 instanceof Just) {
-                var templateTree = tree2.value0.template(v1.value0);
-                return treeLines(new Just(v1.value0))(templateTree)(indentLevel + 1 | 0);
-              }
-              ;
-              if (v1 instanceof Nothing) {
-                return [indent2(indentLevel + 1 | 0) + "-- (no inner data to evaluate template)"];
-              }
-              ;
-              throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 82, column 14 - line 87, column 88): " + [v1.constructor.name]);
-            }
-            ;
-            if (v2 instanceof Nothing) {
-              return [indent2(indentLevel + 1 | 0) + "-- (no data to evaluate template)"];
-            }
-            ;
-            throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 79, column 22 - line 89, column 78): " + [v2.constructor.name]);
-          })();
-          return append126([indent2(indentLevel) + ('T.nestedJoin "' + (tree2.value0.name + ('" "' + (tree2.value0.key + '" data_ decompose $ \\inner ->'))))])(templateCode);
-        }
-        ;
-        if (tree2 instanceof SceneJoin) {
-          var templateCode = (function() {
-            var v2 = head2(tree2.value0.joinData);
-            if (v2 instanceof Just) {
-              var templateTree = tree2.value0.template(v2.value0);
-              return treeLines(new Just(v2.value0))(templateTree)(indentLevel + 1 | 0);
-            }
-            ;
-            if (v2 instanceof Nothing) {
-              return [indent2(indentLevel + 1 | 0) + "-- (no data to evaluate template)"];
-            }
-            ;
-            throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 101, column 22 - line 106, column 78): " + [v2.constructor.name]);
-          })();
-          var behaviors = (function() {
-            var $56 = hasEnter(tree2.value0);
-            if ($56) {
-              return "enter ";
-            }
-            ;
-            return "";
-          })() + ((function() {
-            var $57 = hasUpdate(tree2.value0);
-            if ($57) {
-              return "update ";
-            }
-            ;
-            return "";
-          })() + (function() {
-            var $58 = hasExit(tree2.value0);
-            if ($58) {
-              return "exit";
-            }
-            ;
-            return "";
-          })());
-          return append126([indent2(indentLevel) + ('T.sceneJoin "' + (tree2.value0.name + ('" "' + (tree2.value0.key + '" data_')))), indent2(indentLevel) + ("  -- behaviors: " + behaviors), indent2(indentLevel) + "  $ \\d ->"])(templateCode);
-        }
-        ;
-        if (tree2 instanceof SceneNestedJoin) {
-          return [indent2(indentLevel) + ('T.sceneNestedJoin "' + (tree2.value0.name + ('" "' + (tree2.value0.key + '" data_ decompose')))), indent2(indentLevel) + "  -- (scene nested join - template omitted)"];
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.Interpreter.SemiQuine.TreeToCode (line 35, column 42 - line 116, column 6): " + [tree2.constructor.name]);
-      };
-    };
-  };
-  var treeToCodeWithSample = function(sample) {
-    return function(tree2) {
-      return joinWith("\n")(treeLines(new Just(sample))(tree2)(0));
-    };
-  };
-
   // output/PSD3.Interpreter.SemiQuine.Types/index.js
   var FromField = /* @__PURE__ */ (function() {
     function FromField2(value0) {
@@ -60070,6 +59711,223 @@ T.joined "bars" Rect data identity $ \\\\d ->
     };
   };
 
+  // output/TreeBuilder.BuilderToCode/index.js
+  var show82 = /* @__PURE__ */ show(showNumber);
+  var map124 = /* @__PURE__ */ map(functorArray);
+  var append126 = /* @__PURE__ */ append(semigroupArray);
+  var showElemType3 = function(v2) {
+    if (v2 === "svg") {
+      return "SVG";
+    }
+    ;
+    if (v2 === "group") {
+      return "Group";
+    }
+    ;
+    if (v2 === "g") {
+      return "Group";
+    }
+    ;
+    if (v2 === "circle") {
+      return "Circle";
+    }
+    ;
+    if (v2 === "rect") {
+      return "Rect";
+    }
+    ;
+    if (v2 === "path") {
+      return "Path";
+    }
+    ;
+    if (v2 === "line") {
+      return "Line";
+    }
+    ;
+    if (v2 === "text") {
+      return "Text";
+    }
+    ;
+    if (v2 === "div") {
+      return "Div";
+    }
+    ;
+    if (v2 === "span") {
+      return "Span";
+    }
+    ;
+    if (v2 === "table") {
+      return "Table";
+    }
+    ;
+    if (v2 === "tbody") {
+      return "Tbody";
+    }
+    ;
+    if (v2 === "thead") {
+      return "Thead";
+    }
+    ;
+    if (v2 === "tr") {
+      return "Tr";
+    }
+    ;
+    if (v2 === "td") {
+      return "Td";
+    }
+    ;
+    if (v2 === "th") {
+      return "Th";
+    }
+    ;
+    if (v2 === "defs") {
+      return "Defs";
+    }
+    ;
+    return v2;
+  };
+  var indent2 = function(n) {
+    return joinWith("")(replicate(n)("  "));
+  };
+  var attrToCode = function(binding) {
+    if (binding.choice instanceof ConstantNumber) {
+      return 'v3Attr "' + (binding.attrName + ('" (lit ' + (show82(binding.choice.value0) + ")")));
+    }
+    ;
+    if (binding.choice instanceof ConstantString) {
+      return 'v3AttrStr "' + (binding.attrName + ('" (str "' + (binding.choice.value0 + '")')));
+    }
+    ;
+    if (binding.choice instanceof FromField) {
+      return 'v3AttrFn "' + (binding.attrName + ('" (\\d -> d.' + (binding.choice.value0 + ")")));
+    }
+    ;
+    if (binding.choice instanceof IndexBased) {
+      return 'v3AttrFnI "' + (binding.attrName + '" (\\_ i -> toNumber i)');
+    }
+    ;
+    if (binding.choice instanceof Computed) {
+      return 'v3AttrFn "' + (binding.attrName + ('" (\\d -> ' + (binding.choice.value0 + ")")));
+    }
+    ;
+    throw new Error("Failed pattern match at TreeBuilder.BuilderToCode (line 119, column 22 - line 133, column 70): " + [binding.choice.constructor.name]);
+  };
+  var attrsLines = function(attrs) {
+    return function(indentLevel) {
+      var attrStrings = map124(attrToCode)(attrs);
+      var firstAttr = (function() {
+        var v2 = head2(attrStrings);
+        if (v2 instanceof Just) {
+          return v2.value0;
+        }
+        ;
+        if (v2 instanceof Nothing) {
+          return "";
+        }
+        ;
+        throw new Error("Failed pattern match at TreeBuilder.BuilderToCode (line 103, column 15 - line 105, column 18): " + [v2.constructor.name]);
+      })();
+      var restAttrs = (function() {
+        var v2 = tail2(attrStrings);
+        if (v2 instanceof Just) {
+          return map124(function(a3) {
+            return indent2(indentLevel + 1 | 0) + (", " + a3);
+          })(v2.value0);
+        }
+        ;
+        if (v2 instanceof Nothing) {
+          return [];
+        }
+        ;
+        throw new Error("Failed pattern match at TreeBuilder.BuilderToCode (line 106, column 15 - line 108, column 18): " + [v2.constructor.name]);
+      })();
+      var $22 = $$null3(attrs);
+      if ($22) {
+        return [indent2(indentLevel + 1 | 0) + "[]"];
+      }
+      ;
+      return append126([indent2(indentLevel + 1 | 0) + ("[ " + firstAttr)])(append126(restAttrs)([indent2(indentLevel + 1 | 0) + "]"]));
+    };
+  };
+  var treeLines = function(tree2) {
+    return function(indentLevel) {
+      var childrenWithCommas = function(children3) {
+        return function(ind) {
+          return concat(mapWithIndex3(function(i2) {
+            return function(child) {
+              var prefix = (function() {
+                var $23 = i2 === 0;
+                if ($23) {
+                  return " ";
+                }
+                ;
+                return ", ";
+              })();
+              var lines = treeLines(child)(0);
+              var v2 = uncons4(lines);
+              if (v2 instanceof Just) {
+                return append126([indent2(ind) + (prefix + v2.value0.head)])(map124(function(l2) {
+                  return indent2(ind) + ("  " + l2);
+                })(v2.value0.tail));
+              }
+              ;
+              if (v2 instanceof Nothing) {
+                return [];
+              }
+              ;
+              throw new Error("Failed pattern match at TreeBuilder.BuilderToCode (line 85, column 10 - line 89, column 22): " + [v2.constructor.name]);
+            };
+          })(children3));
+        };
+      };
+      if (tree2 instanceof BNode) {
+        var elemCode = (function() {
+          if (tree2.value0.name instanceof Just) {
+            return "T.named " + (showElemType3(tree2.value0.elementType) + (' "' + (tree2.value0.name.value0 + '"')));
+          }
+          ;
+          if (tree2.value0.name instanceof Nothing) {
+            return "T.elem " + showElemType3(tree2.value0.elementType);
+          }
+          ;
+          throw new Error("Failed pattern match at TreeBuilder.BuilderToCode (line 41, column 18 - line 43, column 62): " + [tree2.value0.name.constructor.name]);
+        })();
+        var childrenCode = (function() {
+          var v2 = length3(tree2.value1);
+          if (v2 === 0) {
+            return [];
+          }
+          ;
+          if (v2 === 1) {
+            var v1 = head2(tree2.value1);
+            if (v1 instanceof Just) {
+              return append126([indent2(indentLevel) + "  `T.withChild`"])(append126([indent2(indentLevel + 2 | 0) + "("])(append126(treeLines(v1.value0)(indentLevel + 2 | 0))([indent2(indentLevel + 2 | 0) + ")"])));
+            }
+            ;
+            if (v1 instanceof Nothing) {
+              return [];
+            }
+            ;
+            throw new Error("Failed pattern match at TreeBuilder.BuilderToCode (line 48, column 14 - line 54, column 24): " + [v1.constructor.name]);
+          }
+          ;
+          return append126([indent2(indentLevel) + "  `T.withChildren`", indent2(indentLevel + 2 | 0) + "["])(append126(childrenWithCommas(tree2.value1)(indentLevel + 2 | 0))([indent2(indentLevel + 2 | 0) + "]"]));
+        })();
+        return append126([indent2(indentLevel) + elemCode])(append126(attrsLines(tree2.value0.attributes)(indentLevel))(childrenCode));
+      }
+      ;
+      if (tree2 instanceof BDataJoin) {
+        var templateElemCode = "T.elem " + showElemType3(tree2.value0.template.elementType);
+        return append126([indent2(indentLevel) + ('(T.joinData "' + (tree2.value0.name + ('" "' + (tree2.value0.elementType + '" data_ $ \\d ->')))), indent2(indentLevel + 1 | 0) + templateElemCode])(append126(attrsLines(tree2.value0.template.attributes)(indentLevel + 1 | 0))([indent2(indentLevel) + ")"]));
+      }
+      ;
+      throw new Error("Failed pattern match at TreeBuilder.BuilderToCode (line 37, column 30 - line 75, column 36): " + [tree2.constructor.name]);
+    };
+  };
+  var builderToCode = function(tree2) {
+    return joinWith("\n")(treeLines(tree2)(0));
+  };
+
   // output/TreeBuilder.Interpreter/foreign.js
   var SVG_NS = "http://www.w3.org/2000/svg";
   var SVG_ELEMENTS = /* @__PURE__ */ new Set(["svg", "circle", "rect", "line", "path", "text", "g", "group"]);
@@ -60112,7 +59970,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
 
   // output/TreeBuilder.Interpreter/index.js
   var show83 = /* @__PURE__ */ show(showNumber);
-  var show137 = /* @__PURE__ */ show(showInt);
+  var show136 = /* @__PURE__ */ show(showInt);
   var bind94 = /* @__PURE__ */ bind(bindMaybe);
   var map125 = /* @__PURE__ */ map(functorArray);
   var getNumericField = function(field4) {
@@ -60235,7 +60093,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
       }
       ;
       if (field4 === "index") {
-        return show137(datum2.index);
+        return show136(datum2.index);
       }
       ;
       return "";
@@ -60424,7 +60282,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
       }
       ;
       if (choice instanceof IndexBased) {
-        return show137(datum2.index);
+        return show136(datum2.index);
       }
       ;
       if (choice instanceof Computed) {
@@ -61340,7 +61198,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
   var elem9 = /* @__PURE__ */ elem2(eqString);
   var eq33 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqInt));
   var show85 = /* @__PURE__ */ show(showNumber);
-  var show138 = /* @__PURE__ */ show(showInt);
+  var show137 = /* @__PURE__ */ show(showInt);
   var intercalate8 = /* @__PURE__ */ intercalate2(monoidString);
   var v3Attr19 = /* @__PURE__ */ v3Attr(showNumber);
   var lit20 = /* @__PURE__ */ lit(numExprEvalD);
@@ -61549,7 +61407,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
             return tree2;
           }
           ;
-          throw new Error("Failed pattern match at TreeBuilder.App (line 842, column 53 - line 850, column 16): " + [tree2.constructor.name]);
+          throw new Error("Failed pattern match at TreeBuilder.App (line 834, column 53 - line 842, column 16): " + [tree2.constructor.name]);
         };
       };
     };
@@ -61665,7 +61523,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
           return new AddRootElement(elem1.id);
         }
         ;
-        throw new Error("Failed pattern match at TreeBuilder.App (line 560, column 14 - line 562, column 40): " + [state3.selectedNodeId.constructor.name]);
+        throw new Error("Failed pattern match at TreeBuilder.App (line 552, column 14 - line 554, column 40): " + [state3.selectedNodeId.constructor.name]);
       })();
       return button2([classes(["palette-btn", "palette-btn--" + elem1.category]), title2(elem1.description), onClick(function(v2) {
         return action2;
@@ -61762,7 +61620,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
           return tree2;
         }
         ;
-        throw new Error("Failed pattern match at TreeBuilder.App (line 866, column 46 - line 874, column 16): " + [tree2.constructor.name]);
+        throw new Error("Failed pattern match at TreeBuilder.App (line 858, column 46 - line 866, column 16): " + [tree2.constructor.name]);
       };
     };
   };
@@ -61864,7 +61722,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
             return text5("");
           }
           ;
-          throw new Error("Failed pattern match at TreeBuilder.App (line 596, column 13 - line 598, column 36): " + [tree2.value0.name.constructor.name]);
+          throw new Error("Failed pattern match at TreeBuilder.App (line 588, column 13 - line 590, column 36): " + [tree2.value0.name.constructor.name]);
         })(), button2([classes(["remove-btn"]), onClick(function(v2) {
           return new RemoveNode(tree2.value0.id);
         })])([text5("x")])]), (function() {
@@ -61902,7 +61760,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
         })()]);
       }
       ;
-      throw new Error("Failed pattern match at TreeBuilder.App (line 572, column 29 - line 637, column 8): " + [tree2.constructor.name]);
+      throw new Error("Failed pattern match at TreeBuilder.App (line 564, column 29 - line 629, column 8): " + [tree2.constructor.name]);
     };
   };
   var renderTreeEditor = function(state3) {
@@ -61915,7 +61773,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
         return renderTreeNode(state3)(state3.tree.value0);
       }
       ;
-      throw new Error("Failed pattern match at TreeBuilder.App (line 191, column 11 - line 197, column 40): " + [state3.tree.constructor.name]);
+      throw new Error("Failed pattern match at TreeBuilder.App (line 196, column 11 - line 202, column 40): " + [state3.tree.constructor.name]);
     })()]), div2([classes(["palette-buttons"])])(map127(renderPaletteBtn(state3))(availableElements))]);
   };
   var initialState6 = /* @__PURE__ */ (function() {
@@ -62011,6 +61869,20 @@ T.joined "bars" Rect data identity $ \\\\d ->
     ;
     return gridTree;
   };
+  var getSemiQuineOutput = function(state3) {
+    if (state3.tree instanceof Nothing) {
+      return "-- No tree defined\n-- Select a preset to start";
+    }
+    ;
+    if (state3.tree instanceof Just) {
+      return builderToCode(state3.tree.value0);
+    }
+    ;
+    throw new Error("Failed pattern match at TreeBuilder.App (line 495, column 28 - line 500, column 30): " + [state3.tree.constructor.name]);
+  };
+  var renderQ3SemiQuine = function(state3) {
+    return div2([classes(["quadrant", "q3-semiquine"])])([div2([classes(["quadrant-header"])])([h3_([text5("SemiQuine Interpreter")]), span4([classes(["interpreter-tag"])])([text5("Tree \u2192 PureScript")])]), div2([classes(["quadrant-content"])])([pre([classes(["code-output", "language-purescript"])])([text5(getSemiQuineOutput(state3))])])]);
+  };
   var getDataSet = function(v2) {
     if (v2 === "sudoku") {
       return sudokuSampleData;
@@ -62032,48 +61904,14 @@ T.joined "bars" Rect data identity $ \\\\d ->
     };
     var preview = take(5)(data_2);
     var count = length3(data_2);
-    return "// " + (show138(count) + (" items\n" + ("[\n" + (intercalate8(",\n")(map127(formatDatumShort)(preview)) + ((function() {
-      var $130 = count > 5;
-      if ($130) {
-        return "\n  // ... " + (show138(count - 5 | 0) + " more");
+    return "// " + (show137(count) + (" items\n" + ("[\n" + (intercalate8(",\n")(map127(formatDatumShort)(preview)) + ((function() {
+      var $132 = count > 5;
+      if ($132) {
+        return "\n  // ... " + (show137(count - 5 | 0) + " more");
       }
       ;
       return "";
     })() + "\n]")))));
-  };
-  var defaultDatum2 = {
-    x: 0,
-    y: 0,
-    cx: 0,
-    cy: 0,
-    rx: 0,
-    ry: 0,
-    sx: 0,
-    sy: 0,
-    radius: 10,
-    width: 50,
-    height: 30,
-    color: "#999",
-    label: "",
-    name: "",
-    value: 0,
-    index: 0
-  };
-  var getSemiQuineOutput = function(state3) {
-    if (state3.tree instanceof Nothing) {
-      return "-- No tree defined";
-    }
-    ;
-    if (state3.tree instanceof Just) {
-      var tree2 = builderToTreeWithData(state3.tree.value0)(state3.sampleData);
-      var firstDatum = fromMaybe(defaultDatum2)(head2(state3.sampleData));
-      return treeToCodeWithSample(firstDatum)(tree2);
-    }
-    ;
-    throw new Error("Failed pattern match at TreeBuilder.App (line 490, column 28 - line 500, column 43): " + [state3.tree.constructor.name]);
-  };
-  var renderQ3SemiQuine = function(state3) {
-    return div2([classes(["quadrant", "q3-semiquine"])])([div2([classes(["quadrant-header"])])([h3_([text5("SemiQuine Interpreter")]), span4([classes(["interpreter-tag"])])([text5("Tree \u2192 PureScript")])]), div2([classes(["quadrant-content"])])([pre([classes(["code-output", "language-purescript"])])([text5(getSemiQuineOutput(state3))])])]);
   };
   var dataButton = function(state3) {
     return function(dataId) {
@@ -62126,11 +61964,11 @@ T.joined "bars" Rect data identity $ \\\\d ->
                 return node.value0.elemType;
               }
               ;
-              throw new Error("Failed pattern match at TreeBuilder.App (line 279, column 19 - line 281, column 32): " + [node.value0.name.constructor.name]);
+              throw new Error("Failed pattern match at TreeBuilder.App (line 284, column 19 - line 286, column 32): " + [node.value0.name.constructor.name]);
             })();
             var childCount = length3(node.value0.children);
             var startX = xPos - 100 * (toNumber(childCount) - 1) / 2;
-            return withChildren(named(Group.value)("node-" + show138(level))([]))(append41([elem3(Circle.value)([v3Attr19("cx")(lit20(xPos)), v3Attr19("cy")(lit20(toNumber(level) * 70)), v3Attr19("r")(lit20(25)), v3AttrStr("fill")(str21("#4A90E2")), v3AttrStr("stroke")(str21("#2E5C8A")), v3Attr19("stroke-width")(lit20(2))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 4)), v3AttrStr("text-content")(str21(label5)), v3AttrStr("text-anchor")(str21("middle")), v3AttrStr("fill")(str21("white")), v3AttrStr("font-size")(str21("10px")), v3AttrStr("font-family")(str21("monospace"))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 38)), v3AttrStr("text-content")(str21("attrs: " + show138(node.value0.attrCount))), v3AttrStr("text-anchor")(str21("middle")), v3AttrStr("fill")(str21("#666")), v3AttrStr("font-size")(str21("9px"))])])(append41(mapWithIndex3(function(i2) {
+            return withChildren(named(Group.value)("node-" + show137(level))([]))(append41([elem3(Circle.value)([v3Attr19("cx")(lit20(xPos)), v3Attr19("cy")(lit20(toNumber(level) * 70)), v3Attr19("r")(lit20(25)), v3AttrStr("fill")(str21("#4A90E2")), v3AttrStr("stroke")(str21("#2E5C8A")), v3Attr19("stroke-width")(lit20(2))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 4)), v3AttrStr("textContent")(str21(label5)), v3AttrStr("text-anchor")(str21("middle")), v3AttrStr("fill")(str21("white")), v3AttrStr("font-size")(str21("10px")), v3AttrStr("font-family")(str21("monospace"))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 38)), v3AttrStr("textContent")(str21("attrs: " + show137(node.value0.attrCount))), v3AttrStr("text-anchor")(str21("middle")), v3AttrStr("fill")(str21("#666")), v3AttrStr("font-size")(str21("9px"))])])(append41(mapWithIndex3(function(i2) {
               return function(v2) {
                 var childY = toNumber(level + 1 | 0) * 70;
                 var childX = startX + toNumber(i2) * 100;
@@ -62145,15 +61983,15 @@ T.joined "bars" Rect data identity $ \\\\d ->
           }
           ;
           if (node instanceof JoinAST) {
-            return withChildren(named(Group.value)("join-" + show138(level))([]))([elem3(Circle.value)([v3Attr19("cx")(lit20(xPos)), v3Attr19("cy")(lit20(toNumber(level) * 70)), v3Attr19("r")(lit20(25)), v3AttrStr("fill")(str21("#E27A4A")), v3AttrStr("stroke")(str21("#8A472E")), v3Attr19("stroke-width")(lit20(2))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 4)), v3AttrStr("text-content")(str21("Join: " + node.value0.name)), v3AttrStr("text-anchor")(str21("middle")), v3AttrStr("fill")(str21("white")), v3AttrStr("font-size")(str21("9px"))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 38)), v3AttrStr("text-content")(str21("data: " + show138(node.value0.dataCount))), v3AttrStr("text-anchor")(str21("middle")), v3AttrStr("fill")(str21("#666")), v3AttrStr("font-size")(str21("9px"))])]);
+            return withChildren(named(Group.value)("join-" + show137(level))([]))([elem3(Circle.value)([v3Attr19("cx")(lit20(xPos)), v3Attr19("cy")(lit20(toNumber(level) * 70)), v3Attr19("r")(lit20(25)), v3AttrStr("fill")(str21("#E27A4A")), v3AttrStr("stroke")(str21("#8A472E")), v3Attr19("stroke-width")(lit20(2))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 4)), v3AttrStr("textContent")(str21("Join: " + node.value0.name)), v3AttrStr("text-anchor")(str21("middle")), v3AttrStr("fill")(str21("white")), v3AttrStr("font-size")(str21("9px"))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 38)), v3AttrStr("textContent")(str21("data: " + show137(node.value0.dataCount))), v3AttrStr("text-anchor")(str21("middle")), v3AttrStr("fill")(str21("#666")), v3AttrStr("font-size")(str21("9px"))])]);
           }
           ;
           if (node instanceof NestedJoinAST) {
-            return withChildren(named(Group.value)("nested-join-" + show138(level))([]))([elem3(Circle.value)([v3Attr19("cx")(lit20(xPos)), v3Attr19("cy")(lit20(toNumber(level) * 70)), v3Attr19("r")(lit20(25)), v3AttrStr("fill")(str21("#9B4AE2")), v3AttrStr("stroke")(str21("#5C2E8A")), v3Attr19("stroke-width")(lit20(2))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 4)), v3AttrStr("text-content")(str21("Nested: " + node.value0.name)), v3AttrStr("text-anchor")(str21("middle")), v3AttrStr("fill")(str21("white")), v3AttrStr("font-size")(str21("9px"))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 38)), v3AttrStr("text-content")(str21("data: " + show138(node.value0.dataCount))), v3AttrStr("text-anchor")(str21("middle")), v3AttrStr("fill")(str21("#666")), v3AttrStr("font-size")(str21("9px"))])]);
+            return withChildren(named(Group.value)("nested-join-" + show137(level))([]))([elem3(Circle.value)([v3Attr19("cx")(lit20(xPos)), v3Attr19("cy")(lit20(toNumber(level) * 70)), v3Attr19("r")(lit20(25)), v3AttrStr("fill")(str21("#9B4AE2")), v3AttrStr("stroke")(str21("#5C2E8A")), v3Attr19("stroke-width")(lit20(2))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 4)), v3AttrStr("textContent")(str21("Nested: " + node.value0.name)), v3AttrStr("text-anchor")(str21("middle")), v3AttrStr("fill")(str21("white")), v3AttrStr("font-size")(str21("9px"))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 38)), v3AttrStr("textContent")(str21("data: " + show137(node.value0.dataCount))), v3AttrStr("text-anchor")(str21("middle")), v3AttrStr("fill")(str21("#666")), v3AttrStr("font-size")(str21("9px"))])]);
           }
           ;
           if (node instanceof SceneJoinAST) {
-            return withChildren(named(Group.value)("scene-join-" + show138(level))([]))([elem3(Circle.value)([v3Attr19("cx")(lit20(xPos)), v3Attr19("cy")(lit20(toNumber(level) * 70)), v3Attr19("r")(lit20(25)), v3AttrStr("fill")(str21("#4AE2A4")), v3AttrStr("stroke")(str21("#2E8A5C")), v3Attr19("stroke-width")(lit20(2))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 4)), v3AttrStr("text-content")(str21("Scene: " + node.value0.name)), v3AttrStr("text-anchor")(str21("middle")), v3AttrStr("fill")(str21("white")), v3AttrStr("font-size")(str21("9px"))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 38)), v3AttrStr("text-content")(str21("data: " + (show138(node.value0.dataCount) + (" {" + ((function() {
+            return withChildren(named(Group.value)("scene-join-" + show137(level))([]))([elem3(Circle.value)([v3Attr19("cx")(lit20(xPos)), v3Attr19("cy")(lit20(toNumber(level) * 70)), v3Attr19("r")(lit20(25)), v3AttrStr("fill")(str21("#4AE2A4")), v3AttrStr("stroke")(str21("#2E8A5C")), v3Attr19("stroke-width")(lit20(2))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 4)), v3AttrStr("textContent")(str21("Scene: " + node.value0.name)), v3AttrStr("text-anchor")(str21("middle")), v3AttrStr("fill")(str21("white")), v3AttrStr("font-size")(str21("9px"))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 38)), v3AttrStr("textContent")(str21("data: " + (show137(node.value0.dataCount) + (" {" + ((function() {
               if (node.value0.hasEnter) {
                 return "E";
               }
@@ -62175,7 +62013,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
           }
           ;
           if (node instanceof SceneNestedJoinAST) {
-            return withChildren(named(Group.value)("scene-nested-" + show138(level))([]))([elem3(Circle.value)([v3Attr19("cx")(lit20(xPos)), v3Attr19("cy")(lit20(toNumber(level) * 70)), v3Attr19("r")(lit20(25)), v3AttrStr("fill")(str21("#E2A44A")), v3AttrStr("stroke")(str21("#8A5C2E")), v3Attr19("stroke-width")(lit20(2))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 4)), v3AttrStr("text-content")(str21("SceneNested: " + node.value0.name)), v3AttrStr("text-anchor")(str21("middle")), v3AttrStr("fill")(str21("white")), v3AttrStr("font-size")(str21("8px"))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 38)), v3AttrStr("text-content")(str21("data: " + (show138(node.value0.dataCount) + (" {" + ((function() {
+            return withChildren(named(Group.value)("scene-nested-" + show137(level))([]))([elem3(Circle.value)([v3Attr19("cx")(lit20(xPos)), v3Attr19("cy")(lit20(toNumber(level) * 70)), v3Attr19("r")(lit20(25)), v3AttrStr("fill")(str21("#E2A44A")), v3AttrStr("stroke")(str21("#8A5C2E")), v3Attr19("stroke-width")(lit20(2))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 4)), v3AttrStr("textContent")(str21("SceneNested: " + node.value0.name)), v3AttrStr("text-anchor")(str21("middle")), v3AttrStr("fill")(str21("white")), v3AttrStr("font-size")(str21("8px"))]), elem3(Text.value)([v3Attr19("x")(lit20(xPos)), v3Attr19("y")(lit20(toNumber(level) * 70 + 38)), v3AttrStr("textContent")(str21("data: " + (show137(node.value0.dataCount) + (" {" + ((function() {
               if (node.value0.hasEnter) {
                 return "E";
               }
@@ -62196,7 +62034,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
             })() + "}"))))))), v3AttrStr("text-anchor")(str21("middle")), v3AttrStr("fill")(str21("#666")), v3AttrStr("font-size")(str21("9px"))])]);
           }
           ;
-          throw new Error("Failed pattern match at TreeBuilder.App (line 276, column 37 - line 464, column 14): " + [node.constructor.name]);
+          throw new Error("Failed pattern match at TreeBuilder.App (line 281, column 37 - line 469, column 14): " + [node.constructor.name]);
         };
       };
     };
@@ -62241,7 +62079,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
           return tree2;
         }
         ;
-        throw new Error("Failed pattern match at TreeBuilder.App (line 855, column 42 - line 863, column 16): " + [tree2.constructor.name]);
+        throw new Error("Failed pattern match at TreeBuilder.App (line 847, column 42 - line 855, column 16): " + [tree2.constructor.name]);
       };
     };
   };
@@ -62507,8 +62345,8 @@ T.joined "bars" Rect data identity $ \\\\d ->
               return discard69(liftEffect53(clearPreviewContainer("#ast-viz-output")))(function() {
                 return discard69(liftEffect53(renderPreview("#tree-builder-preview")(state3.tree.value0)(state3.sampleData)))(function() {
                   var actualTree = builderToTreeWithData(state3.tree.value0)(state3.sampleData);
-                  var ast = toAST(actualTree);
-                  var astVizTree = astToTreeVisualization2(ast);
+                  var treeAST = toAST(actualTree);
+                  var astVizTree = astToTreeVisualization2(treeAST);
                   return liftEffect53(runD3v2M(bind140(select51("#ast-viz-output"))(function(astContainer) {
                     return bind140(renderTree73(astContainer)(astVizTree))(function() {
                       return pure126(unit);
@@ -62519,11 +62357,11 @@ T.joined "bars" Rect data identity $ \\\\d ->
             });
           }
           ;
-          throw new Error("Failed pattern match at TreeBuilder.App (line 776, column 5 - line 797, column 20): " + [state3.tree.constructor.name]);
+          throw new Error("Failed pattern match at TreeBuilder.App (line 768, column 5 - line 789, column 20): " + [state3.tree.constructor.name]);
         });
       }
       ;
-      throw new Error("Failed pattern match at TreeBuilder.App (line 707, column 16 - line 797, column 20): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at TreeBuilder.App (line 699, column 16 - line 789, column 20): " + [v2.constructor.name]);
     };
   };
   var component50 = function(dictMonadAff) {
