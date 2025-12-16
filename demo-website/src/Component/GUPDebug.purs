@@ -29,7 +29,6 @@ module Component.GUPDebug where
 
 import Prelude
 
-import Control.Monad (void)
 import Data.Array as Array
 import Data.Map (Map)
 import Data.Map as Map

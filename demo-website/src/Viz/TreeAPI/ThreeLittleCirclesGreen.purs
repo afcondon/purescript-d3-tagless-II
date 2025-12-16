@@ -7,8 +7,7 @@ import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, cx, cy, r, fill)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
@@ -41,21 +40,21 @@ threeLittleCirclesGreen selector = runD3v2M do
   let tree :: Tree SimpleDatum
       tree =
         T.named SVG "svg"
-          [ v3Attr "width" (lit 400.0)
-          , v3Attr "height" (lit 100.0)
-          , v3AttrStr "viewBox" (str "0 0 400 100")
-          , v3AttrStr "id" (str "three-circles-green-svg")
-          , v3AttrStr "class" (str "tree-api-example")
+          [ width $ num 400.0
+          , height $ num 100.0
+          , viewBox 0.0 0.0 400.0 100.0
+          , attr "id" $ text "three-circles-green-svg"
+          , attr "class" $ text "tree-api-example"
           ]
           `T.withChild`
             -- joinData creates one circle per datum
             -- We use the index from the datum for positioning
             (joinData "circles" "circle" simpleData $ \d ->
               T.elem Circle
-                [ v3Attr "cx" (lit (100.0 + d.index * 100.0))    -- Space circles 100px apart
-                , v3Attr "cy" (lit 50.0)                          -- All at same vertical position
-                , v3Attr "r" (lit 25.0)                      -- All same size
-                , v3AttrStr "fill" (str "green")                     -- All green
+                [ cx $ num (100.0 + d.index * 100.0)    -- Space circles 100px apart
+                , cy $ num 50.0                          -- All at same vertical position
+                , r $ num 25.0                      -- All same size
+                , fill $ text "green"                     -- All green
                 ])
 
   -- Render the tree

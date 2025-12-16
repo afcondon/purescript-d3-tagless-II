@@ -11,8 +11,7 @@ import Effect.Class (liftEffect)
 import Effect.Console as Console
 import PSD3.Shared.Data (HierData, getName, getValue, getChildren, loadDataFile, DataFile(..), parseFlareJson)
 import DataViz.Layout.Hierarchy.Partition (HierarchyData(..), PartitionNode(..), defaultPartitionConfig, hierarchy, partition)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, x, y, fill, stroke, strokeWidth, textAnchor, fontSize, textContent)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
@@ -84,33 +83,33 @@ drawPartition selector flareData = runD3v2M do
     tree :: T.Tree (PartitionNode String)
     tree =
       T.named SVG "svg"
-        [ v3Attr "width" (lit chartWidth)
-        , v3Attr "height" (lit chartHeight)
-        , v3AttrStr "viewBox" (str ("0 0 " <> show chartWidth <> " " <> show chartHeight))
-        , v3AttrStr "class" (str "partition-viz")
+        [ width $ num chartWidth
+        , height $ num chartHeight
+        , viewBox 0.0 0.0 chartWidth chartHeight
+        , attr "class" $ text "partition-viz"
         ]
         `T.withChild`
           ( T.joinData "rects" "g" nodes $ \(PartNode node) ->
               T.named Group ("rect-" <> node.data_)
-                [ v3AttrStr "class" (str "node") ]
+                [ attr "class" $ text "node" ]
                 `T.withChildren`
                   [ T.elem Rect
-                      [ v3Attr "x" (lit node.x0)
-                      , v3Attr "y" (lit node.y0)
-                      , v3Attr "width" (lit (node.x1 - node.x0))
-                      , v3Attr "height" (lit (node.y1 - node.y0))
-                      , v3AttrStr "fill" (str (getColor node.depth))
-                      , v3Attr "fill-opacity" (lit 0.7)
-                      , v3AttrStr "stroke" (str "#fff")
-                      , v3Attr "stroke-width" (lit 1.0)
+                      [ x $ num node.x0
+                      , y $ num node.y0
+                      , width $ num (node.x1 - node.x0)
+                      , height $ num (node.y1 - node.y0)
+                      , fill $ text (getColor node.depth)
+                      , attr "fill-opacity" $ num 0.7
+                      , stroke $ text "#fff"
+                      , strokeWidth $ num 1.0
                       ]
                   , T.elem Text
-                      [ v3Attr "x" (lit ((node.x0 + node.x1) / 2.0))
-                      , v3Attr "y" (lit ((node.y0 + node.y1) / 2.0))
-                      , v3AttrStr "textContent" (str node.data_)
-                      , v3AttrStr "text-anchor" (str "middle")
-                      , v3Attr "font-size" (lit 9.0)
-                      , v3Attr "fill-opacity" (lit (if (node.x1 - node.x0) > 30.0 && (node.y1 - node.y0) > 15.0 then 1.0 else 0.0))
+                      [ x $ num ((node.x0 + node.x1) / 2.0)
+                      , y $ num ((node.y0 + node.y1) / 2.0)
+                      , textContent $ text node.data_
+                      , textAnchor $ text "middle"
+                      , fontSize $ num 9.0
+                      , attr "fill-opacity" $ num (if (node.x1 - node.x0) > 30.0 && (node.y1 - node.y0) > 15.0 then 1.0 else 0.0)
                       ]
                   ]
           )

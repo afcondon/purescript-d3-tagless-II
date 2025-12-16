@@ -19,8 +19,7 @@ import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultLink, defaultCenter)
 import PSD3.ForceEngine.Links (swizzleLinks)
 import PSD3.Scale (schemeCategory10At)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, r, stroke, strokeWidth, opacity, from, fromStr)
 import PSD3.Internal.Behavior.FFI as BehaviorFFI
 import PSD3.Internal.Behavior.Types (Behavior(..), DragConfig(..), ScaleExtent(..), defaultZoom)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
@@ -99,18 +98,18 @@ startLesMis model containerSelector = do
     let containerTree :: T.Tree Unit
         containerTree =
           T.named SVG "svg"
-            [ v3Attr "width" (lit svgWidth)
-            , v3Attr "height" (lit svgHeight)
-            , v3AttrStr "viewBox" (str (show ((-svgWidth) / 2.0) <> " " <> show ((-svgHeight) / 2.0) <> " " <> show svgWidth <> " " <> show svgHeight))
-            , v3AttrStr "id" (str "lesmis-v3-svg")
-            , v3AttrStr "class" (str "lesmis-v3")
+            [ width $ num svgWidth
+            , height $ num svgHeight
+            , viewBox ((-svgWidth) / 2.0) ((-svgHeight) / 2.0) svgWidth svgHeight
+            , attr "id" $ text "lesmis-v3-svg"
+            , attr "class" $ text "lesmis-v3"
             ]
             `T.withBehaviors` [ Zoom $ defaultZoom (ScaleExtent 0.1 10.0) "#lesmis-zoom-group" ]
             `T.withChildren`
-              [ T.named Group "zoom-group" [ v3AttrStr "id" (str "lesmis-zoom-group"), v3AttrStr "class" (str "zoom-group") ]
+              [ T.named Group "zoom-group" [ attr "id" $ text "lesmis-zoom-group", attr "class" $ text "zoom-group" ]
                   `T.withChildren`
-                    [ T.named Group "links" [ v3AttrStr "id" (str "lesmis-links"), v3AttrStr "class" (str "links") ]
-                    , T.named Group "nodes" [ v3AttrStr "id" (str "lesmis-nodes"), v3AttrStr "class" (str "nodes") ]
+                    [ T.named Group "links" [ attr "id" $ text "lesmis-links", attr "class" $ text "links" ]
+                    , T.named Group "nodes" [ attr "id" $ text "lesmis-nodes", attr "class" $ text "nodes" ]
                     ]
               ]
     _ <- renderTree container containerTree
@@ -144,25 +143,25 @@ updateDOM stateRef = runD3v2M do
   -- Render links
   let linksTree = T.joinData "links" "line" state.links $ \_ ->
         T.elem Line
-          [ v3AttrFn "x1" (_.source.x :: SwizzledLink -> Number)
-          , v3AttrFn "y1" (_.source.y :: SwizzledLink -> Number)
-          , v3AttrFn "x2" (_.target.x :: SwizzledLink -> Number)
-          , v3AttrFn "y2" (_.target.y :: SwizzledLink -> Number)
-          , v3AttrFn "stroke-width" ((\link -> sqrt link.value) :: SwizzledLink -> Number)
-          , v3AttrStr "stroke" (str "#999")
-          , v3Attr "opacity" (lit 0.6)
+          [ from "x1" (_.source.x :: SwizzledLink -> Number)
+          , from "y1" (_.source.y :: SwizzledLink -> Number)
+          , from "x2" (_.target.x :: SwizzledLink -> Number)
+          , from "y2" (_.target.y :: SwizzledLink -> Number)
+          , from "stroke-width" ((\link -> sqrt link.value) :: SwizzledLink -> Number)
+          , stroke $ text "#999"
+          , opacity $ num 0.6
           ]
   _ <- renderTree linksGroup linksTree
 
   -- Render nodes with drag behavior
   let nodesTree = T.joinData "nodes" "circle" state.nodes $ \_ ->
         T.elem Circle
-          [ v3AttrFn "cx" (_.x :: LesMisNode -> Number)
-          , v3AttrFn "cy" (_.y :: LesMisNode -> Number)
-          , v3Attr "r" (lit 5.0)
-          , v3AttrFnStr "fill" ((\node -> schemeCategory10At node.group) :: LesMisNode -> String)
-          , v3AttrStr "stroke" (str "#fff")
-          , v3Attr "stroke-width" (lit 1.5)
+          [ from "cx" (_.x :: LesMisNode -> Number)
+          , from "cy" (_.y :: LesMisNode -> Number)
+          , r $ num 5.0
+          , fromStr "fill" ((\node -> schemeCategory10At node.group) :: LesMisNode -> String)
+          , stroke $ text "#fff"
+          , strokeWidth $ num 1.5
           ]
           `T.withBehaviors` [ Drag (SimulationDrag simulationId) ]
   _ <- renderTree nodesGroup nodesTree

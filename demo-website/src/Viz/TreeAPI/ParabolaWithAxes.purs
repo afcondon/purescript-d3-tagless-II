@@ -9,8 +9,7 @@ import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, cx, cy, r, fill, transform)
 import PSD3.Axis.Axis (axisBottom, axisLeft, renderAxis)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
@@ -74,36 +73,36 @@ parabolaWithAxes selector = runD3v2M do
   let tree :: Tree ParabolaPoint
       tree =
         T.named SVG "svg"
-          [ v3Attr "width" (lit svgWidth)
-          , v3Attr "height" (lit svgHeight)
-          , v3AttrStr "viewBox" (str ("0 0 " <> show svgWidth <> " " <> show svgHeight))
-          , v3AttrStr "id" (str "parabola-with-axes-svg")
-          , v3AttrStr "class" (str "tree-api-example")
+          [ width $ num svgWidth
+          , height $ num svgHeight
+          , viewBox 0.0 0.0 svgWidth svgHeight
+          , attr "id" $ text "parabola-with-axes-svg"
+          , attr "class" $ text "tree-api-example"
           ]
           `T.withChild`
             -- Main group with margins
             (T.named Group "plot-area"
-              [ v3AttrStr "transform" (str ("translate(" <> show margin.left <> "," <> show margin.top <> ")"))
-              , v3AttrStr "class" (str "plot-area")
+              [ transform $ text ("translate(" <> show margin.left <> "," <> show margin.top <> ")")
+              , attr "class" $ text "plot-area"
               ]
               `T.withChildren`
                 [ -- X-axis (transformed to bottom)
                   T.named Group "x-axis"
-                    [ v3AttrStr "transform" (str ("translate(0," <> show plotHeight <> ")"))
-                    , v3AttrStr "class" (str "x-axis")
+                    [ transform $ text ("translate(0," <> show plotHeight <> ")")
+                    , attr "class" $ text "x-axis"
                     ]
                     `T.withChild` renderAxis (axisBottom xScale)
                   -- Y-axis
                 , T.named Group "y-axis"
-                    [ v3AttrStr "class" (str "y-axis") ]
+                    [ attr "class" $ text "y-axis" ]
                     `T.withChild` renderAxis (axisLeft yScale)
                   -- Data points
                 , joinData "circles" "circle" parabolaData $ \d ->
                     T.elem Circle
-                      [ v3Attr "cx" (lit (scaleX d.x))
-                      , v3Attr "cy" (lit (scaleY d.y))
-                      , v3Attr "r" (lit 5.0)
-                      , v3AttrStr "fill" (str "green")
+                      [ cx $ num (scaleX d.x)
+                      , cy $ num (scaleY d.y)
+                      , r $ num 5.0
+                      , fill $ text "green"
                       ]
                 ])
 

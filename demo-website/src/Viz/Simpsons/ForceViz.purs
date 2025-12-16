@@ -28,9 +28,7 @@ import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Simulation (SimulationNode)
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultCollide)
--- v3 Integration: all attributes via v3Attr/v3AttrStr (no ToAttr typeclass)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, from, fromStr, fill, stroke, strokeWidth, width, height, viewBox, textAnchor, fontSize, r)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
@@ -101,17 +99,17 @@ initForceViz selector = do
     let containerTree :: T.Tree Unit
         containerTree =
           T.named SVG "svg"
-            [ v3Attr "width" (lit config.width)
-            , v3Attr "height" (lit config.height)
-            , v3AttrStr "viewBox" (str ("0 0 " <> show config.width <> " " <> show config.height))
-            , v3AttrStr "class" (str "force-viz-svg")
+            [ width $ num config.width
+            , height $ num config.height
+            , viewBox 0.0 0.0 config.width config.height
+            , attr "class" $ text "force-viz-svg"
             ]
             `T.withChildren`
               [ T.elem Group []
                   `T.withChildren`
-                    [ T.named Group "dept-labels" [ v3AttrStr "class" (str "dept-labels"), v3AttrStr "id" (str "force-viz-dept-labels") ]
-                    , T.named Group "gender-labels" [ v3AttrStr "class" (str "gender-labels"), v3AttrStr "id" (str "force-viz-gender-labels") ]
-                    , T.named Group "applicants" [ v3AttrStr "class" (str "applicants"), v3AttrStr "id" (str "force-viz-applicants") ]
+                    [ T.named Group "dept-labels" [ attr "class" $ text "dept-labels", attr "id" $ text "force-viz-dept-labels" ]
+                    , T.named Group "gender-labels" [ attr "class" $ text "gender-labels", attr "id" $ text "force-viz-gender-labels" ]
+                    , T.named Group "applicants" [ attr "class" $ text "applicants", attr "id" $ text "force-viz-applicants" ]
                     ]
               ]
     _ <- renderTree container containerTree
@@ -210,12 +208,12 @@ tick stateRef = runD3v2M do
   -- Render applicant circles
   let nodesTree = T.joinData "applicants" "circle" state.nodes $ \_ ->
         T.elem Circle
-          [ v3AttrFn "cx" (_.x :: ApplicantNode -> Number)
-          , v3AttrFn "cy" (_.y :: ApplicantNode -> Number)
-          , v3Attr "r" (lit state.config.nodeRadius)
-          , v3AttrFnStr "fill" nodeColor
-          , v3AttrStr "stroke" (str "white")
-          , v3Attr "stroke-width" (lit 0.5)
+          [ from "cx" (_.x :: ApplicantNode -> Number)
+          , from "cy" (_.y :: ApplicantNode -> Number)
+          , r $ num state.config.nodeRadius
+          , fromStr "fill" nodeColor
+          , stroke $ text "white"
+          , strokeWidth $ num 0.5
           ]
   _ <- renderTree nodesGroup nodesTree
   pure unit
@@ -262,12 +260,12 @@ renderDepartmentLabels config parent = runD3v2M do
 
   let labelsTree = T.joinData "dept-labels" "text" labelData $ \_ ->
         T.elem Text
-          [ v3AttrFn "x" (\(d :: DeptLabel) -> departmentX config d.idx)
-          , v3Attr "y" (lit (config.marginTop - 10.0))
-          , v3AttrStr "text-anchor" (str "middle")
-          , v3Attr "font-size" (lit 12.0)
-          , v3AttrStr "fill" (str black)
-          , v3AttrFnStr "textContent" (_.name :: DeptLabel -> String)
+          [ from "x" (\(d :: DeptLabel) -> departmentX config d.idx)
+          , attr "y" $ num (config.marginTop - 10.0)
+          , textAnchor $ text "middle"
+          , fontSize $ num 12.0
+          , fill $ text black
+          , fromStr "textContent" (_.name :: DeptLabel -> String)
           ]
   _ <- renderTree parent labelsTree
   pure unit
@@ -282,12 +280,12 @@ renderGenderLabels config parent = runD3v2M do
 
   let labelsTree = T.joinData "gender-labels" "text" genders $ \_ ->
         T.elem Text
-          [ v3Attr "x" (lit 15.0)
-          , v3AttrFn "y" (\(d :: GenderLabel) -> genderY config d.gender)
-          , v3AttrStr "text-anchor" (str "start")
-          , v3Attr "font-size" (lit 14.0)
-          , v3AttrFnStr "fill" (\(d :: GenderLabel) -> if d.gender == Female then green else purple)
-          , v3AttrFnStr "textContent" (_.label :: GenderLabel -> String)
+          [ attr "x" $ num 15.0
+          , from "y" (\(d :: GenderLabel) -> genderY config d.gender)
+          , textAnchor $ text "start"
+          , fontSize $ num 14.0
+          , fromStr "fill" (\(d :: GenderLabel) -> if d.gender == Female then green else purple)
+          , fromStr "textContent" (_.label :: GenderLabel -> String)
           ]
   _ <- renderTree parent labelsTree
   pure unit

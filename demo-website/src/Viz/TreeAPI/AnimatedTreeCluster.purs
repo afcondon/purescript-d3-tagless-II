@@ -26,11 +26,11 @@ import DataViz.Layout.Hierarchy.Tree (treeWithSorting, defaultTreeConfig)
 import Web.DOM.Element (Element)
 
 -- v3 DSL imports
-import PSD3.Expr.Expr (class NumExpr, lit, str)
+import PSD3.Expr.Expr (class NumExpr)
 import PSD3.Expr.Datum (class DatumExpr, field)
 import PSD3.Expr.Path (linkVertical)
 import PSD3.Expr.Interpreter.Eval (EvalD, runEvalD)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, cx, cy, r, fill, stroke, strokeWidth, path)
 
 -- | Layout type
 data LayoutType = TreeLayout | ClusterLayout
@@ -194,14 +194,14 @@ draw flareData selector currentLayout = runD3v2M do
     structureTree :: T.Tree Unit
     structureTree =
       T.named SVG "svg"
-        [ v3AttrStr "viewBox" (str ("0 0 " <> show chartWidth <> " " <> show chartHeight))
-        , v3AttrStr "class" (str "animated-tree-cluster")
-        , v3Attr "width" (lit chartWidth)
-        , v3Attr "height" (lit chartHeight)
+        [ viewBox 0.0 0.0 chartWidth chartHeight
+        , attr "class" $ text "animated-tree-cluster"
+        , width $ num chartWidth
+        , height $ num chartHeight
         ]
         `T.withChildren`
-          [ T.named Group "linksGroup" [ v3AttrStr "class" (str "links") ]
-          , T.named Group "nodesGroup" [ v3AttrStr "class" (str "nodes") ]
+          [ T.named Group "linksGroup" [ attr "class" $ text "links" ]
+          , T.named Group "nodesGroup" [ attr "class" $ text "nodes" ]
           ]
 
   -- Render structure
@@ -217,11 +217,11 @@ draw flareData selector currentLayout = runD3v2M do
     linksTree =
       T.sceneJoin "linkElements" "path" links
         (\link -> T.elem Path
-          [ v3AttrStr "class" (str "link")
-          , v3AttrStr "d" (str (verticalLinkPathV3 link))
-          , v3AttrStr "fill" (str "none")
-          , v3AttrStr "stroke" (str "#555")
-          , v3Attr "stroke-width" (lit 1.5)
+          [ attr "class" $ text "link"
+          , path $ text (verticalLinkPathV3 link)
+          , fill $ text "none"
+          , stroke $ text "#555"
+          , strokeWidth $ num 1.5
           ])
         { keyFn: Just linkKey
         , enterBehavior: Just
@@ -246,13 +246,13 @@ draw flareData selector currentLayout = runD3v2M do
     nodesTree =
       T.sceneJoin "nodeElements" "circle" nodes
         (\node -> T.elem Circle
-          [ v3AttrStr "class" (str "node")
-          , v3Attr "cx" (lit (evalNode nodeX node))  -- v3: node.x
-          , v3Attr "cy" (lit (evalNode nodeY node))  -- v3: node.y
-          , v3Attr "r" (lit 4.0)
-          , v3AttrStr "fill" (str "#999")
-          , v3AttrStr "stroke" (str "#555")
-          , v3Attr "stroke-width" (lit 1.5)
+          [ attr "class" $ text "node"
+          , cx $ num (evalNode nodeX node)  -- v3: node.x
+          , cy $ num (evalNode nodeY node)  -- v3: node.y
+          , r $ num 4.0
+          , fill $ text "#999"
+          , stroke $ text "#555"
+          , strokeWidth $ num 1.5
           ])
         { keyFn: Just nodeKey
         , enterBehavior: Just
@@ -304,11 +304,11 @@ update dataTree selector chartWidth chartHeight currentLayout = runD3v2M do
     linksTree =
       T.sceneJoin "linkElements" "path" links
         (\link -> T.elem Path
-          [ v3AttrStr "class" (str "link")
-          , v3AttrStr "d" (str (verticalLinkPathV3 link))
-          , v3AttrStr "fill" (str "none")
-          , v3AttrStr "stroke" (str "#555")
-          , v3Attr "stroke-width" (lit 1.5)
+          [ attr "class" $ text "link"
+          , path $ text (verticalLinkPathV3 link)
+          , fill $ text "none"
+          , stroke $ text "#555"
+          , strokeWidth $ num 1.5
           ])
         { keyFn: Just linkKey
         , enterBehavior: Nothing
@@ -327,13 +327,13 @@ update dataTree selector chartWidth chartHeight currentLayout = runD3v2M do
     nodesTree =
       T.sceneJoin "nodeElements" "circle" nodes
         (\node -> T.elem Circle
-          [ v3AttrStr "class" (str "node")
-          , v3Attr "cx" (lit (evalNode nodeX node))
-          , v3Attr "cy" (lit (evalNode nodeY node))
-          , v3Attr "r" (lit 4.0)
-          , v3AttrStr "fill" (str "#999")
-          , v3AttrStr "stroke" (str "#555")
-          , v3Attr "stroke-width" (lit 1.5)
+          [ attr "class" $ text "node"
+          , cx $ num (evalNode nodeX node)
+          , cy $ num (evalNode nodeY node)
+          , r $ num 4.0
+          , fill $ text "#999"
+          , stroke $ text "#555"
+          , strokeWidth $ num 1.5
           ])
         { keyFn: Just nodeKey
         , enterBehavior: Nothing

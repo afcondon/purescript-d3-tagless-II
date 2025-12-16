@@ -9,8 +9,7 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, cx, cy, r, fill, opacity, transform)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
@@ -87,26 +86,26 @@ scatterPlot = runD3v2M do
   let tree :: Tree Point
       tree =
         T.named SVG "svg"
-          [ v3Attr "width" (lit dims.width)
-          , v3Attr "height" (lit dims.height)
-          , v3AttrStr "viewBox" (str ("0 0 " <> show dims.width <> " " <> show dims.height))
-          , v3AttrStr "class" (str "scatter-plot-tree")
+          [ width $ num dims.width
+          , height $ num dims.height
+          , viewBox 0.0 0.0 dims.width dims.height
+          , attr "class" $ text "scatter-plot-tree"
           ]
           `T.withChild`
             (T.named Group "chartGroup"
-              [ v3AttrStr "class" (str "chart-content")
-              , v3AttrStr "transform" (str ("translate(" <> show dims.marginLeft <> "," <> show dims.marginTop <> ")"))
+              [ attr "class" $ text "chart-content"
+              , transform $ text ("translate(" <> show dims.marginLeft <> "," <> show dims.marginTop <> ")")
               ]
               `T.withChild`
                 -- Data join for points
                 (joinData "points" "circle" scatterData $ \point ->
                   T.elem Circle
-                    [ v3Attr "cx" (lit (xScale point.x))
-                    , v3Attr "cy" (lit (yScale point.y))
-                    , v3Attr "r" (lit 6.0)
-                    , v3AttrStr "fill" (str "#e74c3c")
-                    , v3Attr "opacity" (lit 0.7)
-                    , v3AttrStr "class" (str "point")
+                    [ cx $ num (xScale point.x)
+                    , cy $ num (yScale point.y)
+                    , r $ num 6.0
+                    , fill $ text "#e74c3c"
+                    , opacity $ num 0.7
+                    , attr "class" $ text "point"
                     ]
                 ))
 

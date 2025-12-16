@@ -11,8 +11,7 @@ import Data.String (joinWith)
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, fill, stroke, strokeWidth, transform, path)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
@@ -97,24 +96,24 @@ lineChart = runD3v2M do
   let tree :: Tree Unit
       tree =
         T.named SVG "svg"
-          [ v3Attr "width" (lit dims.width)
-          , v3Attr "height" (lit dims.height)
-          , v3AttrStr "viewBox" (str ("0 0 " <> show dims.width <> " " <> show dims.height))
-          , v3AttrStr "class" (str "line-chart-tree")
+          [ width $ num dims.width
+          , height $ num dims.height
+          , viewBox 0.0 0.0 dims.width dims.height
+          , attr "class" $ text "line-chart-tree"
           ]
           `T.withChild`
             (T.named Group "chartGroup"
-              [ v3AttrStr "class" (str "chart-content")
-              , v3AttrStr "transform" (str ("translate(" <> show dims.marginLeft <> "," <> show dims.marginTop <> ")"))
+              [ attr "class" $ text "chart-content"
+              , transform $ text ("translate(" <> show dims.marginLeft <> "," <> show dims.marginTop <> ")")
               ]
               `T.withChild`
                 -- Single path element for the line
                 (T.named Path "line"
-                  [ v3AttrStr "d" (str pathData)
-                  , v3AttrStr "fill" (str "none")
-                  , v3AttrStr "stroke" (str "#2ecc71")
-                  , v3Attr "stroke-width" (lit 2.0)
-                  , v3AttrStr "class" (str "line")
+                  [ path $ text pathData
+                  , fill $ text "none"
+                  , stroke $ text "#2ecc71"
+                  , strokeWidth $ num 2.0
+                  , attr "class" $ text "line"
                   ]
                 ))
 

@@ -23,9 +23,7 @@ import Data.Int (round) as Int
 import Data.Number (cos, sin)
 import PSD3.Internal.FFI (ArcGenerator_, arcGenerator_, arcPath_, setArcInnerRadius_, setArcOuterRadius_)
 import PSD3.Internal.Types (Datum_)
--- v3 Integration: all attributes via v3Attr/v3AttrStr (no ToAttr typeclass)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, fill, stroke, strokeWidth, transform, path, textAnchor, fontSize, textContent)
 import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.AST (Tree)
 import PSD3.AST as T
@@ -144,21 +142,21 @@ donutChartArcs donutData =
   in
     T.joinData "arcs" "g" donutData.slices \(IndexedSlice { slice }) ->
       T.elem Group
-        [ v3AttrStr "class" (str "arc") ]
+        [ attr "class" $ text "arc" ]
         `T.withChildren`
           [ T.elem Path
-              [ v3AttrStr "d" (str (arcPath_ arcGen (sliceToDatum slice)))
-              , v3AttrStr "fill" (str (sliceColor slice.datum.label))
-              , v3AttrStr "stroke" (str black)
-              , v3Attr "stroke-width" (lit 1.0)
+              [ path $ text (arcPath_ arcGen (sliceToDatum slice))
+              , fill $ text (sliceColor slice.datum.label)
+              , stroke $ text black
+              , strokeWidth $ num 1.0
               ]
           , T.elem Text
-              [ v3AttrStr "transform" (str ("translate(" <> show (arcCentroid config.innerRadius config.outerRadius slice).x <> "," <> show (arcCentroid config.innerRadius config.outerRadius slice).y <> ")"))
-              , v3AttrStr "dy" (str "0.35em")
-              , v3AttrStr "text-anchor" (str "middle")
-              , v3AttrStr "fill" (str black)
-              , v3Attr "font-size" (lit 12.0)
-              , v3AttrStr "textContent" (str (show (Int.round slice.datum.percent) <> "%"))
+              [ transform $ text ("translate(" <> show (arcCentroid config.innerRadius config.outerRadius slice).x <> "," <> show (arcCentroid config.innerRadius config.outerRadius slice).y <> ")")
+              , attr "dy" $ text "0.35em"
+              , textAnchor $ text "middle"
+              , fill $ text black
+              , fontSize $ num 12.0
+              , textContent $ text (show (Int.round slice.datum.percent) <> "%")
               ]
           ]
 
@@ -166,12 +164,12 @@ donutChartArcs donutData =
 donutChartLabel :: DonutData -> Tree Unit
 donutChartLabel donutData =
   T.elem Text
-    [ v3AttrStr "dy" (str "0.35em")
-    , v3AttrStr "text-anchor" (str "middle")
-    , v3AttrStr "fill" (str black)
-    , v3Attr "font-size" (lit 14.0)
-    , v3AttrStr "transform" (str ("translate(0," <> show (donutData.config.outerRadius + 20.0) <> ")"))
-    , v3AttrStr "textContent" (str donutData.label)
+    [ attr "dy" $ text "0.35em"
+    , textAnchor $ text "middle"
+    , fill $ text black
+    , fontSize $ num 14.0
+    , transform $ text ("translate(0," <> show (donutData.config.outerRadius + 20.0) <> ")")
+    , textContent $ text donutData.label
     ]
 
 -- | Convenience: Full donut chart (requires Effect to render in two phases)

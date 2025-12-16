@@ -41,7 +41,7 @@ module D3.Viz.LesMisV3.GUPDemo
 import Prelude
 
 import Data.Array as Array
-import Data.Array (filter, length, (!!))
+import Data.Array (length, (!!))
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
@@ -55,18 +55,17 @@ import PSD3.ForceEngine.Events (SimulationCallbacks)
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultLink, defaultCenter)
 import PSD3.ForceEngine.Links (filterLinksToSubset, swizzleLinksByIndex)
 import PSD3.Transition.Tick as Tick
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, cx, cy, r, x1, y1, x2, y2, fill, stroke, strokeWidth, opacity)
 import PSD3.Internal.Behavior.FFI as BehaviorFFI
 import PSD3.Internal.Behavior.Types (Behavior(..), DragConfig(..), ScaleExtent(..), defaultZoom)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
-import PSD3.Interpreter.D3 (runD3v2M, D3v2M)
+import PSD3.Interpreter.D3 (runD3v2M)
 import PSD3.Internal.Selection.Types (ElementType(..)) as ET
 import PSD3.AST as T
 import Type.Proxy (Proxy(..))
 
 -- v3 DSL imports
-import PSD3.Expr.Expr (class NumExpr, class BoolExpr, class CompareExpr, class StringExpr, ifThenElse)
+import PSD3.Expr.Expr (class NumExpr, class BoolExpr, class CompareExpr, class StringExpr, ifThenElse, lit)
 import PSD3.Expr.Datum (class DatumExpr, field)
 import PSD3.Expr.Sugar ((*:), (+.), (-.), (>.), s)
 import PSD3.Expr.Interpreter.Eval (EvalD, runEvalD)
@@ -409,20 +408,20 @@ renderSVGContainer containerSelector = runD3v2M do
     containerTree :: T.Tree Unit
     containerTree =
       T.named ET.SVG "svg"
-        [ v3Attr "width" (lit svgWidth)
-        , v3Attr "height" (lit svgHeight)
-        , v3AttrStr "viewBox" (str (show ((-svgWidth) / 2.0) <> " " <> show ((-svgHeight) / 2.0) <> " " <> show svgWidth <> " " <> show svgHeight))
-        , v3AttrStr "id" (str "lesmis-gup-svg")
-        , v3AttrStr "class" (str "lesmis-gup")
+        [ width $ num svgWidth
+        , height $ num svgHeight
+        , viewBox ((-svgWidth) / 2.0) ((-svgHeight) / 2.0) svgWidth svgHeight
+        , attr "id" $ text "lesmis-gup-svg"
+        , attr "class" $ text "lesmis-gup"
         ]
         `T.withBehaviors`
           [ Zoom $ defaultZoom (ScaleExtent 0.1 10.0) "#lesmis-gup-zoom-group" ]
         `T.withChildren`
           [ T.named ET.Group "zoomGroup"
-              [ v3AttrStr "id" (str "lesmis-gup-zoom-group"), v3AttrStr "class" (str "zoom-group") ]
+              [ attr "id" $ text "lesmis-gup-zoom-group", attr "class" $ text "zoom-group" ]
               `T.withChildren`
-                [ T.named ET.Group "linksGroup" [ v3AttrStr "id" (str "lesmis-gup-links"), v3AttrStr "class" (str "links") ]
-                , T.named ET.Group "nodesGroup" [ v3AttrStr "id" (str "lesmis-gup-nodes"), v3AttrStr "class" (str "nodes") ]
+                [ T.named ET.Group "linksGroup" [ attr "id" $ text "lesmis-gup-links", attr "class" $ text "links" ]
+                , T.named ET.Group "nodesGroup" [ attr "id" $ text "lesmis-gup-nodes", attr "class" $ text "nodes" ]
                 ]
           ]
 
@@ -458,13 +457,13 @@ createNodesTree scene =
       -- v3 expressions compute visual properties from datum fields
       -- withBehaviors adds simulation-aware drag (nested variant for RenderNode.node)
       T.elem ET.Circle
-        [ v3Attr "cx" (lit (evalNodeNum nodeX datum))           -- v3: d.x
-        , v3Attr "cy" (lit (evalNodeNum nodeY datum))           -- v3: d.y
-        , v3Attr "r" (lit (evalNodeNum nodeRadiusExpr datum))  -- v3: conditional lerp based on progress
-        , v3AttrStr "fill" (str (evalNodeStr nodeFillExpr datum))      -- v3: conditional color
-        , v3Attr "opacity" (lit (evalNodeNum nodeOpacityExpr datum)) -- v3: 1.0 or fade out
-        , v3AttrStr "stroke" (str "#fff")
-        , v3Attr "stroke-width" (lit 1.5)
+        [ cx $ num (evalNodeNum nodeX datum)           -- v3: d.x
+        , cy $ num (evalNodeNum nodeY datum)           -- v3: d.y
+        , r $ num (evalNodeNum nodeRadiusExpr datum)  -- v3: conditional lerp based on progress
+        , fill $ text (evalNodeStr nodeFillExpr datum)      -- v3: conditional color
+        , opacity $ num (evalNodeNum nodeOpacityExpr datum) -- v3: 1.0 or fade out
+        , stroke $ text "#fff"
+        , strokeWidth $ num 1.5
         ]
         `T.withBehaviors`
           [ Drag (SimulationDragNested simulationId) ]
@@ -480,13 +479,13 @@ createLinksTree scene =
     T.joinData "links" "line" linkDatums $ \datum ->
       -- v3 expressions compute link endpoints from datum fields
       T.elem ET.Line
-        [ v3Attr "x1" (lit (evalLinkNum linkSourceX datum))  -- v3: d.sourceX
-        , v3Attr "y1" (lit (evalLinkNum linkSourceY datum))  -- v3: d.sourceY
-        , v3Attr "x2" (lit (evalLinkNum linkTargetX datum))  -- v3: d.targetX
-        , v3Attr "y2" (lit (evalLinkNum linkTargetY datum))  -- v3: d.targetY
-        , v3Attr "stroke-width" (lit (sqrt (evalLinkNum linkValue datum)))  -- v3: sqrt(d.value)
-        , v3AttrStr "stroke" (str "#999")
-        , v3Attr "opacity" (lit 0.6)
+        [ x1 $ num (evalLinkNum linkSourceX datum)  -- v3: d.sourceX
+        , y1 $ num (evalLinkNum linkSourceY datum)  -- v3: d.sourceY
+        , x2 $ num (evalLinkNum linkTargetX datum)  -- v3: d.targetX
+        , y2 $ num (evalLinkNum linkTargetY datum)  -- v3: d.targetY
+        , strokeWidth $ num (sqrt (evalLinkNum linkValue datum))  -- v3: sqrt(d.value)
+        , stroke $ text "#999"
+        , opacity $ num 0.6
         ]
 
 -- =============================================================================

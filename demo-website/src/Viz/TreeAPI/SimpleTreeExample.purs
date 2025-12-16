@@ -12,8 +12,7 @@ import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
 import PSD3.AST (Tree)
 import PSD3.AST as T
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, cx, cy, r, x, y, fill, textAnchor, textContent)
 import Web.DOM.Element (Element)
 
 -- | Simple test: Render a basic tree structure without data joins
@@ -34,12 +33,12 @@ testSimpleTree = runD3v2M do
   -- Define the tree structure using the declarative API
   let tree :: Tree Unit
       tree =
-        T.named SVG "svg" [v3Attr "width" (lit 800.0), v3Attr "height" (lit 600.0), v3AttrStr "viewBox" (str "0 0 800 600"), v3AttrStr "id" (str "simple-tree-svg")]
+        T.named SVG "svg" [width $ num 800.0, height $ num 600.0, viewBox 0.0 0.0 800.0 600.0, attr "id" $ text "simple-tree-svg"]
           `T.withChild`
-            (T.named Group "container" [v3AttrStr "class" (str "container")]
+            (T.named Group "container" [attr "class" $ text "container"]
               `T.withChildren`
-                [ T.named Circle "circle" [v3Attr "cx" (lit 100.0), v3Attr "cy" (lit 100.0), v3Attr "r" (lit 20.0), v3AttrStr "fill" (str "steelblue")]
-                , T.named Text "text" [v3Attr "x" (lit 100.0), v3Attr "y" (lit 130.0), v3AttrStr "textContent" (str "Hello Tree API!"), v3AttrStr "text-anchor" (str "middle")]
+                [ T.named Circle "circle" [cx $ num 100.0, cy $ num 100.0, r $ num 20.0, fill $ text "steelblue"]
+                , T.named Text "text" [x $ num 100.0, y $ num 130.0, textContent $ text "Hello Tree API!", textAnchor $ text "middle"]
                 ])
 
   -- Render the tree

@@ -11,8 +11,7 @@ import Effect.Class (liftEffect)
 import Effect.Console as Console
 import PSD3.Shared.Data (HierData, getName, getValue, getChildren, loadDataFile, DataFile(..), parseFlareJson)
 import DataViz.Layout.Hierarchy.Pack (HierarchyData(..), PackNode(..), defaultPackConfig, hierarchy, pack)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, r, y, fill, stroke, strokeWidth, fontSize, textAnchor, transform)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
@@ -92,34 +91,34 @@ drawPack selector flareData = runD3v2M do
     tree :: T.Tree (PackNode String)
     tree =
       T.named SVG "svg"
-        [ v3Attr "width" (lit chartSize)
-        , v3Attr "height" (lit chartSize)
-        , v3AttrStr "viewBox" (str ("0 0 " <> show chartSize <> " " <> show chartSize))
-        , v3AttrStr "class" (str "pack-viz")
+        [ width $ num chartSize
+        , height $ num chartSize
+        , viewBox 0.0 0.0 chartSize chartSize
+        , attr "class" $ text "pack-viz"
         ]
         `T.withChild`
           ( T.named Group "chartGroup"
-              [ v3AttrStr "class" (str "pack-content") ]
+              [ attr "class" $ text "pack-content" ]
               `T.withChild`
                 ( T.joinData "circles" "g" nodes $ \(PackNode node) ->
                     T.named Group ("circle-" <> node.data_)
-                      [ v3AttrStr "class" (str "node")
-                      , v3AttrStr "transform" (str ("translate(" <> show node.x <> "," <> show node.y <> ")"))
+                      [ attr "class" $ text "node"
+                      , transform $ text ("translate(" <> show node.x <> "," <> show node.y <> ")")
                       ]
                       `T.withChildren`
                         [ T.elem Circle
-                            [ v3Attr "r" (lit node.r)
-                            , v3AttrStr "fill" (str (getColor node.depth))
-                            , v3Attr "fill-opacity" (lit 0.7)
-                            , v3AttrStr "stroke" (str "#fff")
-                            , v3Attr "stroke-width" (lit 1.0)
+                            [ r $ num node.r
+                            , fill $ text (getColor node.depth)
+                            , attr "fill-opacity" $ num 0.7
+                            , stroke $ text "#fff"
+                            , strokeWidth $ num 1.0
                             ]
                         , T.elem Text
-                            [ v3AttrStr "text-content" (str node.data_)
-                            , v3AttrStr "text-anchor" (str "middle")
-                            , v3Attr "y" (lit 4.0)
-                            , v3Attr "font-size" (lit (if node.r > 20.0 then 10.0 else 8.0))
-                            , v3Attr "fill-opacity" (lit (if node.r > 15.0 then 1.0 else 0.0)) -- Hide text in small circles
+                            [ attr "text-content" $ text node.data_
+                            , textAnchor $ text "middle"
+                            , y $ num 4.0
+                            , fontSize $ num (if node.r > 20.0 then 10.0 else 8.0)
+                            , attr "fill-opacity" $ num (if node.r > 15.0 then 1.0 else 0.0) -- Hide text in small circles
                             ]
                         ]
                 )

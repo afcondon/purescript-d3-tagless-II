@@ -10,9 +10,7 @@ module D3.Viz.Simpsons.BarChart
 import Prelude
 
 import D3.Viz.Simpsons.Types (green, purple, gray, Gender(..))
--- v3 Integration: all attributes via v3Attr/v3AttrStr (no ToAttr typeclass)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, fill, stroke, strokeWidth, width, height)
 import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.AST (Tree)
 import PSD3.AST as T
@@ -57,16 +55,16 @@ miniBar config value gender =
       `T.withChildren`
         [ -- Background border
           T.elem Rect
-            [ v3Attr "width" (lit config.width)
-            , v3Attr "height" (lit config.height)
-            , v3AttrStr "fill" (str "none")
-            , v3AttrStr "stroke" (str gray)
-            , v3Attr "stroke-width" (lit 2.0)
+            [ width $ num config.width
+            , height $ num config.height
+            , fill $ text "none"
+            , stroke $ text gray
+            , strokeWidth $ num 2.0
             ]
         -- Filled bar
         , T.elem Rect
-            [ v3Attr "width" (lit barWidth)
-            , v3Attr "height" (lit config.height)
-            , v3AttrStr "fill" (str barColor)
+            [ width $ num barWidth
+            , height $ num config.height
+            , fill $ text barColor
             ]
         ]

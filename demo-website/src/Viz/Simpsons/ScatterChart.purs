@@ -18,9 +18,7 @@ import D3.Viz.Simpsons.Types (green, purple, gray)
 import Data.Array (mapWithIndex, uncons)
 import Data.Maybe (Maybe(..))
 import PSD3.Internal.Attribute (Attribute)
--- v3 Integration: all attributes via v3Attr/v3AttrStr (no ToAttr typeclass)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, cx, cy, r, fill, stroke, strokeWidth, transform, path, textAnchor, fontSize, textContent, width, height, viewBox)
 import PSD3.Axis.Axis (axisBottom, axisLeft, renderAxis, Scale)
 import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.AST (Tree)
@@ -121,61 +119,61 @@ scatterChartStatic config =
     overallTrendLine = [ { x: 0.0, y: 8.2 }, { x: 13.0, y: 1.0 } ]
   in
     T.elem Group
-      [ v3AttrStr "class" (str "chart-static") ]
+      [ attr "class" $ text "chart-static" ]
       `T.withChildren`
         [ -- Y axis
-          T.elem Group [ v3AttrStr "class" (str "y-axis") ]
+          T.elem Group [ attr "class" $ text "y-axis" ]
             `T.withChildren`
               [ renderAxis (axisLeft yAxisScale)
               , T.elem Text
-                  [ v3AttrStr "transform" (str ("translate(-28," <> show (ih / 2.0) <> ") rotate(-90)"))
-                  , v3AttrStr "text-anchor" (str "middle")
-                  , v3Attr "font-size" (lit 12.0)
-                  , v3AttrStr "textContent" (str "y")
+                  [ transform $ text ("translate(-28," <> show (ih / 2.0) <> ") rotate(-90)")
+                  , textAnchor $ text "middle"
+                  , fontSize $ num 12.0
+                  , textContent $ text "y"
                   ]
               ]
 
         -- X axis
         , T.elem Group
-            [ v3AttrStr "transform" (str ("translate(0," <> show ih <> ")"))
-            , v3AttrStr "class" (str "x-axis")
+            [ transform $ text ("translate(0," <> show ih <> ")")
+            , attr "class" $ text "x-axis"
             ]
             `T.withChildren`
               [ renderAxis (axisBottom xAxisScale)
               , T.elem Text
-                  [ v3AttrStr "transform" (str ("translate(" <> show (iw / 2.0) <> ",35)"))
-                  , v3AttrStr "text-anchor" (str "middle")
-                  , v3Attr "font-size" (lit 12.0)
-                  , v3AttrStr "textContent" (str "x")
+                  [ transform $ text ("translate(" <> show (iw / 2.0) <> ",35)")
+                  , textAnchor $ text "middle"
+                  , fontSize $ num 12.0
+                  , textContent $ text "x"
                   ]
               ]
 
         -- Green trend line
         , T.elem Path
-            [ v3AttrStr "class" (str "trend-line green")
-            , v3AttrStr "d" (str (pathFromPoints xScale yScale greenTrendLine))
-            , v3AttrStr "stroke" (str green)
-            , v3Attr "stroke-width" (lit 1.5)
-            , v3AttrStr "fill" (str "none")
+            [ attr "class" $ text "trend-line green"
+            , path $ text (pathFromPoints xScale yScale greenTrendLine)
+            , stroke $ text green
+            , strokeWidth $ num 1.5
+            , fill $ text "none"
             ]
 
         -- Purple trend line
         , T.elem Path
-            [ v3AttrStr "class" (str "trend-line purple")
-            , v3AttrStr "d" (str (pathFromPoints xScale yScale purpleTrendLine))
-            , v3AttrStr "stroke" (str purple)
-            , v3Attr "stroke-width" (lit 1.5)
-            , v3AttrStr "fill" (str "none")
+            [ attr "class" $ text "trend-line purple"
+            , path $ text (pathFromPoints xScale yScale purpleTrendLine)
+            , stroke $ text purple
+            , strokeWidth $ num 1.5
+            , fill $ text "none"
             ]
 
         -- Overall trend line (dashed)
         , T.elem Path
-            [ v3AttrStr "class" (str "trend-line overall")
-            , v3AttrStr "d" (str (pathFromPoints xScale yScale overallTrendLine))
-            , v3AttrStr "stroke" (str gray)
-            , v3Attr "stroke-width" (lit 1.5)
-            , v3AttrStr "stroke-dasharray" (str "4,3")
-            , v3AttrStr "fill" (str "none")
+            [ attr "class" $ text "trend-line overall"
+            , path $ text (pathFromPoints xScale yScale overallTrendLine)
+            , stroke $ text gray
+            , strokeWidth $ num 1.5
+            , attr "stroke-dasharray" $ text "4,3"
+            , fill $ text "none"
             ]
         ]
 
@@ -196,12 +194,12 @@ scatterChartPoints config =
   in
     T.joinData "points" "circle" indexedPoints \(IndexedPoint { point }) ->
       T.elem Circle
-        [ v3Attr "cx" (lit (xScale point.x))
-        , v3Attr "cy" (lit (yScale point.y))
-        , v3Attr "r" (lit 6.0)
-        , v3AttrStr "fill" (str point.color)
-        , v3AttrStr "stroke" (str "white")
-        , v3Attr "stroke-width" (lit 1.0)
+        [ cx $ num (xScale point.x)
+        , cy $ num (yScale point.y)
+        , r $ num 6.0
+        , fill $ text point.color
+        , stroke $ text "white"
+        , strokeWidth $ num 1.0
         ]
 
 -- | Full scatter chart configuration for composing in App
@@ -210,10 +208,10 @@ scatterChart config =
   { static: scatterChartStatic config
   , points: scatterChartPoints config
   , containerAttrs:
-      [ v3Attr "width" (lit config.width)
-      , v3Attr "height" (lit config.height)
-      , v3AttrStr "viewBox" (str ("0 0 " <> show config.width <> " " <> show config.height))
-      , v3AttrStr "class" (str "scatter-chart")
+      [ width $ num config.width
+      , height $ num config.height
+      , viewBox 0.0 0.0 config.width config.height
+      , attr "class" $ text "scatter-chart"
       ]
   }
 

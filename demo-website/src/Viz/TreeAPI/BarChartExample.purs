@@ -10,8 +10,7 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, x, y, fill, stroke, strokeWidth, transform)
 import PSD3.Axis.Axis (axisBottom, axisLeft, renderAxis, Scale)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_, reselectD3v2)
@@ -104,27 +103,27 @@ barChart = runD3v2M do
     axesTree :: Tree Unit
     axesTree =
       T.named SVG "svg"
-        [ v3Attr "width" (lit dims.width)
-        , v3Attr "height" (lit dims.height)
-        , v3AttrStr "viewBox" (str ("0 0 " <> show dims.width <> " " <> show dims.height))
-        , v3AttrStr "class" (str "bar-chart-tree")
+        [ width $ num dims.width
+        , height $ num dims.height
+        , viewBox 0.0 0.0 dims.width dims.height
+        , attr "class" $ text "bar-chart-tree"
         ]
         `T.withChild`
           ( T.named Group "chartGroup"
-              [ v3AttrStr "class" (str "chart-content")
-              , v3AttrStr "transform" (str ("translate(" <> show dims.marginLeft <> "," <> show dims.marginTop <> ")"))
+              [ attr "class" $ text "chart-content"
+              , transform $ text ("translate(" <> show dims.marginLeft <> "," <> show dims.marginTop <> ")")
               ]
               `T.withChildren`
                 [ -- X axis
                   T.named Group "xAxis"
-                    [ v3AttrStr "transform" (str ("translate(0," <> show iHeight <> ")"))
-                    , v3AttrStr "class" (str "x-axis")
+                    [ transform $ text ("translate(0," <> show iHeight <> ")")
+                    , attr "class" $ text "x-axis"
                     ]
                     `T.withChild`
                       renderAxis xAxis
                 , -- Y axis
                   T.named Group "yAxis"
-                    [ v3AttrStr "class" (str "y-axis")
+                    [ attr "class" $ text "y-axis"
                     ]
                     `T.withChild`
                       renderAxis yAxis
@@ -150,14 +149,14 @@ barChart = runD3v2M do
           barHeight = iHeight - yPos -- Bar grows from baseline
         in
           T.elem Rect
-            [ v3Attr "x" (lit xPos) -- Horizontal position
-            , v3Attr "y" (lit yPos) -- Top of bar (SVG coords from top-left)
-            , v3Attr "width" (lit barWidth) -- Bar width
-            , v3Attr "height" (lit barHeight) -- Bar height (grows downward in SVG)
-            , v3AttrStr "fill" (str "#4a90e2")
-            , v3AttrStr "stroke" (str "#357abd")
-            , v3Attr "stroke-width" (lit 1.0)
-            , v3AttrStr "class" (str "bar")
+            [ x $ num xPos -- Horizontal position
+            , y $ num yPos -- Top of bar (SVG coords from top-left)
+            , width $ num barWidth -- Bar width
+            , height $ num barHeight -- Bar height (grows downward in SVG)
+            , fill $ text "#4a90e2"
+            , stroke $ text "#357abd"
+            , strokeWidth $ num 1.0
+            , attr "class" $ text "bar"
             ]
 
   -- Render bars into the chart group (overlaying)

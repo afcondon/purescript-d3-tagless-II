@@ -16,8 +16,7 @@ import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Simulation (SimulationNode, SwizzledLink)
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultCenter, defaultLink)
 import PSD3.ForceEngine.Links (swizzleLinks)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, r, fill, stroke, strokeWidth, from)
 import PSD3.Internal.Behavior.Types (Behavior(..), DragConfig(..), ScaleExtent(..), defaultZoom)
 import PSD3.Internal.Behavior.FFI as BehaviorFFI
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
@@ -50,8 +49,12 @@ nodes =
 
 links :: Array Link
 links =
-  [ { source: 0, target: 1 }, { source: 0, target: 2 }, { source: 1, target: 2 }
-  , { source: 2, target: 3 }, { source: 3, target: 4 }, { source: 4, target: 0 }
+  [ { source: 0, target: 1 }
+  , { source: 0, target: 2 }
+  , { source: 1, target: 2 }
+  , { source: 2, target: 3 }
+  , { source: 3, target: 4 }
+  , { source: 4, target: 0 }
   ]
 
 -- =============================================================================
@@ -87,18 +90,19 @@ simpleForceGraph selector = do
   -- Render initial DOM structure using TreeAPI
   runD3v2M do
     container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
-    let containerTree :: T.Tree Unit
-        containerTree =
-          T.named SVG "svg"
-            [ v3Attr "width" (lit 400.0), v3Attr "height" (lit 300.0), v3AttrStr "viewBox" (str "-200 -150 400 300"), v3AttrStr "id" (str "simple-force-svg") ]
-            `T.withBehaviors` [ Zoom $ defaultZoom (ScaleExtent 0.5 4.0) "#simple-force-zoom-group" ]
-            `T.withChildren`
-              [ T.named Group "zoom-group" [ v3AttrStr "id" (str "simple-force-zoom-group") ]
-                  `T.withChildren`
-                    [ T.named Group "links-group" [ v3AttrStr "id" (str "simple-force-links") ]
-                    , T.named Group "nodes-group" [ v3AttrStr "id" (str "simple-force-nodes") ]
-                    ]
-              ]
+    let
+      containerTree :: T.Tree Unit
+      containerTree =
+        T.named SVG "svg"
+          [ width $ num 400.0, height $ num 300.0, viewBox (-200.0) (-150.0) 400.0 300.0, attr "id" $ text "simple-force-svg" ]
+          `T.withBehaviors` [ Zoom $ defaultZoom (ScaleExtent 0.5 4.0) "#simple-force-zoom-group" ]
+          `T.withChildren`
+            [ T.named Group "zoom-group" [ attr "id" $ text "simple-force-zoom-group" ]
+                `T.withChildren`
+                  [ T.named Group "links-group" [ attr "id" $ text "simple-force-links" ]
+                  , T.named Group "nodes-group" [ attr "id" $ text "simple-force-nodes" ]
+                  ]
+            ]
     _ <- renderTree container containerTree
     pure unit
 
@@ -121,21 +125,30 @@ tick stateRef _selector = runD3v2M do
   nodesGroup <- select "#simple-force-nodes" :: _ (D3v2Selection_ SEmpty Element Unit)
 
   -- Render links
-  let linksTree = T.joinData "links" "line" state.swizzled $ \_ ->
-        T.elem Line
-          [ v3AttrFn "x1" (_.source.x :: SLink -> Number), v3AttrFn "y1" (_.source.y :: SLink -> Number)
-          , v3AttrFn "x2" (_.target.x :: SLink -> Number), v3AttrFn "y2" (_.target.y :: SLink -> Number)
-          , v3AttrStr "stroke" (str "#999"), v3Attr "stroke-width" (lit 2.0)
-          ]
+  let
+    linksTree = T.joinData "links" "line" state.swizzled $ \_ ->
+      T.elem Line
+        [ from "x1" (_.source.x :: SLink -> Number)
+        , from "y1" (_.source.y :: SLink -> Number)
+        , from "x2" (_.target.x :: SLink -> Number)
+        , from "y2" (_.target.y :: SLink -> Number)
+        , stroke $ text "#999"
+        , strokeWidth $ num 2.0
+        ]
   _ <- renderTree linksGroup linksTree
 
   -- Render nodes with drag behavior
-  let nodesTree = T.joinData "nodes" "circle" state.nodes $ \_ ->
-        T.elem Circle
-          [ v3AttrFn "cx" (_.x :: Node -> Number), v3AttrFn "cy" (_.y :: Node -> Number), v3Attr "r" (lit 10.0)
-          , v3AttrStr "fill" (str "#69b3a2"), v3AttrStr "stroke" (str "#fff"), v3Attr "stroke-width" (lit 2.0)
-          ]
-          `T.withBehaviors` [ Drag (SimulationDrag simulationId) ]
+  let
+    nodesTree = T.joinData "nodes" "circle" state.nodes $ \_ ->
+      T.elem Circle
+        [ from "cx" (_.x :: Node -> Number)
+        , from "cy" (_.y :: Node -> Number)
+        , r $ num 10.0
+        , fill $ text "#69b3a2"
+        , stroke $ text "#fff"
+        , strokeWidth $ num 2.0
+        ]
+        `T.withBehaviors` [ Drag (SimulationDrag simulationId) ]
   _ <- renderTree nodesGroup nodesTree
 
   pure unit

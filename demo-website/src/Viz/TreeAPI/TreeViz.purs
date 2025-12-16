@@ -13,8 +13,7 @@ import Effect.Class (liftEffect)
 import Effect.Console as Console
 import PSD3.Shared.Data (loadFlareData)
 import DataViz.Layout.Hierarchy.Tree (tree, defaultTreeConfig)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, cx, cy, r, x, y, fill, stroke, strokeWidth, fontSize, textAnchor, textContent, path)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_, reselectD3v2)
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
@@ -95,31 +94,30 @@ drawTree selector flareTree = runD3v2M do
     linksTree :: T.Tree LinkDatum
     linksTree =
       T.named SVG "svg"
-        [ v3Attr "width" (lit chartWidth)
-        , v3Attr "height" (lit chartHeight)
-        , v3AttrStr "viewBox" (str ("0 0 " <> show chartWidth <> " " <> show chartHeight))
-        , v3AttrStr "class" (str "simple-hierarchy-tree")
+        [ width $ num chartWidth
+        , height $ num chartHeight
+        , viewBox 0.0 0.0 chartWidth chartHeight
+        , attr "class" $ text "simple-hierarchy-tree"
         ]
         `T.withChild`
           ( T.named Group "chartGroup"
-              [ v3AttrStr "class" (str "tree-content") ]
+              [ attr "class" $ text "tree-content" ]
               `T.withChild`
                 ( T.named Group "linksGroup"
-                    [ v3AttrStr "class" (str "links") ]
+                    [ attr "class" $ text "links" ]
                     `T.withChild`
                       ( T.joinData "links" "path" links $ \link ->
                           T.elem Path
-                            [ v3AttrStr "d"
-                                (str ( linkPath
+                            [ path $ text ( linkPath
                                     (link.source.x + padding)
                                     (link.source.y + padding)
                                     (link.target.x + padding)
                                     (link.target.y + padding)
-                                ))
-                            , v3AttrStr "fill" (str "none")
-                            , v3AttrStr "stroke" (str "#999")
-                            , v3Attr "stroke-width" (lit 1.5)
-                            , v3AttrStr "class" (str "link")
+                                )
+                            , fill $ text "none"
+                            , stroke $ text "#999"
+                            , strokeWidth $ num 1.5
+                            , attr "class" $ text "link"
                             ]
                       )
                 )
@@ -136,26 +134,26 @@ drawTree selector flareTree = runD3v2M do
     nodesTree :: T.Tree HierNode
     nodesTree =
       T.named Group "nodesGroup"
-        [ v3AttrStr "class" (str "nodes") ]
+        [ attr "class" $ text "nodes" ]
         `T.withChild`
           ( T.joinData "nodeGroups" "g" nodes $ \node ->
               T.named Group ("node-" <> node.name)
-                [ v3AttrStr "class" (str "node") ]
+                [ attr "class" $ text "node" ]
                 `T.withChildren`
                   [ T.elem Circle
-                      [ v3Attr "cx" (lit (node.x + padding))
-                      , v3Attr "cy" (lit (node.y + padding))
-                      , v3Attr "r" (lit 6.0)
-                      , v3AttrStr "fill" (str "#69b3a2")
-                      , v3AttrStr "stroke" (str "#fff")
-                      , v3Attr "stroke-width" (lit 2.0)
+                      [ cx $ num (node.x + padding)
+                      , cy $ num (node.y + padding)
+                      , r $ num 6.0
+                      , fill $ text "#69b3a2"
+                      , stroke $ text "#fff"
+                      , strokeWidth $ num 2.0
                       ]
                   , T.elem Text
-                      [ v3Attr "x" (lit (node.x + padding + 10.0))
-                      , v3Attr "y" (lit (node.y + padding + 4.0))
-                      , v3AttrStr "textContent" (str node.name)
-                      , v3Attr "font-size" (lit 12.0)
-                      , v3AttrStr "text-anchor" (str "start")
+                      [ x $ num (node.x + padding + 10.0)
+                      , y $ num (node.y + padding + 4.0)
+                      , textContent $ text node.name
+                      , fontSize $ num 12.0
+                      , textAnchor $ text "start"
                       ]
                   ]
           )

@@ -30,7 +30,7 @@ import Type.Proxy (Proxy(..))
 
 -- v2 infrastructure
 import PSD3.Internal.Attribute (Attribute)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn)
+import PSD3.Expr.Friendly (num, text, attr, from, viewBox, width, height, x, y, fill, opacity, fontSize, textAnchor, dominantBaseline, textContent)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
@@ -40,7 +40,7 @@ import PSD3.AST as T
 import Web.DOM.Element (Element)
 
 -- v3 DSL
-import PSD3.Expr.Expr (class NumExpr, lit, str)
+import PSD3.Expr.Expr (class NumExpr)
 import PSD3.Expr.Datum (class DatumExpr, field)
 import PSD3.Expr.Sugar ((*:), (+:))
 import PSD3.Expr.Interpreter.CodeGen (CodeGen, runCodeGen)
@@ -94,23 +94,23 @@ createLettersTree letters =
   T.sceneJoin "letters" "text" letters
     -- Template: FINAL state for each letter (where they end up after enter/update)
     (\d -> T.elem Text
-      [ v3Attr "x" (lit (evalExpr letterX d))   -- v3: computed X position
-      , v3Attr "y" (lit letterY)                -- Final Y position
-      , v3Attr "font-size" (lit 32.0)
-      , v3AttrStr "text-anchor" (str "middle")
-      , v3AttrStr "dominant-baseline" (str "middle")
-      , v3AttrStr "fill" (str "#2c3e50")
-      , v3Attr "opacity" (lit 1.0)
+      [ x $ num (evalExpr letterX d)   -- v3: computed X position
+      , y $ num letterY                -- Final Y position
+      , fontSize $ num 32.0
+      , textAnchor $ text "middle"
+      , dominantBaseline $ text "middle"
+      , fill $ text "#2c3e50"
+      , opacity $ num 1.0
       -- The text content is set via a special TextContent attribute
-      , textContent d.letter
+      , textContent $ text d.letter
       ])
     -- Behaviors for enter/update/exit
     { keyFn: Just _.letter       -- Identity by letter, not by index!
     , enterBehavior: Just
         { initialAttrs:
-            [ v3Attr "y" (lit 20.0)              -- Start above
-            , v3Attr "opacity" (lit 0.0)         -- Start invisible
-            , v3AttrStr "fill" (str "#27ae60")      -- Green for entering
+            [ y $ num 20.0              -- Start above
+            , opacity $ num 0.0         -- Start invisible
+            , fill $ text "#27ae60"      -- Green for entering
             ]
         , transition: Just $ transitionWith
             { duration: Milliseconds 750.0
@@ -122,10 +122,10 @@ createLettersTree letters =
     , updateBehavior: Just
         { attrs:
             -- Update attributes (slide to new position)
-            [ v3AttrFn "x" (\d' -> evalExpr letterX d')
-            , v3Attr "y" (lit letterY)
-            , v3AttrStr "fill" (str "#2c3e50")  -- Dark for stable
-            , v3Attr "opacity" (lit 1.0)
+            [ from "x" (\d' -> evalExpr letterX d')
+            , y $ num letterY
+            , fill $ text "#2c3e50"  -- Dark for stable
+            , opacity $ num 1.0
             ]
         , transition: Just $ transitionWith
             { duration: Milliseconds 500.0
@@ -136,9 +136,9 @@ createLettersTree letters =
         }
     , exitBehavior: Just
         { attrs:
-            [ v3Attr "y" (lit 180.0)             -- Drop below
-            , v3Attr "opacity" (lit 0.0)         -- Fade out
-            , v3AttrStr "fill" (str "#e74c3c")      -- Red for exiting
+            [ y $ num 180.0             -- Drop below
+            , opacity $ num 0.0         -- Fade out
+            , fill $ text "#e74c3c"      -- Red for exiting
             ]
         , transition: Just $ transitionWith
             { duration: Milliseconds 500.0
@@ -148,10 +148,6 @@ createLettersTree letters =
             }
         }
     }
-
--- | Helper: text content attribute (special handling for text elements)
-textContent :: String -> Attribute LetterDatum
-textContent content = v3AttrStr "textContent" (str content)
 
 -- =============================================================================
 -- Public API
@@ -174,11 +170,11 @@ v3GUPDemo = do
     let svgTree :: Tree Unit
         svgTree =
           T.named SVG "svg"
-            [ v3Attr "width" (lit 600.0)
-            , v3Attr "height" (lit 200.0)
-            , v3AttrStr "viewBox" (str "0 0 600 200")
-            , v3AttrStr "id" (str "v3-gup-svg")
-            , v3AttrStr "class" (str "v3-gup-demo")
+            [ width $ num 600.0
+            , height $ num 200.0
+            , viewBox 0.0 0.0 600.0 200.0
+            , attr "id" $ text "v3-gup-svg"
+            , attr "class" $ text "v3-gup-demo"
             ]
             `T.withChild`
               T.elem Group []  -- Empty group placeholder
@@ -234,11 +230,11 @@ initV3GUP containerSelector = do
     let svgTree :: Tree Unit
         svgTree =
           T.named SVG "svg"
-            [ v3Attr "width" (lit 800.0)
-            , v3Attr "height" (lit 500.0)
-            , v3AttrStr "viewBox" (str "0 -50 800 500")
-            , v3AttrStr "id" (str svgId)
-            , v3AttrStr "class" (str "v3-gup-demo d3svg gup")
+            [ width $ num 800.0
+            , height $ num 500.0
+            , viewBox 0.0 (-50.0) 800.0 500.0
+            , attr "id" $ text svgId
+            , attr "class" $ text "v3-gup-demo d3svg gup"
             ]
             `T.withChild`
               T.elem Group []  -- Empty group placeholder

@@ -11,8 +11,7 @@ import Effect.Class (liftEffect)
 import Effect.Console as Console
 import PSD3.Shared.Data (loadFlareImportsData, FlareImportRecord)
 import DataViz.Layout.Hierarchy.EdgeBundle as EdgeBundle
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, x, y, fill, stroke, opacity, path, fontSize, transform)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_, reselectD3v2)
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
@@ -68,28 +67,28 @@ drawEdgeBundle selector importData = runD3v2M do
     linksTree :: T.Tree LinkDatum
     linksTree =
       T.named SVG "svg"
-        [ v3Attr "width" (lit chartSize)
-        , v3Attr "height" (lit chartSize)
-        , v3AttrStr "viewBox" (str ("0 0 " <> show chartSize <> " " <> show chartSize))
-        , v3AttrStr "class" (str "edge-bundle-viz")
+        [ width $ num chartSize
+        , height $ num chartSize
+        , viewBox 0.0 0.0 chartSize chartSize
+        , attr "class" $ text "edge-bundle-viz"
         ]
         `T.withChild`
           ( T.named Group "chartGroup"
-              [ v3AttrStr "class" (str "edge-bundle-content")
-              , v3AttrStr "transform" (str ("translate(" <> show centerX <> "," <> show centerY <> ")"))
+              [ attr "class" $ text "edge-bundle-content"
+              , transform $ text ("translate(" <> show centerX <> "," <> show centerY <> ")")
               ]
               `T.withChild`
                 ( T.named Group "linksGroup"
-                    [ v3AttrStr "class" (str "links") ]
+                    [ attr "class" $ text "links" ]
                     `T.withChild`
                       ( T.joinData "links" "path" links $ \link ->
                           T.elem Path
-                            [ v3AttrStr "d" (str link.path)
-                            , v3AttrStr "fill" (str "none")
-                            , v3AttrStr "stroke" (str "steelblue")
-                            , v3Attr "stroke-opacity" (lit 0.4)
-                            , v3Attr "stroke-width" (lit 1.5)
-                            , v3AttrStr "class" (str "link")
+                            [ path $ text link.path
+                            , fill $ text "none"
+                            , stroke $ text "steelblue"
+                            , opacity $ num 0.4
+                            , attr "stroke-width" $ num 1.5
+                            , attr "class" $ text "link"
                             ]
                       )
                 )
@@ -146,17 +145,17 @@ drawEdgeBundle selector importData = runD3v2M do
     nodesTree :: T.Tree NodeDatum
     nodesTree =
       T.named Group "nodesGroup"
-        [ v3AttrStr "class" (str "nodes") ]
+        [ attr "class" $ text "nodes" ]
         `T.withChild`
           ( T.joinData "nodeLabels" "text" nodeData $ \node ->
               T.elem Text
-                [ v3Attr "x" (lit node.cartX)
-                , v3Attr "y" (lit node.cartY)
-                , v3AttrStr "text-content" (str node.shortName)
-                , v3Attr "font-size" (lit 8.0)
-                , v3AttrStr "text-anchor" (str (getTextAnchor node))
-                , v3AttrStr "transform" (str ("rotate(" <> show (getTextRotation node) <> "," <> show node.cartX <> "," <> show node.cartY <> ") translate(" <> show (getTextOffset node) <> ", 3)"))
-                , v3AttrStr "class" (str "node-label")
+                [ x $ num node.cartX
+                , y $ num node.cartY
+                , attr "text-content" $ text node.shortName
+                , fontSize $ num 8.0
+                , attr "text-anchor" $ text (getTextAnchor node)
+                , transform $ text ("rotate(" <> show (getTextRotation node) <> "," <> show node.cartX <> "," <> show node.cartY <> ") translate(" <> show (getTextOffset node) <> ", 3)")
+                , attr "class" $ text "node-label"
                 ]
           )
 

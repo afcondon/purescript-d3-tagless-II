@@ -12,8 +12,7 @@ import Effect.Class (liftEffect)
 import Effect.Console as Console
 import PSD3.Shared.Data (HierData, getName, getValue, getChildren, loadDataFile, DataFile(..), parseFlareJson)
 import DataViz.Layout.Hierarchy.Partition (HierarchyData(..), PartitionNode(..), defaultPartitionConfig, hierarchy, partition)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, fill, stroke, strokeWidth, opacity, path)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
@@ -142,22 +141,22 @@ drawSunburst selector flareData = runD3v2M do
     tree :: T.Tree (PartitionNode String)
     tree =
       T.named SVG "svg"
-        [ v3Attr "width" (lit chartSize)
-        , v3Attr "height" (lit chartSize)
-        , v3AttrStr "viewBox" (str (show (-radius) <> " " <> show (-radius) <> " " <> show chartSize <> " " <> show chartSize))
-        , v3AttrStr "class" (str "sunburst-viz")
+        [ width $ num chartSize
+        , height $ num chartSize
+        , viewBox (-radius) (-radius) chartSize chartSize
+        , attr "class" $ text "sunburst-viz"
         ]
         `T.withChild`
           ( T.joinData "arcs" "g" nodes $ \(PartNode node) ->
               T.named Group ("arc-" <> node.data_)
-                [ v3AttrStr "class" (str "node") ]
+                [ attr "class" $ text "node" ]
                 `T.withChild`
                   ( T.elem Path
-                      [ v3AttrStr "d" (str (arcPath node.x0 node.y0 node.x1 node.y1 radius))
-                      , v3AttrStr "fill" (str (getColor node.depth))
-                      , v3Attr "fill-opacity" (lit 0.7)
-                      , v3AttrStr "stroke" (str "#fff")
-                      , v3Attr "stroke-width" (lit 1.0)
+                      [ path $ text (arcPath node.x0 node.y0 node.x1 node.y1 radius)
+                      , fill $ text (getColor node.depth)
+                      , attr "fill-opacity" $ num 0.7
+                      , stroke $ text "#fff"
+                      , strokeWidth $ num 1.0
                       ]
                   )
           )

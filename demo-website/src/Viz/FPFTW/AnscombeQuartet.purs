@@ -10,8 +10,7 @@ import PSD3.Internal.Capabilities.Selection (renderTree, select)
 import PSD3.Interpreter.D3 (D3v2Selection_, runD3v2M)
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
 import PSD3.AST as T
-import PSD3.Expr.Expr (lit, str)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Friendly (num, text, attr, width, height, viewBox, cx, cy, r, x, y, x1, y1, x2, y2, fill, stroke, strokeWidth, opacity, transform, textContent, textAnchor)
 import Web.DOM.Element (Element)
 
 -- | A single data point
@@ -102,48 +101,48 @@ scaleY y = 280.0 - ((y - 3.0) * 20.0) -- Domain [3, 13] -> Range [280, 80] (inve
 scatterplot :: String -> Array Point -> T.Tree Unit
 scatterplot datasetName points =
   T.named Group ("plot-" <> datasetName)
-    [ v3AttrStr "class" (str "anscombe-plot") ]
+    [ attr "class" $ text "anscombe-plot" ]
     `T.withChildren`
       ( [ -- Title
           T.elem Text
-            [ v3Attr "x" (lit 260.0)
-            , v3Attr "y" (lit 30.0)
-            , v3AttrStr "text-content" (str datasetName)
-            , v3AttrStr "text-anchor" (str "middle")
-            , v3AttrStr "fill" (str "#333")
-            , v3AttrStr "class" (str "plot-title")
+            [ x $ num 260.0
+            , y $ num 30.0
+            , textContent $ text datasetName
+            , textAnchor $ text "middle"
+            , fill $ text "#333"
+            , attr "class" $ text "plot-title"
             ]
         -- X axis
         , T.elem Line
-            [ v3Attr "x1" (lit 30.0)
-            , v3Attr "y1" (lit 280.0)
-            , v3Attr "x2" (lit 480.0)
-            , v3Attr "y2" (lit 280.0)
-            , v3AttrStr "stroke" (str "#999")
-            , v3Attr "stroke-width" (lit 1.0)
+            [ x1 $ num 30.0
+            , y1 $ num 280.0
+            , x2 $ num 480.0
+            , y2 $ num 280.0
+            , stroke $ text "#999"
+            , strokeWidth $ num 1.0
             ]
         -- Y axis
         , T.elem Line
-            [ v3Attr "x1" (lit 30.0)
-            , v3Attr "y1" (lit 80.0)
-            , v3Attr "x2" (lit 30.0)
-            , v3Attr "y2" (lit 280.0)
-            , v3AttrStr "stroke" (str "#999")
-            , v3Attr "stroke-width" (lit 1.0)
+            [ x1 $ num 30.0
+            , y1 $ num 80.0
+            , x2 $ num 30.0
+            , y2 $ num 280.0
+            , stroke $ text "#999"
+            , strokeWidth $ num 1.0
             ]
         ] <>
           -- Data points
           ( map
               ( \pt ->
                   T.elem Circle
-                    [ v3Attr "cx" (lit (scaleX pt.x))
-                    , v3Attr "cy" (lit (scaleY pt.y))
-                    , v3Attr "r" (lit 4.0)
-                    , v3AttrStr "fill" (str "#4A90E2")
-                    , v3Attr "fill-opacity" (lit 0.7)
-                    , v3AttrStr "stroke" (str "#2E5C8A")
-                    , v3Attr "stroke-width" (lit 1.5)
-                    , v3AttrStr "class" (str "data-point")
+                    [ cx $ num (scaleX pt.x)
+                    , cy $ num (scaleY pt.y)
+                    , r $ num 4.0
+                    , fill $ text "#4A90E2"
+                    , opacity $ num 0.7
+                    , stroke $ text "#2E5C8A"
+                    , strokeWidth $ num 1.5
+                    , attr "class" $ text "data-point"
                     ]
               )
               points
@@ -160,10 +159,10 @@ drawAnscombeQuartet containerSelector = runD3v2M do
   let
     quartetTree =
       T.named SVG "svg"
-        [ v3Attr "width" (lit 1040.0)
-        , v3Attr "height" (lit 600.0)
-        , v3AttrStr "viewBox" (str "0 0 1040 600")
-        , v3AttrStr "class" (str "anscombe-quartet")
+        [ width $ num 1040.0
+        , height $ num 600.0
+        , viewBox 0.0 0.0 1040.0 600.0
+        , attr "class" $ text "anscombe-quartet"
         ]
         `T.withChildren`
           -- Map the scatterplot component over all four datasets!
@@ -175,7 +174,7 @@ drawAnscombeQuartet containerSelector = runD3v2M do
                     yOffset = if name == "Dataset I" || name == "Dataset II" then 0.0 else 300.0
                   in
                     T.named Group ("group-" <> name)
-                      [ v3AttrStr "transform" (str ("translate(" <> show xOffset <> "," <> show yOffset <> ")")) ]
+                      [ transform $ text ("translate(" <> show xOffset <> "," <> show yOffset <> ")") ]
                       `T.withChild` scatterplot name points
               )
               anscombeData

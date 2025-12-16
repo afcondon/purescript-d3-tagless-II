@@ -40,7 +40,6 @@ import PSD3.ForceEngine.Setup as Setup
 import PSD3.ForceEngine.Links (filterLinksToSubset)
 import PSD3.ForceEngine.Events (SimulationEvent(..), defaultCallbacks)
 import PSD3.ForceEngine.Halogen (subscribeToSimulation)
-import Control.Monad (void)
 import Data.Array (catMaybes)
 import Data.String.CodeUnits (toCharArray)
 import Data.Traversable (sequence)

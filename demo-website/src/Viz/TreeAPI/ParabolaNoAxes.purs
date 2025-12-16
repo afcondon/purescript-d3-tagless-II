@@ -9,8 +9,7 @@ import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, cx, cy, r, fill)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
@@ -61,21 +60,21 @@ parabolaNoAxes selector = runD3v2M do
   let tree :: Tree ParabolaPoint
       tree =
         T.named SVG "svg"
-          [ v3Attr "width" (lit svgWidth)
-          , v3Attr "height" (lit svgHeight)
-          , v3AttrStr "viewBox" (str ("0 0 " <> show svgWidth <> " " <> show svgHeight))
-          , v3AttrStr "id" (str "parabola-no-axes-svg")
-          , v3AttrStr "class" (str "tree-api-example")
+          [ width $ num svgWidth
+          , height $ num svgHeight
+          , viewBox 0.0 0.0 svgWidth svgHeight
+          , attr "id" $ text "parabola-no-axes-svg"
+          , attr "class" $ text "tree-api-example"
           ]
           `T.withChild`
             -- joinData creates one circle per point
             -- Position comes from the data: x and y = x²
             (joinData "circles" "circle" parabolaData $ \d ->
               T.elem Circle
-                [ v3Attr "cx" (lit (scaleX d.x))        -- X from datum
-                , v3Attr "cy" (lit (scaleY d.y))        -- Y from datum (y = x²)
-                , v3Attr "r" (lit 5.0)             -- Small circles
-                , v3AttrStr "fill" (str "green")           -- All green
+                [ cx $ num (scaleX d.x)        -- X from datum
+                , cy $ num (scaleY d.y)        -- Y from datum (y = x²)
+                , r $ num 5.0             -- Small circles
+                , fill $ text "green"           -- All green
                 ])
 
   -- Render the tree

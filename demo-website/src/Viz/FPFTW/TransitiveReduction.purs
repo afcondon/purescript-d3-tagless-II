@@ -18,8 +18,7 @@ import PSD3.Internal.Capabilities.Selection (renderTree, select)
 import PSD3.Interpreter.D3 (D3v2Selection_, runD3v2M)
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
 import PSD3.AST as T
-import PSD3.Expr.Expr (lit, str)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Friendly (num, text, attr, width, height, viewBox, cx, cy, r, x, y, x1, y1, x2, y2, fill, stroke, strokeWidth, opacity, textContent, textAnchor)
 import Web.DOM.Element (Element)
 
 -- | Use library's SimpleGraph for String nodes
@@ -107,14 +106,14 @@ visualizeGraph title graph centerX centerY circleRadius highlightRemoved removed
       targetPos <- getPos target
       let isRemoved = highlightRemoved && elem (Tuple source target) removedEdges
       pure $ T.elem Line
-        [ v3Attr "x1" (lit sourcePos.x)
-        , v3Attr "y1" (lit sourcePos.y)
-        , v3Attr "x2" (lit targetPos.x)
-        , v3Attr "y2" (lit targetPos.y)
-        , v3AttrStr "stroke" (str if isRemoved then "#E74C3C" else "#999")
-        , v3Attr "stroke-width" (lit if isRemoved then 3.0 else 2.0)
-        , v3Attr "stroke-opacity" (lit if isRemoved then 0.7 else 1.0)
-        , v3AttrStr "class" (str if isRemoved then "edge removed-edge" else "edge")
+        [ x1 $ num sourcePos.x
+        , y1 $ num sourcePos.y
+        , x2 $ num targetPos.x
+        , y2 $ num targetPos.y
+        , stroke $ text if isRemoved then "#E74C3C" else "#999"
+        , strokeWidth $ num if isRemoved then 3.0 else 2.0
+        , opacity $ num if isRemoved then 0.7 else 1.0
+        , attr "class" $ text if isRemoved then "edge removed-edge" else "edge"
         ]
 
     -- Render nodes
@@ -123,32 +122,32 @@ visualizeGraph title graph centerX centerY circleRadius highlightRemoved removed
         []
         `T.withChildren`
           [ T.elem Circle
-              [ v3Attr "cx" (lit pos.x)
-              , v3Attr "cy" (lit pos.y)
-              , v3Attr "r" (lit 20.0)
-              , v3AttrStr "fill" (str "#4A90E2")
-              , v3AttrStr "stroke" (str "#2E5C8A")
-              , v3Attr "stroke-width" (lit 2.0)
-              , v3AttrStr "class" (str "graph-node")
+              [ cx $ num pos.x
+              , cy $ num pos.y
+              , r $ num 20.0
+              , fill $ text "#4A90E2"
+              , stroke $ text "#2E5C8A"
+              , strokeWidth $ num 2.0
+              , attr "class" $ text "graph-node"
               ]
           , T.elem Text
-              [ v3Attr "x" (lit pos.x)
-              , v3Attr "y" (lit (pos.y + 5.0))
-              , v3AttrStr "text-content" (str pos.id)
-              , v3AttrStr "text-anchor" (str "middle")
-              , v3AttrStr "fill" (str "#fff")
-              , v3AttrStr "class" (str "node-label")
+              [ x $ num pos.x
+              , y $ num (pos.y + 5.0)
+              , textContent $ text pos.id
+              , textAnchor $ text "middle"
+              , fill $ text "#fff"
+              , attr "class" $ text "node-label"
               ]
           ]
 
     -- Title
     titleElement = T.elem Text
-      [ v3Attr "x" (lit centerX)
-      , v3Attr "y" (lit (centerY - circleRadius - 30.0))
-      , v3AttrStr "text-content" (str title)
-      , v3AttrStr "text-anchor" (str "middle")
-      , v3AttrStr "fill" (str "#333")
-      , v3AttrStr "class" (str "graph-title")
+      [ x $ num centerX
+      , y $ num (centerY - circleRadius - 30.0)
+      , textContent $ text title
+      , textAnchor $ text "middle"
+      , fill $ text "#333"
+      , attr "class" $ text "graph-title"
       ]
   in
     T.named Group ("graph-" <> title)
@@ -175,10 +174,10 @@ drawTransitiveReduction containerSelector = runD3v2M do
     -- Create side-by-side visualization
     vizTree =
       T.named SVG "svg"
-        [ v3Attr "width" (lit totalWidth)
-        , v3Attr "height" (lit totalHeight)
-        , v3AttrStr "viewBox" (str "0 0 1000 400")
-        , v3AttrStr "class" (str "transitive-reduction")
+        [ width $ num totalWidth
+        , height $ num totalHeight
+        , viewBox 0.0 0.0 1000.0 400.0
+        , attr "class" $ text "transitive-reduction"
         ]
         `T.withChildren`
           [ -- Original graph (left)
@@ -201,12 +200,12 @@ drawTransitiveReduction containerSelector = runD3v2M do
               []
           , -- Arrow indicating transformation
             T.elem Text
-              [ v3Attr "x" (lit 500.0)
-              , v3Attr "y" (lit 200.0)
-              , v3AttrStr "text-content" (str "→")
-              , v3AttrStr "text-anchor" (str "middle")
-              , v3AttrStr "fill" (str "#666")
-              , v3AttrStr "class" (str "transformation-arrow")
+              [ x $ num 500.0
+              , y $ num 200.0
+              , textContent $ text "→"
+              , textAnchor $ text "middle"
+              , fill $ text "#666"
+              , attr "class" $ text "transformation-arrow"
               ]
           ]
 

@@ -18,8 +18,7 @@ import DataViz.Layout.Sankey.CSV (parseSankeyCSV)
 import DataViz.Layout.Sankey.Compute (computeLayout)
 import DataViz.Layout.Sankey.Path (generateLinkPath)
 import DataViz.Layout.Sankey.Types (SankeyLink, SankeyNode, NodeID(..), LinkID(..))
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, x, y, fill, stroke, strokeWidth, opacity, path)
 import PSD3.Internal.Capabilities.Selection (renderTree, select)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_, reselectD3v2)
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
@@ -196,16 +195,16 @@ drawSankey csvData containerSelector w h = runD3v2M do
     mkGradientTree :: GradientSpec -> T.Tree Unit
     mkGradientTree (GradientSpec spec) =
       T.named LinearGradient spec.id
-        [ v3AttrStr "id" (str spec.id)
-        , v3AttrStr "gradientUnits" (str "userSpaceOnUse")  -- Use absolute pixel coordinates
-        , v3Attr "x1" (lit spec.sourceX)
-        , v3Attr "x2" (lit spec.targetX)
-        , v3Attr "y1" (lit 0.0)  -- Horizontal gradient
-        , v3Attr "y2" (lit 0.0)
+        [ attr "id" $ text spec.id
+        , attr "gradientUnits" $ text "userSpaceOnUse"  -- Use absolute pixel coordinates
+        , attr "x1" $ num spec.sourceX
+        , attr "x2" $ num spec.targetX
+        , attr "y1" $ num 0.0  -- Horizontal gradient
+        , attr "y2" $ num 0.0
         ]
         `T.withChildren`
-          [ T.elem Stop [ v3AttrStr "offset" (str "0%"), v3AttrStr "stop-color" (str spec.sourceColor) ]
-          , T.elem Stop [ v3AttrStr "offset" (str "100%"), v3AttrStr "stop-color" (str spec.targetColor) ]
+          [ T.elem Stop [ attr "offset" $ text "0%", attr "stop-color" $ text spec.sourceColor ]
+          , T.elem Stop [ attr "offset" $ text "100%", attr "stop-color" $ text spec.targetColor ]
           ]
 
     -- Build defs children (empty if no gradients needed)
@@ -217,17 +216,17 @@ drawSankey csvData containerSelector w h = runD3v2M do
     sankeyTree :: T.Tree Unit
     sankeyTree =
       T.named SVG "svg"
-        [ v3Attr "width" (lit w)
-        , v3Attr "height" (lit h)
-        , v3AttrStr "viewBox" (str ("0 0 " <> show w <> " " <> show h))
-        , v3AttrStr "id" (str "sankey-svg")
-        , v3AttrStr "class" (str "sankey")
+        [ width $ num w
+        , height $ num h
+        , viewBox 0.0 0.0 w h
+        , attr "id" $ text "sankey-svg"
+        , attr "class" $ text "sankey"
         ]
         `T.withChildren`
           ( [ T.named Defs "defs" [] `T.withChildren` defsChildren
-            , T.named Group "linksGroup" [ v3AttrStr "class" (str "links") ]
-            , T.named Group "nodesGroup" [ v3AttrStr "class" (str "nodes") ]
-            , T.named Group "labelsGroup" [ v3AttrStr "class" (str "labels") ]
+            , T.named Group "linksGroup" [ attr "class" $ text "links" ]
+            , T.named Group "nodesGroup" [ attr "class" $ text "nodes" ]
+            , T.named Group "labelsGroup" [ attr "class" $ text "labels" ]
             ]
           )
 
@@ -248,10 +247,10 @@ drawSankey csvData containerSelector w h = runD3v2M do
           link = il.link
         in
           T.elem Path
-            [ v3AttrStr "class" (str "sankey-link")
-            , v3AttrStr "d" (str $ generateLinkPath layoutResult.nodes link)
-            , v3AttrStr "fill" (str link.color)
-            , v3Attr "fill-opacity" (lit 0.5)
+            [ attr "class" $ text "sankey-link"
+            , path $ text $ generateLinkPath layoutResult.nodes link
+            , fill $ text link.color
+            , opacity $ num 0.5
             ]
 
   _ <- renderTree linksGroupSel linksTree
@@ -265,15 +264,15 @@ drawSankey csvData containerSelector w h = runD3v2M do
           node = in_.node
         in
           T.elem Rect
-            [ v3AttrStr "class" (str "sankey-node")
-            , v3Attr "x" (lit node.x0)
-            , v3Attr "y" (lit node.y0)
-            , v3Attr "width" (lit (node.x1 - node.x0))
-            , v3Attr "height" (lit (node.y1 - node.y0))
-            , v3AttrStr "fill" (str node.color)
-            , v3AttrStr "stroke" (str "#000")
-            , v3Attr "stroke-width" (lit 1.0)
-            , v3Attr "stroke-opacity" (lit 0.3)
+            [ attr "class" $ text "sankey-node"
+            , x $ num node.x0
+            , y $ num node.y0
+            , width $ num (node.x1 - node.x0)
+            , height $ num (node.y1 - node.y0)
+            , fill $ text node.color
+            , stroke $ text "#000"
+            , strokeWidth $ num 1.0
+            , opacity $ num 0.3
             ]
 
   _ <- renderTree nodesGroupSel nodesTree
@@ -288,12 +287,12 @@ drawSankey csvData containerSelector w h = runD3v2M do
       T.joinData "labelElements" "text" labelData $ \datum ->
         -- v3 expressions evaluate the conditional positioning logic
         T.elem Text
-          [ v3AttrStr "class" (str "sankey-label")
-          , v3Attr "x" (lit (evalLabelNum labelXExpr datum))      -- v3: if x0 < w/2 then x1+6 else x0-6
-          , v3Attr "y" (lit (evalLabelNum labelYExpr datum))      -- v3: (y0 + y1) / 2
-          , v3AttrStr "text-anchor" (str (evalLabelStr labelAnchorExpr datum))  -- v3: if x0 < w/2 then "start" else "end"
-          , v3AttrStr "fill" (str "#000")
-          , v3AttrStr "text-content" (str datum.name)
+          [ attr "class" $ text "sankey-label"
+          , x $ num (evalLabelNum labelXExpr datum)      -- v3: if x0 < w/2 then x1+6 else x0-6
+          , y $ num (evalLabelNum labelYExpr datum)      -- v3: (y0 + y1) / 2
+          , attr "text-anchor" $ text (evalLabelStr labelAnchorExpr datum)  -- v3: if x0 < w/2 then "start" else "end"
+          , fill $ text "#000"
+          , attr "text-content" $ text datum.name
           ]
 
   _ <- renderTree labelsGroupSel labelsTree

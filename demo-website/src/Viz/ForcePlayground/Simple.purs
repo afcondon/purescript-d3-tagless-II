@@ -60,8 +60,7 @@ import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, d
 import PSD3.ForceEngine.Links (swizzleLinksByIndex, filterLinksToSubset)
 import PSD3.ForceEngine.Events (SimulationCallbacks)
 import PSD3.Transition.Tick as Tick
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, viewBox, width, height, cx, cy, r, x1, y1, x2, y2, fill, stroke, strokeWidth, opacity)
 import PSD3.Internal.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M)
@@ -262,18 +261,18 @@ renderSVGContainer containerSelector = runD3v2M do
   let containerTree :: T.Tree Unit
       containerTree =
         T.named ET.SVG "svg"
-          [ v3Attr "width" (lit svgWidth)
-          , v3Attr "height" (lit svgHeight)
-          , v3AttrStr "viewBox" (str (show ((-svgWidth) / 2.0) <> " " <> show ((-svgHeight) / 2.0) <> " " <> show svgWidth <> " " <> show svgHeight))
-          , v3AttrStr "id" (str "network-force-svg")
-          , v3AttrStr "class" (str "network-force")
+          [ width $ num svgWidth
+          , height $ num svgHeight
+          , viewBox ((-svgWidth) / 2.0) ((-svgHeight) / 2.0) svgWidth svgHeight
+          , attr "id" $ text "network-force-svg"
+          , attr "class" $ text "network-force"
           ]
           `T.withBehaviors` [ Zoom $ defaultZoom (ScaleExtent 0.1 10.0) "#network-zoom-group" ]
           `T.withChild`
-            T.named ET.Group "zoom-group" [ v3AttrStr "id" (str "network-zoom-group"), v3AttrStr "class" (str "zoom-group") ]
+            T.named ET.Group "zoom-group" [ attr "id" $ text "network-zoom-group", attr "class" $ text "zoom-group" ]
               `T.withChildren`
-                [ T.named ET.Group "links" [ v3AttrStr "id" (str "network-links"), v3AttrStr "class" (str "links") ]
-                , T.named ET.Group "nodes" [ v3AttrStr "id" (str "network-nodes"), v3AttrStr "class" (str "nodes") ]
+                [ T.named ET.Group "links" [ attr "id" $ text "network-links", attr "class" $ text "links" ]
+                , T.named ET.Group "nodes" [ attr "id" $ text "network-nodes", attr "class" $ text "nodes" ]
                 ]
 
   _ <- renderTree container containerTree
@@ -354,13 +353,13 @@ createNodesTree scene =
     [ scene ]
     (_.nodes)
     ( \rn -> T.elem ET.Circle
-        [ v3Attr "cx" (lit rn.node.x)
-        , v3Attr "cy" (lit rn.node.y)
-        , v3Attr "r" (lit (radiusForRenderNode rn))
-        , v3AttrStr "fill" (str (fillForRenderNode rn))
-        , v3AttrStr "stroke" (str (strokeForRenderNode rn))
-        , v3Attr "stroke-width" (lit (strokeWidthForRenderNode rn))
-        , v3Attr "opacity" (lit (opacityForRenderNode rn))
+        [ cx $ num rn.node.x
+        , cy $ num rn.node.y
+        , r $ num (radiusForRenderNode rn)
+        , fill $ text (fillForRenderNode rn)
+        , stroke $ text (strokeForRenderNode rn)
+        , strokeWidth $ num (strokeWidthForRenderNode rn)
+        , opacity $ num (opacityForRenderNode rn)
         ]
     )
     { enterBehavior: Nothing
@@ -375,13 +374,13 @@ createLinksTree scene =
     [ scene ]
     (_.links)
     ( \link -> T.elem ET.Line
-        [ v3Attr "x1" (lit link.source.x)
-        , v3Attr "y1" (lit link.source.y)
-        , v3Attr "x2" (lit link.target.x)
-        , v3Attr "y2" (lit link.target.y)
-        , v3Attr "stroke-width" (lit (0.5 + link.weight * 2.0))  -- 0.5-2.5 based on weight
-        , v3AttrStr "stroke" (str (linkTypeColor link.linkType))
-        , v3Attr "opacity" (lit (0.3 + link.weight * 0.4))      -- 0.3-0.7 based on weight
+        [ x1 $ num link.source.x
+        , y1 $ num link.source.y
+        , x2 $ num link.target.x
+        , y2 $ num link.target.y
+        , strokeWidth $ num (0.5 + link.weight * 2.0)  -- 0.5-2.5 based on weight
+        , stroke $ text (linkTypeColor link.linkType)
+        , opacity $ num (0.3 + link.weight * 0.4)      -- 0.3-0.7 based on weight
         ]
     )
     { enterBehavior: Nothing

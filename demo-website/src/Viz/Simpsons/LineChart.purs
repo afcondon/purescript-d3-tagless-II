@@ -16,9 +16,7 @@ import Prelude
 
 import D3.Viz.Simpsons.Types (Proportions, DerivedData, deriveData, rates, black, green, purple)
 import Data.Array (mapWithIndex)
--- v3 Integration: all attributes via v3Attr/v3AttrStr (no ToAttr typeclass)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
-import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Friendly (num, text, attr, cx, cy, r, fill, stroke, strokeWidth, transform, path, textAnchor, fontSize, textContent)
 import PSD3.Axis.Axis (axisBottom, axisLeft, renderAxis, Scale)
 import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.AST (Tree)
@@ -111,51 +109,51 @@ lineChartStatic config =
       ]
   in
     T.elem Group
-      [ v3AttrStr "class" (str "line-chart-static") ]
+      [ attr "class" $ text "line-chart-static" ]
       `T.withChildren`
         [ -- Y axis
-          T.elem Group [ v3AttrStr "class" (str "y-axis") ]
+          T.elem Group [ attr "class" $ text "y-axis" ]
             `T.withChildren`
               [ renderAxis (axisLeft yAxisScale)
               , T.elem Text
-                  [ v3AttrStr "transform" (str ("translate(-35," <> show (ih / 2.0) <> ") rotate(-90)"))
-                  , v3AttrStr "text-anchor" (str "middle")
-                  , v3Attr "font-size" (lit 12.0)
-                  , v3AttrStr "textContent" (str "% admitted")
+                  [ transform $ text ("translate(-35," <> show (ih / 2.0) <> ") rotate(-90)")
+                  , textAnchor $ text "middle"
+                  , fontSize $ num 12.0
+                  , textContent $ text "% admitted"
                   ]
               ]
 
         -- X axis
         , T.elem Group
-            [ v3AttrStr "transform" (str ("translate(0," <> show ih <> ")"))
-            , v3AttrStr "class" (str "x-axis")
+            [ transform $ text ("translate(0," <> show ih <> ")")
+            , attr "class" $ text "x-axis"
             ]
             `T.withChildren`
               [ renderAxis (axisBottom xAxisScale)
               , T.elem Text
-                  [ v3AttrStr "transform" (str ("translate(" <> show (iw / 2.0) <> ",40)"))
-                  , v3AttrStr "text-anchor" (str "middle")
-                  , v3Attr "font-size" (lit 12.0)
-                  , v3AttrStr "textContent" (str "% applied to easy department")
+                  [ transform $ text ("translate(" <> show (iw / 2.0) <> ",40)")
+                  , textAnchor $ text "middle"
+                  , fontSize $ num 12.0
+                  , textContent $ text "% applied to easy department"
                   ]
               ]
 
         -- Women's rate line (green)
         , T.elem Path
-            [ v3AttrStr "class" (str "rate-line women")
-            , v3AttrStr "d" (str (pathFromPoints xScale yScale womenLine))
-            , v3AttrStr "stroke" (str green)
-            , v3Attr "stroke-width" (lit 1.5)
-            , v3AttrStr "fill" (str "none")
+            [ attr "class" $ text "rate-line women"
+            , path $ text (pathFromPoints xScale yScale womenLine)
+            , stroke $ text green
+            , strokeWidth $ num 1.5
+            , fill $ text "none"
             ]
 
         -- Men's rate line (purple)
         , T.elem Path
-            [ v3AttrStr "class" (str "rate-line men")
-            , v3AttrStr "d" (str (pathFromPoints xScale yScale menLine))
-            , v3AttrStr "stroke" (str purple)
-            , v3Attr "stroke-width" (lit 1.5)
-            , v3AttrStr "fill" (str "none")
+            [ attr "class" $ text "rate-line men"
+            , path $ text (pathFromPoints xScale yScale menLine)
+            , stroke $ text purple
+            , strokeWidth $ num 1.5
+            , fill $ text "none"
             ]
         ]
 
@@ -199,21 +197,21 @@ lineChartPoints config props =
         `T.withChildren`
           [ -- Horizontal dashed line to y-axis
             T.elem Path
-              [ v3AttrStr "class" (str "guide-line")
-              , v3AttrStr "d" (str ("M 0 " <> show (yScale point.y) <> " L " <> show (xScale point.x) <> " " <> show (yScale point.y)))
-              , v3AttrStr "stroke" (str black)
-              , v3Attr "stroke-width" (lit 1.0)
-              , v3AttrStr "stroke-dasharray" (str "5,5")
-              , v3AttrStr "fill" (str "none")
+              [ attr "class" $ text "guide-line"
+              , path $ text ("M 0 " <> show (yScale point.y) <> " L " <> show (xScale point.x) <> " " <> show (yScale point.y))
+              , stroke $ text black
+              , strokeWidth $ num 1.0
+              , attr "stroke-dasharray" $ text "5,5"
+              , fill $ text "none"
               ]
           -- The point itself
           , T.elem Circle
-              [ v3Attr "cx" (lit (xScale point.x))
-              , v3Attr "cy" (lit (yScale point.y))
-              , v3Attr "r" (lit 6.0)
-              , v3AttrStr "fill" (str point.color)
-              , v3AttrStr "stroke" (str "white")
-              , v3Attr "stroke-width" (lit 1.0)
+              [ cx $ num (xScale point.x)
+              , cy $ num (yScale point.y)
+              , r $ num 6.0
+              , fill $ text point.color
+              , stroke $ text "white"
+              , strokeWidth $ num 1.0
               ]
           ]
 
