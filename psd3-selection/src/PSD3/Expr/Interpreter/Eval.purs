@@ -7,6 +7,7 @@ module PSD3.Expr.Interpreter.Eval
   , runEval
   , EvalD(..)
   , runEvalD
+  , unsafeGetField
   ) where
 
 import Prelude hiding (add, sub, mul, div, negate, not)

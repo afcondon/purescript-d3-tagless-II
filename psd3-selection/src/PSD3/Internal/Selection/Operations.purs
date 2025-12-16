@@ -980,14 +980,14 @@ applyAttributes element datum index attrs =
       if name == "textContent" then setTextContent_ (attributeValueToString value) element
       else Element.setAttribute name (attributeValueToString value) element
 
-    DataAttr (AttributeName name) f ->
+    DataAttr (AttributeName name) _src f ->
       let
         val = attributeValueToString (f datum)
       in
         if name == "textContent" then setTextContent_ val element
         else Element.setAttribute name val element
 
-    IndexedAttr (AttributeName name) f ->
+    IndexedAttr (AttributeName name) _src f ->
       let
         val = attributeValueToString (f datum index)
       in
@@ -1078,10 +1078,10 @@ applyTransitionToElements config elementDatumPairs attrs = do
       StaticAttr (AttributeName name) value ->
         TransitionFFI.transitionSetAttribute_ name (attributeValueToString value) transition
 
-      DataAttr (AttributeName name) f ->
+      DataAttr (AttributeName name) _src f ->
         TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum)) transition
 
-      IndexedAttr (AttributeName name) f ->
+      IndexedAttr (AttributeName name) _src f ->
         TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum index)) transition
 
 -- | Apply a transition to a single element with an explicit index
@@ -1110,10 +1110,10 @@ applyTransitionToSingleElement config index element datum attrs = do
     StaticAttr (AttributeName name) value ->
       TransitionFFI.transitionSetAttribute_ name (attributeValueToString value) transition
 
-    DataAttr (AttributeName name) f ->
+    DataAttr (AttributeName name) _src f ->
       TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum)) transition
 
-    IndexedAttr (AttributeName name) f ->
+    IndexedAttr (AttributeName name) _src f ->
       TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum index)) transition
 
 -- | Apply a transition with removal to an array of elements
@@ -1146,10 +1146,10 @@ applyExitTransitionToElements config elementDatumPairs attrs = do
       StaticAttr (AttributeName name) value ->
         TransitionFFI.transitionSetAttribute_ name (attributeValueToString value) transition
 
-      DataAttr (AttributeName name) f ->
+      DataAttr (AttributeName name) _src f ->
         TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum)) transition
 
-      IndexedAttr (AttributeName name) f ->
+      IndexedAttr (AttributeName name) _src f ->
         TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum index)) transition
 
     -- Schedule removal after transition completes

@@ -177,10 +177,10 @@ instance TransitionM D3v2Selection_ D3v2M where
         StaticAttr (AttributeName name) value ->
           TransitionFFI.transitionSetAttribute_ name (attributeValueToString value) transition
 
-        DataAttr (AttributeName name) f ->
+        DataAttr (AttributeName name) _src f ->
           TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum)) transition
 
-        IndexedAttr (AttributeName name) f ->
+        IndexedAttr (AttributeName name) _src f ->
           TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum logicalIndex)) transition
 
   withTransitionExit config (D3v2Selection_ selection) attrs = D3v2M do
@@ -206,10 +206,10 @@ instance TransitionM D3v2Selection_ D3v2M where
         StaticAttr (AttributeName name) value ->
           TransitionFFI.transitionSetAttribute_ name (attributeValueToString value) transition
 
-        DataAttr (AttributeName name) f ->
+        DataAttr (AttributeName name) _src f ->
           TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum)) transition
 
-        IndexedAttr (AttributeName name) f ->
+        IndexedAttr (AttributeName name) _src f ->
           TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum index)) transition
 
       -- Remove element after transition completes (D3 pattern: transition.remove())
@@ -246,10 +246,10 @@ instance TransitionM D3v2Selection_ D3v2M where
         StaticAttr (AttributeName name) value ->
           TransitionFFI.transitionSetAttribute_ name (attributeValueToString value) transition
 
-        DataAttr (AttributeName name) f ->
+        DataAttr (AttributeName name) _src f ->
           TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum)) transition
 
-        IndexedAttr (AttributeName name) f ->
+        IndexedAttr (AttributeName name) _src f ->
           TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum logicalIndex)) transition
 
   withTransitionExitStaggered config delayFn (D3v2Selection_ selection) attrs = D3v2M do
@@ -278,10 +278,10 @@ instance TransitionM D3v2Selection_ D3v2M where
         StaticAttr (AttributeName name) value ->
           TransitionFFI.transitionSetAttribute_ name (attributeValueToString value) transition
 
-        DataAttr (AttributeName name) f ->
+        DataAttr (AttributeName name) _src f ->
           TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum)) transition
 
-        IndexedAttr (AttributeName name) f ->
+        IndexedAttr (AttributeName name) _src f ->
           TransitionFFI.transitionSetAttribute_ name (attributeValueToString (f datum index)) transition
 
       -- Remove element after transition completes (D3 pattern: transition.remove())

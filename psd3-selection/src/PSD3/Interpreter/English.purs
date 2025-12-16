@@ -18,7 +18,7 @@ import Data.Array (length, null)
 import Data.Foldable (for_)
 import Data.Maybe (Maybe(..), isJust)
 import Data.Tuple (snd)
-import PSD3.Internal.Attribute (Attribute(..), AttributeName(..), AttributeValue(..))
+import PSD3.Internal.Attribute (Attribute(..), AttributeName(..), AttributeValue(..), AttrSource(..))
 import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.AST (Tree(..))
 
@@ -88,11 +88,20 @@ describeAttribute :: forall datum. Attribute datum -> String
 describeAttribute (StaticAttr name value) =
   "Set " <> showAttrName name <> " to " <> showAttrValue value
 
-describeAttribute (DataAttr name _) =
-  "Set " <> showAttrName name <> " based on data (dynamic)"
+describeAttribute (DataAttr name src _) =
+  "Set " <> showAttrName name <> " " <> describeSource src
 
-describeAttribute (IndexedAttr name _) =
-  "Set " <> showAttrName name <> " based on data and index (dynamic)"
+describeAttribute (IndexedAttr name src _) =
+  "Set " <> showAttrName name <> " " <> describeSource src
+
+-- | Describe attribute source in English
+describeSource :: AttrSource -> String
+describeSource = case _ of
+  UnknownSource -> "based on data (dynamic)"
+  StaticSource s -> "to " <> s
+  FieldSource f -> "from data field '" <> f <> "'"
+  ExprSource e -> "computed as " <> e
+  IndexSource -> "from element index"
 
 -- | Show element type as English
 showElemType :: ElementType -> String

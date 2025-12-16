@@ -43,7 +43,7 @@ module PSD3.Expr.Integration
 
 import Prelude
 
-import PSD3.Internal.Attribute (Attribute(..), AttributeName(..), AttributeValue(..))
+import PSD3.Internal.Attribute (Attribute(..), AttributeName(..), AttributeValue(..), AttrSource(..))
 import PSD3.Expr.Interpreter.Eval (EvalD(..), runEvalD)
 
 -- | Convert a v3 datum expression to a v2 data-driven attribute.
@@ -65,7 +65,7 @@ v3Attr :: forall datum a
        => String
        -> EvalD datum a
        -> Attribute datum
-v3Attr name expr = DataAttr (AttributeName name) (\d -> StringValue $ show (runEvalD expr d 0))
+v3Attr name expr = DataAttr (AttributeName name) UnknownSource (\d -> StringValue $ show (runEvalD expr d 0))
 
 -- | Convert a v3 expression to a v2 indexed attribute.
 -- |
@@ -87,7 +87,7 @@ v3AttrIndexed :: forall datum a
               => String
               -> EvalD datum a
               -> Attribute datum
-v3AttrIndexed name expr = IndexedAttr (AttributeName name) (\d i -> StringValue $ show (runEvalD expr d i))
+v3AttrIndexed name expr = IndexedAttr (AttributeName name) UnknownSource (\d i -> StringValue $ show (runEvalD expr d i))
 
 -- | Create a static v2 attribute from a v3 static expression.
 -- |
@@ -132,14 +132,14 @@ v3AttrStr :: forall datum
            . String
           -> EvalD datum String
           -> Attribute datum
-v3AttrStr name expr = DataAttr (AttributeName name) (\d -> StringValue $ runEvalD expr d 0)
+v3AttrStr name expr = DataAttr (AttributeName name) UnknownSource (\d -> StringValue $ runEvalD expr d 0)
 
 -- | Convert a v3 indexed string expression to a v2 attribute (no quoting)
 v3AttrIndexedStr :: forall datum
                   . String
                  -> EvalD datum String
                  -> Attribute datum
-v3AttrIndexedStr name expr = IndexedAttr (AttributeName name) (\d i -> StringValue $ runEvalD expr d i)
+v3AttrIndexedStr name expr = IndexedAttr (AttributeName name) UnknownSource (\d i -> StringValue $ runEvalD expr d i)
 
 -- | Create a static string attribute (no quoting)
 v3StaticStr :: forall datum. String -> String -> Attribute datum
@@ -175,7 +175,7 @@ v3AttrFn :: forall datum a
          => String
          -> (datum -> a)
          -> Attribute datum
-v3AttrFn name f = DataAttr (AttributeName name) (\d -> StringValue $ show (f d))
+v3AttrFn name f = DataAttr (AttributeName name) UnknownSource (\d -> StringValue $ show (f d))
 
 -- | Create a string data-driven attribute from a plain PureScript function
 -- |
@@ -184,7 +184,7 @@ v3AttrFnStr :: forall datum
              . String
             -> (datum -> String)
             -> Attribute datum
-v3AttrFnStr name f = DataAttr (AttributeName name) (\d -> StringValue (f d))
+v3AttrFnStr name f = DataAttr (AttributeName name) UnknownSource (\d -> StringValue (f d))
 
 -- | Create an indexed attribute from a plain PureScript function (datum -> Int -> a)
 -- |
@@ -194,11 +194,11 @@ v3AttrFnI :: forall datum a
           => String
           -> (datum -> Int -> a)
           -> Attribute datum
-v3AttrFnI name f = IndexedAttr (AttributeName name) (\d i -> StringValue $ show (f d i))
+v3AttrFnI name f = IndexedAttr (AttributeName name) UnknownSource (\d i -> StringValue $ show (f d i))
 
 -- | Create an indexed string attribute from a plain PureScript function
 v3AttrFnIStr :: forall datum
               . String
              -> (datum -> Int -> String)
              -> Attribute datum
-v3AttrFnIStr name f = IndexedAttr (AttributeName name) (\d i -> StringValue (f d i))
+v3AttrFnIStr name f = IndexedAttr (AttributeName name) UnknownSource (\d i -> StringValue (f d i))

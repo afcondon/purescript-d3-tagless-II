@@ -18,30 +18,58 @@ module PSD3.Internal.Attribute
   ( Attribute(..)
   , AttributeName(..)
   , AttributeValue(..)
+  , AttrSource(..)
   ) where
 
 import Prelude
 import Data.Functor.Contravariant (class Contravariant)
 
+-- | Source metadata for attributes
+-- |
+-- | Describes where the attribute value comes from, enabling interpreters
+-- | like MetaAST to show meaningful information about attribute bindings.
+-- |
+-- | This is automatically captured when using the DSL (field, num, etc.)
+-- | but is `UnknownSource` for raw PureScript functions (escape hatches).
+data AttrSource
+  = UnknownSource           -- ^ Raw function, can't introspect
+  | StaticSource String     -- ^ Constant value with its string representation
+  | FieldSource String      -- ^ Single field access: d.fieldName
+  | ExprSource String       -- ^ Computed expression: "d.x * 20 + 50"
+  | IndexSource             -- ^ Uses element index
+
+derive instance Eq AttrSource
+derive instance Ord AttrSource
+
+instance Show AttrSource where
+  show UnknownSource = "UnknownSource"
+  show (StaticSource s) = "(StaticSource " <> show s <> ")"
+  show (FieldSource f) = "(FieldSource " <> show f <> ")"
+  show (ExprSource e) = "(ExprSource " <> show e <> ")"
+  show IndexSource = "IndexSource"
+
 -- | Type-safe attribute with datum phantom type
 -- |
 -- | Attributes can be:
 -- | - Static: Same value for all elements
--- | - Data-driven: Value computed from datum
--- | - Indexed: Value computed from datum and index
+-- | - Data-driven: Value computed from datum (with source metadata)
+-- | - Indexed: Value computed from datum and index (with source metadata)
 -- |
 -- | The phantom type `datum` ensures attributes are only applied
 -- | to selections with matching data types.
+-- |
+-- | The `AttrSource` field enables interpreters to inspect attribute origins
+-- | without evaluating the functions.
 data Attribute datum
   = StaticAttr AttributeName AttributeValue
-  | DataAttr AttributeName (datum -> AttributeValue)
-  | IndexedAttr AttributeName (datum -> Int -> AttributeValue)
+  | DataAttr AttributeName AttrSource (datum -> AttributeValue)
+  | IndexedAttr AttributeName AttrSource (datum -> Int -> AttributeValue)
 
 -- We can't derive Show for function types, but we can show the structure
 instance Show (Attribute datum) where
   show (StaticAttr name val) = "(StaticAttr " <> show name <> " " <> show val <> ")"
-  show (DataAttr name _) = "(DataAttr " <> show name <> " <function>)"
-  show (IndexedAttr name _) = "(IndexedAttr " <> show name <> " <function>)"
+  show (DataAttr name src _) = "(DataAttr " <> show name <> " " <> show src <> " <fn>)"
+  show (IndexedAttr name src _) = "(IndexedAttr " <> show name <> " " <> show src <> " <fn>)"
 
 -- | Contravariant instance for Attribute
 -- |
@@ -64,8 +92,8 @@ instance Show (Attribute datum) where
 -- | complex types via field selection.
 instance Contravariant Attribute where
   cmap _ (StaticAttr name val) = StaticAttr name val -- Static doesn't depend on datum
-  cmap f (DataAttr name g) = DataAttr name (g <<< f) -- Compose: first project, then extract value
-  cmap f (IndexedAttr name g) = IndexedAttr name (\b i -> g (f b) i) -- Project datum before indexing
+  cmap f (DataAttr name src g) = DataAttr name src (g <<< f) -- Compose: first project, then extract value
+  cmap f (IndexedAttr name src g) = IndexedAttr name src (\b i -> g (f b) i) -- Project datum before indexing
 
 -- | Attribute names (SVG/HTML properties)
 -- |

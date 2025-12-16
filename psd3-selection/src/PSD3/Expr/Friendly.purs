@@ -146,7 +146,7 @@ import PSD3.Expr.Expr as E
 import PSD3.Expr.Datum (class DatumExpr)
 import PSD3.Expr.Datum as D
 import PSD3.Expr.Interpreter.Eval (EvalD, runEvalD)
-import PSD3.Internal.Attribute (Attribute(..), AttributeName(..), AttributeValue(..))
+import PSD3.Internal.Attribute (Attribute(..), AttributeName(..), AttributeValue(..), AttrSource(..))
 
 -- Re-exports for when users need the underlying type classes
 import PSD3.Expr.Expr (class NumExpr, class StringExpr, class BoolExpr) as ReExports
@@ -571,7 +571,7 @@ attr :: forall datum a
      => String
      -> EvalD datum a
      -> Attribute datum
-attr name expr = DataAttr (AttributeName name) \d -> StringValue $ toAttrValue (runEvalD expr d 0)
+attr name expr = DataAttr (AttributeName name) UnknownSource \d -> StringValue $ toAttrValue (runEvalD expr d 0)
 
 -- | Create a data-driven attribute that also uses the element index
 -- |
@@ -583,7 +583,7 @@ attrWithIndex :: forall datum a
               => String
               -> EvalD datum a
               -> Attribute datum
-attrWithIndex name expr = IndexedAttr (AttributeName name) \d i -> StringValue $ toAttrValue (runEvalD expr d i)
+attrWithIndex name expr = IndexedAttr (AttributeName name) UnknownSource \d i -> StringValue $ toAttrValue (runEvalD expr d i)
 
 -- =============================================================================
 -- SVG Helpers
@@ -614,7 +614,7 @@ computed :: forall datum a
          => String
          -> EvalD datum a
          -> Attribute datum
-computed name expr = DataAttr (AttributeName name) \d -> StringValue $ show (runEvalD expr d 0)
+computed name expr = DataAttr (AttributeName name) UnknownSource \d -> StringValue $ show (runEvalD expr d 0)
 
 -- | Create a data-driven string attribute (no quotes added)
 -- |
@@ -626,7 +626,7 @@ computedStr :: forall datum
              . String
             -> EvalD datum String
             -> Attribute datum
-computedStr name expr = DataAttr (AttributeName name) (\d -> StringValue $ runEvalD expr d 0)
+computedStr name expr = DataAttr (AttributeName name) UnknownSource (\d -> StringValue $ runEvalD expr d 0)
 
 -- | Create a data-driven attribute that also uses the element index
 -- |
@@ -638,14 +638,14 @@ computedWithIndex :: forall datum a
                   => String
                   -> EvalD datum a
                   -> Attribute datum
-computedWithIndex name expr = IndexedAttr (AttributeName name) (\d i -> StringValue $ show (runEvalD expr d i))
+computedWithIndex name expr = IndexedAttr (AttributeName name) UnknownSource (\d i -> StringValue $ show (runEvalD expr d i))
 
 -- | Create a data-driven string attribute that also uses the element index
 computedStrWithIndex :: forall datum
                       . String
                      -> EvalD datum String
                      -> Attribute datum
-computedStrWithIndex name expr = IndexedAttr (AttributeName name) (\d i -> StringValue $ runEvalD expr d i)
+computedStrWithIndex name expr = IndexedAttr (AttributeName name) UnknownSource (\d i -> StringValue $ runEvalD expr d i)
 
 -- | Create a static (constant) attribute
 -- |
@@ -678,7 +678,7 @@ from :: forall datum a
      => String
      -> (datum -> a)
      -> Attribute datum
-from name f = DataAttr (AttributeName name) (\d -> StringValue $ show (f d))
+from name f = DataAttr (AttributeName name) UnknownSource (\d -> StringValue $ show (f d))
 
 -- | Create a string attribute from a plain function
 -- |
@@ -690,7 +690,7 @@ fromStr :: forall datum
          . String
         -> (datum -> String)
         -> Attribute datum
-fromStr name f = DataAttr (AttributeName name) (\d -> StringValue (f d))
+fromStr name f = DataAttr (AttributeName name) UnknownSource (\d -> StringValue (f d))
 
 -- | Create an indexed attribute from a function taking datum and index
 -- |
@@ -702,14 +702,14 @@ fromWithIndex :: forall datum a
               => String
               -> (datum -> Int -> a)
               -> Attribute datum
-fromWithIndex name f = IndexedAttr (AttributeName name) (\d i -> StringValue $ show (f d i))
+fromWithIndex name f = IndexedAttr (AttributeName name) UnknownSource (\d i -> StringValue $ show (f d i))
 
 -- | Create an indexed string attribute from a function
 fromStrWithIndex :: forall datum
                   . String
                  -> (datum -> Int -> String)
                  -> Attribute datum
-fromStrWithIndex name f = IndexedAttr (AttributeName name) (\d i -> StringValue (f d i))
+fromStrWithIndex name f = IndexedAttr (AttributeName name) UnknownSource (\d i -> StringValue (f d i))
 
 -- =============================================================================
 -- SVG Attribute Sugar

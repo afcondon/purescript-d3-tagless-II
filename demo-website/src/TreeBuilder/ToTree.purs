@@ -21,7 +21,7 @@ import Data.Maybe (Maybe(..))
 import Data.Number as Number
 import Data.String as String
 import PSD3.AST as T
-import PSD3.Internal.Attribute (Attribute(..), AttributeName(..), AttributeValue(..))
+import PSD3.Internal.Attribute (Attribute(..), AttributeName(..), AttributeValue(..), AttrSource(..))
 import PSD3.Internal.Selection.Types (ElementType(..))
 import TreeBuilder.Types (SampleDatum)
 import PSD3.Interpreter.SemiQuine.Types (BuilderTree(..), BuilderNode, AttributeChoice(..), AttributeBinding)
@@ -95,15 +95,16 @@ choiceToAttribute name choice = case choice of
     StaticAttr name (StringValue s)
 
   FromField field ->
-    DataAttr name (getFieldValue field)
+    -- Use FieldSource to capture the field name for interpreters
+    DataAttr name (FieldSource field) (getFieldValue field)
 
   IndexBased ->
-    IndexedAttr name (\_ idx -> NumberValue (toNumber idx))
+    -- Use IndexSource to indicate this uses the element index
+    IndexedAttr name IndexSource (\_ idx -> NumberValue (toNumber idx))
 
   Computed expr ->
-    -- For computed expressions, evaluate them as best we can
-    -- This is simplified - real expressions would need proper parsing
-    DataAttr name (evalComputedExpr expr)
+    -- Use ExprSource to capture the expression string for interpreters
+    DataAttr name (ExprSource expr) (evalComputedExpr expr)
 
 -- | Get a field value from a SampleDatum as an AttributeValue
 -- | This is the key function that makes field references work

@@ -18,7 +18,7 @@ import Prelude
 import Data.Array (head, length, null, replicate) as Array
 import Data.Maybe (Maybe(..))
 import Data.String (joinWith) as String
-import PSD3.Internal.Attribute (Attribute(..), AttributeName(..), AttributeValue(..))
+import PSD3.Internal.Attribute (Attribute(..), AttributeName(..), AttributeValue(..), AttrSource(..))
 import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.AST (Tree(..))
 
@@ -139,21 +139,30 @@ attrToCode maybeSample attr = case attr of
   StaticAttr (AttributeName name) value ->
     attrFnName name <> " " <> showAttrValue value
 
-  DataAttr (AttributeName name) fn ->
+  DataAttr (AttributeName name) src fn ->
     case maybeSample of
       Just sample ->
         let evaluated = fn sample
-        in attrFnName name <> " d.<?> {- → " <> showAttrValue evaluated <> " -}"
+        in attrFnName name <> " " <> attrSourceToCode src <> " {- → " <> showAttrValue evaluated <> " -}"
       Nothing ->
-        attrFnName name <> " d.<?>"
+        attrFnName name <> " " <> attrSourceToCode src
 
-  IndexedAttr (AttributeName name) fn ->
+  IndexedAttr (AttributeName name) src fn ->
     case maybeSample of
       Just sample ->
         let evaluated = fn sample 0
-        in attrFnName name <> " (\\d i -> <?>) {- → " <> showAttrValue evaluated <> " -}"
+        in attrFnName name <> " " <> attrSourceToCode src <> " {- → " <> showAttrValue evaluated <> " -}"
       Nothing ->
-        attrFnName name <> " (\\d i -> <?>)"
+        attrFnName name <> " " <> attrSourceToCode src
+
+-- | Convert AttrSource to PureScript code representation
+attrSourceToCode :: AttrSource -> String
+attrSourceToCode = case _ of
+  UnknownSource -> "d.<?>"
+  StaticSource _ -> "<?>" -- Static values should use StaticAttr, not this
+  FieldSource f -> "(field @\"" <> f <> "\")"
+  ExprSource e -> "(" <> e <> ")" -- The expression string
+  IndexSource -> "index"
 
 -- | Map attribute names to PureScript function names
 attrFnName :: String -> String

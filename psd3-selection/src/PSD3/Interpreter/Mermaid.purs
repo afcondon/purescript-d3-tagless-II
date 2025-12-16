@@ -23,7 +23,7 @@ import Data.String.Common (replaceAll)
 import Data.String.Pattern (Pattern(..), Replacement(..))
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
-import PSD3.Internal.Attribute (Attribute(..), AttributeName(..))
+import PSD3.Internal.Attribute (Attribute(..), AttributeName(..), AttrSource(..))
 import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.AST (Tree(..))
 
@@ -92,8 +92,17 @@ showElement Stop = "stop"
 formatAttribute :: forall d. Attribute d -> String
 formatAttribute = case _ of
   StaticAttr (AttributeName name) _ -> name
-  DataAttr (AttributeName name) _ -> name <> "(datum)"
-  IndexedAttr (AttributeName name) _ -> name <> "(datum, i)"
+  DataAttr (AttributeName name) src _ -> formatAttrSource name src
+  IndexedAttr (AttributeName name) src _ -> formatAttrSource name src
+
+-- | Format attribute source for Mermaid display
+formatAttrSource :: String -> AttrSource -> String
+formatAttrSource name = case _ of
+  UnknownSource -> name <> "(d)"
+  StaticSource _ -> name
+  FieldSource f -> name <> "=d." <> f
+  ExprSource e -> name <> "=(" <> e <> ")"
+  IndexSource -> name <> "=i"
 
 -- | Format a list of attributes as a comma-separated string
 formatAttributeList :: forall d. Array (Attribute d) -> String
