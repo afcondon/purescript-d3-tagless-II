@@ -701,6 +701,194 @@
 }
 
 /* =============================================================================
+   4-QUADRANT LAYOUT - Multiple Interpreters Demo
+   ============================================================================= */
+
+.quadrant-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  gap: 2px;
+  background-color: var(--color-line);
+}
+
+.quadrant {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-beige-card);
+  overflow: hidden;
+}
+
+.quadrant-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-beige-base);
+  border-bottom: 1px solid var(--color-line);
+  min-height: 36px;
+}
+
+.quadrant-header h3 {
+  font-size: var(--font-size-small);
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-dark);
+  margin: 0;
+}
+
+.interpreter-tag {
+  font-size: var(--font-size-tiny);
+  font-family: var(--font-mono);
+  padding: 2px 6px;
+  border: 1px solid var(--color-line);
+  background-color: white;
+  color: var(--color-text-muted);
+}
+
+.quadrant-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-sm);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+
+.quadrant-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.quadrant-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.quadrant-content::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 3px;
+}
+
+/* Q1: TreeBuilder - with tabs */
+.q1-treebuilder {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.q1-treebuilder .tab-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.q1-treebuilder .tab-btn {
+  padding: 4px 12px;
+  font-size: var(--font-size-tiny);
+  font-family: var(--font-mono);
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 1px solid var(--color-line);
+  background-color: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.q1-treebuilder .tab-btn:hover {
+  background-color: var(--color-beige-light);
+  border-color: var(--color-text-dark);
+}
+
+.q1-treebuilder .tab-btn--active {
+  background-color: var(--color-teal);
+  border-color: var(--color-teal);
+  color: white;
+}
+
+/* Q2: MetaAST */
+.q2-metaast {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.q2-metaast .ast-viz-container {
+  background-color: white;
+  border: 1px solid var(--color-line);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+}
+
+.q2-metaast .ast-viz-container svg {
+  display: block;
+  max-width: 100%;
+}
+
+.q2-metaast .interpreter-tag {
+  border-color: var(--color-teal);
+  color: var(--color-teal);
+}
+
+/* Q3: SemiQuine/TreeToCode */
+.q3-semiquine {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.q3-semiquine .code-output {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-tiny);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--color-text-dark);
+  margin: 0;
+  padding: var(--spacing-xs);
+  background-color: #1e1e1e;
+  border: 1px solid var(--color-line);
+  min-height: 100px;
+  color: #d4d4d4;
+}
+
+.q3-semiquine .interpreter-tag {
+  border-color: var(--color-red-accent);
+  color: var(--color-red-accent);
+}
+
+/* Q4: D3 Preview */
+.q4-d3preview {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.q4-d3preview .preview-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border: 1px solid var(--color-line);
+  min-height: 200px;
+}
+
+.q4-d3preview .preview-container svg {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.q4-d3preview .interpreter-tag {
+  border-color: #1d4ed8;
+  color: #1d4ed8;
+}
+
+/* =============================================================================
    SANKEY WATERMARK
    ============================================================================= */
 

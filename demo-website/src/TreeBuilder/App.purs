@@ -1,12 +1,16 @@
--- | Tree Builder App
+-- | Tree Builder App - 4-Quadrant Interpreter Demo
 -- |
--- | CodePen-style interactive tree builder with four columns:
--- | 1. Tree structure (AST)
--- | 2. Attributes of selected node
--- | 3. Editable data
--- | 4. Generated PureScript code
+-- | Educational demonstration of tagless final / multiple interpreters:
+-- | ONE Tree definition → THREE different interpretations
 -- |
--- | Full-width visualization preview below.
+-- | Layout:
+-- |   Q1 (top-left):     TreeBuilder UI - Edit the tree structure
+-- |   Q2 (top-right):    MetaAST - Tree structure visualization
+-- |   Q3 (bottom-left):  SemiQuine - Generated PureScript code
+-- |   Q4 (bottom-right): D3 Preview - Rendered SVG output
+-- |
+-- | The key insight: The same BuilderTree is converted to a real Tree,
+-- | then THREE different interpreters produce THREE different outputs.
 module TreeBuilder.App
   ( component
   ) where
@@ -14,7 +18,7 @@ module TreeBuilder.App
 import Prelude
 
 import Data.Array as Array
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Effect (Effect)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
@@ -23,9 +27,29 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.SiteNav as SiteNav
+
+-- Core types
 import TreeBuilder.Types (BuilderTree(..), BuilderNode, NodeId, AttributeChoice(..), AttributeBinding, SampleDatum, ElementOption, availableElements, attributeOptionsFor, emptyNode, sudokuSampleData, chessSampleData, goSampleData)
+
+-- THE KEY CONVERTER: BuilderTree → Tree SampleDatum
+import TreeBuilder.ToTree (builderToTreeWithData)
+
+-- INTERPRETERS - all work on Tree SampleDatum
+import PSD3.Interpreter.MetaAST (toAST, TreeAST(..))
+import PSD3.Interpreter.SemiQuine.TreeToCode (treeToCodeWithSample)
+
+-- D3 rendering for AST visualization
+import PSD3.Internal.Capabilities.Selection (select, renderTree)
+import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
+import PSD3.Internal.Selection.Types (SEmpty, ElementType(..))
+import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Expr (lit, str)
+import PSD3.AST as T
+import Web.DOM.Element (Element)
+import Data.Int (toNumber)
+
+-- Preview (FFI-based for now)
 import TreeBuilder.Interpreter (renderPreview)
-import PSD3.Interpreter.SemiQuine (treeToCode)
 
 -- =============================================================================
 -- Component Types
@@ -39,6 +63,7 @@ type State =
   , previewError :: Maybe String
   , currentTreeType :: String   -- "grid" | "radial" | "strip"
   , currentDataSet :: String    -- "sudoku" | "chess" | "go"
+  , activeTab :: String         -- "tree" | "data" (for Q1)
   }
 
 data Action
@@ -53,6 +78,7 @@ data Action
   | RemoveAttribute NodeId String
   | SelectTreeType String    -- "grid" | "radial" | "strip"
   | SelectDataSet String     -- "sudoku" | "chess" | "go"
+  | SwitchTab String         -- "tree" | "data"
   | RefreshPreview
 
 -- =============================================================================
@@ -78,103 +104,437 @@ initialState =
   , previewError: Nothing
   , currentTreeType: "grid"
   , currentDataSet: "sudoku"
+  , activeTab: "tree"
   }
 
 -- =============================================================================
--- Render
+-- Render - 4 Quadrant Layout
 -- =============================================================================
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render state =
   HH.div
-    [ HP.classes [ HH.ClassName "tree-builder-page" ] ]
+    [ HP.classes [ HH.ClassName "interpreter-demo-page" ] ]
     [ -- Site Navigation
       SiteNav.render
         { logoSize: SiteNav.Normal
         , quadrant: SiteNav.NoQuadrant
         , prevNext: Nothing
-        , pageTitle: Just "Tree Builder"
+        , pageTitle: Just "Multiple Interpreters Demo"
         }
 
-    -- Main layout: Left (editors + viz) | Right (code panel)
+    -- 4-Quadrant Grid
     , HH.div
-        [ HP.classes [ HH.ClassName "tree-builder-layout" ] ]
-        [ -- Left side: Tree/Data editors + visualization
-          HH.div
-            [ HP.classes [ HH.ClassName "tree-builder-left" ] ]
-            [ -- Top: Tree and Data editors side by side
-              HH.div
-                [ HP.classes [ HH.ClassName "tree-builder-editors" ] ]
-                [ renderTreeColumn state
-                , renderDataColumn state
-                ]
-
-            -- Bottom: Large visualization with Sankey watermark
-            , HH.div
-                [ HP.classes [ HH.ClassName "tree-builder-viz" ] ]
-                [ renderSankeyWatermark
-                , HH.div
-                    [ HP.id "tree-builder-preview"
-                    , HP.classes [ HH.ClassName "viz-container" ]
-                    ]
-                    []
-                ]
-            ]
-
-        -- Right side: Full-height code panel
-        , renderCodePanel state
+        [ HP.classes [ HH.ClassName "quadrant-grid" ] ]
+        [ -- Q1: TreeBuilder UI (top-left)
+          renderQ1TreeBuilder state
+        -- Q2: MetaAST Output (top-right)
+        , renderQ2MetaAST state
+        -- Q3: SemiQuine/Code Output (bottom-left)
+        , renderQ3SemiQuine state
+        -- Q4: D3 Preview (bottom-right)
+        , renderQ4D3Preview state
         ]
     ]
 
--- | Sankey watermark container - SVG rendered via FFI
-renderSankeyWatermark :: forall m. H.ComponentHTML Action () m
-renderSankeyWatermark =
-  HH.div
-    [ HP.classes [ HH.ClassName "sankey-watermark" ]
-    , HP.id "sankey-watermark-container"
-    ]
-    []
-
 -- =============================================================================
--- Column 1: Tree Structure
+-- Q1: TreeBuilder UI (with Tree/Data tabs)
 -- =============================================================================
 
-renderTreeColumn :: forall m. State -> H.ComponentHTML Action () m
-renderTreeColumn state =
+renderQ1TreeBuilder :: forall m. State -> H.ComponentHTML Action () m
+renderQ1TreeBuilder state =
   HH.div
-    [ HP.classes [ HH.ClassName "tb-column" ] ]
-    [ -- Header with tree type selector only
+    [ HP.classes [ HH.ClassName "quadrant", HH.ClassName "q1-builder" ] ]
+    [ -- Header with tabs
       HH.div
-        [ HP.classes [ HH.ClassName "tb-column-header" ] ]
-        [ HH.h3 [ HP.classes [ HH.ClassName "tb-column-title" ] ] [ HH.text "Tree" ]
+        [ HP.classes [ HH.ClassName "quadrant-header" ] ]
+        [ HH.h3_ [ HH.text "TreeBuilder" ]
         , HH.div
-            [ HP.classes [ HH.ClassName "preset-buttons" ] ]
-            [ treeButton state "grid" "Grid"
-            , treeButton state "radial" "Radial"
-            , treeButton state "strip" "Strip"
+            [ HP.classes [ HH.ClassName "quadrant-tabs" ] ]
+            [ tabButton state.activeTab "tree" "Tree"
+            , tabButton state.activeTab "data" "Data"
             ]
         ]
-    -- Content
+    -- Tab content
     , HH.div
-        [ HP.classes [ HH.ClassName "tb-column-content" ] ]
-        [ HH.div
-            [ HP.classes [ HH.ClassName "tree-view" ] ]
-            [ case state.tree of
-                Nothing ->
-                  HH.div
-                    [ HP.classes [ HH.ClassName "empty-tree" ] ]
-                    [ HH.text "Select a preset to start" ]
-                Just tree ->
-                  renderTreeNode state tree
-            ]
-        -- Element palette
-        , HH.div
-            [ HP.classes [ HH.ClassName "palette-buttons" ]
-            , HP.style "margin-top: 8px; padding-top: 8px; border-top: 1px dashed #999;"
-            ]
-            (map (renderPaletteBtn state) availableElements)
+        [ HP.classes [ HH.ClassName "quadrant-content" ] ]
+        [ if state.activeTab == "tree"
+            then renderTreeEditor state
+            else renderDataEditor state
         ]
     ]
+
+tabButton :: forall m. String -> String -> String -> H.ComponentHTML Action () m
+tabButton active tabId label =
+  HH.button
+    [ HP.classes $ [ HH.ClassName "tab-btn" ] <>
+        if active == tabId then [ HH.ClassName "tab-btn--active" ] else []
+    , HE.onClick \_ -> SwitchTab tabId
+    ]
+    [ HH.text label ]
+
+-- Tree editor panel
+renderTreeEditor :: forall m. State -> H.ComponentHTML Action () m
+renderTreeEditor state =
+  HH.div
+    [ HP.classes [ HH.ClassName "tree-editor" ] ]
+    [ -- Preset buttons
+      HH.div
+        [ HP.classes [ HH.ClassName "preset-buttons" ] ]
+        [ treeButton state "grid" "Grid"
+        , treeButton state "radial" "Radial"
+        , treeButton state "strip" "Strip"
+        ]
+    -- Tree view
+    , HH.div
+        [ HP.classes [ HH.ClassName "tree-view" ] ]
+        [ case state.tree of
+            Nothing ->
+              HH.div
+                [ HP.classes [ HH.ClassName "empty-tree" ] ]
+                [ HH.text "Select a preset to start" ]
+            Just tree ->
+              renderTreeNode state tree
+        ]
+    -- Element palette
+    , HH.div
+        [ HP.classes [ HH.ClassName "palette-buttons" ] ]
+        (map (renderPaletteBtn state) availableElements)
+    ]
+
+-- Data editor panel
+renderDataEditor :: forall m. State -> H.ComponentHTML Action () m
+renderDataEditor state =
+  HH.div
+    [ HP.classes [ HH.ClassName "data-editor" ] ]
+    [ -- Dataset selector
+      HH.div
+        [ HP.classes [ HH.ClassName "preset-buttons" ] ]
+        [ dataButton state "sudoku" "9x9"
+        , dataButton state "chess" "8x8"
+        , dataButton state "go" "19x19"
+        ]
+    -- Data preview (first few items)
+    , HH.pre
+        [ HP.classes [ HH.ClassName "data-preview" ] ]
+        [ HH.text $ formatSampleDataPreview state.sampleData ]
+    ]
+
+formatSampleDataPreview :: Array SampleDatum -> String
+formatSampleDataPreview data_ =
+  let preview = Array.take 5 data_
+      count = Array.length data_
+  in "// " <> show count <> " items\n" <>
+     "[\n" <> Array.intercalate ",\n" (map formatDatumShort preview) <>
+     (if count > 5 then "\n  // ... " <> show (count - 5) <> " more" else "") <>
+     "\n]"
+  where
+  formatDatumShort d =
+    "  { x: " <> show d.x <> ", y: " <> show d.y <>
+    ", color: \"" <> d.color <> "\" }"
+
+-- =============================================================================
+-- Q2: MetaAST Output (Visual Tree Diagram)
+-- =============================================================================
+
+renderQ2MetaAST :: forall m. State -> H.ComponentHTML Action () m
+renderQ2MetaAST _ =
+  HH.div
+    [ HP.classes [ HH.ClassName "quadrant", HH.ClassName "q2-metaast" ] ]
+    [ HH.div
+        [ HP.classes [ HH.ClassName "quadrant-header" ] ]
+        [ HH.h3_ [ HH.text "MetaAST Interpreter" ]
+        , HH.span
+            [ HP.classes [ HH.ClassName "interpreter-tag" ] ]
+            [ HH.text "Tree → Structure" ]
+        ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "quadrant-content" ] ]
+        [ HH.div
+            [ HP.id "ast-viz-output"
+            , HP.classes [ HH.ClassName "ast-viz-container" ]
+            ]
+            []
+        ]
+    ]
+
+-- | Convert TreeAST to a visual tree diagram using D3
+-- | This visualizes the AST structure with nodes and connecting lines
+astToTreeVisualization :: TreeAST -> T.Tree Unit
+astToTreeVisualization ast =
+  T.named SVG "ast-svg"
+    [ v3Attr "width" (lit 400.0)
+    , v3Attr "height" (lit 350.0)
+    , v3AttrStr "viewBox" (str "0 0 400 350")
+    ]
+    `T.withChild`
+      (T.named Group "ast-tree"
+        [ v3AttrStr "transform" (str "translate(200, 40)") ]
+        `T.withChild` renderASTNode ast 0.0 0)
+  where
+    renderASTNode :: TreeAST -> Number -> Int -> T.Tree Unit
+    renderASTNode node xPos level = case node of
+      NodeAST {name, elemType, attrCount, children} ->
+        let
+          label = case name of
+            Just n -> elemType <> ": " <> n
+            Nothing -> elemType
+          childSpacing = 100.0
+          childCount = Array.length children
+          startX = xPos - (childSpacing * (toNumber childCount - 1.0) / 2.0)
+        in T.named Group ("node-" <> show level)
+            []
+            `T.withChildren`
+              ([ -- Node circle (blue for regular nodes)
+                 T.elem Circle
+                   [ v3Attr "cx" (lit xPos)
+                   , v3Attr "cy" (lit (toNumber level * 70.0))
+                   , v3Attr "r" (lit 25.0)
+                   , v3AttrStr "fill" (str "#4A90E2")
+                   , v3AttrStr "stroke" (str "#2E5C8A")
+                   , v3Attr "stroke-width" (lit 2.0)
+                   ]
+               -- Node label
+               , T.elem Text
+                   [ v3Attr "x" (lit xPos)
+                   , v3Attr "y" (lit (toNumber level * 70.0 + 4.0))
+                   , v3AttrStr "text-content" (str label)
+                   , v3AttrStr "text-anchor" (str "middle")
+                   , v3AttrStr "fill" (str "white")
+                   , v3AttrStr "font-size" (str "10px")
+                   , v3AttrStr "font-family" (str "monospace")
+                   ]
+               -- Attribute count badge below
+               , T.elem Text
+                   [ v3Attr "x" (lit xPos)
+                   , v3Attr "y" (lit (toNumber level * 70.0 + 38.0))
+                   , v3AttrStr "text-content" (str ("attrs: " <> show attrCount))
+                   , v3AttrStr "text-anchor" (str "middle")
+                   , v3AttrStr "fill" (str "#666")
+                   , v3AttrStr "font-size" (str "9px")
+                   ]
+               ] <>
+               -- Lines to children
+               (Array.mapWithIndex (\i _ ->
+                 let childX = startX + (toNumber i * childSpacing)
+                     childY = (toNumber (level + 1)) * 70.0
+                 in T.elem Line
+                      [ v3Attr "x1" (lit xPos)
+                      , v3Attr "y1" (lit (toNumber level * 70.0 + 25.0))
+                      , v3Attr "x2" (lit childX)
+                      , v3Attr "y2" (lit (childY - 25.0))
+                      , v3AttrStr "stroke" (str "#999")
+                      , v3Attr "stroke-width" (lit 1.5)
+                      ]
+               ) children) <>
+               -- Child nodes (recursive)
+               (Array.mapWithIndex (\i child ->
+                 let childX = startX + (toNumber i * childSpacing)
+                 in renderASTNode child childX (level + 1)
+               ) children))
+
+      JoinAST {name, dataCount} ->
+        T.named Group ("join-" <> show level)
+          []
+          `T.withChildren`
+            [ -- Join node (orange)
+              T.elem Circle
+                [ v3Attr "cx" (lit xPos)
+                , v3Attr "cy" (lit (toNumber level * 70.0))
+                , v3Attr "r" (lit 25.0)
+                , v3AttrStr "fill" (str "#E27A4A")
+                , v3AttrStr "stroke" (str "#8A472E")
+                , v3Attr "stroke-width" (lit 2.0)
+                ]
+            , T.elem Text
+                [ v3Attr "x" (lit xPos)
+                , v3Attr "y" (lit (toNumber level * 70.0 + 4.0))
+                , v3AttrStr "text-content" (str ("Join: " <> name))
+                , v3AttrStr "text-anchor" (str "middle")
+                , v3AttrStr "fill" (str "white")
+                , v3AttrStr "font-size" (str "9px")
+                ]
+            , T.elem Text
+                [ v3Attr "x" (lit xPos)
+                , v3Attr "y" (lit (toNumber level * 70.0 + 38.0))
+                , v3AttrStr "text-content" (str ("data: " <> show dataCount))
+                , v3AttrStr "text-anchor" (str "middle")
+                , v3AttrStr "fill" (str "#666")
+                , v3AttrStr "font-size" (str "9px")
+                ]
+            ]
+
+      NestedJoinAST {name, dataCount} ->
+        T.named Group ("nested-join-" <> show level)
+          []
+          `T.withChildren`
+            [ -- Nested join (purple)
+              T.elem Circle
+                [ v3Attr "cx" (lit xPos)
+                , v3Attr "cy" (lit (toNumber level * 70.0))
+                , v3Attr "r" (lit 25.0)
+                , v3AttrStr "fill" (str "#9B4AE2")
+                , v3AttrStr "stroke" (str "#5C2E8A")
+                , v3Attr "stroke-width" (lit 2.0)
+                ]
+            , T.elem Text
+                [ v3Attr "x" (lit xPos)
+                , v3Attr "y" (lit (toNumber level * 70.0 + 4.0))
+                , v3AttrStr "text-content" (str ("Nested: " <> name))
+                , v3AttrStr "text-anchor" (str "middle")
+                , v3AttrStr "fill" (str "white")
+                , v3AttrStr "font-size" (str "9px")
+                ]
+            , T.elem Text
+                [ v3Attr "x" (lit xPos)
+                , v3Attr "y" (lit (toNumber level * 70.0 + 38.0))
+                , v3AttrStr "text-content" (str ("data: " <> show dataCount))
+                , v3AttrStr "text-anchor" (str "middle")
+                , v3AttrStr "fill" (str "#666")
+                , v3AttrStr "font-size" (str "9px")
+                ]
+            ]
+
+      SceneJoinAST {name, dataCount, hasEnter, hasUpdate, hasExit} ->
+        T.named Group ("scene-join-" <> show level)
+          []
+          `T.withChildren`
+            [ -- Scene join (green)
+              T.elem Circle
+                [ v3Attr "cx" (lit xPos)
+                , v3Attr "cy" (lit (toNumber level * 70.0))
+                , v3Attr "r" (lit 25.0)
+                , v3AttrStr "fill" (str "#4AE2A4")
+                , v3AttrStr "stroke" (str "#2E8A5C")
+                , v3Attr "stroke-width" (lit 2.0)
+                ]
+            , T.elem Text
+                [ v3Attr "x" (lit xPos)
+                , v3Attr "y" (lit (toNumber level * 70.0 + 4.0))
+                , v3AttrStr "text-content" (str ("Scene: " <> name))
+                , v3AttrStr "text-anchor" (str "middle")
+                , v3AttrStr "fill" (str "white")
+                , v3AttrStr "font-size" (str "9px")
+                ]
+            , T.elem Text
+                [ v3Attr "x" (lit xPos)
+                , v3Attr "y" (lit (toNumber level * 70.0 + 38.0))
+                , v3AttrStr "text-content" (str ("data: " <> show dataCount <> " {" <>
+                              (if hasEnter then "E" else "") <>
+                              (if hasUpdate then "U" else "") <>
+                              (if hasExit then "X" else "") <> "}"))
+                , v3AttrStr "text-anchor" (str "middle")
+                , v3AttrStr "fill" (str "#666")
+                , v3AttrStr "font-size" (str "9px")
+                ]
+            ]
+
+      SceneNestedJoinAST {name, dataCount, hasEnter, hasUpdate, hasExit} ->
+        T.named Group ("scene-nested-" <> show level)
+          []
+          `T.withChildren`
+            [ -- Scene nested join (gold)
+              T.elem Circle
+                [ v3Attr "cx" (lit xPos)
+                , v3Attr "cy" (lit (toNumber level * 70.0))
+                , v3Attr "r" (lit 25.0)
+                , v3AttrStr "fill" (str "#E2A44A")
+                , v3AttrStr "stroke" (str "#8A5C2E")
+                , v3Attr "stroke-width" (lit 2.0)
+                ]
+            , T.elem Text
+                [ v3Attr "x" (lit xPos)
+                , v3Attr "y" (lit (toNumber level * 70.0 + 4.0))
+                , v3AttrStr "text-content" (str ("SceneNested: " <> name))
+                , v3AttrStr "text-anchor" (str "middle")
+                , v3AttrStr "fill" (str "white")
+                , v3AttrStr "font-size" (str "8px")
+                ]
+            , T.elem Text
+                [ v3Attr "x" (lit xPos)
+                , v3Attr "y" (lit (toNumber level * 70.0 + 38.0))
+                , v3AttrStr "text-content" (str ("data: " <> show dataCount <> " {" <>
+                              (if hasEnter then "E" else "") <>
+                              (if hasUpdate then "U" else "") <>
+                              (if hasExit then "X" else "") <> "}"))
+                , v3AttrStr "text-anchor" (str "middle")
+                , v3AttrStr "fill" (str "#666")
+                , v3AttrStr "font-size" (str "9px")
+                ]
+            ]
+
+-- =============================================================================
+-- Q3: SemiQuine/TreeToCode Output
+-- =============================================================================
+
+renderQ3SemiQuine :: forall m. State -> H.ComponentHTML Action () m
+renderQ3SemiQuine state =
+  HH.div
+    [ HP.classes [ HH.ClassName "quadrant", HH.ClassName "q3-semiquine" ] ]
+    [ HH.div
+        [ HP.classes [ HH.ClassName "quadrant-header" ] ]
+        [ HH.h3_ [ HH.text "SemiQuine Interpreter" ]
+        , HH.span
+            [ HP.classes [ HH.ClassName "interpreter-tag" ] ]
+            [ HH.text "Tree → PureScript" ]
+        ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "quadrant-content" ] ]
+        [ HH.pre
+            [ HP.classes [ HH.ClassName "code-output", HH.ClassName "language-purescript" ] ]
+            [ HH.text $ getSemiQuineOutput state ]
+        ]
+    ]
+
+getSemiQuineOutput :: State -> String
+getSemiQuineOutput state = case state.tree of
+  Nothing -> "-- No tree defined"
+  Just builderTree ->
+    let
+      -- Convert BuilderTree → Tree SampleDatum
+      tree = builderToTreeWithData builderTree state.sampleData
+      -- Get first datum for evaluation
+      firstDatum = fromMaybe defaultDatum (Array.head state.sampleData)
+    in
+      -- Use TreeToCode on the actual Tree (evaluates dynamic attrs)
+      treeToCodeWithSample firstDatum tree
+
+-- Default datum for when array is empty
+defaultDatum :: SampleDatum
+defaultDatum =
+  { x: 0.0, y: 0.0, cx: 0.0, cy: 0.0, rx: 0.0, ry: 0.0, sx: 0.0, sy: 0.0
+  , radius: 10.0, width: 50.0, height: 30.0, color: "#999"
+  , label: "", name: "", value: 0.0, index: 0
+  }
+
+-- =============================================================================
+-- Q4: D3 Preview
+-- =============================================================================
+
+renderQ4D3Preview :: forall m. State -> H.ComponentHTML Action () m
+renderQ4D3Preview _ =
+  HH.div
+    [ HP.classes [ HH.ClassName "quadrant", HH.ClassName "q4-d3preview" ] ]
+    [ HH.div
+        [ HP.classes [ HH.ClassName "quadrant-header" ] ]
+        [ HH.h3_ [ HH.text "D3 Interpreter" ]
+        , HH.span
+            [ HP.classes [ HH.ClassName "interpreter-tag" ] ]
+            [ HH.text "Tree → SVG" ]
+        ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "quadrant-content" ] ]
+        [ HH.div
+            [ HP.id "tree-builder-preview"
+            , HP.classes [ HH.ClassName "d3-preview-container" ]
+            ]
+            []
+        ]
+    ]
+
+-- =============================================================================
+-- Tree Node Rendering (simplified from original)
+-- =============================================================================
 
 treeButton :: forall m. State -> String -> String -> H.ComponentHTML Action () m
 treeButton state treeId label =
@@ -208,15 +568,13 @@ renderPaletteBtn state elem =
       ]
       [ HH.text elem.label ]
 
--- | Render a tree node recursively with inline attribute editing
 renderTreeNode :: forall m. State -> BuilderTree -> H.ComponentHTML Action () m
 renderTreeNode state tree = case tree of
   BNode node children ->
     let isSelected = state.selectedNodeId == Just node.id
     in HH.div
       [ HP.classes [ HH.ClassName "tree-node" ] ]
-      [ -- Node header
-        HH.div
+      [ HH.div
           [ HP.classes $
               [ HH.ClassName "node-header" ] <>
               if isSelected then [ HH.ClassName "node-header--selected" ] else []
@@ -228,8 +586,8 @@ renderTreeNode state tree = case tree of
                 [ HP.classes [ HH.ClassName "expand-toggle" ]
                 , HE.onClick \_ -> ToggleNodeExpand node.id
                 ]
-                [ HH.text $ if node.expanded then "▼" else "▶" ]
-              else HH.span [ HP.classes [ HH.ClassName "expand-placeholder" ] ] [ HH.text "•" ]
+                [ HH.text $ if node.expanded then "v" else ">" ]
+              else HH.span [ HP.classes [ HH.ClassName "expand-placeholder" ] ] [ HH.text "o" ]
           -- Element type
           , HH.span
               [ HP.classes [ HH.ClassName "element-badge", HH.ClassName $ "element-badge--" <> node.elementType ] ]
@@ -243,9 +601,9 @@ renderTreeNode state tree = case tree of
               [ HP.classes [ HH.ClassName "remove-btn" ]
               , HE.onClick \_ -> RemoveNode node.id
               ]
-              [ HH.text "×" ]
+              [ HH.text "x" ]
           ]
-      -- Inline attributes (always shown when expanded)
+      -- Inline attributes
       , if node.expanded
           then renderInlineAttrs node.id node.elementType node.attributes
           else HH.text ""
@@ -273,13 +631,11 @@ renderTreeNode state tree = case tree of
               [ HH.text join.elementType ]
           , HH.span [ HP.classes [ HH.ClassName "node-name" ] ] [ HH.text join.name ]
           ]
-      -- Inline attributes for join template (always shown when expanded)
       , if join.expanded
           then renderInlineAttrs join.id join.template.elementType join.template.attributes
           else HH.text ""
       ]
 
--- | Render inline attributes with compact editing
 renderInlineAttrs :: forall m. NodeId -> String -> Array AttributeBinding -> H.ComponentHTML Action () m
 renderInlineAttrs nodeId elemType attrs =
   HH.div
@@ -292,7 +648,6 @@ renderInlineAttrs nodeId elemType attrs =
         (map (renderAddAttrBtn nodeId) (missingAttrs elemType attrs))
     ]
 
--- | Get attributes not yet added
 missingAttrs :: String -> Array AttributeBinding -> Array { name :: String, label :: String }
 missingAttrs elemType current =
   let currentNames = map _.attrName current
@@ -300,7 +655,6 @@ missingAttrs elemType current =
   in Array.filter (\opt -> not (Array.elem opt.name currentNames))
        (map (\o -> { name: o.name, label: o.label }) available)
 
--- | Button to add a missing attribute
 renderAddAttrBtn :: forall m. NodeId -> { name :: String, label :: String } -> H.ComponentHTML Action () m
 renderAddAttrBtn nodeId attr =
   HH.button
@@ -310,22 +664,20 @@ renderAddAttrBtn nodeId attr =
     ]
     [ HH.text $ "+" <> attr.label ]
 
--- | Render a single inline attribute with value selector
 renderInlineAttr :: forall m. NodeId -> AttributeBinding -> H.ComponentHTML Action () m
 renderInlineAttr nodeId binding =
   HH.div
     [ HP.classes [ HH.ClassName "inline-attr" ] ]
     [ HH.span [ HP.classes [ HH.ClassName "inline-attr-name" ] ] [ HH.text binding.attrName ]
-    , HH.span [ HP.classes [ HH.ClassName "inline-attr-arrow" ] ] [ HH.text "←" ]
+    , HH.span [ HP.classes [ HH.ClassName "inline-attr-arrow" ] ] [ HH.text "<-" ]
     , renderChoiceButtons nodeId binding
     , HH.button
         [ HP.classes [ HH.ClassName "inline-attr-remove" ]
         , HE.onClick \_ -> RemoveAttribute nodeId binding.attrName
         ]
-        [ HH.text "×" ]
+        [ HH.text "x" ]
     ]
 
--- | Render choice as clickable buttons instead of dropdown
 renderChoiceButtons :: forall m. NodeId -> AttributeBinding -> H.ComponentHTML Action () m
 renderChoiceButtons nodeId binding =
   HH.span [ HP.classes [ HH.ClassName "choice-buttons" ] ]
@@ -336,7 +688,6 @@ renderChoiceButtons nodeId binding =
     , choiceBtn "r" (FromField "radius")
     , choiceBtn "color" (FromField "color")
     , choiceBtn "label" (FromField "label")
-    , choiceBtn "val" (FromField "value")
     ]
   where
   choiceBtn label choice =
@@ -348,68 +699,6 @@ renderChoiceButtons nodeId binding =
       ]
       [ HH.text label ]
 
--- Note: Attributes are now edited inline in tree nodes (renderInlineAttrs)
-
--- =============================================================================
--- Column 2: Data (with data selector)
--- =============================================================================
-
-renderDataColumn :: forall m. State -> H.ComponentHTML Action () m
-renderDataColumn state =
-  HH.div
-    [ HP.classes [ HH.ClassName "tb-column" ] ]
-    [ HH.div
-        [ HP.classes [ HH.ClassName "tb-column-header" ] ]
-        [ HH.h3 [ HP.classes [ HH.ClassName "tb-column-title" ] ] [ HH.text "Data" ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "preset-buttons" ] ]
-            [ dataButton state "sudoku" "9×9"
-            , dataButton state "chess" "8×8"
-            , dataButton state "go" "19×19"
-            ]
-        ]
-    , HH.div
-        [ HP.classes [ HH.ClassName "tb-column-content" ] ]
-        [ HH.pre
-            [ HP.classes [ HH.ClassName "data-json" ] ]
-            [ HH.text $ formatSampleData state.sampleData ]
-        ]
-    ]
-
-formatSampleData :: Array SampleDatum -> String
-formatSampleData data_ =
-  "[\n" <> Array.intercalate ",\n" (map formatDatum data_) <> "\n]"
-  where
-  formatDatum d =
-    "  { x: " <> show d.x <>
-    ", y: " <> show d.y <>
-    ", w: " <> show d.width <>
-    ", h: " <> show d.height <>
-    "\n    color: \"" <> d.color <>
-    "\", label: \"" <> d.label <> "\" }"
-
--- =============================================================================
--- Right Panel: Full-height Code
--- =============================================================================
-
-renderCodePanel :: forall m. State -> H.ComponentHTML Action () m
-renderCodePanel state =
-  HH.div
-    [ HP.classes [ HH.ClassName "code-panel" ] ]
-    [ HH.div
-        [ HP.classes [ HH.ClassName "tb-column-header" ] ]
-        [ HH.h3 [ HP.classes [ HH.ClassName "tb-column-title" ] ] [ HH.text "PureScript" ] ]
-    , HH.div
-        [ HP.classes [ HH.ClassName "tb-column-content" ] ]
-        [ HH.pre
-            [ HP.classes [ HH.ClassName "code-view" ] ]
-            [ HH.text $ case state.tree of
-                Nothing -> "-- No tree defined"
-                Just tree -> treeToCode tree
-            ]
-        ]
-    ]
-
 -- =============================================================================
 -- Action Handler
 -- =============================================================================
@@ -417,9 +706,6 @@ renderCodePanel state =
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
-    -- Render the Sankey watermark showing data flow architecture
-    liftEffect $ renderSankeyWatermarkImpl "#sankey-watermark-container"
-    -- Load initial tree and data
     handleAction (SelectTreeType "grid")
     handleAction (SelectDataSet "sudoku")
 
@@ -473,7 +759,6 @@ handleAction = case _ of
     handleAction RefreshPreview
 
   SelectTreeType treeType -> do
-    state <- H.get
     let tree = getTreeForType treeType
     H.modify_ _ { tree = Just tree, currentTreeType = treeType, selectedNodeId = Nothing }
     handleAction RefreshPreview
@@ -483,19 +768,36 @@ handleAction = case _ of
     H.modify_ _ { sampleData = data_, currentDataSet = dataSet }
     handleAction RefreshPreview
 
+  SwitchTab tab -> do
+    H.modify_ _ { activeTab = tab }
+
   RefreshPreview -> do
     state <- H.get
     case state.tree of
       Nothing -> pure unit
-      Just tree -> do
+      Just builderTree -> do
+        -- Clear both preview containers
         liftEffect $ clearPreviewContainer "#tree-builder-preview"
-        liftEffect $ renderPreview "#tree-builder-preview" tree state.sampleData
+        liftEffect $ clearPreviewContainer "#ast-viz-output"
 
--- | Clear preview container (FFI)
+        -- Render D3 preview (Q4)
+        liftEffect $ renderPreview "#tree-builder-preview" builderTree state.sampleData
+
+        -- Render AST visualization (Q2)
+        -- 1. Convert BuilderTree → Tree SampleDatum
+        let actualTree = builderToTreeWithData builderTree state.sampleData
+        -- 2. Run MetaAST interpreter to get TreeAST
+        let ast = toAST actualTree
+        -- 3. Convert TreeAST → visual Tree for D3 rendering
+        let astVizTree = astToTreeVisualization ast
+        -- 4. Render with D3
+        liftEffect $ runD3v2M do
+          astContainer <- select "#ast-viz-output" :: _ (D3v2Selection_ SEmpty Element Unit)
+          _ <- renderTree astContainer astVizTree
+          pure unit
+
+-- FFI
 foreign import clearPreviewContainer :: String -> Effect Unit
-
--- | Render Sankey watermark SVG (FFI)
-foreign import renderSankeyWatermarkImpl :: String -> Effect Unit
 
 -- =============================================================================
 -- Tree Manipulation Helpers
@@ -575,7 +877,6 @@ removeNodeAttribute targetId attrName tree = case tree of
 -- Tree Types and Data Sets
 -- =============================================================================
 
--- | Get tree structure for a tree type
 getTreeForType :: String -> BuilderTree
 getTreeForType = case _ of
   "grid" -> gridTree
@@ -583,7 +884,6 @@ getTreeForType = case _ of
   "strip" -> stripTree
   _ -> gridTree
 
--- | Get data set by name
 getDataSet :: String -> Array SampleDatum
 getDataSet = case _ of
   "sudoku" -> sudokuSampleData
@@ -591,8 +891,7 @@ getDataSet = case _ of
   "go" -> goSampleData
   _ -> sudokuSampleData
 
--- | Grid tree: renders data as square grid using x, y coordinates
--- | Rects for cells + text for labels
+-- Grid tree: renders data as square grid
 gridTree :: BuilderTree
 gridTree = BNode
   { id: 1
@@ -601,12 +900,10 @@ gridTree = BNode
   , attributes:
       [ { attrName: "width", choice: ConstantNumber 300.0 }
       , { attrName: "height", choice: ConstantNumber 300.0 }
-      , { attrName: "viewBox", choice: ConstantString "0 0 300 300" }
       ]
   , expanded: true
   }
-  [ -- Cells (join) - rects positioned by x, y
-    BDataJoin
+  [ BDataJoin
       { id: 2
       , name: "cells"
       , elementType: "rect"
@@ -625,8 +922,7 @@ gridTree = BNode
           }
       , expanded: true
       }
-  , -- Labels (join) - text centered in cells
-    BDataJoin
+  , BDataJoin
       { id: 4
       , name: "labels"
       , elementType: "text"
@@ -639,8 +935,6 @@ gridTree = BNode
               , { attrName: "y", choice: FromField "cy" }
               , { attrName: "text", choice: FromField "label" }
               , { attrName: "fill", choice: ConstantString "#333" }
-              , { attrName: "font-size", choice: ConstantNumber 16.0 }
-              , { attrName: "text-anchor", choice: ConstantString "middle" }
               ]
           , expanded: true
           }
@@ -648,8 +942,7 @@ gridTree = BNode
       }
   ]
 
--- | Radial tree: renders data as polar arrangement using rx, ry coordinates
--- | Circles positioned in concentric rings
+-- Radial tree: renders data as polar arrangement
 radialTree :: BuilderTree
 radialTree = BNode
   { id: 1
@@ -658,12 +951,10 @@ radialTree = BNode
   , attributes:
       [ { attrName: "width", choice: ConstantNumber 300.0 }
       , { attrName: "height", choice: ConstantNumber 300.0 }
-      , { attrName: "viewBox", choice: ConstantString "0 0 300 300" }
       ]
   , expanded: true
   }
-  [ -- Dots (join) - circles positioned by rx, ry (polar coordinates)
-    BDataJoin
+  [ BDataJoin
       { id: 2
       , name: "dots"
       , elementType: "circle"
@@ -676,29 +967,6 @@ radialTree = BNode
               , { attrName: "cy", choice: FromField "ry" }
               , { attrName: "r", choice: FromField "radius" }
               , { attrName: "fill", choice: FromField "color" }
-              , { attrName: "stroke", choice: ConstantString "#333" }
-              , { attrName: "stroke-width", choice: ConstantNumber 0.5 }
-              ]
-          , expanded: true
-          }
-      , expanded: true
-      }
-  , -- Labels (join) - text at radial positions
-    BDataJoin
-      { id: 4
-      , name: "labels"
-      , elementType: "text"
-      , template:
-          { id: 5
-          , elementType: "text"
-          , name: Nothing
-          , attributes:
-              [ { attrName: "x", choice: FromField "rx" }
-              , { attrName: "y", choice: FromField "ry" }
-              , { attrName: "text", choice: FromField "label" }
-              , { attrName: "fill", choice: ConstantString "#333" }
-              , { attrName: "font-size", choice: ConstantNumber 8.0 }
-              , { attrName: "text-anchor", choice: ConstantString "middle" }
               ]
           , expanded: true
           }
@@ -706,8 +974,7 @@ radialTree = BNode
       }
   ]
 
--- | Strip tree: renders data as horizontal strip using sx, sy coordinates
--- | All cells in one long row - like a barcode or DNA sequence
+-- Strip tree: renders data as horizontal strip
 stripTree :: BuilderTree
 stripTree = BNode
   { id: 1
@@ -716,12 +983,10 @@ stripTree = BNode
   , attributes:
       [ { attrName: "width", choice: ConstantNumber 300.0 }
       , { attrName: "height", choice: ConstantNumber 60.0 }
-      , { attrName: "viewBox", choice: ConstantString "0 0 300 60" }
       ]
   , expanded: true
   }
-  [ -- Bars (join) - thin vertical bars
-    BDataJoin
+  [ BDataJoin
       { id: 2
       , name: "bars"
       , elementType: "rect"
