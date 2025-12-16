@@ -21,21 +21,33 @@
 -- | append Circle [radiusAttr, v3Attr "fill" nodeFill] enterSelection
 -- | ```
 module PSD3.Expr.Integration
-  ( -- * Attribute Constructors
-    v3Attr
+  ( -- * Attribute Constructors (preferred names)
+    evalAttr
+  , evalAttrStr
+  , evalAttrIndexed
+  , evalAttrIndexedStr
+  , staticNum
+  , staticStr
+    -- * Lifting PureScript functions (preferred names)
+  , liftFn
+  , liftFnI
+  , fnAttr
+  , fnAttrStr
+  , fnAttrI
+  , fnAttrIStr
+    -- * Batch Conversion
+  , evalAttrs
+    -- * Legacy names (use preferred names above for new code)
+  , v3Attr
   , v3AttrStr
   , v3AttrIndexed
   , v3AttrIndexedStr
   , v3Static
   , v3StaticStr
-    -- * Lifting PureScript functions
-  , liftFn
-  , liftFnI
   , v3AttrFn
   , v3AttrFnStr
   , v3AttrFnI
   , v3AttrFnIStr
-    -- * Batch Conversion
   , v3Attrs
     -- * Re-exports for convenience
   , module PSD3.Internal.Attribute
@@ -202,3 +214,51 @@ v3AttrFnIStr :: forall datum
              -> (datum -> Int -> String)
              -> Attribute datum
 v3AttrFnIStr name f = IndexedAttr (AttributeName name) UnknownSource (\d i -> StringValue (f d i))
+
+-- =============================================================================
+-- Preferred names (aliases without v3 prefix)
+-- =============================================================================
+
+-- | Convert an EvalD expression to a data-driven attribute
+evalAttr :: forall datum a. Show a => String -> EvalD datum a -> Attribute datum
+evalAttr = v3Attr
+
+-- | Convert an EvalD string expression to a data-driven attribute
+evalAttrStr :: forall datum. String -> EvalD datum String -> Attribute datum
+evalAttrStr = v3AttrStr
+
+-- | Convert an EvalD expression to an indexed attribute
+evalAttrIndexed :: forall datum a. Show a => String -> EvalD datum a -> Attribute datum
+evalAttrIndexed = v3AttrIndexed
+
+-- | Convert an EvalD string expression to an indexed attribute
+evalAttrIndexedStr :: forall datum. String -> EvalD datum String -> Attribute datum
+evalAttrIndexedStr = v3AttrIndexedStr
+
+-- | Create a static numeric attribute
+staticNum :: forall datum a. Show a => String -> a -> Attribute datum
+staticNum = v3Static
+
+-- | Create a static string attribute
+staticStr :: forall datum. String -> String -> Attribute datum
+staticStr = v3StaticStr
+
+-- | Create a data-driven attribute from a function
+fnAttr :: forall datum a. Show a => String -> (datum -> a) -> Attribute datum
+fnAttr = v3AttrFn
+
+-- | Create a data-driven string attribute from a function
+fnAttrStr :: forall datum. String -> (datum -> String) -> Attribute datum
+fnAttrStr = v3AttrFnStr
+
+-- | Create an indexed attribute from a function
+fnAttrI :: forall datum a. Show a => String -> (datum -> Int -> a) -> Attribute datum
+fnAttrI = v3AttrFnI
+
+-- | Create an indexed string attribute from a function
+fnAttrIStr :: forall datum. String -> (datum -> Int -> String) -> Attribute datum
+fnAttrIStr = v3AttrFnIStr
+
+-- | Convert multiple expressions to attributes
+evalAttrs :: forall datum a. Show a => Array { name :: String, expr :: EvalD datum a } -> Array (Attribute datum)
+evalAttrs = v3Attrs
