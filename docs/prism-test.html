@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PSD3 Syntax Highlighting Test</title>
+
+  <!-- Prism.js core -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      background: #1a1a2e;
+      color: #eee;
+    }
+
+    h1, h2 { color: #fff; }
+
+    pre {
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    /* Custom token colors for PSD3 semantic highlighting */
+
+    /* SVG Attributes - teal/cyan (visual properties) */
+    .token.attr-function,
+    .token.property {
+      color: #4ecdc4 !important;
+    }
+
+    /* Value Constructors - gold/yellow (type-safe wrapping) */
+    .token.value-constructor,
+    .token.builtin {
+      color: #ffd93d !important;
+    }
+
+    /* Expression Combinators - orange (math/composition) */
+    .token.expr-combinator {
+      color: #ff8c42 !important;
+    }
+
+    /* Tree Structure - green (DOM shape) - INVERSE */
+    .token.tree-function {
+      background-color: #6bcb77 !important;
+      color: #1a1a2e !important;
+      padding: 0 4px;
+      border-radius: 3px;
+    }
+
+    /* Element Types - coral/salmon (SVG vocabulary) - INVERSE */
+    .token.element-type {
+      background-color: #ff6b6b !important;
+      color: #1a1a2e !important;
+      padding: 0 4px;
+      border-radius: 3px;
+    }
+
+    /* GUP Keywords - warm yellow (animation lifecycle) */
+    .token.gup-keyword {
+      color: #ffe66d !important;
+      font-style: italic;
+    }
+
+    /* Easing - light purple (animation curves) */
+    .token.easing,
+    .token.constant {
+      color: #c9b1ff !important;
+    }
+
+    /* Force/Behavior - blue (physics) */
+    .token.force-spec,
+    .token.behavior {
+      color: #74b9ff !important;
+    }
+
+    /* Selection functions */
+    .token.selection-function {
+      color: #81ecec !important;
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.5rem;
+      margin: 1rem 0;
+      padding: 1rem;
+      background: #2d2d44;
+      border-radius: 8px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+    }
+
+    .note {
+      background: #2d2d44;
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      border-left: 4px solid #4ecdc4;
+    }
+  </style>
+</head>
+<body>
+  <h1>PSD3 Syntax Highlighting</h1>
+
+  <p>Custom Prism.js highlighting for the PSD3 visualization DSL. Each color category adds semantic meaning.</p>
+
+  <h2>Color Legend</h2>
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-color" style="background: #4ecdc4"></div>
+      <span>Attributes (x, y, fill, opacity...)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #ffd93d"></div>
+      <span>Value Constructors (num, text, hex, pt...)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #ff8c42"></div>
+      <span>Expression Combinators (timesN, plusN...)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #6bcb77"></div>
+      <span>Tree Structure (T.elem, T.withChild...)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #ff6b6b"></div>
+      <span>Element Types (SVG, Circle, Text...)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #ffe66d"></div>
+      <span>GUP Lifecycle (enterBehavior, transition...)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #c9b1ff"></div>
+      <span>Easing (BounceOut, CubicInOut...)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: #74b9ff"></div>
+      <span>Forces/Behaviors (ManyBody, Zoom...)</span>
+    </div>
+  </div>
+
+  <h2>Example: GUP Letters Demo</h2>
+
+  <pre><code class="language-psd3">-- | Create the GUP tree for letters
+createLettersTree :: Array LetterDatum -> Tree LetterDatum
+createLettersTree letters =
+  T.sceneJoin "letters" "text" letters
+    -- Template: FINAL state for each letter
+    ( \d -> T.elem Text
+        [ x letterX
+        , y letterY
+        , fontSize $ pt 32.0
+        , textAnchor $ text "middle"
+        , dominantBaseline $ text "middle"
+        , fill $ hex "#2c3e50"
+        , opacity $ num 1.0
+        , textContent $ text d.letter
+        ]
+    )
+    -- Behaviors for enter/update/exit
+    { keyFn: Just _.letter
+    , enterBehavior: Just
+        { initialAttrs:
+            [ y $ num 20.0
+            , opacity $ num 0.0
+            , fill $ hex "#27ae60"
+            ]
+        , transition: Just $ transitionWith
+            { duration: Milliseconds 750.0
+            , delay: Nothing
+            , staggerDelay: Just 50.0
+            , easing: Just BounceOut
+            }
+        }
+    , updateBehavior: Just
+        { attrs:
+            [ x letterX
+            , y letterY
+            , fill $ hex "#2c3e50"
+            , opacity $ num 1.0
+            ]
+        , transition: Just $ transitionWith
+            { duration: Milliseconds 500.0
+            , delay: Nothing
+            , staggerDelay: Just 30.0
+            , easing: Just CubicInOut
+            }
+        }
+    , exitBehavior: Just
+        { attrs:
+            [ y $ num 180.0
+            , opacity $ num 0.0
+            , fill $ hex "#e74c3c"
+            ]
+        , transition: Just $ transitionWith
+            { duration: Milliseconds 500.0
+            , delay: Nothing
+            , staggerDelay: Just 40.0
+            , easing: Just CubicIn
+            }
+        }
+    }</code></pre>
+
+  <h2>Example: Expressions</h2>
+
+  <pre><code class="language-psd3">-- | X position: index * 40 + 50
+letterX :: forall repr. NumExpr repr => DatumExpr repr LetterRow => repr Number
+letterX = _index `timesN` 40.0 `plusN` 50.0
+
+-- | Access the index field
+_index :: forall repr. DatumExpr repr LetterRow => repr Number
+_index = field @"index"</code></pre>
+
+  <h2>Example: Force Simulation</h2>
+
+  <pre><code class="language-psd3">-- Add forces to simulation
+Sim.addForce (ManyBody "charge" defaultManyBody { strength = -50.0 }) sim
+Sim.addForce (Collide "collide" defaultCollide { radius = 10.0 }) sim
+Sim.addForce (Link "links" defaultLink { distance = 30.0 }) sim
+
+-- Build tree with zoom behavior
+T.named SVG "svg"
+    [ viewBox 0.0 0.0 800.0 600.0
+    , width $ num 800.0
+    , height $ num 600.0
+    ]
+    `T.withBehaviors` [ Zoom $ defaultZoom (ScaleExtent 0.5 4.0) "#zoom-group" ]
+    `T.withChild`
+      T.named Group "zoom-group" []</code></pre>
+
+  <div class="note">
+    <strong>Note:</strong> This highlighting extends Haskell/PureScript syntax with domain-specific tokens.
+    The semantic coloring helps readers quickly identify what role each piece of code plays in the visualization.
+  </div>
+
+  <!-- Prism.js scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-haskell.min.js"></script>
+  <script src="prism-psd3.js"></script>
+</body>
+</html>
