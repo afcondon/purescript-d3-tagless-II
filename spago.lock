@@ -238,6 +238,7 @@
             "avar",
             "bifunctors",
             "catenable-lists",
+            "colors",
             "console",
             "const",
             "contravariant",
@@ -369,6 +370,7 @@
             "avar",
             "bifunctors",
             "catenable-lists",
+            "colors",
             "console",
             "const",
             "contravariant",
@@ -525,6 +527,7 @@
             "avar",
             "bifunctors",
             "catenable-lists",
+            "colors",
             "console",
             "const",
             "contravariant",
@@ -706,6 +709,7 @@
           "dependencies": [
             "aff",
             "arrays",
+            "colors",
             "console",
             "contravariant",
             "datetime",
@@ -743,6 +747,7 @@
             "arrays",
             "bifunctors",
             "catenable-lists",
+            "colors",
             "console",
             "const",
             "contravariant",
@@ -844,6 +849,7 @@
             "arrays",
             "bifunctors",
             "catenable-lists",
+            "colors",
             "console",
             "const",
             "contravariant",
@@ -1704,6 +1710,19 @@
         "prelude",
         "tuples",
         "unfoldable"
+      ]
+    },
+    "colors": {
+      "type": "registry",
+      "version": "7.0.1",
+      "integrity": "sha256-udlg/y2PFsHYli8Tgz8BQGGrOjyGo0BcJj36IfgYADs=",
+      "dependencies": [
+        "arrays",
+        "integers",
+        "lists",
+        "numbers",
+        "partial",
+        "strings"
       ]
     },
     "console": {
