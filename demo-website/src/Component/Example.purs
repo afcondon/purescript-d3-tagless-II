@@ -23,16 +23,6 @@ import PSD3.Shared.SiteNav as SiteNav
 import PSD3.Shared.Utilities (syntaxHighlightedCode)
 import PSD3.Website.Types (Route(..))
 
--- SNIPPET: threeLittleCircles src/website/Viz/TreeAPI/ThreeLittleCircles.purs 25-62
--- SNIPPET: threeLittleCirclesTransition src/website/Viz/TreeAPI/ThreeLittleCirclesTransition.purs 112-150
--- SNIPPET: simpleTree src/website/Viz/TreeAPI/SimpleTreeExample.purs 28-45
--- SNIPPET: nestedElements src/website/Viz/TreeAPI/NestedElementsExample.purs 25-105
--- SNIPPET: barChart src/website/Viz/TreeAPI/BarChartExample.purs 65-157
--- SNIPPET: scatterPlot src/website/Viz/TreeAPI/ScatterPlotExample.purs 64-113
--- SNIPPET: lineChart src/website/Viz/TreeAPI/LineChartExample.purs 78-121
--- SNIPPET: groupedBarChart src/website/Viz/TreeAPI/GroupedBarChartExample.purs 134-240
--- SNIPPET: treeViz src/website/Viz/TreeAPI/TreeViz.purs 54-141
--- SNIPPET: threeLittleDimensions src/website/Viz/TreeAPI/ThreeLittleDimensionsExample.purs 27-54
 -- Import TreeAPI examples
 import D3.Viz.TreeAPI.ThreeLittleCircles as ThreeLittleCircles
 import D3.Viz.TreeAPI.ThreeLittleCirclesTransition as ThreeLittleCirclesTransition
