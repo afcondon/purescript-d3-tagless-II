@@ -5,7 +5,7 @@ import Prelude
 import Data.String (contains, Pattern(..))
 import Effect (Effect)
 import Effect.Console (log)
-import PSD3.Internal.Attribute (cx, cy, radius, fill, width, height, id_, class_)
+import PSD3.Expr.Friendly (computed, num, static, staticStr)
 import PSD3.Interpreter.SemiQuine.TreeToCode (treeToCode)
 import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.AST (Tree)
@@ -33,36 +33,37 @@ scaleY :: Number -> Number
 scaleY y = 300.0 - (y * 2.5)  -- Maps 0..100 to 300..50 (inverted)
 
 -- | Parabola tree - similar to the real example
+-- | Using finally-tagless Friendly API
 parabolaTree :: Tree ParabolaPoint
 parabolaTree =
   T.named SVG "svg"
-    [ width 400.0
-    , height 300.0
-    , id_ "parabola-svg"
-    , class_ "test-example"
+    [ static "width" 400.0
+    , static "height" 300.0
+    , staticStr "id" "parabola-svg"
+    , staticStr "class" "test-example"
     ]
     `T.withChild`
       (T.joinData "circles" "circle" parabolaData $ \d ->
         T.elem Circle
-          [ cx (scaleX d.x)
-          , cy (scaleY d.y)
-          , radius 5.0
-          , fill "green"
+          [ computed "cx" (num (scaleX d.x))
+          , computed "cy" (num (scaleY d.y))
+          , static "r" 5.0
+          , staticStr "fill" "green"
           ])
 
 -- | Static-only tree for comparison
 staticTree :: Tree Unit
 staticTree =
   T.named SVG "root"
-    [ width 200.0
-    , height 100.0
+    [ static "width" 200.0
+    , static "height" 100.0
     ]
     `T.withChild`
       T.elem Circle
-        [ cx 50.0
-        , cy 50.0
-        , radius 10.0
-        , fill "blue"
+        [ static "cx" 50.0
+        , static "cy" 50.0
+        , static "r" 10.0
+        , staticStr "fill" "blue"
         ]
 
 -- | Helper to check if string contains pattern
@@ -103,10 +104,10 @@ testStaticAttributes :: Effect Unit
 testStaticAttributes = do
   log "  ✓ generates correct static attributes"
   let code = treeToCode staticTree
-  code `shouldContain` "width 200.0"
-  code `shouldContain` "height 100.0"
-  code `shouldContain` "cx 50.0"
-  code `shouldContain` "radius 10.0"
+  code `shouldContain` "width \"200.0\""
+  code `shouldContain` "height \"100.0\""
+  code `shouldContain` "cx \"50.0\""
+  code `shouldContain` "radius \"10.0\""
   code `shouldContain` "fill \"blue\""
 
 -- | Test: generates withChild for single child
@@ -124,16 +125,17 @@ testJoinData = do
   code `shouldContain` "T.joinData \"circles\""
 
 -- | Test: template evaluation produces concrete values
--- | Note: When template is evaluated with first datum, DataAttr becomes StaticAttr
--- | So we see `cx 0.0` not `cx d.<?>` - the function has been applied!
+-- | Note: DataAttr shown as `d.<?> {- → "value" -}` with evaluated value in comment
 testDynamicAttributes :: Effect Unit
 testDynamicAttributes = do
-  log "  ✓ template evaluation produces concrete values (cx 0.0, cy 50.0)"
+  log "  ✓ template evaluation shows concrete values in comments"
   let code = treeToCode parabolaTree
   -- First datum is { x: -10.0, y: 100.0 }
   -- scaleX (-10.0) = 0.0, scaleY 100.0 = 50.0
-  code `shouldContain` "cx 0.0"
-  code `shouldContain` "cy 50.0"
+  code `shouldContain` "cx d.<?>"
+  code `shouldContain` "→ \"0.0\""
+  code `shouldContain` "cy d.<?>"
+  code `shouldContain` "→ \"50.0\""
 
 -- | Test: preserves static attributes in templates
 testStaticAttributesInTemplate :: Effect Unit
@@ -141,7 +143,7 @@ testStaticAttributesInTemplate = do
   log "  ✓ preserves static attributes in templates"
   let code = treeToCode parabolaTree
   -- radius and fill are static
-  code `shouldContain` "radius 5.0"
+  code `shouldContain` "radius \"5.0\""
   code `shouldContain` "fill \"green\""
 
 -- | Test: join structure with data count

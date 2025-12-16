@@ -96,11 +96,11 @@ v3AttrIndexed name expr = IndexedAttr (AttributeName name) (\d i -> StringValue 
 -- |
 -- | Note: The expression must be fully evaluable without datum context.
 -- | For truly static values, prefer v2's native static attributes.
-v3Static :: forall a
+v3Static :: forall datum a
           . Show a
          => String
          -> a
-         -> Attribute Unit
+         -> Attribute datum
 v3Static name value = StaticAttr (AttributeName name) (StringValue $ show value)
 
 -- | Convert multiple v3 expressions to v2 attributes at once.
@@ -142,7 +142,7 @@ v3AttrIndexedStr :: forall datum
 v3AttrIndexedStr name expr = IndexedAttr (AttributeName name) (\d i -> StringValue $ runEvalD expr d i)
 
 -- | Create a static string attribute (no quoting)
-v3StaticStr :: String -> String -> Attribute Unit
+v3StaticStr :: forall datum. String -> String -> Attribute datum
 v3StaticStr name value = StaticAttr (AttributeName name) (StringValue value)
 
 -- =============================================================================

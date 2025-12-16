@@ -7,16 +7,24 @@
 -- |
 -- | ```purescript
 -- | import PSD3.AST as A
--- | import PSD3.Attr (width, height, cx, cy, radius, fill)
+-- | import PSD3.Expr.Friendly (computed, computedStr, num, text)
 -- | import PSD3.Render (runD3, select, renderTree)
 -- |
 -- | main :: Effect Unit
 -- | main = void $ runD3 do
 -- |   container <- select "body"
 -- |   let ast =
--- |         A.elem SVG [width 800.0, height 600.0]
+-- |         A.elem SVG
+-- |           [ computed "width" (num 800.0)
+-- |           , computed "height" (num 600.0)
+-- |           ]
 -- |           `A.withChild`
--- |             A.elem Circle [cx 100.0, cy 100.0, radius 50.0, fill "steelblue"]
+-- |             A.elem Circle
+-- |               [ computed "cx" (num 100.0)
+-- |               , computed "cy" (num 100.0)
+-- |               , computed "r" (num 50.0)
+-- |               , computedStr "fill" (text "steelblue")
+-- |               ]
 -- |   renderTree container ast
 -- | ```
 -- |
@@ -26,18 +34,22 @@
 -- |
 -- | ```purescript
 -- | import PSD3.AST as A
+-- | import PSD3.Expr.Friendly (computed, computedStr, from, num, text)
 -- |
 -- | barChart :: Array Number -> A.AST Number
 -- | barChart data =
--- |   A.elem SVG [width 500.0, height 300.0]
+-- |   A.elem SVG
+-- |     [ computed "width" (num 500.0)
+-- |     , computed "height" (num 300.0)
+-- |     ]
 -- |     `A.withChild`
 -- |       A.joinData "bars" "rect" data \d ->
 -- |         A.elem Rect
--- |           [ x (\_ i -> toNumber i * 25.0)
--- |           , y (\val _ -> 300.0 - val)
--- |           , width 20.0
--- |           , height (\val _ -> val)
--- |           , fill "steelblue"
+-- |           [ from "x" (\_ i -> toNumber i * 25.0)
+-- |           , from "y" (\val _ -> 300.0 - val)
+-- |           , computed "width" (num 20.0)
+-- |           , from "height" (\val _ -> val)
+-- |           , computedStr "fill" (text "steelblue")
 -- |           ]
 -- | ```
 -- |
@@ -52,7 +64,7 @@
 -- |
 -- | **Core Modules**:
 -- | - `PSD3.AST` - Declarative visualization AST (element types, data joins)
--- | - `PSD3.Attr` - All attributes (width, height, cx, cy, fill, stroke, etc.)
+-- | - `PSD3.Expr.Friendly` - Finally-tagless attribute DSL (computed, from, num, text)
 -- | - `PSD3.Render` - D3 DOM rendering (runD3, select, renderTree)
 -- | - `PSD3.Internal.Behavior.Types` - Behaviors (drag, zoom)
 -- |
@@ -72,7 +84,7 @@
 -- | **Basic visualization**:
 -- | ```purescript
 -- | import PSD3.AST as A
--- | import PSD3.Attr (width, height, cx, cy, radius, fill, stroke)
+-- | import PSD3.Expr.Friendly (computed, computedStr, from, num, text)
 -- | import PSD3.Render (runD3, select, renderTree)
 -- | ```
 -- |
@@ -90,7 +102,8 @@ module PSD3 (module X) where
 
 -- Clean Public API
 import PSD3.AST (AST, ASTNode, ElementType(..), elem, joinData, withChild, withChildren, named, nestedJoin, sceneJoin, sceneNestedJoin, withBehaviors, beside, siblings, (>:), (+:)) as X
-import PSD3.Attr (Attribute, cx, cy, x, y, x1, y1, x2, y2, width, height, radius, fill, stroke, strokeWidth, opacity, transform, viewBox, id_, class_) as X
+import PSD3.Internal.Attribute (Attribute(..)) as X
+import PSD3.Expr.Friendly (computed, computedStr, computedWithIndex, computedStrWithIndex, from, fromStr, fromWithIndex, fromStrWithIndex, static, staticStr, num, text, bool, field, index, plus, minus, times, dividedBy, plusN, minusN, timesN, dividedByN, negated, lessThan, lessOrEqual, greaterThan, greaterOrEqual, equals, textEquals, textNotEquals, and_, or_, not_, ifThen, sin, cos, tan, asin, acos, atan, atan2, pi, append) as X
 import PSD3.Render (runD3, D3M, D3Selection) as X
 
 -- Selection & Transition Capabilities

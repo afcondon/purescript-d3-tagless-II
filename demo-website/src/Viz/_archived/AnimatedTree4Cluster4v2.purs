@@ -13,7 +13,7 @@ import Data.Time.Duration (Milliseconds(..))
 import Control.Comonad.Cofree (head, tail)
 import Data.Tree (Tree, mkTree)
 import Effect (Effect)
-import PSD3.Internal.Attribute (class_, cx, cy, d, fill, radius, stroke, strokeWidth, viewBox)
+import PSD3.Expr.Integration (v3AttrFn, v3AttrFnStr, v3StaticStr, v3Static)
 import PSD3.Internal.Capabilities.Selection (appendChild, openSelection, select, setAttrs, updateJoin, append, remove)
 import PSD3.Internal.Capabilities.Transition (withTransition)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
@@ -126,14 +126,14 @@ draw flareData selector = runD3v2M do
   -- Create SVG with viewBox matching the layout size
   container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
   svg <- appendChild SVG
-    [ viewBox ("0 0 " <> show chartWidth <> " " <> show chartHeight)
-    , class_ "animated-tree4-cluster4"
+    [ v3StaticStr "viewBox" ("0 0 " <> show chartWidth <> " " <> show chartHeight)
+    , v3StaticStr "class" "animated-tree4-cluster4"
     ]
     container
 
   -- Create groups
-  linksGroup <- appendChild Group [ class_ "links" ] svg
-  nodesGroup <- appendChild Group [ class_ "nodes" ] svg
+  linksGroup <- appendChild Group [ v3StaticStr "class" "links" ] svg
+  nodesGroup <- appendChild Group [ v3StaticStr "class" "nodes" ] svg
 
   pure { dataTree, linksGroup, nodesGroup, chartWidth, chartHeight }
 
@@ -186,25 +186,25 @@ animationStep dataTree linksGroup nodesGroup chartWidth chartHeight currentLayou
 
   -- ENTER links: Set initial path and static attributes
   _ <- append Path
-    [ fill "none"
-    , stroke "#555"
-    , strokeWidth 1.5
-    , class_ "link"
-    , d (linkPathFn :: LinkData -> String)
+    [ v3StaticStr "fill" "none"
+    , v3StaticStr "stroke" "#555"
+    , v3Static "stroke-width" 1.5
+    , v3StaticStr "class" "link"
+    , v3AttrFnStr "d" (linkPathFn :: LinkData -> String)
     ]
     linkEnter
 
   -- UPDATE links: Set static attributes
   _ <- setAttrs
-    [ fill "none"
-    , stroke "#555"
-    , strokeWidth 1.5
-    , class_ "link"
+    [ v3StaticStr "fill" "none"
+    , v3StaticStr "stroke" "#555"
+    , v3Static "stroke-width" 1.5
+    , v3StaticStr "class" "link"
     ]
     linkUpdate
 
   -- UPDATE links: Transition path to new positions
-  withTransition transitionConfig linkUpdate [ d (linkPathFn :: LinkData -> String) ]
+  withTransition transitionConfig linkUpdate [ v3AttrFnStr "d" (linkPathFn :: LinkData -> String) ]
 
   -- Update nodes with transition
   nodesSelection <- openSelection nodesGroup "circle"
@@ -215,30 +215,30 @@ animationStep dataTree linksGroup nodesGroup chartWidth chartHeight currentLayou
 
   -- ENTER nodes: Create with initial position and static attributes
   _ <- append Circle
-    [ radius 4.0
-    , fill "#999"
-    , stroke "#555"
-    , strokeWidth 1.5
-    , class_ "node"
-    , cx (\(node :: TreeModel) -> node.x)
-    , cy (\(node :: TreeModel) -> node.y)
+    [ v3Static "r" 4.0
+    , v3StaticStr "fill" "#999"
+    , v3StaticStr "stroke" "#555"
+    , v3Static "stroke-width" 1.5
+    , v3StaticStr "class" "node"
+    , v3AttrFn "cx" (\(node :: TreeModel) -> node.x)
+    , v3AttrFn "cy" (\(node :: TreeModel) -> node.y)
     ]
     nodeEnter
 
   -- UPDATE nodes: Set static attributes
   _ <- setAttrs
-    [ radius 4.0
-    , fill "#999"
-    , stroke "#555"
-    , strokeWidth 1.5
-    , class_ "node"
+    [ v3Static "r" 4.0
+    , v3StaticStr "fill" "#999"
+    , v3StaticStr "stroke" "#555"
+    , v3Static "stroke-width" 1.5
+    , v3StaticStr "class" "node"
     ]
     nodeUpdate
 
   -- UPDATE nodes: Transition to new position
   withTransition transitionConfig nodeUpdate
-    [ cx (\(node :: TreeModel) -> node.x)
-    , cy (\(node :: TreeModel) -> node.y)
+    [ v3AttrFn "cx" (\(node :: TreeModel) -> node.x)
+    , v3AttrFn "cy" (\(node :: TreeModel) -> node.y)
     ]
 
   -- Done with this animation step

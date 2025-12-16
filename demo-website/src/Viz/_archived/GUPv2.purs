@@ -10,7 +10,7 @@ import Data.Int (toNumber)
 import Data.String.CodeUnits (singleton)
 import Data.Time.Duration (Milliseconds(..))
 import Effect (Effect)
-import PSD3.Internal.Attribute (class_, fill, fontSize, textContent, viewBox, x, y)
+import PSD3.Expr.Integration (v3AttrFn, v3AttrFnI, v3AttrFnStr, v3StaticStr, v3Static)
 import PSD3.Internal.Capabilities.Selection (append, appendChild, openSelection, select, setAttrs, setAttrsExit, updateJoin)
 import PSD3.Internal.Capabilities.Transition (withTransition, withTransitionExit)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
@@ -37,8 +37,8 @@ initGUP selector = runD3v2M do
   -- Create SVG structure
   container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
   svg <- appendChild SVG
-    [ viewBox "0 -50 800 500"
-    , class_ "d3svg gup"
+    [ v3StaticStr "viewBox" "0 -50 800 500"
+    , v3StaticStr "class" "d3svg gup"
     ] container
   letterGroup <- appendChild Group [] svg
 
@@ -51,22 +51,22 @@ initGUP selector = runD3v2M do
     JoinResult { enter, update, exit } <- updateJoin openSel Text letters charToKey "text"
 
     -- EXIT: Brown, fall down, then remove
-    _ <- setAttrsExit [ class_ "exit", fill "brown" ] exit
-    withTransitionExit transitionConfig exit [ y 400.0 ]
+    _ <- setAttrsExit [ v3StaticStr "class" "exit", v3StaticStr "fill" "brown" ] exit
+    withTransitionExit transitionConfig exit [ v3Static "y" 400.0 ]
 
     -- UPDATE: Gray, slide to new position
-    _ <- setAttrs [ class_ "update", fill "gray", y 200.0 ] update
-    withTransition transitionConfig update [ x (xFromIndex :: Char -> Int -> Number) ]
+    _ <- setAttrs [ v3StaticStr "class" "update", v3StaticStr "fill" "gray", v3Static "y" 200.0 ] update
+    withTransition transitionConfig update [ v3AttrFnI "x" (xFromIndex :: Char -> Int -> Number) ]
 
     -- ENTER: Create elements, start green at top, fall to middle
     entered <- append Text
-      [ class_ "enter"
-      , fill "green"
-      , x (xFromIndex :: Char -> Int -> Number)
-      , y 0.0
-      , textContent (singleton :: Char -> String)
-      , fontSize 60.0
+      [ v3StaticStr "class" "enter"
+      , v3StaticStr "fill" "green"
+      , v3AttrFnI "x" (xFromIndex :: Char -> Int -> Number)
+      , v3Static "y" 0.0
+      , v3AttrFnStr "textContent" (singleton :: Char -> String)
+      , v3Static "font-size" 60.0
       ] enter
-    withTransition transitionConfig entered [ y 200.0 ]
+    withTransition transitionConfig entered [ v3Static "y" 200.0 ]
 
     pure unit
