@@ -54,11 +54,11 @@
 -- | - `PSD3.AST` - Declarative visualization AST (element types, data joins)
 -- | - `PSD3.Attr` - All attributes (width, height, cx, cy, fill, stroke, etc.)
 -- | - `PSD3.Render` - D3 DOM rendering (runD3, select, renderTree)
--- | - `PSD3v2.Behavior.Types` - Behaviors (drag, zoom)
+-- | - `PSD3.Internal.Behavior.Types` - Behaviors (drag, zoom)
 -- |
 -- | **Interpreters** (for debugging):
--- | - `PSD3v2.Interpreter.MermaidTree` - Mermaid diagram of AST structure
--- | - `PSD3v2.Interpreter.English` - English description of AST
+-- | - `PSD3.Interpreter.Mermaid` - Mermaid diagram of AST structure
+-- | - `PSD3.Interpreter.English` - English description of AST
 -- |
 -- | **Shared Modules**:
 -- | - `PSD3.Data.Node` - SimulationNode, D3Link types
@@ -79,7 +79,7 @@
 -- | **With behaviors**:
 -- | ```purescript
 -- | import PSD3.Render (on)
--- | import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, defaultZoom)
+-- | import PSD3.Internal.Behavior.Types (Behavior(..), defaultDrag, defaultZoom)
 -- | ```
 -- |
 -- | ## Exports
@@ -94,15 +94,15 @@ import PSD3.Attr (Attribute, cx, cy, x, y, x1, y1, x2, y2, width, height, radius
 import PSD3.Render (runD3, D3M, D3Selection) as X
 
 -- Selection & Transition Capabilities
-import PSD3v2.Capabilities.Selection (class SelectionM, select, appendChildInheriting, appendData, renderTree, renderData, setAttrs, on, clear) as X
-import PSD3v2.Capabilities.Transition (class TransitionM, withTransition, withTransitionExit) as X
+import PSD3.Internal.Capabilities.Selection (class SelectionM, select, appendChildInheriting, appendData, renderTree, renderData, setAttrs, on, clear) as X
+import PSD3.Internal.Capabilities.Transition (class TransitionM, withTransition, withTransitionExit) as X
 
 -- Legacy type names (keep for backwards compatibility, prefer D3M/D3Selection)
-import PSD3v2.Interpreter.D3v2 (D3v2M, D3v2Selection_, runD3v2M, reselectD3v2) as X
+import PSD3.Interpreter.D3 (D3v2M, D3v2Selection_, runD3v2M, reselectD3v2) as X
 
 -- Internal Types (for advanced use)
-import PSD3v2.Selection.Types (SEmpty, SBoundOwns, SBoundInherits, SPending, SExiting, Selection(..)) as X
-import PSD3v2.Behavior.Types (Behavior(..), defaultDrag, ScaleExtent(..)) as X
+import PSD3.Internal.Selection.Types (SEmpty, SBoundOwns, SBoundInherits, SPending, SExiting, Selection(..)) as X
+import PSD3.Internal.Behavior.Types (Behavior(..), defaultDrag, ScaleExtent(..)) as X
 
 -- Shared data types
 import PSD3.Data.Node (SimulationNode) as X

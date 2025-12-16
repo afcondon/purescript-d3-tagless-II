@@ -62,7 +62,7 @@ render _ =
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3v2.Behavior.Types (onClickWithDatum)
+                    [ HH.text """import PSD3.Internal.Behavior.Types (onClickWithDatum)
 
 circles <- append Circle [fill "blue", radius 20.0] container
 _ <- on (onClickWithDatum \\d -> log ("Clicked: " <> d.name)) circles""" ]
@@ -72,7 +72,7 @@ _ <- on (onClickWithDatum \\d -> log ("Clicked: " <> d.name)) circles""" ]
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3v2.Behavior.Types (onClick)
+                    [ HH.text """import PSD3.Internal.Behavior.Types (onClick)
 
 _ <- on (onClick (log "Button clicked!")) button""" ]
                 ]
@@ -89,7 +89,7 @@ _ <- on (onClick (log "Button clicked!")) button""" ]
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3v2.Behavior.Types (onMouseEnter, onMouseLeave)
+                    [ HH.text """import PSD3.Internal.Behavior.Types (onMouseEnter, onMouseLeave)
 
 _ <- on (onMouseEnter \\d -> highlightNode d) circles
 _ <- on (onMouseLeave \\_ -> clearHighlight) circles""" ]
@@ -99,7 +99,7 @@ _ <- on (onMouseLeave \\_ -> clearHighlight) circles""" ]
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3v2.Behavior.Types (onHover)
+                    [ HH.text """import PSD3.Internal.Behavior.Types (onHover)
 
 _ <- on (onHover
   { enter: [{ attr: "stroke", value: "#333" }, { attr: "stroke-width", value: "3" }]
@@ -111,7 +111,7 @@ _ <- on (onHover
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3v2.Behavior.Types (onMouseEnterWithInfo)
+                    [ HH.text """import PSD3.Internal.Behavior.Types (onMouseEnterWithInfo)
 
 _ <- on (onMouseEnterWithInfo \\info -> do
   -- info.datum: bound data
@@ -133,7 +133,7 @@ _ <- on (onMouseEnterWithInfo \\info -> do
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3v2.Behavior.Types (Drag(..), defaultDrag)
+                    [ HH.text """import PSD3.Internal.Behavior.Types (Drag(..), defaultDrag)
 
 _ <- on (Drag defaultDrag) draggableElement""" ]
                 ]
@@ -142,7 +142,7 @@ _ <- on (Drag defaultDrag) draggableElement""" ]
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3v2.Behavior.Types (Drag(..), simulationDrag)
+                    [ HH.text """import PSD3.Internal.Behavior.Types (Drag(..), simulationDrag)
 
 _ <- on (Drag (simulationDrag "my-simulation-id")) nodes""" ]
                 ]
@@ -151,7 +151,7 @@ _ <- on (Drag (simulationDrag "my-simulation-id")) nodes""" ]
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3v2.Behavior.Types (Zoom(..), defaultZoom, ScaleExtent(..))
+                    [ HH.text """import PSD3.Internal.Behavior.Types (Zoom(..), defaultZoom, ScaleExtent(..))
 
 -- Attach to outer SVG, transforms inner group
 _ <- on (Zoom (defaultZoom (ScaleExtent 0.5 4.0) ".zoom-group")) svg""" ]

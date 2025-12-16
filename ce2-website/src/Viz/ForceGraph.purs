@@ -67,16 +67,16 @@ import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Setup as Setup
 import PSD3.ForceEngine.Events (SimulationCallbacks)
 import PSD3.ForceEngine.Links (swizzleLinksByIndex, filterLinksToSubset)
-import PSD3v2.Capabilities.Selection (select, renderTree)
-import PSD3v2.Interpreter.D3v2 (runD3v2M)
+import PSD3.Internal.Capabilities.Selection (select, renderTree)
+import PSD3.Interpreter.D3 (runD3v2M)
 import PSD3v2.Transform (transformCircles, transformPaths, removeElement)
 import PSD3v2.Classify (classifyElements)
-import PSD3v2.Selection.Types (ElementType(..))
+import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.AST as T
-import PSD3v2.Behavior.Types (Behavior(..), DragConfig(..), ScaleExtent(..), defaultZoom)
-import PSD3v2.Behavior.FFI as BehaviorFFI
-import PSD3v3.Integration (v3Attr, v3AttrFn, v3AttrFnStr, v3AttrStr)
-import PSD3v3.Expr (lit, str)
+import PSD3.Internal.Behavior.Types (Behavior(..), DragConfig(..), ScaleExtent(..), defaultZoom)
+import PSD3.Internal.Behavior.FFI as BehaviorFFI
+import PSD3.Expr.Integration (v3Attr, v3AttrFn, v3AttrFnStr, v3AttrStr)
+import PSD3.Expr.Expr (lit, str)
 import PSD3.Transition.Tick as Tick
 
 -- =============================================================================

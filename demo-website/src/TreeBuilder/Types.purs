@@ -1,7 +1,7 @@
 -- | Tree Builder Types
 -- |
 -- | UI-specific types for the interactive tree builder.
--- | Core types (BuilderTree, AttributeChoice, etc.) are in PSD3v2.Interpreter.SemiQuine.Types
+-- | Core types (BuilderTree, AttributeChoice, etc.) are in PSD3.Interpreter.SemiQuine.Types
 module TreeBuilder.Types
   ( -- * Re-exports from SemiQuine
     module SemiQuineTypes
@@ -33,7 +33,7 @@ import Data.Maybe (Maybe(..))
 import Data.Number (cos, sin) as Math
 import Effect (Effect)
 import Effect.Random (randomInt)
-import PSD3v2.Interpreter.SemiQuine.Types (AttributeBinding, AttributeChoice(..), BuilderNode, BuilderTree(..), NodeId, defaultAttributesFor, emptyNode) as SemiQuineTypes
+import PSD3.Interpreter.SemiQuine.Types (AttributeBinding, AttributeChoice(..), BuilderNode, BuilderTree(..), NodeId, defaultAttributesFor, emptyNode) as SemiQuineTypes
 
 -- =============================================================================
 -- Node ID Generation

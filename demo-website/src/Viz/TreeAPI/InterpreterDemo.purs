@@ -5,9 +5,9 @@ module D3.Viz.TreeAPI.InterpreterDemo where
 import Prelude
 
 import Data.Int (toNumber)
-import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr, v3AttrFnI)
-import PSD3v3.Expr (lit, str)
-import PSD3v2.Selection.Types (ElementType(..))
+import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr, v3AttrFnI)
+import PSD3.Expr.Expr (lit, str)
+import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.AST as T
 
 -- | Three Little Circles - simple and familiar

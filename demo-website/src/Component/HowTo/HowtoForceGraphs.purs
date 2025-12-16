@@ -68,7 +68,7 @@ render _ =
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3v2.Capabilities.Simulation (class SimulationM, init, addTickFunction, start, Step(..))
+                    [ HH.text """import PSD3.Internal.Capabilities.Simulation (class SimulationM, init, addTickFunction, start, Step(..))
 
 { nodes, links } <- init
   { nodes: myNodeData
@@ -139,7 +139,7 @@ start -- Begin animation""" ]
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3v2.Capabilities.Simulation (class SimulationM2, update, reheat)
+                    [ HH.text """import PSD3.Internal.Capabilities.Simulation (class SimulationM2, update, reheat)
 
 { nodes, links } <- update
   { nodes: Just newNodeArray
@@ -167,7 +167,7 @@ start       -- Begin animation""" ]
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3v2.Behavior.Types (Drag(..), simulationDrag)
+                    [ HH.text """import PSD3.Internal.Behavior.Types (Drag(..), simulationDrag)
 
 -- Drag reheats simulation automatically
 _ <- on (Drag (simulationDrag "my-simulation-id")) nodeCircles""" ]

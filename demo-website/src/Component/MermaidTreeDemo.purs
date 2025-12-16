@@ -11,11 +11,11 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import PSD3v2.Interpreter.MermaidTree (runMermaidTree)
-import PSD3v2.Selection.Types (ElementType(..))
+import PSD3.Interpreter.Mermaid (runMermaidTree)
+import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.AST as T
-import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
-import PSD3v3.Expr (lit, str)
+import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3.Expr.Expr (lit, str)
 
 -- FFI
 foreign import runMermaid :: Effect Unit

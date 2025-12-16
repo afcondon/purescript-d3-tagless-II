@@ -23,8 +23,8 @@ import PSD3.Shared.DataLoader (simpleLoadJSON)
 import Unsafe.Coerce (unsafeCoerce)
 import D3.Viz.TreeAPI.ThreeLittleCirclesTransition as ThreeLittleCirclesTransition
 import Effect.Ref as Ref
-import PSD3v2.Interpreter.D3v2 (D3v2Selection_)
-import PSD3v2.Selection.Types (SBoundOwns)
+import PSD3.Interpreter.D3 (D3v2Selection_)
+import PSD3.Internal.Selection.Types (SBoundOwns)
 import Web.DOM.Element (Element)
 import D3.Viz.TreeAPI.V3GUPDemo as GUP
 import D3.Viz.AnimatedTreeClusterLoop as AnimatedTreeLoop

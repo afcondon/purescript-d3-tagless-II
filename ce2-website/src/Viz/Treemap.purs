@@ -28,14 +28,14 @@ import Effect.Class.Console (log)
 import Types (SimNode, NodeType(..), Package)
 import ViewState (ViewState)
 import Data.Set as Set
-import PSD3v2.Capabilities.Selection (select, renderTree)
+import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3v2.Classify (classifyElements, clearClasses)
-import PSD3v2.Interpreter.D3v2 (runD3v2M)
+import PSD3.Interpreter.D3 (runD3v2M)
 import PSD3.AST as T
-import PSD3v2.Behavior.Types (onMouseEnter, onMouseLeave, onClickWithDatum)
-import PSD3v2.Selection.Types (ElementType(..))
-import PSD3v3.Integration (v3AttrFn, v3AttrFnStr, v3AttrStr)
-import PSD3v3.Expr (str)
+import PSD3.Internal.Behavior.Types (onMouseEnter, onMouseLeave, onClickWithDatum)
+import PSD3.Internal.Selection.Types (ElementType(..))
+import PSD3.Expr.Integration (v3AttrFn, v3AttrFnStr, v3AttrStr)
+import PSD3.Expr.Expr (str)
 import DataViz.Layout.Hierarchy.Core (hierarchy, sum) as Hier
 import DataViz.Layout.Hierarchy.Treemap (treemap, defaultTreemapConfig, TreemapNode(..)) as TM
 

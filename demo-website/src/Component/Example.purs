@@ -13,7 +13,7 @@ import Effect.Aff (Milliseconds(..), delay)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
 import Effect.Random (random)
-import PSD3v2.Selection.Operations (clear) as Ops
+import PSD3.Internal.Selection.Operations (clear) as Ops
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP

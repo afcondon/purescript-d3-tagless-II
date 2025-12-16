@@ -1,7 +1,7 @@
 -- | Tests for PSD3v3 Expression DSL
 -- |
 -- | Demonstrates the key benefit: one expression, multiple interpretations
-module Test.PSD3v3.ExprSpec where
+module Test.PSD3.Expr.ExprSpec where
 
 import Prelude hiding (add, sub, mul, div)
 
@@ -12,16 +12,16 @@ import Type.Proxy (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- DSL imports
-import PSD3v3.Expr (class NumExpr, lit, add, mul, class TrigExpr, sin, cos, pi)
-import PSD3v3.Units (class UnitExpr, class UnitArith, Pixels, Em, px, em, addU, scaleU)
-import PSD3v3.Datum (class DatumExpr, field)
-import PSD3v3.Sugar ((*:), (+:), (-:), (*~), (+~), n)
+import PSD3.Expr.Expr (class NumExpr, lit, add, mul, class TrigExpr, sin, cos, pi)
+import PSD3.Expr.Units (class UnitExpr, class UnitArith, Pixels, Em, px, em, addU, scaleU)
+import PSD3.Expr.Datum (class DatumExpr, field)
+import PSD3.Expr.Sugar ((*:), (+:), (-:), (*~), (+~), n)
 import Data.Number (pi) as Math
 
 -- Interpreter imports
-import PSD3v3.Interpreter.Eval (Eval, runEval, EvalD, runEvalD)
-import PSD3v3.Interpreter.CodeGen (CodeGen, runCodeGen)
-import PSD3v3.Interpreter.SVG (SVG, runSVG, SVGD, runSVGD)
+import PSD3.Expr.Interpreter.Eval (Eval, runEval, EvalD, runEvalD)
+import PSD3.Expr.Interpreter.CodeGen (CodeGen, runCodeGen)
+import PSD3.Expr.Interpreter.SVG (SVG, runSVG, SVGD, runSVGD)
 
 -- =============================================================================
 -- Sample datum type (parabola point)

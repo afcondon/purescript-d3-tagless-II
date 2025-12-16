@@ -10,12 +10,12 @@ import Data.Maybe (Maybe(Just, Nothing))
 import Data.Time.Duration (Milliseconds(..))
 import Effect (Effect)
 import Effect.Class (liftEffect)
-import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
-import PSD3v3.Expr (lit, str)
-import PSD3v2.Capabilities.Selection (renderTree, select)
-import PSD3v2.Interpreter.D3v2 (D3v2M)
-import PSD3v2.Selection.Types (ElementType(..))
-import PSD3v2.Transition.Types (Easing(CubicIn, CubicInOut))
+import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3.Expr.Expr (lit, str)
+import PSD3.Internal.Capabilities.Selection (renderTree, select)
+import PSD3.Interpreter.D3 (D3v2M)
+import PSD3.Internal.Selection.Types (ElementType(..))
+import PSD3.Internal.Transition.Types (Easing(CubicIn, CubicInOut))
 import PSD3.AST as T
 
 -- | Simple data point

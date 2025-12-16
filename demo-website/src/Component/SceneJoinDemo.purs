@@ -10,7 +10,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import PSD3v2.Interpreter.D3v2 (runD3v2M)
+import PSD3.Interpreter.D3 (runD3v2M)
 
 type State = Unit
 

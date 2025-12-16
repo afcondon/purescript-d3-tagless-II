@@ -55,21 +55,21 @@ import PSD3.ForceEngine.Events (SimulationCallbacks)
 import PSD3.ForceEngine.Types (ForceSpec(..), defaultManyBody, defaultCollide, defaultLink, defaultCenter)
 import PSD3.ForceEngine.Links (filterLinksToSubset, swizzleLinksByIndex)
 import PSD3.Transition.Tick as Tick
-import PSD3v3.Integration (v3Attr, v3AttrStr)
-import PSD3v3.Expr (lit, str)
-import PSD3v2.Behavior.FFI as BehaviorFFI
-import PSD3v2.Behavior.Types (Behavior(..), DragConfig(..), ScaleExtent(..), defaultZoom)
-import PSD3v2.Capabilities.Selection (select, renderTree)
-import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M)
-import PSD3v2.Selection.Types (ElementType(..)) as ET
+import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Expr (lit, str)
+import PSD3.Internal.Behavior.FFI as BehaviorFFI
+import PSD3.Internal.Behavior.Types (Behavior(..), DragConfig(..), ScaleExtent(..), defaultZoom)
+import PSD3.Internal.Capabilities.Selection (select, renderTree)
+import PSD3.Interpreter.D3 (runD3v2M, D3v2M)
+import PSD3.Internal.Selection.Types (ElementType(..)) as ET
 import PSD3.AST as T
 import Type.Proxy (Proxy(..))
 
 -- v3 DSL imports
-import PSD3v3.Expr (class NumExpr, class BoolExpr, class CompareExpr, class StringExpr, ifThenElse)
-import PSD3v3.Datum (class DatumExpr, field)
-import PSD3v3.Sugar ((*:), (+.), (-.), (>.), s)
-import PSD3v3.Interpreter.Eval (EvalD, runEvalD)
+import PSD3.Expr.Expr (class NumExpr, class BoolExpr, class CompareExpr, class StringExpr, ifThenElse)
+import PSD3.Expr.Datum (class DatumExpr, field)
+import PSD3.Expr.Sugar ((*:), (+.), (-.), (>.), s)
+import PSD3.Expr.Interpreter.Eval (EvalD, runEvalD)
 
 -- =============================================================================
 -- Types

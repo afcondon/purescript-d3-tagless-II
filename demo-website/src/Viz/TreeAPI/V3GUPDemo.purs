@@ -29,22 +29,22 @@ import Effect.Console as Console
 import Type.Proxy (Proxy(..))
 
 -- v2 infrastructure
-import PSD3v2.Attribute.Types (Attribute)
-import PSD3v3.Integration (v3Attr, v3AttrStr, v3AttrFn)
-import PSD3v2.Capabilities.Selection (select, renderTree)
-import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
-import PSD3v2.Selection.Types (ElementType(..), SEmpty)
-import PSD3v2.Transition.Types (Easing(..), transitionWith)
+import PSD3.Internal.Attribute (Attribute)
+import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn)
+import PSD3.Internal.Capabilities.Selection (select, renderTree)
+import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
+import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
+import PSD3.Internal.Transition.Types (Easing(..), transitionWith)
 import PSD3.AST (Tree)
 import PSD3.AST as T
 import Web.DOM.Element (Element)
 
 -- v3 DSL
-import PSD3v3.Expr (class NumExpr, lit, str)
-import PSD3v3.Datum (class DatumExpr, field)
-import PSD3v3.Sugar ((*:), (+:))
-import PSD3v3.Interpreter.CodeGen (CodeGen, runCodeGen)
-import PSD3v3.Interpreter.Eval (EvalD, runEvalD)
+import PSD3.Expr.Expr (class NumExpr, lit, str)
+import PSD3.Expr.Datum (class DatumExpr, field)
+import PSD3.Expr.Sugar ((*:), (+:))
+import PSD3.Expr.Interpreter.CodeGen (CodeGen, runCodeGen)
+import PSD3.Expr.Interpreter.Eval (EvalD, runEvalD)
 
 -- =============================================================================
 -- Data Type

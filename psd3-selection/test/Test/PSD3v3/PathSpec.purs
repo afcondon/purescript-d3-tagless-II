@@ -1,7 +1,7 @@
 -- | Tests for PSD3v3 Path DSL
 -- |
 -- | Demonstrates path generation for trees, Sankey, and chord diagrams
-module Test.PSD3v3.PathSpec where
+module Test.PSD3.Expr.PathSpec where
 
 import Prelude
 
@@ -10,12 +10,12 @@ import Effect.Console (log)
 import Data.Number (pi)
 
 -- DSL
-import PSD3v3.Expr (class NumExpr, lit)
-import PSD3v3.Path (class PathExpr, linePath, linkHorizontal, linkVertical, sankeyLink, arc)
+import PSD3.Expr.Expr (class NumExpr, lit)
+import PSD3.Expr.Path (class PathExpr, linePath, linkHorizontal, linkVertical, sankeyLink, arc)
 
 -- Interpreters
-import PSD3v3.Interpreter.Eval (Eval, runEval)
-import PSD3v3.Interpreter.CodeGen (CodeGen, runCodeGen)
+import PSD3.Expr.Interpreter.Eval (Eval, runEval)
+import PSD3.Expr.Interpreter.CodeGen (CodeGen, runCodeGen)
 
 -- =============================================================================
 -- Path Examples (polymorphic!)

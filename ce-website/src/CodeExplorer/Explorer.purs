@@ -69,11 +69,11 @@ import PSD3v3.Expr (lit, str)
 import PSD3v2.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom, onMouseEnter, onMouseLeave, onClickWithDatum)
 import PSD3v2.Capabilities.Selection (select, selectAll, on, renderTree)
 import PSD3.AST as T
-import PSD3v2.Interpreter.D3v2 (getElementsD3v2) as D3v2
+import PSD3.Interpreter.D3 (getElementsD3v2) as D3v2
 import PSD3v2.Classify (classifyElements, clearClasses)
 import Data.Set as Set
 import PSD3v2.Tooltip (onTooltip)
-import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M, D3v2Selection_, reselectD3v2)
+import PSD3.Interpreter.D3 (runD3v2M, D3v2M, D3v2Selection_, reselectD3v2)
 import PSD3v2.Selection.Types (ElementType(..), SBoundOwns, SEmpty)
 import Types (SimNode, SimLink, NodeType(..), LinkType, isTreeLink)
 import CodeExplorer.ViewBox as ViewBox

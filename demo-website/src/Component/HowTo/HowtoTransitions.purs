@@ -63,8 +63,8 @@ render _ =
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
                     [ HH.text """import Data.Time.Duration (Milliseconds(..))
-import PSD3v2.Transition.Types (transition)
-import PSD3v2.Capabilities.Transition (withTransition)
+import PSD3.Internal.Transition.Types (transition)
+import PSD3.Internal.Capabilities.Transition (withTransition)
 
 -- Animate circles to new state over 1 second
 withTransition (transition (Milliseconds 1000.0)) circles
@@ -86,7 +86,7 @@ withTransition (transition (Milliseconds 1000.0)) circles
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3v2.Transition.Types (transitionWith, Easing(..))
+                    [ HH.text """import PSD3.Internal.Transition.Types (transitionWith, Easing(..))
 
 let config = transitionWith
       { duration: Milliseconds 1500.0
@@ -111,7 +111,7 @@ withTransition config circles [radius 30.0]""" ]
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3v2.Capabilities.Transition (withTransitionStaggered, staggerByIndex)
+                    [ HH.text """import PSD3.Internal.Capabilities.Transition (withTransitionStaggered, staggerByIndex)
 
 -- Each element delays 50ms more than the previous
 withTransitionStaggered config (staggerByIndex 50.0) bars
@@ -141,7 +141,7 @@ withTransitionStaggered config (\\d _ -> Milliseconds (d.priority * 100.0)) item
             , HH.pre
                 [ HP.classes [ HH.ClassName "code-block" ] ]
                 [ HH.code_
-                    [ HH.text """import PSD3v2.Capabilities.Transition (withTransitionExit)
+                    [ HH.text """import PSD3.Internal.Capabilities.Transition (withTransitionExit)
 
 -- Fade out and shrink before removing
 withTransitionExit (transition (Milliseconds 500.0)) exitSelection

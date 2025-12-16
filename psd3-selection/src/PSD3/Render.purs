@@ -30,8 +30,8 @@ import Prelude
 
 import Effect (Effect)
 
-import PSD3v2.Interpreter.D3v2 (D3v2M, D3v2Selection_, runD3v2M, reselectD3v2) as D3Exports
-import PSD3v2.Capabilities.Selection (select, renderTree, renderData, setAttrs, clear) as SelectionExports
+import PSD3.Interpreter.D3 (D3v2M, D3v2Selection_, runD3v2M, reselectD3v2) as D3Exports
+import PSD3.Internal.Capabilities.Selection (select, renderTree, renderData, setAttrs, clear) as SelectionExports
 
 -- | Type alias for the D3 monad
 type D3M = D3Exports.D3v2M

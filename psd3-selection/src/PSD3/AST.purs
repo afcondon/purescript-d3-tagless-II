@@ -26,8 +26,8 @@
 -- |
 -- | The same AST can be interpreted multiple ways:
 -- | - `PSD3.Render` - Renders to DOM via D3.js
--- | - `PSD3v2.Interpreter.MermaidTree` - Generates Mermaid diagram of structure
--- | - `PSD3v2.Interpreter.English` - Produces English description (debugging)
+-- | - `PSD3.Interpreter.Mermaid` - Generates Mermaid diagram of structure
+-- | - `PSD3.Interpreter.English` - Produces English description (debugging)
 -- |
 -- | ## Key Types
 -- |
@@ -82,11 +82,11 @@ module PSD3.AST
 import Prelude
 
 import Data.Maybe (Maybe(..))
-import PSD3v2.Attribute.Types (Attribute)
-import PSD3v2.Behavior.Types (Behavior)
-import PSD3v2.Selection.Types (ElementType(..)) as ElementTypes
-import PSD3v2.Selection.Types (ElementType)
-import PSD3v2.Transition.Types (TransitionConfig)
+import PSD3.Internal.Attribute (Attribute)
+import PSD3.Internal.Behavior.Types (Behavior)
+import PSD3.Internal.Selection.Types (ElementType(..)) as ElementTypes
+import PSD3.Internal.Selection.Types (ElementType)
+import PSD3.Internal.Transition.Types (TransitionConfig)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | AST - Abstract Syntax Tree for visualization specifications

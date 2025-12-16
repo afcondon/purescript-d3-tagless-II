@@ -45,13 +45,13 @@ import Effect (Effect)
 import Effect.Console as Console
 import PSD3.Scale as Scale
 import PSD3.Scale (ContinuousScale, applyScale, ticks, nice)
-import PSD3v2.Attribute.Types (Attribute)
-import PSD3v3.Integration (v3Attr, v3AttrStr)
-import PSD3v3.Expr (lit, str)
+import PSD3.Internal.Attribute (Attribute)
+import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Expr (lit, str)
 import PSD3v2.Brush (attachBrush, clearBrush, BrushHandle, BrushSelection, BrushConfig)
-import PSD3v2.Capabilities.Selection (select, renderTree, clear)
-import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M)
-import PSD3v2.Selection.Types (ElementType(..)) as ET
+import PSD3.Internal.Capabilities.Selection (select, renderTree, clear)
+import PSD3.Interpreter.D3 (runD3v2M, D3v2M)
+import PSD3.Internal.Selection.Types (ElementType(..)) as ET
 import PSD3.AST (Tree)
 import PSD3.AST as T
 import D3.Viz.SPLOM.Types (Penguin, NumericDimension, dimensionLabel, dimensionKey, getDimensionValue, speciesColor, allDimensions)

@@ -13,12 +13,12 @@ import Data.Number as Number
 import Data.Set (Set)
 import Data.Set as Set
 import Effect (Effect)
-import PSD3v2.Capabilities.Selection (renderTree, select)
-import PSD3v2.Interpreter.D3v2 (D3v2Selection_, runD3v2M)
-import PSD3v2.Selection.Types (ElementType(..), SEmpty)
+import PSD3.Internal.Capabilities.Selection (renderTree, select)
+import PSD3.Interpreter.D3 (D3v2Selection_, runD3v2M)
+import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
 import PSD3.AST as T
-import PSD3v3.Expr (lit, str)
-import PSD3v3.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Integration (v3Attr, v3AttrStr)
 import Web.DOM.Element (Element)
 
 -- | Phylotaxis layout constants (sunflower spiral pattern)

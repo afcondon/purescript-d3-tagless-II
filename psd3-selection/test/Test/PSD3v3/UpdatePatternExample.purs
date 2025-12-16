@@ -3,7 +3,7 @@
 -- | Demonstrates integration of v3 attribute DSL with the v2 selection
 -- | system's enter/update/exit pattern. Shows how polymorphic expressions
 -- | compile to runtime attributes for DOM manipulation.
-module Test.PSD3v3.UpdatePatternExample where
+module Test.PSD3.Expr.UpdatePatternExample where
 
 import Prelude hiding (add)
 
@@ -15,14 +15,14 @@ import Effect.Console (log)
 import Type.Proxy (Proxy(..))
 
 -- v3 DSL
-import PSD3v3.Expr (class NumExpr, class BoolExpr, class CompareExpr, class StringExpr, ifThenElse)
-import PSD3v3.Expr as E
-import PSD3v3.Datum (class DatumExpr, field, index)
-import PSD3v3.Sugar ((*:), (<.), n, s)
+import PSD3.Expr.Expr (class NumExpr, class BoolExpr, class CompareExpr, class StringExpr, ifThenElse)
+import PSD3.Expr.Expr as E
+import PSD3.Expr.Datum (class DatumExpr, field, index)
+import PSD3.Expr.Sugar ((*:), (<.), n, s)
 
 -- Interpreters
-import PSD3v3.Interpreter.Eval (EvalD, runEvalD)
-import PSD3v3.Interpreter.CodeGen (CodeGen, runCodeGen)
+import PSD3.Expr.Interpreter.Eval (EvalD, runEvalD)
+import PSD3.Expr.Interpreter.CodeGen (CodeGen, runCodeGen)
 
 -- =============================================================================
 -- Data Types

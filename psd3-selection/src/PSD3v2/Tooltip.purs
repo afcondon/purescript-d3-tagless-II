@@ -19,7 +19,7 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
-import PSD3v2.Behavior.Types (Behavior(..), MouseEventInfo)
+import PSD3.Internal.Behavior.Types (Behavior(..), MouseEventInfo)
 
 -- | Show tooltip with HTML content at screen position
 -- |

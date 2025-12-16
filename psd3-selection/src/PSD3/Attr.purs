@@ -36,7 +36,7 @@ module PSD3.Attr
   ( module Exports
   ) where
 
-import PSD3v2.Attribute.Types
+import PSD3.Internal.Attribute
   ( Attribute(..)
   , AttributeName(..)
   , AttributeValue(..)

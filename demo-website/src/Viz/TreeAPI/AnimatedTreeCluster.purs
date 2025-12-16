@@ -16,21 +16,21 @@ import Effect.Class (liftEffect)
 import Effect.Console as Console
 import Type.Proxy (Proxy(..))
 import PSD3.Shared.FlareData (HierData, getName, getValue, getChildren)
-import PSD3v2.Capabilities.Selection (renderTree, select)
-import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, reselectD3v2)
-import PSD3v2.Selection.Types (ElementType(..), SEmpty)
-import PSD3v2.Transition.Types (TransitionConfig, transition)
+import PSD3.Internal.Capabilities.Selection (renderTree, select)
+import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_, reselectD3v2)
+import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
+import PSD3.Internal.Transition.Types (TransitionConfig, transition)
 import PSD3.AST as T
 import DataViz.Layout.Hierarchy.Cluster (cluster, defaultClusterConfig)
 import DataViz.Layout.Hierarchy.Tree (treeWithSorting, defaultTreeConfig)
 import Web.DOM.Element (Element)
 
 -- v3 DSL imports
-import PSD3v3.Expr (class NumExpr, lit, str)
-import PSD3v3.Datum (class DatumExpr, field)
-import PSD3v3.Path (linkVertical)
-import PSD3v3.Interpreter.Eval (EvalD, runEvalD)
-import PSD3v3.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Expr (class NumExpr, lit, str)
+import PSD3.Expr.Datum (class DatumExpr, field)
+import PSD3.Expr.Path (linkVertical)
+import PSD3.Expr.Interpreter.Eval (EvalD, runEvalD)
+import PSD3.Expr.Integration (v3Attr, v3AttrStr)
 
 -- | Layout type
 data LayoutType = TreeLayout | ClusterLayout

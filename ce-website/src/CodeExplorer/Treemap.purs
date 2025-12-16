@@ -29,7 +29,7 @@ import Foreign.Object as Object
 import DataViz.Layout.Hierarchy.Core as H
 import DataViz.Layout.Hierarchy.Treemap (TreemapNode(..), TreemapConfig, treemap, squarify, defaultTreemapConfig)
 import PSD3.Scale (interpolateTurbo)
-import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2M, D3v2Selection_, reselectD3v2)
+import PSD3.Interpreter.D3 (runD3v2M, D3v2M, D3v2Selection_, reselectD3v2)
 import PSD3v2.Capabilities.Selection (select, renderTree)
 import PSD3v2.Selection.Types (ElementType(..), SEmpty)
 import PSD3.AST as T

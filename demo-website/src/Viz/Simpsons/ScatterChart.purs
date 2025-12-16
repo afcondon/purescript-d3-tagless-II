@@ -17,12 +17,12 @@ import Prelude
 import D3.Viz.Simpsons.Types (green, purple, gray)
 import Data.Array (mapWithIndex, uncons)
 import Data.Maybe (Maybe(..))
-import PSD3v2.Attribute.Types (Attribute)
+import PSD3.Internal.Attribute (Attribute)
 -- v3 Integration: all attributes via v3Attr/v3AttrStr (no ToAttr typeclass)
-import PSD3v3.Integration (v3Attr, v3AttrStr)
-import PSD3v3.Expr (lit, str)
+import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Expr (lit, str)
 import PSD3v2.Axis.Axis (axisBottom, axisLeft, renderAxis, Scale)
-import PSD3v2.Selection.Types (ElementType(..))
+import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.AST (Tree)
 import PSD3.AST as T
 

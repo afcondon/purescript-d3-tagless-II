@@ -4,7 +4,7 @@
 -- | - Node positioning from layout coordinates
 -- | - Link paths connecting parent to child
 -- | - Conditional styling based on depth/leaf status
-module Test.PSD3v3.TreeExample where
+module Test.PSD3.Expr.TreeExample where
 
 import Prelude hiding (add)
 
@@ -16,15 +16,15 @@ import Effect.Console (log)
 import Type.Proxy (Proxy(..))
 
 -- DSL
-import PSD3v3.Expr (class NumExpr, class BoolExpr, class CompareExpr, class StringExpr, ifThenElse)
-import PSD3v3.Expr as E
-import PSD3v3.Datum (class DatumExpr, field)
-import PSD3v3.Path (class PathExpr, linkVertical)
-import PSD3v3.Sugar ((+:), (<.), n, s)
+import PSD3.Expr.Expr (class NumExpr, class BoolExpr, class CompareExpr, class StringExpr, ifThenElse)
+import PSD3.Expr.Expr as E
+import PSD3.Expr.Datum (class DatumExpr, field)
+import PSD3.Expr.Path (class PathExpr, linkVertical)
+import PSD3.Expr.Sugar ((+:), (<.), n, s)
 
 -- Interpreters
-import PSD3v3.Interpreter.Eval (EvalD, runEvalD)
-import PSD3v3.Interpreter.CodeGen (CodeGen, runCodeGen)
+import PSD3.Expr.Interpreter.Eval (EvalD, runEvalD)
+import PSD3.Expr.Interpreter.CodeGen (CodeGen, runCodeGen)
 
 -- =============================================================================
 -- Tree Data Types (matching typical d3-hierarchy output)

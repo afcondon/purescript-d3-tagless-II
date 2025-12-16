@@ -30,12 +30,12 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import PSD3v2.Capabilities.Selection (renderTree, select)
-import PSD3v2.Interpreter.D3v2 (D3v2M, runD3v2M, D3v2Selection_)
-import PSD3v2.Selection.Types (ElementType(..), SEmpty)
+import PSD3.Internal.Capabilities.Selection (renderTree, select)
+import PSD3.Interpreter.D3 (D3v2M, runD3v2M, D3v2Selection_)
+import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
 import PSD3.AST as T
-import PSD3v3.Expr (lit, str)
-import PSD3v3.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Expr (lit, str)
+import PSD3.Expr.Integration (v3Attr, v3AttrStr)
 import Web.DOM.Element (Element)
 
 -- =============================================================================

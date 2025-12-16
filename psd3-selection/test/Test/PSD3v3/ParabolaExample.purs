@@ -2,7 +2,7 @@
 -- |
 -- | A complete example showing the v3 DSL for a real visualization.
 -- | Demonstrates how the same definitions work across all interpreters.
-module Test.PSD3v3.ParabolaExample where
+module Test.PSD3.Expr.ParabolaExample where
 
 import Prelude hiding (add, sub, mul, div)
 
@@ -13,16 +13,16 @@ import Effect.Console (log)
 import Type.Proxy (Proxy(..))
 
 -- DSL
-import PSD3v3.Expr (class NumExpr, lit, add, mul)
-import PSD3v3.Units (class UnitExpr, class UnitArith, Pixels, px)
-import PSD3v3.Datum (class DatumExpr, field, index)
-import PSD3v3.Sugar ((*:), (+:), (-:), n)
+import PSD3.Expr.Expr (class NumExpr, lit, add, mul)
+import PSD3.Expr.Units (class UnitExpr, class UnitArith, Pixels, px)
+import PSD3.Expr.Datum (class DatumExpr, field, index)
+import PSD3.Expr.Sugar ((*:), (+:), (-:), n)
 
 -- Interpreters
-import PSD3v3.Interpreter.Eval (EvalD, runEvalD)
-import PSD3v3.Interpreter.CodeGen (CodeGen, runCodeGen)
-import PSD3v3.Interpreter.SVG (SVGD, runSVGD)
-import PSD3v3.Interpreter.PureSVG as Pure
+import PSD3.Expr.Interpreter.Eval (EvalD, runEvalD)
+import PSD3.Expr.Interpreter.CodeGen (CodeGen, runCodeGen)
+import PSD3.Expr.Interpreter.SVG (SVGD, runSVGD)
+import PSD3.Expr.Interpreter.PureSVG as Pure
 
 -- =============================================================================
 -- Data Types

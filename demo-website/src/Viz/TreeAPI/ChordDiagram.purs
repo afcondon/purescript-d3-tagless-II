@@ -20,21 +20,21 @@ import Type.Proxy (Proxy(..))
 import PSD3.Shared.Data (loadBridgesData)
 import PSD3.Internal.FFI (arcGenerator_, arcPath_, chordArray_, chordGroups_, chordLayoutWithPadAngle_, ribbonGenerator_, ribbonPath_, setArcInnerRadius_, setArcOuterRadius_, setRibbonRadius_)
 import PSD3.Internal.Types (Datum_)
-import PSD3v3.Integration (v3Attr, v3AttrStr)
-import PSD3v3.Expr (lit, str)
-import PSD3v2.Capabilities.Selection (renderTree, select)
-import PSD3v2.Interpreter.D3v2 (D3v2Selection_, reselectD3v2, runD3v2M)
-import PSD3v2.Selection.Types (ElementType(..), SEmpty)
+import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Expr (lit, str)
+import PSD3.Internal.Capabilities.Selection (renderTree, select)
+import PSD3.Interpreter.D3 (D3v2Selection_, reselectD3v2, runD3v2M)
+import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
 import PSD3.AST as T
 import Unsafe.Coerce (unsafeCoerce)
 import Web.DOM.Element (Element)
 
 -- v3 DSL imports
-import PSD3v3.Expr (class NumExpr, class BoolExpr, class CompareExpr, class StringExpr, class TrigExpr, ifThenElse, add, sub, mul)
-import PSD3v3.Expr (pi, cos, sin) as V3
-import PSD3v3.Datum (class DatumExpr, field)
-import PSD3v3.Sugar ((/:), (>.), s)
-import PSD3v3.Interpreter.Eval (EvalD, runEvalD)
+import PSD3.Expr.Expr (class NumExpr, class BoolExpr, class CompareExpr, class StringExpr, class TrigExpr, ifThenElse, add, sub, mul)
+import PSD3.Expr.Expr (pi, cos, sin) as V3
+import PSD3.Expr.Datum (class DatumExpr, field)
+import PSD3.Expr.Sugar ((/:), (>.), s)
+import PSD3.Expr.Interpreter.Eval (EvalD, runEvalD)
 
 -- | Traffic flow matrix (11 regions of Baton Rouge)
 type TrafficMatrix = Array (Array Number)

@@ -18,19 +18,19 @@ import DataViz.Layout.Sankey.CSV (parseSankeyCSV)
 import DataViz.Layout.Sankey.Compute (computeLayout)
 import DataViz.Layout.Sankey.Path (generateLinkPath)
 import DataViz.Layout.Sankey.Types (SankeyLink, SankeyNode, NodeID(..), LinkID(..))
-import PSD3v3.Integration (v3Attr, v3AttrStr)
-import PSD3v3.Expr (lit, str)
-import PSD3v2.Capabilities.Selection (renderTree, select)
-import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_, reselectD3v2)
-import PSD3v2.Selection.Types (ElementType(..), SEmpty)
+import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Expr (lit, str)
+import PSD3.Internal.Capabilities.Selection (renderTree, select)
+import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_, reselectD3v2)
+import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
 import PSD3.AST as T
 import Web.DOM.Element (Element)
 
 -- v3 DSL imports
-import PSD3v3.Expr (class NumExpr, class BoolExpr, class CompareExpr, class StringExpr, ifThenElse, add)
-import PSD3v3.Datum (class DatumExpr, field)
-import PSD3v3.Sugar ((+:), (-:), (/:), (<.), s)
-import PSD3v3.Interpreter.Eval (EvalD, runEvalD)
+import PSD3.Expr.Expr (class NumExpr, class BoolExpr, class CompareExpr, class StringExpr, ifThenElse, add)
+import PSD3.Expr.Datum (class DatumExpr, field)
+import PSD3.Expr.Sugar ((+:), (-:), (/:), (<.), s)
+import PSD3.Expr.Interpreter.Eval (EvalD, runEvalD)
 
 -- | Indexed link for data join (ensures unique keys)
 newtype IndexedLink = IndexedLink { index :: Int, link :: SankeyLink }

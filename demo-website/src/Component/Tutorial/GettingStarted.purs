@@ -121,7 +121,7 @@ import Effect (Effect)
 import PSD3v2.Tree as T
 import PSD3v2.Tree (Tree)
 import PSD3v2.Attribute (class_, cx, cy, r, fill)
-import PSD3v2.Interpreter.D3v2 (render)
+import PSD3.Interpreter.D3 (render)
 
 -- Your data
 type Point = { x :: Number, y :: Number, color :: String }

@@ -12,11 +12,11 @@ import Prelude
 import Data.Array (concat)
 import Effect (Effect)
 import DataViz.Layout.StateMachine (layout, StateMachine, LayoutState, LayoutTransition, transitionPathD, arrowheadPathD, initialArrowPathD, stateEllipse, stateFinalRing)
-import PSD3v3.Integration (v3Attr, v3AttrStr)
-import PSD3v3.Expr (lit, str)
-import PSD3v2.Capabilities.Selection (select, renderTree)
-import PSD3v2.Interpreter.D3v2 (runD3v2M, D3v2Selection_)
-import PSD3v2.Selection.Types (ElementType(..), SEmpty)
+import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Expr (lit, str)
+import PSD3.Internal.Capabilities.Selection (select, renderTree)
+import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
+import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
 import PSD3.AST as T
 import Web.DOM.Element (Element)
 

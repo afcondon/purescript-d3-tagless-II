@@ -5,9 +5,9 @@ import Prelude
 import Data.String (contains, Pattern(..))
 import Effect (Effect)
 import Effect.Console (log)
-import PSD3v2.Attribute.Types (cx, cy, radius, fill, width, height, id_, class_)
-import PSD3v2.Interpreter.SemiQuine.TreeToCode (treeToCode)
-import PSD3v2.Selection.Types (ElementType(..))
+import PSD3.Internal.Attribute (cx, cy, radius, fill, width, height, id_, class_)
+import PSD3.Interpreter.SemiQuine.TreeToCode (treeToCode)
+import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.AST (Tree)
 import PSD3.AST as T
 import Test.Assert (assert')
