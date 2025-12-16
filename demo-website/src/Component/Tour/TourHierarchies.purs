@@ -225,9 +225,9 @@ render _ =
             , HH.p_
                 [ HH.text "More hierarchical layout examples will be added to the "
                 , HH.a
-                    [ HP.href $ "#" <> routeToPath Gallery ]
-                    [ HH.text "Examples Gallery" ]
-                , HH.text " as they are implemented in TreeAPI."
+                    [ HP.href $ "#" <> routeToPath Examples ]
+                    [ HH.text "Examples" ]
+                , HH.text " page as they are implemented in TreeAPI."
                 ]
             ]
         ]

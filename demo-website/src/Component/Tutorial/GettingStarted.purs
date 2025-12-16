@@ -306,7 +306,7 @@ T.joined "bars" Rect data identity $ \\d ->
                 , HH.text " - Interactive examples like the Code Explorer and SPLOM"
                 ]
             , HH.li_
-                [ HH.a [ HP.href "#/gallery" ] [ HH.text "Browse the Gallery" ]
+                [ HH.a [ HP.href "#/examples" ] [ HH.text "Browse Examples" ]
                 , HH.text " - All examples organized by category"
                 ]
             , HH.li_

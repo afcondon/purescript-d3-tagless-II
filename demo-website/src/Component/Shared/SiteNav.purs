@@ -106,7 +106,7 @@ render config =
                     ]
                     [ HH.text "Tour" ]
                 , HH.a
-                    [ HP.href $ "#" <> routeToPath Gallery
+                    [ HP.href $ "#" <> routeToPath Examples
                     , HP.classes [ HH.ClassName "site-nav-link" ]
                     ]
                     [ HH.text "Examples" ]

@@ -125,7 +125,7 @@ type Slots =
   , tourGraphAlgorithms :: forall q. H.Slot q Void Unit
   , tourSimpsons :: forall q. H.Slot q Void Unit
   , showcase :: forall q. H.Slot q Void Unit
-  , gallery :: forall q. H.Slot q Void Unit
+  , examples :: forall q. H.Slot q Void Unit
   , example :: forall q. H.Slot q Void Unit
   , treeAPI :: forall q. H.Slot q Void Unit
   , animatedTreeCluster :: forall q. H.Slot q Void Unit
@@ -177,7 +177,7 @@ _tourFPFTW = Proxy :: Proxy "tourFPFTW"
 _tourGraphAlgorithms = Proxy :: Proxy "tourGraphAlgorithms"
 _tourSimpsons = Proxy :: Proxy "tourSimpsons"
 _showcase = Proxy :: Proxy "showcase"
-_gallery = Proxy :: Proxy "gallery"
+_examples = Proxy :: Proxy "examples"
 _example = Proxy :: Proxy "example"
 _treeAPI = Proxy :: Proxy "treeAPI"
 _animatedTreeCluster = Proxy :: Proxy "animatedTreeCluster"
@@ -333,8 +333,8 @@ renderPage route = case spy "Route is" route of
     HH.slot_ _showcase unit ShowcaseIndex.component unit
 
   -- Tree API Examples
-  Gallery ->
-    HH.slot_ _gallery unit ExamplesGallery.component unit
+  Examples ->
+    HH.slot_ _examples unit ExamplesGallery.component unit
 
   Example exampleId ->
     HH.slot_ _example unit Example.component exampleId

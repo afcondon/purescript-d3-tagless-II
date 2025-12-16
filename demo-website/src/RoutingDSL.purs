@@ -53,7 +53,7 @@ routes =
   <|> tourSimpsons
   <|> tourIndex
   <|> showcase
-  <|> gallery
+  <|> examples
   <|> examplePage     -- Must come before other routes to match /example/:id
   <|> treeAPI
   <|> animatedTreeCluster
@@ -227,9 +227,9 @@ tourIndex = TourIndex <$ lit "tour" <* end
 showcase :: Match Route
 showcase = Showcase <$ lit "showcase" <* end
 
--- | Match: /gallery
-gallery :: Match Route
-gallery = Gallery <$ lit "gallery" <* end
+-- | Match: /examples
+examples :: Match Route
+examples = Examples <$ lit "examples" <* end
 
 -- | Match: /example/:exampleId
 examplePage :: Match Route
@@ -363,7 +363,7 @@ routeToPath TourGraphAlgorithms = "/tour/graph-algorithms"
 routeToPath TourLesMisGUP = "/tour/lesmis-gup"
 routeToPath TourSimpsons = "/tour/simpsons"
 routeToPath Showcase = "/showcase"
-routeToPath Gallery = "/gallery"
+routeToPath Examples = "/examples"
 routeToPath (Example exampleId) = "/example/" <> exampleId
 routeToPath TreeAPI = "/tree-api"
 routeToPath AnimatedTreeCluster = "/animated-tree-cluster"

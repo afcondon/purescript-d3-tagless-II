@@ -121,7 +121,7 @@ data Route
   -- Showcase (complex app-like visualizations)
   | Showcase             -- Showcase: index page with hero and cards
   -- Tree API Examples
-  | Gallery         -- Gallery of all TreeAPI examples with cards
+  | Examples        -- Examples page showing all TreeAPI examples
   | Example String  -- Individual example page by ID
   | TreeAPI         -- Tree API examples (declarative tree API)
   | AnimatedTreeCluster  -- Animated Tree ↔ Cluster transitions (flagship example from yesterday)
@@ -186,7 +186,7 @@ instance showRoute :: Show Route where
   show TourLesMisGUP = "Tour: General Update Pattern"
   show TourSimpsons = "Tour: Simpson's Paradox"
   show Showcase = "Showcase"
-  show Gallery = "Examples Gallery"
+  show Examples = "Examples"
   show (Example exampleId) = "Example: " <> exampleId
   show TreeAPI = "Tree API Examples"
   show AnimatedTreeCluster = "Animated Tree ↔ Cluster"

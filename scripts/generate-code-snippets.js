@@ -16,16 +16,45 @@ const OUTPUT_FILE = path.join(DEMO_SRC, 'HTML', 'CodeSnippets.purs');
 
 // Map snippet names to source files
 const SNIPPETS = {
+  // Basic examples
   'threeLittleCircles': 'Viz/TreeAPI/ThreeLittleCircles.purs',
   'threeLittleCirclesTransition': 'Viz/TreeAPI/ThreeLittleCirclesTransition.purs',
   'simpleTree': 'Viz/TreeAPI/SimpleTreeExample.purs',
   'nestedElements': 'Viz/TreeAPI/NestedElementsExample.purs',
+  'threeLittleDimensions': 'Viz/TreeAPI/ThreeLittleDimensionsExample.purs',
+
+  // Charts
   'barChart': 'Viz/TreeAPI/BarChartExample.purs',
   'scatterPlot': 'Viz/TreeAPI/ScatterPlotExample.purs',
   'lineChart': 'Viz/TreeAPI/LineChartExample.purs',
   'groupedBarChart': 'Viz/TreeAPI/GroupedBarChartExample.purs',
+  'multiLineChart': 'Viz/TreeAPI/MultiLineChartExample.purs',
+  'radialStackedBar': 'Viz/TreeAPI/RadialStackedBarExample.purs',
+  'anscombesQuartet': 'Viz/TreeAPI/AnscombesQuartet.purs',
+  'wealthHealth': 'Viz/TreeAPI/WealthHealthDraw.purs',
+  'splom': 'Viz/SPLOM/SPLOM.purs',
+
+  // Hierarchies
   'treeViz': 'Viz/TreeAPI/TreeViz.purs',
-  'threeLittleDimensions': 'Viz/TreeAPI/ThreeLittleDimensionsExample.purs',
+  'radialTree': 'Viz/TreeAPI/RadialTreeViz.purs',
+  'horizontalTree': 'Viz/TreeAPI/HorizontalTreeViz.purs',
+  'cluster': 'Viz/TreeAPI/ClusterViz.purs',
+  'treemap': 'Viz/TreeAPI/TreemapViz.purs',
+  'sunburst': 'Viz/TreeAPI/SunburstViz.purs',
+  'pack': 'Viz/TreeAPI/PackViz.purs',
+  'partition': 'Viz/TreeAPI/PartitionViz.purs',
+  'animatedTreeCluster': 'Viz/TreeAPI/AnimatedTreeCluster.purs',
+
+  // Relational
+  'sankey': 'Viz/TreeAPI/SankeyDiagram.purs',
+  'chord': 'Viz/TreeAPI/ChordDiagram.purs',
+  'edgeBundle': 'Viz/TreeAPI/EdgeBundleViz.purs',
+
+  // Force-directed
+  'simpleForce': 'Viz/SimpleForceGraph.purs',
+  'lesMis': 'Viz/LesMisV3/Draw.purs',
+
+  // v3 DSL demos
   'v3Parabola': 'Viz/TreeAPI/V3ParabolaDemo.purs',
   'v3Transition': 'Viz/TreeAPI/V3TransitionDemo.purs',
   'v3GUP': 'Viz/TreeAPI/V3GUPDemo.purs',
