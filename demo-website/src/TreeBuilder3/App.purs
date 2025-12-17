@@ -19,7 +19,9 @@ import Control.Comonad.Cofree (head, tail)
 import Data.Array as Array
 import Data.Foldable (for_)
 import Data.List (List(..), (:))
+import Data.List as Data.List
 import Data.Maybe (Maybe(..))
+import Control.Alt ((<|>))
 import Data.Tree (Tree, mkTree)
 import DataViz.Layout.Hierarchy.Link (linkBezierVertical)
 import DataViz.Layout.Hierarchy.Tree (defaultTreeConfig, tree)
@@ -46,6 +48,7 @@ import Web.DOM.Element (Element)
 import Web.DOM.ParentNode (QuerySelector(..), querySelector)
 import Web.HTML (window)
 import Web.HTML.HTMLDocument (toDocument)
+import Web.HTML.HTMLElement (focus)
 import Web.HTML.Window (document)
 import Web.UIEvent.KeyboardEvent (KeyboardEvent)
 import Web.UIEvent.KeyboardEvent as KE
@@ -55,14 +58,20 @@ import Web.UIEvent.KeyboardEvent as KE
 -- =============================================================================
 
 -- | The different AST node types from the PSD3 grammar
+-- | Includes "pending" states for nodes awaiting further input
 data DslNodeType
-  = NodeElem ElementType  -- Element node (SVG, Group, Circle, etc.)
-  | NodeJoin              -- Simple data join
-  | NodeNestedJoin        -- Type-decomposing join
-  | NodeSceneJoin         -- GUP join
-  | NodeSceneNestedJoin   -- GUP + type decomposition
-  | NodeAttr AttrKind     -- Attribute
-  | NodeBehavior BehaviorKind  -- Behavior
+  = NodeElem ElementType      -- Element node (SVG, Group, Circle, etc.)
+  | NodeJoin                  -- Simple data join
+  | NodeNestedJoin            -- Type-decomposing join
+  | NodeSceneJoin             -- GUP join
+  | NodeSceneNestedJoin       -- GUP + type decomposition
+  | NodeAttr AttrKind         -- Attribute (fully specified)
+  | NodeBehavior BehaviorKind -- Behavior (fully specified)
+  -- Pending states - awaiting further input
+  | PendingElement            -- Awaiting element type (s,g,c,r,p,l,t,d)
+  | PendingAttr               -- Awaiting attr name (c,x,y,r,f,s,w,h,t)
+  | PendingAttrValue String   -- Has attr name, awaiting value type (l,f,e,i)
+  | PendingBehavior           -- Awaiting behavior type (z,d,c,h)
 
 derive instance Eq DslNodeType
 derive instance Ord DslNodeType
@@ -83,6 +92,7 @@ data BehaviorKind = BehaviorZoom | BehaviorDrag | BehaviorClick | BehaviorHover
 derive instance Eq BehaviorKind
 derive instance Ord BehaviorKind
 
+
 -- | Get color for a DSL node type
 nodeColor :: DslNodeType -> String
 nodeColor (NodeElem _) = "#6B7280"      -- Gray
@@ -92,6 +102,11 @@ nodeColor NodeSceneJoin = "#4A90E2"     -- Blue
 nodeColor NodeSceneNestedJoin = "#9B4AE2" -- Purple
 nodeColor (NodeAttr _) = "#4AE24A"      -- Green
 nodeColor (NodeBehavior _) = "#E27A4A"  -- Orange
+-- Pending types - lighter/desaturated versions
+nodeColor PendingElement = "#9CA3AF"    -- Light gray
+nodeColor PendingAttr = "#86EFAC"       -- Light green
+nodeColor (PendingAttrValue _) = "#86EFAC" -- Light green
+nodeColor PendingBehavior = "#FDBA74"   -- Light orange
 
 -- | Get label for a DSL node type
 nodeLabel :: DslNodeType -> String
@@ -116,28 +131,38 @@ nodeLabel (NodeBehavior BehaviorZoom) = "Zoom"
 nodeLabel (NodeBehavior BehaviorDrag) = "Drag"
 nodeLabel (NodeBehavior BehaviorClick) = "Click"
 nodeLabel (NodeBehavior BehaviorHover) = "Hover"
+-- Pending types - show "?" to indicate awaiting input
+nodeLabel PendingElement = "Element?"
+nodeLabel PendingAttr = "Attr?"
+nodeLabel (PendingAttrValue name) = "attr:" <> name <> "?"
+nodeLabel PendingBehavior = "Behavior?"
 
--- =============================================================================
--- Menu Types
--- =============================================================================
+-- | Get valid key hints for a node type (shown next to selected node)
+-- | Grammar-constrained: only shows keys that are valid for this node type
+nodeKeyHints :: DslNodeType -> String
+nodeKeyHints PendingElement = "[g,c,r,p,l,t,d]"  -- No SVG - that's root only
+nodeKeyHints PendingAttr = "[c,x,y,r,f,s,w,h,t]"
+nodeKeyHints (PendingAttrValue _) = "[l,f,e,i]"
+nodeKeyHints PendingBehavior = "[z,d,c,h]"
+-- Resolved nodes - element-specific hints
+nodeKeyHints (NodeElem SVG) = "[e,j,n,s,x,a,b]"    -- SVG (root): can have all children
+nodeKeyHints (NodeElem Group) = "[e,j,n,s,x,a,b]"  -- Group: can have all children
+nodeKeyHints (NodeElem Defs) = "[a]"               -- Defs: only attrs (simplified)
+nodeKeyHints (NodeElem Circle) = "[a,b]"           -- Circle: leaf - only attrs/behaviors
+nodeKeyHints (NodeElem Rect) = "[a,b]"             -- Rect: leaf
+nodeKeyHints (NodeElem Path) = "[a,b]"             -- Path: leaf
+nodeKeyHints (NodeElem Line) = "[a,b]"             -- Line: leaf
+nodeKeyHints (NodeElem Text) = "[a,b]"             -- Text: leaf
+nodeKeyHints (NodeElem _) = "[a,b]"                -- Other elements: leaf by default
+-- Join nodes
+nodeKeyHints NodeJoin = "[e]"                      -- Joins can only have element template
+nodeKeyHints NodeNestedJoin = "[e]"
+nodeKeyHints NodeSceneJoin = "[e]"
+nodeKeyHints NodeSceneNestedJoin = "[e]"
+-- Attr/Behavior nodes
+nodeKeyHints (NodeAttr _) = "[a]"                  -- Attrs can add sibling attrs
+nodeKeyHints (NodeBehavior _) = "[b]"              -- Behaviors can add sibling behaviors
 
--- | Menu state - which menu is currently open
-data MenuState
-  = NoMenu
-  | TopLevelMenu          -- e, j, n, s, x, a, b
-  | ElementTypeMenu       -- After pressing 'e'
-  | AttrNameMenu          -- After pressing 'a'
-  | AttrValueMenu String  -- After selecting attr name
-  | BehaviorMenu          -- After pressing 'b'
-
-derive instance Eq MenuState
-
--- | Menu item with key, label, and optional description
-type MenuItem =
-  { key :: String
-  , label :: String
-  , description :: String
-  }
 
 -- =============================================================================
 -- State Types
@@ -162,6 +187,8 @@ type RenderNode =
   , color :: String
   , strokeWidth :: Number
   , label :: String
+  , keyHints :: String     -- Valid key hints to show (e.g., "[e,j,n,s,x,a,b]")
+  , isSelected :: Boolean  -- Whether this node is currently selected
   }
 
 -- | Link data for rendering
@@ -178,8 +205,6 @@ type State =
   { userTree :: Tree TreeNode
   , selectedNodeId :: Maybe Int
   , nextId :: Int
-  , menuState :: MenuState
-  , menuIndex :: Int  -- Currently highlighted menu item
   , clickListener :: Maybe (HS.Listener Action)
   }
 
@@ -189,7 +214,6 @@ data Action
   | NodeClicked Int
   | HandleKeyDown KeyboardEvent
   | RenderTree
-  | CloseMenu
 
 -- =============================================================================
 -- Initial State
@@ -210,65 +234,9 @@ initialState =
   { userTree: initialTree
   , selectedNodeId: Just 0  -- Start with root selected
   , nextId: 1
-  , menuState: NoMenu
-  , menuIndex: 0
   , clickListener: Nothing
   }
 
--- =============================================================================
--- Menu Definitions
--- =============================================================================
-
-topLevelMenuItems :: Array MenuItem
-topLevelMenuItems =
-  [ { key: "e", label: "Element", description: "Add element node (SVG, Circle, etc.)" }
-  , { key: "j", label: "Join", description: "Add data join" }
-  , { key: "n", label: "NestedJoin", description: "Add type-decomposing join" }
-  , { key: "s", label: "SceneJoin", description: "Add GUP join" }
-  , { key: "x", label: "SceneNestedJoin", description: "Add GUP + decomposition" }
-  , { key: "a", label: "Attr", description: "Add attribute" }
-  , { key: "b", label: "Behavior", description: "Add behavior" }
-  ]
-
-elementTypeMenuItems :: Array MenuItem
-elementTypeMenuItems =
-  [ { key: "s", label: "SVG", description: "Root SVG container" }
-  , { key: "g", label: "Group", description: "Grouping element <g>" }
-  , { key: "c", label: "Circle", description: "Circle element" }
-  , { key: "r", label: "Rect", description: "Rectangle element" }
-  , { key: "p", label: "Path", description: "Path element" }
-  , { key: "l", label: "Line", description: "Line element" }
-  , { key: "t", label: "Text", description: "Text element" }
-  , { key: "d", label: "Defs", description: "Definitions (gradients, etc.)" }
-  ]
-
-attrNameMenuItems :: Array MenuItem
-attrNameMenuItems =
-  [ { key: "x", label: "x/cx", description: "Horizontal position" }
-  , { key: "y", label: "y/cy", description: "Vertical position" }
-  , { key: "w", label: "width", description: "Width" }
-  , { key: "h", label: "height", description: "Height" }
-  , { key: "r", label: "r", description: "Radius" }
-  , { key: "f", label: "fill", description: "Fill color" }
-  , { key: "s", label: "stroke", description: "Stroke color" }
-  , { key: "o", label: "opacity", description: "Opacity (0-1)" }
-  ]
-
-attrValueMenuItems :: Array MenuItem
-attrValueMenuItems =
-  [ { key: "l", label: "Lit", description: "Static literal value" }
-  , { key: "f", label: "Field", description: "Data field (d.field)" }
-  , { key: "e", label: "Expr", description: "Expression" }
-  , { key: "i", label: "Index", description: "Element index" }
-  ]
-
-behaviorMenuItems :: Array MenuItem
-behaviorMenuItems =
-  [ { key: "z", label: "Zoom", description: "Pan and zoom" }
-  , { key: "d", label: "Drag", description: "Draggable" }
-  , { key: "c", label: "Click", description: "Click handler" }
-  , { key: "h", label: "Hover", description: "Hover handler" }
-  ]
 
 -- =============================================================================
 -- Tree Operations
@@ -348,67 +316,28 @@ component = H.mkComponent
       }
   }
 
+-- | Ref label for the container div (for focusing)
+containerRef :: H.RefLabel
+containerRef = H.RefLabel "tree-builder3-main"
+
 render :: forall m. State -> H.ComponentHTML Action () m
-render state =
+render _state =
   HH.div
     [ HP.class_ (HH.ClassName "tree-builder3-container")
     , HP.tabIndex 0
+    , HP.ref containerRef
     , HE.onKeyDown HandleKeyDown
     ]
     [ HH.h2_ [ HH.text "DSL Grammar Tree Builder" ]
     , HH.p
         [ HP.class_ (HH.ClassName "instructions") ]
-        [ HH.text $ case state.menuState of
-            NoMenu -> "Press a key to add node: e=Element, j=Join, n=NestedJoin, s=SceneJoin, x=SceneNestedJoin, a=Attr, b=Behavior"
-            TopLevelMenu -> "Select node type (arrows + Enter, or press key)"
-            ElementTypeMenu -> "Select element type: s=SVG, g=Group, c=Circle, r=Rect, p=Path, l=Line, t=Text, d=Defs"
-            AttrNameMenu -> "Select attribute: x=x/cx, y=y/cy, w=width, h=height, r=radius, f=fill, s=stroke, o=opacity"
-            AttrValueMenu name -> "Attr '" <> name <> "': l=Lit, f=Field, e=Expr, i=Index"
-            BehaviorMenu -> "Select behavior: z=Zoom, d=Drag, c=Click, h=Hover"
-        ]
+        [ HH.text "Click to select, arrows to navigate. Key hints shown next to selected node." ]
     , HH.div
-        [ HP.class_ (HH.ClassName "tree-builder3-layout") ]
-        [ -- Tree visualization container
-          HH.div
-            [ HP.class_ (HH.ClassName "tree-builder3-svg-container")
-            , HP.id "tree-builder3-container"
-            ]
-            []
-        , -- Menu panel (shown when menu is open)
-          renderMenu state
+        [ HP.class_ (HH.ClassName "tree-builder3-svg-container")
+        , HP.id "tree-builder3-container"
         ]
+        []
     ]
-
-renderMenu :: forall m. State -> H.ComponentHTML Action () m
-renderMenu state =
-  case state.menuState of
-    NoMenu -> HH.text ""
-    TopLevelMenu -> renderMenuPanel "Add Node" topLevelMenuItems state.menuIndex
-    ElementTypeMenu -> renderMenuPanel "Element Type" elementTypeMenuItems state.menuIndex
-    AttrNameMenu -> renderMenuPanel "Attribute Name" attrNameMenuItems state.menuIndex
-    AttrValueMenu _ -> renderMenuPanel "Attribute Value" attrValueMenuItems state.menuIndex
-    BehaviorMenu -> renderMenuPanel "Behavior" behaviorMenuItems state.menuIndex
-
-renderMenuPanel :: forall m. String -> Array MenuItem -> Int -> H.ComponentHTML Action () m
-renderMenuPanel title items selectedIndex =
-  HH.div
-    [ HP.class_ (HH.ClassName "menu-panel") ]
-    [ HH.h3_ [ HH.text title ]
-    , HH.ul
-        [ HP.class_ (HH.ClassName "menu-items") ]
-        (Array.mapWithIndex renderMenuItem items)
-    , HH.p
-        [ HP.class_ (HH.ClassName "menu-hint") ]
-        [ HH.text "Arrow keys to navigate, Enter to select, Escape to cancel" ]
-    ]
-  where
-  renderMenuItem idx item =
-    HH.li
-      [ HP.class_ (HH.ClassName $ if idx == selectedIndex then "menu-item selected" else "menu-item") ]
-      [ HH.span [ HP.class_ (HH.ClassName "menu-key") ] [ HH.text $ "[" <> item.key <> "]" ]
-      , HH.span [ HP.class_ (HH.ClassName "menu-label") ] [ HH.text item.label ]
-      , HH.span [ HP.class_ (HH.ClassName "menu-desc") ] [ HH.text item.description ]
-      ]
 
 -- =============================================================================
 -- Event Handling
@@ -422,6 +351,9 @@ handleAction = case _ of
     void $ H.subscribe emitter
     handleAction RenderTree
     liftEffect setupZoom
+    -- Focus the container so it receives keyboard events immediately
+    maybeElem <- H.getHTMLElementRef containerRef
+    for_ maybeElem \elem -> liftEffect $ focus elem
 
   NodeClicked nodeId -> do
     state <- H.get
@@ -432,20 +364,9 @@ handleAction = case _ of
         H.modify_ \s -> s { selectedNodeId = Just nodeId }
     handleAction RenderTree
 
-  CloseMenu -> do
-    H.modify_ \s -> s { menuState = NoMenu, menuIndex = 0 }
-
   HandleKeyDown event -> do
-    state <- H.get
     let keyName = KE.key event
-
-    case state.menuState of
-      NoMenu -> handleNoMenuKey keyName
-      TopLevelMenu -> handleTopLevelMenuKey keyName
-      ElementTypeMenu -> handleElementTypeMenuKey keyName
-      AttrNameMenu -> handleAttrNameMenuKey keyName
-      AttrValueMenu attrName -> handleAttrValueMenuKey attrName keyName
-      BehaviorMenu -> handleBehaviorMenuKey keyName
+    handleNoMenuKey keyName  -- All key handling is context-based on selected node
 
   RenderTree -> do
     state <- H.get
@@ -453,194 +374,238 @@ handleAction = case _ of
       Just listener -> liftEffect $ renderTreeViz state listener
       Nothing -> pure unit
 
--- | Handle keys when no menu is open
+-- | Handle keys - context depends on selected node's type
 handleNoMenuKey :: forall output m. MonadAff m => String -> H.HalogenM State Action () output m Unit
 handleNoMenuKey keyName = do
   state <- H.get
 
+  -- Navigation always works
   case keyName of
-    -- Navigation
     "ArrowUp" -> navigateUp
     "ArrowDown" -> navigateDown
     "ArrowLeft" -> navigateLeft
     "ArrowRight" -> navigateRight
+    _ ->
+      -- Other keys depend on selected node's type
+      case getSelectedNodeType state of
+        Nothing -> pure unit  -- No selection, no action
+        Just nodeType -> handleKeyForNodeType nodeType keyName
 
-    -- Open menus for adding nodes (only when something selected)
-    "e" -> when (state.selectedNodeId /= Nothing) $ H.modify_ \s -> s { menuState = ElementTypeMenu, menuIndex = 0 }
-    "j" -> addNodeOfType NodeJoin
-    "n" -> addNodeOfType NodeNestedJoin
-    "s" -> addNodeOfType NodeSceneJoin
-    "x" -> addNodeOfType NodeSceneNestedJoin
-    "a" -> when (state.selectedNodeId /= Nothing) $ H.modify_ \s -> s { menuState = AttrNameMenu, menuIndex = 0 }
-    "b" -> when (state.selectedNodeId /= Nothing) $ H.modify_ \s -> s { menuState = BehaviorMenu, menuIndex = 0 }
+-- | Handle key based on the selected node's type
+handleKeyForNodeType :: forall output m. MonadAff m => DslNodeType -> String -> H.HalogenM State Action () output m Unit
+handleKeyForNodeType PendingElement keyName = handlePendingElementKey keyName
+handleKeyForNodeType PendingAttr keyName = handlePendingAttrKey keyName
+handleKeyForNodeType (PendingAttrValue attrName) keyName = handlePendingAttrValueKey attrName keyName
+handleKeyForNodeType PendingBehavior keyName = handlePendingBehaviorKey keyName
+-- Resolved nodes - grammar-constrained handlers (element-specific)
+handleKeyForNodeType (NodeElem elemType) keyName = handleElementKey elemType keyName
+handleKeyForNodeType NodeJoin keyName = handleJoinKey keyName
+handleKeyForNodeType NodeNestedJoin keyName = handleJoinKey keyName
+handleKeyForNodeType NodeSceneJoin keyName = handleJoinKey keyName
+handleKeyForNodeType NodeSceneNestedJoin keyName = handleJoinKey keyName
+handleKeyForNodeType (NodeAttr _) keyName = handleAttrKey keyName
+handleKeyForNodeType (NodeBehavior _) keyName = handleBehaviorKey keyName
 
-    _ -> pure unit
+-- | Handle keys for Element nodes - element-type specific
+handleElementKey :: forall output m. MonadAff m => ElementType -> String -> H.HalogenM State Action () output m Unit
+handleElementKey elemType keyName = case elemType of
+  -- Container elements (SVG, Group) - can have all children
+  SVG -> handleContainerElementKey keyName
+  Group -> handleContainerElementKey keyName
+  -- Defs - only attrs (simplified)
+  Defs -> handleDefsKey keyName
+  -- Leaf elements - only attrs and behaviors
+  _ -> handleLeafElementKey keyName
 
--- | Handle keys in top-level menu
-handleTopLevelMenuKey :: forall output m. MonadAff m => String -> H.HalogenM State Action () output m Unit
-handleTopLevelMenuKey keyName = do
-  state <- H.get
-  let maxIndex = Array.length topLevelMenuItems - 1
-
-  case keyName of
-    "Escape" -> handleAction CloseMenu
-    "ArrowUp" -> H.modify_ \s -> s { menuIndex = max 0 (s.menuIndex - 1) }
-    "ArrowDown" -> H.modify_ \s -> s { menuIndex = min maxIndex (s.menuIndex + 1) }
-    "Enter" -> selectTopLevelMenuItem state.menuIndex
-    "e" -> H.modify_ \s -> s { menuState = ElementTypeMenu, menuIndex = 0 }
-    "j" -> addNodeOfType NodeJoin *> handleAction CloseMenu
-    "n" -> addNodeOfType NodeNestedJoin *> handleAction CloseMenu
-    "s" -> addNodeOfType NodeSceneJoin *> handleAction CloseMenu
-    "x" -> addNodeOfType NodeSceneNestedJoin *> handleAction CloseMenu
-    "a" -> H.modify_ \s -> s { menuState = AttrNameMenu, menuIndex = 0 }
-    "b" -> H.modify_ \s -> s { menuState = BehaviorMenu, menuIndex = 0 }
-    _ -> pure unit
-
-selectTopLevelMenuItem :: forall output m. MonadAff m => Int -> H.HalogenM State Action () output m Unit
-selectTopLevelMenuItem idx = case idx of
-  0 -> H.modify_ \s -> s { menuState = ElementTypeMenu, menuIndex = 0 }
-  1 -> addNodeOfType NodeJoin *> handleAction CloseMenu
-  2 -> addNodeOfType NodeNestedJoin *> handleAction CloseMenu
-  3 -> addNodeOfType NodeSceneJoin *> handleAction CloseMenu
-  4 -> addNodeOfType NodeSceneNestedJoin *> handleAction CloseMenu
-  5 -> H.modify_ \s -> s { menuState = AttrNameMenu, menuIndex = 0 }
-  6 -> H.modify_ \s -> s { menuState = BehaviorMenu, menuIndex = 0 }
+-- | Handle keys for container elements (SVG, Group) - can have all children
+handleContainerElementKey :: forall output m. MonadAff m => String -> H.HalogenM State Action () output m Unit
+handleContainerElementKey keyName = case keyName of
+  "e" -> addNodeOfType PendingElement
+  "j" -> addNodeOfType NodeJoin
+  "n" -> addNodeOfType NodeNestedJoin
+  "s" -> addNodeOfType NodeSceneJoin
+  "x" -> addNodeOfType NodeSceneNestedJoin
+  "a" -> addNodeOfType PendingAttr
+  "b" -> addNodeOfType PendingBehavior
   _ -> pure unit
 
--- | Handle keys in element type menu
-handleElementTypeMenuKey :: forall output m. MonadAff m => String -> H.HalogenM State Action () output m Unit
-handleElementTypeMenuKey keyName = do
-  state <- H.get
-  let maxIndex = Array.length elementTypeMenuItems - 1
+-- | Handle keys for Defs - only attrs
+handleDefsKey :: forall output m. MonadAff m => String -> H.HalogenM State Action () output m Unit
+handleDefsKey keyName = case keyName of
+  "a" -> addNodeOfType PendingAttr
+  _ -> pure unit
 
+-- | Handle keys for leaf elements (Circle, Rect, etc.) - only attrs and behaviors
+handleLeafElementKey :: forall output m. MonadAff m => String -> H.HalogenM State Action () output m Unit
+handleLeafElementKey keyName = case keyName of
+  "a" -> addNodeOfType PendingAttr
+  "b" -> addNodeOfType PendingBehavior
+  _ -> pure unit
+
+-- | Handle keys for Join nodes - can only add element template (and only one)
+handleJoinKey :: forall output m. MonadAff m => String -> H.HalogenM State Action () output m Unit
+handleJoinKey keyName = do
+  state <- H.get
   case keyName of
-    "Escape" -> handleAction CloseMenu
-    "ArrowUp" -> H.modify_ \s -> s { menuIndex = max 0 (s.menuIndex - 1) }
-    "ArrowDown" -> H.modify_ \s -> s { menuIndex = min maxIndex (s.menuIndex + 1) }
-    "Enter" -> selectElementType state.menuIndex
-    "s" -> addNodeOfType (NodeElem SVG) *> handleAction CloseMenu
-    "g" -> addNodeOfType (NodeElem Group) *> handleAction CloseMenu
-    "c" -> addNodeOfType (NodeElem Circle) *> handleAction CloseMenu
-    "r" -> addNodeOfType (NodeElem Rect) *> handleAction CloseMenu
-    "p" -> addNodeOfType (NodeElem Path) *> handleAction CloseMenu
-    "l" -> addNodeOfType (NodeElem Line) *> handleAction CloseMenu
-    "t" -> addNodeOfType (NodeElem Text) *> handleAction CloseMenu
-    "d" -> addNodeOfType (NodeElem Defs) *> handleAction CloseMenu
+    "e" -> do
+      -- Only allow adding template if Join doesn't already have one
+      for_ state.selectedNodeId \selectedId -> do
+        let children = getChildrenIds selectedId state.userTree
+        when (Array.null children) do
+          addNodeOfType PendingElement
     _ -> pure unit
 
-selectElementType :: forall output m. MonadAff m => Int -> H.HalogenM State Action () output m Unit
-selectElementType idx = do
-  let elemKind = case idx of
-        0 -> SVG
-        1 -> Group
-        2 -> Circle
-        3 -> Rect
-        4 -> Path
-        5 -> Line
-        6 -> Text
-        _ -> Defs
-  addNodeOfType (NodeElem elemKind)
-  handleAction CloseMenu
+-- | Handle keys for resolved Attr nodes - can add sibling attrs
+handleAttrKey :: forall output m. MonadAff m => String -> H.HalogenM State Action () output m Unit
+handleAttrKey keyName = case keyName of
+  "a" -> addSiblingOfType PendingAttr
+  _ -> pure unit
 
--- | Handle keys in attr name menu
-handleAttrNameMenuKey :: forall output m. MonadAff m => String -> H.HalogenM State Action () output m Unit
-handleAttrNameMenuKey keyName = do
+-- | Handle keys for resolved Behavior nodes - can add sibling behaviors
+handleBehaviorKey :: forall output m. MonadAff m => String -> H.HalogenM State Action () output m Unit
+handleBehaviorKey keyName = case keyName of
+  "b" -> addSiblingOfType PendingBehavior
+  _ -> pure unit
+
+-- | Handle keys for pending element node
+-- | Note: SVG (s) is not allowed - SVG is root only
+handlePendingElementKey :: forall output m. MonadAff m => String -> H.HalogenM State Action () output m Unit
+handlePendingElementKey keyName = case keyName of
+  "g" -> resolveSelectedNode (NodeElem Group)
+  "c" -> resolveSelectedNode (NodeElem Circle)
+  "r" -> resolveSelectedNode (NodeElem Rect)
+  "p" -> resolveSelectedNode (NodeElem Path)
+  "l" -> resolveSelectedNode (NodeElem Line)
+  "t" -> resolveSelectedNode (NodeElem Text)
+  "d" -> resolveSelectedNode (NodeElem Defs)
+  "Escape" -> deleteSelectedNode  -- Cancel pending node
+  _ -> pure unit
+
+-- | Handle keys for pending attr node (selecting attr name)
+handlePendingAttrKey :: forall output m. MonadAff m => String -> H.HalogenM State Action () output m Unit
+handlePendingAttrKey keyName = case keyName of
+  "c" -> resolveSelectedNode (PendingAttrValue "cx")
+  "x" -> resolveSelectedNode (PendingAttrValue "x")
+  "y" -> resolveSelectedNode (PendingAttrValue "y")
+  "r" -> resolveSelectedNode (PendingAttrValue "r")
+  "f" -> resolveSelectedNode (PendingAttrValue "fill")
+  "s" -> resolveSelectedNode (PendingAttrValue "stroke")
+  "w" -> resolveSelectedNode (PendingAttrValue "width")
+  "h" -> resolveSelectedNode (PendingAttrValue "height")
+  "t" -> resolveSelectedNode (PendingAttrValue "transform")
+  "Escape" -> deleteSelectedNode
+  _ -> pure unit
+
+-- | Handle keys for pending attr value (selecting value type)
+handlePendingAttrValueKey :: forall output m. MonadAff m => String -> String -> H.HalogenM State Action () output m Unit
+handlePendingAttrValueKey attrName keyName = case keyName of
+  "l" -> resolveSelectedNode (NodeAttr (AttrStatic attrName "100"))
+  "f" -> resolveSelectedNode (NodeAttr (AttrField attrName "value"))
+  "e" -> resolveSelectedNode (NodeAttr (AttrExpr attrName "d.x + 10"))
+  "i" -> resolveSelectedNode (NodeAttr (AttrIndex attrName))
+  "Escape" -> deleteSelectedNode
+  _ -> pure unit
+
+-- | Handle keys for pending behavior node
+handlePendingBehaviorKey :: forall output m. MonadAff m => String -> H.HalogenM State Action () output m Unit
+handlePendingBehaviorKey keyName = case keyName of
+  "z" -> resolveSelectedNode (NodeBehavior BehaviorZoom)
+  "d" -> resolveSelectedNode (NodeBehavior BehaviorDrag)
+  "c" -> resolveSelectedNode (NodeBehavior BehaviorClick)
+  "h" -> resolveSelectedNode (NodeBehavior BehaviorHover)
+  "Escape" -> deleteSelectedNode
+  _ -> pure unit
+
+-- | Delete the selected node (for canceling pending nodes)
+deleteSelectedNode :: forall output m. MonadAff m => H.HalogenM State Action () output m Unit
+deleteSelectedNode = do
   state <- H.get
-  let maxIndex = Array.length attrNameMenuItems - 1
+  for_ state.selectedNodeId \selectedId -> do
+    -- Don't delete root
+    when (selectedId /= 0) do
+      -- Find parent and select it
+      let parentId = findParentId selectedId state.userTree
+      let newTree = removeNodeById selectedId state.userTree
+      H.modify_ \s -> s
+        { userTree = newTree
+        , selectedNodeId = parentId
+        }
+      handleAction RenderTree
 
-  case keyName of
-    "Escape" -> handleAction CloseMenu
-    "ArrowUp" -> H.modify_ \s -> s { menuIndex = max 0 (s.menuIndex - 1) }
-    "ArrowDown" -> H.modify_ \s -> s { menuIndex = min maxIndex (s.menuIndex + 1) }
-    "Enter" -> selectAttrName state.menuIndex
-    "x" -> H.modify_ \s -> s { menuState = AttrValueMenu "x", menuIndex = 0 }
-    "y" -> H.modify_ \s -> s { menuState = AttrValueMenu "y", menuIndex = 0 }
-    "w" -> H.modify_ \s -> s { menuState = AttrValueMenu "width", menuIndex = 0 }
-    "h" -> H.modify_ \s -> s { menuState = AttrValueMenu "height", menuIndex = 0 }
-    "r" -> H.modify_ \s -> s { menuState = AttrValueMenu "r", menuIndex = 0 }
-    "f" -> H.modify_ \s -> s { menuState = AttrValueMenu "fill", menuIndex = 0 }
-    "s" -> H.modify_ \s -> s { menuState = AttrValueMenu "stroke", menuIndex = 0 }
-    "o" -> H.modify_ \s -> s { menuState = AttrValueMenu "opacity", menuIndex = 0 }
-    _ -> pure unit
-
-selectAttrName :: forall output m. MonadAff m => Int -> H.HalogenM State Action () output m Unit
-selectAttrName idx = do
-  let attrName = case idx of
-        0 -> "x"
-        1 -> "y"
-        2 -> "width"
-        3 -> "height"
-        4 -> "r"
-        5 -> "fill"
-        6 -> "stroke"
-        _ -> "opacity"
-  H.modify_ \s -> s { menuState = AttrValueMenu attrName, menuIndex = 0 }
-
--- | Handle keys in attr value menu
-handleAttrValueMenuKey :: forall output m. MonadAff m => String -> String -> H.HalogenM State Action () output m Unit
-handleAttrValueMenuKey attrName keyName = do
-  state <- H.get
-  let maxIndex = Array.length attrValueMenuItems - 1
-
-  case keyName of
-    "Escape" -> handleAction CloseMenu
-    "ArrowUp" -> H.modify_ \s -> s { menuIndex = max 0 (s.menuIndex - 1) }
-    "ArrowDown" -> H.modify_ \s -> s { menuIndex = min maxIndex (s.menuIndex + 1) }
-    "Enter" -> selectAttrValue attrName state.menuIndex
-    "l" -> addNodeOfType (NodeAttr (AttrStatic attrName "100")) *> handleAction CloseMenu
-    "f" -> addNodeOfType (NodeAttr (AttrField attrName "value")) *> handleAction CloseMenu
-    "e" -> addNodeOfType (NodeAttr (AttrExpr attrName "d.x + 10")) *> handleAction CloseMenu
-    "i" -> addNodeOfType (NodeAttr (AttrIndex attrName)) *> handleAction CloseMenu
-    _ -> pure unit
-
-selectAttrValue :: forall output m. MonadAff m => String -> Int -> H.HalogenM State Action () output m Unit
-selectAttrValue attrName idx = do
-  let attrKind = case idx of
-        0 -> AttrStatic attrName "100"
-        1 -> AttrField attrName "value"
-        2 -> AttrExpr attrName "d.x + 10"
-        _ -> AttrIndex attrName
-  addNodeOfType (NodeAttr attrKind)
-  handleAction CloseMenu
-
--- | Handle keys in behavior menu
-handleBehaviorMenuKey :: forall output m. MonadAff m => String -> H.HalogenM State Action () output m Unit
-handleBehaviorMenuKey keyName = do
-  state <- H.get
-  let maxIndex = Array.length behaviorMenuItems - 1
-
-  case keyName of
-    "Escape" -> handleAction CloseMenu
-    "ArrowUp" -> H.modify_ \s -> s { menuIndex = max 0 (s.menuIndex - 1) }
-    "ArrowDown" -> H.modify_ \s -> s { menuIndex = min maxIndex (s.menuIndex + 1) }
-    "Enter" -> selectBehavior state.menuIndex
-    "z" -> addNodeOfType (NodeBehavior BehaviorZoom) *> handleAction CloseMenu
-    "d" -> addNodeOfType (NodeBehavior BehaviorDrag) *> handleAction CloseMenu
-    "c" -> addNodeOfType (NodeBehavior BehaviorClick) *> handleAction CloseMenu
-    "h" -> addNodeOfType (NodeBehavior BehaviorHover) *> handleAction CloseMenu
-    _ -> pure unit
-
-selectBehavior :: forall output m. MonadAff m => Int -> H.HalogenM State Action () output m Unit
-selectBehavior idx = do
-  let behaviorKind = case idx of
-        0 -> BehaviorZoom
-        1 -> BehaviorDrag
-        2 -> BehaviorClick
-        _ -> BehaviorHover
-  addNodeOfType (NodeBehavior behaviorKind)
-  handleAction CloseMenu
+-- | Remove a node by id from the tree
+removeNodeById :: Int -> Tree TreeNode -> Tree TreeNode
+removeNodeById targetId t =
+  let val = head t
+      children = tail t
+      filteredChildren = Data.List.filter (\child -> (head child).id /= targetId) children
+  in mkTree val (map (removeNodeById targetId) filteredChildren)
 
 -- | Add a node of the given type as child of selected node
+-- | Add a node as child of selected, and select the new node
 addNodeOfType :: forall output m. MonadAff m => DslNodeType -> H.HalogenM State Action () output m Unit
 addNodeOfType nodeType = do
   state <- H.get
   for_ state.selectedNodeId \selectedId -> do
-    let newChild = { id: state.nextId, nodeType, x: 0.0, y: 0.0, depth: 0 }
+    let newId = state.nextId
+    let newChild = { id: newId, nodeType, x: 0.0, y: 0.0, depth: 0 }
     let newTree = addChildToNode selectedId newChild state.userTree
     H.modify_ \s -> s
       { userTree = newTree
       , nextId = s.nextId + 1
+      , selectedNodeId = Just newId  -- Select the new node
       }
+    handleAction RenderTree
+
+-- | Add a node as sibling of selected (adds to parent)
+addSiblingOfType :: forall output m. MonadAff m => DslNodeType -> H.HalogenM State Action () output m Unit
+addSiblingOfType nodeType = do
+  state <- H.get
+  for_ state.selectedNodeId \selectedId -> do
+    -- Find parent of selected node
+    case findParentId selectedId state.userTree of
+      Nothing -> pure unit  -- Root has no parent, can't add sibling
+      Just parentId -> do
+        let newId = state.nextId
+        let newChild = { id: newId, nodeType, x: 0.0, y: 0.0, depth: 0 }
+        let newTree = addChildToNode parentId newChild state.userTree
+        H.modify_ \s -> s
+          { userTree = newTree
+          , nextId = s.nextId + 1
+          , selectedNodeId = Just newId  -- Select the new sibling
+          }
+        handleAction RenderTree
+
+-- | Get the node type of the selected node
+getSelectedNodeType :: State -> Maybe DslNodeType
+getSelectedNodeType state = do
+  selectedId <- state.selectedNodeId
+  node <- findNodeById selectedId state.userTree
+  pure node.nodeType
+
+-- | Find a node by id in the tree
+findNodeById :: Int -> Tree TreeNode -> Maybe TreeNode
+findNodeById targetId t =
+  let val = head t
+      children = tail t
+  in if val.id == targetId
+     then Just val
+     else Array.foldl (\acc child -> acc <|> findNodeById targetId child) Nothing (Array.fromFoldable children)
+
+-- | Update a node's type in the tree
+updateNodeType :: Int -> DslNodeType -> Tree TreeNode -> Tree TreeNode
+updateNodeType targetId newType t =
+  let val = head t
+      children = tail t
+      newVal = if val.id == targetId then val { nodeType = newType } else val
+  in mkTree newVal (map (updateNodeType targetId newType) children)
+
+-- | Update the selected node's type (for resolving pending nodes)
+resolveSelectedNode :: forall output m. MonadAff m => DslNodeType -> H.HalogenM State Action () output m Unit
+resolveSelectedNode newType = do
+  state <- H.get
+  for_ state.selectedNodeId \selectedId -> do
+    let newTree = updateNodeType selectedId newType state.userTree
+    H.modify_ \s -> s { userTree = newTree }
     handleAction RenderTree
 
 -- | Navigation helpers
@@ -810,6 +775,17 @@ renderTreeViz state listener = do
                         , v3AttrStr "font-weight" (str "bold")
                         , Friendly.textContent (str node.label)
                         ]
+                    , -- Key hints (shown to right of selected node)
+                      T.elem Text
+                        [ v3Attr "x" (lit 50.0)  -- Right of the node rect
+                        , v3Attr "y" (lit 4.0)
+                        , v3AttrStr "text-anchor" (str "start")
+                        , v3AttrStr "fill" (str "#666")
+                        , v3AttrStr "font-size" (str "10px")
+                        , v3AttrStr "font-family" (str "monospace")
+                        , v3AttrStr "opacity" (str (if node.isSelected then "1" else "0"))
+                        , Friendly.textContent (str node.keyHints)
+                        ]
                     ]
             )
 
@@ -819,7 +795,7 @@ renderTreeViz state listener = do
 
 toRenderNode :: State -> TreeNode -> RenderNode
 toRenderNode state node =
-  let isSelected = state.selectedNodeId == Just node.id
+  let selected = state.selectedNodeId == Just node.id
   in
     { id: node.id
     , nodeType: node.nodeType
@@ -827,9 +803,27 @@ toRenderNode state node =
     , y: node.y
     , depth: node.depth
     , color: nodeColor node.nodeType
-    , strokeWidth: if isSelected then selectedStrokeWidth else normalStrokeWidth
+    , strokeWidth: if selected then selectedStrokeWidth else normalStrokeWidth
     , label: nodeLabel node.nodeType
+    , keyHints: computeKeyHints state.userTree node
+    , isSelected: selected
     }
+
+-- | Compute key hints dynamically based on tree state
+-- | Accounts for constraints like "Join can only have one template"
+computeKeyHints :: Tree TreeNode -> TreeNode -> String
+computeKeyHints tree node = case node.nodeType of
+  -- Join types: show [e] only if no template yet, otherwise []
+  NodeJoin -> joinHints node.id
+  NodeNestedJoin -> joinHints node.id
+  NodeSceneJoin -> joinHints node.id
+  NodeSceneNestedJoin -> joinHints node.id
+  -- All other types use static hints
+  _ -> nodeKeyHints node.nodeType
+  where
+  joinHints nodeId =
+    let children = getChildrenIds nodeId tree
+    in if Array.null children then "[e]" else "[]"
 
 setupZoom :: Effect Unit
 setupZoom = do
