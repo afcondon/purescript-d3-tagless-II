@@ -1,0 +1,1 @@
+{"name":"root","depth":0,"height":3,"value":50,"x0":0,"y0":0,"x1":100,"y1":25,"children":[{"name":"A","depth":1,"height":2,"value":50,"x0":0,"y0":25,"x1":100,"y1":50,"children":[{"name":"B","depth":2,"height":1,"value":50,"x0":0,"y0":50,"x1":100,"y1":75,"children":[{"name":"C","depth":3,"height":0,"value":50,"x0":0,"y0":75,"x1":100,"y1":100,"children":[]}]}]}]}
