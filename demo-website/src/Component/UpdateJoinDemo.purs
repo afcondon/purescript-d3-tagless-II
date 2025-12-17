@@ -1,8 +1,8 @@
-module Component.SceneJoinDemo where
+module Component.UpdateJoinDemo where
 
 import Prelude
 
-import D3.Viz.TreeAPI.SceneJoinDemo as Demo
+import D3.Viz.TreeAPI.UpdateJoinDemo as Demo
 import Data.Maybe (Maybe(..))
 import Effect.Class (liftEffect)
 import Effect.Aff.Class (class MonadAff)
@@ -35,9 +35,9 @@ render :: forall m. State -> H.ComponentHTML Action () m
 render _ =
   HH.div
     [ HP.class_ (H.ClassName "scene-join-demo-container") ]
-    [ HH.h1_ [ HH.text "SceneNestedJoin Demo" ]
+    [ HH.h1_ [ HH.text "UpdateNestedJoin Demo" ]
     , HH.p_
-        [ HH.text "This demonstrates SceneNestedJoin - the clean solution for General Update Pattern with type decomposition!" ]
+        [ HH.text "This demonstrates UpdateNestedJoin - the clean solution for General Update Pattern with type decomposition!" ]
 
     , HH.div
         [ HP.class_ (H.ClassName "controls") ]
@@ -75,7 +75,7 @@ render _ =
         , HH.h3_ [ HH.text "The Code" ]
         , HH.pre_
             [ HH.code_
-                [ HH.text """T.sceneNestedJoin "circles" "circle"
+                [ HH.text """T.updateNestedJoin "circles" "circle"
   [scene]              -- Outer data: SceneData
   (_.points)           -- Decompose to Array DataPoint
   (\\point -> ...)      -- Template

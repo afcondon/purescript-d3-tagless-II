@@ -64,7 +64,7 @@ import Component.TreeAPI as TreeAPI
 import Component.AnimatedTreeCluster as AnimatedTreeCluster
 import Component.GeneralUpdatePattern as GeneralUpdatePattern
 import Component.MermaidTreeDemo as MermaidTreeDemo
-import Component.SceneJoinDemo as SceneJoinDemo
+import Component.UpdateJoinDemo as UpdateJoinDemo
 import Component.SimpleForceGraph as SimpleForceGraph
 import Component.SankeyDebug as SankeyDebug
 import Component.ForcePlayground as ForcePlayground
@@ -133,7 +133,7 @@ type Slots =
   , animatedTreeCluster :: forall q. H.Slot q Void Unit
   , generalUpdatePattern :: forall q. H.Slot q Void Unit
   , mermaidTreeDemo :: forall q. H.Slot q Void Unit
-  , sceneJoinDemo :: forall q. H.Slot q Void Unit
+  , updateJoinDemo :: forall q. H.Slot q Void Unit
   , forceConfigPOC :: forall q. H.Slot q Void Unit
   , forceConfigV2Test :: forall q. H.Slot q Void Unit
   , simpleForceGraph :: forall q. H.Slot q Void Unit
@@ -187,7 +187,7 @@ _treeAPI = Proxy :: Proxy "treeAPI"
 _animatedTreeCluster = Proxy :: Proxy "animatedTreeCluster"
 _generalUpdatePattern = Proxy :: Proxy "generalUpdatePattern"
 _mermaidTreeDemo = Proxy :: Proxy "mermaidTreeDemo"
-_sceneJoinDemo = Proxy :: Proxy "sceneJoinDemo"
+_updateJoinDemo = Proxy :: Proxy "updateJoinDemo"
 _forceConfigPOC = Proxy :: Proxy "forceConfigPOC"
 _forceConfigV2Test = Proxy :: Proxy "forceConfigV2Test"
 _simpleForceGraph = Proxy :: Proxy "simpleForceGraph"
@@ -385,8 +385,8 @@ renderPage route = case spy "Route is" route of
   MermaidTreeDemo ->
     HH.slot_ _mermaidTreeDemo unit MermaidTreeDemo.component unit
 
-  SceneJoinDemo ->
-    HH.slot_ _sceneJoinDemo unit SceneJoinDemo.component unit
+  UpdateJoinDemo ->
+    HH.slot_ _updateJoinDemo unit UpdateJoinDemo.component unit
 
   ForceConfigPOC ->
     -- Legacy POC archived, redirect to SimpleForceGraph

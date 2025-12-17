@@ -497,7 +497,7 @@ cleanupSimulation sim = do
 -- | Create nodes tree for scene rendering
 createNodesTree :: SceneData -> T.Tree SceneData
 createNodesTree scene =
-  T.sceneNestedJoin "nodes" "circle"
+  T.updateNestedJoin "nodes" "circle"
     [ scene ]
     (_.nodes)
     ( \rn -> T.elem Circle
@@ -519,7 +519,7 @@ createNodesTree scene =
 -- | Create links tree for scene rendering
 createLinksTree :: SceneData -> T.Tree SceneData
 createLinksTree scene =
-  T.sceneNestedJoin "links" "line"
+  T.updateNestedJoin "links" "line"
     [ scene ]
     (_.links)
     ( \link -> T.elem Line

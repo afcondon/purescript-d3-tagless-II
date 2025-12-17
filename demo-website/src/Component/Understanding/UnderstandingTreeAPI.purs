@@ -67,7 +67,7 @@ render _ =
             , HH.div
                 [ HP.classes [ HH.ClassName "section-nav-cards" ] ]
                 [ renderNavCard "Architecture" "#architecture" "API layer cake"
-                , renderNavCard "Tree Variants" "#tree-variants" "Node, Join, SceneJoin"
+                , renderNavCard "Tree Variants" "#tree-variants" "Node, Join, UpdateJoin"
                 , renderNavCard "Static vs GUP" "#static-vs-gup" "When to use what"
                 , renderNavCard "Limitations" "#limitations" "When to use Selection API"
                 ]
@@ -151,9 +151,9 @@ render _ =
                         , HH.td_ [ HH.code_ [ HH.text "nestedJoin" ] ]
                         ]
                     , HH.tr_
-                        [ HH.td_ [ HH.code_ [ HH.text "SceneJoin" ] ]
+                        [ HH.td_ [ HH.code_ [ HH.text "UpdateJoin" ] ]
                         , HH.td_ [ HH.text "GUP with enter/update/exit behaviors" ]
-                        , HH.td_ [ HH.code_ [ HH.text "sceneJoin, sceneNestedJoin" ] ]
+                        , HH.td_ [ HH.code_ [ HH.text "updateJoin, updateNestedJoin" ] ]
                         ]
                     ]
                 ]
@@ -185,7 +185,7 @@ render _ =
 
             , HH.p_
                 [ HH.text "For updating visualizations, use "
-                , HH.code_ [ HH.text "SceneJoin" ]
+                , HH.code_ [ HH.text "UpdateJoin" ]
                 , HH.text " which declaratively specifies enter/update/exit behaviors:"
                 ]
 
@@ -206,7 +206,7 @@ render _ =
 
             , HH.p
                 [ HP.classes [ HH.ClassName "code-highlight" ] ]
-                [ HH.text "SceneNestedJoin: "
+                [ HH.text "UpdateNestedJoin: "
                 , HH.text "Combines type decomposition with GUP - the most powerful variant."
                 ]
             ]
@@ -262,9 +262,9 @@ render _ =
                 [ HH.text "TreeAPI provides:" ]
             , HH.ul_
                 [ HH.li_ [ HH.text "Declarative tree structures instead of imperative chains" ]
-                , HH.li_ [ HH.text "Four variants: Node, Join, NestedJoin, SceneJoin" ]
+                , HH.li_ [ HH.text "Four variants: Node, Join, NestedJoin, UpdateJoin" ]
                 , HH.li_ [ HH.text "Succinct static visualizations" ]
-                , HH.li_ [ HH.text "SceneJoin for declarative GUP with transitions" ]
+                , HH.li_ [ HH.text "UpdateJoin for declarative GUP with transitions" ]
                 , HH.li_ [ HH.text "Compatible with underlying Selection API" ]
                 ]
             ]

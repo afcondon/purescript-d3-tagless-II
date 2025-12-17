@@ -108,7 +108,7 @@ letterY = num 100.0
 -- | No more choosing between `computed` and `computedStr`.
 createLettersTree :: Array LetterDatum -> Tree LetterDatum
 createLettersTree letters =
-  T.sceneJoin "letters" "text" letters
+  T.updateJoin "letters" "text" letters
     -- Template: FINAL state for each letter
     ( \d -> T.elem Text
         [ x letterX

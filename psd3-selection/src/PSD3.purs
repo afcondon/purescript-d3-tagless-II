@@ -101,7 +101,7 @@
 module PSD3 (module X) where
 
 -- Clean Public API
-import PSD3.AST (AST, ASTNode, ElementType(..), elem, joinData, withChild, withChildren, named, nestedJoin, sceneJoin, sceneNestedJoin, withBehaviors, beside, siblings, (>:), (+:)) as X
+import PSD3.AST (AST, ASTNode, ElementType(..), elem, joinData, withChild, withChildren, named, nestedJoin, updateJoin, updateNestedJoin, withBehaviors, beside, siblings, (>:), (+:)) as X
 import PSD3.Internal.Attribute (Attribute(..)) as X
 import PSD3.Expr.Friendly (computed, computedStr, computedWithIndex, computedStrWithIndex, from, fromStr, fromWithIndex, fromStrWithIndex, static, staticStr, num, text, bool, field, index, plus, minus, times, dividedBy, plusN, minusN, timesN, dividedByN, negated, lessThan, lessOrEqual, greaterThan, greaterOrEqual, equals, textEquals, textNotEquals, and_, or_, not_, ifThen, sin, cos, tan, asin, acos, atan, atan2, pi, append) as X
 import PSD3.Render (runD3, D3M, D3Selection) as X

@@ -66,7 +66,7 @@ routes =
   <|> lesMisQueryDemo
   <|> moduleGraph
   <|> mermaidTreeDemo
-  <|> sceneJoinDemo
+  <|> updateJoinDemo
   <|> forceConfigPOC
   <|> forceConfigV2Test
   <|> simpleForceGraphRoute
@@ -282,8 +282,8 @@ mermaidTreeDemo :: Match Route
 mermaidTreeDemo = MermaidTreeDemo <$ lit "mermaid-tree-demo" <* end
 
 -- | Match: /scene-join-demo
-sceneJoinDemo :: Match Route
-sceneJoinDemo = SceneJoinDemo <$ lit "scene-join-demo" <* end
+updateJoinDemo :: Match Route
+updateJoinDemo = UpdateJoinDemo <$ lit "scene-join-demo" <* end
 
 -- | Match: /force-config-poc
 forceConfigPOC :: Match Route
@@ -386,7 +386,7 @@ routeToPath LesMisGUPClean = "/lesmis-gup-clean"
 routeToPath LesMisQueryDemo = "/lesmis-query-demo"
 routeToPath ModuleGraph = "/module-graph"
 routeToPath MermaidTreeDemo = "/mermaid-tree-demo"
-routeToPath SceneJoinDemo = "/scene-join-demo"
+routeToPath UpdateJoinDemo = "/scene-join-demo"
 routeToPath ForceConfigPOC = "/force-config-poc"
 routeToPath ForceConfigV2Test = "/force-config-v2-test"
 routeToPath SimpleForceGraph = "/simple-force-graph"

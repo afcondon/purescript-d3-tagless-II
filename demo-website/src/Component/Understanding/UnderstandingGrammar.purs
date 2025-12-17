@@ -284,7 +284,7 @@ render _ =
                     , HH.text " - nested data with type decomposition"
                     ]
                 , HH.li_
-                    [ HH.code_ [ HH.text "SceneJoin" ]
+                    [ HH.code_ [ HH.text "UpdateJoin" ]
                     , HH.text " - declarative GUP with enter/update/exit behaviors"
                     ]
                 ]

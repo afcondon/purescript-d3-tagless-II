@@ -2,7 +2,7 @@
 -- |
 -- | The classic D3 "letters" example reimagined with:
 -- | - v3 polymorphic expressions for computed attributes
--- | - sceneJoin with declarative enter/update/exit behaviors
+-- | - updateJoin with declarative enter/update/exit behaviors
 -- | - Staggered transitions for visual appeal
 -- |
 -- | Data changes trigger the full GUP cycle:
@@ -91,7 +91,7 @@ evalExpr expr datum = runEvalD expr datum 0
 -- | EXIT: Letters fade out and drop below (y=180)
 createLettersTree :: Array LetterDatum -> Tree LetterDatum
 createLettersTree letters =
-  T.sceneJoin "letters" "text" letters
+  T.updateJoin "letters" "text" letters
     -- Template: FINAL state for each letter (where they end up after enter/update)
     (\d -> T.elem Text
       [ x $ num (evalExpr letterX d)   -- v3: computed X position
@@ -206,7 +206,7 @@ updateWithLetters letterString = runD3v2M do
   let tree :: Tree LetterDatum
       tree = createLettersTree letters
 
-  -- Render - sceneJoin handles enter/update/exit automatically!
+  -- Render - updateJoin handles enter/update/exit automatically!
   _ <- renderTree svg tree
 
   liftEffect do

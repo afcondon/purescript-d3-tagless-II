@@ -403,7 +403,7 @@ astToTreeVisualization ast =
                 ]
             ]
 
-      SceneJoinAST {name, dataCount, hasEnter, hasUpdate, hasExit} ->
+      UpdateJoinAST {name, dataCount, hasEnter, hasUpdate, hasExit} ->
         T.named Group ("scene-join-" <> show level)
           []
           `T.withChildren`
@@ -437,7 +437,7 @@ astToTreeVisualization ast =
                 ]
             ]
 
-      SceneNestedJoinAST {name, dataCount, hasEnter, hasUpdate, hasExit} ->
+      UpdateNestedJoinAST {name, dataCount, hasEnter, hasUpdate, hasExit} ->
         T.named Group ("scene-nested-" <> show level)
           []
           `T.withChildren`

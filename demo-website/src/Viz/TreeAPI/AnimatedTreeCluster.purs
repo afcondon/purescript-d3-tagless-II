@@ -1,7 +1,7 @@
 module D3.Viz.TreeAPI.AnimatedTreeCluster where
 
 -- | Animated transition between Tree (Reingold-Tilford) and Cluster (dendrogram) layouts
--- | TreeAPI implementation using sceneJoin for declarative enter/update/exit
+-- | TreeAPI implementation using updateJoin for declarative enter/update/exit
 
 import Prelude hiding (add, sub, mul)
 
@@ -136,7 +136,7 @@ makeLinks t =
 verticalLinkPathV3 :: LinkData -> String
 verticalLinkPathV3 link = runEvalD (linkVertical linkSourceX linkSourceY linkTargetX linkTargetY) link 0
 
--- | Key functions for sceneJoin
+-- | Key functions for updateJoin
 nodeKey :: TreeModel -> String
 nodeKey node = node.name
 
@@ -158,14 +158,14 @@ type VizState =
   , chartHeight :: Number
   }
 
--- | Draw the animated tree/cluster visualization using TreeAPI with sceneJoin
+-- | Draw the animated tree/cluster visualization using TreeAPI with updateJoin
 -- | Uses the two-phase approach: render structure first, then data-driven subtrees
 draw :: HierData -> String -> LayoutType -> Effect VizState
 draw flareData selector currentLayout = runD3v2M do
   let chartWidth = 1200.0
   let chartHeight = 900.0
 
-  liftEffect $ Console.log $ "=== Drawing AnimatedTreeCluster with TreeAPI (sceneJoin) ==="
+  liftEffect $ Console.log $ "=== Drawing AnimatedTreeCluster with TreeAPI (updateJoin) ==="
   liftEffect $ Console.log $ "Layout: " <> show currentLayout
 
   -- Convert to Data.Tree
@@ -211,11 +211,11 @@ draw flareData selector currentLayout = runD3v2M do
   linksGroupSel <- liftEffect $ reselectD3v2 "linksGroup" selections
   nodesGroupSel <- liftEffect $ reselectD3v2 "nodesGroup" selections
 
-  -- Phase 2: Render links with sceneJoin
+  -- Phase 2: Render links with updateJoin
   let
     linksTree :: T.Tree LinkData
     linksTree =
-      T.sceneJoin "linkElements" "path" links
+      T.updateJoin "linkElements" "path" links
         (\link -> T.elem Path
           [ attr "class" $ text "link"
           , path $ text (verticalLinkPathV3 link)
@@ -240,11 +240,11 @@ draw flareData selector currentLayout = runD3v2M do
 
   _ <- renderTree linksGroupSel linksTree
 
-  -- Phase 3: Render nodes with sceneJoin
+  -- Phase 3: Render nodes with updateJoin
   let
     nodesTree :: T.Tree TreeModel
     nodesTree =
-      T.sceneJoin "nodeElements" "circle" nodes
+      T.updateJoin "nodeElements" "circle" nodes
         (\node -> T.elem Circle
           [ attr "class" $ text "node"
           , cx $ num (evalNode nodeX node)  -- v3: node.x
@@ -271,12 +271,12 @@ draw flareData selector currentLayout = runD3v2M do
 
   _ <- renderTree nodesGroupSel nodesTree
 
-  liftEffect $ Console.log "Rendered with TreeAPI sceneJoin"
+  liftEffect $ Console.log "Rendered with TreeAPI updateJoin"
 
   pure { dataTree, chartWidth, chartHeight }
 
 -- | Update existing visualization with new layout
--- | This re-renders with new positions, and sceneJoin handles the transitions
+-- | This re-renders with new positions, and updateJoin handles the transitions
 update :: Tree TreeModel -> String -> Number -> Number -> LayoutType -> Effect Unit
 update dataTree selector chartWidth chartHeight currentLayout = runD3v2M do
   liftEffect $ Console.log $ "=== Updating AnimatedTreeCluster to " <> show currentLayout <> " ==="
@@ -298,11 +298,11 @@ update dataTree selector chartWidth chartHeight currentLayout = runD3v2M do
   linksGroupSel <- select (selector <> " .links") :: _ (D3v2Selection_ SEmpty Element Unit)
   nodesGroupSel <- select (selector <> " .nodes") :: _ (D3v2Selection_ SEmpty Element Unit)
 
-  -- Re-render links with new positions - sceneJoin's updateBehavior handles transitions
+  -- Re-render links with new positions - updateJoin's updateBehavior handles transitions
   let
     linksTree :: T.Tree LinkData
     linksTree =
-      T.sceneJoin "linkElements" "path" links
+      T.updateJoin "linkElements" "path" links
         (\link -> T.elem Path
           [ attr "class" $ text "link"
           , path $ text (verticalLinkPathV3 link)
@@ -325,7 +325,7 @@ update dataTree selector chartWidth chartHeight currentLayout = runD3v2M do
   let
     nodesTree :: T.Tree TreeModel
     nodesTree =
-      T.sceneJoin "nodeElements" "circle" nodes
+      T.updateJoin "nodeElements" "circle" nodes
         (\node -> T.elem Circle
           [ attr "class" $ text "node"
           , cx $ num (evalNode nodeX node)
@@ -346,6 +346,6 @@ update dataTree selector chartWidth chartHeight currentLayout = runD3v2M do
 
   _ <- renderTree nodesGroupSel nodesTree
 
-  liftEffect $ Console.log "Update complete with sceneJoin transitions"
+  liftEffect $ Console.log "Update complete with updateJoin transitions"
 
   pure unit

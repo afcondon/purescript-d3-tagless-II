@@ -53,7 +53,7 @@ describeTree tree level = case tree of
     tell " using data-driven attributes\n"
     tell $ indent (level + 1) <> "(Nested template function defined)\n"
 
-  SceneJoin { name, key, joinData, enterBehavior, updateBehavior, exitBehavior } -> do
+  UpdateJoin { name, key, joinData, enterBehavior, updateBehavior, exitBehavior } -> do
     tell $ indent level <> "For each of " <> show (length joinData) <> " data items, "
     tell $ "create/update/remove " <> key <> " (scene join named \"" <> name <> "\")"
     tell " with General Update Pattern:\n"
@@ -68,7 +68,7 @@ describeTree tree level = case tree of
       $ indent (level + 1) <> "- Exit: elements transition out then removed\n"
     tell $ indent (level + 1) <> "(Template function defined for creating elements from data)\n"
 
-  SceneNestedJoin { name, key, joinData, enterBehavior, updateBehavior, exitBehavior } -> do
+  UpdateNestedJoin { name, key, joinData, enterBehavior, updateBehavior, exitBehavior } -> do
     tell $ indent level <> "For each of " <> show (length joinData) <> " nested data items, "
     tell $ "decompose and create/update/remove " <> key <> " (scene nested join named \"" <> name <> "\")"
     tell " with General Update Pattern:\n"

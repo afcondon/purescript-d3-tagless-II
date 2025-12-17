@@ -37,7 +37,7 @@ data TreeAST
       , dataCount :: Int
       , hasTemplate :: Boolean
       }
-  | SceneJoinAST
+  | UpdateJoinAST
       { name :: String
       , key :: String
       , dataCount :: Int
@@ -46,7 +46,7 @@ data TreeAST
       , hasExit :: Boolean
       , hasTemplate :: Boolean
       }
-  | SceneNestedJoinAST
+  | UpdateNestedJoinAST
       { name :: String
       , key :: String
       , dataCount :: Int
@@ -85,8 +85,8 @@ toAST tree = case tree of
       , hasTemplate: true
       }
 
-  SceneJoin {name, key, joinData, enterBehavior, updateBehavior, exitBehavior} ->
-    SceneJoinAST
+  UpdateJoin {name, key, joinData, enterBehavior, updateBehavior, exitBehavior} ->
+    UpdateJoinAST
       { name
       , key
       , dataCount: length joinData
@@ -102,8 +102,8 @@ toAST tree = case tree of
       , hasTemplate: true
       }
 
-  SceneNestedJoin {name, key, joinData, enterBehavior, updateBehavior, exitBehavior} ->
-    SceneNestedJoinAST
+  UpdateNestedJoin {name, key, joinData, enterBehavior, updateBehavior, exitBehavior} ->
+    UpdateNestedJoinAST
       { name
       , key
       , dataCount: length joinData
@@ -156,8 +156,8 @@ prettyPrintAST ast = prettyPrint ast 0
         <> indent (level + 1) <> ", hasTemplate: " <> show hasTemplate <> "\n"
         <> indent level <> "}"
 
-      SceneJoinAST {name, key, dataCount, hasEnter, hasUpdate, hasExit, hasTemplate} ->
-        indent level <> "SceneJoinAST\n"
+      UpdateJoinAST {name, key, dataCount, hasEnter, hasUpdate, hasExit, hasTemplate} ->
+        indent level <> "UpdateJoinAST\n"
         <> indent (level + 1) <> "{ name: \"" <> name <> "\"\n"
         <> indent (level + 1) <> ", key: \"" <> key <> "\"\n"
         <> indent (level + 1) <> ", dataCount: " <> show dataCount <> "\n"
@@ -167,8 +167,8 @@ prettyPrintAST ast = prettyPrint ast 0
         <> indent (level + 1) <> ", hasTemplate: " <> show hasTemplate <> "\n"
         <> indent level <> "}"
 
-      SceneNestedJoinAST {name, key, dataCount, hasEnter, hasUpdate, hasExit, hasTemplate} ->
-        indent level <> "SceneNestedJoinAST\n"
+      UpdateNestedJoinAST {name, key, dataCount, hasEnter, hasUpdate, hasExit, hasTemplate} ->
+        indent level <> "UpdateNestedJoinAST\n"
         <> indent (level + 1) <> "{ name: \"" <> name <> "\"\n"
         <> indent (level + 1) <> ", key: \"" <> key <> "\"\n"
         <> indent (level + 1) <> ", dataCount: " <> show dataCount <> "\n"

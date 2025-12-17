@@ -191,7 +191,7 @@ renderTree tree parentId = case tree of
 
     pure joinId
 
-  SceneJoin sceneSpec -> do
+  UpdateJoin sceneSpec -> do
     -- Create scene join node with GUP info
     let behaviorInfo =
           (if isJust sceneSpec.enterBehavior then "E" else "") <>
@@ -199,7 +199,7 @@ renderTree tree parentId = case tree of
           (if isJust sceneSpec.exitBehavior then "X" else "")
         joinLabel = "SCENE JOIN \"" <> sceneSpec.name <> "\" (" <> sceneSpec.key <> ") ["
                     <> show (length sceneSpec.joinData) <> " items] {" <> behaviorInfo <> "}"
-    joinId <- addNode joinLabel "sceneJoinNode"
+    joinId <- addNode joinLabel "updateJoinNode"
 
     -- Connect to parent if present
     case parentId of
@@ -220,7 +220,7 @@ renderTree tree parentId = case tree of
 
     pure joinId
 
-  SceneNestedJoin sceneNestedSpec -> do
+  UpdateNestedJoin sceneNestedSpec -> do
     -- Create scene nested join node with GUP info
     let behaviorInfo =
           (if isJust sceneNestedSpec.enterBehavior then "E" else "") <>
@@ -228,7 +228,7 @@ renderTree tree parentId = case tree of
           (if isJust sceneNestedSpec.exitBehavior then "X" else "")
         joinLabel = "SCENE NESTED JOIN \"" <> sceneNestedSpec.name <> "\" (" <> sceneNestedSpec.key <> ") ["
                     <> show (length sceneNestedSpec.joinData) <> " items] {" <> behaviorInfo <> "}"
-    joinId <- addNode joinLabel "sceneNestedJoinNode"
+    joinId <- addNode joinLabel "updateNestedJoinNode"
 
     -- Connect to parent if present
     case parentId of

@@ -7,7 +7,7 @@ module TreeBuilder3.App
 -- | An interactive demo for building PSD3 AST trees:
 -- | - Keyboard-driven with sub-menus for node types
 -- | - Each AST node type has a distinct color
--- | - Supports: Node, Join, NestedJoin, SceneJoin, SceneNestedJoin
+-- | - Supports: Node, Join, NestedJoin, UpdateJoin, UpdateNestedJoin
 -- | - Node children include Attr and Behavior nodes
 -- | - Sub-menus for ElementType, AttrName, AttrValue, Behavior
 -- |
@@ -63,11 +63,11 @@ data DslNodeType
   = NodeElem ElementType -- Element node (SVG, Group, Circle, etc.)
   | NodeJoin -- Simple data join
   | NodeNestedJoin -- Type-decomposing join
-  | NodeSceneJoin -- GUP join
-  | NodeSceneNestedJoin -- GUP + type decomposition
+  | NodeUpdateJoin -- GUP join
+  | NodeUpdateNestedJoin -- GUP + type decomposition
   | NodeAttr AttrKind -- Attribute (fully specified)
   | NodeBehavior BehaviorKind -- Behavior (fully specified)
-  -- GUP selection phases (auto-created under SceneJoin templates)
+  -- GUP selection phases (auto-created under UpdateJoin templates)
   | NodeEnter -- Enter selection (new elements)
   | NodeUpdate -- Update selection (existing elements)
   | NodeExit -- Exit selection (removed elements)
@@ -101,8 +101,8 @@ nodeColor :: DslNodeType -> String
 nodeColor (NodeElem _) = "#6B7280" -- Gray
 nodeColor NodeJoin = "#E2D24A" -- Yellow
 nodeColor NodeNestedJoin = "#D4A017" -- Gold
-nodeColor NodeSceneJoin = "#4A90E2" -- Blue
-nodeColor NodeSceneNestedJoin = "#9B4AE2" -- Purple
+nodeColor NodeUpdateJoin = "#4A90E2" -- Blue
+nodeColor NodeUpdateNestedJoin = "#9B4AE2" -- Purple
 nodeColor (NodeAttr _) = "#4AE24A" -- Green
 nodeColor (NodeBehavior _) = "#E27A4A" -- Orange
 -- GUP selection phases (classic GUP demo colors)
@@ -128,8 +128,8 @@ nodeLabel (NodeElem Defs) = "Defs"
 nodeLabel (NodeElem _) = "Element" -- Other element types
 nodeLabel NodeJoin = "Join"
 nodeLabel NodeNestedJoin = "NestedJoin"
-nodeLabel NodeSceneJoin = "SceneJoin"
-nodeLabel NodeSceneNestedJoin = "SceneNestedJoin"
+nodeLabel NodeUpdateJoin = "UpdateJoin"
+nodeLabel NodeUpdateNestedJoin = "UpdateNestedJoin"
 nodeLabel (NodeAttr (AttrStatic name _)) = "attr:" <> name
 nodeLabel (NodeAttr (AttrField name _)) = "attr:" <> name
 nodeLabel (NodeAttr (AttrExpr name _)) = "attr:" <> name
@@ -168,8 +168,8 @@ nodeKeyHints (NodeElem _) = "[a,b]" -- Other elements: leaf by default
 -- Join nodes
 nodeKeyHints NodeJoin = "[e]" -- Joins can only have element template
 nodeKeyHints NodeNestedJoin = "[e]"
-nodeKeyHints NodeSceneJoin = "[e]"
-nodeKeyHints NodeSceneNestedJoin = "[e]"
+nodeKeyHints NodeUpdateJoin = "[e]"
+nodeKeyHints NodeUpdateNestedJoin = "[e]"
 -- Attr/Behavior nodes
 nodeKeyHints (NodeAttr _) = "[a]" -- Attrs can add sibling attrs
 nodeKeyHints (NodeBehavior _) = "[b]" -- Behaviors can add sibling behaviors
@@ -297,26 +297,26 @@ isJoinChild nodeId t = case findParentId nodeId t of
     Just parent -> isJoinType parent.nodeType
 
 -- | Check if a node's parent is a Scene Join type (GUP - has enter/update/exit)
-isSceneJoinChild :: Int -> Tree TreeNode -> Boolean
-isSceneJoinChild nodeId t = case findParentId nodeId t of
+isUpdateJoinChild :: Int -> Tree TreeNode -> Boolean
+isUpdateJoinChild nodeId t = case findParentId nodeId t of
   Nothing -> false
   Just parentId -> case findNodeById parentId t of
     Nothing -> false
-    Just parent -> isSceneJoinType parent.nodeType
+    Just parent -> isUpdateJoinType parent.nodeType
 
 -- | Check if a node type is a Join variant
 isJoinType :: DslNodeType -> Boolean
 isJoinType NodeJoin = true
 isJoinType NodeNestedJoin = true
-isJoinType NodeSceneJoin = true
-isJoinType NodeSceneNestedJoin = true
+isJoinType NodeUpdateJoin = true
+isJoinType NodeUpdateNestedJoin = true
 isJoinType _ = false
 
 -- | Check if a node type is a Scene Join (GUP) variant
-isSceneJoinType :: DslNodeType -> Boolean
-isSceneJoinType NodeSceneJoin = true
-isSceneJoinType NodeSceneNestedJoin = true
-isSceneJoinType _ = false
+isUpdateJoinType :: DslNodeType -> Boolean
+isUpdateJoinType NodeUpdateJoin = true
+isUpdateJoinType NodeUpdateNestedJoin = true
+isUpdateJoinType _ = false
 
 addChildToNode :: Int -> TreeNode -> Tree TreeNode -> Tree TreeNode
 addChildToNode targetId newChild t =
@@ -460,8 +460,8 @@ handleKeyForNodeType PendingBehavior keyName = handlePendingBehaviorKey keyName
 handleKeyForNodeType (NodeElem elemType) keyName = handleElementKey elemType keyName
 handleKeyForNodeType NodeJoin keyName = handleJoinKey keyName
 handleKeyForNodeType NodeNestedJoin keyName = handleJoinKey keyName
-handleKeyForNodeType NodeSceneJoin keyName = handleJoinKey keyName
-handleKeyForNodeType NodeSceneNestedJoin keyName = handleJoinKey keyName
+handleKeyForNodeType NodeUpdateJoin keyName = handleJoinKey keyName
+handleKeyForNodeType NodeUpdateNestedJoin keyName = handleJoinKey keyName
 handleKeyForNodeType (NodeAttr _) keyName = handleAttrKey keyName
 handleKeyForNodeType (NodeBehavior _) keyName = handleBehaviorKey keyName
 -- GUP phase nodes - can add attrs
@@ -486,8 +486,8 @@ handleContainerElementKey keyName = case keyName of
   "e" -> addNodeOfType PendingElement
   "j" -> addNodeOfType NodeJoin
   "n" -> addNodeOfType NodeNestedJoin
-  "s" -> addNodeOfType NodeSceneJoin
-  "x" -> addNodeOfType NodeSceneNestedJoin
+  "s" -> addNodeOfType NodeUpdateJoin
+  "x" -> addNodeOfType NodeUpdateNestedJoin
   "a" -> addNodeOfType PendingAttr
   "b" -> addNodeOfType PendingBehavior
   _ -> pure unit
@@ -674,7 +674,7 @@ updateNodeType targetId newType t =
     mkTree newVal (map (updateNodeType targetId newType) children)
 
 -- | Update the selected node's type (for resolving pending nodes)
--- | If resolving an Element under a SceneJoin, auto-create Enter/Update/Exit children
+-- | If resolving an Element under a UpdateJoin, auto-create Enter/Update/Exit children
 resolveSelectedNode :: forall output m. MonadAff m => DslNodeType -> H.HalogenM State Action () output m Unit
 resolveSelectedNode newType = do
   state <- H.get
@@ -682,9 +682,9 @@ resolveSelectedNode newType = do
     -- First, update the node type
     let treeWithType = updateNodeType selectedId newType state.userTree
 
-    -- Check if this is an Element being resolved under a SceneJoin
+    -- Check if this is an Element being resolved under a UpdateJoin
     let isElementUnderScene = case newType of
-          NodeElem _ -> isSceneJoinChild selectedId state.userTree
+          NodeElem _ -> isUpdateJoinChild selectedId state.userTree
           _ -> false
 
     -- If so, auto-create Enter/Update/Exit children
@@ -958,8 +958,8 @@ computeKeyHints tree node = case node.nodeType of
   -- Join types: show [e] only if no template yet, otherwise []
   NodeJoin -> joinHints node.id
   NodeNestedJoin -> joinHints node.id
-  NodeSceneJoin -> joinHints node.id
-  NodeSceneNestedJoin -> joinHints node.id
+  NodeUpdateJoin -> joinHints node.id
+  NodeUpdateNestedJoin -> joinHints node.id
   -- All other types use static hints
   _ -> nodeKeyHints node.nodeType
   where

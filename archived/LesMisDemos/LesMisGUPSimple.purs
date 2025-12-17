@@ -65,9 +65,9 @@ render :: forall m. State -> H.ComponentHTML Action () m
 render _ =
   HH.div [ HP.class_ (HH.ClassName "lesmis-gup-simple-page") ]
     [ HH.div [ HP.class_ (HH.ClassName "page-header") ]
-        [ HH.h1_ [ HH.text "Les Misérables - Minimal GUP Demo (SceneNestedJoin)" ]
+        [ HH.h1_ [ HH.text "Les Misérables - Minimal GUP Demo (UpdateNestedJoin)" ]
         , HH.p [ HP.class_ (HH.ClassName "page-description") ]
-            [ HH.text "Minimal force simulation demonstrating SceneNestedJoin with declarative enter/update/exit behaviors. Colors based on node group." ]
+            [ HH.text "Minimal force simulation demonstrating UpdateNestedJoin with declarative enter/update/exit behaviors. Colors based on node group." ]
         ]
 
     , HH.div [ HP.class_ (HH.ClassName "controls-panel") ]
@@ -103,7 +103,7 @@ render _ =
     , HH.div [ HP.class_ (HH.ClassName "info-panel") ]
         [ HH.h3_ [ HH.text "What This Demonstrates" ]
         , HH.ul_
-            [ HH.li_ [ HH.text "SceneNestedJoin - declarative GUP with type decomposition (SceneData → KeyedNode)" ]
+            [ HH.li_ [ HH.text "UpdateNestedJoin - declarative GUP with type decomposition (SceneData → KeyedNode)" ]
             , HH.li_ [ HH.text "12-line update function - just call renderTree with new scene data!" ]
             , HH.li_ [ HH.text "Datum-based colors - no functions in scene data (like Letters GUP)" ]
             , HH.li_ [ HH.text "Phylotaxis initial layout - sunflower spiral positioning" ]
@@ -114,7 +114,7 @@ render _ =
             [ HH.text """-- Define scene structure ONCE:
 createNodesTree :: SceneData -> T.Tree SceneData
 createNodesTree scene =
-  T.sceneNestedJoin "nodeElements" "circle"
+  T.updateNestedJoin "nodeElements" "circle"
     [scene]
     (_.nodes >>> map KeyedNode)
     template

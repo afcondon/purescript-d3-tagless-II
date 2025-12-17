@@ -46,8 +46,8 @@
 -- |
 -- | - `joinData` - Simple data join (datum type stays same)
 -- | - `nestedJoin` - Data join with type decomposition
--- | - `sceneJoin` - Data join with enter/update/exit behaviors
--- | - `sceneNestedJoin` - Type decomposition + GUP (recommended for most cases)
+-- | - `updateJoin` - Data join with enter/update/exit behaviors
+-- | - `updateNestedJoin` - Type decomposition + GUP (recommended for most cases)
 -- |
 module PSD3.AST
   ( -- * Core Types
@@ -69,8 +69,8 @@ module PSD3.AST
     -- * Data Joins
   , joinData
   , nestedJoin
-  , sceneJoin
-  , sceneNestedJoin
+  , updateJoin
+  , updateNestedJoin
     -- * Combinators
   , beside
   , siblings
@@ -152,7 +152,7 @@ data Tree datum
       , decompose :: datum -> Array datum   -- Decomposer (type-erased)
       , template :: datum -> Tree datum     -- Template (type-erased)
       }
-  -- | SceneJoin handles General Update Pattern (GUP) with enter/update/exit
+  -- | UpdateJoin handles General Update Pattern (GUP) with enter/update/exit
   -- |
   -- | This variant declaratively specifies behavior for all three phases:
   -- | - Enter: New data items appearing (with optional transition)
@@ -164,7 +164,7 @@ data Tree datum
   -- | - Applying the correct template and attributes to each set
   -- | - Running transitions
   -- | - Removing exited elements
-  | SceneJoin
+  | UpdateJoin
       { name :: String                         -- Name for this join
       , key :: String                          -- Element type (e.g., "circle", "g")
       , joinData :: Array datum                -- Data to join
@@ -174,7 +174,7 @@ data Tree datum
       , updateBehavior :: Maybe (UpdateBehavior datum)
       , exitBehavior :: Maybe (ExitBehavior datum)
       }
-  -- | SceneNestedJoin combines NestedJoin's type decomposition with SceneJoin's GUP behaviors
+  -- | UpdateNestedJoin combines NestedJoin's type decomposition with UpdateJoin's GUP behaviors
   -- |
   -- | This is the IDEAL variant for most use cases - it allows:
   -- | 1. Type transitions (e.g., SceneData -> Array DataPoint)
@@ -184,7 +184,7 @@ data Tree datum
   -- | each item gets enter/update/exit transitions.
   -- |
   -- | Uses unsafeCoerce internally to handle type changing (same as NestedJoin).
-  | SceneNestedJoin
+  | UpdateNestedJoin
       { name :: String                              -- Name for this join
       , key :: String                               -- Element type (e.g., "circle", "g")
       , joinData :: Array datum                     -- Outer data (e.g., scene data)
@@ -246,8 +246,8 @@ withChild parent child = case parent of
   Node node -> Node node { children = node.children <> [child] }
   Join j -> Join j  -- Joins can't have additional children (template already defined)
   NestedJoin nj -> NestedJoin nj  -- Nested joins can't have additional children
-  SceneJoin sj -> SceneJoin sj  -- Scene joins can't have additional children (template already defined)
-  SceneNestedJoin snj -> SceneNestedJoin snj  -- Scene nested joins can't have additional children
+  UpdateJoin sj -> UpdateJoin sj  -- Scene joins can't have additional children (template already defined)
+  UpdateNestedJoin snj -> UpdateNestedJoin snj  -- Scene nested joins can't have additional children
 
 -- | Add multiple children to a tree node
 -- |
@@ -257,8 +257,8 @@ withChildren parent newChildren = case parent of
   Node node -> Node node { children = node.children <> newChildren }
   Join j -> Join j
   NestedJoin nj -> NestedJoin nj
-  SceneJoin sj -> SceneJoin sj
-  SceneNestedJoin snj -> SceneNestedJoin snj
+  UpdateJoin sj -> UpdateJoin sj
+  UpdateNestedJoin snj -> UpdateNestedJoin snj
 
 -- | Add behaviors to a tree node
 -- |
@@ -282,8 +282,8 @@ withBehaviors tree newBehaviors = case tree of
   Node node -> Node node { behaviors = node.behaviors <> newBehaviors }
   Join j -> Join j  -- Joins apply behaviors via template
   NestedJoin nj -> NestedJoin nj
-  SceneJoin sj -> SceneJoin sj
-  SceneNestedJoin snj -> SceneNestedJoin snj
+  UpdateJoin sj -> UpdateJoin sj
+  UpdateNestedJoin snj -> UpdateNestedJoin snj
 
 -- | Create a named data join
 -- |
@@ -353,7 +353,7 @@ nestedJoin name key data' decomposeFn templateFn =
 -- |
 -- | Usage:
 -- | ```purescript
--- | sceneJoin "nodes" "circle" nodeData
+-- | updateJoin "nodes" "circle" nodeData
 -- |   (\node -> elem Circle [ cx node.x, cy node.y, radius 5.0 ])
 -- |   { enterBehavior: Just
 -- |       { initialAttrs: [ y 0.0, opacity 0.0 ]
@@ -369,7 +369,7 @@ nestedJoin name key data' decomposeFn templateFn =
 -- |       }
 -- |   }
 -- | ```
-sceneJoin
+updateJoin
   :: forall datum
    . String                                      -- Name for this join
   -> String                                      -- Element type (e.g., "circle", "g")
@@ -381,8 +381,8 @@ sceneJoin
      , keyFn :: Maybe (datum -> String)          -- Optional: identity function for matching
      }
   -> Tree datum
-sceneJoin name key data' template behaviors =
-  SceneJoin
+updateJoin name key data' template behaviors =
+  UpdateJoin
     { name
     , key
     , joinData: data'
@@ -395,13 +395,13 @@ sceneJoin name key data' template behaviors =
 
 -- | Create a scene nested join with type decomposition and GUP behaviors
 -- |
--- | This is the RECOMMENDED way to use SceneJoin - it combines type decomposition
+-- | This is the RECOMMENDED way to use UpdateJoin - it combines type decomposition
 -- | with enter/update/exit behaviors, solving the type mixing problem.
 -- |
 -- | Usage:
 -- | ```purescript
 -- | -- Container has SceneData, decompose to DataPoints, each gets GUP
--- | sceneNestedJoin "circles" "circle"
+-- | updateNestedJoin "circles" "circle"
 -- |   [sceneData]              -- Outer data (SceneData)
 -- |   (_.points)               -- Decompose: SceneData -> Array DataPoint
 -- |   (\point -> elem Circle   -- Template for each DataPoint
@@ -413,7 +413,7 @@ sceneJoin name key data' template behaviors =
 -- |   , exitBehavior: Just { attrs: [], transition: Just fadeOut }
 -- |   }
 -- | ```
-sceneNestedJoin
+updateNestedJoin
   :: forall outerDatum innerDatum
    . String                                           -- Name for this join
   -> String                                           -- Element type (e.g., "circle")
@@ -425,8 +425,8 @@ sceneNestedJoin
      , exitBehavior :: Maybe (ExitBehavior innerDatum)
      }
   -> Tree outerDatum
-sceneNestedJoin name key data' decomposeFn templateFn behaviors =
-  SceneNestedJoin
+updateNestedJoin name key data' decomposeFn templateFn behaviors =
+  UpdateNestedJoin
     { name
     , key
     , joinData: data'

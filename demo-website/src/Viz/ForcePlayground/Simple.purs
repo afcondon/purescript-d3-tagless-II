@@ -349,7 +349,7 @@ nodeRadius node =
 -- | Create nodes tree with transition-aware visual properties
 createNodesTree :: SceneData -> T.Tree SceneData
 createNodesTree scene =
-  T.sceneNestedJoin "nodes" "circle"
+  T.updateNestedJoin "nodes" "circle"
     [ scene ]
     (_.nodes)
     ( \rn -> T.elem ET.Circle
@@ -370,7 +370,7 @@ createNodesTree scene =
 -- | Create links tree with rich visual encoding
 createLinksTree :: SceneData -> T.Tree SceneData
 createLinksTree scene =
-  T.sceneNestedJoin "links" "line"
+  T.updateNestedJoin "links" "line"
     [ scene ]
     (_.links)
     ( \link -> T.elem ET.Line

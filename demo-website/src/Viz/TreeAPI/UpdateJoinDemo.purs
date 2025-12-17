@@ -1,18 +1,16 @@
-module D3.Viz.TreeAPI.SceneJoinDemo where
+module D3.Viz.TreeAPI.UpdateJoinDemo where
 
--- | Simple demonstration of SceneNestedJoin with enter/update/exit
+-- | Simple demonstration of UpdateNestedJoin with enter/update/exit
 -- |
--- | This shows how SceneNestedJoin solves the type mixing problem cleanly!
+-- | This shows how UpdateNestedJoin solves the type mixing problem cleanly!
 
 import Prelude
 
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Time.Duration (Milliseconds(..))
-import Effect (Effect)
-import Effect.Class (liftEffect)
 import PSD3.Expr.Integration (evalAttr, evalAttrStr, fnAttr, fnAttrStr)
 import PSD3.Expr.Expr (lit, str)
-import PSD3.Internal.Capabilities.Selection (renderTree, select)
+import PSD3.Internal.Capabilities.Selection (clear, renderTree, select)
 import PSD3.Interpreter.D3 (D3v2M)
 import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.Internal.Transition.Types (Easing(CubicIn, CubicInOut))
@@ -29,7 +27,7 @@ createSvgContainer :: String -> D3v2M Unit
 createSvgContainer containerSelector = do
   container <- select containerSelector
   -- Clear any existing content to avoid duplicate SVGs
-  liftEffect $ clearInnerHTML containerSelector
+  clear containerSelector
   let svgTree :: T.Tree Unit
       svgTree = T.named SVG "svg"
         [ evalAttr "width" (lit 800.0)
@@ -42,8 +40,6 @@ createSvgContainer containerSelector = do
   _ <- renderTree container svgTree
   pure unit
 
--- | Clear innerHTML of an element (FFI helper)
-foreign import clearInnerHTML :: String -> Effect Unit
 
 -- | Initial render with 5 points
 drawInitial :: String -> D3v2M Unit
@@ -81,7 +77,7 @@ updateToSeven _ = do
     , { x: 700.0, y: 100.0, color: "cyan" }    -- New
     ]
 
--- | Update circles using SceneNestedJoin
+-- | Update circles using UpdateNestedJoin
 updateCircles :: Array DataPoint -> D3v2M Unit
 updateCircles points = do
   svgContainer <- select "#scene-join-demo-svg"
@@ -90,7 +86,7 @@ updateCircles points = do
   _ <- renderTree svgContainer tree
   pure unit
 
--- | Create tree with SceneNestedJoin - THIS IS THE CLEAN SOLUTION!
+-- | Create tree with UpdateNestedJoin - THIS IS THE CLEAN SOLUTION!
 -- |
 -- | Notice how we:
 -- | 1. Use SceneData at the container level (Tree SceneData)
@@ -99,8 +95,8 @@ updateCircles points = do
 -- | 4. No type gymnastics needed!
 createCirclesTree :: SceneData -> T.Tree SceneData
 createCirclesTree scene =
-  -- SceneNestedJoin: decompose SceneData -> DataPoints with GUP!
-  T.sceneNestedJoin "circles" "circle"
+  -- UpdateNestedJoin: decompose SceneData -> DataPoints with GUP!
+  T.updateNestedJoin "circles" "circle"
     [scene]              -- Outer data: SceneData
     (_.points)           -- Decompose: extract points array
     (\point -> T.elem Circle  -- Template for each DataPoint

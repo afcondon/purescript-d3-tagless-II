@@ -128,13 +128,13 @@ data Route
   | GeneralUpdatePattern  -- Classic GUP with animated letters (v1 restored)
   | LesMisGUPTree   -- Les Mis with Tree API + GUP + Dynamic Layouts (proof-of-concept)
   | LesMisGUP       -- Les Mis with declarative scene-based PSD3 + GUP (clean example)
-  | LesMisGUPSimple -- Les Mis minimal GUP with SceneNestedJoin (12-line update function!)
+  | LesMisGUPSimple -- Les Mis minimal GUP with UpdateNestedJoin (12-line update function!)
   | LesMisGUPTreeAPI -- Les Mis testing renderTreeWithSimulation pattern
   | LesMisGUPClean  -- Les Mis GUP with existing primitives (no wrappers!)
   | LesMisQueryDemo -- Query language demo with interactive group filtering
   | ModuleGraph     -- Module dependency graph (dogfooding!)
   | MermaidTreeDemo -- Mermaid interpreter for Tree API (visualizes tree structure)
-  | SceneJoinDemo   -- SceneNestedJoin demonstration (GUP with type decomposition)
+  | UpdateJoinDemo   -- UpdateNestedJoin demonstration (GUP with type decomposition)
   | ForceConfigPOC  -- POC for testing new force configuration system
   | ForceConfigV2Test -- Minimal standalone test of V2 force configuration
   | SimpleForceGraph  -- Simplest force graph with hardcoded data
@@ -201,7 +201,7 @@ instance showRoute :: Show Route where
   show LesMisQueryDemo = "Query Language Demo"
   show ModuleGraph = "Module Graph"
   show MermaidTreeDemo = "Mermaid Tree Visualizer"
-  show SceneJoinDemo = "SceneNestedJoin Demo"
+  show UpdateJoinDemo = "UpdateNestedJoin Demo"
   show ForceConfigPOC = "Force Config POC"
   show ForceConfigV2Test = "Force Config V2 Test"
   show SimpleForceGraph = "Simple Force Graph"

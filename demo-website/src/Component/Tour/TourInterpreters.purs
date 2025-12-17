@@ -187,7 +187,7 @@ astToTreeVisualization ast =
                 ]
             ]
 
-      SceneJoinAST {name, dataCount, hasEnter, hasUpdate, hasExit} ->
+      UpdateJoinAST {name, dataCount, hasEnter, hasUpdate, hasExit} ->
         T.named Group ("scene-join-" <> show level)
           []
           `T.withChildren`
@@ -202,7 +202,7 @@ astToTreeVisualization ast =
             , T.elem Text
                 [ evalAttr "x" (lit xPos)
                 , evalAttr "y" (lit (toNumber level * 80.0 + 5.0))
-                , evalAttrStr "text-content" (str ("SceneJoin: " <> name))
+                , evalAttrStr "text-content" (str ("UpdateJoin: " <> name))
                 , evalAttrStr "text-anchor" (str "middle")
                 , evalAttrStr "fill" (str "white")
                 ]
@@ -218,7 +218,7 @@ astToTreeVisualization ast =
                 ]
             ]
 
-      SceneNestedJoinAST {name, dataCount, hasEnter, hasUpdate, hasExit} ->
+      UpdateNestedJoinAST {name, dataCount, hasEnter, hasUpdate, hasExit} ->
         T.named Group ("scene-nested-join-" <> show level)
           []
           `T.withChildren`
@@ -233,7 +233,7 @@ astToTreeVisualization ast =
             , T.elem Text
                 [ evalAttr "x" (lit xPos)
                 , evalAttr "y" (lit (toNumber level * 80.0 + 5.0))
-                , evalAttrStr "text-content" (str ("SceneNestedJoin: " <> name))
+                , evalAttrStr "text-content" (str ("UpdateNestedJoin: " <> name))
                 , evalAttrStr "text-anchor" (str "middle")
                 , evalAttrStr "fill" (str "white")
                 ]

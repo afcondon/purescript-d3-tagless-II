@@ -67,7 +67,7 @@ render _ =
     [ HH.div [ HP.class_ (HH.ClassName "page-header") ]
         [ HH.h1_ [ HH.text "Les Misérables - Clean GUP (No Wrappers!)" ]
         , HH.p [ HP.class_ (HH.ClassName "page-description") ]
-            [ HH.text "Force simulation using existing SelectionM primitives. No SceneNestedJoin, no SceneData, no KeyedNode - just arrays and functions!" ]
+            [ HH.text "Force simulation using existing SelectionM primitives. No UpdateNestedJoin, no SceneData, no KeyedNode - just arrays and functions!" ]
         ]
 
     , HH.div [ HP.class_ (HH.ClassName "controls-panel") ]

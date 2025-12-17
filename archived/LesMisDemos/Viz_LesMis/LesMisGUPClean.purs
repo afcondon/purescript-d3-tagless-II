@@ -1,6 +1,6 @@
 module D3.Viz.LesMis.LesMisGUPClean where
 
--- | Clean LesMis GUP using existing primitives (no SceneNestedJoin, no wrappers!)
+-- | Clean LesMis GUP using existing primitives (no UpdateNestedJoin, no wrappers!)
 -- |
 -- | This uses renderData + joinDataWithKey directly on the raw arrays.
 
@@ -60,7 +60,7 @@ instance Ord IndexedLink where
         sourceComp = compare linkA.source.id linkB.source.id
     in if sourceComp == EQ then compare linkA.target.id linkB.target.id else sourceComp
 
--- | Draw initial force graph - NO SceneNestedJoin, NO SceneData wrapper!
+-- | Draw initial force graph - NO UpdateNestedJoin, NO SceneData wrapper!
 drawLesMisGUPClean ::
   Array (Force LesMisSimNode) ->
   Set.Set String ->

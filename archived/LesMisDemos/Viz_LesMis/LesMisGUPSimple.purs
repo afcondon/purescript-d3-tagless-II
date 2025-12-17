@@ -1,11 +1,11 @@
 module D3.Viz.LesMis.LesMisGUPSimple where
 
--- | Minimal LesMis GUP demo using declarative SceneNestedJoin
+-- | Minimal LesMis GUP demo using declarative UpdateNestedJoin
 -- |
 -- | This demonstrates the power of the declarative Tree API:
 -- | - Define the scene structure once with enter/update/exit behaviors
 -- | - Update by just calling renderTree with new data
--- | - SceneNestedJoin handles all the GUP transitions automatically!
+-- | - UpdateNestedJoin handles all the GUP transitions automatically!
 
 import Prelude
 
@@ -73,14 +73,14 @@ phylotaxisPosition i =
 setPhyllotaxisPositions :: forall r. Array (Record (x :: Number, y :: Number | r)) -> Array (Record (x :: Number, y :: Number | r))
 setPhyllotaxisPositions nodes = Array.mapWithIndex (\i n -> n { x = (phylotaxisPosition i).x, y = (phylotaxisPosition i).y }) nodes
 
--- | The key function: declarative tree with SceneNestedJoin for GUP
+-- | The key function: declarative tree with UpdateNestedJoin for GUP
 -- |
 -- | This defines ONCE how nodes should appear, update, and exit.
 -- | Color is based on datum properties (group field), not scene config.
 -- | To update the visualization, just call renderTree with new SceneData!
 createNodesTree :: SceneData -> T.Tree SceneData
 createNodesTree (SceneData scene) =
-  T.sceneNestedJoin "nodeElements" "circle"
+  T.updateNestedJoin "nodeElements" "circle"
     [SceneData scene]                       -- Outer data: SceneData
     (\(SceneData s) -> map KeyedNode s.nodes)  -- Decompose: extract and wrap nodes
     (\(KeyedNode node) -> T.elem ST.Circle  -- Template for each node (unwrap)
@@ -199,14 +199,14 @@ drawLesMisGUPSimple forcesArray activeForces model containerSelector = do
         Just sel -> sel
         Nothing -> unsafePartial $ unsafeCrashWith "linkElements not found"
 
-  -- Render nodes using SceneNestedJoin (all nodes colored by group)
+  -- Render nodes using UpdateNestedJoin (all nodes colored by group)
   let scene = SceneData { nodes: nodesInSim }
   nodesSelections <- renderTree nodesGroup (createNodesTree scene)
   let nodeCircles = case Map.lookup "nodeElements" nodesSelections of
         Just sel -> sel
         Nothing -> unsafePartial $ unsafeCrashWith "nodeElements not found"
 
-  -- SceneNestedJoin returns Selection SceneData, but DOM elements are bound to KeyedNode
+  -- UpdateNestedJoin returns Selection SceneData, but DOM elements are bound to KeyedNode
   -- This is a library limitation - the type signature doesn't capture the inner datum type
   -- We use unsafeCoerce because we know the runtime datum type is KeyedNode
   let nodeCirclesKeyed = unsafeCoerce nodeCircles :: _ SBoundOwns _ KeyedNode
@@ -229,7 +229,7 @@ drawLesMisGUPSimple forcesArray activeForces model containerSelector = do
 
 -- | Update nodes with new data - this is where the magic happens!
 -- |
--- | Just call renderTree with new SceneData, and SceneNestedJoin automatically:
+-- | Just call renderTree with new SceneData, and UpdateNestedJoin automatically:
 -- | - Adds entering nodes with transitions (colored by group)
 -- | - Updates existing nodes with transitions (colored by group)
 -- | - Removes exiting nodes with transitions
@@ -241,7 +241,7 @@ updateNodes newNodes = do
     , activeForces: Nothing, config: Nothing, keyFn: keyIsID_
     }
 
-  -- Render new scene - SceneNestedJoin does all the GUP work!
+  -- Render new scene - UpdateNestedJoin does all the GUP work!
   nodesGroup <- select "#nodes"
   let scene = SceneData { nodes: updatedNodes }
   _ <- renderTree nodesGroup (createNodesTree scene)

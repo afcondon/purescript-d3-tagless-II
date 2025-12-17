@@ -1233,8 +1233,8 @@ renderNodeHelperWithDatum parentSel (Node node) datumOpt = do
 -- (Join cases manage their own data through the join logic, no datum passing needed)
 renderNodeHelperWithDatum parentSel tree@(Join _) _ = renderNodeHelper parentSel tree
 renderNodeHelperWithDatum parentSel tree@(NestedJoin _) _ = renderNodeHelper parentSel tree
-renderNodeHelperWithDatum parentSel tree@(SceneJoin _) _ = renderNodeHelper parentSel tree
-renderNodeHelperWithDatum parentSel tree@(SceneNestedJoin _) _ = renderNodeHelper parentSel tree
+renderNodeHelperWithDatum parentSel tree@(UpdateJoin _) _ = renderNodeHelper parentSel tree
+renderNodeHelperWithDatum parentSel tree@(UpdateNestedJoin _) _ = renderNodeHelper parentSel tree
 
 -- | Helper: Render a single node and its children (no explicit datum)
 -- | Returns the created element and accumulated selections map
@@ -1375,7 +1375,7 @@ renderNodeHelper parentSel (NestedJoin joinSpec) = do
 
 -- Render a scene join with General Update Pattern behavior
 -- This implements enter/update/exit with behavior specs
-renderNodeHelper parentSel (SceneJoin joinSpec) = do
+renderNodeHelper parentSel (UpdateJoin joinSpec) = do
   -- 1. Perform data join (enter/update/exit)
   -- Use key function if provided, otherwise fall back to Eq-based join
   JoinResult { enter: enterSel, update: updateSel, exit: exitSel } <-
@@ -1401,7 +1401,7 @@ renderNodeHelper parentSel (SceneJoin joinSpec) = do
         BoundSelection rec -> Array.length rec.data
         ExitingSelection rec -> Array.length rec.data
         _ -> 0
-    log $ "Tree API SceneJoin '" <> joinSpec.name <> "': enter=" <> show enterCount <> ", update=" <> show updateCount <> ", exit=" <> show exitCount
+    log $ "Tree API UpdateJoin '" <> joinSpec.name <> "': enter=" <> show enterCount <> ", update=" <> show updateCount <> ", exit=" <> show exitCount
 
   -- 2. Handle EXIT with behavior
   --
@@ -1543,8 +1543,8 @@ renderNodeHelper parentSel (SceneJoin joinSpec) = do
 
   pure $ Tuple firstElement selectionsMap
 
--- SceneNestedJoin: Combines NestedJoin's type decomposition with SceneJoin's GUP behaviors
-renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
+-- UpdateNestedJoin: Combines NestedJoin's type decomposition with UpdateJoin's GUP behaviors
+renderNodeHelper parentSel (UpdateNestedJoin joinSpec) = do
   -- 1. Decompose outer data into inner data
   --    joinSpec.joinData :: Array outerDatum
   --    joinSpec.decompose :: outerDatum -> Array innerDatum
@@ -1578,7 +1578,7 @@ renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
   --       BoundSelection rec -> Array.length rec.data
   --       ExitingSelection rec -> Array.length rec.data
   --       _ -> 0
-  --   log $ "Tree API SceneNestedJoin '" <> joinSpec.name <> "': enter=" <> show enterCount <> ", update=" <> show updateCount <> ", exit=" <> show exitCount
+  --   log $ "Tree API UpdateNestedJoin '" <> joinSpec.name <> "': enter=" <> show enterCount <> ", update=" <> show updateCount <> ", exit=" <> show exitCount
 
   -- 3. Handle EXIT with behavior
   --
@@ -1614,7 +1614,7 @@ renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
   -- 3. Creating a transition that animates to the original template attrs
   --
   -- TYPE ERASURE NOTE:
-  -- SceneNestedJoin uses unsafeCoerce because the outer datum type differs from
+  -- UpdateNestedJoin uses unsafeCoerce because the outer datum type differs from
   -- the inner (decomposed) datum type. The template and behaviors are typed for
   -- inner datum but we're in a context typed for outer datum. At runtime, the
   -- data IS the correct inner type due to decomposition, so the coercion is safe.
@@ -1670,7 +1670,7 @@ renderNodeHelper parentSel (SceneNestedJoin joinSpec) = do
           renderTemplatesForBoundSelection (unsafeCoerce joinSpec.template) updateSel
     Nothing -> renderTemplatesForBoundSelection (unsafeCoerce joinSpec.template) updateSel
 
-  -- 6-9. Combine results (same as SceneJoin)
+  -- 6-9. Combine results (same as UpdateJoin)
   -- Note: Only ENTER elements contribute child selections (UPDATE only updates root attrs)
   let
     enterElements = map fst enterElementsAndMaps

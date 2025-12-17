@@ -1,7 +1,7 @@
 -- | Expression Transition Demo - Declarative Transitions with v3 Expressions
 -- |
 -- | This demonstrates the fully declarative approach to transitions:
--- | - sceneJoin defines enter behavior with initial state + transition
+-- | - updateJoin defines enter behavior with initial state + transition
 -- | - Template defines final state using v3 expressions
 -- | - No Map lookup, no unsafeCoerce - type flows through the tree
 -- |
@@ -106,8 +106,8 @@ v3TransitionDemo = runD3v2M do
         , evalAttrStr "class" (str "v3-demo")
         ]
         `T.withChild`
-          -- sceneJoin: template = final state, enterBehavior = initial state + transition
-          ( T.sceneJoin "circles" "circle" circleData
+          -- updateJoin: template = final state, enterBehavior = initial state + transition
+          ( T.updateJoin "circles" "circle" circleData
               -- Template defines FINAL state (where elements end up)
               ( \d -> T.elem Circle
                   [ evalAttr "cx" (lit (evalExpr posX d)) -- v3: final X position
@@ -143,7 +143,7 @@ v3TransitionDemo = runD3v2M do
     Console.log $ "  posY         → " <> runCodeGen (posY :: CodeGen Number)
     Console.log $ "  circleRadius → " <> runCodeGen (circleRadius :: CodeGen Number)
     Console.log ""
-    Console.log "Approach: Fully declarative with sceneJoin + staggeredTransition"
+    Console.log "Approach: Fully declarative with updateJoin + staggeredTransition"
     Console.log "  • Template defines final state (v3 expressions)"
     Console.log "  • enterBehavior defines initial state + staggered transition"
     Console.log "  • staggeredTransition: 600ms duration, 100ms stagger per element"

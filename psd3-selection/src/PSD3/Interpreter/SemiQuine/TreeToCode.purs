@@ -93,7 +93,7 @@ treeLines maybeSample tree indentLevel = case tree of
       [ indent indentLevel <> "T.nestedJoin \"" <> nestedSpec.name <> "\" \"" <> nestedSpec.key <> "\" data_ decompose $ \\inner ->"
       ] <> templateCode
 
-  SceneJoin sceneSpec ->
+  UpdateJoin sceneSpec ->
     let
       behaviors =
         (if hasEnter sceneSpec then "enter " else "") <>
@@ -107,13 +107,13 @@ treeLines maybeSample tree indentLevel = case tree of
         Nothing ->
           [ indent (indentLevel + 1) <> "-- (no data to evaluate template)" ]
     in
-      [ indent indentLevel <> "T.sceneJoin \"" <> sceneSpec.name <> "\" \"" <> sceneSpec.key <> "\" data_"
+      [ indent indentLevel <> "T.updateJoin \"" <> sceneSpec.name <> "\" \"" <> sceneSpec.key <> "\" data_"
       , indent indentLevel <> "  -- behaviors: " <> behaviors
       , indent indentLevel <> "  $ \\d ->"
       ] <> templateCode
 
-  SceneNestedJoin sceneNestedSpec ->
-    [ indent indentLevel <> "T.sceneNestedJoin \"" <> sceneNestedSpec.name <> "\" \"" <> sceneNestedSpec.key <> "\" data_ decompose"
+  UpdateNestedJoin sceneNestedSpec ->
+    [ indent indentLevel <> "T.updateNestedJoin \"" <> sceneNestedSpec.name <> "\" \"" <> sceneNestedSpec.key <> "\" data_ decompose"
     , indent indentLevel <> "  -- (scene nested join - template omitted)"
     ]
 
