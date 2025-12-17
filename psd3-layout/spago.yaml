@@ -29,4 +29,10 @@ package:
     - unsafe-coerce
   test:
     main: Test.Main
-    dependencies: []
+    dependencies:
+      - argonaut-codecs
+      - argonaut-core
+      - node-buffer
+      - node-fs
+      - node-path
+      - node-process
