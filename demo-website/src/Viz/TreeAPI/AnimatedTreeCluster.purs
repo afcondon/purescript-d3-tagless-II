@@ -224,15 +224,15 @@ draw flareData selector currentLayout = runD3v2M do
           , strokeWidth $ num 1.5
           ])
         { keyFn: Just linkKey
-        , enterBehavior: Just
-            { initialAttrs: []  -- Start with correct path (no position animation on enter)
+        , enter: Just
+            { attrs: []  -- Start with correct path (no position animation on enter)
             , transition: Nothing  -- Instant enter
             }
-        , updateBehavior: Just
+        , update: Just
             { attrs: []
             , transition: Just transitionConfig  -- Animate path changes
             }
-        , exitBehavior: Just
+        , exit: Just
             { attrs: []
             , transition: Nothing  -- Instant exit
             }
@@ -255,15 +255,15 @@ draw flareData selector currentLayout = runD3v2M do
           , strokeWidth $ num 1.5
           ])
         { keyFn: Just nodeKey
-        , enterBehavior: Just
-            { initialAttrs: []  -- Start at final position (no animation on enter)
+        , enter: Just
+            { attrs: []  -- Start at final position (no animation on enter)
             , transition: Nothing
             }
-        , updateBehavior: Just
+        , update: Just
             { attrs: []
             , transition: Just transitionConfig  -- Animate position changes
             }
-        , exitBehavior: Just
+        , exit: Just
             { attrs: []
             , transition: Nothing
             }
@@ -311,12 +311,12 @@ update dataTree selector chartWidth chartHeight currentLayout = runD3v2M do
           , strokeWidth $ num 1.5
           ])
         { keyFn: Just linkKey
-        , enterBehavior: Nothing
-        , updateBehavior: Just
+        , enter: Nothing
+        , update: Just
             { attrs: []
             , transition: Just transitionConfig
             }
-        , exitBehavior: Nothing
+        , exit: Nothing
         }
 
   _ <- renderTree linksGroupSel linksTree
@@ -336,12 +336,12 @@ update dataTree selector chartWidth chartHeight currentLayout = runD3v2M do
           , strokeWidth $ num 1.5
           ])
         { keyFn: Just nodeKey
-        , enterBehavior: Nothing
-        , updateBehavior: Just
+        , enter: Nothing
+        , update: Just
             { attrs: []
             , transition: Just transitionConfig
             }
-        , exitBehavior: Nothing
+        , exit: Nothing
         }
 
   _ <- renderTree nodesGroupSel nodesTree

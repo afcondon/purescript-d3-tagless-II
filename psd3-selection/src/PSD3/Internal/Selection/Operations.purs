@@ -1411,7 +1411,7 @@ renderNodeHelper parentSel (UpdateJoin joinSpec) = do
   -- If we set attrs before creating the transition, there's nothing to animate.
   -- Instead, we create the transition and let it animate to the exit attrs,
   -- then D3's transition.remove() handles cleanup after animation completes.
-  case joinSpec.exitBehavior of
+  case joinSpec.behaviors.exit of
     Just exitBehavior -> do
       case exitBehavior.transition of
         Just transConfig -> do
@@ -1430,25 +1430,25 @@ renderNodeHelper parentSel (UpdateJoin joinSpec) = do
   -- 3. Handle ENTER with behavior
   --
   -- ENTER TRANSITION DESIGN:
-  -- For enter transitions, elements need to start at initialAttrs and animate
+  -- For enter transitions, elements need to start at attrs (enter phase) and animate
   -- to their final template attrs. We achieve this by:
-  -- 1. Modifying the template to include initialAttrs at the END of the attrs array
+  -- 1. Modifying the template to include attrs (enter phase) at the END of the attrs array
   --    (Array append means last value wins when same attribute appears twice)
-  -- 2. Rendering elements with this modified template (they start at initialAttrs)
+  -- 2. Rendering elements with this modified template (they start at attrs (enter phase))
   -- 3. Creating a transition that animates to the original template attrs
-  enterElementsAndMaps <- case joinSpec.enterBehavior of
+  enterElementsAndMaps <- case joinSpec.behaviors.enter of
     Just enterBehavior -> do
-      -- Modify template: append initialAttrs so they override template attrs
+      -- Modify template: append attrs (enter phase) so they override template attrs
       -- (last occurrence of an attribute wins when applied to DOM)
       let
         modifiedTemplate datum = case joinSpec.template datum of
-          Node nodeSpec -> Node nodeSpec { attrs = nodeSpec.attrs <> enterBehavior.initialAttrs }
+          Node nodeSpec -> Node nodeSpec { attrs = nodeSpec.attrs <> enterBehavior.attrs }
           other -> other -- For non-Node trees, can't modify attrs easily
 
-      -- Render with modified template (elements start with initialAttrs)
+      -- Render with modified template (elements start with attrs (enter phase))
       rendered <- renderTemplatesForPendingSelection modifiedTemplate enterSel
 
-      -- Apply enter transition to animate from initialAttrs to final template attrs
+      -- Apply enter transition to animate from attrs (enter phase) to final template attrs
       case enterBehavior.transition of
         Just transConfig -> do
           let enterElements = map fst rendered
@@ -1476,7 +1476,7 @@ renderNodeHelper parentSel (UpdateJoin joinSpec) = do
   let enterChildMaps = map snd enterElementsAndMaps
 
   -- 4. Handle UPDATE with behavior (children not tracked, only root attrs updated)
-  updateElements <- case joinSpec.updateBehavior of
+  updateElements <- case joinSpec.behaviors.update of
     Just updateBehavior -> do
       -- Check for transition
       case updateBehavior.transition of
@@ -1588,7 +1588,7 @@ renderNodeHelper parentSel (UpdateNestedJoin joinSpec) = do
   -- If we set attrs before creating the transition, there's nothing to animate.
   -- Instead, we create the transition and let it animate to the exit attrs,
   -- then D3's transition.remove() handles cleanup after animation completes.
-  case joinSpec.exitBehavior of
+  case joinSpec.behaviors.exit of
     Just exitBehavior -> do
       case (unsafeCoerce exitBehavior).transition of
         Just transConfig -> do
@@ -1606,11 +1606,11 @@ renderNodeHelper parentSel (UpdateNestedJoin joinSpec) = do
   -- 4. Handle ENTER with behavior
   --
   -- ENTER TRANSITION DESIGN:
-  -- For enter transitions, elements need to start at initialAttrs and animate
+  -- For enter transitions, elements need to start at attrs (enter phase) and animate
   -- to their final template attrs. We achieve this by:
-  -- 1. Modifying the template to include initialAttrs at the END of the attrs array
+  -- 1. Modifying the template to include attrs (enter phase) at the END of the attrs array
   --    (Array append means last value wins when same attribute appears twice)
-  -- 2. Rendering elements with this modified template (they start at initialAttrs)
+  -- 2. Rendering elements with this modified template (they start at attrs (enter phase))
   -- 3. Creating a transition that animates to the original template attrs
   --
   -- TYPE ERASURE NOTE:
@@ -1618,17 +1618,17 @@ renderNodeHelper parentSel (UpdateNestedJoin joinSpec) = do
   -- the inner (decomposed) datum type. The template and behaviors are typed for
   -- inner datum but we're in a context typed for outer datum. At runtime, the
   -- data IS the correct inner type due to decomposition, so the coercion is safe.
-  enterElementsAndMaps <- case joinSpec.enterBehavior of
+  enterElementsAndMaps <- case joinSpec.behaviors.enter of
     Just enterBehavior -> do
-      -- Modify template: append initialAttrs so they override template attrs
+      -- Modify template: append attrs (enter phase) so they override template attrs
       -- (last occurrence of an attribute wins when applied to DOM)
       let
         modifiedTemplate datum = case (unsafeCoerce joinSpec.template) datum of
-          Node nodeSpec -> Node nodeSpec { attrs = nodeSpec.attrs <> (unsafeCoerce enterBehavior.initialAttrs) }
+          Node nodeSpec -> Node nodeSpec { attrs = nodeSpec.attrs <> (unsafeCoerce enterBehavior.attrs) }
           other -> other
       rendered <- renderTemplatesForPendingSelection modifiedTemplate enterSel
 
-      -- Apply enter transition to animate from initialAttrs to final template attrs
+      -- Apply enter transition to animate from attrs (enter phase) to final template attrs
       case (unsafeCoerce enterBehavior).transition of
         Just transConfig -> do
           let enterElements = map fst rendered
@@ -1651,7 +1651,7 @@ renderNodeHelper parentSel (UpdateNestedJoin joinSpec) = do
     Nothing -> renderTemplatesForPendingSelection (unsafeCoerce joinSpec.template) enterSel
 
   -- 5. Handle UPDATE with behavior (children not tracked, only root attrs updated)
-  updateElements <- case joinSpec.updateBehavior of
+  updateElements <- case joinSpec.behaviors.update of
     Just updateBehavior -> do
       -- Check for transition
       case (unsafeCoerce updateBehavior).transition of

@@ -362,9 +362,9 @@ createNodesTree scene =
         , opacity $ num (opacityForRenderNode rn)
         ]
     )
-    { enterBehavior: Nothing
-    , updateBehavior: Nothing
-    , exitBehavior: Nothing
+    { enter: Nothing
+    , update: Nothing
+    , exit: Nothing
     }
 
 -- | Create links tree with rich visual encoding
@@ -383,9 +383,9 @@ createLinksTree scene =
         , opacity $ num (0.3 + link.weight * 0.4)      -- 0.3-0.7 based on weight
         ]
     )
-    { enterBehavior: Nothing
-    , updateBehavior: Nothing
-    , exitBehavior: Nothing
+    { enter: Nothing
+    , update: Nothing
+    , exit: Nothing
     }
 
 -- =============================================================================

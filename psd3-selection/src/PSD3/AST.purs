@@ -33,7 +33,7 @@
 -- |
 -- | - `AST datum` / `Tree datum` - A visualization specification parameterized by datum type
 -- | - `ASTNode datum` / `TreeNode datum` - A node in the AST
--- | - `EnterBehavior`, `UpdateBehavior`, `ExitBehavior` - GUP phase specifications
+-- | - `PhaseBehavior`, `GUPBehaviors` - GUP phase specifications
 -- |
 -- | ## Smart Constructors
 -- |
@@ -55,9 +55,8 @@ module PSD3.AST
   , ASTNode
   , Tree(..)
   , TreeNode
-  , EnterBehavior
-  , UpdateBehavior
-  , ExitBehavior
+  , PhaseBehavior
+  , GUPBehaviors
     -- * Element Types (Circle, Rect, SVG, etc.)
   , module ElementTypes
     -- * Smart Constructors
@@ -170,9 +169,7 @@ data Tree datum
       , joinData :: Array datum                -- Data to join
       , template :: datum -> Tree datum        -- Base template (used for all phases)
       , keyFn :: Maybe (datum -> String)       -- Optional key function for identity matching
-      , enterBehavior :: Maybe (EnterBehavior datum)
-      , updateBehavior :: Maybe (UpdateBehavior datum)
-      , exitBehavior :: Maybe (ExitBehavior datum)
+      , behaviors :: GUPBehaviors datum        -- Enter/update/exit behaviors
       }
   -- | UpdateNestedJoin combines NestedJoin's type decomposition with UpdateJoin's GUP behaviors
   -- |
@@ -190,36 +187,31 @@ data Tree datum
       , joinData :: Array datum                     -- Outer data (e.g., scene data)
       , decompose :: datum -> Array datum           -- Decomposer: extract inner collection (type-erased)
       , template :: datum -> Tree datum             -- Template for inner elements (type-erased)
-      , enterBehavior :: Maybe (EnterBehavior datum)   -- Enter behavior (type-erased)
-      , updateBehavior :: Maybe (UpdateBehavior datum) -- Update behavior (type-erased)
-      , exitBehavior :: Maybe (ExitBehavior datum)     -- Exit behavior (type-erased)
+      , behaviors :: GUPBehaviors datum             -- Enter/update/exit behaviors (type-erased)
       }
 
--- | Behavior specification for entering elements
+-- | Unified behavior specification for any GUP phase (enter, update, or exit)
 -- |
--- | Entering elements are new data items that don't have existing DOM elements.
--- | They need to be created and optionally animated in.
-type EnterBehavior datum =
-  { initialAttrs :: Array (Attribute datum)  -- Initial state before transition (e.g., y 0.0, opacity 0.0)
-  , transition :: Maybe TransitionConfig      -- How to animate to final state
+-- | Each phase can specify:
+-- | - `attrs`: Attributes to apply for this phase
+-- | - `transition`: Optional animation configuration
+-- |
+-- | For enter: attrs are initial state before animating to template attrs
+-- | For update: attrs override template attrs, then animate
+-- | For exit: attrs applied before animating out and removing
+type PhaseBehavior datum =
+  { attrs :: Array (Attribute datum)         -- Attributes for this phase
+  , transition :: Maybe TransitionConfig      -- Optional animation
   }
 
--- | Behavior specification for updating elements
+-- | Complete GUP (General Update Pattern) behavior specification
 -- |
--- | Updating elements are existing DOM elements whose data has changed.
--- | They typically transition to new positions/styles.
-type UpdateBehavior datum =
-  { attrs :: Array (Attribute datum)         -- Attributes to set immediately
-  , transition :: Maybe TransitionConfig      -- How to transition to new state
-  }
-
--- | Behavior specification for exiting elements
--- |
--- | Exiting elements are old DOM elements whose data is no longer present.
--- | They should be animated out then removed.
-type ExitBehavior datum =
-  { attrs :: Array (Attribute datum)         -- Attributes to set before transition (e.g., class "exit")
-  , transition :: Maybe TransitionConfig      -- How to animate out (element removed after)
+-- | Bundles enter/update/exit behaviors together. Each phase is optional -
+-- | if Nothing, the phase uses default behavior (no special attrs, no animation).
+type GUPBehaviors datum =
+  { enter :: Maybe (PhaseBehavior datum)     -- New elements appearing
+  , update :: Maybe (PhaseBehavior datum)    -- Existing elements with changed data
+  , exit :: Maybe (PhaseBehavior datum)      -- Elements being removed
   }
 
 -- | Smart constructors
@@ -346,7 +338,7 @@ nestedJoin name key data' decomposeFn templateFn =
     , template: unsafeCoerce templateFn
     }
 
--- | Create a scene join with General Update Pattern behavior
+-- | Create an update join with General Update Pattern behavior
 -- |
 -- | This is the declarative way to specify enter/update/exit behavior.
 -- | The interpreter handles all the complexity of computing joins and applying transitions.
@@ -355,18 +347,10 @@ nestedJoin name key data' decomposeFn templateFn =
 -- | ```purescript
 -- | updateJoin "nodes" "circle" nodeData
 -- |   (\node -> elem Circle [ cx node.x, cy node.y, radius 5.0 ])
--- |   { enterBehavior: Just
--- |       { initialAttrs: [ y 0.0, opacity 0.0 ]
--- |       , transition: Just slideDown
--- |       }
--- |   , updateBehavior: Just
--- |       { attrs: []
--- |       , transition: Just moveToPosition
--- |       }
--- |   , exitBehavior: Just
--- |       { attrs: [ class_ "exit" ]
--- |       , transition: Just fadeOut
--- |       }
+-- |   { enter: Just { attrs: [ y 0.0, opacity 0.0 ], transition: Just slideDown }
+-- |   , update: Just { attrs: [], transition: Just moveToPosition }
+-- |   , exit: Just { attrs: [ class_ "exit" ], transition: Just fadeOut }
+-- |   , keyFn: Just _.id  -- Optional key function for identity matching
 -- |   }
 -- | ```
 updateJoin
@@ -375,10 +359,10 @@ updateJoin
   -> String                                      -- Element type (e.g., "circle", "g")
   -> Array datum                                 -- Data to join
   -> (datum -> Tree datum)                       -- Template builder
-  -> { enterBehavior :: Maybe (EnterBehavior datum)
-     , updateBehavior :: Maybe (UpdateBehavior datum)
-     , exitBehavior :: Maybe (ExitBehavior datum)
-     , keyFn :: Maybe (datum -> String)          -- Optional: identity function for matching
+  -> { enter :: Maybe (PhaseBehavior datum)
+     , update :: Maybe (PhaseBehavior datum)
+     , exit :: Maybe (PhaseBehavior datum)
+     , keyFn :: Maybe (datum -> String)
      }
   -> Tree datum
 updateJoin name key data' template behaviors =
@@ -388,12 +372,10 @@ updateJoin name key data' template behaviors =
     , joinData: data'
     , template
     , keyFn: behaviors.keyFn
-    , enterBehavior: behaviors.enterBehavior
-    , updateBehavior: behaviors.updateBehavior
-    , exitBehavior: behaviors.exitBehavior
+    , behaviors: { enter: behaviors.enter, update: behaviors.update, exit: behaviors.exit }
     }
 
--- | Create a scene nested join with type decomposition and GUP behaviors
+-- | Create an update nested join with type decomposition and GUP behaviors
 -- |
 -- | This is the RECOMMENDED way to use UpdateJoin - it combines type decomposition
 -- | with enter/update/exit behaviors, solving the type mixing problem.
@@ -408,9 +390,9 @@ updateJoin name key data' template behaviors =
 -- |     [ cx point.x
 -- |     , cy point.y
 -- |     ])
--- |   { enterBehavior: Just { initialAttrs: [radius 0.0], transition: Just fadeIn }
--- |   , updateBehavior: Just { attrs: [], transition: Just move }
--- |   , exitBehavior: Just { attrs: [], transition: Just fadeOut }
+-- |   { enter: Just { attrs: [radius 0.0], transition: Just fadeIn }
+-- |   , update: Just { attrs: [], transition: Just move }
+-- |   , exit: Just { attrs: [], transition: Just fadeOut }
 -- |   }
 -- | ```
 updateNestedJoin
@@ -420,10 +402,7 @@ updateNestedJoin
   -> Array outerDatum                                 -- Outer data (e.g., scene data)
   -> (outerDatum -> Array innerDatum)                 -- Decomposer: extract inner collection
   -> (innerDatum -> Tree innerDatum)                  -- Template for inner elements
-  -> { enterBehavior :: Maybe (EnterBehavior innerDatum)
-     , updateBehavior :: Maybe (UpdateBehavior innerDatum)
-     , exitBehavior :: Maybe (ExitBehavior innerDatum)
-     }
+  -> GUPBehaviors innerDatum                          -- Enter/update/exit behaviors
   -> Tree outerDatum
 updateNestedJoin name key data' decomposeFn templateFn behaviors =
   UpdateNestedJoin
@@ -435,9 +414,7 @@ updateNestedJoin name key data' decomposeFn templateFn behaviors =
     -- so they agree on innerDatum type
     , decompose: unsafeCoerce decomposeFn
     , template: unsafeCoerce templateFn
-    , enterBehavior: unsafeCoerce behaviors.enterBehavior
-    , updateBehavior: unsafeCoerce behaviors.updateBehavior
-    , exitBehavior: unsafeCoerce behaviors.exitBehavior
+    , behaviors: unsafeCoerce behaviors
     }
 
 -- | Operators for Emmet-style syntax

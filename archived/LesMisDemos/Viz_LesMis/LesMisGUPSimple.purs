@@ -91,8 +91,8 @@ createNodesTree (SceneData scene) =
       , stroke "#fff"
       , strokeWidth 2.0
       ])
-    { enterBehavior: Just             -- New nodes enter from center
-        { initialAttrs:
+    { enter: Just             -- New nodes enter from center
+        { attrs:
             [ cx 0.0
             , cy 0.0
             , radius 0.0
@@ -103,8 +103,8 @@ createNodesTree (SceneData scene) =
             , easing: Just CubicInOut
             }
         }
-    , updateBehavior: Nothing  -- No update behavior - positions updated by tick function
-    , exitBehavior: Just              -- Exiting nodes shrink away
+    , update: Nothing  -- No update behavior - positions updated by tick function
+    , exit: Just              -- Exiting nodes shrink away
         { attrs: [ radius 0.0 ]
         , transition: Just
             { duration: Milliseconds 500.0

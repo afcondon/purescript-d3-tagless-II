@@ -106,8 +106,8 @@ createLettersTree letters =
       ])
     -- Behaviors for enter/update/exit
     { keyFn: Just _.letter       -- Identity by letter, not by index!
-    , enterBehavior: Just
-        { initialAttrs:
+    , enter: Just
+        { attrs:
             [ y $ num 20.0              -- Start above
             , opacity $ num 0.0         -- Start invisible
             , fill $ text "#27ae60"      -- Green for entering
@@ -119,7 +119,7 @@ createLettersTree letters =
             , easing: Just BounceOut   -- Bouncy entrance!
             }
         }
-    , updateBehavior: Just
+    , update: Just
         { attrs:
             -- Update attributes (slide to new position)
             [ from "x" (\d' -> evalExpr letterX d')
@@ -134,7 +134,7 @@ createLettersTree letters =
             , easing: Just CubicInOut
             }
         }
-    , exitBehavior: Just
+    , exit: Just
         { attrs:
             [ y $ num 180.0             -- Drop below
             , opacity $ num 0.0         -- Fade out

@@ -79,9 +79,9 @@ render _ =
   [scene]              -- Outer data: SceneData
   (_.points)           -- Decompose to Array DataPoint
   (\\point -> ...)      -- Template
-  { enterBehavior: Just { initialAttrs: [...], transition: ... }
-  , updateBehavior: Just { attrs: [], transition: ... }
-  , exitBehavior: Just { attrs: [...], transition: ... }
+  { enter: Just { attrs: [...], transition: ... }
+  , update: Just { attrs: [], transition: ... }
+  , exit: Just { attrs: [...], transition: ... }
   }"""
                 ]
             ]

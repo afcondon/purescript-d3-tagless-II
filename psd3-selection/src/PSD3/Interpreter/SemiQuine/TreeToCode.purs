@@ -118,13 +118,13 @@ treeLines maybeSample tree indentLevel = case tree of
     ]
 
   where
-    hasEnter spec = case spec.enterBehavior of
+    hasEnter spec = case spec.behaviors.enter of
       Just _ -> true
       Nothing -> false
-    hasUpdate spec = case spec.updateBehavior of
+    hasUpdate spec = case spec.behaviors.update of
       Just _ -> true
       Nothing -> false
-    hasExit spec = case spec.exitBehavior of
+    hasExit spec = case spec.behaviors.exit of
       Just _ -> true
       Nothing -> false
 

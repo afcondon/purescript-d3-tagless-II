@@ -511,9 +511,9 @@ createNodesTree scene =
         ]
         `T.withBehaviors` [ Drag (SimulationDrag simulationId) ]
     )
-    { enterBehavior: Nothing
-    , updateBehavior: Nothing
-    , exitBehavior: Nothing
+    { enter: Nothing
+    , update: Nothing
+    , exit: Nothing
     }
 
 -- | Create links tree for scene rendering
@@ -532,9 +532,9 @@ createLinksTree scene =
         , evalAttrStr "class" (str "force-link")
         ]
     )
-    { enterBehavior: Nothing
-    , updateBehavior: Nothing
-    , exitBehavior: Nothing
+    { enter: Nothing
+    , update: Nothing
+    , exit: Nothing
     }
 
 -- =============================================================================

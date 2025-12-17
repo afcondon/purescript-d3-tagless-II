@@ -107,8 +107,8 @@ createCirclesTree scene =
       , evalAttrStr "stroke" (str "#000")
       , evalAttr "stroke-width" (lit 2.0)
       ])
-    { enterBehavior: Just  -- Elements enter from center
-        { initialAttrs:
+    { enter: Just  -- Elements enter from center
+        { attrs:
             [ evalAttr "cx" (lit 400.0)
             , evalAttr "cy" (lit 150.0)
             , evalAttr "r" (lit 0.0)
@@ -120,7 +120,7 @@ createCirclesTree scene =
             , easing: Just CubicInOut
             }
         }
-    , updateBehavior: Just  -- Elements transition to new positions
+    , update: Just  -- Elements transition to new positions
         { attrs:
             [ fnAttr "cx" (_.x)
             , fnAttr "cy" (_.y)
@@ -136,7 +136,7 @@ createCirclesTree scene =
             , easing: Just CubicInOut
             }
         }
-    , exitBehavior: Just  -- Elements shrink away
+    , exit: Just  -- Elements shrink away
         { attrs:
             [ evalAttr "r" (lit 0.0)
             ]

@@ -85,35 +85,35 @@ toAST tree = case tree of
       , hasTemplate: true
       }
 
-  UpdateJoin {name, key, joinData, enterBehavior, updateBehavior, exitBehavior} ->
+  UpdateJoin {name, key, joinData, behaviors} ->
     UpdateJoinAST
       { name
       , key
       , dataCount: length joinData
-      , hasEnter: case enterBehavior of
+      , hasEnter: case behaviors.enter of
           Just _ -> true
           Nothing -> false
-      , hasUpdate: case updateBehavior of
+      , hasUpdate: case behaviors.update of
           Just _ -> true
           Nothing -> false
-      , hasExit: case exitBehavior of
+      , hasExit: case behaviors.exit of
           Just _ -> true
           Nothing -> false
       , hasTemplate: true
       }
 
-  UpdateNestedJoin {name, key, joinData, enterBehavior, updateBehavior, exitBehavior} ->
+  UpdateNestedJoin {name, key, joinData, behaviors} ->
     UpdateNestedJoinAST
       { name
       , key
       , dataCount: length joinData
-      , hasEnter: case enterBehavior of
+      , hasEnter: case behaviors.enter of
           Just _ -> true
           Nothing -> false
-      , hasUpdate: case updateBehavior of
+      , hasUpdate: case behaviors.update of
           Just _ -> true
           Nothing -> false
-      , hasExit: case exitBehavior of
+      , hasExit: case behaviors.exit of
           Just _ -> true
           Nothing -> false
       , hasTemplate: true

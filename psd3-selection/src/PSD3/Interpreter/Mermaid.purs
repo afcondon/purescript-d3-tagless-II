@@ -192,12 +192,12 @@ renderTree tree parentId = case tree of
     pure joinId
 
   UpdateJoin sceneSpec -> do
-    -- Create scene join node with GUP info
+    -- Create update join node with GUP info
     let behaviorInfo =
-          (if isJust sceneSpec.enterBehavior then "E" else "") <>
-          (if isJust sceneSpec.updateBehavior then "U" else "") <>
-          (if isJust sceneSpec.exitBehavior then "X" else "")
-        joinLabel = "SCENE JOIN \"" <> sceneSpec.name <> "\" (" <> sceneSpec.key <> ") ["
+          (if isJust sceneSpec.behaviors.enter then "E" else "") <>
+          (if isJust sceneSpec.behaviors.update then "U" else "") <>
+          (if isJust sceneSpec.behaviors.exit then "X" else "")
+        joinLabel = "UPDATE JOIN \"" <> sceneSpec.name <> "\" (" <> sceneSpec.key <> ") ["
                     <> show (length sceneSpec.joinData) <> " items] {" <> behaviorInfo <> "}"
     joinId <- addNode joinLabel "updateJoinNode"
 
@@ -221,12 +221,12 @@ renderTree tree parentId = case tree of
     pure joinId
 
   UpdateNestedJoin sceneNestedSpec -> do
-    -- Create scene nested join node with GUP info
+    -- Create update nested join node with GUP info
     let behaviorInfo =
-          (if isJust sceneNestedSpec.enterBehavior then "E" else "") <>
-          (if isJust sceneNestedSpec.updateBehavior then "U" else "") <>
-          (if isJust sceneNestedSpec.exitBehavior then "X" else "")
-        joinLabel = "SCENE NESTED JOIN \"" <> sceneNestedSpec.name <> "\" (" <> sceneNestedSpec.key <> ") ["
+          (if isJust sceneNestedSpec.behaviors.enter then "E" else "") <>
+          (if isJust sceneNestedSpec.behaviors.update then "U" else "") <>
+          (if isJust sceneNestedSpec.behaviors.exit then "X" else "")
+        joinLabel = "UPDATE NESTED JOIN \"" <> sceneNestedSpec.name <> "\" (" <> sceneNestedSpec.key <> ") ["
                     <> show (length sceneNestedSpec.joinData) <> " items] {" <> behaviorInfo <> "}"
     joinId <- addNode joinLabel "updateNestedJoinNode"
 

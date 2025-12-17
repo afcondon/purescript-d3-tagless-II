@@ -53,32 +53,32 @@ describeTree tree level = case tree of
     tell " using data-driven attributes\n"
     tell $ indent (level + 1) <> "(Nested template function defined)\n"
 
-  UpdateJoin { name, key, joinData, enterBehavior, updateBehavior, exitBehavior } -> do
+  UpdateJoin { name, key, joinData, behaviors } -> do
     tell $ indent level <> "For each of " <> show (length joinData) <> " data items, "
-    tell $ "create/update/remove " <> key <> " (scene join named \"" <> name <> "\")"
+    tell $ "create/update/remove " <> key <> " (update join named \"" <> name <> "\")"
     tell " with General Update Pattern:\n"
-    when (isJust enterBehavior)
+    when (isJust behaviors.enter)
       $ tell
       $ indent (level + 1) <> "- Enter: elements appear with initial attributes and transition\n"
-    when (isJust updateBehavior)
+    when (isJust behaviors.update)
       $ tell
       $ indent (level + 1) <> "- Update: elements transition to new state\n"
-    when (isJust exitBehavior)
+    when (isJust behaviors.exit)
       $ tell
       $ indent (level + 1) <> "- Exit: elements transition out then removed\n"
     tell $ indent (level + 1) <> "(Template function defined for creating elements from data)\n"
 
-  UpdateNestedJoin { name, key, joinData, enterBehavior, updateBehavior, exitBehavior } -> do
+  UpdateNestedJoin { name, key, joinData, behaviors } -> do
     tell $ indent level <> "For each of " <> show (length joinData) <> " nested data items, "
-    tell $ "decompose and create/update/remove " <> key <> " (scene nested join named \"" <> name <> "\")"
+    tell $ "decompose and create/update/remove " <> key <> " (update nested join named \"" <> name <> "\")"
     tell " with General Update Pattern:\n"
-    when (isJust enterBehavior)
+    when (isJust behaviors.enter)
       $ tell
       $ indent (level + 1) <> "- Enter: elements appear with initial attributes and transition\n"
-    when (isJust updateBehavior)
+    when (isJust behaviors.update)
       $ tell
       $ indent (level + 1) <> "- Update: elements transition to new state\n"
-    when (isJust exitBehavior)
+    when (isJust behaviors.exit)
       $ tell
       $ indent (level + 1) <> "- Exit: elements transition out then removed\n"
     tell $ indent (level + 1) <> "(Decompose and template functions defined)\n"

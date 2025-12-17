@@ -118,7 +118,7 @@ createNodesTree scene =
     [scene]
     (_.nodes >>> map KeyedNode)
     template
-    { enterBehavior: ..., updateBehavior: ..., exitBehavior: ... }
+    { enter: ..., update: ..., exit: ... }
 
 -- Update is just 12 lines:
 updateNodes :: Array LesMisSimNode -> D3v2SimM () LesMisSimNode Unit

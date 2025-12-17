@@ -120,8 +120,8 @@ v3TransitionDemo = runD3v2M do
               )
               -- Behaviors: enter starts at center, transitions to final with stagger
               { keyFn: Nothing  -- No updates in this demo
-              , enterBehavior: Just
-                  { initialAttrs:
+              , enter: Just
+                  { attrs:
                       [ evalAttr "cx" (lit 250.0) -- start at center X
                       , evalAttr "cy" (lit 150.0) -- start at center Y
                       , evalAttrStr "fill" (str "#3498db") -- start color (blue)
@@ -129,8 +129,8 @@ v3TransitionDemo = runD3v2M do
                   , transition: Just (staggeredTransition (Milliseconds 600.0) 100.0)
                   -- Each element delays 100ms more than previous
                   }
-              , updateBehavior: Nothing
-              , exitBehavior: Nothing
+              , update: Nothing
+              , exit: Nothing
               }
           )
 

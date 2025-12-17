@@ -123,8 +123,8 @@ createLettersTree letters =
     )
     -- Behaviors for enter/update/exit
     { keyFn: Just _.letter
-    , enterBehavior: Just
-        { initialAttrs:
+    , enter: Just
+        { attrs:
             [ y $ num 20.0
             , opacity $ num 0.0
             , fill $ hex "#27ae60"   -- Green for entering
@@ -136,7 +136,7 @@ createLettersTree letters =
             , easing: Just BounceOut
             }
         }
-    , updateBehavior: Just
+    , update: Just
         { attrs:
             [ x letterX              -- Use expression directly!
             , y letterY
@@ -150,7 +150,7 @@ createLettersTree letters =
             , easing: Just CubicInOut
             }
         }
-    , exitBehavior: Just
+    , exit: Just
         { attrs:
             [ y $ num 180.0
             , opacity $ num 0.0
