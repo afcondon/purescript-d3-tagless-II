@@ -6,8 +6,10 @@ module TreeBuilder2.App
 -- |
 -- | An interactive demo where users build a tree by clicking nodes:
 -- | - Start with a single blue root node
--- | - Click a leaf node to select it (turns red)
+-- | - Click any node to select it (thick stroke indicates selection)
 -- | - Press 'a' to add a green child, 'b' to add an orange child
+-- | - Selection is retained after adding children (for adding siblings)
+-- | - Arrow keys navigate the tree (up=parent, down=child, left/right=siblings)
 -- | - Click selected node again to deselect
 -- | - Tree uses vertical hierarchical layout with bezier links
 -- | - SVG container supports zoom and pan
@@ -42,6 +44,7 @@ import PSD3.Internal.Selection.Types (SEmpty, ElementType(..))
 import PSD3.Expr.Integration (v3Attr, v3AttrStr)
 import PSD3.Expr.Expr (lit, str)
 import PSD3.AST as T
+import PSD3.Transform (clearContainer)
 import Web.DOM.Document (toParentNode) as Document
 import Web.DOM.Element (Element)
 import Web.DOM.ParentNode (QuerySelector(..), querySelector)
@@ -67,9 +70,12 @@ nodeColor Root = "#4A90E2"   -- Blue
 nodeColor TypeA = "#4AE2A4"  -- Green
 nodeColor TypeB = "#E27A4A"  -- Orange
 
--- | Selected color (red)
-selectedColor :: String
-selectedColor = "#E24A4A"
+-- | Selection stroke width (thick for selected, thin for normal)
+selectedStrokeWidth :: Number
+selectedStrokeWidth = 5.0
+
+normalStrokeWidth :: Number
+normalStrokeWidth = 2.0
 
 -- | Our tree node data
 type TreeNode =
@@ -88,7 +94,7 @@ type RenderNode =
   , y :: Number
   , depth :: Int
   , color :: String
-  , strokeColor :: String
+  , strokeWidth :: Number
   , isLeaf :: Boolean
   }
 
@@ -171,6 +177,28 @@ addChildToNode targetId newChild t =
 flattenTree :: Tree TreeNode -> Array TreeNode
 flattenTree = Array.fromFoldable
 
+-- | Find parent node ID for a given node
+findParentId :: Int -> Tree TreeNode -> Maybe Int
+findParentId targetId t =
+  let val = head t
+      children = tail t
+      childIds = map (\c -> (head c).id) children
+  in if Array.elem targetId (Array.fromFoldable childIds)
+     then Just val.id
+     else Array.foldl (\acc c -> case acc of
+       Just pid -> Just pid
+       Nothing -> findParentId targetId c) Nothing (Array.fromFoldable children)
+
+-- | Get children IDs of a node
+getChildrenIds :: Int -> Tree TreeNode -> Array Int
+getChildrenIds targetId t =
+  let val = head t
+      children = tail t
+  in if val.id == targetId
+     then map (\c -> (head c).id) (Array.fromFoldable children)
+     else Array.foldl (\acc c -> if Array.null acc then getChildrenIds targetId c else acc)
+                       [] (Array.fromFoldable children)
+
 -- | Create links from tree structure
 makeLinks :: Tree TreeNode -> Array LinkData
 makeLinks t =
@@ -221,8 +249,8 @@ render state =
     , HH.p
         [ HP.class_ (HH.ClassName "instructions") ]
         [ HH.text $ case state.selectedNodeId of
-            Nothing -> "Click a leaf node to select it"
-            Just _ -> "Press 'a' for green child, 'b' for orange child. Click again to deselect."
+            Nothing -> "Click any node to select it, or use arrow keys to navigate"
+            Just _ -> "Press 'a' for green child, 'b' for orange child. Arrow keys to navigate. Click to deselect."
         ]
     -- Container div for D3 to render into
     , HH.div
@@ -251,18 +279,15 @@ handleAction = case _ of
   NodeClicked nodeId -> do
     state <- H.get
 
-    -- Only allow clicking on leaf nodes
-    let isNodeLeaf = isLeafById nodeId state.userTree
+    -- Allow clicking any node for navigation
+    case state.selectedNodeId of
+      -- If clicking the already-selected node, deselect
+      Just selectedId | selectedId == nodeId ->
+        H.modify_ \s -> s { selectedNodeId = Nothing }
 
-    when isNodeLeaf do
-      case state.selectedNodeId of
-        -- If clicking the already-selected node, deselect
-        Just selectedId | selectedId == nodeId ->
-          H.modify_ \s -> s { selectedNodeId = Nothing }
-
-        -- Otherwise, select this node
-        _ ->
-          H.modify_ \s -> s { selectedNodeId = Just nodeId }
+      -- Otherwise, select this node
+      _ ->
+        H.modify_ \s -> s { selectedNodeId = Just nodeId }
 
     handleAction RenderTree
 
@@ -270,32 +295,88 @@ handleAction = case _ of
     state <- H.get
     let keyName = KE.key event
 
-    -- Only respond to keys when a node is selected
-    for_ state.selectedNodeId \selectedId -> do
-      case keyName of
-        "a" -> do
-          -- Add green (TypeA) child
+    case keyName of
+      -- Arrow keys work even without selection (select root if nothing selected)
+      "ArrowUp" -> do
+        case state.selectedNodeId of
+          Nothing -> H.modify_ \s -> s { selectedNodeId = Just 0 }  -- Select root
+          Just selectedId ->
+            -- Go to parent
+            case findParentId selectedId state.userTree of
+              Just parentId -> H.modify_ \s -> s { selectedNodeId = Just parentId }
+              Nothing -> pure unit  -- Already at root
+        handleAction RenderTree
+
+      "ArrowDown" -> do
+        case state.selectedNodeId of
+          Nothing -> H.modify_ \s -> s { selectedNodeId = Just 0 }  -- Select root
+          Just selectedId ->
+            -- Go to first child
+            case Array.head (getChildrenIds selectedId state.userTree) of
+              Just childId -> H.modify_ \s -> s { selectedNodeId = Just childId }
+              Nothing -> pure unit  -- No children (leaf node)
+        handleAction RenderTree
+
+      "ArrowLeft" -> do
+        case state.selectedNodeId of
+          Nothing -> H.modify_ \s -> s { selectedNodeId = Just 0 }  -- Select root
+          Just selectedId ->
+            -- Go to previous sibling
+            case findParentId selectedId state.userTree of
+              Nothing -> pure unit  -- Root has no siblings
+              Just parentId ->
+                let siblings = getChildrenIds parentId state.userTree
+                    currentIdx = Array.elemIndex selectedId siblings
+                in case currentIdx of
+                  Just idx | idx > 0 ->
+                    case Array.index siblings (idx - 1) of
+                      Just prevId -> H.modify_ \s -> s { selectedNodeId = Just prevId }
+                      Nothing -> pure unit
+                  _ -> pure unit
+        handleAction RenderTree
+
+      "ArrowRight" -> do
+        case state.selectedNodeId of
+          Nothing -> H.modify_ \s -> s { selectedNodeId = Just 0 }  -- Select root
+          Just selectedId ->
+            -- Go to next sibling
+            case findParentId selectedId state.userTree of
+              Nothing -> pure unit  -- Root has no siblings
+              Just parentId ->
+                let siblings = getChildrenIds parentId state.userTree
+                    currentIdx = Array.elemIndex selectedId siblings
+                in case currentIdx of
+                  Just idx ->
+                    case Array.index siblings (idx + 1) of
+                      Just nextId -> H.modify_ \s -> s { selectedNodeId = Just nextId }
+                      Nothing -> pure unit
+                  Nothing -> pure unit
+        handleAction RenderTree
+
+      -- 'a' and 'b' only work when a node is selected
+      "a" ->
+        for_ state.selectedNodeId \selectedId -> do
+          -- Add green (TypeA) child (keep parent selected for adding siblings)
           let newChild = { id: state.nextId, nodeType: TypeA, x: 0.0, y: 0.0, depth: 0 }
           let newTree = addChildToNode selectedId newChild state.userTree
           H.modify_ \s -> s
             { userTree = newTree
             , nextId = s.nextId + 1
-            , selectedNodeId = Nothing  -- Deselect after adding
             }
           handleAction RenderTree
 
-        "b" -> do
-          -- Add orange (TypeB) child
+      "b" ->
+        for_ state.selectedNodeId \selectedId -> do
+          -- Add orange (TypeB) child (keep parent selected for adding siblings)
           let newChild = { id: state.nextId, nodeType: TypeB, x: 0.0, y: 0.0, depth: 0 }
           let newTree = addChildToNode selectedId newChild state.userTree
           H.modify_ \s -> s
             { userTree = newTree
             , nextId = s.nextId + 1
-            , selectedNodeId = Nothing  -- Deselect after adding
             }
           handleAction RenderTree
 
-        _ -> pure unit
+      _ -> pure unit
 
   RenderTree -> do
     state <- H.get
@@ -387,9 +468,9 @@ renderTreeViz state listener = do
                   , v3Attr "cy" (lit (node.y + offsetY))
                   , v3Attr "r" (lit 15.0)
                   , v3AttrStr "fill" (str node.color)
-                  , v3AttrStr "stroke" (str node.strokeColor)
-                  , v3Attr "stroke-width" (lit 2.0)
-                  , v3AttrStr "cursor" (str (if node.isLeaf then "pointer" else "default"))
+                  , v3AttrStr "stroke" (str "#333")
+                  , v3Attr "stroke-width" (lit node.strokeWidth)
+                  , v3AttrStr "cursor" (str "pointer")
                   ]
                   `T.withBehaviors`
                     [ ClickWithDatum \n -> HS.notify listener (NodeClicked n.id) ]
@@ -405,16 +486,14 @@ toRenderNode state node =
   let
     isSelected = state.selectedNodeId == Just node.id
     isNodeLeaf = isLeafById node.id state.userTree
-    fillColor = if isSelected then selectedColor else nodeColor node.nodeType
-    strokeClr = if isSelected then "#8A2E2E" else "#555"
   in
     { id: node.id
     , nodeType: node.nodeType
     , x: node.x
     , y: node.y
     , depth: node.depth
-    , color: fillColor
-    , strokeColor: strokeClr
+    , color: nodeColor node.nodeType  -- Always use node type color
+    , strokeWidth: if isSelected then selectedStrokeWidth else normalStrokeWidth
     , isLeaf: isNodeLeaf
     }
 
@@ -428,6 +507,3 @@ setupZoom = do
     let ScaleExtent minScale maxScale = ScaleExtent 0.5 4.0
     _ <- attachZoom_ svg minScale maxScale ".zoom-group"
     pure unit
-
--- FFI functions
-foreign import clearContainer :: String -> Effect Unit

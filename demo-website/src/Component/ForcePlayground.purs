@@ -41,6 +41,7 @@ import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Events (SimulationEvent(..), defaultCallbacks)
 import PSD3.ForceEngine.Halogen (subscribeToSimulation)
 import PSD3.Transition.Tick as Tick
+import PSD3.Transform (clearContainer)
 import D3.Viz.ForcePlayground.Model (NetworkModel, fromGeneratedGraph)
 import D3.Viz.ForcePlayground.Simple as Simple
 import D3.Viz.ForcePlayground.Simple (ForceId(..), NetworkSimulation, ExitingNode)
@@ -464,5 +465,3 @@ doRender = do
       Simple.renderScene scene
 
     _, _ -> pure unit
-
-foreign import clearContainer :: String -> Effect Unit
