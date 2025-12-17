@@ -13,6 +13,7 @@ module TreeBuilder3.Types
 
 import Prelude
 
+import Data.Maybe (Maybe)
 import PSD3.Internal.Selection.Types (ElementType(..))
 
 -- | The different AST node types from the PSD3 grammar
@@ -58,6 +59,8 @@ derive instance Ord BehaviorKind
 type TreeNode =
   { id :: Int
   , nodeType :: DslNodeType
+  , name :: Maybe String     -- Element/join name (e.g., "svg", "nodes")
+  , key :: Maybe String      -- Join key (e.g., "circle", "line")
   , x :: Number
   , y :: Number
   , depth :: Int

@@ -20,7 +20,7 @@ import Data.Maybe (Maybe(..))
 import Data.String (joinWith) as String
 import PSD3.Internal.Attribute (Attribute(..), AttributeName(..), AttributeValue(..), AttrSource(..))
 import PSD3.Internal.Selection.Types (ElementType(..))
-import PSD3.AST (Tree(..))
+import PSD3.AST (Tree(..), GUPBehaviors, PhaseBehavior)
 
 -- | Convert a Tree to PureScript code (no sample data - dynamic attrs shown as placeholders)
 treeToCode :: forall datum. Tree datum -> String
@@ -95,38 +95,43 @@ treeLines maybeSample tree indentLevel = case tree of
 
   UpdateJoin sceneSpec ->
     let
-      behaviors =
-        (if hasEnter sceneSpec then "enter " else "") <>
-        (if hasUpdate sceneSpec then "update " else "") <>
-        (if hasExit sceneSpec then "exit" else "")
+      maybeDatum = Array.head sceneSpec.joinData
 
-      templateCode = case Array.head sceneSpec.joinData of
+      templateCode = case maybeDatum of
         Just firstDatum ->
           let templateTree = sceneSpec.template firstDatum
           in treeLines (Just firstDatum) templateTree (indentLevel + 1)
         Nothing ->
           [ indent (indentLevel + 1) <> "-- (no data to evaluate template)" ]
+
+      behaviorsCode = gupBehaviorsToLines maybeDatum sceneSpec.behaviors (indentLevel + 1)
     in
       [ indent indentLevel <> "T.updateJoin \"" <> sceneSpec.name <> "\" \"" <> sceneSpec.key <> "\" data_"
-      , indent indentLevel <> "  -- behaviors: " <> behaviors
-      , indent indentLevel <> "  $ \\d ->"
-      ] <> templateCode
+      , indent indentLevel <> "  (\\d ->"
+      ] <> templateCode <>
+      [ indent indentLevel <> "  )"
+      ] <> behaviorsCode
 
   UpdateNestedJoin sceneNestedSpec ->
-    [ indent indentLevel <> "T.updateNestedJoin \"" <> sceneNestedSpec.name <> "\" \"" <> sceneNestedSpec.key <> "\" data_ decompose"
-    , indent indentLevel <> "  -- (scene nested join - template omitted)"
-    ]
+    let
+      maybeDatum = case Array.head sceneNestedSpec.joinData of
+        Just outer -> Array.head (sceneNestedSpec.decompose outer)
+        Nothing -> Nothing
 
-  where
-    hasEnter spec = case spec.behaviors.enter of
-      Just _ -> true
-      Nothing -> false
-    hasUpdate spec = case spec.behaviors.update of
-      Just _ -> true
-      Nothing -> false
-    hasExit spec = case spec.behaviors.exit of
-      Just _ -> true
-      Nothing -> false
+      templateCode = case maybeDatum of
+        Just innerDatum ->
+          let templateTree = sceneNestedSpec.template innerDatum
+          in treeLines (Just innerDatum) templateTree (indentLevel + 1)
+        Nothing ->
+          [ indent (indentLevel + 1) <> "-- (no data to evaluate template)" ]
+
+      behaviorsCode = gupBehaviorsToLines maybeDatum sceneNestedSpec.behaviors (indentLevel + 1)
+    in
+      [ indent indentLevel <> "T.updateNestedJoin \"" <> sceneNestedSpec.name <> "\" \"" <> sceneNestedSpec.key <> "\" data_ decompose"
+      , indent indentLevel <> "  (\\inner ->"
+      ] <> templateCode <>
+      [ indent indentLevel <> "  )"
+      ] <> behaviorsCode
 
 -- | Render children with proper comma formatting
 childrenWithCommas :: forall datum. Maybe datum -> Array (Tree datum) -> Int -> Array String
@@ -254,3 +259,25 @@ showAttrValue = case _ of
 -- | Generate indentation (2 spaces per level)
 indent :: Int -> String
 indent n = String.joinWith "" (Array.replicate n "  ")
+
+-- | Convert GUP behaviors to code lines
+gupBehaviorsToLines :: forall datum. Maybe datum -> GUPBehaviors datum -> Int -> Array String
+gupBehaviorsToLines maybeSample behaviors ind =
+  [ indent ind <> "{ enter: " <> phaseToCode maybeSample behaviors.enter
+  , indent ind <> ", update: " <> phaseToCode maybeSample behaviors.update
+  , indent ind <> ", exit: " <> phaseToCode maybeSample behaviors.exit
+  , indent ind <> "}"
+  ]
+
+-- | Convert a single phase behavior to code
+phaseToCode :: forall datum. Maybe datum -> Maybe (PhaseBehavior datum) -> String
+phaseToCode _ Nothing = "Nothing"
+phaseToCode maybeSample (Just phase) =
+  if Array.null phase.attrs
+    then "Nothing"
+    else "Just { attrs: " <> attrsInlineToCode maybeSample phase.attrs <> ", transition: Nothing }"
+
+-- | Convert attributes to inline code (for phase behaviors)
+attrsInlineToCode :: forall datum. Maybe datum -> Array (Attribute datum) -> String
+attrsInlineToCode maybeSample attrs =
+  "[ " <> String.joinWith ", " (map (attrToCode maybeSample) attrs) <> " ]"

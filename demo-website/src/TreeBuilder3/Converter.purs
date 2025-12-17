@@ -20,7 +20,7 @@ import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Foldable (foldl)
 import Data.List (List)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tree (Tree) as DT
 import PSD3.AST as AST
 import PSD3.Internal.Attribute (Attribute(..), AttributeName(..), AttributeValue(..), AttrSource(..))
@@ -66,7 +66,7 @@ convertNode node children = case node.nodeType of
     convertedBehaviors <- convertBehaviors behaviors
     convertedChildren <- convertStructuralChildren structuralChildren
     pure $ AST.Node
-      { name: Nothing  -- TreeBuilder3 doesn't track names yet
+      { name: node.name  -- Use stored name from TreeNode
       , elemType
       , attrs: convertedAttrs
       , behaviors: convertedBehaviors
@@ -76,31 +76,35 @@ convertNode node children = case node.nodeType of
   -- Join nodes
   NodeJoin -> do
     let childList = Array.fromFoldable children
+    let joinName = fromMaybe "join" node.name
+    let joinKey = fromMaybe "g" node.key
     case Array.head childList of
       Nothing ->
         -- Empty join - valid but no template yet
         pure $ AST.Join
-          { name: "join"
-          , key: "g"
+          { name: joinName
+          , key: joinKey
           , joinData: []
           , template: \_ -> AST.elem AST.Group []
           }
       Just templateChild -> do
         templateAST <- builderTreeToAST templateChild
         pure $ AST.Join
-          { name: "join"
-          , key: getKeyFromTemplate templateChild
+          { name: joinName
+          , key: joinKey
           , joinData: [unit]  -- Placeholder data
           , template: \_ -> templateAST
           }
 
   NodeNestedJoin -> do
     let childList = Array.fromFoldable children
+    let joinName = fromMaybe "nestedJoin" node.name
+    let joinKey = fromMaybe "g" node.key
     case Array.head childList of
       Nothing ->
         pure $ AST.NestedJoin
-          { name: "nestedJoin"
-          , key: "g"
+          { name: joinName
+          , key: joinKey
           , joinData: []
           , decompose: \_ -> []
           , template: \_ -> AST.elem AST.Group []
@@ -108,8 +112,8 @@ convertNode node children = case node.nodeType of
       Just templateChild -> do
         templateAST <- builderTreeToAST templateChild
         pure $ AST.NestedJoin
-          { name: "nestedJoin"
-          , key: getKeyFromTemplate templateChild
+          { name: joinName
+          , key: joinKey
           , joinData: [unit]
           , decompose: \_ -> [unit]
           , template: \_ -> templateAST
@@ -117,23 +121,30 @@ convertNode node children = case node.nodeType of
 
   NodeUpdateJoin -> do
     let childList = Array.fromFoldable children
-    let { gupPhases, templateChild } = partitionUpdateJoinChildren childList
+    let joinName = fromMaybe "updateJoin" node.name
+    let joinKey = fromMaybe "g" node.key
+    -- Find the template element (direct child that's an Element)
+    let templateChild = Array.find (\c -> isElementNode (head c).nodeType) childList
     case templateChild of
       Nothing ->
         pure $ AST.UpdateJoin
-          { name: "updateJoin"
-          , key: "g"
+          { name: joinName
+          , key: joinKey
           , joinData: []
           , template: \_ -> AST.elem AST.Group []
           , keyFn: Nothing
           , behaviors: { enter: Nothing, update: Nothing, exit: Nothing }
           }
       Just tc -> do
-        templateAST <- builderTreeToAST tc
+        -- GUP phases are children of the template element, not UpdateJoin
+        let templateChildren = Array.fromFoldable (tail tc)
+        let gupPhases = extractGUPPhasesFromChildren templateChildren
+        -- Convert template WITHOUT its GUP phase children
+        templateAST <- convertTemplateWithoutGUP tc
         behaviors <- convertGUPPhases gupPhases
         pure $ AST.UpdateJoin
-          { name: "updateJoin"
-          , key: getKeyFromTemplate tc
+          { name: joinName
+          , key: joinKey
           , joinData: [unit]
           , template: \_ -> templateAST
           , keyFn: Nothing
@@ -142,23 +153,30 @@ convertNode node children = case node.nodeType of
 
   NodeUpdateNestedJoin -> do
     let childList = Array.fromFoldable children
-    let { gupPhases, templateChild } = partitionUpdateJoinChildren childList
+    let joinName = fromMaybe "updateNestedJoin" node.name
+    let joinKey = fromMaybe "g" node.key
+    -- Find the template element (direct child that's an Element)
+    let templateChild = Array.find (\c -> isElementNode (head c).nodeType) childList
     case templateChild of
       Nothing ->
         pure $ AST.UpdateNestedJoin
-          { name: "updateNestedJoin"
-          , key: "g"
+          { name: joinName
+          , key: joinKey
           , joinData: []
           , decompose: \_ -> []
           , template: \_ -> AST.elem AST.Group []
           , behaviors: { enter: Nothing, update: Nothing, exit: Nothing }
           }
       Just tc -> do
-        templateAST <- builderTreeToAST tc
+        -- GUP phases are children of the template element, not UpdateNestedJoin
+        let templateChildren = Array.fromFoldable (tail tc)
+        let gupPhases = extractGUPPhasesFromChildren templateChildren
+        -- Convert template WITHOUT its GUP phase children
+        templateAST <- convertTemplateWithoutGUP tc
         behaviors <- convertGUPPhases gupPhases
         pure $ AST.UpdateNestedJoin
-          { name: "updateNestedJoin"
-          , key: getKeyFromTemplate tc
+          { name: joinName
+          , key: joinKey
           , joinData: [unit]
           , decompose: \_ -> [unit]
           , template: \_ -> templateAST
@@ -198,27 +216,6 @@ partitionChildren children =
       NodeBehavior _ -> acc { behaviors = acc.behaviors <> [child] }
       _ -> acc { structuralChildren = acc.structuralChildren <> [child] }
 
--- | Partition UpdateJoin children into GUP phases and template
-partitionUpdateJoinChildren :: Array (DT.Tree TreeNode) ->
-  { gupPhases :: { enter :: Maybe (DT.Tree TreeNode), update :: Maybe (DT.Tree TreeNode), exit :: Maybe (DT.Tree TreeNode) }
-  , templateChild :: Maybe (DT.Tree TreeNode)
-  }
-partitionUpdateJoinChildren children =
-  foldl categorize
-    { gupPhases: { enter: Nothing, update: Nothing, exit: Nothing }
-    , templateChild: Nothing
-    }
-    children
-  where
-  categorize acc child =
-    let node = head child
-    in case node.nodeType of
-      NodeEnter -> acc { gupPhases = acc.gupPhases { enter = Just child } }
-      NodeUpdate -> acc { gupPhases = acc.gupPhases { update = Just child } }
-      NodeExit -> acc { gupPhases = acc.gupPhases { exit = Just child } }
-      NodeElem _ -> acc { templateChild = Just child }
-      _ -> acc  -- Ignore other children
-
 -- | Convert GUP phase nodes to PhaseBehavior records
 convertGUPPhases ::
   { enter :: Maybe (DT.Tree TreeNode)
@@ -249,6 +246,59 @@ isAttrNode (NodeAttr _) = true
 isAttrNode (PendingAttr) = true
 isAttrNode (PendingAttrValue _) = true
 isAttrNode _ = false
+
+-- | Check if a node type is an element
+isElementNode :: DslNodeType -> Boolean
+isElementNode (NodeElem _) = true
+isElementNode _ = false
+
+-- | Check if a node type is a GUP phase
+isGUPPhaseNode :: DslNodeType -> Boolean
+isGUPPhaseNode NodeEnter = true
+isGUPPhaseNode NodeUpdate = true
+isGUPPhaseNode NodeExit = true
+isGUPPhaseNode _ = false
+
+-- | Extract GUP phase nodes from template's children
+extractGUPPhasesFromChildren :: Array (DT.Tree TreeNode) ->
+  { enter :: Maybe (DT.Tree TreeNode)
+  , update :: Maybe (DT.Tree TreeNode)
+  , exit :: Maybe (DT.Tree TreeNode)
+  }
+extractGUPPhasesFromChildren children =
+  foldl categorize { enter: Nothing, update: Nothing, exit: Nothing } children
+  where
+  categorize acc child =
+    let node = head child
+    in case node.nodeType of
+      NodeEnter -> acc { enter = Just child }
+      NodeUpdate -> acc { update = Just child }
+      NodeExit -> acc { exit = Just child }
+      _ -> acc
+
+-- | Convert template element excluding its GUP phase children
+-- | This converts the template as if it had no Enter/Update/Exit children
+convertTemplateWithoutGUP :: DT.Tree TreeNode -> Either ASTConversionError (AST.Tree Unit)
+convertTemplateWithoutGUP templateTree =
+  let
+    node = head templateTree
+    allChildren = Array.fromFoldable $ tail templateTree
+    -- Filter out GUP phase children
+    nonGUPChildren = Array.filter (\c -> not $ isGUPPhaseNode (head c).nodeType) allChildren
+  in case node.nodeType of
+    NodeElem elemType -> do
+      let { attrs, behaviors, structuralChildren } = partitionChildren nonGUPChildren
+      convertedAttrs <- convertAttrs attrs
+      convertedBehaviors <- convertBehaviors behaviors
+      convertedChildren <- convertStructuralChildren structuralChildren
+      pure $ AST.Node
+        { name: node.name  -- Use stored name from TreeNode
+        , elemType
+        , attrs: convertedAttrs
+        , behaviors: convertedBehaviors
+        , children: convertedChildren
+        }
+    _ -> Left $ InvalidStructure "Template must be an element node"
 
 -- | Convert attr child nodes to PSD3 Attributes
 convertAttrs :: Array (DT.Tree TreeNode) -> Either ASTConversionError (Array (Attribute Unit))
