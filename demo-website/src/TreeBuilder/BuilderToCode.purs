@@ -114,23 +114,71 @@ attrsToCode attrs =
     then "[]"
     else "[ " <> String.joinWith ", " (map attrToCode attrs) <> " ]"
 
--- | Convert a single attribute binding to DSL code
+-- | Convert a single attribute binding to DSL code (Friendly DSL syntax)
+-- | This generates code that matches the Prism.js semantic highlighting patterns
 attrToCode :: AttributeBinding -> String
 attrToCode binding = case binding.choice of
   ConstantNumber n ->
-    "v3Attr \"" <> binding.attrName <> "\" (lit " <> show n <> ")"
+    -- Use Friendly sugar: width $ num 300.0
+    attrFn binding.attrName <> " $ num " <> show n
 
   ConstantString s ->
-    "v3AttrStr \"" <> binding.attrName <> "\" (str \"" <> s <> "\")"
+    -- Use Friendly sugar: fill $ text "blue"
+    attrFn binding.attrName <> " $ text \"" <> s <> "\""
 
-  FromField field ->
-    "v3AttrFn \"" <> binding.attrName <> "\" (\\d -> d." <> field <> ")"
+  FromField fieldName ->
+    -- Use Friendly sugar: cx $ field @"x"
+    attrFn binding.attrName <> " $ field @\"" <> fieldName <> "\""
 
   IndexBased ->
-    "v3AttrFnI \"" <> binding.attrName <> "\" (\\_ i -> toNumber i)"
+    -- Use Friendly sugar: x $ index `timesN` 50.0
+    attrFn binding.attrName <> " $ index"
 
   Computed expr ->
-    "v3AttrFn \"" <> binding.attrName <> "\" (\\d -> " <> expr <> ")"
+    -- Computed expressions - try to preserve readable form
+    attrFn binding.attrName <> " $ " <> exprToFriendly expr
+
+-- | Convert attribute name to Friendly sugar function
+-- | Maps SVG attribute names to their Friendly DSL equivalents
+attrFn :: String -> String
+attrFn = case _ of
+  -- Position
+  "x" -> "x"
+  "y" -> "y"
+  "cx" -> "cx"
+  "cy" -> "cy"
+  "x1" -> "x1"
+  "y1" -> "y1"
+  "x2" -> "x2"
+  "y2" -> "y2"
+  "dx" -> "dx"
+  "dy" -> "dy"
+  -- Size
+  "width" -> "width"
+  "height" -> "height"
+  "r" -> "r"
+  -- Style
+  "fill" -> "fill"
+  "stroke" -> "stroke"
+  "stroke-width" -> "strokeWidth"
+  "opacity" -> "opacity"
+  -- Text
+  "text-anchor" -> "textAnchor"
+  "dominant-baseline" -> "dominantBaseline"
+  "font-size" -> "fontSize"
+  "font-family" -> "fontFamily"
+  "textContent" -> "textContent"
+  "text" -> "textContent"  -- alias
+  -- Path
+  "d" -> "path"
+  "transform" -> "transform"
+  -- Fallback: use attr function for unknown attributes
+  other -> "attr \"" <> other <> "\""
+
+-- | Convert computed expression to Friendly DSL
+-- | Tries to parse simple patterns into DSL combinators
+exprToFriendly :: String -> String
+exprToFriendly expr = expr  -- For now, pass through as-is
 
 -- | Show element type as constructor
 showElemType :: String -> String

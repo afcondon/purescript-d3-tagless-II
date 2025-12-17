@@ -37,8 +37,8 @@ import TreeBuilder.ToTree (builderToTreeWithData)
 -- INTERPRETERS - all work on Tree SampleDatum
 import PSD3.Interpreter.MetaAST (TreeAST(..), toAST)
 
--- Code generation from BuilderTree (preserves AttributeChoice info)
-import TreeBuilder.BuilderToCode (builderToCode)
+-- Code generation from actual Tree AST (uses AttrSource metadata)
+import PSD3.Interpreter.SemiQuine.TreeToCode (treeToCodeWithSample)
 
 -- Note: BuilderToAST not used - we interpret the actual Tree AST to be honest
 -- about what MetaAST can extract from opaque attribute functions
@@ -55,6 +55,9 @@ import Data.Int (toNumber)
 
 -- Preview (FFI-based for now)
 import TreeBuilder.Interpreter (renderPreview)
+
+-- Prism syntax highlighting
+import PSD3.PrismJS as Prism
 
 -- =============================================================================
 -- Component Types
@@ -486,8 +489,11 @@ renderQ3SemiQuine state =
     , HH.div
         [ HP.classes [ HH.ClassName "quadrant-content" ] ]
         [ HH.pre
-            [ HP.classes [ HH.ClassName "code-output", HH.ClassName "language-purescript" ] ]
-            [ HH.text $ getSemiQuineOutput state ]
+            [ HP.classes [ HH.ClassName "code-output", HH.ClassName "language-psd3" ] ]
+            [ HH.code
+                [ HP.classes [ HH.ClassName "language-psd3" ] ]
+                [ HH.text $ getSemiQuineOutput state ]
+            ]
         ]
     ]
 
@@ -495,9 +501,16 @@ getSemiQuineOutput :: State -> String
 getSemiQuineOutput state = case state.tree of
   Nothing -> "-- No tree defined\n-- Select a preset to start"
   Just builderTree ->
-    -- Use BuilderToCode directly on BuilderTree (preserves AttributeChoice info)
-    -- This generates proper DSL syntax: v3Attr, v3AttrStr, v3AttrFn, etc.
-    builderToCode builderTree
+    -- Convert BuilderTree → actual Tree SampleDatum (same AST used by MetaAST and D3)
+    let actualTree = builderToTreeWithData builderTree state.sampleData
+        -- Get first sample datum for evaluating data-driven attrs
+        sampleDatum = case Array.head state.sampleData of
+          Just d -> d
+          Nothing -> { x: 0.0, y: 0.0, cx: 0.0, cy: 0.0, rx: 0.0, ry: 0.0
+                     , sx: 0.0, sy: 0.0, radius: 0.0, width: 0.0, height: 0.0
+                     , value: 0.0, color: "", label: "", name: "", index: 0 }
+    -- Run TreeToCode interpreter on the REAL Tree AST (same source as MetaAST!)
+    in treeToCodeWithSample sampleDatum actualTree
 
 -- =============================================================================
 -- Q4: D3 Preview
@@ -787,6 +800,9 @@ handleAction = case _ of
           astContainer <- select "#ast-viz-output" :: _ (D3v2Selection_ SEmpty Element Unit)
           _ <- renderTree astContainer astVizTree
           pure unit
+
+        -- Highlight code with Prism
+        liftEffect Prism.highlightAll
 
 -- FFI
 foreign import clearPreviewContainer :: String -> Effect Unit

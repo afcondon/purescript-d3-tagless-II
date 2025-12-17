@@ -225,3 +225,104 @@ pre[class*="language-"] ::selection {
 .language-haskell .token.namespace {
   color: #444444;
 }
+
+/* ========================================
+   PSD3 DSL SEMANTIC TOKENS
+   Colors unified with MetaAST visualization
+
+   MetaAST Color Palette Reference:
+   --------------------------------
+   NodeAST (tree structure):     #4A90E2 (blue)      stroke: #2E5C8A
+   JoinAST (data joins):         #E27A4A (orange)    stroke: #8A472E
+   NestedJoinAST (nested):       #9B4AE2 (purple)    stroke: #5C2E8A
+   SceneJoinAST (GUP lifecycle): #4AE2A4 (green)     stroke: #2E8A5C
+   SceneNestedJoinAST (gold):    #E2A44A (gold)      stroke: #8A5C2E
+
+   Token → MetaAST Mapping:
+   ------------------------
+   tree-function, element-type → NodeAST (blue)
+   force-spec, join functions  → JoinAST (orange)
+   easing                      → NestedJoinAST (purple)
+   gup-keyword                 → SceneJoinAST (green)
+   behavior                    → SceneNestedJoinAST (gold)
+   ======================================== */
+
+/* Tree Structure Functions - matches NodeAST blue
+   T.elem, T.named, withChild, withChildren, withBehaviors */
+.token.tree-function {
+  color: #3873a9;  /* Slightly darker blue for text readability */
+  font-weight: bold;
+  background: rgba(74, 144, 226, 0.08);
+  padding: 0 0.15em;
+  border-radius: 2px;
+}
+
+/* Element Types - matches NodeAST blue
+   SVG, Group, Circle, Rect, Path, etc. */
+.token.element-type {
+  color: #4A90E2;  /* NodeAST blue */
+  font-weight: bold;
+}
+
+/* SVG Attribute Functions
+   x, y, cx, fill, stroke, etc. */
+.token.attr-function {
+  color: #3d7070;  /* Teal - attributes set properties */
+}
+
+/* Value Constructors
+   num, text, str, lit, hex, rgb, field, eval */
+.token.value-constructor {
+  color: #b87d5a;  /* Warm brown - creating values */
+}
+
+/* Expression Combinators
+   timesN, plusN, minusN, etc. */
+.token.expr-combinator {
+  color: #8a5c2e;  /* Darker brown - operations */
+}
+
+/* GUP Lifecycle Keywords - matches SceneJoinAST green
+   enterBehavior, updateBehavior, exitBehavior */
+.token.gup-keyword {
+  color: #2E8A5C;  /* Darker green for text */
+  font-weight: bold;
+  background: rgba(74, 226, 164, 0.08);
+  padding: 0 0.15em;
+  border-radius: 2px;
+}
+
+/* Easing Functions - matches NestedJoinAST purple
+   Linear, CubicIn, CubicOut, etc. */
+.token.easing {
+  color: #7B3AB2;  /* Darker purple for text */
+}
+
+/* Behavior Types - matches SceneNestedJoinAST gold
+   Drag, Zoom, Brush, etc. */
+.token.behavior {
+  color: #b87d5a;  /* Gold-brown */
+  font-weight: bold;
+}
+
+/* Force Simulation - matches JoinAST orange
+   ManyBody, Collide, Center, Link, etc. */
+.token.force-spec {
+  color: #c55a35;  /* Darker orange for text */
+  font-weight: bold;
+}
+
+/* Selection/Rendering Functions
+   select, selectAll, renderTree */
+.token.selection-function {
+  color: #2d5050;  /* Dark teal - D3 operations */
+  font-weight: bold;
+}
+
+/* Join Functions - matches JoinAST orange
+   sceneJoin, sceneNestedJoin, joinData */
+.language-psd3 .token.tree-function[class*="Join"],
+.language-purs .token.tree-function[class*="Join"] {
+  color: #c55a35;  /* Orange for joins */
+  background: rgba(226, 122, 74, 0.08);
+}

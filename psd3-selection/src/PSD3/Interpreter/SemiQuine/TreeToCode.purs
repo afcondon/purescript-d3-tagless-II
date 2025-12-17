@@ -3,11 +3,11 @@
 -- | Converts a Tree datum directly to PureScript code.
 -- | Unlike the BuilderTree version, this works on actual Tree API trees.
 -- |
--- | Limitations:
--- | - DataAttr/IndexedAttr functions are opaque - we can show they exist
--- |   and optionally evaluate them with sample data, but can't recover
--- |   the original expression (e.g., "d.x" vs "50.0")
--- | - Template functions in Join are evaluated with sample data to reveal structure
+-- | The generated code uses Friendly DSL syntax designed for Prism.js highlighting:
+-- | - `width $ num 300.0` instead of `v3Attr "width" (lit 300.0)`
+-- | - `fill $ field @"color"` instead of `v3AttrFn "fill" (\d -> d.color)`
+-- |
+-- | AttrSource metadata enables recovering original expressions from opaque functions.
 module PSD3.Interpreter.SemiQuine.TreeToCode
   ( treeToCode
   , treeToCodeWithSample
@@ -15,7 +15,7 @@ module PSD3.Interpreter.SemiQuine.TreeToCode
 
 import Prelude
 
-import Data.Array (head, length, null, replicate) as Array
+import Data.Array (concat, drop, head, length, mapWithIndex, null, replicate, zipWith) as Array
 import Data.Maybe (Maybe(..))
 import Data.String (joinWith) as String
 import PSD3.Internal.Attribute (Attribute(..), AttributeName(..), AttributeValue(..), AttrSource(..))
@@ -36,29 +36,32 @@ treeLines maybeSample tree indentLevel = case tree of
 
   Node node ->
     let
+      -- Element constructor line
       elemCode = case node.name of
         Just name -> "T.named " <> showElemType node.elemType <> " \"" <> name <> "\""
         Nothing -> "T.elem " <> showElemType node.elemType
 
-      attrsCode = attrsToCode maybeSample node.attrs
+      -- Attributes as multi-line array
+      attrsLines = attrsToLines maybeSample node.attrs (indentLevel + 1)
 
+      -- Children
       childrenCode = case Array.length node.children of
         0 -> []
         1 -> case Array.head node.children of
           Just child ->
-            [ indent indentLevel <> "  `T.withChild`" ] <>
-            treeLines maybeSample child (indentLevel + 2)
+            [ indent indentLevel <> "`T.withChild`" ] <>
+            treeLines maybeSample child (indentLevel + 1)
           Nothing -> []
         _ ->
-          [ indent indentLevel <> "  `T.withChildren`"
-          , indent indentLevel <> "    [ " <> String.joinWith ("\n" <> indent indentLevel <> "    , ")
-              (map (\c -> String.joinWith " " (treeLines maybeSample c 0)) node.children)
-          , indent indentLevel <> "    ]"
-          ]
+          [ indent indentLevel <> "`T.withChildren`"
+          , indent (indentLevel + 1) <> "["
+          ] <>
+          childrenWithCommas maybeSample node.children (indentLevel + 1) <>
+          [ indent (indentLevel + 1) <> "]" ]
     in
-      [ indent indentLevel <> elemCode
-      , indent indentLevel <> "  " <> attrsCode
-      ] <> childrenCode
+      [ indent indentLevel <> elemCode ] <>
+      attrsLines <>
+      childrenCode
 
   Join joinSpec ->
     let
@@ -75,7 +78,6 @@ treeLines maybeSample tree indentLevel = case tree of
 
   NestedJoin nestedSpec ->
     let
-      -- Try to evaluate with first datum decomposed
       templateCode = case Array.head nestedSpec.joinData of
         Just firstDatum ->
           let innerData = nestedSpec.decompose firstDatum
@@ -126,48 +128,87 @@ treeLines maybeSample tree indentLevel = case tree of
       Just _ -> true
       Nothing -> false
 
--- | Convert attributes array to code
-attrsToCode :: forall datum. Maybe datum -> Array (Attribute datum) -> String
-attrsToCode maybeSample attrs =
-  if Array.null attrs
-    then "[]"
-    else "[ " <> String.joinWith ", " (map (attrToCode maybeSample) attrs) <> " ]"
+-- | Render children with proper comma formatting
+childrenWithCommas :: forall datum. Maybe datum -> Array (Tree datum) -> Int -> Array String
+childrenWithCommas maybeSample children ind =
+  Array.concat $ Array.zipWith renderChild (Array.replicate (Array.length children) unit) (indexedChildren children)
+  where
+  indexedChildren cs = Array.mapWithIndex (\i c -> { idx: i, child: c }) cs
 
--- | Convert a single attribute to code
+  renderChild _ { idx, child } =
+    let
+      childLines = treeLines maybeSample child 0
+      prefix = if idx == 0 then "  " else ", "
+    in case Array.head childLines of
+      Just firstLine ->
+        [ indent ind <> prefix <> firstLine ] <>
+        map (\l -> indent (ind + 1) <> l) (dropFirst childLines)
+      Nothing -> []
+
+  dropFirst arr = case Array.length arr of
+    0 -> []
+    1 -> []
+    _ -> Array.drop 1 arr
+
+-- | Convert attributes array to multi-line code
+attrsToLines :: forall datum. Maybe datum -> Array (Attribute datum) -> Int -> Array String
+attrsToLines maybeSample attrs indentLevel =
+  if Array.null attrs
+    then [ indent indentLevel <> "[]" ]
+    else
+      let attrStrings = map (attrToCode maybeSample) attrs
+      in case Array.head attrStrings of
+        Just first ->
+          [ indent indentLevel <> "[ " <> first ] <>
+          map (\a -> indent indentLevel <> ", " <> a) (Array.drop 1 attrStrings) <>
+          [ indent indentLevel <> "]" ]
+        Nothing -> [ indent indentLevel <> "[]" ]
+
+-- | Convert a single attribute to code (Friendly DSL syntax for Prism highlighting)
 attrToCode :: forall datum. Maybe datum -> Attribute datum -> String
 attrToCode maybeSample attr = case attr of
   StaticAttr (AttributeName name) value ->
-    attrFnName name <> " " <> showAttrValue value
+    -- Friendly DSL: width $ num 300.0, fill $ text "blue"
+    attrFnName name <> " $ " <> staticValueToCode value
 
   DataAttr (AttributeName name) src fn ->
     case maybeSample of
       Just sample ->
         let evaluated = fn sample
-        in attrFnName name <> " " <> attrSourceToCode src <> " {- → " <> showAttrValue evaluated <> " -}"
+        -- Show source expression with evaluated result as comment
+        in attrFnName name <> " $ " <> attrSourceToCode src <> " {- → " <> showAttrValue evaluated <> " -}"
       Nothing ->
-        attrFnName name <> " " <> attrSourceToCode src
+        attrFnName name <> " $ " <> attrSourceToCode src
 
   IndexedAttr (AttributeName name) src fn ->
     case maybeSample of
       Just sample ->
         let evaluated = fn sample 0
-        in attrFnName name <> " " <> attrSourceToCode src <> " {- → " <> showAttrValue evaluated <> " -}"
+        in attrFnName name <> " $ " <> attrSourceToCode src <> " {- → " <> showAttrValue evaluated <> " -}"
       Nothing ->
-        attrFnName name <> " " <> attrSourceToCode src
+        attrFnName name <> " $ " <> attrSourceToCode src
 
--- | Convert AttrSource to PureScript code representation
+-- | Convert static value to Friendly DSL code
+staticValueToCode :: AttributeValue -> String
+staticValueToCode = case _ of
+  StringValue s -> "text \"" <> s <> "\""
+  NumberValue n -> "num " <> show n
+  BooleanValue b -> "bool " <> show b
+
+-- | Convert AttrSource to Friendly DSL code representation
+-- | Designed to match Prism.js highlighting patterns
 attrSourceToCode :: AttrSource -> String
 attrSourceToCode = case _ of
   UnknownSource -> "d.<?>"
-  StaticSource _ -> "<?>" -- Static values should use StaticAttr, not this
-  FieldSource f -> "(field @\"" <> f <> "\")"
-  ExprSource e -> "(" <> e <> ")" -- The expression string
+  StaticSource s -> "num " <> s
+  FieldSource f -> "field @\"" <> f <> "\""
+  ExprSource e -> e
   IndexSource -> "index"
 
--- | Map attribute names to PureScript function names
+-- | Map attribute names to Friendly DSL function names
 attrFnName :: String -> String
 attrFnName = case _ of
-  "r" -> "radius"
+  -- Friendly DSL uses 'r' directly, not 'radius'
   "stroke-width" -> "strokeWidth"
   "fill-opacity" -> "fillOpacity"
   "stroke-opacity" -> "strokeOpacity"
@@ -203,13 +244,13 @@ showElemType = case _ of
   LinearGradient -> "LinearGradient"
   Stop -> "Stop"
 
--- | Show attribute value
+-- | Show attribute value for display in comments
 showAttrValue :: AttributeValue -> String
 showAttrValue = case _ of
   StringValue s -> "\"" <> s <> "\""
   NumberValue n -> show n
   BooleanValue b -> show b
 
--- | Generate indentation
+-- | Generate indentation (2 spaces per level)
 indent :: Int -> String
 indent n = String.joinWith "" (Array.replicate n "  ")
