@@ -60,28 +60,32 @@ import Web.UIEvent.KeyboardEvent as KE
 -- | The different AST node types from the PSD3 grammar
 -- | Includes "pending" states for nodes awaiting further input
 data DslNodeType
-  = NodeElem ElementType      -- Element node (SVG, Group, Circle, etc.)
-  | NodeJoin                  -- Simple data join
-  | NodeNestedJoin            -- Type-decomposing join
-  | NodeSceneJoin             -- GUP join
-  | NodeSceneNestedJoin       -- GUP + type decomposition
-  | NodeAttr AttrKind         -- Attribute (fully specified)
+  = NodeElem ElementType -- Element node (SVG, Group, Circle, etc.)
+  | NodeJoin -- Simple data join
+  | NodeNestedJoin -- Type-decomposing join
+  | NodeSceneJoin -- GUP join
+  | NodeSceneNestedJoin -- GUP + type decomposition
+  | NodeAttr AttrKind -- Attribute (fully specified)
   | NodeBehavior BehaviorKind -- Behavior (fully specified)
+  -- GUP selection phases (auto-created under SceneJoin templates)
+  | NodeEnter -- Enter selection (new elements)
+  | NodeUpdate -- Update selection (existing elements)
+  | NodeExit -- Exit selection (removed elements)
   -- Pending states - awaiting further input
-  | PendingElement            -- Awaiting element type (s,g,c,r,p,l,t,d)
-  | PendingAttr               -- Awaiting attr name (c,x,y,r,f,s,w,h,t)
-  | PendingAttrValue String   -- Has attr name, awaiting value type (l,f,e,i)
-  | PendingBehavior           -- Awaiting behavior type (z,d,c,h)
+  | PendingElement -- Awaiting element type (s,g,c,r,p,l,t,d)
+  | PendingAttr -- Awaiting attr name (c,x,y,r,f,s,w,h,t)
+  | PendingAttrValue String -- Has attr name, awaiting value type (l,f,e,i)
+  | PendingBehavior -- Awaiting behavior type (z,d,c,h)
 
 derive instance Eq DslNodeType
 derive instance Ord DslNodeType
 
 -- | Attribute kinds
 data AttrKind
-  = AttrStatic String String  -- name, value
-  | AttrField String String   -- name, field
-  | AttrExpr String String    -- name, expr
-  | AttrIndex String          -- name (uses index)
+  = AttrStatic String String -- name, value
+  | AttrField String String -- name, field
+  | AttrExpr String String -- name, expr
+  | AttrIndex String -- name (uses index)
 
 derive instance Eq AttrKind
 derive instance Ord AttrKind
@@ -92,21 +96,24 @@ data BehaviorKind = BehaviorZoom | BehaviorDrag | BehaviorClick | BehaviorHover
 derive instance Eq BehaviorKind
 derive instance Ord BehaviorKind
 
-
 -- | Get color for a DSL node type
 nodeColor :: DslNodeType -> String
-nodeColor (NodeElem _) = "#6B7280"      -- Gray
-nodeColor NodeJoin = "#E2D24A"          -- Yellow
-nodeColor NodeNestedJoin = "#D4A017"    -- Gold
-nodeColor NodeSceneJoin = "#4A90E2"     -- Blue
+nodeColor (NodeElem _) = "#6B7280" -- Gray
+nodeColor NodeJoin = "#E2D24A" -- Yellow
+nodeColor NodeNestedJoin = "#D4A017" -- Gold
+nodeColor NodeSceneJoin = "#4A90E2" -- Blue
 nodeColor NodeSceneNestedJoin = "#9B4AE2" -- Purple
-nodeColor (NodeAttr _) = "#4AE24A"      -- Green
-nodeColor (NodeBehavior _) = "#E27A4A"  -- Orange
+nodeColor (NodeAttr _) = "#4AE24A" -- Green
+nodeColor (NodeBehavior _) = "#E27A4A" -- Orange
+-- GUP selection phases (classic GUP demo colors)
+nodeColor NodeEnter = "#2CA02C" -- Green (enter = new)
+nodeColor NodeUpdate = "#7F7F7F" -- Gray (update = existing)
+nodeColor NodeExit = "#8C564B" -- Brown (exit = removed)
 -- Pending types - lighter/desaturated versions
-nodeColor PendingElement = "#9CA3AF"    -- Light gray
-nodeColor PendingAttr = "#86EFAC"       -- Light green
+nodeColor PendingElement = "#9CA3AF" -- Light gray
+nodeColor PendingAttr = "#86EFAC" -- Light green
 nodeColor (PendingAttrValue _) = "#86EFAC" -- Light green
-nodeColor PendingBehavior = "#FDBA74"   -- Light orange
+nodeColor PendingBehavior = "#FDBA74" -- Light orange
 
 -- | Get label for a DSL node type
 nodeLabel :: DslNodeType -> String
@@ -118,7 +125,7 @@ nodeLabel (NodeElem Path) = "Path"
 nodeLabel (NodeElem Line) = "Line"
 nodeLabel (NodeElem Text) = "Text"
 nodeLabel (NodeElem Defs) = "Defs"
-nodeLabel (NodeElem _) = "Element"  -- Other element types
+nodeLabel (NodeElem _) = "Element" -- Other element types
 nodeLabel NodeJoin = "Join"
 nodeLabel NodeNestedJoin = "NestedJoin"
 nodeLabel NodeSceneJoin = "SceneJoin"
@@ -131,6 +138,10 @@ nodeLabel (NodeBehavior BehaviorZoom) = "Zoom"
 nodeLabel (NodeBehavior BehaviorDrag) = "Drag"
 nodeLabel (NodeBehavior BehaviorClick) = "Click"
 nodeLabel (NodeBehavior BehaviorHover) = "Hover"
+-- GUP selection phases
+nodeLabel NodeEnter = "Enter"
+nodeLabel NodeUpdate = "Update"
+nodeLabel NodeExit = "Exit"
 -- Pending types - show "?" to indicate awaiting input
 nodeLabel PendingElement = "Element?"
 nodeLabel PendingAttr = "Attr?"
@@ -140,29 +151,32 @@ nodeLabel PendingBehavior = "Behavior?"
 -- | Get valid key hints for a node type (shown next to selected node)
 -- | Grammar-constrained: only shows keys that are valid for this node type
 nodeKeyHints :: DslNodeType -> String
-nodeKeyHints PendingElement = "[g,c,r,p,l,t,d]"  -- No SVG - that's root only
+nodeKeyHints PendingElement = "[g,c,r,p,l,t,d]" -- No SVG - that's root only
 nodeKeyHints PendingAttr = "[c,x,y,r,f,s,w,h,t]"
 nodeKeyHints (PendingAttrValue _) = "[l,f,e,i]"
 nodeKeyHints PendingBehavior = "[z,d,c,h]"
 -- Resolved nodes - element-specific hints
-nodeKeyHints (NodeElem SVG) = "[e,j,n,s,x,a,b]"    -- SVG (root): can have all children
-nodeKeyHints (NodeElem Group) = "[e,j,n,s,x,a,b]"  -- Group: can have all children
-nodeKeyHints (NodeElem Defs) = "[a]"               -- Defs: only attrs (simplified)
-nodeKeyHints (NodeElem Circle) = "[a,b]"           -- Circle: leaf - only attrs/behaviors
-nodeKeyHints (NodeElem Rect) = "[a,b]"             -- Rect: leaf
-nodeKeyHints (NodeElem Path) = "[a,b]"             -- Path: leaf
-nodeKeyHints (NodeElem Line) = "[a,b]"             -- Line: leaf
-nodeKeyHints (NodeElem Text) = "[a,b]"             -- Text: leaf
-nodeKeyHints (NodeElem _) = "[a,b]"                -- Other elements: leaf by default
+nodeKeyHints (NodeElem SVG) = "[e,j,n,s,x,a,b]" -- SVG (root): can have all children
+nodeKeyHints (NodeElem Group) = "[e,j,n,s,x,a,b]" -- Group: can have all children
+nodeKeyHints (NodeElem Defs) = "[a]" -- Defs: only attrs (simplified)
+nodeKeyHints (NodeElem Circle) = "[a,b]" -- Circle: leaf - only attrs/behaviors
+nodeKeyHints (NodeElem Rect) = "[a,b]" -- Rect: leaf
+nodeKeyHints (NodeElem Path) = "[a,b]" -- Path: leaf
+nodeKeyHints (NodeElem Line) = "[a,b]" -- Line: leaf
+nodeKeyHints (NodeElem Text) = "[a,b]" -- Text: leaf
+nodeKeyHints (NodeElem _) = "[a,b]" -- Other elements: leaf by default
 -- Join nodes
-nodeKeyHints NodeJoin = "[e]"                      -- Joins can only have element template
+nodeKeyHints NodeJoin = "[e]" -- Joins can only have element template
 nodeKeyHints NodeNestedJoin = "[e]"
 nodeKeyHints NodeSceneJoin = "[e]"
 nodeKeyHints NodeSceneNestedJoin = "[e]"
 -- Attr/Behavior nodes
-nodeKeyHints (NodeAttr _) = "[a]"                  -- Attrs can add sibling attrs
-nodeKeyHints (NodeBehavior _) = "[b]"              -- Behaviors can add sibling behaviors
-
+nodeKeyHints (NodeAttr _) = "[a]" -- Attrs can add sibling attrs
+nodeKeyHints (NodeBehavior _) = "[b]" -- Behaviors can add sibling behaviors
+-- GUP selection phases - can have attrs
+nodeKeyHints NodeEnter = "[a]"
+nodeKeyHints NodeUpdate = "[a]"
+nodeKeyHints NodeExit = "[a]"
 
 -- =============================================================================
 -- State Types
@@ -187,8 +201,9 @@ type RenderNode =
   , color :: String
   , strokeWidth :: Number
   , label :: String
-  , keyHints :: String     -- Valid key hints to show (e.g., "[e,j,n,s,x,a,b]")
-  , isSelected :: Boolean  -- Whether this node is currently selected
+  , keyHints :: String -- Valid key hints to show (e.g., "[e,j,n,s,x,a,b]")
+  , isSelected :: Boolean -- Whether this node is currently selected
+  , showAsStack :: Boolean -- Whether to draw as deck-of-cards (join templates + GUP phases)
   }
 
 -- | Link data for rendering
@@ -232,11 +247,10 @@ initialTree = mkTree
 initialState :: State
 initialState =
   { userTree: initialTree
-  , selectedNodeId: Just 0  -- Start with root selected
+  , selectedNodeId: Just 0 -- Start with root selected
   , nextId: 1
   , clickListener: Nothing
   }
-
 
 -- =============================================================================
 -- Tree Operations
@@ -249,58 +263,103 @@ initialState =
 
 findParentId :: Int -> Tree TreeNode -> Maybe Int
 findParentId targetId t =
-  let val = head t
-      children = tail t
-      childIds = map (\c -> (head c).id) children
-  in if Array.elem targetId (Array.fromFoldable childIds)
-     then Just val.id
-     else Array.foldl (\acc c -> case acc of
-       Just pid -> Just pid
-       Nothing -> findParentId targetId c) Nothing (Array.fromFoldable children)
+  let
+    val = head t
+    children = tail t
+    childIds = map (\c -> (head c).id) children
+  in
+    if Array.elem targetId (Array.fromFoldable childIds) then Just val.id
+    else Array.foldl
+      ( \acc c -> case acc of
+          Just pid -> Just pid
+          Nothing -> findParentId targetId c
+      )
+      Nothing
+      (Array.fromFoldable children)
 
 getChildrenIds :: Int -> Tree TreeNode -> Array Int
 getChildrenIds targetId t =
-  let val = head t
-      children = tail t
-  in if val.id == targetId
-     then map (\c -> (head c).id) (Array.fromFoldable children)
-     else Array.foldl (\acc c -> if Array.null acc then getChildrenIds targetId c else acc)
-                       [] (Array.fromFoldable children)
+  let
+    val = head t
+    children = tail t
+  in
+    if val.id == targetId then map (\c -> (head c).id) (Array.fromFoldable children)
+    else Array.foldl (\acc c -> if Array.null acc then getChildrenIds targetId c else acc)
+      []
+      (Array.fromFoldable children)
+
+-- | Check if a node's parent is a Join type (making it a "template" node)
+isJoinChild :: Int -> Tree TreeNode -> Boolean
+isJoinChild nodeId t = case findParentId nodeId t of
+  Nothing -> false
+  Just parentId -> case findNodeById parentId t of
+    Nothing -> false
+    Just parent -> isJoinType parent.nodeType
+
+-- | Check if a node's parent is a Scene Join type (GUP - has enter/update/exit)
+isSceneJoinChild :: Int -> Tree TreeNode -> Boolean
+isSceneJoinChild nodeId t = case findParentId nodeId t of
+  Nothing -> false
+  Just parentId -> case findNodeById parentId t of
+    Nothing -> false
+    Just parent -> isSceneJoinType parent.nodeType
+
+-- | Check if a node type is a Join variant
+isJoinType :: DslNodeType -> Boolean
+isJoinType NodeJoin = true
+isJoinType NodeNestedJoin = true
+isJoinType NodeSceneJoin = true
+isJoinType NodeSceneNestedJoin = true
+isJoinType _ = false
+
+-- | Check if a node type is a Scene Join (GUP) variant
+isSceneJoinType :: DslNodeType -> Boolean
+isSceneJoinType NodeSceneJoin = true
+isSceneJoinType NodeSceneNestedJoin = true
+isSceneJoinType _ = false
 
 addChildToNode :: Int -> TreeNode -> Tree TreeNode -> Tree TreeNode
 addChildToNode targetId newChild t =
-  let val = head t
-      children = tail t
-  in if val.id == targetId
-     then mkTree val (children <> (mkTree newChild Nil : Nil))
-     else mkTree val (map (addChildToNode targetId newChild) children)
+  let
+    val = head t
+    children = tail t
+  in
+    if val.id == targetId then mkTree val (children <> (mkTree newChild Nil : Nil))
+    else mkTree val (map (addChildToNode targetId newChild) children)
 
 flattenTree :: Tree TreeNode -> Array TreeNode
 flattenTree = Array.fromFoldable
 
 makeLinks :: Tree TreeNode -> Array LinkData
 makeLinks t =
-  let val = head t
-      children = tail t
-      childLinks = Array.fromFoldable children >>= \child ->
-        let childVal = head child
-        in [ { id: show val.id <> "->" <> show childVal.id
-             , sourceX: val.x
-             , sourceY: val.y
-             , targetX: childVal.x
-             , targetY: childVal.y
-             } ]
-      grandchildLinks = Array.fromFoldable children >>= makeLinks
-  in childLinks <> grandchildLinks
+  let
+    val = head t
+    children = tail t
+    childLinks = Array.fromFoldable children >>= \child ->
+      let
+        childVal = head child
+      in
+        [ { id: show val.id <> "->" <> show childVal.id
+          , sourceX: val.x
+          , sourceY: val.y
+          , targetX: childVal.x
+          , targetY: childVal.y
+          }
+        ]
+    grandchildLinks = Array.fromFoldable children >>= makeLinks
+  in
+    childLinks <> grandchildLinks
 
 applyLayout :: Tree TreeNode -> Tree TreeNode
 applyLayout t =
-  let config = defaultTreeConfig
-        { size = { width: 700.0, height: 600.0 }
-        , minSeparation = 2.0
-        , layerSeparation = Just 60.0  -- Fixed 60px between layers (2.5x node height)
-        }
-  in tree config t
+  let
+    config = defaultTreeConfig
+      { size = { width: 700.0, height: 600.0 }
+      , minSeparation = 2.0
+      , layerSeparation = Just 60.0 -- Fixed 60px between layers (2.5x node height)
+      }
+  in
+    tree config t
 
 -- =============================================================================
 -- Component
@@ -366,7 +425,7 @@ handleAction = case _ of
 
   HandleKeyDown event -> do
     let keyName = KE.key event
-    handleNoMenuKey keyName  -- All key handling is context-based on selected node
+    handleNoMenuKey keyName -- All key handling is context-based on selected node
 
   RenderTree -> do
     state <- H.get
@@ -388,7 +447,7 @@ handleNoMenuKey keyName = do
     _ ->
       -- Other keys depend on selected node's type
       case getSelectedNodeType state of
-        Nothing -> pure unit  -- No selection, no action
+        Nothing -> pure unit -- No selection, no action
         Just nodeType -> handleKeyForNodeType nodeType keyName
 
 -- | Handle key based on the selected node's type
@@ -405,6 +464,10 @@ handleKeyForNodeType NodeSceneJoin keyName = handleJoinKey keyName
 handleKeyForNodeType NodeSceneNestedJoin keyName = handleJoinKey keyName
 handleKeyForNodeType (NodeAttr _) keyName = handleAttrKey keyName
 handleKeyForNodeType (NodeBehavior _) keyName = handleBehaviorKey keyName
+-- GUP phase nodes - can add attrs
+handleKeyForNodeType NodeEnter keyName = handleGupPhaseKey keyName
+handleKeyForNodeType NodeUpdate keyName = handleGupPhaseKey keyName
+handleKeyForNodeType NodeExit keyName = handleGupPhaseKey keyName
 
 -- | Handle keys for Element nodes - element-type specific
 handleElementKey :: forall output m. MonadAff m => ElementType -> String -> H.HalogenM State Action () output m Unit
@@ -467,6 +530,12 @@ handleBehaviorKey keyName = case keyName of
   "b" -> addSiblingOfType PendingBehavior
   _ -> pure unit
 
+-- | Handle keys for GUP phase nodes (Enter/Update/Exit) - can add attrs
+handleGupPhaseKey :: forall output m. MonadAff m => String -> H.HalogenM State Action () output m Unit
+handleGupPhaseKey keyName = case keyName of
+  "a" -> addNodeOfType PendingAttr
+  _ -> pure unit
+
 -- | Handle keys for pending element node
 -- | Note: SVG (s) is not allowed - SVG is root only
 handlePendingElementKey :: forall output m. MonadAff m => String -> H.HalogenM State Action () output m Unit
@@ -478,7 +547,7 @@ handlePendingElementKey keyName = case keyName of
   "l" -> resolveSelectedNode (NodeElem Line)
   "t" -> resolveSelectedNode (NodeElem Text)
   "d" -> resolveSelectedNode (NodeElem Defs)
-  "Escape" -> deleteSelectedNode  -- Cancel pending node
+  "Escape" -> deleteSelectedNode -- Cancel pending node
   _ -> pure unit
 
 -- | Handle keys for pending attr node (selecting attr name)
@@ -535,10 +604,12 @@ deleteSelectedNode = do
 -- | Remove a node by id from the tree
 removeNodeById :: Int -> Tree TreeNode -> Tree TreeNode
 removeNodeById targetId t =
-  let val = head t
-      children = tail t
-      filteredChildren = Data.List.filter (\child -> (head child).id /= targetId) children
-  in mkTree val (map (removeNodeById targetId) filteredChildren)
+  let
+    val = head t
+    children = tail t
+    filteredChildren = Data.List.filter (\child -> (head child).id /= targetId) children
+  in
+    mkTree val (map (removeNodeById targetId) filteredChildren)
 
 -- | Add a node of the given type as child of selected node
 -- | Add a node as child of selected, and select the new node
@@ -552,7 +623,7 @@ addNodeOfType nodeType = do
     H.modify_ \s -> s
       { userTree = newTree
       , nextId = s.nextId + 1
-      , selectedNodeId = Just newId  -- Select the new node
+      , selectedNodeId = Just newId -- Select the new node
       }
     handleAction RenderTree
 
@@ -563,7 +634,7 @@ addSiblingOfType nodeType = do
   for_ state.selectedNodeId \selectedId -> do
     -- Find parent of selected node
     case findParentId selectedId state.userTree of
-      Nothing -> pure unit  -- Root has no parent, can't add sibling
+      Nothing -> pure unit -- Root has no parent, can't add sibling
       Just parentId -> do
         let newId = state.nextId
         let newChild = { id: newId, nodeType, x: 0.0, y: 0.0, depth: 0 }
@@ -571,7 +642,7 @@ addSiblingOfType nodeType = do
         H.modify_ \s -> s
           { userTree = newTree
           , nextId = s.nextId + 1
-          , selectedNodeId = Just newId  -- Select the new sibling
+          , selectedNodeId = Just newId -- Select the new sibling
           }
         handleAction RenderTree
 
@@ -585,27 +656,55 @@ getSelectedNodeType state = do
 -- | Find a node by id in the tree
 findNodeById :: Int -> Tree TreeNode -> Maybe TreeNode
 findNodeById targetId t =
-  let val = head t
-      children = tail t
-  in if val.id == targetId
-     then Just val
-     else Array.foldl (\acc child -> acc <|> findNodeById targetId child) Nothing (Array.fromFoldable children)
+  let
+    val = head t
+    children = tail t
+  in
+    if val.id == targetId then Just val
+    else Array.foldl (\acc child -> acc <|> findNodeById targetId child) Nothing (Array.fromFoldable children)
 
 -- | Update a node's type in the tree
 updateNodeType :: Int -> DslNodeType -> Tree TreeNode -> Tree TreeNode
 updateNodeType targetId newType t =
-  let val = head t
-      children = tail t
-      newVal = if val.id == targetId then val { nodeType = newType } else val
-  in mkTree newVal (map (updateNodeType targetId newType) children)
+  let
+    val = head t
+    children = tail t
+    newVal = if val.id == targetId then val { nodeType = newType } else val
+  in
+    mkTree newVal (map (updateNodeType targetId newType) children)
 
 -- | Update the selected node's type (for resolving pending nodes)
+-- | If resolving an Element under a SceneJoin, auto-create Enter/Update/Exit children
 resolveSelectedNode :: forall output m. MonadAff m => DslNodeType -> H.HalogenM State Action () output m Unit
 resolveSelectedNode newType = do
   state <- H.get
   for_ state.selectedNodeId \selectedId -> do
-    let newTree = updateNodeType selectedId newType state.userTree
-    H.modify_ \s -> s { userTree = newTree }
+    -- First, update the node type
+    let treeWithType = updateNodeType selectedId newType state.userTree
+
+    -- Check if this is an Element being resolved under a SceneJoin
+    let isElementUnderScene = case newType of
+          NodeElem _ -> isSceneJoinChild selectedId state.userTree
+          _ -> false
+
+    -- If so, auto-create Enter/Update/Exit children
+    if isElementUnderScene then do
+      let enterId = state.nextId
+      let updateId = state.nextId + 1
+      let exitId = state.nextId + 2
+      let enterNode = { id: enterId, nodeType: NodeEnter, x: 0.0, y: 0.0, depth: 0 }
+      let updateNode = { id: updateId, nodeType: NodeUpdate, x: 0.0, y: 0.0, depth: 0 }
+      let exitNode = { id: exitId, nodeType: NodeExit, x: 0.0, y: 0.0, depth: 0 }
+      let treeWithEnter = addChildToNode selectedId enterNode treeWithType
+      let treeWithUpdate = addChildToNode selectedId updateNode treeWithEnter
+      let treeWithExit = addChildToNode selectedId exitNode treeWithUpdate
+      H.modify_ \s -> s
+        { userTree = treeWithExit
+        , nextId = s.nextId + 3
+        }
+    else
+      H.modify_ \s -> s { userTree = treeWithType }
+
     handleAction RenderTree
 
 -- | Navigation helpers
@@ -640,14 +739,16 @@ navigateLeft = do
       case findParentId selectedId state.userTree of
         Nothing -> pure unit
         Just parentId ->
-          let siblings = getChildrenIds parentId state.userTree
-              currentIdx = Array.elemIndex selectedId siblings
-          in case currentIdx of
-            Just idx | idx > 0 ->
-              case Array.index siblings (idx - 1) of
-                Just prevId -> H.modify_ \s -> s { selectedNodeId = Just prevId }
-                Nothing -> pure unit
-            _ -> pure unit
+          let
+            siblings = getChildrenIds parentId state.userTree
+            currentIdx = Array.elemIndex selectedId siblings
+          in
+            case currentIdx of
+              Just idx | idx > 0 ->
+                case Array.index siblings (idx - 1) of
+                  Just prevId -> H.modify_ \s -> s { selectedNodeId = Just prevId }
+                  Nothing -> pure unit
+              _ -> pure unit
   handleAction RenderTree
 
 navigateRight :: forall output m. MonadAff m => H.HalogenM State Action () output m Unit
@@ -659,14 +760,16 @@ navigateRight = do
       case findParentId selectedId state.userTree of
         Nothing -> pure unit
         Just parentId ->
-          let siblings = getChildrenIds parentId state.userTree
-              currentIdx = Array.elemIndex selectedId siblings
-          in case currentIdx of
-            Just idx ->
-              case Array.index siblings (idx + 1) of
-                Just nextId -> H.modify_ \s -> s { selectedNodeId = Just nextId }
-                Nothing -> pure unit
-            Nothing -> pure unit
+          let
+            siblings = getChildrenIds parentId state.userTree
+            currentIdx = Array.elemIndex selectedId siblings
+          in
+            case currentIdx of
+              Just idx ->
+                case Array.index siblings (idx + 1) of
+                  Just nextId -> H.modify_ \s -> s { selectedNodeId = Just nextId }
+                  Nothing -> pure unit
+              Nothing -> pure unit
   handleAction RenderTree
 
 -- =============================================================================
@@ -694,9 +797,10 @@ renderTreeViz state listener = do
 
   -- Center the tree horizontally in the SVG
   -- For a single node, minX == maxX, so we center on that point
-  let firstX = case Array.head nodes of
-        Just n -> n.x
-        Nothing -> 0.0
+  let
+    firstX = case Array.head nodes of
+      Just n -> n.x
+      Nothing -> 0.0
   let minX = Array.foldl (\acc n -> min acc n.x) firstX nodes
   let maxX = Array.foldl (\acc n -> max acc n.x) firstX nodes
   let centerX = (minX + maxX) / 2.0
@@ -724,11 +828,15 @@ renderTreeViz state listener = do
                       `T.withChild`
                         ( T.joinData "linkPaths" "path" links $ \link ->
                             T.elem Path
-                              [ evalAttrStr "d" (str (linkBezierVertical
-                                  (link.sourceX + offsetX)
-                                  (link.sourceY + offsetY)
-                                  (link.targetX + offsetX)
-                                  (link.targetY + offsetY)))
+                              [ evalAttrStr "d"
+                                  ( str
+                                      ( linkBezierVertical
+                                          (link.sourceX + offsetX)
+                                          (link.sourceY + offsetY)
+                                          (link.targetX + offsetX)
+                                          (link.targetY + offsetY)
+                                      )
+                                  )
                               , evalAttrStr "fill" (str "none")
                               , evalAttrStr "stroke" (str "#888")
                               , evalAttr "stroke-width" (lit 2.0)
@@ -739,6 +847,21 @@ renderTreeViz state listener = do
 
     linksSelections <- renderTree container linksTree
     zoomGroupSel <- liftEffect $ reselectD3v2 "zoomGroup" linksSelections
+
+    -- Helper to create a stacked "punch card" rect at a given offset
+    let
+      stackedRect :: Number -> Number -> String -> T.Tree RenderNode
+      stackedRect dx dy color =
+        T.elem Rect
+          [ evalAttr "x" (lit (-40.0 + dx))
+          , evalAttr "y" (lit (-12.0 + dy))
+          , evalAttr "width" (lit 80.0)
+          , evalAttr "height" (lit 24.0)
+          , evalAttr "rx" (lit 4.0)
+          , evalAttrStr "fill" (str color)
+          , evalAttrStr "stroke" (str "#333")
+          , evalAttr "stroke-width" (lit 1.5)
+          ]
 
     let
       nodesTree :: T.Tree RenderNode
@@ -754,39 +877,49 @@ renderTreeViz state listener = do
                   `T.withBehaviors`
                     [ ClickWithDatum \n -> HS.notify listener (NodeClicked n.id) ]
                   `T.withChildren`
-                    [ -- Background rect for the node
-                      T.elem Rect
-                        [ evalAttr "x" (lit (-40.0))
-                        , evalAttr "y" (lit (-12.0))
-                        , evalAttr "width" (lit 80.0)
-                        , evalAttr "height" (lit 24.0)
-                        , evalAttr "rx" (lit 4.0)
-                        , evalAttrStr "fill" (str node.color)
-                        , evalAttrStr "stroke" (str "#333")
-                        , evalAttr "stroke-width" (lit node.strokeWidth)
-                        ]
-                    , -- Label text
-                      T.elem Text
-                        [ evalAttr "x" (lit 0.0)
-                        , evalAttr "y" (lit 4.0)
-                        , evalAttrStr "text-anchor" (str "middle")
-                        , evalAttrStr "fill" (str "white")
-                        , evalAttrStr "font-size" (str "11px")
-                        , evalAttrStr "font-weight" (str "bold")
-                        , Friendly.textContent (str node.label)
-                        ]
-                    , -- Key hints (shown to right of selected node)
-                      T.elem Text
-                        [ evalAttr "x" (lit 50.0)  -- Right of the node rect
-                        , evalAttr "y" (lit 4.0)
-                        , evalAttrStr "text-anchor" (str "start")
-                        , evalAttrStr "fill" (str "#666")
-                        , evalAttrStr "font-size" (str "10px")
-                        , evalAttrStr "font-family" (str "monospace")
-                        , evalAttrStr "opacity" (str (if node.isSelected then "1" else "0"))
-                        , Friendly.textContent (str node.keyHints)
-                        ]
-                    ]
+                    ( -- Stacked "punch card" rects for join templates + GUP phases (drawn back-to-front)
+                      ( if node.showAsStack then
+                          [ stackedRect 9.0 9.0 node.color -- Back card
+                          , stackedRect 6.0 6.0 node.color -- Middle card
+                          , stackedRect 3.0 3.0 node.color -- Front-ish card
+                          ]
+                        else []
+                      )
+                        <>
+                          [ -- Main/front rect for the node
+                            T.elem Rect
+                              [ evalAttr "x" (lit (-40.0))
+                              , evalAttr "y" (lit (-12.0))
+                              , evalAttr "width" (lit 80.0)
+                              , evalAttr "height" (lit 24.0)
+                              , evalAttr "rx" (lit 4.0)
+                              , evalAttrStr "fill" (str node.color)
+                              , evalAttrStr "stroke" (str "#333")
+                              , evalAttr "stroke-width" (lit node.strokeWidth)
+                              ]
+                          , -- Label text
+                            T.elem Text
+                              [ evalAttr "x" (lit 0.0)
+                              , evalAttr "y" (lit 4.0)
+                              , evalAttrStr "text-anchor" (str "middle")
+                              , evalAttrStr "fill" (str "white")
+                              , evalAttrStr "font-size" (str "11px")
+                              , evalAttrStr "font-weight" (str "bold")
+                              , Friendly.textContent (str node.label)
+                              ]
+                          , -- Key hints (shown to right of selected node)
+                            T.elem Text
+                              [ evalAttr "x" (lit 50.0) -- Right of the node rect
+                              , evalAttr "y" (lit 4.0)
+                              , evalAttrStr "text-anchor" (str "start")
+                              , evalAttrStr "fill" (str "#666")
+                              , evalAttrStr "font-size" (str "10px")
+                              , evalAttrStr "font-family" (str "monospace")
+                              , evalAttrStr "opacity" (str (if node.isSelected then "1" else "0"))
+                              , Friendly.textContent (str node.keyHints)
+                              ]
+                          ]
+                    )
             )
 
     _ <- renderTree zoomGroupSel nodesTree
@@ -795,7 +928,15 @@ renderTreeViz state listener = do
 
 toRenderNode :: State -> TreeNode -> RenderNode
 toRenderNode state node =
-  let selected = state.selectedNodeId == Just node.id
+  let
+    selected = state.selectedNodeId == Just node.id
+    -- Show as stack: join templates OR GUP phase nodes (Enter/Update/Exit)
+    isGupPhase = case node.nodeType of
+      NodeEnter -> true
+      NodeUpdate -> true
+      NodeExit -> true
+      _ -> false
+    shouldStack = isJoinChild node.id state.userTree || isGupPhase
   in
     { id: node.id
     , nodeType: node.nodeType
@@ -807,6 +948,7 @@ toRenderNode state node =
     , label: nodeLabel node.nodeType
     , keyHints: computeKeyHints state.userTree node
     , isSelected: selected
+    , showAsStack: shouldStack
     }
 
 -- | Compute key hints dynamically based on tree state
@@ -822,8 +964,10 @@ computeKeyHints tree node = case node.nodeType of
   _ -> nodeKeyHints node.nodeType
   where
   joinHints nodeId =
-    let children = getChildrenIds nodeId tree
-    in if Array.null children then "[e]" else "[]"
+    let
+      children = getChildrenIds nodeId tree
+    in
+      if Array.null children then "[e]" else "[]"
 
 setupZoom :: Effect Unit
 setupZoom = do

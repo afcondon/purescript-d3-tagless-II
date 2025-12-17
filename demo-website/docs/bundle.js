@@ -8426,8 +8426,8 @@
                     if (v5 instanceof Nil && v6 instanceof Cons) {
                       var actualSep = v2 + v6.value0 - v3;
                       var neededSep = (function() {
-                        var $71 = actualSep < baseSep;
-                        if ($71) {
+                        var $72 = actualSep < baseSep;
+                        if ($72) {
                           return v2 + (baseSep - actualSep);
                         }
                         ;
@@ -8444,8 +8444,8 @@
                     if (v5 instanceof Cons && v6 instanceof Nil) {
                       var actualSep = v2 + v4 - v5.value0;
                       var neededSep = (function() {
-                        var $74 = actualSep < baseSep;
-                        if ($74) {
+                        var $75 = actualSep < baseSep;
+                        if ($75) {
                           return v2 + (baseSep - actualSep);
                         }
                         ;
@@ -8462,8 +8462,8 @@
                     if (v5 instanceof Cons && v6 instanceof Cons) {
                       var actualSep = v2 + v6.value0 - v5.value0;
                       var neededSep = (function() {
-                        var $77 = actualSep < baseSep;
-                        if ($77) {
+                        var $78 = actualSep < baseSep;
+                        if ($78) {
                           return v2 + (baseSep - actualSep);
                         }
                         ;
@@ -8477,7 +8477,7 @@
                       return;
                     }
                     ;
-                    throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 292, column 3 - line 292, column 67): " + [v2.constructor.name, v3.constructor.name, v4.constructor.name, v5.constructor.name, v6.constructor.name]);
+                    throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 308, column 3 - line 308, column 67): " + [v2.constructor.name, v3.constructor.name, v4.constructor.name, v5.constructor.name, v6.constructor.name]);
                   }
                   ;
                   while (!$tco_done) {
@@ -8504,8 +8504,8 @@
       var maxX = fromMaybe(1)(maximum4(allX));
       var minX = fromMaybe(0)(minimum2(allX));
       var xRange = (function() {
-        var $105 = maxX - minX === 0;
-        if ($105) {
+        var $106 = maxX - minX === 0;
+        if ($106) {
           return 1;
         }
         ;
@@ -8519,24 +8519,32 @@
       })(allNodes);
       var maxScaledDepth = fromMaybe(1)(maximum4(scaledDepths));
       var scaleY = function(depth) {
-        var scaledDepth = layerScaleFn(depth);
-        return scaledDepth / maxScaledDepth * config.size.height;
+        if (config.layerSeparation instanceof Just) {
+          return toNumber(depth) * config.layerSeparation.value0;
+        }
+        ;
+        if (config.layerSeparation instanceof Nothing) {
+          var scaledDepth = layerScaleFn(depth);
+          return scaledDepth / maxScaledDepth * config.size.height;
+        }
+        ;
+        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 521, column 20 - line 527, column 63): " + [config.layerSeparation.constructor.name]);
       };
       var go2 = function(tr2) {
         var val = head3(tr2);
         var cs = tail2(tr2);
         return mkTree((function() {
-          var $106 = {};
-          for (var $107 in val) {
-            if ({}.hasOwnProperty.call(val, $107)) {
-              $106[$107] = val[$107];
+          var $109 = {};
+          for (var $110 in val) {
+            if ({}.hasOwnProperty.call(val, $110)) {
+              $109[$110] = val[$110];
             }
             ;
           }
           ;
-          $106.x = scaleX(val.x);
-          $106.y = scaleY(val.depth);
-          return $106;
+          $109.x = scaleX(val.x);
+          $109.y = scaleY(val.depth);
+          return $109;
         })())(map16(go2)(cs));
       };
       return go2(inputTree);
@@ -8550,17 +8558,17 @@
       var children3 = tail2(t);
       var childrenWithCoords = map16(petrify(nodeX))(children3);
       return mkTree((function() {
-        var $110 = {};
-        for (var $111 in v.value1) {
-          if ({}.hasOwnProperty.call(v.value1, $111)) {
-            $110[$111] = v["value1"][$111];
+        var $113 = {};
+        for (var $114 in v.value1) {
+          if ({}.hasOwnProperty.call(v.value1, $114)) {
+            $113[$114] = v["value1"][$114];
           }
           ;
         }
         ;
-        $110.x = nodeX;
-        $110.y = nodeY;
-        return $110;
+        $113.x = nodeX;
+        $113.y = nodeY;
+        return $113;
       })())(childrenWithCoords);
     };
   };
@@ -8575,7 +8583,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 437, column 17 - line 439, column 27): " + [c.constructor.name]);
+        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 453, column 17 - line 455, column 27): " + [c.constructor.name]);
       })(cs);
       var v = head(currentLevels);
       if (v instanceof Nothing) {
@@ -8592,13 +8600,13 @@
             return Nothing.value;
           }
           ;
-          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 450, column 23 - line 452, column 33): " + [c.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 466, column 23 - line 468, column 33): " + [c.constructor.name]);
         })(cs);
         var maxVal = fromMaybe(0)(maximum4(currentLevels));
         return new Cons(maxVal, mergeLevel(restContours));
       }
       ;
-      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 443, column 7 - line 456, column 50): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 459, column 7 - line 472, column 50): " + [v.constructor.name]);
     };
     if (contours.length === 0) {
       return Nil.value;
@@ -8617,7 +8625,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 404, column 17 - line 406, column 27): " + [c.constructor.name]);
+        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 420, column 17 - line 422, column 27): " + [c.constructor.name]);
       })(cs);
       var v = head(currentLevels);
       if (v instanceof Nothing) {
@@ -8634,13 +8642,13 @@
             return Nothing.value;
           }
           ;
-          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 417, column 23 - line 419, column 33): " + [c.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 433, column 23 - line 435, column 33): " + [c.constructor.name]);
         })(cs);
         var minVal = fromMaybe(0)(minimum2(currentLevels));
         return new Cons(minVal, mergeLevel(restContours));
       }
       ;
-      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 410, column 7 - line 423, column 50): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 426, column 7 - line 439, column 50): " + [v.constructor.name]);
     };
     if (contours.length === 0) {
       return Nil.value;
@@ -8703,7 +8711,7 @@
           return v2.value1;
         }
         ;
-        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 280, column 3 - line 280, column 41): " + [v2.constructor.name]);
+        throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 296, column 3 - line 296, column 41): " + [v2.constructor.name]);
       };
       var applyBase = function(base2) {
         return function(v2) {
@@ -8739,7 +8747,7 @@
             return v.value1;
           }
           ;
-          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 258, column 3 - line 258, column 41): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 274, column 3 - line 274, column 41): " + [v.constructor.name]);
         };
         var getSep = function(v) {
           return function(v1) {
@@ -8753,7 +8761,7 @@
                   return v.value0(v2)(v3) + v1;
                 }
                 ;
-                throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 254, column 3 - line 254, column 67): " + [v.constructor.name, v1.constructor.name, v2.constructor.name, v3.constructor.name]);
+                throw new Error("Failed pattern match at DataViz.Layout.Hierarchy.Tree (line 270, column 3 - line 270, column 67): " + [v.constructor.name, v1.constructor.name, v2.constructor.name, v3.constructor.name]);
               };
             };
           };
@@ -8826,16 +8834,16 @@
       var val = head3(t);
       var children3 = tail2(t);
       return mkTree((function() {
-        var $193 = {};
-        for (var $194 in val) {
-          if ({}.hasOwnProperty.call(val, $194)) {
-            $193[$194] = val[$194];
+        var $196 = {};
+        for (var $197 in val) {
+          if ({}.hasOwnProperty.call(val, $197)) {
+            $196[$197] = val[$197];
           }
           ;
         }
         ;
-        $193.depth = currentDepth;
-        return $193;
+        $196.depth = currentDepth;
+        return $196;
       })())(map16(addDepth(currentDepth + 1 | 0))(children3));
     };
   };
@@ -9168,7 +9176,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at Data.TreeLayout (line 260, column 28 - line 281, column 14): " + [orient.constructor.name]);
+            throw new Error("Failed pattern match at Data.TreeLayout (line 261, column 28 - line 282, column 14): " + [orient.constructor.name]);
           })();
           var rad = mPos.value0.y / layoutSize * 500;
           var angle = mPos.value0.x / layoutSize * 2 * pi - pi / 2;
@@ -9182,7 +9190,7 @@
           };
         }
         ;
-        throw new Error("Failed pattern match at Data.TreeLayout (line 243, column 3 - line 289, column 43): " + [mPos.constructor.name]);
+        throw new Error("Failed pattern match at Data.TreeLayout (line 244, column 3 - line 290, column 43): " + [mPos.constructor.name]);
       };
     };
   };
@@ -9243,10 +9251,10 @@
         return 0;
       }
       ;
-      throw new Error("Failed pattern match at Data.TreeLayout (line 176, column 7 - line 178, column 21): " + [v1.constructor.name]);
+      throw new Error("Failed pattern match at Data.TreeLayout (line 177, column 7 - line 179, column 21): " + [v1.constructor.name]);
     }
     ;
-    throw new Error("Failed pattern match at Data.TreeLayout (line 172, column 3 - line 178, column 21): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Data.TreeLayout (line 173, column 3 - line 179, column 21): " + [v.constructor.name]);
   };
   var buildTreeFromEdges = function(rootId) {
     return function(edges) {
@@ -9279,7 +9287,8 @@
             },
             minSeparation: 1,
             separation: Nothing.value,
-            layerScale: Nothing.value
+            layerScale: Nothing.value,
+            layerSeparation: Nothing.value
           };
           var nodeTypeMap = fromFoldable15(mapFlipped6(nodes)(function(n) {
             return new Tuple(n.id, n.nodeType);
@@ -9349,7 +9358,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at Data.TreeLayout (line 151, column 15 - line 153, column 36): " + [v.constructor.name]);
+            throw new Error("Failed pattern match at Data.TreeLayout (line 152, column 15 - line 154, column 36): " + [v.constructor.name]);
           })();
           return {
             treeNodes,
@@ -14445,21 +14454,14 @@
   })();
 
   // output/PSD3.Expr.Integration/index.js
-  var v3AttrStr = function(name16) {
-    return function(expr) {
-      return new DataAttr(name16, UnknownSource.value, function(d) {
-        return new StringValue(runEvalD(expr)(d)(0));
-      });
-    };
-  };
-  var v3AttrFnStr = function(name16) {
+  var fnAttrStr = function(name16) {
     return function(f) {
       return new DataAttr(name16, UnknownSource.value, function(d) {
         return new StringValue(f(d));
       });
     };
   };
-  var v3AttrFn = function(dictShow) {
+  var fnAttr = function(dictShow) {
     var show9 = show(dictShow);
     return function(name16) {
       return function(f) {
@@ -14467,6 +14469,13 @@
           return new StringValue(show9(f(d)));
         });
       };
+    };
+  };
+  var evalAttrStr = function(name16) {
+    return function(expr) {
+      return new DataAttr(name16, UnknownSource.value, function(d) {
+        return new StringValue(runEvalD(expr)(d)(0));
+      });
     };
   };
 
@@ -20138,7 +20147,7 @@
   var member6 = /* @__PURE__ */ member2(ordInt);
   var show5 = /* @__PURE__ */ show(showNumber);
   var str2 = /* @__PURE__ */ str(stringExprEvalD);
-  var v3AttrFn2 = /* @__PURE__ */ v3AttrFn(showNumber);
+  var fnAttr2 = /* @__PURE__ */ fnAttr(showNumber);
   var eq5 = /* @__PURE__ */ eq(eqNodeType);
   var toUnfoldable9 = /* @__PURE__ */ toUnfoldable5(unfoldableArray);
   var show14 = /* @__PURE__ */ show(showInt);
@@ -20341,11 +20350,11 @@
   var linkTemplate = function(rootX) {
     return function(rootY) {
       return function(_el) {
-        return elem3(Path.value)([v3AttrFnStr("d")(function(v) {
+        return elem3(Path.value)([fnAttrStr("d")(function(v) {
           return radialTree.linkPath(rootX)(rootY)(rootX)(rootY);
-        }), v3AttrStr("fill")(str2("none")), v3AttrStr("stroke")(str2("rgba(255, 255, 255, 0.5)")), v3AttrFn2("stroke-width")(function(v) {
+        }), evalAttrStr("fill")(str2("none")), evalAttrStr("stroke")(str2("rgba(255, 255, 255, 0.5)")), fnAttr2("stroke-width")(function(v) {
           return 1.5;
-        }), v3AttrFnStr("class")(function(v) {
+        }), fnAttrStr("class")(function(v) {
           return "force-link";
         })]);
       };
@@ -20491,7 +20500,7 @@
   var buildLinksVizTree = function(linkElements) {
     return function(rootX) {
       return function(rootY) {
-        return withChild(named(Group.value)("force-links-group")([v3AttrFnStr("class")($$const("force-links-group"))]))(joinData("force-links")("path")(linkElements)(linkTemplate(rootX)(rootY)));
+        return withChild(named(Group.value)("force-links-group")([fnAttrStr("class")($$const("force-links-group"))]))(joinData("force-links")("path")(linkElements)(linkTemplate(rootX)(rootY)));
       };
     };
   };
@@ -20541,7 +20550,7 @@
   var min5 = /* @__PURE__ */ min(ordNumber);
   var log6 = /* @__PURE__ */ log3(monadEffectEffect);
   var str3 = /* @__PURE__ */ str(stringExprEvalD);
-  var v3AttrFn3 = /* @__PURE__ */ v3AttrFn(showNumber);
+  var fnAttr3 = /* @__PURE__ */ fnAttr(showNumber);
   var bind8 = /* @__PURE__ */ bind(bindMaybe);
   var pure11 = /* @__PURE__ */ pure(applicativeMaybe);
   var toUnfoldable10 = /* @__PURE__ */ toUnfoldable5(unfoldableArray);
@@ -20664,11 +20673,11 @@
     return function(rootX) {
       return function(rootY) {
         return function(_el) {
-          return elem3(Path.value)([v3AttrFnStr("d")(function(v) {
+          return elem3(Path.value)([fnAttrStr("d")(function(v) {
             return linkPathFn(rootX)(rootY)(rootX)(rootY);
-          }), v3AttrStr("fill")(str3("none")), v3AttrStr("stroke")(str3("rgba(255, 255, 255, 0.5)")), v3AttrFn3("stroke-width")(function(v) {
+          }), evalAttrStr("fill")(str3("none")), evalAttrStr("stroke")(str3("rgba(255, 255, 255, 0.5)")), fnAttr3("stroke-width")(function(v) {
             return 1.5;
-          }), v3AttrFnStr("class")(function(v) {
+          }), fnAttrStr("class")(function(v) {
             return "tree-link";
           })]);
         };
@@ -20695,7 +20704,7 @@
     return function(linkElements) {
       return function(rootX) {
         return function(rootY) {
-          return withChild(named(Group.value)("tree-links-group")([v3AttrFnStr("class")(function(v) {
+          return withChild(named(Group.value)("tree-links-group")([fnAttrStr("class")(function(v) {
             return "tree-links-group";
           })]))(joinData("tree-links")("path")(linkElements)(linkTemplate2(linkPathFn)(rootX)(rootY)));
         };
@@ -21481,7 +21490,7 @@
   };
 
   // output/Viz.Treemap/index.js
-  var v3AttrFn4 = /* @__PURE__ */ v3AttrFn(showNumber);
+  var fnAttr4 = /* @__PURE__ */ fnAttr(showNumber);
   var str4 = /* @__PURE__ */ str(stringExprEvalD);
   var min7 = /* @__PURE__ */ min(ordNumber);
   var pure12 = /* @__PURE__ */ pure(applicativeEffect);
@@ -21623,17 +21632,17 @@
   })(ordNumber))()(clusterIsSymbol)(ordInt)));
   var packageRectTemplate = function(callbacks) {
     return function(_rect) {
-      return withBehaviors(elem3(Rect.value)([v3AttrFn4("x")(function(v) {
+      return withBehaviors(elem3(Rect.value)([fnAttr4("x")(function(v) {
         return v.x;
-      }), v3AttrFn4("y")(function(v) {
+      }), fnAttr4("y")(function(v) {
         return v.y;
-      }), v3AttrFn4("width")(function(v) {
+      }), fnAttr4("width")(function(v) {
         return v.width;
-      }), v3AttrFn4("height")(function(v) {
+      }), fnAttr4("height")(function(v) {
         return v.height;
-      }), v3AttrStr("fill")(str4("none")), v3AttrStr("stroke")(str4("rgba(255, 255, 255, 0.3)")), v3AttrFn4("stroke-width")(function(v) {
+      }), evalAttrStr("fill")(str4("none")), evalAttrStr("stroke")(str4("rgba(255, 255, 255, 0.3)")), fnAttr4("stroke-width")(function(v) {
         return 1;
-      }), v3AttrStr("pointer-events")(str4("all")), v3AttrFnStr("class")(function(v) {
+      }), evalAttrStr("pointer-events")(str4("all")), fnAttrStr("class")(function(v) {
         return "package-rect";
       })]))([onMouseEnter(function(r) {
         return callbacks.onNodeHover(r.simNode);
@@ -21643,37 +21652,37 @@
     };
   };
   var packageLabelTemplate = function(_rect) {
-    return elem3(Text2.value)([v3AttrFn4("x")(function(r) {
+    return elem3(Text2.value)([fnAttr4("x")(function(r) {
       return r.x + 4;
-    }), v3AttrFn4("y")(function(r) {
+    }), fnAttr4("y")(function(r) {
       return r.y + 12;
-    }), v3AttrStr("fill")(str4("rgba(255, 255, 255, 0.5)")), v3AttrStr("font-size")(str4("10px")), v3AttrStr("font-family")(str4("monospace")), v3AttrFnStr("class")(function(v) {
+    }), evalAttrStr("fill")(str4("rgba(255, 255, 255, 0.5)")), evalAttrStr("font-size")(str4("10px")), evalAttrStr("font-family")(str4("monospace")), fnAttrStr("class")(function(v) {
       return "package-label";
-    }), v3AttrFnStr("textContent")(function(v) {
+    }), fnAttrStr("textContent")(function(v) {
       return v.name;
     })]);
   };
   var moduleCircleTemplate = function(callbacks) {
     return function(_node) {
-      return withBehaviors(elem3(Circle.value)([v3AttrFn4("cx")(function(r) {
+      return withBehaviors(elem3(Circle.value)([fnAttr4("cx")(function(r) {
         return r.x + r.width / 2;
-      }), v3AttrFn4("cy")(function(r) {
+      }), fnAttr4("cy")(function(r) {
         return r.y + r.height / 2;
-      }), v3AttrFn4("r")(function(r) {
+      }), fnAttr4("r")(function(r) {
         return min7(r.width)(r.height) / 2 * 0.8;
-      }), v3AttrStr("fill")(str4("#0E4C8A")), v3AttrFnStr("stroke")(function(r) {
+      }), evalAttrStr("fill")(str4("#0E4C8A")), fnAttrStr("stroke")(function(r) {
         if (r.isUsed) {
           return "rgba(255, 255, 255, 0.7)";
         }
         ;
         return "black";
-      }), v3AttrFn4("stroke-width")(function(r) {
+      }), fnAttr4("stroke-width")(function(r) {
         if (r.isUsed) {
           return 1;
         }
         ;
         return 0.5;
-      }), v3AttrFnStr("class")(function(v) {
+      }), fnAttrStr("class")(function(v) {
         return "module-node";
       })]))([onMouseEnter(function(r) {
         return callbacks.onNodeHover(r.simNode);
@@ -21908,11 +21917,11 @@
             simNode: new Just(pn.simNode)
           };
         };
-        return withChildren(named(SVG.value)("root")([v3AttrStr("viewBox")(str4("-950 -570 1900 1140")), v3AttrFnStr("class")(function(v) {
+        return withChildren(named(SVG.value)("root")([evalAttrStr("viewBox")(str4("-950 -570 1900 1140")), fnAttrStr("class")(function(v) {
           return "treemap-svg";
-        })]))([withChildren(named(Group.value)("package-rects")([v3AttrFnStr("class")(function(v) {
+        })]))([withChildren(named(Group.value)("package-rects")([fnAttrStr("class")(function(v) {
           return "package-rects-group";
-        })]))([joinData("pkg-rects")("rect")(positioned.packageRects)(packageRectTemplate(callbacks)), joinData("pkg-labels")("text")(positioned.packageRects)(packageLabelTemplate)]), withChild(named(Group.value)("modules")([v3AttrFnStr("class")(function(v) {
+        })]))([joinData("pkg-rects")("rect")(positioned.packageRects)(packageRectTemplate(callbacks)), joinData("pkg-labels")("text")(positioned.packageRects)(packageLabelTemplate)]), withChild(named(Group.value)("modules")([fnAttrStr("class")(function(v) {
           return "modules-group";
         })]))(joinData("module-circles")("circle")(map33(toPackageRect)(positioned.modules))(moduleCircleTemplate(callbacks)))]);
       };
