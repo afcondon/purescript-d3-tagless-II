@@ -73,6 +73,7 @@ routes =
   <|> sankeyDebug
   <|> forcePlayground
   <|> treeBuilder
+  <|> treeBuilder2
   <|> splom
   <|> gupDebug
   <|> acknowledgements
@@ -307,6 +308,10 @@ forcePlayground = ForcePlayground <$ lit "force-playground" <* end
 treeBuilder :: Match Route
 treeBuilder = TreeBuilder <$ lit "tree-builder" <* end
 
+-- | Match: /tree-builder2
+treeBuilder2 :: Match Route
+treeBuilder2 = TreeBuilder2 <$ lit "tree-builder2" <* end
+
 -- | Match: /splom
 splom :: Match Route
 splom = SPLOM <$ lit "splom" <* end
@@ -383,6 +388,7 @@ routeToPath SimpleForceGraph = "/simple-force-graph"
 routeToPath SankeyDebug = "/sankey-debug"
 routeToPath ForcePlayground = "/force-playground"
 routeToPath TreeBuilder = "/tree-builder"
+routeToPath TreeBuilder2 = "/tree-builder2"
 routeToPath SPLOM = "/splom"
 routeToPath GUPDebug = "/gup-debug"
 routeToPath Acknowledgements = "/acknowledgements"

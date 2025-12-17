@@ -69,6 +69,7 @@ import Component.SimpleForceGraph as SimpleForceGraph
 import Component.SankeyDebug as SankeyDebug
 import Component.ForcePlayground as ForcePlayground
 import TreeBuilder.App as TreeBuilder
+import TreeBuilder2.App as TreeBuilder2
 import Component.SPLOM as SPLOM
 import Component.GUPDebug as GUPDebug
 
@@ -138,6 +139,7 @@ type Slots =
   , sankeyDebug :: forall q. H.Slot q Void Unit
   , forcePlayground :: forall q. H.Slot q Void Unit
   , treeBuilder :: forall q. H.Slot q Void Unit
+  , treeBuilder2 :: forall q. H.Slot q Void Unit
   , splom :: forall q. H.Slot q Void Unit
   , gupDebug :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
@@ -190,6 +192,7 @@ _simpleForceGraph = Proxy :: Proxy "simpleForceGraph"
 _sankeyDebug = Proxy :: Proxy "sankeyDebug"
 _forcePlayground = Proxy :: Proxy "forcePlayground"
 _treeBuilder = Proxy :: Proxy "treeBuilder"
+_treeBuilder2 = Proxy :: Proxy "treeBuilder2"
 _splom = Proxy :: Proxy "splom"
 _gupDebug = Proxy :: Proxy "gupDebug"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
@@ -401,6 +404,9 @@ renderPage route = case spy "Route is" route of
 
   TreeBuilder ->
     HH.slot_ _treeBuilder unit TreeBuilder.component unit
+
+  TreeBuilder2 ->
+    HH.slot_ _treeBuilder2 unit TreeBuilder2.component unit
 
   SPLOM ->
     HH.slot_ _splom unit SPLOM.component unit

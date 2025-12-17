@@ -141,6 +141,7 @@ data Route
   | SankeyDebug     -- Debug testbed for Sankey layout algorithms
   | ForcePlayground -- Force simulation playground with network datasets
   | TreeBuilder    -- Interactive tree builder for Tree API visualization
+  | TreeBuilder2   -- Interactive tree builder with node creation
   | SPLOM          -- Brushable Scatterplot Matrix (Palmer Penguins)
   | GUPDebug       -- Standalone debug page for Setup.applySetupWithData GUP API
   -- Meta
@@ -206,6 +207,7 @@ instance showRoute :: Show Route where
   show SankeyDebug = "Sankey Debug"
   show ForcePlayground = "Force Playground"
   show TreeBuilder = "Tree Builder"
+  show TreeBuilder2 = "Tree Builder 2"
   show SPLOM = "Brushable SPLOM"
   show GUPDebug = "GUP Debug"
   show Acknowledgements = "Acknowledgements"
