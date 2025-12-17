@@ -6,6 +6,7 @@ module DataViz.Layout.Hierarchy.Tree
   ( TreeConfig
   , defaultTreeConfig
   , withLayerScale
+  , withLayerSeparation
   , withSeparation
   , Contour
   , Contours(..)
@@ -43,6 +44,7 @@ type TreeConfig a =
   , minSeparation :: Number -- Minimum horizontal separation between siblings
   , separation :: Maybe (a -> a -> Number) -- Custom separation function based on node data
   , layerScale :: Maybe (Int -> Number) -- Custom vertical spacing by depth
+  , layerSeparation :: Maybe Number -- Fixed pixel separation between layers (overrides height-based scaling)
   }
 
 -- | Default configuration
@@ -52,6 +54,7 @@ defaultTreeConfig =
   , minSeparation: 1.0
   , separation: Nothing
   , layerScale: Nothing
+  , layerSeparation: Nothing
   }
 
 -- | Configuration with custom layer scaling
@@ -71,6 +74,19 @@ withLayerScale scale config = config { layerScale = Just scale }
 -- | ```
 withSeparation :: forall a. (a -> a -> Number) -> TreeConfig a -> TreeConfig a
 withSeparation sep config = config { separation = Just sep }
+
+-- | Configuration with fixed layer separation in pixels
+-- |
+-- | When set, layers are spaced by a fixed pixel amount rather than
+-- | being normalized to fit within the configured height. This gives
+-- | consistent vertical spacing regardless of tree depth.
+-- |
+-- | Example for 60px between layers:
+-- | ```purescript
+-- | withLayerSeparation 60.0 config
+-- | ```
+withLayerSeparation :: forall a. Number -> TreeConfig a -> TreeConfig a
+withLayerSeparation sep config = config { layerSeparation = Just sep }
 
 -- | A contour is a list of offsets at each depth level
 -- | Represents the left or right edge of a subtree
@@ -502,11 +518,13 @@ scaleToPixels config inputTree =
 
     -- Scale functions
     scaleX x = ((x - minX) / xRange) * config.size.width
-    scaleY depth =
-      let
-        scaledDepth = layerScaleFn depth
-      in
-        (scaledDepth / maxScaledDepth) * config.size.height
+    scaleY depth = case config.layerSeparation of
+      -- Fixed layer separation: y = depth * separation
+      Just sep -> toNumber depth * sep
+      -- Default: normalize to fit within height
+      Nothing ->
+        let scaledDepth = layerScaleFn depth
+        in (scaledDepth / maxScaledDepth) * config.size.height
 
     -- Apply scaling via map
     go tr =

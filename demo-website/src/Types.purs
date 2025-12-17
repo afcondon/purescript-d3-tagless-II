@@ -142,6 +142,7 @@ data Route
   | ForcePlayground -- Force simulation playground with network datasets
   | TreeBuilder    -- Interactive tree builder for Tree API visualization
   | TreeBuilder2   -- Interactive tree builder with node creation
+  | TreeBuilder3   -- DSL grammar tree builder (keyboard-driven)
   | SPLOM          -- Brushable Scatterplot Matrix (Palmer Penguins)
   | GUPDebug       -- Standalone debug page for Setup.applySetupWithData GUP API
   -- Meta
@@ -208,6 +209,7 @@ instance showRoute :: Show Route where
   show ForcePlayground = "Force Playground"
   show TreeBuilder = "Tree Builder"
   show TreeBuilder2 = "Tree Builder 2"
+  show TreeBuilder3 = "DSL Tree Builder"
   show SPLOM = "Brushable SPLOM"
   show GUPDebug = "GUP Debug"
   show Acknowledgements = "Acknowledgements"
