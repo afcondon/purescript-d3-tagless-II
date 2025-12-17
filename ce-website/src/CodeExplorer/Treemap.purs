@@ -33,7 +33,7 @@ import PSD3.Interpreter.D3 (runD3v2M, D3v2M, D3v2Selection_, reselectD3v2)
 import PSD3.Capabilities.Selection (select, renderTree)
 import PSD3.Selection.Types (ElementType(..), SEmpty)
 import PSD3.AST as T
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Integration (evalAttr, evalAttrStr)
 import PSD3.Expr.Expr (lit, str)
 import Effect.Class (liftEffect)
 import Types (SimNode, NodeType(..))
@@ -241,8 +241,8 @@ renderTreemapSVG packageNodes moduleNodes = do
     structureTree :: T.Tree Unit
     structureTree =
       T.named Group "treemap-group"
-        [ v3AttrStr "id" (str "treemap-group")
-        , v3AttrStr "transform" (str ("translate(" <> show translateX <> "," <> show translateY <> ")"))
+        [ evalAttrStr "id" (str "treemap-group")
+        , evalAttrStr "transform" (str ("translate(" <> show translateX <> "," <> show translateY <> ")"))
         ]
         `T.withChildren`
           [ T.named Group "treemap-packages" []
@@ -263,15 +263,15 @@ renderTreemapSVG packageNodes moduleNodes = do
       packagesTree =
         T.joinData "package-rects" "rect" packageNodes $ \n ->
           T.elem Rect
-            [ v3Attr "x" (lit n.x0)
-            , v3Attr "y" (lit n.y0)
-            , v3Attr "width" (lit (n.x1 - n.x0))
-            , v3Attr "height" (lit (n.y1 - n.y0))
-            , v3AttrStr "fill" (str "none")
-            , v3AttrStr "stroke" (str "rgba(255, 255, 255, 0.6)")
-            , v3Attr "stroke-width" (lit 1.5)
-            , v3Attr "opacity" (lit 1.0)
-            , v3AttrStr "class" (str "treemap-package")
+            [ evalAttr "x" (lit n.x0)
+            , evalAttr "y" (lit n.y0)
+            , evalAttr "width" (lit (n.x1 - n.x0))
+            , evalAttr "height" (lit (n.y1 - n.y0))
+            , evalAttrStr "fill" (str "none")
+            , evalAttrStr "stroke" (str "rgba(255, 255, 255, 0.6)")
+            , evalAttr "stroke-width" (lit 1.5)
+            , evalAttr "opacity" (lit 1.0)
+            , evalAttrStr "class" (str "treemap-package")
             ]
   _ <- renderTree packagesGroup packagesTree
 
@@ -280,14 +280,14 @@ renderTreemapSVG packageNodes moduleNodes = do
       modulesTree =
         T.joinData "module-rects" "rect" moduleNodes $ \n ->
           T.elem Rect
-            [ v3Attr "x" (lit n.x0)
-            , v3Attr "y" (lit n.y0)
-            , v3Attr "width" (lit (n.x1 - n.x0))
-            , v3Attr "height" (lit (n.y1 - n.y0))
-            , v3AttrStr "fill" (str "none")
-            , v3AttrStr "stroke" (str "rgba(255, 255, 255, 0.4)")
-            , v3Attr "stroke-width" (lit 0.5)
-            , v3AttrStr "class" (str "treemap-module")
+            [ evalAttr "x" (lit n.x0)
+            , evalAttr "y" (lit n.y0)
+            , evalAttr "width" (lit (n.x1 - n.x0))
+            , evalAttr "height" (lit (n.y1 - n.y0))
+            , evalAttrStr "fill" (str "none")
+            , evalAttrStr "stroke" (str "rgba(255, 255, 255, 0.4)")
+            , evalAttr "stroke-width" (lit 0.5)
+            , evalAttrStr "class" (str "treemap-module")
             ]
   _ <- renderTree modulesGroup modulesTree
 
@@ -297,15 +297,15 @@ renderTreemapSVG packageNodes moduleNodes = do
       labelsTree =
         T.joinData "package-labels" "text" packageNodes $ \n ->
           T.elem Text
-            [ v3Attr "x" (lit ((n.x0 + n.x1) / 2.0))
-            , v3Attr "y" (lit (n.y0 + 14.0))
-            , v3AttrStr "text-anchor" (str "middle")
-            , v3AttrStr "fill" (str "rgba(255, 255, 255, 0.7)")
-            , v3AttrStr "font-family" (str "Monaco, 'Courier New', monospace")
-            , v3Attr "font-size" (lit 10.0)
-            , v3Attr "opacity" (lit 1.0)
-            , v3AttrStr "class" (str "treemap-package-label")
-            , v3AttrStr "textContent" (str n.name)
+            [ evalAttr "x" (lit ((n.x0 + n.x1) / 2.0))
+            , evalAttr "y" (lit (n.y0 + 14.0))
+            , evalAttrStr "text-anchor" (str "middle")
+            , evalAttrStr "fill" (str "rgba(255, 255, 255, 0.7)")
+            , evalAttrStr "font-family" (str "Monaco, 'Courier New', monospace")
+            , evalAttr "font-size" (lit 10.0)
+            , evalAttr "opacity" (lit 1.0)
+            , evalAttrStr "class" (str "treemap-package-label")
+            , evalAttrStr "textContent" (str n.name)
             ]
   _ <- renderTree labelsGroup labelsTree
   liftEffect $ log "[Treemap] Labels rendered"
@@ -452,8 +452,8 @@ renderWatermarkSVG packageNodes = do
     structureTree :: T.Tree Unit
     structureTree =
       T.named Group "watermark-inner"
-        [ v3AttrStr "transform" (str ("translate(" <> show translateX <> "," <> show translateY <> ")"))
-        , v3AttrStr "id" (str "watermark-inner")
+        [ evalAttrStr "transform" (str ("translate(" <> show translateX <> "," <> show translateY <> ")"))
+        , evalAttrStr "id" (str "watermark-inner")
         ]
         `T.withChildren`
           [ T.named Group "watermark-rects" []
@@ -472,15 +472,15 @@ renderWatermarkSVG packageNodes = do
       rectsTree =
         T.joinData "watermark-package-rects" "rect" packageNodes $ \n ->
           T.elem Rect
-            [ v3Attr "x" (lit n.x0)
-            , v3Attr "y" (lit n.y0)
-            , v3Attr "width" (lit (n.x1 - n.x0))
-            , v3Attr "height" (lit (n.y1 - n.y0))
-            , v3AttrStr "fill" (str "rgba(255, 255, 255, 0)")
-            , v3AttrStr "stroke" (str "rgba(255, 255, 255, 0.15)")
-            , v3Attr "stroke-width" (lit 1.0)
-            , v3Attr "opacity" (lit 1.0)
-            , v3AttrStr "class" (str "watermark-package")
+            [ evalAttr "x" (lit n.x0)
+            , evalAttr "y" (lit n.y0)
+            , evalAttr "width" (lit (n.x1 - n.x0))
+            , evalAttr "height" (lit (n.y1 - n.y0))
+            , evalAttrStr "fill" (str "rgba(255, 255, 255, 0)")
+            , evalAttrStr "stroke" (str "rgba(255, 255, 255, 0.15)")
+            , evalAttr "stroke-width" (lit 1.0)
+            , evalAttr "opacity" (lit 1.0)
+            , evalAttrStr "class" (str "watermark-package")
             ]
   _ <- renderTree rectsGroup rectsTree
 
@@ -490,15 +490,15 @@ renderWatermarkSVG packageNodes = do
       labelsTree =
         T.joinData "watermark-package-labels" "text" packageNodes $ \n ->
           T.elem Text
-            [ v3Attr "x" (lit ((n.x0 + n.x1) / 2.0))
-            , v3Attr "y" (lit (n.y0 + 14.0))
-            , v3AttrStr "text-anchor" (str "middle")
-            , v3AttrStr "fill" (str "rgba(255, 255, 255, 0.2)")
-            , v3AttrStr "font-family" (str "Monaco, 'Courier New', monospace")
-            , v3Attr "font-size" (lit 10.0)
-            , v3Attr "opacity" (lit 1.0)
-            , v3AttrStr "class" (str "watermark-package-label")
-            , v3AttrStr "textContent" (str n.name)
+            [ evalAttr "x" (lit ((n.x0 + n.x1) / 2.0))
+            , evalAttr "y" (lit (n.y0 + 14.0))
+            , evalAttrStr "text-anchor" (str "middle")
+            , evalAttrStr "fill" (str "rgba(255, 255, 255, 0.2)")
+            , evalAttrStr "font-family" (str "Monaco, 'Courier New', monospace")
+            , evalAttr "font-size" (lit 10.0)
+            , evalAttr "opacity" (lit 1.0)
+            , evalAttrStr "class" (str "watermark-package-label")
+            , evalAttrStr "textContent" (str n.name)
             ]
   _ <- renderTree labelsGroup labelsTree
   liftEffect $ log "[Treemap] Watermark labels rendered"

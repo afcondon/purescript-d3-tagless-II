@@ -18,8 +18,8 @@ import Data.Array (range)
 import Data.Int as Int
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Number.Format (fixed, toStringWith)
--- v3 Integration: all attributes via v3Attr/v3AttrStr (no ToAttr typeclass)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+-- v3 Integration: all attributes via evalAttr/evalAttrStr (no ToAttr typeclass)
+import PSD3.Expr.Integration (evalAttr, evalAttrStr)
 import PSD3.Expr.Expr (lit, str)
 import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.AST (Tree)
@@ -148,41 +148,41 @@ renderAxis ax =
     tickElements = map (\tickValue ->
       let pos = applyScale ax.scale tickValue
       in T.elem Group
-          [ v3AttrStr "class" (str "tick")
-          , v3AttrStr "transform" (str (tickTransform pos))
+          [ evalAttrStr "class" (str "tick")
+          , evalAttrStr "transform" (str (tickTransform pos))
           ]
           `T.withChildren`
             [ T.elem Line
-                [ v3Attr "x1" (lit tickLine.x1)
-                , v3Attr "y1" (lit tickLine.y1)
-                , v3Attr "x2" (lit tickLine.x2)
-                , v3Attr "y2" (lit tickLine.y2)
-                , v3AttrStr "stroke" (str "currentColor")
+                [ evalAttr "x1" (lit tickLine.x1)
+                , evalAttr "y1" (lit tickLine.y1)
+                , evalAttr "x2" (lit tickLine.x2)
+                , evalAttr "y2" (lit tickLine.y2)
+                , evalAttrStr "stroke" (str "currentColor")
                 ]
             , T.elem Text
-                [ v3Attr "x" (lit tickText.x)
-                , v3Attr "y" (lit tickText.y)
-                , v3AttrStr "text-anchor" (str tickText.anchor)
-                , v3Attr "dy" (lit tickText.dyVal)
-                , v3AttrStr "fill" (str "currentColor")
-                , v3Attr "font-size" (lit 10.0)
-                , v3AttrStr "textContent" (str (formatter tickValue))
+                [ evalAttr "x" (lit tickText.x)
+                , evalAttr "y" (lit tickText.y)
+                , evalAttrStr "text-anchor" (str tickText.anchor)
+                , evalAttr "dy" (lit tickText.dyVal)
+                , evalAttrStr "fill" (str "currentColor")
+                , evalAttr "font-size" (lit 10.0)
+                , evalAttrStr "textContent" (str (formatter tickValue))
                 ]
             ]
       ) ticks
 
   in
     T.elem Group
-      [ v3AttrStr "class" (str "axis")
-      , v3AttrStr "fill" (str "none")
-      , v3Attr "font-size" (lit 10.0)
-      , v3AttrStr "stroke" (str "currentColor")
+      [ evalAttrStr "class" (str "axis")
+      , evalAttrStr "fill" (str "none")
+      , evalAttr "font-size" (lit 10.0)
+      , evalAttrStr "stroke" (str "currentColor")
       ]
       `T.withChildren`
         ([ -- Domain path
            T.elem Path
-            [ v3AttrStr "class" (str "domain")
-            , v3AttrStr "stroke" (str "currentColor")
-            , v3AttrStr "d" (str domainPath)
+            [ evalAttrStr "class" (str "domain")
+            , evalAttrStr "stroke" (str "currentColor")
+            , evalAttrStr "d" (str domainPath)
             ]
          ] <> tickElements)

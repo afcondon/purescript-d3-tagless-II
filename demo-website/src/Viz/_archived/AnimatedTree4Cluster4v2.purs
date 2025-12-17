@@ -13,7 +13,7 @@ import Data.Time.Duration (Milliseconds(..))
 import Control.Comonad.Cofree (head, tail)
 import Data.Tree (Tree, mkTree)
 import Effect (Effect)
-import PSD3.Expr.Integration (v3AttrFn, v3AttrFnStr, v3StaticStr, v3Static)
+import PSD3.Expr.Integration (fnAttr, fnAttrStr, staticStr, staticNum)
 import PSD3.Internal.Capabilities.Selection (appendChild, openSelection, select, setAttrs, updateJoin, append, remove)
 import PSD3.Internal.Capabilities.Transition (withTransition)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
@@ -126,14 +126,14 @@ draw flareData selector = runD3v2M do
   -- Create SVG with viewBox matching the layout size
   container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
   svg <- appendChild SVG
-    [ v3StaticStr "viewBox" ("0 0 " <> show chartWidth <> " " <> show chartHeight)
-    , v3StaticStr "class" "animated-tree4-cluster4"
+    [ staticStr "viewBox" ("0 0 " <> show chartWidth <> " " <> show chartHeight)
+    , staticStr "class" "animated-tree4-cluster4"
     ]
     container
 
   -- Create groups
-  linksGroup <- appendChild Group [ v3StaticStr "class" "links" ] svg
-  nodesGroup <- appendChild Group [ v3StaticStr "class" "nodes" ] svg
+  linksGroup <- appendChild Group [ staticStr "class" "links" ] svg
+  nodesGroup <- appendChild Group [ staticStr "class" "nodes" ] svg
 
   pure { dataTree, linksGroup, nodesGroup, chartWidth, chartHeight }
 
@@ -186,25 +186,25 @@ animationStep dataTree linksGroup nodesGroup chartWidth chartHeight currentLayou
 
   -- ENTER links: Set initial path and static attributes
   _ <- append Path
-    [ v3StaticStr "fill" "none"
-    , v3StaticStr "stroke" "#555"
-    , v3Static "stroke-width" 1.5
-    , v3StaticStr "class" "link"
-    , v3AttrFnStr "d" (linkPathFn :: LinkData -> String)
+    [ staticStr "fill" "none"
+    , staticStr "stroke" "#555"
+    , staticNum "stroke-width" 1.5
+    , staticStr "class" "link"
+    , fnAttrStr "d" (linkPathFn :: LinkData -> String)
     ]
     linkEnter
 
   -- UPDATE links: Set static attributes
   _ <- setAttrs
-    [ v3StaticStr "fill" "none"
-    , v3StaticStr "stroke" "#555"
-    , v3Static "stroke-width" 1.5
-    , v3StaticStr "class" "link"
+    [ staticStr "fill" "none"
+    , staticStr "stroke" "#555"
+    , staticNum "stroke-width" 1.5
+    , staticStr "class" "link"
     ]
     linkUpdate
 
   -- UPDATE links: Transition path to new positions
-  withTransition transitionConfig linkUpdate [ v3AttrFnStr "d" (linkPathFn :: LinkData -> String) ]
+  withTransition transitionConfig linkUpdate [ fnAttrStr "d" (linkPathFn :: LinkData -> String) ]
 
   -- Update nodes with transition
   nodesSelection <- openSelection nodesGroup "circle"
@@ -215,30 +215,30 @@ animationStep dataTree linksGroup nodesGroup chartWidth chartHeight currentLayou
 
   -- ENTER nodes: Create with initial position and static attributes
   _ <- append Circle
-    [ v3Static "r" 4.0
-    , v3StaticStr "fill" "#999"
-    , v3StaticStr "stroke" "#555"
-    , v3Static "stroke-width" 1.5
-    , v3StaticStr "class" "node"
-    , v3AttrFn "cx" (\(node :: TreeModel) -> node.x)
-    , v3AttrFn "cy" (\(node :: TreeModel) -> node.y)
+    [ staticNum "r" 4.0
+    , staticStr "fill" "#999"
+    , staticStr "stroke" "#555"
+    , staticNum "stroke-width" 1.5
+    , staticStr "class" "node"
+    , fnAttr "cx" (\(node :: TreeModel) -> node.x)
+    , fnAttr "cy" (\(node :: TreeModel) -> node.y)
     ]
     nodeEnter
 
   -- UPDATE nodes: Set static attributes
   _ <- setAttrs
-    [ v3Static "r" 4.0
-    , v3StaticStr "fill" "#999"
-    , v3StaticStr "stroke" "#555"
-    , v3Static "stroke-width" 1.5
-    , v3StaticStr "class" "node"
+    [ staticNum "r" 4.0
+    , staticStr "fill" "#999"
+    , staticStr "stroke" "#555"
+    , staticNum "stroke-width" 1.5
+    , staticStr "class" "node"
     ]
     nodeUpdate
 
   -- UPDATE nodes: Transition to new position
   withTransition transitionConfig nodeUpdate
-    [ v3AttrFn "cx" (\(node :: TreeModel) -> node.x)
-    , v3AttrFn "cy" (\(node :: TreeModel) -> node.y)
+    [ fnAttr "cx" (\(node :: TreeModel) -> node.x)
+    , fnAttr "cy" (\(node :: TreeModel) -> node.y)
     ]
 
   -- Done with this animation step

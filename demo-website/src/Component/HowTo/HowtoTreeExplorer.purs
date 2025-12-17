@@ -28,7 +28,7 @@ import Halogen.HTML.Properties as HP
 import DataViz.Layout.Hierarchy.Tree as Tree
 import DataViz.Layout.Hierarchy.Link (LinkStyle(..), linkGenerator)
 import PSD3.Shared.Data (loadFlareData)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3.Expr.Integration (evalAttr, evalAttrStr, fnAttr, fnAttrStr)
 import PSD3.Expr.Expr (lit, str)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_, reselectD3v2)
@@ -314,31 +314,31 @@ drawTreeExplorer selector state flareTree = do
       linksTree :: T.Tree LinkDatum
       linksTree =
         T.named SVG "svg"
-          [ v3Attr "width" (lit chartWidth)
-          , v3Attr "height" (lit chartHeight)
-          , v3AttrStr "viewBox" (str ("0 0 " <> show chartWidth <> " " <> show chartHeight))
-          , v3AttrStr "class" (str "tree-explorer-svg")
+          [ evalAttr "width" (lit chartWidth)
+          , evalAttr "height" (lit chartHeight)
+          , evalAttrStr "viewBox" (str ("0 0 " <> show chartWidth <> " " <> show chartHeight))
+          , evalAttrStr "class" (str "tree-explorer-svg")
           ]
           `T.withChild`
             ( T.named Group "chartGroup"
-                [ v3AttrStr "class" (str "tree-content") ]
+                [ evalAttrStr "class" (str "tree-content") ]
                 `T.withChild`
                   ( T.named Group "linksGroup"
-                      [ v3AttrStr "class" (str "links") ]
+                      [ evalAttrStr "class" (str "links") ]
                       `T.withChild`
                         ( T.joinData "links" "path" links $ \link ->
                             T.elem Path
-                              [ v3AttrStr "d" (str
+                              [ evalAttrStr "d" (str
                                   ( linkPathFn
                                       (link.source.x + padding)
                                       (link.source.y + padding)
                                       (link.target.x + padding)
                                       (link.target.y + padding)
                                   ))
-                              , v3AttrStr "fill" (str "none")
-                              , v3AttrStr "stroke" (str "#555")
-                              , v3Attr "stroke-width" (lit 1.5)
-                              , v3AttrStr "class" (str "link")
+                              , evalAttrStr "fill" (str "none")
+                              , evalAttrStr "stroke" (str "#555")
+                              , evalAttr "stroke-width" (lit 1.5)
+                              , evalAttrStr "class" (str "link")
                               ]
                         )
                   )
@@ -355,17 +355,17 @@ drawTreeExplorer selector state flareTree = do
       nodesTree :: T.Tree NodeWithRadius
       nodesTree =
         T.named Group "nodesGroup"
-          [ v3AttrStr "class" (str "nodes") ]
+          [ evalAttrStr "class" (str "nodes") ]
           `T.withChild`
             ( T.joinData "nodeGroups" "g" nodes $ \node ->
                 T.elem Circle
-                  [ v3Attr "cx" (lit (node.x + padding))
-                  , v3Attr "cy" (lit (node.y + padding))
-                  , v3Attr "r" (lit (node.radius * radiusScale)) -- Scale from tree units to pixels
-                  , v3AttrStr "fill" (str (computeColor node))
-                  , v3AttrStr "stroke" (str "none")
-                  , v3Attr "stroke-opacity" (lit 0.0)
-                  , v3AttrStr "class" (str "node")
+                  [ evalAttr "cx" (lit (node.x + padding))
+                  , evalAttr "cy" (lit (node.y + padding))
+                  , evalAttr "r" (lit (node.radius * radiusScale)) -- Scale from tree units to pixels
+                  , evalAttrStr "fill" (str (computeColor node))
+                  , evalAttrStr "stroke" (str "none")
+                  , evalAttr "stroke-opacity" (lit 0.0)
+                  , evalAttrStr "class" (str "node")
                   ]
             )
 

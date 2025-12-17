@@ -191,11 +191,11 @@ runExample = do
   log ""
   log "  -- v2 attribute (for selection operations)"
   log "  fillAttr :: Attribute BarData"
-  log "  fillAttr = v3Attr \"fill\" barFill"
+  log "  fillAttr = evalAttr \"fill\" barFill"
   log ""
   log "  -- Usage in enter/update/exit"
-  log "  append Rect [v3Attr \"x\" barX, v3Attr \"fill\" barFill] enterSelection"
-  log "  setAttrs [v3Attr \"fill\" barFill] updateSelection"
+  log "  append Rect [evalAttr \"x\" barX, evalAttr \"fill\" barFill] enterSelection"
+  log "  setAttrs [evalAttr \"fill\" barFill] updateSelection"
 
   log "\n--- Generated SVG (both datasets) ---"
   log $ generateBarChartSVG dataset1 dataset2

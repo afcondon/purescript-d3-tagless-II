@@ -125,6 +125,7 @@ computeTreeLayout style rootId nodes links =
       , minSeparation: 1.0
       , separation: Nothing
       , layerScale: Nothing
+      , layerSeparation: Nothing
       }
     laidOutTree = Tree.tree treeConfig dataTree
 

@@ -20,7 +20,7 @@ import Effect.Console as Console
 import Type.Proxy (Proxy(..))
 
 -- v2 infrastructure for D3 rendering
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3.Expr.Integration (evalAttr, evalAttrStr, fnAttr, fnAttrStr)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
@@ -105,22 +105,22 @@ v3ParabolaDemo = runD3v2M do
   let tree :: Tree ParabolaPoint
       tree =
         T.named SVG "svg"
-          [ v3Attr "width" (lit 400.0)
-          , v3Attr "height" (lit 250.0)
-          , v3AttrStr "viewBox" (str "0 0 400 250")
-          , v3AttrStr "id" (str "v3-parabola-svg")
-          , v3AttrStr "class" (str "v3-demo")
+          [ evalAttr "width" (lit 400.0)
+          , evalAttr "height" (lit 250.0)
+          , evalAttrStr "viewBox" (str "0 0 400 250")
+          , evalAttrStr "id" (str "v3-parabola-svg")
+          , evalAttrStr "class" (str "v3-demo")
           ]
           `T.withChild`
             (T.joinData "points" "circle" parabolaData $ \d ->
               -- v3 expressions are evaluated with datum → static v2 attributes
               T.elem Circle
-                [ v3Attr "cx" (lit (evalExpr scaleX d))       -- v3 expression evaluated!
-                , v3Attr "cy" (lit (evalExpr scaleY d))       -- v3 expression evaluated!
-                , v3Attr "r" (lit (evalExpr pointRadius d))  -- v3 expression evaluated!
-                , v3AttrStr "fill" (str "#3498db")
-                , v3AttrStr "stroke" (str "white")
-                , v3Attr "stroke-width" (lit 2.0)
+                [ evalAttr "cx" (lit (evalExpr scaleX d))       -- v3 expression evaluated!
+                , evalAttr "cy" (lit (evalExpr scaleY d))       -- v3 expression evaluated!
+                , evalAttr "r" (lit (evalExpr pointRadius d))  -- v3 expression evaluated!
+                , evalAttrStr "fill" (str "#3498db")
+                , evalAttrStr "stroke" (str "white")
+                , evalAttr "stroke-width" (lit 2.0)
                 ])
 
   -- Render to DOM via D3!

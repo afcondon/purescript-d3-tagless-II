@@ -16,7 +16,7 @@ import Effect.Aff (Aff, launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import PSD3.Shared.Data (DataFile(..), loadDataFile, parseCSVRow)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3.Expr.Integration (evalAttr, evalAttrStr, fnAttr, fnAttrStr)
 import PSD3.Expr.Expr (lit, str)
 import PSD3.Axis.Axis (axisBottom, axisLeft, renderAxis, Scale)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
@@ -182,27 +182,27 @@ drawGroupedBarChart selector populationData = runD3v2M do
     axesTree :: T.Tree Unit
     axesTree =
       T.named SVG "svg"
-        [ v3Attr "width" (lit dims.width)
-        , v3Attr "height" (lit dims.height)
-        , v3AttrStr "viewBox" (str ("0 0 " <> show dims.width <> " " <> show dims.height))
-        , v3AttrStr "class" (str "grouped-bar-chart")
+        [ evalAttr "width" (lit dims.width)
+        , evalAttr "height" (lit dims.height)
+        , evalAttrStr "viewBox" (str ("0 0 " <> show dims.width <> " " <> show dims.height))
+        , evalAttrStr "class" (str "grouped-bar-chart")
         ]
         `T.withChild`
           ( T.named Group "chartGroup"
-              [ v3AttrStr "class" (str "chart-content")
-              , v3AttrStr "transform" (str ("translate(" <> show dims.marginLeft <> "," <> show dims.marginTop <> ")"))
+              [ evalAttrStr "class" (str "chart-content")
+              , evalAttrStr "transform" (str ("translate(" <> show dims.marginLeft <> "," <> show dims.marginTop <> ")"))
               ]
               `T.withChildren`
                 [ -- X axis
                   T.named Group "xAxis"
-                    [ v3AttrStr "transform" (str ("translate(0," <> show iHeight <> ")"))
-                    , v3AttrStr "class" (str "x-axis")
+                    [ evalAttrStr "transform" (str ("translate(0," <> show iHeight <> ")"))
+                    , evalAttrStr "class" (str "x-axis")
                     ]
                     `T.withChild`
                       renderAxis xAxis
                 , -- Y axis
                   T.named Group "yAxis"
-                    [ v3AttrStr "class" (str "y-axis")
+                    [ evalAttrStr "class" (str "y-axis")
                     ]
                     `T.withChild`
                       renderAxis yAxis
@@ -237,12 +237,12 @@ drawGroupedBarChart selector populationData = runD3v2M do
           barHeight = (bar.population / maxPop) * iHeight
         in
           T.elem Rect
-            [ v3Attr "x" (lit xPos)
-            , v3Attr "y" (lit yPos)
-            , v3Attr "width" (lit barWidth)
-            , v3Attr "height" (lit barHeight)
-            , v3AttrStr "fill" (str (colorForAge bar.age))
-            , v3AttrStr "class" (str "bar")
+            [ evalAttr "x" (lit xPos)
+            , evalAttr "y" (lit yPos)
+            , evalAttr "width" (lit barWidth)
+            , evalAttr "height" (lit barHeight)
+            , evalAttrStr "fill" (str (colorForAge bar.age))
+            , evalAttrStr "class" (str "bar")
             ]
 
   -- Render bars

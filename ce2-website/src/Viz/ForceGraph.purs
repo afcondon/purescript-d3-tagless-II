@@ -75,7 +75,7 @@ import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.AST as T
 import PSD3.Internal.Behavior.Types (Behavior(..), DragConfig(..), ScaleExtent(..), defaultZoom)
 import PSD3.Internal.Behavior.FFI as BehaviorFFI
-import PSD3.Expr.Integration (v3Attr, v3AttrFn, v3AttrFnStr, v3AttrStr)
+import PSD3.Expr.Integration (evalAttr, fnAttr, fnAttrStr, evalAttrStr)
 import PSD3.Expr.Expr (lit, str)
 import PSD3.Transition.Tick as Tick
 
@@ -501,13 +501,13 @@ createNodesTree scene =
     [ scene ]
     (_.nodes)
     ( \rn -> T.elem Circle
-        [ v3Attr "cx" (lit rn.cx)
-        , v3Attr "cy" (lit rn.cy)
-        , v3Attr "r" (lit (max 5.0 (rn.node.r * 0.5)))
-        , v3AttrStr "fill" (str "rgba(255, 255, 255, 0.5)")
-        , v3AttrStr "stroke" (str "rgba(255, 255, 255, 0.8)")
-        , v3Attr "stroke-width" (lit 1.5)
-        , v3AttrStr "class" (str "force-node module-node")
+        [ evalAttr "cx" (lit rn.cx)
+        , evalAttr "cy" (lit rn.cy)
+        , evalAttr "r" (lit (max 5.0 (rn.node.r * 0.5)))
+        , evalAttrStr "fill" (str "rgba(255, 255, 255, 0.5)")
+        , evalAttrStr "stroke" (str "rgba(255, 255, 255, 0.8)")
+        , evalAttr "stroke-width" (lit 1.5)
+        , evalAttrStr "class" (str "force-node module-node")
         ]
         `T.withBehaviors` [ Drag (SimulationDrag simulationId) ]
     )
@@ -523,13 +523,13 @@ createLinksTree scene =
     [ scene ]
     (_.links)
     ( \link -> T.elem Line
-        [ v3Attr "x1" (lit link.source.x)
-        , v3Attr "y1" (lit link.source.y)
-        , v3Attr "x2" (lit link.target.x)
-        , v3Attr "y2" (lit link.target.y)
-        , v3AttrStr "stroke" (str "rgba(255, 255, 255, 0.3)")
-        , v3Attr "stroke-width" (lit 1.0)
-        , v3AttrStr "class" (str "force-link")
+        [ evalAttr "x1" (lit link.source.x)
+        , evalAttr "y1" (lit link.source.y)
+        , evalAttr "x2" (lit link.target.x)
+        , evalAttr "y2" (lit link.target.y)
+        , evalAttrStr "stroke" (str "rgba(255, 255, 255, 0.3)")
+        , evalAttr "stroke-width" (lit 1.0)
+        , evalAttrStr "class" (str "force-link")
         ]
     )
     { enterBehavior: Nothing
@@ -566,7 +566,7 @@ buildLinkElement nodeMap rootX rootY (Tuple srcId tgtId) = do
 buildLinksVizTree :: Array LinkElement -> Number -> Number -> T.Tree LinkElement
 buildLinksVizTree linkElements rootX rootY =
   T.named Group "force-links-group"
-    [ v3AttrFnStr "class" (const "force-links-group")
+    [ fnAttrStr "class" (const "force-links-group")
     ]
   `T.withChild`
     T.joinData "force-links" "path" linkElements (linkTemplate rootX rootY)
@@ -575,9 +575,9 @@ buildLinksVizTree linkElements rootX rootY =
 linkTemplate :: Number -> Number -> LinkElement -> T.Tree LinkElement
 linkTemplate rootX rootY _el =
   T.elem Path
-    [ v3AttrFnStr "d" (\_ -> TreeStyle.radialTree.linkPath rootX rootY rootX rootY)
-    , v3AttrStr "fill" (str "none")
-    , v3AttrStr "stroke" (str "rgba(255, 255, 255, 0.5)")
-    , v3AttrFn "stroke-width" (\_ -> 1.5)
-    , v3AttrFnStr "class" (\_ -> "force-link")
+    [ fnAttrStr "d" (\_ -> TreeStyle.radialTree.linkPath rootX rootY rootX rootY)
+    , evalAttrStr "fill" (str "none")
+    , evalAttrStr "stroke" (str "rgba(255, 255, 255, 0.5)")
+    , fnAttr "stroke-width" (\_ -> 1.5)
+    , fnAttrStr "class" (\_ -> "force-link")
     ]

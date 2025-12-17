@@ -12,7 +12,7 @@ import PSD3.AST (Tree)
 import PSD3.AST as T
 import PSD3.Internal.Behavior.Types (Behavior(..), MouseEventInfo)
 import PSD3.Tooltip (showTooltip, hideTooltip)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3.Expr.Integration (evalAttr, evalAttrStr, fnAttr, fnAttrStr)
 import PSD3.Expr.Expr (lit, str)
 import Web.DOM.Element (Element)
 
@@ -99,20 +99,20 @@ yTicks = [ 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0 ]
 verticalGridLine :: VizConfig -> Number -> Tree NationPoint
 verticalGridLine config tickValue =
   T.elem Line
-    [ v3Attr "x1" (lit (0.5 + scaleX config tickValue))
-    , v3Attr "x2" (lit (0.5 + scaleX config tickValue))
-    , v3Attr "y1" (lit config.marginTop)
-    , v3Attr "y2" (lit (config.height - config.marginBottom))
+    [ evalAttr "x1" (lit (0.5 + scaleX config tickValue))
+    , evalAttr "x2" (lit (0.5 + scaleX config tickValue))
+    , evalAttr "y1" (lit config.marginTop)
+    , evalAttr "y2" (lit (config.height - config.marginBottom))
     ]
 
 -- | Build horizontal grid line
 horizontalGridLine :: VizConfig -> Number -> Tree NationPoint
 horizontalGridLine config tickValue =
   T.elem Line
-    [ v3Attr "y1" (lit (0.5 + scaleY config tickValue))
-    , v3Attr "y2" (lit (0.5 + scaleY config tickValue))
-    , v3Attr "x1" (lit config.marginLeft)
-    , v3Attr "x2" (lit (config.width - config.marginRight))
+    [ evalAttr "y1" (lit (0.5 + scaleY config tickValue))
+    , evalAttr "y2" (lit (0.5 + scaleY config tickValue))
+    , evalAttr "x1" (lit config.marginLeft)
+    , evalAttr "x2" (lit (config.width - config.marginRight))
     ]
 
 -- | Build x-axis tick mark and label
@@ -121,20 +121,20 @@ xAxisTick config tickValue =
   T.named Group "x-tick" []
     `T.withChildren`
       [ T.elem Line
-          [ v3Attr "x1" (lit (scaleX config tickValue))
-          , v3Attr "x2" (lit (scaleX config tickValue))
-          , v3Attr "y1" (lit (config.height - config.marginBottom))
-          , v3Attr "y2" (lit (config.height - config.marginBottom + 6.0))
-          , v3AttrStr "stroke" (str "#333")
-          , v3Attr "stroke-width" (lit 1.0)
+          [ evalAttr "x1" (lit (scaleX config tickValue))
+          , evalAttr "x2" (lit (scaleX config tickValue))
+          , evalAttr "y1" (lit (config.height - config.marginBottom))
+          , evalAttr "y2" (lit (config.height - config.marginBottom + 6.0))
+          , evalAttrStr "stroke" (str "#333")
+          , evalAttr "stroke-width" (lit 1.0)
           ]
       , T.elem Text
-          [ v3Attr "x" (lit (scaleX config tickValue))
-          , v3Attr "y" (lit (config.height - config.marginBottom + 15.0))
-          , v3AttrStr "text-anchor" (str "middle")
-          , v3Attr "font-size" (lit 10.0)
-          , v3AttrStr "fill" (str "#333")
-          , v3AttrStr "textContent" (str (formatIncome tickValue))
+          [ evalAttr "x" (lit (scaleX config tickValue))
+          , evalAttr "y" (lit (config.height - config.marginBottom + 15.0))
+          , evalAttrStr "text-anchor" (str "middle")
+          , evalAttr "font-size" (lit 10.0)
+          , evalAttrStr "fill" (str "#333")
+          , evalAttrStr "textContent" (str (formatIncome tickValue))
           ]
       ]
 
@@ -144,20 +144,20 @@ yAxisTick config tickValue =
   T.named Group "y-tick" []
     `T.withChildren`
       [ T.elem Line
-          [ v3Attr "x1" (lit (config.marginLeft - 6.0))
-          , v3Attr "x2" (lit config.marginLeft)
-          , v3Attr "y1" (lit (scaleY config tickValue))
-          , v3Attr "y2" (lit (scaleY config tickValue))
-          , v3AttrStr "stroke" (str "#333")
-          , v3Attr "stroke-width" (lit 1.0)
+          [ evalAttr "x1" (lit (config.marginLeft - 6.0))
+          , evalAttr "x2" (lit config.marginLeft)
+          , evalAttr "y1" (lit (scaleY config tickValue))
+          , evalAttr "y2" (lit (scaleY config tickValue))
+          , evalAttrStr "stroke" (str "#333")
+          , evalAttr "stroke-width" (lit 1.0)
           ]
       , T.elem Text
-          [ v3Attr "x" (lit (config.marginLeft - 10.0))
-          , v3Attr "y" (lit (scaleY config tickValue + 3.0))
-          , v3AttrStr "text-anchor" (str "end")
-          , v3Attr "font-size" (lit 10.0)
-          , v3AttrStr "fill" (str "#333")
-          , v3AttrStr "textContent" (str (show $ floor tickValue))
+          [ evalAttr "x" (lit (config.marginLeft - 10.0))
+          , evalAttr "y" (lit (scaleY config tickValue + 3.0))
+          , evalAttrStr "text-anchor" (str "end")
+          , evalAttr "font-size" (lit 10.0)
+          , evalAttrStr "fill" (str "#333")
+          , evalAttrStr "textContent" (str (show $ floor tickValue))
           ]
       ]
 
@@ -173,16 +173,16 @@ initWealthHealth selector = runD3v2M do
     staticTree :: Tree NationPoint
     staticTree =
       T.named SVG "svg"
-        [ v3Attr "width" (lit config.width)
-        , v3Attr "height" (lit config.height)
-        , v3AttrStr "viewBox" (str ("0 0 " <> show config.width <> " " <> show config.height))
-        , v3AttrStr "class" (str "wealth-health-viz")
+        [ evalAttr "width" (lit config.width)
+        , evalAttr "height" (lit config.height)
+        , evalAttrStr "viewBox" (str ("0 0 " <> show config.width <> " " <> show config.height))
+        , evalAttrStr "class" (str "wealth-health-viz")
         ]
         `T.withChildren`
           [ -- Grid lines
             T.named Group "grid"
-              [ v3AttrStr "stroke" (str "currentColor")
-              , v3Attr "stroke-opacity" (lit 0.1)
+              [ evalAttrStr "stroke" (str "currentColor")
+              , evalAttr "stroke-opacity" (lit 0.1)
               ]
               `T.withChildren`
                 ( map (verticalGridLine config) xTicks <>
@@ -193,12 +193,12 @@ initWealthHealth selector = runD3v2M do
           , T.named Group "x-axis" []
               `T.withChildren`
                 [ T.elem Line
-                    [ v3Attr "x1" (lit config.marginLeft)
-                    , v3Attr "y1" (lit (config.height - config.marginBottom))
-                    , v3Attr "x2" (lit (config.width - config.marginRight))
-                    , v3Attr "y2" (lit (config.height - config.marginBottom))
-                    , v3AttrStr "stroke" (str "#333")
-                    , v3Attr "stroke-width" (lit 1.5)
+                    [ evalAttr "x1" (lit config.marginLeft)
+                    , evalAttr "y1" (lit (config.height - config.marginBottom))
+                    , evalAttr "x2" (lit (config.width - config.marginRight))
+                    , evalAttr "y2" (lit (config.height - config.marginBottom))
+                    , evalAttrStr "stroke" (str "#333")
+                    , evalAttr "stroke-width" (lit 1.5)
                     ]
                 ]
 
@@ -208,24 +208,24 @@ initWealthHealth selector = runD3v2M do
 
           -- X-axis label
           , T.elem Text
-              [ v3Attr "x" (lit (config.width / 2.0))
-              , v3Attr "y" (lit (config.height - 5.0))
-              , v3AttrStr "text-anchor" (str "middle")
-              , v3Attr "font-size" (lit 14.0)
-              , v3AttrStr "fill" (str "#333")
-              , v3AttrStr "textContent" (str "Income per Person (GDP/capita, PPP$ inflation-adjusted)")
+              [ evalAttr "x" (lit (config.width / 2.0))
+              , evalAttr "y" (lit (config.height - 5.0))
+              , evalAttrStr "text-anchor" (str "middle")
+              , evalAttr "font-size" (lit 14.0)
+              , evalAttrStr "fill" (str "#333")
+              , evalAttrStr "textContent" (str "Income per Person (GDP/capita, PPP$ inflation-adjusted)")
               ]
 
           -- Y-axis
           , T.named Group "y-axis" []
               `T.withChildren`
                 [ T.elem Line
-                    [ v3Attr "x1" (lit config.marginLeft)
-                    , v3Attr "y1" (lit config.marginTop)
-                    , v3Attr "x2" (lit config.marginLeft)
-                    , v3Attr "y2" (lit (config.height - config.marginBottom))
-                    , v3AttrStr "stroke" (str "#333")
-                    , v3Attr "stroke-width" (lit 1.5)
+                    [ evalAttr "x1" (lit config.marginLeft)
+                    , evalAttr "y1" (lit config.marginTop)
+                    , evalAttr "x2" (lit config.marginLeft)
+                    , evalAttr "y2" (lit (config.height - config.marginBottom))
+                    , evalAttrStr "stroke" (str "#333")
+                    , evalAttr "stroke-width" (lit 1.5)
                     ]
                 ]
 
@@ -235,16 +235,16 @@ initWealthHealth selector = runD3v2M do
 
           -- Y-axis label
           , T.elem Text
-              [ v3Attr "x" (lit 15.0)
-              , v3Attr "y" (lit (config.height / 2.0))
-              , v3AttrStr "text-anchor" (str "middle")
-              , v3Attr "font-size" (lit 14.0)
-              , v3AttrStr "fill" (str "#333")
-              , v3AttrStr "textContent" (str "Life Expectancy (years)")
+              [ evalAttr "x" (lit 15.0)
+              , evalAttr "y" (lit (config.height / 2.0))
+              , evalAttrStr "text-anchor" (str "middle")
+              , evalAttr "font-size" (lit 14.0)
+              , evalAttrStr "fill" (str "#333")
+              , evalAttrStr "textContent" (str "Life Expectancy (years)")
               ]
 
           -- Empty group for nations (will be populated by update function)
-          , T.named Group "nations-container" [ v3AttrStr "class" (str "nations") ] `T.withChildren` []
+          , T.named Group "nations-container" [ evalAttrStr "class" (str "nations") ] `T.withChildren` []
           ]
 
   -- Render the static structure
@@ -262,14 +262,14 @@ initWealthHealth selector = runD3v2M do
       nationsTree =
         T.joinData "nations" "circle" nations $ \_ ->
           T.elem Circle
-            [ v3AttrFn "cx" ((\n -> scaleX config n.income) :: NationPoint -> Number)
-            , v3AttrFn "cy" ((\n -> scaleY config n.lifeExpectancy) :: NationPoint -> Number)
-            , v3AttrFn "r" ((\n -> scaleRadius n.population) :: NationPoint -> Number)
-            , v3AttrFnStr "fill" ((_.regionColor) :: NationPoint -> String)
-            , v3Attr "fill-opacity" (lit 0.7)
-            , v3AttrStr "stroke" (str "#333")
-            , v3Attr "stroke-width" (lit 0.5)
-            , v3AttrStr "class" (str "nation-circle")
+            [ fnAttr "cx" ((\n -> scaleX config n.income) :: NationPoint -> Number)
+            , fnAttr "cy" ((\n -> scaleY config n.lifeExpectancy) :: NationPoint -> Number)
+            , fnAttr "r" ((\n -> scaleRadius n.population) :: NationPoint -> Number)
+            , fnAttrStr "fill" ((_.regionColor) :: NationPoint -> String)
+            , evalAttr "fill-opacity" (lit 0.7)
+            , evalAttrStr "stroke" (str "#333")
+            , evalAttr "stroke-width" (lit 0.5)
+            , evalAttrStr "class" (str "nation-circle")
             ]
             `T.withBehaviors`
               [ -- Tooltip on mouse enter

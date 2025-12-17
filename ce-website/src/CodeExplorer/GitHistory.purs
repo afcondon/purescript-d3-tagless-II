@@ -33,7 +33,7 @@ import Data.Tree (Tree, mkTree)
 import Effect (Effect)
 import PSD3.Data.DAGTree (DAGTree, DAGLink, dagTree, addLinks, layoutDAGTree)
 import PSD3.Data.Tree (TreeLayout(..))
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Integration (evalAttr, evalAttrStr)
 import PSD3.Expr.Expr (lit, str)
 import PSD3.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_, reselectD3v2)
@@ -253,15 +253,15 @@ renderGitHistory selector size history = void $ runD3v2M do
   let structureTree :: T.Tree Unit
       structureTree =
         T.named SVG "svg"
-          [ v3Attr "width" (lit size.width)
-          , v3Attr "height" (lit size.height)
-          , v3AttrStr "class" (str "git-history")
+          [ evalAttr "width" (lit size.width)
+          , evalAttr "height" (lit size.height)
+          , evalAttrStr "class" (str "git-history")
           ]
           `T.withChildren`
-            [ T.named Group "tree-links" [ v3AttrStr "class" (str "tree-links") ]
-            , T.named Group "merge-links" [ v3AttrStr "class" (str "merge-links") ]
-            , T.named Group "commits" [ v3AttrStr "class" (str "commits") ]
-            , T.named Group "labels" [ v3AttrStr "class" (str "labels") ]
+            [ T.named Group "tree-links" [ evalAttrStr "class" (str "tree-links") ]
+            , T.named Group "merge-links" [ evalAttrStr "class" (str "merge-links") ]
+            , T.named Group "commits" [ evalAttrStr "class" (str "commits") ]
+            , T.named Group "labels" [ evalAttrStr "class" (str "labels") ]
             ]
 
   -- Render structure
@@ -278,12 +278,12 @@ renderGitHistory selector size history = void $ runD3v2M do
       treeLinksTree =
         T.joinData "tree-links-data" "line" positioned.treeLinks $ \link ->
           T.elem Line
-            [ v3Attr "x1" (lit link.source.x)
-            , v3Attr "y1" (lit link.source.y)
-            , v3Attr "x2" (lit link.target.x)
-            , v3Attr "y2" (lit link.target.y)
-            , v3AttrStr "stroke" (str "#708090")
-            , v3Attr "stroke-width" (lit 2.0)
+            [ evalAttr "x1" (lit link.source.x)
+            , evalAttr "y1" (lit link.source.y)
+            , evalAttr "x2" (lit link.target.x)
+            , evalAttr "y2" (lit link.target.y)
+            , evalAttrStr "stroke" (str "#708090")
+            , evalAttr "stroke-width" (lit 2.0)
             ]
   _ <- renderTree treeLinksGroup treeLinksTree
 
@@ -292,13 +292,13 @@ renderGitHistory selector size history = void $ runD3v2M do
       mergeLinksTree =
         T.joinData "merge-links-data" "line" positioned.extraLinks $ \link ->
           T.elem Line
-            [ v3Attr "x1" (lit link.source.x)
-            , v3Attr "y1" (lit link.source.y)
-            , v3Attr "x2" (lit link.target.x)
-            , v3Attr "y2" (lit link.target.y)
-            , v3AttrStr "stroke" (str "#7B68EE")
-            , v3Attr "stroke-width" (lit 2.0)
-            , v3AttrStr "class" (str "merge-link")
+            [ evalAttr "x1" (lit link.source.x)
+            , evalAttr "y1" (lit link.source.y)
+            , evalAttr "x2" (lit link.target.x)
+            , evalAttr "y2" (lit link.target.y)
+            , evalAttrStr "stroke" (str "#7B68EE")
+            , evalAttr "stroke-width" (lit 2.0)
+            , evalAttrStr "class" (str "merge-link")
             ]
   _ <- renderTree mergeLinksGroup mergeLinksTree
 
@@ -307,12 +307,12 @@ renderGitHistory selector size history = void $ runD3v2M do
       nodesTree =
         T.joinData "commits-data" "circle" positioned.nodes $ \node ->
           T.elem Circle
-            [ v3Attr "cx" (lit node.x)
-            , v3Attr "cy" (lit node.y)
-            , v3Attr "r" (lit (commitRadius node))
-            , v3AttrStr "fill" (str (commitFill node))
-            , v3AttrStr "stroke" (str "#fff")
-            , v3Attr "stroke-width" (lit 2.0)
+            [ evalAttr "cx" (lit node.x)
+            , evalAttr "cy" (lit node.y)
+            , evalAttr "r" (lit (commitRadius node))
+            , evalAttrStr "fill" (str (commitFill node))
+            , evalAttrStr "stroke" (str "#fff")
+            , evalAttr "stroke-width" (lit 2.0)
             ]
   _ <- renderTree commitsGroup nodesTree
 
@@ -321,11 +321,11 @@ renderGitHistory selector size history = void $ runD3v2M do
       labelsTree =
         T.joinData "labels-data" "text" positioned.nodes $ \node ->
           T.elem Text
-            [ v3Attr "x" (lit (node.x + 15.0))
-            , v3Attr "y" (lit (node.y + 4.0))
-            , v3AttrStr "textContent" (str (commitLabel node))
-            , v3Attr "font-size" (lit 11.0)
-            , v3AttrStr "fill" (str "#2F4F4F")
+            [ evalAttr "x" (lit (node.x + 15.0))
+            , evalAttr "y" (lit (node.y + 4.0))
+            , evalAttrStr "textContent" (str (commitLabel node))
+            , evalAttr "font-size" (lit 11.0)
+            , evalAttrStr "fill" (str "#2F4F4F")
             ]
   _ <- renderTree labelsGroup labelsTree
 

@@ -4,8 +4,8 @@
 -- | Unlike the BuilderTree version, this works on actual Tree API trees.
 -- |
 -- | The generated code uses Friendly DSL syntax designed for Prism.js highlighting:
--- | - `width $ num 300.0` instead of `v3Attr "width" (lit 300.0)`
--- | - `fill $ field @"color"` instead of `v3AttrFn "fill" (\d -> d.color)`
+-- | - `width $ num 300.0` instead of `evalAttr "width" (lit 300.0)`
+-- | - `fill $ field @"color"` instead of `fnAttr "fill" (\d -> d.color)`
 -- |
 -- | AttrSource metadata enables recovering original expressions from opaque functions.
 module PSD3.Interpreter.SemiQuine.TreeToCode

@@ -12,7 +12,7 @@ import Prelude
 import Data.Array (concat)
 import Effect (Effect)
 import DataViz.Layout.StateMachine (layout, StateMachine, LayoutState, LayoutTransition, transitionPathD, arrowheadPathD, initialArrowPathD, stateEllipse, stateFinalRing)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Integration (evalAttr, evalAttrStr)
 import PSD3.Expr.Expr (lit, str)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
@@ -79,28 +79,28 @@ startStateMachine selector = do
     let tree :: T.Tree Unit
         tree =
           T.named SVG "svg"
-            [ v3Attr "width" (lit config.width)
-            , v3Attr "height" (lit config.height)
-            , v3AttrStr "viewBox" (str ("0 0 " <> show config.width <> " " <> show config.height))
-            , v3AttrStr "class" (str "state-machine-diagram")
-            , v3AttrStr "style" (str "font-family: monospace;")
+            [ evalAttr "width" (lit config.width)
+            , evalAttr "height" (lit config.height)
+            , evalAttrStr "viewBox" (str ("0 0 " <> show config.width <> " " <> show config.height))
+            , evalAttrStr "class" (str "state-machine-diagram")
+            , evalAttrStr "style" (str "font-family: monospace;")
             ]
             `T.withChildren`
               [ -- Defs for arrowhead marker
                 T.elem Defs []
                   `T.withChild`
                     T.named Group "arrow-marker"
-                      [ v3AttrStr "id" (str "arrowhead") ]
+                      [ evalAttrStr "id" (str "arrowhead") ]
 
               -- Transitions layer (below states)
               , T.named Group "transitions"
-                  [ v3AttrStr "class" (str "transitions") ]
+                  [ evalAttrStr "class" (str "transitions") ]
                   `T.withChildren`
                     (map transitionElement laid.transitions)
 
               -- States layer
               , T.named Group "states"
-                  [ v3AttrStr "class" (str "states") ]
+                  [ evalAttrStr "class" (str "states") ]
                   `T.withChildren`
                     (map stateElement laid.states)
 
@@ -108,19 +108,19 @@ startStateMachine selector = do
               , T.elem Group []
                   `T.withChildren`
                     [ T.elem Path
-                        [ v3AttrStr "d" (str (initialArrowPathD laid.initialArrow 35.0))
-                        , v3AttrStr "stroke" (str "#333")
-                        , v3Attr "stroke-width" (lit 2.0)
-                        , v3AttrStr "fill" (str "none")
-                        , v3AttrStr "marker-end" (str "url(#arrowhead-marker)")
+                        [ evalAttrStr "d" (str (initialArrowPathD laid.initialArrow 35.0))
+                        , evalAttrStr "stroke" (str "#333")
+                        , evalAttr "stroke-width" (lit 2.0)
+                        , evalAttrStr "fill" (str "none")
+                        , evalAttrStr "marker-end" (str "url(#arrowhead-marker)")
                         ]
                     , T.elem Path
-                        [ v3AttrStr "d" (str (arrowheadPathD
+                        [ evalAttrStr "d" (str (arrowheadPathD
                             (laid.initialArrow.x + 35.0)
                             laid.initialArrow.y
                             0.0
                             8.0))
-                        , v3AttrStr "fill" (str "#333")
+                        , evalAttrStr "fill" (str "#333")
                         ]
                     ]
               ]
@@ -140,12 +140,12 @@ stateElement ls =
       `T.withChildren` concat
         [ -- Outer ellipse
           [ T.elem Circle
-              [ v3Attr "cx" (lit pos.cx)
-              , v3Attr "cy" (lit pos.cy)
-              , v3Attr "r" (lit pos.rx)  -- Use rx as radius for circle
-              , v3AttrStr "fill" (str (if isInitial then "#e8f5e9" else if isFinal then "#fff3e0" else "#e3f2fd"))
-              , v3AttrStr "stroke" (str (if isInitial then "#4caf50" else if isFinal then "#ff9800" else "#2196f3"))
-              , v3Attr "stroke-width" (lit 2.0)
+              [ evalAttr "cx" (lit pos.cx)
+              , evalAttr "cy" (lit pos.cy)
+              , evalAttr "r" (lit pos.rx)  -- Use rx as radius for circle
+              , evalAttrStr "fill" (str (if isInitial then "#e8f5e9" else if isFinal then "#fff3e0" else "#e3f2fd"))
+              , evalAttrStr "stroke" (str (if isInitial then "#4caf50" else if isFinal then "#ff9800" else "#2196f3"))
+              , evalAttr "stroke-width" (lit 2.0)
               ]
           ]
         -- Inner ring for final states
@@ -153,24 +153,24 @@ stateElement ls =
             then
               let inner = stateFinalRing ls.position 5.0
               in [ T.elem Circle
-                     [ v3Attr "cx" (lit inner.cx)
-                     , v3Attr "cy" (lit inner.cy)
-                     , v3Attr "r" (lit inner.rx)
-                     , v3AttrStr "fill" (str "none")
-                     , v3AttrStr "stroke" (str "#ff9800")
-                     , v3Attr "stroke-width" (lit 2.0)
+                     [ evalAttr "cx" (lit inner.cx)
+                     , evalAttr "cy" (lit inner.cy)
+                     , evalAttr "r" (lit inner.rx)
+                     , evalAttrStr "fill" (str "none")
+                     , evalAttrStr "stroke" (str "#ff9800")
+                     , evalAttr "stroke-width" (lit 2.0)
                      ]
                  ]
             else []
         -- Label
         , [ T.elem Text
-              [ v3Attr "x" (lit pos.cx)
-              , v3Attr "y" (lit pos.cy)
-              , v3AttrStr "text-anchor" (str "middle")
-              , v3AttrStr "dominant-baseline" (str "middle")
-              , v3Attr "font-size" (lit 11.0)
-              , v3AttrStr "fill" (str "#333")
-              , v3AttrStr "textContent" (str ls.state.label)
+              [ evalAttr "x" (lit pos.cx)
+              , evalAttr "y" (lit pos.cy)
+              , evalAttrStr "text-anchor" (str "middle")
+              , evalAttrStr "dominant-baseline" (str "middle")
+              , evalAttr "font-size" (lit 11.0)
+              , evalAttrStr "fill" (str "#333")
+              , evalAttrStr "textContent" (str ls.state.label)
               ]
           ]
         ]
@@ -186,24 +186,24 @@ transitionElement lt =
       `T.withChildren`
         [ -- Arrow path
           T.elem Path
-            [ v3AttrStr "d" (str pathD)
-            , v3AttrStr "stroke" (str "#666")
-            , v3Attr "stroke-width" (lit 1.5)
-            , v3AttrStr "fill" (str "none")
+            [ evalAttrStr "d" (str pathD)
+            , evalAttrStr "stroke" (str "#666")
+            , evalAttr "stroke-width" (lit 1.5)
+            , evalAttrStr "fill" (str "none")
             ]
         -- Arrowhead
         , T.elem Path
-            [ v3AttrStr "d" (str arrowD)
-            , v3AttrStr "fill" (str "#666")
+            [ evalAttrStr "d" (str arrowD)
+            , evalAttrStr "fill" (str "#666")
             ]
         -- Label
         , T.elem Text
-            [ v3Attr "x" (lit lt.path.labelX)
-            , v3Attr "y" (lit lt.path.labelY)
-            , v3AttrStr "text-anchor" (str "middle")
-            , v3Attr "font-size" (lit 10.0)
-            , v3AttrStr "fill" (str "#666")
-            , v3AttrStr "font-style" (str "italic")
-            , v3AttrStr "textContent" (str lt.transition.label)
+            [ evalAttr "x" (lit lt.path.labelX)
+            , evalAttr "y" (lit lt.path.labelY)
+            , evalAttrStr "text-anchor" (str "middle")
+            , evalAttr "font-size" (lit 10.0)
+            , evalAttrStr "fill" (str "#666")
+            , evalAttrStr "font-style" (str "italic")
+            , evalAttrStr "textContent" (str lt.transition.label)
             ]
         ]

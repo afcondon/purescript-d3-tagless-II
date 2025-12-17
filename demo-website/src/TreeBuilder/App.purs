@@ -47,7 +47,7 @@ import PSD3.Interpreter.SemiQuine.TreeToCode (treeToCodeWithSample)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
 import PSD3.Internal.Selection.Types (SEmpty, ElementType(..))
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Integration (evalAttr, evalAttrStr)
 import PSD3.Expr.Expr (lit, str)
 import PSD3.AST as T
 import Web.DOM.Element (Element)
@@ -271,13 +271,13 @@ renderQ2MetaAST _ =
 astToTreeVisualization :: TreeAST -> T.Tree Unit
 astToTreeVisualization ast =
   T.named SVG "ast-svg"
-    [ v3Attr "width" (lit 400.0)
-    , v3Attr "height" (lit 350.0)
-    , v3AttrStr "viewBox" (str "0 0 400 350")
+    [ evalAttr "width" (lit 400.0)
+    , evalAttr "height" (lit 350.0)
+    , evalAttrStr "viewBox" (str "0 0 400 350")
     ]
     `T.withChild`
       (T.named Group "ast-tree"
-        [ v3AttrStr "transform" (str "translate(200, 40)") ]
+        [ evalAttrStr "transform" (str "translate(200, 40)") ]
         `T.withChild` renderASTNode ast 0.0 0)
   where
     renderASTNode :: TreeAST -> Number -> Int -> T.Tree Unit
@@ -295,31 +295,31 @@ astToTreeVisualization ast =
             `T.withChildren`
               ([ -- Node circle (blue for regular nodes)
                  T.elem Circle
-                   [ v3Attr "cx" (lit xPos)
-                   , v3Attr "cy" (lit (toNumber level * 70.0))
-                   , v3Attr "r" (lit 25.0)
-                   , v3AttrStr "fill" (str "#4A90E2")
-                   , v3AttrStr "stroke" (str "#2E5C8A")
-                   , v3Attr "stroke-width" (lit 2.0)
+                   [ evalAttr "cx" (lit xPos)
+                   , evalAttr "cy" (lit (toNumber level * 70.0))
+                   , evalAttr "r" (lit 25.0)
+                   , evalAttrStr "fill" (str "#4A90E2")
+                   , evalAttrStr "stroke" (str "#2E5C8A")
+                   , evalAttr "stroke-width" (lit 2.0)
                    ]
                -- Node label
                , T.elem Text
-                   [ v3Attr "x" (lit xPos)
-                   , v3Attr "y" (lit (toNumber level * 70.0 + 4.0))
-                   , v3AttrStr "textContent" (str label)
-                   , v3AttrStr "text-anchor" (str "middle")
-                   , v3AttrStr "fill" (str "white")
-                   , v3AttrStr "font-size" (str "10px")
-                   , v3AttrStr "font-family" (str "monospace")
+                   [ evalAttr "x" (lit xPos)
+                   , evalAttr "y" (lit (toNumber level * 70.0 + 4.0))
+                   , evalAttrStr "textContent" (str label)
+                   , evalAttrStr "text-anchor" (str "middle")
+                   , evalAttrStr "fill" (str "white")
+                   , evalAttrStr "font-size" (str "10px")
+                   , evalAttrStr "font-family" (str "monospace")
                    ]
                -- Attribute count badge below
                , T.elem Text
-                   [ v3Attr "x" (lit xPos)
-                   , v3Attr "y" (lit (toNumber level * 70.0 + 38.0))
-                   , v3AttrStr "textContent" (str ("attrs: " <> show attrCount))
-                   , v3AttrStr "text-anchor" (str "middle")
-                   , v3AttrStr "fill" (str "#666")
-                   , v3AttrStr "font-size" (str "9px")
+                   [ evalAttr "x" (lit xPos)
+                   , evalAttr "y" (lit (toNumber level * 70.0 + 38.0))
+                   , evalAttrStr "textContent" (str ("attrs: " <> show attrCount))
+                   , evalAttrStr "text-anchor" (str "middle")
+                   , evalAttrStr "fill" (str "#666")
+                   , evalAttrStr "font-size" (str "9px")
                    ]
                ] <>
                -- Lines to children
@@ -327,12 +327,12 @@ astToTreeVisualization ast =
                  let childX = startX + (toNumber i * childSpacing)
                      childY = (toNumber (level + 1)) * 70.0
                  in T.elem Line
-                      [ v3Attr "x1" (lit xPos)
-                      , v3Attr "y1" (lit (toNumber level * 70.0 + 25.0))
-                      , v3Attr "x2" (lit childX)
-                      , v3Attr "y2" (lit (childY - 25.0))
-                      , v3AttrStr "stroke" (str "#999")
-                      , v3Attr "stroke-width" (lit 1.5)
+                      [ evalAttr "x1" (lit xPos)
+                      , evalAttr "y1" (lit (toNumber level * 70.0 + 25.0))
+                      , evalAttr "x2" (lit childX)
+                      , evalAttr "y2" (lit (childY - 25.0))
+                      , evalAttrStr "stroke" (str "#999")
+                      , evalAttr "stroke-width" (lit 1.5)
                       ]
                ) children) <>
                -- Child nodes (recursive)
@@ -347,28 +347,28 @@ astToTreeVisualization ast =
           `T.withChildren`
             [ -- Join node (orange)
               T.elem Circle
-                [ v3Attr "cx" (lit xPos)
-                , v3Attr "cy" (lit (toNumber level * 70.0))
-                , v3Attr "r" (lit 25.0)
-                , v3AttrStr "fill" (str "#E27A4A")
-                , v3AttrStr "stroke" (str "#8A472E")
-                , v3Attr "stroke-width" (lit 2.0)
+                [ evalAttr "cx" (lit xPos)
+                , evalAttr "cy" (lit (toNumber level * 70.0))
+                , evalAttr "r" (lit 25.0)
+                , evalAttrStr "fill" (str "#E27A4A")
+                , evalAttrStr "stroke" (str "#8A472E")
+                , evalAttr "stroke-width" (lit 2.0)
                 ]
             , T.elem Text
-                [ v3Attr "x" (lit xPos)
-                , v3Attr "y" (lit (toNumber level * 70.0 + 4.0))
-                , v3AttrStr "textContent" (str ("Join: " <> name))
-                , v3AttrStr "text-anchor" (str "middle")
-                , v3AttrStr "fill" (str "white")
-                , v3AttrStr "font-size" (str "9px")
+                [ evalAttr "x" (lit xPos)
+                , evalAttr "y" (lit (toNumber level * 70.0 + 4.0))
+                , evalAttrStr "textContent" (str ("Join: " <> name))
+                , evalAttrStr "text-anchor" (str "middle")
+                , evalAttrStr "fill" (str "white")
+                , evalAttrStr "font-size" (str "9px")
                 ]
             , T.elem Text
-                [ v3Attr "x" (lit xPos)
-                , v3Attr "y" (lit (toNumber level * 70.0 + 38.0))
-                , v3AttrStr "textContent" (str ("data: " <> show dataCount))
-                , v3AttrStr "text-anchor" (str "middle")
-                , v3AttrStr "fill" (str "#666")
-                , v3AttrStr "font-size" (str "9px")
+                [ evalAttr "x" (lit xPos)
+                , evalAttr "y" (lit (toNumber level * 70.0 + 38.0))
+                , evalAttrStr "textContent" (str ("data: " <> show dataCount))
+                , evalAttrStr "text-anchor" (str "middle")
+                , evalAttrStr "fill" (str "#666")
+                , evalAttrStr "font-size" (str "9px")
                 ]
             ]
 
@@ -378,28 +378,28 @@ astToTreeVisualization ast =
           `T.withChildren`
             [ -- Nested join (purple)
               T.elem Circle
-                [ v3Attr "cx" (lit xPos)
-                , v3Attr "cy" (lit (toNumber level * 70.0))
-                , v3Attr "r" (lit 25.0)
-                , v3AttrStr "fill" (str "#9B4AE2")
-                , v3AttrStr "stroke" (str "#5C2E8A")
-                , v3Attr "stroke-width" (lit 2.0)
+                [ evalAttr "cx" (lit xPos)
+                , evalAttr "cy" (lit (toNumber level * 70.0))
+                , evalAttr "r" (lit 25.0)
+                , evalAttrStr "fill" (str "#9B4AE2")
+                , evalAttrStr "stroke" (str "#5C2E8A")
+                , evalAttr "stroke-width" (lit 2.0)
                 ]
             , T.elem Text
-                [ v3Attr "x" (lit xPos)
-                , v3Attr "y" (lit (toNumber level * 70.0 + 4.0))
-                , v3AttrStr "textContent" (str ("Nested: " <> name))
-                , v3AttrStr "text-anchor" (str "middle")
-                , v3AttrStr "fill" (str "white")
-                , v3AttrStr "font-size" (str "9px")
+                [ evalAttr "x" (lit xPos)
+                , evalAttr "y" (lit (toNumber level * 70.0 + 4.0))
+                , evalAttrStr "textContent" (str ("Nested: " <> name))
+                , evalAttrStr "text-anchor" (str "middle")
+                , evalAttrStr "fill" (str "white")
+                , evalAttrStr "font-size" (str "9px")
                 ]
             , T.elem Text
-                [ v3Attr "x" (lit xPos)
-                , v3Attr "y" (lit (toNumber level * 70.0 + 38.0))
-                , v3AttrStr "textContent" (str ("data: " <> show dataCount))
-                , v3AttrStr "text-anchor" (str "middle")
-                , v3AttrStr "fill" (str "#666")
-                , v3AttrStr "font-size" (str "9px")
+                [ evalAttr "x" (lit xPos)
+                , evalAttr "y" (lit (toNumber level * 70.0 + 38.0))
+                , evalAttrStr "textContent" (str ("data: " <> show dataCount))
+                , evalAttrStr "text-anchor" (str "middle")
+                , evalAttrStr "fill" (str "#666")
+                , evalAttrStr "font-size" (str "9px")
                 ]
             ]
 
@@ -409,31 +409,31 @@ astToTreeVisualization ast =
           `T.withChildren`
             [ -- Scene join (green)
               T.elem Circle
-                [ v3Attr "cx" (lit xPos)
-                , v3Attr "cy" (lit (toNumber level * 70.0))
-                , v3Attr "r" (lit 25.0)
-                , v3AttrStr "fill" (str "#4AE2A4")
-                , v3AttrStr "stroke" (str "#2E8A5C")
-                , v3Attr "stroke-width" (lit 2.0)
+                [ evalAttr "cx" (lit xPos)
+                , evalAttr "cy" (lit (toNumber level * 70.0))
+                , evalAttr "r" (lit 25.0)
+                , evalAttrStr "fill" (str "#4AE2A4")
+                , evalAttrStr "stroke" (str "#2E8A5C")
+                , evalAttr "stroke-width" (lit 2.0)
                 ]
             , T.elem Text
-                [ v3Attr "x" (lit xPos)
-                , v3Attr "y" (lit (toNumber level * 70.0 + 4.0))
-                , v3AttrStr "textContent" (str ("Scene: " <> name))
-                , v3AttrStr "text-anchor" (str "middle")
-                , v3AttrStr "fill" (str "white")
-                , v3AttrStr "font-size" (str "9px")
+                [ evalAttr "x" (lit xPos)
+                , evalAttr "y" (lit (toNumber level * 70.0 + 4.0))
+                , evalAttrStr "textContent" (str ("Scene: " <> name))
+                , evalAttrStr "text-anchor" (str "middle")
+                , evalAttrStr "fill" (str "white")
+                , evalAttrStr "font-size" (str "9px")
                 ]
             , T.elem Text
-                [ v3Attr "x" (lit xPos)
-                , v3Attr "y" (lit (toNumber level * 70.0 + 38.0))
-                , v3AttrStr "textContent" (str ("data: " <> show dataCount <> " {" <>
+                [ evalAttr "x" (lit xPos)
+                , evalAttr "y" (lit (toNumber level * 70.0 + 38.0))
+                , evalAttrStr "textContent" (str ("data: " <> show dataCount <> " {" <>
                               (if hasEnter then "E" else "") <>
                               (if hasUpdate then "U" else "") <>
                               (if hasExit then "X" else "") <> "}"))
-                , v3AttrStr "text-anchor" (str "middle")
-                , v3AttrStr "fill" (str "#666")
-                , v3AttrStr "font-size" (str "9px")
+                , evalAttrStr "text-anchor" (str "middle")
+                , evalAttrStr "fill" (str "#666")
+                , evalAttrStr "font-size" (str "9px")
                 ]
             ]
 
@@ -443,31 +443,31 @@ astToTreeVisualization ast =
           `T.withChildren`
             [ -- Scene nested join (gold)
               T.elem Circle
-                [ v3Attr "cx" (lit xPos)
-                , v3Attr "cy" (lit (toNumber level * 70.0))
-                , v3Attr "r" (lit 25.0)
-                , v3AttrStr "fill" (str "#E2A44A")
-                , v3AttrStr "stroke" (str "#8A5C2E")
-                , v3Attr "stroke-width" (lit 2.0)
+                [ evalAttr "cx" (lit xPos)
+                , evalAttr "cy" (lit (toNumber level * 70.0))
+                , evalAttr "r" (lit 25.0)
+                , evalAttrStr "fill" (str "#E2A44A")
+                , evalAttrStr "stroke" (str "#8A5C2E")
+                , evalAttr "stroke-width" (lit 2.0)
                 ]
             , T.elem Text
-                [ v3Attr "x" (lit xPos)
-                , v3Attr "y" (lit (toNumber level * 70.0 + 4.0))
-                , v3AttrStr "textContent" (str ("SceneNested: " <> name))
-                , v3AttrStr "text-anchor" (str "middle")
-                , v3AttrStr "fill" (str "white")
-                , v3AttrStr "font-size" (str "8px")
+                [ evalAttr "x" (lit xPos)
+                , evalAttr "y" (lit (toNumber level * 70.0 + 4.0))
+                , evalAttrStr "textContent" (str ("SceneNested: " <> name))
+                , evalAttrStr "text-anchor" (str "middle")
+                , evalAttrStr "fill" (str "white")
+                , evalAttrStr "font-size" (str "8px")
                 ]
             , T.elem Text
-                [ v3Attr "x" (lit xPos)
-                , v3Attr "y" (lit (toNumber level * 70.0 + 38.0))
-                , v3AttrStr "textContent" (str ("data: " <> show dataCount <> " {" <>
+                [ evalAttr "x" (lit xPos)
+                , evalAttr "y" (lit (toNumber level * 70.0 + 38.0))
+                , evalAttrStr "textContent" (str ("data: " <> show dataCount <> " {" <>
                               (if hasEnter then "E" else "") <>
                               (if hasUpdate then "U" else "") <>
                               (if hasExit then "X" else "") <> "}"))
-                , v3AttrStr "text-anchor" (str "middle")
-                , v3AttrStr "fill" (str "#666")
-                , v3AttrStr "font-size" (str "9px")
+                , evalAttrStr "text-anchor" (str "middle")
+                , evalAttrStr "fill" (str "#666")
+                , evalAttrStr "font-size" (str "9px")
                 ]
             ]
 

@@ -13,8 +13,8 @@ import Data.Tree (Tree, mkTree)
 import Effect (Effect)
 import PSD3.Data.DAGTree (DAGLink, dagTree, addLinks, layoutDAGTree)
 import PSD3.Data.Tree (TreeLayout(..))
--- v3 Integration: all attributes via v3Attr/v3AttrStr (no ToAttr typeclass)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+-- v3 Integration: all attributes via evalAttr/evalAttrStr (no ToAttr typeclass)
+import PSD3.Expr.Integration (evalAttr, evalAttrStr, fnAttr, fnAttrStr)
 import PSD3.Expr.Expr (lit, str)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
@@ -127,60 +127,60 @@ drawDAGTreeExample selector = void $ runD3v2M do
     staticTree :: T.Tree Unit
     staticTree =
       T.named SVG "svg"
-        [ v3Attr "width" (lit size.width)
-        , v3Attr "height" (lit size.height)
-        , v3AttrStr "class" (str "dag-tree-example")
+        [ evalAttr "width" (lit size.width)
+        , evalAttr "height" (lit size.height)
+        , evalAttrStr "class" (str "dag-tree-example")
         ]
         `T.withChildren`
           [ -- Title
             T.elem Text
-              [ v3Attr "x" (lit (size.width / 2.0))
-              , v3Attr "y" (lit 20.0)
-              , v3AttrStr "textContent" (str "DAG Tree: Tree + Extra Links")
-              , v3Attr "font-size" (lit 14.0)
-              , v3AttrStr "fill" (str "#2F4F4F")
-              , v3AttrStr "text-anchor" (str "middle")
-              , v3AttrStr "class" (str "diagram-title")
+              [ evalAttr "x" (lit (size.width / 2.0))
+              , evalAttr "y" (lit 20.0)
+              , evalAttrStr "textContent" (str "DAG Tree: Tree + Extra Links")
+              , evalAttr "font-size" (lit 14.0)
+              , evalAttrStr "fill" (str "#2F4F4F")
+              , evalAttrStr "text-anchor" (str "middle")
+              , evalAttrStr "class" (str "diagram-title")
               ]
 
           -- Empty groups for data-bound elements
-          , T.named Group "tree-links" [ v3AttrStr "class" (str "tree-links") ]
-          , T.named Group "extra-links" [ v3AttrStr "class" (str "extra-links") ]
-          , T.named Group "nodes" [ v3AttrStr "class" (str "nodes") ]
-          , T.named Group "labels" [ v3AttrStr "class" (str "labels") ]
+          , T.named Group "tree-links" [ evalAttrStr "class" (str "tree-links") ]
+          , T.named Group "extra-links" [ evalAttrStr "class" (str "extra-links") ]
+          , T.named Group "nodes" [ evalAttrStr "class" (str "nodes") ]
+          , T.named Group "labels" [ evalAttrStr "class" (str "labels") ]
 
           -- Legend: Tree edge
           , T.elem Line
-              [ v3Attr "x1" (lit (size.width - 200.0))
-              , v3Attr "y1" (lit legendY)
-              , v3Attr "x2" (lit (size.width - 170.0))
-              , v3Attr "y2" (lit legendY)
-              , v3AttrStr "stroke" (str "#708090")
-              , v3Attr "stroke-width" (lit 2.0)
+              [ evalAttr "x1" (lit (size.width - 200.0))
+              , evalAttr "y1" (lit legendY)
+              , evalAttr "x2" (lit (size.width - 170.0))
+              , evalAttr "y2" (lit legendY)
+              , evalAttrStr "stroke" (str "#708090")
+              , evalAttr "stroke-width" (lit 2.0)
               ]
           , T.elem Text
-              [ v3Attr "x" (lit (size.width - 165.0))
-              , v3Attr "y" (lit (legendY + 4.0))
-              , v3AttrStr "textContent" (str "Tree edge")
-              , v3Attr "font-size" (lit 11.0)
-              , v3AttrStr "fill" (str "#708090")
+              [ evalAttr "x" (lit (size.width - 165.0))
+              , evalAttr "y" (lit (legendY + 4.0))
+              , evalAttrStr "textContent" (str "Tree edge")
+              , evalAttr "font-size" (lit 11.0)
+              , evalAttrStr "fill" (str "#708090")
               ]
 
           -- Legend: Extra link
           , T.elem Line
-              [ v3Attr "x1" (lit (size.width - 90.0))
-              , v3Attr "y1" (lit legendY)
-              , v3Attr "x2" (lit (size.width - 60.0))
-              , v3Attr "y2" (lit legendY)
-              , v3AttrStr "stroke" (str "#F4A460")
-              , v3Attr "stroke-width" (lit 2.5)
+              [ evalAttr "x1" (lit (size.width - 90.0))
+              , evalAttr "y1" (lit legendY)
+              , evalAttr "x2" (lit (size.width - 60.0))
+              , evalAttr "y2" (lit legendY)
+              , evalAttrStr "stroke" (str "#F4A460")
+              , evalAttr "stroke-width" (lit 2.5)
               ]
           , T.elem Text
-              [ v3Attr "x" (lit (size.width - 55.0))
-              , v3Attr "y" (lit (legendY + 4.0))
-              , v3AttrStr "textContent" (str "Extra link")
-              , v3Attr "font-size" (lit 11.0)
-              , v3AttrStr "fill" (str "#F4A460")
+              [ evalAttr "x" (lit (size.width - 55.0))
+              , evalAttr "y" (lit (legendY + 4.0))
+              , evalAttrStr "textContent" (str "Extra link")
+              , evalAttr "font-size" (lit 11.0)
+              , evalAttrStr "fill" (str "#F4A460")
               ]
           ]
 
@@ -191,51 +191,51 @@ drawDAGTreeExample selector = void $ runD3v2M do
   treeLinksGroup <- select ".dag-tree-example .tree-links" :: _ (D3v2Selection_ SEmpty Element Unit)
   let treeLinksTree = T.joinData "links" "line" treeLinks $ \_ ->
         T.elem Line
-          [ v3AttrFn "x1" (_.source.x :: TreeLink -> Number)
-          , v3AttrFn "y1" (_.source.y :: TreeLink -> Number)
-          , v3AttrFn "x2" (_.target.x :: TreeLink -> Number)
-          , v3AttrFn "y2" (_.target.y :: TreeLink -> Number)
-          , v3AttrStr "stroke" (str "#708090")
-          , v3Attr "stroke-width" (lit 2.0)
-          , v3Attr "opacity" (lit 0.6)
+          [ fnAttr "x1" (_.source.x :: TreeLink -> Number)
+          , fnAttr "y1" (_.source.y :: TreeLink -> Number)
+          , fnAttr "x2" (_.target.x :: TreeLink -> Number)
+          , fnAttr "y2" (_.target.y :: TreeLink -> Number)
+          , evalAttrStr "stroke" (str "#708090")
+          , evalAttr "stroke-width" (lit 2.0)
+          , evalAttr "opacity" (lit 0.6)
           ]
   _ <- renderTree treeLinksGroup treeLinksTree
 
   extraLinksGroup <- select ".dag-tree-example .extra-links" :: _ (D3v2Selection_ SEmpty Element Unit)
   let extraLinksTree = T.joinData "extra" "line" extraLinksPositioned $ \_ ->
         T.elem Line
-          [ v3AttrFn "x1" (_.source.x :: ExtraLink -> Number)
-          , v3AttrFn "y1" (_.source.y :: ExtraLink -> Number)
-          , v3AttrFn "x2" (_.target.x :: ExtraLink -> Number)
-          , v3AttrFn "y2" (_.target.y :: ExtraLink -> Number)
-          , v3AttrStr "stroke" (str "#F4A460")  -- Sandy orange
-          , v3Attr "stroke-width" (lit 2.5)
-          , v3AttrStr "class" (str "extra-link")
+          [ fnAttr "x1" (_.source.x :: ExtraLink -> Number)
+          , fnAttr "y1" (_.source.y :: ExtraLink -> Number)
+          , fnAttr "x2" (_.target.x :: ExtraLink -> Number)
+          , fnAttr "y2" (_.target.y :: ExtraLink -> Number)
+          , evalAttrStr "stroke" (str "#F4A460")  -- Sandy orange
+          , evalAttr "stroke-width" (lit 2.5)
+          , evalAttrStr "class" (str "extra-link")
           ]
   _ <- renderTree extraLinksGroup extraLinksTree
 
   nodesGroup <- select ".dag-tree-example .nodes" :: _ (D3v2Selection_ SEmpty Element Unit)
   let nodesTree = T.joinData "nodes" "circle" nodes $ \_ ->
         T.elem Circle
-          [ v3AttrFn "cx" (_.x :: PositionedNode -> Number)
-          , v3AttrFn "cy" (_.y :: PositionedNode -> Number)
-          , v3Attr "r" (lit 18.0)
-          , v3AttrStr "fill" (str "#4A90A4")
-          , v3AttrStr "stroke" (str "#fff")
-          , v3Attr "stroke-width" (lit 2.0)
+          [ fnAttr "cx" (_.x :: PositionedNode -> Number)
+          , fnAttr "cy" (_.y :: PositionedNode -> Number)
+          , evalAttr "r" (lit 18.0)
+          , evalAttrStr "fill" (str "#4A90A4")
+          , evalAttrStr "stroke" (str "#fff")
+          , evalAttr "stroke-width" (lit 2.0)
           ]
   _ <- renderTree nodesGroup nodesTree
 
   labelsGroup <- select ".dag-tree-example .labels" :: _ (D3v2Selection_ SEmpty Element Unit)
   let labelsTree = T.joinData "labels" "text" nodes $ \_ ->
         T.elem Text
-          [ v3AttrFn "x" (_.x :: PositionedNode -> Number)
-          , v3AttrFn "y" ((\n -> n.y + 5.0) :: PositionedNode -> Number)
-          , v3AttrFnStr "textContent" (_.datum.label :: PositionedNode -> String)
-          , v3Attr "font-size" (lit 14.0)
-          , v3AttrStr "fill" (str "#fff")
-          , v3AttrStr "text-anchor" (str "middle")
-          , v3AttrStr "class" (str "node-label")
+          [ fnAttr "x" (_.x :: PositionedNode -> Number)
+          , fnAttr "y" ((\n -> n.y + 5.0) :: PositionedNode -> Number)
+          , fnAttrStr "textContent" (_.datum.label :: PositionedNode -> String)
+          , evalAttr "font-size" (lit 14.0)
+          , evalAttrStr "fill" (str "#fff")
+          , evalAttrStr "text-anchor" (str "middle")
+          , evalAttrStr "class" (str "node-label")
           ]
   _ <- renderTree labelsGroup labelsTree
 

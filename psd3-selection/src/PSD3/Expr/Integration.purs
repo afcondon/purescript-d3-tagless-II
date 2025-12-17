@@ -1,7 +1,7 @@
 -- | Integration with Selection System
 -- |
--- | This module bridges the v3 "finally tagless" attribute DSL with the
--- | v2 selection/update pattern. v3 expressions compile to v2 attributes,
+-- | This module bridges the "finally tagless" attribute DSL with the
+-- | selection/update pattern. Expressions compile to attributes,
 -- | enabling:
 -- |   - Polymorphic attribute definitions (same expr → different interpreters)
 -- |   - Type-safe datum field access
@@ -9,26 +9,26 @@
 -- |
 -- | Usage:
 -- | ```purescript
--- | -- Define v3 expression (polymorphic)
+-- | -- Define expression (polymorphic)
 -- | nodeRadius :: forall repr. NumExpr repr => BoolExpr repr => DatumExpr repr NodeRow => repr Number
 -- | nodeRadius = ifThenElse hasChildren (n 8.0) (n 5.0)
 -- |
--- | -- Convert to v2 attribute
+-- | -- Convert to attribute
 -- | radiusAttr :: Attribute Node
--- | radiusAttr = v3Attr "r" nodeRadius
+-- | radiusAttr = evalAttr "r" nodeRadius
 -- |
 -- | -- Use in selection
--- | append Circle [radiusAttr, v3Attr "fill" nodeFill] enterSelection
+-- | append Circle [radiusAttr, evalAttr "fill" nodeFill] enterSelection
 -- | ```
 module PSD3.Expr.Integration
-  ( -- * Attribute Constructors (preferred names)
+  ( -- * Attribute Constructors
     evalAttr
   , evalAttrStr
   , evalAttrIndexed
   , evalAttrIndexedStr
   , staticNum
   , staticStr
-    -- * Lifting PureScript functions (preferred names)
+    -- * Lifting PureScript functions
   , liftFn
   , liftFnI
   , fnAttr
@@ -37,18 +37,6 @@ module PSD3.Expr.Integration
   , fnAttrIStr
     -- * Batch Conversion
   , evalAttrs
-    -- * Legacy names (use preferred names above for new code)
-  , v3Attr
-  , v3AttrStr
-  , v3AttrIndexed
-  , v3AttrIndexedStr
-  , v3Static
-  , v3StaticStr
-  , v3AttrFn
-  , v3AttrFnStr
-  , v3AttrFnI
-  , v3AttrFnIStr
-  , v3Attrs
     -- * Re-exports for convenience
   , module PSD3.Internal.Attribute
   ) where
@@ -58,104 +46,97 @@ import Prelude
 import PSD3.Internal.Attribute (Attribute(..), AttributeName(..), AttributeValue(..), AttrSource(..))
 import PSD3.Expr.Interpreter.Eval (EvalD(..), runEvalD)
 
--- | Convert a v3 datum expression to a v2 data-driven attribute.
+-- | Convert a datum expression to a data-driven attribute.
 -- |
 -- | The expression is interpreted using EvalD, which produces a function
 -- | from (datum, index) to the attribute value.
 -- |
 -- | ```purescript
--- | -- v3 expression
+-- | -- expression
 -- | scaleX :: forall repr. NumExpr repr => DatumExpr repr PointRow => repr Number
 -- | scaleX = xField *: 20.0 +: 200.0
 -- |
--- | -- v2 attribute
+-- | -- attribute
 -- | cxAttr :: Attribute Point
--- | cxAttr = v3Attr "cx" scaleX
+-- | cxAttr = evalAttr "cx" scaleX
 -- | ```
-v3Attr :: forall datum a
-        . Show a
-       => String
-       -> EvalD datum a
-       -> Attribute datum
-v3Attr name expr = DataAttr (AttributeName name) UnknownSource (\d -> StringValue $ show (runEvalD expr d 0))
+evalAttr :: forall datum a
+          . Show a
+         => String
+         -> EvalD datum a
+         -> Attribute datum
+evalAttr name expr = DataAttr (AttributeName name) UnknownSource (\d -> StringValue $ show (runEvalD expr d 0))
 
--- | Convert a v3 expression to a v2 indexed attribute.
+-- | Convert a string expression to an attribute (no quoting)
+-- |
+-- | Use this for string-valued attributes like fill, stroke, class, d, etc.
+evalAttrStr :: forall datum
+             . String
+            -> EvalD datum String
+            -> Attribute datum
+evalAttrStr name expr = DataAttr (AttributeName name) UnknownSource (\d -> StringValue $ runEvalD expr d 0)
+
+-- | Convert an expression to an indexed attribute.
 -- |
 -- | Use this when your expression uses the datum index (e.g., for staggered
 -- | positioning or animation delays).
 -- |
 -- | ```purescript
--- | -- v3 expression using index
+-- | -- expression using index
 -- | xFromIndex :: forall repr. NumExpr repr => DatumExpr repr PointRow => repr Number
 -- | xFromIndex = indexNum *: 50.0 +: 25.0
 -- |   where indexNum = E.mul (n 1.0) (unsafeCoerce index)  -- Convert Int to Number
 -- |
--- | -- v2 indexed attribute
+-- | -- indexed attribute
 -- | xAttr :: Attribute Point
--- | xAttr = v3AttrIndexed "x" xFromIndex
+-- | xAttr = evalAttrIndexed "x" xFromIndex
 -- | ```
-v3AttrIndexed :: forall datum a
-               . Show a
-              => String
-              -> EvalD datum a
-              -> Attribute datum
-v3AttrIndexed name expr = IndexedAttr (AttributeName name) UnknownSource (\d i -> StringValue $ show (runEvalD expr d i))
+evalAttrIndexed :: forall datum a
+                 . Show a
+                => String
+                -> EvalD datum a
+                -> Attribute datum
+evalAttrIndexed name expr = IndexedAttr (AttributeName name) UnknownSource (\d i -> StringValue $ show (runEvalD expr d i))
 
--- | Create a static v2 attribute from a v3 static expression.
+-- | Convert an indexed string expression to an attribute (no quoting)
+evalAttrIndexedStr :: forall datum
+                    . String
+                   -> EvalD datum String
+                   -> Attribute datum
+evalAttrIndexedStr name expr = IndexedAttr (AttributeName name) UnknownSource (\d i -> StringValue (runEvalD expr d i))
+
+-- | Create a static numeric attribute.
 -- |
 -- | For expressions that don't depend on datum at all, this produces
 -- | a StaticAttr which is more efficient (evaluated once, not per-element).
--- |
--- | Note: The expression must be fully evaluable without datum context.
--- | For truly static values, prefer v2's native static attributes.
-v3Static :: forall datum a
-          . Show a
-         => String
-         -> a
-         -> Attribute datum
-v3Static name value = StaticAttr (AttributeName name) (StringValue $ show value)
+staticNum :: forall datum a
+           . Show a
+          => String
+          -> a
+          -> Attribute datum
+staticNum name value = StaticAttr (AttributeName name) (StringValue $ show value)
 
--- | Convert multiple v3 expressions to v2 attributes at once.
+-- | Create a static string attribute (no quoting)
+staticStr :: forall datum. String -> String -> Attribute datum
+staticStr name value = StaticAttr (AttributeName name) (StringValue value)
+
+-- | Convert multiple expressions to attributes at once.
 -- |
 -- | This is a convenience for defining attribute sets:
 -- |
 -- | ```purescript
 -- | circleAttrs :: Array (Attribute Point)
--- | circleAttrs = v3Attrs
--- |   [ Tuple "cx" scaleX
--- |   , Tuple "cy" scaleY
--- |   , Tuple "r" radius
+-- | circleAttrs = evalAttrs
+-- |   [ { name: "cx", expr: scaleX }
+-- |   , { name: "cy", expr: scaleY }
+-- |   , { name: "r", expr: radius }
 -- |   ]
 -- | ```
-v3Attrs :: forall datum a
-         . Show a
-        => Array { name :: String, expr :: EvalD datum a }
-        -> Array (Attribute datum)
-v3Attrs = map (\{ name, expr } -> v3Attr name expr)
-
--- =============================================================================
--- String-specific versions (no Show/quotes)
--- =============================================================================
-
--- | Convert a v3 string expression to a v2 attribute (no quoting)
--- |
--- | Use this for string-valued attributes like fill, stroke, class, d, etc.
-v3AttrStr :: forall datum
-           . String
-          -> EvalD datum String
-          -> Attribute datum
-v3AttrStr name expr = DataAttr (AttributeName name) UnknownSource (\d -> StringValue $ runEvalD expr d 0)
-
--- | Convert a v3 indexed string expression to a v2 attribute (no quoting)
-v3AttrIndexedStr :: forall datum
-                  . String
-                 -> EvalD datum String
-                 -> Attribute datum
-v3AttrIndexedStr name expr = IndexedAttr (AttributeName name) UnknownSource (\d i -> StringValue $ runEvalD expr d i)
-
--- | Create a static string attribute (no quoting)
-v3StaticStr :: forall datum. String -> String -> Attribute datum
-v3StaticStr name value = StaticAttr (AttributeName name) (StringValue value)
+evalAttrs :: forall datum a
+           . Show a
+          => Array { name :: String, expr :: EvalD datum a }
+          -> Array (Attribute datum)
+evalAttrs = map (\{ name, expr } -> evalAttr name expr)
 
 -- =============================================================================
 -- Lifting PureScript functions to EvalD
@@ -164,7 +145,7 @@ v3StaticStr name value = StaticAttr (AttributeName name) (StringValue value)
 -- | Lift a datum-dependent PureScript function to an EvalD expression
 -- |
 -- | This is an escape hatch for complex computations that can't easily
--- | be expressed in the v3 DSL.
+-- | be expressed in the DSL.
 -- |
 -- | ```purescript
 -- | linePath :: Series -> String
@@ -181,84 +162,36 @@ liftFnI = EvalD
 
 -- | Create a data-driven attribute from a plain PureScript function
 -- |
--- | Shortcut for v3Attr name (liftFn f)
-v3AttrFn :: forall datum a
-          . Show a
-         => String
-         -> (datum -> a)
-         -> Attribute datum
-v3AttrFn name f = DataAttr (AttributeName name) UnknownSource (\d -> StringValue $ show (f d))
+-- | Shortcut for evalAttr name (liftFn f)
+fnAttr :: forall datum a
+        . Show a
+       => String
+       -> (datum -> a)
+       -> Attribute datum
+fnAttr name f = DataAttr (AttributeName name) UnknownSource (\d -> StringValue $ show (f d))
 
 -- | Create a string data-driven attribute from a plain PureScript function
 -- |
--- | Shortcut for v3AttrStr name (liftFn f)
-v3AttrFnStr :: forall datum
-             . String
-            -> (datum -> String)
-            -> Attribute datum
-v3AttrFnStr name f = DataAttr (AttributeName name) UnknownSource (\d -> StringValue (f d))
+-- | Shortcut for evalAttrStr name (liftFn f)
+fnAttrStr :: forall datum
+           . String
+          -> (datum -> String)
+          -> Attribute datum
+fnAttrStr name f = DataAttr (AttributeName name) UnknownSource (\d -> StringValue (f d))
 
 -- | Create an indexed attribute from a plain PureScript function (datum -> Int -> a)
 -- |
 -- | Use this when you need both datum and index access
-v3AttrFnI :: forall datum a
-           . Show a
-          => String
-          -> (datum -> Int -> a)
-          -> Attribute datum
-v3AttrFnI name f = IndexedAttr (AttributeName name) UnknownSource (\d i -> StringValue $ show (f d i))
+fnAttrI :: forall datum a
+         . Show a
+        => String
+        -> (datum -> Int -> a)
+        -> Attribute datum
+fnAttrI name f = IndexedAttr (AttributeName name) UnknownSource (\d i -> StringValue $ show (f d i))
 
 -- | Create an indexed string attribute from a plain PureScript function
-v3AttrFnIStr :: forall datum
-              . String
-             -> (datum -> Int -> String)
-             -> Attribute datum
-v3AttrFnIStr name f = IndexedAttr (AttributeName name) UnknownSource (\d i -> StringValue (f d i))
-
--- =============================================================================
--- Preferred names (aliases without v3 prefix)
--- =============================================================================
-
--- | Convert an EvalD expression to a data-driven attribute
-evalAttr :: forall datum a. Show a => String -> EvalD datum a -> Attribute datum
-evalAttr = v3Attr
-
--- | Convert an EvalD string expression to a data-driven attribute
-evalAttrStr :: forall datum. String -> EvalD datum String -> Attribute datum
-evalAttrStr = v3AttrStr
-
--- | Convert an EvalD expression to an indexed attribute
-evalAttrIndexed :: forall datum a. Show a => String -> EvalD datum a -> Attribute datum
-evalAttrIndexed = v3AttrIndexed
-
--- | Convert an EvalD string expression to an indexed attribute
-evalAttrIndexedStr :: forall datum. String -> EvalD datum String -> Attribute datum
-evalAttrIndexedStr = v3AttrIndexedStr
-
--- | Create a static numeric attribute
-staticNum :: forall datum a. Show a => String -> a -> Attribute datum
-staticNum = v3Static
-
--- | Create a static string attribute
-staticStr :: forall datum. String -> String -> Attribute datum
-staticStr = v3StaticStr
-
--- | Create a data-driven attribute from a function
-fnAttr :: forall datum a. Show a => String -> (datum -> a) -> Attribute datum
-fnAttr = v3AttrFn
-
--- | Create a data-driven string attribute from a function
-fnAttrStr :: forall datum. String -> (datum -> String) -> Attribute datum
-fnAttrStr = v3AttrFnStr
-
--- | Create an indexed attribute from a function
-fnAttrI :: forall datum a. Show a => String -> (datum -> Int -> a) -> Attribute datum
-fnAttrI = v3AttrFnI
-
--- | Create an indexed string attribute from a function
-fnAttrIStr :: forall datum. String -> (datum -> Int -> String) -> Attribute datum
-fnAttrIStr = v3AttrFnIStr
-
--- | Convert multiple expressions to attributes
-evalAttrs :: forall datum a. Show a => Array { name :: String, expr :: EvalD datum a } -> Array (Attribute datum)
-evalAttrs = v3Attrs
+fnAttrIStr :: forall datum
+            . String
+           -> (datum -> Int -> String)
+           -> Attribute datum
+fnAttrIStr name f = IndexedAttr (AttributeName name) UnknownSource (\d i -> StringValue (f d i))

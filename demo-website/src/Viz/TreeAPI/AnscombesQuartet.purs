@@ -16,7 +16,7 @@ import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
 import PSD3.AST (Tree, joinData)
 import PSD3.AST as T
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn)
+import PSD3.Expr.Integration (evalAttr, evalAttrStr, fnAttr)
 import PSD3.Expr.Expr (lit, str)
 import Web.DOM.Element (Element)
 
@@ -174,26 +174,26 @@ anscombesQuartet selector = runD3v2M do
   let buildPlot :: Int -> Dataset -> Tree Point
       buildPlot idx dataset =
         T.named Group ("plot-" <> show idx)
-          [ v3AttrStr "transform" (str ("translate(" <> show (getPlotX idx) <> "," <> show (getPlotY idx) <> ")"))
-          , v3AttrStr "class" (str "anscombe-plot")
+          [ evalAttrStr "transform" (str ("translate(" <> show (getPlotX idx) <> "," <> show (getPlotY idx) <> ")"))
+          , evalAttrStr "class" (str "anscombe-plot")
           ]
           `T.withChildren`
             [ -- Title
               T.elem Text
-                [ v3Attr "x" (lit (plotSize / 2.0))
-                , v3Attr "y" (lit 10.0)
-                , v3AttrStr "text-anchor" (str "middle")
-                , v3AttrStr "class" (str "plot-title")
-                , v3AttrStr "textContent" (str dataset.name)
+                [ evalAttr "x" (lit (plotSize / 2.0))
+                , evalAttr "y" (lit 10.0)
+                , evalAttrStr "text-anchor" (str "middle")
+                , evalAttrStr "class" (str "plot-title")
+                , evalAttrStr "textContent" (str dataset.name)
                 ]
 
             , -- Main plot area
               T.named Group "plot-area"
-                [ v3AttrStr "transform" (str ("translate(" <> show margin.left <> "," <> show margin.top <> ")")) ]
+                [ evalAttrStr "transform" (str ("translate(" <> show margin.left <> "," <> show margin.top <> ")")) ]
                 `T.withChildren`
                   [ -- X-axis
                     T.named Group "x-axis"
-                      [ v3AttrStr "transform" (str ("translate(0," <> show plotHeight <> ")")) ]
+                      [ evalAttrStr "transform" (str ("translate(0," <> show plotHeight <> ")")) ]
                       `T.withChild` renderAxis (axisBottom xScale)
 
                   , -- Y-axis
@@ -204,10 +204,10 @@ anscombesQuartet selector = runD3v2M do
                   , -- Data points
                     joinData ("points-" <> show idx) "circle" dataset.data $ \d ->
                       T.elem Circle
-                        [ v3Attr "cx" (lit (scaleX d.x))
-                        , v3Attr "cy" (lit (scaleY d.y))
-                        , v3Attr "r" (lit 3.0)
-                        , v3AttrStr "fill" (str "steelblue")
+                        [ evalAttr "cx" (lit (scaleX d.x))
+                        , evalAttr "cy" (lit (scaleY d.y))
+                        , evalAttr "r" (lit 3.0)
+                        , evalAttrStr "fill" (str "steelblue")
                         ]
                   ]
             ]
@@ -219,11 +219,11 @@ anscombesQuartet selector = runD3v2M do
       tree :: Tree Point
       tree =
         T.named SVG "svg"
-          [ v3Attr "width" (lit svgWidth)
-          , v3Attr "height" (lit svgHeight)
-          , v3AttrStr "viewBox" (str ("0 0 " <> show svgWidth <> " " <> show svgHeight))
-          , v3AttrStr "id" (str "anscombes-quartet-svg")
-          , v3AttrStr "class" (str "tree-api-example")
+          [ evalAttr "width" (lit svgWidth)
+          , evalAttr "height" (lit svgHeight)
+          , evalAttrStr "viewBox" (str ("0 0 " <> show svgWidth <> " " <> show svgHeight))
+          , evalAttrStr "id" (str "anscombes-quartet-svg")
+          , evalAttrStr "class" (str "tree-api-example")
           ]
           `T.withChildren`
             [ buildPlot 0 (getDataset 0)

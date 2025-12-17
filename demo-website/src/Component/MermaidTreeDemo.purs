@@ -14,7 +14,7 @@ import Halogen.HTML.Properties as HP
 import PSD3.Interpreter.Mermaid (runMermaidTree)
 import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.AST as T
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3.Expr.Integration (evalAttr, evalAttrStr, fnAttr, fnAttrStr)
 import PSD3.Expr.Expr (lit, str)
 
 -- FFI
@@ -81,10 +81,10 @@ handleAction = case _ of
 
   GenerateSimpleTree -> do
     let
-      tree = T.named SVG "svg" [ v3AttrStr "width" (str "800"), v3AttrStr "height" (str "600") ] `T.withChildren`
-        [ T.elem Group [ v3AttrStr "class" (str "container") ] `T.withChild`
-            T.elem Circle [ v3AttrStr "r" (str "50"), v3AttrStr "fill" (str "blue") ]
-        , T.elem Text [ v3AttrStr "x" (str "100"), v3AttrStr "y" (str "100") ]
+      tree = T.named SVG "svg" [ evalAttrStr "width" (str "800"), evalAttrStr "height" (str "600") ] `T.withChildren`
+        [ T.elem Group [ evalAttrStr "class" (str "container") ] `T.withChild`
+            T.elem Circle [ evalAttrStr "r" (str "50"), evalAttrStr "fill" (str "blue") ]
+        , T.elem Text [ evalAttrStr "x" (str "100"), evalAttrStr "y" (str "100") ]
         ]
     code <- liftEffect $ runMermaidTree tree
     H.modify_ _ { mermaidCode = Just code }
@@ -94,13 +94,13 @@ handleAction = case _ of
   GenerateJoinTree -> do
     let
       sampleData = [ 1, 2, 3, 4, 5 ]
-      tree = T.named SVG "svg" [ v3AttrStr "width" (str "800") ] `T.withChild`
+      tree = T.named SVG "svg" [ evalAttrStr "width" (str "800") ] `T.withChild`
         ( T.joinData "circles" "circle" sampleData $ \d ->
             T.elem Circle
-              [ v3AttrFn "cx" (\datum -> toNumber datum * 50.0)
-              , v3Attr "cy" (lit 100.0)
-              , v3AttrStr "r" (str "20")
-              , v3AttrStr "fill" (str "steelblue")
+              [ fnAttr "cx" (\datum -> toNumber datum * 50.0)
+              , evalAttr "cy" (lit 100.0)
+              , evalAttrStr "r" (str "20")
+              , evalAttrStr "fill" (str "steelblue")
               ]
         )
     code <- liftEffect $ runMermaidTree tree

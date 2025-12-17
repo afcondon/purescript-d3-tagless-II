@@ -64,7 +64,7 @@ import PSD3.ForceEngine.Core as Core
 import PSD3.ForceEngine.Links (swizzleLinks)
 import PSD3.ForceEngine.Render (updateGroupPositions, updateLinkPositions)
 import PSD3.ForceEngine.Simulation as Sim
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Integration (evalAttr, evalAttrStr)
 import PSD3.Expr.Expr (lit, str)
 import PSD3.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom, onMouseEnter, onMouseLeave, onClickWithDatum)
 import PSD3.Capabilities.Selection (select, selectAll, on, renderTree)
@@ -658,17 +658,17 @@ renderSVG currentView containerSelector nodes = do
   let structureTree :: T.Tree Unit
       structureTree =
         T.named SVG "explorer-svg"
-          [ v3AttrStr "viewBox" (str (show ((-ViewBox.viewBoxWidth) / 2.0) <> " " <> show ((-ViewBox.viewBoxHeight) / 2.0) <> " " <> show ViewBox.viewBoxWidth <> " " <> show ViewBox.viewBoxHeight))
-          , v3AttrStr "id" (str "explorer-svg")
-          , v3AttrStr "class" (str "ce-viz")
+          [ evalAttrStr "viewBox" (str (show ((-ViewBox.viewBoxWidth) / 2.0) <> " " <> show ((-ViewBox.viewBoxHeight) / 2.0) <> " " <> show ViewBox.viewBoxWidth <> " " <> show ViewBox.viewBoxHeight))
+          , evalAttrStr "id" (str "explorer-svg")
+          , evalAttrStr "class" (str "ce-viz")
           ]
           `T.withChildren`
             [ T.named Group "explorer-zoom-group"
-                [ v3AttrStr "id" (str "explorer-zoom-group") ]
+                [ evalAttrStr "id" (str "explorer-zoom-group") ]
                 `T.withChildren`
-                  [ T.named Group "treemap-watermark" [ v3AttrStr "id" (str "treemap-watermark"), v3AttrStr "class" (str "watermark") ]
-                  , T.named Group "explorer-links" [ v3AttrStr "id" (str "explorer-links") ]
-                  , T.named Group "explorer-nodes" [ v3AttrStr "id" (str "explorer-nodes") ]
+                  [ T.named Group "treemap-watermark" [ evalAttrStr "id" (str "treemap-watermark"), evalAttrStr "class" (str "watermark") ]
+                  , T.named Group "explorer-links" [ evalAttrStr "id" (str "explorer-links") ]
+                  , T.named Group "explorer-nodes" [ evalAttrStr "id" (str "explorer-nodes") ]
                   ]
             ]
 
@@ -684,13 +684,13 @@ renderSVG currentView containerSelector nodes = do
       nodesTree =
         T.joinData "nodes-data" "circle" nodes $ \node ->
           T.elem Circle
-            [ v3Attr "cx" (lit node.x)
-            , v3Attr "cy" (lit node.y)
-            , v3Attr "r" (lit node.r)
-            , v3AttrStr "fill" (str (ColorPalette.getNodeFill currentView node))
-            , v3AttrStr "stroke" (str (ColorPalette.getNodeStroke currentView node))
-            , v3Attr "stroke-width" (lit 1.0) -- Slightly thicker stroke for visibility
-            , v3AttrStr "class" (str (nodeClass node)) -- CSS class for type-based styling/transitions
+            [ evalAttr "cx" (lit node.x)
+            , evalAttr "cy" (lit node.y)
+            , evalAttr "r" (lit node.r)
+            , evalAttrStr "fill" (str (ColorPalette.getNodeFill currentView node))
+            , evalAttrStr "stroke" (str (ColorPalette.getNodeStroke currentView node))
+            , evalAttr "stroke-width" (lit 1.0) -- Slightly thicker stroke for visibility
+            , evalAttrStr "class" (str (nodeClass node)) -- CSS class for type-based styling/transitions
             ]
 
   nodeSelections <- renderTree nodesGroup nodesTree
@@ -856,12 +856,12 @@ renderTreeLinksD3 nodeMap links = do
             opac = linkOpacityFn nodeMap link
           in
             T.elem Path
-              [ v3AttrStr "d" (str d)
-              , v3AttrStr "fill" (str "none")
-              , v3AttrStr "stroke" (str strokeColor)
-              , v3Attr "stroke-width" (lit strokeW)
-              , v3Attr "opacity" (lit opac)
-              , v3AttrStr "class" (str "tree-link")
+              [ evalAttrStr "d" (str d)
+              , evalAttrStr "fill" (str "none")
+              , evalAttrStr "stroke" (str strokeColor)
+              , evalAttr "stroke-width" (lit strokeW)
+              , evalAttr "opacity" (lit opac)
+              , evalAttrStr "class" (str "tree-link")
               ]
 
   _ <- renderTree linksGroup linksTree
@@ -955,14 +955,14 @@ renderForceLinksD3 links = do
             score = linkInterconnectivity link.source link.target
           in
             T.elem Line
-              [ v3Attr "x1" (lit link.source.x)
-              , v3Attr "y1" (lit link.source.y)
-              , v3Attr "x2" (lit link.target.x)
-              , v3Attr "y2" (lit link.target.y)
-              , v3AttrStr "stroke" (str (linkStrokeColor score))
-              , v3Attr "stroke-width" (lit (linkStrokeWidth score))
-              , v3Attr "opacity" (lit (linkOpacity score))
-              , v3AttrStr "class" (str "force-link")
+              [ evalAttr "x1" (lit link.source.x)
+              , evalAttr "y1" (lit link.source.y)
+              , evalAttr "x2" (lit link.target.x)
+              , evalAttr "y2" (lit link.target.y)
+              , evalAttrStr "stroke" (str (linkStrokeColor score))
+              , evalAttr "stroke-width" (lit (linkStrokeWidth score))
+              , evalAttr "opacity" (lit (linkOpacity score))
+              , evalAttrStr "class" (str "force-link")
               ]
 
   _ <- renderTree linksGroup linksTree
@@ -1409,14 +1409,14 @@ renderNeighborhoodLinksD3 links = do
             score = linkInterconnectivity link.source link.target
           in
             T.elem Line
-              [ v3Attr "x1" (lit link.source.x)
-              , v3Attr "y1" (lit link.source.y)
-              , v3Attr "x2" (lit link.target.x)
-              , v3Attr "y2" (lit link.target.y)
-              , v3AttrStr "stroke" (str (linkStrokeColor score))
-              , v3Attr "stroke-width" (lit (linkStrokeWidth score))
-              , v3Attr "opacity" (lit (linkOpacity score))
-              , v3AttrStr "class" (str "neighborhood-link")
+              [ evalAttr "x1" (lit link.source.x)
+              , evalAttr "y1" (lit link.source.y)
+              , evalAttr "x2" (lit link.target.x)
+              , evalAttr "y2" (lit link.target.y)
+              , evalAttrStr "stroke" (str (linkStrokeColor score))
+              , evalAttr "stroke-width" (lit (linkStrokeWidth score))
+              , evalAttr "opacity" (lit (linkOpacity score))
+              , evalAttrStr "class" (str "neighborhood-link")
               ]
 
   _ <- renderTree linksGroup linksTree
@@ -1439,14 +1439,14 @@ renderDirectionalLinksD3 links = do
             className = if link.isOutgoing then "neighborhood-link outgoing-link" else "neighborhood-link incoming-link"
           in
             T.elem Line
-              [ v3Attr "x1" (lit link.source.x)
-              , v3Attr "y1" (lit link.source.y)
-              , v3Attr "x2" (lit link.target.x)
-              , v3Attr "y2" (lit link.target.y)
-              , v3AttrStr "stroke" (str strokeColor)
-              , v3Attr "stroke-width" (lit (linkStrokeWidth score))
-              , v3Attr "opacity" (lit 0.7)
-              , v3AttrStr "class" (str className)
+              [ evalAttr "x1" (lit link.source.x)
+              , evalAttr "y1" (lit link.source.y)
+              , evalAttr "x2" (lit link.target.x)
+              , evalAttr "y2" (lit link.target.y)
+              , evalAttrStr "stroke" (str strokeColor)
+              , evalAttr "stroke-width" (lit (linkStrokeWidth score))
+              , evalAttr "opacity" (lit 0.7)
+              , evalAttrStr "class" (str className)
               ]
 
   _ <- renderTree linksGroup linksTree
@@ -1630,13 +1630,13 @@ renderNodesOnly currentView nodes = do
       nodesTree =
         T.joinData "nodes-data" "circle" nodes $ \node ->
           T.elem Circle
-            [ v3Attr "cx" (lit node.x)
-            , v3Attr "cy" (lit node.y)
-            , v3Attr "r" (lit node.r)
-            , v3AttrStr "fill" (str (ColorPalette.getNodeFill currentView node))
-            , v3AttrStr "stroke" (str (ColorPalette.getNodeStroke currentView node))
-            , v3Attr "stroke-width" (lit 1.0) -- Slightly thicker stroke for visibility
-            , v3AttrStr "class" (str (nodeClass node))
+            [ evalAttr "cx" (lit node.x)
+            , evalAttr "cy" (lit node.y)
+            , evalAttr "r" (lit node.r)
+            , evalAttrStr "fill" (str (ColorPalette.getNodeFill currentView node))
+            , evalAttrStr "stroke" (str (ColorPalette.getNodeStroke currentView node))
+            , evalAttr "stroke-width" (lit 1.0) -- Slightly thicker stroke for visibility
+            , evalAttrStr "class" (str (nodeClass node))
             ]
 
   nodeSelections <- renderTree nodesGroup nodesTree

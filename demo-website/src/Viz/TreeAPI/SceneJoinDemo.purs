@@ -10,7 +10,7 @@ import Data.Maybe (Maybe(Just, Nothing))
 import Data.Time.Duration (Milliseconds(..))
 import Effect (Effect)
 import Effect.Class (liftEffect)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)
+import PSD3.Expr.Integration (evalAttr, evalAttrStr, fnAttr, fnAttrStr)
 import PSD3.Expr.Expr (lit, str)
 import PSD3.Internal.Capabilities.Selection (renderTree, select)
 import PSD3.Interpreter.D3 (D3v2M)
@@ -32,11 +32,11 @@ createSvgContainer containerSelector = do
   liftEffect $ clearInnerHTML containerSelector
   let svgTree :: T.Tree Unit
       svgTree = T.named SVG "svg"
-        [ v3Attr "width" (lit 800.0)
-        , v3Attr "height" (lit 300.0)
-        , v3AttrStr "viewBox" (str "0 0 800 300")
-        , v3AttrStr "id" (str "scene-join-demo-svg")
-        , v3AttrStr "class" (str "scene-join-demo")
+        [ evalAttr "width" (lit 800.0)
+        , evalAttr "height" (lit 300.0)
+        , evalAttrStr "viewBox" (str "0 0 800 300")
+        , evalAttrStr "id" (str "scene-join-demo-svg")
+        , evalAttrStr "class" (str "scene-join-demo")
         ]
         `T.withChildren` []  -- Empty children initially
   _ <- renderTree container svgTree
@@ -104,18 +104,18 @@ createCirclesTree scene =
     [scene]              -- Outer data: SceneData
     (_.points)           -- Decompose: extract points array
     (\point -> T.elem Circle  -- Template for each DataPoint
-      [ v3Attr "cx" (lit point.x)
-      , v3Attr "cy" (lit point.y)
-      , v3Attr "r" (lit 20.0)
-      , v3AttrStr "fill" (str point.color)
-      , v3AttrStr "stroke" (str "#000")
-      , v3Attr "stroke-width" (lit 2.0)
+      [ evalAttr "cx" (lit point.x)
+      , evalAttr "cy" (lit point.y)
+      , evalAttr "r" (lit 20.0)
+      , evalAttrStr "fill" (str point.color)
+      , evalAttrStr "stroke" (str "#000")
+      , evalAttr "stroke-width" (lit 2.0)
       ])
     { enterBehavior: Just  -- Elements enter from center
         { initialAttrs:
-            [ v3Attr "cx" (lit 400.0)
-            , v3Attr "cy" (lit 150.0)
-            , v3Attr "r" (lit 0.0)
+            [ evalAttr "cx" (lit 400.0)
+            , evalAttr "cy" (lit 150.0)
+            , evalAttr "r" (lit 0.0)
             ]
         , transition: Just
             { duration: Milliseconds 600.0
@@ -126,12 +126,12 @@ createCirclesTree scene =
         }
     , updateBehavior: Just  -- Elements transition to new positions
         { attrs:
-            [ v3AttrFn "cx" (_.x)
-            , v3AttrFn "cy" (_.y)
-            , v3Attr "r" (lit 20.0)
-            , v3AttrFnStr "fill" (_.color)
-            , v3AttrStr "stroke" (str "#000")
-            , v3Attr "stroke-width" (lit 2.0)
+            [ fnAttr "cx" (_.x)
+            , fnAttr "cy" (_.y)
+            , evalAttr "r" (lit 20.0)
+            , fnAttrStr "fill" (_.color)
+            , evalAttrStr "stroke" (str "#000")
+            , evalAttr "stroke-width" (lit 2.0)
             ]
         , transition: Just
             { duration: Milliseconds 400.0
@@ -142,7 +142,7 @@ createCirclesTree scene =
         }
     , exitBehavior: Just  -- Elements shrink away
         { attrs:
-            [ v3Attr "r" (lit 0.0)
+            [ evalAttr "r" (lit 0.0)
             ]
         , transition: Just
             { duration: Milliseconds 300.0

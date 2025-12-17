@@ -30,21 +30,21 @@ import PSD3.Interpreter.SemiQuine.Types (BuilderTree(..), BuilderNode, NodeId, A
 -- =============================================================================
 
 -- | Convert a BuilderTree to compilable PureScript code
--- | Now generates v3Attr syntax for true round-trip capability
+-- | Now generates evalAttr syntax for true round-trip capability
 treeToCode :: BuilderTree -> String
 treeToCode tree = String.joinWith "\n" $
-  [ "-- Generated Tree API code (v3Attr)"
+  [ "-- Generated Tree API code (evalAttr)"
   , ""
   , "import PSD3.AST as T"
   , "import PSD3.Internal.Selection.Types (ElementType(..))"
-  , "import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr)"
+  , "import PSD3.Expr.Integration (evalAttr, evalAttrStr, fnAttr, fnAttrStr)"
   , "import PSD3.Expr.Expr (lit, str)"
   , ""
   , "tree :: T.Tree Datum"
   , "tree ="
   ] <> indentLines 2 (nodeToCode tree)
 
--- Note: v3Attr imports are fixed (no per-attribute imports needed)
+-- Note: evalAttr imports are fixed (no per-attribute imports needed)
 
 -- | Convert a tree node to code lines
 nodeToCode :: BuilderTree -> Array String
@@ -140,7 +140,7 @@ templateAttrsArray attrs =
     then "[ " <> String.joinWith ", " (map templateAttrCode attrs) <> " ]"
     else "[ " <> String.joinWith "\n    , " (map templateAttrCode attrs) <> "\n    ]"
 
--- | Generate a single attribute using v3Attr syntax
+-- | Generate a single attribute using evalAttr syntax
 attrCode :: AttributeBinding -> String
 attrCode binding = choiceToV3Attr binding.attrName binding.choice
 
@@ -148,7 +148,7 @@ attrCode binding = choiceToV3Attr binding.attrName binding.choice
 templateAttrCode :: AttributeBinding -> String
 templateAttrCode binding = templateChoiceToV3Attr binding.attrName binding.choice
 
--- | Determine if an attribute is string-typed (for choosing v3AttrStr vs v3Attr)
+-- | Determine if an attribute is string-typed (for choosing evalAttrStr vs evalAttr)
 isStringAttr :: String -> Boolean
 isStringAttr = case _ of
   "fill" -> true
@@ -161,42 +161,42 @@ isStringAttr = case _ of
   "font-family" -> true
   _ -> false
 
--- | Convert an AttributeChoice to v3Attr expression (for static nodes)
+-- | Convert an AttributeChoice to evalAttr expression (for static nodes)
 choiceToV3Attr :: String -> AttributeChoice -> String
 choiceToV3Attr attrName = case _ of
   ConstantNumber n ->
-    "v3Attr \"" <> attrName <> "\" (lit " <> show n <> ")"
+    "evalAttr \"" <> attrName <> "\" (lit " <> show n <> ")"
   ConstantString s ->
-    "v3AttrStr \"" <> attrName <> "\" (str \"" <> s <> "\")"
+    "evalAttrStr \"" <> attrName <> "\" (str \"" <> s <> "\")"
   FromField field ->
     if isStringAttr attrName
-      then "v3AttrFnStr \"" <> attrName <> "\" (_." <> field <> " :: Datum -> String)"
-      else "v3AttrFn \"" <> attrName <> "\" (_." <> field <> " :: Datum -> Number)"
+      then "fnAttrStr \"" <> attrName <> "\" (_." <> field <> " :: Datum -> String)"
+      else "fnAttr \"" <> attrName <> "\" (_." <> field <> " :: Datum -> Number)"
   IndexBased ->
-    "v3AttrFn \"" <> attrName <> "\" (\\d -> toNumber d.index)"
+    "fnAttr \"" <> attrName <> "\" (\\d -> toNumber d.index)"
   Computed expr ->
-    -- For computed expressions, wrap in v3Attr with the expression
+    -- For computed expressions, wrap in evalAttr with the expression
     if isStringAttr attrName
-      then "v3AttrStr \"" <> attrName <> "\" (str (" <> expr <> "))"
-      else "v3Attr \"" <> attrName <> "\" (lit (" <> expr <> "))"
+      then "evalAttrStr \"" <> attrName <> "\" (str (" <> expr <> "))"
+      else "evalAttr \"" <> attrName <> "\" (lit (" <> expr <> "))"
 
--- | Convert an AttributeChoice for template (datum accessor) using v3Attr
+-- | Convert an AttributeChoice for template (datum accessor) using evalAttr
 templateChoiceToV3Attr :: String -> AttributeChoice -> String
 templateChoiceToV3Attr attrName = case _ of
   ConstantNumber n ->
-    "v3Attr \"" <> attrName <> "\" (lit " <> show n <> ")"
+    "evalAttr \"" <> attrName <> "\" (lit " <> show n <> ")"
   ConstantString s ->
-    "v3AttrStr \"" <> attrName <> "\" (str \"" <> s <> "\")"
+    "evalAttrStr \"" <> attrName <> "\" (str \"" <> s <> "\")"
   FromField field ->
     if isStringAttr attrName
-      then "v3AttrFnStr \"" <> attrName <> "\" (_." <> field <> " :: Datum -> String)"
-      else "v3AttrFn \"" <> attrName <> "\" (_." <> field <> " :: Datum -> Number)"
+      then "fnAttrStr \"" <> attrName <> "\" (_." <> field <> " :: Datum -> String)"
+      else "fnAttr \"" <> attrName <> "\" (_." <> field <> " :: Datum -> Number)"
   IndexBased ->
-    "v3AttrFn \"" <> attrName <> "\" (\\d -> toNumber d.index)"
+    "fnAttr \"" <> attrName <> "\" (\\d -> toNumber d.index)"
   Computed expr ->
     if isStringAttr attrName
-      then "v3AttrFnStr \"" <> attrName <> "\" (\\d -> " <> expr <> ")"
-      else "v3AttrFn \"" <> attrName <> "\" (\\d -> " <> expr <> ")"
+      then "fnAttrStr \"" <> attrName <> "\" (\\d -> " <> expr <> ")"
+      else "fnAttr \"" <> attrName <> "\" (\\d -> " <> expr <> ")"
 
 -- =============================================================================
 -- Helpers

@@ -34,7 +34,7 @@ import PSD3.Interpreter.D3 (runD3v2M)
 import PSD3.AST as T
 import PSD3.Internal.Behavior.Types (onMouseEnter, onMouseLeave, onClickWithDatum)
 import PSD3.Internal.Selection.Types (ElementType(..))
-import PSD3.Expr.Integration (v3AttrFn, v3AttrFnStr, v3AttrStr)
+import PSD3.Expr.Integration (fnAttr, fnAttrStr, evalAttrStr)
 import PSD3.Expr.Expr (str)
 import DataViz.Layout.Hierarchy.Core (hierarchy, sum) as Hier
 import DataViz.Layout.Hierarchy.Treemap (treemap, defaultTreemapConfig, TreemapNode(..)) as TM
@@ -287,13 +287,13 @@ buildVizTree :: Config -> Callbacks -> PositionedNodes -> T.Tree PackageRect
 buildVizTree _config callbacks positioned =
   -- Root SVG element - viewBox centered at origin, matching treemap dimensions
   T.named SVG "root"
-    [ v3AttrStr "viewBox" (str "-950 -570 1900 1140")
-    , v3AttrFnStr "class" (\_ -> "treemap-svg")
+    [ evalAttrStr "viewBox" (str "-950 -570 1900 1140")
+    , fnAttrStr "class" (\_ -> "treemap-svg")
     ]
   `T.withChildren`
     [ -- Package rectangles (blueprint background)
       T.named Group "package-rects"
-        [ v3AttrFnStr "class" (\_ -> "package-rects-group")
+        [ fnAttrStr "class" (\_ -> "package-rects-group")
         ]
       `T.withChildren`
         [ T.joinData "pkg-rects" "rect" positioned.packageRects (packageRectTemplate callbacks)
@@ -307,7 +307,7 @@ buildVizTree _config callbacks positioned =
 
       -- Module circles group
     , T.named Group "modules"
-        [ v3AttrFnStr "class" (\_ -> "modules-group")
+        [ fnAttrStr "class" (\_ -> "modules-group")
         ]
       `T.withChild`
         T.joinData "module-circles" "circle" (map toPackageRect positioned.modules) (moduleCircleTemplate callbacks)
@@ -331,15 +331,15 @@ buildVizTree _config callbacks positioned =
 packageRectTemplate :: Callbacks -> PackageRect -> T.Tree PackageRect
 packageRectTemplate callbacks _rect =
   T.elem Rect
-    [ v3AttrFn "x" (_.x)
-    , v3AttrFn "y" (_.y)
-    , v3AttrFn "width" (_.width)
-    , v3AttrFn "height" (_.height)
-    , v3AttrStr "fill" (str "none")
-    , v3AttrStr "stroke" (str "rgba(255, 255, 255, 0.3)")
-    , v3AttrFn "stroke-width" (\_ -> 1.0)
-    , v3AttrStr "pointer-events" (str "all")  -- Capture events despite no fill
-    , v3AttrFnStr "class" (\_ -> "package-rect")
+    [ fnAttr "x" (_.x)
+    , fnAttr "y" (_.y)
+    , fnAttr "width" (_.width)
+    , fnAttr "height" (_.height)
+    , evalAttrStr "fill" (str "none")
+    , evalAttrStr "stroke" (str "rgba(255, 255, 255, 0.3)")
+    , fnAttr "stroke-width" (\_ -> 1.0)
+    , evalAttrStr "pointer-events" (str "all")  -- Capture events despite no fill
+    , fnAttrStr "class" (\_ -> "package-rect")
     ]
   `T.withBehaviors`
     [ onMouseEnter (\r -> callbacks.onNodeHover r.simNode)
@@ -350,13 +350,13 @@ packageRectTemplate callbacks _rect =
 packageLabelTemplate :: PackageRect -> T.Tree PackageRect
 packageLabelTemplate _rect =
   T.elem Text
-    [ v3AttrFn "x" (\r -> r.x + 4.0)  -- Small offset from left edge
-    , v3AttrFn "y" (\r -> r.y + 12.0) -- Small offset from top
-    , v3AttrStr "fill" (str "rgba(255, 255, 255, 0.5)")
-    , v3AttrStr "font-size" (str "10px")
-    , v3AttrStr "font-family" (str "monospace")
-    , v3AttrFnStr "class" (\_ -> "package-label")
-    , v3AttrFnStr "textContent" (_.name)  -- Text content via attribute
+    [ fnAttr "x" (\r -> r.x + 4.0)  -- Small offset from left edge
+    , fnAttr "y" (\r -> r.y + 12.0) -- Small offset from top
+    , evalAttrStr "fill" (str "rgba(255, 255, 255, 0.5)")
+    , evalAttrStr "font-size" (str "10px")
+    , evalAttrStr "font-family" (str "monospace")
+    , fnAttrStr "class" (\_ -> "package-label")
+    , fnAttrStr "textContent" (_.name)  -- Text content via attribute
     ]
 
 -- | Template for a single module circle
@@ -366,13 +366,13 @@ packageLabelTemplate _rect =
 moduleCircleTemplate :: Callbacks -> PackageRect -> T.Tree PackageRect
 moduleCircleTemplate callbacks _node =
   T.elem Circle
-    [ v3AttrFn "cx" (\r -> r.x + r.width / 2.0)   -- Center from rect bounds
-    , v3AttrFn "cy" (\r -> r.y + r.height / 2.0)
-    , v3AttrFn "r" (\r -> min r.width r.height / 2.0 * 0.8)  -- Fit in rect with margin
-    , v3AttrStr "fill" (str "#0E4C8A")  -- Background blue to capture mouse events
-    , v3AttrFnStr "stroke" (\r -> if r.isUsed then "rgba(255, 255, 255, 0.7)" else "black")
-    , v3AttrFn "stroke-width" (\r -> if r.isUsed then 1.0 else 0.5)
-    , v3AttrFnStr "class" (\_ -> "module-node")
+    [ fnAttr "cx" (\r -> r.x + r.width / 2.0)   -- Center from rect bounds
+    , fnAttr "cy" (\r -> r.y + r.height / 2.0)
+    , fnAttr "r" (\r -> min r.width r.height / 2.0 * 0.8)  -- Fit in rect with margin
+    , evalAttrStr "fill" (str "#0E4C8A")  -- Background blue to capture mouse events
+    , fnAttrStr "stroke" (\r -> if r.isUsed then "rgba(255, 255, 255, 0.7)" else "black")
+    , fnAttr "stroke-width" (\r -> if r.isUsed then 1.0 else 0.5)
+    , fnAttrStr "class" (\_ -> "module-node")
     ]
   `T.withBehaviors`
     [ onMouseEnter (\r -> callbacks.onNodeHover r.simNode)

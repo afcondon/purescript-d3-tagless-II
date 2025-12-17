@@ -7,14 +7,14 @@
 -- | Target output format:
 -- | ```purescript
 -- | T.named SVG "svg"
--- |   [ v3Attr "width" (lit 300.0)
--- |   , v3Attr "height" (lit 300.0)
+-- |   [ evalAttr "width" (lit 300.0)
+-- |   , evalAttr "height" (lit 300.0)
 -- |   ]
 -- |   `T.withChild`
 -- |     (T.joinData "cells" "rect" data_ $ \d ->
 -- |       T.elem Rect
--- |         [ v3AttrFn "x" (\d -> d.x)
--- |         , v3AttrFn "fill" (\d -> d.color)
+-- |         [ fnAttr "x" (\d -> d.x)
+-- |         , fnAttr "fill" (\d -> d.color)
 -- |         ])
 -- | ```
 module TreeBuilder.BuilderToCode

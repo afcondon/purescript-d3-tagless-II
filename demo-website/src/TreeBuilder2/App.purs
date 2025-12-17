@@ -41,7 +41,7 @@ import PSD3.Internal.Behavior.Types (Behavior(..), ScaleExtent(..))
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_, reselectD3v2)
 import PSD3.Internal.Selection.Types (SEmpty, ElementType(..))
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Integration (evalAttr, evalAttrStr)
 import PSD3.Expr.Expr (lit, str)
 import PSD3.AST as T
 import PSD3.Transform (clearContainer)
@@ -422,28 +422,28 @@ renderTreeViz state listener = do
       linksTree :: T.Tree LinkData
       linksTree =
         T.named SVG "svg"
-          [ v3Attr "width" (lit svgWidth)
-          , v3Attr "height" (lit svgHeight)
-          , v3AttrStr "viewBox" (str ("0 0 " <> show svgWidth <> " " <> show svgHeight))
-          , v3AttrStr "id" (str "tree-builder2-svg")
+          [ evalAttr "width" (lit svgWidth)
+          , evalAttr "height" (lit svgHeight)
+          , evalAttrStr "viewBox" (str ("0 0 " <> show svgWidth <> " " <> show svgHeight))
+          , evalAttrStr "id" (str "tree-builder2-svg")
           ]
           `T.withChild`
             ( T.named Group "zoomGroup"
-                [ v3AttrStr "class" (str "zoom-group") ]
+                [ evalAttrStr "class" (str "zoom-group") ]
                 `T.withChild`
                   ( T.named Group "linksGroup"
-                      [ v3AttrStr "class" (str "links") ]
+                      [ evalAttrStr "class" (str "links") ]
                       `T.withChild`
                         ( T.joinData "linkPaths" "path" links $ \link ->
                             T.elem Path
-                              [ v3AttrStr "d" (str (linkBezierVertical
+                              [ evalAttrStr "d" (str (linkBezierVertical
                                   (link.sourceX + offsetX)
                                   (link.sourceY + offsetY)
                                   (link.targetX + offsetX)
                                   (link.targetY + offsetY)))
-                              , v3AttrStr "fill" (str "none")
-                              , v3AttrStr "stroke" (str "#888")
-                              , v3Attr "stroke-width" (lit 2.0)
+                              , evalAttrStr "fill" (str "none")
+                              , evalAttrStr "stroke" (str "#888")
+                              , evalAttr "stroke-width" (lit 2.0)
                               ]
                         )
                   )
@@ -460,17 +460,17 @@ renderTreeViz state listener = do
       nodesTree :: T.Tree RenderNode
       nodesTree =
         T.named Group "nodesGroup"
-          [ v3AttrStr "class" (str "nodes") ]
+          [ evalAttrStr "class" (str "nodes") ]
           `T.withChild`
             ( T.joinData "nodeCircles" "circle" renderNodes $ \node ->
                 T.elem Circle
-                  [ v3Attr "cx" (lit (node.x + offsetX))
-                  , v3Attr "cy" (lit (node.y + offsetY))
-                  , v3Attr "r" (lit 15.0)
-                  , v3AttrStr "fill" (str node.color)
-                  , v3AttrStr "stroke" (str "#333")
-                  , v3Attr "stroke-width" (lit node.strokeWidth)
-                  , v3AttrStr "cursor" (str "pointer")
+                  [ evalAttr "cx" (lit (node.x + offsetX))
+                  , evalAttr "cy" (lit (node.y + offsetY))
+                  , evalAttr "r" (lit 15.0)
+                  , evalAttrStr "fill" (str node.color)
+                  , evalAttrStr "stroke" (str "#333")
+                  , evalAttr "stroke-width" (lit node.strokeWidth)
+                  , evalAttrStr "cursor" (str "pointer")
                   ]
                   `T.withBehaviors`
                     [ ClickWithDatum \n -> HS.notify listener (NodeClicked n.id) ]

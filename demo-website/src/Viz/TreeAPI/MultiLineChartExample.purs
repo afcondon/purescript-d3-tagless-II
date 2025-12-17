@@ -17,8 +17,8 @@ import Effect.Aff (Aff, launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import PSD3.Shared.Data (DataFile(..), loadDataFile, parseCSVRow)
--- v3 Integration: all attributes via v3Attr/v3AttrStr (no ToAttr typeclass)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFnStr)
+-- v3 Integration: all attributes via evalAttr/evalAttrStr (no ToAttr typeclass)
+import PSD3.Expr.Integration (evalAttr, evalAttrStr, fnAttrStr)
 import PSD3.Expr.Expr (lit, str)
 import PSD3.Axis.Axis (axisBottom, axisLeft, renderAxis, Scale)
 import PSD3.Internal.Capabilities.Selection (select, renderTree, on)
@@ -152,46 +152,46 @@ drawMultiLineChart selector unemploymentData = runD3v2M do
   let tree :: Tree Series
       tree =
         T.named SVG "svg"
-          [ v3Attr "width" (lit svgWidth)
-          , v3Attr "height" (lit svgHeight)
-          , v3AttrStr "viewBox" (str $ "0 0 " <> show svgWidth <> " " <> show svgHeight)
-          , v3AttrStr "class" (str "multi-line-chart")  -- This class enables hover CSS
+          [ evalAttr "width" (lit svgWidth)
+          , evalAttr "height" (lit svgHeight)
+          , evalAttrStr "viewBox" (str $ "0 0 " <> show svgWidth <> " " <> show svgHeight)
+          , evalAttrStr "class" (str "multi-line-chart")  -- This class enables hover CSS
           ]
           `T.withChild`
             (T.named Group "plot-area"
-              [ v3AttrStr "transform" (str $ "translate(" <> show margin.left <> "," <> show margin.top <> ")") ]
+              [ evalAttrStr "transform" (str $ "translate(" <> show margin.left <> "," <> show margin.top <> ")") ]
               `T.withChildren`
                 [ -- X-axis
                   T.named Group "x-axis"
-                    [ v3AttrStr "transform" (str $ "translate(0," <> show plotHeight <> ")")
-                    , v3AttrStr "class" (str "x-axis")
+                    [ evalAttrStr "transform" (str $ "translate(0," <> show plotHeight <> ")")
+                    , evalAttrStr "class" (str "x-axis")
                     ]
                     `T.withChild` renderAxis (axisBottom xScale)
 
                 , -- Y-axis
                   T.named Group "y-axis"
-                    [ v3AttrStr "class" (str "y-axis") ]
+                    [ evalAttrStr "class" (str "y-axis") ]
                     `T.withChild` renderAxis (axisLeft yScale)
 
                 , -- Y-axis label
                   T.elem Text
-                    [ v3AttrStr "transform" (str "rotate(-90)")
-                    , v3Attr "x" (lit (-(plotHeight / 2.0)))
-                    , v3Attr "y" (lit (-40.0))
-                    , v3AttrStr "text-anchor" (str "middle")
-                    , v3Attr "font-size" (lit 12.0)
-                    , v3AttrStr "textContent" (str "Unemployment Rate (%)")
+                    [ evalAttrStr "transform" (str "rotate(-90)")
+                    , evalAttr "x" (lit (-(plotHeight / 2.0)))
+                    , evalAttr "y" (lit (-40.0))
+                    , evalAttrStr "text-anchor" (str "middle")
+                    , evalAttr "font-size" (lit 12.0)
+                    , evalAttrStr "textContent" (str "Unemployment Rate (%)")
                     ]
 
                 , -- Lines with hover interaction (CSS: .multi-line-chart .line:hover)
                   -- All lines are light gray (#ddd), dark gray (#333) on hover
                   joinData "lines" "path" series $ \_ ->
                     T.elem Path
-                      [ v3AttrFnStr "d" (\s -> linePath s.points)
-                      , v3AttrStr "fill" (str "none")
-                      , v3AttrStr "stroke" (str "#ddd")  -- Light gray for all lines
-                      , v3Attr "stroke-width" (lit 1.5)
-                      , v3AttrStr "class" (str "line")  -- CSS uses .multi-line-chart .line for hover
+                      [ fnAttrStr "d" (\s -> linePath s.points)
+                      , evalAttrStr "fill" (str "none")
+                      , evalAttrStr "stroke" (str "#ddd")  -- Light gray for all lines
+                      , evalAttr "stroke-width" (lit 1.5)
+                      , evalAttrStr "class" (str "line")  -- CSS uses .multi-line-chart .line for hover
                       ]
                 ])
 

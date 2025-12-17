@@ -41,7 +41,7 @@ import PSD3.Transform (transformCircles, transformPaths, removeElement)
 import PSD3.Classify (classifyElements, clearClasses)
 import PSD3.AST as T
 import PSD3.Internal.Selection.Types (ElementType(..))
-import PSD3.Expr.Integration (v3AttrFn, v3AttrFnStr, v3AttrStr)
+import PSD3.Expr.Integration (fnAttr, fnAttrStr, evalAttrStr)
 import PSD3.Expr.Expr (str)
 import PSD3.Transition.Tick as Tick
 
@@ -275,7 +275,7 @@ type LinkPathFn = Number -> Number -> Number -> Number -> String
 buildLinksVizTree :: LinkPathFn -> Array LinkElement -> Number -> Number -> T.Tree LinkElement
 buildLinksVizTree linkPathFn linkElements rootX rootY =
   T.named Group "tree-links-group"
-    [ v3AttrFnStr "class" (\_ -> "tree-links-group")
+    [ fnAttrStr "class" (\_ -> "tree-links-group")
     ]
   `T.withChild`
     T.joinData "tree-links" "path" linkElements (linkTemplate linkPathFn rootX rootY)
@@ -285,9 +285,9 @@ buildLinksVizTree linkPathFn linkElements rootX rootY =
 linkTemplate :: LinkPathFn -> Number -> Number -> LinkElement -> T.Tree LinkElement
 linkTemplate linkPathFn rootX rootY _el =
   T.elem Path
-    [ v3AttrFnStr "d" (\_ -> linkPathFn rootX rootY rootX rootY)
-    , v3AttrStr "fill" (str "none")
-    , v3AttrStr "stroke" (str "rgba(255, 255, 255, 0.5)")
-    , v3AttrFn "stroke-width" (\_ -> 1.5)
-    , v3AttrFnStr "class" (\_ -> "tree-link")
+    [ fnAttrStr "d" (\_ -> linkPathFn rootX rootY rootX rootY)
+    , evalAttrStr "fill" (str "none")
+    , evalAttrStr "stroke" (str "rgba(255, 255, 255, 0.5)")
+    , fnAttr "stroke-width" (\_ -> 1.5)
+    , fnAttrStr "class" (\_ -> "tree-link")
     ]

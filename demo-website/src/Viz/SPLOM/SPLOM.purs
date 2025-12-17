@@ -46,7 +46,7 @@ import Effect.Console as Console
 import PSD3.Scale as Scale
 import PSD3.Scale (ContinuousScale, applyScale, ticks, nice)
 import PSD3.Internal.Attribute (Attribute)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Integration (evalAttr, evalAttrStr)
 import PSD3.Expr.Expr (lit, str)
 import PSD3.Brush (attachBrush, clearBrush, BrushHandle, BrushSelection, BrushConfig)
 import PSD3.Internal.Capabilities.Selection (select, renderTree, clear)
@@ -265,18 +265,18 @@ renderSPLOMWithState state = do
 buildSPLOMTree :: SPLOMState -> Array Cell -> Number -> Tree Penguin
 buildSPLOMTree state cells totalSize =
   T.named ET.SVG "svg"
-    [ v3Attr "width" (lit totalSize)
-    , v3Attr "height" (lit totalSize)
-    , v3AttrStr "viewBox" (str ("0 0 " <> show totalSize <> " " <> show totalSize))
-    , v3AttrStr "class" (str "splom-svg")
-    , v3AttrStr "id" (str "splom-matrix")
+    [ evalAttr "width" (lit totalSize)
+    , evalAttr "height" (lit totalSize)
+    , evalAttrStr "viewBox" (str ("0 0 " <> show totalSize <> " " <> show totalSize))
+    , evalAttrStr "class" (str "splom-svg")
+    , evalAttrStr "id" (str "splom-matrix")
     ]
     `T.withChildren`
       [ -- Background
         T.elem ET.Rect
-          [ v3Attr "width" (lit totalSize)
-          , v3Attr "height" (lit totalSize)
-          , v3AttrStr "fill" (str "white")
+          [ evalAttr "width" (lit totalSize)
+          , evalAttr "height" (lit totalSize)
+          , evalAttrStr "fill" (str "white")
           ]
 
       , -- All cells
@@ -306,20 +306,20 @@ buildCell state cell =
     cellId = "cell-" <> show cell.row <> "-" <> show cell.col
   in
     T.named ET.Group cellId
-      [ v3AttrStr "id" (str cellId)
-      , v3AttrStr "class" (str $ if isDiagonal then "cell diagonal" else "cell off-diagonal")
-      , v3AttrStr "transform" (str ("translate(" <> show (state.config.matrixPadding + toNumber cell.col * cellSize) <> ","
+      [ evalAttrStr "id" (str cellId)
+      , evalAttrStr "class" (str $ if isDiagonal then "cell diagonal" else "cell off-diagonal")
+      , evalAttrStr "transform" (str ("translate(" <> show (state.config.matrixPadding + toNumber cell.col * cellSize) <> ","
                                <> show (state.config.matrixPadding + toNumber cell.row * cellSize) <> ")"))
       ]
       `T.withChildren`
         ([ -- Cell frame
            T.elem ET.Rect
-             [ v3AttrStr "class" (str "cell-frame")
-             , v3Attr "width" (lit cellSize)
-             , v3Attr "height" (lit cellSize)
-             , v3AttrStr "fill" (str "none")
-             , v3AttrStr "stroke" (str "#aaa")
-             , v3Attr "stroke-width" (lit 0.5)
+             [ evalAttrStr "class" (str "cell-frame")
+             , evalAttr "width" (lit cellSize)
+             , evalAttr "height" (lit cellSize)
+             , evalAttrStr "fill" (str "none")
+             , evalAttrStr "stroke" (str "#aaa")
+             , evalAttr "stroke-width" (lit 0.5)
              ]
          ] <> (if isDiagonal
                then buildDiagonalContent state cellPenguins cell mXScale
@@ -355,47 +355,47 @@ buildDiagonalContent state penguins cell mScale =
           T.named ET.Group "grid-v" [] `T.withChildren`
             (tickValues <#> \tick ->
               T.elem ET.Line
-                [ v3Attr "x1" (lit (applyScale scale tick))
-                , v3Attr "x2" (lit (applyScale scale tick))
-                , v3Attr "y1" (lit padding)
-                , v3Attr "y2" (lit (cellSize - padding))
-                , v3AttrStr "stroke" (str "#eee")
-                , v3Attr "stroke-width" (lit 0.5)
+                [ evalAttr "x1" (lit (applyScale scale tick))
+                , evalAttr "x2" (lit (applyScale scale tick))
+                , evalAttr "y1" (lit padding)
+                , evalAttr "y2" (lit (cellSize - padding))
+                , evalAttrStr "stroke" (str "#eee")
+                , evalAttr "stroke-width" (lit 0.5)
                 ])
 
         , -- Grid lines (horizontal)
           T.named ET.Group "grid-h" [] `T.withChildren`
             (tickValues <#> \tick ->
               T.elem ET.Line
-                [ v3Attr "x1" (lit padding)
-                , v3Attr "x2" (lit (cellSize - padding))
-                , v3Attr "y1" (lit (applyScale scale tick))
-                , v3Attr "y2" (lit (applyScale scale tick))
-                , v3AttrStr "stroke" (str "#eee")
-                , v3Attr "stroke-width" (lit 0.5)
+                [ evalAttr "x1" (lit padding)
+                , evalAttr "x2" (lit (cellSize - padding))
+                , evalAttr "y1" (lit (applyScale scale tick))
+                , evalAttr "y2" (lit (applyScale scale tick))
+                , evalAttrStr "stroke" (str "#eee")
+                , evalAttr "stroke-width" (lit 0.5)
                 ])
 
         , -- Label
           T.elem ET.Text
-            [ v3AttrStr "class" (str "cell-label")
-            , v3Attr "x" (lit (padding + 4.0))
-            , v3Attr "y" (lit (padding + 12.0))
-            , v3Attr "font-size" (lit 11.0)
-            , v3AttrStr "font-weight" (str "bold")
-            , v3AttrStr "fill" (str "#333")
-            , v3AttrStr "textContent" (str shortLabel)
+            [ evalAttrStr "class" (str "cell-label")
+            , evalAttr "x" (lit (padding + 4.0))
+            , evalAttr "y" (lit (padding + 12.0))
+            , evalAttr "font-size" (lit 11.0)
+            , evalAttrStr "font-weight" (str "bold")
+            , evalAttrStr "fill" (str "#333")
+            , evalAttrStr "textContent" (str shortLabel)
             ]
 
         , -- Identity line (SW-NE)
           T.elem ET.Line
-            [ v3AttrStr "class" (str "identity-line")
-            , v3Attr "x1" (lit (applyScale scale minVal))
-            , v3Attr "y1" (lit (applyScale yScaleInverted minVal))
-            , v3Attr "x2" (lit (applyScale scale maxVal))
-            , v3Attr "y2" (lit (applyScale yScaleInverted maxVal))
-            , v3AttrStr "stroke" (str "#333")
-            , v3Attr "stroke-width" (lit 1.0)
-            , v3AttrStr "stroke-dasharray" (str "2,2")
+            [ evalAttrStr "class" (str "identity-line")
+            , evalAttr "x1" (lit (applyScale scale minVal))
+            , evalAttr "y1" (lit (applyScale yScaleInverted minVal))
+            , evalAttr "x2" (lit (applyScale scale maxVal))
+            , evalAttr "y2" (lit (applyScale yScaleInverted maxVal))
+            , evalAttrStr "stroke" (str "#333")
+            , evalAttr "stroke-width" (lit 1.0)
+            , evalAttrStr "stroke-dasharray" (str "2,2")
             ]
 
         , -- Diagonal scatter points
@@ -404,12 +404,12 @@ buildDiagonalContent state penguins cell mScale =
               case getDimensionValue cell.dimX p of
                 Just val -> Just $
                   T.elem ET.Circle
-                    [ v3AttrStr "class" (str "diag-point")
-                    , v3Attr "cx" (lit (applyScale scale val))
-                    , v3Attr "cy" (lit (applyScale yScaleInverted val))
-                    , v3Attr "r" (lit 1.5)
-                    , v3AttrStr "fill" (str (speciesColor p.species))
-                    , v3Attr "fill-opacity" (lit 0.7)
+                    [ evalAttrStr "class" (str "diag-point")
+                    , evalAttr "cx" (lit (applyScale scale val))
+                    , evalAttr "cy" (lit (applyScale yScaleInverted val))
+                    , evalAttr "r" (lit 1.5)
+                    , evalAttrStr "fill" (str (speciesColor p.species))
+                    , evalAttr "fill-opacity" (lit 0.7)
                     ]
                 Nothing -> Nothing
             ) penguins)
@@ -431,24 +431,24 @@ buildOffDiagonalContent state penguins cell mXScale mYScale =
           T.named ET.Group "grid-v" [] `T.withChildren`
             (xTicks <#> \tick ->
               T.elem ET.Line
-                [ v3Attr "x1" (lit (applyScale xScale tick))
-                , v3Attr "x2" (lit (applyScale xScale tick))
-                , v3Attr "y1" (lit padding)
-                , v3Attr "y2" (lit (cellSize - padding))
-                , v3AttrStr "stroke" (str "#eee")
-                , v3Attr "stroke-width" (lit 0.5)
+                [ evalAttr "x1" (lit (applyScale xScale tick))
+                , evalAttr "x2" (lit (applyScale xScale tick))
+                , evalAttr "y1" (lit padding)
+                , evalAttr "y2" (lit (cellSize - padding))
+                , evalAttrStr "stroke" (str "#eee")
+                , evalAttr "stroke-width" (lit 0.5)
                 ])
 
         , -- Horizontal grid lines
           T.named ET.Group "grid-h" [] `T.withChildren`
             (yTicks <#> \tick ->
               T.elem ET.Line
-                [ v3Attr "x1" (lit padding)
-                , v3Attr "x2" (lit (cellSize - padding))
-                , v3Attr "y1" (lit (applyScale yScale tick))
-                , v3Attr "y2" (lit (applyScale yScale tick))
-                , v3AttrStr "stroke" (str "#eee")
-                , v3Attr "stroke-width" (lit 0.5)
+                [ evalAttr "x1" (lit padding)
+                , evalAttr "x2" (lit (cellSize - padding))
+                , evalAttr "y1" (lit (applyScale yScale tick))
+                , evalAttr "y2" (lit (applyScale yScale tick))
+                , evalAttrStr "stroke" (str "#eee")
+                , evalAttr "stroke-width" (lit 0.5)
                 ])
 
         , -- Scatter points
@@ -467,13 +467,13 @@ buildOffDiagonalContent state penguins cell mXScale mYScale =
                     bodyMas = fromMaybe 0.0 p.bodyMass
                   in Just $
                     T.elem ET.Circle
-                      [ v3AttrStr "class" (str "point")
-                      , v3Attr "cx" (lit (applyScale xScale xVal))
-                      , v3Attr "cy" (lit (applyScale yScale yVal))
-                      , v3Attr "r" (lit pointRadius)
-                      , v3AttrStr "fill" (str (speciesColor p.species))
-                      , v3Attr "fill-opacity" (lit pointOpacity)
-                      , v3AttrStr "stroke" (str "none")
+                      [ evalAttrStr "class" (str "point")
+                      , evalAttr "cx" (lit (applyScale xScale xVal))
+                      , evalAttr "cy" (lit (applyScale yScale yVal))
+                      , evalAttr "r" (lit pointRadius)
+                      , evalAttrStr "fill" (str (speciesColor p.species))
+                      , evalAttr "fill-opacity" (lit pointOpacity)
+                      , evalAttrStr "stroke" (str "none")
                       , dataAttr "bill-length" billLen
                       , dataAttr "bill-depth" billDep
                       , dataAttr "flipper-length" flipLen
@@ -483,7 +483,7 @@ buildOffDiagonalContent state penguins cell mXScale mYScale =
             ) penguins)
 
         , -- Brush overlay (empty group for brush attachment)
-          T.named ET.Group "brush" [ v3AttrStr "class" (str "brush") ]
+          T.named ET.Group "brush" [ evalAttrStr "class" (str "brush") ]
         ]
     _, _ -> []
 
@@ -505,16 +505,16 @@ buildAxisLabels state =
                 xOffset = padding + toNumber i * cellSize
               in
                 T.named ET.Group ("axis-bottom-" <> show i)
-                  [ v3AttrStr "transform" (str ("translate(" <> show xOffset <> "," <> show (padding + toNumber n * cellSize) <> ")")) ]
+                  [ evalAttrStr "transform" (str ("translate(" <> show xOffset <> "," <> show (padding + toNumber n * cellSize) <> ")")) ]
                   `T.withChildren`
                     (tickValues <#> \tick ->
                       T.elem ET.Text
-                        [ v3Attr "x" (lit (applyScale dimScale.scale tick))
-                        , v3Attr "y" (lit 12.0)
-                        , v3AttrStr "text-anchor" (str "middle")
-                        , v3Attr "font-size" (lit 8.0)
-                        , v3AttrStr "fill" (str "#666")
-                        , v3AttrStr "textContent" (str (formatTick tick))
+                        [ evalAttr "x" (lit (applyScale dimScale.scale tick))
+                        , evalAttr "y" (lit 12.0)
+                        , evalAttrStr "text-anchor" (str "middle")
+                        , evalAttr "font-size" (lit 8.0)
+                        , evalAttrStr "fill" (str "#666")
+                        , evalAttrStr "textContent" (str (formatTick tick))
                         ])
             ) state.scales
 
@@ -525,17 +525,17 @@ buildAxisLabels state =
                 yOffset = padding + toNumber i * cellSize
               in
                 T.named ET.Group ("axis-left-" <> show i)
-                  [ v3AttrStr "transform" (str ("translate(" <> show padding <> "," <> show yOffset <> ")")) ]
+                  [ evalAttrStr "transform" (str ("translate(" <> show padding <> "," <> show yOffset <> ")")) ]
                   `T.withChildren`
                     (tickValues <#> \tick ->
                       T.elem ET.Text
-                        [ v3Attr "x" (lit (-4.0))
-                        , v3Attr "y" (lit (applyScale dimScale.scale tick))
-                        , v3AttrStr "text-anchor" (str "end")
-                        , v3AttrStr "dominant-baseline" (str "middle")
-                        , v3Attr "font-size" (lit 8.0)
-                        , v3AttrStr "fill" (str "#666")
-                        , v3AttrStr "textContent" (str (formatTick tick))
+                        [ evalAttr "x" (lit (-4.0))
+                        , evalAttr "y" (lit (applyScale dimScale.scale tick))
+                        , evalAttrStr "text-anchor" (str "end")
+                        , evalAttrStr "dominant-baseline" (str "middle")
+                        , evalAttr "font-size" (lit 8.0)
+                        , evalAttrStr "fill" (str "#666")
+                        , evalAttrStr "textContent" (str (formatTick tick))
                         ])
             ) state.scales
           ])
@@ -612,7 +612,7 @@ clearBrushSelection handles =
 
 -- | Create a data-* attribute for storing values on DOM elements
 dataAttr :: forall datum. String -> Number -> Attribute datum
-dataAttr name value = v3Attr ("data-" <> name) (lit value)
+dataAttr name value = evalAttr ("data-" <> name) (lit value)
 
 -- | Format tick value for display
 formatTick :: Number -> String

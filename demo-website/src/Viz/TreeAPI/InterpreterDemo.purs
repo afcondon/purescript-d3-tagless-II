@@ -5,7 +5,7 @@ module D3.Viz.TreeAPI.InterpreterDemo where
 import Prelude
 
 import Data.Int (toNumber)
-import PSD3.Expr.Integration (v3Attr, v3AttrStr, v3AttrFn, v3AttrFnStr, v3AttrFnI)
+import PSD3.Expr.Integration (evalAttr, evalAttrStr, fnAttr, fnAttrStr, fnAttrI)
 import PSD3.Expr.Expr (lit, str)
 import PSD3.Internal.Selection.Types (ElementType(..))
 import PSD3.AST as T
@@ -14,32 +14,32 @@ import PSD3.AST as T
 threeLittleCircles :: T.Tree Unit
 threeLittleCircles =
   T.named SVG "svg"
-    [ v3Attr "width" (lit 300.0)
-    , v3Attr "height" (lit 100.0)
-    , v3AttrStr "viewBox" (str "0 0 300 100")
+    [ evalAttr "width" (lit 300.0)
+    , evalAttr "height" (lit 100.0)
+    , evalAttrStr "viewBox" (str "0 0 300 100")
     ]
     `T.withChild`
       (T.named Group "circles"
-        [ v3AttrStr "class" (str "circles-group")
+        [ evalAttrStr "class" (str "circles-group")
         ]
         `T.withChildren`
           [ T.elem Circle
-              [ v3Attr "cx" (lit 50.0)
-              , v3Attr "cy" (lit 50.0)
-              , v3Attr "r" (lit 20.0)
-              , v3AttrStr "fill" (str "red")
+              [ evalAttr "cx" (lit 50.0)
+              , evalAttr "cy" (lit 50.0)
+              , evalAttr "r" (lit 20.0)
+              , evalAttrStr "fill" (str "red")
               ]
           , T.elem Circle
-              [ v3Attr "cx" (lit 150.0)
-              , v3Attr "cy" (lit 50.0)
-              , v3Attr "r" (lit 20.0)
-              , v3AttrStr "fill" (str "green")
+              [ evalAttr "cx" (lit 150.0)
+              , evalAttr "cy" (lit 50.0)
+              , evalAttr "r" (lit 20.0)
+              , evalAttrStr "fill" (str "green")
               ]
           , T.elem Circle
-              [ v3Attr "cx" (lit 250.0)
-              , v3Attr "cy" (lit 50.0)
-              , v3Attr "r" (lit 20.0)
-              , v3AttrStr "fill" (str "blue")
+              [ evalAttr "cx" (lit 250.0)
+              , evalAttr "cy" (lit 50.0)
+              , evalAttr "r" (lit 20.0)
+              , evalAttrStr "fill" (str "blue")
               ]
           ])
 
@@ -48,68 +48,68 @@ simpleBarChart :: T.Tree Int
 simpleBarChart =
   let barData = [10, 25, 15, 30, 20]
   in T.named SVG "svg"
-       [ v3Attr "width" (lit 400.0)
-       , v3Attr "height" (lit 200.0)
-       , v3AttrStr "viewBox" (str "0 0 400 200")
+       [ evalAttr "width" (lit 400.0)
+       , evalAttr "height" (lit 200.0)
+       , evalAttrStr "viewBox" (str "0 0 400 200")
        ]
        `T.withChild`
          (T.joinData "bars" "rect" barData $ \_ ->
            T.elem Rect
-             [ v3AttrFnI "x" ((\ (_ :: Int) i -> toNumber i * 70.0 + 20.0) :: Int -> Int -> Number)
-             , v3AttrFnI "y" ((\ (value :: Int) _ -> 180.0 - toNumber value * 5.0) :: Int -> Int -> Number)
-             , v3Attr "width" (lit 50.0)
-             , v3AttrFnI "height" ((\ (value :: Int) _ -> toNumber value * 5.0) :: Int -> Int -> Number)
-             , v3AttrStr "fill" (str "steelblue")
+             [ fnAttrI "x" ((\ (_ :: Int) i -> toNumber i * 70.0 + 20.0) :: Int -> Int -> Number)
+             , fnAttrI "y" ((\ (value :: Int) _ -> 180.0 - toNumber value * 5.0) :: Int -> Int -> Number)
+             , evalAttr "width" (lit 50.0)
+             , fnAttrI "height" ((\ (value :: Int) _ -> toNumber value * 5.0) :: Int -> Int -> Number)
+             , evalAttrStr "fill" (str "steelblue")
              ])
 
 -- | Simple bar chart without data join (for interpreter demos)
 simpleBarChartNoJoin :: T.Tree Unit
 simpleBarChartNoJoin =
   T.named SVG "svg"
-    [ v3Attr "width" (lit 400.0)
-    , v3Attr "height" (lit 200.0)
-    , v3AttrStr "viewBox" (str "0 0 400 200")
-    , v3AttrStr "class" (str "bar-chart")
+    [ evalAttr "width" (lit 400.0)
+    , evalAttr "height" (lit 200.0)
+    , evalAttrStr "viewBox" (str "0 0 400 200")
+    , evalAttrStr "class" (str "bar-chart")
     ]
     `T.withChild`
       (T.named Group "bars"
-        [ v3AttrStr "class" (str "bars-group")
+        [ evalAttrStr "class" (str "bars-group")
         ]
         `T.withChildren`
           [ T.elem Rect
-              [ v3Attr "x" (lit 20.0)
-              , v3Attr "y" (lit 130.0)
-              , v3Attr "width" (lit 50.0)
-              , v3Attr "height" (lit 50.0)
-              , v3AttrStr "fill" (str "steelblue")
+              [ evalAttr "x" (lit 20.0)
+              , evalAttr "y" (lit 130.0)
+              , evalAttr "width" (lit 50.0)
+              , evalAttr "height" (lit 50.0)
+              , evalAttrStr "fill" (str "steelblue")
               ]
           , T.elem Rect
-              [ v3Attr "x" (lit 90.0)
-              , v3Attr "y" (lit 55.0)
-              , v3Attr "width" (lit 50.0)
-              , v3Attr "height" (lit 125.0)
-              , v3AttrStr "fill" (str "steelblue")
+              [ evalAttr "x" (lit 90.0)
+              , evalAttr "y" (lit 55.0)
+              , evalAttr "width" (lit 50.0)
+              , evalAttr "height" (lit 125.0)
+              , evalAttrStr "fill" (str "steelblue")
               ]
           , T.elem Rect
-              [ v3Attr "x" (lit 160.0)
-              , v3Attr "y" (lit 105.0)
-              , v3Attr "width" (lit 50.0)
-              , v3Attr "height" (lit 75.0)
-              , v3AttrStr "fill" (str "steelblue")
+              [ evalAttr "x" (lit 160.0)
+              , evalAttr "y" (lit 105.0)
+              , evalAttr "width" (lit 50.0)
+              , evalAttr "height" (lit 75.0)
+              , evalAttrStr "fill" (str "steelblue")
               ]
           , T.elem Rect
-              [ v3Attr "x" (lit 230.0)
-              , v3Attr "y" (lit 30.0)
-              , v3Attr "width" (lit 50.0)
-              , v3Attr "height" (lit 150.0)
-              , v3AttrStr "fill" (str "steelblue")
+              [ evalAttr "x" (lit 230.0)
+              , evalAttr "y" (lit 30.0)
+              , evalAttr "width" (lit 50.0)
+              , evalAttr "height" (lit 150.0)
+              , evalAttrStr "fill" (str "steelblue")
               ]
           , T.elem Rect
-              [ v3Attr "x" (lit 300.0)
-              , v3Attr "y" (lit 80.0)
-              , v3Attr "width" (lit 50.0)
-              , v3Attr "height" (lit 100.0)
-              , v3AttrStr "fill" (str "steelblue")
+              [ evalAttr "x" (lit 300.0)
+              , evalAttr "y" (lit 80.0)
+              , evalAttr "width" (lit 50.0)
+              , evalAttr "height" (lit 100.0)
+              , evalAttrStr "fill" (str "steelblue")
               ]
           ])
 
@@ -117,9 +117,9 @@ simpleBarChartNoJoin =
 nestedStructure :: T.Tree Unit
 nestedStructure =
   T.named SVG "svg"
-    [ v3Attr "width" (lit 200.0)
-    , v3Attr "height" (lit 200.0)
-    , v3AttrStr "viewBox" (str "0 0 200 200")
+    [ evalAttr "width" (lit 200.0)
+    , evalAttr "height" (lit 200.0)
+    , evalAttrStr "viewBox" (str "0 0 200 200")
     ]
     `T.withChild`
       (T.named Group "outer"
@@ -129,15 +129,15 @@ nestedStructure =
             []
             `T.withChildren`
               [ T.elem Circle
-                  [ v3Attr "cx" (lit 100.0)
-                  , v3Attr "cy" (lit 100.0)
-                  , v3Attr "r" (lit 50.0)
-                  , v3AttrStr "fill" (str "purple")
+                  [ evalAttr "cx" (lit 100.0)
+                  , evalAttr "cy" (lit 100.0)
+                  , evalAttr "r" (lit 50.0)
+                  , evalAttrStr "fill" (str "purple")
                   ]
               , T.elem Text
-                  [ v3Attr "x" (lit 100.0)
-                  , v3Attr "y" (lit 105.0)
-                  , v3AttrStr "textContent" (str "Hello!")
-                  , v3AttrStr "fill" (str "white")
+                  [ evalAttr "x" (lit 100.0)
+                  , evalAttr "y" (lit 105.0)
+                  , evalAttrStr "textContent" (str "Hello!")
+                  , evalAttrStr "fill" (str "white")
                   ]
               ]))

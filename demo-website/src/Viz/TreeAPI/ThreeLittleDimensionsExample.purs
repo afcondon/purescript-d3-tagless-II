@@ -8,7 +8,7 @@ import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
-import PSD3.Expr.Integration (v3AttrStr)
+import PSD3.Expr.Integration (evalAttrStr)
 import PSD3.Expr.Expr (str)
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_)
@@ -40,15 +40,15 @@ threeLittleDimensions = runD3v2M do
     tree :: T.Tree (Array Int)
     tree =
       T.named Table "table"
-        [ v3AttrStr "class" (str "nested-data-table") ]
+        [ evalAttrStr "class" (str "nested-data-table") ]
         `T.withChild`
           -- nestedJoin handles the type change from Array Int → Int
           -- identity is the decomposer: it just returns the row data as-is
           ( T.nestedJoin "rows" "tr" matrixData identity $ \cellValue ->
               -- cellValue :: Int (decomposed from Array Int)
               T.elem Td
-                [ v3AttrStr "class" (str "table-cell")
-                , v3AttrStr "textContent" (str (show cellValue))
+                [ evalAttrStr "class" (str "table-cell")
+                , evalAttrStr "textContent" (str (show cellValue))
                 ]
           )
 

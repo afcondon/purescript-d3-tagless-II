@@ -38,7 +38,7 @@ import PSD3.Internal.Behavior.Types (Behavior(..), ScaleExtent(..))
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_, reselectD3v2)
 import PSD3.Internal.Selection.Types (SEmpty, ElementType(..))
-import PSD3.Expr.Integration (v3Attr, v3AttrStr)
+import PSD3.Expr.Integration (evalAttr, evalAttrStr)
 import PSD3.Expr.Expr (lit, str)
 import PSD3.Expr.Friendly (textContent) as Friendly
 import PSD3.AST as T
@@ -710,28 +710,28 @@ renderTreeViz state listener = do
       linksTree :: T.Tree LinkData
       linksTree =
         T.named SVG "svg"
-          [ v3Attr "width" (lit svgWidth)
-          , v3Attr "height" (lit svgHeight)
-          , v3AttrStr "viewBox" (str ("0 0 " <> show svgWidth <> " " <> show svgHeight))
-          , v3AttrStr "id" (str "tree-builder3-svg")
+          [ evalAttr "width" (lit svgWidth)
+          , evalAttr "height" (lit svgHeight)
+          , evalAttrStr "viewBox" (str ("0 0 " <> show svgWidth <> " " <> show svgHeight))
+          , evalAttrStr "id" (str "tree-builder3-svg")
           ]
           `T.withChild`
             ( T.named Group "zoomGroup"
-                [ v3AttrStr "class" (str "zoom-group") ]
+                [ evalAttrStr "class" (str "zoom-group") ]
                 `T.withChild`
                   ( T.named Group "linksGroup"
-                      [ v3AttrStr "class" (str "links") ]
+                      [ evalAttrStr "class" (str "links") ]
                       `T.withChild`
                         ( T.joinData "linkPaths" "path" links $ \link ->
                             T.elem Path
-                              [ v3AttrStr "d" (str (linkBezierVertical
+                              [ evalAttrStr "d" (str (linkBezierVertical
                                   (link.sourceX + offsetX)
                                   (link.sourceY + offsetY)
                                   (link.targetX + offsetX)
                                   (link.targetY + offsetY)))
-                              , v3AttrStr "fill" (str "none")
-                              , v3AttrStr "stroke" (str "#888")
-                              , v3Attr "stroke-width" (lit 2.0)
+                              , evalAttrStr "fill" (str "none")
+                              , evalAttrStr "stroke" (str "#888")
+                              , evalAttr "stroke-width" (lit 2.0)
                               ]
                         )
                   )
@@ -744,46 +744,46 @@ renderTreeViz state listener = do
       nodesTree :: T.Tree RenderNode
       nodesTree =
         T.named Group "nodesGroup"
-          [ v3AttrStr "class" (str "nodes") ]
+          [ evalAttrStr "class" (str "nodes") ]
           `T.withChild`
             ( T.joinData "nodeGroups" "g" renderNodes $ \node ->
                 T.elem Group
-                  [ v3AttrStr "transform" (str ("translate(" <> show (node.x + offsetX) <> "," <> show (node.y + offsetY) <> ")"))
-                  , v3AttrStr "cursor" (str "pointer")
+                  [ evalAttrStr "transform" (str ("translate(" <> show (node.x + offsetX) <> "," <> show (node.y + offsetY) <> ")"))
+                  , evalAttrStr "cursor" (str "pointer")
                   ]
                   `T.withBehaviors`
                     [ ClickWithDatum \n -> HS.notify listener (NodeClicked n.id) ]
                   `T.withChildren`
                     [ -- Background rect for the node
                       T.elem Rect
-                        [ v3Attr "x" (lit (-40.0))
-                        , v3Attr "y" (lit (-12.0))
-                        , v3Attr "width" (lit 80.0)
-                        , v3Attr "height" (lit 24.0)
-                        , v3Attr "rx" (lit 4.0)
-                        , v3AttrStr "fill" (str node.color)
-                        , v3AttrStr "stroke" (str "#333")
-                        , v3Attr "stroke-width" (lit node.strokeWidth)
+                        [ evalAttr "x" (lit (-40.0))
+                        , evalAttr "y" (lit (-12.0))
+                        , evalAttr "width" (lit 80.0)
+                        , evalAttr "height" (lit 24.0)
+                        , evalAttr "rx" (lit 4.0)
+                        , evalAttrStr "fill" (str node.color)
+                        , evalAttrStr "stroke" (str "#333")
+                        , evalAttr "stroke-width" (lit node.strokeWidth)
                         ]
                     , -- Label text
                       T.elem Text
-                        [ v3Attr "x" (lit 0.0)
-                        , v3Attr "y" (lit 4.0)
-                        , v3AttrStr "text-anchor" (str "middle")
-                        , v3AttrStr "fill" (str "white")
-                        , v3AttrStr "font-size" (str "11px")
-                        , v3AttrStr "font-weight" (str "bold")
+                        [ evalAttr "x" (lit 0.0)
+                        , evalAttr "y" (lit 4.0)
+                        , evalAttrStr "text-anchor" (str "middle")
+                        , evalAttrStr "fill" (str "white")
+                        , evalAttrStr "font-size" (str "11px")
+                        , evalAttrStr "font-weight" (str "bold")
                         , Friendly.textContent (str node.label)
                         ]
                     , -- Key hints (shown to right of selected node)
                       T.elem Text
-                        [ v3Attr "x" (lit 50.0)  -- Right of the node rect
-                        , v3Attr "y" (lit 4.0)
-                        , v3AttrStr "text-anchor" (str "start")
-                        , v3AttrStr "fill" (str "#666")
-                        , v3AttrStr "font-size" (str "10px")
-                        , v3AttrStr "font-family" (str "monospace")
-                        , v3AttrStr "opacity" (str (if node.isSelected then "1" else "0"))
+                        [ evalAttr "x" (lit 50.0)  -- Right of the node rect
+                        , evalAttr "y" (lit 4.0)
+                        , evalAttrStr "text-anchor" (str "start")
+                        , evalAttrStr "fill" (str "#666")
+                        , evalAttrStr "font-size" (str "10px")
+                        , evalAttrStr "font-family" (str "monospace")
+                        , evalAttrStr "opacity" (str (if node.isSelected then "1" else "0"))
                         , Friendly.textContent (str node.keyHints)
                         ]
                     ]
