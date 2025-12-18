@@ -981,8 +981,24 @@
           ]
         },
         "test": {
-          "dependencies": [],
-          "build_plan": []
+          "dependencies": [
+            "assert",
+            "nullable"
+          ],
+          "build_plan": [
+            "assert",
+            "console",
+            "control",
+            "effect",
+            "functions",
+            "invariant",
+            "maybe",
+            "newtype",
+            "nullable",
+            "prelude",
+            "safe-coerce",
+            "unsafe-coerce"
+          ]
         }
       },
       "psd3-tree": {

@@ -26,3 +26,8 @@ package:
     - tuples
     - unsafe-coerce
     - web-dom
+  test:
+    main: Test.Main
+    dependencies:
+      - assert
+      - nullable
