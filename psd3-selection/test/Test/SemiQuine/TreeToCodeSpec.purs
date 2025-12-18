@@ -104,11 +104,11 @@ testStaticAttributes :: Effect Unit
 testStaticAttributes = do
   log "  ✓ generates correct static attributes"
   let code = treeToCode staticTree
-  code `shouldContain` "width \"200.0\""
-  code `shouldContain` "height \"100.0\""
-  code `shouldContain` "cx \"50.0\""
-  code `shouldContain` "radius \"10.0\""
-  code `shouldContain` "fill \"blue\""
+  code `shouldContain` "width $ text \"200.0\""
+  code `shouldContain` "height $ text \"100.0\""
+  code `shouldContain` "cx $ text \"50.0\""
+  code `shouldContain` "r $ text \"10.0\""
+  code `shouldContain` "fill $ text \"blue\""
 
 -- | Test: generates withChild for single child
 testWithChild :: Effect Unit
@@ -132,9 +132,9 @@ testDynamicAttributes = do
   let code = treeToCode parabolaTree
   -- First datum is { x: -10.0, y: 100.0 }
   -- scaleX (-10.0) = 0.0, scaleY 100.0 = 50.0
-  code `shouldContain` "cx d.<?>"
+  code `shouldContain` "cx $ d.<?>"
   code `shouldContain` "→ \"0.0\""
-  code `shouldContain` "cy d.<?>"
+  code `shouldContain` "cy $ d.<?>"
   code `shouldContain` "→ \"50.0\""
 
 -- | Test: preserves static attributes in templates
@@ -143,8 +143,8 @@ testStaticAttributesInTemplate = do
   log "  ✓ preserves static attributes in templates"
   let code = treeToCode parabolaTree
   -- radius and fill are static
-  code `shouldContain` "radius \"5.0\""
-  code `shouldContain` "fill \"green\""
+  code `shouldContain` "r $ text \"5.0\""
+  code `shouldContain` "fill $ text \"green\""
 
 -- | Test: join structure with data count
 testEvaluatedValues :: Effect Unit
