@@ -26,6 +26,11 @@ module TreeBuilder3.Theme
   , typeCardFieldText
   , typeCardDisabled
   , typeCardHighlight
+    -- * Data Card Colors
+  , dataCardFill
+  , dataCardStroke
+  , dataCardHeader
+  , dataCardHighlight
     -- * Stroke Widths
   , strokeWidthNormal
   , strokeWidthSelected
@@ -46,6 +51,10 @@ module TreeBuilder3.Theme
   , typeCardWidth
   , typeCardFieldHeight
   , typeCardSpacing
+    -- * Data Card Dimensions
+  , dataCardWidth
+  , dataCardHeight
+  , dataCardSpacing
     -- * Re-export color utilities
   , module Color
   ) where
@@ -218,3 +227,36 @@ typeCardFieldHeight = 18.0
 
 typeCardSpacing :: Number
 typeCardSpacing = 15.0
+
+-- =============================================================================
+-- Data Card Colors (for sample data selection on RHS)
+-- =============================================================================
+
+-- | Background fill for data cards
+dataCardFill :: Color
+dataCardFill = hex "#F0FFF0" -- Light green/honeydew
+
+-- | Stroke color for data card borders
+dataCardStroke :: Color
+dataCardStroke = hex "#2E8B57" -- Sea green
+
+-- | Header background color (data name row)
+dataCardHeader :: Color
+dataCardHeader = hex "#2E8B57" -- Sea green
+
+-- | Highlight color when data card is selected
+dataCardHighlight :: Color
+dataCardHighlight = hex "#90EE90" -- Light green
+
+-- =============================================================================
+-- Data Card Dimensions
+-- =============================================================================
+
+dataCardWidth :: Number
+dataCardWidth = 100.0
+
+dataCardHeight :: Number
+dataCardHeight = 50.0
+
+dataCardSpacing :: Number
+dataCardSpacing = 10.0

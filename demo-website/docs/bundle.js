@@ -14145,25 +14145,25 @@
     };
     return NestedJoin2;
   })();
-  var SceneJoin = /* @__PURE__ */ (function() {
-    function SceneJoin2(value0) {
+  var UpdateJoin = /* @__PURE__ */ (function() {
+    function UpdateJoin2(value0) {
       this.value0 = value0;
     }
     ;
-    SceneJoin2.create = function(value0) {
-      return new SceneJoin2(value0);
+    UpdateJoin2.create = function(value0) {
+      return new UpdateJoin2(value0);
     };
-    return SceneJoin2;
+    return UpdateJoin2;
   })();
-  var SceneNestedJoin = /* @__PURE__ */ (function() {
-    function SceneNestedJoin2(value0) {
+  var UpdateNestedJoin = /* @__PURE__ */ (function() {
+    function UpdateNestedJoin2(value0) {
       this.value0 = value0;
     }
     ;
-    SceneNestedJoin2.create = function(value0) {
-      return new SceneNestedJoin2(value0);
+    UpdateNestedJoin2.create = function(value0) {
+      return new UpdateNestedJoin2(value0);
     };
-    return SceneNestedJoin2;
+    return UpdateNestedJoin2;
   })();
   var withChildren = function(parent2) {
     return function(newChildren) {
@@ -14185,15 +14185,15 @@
         return new NestedJoin(parent2.value0);
       }
       ;
-      if (parent2 instanceof SceneJoin) {
-        return new SceneJoin(parent2.value0);
+      if (parent2 instanceof UpdateJoin) {
+        return new UpdateJoin(parent2.value0);
       }
       ;
-      if (parent2 instanceof SceneNestedJoin) {
-        return new SceneNestedJoin(parent2.value0);
+      if (parent2 instanceof UpdateNestedJoin) {
+        return new UpdateNestedJoin(parent2.value0);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.AST (line 256, column 35 - line 261, column 45): " + [parent2.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.AST (line 248, column 35 - line 253, column 47): " + [parent2.constructor.name]);
     };
   };
   var withChild = function(parent2) {
@@ -14216,15 +14216,15 @@
         return new NestedJoin(parent2.value0);
       }
       ;
-      if (parent2 instanceof SceneJoin) {
-        return new SceneJoin(parent2.value0);
+      if (parent2 instanceof UpdateJoin) {
+        return new UpdateJoin(parent2.value0);
       }
       ;
-      if (parent2 instanceof SceneNestedJoin) {
-        return new SceneNestedJoin(parent2.value0);
+      if (parent2 instanceof UpdateNestedJoin) {
+        return new UpdateNestedJoin(parent2.value0);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.AST (line 245, column 26 - line 250, column 45): " + [parent2.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.AST (line 237, column 26 - line 242, column 47): " + [parent2.constructor.name]);
     };
   };
   var withBehaviors = function(tree2) {
@@ -14247,15 +14247,15 @@
         return new NestedJoin(tree2.value0);
       }
       ;
-      if (tree2 instanceof SceneJoin) {
-        return new SceneJoin(tree2.value0);
+      if (tree2 instanceof UpdateJoin) {
+        return new UpdateJoin(tree2.value0);
       }
       ;
-      if (tree2 instanceof SceneNestedJoin) {
-        return new SceneNestedJoin(tree2.value0);
+      if (tree2 instanceof UpdateNestedJoin) {
+        return new UpdateNestedJoin(tree2.value0);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.AST (line 281, column 35 - line 286, column 45): " + [tree2.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.AST (line 273, column 35 - line 278, column 47): " + [tree2.constructor.name]);
     };
   };
   var named = function(elemType) {
@@ -19054,11 +19054,11 @@
             return renderNodeHelper(dictOrd)(v)(v1);
           }
           ;
-          if (v1 instanceof SceneJoin) {
+          if (v1 instanceof UpdateJoin) {
             return renderNodeHelper(dictOrd)(v)(v1);
           }
           ;
-          if (v1 instanceof SceneNestedJoin) {
+          if (v1 instanceof UpdateNestedJoin) {
             return renderNodeHelper(dictOrd)(v)(v1);
           }
           ;
@@ -19171,7 +19171,7 @@
           };
         }
         ;
-        if (v1 instanceof SceneJoin) {
+        if (v1 instanceof UpdateJoin) {
           return function __do3() {
             var v2 = (function() {
               if (v1.value0.keyFn instanceof Just) {
@@ -19210,33 +19210,33 @@
                 ;
                 return 0;
               })();
-              return log4("Tree API SceneJoin '" + (v1.value0.name + ("': enter=" + (show22(enterCount) + (", update=" + (show22(updateCount) + (", exit=" + show22(exitCount))))))));
+              return log4("Tree API UpdateJoin '" + (v1.value0.name + ("': enter=" + (show22(enterCount) + (", update=" + (show22(updateCount) + (", exit=" + show22(exitCount))))))));
             })())();
             (function() {
-              if (v1.value0.exitBehavior instanceof Just) {
-                if (v1.value0.exitBehavior.value0.transition instanceof Just) {
+              if (v1.value0.behaviors.exit instanceof Just) {
+                if (v1.value0.behaviors.exit.value0.transition instanceof Just) {
                   var pairs = getExitingElementDatumPairs(v2.value0.exit);
-                  return liftEffect3(applyExitTransitionToElements(v1.value0.exitBehavior.value0.transition.value0)(pairs)(v1.value0.exitBehavior.value0.attrs))();
+                  return liftEffect3(applyExitTransitionToElements(v1.value0.behaviors.exit.value0.transition.value0)(pairs)(v1.value0.behaviors.exit.value0.attrs))();
                 }
                 ;
-                if (v1.value0.exitBehavior.value0.transition instanceof Nothing) {
-                  setAttrsExit1(v1.value0.exitBehavior.value0.attrs)(v2.value0.exit)();
+                if (v1.value0.behaviors.exit.value0.transition instanceof Nothing) {
+                  setAttrsExit1(v1.value0.behaviors.exit.value0.attrs)(v2.value0.exit)();
                   remove1(v2.value0.exit)();
                   return unit;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1416, column 7 - line 1424, column 20): " + [v1.value0.exitBehavior.value0.transition.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1416, column 7 - line 1424, column 20): " + [v1.value0.behaviors.exit.value0.transition.constructor.name]);
               }
               ;
-              if (v1.value0.exitBehavior instanceof Nothing) {
+              if (v1.value0.behaviors.exit instanceof Nothing) {
                 remove1(v2.value0.exit)();
                 return unit;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1414, column 3 - line 1428, column 16): " + [v1.value0.exitBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1414, column 3 - line 1428, column 16): " + [v1.value0.behaviors.exit.constructor.name]);
             })();
             var enterElementsAndMaps = (function() {
-              if (v1.value0.enterBehavior instanceof Just) {
+              if (v1.value0.behaviors.enter instanceof Just) {
                 var modifiedTemplate = function(datum2) {
                   var v3 = v1.value0.template(datum2);
                   if (v3 instanceof Node2) {
@@ -19245,7 +19245,7 @@
                       elemType: v3.value0.elemType,
                       behaviors: v3.value0.behaviors,
                       children: v3.value0.children,
-                      attrs: append14(v3.value0.attrs)(v1.value0.enterBehavior.value0.initialAttrs)
+                      attrs: append14(v3.value0.attrs)(v1.value0.behaviors.enter.value0.attrs)
                     });
                   }
                   ;
@@ -19253,7 +19253,7 @@
                 };
                 var rendered = renderTemplatesForPendingSelection(dictOrd)(modifiedTemplate)(v2.value0.enter)();
                 (function() {
-                  if (v1.value0.enterBehavior.value0.transition instanceof Just) {
+                  if (v1.value0.behaviors.enter.value0.transition instanceof Just) {
                     var enterElements2 = map29(fst)(rendered);
                     var pendingData = (function() {
                       if (v2.value0.enter instanceof PendingSelection) {
@@ -19273,53 +19273,53 @@
                           ;
                           return [];
                         })();
-                        return applyTransitionToSingleElement(v1.value0.enterBehavior.value0.transition.value0)(index5)(v3.value0)(v3.value1)(finalAttrs);
+                        return applyTransitionToSingleElement(v1.value0.behaviors.enter.value0.transition.value0)(index5)(v3.value0)(v3.value1)(finalAttrs);
                       };
                     })(pairs))();
                   }
                   ;
-                  if (v1.value0.enterBehavior.value0.transition instanceof Nothing) {
+                  if (v1.value0.behaviors.enter.value0.transition instanceof Nothing) {
                     return unit;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1452, column 7 - line 1468, column 29): " + [v1.value0.enterBehavior.value0.transition.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1452, column 7 - line 1468, column 29): " + [v1.value0.behaviors.enter.value0.transition.constructor.name]);
                 })();
                 return rendered;
               }
               ;
-              if (v1.value0.enterBehavior instanceof Nothing) {
+              if (v1.value0.behaviors.enter instanceof Nothing) {
                 return renderTemplatesForPendingSelection(dictOrd)(v1.value0.template)(v2.value0.enter)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1439, column 27 - line 1473, column 68): " + [v1.value0.enterBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1439, column 27 - line 1473, column 68): " + [v1.value0.behaviors.enter.constructor.name]);
             })();
             var enterElements = map29(fst)(enterElementsAndMaps);
             var enterChildMaps = map29(snd)(enterElementsAndMaps);
             var updateElements = (function() {
-              if (v1.value0.updateBehavior instanceof Just) {
-                if (v1.value0.updateBehavior.value0.transition instanceof Just) {
+              if (v1.value0.behaviors.update instanceof Just) {
+                if (v1.value0.behaviors.update.value0.transition instanceof Just) {
                   var pairs = getBoundElementDatumPairs(v2.value0.update);
                   liftEffect3(traverseWithIndex_2(function(index5) {
                     return function(v3) {
-                      return applyTransitionToSingleElement(v1.value0.updateBehavior.value0.transition.value0)(index5)(v3.value0)(v3.value1)(v1.value0.updateBehavior.value0.attrs);
+                      return applyTransitionToSingleElement(v1.value0.behaviors.update.value0.transition.value0)(index5)(v3.value0)(v3.value1)(v1.value0.behaviors.update.value0.attrs);
                     };
                   })(pairs))();
                   return getElementsFromBoundSelection(v2.value0.update);
                 }
                 ;
-                if (v1.value0.updateBehavior.value0.transition instanceof Nothing) {
-                  setAttrs1(v1.value0.updateBehavior.value0.attrs)(v2.value0.update)();
+                if (v1.value0.behaviors.update.value0.transition instanceof Nothing) {
+                  setAttrs1(v1.value0.behaviors.update.value0.attrs)(v2.value0.update)();
                   return renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1482, column 7 - line 1498, column 71): " + [v1.value0.updateBehavior.value0.transition.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1482, column 7 - line 1498, column 71): " + [v1.value0.behaviors.update.value0.transition.constructor.name]);
               }
               ;
-              if (v1.value0.updateBehavior instanceof Nothing) {
+              if (v1.value0.behaviors.update instanceof Nothing) {
                 return renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1479, column 21 - line 1501, column 67): " + [v1.value0.updateBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1479, column 21 - line 1501, column 67): " + [v1.value0.behaviors.update.constructor.name]);
             })();
             var allElements = append14(enterElements)(updateElements);
             var combinedChildMap = foldl2(union5)(empty3)(enterChildMaps);
@@ -19371,35 +19371,35 @@
           };
         }
         ;
-        if (v1 instanceof SceneNestedJoin) {
+        if (v1 instanceof UpdateNestedJoin) {
           var innerData = join2(map29(v1.value0.decompose)(v1.value0.joinData));
           return function __do3() {
             var v2 = joinDataWithKey1(innerData)(jsonStringify_)(v1.value0.key)(v)();
             (function() {
-              if (v1.value0.exitBehavior instanceof Just) {
-                if (v1.value0.exitBehavior.value0.transition instanceof Just) {
+              if (v1.value0.behaviors.exit instanceof Just) {
+                if (v1.value0.behaviors.exit.value0.transition instanceof Just) {
                   var pairs = getExitingElementDatumPairs(v2.value0.exit);
-                  return liftEffect3(applyExitTransitionToElements(v1.value0.exitBehavior.value0.transition.value0)(pairs)(v1.value0.exitBehavior.value0.attrs))();
+                  return liftEffect3(applyExitTransitionToElements(v1.value0.behaviors.exit.value0.transition.value0)(pairs)(v1.value0.behaviors.exit.value0.attrs))();
                 }
                 ;
-                if (v1.value0.exitBehavior.value0.transition instanceof Nothing) {
-                  setAttrsExit1(v1.value0.exitBehavior.value0.attrs)(v2.value0.exit)();
+                if (v1.value0.behaviors.exit.value0.transition instanceof Nothing) {
+                  setAttrsExit1(v1.value0.behaviors.exit.value0.attrs)(v2.value0.exit)();
                   remove1(v2.value0.exit)();
                   return unit;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1593, column 7 - line 1601, column 20): " + [v1.value0.exitBehavior.value0.transition.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1593, column 7 - line 1601, column 20): " + [v1.value0.behaviors.exit.value0.transition.constructor.name]);
               }
               ;
-              if (v1.value0.exitBehavior instanceof Nothing) {
+              if (v1.value0.behaviors.exit instanceof Nothing) {
                 remove1(v2.value0.exit)();
                 return unit;
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1591, column 3 - line 1604, column 16): " + [v1.value0.exitBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1591, column 3 - line 1604, column 16): " + [v1.value0.behaviors.exit.constructor.name]);
             })();
             var enterElementsAndMaps = (function() {
-              if (v1.value0.enterBehavior instanceof Just) {
+              if (v1.value0.behaviors.enter instanceof Just) {
                 var modifiedTemplate = function(datum2) {
                   var v3 = v1.value0.template(datum2);
                   if (v3 instanceof Node2) {
@@ -19408,7 +19408,7 @@
                       elemType: v3.value0.elemType,
                       behaviors: v3.value0.behaviors,
                       children: v3.value0.children,
-                      attrs: append14(v3.value0.attrs)(v1.value0.enterBehavior.value0.initialAttrs)
+                      attrs: append14(v3.value0.attrs)(v1.value0.behaviors.enter.value0.attrs)
                     });
                   }
                   ;
@@ -19416,7 +19416,7 @@
                 };
                 var rendered = renderTemplatesForPendingSelection(dictOrd)(modifiedTemplate)(v2.value0.enter)();
                 (function() {
-                  if (v1.value0.enterBehavior.value0.transition instanceof Just) {
+                  if (v1.value0.behaviors.enter.value0.transition instanceof Just) {
                     var enterElements2 = map29(fst)(rendered);
                     var pendingData = (function() {
                       if (v2.value0.enter instanceof PendingSelection) {
@@ -19436,51 +19436,51 @@
                           ;
                           return [];
                         })();
-                        return applyTransitionToSingleElement(v1.value0.enterBehavior.value0.transition.value0)(index5)(v4.value0)(v4.value1)(finalAttrs);
+                        return applyTransitionToSingleElement(v1.value0.behaviors.enter.value0.transition.value0)(index5)(v4.value0)(v4.value1)(finalAttrs);
                       };
                     })(pairs))();
                   }
                   ;
-                  if (v1.value0.enterBehavior.value0.transition instanceof Nothing) {
+                  if (v1.value0.behaviors.enter.value0.transition instanceof Nothing) {
                     return unit;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1632, column 7 - line 1648, column 29): " + [v1.value0.enterBehavior.value0.transition.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1632, column 7 - line 1648, column 29): " + [v1.value0.behaviors.enter.value0.transition.constructor.name]);
                 })();
                 return rendered;
               }
               ;
-              if (v1.value0.enterBehavior instanceof Nothing) {
+              if (v1.value0.behaviors.enter instanceof Nothing) {
                 return renderTemplatesForPendingSelection(dictOrd)(v1.value0.template)(v2.value0.enter)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1621, column 27 - line 1651, column 92): " + [v1.value0.enterBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1621, column 27 - line 1651, column 92): " + [v1.value0.behaviors.enter.constructor.name]);
             })();
             var updateElements = (function() {
-              if (v1.value0.updateBehavior instanceof Just) {
-                if (v1.value0.updateBehavior.value0.transition instanceof Just) {
+              if (v1.value0.behaviors.update instanceof Just) {
+                if (v1.value0.behaviors.update.value0.transition instanceof Just) {
                   var pairs = getBoundElementDatumPairs(v2.value0.update);
                   liftEffect3(traverseWithIndex_2(function(index5) {
                     return function(v4) {
-                      return applyTransitionToSingleElement(v1.value0.updateBehavior.value0.transition.value0)(index5)(v4.value0)(v4.value1)(v1.value0.updateBehavior.value0.attrs);
+                      return applyTransitionToSingleElement(v1.value0.behaviors.update.value0.transition.value0)(index5)(v4.value0)(v4.value1)(v1.value0.behaviors.update.value0.attrs);
                     };
                   })(pairs))();
                   return getElementsFromBoundSelection(v2.value0.update);
                 }
                 ;
-                if (v1.value0.updateBehavior.value0.transition instanceof Nothing) {
-                  setAttrs1(v1.value0.updateBehavior.value0.attrs)(v2.value0.update)();
+                if (v1.value0.behaviors.update.value0.transition instanceof Nothing) {
+                  setAttrs1(v1.value0.behaviors.update.value0.attrs)(v2.value0.update)();
                   return renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1657, column 7 - line 1670, column 86): " + [v1.value0.updateBehavior.value0.transition.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1657, column 7 - line 1670, column 86): " + [v1.value0.behaviors.update.value0.transition.constructor.name]);
               }
               ;
-              if (v1.value0.updateBehavior instanceof Nothing) {
+              if (v1.value0.behaviors.update instanceof Nothing) {
                 return renderTemplatesForBoundSelection1(v1.value0.template)(v2.value0.update)();
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1654, column 21 - line 1671, column 91): " + [v1.value0.updateBehavior.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Internal.Selection.Operations (line 1654, column 21 - line 1671, column 91): " + [v1.value0.behaviors.update.constructor.name]);
             })();
             var enterElements = map29(fst)(enterElementsAndMaps);
             var allElements = append14(enterElements)(updateElements);

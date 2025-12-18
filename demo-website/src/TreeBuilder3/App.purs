@@ -114,6 +114,28 @@ type TypeCard =
   , isAssigned :: Boolean -- This type is assigned to selected Join
   }
 
+-- | Sample data identifier
+data SampleDataId
+  = SampleChess
+  | SampleSudoku
+  | SampleGo
+  | SampleScatterPlot
+  | SampleForceGraph
+  | SampleGapminder
+
+derive instance eqSampleDataId :: Eq SampleDataId
+derive instance ordSampleDataId :: Ord SampleDataId
+
+-- | Data card for rendering sample data options in SVG
+type DataCard =
+  { name :: String -- Display name (e.g., "Chess")
+  , description :: String -- Brief description
+  , sampleId :: SampleDataId -- ID for selection
+  , y :: Number -- Y position
+  , isEnabled :: Boolean -- Can be clicked (type is assigned)
+  , isSelected :: Boolean -- This sample is currently selected
+  }
+
 -- | Zoom transform for preserving zoom state across re-renders
 type ZoomTransform = { k :: Number, x :: Number, y :: Number }
 
@@ -125,6 +147,7 @@ type State =
   , clickListener :: Maybe (HS.Listener Action)
   , generatedCode :: String -- Live generated PSD3 code
   , zoomTransform :: ZoomTransform -- Current zoom state (preserved across renders)
+  , selectedSampleData :: Maybe SampleDataId -- Selected sample data for visualization
   }
 
 -- | Actions
@@ -137,6 +160,7 @@ data Action
   | HandleFormAction FormAction
   | AssignType DatumType -- Assign a type to the selected Join node
   | ZoomChanged ZoomTransform -- Zoom/pan changed, update arrow
+  | SelectSampleData SampleDataId -- Select sample data to visualize
 
 -- =============================================================================
 -- Initial State
@@ -163,6 +187,7 @@ initialState =
   , clickListener: Nothing
   , generatedCode: "-- Build a tree to see generated code"
   , zoomTransform: { k: 1.0, x: 0.0, y: 0.0 } -- Identity transform
+  , selectedSampleData: Nothing
   }
 
 -- | Sample AST for testing import functionality
@@ -323,7 +348,8 @@ handleAction = case _ of
       case findNodeById selectedId state.userTree of
         Just node | isJoinNodeType node.nodeType -> do
           let newTree = updateNodeDatumType selectedId datumType state.userTree
-          H.modify_ \s -> s { userTree = newTree }
+          -- Clear sample data selection when type changes
+          H.modify_ \s -> s { userTree = newTree, selectedSampleData = Nothing }
           handleAction RenderTree
         _ -> pure unit
     where
@@ -332,6 +358,10 @@ handleAction = case _ of
     isJoinNodeType NodeUpdateJoin = true
     isJoinNodeType NodeUpdateNestedJoin = true
     isJoinNodeType _ = false
+
+  SelectSampleData sampleId -> do
+    H.modify_ \s -> s { selectedSampleData = Just sampleId }
+    handleAction RenderTree
 
   ZoomChanged newTransform -> do
     -- Update state with new zoom transform
@@ -727,6 +757,12 @@ renderTreeViz state listener = do
   -- Create type card data
   let typeCards = makeTypeCards isJoinSelected selectedJoinType
 
+  -- Create data card options based on assigned type
+  let dataCards = makeDataCards selectedJoinType state.selectedSampleData
+
+  -- Position for data cards (RHS of SVG)
+  let dataCardsX = svgWidth - Theme.dataCardWidth - 10.0
+
   runD3v2M do
     container <- select "#tree-builder3-container" :: _ (D3v2Selection_ SEmpty Element Unit)
 
@@ -994,6 +1030,58 @@ renderTreeViz state listener = do
 
     _ <- renderTree svgSel fieldLabelsTree
 
+    -- Render data cards on RHS (only shown when type is assigned)
+    let
+      dataCardsTree :: T.Tree DataCard
+      dataCardsTree =
+        T.named Group "dataCardsGroup"
+          [ F.staticStr "class" "data-cards"
+          , F.transform $ F.text $ "translate(" <> show dataCardsX <> ", 30)"
+          ]
+          `T.withChild`
+            ( T.joinData "dataCardGroups" "g" dataCards $ \card ->
+                T.elem Group
+                  [ F.transform $ F.text $ "translate(0," <> show card.y <> ")"
+                  , F.staticStr "cursor" "pointer"
+                  ]
+                  `T.withBehaviors`
+                    [ ClickWithDatum \c -> HS.notify listener (SelectSampleData c.sampleId) ]
+                  `T.withChildren`
+                    -- Card background
+                    [ T.elem Rect
+                        [ F.x (F.num 0.0)
+                        , F.y (F.num 0.0)
+                        , F.width (F.num Theme.dataCardWidth)
+                        , F.height (F.num Theme.dataCardHeight)
+                        , F.static "rx" 6.0
+                        , F.fill (F.color (if card.isSelected then Theme.dataCardHighlight else Theme.dataCardFill))
+                        , F.stroke (F.color Theme.dataCardStroke)
+                        , F.strokeWidth (F.num (if card.isSelected then 3.0 else 1.5))
+                        ]
+                    -- Name text
+                    , T.elem Text
+                        [ F.x (F.num (Theme.dataCardWidth / 2.0))
+                        , F.y (F.num 20.0)
+                        , F.textAnchor (F.text "middle")
+                        , F.fill (F.color Theme.dataCardStroke)
+                        , F.fontSize (F.px 12.0)
+                        , F.staticStr "font-weight" "bold"
+                        , F.textContent (F.text card.name)
+                        ]
+                    -- Description text
+                    , T.elem Text
+                        [ F.x (F.num (Theme.dataCardWidth / 2.0))
+                        , F.y (F.num 38.0)
+                        , F.textAnchor (F.text "middle")
+                        , F.fill (F.color Theme.keyHintsColor)
+                        , F.fontSize (F.px 9.0)
+                        , F.textContent (F.text card.description)
+                        ]
+                    ]
+            )
+
+    _ <- renderTree svgSel dataCardsTree
+
     -- Draw arrow from assigned type card to the selected Join node
     -- Only draw if a Join is selected and has a type assigned
     let
@@ -1055,6 +1143,131 @@ renderTreeViz state listener = do
             )
 
     _ <- renderTree svgSel arrowTree
+
+    -- Draw arrows from selected data card to Enter/Update/Exit nodes
+    -- For regular joins: arrow to the template element
+    -- For update joins: arrows to Enter, Update, Exit nodes
+    let
+      -- Find GUP phase nodes (Enter/Update/Exit) by looking at the tree
+      findGUPNodes :: Array TreeNode
+      findGUPNodes = Array.filter isGUPNode structuralNodes
+        where
+        isGUPNode n = case n.nodeType of
+          NodeEnter -> true
+          NodeUpdate -> true
+          NodeExit -> true
+          _ -> false
+
+      -- Find the template element (first structural child of the selected Join)
+      findTemplateNode :: Maybe TreeNode
+      findTemplateNode = do
+        selectedId <- state.selectedNodeId
+        selectedNode <- findNodeById selectedId state.userTree
+        -- Check if it's an update join
+        if isUpdateJoinType selectedNode.nodeType
+          then Nothing -- For update joins, we use GUP nodes instead
+          else do
+            -- For regular joins, find the template (first child)
+            let childIds = getChildrenIds selectedId state.userTree
+            firstChildId <- Array.head childIds
+            Array.find (\n -> n.id == firstChildId) structuralNodes
+        where
+        isUpdateJoinType NodeUpdateJoin = true
+        isUpdateJoinType NodeUpdateNestedJoin = true
+        isUpdateJoinType _ = false
+
+      -- Build arrow data for data card -> node connections
+      -- Include targetId for zoom-reactive updates
+      dataArrowTargets :: Array { nodeBaseX :: Number, nodeBaseY :: Number, color :: String, targetId :: String }
+      dataArrowTargets =
+        case state.selectedSampleData of
+          Nothing -> []
+          Just _ ->
+            -- Check if we have GUP nodes or template node
+            let gupNodes = findGUPNodes
+            in if Array.length gupNodes > 0
+              then map (\n ->
+                { nodeBaseX: n.x + offsetX + 40.0 -- Right edge of node (base position)
+                , nodeBaseY: n.y + offsetY
+                , color: toHexString $ Theme.nodeTypeColor n.nodeType
+                , targetId: nodeTypeToTargetId n.nodeType
+                }) gupNodes
+              else case findTemplateNode of
+                Just n ->
+                  [ { nodeBaseX: n.x + offsetX + 40.0
+                    , nodeBaseY: n.y + offsetY
+                    , color: toHexString $ Theme.dataCardStroke
+                    , targetId: "template"
+                    } ]
+                Nothing -> []
+
+      -- Convert node type to arrow target ID
+      nodeTypeToTargetId :: DslNodeType -> String
+      nodeTypeToTargetId = case _ of
+        NodeEnter -> "enter"
+        NodeUpdate -> "update"
+        NodeExit -> "exit"
+        _ -> "template"
+
+      -- Find selected data card position
+      selectedDataCard = Array.find _.isSelected dataCards
+
+      -- Build full arrow data with source position
+      -- nodeBaseX/Y are pre-zoom positions, nodeX/Y are rendered positions
+      dataArrowData = case selectedDataCard of
+        Nothing -> []
+        Just card ->
+          map (\target ->
+            { cardX: dataCardsX -- Left edge of data card
+            , cardY: 30.0 + card.y + Theme.dataCardHeight / 2.0 -- Center of card
+            , nodeX: target.nodeBaseX -- For initial render (no zoom yet)
+            , nodeY: target.nodeBaseY
+            , color: target.color
+            , targetId: target.targetId
+            }) dataArrowTargets
+
+      -- Bezier curve from data card to node (going left)
+      dataArrowPath arrow =
+        let
+          midX = (arrow.cardX + arrow.nodeX) / 2.0
+        in
+          "M " <> show arrow.cardX <> " " <> show arrow.cardY <>
+          " C " <> show midX <> " " <> show arrow.cardY <>
+          " " <> show midX <> " " <> show arrow.nodeY <>
+          " " <> show arrow.nodeX <> " " <> show arrow.nodeY
+
+      dataArrowTree :: T.Tree { cardX :: Number, cardY :: Number, nodeX :: Number, nodeY :: Number, color :: String, targetId :: String }
+      dataArrowTree =
+        T.named Group "dataArrowGroup"
+          [ F.staticStr "class" "data-arrow" ]
+          `T.withChild`
+            ( T.joinData "dataArrows" "g" dataArrowData $ \arrow ->
+                T.elem Group
+                  -- Add class based on target for zoom-reactive updates
+                  [ F.staticStr "class" ("data-arrow-" <> arrow.targetId) ]
+                  `T.withChildren`
+                    [ -- Arrow path
+                      T.elem Path
+                        [ F.path $ F.text $ dataArrowPath arrow
+                        , F.fill (F.text "none")
+                        , F.stroke (F.text arrow.color)
+                        , F.strokeWidth (F.num 2.0)
+                        , F.staticStr "stroke-dasharray" "5,3"
+                        ]
+                    , -- Arrow head (triangle pointing left, at the node)
+                      T.elem Path
+                        [ F.path $ F.text $
+                            "M " <> show (arrow.nodeX + 8.0) <> " " <> show (arrow.nodeY - 5.0) <>
+                            " L " <> show arrow.nodeX <> " " <> show arrow.nodeY <>
+                            " L " <> show (arrow.nodeX + 8.0) <> " " <> show (arrow.nodeY + 5.0) <>
+                            " Z"
+                        , F.fill (F.text arrow.color)
+                        , F.stroke (F.text "none")
+                        ]
+                    ]
+            )
+
+    _ <- renderTree svgSel dataArrowTree
 
     pure unit
 
@@ -1209,6 +1422,101 @@ updateArrowPosition state = do
 
     Nothing -> pure unit
 
+  -- ===== Data Arrow Updates =====
+  -- Update data arrows (from data cards to GUP/template nodes)
+  let { k, x, y } = state.zoomTransform
+  let dataCardsX = svgWidth - Theme.dataCardWidth - 10.0
+
+  -- Find GUP nodes (Enter/Update/Exit)
+  let
+    findGUPNodes :: Array TreeNode
+    findGUPNodes = Array.filter isGUPNode structuralNodes
+      where
+      isGUPNode n = case n.nodeType of
+        NodeEnter -> true
+        NodeUpdate -> true
+        NodeExit -> true
+        _ -> false
+
+    -- Find template node (for regular joins)
+    findTemplateNode :: Maybe TreeNode
+    findTemplateNode = do
+      selectedId <- state.selectedNodeId
+      selectedNode <- findNodeById selectedId state.userTree
+      if isUpdateJoinType selectedNode.nodeType
+        then Nothing
+        else do
+          let childIds = getChildrenIds selectedId state.userTree
+          firstChildId <- Array.head childIds
+          Array.find (\n -> n.id == firstChildId) structuralNodes
+      where
+      isUpdateJoinType NodeUpdateJoin = true
+      isUpdateJoinType NodeUpdateNestedJoin = true
+      isUpdateJoinType _ = false
+
+    -- Build data arrow targets (same logic as renderTreeViz but with base positions)
+    dataArrowTargets :: Array { nodeBaseX :: Number, nodeBaseY :: Number, targetId :: String }
+    dataArrowTargets =
+      case state.selectedSampleData of
+        Nothing -> []
+        Just _ ->
+          let gupNodes = findGUPNodes
+          in if Array.length gupNodes > 0
+            then map (\n ->
+              { nodeBaseX: n.x + offsetX + 40.0
+              , nodeBaseY: n.y + offsetY
+              , targetId: nodeTypeToTargetId n.nodeType
+              }) gupNodes
+            else case findTemplateNode of
+              Just n ->
+                [ { nodeBaseX: n.x + offsetX + 40.0
+                  , nodeBaseY: n.y + offsetY
+                  , targetId: "template"
+                  } ]
+              Nothing -> []
+
+    nodeTypeToTargetId :: DslNodeType -> String
+    nodeTypeToTargetId = case _ of
+      NodeEnter -> "enter"
+      NodeUpdate -> "update"
+      NodeExit -> "exit"
+      _ -> "template"
+
+    -- Get selected data card position
+    dataCards = makeDataCards selectedJoinType state.selectedSampleData
+    selectedDataCard = Array.find _.isSelected dataCards
+
+  -- Update each data arrow
+  case selectedDataCard of
+    Nothing -> pure unit
+    Just card -> do
+      let cardY = 30.0 + card.y + Theme.dataCardHeight / 2.0
+      -- Update each target arrow
+      for_ dataArrowTargets \target -> do
+        -- Transform node position using zoom
+        let nodeX = target.nodeBaseX * k + x
+        let nodeY = target.nodeBaseY * k + y
+        let midX = (dataCardsX + nodeX) / 2.0
+
+        -- Build arrow path (going from right to left)
+        let pathD =
+              "M " <> show dataCardsX <> " " <> show cardY <>
+              " C " <> show midX <> " " <> show cardY <>
+              " " <> show midX <> " " <> show nodeY <>
+              " " <> show nodeX <> " " <> show nodeY
+
+        -- Build arrowhead path (pointing left)
+        let arrowheadD =
+              "M " <> show (nodeX + 8.0) <> " " <> show (nodeY - 5.0) <>
+              " L " <> show nodeX <> " " <> show nodeY <>
+              " L " <> show (nodeX + 8.0) <> " " <> show (nodeY + 5.0) <>
+              " Z"
+
+        -- Update DOM elements using target-specific selectors
+        let selector = ".data-arrow-" <> target.targetId
+        updateAttr_ (selector <> " path:first-child") "d" pathD
+        updateAttr_ (selector <> " path:last-child") "d" arrowheadD
+
 -- =============================================================================
 -- SVG Type Cards Helpers
 -- =============================================================================
@@ -1296,4 +1604,42 @@ makeTypeCards isJoinSelected selectedJoinType =
   isTypeAssigned :: DatumType -> Maybe DatumType -> Boolean
   isTypeAssigned cardType (Just selectedType) = cardType == selectedType
   isTypeAssigned _ Nothing = false
+
+-- | Create data card options for a given type
+-- | Different types have different sample data options
+makeDataCards :: Maybe DatumType -> Maybe SampleDataId -> Array DataCard
+makeDataCards maybeType selectedSample = case maybeType of
+  Nothing -> []
+  Just TypeUnit -> []
+  Just TypeUnknown -> []
+  -- Board type -> board game samples
+  Just t | t == boardType ->
+    [ mkCard 0 "Chess" "8x8 board" SampleChess
+    , mkCard 1 "Sudoku" "9x9 puzzle" SampleSudoku
+    , mkCard 2 "Go" "19x19 board" SampleGo
+    ]
+  -- Country type -> geographic data
+  Just t | t == countryType ->
+    [ mkCard 0 "Gapminder" "Health & wealth" SampleGapminder
+    ]
+  -- Node type -> graph data
+  Just t | t == nodeType ->
+    [ mkCard 0 "Force Graph" "Node network" SampleForceGraph
+    ]
+  -- Point type -> scatter data
+  Just t | t == pointType ->
+    [ mkCard 0 "Scatter Plot" "X/Y points" SampleScatterPlot
+    ]
+  -- Other types don't have sample data yet
+  Just _ -> []
+  where
+  mkCard :: Int -> String -> String -> SampleDataId -> DataCard
+  mkCard idx name desc sampleId =
+    { name
+    , description: desc
+    , sampleId
+    , y: toNumber idx * (Theme.dataCardHeight + Theme.dataCardSpacing)
+    , isEnabled: true
+    , isSelected: selectedSample == Just sampleId
+    }
 
