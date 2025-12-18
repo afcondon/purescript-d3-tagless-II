@@ -16,8 +16,16 @@ module TreeBuilder3.Theme
   , nodeStroke
   , nameLabelColor
   , keyHintsColor
+  , typeLabelColor
   , nodeLabelLight
   , nodeLabelDark
+    -- * Type Card Colors
+  , typeCardFill
+  , typeCardStroke
+  , typeCardHeader
+  , typeCardFieldText
+  , typeCardDisabled
+  , typeCardHighlight
     -- * Stroke Widths
   , strokeWidthNormal
   , strokeWidthSelected
@@ -34,6 +42,10 @@ module TreeBuilder3.Theme
   , badgeWidth
   , badgeHeight
   , badgeCornerRadius
+    -- * Type Card Dimensions
+  , typeCardWidth
+  , typeCardFieldHeight
+  , typeCardSpacing
     -- * Re-export color utilities
   , module Color
   ) where
@@ -103,6 +115,10 @@ nameLabelColor = hex "#4A90E2"
 keyHintsColor :: Color
 keyHintsColor = hex "#666666"
 
+-- | Color for type annotations (shown below nodes)
+typeLabelColor :: Color
+typeLabelColor = hex "#9B59B6" -- Purple for types (like IDE type hints)
+
 -- | Light text color (for dark node backgrounds)
 nodeLabelLight :: Color
 nodeLabelLight = Color.white
@@ -161,3 +177,44 @@ badgeHeight = 20.0
 
 badgeCornerRadius :: Number
 badgeCornerRadius = 10.0
+
+-- =============================================================================
+-- Type Card Colors (for the visual type palette in SVG)
+-- =============================================================================
+
+-- | Background fill for type cards
+typeCardFill :: Color
+typeCardFill = hex "#F8F9FA" -- Light gray background
+
+-- | Stroke color for type card borders
+typeCardStroke :: Color
+typeCardStroke = hex "#9B59B6" -- Purple (matches typeLabelColor)
+
+-- | Header background color (type name row)
+typeCardHeader :: Color
+typeCardHeader = hex "#9B59B6" -- Purple
+
+-- | Text color for field names/types
+typeCardFieldText :: Color
+typeCardFieldText = hex "#333333"
+
+-- | Dimmed color when type card is disabled
+typeCardDisabled :: Color
+typeCardDisabled = hex "#CCCCCC"
+
+-- | Highlight color when type is assigned to selected Join
+typeCardHighlight :: Color
+typeCardHighlight = hex "#FFD700" -- Gold highlight
+
+-- =============================================================================
+-- Type Card Dimensions
+-- =============================================================================
+
+typeCardWidth :: Number
+typeCardWidth = 120.0
+
+typeCardFieldHeight :: Number
+typeCardFieldHeight = 18.0
+
+typeCardSpacing :: Number
+typeCardSpacing = 15.0

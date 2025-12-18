@@ -1,8 +1,10 @@
 module PSD3.Internal.Behavior.FFI
   ( attachZoom_
   , attachZoomWithTransform_
+  , attachZoomWithCallback_
   , getZoomTransform_
   , ZoomTransform
+  , updateAttr_
   , attachSimpleDrag_
   , attachSimulationDrag_
   , attachSimulationDragById_
@@ -54,6 +56,14 @@ foreign import attachZoom_
 -- | Zoom transform record {k, x, y} for scale and translation
 type ZoomTransform = { k :: Number, x :: Number, y :: Number }
 
+-- | Update an element's attribute by CSS selector
+-- | Useful for imperatively updating elements (e.g., arrows during zoom)
+foreign import updateAttr_
+  :: String -- CSS selector
+  -> String -- Attribute name
+  -> String -- Attribute value
+  -> Effect Unit
+
 -- | Get the current zoom transform from a DOM element
 -- | Returns identity transform {k:1, x:0, y:0} if none exists
 foreign import getZoomTransform_
@@ -70,6 +80,20 @@ foreign import attachZoomWithTransform_
   -> Number
   -> String
   -> ZoomTransform
+  -> Effect Element
+
+-- | Attach zoom behavior with callback on zoom events
+-- |
+-- | Like attachZoomWithTransform_ but also calls a callback with the current
+-- | transform on each zoom event. Use this when you need to update other UI
+-- | elements (like arrows) that depend on the zoom state.
+foreign import attachZoomWithCallback_
+  :: Element
+  -> Number
+  -> Number
+  -> String
+  -> ZoomTransform
+  -> (ZoomTransform -> Effect Unit)
   -> Effect Element
 
 -- | Attach simple drag behavior to a DOM element

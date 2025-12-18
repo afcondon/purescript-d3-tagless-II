@@ -8,6 +8,12 @@ module TreeBuilder3.Types
   , BehaviorKind(..)
   , nodeLabel
   , nodeKeyHints
+  -- Datum types
+  , DatumType(..)
+  , PrimType(..)
+  , FieldDef
+  , datumTypeLabel
+  , datumTypeFields
   ) where
 
 import Prelude
@@ -54,12 +60,68 @@ data BehaviorKind = BehaviorZoom | BehaviorDrag | BehaviorClick | BehaviorHover
 derive instance Eq BehaviorKind
 derive instance Ord BehaviorKind
 
+-- =============================================================================
+-- Datum Types (for phantom type visualization)
+-- =============================================================================
+
+-- | Primitive types that can appear in records
+data PrimType
+  = TNumber
+  | TString
+  | TInt
+  | TBoolean
+
+derive instance Eq PrimType
+derive instance Ord PrimType
+
+-- | A field in a record type
+type FieldDef =
+  { name :: String
+  , typ :: PrimType
+  }
+
+-- | The datum type at a point in the tree
+-- | This represents what type `d` has in expressions like `F.field "x"`
+data DatumType
+  = TypeUnit                              -- No datum (root, before any join)
+  | TypeRecord String (Array FieldDef)    -- Named record: "Point" { x :: Number, y :: Number }
+  | TypeArray DatumType                   -- Array of a type (for nested joins)
+  | TypeUnknown                           -- Type not yet specified (joins without type)
+
+derive instance Eq DatumType
+
+-- Can't derive Ord for recursive types easily, so manual instance
+instance Ord DatumType where
+  compare TypeUnit TypeUnit = EQ
+  compare TypeUnit _ = LT
+  compare _ TypeUnit = GT
+  compare TypeUnknown TypeUnknown = EQ
+  compare TypeUnknown _ = LT
+  compare _ TypeUnknown = GT
+  compare (TypeRecord n1 _) (TypeRecord n2 _) = compare n1 n2
+  compare (TypeRecord _ _) _ = LT
+  compare _ (TypeRecord _ _) = GT
+  compare (TypeArray t1) (TypeArray t2) = compare t1 t2
+
+-- | Get a display label for a datum type
+datumTypeLabel :: DatumType -> String
+datumTypeLabel TypeUnit = "Unit"
+datumTypeLabel (TypeRecord name _) = name
+datumTypeLabel (TypeArray inner) = "Array " <> datumTypeLabel inner
+datumTypeLabel TypeUnknown = "?"
+
+-- | Get the fields available for a datum type (empty for non-records)
+datumTypeFields :: DatumType -> Array FieldDef
+datumTypeFields (TypeRecord _ fields) = fields
+datumTypeFields _ = []
+
 -- | Our tree node data
 type TreeNode =
   { id :: Int
   , nodeType :: DslNodeType
   , name :: Maybe String     -- Element/join name (e.g., "svg", "nodes")
   , key :: Maybe String      -- Join key (e.g., "circle", "line")
+  , datumType :: DatumType   -- The datum type at this node (phantom type)
   , x :: Number
   , y :: Number
   , depth :: Int

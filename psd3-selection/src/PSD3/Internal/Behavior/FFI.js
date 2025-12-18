@@ -1,6 +1,18 @@
 // FFI for D3 zoom and drag behaviors
 // D3 dependencies: d3-selection, d3-zoom, d3-drag
 import { select, selectAll, pointer } from "d3-selection";
+
+/**
+ * Update an element's attribute by selector
+ * @param {string} selector - CSS selector
+ * @param {string} attr - Attribute name
+ * @param {string} value - Attribute value
+ */
+export function updateAttr_(selector) {
+  return attr => value => () => {
+    select(selector).attr(attr, value);
+  };
+}
 import { zoom, zoomIdentity, zoomTransform } from "d3-zoom";
 import { drag } from "d3-drag";
 
@@ -224,6 +236,43 @@ export function attachZoomWithTransform_(element) {
 
     // Restore the previous transform
     const t = zoomIdentity.translate(transform.x, transform.y).scale(transform.k);
+    selection.call(zoomBehavior.transform, t);
+
+    return element;
+  };
+}
+
+/**
+ * Attach zoom behavior with callback on zoom events
+ * Like attachZoomWithTransform_ but also calls a callback with the current transform
+ * @param {Element} element - The DOM element to attach zoom to
+ * @param {number} scaleMin - Minimum zoom scale
+ * @param {number} scaleMax - Maximum zoom scale
+ * @param {string} targetSelector - CSS selector for the element to transform
+ * @param {{k: number, x: number, y: number}} initialTransform - Transform to restore
+ * @param {Function} onZoom - PureScript (ZoomTransform -> Effect Unit) callback
+ * @returns {Element} The element (for chaining)
+ */
+export function attachZoomWithCallback_(element) {
+  return scaleMin => scaleMax => targetSelector => initialTransform => onZoom => () => {
+    const selection = select(element);
+
+    function zoomed(event) {
+      const target = selection.select(targetSelector);
+      target.attr('transform', event.transform);
+      // Call PureScript callback with transform
+      const t = { k: event.transform.k, x: event.transform.x, y: event.transform.y };
+      onZoom(t)();
+    }
+
+    const zoomBehavior = zoom()
+      .scaleExtent([scaleMin, scaleMax])
+      .on('zoom', zoomed);
+
+    selection.call(zoomBehavior);
+
+    // Restore the previous transform
+    const t = zoomIdentity.translate(initialTransform.x, initialTransform.y).scale(initialTransform.k);
     selection.call(zoomBehavior.transform, t);
 
     return element;

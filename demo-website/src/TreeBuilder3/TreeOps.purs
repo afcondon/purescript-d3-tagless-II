@@ -18,6 +18,7 @@ module TreeBuilder3.TreeOps
   , addChildToNode
   , removeNodeById
   , updateNodeType
+  , updateNodeDatumType
   , filterStructuralTree
     -- * Path-based Updates (for form integration)
   , updateNameAtPath
@@ -46,7 +47,7 @@ import Data.Maybe (Maybe(..))
 import Data.Tree (Tree, mkTree)
 import DataViz.Layout.Hierarchy.Tree (defaultTreeConfig, tree)
 
-import TreeBuilder3.Types (TreeNode, DslNodeType(..))
+import TreeBuilder3.Types (TreeNode, DslNodeType(..), DatumType)
 
 -- =============================================================================
 -- Types
@@ -190,6 +191,16 @@ updateNodeType targetId newType t =
     newVal = if val.id == targetId then val { nodeType = newType } else val
   in
     mkTree newVal (map (updateNodeType targetId newType) children)
+
+-- | Update a node's datum type in the tree
+updateNodeDatumType :: Int -> DatumType -> Tree TreeNode -> Tree TreeNode
+updateNodeDatumType targetId newDatumType t =
+  let
+    val = head t
+    children = tail t
+    newVal = if val.id == targetId then val { datumType = newDatumType } else val
+  in
+    mkTree newVal (map (updateNodeDatumType targetId newDatumType) children)
 
 -- | Filter tree to only structural nodes (for layout calculation)
 -- | Badge nodes are removed; their positions will be computed relative to parent

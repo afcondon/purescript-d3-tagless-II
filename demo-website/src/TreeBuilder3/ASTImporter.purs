@@ -26,7 +26,7 @@ import Control.Comonad.Cofree (mkCofree)
 import PSD3.AST as AST
 import PSD3.Internal.Attribute (Attribute(..), AttributeName(..), AttributeValue(..), AttrSource(..))
 import PSD3.Internal.Behavior.Types (Behavior(..))
-import TreeBuilder3.Types (TreeNode, DslNodeType(..), AttrKind(..), BehaviorKind(..))
+import TreeBuilder3.Types (TreeNode, DslNodeType(..), AttrKind(..), BehaviorKind(..), DatumType(..))
 
 -- | State for generating unique IDs during import
 type ImportState = { nextId :: Int }
@@ -232,12 +232,14 @@ freshId = do
   pure state.nextId
 
 -- | Create a TreeNode with default position (layout will fix this)
+-- | datumType starts as TypeUnit; propagateTypes will compute actual types
 mkTreeNode :: Int -> DslNodeType -> Maybe String -> Maybe String -> Int -> TreeNode
 mkTreeNode id nodeType name key depth =
   { id
   , nodeType
   , name
   , key
+  , datumType: TypeUnit -- Will be computed by propagateTypes
   , x: 0.0
   , y: 0.0
   , depth
