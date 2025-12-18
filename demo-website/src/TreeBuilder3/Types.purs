@@ -83,10 +83,10 @@ type FieldDef =
 -- | The datum type at a point in the tree
 -- | This represents what type `d` has in expressions like `F.field "x"`
 data DatumType
-  = TypeUnit                              -- No datum (root, before any join)
-  | TypeRecord String (Array FieldDef)    -- Named record: "Point" { x :: Number, y :: Number }
-  | TypeArray DatumType                   -- Array of a type (for nested joins)
-  | TypeUnknown                           -- Type not yet specified (joins without type)
+  = TypeUnit -- No datum (root, before any join)
+  | TypeRecord String (Array FieldDef) -- Named record: "Point" { x :: Number, y :: Number }
+  | TypeArray DatumType -- Array of a type (for nested joins)
+  | TypeUnknown -- Type not yet specified (joins without type)
 
 derive instance Eq DatumType
 
@@ -119,9 +119,9 @@ datumTypeFields _ = []
 type TreeNode =
   { id :: Int
   , nodeType :: DslNodeType
-  , name :: Maybe String     -- Element/join name (e.g., "svg", "nodes")
-  , key :: Maybe String      -- Join key (e.g., "circle", "line")
-  , datumType :: DatumType   -- The datum type at this node (phantom type)
+  , name :: Maybe String -- Element/join name (e.g., "svg", "nodes")
+  , key :: Maybe String -- Join key (e.g., "circle", "line")
+  , datumType :: DatumType -- The datum type at this node (phantom type)
   , x :: Number
   , y :: Number
   , depth :: Int
@@ -168,8 +168,8 @@ nodeKeyHints PendingAttr = "[c,x,y,r,f,s,w,h,t]"
 nodeKeyHints (PendingAttrValue _) = "[l,f,e,i]"
 nodeKeyHints PendingBehavior = "[z,d,c,h]"
 -- Resolved nodes - element-specific hints
-nodeKeyHints (NodeElem SVG) = "[e,j,n,s,x,a,b]" -- SVG (root): can have all children
-nodeKeyHints (NodeElem Group) = "[e,j,n,s,x,a,b]" -- Group: can have all children
+nodeKeyHints (NodeElem SVG) = "[e,j,n,u,x,a,b]" -- SVG (root): can have all children
+nodeKeyHints (NodeElem Group) = "[e,j,n,u,x,a,b]" -- Group: can have all children
 nodeKeyHints (NodeElem Defs) = "[a]" -- Defs: only attrs (simplified)
 nodeKeyHints (NodeElem Circle) = "[a,b]" -- Circle: leaf - only attrs/behaviors
 nodeKeyHints (NodeElem Rect) = "[a,b]" -- Rect: leaf

@@ -390,9 +390,11 @@ makeLinks t =
 applyLayout :: Tree TreeNode -> Tree TreeNode
 applyLayout t =
   let
+    -- Use tighter horizontal spacing - about 1.5 node widths between siblings
+    -- Node width is 80px, so 300px total gives comfortable spacing without excessive spread
     config = defaultTreeConfig
-      { size = { width: 700.0, height: 600.0 }
-      , minSeparation = 2.0
+      { size = { width: 300.0, height: 600.0 }
+      , minSeparation = 1.5
       , layerSeparation = Just 60.0 -- Fixed 60px between layers (2.5x node height)
       }
   in

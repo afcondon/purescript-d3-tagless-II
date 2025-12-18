@@ -96,7 +96,7 @@ type RenderNode =
   , label :: String
   , nameLabel :: Maybe String -- Name to show on LHS (element name or join name)
   , keyLabel :: Maybe String -- Key to show (join key)
-  , keyHints :: String -- Valid key hints to show (e.g., "[e,j,n,s,x,a,b]")
+  , keyHints :: String -- Valid key hints to show (e.g., "[e,j,n,u,x,a,b]")
   , typeLabel :: String -- Datum type annotation (e.g., "Unit", "Point", "?")
   , isSelected :: Boolean -- Whether this node is currently selected
   , showAsStack :: Boolean -- Whether to draw as deck-of-cards (join templates + GUP phases)
@@ -375,9 +375,10 @@ handleAction = case _ of
     -- Save current zoom transform before clearing (if SVG exists)
     savedTransform <- liftEffect $ saveZoomTransform
     -- Store in state for use by setupZoom
-    let transform = case savedTransform of
-          Just t -> t
-          Nothing -> state.zoomTransform
+    let
+      transform = case savedTransform of
+        Just t -> t
+        Nothing -> state.zoomTransform
     H.modify_ \s -> s { zoomTransform = transform }
     -- Propagate datum types through the tree
     let typedTree = propagateTypes state.userTree
@@ -446,7 +447,7 @@ handleContainerElementKey keyName = case keyName of
   "e" -> addNodeOfType PendingElement
   "j" -> addNodeOfType NodeJoin
   "n" -> addNodeOfType NodeNestedJoin
-  "s" -> addNodeOfType NodeUpdateJoin
+  "u" -> addNodeOfType NodeUpdateJoin
   "x" -> addNodeOfType NodeUpdateNestedJoin
   "a" -> addNodeOfType PendingAttr
   "b" -> addNodeOfType PendingBehavior
@@ -707,7 +708,6 @@ navigateRight = do
 -- D3/PSD3 Rendering
 -- =============================================================================
 
-
 renderTreeViz :: State -> HS.Listener Action -> Effect Unit
 renderTreeViz state listener = do
   clearContainer "#tree-builder3-container"
@@ -957,9 +957,8 @@ renderTreeViz state listener = do
                   , F.opacity (F.text (if card.isEnabled then "1" else "0.5"))
                   ]
                   `T.withBehaviors`
-                    ( if card.isEnabled
-                        then [ ClickWithDatum \c -> HS.notify listener (AssignType c.datumType) ]
-                        else []
+                    ( if card.isEnabled then [ ClickWithDatum \c -> HS.notify listener (AssignType c.datumType) ]
+                      else []
                     )
                   `T.withChildren`
                     -- Header row (type name)
@@ -1002,12 +1001,14 @@ renderTreeViz state listener = do
     -- We'll use a simple approach: render all field labels as a flat join
     let
       allFieldLabels = typeCards >>= \card ->
-        Array.mapWithIndex (\i field ->
-          { text: field.name <> " :: " <> field.typ
-          , cardY: card.y
-          , fieldY: 22.0 + toNumber i * Theme.typeCardFieldHeight + 14.0
-          }
-        ) card.fields
+        Array.mapWithIndex
+          ( \i field ->
+              { text: field.name <> " :: " <> field.typ
+              , cardY: card.y
+              , fieldY: 22.0 + toNumber i * Theme.typeCardFieldHeight + 14.0
+              }
+          )
+          card.fields
 
       fieldLabelsTree :: T.Tree { text :: String, cardY :: Number, fieldY :: Number }
       fieldLabelsTree =
@@ -1100,7 +1101,7 @@ renderTreeViz state listener = do
           }
 
       arrowData = case maybeArrow of
-        Just arrow -> [arrow]
+        Just arrow -> [ arrow ]
         Nothing -> []
 
       -- Bezier curve from type card to Join node
@@ -1108,10 +1109,19 @@ renderTreeViz state listener = do
         let
           midX = (arrow.cardX + arrow.nodeX) / 2.0
         in
-          "M " <> show arrow.cardX <> " " <> show arrow.cardY <>
-          " C " <> show midX <> " " <> show arrow.cardY <>
-          " " <> show midX <> " " <> show arrow.nodeY <>
-          " " <> show arrow.nodeX <> " " <> show arrow.nodeY
+          "M " <> show arrow.cardX <> " " <> show arrow.cardY
+            <> " C "
+            <> show midX
+            <> " "
+            <> show arrow.cardY
+            <> " "
+            <> show midX
+            <> " "
+            <> show arrow.nodeY
+            <> " "
+            <> show arrow.nodeX
+            <> " "
+            <> show arrow.nodeY
 
       arrowTree :: T.Tree { cardX :: Number, cardY :: Number, nodeX :: Number, nodeY :: Number }
       arrowTree =
@@ -1132,10 +1142,17 @@ renderTreeViz state listener = do
                     , -- Arrow head (triangle at the end)
                       T.elem Path
                         [ F.path $ F.text $
-                            "M " <> show (arrow.nodeX - 8.0) <> " " <> show (arrow.nodeY - 5.0) <>
-                            " L " <> show arrow.nodeX <> " " <> show arrow.nodeY <>
-                            " L " <> show (arrow.nodeX - 8.0) <> " " <> show (arrow.nodeY + 5.0) <>
-                            " Z"
+                            "M " <> show (arrow.nodeX - 8.0) <> " " <> show (arrow.nodeY - 5.0)
+                              <> " L "
+                              <> show arrow.nodeX
+                              <> " "
+                              <> show arrow.nodeY
+                              <> " L "
+                              <> show (arrow.nodeX - 8.0)
+                              <> " "
+                              <> show (arrow.nodeY + 5.0)
+                              <>
+                                " Z"
                         , F.fill (F.color Theme.typeCardHeader)
                         , F.stroke (F.text "none")
                         ]
@@ -1164,13 +1181,12 @@ renderTreeViz state listener = do
         selectedId <- state.selectedNodeId
         selectedNode <- findNodeById selectedId state.userTree
         -- Check if it's an update join
-        if isUpdateJoinType selectedNode.nodeType
-          then Nothing -- For update joins, we use GUP nodes instead
-          else do
-            -- For regular joins, find the template (first child)
-            let childIds = getChildrenIds selectedId state.userTree
-            firstChildId <- Array.head childIds
-            Array.find (\n -> n.id == firstChildId) structuralNodes
+        if isUpdateJoinType selectedNode.nodeType then Nothing -- For update joins, we use GUP nodes instead
+        else do
+          -- For regular joins, find the template (first child)
+          let childIds = getChildrenIds selectedId state.userTree
+          firstChildId <- Array.head childIds
+          Array.find (\n -> n.id == firstChildId) structuralNodes
         where
         isUpdateJoinType NodeUpdateJoin = true
         isUpdateJoinType NodeUpdateNestedJoin = true
@@ -1184,21 +1200,26 @@ renderTreeViz state listener = do
           Nothing -> []
           Just _ ->
             -- Check if we have GUP nodes or template node
-            let gupNodes = findGUPNodes
-            in if Array.length gupNodes > 0
-              then map (\n ->
-                { nodeBaseX: n.x + offsetX + 40.0 -- Right edge of node (base position)
-                , nodeBaseY: n.y + offsetY
-                , color: toHexString $ Theme.nodeTypeColor n.nodeType
-                , targetId: nodeTypeToTargetId n.nodeType
-                }) gupNodes
+            let
+              gupNodes = findGUPNodes
+            in
+              if Array.length gupNodes > 0 then map
+                ( \n ->
+                    { nodeBaseX: n.x + offsetX + 40.0 -- Right edge of node (base position)
+                    , nodeBaseY: n.y + offsetY
+                    , color: toHexString $ Theme.nodeTypeColor n.nodeType
+                    , targetId: nodeTypeToTargetId n.nodeType
+                    }
+                )
+                gupNodes
               else case findTemplateNode of
                 Just n ->
                   [ { nodeBaseX: n.x + offsetX + 40.0
                     , nodeBaseY: n.y + offsetY
                     , color: toHexString $ Theme.dataCardStroke
                     , targetId: "template"
-                    } ]
+                    }
+                  ]
                 Nothing -> []
 
       -- Convert node type to arrow target ID
@@ -1217,24 +1238,36 @@ renderTreeViz state listener = do
       dataArrowData = case selectedDataCard of
         Nothing -> []
         Just card ->
-          map (\target ->
-            { cardX: dataCardsX -- Left edge of data card
-            , cardY: 30.0 + card.y + Theme.dataCardHeight / 2.0 -- Center of card
-            , nodeX: target.nodeBaseX -- For initial render (no zoom yet)
-            , nodeY: target.nodeBaseY
-            , color: target.color
-            , targetId: target.targetId
-            }) dataArrowTargets
+          map
+            ( \target ->
+                { cardX: dataCardsX -- Left edge of data card
+                , cardY: 30.0 + card.y + Theme.dataCardHeight / 2.0 -- Center of card
+                , nodeX: target.nodeBaseX -- For initial render (no zoom yet)
+                , nodeY: target.nodeBaseY
+                , color: target.color
+                , targetId: target.targetId
+                }
+            )
+            dataArrowTargets
 
       -- Bezier curve from data card to node (going left)
       dataArrowPath arrow =
         let
           midX = (arrow.cardX + arrow.nodeX) / 2.0
         in
-          "M " <> show arrow.cardX <> " " <> show arrow.cardY <>
-          " C " <> show midX <> " " <> show arrow.cardY <>
-          " " <> show midX <> " " <> show arrow.nodeY <>
-          " " <> show arrow.nodeX <> " " <> show arrow.nodeY
+          "M " <> show arrow.cardX <> " " <> show arrow.cardY
+            <> " C "
+            <> show midX
+            <> " "
+            <> show arrow.cardY
+            <> " "
+            <> show midX
+            <> " "
+            <> show arrow.nodeY
+            <> " "
+            <> show arrow.nodeX
+            <> " "
+            <> show arrow.nodeY
 
       dataArrowTree :: T.Tree { cardX :: Number, cardY :: Number, nodeX :: Number, nodeY :: Number, color :: String, targetId :: String }
       dataArrowTree =
@@ -1257,10 +1290,17 @@ renderTreeViz state listener = do
                     , -- Arrow head (triangle pointing left, at the node)
                       T.elem Path
                         [ F.path $ F.text $
-                            "M " <> show (arrow.nodeX + 8.0) <> " " <> show (arrow.nodeY - 5.0) <>
-                            " L " <> show arrow.nodeX <> " " <> show arrow.nodeY <>
-                            " L " <> show (arrow.nodeX + 8.0) <> " " <> show (arrow.nodeY + 5.0) <>
-                            " Z"
+                            "M " <> show (arrow.nodeX + 8.0) <> " " <> show (arrow.nodeY - 5.0)
+                              <> " L "
+                              <> show arrow.nodeX
+                              <> " "
+                              <> show arrow.nodeY
+                              <> " L "
+                              <> show (arrow.nodeX + 8.0)
+                              <> " "
+                              <> show (arrow.nodeY + 5.0)
+                              <>
+                                " Z"
                         , F.fill (F.text arrow.color)
                         , F.stroke (F.text "none")
                         ]
@@ -1403,18 +1443,36 @@ updateArrowPosition state = do
       let midX = (arrow.cardX + nodeX) / 2.0
 
       -- Build arrow path
-      let pathD =
-            "M " <> show arrow.cardX <> " " <> show arrow.cardY <>
-            " C " <> show midX <> " " <> show arrow.cardY <>
-            " " <> show midX <> " " <> show nodeY <>
-            " " <> show nodeX <> " " <> show nodeY
+      let
+        pathD =
+          "M " <> show arrow.cardX <> " " <> show arrow.cardY
+            <> " C "
+            <> show midX
+            <> " "
+            <> show arrow.cardY
+            <> " "
+            <> show midX
+            <> " "
+            <> show nodeY
+            <> " "
+            <> show nodeX
+            <> " "
+            <> show nodeY
 
       -- Build arrowhead path
-      let arrowheadD =
-            "M " <> show (nodeX - 8.0) <> " " <> show (nodeY - 5.0) <>
-            " L " <> show nodeX <> " " <> show nodeY <>
-            " L " <> show (nodeX - 8.0) <> " " <> show (nodeY + 5.0) <>
-            " Z"
+      let
+        arrowheadD =
+          "M " <> show (nodeX - 8.0) <> " " <> show (nodeY - 5.0)
+            <> " L "
+            <> show nodeX
+            <> " "
+            <> show nodeY
+            <> " L "
+            <> show (nodeX - 8.0)
+            <> " "
+            <> show (nodeY + 5.0)
+            <>
+              " Z"
 
       -- Update DOM elements using class selectors
       updateAttr_ ".type-arrow path:first-child" "d" pathD
@@ -1443,12 +1501,11 @@ updateArrowPosition state = do
     findTemplateNode = do
       selectedId <- state.selectedNodeId
       selectedNode <- findNodeById selectedId state.userTree
-      if isUpdateJoinType selectedNode.nodeType
-        then Nothing
-        else do
-          let childIds = getChildrenIds selectedId state.userTree
-          firstChildId <- Array.head childIds
-          Array.find (\n -> n.id == firstChildId) structuralNodes
+      if isUpdateJoinType selectedNode.nodeType then Nothing
+      else do
+        let childIds = getChildrenIds selectedId state.userTree
+        firstChildId <- Array.head childIds
+        Array.find (\n -> n.id == firstChildId) structuralNodes
       where
       isUpdateJoinType NodeUpdateJoin = true
       isUpdateJoinType NodeUpdateNestedJoin = true
@@ -1460,19 +1517,24 @@ updateArrowPosition state = do
       case state.selectedSampleData of
         Nothing -> []
         Just _ ->
-          let gupNodes = findGUPNodes
-          in if Array.length gupNodes > 0
-            then map (\n ->
-              { nodeBaseX: n.x + offsetX + 40.0
-              , nodeBaseY: n.y + offsetY
-              , targetId: nodeTypeToTargetId n.nodeType
-              }) gupNodes
+          let
+            gupNodes = findGUPNodes
+          in
+            if Array.length gupNodes > 0 then map
+              ( \n ->
+                  { nodeBaseX: n.x + offsetX + 40.0
+                  , nodeBaseY: n.y + offsetY
+                  , targetId: nodeTypeToTargetId n.nodeType
+                  }
+              )
+              gupNodes
             else case findTemplateNode of
               Just n ->
                 [ { nodeBaseX: n.x + offsetX + 40.0
                   , nodeBaseY: n.y + offsetY
                   , targetId: "template"
-                  } ]
+                  }
+                ]
               Nothing -> []
 
     nodeTypeToTargetId :: DslNodeType -> String
@@ -1499,18 +1561,36 @@ updateArrowPosition state = do
         let midX = (dataCardsX + nodeX) / 2.0
 
         -- Build arrow path (going from right to left)
-        let pathD =
-              "M " <> show dataCardsX <> " " <> show cardY <>
-              " C " <> show midX <> " " <> show cardY <>
-              " " <> show midX <> " " <> show nodeY <>
-              " " <> show nodeX <> " " <> show nodeY
+        let
+          pathD =
+            "M " <> show dataCardsX <> " " <> show cardY
+              <> " C "
+              <> show midX
+              <> " "
+              <> show cardY
+              <> " "
+              <> show midX
+              <> " "
+              <> show nodeY
+              <> " "
+              <> show nodeX
+              <> " "
+              <> show nodeY
 
         -- Build arrowhead path (pointing left)
-        let arrowheadD =
-              "M " <> show (nodeX + 8.0) <> " " <> show (nodeY - 5.0) <>
-              " L " <> show nodeX <> " " <> show nodeY <>
-              " L " <> show (nodeX + 8.0) <> " " <> show (nodeY + 5.0) <>
-              " Z"
+        let
+          arrowheadD =
+            "M " <> show (nodeX + 8.0) <> " " <> show (nodeY - 5.0)
+              <> " L "
+              <> show nodeX
+              <> " "
+              <> show nodeY
+              <> " L "
+              <> show (nodeX + 8.0)
+              <> " "
+              <> show (nodeY + 5.0)
+              <>
+                " Z"
 
         -- Update DOM elements using target-specific selectors
         let selector = ".data-arrow-" <> target.targetId
@@ -1542,9 +1622,8 @@ getSelectedJoinDatumType state = case state.selectedNodeId of
   Just selectedId -> case findNodeById selectedId state.userTree of
     Nothing -> Nothing
     Just node ->
-      if isJoinNodeType node.nodeType
-        then Just node.datumType
-        else Nothing
+      if isJoinNodeType node.nodeType then Just node.datumType
+      else Nothing
   where
   isJoinNodeType NodeJoin = true
   isJoinNodeType NodeNestedJoin = true
@@ -1581,7 +1660,7 @@ makeTypeCards isJoinSelected selectedJoinType =
   -- Cell fields
   cellFields = [ { name: "row", typ: "Int" }, { name: "col", typ: "Int" }, { name: "value", typ: "String" } ]
   -- Array types show their inner type
-  rowFields = [ { name: "[ ]", typ: "Cell" } ]  -- Row = Array Cell
+  rowFields = [ { name: "[ ]", typ: "Cell" } ] -- Row = Array Cell
   boardFields = [ { name: "[ ]", typ: "Row" } ] -- Board = Array Row
 
   -- Calculate cumulative Y positions

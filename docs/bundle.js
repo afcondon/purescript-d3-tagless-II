@@ -65108,11 +65108,11 @@ T.joined "bars" Rect data identity $ \\\\d ->
     }
     ;
     if (v2 instanceof NodeElem && v2.value0 instanceof SVG) {
-      return "[e,j,n,s,x,a,b]";
+      return "[e,j,n,u,x,a,b]";
     }
     ;
     if (v2 instanceof NodeElem && v2.value0 instanceof Group) {
-      return "[e,j,n,s,x,a,b]";
+      return "[e,j,n,u,x,a,b]";
     }
     ;
     if (v2 instanceof NodeElem && v2.value0 instanceof Defs) {
@@ -67124,10 +67124,10 @@ T.joined "bars" Rect data identity $ \\\\d ->
       layerScale: defaultTreeConfig.layerScale,
       separation: defaultTreeConfig.separation,
       size: {
-        width: 700,
+        width: 300,
         height: 600
       },
-      minSeparation: 2,
+      minSeparation: 1.5,
       layerSeparation: new Just(60)
     };
     return tree(config)(t2);
@@ -67725,7 +67725,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
       return Nothing.value;
     }
     ;
-    throw new Error("Failed pattern match at TreeBuilder3.App (line 1337, column 3 - line 1341, column 28): " + [maybeSvg.constructor.name]);
+    throw new Error("Failed pattern match at TreeBuilder3.App (line 1377, column 3 - line 1381, column 28): " + [maybeSvg.constructor.name]);
   };
   var sampleAST = /* @__PURE__ */ (function() {
     return withChild(named(SVG.value)("svg")([fill41(text47("none"))]))(withChild(named(Group.value)("zoomGroup")([]))(joinData("nodes")("circle")([unit])(function(v2) {
@@ -67778,7 +67778,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
             return false;
           }
           ;
-          throw new Error("Failed pattern match at TreeBuilder3.App (line 1604, column 3 - line 1604, column 60): " + [v2.constructor.name, v1.constructor.name]);
+          throw new Error("Failed pattern match at TreeBuilder3.App (line 1683, column 3 - line 1683, column 60): " + [v2.constructor.name, v1.constructor.name]);
         };
       };
       var countryFields = [{
@@ -67892,10 +67892,10 @@ T.joined "bars" Rect data identity $ \\\\d ->
         return isJoinType2(v2.value0.nodeType);
       }
       ;
-      throw new Error("Failed pattern match at TreeBuilder3.App (line 1528, column 22 - line 1530, column 42): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at TreeBuilder3.App (line 1608, column 22 - line 1610, column 42): " + [v2.constructor.name]);
     }
     ;
-    throw new Error("Failed pattern match at TreeBuilder3.App (line 1526, column 28 - line 1530, column 42): " + [state3.selectedNodeId.constructor.name]);
+    throw new Error("Failed pattern match at TreeBuilder3.App (line 1606, column 28 - line 1610, column 42): " + [state3.selectedNodeId.constructor.name]);
   };
   var initialTree2 = /* @__PURE__ */ (function() {
     return mkTree({
@@ -67970,10 +67970,10 @@ T.joined "bars" Rect data identity $ \\\\d ->
         return Nothing.value;
       }
       ;
-      throw new Error("Failed pattern match at TreeBuilder3.App (line 1542, column 22 - line 1547, column 21): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at TreeBuilder3.App (line 1622, column 22 - line 1626, column 19): " + [v2.constructor.name]);
     }
     ;
-    throw new Error("Failed pattern match at TreeBuilder3.App (line 1540, column 34 - line 1547, column 21): " + [state3.selectedNodeId.constructor.name]);
+    throw new Error("Failed pattern match at TreeBuilder3.App (line 1620, column 34 - line 1626, column 19): " + [state3.selectedNodeId.constructor.name]);
   };
   var generateCode = function(builderTree) {
     var v2 = builderTreeToAST(builderTree);
@@ -68005,7 +68005,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
         return "";
       }
       ;
-      throw new Error("Failed pattern match at TreeBuilder3.App (line 1307, column 38 - line 1311, column 25): " + [maybeName.constructor.name, maybeKey.constructor.name]);
+      throw new Error("Failed pattern match at TreeBuilder3.App (line 1347, column 38 - line 1351, column 25): " + [maybeName.constructor.name, maybeKey.constructor.name]);
     };
   };
   var eqSampleDataId = {
@@ -68090,7 +68090,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
         return [];
       }
       ;
-      throw new Error("Failed pattern match at TreeBuilder3.App (line 1611, column 42 - line 1634, column 15): " + [maybeType.constructor.name]);
+      throw new Error("Failed pattern match at TreeBuilder3.App (line 1690, column 42 - line 1713, column 15): " + [maybeType.constructor.name]);
     };
   };
   var updateArrowPosition = function(state3) {
@@ -68107,7 +68107,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
         return 0;
       }
       ;
-      throw new Error("Failed pattern match at TreeBuilder3.App (line 1370, column 14 - line 1372, column 21): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at TreeBuilder3.App (line 1410, column 14 - line 1412, column 21): " + [v2.constructor.name]);
     })();
     var minX = foldl4(function(acc) {
       return function(n) {
@@ -68156,7 +68156,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
           return unit;
         }
         ;
-        throw new Error("Failed pattern match at TreeBuilder3.App (line 1397, column 3 - line 1423, column 25): " + [maybeArrow.constructor.name]);
+        throw new Error("Failed pattern match at TreeBuilder3.App (line 1437, column 3 - line 1481, column 25): " + [maybeArrow.constructor.name]);
       })();
       var dataCardsX = 900 - dataCardWidth - 10;
       var nodeTypeToTargetId = function(v2) {
@@ -68253,10 +68253,10 @@ T.joined "bars" Rect data identity $ \\\\d ->
             return [];
           }
           ;
-          throw new Error("Failed pattern match at TreeBuilder3.App (line 1470, column 18 - line 1476, column 28): " + [findTemplateNode.constructor.name]);
+          throw new Error("Failed pattern match at TreeBuilder3.App (line 1531, column 18 - line 1538, column 28): " + [findTemplateNode.constructor.name]);
         }
         ;
-        throw new Error("Failed pattern match at TreeBuilder3.App (line 1460, column 7 - line 1476, column 28): " + [state3.selectedSampleData.constructor.name]);
+        throw new Error("Failed pattern match at TreeBuilder3.App (line 1517, column 7 - line 1538, column 28): " + [state3.selectedSampleData.constructor.name]);
       })();
       if (selectedDataCard instanceof Nothing) {
         return unit;
@@ -68278,7 +68278,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
         })();
       }
       ;
-      throw new Error("Failed pattern match at TreeBuilder3.App (line 1490, column 3 - line 1518, column 68): " + [selectedDataCard.constructor.name]);
+      throw new Error("Failed pattern match at TreeBuilder3.App (line 1552, column 3 - line 1598, column 68): " + [selectedDataCard.constructor.name]);
     };
   };
   var ordSampleDataId = {
@@ -68664,7 +68664,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
                             return [];
                           }
                           ;
-                          throw new Error("Failed pattern match at TreeBuilder3.App (line 1102, column 19 - line 1104, column 22): " + [maybeArrow.constructor.name]);
+                          throw new Error("Failed pattern match at TreeBuilder3.App (line 1103, column 19 - line 1105, column 22): " + [maybeArrow.constructor.name]);
                         })();
                         var arrowTree = withChild(named(Group.value)("typeArrowGroup")([staticStr2("class")("type-arrow")]))(joinData("typeArrows")("g")(arrowData)(function(arrow) {
                           return withChildren(elem3(Group.value)([]))([elem3(Path.value)([path18(text47(arrowPath(arrow))), fill41(text47("none")), stroke30(color3(typeCardHeader)), strokeWidth29(num41(2)), staticStr2("stroke-dasharray")("5,3")]), elem3(Path.value)([path18(text47("M " + (show142(arrow.nodeX - 8) + (" " + (show142(arrow.nodeY - 5) + (" L " + (show142(arrow.nodeX) + (" " + (show142(arrow.nodeY) + (" L " + (show142(arrow.nodeX - 8) + (" " + (show142(arrow.nodeY + 5) + " Z"))))))))))))), fill41(color3(typeCardHeader)), stroke30(text47("none"))])]);
@@ -68765,10 +68765,10 @@ T.joined "bars" Rect data identity $ \\\\d ->
                                 return [];
                               }
                               ;
-                              throw new Error("Failed pattern match at TreeBuilder3.App (line 1195, column 20 - line 1202, column 30): " + [findTemplateNode.constructor.name]);
+                              throw new Error("Failed pattern match at TreeBuilder3.App (line 1215, column 20 - line 1223, column 30): " + [findTemplateNode.constructor.name]);
                             }
                             ;
-                            throw new Error("Failed pattern match at TreeBuilder3.App (line 1183, column 9 - line 1202, column 30): " + [state3.selectedSampleData.constructor.name]);
+                            throw new Error("Failed pattern match at TreeBuilder3.App (line 1199, column 9 - line 1223, column 30): " + [state3.selectedSampleData.constructor.name]);
                           })();
                           var dataArrowPath = function(arrow) {
                             var midX = (arrow.cardX + arrow.nodeX) / 2;
@@ -68792,7 +68792,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
                               })(dataArrowTargets);
                             }
                             ;
-                            throw new Error("Failed pattern match at TreeBuilder3.App (line 1217, column 23 - line 1227, column 32): " + [selectedDataCard.constructor.name]);
+                            throw new Error("Failed pattern match at TreeBuilder3.App (line 1238, column 23 - line 1251, column 29): " + [selectedDataCard.constructor.name]);
                           })();
                           var dataArrowTree = withChild(named(Group.value)("dataArrowGroup")([staticStr2("class")("data-arrow")]))(joinData("dataArrows")("g")(dataArrowData)(function(arrow) {
                             return withChildren(elem3(Group.value)([staticStr2("class")("data-arrow-" + arrow.targetId)]))([elem3(Path.value)([path18(text47(dataArrowPath(arrow))), fill41(text47("none")), stroke30(text47(arrow.color)), strokeWidth29(num41(2)), staticStr2("stroke-dasharray")("5,3")]), elem3(Path.value)([path18(text47("M " + (show142(arrow.nodeX + 8) + (" " + (show142(arrow.nodeY - 5) + (" L " + (show142(arrow.nodeX) + (" " + (show142(arrow.nodeY) + (" L " + (show142(arrow.nodeX + 8) + (" " + (show142(arrow.nodeY + 5) + " Z"))))))))))))), fill41(text47(arrow.color)), stroke30(text47("none"))])]);
@@ -68934,10 +68934,10 @@ T.joined "bars" Rect data identity $ \\\\d ->
             return pure310(unit);
           }
           ;
-          throw new Error("Failed pattern match at TreeBuilder3.App (line 648, column 7 - line 650, column 29): " + [v2.constructor.name]);
+          throw new Error("Failed pattern match at TreeBuilder3.App (line 649, column 7 - line 651, column 29): " + [v2.constructor.name]);
         }
         ;
-        throw new Error("Failed pattern match at TreeBuilder3.App (line 645, column 3 - line 650, column 29): " + [state3.selectedNodeId.constructor.name]);
+        throw new Error("Failed pattern match at TreeBuilder3.App (line 646, column 3 - line 651, column 29): " + [state3.selectedNodeId.constructor.name]);
       })())(function() {
         return handleAction51(dictMonadAff)(RenderTree2.value);
       });
@@ -68991,20 +68991,20 @@ T.joined "bars" Rect data identity $ \\\\d ->
                 return pure310(unit);
               }
               ;
-              throw new Error("Failed pattern match at TreeBuilder3.App (line 700, column 17 - line 702, column 39): " + [v1.constructor.name]);
+              throw new Error("Failed pattern match at TreeBuilder3.App (line 701, column 17 - line 703, column 39): " + [v1.constructor.name]);
             }
             ;
             if (currentIdx instanceof Nothing) {
               return pure310(unit);
             }
             ;
-            throw new Error("Failed pattern match at TreeBuilder3.App (line 698, column 13 - line 703, column 35): " + [currentIdx.constructor.name]);
+            throw new Error("Failed pattern match at TreeBuilder3.App (line 699, column 13 - line 704, column 35): " + [currentIdx.constructor.name]);
           }
           ;
-          throw new Error("Failed pattern match at TreeBuilder3.App (line 691, column 7 - line 703, column 35): " + [v2.constructor.name]);
+          throw new Error("Failed pattern match at TreeBuilder3.App (line 692, column 7 - line 704, column 35): " + [v2.constructor.name]);
         }
         ;
-        throw new Error("Failed pattern match at TreeBuilder3.App (line 688, column 3 - line 703, column 35): " + [state3.selectedNodeId.constructor.name]);
+        throw new Error("Failed pattern match at TreeBuilder3.App (line 689, column 3 - line 704, column 35): " + [state3.selectedNodeId.constructor.name]);
       })())(function() {
         return handleAction51(dictMonadAff)(RenderTree2.value);
       });
@@ -69058,16 +69058,16 @@ T.joined "bars" Rect data identity $ \\\\d ->
                 return pure310(unit);
               }
               ;
-              throw new Error("Failed pattern match at TreeBuilder3.App (line 679, column 17 - line 681, column 39): " + [v1.constructor.name]);
+              throw new Error("Failed pattern match at TreeBuilder3.App (line 680, column 17 - line 682, column 39): " + [v1.constructor.name]);
             }
             ;
             return pure310(unit);
           }
           ;
-          throw new Error("Failed pattern match at TreeBuilder3.App (line 670, column 7 - line 682, column 29): " + [v2.constructor.name]);
+          throw new Error("Failed pattern match at TreeBuilder3.App (line 671, column 7 - line 683, column 29): " + [v2.constructor.name]);
         }
         ;
-        throw new Error("Failed pattern match at TreeBuilder3.App (line 667, column 3 - line 682, column 29): " + [state3.selectedNodeId.constructor.name]);
+        throw new Error("Failed pattern match at TreeBuilder3.App (line 668, column 3 - line 683, column 29): " + [state3.selectedNodeId.constructor.name]);
       })())(function() {
         return handleAction51(dictMonadAff)(RenderTree2.value);
       });
@@ -69112,10 +69112,10 @@ T.joined "bars" Rect data identity $ \\\\d ->
             return pure310(unit);
           }
           ;
-          throw new Error("Failed pattern match at TreeBuilder3.App (line 659, column 7 - line 661, column 29): " + [v2.constructor.name]);
+          throw new Error("Failed pattern match at TreeBuilder3.App (line 660, column 7 - line 662, column 29): " + [v2.constructor.name]);
         }
         ;
-        throw new Error("Failed pattern match at TreeBuilder3.App (line 656, column 3 - line 661, column 29): " + [state3.selectedNodeId.constructor.name]);
+        throw new Error("Failed pattern match at TreeBuilder3.App (line 657, column 3 - line 662, column 29): " + [state3.selectedNodeId.constructor.name]);
       })())(function() {
         return handleAction51(dictMonadAff)(RenderTree2.value);
       });
@@ -69283,7 +69283,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
           return handleKeyForNodeType(dictMonadAff)(v2.value0)(keyName);
         }
         ;
-        throw new Error("Failed pattern match at TreeBuilder3.App (line 409, column 7 - line 411, column 63): " + [v2.constructor.name]);
+        throw new Error("Failed pattern match at TreeBuilder3.App (line 410, column 7 - line 412, column 63): " + [v2.constructor.name]);
       });
     };
   };
@@ -69359,7 +69359,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
           return handleGupPhaseKey(dictMonadAff)(v1);
         }
         ;
-        throw new Error("Failed pattern match at TreeBuilder3.App (line 414, column 1 - line 414, column 121): " + [v2.constructor.name, v1.constructor.name]);
+        throw new Error("Failed pattern match at TreeBuilder3.App (line 415, column 1 - line 415, column 121): " + [v2.constructor.name, v1.constructor.name]);
       };
     };
   };
@@ -69428,7 +69428,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
         return addNodeOfType(dictMonadAff)(NodeNestedJoin.value);
       }
       ;
-      if (keyName === "s") {
+      if (keyName === "u") {
         return addNodeOfType(dictMonadAff)(NodeUpdateJoin.value);
       }
       ;
@@ -69691,7 +69691,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
                 return state3.zoomTransform;
               }
               ;
-              throw new Error("Failed pattern match at TreeBuilder3.App (line 378, column 21 - line 380, column 41): " + [savedTransform.constructor.name]);
+              throw new Error("Failed pattern match at TreeBuilder3.App (line 379, column 19 - line 381, column 39): " + [savedTransform.constructor.name]);
             })();
             return discard220(modify_22(function(s3) {
               var $611 = {};
@@ -69742,7 +69742,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
                       return pure310(unit);
                     }
                     ;
-                    throw new Error("Failed pattern match at TreeBuilder3.App (line 390, column 5 - line 394, column 27): " + [state$prime.clickListener.constructor.name]);
+                    throw new Error("Failed pattern match at TreeBuilder3.App (line 391, column 5 - line 395, column 27): " + [state$prime.clickListener.constructor.name]);
                   });
                 });
               });
@@ -69751,7 +69751,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
         });
       }
       ;
-      throw new Error("Failed pattern match at TreeBuilder3.App (line 296, column 16 - line 394, column 27): " + [v2.constructor.name]);
+      throw new Error("Failed pattern match at TreeBuilder3.App (line 296, column 16 - line 395, column 27): " + [v2.constructor.name]);
     };
   };
   var deleteSelectedNode = function(dictMonadAff) {
@@ -69818,7 +69818,7 @@ T.joined "bars" Rect data identity $ \\\\d ->
             });
           }
           ;
-          throw new Error("Failed pattern match at TreeBuilder3.App (line 586, column 5 - line 597, column 32): " + [v2.constructor.name]);
+          throw new Error("Failed pattern match at TreeBuilder3.App (line 587, column 5 - line 598, column 32): " + [v2.constructor.name]);
         });
       });
     };
