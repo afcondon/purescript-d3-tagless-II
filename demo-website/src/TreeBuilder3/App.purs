@@ -17,7 +17,6 @@ module TreeBuilder3.App
 import Prelude
 
 import Data.Array as Array
-import Data.Either (Either(..))
 import Data.Foldable (for_)
 import Data.Int (toNumber)
 import Data.List (List(..))
@@ -40,7 +39,6 @@ import PSD3.Internal.Selection.Types (SEmpty, ElementType(..))
 import PSD3.Expr.Friendly as F
 import PSD3.AST as T
 import PSD3.Transform (clearContainer)
-import PSD3.Interpreter.SemiQuine.TreeToCode (treeToCode)
 import TreeBuilder3.Types (TreeNode, DslNodeType(..), AttrKind(..), BehaviorKind(..), DatumType(..), nodeLabel, nodeKeyHints, datumTypeLabel)
 import TreeBuilder3.TypePropagation (propagateTypes, pointType, nodeType, linkType, countryType, cellType, rowType, boardType)
 import TreeBuilder3.Theme as Theme
@@ -66,9 +64,8 @@ import TreeBuilder3.TreeOps
   , applyLayout
   )
 import Color (toHexString)
-import TreeBuilder3.Converter (builderTreeToAST)
 import TreeBuilder3.ASTImporter (runImport)
-import TreeBuilder3.FormInterpreter (astToForm, FormAction(..))
+import TreeBuilder3.FormInterpreter (FormAction(..))
 import PSD3.AST as AST
 import Web.DOM.Document (toParentNode) as Document
 import Web.DOM.Element (Element)
@@ -126,6 +123,51 @@ data SampleDataId
 derive instance eqSampleDataId :: Eq SampleDataId
 derive instance ordSampleDataId :: Ord SampleDataId
 
+-- | AST preset identifiers (TOP cards)
+data AstPreset
+  = AstEmpty       -- Empty tree for building from scratch
+  | AstGrid        -- Grid layout: SVG > NestedJoin(Row) > NestedJoin(Cell) > Rect
+  | AstScatter     -- Scatter plot: SVG > Join > Circle
+  | AstBubble      -- Bubble chart: SVG > Join > Circle (with radius encoding)
+  | AstTree        -- Tree layout: SVG > Join > Group > Path, Circle, Text
+  | AstUpdateJoin  -- GUP demo: SVG > UpdateJoin > Text (enter/update/exit)
+
+derive instance eqAstPreset :: Eq AstPreset
+derive instance ordAstPreset :: Ord AstPreset
+
+-- | Get label for AST preset
+astPresetLabel :: AstPreset -> String
+astPresetLabel = case _ of
+  AstEmpty -> "Empty"
+  AstGrid -> "Grid"
+  AstScatter -> "Scatter"
+  AstBubble -> "Bubble"
+  AstTree -> "Tree"
+  AstUpdateJoin -> "GUP"
+
+-- | Get description for AST preset
+astPresetDescription :: AstPreset -> String
+astPresetDescription = case _ of
+  AstEmpty -> "Build from scratch"
+  AstGrid -> "Row × Column"
+  AstScatter -> "X × Y points"
+  AstBubble -> "Sized circles"
+  AstTree -> "Hierarchical"
+  AstUpdateJoin -> "Enter/Update/Exit"
+
+-- | All available AST presets
+allAstPresets :: Array AstPreset
+allAstPresets = [ AstEmpty, AstGrid, AstScatter, AstBubble, AstTree, AstUpdateJoin ]
+
+-- | AST card for rendering preset options in SVG
+type AstCard =
+  { name :: String
+  , description :: String
+  , preset :: AstPreset
+  , x :: Number
+  , isSelected :: Boolean
+  }
+
 -- | Data card for rendering sample data options in SVG
 type DataCard =
   { name :: String -- Display name (e.g., "Chess")
@@ -145,9 +187,9 @@ type State =
   , selectedNodeId :: Maybe Int
   , nextId :: Int
   , clickListener :: Maybe (HS.Listener Action)
-  , generatedCode :: String -- Live generated PSD3 code
   , zoomTransform :: ZoomTransform -- Current zoom state (preserved across renders)
   , selectedSampleData :: Maybe SampleDataId -- Selected sample data for visualization
+  , selectedAstPreset :: AstPreset -- Currently selected AST preset
   }
 
 -- | Actions
@@ -161,13 +203,35 @@ data Action
   | AssignType DatumType -- Assign a type to the selected Join node
   | ZoomChanged ZoomTransform -- Zoom/pan changed, update arrow
   | SelectSampleData SampleDataId -- Select sample data to visualize
+  | SelectAstPreset AstPreset -- Select an AST preset from top cards
 
 -- =============================================================================
--- Initial State
+-- Initial State & Preset Trees
 -- =============================================================================
 
-initialTree :: Tree TreeNode
-initialTree = mkTree
+-- | Get the tree for an AST preset
+presetTree :: AstPreset -> Tree TreeNode
+presetTree = case _ of
+  AstEmpty -> emptyTree
+  AstGrid -> gridTree
+  AstScatter -> scatterTree
+  AstBubble -> bubbleTree
+  AstTree -> hierarchyTree
+  AstUpdateJoin -> gupTree
+
+-- | Get the next ID for a preset tree (for adding new nodes)
+presetNextId :: AstPreset -> Int
+presetNextId = case _ of
+  AstEmpty -> 1
+  AstGrid -> 5
+  AstScatter -> 3
+  AstBubble -> 3
+  AstTree -> 5
+  AstUpdateJoin -> 6
+
+-- | Empty tree: just SVG root
+emptyTree :: Tree TreeNode
+emptyTree = mkTree
   { id: 0
   , nodeType: NodeElem SVG
   , name: Nothing
@@ -179,15 +243,139 @@ initialTree = mkTree
   }
   Nil
 
+-- | Grid tree: SVG > NestedJoin(rows) > NestedJoin(cells) > Rect
+-- | For board games like Chess, Go, Sudoku
+gridTree :: Tree TreeNode
+gridTree = mkTree
+  { id: 0, nodeType: NodeElem SVG, name: Just "svg", key: Nothing, datumType: TypeUnit, x: 0.0, y: 0.0, depth: 0 }
+  ( Cons
+      ( mkTree
+          { id: 1, nodeType: NodeNestedJoin, name: Just "rows", key: Just "row", datumType: rowType, x: 0.0, y: 0.0, depth: 1 }
+          ( Cons
+              ( mkTree
+                  { id: 2, nodeType: NodeNestedJoin, name: Just "cells", key: Just "col", datumType: cellType, x: 0.0, y: 0.0, depth: 2 }
+                  ( Cons
+                      ( mkTree
+                          { id: 3, nodeType: NodeElem Group, name: Just "cell", key: Nothing, datumType: TypeUnit, x: 0.0, y: 0.0, depth: 3 }
+                          ( Cons
+                              ( mkTree
+                                  { id: 4, nodeType: NodeElem Rect, name: Nothing, key: Nothing, datumType: TypeUnit, x: 0.0, y: 0.0, depth: 4 }
+                                  Nil
+                              )
+                              Nil
+                          )
+                      )
+                      Nil
+                  )
+              )
+              Nil
+          )
+      )
+      Nil
+  )
+
+-- | Scatter tree: SVG > Join > Circle
+scatterTree :: Tree TreeNode
+scatterTree = mkTree
+  { id: 0, nodeType: NodeElem SVG, name: Just "svg", key: Nothing, datumType: TypeUnit, x: 0.0, y: 0.0, depth: 0 }
+  ( Cons
+      ( mkTree
+          { id: 1, nodeType: NodeJoin, name: Just "points", key: Just "id", datumType: pointType, x: 0.0, y: 0.0, depth: 1 }
+          ( Cons
+              ( mkTree
+                  { id: 2, nodeType: NodeElem Circle, name: Nothing, key: Nothing, datumType: TypeUnit, x: 0.0, y: 0.0, depth: 2 }
+                  Nil
+              )
+              Nil
+          )
+      )
+      Nil
+  )
+
+-- | Bubble tree: SVG > Join > Circle (same structure, different type)
+bubbleTree :: Tree TreeNode
+bubbleTree = mkTree
+  { id: 0, nodeType: NodeElem SVG, name: Just "svg", key: Nothing, datumType: TypeUnit, x: 0.0, y: 0.0, depth: 0 }
+  ( Cons
+      ( mkTree
+          { id: 1, nodeType: NodeJoin, name: Just "bubbles", key: Just "name", datumType: countryType, x: 0.0, y: 0.0, depth: 1 }
+          ( Cons
+              ( mkTree
+                  { id: 2, nodeType: NodeElem Circle, name: Nothing, key: Nothing, datumType: TypeUnit, x: 0.0, y: 0.0, depth: 2 }
+                  Nil
+              )
+              Nil
+          )
+      )
+      Nil
+  )
+
+-- | Hierarchy tree: SVG > Join > Group > Path + Circle + Text
+hierarchyTree :: Tree TreeNode
+hierarchyTree = mkTree
+  { id: 0, nodeType: NodeElem SVG, name: Just "svg", key: Nothing, datumType: TypeUnit, x: 0.0, y: 0.0, depth: 0 }
+  ( Cons
+      ( mkTree
+          { id: 1, nodeType: NodeJoin, name: Just "nodes", key: Just "id", datumType: nodeType, x: 0.0, y: 0.0, depth: 1 }
+          ( Cons
+              ( mkTree
+                  { id: 2, nodeType: NodeElem Group, name: Just "node", key: Nothing, datumType: TypeUnit, x: 0.0, y: 0.0, depth: 2 }
+                  ( Cons
+                      ( mkTree
+                          { id: 3, nodeType: NodeElem Circle, name: Nothing, key: Nothing, datumType: TypeUnit, x: 0.0, y: 0.0, depth: 3 }
+                          Nil
+                      )
+                      ( Cons
+                          ( mkTree
+                              { id: 4, nodeType: NodeElem Text, name: Nothing, key: Nothing, datumType: TypeUnit, x: 0.0, y: 0.0, depth: 3 }
+                              Nil
+                          )
+                          Nil
+                      )
+                  )
+              )
+              Nil
+          )
+      )
+      Nil
+  )
+
+-- | GUP tree: SVG > UpdateJoin > Text (with Enter/Update/Exit phases)
+gupTree :: Tree TreeNode
+gupTree = mkTree
+  { id: 0, nodeType: NodeElem SVG, name: Just "svg", key: Nothing, datumType: TypeUnit, x: 0.0, y: 0.0, depth: 0 }
+  ( Cons
+      ( mkTree
+          { id: 1, nodeType: NodeUpdateJoin, name: Just "letters", key: Just "char", datumType: TypeUnit, x: 0.0, y: 0.0, depth: 1 }
+          ( Cons
+              ( mkTree
+                  { id: 2, nodeType: NodeElem Text, name: Just "letter", key: Nothing, datumType: TypeUnit, x: 0.0, y: 0.0, depth: 2 }
+                  ( Cons
+                      ( mkTree { id: 3, nodeType: NodeEnter, name: Nothing, key: Nothing, datumType: TypeUnit, x: 0.0, y: 0.0, depth: 3 } Nil )
+                      ( Cons
+                          ( mkTree { id: 4, nodeType: NodeUpdate, name: Nothing, key: Nothing, datumType: TypeUnit, x: 0.0, y: 0.0, depth: 3 } Nil )
+                          ( Cons
+                              ( mkTree { id: 5, nodeType: NodeExit, name: Nothing, key: Nothing, datumType: TypeUnit, x: 0.0, y: 0.0, depth: 3 } Nil )
+                              Nil
+                          )
+                      )
+                  )
+              )
+              Nil
+          )
+      )
+      Nil
+  )
+
 initialState :: State
 initialState =
-  { userTree: initialTree
-  , selectedNodeId: Just 0 -- Start with root selected
-  , nextId: 1
+  { userTree: presetTree AstGrid
+  , selectedNodeId: Just 1 -- Select the first Join node
+  , nextId: presetNextId AstGrid
   , clickListener: Nothing
-  , generatedCode: "-- Build a tree to see generated code"
   , zoomTransform: { k: 1.0, x: 0.0, y: 0.0 } -- Identity transform
-  , selectedSampleData: Nothing
+  , selectedSampleData: Just SampleChess -- Preload Chess data
+  , selectedAstPreset: AstGrid -- Start with Grid preset
   }
 
 -- | Sample AST for testing import functionality
@@ -210,17 +398,6 @@ sampleAST =
                   ]
             )
       )
-
--- =============================================================================
--- Code Generation
--- =============================================================================
-
--- | Generate PSD3 code from the builder tree
-generateCode :: Tree TreeNode -> String
-generateCode builderTree =
-  case builderTreeToAST builderTree of
-    Left err -> "-- " <> show err
-    Right ast -> treeToCode ast
 
 -- =============================================================================
 -- Component
@@ -260,6 +437,10 @@ render state =
     , HH.p
         [ HP.class_ (HH.ClassName "instructions") ]
         [ HH.text "Click to select, arrows to navigate. Key hints shown next to selected node." ]
+    , -- AST preset cards row (like VizMatrix top cards)
+      HH.div
+        [ HP.class_ (HH.ClassName "tree-builder3-ast-cards") ]
+        ( map (renderAstCard state) allAstPresets )
     , HH.div
         [ HP.class_ (HH.ClassName "tree-builder3-editors-row") ]
         [ -- Tree visualization panel (with integrated type cards)
@@ -268,23 +449,12 @@ render state =
             , HP.id "tree-builder3-container"
             ]
             []
-        , -- Interactive form editor
-          case builderTreeToAST state.userTree of
-            Left _ -> HH.text "" -- Don't show form for incomplete trees
-            Right ast ->
-              HH.div
-                [ HP.class_ (HH.ClassName "tree-builder3-form-panel") ]
-                [ HH.h3_ [ HH.text "Interactive Editor" ]
-                , map HandleFormAction (astToForm ast)
-                ]
-        ]
-    , -- Code generation panel (below)
-      HH.div
-        [ HP.class_ (HH.ClassName "tree-builder3-code-panel") ]
-        [ HH.h3_ [ HH.text "Generated PSD3 Code" ]
-        , HH.pre
-            [ HP.class_ (HH.ClassName "code-output") ]
-            [ HH.code_ [ HH.text state.generatedCode ] ]
+        , -- Rendered output panel (visualization result)
+          HH.div
+            [ HP.class_ (HH.ClassName "tree-builder3-output-panel") ]
+            [ HH.h3_ [ HH.text "Rendered Output" ]
+            , renderOutput state
+            ]
         ]
     ]
 
@@ -363,6 +533,20 @@ handleAction = case _ of
     H.modify_ \s -> s { selectedSampleData = Just sampleId }
     handleAction RenderTree
 
+  SelectAstPreset preset -> do
+    -- Load the preset tree, reset selections, reset zoom
+    let newTree = presetTree preset
+    let newNextId = presetNextId preset
+    H.modify_ \s -> s
+      { userTree = newTree
+      , selectedNodeId = if preset == AstEmpty then Just 0 else Just 1 -- Select first Join or root
+      , nextId = newNextId
+      , selectedAstPreset = preset
+      , selectedSampleData = Nothing -- Clear sample data when changing AST
+      , zoomTransform = { k: 1.0, x: 0.0, y: 0.0 } -- Reset zoom
+      }
+    handleAction RenderTree
+
   ZoomChanged newTransform -> do
     -- Update state with new zoom transform
     H.modify_ \s -> s { zoomTransform = newTransform }
@@ -383,9 +567,6 @@ handleAction = case _ of
     -- Propagate datum types through the tree
     let typedTree = propagateTypes state.userTree
     H.modify_ \s -> s { userTree = typedTree }
-    -- Update generated code
-    let newCode = generateCode typedTree
-    H.modify_ \s -> s { generatedCode = newCode }
     -- Render tree visualization
     state' <- H.get -- Get updated state with zoom transform and types
     case state'.clickListener of
@@ -1721,4 +1902,104 @@ makeDataCards maybeType selectedSample = case maybeType of
     , isEnabled: true
     , isSelected: selectedSample == Just sampleId
     }
+
+-- =============================================================================
+-- AST Preset Cards (Halogen HTML)
+-- =============================================================================
+
+-- | Render a single AST preset card (Halogen HTML)
+renderAstCard :: forall m. State -> AstPreset -> H.ComponentHTML Action () m
+renderAstCard state preset =
+  HH.div
+    [ HP.class_ (HH.ClassName cardClasses)
+    , HE.onClick \_ -> SelectAstPreset preset
+    ]
+    [ HH.div
+        [ HP.class_ (HH.ClassName "ast-card-name") ]
+        [ HH.text (astPresetLabel preset) ]
+    , HH.div
+        [ HP.class_ (HH.ClassName "ast-card-description") ]
+        [ HH.text (astPresetDescription preset) ]
+    ]
+  where
+  isSelected = state.selectedAstPreset == preset
+  cardClasses =
+    if isSelected then "ast-card ast-card-selected"
+    else "ast-card"
+
+-- =============================================================================
+-- Rendered Output Panel
+-- =============================================================================
+
+-- | Render the output panel showing visualization result
+-- | This will eventually render the actual visualization from the current AST + data
+renderOutput :: forall m. State -> H.ComponentHTML Action () m
+renderOutput state =
+  HH.div
+    [ HP.class_ (HH.ClassName "tree-builder3-output-content") ]
+    [ -- Show status based on what's selected
+      case getOutputStatus state of
+        NoJoinSelected ->
+          HH.div
+            [ HP.class_ (HH.ClassName "output-placeholder") ]
+            [ HH.p_ [ HH.text "Select a Join node to assign a type" ]
+            , HH.p_ [ HH.text "Use keyboard: j=Join, n=NestedJoin, u=UpdateJoin" ]
+            ]
+        JoinNeedsType ->
+          HH.div
+            [ HP.class_ (HH.ClassName "output-placeholder") ]
+            [ HH.p_ [ HH.text "Click a type card on the left to assign data type" ]
+            ]
+        TypeNeedsData ->
+          HH.div
+            [ HP.class_ (HH.ClassName "output-placeholder") ]
+            [ HH.p_ [ HH.text "Click a data card on the right to select sample data" ]
+            ]
+        ReadyToRender sampleId ->
+          HH.div
+            [ HP.class_ (HH.ClassName "output-ready") ]
+            [ HH.p_ [ HH.text $ "Ready to render: " <> sampleIdLabel sampleId ]
+            , HH.div
+                [ HP.id "tree-builder3-output-svg"
+                , HP.class_ (HH.ClassName "output-svg-container")
+                ]
+                []
+            ]
+    ]
+
+-- | Status of the output panel
+data OutputStatus
+  = NoJoinSelected
+  | JoinNeedsType
+  | TypeNeedsData
+  | ReadyToRender SampleDataId
+
+-- | Determine the current output status
+getOutputStatus :: State -> OutputStatus
+getOutputStatus state = case state.selectedNodeId of
+  Nothing -> NoJoinSelected
+  Just selectedId -> case findNodeById selectedId state.userTree of
+    Nothing -> NoJoinSelected
+    Just node ->
+      if not (isJoinType node.nodeType) then NoJoinSelected
+      else if node.datumType == TypeUnit || node.datumType == TypeUnknown then JoinNeedsType
+      else case state.selectedSampleData of
+        Nothing -> TypeNeedsData
+        Just sampleId -> ReadyToRender sampleId
+  where
+  isJoinType NodeJoin = true
+  isJoinType NodeNestedJoin = true
+  isJoinType NodeUpdateJoin = true
+  isJoinType NodeUpdateNestedJoin = true
+  isJoinType _ = false
+
+-- | Get label for sample data ID
+sampleIdLabel :: SampleDataId -> String
+sampleIdLabel = case _ of
+  SampleChess -> "Chess Board"
+  SampleSudoku -> "Sudoku Puzzle"
+  SampleGo -> "Go Board"
+  SampleScatterPlot -> "Scatter Plot"
+  SampleForceGraph -> "Force Graph"
+  SampleGapminder -> "Gapminder"
 

@@ -145,6 +145,7 @@ data Route
   | TreeBuilder3   -- DSL grammar tree builder (keyboard-driven)
   | SPLOM          -- Brushable Scatterplot Matrix (Palmer Penguins)
   | GUPDebug       -- Standalone debug page for Setup.applySetupWithData GUP API
+  | VizMatrix     -- Type × AST × Data matrix demo
   -- Meta
   | Acknowledgements -- Credits and acknowledgements
   | NotFound
@@ -212,5 +213,6 @@ instance showRoute :: Show Route where
   show TreeBuilder3 = "DSL Tree Builder"
   show SPLOM = "Brushable SPLOM"
   show GUPDebug = "GUP Debug"
+  show VizMatrix = "VizMatrix"
   show Acknowledgements = "Acknowledgements"
   show NotFound = "Not Found"

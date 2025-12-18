@@ -73,6 +73,7 @@ import TreeBuilder2.App as TreeBuilder2
 import TreeBuilder3.App as TreeBuilder3
 import Component.SPLOM as SPLOM
 import Component.GUPDebug as GUPDebug
+import VizMatrix.App as VizMatrix
 
 -- Routing
 import PSD3.RoutingDSL (routing, routeToPath)
@@ -144,6 +145,7 @@ type Slots =
   , treeBuilder3 :: forall q. H.Slot q Void Unit
   , splom :: forall q. H.Slot q Void Unit
   , gupDebug :: forall q. H.Slot q Void Unit
+  , vizMatrix :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
 
@@ -198,6 +200,7 @@ _treeBuilder2 = Proxy :: Proxy "treeBuilder2"
 _treeBuilder3 = Proxy :: Proxy "treeBuilder3"
 _splom = Proxy :: Proxy "splom"
 _gupDebug = Proxy :: Proxy "gupDebug"
+_vizMatrix = Proxy :: Proxy "vizMatrix"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
 -- | Main application component
@@ -419,6 +422,9 @@ renderPage route = case spy "Route is" route of
 
   GUPDebug ->
     HH.slot_ _gupDebug unit GUPDebug.component unit
+
+  VizMatrix ->
+    HH.slot_ _vizMatrix unit VizMatrix.component unit
 
   Acknowledgements ->
     HH.slot_ _acknowledgements unit Acknowledgements.component unit

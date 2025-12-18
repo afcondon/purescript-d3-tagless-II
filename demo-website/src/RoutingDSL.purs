@@ -77,6 +77,7 @@ routes =
   <|> treeBuilder3
   <|> splom
   <|> gupDebug
+  <|> vizMatrix
   <|> acknowledgements
   <|> rootRedirect
   <|> notFound
@@ -325,6 +326,10 @@ splom = SPLOM <$ lit "splom" <* end
 gupDebug :: Match Route
 gupDebug = GUPDebug <$ lit "gup-debug" <* end
 
+-- | Match: /viz-matrix
+vizMatrix :: Match Route
+vizMatrix = VizMatrix <$ lit "viz-matrix" <* end
+
 -- | Match: /acknowledgements
 acknowledgements :: Match Route
 acknowledgements = Acknowledgements <$ lit "acknowledgements" <* end
@@ -397,5 +402,6 @@ routeToPath TreeBuilder2 = "/tree-builder2"
 routeToPath TreeBuilder3 = "/tree-builder3"
 routeToPath SPLOM = "/splom"
 routeToPath GUPDebug = "/gup-debug"
+routeToPath VizMatrix = "/viz-matrix"
 routeToPath Acknowledgements = "/acknowledgements"
 routeToPath NotFound = "/not-found"
