@@ -1,5 +1,8 @@
 module PSD3.Internal.Behavior.FFI
   ( attachZoom_
+  , attachZoomWithTransform_
+  , getZoomTransform_
+  , ZoomTransform
   , attachSimpleDrag_
   , attachSimulationDrag_
   , attachSimulationDragById_
@@ -46,6 +49,27 @@ foreign import attachZoom_
   -> Number
   -> Number
   -> String
+  -> Effect Element
+
+-- | Zoom transform record {k, x, y} for scale and translation
+type ZoomTransform = { k :: Number, x :: Number, y :: Number }
+
+-- | Get the current zoom transform from a DOM element
+-- | Returns identity transform {k:1, x:0, y:0} if none exists
+foreign import getZoomTransform_
+  :: Element
+  -> Effect ZoomTransform
+
+-- | Attach zoom behavior and restore a previous transform
+-- |
+-- | Like attachZoom_ but also applies the given transform after setup.
+-- | Use this to preserve zoom state across re-renders.
+foreign import attachZoomWithTransform_
+  :: Element
+  -> Number
+  -> Number
+  -> String
+  -> ZoomTransform
   -> Effect Element
 
 -- | Attach simple drag behavior to a DOM element

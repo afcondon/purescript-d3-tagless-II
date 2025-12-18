@@ -1,7 +1,7 @@
 // FFI for D3 zoom and drag behaviors
 // D3 dependencies: d3-selection, d3-zoom, d3-drag
 import { select, selectAll, pointer } from "d3-selection";
-import { zoom } from "d3-zoom";
+import { zoom, zoomIdentity, zoomTransform } from "d3-zoom";
 import { drag } from "d3-drag";
 
 // =============================================================================
@@ -175,6 +175,56 @@ export function attachZoom_(element) {
       .on('zoom', zoomed);
 
     selection.call(zoomBehavior);
+
+    return element;
+  };
+}
+
+/**
+ * Get the current zoom transform from an element
+ * Returns {k, x, y} or identity transform if none set
+ * @param {Element} element - The DOM element with zoom behavior
+ * @returns {{k: number, x: number, y: number}} The zoom transform
+ */
+export function getZoomTransform_(element) {
+  return () => {
+    try {
+      const t = zoomTransform(element);
+      return { k: t.k, x: t.x, y: t.y };
+    } catch (e) {
+      // Return identity if no transform exists
+      return { k: 1, x: 0, y: 0 };
+    }
+  };
+}
+
+/**
+ * Attach zoom behavior and restore a previous transform
+ * @param {Element} element - The DOM element to attach zoom to
+ * @param {number} scaleMin - Minimum zoom scale
+ * @param {number} scaleMax - Maximum zoom scale
+ * @param {string} targetSelector - CSS selector for the element to transform
+ * @param {{k: number, x: number, y: number}} transform - Transform to restore
+ * @returns {Element} The element (for chaining)
+ */
+export function attachZoomWithTransform_(element) {
+  return scaleMin => scaleMax => targetSelector => transform => () => {
+    const selection = select(element);
+
+    function zoomed(event) {
+      const target = selection.select(targetSelector);
+      target.attr('transform', event.transform);
+    }
+
+    const zoomBehavior = zoom()
+      .scaleExtent([scaleMin, scaleMax])
+      .on('zoom', zoomed);
+
+    selection.call(zoomBehavior);
+
+    // Restore the previous transform
+    const t = zoomIdentity.translate(transform.x, transform.y).scale(transform.k);
+    selection.call(zoomBehavior.transform, t);
 
     return element;
   };

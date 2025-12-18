@@ -922,3 +922,144 @@
   position: relative;
   z-index: 1;
 }
+
+/* =============================================================================
+   TREEBUILDER3 - DSL Grammar Tree Builder
+   ============================================================================= */
+
+.tree-builder3-container {
+  font-family: var(--font-mono);
+  padding: var(--spacing-md);
+  outline: none;
+}
+
+.tree-builder3-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.tree-builder3-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.import-example-btn {
+  padding: 6px 12px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  border: 1px solid var(--color-line);
+  background-color: var(--color-beige-card);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.import-example-btn:hover {
+  background-color: var(--color-beige-base);
+  border-color: var(--color-text-dark);
+}
+
+.tree-builder3-container .instructions {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-md);
+}
+
+/* Editors row: tree viz and form side by side */
+.tree-builder3-editors-row {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.tree-builder3-svg-container {
+  flex: 1;
+  min-width: 400px;
+  background-color: white;
+  border: 1px solid var(--color-line);
+}
+
+.tree-builder3-form-panel {
+  flex: 1;
+  min-width: 300px;
+  max-width: 500px;
+  background-color: var(--color-beige-card);
+  border: 1px solid var(--color-line);
+  padding: var(--spacing-sm);
+  overflow: auto;
+  max-height: 500px;
+}
+
+.tree-builder3-form-panel h3 {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: var(--font-size-small);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-dark);
+  border-bottom: 1px solid var(--color-line);
+  padding-bottom: var(--spacing-xs);
+}
+
+/* Code panel below */
+.tree-builder3-code-panel {
+  background-color: var(--color-beige-card);
+  border: 1px solid var(--color-line);
+  padding: var(--spacing-sm);
+}
+
+.tree-builder3-code-panel h3 {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: var(--font-size-small);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-dark);
+}
+
+.tree-builder3-code-panel .code-output {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-tiny);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  padding: var(--spacing-sm);
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  border: 1px solid var(--color-line);
+  max-height: 300px;
+  overflow: auto;
+}
+
+/* AST Form styles */
+.ast-form {
+  font-family: var(--font-mono);
+}
+
+.ast-form-code {
+  font-size: var(--font-size-tiny);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.ast-form-name-input,
+.ast-form-key-input,
+.ast-form-value-input {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-tiny);
+  padding: 2px 4px;
+  border: 1px solid var(--color-teal);
+  background-color: white;
+  color: var(--color-teal);
+}
+
+.ast-form-name-input:focus,
+.ast-form-key-input:focus,
+.ast-form-value-input:focus {
+  outline: none;
+  border-color: var(--color-red-accent);
+  box-shadow: 0 0 0 2px rgba(230, 57, 70, 0.2);
+}

@@ -6,7 +6,6 @@ module TreeBuilder3.Types
   , DslNodeType(..)
   , AttrKind(..)
   , BehaviorKind(..)
-  , nodeColor
   , nodeLabel
   , nodeKeyHints
   ) where
@@ -66,25 +65,6 @@ type TreeNode =
   , depth :: Int
   }
 
--- | Get color for a DSL node type
-nodeColor :: DslNodeType -> String
-nodeColor (NodeElem _) = "#6B7280" -- Gray
-nodeColor NodeJoin = "#E2D24A" -- Yellow
-nodeColor NodeNestedJoin = "#D4A017" -- Gold
-nodeColor NodeUpdateJoin = "#4A90E2" -- Blue
-nodeColor NodeUpdateNestedJoin = "#9B4AE2" -- Purple
-nodeColor (NodeAttr _) = "#4AE24A" -- Green
-nodeColor (NodeBehavior _) = "#E27A4A" -- Orange
--- GUP selection phases (classic GUP demo colors)
-nodeColor NodeEnter = "#2CA02C" -- Green (enter = new)
-nodeColor NodeUpdate = "#7F7F7F" -- Gray (update = existing)
-nodeColor NodeExit = "#8C564B" -- Brown (exit = removed)
--- Pending types - lighter/desaturated versions
-nodeColor PendingElement = "#9CA3AF" -- Light gray
-nodeColor PendingAttr = "#86EFAC" -- Light green
-nodeColor (PendingAttrValue _) = "#86EFAC" -- Light green
-nodeColor PendingBehavior = "#FDBA74" -- Light orange
-
 -- | Get label for a DSL node type
 nodeLabel :: DslNodeType -> String
 nodeLabel (NodeElem SVG) = "SVG"
@@ -100,10 +80,10 @@ nodeLabel NodeJoin = "Join"
 nodeLabel NodeNestedJoin = "NestedJoin"
 nodeLabel NodeUpdateJoin = "UpdateJoin"
 nodeLabel NodeUpdateNestedJoin = "UpdateNestedJoin"
-nodeLabel (NodeAttr (AttrStatic name _)) = "attr:" <> name
-nodeLabel (NodeAttr (AttrField name _)) = "attr:" <> name
-nodeLabel (NodeAttr (AttrExpr name _)) = "attr:" <> name
-nodeLabel (NodeAttr (AttrIndex name)) = "attr:" <> name
+nodeLabel (NodeAttr (AttrStatic name _)) = name
+nodeLabel (NodeAttr (AttrField name _)) = name
+nodeLabel (NodeAttr (AttrExpr name _)) = name
+nodeLabel (NodeAttr (AttrIndex name)) = name
 nodeLabel (NodeBehavior BehaviorZoom) = "Zoom"
 nodeLabel (NodeBehavior BehaviorDrag) = "Drag"
 nodeLabel (NodeBehavior BehaviorClick) = "Click"

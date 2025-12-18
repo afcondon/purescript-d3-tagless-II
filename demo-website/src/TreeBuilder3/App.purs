@@ -16,19 +16,13 @@ module TreeBuilder3.App
 
 import Prelude
 
-import Control.Comonad.Cofree (head, tail)
 import Data.Array as Array
 import Data.Either (Either(..))
-import Data.Int (toNumber)
-import Data.Int as Int
 import Data.Foldable (for_)
-import Data.List (List(..), (:))
-import Data.List as Data.List
+import Data.List (List(..))
 import Data.Maybe (Maybe(..))
-import Control.Alt ((<|>))
 import Data.Tree (Tree, mkTree)
 import DataViz.Layout.Hierarchy.Link (linkBezierVertical)
-import DataViz.Layout.Hierarchy.Tree (defaultTreeConfig, tree)
 import Effect (Effect)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
@@ -37,23 +31,42 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
-import PSD3.Internal.Behavior.FFI (attachZoom_)
+import PSD3.Internal.Behavior.FFI (attachZoomWithTransform_, getZoomTransform_)
 import PSD3.Internal.Behavior.Types (Behavior(..), ScaleExtent(..))
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M, D3v2Selection_, reselectD3v2)
 import PSD3.Internal.Selection.Types (SEmpty, ElementType(..))
-import PSD3.Expr.Integration (evalAttr, evalAttrStr)
-import PSD3.Expr.Expr (lit, str)
-import PSD3.Expr.Friendly (textContent) as Friendly
+import PSD3.Expr.Friendly as F
 import PSD3.AST as T
 import PSD3.Transform (clearContainer)
 import PSD3.Interpreter.SemiQuine.TreeToCode (treeToCode)
-import TreeBuilder3.Types (TreeNode, DslNodeType(..), AttrKind(..), BehaviorKind(..), nodeColor, nodeLabel, nodeKeyHints)
+import TreeBuilder3.Types (TreeNode, DslNodeType(..), AttrKind(..), BehaviorKind(..), nodeLabel, nodeKeyHints)
+import TreeBuilder3.Theme as Theme
+import TreeBuilder3.TreeOps
+  ( LinkData
+  , findNodeById
+  , findParentId
+  , getChildrenIds
+  , findMaxId
+  , isJoinChild
+  , isUpdateJoinChild
+  , addChildToNode
+  , removeNodeById
+  , updateNodeType
+  , filterStructuralTree
+  , updateNameAtPath
+  , updateKeyAtPath
+  , getBadgeChildren
+  , positionBadges
+  , flattenTree
+  , makeLinks
+  , applyLayout
+  )
+import Color (toHexString)
 import TreeBuilder3.Converter (builderTreeToAST)
 import TreeBuilder3.ASTImporter (runImport)
 import TreeBuilder3.FormInterpreter (astToForm, FormAction(..))
 import PSD3.AST as AST
-import PSD3.Expr.Friendly (cx, cy, r, fill, stroke, strokeWidth, num, text) as Attr
 import Web.DOM.Document (toParentNode) as Document
 import Web.DOM.Element (Element)
 import Web.DOM.ParentNode (QuerySelector(..), querySelector)
@@ -87,14 +100,8 @@ type RenderNode =
   , badgeIndex :: Int -- Position in badge row (0, 1, 2, ...)
   }
 
--- | Link data for rendering
-type LinkData =
-  { id :: String
-  , sourceX :: Number
-  , sourceY :: Number
-  , targetX :: Number
-  , targetY :: Number
-  }
+-- | Zoom transform for preserving zoom state across re-renders
+type ZoomTransform = { k :: Number, x :: Number, y :: Number }
 
 -- | Component state
 type State =
@@ -102,7 +109,8 @@ type State =
   , selectedNodeId :: Maybe Int
   , nextId :: Int
   , clickListener :: Maybe (HS.Listener Action)
-  , generatedCode :: String  -- Live generated PSD3 code
+  , generatedCode :: String -- Live generated PSD3 code
+  , zoomTransform :: ZoomTransform -- Current zoom state (preserved across renders)
   }
 
 -- | Actions
@@ -137,6 +145,7 @@ initialState =
   , nextId: 1
   , clickListener: Nothing
   , generatedCode: "-- Build a tree to see generated code"
+  , zoomTransform: { k: 1.0, x: 0.0, y: 0.0 } -- Identity transform
   }
 
 -- | Sample AST for testing import functionality
@@ -144,20 +153,20 @@ initialState =
 sampleAST :: AST.Tree Unit
 sampleAST =
   AST.named AST.SVG "svg"
-    [ Attr.fill $ Attr.text "none" ]
+    [ F.fill $ F.text "none" ]
     `AST.withChild`
-      (AST.named AST.Group "zoomGroup" []
-        `AST.withChild`
-          (AST.joinData "nodes" "circle" [unit] $ \_ ->
-            AST.elem AST.Circle
-              [ Attr.cx $ Attr.num 100.0
-              , Attr.cy $ Attr.num 100.0
-              , Attr.r $ Attr.num 5.0
-              , Attr.fill $ Attr.text "#4a90e2"
-              , Attr.stroke $ Attr.text "#333"
-              , Attr.strokeWidth $ Attr.num 1.0
-              ]
-          )
+      ( AST.named AST.Group "zoomGroup" []
+          `AST.withChild`
+            ( AST.joinData "nodes" "circle" [ unit ] $ \_ ->
+                AST.elem AST.Circle
+                  [ F.cx $ F.num 100.0
+                  , F.cy $ F.num 100.0
+                  , F.r $ F.num 5.0
+                  , F.fill $ F.hex "#4a90e2"
+                  , F.stroke $ F.hex "#333333"
+                  , F.strokeWidth $ F.num 1.0
+                  ]
+            )
       )
 
 -- =============================================================================
@@ -170,175 +179,6 @@ generateCode builderTree =
   case builderTreeToAST builderTree of
     Left err -> "-- " <> show err
     Right ast -> treeToCode ast
-
--- =============================================================================
--- Tree Operations
--- =============================================================================
-
--- | Check if a node type should render as a badge (attr, behavior, pending variants)
-isBadgeNodeType :: DslNodeType -> Boolean
-isBadgeNodeType (NodeAttr _) = true
-isBadgeNodeType (NodeBehavior _) = true
-isBadgeNodeType PendingAttr = true
-isBadgeNodeType (PendingAttrValue _) = true
-isBadgeNodeType PendingBehavior = true
-isBadgeNodeType _ = false
-
--- | Filter tree to only structural nodes (for layout calculation)
--- | Badge nodes are removed; their positions will be computed relative to parent
-filterStructuralTree :: Tree TreeNode -> Tree TreeNode
-filterStructuralTree t =
-  let
-    val = head t
-    children = tail t
-    -- Filter out badge children, recurse on structural children
-    structuralChildren = Data.List.filter (\c -> not (isBadgeNodeType (head c).nodeType)) children
-  in
-    mkTree val (map filterStructuralTree structuralChildren)
-
--- | Get badge children (attrs, behaviors) for a node
-getBadgeChildren :: Int -> Tree TreeNode -> Array TreeNode
-getBadgeChildren targetId t =
-  let
-    val = head t
-    children = tail t
-  in
-    if val.id == targetId
-      then Array.filter (\n -> isBadgeNodeType n.nodeType) (Array.fromFoldable (map head children))
-      else Array.foldl (\acc c -> if Array.null acc then getBadgeChildren targetId c else acc)
-             []
-             (Array.fromFoldable children)
-
--- | Position badge nodes relative to their parent
--- | Returns array of (TreeNode with updated position, badge index)
-positionBadges :: TreeNode -> Array TreeNode -> Array { node :: TreeNode, index :: Int }
-positionBadges parent badges =
-  Array.mapWithIndex (\i badge ->
-    let
-      -- Badges appear in a column to the right of the parent
-      -- Each badge is stacked vertically with small gap
-      badgeX = parent.x + 70.0  -- 70px to the right (past the 40px half-width + 30px gap)
-      badgeY = parent.y + toNumber i * 25.0  -- Stack vertically, 25px apart
-    in
-      { node: badge { x = badgeX, y = badgeY }, index: i }
-  ) badges
-
--- isLeaf :: forall a. Tree a -> Boolean
--- isLeaf t = case tail t of
---   Nil -> true
---   _ -> false
-
-findParentId :: Int -> Tree TreeNode -> Maybe Int
-findParentId targetId t =
-  let
-    val = head t
-    children = tail t
-    childIds = map (\c -> (head c).id) children
-  in
-    if Array.elem targetId (Array.fromFoldable childIds) then Just val.id
-    else Array.foldl
-      ( \acc c -> case acc of
-          Just pid -> Just pid
-          Nothing -> findParentId targetId c
-      )
-      Nothing
-      (Array.fromFoldable children)
-
-getChildrenIds :: Int -> Tree TreeNode -> Array Int
-getChildrenIds targetId t =
-  let
-    val = head t
-    children = tail t
-  in
-    if val.id == targetId then map (\c -> (head c).id) (Array.fromFoldable children)
-    else Array.foldl (\acc c -> if Array.null acc then getChildrenIds targetId c else acc)
-      []
-      (Array.fromFoldable children)
-
--- | Find the maximum ID in a tree (for setting nextId after import)
-findMaxId :: Tree TreeNode -> Int
-findMaxId t =
-  let
-    val = head t
-    children = tail t
-    childMaxes = map findMaxId (Array.fromFoldable children)
-  in
-    Array.foldl max val.id childMaxes
-
--- | Check if a node's parent is a Join type (making it a "template" node)
-isJoinChild :: Int -> Tree TreeNode -> Boolean
-isJoinChild nodeId t = case findParentId nodeId t of
-  Nothing -> false
-  Just parentId -> case findNodeById parentId t of
-    Nothing -> false
-    Just parent -> isJoinType parent.nodeType
-
--- | Check if a node's parent is a Scene Join type (GUP - has enter/update/exit)
-isUpdateJoinChild :: Int -> Tree TreeNode -> Boolean
-isUpdateJoinChild nodeId t = case findParentId nodeId t of
-  Nothing -> false
-  Just parentId -> case findNodeById parentId t of
-    Nothing -> false
-    Just parent -> isUpdateJoinType parent.nodeType
-
--- | Check if a node type is a Join variant
-isJoinType :: DslNodeType -> Boolean
-isJoinType NodeJoin = true
-isJoinType NodeNestedJoin = true
-isJoinType NodeUpdateJoin = true
-isJoinType NodeUpdateNestedJoin = true
-isJoinType _ = false
-
--- | Check if a node type is a Scene Join (GUP) variant
-isUpdateJoinType :: DslNodeType -> Boolean
-isUpdateJoinType NodeUpdateJoin = true
-isUpdateJoinType NodeUpdateNestedJoin = true
-isUpdateJoinType _ = false
-
-addChildToNode :: Int -> TreeNode -> Tree TreeNode -> Tree TreeNode
-addChildToNode targetId newChild t =
-  let
-    val = head t
-    children = tail t
-  in
-    if val.id == targetId then mkTree val (children <> (mkTree newChild Nil : Nil))
-    else mkTree val (map (addChildToNode targetId newChild) children)
-
-flattenTree :: Tree TreeNode -> Array TreeNode
-flattenTree = Array.fromFoldable
-
-makeLinks :: Tree TreeNode -> Array LinkData
-makeLinks t =
-  let
-    val = head t
-    children = tail t
-    -- Only create links to structural children (not badges)
-    structuralChildren = Data.List.filter (\c -> not (isBadgeNodeType (head c).nodeType)) children
-    childLinks = Array.fromFoldable structuralChildren >>= \child ->
-      let
-        childVal = head child
-      in
-        [ { id: show val.id <> "->" <> show childVal.id
-          , sourceX: val.x
-          , sourceY: val.y
-          , targetX: childVal.x
-          , targetY: childVal.y
-          }
-        ]
-    grandchildLinks = Array.fromFoldable structuralChildren >>= makeLinks
-  in
-    childLinks <> grandchildLinks
-
-applyLayout :: Tree TreeNode -> Tree TreeNode
-applyLayout t =
-  let
-    config = defaultTreeConfig
-      { size = { width: 700.0, height: 600.0 }
-      , minSeparation = 2.0
-      , layerSeparation = Just 60.0 -- Fixed 60px between layers (2.5x node height)
-      }
-  in
-    tree config t
 
 -- =============================================================================
 -- Component
@@ -379,30 +219,30 @@ render state =
         [ HP.class_ (HH.ClassName "instructions") ]
         [ HH.text "Click to select, arrows to navigate. Key hints shown next to selected node." ]
     , HH.div
-        [ HP.class_ (HH.ClassName "tree-builder3-main-layout") ]
-        [ -- Tree visualization panel
+        [ HP.class_ (HH.ClassName "tree-builder3-editors-row") ]
+        [ -- Tree visualization panel (left)
           HH.div
             [ HP.class_ (HH.ClassName "tree-builder3-svg-container")
             , HP.id "tree-builder3-container"
             ]
             []
-        , -- Code generation panel
-          HH.div
-            [ HP.class_ (HH.ClassName "tree-builder3-code-panel") ]
-            [ HH.h3_ [ HH.text "Generated PSD3 Code" ]
-            , HH.pre
-                [ HP.class_ (HH.ClassName "code-output") ]
-                [ HH.code_ [ HH.text state.generatedCode ] ]
-            , -- Interactive form (if AST conversion succeeds)
-              case builderTreeToAST state.userTree of
-                Left _ -> HH.text ""  -- Don't show form for incomplete trees
-                Right ast ->
-                  HH.div
-                    [ HP.class_ (HH.ClassName "ast-form-container") ]
-                    [ HH.h3_ [ HH.text "Interactive Editor (names editable)" ]
-                    , map HandleFormAction (astToForm ast)
-                    ]
-            ]
+        , -- Interactive form editor (right, side by side with tree)
+          case builderTreeToAST state.userTree of
+            Left _ -> HH.text "" -- Don't show form for incomplete trees
+            Right ast ->
+              HH.div
+                [ HP.class_ (HH.ClassName "tree-builder3-form-panel") ]
+                [ HH.h3_ [ HH.text "Interactive Editor" ]
+                , map HandleFormAction (astToForm ast)
+                ]
+        ]
+    , -- Code generation panel (below)
+      HH.div
+        [ HP.class_ (HH.ClassName "tree-builder3-code-panel") ]
+        [ HH.h3_ [ HH.text "Generated PSD3 Code" ]
+        , HH.pre
+            [ HP.class_ (HH.ClassName "code-output") ]
+            [ HH.code_ [ HH.text state.generatedCode ] ]
         ]
     ]
 
@@ -417,7 +257,6 @@ handleAction = case _ of
     H.modify_ _ { clickListener = Just listener }
     void $ H.subscribe emitter
     handleAction RenderTree
-    liftEffect setupZoom
     -- Focus the container so it receives keyboard events immediately
     maybeElem <- H.getHTMLElementRef containerRef
     for_ maybeElem \elem -> liftEffect $ focus elem
@@ -440,31 +279,44 @@ handleAction = case _ of
     let importedTree = runImport sampleAST
     -- Find the max ID in the imported tree to set nextId correctly
     let maxId = findMaxId importedTree
+    -- Reset zoom to identity when loading new AST
     H.modify_ \s -> s
       { userTree = importedTree
-      , selectedNodeId = Just 0  -- Select root
+      , selectedNodeId = Just 0 -- Select root
       , nextId = maxId + 1
+      , zoomTransform = { k: 1.0, x: 0.0, y: 0.0 } -- Reset zoom
       }
     handleAction RenderTree
 
   HandleFormAction formAction -> do
     state <- H.get
     -- Update tree based on form action
-    let newTree = case formAction of
-          NameChanged path value -> updateNameAtPath path value state.userTree
-          KeyChanged path value -> updateKeyAtPath path value state.userTree
-          StaticValueChanged _ _ -> state.userTree  -- TODO: implement static value updates
+    let
+      newTree = case formAction of
+        NameChanged path value -> updateNameAtPath path value state.userTree
+        KeyChanged path value -> updateKeyAtPath path value state.userTree
+        StaticValueChanged _ _ -> state.userTree -- TODO: implement static value updates
     H.modify_ \s -> s { userTree = newTree }
     handleAction RenderTree
 
   RenderTree -> do
     state <- H.get
+    -- Save current zoom transform before clearing (if SVG exists)
+    savedTransform <- liftEffect $ saveZoomTransform
+    -- Store in state for use by setupZoom
+    let transform = case savedTransform of
+          Just t -> t
+          Nothing -> state.zoomTransform
+    H.modify_ \s -> s { zoomTransform = transform }
     -- Update generated code
     let newCode = generateCode state.userTree
     H.modify_ \s -> s { generatedCode = newCode }
     -- Render tree visualization
-    case state.clickListener of
-      Just listener -> liftEffect $ renderTreeViz state listener
+    state' <- H.get -- Get updated state with zoom transform
+    case state'.clickListener of
+      Just listener -> do
+        liftEffect $ renderTreeViz state' listener
+        liftEffect $ setupZoomWithTransform state'.zoomTransform
       Nothing -> pure unit
 
 -- | Handle keys - context depends on selected node's type
@@ -635,16 +487,6 @@ deleteSelectedNode = do
         }
       handleAction RenderTree
 
--- | Remove a node by id from the tree
-removeNodeById :: Int -> Tree TreeNode -> Tree TreeNode
-removeNodeById targetId t =
-  let
-    val = head t
-    children = tail t
-    filteredChildren = Data.List.filter (\child -> (head child).id /= targetId) children
-  in
-    mkTree val (map (removeNodeById targetId) filteredChildren)
-
 -- | Add a node of the given type as child of selected node
 -- | Add a node as child of selected, and select the new node
 addNodeOfType :: forall output m. MonadAff m => DslNodeType -> H.HalogenM State Action () output m Unit
@@ -687,111 +529,6 @@ getSelectedNodeType state = do
   node <- findNodeById selectedId state.userTree
   pure node.nodeType
 
--- | Find a node by id in the tree
-findNodeById :: Int -> Tree TreeNode -> Maybe TreeNode
-findNodeById targetId t =
-  let
-    val = head t
-    children = tail t
-  in
-    if val.id == targetId then Just val
-    else Array.foldl (\acc child -> acc <|> findNodeById targetId child) Nothing (Array.fromFoldable children)
-
--- | Update a node's type in the tree
-updateNodeType :: Int -> DslNodeType -> Tree TreeNode -> Tree TreeNode
-updateNodeType targetId newType t =
-  let
-    val = head t
-    children = tail t
-    newVal = if val.id == targetId then val { nodeType = newType } else val
-  in
-    mkTree newVal (map (updateNodeType targetId newType) children)
-
--- | Update name at a FormPath
--- | Path structure: ["name"] for root, ["children", "0", "name"] for first child, etc.
--- | "template" navigates to the first child of a join
-updateNameAtPath :: Array String -> String -> Tree TreeNode -> Tree TreeNode
-updateNameAtPath path newName t = case Array.uncons path of
-  Nothing -> t  -- Empty path, no change
-  Just { head: segment, tail: rest } ->
-    case segment of
-      "name" ->
-        -- Update this node's name
-        let val = head t
-            newVal = val { name = Just newName }
-        in mkTree newVal (tail t)
-      "children" ->
-        -- Navigate to children, next segment is index
-        case Array.uncons rest of
-          Just { head: idxStr, tail: restAfterIdx } ->
-            case Int.fromString idxStr of
-              Just idx ->
-                let val = head t
-                    children = tail t
-                    -- Only count structural children (skip attrs/behaviors)
-                    structuralChildren = Data.List.filter (\c -> not (isBadgeNodeType (head c).nodeType)) children
-                    structArray = Array.fromFoldable structuralChildren
-                in case Array.index structArray idx of
-                  Just targetChild ->
-                    let updatedChild = updateNameAtPath restAfterIdx newName targetChild
-                        -- Replace the child in the original list
-                        newChildren = map (\c -> if (head c).id == (head targetChild).id then updatedChild else c) children
-                    in mkTree val newChildren
-                  Nothing -> t  -- Index out of bounds
-              Nothing -> t  -- Invalid index
-          Nothing -> t  -- Missing index
-      "template" ->
-        -- Template refers to first structural child (for joins)
-        let val = head t
-            children = tail t
-            structuralChildren = Data.List.filter (\c -> not (isBadgeNodeType (head c).nodeType)) children
-        in case Data.List.head structuralChildren of
-          Just firstChild ->
-            let updatedChild = updateNameAtPath rest newName firstChild
-                newChildren = map (\c -> if (head c).id == (head firstChild).id then updatedChild else c) children
-            in mkTree val newChildren
-          Nothing -> t
-      _ -> t  -- Unknown segment
-
--- | Update key at a FormPath (similar to updateNameAtPath)
-updateKeyAtPath :: Array String -> String -> Tree TreeNode -> Tree TreeNode
-updateKeyAtPath path newKey t = case Array.uncons path of
-  Nothing -> t
-  Just { head: segment, tail: rest } ->
-    case segment of
-      "key" ->
-        let val = head t
-            newVal = val { key = Just newKey }
-        in mkTree newVal (tail t)
-      "children" ->
-        case Array.uncons rest of
-          Just { head: idxStr, tail: restAfterIdx } ->
-            case Int.fromString idxStr of
-              Just idx ->
-                let val = head t
-                    children = tail t
-                    structuralChildren = Data.List.filter (\c -> not (isBadgeNodeType (head c).nodeType)) children
-                    structArray = Array.fromFoldable structuralChildren
-                in case Array.index structArray idx of
-                  Just targetChild ->
-                    let updatedChild = updateKeyAtPath restAfterIdx newKey targetChild
-                        newChildren = map (\c -> if (head c).id == (head targetChild).id then updatedChild else c) children
-                    in mkTree val newChildren
-                  Nothing -> t
-              Nothing -> t
-          Nothing -> t
-      "template" ->
-        let val = head t
-            children = tail t
-            structuralChildren = Data.List.filter (\c -> not (isBadgeNodeType (head c).nodeType)) children
-        in case Data.List.head structuralChildren of
-          Just firstChild ->
-            let updatedChild = updateKeyAtPath rest newKey firstChild
-                newChildren = map (\c -> if (head c).id == (head firstChild).id then updatedChild else c) children
-            in mkTree val newChildren
-          Nothing -> t
-      _ -> t
-
 -- | Update the selected node's type (for resolving pending nodes)
 -- | If resolving an Element under a UpdateJoin, auto-create Enter/Update/Exit children
 resolveSelectedNode :: forall output m. MonadAff m => DslNodeType -> H.HalogenM State Action () output m Unit
@@ -802,9 +539,10 @@ resolveSelectedNode newType = do
     let treeWithType = updateNodeType selectedId newType state.userTree
 
     -- Check if this is an Element being resolved under a UpdateJoin
-    let isElementUnderScene = case newType of
-          NodeElem _ -> isUpdateJoinChild selectedId state.userTree
-          _ -> false
+    let
+      isElementUnderScene = case newType of
+        NodeElem _ -> isUpdateJoinChild selectedId state.userTree
+        _ -> false
 
     -- If so, auto-create Enter/Update/Exit children
     if isElementUnderScene then do
@@ -895,11 +633,6 @@ navigateRight = do
 -- D3/PSD3 Rendering
 -- =============================================================================
 
-selectedStrokeWidth :: Number
-selectedStrokeWidth = 4.0
-
-normalStrokeWidth :: Number
-normalStrokeWidth = 2.0
 
 renderTreeViz :: State -> HS.Listener Action -> Effect Unit
 renderTreeViz state listener = do
@@ -912,10 +645,13 @@ renderTreeViz state listener = do
   let links = makeLinks positioned
 
   -- Collect badges for each structural node and position them
-  let badgeNodes = structuralNodes >>= \parent ->
-        let badges = getBadgeChildren parent.id state.userTree
-            positioned' = positionBadges parent badges
-        in map (\b -> { node: b.node, index: b.index, parentId: parent.id }) positioned'
+  let
+    badgeNodes = structuralNodes >>= \parent ->
+      let
+        badges = getBadgeChildren parent.id state.userTree
+        positioned' = positionBadges parent badges
+      in
+        map (\b -> { node: b.node, index: b.index, parentId: parent.id }) positioned'
 
   -- Convert structural nodes to render nodes
   let structuralRenderNodes = map (toRenderNode state false 0) structuralNodes
@@ -947,32 +683,28 @@ renderTreeViz state listener = do
       linksTree :: T.Tree LinkData
       linksTree =
         T.named SVG "svg"
-          [ evalAttr "width" (lit svgWidth)
-          , evalAttr "height" (lit svgHeight)
-          , evalAttrStr "viewBox" (str ("0 0 " <> show svgWidth <> " " <> show svgHeight))
-          , evalAttrStr "id" (str "tree-builder3-svg")
+          [ F.width (F.num svgWidth)
+          , F.height (F.num svgHeight)
+          , F.viewBox 0.0 0.0 svgWidth svgHeight
+          , F.staticStr "id" "tree-builder3-svg"
           ]
           `T.withChild`
             ( T.named Group "zoomGroup"
-                [ evalAttrStr "class" (str "zoom-group") ]
+                [ F.staticStr "class" "zoom-group" ]
                 `T.withChild`
                   ( T.named Group "linksGroup"
-                      [ evalAttrStr "class" (str "links") ]
+                      [ F.staticStr "class" "links" ]
                       `T.withChild`
                         ( T.joinData "linkPaths" "path" links $ \link ->
                             T.elem Path
-                              [ evalAttrStr "d"
-                                  ( str
-                                      ( linkBezierVertical
-                                          (link.sourceX + offsetX)
-                                          (link.sourceY + offsetY)
-                                          (link.targetX + offsetX)
-                                          (link.targetY + offsetY)
-                                      )
-                                  )
-                              , evalAttrStr "fill" (str "none")
-                              , evalAttrStr "stroke" (str "#888")
-                              , evalAttr "stroke-width" (lit 2.0)
+                              [ F.path $ F.text $ linkBezierVertical
+                                  (link.sourceX + offsetX)
+                                  (link.sourceY + offsetY)
+                                  (link.targetX + offsetX)
+                                  (link.targetY + offsetY)
+                              , F.fill (F.text "none")
+                              , F.stroke (F.color Theme.linkColor)
+                              , F.strokeWidth (F.num Theme.strokeWidthLink)
                               ]
                         )
                   )
@@ -984,16 +716,16 @@ renderTreeViz state listener = do
     -- Helper to create a stacked "punch card" rect at a given offset
     let
       stackedRect :: Number -> Number -> String -> T.Tree RenderNode
-      stackedRect dx dy color =
+      stackedRect dx' dy' color =
         T.elem Rect
-          [ evalAttr "x" (lit (-40.0 + dx))
-          , evalAttr "y" (lit (-12.0 + dy))
-          , evalAttr "width" (lit 80.0)
-          , evalAttr "height" (lit 24.0)
-          , evalAttr "rx" (lit 4.0)
-          , evalAttrStr "fill" (str color)
-          , evalAttrStr "stroke" (str "#333")
-          , evalAttr "stroke-width" (lit 1.5)
+          [ F.x (F.num (-40.0 + dx'))
+          , F.y (F.num (-12.0 + dy'))
+          , F.width (F.num 80.0)
+          , F.height (F.num 24.0)
+          , F.static "rx" 4.0
+          , F.fill (F.text color)
+          , F.stroke (F.color Theme.nodeStroke)
+          , F.strokeWidth (F.num 1.5)
           ]
 
     -- Badge rendering helper - smaller pill-shaped nodes
@@ -1001,26 +733,26 @@ renderTreeViz state listener = do
       badgeRect :: RenderNode -> T.Tree RenderNode
       badgeRect node =
         T.elem Rect
-          [ evalAttr "x" (lit (-28.0))
-          , evalAttr "y" (lit (-10.0))
-          , evalAttr "width" (lit 56.0)
-          , evalAttr "height" (lit 20.0)
-          , evalAttr "rx" (lit 10.0) -- Pill shape
-          , evalAttrStr "fill" (str node.color)
-          , evalAttrStr "stroke" (str "#333")
-          , evalAttr "stroke-width" (lit node.strokeWidth)
+          [ F.x (F.num (-28.0))
+          , F.y (F.num (-10.0))
+          , F.width (F.num 56.0)
+          , F.height (F.num 20.0)
+          , F.static "rx" 10.0 -- Pill shape
+          , F.fill (F.text node.color)
+          , F.stroke (F.color Theme.nodeStroke)
+          , F.strokeWidth (F.num node.strokeWidth)
           ]
 
     let
       nodesTree :: T.Tree RenderNode
       nodesTree =
         T.named Group "nodesGroup"
-          [ evalAttrStr "class" (str "nodes") ]
+          [ F.staticStr "class" "nodes" ]
           `T.withChild`
             ( T.joinData "nodeGroups" "g" renderNodes $ \node ->
                 T.elem Group
-                  [ evalAttrStr "transform" (str ("translate(" <> show (node.x + offsetX) <> "," <> show (node.y + offsetY) <> ")"))
-                  , evalAttrStr "cursor" (str "pointer")
+                  [ F.transform $ F.text $ "translate(" <> show (node.x + offsetX) <> "," <> show (node.y + offsetY) <> ")"
+                  , F.staticStr "cursor" "pointer"
                   ]
                   `T.withBehaviors`
                     [ ClickWithDatum \n -> HS.notify listener (NodeClicked n.id) ]
@@ -1029,25 +761,25 @@ renderTreeViz state listener = do
                         -- Badge rendering: smaller pill + smaller label
                         [ badgeRect node
                         , T.elem Text
-                            [ evalAttr "x" (lit 0.0)
-                            , evalAttr "y" (lit 3.0)
-                            , evalAttrStr "text-anchor" (str "middle")
-                            , evalAttrStr "fill" (str "white")
-                            , evalAttrStr "font-size" (str "9px")
-                            , evalAttrStr "font-weight" (str "bold")
-                            , Friendly.textContent (str node.label)
+                            [ F.x (F.num 0.0)
+                            , F.y (F.num 3.0)
+                            , F.textAnchor (F.text "middle")
+                            , F.fill (F.color Theme.nodeLabelDark)
+                            , F.fontSize (F.px 9.0)
+                            , F.staticStr "font-weight" "bold"
+                            , F.textContent (F.text node.label)
                             ]
                         , -- Key hints for badges (shown to right)
                           T.elem Text
-                            [ evalAttr "x" (lit 40.0) -- Further right to avoid overlap
-                            , evalAttr "y" (lit 3.0)
-                            , evalAttrStr "text-anchor" (str "start")
-                            , evalAttrStr "fill" (str "#333") -- Darker for better visibility
-                            , evalAttrStr "font-size" (str "11px") -- Larger for readability
-                            , evalAttrStr "font-family" (str "monospace")
-                            , evalAttrStr "font-weight" (str "bold") -- Bold for emphasis
-                            , evalAttrStr "opacity" (str (if node.isSelected then "1" else "0"))
-                            , Friendly.textContent (str node.keyHints)
+                            [ F.x (F.num 40.0) -- Further right to avoid overlap
+                            , F.y (F.num 3.0)
+                            , F.textAnchor (F.text "start")
+                            , F.fill (F.color Theme.keyHintsColor) -- Darker for better visibility
+                            , F.fontSize (F.px 11.0) -- Larger for readability
+                            , F.fontFamily (F.text "monospace")
+                            , F.staticStr "font-weight" "bold" -- Bold for emphasis
+                            , F.opacity (F.text (if node.isSelected then "1" else "0"))
+                            , F.textContent (F.text node.keyHints)
                             ]
                         ]
                       else
@@ -1063,45 +795,45 @@ renderTreeViz state listener = do
                             <>
                               [ -- Main/front rect for the node
                                 T.elem Rect
-                                  [ evalAttr "x" (lit (-40.0))
-                                  , evalAttr "y" (lit (-12.0))
-                                  , evalAttr "width" (lit 80.0)
-                                  , evalAttr "height" (lit 24.0)
-                                  , evalAttr "rx" (lit 4.0)
-                                  , evalAttrStr "fill" (str node.color)
-                                  , evalAttrStr "stroke" (str "#333")
-                                  , evalAttr "stroke-width" (lit node.strokeWidth)
+                                  [ F.x (F.num (-40.0))
+                                  , F.y (F.num (-12.0))
+                                  , F.width (F.num 80.0)
+                                  , F.height (F.num 24.0)
+                                  , F.static "rx" 4.0
+                                  , F.fill (F.text node.color)
+                                  , F.stroke (F.color Theme.nodeStroke)
+                                  , F.strokeWidth (F.num node.strokeWidth)
                                   ]
                               , -- Label text
                                 T.elem Text
-                                  [ evalAttr "x" (lit 0.0)
-                                  , evalAttr "y" (lit 4.0)
-                                  , evalAttrStr "text-anchor" (str "middle")
-                                  , evalAttrStr "fill" (str "white")
-                                  , evalAttrStr "font-size" (str "11px")
-                                  , evalAttrStr "font-weight" (str "bold")
-                                  , Friendly.textContent (str node.label)
+                                  [ F.x (F.num 0.0)
+                                  , F.y (F.num 4.0)
+                                  , F.textAnchor (F.text "middle")
+                                  , F.fill (F.color Theme.nodeLabelLight)
+                                  , F.fontSize (F.px 11.0)
+                                  , F.staticStr "font-weight" "bold"
+                                  , F.textContent (F.text node.label)
                                   ]
                               , -- Name label (shown to left of node)
                                 T.elem Text
-                                  [ evalAttr "x" (lit (-50.0)) -- Left of the node rect
-                                  , evalAttr "y" (lit 4.0)
-                                  , evalAttrStr "text-anchor" (str "end")
-                                  , evalAttrStr "fill" (str "#4a90e2") -- Blue color for names
-                                  , evalAttrStr "font-size" (str "10px")
-                                  , evalAttrStr "font-family" (str "monospace")
-                                  , Friendly.textContent (str (formatNameLabel node.nameLabel node.keyLabel))
+                                  [ F.x (F.num (-50.0)) -- Left of the node rect
+                                  , F.y (F.num 4.0)
+                                  , F.textAnchor (F.text "end")
+                                  , F.fill (F.color Theme.nameLabelColor) -- Blue color for names
+                                  , F.fontSize (F.px 10.0)
+                                  , F.fontFamily (F.text "monospace")
+                                  , F.textContent (F.text (formatNameLabel node.nameLabel node.keyLabel))
                                   ]
                               , -- Key hints (shown to right of selected node)
                                 T.elem Text
-                                  [ evalAttr "x" (lit 50.0) -- Right of the node rect
-                                  , evalAttr "y" (lit 4.0)
-                                  , evalAttrStr "text-anchor" (str "start")
-                                  , evalAttrStr "fill" (str "#666")
-                                  , evalAttrStr "font-size" (str "10px")
-                                  , evalAttrStr "font-family" (str "monospace")
-                                  , evalAttrStr "opacity" (str (if node.isSelected then "1" else "0"))
-                                  , Friendly.textContent (str node.keyHints)
+                                  [ F.x (F.num 50.0) -- Right of the node rect
+                                  , F.y (F.num 4.0)
+                                  , F.textAnchor (F.text "start")
+                                  , F.fill (F.color Theme.keyHintsColor)
+                                  , F.fontSize (F.px 10.0)
+                                  , F.fontFamily (F.text "monospace")
+                                  , F.opacity (F.text (if node.isSelected then "1" else "0"))
+                                  , F.textContent (F.text node.keyHints)
                                   ]
                               ]
                         )
@@ -1129,11 +861,11 @@ toRenderNode state isBadge badgeIndex node =
     , x: node.x
     , y: node.y
     , depth: node.depth
-    , color: nodeColor node.nodeType
-    , strokeWidth: if selected then selectedStrokeWidth else normalStrokeWidth
+    , color: toHexString $ Theme.nodeTypeColor node.nodeType
+    , strokeWidth: if selected then Theme.strokeWidthSelected else Theme.strokeWidthNormal
     , label: nodeLabel node.nodeType
-    , nameLabel: node.name  -- Name from imported AST (element/join name)
-    , keyLabel: node.key    -- Key from imported AST (join key)
+    , nameLabel: node.name -- Name from imported AST (element/join name)
+    , keyLabel: node.key -- Key from imported AST (join key)
     , keyHints: computeKeyHints state.userTree node
     , isSelected: selected
     , showAsStack: shouldStack
@@ -1168,12 +900,25 @@ computeKeyHints tree node = case node.nodeType of
     in
       if Array.null children then "[e]" else "[]"
 
-setupZoom :: Effect Unit
-setupZoom = do
+-- | Save the current zoom transform from the existing SVG (if any)
+saveZoomTransform :: Effect (Maybe ZoomTransform)
+saveZoomTransform = do
+  doc <- window >>= document
+  let parentNode = Document.toParentNode (toDocument doc)
+  maybeSvg <- querySelector (QuerySelector "#tree-builder3-svg") parentNode
+  case maybeSvg of
+    Just svg -> do
+      t <- getZoomTransform_ svg
+      pure (Just t)
+    Nothing -> pure Nothing
+
+-- | Setup zoom with a given transform (to restore previous zoom state)
+setupZoomWithTransform :: ZoomTransform -> Effect Unit
+setupZoomWithTransform transform = do
   doc <- window >>= document
   let parentNode = Document.toParentNode (toDocument doc)
   maybeSvg <- querySelector (QuerySelector "#tree-builder3-svg") parentNode
   for_ maybeSvg \svg -> do
     let ScaleExtent minScale maxScale = ScaleExtent 0.5 4.0
-    _ <- attachZoom_ svg minScale maxScale ".zoom-group"
+    _ <- attachZoomWithTransform_ svg minScale maxScale ".zoom-group" transform
     pure unit
