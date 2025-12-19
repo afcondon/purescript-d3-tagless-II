@@ -1178,3 +1178,103 @@
   align-items: center;
   justify-content: center;
 }
+
+/* =============================================================================
+   TryMe Mode - Instructions Popup
+   ============================================================================= */
+
+.tryme-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.tryme-popup {
+  background-color: var(--color-beige-card, #F5F2E8);
+  border: 2px solid var(--color-teal, #5A8A8A);
+  border-radius: 8px;
+  padding: 2rem;
+  max-width: 500px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.tryme-popup h2 {
+  margin: 0 0 1rem 0;
+  color: var(--color-teal, #5A8A8A);
+  font-size: 1.5rem;
+}
+
+.tryme-popup h3 {
+  margin: 1.5rem 0 0.75rem 0;
+  color: var(--color-text-dark, #333);
+  font-size: 1rem;
+  border-bottom: 1px solid var(--color-line, #999);
+  padding-bottom: 0.25rem;
+}
+
+.tryme-popup p {
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+  color: var(--color-text-dark, #333);
+}
+
+.tryme-popup ul,
+.tryme-popup ol {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.tryme-popup li {
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.tryme-popup strong {
+  color: var(--color-teal, #5A8A8A);
+  background-color: rgba(90, 138, 138, 0.1);
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  font-family: var(--font-mono, monospace);
+}
+
+.tryme-content {
+  font-size: 0.95rem;
+}
+
+.tryme-dismiss {
+  text-align: center;
+  font-style: italic;
+  color: var(--color-text-muted, #666);
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--color-line, #999);
+}
+
+/* =============================================================================
+   TryMe Mode - English Description Output
+   ============================================================================= */
+
+.english-output {
+  background-color: var(--color-beige-card, #F5F2E8);
+}
+
+.english-description {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-text-dark, #333);
+  margin: 0;
+  padding: 1rem;
+  background-color: white;
+  border: 1px solid var(--color-line, #999);
+  border-radius: 4px;
+  white-space: pre-wrap;
+  min-height: 200px;
+}

@@ -21,7 +21,9 @@ import Data.Foldable (for_)
 import Data.Int (toNumber)
 import Data.List (List(..))
 import Data.Maybe (Maybe(..))
+import Data.String as String
 import Data.Tree (Tree, mkTree)
+import Control.Comonad.Cofree (head, tail) as Cofree
 import DataViz.Layout.Hierarchy.Link (linkBezierVertical)
 import Effect (Effect)
 import Effect.Aff.Class (class MonadAff)
@@ -138,7 +140,7 @@ derive instance ordAstPreset :: Ord AstPreset
 -- | Get label for AST preset
 astPresetLabel :: AstPreset -> String
 astPresetLabel = case _ of
-  AstEmpty -> "Empty"
+  AstEmpty -> "Try Me"
   AstGrid -> "Grid"
   AstScatter -> "Scatter"
   AstBubble -> "Bubble"
@@ -148,7 +150,7 @@ astPresetLabel = case _ of
 -- | Get description for AST preset
 astPresetDescription :: AstPreset -> String
 astPresetDescription = case _ of
-  AstEmpty -> "Build from scratch"
+  AstEmpty -> "Build your own!"
   AstGrid -> "Row × Column"
   AstScatter -> "X × Y points"
   AstBubble -> "Sized circles"
@@ -158,6 +160,34 @@ astPresetDescription = case _ of
 -- | All available AST presets
 allAstPresets :: Array AstPreset
 allAstPresets = [ AstEmpty, AstGrid, AstScatter, AstBubble, AstTree, AstUpdateJoin ]
+
+-- | Get compatible DatumTypes for an AST preset
+compatibleTypesForAst :: AstPreset -> Array DatumType
+compatibleTypesForAst = case _ of
+  AstEmpty -> [ pointType, nodeType, countryType, boardType ] -- Try Me: all types available
+  AstGrid -> [ boardType ]
+  AstScatter -> [ pointType ]
+  AstBubble -> [ countryType ]
+  AstTree -> [ nodeType ]
+  AstUpdateJoin -> [] -- Letter type not yet defined
+
+-- | Get compatible SampleDataIds for a DatumType
+compatibleDatasetsForType :: DatumType -> Array SampleDataId
+compatibleDatasetsForType t
+  | t == boardType = [ SampleChess, SampleSudoku, SampleGo ]
+  | t == countryType = [ SampleGapminder ]
+  | t == nodeType = [ SampleForceGraph ]
+  | t == pointType = [ SampleScatterPlot ]
+  | otherwise = []
+
+-- | Check if a type is compatible with the current AST
+isTypeCompatibleWithAst :: AstPreset -> DatumType -> Boolean
+isTypeCompatibleWithAst ast typ = Array.elem typ (compatibleTypesForAst ast)
+
+-- | Check if a dataset is compatible with the current type
+isDatasetCompatibleWithType :: Maybe DatumType -> SampleDataId -> Boolean
+isDatasetCompatibleWithType Nothing _ = false
+isDatasetCompatibleWithType (Just typ) dataset = Array.elem dataset (compatibleDatasetsForType typ)
 
 -- | AST card for rendering preset options in SVG
 type AstCard =
@@ -190,6 +220,7 @@ type State =
   , zoomTransform :: ZoomTransform -- Current zoom state (preserved across renders)
   , selectedSampleData :: Maybe SampleDataId -- Selected sample data for visualization
   , selectedAstPreset :: AstPreset -- Currently selected AST preset
+  , showTryMeInstructions :: Boolean -- Show the TryMe mode instructions popup
   }
 
 -- | Actions
@@ -204,6 +235,7 @@ data Action
   | ZoomChanged ZoomTransform -- Zoom/pan changed, update arrow
   | SelectSampleData SampleDataId -- Select sample data to visualize
   | SelectAstPreset AstPreset -- Select an AST preset from top cards
+  | DismissTryMeInstructions -- Dismiss the TryMe instructions popup
 
 -- =============================================================================
 -- Initial State & Preset Trees
@@ -376,6 +408,7 @@ initialState =
   , zoomTransform: { k: 1.0, x: 0.0, y: 0.0 } -- Identity transform
   , selectedSampleData: Just SampleChess -- Preload Chess data
   , selectedAstPreset: AstGrid -- Start with Grid preset
+  , showTryMeInstructions: false -- Don't show TryMe popup initially
   }
 
 -- | Sample AST for testing import functionality
@@ -452,10 +485,14 @@ render state =
         , -- Rendered output panel (visualization result)
           HH.div
             [ HP.class_ (HH.ClassName "tree-builder3-output-panel") ]
-            [ HH.h3_ [ HH.text "Rendered Output" ]
+            [ HH.h3_ [ HH.text (if state.selectedAstPreset == AstEmpty then "English Description" else "Rendered Output") ]
             , renderOutput state
             ]
         ]
+    , -- TryMe instructions popup overlay
+      if state.showTryMeInstructions
+        then renderTryMePopup
+        else HH.text ""
     ]
 
 -- =============================================================================
@@ -544,8 +581,12 @@ handleAction = case _ of
       , selectedAstPreset = preset
       , selectedSampleData = Nothing -- Clear sample data when changing AST
       , zoomTransform = { k: 1.0, x: 0.0, y: 0.0 } -- Reset zoom
+      , showTryMeInstructions = preset == AstEmpty -- Show popup for TryMe mode
       }
     handleAction RenderTree
+
+  DismissTryMeInstructions -> do
+    H.modify_ \s -> s { showTryMeInstructions = false }
 
   ZoomChanged newTransform -> do
     -- Update state with new zoom transform
@@ -933,12 +974,11 @@ renderTreeViz state listener = do
 
   -- Check if selected node is a Join and what type it has
   let selectedJoinType = getSelectedJoinDatumType state
-  let isJoinSelected = isSelectedNodeJoin state
 
-  -- Create type card data
-  let typeCards = makeTypeCards isJoinSelected selectedJoinType
+  -- Create type card data (all types shown, incompatible ones at 0.3 opacity)
+  let typeCards = makeTypeCards state.selectedAstPreset selectedJoinType
 
-  -- Create data card options based on assigned type
+  -- Create data card options (all datasets shown, incompatible ones at 0.3 opacity)
   let dataCards = makeDataCards selectedJoinType state.selectedSampleData
 
   -- Position for data cards (RHS of SVG)
@@ -1135,7 +1175,7 @@ renderTreeViz state listener = do
                 T.elem Group
                   [ F.transform $ F.text $ "translate(0," <> show card.y <> ")"
                   , F.staticStr "cursor" (if card.isEnabled then "pointer" else "default")
-                  , F.opacity (F.text (if card.isEnabled then "1" else "0.5"))
+                  , F.opacity (F.text (if card.isEnabled then "1" else "0.3"))
                   ]
                   `T.withBehaviors`
                     ( if card.isEnabled then [ ClickWithDatum \c -> HS.notify listener (AssignType c.datumType) ]
@@ -1172,6 +1212,16 @@ renderTreeViz state listener = do
                         , F.fill (F.color Theme.typeCardFill)
                         , F.stroke (F.color Theme.typeCardStroke)
                         , F.strokeWidth (F.num 1.0)
+                        ]
+                    -- Red X for incompatible (only shown when disabled)
+                    , T.elem Text
+                        [ F.x (F.num (Theme.typeCardWidth - 8.0))
+                        , F.y (F.num 15.0)
+                        , F.textAnchor (F.text "middle")
+                        , F.fill (F.text (if card.isEnabled then "none" else "#E63946"))
+                        , F.fontSize (F.px 14.0)
+                        , F.staticStr "font-weight" "bold"
+                        , F.textContent (F.text "✕")
                         ]
                     ]
             )
@@ -1212,8 +1262,13 @@ renderTreeViz state listener = do
 
     _ <- renderTree svgSel fieldLabelsTree
 
-    -- Render data cards on RHS (only shown when type is assigned)
+    -- Render data cards on RHS as database icons
     let
+      -- Database icon dimensions
+      dbWidth = 50.0
+      dbHeight = 40.0
+      dbEllipseRy = 8.0
+
       dataCardsTree :: T.Tree DataCard
       dataCardsTree =
         T.named Group "dataCardsGroup"
@@ -1224,40 +1279,99 @@ renderTreeViz state listener = do
             ( T.joinData "dataCardGroups" "g" dataCards $ \card ->
                 T.elem Group
                   [ F.transform $ F.text $ "translate(0," <> show card.y <> ")"
-                  , F.staticStr "cursor" "pointer"
+                  , F.staticStr "cursor" (if card.isEnabled then "pointer" else "default")
+                  , F.opacity (F.text (if card.isEnabled then "1" else "0.3"))
                   ]
                   `T.withBehaviors`
-                    [ ClickWithDatum \c -> HS.notify listener (SelectSampleData c.sampleId) ]
+                    ( if card.isEnabled then [ ClickWithDatum \c -> HS.notify listener (SelectSampleData c.sampleId) ]
+                      else []
+                    )
                   `T.withChildren`
-                    -- Card background
+                    -- Database icon: cylinder shape using Path elements
+                    -- (Ellipse not available in ElementType)
+                    let
+                      cx = Theme.dataCardWidth / 2.0
+                      rx = dbWidth / 2.0
+                      ry = dbEllipseRy
+                      -- SVG path for ellipse: M cx-rx,y A rx,ry 0 1,1 cx+rx,y A rx,ry 0 1,1 cx-rx,y
+                      ellipsePath y' =
+                        "M " <> show (cx - rx) <> " " <> show y'
+                          <> " A " <> show rx <> " " <> show ry <> " 0 1 1 " <> show (cx + rx) <> " " <> show y'
+                          <> " A " <> show rx <> " " <> show ry <> " 0 1 1 " <> show (cx - rx) <> " " <> show y'
+                          <> " Z"
+                      -- Bottom arc (only bottom half visible)
+                      bottomArcPath =
+                        "M " <> show (cx - rx) <> " " <> show dbHeight
+                          <> " A " <> show rx <> " " <> show ry <> " 0 0 0 " <> show (cx + rx) <> " " <> show dbHeight
+                    in
+                    -- Body (rectangle)
                     [ T.elem Rect
-                        [ F.x (F.num 0.0)
-                        , F.y (F.num 0.0)
-                        , F.width (F.num Theme.dataCardWidth)
-                        , F.height (F.num Theme.dataCardHeight)
-                        , F.static "rx" 6.0
+                        [ F.x (F.num ((Theme.dataCardWidth - dbWidth) / 2.0))
+                        , F.y (F.num dbEllipseRy)
+                        , F.width (F.num dbWidth)
+                        , F.height (F.num (dbHeight - dbEllipseRy))
                         , F.fill (F.color (if card.isSelected then Theme.dataCardHighlight else Theme.dataCardFill))
-                        , F.stroke (F.color Theme.dataCardStroke)
-                        , F.strokeWidth (F.num (if card.isSelected then 3.0 else 1.5))
+                        , F.stroke (F.text "none")
                         ]
-                    -- Name text
+                    -- Bottom arc (curve at bottom of cylinder)
+                    , T.elem Path
+                        [ F.path $ F.text bottomArcPath
+                        , F.fill (F.text "none")
+                        , F.stroke (F.color Theme.dataCardStroke)
+                        , F.strokeWidth (F.num (if card.isSelected then 2.5 else 1.5))
+                        ]
+                    -- Side lines
+                    , T.elem Line
+                        [ F.x1 (F.num (cx - rx))
+                        , F.y1 (F.num dbEllipseRy)
+                        , F.x2 (F.num (cx - rx))
+                        , F.y2 (F.num dbHeight)
+                        , F.stroke (F.color Theme.dataCardStroke)
+                        , F.strokeWidth (F.num (if card.isSelected then 2.5 else 1.5))
+                        ]
+                    , T.elem Line
+                        [ F.x1 (F.num (cx + rx))
+                        , F.y1 (F.num dbEllipseRy)
+                        , F.x2 (F.num (cx + rx))
+                        , F.y2 (F.num dbHeight)
+                        , F.stroke (F.color Theme.dataCardStroke)
+                        , F.strokeWidth (F.num (if card.isSelected then 2.5 else 1.5))
+                        ]
+                    -- Top ellipse (filled cap)
+                    , T.elem Path
+                        [ F.path $ F.text (ellipsePath dbEllipseRy)
+                        , F.fill (F.color (if card.isSelected then Theme.dataCardHighlight else Theme.typeCardHeader))
+                        , F.stroke (F.color Theme.dataCardStroke)
+                        , F.strokeWidth (F.num (if card.isSelected then 2.5 else 1.5))
+                        ]
+                    -- Name text below icon
                     , T.elem Text
                         [ F.x (F.num (Theme.dataCardWidth / 2.0))
-                        , F.y (F.num 20.0)
+                        , F.y (F.num (dbHeight + 16.0))
                         , F.textAnchor (F.text "middle")
                         , F.fill (F.color Theme.dataCardStroke)
-                        , F.fontSize (F.px 12.0)
+                        , F.fontSize (F.px 11.0)
                         , F.staticStr "font-weight" "bold"
                         , F.textContent (F.text card.name)
                         ]
                     -- Description text
                     , T.elem Text
                         [ F.x (F.num (Theme.dataCardWidth / 2.0))
-                        , F.y (F.num 38.0)
+                        , F.y (F.num (dbHeight + 28.0))
                         , F.textAnchor (F.text "middle")
                         , F.fill (F.color Theme.keyHintsColor)
                         , F.fontSize (F.px 9.0)
                         , F.textContent (F.text card.description)
+                        ]
+                    -- Red X for incompatible (only shown when disabled)
+                    , T.elem Text
+                        [ F.x (F.num (Theme.dataCardWidth - 8.0))
+                        , F.y (F.num 12.0)
+                        , F.textAnchor (F.text "middle")
+                        , F.fill (F.text (if card.isEnabled then "none" else "#E63946"))
+                        , F.fontSize (F.px 16.0)
+                        , F.staticStr "font-weight" "bold"
+                        , F.textContent (F.text "✕")
                         ]
                     ]
             )
@@ -1598,8 +1712,7 @@ updateArrowPosition state = do
 
   -- Get the assigned type card and selected node info
   let selectedJoinType = getSelectedJoinDatumType state
-  let isJoinSelected = isSelectedNodeJoin state
-  let typeCards = makeTypeCards isJoinSelected selectedJoinType
+  let typeCards = makeTypeCards state.selectedAstPreset selectedJoinType
 
   -- Find arrow data (same logic as in renderTreeViz)
   let
@@ -1782,20 +1895,6 @@ updateArrowPosition state = do
 -- SVG Type Cards Helpers
 -- =============================================================================
 
--- | Check if the selected node is a Join type
-isSelectedNodeJoin :: State -> Boolean
-isSelectedNodeJoin state = case state.selectedNodeId of
-  Nothing -> false
-  Just selectedId -> case findNodeById selectedId state.userTree of
-    Nothing -> false
-    Just node -> isJoinType node.nodeType
-  where
-  isJoinType NodeJoin = true
-  isJoinType NodeNestedJoin = true
-  isJoinType NodeUpdateJoin = true
-  isJoinType NodeUpdateNestedJoin = true
-  isJoinType _ = false
-
 -- | Get the datum type of the selected Join (if any)
 getSelectedJoinDatumType :: State -> Maybe DatumType
 getSelectedJoinDatumType state = case state.selectedNodeId of
@@ -1813,8 +1912,9 @@ getSelectedJoinDatumType state = case state.selectedNodeId of
   isJoinNodeType _ = false
 
 -- | Create type card data for SVG rendering
-makeTypeCards :: Boolean -> Maybe DatumType -> Array TypeCard
-makeTypeCards isJoinSelected selectedJoinType =
+-- | Types incompatible with current AST have isEnabled = false (rendered at 0.3 opacity)
+makeTypeCards :: AstPreset -> Maybe DatumType -> Array TypeCard
+makeTypeCards currentAst selectedJoinType =
   Array.mapWithIndex makeCard availableTypeInfos
   where
   -- Calculate card height: header (22) + fields * fieldHeight + padding (4)
@@ -1856,7 +1956,7 @@ makeTypeCards isJoinSelected selectedJoinType =
       , fields: info.fields
       , datumType: info.typ
       , y: prevHeights
-      , isEnabled: isJoinSelected
+      , isEnabled: isTypeCompatibleWithAst currentAst info.typ
       , isAssigned: isTypeAssigned info.typ selectedJoinType
       }
 
@@ -1865,42 +1965,30 @@ makeTypeCards isJoinSelected selectedJoinType =
   isTypeAssigned cardType (Just selectedType) = cardType == selectedType
   isTypeAssigned _ Nothing = false
 
--- | Create data card options for a given type
--- | Different types have different sample data options
+-- | Create data card options - always shows all datasets
+-- | Datasets incompatible with current type have isEnabled = false (rendered at 0.3 opacity)
 makeDataCards :: Maybe DatumType -> Maybe SampleDataId -> Array DataCard
-makeDataCards maybeType selectedSample = case maybeType of
-  Nothing -> []
-  Just TypeUnit -> []
-  Just TypeUnknown -> []
-  -- Board type -> board game samples
-  Just t | t == boardType ->
-    [ mkCard 0 "Chess" "8x8 board" SampleChess
-    , mkCard 1 "Sudoku" "9x9 puzzle" SampleSudoku
-    , mkCard 2 "Go" "19x19 board" SampleGo
-    ]
-  -- Country type -> geographic data
-  Just t | t == countryType ->
-    [ mkCard 0 "Gapminder" "Health & wealth" SampleGapminder
-    ]
-  -- Node type -> graph data
-  Just t | t == nodeType ->
-    [ mkCard 0 "Force Graph" "Node network" SampleForceGraph
-    ]
-  -- Point type -> scatter data
-  Just t | t == pointType ->
-    [ mkCard 0 "Scatter Plot" "X/Y points" SampleScatterPlot
-    ]
-  -- Other types don't have sample data yet
-  Just _ -> []
+makeDataCards maybeType selectedSample =
+  Array.mapWithIndex mkCard allDatasets
   where
-  mkCard :: Int -> String -> String -> SampleDataId -> DataCard
-  mkCard idx name desc sampleId =
-    { name
-    , description: desc
-    , sampleId
+  -- All available datasets
+  allDatasets =
+    [ { name: "Chess", desc: "8x8 board", sampleId: SampleChess }
+    , { name: "Sudoku", desc: "9x9 puzzle", sampleId: SampleSudoku }
+    , { name: "Go", desc: "19x19 board", sampleId: SampleGo }
+    , { name: "Gapminder", desc: "Health & wealth", sampleId: SampleGapminder }
+    , { name: "Force Graph", desc: "Node network", sampleId: SampleForceGraph }
+    , { name: "Scatter Plot", desc: "X/Y points", sampleId: SampleScatterPlot }
+    ]
+
+  mkCard :: Int -> { name :: String, desc :: String, sampleId :: SampleDataId } -> DataCard
+  mkCard idx dataset =
+    { name: dataset.name
+    , description: dataset.desc
+    , sampleId: dataset.sampleId
     , y: toNumber idx * (Theme.dataCardHeight + Theme.dataCardSpacing)
-    , isEnabled: true
-    , isSelected: selectedSample == Just sampleId
+    , isEnabled: isDatasetCompatibleWithType maybeType dataset.sampleId
+    , isSelected: selectedSample == Just dataset.sampleId
     }
 
 -- =============================================================================
@@ -1934,38 +2022,47 @@ renderAstCard state preset =
 -- | Render the output panel showing visualization result
 -- | This will eventually render the actual visualization from the current AST + data
 renderOutput :: forall m. State -> H.ComponentHTML Action () m
-renderOutput state =
-  HH.div
-    [ HP.class_ (HH.ClassName "tree-builder3-output-content") ]
-    [ -- Show status based on what's selected
-      case getOutputStatus state of
-        NoJoinSelected ->
-          HH.div
-            [ HP.class_ (HH.ClassName "output-placeholder") ]
-            [ HH.p_ [ HH.text "Select a Join node to assign a type" ]
-            , HH.p_ [ HH.text "Use keyboard: j=Join, n=NestedJoin, u=UpdateJoin" ]
-            ]
-        JoinNeedsType ->
-          HH.div
-            [ HP.class_ (HH.ClassName "output-placeholder") ]
-            [ HH.p_ [ HH.text "Click a type card on the left to assign data type" ]
-            ]
-        TypeNeedsData ->
-          HH.div
-            [ HP.class_ (HH.ClassName "output-placeholder") ]
-            [ HH.p_ [ HH.text "Click a data card on the right to select sample data" ]
-            ]
-        ReadyToRender sampleId ->
-          HH.div
-            [ HP.class_ (HH.ClassName "output-ready") ]
-            [ HH.p_ [ HH.text $ "Ready to render: " <> sampleIdLabel sampleId ]
-            , HH.div
-                [ HP.id "tree-builder3-output-svg"
-                , HP.class_ (HH.ClassName "output-svg-container")
+renderOutput state
+  -- TryMe mode: show English description of the tree
+  | state.selectedAstPreset == AstEmpty =
+      HH.div
+        [ HP.class_ (HH.ClassName "tree-builder3-output-content english-output") ]
+        [ HH.pre
+            [ HP.class_ (HH.ClassName "english-description") ]
+            [ HH.text (treeToEnglish state.userTree 0) ]
+        ]
+  -- Normal mode: show visualization status
+  | otherwise =
+      HH.div
+        [ HP.class_ (HH.ClassName "tree-builder3-output-content") ]
+        [ case getOutputStatus state of
+            NoJoinSelected ->
+              HH.div
+                [ HP.class_ (HH.ClassName "output-placeholder") ]
+                [ HH.p_ [ HH.text "Select a Join node to assign a type" ]
+                , HH.p_ [ HH.text "Use keyboard: j=Join, n=NestedJoin, u=UpdateJoin" ]
                 ]
-                []
-            ]
-    ]
+            JoinNeedsType ->
+              HH.div
+                [ HP.class_ (HH.ClassName "output-placeholder") ]
+                [ HH.p_ [ HH.text "Click a type card on the left to assign data type" ]
+                ]
+            TypeNeedsData ->
+              HH.div
+                [ HP.class_ (HH.ClassName "output-placeholder") ]
+                [ HH.p_ [ HH.text "Click a data card on the right to select sample data" ]
+                ]
+            ReadyToRender sampleId ->
+              HH.div
+                [ HP.class_ (HH.ClassName "output-ready") ]
+                [ HH.p_ [ HH.text $ "Ready to render: " <> sampleIdLabel sampleId ]
+                , HH.div
+                    [ HP.id "tree-builder3-output-svg"
+                    , HP.class_ (HH.ClassName "output-svg-container")
+                    ]
+                    []
+                ]
+        ]
 
 -- | Status of the output panel
 data OutputStatus
@@ -2002,4 +2099,93 @@ sampleIdLabel = case _ of
   SampleScatterPlot -> "Scatter Plot"
   SampleForceGraph -> "Force Graph"
   SampleGapminder -> "Gapminder"
+
+-- =============================================================================
+-- TryMe Mode: English Description & Popup
+-- =============================================================================
+
+-- | Convert tree to English description (for TryMe mode)
+treeToEnglish :: Tree TreeNode -> Int -> String
+treeToEnglish tree depth =
+  let
+    node = Cofree.head tree
+    indent = String.joinWith "" (Array.replicate depth "  ")
+    children = Array.fromFoldable (Cofree.tail tree)
+    childrenText = String.joinWith "\n" (map (\c -> treeToEnglish c (depth + 1)) children)
+    nodeDesc = describeNode node
+  in
+    indent <> nodeDesc <> (if String.null childrenText then "" else "\n" <> childrenText)
+
+-- | Describe a single node in English
+describeNode :: TreeNode -> String
+describeNode node = case node.nodeType of
+  NodeElem SVG -> "Create an SVG container"
+  NodeElem Group -> "Wrap in a group" <> maybeNamed node.name
+  NodeElem Circle -> "Draw a circle"
+  NodeElem Rect -> "Draw a rectangle"
+  NodeElem Text -> "Add text"
+  NodeElem Path -> "Draw a path"
+  NodeElem Line -> "Draw a line"
+  NodeElem _ -> "Create element"
+  NodeJoin -> "Join data as elements" <> maybeNamed node.name <> maybeTyped node.datumType
+  NodeNestedJoin -> "Nest data by grouping" <> maybeNamed node.name <> maybeTyped node.datumType
+  NodeUpdateJoin -> "Use enter/update/exit pattern" <> maybeNamed node.name
+  NodeUpdateNestedJoin -> "Nested update pattern" <> maybeNamed node.name
+  NodeEnter -> "For entering elements:"
+  NodeUpdate -> "For updating elements:"
+  NodeExit -> "For exiting elements:"
+  NodeAttr _ -> "Set attribute"
+  NodeBehavior _ -> "Add behavior"
+  PendingElement -> "(selecting element type...)"
+  PendingAttr -> "(selecting attribute...)"
+  PendingAttrValue _ -> "(selecting value...)"
+  PendingBehavior -> "(selecting behavior...)"
+  where
+  maybeNamed Nothing = ""
+  maybeNamed (Just n) = " (\"" <> n <> "\")"
+  maybeTyped TypeUnit = ""
+  maybeTyped TypeUnknown = ""
+  maybeTyped (TypeRecord typeName fields) =
+    let fieldNames = map (\f -> f.name) fields
+    in " (" <> typeName <> ": " <> String.joinWith ", " fieldNames <> ")"
+  maybeTyped (TypeArray _) = ""
+
+-- | Render the TryMe instructions popup
+renderTryMePopup :: forall m. H.ComponentHTML Action () m
+renderTryMePopup =
+  HH.div
+    [ HP.class_ (HH.ClassName "tryme-popup-overlay")
+    , HE.onClick \_ -> DismissTryMeInstructions
+    ]
+    [ HH.div
+        [ HP.class_ (HH.ClassName "tryme-popup")
+        , HE.onClick \_ -> DismissTryMeInstructions -- Clicking popup also dismisses
+        ]
+        [ HH.h2_ [ HH.text "Build Your Own Visualization!" ]
+        , HH.div
+            [ HP.class_ (HH.ClassName "tryme-content") ]
+            [ HH.p_ [ HH.text "Welcome to TryMe mode! Build a visualization tree using keyboard commands." ]
+            , HH.h3_ [ HH.text "Getting Started:" ]
+            , HH.ol_
+                [ HH.li_ [ HH.text "First, pick a data type from the left cards" ]
+                , HH.li_ [ HH.text "Then, select a dataset from the right cards" ]
+                , HH.li_ [ HH.text "Use keys to add nodes to your tree" ]
+                ]
+            , HH.h3_ [ HH.text "Key Commands:" ]
+            , HH.ul_
+                [ HH.li_ [ HH.strong_ [ HH.text "J" ], HH.text " - Add a Join (binds data to elements)" ]
+                , HH.li_ [ HH.strong_ [ HH.text "N" ], HH.text " - Add a NestedJoin (for nested data)" ]
+                , HH.li_ [ HH.strong_ [ HH.text "G" ], HH.text " - Add a Group (container)" ]
+                , HH.li_ [ HH.strong_ [ HH.text "C" ], HH.text " - Add a Circle" ]
+                , HH.li_ [ HH.strong_ [ HH.text "R" ], HH.text " - Add a Rectangle" ]
+                , HH.li_ [ HH.strong_ [ HH.text "T" ], HH.text " - Add Text" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Arrow keys" ], HH.text " - Navigate the tree" ]
+                , HH.li_ [ HH.strong_ [ HH.text "Delete/Backspace" ], HH.text " - Remove selected node" ]
+                ]
+            , HH.p
+                [ HP.class_ (HH.ClassName "tryme-dismiss") ]
+                [ HH.text "Click anywhere to start building!" ]
+            ]
+        ]
+    ]
 
