@@ -7,6 +7,7 @@
     "build": "npm run extract-snippets && spago build",
     "build:selection": "spago build -p psd3-selection",
     "build:simulation": "spago build -p psd3-simulation",
+    "build:music": "spago build -p psd3-music",
     "build:website": "spago build -p demo-website",
     "build:ce": "spago build -p ce-website",
     "build:ce-server": "spago build -p ce-server",
@@ -45,6 +46,8 @@
     "tailwindcss": "^3.4.16"
   },
   "dependencies": {
+    "@anthropic-ai/claude-code": "^2.0.73",
+    "claude": "^0.1.1",
     "d3-array": "^3.2.4",
     "d3-brush": "^3.0.0",
     "d3-chord": "^3.0.1",

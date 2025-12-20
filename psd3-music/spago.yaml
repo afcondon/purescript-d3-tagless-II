@@ -1,0 +1,30 @@
+package:
+  name: psd3-music
+  description: Audio interpreter for PSD3 - data sonification and accessibility
+  publish:
+    version: 0.1.0
+    license: MIT
+    location:
+      githubOwner: afcondon
+      githubRepo: purescript-psd3-music
+  dependencies:
+    - arrays
+    - console
+    - effect
+    - either
+    - foldable-traversable
+    - functions
+    - maybe
+    - newtype
+    - numbers
+    - ordered-collections
+    - prelude
+    - psd3-selection
+    - refs
+    - transformers
+    - tuples
+    - unsafe-coerce
+  test:
+    main: Test.Main
+    dependencies:
+      - assert

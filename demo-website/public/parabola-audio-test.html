@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Parabola Sonification Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 10px 10px 0;
+            transition: all 0.2s;
+        }
+        button.visual-btn {
+            background: #3498db;
+            color: white;
+        }
+        button.audio-btn {
+            background: #e74c3c;
+            color: white;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .mapping-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .mapping-table th,
+        .mapping-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .mapping-table th {
+            background: #34495e;
+            color: white;
+        }
+        code {
+            background: #2c3e50;
+            color: #e74c3c;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        .audio-hint {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 6px;
+            display: none;
+        }
+        #status.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎵 Parabola Sonification Demo</h1>
+
+    <div class="section">
+        <h2>What is this?</h2>
+        <p>This demonstrates the <strong>Finally Tagless</strong> pattern: the same PureScript code can be interpreted in multiple ways.</p>
+        <p>The parabola data (y = x²) is:</p>
+        <table class="mapping-table">
+            <thead>
+                <tr>
+                    <th>Data Dimension</th>
+                    <th>Visual (D3)</th>
+                    <th>Audio (Web Audio)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>x value</td>
+                    <td>Horizontal position</td>
+                    <td>Time (when to play)</td>
+                </tr>
+                <tr>
+                    <td>y value</td>
+                    <td>Vertical position</td>
+                    <td>Pitch (frequency in Hz)</td>
+                </tr>
+                <tr>
+                    <td>y value</td>
+                    <td>Circle radius</td>
+                    <td>Duration & volume</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Try it!</h2>
+        <p><strong>Audio Test:</strong> Click to hear the parabola as sound</p>
+        <div class="audio-hint">
+            🔊 <strong>Tip:</strong> Set your volume to a comfortable level. You'll hear 9 notes forming a melodic arc (high → low → high), mirroring the parabola's shape.
+        </div>
+        <button class="audio-btn" id="playAudioBtn" onclick="playParabolaAudio()">
+            🎵 Play Parabola Audio
+        </button>
+        <div id="status"></div>
+    </div>
+
+    <div class="section">
+        <h2>The Data</h2>
+        <p>9 points on the parabola y = x²:</p>
+        <code>
+            [(-10, 100), (-7.5, 56.25), (-5, 25), (-2.5, 6.25), (0, 0), (2.5, 6.25), (5, 25), (7.5, 56.25), (10, 100)]
+        </code>
+        <p>These map to frequencies between 200-500 Hz, played every 400ms</p>
+    </div>
+
+    <script>
+        // Parabola data
+        const parabolaData = [
+            { x: -10.0, y: 100.0 },
+            { x: -7.5, y: 56.25 },
+            { x: -5.0, y: 25.0 },
+            { x: -2.5, y: 6.25 },
+            { x: 0.0, y: 0.0 },
+            { x: 2.5, y: 6.25 },
+            { x: 5.0, y: 25.0 },
+            { x: 7.5, y: 56.25 },
+            { x: 10.0, y: 100.0 }
+        ];
+
+        let audioContext = null;
+
+        function showStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'show';
+            status.style.background = isError ? '#ffebee' : '#e8f5e9';
+        }
+
+        function playParabolaAudio() {
+            try {
+                // Create audio context if needed
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    showStatus('Audio context created!');
+                }
+
+                showStatus('Playing parabola audio...');
+                document.getElementById('playAudioBtn').disabled = true;
+
+                // Schedule each note
+                parabolaData.forEach((d, i) => {
+                    const time = i * 0.4;              // 400ms between notes
+                    const frequency = 200.0 + (d.y * 3.0);  // 200-500 Hz range
+                    const duration = 0.3 + (d.y * 0.002);   // 300-500ms
+                    const volume = 0.3 + (d.y * 0.003);     // 0.3-0.6
+
+                    scheduleNote(audioContext, {
+                        time,
+                        frequency,
+                        duration,
+                        volume,
+                        waveform: 'sine'
+                    });
+
+                    console.log(`Note ${i}: time=${time}s, freq=${frequency.toFixed(1)}Hz, dur=${duration.toFixed(3)}s`);
+                });
+
+                // Re-enable button after all notes finish
+                const totalDuration = (parabolaData.length * 0.4) + 0.5;
+                setTimeout(() => {
+                    document.getElementById('playAudioBtn').disabled = false;
+                    showStatus(`Finished playing ${parabolaData.length} notes!`);
+                }, totalDuration * 1000);
+
+            } catch (err) {
+                showStatus(`Error: ${err.message}`, true);
+                console.error(err);
+                document.getElementById('playAudioBtn').disabled = false;
+            }
+        }
+
+        function scheduleNote(ctx, params) {
+            const now = ctx.currentTime;
+            const startTime = now + params.time;
+            const stopTime = startTime + params.duration;
+
+            // Create oscillator
+            const oscillator = ctx.createOscillator();
+            oscillator.type = params.waveform;
+            oscillator.frequency.setValueAtTime(params.frequency, startTime);
+
+            // Create gain node for volume
+            const gainNode = ctx.createGain();
+            gainNode.gain.setValueAtTime(params.volume, startTime);
+
+            // Fade out to avoid clicks
+            const fadeOutStart = stopTime - 0.01;
+            gainNode.gain.setValueAtTime(params.volume, fadeOutStart);
+            gainNode.gain.linearRampToValueAtTime(0.0, stopTime);
+
+            // Connect: oscillator -> gain -> speakers
+            oscillator.connect(gainNode);
+            gainNode.connect(ctx.destination);
+
+            // Schedule
+            oscillator.start(startTime);
+            oscillator.stop(stopTime);
+
+            // Cleanup
+            oscillator.onended = () => {
+                oscillator.disconnect();
+                gainNode.disconnect();
+            };
+        }
+
+        // Show instructions
+        showStatus('Click the button above to play the parabola as sound!');
+    </script>
+</body>
+</html>
