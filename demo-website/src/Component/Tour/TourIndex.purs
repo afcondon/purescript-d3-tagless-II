@@ -103,6 +103,9 @@ render _ =
             [ renderCard TourInterpreters "Alternative Interpreters"
                 "Mermaid diagrams, English descriptions, and code generators."
 
+            , renderCard TourSonification "Data Sonification"
+                "🎵 Hear Anscombe's Quartet. Same stats, different sounds. Audio interpreter proof-of-concept."
+
             , renderCard TourFPFTW "FP For The Win"
                 "Maps, Sets, contravariant attributes. Leveraging functional programming."
 

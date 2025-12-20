@@ -22,6 +22,7 @@ allTutorialRoutes =
   , TourHierarchies
   , TourMotion
   , TourInterpreters
+  , TourSonification
   , TourFPFTW
   , TourGraphAlgorithms
   ]

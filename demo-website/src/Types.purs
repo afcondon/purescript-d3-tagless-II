@@ -114,6 +114,7 @@ data Route
   | TourMotion           -- Tour 5: Transitions and animations
   | TourWealthHealth     -- Tour 5b: Wealth & Health of Nations (animated bubble chart)
   | TourInterpreters     -- Tour 6: Alternative interpreters (Mermaid, English, generators)
+  | TourSonification     -- Tour 6b: Data sonification - audio interpreter (Anscombe's Quartet as sound)
   | TourFPFTW            -- Tour 7: Functional Programming For The Win (Maps, Sets, contravariant attributes)
   | TourGraphAlgorithms  -- Tour 8: Graph Algorithms (topological sort, transitive reduction)
   | TourLesMisGUP        -- Tour 9: General Update Pattern with dynamic graphs
@@ -184,6 +185,7 @@ instance showRoute :: Show Route where
   show TourMotion = "Tour: Motion & Transitions"
   show TourWealthHealth = "Tour: Wealth & Health"
   show TourInterpreters = "Tour: Alternative Interpreters"
+  show TourSonification = "Tour: Data Sonification"
   show TourFPFTW = "Tour: FP For The Win"
   show TourGraphAlgorithms = "Tour: Graph Algorithms"
   show TourLesMisGUP = "Tour: General Update Pattern"

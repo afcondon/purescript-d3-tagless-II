@@ -62,10 +62,10 @@ render state =
     , HH.section
         [ HP.classes [ HH.ClassName "intro-section" ] ]
         [ HH.p_
-            [ HH.text "This demonstrates the Finally Tagless pattern: the " ]
-        , HH.strong_ [ HH.text "same PureScript code" ]
-        , HH.text " can be interpreted as:"
-        ]
+            [ HH.text "This demonstrates the Finally Tagless pattern: the "
+            , HH.strong_ [ HH.text "same PureScript code" ]
+            , HH.text " can be interpreted as:"
+            ]
         , HH.ul_
             [ HH.li_ [ HH.text "Visual output (D3 → SVG circles)" ]
             , HH.li_ [ HH.text "Audio output (Web Audio → sound)" ]
@@ -184,9 +184,9 @@ initMusicContext sonifyParabola"""
                 ]
             ]
         , HH.p_
-            [ HH.text "Next: Try Anscombe's Quartet! Four statistically identical datasets that look different visually will also " ]
-        , HH.em_ [ HH.text "sound" ]
-        , HH.text " different."
-        ]
+            [ HH.text "Next: Try Anscombe's Quartet! Four statistically identical datasets that look different visually will also "
+            , HH.em_ [ HH.text "sound" ]
+            , HH.text " different."
+            ]
         ]
     ]

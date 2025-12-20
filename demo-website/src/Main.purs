@@ -50,6 +50,7 @@ import Component.Tour.TourHierarchies as TourHierarchies
 import Component.Tour.TourMotion as TourMotion
 import Component.Tour.TourWealthHealth as TourWealthHealth
 import Component.Tour.TourInterpreters as TourInterpreters
+import Component.Tour.TourSonification as TourSonification
 import Component.Tour.TourFPFTW as TourFPFTW
 import Component.Tour.TourGraphAlgorithms as TourGraphAlgorithms
 import Component.Tour.TourSimpsons as TourSimpsons
@@ -124,6 +125,7 @@ type Slots =
   , tourMotion :: forall q. H.Slot q Void Unit
   , tourWealthHealth :: forall q. H.Slot q Void Unit
   , tourInterpreters :: forall q. H.Slot q Void Unit
+  , tourSonification :: forall q. H.Slot q Void Unit
   , tourFPFTW :: forall q. H.Slot q Void Unit
   , tourGraphAlgorithms :: forall q. H.Slot q Void Unit
   , tourSimpsons :: forall q. H.Slot q Void Unit
@@ -179,6 +181,7 @@ _tourHierarchies = Proxy :: Proxy "tourHierarchies"
 _tourMotion = Proxy :: Proxy "tourMotion"
 _tourWealthHealth = Proxy :: Proxy "tourWealthHealth"
 _tourInterpreters = Proxy :: Proxy "tourInterpreters"
+_tourSonification = Proxy :: Proxy "tourSonification"
 _tourFPFTW = Proxy :: Proxy "tourFPFTW"
 _tourGraphAlgorithms = Proxy :: Proxy "tourGraphAlgorithms"
 _tourSimpsons = Proxy :: Proxy "tourSimpsons"
@@ -323,6 +326,9 @@ renderPage route = case spy "Route is" route of
 
   TourInterpreters ->
     HH.slot_ _tourInterpreters unit TourInterpreters.component unit
+
+  TourSonification ->
+    HH.slot_ _tourSonification unit TourSonification.component unit
 
   TourFPFTW ->
     HH.slot_ _tourFPFTW unit TourFPFTW.component unit
