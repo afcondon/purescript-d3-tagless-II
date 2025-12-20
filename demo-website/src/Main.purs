@@ -75,6 +75,7 @@ import TreeBuilder3.App as TreeBuilder3
 import Component.SPLOM as SPLOM
 import Component.GUPDebug as GUPDebug
 import VizMatrix.App as VizMatrix
+import Component.AlgoraveViz as AlgoraveViz
 
 -- Routing
 import PSD3.RoutingDSL (routing, routeToPath)
@@ -148,6 +149,7 @@ type Slots =
   , splom :: forall q. H.Slot q Void Unit
   , gupDebug :: forall q. H.Slot q Void Unit
   , vizMatrix :: forall q. H.Slot q Void Unit
+  , algoraveViz :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
 
@@ -204,6 +206,7 @@ _treeBuilder3 = Proxy :: Proxy "treeBuilder3"
 _splom = Proxy :: Proxy "splom"
 _gupDebug = Proxy :: Proxy "gupDebug"
 _vizMatrix = Proxy :: Proxy "vizMatrix"
+_algoraveViz = Proxy :: Proxy "algoraveViz"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
 -- | Main application component
@@ -431,6 +434,9 @@ renderPage route = case spy "Route is" route of
 
   VizMatrix ->
     HH.slot_ _vizMatrix unit VizMatrix.component unit
+
+  AlgoraveViz ->
+    HH.slot_ _algoraveViz unit AlgoraveViz.component unit
 
   Acknowledgements ->
     HH.slot_ _acknowledgements unit Acknowledgements.component unit

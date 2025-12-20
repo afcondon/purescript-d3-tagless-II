@@ -79,6 +79,7 @@ routes =
   <|> splom
   <|> gupDebug
   <|> vizMatrix
+  <|> algoraveViz
   <|> acknowledgements
   <|> rootRedirect
   <|> notFound
@@ -335,6 +336,10 @@ gupDebug = GUPDebug <$ lit "gup-debug" <* end
 vizMatrix :: Match Route
 vizMatrix = VizMatrix <$ lit "viz-matrix" <* end
 
+-- | Match: /algorave-viz
+algoraveViz :: Match Route
+algoraveViz = AlgoraveViz <$ lit "algorave-viz" <* end
+
 -- | Match: /acknowledgements
 acknowledgements :: Match Route
 acknowledgements = Acknowledgements <$ lit "acknowledgements" <* end
@@ -409,5 +414,6 @@ routeToPath TreeBuilder3 = "/tree-builder3"
 routeToPath SPLOM = "/splom"
 routeToPath GUPDebug = "/gup-debug"
 routeToPath VizMatrix = "/viz-matrix"
+routeToPath AlgoraveViz = "/algorave-viz"
 routeToPath Acknowledgements = "/acknowledgements"
 routeToPath NotFound = "/not-found"

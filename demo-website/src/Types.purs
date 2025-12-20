@@ -147,6 +147,7 @@ data Route
   | SPLOM          -- Brushable Scatterplot Matrix (Palmer Penguins)
   | GUPDebug       -- Standalone debug page for Setup.applySetupWithData GUP API
   | VizMatrix     -- Type × AST × Data matrix demo
+  | AlgoraveViz   -- Algorave set visualizer - pattern trees and forest view
   -- Meta
   | Acknowledgements -- Credits and acknowledgements
   | NotFound
@@ -216,5 +217,6 @@ instance showRoute :: Show Route where
   show SPLOM = "Brushable SPLOM"
   show GUPDebug = "GUP Debug"
   show VizMatrix = "VizMatrix"
+  show AlgoraveViz = "Algorave Visualizer"
   show Acknowledgements = "Acknowledgements"
   show NotFound = "Not Found"
