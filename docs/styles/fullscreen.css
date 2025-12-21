@@ -318,6 +318,22 @@
 }
 
 /* ========================================
+   PAGE-SPECIFIC OVERRIDES
+   ======================================== */
+
+/* Algorave Viz - Position panels lower to avoid nav header */
+.algorave-viz-container .floating-panel--top-left,
+.algorave-viz-container .floating-panel--top-right {
+  top: calc(100px + var(--spacing-md));
+  /* Header height + spacing */
+}
+
+.algorave-viz-container .floating-panel--bottom-center {
+  bottom: calc(var(--spacing-md) + 20px);
+  /* Extra spacing from bottom */
+}
+
+/* ========================================
    PRINT STYLES
    ======================================== */
 

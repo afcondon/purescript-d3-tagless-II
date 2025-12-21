@@ -2,20 +2,18 @@ module Component.AlgoraveViz where
 
 import Prelude
 
-import Component.MiniNotation (parseMiniNotation)
 import Component.PatternTree (PatternTree(..))
+import D3.Viz.PatternTreeViz (drawPatternForest, drawPatternForestRadial, drawPatternForestIsometric)
 import Data.Array as Array
-import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String as String
 import Effect.Aff.Class (class MonadAff)
+import Effect.Class (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.SiteNav as SiteNav
-import PSD3.Website.Types (Route(..))
-import Parsing (ParseError)
 
 -- | Named pattern (a track in the set)
 type Track =
@@ -24,80 +22,83 @@ type Track =
   , active :: Boolean
   }
 
--- | Example Strudel set: "lo-fi birds" by keisi
--- | Source: https://strudel.cc/ (shared REPL example)
+-- | Example algorave set with realistic patterns
+-- | Mix of simple and complex mini-notation from real performances
 exampleSet :: Array Track
 exampleSet =
-  [ { name: "crackle"
-    , pattern: Sound "crackle"
+  [ { name: "kick"
+    , pattern: Sequence [Sound "bd", Rest, Sound "bd", Rest]
     , active: true
     }
-  , { name: "chorus"
-    , pattern: Sequence [Sound "Gm", Sound "Fm", Sound "Cm", Sound "G#m"]
+  , { name: "snare"
+    , pattern: Sequence [Rest, Sound "sn", Rest, Parallel [Sound "sn", Sound "sn"]]
     , active: true
     }
-  , { name: "drums"
+  , { name: "hats"
     , pattern: Sequence
-        [ Sound "bd"
-        , Rest
-        , Sound "hh"
-        , Sound "hh"
-        , Rest
-        , Sound "oh"
-        , Sound "bd"
-        , Parallel [Sound "rim", Sound "clap"]  -- [rim clap]
+        [ Sound "hh", Sound "hh", Sound "oh", Sound "hh"
+        , Sound "hh", Sound "cp", Sound "hh", Sound "oh"
         ]
     , active: true
     }
-  , { name: "lead"
-    , pattern: Sequence
-        [ Sound "5", Sound "3", Sound "4"
-        , Sequence [Sound "7", Parallel [Sound "6", Sound "4"]]  -- <7 [6 4]>
+  , { name: "bass"
+    , pattern: Choice
+        [ Sequence [Sound "bass1", Sound "bass1", Rest, Sound "bass2"]
+        , Sequence [Sound "bass3", Rest, Sound "bass1", Sound "bass1"]
         ]
     , active: true
     }
-  , { name: "voice"
+  , { name: "perc"
     , pattern: Sequence
-        [ Sound "chill"
-        , Sound "beats"
-        , Parallel [Sound "birds", Sound "in_space"]  -- [birds in_space]
+        [ Parallel [Sound "rim", Sound "clap"]
+        , Sound "rim"
+        , Rest
+        , Sound "cp"
         ]
     , active: false
     }
-  , { name: "crow"
-    , pattern: Sound "crow"
+  , { name: "melody"
+    , pattern: Sequence
+        [ Sound "c4", Sound "e4"
+        , Parallel [Sound "g4", Sound "b4"]
+        , Sound "a4"
+        ]
     , active: false
     }
-  , { name: "twitter"
-    , pattern: Sequence
-        [ Sound "0", Sound "1", Sound "2", Sound "3"
-        , Sound "4", Sound "5", Sound "6"
+  , { name: "texture"
+    , pattern: Choice
+        [ Sound "crackle"
+        , Sequence [Sound "noise", Rest, Sound "noise"]
+        , Parallel [Sound "pad1", Sound "pad2"]
         ]
     , active: false
     }
   ]
 
+-- | Tree layout style
+data LayoutStyle = LinearLayout | RadialLayout | IsometricLayout
+
+derive instance eqLayoutStyle :: Eq LayoutStyle
+
 -- | Component state
 type State =
   { tracks :: Array Track
-  , parserInput :: String
-  , parserResult :: Maybe (Either ParseError PatternTree)
+  , layout :: LayoutStyle
   }
 
 -- | Component actions
 data Action
   = Initialize
   | ToggleTrack Int
-  | UpdateParserInput String
-  | ParseInput
+  | SetLayout LayoutStyle
+  | RenderForest
 
 -- | Component definition
 component :: forall q i o m. MonadAff m => H.Component q i o m
 component = H.mkComponent
   { initialState: \_ ->
       { tracks: exampleSet
-      , parserInput: "bd sd hh ~"
-      , parserResult: Nothing
+      , layout: IsometricLayout
       }
   , render
   , eval: H.mkEval H.defaultEval
@@ -115,13 +116,16 @@ handleAction = case _ of
       { tracks = updateAt idx (\t -> t { active = not t.active }) s.tracks
       }
 
-  UpdateParserInput input -> do
-    H.modify_ \s -> s { parserInput = input }
+  SetLayout layout -> do
+    H.modify_ \s -> s { layout = layout }
 
-  ParseInput -> do
+  RenderForest -> do
     state <- H.get
-    let result = parseMiniNotation state.parserInput
-    H.modify_ \s -> s { parserResult = Just result }
+    let activePatterns = Array.mapMaybe (\t -> if t.active then Just t.pattern else Nothing) state.tracks
+    case state.layout of
+      LinearLayout -> liftEffect $ drawPatternForest "#pattern-forest-viz" activePatterns
+      RadialLayout -> liftEffect $ drawPatternForestRadial "#pattern-forest-viz" activePatterns
+      IsometricLayout -> liftEffect $ drawPatternForestIsometric "#pattern-forest-viz" activePatterns
 
 -- Helper to update array element
 updateAt :: forall a. Int -> (a -> a) -> Array a -> Array a
@@ -133,123 +137,118 @@ updateAt idx f arr =
 render :: forall m. State -> H.ComponentHTML Action () m
 render state =
   HH.div
-    [ HP.classes [ HH.ClassName "showcase-page" ] ]
+    [ HP.classes [ HH.ClassName "algorave-showcase" ] ]
     [ SiteNav.render
         { logoSize: SiteNav.Large
         , quadrant: SiteNav.NoQuadrant
         , prevNext: Nothing
-        , pageTitle: Just "Algorave Visualizer"
+        , pageTitle: Just "Algorave Pattern Visualizer"
         }
 
-    , HH.main_
-        [ HH.section
-            [ HP.classes [ HH.ClassName "showcase-section" ] ]
-            [ HH.h1_ [ HH.text "Algorave Set Visualization" ]
-            , HH.p_
-                [ HH.text "Visualizing the structure of live-coded music. Each tree represents a pattern, the forest represents the complete set." ]
-            , HH.p
-                [ HP.classes [ HH.ClassName "example-attribution" ] ]
-                [ HH.text "Example: "
-                , HH.strong_ [ HH.text "\"lo-fi birds\"" ]
-                , HH.text " by keisi (from "
-                , HH.a
-                    [ HP.href "https://strudel.cc/"
-                    , HP.target "_blank"
-                    ]
-                    [ HH.text "Strudel REPL" ]
-                , HH.text ")"
+    -- Fullscreen visualization container
+    , HH.div
+        [ HP.classes [ HH.ClassName "fullscreen-container", HH.ClassName "algorave-viz-container" ] ]
+        [ -- Main viz area
+          HH.div
+            [ HP.id "pattern-forest-viz"
+            , HP.classes [ HH.ClassName "fullscreen-viz", HH.ClassName "svg-container" ]
+            ]
+            []
+
+        -- Floating input panel (top-left)
+        , HH.div
+            [ HP.classes
+                [ HH.ClassName "floating-panel"
+                , HH.ClassName "floating-panel--top-left"
+                , HH.ClassName "floating-panel--medium"
+                , HH.ClassName "algorave-input-panel"
                 ]
             ]
-
-        , HH.section
-            [ HP.classes [ HH.ClassName "showcase-section" ] ]
-            [ HH.h2_ [ HH.text "Pattern Forest" ]
-            , HH.p_ [ HH.text "Click a track name to toggle it on/off (like commenting/uncommenting in the REPL). Active tracks shown with ✓" ]
-            , HH.div
-                [ HP.classes [ HH.ClassName "track-list" ] ]
-                (Array.mapWithIndex renderTrack state.tracks)
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
+                [ HH.text "Input Patterns" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "code-display" ] ]
+                [ HH.code_ [ HH.text $ generateInputCode state.tracks ] ]
             ]
 
-        , HH.section
-            [ HP.classes [ HH.ClassName "showcase-section" ] ]
-            [ HH.h2_ [ HH.text "Mini-notation Output" ]
-            , HH.p_ [ HH.text "Generated Tidal code from the active patterns:" ]
+        -- Floating output panel (top-right)
+        , HH.div
+            [ HP.classes
+                [ HH.ClassName "floating-panel"
+                , HH.ClassName "floating-panel--top-right"
+                , HH.ClassName "floating-panel--medium"
+                , HH.ClassName "algorave-output-panel"
+                ]
+            ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
+                [ HH.text "Round-trip Output" ]
             , HH.pre
-                [ HP.classes [ HH.ClassName "code-output" ] ]
+                [ HP.classes [ HH.ClassName "code-display" ] ]
                 [ HH.code_ [ HH.text $ generateTidalCode state.tracks ] ]
             ]
 
-        , HH.section
-            [ HP.classes [ HH.ClassName "showcase-section" ] ]
-            [ HH.h2_ [ HH.text "Parser Test" ]
-            , HH.p_ [ HH.text "Test the mini-notation parser. Try: \"bd sd hh ~\" or \"bd [sd cp] hh\"" ]
-            , HH.div
-                [ HP.classes [ HH.ClassName "parser-test" ] ]
-                [ HH.input
-                    [ HP.type_ HP.InputText
-                    , HP.value state.parserInput
-                    , HP.placeholder "Enter mini-notation..."
-                    , HE.onValueInput UpdateParserInput
-                    , HP.classes [ HH.ClassName "parser-input" ]
-                    ]
-                , HH.button
-                    [ HE.onClick \_ -> ParseInput
-                    , HP.classes [ HH.ClassName "parse-button" ]
-                    ]
-                    [ HH.text "Parse" ]
-                , renderParserResult state.parserResult
+        -- Floating control panel (bottom-center)
+        , HH.div
+            [ HP.classes
+                [ HH.ClassName "floating-panel"
+                , HH.ClassName "floating-panel--bottom-center"
+                , HH.ClassName "floating-panel--small"
+                , HH.ClassName "algorave-control-panel"
                 ]
+            ]
+            [ -- Layout toggle
+              HH.div
+                [ HP.classes [ HH.ClassName "control-group" ] ]
+                [ HH.div
+                    [ HP.classes [ HH.ClassName "button-row" ] ]
+                    [ HH.button
+                        [ HE.onClick \_ -> SetLayout LinearLayout
+                        , HP.classes
+                            [ HH.ClassName "control-button"
+                            , HH.ClassName "control-button--secondary"
+                            , HH.ClassName if state.layout == LinearLayout then "active" else ""
+                            ]
+                        ]
+                        [ HH.text "Linear" ]
+                    , HH.button
+                        [ HE.onClick \_ -> SetLayout RadialLayout
+                        , HP.classes
+                            [ HH.ClassName "control-button"
+                            , HH.ClassName "control-button--secondary"
+                            , HH.ClassName if state.layout == RadialLayout then "active" else ""
+                            ]
+                        ]
+                        [ HH.text "Radial" ]
+                    , HH.button
+                        [ HE.onClick \_ -> SetLayout IsometricLayout
+                        , HP.classes
+                            [ HH.ClassName "control-button"
+                            , HH.ClassName "control-button--secondary"
+                            , HH.ClassName if state.layout == IsometricLayout then "active" else ""
+                            ]
+                        ]
+                        [ HH.text "Isometric" ]
+                    ]
+                ]
+            -- Visualize button
+            , HH.button
+                [ HE.onClick \_ -> RenderForest
+                , HP.classes [ HH.ClassName "control-button", HH.ClassName "control-button--primary" ]
+                ]
+                [ HH.text "▶ Visualize" ]
             ]
         ]
     ]
 
-renderTrack :: forall w. Int -> Track -> HH.HTML w Action
-renderTrack idx track =
-  HH.div
-    [ HP.classes
-        [ HH.ClassName "track-item"
-        , HH.ClassName $ if track.active then "active" else "inactive"
-        ]
-    ]
-    [ HH.button
-        [ HP.classes [ HH.ClassName "track-toggle" ]
-        , HE.onClick \_ -> ToggleTrack idx
-        ]
-        [ HH.text $ (if track.active then "✓" else "○") <> " " <> track.name ]
-    , HH.div
-        [ HP.classes [ HH.ClassName "pattern-viz" ] ]
-        [ renderPatternTree track.pattern ]
-    ]
-
--- | Render a pattern tree (text for now, will use PSD3 tree layout later)
-renderPatternTree :: forall w i. PatternTree -> HH.HTML w i
-renderPatternTree = case _ of
-  Sound s -> HH.span [ HP.classes [ HH.ClassName "sound-node" ] ] [ HH.text s ]
-  Rest -> HH.span [ HP.classes [ HH.ClassName "rest-node" ] ] [ HH.text "~" ]
-  Sequence children ->
-    HH.div
-      [ HP.classes [ HH.ClassName "sequence-node" ] ]
-      [ HH.span [ HP.classes [ HH.ClassName "node-label" ] ] [ HH.text "seq:" ]
-      , HH.div
-          [ HP.classes [ HH.ClassName "node-children" ] ]
-          (map renderPatternTree children)
-      ]
-  Parallel children ->
-    HH.div
-      [ HP.classes [ HH.ClassName "parallel-node" ] ]
-      [ HH.span [ HP.classes [ HH.ClassName "node-label" ] ] [ HH.text "par:" ]
-      , HH.div
-          [ HP.classes [ HH.ClassName "node-children" ] ]
-          (map renderPatternTree children)
-      ]
-  Choice children ->
-    HH.div
-      [ HP.classes [ HH.ClassName "choice-node" ] ]
-      [ HH.span [ HP.classes [ HH.ClassName "node-label" ] ] [ HH.text "choice:" ]
-      , HH.div
-          [ HP.classes [ HH.ClassName "node-children" ] ]
-          (map renderPatternTree children)
-      ]
+-- | Generate input code (all patterns as-is)
+generateInputCode :: Array Track -> String
+generateInputCode tracks =
+  String.joinWith "\n" $
+    Array.mapMaybe (\t ->
+      Just $ t.name <> " $ sound \"" <> patternToMiniNotation t.pattern <> "\""
+    ) tracks
 
 -- | Generate Tidal mini-notation from pattern tree
 patternToMiniNotation :: PatternTree -> String
@@ -273,22 +272,3 @@ generateTidalCode tracks =
         else Just $ "-- " <> t.name <> " $ sound \"" <> patternToMiniNotation t.pattern <> "\""
     ) tracks
 
--- | Render parser result
-renderParserResult :: forall w i. Maybe (Either ParseError PatternTree) -> HH.HTML w i
-renderParserResult = case _ of
-  Nothing ->
-    HH.div
-      [ HP.classes [ HH.ClassName "parser-result" ] ]
-      [ HH.text "Click Parse to see the result" ]
-  Just (Left err) ->
-    HH.div
-      [ HP.classes [ HH.ClassName "parser-result", HH.ClassName "error" ] ]
-      [ HH.text $ "Parse error: " <> show err ]
-  Just (Right tree) ->
-    HH.div
-      [ HP.classes [ HH.ClassName "parser-result", HH.ClassName "success" ] ]
-      [ HH.div
-          [ HP.classes [ HH.ClassName "result-label" ] ]
-          [ HH.text "Parsed successfully:" ]
-      , renderPatternTree tree
-      ]
