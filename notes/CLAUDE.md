@@ -8,7 +8,7 @@ This is a PureScript library implementing a Finally Tagless embedded DSL for bui
 
 ## Repository Structure
 
-This is a **Spago monorepo** with three packages:
+This is a **Spago monorepo** with four packages:
 
 ```
 ├── psd3-selection/       # Core D3 selection/attribute library (publishable)
@@ -17,8 +17,11 @@ This is a **Spago monorepo** with three packages:
 ├── psd3-simulation/      # Force simulation library (publishable)
 │   ├── spago.yaml        # Depends on psd3-selection
 │   └── src/PSD3/         # ForceEngine, Config
+├── psd3-tidal/           # TidalCycles mini-notation parser (publishable)
+│   ├── spago.yaml        # Standalone package
+│   └── src/Tidal/        # AST, Parser, Pretty-printer
 ├── demo-website/         # Documentation and examples website
-│   ├── spago.yaml        # Depends on both libraries
+│   ├── spago.yaml        # Depends on all libraries
 │   ├── src/              # Halogen components, visualizations
 │   └── public/           # Static assets, bundle.js
 └── spago.yaml            # Workspace-only config (no package section)
@@ -87,6 +90,37 @@ Force-directed graph simulation:
 - `Force.purs`: Immutable force configuration
 - `Scene.purs`: Scene definitions
 - `Apply.purs`: Apply configs to simulations
+
+### psd3-tidal Package
+
+TidalCycles mini-notation parser for visual pattern editing:
+
+**Core** (Tidal/Core/):
+- `Types.purs`: Time (Rational), SourceSpan, Seed, ControlName
+
+**AST** (Tidal/AST/):
+- `Types.purs`: TPat data type with 14 constructors (Atom, Silence, Seq, Stack, Fast, Slow, Polyrhythm, Euclid, etc.)
+- `Pretty.purs`: Round-trip serialization back to mini-notation strings
+
+**Parser** (Tidal/Parse/):
+- `Class.purs`: AtomParseable class with instances for String, Number, Int, Rational
+- `Combinators.purs`: Parser implementation using purescript-parsing
+- `Parser.purs`: Entry points (parseTPat, parseMini)
+- `State.purs`: Parser state for deterministic seed generation
+
+**Usage**:
+```purescript
+import Tidal.Parse.Parser (parseTPat)
+import Tidal.AST.Pretty (pretty)
+
+-- Parse mini-notation
+let ast = parseTPat "bd sn [hh hh]*2" :: Either _ (TPat String)
+
+-- Round-trip back to string
+let src = pretty <$> ast  -- Right "bd sn [hh hh]*2"
+```
+
+See `notes/TIDAL_VISUAL_EDITOR_GUIDE.md` for integration with PSD3 visual editing.
 
 ### demo-website Package
 

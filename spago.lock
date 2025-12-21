@@ -493,14 +493,17 @@
             "nullable",
             "numbers",
             "ordered-collections",
+            "parsing",
             "partial",
             "prelude",
             "profunctor",
             "profunctor-lenses",
             "psci-support",
             "psd3-layout",
+            "psd3-music",
             "psd3-selection",
             "psd3-simulation",
+            "psd3-tidal",
             "random",
             "read",
             "refs",
@@ -562,6 +565,7 @@
             "indexed-monad",
             "integers",
             "invariant",
+            "js-bigints",
             "js-date",
             "js-promise",
             "js-uri",
@@ -577,16 +581,20 @@
             "ordered-collections",
             "orders",
             "parallel",
+            "parsing",
             "partial",
             "prelude",
             "profunctor",
             "profunctor-lenses",
             "psci-support",
             "psd3-layout",
+            "psd3-music",
             "psd3-selection",
             "psd3-simulation",
+            "psd3-tidal",
             "psd3-tree",
             "random",
+            "rationals",
             "read",
             "record",
             "refs",
@@ -603,6 +611,7 @@
             "type-equality",
             "typelevel-prelude",
             "unfoldable",
+            "unicode",
             "unsafe-coerce",
             "unsafe-reference",
             "validation",
@@ -767,6 +776,107 @@
             "typelevel-prelude",
             "unfoldable",
             "unsafe-coerce"
+          ]
+        }
+      },
+      "psd3-music": {
+        "path": "psd3-music",
+        "core": {
+          "dependencies": [
+            "arrays",
+            "console",
+            "effect",
+            "either",
+            "foldable-traversable",
+            "functions",
+            "maybe",
+            "newtype",
+            "numbers",
+            "ordered-collections",
+            "prelude",
+            "psd3-selection",
+            "refs",
+            "transformers",
+            "tuples",
+            "unsafe-coerce"
+          ],
+          "build_plan": [
+            "aff",
+            "arrays",
+            "bifunctors",
+            "catenable-lists",
+            "colors",
+            "console",
+            "const",
+            "contravariant",
+            "control",
+            "datetime",
+            "debug",
+            "distributive",
+            "effect",
+            "either",
+            "enums",
+            "exceptions",
+            "exists",
+            "foldable-traversable",
+            "foreign",
+            "foreign-object",
+            "free",
+            "functions",
+            "functors",
+            "gen",
+            "graphs",
+            "identity",
+            "integers",
+            "invariant",
+            "js-date",
+            "lazy",
+            "lists",
+            "maybe",
+            "media-types",
+            "newtype",
+            "nonempty",
+            "now",
+            "nullable",
+            "numbers",
+            "ordered-collections",
+            "orders",
+            "parallel",
+            "partial",
+            "prelude",
+            "profunctor",
+            "psd3-selection",
+            "psd3-tree",
+            "refs",
+            "safe-coerce",
+            "st",
+            "strings",
+            "tailrec",
+            "transformers",
+            "tree-rose",
+            "tuples",
+            "type-equality",
+            "typelevel-prelude",
+            "unfoldable",
+            "unsafe-coerce",
+            "unsafe-reference",
+            "web-dom",
+            "web-events",
+            "web-file",
+            "web-html",
+            "web-storage",
+            "web-uievents"
+          ]
+        },
+        "test": {
+          "dependencies": [
+            "assert"
+          ],
+          "build_plan": [
+            "assert",
+            "console",
+            "effect",
+            "prelude"
           ]
         }
       },
@@ -997,6 +1107,154 @@
             "nullable",
             "prelude",
             "safe-coerce",
+            "unsafe-coerce"
+          ]
+        }
+      },
+      "psd3-tidal": {
+        "path": "psd3-tidal",
+        "core": {
+          "dependencies": [
+            "arrays",
+            "control",
+            "either",
+            "foldable-traversable",
+            "integers",
+            "maybe",
+            "newtype",
+            "ordered-collections",
+            "parsing",
+            "prelude",
+            "rationals",
+            "strings",
+            "transformers",
+            "tuples"
+          ],
+          "build_plan": [
+            "arrays",
+            "bifunctors",
+            "const",
+            "contravariant",
+            "control",
+            "distributive",
+            "effect",
+            "either",
+            "enums",
+            "exceptions",
+            "exists",
+            "foldable-traversable",
+            "functions",
+            "functors",
+            "gen",
+            "identity",
+            "integers",
+            "invariant",
+            "js-bigints",
+            "lazy",
+            "lists",
+            "maybe",
+            "newtype",
+            "nonempty",
+            "nullable",
+            "numbers",
+            "ordered-collections",
+            "orders",
+            "parsing",
+            "partial",
+            "prelude",
+            "profunctor",
+            "rationals",
+            "refs",
+            "safe-coerce",
+            "st",
+            "strings",
+            "tailrec",
+            "transformers",
+            "tuples",
+            "type-equality",
+            "unfoldable",
+            "unicode",
+            "unsafe-coerce"
+          ]
+        },
+        "test": {
+          "dependencies": [
+            "spec",
+            "spec-discovery"
+          ],
+          "build_plan": [
+            "aff",
+            "ansi",
+            "argonaut-codecs",
+            "argonaut-core",
+            "arraybuffer-types",
+            "arrays",
+            "avar",
+            "bifunctors",
+            "catenable-lists",
+            "console",
+            "const",
+            "contravariant",
+            "control",
+            "datetime",
+            "distributive",
+            "effect",
+            "either",
+            "enums",
+            "exceptions",
+            "exists",
+            "exitcodes",
+            "foldable-traversable",
+            "foreign",
+            "foreign-object",
+            "fork",
+            "free",
+            "functions",
+            "functors",
+            "gen",
+            "identity",
+            "integers",
+            "invariant",
+            "js-date",
+            "lazy",
+            "lists",
+            "maybe",
+            "mmorph",
+            "newtype",
+            "node-buffer",
+            "node-event-emitter",
+            "node-fs",
+            "node-path",
+            "node-process",
+            "node-streams",
+            "nonempty",
+            "now",
+            "nullable",
+            "numbers",
+            "open-memoize",
+            "optparse",
+            "ordered-collections",
+            "orders",
+            "parallel",
+            "partial",
+            "pipes",
+            "posix-types",
+            "prelude",
+            "profunctor",
+            "record",
+            "refs",
+            "safe-coerce",
+            "spec",
+            "spec-discovery",
+            "spec-node",
+            "st",
+            "strings",
+            "tailrec",
+            "transformers",
+            "tuples",
+            "type-equality",
+            "typelevel-prelude",
+            "unfoldable",
             "unsafe-coerce"
           ]
         }
@@ -1683,6 +1941,16 @@
         "prelude"
       ]
     },
+    "ansi": {
+      "type": "registry",
+      "version": "7.0.0",
+      "integrity": "sha256-ZMB6HD+q9CXvn9fRCmJ8dvuDrOVHcjombL3oNOerVnE=",
+      "dependencies": [
+        "foldable-traversable",
+        "lists",
+        "strings"
+      ]
+    },
     "argonaut-codecs": {
       "type": "registry",
       "version": "9.1.0",
@@ -1957,6 +2225,14 @@
       "integrity": "sha256-A0JQHpTfo1dNOj9U5/Fd3xndlRSE0g2IQWOGor2yXn8=",
       "dependencies": [
         "unsafe-coerce"
+      ]
+    },
+    "exitcodes": {
+      "type": "registry",
+      "version": "4.0.0",
+      "integrity": "sha256-4wxViTbyOoyKJ/WaRGI6+hZmgMKI5Miv16lSwefiLSM=",
+      "dependencies": [
+        "enums"
       ]
     },
     "foldable-traversable": {
@@ -2310,6 +2586,16 @@
         "prelude"
       ]
     },
+    "js-bigints": {
+      "type": "registry",
+      "version": "2.2.1",
+      "integrity": "sha256-hKWZo9NxtsAaHmNXr6B8GY4c0olQbYLXPVGWm4TF2Ss=",
+      "dependencies": [
+        "integers",
+        "maybe",
+        "prelude"
+      ]
+    },
     "js-date": {
       "type": "registry",
       "version": "8.0.0",
@@ -2431,6 +2717,16 @@
       "dependencies": [
         "newtype",
         "prelude"
+      ]
+    },
+    "mmorph": {
+      "type": "registry",
+      "version": "7.0.0",
+      "integrity": "sha256-urZlZNNqGeQFe5D/ClHlR8QgGBNHTMFPtJ5S5IpflTQ=",
+      "dependencies": [
+        "free",
+        "functors",
+        "transformers"
       ]
     },
     "newtype": {
@@ -2652,6 +2948,22 @@
         "maybe"
       ]
     },
+    "open-memoize": {
+      "type": "registry",
+      "version": "6.2.0",
+      "integrity": "sha256-p1m7wF3aHQ80yUvqMs20OTMl496WS6YpKlmI2Nkg9j0=",
+      "dependencies": [
+        "either",
+        "integers",
+        "lazy",
+        "lists",
+        "maybe",
+        "partial",
+        "prelude",
+        "strings",
+        "tuples"
+      ]
+    },
     "options": {
       "type": "registry",
       "version": "7.0.0",
@@ -2661,6 +2973,43 @@
         "foreign",
         "foreign-object",
         "maybe",
+        "tuples"
+      ]
+    },
+    "optparse": {
+      "type": "registry",
+      "version": "5.0.1",
+      "integrity": "sha256-cEzEkNW4q0gZlXl4z0zn+H2vs6l2UAp7NPHCsois73k=",
+      "dependencies": [
+        "aff",
+        "arrays",
+        "bifunctors",
+        "console",
+        "control",
+        "effect",
+        "either",
+        "enums",
+        "exists",
+        "exitcodes",
+        "foldable-traversable",
+        "free",
+        "gen",
+        "integers",
+        "lazy",
+        "lists",
+        "maybe",
+        "newtype",
+        "node-buffer",
+        "node-process",
+        "node-streams",
+        "nonempty",
+        "numbers",
+        "open-memoize",
+        "partial",
+        "prelude",
+        "strings",
+        "tailrec",
+        "transformers",
         "tuples"
       ]
     },
@@ -2709,11 +3058,57 @@
         "transformers"
       ]
     },
+    "parsing": {
+      "type": "registry",
+      "version": "10.3.0",
+      "integrity": "sha256-ykIVIZcsyRcMxui1ZH+4GLzoVTstv6BRVZyz55+2TvI=",
+      "dependencies": [
+        "arrays",
+        "control",
+        "effect",
+        "either",
+        "enums",
+        "foldable-traversable",
+        "functions",
+        "identity",
+        "integers",
+        "lazy",
+        "lists",
+        "maybe",
+        "newtype",
+        "nullable",
+        "numbers",
+        "partial",
+        "prelude",
+        "st",
+        "strings",
+        "tailrec",
+        "transformers",
+        "tuples",
+        "unfoldable",
+        "unicode",
+        "unsafe-coerce"
+      ]
+    },
     "partial": {
       "type": "registry",
       "version": "4.0.0",
       "integrity": "sha256-fwXerld6Xw1VkReh8yeQsdtLVrjfGiVuC5bA1Wyo/J4=",
       "dependencies": []
+    },
+    "pipes": {
+      "type": "registry",
+      "version": "8.0.0",
+      "integrity": "sha256-kvfqGM4cPA/wCcBHbp5psouFw5dZGvku2462x7ZBwSY=",
+      "dependencies": [
+        "aff",
+        "lists",
+        "mmorph",
+        "prelude",
+        "tailrec",
+        "transformers",
+        "tuples"
+      ]
     },
     "posix-types": {
       "type": "registry",
@@ -2825,6 +3220,16 @@
         "integers"
       ]
     },
+    "rationals": {
+      "type": "registry",
+      "version": "6.0.0",
+      "integrity": "sha256-58lUkv9LTanrMJ9U/IYf+i4+NibDZb6suVfLOK4OKhA=",
+      "dependencies": [
+        "integers",
+        "js-bigints",
+        "prelude"
+      ]
+    },
     "read": {
       "type": "registry",
       "version": "1.0.1",
@@ -2931,6 +3336,85 @@
         "lists",
         "newtype",
         "prelude"
+      ]
+    },
+    "spec": {
+      "type": "registry",
+      "version": "8.1.1",
+      "integrity": "sha256-EM7UfQIaSgiw13LJ4ZASkfYmmRDKIlec3nYbGKFqGhk=",
+      "dependencies": [
+        "aff",
+        "ansi",
+        "arrays",
+        "avar",
+        "bifunctors",
+        "control",
+        "datetime",
+        "effect",
+        "either",
+        "exceptions",
+        "foldable-traversable",
+        "fork",
+        "identity",
+        "integers",
+        "lists",
+        "maybe",
+        "newtype",
+        "now",
+        "ordered-collections",
+        "parallel",
+        "pipes",
+        "prelude",
+        "refs",
+        "strings",
+        "tailrec",
+        "transformers",
+        "tuples"
+      ]
+    },
+    "spec-discovery": {
+      "type": "registry",
+      "version": "8.4.0",
+      "integrity": "sha256-ajaGtBe+WBnURPPxIfqyiBbxI9DvbCGpxpYYYrvi5nk=",
+      "dependencies": [
+        "aff",
+        "effect",
+        "foldable-traversable",
+        "prelude",
+        "spec",
+        "spec-node"
+      ]
+    },
+    "spec-node": {
+      "type": "registry",
+      "version": "0.0.3",
+      "integrity": "sha256-Bjzg6l4uOfMN/FV0SKuT1Mm8eMP9sloLGVcY/0MeMnI=",
+      "dependencies": [
+        "aff",
+        "argonaut-codecs",
+        "argonaut-core",
+        "arrays",
+        "control",
+        "datetime",
+        "effect",
+        "either",
+        "foldable-traversable",
+        "identity",
+        "integers",
+        "maybe",
+        "newtype",
+        "node-buffer",
+        "node-fs",
+        "node-process",
+        "now",
+        "numbers",
+        "optparse",
+        "ordered-collections",
+        "partial",
+        "prelude",
+        "spec",
+        "strings",
+        "tuples"
       ]
     },
     "st": {
@@ -3070,6 +3554,16 @@
         "partial",
         "prelude",
         "tuples"
+      ]
+    },
+    "unicode": {
+      "type": "registry",
+      "version": "6.0.0",
+      "integrity": "sha256-QJnTVZpmihEAUiMeYrfkusVoziJWp2hJsgi9bMQLue8=",
+      "dependencies": [
+        "foldable-traversable",
+        "maybe",
+        "strings"
       ]
     },
     "unsafe-coerce": {

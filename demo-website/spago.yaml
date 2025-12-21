@@ -35,6 +35,7 @@ package:
     - nullable
     - numbers
     - ordered-collections
+    - parsing
     - partial
     - prelude
     - profunctor
@@ -43,6 +44,7 @@ package:
     - psd3-music
     - psd3-selection
     - psd3-simulation
+    - psd3-tidal
     - psci-support
     - random
     - read

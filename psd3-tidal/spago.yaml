@@ -1,0 +1,29 @@
+package:
+  name: psd3-tidal
+  description: TidalCycles mini-notation parser for PureScript
+  publish:
+    version: 0.1.0
+    license: GPL-3.0-or-later
+    location:
+      githubOwner: afcondon
+      githubRepo: purescript-psd3-tidal
+  dependencies:
+    - arrays
+    - control
+    - either
+    - foldable-traversable
+    - integers
+    - maybe
+    - newtype
+    - ordered-collections
+    - parsing
+    - prelude
+    - rationals
+    - strings
+    - transformers
+    - tuples
+  test:
+    main: Test.Main
+    dependencies:
+      - spec
+      - spec-discovery

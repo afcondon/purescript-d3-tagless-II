@@ -2,7 +2,10 @@ module Component.AlgoraveViz where
 
 import Prelude
 
+import Component.MiniNotation (parseMiniNotation)
+import Component.PatternTree (PatternTree(..))
 import Data.Array as Array
+import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String as String
 import Effect.Aff.Class (class MonadAff)
@@ -12,13 +15,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.SiteNav as SiteNav
 import PSD3.Website.Types (Route(..))
-
--- | Pattern tree structure (minimal for now)
-data PatternTree
-  = Sequence (Array PatternTree)
-  | Parallel (Array PatternTree)
-  | Sound String
-  | Rest
+import Parsing (ParseError)
 
 -- | Named pattern (a track in the set)
 type Track =
@@ -83,17 +80,25 @@ exampleSet =
 -- | Component state
 type State =
   { tracks :: Array Track
+  , parserInput :: String
+  , parserResult :: Maybe (Either ParseError PatternTree)
   }
 
 -- | Component actions
 data Action
   = Initialize
   | ToggleTrack Int
+  | UpdateParserInput String
+  | ParseInput
 
 -- | Component definition
 component :: forall q i o m. MonadAff m => H.Component q i o m
 component = H.mkComponent
-  { initialState: \_ -> { tracks: exampleSet }
+  { initialState: \_ ->
+      { tracks: exampleSet
+      , parserInput: "bd sd hh ~"
+      , parserResult: Nothing
+      }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -109,6 +114,14 @@ handleAction = case _ of
     H.modify_ \s -> s
       { tracks = updateAt idx (\t -> t { active = not t.active }) s.tracks
       }
+
+  UpdateParserInput input -> do
+    H.modify_ \s -> s { parserInput = input }
+
+  ParseInput -> do
+    state <- H.get
+    let result = parseMiniNotation state.parserInput
+    H.modify_ \s -> s { parserResult = Just result }
 
 -- Helper to update array element
 updateAt :: forall a. Int -> (a -> a) -> Array a -> Array a
@@ -165,6 +178,28 @@ render state =
                 [ HP.classes [ HH.ClassName "code-output" ] ]
                 [ HH.code_ [ HH.text $ generateTidalCode state.tracks ] ]
             ]
+
+        , HH.section
+            [ HP.classes [ HH.ClassName "showcase-section" ] ]
+            [ HH.h2_ [ HH.text "Parser Test" ]
+            , HH.p_ [ HH.text "Test the mini-notation parser. Try: \"bd sd hh ~\" or \"bd [sd cp] hh\"" ]
+            , HH.div
+                [ HP.classes [ HH.ClassName "parser-test" ] ]
+                [ HH.input
+                    [ HP.type_ HP.InputText
+                    , HP.value state.parserInput
+                    , HP.placeholder "Enter mini-notation..."
+                    , HE.onValueInput UpdateParserInput
+                    , HP.classes [ HH.ClassName "parser-input" ]
+                    ]
+                , HH.button
+                    [ HE.onClick \_ -> ParseInput
+                    , HP.classes [ HH.ClassName "parse-button" ]
+                    ]
+                    [ HH.text "Parse" ]
+                , renderParserResult state.parserResult
+                ]
+            ]
         ]
     ]
 
@@ -207,6 +242,14 @@ renderPatternTree = case _ of
           [ HP.classes [ HH.ClassName "node-children" ] ]
           (map renderPatternTree children)
       ]
+  Choice children ->
+    HH.div
+      [ HP.classes [ HH.ClassName "choice-node" ] ]
+      [ HH.span [ HP.classes [ HH.ClassName "node-label" ] ] [ HH.text "choice:" ]
+      , HH.div
+          [ HP.classes [ HH.ClassName "node-children" ] ]
+          (map renderPatternTree children)
+      ]
 
 -- | Generate Tidal mini-notation from pattern tree
 patternToMiniNotation :: PatternTree -> String
@@ -217,6 +260,8 @@ patternToMiniNotation = case _ of
     String.joinWith " " (map patternToMiniNotation children)
   Parallel children ->
     "[" <> String.joinWith ", " (map patternToMiniNotation children) <> "]"
+  Choice children ->
+    String.joinWith " | " (map patternToMiniNotation children)
 
 -- | Generate complete Tidal code for all active tracks
 generateTidalCode :: Array Track -> String
@@ -227,3 +272,23 @@ generateTidalCode tracks =
         then Just $ t.name <> " $ sound \"" <> patternToMiniNotation t.pattern <> "\""
         else Just $ "-- " <> t.name <> " $ sound \"" <> patternToMiniNotation t.pattern <> "\""
     ) tracks
+
+-- | Render parser result
+renderParserResult :: forall w i. Maybe (Either ParseError PatternTree) -> HH.HTML w i
+renderParserResult = case _ of
+  Nothing ->
+    HH.div
+      [ HP.classes [ HH.ClassName "parser-result" ] ]
+      [ HH.text "Click Parse to see the result" ]
+  Just (Left err) ->
+    HH.div
+      [ HP.classes [ HH.ClassName "parser-result", HH.ClassName "error" ] ]
+      [ HH.text $ "Parse error: " <> show err ]
+  Just (Right tree) ->
+    HH.div
+      [ HP.classes [ HH.ClassName "parser-result", HH.ClassName "success" ] ]
+      [ HH.div
+          [ HP.classes [ HH.ClassName "result-label" ] ]
+          [ HH.text "Parsed successfully:" ]
+      , renderPatternTree tree
+      ]
