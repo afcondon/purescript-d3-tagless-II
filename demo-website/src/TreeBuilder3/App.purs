@@ -42,7 +42,7 @@ import PSD3.Expr.Friendly as F
 import PSD3.AST as T
 import PSD3.Transform (clearContainer)
 import TreeBuilder3.Types (TreeNode, DslNodeType(..), AttrKind(..), BehaviorKind(..), DatumType(..), nodeLabel, nodeKeyHints, datumTypeLabel)
-import TreeBuilder3.TypePropagation (propagateTypes, pointType, nodeType, linkType, countryType, cellType, rowType, boardType)
+import TreeBuilder3.TypePropagation (propagateTypes, pointType, nodeType, linkType, countryType, cellType, rowType, boardType, letterType)
 import TreeBuilder3.Theme as Theme
 import TreeBuilder3.TreeOps
   ( LinkData
@@ -121,6 +121,7 @@ data SampleDataId
   | SampleScatterPlot
   | SampleForceGraph
   | SampleGapminder
+  | SampleGupLetters
 
 derive instance eqSampleDataId :: Eq SampleDataId
 derive instance ordSampleDataId :: Ord SampleDataId
@@ -164,12 +165,12 @@ allAstPresets = [ AstEmpty, AstGrid, AstScatter, AstBubble, AstTree, AstUpdateJo
 -- | Get compatible DatumTypes for an AST preset
 compatibleTypesForAst :: AstPreset -> Array DatumType
 compatibleTypesForAst = case _ of
-  AstEmpty -> [ pointType, nodeType, countryType, boardType ] -- Try Me: all types available
+  AstEmpty -> [ pointType, nodeType, countryType, boardType, letterType ] -- Try Me: all types available
   AstGrid -> [ boardType ]
   AstScatter -> [ pointType ]
   AstBubble -> [ countryType ]
   AstTree -> [ nodeType ]
-  AstUpdateJoin -> [] -- Letter type not yet defined
+  AstUpdateJoin -> [ letterType ] -- GUP demo with letters
 
 -- | Get compatible SampleDataIds for a DatumType
 compatibleDatasetsForType :: DatumType -> Array SampleDataId
@@ -178,6 +179,7 @@ compatibleDatasetsForType t
   | t == countryType = [ SampleGapminder ]
   | t == nodeType = [ SampleForceGraph ]
   | t == pointType = [ SampleScatterPlot ]
+  | t == letterType = [ SampleGupLetters ]
   | otherwise = []
 
 -- | Check if a type is compatible with the current AST
@@ -614,6 +616,8 @@ handleAction = case _ of
       Just listener -> do
         liftEffect $ renderTreeViz state' listener
         liftEffect $ setupZoomWithCallback state'.zoomTransform listener
+        -- Render output visualization if ready
+        liftEffect $ renderOutputViz state'
       Nothing -> pure unit
 
 -- | Handle keys - context depends on selected node's type
@@ -1979,6 +1983,7 @@ makeDataCards maybeType selectedSample =
     , { name: "Gapminder", desc: "Health & wealth", sampleId: SampleGapminder }
     , { name: "Force Graph", desc: "Node network", sampleId: SampleForceGraph }
     , { name: "Scatter Plot", desc: "X/Y points", sampleId: SampleScatterPlot }
+    , { name: "GUP Letters", desc: "Enter/Update/Exit", sampleId: SampleGupLetters }
     ]
 
   mkCard :: Int -> { name :: String, desc :: String, sampleId :: SampleDataId } -> DataCard
@@ -2099,6 +2104,7 @@ sampleIdLabel = case _ of
   SampleScatterPlot -> "Scatter Plot"
   SampleForceGraph -> "Force Graph"
   SampleGapminder -> "Gapminder"
+  SampleGupLetters -> "GUP Letters"
 
 -- =============================================================================
 -- TryMe Mode: English Description & Popup
@@ -2188,4 +2194,593 @@ renderTryMePopup =
             ]
         ]
     ]
+
+-- =============================================================================
+-- Output Visualization Rendering
+-- =============================================================================
+
+-- | Render the output visualization when state is ready
+renderOutputViz :: State -> Effect Unit
+renderOutputViz state
+  -- TryMe mode doesn't render a visualization
+  | state.selectedAstPreset == AstEmpty = pure unit
+  -- Only render if we have selected sample data
+  | otherwise = case state.selectedSampleData of
+      Nothing -> pure unit
+      Just sampleId -> do
+        -- Clear and render
+        clearOutputContainer
+        renderForPreset state.selectedAstPreset sampleId
+
+-- | Clear the output SVG container
+clearOutputContainer :: Effect Unit
+clearOutputContainer = clearContainer "#tree-builder3-output-svg"
+
+-- | Render visualization for a specific preset and sample data
+renderForPreset :: AstPreset -> SampleDataId -> Effect Unit
+renderForPreset preset sampleId = case preset of
+  AstEmpty -> pure unit  -- TryMe mode - no rendering
+  AstGrid -> renderGridViz sampleId
+  AstScatter -> renderScatterViz sampleId
+  AstBubble -> renderBubbleViz sampleId
+  AstTree -> renderTreeOutputViz sampleId
+  AstUpdateJoin -> renderGupViz sampleId
+
+-- =============================================================================
+-- Grid Visualization (Chess, Sudoku, Go)
+-- =============================================================================
+
+-- | Render a grid visualization for board games
+renderGridViz :: SampleDataId -> Effect Unit
+renderGridViz sampleId = do
+  let config = gridConfigFor sampleId
+  runD3v2M do
+    container <- select "#tree-builder3-output-svg" :: _ (D3v2Selection_ SEmpty Element Unit)
+    let
+      tree :: T.Tree { row :: Int, col :: Int, value :: String, color :: String }
+      tree =
+        T.named SVG "outputSvg"
+          [ F.width (F.num config.svgWidth)
+          , F.height (F.num config.svgHeight)
+          , F.viewBox 0.0 0.0 config.svgWidth config.svgHeight
+          ]
+          `T.withChild`
+            ( T.named Group "board"
+                [ F.transform $ F.text $ "translate(" <> show config.padding <> "," <> show config.padding <> ")" ]
+                `T.withChild`
+                  ( T.joinData "cells" "g" config.data $ \cell ->
+                      T.elem Group
+                        [ F.transform $ F.text $
+                            "translate(" <> show (toNumber cell.col * config.cellSize) <>
+                            "," <> show (toNumber cell.row * config.cellSize) <> ")"
+                        ]
+                        `T.withChild`
+                          ( T.elem Rect
+                              [ F.x $ F.num 0.0
+                              , F.y $ F.num 0.0
+                              , F.width $ F.num (config.cellSize - 1.0)
+                              , F.height $ F.num (config.cellSize - 1.0)
+                              , F.fill $ F.text cell.color
+                              , F.stroke $ F.hex "#333"
+                              , F.strokeWidth $ F.num 0.5
+                              ]
+                          )
+                        `T.withChild`
+                          ( T.elem Text
+                              [ F.x $ F.num (config.cellSize / 2.0)
+                              , F.y $ F.num (config.cellSize / 2.0 + 4.0)
+                              , F.textAnchor $ F.text "middle"
+                              , F.fontSize $ F.text config.fontSize
+                              , F.fill $ F.text config.textColor
+                              , F.textContent $ F.text cell.value
+                              ]
+                          )
+                  )
+            )
+    _ <- renderTree container tree
+    pure unit
+
+-- | Configuration for grid visualizations
+type GridConfig =
+  { svgWidth :: Number
+  , svgHeight :: Number
+  , cellSize :: Number
+  , padding :: Number
+  , fontSize :: String
+  , textColor :: String
+  , data :: Array { row :: Int, col :: Int, value :: String, color :: String }
+  }
+
+-- | Get grid config for a sample ID
+gridConfigFor :: SampleDataId -> GridConfig
+gridConfigFor SampleChess =
+  { svgWidth: 200.0
+  , svgHeight: 200.0
+  , cellSize: 22.0
+  , padding: 5.0
+  , fontSize: "14px"
+  , textColor: "#000"
+  , data: chessData
+  }
+gridConfigFor SampleSudoku =
+  { svgWidth: 200.0
+  , svgHeight: 200.0
+  , cellSize: 20.0
+  , padding: 5.0
+  , fontSize: "11px"
+  , textColor: "#333"
+  , data: sudokuData
+  }
+gridConfigFor SampleGo =
+  { svgWidth: 200.0
+  , svgHeight: 200.0
+  , cellSize: 20.0
+  , padding: 5.0
+  , fontSize: "16px"
+  , textColor: "#000"
+  , data: goData
+  }
+gridConfigFor _ =
+  { svgWidth: 200.0
+  , svgHeight: 200.0
+  , cellSize: 20.0
+  , padding: 5.0
+  , fontSize: "12px"
+  , textColor: "#333"
+  , data: []
+  }
+
+-- | Chess board data (8x8)
+chessData :: Array { row :: Int, col :: Int, value :: String, color :: String }
+chessData = do
+  row <- Array.range 0 7
+  col <- Array.range 0 7
+  let
+    isLight = (row + col) `mod` 2 == 0
+    color = if isLight then "#f0d9b5" else "#b58863"
+    -- Starting position pieces
+    piece = chessPiece row col
+  pure { row, col, value: piece, color }
+
+-- | Get chess piece for starting position
+chessPiece :: Int -> Int -> String
+chessPiece 0 0 = "♜"
+chessPiece 0 1 = "♞"
+chessPiece 0 2 = "♝"
+chessPiece 0 3 = "♛"
+chessPiece 0 4 = "♚"
+chessPiece 0 5 = "♝"
+chessPiece 0 6 = "♞"
+chessPiece 0 7 = "♜"
+chessPiece 1 _ = "♟"
+chessPiece 6 _ = "♙"
+chessPiece 7 0 = "♖"
+chessPiece 7 1 = "♘"
+chessPiece 7 2 = "♗"
+chessPiece 7 3 = "♕"
+chessPiece 7 4 = "♔"
+chessPiece 7 5 = "♗"
+chessPiece 7 6 = "♘"
+chessPiece 7 7 = "♖"
+chessPiece _ _ = ""
+
+-- | Sudoku data (9x9)
+sudokuData :: Array { row :: Int, col :: Int, value :: String, color :: String }
+sudokuData = do
+  row <- Array.range 0 8
+  col <- Array.range 0 8
+  let
+    -- Alternating 3x3 box colors
+    boxRow = row / 3
+    boxCol = col / 3
+    isAltBox = (boxRow + boxCol) `mod` 2 == 0
+    color = if isAltBox then "#e8e8e8" else "#ffffff"
+    value = sudokuValue row col
+  pure { row, col, value, color }
+
+-- | Get sudoku value (sample puzzle)
+sudokuValue :: Int -> Int -> String
+sudokuValue 0 0 = "5"
+sudokuValue 0 1 = "3"
+sudokuValue 0 4 = "7"
+sudokuValue 1 0 = "6"
+sudokuValue 1 3 = "1"
+sudokuValue 1 4 = "9"
+sudokuValue 1 5 = "5"
+sudokuValue 2 1 = "9"
+sudokuValue 2 2 = "8"
+sudokuValue 2 7 = "6"
+sudokuValue 3 0 = "8"
+sudokuValue 3 4 = "6"
+sudokuValue 3 8 = "3"
+sudokuValue 4 0 = "4"
+sudokuValue 4 3 = "8"
+sudokuValue 4 5 = "3"
+sudokuValue 4 8 = "1"
+sudokuValue 5 0 = "7"
+sudokuValue 5 4 = "2"
+sudokuValue 5 8 = "6"
+sudokuValue 6 1 = "6"
+sudokuValue 6 6 = "2"
+sudokuValue 6 7 = "8"
+sudokuValue 7 3 = "4"
+sudokuValue 7 4 = "1"
+sudokuValue 7 5 = "9"
+sudokuValue 7 8 = "5"
+sudokuValue 8 4 = "8"
+sudokuValue 8 7 = "7"
+sudokuValue 8 8 = "9"
+sudokuValue _ _ = ""
+
+-- | Go board data (9x9 sample)
+goData :: Array { row :: Int, col :: Int, value :: String, color :: String }
+goData = do
+  row <- Array.range 0 8
+  col <- Array.range 0 8
+  let
+    color = "#dcb35c"  -- Wood color
+    stone = goStone row col
+  pure { row, col, value: stone, color }
+
+-- | Get go stone (sample game position)
+goStone :: Int -> Int -> String
+goStone 2 2 = "●"  -- Black
+goStone 2 6 = "●"
+goStone 3 3 = "○"  -- White
+goStone 3 5 = "●"
+goStone 4 4 = "○"
+goStone 5 3 = "●"
+goStone 5 5 = "○"
+goStone 6 2 = "○"
+goStone 6 6 = "●"
+goStone _ _ = "·"  -- Grid point
+
+-- =============================================================================
+-- Scatter Visualization
+-- =============================================================================
+
+-- | Render a scatter plot
+renderScatterViz :: SampleDataId -> Effect Unit
+renderScatterViz _ = do
+  runD3v2M do
+    container <- select "#tree-builder3-output-svg" :: _ (D3v2Selection_ SEmpty Element Unit)
+    let
+      tree :: T.Tree { x :: Number, y :: Number, color :: String }
+      tree =
+        T.named SVG "outputSvg"
+          [ F.width (F.num 200.0)
+          , F.height (F.num 200.0)
+          , F.viewBox 0.0 0.0 200.0 200.0
+          ]
+          `T.withChild`
+            ( T.named Group "points"
+                [ F.transform $ F.text "translate(20, 20)" ]
+                `T.withChild`
+                  ( T.joinData "circles" "circle" scatterData $ \pt ->
+                      T.elem Circle
+                        [ F.cx $ F.num pt.x
+                        , F.cy $ F.num (160.0 - pt.y)  -- Flip Y axis
+                        , F.r $ F.num 5.0
+                        , F.fill $ F.text pt.color
+                        , F.opacity $ F.num 0.7
+                        ]
+                  )
+            )
+          `T.withChild`
+            -- X axis
+            ( T.elem Line
+                [ F.x1 $ F.num 20.0
+                , F.y1 $ F.num 180.0
+                , F.x2 $ F.num 180.0
+                , F.y2 $ F.num 180.0
+                , F.stroke $ F.hex "#333"
+                , F.strokeWidth $ F.num 1.0
+                ]
+            )
+          `T.withChild`
+            -- Y axis
+            ( T.elem Line
+                [ F.x1 $ F.num 20.0
+                , F.y1 $ F.num 20.0
+                , F.x2 $ F.num 20.0
+                , F.y2 $ F.num 180.0
+                , F.stroke $ F.hex "#333"
+                , F.strokeWidth $ F.num 1.0
+                ]
+            )
+    _ <- renderTree container tree
+    pure unit
+
+-- | Sample scatter plot data
+scatterData :: Array { x :: Number, y :: Number, color :: String }
+scatterData =
+  [ { x: 20.0, y: 30.0, color: "#4A90E2" }
+  , { x: 40.0, y: 80.0, color: "#4A90E2" }
+  , { x: 60.0, y: 45.0, color: "#4A90E2" }
+  , { x: 80.0, y: 120.0, color: "#4A90E2" }
+  , { x: 100.0, y: 90.0, color: "#4A90E2" }
+  , { x: 120.0, y: 140.0, color: "#4A90E2" }
+  , { x: 140.0, y: 70.0, color: "#E24A4A" }
+  , { x: 50.0, y: 50.0, color: "#E24A4A" }
+  , { x: 90.0, y: 110.0, color: "#E24A4A" }
+  , { x: 130.0, y: 100.0, color: "#E24A4A" }
+  ]
+
+-- =============================================================================
+-- Bubble Visualization (Gapminder style)
+-- =============================================================================
+
+-- | Render a bubble chart
+renderBubbleViz :: SampleDataId -> Effect Unit
+renderBubbleViz _ = do
+  runD3v2M do
+    container <- select "#tree-builder3-output-svg" :: _ (D3v2Selection_ SEmpty Element Unit)
+    let
+      tree :: T.Tree { x :: Number, y :: Number, r :: Number, color :: String, label :: String }
+      tree =
+        T.named SVG "outputSvg"
+          [ F.width (F.num 200.0)
+          , F.height (F.num 200.0)
+          , F.viewBox 0.0 0.0 200.0 200.0
+          ]
+          `T.withChild`
+            ( T.named Group "bubbles"
+                [ F.transform $ F.text "translate(20, 20)" ]
+                `T.withChild`
+                  ( T.joinData "circles" "circle" bubbleData $ \pt ->
+                      T.elem Circle
+                        [ F.cx $ F.num pt.x
+                        , F.cy $ F.num (160.0 - pt.y)
+                        , F.r $ F.num pt.r
+                        , F.fill $ F.text pt.color
+                        , F.opacity $ F.num 0.6
+                        , F.stroke $ F.text pt.color
+                        , F.strokeWidth $ F.num 1.0
+                        ]
+                  )
+            )
+          `T.withChild`
+            -- X axis
+            ( T.elem Line
+                [ F.x1 $ F.num 20.0
+                , F.y1 $ F.num 180.0
+                , F.x2 $ F.num 180.0
+                , F.y2 $ F.num 180.0
+                , F.stroke $ F.hex "#333"
+                , F.strokeWidth $ F.num 1.0
+                ]
+            )
+          `T.withChild`
+            -- Y axis
+            ( T.elem Line
+                [ F.x1 $ F.num 20.0
+                , F.y1 $ F.num 20.0
+                , F.x2 $ F.num 20.0
+                , F.y2 $ F.num 180.0
+                , F.stroke $ F.hex "#333"
+                , F.strokeWidth $ F.num 1.0
+                ]
+            )
+          `T.withChild`
+            -- X label
+            ( T.elem Text
+                [ F.x $ F.num 100.0
+                , F.y $ F.num 195.0
+                , F.textAnchor $ F.text "middle"
+                , F.fontSize $ F.text "10px"
+                , F.fill $ F.hex "#666"
+                , F.textContent $ F.text "GDP per capita"
+                ]
+            )
+    _ <- renderTree container tree
+    pure unit
+
+-- | Sample bubble data (Gapminder-like)
+bubbleData :: Array { x :: Number, y :: Number, r :: Number, color :: String, label :: String }
+bubbleData =
+  [ { x: 30.0, y: 40.0, r: 15.0, color: "#E24A4A", label: "China" }      -- Asia
+  , { x: 100.0, y: 120.0, r: 20.0, color: "#4A90E2", label: "USA" }       -- Americas
+  , { x: 80.0, y: 100.0, r: 12.0, color: "#4AE24A", label: "Germany" }    -- Europe
+  , { x: 50.0, y: 60.0, r: 18.0, color: "#E24A4A", label: "India" }       -- Asia
+  , { x: 120.0, y: 130.0, r: 8.0, color: "#4AE24A", label: "UK" }         -- Europe
+  , { x: 90.0, y: 90.0, r: 10.0, color: "#4A90E2", label: "Brazil" }      -- Americas
+  , { x: 40.0, y: 30.0, r: 6.0, color: "#E2E24A", label: "Nigeria" }      -- Africa
+  ]
+
+-- =============================================================================
+-- Tree Visualization (Force Graph nodes)
+-- =============================================================================
+
+-- | Render a tree/node visualization
+-- | Uses a combined data type to render both links and nodes
+renderTreeOutputViz :: SampleDataId -> Effect Unit
+renderTreeOutputViz _ = do
+  runD3v2M do
+    container <- select "#tree-builder3-output-svg" :: _ (D3v2Selection_ SEmpty Element Unit)
+    let
+      tree :: T.Tree ForceGraphNode
+      tree =
+        T.named SVG "outputSvg"
+          [ F.width (F.num 200.0)
+          , F.height (F.num 200.0)
+          , F.viewBox 0.0 0.0 200.0 200.0
+          ]
+          `T.withChild`
+            -- Links (static, no data binding needed)
+            ( T.named Group "links"
+                []
+                `T.withChildren`
+                  (map renderLink nodeLinks)
+            )
+          `T.withChild`
+            -- Nodes (with data binding)
+            ( T.named Group "nodes"
+                []
+                `T.withChild`
+                  ( T.joinData "nodeGroups" "g" forceGraphData $ \node ->
+                      T.elem Group
+                        [ F.transform $ F.text $ "translate(" <> show node.x <> "," <> show node.y <> ")" ]
+                        `T.withChild`
+                          ( T.elem Circle
+                              [ F.cx $ F.num 0.0
+                              , F.cy $ F.num 0.0
+                              , F.r $ F.num 8.0
+                              , F.fill $ F.text (groupColor node.group)
+                              , F.stroke $ F.hex "#fff"
+                              , F.strokeWidth $ F.num 1.5
+                              ]
+                          )
+                        `T.withChild`
+                          ( T.elem Text
+                              [ F.x $ F.num 12.0
+                              , F.y $ F.num 4.0
+                              , F.fontSize $ F.text "10px"
+                              , F.fill $ F.hex "#333"
+                              , F.textContent $ F.text node.label
+                              ]
+                          )
+                  )
+            )
+    _ <- renderTree container tree
+    pure unit
+
+-- | Render a single link as a static line element
+renderLink :: { x1 :: Number, y1 :: Number, x2 :: Number, y2 :: Number } -> T.Tree ForceGraphNode
+renderLink link =
+  T.elem Line
+    [ F.x1 $ F.num link.x1
+    , F.y1 $ F.num link.y1
+    , F.x2 $ F.num link.x2
+    , F.y2 $ F.num link.y2
+    , F.stroke $ F.hex "#999"
+    , F.strokeWidth $ F.num 1.0
+    , F.opacity $ F.num 0.6
+    ]
+
+-- | Force graph node data type
+type ForceGraphNode = { x :: Number, y :: Number, label :: String, group :: Int }
+
+-- | Get color for force graph group
+groupColor :: Int -> String
+groupColor 0 = "#4A90E2"
+groupColor 1 = "#E24A4A"
+groupColor 2 = "#4AE24A"
+groupColor _ = "#999"
+
+-- | Sample force graph node data
+forceGraphData :: Array ForceGraphNode
+forceGraphData =
+  [ { x: 100.0, y: 50.0, label: "A", group: 0 }
+  , { x: 60.0, y: 100.0, label: "B", group: 0 }
+  , { x: 140.0, y: 100.0, label: "C", group: 1 }
+  , { x: 40.0, y: 150.0, label: "D", group: 0 }
+  , { x: 100.0, y: 150.0, label: "E", group: 1 }
+  , { x: 160.0, y: 150.0, label: "F", group: 2 }
+  ]
+
+-- | Links between nodes
+nodeLinks :: Array { x1 :: Number, y1 :: Number, x2 :: Number, y2 :: Number }
+nodeLinks =
+  [ { x1: 100.0, y1: 50.0, x2: 60.0, y2: 100.0 }   -- A-B
+  , { x1: 100.0, y1: 50.0, x2: 140.0, y2: 100.0 }  -- A-C
+  , { x1: 60.0, y1: 100.0, x2: 40.0, y2: 150.0 }   -- B-D
+  , { x1: 60.0, y1: 100.0, x2: 100.0, y2: 150.0 }  -- B-E
+  , { x1: 140.0, y1: 100.0, x2: 100.0, y2: 150.0 } -- C-E
+  , { x1: 140.0, y1: 100.0, x2: 160.0, y2: 150.0 } -- C-F
+  ]
+
+-- =============================================================================
+-- GUP Visualization (Enter/Update/Exit)
+-- =============================================================================
+
+-- | Render GUP demo (enter/update/exit letters)
+renderGupViz :: SampleDataId -> Effect Unit
+renderGupViz _ = do
+  runD3v2M do
+    container <- select "#tree-builder3-output-svg" :: _ (D3v2Selection_ SEmpty Element Unit)
+    let
+      tree :: T.Tree { letter :: String, x :: Number, phase :: String, color :: String }
+      tree =
+        T.named SVG "outputSvg"
+          [ F.width (F.num 200.0)
+          , F.height (F.num 200.0)
+          , F.viewBox 0.0 0.0 200.0 200.0
+          ]
+          `T.withChild`
+            -- Phase labels
+            ( T.elem Text
+                [ F.x $ F.num 100.0
+                , F.y $ F.num 25.0
+                , F.textAnchor $ F.text "middle"
+                , F.fontSize $ F.text "10px"
+                , F.fill $ F.hex "#4AE24A"
+                , F.textContent $ F.text "← Enter"
+                ]
+            )
+          `T.withChild`
+            ( T.elem Text
+                [ F.x $ F.num 100.0
+                , F.y $ F.num 95.0
+                , F.textAnchor $ F.text "middle"
+                , F.fontSize $ F.text "10px"
+                , F.fill $ F.hex "#4A90E2"
+                , F.textContent $ F.text "← Update"
+                ]
+            )
+          `T.withChild`
+            ( T.elem Text
+                [ F.x $ F.num 100.0
+                , F.y $ F.num 165.0
+                , F.textAnchor $ F.text "middle"
+                , F.fontSize $ F.text "10px"
+                , F.fill $ F.hex "#E24A4A"
+                , F.textContent $ F.text "← Exit"
+                ]
+            )
+          `T.withChild`
+            ( T.named Group "letters"
+                []
+                `T.withChild`
+                  ( T.joinData "letterGroups" "g" gupLetters $ \d ->
+                      T.elem Group
+                        [ F.transform $ F.text $ "translate(" <> show d.x <> "," <> show (phaseY d.phase) <> ")" ]
+                        `T.withChild`
+                          ( T.elem Text
+                              [ F.x $ F.num 0.0
+                              , F.y $ F.num 0.0
+                              , F.textAnchor $ F.text "middle"
+                              , F.fontSize $ F.text "24px"
+                              , F.fontFamily $ F.text "monospace"
+                              , F.fill $ F.text d.color
+                              , F.textContent $ F.text d.letter
+                              ]
+                          )
+                  )
+            )
+    _ <- renderTree container tree
+    pure unit
+
+-- | Get Y position for GUP phase
+phaseY :: String -> Number
+phaseY "enter" = 50.0
+phaseY "update" = 120.0
+phaseY "exit" = 190.0
+phaseY _ = 120.0
+
+-- | Sample GUP letter data
+gupLetters :: Array { letter :: String, x :: Number, phase :: String, color :: String }
+gupLetters =
+  -- New letters (enter)
+  [ { letter: "G", x: 30.0, phase: "enter", color: "#4AE24A" }
+  , { letter: "H", x: 60.0, phase: "enter", color: "#4AE24A" }
+  , { letter: "I", x: 90.0, phase: "enter", color: "#4AE24A" }
+  -- Existing letters (update)
+  , { letter: "D", x: 40.0, phase: "update", color: "#4A90E2" }
+  , { letter: "E", x: 70.0, phase: "update", color: "#4A90E2" }
+  , { letter: "F", x: 100.0, phase: "update", color: "#4A90E2" }
+  -- Removed letters (exit)
+  , { letter: "A", x: 50.0, phase: "exit", color: "#E24A4A" }
+  , { letter: "B", x: 80.0, phase: "exit", color: "#E24A4A" }
+  , { letter: "C", x: 110.0, phase: "exit", color: "#E24A4A" }
+  ]
 

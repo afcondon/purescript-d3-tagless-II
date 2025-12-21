@@ -12,6 +12,7 @@ module TreeBuilder3.TypePropagation
   , nodeType
   , linkType
   , countryType
+  , letterType
     -- * Array Types (for nested joins)
   , cellType
   , rowType
@@ -85,6 +86,13 @@ rowType = TypeArray cellType
 boardType :: DatumType
 boardType = TypeArray rowType
 
+-- | Letter type for GUP demo: { letter :: String, phase :: String }
+letterType :: DatumType
+letterType = TypeRecord "Letter"
+  [ { name: "letter", typ: TString }
+  , { name: "phase", typ: TString }
+  ]
+
 -- | All built-in types as a map from name to type
 builtinTypes :: Map String DatumType
 builtinTypes = Map.fromFoldable
@@ -92,6 +100,7 @@ builtinTypes = Map.fromFoldable
   , Tuple "Node" nodeType
   , Tuple "Link" linkType
   , Tuple "Country" countryType
+  , Tuple "Letter" letterType
   ]
 
 -- =============================================================================
