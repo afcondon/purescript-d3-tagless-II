@@ -11,7 +11,7 @@
 -- | - Loader provides raw graph data (nodes with targets/sources, links)
 -- | - TreeView calls this module to compute layout on demand
 -- | - Supports any root node, enabling subtree visualization
-module Data.TreeLayout
+module CE2.Data.TreeLayout
   ( computeTreeLayout
   , findRootModule
   , TreeLayoutResult
@@ -39,7 +39,7 @@ import Data.Number (cos, pi, sin)
 import DataViz.Layout.Hierarchy.Tree as Tree
 import PSD3.Data.Graph as Graph
 import PSD3.Data.Graph.Algorithms as Algorithms
-import Types (SimNode, SimLink, NodeType(..))
+import CE2.Types (SimNode, SimLink, NodeType(..))
 
 -- =============================================================================
 -- Types

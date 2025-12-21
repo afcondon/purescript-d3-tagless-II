@@ -7,7 +7,7 @@
 -- | - fetchProjects: get available projects with their snapshots
 -- | - loadModelForSnapshot: load model for a specific snapshot ID
 -- | - loadModel: (legacy) loads latest snapshot for backward compatibility
-module Data.Loader
+module CE2.Data.Loader
   ( loadModel
   , loadModelForSnapshot
   , loadModelForProject
@@ -66,7 +66,7 @@ import Foreign.Object (Object)
 import Foreign.Object as Object
 import Data.Graph.Algorithms as TopoAlgorithms
 import Data.Foldable (maximum) as Foldable
-import Types (SimNode, SimLink, NodeType(..), LinkType(..), Package)
+import CE2.Types (SimNode, SimLink, NodeType(..), LinkType(..), Package)
 
 -- | API base URL for ce-server
 -- | TODO: Make this configurable via environment or runtime config

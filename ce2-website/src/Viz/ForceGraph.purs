@@ -19,7 +19,7 @@
 -- | - renderForcePhase: Renders phase 3 (simulation active)
 -- | - buildSceneData: Pure function to build render data
 -- | - renderScene: Renders scene to DOM
-module Viz.ForceGraph
+module CE2.Viz.ForceGraph
   ( -- Simulation creation
     createSimulationWithCallbacks
   , ForceSimulation
@@ -60,8 +60,8 @@ import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Class.Console (log)
-import Types (SimNode, SimLink, NodeType(..))
-import Data.TreeLayout as TreeLayout
+import CE2.Types (SimNode, SimLink, NodeType(..))
+import CE2.Data.TreeLayout as TreeLayout
 import DataViz.Layout.Hierarchy.TreeStyle as TreeStyle
 import PSD3.ForceEngine.Simulation as Sim
 import PSD3.ForceEngine.Setup as Setup

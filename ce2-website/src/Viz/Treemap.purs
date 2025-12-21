@@ -8,7 +8,7 @@
 -- | - This module builds a declarative VizTree
 -- | - Library interprets the tree into D3 commands
 -- | - D3 manages its own DOM mutations (hidden from us)
-module Viz.Treemap
+module CE2.Viz.Treemap
   ( render
   , highlightDependencies
   , clearHighlight
@@ -25,8 +25,8 @@ import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
 import Effect (Effect)
 import Effect.Class.Console (log)
-import Types (SimNode, NodeType(..), Package)
-import ViewState (ViewState)
+import CE2.Types (SimNode, NodeType(..), Package)
+import CE2.ViewState (ViewState)
 import Data.Set as Set
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Classify (classifyElements, clearClasses)

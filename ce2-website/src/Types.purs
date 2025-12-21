@@ -1,5 +1,5 @@
 -- | Core types for Code Explorer
-module Types where
+module CE2.Types where
 
 import Prelude
 import Data.Maybe (Maybe)

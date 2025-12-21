@@ -3,7 +3,7 @@
 -- | Simplified architecture: four icon-selectable overview views,
 -- | with Neighborhood/FunctionCalls as modal overlays.
 -- | Detail views can be exited by clicking any overview icon.
-module ViewState
+module CE2.ViewState
   ( ViewState(..)
   , OverviewView(..)
   , DetailView(..)

@@ -6,7 +6,7 @@
 -- | The module provides two main APIs:
 -- | 1. Declaration type colors - for coloring by PureScript declaration kind
 -- | 2. Node colors - view-aware coloring for simulation nodes (packages/modules)
-module Data.ColorPalette
+module CE2.Data.ColorPalette
   ( -- * Palette Types
     PaletteType(..)
   , PaletteConfig
@@ -31,9 +31,9 @@ import Data.Array as Array
 import Data.Int (hexadecimal, fromStringAs)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String as String
-import ViewState (ViewState(..), OverviewView(..))
+import CE2.ViewState (ViewState(..), OverviewView(..))
 import PSD3.Scale (schemeTableau10At)
-import Types (SimNode, NodeType(..))
+import CE2.Types (SimNode, NodeType(..))
 
 -- =============================================================================
 -- Types

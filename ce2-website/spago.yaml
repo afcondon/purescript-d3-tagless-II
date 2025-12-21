@@ -2,7 +2,7 @@ package:
   name: ce2-website
   description: Code Explorer v2 - Clean functional architecture showcase
   bundle:
-    module: Main
+    module: CE2.Main
     outfile: public/bundle.js
     platform: browser
   dependencies:

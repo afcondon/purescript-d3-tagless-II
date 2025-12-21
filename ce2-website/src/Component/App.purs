@@ -10,7 +10,7 @@
 -- | 1. TreeGrowth: Nodes animate from center to radial tree positions
 -- | 2. LinkMorph: Bezier curves morph into straight lines
 -- | 3. ForceActive: Force simulation takes over, positions updated via ticks
-module Component.App where
+module CE2.Component.App where
 
 import Prelude
 
@@ -23,19 +23,19 @@ import Effect.Aff as Aff
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
-import Data.Loader as Loader
-import Data.TreeLayout as TreeLayout
-import Data.TreeLayout (findRootModule)
-import ViewState (ViewState(..), OverviewView(..), viewDescription)
+import CE2.Data.Loader as Loader
+import CE2.Data.TreeLayout as TreeLayout
+import CE2.Data.TreeLayout (findRootModule)
+import CE2.ViewState (ViewState(..), OverviewView(..), viewDescription)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
-import Types (SimNode)
-import Viz.Treemap as Treemap
-import Viz.TreeView as TreeView
-import Viz.ForceGraph as ForceGraph
+import CE2.Types (SimNode)
+import CE2.Viz.Treemap as Treemap
+import CE2.Viz.TreeView as TreeView
+import CE2.Viz.ForceGraph as ForceGraph
 import DataViz.Layout.Hierarchy.TreeStyle as TreeStyle
 import PSD3.Transition.Tick as Tick
 import PSD3.ForceEngine.Simulation as Sim

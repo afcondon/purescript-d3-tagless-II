@@ -1,4 +1,4 @@
-module Main where
+module CE2.Main where
 
 import Prelude
 
@@ -9,7 +9,7 @@ import Effect.Class.Console (log)
 import Halogen.Aff as HA
 import Halogen.VDom.Driver (runUI)
 import Web.DOM.ParentNode (QuerySelector(..))
-import Component.App as App
+import CE2.Component.App as App
 
 main :: Effect Unit
 main = HA.runHalogenAff do

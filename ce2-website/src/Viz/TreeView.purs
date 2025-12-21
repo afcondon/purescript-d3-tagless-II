@@ -9,7 +9,7 @@
 -- | - Treemap circles stay in DOM, we just move the "used" ones
 -- | - Tree links (paths) are added on first frame, then animated
 -- | - Unused modules stay in their treemap positions (low-key in blueprint)
-module Viz.TreeView
+module CE2.Viz.TreeView
   ( renderAnimated
   , resetToTreemap
   , AnimationState
@@ -32,9 +32,9 @@ import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Class.Console (log)
-import Types (SimNode, SimLink, NodeType(..))
-import Data.TreeLayout as TreeLayout
-import Data.TreeLayout (TreeOrientation(..))
+import CE2.Types (SimNode, SimLink, NodeType(..))
+import CE2.Data.TreeLayout as TreeLayout
+import CE2.Data.TreeLayout (TreeOrientation(..))
 import PSD3.Internal.Capabilities.Selection (select, renderTree)
 import PSD3.Interpreter.D3 (runD3v2M)
 import PSD3.Transform (transformCircles, transformPaths, removeElement)
