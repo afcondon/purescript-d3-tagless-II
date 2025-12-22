@@ -2,17 +2,21 @@ module Component.AlgoraveViz where
 
 import Prelude
 
-import Component.PatternTree (PatternTree(..))
-import D3.Viz.PatternTreeViz (drawPatternForest, drawPatternForestRadial, drawPatternForestIsometric)
+import Component.PatternTree (PatternTree(..), parseMiniNotation)
+import D3.Viz.PatternTreeViz (drawPatternForest, drawPatternForestRadial, drawPatternForestIsometric, drawPatternForestSunburst)
 import Data.Array as Array
+import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String as String
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
+import Effect.Console as Console
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Halogen.Subscription as HS
+import Parsing (parseErrorMessage)
 import PSD3.Shared.SiteNav as SiteNav
 
 -- | Named pattern (a track in the set)
@@ -76,7 +80,7 @@ exampleSet =
   ]
 
 -- | Tree layout style
-data LayoutStyle = LinearLayout | RadialLayout | IsometricLayout
+data LayoutStyle = LinearLayout | RadialLayout | IsometricLayout | SunburstLayout
 
 derive instance eqLayoutStyle :: Eq LayoutStyle
 
@@ -84,6 +88,8 @@ derive instance eqLayoutStyle :: Eq LayoutStyle
 type State =
   { tracks :: Array Track
   , layout :: LayoutStyle
+  , miniNotationInput :: String
+  , parseError :: Maybe String
   }
 
 -- | Component actions
@@ -92,13 +98,20 @@ data Action
   | ToggleTrack Int
   | SetLayout LayoutStyle
   | RenderForest
+  | ToggleTrackFromViz Int  -- Called from D3 viz click handler
+  | UpdateMiniNotation String
+  | ParseAndAddTrack
+  | AddPresetPattern String String  -- name, pattern
+  | ClearTracks
 
 -- | Component definition
 component :: forall q i o m. MonadAff m => H.Component q i o m
 component = H.mkComponent
   { initialState: \_ ->
       { tracks: exampleSet
-      , layout: IsometricLayout
+      , layout: SunburstLayout
+      , miniNotationInput: "bd sn*2 [cp hh]"
+      , parseError: Nothing
       }
   , render
   , eval: H.mkEval H.defaultEval
@@ -116,16 +129,68 @@ handleAction = case _ of
       { tracks = updateAt idx (\t -> t { active = not t.active }) s.tracks
       }
 
+  ToggleTrackFromViz idx -> do
+    -- Toggle track and re-render
+    H.modify_ \s -> s
+      { tracks = updateAt idx (\t -> t { active = not t.active }) s.tracks
+      }
+    handleAction RenderForest
+
   SetLayout layout -> do
     H.modify_ \s -> s { layout = layout }
+
+  UpdateMiniNotation input -> do
+    H.modify_ \s -> s { miniNotationInput = input, parseError = Nothing }
+
+  ParseAndAddTrack -> do
+    state <- H.get
+    let input = state.miniNotationInput
+    case parseMiniNotation input of
+      Left err -> do
+        liftEffect $ Console.log $ "Parse error: " <> parseErrorMessage err
+        H.modify_ \s -> s { parseError = Just (parseErrorMessage err) }
+      Right pattern -> do
+        -- Add new track with parsed pattern
+        liftEffect $ Console.log $ "Parsed pattern successfully: " <> show pattern
+        let trackName = "parsed" <> show (Array.length state.tracks + 1)
+        let newTrack = { name: trackName, pattern, active: true }
+        H.modify_ \s -> s
+          { tracks = Array.snoc s.tracks newTrack
+          , miniNotationInput = ""
+          , parseError = Nothing
+          }
+        liftEffect $ Console.log $ "Added track, now rendering..."
+        handleAction RenderForest
+
+  AddPresetPattern name patternStr -> do
+    case parseMiniNotation patternStr of
+      Left err -> do
+        liftEffect $ Console.log $ "Preset parse error: " <> parseErrorMessage err
+      Right pattern -> do
+        liftEffect $ Console.log $ "Adding preset: " <> name <> " = " <> show pattern
+        let newTrack = { name, pattern, active: true }
+        H.modify_ \s -> s { tracks = Array.snoc s.tracks newTrack }
+        handleAction RenderForest
+
+  ClearTracks -> do
+    H.modify_ \s -> s { tracks = [] }
+    handleAction RenderForest
 
   RenderForest -> do
     state <- H.get
     let activePatterns = Array.mapMaybe (\t -> if t.active then Just t.pattern else Nothing) state.tracks
+    -- For sunburst, show ALL tracks with track index for toggle callback
+    let allNamedPatterns = Array.mapWithIndex (\idx t ->
+          { name: t.name, pattern: t.pattern, trackIndex: idx, active: t.active }) state.tracks
     case state.layout of
       LinearLayout -> liftEffect $ drawPatternForest "#pattern-forest-viz" activePatterns
       RadialLayout -> liftEffect $ drawPatternForestRadial "#pattern-forest-viz" activePatterns
       IsometricLayout -> liftEffect $ drawPatternForestIsometric "#pattern-forest-viz" activePatterns
+      SunburstLayout -> do
+        -- Create emitter for click callbacks
+        { emitter, listener } <- liftEffect HS.create
+        _ <- H.subscribe (ToggleTrackFromViz <$> emitter)
+        liftEffect $ drawPatternForestSunburst "#pattern-forest-viz" allNamedPatterns (HS.notify listener)
 
 -- Helper to update array element
 updateAt :: forall a. Int -> (a -> a) -> Array a -> Array a
@@ -160,16 +225,62 @@ render state =
             [ HP.classes
                 [ HH.ClassName "floating-panel"
                 , HH.ClassName "floating-panel--top-left"
-                , HH.ClassName "floating-panel--medium"
+                , HH.ClassName "floating-panel--large"
                 , HH.ClassName "algorave-input-panel"
                 ]
             ]
             [ HH.h2
                 [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
-                [ HH.text "Input Patterns" ]
-            , HH.pre
-                [ HP.classes [ HH.ClassName "code-display" ] ]
-                [ HH.code_ [ HH.text $ generateInputCode state.tracks ] ]
+                [ HH.text "Mini-notation Parser" ]
+            -- Mini-notation input
+            , HH.div
+                [ HP.classes [ HH.ClassName "control-group" ] ]
+                [ HH.textarea
+                    [ HP.value state.miniNotationInput
+                    , HE.onValueInput UpdateMiniNotation
+                    , HP.placeholder "Enter Tidal pattern: bd sn*2 [cp hh]"
+                    , HP.rows 2
+                    , HP.classes [ HH.ClassName "mini-notation-input" ]
+                    ]
+                , HH.div
+                    [ HP.classes [ HH.ClassName "button-row" ] ]
+                    [ HH.button
+                        [ HE.onClick \_ -> ParseAndAddTrack
+                        , HP.classes [ HH.ClassName "control-button", HH.ClassName "control-button--primary" ]
+                        ]
+                        [ HH.text "+ Add" ]
+                    , HH.button
+                        [ HE.onClick \_ -> ClearTracks
+                        , HP.classes [ HH.ClassName "control-button", HH.ClassName "control-button--secondary" ]
+                        ]
+                        [ HH.text "Clear All" ]
+                    ]
+                -- Parse error display
+                , case state.parseError of
+                    Just err -> HH.div
+                      [ HP.classes [ HH.ClassName "parse-error" ] ]
+                      [ HH.text $ "Parse error: " <> err ]
+                    Nothing -> HH.text ""
+                ]
+            -- Preset patterns
+            , HH.h3
+                [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
+                [ HH.text "Test Patterns" ]
+            , HH.div
+                [ HP.classes [ HH.ClassName "preset-grid" ] ]
+                [ presetButton "fast" "808bd:05*4"
+                , presetButton "slow" "bd/2 sn"
+                , presetButton "euclid" "bd(3,8)"
+                , presetButton "choice" "<bd sn cp hh>"
+                , presetButton "group" "[tabla2:23 tabla2:09]"
+                , presetButton "mixed" "bd*2 [sn cp] hh"
+                , presetButton "rest" "bd ~ sn ~"
+                , presetButton "poly" "{bd sn, cp cp cp}"
+                , presetButton "prob" "bd? sn?0.5 cp"
+                , presetButton "repeat" "bd!4"
+                , presetButton "complex" "al_perc:00*2 [tabla2:23 tabla2:09]"
+                , presetButton "nested" "[bd sn] [cp [hh oh]]"
+                ]
             ]
 
         -- Floating output panel (top-right)
@@ -230,6 +341,15 @@ render state =
                             ]
                         ]
                         [ HH.text "Isometric" ]
+                    , HH.button
+                        [ HE.onClick \_ -> SetLayout SunburstLayout
+                        , HP.classes
+                            [ HH.ClassName "control-button"
+                            , HH.ClassName "control-button--secondary"
+                            , HH.ClassName if state.layout == SunburstLayout then "active" else ""
+                            ]
+                        ]
+                        [ HH.text "Sunburst" ]
                     ]
                 ]
             -- Visualize button
@@ -241,6 +361,16 @@ render state =
             ]
         ]
     ]
+
+-- | Helper to create a preset pattern button
+presetButton :: forall m. String -> String -> H.ComponentHTML Action () m
+presetButton name pattern =
+  HH.button
+    [ HE.onClick \_ -> AddPresetPattern name pattern
+    , HP.classes [ HH.ClassName "preset-button" ]
+    , HP.title pattern
+    ]
+    [ HH.text name ]
 
 -- | Generate input code (all patterns as-is)
 generateInputCode :: Array Track -> String
@@ -261,6 +391,18 @@ patternToMiniNotation = case _ of
     "[" <> String.joinWith ", " (map patternToMiniNotation children) <> "]"
   Choice children ->
     String.joinWith " | " (map patternToMiniNotation children)
+  Fast n child ->
+    patternToMiniNotation child <> "*" <> show n
+  Slow n child ->
+    patternToMiniNotation child <> "/" <> show n
+  Euclidean n k child ->
+    patternToMiniNotation child <> "(" <> show n <> "," <> show k <> ")"
+  Degrade prob child ->
+    patternToMiniNotation child <> "?" <> show prob
+  Repeat n child ->
+    patternToMiniNotation child <> "!" <> show n
+  Elongate n child ->
+    patternToMiniNotation child <> "@" <> show n
 
 -- | Generate complete Tidal code for all active tracks
 generateTidalCode :: Array Track -> String

@@ -3,6 +3,8 @@ module D3.Viz.PatternTreeViz
   , drawPatternForest
   , drawPatternForestRadial
   , drawPatternForestIsometric
+  , drawPatternForestSunburst
+  , NamedPattern
   ) where
 
 import Prelude
@@ -10,19 +12,23 @@ import Prelude
 import Component.PatternTree (PatternTree(..))
 import Control.Comonad.Cofree (head, tail)
 import Data.Array as Array
+import Data.Foldable (for_)
 import Data.Int as Int
 import Data.List (List(..))
-import Data.Number (pi, cos, sin, abs)
+import Data.Maybe (Maybe(..))
+import Data.Number (pi, cos, sin, abs, sqrt)
 import Data.Tree (Tree, mkTree)
 import DataViz.Layout.Hierarchy.Link (linkBezierRadialCartesian)
+import DataViz.Layout.Hierarchy.Partition (HierarchyData(..), PartitionNode(..), defaultPartitionConfig, hierarchy, partition)
 import DataViz.Layout.Hierarchy.Tree (tree, defaultTreeConfig)
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import PSD3.AST as T
 import PSD3.Expr.Friendly (attr, cx, cy, fill, fontSize, height, num, path, r, stroke, strokeWidth, text, textAnchor, textContent, viewBox, width, x, y)
-import PSD3.Internal.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom)
+import PSD3.Internal.Behavior.Types (Behavior(..), ScaleExtent(..), defaultZoom, onClick)
 import PSD3.Internal.Capabilities.Selection (renderTree, select)
+import PSD3.Internal.Selection.Operations as Ops
 import PSD3.Internal.Selection.Types (ElementType(..), SEmpty)
 import PSD3.Interpreter.D3 (D3v2Selection_, reselectD3v2, runD3v2M)
 import Web.DOM.Element (Element)
@@ -77,6 +83,37 @@ patternTreeToTree = go
       mkTree
         { label: "choice", nodeType: "choice", x: 0.0, y: 0.0, depth: 0 }
         (Array.toUnfoldable $ map patternTreeToTree children)
+
+    -- New extended constructors - wrap child with modifier label
+    Fast n child ->
+      mkTree
+        { label: "*" <> show (Int.round n), nodeType: "fast", x: 0.0, y: 0.0, depth: 0 }
+        (Cons (patternTreeToTree child) Nil)
+
+    Slow n child ->
+      mkTree
+        { label: "/" <> show (Int.round n), nodeType: "slow", x: 0.0, y: 0.0, depth: 0 }
+        (Cons (patternTreeToTree child) Nil)
+
+    Euclidean n k child ->
+      mkTree
+        { label: "(" <> show n <> "," <> show k <> ")", nodeType: "euclidean", x: 0.0, y: 0.0, depth: 0 }
+        (Cons (patternTreeToTree child) Nil)
+
+    Degrade prob child ->
+      mkTree
+        { label: "?" <> show (Int.round (prob * 100.0)) <> "%", nodeType: "degrade", x: 0.0, y: 0.0, depth: 0 }
+        (Cons (patternTreeToTree child) Nil)
+
+    Repeat n child ->
+      mkTree
+        { label: "!" <> show n, nodeType: "repeat", x: 0.0, y: 0.0, depth: 0 }
+        (Cons (patternTreeToTree child) Nil)
+
+    Elongate n child ->
+      mkTree
+        { label: "@" <> show (Int.round n), nodeType: "elongate", x: 0.0, y: 0.0, depth: 0 }
+        (Cons (patternTreeToTree child) Nil)
 
 -- | Forest layout: "fake giant tree" approach
 -- | Takes multiple pattern trees and lays them out as a forest
@@ -164,6 +201,12 @@ nodeColor = case _ of
   "sequence" -> "#2196F3"   -- Blue for sequences
   "parallel" -> "#FF9800"   -- Orange for parallel
   "choice" -> "#9C27B0"     -- Purple for choice
+  "fast" -> "#E91E63"       -- Pink for fast
+  "slow" -> "#00BCD4"       -- Cyan for slow
+  "euclidean" -> "#FFEB3B"  -- Yellow for euclidean
+  "degrade" -> "#795548"    -- Brown for degrade/probability
+  "repeat" -> "#673AB7"     -- Deep purple for repeat
+  "elongate" -> "#009688"   -- Teal for elongate
   _ -> "#000000"
 
 -- | Draw a single pattern tree
@@ -635,6 +678,103 @@ layout3D xPos yPos zPos depth pattern = case pattern of
         }
         (Array.toUnfoldable layoutedChildren)
 
+  -- New extended constructors - modifiers with single child
+  Fast n child ->
+    let
+      childDepth = depth + 1
+      childY = yPos + 60.0
+      childTree = layout3D xPos childY zPos childDepth child
+    in
+      mkTree
+        { label: "*" <> show (Int.round n)
+        , nodeType: "fast"
+        , x: xPos
+        , y: yPos
+        , z: zPos
+        , depth
+        }
+        (Cons childTree Nil)
+
+  Slow n child ->
+    let
+      childDepth = depth + 1
+      childY = yPos + 60.0
+      childTree = layout3D xPos childY zPos childDepth child
+    in
+      mkTree
+        { label: "/" <> show (Int.round n)
+        , nodeType: "slow"
+        , x: xPos
+        , y: yPos
+        , z: zPos
+        , depth
+        }
+        (Cons childTree Nil)
+
+  Euclidean n k child ->
+    let
+      childDepth = depth + 1
+      childY = yPos + 60.0
+      childTree = layout3D xPos childY zPos childDepth child
+    in
+      mkTree
+        { label: "(" <> show n <> "," <> show k <> ")"
+        , nodeType: "euclidean"
+        , x: xPos
+        , y: yPos
+        , z: zPos
+        , depth
+        }
+        (Cons childTree Nil)
+
+  Degrade prob child ->
+    let
+      childDepth = depth + 1
+      childY = yPos + 60.0
+      childTree = layout3D xPos childY zPos childDepth child
+    in
+      mkTree
+        { label: "?" <> show (Int.round (prob * 100.0)) <> "%"
+        , nodeType: "degrade"
+        , x: xPos
+        , y: yPos
+        , z: zPos
+        , depth
+        }
+        (Cons childTree Nil)
+
+  Repeat n child ->
+    let
+      childDepth = depth + 1
+      childY = yPos + 60.0
+      childTree = layout3D xPos childY zPos childDepth child
+    in
+      mkTree
+        { label: "!" <> show n
+        , nodeType: "repeat"
+        , x: xPos
+        , y: yPos
+        , z: zPos
+        , depth
+        }
+        (Cons childTree Nil)
+
+  Elongate n child ->
+    let
+      childDepth = depth + 1
+      childY = yPos + 60.0
+      childTree = layout3D xPos childY zPos childDepth child
+    in
+      mkTree
+        { label: "@" <> show (Int.round n)
+        , nodeType: "elongate"
+        , x: xPos
+        , y: yPos
+        , z: zPos
+        , depth
+        }
+        (Cons childTree Nil)
+
   where
   toNumber :: Int -> Number
   toNumber = Int.toNumber
@@ -800,3 +940,333 @@ drawPatternForestIsometric selector patterns = do
     _ <- renderTree chartGroupSel nodesTree
 
     liftEffect $ Console.log "Isometric pattern forest visualization complete!"
+
+-- ============================================================================
+-- Sunburst Layout for Musical Pattern Trees
+-- ============================================================================
+
+-- | Convert PatternTree to HierarchyData for partition layout
+-- | Each node gets value = 1 so siblings share angular space equally
+patternToHierarchy :: PatternTree -> HierarchyData { label :: String, nodeType :: String }
+patternToHierarchy = case _ of
+  Sound s ->
+    HierarchyData
+      { data_: { label: s, nodeType: "sound" }
+      , value: Just 1.0  -- Leaf nodes have explicit value
+      , children: Nothing
+      }
+
+  Rest ->
+    HierarchyData
+      { data_: { label: "~", nodeType: "rest" }
+      , value: Just 1.0
+      , children: Nothing
+      }
+
+  Sequence children ->
+    HierarchyData
+      { data_: { label: "seq", nodeType: "sequence" }
+      , value: Nothing  -- Will sum children
+      , children: Just $ map patternToHierarchy children
+      }
+
+  Parallel children ->
+    HierarchyData
+      { data_: { label: "par", nodeType: "parallel" }
+      , value: Nothing
+      , children: Just $ map patternToHierarchy children
+      }
+
+  Choice children ->
+    HierarchyData
+      { data_: { label: "?", nodeType: "choice" }
+      , value: Nothing
+      , children: Just $ map patternToHierarchy children
+      }
+
+  -- New extended constructors - wrap child with modifier
+  Fast n child ->
+    HierarchyData
+      { data_: { label: "*" <> show (Int.round n), nodeType: "fast" }
+      , value: Nothing
+      , children: Just [ patternToHierarchy child ]
+      }
+
+  Slow n child ->
+    HierarchyData
+      { data_: { label: "/" <> show (Int.round n), nodeType: "slow" }
+      , value: Nothing
+      , children: Just [ patternToHierarchy child ]
+      }
+
+  Euclidean n k child ->
+    HierarchyData
+      { data_: { label: "(" <> show n <> "," <> show k <> ")", nodeType: "euclidean" }
+      , value: Nothing
+      , children: Just [ patternToHierarchy child ]
+      }
+
+  Degrade prob child ->
+    HierarchyData
+      { data_: { label: "?" <> show (Int.round (prob * 100.0)) <> "%", nodeType: "degrade" }
+      , value: Nothing
+      , children: Just [ patternToHierarchy child ]
+      }
+
+  Repeat n child ->
+    HierarchyData
+      { data_: { label: "!" <> show n, nodeType: "repeat" }
+      , value: Nothing
+      , children: Just [ patternToHierarchy child ]
+      }
+
+  Elongate n child ->
+    HierarchyData
+      { data_: { label: "@" <> show (Int.round n), nodeType: "elongate" }
+      , value: Nothing
+      , children: Just [ patternToHierarchy child ]
+      }
+
+-- | Get color for node type (sunburst version - more saturated)
+sunburstColor :: String -> String
+sunburstColor = case _ of
+  "sound" -> "#4CAF50"      -- Green for sounds
+  "rest" -> "#9E9E9E"       -- Gray for rests
+  "sequence" -> "#2196F3"   -- Blue for sequences
+  "parallel" -> "#FF9800"   -- Orange for parallel
+  "choice" -> "#9C27B0"     -- Purple for choice
+  "fast" -> "#E91E63"       -- Pink for fast
+  "slow" -> "#00BCD4"       -- Cyan for slow
+  "euclidean" -> "#FFEB3B"  -- Yellow for euclidean
+  "degrade" -> "#795548"    -- Brown for degrade/probability
+  "repeat" -> "#673AB7"     -- Deep purple for repeat
+  "elongate" -> "#009688"   -- Teal for elongate
+  _ -> "#607D8B"
+
+-- | Convert partition coordinates to sunburst arc path
+-- | x0, x1 are normalized [0,1] representing angles around the circle
+-- | y0, y1 are normalized [0,1] representing radius from center
+sunburstArcPath :: Number -> Number -> Number -> Number -> Number -> String
+sunburstArcPath x0_ y0_ x1_ y1_ radius =
+  let
+    -- Convert normalized x to angles (0 to 2π), starting at top
+    startAngle = x0_ * 2.0 * pi - (pi / 2.0)
+    endAngle = x1_ * 2.0 * pi - (pi / 2.0)
+
+    -- Convert normalized y to radius
+    innerRadius = y0_ * radius
+    outerRadius = y1_ * radius
+
+    -- Calculate arc points
+    x00 = cos startAngle * innerRadius
+    y00 = sin startAngle * innerRadius
+    x01 = cos endAngle * innerRadius
+    y01 = sin endAngle * innerRadius
+    x10 = cos startAngle * outerRadius
+    y10 = sin startAngle * outerRadius
+    x11 = cos endAngle * outerRadius
+    y11 = sin endAngle * outerRadius
+
+    -- Large arc flag: 1 if angle > π, 0 otherwise
+    largeArc = if (endAngle - startAngle) > pi then 1 else 0
+  in
+    -- SVG path for arc segment
+    "M" <> show x10 <> "," <> show y10
+      <> "A" <> show outerRadius <> "," <> show outerRadius
+      <> " 0 " <> show largeArc <> " 1 "
+      <> show x11 <> "," <> show y11
+      <> "L" <> show x01 <> "," <> show y01
+      <> "A" <> show innerRadius <> "," <> show innerRadius
+      <> " 0 " <> show largeArc <> " 0 "
+      <> show x00 <> "," <> show y00
+      <> "Z"
+
+-- | Flatten PartitionNode tree to array
+flattenPartition :: forall a. PartitionNode a -> Array (PartitionNode a)
+flattenPartition node@(PartNode n) =
+  if Array.length n.children == 0 then [ node ]
+  else [ node ] <> (n.children >>= flattenPartition)
+
+-- | Named pattern for sunburst visualization
+type NamedPattern = { name :: String, pattern :: PatternTree, trackIndex :: Int, active :: Boolean }
+
+-- | Draw multiple pattern trees as sunbursts side by side
+-- | onToggle callback is called with track index when center is clicked
+drawPatternForestSunburst :: String -> Array NamedPattern -> (Int -> Effect Unit) -> Effect Unit
+drawPatternForestSunburst selector namedPatterns onToggle = do
+  Console.log $ "=== drawPatternForestSunburst called with " <> show (Array.length namedPatterns) <> " patterns"
+
+  let numPatterns = Array.length namedPatterns
+  let chartWidth = 1400.0
+  let chartHeight = 1200.0  -- Taller for grid layout
+
+  -- Grid layout: determine columns and rows
+  let cols = max 1 (min 5 (Int.ceil (sqrt (Int.toNumber numPatterns))))
+  let rows = Int.ceil (Int.toNumber numPatterns / Int.toNumber cols)
+
+  -- Calculate size for each sunburst based on grid
+  let cellWidth = (chartWidth - 100.0) / Int.toNumber cols
+  let cellHeight = (chartHeight - 200.0) / Int.toNumber rows
+  let sunburstSize = min 200.0 (min cellWidth cellHeight * 0.85)
+  let radius = sunburstSize / 2.0
+
+  -- Starting position (centered in available space)
+  let gridWidth = Int.toNumber cols * cellWidth
+  let startX = (chartWidth - gridWidth) / 2.0 + cellWidth / 2.0
+  let startY = 150.0 + cellHeight / 2.0  -- Below header area
+
+  -- Convert each pattern to partitioned hierarchy with grid position
+  let processPattern idx { name, pattern, trackIndex, active } =
+        let
+          hierData = patternToHierarchy pattern
+          partRoot = hierarchy hierData
+          config = defaultPartitionConfig
+            { size = { width: 1.0, height: 1.0 }
+            , padding = 0.002
+            }
+          partitioned = partition config partRoot
+          -- Flatten and filter out root (depth 0)
+          allNodes = flattenPartition partitioned
+          nodes = Array.filter (\(PartNode n) -> n.depth > 0) allNodes
+          -- Separate leaf nodes (sounds/rests) for labeling
+          leafNodes = Array.filter (\(PartNode n) -> n.data_.nodeType == "sound" || n.data_.nodeType == "rest") nodes
+          -- Grid position
+          col = idx `mod` cols
+          row = idx / cols
+          centerX = startX + Int.toNumber col * cellWidth
+          centerY = startY + Int.toNumber row * cellHeight
+        in
+          { name, nodes, leafNodes, centerX, centerY, radius, idx, trackIndex, active }
+
+  let sunburstData = Array.mapWithIndex processPattern namedPatterns
+
+  runD3v2M do
+    -- Clear the container first
+    Ops.clear selector
+
+    container <- select selector :: _ (D3v2Selection_ SEmpty Element Unit)
+    liftEffect $ Console.log "Container selected for sunburst"
+
+    -- Render each sunburst separately
+    -- First render the SVG container
+    let
+      svgTree :: T.Tree Unit
+      svgTree =
+        T.named SVG "pattern-sunburst-svg"
+          [ width $ num chartWidth
+          , height $ num chartHeight
+          , viewBox 0.0 0.0 chartWidth chartHeight
+          , attr "class" $ text "pattern-forest-viz pattern-forest-sunburst"
+          ]
+          `T.withBehaviors` [ Zoom $ defaultZoom (ScaleExtent 0.1 10.0) "#pattern-sunburst-zoom-group" ]
+          `T.withChild`
+            ( T.named Group "zoom-group"
+                [ attr "id" $ text "pattern-sunburst-zoom-group"
+                , attr "class" $ text "zoom-group"
+                ]
+            )
+
+    svgSel <- renderTree container svgTree
+    zoomGroupSel <- liftEffect $ reselectD3v2 "zoom-group" svgSel
+
+    -- Render each sunburst into the zoom group
+    for_ sunburstData \{ name, nodes, leafNodes, centerX, centerY, radius: r', idx, trackIndex, active } -> do
+      -- Opacity based on active state
+      let arcOpacity = if active then 0.85 else 0.25
+
+      -- Render arcs
+      let
+        arcsTree :: T.Tree (PartitionNode { label :: String, nodeType :: String })
+        arcsTree =
+          T.named Group ("sunburst-" <> show idx)
+            [ attr "transform" $ text ("translate(" <> show centerX <> "," <> show centerY <> ")") ]
+            `T.withChild`
+              ( T.joinData ("arcs-" <> show idx) "path" nodes $ \(PartNode node) ->
+                  T.elem Path
+                    [ path $ text (sunburstArcPath node.x0 node.y0 node.x1 node.y1 r')
+                    , fill $ text (sunburstColor node.data_.nodeType)
+                    , attr "fill-opacity" $ num arcOpacity
+                    , stroke $ text "#fff"
+                    , strokeWidth $ num 1.0
+                    , attr "class" $ text ("arc arc-" <> node.data_.nodeType)
+                    ]
+              )
+      _ <- renderTree zoomGroupSel arcsTree
+
+      -- Render center circle with track name (clickable to toggle)
+      let
+        innerRadius = r' * 0.35  -- Inner hole radius
+        centerBg = if active then "#fff" else "#f5f5f5"
+        centerStroke = if active then "#ddd" else "#ccc"
+        centerTextColor = if active then "#333" else "#999"
+        centerTree :: T.Tree Unit
+        centerTree =
+          T.named Group ("center-" <> show idx)
+            [ attr "transform" $ text ("translate(" <> show centerX <> "," <> show centerY <> ")")
+            , attr "class" $ text "sunburst-center"
+            , attr "style" $ text "cursor: pointer;"
+            , attr "data-track-index" $ text (show trackIndex)
+            ]
+            `T.withBehaviors` [ onClick (onToggle trackIndex) ]
+            `T.withChildren`
+              [ T.elem Circle
+                  [ cx $ num 0.0
+                  , cy $ num 0.0
+                  , r $ num innerRadius
+                  , fill $ text centerBg
+                  , stroke $ text centerStroke
+                  , strokeWidth $ num 2.0
+                  , attr "class" $ text "center-circle"
+                  ]
+              , T.elem Text
+                  [ x $ num 0.0
+                  , y $ num 4.0  -- Slight offset for vertical centering
+                  , textContent $ text name
+                  , fontSize $ num 12.0
+                  , textAnchor $ text "middle"
+                  , fill $ text centerTextColor
+                  , attr "font-weight" $ text "600"
+                  , attr "class" $ text "center-label"
+                  ]
+              ]
+      _ <- renderTree zoomGroupSel centerTree
+
+      -- Render sound labels on leaf arcs (only for sounds, not rests, and only if active)
+      when active do
+        let soundLeaves = Array.filter (\(PartNode n) -> n.data_.nodeType == "sound") leafNodes
+        let
+          soundLabelsTree :: T.Tree (PartitionNode { label :: String, nodeType :: String })
+          soundLabelsTree =
+            T.named Group ("sound-labels-" <> show idx)
+              [ attr "transform" $ text ("translate(" <> show centerX <> "," <> show centerY <> ")") ]
+              `T.withChild`
+                ( T.joinData ("labels-" <> show idx) "text" soundLeaves $ \(PartNode node) ->
+                    let
+                      -- Calculate midpoint angle and radius for label positioning
+                      midAngle = ((node.x0 + node.x1) / 2.0) * 2.0 * pi - (pi / 2.0)
+                      midRadius = ((node.y0 + node.y1) / 2.0) * r'
+                      labelX = cos midAngle * midRadius
+                      labelY = sin midAngle * midRadius
+                      -- Rotate text to follow arc angle
+                      rotateAngle = ((node.x0 + node.x1) / 2.0) * 360.0 - 90.0
+                      -- Flip text if on left side of circle
+                      finalRotate = if rotateAngle > 90.0 && rotateAngle < 270.0
+                        then rotateAngle + 180.0
+                        else rotateAngle
+                    in
+                      T.elem Text
+                        [ x $ num labelX
+                        , y $ num labelY
+                        , textContent $ text node.data_.label
+                        , fontSize $ num 9.0
+                        , textAnchor $ text "middle"
+                        , attr "dominant-baseline" $ text "middle"
+                        , fill $ text "#000"
+                        , attr "transform" $ text ("rotate(" <> show finalRotate <> "," <> show labelX <> "," <> show labelY <> ")")
+                        , attr "class" $ text "sound-label"
+                        ]
+                )
+        _ <- renderTree zoomGroupSel soundLabelsTree
+        pure unit
+
+    liftEffect $ Console.log "Sunburst pattern forest complete!"

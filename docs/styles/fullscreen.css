@@ -569,6 +569,68 @@
 }
 
 /* ========================================
+   MINI-NOTATION INPUT STYLES
+   ======================================== */
+
+.mini-notation-input {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: monospace;
+  font-size: 0.875rem;
+  resize: vertical;
+  margin-bottom: var(--spacing-xs);
+}
+
+.mini-notation-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(107, 91, 149, 0.2);
+}
+
+.parse-error {
+  color: #E63946;
+  font-size: 0.75rem;
+  padding: var(--spacing-xs);
+  background-color: rgba(230, 57, 70, 0.1);
+  border-radius: var(--radius-sm);
+  margin-top: var(--spacing-xs);
+}
+
+.button-row {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+}
+
+/* Preset pattern grid */
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+}
+
+.preset-button {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-light);
+  font-size: 0.75rem;
+  font-family: monospace;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.preset-button:hover {
+  background-color: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+/* ========================================
    PRINT STYLES
    ======================================== */
 

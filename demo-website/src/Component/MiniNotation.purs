@@ -7,7 +7,7 @@ import Prelude
 
 import Component.PatternTree (PatternTree(..))
 import Data.Array as Array
-import Data.Either (Either(..))
+import Data.Either (Either)
 import Data.Maybe (Maybe(..))
 import Parsing (ParseError)
 import Tidal.AST.Types (TPat(..), Located(..))
