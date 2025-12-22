@@ -23,6 +23,7 @@ import Data.List (List(..))
 import Data.Maybe (Maybe(..))
 import Data.String as String
 import Data.Tree (Tree, mkTree)
+import Data.Tuple (Tuple(..))
 import Control.Comonad.Cofree (head, tail) as Cofree
 import DataViz.Layout.Hierarchy.Link (linkBezierVertical)
 import Effect (Effect)
@@ -78,6 +79,7 @@ import Web.HTML.HTMLElement (focus)
 import Web.HTML.Window (document)
 import Web.UIEvent.KeyboardEvent (KeyboardEvent)
 import Web.UIEvent.KeyboardEvent as KE
+import PSD3.Shared.SiteNav as SiteNav
 
 -- =============================================================================
 -- State Types
@@ -109,6 +111,7 @@ type TypeCard =
   , fields :: Array { name :: String, typ :: String } -- Fields to display
   , datumType :: DatumType -- The actual type for assignment
   , y :: Number -- Y position
+  , indent :: Number -- Indentation level (0 = no indent, 15 = nested once, etc.)
   , isEnabled :: Boolean -- Can be clicked (Join is selected)
   , isAssigned :: Boolean -- This type is assigned to selected Join
   }
@@ -117,7 +120,7 @@ type TypeCard =
 data SampleDataId
   = SampleChess
   | SampleSudoku
-  | SampleGo
+  | SampleScrabble
   | SampleScatterPlot
   | SampleForceGraph
   | SampleGapminder
@@ -166,16 +169,19 @@ allAstPresets = [ AstEmpty, AstGrid, AstScatter, AstBubble, AstTree, AstUpdateJo
 compatibleTypesForAst :: AstPreset -> Array DatumType
 compatibleTypesForAst = case _ of
   AstEmpty -> [ pointType, nodeType, countryType, boardType, letterType ] -- Try Me: all types available
-  AstGrid -> [ boardType ]
+  AstGrid -> [ boardType, rowType, cellType ] -- Nested joins: Board → Row → Cell
   AstScatter -> [ pointType ]
   AstBubble -> [ countryType ]
   AstTree -> [ nodeType ]
   AstUpdateJoin -> [ letterType ] -- GUP demo with letters
 
 -- | Get compatible SampleDataIds for a DatumType
+-- | For nested joins, the join's datumType is the element type (Row/Cell), not the array type
 compatibleDatasetsForType :: DatumType -> Array SampleDataId
 compatibleDatasetsForType t
-  | t == boardType = [ SampleChess, SampleSudoku, SampleGo ]
+  | t == boardType = [ SampleChess, SampleSudoku, SampleScrabble ]
+  | t == rowType = [ SampleChess, SampleSudoku, SampleScrabble ]  -- Outer nested join gets Row
+  | t == cellType = [ SampleChess, SampleSudoku, SampleScrabble ] -- Inner nested join gets Cell
   | t == countryType = [ SampleGapminder ]
   | t == nodeType = [ SampleForceGraph ]
   | t == pointType = [ SampleScatterPlot ]
@@ -455,45 +461,222 @@ containerRef = H.RefLabel "tree-builder3-main"
 render :: forall m. State -> H.ComponentHTML Action () m
 render state =
   HH.div
-    [ HP.class_ (HH.ClassName "tree-builder3-container")
+    [ HP.classes [ HH.ClassName "tree-builder3-showcase" ]
     , HP.tabIndex 0
     , HP.ref containerRef
     , HE.onKeyDown HandleKeyDown
     ]
-    [ HH.div
-        [ HP.class_ (HH.ClassName "tree-builder3-header") ]
-        [ HH.h2_ [ HH.text "DSL Grammar Tree Builder" ]
-        , HH.button
-            [ HP.class_ (HH.ClassName "import-example-btn")
-            , HE.onClick \_ -> ImportExample
-            ]
-            [ HH.text "Import Example AST" ]
-        ]
-    , HH.p
-        [ HP.class_ (HH.ClassName "instructions") ]
-        [ HH.text "Click to select, arrows to navigate. Key hints shown next to selected node." ]
-    , -- AST preset cards row (like VizMatrix top cards)
-      HH.div
-        [ HP.class_ (HH.ClassName "tree-builder3-ast-cards") ]
-        ( map (renderAstCard state) allAstPresets )
+    [ -- Standard nav banner
+      SiteNav.render
+        { logoSize: SiteNav.Large
+        , quadrant: SiteNav.NoQuadrant
+        , prevNext: Nothing
+        , pageTitle: Just "Grammar Tree Builder"
+        }
+
+    -- Fullscreen visualization container
     , HH.div
-        [ HP.class_ (HH.ClassName "tree-builder3-editors-row") ]
-        [ -- Tree visualization panel (with integrated type cards)
+        [ HP.classes [ HH.ClassName "fullscreen-container", HH.ClassName "tree-builder3-viz-container" ] ]
+        [ -- Main viz area (fullscreen SVG)
           HH.div
-            [ HP.class_ (HH.ClassName "tree-builder3-svg-container")
-            , HP.id "tree-builder3-container"
+            [ HP.id "tree-builder3-container"
+            , HP.classes [ HH.ClassName "fullscreen-viz", HH.ClassName "svg-container" ]
             ]
             []
-        , -- Rendered output panel (visualization result)
-          HH.div
-            [ HP.class_ (HH.ClassName "tree-builder3-output-panel") ]
-            [ HH.h3_ [ HH.text (if state.selectedAstPreset == AstEmpty then "English Description" else "Rendered Output") ]
-            , renderOutput state
+
+        -- Floating panel: AST Presets (top-center, horizontal)
+        , HH.div
+            [ HP.classes
+                [ HH.ClassName "floating-panel"
+                , HH.ClassName "floating-panel--top-center"
+                , HH.ClassName "tree-builder3-ast-panel"
+                ]
             ]
+            [ HH.div
+                [ HP.classes [ HH.ClassName "ast-preset-row" ] ]
+                ( map (renderAstPresetCard state) allAstPresets )
+            ]
+
+        -- Floating panel: Type Cards (left side)
+        , HH.div
+            [ HP.classes
+                [ HH.ClassName "floating-panel"
+                , HH.ClassName "floating-panel--left-middle"
+                , HH.ClassName "floating-panel--small"
+                , HH.ClassName "tree-builder3-type-panel"
+                ]
+            ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
+                [ HH.text "Datum Types" ]
+            , HH.div
+                [ HP.classes [ HH.ClassName "type-cards-list" ] ]
+                ( map (renderTypeCardHtml state) (makeTypeCardsForHtml state) )
+            ]
+
+        -- Floating panel: Dataset Cards (right side)
+        , HH.div
+            [ HP.classes
+                [ HH.ClassName "floating-panel"
+                , HH.ClassName "floating-panel--right-middle"
+                , HH.ClassName "floating-panel--small"
+                , HH.ClassName "tree-builder3-data-panel"
+                ]
+            ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
+                [ HH.text "Datasets" ]
+            , HH.div
+                [ HP.classes [ HH.ClassName "data-cards-list" ] ]
+                ( map (renderDataCardHtml state) (makeDataCardsForHtml state) )
+            ]
+
+        -- TryMe instructions popup overlay
+        , if state.showTryMeInstructions
+            then renderTryMePopup
+            else HH.text ""
         ]
-    , -- TryMe instructions popup overlay
-      if state.showTryMeInstructions
-        then renderTryMePopup
+    ]
+
+-- | Render an AST preset card for horizontal top panel
+renderAstPresetCard :: forall m. State -> AstPreset -> H.ComponentHTML Action () m
+renderAstPresetCard state preset =
+  HH.div
+    [ HP.classes
+        [ HH.ClassName "ast-preset-card"
+        , HH.ClassName if state.selectedAstPreset == preset then "ast-preset-card--selected" else ""
+        ]
+    , HE.onClick \_ -> SelectAstPreset preset
+    ]
+    [ HH.div
+        [ HP.classes [ HH.ClassName "ast-preset-card__name" ] ]
+        [ HH.text (astPresetLabel preset) ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "ast-preset-card__desc" ] ]
+        [ HH.text (astPresetDescription preset) ]
+    ]
+
+-- | Type card data for HTML rendering
+type TypeCardHtml =
+  { name :: String
+  , fields :: Array { name :: String, typ :: String }
+  , datumType :: DatumType
+  , indent :: Int -- 0 = no indent, 1 = first level, 2 = second level
+  , isEnabled :: Boolean
+  , isAssigned :: Boolean
+  }
+
+-- | Make type cards for HTML rendering
+makeTypeCardsForHtml :: State -> Array TypeCardHtml
+makeTypeCardsForHtml state =
+  let
+    selectedJoinType = getSelectedJoinDatumType state
+    typeInfos =
+      [ { name: "Point", typ: pointType, fields: [ { name: "x", typ: "Number" }, { name: "y", typ: "Number" } ], indent: 0 }
+      , { name: "Node", typ: nodeType, fields: [ { name: "id", typ: "String" }, { name: "x", typ: "Number" }, { name: "y", typ: "Number" }, { name: "group", typ: "Int" } ], indent: 0 }
+      , { name: "Link", typ: linkType, fields: [ { name: "source", typ: "String" }, { name: "target", typ: "String" }, { name: "value", typ: "Number" } ], indent: 0 }
+      , { name: "Country", typ: countryType, fields: [ { name: "name", typ: "String" }, { name: "population", typ: "Number" }, { name: "gdp", typ: "Number" }, { name: "lifeExp", typ: "Number" } ], indent: 0 }
+      , { name: "Letter", typ: letterType, fields: [ { name: "letter", typ: "String" }, { name: "phase", typ: "String" } ], indent: 0 }
+      , { name: "Board", typ: boardType, fields: [ { name: "[ ]", typ: "Row" } ], indent: 0 }
+      , { name: "Row", typ: rowType, fields: [ { name: "[ ]", typ: "Cell" } ], indent: 1 }
+      , { name: "Cell", typ: cellType, fields: [ { name: "row", typ: "Int" }, { name: "col", typ: "Int" }, { name: "value", typ: "String" } ], indent: 2 }
+      ]
+  in
+    map (\info ->
+      { name: info.name
+      , fields: info.fields
+      , datumType: info.typ
+      , indent: info.indent
+      , isEnabled: isTypeCompatibleWithAst state.selectedAstPreset info.typ
+      , isAssigned: selectedJoinType == Just info.typ
+      }) typeInfos
+
+-- | Render a type card in HTML
+renderTypeCardHtml :: forall m. State -> TypeCardHtml -> H.ComponentHTML Action () m
+renderTypeCardHtml _state card =
+  HH.div
+    [ HP.classes
+        [ HH.ClassName "type-card-html"
+        , HH.ClassName $ "type-card-html--indent-" <> show card.indent
+        , HH.ClassName if card.isAssigned then "type-card-html--assigned" else ""
+        , HH.ClassName if not card.isEnabled then "type-card-html--disabled" else ""
+        ]
+    , HE.onClick \_ -> AssignType card.datumType
+    ]
+    [ HH.div
+        [ HP.classes [ HH.ClassName "type-card-html__header" ] ]
+        [ HH.span
+            [ HP.classes [ HH.ClassName "type-card-html__name" ] ]
+            [ HH.text card.name ]
+        , if not card.isEnabled
+            then HH.span [ HP.classes [ HH.ClassName "type-card-html__x" ] ] [ HH.text "✕" ]
+            else HH.text ""
+        ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "type-card-html__fields" ] ]
+        ( map (\f -> HH.div
+            [ HP.classes [ HH.ClassName "type-card-html__field" ] ]
+            [ HH.text $ f.name <> " :: " <> f.typ ]
+          ) card.fields )
+    ]
+
+-- | Data card data for HTML rendering
+type DataCardHtml =
+  { name :: String
+  , description :: String
+  , sampleId :: SampleDataId
+  , isEnabled :: Boolean
+  , isSelected :: Boolean
+  }
+
+-- | Make data cards for HTML rendering
+makeDataCardsForHtml :: State -> Array DataCardHtml
+makeDataCardsForHtml state =
+  let
+    selectedJoinType = getSelectedJoinDatumType state
+    datasets =
+      [ { name: "Chess", desc: "8x8 board", sampleId: SampleChess }
+      , { name: "Sudoku", desc: "9x9 puzzle", sampleId: SampleSudoku }
+      , { name: "Scrabble", desc: "Word game", sampleId: SampleScrabble }
+      , { name: "Gapminder", desc: "Health & wealth", sampleId: SampleGapminder }
+      , { name: "Force Graph", desc: "Node network", sampleId: SampleForceGraph }
+      , { name: "Scatter Plot", desc: "X/Y points", sampleId: SampleScatterPlot }
+      , { name: "GUP Letters", desc: "Enter/Update/Exit", sampleId: SampleGupLetters }
+      ]
+  in
+    map (\d ->
+      { name: d.name
+      , description: d.desc
+      , sampleId: d.sampleId
+      , isEnabled: isDatasetCompatibleWithType selectedJoinType d.sampleId
+      , isSelected: state.selectedSampleData == Just d.sampleId
+      }) datasets
+
+-- | Render a data card in HTML
+renderDataCardHtml :: forall m. State -> DataCardHtml -> H.ComponentHTML Action () m
+renderDataCardHtml _state card =
+  HH.div
+    [ HP.classes
+        [ HH.ClassName "data-card-html"
+        , HH.ClassName if card.isSelected then "data-card-html--selected" else ""
+        , HH.ClassName if not card.isEnabled then "data-card-html--disabled" else ""
+        ]
+    , HE.onClick \_ -> SelectSampleData card.sampleId
+    ]
+    [ HH.div
+        [ HP.classes [ HH.ClassName "data-card-html__icon" ] ]
+        [ HH.text "🗄️" ] -- Simple icon placeholder
+    , HH.div
+        [ HP.classes [ HH.ClassName "data-card-html__info" ] ]
+        [ HH.div
+            [ HP.classes [ HH.ClassName "data-card-html__name" ] ]
+            [ HH.text card.name ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "data-card-html__desc" ] ]
+            [ HH.text card.description ]
+        ]
+    , if not card.isEnabled
+        then HH.span [ HP.classes [ HH.ClassName "data-card-html__x" ] ] [ HH.text "✕" ]
         else HH.text ""
     ]
 
@@ -961,11 +1144,11 @@ renderTreeViz state listener = do
 
   let renderNodes = structuralRenderNodes <> badgeRenderNodes
 
-  let svgWidth = 900.0
-  let svgHeight = 600.0
+  -- Use large viewport dimensions for fullscreen (actual size comes from CSS)
+  let svgWidth = 1920.0
+  let svgHeight = 1080.0
 
-  -- Center the tree horizontally in the SVG (use structural nodes for centering)
-  -- For a single node, minX == maxX, so we center on that point
+  -- Center the tree in the middle of the viewport
   let
     firstX = case Array.head structuralNodes of
       Just n -> n.x
@@ -974,7 +1157,7 @@ renderTreeViz state listener = do
   let maxX = Array.foldl (\acc n -> max acc n.x) firstX structuralNodes
   let centerX = (minX + maxX) / 2.0
   let offsetX = (svgWidth / 2.0) - centerX
-  let offsetY = 60.0
+  let offsetY = 150.0 -- More space from top for fullscreen
 
   -- Check if selected node is a Join and what type it has
   let selectedJoinType = getSelectedJoinDatumType state
@@ -986,7 +1169,7 @@ renderTreeViz state listener = do
   let dataCards = makeDataCards selectedJoinType state.selectedSampleData
 
   -- Position for data cards (RHS of SVG)
-  let dataCardsX = svgWidth - Theme.dataCardWidth - 10.0
+  let dataCardsX = svgWidth - Theme.dataCardWidth - 50.0
 
   runD3v2M do
     container <- select "#tree-builder3-container" :: _ (D3v2Selection_ SEmpty Element Unit)
@@ -995,10 +1178,11 @@ renderTreeViz state listener = do
       linksTree :: T.Tree LinkData
       linksTree =
         T.named SVG "svg"
-          [ F.width (F.num svgWidth)
-          , F.height (F.num svgHeight)
+          [ F.staticStr "width" "100%"
+          , F.staticStr "height" "100%"
           , F.viewBox 0.0 0.0 svgWidth svgHeight
           , F.staticStr "id" "tree-builder3-svg"
+          , F.staticStr "preserveAspectRatio" "xMidYMid meet"
           ]
           `T.withChild`
             ( T.named Group "zoomGroup"
@@ -1164,244 +1348,71 @@ renderTreeViz state listener = do
 
     _ <- renderTree zoomGroupSel nodesTree
 
-    -- Render type cards in a fixed group (not affected by zoom)
+    -- Type cards and Data cards are now rendered in HTML floating panels
+    -- Get SVG selection for arrow rendering
     svgSel <- liftEffect $ reselectD3v2 "svg" linksSelections
 
+    -- Draw arrows from type cards (HTML panel) to their corresponding Join nodes (SVG)
+    -- Arrows start from the specific type card that matches the join's datum type
     let
-      typeCardsTree :: T.Tree TypeCard
-      typeCardsTree =
-        T.named Group "typeCardsGroup"
-          [ F.staticStr "class" "type-cards"
-          , F.transform $ F.text "translate(10, 30)" -- Fixed position, top-left
-          ]
-          `T.withChild`
-            ( T.joinData "typeCardGroups" "g" typeCards $ \card ->
-                T.elem Group
-                  [ F.transform $ F.text $ "translate(0," <> show card.y <> ")"
-                  , F.staticStr "cursor" (if card.isEnabled then "pointer" else "default")
-                  , F.opacity (F.text (if card.isEnabled then "1" else "0.3"))
-                  ]
-                  `T.withBehaviors`
-                    ( if card.isEnabled then [ ClickWithDatum \c -> HS.notify listener (AssignType c.datumType) ]
-                      else []
-                    )
-                  `T.withChildren`
-                    -- Header row (type name)
-                    [ T.elem Rect
-                        [ F.x (F.num 0.0)
-                        , F.y (F.num 0.0)
-                        , F.width (F.num Theme.typeCardWidth)
-                        , F.height (F.num 22.0)
-                        , F.static "rx" 4.0
-                        , F.fill (F.color (if card.isAssigned then Theme.typeCardHighlight else Theme.typeCardHeader))
-                        , F.stroke (F.color Theme.typeCardStroke)
-                        , F.strokeWidth (F.num (if card.isAssigned then 3.0 else 1.5))
-                        ]
-                    , T.elem Text
-                        [ F.x (F.num (Theme.typeCardWidth / 2.0))
-                        , F.y (F.num 15.0)
-                        , F.textAnchor (F.text "middle")
-                        , F.fill (F.color (if card.isAssigned then Theme.nodeLabelDark else Theme.nodeLabelLight))
-                        , F.fontSize (F.px 11.0)
-                        , F.staticStr "font-weight" "bold"
-                        , F.textContent (F.text card.name)
-                        ]
-                    -- Fields background
-                    , T.elem Rect
-                        [ F.x (F.num 0.0)
-                        , F.y (F.num 22.0)
-                        , F.width (F.num Theme.typeCardWidth)
-                        , F.height (F.num (toNumber (Array.length card.fields) * Theme.typeCardFieldHeight + 4.0))
-                        , F.static "rx" 0.0
-                        , F.fill (F.color Theme.typeCardFill)
-                        , F.stroke (F.color Theme.typeCardStroke)
-                        , F.strokeWidth (F.num 1.0)
-                        ]
-                    -- Red X for incompatible (only shown when disabled)
-                    , T.elem Text
-                        [ F.x (F.num (Theme.typeCardWidth - 8.0))
-                        , F.y (F.num 15.0)
-                        , F.textAnchor (F.text "middle")
-                        , F.fill (F.text (if card.isEnabled then "none" else "#E63946"))
-                        , F.fontSize (F.px 14.0)
-                        , F.staticStr "font-weight" "bold"
-                        , F.textContent (F.text "✕")
-                        ]
-                    ]
-            )
+      -- Fixed X position for left panel's right edge (in SVG viewBox coordinates)
+      leftPanelRightEdge = 270.0
 
-    _ <- renderTree svgSel typeCardsTree
+      -- Panel position in SVG viewBox coordinates
+      -- The HTML panel is at CSS position: top ~116px (100px header + 16px spacing)
+      -- But SVG viewBox is 1920x1080 and scales to fit viewport
+      -- We need to estimate the scaling factor
+      -- Typical viewport might be ~1440px wide, so scale = 1920/1440 ≈ 1.33
+      -- Panel title "DATUM TYPES" adds ~30px, then cards start
+      -- Total offset: 116 + 30 = 146px in CSS, scaled to SVG ≈ 195
+      panelTopY = 180.0 -- Start of first card in SVG viewBox coords (after title)
 
-    -- Now render field labels for each card (separate pass since nested joins aren't ideal here)
-    -- We'll use a simple approach: render all field labels as a flat join
-    let
-      allFieldLabels = typeCards >>= \card ->
-        Array.mapWithIndex
-          ( \i field ->
-              { text: field.name <> " :: " <> field.typ
-              , cardY: card.y
-              , fieldY: 22.0 + toNumber i * Theme.typeCardFieldHeight + 14.0
-              }
-          )
-          card.fields
+      -- Card heights in SVG viewBox units (CSS heights scaled by ~1.33)
+      -- Each card: header (~22px) + fields * (~13px) + gap (~6px) = CSS height
+      -- Scaled to SVG viewBox: multiply by ~1.33
+      -- Order: Point, Node, Link, Country, Letter, Board, Row, Cell
+      typeCardHeights =
+        [ { typ: pointType, height: 70.0 }    -- Point: 2 fields
+        , { typ: nodeType, height: 95.0 }     -- Node: 4 fields
+        , { typ: linkType, height: 82.0 }     -- Link: 3 fields
+        , { typ: countryType, height: 95.0 }  -- Country: 4 fields
+        , { typ: letterType, height: 70.0 }   -- Letter: 2 fields
+        , { typ: boardType, height: 58.0 }    -- Board: 1 field
+        , { typ: rowType, height: 58.0 }      -- Row: 1 field
+        , { typ: cellType, height: 82.0 }     -- Cell: 3 fields
+        ]
 
-      fieldLabelsTree :: T.Tree { text :: String, cardY :: Number, fieldY :: Number }
-      fieldLabelsTree =
-        T.named Group "fieldLabelsGroup"
-          [ F.staticStr "class" "field-labels"
-          , F.transform $ F.text "translate(10, 30)" -- Same offset as type cards
-          ]
-          `T.withChild`
-            ( T.joinData "fieldLabelTexts" "text" allFieldLabels $ \field ->
-                T.elem Text
-                  [ F.x (F.num 6.0)
-                  , F.y (F.num (field.cardY + field.fieldY))
-                  , F.textAnchor (F.text "start")
-                  , F.fill (F.color Theme.typeCardFieldText)
-                  , F.fontSize (F.px 9.0)
-                  , F.fontFamily (F.text "monospace")
-                  , F.textContent (F.text field.text)
-                  ]
-            )
+      -- Calculate Y position for a given datum type (center of its card)
+      getCardY :: DatumType -> Number
+      getCardY targetType = panelTopY + go 0.0 typeCardHeights
+        where
+        go accY cards = case Array.uncons cards of
+          Nothing -> accY -- Not found, return accumulated
+          Just { head: card, tail: rest }
+            | card.typ == targetType -> accY + card.height / 2.0 -- Return center of this card
+            | otherwise -> go (accY + card.height) rest
 
-    _ <- renderTree svgSel fieldLabelsTree
+      -- Find all join nodes that have a non-Unit datum type assigned
+      joinNodes = Array.filter isJoinWithType structuralNodes
+        where
+        isJoinWithType node = case node.nodeType of
+          NodeJoin -> node.datumType /= TypeUnit && node.datumType /= TypeUnknown
+          NodeNestedJoin -> node.datumType /= TypeUnit && node.datumType /= TypeUnknown
+          NodeUpdateJoin -> node.datumType /= TypeUnit && node.datumType /= TypeUnknown
+          NodeUpdateNestedJoin -> node.datumType /= TypeUnit && node.datumType /= TypeUnknown
+          _ -> false
 
-    -- Render data cards on RHS as database icons
-    let
-      -- Database icon dimensions
-      dbWidth = 50.0
-      dbHeight = 40.0
-      dbEllipseRy = 8.0
-
-      dataCardsTree :: T.Tree DataCard
-      dataCardsTree =
-        T.named Group "dataCardsGroup"
-          [ F.staticStr "class" "data-cards"
-          , F.transform $ F.text $ "translate(" <> show dataCardsX <> ", 30)"
-          ]
-          `T.withChild`
-            ( T.joinData "dataCardGroups" "g" dataCards $ \card ->
-                T.elem Group
-                  [ F.transform $ F.text $ "translate(0," <> show card.y <> ")"
-                  , F.staticStr "cursor" (if card.isEnabled then "pointer" else "default")
-                  , F.opacity (F.text (if card.isEnabled then "1" else "0.3"))
-                  ]
-                  `T.withBehaviors`
-                    ( if card.isEnabled then [ ClickWithDatum \c -> HS.notify listener (SelectSampleData c.sampleId) ]
-                      else []
-                    )
-                  `T.withChildren`
-                    -- Database icon: cylinder shape using Path elements
-                    -- (Ellipse not available in ElementType)
-                    let
-                      cx = Theme.dataCardWidth / 2.0
-                      rx = dbWidth / 2.0
-                      ry = dbEllipseRy
-                      -- SVG path for ellipse: M cx-rx,y A rx,ry 0 1,1 cx+rx,y A rx,ry 0 1,1 cx-rx,y
-                      ellipsePath y' =
-                        "M " <> show (cx - rx) <> " " <> show y'
-                          <> " A " <> show rx <> " " <> show ry <> " 0 1 1 " <> show (cx + rx) <> " " <> show y'
-                          <> " A " <> show rx <> " " <> show ry <> " 0 1 1 " <> show (cx - rx) <> " " <> show y'
-                          <> " Z"
-                      -- Bottom arc (only bottom half visible)
-                      bottomArcPath =
-                        "M " <> show (cx - rx) <> " " <> show dbHeight
-                          <> " A " <> show rx <> " " <> show ry <> " 0 0 0 " <> show (cx + rx) <> " " <> show dbHeight
-                    in
-                    -- Body (rectangle)
-                    [ T.elem Rect
-                        [ F.x (F.num ((Theme.dataCardWidth - dbWidth) / 2.0))
-                        , F.y (F.num dbEllipseRy)
-                        , F.width (F.num dbWidth)
-                        , F.height (F.num (dbHeight - dbEllipseRy))
-                        , F.fill (F.color (if card.isSelected then Theme.dataCardHighlight else Theme.dataCardFill))
-                        , F.stroke (F.text "none")
-                        ]
-                    -- Bottom arc (curve at bottom of cylinder)
-                    , T.elem Path
-                        [ F.path $ F.text bottomArcPath
-                        , F.fill (F.text "none")
-                        , F.stroke (F.color Theme.dataCardStroke)
-                        , F.strokeWidth (F.num (if card.isSelected then 2.5 else 1.5))
-                        ]
-                    -- Side lines
-                    , T.elem Line
-                        [ F.x1 (F.num (cx - rx))
-                        , F.y1 (F.num dbEllipseRy)
-                        , F.x2 (F.num (cx - rx))
-                        , F.y2 (F.num dbHeight)
-                        , F.stroke (F.color Theme.dataCardStroke)
-                        , F.strokeWidth (F.num (if card.isSelected then 2.5 else 1.5))
-                        ]
-                    , T.elem Line
-                        [ F.x1 (F.num (cx + rx))
-                        , F.y1 (F.num dbEllipseRy)
-                        , F.x2 (F.num (cx + rx))
-                        , F.y2 (F.num dbHeight)
-                        , F.stroke (F.color Theme.dataCardStroke)
-                        , F.strokeWidth (F.num (if card.isSelected then 2.5 else 1.5))
-                        ]
-                    -- Top ellipse (filled cap)
-                    , T.elem Path
-                        [ F.path $ F.text (ellipsePath dbEllipseRy)
-                        , F.fill (F.color (if card.isSelected then Theme.dataCardHighlight else Theme.typeCardHeader))
-                        , F.stroke (F.color Theme.dataCardStroke)
-                        , F.strokeWidth (F.num (if card.isSelected then 2.5 else 1.5))
-                        ]
-                    -- Name text below icon
-                    , T.elem Text
-                        [ F.x (F.num (Theme.dataCardWidth / 2.0))
-                        , F.y (F.num (dbHeight + 16.0))
-                        , F.textAnchor (F.text "middle")
-                        , F.fill (F.color Theme.dataCardStroke)
-                        , F.fontSize (F.px 11.0)
-                        , F.staticStr "font-weight" "bold"
-                        , F.textContent (F.text card.name)
-                        ]
-                    -- Description text
-                    , T.elem Text
-                        [ F.x (F.num (Theme.dataCardWidth / 2.0))
-                        , F.y (F.num (dbHeight + 28.0))
-                        , F.textAnchor (F.text "middle")
-                        , F.fill (F.color Theme.keyHintsColor)
-                        , F.fontSize (F.px 9.0)
-                        , F.textContent (F.text card.description)
-                        ]
-                    -- Red X for incompatible (only shown when disabled)
-                    , T.elem Text
-                        [ F.x (F.num (Theme.dataCardWidth - 8.0))
-                        , F.y (F.num 12.0)
-                        , F.textAnchor (F.text "middle")
-                        , F.fill (F.text (if card.isEnabled then "none" else "#E63946"))
-                        , F.fontSize (F.px 16.0)
-                        , F.staticStr "font-weight" "bold"
-                        , F.textContent (F.text "✕")
-                        ]
-                    ]
-            )
-
-    _ <- renderTree svgSel dataCardsTree
-
-    -- Draw arrow from assigned type card to the selected Join node
-    -- Only draw if a Join is selected and has a type assigned
-    let
-      maybeArrow = do
-        -- Find the assigned type card
-        assignedCard <- Array.find _.isAssigned typeCards
-        -- Find the selected Join node
-        selectedId <- state.selectedNodeId
-        selectedNode <- Array.find (\n -> n.id == selectedId) structuralNodes
-        -- Return arrow data
-        pure
-          { cardX: 10.0 + Theme.typeCardWidth -- Right edge of card
-          , cardY: 30.0 + assignedCard.y + 11.0 -- Center of header
-          , nodeX: selectedNode.x + offsetX - 40.0 -- Left edge of node
-          , nodeY: selectedNode.y + offsetY -- Center of node
+      -- Build arrow data for each join→type pair
+      -- Arrow goes from the specific type card to the join node
+      arrowData = map makeArrowForJoin joinNodes
+        where
+        makeArrowForJoin joinNode =
+          { cardX: leftPanelRightEdge
+          , cardY: getCardY joinNode.datumType -- Y position of the matching type card
+          , nodeX: joinNode.x + offsetX - 40.0 -- Left edge of node
+          , nodeY: joinNode.y + offsetY -- Center of node
+          , datumType: joinNode.datumType
           }
-
-      arrowData = case maybeArrow of
-        Just arrow -> [ arrow ]
-        Nothing -> []
 
       -- Bezier curve from type card to Join node
       arrowPath arrow =
@@ -1422,7 +1433,7 @@ renderTreeViz state listener = do
             <> " "
             <> show arrow.nodeY
 
-      arrowTree :: T.Tree { cardX :: Number, cardY :: Number, nodeX :: Number, nodeY :: Number }
+      arrowTree :: T.Tree { cardX :: Number, cardY :: Number, nodeX :: Number, nodeY :: Number, datumType :: DatumType }
       arrowTree =
         T.named Group "typeArrowGroup"
           [ F.staticStr "class" "type-arrow" ]
@@ -1460,10 +1471,12 @@ renderTreeViz state listener = do
 
     _ <- renderTree svgSel arrowTree
 
-    -- Draw arrows from selected data card to Enter/Update/Exit nodes
-    -- For regular joins: arrow to the template element
-    -- For update joins: arrows to Enter, Update, Exit nodes
+    -- Draw arrows from data card (HTML panel) to Enter/Update/Exit or template nodes
+    -- The right panel is positioned at right edge of viewport
     let
+      -- Fixed X position for right panel's left edge (in SVG viewBox coordinates)
+      rightPanelLeftEdge = svgWidth - 270.0
+
       -- Find GUP phase nodes (Enter/Update/Exit) by looking at the tree
       findGUPNodes :: Array TreeNode
       findGUPNodes = Array.filter isGUPNode structuralNodes
@@ -1492,9 +1505,8 @@ renderTreeViz state listener = do
         isUpdateJoinType _ = false
 
       -- Build arrow data for data card -> node connections
-      -- Include targetId for zoom-reactive updates
-      dataArrowTargets :: Array { nodeBaseX :: Number, nodeBaseY :: Number, color :: String, targetId :: String }
-      dataArrowTargets =
+      dataArrowData :: Array { cardX :: Number, cardY :: Number, nodeX :: Number, nodeY :: Number, color :: String, targetId :: String }
+      dataArrowData =
         case state.selectedSampleData of
           Nothing -> []
           Just _ ->
@@ -1504,8 +1516,10 @@ renderTreeViz state listener = do
             in
               if Array.length gupNodes > 0 then map
                 ( \n ->
-                    { nodeBaseX: n.x + offsetX + 40.0 -- Right edge of node (base position)
-                    , nodeBaseY: n.y + offsetY
+                    { cardX: rightPanelLeftEdge
+                    , cardY: n.y + offsetY -- Same Y as node for horizontal arrow
+                    , nodeX: n.x + offsetX + 40.0 -- Right edge of node
+                    , nodeY: n.y + offsetY
                     , color: toHexString $ Theme.nodeTypeColor n.nodeType
                     , targetId: nodeTypeToTargetId n.nodeType
                     }
@@ -1513,8 +1527,10 @@ renderTreeViz state listener = do
                 gupNodes
               else case findTemplateNode of
                 Just n ->
-                  [ { nodeBaseX: n.x + offsetX + 40.0
-                    , nodeBaseY: n.y + offsetY
+                  [ { cardX: rightPanelLeftEdge
+                    , cardY: n.y + offsetY
+                    , nodeX: n.x + offsetX + 40.0
+                    , nodeY: n.y + offsetY
                     , color: toHexString $ Theme.dataCardStroke
                     , targetId: "template"
                     }
@@ -1528,26 +1544,6 @@ renderTreeViz state listener = do
         NodeUpdate -> "update"
         NodeExit -> "exit"
         _ -> "template"
-
-      -- Find selected data card position
-      selectedDataCard = Array.find _.isSelected dataCards
-
-      -- Build full arrow data with source position
-      -- nodeBaseX/Y are pre-zoom positions, nodeX/Y are rendered positions
-      dataArrowData = case selectedDataCard of
-        Nothing -> []
-        Just card ->
-          map
-            ( \target ->
-                { cardX: dataCardsX -- Left edge of data card
-                , cardY: 30.0 + card.y + Theme.dataCardHeight / 2.0 -- Center of card
-                , nodeX: target.nodeBaseX -- For initial render (no zoom yet)
-                , nodeY: target.nodeBaseY
-                , color: target.color
-                , targetId: target.targetId
-                }
-            )
-            dataArrowTargets
 
       -- Bezier curve from data card to node (going left)
       dataArrowPath arrow =
@@ -1608,6 +1604,247 @@ renderTreeViz state listener = do
 
     _ <- renderTree svgSel dataArrowTree
 
+    -- Render visualization output near the AST tree (right side, below tree)
+    -- This shows the actual rendered visualization (grid, scatter, etc.)
+    let
+      -- Position relative to tree center - offset to the right
+      vizOutputX = offsetX + centerX + 200.0
+      vizOutputY = 400.0 -- Below the typical tree height
+
+      vizOutputTree :: T.Tree Unit
+      vizOutputTree =
+        T.named Group "vizOutputGroup"
+          [ F.staticStr "class" "viz-output"
+          , F.transform $ F.text $ "translate(" <> show vizOutputX <> "," <> show vizOutputY <> ")"
+          ]
+          `T.withChildren`
+            [ -- Background panel
+              T.elem Rect
+                [ F.x (F.num 0.0)
+                , F.y (F.num 0.0)
+                , F.width (F.num 280.0)
+                , F.height (F.num 280.0)
+                , F.static "rx" 8.0
+                , F.fill (F.text "rgba(255, 255, 255, 0.95)")
+                , F.stroke (F.color Theme.typeCardStroke)
+                , F.strokeWidth (F.num 1.5)
+                ]
+            -- Title
+            , T.elem Text
+                [ F.x (F.num 140.0)
+                , F.y (F.num 20.0)
+                , F.textAnchor (F.text "middle")
+                , F.fill (F.color Theme.nodeLabelDark)
+                , F.fontSize (F.px 12.0)
+                , F.staticStr "font-weight" "bold"
+                , F.textContent (F.text $ case state.selectedSampleData of
+                    Just sampleId -> sampleIdLabel sampleId
+                    Nothing -> "Output Preview")
+                ]
+            -- Container for the actual visualization (rendered separately)
+            , T.named Group "vizOutputContent"
+                [ F.transform $ F.text "translate(15, 35)"
+                , F.staticStr "id" "viz-output-content"
+                ]
+            ]
+
+    _ <- renderTree zoomGroupSel vizOutputTree
+
+    -- Now render the actual visualization content into the container
+    liftEffect $ renderVizIntoContainer state
+
+    pure unit
+
+-- | Render visualization into the viz output container in the main SVG
+renderVizIntoContainer :: State -> Effect Unit
+renderVizIntoContainer state = case state.selectedSampleData of
+  Nothing -> pure unit
+  Just sampleId -> renderInlineViz state.selectedAstPreset sampleId
+
+-- | Render visualization inline (into the main SVG)
+renderInlineViz :: AstPreset -> SampleDataId -> Effect Unit
+renderInlineViz preset sampleId = case preset of
+  AstGrid -> renderInlineGrid sampleId
+  AstScatter -> renderInlineScatter
+  AstBubble -> renderInlineBubble
+  AstTree -> renderInlineTree
+  AstUpdateJoin -> renderInlineGup
+  AstEmpty -> pure unit
+
+-- | Render a small grid visualization inline
+renderInlineGrid :: SampleDataId -> Effect Unit
+renderInlineGrid sampleId = do
+  let config = gridConfigFor sampleId
+  let cellSize = 25.0 -- Smaller for inline
+  runD3v2M do
+    container <- select "#viz-output-content" :: _ (D3v2Selection_ SEmpty Element Unit)
+    liftEffect $ clearContainer "#viz-output-content"
+
+    let
+      gridTree =
+        T.named Group "inlineGrid" []
+          `T.withChild`
+            ( T.joinData "gridCells" "g" config.data $ \cell ->
+                T.elem Group
+                  [ F.transform $ F.text $ "translate("
+                      <> show (toNumber cell.col * cellSize) <> ","
+                      <> show (toNumber cell.row * cellSize) <> ")"
+                  ]
+                  `T.withChildren`
+                    [ T.elem Rect
+                        [ F.x (F.num 0.0)
+                        , F.y (F.num 0.0)
+                        , F.width (F.num (cellSize - 1.0))
+                        , F.height (F.num (cellSize - 1.0))
+                        , F.fill (F.text cell.color)
+                        , F.stroke (F.text "#333")
+                        , F.strokeWidth (F.num 0.5)
+                        ]
+                    , T.elem Text
+                        [ F.x (F.num (cellSize / 2.0))
+                        , F.y (F.num (cellSize / 2.0 + 4.0))
+                        , F.textAnchor (F.text "middle")
+                        , F.fill (F.text "#000")
+                        , F.fontSize (F.px 10.0)
+                        , F.textContent (F.text cell.value)
+                        ]
+                    ]
+            )
+
+    _ <- renderTree container gridTree
+    pure unit
+
+-- | Render inline scatter plot
+renderInlineScatter :: Effect Unit
+renderInlineScatter = do
+  runD3v2M do
+    container <- select "#viz-output-content" :: _ (D3v2Selection_ SEmpty Element Unit)
+    liftEffect $ clearContainer "#viz-output-content"
+
+    let
+      scatterTree =
+        T.named Group "inlineScatter" []
+          `T.withChild`
+            ( T.joinData "scatterPoints" "circle" scatterData $ \pt ->
+                T.elem Circle
+                  [ F.cx (F.num (pt.x * 2.0)) -- Scale to fit
+                  , F.cy (F.num (200.0 - pt.y * 2.0)) -- Invert Y, scale
+                  , F.r (F.num 6.0)
+                  , F.fill (F.text "#4CAF50")
+                  , F.stroke (F.text "#2E7D32")
+                  , F.strokeWidth (F.num 1.5)
+                  ]
+            )
+
+    _ <- renderTree container scatterTree
+    pure unit
+
+-- | Render inline bubble chart
+renderInlineBubble :: Effect Unit
+renderInlineBubble = do
+  runD3v2M do
+    container <- select "#viz-output-content" :: _ (D3v2Selection_ SEmpty Element Unit)
+    liftEffect $ clearContainer "#viz-output-content"
+
+    let
+      bubbleTree =
+        T.named Group "inlineBubble" []
+          `T.withChild`
+            ( T.joinData "bubbles" "circle" bubbleData $ \b ->
+                T.elem Circle
+                  [ F.cx (F.num (b.x * 2.0))
+                  , F.cy (F.num (b.y * 2.0))
+                  , F.r (F.num (b.r * 0.8))
+                  , F.fill (F.text b.color)
+                  , F.opacity (F.text "0.7")
+                  , F.stroke (F.text "#333")
+                  , F.strokeWidth (F.num 1.0)
+                  ]
+            )
+
+    _ <- renderTree container bubbleTree
+    pure unit
+
+-- | Render inline tree/force graph (simplified)
+renderInlineTree :: Effect Unit
+renderInlineTree = do
+  runD3v2M do
+    container <- select "#viz-output-content" :: _ (D3v2Selection_ SEmpty Element Unit)
+    liftEffect $ clearContainer "#viz-output-content"
+
+    let
+      -- Simple node layout
+      nodes =
+        [ { x: 120.0, y: 30.0, label: "root", color: "#E91E63" }
+        , { x: 60.0, y: 90.0, label: "a", color: "#9C27B0" }
+        , { x: 180.0, y: 90.0, label: "b", color: "#9C27B0" }
+        , { x: 30.0, y: 150.0, label: "a1", color: "#673AB7" }
+        , { x: 90.0, y: 150.0, label: "a2", color: "#673AB7" }
+        , { x: 150.0, y: 150.0, label: "b1", color: "#673AB7" }
+        , { x: 210.0, y: 150.0, label: "b2", color: "#673AB7" }
+        ]
+
+      treeTree =
+        T.named Group "inlineTree" []
+          `T.withChild`
+            ( T.joinData "treeNodes" "g" nodes $ \n ->
+                T.elem Group
+                  [ F.transform $ F.text $ "translate(" <> show n.x <> "," <> show n.y <> ")" ]
+                  `T.withChildren`
+                    [ T.elem Circle
+                        [ F.cx (F.num 0.0)
+                        , F.cy (F.num 0.0)
+                        , F.r (F.num 15.0)
+                        , F.fill (F.text n.color)
+                        , F.stroke (F.text "#333")
+                        , F.strokeWidth (F.num 1.5)
+                        ]
+                    , T.elem Text
+                        [ F.x (F.num 0.0)
+                        , F.y (F.num 4.0)
+                        , F.textAnchor (F.text "middle")
+                        , F.fill (F.text "white")
+                        , F.fontSize (F.px 10.0)
+                        , F.textContent (F.text n.label)
+                        ]
+                    ]
+            )
+
+    _ <- renderTree container treeTree
+    pure unit
+
+-- | Render inline GUP demo
+renderInlineGup :: Effect Unit
+renderInlineGup = do
+  runD3v2M do
+    container <- select "#viz-output-content" :: _ (D3v2Selection_ SEmpty Element Unit)
+    liftEffect $ clearContainer "#viz-output-content"
+
+    let
+      letters =
+        [ { x: 20.0, letter: "H", phase: "enter", color: "#4CAF50" }
+        , { x: 50.0, letter: "E", phase: "enter", color: "#4CAF50" }
+        , { x: 80.0, letter: "L", phase: "update", color: "#2196F3" }
+        , { x: 110.0, letter: "L", phase: "update", color: "#2196F3" }
+        , { x: 140.0, letter: "O", phase: "exit", color: "#F44336" }
+        ]
+
+      gupTree =
+        T.named Group "inlineGup" []
+          `T.withChild`
+            ( T.joinData "gupLetters" "text" letters $ \l ->
+                T.elem Text
+                  [ F.x (F.num l.x)
+                  , F.y (F.num 100.0)
+                  , F.textAnchor (F.text "middle")
+                  , F.fill (F.text l.color)
+                  , F.fontSize (F.px 36.0)
+                  , F.staticStr "font-weight" "bold"
+                  , F.textContent (F.text l.letter)
+                  ]
+            )
+
+    _ <- renderTree container gupTree
     pure unit
 
 toRenderNode :: State -> Boolean -> Int -> TreeNode -> RenderNode
@@ -1695,9 +1932,36 @@ setupZoomWithCallback transform listener = do
 -- | Recalculates arrow path using current zoom transform
 updateArrowPosition :: State -> Effect Unit
 updateArrowPosition state = do
-  -- Calculate same offsets as renderTreeViz
-  let svgWidth = 900.0
-  let offsetY = 60.0
+  -- Same dimensions as renderTreeViz
+  let svgWidth = 1920.0
+  let svgHeight = 1080.0
+  let offsetY = 150.0
+
+  -- Fixed panel edge positions (same as in renderTreeViz)
+  let leftPanelRightEdge = 270.0
+  let rightPanelLeftEdge = svgWidth - 270.0
+  let panelTopY = 180.0
+
+  -- Type card heights in SVG viewBox units (same as in renderTreeViz)
+  let typeCardHeights =
+        [ { typ: pointType, height: 70.0 }
+        , { typ: nodeType, height: 95.0 }
+        , { typ: linkType, height: 82.0 }
+        , { typ: countryType, height: 95.0 }
+        , { typ: letterType, height: 70.0 }
+        , { typ: boardType, height: 58.0 }
+        , { typ: rowType, height: 58.0 }
+        , { typ: cellType, height: 82.0 }
+        ]
+
+  -- Calculate Y position for a given datum type (center of its card)
+  let getCardY targetType = panelTopY + go 0.0 typeCardHeights
+        where
+        go accY cards = case Array.uncons cards of
+          Nothing -> accY
+          Just { head: card, tail: rest }
+            | card.typ == targetType -> accY + card.height / 2.0
+            | otherwise -> go (accY + card.height) rest
 
   -- Get structural tree and apply layout
   let structuralTree = filterStructuralTree state.userTree
@@ -1714,184 +1978,121 @@ updateArrowPosition state = do
   let centerX = (minX + maxX) / 2.0
   let offsetX = (svgWidth / 2.0) - centerX
 
-  -- Get the assigned type card and selected node info
-  let selectedJoinType = getSelectedJoinDatumType state
-  let typeCards = makeTypeCards state.selectedAstPreset selectedJoinType
-
-  -- Find arrow data (same logic as in renderTreeViz)
-  let
-    maybeArrow = do
-      assignedCard <- Array.find _.isAssigned typeCards
-      selectedId <- state.selectedNodeId
-      selectedNode <- Array.find (\n -> n.id == selectedId) structuralNodes
-      pure
-        { cardX: 10.0 + Theme.typeCardWidth
-        , cardY: 30.0 + assignedCard.y + 11.0
-        -- Base node position (before zoom)
-        , nodeBaseX: selectedNode.x + offsetX - 40.0
-        , nodeBaseY: selectedNode.y + offsetY
-        }
-
-  case maybeArrow of
-    Just arrow -> do
-      let { k, x, y } = state.zoomTransform
-      -- Transform node position using zoom
-      let nodeX = arrow.nodeBaseX * k + x
-      let nodeY = arrow.nodeBaseY * k + y
-      let midX = (arrow.cardX + nodeX) / 2.0
-
-      -- Build arrow path
-      let
-        pathD =
-          "M " <> show arrow.cardX <> " " <> show arrow.cardY
-            <> " C "
-            <> show midX
-            <> " "
-            <> show arrow.cardY
-            <> " "
-            <> show midX
-            <> " "
-            <> show nodeY
-            <> " "
-            <> show nodeX
-            <> " "
-            <> show nodeY
-
-      -- Build arrowhead path
-      let
-        arrowheadD =
-          "M " <> show (nodeX - 8.0) <> " " <> show (nodeY - 5.0)
-            <> " L "
-            <> show nodeX
-            <> " "
-            <> show nodeY
-            <> " L "
-            <> show (nodeX - 8.0)
-            <> " "
-            <> show (nodeY + 5.0)
-            <>
-              " Z"
-
-      -- Update DOM elements using class selectors
-      updateAttr_ ".type-arrow path:first-child" "d" pathD
-      updateAttr_ ".type-arrow path:last-child" "d" arrowheadD
-
-    Nothing -> pure unit
-
-  -- ===== Data Arrow Updates =====
-  -- Update data arrows (from data cards to GUP/template nodes)
+  -- Get zoom transform
   let { k, x, y } = state.zoomTransform
-  let dataCardsX = svgWidth - Theme.dataCardWidth - 10.0
 
-  -- Find GUP nodes (Enter/Update/Exit)
-  let
-    findGUPNodes :: Array TreeNode
-    findGUPNodes = Array.filter isGUPNode structuralNodes
-      where
-      isGUPNode n = case n.nodeType of
-        NodeEnter -> true
-        NodeUpdate -> true
-        NodeExit -> true
-        _ -> false
+  -- ===== Type Arrows (left panel → join nodes) =====
+  -- Find all join nodes with assigned types
+  let joinNodes = Array.filter isJoinWithType structuralNodes
+        where
+        isJoinWithType node = case node.nodeType of
+          NodeJoin -> node.datumType /= TypeUnit && node.datumType /= TypeUnknown
+          NodeNestedJoin -> node.datumType /= TypeUnit && node.datumType /= TypeUnknown
+          NodeUpdateJoin -> node.datumType /= TypeUnit && node.datumType /= TypeUnknown
+          NodeUpdateNestedJoin -> node.datumType /= TypeUnit && node.datumType /= TypeUnknown
+          _ -> false
 
-    -- Find template node (for regular joins)
-    findTemplateNode :: Maybe TreeNode
-    findTemplateNode = do
-      selectedId <- state.selectedNodeId
-      selectedNode <- findNodeById selectedId state.userTree
-      if isUpdateJoinType selectedNode.nodeType then Nothing
-      else do
-        let childIds = getChildrenIds selectedId state.userTree
-        firstChildId <- Array.head childIds
-        Array.find (\n -> n.id == firstChildId) structuralNodes
-      where
-      isUpdateJoinType NodeUpdateJoin = true
-      isUpdateJoinType NodeUpdateNestedJoin = true
-      isUpdateJoinType _ = false
+  -- Update each type arrow
+  for_ (Array.mapWithIndex Tuple joinNodes) \(Tuple idx node) -> do
+    -- Base node position (before zoom)
+    let nodeBaseX = node.x + offsetX - 40.0
+    let nodeBaseY = node.y + offsetY
 
-    -- Build data arrow targets (same logic as renderTreeViz but with base positions)
-    dataArrowTargets :: Array { nodeBaseX :: Number, nodeBaseY :: Number, targetId :: String }
-    dataArrowTargets =
-      case state.selectedSampleData of
-        Nothing -> []
-        Just _ ->
-          let
-            gupNodes = findGUPNodes
-          in
-            if Array.length gupNodes > 0 then map
-              ( \n ->
-                  { nodeBaseX: n.x + offsetX + 40.0
-                  , nodeBaseY: n.y + offsetY
-                  , targetId: nodeTypeToTargetId n.nodeType
-                  }
-              )
-              gupNodes
-            else case findTemplateNode of
-              Just n ->
-                [ { nodeBaseX: n.x + offsetX + 40.0
-                  , nodeBaseY: n.y + offsetY
-                  , targetId: "template"
-                  }
-                ]
+    -- Apply zoom transform to node position
+    let nodeX = nodeBaseX * k + x
+    let nodeY = nodeBaseY * k + y
+
+    -- Card position stays fixed (Y from the specific type card)
+    let cardX = leftPanelRightEdge
+    let cardY = getCardY node.datumType
+
+    let midX = (cardX + nodeX) / 2.0
+
+    -- Build arrow path
+    let pathD =
+          "M " <> show cardX <> " " <> show cardY
+            <> " C " <> show midX <> " " <> show cardY
+            <> " " <> show midX <> " " <> show nodeY
+            <> " " <> show nodeX <> " " <> show nodeY
+
+    -- Build arrowhead path
+    let arrowheadD =
+          "M " <> show (nodeX - 8.0) <> " " <> show (nodeY - 5.0)
+            <> " L " <> show nodeX <> " " <> show nodeY
+            <> " L " <> show (nodeX - 8.0) <> " " <> show (nodeY + 5.0)
+            <> " Z"
+
+    -- Update DOM elements using nth-child selectors
+    let selector = ".type-arrow > g:nth-child(" <> show (idx + 1) <> ")"
+    updateAttr_ (selector <> " path:first-child") "d" pathD
+    updateAttr_ (selector <> " path:last-child") "d" arrowheadD
+
+  -- ===== Data Arrows (right panel → GUP/template nodes) =====
+  -- Find GUP nodes or template node
+  let gupNodes = Array.filter isGUPNode structuralNodes
+        where
+        isGUPNode n = case n.nodeType of
+          NodeEnter -> true
+          NodeUpdate -> true
+          NodeExit -> true
+          _ -> false
+
+  let templateNode = do
+        selectedId <- state.selectedNodeId
+        selectedNode <- findNodeById selectedId state.userTree
+        if isUpdateJoinType selectedNode.nodeType then Nothing
+        else do
+          let childIds = getChildrenIds selectedId state.userTree
+          firstChildId <- Array.head childIds
+          Array.find (\n -> n.id == firstChildId) structuralNodes
+        where
+        isUpdateJoinType NodeUpdateJoin = true
+        isUpdateJoinType NodeUpdateNestedJoin = true
+        isUpdateJoinType _ = false
+
+  -- Only show data arrows if data is selected
+  case state.selectedSampleData of
+    Nothing -> pure unit
+    Just _ -> do
+      -- Determine target nodes
+      let targetNodes = if Array.length gupNodes > 0
+            then gupNodes
+            else case templateNode of
+              Just n -> [n]
               Nothing -> []
 
-    nodeTypeToTargetId :: DslNodeType -> String
-    nodeTypeToTargetId = case _ of
-      NodeEnter -> "enter"
-      NodeUpdate -> "update"
-      NodeExit -> "exit"
-      _ -> "template"
+      -- Update each data arrow
+      for_ (Array.mapWithIndex Tuple targetNodes) \(Tuple idx node) -> do
+        -- Base node position (before zoom)
+        let nodeBaseX = node.x + offsetX + 40.0
+        let nodeBaseY = node.y + offsetY
 
-    -- Get selected data card position
-    dataCards = makeDataCards selectedJoinType state.selectedSampleData
-    selectedDataCard = Array.find _.isSelected dataCards
+        -- Apply zoom transform
+        let nodeX = nodeBaseX * k + x
+        let nodeY = nodeBaseY * k + y
 
-  -- Update each data arrow
-  case selectedDataCard of
-    Nothing -> pure unit
-    Just card -> do
-      let cardY = 30.0 + card.y + Theme.dataCardHeight / 2.0
-      -- Update each target arrow
-      for_ dataArrowTargets \target -> do
-        -- Transform node position using zoom
-        let nodeX = target.nodeBaseX * k + x
-        let nodeY = target.nodeBaseY * k + y
-        let midX = (dataCardsX + nodeX) / 2.0
+        -- Card position stays fixed
+        let cardX = rightPanelLeftEdge
+        let cardY = nodeY
 
-        -- Build arrow path (going from right to left)
-        let
-          pathD =
-            "M " <> show dataCardsX <> " " <> show cardY
-              <> " C "
-              <> show midX
-              <> " "
-              <> show cardY
-              <> " "
-              <> show midX
-              <> " "
-              <> show nodeY
-              <> " "
-              <> show nodeX
-              <> " "
-              <> show nodeY
+        let midX = (cardX + nodeX) / 2.0
+
+        -- Build arrow path (going right to left)
+        let pathD =
+              "M " <> show cardX <> " " <> show cardY
+                <> " C " <> show midX <> " " <> show cardY
+                <> " " <> show midX <> " " <> show nodeY
+                <> " " <> show nodeX <> " " <> show nodeY
 
         -- Build arrowhead path (pointing left)
-        let
-          arrowheadD =
-            "M " <> show (nodeX + 8.0) <> " " <> show (nodeY - 5.0)
-              <> " L "
-              <> show nodeX
-              <> " "
-              <> show nodeY
-              <> " L "
-              <> show (nodeX + 8.0)
-              <> " "
-              <> show (nodeY + 5.0)
-              <>
-                " Z"
+        let arrowheadD =
+              "M " <> show (nodeX + 8.0) <> " " <> show (nodeY - 5.0)
+                <> " L " <> show nodeX <> " " <> show nodeY
+                <> " L " <> show (nodeX + 8.0) <> " " <> show (nodeY + 5.0)
+                <> " Z"
 
-        -- Update DOM elements using target-specific selectors
-        let selector = ".data-arrow-" <> target.targetId
+        -- Update DOM elements
+        let selector = ".data-arrow > g:nth-child(" <> show (idx + 1) <> ")"
         updateAttr_ (selector <> " path:first-child") "d" pathD
         updateAttr_ (selector <> " path:last-child") "d" arrowheadD
 
@@ -1917,31 +2118,35 @@ getSelectedJoinDatumType state = case state.selectedNodeId of
 
 -- | Create type card data for SVG rendering
 -- | Types incompatible with current AST have isEnabled = false (rendered at 0.3 opacity)
+-- | Nested types (Board → Row → Cell) are shown with indentation
 makeTypeCards :: AstPreset -> Maybe DatumType -> Array TypeCard
 makeTypeCards currentAst selectedJoinType =
   Array.mapWithIndex makeCard availableTypeInfos
   where
   -- Calculate card height: header (22) + fields * fieldHeight + padding (4)
-  cardHeight :: Int -> Number
-  cardHeight numFields = 22.0 + toNumber numFields * Theme.typeCardFieldHeight + 4.0 + Theme.typeCardSpacing
+  cardHeight :: { indent :: Number | _ } -> Number
+  cardHeight info = 22.0 + toNumber (Array.length info.fields) * Theme.typeCardFieldHeight + 4.0 + Theme.typeCardSpacing
 
-  -- Available types with their field info
+  -- Available types with their field info and indentation
   -- Record types show their fields, Array types show [ innerType ]
+  -- Nested types are indented: Board (0) → Row (15) → Cell (30)
   availableTypeInfos =
-    [ { name: "Point", typ: pointType, fields: pointFields }
-    , { name: "Node", typ: nodeType, fields: nodeFields }
-    , { name: "Link", typ: linkType, fields: linkFields }
-    , { name: "Country", typ: countryType, fields: countryFields }
-    -- Array types for nested joins (board games)
-    , { name: "Cell", typ: cellType, fields: cellFields }
-    , { name: "Row", typ: rowType, fields: rowFields }
-    , { name: "Board", typ: boardType, fields: boardFields }
+    [ { name: "Point", typ: pointType, fields: pointFields, indent: 0.0 }
+    , { name: "Node", typ: nodeType, fields: nodeFields, indent: 0.0 }
+    , { name: "Link", typ: linkType, fields: linkFields, indent: 0.0 }
+    , { name: "Country", typ: countryType, fields: countryFields, indent: 0.0 }
+    , { name: "Letter", typ: letterType, fields: letterFields, indent: 0.0 }
+    -- Nested array types for board games - shown with visual nesting
+    , { name: "Board", typ: boardType, fields: boardFields, indent: 0.0 }
+    , { name: "Row", typ: rowType, fields: rowFields, indent: 15.0 }
+    , { name: "Cell", typ: cellType, fields: cellFields, indent: 30.0 }
     ]
 
   pointFields = [ { name: "x", typ: "Number" }, { name: "y", typ: "Number" } ]
   nodeFields = [ { name: "id", typ: "String" }, { name: "x", typ: "Number" }, { name: "y", typ: "Number" }, { name: "group", typ: "Int" } ]
   linkFields = [ { name: "source", typ: "String" }, { name: "target", typ: "String" }, { name: "value", typ: "Number" } ]
   countryFields = [ { name: "name", typ: "String" }, { name: "population", typ: "Number" }, { name: "gdp", typ: "Number" }, { name: "lifeExp", typ: "Number" } ]
+  letterFields = [ { name: "letter", typ: "String" }, { name: "phase", typ: "String" } ]
   -- Cell fields
   cellFields = [ { name: "row", typ: "Int" }, { name: "col", typ: "Int" }, { name: "value", typ: "String" } ]
   -- Array types show their inner type
@@ -1953,13 +2158,14 @@ makeTypeCards currentAst selectedJoinType =
     let
       -- Calculate Y by summing heights of previous cards
       prevHeights = Array.take idx availableTypeInfos
-        # map (\t -> cardHeight (Array.length t.fields))
+        # map cardHeight
         # Array.foldl (+) 0.0
     in
       { name: info.name
       , fields: info.fields
       , datumType: info.typ
       , y: prevHeights
+      , indent: info.indent
       , isEnabled: isTypeCompatibleWithAst currentAst info.typ
       , isAssigned: isTypeAssigned info.typ selectedJoinType
       }
@@ -1979,7 +2185,7 @@ makeDataCards maybeType selectedSample =
   allDatasets =
     [ { name: "Chess", desc: "8x8 board", sampleId: SampleChess }
     , { name: "Sudoku", desc: "9x9 puzzle", sampleId: SampleSudoku }
-    , { name: "Go", desc: "19x19 board", sampleId: SampleGo }
+    , { name: "Scrabble", desc: "Word game", sampleId: SampleScrabble }
     , { name: "Gapminder", desc: "Health & wealth", sampleId: SampleGapminder }
     , { name: "Force Graph", desc: "Node network", sampleId: SampleForceGraph }
     , { name: "Scatter Plot", desc: "X/Y points", sampleId: SampleScatterPlot }
@@ -2100,7 +2306,7 @@ sampleIdLabel :: SampleDataId -> String
 sampleIdLabel = case _ of
   SampleChess -> "Chess Board"
   SampleSudoku -> "Sudoku Puzzle"
-  SampleGo -> "Go Board"
+  SampleScrabble -> "Scrabble"
   SampleScatterPlot -> "Scatter Plot"
   SampleForceGraph -> "Force Graph"
   SampleGapminder -> "Gapminder"
@@ -2311,14 +2517,14 @@ gridConfigFor SampleSudoku =
   , textColor: "#333"
   , data: sudokuData
   }
-gridConfigFor SampleGo =
+gridConfigFor SampleScrabble =
   { svgWidth: 200.0
   , svgHeight: 200.0
   , cellSize: 20.0
   , padding: 5.0
-  , fontSize: "16px"
+  , fontSize: "12px"
   , textColor: "#000"
-  , data: goData
+  , data: scrabbleData
   }
 gridConfigFor _ =
   { svgWidth: 200.0
@@ -2412,28 +2618,50 @@ sudokuValue 8 7 = "7"
 sudokuValue 8 8 = "9"
 sudokuValue _ _ = ""
 
--- | Go board data (9x9 sample)
-goData :: Array { row :: Int, col :: Int, value :: String, color :: String }
-goData = do
+-- | Scrabble board data (showing corner section with bonus squares)
+scrabbleData :: Array { row :: Int, col :: Int, value :: String, color :: String }
+scrabbleData = do
   row <- Array.range 0 8
   col <- Array.range 0 8
   let
-    color = "#dcb35c"  -- Wood color
-    stone = goStone row col
-  pure { row, col, value: stone, color }
+    color = scrabbleSquareColor row col
+    tile = scrabbleTile row col
+  pure { row, col, value: tile, color }
 
--- | Get go stone (sample game position)
-goStone :: Int -> Int -> String
-goStone 2 2 = "●"  -- Black
-goStone 2 6 = "●"
-goStone 3 3 = "○"  -- White
-goStone 3 5 = "●"
-goStone 4 4 = "○"
-goStone 5 3 = "●"
-goStone 5 5 = "○"
-goStone 6 2 = "○"
-goStone 6 6 = "●"
-goStone _ _ = "·"  -- Grid point
+-- | Get Scrabble square color based on position
+-- | Pattern based on standard Scrabble board corner
+scrabbleSquareColor :: Int -> Int -> String
+scrabbleSquareColor 0 0 = "#c41e3a"  -- Triple Word (red)
+scrabbleSquareColor 0 7 = "#c41e3a"  -- TW
+scrabbleSquareColor 7 0 = "#c41e3a"  -- TW
+scrabbleSquareColor 1 5 = "#3b82f6"  -- Triple Letter (blue)
+scrabbleSquareColor 5 1 = "#3b82f6"  -- TL
+scrabbleSquareColor 5 5 = "#3b82f6"  -- TL
+scrabbleSquareColor 1 1 = "#ec4899"  -- Double Word (pink)
+scrabbleSquareColor 2 2 = "#ec4899"  -- DW
+scrabbleSquareColor 3 3 = "#ec4899"  -- DW
+scrabbleSquareColor 4 4 = "#ec4899"  -- DW (center star area)
+scrabbleSquareColor 0 3 = "#60a5fa"  -- Double Letter (light blue)
+scrabbleSquareColor 3 0 = "#60a5fa"  -- DL
+scrabbleSquareColor 2 6 = "#60a5fa"  -- DL
+scrabbleSquareColor 6 2 = "#60a5fa"  -- DL
+scrabbleSquareColor 6 6 = "#60a5fa"  -- DL
+scrabbleSquareColor 3 7 = "#60a5fa"  -- DL
+scrabbleSquareColor 7 3 = "#60a5fa"  -- DL
+scrabbleSquareColor _ _ = "#f5deb3"  -- Regular (wheat/beige)
+
+-- | Get Scrabble tile at position (sample word play)
+scrabbleTile :: Int -> Int -> String
+scrabbleTile 4 2 = "H"
+scrabbleTile 4 3 = "E"
+scrabbleTile 4 4 = "L"
+scrabbleTile 4 5 = "L"
+scrabbleTile 4 6 = "O"
+scrabbleTile 2 4 = "W"
+scrabbleTile 3 4 = "O"
+scrabbleTile 5 4 = "R"
+scrabbleTile 6 4 = "D"
+scrabbleTile _ _ = ""
 
 -- =============================================================================
 -- Scatter Visualization
